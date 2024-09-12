@@ -955,12 +955,12 @@ static int phar_tar_setupmetadata(zval *zv, void *argument) /* {{{ */
 }
 /* }}} */
 
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error) /* {{{ */
+int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
-	php_stream *oldfile, *newfile, *stubfile;
-	int closeoldfile, free_user_stub;
+	php_stream *oldfile, *newfile;
+	int closeoldfile;
 	size_t signature_length;
 	struct _phar_pass_tar_info pass;
 	char *buf, *signature, sigbuf[8];
@@ -1017,73 +1017,33 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	}
 
 	/* set stub */
-	if (user_stub && !defaultstub) {
-		char *pos;
-		if (len < 0) {
-			/* resource passed in */
-			if (!(php_stream_from_zval_no_verify(stubfile, (zval *)user_stub))) {
-				if (error) {
-					spprintf(error, 0, "unable to access resource to copy stub to new tar-based phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
-			if (len == -1) {
-				len = PHP_STREAM_COPY_ALL;
-			} else {
-				len = -len;
-			}
-			user_stub = 0;
+	if (user_stub && !is_default_stub) {
+		char *pos = php_stristr(ZSTR_VAL(user_stub), halt_stub, ZSTR_LEN(user_stub), sizeof(halt_stub) - 1);
 
-			// TODO: refactor to avoid reallocation ???
-//???		len = php_stream_copy_to_mem(stubfile, &user_stub, len, 0)
-			{
-				zend_string *str = php_stream_copy_to_mem(stubfile, len, 0);
-				if (str) {
-					len = ZSTR_LEN(str);
-					user_stub = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
-					zend_string_release_ex(str, 0);
-				} else {
-					user_stub = NULL;
-					len = 0;
-				}
-			}
-
-			if (!len || !user_stub) {
-				if (error) {
-					spprintf(error, 0, "unable to read resource to copy stub to new tar-based phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
-			free_user_stub = 1;
-		} else {
-			free_user_stub = 0;
-		}
-
-		if ((pos = php_stristr(user_stub, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
+		if (pos == NULL) {
 			if (error) {
 				spprintf(error, 0, "illegal stub for tar-based phar \"%s\"", phar->fname);
-			}
-			if (free_user_stub) {
-				efree(user_stub);
 			}
 			return EOF;
 		}
 
-		len = pos - user_stub + 18;
+		size_t len = pos - ZSTR_VAL(user_stub) + strlen(halt_stub);
+		const char end_sequence[] = " ?>\r\n";
+		size_t end_sequence_len = strlen(end_sequence);
+
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return EOF;
 		}
-		entry.uncompressed_filesize = len + 5;
+		entry.uncompressed_filesize = len + end_sequence_len;
 
-		if ((size_t)len != php_stream_write(entry.fp, user_stub, len)
-		||            5 != php_stream_write(entry.fp, " ?>\r\n", 5)) {
+		if (
+			len != php_stream_write(entry.fp, ZSTR_VAL(user_stub), len)
+			|| end_sequence_len != php_stream_write(entry.fp, end_sequence, end_sequence_len)
+		) {
 			if (error) {
 				spprintf(error, 0, "unable to create stub from string in new tar-based phar \"%s\"", phar->fname);
-			}
-			if (free_user_stub) {
-				efree(user_stub);
 			}
 			php_stream_close(entry.fp);
 			return EOF;
@@ -1092,10 +1052,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
 		entry.filename_len = sizeof(".phar/stub.php")-1;
 		zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
-
-		if (free_user_stub) {
-			efree(user_stub);
-		}
 	} else {
 		/* Either this is a brand new phar (add the stub), or the default stub is required (overwrite the stub) */
 		entry.fp = php_stream_fopen_tmpfile();
@@ -1115,7 +1071,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
 		entry.filename_len = sizeof(".phar/stub.php")-1;
 
-		if (!defaultstub) {
+		if (!is_default_stub) {
 			if (!zend_hash_str_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 				if (NULL == zend_hash_str_add_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
 					php_stream_close(entry.fp);
