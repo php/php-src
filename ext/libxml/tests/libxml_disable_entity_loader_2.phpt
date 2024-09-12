@@ -39,6 +39,6 @@ bool(true)
 Deprecated: Function libxml_disable_entity_loader() is deprecated in %s on line %d
 bool(false)
 
-Warning: DOMDocument::loadXML(): %Sfailed to load external entity "%s" in %s on line %d
+%s: DOMDocument::loadXML(): %Sfailed to load %s
 bool(true)
 Done
