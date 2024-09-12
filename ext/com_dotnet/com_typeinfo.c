@@ -233,6 +233,12 @@ PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, in
 					} else {
 						c.name = const_name;
 					}
+					zend_string *filename = zend_get_executed_filename_ex();
+					if (filename == NULL) {
+						c.filename = NULL;
+					} else {
+						c.filename = zend_string_copy(filename);
+					}
 					zend_register_constant(&c);
 				}
 				ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
