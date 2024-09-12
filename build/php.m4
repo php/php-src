@@ -2849,3 +2849,15 @@ AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS], [
   AC_DEFINE_UNQUOTED([PHP_HAVE_AVX512_VBMI_SUPPORTS],
    [$have_avx512_vbmi_supports], [Whether the compiler supports AVX512 VBMI])
 ])
+
+dnl
+dnl PHP_REMOVE_OPTIMIZATION_FLAGS
+dnl
+dnl Removes known compiler optimization flags like -O, -O0, -O1, ..., -Ofast
+dnl from CFLAGS and CXXFLAGS.
+dnl
+AC_DEFUN([PHP_REMOVE_OPTIMIZATION_FLAGS], [
+  sed_script='s/\([[\t ]]\|^\)-O\([[0-9gsz]]\|fast\|\)\([[\t ]]\|$\)/\1/g'
+  CFLAGS=$(echo "$CFLAGS" | $SED -e "$sed_script")
+  CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e "$sed_script")
+])
