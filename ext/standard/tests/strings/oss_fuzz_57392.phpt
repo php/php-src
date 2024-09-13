@@ -6,6 +6,7 @@ var_dump(str_getcsv(
     "aaaaaaaaaaaa\0  ",
     "\0",
     "\0",
+    escape: '',
 ));
 ?>
 --EXPECT--

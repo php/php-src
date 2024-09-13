@@ -47,7 +47,10 @@ PHPAPI void php_flock_common(php_stream *stream, zend_long operation, uint32_t o
 	zval *wouldblock, zval *return_value);
 
 #define PHP_CSV_NO_ESCAPE EOF
+#define PHP_CSV_ESCAPE_ERROR -500
+
 PHPAPI HashTable *php_bc_fgetcsv_empty_line(void);
+PHPAPI int php_csv_handle_escape_argument(const zend_string *escape_str, uint32_t arg_num);
 PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf);
 PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str);
 

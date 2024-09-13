@@ -581,11 +581,11 @@ PHP 8.4 UPGRADE NOTES
 - SPL:
   . The SplFixedArray::__wakeup() method has been deprecated as it implements
     __serialize() and __unserialize() which need to be overwritten instead.
-  . Passing a non-empty string for the $enclosure parameter of:
+  . Using the default value for $escape parameter of:
     - SplFileObject::setCsvControl()
     - SplFileObject::fputcsv()
     - SplFileObject::fgetcsv()
-    is now deprecated.
+    is now deprecated. It must be passed explicitly either positionally or via named arguments.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_proprietary_csv_escaping_mechanism
 
 - Standard:
@@ -595,11 +595,11 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number
   . Unserializing strings using the uppercase 'S' tag is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#unserialize_s_s_tag
-  . Passing a non-empty string for the $enclosure parameter of:
+  . Using the default value for $escape parameter of:
     - fputcsv()
     - fgetcsv()
     - str_getcsv()
-    is now deprecated.
+    is now deprecated. It must be passed explicitly either positionally or via named arguments.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_proprietary_csv_escaping_mechanism
 
 - XML:

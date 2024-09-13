@@ -2,9 +2,9 @@
 GH-11982 (str_getcsv returns null byte for unterminated quoted string)
 --FILE--
 <?php
-var_dump(str_getcsv('"'));
-var_dump(str_getcsv('"field","'));
-var_dump(str_getcsv('"","a'));
+var_dump(str_getcsv('"', escape: ''));
+var_dump(str_getcsv('"field","', escape: ''));
+var_dump(str_getcsv('"","a', escape: ''));
 ?>
 --EXPECT--
 array(1) {

@@ -82,6 +82,7 @@ struct _spl_filesystem_object {
 			char               delimiter;
 			char               enclosure;
 			int                escape;
+			bool               is_escape_default;
 		} file;
 	} u;
 	zend_object        std;

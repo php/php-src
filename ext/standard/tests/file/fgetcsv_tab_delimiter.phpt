@@ -2,9 +2,10 @@
 fgetcsv() with tab delimited fields (BUG #8258)
 --FILE--
 <?php
-chdir(__DIR__);
-$fp=fopen("004.data","r");
-while($a=fgetcsv($fp,100,"\t")) {
+
+$file = __DIR__ . '/fgetcsv_tab_delimiter.data';
+$fp = fopen($file,"r");
+while ($a = fgetcsv($fp, 100, "\t", escape: '')) {
     echo join(",",$a)."\n";
 }
 fclose($fp);
