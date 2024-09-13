@@ -2218,6 +2218,9 @@ TEST $file
         } elseif (!strncasecmp('xleak', $output, 5)) {
             // Pretend we have an XLEAK section
             $test->setSection('XLEAK', ltrim(substr($output, 5)));
+        } elseif (!strncasecmp('flaky', $output, 5)) {
+            // Pretend we have a FLAKY section
+            $test->setSection('FLAKY', ltrim(substr($output, 5)));
         } elseif ($output !== '') {
             show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
             $PHP_FAILED_TESTS['BORKED'][] = [
