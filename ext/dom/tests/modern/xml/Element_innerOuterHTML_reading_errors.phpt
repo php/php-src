@@ -1,5 +1,5 @@
 --TEST--
-Test reading Element::$innerHTML on XML documents - error cases
+Test reading Element::${inner,outer}HTML on XML documents - error cases
 --EXTENSIONS--
 dom
 --FILE--
@@ -16,6 +16,11 @@ function createContainer() {
 function test($container) {
     try {
         var_dump($container->innerHTML);
+    } catch (DOMException $e) {
+        echo $e->getMessage(), "\n";
+    }
+    try {
+        var_dump($container->outerHTML);
     } catch (DOMException $e) {
         echo $e->getMessage(), "\n";
     }
@@ -91,6 +96,21 @@ test($container);
 
 ?>
 --EXPECT--
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
+The resulting XML serialization is not well-formed
 The resulting XML serialization is not well-formed
 The resulting XML serialization is not well-formed
 The resulting XML serialization is not well-formed
