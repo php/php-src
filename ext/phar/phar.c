@@ -2535,8 +2535,9 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 	zend_string *newstub;
 	phar_entry_info *entry, *newentry;
 	size_t halt_offset;
-	int restore_alias_len, global_flags = 0, closeoldfile;
-	bool has_dirs = 0;
+	int restore_alias_len, global_flags = 0;
+	bool must_close_old_file = false;
+	bool has_dirs = false;
 	char manifest[18], entry_buffer[24];
 	zend_off_t manifest_ftell;
 	zend_long offset;
@@ -2547,8 +2548,9 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
-	int free_fp = 1, free_ufp = 1;
-	int manifest_hack = 0;
+	bool free_fp = true;
+	bool free_ufp = true;
+	bool manifest_hack = false;
 	php_stream *shared_cfp = NULL;
 
 	if (phar->is_persistent) {
@@ -2582,18 +2584,18 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 
 	if (phar->fp && !phar->is_brandnew) {
 		oldfile = phar->fp;
-		closeoldfile = 0;
+		must_close_old_file = false;
 		php_stream_rewind(oldfile);
 	} else {
 		oldfile = php_stream_open_wrapper(phar->fname, "rb", 0, NULL);
-		closeoldfile = oldfile != NULL;
+		must_close_old_file = oldfile != NULL;
 	}
 	newfile = php_stream_fopen_tmpfile();
 	if (!newfile) {
 		if (error) {
 			spprintf(error, 0, "unable to create temporary file");
 		}
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 		return EOF;
@@ -2603,7 +2605,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		char *pos = php_stristr(ZSTR_VAL(user_stub), halt_stub, ZSTR_LEN(user_stub), strlen(halt_stub));
 
 		if (pos == NULL) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2621,7 +2623,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			len != php_stream_write(newfile, ZSTR_VAL(user_stub), len)
 			|| end_sequence_len != php_stream_write(newfile, end_sequence, end_sequence_len)
 		) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2644,7 +2646,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			written = php_stream_write(newfile, ZSTR_VAL(newstub), phar->halt_offset);
 		}
 		if (phar->halt_offset != written) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2697,10 +2699,10 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			/* open file pointers refer to this fp, do not free the stream */
 			switch (entry->fp_type) {
 				case PHAR_FP:
-					free_fp = 0;
+					free_fp = false;
 					break;
 				case PHAR_UFP:
-					free_ufp = 0;
+					free_ufp = false;
 				default:
 					break;
 			}
@@ -2711,7 +2713,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 
 		if (entry->is_dir) {
 			/* we use this to calculate API version, 1.1.1 is used for phars with directories */
-			has_dirs = 1;
+			has_dirs = true;
 		}
 		if (!Z_ISUNDEF(entry->metadata_tracker.val) && !entry->metadata_tracker.str) {
 			ZEND_ASSERT(!entry->is_persistent);
@@ -2747,7 +2749,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		}
 		file = phar_get_efp(entry, 0);
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 1)) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2767,7 +2769,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		}
 		filter = php_stream_filter_create(phar_compress_filter(entry, 0), NULL, 0);
 		if (!filter) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2794,7 +2796,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			if (error) {
 				spprintf(error, 0, "unable to create temporary file");
 			}
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2805,7 +2807,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		entry->header_offset = php_stream_tell(entry->cfp);
 		php_stream_flush(file);
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2816,7 +2818,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		}
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
 		if (SUCCESS != php_stream_copy_to_stream_ex(file, entry->cfp, entry->uncompressed_filesize, NULL)) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2858,7 +2860,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 	if(manifest[0] == '\r' || manifest[0] == '\n') {
 		manifest_len++;
 		phar_set_32(manifest, manifest_len);
-		manifest_hack = 1;
+		manifest_hack = true;
 	}
 	phar_set_32(manifest+4, new_manifest_count);
 	if (has_dirs) {
@@ -2875,7 +2877,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 	if (sizeof(manifest) != php_stream_write(newfile, manifest, sizeof(manifest))
 	|| (size_t)phar->alias_len != php_stream_write(newfile, phar->alias, phar->alias_len)) {
 
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 
@@ -2896,7 +2898,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 	&& ZSTR_LEN(main_metadata_str.s) != php_stream_write(newfile, ZSTR_VAL(main_metadata_str.s), ZSTR_LEN(main_metadata_str.s)))) {
 		smart_str_free(&main_metadata_str);
 
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 
@@ -2932,7 +2934,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		if (4 != php_stream_write(newfile, entry_buffer, 4)
 		|| entry->filename_len != php_stream_write(newfile, entry->filename, entry->filename_len)
 		|| (entry->is_dir && 1 != php_stream_write(newfile, "/", 1))) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -2967,7 +2969,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
 		|| (metadata_str &&
 		    ZSTR_LEN(metadata_str) != php_stream_write(newfile, ZSTR_VAL(metadata_str), ZSTR_LEN(metadata_str)))) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 
@@ -2981,9 +2983,9 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		}
 	} ZEND_HASH_FOREACH_END();
 	/* Hack - see bug #65028, add padding byte to the end of the manifest */
-	if(manifest_hack) {
+	if (manifest_hack) {
 		if(1 != php_stream_write(newfile, manifest, 1)) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 
@@ -3010,7 +3012,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		} else {
 			file = phar_get_efp(entry, 0);
 			if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
-				if (closeoldfile) {
+				if (must_close_old_file) {
 					php_stream_close(oldfile);
 				}
 				php_stream_close(newfile);
@@ -3022,7 +3024,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		}
 
 		if (!file) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -3036,7 +3038,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		entry->offset = entry->offset_abs = offset;
 		offset += entry->compressed_filesize;
 		if (php_stream_copy_to_stream_ex(file, newfile, entry->compressed_filesize, &wrote) == FAILURE) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 
@@ -3099,7 +3101,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 					if (digest) {
 						efree(digest);
 					}
-					if (closeoldfile) {
+					if (must_close_old_file) {
 						php_stream_close(oldfile);
 					}
 					php_stream_close(newfile);
@@ -3136,7 +3138,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		phar->ufp = NULL;
 	}
 
-	if (closeoldfile) {
+	if (must_close_old_file) {
 		php_stream_close(oldfile);
 	}
 
