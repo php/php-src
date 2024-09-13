@@ -957,14 +957,15 @@ static int phar_tar_setupmetadata(zval *zv, void *argument) /* {{{ */
 
 int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
 {
-	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
+	static const char halt_stub[] = "__HALT_COMPILER();";
+
+	phar_entry_info entry = {0};
 	php_stream *oldfile, *newfile;
 	bool must_close_old_file = false;
 	size_t signature_length;
 	struct _phar_pass_tar_info pass;
 	char *buf, *signature, sigbuf[8];
-	char halt_stub[] = "__HALT_COMPILER();";
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
 	entry.timestamp = time(NULL);

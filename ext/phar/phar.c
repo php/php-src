@@ -2531,7 +2531,8 @@ int phar_flush(phar_archive_data *phar, char **error) {
  */
 int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
 {
-	char halt_stub[] = "__HALT_COMPILER();";
+	static const char halt_stub[] = "__HALT_COMPILER();";
+
 	zend_string *newstub;
 	phar_entry_info *entry, *newentry;
 	size_t halt_offset;

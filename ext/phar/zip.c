@@ -1254,7 +1254,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 int phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
 {
 	static const char newstub[] = "<?php // zip-based phar archive stub file\n__HALT_COMPILER();";
-	char halt_stub[] = "__HALT_COMPILER();";
+	static const char halt_stub[] = "__HALT_COMPILER();";
 
 	php_stream *oldfile;
 	bool must_close_old_file = false;
