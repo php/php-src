@@ -55,12 +55,9 @@ static int dom_write_smart_str(void *context, const char *buffer, int len)
 	return len;
 }
 
-/* https://w3c.github.io/DOM-Parsing/#the-innerhtml-mixin
- * and https://w3c.github.io/DOM-Parsing/#dfn-fragment-serializing-algorithm */
-zend_result dom_element_inner_html_read(dom_object *obj, zval *retval)
+/* https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#fragment-serializing-algorithm-steps */
+static zend_string *dom_element_html_fragment_serialize(dom_object *obj, xmlNodePtr node)
 {
-	DOM_PROP_NODE(xmlNodePtr, node, obj);
-
 	/* 1. Let context document be the value of node's node document. */
 	const xmlDoc *context_document = node->doc;
 
@@ -73,7 +70,7 @@ zend_result dom_element_inner_html_read(dom_object *obj, zval *retval)
 		ctx.write_string = dom_inner_html_write_string;
 		ctx.write_string_len = dom_inner_html_write_string_len;
 		dom_html5_serialize(&ctx, node);
-		ZVAL_STR(retval, smart_str_extract(&output));
+		return smart_str_extract(&output);
 	}
 	/* 3. Otherwise, context document is an XML document; return an XML serialization of node passing the flag require well-formed. */
 	else {
@@ -104,11 +101,21 @@ zend_result dom_element_inner_html_read(dom_object *obj, zval *retval)
 		if (UNEXPECTED(status < 0)) {
 			smart_str_free_ex(&str, false);
 			php_dom_throw_error_with_message(SYNTAX_ERR, "The resulting XML serialization is not well-formed", true);
-			return FAILURE;
+			return NULL;
 		}
-		ZVAL_STR(retval, smart_str_extract(&str));
+		return smart_str_extract(&str);
 	}
+}
 
+/* https://w3c.github.io/DOM-Parsing/#the-innerhtml-mixin */
+zend_result dom_element_inner_html_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, node, obj);
+	zend_string *serialization = dom_element_html_fragment_serialize(obj, node);
+	if (serialization == NULL) {
+		return FAILURE;
+	}
+	ZVAL_STR(retval, serialization);
 	return SUCCESS;
 }
 
@@ -361,6 +368,33 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 
 	dom_remove_all_children(context_node);
 	return php_dom_pre_insert(obj->document, fragment, context_node, NULL) ? SUCCESS : FAILURE;
+}
+
+/* https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-outerhtml-property */
+zend_result dom_element_outer_html_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, this, obj);
+
+	/* 1. Let element be a fictional node whose only child is this. */
+	xmlNode element;
+	memset(&element, 0, sizeof(element));
+	element.type = XML_DOCUMENT_FRAG_NODE;
+	element.children = element.last = this;
+	element.doc = this->doc;
+
+	xmlNodePtr old_parent = this->parent;
+	this->parent = &element;
+
+	/* 2. Return the result of running fragment serializing algorithm steps with element and true. */
+	zend_string *serialization = dom_element_html_fragment_serialize(obj, &element);
+
+	this->parent = old_parent;
+
+	if (serialization == NULL) {
+		return FAILURE;
+	}
+	ZVAL_STR(retval, serialization);
+	return SUCCESS;
 }
 
 #endif

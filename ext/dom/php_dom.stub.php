@@ -1689,6 +1689,9 @@ namespace Dom
         public string $innerHTML;
 
         /** @virtual */
+        public string $outerHTML;
+
+        /** @virtual */
         public string $substitutedNodeValue;
 
         /** @return list<NamespaceInfo> */
