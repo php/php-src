@@ -9,7 +9,7 @@ $h = password_hash($secret, PASSWORD_BCRYPT);
 var_dump($h, password_verify($secret, $h), $h===crypt($secret, $h));
 
 /* generate with crypt, check with both */
-$h = crypt($secret, crypt_gensalt(CRYPT_BLOWFISH));
+$h = crypt($secret, crypt_gensalt(CRYPT_PREFIX_BLOWFISH));
 var_dump($h, password_verify($secret, $h), $h===crypt($secret, $h));
 ?>
 --EXPECTF--
