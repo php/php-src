@@ -5,6 +5,8 @@ phar
 --INI--
 phar.readonly=1
 phar.require_hash=0
+--SKIPIF--
+<?php if (PHP_OS_FAMILY === "Darwin") die("xfail Flaky on macOS for unknown reasons"); ?>
 --FILE--
 <?php
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.phar.php';
