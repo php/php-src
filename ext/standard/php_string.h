@@ -42,7 +42,7 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, const char *what, size_t w
 PHPAPI void php_stripcslashes(zend_string *str);
 PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, size_t sufflen);
 PHPAPI size_t php_dirname(char *str, size_t len);
-PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
+PHPAPI char *php_stristr(const char *s, const char *t, size_t s_len, size_t t_len);
 PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const char *needle,
 		size_t needle_len, const char *str, size_t str_len);
 PHPAPI zend_string *php_trim(zend_string *str, const char *what, size_t what_len, int mode);
