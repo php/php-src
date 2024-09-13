@@ -2455,7 +2455,7 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 	/* complete initialization of trait structures in ce */
 	zend_traits_init_trait_structures(ce, traits, &exclude_tables, &aliases);
 
-	/* first care about all methods to be flattened into the class */
+	/* Flatten all methods into the class */
 	zend_do_traits_method_binding(ce, traits, exclude_tables, aliases);
 
 	if (aliases) {
@@ -2465,10 +2465,6 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 	if (exclude_tables) {
 		efree(exclude_tables);
 	}
-
-	/* then flatten the constants and properties into it, to, mostly to notify developer about problems */
-	zend_do_traits_constant_binding(ce, traits);
-	zend_do_traits_property_binding(ce, traits);
 }
 /* }}} */
 
@@ -2990,6 +2986,12 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_enum_register_funcs(ce);
 		}
 
+		if (ce->num_traits) {
+			/* Bind all constants and properties first, so that parent inheritance treats them as if
+			 * they were declared in the child class. */
+			zend_do_traits_constant_binding(ce, traits_and_interfaces);
+			zend_do_traits_property_binding(ce, traits_and_interfaces);
+		}
 		if (parent) {
 			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 				add_dependency_obligation(ce, parent);
