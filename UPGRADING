@@ -565,6 +565,10 @@ PHP 8.4 UPGRADE NOTES
     is deprecated. Update the session storage backend to accept 32 character
     hexadecimal session IDs and stop changing these two INI settings.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#sessionsid_length_and_sessionsid_bits_per_character
+  . Changing the INI settings session.use_only_cookies, session.use_trans_sid,
+    session.trans_sid_tags, session.trans_sid_hosts, and session.referer_check
+    is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-get-post-sessions
 
 - SOAP:
   . Passing an int to SoapServer::addFunction() is now deprecated.
