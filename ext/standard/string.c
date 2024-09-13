@@ -1669,7 +1669,7 @@ PHP_FUNCTION(pathinfo)
 
 /* {{{ php_stristr
    case insensitive strstr */
-PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
+PHPAPI char *php_stristr(const char *s, const char *t, size_t s_len, size_t t_len)
 {
 	return (char*)php_memnistr(s, t, t_len, s + s_len);
 }
