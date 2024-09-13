@@ -19,12 +19,24 @@
 #ifndef PHP_CRYPT_H
 #define PHP_CRYPT_H
 
+#ifdef HAVE_CRYPT_H
+# if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
+#  define _GNU_SOURCE
+# endif
+# include <crypt.h>
+#endif
+
 PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, bool quiet);
 PHP_MINIT_FUNCTION(crypt);
 PHP_MSHUTDOWN_FUNCTION(crypt);
 PHP_RINIT_FUNCTION(crypt);
 
+#ifdef CRYPT_GENSALT_OUTPUT_SIZE
+/* use salt length from library (192) */
+#define PHP_MAX_SALT_LEN CRYPT_GENSALT_OUTPUT_SIZE
+#else
 /* sha512 crypt has the maximal salt length of 123 characters */
 #define PHP_MAX_SALT_LEN 123
+#endif
 
 #endif
