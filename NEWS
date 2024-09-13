@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15613 (overflow on unpack call hex string repeater).
     (David Carlier)
 
+- XML:
+  . Fixed bug GH-15868 (Assertion failure in xml_parse_into_struct after
+    exception). (nielsdos)
+
 26 Sep 2024, PHP 8.2.24
 
 - Core:
