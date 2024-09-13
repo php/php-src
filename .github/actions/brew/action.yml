@@ -12,31 +12,15 @@ runs:
         sudo sed -Ei '' "s/$code.*/$code, overwrite: true\)/" "$formula_installer"
 
         brew install \
-          pkg-config \
-          autoconf \
           bison \
           re2c
         brew install \
-          openssl@1.1 \
-          curl \
-          krb5 \
           bzip2 \
           enchant \
           libffi \
-          libpng \
-          webp \
-          freetype \
           intltool \
-          icu4c \
           libiconv \
-          zlib \
           t1lib \
-          gd \
-          libzip \
-          gmp \
-          tidy-html5 \
           libxml2 \
           libjpeg \
-          libxslt \
-          postgresql
-        brew link icu4c gettext --force
+          libxslt
