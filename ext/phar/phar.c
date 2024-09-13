@@ -2520,8 +2520,8 @@ zend_string *phar_create_default_stub(const char *index_php, const char *web_ind
 }
 /* }}} */
 
-int phar_flush(phar_archive_data *phar, char **error) {
-	return phar_flush_ex(phar, NULL, false, error);
+void phar_flush(phar_archive_data *phar, char **error) {
+	phar_flush_ex(phar, NULL, false, error);
 }
 
 /**
@@ -2529,7 +2529,7 @@ int phar_flush(phar_archive_data *phar, char **error) {
  *
  * if user_stub is NULL the default or existing stub should be used
  */
-int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
+void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
 {
 	static const char halt_stub[] = "__HALT_COMPILER();";
 
@@ -2557,7 +2557,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		if (error) {
 			spprintf(error, 0, "internal error: attempt to flush cached zip-based phar \"%s\"", phar->fname);
 		}
-		return EOF;
+		return;
 	}
 
 	if (error) {
@@ -2565,21 +2565,23 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 	}
 
 	if (!zend_hash_num_elements(&phar->manifest) && !user_stub) {
-		return EOF;
+		return;
 	}
 
 	zend_hash_clean(&phar->virtual_dirs);
 
 	if (phar->is_zip) {
-		return phar_zip_flush(phar, user_stub, is_default_stub, error);
+		phar_zip_flush(phar, user_stub, is_default_stub, error);
+		return;
 	}
 
 	if (phar->is_tar) {
-		return phar_tar_flush(phar, user_stub, is_default_stub, error);
+		phar_tar_flush(phar, user_stub, is_default_stub, error);
+		return;
 	}
 
 	if (PHAR_G(readonly)) {
-		return EOF;
+		return;
 	}
 
 	if (phar->fp && !phar->is_brandnew) {
@@ -2598,7 +2600,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
-		return EOF;
+		return;
 	}
 
 	if (user_stub) {
@@ -2612,7 +2614,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			if (error) {
 				spprintf(error, 0, "illegal stub for phar \"%s\" (__HALT_COMPILER(); is missing)", phar->fname);
 			}
-			return EOF;
+			return;
 		}
 
 		size_t len = pos - ZSTR_VAL(user_stub) + strlen(halt_stub);
@@ -2630,7 +2632,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			if (error) {
 				spprintf(error, 0, "unable to create stub from string in new phar \"%s\"", phar->fname);
 			}
-			return EOF;
+			return;
 		}
 		phar->halt_offset = len + end_sequence_len;
 	} else {
@@ -2660,7 +2662,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			if (new_stub) {
 				zend_string_free(new_stub);
 			}
-			return EOF;
+			return;
 		}
 		if (new_stub) {
 			zend_string_free(new_stub);
@@ -2756,7 +2758,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			if (error) {
 				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 			}
-			return EOF;
+			return;
 		}
 		newcrc32 = php_crc32_bulk_init();
 		php_crc32_stream_bulk_update(&newcrc32, file, entry->uncompressed_filesize);
@@ -2782,7 +2784,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 					spprintf(error, 0, "unable to bzip2 compress file \"%s\" to new phar \"%s\"", entry->filename, phar->fname);
 				}
 			}
-			return EOF;
+			return;
 		}
 
 		/* create new file that holds the compressed versions */
@@ -3105,7 +3107,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 						php_stream_close(oldfile);
 					}
 					php_stream_close(newfile);
-					return EOF;
+					return;
 				}
 
 				php_stream_write(newfile, digest, digest_len);
@@ -3157,7 +3159,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			if (error) {
 				spprintf(error, 4096, "unable to open new phar \"%s\" for writing", phar->fname);
 			}
-			return EOF;
+			return;
 		}
 
 		if (phar->flags & PHAR_FILE_COMPRESSED_GZ) {
@@ -3173,7 +3175,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 				if (error) {
 					spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", phar->fname);
 				}
-				return EOF;
+				return;
 			}
 
 			php_stream_filter_append(&phar->fp->writefilters, filter);
@@ -3203,10 +3205,9 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		if (error) {
 			spprintf(error, 0, "unable to seek to __HALT_COMPILER(); in new phar \"%s\"", phar->fname);
 		}
-		return EOF;
 	}
 
-	return EOF;
+	return;
 
 cleanup:
 	if (shared_cfp != NULL) {
@@ -3218,8 +3219,6 @@ cleanup:
 			entry->header_offset = 0;
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	return EOF;
 }
 /* }}} */
 
