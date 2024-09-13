@@ -11,6 +11,9 @@ runs:
         code=" keg.link\(verbose: verbose\?"
         sudo sed -Ei '' "s/$code.*/$code, overwrite: true\)/" "$formula_installer"
 
+        # Some packages exist on x86 but not arm, or vice versa.
+        # Install them with reinstall to avoid warnings.
+        brew reinstall autoconf webp tidy-html5 libzip
         brew install \
           bison \
           re2c
