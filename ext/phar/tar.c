@@ -960,7 +960,7 @@ int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
 	php_stream *oldfile, *newfile;
-	int closeoldfile;
+	bool must_close_old_file = false;
 	size_t signature_length;
 	struct _phar_pass_tar_info pass;
 	char *buf, *signature, sigbuf[8];
@@ -1092,11 +1092,11 @@ int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 nostub:
 	if (phar->fp && !phar->is_brandnew) {
 		oldfile = phar->fp;
-		closeoldfile = 0;
+		must_close_old_file = false;
 		php_stream_rewind(oldfile);
 	} else {
 		oldfile = php_stream_open_wrapper(phar->fname, "rb", 0, NULL);
-		closeoldfile = oldfile != NULL;
+		must_close_old_file = oldfile != NULL;
 	}
 
 	newfile = php_stream_fopen_tmpfile();
@@ -1104,7 +1104,7 @@ nostub:
 		if (error) {
 			spprintf(error, 0, "unable to create temporary file");
 		}
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 		return EOF;
@@ -1120,7 +1120,7 @@ nostub:
 		phar_entry_info *mentry;
 		if (NULL != (mentry = zend_hash_str_find_ptr(&(phar->manifest), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1))) {
 			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(&phar->metadata_tracker, mentry, error)) {
-				if (closeoldfile) {
+				if (must_close_old_file) {
 					php_stream_close(oldfile);
 				}
 				return EOF;
@@ -1136,7 +1136,7 @@ nostub:
 
 			if (NULL == (mentry = zend_hash_str_add_mem(&(phar->manifest), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1, (void *)&newentry, sizeof(phar_entry_info)))) {
 				spprintf(error, 0, "phar tar error: unable to add magic metadata file to manifest for phar archive \"%s\"", phar->fname);
-				if (closeoldfile) {
+				if (must_close_old_file) {
 					php_stream_close(oldfile);
 				}
 				return EOF;
@@ -1144,7 +1144,7 @@ nostub:
 
 			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(&phar->metadata_tracker, mentry, error)) {
 				zend_hash_str_del(&(phar->manifest), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1);
-				if (closeoldfile) {
+				if (must_close_old_file) {
 					php_stream_close(oldfile);
 				}
 				return EOF;
@@ -1155,7 +1155,7 @@ nostub:
 	zend_hash_apply_with_argument(&phar->manifest, phar_tar_setupmetadata, (void *) &pass);
 
 	if (error && *error) {
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 
@@ -1175,7 +1175,7 @@ nostub:
 				efree(save);
 			}
 
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 
@@ -1210,7 +1210,7 @@ nostub:
 				spprintf(error, 0, "phar error: unable to write signature to tar-based phar %s", phar->fname);
 			}
 
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
@@ -1223,7 +1223,7 @@ nostub:
 		entry.filename_len = phar_tar_writeheaders_int(&entry, (void *)&pass);
 
 		if (error && *error) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			/* error is set by writeheaders */
@@ -1237,7 +1237,7 @@ nostub:
 	php_stream_write(newfile, buf, 1024);
 	efree(buf);
 
-	if (closeoldfile) {
+	if (must_close_old_file) {
 		php_stream_close(oldfile);
 	}
 

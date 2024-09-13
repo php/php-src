@@ -1257,7 +1257,7 @@ int phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 	char halt_stub[] = "__HALT_COMPILER();";
 
 	php_stream *oldfile;
-	int closeoldfile = 0;
+	bool must_close_old_file = false;
 	phar_entry_info entry = {0};
 	char *temperr = NULL;
 	struct _phar_zip_pass pass;
@@ -1268,7 +1268,7 @@ int phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
 	entry.timestamp = time(NULL);
 	entry.is_modified = 1;
-	entry.is_zip = 1;
+	entry.is_zip = true;
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
 
@@ -1390,11 +1390,11 @@ int phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 nostub:
 	if (phar->fp && !phar->is_brandnew) {
 		oldfile = phar->fp;
-		closeoldfile = 0;
+		must_close_old_file = false;
 		php_stream_rewind(oldfile);
 	} else {
 		oldfile = php_stream_open_wrapper(phar->fname, "rb", 0, NULL);
-		closeoldfile = oldfile != NULL;
+		must_close_old_file = oldfile != NULL;
 	}
 
 	/* save modified files to the zip */
@@ -1403,7 +1403,7 @@ nostub:
 
 	if (!pass.filefp) {
 fperror:
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 		if (error) {
@@ -1444,7 +1444,7 @@ temperror:
 		php_stream_close(pass.centralfp);
 nocentralerror:
 		php_stream_close(pass.filefp);
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 		return EOF;
@@ -1521,7 +1521,7 @@ nocentralerror:
 	} else {
 		phar->fp = php_stream_open_wrapper(phar->fname, "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (!phar->fp) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			phar->fp = pass.filefp;
@@ -1536,7 +1536,7 @@ nocentralerror:
 		php_stream_close(pass.filefp);
 	}
 
-	if (closeoldfile) {
+	if (must_close_old_file) {
 		php_stream_close(oldfile);
 	}
 	return EOF;
