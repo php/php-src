@@ -1135,7 +1135,10 @@ static inheritance_status do_inheritance_check_on_method(
 
 #define SEPARATE_METHOD() do { \
 			if ((flags & ZEND_INHERITANCE_LAZY_CHILD_CLONE) \
-			 && child_scope != ce && child->type == ZEND_USER_FUNCTION) { \
+			 && child_scope != ce \
+			 /* Trait scopes are fixed after inheritance. However, they are always duplicated. */ \
+			 && !(child_scope->ce_flags & ZEND_ACC_TRAIT) \
+			 && child->type == ZEND_USER_FUNCTION) { \
 				/* op_array wasn't duplicated yet */ \
 				zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array)); \
 				memcpy(new_function, child, sizeof(zend_op_array)); \
@@ -2695,7 +2698,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 }
 /* }}} */
 
-static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry **traits, HashTable **exclude_tables, zend_class_entry **aliases) /* {{{ */
+static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry **traits, HashTable **exclude_tables, zend_class_entry **aliases, bool verify_abstract, bool *contains_abstract_methods) /* {{{ */
 {
 	uint32_t i;
 	zend_string *key;
@@ -2706,6 +2709,10 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 			if (traits[i]) {
 				/* copies functions, applies defined aliasing, and excludes unused trait methods */
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->function_table, key, fn) {
+					if (verify_abstract != (bool) (fn->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+						*contains_abstract_methods = true;
+						continue;
+					}
 					zend_traits_copy_functions(key, fn, ce, exclude_tables[i], aliases);
 				} ZEND_HASH_FOREACH_END();
 
@@ -2720,15 +2727,15 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 		for (i = 0; i < ce->num_traits; i++) {
 			if (traits[i]) {
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->function_table, key, fn) {
+					if (verify_abstract != (bool) (fn->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+						*contains_abstract_methods = true;
+						continue;
+					}
 					zend_traits_copy_functions(key, fn, ce, NULL, aliases);
 				} ZEND_HASH_FOREACH_END();
 			}
 		}
 	}
-
-	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
-		zend_fixup_trait_method(fn, ce);
-	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -3007,33 +3014,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
-}
-/* }}} */
-
-static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits) /* {{{ */
-{
-	HashTable **exclude_tables;
-	zend_class_entry **aliases;
-
-	ZEND_ASSERT(ce->num_traits > 0);
-
-	/* complete initialization of trait structures in ce */
-	zend_traits_init_trait_structures(ce, traits, &exclude_tables, &aliases);
-
-	/* first care about all methods to be flattened into the class */
-	zend_do_traits_method_binding(ce, traits, exclude_tables, aliases);
-
-	if (aliases) {
-		efree(aliases);
-	}
-
-	if (exclude_tables) {
-		efree(exclude_tables);
-	}
-
-	/* then flatten the constants and properties into it, to, mostly to notify developer about problems */
-	zend_do_traits_constant_binding(ce, traits);
-	zend_do_traits_property_binding(ce, traits);
 }
 /* }}} */
 
@@ -3649,6 +3629,15 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		zend_link_hooked_object_iter(ce);
 #endif
 
+		HashTable **trait_exclude_tables;
+		zend_class_entry **trait_aliases;
+		bool trait_contains_abstract_methods = false;
+		if (ce->num_traits) {
+			zend_traits_init_trait_structures(ce, traits_and_interfaces, &trait_exclude_tables, &trait_aliases);
+			zend_do_traits_method_binding(ce, traits_and_interfaces, trait_exclude_tables, trait_aliases, false, &trait_contains_abstract_methods);
+			zend_do_traits_constant_binding(ce, traits_and_interfaces);
+			zend_do_traits_property_binding(ce, traits_and_interfaces);
+		}
 		if (parent) {
 			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 				add_dependency_obligation(ce, parent);
@@ -3656,7 +3645,29 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_do_inheritance(ce, parent);
 		}
 		if (ce->num_traits) {
-			zend_do_bind_traits(ce, traits_and_interfaces);
+			if (trait_contains_abstract_methods) {
+				zend_do_traits_method_binding(ce, traits_and_interfaces, trait_exclude_tables, trait_aliases, true, &trait_contains_abstract_methods);
+			}
+
+			if (trait_exclude_tables) {
+				for (i = 0; i < ce->num_traits; i++) {
+					if (traits_and_interfaces[i]) {
+						if (trait_exclude_tables[i]) {
+							zend_hash_destroy(trait_exclude_tables[i]);
+							FREE_HASHTABLE(trait_exclude_tables[i]);
+						}
+					}
+				}
+				efree(trait_exclude_tables);
+			}
+			if (trait_aliases) {
+				efree(trait_aliases);
+			}
+
+			zend_function *fn;
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
+				zend_fixup_trait_method(fn, ce);
+			} ZEND_HASH_FOREACH_END();
 		}
 		if (ce->num_interfaces) {
 			/* Also copy the parent interfaces here, so we don't need to reallocate later. */
