@@ -4753,8 +4753,7 @@ PHP_FUNCTION(array_pad)
 
 	if (input_size >= pad_size_abs) {
 		/* Copy the original array */
-		ZVAL_COPY(return_value, input);
-		return;
+		RETURN_COPY(input);
 	}
 
 	num_pads = pad_size_abs - input_size;
@@ -4916,8 +4915,7 @@ PHP_FUNCTION(array_unique)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
-		ZVAL_COPY(return_value, array);
-		return;
+		RETURN_COPY(array);
 	}
 
 	if (sort_type == PHP_SORT_STRING) {
@@ -6504,8 +6502,7 @@ PHP_FUNCTION(array_filter)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
-		RETVAL_EMPTY_ARRAY();
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 	array_init(return_value);
 
@@ -6758,8 +6755,7 @@ PHP_FUNCTION(array_map)
 
 		/* Short-circuit: if no callback and only one array, just return it. */
 		if (!ZEND_FCI_INITIALIZED(fci) || !maxlen) {
-			ZVAL_COPY(return_value, &arrays[0]);
-			return;
+			RETURN_COPY(&arrays[0]);
 		}
 
 		array_init_size(return_value, maxlen);
@@ -6977,8 +6973,7 @@ PHP_FUNCTION(array_chunk)
 
 	if (size > num_in) {
 		if (num_in == 0) {
-			RETVAL_EMPTY_ARRAY();
-			return;
+			RETURN_EMPTY_ARRAY();
 		}
 		size = num_in;
 	}
