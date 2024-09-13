@@ -2533,7 +2533,6 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 {
 	static const char halt_stub[] = "__HALT_COMPILER();";
 
-	zend_string *newstub;
 	phar_entry_info *entry, *newentry;
 	size_t halt_offset;
 	int restore_alias_len, global_flags = 0;
@@ -2636,15 +2635,15 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		phar->halt_offset = len + end_sequence_len;
 	} else {
 		size_t written;
+		zend_string *new_stub = NULL;
 
 		if (!user_stub && phar->halt_offset && oldfile && !phar->is_brandnew) {
 			php_stream_copy_to_stream_ex(oldfile, newfile, phar->halt_offset, &written);
-			newstub = NULL;
 		} else {
 			/* this is either a brand new phar or a default stub overwrite */
-			newstub = phar_create_default_stub(NULL, NULL, NULL);
-			phar->halt_offset = ZSTR_LEN(newstub);
-			written = php_stream_write(newfile, ZSTR_VAL(newstub), phar->halt_offset);
+			new_stub = phar_create_default_stub(NULL, NULL, NULL);
+			phar->halt_offset = ZSTR_LEN(new_stub);
+			written = php_stream_write(newfile, ZSTR_VAL(new_stub), phar->halt_offset);
 		}
 		if (phar->halt_offset != written) {
 			if (must_close_old_file) {
@@ -2652,19 +2651,19 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			}
 			php_stream_close(newfile);
 			if (error) {
-				if (newstub) {
+				if (new_stub) {
 					spprintf(error, 0, "unable to create stub in new phar \"%s\"", phar->fname);
 				} else {
 					spprintf(error, 0, "unable to copy stub of old phar to new phar \"%s\"", phar->fname);
 				}
 			}
-			if (newstub) {
-				zend_string_free(newstub);
+			if (new_stub) {
+				zend_string_free(new_stub);
 			}
 			return EOF;
 		}
-		if (newstub) {
-			zend_string_free(newstub);
+		if (new_stub) {
+			zend_string_free(new_stub);
 		}
 	}
 	manifest_ftell = php_stream_tell(newfile);
