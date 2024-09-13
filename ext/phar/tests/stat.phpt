@@ -6,7 +6,11 @@ phar
 phar.require_hash=1
 phar.readonly=0
 --SKIPIF--
-<?php if (PHP_OS_FAMILY === "Darwin") die("xfail Flaky on macOS for unknown reasons"); ?>
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
+?>
 --FILE--
 <?php
 umask(0);
