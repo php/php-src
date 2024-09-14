@@ -207,7 +207,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 		} else {
 			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, gai_error);
 		}
-# if PHP_WIN32
+# ifdef PHP_WIN32
 		php_win32_error_msg_free(gai_error);
 # endif
 		return 0;

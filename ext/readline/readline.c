@@ -186,7 +186,7 @@ PHP_FUNCTION(readline_info)
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-#if !defined(PHP_WIN32) && !HAVE_LIBEDIT
+#if !defined(PHP_WIN32) && !defined(HAVE_LIBEDIT)
 				if (!rl_line_buffer) {
 					rl_line_buffer = malloc(Z_STRLEN_P(value) + 1);
 				} else if (strlen(oldstr) < Z_STRLEN_P(value)) {
