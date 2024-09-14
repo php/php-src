@@ -19,9 +19,6 @@ runs:
             re2c \
             pkgconf \
             mysql-client \
-            aspell-dev \
-            hunspell-dev \
-            hunspell-en \
             bzip2-dev \
             curl-dev \
             freetype-dev \
@@ -49,7 +46,6 @@ runs:
             lmdb-dev \
             argon2-dev \
             enchant2-dev \
-            enchant2-hunspell \
             freetds-dev \
             imap-dev \
             net-snmp-dev \
