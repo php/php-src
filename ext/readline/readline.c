@@ -74,8 +74,6 @@ PHP_MINIT_FUNCTION(readline)
 	ZVAL_UNDEF(&_prepped_callback);
 #endif
 
-	register_readline_symbols(module_number);
-
 	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
 }
 
