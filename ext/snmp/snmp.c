@@ -26,6 +26,11 @@
 #include "php.h"
 #include "main/php_network.h"
 #include "ext/standard/info.h"
+
+#ifdef PHP_WIN32
+// avoid conflicting declarations of (v)asprintf()
+# define HAVE_ASPRINTF
+#endif
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
