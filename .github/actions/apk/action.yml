@@ -41,7 +41,7 @@ runs:
             libzip-dev \
             oniguruma-dev \
             openssl-dev \
-            readline-dev \
+            libedit-dev \
             sqlite-dev \
             tidyhtml-dev \
             krb5-dev \

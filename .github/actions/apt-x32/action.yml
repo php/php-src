@@ -28,7 +28,7 @@ runs:
           libonig-dev:i386 \
           libpng-dev:i386 \
           libpq-dev:i386 \
-          libreadline-dev:i386 \
+          libedit-dev:i386 \
           libsasl2-dev:i386 \
           libsodium-dev:i386 \
           libsqlite3-dev:i386 \

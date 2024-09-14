@@ -20,10 +20,10 @@
 #ifdef HAVE_LIBEDIT
 #define READLINE_LIB "libedit"
 #else
-#define READLINE_LIB "readline"
+#define READLINE_LIB ""
 #endif
 
-#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
+#ifdef HAVE_LIBEDIT
 
 extern zend_module_entry readline_module_entry;
 #define phpext_readline_ptr &readline_module_entry
@@ -35,6 +35,6 @@ extern zend_module_entry readline_module_entry;
 
 #define phpext_readline_ptr NULL
 
-#endif /* HAVE_LIBREADLINE */
+#endif /* HAVE_LIBEDIT */
 
 #endif /* PHP_READLINE_H */

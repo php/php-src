@@ -25,18 +25,13 @@
 #include "readline_cli.h"
 #include "readline_arginfo.h"
 
-#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
+#ifdef HAVE_LIBEDIT
 
 #ifndef HAVE_RL_COMPLETION_MATCHES
 #define rl_completion_matches completion_matches
 #endif
 
-#ifdef HAVE_LIBEDIT
 #include <editline/readline.h>
-#else
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
 
 #ifdef HAVE_RL_CALLBACK_READ_CHAR
 
@@ -74,10 +69,6 @@ ZEND_GET_MODULE(readline)
 
 PHP_MINIT_FUNCTION(readline)
 {
-#ifdef HAVE_LIBREADLINE
-		/* libedit don't need this call which set the tty in cooked mode */
-	using_history();
-#endif
 	ZVAL_UNDEF(&_readline_completion);
 #ifdef HAVE_RL_CALLBACK_READ_CHAR
 	ZVAL_UNDEF(&_prepped_callback);
@@ -159,18 +150,6 @@ PHP_FUNCTION(readline_info)
 #ifndef PHP_WIN32
 		add_assoc_long(return_value,"end",rl_end);
 #endif
-#ifdef HAVE_LIBREADLINE
-		add_assoc_long(return_value,"mark",rl_mark);
-		add_assoc_long(return_value,"done",rl_done);
-		add_assoc_long(return_value,"pending_input",rl_pending_input);
-		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt));
-		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name));
-		add_assoc_str(return_value, "completion_append_character",
-			rl_completion_append_character == 0
-				? ZSTR_EMPTY_ALLOC()
-				: ZSTR_CHAR(rl_completion_append_character));
-		add_assoc_bool(return_value,"completion_suppress_append",rl_completion_suppress_append);
-#endif
 #ifdef HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
@@ -186,15 +165,6 @@ PHP_FUNCTION(readline_info)
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-#if !defined(PHP_WIN32) && !defined(HAVE_LIBEDIT)
-				if (!rl_line_buffer) {
-					rl_line_buffer = malloc(Z_STRLEN_P(value) + 1);
-				} else if (strlen(oldstr) < Z_STRLEN_P(value)) {
-					rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
-					oldstr = rl_line_buffer;
-				}
-				memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
-#else
 				char *tmp = strdup(Z_STRVAL_P(value));
 				if (tmp) {
 					if (rl_line_buffer) {
@@ -202,7 +172,6 @@ PHP_FUNCTION(readline_info)
 					}
 					rl_line_buffer = tmp;
 				}
-#endif
 #if !defined(PHP_WIN32)
 				rl_end = Z_STRLEN_P(value);
 #endif
@@ -213,45 +182,6 @@ PHP_FUNCTION(readline_info)
 #ifndef PHP_WIN32
 		} else if (zend_string_equals_literal_ci(what, "end")) {
 			RETVAL_LONG(rl_end);
-#endif
-#ifdef HAVE_LIBREADLINE
-		} else if (zend_string_equals_literal_ci(what, "mark")) {
-			RETVAL_LONG(rl_mark);
-		} else if (zend_string_equals_literal_ci(what, "done")) {
-			oldval = rl_done;
-			if (value) {
-				rl_done = zval_get_long(value);
-			}
-			RETVAL_LONG(oldval);
-		} else if (zend_string_equals_literal_ci(what, "pending_input")) {
-			oldval = rl_pending_input;
-			if (value) {
-				if (!try_convert_to_string(value)) {
-					RETURN_THROWS();
-				}
-				rl_pending_input = Z_STRVAL_P(value)[0];
-			}
-			RETVAL_LONG(oldval);
-		} else if (zend_string_equals_literal_ci(what, "prompt")) {
-			RETVAL_STRING(SAFE_STRING(rl_prompt));
-		} else if (zend_string_equals_literal_ci(what, "terminal_name")) {
-			RETVAL_STRING((char *)SAFE_STRING(rl_terminal_name));
-		} else if (zend_string_equals_literal_ci(what, "completion_suppress_append")) {
-			oldval = rl_completion_suppress_append;
-			if (value) {
-				rl_completion_suppress_append = zend_is_true(value);
-			}
-			RETVAL_BOOL(oldval);
-		} else if (zend_string_equals_literal_ci(what, "completion_append_character")) {
-			oldval = rl_completion_append_character;
-			if (value) {
-				if (!try_convert_to_string(value)) {
-					RETURN_THROWS();
-				}
-				rl_completion_append_character = (int)Z_STRVAL_P(value)[0];
-			}
-			RETVAL_INTERNED_STR(
-				oldval == 0 ? ZSTR_EMPTY_ALLOC() : ZSTR_CHAR(oldval));
 #endif
 #ifdef HAVE_ERASE_EMPTY_LINE
 		} else if (zend_string_equals_literal_ci(what, "erase_empty_line")) {
@@ -309,11 +239,9 @@ PHP_FUNCTION(readline_clear_history)
 		RETURN_THROWS();
 	}
 
-#ifdef HAVE_LIBEDIT
 	/* clear_history is the only function where rl_initialize
 	   is not call to ensure correct allocation */
 	using_history();
-#endif
 	clear_history();
 
 	RETURN_TRUE;
@@ -333,7 +261,7 @@ PHP_FUNCTION(readline_list_history)
 
 	array_init(return_value);
 
-#if defined(HAVE_LIBEDIT) && defined(PHP_WIN32) /* Winedit on Windows */
+#if defined(PHP_WIN32) /* Winedit on Windows */
 	history = history_list();
 
 	if (history) {
@@ -343,7 +271,7 @@ PHP_FUNCTION(readline_list_history)
 		}
 	}
 
-#elif defined(HAVE_LIBEDIT) /* libedit */
+#else /* libedit */
 	{
 		HISTORY_STATE *hs;
 		int i;
@@ -359,16 +287,6 @@ PHP_FUNCTION(readline_list_history)
 			}
 		}
 		free(hs);
-	}
-
-#else /* readline */
-	history = history_list();
-
-	if (history) {
-		int i;
-		for (i = 0; history[i]; i++) {
-			add_next_index_string(return_value, history[i]->line);
-		}
 	}
 #endif
 }
@@ -585,11 +503,9 @@ PHP_FUNCTION(readline_redisplay)
 		RETURN_THROWS();
 	}
 
-#ifdef HAVE_LIBEDIT
 	/* seems libedit doesn't take care of rl_initialize in rl_redisplay
 	 * see bug #72538 */
 	using_history();
-#endif
 	rl_redisplay();
 }
 /* }}} */
@@ -611,4 +527,4 @@ PHP_FUNCTION(readline_on_new_line)
 #endif
 
 
-#endif /* HAVE_LIBREADLINE */
+#endif /* HAVE_LIBEDIT */

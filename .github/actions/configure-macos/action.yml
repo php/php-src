@@ -45,7 +45,7 @@ runs:
           --enable-sysvshm \
           --enable-shmop \
           --enable-pcntl \
-          --with-readline="$BREW_OPT"/readline \
+          --with-readline \
           --enable-mbstring \
           --with-curl \
           --with-gettext="$BREW_OPT"/gettext \

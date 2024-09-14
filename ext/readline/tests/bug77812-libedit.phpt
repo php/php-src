@@ -4,7 +4,6 @@ Bug #77812 (Interactive mode does not support PHP 7.3-style heredoc)
 readline
 --SKIPIF--
 <?php
-if (READLINE_LIB !== "libedit") die('skip libedit only');
 if (!function_exists('proc_open')) die('skip proc_open() not available');
 ?>
 --FILE--

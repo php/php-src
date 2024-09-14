@@ -4,8 +4,8 @@ lsan disabled due to a leak on ubuntu focal only.
 --EXTENSIONS--
 readline
 --SKIPIF--
-<?php if (!function_exists('readline_callback_handler_remove')) die("skip");
-if (READLINE_LIB != "libedit") die("skip libedit only");
+<?php
+if (!function_exists('readline_callback_handler_remove')) die("skip readline_callback_handler_remove not available");
 ?>
 --INI--
 zend.signal_check=0

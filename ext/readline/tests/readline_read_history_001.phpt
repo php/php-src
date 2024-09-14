@@ -4,7 +4,7 @@ readline_read_history(): Basic test
 readline
 --SKIPIF--
 <?php
-if (!function_exists('readline_list_history')) die("skip");
+if (!function_exists('readline_list_history')) die("skip readline_list_history not available");
 if (getenv('SKIP_REPEAT')) die("skip readline has global state");
 ?>
 --FILE--

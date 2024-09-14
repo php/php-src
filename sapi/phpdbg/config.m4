@@ -16,7 +16,7 @@ PHP_ARG_ENABLE([phpdbg-debug],
 PHP_ARG_ENABLE([phpdbg-readline],
   [for phpdbg readline support],
   [AS_HELP_STRING([--enable-phpdbg-readline],
-    [Enable readline support in phpdbg (depends on static ext/readline)])],
+    [Enable readline support in phpdbg (requires libedit)])],
   [no],
   [no])
 
@@ -27,19 +27,11 @@ if test "$PHP_PHPDBG" != "no"; then
   AS_VAR_IF([PHP_PHPDBG_DEBUG], [no],,
     [AS_VAR_APPEND([PHP_PHPDBG_CFLAGS], [" -DPHPDBG_DEBUG=1"])])
 
-  AC_MSG_CHECKING([for phpdbg and readline integration])
-  if test "$PHP_PHPDBG_READLINE" = "yes"; then
-    if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then
-      AC_DEFINE([HAVE_PHPDBG_READLINE], [1],
-        [Define to 1 if the phpdbg SAPI has libedit/readline integration.])
-      PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
-      AC_MSG_RESULT([ok])
-    else
-      AC_MSG_RESULT([readline is not available])
-    fi
-  else
-    AC_MSG_RESULT([disabled])
-  fi
+  AS_VAR_IF([PHP_PHPDBG_READLINE], [yes], [
+    PHP_SETUP_EDIT([PHPDBG_EXTRA_LIBS],,, [yes])
+    AC_DEFINE([HAVE_PHPDBG_READLINE], [1],
+        [Define to 1 if the phpdbg SAPI has libedit integration.])
+  ])
 
   AH_TEMPLATE([HAVE_USERFAULTFD_WRITEFAULT],
     [Define to 1 if faulting on write-protected memory support can be compiled

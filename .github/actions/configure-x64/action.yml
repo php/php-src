@@ -41,7 +41,7 @@ runs:
           --enable-sysvshm \
           --enable-shmop \
           --enable-pcntl \
-          --without-readline --with-libedit \
+          --with-readline \
           --enable-mbstring \
           --with-curl \
           --with-gettext \
