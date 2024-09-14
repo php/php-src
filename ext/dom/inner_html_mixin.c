@@ -341,23 +341,31 @@ static xmlNodePtr dom_xml_fragment_parsing_algorithm(dom_object *obj, const xmlN
 	return NULL;
 }
 
-/* https://w3c.github.io/DOM-Parsing/#the-innerhtml-mixin
- * and https://w3c.github.io/DOM-Parsing/#dfn-fragment-parsing-algorithm */
+/* https://w3c.github.io/DOM-Parsing/#dfn-fragment-parsing-algorithm */
+static xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input)
+{
+	if (context_node->doc->type == XML_DOCUMENT_NODE) {
+		return dom_xml_fragment_parsing_algorithm(obj, context_node, input);
+	} else {
+		return dom_html_fragment_parsing_algorithm(obj, context_node, input, obj->document->quirks_mode);
+	}
+}
+
+/* https://w3c.github.io/DOM-Parsing/#the-innerhtml-mixin */
 zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 {
+	/* 1. We don't do injection sinks, skip. */
+
+	/* 2. Let context be this. */
 	DOM_PROP_NODE(xmlNodePtr, context_node, obj);
 
-	xmlNodePtr fragment;
-	if (context_node->doc->type == XML_DOCUMENT_NODE) {
-		fragment = dom_xml_fragment_parsing_algorithm(obj, context_node, Z_STR_P(newval));
-	} else {
-		fragment = dom_html_fragment_parsing_algorithm(obj, context_node, Z_STR_P(newval), obj->document->quirks_mode);
-	}
-
+	/* 3. Let fragment be the result of invoking the fragment parsing algorithm steps with context and compliantString. */
+	xmlNodePtr fragment = dom_parse_fragment(obj, context_node, Z_STR_P(newval));
 	if (fragment == NULL) {
 		return FAILURE;
 	}
 
+	/* 4. If context is a template element, then set context to the template element's template contents (a DocumentFragment). */
 	if (php_dom_ns_is_fast(context_node, php_dom_ns_is_html_magic_token) && xmlStrEqual(context_node->name, BAD_CAST "template")) {
 		context_node = php_dom_ensure_templated_content(php_dom_get_private_data(obj), context_node);
 		if (context_node == NULL) {
@@ -366,6 +374,7 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 		}
 	}
 
+	/* 5. Replace all with fragment within context. */
 	dom_remove_all_children(context_node);
 	return php_dom_pre_insert(obj->document, fragment, context_node, NULL) ? SUCCESS : FAILURE;
 }
@@ -394,6 +403,64 @@ zend_result dom_element_outer_html_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 	ZVAL_STR(retval, serialization);
+	return SUCCESS;
+}
+
+/* https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-outerhtml-property */
+zend_result dom_element_outer_html_write(dom_object *obj, zval *newval)
+{
+	/* 1. We don't do injection sinks, skip. */
+
+	/* 2. Let parent be this's parent. */
+	DOM_PROP_NODE(xmlNodePtr, this, obj);
+	xmlNodePtr parent = this->parent;
+	bool created_parent = false;
+
+	/* 3. If parent is null, return. */
+	if (parent == NULL) {
+		return SUCCESS;
+	}
+
+	/* 4. If parent is a Document, throw. */
+	if (parent->type == XML_DOCUMENT_NODE || parent->type == XML_HTML_DOCUMENT_NODE) {
+		php_dom_throw_error(INVALID_MODIFICATION_ERR, true);
+		return FAILURE;
+	}
+
+	/* 5. If parent is a DocumentFragment, set parent to the result of creating an element given this's node document, body, and the HTML namespace. */
+	if (parent->type == XML_DOCUMENT_FRAG_NODE) {
+		xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(php_dom_get_ns_mapper(obj));
+
+		parent = xmlNewDocNode(parent->doc, html_ns, BAD_CAST "body", NULL);
+		created_parent = true;
+		if (UNEXPECTED(parent == NULL)) {
+			php_dom_throw_error(INVALID_STATE_ERR, true);
+			return FAILURE;
+		}
+	}
+
+	/* 6. Let fragment be the result of invoking the fragment parsing algorithm steps given parent and compliantString. */
+	xmlNodePtr fragment = dom_parse_fragment(obj, parent, Z_STR_P(newval));
+	if (fragment == NULL) {
+		if (created_parent) {
+			xmlFreeNode(parent);
+		}
+		return FAILURE;
+	}
+
+	/* 7. Replace this with fragment within this's parent. */
+	if (!php_dom_pre_insert(obj->document, fragment, this->parent, this)) {
+		xmlFreeNode(fragment);
+		if (created_parent) {
+			xmlFreeNode(parent);
+		}
+		return FAILURE;
+	}
+	xmlUnlinkNode(this);
+	if (created_parent) {
+		ZEND_ASSERT(parent->children == NULL);
+		xmlFreeNode(parent);
+	}
 	return SUCCESS;
 }
 
