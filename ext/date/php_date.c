@@ -5912,6 +5912,7 @@ PHP_METHOD(DatePeriod, __wakeup)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	period_obj = Z_PHPPERIOD_P(object);
+
 	myht = Z_OBJPROP_P(object);
 
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
