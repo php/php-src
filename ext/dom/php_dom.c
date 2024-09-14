@@ -478,6 +478,18 @@ static int dom_property_exists(zend_object *object, zend_string *name, int check
 }
 /* }}} */
 
+static void dom_unset_property(zend_object *object, zend_string *member, void **cache_slot)
+{
+	dom_object *obj = php_dom_obj_from_obj(object);
+
+	if (obj->prop_handler != NULL && zend_hash_exists(obj->prop_handler, member)) {
+		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		return;
+	}
+
+	zend_std_unset_property(object, member, cache_slot);
+}
+
 static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /* {{{ */
 {
 	dom_object			*obj = php_dom_obj_from_obj(object);
@@ -755,6 +767,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
+	dom_object_handlers.unset_property = dom_unset_property;
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.has_property = dom_property_exists;
 	dom_object_handlers.get_debug_info = dom_get_debug_info;

@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fix XML serializer errata: xmlns="" serialization should be allowed.
     (nielsdos)
   . Fixed bug GH-15910 (Assertion failure in ext/dom/element.c). (nielsdos)
+  . Fix unsetting DOM properties. (nielsdos)
 
 - MBString:
   . Fixed bug GH-15824 (mb_detect_encoding(): Argument $encodings contains
