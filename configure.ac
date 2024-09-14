@@ -1526,11 +1526,12 @@ AS_VAR_IF([PHP_UNDEFINED_SANITIZER], [yes],
     AC_CACHE_CHECK([whether to add -fno-sanitize=function],
     [php_cv_ubsan_no_function],
     [AC_RUN_IFELSE([AC_LANG_SOURCE([
-void foo(char *string) {}
-int main(void) {
-  void (*f)(void *) = (void (*)(void *))foo;
-  f("foo");
-}
+      void foo(char *string) { (void)string; }
+      int main(void) {
+        void (*f)(void *) = (void (*)(void *))foo;
+        f("foo");
+        return 0;
+      }
     ])],
     [php_cv_ubsan_no_function=no],
     [php_cv_ubsan_no_function=yes],
