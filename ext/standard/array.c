@@ -3711,7 +3711,7 @@ PHP_FUNCTION(array_splice)
 		/* ..and the length */
 		if (length < 0) {
 			size = num_in - offset + length;
-		} else if (((zend_ulong) offset + (zend_ulong) length) > (uint32_t) num_in) {
+		} else if (((zend_ulong) offset + (zend_ulong) length) > num_in) {
 			size = num_in - offset;
 		}
 
@@ -6638,8 +6638,7 @@ PHP_FUNCTION(array_map)
 	zval result;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-	uint32_t i;
-	uint32_t k, maxlen = 0;
+	uint32_t maxlen = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_FUNC_OR_NULL(fci, fci_cache)
@@ -6712,7 +6711,7 @@ PHP_FUNCTION(array_map)
 			} ZEND_HASH_FOREACH_END();
 		}
 	} else {
-		for (i = 0; i < n_arrays; i++) {
+		for (uint32_t i = 0; i < n_arrays; i++) {
 			if (Z_TYPE(arrays[i]) != IS_ARRAY) {
 				zend_argument_type_error(i + 2, "must be of type array, %s given", zend_zval_value_name(&arrays[i]));
 				RETURN_THROWS();
@@ -6729,13 +6728,13 @@ PHP_FUNCTION(array_map)
 			zval zv;
 
 			/* We iterate through all the arrays at once. */
-			for (k = 0; k < maxlen; k++) {
+			for (uint32_t k = 0; k < maxlen; k++) {
 
 				/* If no callback, the result will be an array, consisting of current
 				 * entries from all arrays. */
 				array_init_size(&result, n_arrays);
 
-				for (i = 0; i < n_arrays; i++) {
+				for (uint32_t i = 0; i < n_arrays; i++) {
 					/* If this array still has elements, add the current one to the
 					 * parameter list, otherwise use null value. */
 					uint32_t pos = array_pos[i];
@@ -6775,7 +6774,7 @@ PHP_FUNCTION(array_map)
 			zval *params = (zval *)safe_emalloc(n_arrays, sizeof(zval), 0);
 
 			/* Remember next starting point in the array, initialize those as zeros. */
-			for (i = 0; i < n_arrays; i++) {
+			for (uint32_t i = 0; i < n_arrays; i++) {
 				Z_EXTRA(params[i]) = 0;
 			}
 
@@ -6784,8 +6783,8 @@ PHP_FUNCTION(array_map)
 			fci.params = params;
 
 			/* We iterate through all the arrays at once. */
-			for (k = 0; k < maxlen; k++) {
-				for (i = 0; i < n_arrays; i++) {
+			for (uint32_t k = 0; k < maxlen; k++) {
+				for (uint32_t i = 0; i < n_arrays; i++) {
 					/* If this array still has elements, add the current one to the
 					 * parameter list, otherwise use null value. */
 					uint32_t pos = Z_EXTRA(params[i]);
@@ -6879,7 +6878,6 @@ PHP_FUNCTION(array_key_exists)
 /* {{{ Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {
-	int num_in;
 	zend_long size, current = 0;
 	zend_string *str_key;
 	zend_ulong num_key;
@@ -6901,7 +6899,7 @@ PHP_FUNCTION(array_chunk)
 		RETURN_THROWS();
 	}
 
-	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
+	uint32_t num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
 
 	if (size > num_in) {
 		if (num_in == 0) {
@@ -6945,15 +6943,14 @@ PHP_FUNCTION(array_combine)
 	HashTable *values, *keys;
 	uint32_t pos_values = 0;
 	zval *entry_keys, *entry_values;
-	int num_keys, num_values;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(keys)
 		Z_PARAM_ARRAY_HT(values)
 	ZEND_PARSE_PARAMETERS_END();
 
-	num_keys = zend_hash_num_elements(keys);
-	num_values = zend_hash_num_elements(values);
+	uint32_t num_keys = zend_hash_num_elements(keys);
+	uint32_t num_values = zend_hash_num_elements(values);
 
 	if (num_keys != num_values) {
 		zend_argument_value_error(1, "and argument #2 ($values) must have the same number of elements");
