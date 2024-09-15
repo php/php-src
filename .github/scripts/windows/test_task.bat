@@ -105,7 +105,7 @@ popd
 
 rem prepare for snmp
 set MIBDIRS=%DEPS_DIR%\share\mibs
-start %DEPS_DIR%\bin\snmpd.exe -C -c %APPVEYOR_BUILD_FOLDER%\ext\snmp\tests\snmpd.conf -Ln
+start %DEPS_DIR%\bin\snmpd.exe -C -c %GITHUB_WORKSPACE%\ext\snmp\tests\snmpd.conf -Ln
 
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
 if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
