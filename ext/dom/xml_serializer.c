@@ -600,7 +600,7 @@ static int dom_xml_serialize_attribute_node_value(xmlOutputBufferPtr out, xmlAtt
 /* These steps are from the attribute serialization algorithm's well-formed checks.
  * Note that this does not return a boolean but an int to be compatible with the TRY/TRY_CLEANUP interface
  * that we do for compatibility with libxml's interfaces. */
-static zend_always_inline int dom_xml_check_xmlns_attribute_requirements(const xmlAttr *attr)
+static zend_always_inline int dom_xml_check_xmlns_attribute_requirements(const xmlAttr *attr, const xmlChar *candidate_prefix)
 {
 	const xmlChar *attr_value = dom_get_attribute_value(attr);
 
@@ -609,8 +609,9 @@ static zend_always_inline int dom_xml_check_xmlns_attribute_requirements(const x
 		return -1;
 	}
 
-	/* 3.5.2.3. If the require well-formed flag is set and the value of attr's value attribute is the empty string */
-	if (*attr_value == '\0') {
+	/* 3.5.2.3. If the require well-formed flag is set and the value of attr's value attribute is the empty string.
+	 * Errata: an "xmlns" attribute is allowed but not one with a prefix, so the idea in the spec is right but the description isn't. */
+	if (*attr_value == '\0' && candidate_prefix != NULL) {
 		return -1;
 	}
 
@@ -790,14 +791,15 @@ static int dom_xml_serialize_attributes(
 					}
 				}
 
-				if (require_well_formed) {
-					/* 3.5.2.2 and 3.5.2.3 are done by this call. */
-					TRY_OR_CLEANUP(dom_xml_check_xmlns_attribute_requirements(attr));
-				}
-
 				/* 3.5.2.4. the attr's prefix matches the string "xmlns", then let candidate prefix be the string "xmlns". */
 				if (attr->ns->prefix != NULL && strcmp((const char *) attr->ns->prefix, "xmlns") == 0) {
 					candidate_prefix = BAD_CAST "xmlns";
+				}
+
+				/* Errata: step 3.5.2.3 can only really be checked if we already know the candidate prefix. */
+				if (require_well_formed) {
+					/* 3.5.2.2 and 3.5.2.3 are done by this call. */
+					TRY_OR_CLEANUP(dom_xml_check_xmlns_attribute_requirements(attr, candidate_prefix));
 				}
 			}
 			/* 3.5.3. Otherwise, the attribute namespace in not the XMLNS namespace. Run these steps: */
