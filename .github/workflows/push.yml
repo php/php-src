@@ -255,6 +255,10 @@ jobs:
         run: .github/scripts/windows/build.bat
       - name: Test
         run: .github/scripts/windows/test.bat
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+            path: junit.out.xml
   BENCHMARKING:
     name: BENCHMARKING
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
