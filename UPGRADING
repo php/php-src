@@ -966,7 +966,7 @@ PHP 8.4 UPGRADE NOTES
   . The libxml extension now requires at least libxml2 2.9.4.
 
 - MBString:
-  . Unicode data tables have been updated to Unicode 15.1.
+  . Unicode data tables have been updated to Unicode 16.0.
 
 - Mysqli:
   . The unused and undocumented constant MYSQLI_SET_CHARSET_DIR

@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-15824 (mb_detect_encoding(): Argument $encodings contains
     invalid encoding "UTF8"). (Yuya Hamada)
+  . Updated Unicode data tables to Unicode 16.0. (Ayesh Karunaratne)
 
 - Opcache:
   . Fixed bug GH-15657 (Segmentation fault in dasm_x86.h). (nielsdos)
