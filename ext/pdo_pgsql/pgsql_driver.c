@@ -31,6 +31,7 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 #include "zend_smart_str.h"
 #include "pgsql_driver_arginfo.h"
 
@@ -606,6 +607,32 @@ static bool pgsql_handle_rollback(pdo_dbh_t *dbh)
 	return ret;
 }
 
+static bool _pdo_pgsql_send_copy_data(pdo_pgsql_db_handle *H, zval *line) {
+	size_t query_len;
+	char *query;
+
+	if (!try_convert_to_string(line)) {
+		return false;
+	}
+
+	query_len = Z_STRLEN_P(line);
+	query = emalloc(query_len + 2); /* room for \n\0 */
+	memcpy(query, Z_STRVAL_P(line), query_len);
+
+	if (query[query_len - 1] != '\n') {
+		query[query_len++] = '\n';
+	}
+	query[query_len] = '\0';
+
+	if (PQputCopyData(H->server, query, query_len) != 1) {
+		efree(query);
+		return false;
+	}
+
+	efree(query);
+	return true;
+}
+
 void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
@@ -620,14 +647,14 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|sss!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sA|sss!",
 		&table_name, &table_name_len, &pg_rows,
 		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!zend_hash_num_elements(Z_ARRVAL_P(pg_rows))) {
-		zend_argument_must_not_be_empty_error(2);
+	if ((Z_TYPE_P(pg_rows) != IS_ARRAY && !instanceof_function(Z_OBJCE_P(pg_rows), zend_ce_traversable))) {
+		zend_argument_type_error(2, "must be of type array or Traversable");
 		RETURN_THROWS();
 	}
 
@@ -661,34 +688,35 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (status == PGRES_COPY_IN && pgsql_result) {
 		int command_failed = 0;
-		size_t buffer_len = 0;
 		zval *tmp;
+		zend_object_iterator *iter;
 
 		PQclear(pgsql_result);
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), tmp) {
-			size_t query_len;
-			if (!try_convert_to_string(tmp)) {
-				efree(query);
+
+		if (Z_TYPE_P(pg_rows) == IS_ARRAY) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), tmp) {
+				if (!_pdo_pgsql_send_copy_data(H, tmp)) {
+					efree(query);
+					RETURN_THROWS();
+				}
+			} ZEND_HASH_FOREACH_END();
+		} else {
+			iter = Z_OBJ_P(pg_rows)->ce->get_iterator(Z_OBJCE_P(pg_rows), pg_rows, 0);
+			if (iter == NULL || EG(exception)) {
 				RETURN_THROWS();
 			}
 
-			if (buffer_len < Z_STRLEN_P(tmp)) {
-				buffer_len = Z_STRLEN_P(tmp);
-				query = erealloc(query, buffer_len + 2); /* room for \n\0 */
+			for (; iter->funcs->valid(iter) == SUCCESS && EG(exception) == NULL; iter->funcs->move_forward(iter)) {
+				tmp = iter->funcs->get_current_data(iter);
+				if (!_pdo_pgsql_send_copy_data(H, tmp)) {
+					efree(query);
+					zend_iterator_dtor(iter);
+					RETURN_THROWS();
+				}
 			}
-			query_len = Z_STRLEN_P(tmp);
-			memcpy(query, Z_STRVAL_P(tmp), query_len);
-			if (query[query_len - 1] != '\n') {
-				query[query_len++] = '\n';
-			}
-			query[query_len] = '\0';
-			if (PQputCopyData(H->server, query, query_len) != 1) {
-				efree(query);
-				pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
-				PDO_HANDLE_DBH_ERR();
-				RETURN_FALSE;
-			}
-		} ZEND_HASH_FOREACH_END();
+			zend_iterator_dtor(iter);
+		}
+
 		if (query) {
 			efree(query);
 		}
