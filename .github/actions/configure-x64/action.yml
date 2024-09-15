@@ -28,6 +28,7 @@ runs:
           --enable-gd \
           --with-jpeg \
           --with-webp \
+          --with-avif \
           --with-freetype \
           --with-xpm \
           --enable-exif \

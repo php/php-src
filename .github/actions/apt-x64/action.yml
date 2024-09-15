@@ -39,6 +39,7 @@ runs:
           libsqlite3-dev \
           libsqlite3-mod-spatialite \
           libwebp-dev \
+          libavif-dev \
           libonig-dev \
           libcurl4-openssl-dev \
           libxml2-dev \
