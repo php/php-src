@@ -2,4 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- PDO_PGSQL:
+  . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

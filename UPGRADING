@@ -39,6 +39,9 @@ PHP 8.5 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- PDO_PGSQL:
+  . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
+
 ========================================
 6. New Functions
 ========================================
