@@ -1573,7 +1573,7 @@ static int get_parameter_default(zval *result, parameter_reference *param) {
 /* {{{ Preventing __clone from being called */
 ZEND_METHOD(ReflectionClass, __clone)
 {
-	/* Should never be executable */
+	/* __clone() is private but this is reachable with reflection */
 	_DO_THROW("Cannot clone object using __clone()");
 }
 /* }}} */
@@ -7183,7 +7183,7 @@ ZEND_METHOD(ReflectionAttribute, __construct)
 
 ZEND_METHOD(ReflectionAttribute, __clone)
 {
-	/* Should never be executable */
+	/* __clone() is private but this is reachable with reflection */
 	_DO_THROW("Cannot clone object using __clone()");
 }
 
