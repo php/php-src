@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0RC1
 
-- Core:
-  . Add missing ReflectionProperty::hasHook[s]() methods. (ilutov)
-
 - DOM:
   . Fix XML serializer errata: xmlns="" serialization should be allowed.
     (nielsdos)
@@ -18,6 +15,9 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Fix UAF issues with PCRE after request shutdown. (nielsdos)
+
+- Reflection:
+  . Add missing ReflectionProperty::hasHook[s]() methods. (ilutov)
 
 - SimpleXML:
   . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
