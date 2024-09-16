@@ -28,6 +28,8 @@ PHP                                                                        NEWS
   . Fixed bug #73182 (PHP SOAPClient does not support stream context HTTP
     headers in array form). (nielsdos)
   . Fixed bug #62900 (Wrong namespace on xsd import error message). (nielsdos)
+  . Fixed bug GH-15711 (SoapClient can't convert BackedEnum to scalar value).
+    (nielsdos)
 
 12 Sep 2024, PHP 8.4.0beta5
 
