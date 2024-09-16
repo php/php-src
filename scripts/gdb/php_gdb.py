@@ -301,7 +301,7 @@ def load_type_bits():
 
     (symbol,_) = gdb.lookup_symbol("zend_gc_refcount")
     if symbol == None:
-        raise "Could not find zend_types.h: symbol zend_gc_refcount not found"
+        raise Exception("Could not find zend_types.h: symbol zend_gc_refcount not found")
     filename = symbol.symtab.fullname()
 
     bits = {}

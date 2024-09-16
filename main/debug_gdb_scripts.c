@@ -971,7 +971,7 @@ asm(
     ".ascii \"\\n\"\n"
     ".ascii \"    (symbol,_) = gdb.lookup_symbol(\\\"zend_gc_refcount\\\")\\n\"\n"
     ".ascii \"    if symbol == None:\\n\"\n"
-    ".ascii \"        raise \\\"Could not find zend_types.h: symbol zend_gc_refcount not found\\\"\\n\"\n"
+    ".ascii \"        raise Exception(\\\"Could not find zend_types.h: symbol zend_gc_refcount not found\\\")\\n\"\n"
     ".ascii \"    filename = symbol.symtab.fullname()\\n\"\n"
     ".ascii \"\\n\"\n"
     ".ascii \"    bits = {}\\n\"\n"
