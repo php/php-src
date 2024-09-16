@@ -28,6 +28,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16508 (Incorrect line number in inheritance errors of delayed
     early bound classes). (ilutov)
   . Fixed bug GH-16648 (Use-after-free during array sorting). (ilutov)
+  . Fixed bug GH-15915 (overflow with a high value for precision INI).
+    (David Carlier / cmb)
 
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
