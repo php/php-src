@@ -10,6 +10,8 @@ class C {
     static public $a4;
     static protected $a5;
     static private $a6;
+    public final $a7;
+    public static final $a8;
 }
 
 class D extends C {
@@ -21,7 +23,7 @@ class D extends C {
     static private $a6;
 }
 
-for ($i = 1;$i <= 6;$i++) {
+for ($i = 1;$i <= 8;$i++) {
     $rp = new ReflectionProperty("C", "a$i");
     echo "C::a$i: ";
     var_dump($rp->getModifiers());
@@ -44,3 +46,7 @@ C::a5: int(18)
 D::a5: int(18)
 C::a6: int(20)
 D::a6: int(20)
+C::a7: int(33)
+D::a7: int(33)
+C::a8: int(49)
+D::a8: int(49)

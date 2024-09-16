@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 83e9d4a4b2f49739af3e7faa3037df13e779bb8b */
+ * Stub hash: 261798b92d4eac170538185ced1068bc72705385 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -460,6 +460,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionProperty_getHook,
 	ZEND_ARG_OBJ_INFO(0, type, PropertyHookType, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_ReflectionProperty_isFinal arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
 #define arginfo_class_ReflectionClassConstant___clone arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClassConstant___construct, 0, 0, 2)
@@ -868,6 +870,7 @@ ZEND_METHOD(ReflectionProperty, hasHooks);
 ZEND_METHOD(ReflectionProperty, getHooks);
 ZEND_METHOD(ReflectionProperty, hasHook);
 ZEND_METHOD(ReflectionProperty, getHook);
+ZEND_METHOD(ReflectionProperty, isFinal);
 ZEND_METHOD(ReflectionClassConstant, __construct);
 ZEND_METHOD(ReflectionClassConstant, __toString);
 ZEND_METHOD(ReflectionClassConstant, getName);
@@ -1164,6 +1167,7 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, getHooks, arginfo_class_ReflectionProperty_getHooks, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, hasHook, arginfo_class_ReflectionProperty_hasHook, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getHook, arginfo_class_ReflectionProperty_getHook, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isFinal, arginfo_class_ReflectionProperty_isFinal, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1606,6 +1610,12 @@ static zend_class_entry *register_class_ReflectionProperty(zend_class_entry *cla
 	zend_string *const_IS_PRIVATE_SET_name = zend_string_init_interned("IS_PRIVATE_SET", sizeof("IS_PRIVATE_SET") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_SET_name, &const_IS_PRIVATE_SET_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IS_PRIVATE_SET_name);
+
+	zval const_IS_FINAL_value;
+	ZVAL_LONG(&const_IS_FINAL_value, ZEND_ACC_FINAL);
+	zend_string *const_IS_FINAL_name = zend_string_init_interned("IS_FINAL", sizeof("IS_FINAL") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IS_FINAL_name, &const_IS_FINAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IS_FINAL_name);
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
