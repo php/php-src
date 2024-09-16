@@ -683,7 +683,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	dom_object *intern, *attrobj, *oldobj;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_get_node_ce(modern)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_get_attr_ce(modern)) == FAILURE) {
 		RETURN_THROWS();
 	}
 
