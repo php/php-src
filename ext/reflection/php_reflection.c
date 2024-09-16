@@ -188,11 +188,11 @@ static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
 
 static zend_object_handlers reflection_object_handlers;
 
-static zend_always_inline uint32_t prop_get_flags(property_reference *ref) {
+static zend_always_inline uint32_t prop_get_flags(const property_reference *ref) {
 	return ref->prop ? ref->prop->flags : ZEND_ACC_PUBLIC;
 }
 
-static inline bool is_closure_invoke(zend_class_entry *ce, zend_string *lcname) {
+static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_string *lcname) {
 	return ce == zend_ce_closure
 		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
 }
@@ -302,16 +302,16 @@ static zval *reflection_instantiate(zend_class_entry *pce, zval *object) /* {{{ 
 }
 /* }}} */
 
-static void _const_string(smart_str *str, char *name, zval *value, char *indent);
-static void _function_string(smart_str *str, zend_function *fptr, zend_class_entry *scope, char* indent);
-static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, char* indent);
-static void _class_const_string(smart_str *str, zend_string *name, zend_class_constant *c, char* indent);
-static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char *indent);
-static void _extension_string(smart_str *str, zend_module_entry *module, char *indent);
-static void _zend_extension_string(smart_str *str, zend_extension *extension, char *indent);
+static void _const_string(smart_str *str, const char *name, zval *value, const char *indent);
+static void _function_string(smart_str *str, zend_function *fptr, zend_class_entry *scope, const char* indent);
+static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, const char* indent);
+static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
+static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
+static void _extension_string(smart_str *str, const zend_module_entry *module, const char *indent);
+static void _zend_extension_string(smart_str *str, const zend_extension *extension, const char *indent);
 
 /* {{{ _class_string */
-static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char *indent)
+static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent)
 {
 	int count, count_static_props = 0, count_static_funcs = 0, count_shadow_props = 0;
 	zend_string *sub_indent = strpprintf(0, "%s    ", indent);
@@ -543,7 +543,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 /* }}} */
 
 /* {{{ _const_string */
-static void _const_string(smart_str *str, char *name, zval *value, char *indent)
+static void _const_string(smart_str *str, const char *name, zval *value, const char *indent)
 {
 	const char *type = zend_zval_type_name(value);
 	uint32_t flags = Z_CONSTANT_FLAGS_P(value);
@@ -592,7 +592,7 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 /* }}} */
 
 /* {{{ _class_const_string */
-static void _class_const_string(smart_str *str, zend_string *name, zend_class_constant *c, char *indent)
+static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent)
 {
 	if (Z_TYPE(c->value) == IS_CONSTANT_AST && zend_update_class_constant(c, name, c->ce) == FAILURE) {
 		return;
@@ -626,10 +626,10 @@ static void _class_const_string(smart_str *str, zend_string *name, zend_class_co
 }
 /* }}} */
 
-static zend_op *get_recv_op(zend_op_array *op_array, uint32_t offset)
+static zend_op *get_recv_op(const zend_op_array *op_array, uint32_t offset)
 {
 	zend_op *op = op_array->opcodes;
-	zend_op *end = op + op_array->last;
+	const zend_op *end = op + op_array->last;
 
 	++offset;
 	while (op < end) {
@@ -772,11 +772,11 @@ static void _function_parameter_string(smart_str *str, zend_function *fptr, char
 /* }}} */
 
 /* {{{ _function_closure_string */
-static void _function_closure_string(smart_str *str, zend_function *fptr, char* indent)
+static void _function_closure_string(smart_str *str, const zend_function *fptr, const char* indent)
 {
 	uint32_t i, count;
-	zend_string *key;
-	HashTable *static_variables;
+	const zend_string *key;
+	const HashTable *static_variables;
 
 	if (fptr->type != ZEND_USER_FUNCTION || !fptr->op_array.static_variables) {
 		return;
@@ -790,7 +790,7 @@ static void _function_closure_string(smart_str *str, zend_function *fptr, char* 
 	}
 
 	smart_str_append_printf(str, "\n");
-	smart_str_append_printf(str, "%s- Bound Variables [%d] {\n", indent, zend_hash_num_elements(static_variables));
+	smart_str_append_printf(str, "%s- Bound Variables [%d] {\n", indent, count);
 	i = 0;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(static_variables, key) {
 		smart_str_append_printf(str, "%s    Variable #%d [ $%s ]\n", indent, i++, ZSTR_VAL(key));
@@ -800,7 +800,7 @@ static void _function_closure_string(smart_str *str, zend_function *fptr, char* 
 /* }}} */
 
 /* {{{ _function_string */
-static void _function_string(smart_str *str, zend_function *fptr, zend_class_entry *scope, char* indent)
+static void _function_string(smart_str *str, zend_function *fptr, zend_class_entry *scope, const char* indent)
 {
 	smart_str param_indent = {0};
 	zend_function *overwrites;
@@ -923,7 +923,7 @@ static zval *property_get_default(zend_property_info *prop_info) {
 }
 
 /* {{{ _property_string */
-static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, char* indent)
+static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, const char* indent)
 {
 	if (prop && prop->doc_comment) {
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(prop->doc_comment));
@@ -986,7 +986,7 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 }
 /* }}} */
 
-static void _extension_ini_string(zend_ini_entry *ini_entry, smart_str *str, char *indent, int number) /* {{{ */
+static void _extension_ini_string(const zend_ini_entry *ini_entry, smart_str *str, const char *indent, int number) /* {{{ */
 {
 	char *comma = "";
 
@@ -1018,7 +1018,7 @@ static void _extension_ini_string(zend_ini_entry *ini_entry, smart_str *str, cha
 }
 /* }}} */
 
-static void _extension_class_string(zend_class_entry *ce, zend_string *key, smart_str *str, char *indent, zend_module_entry *module, int *num_classes) /* {{{ */
+static void _extension_class_string(zend_class_entry *ce, zend_string *key, smart_str *str, char *indent, const zend_module_entry *module, int *num_classes) /* {{{ */
 {
 	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
 		/* dump class if it is not an alias */
@@ -1031,7 +1031,7 @@ static void _extension_class_string(zend_class_entry *ce, zend_string *key, smar
 }
 /* }}} */
 
-static void _extension_string(smart_str *str, zend_module_entry *module, char *indent) /* {{{ */
+static void _extension_string(smart_str *str, const zend_module_entry *module, const char *indent) /* {{{ */
 {
 	smart_str_append_printf(str, "%sExtension [ ", indent);
 	if (module->type == MODULE_PERSISTENT) {
@@ -1270,7 +1270,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 }
 /* }}} */
 
-static void _zend_extension_string(smart_str *str, zend_extension *extension, char *indent) /* {{{ */
+static void _zend_extension_string(smart_str *str, const zend_extension *extension, const char *indent) /* {{{ */
 {
 	smart_str_append_printf(str, "%sZend Extension [ %s ", indent, extension->name);
 
