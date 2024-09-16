@@ -700,7 +700,7 @@ auto_globals_jit = On
 ; Its value may be 0 to disable the limit. It is ignored if POST data reading
 ; is disabled through enable_post_data_reading.
 ; https://php.net/post-max-size
-post_max_size = 8M
+post_max_size = 50M
 
 ; Automatically add files before PHP document.
 ; https://php.net/auto-prepend-file
@@ -852,7 +852,7 @@ file_uploads = On
 
 ; Maximum allowed size for uploaded files.
 ; https://php.net/upload-max-filesize
-upload_max_filesize = 2M
+upload_max_filesize = 50M
 
 ; Maximum number of files that can be uploaded via a single request
 max_file_uploads = 20
