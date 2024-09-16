@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 
 - Reflection:
   . Add missing ReflectionProperty::hasHook[s]() methods. (ilutov)
+  . Add missing ReflectionProperty::isFinal() method. (ilutov)
 
 - SimpleXML:
   . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
