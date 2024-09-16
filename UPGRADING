@@ -289,6 +289,8 @@ PHP 8.5 UPGRADE NOTES
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
+  . pcntl_waitid() takes an additional resource_usage argument to
+    gather various platform specific metrics about the child process.
 
 - PDO_PGSQL:
   . PDO::pgsqlCopyFromArray also supports inputs as Iterable.

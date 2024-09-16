@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c637fe2de641cfd8f0ff83a908ac59bf63a68e44 */
+ * Stub hash: 5e4b066d70fa264c7de3ba4b2113369c34c33e43 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -17,6 +17,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitid, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, id, IS_LONG, 1, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "WEXITED")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, resource_usage, "[]")
 ZEND_END_ARG_INFO()
 #endif
 

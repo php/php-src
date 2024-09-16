@@ -134,6 +134,9 @@ PHP                                                                        NEWS
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
 
+- PCNTL:
+  . Extend pcntl_waitid with rusage parameter. (vrza)
+
 - PCRE:
   . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
   . Remove PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK from pcre compile options.
