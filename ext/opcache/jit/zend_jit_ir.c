@@ -10114,9 +10114,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				exit_addr = NULL;
 			}
 
-			if (!zend_jit_check_timeout(jit, NULL /* we're inside the called function */, exit_addr)) {
-				return 0;
-			}
+			zend_jit_check_timeout(jit, NULL /* we're inside the called function */, exit_addr);
 
 			jit_observer_fcall_is_unobserved_end(jit, &unobserved_data);
 		}
