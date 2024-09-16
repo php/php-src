@@ -734,3 +734,21 @@ HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n)
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 	return NULL;
 }
+
+zend_property_info *zend_lazy_object_get_property_info_for_slot(zend_object *obj, zval *slot)
+{
+	ZEND_ASSERT(zend_object_is_lazy_proxy(obj));
+
+	zend_property_info **table = obj->ce->properties_info_table;
+	intptr_t prop_num = slot - obj->properties_table;
+	if (prop_num >= 0 && prop_num < obj->ce->default_properties_count) {
+		return table[prop_num];
+	}
+
+	if (!zend_lazy_object_initialized(obj)) {
+		return NULL;
+	}
+
+	obj = zend_lazy_object_get_instance(obj);
+	return zend_get_property_info_for_slot(obj, slot);
+}
