@@ -11178,14 +11178,9 @@ static void zend_compile_const_expr_args(zend_ast **ast_ptr)
 	}
 }
 
-typedef struct {
-	/* Whether the value of this expression may differ on each evaluation. */
-	bool allow_dynamic;
-} const_expr_context;
-
 static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 {
-	const_expr_context *ctx = (const_expr_context *) context;
+	bool allow_dynamic = *(bool *) context;
 	zend_ast *ast = *ast_ptr;
 	if (ast == NULL || ast->kind == ZEND_AST_ZVAL) {
 		return;
@@ -11209,7 +11204,7 @@ static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 			zend_compile_const_expr_magic_const(ast_ptr);
 			break;
 		case ZEND_AST_NEW:
-			if (!ctx->allow_dynamic) {
+			if (!allow_dynamic) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"New expressions are not supported in this context");
 			}
@@ -11226,11 +11221,8 @@ static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 
 void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr, bool allow_dynamic) /* {{{ */
 {
-	const_expr_context context;
-	context.allow_dynamic = allow_dynamic;
-
 	zend_eval_const_expr(ast_ptr);
-	zend_compile_const_expr(ast_ptr, &context);
+	zend_compile_const_expr(ast_ptr, &allow_dynamic);
 	if ((*ast_ptr)->kind != ZEND_AST_ZVAL) {
 		/* Replace with compiled AST zval representation. */
 		zval ast_zv;
