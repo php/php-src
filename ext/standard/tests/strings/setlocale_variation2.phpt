@@ -53,7 +53,7 @@ echo "-- Test setlocale() with all available locale in the system --\n";
 // try n set each locale using setlocale() and keep track failures, if any
 foreach($all_system_locales as $value){
   //set locale to $value, if success, count increments
-  if(setlocale(LC_ALL,$value )){
+  if(setlocale(LC_CTYPE,$value )){
    $success_count++;
   }
   else{

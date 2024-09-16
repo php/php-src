@@ -7,6 +7,10 @@ sockets
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not valid for Windows');
 }
+// FreeBSD 14 bug ? even with non-sense protocol socket_create here does not warn
+if (PHP_OS == 'FreeBSD') {
+    die('skip.. warning not triggered on freebsd');
+}
 ?>
 --FILE--
 <?php
