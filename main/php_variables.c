@@ -897,6 +897,7 @@ static bool php_auto_globals_create_server(zend_string *name)
 	} else {
 		zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_SERVER]);
 		array_init(&PG(http_globals)[TRACK_VARS_SERVER]);
+		zend_hash_real_init_mixed(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 	}
 
 	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));

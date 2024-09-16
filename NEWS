@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-15712: zend_strtod overflow with precision INI set on
     large value. (David Carlier)
+  . Fixed bug GH-15905 (Assertion failure for TRACK_VARS_SERVER). (cmb)
 
 - Date:
   . Fixed bug GH-15582: Crash when not calling parent constructor of
