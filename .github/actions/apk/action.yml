@@ -44,7 +44,6 @@ runs:
             readline-dev \
             sqlite-dev \
             tidyhtml-dev \
-            krb5-dev \
             gdbm-dev \
             lmdb-dev \
             argon2-dev \
