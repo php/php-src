@@ -27,7 +27,20 @@
 #include <stddef.h>
 
 #ifdef HAVE_IEEEFP_H
-#include <ieeefp.h>
+/**
+ * On FreeBSD with ubsan/clang we get the following:
+ * `/usr/include/machine/ieeefp.h:161:17: runtime error: left shift of negative value -1`
+ * `SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/include/machine/ieeefp.h:161:17`
+ * ...
+ * `_newcw |= (~_m << FP_MSKS_OFF) & FP_MSKS_FLD;`
+**/
+# if __has_feature(undefined_behavior_sanitizer) && defined(__FreeBSD__) && defined(__clang__)
+#  pragma clang attribute push (__attribute__((no_sanitize("undefined"))), apply_to=function)
+# endif
+# include <ieeefp.h>
+# if __has_feature(undefined_behavior_sanitizer) && defined(__FreeBSD__) && defined(__clang__)
+#  pragma clang attribute pop
+# endif
 #endif
 
 #include "zend_portability.h"
