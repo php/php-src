@@ -112,7 +112,8 @@ static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, 
 	dst_type = ZEND_FFI_TYPE(dst_type);
 	if (!zend_jit_ffi_supported_type(dst_type)) {
 		return false;
-	} else if (src_info == MAY_BE_LONG || src_info == MAY_BE_DOUBLE) {
+	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
+			|| (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE) {
 		return dst_type->kind < ZEND_FFI_TYPE_POINTER && dst_type->kind != ZEND_FFI_TYPE_VOID;
 	} else if (src_info == MAY_BE_FALSE || src_info == MAY_BE_TRUE || src_info == (MAY_BE_FALSE|MAY_BE_TRUE)) {
 		return dst_type->kind == ZEND_FFI_TYPE_BOOL;
