@@ -54,7 +54,7 @@ static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access,
 	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
 		zobj = zend_lazy_object_init(zobj);
 		if (UNEXPECTED(!zobj)) {
-			return (zend_array*) &zend_empty_array;
+			return zend_new_array(0);
 		}
 	}
 
