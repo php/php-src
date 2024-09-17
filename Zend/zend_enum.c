@@ -124,7 +124,7 @@ void zend_verify_enum(const zend_class_entry *ce)
 	zend_verify_enum_interfaces(ce);
 }
 
-static int zend_implement_unit_enum(const zend_class_entry *interface, const zend_class_entry *class_type)
+static int zend_implement_unit_enum(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->ce_flags & ZEND_ACC_ENUM) {
 		return SUCCESS;
@@ -137,7 +137,7 @@ static int zend_implement_unit_enum(const zend_class_entry *interface, const zen
 	return FAILURE;
 }
 
-static int zend_implement_backed_enum(const zend_class_entry *interface, const zend_class_entry *class_type)
+static int zend_implement_backed_enum(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (!(class_type->ce_flags & ZEND_ACC_ENUM)) {
 		zend_error_noreturn(E_ERROR, "Non-enum class %s cannot implement interface %s",
