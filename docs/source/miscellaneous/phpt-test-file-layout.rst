@@ -58,11 +58,12 @@ Description
 
 Required
    No.
-   
+
    .. note::
+
       For newly created tests this section should no longer be included, as test authorship is
-      already accurately tracked by Git. If multiple authors should be credited, the ``Co-authored-by``
-      tag in the commit message may be used.
+      already accurately tracked by Git. If multiple authors should be credited, the
+      ``Co-authored-by`` tag in the commit message may be used.
 
 Format
    .. code:: text
@@ -74,7 +75,7 @@ Example 1
    .. code:: text
 
       --CREDITS--
-      Felipe Pena 
+      Felipe Pena
 
 Example 2
    .. code:: text
@@ -127,15 +128,13 @@ Example 3
 *******************
 
 Description
-   This section is only relevant for parallel test execution, and allows to specify conflict keys.
-   While a test that conflicts with key K is running, no other test that conflicts with K is run.
-   For tests conflicting with "all", no other tests are run in parallel.
+   This section is only relevant for parallel test execution (available as of PHP 7.4.0), and allows
+   to specify conflict keys. While a test that conflicts with key K is running, no other test that
+   conflicts with K is run. For tests conflicting with "all", no other tests are run in parallel.
 
    An alternative to have a ``--CONFLICTS--`` section is to add a file named CONFLICTS to the
    directory containing the tests. The contents of the CONFLICTS file must have the same format as
    the contents of the ``--CONFLICTS--`` section.
-
-.. versionadded:: 7.4.0
 
 Required
    No.
