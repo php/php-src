@@ -874,7 +874,7 @@ static inheritance_status zend_do_perform_implementation_check(
 /* }}} */
 
 static ZEND_COLD void zend_append_type_hint(
-		smart_str *str, const zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
+		smart_str *str, zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
 {
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
 		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, scope);
@@ -1514,7 +1514,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		const zend_function **hooks = parent_info->hooks;
+		zend_function **hooks = parent_info->hooks;
 		if (hooks) {
 			ce->num_hooked_props++;
 			if (parent_info->flags & ZEND_ACC_ABSTRACT) {
@@ -2649,7 +2649,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
-static const zend_class_entry* find_first_constant_definition(const zend_class_entry *ce, const zend_class_entry **traits, size_t current_trait, zend_string *constant_name, const zend_class_entry *colliding_ce) /* {{{ */
+static const zend_class_entry* find_first_constant_definition(const zend_class_entry *ce, zend_class_entry **traits, size_t current_trait, zend_string *constant_name, const zend_class_entry *colliding_ce) /* {{{ */
 {
 	/* This function is used to show the place of the existing conflicting
 	 * definition in error messages when conflicts occur. Since trait constants
@@ -2675,7 +2675,7 @@ static const zend_class_entry* find_first_constant_definition(const zend_class_e
 
 static void emit_incompatible_trait_constant_error(
 	const zend_class_entry *ce, const zend_class_constant *existing_constant, const zend_class_constant *trait_constant, zend_string *name,
-	const zend_class_entry **traits, size_t current_trait
+	zend_class_entry **traits, size_t current_trait
 ) {
 	zend_error_noreturn(E_COMPILE_ERROR,
 		"%s and %s define the same constant (%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
@@ -2770,7 +2770,7 @@ static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_ent
 }
 /* }}} */
 
-static const zend_class_entry* find_first_property_definition(const zend_class_entry *ce, const zend_class_entry **traits, size_t current_trait, zend_string *prop_name, const zend_class_entry *colliding_ce) /* {{{ */
+static const zend_class_entry* find_first_property_definition(const zend_class_entry *ce, zend_class_entry **traits, size_t current_trait, zend_string *prop_name, const zend_class_entry *colliding_ce) /* {{{ */
 {
 	size_t i;
 
