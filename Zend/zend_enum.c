@@ -57,9 +57,9 @@ zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case
 	return zobj;
 }
 
-static void zend_verify_enum_properties(zend_class_entry *ce)
+static void zend_verify_enum_properties(const zend_class_entry *ce)
 {
-	zend_property_info *property_info;
+	const zend_property_info *property_info;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property_info) {
 		if (zend_string_equals(property_info->name, ZSTR_KNOWN(ZEND_STR_NAME))) {
@@ -77,7 +77,7 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static void zend_verify_enum_magic_methods(zend_class_entry *ce)
+static void zend_verify_enum_magic_methods(const zend_class_entry *ce)
 {
 	// Only __get, __call and __invoke are allowed
 
@@ -109,7 +109,7 @@ static void zend_verify_enum_magic_methods(zend_class_entry *ce)
 	}
 }
 
-static void zend_verify_enum_interfaces(zend_class_entry *ce)
+static void zend_verify_enum_interfaces(const zend_class_entry *ce)
 {
 	if (zend_class_implements_interface(ce, zend_ce_serializable)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
@@ -117,14 +117,14 @@ static void zend_verify_enum_interfaces(zend_class_entry *ce)
 	}
 }
 
-void zend_verify_enum(zend_class_entry *ce)
+void zend_verify_enum(const zend_class_entry *ce)
 {
 	zend_verify_enum_properties(ce);
 	zend_verify_enum_magic_methods(ce);
 	zend_verify_enum_interfaces(ce);
 }
 
-static int zend_implement_unit_enum(zend_class_entry *interface, zend_class_entry *class_type)
+static int zend_implement_unit_enum(const zend_class_entry *interface, const zend_class_entry *class_type)
 {
 	if (class_type->ce_flags & ZEND_ACC_ENUM) {
 		return SUCCESS;
@@ -137,7 +137,7 @@ static int zend_implement_unit_enum(zend_class_entry *interface, zend_class_entr
 	return FAILURE;
 }
 
-static int zend_implement_backed_enum(zend_class_entry *interface, zend_class_entry *class_type)
+static int zend_implement_backed_enum(const zend_class_entry *interface, const zend_class_entry *class_type)
 {
 	if (!(class_type->ce_flags & ZEND_ACC_ENUM)) {
 		zend_error_noreturn(E_ERROR, "Non-enum class %s cannot implement interface %s",
@@ -205,7 +205,7 @@ zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 	zend_hash_init(backed_enum_table, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_class_set_backed_enum_table(ce, backed_enum_table);
 
-	zend_string *enum_class_name = ce->name;
+	const zend_string *enum_class_name = ce->name;
 
 	zend_string *name;
 	zval *val;
@@ -228,7 +228,7 @@ zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 
 		if (ce->enum_backing_type == IS_LONG) {
 			zend_long long_key = Z_LVAL_P(case_value);
-			zval *existing_case_name = zend_hash_index_find(backed_enum_table, long_key);
+			const zval *existing_case_name = zend_hash_index_find(backed_enum_table, long_key);
 			if (existing_case_name) {
 				zend_throw_error(NULL, "Duplicate value in enum %s for cases %s and %s",
 					ZSTR_VAL(enum_class_name),
@@ -241,7 +241,7 @@ zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 		} else {
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
 			zend_string *string_key = Z_STR_P(case_value);
-			zval *existing_case_name = zend_hash_find(backed_enum_table, string_key);
+			const zval *existing_case_name = zend_hash_find(backed_enum_table, string_key);
 			if (existing_case_name != NULL) {
 				zend_throw_error(NULL, "Duplicate value in enum %s for cases %s and %s",
 					ZSTR_VAL(enum_class_name),
@@ -294,7 +294,7 @@ ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_clas
 		}
 	}
 
-	HashTable *backed_enum_table = CE_BACKED_ENUM_TABLE(ce);
+	const HashTable *backed_enum_table = CE_BACKED_ENUM_TABLE(ce);
 	if (!backed_enum_table) {
 		goto not_found;
 	}
