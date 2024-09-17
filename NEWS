@@ -43,6 +43,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-15613 (overflow on unpack call hex string repeater).
     (David Carlier)
+  . Fixed bug GH-15937 (overflow on stream timeout option value).
+    (David Carlier)
 
 - Streams:
   . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
