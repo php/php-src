@@ -363,6 +363,7 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 static zval *date_period_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv);
 static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot);
 static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot);
+static void date_period_unset_property(zend_object *object, zend_string *name, void **cache_slot);
 static HashTable *date_period_get_properties_for(zend_object *object, zend_prop_purpose purpose);
 static int date_object_compare_timezone(zval *tz1, zval *tz2);
 
@@ -1798,6 +1799,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_period.read_property = date_period_read_property;
 	date_object_handlers_period.write_property = date_period_write_property;
 	date_object_handlers_period.get_properties_for = date_period_get_properties_for;
+	date_object_handlers_period.unset_property = date_period_unset_property;
 
 	date_ce_date_error = register_class_DateError(zend_ce_error);
 	date_ce_date_object_error = register_class_DateObjectError(date_ce_date_error);
@@ -5985,17 +5987,6 @@ static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *
 
 static HashTable *date_period_get_properties_for(zend_object *object, zend_prop_purpose purpose)
 {
-	switch (purpose) {
-		case ZEND_PROP_PURPOSE_DEBUG:
-		case ZEND_PROP_PURPOSE_SERIALIZE:
-		case ZEND_PROP_PURPOSE_VAR_EXPORT:
-		case ZEND_PROP_PURPOSE_JSON:
-		case ZEND_PROP_PURPOSE_ARRAY_CAST:
-			break;
-		default:
-			return zend_std_get_properties_for(object, purpose);
-	}
-
 	php_period_obj *period_obj = php_period_obj_from_obj(object);
 	HashTable *props = zend_array_dup(zend_std_get_properties(object));
 	if (!period_obj->initialized) {
@@ -6005,4 +5996,14 @@ static HashTable *date_period_get_properties_for(zend_object *object, zend_prop_
 	date_period_object_to_hash(period_obj, props);
 
 	return props;
+}
+
+static void date_period_unset_property(zend_object *object, zend_string *name, void **cache_slot)
+{
+	if (date_period_is_internal_property(name)) {
+		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		return;
+	}
+
+	zend_std_unset_property(object, name, cache_slot);
 }
