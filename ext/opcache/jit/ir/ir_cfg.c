@@ -662,7 +662,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		uint32_t idom = *p;
 		ir_block *idom_bb;
 
-		if (UNEXPECTED(idom > b)) {
+		if (UNEXPECTED(idom >= b)) {
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
 			ctx->flags2 &= ~IR_NO_LOOPS;
 			IR_ASSERT(k > 1 && "Wrong blocks order: BB is before its single predecessor");
