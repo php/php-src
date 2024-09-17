@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0RC1
 
+- BcMath:
+  . bcpow() performance improvement. (Jorg Sowa)
+
 - Debugging:
   . Fixed bug GH-15923 (GDB: Python Exception <class 'TypeError'>:
     exceptions must derive from BaseException). (nielsdos)
