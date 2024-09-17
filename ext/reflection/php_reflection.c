@@ -1018,7 +1018,7 @@ static void _extension_ini_string(const zend_ini_entry *ini_entry, smart_str *st
 }
 /* }}} */
 
-static void _extension_class_string(zend_class_entry *ce, zend_string *key, smart_str *str, char *indent, const zend_module_entry *module, int *num_classes) /* {{{ */
+static void _extension_class_string(zend_class_entry *ce, zend_string *key, smart_str *str, const char *indent, const zend_module_entry *module, int *num_classes) /* {{{ */
 {
 	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
 		/* dump class if it is not an alias */
