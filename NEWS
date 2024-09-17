@@ -270,7 +270,7 @@ PHP                                                                        NEWS
   . The SplFixedArray::__wakeup() method has been deprecated as it implements
     __serialize() and __unserialize() which need to be overwritten instead.
     (TysonAndre)
-  . Passing a non-empty string for the $enclosure parameter of:
+  . Passing a non-empty string for the $escape parameter of:
     - SplFileObject::setCsvControl()
     - SplFileObject::fputcsv()
     - SplFileObject::fgetcsv()
@@ -279,7 +279,7 @@ PHP                                                                        NEWS
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
   . Enables crc32 auxiliary detection on OpenBSD. (David Carlier)
-  . Passing a non-empty string for the $enclosure parameter of:
+  . Passing a non-empty string for the $escape parameter of:
     - fputcsv()
     - fgetcsv()
     - str_getcsv()
