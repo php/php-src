@@ -1033,6 +1033,20 @@ next:
 				bb->loop_depth = loop_depth;
 				if (bb->flags & (IR_BB_ENTRY|IR_BB_LOOP_WITH_ENTRY)) {
 					loop->flags |= IR_BB_LOOP_WITH_ENTRY;
+					if (loop_depth > 1) {
+						/* Set IR_BB_LOOP_WITH_ENTRY flag for all the enclosing loops */
+						bb = &blocks[loop->loop_header];
+						while (1) {
+							if (bb->flags & IR_BB_LOOP_WITH_ENTRY) {
+								break;
+							}
+							bb->flags |= IR_BB_LOOP_WITH_ENTRY;
+							if (bb->loop_depth == 1) {
+								break;
+							}
+							bb = &blocks[loop->loop_header];
+						}
+					}
 				}
 			}
 		}
