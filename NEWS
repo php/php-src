@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed regression where signs after the first one were ignored while parsing
     a signed integer, with the DateTimeInterface::modify() function. (Derick)
 
+- PHPDBG:
+  . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
+
 - SimpleXML:
   . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
     (nielsdos)
