@@ -451,12 +451,9 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 static int dom_property_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
 	dom_object *obj = php_dom_obj_from_obj(object);
-	dom_prop_handler *hnd = NULL;
 	bool retval = false;
+	const dom_prop_handler *hnd = dom_get_prop_handler(obj, name, cache_slot);
 
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	}
 	if (hnd) {
 		zval tmp;
 
