@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-15905 (Assertion failure for TRACK_VARS_SERVER). (cmb)
   . Fixed bug GH-15907 (Failed assertion when promoting Serialize deprecation to
     exception). (ilutov)
+  . Fixed bug GH-15851 (Segfault when printing backtrace during cleanup of
+    nested generator frame). (ilutov)
 
 - Date:
   . Fixed bug GH-15582: Crash when not calling parent constructor of
