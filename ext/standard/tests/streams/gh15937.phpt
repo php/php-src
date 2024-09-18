@@ -8,7 +8,7 @@ $config = [
     ],
 ];
 $ctx = stream_context_create($config);
-var_dump(fopen("http://example.com", "r", false, $ctx));
+var_dump(fopen("http://www.example.com", "r", false, $ctx));
 ?>
 --EXPECTF--
 resource(%d) of type (stream)
