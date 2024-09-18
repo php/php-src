@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-15657 (Segmentation fault in dasm_x86.h). (nielsdos)
 
+- PHPDBG:
+  . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
+
 - PCRE:
   . Fix UAF issues with PCRE after request shutdown. (nielsdos)
 
