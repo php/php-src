@@ -4337,6 +4337,34 @@ ZEND_METHOD(FFI, addr) /* {{{ */
 }
 /* }}} */
 
+ZEND_METHOD(FFI, addrValue) /* {{{ */
+{
+	zval *zv;
+	zend_ffi_cdata *cdata;
+	zend_ffi_type *type;
+
+	ZEND_FFI_VALIDATE_API_RESTRICTION();
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(zv);
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_DEREF(zv);
+	
+	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == zend_ffi_cdata_ce) {
+		cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+		type = ZEND_FFI_TYPE(cdata->type);
+		if (EXPECTED(type->kind != ZEND_FFI_TYPE_POINTER)) {
+			zend_throw_error(zend_ffi_exception_ce, "FFI\\Cdata is not a pointer");
+			RETURN_THROWS();
+		}
+		RETURN_LONG((zend_long)cdata->ptr_holder);
+	} else {
+		zend_wrong_parameter_class_error(1, "FFI\\CData", zv);
+		RETURN_THROWS();
+	}
+}
+/* }}} */
+
 ZEND_METHOD(FFI, sizeof) /* {{{ */
 {
 	zval *zv;
