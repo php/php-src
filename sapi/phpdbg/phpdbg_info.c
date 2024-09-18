@@ -399,7 +399,7 @@ PHPDBG_INFO(classes) /* {{{ */
 	phpdbg_notice("User Classes (%d)", zend_hash_num_elements(&classes));
 
 	/* once added, assume that classes are stable... until shutdown. */
-	if (HT_IS_PACKED(&classes)) {
+	if (HT_IS_INITIALIZED(&classes)) {
 		ZEND_HASH_PACKED_FOREACH_PTR(&classes, ce) {
 			phpdbg_print_class_name(ce);
 
@@ -447,7 +447,7 @@ PHPDBG_INFO(funcs) /* {{{ */
 
 	phpdbg_notice("User Functions (%d)", zend_hash_num_elements(&functions));
 
-	if (HT_IS_PACKED(&functions)) {
+	if (HT_IS_INITIALIZED(&functions)) {
 		ZEND_HASH_PACKED_FOREACH_PTR(&functions, zf) {
 			zend_op_array *op_array = &zf->op_array;
 
