@@ -587,7 +587,7 @@ static int zend_jit_ffi_abc(zend_jit_ctx       *jit,
 				if (!exit_addr) {
 					return 0;
 				}
-				ir_GUARD(ir_ULT(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(ffi_type->array.length)),
+				ir_GUARD(ir_LT(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(ffi_type->array.length)),
 					ir_CONST_ADDR(exit_addr));
 			}
 		}
