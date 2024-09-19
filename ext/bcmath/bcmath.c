@@ -1186,7 +1186,7 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 	}
 
 	if (UNEXPECTED(CHECK_SCALE_OVERFLOW(n1_full_scale) || CHECK_SCALE_OVERFLOW(n2_full_scale))) {
-		zend_value_error("Number has too large scale");
+		zend_value_error("scale must be between 0 and %d", INT_MAX);
 		goto fail;
 	}
 
@@ -1278,7 +1278,7 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 	}
 
 	if (UNEXPECTED(CHECK_SCALE_OVERFLOW(n1_full_scale) || CHECK_SCALE_OVERFLOW(n2_full_scale))) {
-		zend_value_error("Number has too large scale");
+		zend_value_error("scale must be between 0 and %d", INT_MAX);
 		goto fallback;
 	}
 
@@ -1316,7 +1316,7 @@ static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
 		return FAILURE;
 	}
 	if (UNEXPECTED(CHECK_SCALE_OVERFLOW(full_scale))) {
-		zend_argument_value_error(arg_num, "has too large scale");
+		zend_argument_value_error(arg_num, "must be between 0 and %d", INT_MAX);
 		return FAILURE;
 	}
 	if (scale != NULL) {
