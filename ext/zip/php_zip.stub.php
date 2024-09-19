@@ -444,6 +444,13 @@ class ZipArchive implements Countable
      */
     public const int ER_NOT_ALLOWED = UNKNOWN;
 #endif
+#ifdef ZIP_ER_TRUNCATED_ZIP
+    /**
+     * Possibly truncated or corrupted zip archive
+     * @cvalue ZIP_ER_TRUNCATED_ZIP
+     */
+    public const int ER_TRUNCATED_ZIP = UNKNOWN;
+#endif
 #ifdef ZIP_AFL_RDONLY
     /**
      * read only -- cannot be cleared

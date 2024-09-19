@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2b8e40ec2fc17effac1c0acc97bf860ab7e27399 */
+ * Stub hash: 53e04d9b2c25cc8a0c9fe51914b5a47280834fb8 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -1055,6 +1055,14 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_ER_NOT_ALLOWED_name = zend_string_init_interned("ER_NOT_ALLOWED", sizeof("ER_NOT_ALLOWED") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ER_NOT_ALLOWED_name, &const_ER_NOT_ALLOWED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ER_NOT_ALLOWED_name);
+#endif
+#if defined(ZIP_ER_TRUNCATED_ZIP)
+
+	zval const_ER_TRUNCATED_ZIP_value;
+	ZVAL_LONG(&const_ER_TRUNCATED_ZIP_value, ZIP_ER_TRUNCATED_ZIP);
+	zend_string *const_ER_TRUNCATED_ZIP_name = zend_string_init_interned("ER_TRUNCATED_ZIP", sizeof("ER_TRUNCATED_ZIP") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ER_TRUNCATED_ZIP_name, &const_ER_TRUNCATED_ZIP_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ER_TRUNCATED_ZIP_name);
 #endif
 #if defined(ZIP_AFL_RDONLY)
 
