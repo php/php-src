@@ -23,7 +23,9 @@ class ByRef {
         }
     }
     public function __construct() {
+        $this->undef = 'dynamic';
         $this->dynamic = 'dynamic';
+        unset($this->undef);
     }
 }
 
