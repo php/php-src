@@ -463,6 +463,9 @@ PHP 8.4 UPGRADE NOTES
   . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars
     to control the recursion depth of XSL template evaluation.
 
+- Zip:
+  . Added ZipArchive::ER_TRUNCATED_ZIP added in libzip 1.11
+
 ========================================
 3. Changes in SAPI modules
 ========================================

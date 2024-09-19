@@ -47,6 +47,9 @@ PHP                                                                        NEWS
 - Standard:
   . Add support for backed enums in http_build_query(). (ilutov)
 
+- Zip:
+  . Added ZipArchive::ER_TRUNCATED_ZIP added in libzip 1.11. (Remi)
+
 12 Sep 2024, PHP 8.4.0beta5
 
 - BCMath:
