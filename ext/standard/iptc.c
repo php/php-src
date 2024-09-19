@@ -73,14 +73,12 @@
 #define M_APP15 0xef
 
 /* {{{ php_iptc_put1 */
-static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **spoolbuf)
+static void php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **spoolbuf)
 {
 	if (spool > 0)
 		PUTC(c);
 
 	if (spoolbuf) *(*spoolbuf)++ = c;
-
-	return c;
 }
 /* }}} */
 
@@ -106,32 +104,28 @@ static int php_iptc_get1(FILE *fp, int spool, unsigned char **spoolbuf)
 /* }}} */
 
 /* {{{ php_iptc_read_remaining */
-static int php_iptc_read_remaining(FILE *fp, int spool, unsigned char **spoolbuf)
+static void php_iptc_read_remaining(FILE *fp, int spool, unsigned char **spoolbuf)
 {
 	while (php_iptc_get1(fp, spool, spoolbuf) != EOF) continue;
-
-	return M_EOI;
 }
 /* }}} */
 
 /* {{{ php_iptc_skip_variable */
-static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
+static void php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
 {
 	unsigned int  length;
 	int c1, c2;
 
-	if ((c1 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
+	if ((c1 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return;
 
-	if ((c2 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
+	if ((c2 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return;
 
 	length = (((unsigned char) c1) << 8) + ((unsigned char) c2);
 
 	length -= 2;
 
 	while (length--)
-		if (php_iptc_get1(fp, spool, spoolbuf) == EOF) return M_EOI;
-
-	return 0;
+		if (php_iptc_get1(fp, spool, spoolbuf) == EOF) return;
 }
 /* }}} */
 
