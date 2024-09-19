@@ -19,6 +19,12 @@ namespace
     /** @refcount 1 */
     function bcmod(string $num1, string $num2, ?int $scale = null): string {}
 
+    /**
+     * @return string[]
+     * @refcount 1
+     */
+    function bcdivmod(string $num1, string $num2, ?int $scale = null): array {}
+
     /** @refcount 1 */
     function bcpowmod(string $num, string $exponent, string $modulus, ?int $scale = null): string {}
 
@@ -63,6 +69,9 @@ namespace BcMath
         public function div(Number|string|int $num, ?int $scale = null): Number {}
 
         public function mod(Number|string|int $num, ?int $scale = null): Number {}
+
+        /** @return Number[] */
+        public function divmod(Number|string|int $num, ?int $scale = null): array {}
 
         public function powmod(Number|string|int $exponent, Number|string|int $modulus, ?int $scale = null): Number {}
 
