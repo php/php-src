@@ -17374,7 +17374,7 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 						op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &holder);
 					}
 					if ((op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
-					 && op2_info == MAY_BE_LONG
+					 && (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
 					 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind < ZEND_FFI_TYPE_POINTER
 					 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_VOID
 					 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(op1_ffi_type->array.type))) {
@@ -17451,7 +17451,7 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 						op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &holder);
 					}
 					if ((op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
-					 && op2_info == MAY_BE_LONG
+					 && (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
 					 && zend_jit_ffi_compatible(op1_ffi_type->array.type, op1_data_info, op3_ffi_type)) {
 						return 1;
 					}
