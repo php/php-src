@@ -5,22 +5,40 @@ ReflectionConstant::getFileName()
 
 include "included5.inc";
 
-$reflectionConstant = new ReflectionConstant('PHP_VERSION');
-var_dump($reflectionConstant->getFileName());
+function testConstant( string $name ): void {
+    $ref = new ReflectionConstant( $name );
+    echo "$name: ";
+    var_dump( $ref->getFileName() );
+}
 
-define('IN_CURRENT_FILE', 42);
-$reflectionConstant = new ReflectionConstant('IN_CURRENT_FILE');
-var_dump($reflectionConstant->getFileName());
+define('IN_CURRENT_FILE_DEFINED', 42);
+const IN_CURRENT_FILE_AST = 123;
 
-$reflectionConstant = new ReflectionConstant('INCLUDED_CONSTANT_DEFINED');
-var_dump($reflectionConstant->getFileName());
+echo "From PHP:\n";
+testConstant( 'PHP_VERSION' );
+testConstant( 'STDIN' );
+testConstant( 'STDOUT' );
+testConstant( 'STDERR' );
 
-$reflectionConstant = new ReflectionConstant('INCLUDED_CONSTANT_AST');
-var_dump($reflectionConstant->getFileName());
+echo "\nFrom the current file:\n";
+testConstant( 'IN_CURRENT_FILE_DEFINED' );
+testConstant( 'IN_CURRENT_FILE_AST' );
 
+echo "\nFrom an included file:\n";
+testConstant( 'INCLUDED_CONSTANT_DEFINED' );
+testConstant( 'INCLUDED_CONSTANT_AST' );
 ?>
 --EXPECTF--
-bool(false)
-string(%d) "%sReflectionConstant_getFileName.php"
-string(%d) "%sincluded5.inc"
-string(%d) "%sincluded5.inc"
+From PHP:
+PHP_VERSION: bool(false)
+STDIN: bool(false)
+STDOUT: bool(false)
+STDERR: bool(false)
+
+From the current file:
+IN_CURRENT_FILE_DEFINED: string(%d) "%sReflectionConstant_getFileName.php"
+IN_CURRENT_FILE_AST: string(%d) "%sReflectionConstant_getFileName.php"
+
+From an included file:
+INCLUDED_CONSTANT_DEFINED: string(%d) "%sincluded5.inc"
+INCLUDED_CONSTANT_AST: string(%d) "%sincluded5.inc"
