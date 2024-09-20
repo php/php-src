@@ -928,13 +928,13 @@ ZEND_FUNCTION(opcache_invalidate)
 /* {{{ Prevents JIT on function. Call it before the first invocation of the given function. */
 ZEND_FUNCTION(opcache_jit_blacklist)
 {
-	zend_object *closure;
+	zval *closure;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &closure, zend_ce_closure) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	const zend_function *func = zend_get_closure_method_def(closure);
+	const zend_function *func = zend_get_closure_method_def(Z_OBJ_P(closure));
 	if (ZEND_USER_CODE(func->type)) {
 		zend_jit_blacklist_function((zend_op_array *)&func->op_array);
 	}
