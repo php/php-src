@@ -24,21 +24,7 @@
 #include "ext/hash/php_hash_sha.h"
 #include "ext/standard/md5.h"
 
-#ifdef PHAR_HAVE_OPENSSL
-/* OpenSSL includes */
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/crypto.h>
-#include <openssl/pem.h>
-#include <openssl/err.h>
-#include <openssl/conf.h>
-#include <openssl/rand.h>
-#include <openssl/ssl.h>
-#include <openssl/pkcs12.h>
-#else
 static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type);
-#endif
 
 /* for links to relative location, prepend cwd of the entry */
 static char *phar_get_link_location(phar_entry_info *entry) /* {{{ */
@@ -1439,7 +1425,6 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature)
 }
 /* }}} */
 
-#ifndef PHAR_HAVE_OPENSSL
 static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type) /* {{{ */
 {
 	zend_fcall_info fci;
@@ -1538,7 +1523,6 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	}
 }
 /* }}} */
-#endif /* #ifndef PHAR_HAVE_OPENSSL */
 
 zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error) /* {{{ */
 {
@@ -1552,33 +1536,18 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 		case PHAR_SIG_OPENSSL_SHA512:
 		case PHAR_SIG_OPENSSL_SHA256:
 		case PHAR_SIG_OPENSSL: {
-#ifdef PHAR_HAVE_OPENSSL
-			BIO *in;
-			EVP_PKEY *key;
-			const EVP_MD *mdtype;
-			EVP_MD_CTX *md_ctx;
-
-			if (sig_type == PHAR_SIG_OPENSSL_SHA512) {
-				mdtype = EVP_sha512();
-			} else if (sig_type == PHAR_SIG_OPENSSL_SHA256) {
-				mdtype = EVP_sha256();
-			} else {
-				mdtype = EVP_sha1();
-			}
-#else
 			size_t tempsig;
-#endif
 			zend_string *pubkey = NULL;
 			char *pfile;
 			php_stream *pfp;
-#ifndef PHAR_HAVE_OPENSSL
+
 			if (!zend_hash_str_exists(&module_registry, "openssl", sizeof("openssl")-1)) {
 				if (error) {
 					spprintf(error, 0, "openssl not loaded");
 				}
 				return FAILURE;
 			}
-#endif
+
 			/* use __FILE__ . '.pubkey' for public key file */
 			spprintf(&pfile, 0, "%s.pubkey", fname);
 			pfp = php_stream_open_wrapper(pfile, "rb", 0, NULL);
@@ -1595,7 +1564,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 			}
 
 			php_stream_close(pfp);
-#ifndef PHAR_HAVE_OPENSSL
+
 			tempsig = sig_len;
 
 			if (FAILURE == phar_call_openssl_signverify(0, fp, end_of_phar, ZSTR_VAL(pubkey), ZSTR_LEN(pubkey), &sig, &tempsig, sig_type)) {
@@ -1611,76 +1580,6 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 			zend_string_release_ex(pubkey, 0);
 
 			sig_len = tempsig;
-#else
-			in = BIO_new_mem_buf(ZSTR_VAL(pubkey), ZSTR_LEN(pubkey));
-
-			if (NULL == in) {
-				zend_string_release_ex(pubkey, 0);
-				if (error) {
-					spprintf(error, 0, "openssl signature could not be processed");
-				}
-				return FAILURE;
-			}
-
-			key = PEM_read_bio_PUBKEY(in, NULL, NULL, NULL);
-			BIO_free(in);
-			zend_string_release_ex(pubkey, 0);
-
-			if (NULL == key) {
-				if (error) {
-					spprintf(error, 0, "openssl signature could not be processed");
-				}
-				return FAILURE;
-			}
-
-			md_ctx = EVP_MD_CTX_create();
-			if (!md_ctx || !EVP_VerifyInit(md_ctx, mdtype)) {
-				if (md_ctx) {
-					EVP_MD_CTX_destroy(md_ctx);
-				}
-				if (error) {
-					spprintf(error, 0, "openssl signature could not be verified");
-				}
-				return FAILURE;
-			}
-			read_len = end_of_phar;
-
-			if ((size_t)read_len > sizeof(buf)) {
-				read_size = sizeof(buf);
-			} else {
-				read_size = (size_t)read_len;
-			}
-
-			php_stream_seek(fp, 0, SEEK_SET);
-
-			while (read_size && (len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
-				if (UNEXPECTED(EVP_VerifyUpdate (md_ctx, buf, len) == 0)) {
-					goto failure;
-				}
-				read_len -= (zend_off_t)len;
-
-				if (read_len < read_size) {
-					read_size = (size_t)read_len;
-				}
-			}
-
-			if (EVP_VerifyFinal(md_ctx, (unsigned char *)sig, sig_len, key) != 1) {
-				failure:
-				/* 1: signature verified, 0: signature does not match, -1: failed signature operation */
-				EVP_PKEY_free(key);
-				EVP_MD_CTX_destroy(md_ctx);
-
-				if (error) {
-					spprintf(error, 0, "broken openssl signature");
-				}
-
-				return FAILURE;
-			}
-
-			EVP_PKEY_free(key);
-			EVP_MD_CTX_destroy(md_ctx);
-#endif
-
 			*signature_len = phar_hex_str((const char*)sig, sig_len, signature);
 		}
 		break;
@@ -1904,85 +1803,6 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 		case PHAR_SIG_OPENSSL_SHA256:
 		case PHAR_SIG_OPENSSL: {
 			unsigned char *sigbuf;
-#ifdef PHAR_HAVE_OPENSSL
-			unsigned int siglen;
-			BIO *in;
-			EVP_PKEY *key;
-			EVP_MD_CTX *md_ctx;
-			const EVP_MD *mdtype;
-
-			if (phar->sig_flags == PHAR_SIG_OPENSSL_SHA512) {
-				mdtype = EVP_sha512();
-			} else if (phar->sig_flags == PHAR_SIG_OPENSSL_SHA256) {
-				mdtype = EVP_sha256();
-			} else {
-				mdtype = EVP_sha1();
-			}
-
-			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
-
-			if (in == NULL) {
-				if (error) {
-					spprintf(error, 0, "unable to write to phar \"%s\" with requested openssl signature", phar->fname);
-				}
-				return FAILURE;
-			}
-
-			key = PEM_read_bio_PrivateKey(in, NULL,NULL, "");
-			BIO_free(in);
-
-			if (!key) {
-				if (error) {
-					spprintf(error, 0, "unable to process private key");
-				}
-				return FAILURE;
-			}
-
-			md_ctx = EVP_MD_CTX_create();
-			if (md_ctx == NULL) {
-				EVP_PKEY_free(key);
-				if (error) {
-					spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
-				}
-				return FAILURE;
-			}
-
-			siglen = EVP_PKEY_size(key);
-			sigbuf = emalloc(siglen + 1);
-
-			if (!EVP_SignInit(md_ctx, mdtype)) {
-				EVP_PKEY_free(key);
-				efree(sigbuf);
-				if (error) {
-					spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
-				}
-				return FAILURE;
-			}
-
-			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
-				if (!EVP_SignUpdate(md_ctx, buf, sig_len)) {
-					EVP_PKEY_free(key);
-					efree(sigbuf);
-					if (error) {
-						spprintf(error, 0, "unable to update the openssl signature for phar \"%s\"", phar->fname);
-					}
-					return FAILURE;
-				}
-			}
-
-			if (!EVP_SignFinal (md_ctx, sigbuf, &siglen, key)) {
-				EVP_PKEY_free(key);
-				efree(sigbuf);
-				if (error) {
-					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
-				}
-				return FAILURE;
-			}
-
-			sigbuf[siglen] = '\0';
-			EVP_PKEY_free(key);
-			EVP_MD_CTX_destroy(md_ctx);
-#else
 			size_t siglen;
 			sigbuf = NULL;
 			siglen = 0;
@@ -1994,7 +1814,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 				}
 				return FAILURE;
 			}
-#endif
+
 			*signature = (char *) sigbuf;
 			*signature_length = siglen;
 		}
