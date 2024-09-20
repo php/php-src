@@ -22,7 +22,7 @@ try {
 <?php 
 function test() {
   $ffi = FFI::cdef(<<<EOF
-    extern int64_t stdout;
+    extern intptr_t stdout;
     EOF, 'libc.so.6');
 
   $old = $ffi->stdout;
