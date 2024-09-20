@@ -3058,6 +3058,8 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, u
 }
 /* }}} */
 
+/* This function attempts to find the right function name based on the first node's name in the soap body.
+ * If that doesn't work it falls back to get_doc_function(). */
 static sdlFunctionPtr find_function(sdlPtr sdl, xmlNodePtr func, zval* function_name) /* {{{ */
 {
 	sdlFunctionPtr function;
@@ -4185,6 +4187,10 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t
 }
 /* }}} */
 
+/* This function tries to find the function that matches the given parameters.
+ * If params is NULL, it will return the first function that has no parameters.
+ * If params is not NULL, it will return the first function that has the same
+ * parameters as the given XML node. */
 static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params) /* {{{ */
 {
 	if (sdl) {
