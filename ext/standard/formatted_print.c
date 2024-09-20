@@ -251,8 +251,9 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 			php_sprintf_appendstring(buffer, pos, "-INF", 4, 0, padding,
 									 alignment, 4, is_negative, 0, always_sign);
 		} else {
-			php_sprintf_appendstring(buffer, pos, "INF", 3, 0, padding,
-									 alignment, 3, is_negative, 0, always_sign);
+            char *str = is_negative ? "-INF" : "INF";
+			php_sprintf_appendstring(buffer, pos, str, strlen(str), 0, padding,
+									 alignment, strlen(str), is_negative, 0, always_sign);
 		}
 		return;
 	}
