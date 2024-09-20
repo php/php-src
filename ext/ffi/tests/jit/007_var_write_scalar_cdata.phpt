@@ -22,11 +22,11 @@ try {
 <?php 
 function test() {
   $ffi = FFI::cdef(<<<EOF
-    extern int64_t stdout;
+    extern intptr_t stdout;
     EOF, 'libc.so.6');
 
   $old = $ffi->stdout;
-  $x = $ffi->cast('int64_t', 42);
+  $x = $ffi->cast('intptr_t', 42);
   var_dump($x);
   for ($i = 0; $i < 5; $i++) {
   	$ffi->stdout = $x;
@@ -38,7 +38,7 @@ function test() {
 test();
 ?>
 --EXPECTF--
-object(FFI\CData:int64_t)#%d (1) {
+object(FFI\CData:int%d_t)#%d (1) {
   ["cdata"]=>
   int(42)
 }
