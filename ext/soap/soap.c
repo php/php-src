@@ -1346,34 +1346,32 @@ PHP_METHOD(SoapServer, handle)
 			zend_string *server = ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER);
 
 			zend_is_auto_global(server);
-			if ((server_vars = zend_hash_find(&EG(symbol_table), server)) != NULL &&
-			    Z_TYPE_P(server_vars) == IS_ARRAY &&
-			    (encoding = zend_hash_str_find(Z_ARRVAL_P(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING")-1)) != NULL &&
-			    Z_TYPE_P(encoding) == IS_STRING) {
+			if ((server_vars = zend_hash_find(&EG(symbol_table), server)) != NULL && Z_TYPE_P(server_vars) == IS_ARRAY) {
+			    if ((encoding = zend_hash_str_find(Z_ARRVAL_P(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING")-1)) != NULL && Z_TYPE_P(encoding) == IS_STRING) {
+					if (zend_string_equals_literal(Z_STR_P(encoding), "gzip")
+						|| zend_string_equals_literal(Z_STR_P(encoding), "x-gzip")
+						|| zend_string_equals_literal(Z_STR_P(encoding), "deflate")
+					) {
+						zval filter_params;
 
-				if (zend_string_equals_literal(Z_STR_P(encoding), "gzip")
-					|| zend_string_equals_literal(Z_STR_P(encoding), "x-gzip")
-					|| zend_string_equals_literal(Z_STR_P(encoding), "deflate")
-				) {
-					zval filter_params;
+						array_init_size(&filter_params, 1);
+						add_assoc_long_ex(&filter_params, "window", sizeof("window")-1, 0x2f); /* ANY WBITS */
 
-					array_init_size(&filter_params, 1);
-					add_assoc_long_ex(&filter_params, "window", sizeof("window")-1, 0x2f); /* ANY WBITS */
+						zf = php_stream_filter_create("zlib.inflate", &filter_params, 0);
+						zend_array_destroy(Z_ARR(filter_params));
 
-					zf = php_stream_filter_create("zlib.inflate", &filter_params, 0);
-					zend_array_destroy(Z_ARR(filter_params));
-
-					if (zf) {
-						php_stream_filter_append(&SG(request_info).request_body->readfilters, zf);
+						if (zf) {
+							php_stream_filter_append(&SG(request_info).request_body->readfilters, zf);
+						} else {
+							php_error_docref(NULL, E_WARNING,"Can't uncompress compressed request");
+							SOAP_SERVER_END_CODE();
+							return;
+						}
 					} else {
-						php_error_docref(NULL, E_WARNING,"Can't uncompress compressed request");
+						php_error_docref(NULL, E_WARNING,"Request is compressed with unknown compression '%s'",Z_STRVAL_P(encoding));
 						SOAP_SERVER_END_CODE();
 						return;
 					}
-				} else {
-					php_error_docref(NULL, E_WARNING,"Request is compressed with unknown compression '%s'",Z_STRVAL_P(encoding));
-					SOAP_SERVER_END_CODE();
-					return;
 				}
 			}
 
