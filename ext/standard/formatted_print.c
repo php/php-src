@@ -248,9 +248,6 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 	if (zend_isinf(number)) {
 		is_negative = (number<0);
 		if (is_negative) {
-			// ideally negative should have been handled inside php_sprintf_appendstring ,
-			// but the code is difficult to debug, and it's easy to break stuff inside there (I tried, I broke stuff),
-			// handling it here is much easier..
 			php_sprintf_appendstring(buffer, pos, "-INF", 4, 0, padding,
 									 alignment, 4, is_negative, 0, always_sign);
 		} else {
