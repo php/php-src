@@ -47,5 +47,5 @@ runs:
             net-analyzer/net-snmp \
             net-nds/openldap \
             dev-db/unixODBC \
-            dev-db/postgresql
+            dev-db/postgresql \
             || true
