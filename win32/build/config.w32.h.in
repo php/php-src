@@ -6,7 +6,7 @@
 #undef _WIN32_WINNT
 #undef NTDDI_VERSION
 #define _WIN32_WINNT 0x0602
-#define NTDDI_VERSION 0x06010000
+#define NTDDI_VERSION 0x06020000
 
 /* Default PHP / PEAR directories */
 #define PHP_CONFIG_FILE_PATH ""

@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - TSRM:
   . Prevent closing of unrelated handles. (cmb)
 
+- Windows:
+  . Fixed minimal Windows version. (cmb)
+
 12 Sep 2024, PHP 8.3.12
 
 - Core:
