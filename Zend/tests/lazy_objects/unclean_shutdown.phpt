@@ -16,4 +16,4 @@ $obj = $reflector->newLazyGhost(function ($obj) {
 
 var_dump($obj->a);
 --EXPECTF--
-Fatal error: Cannot use 'bool' as class name%s on line %d
+Fatal error: Cannot use 'bool' as a class name%s on line %d

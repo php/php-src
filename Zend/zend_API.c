@@ -3571,7 +3571,7 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		zend_str_tolower_copy(ZSTR_VAL(lcname), name, name_len);
 	}
 
-	zend_assert_valid_class_name(lcname);
+	zend_assert_valid_class_name(lcname, "a type alias");
 
 	lcname = zend_new_interned_string(lcname);
 

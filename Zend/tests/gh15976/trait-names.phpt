@@ -8,6 +8,6 @@ trait bool {}
 
 ?>
 --EXPECTF--
-Deprecated: Using "_" as a class name is deprecated since 8.4 in %strait-names.php on line 3
+Deprecated: Using "_" as a trait name is deprecated since 8.4 in %strait-names.php on line 3
 
-Fatal error: Cannot use 'bool' as class name as it is reserved in %strait-names.php on line 4
+Fatal error: Cannot use 'bool' as a trait name as it is reserved in %strait-names.php on line 4

@@ -237,14 +237,14 @@ static bool zend_is_reserved_class_name(const zend_string *name) /* {{{ */
 }
 /* }}} */
 
-void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
+void zend_assert_valid_class_name(const zend_string *name, const char *type) /* {{{ */
 {
 	if (zend_is_reserved_class_name(name)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot use '%s' as class name as it is reserved", ZSTR_VAL(name));
+			"Cannot use '%s' as %s as it is reserved", ZSTR_VAL(name), type);
 	}
 	if (zend_string_equals_literal(name, "_")) {
-		zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated since 8.4");
+		zend_error(E_DEPRECATED, "Using \"_\" as %s is deprecated since 8.4", type);
 	}
 }
 /* }}} */
@@ -6985,7 +6985,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 				class_name = zend_resolve_class_name_ast(ast);
-				zend_assert_valid_class_name(class_name);
+				zend_assert_valid_class_name(class_name, "a type name");
 			} else {
 				zend_ensure_valid_class_fetch_type(fetch_type);
 				zend_string_addref(class_name);
@@ -8996,7 +8996,15 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
 		}
 
-		zend_assert_valid_class_name(unqualified_name);
+		const char *type = "a class name";
+		if (decl->flags & ZEND_ACC_ENUM) {
+			type = "an enum name";
+		} else if (decl->flags & ZEND_ACC_INTERFACE) {
+			type = "an interface name";
+		} else if (decl->flags & ZEND_ACC_TRAIT) {
+			type = "a trait name";
+		}
+		zend_assert_valid_class_name(unqualified_name, type);
 		name = zend_prefix_with_ns(unqualified_name);
 		name = zend_new_interned_string(name);
 		lcname = zend_string_tolower(name);
