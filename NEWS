@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - BcMath:
   . bcpow() performance improvement. (Jorg Sowa)
+  . ext/bcmath: Check for scale overflow. (SakiTakamachi)
 
 - Debugging:
   . Fixed bug GH-15923 (GDB: Python Exception <class 'TypeError'>:
