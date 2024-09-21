@@ -1553,15 +1553,11 @@ PHP_METHOD(BcMath_Number, divmod)
 	bcmath_number_obj_t *quot_intern = bcmath_number_new_obj(quot, 0);
 	bcmath_number_obj_t *rem_intern = bcmath_number_new_obj(rem, scale);
 
-	array_init(return_value);
-
 	zval z_quot, z_rem;
 	ZVAL_OBJ(&z_quot, &quot_intern->std);
 	ZVAL_OBJ(&z_rem, &rem_intern->std);
 
-	add_next_index_zval(return_value, &z_quot);
-	add_next_index_zval(return_value, &z_rem);
-	return;
+	RETURN_ARR(zend_new_pair(&z_quot, &z_rem));
 
 fail:
 	if (num_obj == NULL) {
