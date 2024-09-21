@@ -439,7 +439,7 @@ PHP_FUNCTION(bcdivmod)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first = NULL, second = NULL, quot, rem;
+	bc_num first = NULL, second = NULL, quot = NULL, rem = NULL;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -451,17 +451,13 @@ PHP_FUNCTION(bcdivmod)
 
 	if (scale_param_is_null) {
 		scale = BCG(bc_precision);
-	} else if (scale_param < 0 || scale_param > INT_MAX) {
-		zend_argument_value_error(3, "must be between 0 and %d", INT_MAX);
+	} else if (bcmath_check_scale(scale_param, 3) == FAILURE) {
 		RETURN_THROWS();
 	} else {
 		scale = (int) scale_param;
 	}
 
 	BC_ARENA_SETUP;
-
-	bc_init_num(&quot);
-	bc_init_num(&rem);
 
 	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
@@ -478,14 +474,11 @@ PHP_FUNCTION(bcdivmod)
 		goto cleanup;
 	}
 
-	array_init(return_value);
-
 	zval z_quot, z_rem;
-	ZVAL_NEW_STR(&z_quot, bc_num2str_ex(quot, 0));
-	ZVAL_NEW_STR(&z_rem, bc_num2str_ex(rem, scale));
+	ZVAL_STR(&z_quot, bc_num2str_ex(quot, 0));
+	ZVAL_STR(&z_rem, bc_num2str_ex(rem, scale));
 
-	add_next_index_zval(return_value, &z_quot);
-	add_next_index_zval(return_value, &z_rem);
+	RETVAL_ARR(zend_new_pair(&z_quot, &z_rem));
 
 	cleanup: {
 		bc_free_num(&first);
