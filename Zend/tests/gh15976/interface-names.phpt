@@ -8,6 +8,6 @@ interface bool {}
 
 ?>
 --EXPECTF--
-Deprecated: Using "_" as a class name is deprecated since 8.4 in %sinterface-names.php on line 3
+Deprecated: Using "_" as an interface name is deprecated since 8.4 in %sinterface-names.php on line 3
 
-Fatal error: Cannot use 'bool' as class name as it is reserved in %sinterface-names.php on line 4
+Fatal error: Cannot use 'bool' as an interface name as it is reserved in %sinterface-names.php on line 4
