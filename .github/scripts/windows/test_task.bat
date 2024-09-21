@@ -103,6 +103,7 @@ popd
 
 rem prepare for snmp
 set MIBDIRS=%DEPS_DIR%\share\mibs
+sed -i "s/exec HexTest .*/exec HexTest cscript\.exe \/nologo %GITHUB_WORKSPACE:\=\/%\/ext\/snmp\/tests\/bigtest\.js/g" %GITHUB_WORKSPACE%\ext\snmp\tests\snmpd.conf
 start %DEPS_DIR%\bin\snmpd.exe -C -c %GITHUB_WORKSPACE%\ext\snmp\tests\snmpd.conf -Ln
 
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
