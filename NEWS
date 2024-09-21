@@ -15,6 +15,7 @@ PHP                                                                        NEWS
     skipLazyInitialization() may change initialized proxy). (Arnaud)
   . Fix is_zend_ptr() huge block comparison. (nielsdos)
   . Fixed potential OOB read in zend_dirname() on Windows. (cmb)
+  . Fixed bug GH-15964 (printf() can strip sign of -INF). (divinity76, cmb)
 
 - Curl:
   . Fix various memory leaks in curl mime handling. (nielsdos)
