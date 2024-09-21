@@ -86,6 +86,12 @@ You may also want to read
 [The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/post/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
 for additional notes on the best way to approach submitting an RFC.
 
+## Tasks that need doing
+
+Long-term projects are tracked on the [tasks issue tracker][tasks-tracker]
+and [issues tagged as "good first issue"][tasks-good-first-issue] are a
+great place for new contributors to start.
+
 ## Technical resources
 
 There are a number of technical resources on php-src. Unfortunately, they are
@@ -447,3 +453,6 @@ New source code files should include the following header block:
 ```
 
 Thank you for contributing to PHP!
+
+[tasks-tracker]: https://github.com/php/php-tasks/issues
+[tasks-good-first-issue]: https://github.com/php/php-tasks/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22
