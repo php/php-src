@@ -357,7 +357,13 @@ if (PHP_SECURITY_FLAGS == "yes") {
 
 ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
 ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
-if (CLANG_TOOLSET) {
+if (VS_TOOLSET) {
+	if (PHP_SANITIZER == "yes") {
+		if (COMPILER_NUMERIC_VERSION < 1929) {
+			ERROR("MSVC at least 16.0 required for sanitation plugins");
+		}
+	}
+} else if (CLANG_TOOLSET) {
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
 		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
 		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +
