@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15918 (Assertion failure in ext/spl/spl_fixedarray.c).
     (nielsdos)
 
+- Streams:
+  . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
+    (nielsdos)
+
 12 Sep 2024, PHP 8.3.12
 
 - Core:
