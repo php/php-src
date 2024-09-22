@@ -70,7 +70,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_
 {
 #ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
-	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
+	if (!php_win32_get_random_bytes(bytes, size)) {
 		snprintf(errstr, errstr_size, "Failed to retrieve randomness from the operating system (BCryptGenRandom)");
 		return FAILURE;
 	}

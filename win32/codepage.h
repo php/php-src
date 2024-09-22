@@ -27,6 +27,11 @@ extern "C" {
 # define PW32CP __declspec(dllimport)
 #endif
 
+#include <stddef.h>
+#include <stdbool.h>
+#include <wchar.h>
+#include <IntSafe.h>
+
 #define PHP_WIN32_CP_IGNORE_LEN (0)
 #define PHP_WIN32_CP_IGNORE_LEN_P ((size_t *)-1)
 
@@ -40,7 +45,7 @@ struct php_win32_cp {
 	char *desc;
 };
 
-PW32CP BOOL php_win32_cp_use_unicode(void);
+PW32CP bool php_win32_cp_use_unicode(void);
 PW32CP const struct php_win32_cp *php_win32_cp_do_setup(const char *);
 #define php_win32_cp_setup() php_win32_cp_do_setup(NULL)
 PW32CP const struct php_win32_cp *php_win32_cp_do_update(const char *);

@@ -23,16 +23,21 @@
 # define PHP_WINUTIL_API __declspec(dllimport)
 #endif
 
+#include <stddef.h>
+#include <stdbool.h>
+#include <windows.h>
+#include <winerror.h>
+
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error);
 PHP_WINUTIL_API void php_win32_error_msg_free(char *msg);
 
 #define php_win_err()	php_win32_error_to_msg(GetLastError())
 #define php_win_err_free(err) php_win32_error_msg_free(err)
-int php_win32_check_trailing_space(const char * path, const size_t path_len);
-PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size);
+bool php_win32_check_trailing_space(const char * path, const size_t path_len);
+PHP_WINUTIL_API bool php_win32_get_random_bytes(unsigned char *buf, size_t size);
 #ifdef PHP_EXPORTS
-BOOL php_win32_init_random_bytes(void);
-BOOL php_win32_shutdown_random_bytes(void);
+bool php_win32_init_random_bytes(void);
+bool php_win32_shutdown_random_bytes(void);
 #endif
 
 #if !defined(ECURDIR)
@@ -53,7 +58,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err);
 
 PHP_WINUTIL_API char *php_win32_get_username(void);
 
-PHP_WINUTIL_API BOOL php_win32_image_compatible(HMODULE handle, char **err);
-PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err);
+PHP_WINUTIL_API bool php_win32_image_compatible(HMODULE handle, char **err);
+PHP_WINUTIL_API bool php_win32_crt_compatible(char **err);
 
 #endif

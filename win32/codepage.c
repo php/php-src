@@ -420,7 +420,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id)
 	return cur_cp;
 }/*}}}*/
 
-PW32CP BOOL php_win32_cp_use_unicode(void)
+PW32CP bool php_win32_cp_use_unicode(void)
 {/*{{{*/
 	return 65001 == cur_cp->id;
 }/*}}}*/

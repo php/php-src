@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
  */
 
-#include "php.h"
 #include "winutil.h"
+#include "ioutil.h"
 #include "codepage.h"
 #include <bcrypt.h>
 #include <lmcons.h>
@@ -54,31 +54,31 @@ PHP_WINUTIL_API void php_win32_error_msg_free(char *msg)
 	}
 }/*}}}*/
 
-int php_win32_check_trailing_space(const char * path, const size_t path_len)
+bool php_win32_check_trailing_space(const char * path, const size_t path_len)
 {/*{{{*/
 	if (path_len > MAXPATHLEN - 1) {
-		return 1;
+		return true;
 	}
 	if (path) {
 		if (path[0] == ' ' || path[path_len - 1] == ' ') {
-			return 0;
+			return false;
 		} else {
-			return 1;
+			return true;
 		}
 	} else {
-		return 0;
+		return false;
 	}
 }/*}}}*/
 
 static BCRYPT_ALG_HANDLE bcrypt_algo;
-static BOOL has_bcrypt_algo = 0;
+static bool has_bcrypt_algo = false;
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
 #ifdef PHP_EXPORTS
-BOOL php_win32_shutdown_random_bytes(void)
+bool php_win32_shutdown_random_bytes(void)
 {/*{{{*/
-	BOOL ret = TRUE;
+	bool ret = true;
 
 	if (has_bcrypt_algo) {
 		ret = NT_SUCCESS(BCryptCloseAlgorithmProvider(bcrypt_algo, 0));
@@ -88,10 +88,10 @@ BOOL php_win32_shutdown_random_bytes(void)
 	return ret;
 }/*}}}*/
 
-BOOL php_win32_init_random_bytes(void)
+bool php_win32_init_random_bytes(void)
 {/*{{{*/
 	if (has_bcrypt_algo) {
-		return TRUE;
+		return true;
 	}
 
 	has_bcrypt_algo = NT_SUCCESS(BCryptOpenAlgorithmProvider(&bcrypt_algo, BCRYPT_RNG_ALGORITHM, NULL, 0));
@@ -100,24 +100,22 @@ BOOL php_win32_init_random_bytes(void)
 }/*}}}*/
 #endif
 
-PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size)
+PHP_WINUTIL_API bool php_win32_get_random_bytes(unsigned char *buf, size_t size)
 {  /* {{{ */
-
-	BOOL ret;
 
 #if 0
 	/* Currently we fail on startup, with CNG API it shows no regressions so far and is secure.
 		Should switch on and try to reinit, if it fails too often on startup. This means also
 		bringing locks back. */
-	if (has_bcrypt_algo == 0) {
-		return FAILURE;
+	if (!has_bcrypt_algo) {
+		return false;
 	}
 #endif
 
 	/* No sense to loop here, the limit is huge enough. */
-	ret = NT_SUCCESS(BCryptGenRandom(bcrypt_algo, buf, (ULONG)size, 0));
+	bool ret = NT_SUCCESS(BCryptGenRandom(bcrypt_algo, buf, (ULONG)size, 0));
 
-	return ret ? SUCCESS : FAILURE;
+	return ret;
 }
 /* }}} */
 
@@ -439,7 +437,7 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 	return uname;
 }/*}}}*/
 
-static zend_always_inline BOOL is_compatible(HMODULE handle, BOOL is_smaller, char *format, char **err)
+static __forceinline bool is_compatible(HMODULE handle, bool is_smaller, char *format, char **err)
 {/*{{{*/
 	PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER) handle;
 	PIMAGE_NT_HEADERS pNTHeader = (PIMAGE_NT_HEADERS)((char *) dosHeader + dosHeader->e_lfanew);
@@ -470,19 +468,19 @@ static zend_always_inline BOOL is_compatible(HMODULE handle, BOOL is_smaller, ch
 		} else {
 			spprintf(err, 0, "Can't retrieve the module name (error %u)", GetLastError());
 		}
-		return FALSE;
+		return false;
 	}
 
-	return TRUE;
+	return true;
 }/*}}}*/
 
-PHP_WINUTIL_API BOOL php_win32_image_compatible(HMODULE handle, char **err)
+PHP_WINUTIL_API bool php_win32_image_compatible(HMODULE handle, char **err)
 {/*{{{*/
-	return is_compatible(handle, TRUE, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", err);
+	return is_compatible(handle, true, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", err);
 }/*}}}*/
 
 /* Expect a CRT module handle */
-PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err)
+PHP_WINUTIL_API bool php_win32_crt_compatible(char **err)
 {/*{{{*/
 #if PHP_LINKER_MAJOR == 14
 	/* Extend for other CRT if needed. */
@@ -494,9 +492,9 @@ PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err)
 	HMODULE handle = GetModuleHandle(crt_name);
 	if (handle == NULL) {
 		spprintf(err, 0, "Can't get handle of module %s (error %u)", crt_name, GetLastError());
-		return FALSE;
+		return false;
 	}
-	return is_compatible(handle, FALSE, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", err);
+	return is_compatible(handle, false, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", err);
 #endif
-	return TRUE;
+	return true;
 }/*}}}*/

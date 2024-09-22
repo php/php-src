@@ -617,7 +617,7 @@ TSRM_API int pclose(FILE *stream)
 /* Returns a number between 0x2000_0000 and 0x3fff_ffff. On Windows, key_t is int. */
 static key_t tsrm_choose_random_shm_key(key_t prev_key) {
 	unsigned char buf[4];
-	if (php_win32_get_random_bytes(buf, 4) != SUCCESS) {
+	if (!php_win32_get_random_bytes(buf, 4)) {
 		return prev_key + 2;
 	}
 	uint32_t n =

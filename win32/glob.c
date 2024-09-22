@@ -41,16 +41,11 @@
  *
  * Optional extra services, controlled by flags not defined by POSIX:
  *
- * GLOB_QUOTE:
- *	Escaping convention: \ inhibits any special meaning the following
- *	character might have (except \ at end of string is retained).
  * GLOB_MAGCHAR:
  *	Set in gl_flags if pattern contained a globbing character.
  * GLOB_NOMAGIC:
  *	Same as GLOB_NOCHECK, but it will only append pattern if it did
  *	not contain any magic characters.  [Used in csh style globbing]
- * GLOB_ALTDIRFUNC:
- *	Use alternately specified directory access functions.
  * GLOB_TILDE:
  *	expand ~user/foo to the /home/dir/of/user/foo
  * GLOB_BRACE:
@@ -58,33 +53,19 @@
  * gl_matchc:
  *	Number of matches in the current invocation of glob.
  */
-#ifdef PHP_WIN32
-#if _MSC_VER < 1800
-# define _POSIX_
-# include <limits.h>
-# undef _POSIX_
-#else
+
 /* Visual Studio 2013 removed all the _POSIX_ defines, but we depend on some */
-# ifndef ARG_MAX
-#  define ARG_MAX 14500
-# endif
-#endif
+#ifndef ARG_MAX
+# define ARG_MAX 14500
 #endif
 
-#include "php.h"
-#include <sys/stat.h>
-
-#include <ctype.h>
-#ifndef PHP_WIN32
-#include <sys/param.h>
-#include <dirent.h>
-#include <pwd.h>
-#include <unistd.h>
-#endif
-#include <errno.h>
 #include "glob.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include "ioutil.h"
+#include "readdir.h"
+
+#include <errno.h>
 #include <string.h>
 
 #define	DOLLAR		'$'
@@ -96,7 +77,8 @@
 #define	QUOTE		'\\'
 #define	RANGE		'-'
 #define	RBRACKET	']'
-#define	SEP		DEFAULT_SLASH
+/* As this is Windows we use a backslash for the separator */
+#define	SEP         '\\'
 #define	STAR		'*'
 #define	TILDE		'~'
 #define	UNDERSCORE	'_'
@@ -137,11 +119,11 @@ typedef char Char;
 #define	ismeta(c)	(((c)&M_QUOTE) != 0)
 
 static int	 compare(const void *, const void *);
-static int	 g_Ctoc(const Char *, char *, u_int);
-static int	 g_lstat(Char *, zend_stat_t *, glob_t *);
+static bool	 g_Ctoc(const Char *, char *, u_int);
+static int	 g_lstat(Char *, php_win32_ioutil_stat_t *, glob_t *);
 static DIR	*g_opendir(Char *, glob_t *);
 static Char	*g_strchr(Char *, int);
-static int	 g_stat(Char *, zend_stat_t *, glob_t *);
+static int	 g_stat(Char *, php_win32_ioutil_stat_t *, glob_t *);
 static int	 glob0(const Char *, glob_t *);
 static int	 glob1(Char *, Char *, glob_t *, size_t *);
 static int	 glob2(Char *, Char *, Char *, Char *, Char *, Char *,
@@ -152,23 +134,21 @@ static int	 globextend(const Char *, glob_t *, size_t *);
 static const Char *globtilde(const Char *, Char *, size_t, glob_t *);
 static int	 globexp1(const Char *, glob_t *);
 static int	 globexp2(const Char *, const Char *, glob_t *, int *);
-static int	 match(Char *, Char *, Char *);
+static bool	 match(Char *, Char *, Char *);
 #ifdef DEBUG
 static void	 qprintf(const char *, Char *);
 #endif
 
-PHPAPI int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
+PHP_WIN_GLOB int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
 {
 	const uint8_t *patnext;
 	int c;
 	Char *bufnext, *bufend, patbuf[MAXPATHLEN];
 
-#ifdef PHP_WIN32
 	/* Force skipping escape sequences on windows
 	 * due to the ambiguity with path backslashes
 	 */
 	flags |= GLOB_NOESCAPE;
-#endif
 
 	patnext = (uint8_t *) pattern;
 	if (!(flags & GLOB_APPEND)) {
@@ -341,9 +321,6 @@ static int globexp2(const Char *ptr, const Char *pattern, glob_t *pglob, int *rv
  */
 static const Char *globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 {
-#ifndef PHP_WIN32
-	struct passwd *pwd;
-#endif
 	char *h;
 	const Char *p;
 	Char *b, *eb;
@@ -359,38 +336,19 @@ static const Char *globtilde(const Char *pattern, Char *patbuf, size_t patbuf_le
 
 	*h = EOS;
 
-#if 0
-	if (h == (char *)eb)
-		return what;
-#endif
-
 	if (((char *) patbuf)[0] == EOS) {
 		/*
 		 * handle a plain ~ or ~/ by expanding $HOME
 		 * first and then trying the password file
 		 */
 		if ((h = getenv("HOME")) == NULL) {
-#ifndef PHP_WIN32
-			if ((pwd = getpwuid(getuid())) == NULL)
-				return pattern;
-			else
-				h = pwd->pw_dir;
-#else
 			return pattern;
-#endif
 		}
 	} else {
 		/*
 		 * Expand a ~user
 		 */
-#ifndef PHP_WIN32
-		if ((pwd = getpwnam((char*) patbuf)) == NULL)
-			return pattern;
-		else
-			h = pwd->pw_dir;
-#else
 		return pattern;
-#endif
 	}
 
 	/* Copy the home directory */
@@ -504,11 +462,7 @@ static int compare(const void *p, const void *q)
 	return(strcmp(*(char **)p, *(char **)q));
 }
 
-static int
-glob1(pattern, pattern_last, pglob, limitp)
-	Char *pattern, *pattern_last;
-	glob_t *pglob;
-	size_t *limitp;
+static int glob1(Char *pattern, Char *pattern_last, glob_t *pglob, size_t *limitp)
 {
 	Char pathbuf[MAXPATHLEN];
 
@@ -520,6 +474,11 @@ glob1(pattern, pattern_last, pglob, limitp)
 		pattern, pattern_last, pglob, limitp));
 }
 
+static inline bool glob_is_slash(Char c)
+{
+	return c == '/' || c == '\\';
+}
+
 /*
  * The functions glob2 and glob3 are mutually recursive; there is one level
  * of recursion for each segment in the pattern that contains one or more
@@ -528,7 +487,7 @@ glob1(pattern, pattern_last, pglob, limitp)
 static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, Char *pattern,
 		Char *pattern_last, glob_t *pglob, size_t *limitp)
 {
-	zend_stat_t sb = {0};
+	php_win32_ioutil_stat_t sb = {0};
 	Char *p, *q;
 	int anymeta;
 
@@ -543,7 +502,7 @@ static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 				return(0);
 
 			if (((pglob->gl_flags & GLOB_MARK) &&
-				!IS_SLASH(pathend[-1])) && (S_ISDIR(sb.st_mode) ||
+				!glob_is_slash(pathend[-1])) && (S_ISDIR(sb.st_mode) ||
 				(S_ISLNK(sb.st_mode) &&
 				(g_stat(pathbuf, &sb, pglob) == 0) &&
 				S_ISDIR(sb.st_mode)))) {
@@ -559,7 +518,7 @@ static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 		/* Find end of next segment, copy tentatively to pathend. */
 		q = pathend;
 		p = pattern;
-		while (*p != EOS && !IS_SLASH(*p)) {
+		while (*p != EOS && !glob_is_slash(*p)) {
 			if (ismeta(*p))
 				anymeta = 1;
 			if (q+1 > pathend_last)
@@ -570,7 +529,7 @@ static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 		if (!anymeta) {		/* No expansion, do next segment. */
 			pathend = q;
 			pattern = p;
-			while (IS_SLASH(*pattern)) {
+			while (glob_is_slash(*pattern)) {
 				if (pathend+1 > pathend_last)
 					return (1);
 				*pathend++ = *pattern++;
@@ -590,14 +549,6 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 	register struct dirent *dp;
 	DIR *dirp;
 	int err;
-
-	/*
-	 * The readdirfunc declaration can't be prototyped, because it is
-	 * assigned, below, to two functions which are prototyped in glob.h
-	 * and dirent.h as taking pointers to differently typed opaque
-	 * structures.
-	 */
-	struct dirent *(*readdirfunc)();
 
 	if (pathend > pathend_last)
 		return (1);
@@ -620,11 +571,7 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 	err = 0;
 
 	/* Search directory for matching names. */
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		readdirfunc = pglob->gl_readdir;
-	else
-		readdirfunc = readdir;
-	while ((dp = (*readdirfunc)(dirp))) {
+	while ((dp = readdir(dirp))) {
 		register uint8_t *sc;
 		register Char *dc;
 
@@ -651,10 +598,7 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 			break;
 	}
 
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		(*pglob->gl_closedir)(dirp);
-	else
-		closedir(dirp);
+	closedir(dirp);
 	return(err);
 }
 
@@ -727,54 +671,62 @@ static int globextend(const Char *path, glob_t *pglob, size_t *limitp)
  * pattern matching function for filenames.  Each occurrence of the *
  * pattern causes a recursion level.
  */
-static int match(Char *name, Char *pat, Char *patend)
+static bool match(Char *name, Char *pat, Char *patend)
 {
-	int ok, negate_range;
+	bool ok, negate_range;
 	Char c, k;
 
 	while (pat < patend) {
 		c = *pat++;
 		switch (c & M_MASK) {
 		case M_ALL:
-			if (pat == patend)
-				return(1);
-			do
-				if (match(name, pat, patend))
-					return(1);
-			while (*name++ != EOS)
-				;
-			return(0);
+			if (pat == patend) {
+				return true;
+			}
+			do {
+				if (match(name, pat, patend)) {
+					return true;
+				}
+			} while (*name++ != EOS);
+			return false;
 		case M_ONE:
-			if (*name++ == EOS)
-				return(0);
+			if (*name++ == EOS) {
+				return false;
+			}
 			break;
 		case M_SET:
-			ok = 0;
-			if ((k = *name++) == EOS)
-				return(0);
-			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != EOS)
+			ok = false;
+			if ((k = *name++) == EOS) {
+				return false;
+			}
+			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != EOS) {
 				++pat;
+			}
 			while (((c = *pat++) & M_MASK) != M_END)
 				if ((*pat & M_MASK) == M_RNG) {
-					if (c <= k && k <= pat[1])
-						ok = 1;
+					if (c <= k && k <= pat[1]) {
+						ok = true;
+					}
 					pat += 2;
-				} else if (c == k)
-					ok = 1;
-			if (ok == negate_range)
-				return(0);
+				} else if (c == k) {
+					ok = true;
+				}
+			if (ok == negate_range) {
+				return false;
+			}
 			break;
 		default:
-			if (*name++ != c)
-				return(0);
+			if (*name++ != c) {
+				return false;
+			}
 			break;
 		}
 	}
-	return(*name == EOS);
+	return *name == EOS;
 }
 
 /* Free allocated data belonging to a glob_t structure. */
-PHPAPI void globfree(glob_t *pglob)
+PHP_WIN_GLOB void globfree(glob_t *pglob)
 {
 	register int i;
 	register char **pp;
@@ -794,38 +746,31 @@ static DIR * g_opendir(Char *str, glob_t *pglob)
 	char buf[MAXPATHLEN];
 
 	if (!*str)
-		strlcpy(buf, ".", sizeof(buf));
+		memcpy(buf, ".", strlen("."));
 	else {
 		if (g_Ctoc(str, buf, sizeof(buf)))
 			return(NULL);
 	}
 
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		return((*pglob->gl_opendir)(buf));
-
 	return(opendir(buf));
 }
 
-static int g_lstat(Char *fn, zend_stat_t *sb, glob_t *pglob)
+static int g_lstat(Char *fn, php_win32_ioutil_stat_t *sb, glob_t *pglob)
 {
 	char buf[MAXPATHLEN];
 
 	if (g_Ctoc(fn, buf, sizeof(buf)))
 		return(-1);
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		return((*pglob->gl_lstat)(buf, sb));
-	return(php_sys_lstat(buf, sb));
+	return(php_win32_ioutil_lstat(buf, sb));
 }
 
-static int g_stat(Char *fn, zend_stat_t *sb, glob_t *pglob)
+static int g_stat(Char *fn, php_win32_ioutil_stat_t *sb, glob_t *pglob)
 {
 	char buf[MAXPATHLEN];
 
 	if (g_Ctoc(fn, buf, sizeof(buf)))
 		return(-1);
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		return((*pglob->gl_stat)(buf, sb));
-	return(php_sys_stat(buf, sb));
+	return(php_win32_ioutil_stat(buf, sb));
 }
 
 static Char *g_strchr(Char *str, int ch)
@@ -837,14 +782,14 @@ static Char *g_strchr(Char *str, int ch)
 	return (NULL);
 }
 
-static int g_Ctoc(const Char *str, char *buf, u_int len)
+static bool g_Ctoc(const Char *str, char *buf, u_int len)
 {
 
 	while (len--) {
 		if ((*buf++ = (char) *str++) == EOS)
-			return (0);
+			return false;
 	}
-	return (1);
+	return true;
 }
 
 #ifdef DEBUG
