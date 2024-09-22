@@ -2211,7 +2211,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			options &= ~USE_PATH;
 		}
 		if (EG(exception)) {
-			ZEND_ASSERT(resolved_path == NULL);
+			if (resolved_path) {
+				zend_string_release_ex(resolved_path, false);
+			}
 			return NULL;
 		}
 	}

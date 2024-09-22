@@ -54,6 +54,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15982 (Assertion failure with array_find when references are
     involved). (nielsdos)
 
+- Streams:
+  . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
+    (nielsdos)
+
 - Zip:
   . Added ZipArchive::ER_TRUNCATED_ZIP added in libzip 1.11. (Remi)
 
