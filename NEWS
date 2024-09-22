@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
     (nielsdos)
+  . Fixed bug GH-15980 (Signed integer overflow in main/streams/streams.c).
+    (cmb)
 
 - TSRM:
   . Prevent closing of unrelated handles. (cmb)
