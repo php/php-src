@@ -7,4 +7,4 @@ class foobar {}
 class_alias("foobar", "bool");
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'bool' as a type alias as it is reserved in %s on line %d
+Fatal error: Cannot use "bool" as a type alias as it is reserved in %s on line %d
