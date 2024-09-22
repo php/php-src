@@ -20,6 +20,7 @@
    :hidden:
 
    miscellaneous/stubs
+   miscellaneous/phpt-test-file-layout
 
 Welcome to the php-src documentation!
 
