@@ -707,6 +707,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	if (NULL != shm->descriptor && (shm->descriptor->shm_perm.key != key || size > shm->descriptor->shm_segsz)) {
 		if (NULL != shm->segment) {
 			CloseHandle(shm->segment);
+			shm->segment = INVALID_HANDLE_VALUE;
 		}
 		UnmapViewOfFile(shm->descriptor);
 		shm->descriptor = NULL;

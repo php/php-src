@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
     (nielsdos)
 
+- TSRM:
+  . Prevent closing of unrelated handles. (cmb)
+
 12 Sep 2024, PHP 8.3.12
 
 - Core:
