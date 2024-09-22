@@ -169,9 +169,7 @@ PHP_METHOD(Pdo_Pgsql, setNoticeCallback)
 	return;
 
 cleanup:
-	if (ZEND_FCC_INITIALIZED(fcc)) {
-		zend_fcc_dtor(&fcc);
-	}
+	zend_release_fcall_info_cache(&fcc);
 	RETURN_THROWS();
 }
 

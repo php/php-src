@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fix UAF issues with PCRE after request shutdown. (nielsdos)
 
+- PDO_PGSQL:
+  . Fixed GH-15986 (Double-free due to Pdo\Pgsql::setNoticeCallback()). (cmb,
+    nielsdos)
+
 - Reflection:
   . Add missing ReflectionProperty::hasHook[s]() methods. (ilutov)
   . Add missing ReflectionProperty::isFinal() method. (ilutov)
