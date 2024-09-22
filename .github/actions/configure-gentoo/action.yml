@@ -77,7 +77,8 @@ runs:
           ${{ inputs.skipSlow == 'false' && '--with-pdo-dblib' || '' }} \
           --enable-werror \
           ${{ inputs.configurationParameters }} \
-          || (echo "::group::config.log"
+          || (echo
+          echo "::group::Show config.log"
           cat config.log
           echo "::endgroup::"
           exit 1)
