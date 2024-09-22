@@ -241,7 +241,7 @@ void zend_assert_valid_class_name(const zend_string *name, const char *type) /* 
 {
 	if (zend_is_reserved_class_name(name)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot use '%s' as %s as it is reserved", ZSTR_VAL(name), type);
+			"Cannot use \"%s\" as %s as it is reserved", ZSTR_VAL(name), type);
 	}
 	if (zend_string_equals_literal(name, "_")) {
 		zend_error(E_DEPRECATED, "Using \"_\" as %s is deprecated since 8.4", type);
