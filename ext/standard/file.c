@@ -1109,30 +1109,6 @@ PHPAPI PHP_FUNCTION(fseek)
 }
 /* }}} */
 
-/* {{{ php_mkdir */
-
-/* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options)
-{
-	int ret;
-
-	if (php_check_open_basedir(dir)) {
-		return -1;
-	}
-
-	if ((ret = VCWD_MKDIR(dir, (mode_t)mode)) < 0 && (options & REPORT_ERRORS)) {
-		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-	}
-
-	return ret;
-}
-
-PHPAPI int php_mkdir(const char *dir, zend_long mode)
-{
-	return php_mkdir_ex(dir, mode, REPORT_ERRORS);
-}
-/* }}} */
-
 /* {{{ Create a directory */
 PHP_FUNCTION(mkdir)
 {

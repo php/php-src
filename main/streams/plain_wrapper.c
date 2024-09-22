@@ -1374,7 +1374,17 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	}
 
 	if (!(options & PHP_STREAM_MKDIR_RECURSIVE)) {
-		return php_mkdir(dir, mode) == 0;
+		if (php_check_open_basedir(dir)) {
+			return 0;
+		}
+
+		int ret = VCWD_MKDIR(dir, (mode_t)mode);
+		if (ret < 0 && (options & REPORT_ERRORS)) {
+			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+			return 0;
+		}
+
+		return 1;
 	}
 
 	char buf[MAXPATHLEN];

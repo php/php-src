@@ -40,8 +40,6 @@ PHPAPI int php_le_stream_context(void);
 PHPAPI zend_result php_copy_file(const char *src, const char *dest);
 PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags);
 PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx);
-PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options);
-PHPAPI int php_mkdir(const char *dir, zend_long mode);
 PHPAPI void php_fstat(php_stream *stream, zval *return_value);
 PHPAPI void php_flock_common(php_stream *stream, zend_long operation, uint32_t operation_arg_num,
 	zval *wouldblock, zval *return_value);
