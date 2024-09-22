@@ -11,7 +11,7 @@ runs:
   steps:
     - shell: bash
       run: |
-        func oops() {
+        oops() {
           echo "::group::Show config.log"
           cat config.log
           echo "::endgroup::"
