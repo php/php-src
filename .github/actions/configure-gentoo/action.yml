@@ -11,6 +11,12 @@ runs:
   steps:
     - shell: bash
       run: |
+        func oops() {
+          echo "::group::Show config.log"
+          cat config.log
+          echo "::endgroup::"
+        }
+        trap oops ERR
         set -x
         ./buildconf --force
         ./configure \
@@ -76,9 +82,4 @@ runs:
           --with-config-file-scan-dir=/etc/php.d \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-dblib' || '' }} \
           --enable-werror \
-          ${{ inputs.configurationParameters }} \
-          || (echo
-          echo "::group::Show config.log"
-          cat config.log
-          echo "::endgroup::"
-          exit 1)
+          ${{ inputs.configurationParameters }}
