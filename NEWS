@@ -61,6 +61,9 @@ PHP                                                                        NEWS
 - TSRM:
   . Prevent closing of unrelated handles. (cmb)
 
+- Windows:
+  . Fixed minimal Windows version. (cmb)
+
 - Zip:
   . Added ZipArchive::ER_TRUNCATED_ZIP added in libzip 1.11. (Remi)
 

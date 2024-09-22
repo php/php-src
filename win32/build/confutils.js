@@ -50,7 +50,7 @@ var PHP_MAKEFILE_FRAGMENTS = PHP_SRC_DIR + "\\Makefile.fragments.w32";
 
 /* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in
    and manifest. */
-var WINVER = "0x0601"; /* 7/2008r2 */
+var WINVER = "0x0602"; /* 8/2012 */
 
 // There's a minimum requirement for bison.
 var MINBISON = "3.0.0";
