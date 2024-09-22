@@ -24,6 +24,7 @@ static const func_info_t func_infos[] = {
 	F1("bcmul", MAY_BE_STRING),
 	F1("bcdiv", MAY_BE_STRING),
 	F1("bcmod", MAY_BE_STRING),
+	F1("bcdivmod", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("bcpowmod", MAY_BE_STRING),
 	F1("bcpow", MAY_BE_STRING),
 	F1("bcsqrt", MAY_BE_STRING),

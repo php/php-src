@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f3101bbd25da90d97801d53ea673789d1ce4f6a1 */
+ * Stub hash: 687d6fb392a9b0c1329152cc0f62341a73e427f4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -14,6 +14,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_bcdiv arginfo_bcadd
 
 #define arginfo_bcmod arginfo_bcadd
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcdivmod, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcpowmod, 0, 3, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
@@ -72,6 +78,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_BcMath_Number_mod arginfo_class_BcMath_Number_add
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_BcMath_Number_divmod, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, num, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_powmod, 0, 2, BcMath\\\116umber, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_OBJ_TYPE_MASK(0, modulus, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -117,6 +128,7 @@ ZEND_FUNCTION(bcsub);
 ZEND_FUNCTION(bcmul);
 ZEND_FUNCTION(bcdiv);
 ZEND_FUNCTION(bcmod);
+ZEND_FUNCTION(bcdivmod);
 ZEND_FUNCTION(bcpowmod);
 ZEND_FUNCTION(bcpow);
 ZEND_FUNCTION(bcsqrt);
@@ -131,6 +143,7 @@ ZEND_METHOD(BcMath_Number, sub);
 ZEND_METHOD(BcMath_Number, mul);
 ZEND_METHOD(BcMath_Number, div);
 ZEND_METHOD(BcMath_Number, mod);
+ZEND_METHOD(BcMath_Number, divmod);
 ZEND_METHOD(BcMath_Number, powmod);
 ZEND_METHOD(BcMath_Number, pow);
 ZEND_METHOD(BcMath_Number, sqrt);
@@ -148,6 +161,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcmul, arginfo_bcmul)
 	ZEND_FE(bcdiv, arginfo_bcdiv)
 	ZEND_FE(bcmod, arginfo_bcmod)
+	ZEND_FE(bcdivmod, arginfo_bcdivmod)
 	ZEND_FE(bcpowmod, arginfo_bcpowmod)
 	ZEND_FE(bcpow, arginfo_bcpow)
 	ZEND_FE(bcsqrt, arginfo_bcsqrt)
@@ -166,6 +180,7 @@ static const zend_function_entry class_BcMath_Number_methods[] = {
 	ZEND_ME(BcMath_Number, mul, arginfo_class_BcMath_Number_mul, ZEND_ACC_PUBLIC)
 	ZEND_ME(BcMath_Number, div, arginfo_class_BcMath_Number_div, ZEND_ACC_PUBLIC)
 	ZEND_ME(BcMath_Number, mod, arginfo_class_BcMath_Number_mod, ZEND_ACC_PUBLIC)
+	ZEND_ME(BcMath_Number, divmod, arginfo_class_BcMath_Number_divmod, ZEND_ACC_PUBLIC)
 	ZEND_ME(BcMath_Number, powmod, arginfo_class_BcMath_Number_powmod, ZEND_ACC_PUBLIC)
 	ZEND_ME(BcMath_Number, pow, arginfo_class_BcMath_Number_pow, ZEND_ACC_PUBLIC)
 	ZEND_ME(BcMath_Number, sqrt, arginfo_class_BcMath_Number_sqrt, ZEND_ACC_PUBLIC)
