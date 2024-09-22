@@ -58,6 +58,9 @@ PHP                                                                        NEWS
   . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
     (nielsdos)
 
+- TSRM:
+  . Prevent closing of unrelated handles. (cmb)
+
 - Zip:
   . Added ZipArchive::ER_TRUNCATED_ZIP added in libzip 1.11. (Remi)
 
