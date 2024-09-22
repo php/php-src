@@ -23,7 +23,7 @@ foreach ($strings as $s) {
 
 ?>
 --EXPECT--
-str_decrement(): Argument #1 ($string) cannot be empty
+str_decrement(): Argument #1 ($string) must not be empty
 str_decrement(): Argument #1 ($string) "0" is out of decrement range
 str_decrement(): Argument #1 ($string) "a" is out of decrement range
 str_decrement(): Argument #1 ($string) "A" is out of decrement range

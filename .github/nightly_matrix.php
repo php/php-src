@@ -121,6 +121,26 @@ function get_macos_matrix_include(array $branches) {
     return $jobs;
 }
 
+function get_alpine_matrix_include(array $branches) {
+    $jobs = [];
+    foreach ($branches as $branch) {
+        if ([$branch['version']['major'], $branch['version']['minor']] < [8, 4]) {
+            continue;
+        }
+        $jobs[] = [
+            'name' => '_ASAN_UBSAN',
+            'branch' => $branch,
+            'debug' => true,
+            'zts' => true,
+            'asan' => true,
+            'test_jit' => true,
+            'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address -fno-sanitize=function' CC=clang-17 CXX=clang++-17",
+            'run_tests_parameters' => '--asan -x',
+        ];
+    }
+    return $jobs;
+}
+
 function get_current_version(): array {
     $file = dirname(__DIR__) . '/main/php_version.h';
     $content = file_get_contents($file);
@@ -145,10 +165,12 @@ $branches = $branch === 'master'
 $matrix_include = get_matrix_include($branches);
 $windows_matrix_include = get_windows_matrix_include($branches);
 $macos_matrix_include = get_macos_matrix_include($branches);
+$alpine_matrix_include = get_alpine_matrix_include($branches);
 
 $f = fopen(getenv('GITHUB_OUTPUT'), 'a');
 fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'matrix-include=' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'windows-matrix-include=' . json_encode($windows_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'macos-matrix-include=' . json_encode($macos_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
+fwrite($f, 'alpine-matrix-include=' . json_encode($alpine_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fclose($f);

@@ -61,7 +61,7 @@ if (!have_innodb($link))
 require_once 'clean_table.inc';
 ?>
 --EXPECT--
-mysqli_release_savepoint(): Argument #2 ($name) cannot be empty
+mysqli_release_savepoint(): Argument #2 ($name) must not be empty
 array(1) {
   ["id"]=>
   string(1) "1"

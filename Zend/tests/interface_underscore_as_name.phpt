@@ -13,6 +13,6 @@ namespace {
 
 ?>
 --EXPECTF--
-Deprecated: Using "_" as a class name is deprecated since 8.4 in %s on line %d
+Deprecated: Using "_" as an interface name is deprecated since 8.4 in %s on line %d
 
-Deprecated: Using "_" as a class name is deprecated since 8.4 in %s on line %d
+Deprecated: Using "_" as an interface name is deprecated since 8.4 in %s on line %d

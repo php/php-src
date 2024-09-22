@@ -52,5 +52,5 @@ if (!have_innodb($link))
 require_once 'clean_table.inc';
 ?>
 --EXPECT--
-mysqli_savepoint(): Argument #2 ($name) cannot be empty
+mysqli_savepoint(): Argument #2 ($name) must not be empty
 done!

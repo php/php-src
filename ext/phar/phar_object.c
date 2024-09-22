@@ -20,6 +20,14 @@
 #include "phar_internal.h"
 #include "func_interceptors.h"
 #include "phar_object_arginfo.h"
+#include "ext/spl/spl_array.h"
+#include "ext/spl/spl_exceptions.h"
+#include "ext/spl/spl_iterators.h"
+#include "ext/standard/php_var.h"
+#include "main/SAPI.h"
+#include "zend_exceptions.h"
+#include "zend_interfaces.h"
+#include "zend_exceptions.h"
 
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_data;
@@ -1804,7 +1812,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 		}
 
 		phar_obj->archive->ufp = pass.fp;
-		phar_flush(phar_obj->archive, 0, 0, 0, &error);
+		phar_flush(phar_obj->archive, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -1869,7 +1877,7 @@ PHP_METHOD(Phar, buildFromIterator)
 
 	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass)) {
 		phar_obj->archive->ufp = pass.fp;
-		phar_flush(phar_obj->archive, 0, 0, 0, &error);
+		phar_flush(phar_obj->archive, &error);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);
@@ -1922,7 +1930,7 @@ PHP_METHOD(Phar, isFileFormat)
 }
 /* }}} */
 
-static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{{ */
+static zend_result phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{{ */
 {
 	char *error;
 	zend_off_t offset;
@@ -2186,7 +2194,7 @@ its_ok:
 		return NULL;
 	}
 
-	phar_flush(phar, 0, 0, 1, &error);
+	phar_flush_ex(phar, NULL, 1, &error);
 
 	if (error) {
 		zend_hash_str_del(&(PHAR_G(phar_fname_map)), newpath, phar->fname_len);
@@ -2600,12 +2608,11 @@ PHP_METHOD(Phar, isWritable)
 /* {{{ Deletes a named file within the archive. */
 PHP_METHOD(Phar, delete)
 {
-	char *fname;
-	size_t fname_len;
+	zend_string *file_name;
 	char *error;
 	phar_entry_info *entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &file_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2621,7 +2628,7 @@ PHP_METHOD(Phar, delete)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
+	if (NULL != (entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name))) {
 		if (entry->is_deleted) {
 			/* entry is deleted, but has not been flushed to disk yet */
 			RETURN_TRUE;
@@ -2631,11 +2638,11 @@ PHP_METHOD(Phar, delete)
 			phar_obj->archive->is_modified = 1;
 		}
 	} else {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be deleted", fname);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be deleted", ZSTR_VAL(file_name));
 		RETURN_THROWS();
 	}
 
-	phar_flush(phar_obj->archive, NULL, 0, 0, &error);
+	phar_flush(phar_obj->archive, &error);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		efree(error);
@@ -2679,12 +2686,13 @@ PHP_METHOD(Phar, getPath)
  */
 PHP_METHOD(Phar, setAlias)
 {
-	char *alias, *error, *oldalias;
+	zend_string *new_alias = NULL;
+	char *error, *oldalias;
 	phar_archive_data *fd_ptr;
-	size_t alias_len, oldalias_len;
+	size_t oldalias_len;
 	int old_temp, readd = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &new_alias) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2711,12 +2719,12 @@ PHP_METHOD(Phar, setAlias)
 		RETURN_THROWS();
 	}
 
-	if (alias_len == phar_obj->archive->alias_len && memcmp(phar_obj->archive->alias, alias, alias_len) == 0) {
+	if (zend_string_equals_cstr(new_alias, phar_obj->archive->alias, phar_obj->archive->alias_len)) {
 		RETURN_TRUE;
 	}
-	if (alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-		spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", alias, fd_ptr->fname);
-		if (SUCCESS == phar_free_alias(fd_ptr, alias, alias_len)) {
+	if (NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), new_alias))) {
+		spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", ZSTR_VAL(new_alias), fd_ptr->fname);
+		if (SUCCESS == phar_free_alias(fd_ptr, ZSTR_VAL(new_alias), ZSTR_LEN(new_alias))) {
 			efree(error);
 			goto valid_alias;
 		}
@@ -2724,9 +2732,9 @@ PHP_METHOD(Phar, setAlias)
 		efree(error);
 		RETURN_THROWS();
 	}
-	if (!phar_validate_alias(alias, alias_len)) {
+	if (!phar_validate_alias(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias))) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-			"Invalid alias \"%s\" specified for phar \"%s\"", alias, phar_obj->archive->fname);
+			"Invalid alias \"%s\" specified for phar \"%s\"", ZSTR_VAL(new_alias), phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 valid_alias:
@@ -2743,15 +2751,10 @@ valid_alias:
 	oldalias_len = phar_obj->archive->alias_len;
 	old_temp = phar_obj->archive->is_temporary_alias;
 
-	if (alias_len) {
-		phar_obj->archive->alias = estrndup(alias, alias_len);
-	} else {
-		phar_obj->archive->alias = NULL;
-	}
-
-	phar_obj->archive->alias_len = alias_len;
+	phar_obj->archive->alias = estrndup(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias));
+	phar_obj->archive->alias_len = ZSTR_LEN(new_alias);
 	phar_obj->archive->is_temporary_alias = 0;
-	phar_flush(phar_obj->archive, NULL, 0, 0, &error);
+	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
 		phar_obj->archive->alias = oldalias;
@@ -2765,7 +2768,7 @@ valid_alias:
 		RETURN_THROWS();
 	}
 
-	zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, phar_obj->archive);
+	zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), new_alias, phar_obj->archive);
 
 	if (oldalias) {
 		efree(oldalias);
@@ -2832,7 +2835,7 @@ PHP_METHOD(Phar, stopBuffering)
 	}
 
 	phar_obj->archive->donotflush = 0;
-	phar_flush(phar_obj->archive, 0, 0, 0, &error);
+	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -2846,9 +2849,9 @@ PHP_METHOD(Phar, stopBuffering)
  */
 PHP_METHOD(Phar, setStub)
 {
+	char *error;
+	zend_string *stub;
 	zval *zstub;
-	char *stub, *error;
-	size_t stub_len;
 	zend_long len = -1;
 	php_stream *stream;
 
@@ -2880,16 +2883,26 @@ PHP_METHOD(Phar, setStub)
 		}
 
 		if ((php_stream_from_zval_no_verify(stream, zstub)) != NULL) {
-			if (len > 0) {
-				len = -len;
-			} else {
-				len = -1;
-			}
 			if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 				RETURN_THROWS();
 			}
-			phar_flush(phar_obj->archive, (char *) zstub, len, 0, &error);
+
+			zend_string *stub_file_content = NULL;
+			if (len > 0) {
+				stub_file_content = php_stream_copy_to_mem(stream, len, false);
+			} else {
+				stub_file_content = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, false);
+			}
+
+			if (stub_file_content == NULL) {
+				zend_throw_exception_ex(phar_ce_PharException, 0, "unable to read resource to copy stub to new phar \"%s\"", phar_obj->archive->fname);
+				RETURN_THROWS();
+			}
+
+			phar_flush_ex(phar_obj->archive, stub_file_content, /* is_default_stub */ false, &error);
+			zend_string_release_ex(stub_file_content, false);
+
 			if (error) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 				efree(error);
@@ -2899,12 +2912,12 @@ PHP_METHOD(Phar, setStub)
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot change stub, unable to read from input stream");
 		}
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &stub, &stub_len) == SUCCESS) {
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &stub) == SUCCESS) {
 		if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 			RETURN_THROWS();
 		}
-		phar_flush(phar_obj->archive, stub, stub_len, 0, &error);
+		phar_flush_ex(phar_obj->archive, stub, /* is_default_stub */ false, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -2985,7 +2998,7 @@ PHP_METHOD(Phar, setDefaultStub)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	phar_flush(phar_obj->archive, stub ? ZSTR_VAL(stub) : 0, stub ? ZSTR_LEN(stub) : 0, 1, &error);
+	phar_flush_ex(phar_obj->archive, stub, /* is_default_stub */ true, &error);
 
 	if (created_stub) {
 		zend_string_free(stub);
@@ -3041,7 +3054,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 			PHAR_G(openssl_privatekey) = key;
 			PHAR_G(openssl_privatekey_len) = key_len;
 
-			phar_flush(phar_obj->archive, 0, 0, 0, &error);
+			phar_flush(phar_obj->archive, &error);
 			if (error) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 				efree(error);
@@ -3350,7 +3363,7 @@ PHP_METHOD(Phar, compressFiles)
 	}
 	pharobj_set_compression(&phar_obj->archive->manifest, flags);
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, 0, 0, 0, &error);
+	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s", error);
@@ -3394,7 +3407,7 @@ PHP_METHOD(Phar, decompressFiles)
 	}
 
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, 0, 0, 0, &error);
+	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s", error);
@@ -3408,13 +3421,13 @@ PHP_METHOD(Phar, decompressFiles)
 /* {{{ copy a file internal to the phar archive to another new file within the phar */
 PHP_METHOD(Phar, copy)
 {
-	char *oldfile, *newfile, *error;
+	char *error;
 	const char *pcr_error;
-	size_t oldfile_len, newfile_len;
 	phar_entry_info *oldentry, newentry = {0}, *temp;
-	size_t tmp_len = 0;
+	zend_string *new_file = NULL;
+	zend_string *old_file = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &oldfile, &oldfile_len, &newfile, &newfile_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "PP", &old_file, &new_file) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3422,43 +3435,43 @@ PHP_METHOD(Phar, copy)
 
 	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-			"Cannot copy \"%s\" to \"%s\", phar is read-only", oldfile, newfile);
+			"Cannot copy \"%s\" to \"%s\", phar is read-only", ZSTR_VAL(old_file), ZSTR_VAL(new_file));
 		RETURN_THROWS();
 	}
 
-	if (oldfile_len >= sizeof(".phar")-1 && !memcmp(oldfile, ".phar", sizeof(".phar")-1)) {
+	if (zend_string_starts_with_literal(old_file, ".phar")) {
 		/* can't copy a meta file */
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-			"file \"%s\" cannot be copied to file \"%s\", cannot copy Phar meta-file in %s", oldfile, newfile, phar_obj->archive->fname);
+			"file \"%s\" cannot be copied to file \"%s\", cannot copy Phar meta-file in %s", ZSTR_VAL(old_file), ZSTR_VAL(new_file), phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	if (newfile_len >= sizeof(".phar")-1 && !memcmp(newfile, ".phar", sizeof(".phar")-1)) {
+	if (zend_string_starts_with_literal(new_file, ".phar")) {
 		/* can't copy a meta file */
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-			"file \"%s\" cannot be copied to file \"%s\", cannot copy to Phar meta-file in %s", oldfile, newfile, phar_obj->archive->fname);
+			"file \"%s\" cannot be copied to file \"%s\", cannot copy to Phar meta-file in %s", ZSTR_VAL(old_file), ZSTR_VAL(new_file), phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	if (NULL == (oldentry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, oldfile, (uint32_t) oldfile_len)) || oldentry->is_deleted) {
+	if (NULL == (oldentry = zend_hash_find_ptr(&phar_obj->archive->manifest, old_file)) || oldentry->is_deleted) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-			"file \"%s\" cannot be copied to file \"%s\", file does not exist in %s", oldfile, newfile, phar_obj->archive->fname);
+			"file \"%s\" cannot be copied to file \"%s\", file does not exist in %s", ZSTR_VAL(old_file), ZSTR_VAL(new_file), phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	if (NULL != (temp = zend_hash_str_find_ptr(&phar_obj->archive->manifest, newfile, (uint32_t) newfile_len)) && !temp->is_deleted) {
+	if (NULL != (temp = zend_hash_find_ptr(&phar_obj->archive->manifest, new_file)) && !temp->is_deleted) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-			"file \"%s\" cannot be copied to file \"%s\", file must not already exist in phar %s", oldfile, newfile, phar_obj->archive->fname);
+			"file \"%s\" cannot be copied to file \"%s\", file must not already exist in phar %s", ZSTR_VAL(old_file), ZSTR_VAL(new_file), phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	tmp_len = newfile_len;
-	if (phar_path_check(&newfile, &tmp_len, &pcr_error) > pcr_is_ok) {
+	size_t tmp_len = ZSTR_LEN(new_file);
+	char *tmp_new_file = ZSTR_VAL(new_file);
+	if (phar_path_check(&tmp_new_file, &tmp_len, &pcr_error) > pcr_is_ok) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"file \"%s\" contains invalid characters %s, cannot be copied from \"%s\" in phar %s", newfile, pcr_error, oldfile, phar_obj->archive->fname);
+				"file \"%s\" contains invalid characters %s, cannot be copied from \"%s\" in phar %s", ZSTR_VAL(new_file), pcr_error, ZSTR_VAL(old_file), phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	newfile_len = tmp_len;
 
 	if (phar_obj->archive->is_persistent) {
 		if (FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
@@ -3466,15 +3479,15 @@ PHP_METHOD(Phar, copy)
 			RETURN_THROWS();
 		}
 		/* re-populate with copied-on-write entry */
-		oldentry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, oldfile, (uint32_t) oldfile_len);
+		oldentry = zend_hash_find_ptr(&phar_obj->archive->manifest, old_file);
 	}
 
 	memcpy((void *) &newentry, oldentry, sizeof(phar_entry_info));
 
 	phar_metadata_tracker_clone(&newentry.metadata_tracker);
 
-	newentry.filename = estrndup(newfile, newfile_len);
-	newentry.filename_len = newfile_len;
+	newentry.filename = estrndup(tmp_new_file, tmp_len);
+	newentry.filename_len = tmp_len;
 	newentry.fp_refcount = 0;
 
 	if (oldentry->fp_type != PHAR_FP) {
@@ -3487,9 +3500,9 @@ PHP_METHOD(Phar, copy)
 		}
 	}
 
-	zend_hash_str_add_mem(&oldentry->phar->manifest, newfile, newfile_len, &newentry, sizeof(phar_entry_info));
+	zend_hash_str_add_mem(&oldentry->phar->manifest, ZSTR_VAL(new_file), tmp_len, &newentry, sizeof(phar_entry_info));
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, 0, 0, 0, &error);
+	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -3503,34 +3516,34 @@ PHP_METHOD(Phar, copy)
 /* {{{ determines whether a file exists in the phar */
 PHP_METHOD(Phar, offsetExists)
 {
-	char *fname;
-	size_t fname_len;
+	zend_string *file_name;
 	phar_entry_info *entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &file_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint32_t) fname_len)) {
-		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
+	if (zend_hash_exists(&phar_obj->archive->manifest, file_name)) {
+		if (NULL != (entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name))) {
 			if (entry->is_deleted) {
 				/* entry is deleted, but has not been flushed to disk yet */
 				RETURN_FALSE;
 			}
 		}
 
-		if (fname_len >= sizeof(".phar")-1 && !memcmp(fname, ".phar", sizeof(".phar")-1)) {
+		if (zend_string_starts_with_literal(file_name, ".phar")) {
 			/* none of these are real files, so they don't exist */
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
 	} else {
-		if (zend_hash_str_exists(&phar_obj->archive->virtual_dirs, fname, (uint32_t) fname_len)) {
-			RETURN_TRUE;
+		/* If the info class is not based on PharFileInfo, directories are not directly instantiable */
+		if (UNEXPECTED(!instanceof_function(phar_obj->spl.info_class, phar_ce_entry))) {
+			RETURN_FALSE;
 		}
-		RETURN_FALSE;
+		RETURN_BOOL(zend_hash_exists(&phar_obj->archive->virtual_dirs, file_name));
 	}
 }
 /* }}} */
@@ -3538,31 +3551,31 @@ PHP_METHOD(Phar, offsetExists)
 /* {{{ get a PharFileInfo object for a specific file */
 PHP_METHOD(Phar, offsetGet)
 {
-	char *fname, *error;
-	size_t fname_len;
+	char *error;
 	phar_entry_info *entry;
+	zend_string *file_name = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &file_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
 
 	/* security is 0 here so that we can get a better error message than "entry doesn't exist" */
-	if (!(entry = phar_get_entry_info_dir(phar_obj->archive, fname, fname_len, 1, &error, 0))) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist%s%s", fname, error?", ":"", error?error:"");
+	if (!(entry = phar_get_entry_info_dir(phar_obj->archive, ZSTR_VAL(file_name), ZSTR_LEN(file_name), 1, &error, 0))) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist%s%s", ZSTR_VAL(file_name), error?", ":"", error?error:"");
 	} else {
-		if (fname_len == sizeof(".phar/stub.php")-1 && !memcmp(fname, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+		if (zend_string_equals_literal(file_name, ".phar/stub.php")) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot get stub \".phar/stub.php\" directly in phar \"%s\", use getStub", phar_obj->archive->fname);
 			RETURN_THROWS();
 		}
 
-		if (fname_len == sizeof(".phar/alias.txt")-1 && !memcmp(fname, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+		if (zend_string_equals_literal(file_name, ".phar/alias.txt")) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot get alias \".phar/alias.txt\" directly in phar \"%s\", use getAlias", phar_obj->archive->fname);
 			RETURN_THROWS();
 		}
 
-		if (fname_len >= sizeof(".phar")-1 && !memcmp(fname, ".phar", sizeof(".phar")-1)) {
+		if (zend_string_starts_with_literal(file_name, ".phar")) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot directly get any files or directories in magic \".phar\" directory");
 			RETURN_THROWS();
 		}
@@ -3572,7 +3585,7 @@ PHP_METHOD(Phar, offsetGet)
 			efree(entry);
 		}
 
-		zend_string *sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, fname);
+		zend_string *sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, ZSTR_VAL(file_name));
 		zval zfname;
 		ZVAL_NEW_STR(&zfname, sfname);
 
@@ -3587,11 +3600,9 @@ PHP_METHOD(Phar, offsetGet)
 /* }}} */
 
 /* {{{ add a file within the phar archive from a string or resource */
-static void phar_add_file(phar_archive_data **pphar, char *filename, size_t filename_len, char *cont_str, size_t cont_len, zval *zresource)
+static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, const zend_string *content, zval *zresource)
 {
-	size_t start_pos=0;
 	char *error;
-	size_t contents_len;
 	phar_entry_data *data;
 	php_stream *contents_file = NULL;
 	php_stream_statbuf ssb;
@@ -3600,14 +3611,21 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 	ALLOCA_FLAG(filename_use_heap)
 #endif
 
-	if (filename_len >= sizeof(".phar")-1) {
-		start_pos = '/' == filename[0]; /* account for any leading slash: multiple-leads handled elsewhere */
-		if (!memcmp(&filename[start_pos], ".phar", sizeof(".phar")-1) && (filename[start_pos+5] == '/' || filename[start_pos+5] == '\\' || filename[start_pos+5] == '\0')) {
+	if (
+		zend_string_starts_with_literal(file_name, ".phar")
+		|| zend_string_starts_with_literal(file_name, "/.phar")
+	) {
+		size_t prefix_len = (ZSTR_VAL(file_name)[0] == '/') + sizeof(".phar")-1;
+		char next_char = ZSTR_VAL(file_name)[prefix_len];
+		if (next_char == '/' || next_char == '\\' || next_char == '\0') {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
 			return;
 		}
 	}
 
+	/* TODO How to handle Windows path normalisation with zend_string ? */
+	char *filename = ZSTR_VAL(file_name);
+	size_t filename_len = ZSTR_LEN(file_name);
 #ifdef PHP_WIN32
 	save_filename = filename;
 	if (memchr(filename, '\\', filename_len)) {
@@ -3631,9 +3649,11 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 		}
 
 		if (!data->internal_file->is_dir) {
-			if (cont_str) {
-				contents_len = php_stream_write(data->fp, cont_str, cont_len);
-				if (contents_len != cont_len) {
+			size_t contents_len = 0;
+			if (content) {
+				contents_len = ZSTR_LEN(content);
+				size_t written_len = php_stream_write(data->fp, ZSTR_VAL(content), ZSTR_LEN(content));
+				if (written_len != contents_len) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s could not be written to", filename);
 					goto finish;
 				}
@@ -3663,7 +3683,7 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 			*pphar = data->phar;
 		}
 		phar_entry_delref(data);
-		phar_flush(*pphar, 0, 0, 0, &error);
+		phar_flush(*pphar, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -3682,17 +3702,17 @@ finish: ;
 /* }}} */
 
 /* {{{ create a directory within the phar archive */
-static void phar_mkdir(phar_archive_data **pphar, char *dirname, size_t dirname_len)
+static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
 {
 	char *error;
 	phar_entry_data *data;
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, dirname, dirname_len, "w+b", 2, &error, 1))) {
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, &error, 1))) {
 		if (error) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Directory %s does not exist and cannot be created: %s", dirname, error);
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Directory %s does not exist and cannot be created: %s", ZSTR_VAL(dir_name), error);
 			efree(error);
 		} else {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Directory %s does not exist and cannot be created", dirname);
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Directory %s does not exist and cannot be created", ZSTR_VAL(dir_name));
 		}
 
 		return;
@@ -3706,7 +3726,7 @@ static void phar_mkdir(phar_archive_data **pphar, char *dirname, size_t dirname_
 			*pphar = data->phar;
 		}
 		phar_entry_delref(data);
-		phar_flush(*pphar, 0, 0, 0, &error);
+		phar_flush(*pphar, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -3719,12 +3739,12 @@ static void phar_mkdir(phar_archive_data **pphar, char *dirname, size_t dirname_
 /* {{{ set the contents of an internal file to those of an external file */
 PHP_METHOD(Phar, offsetSet)
 {
-	char *fname, *cont_str = NULL;
-	size_t fname_len, cont_len;
 	zval *zresource = NULL;
+	zend_string *file_name = NULL;
+	zend_string *file_content = NULL;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "pr", &fname, &fname_len, &zresource) == FAILURE
-	&& zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &fname, &fname_len, &cont_str, &cont_len) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Pr", &file_name, &zresource) == FAILURE
+	&& zend_parse_parameters(ZEND_NUM_ARGS(), "PS", &file_name, &file_content) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3735,33 +3755,33 @@ PHP_METHOD(Phar, offsetSet)
 		RETURN_THROWS();
 	}
 
-	if (fname_len == sizeof(".phar/stub.php")-1 && !memcmp(fname, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+	if (zend_string_equals_literal(file_name, ".phar/stub.php")) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set stub \".phar/stub.php\" directly in phar \"%s\", use setStub", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	if (fname_len == sizeof(".phar/alias.txt")-1 && !memcmp(fname, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+	if (zend_string_equals_literal(file_name, ".phar/alias.txt")) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set alias \".phar/alias.txt\" directly in phar \"%s\", use setAlias", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	if (fname_len >= sizeof(".phar")-1 && !memcmp(fname, ".phar", sizeof(".phar")-1)) {
+	if (zend_string_starts_with_literal(file_name, ".phar")) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set any files or directories in magic \".phar\" directory");
 		RETURN_THROWS();
 	}
 
-	phar_add_file(&(phar_obj->archive), fname, fname_len, cont_str, cont_len, zresource);
+	phar_add_file(&(phar_obj->archive), file_name, file_content, zresource);
 }
 /* }}} */
 
 /* {{{ remove a file from a phar */
 PHP_METHOD(Phar, offsetUnset)
 {
-	char *fname, *error;
-	size_t fname_len;
+	char *error;
+	zend_string *file_name;
 	phar_entry_info *entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &file_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3772,8 +3792,8 @@ PHP_METHOD(Phar, offsetUnset)
 		RETURN_THROWS();
 	}
 
-	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint32_t) fname_len)) {
-		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
+	if (zend_hash_exists(&phar_obj->archive->manifest, file_name)) {
+		if (NULL != (entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name))) {
 			if (entry->is_deleted) {
 				/* entry is deleted, but has not been flushed to disk yet */
 				return;
@@ -3785,12 +3805,12 @@ PHP_METHOD(Phar, offsetUnset)
 					RETURN_THROWS();
 				}
 				/* re-populate entry after copy on write */
-				entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len);
+				entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name);
 			}
 			entry->is_modified = 0;
 			entry->is_deleted = 1;
 			/* we need to "flush" the stream to save the newly deleted file on disk */
-			phar_flush(phar_obj->archive, 0, 0, 0, &error);
+			phar_flush(phar_obj->archive, &error);
 
 			if (error) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -3804,55 +3824,53 @@ PHP_METHOD(Phar, offsetUnset)
 /* {{{ Adds an empty directory to the phar archive */
 PHP_METHOD(Phar, addEmptyDir)
 {
-	char *dirname;
-	size_t dirname_len;
+	zend_string *dir_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &dirname, &dirname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &dir_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (dirname_len >= sizeof(".phar")-1 && !memcmp(dirname, ".phar", sizeof(".phar")-1)) {
+	if (zend_string_starts_with_literal(dir_name, ".phar")) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create a directory in magic \".phar\" directory");
 		RETURN_THROWS();
 	}
 
-	phar_mkdir(&phar_obj->archive, dirname, dirname_len);
+	phar_mkdir(&phar_obj->archive, dir_name);
 }
 /* }}} */
 
 /* {{{ Adds a file to the archive using the filename, or the second parameter as the name within the archive */
 PHP_METHOD(Phar, addFile)
 {
-	char *fname, *localname = NULL;
-	size_t fname_len, localname_len = 0;
+	zend_string *file_name;
+	zend_string *local_name = NULL;
 	php_stream *resource;
 	zval zresource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|s!", &fname, &fname_len, &localname, &localname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|S!", &file_name, &local_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (!strstr(fname, "://") && php_check_open_basedir(fname)) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "phar error: unable to open file \"%s\" to add to phar archive, open_basedir restrictions prevent this", fname);
+	if (!strstr(ZSTR_VAL(file_name), "://") && php_check_open_basedir(ZSTR_VAL(file_name))) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "phar error: unable to open file \"%s\" to add to phar archive, open_basedir restrictions prevent this", ZSTR_VAL(file_name));
 		RETURN_THROWS();
 	}
 
-	if (!(resource = php_stream_open_wrapper(fname, "rb", 0, NULL))) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "phar error: unable to open file \"%s\" to add to phar archive", fname);
+	if (!(resource = php_stream_open_wrapper(ZSTR_VAL(file_name), "rb", 0, NULL))) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "phar error: unable to open file \"%s\" to add to phar archive", ZSTR_VAL(file_name));
 		RETURN_THROWS();
 	}
 
-	if (localname) {
-		fname = localname;
-		fname_len = localname_len;
+	if (local_name) {
+		file_name = local_name;
 	}
 
 	php_stream_to_zval(resource, &zresource);
-	phar_add_file(&(phar_obj->archive), fname, fname_len, NULL, 0, &zresource);
+	phar_add_file(&(phar_obj->archive), file_name, NULL, &zresource);
 	zval_ptr_dtor(&zresource);
 }
 /* }}} */
@@ -3860,16 +3878,16 @@ PHP_METHOD(Phar, addFile)
 /* {{{ Adds a file to the archive using its contents as a string */
 PHP_METHOD(Phar, addFromString)
 {
-	char *localname, *cont_str;
-	size_t localname_len, cont_len;
+	zend_string *local_name = NULL;
+	zend_string *file_content = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &localname, &localname_len, &cont_str, &cont_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "PS", &local_name, &file_content) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHAR_ARCHIVE_OBJECT();
 
-	phar_add_file(&(phar_obj->archive), localname, localname_len, cont_str, cont_len, NULL);
+	phar_add_file(&(phar_obj->archive), local_name, file_content, NULL);
 }
 /* }}} */
 
@@ -4004,7 +4022,7 @@ PHP_METHOD(Phar, getMetadata)
 /* }}} */
 
 /* {{{ Modifies the phar metadata or throws */
-static int serialize_metadata_or_throw(phar_metadata_tracker *tracker, int persistent, zval *metadata)
+static zend_result serialize_metadata_or_throw(phar_metadata_tracker *tracker, int persistent, zval *metadata)
 {
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
@@ -4062,7 +4080,7 @@ PHP_METHOD(Phar, setMetadata)
 	}
 
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, 0, 0, 0, &error);
+	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4093,7 +4111,7 @@ PHP_METHOD(Phar, delMetadata)
 
 	phar_metadata_tracker_free(&phar_obj->archive->metadata_tracker, phar_obj->archive->is_persistent);
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, 0, 0, 0, &error);
+	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4105,7 +4123,7 @@ PHP_METHOD(Phar, delMetadata)
 }
 /* }}} */
 
-static int phar_extract_file(bool overwrite, phar_entry_info *entry, char *dest, size_t dest_len, char **error) /* {{{ */
+static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, char *dest, size_t dest_len, char **error) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	size_t len;
@@ -4259,7 +4277,7 @@ static int phar_extract_file(bool overwrite, phar_entry_info *entry, char *dest,
 		}
 	}
 
-	if (FAILURE == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
+	if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to seek internal file pointer", entry->filename, fullpath);
 		efree(fullpath);
 		php_stream_close(fp);
@@ -4661,7 +4679,7 @@ PHP_METHOD(PharFileInfo, chmod)
 
 	BG(CurrentLStatFile) = NULL;
 	BG(CurrentStatFile) = NULL;
-	phar_flush(entry_obj->entry->phar, 0, 0, 0, &error);
+	phar_flush(entry_obj->entry->phar, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4744,7 +4762,7 @@ PHP_METHOD(PharFileInfo, setMetadata)
 
 	entry_obj->entry->is_modified = 1;
 	entry_obj->entry->phar->is_modified = 1;
-	phar_flush(entry_obj->entry->phar, 0, 0, 0, &error);
+	phar_flush(entry_obj->entry->phar, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4791,7 +4809,7 @@ PHP_METHOD(PharFileInfo, delMetadata)
 		entry_obj->entry->is_modified = 1;
 		entry_obj->entry->phar->is_modified = 1;
 
-		phar_flush(entry_obj->entry->phar, 0, 0, 0, &error);
+		phar_flush(entry_obj->entry->phar, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4971,7 +4989,7 @@ PHP_METHOD(PharFileInfo, compress)
 
 	entry_obj->entry->phar->is_modified = 1;
 	entry_obj->entry->is_modified = 1;
-	phar_flush(entry_obj->entry->phar, 0, 0, 0, &error);
+	phar_flush(entry_obj->entry->phar, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -5063,7 +5081,7 @@ PHP_METHOD(PharFileInfo, decompress)
 	entry_obj->entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->entry->phar->is_modified = 1;
 	entry_obj->entry->is_modified = 1;
-	phar_flush(entry_obj->entry->phar, 0, 0, 0, &error);
+	phar_flush(entry_obj->entry->phar, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);

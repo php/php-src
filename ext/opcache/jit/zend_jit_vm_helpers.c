@@ -503,6 +503,11 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 			/* TODO: Can we continue recording ??? */
 			return -1;
 		}
+		/* Function is a property hook. */
+		if (func->common.prop_info) {
+			/* TODO: Can we continue recording ??? */
+			return -1;
+		}
 		if (func->type == ZEND_INTERNAL_FUNCTION
 		 && (func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE))) {
 			return -1;
@@ -966,6 +971,12 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					break;
 				}
 
+				if (EX(func)->op_array.prop_info) {
+					/* TODO: Can we continue recording ??? */
+					stop = ZEND_JIT_TRACE_STOP_PROP_HOOK_CALL;
+					break;
+				}
+
 				TRACE_RECORD(ZEND_JIT_TRACE_ENTER,
 					EX(return_value) != NULL ? ZEND_JIT_TRACE_RETURN_VALUE_USED : 0,
 					op_array);
@@ -1068,6 +1079,10 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				} else if (EX(call)->func->common.fn_flags & ZEND_ACC_NEVER_CACHE) {
 					/* TODO: Can we continue recording ??? */
 					stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
+					break;
+				} else if (EX(call)->func->common.prop_info) {
+					/* TODO: Can we continue recording ??? */
+					stop = ZEND_JIT_TRACE_STOP_PROP_HOOK_CALL;
 					break;
 				}
 				func = EX(call)->func;

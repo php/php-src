@@ -64,10 +64,12 @@ typedef int boolean_t;
 #include <sys/syscall.h>
 #endif
 #ifdef __sun
-#define _STRUCTURED_PROC 1
-#include <sys/lwp.h>
-#include <sys/procfs.h>
-#include <libproc.h>
+# include <sys/lwp.h>
+# ifdef HAVE_LIBPROC_H
+#  define _STRUCTURED_PROC 1
+#  include <sys/procfs.h>
+#  include <libproc.h>
+# endif
 #include <thread.h>
 #endif
 
@@ -620,7 +622,6 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack, void **ptr)
 	char *start, *end;
 	struct kinfo_vmentry *entry;
 	size_t len, max_size;
-	char buffer[4096];
 	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	int mib[5] = { CTL_VM, VM_PROC, VM_PROC_MAP, getpid(), sizeof(struct kinfo_vmentry) };
 	bool found = false;
@@ -699,9 +700,9 @@ static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 	return true;
 }
 
+#ifdef HAVE_LIBPROC_H
 static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 {
-	char buffer[4096];
 	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	bool found = false, r = false;
 	struct ps_prochandle *proc;
@@ -771,12 +772,15 @@ end:
 	close(fd);
 	return r;
 }
+#endif
 
 static bool zend_call_stack_get_solaris(zend_call_stack *stack)
 {
+#ifdef HAVE_LIBPROC_H
 	if (_lwp_self() == 1) {
 		return zend_call_stack_get_solaris_proc_maps(stack);
 	}
+#endif
 	return zend_call_stack_get_solaris_pthread(stack);
 }
 #else

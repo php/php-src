@@ -48,7 +48,8 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const xmlChar *ty
 {
 	encodePtr enc = NULL;
 	xmlNsPtr nsptr;
-	char *ns, *cptype;
+	const char *cptype;
+	char *ns;
 
 	parse_namespace(type, &cptype, &ns);
 	nsptr = xmlSearchNs(node->doc, node, BAD_CAST(ns));
@@ -60,7 +61,6 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const xmlChar *ty
 	} else {
 		enc = get_encoder_ex(sdl, (char*)type, xmlStrlen(type));
 	}
-	efree(cptype);
 	if (ns) {efree(ns);}
 	return enc;
 }
@@ -71,7 +71,8 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 
 	if (sdl->elements) {
 		xmlNsPtr nsptr;
-		char *ns, *cptype;
+		const char *cptype;
+		char *ns;
 		sdlTypePtr sdl_type;
 
 		parse_namespace(type, &cptype, &ns);
@@ -99,7 +100,6 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 			}
 		}
 
-		efree(cptype);
 		if (ns) {efree(ns);}
 	}
 	return ret;
@@ -259,7 +259,9 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 			ctx->context = php_stream_context_from_zval(context_ptr, 1);
 
 			if (ctx->context &&
-			    (header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL) {
+			    (header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL &&
+				Z_TYPE_P(header) == IS_STRING) {
+				/* TODO: should support header as an array, but this code path is untested */
 				s = strstr(Z_STRVAL_P(header), "Authorization: Basic");
 				if (s && (s == Z_STRVAL_P(header) || *(s-1) == '\n' || *(s-1) == '\r')) {
 					char *rest = strstr(s, "\r\n");
@@ -361,15 +363,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 			/* TODO: namespace ??? */
 			xmlAttrPtr tmp = get_attribute(trav->properties, "location");
 			if (tmp) {
-				xmlChar *uri;
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-					uri = xmlBuildURI(tmp->children->content, trav->doc->URL);
-				} else {
-					uri = xmlBuildURI(tmp->children->content, base);
-					xmlFree(base);
-				}
+				xmlChar *uri = schema_location_construct_uri(tmp);
 				load_wsdl_ex(this_ptr, (char*)uri, ctx, 1);
 				xmlFree(uri);
 			}

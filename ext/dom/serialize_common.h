@@ -20,9 +20,10 @@
 #include <Zend/zend_types.h>
 #include <libxml/tree.h>
 
+/* The lengths are merely here for optimization purposes, this cannot be used to compare substrings. */
 static zend_always_inline bool dom_local_name_compare_ex(const xmlNode *node, const char *tag, size_t tag_length, size_t name_length)
 {
-	return name_length == tag_length && zend_binary_strcmp((const char *) node->name, name_length, tag, tag_length) == 0;
+	return name_length == tag_length && memcmp((const char *) node->name, tag, name_length + 1) == 0;
 }
 
 #endif

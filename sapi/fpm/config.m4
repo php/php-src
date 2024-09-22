@@ -506,8 +506,10 @@ if test "$PHP_FPM" != "no"; then
   php_fpm_prefix=$(eval echo $prefix)
   AC_SUBST([php_fpm_prefix])
 
-  PHP_ADD_BUILD_DIR([sapi/fpm/fpm])
-  PHP_ADD_BUILD_DIR([sapi/fpm/fpm/events])
+  PHP_ADD_BUILD_DIR([
+    sapi/fpm/fpm
+    sapi/fpm/fpm/events
+  ])
   AC_CONFIG_FILES([
     sapi/fpm/init.d.php-fpm
     sapi/fpm/php-fpm.8
@@ -523,8 +525,6 @@ if test "$PHP_FPM" != "no"; then
   AS_VAR_IF([fpm_trace_type],,,
     [AS_IF([test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"],
       [PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"])])
-
-  PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
   PHP_FPM_FILES="fpm/fpm.c \
     fpm/fpm_children.c \
@@ -558,7 +558,7 @@ if test "$PHP_FPM" != "no"; then
   PHP_SELECT_SAPI([fpm],
     [program],
     [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
-    [$PHP_FPM_CFLAGS])
+    [-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   AS_CASE([$host_alias],
     [*aix*], [

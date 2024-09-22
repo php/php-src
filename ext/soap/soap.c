@@ -571,7 +571,7 @@ PHP_METHOD(SoapParam, __construct)
 	}
 
 	if (ZSTR_LEN(name) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -602,11 +602,11 @@ PHP_METHOD(SoapHeader, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(ns) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(name) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -983,6 +983,11 @@ PHP_METHOD(SoapServer, __construct)
 			}
 		}
 
+		if ((tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_TRACE))) != NULL &&
+		    (Z_TYPE_P(tmp) == IS_TRUE ||
+		     (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == 1))) {
+			service->trace = true;
+		}
 	} else if (!wsdl) {
 		php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
 	}
@@ -1644,6 +1649,12 @@ PHP_METHOD(SoapServer, handle)
 			sapi_add_header(cont_len, strlen(cont_len), 1);
 		}
 		php_write(buf, size);
+		if (service->trace) {
+			if (service->last_response_body) {
+				zend_string_release_ex(service->last_response_body, false);
+			}
+			service->last_response_body = zend_string_init((const char *) buf, size, false);
+		}
 		xmlFree(buf);
 	} else {
 		sapi_add_header("HTTP/1.1 202 Accepted", sizeof("HTTP/1.1 202 Accepted")-1, 1);
@@ -1751,6 +1762,16 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	ZVAL_OBJ_COPY(&(*p)->retval, Z_OBJ_P(fault));
 }
 /* }}} */
+
+PHP_METHOD(SoapServer, __getLastResponse)
+{
+	soapServicePtr service;
+	ZEND_PARSE_PARAMETERS_NONE();
+	FETCH_THIS_SERVICE_NO_BAILOUT(service);
+	if (service->last_response_body) {
+		RETURN_STR_COPY(service->last_response_body);
+	}
+}
 
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader *hdr) /* {{{ */
 {
@@ -4155,18 +4176,13 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t
 {
 	sdlFunctionPtr tmp;
 
-	char *str = estrndup(function_name, function_name_length);
-	zend_str_tolower(str, function_name_length);
 	if (sdl != NULL) {
-		if ((tmp = zend_hash_str_find_ptr(&sdl->functions, str, function_name_length)) != NULL) {
-			efree(str);
+		if ((tmp = zend_hash_str_find_ptr_lc(&sdl->functions, function_name, function_name_length)) != NULL) {
 			return tmp;
-		} else if (sdl->requests != NULL && (tmp = zend_hash_str_find_ptr(sdl->requests, str, function_name_length)) != NULL) {
-			efree(str);
+		} else if (sdl->requests != NULL && (tmp = zend_hash_str_find_ptr_lc(sdl->requests, function_name, function_name_length)) != NULL) {
 			return tmp;
 		}
 	}
-	efree(str);
 	return NULL;
 }
 /* }}} */
@@ -4532,6 +4548,9 @@ static void delete_service(soapServicePtr service) /* {{{ */
 	if (service->class_map) {
 		zend_hash_destroy(service->class_map);
 		FREE_HASHTABLE(service->class_map);
+	}
+	if (service->last_response_body) {
+		zend_string_release_ex(service->last_response_body, false);
 	}
 	zval_ptr_dtor(&service->soap_object);
 	efree(service);

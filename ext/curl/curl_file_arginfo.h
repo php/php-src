@@ -56,8 +56,7 @@ static zend_class_entry *register_class_CURLFile(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "CURLFile", class_CURLFile_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval property_name_default_value;
 	ZVAL_EMPTY_STRING(&property_name_default_value);
@@ -85,7 +84,7 @@ static zend_class_entry *register_class_CURLStringFile(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "CURLStringFile", class_CURLStringFile_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_data_default_value;
 	ZVAL_UNDEF(&property_data_default_value);

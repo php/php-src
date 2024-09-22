@@ -11,32 +11,19 @@ runs:
         code=" keg.link\(verbose: verbose\?"
         sudo sed -Ei '' "s/$code.*/$code, overwrite: true\)/" "$formula_installer"
 
+        # Some packages exist on x86 but not arm, or vice versa.
+        # Install them with reinstall to avoid warnings.
+        brew reinstall autoconf webp tidy-html5 libzip libsodium
         brew install \
-          pkg-config \
-          autoconf \
           bison \
           re2c
         brew install \
-          openssl@1.1 \
-          curl \
           bzip2 \
           enchant \
           libffi \
-          libpng \
-          webp \
-          freetype \
           intltool \
-          icu4c \
           libiconv \
-          zlib \
           t1lib \
-          gd \
-          libzip \
-          gmp \
-          tidy-html5 \
           libxml2 \
           libjpeg \
-          libsodium \
-          libxslt \
-          postgresql
-        brew link icu4c gettext --force
+          libxslt

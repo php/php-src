@@ -97,7 +97,7 @@ int ir_build_cfg(ir_ctx *ctx)
 		/* Some successors of IF and SWITCH nodes may be inaccessible by backward DFS */
 		use_list = &ctx->use_lists[end];
 		n = use_list->count;
-		if (n > 1) {
+		if (n > 1 || (n == 1 && (ir_op_flags[insn->op] & IR_OP_FLAG_TERMINATOR) != 0)) {
 			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 				/* Remember possible inaccessible successors */
 				ir_bitset_incl(bb_leaks, *p);
@@ -245,6 +245,7 @@ int ir_build_cfg(ir_ctx *ctx)
 				IR_ASSERT(ref);
 				ir_ref pred_b = _blocks[ref];
 				ir_block *pred_bb = &blocks[pred_b];
+				IR_ASSERT(pred_b > 0);
 				*q = pred_b;
 				edges[pred_bb->successors + pred_bb->successors_count++] = b;
 			}
@@ -661,7 +662,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		uint32_t idom = *p;
 		ir_block *idom_bb;
 
-		if (UNEXPECTED(idom > b)) {
+		if (UNEXPECTED(idom >= b)) {
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
 			ctx->flags2 &= ~IR_NO_LOOPS;
 			IR_ASSERT(k > 1 && "Wrong blocks order: BB is before its single predecessor");
@@ -1032,6 +1033,20 @@ next:
 				bb->loop_depth = loop_depth;
 				if (bb->flags & (IR_BB_ENTRY|IR_BB_LOOP_WITH_ENTRY)) {
 					loop->flags |= IR_BB_LOOP_WITH_ENTRY;
+					if (loop_depth > 1) {
+						/* Set IR_BB_LOOP_WITH_ENTRY flag for all the enclosing loops */
+						bb = &blocks[loop->loop_header];
+						while (1) {
+							if (bb->flags & IR_BB_LOOP_WITH_ENTRY) {
+								break;
+							}
+							bb->flags |= IR_BB_LOOP_WITH_ENTRY;
+							if (bb->loop_depth == 1) {
+								break;
+							}
+							bb = &blocks[loop->loop_header];
+						}
+					}
 				}
 			}
 		}

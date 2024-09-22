@@ -206,9 +206,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_rename, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, delete_old_rdn, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_rename_ext, 0, 5, LDAP\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
@@ -217,39 +215,29 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_rename_ext, 0, 5, LDAP\
 	ZEND_ARG_TYPE_INFO(0, delete_old_rdn, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_get_option, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, value, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_set_option, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 1)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_count_references, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, result, LDAP\\Result, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_first_reference, 0, 2, LDAP\\ResultEntry, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, result, LDAP\\Result, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_next_reference, 0, 2, LDAP\\ResultEntry, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, entry, LDAP\\ResultEntry, 0)
@@ -299,9 +287,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_t61_to_8859, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(STR_TRANSLATION)
 #define arginfo_ldap_8859_to_t61 arginfo_ldap_t61_to_8859
 #endif
 
@@ -314,9 +300,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop, 0, 2, LDAP\\Resul
 	ZEND_ARG_INFO(1, response_data)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_oid, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop_sync, 0, 2, LDAP\\Result, MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, request_oid, IS_STRING, 0)
@@ -407,23 +391,11 @@ ZEND_FUNCTION(ldap_err2str);
 ZEND_FUNCTION(ldap_compare);
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_rename);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_rename_ext);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_get_option);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_set_option);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_count_references);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_first_reference);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_next_reference);
 #endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_REFERENCE)
@@ -441,14 +413,10 @@ ZEND_FUNCTION(ldap_start_tls);
 ZEND_FUNCTION(ldap_escape);
 #if defined(STR_TRANSLATION)
 ZEND_FUNCTION(ldap_t61_to_8859);
-#endif
-#if defined(STR_TRANSLATION)
 ZEND_FUNCTION(ldap_8859_to_t61);
 #endif
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 ZEND_FUNCTION(ldap_exop);
-#endif
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 ZEND_FUNCTION(ldap_exop_sync);
 #endif
 #if defined(HAVE_LDAP_PASSWD)
@@ -515,23 +483,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_compare, arginfo_ldap_compare)
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_rename, arginfo_ldap_rename)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_rename_ext, arginfo_ldap_rename_ext)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_get_option, arginfo_ldap_get_option)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_set_option, arginfo_ldap_set_option)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_count_references, arginfo_ldap_count_references)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_first_reference, arginfo_ldap_first_reference)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_next_reference, arginfo_ldap_next_reference)
 #endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_REFERENCE)
@@ -549,14 +505,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_escape, arginfo_ldap_escape)
 #if defined(STR_TRANSLATION)
 	ZEND_FE(ldap_t61_to_8859, arginfo_ldap_t61_to_8859)
-#endif
-#if defined(STR_TRANSLATION)
 	ZEND_FE(ldap_8859_to_t61, arginfo_ldap_8859_to_t61)
 #endif
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	ZEND_FE(ldap_exop, arginfo_ldap_exop)
-#endif
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	ZEND_FE(ldap_exop_sync, arginfo_ldap_exop_sync)
 #endif
 #if defined(HAVE_LDAP_PASSWD)
@@ -571,18 +523,6 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_LDAP_PARSE_EXTENDED_RESULT)
 	ZEND_FE(ldap_parse_exop, arginfo_ldap_parse_exop)
 #endif
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_LDAP_Connection_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_LDAP_Result_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_LDAP_ResultEntry_methods[] = {
 	ZEND_FE_END
 };
 
@@ -891,9 +831,8 @@ static zend_class_entry *register_class_LDAP_Connection(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Connection", class_LDAP_Connection_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Connection", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -902,9 +841,8 @@ static zend_class_entry *register_class_LDAP_Result(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Result", class_LDAP_Result_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Result", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -913,9 +851,8 @@ static zend_class_entry *register_class_LDAP_ResultEntry(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "LDAP", "ResultEntry", class_LDAP_ResultEntry_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "LDAP", "ResultEntry", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

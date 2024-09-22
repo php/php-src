@@ -817,7 +817,7 @@ PHP_FUNCTION(xmlwriter_open_uri)
 	}
 
 	if (source_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -858,7 +858,7 @@ PHP_METHOD(XMLWriter, toUri)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (source_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

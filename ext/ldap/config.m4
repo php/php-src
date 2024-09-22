@@ -24,7 +24,7 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
       PHP_OCI8_IC_LIBDIR_SUFFIX=64
     ])
 
-    OCISDKRPMINC=`echo "$1" | $SED -e 's!^/usr/lib/oracle/\(.*\)/client\('${PHP_OCI8_IC_LIBDIR_SUFFIX}'\)*/lib[/]*$!/usr/include/oracle/\1/client\2!'`
+    OCISDKRPMINC=$(echo "$1" | $SED -e 's!^/usr/lib/oracle/\(.*\)/client\('${PHP_OCI8_IC_LIBDIR_SUFFIX}'\)*/lib[/]*$!/usr/include/oracle/\1/client\2!')
 
     dnl Check for Oracle Instant Client RPM install
     if test -f $OCISDKRPMINC/ldap.h; then

@@ -9,4 +9,4 @@ class self {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'self' as class name as it is reserved in %s on line %d
+Fatal error: Cannot use 'self' as a class name as it is reserved in %s on line %d

@@ -133,7 +133,10 @@ dnl
 AC_DEFUN([ZEND_INIT], [dnl
 AC_REQUIRE([AC_PROG_CC])
 
-AC_CHECK_HEADERS([cpuid.h])
+AC_CHECK_HEADERS(m4_normalize([
+  cpuid.h
+  libproc.h
+]))
 
 dnl Check for library functions.
 AC_CHECK_FUNCS(m4_normalize([
@@ -223,11 +226,17 @@ AC_DEFUN([ZEND_CHECK_STACK_DIRECTION],
   [AC_RUN_IFELSE([AC_LANG_SOURCE([dnl
 #include <stdint.h>
 
+#ifdef __has_builtin
+# if __has_builtin(__builtin_frame_address)
+#  define builtin_frame_address __builtin_frame_address(0)
+# endif
+#endif
+
 int (*volatile f)(uintptr_t);
 
 int stack_grows_downwards(uintptr_t arg) {
-#if defined(__has_builtin) && __has_builtin(__builtin_frame_address)
-  uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
+#ifdef builtin_frame_address
+  uintptr_t addr = (uintptr_t)builtin_frame_address;
 #else
   int local;
   uintptr_t addr = (uintptr_t)&local;
@@ -237,8 +246,8 @@ int stack_grows_downwards(uintptr_t arg) {
 }
 
 int main(void) {
-#if defined(__has_builtin) && __has_builtin(__builtin_frame_address)
-  uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
+#ifdef builtin_frame_address
+  uintptr_t addr = (uintptr_t)builtin_frame_address;
 #else
   int local;
   uintptr_t addr = (uintptr_t)&local;

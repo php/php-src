@@ -2238,7 +2238,7 @@ PHP_FUNCTION(mb_substr_count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(needle) == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -2278,7 +2278,7 @@ PHP_FUNCTION(mb_substr_count)
 		if (ZSTR_LEN(needle_u8) == 0) {
 			zend_string_free(haystack_u8);
 			zend_string_free(needle_u8);
-			zend_argument_value_error(2, "must not be empty");
+			zend_argument_must_not_be_empty_error(2);
 			RETURN_THROWS();
 		}
 	}
@@ -5673,7 +5673,7 @@ PHP_FUNCTION(mb_ord)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -5810,7 +5810,7 @@ PHP_FUNCTION(mb_str_pad)
 	}
 
 	if (ZSTR_LEN(pad) == 0) {
-		zend_argument_value_error(3, "must be a non-empty string");
+		zend_argument_must_not_be_empty_error(3);
 		RETURN_THROWS();
 	}
 

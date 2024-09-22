@@ -119,7 +119,7 @@ typedef struct _zend_smm_shared_globals {
 	size_t                     reserved_size;
 } zend_smm_shared_globals;
 
-extern zend_smm_shared_globals *smm_shared_globals;
+ZEND_EXT_API extern zend_smm_shared_globals *smm_shared_globals;
 
 #define ZSMMG(element)		(smm_shared_globals->element)
 

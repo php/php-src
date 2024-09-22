@@ -18,6 +18,8 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_hash.h"
+#include "zend_lazy_objects.h"
 #include "zend_property_hooks.h"
 
 typedef struct {
@@ -49,6 +51,13 @@ static uint32_t zho_num_backed_props(zend_object *zobj)
 
 static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access, bool include_dynamic_props)
 {
+	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
+		zobj = zend_lazy_object_init(zobj);
+		if (UNEXPECTED(!zobj)) {
+			return zend_new_array(0);
+		}
+	}
+
 	zend_class_entry *ce = zobj->ce;
 	zend_array *properties = zend_new_array(ce->default_properties_count);
 	zend_hash_real_init_mixed(properties);

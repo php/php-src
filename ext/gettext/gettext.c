@@ -55,7 +55,7 @@ ZEND_GET_MODULE(php_gettext)
 		zend_argument_value_error(_arg_num, "is too long"); \
 		RETURN_THROWS(); \
 	} else if (domain_len == 0) { \
-		zend_argument_value_error(_arg_num, "cannot be empty"); \
+		zend_argument_must_not_be_empty_error(_arg_num); \
 		RETURN_THROWS(); \
 	}
 
@@ -190,11 +190,6 @@ PHP_FUNCTION(bindtextdomain)
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
 
-	if (!ZSTR_LEN(domain)) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 	if (dir == NULL) {
 		RETURN_STRING(bindtextdomain(ZSTR_VAL(domain), NULL));
 	}
@@ -311,11 +306,6 @@ PHP_FUNCTION(bind_textdomain_codeset)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
-
-	if (!ZSTR_LEN(domain)) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	retval = bind_textdomain_codeset(ZSTR_VAL(domain), codeset ? ZSTR_VAL(codeset) : NULL);
 

@@ -25,4 +25,4 @@ bool(false)
 bool(false)
 bool(true)
 bool(true)
-Property [ public readonly int $ro ]
+Property [ public protected(set) readonly int $ro ]

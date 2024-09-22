@@ -69,7 +69,7 @@ PHP_HASH_API void PHP_XXH32Final(unsigned char digest[4], PHP_XXH32_CTX *ctx)
 	XXH32_canonicalFromHash((XXH32_canonical_t*)digest, XXH32_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH32Copy(const php_hash_ops *ops, PHP_XXH32_CTX *orig_context, PHP_XXH32_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH32Copy(const php_hash_ops *ops, const PHP_XXH32_CTX *orig_context, PHP_XXH32_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
@@ -134,7 +134,7 @@ PHP_HASH_API void PHP_XXH64Final(unsigned char digest[8], PHP_XXH64_CTX *ctx)
 	XXH64_canonicalFromHash((XXH64_canonical_t*)digest, XXH64_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH64Copy(const php_hash_ops *ops, PHP_XXH64_CTX *orig_context, PHP_XXH64_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH64Copy(const php_hash_ops *ops, const PHP_XXH64_CTX *orig_context, PHP_XXH64_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
@@ -183,7 +183,7 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 			return;
 		} else if (_secret) {
 			if (IS_STRING != Z_TYPE_P(_secret)) {
-				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs");
+				php_error_docref(NULL, E_DEPRECATED, "Passing a secret of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs");
 			}
 			zend_string *secret_string = zval_try_get_string(_secret);
 			if (UNEXPECTED(!secret_string)) {
@@ -225,7 +225,7 @@ PHP_HASH_API void PHP_XXH3_64_Final(unsigned char digest[8], PHP_XXH3_64_CTX *ct
 	XXH64_canonicalFromHash((XXH64_canonical_t*)digest, XXH3_64bits_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH3_64_Copy(const php_hash_ops *ops, PHP_XXH3_64_CTX *orig_context, PHP_XXH3_64_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH3_64_Copy(const php_hash_ops *ops, const PHP_XXH3_64_CTX *orig_context, PHP_XXH3_64_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
@@ -275,7 +275,7 @@ PHP_HASH_API void PHP_XXH3_128_Final(unsigned char digest[16], PHP_XXH3_128_CTX 
 	XXH128_canonicalFromHash((XXH128_canonical_t*)digest, XXH3_128bits_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH3_128_Copy(const php_hash_ops *ops, PHP_XXH3_128_CTX *orig_context, PHP_XXH3_128_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH3_128_Copy(const php_hash_ops *ops, const PHP_XXH3_128_CTX *orig_context, PHP_XXH3_128_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;

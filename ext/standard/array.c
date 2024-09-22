@@ -6211,7 +6211,7 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 
 	if (num_avail == 0) {
 		if (!silent) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_must_not_be_empty_error(1);
 		}
 		return false;
 	}
@@ -6628,7 +6628,7 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 
 			if (retval_true) {
 				if (result_value != NULL) {
-					ZVAL_COPY(result_value, &args[0]);
+					ZVAL_COPY_DEREF(result_value, &args[0]);
 				}
 
 				if (result_key != NULL) {

@@ -49,14 +49,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Shmop_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_shmop_symbols(int module_number)
 {
 
-	zend_attribute *attribute_Deprecated_func_shmop_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "shmop_close", sizeof("shmop_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_shmop_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "shmop_close", sizeof("shmop_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_shmop_close_0_arg0;
 	zend_string *attribute_Deprecated_func_shmop_close_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_shmop_close_0_arg0, attribute_Deprecated_func_shmop_close_0_arg0_str);
@@ -73,9 +69,8 @@ static zend_class_entry *register_class_Shmop(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Shmop", class_Shmop_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "Shmop", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

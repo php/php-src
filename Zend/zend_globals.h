@@ -42,6 +42,7 @@
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
 #include "zend_strtod.h"
+#include "zend_lazy_objects.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -153,6 +154,9 @@ struct _zend_compiler_globals {
 
 	uint32_t rtd_key_counter;
 
+	void *internal_run_time_cache;
+	uint32_t internal_run_time_cache_size;
+
 	zend_stack short_circuiting_opnums;
 #ifdef ZTS
 	uint32_t copied_functions_count;
@@ -246,6 +250,7 @@ struct _zend_executor_globals {
 	zend_ini_entry *error_reporting_ini_entry;
 
 	zend_objects_store objects_store;
+	zend_lazy_objects_store lazy_objects_store;
 	zend_object *exception, *prev_exception;
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];

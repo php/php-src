@@ -309,7 +309,7 @@ static void dba_close_connection(dba_connection *connection)
 
 static zend_object *dba_connection_create_object(zend_class_entry *class_type)
 {
-	dba_connection *intern = zend_object_alloc(sizeof(dba_info), class_type);
+	dba_connection *intern = zend_object_alloc(sizeof(dba_connection), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -547,15 +547,15 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	}
 
 	if (ZSTR_LEN(path) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(mode) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 	if (handler_str && ZSTR_LEN(handler_str) == 0) {
-		zend_argument_value_error(3, "cannot be empty");
+		zend_argument_must_not_be_empty_error(3);
 		RETURN_THROWS();
 	}
 	// TODO Check Value for permission
@@ -639,11 +639,6 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	bool is_lock_ignored = false;
 	// bool is_file_lock = false;
 
-	if (ZSTR_LEN(mode) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		efree(resource_key);
-		RETURN_THROWS();
-	}
 	if (ZSTR_LEN(mode) > 3) {
 		zend_argument_value_error(2, "must be at most 3 characters");
 		efree(resource_key);

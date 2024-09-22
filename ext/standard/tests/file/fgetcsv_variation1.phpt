@@ -72,7 +72,7 @@ foreach ($csv_lists as $csv_list) {
     // call fgetcsv() to parse csv fields
 
     // use the right delimiter and enclosure with max length
-    var_dump( fgetcsv($file_handle, 1024, $delimiter, $enclosure) );
+    var_dump( fgetcsv($file_handle, 1024, $delimiter, $enclosure, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

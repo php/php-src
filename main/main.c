@@ -83,7 +83,6 @@
 #include "SAPI.h"
 #include "rfc1867.h"
 
-#include "ext/standard/html_tables.h"
 #include "main_arginfo.h"
 /* }}} */
 
@@ -1370,10 +1369,6 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 				error_type_str = "Notice";
 				syslog_type_int = LOG_NOTICE;
 				break;
-			case E_STRICT:
-				error_type_str = "Strict Standards";
-				syslog_type_int = LOG_INFO;
-				break;
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 				error_type_str = "Deprecated";
@@ -2316,6 +2311,9 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 
 	/* freeze the list of observer fcall_init handlers */
 	zend_observer_post_startup();
+
+	/* freeze the list of persistent internal functions */
+	zend_init_internal_run_time_cache();
 
 	/* Extensions that add engine hooks after this point do so at their own peril */
 	zend_finalize_system_id();

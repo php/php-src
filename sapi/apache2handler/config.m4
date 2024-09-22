@@ -53,11 +53,19 @@ if test "$PHP_APXS2" != "no"; then
     AS_CASE([$flag], [-D*], [APACHE_CPPFLAGS="$APACHE_CPPFLAGS $flag"])
   done
 
-  APACHE_CFLAGS="$APACHE_CPPFLAGS -I$APXS_INCLUDEDIR $APR_CFLAGS $APU_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-
-  dnl Check Apache version.
-  PHP_AP_EXTRACT_VERSION([$APXS_HTTPD])
-  AS_VERSION_COMPARE([$APACHE_VERSION], [2004000],
+  dnl Check Apache version. The HTTPD_VERSION was added in Apache 2.4.17.
+  dnl Earlier versions can use the Apache HTTP Server command-line utility.
+  APACHE_VERSION=$($APXS -q HTTPD_VERSION 2>/dev/null)
+  AS_VAR_IF([APACHE_VERSION],, [
+    ac_output=$($APXS_HTTPD -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//')
+    ac_IFS=$IFS
+    IFS="- /.
+"
+    set $ac_output
+    IFS=$ac_IFS
+    APACHE_VERSION="$4.$5.$6"
+  ])
+  AS_VERSION_COMPARE([$APACHE_VERSION], [2.4.0],
     [AC_MSG_ERROR([Please note that Apache version >= 2.4 is required])])
 
   APXS_LIBEXECDIR='$(INSTALL_ROOT)'$($APXS -q LIBEXECDIR)
@@ -104,11 +112,17 @@ if test "$PHP_APXS2" != "no"; then
   PHP_SELECT_SAPI([apache2handler],
     [$php_sapi_apache2handler_type],
     [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
-    [$APACHE_CFLAGS])
+    [
+      $APACHE_CPPFLAGS
+      -I$APXS_INCLUDEDIR
+      $APR_CFLAGS
+      $APU_CFLAGS
+      -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
+    ])
 
   AS_IF([$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes' >/dev/null 2>&1], [
     APACHE_THREADED_MPM=yes
-    PHP_BUILD_THREAD_SAFE
+    enable_zts=yes
   ], [APACHE_THREADED_MPM=no])
 
 AC_CONFIG_COMMANDS([apache2handler], [AS_VAR_IF([enable_zts], [yes],,

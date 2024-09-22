@@ -187,7 +187,12 @@ PHP_FUNCTION(curl_multi_select)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	error = curl_multi_wait(mh->multi, NULL, 0, (unsigned long) (timeout * 1000.0), &numfds);
+	if (!(timeout >= 0.0 && timeout <= ((double)INT_MAX / 1000.0))) {
+		zend_argument_value_error(2, "must be between 0 and %d", (int)ceilf((double)INT_MAX / 1000));
+		RETURN_THROWS();
+	}
+
+	error = curl_multi_wait(mh->multi, NULL, 0, (int) (timeout * 1000.0), &numfds);
 	if (CURLM_OK != error) {
 		SAVE_CURLM_ERROR(mh, error);
 		RETURN_LONG(-1);

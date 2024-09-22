@@ -94,6 +94,7 @@ int fpm_status_export_to_zval(zval *status)
 	add_assoc_long(status, "max-active-processes", scoreboard.active_max);
 	add_assoc_long(status, "max-children-reached", scoreboard.max_children_reached);
 	add_assoc_long(status, "slow-requests", scoreboard.slow_rq);
+	add_assoc_long(status, "memory-peak", scoreboard.memory_peak);
 
 	array_init(&fpm_proc_stats);
 	for(i=0; i<scoreboard.nprocs; i++) {
@@ -244,6 +245,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					"<tr><th>max active processes</th><td>%d</td></tr>\n"
 					"<tr><th>max children reached</th><td>%u</td></tr>\n"
 					"<tr><th>slow requests</th><td>%lu</td></tr>\n"
+					"<tr><th>memory peak</th><td>%zu</td></tr>\n"
 				"</table>\n";
 
 			if (!full) {
@@ -309,7 +311,8 @@ int fpm_status_handle_request(void) /* {{{ */
 				"<total-processes>%d</total-processes>\n"
 				"<max-active-processes>%d</max-active-processes>\n"
 				"<max-children-reached>%u</max-children-reached>\n"
-				"<slow-requests>%lu</slow-requests>\n";
+				"<slow-requests>%lu</slow-requests>\n"
+				"<memory-peak>%zu</memory-peak>\n";
 
 				if (!full) {
 					short_post = "</status>";
@@ -357,7 +360,8 @@ int fpm_status_handle_request(void) /* {{{ */
 				"\"total processes\":%d,"
 				"\"max active processes\":%d,"
 				"\"max children reached\":%u,"
-				"\"slow requests\":%lu";
+				"\"slow requests\":%lu,"
+				"\"memory peak\":%zu";
 
 			if (!full) {
 				short_post = "}";
@@ -426,6 +430,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				"# HELP phpfpm_slow_requests The number of requests that exceeded your 'request_slowlog_timeout' value.\n"
 				"# TYPE phpfpm_slow_requests counter\n"
 				"phpfpm_slow_requests %lu\n"
+				"# HELP phpfpm_memory_peak The memory usage peak since FPM has started.\n"
+				"# TYPE phpfpm_memory_peak gauge\n"
+				"phpfpm_memory_peak %zu\n"
 				"# EOF\n";
 
 			has_start_time = 0;
@@ -457,7 +464,8 @@ int fpm_status_handle_request(void) /* {{{ */
 				"total processes:      %d\n"
 				"max active processes: %d\n"
 				"max children reached: %u\n"
-				"slow requests:        %lu\n";
+				"slow requests:        %lu\n"
+				"memory peak:          %zu\n";
 
 				if (full) {
 					full_syntax =
@@ -496,7 +504,8 @@ int fpm_status_handle_request(void) /* {{{ */
 					scoreboard_p->idle + scoreboard_p->active,
 					scoreboard_p->active_max,
 					scoreboard_p->max_children_reached,
-					scoreboard_p->slow_rq);
+					scoreboard_p->slow_rq,
+					scoreboard_p->memory_peak);
 		} else {
 			spprintf(&buffer, 0, short_syntax,
 					scoreboard_p->pool,
@@ -511,7 +520,8 @@ int fpm_status_handle_request(void) /* {{{ */
 					scoreboard_p->idle + scoreboard_p->active,
 					scoreboard_p->active_max,
 					scoreboard_p->max_children_reached,
-					scoreboard_p->slow_rq);
+					scoreboard_p->slow_rq,
+					scoreboard_p->memory_peak);
 		}
 
 		PUTS(buffer);

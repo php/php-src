@@ -51,10 +51,10 @@ Warning: readfile(-1): Failed to open stream: No such file or directory in %s on
 Warning: readfile(1): Failed to open stream: No such file or directory in %s on line %d
 
 -- Filename: FALSE --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 
 -- Filename: "" --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 
 -- Filename: " " --
 

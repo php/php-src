@@ -201,15 +201,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_wsaprotocol_info_export, 
 	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_socket_wsaprotocol_info_import, 0, 1, Socket, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, info_id, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_wsaprotocol_info_release, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, info_id, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -258,11 +254,7 @@ ZEND_FUNCTION(socket_addrinfo_bind);
 ZEND_FUNCTION(socket_addrinfo_explain);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(socket_wsaprotocol_info_export);
-#endif
-#if defined(PHP_WIN32)
 ZEND_FUNCTION(socket_wsaprotocol_info_import);
-#endif
-#if defined(PHP_WIN32)
 ZEND_FUNCTION(socket_wsaprotocol_info_release);
 #endif
 
@@ -312,21 +304,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(socket_addrinfo_explain, arginfo_socket_addrinfo_explain)
 #if defined(PHP_WIN32)
 	ZEND_FE(socket_wsaprotocol_info_export, arginfo_socket_wsaprotocol_info_export)
-#endif
-#if defined(PHP_WIN32)
 	ZEND_FE(socket_wsaprotocol_info_import, arginfo_socket_wsaprotocol_info_import)
-#endif
-#if defined(PHP_WIN32)
 	ZEND_FE(socket_wsaprotocol_info_release, arginfo_socket_wsaprotocol_info_release)
 #endif
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Socket_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_AddressInfo_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1089,9 +1069,8 @@ static zend_class_entry *register_class_Socket(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Socket", class_Socket_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "Socket", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -1100,9 +1079,8 @@ static zend_class_entry *register_class_AddressInfo(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "AddressInfo", class_AddressInfo_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "AddressInfo", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

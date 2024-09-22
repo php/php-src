@@ -117,6 +117,10 @@ PHPAPI php_basic_globals basic_globals;
 #include "zend_frameless_function.h"
 #include "basic_functions_arginfo.h"
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
 typedef struct _user_tick_function_entry {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
@@ -2233,6 +2237,10 @@ PHP_FUNCTION(getservbyport)
 		RETURN_FALSE;
 	}
 
+	/* MSAN false positive, getservbyport() is not properly intercepted. */
+#if __has_feature(memory_sanitizer)
+	__msan_unpoison_string(serv->s_name);
+#endif
 	RETURN_STRING(serv->s_name);
 }
 /* }}} */
@@ -2500,7 +2508,7 @@ PHP_FUNCTION(parse_ini_file)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(filename) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

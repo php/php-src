@@ -162,7 +162,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_prepare_emulated');
 ?>
 --EXPECTF--
-PDO::prepare(): Argument #1 ($query) cannot be empty
+PDO::prepare(): Argument #1 ($query) must not be empty
 array(1) {
   ["one"]=>
   string(1) "1"

@@ -107,7 +107,7 @@
 ; error_reporting
 ;   Default Value: E_ALL
 ;   Development Value: E_ALL
-;   Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
+;   Production Value: E_ALL & ~E_DEPRECATED
 
 ; log_errors
 ;   Default Value: Off
@@ -442,7 +442,7 @@ memory_limit = 128M
 ; operators. The error level constants are below here for convenience as well as
 ; some common settings and their meanings.
 ; By default, PHP is set to take action on all errors, notices and warnings EXCEPT
-; those related to E_NOTICE and E_STRICT, which together cover best practices and
+; those related to E_NOTICE, which together cover best practices and
 ; recommended coding standards in PHP. For performance reasons, this is the
 ; recommend error reporting setting. Your production server shouldn't be wasting
 ; resources complaining about best practices and coding standards. That's what
@@ -462,9 +462,6 @@ memory_limit = 128M
 ;                     intentional (e.g., using an uninitialized variable and
 ;                     relying on the fact it is automatically initialized to an
 ;                     empty string)
-; E_STRICT          - run-time notices, enable to have PHP suggest changes
-;                     to your code which will ensure the best interoperability
-;                     and forward compatibility of your code
 ; E_CORE_ERROR      - fatal errors that occur during PHP's initial startup
 ; E_CORE_WARNING    - warnings (non-fatal errors) that occur during PHP's
 ;                     initial startup
@@ -480,11 +477,10 @@ memory_limit = 128M
 ; Common Values:
 ;   E_ALL (Show all errors, warnings and notices including coding standards.)
 ;   E_ALL & ~E_NOTICE  (Show all errors, except for notices)
-;   E_ALL & ~E_NOTICE & ~E_STRICT  (Show all errors, except for notices and coding standards warnings.)
 ;   E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR  (Show only errors)
 ; Default Value: E_ALL
 ; Development Value: E_ALL
-; Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
+; Production Value: E_ALL & ~E_DEPRECATED
 ; https://php.net/error-reporting
 error_reporting = E_ALL
 
@@ -1605,7 +1601,7 @@ zend.assertions = 1
 ; With mbstring support this will automatically be converted into the encoding
 ; given by corresponding encode setting. When empty mbstring.internal_encoding
 ; is used. For the decode settings you can distinguish between motorola and
-; intel byte order. A decode setting cannot be empty.
+; intel byte order. A decode setting must not be empty.
 ; https://php.net/exif.encode-unicode
 ;exif.encode_unicode = ISO-8859-15
 

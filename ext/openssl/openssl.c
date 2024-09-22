@@ -270,9 +270,20 @@ static void php_openssl_pkey_free_obj(zend_object *object)
 	zend_object_std_dtor(&key_object->std);
 }
 
+#if defined(HAVE_OPENSSL_ARGON2)
+static const zend_module_dep openssl_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	ZEND_MOD_END
+};
+#endif
 /* {{{ openssl_module_entry */
 zend_module_entry openssl_module_entry = {
+#if defined(HAVE_OPENSSL_ARGON2)
+	STANDARD_MODULE_HEADER_EX, NULL,
+	openssl_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 	"openssl",
 	ext_functions,
 	PHP_MINIT(openssl),
@@ -1329,6 +1340,12 @@ PHP_MINIT_FUNCTION(openssl)
 	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
 
 	REGISTER_INI_ENTRIES();
+
+#if defined(HAVE_OPENSSL_ARGON2)
+	if (FAILURE == PHP_MINIT(openssl_pwhash)(INIT_FUNC_ARGS_PASSTHRU)) {
+		return FAILURE;
+	}
+#endif
 
 	return SUCCESS;
 }
@@ -7243,7 +7260,7 @@ PHP_FUNCTION(openssl_seal)
 	pubkeysht = Z_ARRVAL_P(pubkeys);
 	nkeys = pubkeysht ? zend_hash_num_elements(pubkeysht) : 0;
 	if (!nkeys) {
-		zend_argument_value_error(4, "cannot be empty");
+		zend_argument_must_not_be_empty_error(4);
 		RETURN_THROWS();
 	}
 
@@ -8017,7 +8034,7 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 
 	if (!method_len) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -8059,7 +8076,7 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 	}
 
 	if (ZSTR_LEN(method) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -8088,7 +8105,7 @@ PHP_FUNCTION(openssl_cipher_key_length)
 	}
 
 	if (ZSTR_LEN(method) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

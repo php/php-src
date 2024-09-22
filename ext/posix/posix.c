@@ -746,7 +746,7 @@ PHP_FUNCTION(posix_eaccess)
 
 	path = expand_filepath(filename, NULL);
 	if (!path) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1285,7 +1285,7 @@ PHP_FUNCTION(posix_pathconf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (path_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	} else if (php_check_open_basedir(path)) {
 		php_error_docref(NULL, E_WARNING, "Invalid path supplied: %s", path);

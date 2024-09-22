@@ -977,6 +977,13 @@ PHP_FUNCTION(unpack)
 						zend_string *buf;
 						zend_long ipos, opos;
 
+
+						if (size > INT_MAX / 2) {
+							zend_string_release(real_name);
+							zend_argument_value_error(1, "repeater must be less than or equal to %d", INT_MAX / 2);
+							RETURN_THROWS();
+						}
+
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {
 							len = size * 2;

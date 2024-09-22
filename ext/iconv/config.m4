@@ -8,9 +8,9 @@ if test "$PHP_ICONV" != "no"; then
   PHP_SETUP_ICONV([ICONV_SHARED_LIBADD],,
     [AC_MSG_FAILURE([The iconv not found.])])
 
-  save_LDFLAGS=$LDFLAGS
+  save_LIBS=$LIBS
   save_CFLAGS=$CFLAGS
-  LDFLAGS="$ICONV_SHARED_LIBADD $LDFLAGS"
+  LIBS="$LIBS $ICONV_SHARED_LIBADD"
   CFLAGS="$INCLUDES $CFLAGS"
 
   AC_CACHE_CHECK([for iconv implementation], [php_cv_iconv_implementation], [
@@ -84,7 +84,7 @@ int main(void) {
     [AC_MSG_FAILURE([The iconv check failed, 'errno' is missing.])])
 
   AC_CACHE_CHECK([if iconv supports //IGNORE], [php_cv_iconv_ignore],
-    [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <iconv.h>
 #include <stdlib.h>
 
@@ -103,7 +103,7 @@ int main(void) {
   }
   return 0;
 }
-    ]])],
+    ])],
     [php_cv_iconv_ignore=yes],
     [php_cv_iconv_ignore=no],
     [php_cv_iconv_ignore=no])])
@@ -111,7 +111,7 @@ int main(void) {
     [AC_DEFINE([ICONV_BROKEN_IGNORE], [1],
       [Define to 1 if iconv has broken IGNORE.])])
 
-  LDFLAGS=$save_LDFLAGS
+  LIBS=$save_LIBS
   CFLAGS=$save_CFLAGS
 
   AC_DEFINE([HAVE_ICONV], [1],

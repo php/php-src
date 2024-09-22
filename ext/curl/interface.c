@@ -504,6 +504,11 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.fnmatch);
 	}
 
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+	if (ZEND_FCC_INITIALIZED(curl->handlers.prereq)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.prereq);
+	}
+#endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(curl->handlers.sshhostkey)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.sshhostkey);
@@ -708,6 +713,60 @@ static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 	return rval;
 }
 /* }}} */
+
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_local_ip, int conn_primary_port, int conn_local_port)
+{
+	php_curl *ch = (php_curl *)clientp;
+	int rval = CURL_PREREQFUNC_OK;
+
+	// when CURLOPT_PREREQFUNCTION is set to null, curl_prereqfunction still
+	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
+	// zend_call_known_fcc() with an uninitialized FCC.
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
+    	return rval;
+    }
+
+#if PHP_CURL_DEBUG
+	fprintf(stderr, "curl_prereqfunction() called\n");
+	fprintf(stderr, "conn_primary_ip = %s, conn_local_ip = %s, conn_primary_port = %d, conn_local_port = %d\n", conn_primary_ip, conn_local_ip, conn_primary_port, conn_local_port);
+#endif
+
+	zval args[5];
+	zval retval;
+
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_STRING(&args[1], conn_primary_ip);
+	ZVAL_STRING(&args[2], conn_local_ip);
+	ZVAL_LONG(&args[3], conn_primary_port);
+	ZVAL_LONG(&args[4], conn_local_port);
+
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.prereq, &retval, /* param_count */ 5, args, /* named_params */ NULL);
+	ch->in_callback = false;
+
+	if (!Z_ISUNDEF(retval)) {
+		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		if (Z_TYPE(retval) == IS_LONG) {
+			zend_long retval_long = Z_LVAL(retval);
+			if (retval_long == CURL_PREREQFUNC_OK || retval_long == CURL_PREREQFUNC_ABORT) {
+				rval = retval_long;
+			} else {
+				zend_value_error("The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT");
+			}
+		} else {
+			zend_type_error("The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT");
+		}
+	}
+
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor(&args[2]);
+
+	return rval;
+}
+#endif
 
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key, size_t keylen)
@@ -1037,6 +1096,9 @@ void init_curl_handle(php_curl *ch)
 	ch->handlers.progress = empty_fcall_info_cache;
 	ch->handlers.xferinfo = empty_fcall_info_cache;
 	ch->handlers.fnmatch = empty_fcall_info_cache;
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+	ch->handlers.prereq = empty_fcall_info_cache;
+#endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	ch->handlers.sshhostkey = empty_fcall_info_cache;
 #endif
@@ -1103,9 +1165,6 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
-#ifndef ZTS
-	curl_easy_setopt(ch->cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
-#endif
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
 
@@ -1210,6 +1269,9 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	php_curl_copy_fcc_with_option(ch, CURLOPT_PROGRESSDATA, &ch->handlers.progress, &source->handlers.progress);
 	php_curl_copy_fcc_with_option(ch, CURLOPT_XFERINFODATA, &ch->handlers.xferinfo, &source->handlers.xferinfo);
 	php_curl_copy_fcc_with_option(ch, CURLOPT_FNMATCH_DATA, &ch->handlers.fnmatch, &source->handlers.fnmatch);
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+	php_curl_copy_fcc_with_option(ch, CURLOPT_PREREQDATA, &ch->handlers.prereq, &source->handlers.prereq);
+#endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	php_curl_copy_fcc_with_option(ch, CURLOPT_SSH_HOSTKEYDATA, &ch->handlers.sshhostkey, &source->handlers.sshhostkey);
 #endif
@@ -1570,6 +1632,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_PROGRESS, handlers.progress, curl_progress);
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_XFERINFO, handlers.xferinfo, curl_xferinfo);
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_FNMATCH_, handlers.fnmatch, curl_fnmatch);
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_PREREQ, handlers.prereq, curl_prereqfunction);
+#endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_SSH_HOSTKEY, handlers.sshhostkey, curl_ssh_hostkeyfunction);
 #endif
@@ -1589,7 +1654,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_COOKIESESSION:
 		case CURLOPT_CRLF:
 		case CURLOPT_DNS_CACHE_TIMEOUT:
-		case CURLOPT_DNS_USE_GLOBAL_CACHE:
 		case CURLOPT_FAILONERROR:
 		case CURLOPT_FILETIME:
 		case CURLOPT_FORBID_REUSE:
@@ -1627,7 +1691,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_HTTPAUTH:
 		case CURLOPT_FTP_CREATE_MISSING_DIRS:
 		case CURLOPT_PROXYAUTH:
-		case CURLOPT_FTP_RESPONSE_TIMEOUT:
+		case CURLOPT_SERVER_RESPONSE_TIMEOUT:
 		case CURLOPT_IPRESOLVE:
 		case CURLOPT_MAXFILESIZE:
 		case CURLOPT_TCP_NODELAY:
@@ -1738,12 +1802,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 					php_error_docref(NULL, E_WARNING, "CURLPROTO_FILE cannot be activated when an open_basedir is set");
 					return FAILURE;
 			}
-# if defined(ZTS)
-			if (option == CURLOPT_DNS_USE_GLOBAL_CACHE && lval) {
-				php_error_docref(NULL, E_WARNING, "CURLOPT_DNS_USE_GLOBAL_CACHE cannot be activated when thread safety is enabled");
-				return FAILURE;
-			}
-# endif
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 		case CURLOPT_SAFE_UPLOAD:
@@ -2078,6 +2136,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		}
 
 		case CURLOPT_BINARYTRANSFER:
+		case CURLOPT_DNS_USE_GLOBAL_CACHE:
 			/* Do nothing, just backward compatibility */
 			break;
 
@@ -2736,6 +2795,11 @@ static void curl_free_obj(zend_object *object)
 	if (ZEND_FCC_INITIALIZED(ch->handlers.fnmatch)) {
 		zend_fcc_dtor(&ch->handlers.fnmatch);
 	}
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+	if (ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
+		zend_fcc_dtor(&ch->handlers.prereq);
+	}
+#endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
 		zend_fcc_dtor(&ch->handlers.sshhostkey);
@@ -2814,7 +2878,11 @@ static void _php_curl_reset_handlers(php_curl *ch)
 	if (ZEND_FCC_INITIALIZED(ch->handlers.fnmatch)) {
 		zend_fcc_dtor(&ch->handlers.fnmatch);
 	}
-
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+	if (ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
+		zend_fcc_dtor(&ch->handlers.prereq);
+	}
+#endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
 		zend_fcc_dtor(&ch->handlers.sshhostkey);

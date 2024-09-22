@@ -150,20 +150,20 @@ extern int jit_globals_id;
 extern zend_jit_globals jit_globals;
 #endif
 
-ZEND_EXT_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
-ZEND_EXT_API int  zend_jit_script(zend_script *script);
-ZEND_EXT_API void zend_jit_unprotect(void);
-ZEND_EXT_API void zend_jit_protect(void);
-ZEND_EXT_API void zend_jit_init(void);
-ZEND_EXT_API int  zend_jit_config(zend_string *jit_options, int stage);
-ZEND_EXT_API int  zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage);
-ZEND_EXT_API int  zend_jit_check_support(void);
-ZEND_EXT_API void zend_jit_startup(void *jit_buffer, size_t size, bool reattached);
-ZEND_EXT_API void zend_jit_shutdown(void);
-ZEND_EXT_API void zend_jit_activate(void);
-ZEND_EXT_API void zend_jit_deactivate(void);
-ZEND_EXT_API void zend_jit_status(zval *ret);
-ZEND_EXT_API void zend_jit_restart(void);
+int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
+int  zend_jit_script(zend_script *script);
+void zend_jit_unprotect(void);
+void zend_jit_protect(void);
+void zend_jit_init(void);
+int  zend_jit_config(zend_string *jit_options, int stage);
+int  zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage);
+int  zend_jit_check_support(void);
+void zend_jit_startup(void *jit_buffer, size_t size, bool reattached);
+void zend_jit_shutdown(void);
+void zend_jit_activate(void);
+void zend_jit_deactivate(void);
+void zend_jit_status(zval *ret);
+void zend_jit_restart(void);
 
 #define ZREG_LOAD           (1<<0)
 #define ZREG_STORE          (1<<1)

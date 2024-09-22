@@ -626,7 +626,7 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 		zval_ptr_dtor(&args[2]);
 	}
 
-	if (!Z_ISUNDEF(parser->data)) {
+	if (!Z_ISUNDEF(parser->data) && !EG(exception)) {
 		if (parser->level <= XML_MAXLEVEL)  {
 			zval tag, atr;
 			int atcnt = 0;
@@ -697,7 +697,7 @@ void xml_endElementHandler(void *userData, const XML_Char *name)
 		zval_ptr_dtor(&args[1]);
 	}
 
-	if (!Z_ISUNDEF(parser->data)) {
+	if (!Z_ISUNDEF(parser->data) && !EG(exception)) {
 		zval tag;
 
 		if (parser->lastwasopen) {
@@ -746,7 +746,7 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		zval_ptr_dtor(&args[1]);
 	}
 
-	if (Z_ISUNDEF(parser->data)) {
+	if (Z_ISUNDEF(parser->data) || EG(exception)) {
 		return;
 	}
 

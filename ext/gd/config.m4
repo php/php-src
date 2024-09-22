@@ -279,17 +279,25 @@ dnl Various checks for GD features
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
 
-    GD_CFLAGS="-Wno-strict-prototypes -I$ext_srcdir/libgd $GD_CFLAGS"
-    PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared],, [$GD_CFLAGS])
+    PHP_NEW_EXTENSION([gd],
+      [gd.c $extra_sources],
+      [$ext_shared],,
+      [-Wno-strict-prototypes -I@ext_srcdir@/libgd])
     PHP_ADD_BUILD_DIR([$ext_builddir/libgd])
 
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
 
-    PHP_TEST_BUILD([foobar],
-      [],
-      [AC_MSG_FAILURE([GD library build test failed.])],
-      [$GD_SHARED_LIBADD],
-      [char foobar(void) { return '\0'; }])
+    dnl Sanity check.
+    AC_CACHE_CHECK([whether build works], [php_cv_lib_gd_works], [
+      LIBS_SAVED=$LIBS
+      LIBS="$GD_SHARED_LIBADD $LIBS"
+      AC_LINK_IFELSE([AC_LANG_PROGRAM()],
+        [php_cv_lib_gd_works=yes],
+        [php_cv_lib_gd_works=no])
+      LIBS=$LIBS_SAVED
+    ])
+    AS_VAR_IF([php_cv_lib_gd_works], [yes],,
+      [AC_MSG_FAILURE([GD library build test failed.])])
   else
     extra_sources="gd_compat.c"
     PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])

@@ -226,7 +226,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_STATIC                  (1 <<  4) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
 /* Final class or method                                  |     |     |     */
-#define ZEND_ACC_FINAL                   (1 <<  5) /*  X  |  X  |  X  |     */
+#define ZEND_ACC_FINAL                   (1 <<  5) /*  X  |  X  |  X  |  X  */
 /*                                                        |     |     |     */
 /* Abstract method                                        |     |     |     */
 #define ZEND_ACC_ABSTRACT                (1 <<  6) /*  X  |  X  |  X  |     */
@@ -253,7 +253,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Property Flags (unused: 10...)                         |     |     |     */
+/* Property Flags (unused: 13...)                         |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Promoted property / parameter                          |     |     |     */
@@ -261,6 +261,11 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Virtual property without backing storage               |     |     |     */
 #define ZEND_ACC_VIRTUAL                 (1 <<  9) /*     |     |  X  |     */
+/*                                                        |     |     |     */
+/* Asymmetric visibility                                  |     |     |     */
+#define ZEND_ACC_PUBLIC_SET              (1 << 10) /*     |     |  X  |     */
+#define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
+#define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
 /* Class Flags (unused: 30,31)                            |     |     |     */
 /* ===========                                            |     |     |     */
@@ -332,7 +337,7 @@ typedef struct _zend_oparray_context {
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
-#define ZEND_ACC_DEPRECATED              (1 << 11) /*     |  X  |     |     */
+#define ZEND_ACC_DEPRECATED              (1 << 11) /*     |  X  |     |  X  */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
 #define ZEND_ACC_RETURN_REFERENCE        (1 << 12) /*     |  X  |     |     */
@@ -393,11 +398,32 @@ typedef struct _zend_oparray_context {
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
-
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
+#define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)
+
+static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t visibility)
+{
+	switch (visibility) {
+		case ZEND_ACC_PUBLIC:
+			return ZEND_ACC_PUBLIC_SET;
+		case ZEND_ACC_PROTECTED:
+			return ZEND_ACC_PROTECTED_SET;
+		case ZEND_ACC_PRIVATE:
+			return ZEND_ACC_PRIVATE_SET;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
 
 /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
+
+#define ZEND_ACC_UNINSTANTIABLE (       \
+	ZEND_ACC_INTERFACE |                \
+	ZEND_ACC_TRAIT |                    \
+	ZEND_ACC_IMPLICIT_ABSTRACT_CLASS |  \
+	ZEND_ACC_EXPLICIT_ABSTRACT_CLASS |  \
+	ZEND_ACC_ENUM                       \
+)
 
 #define ZEND_SHORT_CIRCUITING_CHAIN_MASK 0x3
 #define ZEND_SHORT_CIRCUITING_CHAIN_EXPR 0
@@ -975,7 +1001,7 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
 int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
 
-void zend_assert_valid_class_name(const zend_string *const_name);
+void zend_assert_valid_class_name(const zend_string *const_name, const char *type);
 
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope);
 ZEND_API zend_string *zend_type_to_string(zend_type type);
@@ -1001,7 +1027,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_FETCH_CLASS_ALLOW_UNLINKED 0x0400
 #define ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED 0x0800
 
-/* These should not clash with ZEND_ACC_(PUBLIC|PROTECTED|PRIVATE) */
+/* These should not clash with ZEND_ACC_PPP_MASK and ZEND_ACC_PPP_SET_MASK */
 #define ZEND_PARAM_REF      (1<<3)
 #define ZEND_PARAM_VARIADIC (1<<4)
 

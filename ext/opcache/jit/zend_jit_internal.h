@@ -265,6 +265,7 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
 	_(COMPILED_LOOP,     "compiled loop") \
 	_(TRAMPOLINE,        "trampoline call") \
+	_(PROP_HOOK_CALL,    "property hook call") \
 	_(BAD_FUNC,          "bad function call") \
 	_(COMPILER_ERROR,    "JIT compilation error") \
 	/* no recoverable error (blacklist immediately) */ \

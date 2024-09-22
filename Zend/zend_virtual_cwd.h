@@ -168,8 +168,8 @@ typedef int (*verify_path_func)(const cwd_state *);
 
 CWD_API void virtual_cwd_startup(void);
 CWD_API void virtual_cwd_shutdown(void);
-CWD_API int virtual_cwd_activate(void);
-CWD_API int virtual_cwd_deactivate(void);
+CWD_API void virtual_cwd_activate(void);
+CWD_API void virtual_cwd_deactivate(void);
 CWD_API char *virtual_getcwd_ex(size_t *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API zend_result virtual_chdir(const char *path);

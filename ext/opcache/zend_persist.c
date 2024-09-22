@@ -38,7 +38,9 @@
 #define zend_set_str_gc_flags(str) do { \
 	GC_SET_REFCOUNT(str, 2); \
 	uint32_t flags = GC_STRING | (ZSTR_IS_VALID_UTF8(str) ? IS_STR_VALID_UTF8 : 0); \
-	if (file_cache_only) { \
+	if (file_cache_only \
+	 || (ZCG(current_persistent_script) && ZCG(current_persistent_script)->corrupted)) { \
+		GC_TYPE_INFO(str) = GC_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 		flags |= (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
 		flags |= ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
@@ -693,7 +695,10 @@ static void zend_persist_op_array(zval *zv)
 			}
 		}
 #ifdef HAVE_JIT
-		if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
+		if (JIT_G(on)
+		 && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS
+		 && (!ZCG(current_persistent_script)
+		  || !ZCG(current_persistent_script)->corrupted)) {
 			zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 		}
 #endif
@@ -812,7 +817,10 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 			if (prop->hooks[i]) {
 				zend_op_array *hook = zend_persist_class_method(&prop->hooks[i]->op_array, ce);
 #ifdef HAVE_JIT
-				if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
+				if (JIT_G(on)
+				 && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS
+				 && (!ZCG(current_persistent_script)
+				  || !ZCG(current_persistent_script)->corrupted)) {
 					if (hook->scope == ce && !(hook->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 						zend_jit_op_array(hook, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 					}

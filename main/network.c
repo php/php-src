@@ -88,10 +88,7 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 #endif
 
 #ifdef HAVE_GETADDRINFO
-#ifdef HAVE_GAI_STRERROR
-#  define PHP_GAI_STRERROR(x) (gai_strerror(x))
-#else
-#  define PHP_GAI_STRERROR(x) (php_gai_strerror(x))
+# if !defined(PHP_WIN32) && !defined(HAVE_GAI_STRERROR)
 /* {{{ php_gai_strerror */
 static const char *php_gai_strerror(int code)
 {
@@ -113,7 +110,9 @@ static const char *php_gai_strerror(int code)
 		{EAI_NONAME, "Name or service not known"},
 		{EAI_SERVICE, "Servname not supported for ai_socktype"},
 		{EAI_SOCKTYPE, "ai_socktype not supported"},
+#  ifdef EAI_SYSTEM
 		{EAI_SYSTEM, "System error"},
+#  endif
 		{0, NULL}
 	};
 	int i;
@@ -127,7 +126,7 @@ static const char *php_gai_strerror(int code)
 	return "Unknown error";
 }
 /* }}} */
-#endif
+# endif
 #endif
 
 /* {{{ php_network_freeaddresses */
@@ -191,16 +190,26 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 # endif
 
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
+# if defined(PHP_WIN32)
+		char *gai_error = php_win32_error_to_msg(n);
+# elif defined(HAVE_GAI_STRERROR)
+		const char *gai_error = gai_strerror(n);
+# else
+		const char *gai_error = php_gai_strerror(n)
+# endif
 		if (error_string) {
 			/* free error string received during previous iteration (if any) */
 			if (*error_string) {
 				zend_string_release_ex(*error_string, 0);
 			}
-			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, gai_error);
 			php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 		} else {
-			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, gai_error);
 		}
+# ifdef PHP_WIN32
+		php_win32_error_msg_free(gai_error);
+# endif
 		return 0;
 	} else if (res == NULL) {
 		if (error_string) {
@@ -499,11 +508,11 @@ bound:
 }
 /* }}} */
 
-PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_long addrlen, struct sockaddr *sa, socklen_t *sl)
+PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr, size_t addrlen, struct sockaddr *sa, socklen_t *sl)
 {
 	char *colon;
 	char *tmp;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 	short port;
 	struct sockaddr_in *in4 = (struct sockaddr_in*)sa;
 	struct sockaddr **psal;
@@ -843,7 +852,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 				struct sockaddr_in6 in6;
 #endif
 			} local_address = {0};
-			int local_address_len = 0;
+			size_t local_address_len = 0;
 
 			if (sa->sa_family == AF_INET) {
 				if (inet_pton(AF_INET, bindto, &local_address.in4.sin_addr) == 1) {
@@ -974,7 +983,7 @@ PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short 
 /* {{{ php_sockaddr_size
  * Returns the size of struct sockaddr_xx for the family
  */
-PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
+PHPAPI socklen_t php_sockaddr_size(php_sockaddr_storage *addr)
 {
 	switch (((struct sockaddr *)addr)->sa_family) {
 	case AF_INET:
@@ -1099,9 +1108,9 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 	return stream;
 }
 
-PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block)
+PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block)
 {
-	int ret = SUCCESS;
+	zend_result ret = SUCCESS;
 
 #ifdef PHP_WIN32
 	u_long flags;
@@ -1253,7 +1262,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
 	}
 
-	if (res != SUCCESS) {
+	if (res != 0) {
 		return NULL;
 	}
 
@@ -1295,7 +1304,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 	}
 	memset((void *)(*tmphstbuf),0,*hstbuflen);
 
-	if (SUCCESS != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
+	if (0 != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
 		return NULL;
 	}
 

@@ -69,10 +69,6 @@ ZEND_METHOD(InternalIterator, next);
 ZEND_METHOD(InternalIterator, valid);
 ZEND_METHOD(InternalIterator, rewind);
 
-static const zend_function_entry class_Traversable_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_IteratorAggregate_methods[] = {
 	ZEND_RAW_FENTRY("getIterator", NULL, arginfo_class_IteratorAggregate_getIterator, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
@@ -125,7 +121,7 @@ static zend_class_entry *register_class_Traversable(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Traversable", class_Traversable_methods);
+	INIT_CLASS_ENTRY(ce, "Traversable", NULL);
 	class_entry = zend_register_internal_interface(&ce);
 
 	return class_entry;
@@ -198,8 +194,7 @@ static zend_class_entry *register_class_InternalIterator(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "InternalIterator", class_InternalIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	return class_entry;

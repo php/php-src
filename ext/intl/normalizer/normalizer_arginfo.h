@@ -38,7 +38,7 @@ static zend_class_entry *register_class_Normalizer(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Normalizer", class_Normalizer_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval const_FORM_D_value;
 	ZVAL_LONG(&const_FORM_D_value, NORMALIZER_FORM_D);

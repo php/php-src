@@ -237,14 +237,14 @@ static bool zend_is_reserved_class_name(const zend_string *name) /* {{{ */
 }
 /* }}} */
 
-void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
+void zend_assert_valid_class_name(const zend_string *name, const char *type) /* {{{ */
 {
 	if (zend_is_reserved_class_name(name)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot use '%s' as class name as it is reserved", ZSTR_VAL(name));
+			"Cannot use '%s' as %s as it is reserved", ZSTR_VAL(name), type);
 	}
 	if (zend_string_equals_literal(name, "_")) {
-		zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated since 8.4");
+		zend_error(E_DEPRECATED, "Using \"_\" as %s is deprecated since 8.4", type);
 	}
 }
 /* }}} */
@@ -860,6 +860,12 @@ static char *zend_modifier_token_to_string(uint32_t token)
 			return "readonly";
 		case T_ABSTRACT:
 			return "abstract";
+		case T_PUBLIC_SET:
+			return "public(set)";
+		case T_PROTECTED_SET:
+			return "protected(set)";
+		case T_PRIVATE_SET:
+			return "private(set)";
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -903,6 +909,21 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 		case T_STATIC:
 			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_METHOD) {
 				return ZEND_ACC_STATIC;
+			}
+			break;
+		case T_PUBLIC_SET:
+			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+				return ZEND_ACC_PUBLIC_SET;
+			}
+			break;
+		case T_PROTECTED_SET:
+			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+				return ZEND_ACC_PROTECTED_SET;
+			}
+			break;
+		case T_PRIVATE_SET:
+			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+				return ZEND_ACC_PRIVATE_SET;
 			}
 			break;
 	}
@@ -1019,6 +1040,13 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifi
 		zend_throw_exception(zend_ce_compile_error,
 			"Cannot use the final modifier on an abstract method", 0);
 		return 0;
+	}
+	if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+		if ((flags & ZEND_ACC_PPP_SET_MASK) && (new_flag & ZEND_ACC_PPP_SET_MASK)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Multiple access type modifiers are not allowed", 0);
+			return 0;
+		}
 	}
 	return new_flags;
 }
@@ -6957,7 +6985,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 				class_name = zend_resolve_class_name_ast(ast);
-				zend_assert_valid_class_name(class_name);
+				zend_assert_valid_class_name(class_name, "a type name");
 			} else {
 				zend_ensure_valid_class_fetch_type(fetch_type);
 				zend_string_addref(class_name);
@@ -7569,7 +7597,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
-		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
+		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY);
 		bool is_promoted = property_flags || hooks_ast;
 
 		znode var_node, default_node;
@@ -7793,7 +7821,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_ast *param_ast = list->child[i];
 		zend_ast *hooks_ast = param_ast->child[5];
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
-		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
+		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY);
 		bool is_promoted = flags || hooks_ast;
 		if (!is_promoted) {
 			continue;
@@ -8390,7 +8418,7 @@ static void zend_compile_property_hooks(
 	}
 
 	if (hooks->children == 0) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Property hook list cannot be empty");
+		zend_error_noreturn(E_COMPILE_ERROR, "Property hook list must not be empty");
 	}
 
 	for (uint32_t i = 0; i < hooks->children; i++) {
@@ -8968,7 +8996,15 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
 		}
 
-		zend_assert_valid_class_name(unqualified_name);
+		const char *type = "a class name";
+		if (decl->flags & ZEND_ACC_ENUM) {
+			type = "an enum name";
+		} else if (decl->flags & ZEND_ACC_INTERFACE) {
+			type = "an interface name";
+		} else if (decl->flags & ZEND_ACC_TRAIT) {
+			type = "a trait name";
+		}
+		zend_assert_valid_class_name(unqualified_name, type);
 		name = zend_prefix_with_ns(unqualified_name);
 		name = zend_new_interned_string(name);
 		lcname = zend_string_tolower(name);
@@ -9801,7 +9837,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 
 				continue;
 			} else {
-				zend_error_noreturn(E_COMPILE_ERROR, "Only arrays and Traversables can be unpacked");
+				zend_error_noreturn(E_COMPILE_ERROR, "Only arrays and Traversables can be unpacked, %s given", zend_zval_value_name(value));
 			}
 		}
 

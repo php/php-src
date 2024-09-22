@@ -318,6 +318,7 @@ static void date_throw_uninitialized_error(zend_class_entry *ce)
 		}
 		if (ce_ptr->type != ZEND_INTERNAL_CLASS) {
 			zend_throw_error(date_ce_date_object_error, "Object of type %s not been correctly initialized by calling parent::__construct() in its constructor", ZSTR_VAL(ce->name));
+			return;
 		}
 		zend_throw_error(date_ce_date_object_error, "Object of type %s (inheriting %s) has not been correctly initialized by calling parent::__construct() in its constructor", ZSTR_VAL(ce->name), ZSTR_VAL(ce_ptr->name));
 	}
@@ -702,8 +703,11 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 			                          (offset->offset < 0) ? '-' : '+',
 			                          abs(offset->offset / 3600),
 			                          abs((offset->offset % 3600) / 60));
-		} else {
+		} else if (t->zone_type == TIMELIB_ZONETYPE_ID) {
 			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
+		} else {
+			/* Shouldn't happen, but code defensively */
+			offset = timelib_time_offset_ctor();
 		}
 	}
 
@@ -2038,7 +2042,7 @@ static int date_object_compare_timezone(zval *tz1, zval *tz2) /* {{{ */
 
 	if (!o1->initialized || !o2->initialized) {
 		zend_throw_error(date_ce_date_object_error, "Trying to compare uninitialized DateTimeZone objects");
-		return 1;
+		return ZEND_UNCOMPARABLE;
 	}
 
 	if (o1->type != o2->type) {
@@ -2455,6 +2459,9 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 				new_dst    = tzobj->tzi.z.dst;
 				new_abbr   = timelib_strdup(tzobj->tzi.z.abbr);
 				break;
+			default:
+				zend_throw_error(NULL, "The DateTimeZone object has not been correctly initialized by its constructor");
+				return 0;
 		}
 		type = tzobj->type;
 	} else if (dateobj->time->tz_info) {
@@ -3066,6 +3073,7 @@ PHP_METHOD(DateTime, __wakeup)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -3085,6 +3093,7 @@ PHP_METHOD(DateTimeImmutable, __wakeup)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -4085,6 +4094,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	if (!timezone_initialize(tzobj, ZSTR_VAL(tz), ZSTR_LEN(tz), &exception_message)) {
 		zend_throw_exception_ex(date_ce_date_invalid_timezone_exception, 0, "DateTimeZone::__construct(): %s", exception_message);
 		efree(exception_message);
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -4132,6 +4142,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 	tzobj = Z_PHPTIMEZONE_P(return_value);
 	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -4151,6 +4162,7 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -4216,6 +4228,7 @@ PHP_METHOD(DateTimeZone, __unserialize)
 
 	if (!php_date_timezone_initialize_from_hash(&object, &tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
+		RETURN_THROWS();
 	}
 
 	restore_custom_datetimezone_properties(object, myht);
@@ -4637,11 +4650,6 @@ PHP_METHOD(DateInterval, __construct)
 
 static void php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, HashTable *myht) /* {{{ */
 {
-	/* If ->diff is already set, then we need to free it first */
-	if ((*intobj)->diff) {
-		timelib_rel_time_dtor((*intobj)->diff);
-	}
-
 	/* If we have a date_string, use that instead */
 	zval *date_str = zend_hash_str_find(myht, "date_string", strlen("date_string"));
 	if (date_str && Z_TYPE_P(date_str) == IS_STRING) {
@@ -4656,6 +4664,14 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 				Z_STRVAL_P(date_str),
 				err->error_messages[0].position,
 				err->error_messages[0].character ? err->error_messages[0].character : ' ', err->error_messages[0].message);
+				timelib_time_dtor(time);
+				timelib_error_container_dtor(err);
+				return;
+		}
+
+		/* If ->diff is already set, then we need to free it first */
+		if ((*intobj)->diff) {
+			timelib_rel_time_dtor((*intobj)->diff);
 		}
 
 		(*intobj)->diff = timelib_rel_time_clone(&time->relative);
@@ -4668,6 +4684,11 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 		timelib_error_container_dtor(err);
 
 		return;
+	}
+
+	/* If ->diff is already set, then we need to free it first */
+	if ((*intobj)->diff) {
+		timelib_rel_time_dtor((*intobj)->diff);
 	}
 
 	/* Set new value */
@@ -5844,6 +5865,7 @@ PHP_METHOD(DatePeriod, __set_state)
 	period_obj = Z_PHPPERIOD_P(return_value);
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -5919,6 +5941,7 @@ PHP_METHOD(DatePeriod, __unserialize)
 
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+		RETURN_THROWS();
 	}
 	restore_custom_dateperiod_properties(object, myht);
 }
@@ -5939,6 +5962,7 @@ PHP_METHOD(DatePeriod, __wakeup)
 
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */

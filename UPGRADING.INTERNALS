@@ -99,6 +99,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   zend_std_get_properties(). Use zend_std_get_properties_ex() or
   zend_std_get_properties() instead.
 
+* zend_object.properties must not be accessed directly. Use
+  zend_std_get_properties_ex() instead.
+
 * Removed IS_STATIC_VAR_UNINITIALIZED constant. Check for IS_NULL in the
   static_variables array instead.
 
@@ -132,18 +135,21 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      --with-ftp-ssl and --with-mysqlnd-ssl.
    - New configure option --with-openssl-legacy-provider to enable OpenSSL
      legacy provider.
+   - New configure option --with-openssl-argon2 to enable PASSWORD_ARGON2
+     from OpenSSL 3.2
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
-   - PHP_CHECK_IN_ADDR_T M4 macro and 'in_addr_t' fallback definition to 'u_int'
-     removed (use AC_CHECK_TYPES Autoconf macro instead).
+   - PHP_CHECK_IN_ADDR_T Autoconf macro and 'in_addr_t' fallback definition to
+     'u_int' removed (use AC_CHECK_TYPES Autoconf macro instead).
    - HAVE_ODBC2 symbol has been removed in ext/odbc.
    - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
    - Removed checking and linking with obsolete libbind for some functions.
    - Symbol HAVE_JSON has been removed (ext/json is always available since PHP
      8.0).
    - Symbol DARWIN has been removed (use __APPLE__ to target Darwin systems).
-   - Symbol MISSING_FCLOSE_DECL and M4 macro PHP_MISSING_FCLOSE_DECL removed.
+   - Symbol MISSING_FCLOSE_DECL and Autoconf macro PHP_MISSING_FCLOSE_DECL were
+     removed.
    - Symbol HAVE_BSD_ICONV has been removed.
    - Symbol ZEND_FIBER_ASM has been removed.
    - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
@@ -159,29 +165,50 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbols PHP_HAVE_AVX512_SUPPORTS and PHP_HAVE_AVX512_VBMI_SUPPORTS are now
      either defined to 1 or undefined.
    - Symbol HAVE_LIBCRYPT has been removed.
-   - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
-   - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
-   - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
-   - M4 macro PHP_SOCKADDR_CHECKS has been removed (use AC_CHECK_TYPES and
+   - Autoconf macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and
+     config.h).
+   - Autoconf macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
+   - Autoconf macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
+   - Autoconf macro PHP_SOCKADDR_CHECKS has been removed (use AC_CHECK_TYPES and
      AC_CHECK_MEMBERS).
-   - M4 macro PHP_CHECK_GCC_ARG has been removed since PHP 8.0 (use
+   - Autoconf macro PHP_CHECK_GCC_ARG has been removed since PHP 8.0 (use
      AX_CHECK_COMPILE_FLAG).
-   - M4 macro PHP_PROG_RE2C got a new 2nd argument to define common default re2c
-     command-line options substituted to the Makefile RE2C_FLAGS variable.
-   - M4 macros PHP_CHECK_BUILTIN_* have been removed in favor of
+   - Autoconf macro PHP_PROG_RE2C got a new 2nd argument to define common
+     default re2c command-line options substituted to the Makefile RE2C_FLAGS
+     variable.
+   - Autoconf macros PHP_CHECK_BUILTIN_* have been removed in favor of
      PHP_CHECK_BUILTIN and all PHP_HAVE_BUILTIN_* symbols changed to be either
      undefined or defined to 1 whether compiler supports the builtin.
    - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.
-   - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
-   - M4 macro PHP_EVAL_LIBLINE got a new 3rd argument to override the ext_shared
-     checks.
-   - M4 macro PHP_SETUP_LIBXML doesn't define the redundant HAVE_LIBXML symbol
+   - Autoconf macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
+   - Autoconf macro PHP_EVAL_LIBLINE got a new 3rd argument to override the
+     ext_shared checks.
+   - Autoconf macro PHP_SETUP_LIBXML doesn't define the redundant HAVE_LIBXML
+     symbol anymore and requires at least libxml2 2.9.4.
+   - Autoconf macro PHP_SETUP_ICONV doesn't define the HAVE_ICONV symbol
      anymore.
-   - M4 macro PHP_SETUP_ICONV doesn't define the HAVE_ICONV symbol anymore.
-   - M4 macro PHP_OUTPUT is obsolete (use AC_CONFIG_FILES).
-   - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
+   - Autoconf macro PHP_AP_EXTRACT_VERSION is obsolete (use the
+     'apxs -q HTTPD_VERSION').
+   - Autoconf macro PHP_OUTPUT is obsolete (use AC_CONFIG_FILES).
+   - Autoconf macro PHP_TEST_BUILD is obsolete (use AC_* macros).
+   - Autoconf macro PHP_BUILD_THREAD_SAFE is obsolete (set enable_zts manually).
+   - Autoconf macro PHP_DEF_HAVE is obsolete (use AC_DEFINE).
+   - Autoconf macro PHP_PROG_SETUP now accepts an argument to set the minimum
+     required PHP version during the build.
+   - Autoconf macro PHP_INSTALL_HEADERS arguments can now be also
+     blank-or-newline-separated lists instead of only separated with whitespace
+     or backslash-then-newline.
+   - Autoconf macro PHP_ADD_BUILD_DIR now also accepts 1st argument as a
+     blank-or-newline-separated separated list.
+   - Autoconf macros PHP_NEW_EXTENSION, PHP_ADD_SOURCES, PHP_ADD_SOURCES_X,
+     PHP_SELECT_SAPI now have the source files and flags arguments normalized so
+     the list of items can be passed as a blank-or-newline-separated list.
+   - Autoconf macro PHP_ADD_INCLUDE now takes also a blank-or-newline-separated
+     list of include directories instead of a single directory. The "prepend"
+     argument is validated at Autoconf compile time.
+   - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and
      PGSQL_LIBS environment variables. When a directory argument is provided to
@@ -203,6 +230,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
        - ac_cv_func_getaddrinfo            -> php_cv_func_getaddrinfo
        - ac_cv_have_broken_gcc_strlen_opt  -> php_cv_have_broken_gcc_strlen_opt
        - ac_cv_have_pcre2_jit              -> php_cv_have_pcre2_jit
+       - ac_cv_pread                       -> php_cv_func_pread
+       - ac_cv_pwrite                      -> php_cv_func_pwrite
        - ac_cv_syscall_shadow_stack_exists -> php_cv_have_shadow_stack_syscall
        - ac_cv_time_r_type                 -> php_cv_time_r_type
        - ac_cv_write_stdout                -> php_cv_have_write_stdout
@@ -329,6 +358,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - pcre_get_compiled_regex_cache_ex() now provides an option to collect extra
      options (from modifiers used in the expression, for example), and calls
      pcre2_set_compile_extra_options() with those options.
+   - Removed per-request cache, the cache is now always per process or
+     per thread depending on whether you use NTS or ZTS.
+     This was removed due to fundamental ordering issues between destructors.
 
  g. ext/standard
    - Added the php_base64_encode_ex() API with flag parameters, value can be
@@ -346,6 +378,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      types instead.
    - The php_mkdir() and php_mkdir_ex() APIs have been removed, use
      php_stream_mkdir() instead.
+   - The php_strtoupper(), php_string_toupper(), php_strtolower(), and
+     php_string_tolower() functions has been removed, use zend_str_toupper(),
+     zend_string_toupper(), zend_str_tolower(), and zend_string_tolower()
+     respectively instead.
+   - The php_replace_controlchars_ex() function is no longer exposed.
 
  h. ext/session
    - Added the php_get_session_status() API to get the session status, which is
@@ -364,6 +401,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 4. OpCode changes
 ========================
 
+* DO_ICALL, DO_FCALL, and DO_FCALL_BY_NAME now call zend_interrupt_function
+  while the internal frame is still on the stack. This means interrupt handlers
+  will now see the internal call. If your interrupt handler does something like
+  switching EG(current_execute_data), it should not do so if an internal func
+  is on top.
 * New FRAMELESS_ICALL_[0,3] opcodes for faster internal function calls have been
   added. These opcodes don't create a stack frame, but pass arguments via opcode
   operands. They only work for functions that are known at compile-time, and

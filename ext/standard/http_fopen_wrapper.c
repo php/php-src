@@ -115,6 +115,34 @@ static bool check_has_header(const char *headers, const char *header) {
 	return 0;
 }
 
+static zend_result php_stream_handle_proxy_authorization_header(const char *s, smart_str *header)
+{
+	const char *p;
+
+	do {
+		while (*s == ' ' || *s == '\t') s++;
+		p = s;
+		while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
+		if (*p == ':') {
+			p++;
+			if (p - s == sizeof("Proxy-Authorization:") - 1 &&
+				zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
+									   "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
+				while (*p != 0 && *p != '\r' && *p !='\n') p++;
+				smart_str_appendl(header, s, p - s);
+				smart_str_appendl(header, "\r\n", sizeof("\r\n")-1);
+				return SUCCESS;
+			} else {
+				while (*p != 0 && *p != '\r' && *p !='\n') p++;
+			}
+		}
+		s = p;
+		while (*s == '\r' || *s == '\n') s++;
+	} while (*s != 0);
+
+	return FAILURE;
+}
+
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
 		php_stream_context *context, int redirect_max, int flags,
@@ -254,7 +282,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	    /* check if we have Proxy-Authorization header */
 		if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
-			char *s, *p;
+			const char *s;
 
 			if (Z_TYPE_P(tmpzval) == IS_ARRAY) {
 				zval *tmpheader = NULL;
@@ -262,50 +290,16 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 					if (Z_TYPE_P(tmpheader) == IS_STRING) {
 						s = Z_STRVAL_P(tmpheader);
-						do {
-							while (*s == ' ' || *s == '\t') s++;
-							p = s;
-							while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
-							if (*p == ':') {
-								p++;
-								if (p - s == sizeof("Proxy-Authorization:") - 1 &&
-								    zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
-								        "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
-									while (*p != 0 && *p != '\r' && *p !='\n') p++;
-									smart_str_appendl(&header, s, p - s);
-									smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
-									goto finish;
-								} else {
-									while (*p != 0 && *p != '\r' && *p !='\n') p++;
-								}
-							}
-							s = p;
-							while (*s == '\r' || *s == '\n') s++;
-						} while (*s != 0);
+						if (php_stream_handle_proxy_authorization_header(s, &header) == SUCCESS) {
+							goto finish;
+						}
 					}
 				} ZEND_HASH_FOREACH_END();
 			} else if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval)) {
 				s = Z_STRVAL_P(tmpzval);
-				do {
-					while (*s == ' ' || *s == '\t') s++;
-					p = s;
-					while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
-					if (*p == ':') {
-						p++;
-						if (p - s == sizeof("Proxy-Authorization:") - 1 &&
-						    zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
-						        "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
-							while (*p != 0 && *p != '\r' && *p !='\n') p++;
-							smart_str_appendl(&header, s, p - s);
-							smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
-							goto finish;
-						} else {
-							while (*p != 0 && *p != '\r' && *p !='\n') p++;
-						}
-					}
-					s = p;
-					while (*s == '\r' || *s == '\n') s++;
-				} while (*s != 0);
+				if (php_stream_handle_proxy_authorization_header(s, &header) == SUCCESS) {
+					goto finish;
+				}
 			}
 		}
 finish:

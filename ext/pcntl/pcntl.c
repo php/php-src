@@ -860,7 +860,7 @@ static bool php_pcntl_set_user_signal_infos(
 	bool allow_empty_signal_array
 ) {
 	if (!allow_empty_signal_array && zend_hash_num_elements(user_signals) == 0) {
-		zend_argument_value_error(arg_num, "cannot be empty");
+		zend_argument_must_not_be_empty_error(arg_num);
 		return false;
 	}
 
@@ -1693,8 +1693,9 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		Z_PARAM_ARRAY(hmask)
 	ZEND_PARSE_PARAMETERS_END();
 
+	// TODO Why are the arguments optional?
 	if (!hmask || zend_hash_num_elements(Z_ARRVAL_P(hmask)) == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

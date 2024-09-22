@@ -382,7 +382,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (thousand_set) {
 		if (thousand_len < 1) {
-			zend_value_error("%s(): \"thousand\" option cannot be empty", get_active_function_name());
+			zend_value_error("%s(): \"thousand\" option must not be empty", get_active_function_name());
 			RETURN_VALIDATION_FAILED
 		} else {
 			tsd_sep = thousand;

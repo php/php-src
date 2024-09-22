@@ -149,6 +149,7 @@ void zend_shutdown_extensions(void);
 
 ZEND_API size_t zend_internal_run_time_cache_reserved_size(void);
 ZEND_API void zend_init_internal_run_time_cache(void);
+ZEND_API void zend_reset_internal_run_time_cache(void);
 
 BEGIN_EXTERN_C()
 ZEND_API zend_result zend_load_extension(const char *path);

@@ -18,22 +18,12 @@
 #include <firebird/Interface.h>
 #include <cstring>
 
-static void fb_copy_status(const ISC_STATUS* from, ISC_STATUS* to, size_t maxLength)
-{
-	for(size_t i=0; i < maxLength; ++i) {
-		memcpy(to + i, from + i, sizeof(ISC_STATUS));
-		if (from[i] == isc_arg_end) {
-			break;
-		}
-	}
-}
-
 /* Returns the client version. 0 bytes are minor version, 1 bytes are major version. */
 extern "C" unsigned fb_get_client_version(void)
 {
 	Firebird::IMaster* master = Firebird::fb_get_master_interface();
 	Firebird::IUtil* util = master->getUtilInterface();
-	return util->getClientVersion();	
+	return util->getClientVersion();
 }
 
 extern "C" ISC_TIME fb_encode_time(unsigned hours, unsigned minutes, unsigned seconds, unsigned fractions)
@@ -51,9 +41,18 @@ extern "C" ISC_DATE fb_encode_date(unsigned year, unsigned month, unsigned day)
 }
 
 #if FB_API_VER >= 40
+static void fb_copy_status(const ISC_STATUS* from, ISC_STATUS* to, size_t maxLength)
+{
+	for(size_t i=0; i < maxLength; ++i) {
+		memcpy(to + i, from + i, sizeof(ISC_STATUS));
+		if (from[i] == isc_arg_end) {
+			break;
+		}
+	}
+}
 
 /* Decodes a time with time zone into its time components. */
-extern "C" ISC_STATUS fb_decode_time_tz(ISC_STATUS* isc_status, const ISC_TIME_TZ* timeTz, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, 
+extern "C" ISC_STATUS fb_decode_time_tz(ISC_STATUS* isc_status, const ISC_TIME_TZ* timeTz, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions,
    unsigned timeZoneBufferLength, char* timeZoneBuffer)
 {
 	Firebird::IMaster* master = Firebird::fb_get_master_interface();
@@ -70,9 +69,9 @@ extern "C" ISC_STATUS fb_decode_time_tz(ISC_STATUS* isc_status, const ISC_TIME_T
 }
 
 /* Decodes a timestamp with time zone into its date and time components */
-extern "C" ISC_STATUS fb_decode_timestamp_tz(ISC_STATUS* isc_status, const ISC_TIMESTAMP_TZ* timestampTz, 
+extern "C" ISC_STATUS fb_decode_timestamp_tz(ISC_STATUS* isc_status, const ISC_TIMESTAMP_TZ* timestampTz,
 	unsigned* year, unsigned* month, unsigned* day,
-	unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, 
+	unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions,
 	unsigned timeZoneBufferLength, char* timeZoneBuffer)
 {
 	Firebird::IMaster* master = Firebird::fb_get_master_interface();

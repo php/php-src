@@ -133,7 +133,6 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ nodeValue	string
-readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D080
 Modern spec URL: https://dom.spec.whatwg.org/#dom-node-nodevalue
 Since:
@@ -671,7 +670,6 @@ zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ textContent	string
-readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
 Modern spec URL: https://dom.spec.whatwg.org/#dom-node-textcontent
 Since: DOM Level 3

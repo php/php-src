@@ -8,6 +8,7 @@ $expected = [
 ];
 
 $tmp = new SplTempFileObject();
+$tmp->setCsvControl(escape: "");
 foreach ($expected as $row) {
     $tmp->fputcsv($row);
 }

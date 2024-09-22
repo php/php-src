@@ -236,10 +236,6 @@ static const zend_function_entry class_SNMP_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_SNMPException_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_snmp_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_SUFFIX", NETSNMP_OID_OUTPUT_SUFFIX, CONST_PERSISTENT);
@@ -270,7 +266,7 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SNMP", class_SNMP_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval const_VERSION_1_value;
 	ZVAL_LONG(&const_VERSION_1_value, SNMP_VERSION_1);
@@ -399,8 +395,8 @@ static zend_class_entry *register_class_SNMPException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SNMPException", class_SNMPException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	INIT_CLASS_ENTRY(ce, "SNMPException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	return class_entry;
 }

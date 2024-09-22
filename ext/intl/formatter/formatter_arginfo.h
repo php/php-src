@@ -123,8 +123,7 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "NumberFormatter", class_NumberFormatter_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_PATTERN_DECIMAL_value;
 	ZVAL_LONG(&const_PATTERN_DECIMAL_value, UNUM_PATTERN_DECIMAL);
@@ -593,7 +592,7 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_string_release(const_TYPE_CURRENCY_name);
 
 
-	zend_attribute *attribute_Deprecated_const_TYPE_CURRENCY_0 = zend_add_class_constant_attribute(class_entry, const_TYPE_CURRENCY, ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zend_attribute *attribute_Deprecated_const_TYPE_CURRENCY_0 = zend_add_class_constant_attribute(class_entry, const_TYPE_CURRENCY, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	zval attribute_Deprecated_const_TYPE_CURRENCY_0_arg0;
 	zend_string *attribute_Deprecated_const_TYPE_CURRENCY_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
 	ZVAL_STR(&attribute_Deprecated_const_TYPE_CURRENCY_0_arg0, attribute_Deprecated_const_TYPE_CURRENCY_0_arg0_str);

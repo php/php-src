@@ -315,17 +315,16 @@ xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, cha
 	return NULL;
 }
 
-int parse_namespace(const xmlChar *inval, char **value, char **namespace)
+/* namespace is either a copy or NULL, value is never NULL and never a copy. */
+void parse_namespace(const xmlChar *inval, const char **value, char **namespace)
 {
-	char *found = strrchr((char*)inval, ':');
+	const char *found = strrchr((const char *) inval, ':');
 
-	if (found != NULL && found != (char*)inval) {
-		(*namespace) = estrndup((char*)inval, found - (char*)inval);
-		(*value) = estrdup(++found);
+	if (found != NULL && found != (const char *) inval) {
+		(*namespace) = estrndup((const char *) inval, found - (const char *) inval);
+		(*value) = ++found;
 	} else {
-		(*value) = estrdup((char*)inval);
+		(*value) = (const char *) inval;
 		(*namespace) = NULL;
 	}
-
-	return FALSE;
 }

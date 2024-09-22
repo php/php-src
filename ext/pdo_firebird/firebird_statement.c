@@ -84,7 +84,7 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 	unsigned hours = 0, minutes = 0, seconds = 0, fractions = 0;
 	char timeZoneBuffer[40] = {0};
 	char *fmt;
-	struct tm t; 
+	struct tm t;
 	ISC_TIME time;
 	char timeBuf[80] = {0};
 	char timeTzBuf[124] = {0};
@@ -94,7 +94,7 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 	time = fb_encode_time(hours, minutes, seconds, fractions);
 	isc_decode_sql_time(&time, &t);
 	fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
-	
+
 	size_t len = strftime(timeBuf, sizeof(timeBuf), fmt, &t);
 	if (len == 0) {
 		return 1;
@@ -112,7 +112,7 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 	unsigned year, month, day, hours, minutes, seconds, fractions;
 	char timeZoneBuffer[40] = {0};
 	char *fmt;
-	struct tm t; 
+	struct tm t;
 	ISC_TIMESTAMP ts;
 	char timestampBuf[80] = {0};
 	char timestampTzBuf[124] = {0};
@@ -124,7 +124,7 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 	isc_decode_timestamp(&ts, &t);
 
 	fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
-	
+
 	size_t len = strftime(timestampBuf, sizeof(timestampBuf), fmt, &t);
 	if (len == 0) {
 		return 1;
@@ -349,11 +349,9 @@ static int pdo_firebird_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, 
 #endif
 				param_type = PDO_PARAM_INT;
 				break;
-#ifdef SQL_BOOLEAN
 			case SQL_BOOLEAN:
 				param_type = PDO_PARAM_BOOL;
 				break;
-#endif
 			default:
 				param_type = PDO_PARAM_STR;
 				break;
@@ -542,11 +540,9 @@ static int pdo_firebird_stmt_get_col(
 					/* TODO: Why is this not returned as the native type? */
 					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.16H", php_get_double_from_sqldata(var->sqldata)));
 					break;
-#ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:
 					ZVAL_BOOL(result, *(FB_BOOLEAN*)var->sqldata);
 					break;
-#endif
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
 					fmt = S->H->date_format ? S->H->date_format : PDO_FB_DEF_DATE_FMT;
@@ -567,7 +563,7 @@ static int pdo_firebird_stmt_get_col(
 					size_t len = strftime(buf, sizeof(buf), fmt, &t);
 					ZVAL_STRINGL(result, buf, len);
 					break;
-#if FB_API_VER >= 40					
+#if FB_API_VER >= 40
 				case SQL_TIME_TZ: {
 					ISC_TIME_TZ time = php_get_isc_time_tz_from_sqldata(var->sqldata);
 					return get_formatted_time_tz(stmt, &time, result);
@@ -576,7 +572,7 @@ static int pdo_firebird_stmt_get_col(
 					ISC_TIMESTAMP_TZ ts = php_get_isc_timestamp_tz_from_sqldata(var->sqldata);
 					return get_formatted_timestamp_tz(stmt, &ts, result);
 				}
-#endif				
+#endif
 				case SQL_BLOB: {
 					ISC_QUAD quad = php_get_isc_quad_from_sqldata(var->sqldata);
 					return php_firebird_fetch_blob(stmt, colno, result, &quad);
@@ -744,7 +740,6 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 				}
 			}
 
-#ifdef SQL_BOOLEAN
 			/* keep native BOOLEAN type */
 			if ((var->sqltype & ~1) == SQL_BOOLEAN) {
 				switch (Z_TYPE_P(parameter)) {
@@ -797,8 +792,6 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 				}
 				break;
 			}
-#endif
-
 
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(parameter)) {
@@ -829,6 +822,13 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 						case SQL_TIMESTAMP:
 						case SQL_TYPE_DATE:
 						case SQL_TYPE_TIME:
+#if FB_API_VER >= 40
+						case SQL_INT128:
+						case SQL_DEC16:
+						case SQL_DEC34:
+						case SQL_TIMESTAMP_TZ:
+						case SQL_TIME_TZ:
+#endif
 							force_null = (Z_STRLEN_P(parameter) == 0);
 					}
 					if (!force_null) {

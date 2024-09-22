@@ -83,7 +83,7 @@ typedef struct dom_decoding_encoding_ctx {
 /* https://dom.spec.whatwg.org/#dom-document-implementation */
 zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval)
 {
-	const uint32_t PROP_INDEX = 14;
+	const uint32_t PROP_INDEX = 0;
 
 #if ZEND_DEBUG
 	zend_string *implementation_str = ZSTR_INIT_LITERAL("implementation", false);
@@ -1283,7 +1283,7 @@ PHP_METHOD(Dom_HTMLDocument, saveHtmlFile)
 	}
 
 	if (file_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1467,7 +1467,7 @@ static zend_string *dom_get_child_text_content(const xmlNode *node)
 
 	const xmlNode *text = node->children;
 	while (text != NULL) {
-		if (text->type == XML_TEXT_NODE || text->type == XML_CDATA_SECTION_NODE) {
+		if ((text->type == XML_TEXT_NODE || text->type == XML_CDATA_SECTION_NODE) && text->content != NULL) {
 			smart_str_appends(&content, (const char *) text->content);
 		}
 		text = text->next;

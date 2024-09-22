@@ -1317,7 +1317,9 @@ PHP_FUNCTION(proc_open)
 	if (newprocok == FALSE) {
 		DWORD dw = GetLastError();
 		close_all_descriptors(descriptors, ndesc);
-		php_error_docref(NULL, E_WARNING, "CreateProcess failed, error code: %u", dw);
+		char *msg = php_win32_error_to_msg(dw);
+		php_error_docref(NULL, E_WARNING, "CreateProcess failed: %s", msg);
+		php_win32_error_msg_free(msg);
 		goto exit_fail;
 	}
 

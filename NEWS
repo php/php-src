@@ -1,6 +1,138 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0beta4
+?? ??? ????, PHP 8.4.0RC1
+
+- BcMath:
+  . bcpow() performance improvement. (Jorg Sowa)
+  . ext/bcmath: Check for scale overflow. (SakiTakamachi)
+
+- Debugging:
+  . Fixed bug GH-15923 (GDB: Python Exception <class 'TypeError'>:
+    exceptions must derive from BaseException). (nielsdos)
+
+- DOM:
+  . Fix XML serializer errata: xmlns="" serialization should be allowed.
+    (nielsdos)
+  . Fixed bug GH-15910 (Assertion failure in ext/dom/element.c). (nielsdos)
+  . Fix unsetting DOM properties. (nielsdos)
+
+- MBString:
+  . Fixed bug GH-15824 (mb_detect_encoding(): Argument $encodings contains
+    invalid encoding "UTF8"). (Yuya Hamada)
+  . Updated Unicode data tables to Unicode 16.0. (Ayesh Karunaratne)
+
+- Opcache:
+  . Fixed bug GH-15657 (Segmentation fault in dasm_x86.h). (nielsdos)
+
+- PHPDBG:
+  . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
+
+- PCRE:
+  . Fix UAF issues with PCRE after request shutdown. (nielsdos)
+
+- Reflection:
+  . Add missing ReflectionProperty::hasHook[s]() methods. (ilutov)
+  . Add missing ReflectionProperty::isFinal() method. (ilutov)
+
+- SimpleXML:
+  . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
+    (nielsdos)
+
+- SOAP:
+  . Fixed bug #73182 (PHP SOAPClient does not support stream context HTTP
+    headers in array form). (nielsdos)
+  . Fixed bug #62900 (Wrong namespace on xsd import error message). (nielsdos)
+  . Fixed bug GH-15711 (SoapClient can't convert BackedEnum to scalar value).
+    (nielsdos)
+
+- SPL:
+  . Fixed bug GH-15918 (Assertion failure in ext/spl/spl_fixedarray.c).
+    (nielsdos)
+
+- Standard:
+  . Add support for backed enums in http_build_query(). (ilutov)
+  . Fixed bug GH-15982 (Assertion failure with array_find when references are
+    involved). (nielsdos)
+
+- Streams:
+  . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
+    (nielsdos)
+
+- TSRM:
+  . Prevent closing of unrelated handles. (cmb)
+
+- Windows:
+  . Fixed minimal Windows version. (cmb)
+
+- Zip:
+  . Added ZipArchive::ER_TRUNCATED_ZIP added in libzip 1.11. (Remi)
+
+12 Sep 2024, PHP 8.4.0beta5
+
+- BCMath:
+  . Fixed LONG_MAX in BCMath ext. (Saki Takamachi)
+  . Fixed bcdiv() div by one. (Saki Takamachi)
+  . [RFC] Support object types in BCMath. (Saki Takamachi)
+
+- Core:
+  . Fixed bug GH-15330 (Do not scan generator frames more than once). (Arnaud)
+  . Fixed bug GH-15644 (Asymmetric visibility doesn't work with hooks). (ilutov)
+  . Implemented lazy objects RFC. (Arnaud)
+  . Fixed bug GH-15686 (Building shared iconv with external iconv library).
+    (Peter Kokot, zeriyoshi)
+  . Fixed missing error when adding asymmetric visibility to unilateral virtual
+    property. (ilutov)
+  . Fixed bug GH-15693 (Unnecessary include in main.c bloats binary).
+    (nielsdos)
+  . Fixed bug GH-15731 (AllowDynamicProperties validation should error on
+    enums). (DanielEScherzer)
+  . Fixed uninitialized lineno in constant AST of internal enums. (ilutov)
+
+- Curl:
+  . The CURLOPT_DNS_USE_GLOBAL_CACHE option is now silently ignored. (Ayesh Karunaratne)
+
+- DOM:
+  . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
+    PHP 8.1 than in PHP 8.0). (nielsdos)
+  . Fixed bug GH-15654 (Signed integer overflow in ext/dom/nodelist.c).
+    (nielsdos)
+
+- GD:
+  . Added gdImageClone to bundled libgd. (David Carlier)
+
+- Hash:
+  . Fixed bug GH-15742 (php_hash_sha.h incompatible with C++). (cmb)
+
+- OpenSSL:
+  . Implement GH-13514 PASSWORD_ARGON2 from OpenSSL 3.2. (Remi)
+
+- PDO:
+  . The internal header php_pdo_int.h is no longer installed; it is not
+    supposed to be used by PDO drivers. (cmb)
+
+- PDO_Firebird:
+  . Fixed GH-15604 (Always make input parameters nullable). (sim1984)
+
+- Reflection:
+  . Fixed bug GH-15718 (Segfault on ReflectionProperty::get{Hook,Hooks}() on
+    dynamic properties). (DanielEScherzer)
+  . Fixed bug GH-15694 (ReflectionProperty::isInitialized() is incorrect for
+    hooked properties). (ilutov)
+
+- SOAP:
+  . Fixed bug #61525 (SOAP functions require at least one space after HTTP
+    header colon). (nielsdos)
+  . Implement request #47317 (SoapServer::__getLastResponse()). (nielsdos)
+
+- Standard:
+  . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
+  . Implemented GH-15685 (improve proc_open error reporting on Windows). (cmb)
+
+- Streams:
+  . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
+    (cmb)
+
+29 Aug 2024, PHP 8.4.0beta4
 
 - Core:
   . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
@@ -14,18 +146,53 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-15501 (Windows HAVE_<header>_H macros defined to 1 or
     undefined). (Peter Kokot)
+  . Fixed bug GH-15565 (--disable-ipv6 during compilation produces error
+    EAI_SYSTEM not found). (nielsdos)
+  . Implemented asymmetric visibility for properties. (ilutov)
+
+- Curl:
+  . Added CURLOPT_PREREQFUNCTION Curl option to set a custom callback
+    after the connection is established, but before the request is
+    performed. (Ayesh Karunaratne)
+  . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
+    CURLOPT_FTP_RESPONSE_TIMEOUT. (Ayesh Karunaratne)
 
 - Date:
   . Fixed bug GH-13773 (DatePeriod not taking into account microseconds for end
     date). (Mark Bennewitz, Derick)
 
+- DOM:
+  . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
+    ext/dom/xml_common.h). (nielsdos)
+  . Fixed bug GH-15570 (Segmentation fault (access null pointer) in
+    ext/dom/html5_serializer.c). (nielsdos)
+
+- FPM:
+  . Added memory peak to the scoreboard / status page. (Flávio Heleno)
+
 - MySQLnd:
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
 
+- Opcache:
+  . Fixed bug GH-15490 (Building of callgraph modifies preloaded symbols).
+    (ilutov)
+  . Fixed bug GH-15178 (Assertion in tracing JIT on hooks). (ilutov)
+
+- PDO_MYSQL:
+  . mysqlnd: support ER_CLIENT_INTERACTION_TIMEOUT. (Appla)
+
+- Session:
+  . Emit warnings for non-positive values of session.gc_divisor and negative values
+    of session.gc_probability. (Jorg Sowa)
+
 - Standard:
   . The "allowed_classes" option for unserialize() now throws TypeErrors and
     ValueErrors	if it is not an	array of class names. (Girgias)
+
+- Streams:
+  . Fixed bug GH-14930 (Custom stream wrapper dir_readdir output truncated to
+    255 characters in PHP 8.3). (Joe Cai)
 
 
 15 Aug 2024, PHP 8.4.0beta3
@@ -137,7 +304,7 @@ PHP                                                                        NEWS
   . The SplFixedArray::__wakeup() method has been deprecated as it implements
     __serialize() and __unserialize() which need to be overwritten instead.
     (TysonAndre)
-  . Passing a non-empty string for the $enclosure parameter of:
+  . Passing a non-empty string for the $escape parameter of:
     - SplFileObject::setCsvControl()
     - SplFileObject::fputcsv()
     - SplFileObject::fgetcsv()
@@ -146,7 +313,7 @@ PHP                                                                        NEWS
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
   . Enables crc32 auxiliary detection on OpenBSD. (David Carlier)
-  . Passing a non-empty string for the $enclosure parameter of:
+  . Passing a non-empty string for the $escape parameter of:
     - fputcsv()
     - fgetcsv()
     - str_getcsv()

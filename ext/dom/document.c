@@ -107,10 +107,7 @@ zend_result dom_document_encoding_read(dom_object *obj, zval *retval)
 
 zend_result dom_document_actual_encoding_read(dom_object *obj, zval *retval)
 {
-	zend_error(E_DEPRECATED, "Property DOMDocument::$actualEncoding is deprecated");
-	if (UNEXPECTED(EG(exception))) {
-		return FAILURE;
-	}
+	PHP_DOM_DEPRECATED_PROPERTY("Property DOMDocument::$actualEncoding is deprecated");
 
 	return dom_document_encoding_read(obj, retval);
 }
@@ -419,10 +416,7 @@ Since: DOM Level 3
 */
 zend_result dom_document_config_read(dom_object *obj, zval *retval)
 {
-	zend_error(E_DEPRECATED, "Property DOMDocument::$config is deprecated");
-	if (UNEXPECTED(EG(exception))) {
-		return FAILURE;
-	}
+	PHP_DOM_DEPRECATED_PROPERTY("Property DOMDocument::$config is deprecated");
 
 	ZVAL_NULL(retval);
 	return SUCCESS;
@@ -1525,7 +1519,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (!source_len) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
@@ -1579,7 +1573,7 @@ PHP_METHOD(DOMDocument, save)
 	}
 
 	if (file_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1883,7 +1877,7 @@ static void dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	if (!source_len) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1992,7 +1986,7 @@ static void dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	}
 
 	if (!source_len) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2085,7 +2079,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 
 	if (!source_len) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2162,7 +2156,7 @@ PHP_METHOD(DOMDocument, saveHTMLFile)
 	}
 
 	if (file_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

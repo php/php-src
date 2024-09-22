@@ -31,7 +31,9 @@ dnl PHP_DEF_HAVE(what)
 dnl
 dnl Generates 'AC_DEFINE(HAVE_WHAT, 1, [ ])'.
 dnl
-AC_DEFUN([PHP_DEF_HAVE],[AC_DEFINE([HAVE_]translit($1,a-z_.-,A-Z___), 1, [ ])])
+AC_DEFUN([PHP_DEF_HAVE], [m4_warn([obsolete],
+  [The macro 'PHP_DEF_HAVE' is obsolete. Use AC_DEFINE.])
+AC_DEFINE([HAVE_]translit($1,a-z_.-,A-Z___), 1, [ ])])
 
 dnl
 dnl PHP_RUN_ONCE(namespace, variable, code)
@@ -40,10 +42,10 @@ dnl Execute code, if variable is not set in namespace.
 dnl
 AC_DEFUN([PHP_RUN_ONCE],[
   changequote({,})
-  unique=`echo $2|$SED 's/[^a-zA-Z0-9]/_/g'`
+  unique=$(echo $2|$SED 's/[^a-zA-Z0-9]/_/g')
   changequote([,])
   cmd="echo $ac_n \"\$$1$unique$ac_c\""
-  if test -n "$unique" && test "`eval $cmd`" = "" ; then
+  if test -n "$unique" && test "$(eval $cmd)" = "" ; then
     eval "$1$unique=set"
     $3
   fi
@@ -59,10 +61,10 @@ AC_DEFUN([PHP_EXPAND_PATH],[
     $2=$1
   else
     changequote({,})
-    ep_dir=`echo $1|$SED 's%/*[^/][^/]*/*$%%'`
+    ep_dir=$(echo $1|$SED 's%/*[^/][^/]*/*$%%')
     changequote([,])
-    ep_realdir=`(cd "$ep_dir" && pwd)`
-    $2="$ep_realdir"/`basename "$1"`
+    ep_realdir=$(cd "$ep_dir" && pwd)
+    $2="$ep_realdir"/$(basename "$1")
   fi
 ])
 
@@ -112,9 +114,8 @@ AC_DEFUN([PHP_CANONICAL_HOST_TARGET],[
   if test -z "$host_alias" && test -n "$host"; then
     host_alias=$host
   fi
-  if test -z "$host_alias"; then
-    AC_MSG_ERROR([host_alias is not set! Make sure to run config.guess])
-  fi
+  AS_VAR_IF([host_alias],,
+    [AC_MSG_ERROR([host_alias is not set! Make sure to run config.guess])])
 ])
 
 dnl
@@ -141,6 +142,9 @@ AS_VAR_IF([CFLAGS],, [auto_cflags=1])
 
 dnl Required programs.
 PHP_PROG_AWK
+
+abs_srcdir=$(cd $srcdir && pwd)
+abs_builddir=$(pwd)
 
 dnl Run at the end of the configuration, before creating the config.status.
 AC_CONFIG_COMMANDS_PRE(
@@ -194,9 +198,10 @@ dnl
 dnl PHP_ADD_SOURCES(source-path, sources [, special-flags [, type]])
 dnl
 dnl Adds sources which are located relative to source-path to the array of type
-dnl type. Sources are processed with optional special-flags which are passed to
-dnl the compiler. Sources can be either written in C or C++ (filenames shall end
-dnl in .c or .cpp, respectively).
+dnl type. The blank-or-newline separated list of "sources" are processed with
+dnl optional special-flags which are passed to the compiler. Sources can be
+dnl either written in C or C++ (filenames shall end in .c or .cpp,
+dnl respectively).
 dnl
 dnl Note: If source-path begins with a "/", the "/" is removed and the path is
 dnl interpreted relative to the top build-directory.
@@ -236,14 +241,15 @@ dnl PHP_ADD_SOURCES_X(source-path, sources[, special-flags[, target-var[, shared
 dnl
 dnl Additional to PHP_ADD_SOURCES (see above), this lets you set the name of the
 dnl array target-var directly, as well as whether shared objects will be built
-dnl from the sources. Should not be used directly.
+dnl from the blank-or-newline-separated list of "sources". Should not be used
+dnl directly.
 dnl
 AC_DEFUN([PHP_ADD_SOURCES_X],[
 dnl Relative to source- or build-directory?
 dnl ac_srcdir/ac_bdir include trailing slash
   case $1 in
   ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
-  /*[)] ac_srcdir=`echo "$1"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
+  /*[)] ac_srcdir=$(echo "$1"|cut -c 2-)"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
   *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
 
@@ -252,7 +258,7 @@ dnl how to build .. shared or static?
 
 dnl Iterate over the sources.
   old_IFS=[$]IFS
-  for ac_src in $2; do
+  for ac_src in m4_normalize(m4_expand([$2])); do
 
 dnl Remove the suffix.
       IFS=.
@@ -265,10 +271,10 @@ dnl Append to the array which has been dynamically chosen at m4 time.
 
 dnl Choose the right compiler/flags/etc. for the source-file.
       case $ac_src in
-        *.c[)] ac_comp="$b_c_pre $ac_inc $b_c_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
-        *.s[)] ac_comp="$b_c_pre $ac_inc $b_c_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
-        *.S[)] ac_comp="$b_c_pre $ac_inc $b_c_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
-        *.cpp|*.cc|*.cxx[)] ac_comp="$b_cxx_pre $ac_inc $b_cxx_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_cxx_post" ;;
+        *.c[)] ac_comp="$b_c_pre $ac_inc $b_c_meta m4_normalize(m4_expand([$3])) -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
+        *.s[)] ac_comp="$b_c_pre $ac_inc $b_c_meta m4_normalize(m4_expand([$3])) -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
+        *.S[)] ac_comp="$b_c_pre $ac_inc $b_c_meta m4_normalize(m4_expand([$3])) -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
+        *.cpp|*.cc|*.cxx[)] ac_comp="$b_cxx_pre $ac_inc $b_cxx_meta m4_normalize(m4_expand([$3])) -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_cxx_post" ;;
       esac
 
 dnl Generate Makefiles with dependencies
@@ -293,33 +299,29 @@ dnl
 dnl Checks for -R, etc. switch.
 dnl
 AC_DEFUN([PHP_RUNPATH_SWITCH],[
-AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
-AC_CACHE_VAL(php_cv_cc_rpath,[
+AC_CACHE_CHECK([if compiler supports -Wl,-rpath,], [php_cv_cc_rpath], [
   SAVE_LIBS=$LIBS
   LIBS="-Wl,-rpath,/usr/$PHP_LIBDIR $LIBS"
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_rpath=yes],[php_cv_cc_rpath=no])
-  LIBS=$SAVE_LIBS])
-AC_MSG_RESULT([$php_cv_cc_rpath])
-if test $php_cv_cc_rpath = "yes"; then
-  ld_runpath_switch=-Wl,-rpath,
-else
-  AC_MSG_CHECKING([if compiler supports -R])
-  AC_CACHE_VAL(php_cv_cc_dashr,[
+  AC_LINK_IFELSE([AC_LANG_PROGRAM()],
+    [php_cv_cc_rpath=yes],
+    [php_cv_cc_rpath=no])
+  LIBS=$SAVE_LIBS
+])
+AS_VAR_IF([php_cv_cc_rpath], [yes],
+  [ld_runpath_switch=-Wl,-rpath,],
+  [AC_CACHE_CHECK([if compiler supports -R], [php_cv_cc_dashr], [
     SAVE_LIBS=$LIBS
     LIBS="-R /usr/$PHP_LIBDIR $LIBS"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_dashr=yes],[php_cv_cc_dashr=no])
-    LIBS=$SAVE_LIBS])
-  AC_MSG_RESULT([$php_cv_cc_dashr])
-  if test $php_cv_cc_dashr = "yes"; then
-    ld_runpath_switch=-R
-  else
-    dnl Something innocuous.
-    ld_runpath_switch=-L
-  fi
-fi
-if test "$PHP_RPATH" = "no"; then
-  ld_runpath_switch=
-fi
+    AC_LINK_IFELSE([AC_LANG_PROGRAM()],
+      [php_cv_cc_dashr=yes],
+      [php_cv_cc_dashr=no])
+    LIBS=$SAVE_LIBS
+  ])
+  AS_VAR_IF([php_cv_cc_dashr], [yes],
+    [ld_runpath_switch=-R],
+    [ld_runpath_switch=-L])
+])
+AS_VAR_IF([PHP_RPATH], [no], [ld_runpath_switch=])
 ])
 
 dnl
@@ -329,7 +331,7 @@ dnl Stores the location of libgcc in libgcc_libpath.
 dnl
 AC_DEFUN([PHP_LIBGCC_LIBPATH],[
   changequote({,})
-  libgcc_libpath=`$1 --print-libgcc-file-name|$SED 's%/*[^/][^/]*$%%'`
+  libgcc_libpath=$($1 --print-libgcc-file-name|$SED 's%/*[^/][^/]*$%%')
   changequote([,])
 ])
 
@@ -370,25 +372,23 @@ AC_DEFUN([PHP_EVAL_LIBLINE],
   [m4_warn([syntax], [Missing 2nd argument when skipping extension check])],
   [_php_ext_shared_saved=$ext_shared; ext_shared=yes])])
   for ac_i in $1; do
-    case $ac_i in
-    -pthread[)]
-      if test "$ext_shared" = "yes"; then
-        $2="[$]$2 -pthread"
-      else
-        PHP_RUN_ONCE(EXTRA_LDFLAGS, [$ac_i], [EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ac_i"])
-        PHP_RUN_ONCE(EXTRA_LDFLAGS_PROGRAM, [$ac_i],
+    AS_CASE([$ac_i],
+      [-pthread], [
+        AS_VAR_IF([ext_shared], [yes], [$2="$$2 -pthread"], [
+          PHP_RUN_ONCE([EXTRA_LDFLAGS], [$ac_i],
+            [EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ac_i"])
+          PHP_RUN_ONCE([EXTRA_LDFLAGS_PROGRAM], [$ac_i],
             [EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $ac_i"])
-      fi
-    ;;
-    -l*[)]
-      ac_ii=`echo $ac_i|cut -c 3-`
-      PHP_ADD_LIBRARY($ac_ii,1,$2)
-    ;;
-    -L*[)]
-      ac_ii=`echo $ac_i|cut -c 3-`
-      PHP_ADD_LIBPATH($ac_ii,$2)
-    ;;
-    esac
+        ])
+      ],
+      [-l*], [
+        ac_ii=$(echo $ac_i|cut -c 3-)
+        PHP_ADD_LIBRARY([$ac_ii], [yes], [$2])
+      ],
+      [-L*], [
+        ac_ii=$(echo $ac_i|cut -c 3-)
+        PHP_ADD_LIBPATH([$ac_ii], [$2])
+      ])
   done
 m4_ifnblank([$3], [m4_ifnblank([$2], [ext_shared=$_php_ext_shared_saved])])[]dnl
 ])
@@ -403,7 +403,7 @@ AC_DEFUN([PHP_EVAL_INCLINE],[
   for ac_i in $1; do
     case $ac_i in
     -I*[)]
-      ac_ii=`echo $ac_i|cut -c 3-`
+      ac_ii=$(echo $ac_i|cut -c 3-)
       PHP_ADD_INCLUDE([$ac_ii])
     ;;
     esac
@@ -462,28 +462,27 @@ AC_DEFUN([PHP_UTILIZE_RPATHS],[
     NATIVE_RPATHS="$NATIVE_RPATHS $ld_runpath_switch$i"
   done
 
-  if test "$PHP_RPATH" = "no"; then
+  AS_VAR_IF([PHP_RPATH], [no], [
     unset PHP_RPATHS
     unset NATIVE_RPATHS
-  fi
+  ])
 ])
 
 dnl
-dnl PHP_ADD_INCLUDE(path [,before])
+dnl PHP_ADD_INCLUDE(paths [,prepend])
 dnl
-dnl Add an include path. If before is 1, add in the beginning of INCLUDES.
+dnl Add blank-or-newline-separated list of include paths. If "prepend" is given,
+dnl paths are prepended to the beginning of INCLUDES.
 dnl
-AC_DEFUN([PHP_ADD_INCLUDE],[
-  if test "$1" != "/usr/include"; then
-    PHP_EXPAND_PATH($1, ai_p)
-    PHP_RUN_ONCE(INCLUDEPATH, $ai_p, [
-      if test "$2"; then
-        INCLUDES="-I$ai_p $INCLUDES"
-      else
-        INCLUDES="$INCLUDES -I$ai_p"
-      fi
-    ])
-  fi
+AC_DEFUN([PHP_ADD_INCLUDE], [
+for include_path in m4_normalize(m4_expand([$1])); do
+  AS_IF([test "$include_path" != "/usr/include"], [
+    PHP_EXPAND_PATH([$include_path], [ai_p])
+    PHP_RUN_ONCE([INCLUDEPATH], [$ai_p], [m4_ifnblank([$2],
+      [INCLUDES="-I$ai_p $INCLUDES"],
+      [INCLUDES="$INCLUDES -I$ai_p"])])
+  ])
+done
 ])
 
 dnl
@@ -635,12 +634,10 @@ dnl PHP_SET_LIBTOOL_VARIABLE(var)
 dnl
 dnl Set libtool variable.
 dnl
-AC_DEFUN([PHP_SET_LIBTOOL_VARIABLE],[
-  if test -z "$LIBTOOL"; then
-    LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
-  else
-    LIBTOOL="$LIBTOOL $1"
-  fi
+AC_DEFUN([PHP_SET_LIBTOOL_VARIABLE], [
+AS_VAR_IF([LIBTOOL],,
+  [LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'],
+  [LIBTOOL="$LIBTOOL $1"])
 ])
 
 dnl ----------------------------------------------------------------------------
@@ -657,7 +654,7 @@ ext_output="yes, shared"
 ext_shared=yes
 case [$]$1 in
 shared,*[)]
-  $1=`echo "[$]$1"|$SED 's/^shared,//'`
+  $1=$(echo "[$]$1"|$SED 's/^shared,//')
   ;;
 shared[)]
   $1=yes
@@ -749,18 +746,20 @@ dnl ----------------------------------------------------------------------------
 dnl
 dnl PHP_BUILD_THREAD_SAFE
 dnl
-AC_DEFUN([PHP_BUILD_THREAD_SAFE], [enable_zts=yes])
+AC_DEFUN([PHP_BUILD_THREAD_SAFE], [m4_warn([obsolete],
+  [The macro 'PHP_BUILD_THREAD_SAFE' is obsolete. Set 'enable_zts' manually.])
+  enable_zts=yes])
 
 dnl
 dnl PHP_REQUIRE_CXX
 dnl
-AC_DEFUN([PHP_REQUIRE_CXX],[
-  if test -z "$php_cxx_done"; then
-    AC_PROG_CXX
-    AC_PROG_CXXCPP
-    PHP_ADD_LIBRARY([stdc++])
-    php_cxx_done=yes
-  fi
+AC_DEFUN([PHP_REQUIRE_CXX], [
+AS_VAR_IF([php_cxx_done],, [
+  AC_PROG_CXX
+  AC_PROG_CXXCPP
+  PHP_ADD_LIBRARY([stdc++])
+  php_cxx_done=yes
+])
 ])
 
 dnl
@@ -834,11 +833,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
   install_modules="install-modules"
   suffix=la
 
-  case $host_alias in
-    *aix*[)]
-      additional_flags="-Wl,-G"
-      ;;
-  esac
+  AS_CASE([$host_alias], [*aix*], [additional_flags="-Wl,-G"])
 
   if test "x$5" = "xyes"; then
     PHP_ZEND_EX="$PHP_ZEND_EX \$(phplibdir)/$1.$suffix"
@@ -861,8 +856,9 @@ dnl PHP_SELECT_SAPI(name, type[, sources [, extra-cflags]])
 dnl
 dnl When developing PHP SAPI modules, this macro specifies the SAPI "name" by
 dnl its "type", how PHP is supposed to be built (static, shared, bundle, or
-dnl program). It optionally adds the source files "sources" and compilation
-dnl flags "extra-cflags" to build the SAPI-specific objects. For example:
+dnl program). It optionally adds the blank-or-newline-separated source files
+dnl "sources" and compilation flags "extra-cflags" to build the SAPI-specific
+dnl objects. For example:
 dnl   PHP_SELECT_SAPI([apache2handler],
 dnl     [shared],
 dnl     [<sources...>],
@@ -908,12 +904,15 @@ AC_DEFUN([PHP_SELECT_SAPI],[
 dnl
 dnl PHP_ADD_BUILD_DIR(dirs [, create])
 dnl
-dnl Add build directories and directories required for the out-of-source builds.
-dnl When "create" is given, the provided "dirs" are created immediately upon
-dnl macro invocation, instead of deferring it to the PHP_GEN_BUILD_DIRS.
+dnl Add blank-or-newline-separated list of build directories or directories
+dnl required for the out-of-source builds. When "create" is given, the provided
+dnl "dirs" are created immediately upon macro invocation, instead of deferring
+dnl them to the PHP_GEN_BUILD_DIRS.
 dnl
-AC_DEFUN([PHP_ADD_BUILD_DIR],[
-  ifelse($2,,[BUILD_DIR="$BUILD_DIR $1"], [$php_shtool mkdir -p $1])
+AC_DEFUN([PHP_ADD_BUILD_DIR],
+[m4_ifblank([$2],
+  [AS_VAR_APPEND([BUILD_DIR], [" m4_normalize(m4_expand([$1]))"])],
+  [$php_shtool mkdir -p m4_normalize(m4_expand([$1]))])
 ])
 
 dnl
@@ -930,8 +929,8 @@ dnl
 dnl Includes an extension in the build.
 dnl
 dnl "extname" is the name of the extension.
-dnl "sources" is a list of files relative to the subdir which are used to build
-dnl the extension.
+dnl "sources" is a blank-or-newline-separated list of source files relative to
+dnl the subdir which are used to build the extension.
 dnl "shared" can be set to "shared" or "yes" to build the extension as a
 dnl dynamically loadable library. Optional parameter "sapi_class" can be set to
 dnl "cli" to mark extension build only with CLI or CGI sapi's. "extra-cflags"
@@ -944,7 +943,7 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_srcdir=[]PHP_EXT_SRCDIR()
   ext_dir=[]PHP_EXT_DIR()
 
-  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g`])
+  ifelse($5,,ac_extra=,[ac_extra=$(echo "m4_normalize(m4_expand([$5]))"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g)])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
@@ -1040,7 +1039,7 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
     LIBS=
     old_LDFLAGS=$LDFLAGS
     LDFLAGS=
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
+    AC_RUN_IFELSE([AC_LANG_SOURCE([#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <inttypes.h>
@@ -1056,8 +1055,8 @@ int main(void)
   fprintf(fp, "%d\n", sizeof($1));
   return(0);
 }
-  ]])], [
-    eval $php_cache_value=`cat conftestval`
+  ])], [
+    eval $php_cache_value=$(cat conftestval)
   ], [
     eval $php_cache_value=0
   ], [
@@ -1141,8 +1140,8 @@ dnl PHP_DOES_PWRITE_WORK
 dnl
 dnl Internal.
 dnl
-AC_DEFUN([PHP_DOES_PWRITE_WORK],[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_DEFUN([PHP_DOES_PWRITE_WORK], [
+AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -1159,14 +1158,10 @@ $1
     if (pwrite(fd, "text", 4, -1) != -1 || errno != EINVAL) return 1;
     return 0;
     }
-
-  ]])],[
-    ac_cv_pwrite=yes
-  ],[
-    ac_cv_pwrite=no
-  ],[
-    ac_cv_pwrite=no
-  ])
+  ])],
+  [php_cv_func_pwrite=yes],
+  [php_cv_func_pwrite=no],
+  [php_cv_func_pwrite=no])
 ])
 
 dnl
@@ -1174,9 +1169,9 @@ dnl PHP_DOES_PREAD_WORK
 dnl
 dnl Internal.
 dnl
-AC_DEFUN([PHP_DOES_PREAD_WORK],[
-  echo test > conftest_pread
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_DEFUN([PHP_DOES_PREAD_WORK], [
+echo test > conftest_pread
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -1193,61 +1188,52 @@ $1
     if (pread(fd, buf, 2, -1) != -1 || errno != EINVAL) return 1;
     return 0;
     }
-  ]])],[
-    ac_cv_pread=yes
-  ],[
-    ac_cv_pread=no
-  ],[
-    ac_cv_pread=no
-  ])
+  ]])],
+  [php_cv_func_pread=yes],
+  [php_cv_func_pread=no],
+  [php_cv_func_pread=no])
 ])
 
 dnl
 dnl PHP_PWRITE_TEST
 dnl
-AC_DEFUN([PHP_PWRITE_TEST],[
-  AC_CACHE_CHECK(whether pwrite works,ac_cv_pwrite,[
-    PHP_DOES_PWRITE_WORK
-    if test "$ac_cv_pwrite" = "no"; then
-      PHP_DOES_PWRITE_WORK([ssize_t pwrite(int, void *, size_t, off64_t);])
-      if test "$ac_cv_pwrite" = "yes"; then
-        ac_cv_pwrite=64
-      fi
-    fi
+AC_DEFUN([PHP_PWRITE_TEST], [
+AC_CACHE_CHECK([whether pwrite works], [php_cv_func_pwrite], [
+  PHP_DOES_PWRITE_WORK
+  AS_VAR_IF([php_cv_func_pwrite], [no], [
+    PHP_DOES_PWRITE_WORK([ssize_t pwrite(int, void *, size_t, off64_t);])
+    AS_VAR_IF([php_cv_func_pwrite], [yes], [php_cv_func_pwrite=64])
   ])
+])
 
-  if test "$ac_cv_pwrite" != "no"; then
-    AC_DEFINE([HAVE_PWRITE], [1],
-      [Define to 1 if you have the 'pwrite' function.])
-    if test "$ac_cv_pwrite" = "64"; then
-      AC_DEFINE([PHP_PWRITE_64], [1],
-        [Define to 1 if 'pwrite' declaration with 'off64_t' is missing.])
-    fi
-  fi
+AS_VAR_IF([php_cv_func_pwrite], [no],, [
+  AC_DEFINE([HAVE_PWRITE], [1],
+    [Define to 1 if you have the 'pwrite' function.])
+  AS_VAR_IF([php_cv_func_pwrite], [64],
+    [AC_DEFINE([PHP_PWRITE_64], [1],
+      [Define to 1 if 'pwrite' declaration with 'off64_t' is missing.])])
+])
 ])
 
 dnl
 dnl PHP_PREAD_TEST
 dnl
-AC_DEFUN([PHP_PREAD_TEST],[
-  AC_CACHE_CHECK(whether pread works,ac_cv_pread,[
-    PHP_DOES_PREAD_WORK
-    if test "$ac_cv_pread" = "no"; then
-      PHP_DOES_PREAD_WORK([ssize_t pread(int, void *, size_t, off64_t);])
-      if test "$ac_cv_pread" = "yes"; then
-        ac_cv_pread=64
-      fi
-    fi
+AC_DEFUN([PHP_PREAD_TEST], [
+AC_CACHE_CHECK([whether pread works], [php_cv_func_pread], [
+  PHP_DOES_PREAD_WORK
+  AS_VAR_IF([php_cv_func_pread], [no], [
+    PHP_DOES_PREAD_WORK([ssize_t pread(int, void *, size_t, off64_t);])
+    AS_VAR_IF([php_cv_func_pread], [yes], [php_cv_func_pread=64])
   ])
+])
 
-  if test "$ac_cv_pread" != "no"; then
-    AC_DEFINE([HAVE_PREAD], [1],
-      [Define to 1 if you have the 'pread' function.])
-    if test "$ac_cv_pread" = "64"; then
-      AC_DEFINE([PHP_PREAD_64], [1],
-        [Define to 1 if 'pread' declaration with 'off64_t' is missing.])
-    fi
-  fi
+AS_VAR_IF([php_cv_func_pread], [no],, [
+  AC_DEFINE([HAVE_PREAD], [1],
+    [Define to 1 if you have the 'pread' function.])
+  AS_VAR_IF([php_cv_func_pread], [64],
+    [AC_DEFINE([PHP_PREAD_64], [1],
+      [Define to 1 if 'pread' declaration with 'off64_t' is missing.])])
+])
 ])
 
 dnl
@@ -1299,24 +1285,21 @@ dnl
 dnl Some systems, notably Solaris, cause getcwd() or realpath to fail if a
 dnl component of the path has execute but not read permissions.
 dnl
-AC_DEFUN([PHP_BROKEN_GETCWD],[
-  AC_MSG_CHECKING([for broken getcwd])
-  os=`uname -sr 2>/dev/null`
-  case $os in
-    SunOS*[)]
-      AC_DEFINE([HAVE_BROKEN_GETCWD], [1],
-        [Define to 1 if system has a broken 'getcwd'.])
-      AC_MSG_RESULT([yes]);;
-    *[)]
-      AC_MSG_RESULT([no]);;
-  esac
+AC_DEFUN([PHP_BROKEN_GETCWD], [
+AC_CACHE_CHECK([for broken getcwd], [php_cv_func_getcwd_broken],
+  [AS_CASE([$host_alias],
+    [*solaris*], [php_cv_func_getcwd_broken=yes],
+    [php_cv_func_getcwd_broken=no])])
+AS_VAR_IF([php_cv_func_getcwd_broken], [yes],
+  [AC_DEFINE([HAVE_BROKEN_GETCWD], [1],
+    [Define to 1 if system has a broken 'getcwd'.])])
 ])
 
 dnl
 dnl PHP_BROKEN_GCC_STRLEN_OPT
 dnl
 dnl Early releases of GCC 8 shipped with a strlen() optimization bug, so they
-dnl didn't properly handle the `char val[1]` struct hack. See bug #76510.
+dnl didn't properly handle the 'char val[1]' struct hack. See bug #76510.
 dnl
 AC_DEFUN([PHP_BROKEN_GCC_STRLEN_OPT],
 [AC_CACHE_CHECK([for broken gcc optimize-strlen],
@@ -1531,17 +1514,18 @@ dnl PHP_TEST_BUILD(function, action-if-ok, action-if-not-ok [, extra-libs [, ext
 dnl
 dnl This macro checks whether build works and given function exists.
 dnl
-AC_DEFUN([PHP_TEST_BUILD], [
+AC_DEFUN([PHP_TEST_BUILD], [m4_warn([obsolete],
+  [The macro 'PHP_TEST_BUILD' is obsolete. Use AC_* macros.])
   old_LIBS=$LIBS
   LIBS="$4 $LIBS"
-  AC_LINK_IFELSE([AC_LANG_SOURCE([[
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
     $5
     char $1(void);
     int main(void) {
       $1();
       return 0;
     }
-  ]])],[
+  ])],[
     LIBS=$old_LIBS
     $2
   ],[
@@ -1563,22 +1547,22 @@ dnl
 dnl Determines shared library suffix SHLIB_DL_SUFFIX_NAME suffix can be: .so or
 dnl .sl
 dnl
-AC_DEFUN([PHP_SHLIB_SUFFIX_NAMES],[
- AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
- PHP_SUBST_OLD([SHLIB_SUFFIX_NAME])
- PHP_SUBST_OLD([SHLIB_DL_SUFFIX_NAME])
- SHLIB_SUFFIX_NAME=so
- SHLIB_DL_SUFFIX_NAME=$SHLIB_SUFFIX_NAME
- case $host_alias in
- *hpux*[)]
-   SHLIB_SUFFIX_NAME=sl
-   SHLIB_DL_SUFFIX_NAME=sl
-   ;;
- *darwin*[)]
-   SHLIB_SUFFIX_NAME=dylib
-   SHLIB_DL_SUFFIX_NAME=so
-   ;;
- esac
+AC_DEFUN([PHP_SHLIB_SUFFIX_NAMES], [
+AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
+AS_CASE([$host_alias],
+  [*hpux*], [
+    SHLIB_SUFFIX_NAME=sl
+    SHLIB_DL_SUFFIX_NAME=sl
+  ],
+  [*darwin*], [
+    SHLIB_SUFFIX_NAME=dylib
+    SHLIB_DL_SUFFIX_NAME=so
+  ], [
+    SHLIB_SUFFIX_NAME=so
+    SHLIB_DL_SUFFIX_NAME=$SHLIB_SUFFIX_NAME
+  ])
+PHP_SUBST_OLD([SHLIB_SUFFIX_NAME])
+PHP_SUBST_OLD([SHLIB_DL_SUFFIX_NAME])
 ])
 
 dnl
@@ -1630,27 +1614,23 @@ dnl
 dnl Some vendors force mawk before gawk; mawk is broken so we don't like that.
 dnl
 AC_DEFUN([PHP_PROG_AWK], [
-  AC_CHECK_PROGS([AWK], [gawk nawk awk mawk], [bork], [/usr/xpg4/bin/:$PATH])
-  case "$AWK" in
-    *mawk)
-      AC_MSG_WARN([mawk is known to have problems on some systems. You should install GNU awk])
-      ;;
-    *gawk)
-      ;;
-    bork)
-      AC_MSG_ERROR([Could not find awk; Install GNU awk])
-      ;;
-    *)
-      AC_MSG_CHECKING([if $AWK is broken])
-      if ! $AWK 'function foo() {}' >/dev/null 2>&1 ; then
-        AC_MSG_RESULT([yes])
-        AC_MSG_ERROR([You should install GNU awk])
-      else
-        AC_MSG_RESULT([no])
-      fi
-      ;;
-  esac
-  PHP_SUBST([AWK])
+AC_CHECK_PROGS([AWK], [gawk nawk awk mawk], [bork], [/usr/xpg4/bin/:$PATH])
+AS_CASE([$AWK],
+  [*mawk],
+    [AC_MSG_WARN(m4_text_wrap([
+      mawk is known to have problems on some systems. You should install GNU awk
+    ]))],
+  [*gawk], [],
+  [bork], [AC_MSG_ERROR([Could not find awk; Install GNU awk])],
+  [
+    AC_MSG_CHECKING([if $AWK is broken])
+    AS_IF([! $AWK 'function foo() {}' >/dev/null 2>&1], [
+      AC_MSG_RESULT([yes])
+      AC_MSG_ERROR([You should install GNU awk])
+    ],
+    [AC_MSG_RESULT([no])])
+  ])
+PHP_SUBST([AWK])
 ])
 
 dnl
@@ -1676,7 +1656,7 @@ AC_DEFUN([PHP_PROG_BISON], [
     ac_IFS=$IFS; IFS="."
     set $php_bison_version
     IFS=$ac_IFS
-    php_bison_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
+    php_bison_num=$(expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0})
     php_bison_branch="[$]1.[$]2"
     php_bison_check=ok
 
@@ -1686,7 +1666,7 @@ AC_DEFUN([PHP_PROG_BISON], [
       ac_IFS=$IFS; IFS="."
       set $php_bison_required_version
       IFS=$ac_IFS
-      php_bison_required_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
+      php_bison_required_num=$(expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0})
       php_bison_required_version="$php_bison_required_version or later"
 
       if test -z "$php_bison_num" || test "$php_bison_num" -lt "$php_bison_required_num"; then
@@ -1736,82 +1716,57 @@ dnl
 AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG([RE2C], [re2c], [re2c])
 
-  ifelse($1,,php_re2c_required_version='',php_re2c_required_version="$1")
-
-  if test -n "$RE2C"; then
+  php_re2c_check=
+  AS_VAR_IF([RE2C],,, [
     AC_MSG_CHECKING([for re2c version])
 
     php_re2c_version=$($RE2C --version | cut -d ' ' -f 2 2>/dev/null)
-    if test -z "$php_re2c_version"; then
-      php_re2c_version=0.0.0
-    fi
-    ac_IFS=$IFS; IFS="."
-    set $php_re2c_version
-    IFS=$ac_IFS
-    php_re2c_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
+
     php_re2c_check=ok
+    AS_VERSION_COMPARE([$php_re2c_version], [$1],
+      [php_re2c_check=invalid])
 
-    if test -z "$php_re2c_required_version" && test -z "$php_re2c_num"; then
-      php_re2c_check=invalid
-    elif test -n "$php_re2c_required_version"; then
-      ac_IFS=$IFS; IFS="."
-      set $php_re2c_required_version
-      IFS=$ac_IFS
-      php_re2c_required_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
-      php_re2c_required_version="$php_re2c_required_version or later"
+    AS_VAR_IF([php_re2c_check], [invalid],
+      [AC_MSG_RESULT([$php_re2c_version (too old)])],
+      [AC_MSG_RESULT([$php_re2c_version (ok)])])
+  ])
 
-      if test -z "$php_re2c_num" || test "$php_re2c_num" -lt "$php_re2c_required_num"; then
-        php_re2c_check=invalid
-      fi
-    fi
-
-    if test "$php_re2c_check" != "invalid"; then
-      AC_MSG_RESULT([$php_re2c_version (ok)])
-    else
-      AC_MSG_RESULT([$php_re2c_version (too old)])
-    fi
-  fi
-
-  case $php_re2c_check in
-    ""|invalid[)]
-      if test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
+  AS_CASE([$php_re2c_check],
+    [""|invalid], [
+      AS_IF([test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"], [
         AC_MSG_ERROR(m4_text_wrap([
-          re2c $php_re2c_required_version or newer is required to generate PHP
-          lexers.
+          re2c $1 or newer is required to generate PHP lexers.
         ]))
-      fi
+      ])
 
       RE2C="exit 0;"
-      ;;
-  esac
+    ])
 
   PHP_SUBST([RE2C])
   AS_VAR_SET([RE2C_FLAGS], m4_normalize(["$2"]))
   PHP_SUBST([RE2C_FLAGS])
 ])
 
-AC_DEFUN([PHP_PROG_PHP],[
-  AC_CHECK_PROG([PHP], [php], [php])
-
-  if test -n "$PHP"; then
-    AC_MSG_CHECKING([for php version])
-    php_version=$($PHP -v | head -n1 | cut -d ' ' -f 2 | cut -d '-' -f 1)
-    if test -z "$php_version"; then
-      php_version=0.0.0
-    fi
-    ac_IFS=$IFS; IFS="."
-    set $php_version
-    IFS=$ac_IFS
-    php_version_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
-    dnl Minimum supported version for gen_stub.php is PHP 7.4.
-    if test "$php_version_num" -lt 70400; then
-      AC_MSG_RESULT([$php_version (too old)])
-      unset PHP
-    else
-      AC_MSG_RESULT([$php_version (ok)])
-    fi
-  fi
-  PHP_SUBST([PHP])
+dnl
+dnl PHP_PROG_PHP([min-version])
+dnl
+dnl Find PHP command-line interface SAPI on the system and check if version is
+dnl greater or equal to "min-version". If suitable version is found, the PHP
+dnl variable is set and substituted to a Makefile variable. Used for generating
+dnl files and running PHP utilities during the build.
+dnl
+AC_DEFUN([PHP_PROG_PHP],
+[m4_if([$1],, [php_required_version=7.4], [php_required_version=$1])
+AC_CHECK_PROG([PHP], [php], [php])
+AS_VAR_IF([PHP],,, [
+AC_MSG_CHECKING([for php version])
+php_version=$($PHP -v | head -n1 | cut -d ' ' -f 2)
+AS_VERSION_COMPARE([$php_version], [$php_required_version], [unset PHP])
+AS_VAR_IF([PHP],,
+  [AC_MSG_RESULT([$php_version (too old, install $php_required_version or later)])],
+  [AC_MSG_RESULT([$php_version (ok)])])
+])
+PHP_SUBST([PHP])
 ])
 
 dnl ----------------------------------------------------------------------------
@@ -1934,7 +1889,7 @@ dnl
 dnl Common setup macro for libxml.
 dnl
 AC_DEFUN([PHP_SETUP_LIBXML], [
-  PKG_CHECK_MODULES([LIBXML], [libxml-2.0 >= 2.9.0])
+  PKG_CHECK_MODULES([LIBXML], [libxml-2.0 >= 2.9.4])
   PHP_EVAL_INCLINE([$LIBXML_CFLAGS])
   PHP_EVAL_LIBLINE([$LIBXML_LIBS], [$1])
   $2
@@ -2052,24 +2007,25 @@ dnl Misc. macros
 dnl ----------------------------------------------------------------------------
 
 dnl
-dnl PHP_INSTALL_HEADERS(path [, file ...])
+dnl PHP_INSTALL_HEADERS(path [, files ...])
 dnl
-dnl PHP header files to be installed.
+dnl Add PHP header files to the list to be installed on the system. The "files"
+dnl argument is a blank-or-newline-separated list of header files or directories
+dnl located in the "path". If 2nd argument is not given, it installs header
+dnl files in all paths from the blank-or-newline-separated "path" argument.
 dnl
-AC_DEFUN([PHP_INSTALL_HEADERS],[
-  ifelse([$2],[],[
-    for header_file in $1; do
-      PHP_RUN_ONCE(INSTALLHEADERS, $header_file, [
-        INSTALL_HEADERS="$INSTALL_HEADERS $header_file"
-      ])
+AC_DEFUN([PHP_INSTALL_HEADERS],
+  [m4_ifblank([$2], [
+    for header_file in m4_normalize(m4_expand([$1])); do
+      PHP_RUN_ONCE([INSTALLHEADERS], [$header_file],
+        [INSTALL_HEADERS="$INSTALL_HEADERS $header_file"])
     done
   ], [
     header_path=$1
-    for header_file in $2; do
+    for header_file in m4_normalize(m4_expand([$2])); do
       hp_hf="$header_path/$header_file"
-      PHP_RUN_ONCE(INSTALLHEADERS, $hp_hf, [
-        INSTALL_HEADERS="$INSTALL_HEADERS $hp_hf"
-      ])
+      PHP_RUN_ONCE([INSTALLHEADERS], [$hp_hf],
+        [INSTALL_HEADERS="$INSTALL_HEADERS $hp_hf"])
     done
   ])
 ])
@@ -2079,16 +2035,17 @@ dnl PHP_AP_EXTRACT_VERSION(/path/httpd)
 dnl
 dnl This macro is used to get a comparable version for Apache.
 dnl
-AC_DEFUN([PHP_AP_EXTRACT_VERSION],[
+AC_DEFUN([PHP_AP_EXTRACT_VERSION], [m4_warn([obsolete],
+  [The macro 'PHP_AP_EXTRACT_VERSION' is obsolete. Use 'apxs -q HTTPD_VERSION'])
 AS_IF([test -x "$1"], [
-  ac_output=`$1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//'`
+  ac_output=$($1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//')
   ac_IFS=$IFS
 IFS="- /.
 "
   set $ac_output
   IFS=$ac_IFS
 
-  APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
+  APACHE_VERSION=$(expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6)
 ])
 ])
 
@@ -2117,14 +2074,14 @@ EOF
     eval val=\$$var
     if test -n "$val"; then
       echo "$var='$val' \\" >> $1
-      if test `expr "X$ac_configure_args" : ".*${var}.*"` != 0; then
-        clean_configure_args=$(echo $clean_configure_args | sed -e "s#'$var=$val'##")
+      if test $(expr "X$ac_configure_args" : ".*${var}.*") != 0; then
+        clean_configure_args=$(echo $clean_configure_args | $SED -e "s#'$var=$val'##")
       fi
     fi
   done
 
   echo "'[$]0' \\" >> $1
-  if test `expr " [$]0" : " '.*"` = 0; then
+  if test $(expr " [$]0" : " '.*") = 0; then
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND '[$]0'"
   else
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND [$]0"
@@ -2132,12 +2089,12 @@ EOF
   CONFIGURE_ARGS="$clean_configure_args"
   while test "X$CONFIGURE_ARGS" != "X";
   do
-   if CURRENT_ARG=`expr "X$CONFIGURE_ARGS" : "X *\('[[^']]*'\)"`
+   if CURRENT_ARG=$(expr "X$CONFIGURE_ARGS" : "X *\('[[^']]*'\)")
    then
-     CONFIGURE_ARGS=`expr "X$CONFIGURE_ARGS" : "X *'[[^']]*' \(.*\)"`
-   elif CURRENT_ARG=`expr "X$CONFIGURE_ARGS" : "X *\([[^ ]]*\)"`
+     CONFIGURE_ARGS=$(expr "X$CONFIGURE_ARGS" : "X *'[[^']]*' \(.*\)")
+   elif CURRENT_ARG=$(expr "X$CONFIGURE_ARGS" : "X *\([[^ ]]*\)")
    then
-     CONFIGURE_ARGS=`expr "X$CONFIGURE_ARGS" : "X *[[^ ]]* \(.*\)"`
+     CONFIGURE_ARGS=$(expr "X$CONFIGURE_ARGS" : "X *[[^ ]]* \(.*\)")
      CURRENT_ARG="'$CURRENT_ARG'"
    else
     break
@@ -2316,7 +2273,7 @@ AC_DEFUN([PHP_INIT_DTRACE],
 dnl Set paths properly when called from extension.
   case "$4" in
     ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir;;
-    /*[)] ac_srcdir=`echo "$4"|cut -c 2-`"/"; ac_bdir=$ac_srcdir;;
+    /*[)] ac_srcdir=$(echo "$4"|cut -c 2-)"/"; ac_bdir=$ac_srcdir;;
     *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$4/";;
   esac
 
@@ -2359,7 +2316,7 @@ dnl DTrace objects.
   case [$]php_sapi_module in
   shared[)]
     for ac_lo in $PHP_DTRACE_OBJS; do
-      dtrace_objs="[$]dtrace_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+      dtrace_objs="[$]dtrace_objs $(echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#')"
     done;
     ;;
   *[)]
@@ -2383,12 +2340,12 @@ EOF
 
   case $host_alias in
   *solaris*|*linux*|*freebsd*)
-    dtrace_prov_name="`echo $ac_provsrc | $SED -e 's#\(.*\)\/##'`.o"
-    dtrace_lib_dir="`echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/[^/]*#\1#'`/.libs"
-    dtrace_d_obj="`echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/\([^/]*\)#\1/.libs/\2#'`.o"
+    dtrace_prov_name="$(echo $ac_provsrc | $SED -e 's#\(.*\)\/##').o"
+    dtrace_lib_dir="$(echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/[^/]*#\1#')/.libs"
+    dtrace_d_obj="$(echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/\([^/]*\)#\1/.libs/\2#').o"
     dtrace_nolib_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
     for ac_lo in $PHP_DTRACE_OBJS; do
-      dtrace_lib_objs="[$]dtrace_lib_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+      dtrace_lib_objs="[$]dtrace_lib_objs $(echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#')"
     done;
     dnl Always attempt to create both PIC and non-PIC DTrace objects (Bug 63692)
     cat>>Makefile.objects<<EOF
@@ -2575,4 +2532,16 @@ AS_VAR_IF([php_var], [yes],
   [AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_ATTRIBUTE_$1]), [1],
     [Define to 1 if the compiler supports the '$1' variable attribute.])])
 AS_VAR_POPDEF([php_var])
+])
+
+dnl
+dnl PHP_REMOVE_OPTIMIZATION_FLAGS
+dnl
+dnl Removes known compiler optimization flags like -O, -O0, -O1, ..., -Ofast
+dnl from CFLAGS and CXXFLAGS.
+dnl
+AC_DEFUN([PHP_REMOVE_OPTIMIZATION_FLAGS], [
+  sed_script='s/\([[\t ]]\|^\)-O\([[0-9gsz]]\|fast\|\)\([[\t ]]\|$\)/\1/g'
+  CFLAGS=$(echo "$CFLAGS" | $SED -e "$sed_script")
+  CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e "$sed_script")
 ])

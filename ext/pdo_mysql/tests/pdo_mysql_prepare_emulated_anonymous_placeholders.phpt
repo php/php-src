@@ -161,7 +161,7 @@ $db = MySQLPDOTest::factory();
 $db->query('DROP TABLE IF EXISTS test_prepare_emulated_anonymous_placeholder');
 ?>
 --EXPECTF--
-PDO::prepare(): Argument #1 ($query) cannot be empty
+PDO::prepare(): Argument #1 ($query) must not be empty
 array(1) {
   [0]=>
   array(1) {
