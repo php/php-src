@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
     (nielsdos)
 
+- TSRM:
+  . Prevent closing of unrelated handles. (cmb)
+
 - XML:
   . Fixed bug GH-15868 (Assertion failure in xml_parse_into_struct after
     exception). (nielsdos)
