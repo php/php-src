@@ -23,6 +23,8 @@
 #include "func_interceptors.h"
 #include "ext/standard/php_var.h"
 
+int nonsense;
+
 static void destroy_phar_data(zval *zv);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
