@@ -177,7 +177,7 @@ Since: DOM Level 3
 */
 zend_result dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 {
-	/* This was never implemented, and is dropped from teh modern-day DOM spec.
+	/* This was never implemented, and is dropped from the modern-day DOM spec.
 	 * It only exists in old DOM to preserve BC. */
 	ZVAL_NULL(retval);
 	return SUCCESS;
