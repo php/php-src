@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0RC2
 
+- Opcache:
+  . Fixed bug GH-16009 (Segmentation fault with frameless functions and
+    undefined CVs). (nielsdos)
 
 26 Sep 2024, PHP 8.4.0RC1
 
