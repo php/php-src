@@ -1175,7 +1175,7 @@ static zend_result bcmath_number_parse_num(zval *zv, zend_object **obj, zend_str
 
 			case IS_NULL:
 				*lval = 0;
-				return SUCCESS;
+				return FAILURE;
 
 			default:
 				return zend_parse_arg_str_or_long_slow(zv, str, lval, 1 /* dummy */) ? SUCCESS : FAILURE;
@@ -1234,9 +1234,12 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 	bc_num n2 = NULL;
 	size_t n1_full_scale;
 	size_t n2_full_scale;
-	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n1, &n1_full_scale, obj1, str1, lval1) == FAILURE ||
-		bc_num_from_obj_or_str_or_long(&n2, &n2_full_scale, obj2, str2, lval2) == FAILURE)) {
-		zend_value_error("Number is not well-formed");
+	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n1, &n1_full_scale, obj1, str1, lval1) == FAILURE)) {
+		zend_value_error("Left string operand cannot be converted to BcMath\\Number");
+		goto fail;
+	}
+	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n2, &n2_full_scale, obj2, str2, lval2) == FAILURE)) {
+		zend_value_error("Right string operand cannot be converted to BcMath\\Number");
 		goto fail;
 	}
 
@@ -1317,28 +1320,31 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 	bc_num n1 = NULL;
 	bc_num n2 = NULL;
 
+	int ret = ZEND_UNCOMPARABLE;
+
 	if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &lval1) == FAILURE)) {
-		goto fallback;
+		goto failure;
 	}
 
 	if (UNEXPECTED(bcmath_number_parse_num(op2, &obj2, &str2, &lval2) == FAILURE)) {
-		goto fallback;
+		goto failure;
 	}
 
 	size_t n1_full_scale;
 	size_t n2_full_scale;
 	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n1, &n1_full_scale, obj1, str1, lval1) == FAILURE ||
 		bc_num_from_obj_or_str_or_long(&n2, &n2_full_scale, obj2, str2, lval2) == FAILURE)) {
-		goto fallback;
+		goto failure;
 	}
 
 	if (UNEXPECTED(CHECK_SCALE_OVERFLOW(n1_full_scale) || CHECK_SCALE_OVERFLOW(n2_full_scale))) {
 		zend_value_error("scale must be between 0 and %d", INT_MAX);
-		goto fallback;
+		goto failure;
 	}
 
-	bcmath_compare_result ret = bc_compare(n1, n2, MAX(n1->n_scale, n2->n_scale));
+	ret = bc_compare(n1, n2, MAX(n1->n_scale, n2->n_scale));
 
+failure:
 	if (Z_TYPE_P(op1) != IS_OBJECT) {
 		bc_free_num(&n1);
 	}
@@ -1346,10 +1352,7 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 		bc_free_num(&n2);
 	}
 
-	return (int) ret;
-
-fallback:
-	return zend_std_compare_objects(op1, op2);
+	return ret;
 }
 
 #define BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(dest_obj, ce, dest_str, dest_long) \

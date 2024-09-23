@@ -43,9 +43,9 @@ try {
 }
 ?>
 --EXPECT--
-Number is not well-formed
-Number is not well-formed
-Number is not well-formed
-Number is not well-formed
-Number is not well-formed
-Number is not well-formed
+Right string operand cannot be converted to BcMath\Number
+Right string operand cannot be converted to BcMath\Number
+Right string operand cannot be converted to BcMath\Number
+Right string operand cannot be converted to BcMath\Number
+Right string operand cannot be converted to BcMath\Number
+Right string operand cannot be converted to BcMath\Number
