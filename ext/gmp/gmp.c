@@ -619,6 +619,13 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 	case IS_STRING: {
 		return convert_zstr_to_gmp(gmpnumber, Z_STR_P(val), base, arg_pos);
 	}
+	case IS_NULL:
+		/* Just reject null for operator overloading */
+		if (arg_pos == 0) {
+			zend_type_error("Number must be of type GMP|string|int, %s given", zend_zval_type_name(val));
+			return FAILURE;
+		}
+		ZEND_FALLTHROUGH;
 	default: {
 		zend_long lval;
 		if (!zend_parse_arg_long_slow(val, &lval, arg_pos)) {
