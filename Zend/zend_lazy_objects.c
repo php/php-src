@@ -429,6 +429,9 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	ZEND_ASSERT(zend_object_is_lazy_proxy(obj));
 	ZEND_ASSERT(!zend_lazy_object_initialized(obj));
 
+	/* Prevent object from being released during initialization */
+	GC_ADDREF(obj);
+
 	zend_lazy_object_info *info = zend_lazy_object_get_info(obj);
 
 	/* prevent reentrant initialization */
@@ -440,6 +443,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	zval zobj;
 	HashTable *named_params = NULL;
 	zend_fcall_info_cache *initializer = &info->u.initializer.fcc;
+	zend_object *instance = NULL;
 
 	ZVAL_OBJ(&zobj, obj);
 
@@ -447,7 +451,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 
 	if (UNEXPECTED(EG(exception))) {
 		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
-		return NULL;
+		goto exit;
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT)) {
@@ -456,8 +460,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 				ZSTR_VAL(obj->ce->name),
 				zend_zval_value_name(&retval));
 		zval_ptr_dtor(&retval);
-		return NULL;
-
+		goto exit;
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT || !zend_lazy_object_compatible(Z_OBJ(retval), obj))) {
@@ -466,14 +469,14 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 				zend_zval_value_name(&retval),
 				ZSTR_VAL(obj->ce->name));
 		zval_ptr_dtor(&retval);
-		return NULL;
+		goto exit;
 	}
 
 	if (UNEXPECTED(Z_OBJ(retval) == obj || zend_object_is_lazy(Z_OBJ(retval)))) {
 		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		zend_throw_error(NULL, "Lazy proxy factory must return a non-lazy object");
 		zval_ptr_dtor(&retval);
-		return NULL;
+		goto exit;
 	}
 
 	zend_fcc_dtor(&info->u.initializer.fcc);
@@ -495,7 +498,18 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 		}
 	}
 
-	return Z_OBJ(retval);
+	instance = Z_OBJ(retval);
+
+exit:
+	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+		zend_throw_error(NULL, "Lazy object was released during initialization");
+		zend_objects_store_del(obj);
+		instance = NULL;
+	} else {
+		gc_check_possible_root((zend_refcounted*) obj);
+	}
+
+	return instance;
 }
 
 /* Initialize a lazy object. */
@@ -528,6 +542,9 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	if (zend_object_is_lazy_proxy(obj)) {
 		return zend_lazy_object_init_proxy(obj);
 	}
+
+	/* Prevent object from being released during initialization */
+	GC_ADDREF(obj);
 
 	zend_fcall_info_cache *initializer = zend_lazy_object_get_initializer_fcc(obj);
 
@@ -562,6 +579,7 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	int argc = 1;
 	zval zobj;
 	HashTable *named_params = NULL;
+	zend_object *instance = NULL;
 
 	ZVAL_OBJ(&zobj, obj);
 
@@ -569,14 +587,14 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 
 	if (EG(exception)) {
 		zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
-		return NULL;
+		goto exit;
 	}
 
 	if (Z_TYPE(retval) != IS_NULL) {
 		zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
 		zval_ptr_dtor(&retval);
 		zend_type_error("Lazy object initializer must return NULL or no value");
-		return NULL;
+		goto exit;
 	}
 
 	if (properties_table_snapshot) {
@@ -598,7 +616,18 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	 * zend_lazy_object_has_stale_info() check */
 	zend_lazy_object_del_info(obj);
 
-	return obj;
+	instance = obj;
+
+exit:
+	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+		zend_throw_error(NULL, "Lazy object was released during initialization");
+		zend_objects_store_del(obj);
+		instance = NULL;
+	} else {
+		gc_check_possible_root((zend_refcounted*) obj);
+	}
+
+	return instance;
 }
 
 /* Mark an object as non-lazy (after all properties were initialized) */

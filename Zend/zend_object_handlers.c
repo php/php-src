@@ -1189,6 +1189,10 @@ lazy_init:
 		variable_ptr = &EG(error_zval);
 		goto exit;
 	}
+	/* value may have changed during initialization */
+	if (UNEXPECTED(Z_ISREF_P(value))) {
+		value = Z_REFVAL_P(value);
+	}
 	return zend_std_write_property(zobj, name, value, cache_slot);
 }
 /* }}} */
