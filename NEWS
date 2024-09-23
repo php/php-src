@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug GHSA-p99j-rfp4-xqvq (Bypass of CVE-2024-4577, Parameter Injection
     Vulnerability). (CVE-2024-8926) (nielsdos)
   . Fixed bug GHSA-94p6-54jq-9mwp (cgi.force_redirect configuration is
-    byppassible due to the environment variable collision). (CVE-2024-8927)
+    bypassable due to the environment variable collision). (CVE-2024-8927)
     (nielsdos)
 
 - FPM:
