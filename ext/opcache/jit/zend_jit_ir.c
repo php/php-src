@@ -17195,7 +17195,9 @@ static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint3
 	ir_ref op1_ref = jit_ZVAL_ADDR(jit, op1_addr);
 	jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
-		zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
+		op1_ref = zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
+		op1_info |= MAY_BE_NULL;
+		op1_addr = ZEND_ADDR_REF_ZVAL(op1_ref);
 	}
 	if (op1_info & MAY_BE_REF) {
 		op1_ref = jit_ZVAL_DEREF_ref(jit, op1_ref);
@@ -17237,10 +17239,14 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 	ir_ref op2_ref = jit_ZVAL_ADDR(jit, op2_addr);
 	jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
-		zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
+		op1_ref = zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
+		op1_info |= MAY_BE_NULL;
+		op1_addr = ZEND_ADDR_REF_ZVAL(op1_ref);
 	}
 	if (opline->op2_type == IS_CV && (op2_info & MAY_BE_UNDEF)) {
-		zend_jit_zval_check_undef(jit, op2_ref, opline->op2.var, opline, 1);
+		op2_ref = zend_jit_zval_check_undef(jit, op2_ref, opline->op2.var, opline, 1);
+		op2_info |= MAY_BE_NULL;
+		op2_addr = ZEND_ADDR_REF_ZVAL(op2_ref);
 	}
 	if (op1_info & MAY_BE_REF) {
 		op1_ref = jit_ZVAL_DEREF_ref(jit, op1_ref);
@@ -17296,13 +17302,19 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 	ir_ref op3_ref = jit_ZVAL_ADDR(jit, op3_addr);
 	jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
-		zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
+		op1_ref = zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
+		op1_info |= MAY_BE_NULL;
+		op1_addr = ZEND_ADDR_REF_ZVAL(op1_ref);
 	}
 	if (opline->op2_type == IS_CV && (op2_info & MAY_BE_UNDEF)) {
-		zend_jit_zval_check_undef(jit, op2_ref, opline->op2.var, opline, 1);
+		op2_ref = zend_jit_zval_check_undef(jit, op2_ref, opline->op2.var, opline, 1);
+		op2_info |= MAY_BE_NULL;
+		op2_addr = ZEND_ADDR_REF_ZVAL(op2_ref);
 	}
 	if ((opline+1)->op1_type == IS_CV && (op1_data_info & MAY_BE_UNDEF)) {
-		zend_jit_zval_check_undef(jit, op3_ref, (opline+1)->op1.var, opline, 1);
+		op3_ref = zend_jit_zval_check_undef(jit, op3_ref, (opline+1)->op1.var, opline, 1);
+		op1_data_info |= MAY_BE_NULL;
+		op3_addr = ZEND_ADDR_REF_ZVAL(op3_ref);
 	}
 	if (op1_info & MAY_BE_REF) {
 		op1_ref = jit_ZVAL_DEREF_ref(jit, op1_ref);
