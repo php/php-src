@@ -7,8 +7,9 @@ Rein Velt (rein@velt.org)
 curl
 --SKIPIF--
 <?php
-if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin" && php_uname("m") === "x86_64") {
-    die("xfail Test fails for unknown reasons");
+if (curl_version()['version_number'] === 0x080a00) {
+    // https://github.com/php/php-src/issues/15997
+    die('xfail due to a libcurl bug');
 }
 ?>
 --FILE--
