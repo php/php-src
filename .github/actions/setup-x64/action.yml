@@ -8,6 +8,7 @@ runs:
         set -x
 
         sudo service mysql start
+    - shell: bash
       run: |
         sudo systemctl status mysql.service
         sudo journalctl -xeu mysql.service
