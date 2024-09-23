@@ -334,8 +334,19 @@ static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 }
 /* }}} */
 
-static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2, zend_uchar opcode) {
-	zend_long shift = zval_get_long(op2);
+static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2, zend_uchar opcode) {
+	zend_long shift = 0;
+
+	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
+		if (UNEXPECTED(!IS_GMP(op2))) {
+			goto typeof_op_failure;
+		} else {
+			// TODO We shouldn't cast the GMP object to int here
+			shift = zval_get_long(op2);
+		}
+	} else {
+		shift = Z_LVAL_P(op2);
+	}
 
 	if (shift < 0) {
 		zend_throw_error(
@@ -343,16 +354,51 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 			opcode == ZEND_POW ? "Exponent" : "Shift"
 		);
 		ZVAL_UNDEF(return_value);
-		return;
+		return FAILURE;
 	} else {
 		mpz_ptr gmpnum_op, gmpnum_result;
 		gmp_temp_t temp;
 
-		FETCH_GMP_ZVAL(gmpnum_op, op1, temp, 1);
+		/* Inline FETCH_GMP_ZVAL(gmpnum_op, op1, temp, 1); as cannot use RETURN_THROWS() */
+		if (UNEXPECTED(!IS_GMP(op1))) {
+			if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
+				goto typeof_op_failure;
+			}
+			mpz_init(temp.num);
+			mpz_set_si(temp.num, Z_LVAL_P(op1));
+			temp.is_used = 1;
+			gmpnum_op = temp.num;
+		} else {
+			gmpnum_op = GET_GMP_FROM_ZVAL(op1);
+			temp.is_used = 0;
+		}
 		INIT_GMP_RETVAL(gmpnum_result);
 		op(gmpnum_result, gmpnum_op, (gmp_ulong) shift);
 		FREE_GMP_TEMP(temp);
+		return SUCCESS;
 	}
+
+typeof_op_failure:
+	; /* Blank statement */
+	/* Returning FAILURE without throwing an exception would emit the
+	 * Unsupported operand types: GMP OP TypeOfOp2
+	 * However, this leads to the engine trying to interpret the GMP object as an integer
+	 * and doing the operation that way, which is not something we want. */
+	const char *op_sigil;
+	switch (opcode) {
+		case ZEND_POW:
+			op_sigil = "**";
+		break;
+		case ZEND_SL:
+			op_sigil = "<<";
+		break;
+		case ZEND_SR:
+			op_sigil = ">>";
+		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	zend_type_error("Unsupported operand types: %s %s %s", zend_zval_type_name(op1), op_sigil, zend_zval_type_name(op2));
+	return FAILURE;
 }
 
 #define DO_BINARY_UI_OP_EX(op, uop, check_b_zero) \
@@ -381,18 +427,15 @@ static zend_result gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op
 	case ZEND_MUL:
 		DO_BINARY_UI_OP(mpz_mul);
 	case ZEND_POW:
-		shift_operator_helper(mpz_pow_ui, result, op1, op2, opcode);
-		return SUCCESS;
+		return shift_operator_helper(mpz_pow_ui, result, op1, op2, opcode);
 	case ZEND_DIV:
 		DO_BINARY_UI_OP_EX(mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
 		DO_BINARY_UI_OP_EX(mpz_mod, gmp_mpz_mod_ui, 1);
 	case ZEND_SL:
-		shift_operator_helper(mpz_mul_2exp, result, op1, op2, opcode);
-		return SUCCESS;
+		return shift_operator_helper(mpz_mul_2exp, result, op1, op2, opcode);
 	case ZEND_SR:
-		shift_operator_helper(mpz_fdiv_q_2exp, result, op1, op2, opcode);
-		return SUCCESS;
+		return shift_operator_helper(mpz_fdiv_q_2exp, result, op1, op2, opcode);
 	case ZEND_BW_OR:
 		DO_BINARY_OP(mpz_ior);
 	case ZEND_BW_AND:

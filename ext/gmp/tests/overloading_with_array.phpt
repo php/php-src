@@ -76,18 +76,9 @@ TypeError: Number must be of type GMP|string|int, array given
 TypeError: Number must be of type GMP|string|int, array given
 TypeError: Number must be of type GMP|string|int, array given
 TypeError: Number must be of type GMP|string|int, array given
-object(GMP)#3 (1) {
-  ["num"]=>
-  string(1) "1"
-}
+TypeError: Unsupported operand types: GMP ** array
 TypeError: Number must be of type GMP|string|int, array given
 TypeError: Number must be of type GMP|string|int, array given
 TypeError: Number must be of type GMP|string|int, array given
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(2) "42"
-}
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(2) "42"
-}
+TypeError: Unsupported operand types: GMP << array
+TypeError: Unsupported operand types: GMP >> array
