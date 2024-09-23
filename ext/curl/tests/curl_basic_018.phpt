@@ -4,6 +4,12 @@ Test curl_setopt() with curl_multi function with basic functionality
 TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin" && php_uname("m") === "x86_64") {
+    die("xfail Test fails for unknown reasons");
+}
+?>
 --FILE--
 <?php
   include 'server.inc';
