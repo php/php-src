@@ -71,18 +71,18 @@ try {
 
 ?>
 --EXPECT--
-TypeError: Number must be of type GMP|string|int, resource given
-TypeError: Number must be of type GMP|string|int, resource given
-TypeError: Number must be of type GMP|string|int, resource given
-TypeError: Number must be of type GMP|string|int, resource given
-TypeError: Number must be of type GMP|string|int, resource given
+TypeError: Unsupported operand types: GMP + resource
+TypeError: Unsupported operand types: GMP - resource
+TypeError: Unsupported operand types: GMP * resource
+TypeError: Unsupported operand types: GMP / resource
+TypeError: Unsupported operand types: GMP % resource
 object(GMP)#3 (1) {
   ["num"]=>
   string(5) "74088"
 }
-TypeError: Number must be of type GMP|string|int, resource given
-TypeError: Number must be of type GMP|string|int, resource given
-TypeError: Number must be of type GMP|string|int, resource given
+TypeError: Unsupported operand types: GMP | resource
+TypeError: Unsupported operand types: GMP & resource
+TypeError: Unsupported operand types: GMP ^ resource
 object(GMP)#2 (1) {
   ["num"]=>
   string(3) "336"
