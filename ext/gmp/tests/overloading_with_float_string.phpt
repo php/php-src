@@ -76,18 +76,9 @@ ValueError: Number is not an integer string
 ValueError: Number is not an integer string
 ValueError: Number is not an integer string
 ValueError: Number is not an integer string
-object(GMP)#3 (1) {
-  ["num"]=>
-  string(4) "1764"
-}
 ValueError: Number is not an integer string
 ValueError: Number is not an integer string
 ValueError: Number is not an integer string
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(3) "168"
-}
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(2) "10"
-}
+ValueError: Number is not an integer string
+ValueError: Number is not an integer string
+ValueError: Number is not an integer string

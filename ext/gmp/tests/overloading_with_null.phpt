@@ -2,8 +2,6 @@
 GMP operator overloading does not support null
 --EXTENSIONS--
 gmp
---XFAIL--
-Test showcasing segfaulting behaviour
 --FILE--
 <?php
 
@@ -73,4 +71,14 @@ try {
 
 ?>
 --EXPECT--
-SEGFAULT
+TypeError: Number must be of type GMP|string|int, null given
+TypeError: Number must be of type GMP|string|int, null given
+TypeError: Number must be of type GMP|string|int, null given
+TypeError: Number must be of type GMP|string|int, null given
+TypeError: Number must be of type GMP|string|int, null given
+TypeError: Unsupported operand types: GMP ** null
+TypeError: Number must be of type GMP|string|int, null given
+TypeError: Number must be of type GMP|string|int, null given
+TypeError: Number must be of type GMP|string|int, null given
+TypeError: Unsupported operand types: GMP << null
+TypeError: Unsupported operand types: GMP >> null
