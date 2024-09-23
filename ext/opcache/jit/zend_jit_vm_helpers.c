@@ -210,6 +210,15 @@ void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D)
 	ZVAL_NULL(result);
 }
 
+void ZEND_FASTCALL zend_jit_undefined_long_key_ex(zend_long key EXECUTE_DATA_DC)
+{
+	const zend_op *opline = EX(opline);
+	zval *result = EX_VAR(opline->result.var);
+
+	zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, key);
+	ZVAL_NULL(result);
+}
+
 void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D)
 {
 	const zend_op *opline = EX(opline);
