@@ -41,6 +41,8 @@
 #include "zend_signal.h"
 #include "zend_max_execution_timer.h"
 
+int nonsense;
+
 #define zend_sprintf sprintf
 
 #define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPTIONS()
