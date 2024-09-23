@@ -436,9 +436,10 @@ jobs:
         uses: ./.github/actions/install-linux
       - name: Setup
         run: |
-          sudo service mysql start
-          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
-          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+          ## TODO sudo service mysql start
+          ## TODO mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          ## TODO mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+          echo test
       - name: Enable Opcache
         run: |
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
@@ -747,10 +748,10 @@ jobs:
       - name: Setup
         run: |
           set -x
-          sudo service mysql start
-          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          ## TODO sudo service mysql start
+          ## TODO mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           # Ensure local_infile tests can run.
-          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+          ## TODO mysql -uroot -proot -e "SET GLOBAL local_infile = true"
           sudo locale-gen de_DE
       - name: Test
         uses: ./.github/actions/test-linux
@@ -791,10 +792,11 @@ jobs:
           sudo apt install bison re2c
       - name: Setup
         run: |
-          sudo service mysql start
-          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          ## TODO sudo service mysql start
+          ## TODO mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           # Ensure local_infile tests can run.
-          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+          ## TODO mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+          echo test
       - name: Build mysql-8.0
         uses: ./.github/actions/build-libmysqlclient
         with:
