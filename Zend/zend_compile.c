@@ -1764,7 +1764,7 @@ static zend_string *zend_resolve_const_class_name_reference(zend_ast *ast, const
 	zend_string *class_name = zend_ast_get_str(ast);
 	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type_ast(ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot use '%s' as %s, as it is reserved",
+			"Cannot use \"%s\" as %s, as it is reserved",
 			ZSTR_VAL(class_name), type);
 	}
 	return zend_resolve_class_name(class_name, ast->attr);
