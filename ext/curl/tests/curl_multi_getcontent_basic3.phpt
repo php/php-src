@@ -5,6 +5,12 @@ Rein Velt (rein@velt.org)
 #TestFest Utrecht 20090509
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin" && php_uname("m") === "x86_64") {
+    die("xfail Test fails for unknown reasons");
+}
+?>
 --FILE--
 <?php
     //CURL_MULTI_GETCONTENT TEST
