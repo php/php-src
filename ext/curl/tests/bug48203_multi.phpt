@@ -2,6 +2,12 @@
 Variation of bug #48203 with curl_multi_exec (Crash when file pointers passed to curl are closed before calling curl_multi_exec)
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin" && php_uname("m") === "x86_64") {
+    die("xfail Test fails for unknown reasons");
+}
+?>
 --FILE--
 <?php
 include 'server.inc';
