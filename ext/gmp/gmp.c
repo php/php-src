@@ -415,14 +415,13 @@ static zend_result gmp_do_operation_ex(uint8_t opcode, zval *result, zval *op1, 
 static zend_result gmp_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval op1_copy;
-	int retval;
 
 	if (result == op1) {
 		ZVAL_COPY_VALUE(&op1_copy, op1);
 		op1 = &op1_copy;
 	}
 
-	retval = gmp_do_operation_ex(opcode, result, op1, op2);
+	zend_result retval = gmp_do_operation_ex(opcode, result, op1, op2);
 
 	if (retval == SUCCESS && op1 == &op1_copy) {
 		zval_ptr_dtor(op1);
