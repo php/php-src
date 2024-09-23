@@ -78,20 +78,20 @@ try {
 
 ?>
 --EXPECTF--
-TypeError: Unsupported operand types: GMP + T
-TypeError: Unsupported operand types: GMP - T
-TypeError: Unsupported operand types: GMP * T
-TypeError: Unsupported operand types: GMP / T
-TypeError: Unsupported operand types: GMP % T
+TypeError: Number must be of type GMP|string|int, T given
+TypeError: Number must be of type GMP|string|int, T given
+TypeError: Number must be of type GMP|string|int, T given
+TypeError: Number must be of type GMP|string|int, T given
+TypeError: Number must be of type GMP|string|int, T given
 
 Warning: Object of class T could not be converted to int in %s on line %d
 object(GMP)#4 (1) {
   ["num"]=>
   string(2) "42"
 }
-TypeError: Unsupported operand types: GMP | T
-TypeError: Unsupported operand types: GMP & T
-TypeError: Unsupported operand types: GMP ^ T
+TypeError: Number must be of type GMP|string|int, T given
+TypeError: Number must be of type GMP|string|int, T given
+TypeError: Number must be of type GMP|string|int, T given
 
 Warning: Object of class T could not be converted to int in %s on line %d
 object(GMP)#3 (1) {

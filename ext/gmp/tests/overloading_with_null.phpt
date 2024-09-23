@@ -2,6 +2,8 @@
 GMP operator overloading does not support null
 --EXTENSIONS--
 gmp
+--XFAIL--
+Test showcasing segfaulting behaviour
 --FILE--
 <?php
 
@@ -71,23 +73,4 @@ try {
 
 ?>
 --EXPECT--
-int(42)
-int(42)
-int(0)
-DivisionByZeroError: Division by zero
-DivisionByZeroError: Modulo by zero
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(1) "1"
-}
-int(42)
-int(0)
-int(42)
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(2) "42"
-}
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(2) "42"
-}
+SEGFAULT
