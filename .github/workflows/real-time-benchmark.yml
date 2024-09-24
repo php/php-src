@@ -1,12 +1,12 @@
-name: Benchmark
+name: Real-time Benchmark
 on:
   schedule:
     - cron: "30 0 * * *"
 permissions:
   contents: read
 jobs:
-  BENCHMARK:
-    name: BENCHMARK
+  REAL_TIME_BENCHMARK:
+    name: REAL_TIME_BENCHMARK
     if: github.repository == 'php/php-src'
     runs-on: ubuntu-22.04
     steps:
@@ -45,7 +45,7 @@ jobs:
       - name: Checkout benchmark results
         uses: actions/checkout@v4
         with:
-          repository: kocsismate/php-version-benchmark-results
+          repository: php/php-version-benchmark-results
           ssh-key: ${{ secrets.PHP_VERSION_BENCHMARK_RESULTS_DEPLOY_KEY }}
           path: 'php-version-benchmarks/docs/results'
       - name: Set benchmark config
@@ -69,7 +69,7 @@ jobs:
             LAST_RESULT_SHA="$(cd ./php-version-benchmarks/tmp/php_master/ && git --no-pager log --until="$YESTERDAY" -n 1 --pretty='%H')"
           fi
 
-          BASELINE_SHA="306a51951f460abc3a7ebf4d196474d4c041b87e"
+          BASELINE_SHA="d5f6e56610c729710073350af318c4ea1b292cfe"
           BASELINE_SHORT_SHA="$(echo "$BASELINE_SHA" | cut -c1-4)"
 
           # Set config for the baseline PHP version
