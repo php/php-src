@@ -133,8 +133,12 @@ bool(false)
 -- Iteration  11 --
 bool(false)
 bool(false)
+
+Warning: Resource to string conversion in %s on line %d
 bool(false)
 Resource id #%d
 bool(false)
+
+Warning: Resource to string conversion in %s on line %d
 bool(false)
 Resource id #%d

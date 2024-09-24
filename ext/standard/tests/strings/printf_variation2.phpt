@@ -286,7 +286,11 @@ int(0)
 int(0)
 
 -- Iteration 28 --
+
+Warning: Resource to string conversion in %s on line %d
 Resource id #%d
 int(%d)
+
+Warning: Resource to string conversion in %s on line %d
 Resource id #%d
 int(%d)

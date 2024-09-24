@@ -96,6 +96,10 @@ array(2) {
   string(11) "Hello world"
 }
 -- Iteration 6 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(3) {
   [11]=>
   object(classA)#%d (0) {

@@ -49,6 +49,8 @@ Warning: Array to string conversion in %s on line %d
 Array
 
 %s with resource:
+
+Warning: Resource to string conversion in %s on line %d
 Resource id #%d
 
 %s with {}:
