@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* Lazy objects are standard zend_object whose initialization is defered until
+/* Lazy objects are standard zend_object whose initialization is deferred until
  * one of their properties backing store is accessed for the first time.
  *
  * This is implemented by using the same fallback mechanism as __get and __set
@@ -303,7 +303,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 	}
 
 	/* Objects become non-lazy if all properties are made non-lazy before
-	 * initialization is triggerd. If the object has no properties to begin
+	 * initialization is triggered. If the object has no properties to begin
 	 * with, this happens immediately. */
 	if (UNEXPECTED(!lazy_properties_count)) {
 		return obj;

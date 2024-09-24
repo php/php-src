@@ -273,7 +273,7 @@ ZEND_INI_BEGIN()
 #ifdef ZEND_CHECK_STACK_LIMIT
 	/* The maximum allowed call stack size. 0: auto detect, -1: no limit. For fibers, this is fiber.stack_size. */
 	STD_ZEND_INI_ENTRY("zend.max_allowed_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateMaxAllowedStackSize,	max_allowed_stack_size,		zend_executor_globals,	executor_globals)
-	/* Substracted from the max allowed stack size, as a buffer, when checking for overflow. 0: auto detect. */
+	/* Subtracted from the max allowed stack size, as a buffer, when checking for overflow. 0: auto detect. */
 	STD_ZEND_INI_ENTRY("zend.reserved_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateReservedStackSize,	reserved_stack_size,		zend_executor_globals,	executor_globals)
 #endif
 
