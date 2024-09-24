@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . bcpow() performance improvement. (Jorg Sowa)
   . ext/bcmath: Check for scale overflow. (SakiTakamachi)
   . [RFC] ext/bcmath: Added bcdivmod. (SakiTakamachi)
+  . Fix GH-15968 (Avoid converting objects to strings in operator calculations).
+    (SakiTakamachi)
 
 - Curl:
   . Added CURLOPT_DEBUGFUNCTION as a Curl option. (Ayesh Karunaratne)
