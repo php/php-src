@@ -457,14 +457,14 @@ void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
 
 #ifdef WORDS_BIGENDIAN
 # define PHAR_GET_32(buffer, var) \
-	var = ((((unsigned char*)(buffer))[3]) << 24) \
-		| ((((unsigned char*)(buffer))[2]) << 16) \
-		| ((((unsigned char*)(buffer))[1]) <<  8) \
-		| (((unsigned char*)(buffer))[0]); \
+	var = ((uint32_t)(((unsigned char*)(buffer))[3]) << 24) \
+		| ((uint32_t)(((unsigned char*)(buffer))[2]) << 16) \
+		| ((uint32_t)(((unsigned char*)(buffer))[1]) <<  8) \
+		| ((uint32_t)((unsigned char*)(buffer))[0]); \
 	(buffer) += 4
 # define PHAR_GET_16(buffer, var) \
-	var = ((((unsigned char*)(buffer))[1]) <<  8) \
-		| (((unsigned char*)(buffer))[0]); \
+	var = ((uint16_t)(((unsigned char*)(buffer))[1]) <<  8) \
+		| ((uint16_t)((unsigned char*)(buffer))[0]); \
 	(buffer) += 2
 #else
 # define PHAR_GET_32(buffer, var) \
