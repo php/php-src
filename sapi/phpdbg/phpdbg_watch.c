@@ -138,10 +138,10 @@ const phpdbg_command_t phpdbg_watch_commands[] = {
 bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *newPtr) {
 	switch (type) {
 		case WATCH_ON_BUCKET:
-			if (memcmp(&((Bucket *) oldPtr)->h, &((Bucket *) newPtr)->h, sizeof(Bucket) - sizeof(zval) /* key/val comparison */) != 0) {
+			if (memcmp(&((Bucket *) oldPtr)->h, &((Bucket *) newPtr)->h, sizeof(Bucket) - sizeof(zval) /* hash+key comparison */) != 0) {
 				return 2;
 			}
-			/* TODO: Is this intentional? */
+			/* Fall through to also compare the value from the bucket. */
 			ZEND_FALLTHROUGH;
 		case WATCH_ON_ZVAL:
 			return memcmp(oldPtr, newPtr, sizeof(zend_value) + sizeof(uint32_t) /* value + typeinfo */) != 0;
