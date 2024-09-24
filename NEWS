@@ -149,6 +149,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fix UAF issues with PCRE after request shutdown. (nielsdos)
 
+- PDO_MYSQL:
+  . Fixed GH-15949 (PDO_MySQL not properly quoting PDO_PARAM_LOB binary
+    data). (mbeccati, lcobucci)
+
 - PDO_PGSQL:
   . Fixed GH-15986 (Double-free due to Pdo\Pgsql::setNoticeCallback()). (cmb,
     nielsdos)

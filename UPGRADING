@@ -184,6 +184,9 @@ PHP 8.4 UPGRADE NOTES
 - PDO_MYSQL:
   . getAttribute, ATTR_AUTOCOMMIT, ATTR_EMULATE_PREPARES, MYSQL_ATTR_DIRECT_QUERY have
     been changed to get values as bool.
+  . Quoting a string with PARAM_LOB as type now outputs the string explicitly quoted
+    as binary. This also affects parameters bound as PARAM_LOB when
+    ATTR_EMULATE_PREPARES is enabled.
 
 - PDO_PGSQL:
   . The DSN's credentials, when set, are given priority over their PDO
