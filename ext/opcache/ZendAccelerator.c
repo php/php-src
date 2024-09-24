@@ -3431,6 +3431,11 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 		/* don't schedule twice */
 		return;
 	}
+
+	if (UNEXPECTED(zend_accel_schedule_restart_hook)) {
+		zend_accel_schedule_restart_hook(reason);
+	}
+
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled! Reason: %s",
 			zend_accel_restart_reason_text[reason]);
 
