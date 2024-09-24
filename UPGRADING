@@ -309,6 +309,11 @@ PHP 8.4 UPGRADE NOTES
     CURLINFO_HEADER_OUT, CURLINFO_DATA_IN, CURLINFO_DATA_OUT, CURLINFO_SSL_DATA_OUT,
     CURLINFO_SSL_DATA_IN constants. Once this option is set, CURLINFO_HEADER_OUT
     must not be set because it uses the same libcurl functionality.
+  . curl_getinfo() function now returns "posttransfer_time_us", containing the
+    number of microseconds from the start until the last byte is sent. When a
+    redirect is followed, the time from each request is added together. This
+    value can also be retrieved by passing CURLINFO_POSTTRANSFER_TIME_T to the
+    curl_getinfo() $option parameter. This requires libcurl 8.10.0 or later.
 
 - Date:
   . Added static methods
@@ -1055,6 +1060,7 @@ PHP 8.4 UPGRADE NOTES
   . CURLINFO_DATA_OUT.
   . CURLINFO_SSL_DATA_OUT.
   . CURLINFO_SSL_DATA_IN.
+  . CURLINFO_POSTTRANSFER_TIME_T.
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
