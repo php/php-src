@@ -23,6 +23,4 @@ try {
 
 ?>
 --EXPECT--
-int(17)
-Using original object:
-int(0)
+Error: Trying to clone an uncloneable object of class Directory
