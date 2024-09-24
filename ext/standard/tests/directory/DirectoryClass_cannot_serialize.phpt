@@ -12,5 +12,5 @@ try {
 }
 
 ?>
---EXPECTF--
-string(%d) "O:9:"Directory":2:{s:4:"path";s:%d:"%s";s:6:"handle";i:%d;}"
+--EXPECT--
+Exception: Serialization of 'Directory' is not allowed

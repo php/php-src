@@ -48,9 +48,16 @@ php_dir_globals dir_globals;
 #endif
 
 static zend_class_entry *dir_class_entry_ptr;
+static zend_object_handlers dir_class_object_handlers;
 
 #define Z_DIRECTORY_PATH_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
 #define Z_DIRECTORY_HANDLE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+
+static zend_function *dir_class_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct Directory, use dir() instead");
+	return NULL;
+}
 
 #define FETCH_DIRP() \
 	myself = getThis(); \
@@ -115,6 +122,12 @@ PHP_MINIT_FUNCTION(dir)
 	register_dir_symbols(module_number);
 
 	dir_class_entry_ptr = register_class_Directory();
+	dir_class_entry_ptr->default_object_handlers = &dir_class_object_handlers;
+
+	memcpy(&dir_class_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	dir_class_object_handlers.get_constructor = dir_class_get_constructor;
+	dir_class_object_handlers.clone_obj = NULL;
+	dir_class_object_handlers.compare = zend_objects_not_comparable;
 
 #ifdef ZTS
 	ts_allocate_id(&dir_globals_id, sizeof(php_dir_globals), NULL, NULL);

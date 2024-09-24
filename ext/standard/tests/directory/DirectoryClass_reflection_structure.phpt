@@ -14,7 +14,7 @@ echo $rc;
 ?>
 --EXPECTF--
 Structure of Directory class:
-Class [ <internal%s> class Directory ] {
+Class [ <internal%s> final class Directory ] {
 
   - Constants [0] {
   }

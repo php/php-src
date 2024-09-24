@@ -12,9 +12,4 @@ try {
 
 ?>
 --EXPECT--
-object(Directory)#1 (0) {
-  ["path"]=>
-  uninitialized(string)
-  ["handle"]=>
-  uninitialized(mixed)
-}
+Error: Cannot directly construct Directory, use dir() instead
