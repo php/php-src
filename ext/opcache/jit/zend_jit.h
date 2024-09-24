@@ -162,7 +162,8 @@ void zend_jit_startup(void *jit_buffer, size_t size, bool reattached);
 void zend_jit_shutdown(void);
 void zend_jit_activate(void);
 void zend_jit_deactivate(void);
-void zend_jit_status(zval *ret);
+ZEND_EXT_API void zend_jit_status(zval *ret);
+ZEND_EXT_API void zend_jit_blacklist_function(zend_op_array *op_array);
 void zend_jit_restart(void);
 
 #define ZREG_LOAD           (1<<0)

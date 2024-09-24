@@ -10102,6 +10102,20 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				ir_STORE(jit_EX(opline), jit_IP(jit));
 			}
 			jit_observer_fcall_begin(jit, rx, observer_handler);
+
+			if (trace) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
+			} else {
+				exit_addr = NULL;
+			}
+
+			zend_jit_check_timeout(jit, NULL /* we're inside the called function */, exit_addr);
+
 			jit_observer_fcall_is_unobserved_end(jit, &unobserved_data);
 		}
 

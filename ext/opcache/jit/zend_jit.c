@@ -706,7 +706,7 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 # endif
 #endif
 
-void zend_jit_status(zval *ret)
+ZEND_EXT_API void zend_jit_status(zval *ret)
 {
 	zval stats;
 	array_init(&stats);
