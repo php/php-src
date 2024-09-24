@@ -52,6 +52,8 @@ string(5) "Array"
 string(0) ""
 string(1) "1"
 string(0) ""
+
+Warning: Resource to string conversion in %s on line %d
 string(%d) "Resource id #%d"
 string(2) "10"
 Done
