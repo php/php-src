@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . ext/bcmath: Check for scale overflow. (SakiTakamachi)
   . [RFC] ext/bcmath: Added bcdivmod. (SakiTakamachi)
 
+- Curl:
+  . Added CURLOPT_DEBUGFUNCTION as a Curl option. (Ayesh Karunaratne)
+
 - Debugging:
   . Fixed bug GH-15923 (GDB: Python Exception <class 'TypeError'>:
     exceptions must derive from BaseException). (nielsdos)
