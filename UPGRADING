@@ -1172,6 +1172,9 @@ PHP 8.4 UPGRADE NOTES
     ZTS builds under highly concurrent loads. This affects the `printf()` family
     of functions as well as serialization functions such as `json_encode()`,
     `serialize()`.
+  . `sprintf()` using only `%s` and `%d` will be compiled into the equivalent
+    string interpolation, avoiding the overhead of a function call and repeatedly
+    parsing the format string.
 
 - DOM:
   . The performance of DOMNode::C14N() is greatly improved for the case without
@@ -1200,6 +1203,10 @@ PHP 8.4 UPGRADE NOTES
 
 - PCRE:
   . Improved the performance of named capture groups.
+
+- Random:
+  . Improved the performance of \Random\Randomizer, with a specific focus
+    on the getBytes() and getBytesFromString() methods.
 
 - SimpleXML:
   . Improved performance and reduce memory consumption of XML serialization.
