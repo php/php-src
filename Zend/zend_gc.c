@@ -2261,6 +2261,9 @@ static ZEND_FUNCTION(gc_destructor_fiber)
 
 		if (UNEXPECTED(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)) {
 			/* Fiber is being destroyed by shutdown sequence */
+			if (GC_G(dtor_fiber) == fiber) {
+				GC_G(dtor_fiber) = NULL;
+			}
 			GC_DELREF(&fiber->std);
 			gc_check_possible_root((zend_refcounted*)&fiber->std.gc);
 			return;
