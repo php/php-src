@@ -362,6 +362,8 @@ extern ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
 
+extern ZEND_API void (*zend_accel_schedule_restart_hook)(int reason);
+
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...);

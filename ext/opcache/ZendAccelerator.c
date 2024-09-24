@@ -26,7 +26,6 @@
 #include "zend_compile.h"
 #include "ZendAccelerator.h"
 #include "zend_persist.h"
-#include "zend_portability.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_module.h"
 #include "zend_accelerator_blacklist.h"
@@ -3410,8 +3409,6 @@ void accel_shutdown(void)
 		ini_entry->on_modify = orig_include_path_on_modify;
 	}
 }
-
-ZEND_EXT_API void (*zend_accel_schedule_restart_hook)(zend_accel_restart_reason reason) = NULL;
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 {
