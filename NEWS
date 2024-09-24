@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0RC1
+?? ??? ????, PHP 8.4.0RC2
+
+
+26 Sep 2024, PHP 8.4.0RC1
 
 - BcMath:
   . bcpow() performance improvement. (Jorg Sowa)
