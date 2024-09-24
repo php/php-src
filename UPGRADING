@@ -815,6 +815,10 @@ PHP 8.4 UPGRADE NOTES
   . Added mb_ucfirst and mb_lcfirst functions.
     RFC: https://wiki.php.net/rfc/mb_ucfirst
 
+- OPCache:
+  . Added opcache_jit_blacklist function. It allows skipping the tracing JIT
+    execution of select functions.
+
 - PCNTL:
   . Added pcntl_setns allowing a process to be reassociated with a namespace in order
     to share resources with other processes within this context.
