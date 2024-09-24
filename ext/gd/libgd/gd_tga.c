@@ -195,6 +195,7 @@ int read_header_tga(gdIOCtx *ctx, oTga *tga)
 			gd_error("fail to read header ident");
 			return -1;
 		}
+	}
 
 	return 1;
 }
