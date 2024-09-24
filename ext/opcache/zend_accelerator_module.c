@@ -934,10 +934,12 @@ ZEND_FUNCTION(opcache_jit_blacklist)
 		RETURN_THROWS();
 	}
 
+#ifdef HAVE_JIT
 	const zend_function *func = zend_get_closure_method_def(Z_OBJ_P(closure));
 	if (ZEND_USER_CODE(func->type)) {
 		zend_jit_blacklist_function((zend_op_array *)&func->op_array);
 	}
+#endif
 }
 
 ZEND_FUNCTION(opcache_compile_file)
