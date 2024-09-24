@@ -10,6 +10,7 @@ runs:
       run: |
         set -x
         # XXX: Set up database tests?
+        # Slow tests criteron is doubled because this runner isn't as fast as others
         export SKIP_IO_CAPTURE_TESTS=1
         export STACK_LIMIT_DEFAULTS_CHECK=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
@@ -17,5 +18,5 @@ runs:
           -g FAIL,BORK,LEAK,XLEAK \
           --no-progress \
           --show-diff \
-          --show-slow 1000 \
+          --show-slow 2000 \
           --set-timeout 120
