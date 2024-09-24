@@ -13,6 +13,10 @@ MySQLPDOTest::skip();
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 
+    // Force the connection to utf8, which is enough to make the test fail
+    // MySQL 5.6+ would be required for utf8mb4
+    $db->exec("SET NAMES 'utf8'");
+
     $content = '0191D886E6DC73E7AF1FEE7F99EC6235';
 
     $statement = $db->prepare('SELECT HEX(?) as test');

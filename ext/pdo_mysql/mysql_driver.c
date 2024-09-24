@@ -309,23 +309,29 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	bool use_national_character_set = 0;
+	bool use_binary = 0;
 	size_t quotedlen;
 
-	if (H->assume_national_character_set_strings) {
-		use_national_character_set = 1;
-	}
-	if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
-		use_national_character_set = 1;
-	}
-	if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
-		use_national_character_set = 0;
+	if ((paramtype & PDO_PARAM_LOB) == PDO_PARAM_LOB) {
+		use_binary = 1;
+	} else {
+		if (H->assume_national_character_set_strings) {
+			use_national_character_set = 1;
+		}
+		if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
+			use_national_character_set = 1;
+		}
+		if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
+			use_national_character_set = 0;
+		}
 	}
 
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("unquoted=%.*s", (int)ZSTR_LEN(unquoted), ZSTR_VAL(unquoted));
 
-	zend_string *quoted_str = zend_string_safe_alloc(2, ZSTR_LEN(unquoted), 3 + (use_national_character_set ? 1 : 0), false);
+	zend_string *quoted_str = zend_string_safe_alloc(2, ZSTR_LEN(unquoted),
+		3 + (use_national_character_set ? 1 : 0) + (use_binary ? 7 : 0), false);
 	char *quoted = ZSTR_VAL(quoted_str);
 
 	if (use_national_character_set) {
@@ -334,6 +340,11 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 		quoted[1] = '\'';
 
 		++quotedlen; /* N prefix */
+	} else if (use_binary) {
+		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 8, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
+		memcpy(quoted, "_binary'", 8);
+
+		quotedlen += 7; /* _binary prefix */
 	} else {
 		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
 		quoted[0] = '\'';
