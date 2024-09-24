@@ -1,5 +1,5 @@
 --TEST--
-GC 002: gc_enable()/gc_diable() and ini_get()
+GC 002: gc_enable()/gc_disable() and ini_get()
 --FILE--
 <?php
 gc_disable();

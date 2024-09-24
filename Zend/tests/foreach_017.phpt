@@ -1,5 +1,5 @@
 --TEST--
-array_splice() function precerve foreach by reference iterator pointer
+array_splice() function preserve foreach by reference iterator pointer
 --FILE--
 <?php
 /* remove before */

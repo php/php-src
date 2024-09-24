@@ -11,7 +11,7 @@ class ClassName
 function test (OtherClassName $object) { }
 
 spl_autoload_register(function ($class) {
-    var_dump("__autload($class)");
+    var_dump("__autoload($class)");
 });
 
 $obj = new ClassName;

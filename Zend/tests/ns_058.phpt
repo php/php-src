@@ -1,5 +1,5 @@
 --TEST--
-058: Usage of 'namespace' in compound names (out of namespase)
+058: Usage of 'namespace' in compound names (out of namespace)
 --FILE--
 <?php
 const C = "const ok\n";

@@ -1,5 +1,5 @@
 --TEST--
-Lazy objects: destructor of initialized objets is called
+Lazy objects: destructor of initialized objects is called
 --FILE--
 <?php
 

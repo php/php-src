@@ -1,5 +1,5 @@
 --TEST--
-Property hooks cannot have explicity visibility
+Property hooks cannot have explicitly visibility
 --FILE--
 <?php
 

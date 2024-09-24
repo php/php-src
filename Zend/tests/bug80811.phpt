@@ -1,5 +1,5 @@
 --TEST--
-Bug #80811: Function exec without $output but with $restult_code parameter crashes
+Bug #80811: Function exec without $output but with $result_code parameter crashes
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-array_walk() function precerve foreach by reference iterator pointer
+array_walk() function preserve foreach by reference iterator pointer
 --FILE--
 <?php
 $a = [1,2,3,4,5];
