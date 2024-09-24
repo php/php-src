@@ -1204,6 +1204,10 @@ PHP 8.4 UPGRADE NOTES
 - PCRE:
   . Improved the performance of named capture groups.
 
+- Random:
+  . Improved the performance of \Random\Randomizer, with a specific focus
+    on the getBytes() and getBytesFromString() methods.
+
 - SimpleXML:
   . Improved performance and reduce memory consumption of XML serialization.
 
