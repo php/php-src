@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0RC2
 
+- DOM:
+  . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
+    ext/dom/parentnode/tree.c). (nielsdos)
+
 - Opcache:
   . Fixed bug GH-16009 (Segmentation fault with frameless functions and
     undefined CVs). (nielsdos)
