@@ -828,8 +828,8 @@ try_again:
 
 		if (EXPECTED(cache_slot
 		 && zend_execute_ex == execute_ex
-		 && zobj->ce->default_object_handlers->read_property == zend_std_read_property
-		 && !zobj->ce->create_object
+		 && ce->default_object_handlers->read_property == zend_std_read_property
+		 && !ce->create_object
 		 && !zend_is_in_hook(prop_info)
 		 && !(prop_info->hooks[ZEND_PROPERTY_HOOK_GET]->common.fn_flags & ZEND_ACC_RETURN_REFERENCE))) {
 			ZEND_SET_PROPERTY_HOOK_SIMPLE_GET(cache_slot);
