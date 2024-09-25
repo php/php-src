@@ -422,7 +422,6 @@ jobs:
           - { branch: { name: 'PHP-8.1', ref: 'PHP-8.1', major: 8, minor: 1 }, type: 'verify_type_inference' }
           - { branch: { name: 'PHP-8.2', ref: 'PHP-8.2', major: 8, minor: 2 }, type: 'verify_type_inference' }
           - { branch: { name: 'PHP-8.3', ref: 'PHP-8.3', major: 8, minor: 3 }, type: 'verify_type_inference' }
-          - { branch: { name: 'PHP-8.4', ref: 'PHP-8.4', major: 8, minor: 4 }, type: 'verify_type_inference' }
     name: "${{ matrix.branch.name }}_COMMUNITY_${{ matrix.type }}"
     runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     env:
