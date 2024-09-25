@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
     ext/dom/parentnode/tree.c). (nielsdos)
 
+- JSON:
+  . Fixed bug GH-15168 (stack overflow in json_encode()). (nielsdos)
+
 - LDAP:
   . Fixed bug GH-16032 (Various NULL pointer dereferencements in
     ldap_modify_batch()). (Girgias)
