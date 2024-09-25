@@ -3244,7 +3244,7 @@ PHP_FUNCTION(mb_levenshtein)
 			}
 			if (tmp_wchar_len_2 == 0) {
 				/* Insertion process when there is a surplus of 128 code points. */
-				for (i2 = 0; i2 < tmp_wchar_len_1; i2++) {
+				for (i2 = 0; i2 < tmp_wchar_len_1 && len_2 != 0; i2++) {
 					/* for overflow */
 					if (len_2 < tmp_wchar_len_1) {
 						c0 = p1[i2] + cost_rep;
