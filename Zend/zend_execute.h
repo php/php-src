@@ -66,6 +66,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void);
 ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim);
+zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_call_stack_size_error(void);
 
 ZEND_API bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, bool strict);
 
