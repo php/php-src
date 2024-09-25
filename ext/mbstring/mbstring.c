@@ -3210,7 +3210,6 @@ PHP_FUNCTION(mb_levenshtein)
 	zend_long *p1, *p2, *tmp;
 	size_t strlen_1 = mb_get_strlen(string1, enc);
 	size_t strlen_2 = mb_get_strlen(string2, enc);
-	size_t len_1 = 0;
 	size_t len_2 = 0;
 	size_t in_len_1 = ZSTR_LEN(string1);
 	size_t in_len_2 = ZSTR_LEN(string2);
@@ -3233,7 +3232,6 @@ PHP_FUNCTION(mb_levenshtein)
 
 	while (in_len_1) {
 		tmp_wchar_len_1 = enc->to_wchar(&in_1, &in_len_1, wchar_buf_1, 128, &state);
-		len_1 += tmp_wchar_len_1;
 		ZEND_ASSERT(in_len_1 <= 128);
 		tmp_wchar_len_2 = enc->to_wchar(&in_2, &in_len_2, wchar_buf_2, 128, &state);
 		len_2 += tmp_wchar_len_2;
