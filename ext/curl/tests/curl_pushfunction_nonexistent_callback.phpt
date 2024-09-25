@@ -6,6 +6,7 @@ Kévin Dunglas
 Niels Dossche
 --EXTENSIONS--
 curl
+--XLEAK--
 --SKIPIF--
 <?php
 include 'skipif-nocaddy.inc';
