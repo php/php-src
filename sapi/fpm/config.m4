@@ -499,10 +499,6 @@ if test "$PHP_FPM" != "no"; then
 
   AC_SUBST([php_fpm_user])
   AC_SUBST([php_fpm_group])
-  php_fpm_sysconfdir=$(eval echo $sysconfdir)
-  AC_SUBST([php_fpm_sysconfdir])
-  php_fpm_localstatedir=$(eval echo $localstatedir)
-  AC_SUBST([php_fpm_localstatedir])
   php_fpm_prefix=$(eval echo $prefix)
   AC_SUBST([php_fpm_prefix])
 

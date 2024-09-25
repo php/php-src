@@ -7,7 +7,7 @@ install-fpm: $(SAPI_FPM_PATH)
 	@echo "Installing PHP FPM binary:        $(INSTALL_ROOT)$(sbindir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(sbindir)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
-	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/run
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(runstatedir)
 	@$(INSTALL) -m 0755 $(SAPI_FPM_PATH) $(INSTALL_ROOT)$(sbindir)/$(program_prefix)php-fpm$(program_suffix)$(EXEEXT)
 
 	@if test -f "$(INSTALL_ROOT)$(sysconfdir)/php-fpm.conf"; then \

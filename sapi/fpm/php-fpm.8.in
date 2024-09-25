@@ -8,9 +8,9 @@ php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
 .LP
 .SH DESCRIPTION
 \fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for
-Web development and can be embedded into HTML. This is a variant of PHP that will run in the background as a daemon, listening for CGI requests. Output is logged to @php_fpm_localstatedir@/log/php-fpm.log.
+Web development and can be embedded into HTML. This is a variant of PHP that will run in the background as a daemon, listening for CGI requests. Output is logged to @EXPANDED_LOCALSTATEDIR@/log/php-fpm.log.
 .LP
-Most options are set in the configuration file. The configuration file is @php_fpm_sysconfdir@/php-fpm.conf. By default, php-fpm will respond to CGI requests listening on localhost http port 9000. Therefore php-fpm expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
+Most options are set in the configuration file. The configuration file is @EXPANDED_SYSCONFDIR@/php-fpm.conf. By default, php-fpm will respond to CGI requests listening on localhost http port 9000. Therefore php-fpm expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
 .SH OPTIONS
 .TP 15
 .B \-C
@@ -97,7 +97,7 @@ Specify the PID file location.
 .TP
 .PD 1
 .B \-y
-Specify alternative path to FastCGI process manager configuration file (the default is @php_fpm_sysconfdir@/php-fpm.conf)
+Specify alternative path to FastCGI process manager configuration file (the default is @EXPANDED_SYSCONFDIR@/php-fpm.conf)
 .TP
 .PD 0
 .B \-\-test
@@ -156,7 +156,7 @@ For any unix systems which use systemd for their main process manager, you shoul
 sudo systemctl start php-fpm.service
 .RE
 .TP
-If your installation has no appropriate init script, launch php-fpm with no arguments. It will launch as a daemon (background process) by default. The file @php_fpm_localstatedir@/run/php-fpm.pid determines whether php-fpm is already up and running. Once started, php-fpm then responds to several POSIX signals:
+If your installation has no appropriate init script, launch php-fpm with no arguments. It will launch as a daemon (background process) by default. The file @EXPANDED_RUNSTATEDIR@/php-fpm.pid determines whether php-fpm is already up and running. Once started, php-fpm then responds to several POSIX signals:
 .P
 .PD 0
 .RS
