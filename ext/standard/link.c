@@ -30,18 +30,7 @@
 #include <sys/stat.h>
 #endif
 #include <string.h>
-#ifdef HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
-#include <pwd.h>
-#endif
-#endif
-#ifdef HAVE_GRP_H
-# include <grp.h>
-#endif
 #include <errno.h>
-#include <ctype.h>
 
 #include "php_string.h"
 
