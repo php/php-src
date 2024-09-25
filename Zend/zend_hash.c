@@ -2345,17 +2345,20 @@ static zend_always_inline bool zend_array_dup_element(HashTable *source, HashTab
 
 // We need to duplicate iterators to be able to search through all copy-on-write copies to find the actually iterated HashTable and position back
 static void zend_array_dup_ht_iterators(HashTable *source, HashTable *target) {
-	HashTableIterator *iter = EG(ht_iterators);
-	HashTableIterator *end  = iter + EG(ht_iterators_used);
+	uint32_t iter_index = 0;
+	uint32_t end_index = EG(ht_iterators_used);
 
-	while (iter != end) {
+	while (iter_index != end_index) {
+		HashTableIterator *iter = &EG(ht_iterators)[iter_index];
 		if (iter->ht == source) {
 			uint32_t copy_idx = zend_hash_iterator_add(target, iter->pos);
+			/* Refetch iter because the memory may be reallocated. */
+			iter = &EG(ht_iterators)[iter_index];
 			HashTableIterator *copy_iter = EG(ht_iterators) + copy_idx;
 			copy_iter->next_copy = iter->next_copy;
 			iter->next_copy = copy_idx;
 		}
-		iter++;
+		iter_index++;
 	}
 }
 
