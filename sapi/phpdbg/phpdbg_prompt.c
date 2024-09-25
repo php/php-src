@@ -1652,6 +1652,15 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 
 	PHPDBG_G(in_execution) = 1;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		/* No opline was executed before exception */
+		EG(opline_before_exception) = NULL;
+		/* Fall through to handle exception below. */
+	}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 	while (1) {
 		zend_object *exception = EG(exception);
 
