@@ -144,15 +144,10 @@ bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 					stmt->columns[col].name = zend_string_tolower(orig_name);
 					zend_string_release(orig_name);
 					break;
-				case PDO_CASE_UPPER: {
-					stmt->columns[col].name = zend_string_separate(orig_name, 0);
-					char *s = ZSTR_VAL(stmt->columns[col].name);
-					while (*s != '\0') {
-						*s = toupper(*s);
-						s++;
-					}
+				case PDO_CASE_UPPER:
+					stmt->columns[col].name = zend_string_toupper(orig_name);
+					zend_string_release(orig_name);
 					break;
-				}
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		}
