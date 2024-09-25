@@ -3183,14 +3183,6 @@ PHP_FUNCTION(mb_levenshtein)
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZSTR_LEN(string1) == 0) {
-		RETVAL_LONG(ZSTR_LEN(string2) * cost_ins);
-	}
-
-	if (ZSTR_LEN(string2) == 0) {
-		RETVAL_LONG(ZSTR_LEN(string1) * cost_del);
-	}
-
 	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 6);
 	if (!enc) {
 		RETURN_THROWS();
@@ -3216,6 +3208,14 @@ PHP_FUNCTION(mb_levenshtein)
 	unsigned char *in_1 = (unsigned char*)ZSTR_VAL(string1);
 	unsigned char *in_2 = (unsigned char*)ZSTR_VAL(string2);
 	unsigned int state = 0;
+
+	if (strlen_1 == 0) {
+		RETURN_LONG(strlen_2 * cost_ins);
+	}
+
+	if (strlen_2 == 0) {
+		RETURN_LONG(strlen_1 * cost_ins);
+	}
 
 	zend_long c0, c1, c2;
 
