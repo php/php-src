@@ -359,7 +359,8 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 		mpz_ptr gmpnum_op, gmpnum_result;
 		gmp_temp_t temp;
 
-		/* Inline FETCH_GMP_ZVAL(gmpnum_op, op1, temp, 1); as cannot use RETURN_THROWS() */
+		/* We do not use FETCH_GMP_ZVAL(...); here as we don't use convert_to_gmp()
+		 * as we want to handle the emitted exception ourself.  */
 		if (UNEXPECTED(!IS_GMP(op1))) {
 			if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
 				goto typeof_op_failure;
@@ -378,8 +379,7 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 		return SUCCESS;
 	}
 
-typeof_op_failure:
-	; /* Blank statement */
+typeof_op_failure: ;
 	/* Returning FAILURE without throwing an exception would emit the
 	 * Unsupported operand types: GMP OP TypeOfOp2
 	 * However, this leads to the engine trying to interpret the GMP object as an integer
@@ -388,13 +388,13 @@ typeof_op_failure:
 	switch (opcode) {
 		case ZEND_POW:
 			op_sigil = "**";
-		break;
+			break;
 		case ZEND_SL:
 			op_sigil = "<<";
-		break;
+			break;
 		case ZEND_SR:
 			op_sigil = ">>";
-		break;
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	zend_type_error("Unsupported operand types: %s %s %s", zend_zval_type_name(op1), op_sigil, zend_zval_type_name(op2));
