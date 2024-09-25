@@ -77,6 +77,7 @@ jobs:
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
     runs-on: ubuntu-${{ !matrix.asan && '22' || '20' }}.04
+    timeout-minutes: 50
     container:
       image: ${{ matrix.asan && 'ubuntu:23.04' || null }}
     steps:
@@ -146,6 +147,7 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
+    timeout-minutes: 50
     container:
       image: ubuntu:20.04
     env:
@@ -199,6 +201,7 @@ jobs:
             arch: ARM64
     name: MACOS_${{ matrix.arch }}_DEBUG_NTS
     runs-on: macos-${{ matrix.os }}
+    timeout-minutes: 50
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -233,6 +236,7 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
     runs-on: windows-2022
+    timeout-minutes: 50
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
@@ -259,6 +263,7 @@ jobs:
     name: BENCHMARKING
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
+    timeout-minutes: 50
     steps:
       - name: git checkout
         uses: actions/checkout@v4
