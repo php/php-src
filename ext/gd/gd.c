@@ -3254,6 +3254,63 @@ PHP_FUNCTION(imagecopyresized)
 }
 /* }}} */
 
+#define GET_TRUECOLOR_PIXEL(px, im, x, y) \
+	if (im->trueColor) { \
+		px = gdImageTrueColorPixel(im, x, y); \
+	} \
+	else { \
+		int c = gdImagePalettePixel(im, x, y); \
+		px = gdTrueColor( \
+			gdImageRed(im, c), \
+			gdImageGreen(im, c), \
+			gdImageBlue(im, c)); \
+	}
+
+/* {{{ Check whether two images are pixel by pixel identical */
+PHP_FUNCTION(imagematch)
+{
+	zval *IM1, *IM2;
+	gdImagePtr im1, im2;
+	int x, y, sx, sy;
+	bool result = true;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(IM1, gd_image_ce)
+		Z_PARAM_OBJECT_OF_CLASS(IM2, gd_image_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	im1 = php_gd_libgdimageptr_from_zval_p(IM1);
+	im2 = php_gd_libgdimageptr_from_zval_p(IM2);
+
+	sx = im1->sx;
+	if (im1->sx != im2->sx) {
+		RETURN_FALSE;
+	}
+
+	sy = im1->sy;
+	if (im1->sy != im2->sy) {
+		RETURN_FALSE;
+	}
+
+	for (y = 0; y < sy; y++) {
+		for (x = 0; x < sx; x++) {
+			int p1, p2;
+
+			GET_TRUECOLOR_PIXEL(p1, im1, x, y);
+			GET_TRUECOLOR_PIXEL(p2, im2, x, y);
+
+			if (p1 != p2) {
+				result = false;
+			}
+		}
+	}
+
+	RETURN_BOOL(result);
+}
+/* }}} */
+
+#undef GET_TRUECOLOR_PIXEL
+
 /* {{{ Get image width */
 PHP_FUNCTION(imagesx)
 {
