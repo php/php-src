@@ -272,6 +272,11 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 			if (instanceof_function(ce, dom_node_class_entry)) {
 				xmlNodePtr node = dom_object_get_node(Z_DOMOBJ_P(nodes + i));
 
+				if (!node) {
+					php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+					return FAILURE;
+				}
+
 				if (node->doc != documentNode) {
 					php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(document));
 					return FAILURE;
