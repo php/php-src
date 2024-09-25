@@ -1182,6 +1182,7 @@ PHP_FUNCTION(time_nanosleep)
 		RETURN_TRUE;
 	} else if (errno == EINTR) {
 		array_init(return_value);
+		MSAN_UNPOISON(php_rem);
 		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
 		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
 		return;

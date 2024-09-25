@@ -515,6 +515,13 @@ extern "C++" {
 # undef HAVE_FUNC_ATTRIBUTE_IFUNC
 #endif
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+# define MSAN_UNPOISON(value) __msan_unpoison(&(value), sizeof(value))
+#else
+# define MSAN_UNPOISON(value)
+#endif
+
 /* Only use ifunc resolvers if we have __builtin_cpu_supports() and __builtin_cpu_init(),
  * otherwise the use of zend_cpu_supports() may not be safe inside ifunc resolvers. */
 #if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && \
