@@ -2544,10 +2544,10 @@ PHP_FUNCTION(ldap_modify_batch)
 			/* for the modification hashtable... */
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(mod));
 			num_modprops = zend_hash_num_elements(Z_ARRVAL_P(mod));
+			bool has_attrib_key = false;
+			bool has_modtype_key = false;
 
 			for (j = 0; j < num_modprops; j++) {
-				bool has_attrib_key = false;
-				bool has_modtype_key = false;
 
 				/* are the keys strings? */
 				if (zend_hash_get_current_key(Z_ARRVAL_P(mod), &modkey, &tmpUlong) != HASH_KEY_IS_STRING) {
@@ -2644,16 +2644,16 @@ PHP_FUNCTION(ldap_modify_batch)
 					}
 				}
 
-				if (!has_attrib_key) {
-					zend_value_error("%s(): Required option \"" LDAP_MODIFY_BATCH_ATTRIB "\" is missing", get_active_function_name());
-					RETURN_THROWS();
-				}
-				if (!has_modtype_key) {
-					zend_value_error("%s(): Required option \"" LDAP_MODIFY_BATCH_MODTYPE "\" is missing", get_active_function_name());
-					RETURN_THROWS();
-				}
-
 				zend_hash_move_forward(Z_ARRVAL_P(mod));
+			}
+
+			if (!has_attrib_key) {
+				zend_value_error("%s(): Required option \"" LDAP_MODIFY_BATCH_ATTRIB "\" is missing", get_active_function_name());
+				RETURN_THROWS();
+			}
+			if (!has_modtype_key) {
+				zend_value_error("%s(): Required option \"" LDAP_MODIFY_BATCH_MODTYPE "\" is missing", get_active_function_name());
+				RETURN_THROWS();
 			}
 		}
 	}
