@@ -2981,7 +2981,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	const zend_function *func;
 	zend_abstract_info ai;
 	bool is_explicit_abstract = (ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) != 0;
-	bool can_be_abstract = (ce->ce_flags & ZEND_ACC_ENUM) == 0;
+	bool can_be_abstract = (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_ANON_CLASS)) == 0;
 	memset(&ai, 0, sizeof(ai));
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, func) {
@@ -3022,7 +3022,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 			);
 		} else {
 			zend_error_noreturn(E_ERROR,
-				"%s %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+				"%s %s must implement %d abstract method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
 				zend_get_object_type_uc(ce),
 				ZSTR_VAL(ce->name), ai.cnt,
 				ai.cnt > 1 ? "s" : "",
