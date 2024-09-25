@@ -3009,16 +3009,28 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	}
 
 	if (ai.cnt) {
-		zend_error_noreturn(E_ERROR, !is_explicit_abstract && can_be_abstract
-			? "%s %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")"
-			: "%s %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
-			zend_get_object_type_uc(ce),
-			ZSTR_VAL(ce->name), ai.cnt,
-			ai.cnt > 1 ? "s" : "",
-			DISPLAY_ABSTRACT_FN(0),
-			DISPLAY_ABSTRACT_FN(1),
-			DISPLAY_ABSTRACT_FN(2)
+		if (!is_explicit_abstract && can_be_abstract) {
+			zend_error_noreturn(E_ERROR,
+				"%s %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+				zend_get_object_type_uc(ce),
+				ZSTR_VAL(ce->name), ai.cnt,
+				ai.cnt > 1 ? "s" : "",
+				ai.cnt > 1 ? "s" : "",
+				DISPLAY_ABSTRACT_FN(0),
+				DISPLAY_ABSTRACT_FN(1),
+				DISPLAY_ABSTRACT_FN(2)
 			);
+		} else {
+			zend_error_noreturn(E_ERROR,
+				"%s %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+				zend_get_object_type_uc(ce),
+				ZSTR_VAL(ce->name), ai.cnt,
+				ai.cnt > 1 ? "s" : "",
+				DISPLAY_ABSTRACT_FN(0),
+				DISPLAY_ABSTRACT_FN(1),
+				DISPLAY_ABSTRACT_FN(2)
+			);
+		}
 	} else {
 		/* now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed */
 		ce->ce_flags &= ~ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
