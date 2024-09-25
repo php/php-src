@@ -162,6 +162,7 @@ jobs:
             ${{ matrix.configuration_parameters }}
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
+          asan: ${{ matrix.asan && 'true' || 'false' }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install

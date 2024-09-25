@@ -1,4 +1,8 @@
 name: apt
+inputs:
+  asan:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
@@ -39,7 +43,7 @@ runs:
           libsqlite3-dev \
           libsqlite3-mod-spatialite \
           libwebp-dev \
-          libavif-dev \
+          ${{ inputs.asan == 'false' && 'libavif-dev' || '' }} \
           libonig-dev \
           libcurl4-openssl-dev \
           libxml2-dev \
