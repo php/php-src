@@ -3219,8 +3219,8 @@ PHP_FUNCTION(mb_levenshtein)
 
 	zend_long c0, c1, c2;
 
-	p1 = safe_emalloc(strlen_1, sizeof(zend_long), 0);
-	p2 = safe_emalloc(strlen_2, sizeof(zend_long), 0);
+	p1 = safe_emalloc(strlen_1 + 1, sizeof(zend_long), 0);
+	p2 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
 
 	for (i2 = 0; i2 <= strlen_2; i2++) {
 		p1[i2] = i2 * cost_ins;
@@ -3232,29 +3232,43 @@ PHP_FUNCTION(mb_levenshtein)
 
 	while (in_len_1) {
 		tmp_wchar_len_1 = enc->to_wchar(&in_1, &in_len_1, wchar_buf_1, 128, &state);
-		ZEND_ASSERT(in_len_1 <= 128);
+		ZEND_ASSERT(tmp_wchar_len_1 <= 128);
 		tmp_wchar_len_2 = enc->to_wchar(&in_2, &in_len_2, wchar_buf_2, 128, &state);
 		len_2 += tmp_wchar_len_2;
-		ZEND_ASSERT(in_len_2 <= 128);
+		ZEND_ASSERT(tmp_wchar_len_2 <= 128);
 
 		for (i1 = 0; i1 < tmp_wchar_len_1; i1++) {
 			/* First loop that does not cross a 128 code points */
 			if (first) {
 				p2[0] = p1[0] + cost_del;
 			}
-			/* Insertion process when there is a surplus of 128 code points. */
 			if (tmp_wchar_len_2 == 0) {
+				/* Insertion process when there is a surplus of 128 code points. */
 				for (i2 = 0; i2 < tmp_wchar_len_1; i2++) {
-					c0 = p1[i2 + (len_2 - tmp_wchar_len_1)] + cost_rep;
-					c1 = p1[i2 + (len_2 - tmp_wchar_len_1) + 1] + cost_del;
+					/* for overflow */
+					if (len_2 < tmp_wchar_len_1) {
+						c0 = p1[i2] + cost_rep;
+						c1 = p1[i2 + 1] + cost_del;
+					} else {
+						c0 = p1[i2 + (len_2 - tmp_wchar_len_1)] + cost_rep;
+						c1 = p1[i2 + (len_2 - tmp_wchar_len_1) + 1] + cost_del;
+					}
 					if (c1 < c0) {
 						c0 = c1;
 					}
-					c2 = p2[i2 + (len_2 - tmp_wchar_len_1)] + cost_ins;
+					if (len_2 < tmp_wchar_len_1) {
+						c2 = p2[i2] + cost_ins;
+					} else {
+						c2 = p2[i2] + cost_ins;
+					}
 					if (c2 < c0) {
 						c0 = c2;
 					}
-					p2[i2 + (len_2 - tmp_wchar_len_1) + 1] = c0;
+					if (len_2 < tmp_wchar_len_1) {
+						p2[i2 + 1] = c0;
+					} else {
+						p2[i2 + (len_2 - tmp_wchar_len_1) + 1] = c0;
+					}
 				}
 			} else {
 				for (i2 = 0; i2 < tmp_wchar_len_2; i2++) {
