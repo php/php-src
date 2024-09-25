@@ -2494,7 +2494,7 @@ PHP_FUNCTION(ldap_delete_ext)
 /* {{{ Perform multiple modifications as part of one operation */
 PHP_FUNCTION(ldap_modify_batch)
 {
-	zval *serverctrls = NULL;
+	zval *server_controls_zv = NULL;
 	zval *link;
 	char *dn;
 	size_t dn_len;
@@ -2525,7 +2525,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	];
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osh/|a!", &link, ldap_link_ce, &dn, &dn_len, &modifications, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osh/|a!", &link, ldap_link_ce, &dn, &dn_len, &modifications, &server_controls_zv) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2637,7 +2637,16 @@ PHP_FUNCTION(ldap_modify_batch)
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();
-	/* validation was successful */
+	/* validation of modifications array was successful */
+
+	/* Check that the LDAP server controls array is valid */
+	if (server_controls_zv) {
+		lserverctrls = _php_ldap_controls_from_array(ld->link, server_controls_zv, 4);
+		if (lserverctrls == NULL) {
+			_php_ldap_controls_free(&lserverctrls);
+			RETURN_FALSE;
+		}
+	}
 
 	/* allocate array of modifications */
 	uint32_t num_mods = zend_hash_num_elements(modifications);
@@ -2711,14 +2720,6 @@ PHP_FUNCTION(ldap_modify_batch)
 
 	/* NULL-terminate modifications */
 	ldap_mods[num_mods] = NULL;
-
-	if (serverctrls) {
-		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 4);
-		if (lserverctrls == NULL) {
-			RETVAL_FALSE;
-			goto cleanup;
-		}
-	}
 
 	/* perform (finally) */
 	int ldap_status = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL);
