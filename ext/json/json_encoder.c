@@ -31,6 +31,15 @@
 
 static const char digits[] = "0123456789abcdef";
 
+static zend_always_inline bool php_json_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 static int php_json_determine_array_type(zval *val) /* {{{ */
 {
 	zend_array *myht = Z_ARRVAL_P(val);
@@ -114,6 +123,14 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 {
 	int i, r, need_comma = 0;
 	HashTable *myht, *prop_ht;
+
+	if (php_json_check_stack_limit()) {
+		encoder->error_code = PHP_JSON_ERROR_DEPTH;
+		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+			smart_str_appendl(buf, "null", 4);
+		}
+		return FAILURE;
+	}
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		myht = Z_ARRVAL_P(val);
