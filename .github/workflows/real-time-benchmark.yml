@@ -42,10 +42,10 @@ jobs:
           git config --global user.email "benchmark@php.net"
           
           rm -rf ./php-version-benchmarks/docs/results
-      - name: Checkout benchmark results
+      - name: Checkout benchmark data
         uses: actions/checkout@v4
         with:
-          repository: php/php-version-benchmark-results
+          repository: php/real-time-benchmark-data
           ssh-key: ${{ secrets.PHP_VERSION_BENCHMARK_RESULTS_DEPLOY_KEY }}
           path: 'php-version-benchmarks/docs/results'
       - name: Set benchmark config
