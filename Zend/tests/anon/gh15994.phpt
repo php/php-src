@@ -3,9 +3,11 @@ Abstract function must be implemented
 --FILE--
 <?php
 
-$c = new class {
+abstract class ParentClass {
     abstract public function f();
-};
+}
+
+$o = new class extends ParentClass {};
 ?>
 --EXPECTF--
-Fatal error: Class class@anonymous must implement 1 abstract method (class@anonymous::f) in %sgh15994.php on line 3
+Fatal error: Class ParentClass@anonymous must implement 1 abstract method (ParentClass::f) in %sgh15994.php on line 7
