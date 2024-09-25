@@ -2618,8 +2618,11 @@ PHP_FUNCTION(ldap_modify_batch)
 			/* for the modification hashtable... */
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(mod));
 			num_modprops = zend_hash_num_elements(Z_ARRVAL_P(mod));
+			bool has_attrib_key = false;
+			bool has_modtype_key = false;
 
 			for (j = 0; j < num_modprops; j++) {
+
 				/* are the keys strings? */
 				if (zend_hash_get_current_key(Z_ARRVAL_P(mod), &modkey, &tmpUlong) != HASH_KEY_IS_STRING) {
 					zend_argument_type_error(3, "must only contain string-indexed arrays");
@@ -2641,6 +2644,7 @@ PHP_FUNCTION(ldap_modify_batch)
 
 				/* does the value type match the key? */
 				if (_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_ATTRIB)) {
+					has_attrib_key = true;
 					if (Z_TYPE_P(modinfo) != IS_STRING) {
 						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must be of type string, %s given", get_active_function_name(), zend_zval_value_name(modinfo));
 						RETURN_THROWS();
@@ -2652,6 +2656,7 @@ PHP_FUNCTION(ldap_modify_batch)
 					}
 				}
 				else if (_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_MODTYPE)) {
+					has_modtype_key = true;
 					if (Z_TYPE_P(modinfo) != IS_LONG) {
 						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be of type int, %s given", get_active_function_name(), zend_zval_value_name(modinfo));
 						RETURN_THROWS();
@@ -2714,6 +2719,15 @@ PHP_FUNCTION(ldap_modify_batch)
 				}
 
 				zend_hash_move_forward(Z_ARRVAL_P(mod));
+			}
+
+			if (!has_attrib_key) {
+				zend_value_error("%s(): Required option \"" LDAP_MODIFY_BATCH_ATTRIB "\" is missing", get_active_function_name());
+				RETURN_THROWS();
+			}
+			if (!has_modtype_key) {
+				zend_value_error("%s(): Required option \"" LDAP_MODIFY_BATCH_MODTYPE "\" is missing", get_active_function_name());
+				RETURN_THROWS();
 			}
 		}
 	}

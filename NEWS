@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
     ext/dom/parentnode/tree.c). (nielsdos)
 
+- LDAP:
+  . Fixed bug GH-16032 (Various NULL pointer dereferencements in
+    ldap_modify_batch()). (Girgias)
+
 - PHPDBG:
   . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
 
