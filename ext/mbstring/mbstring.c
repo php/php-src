@@ -3295,7 +3295,7 @@ PHP_FUNCTION(mb_levenshtein)
 	efree(p1);
 	efree(p2);
 
-	RETVAL_LONG(c0);
+	RETURN_LONG(c0);
 }
 
 static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t size)
