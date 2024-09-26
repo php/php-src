@@ -2,6 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0RC2
 
+- CGI:
+  . Fixed bug GHSA-p99j-rfp4-xqvq (Bypass of CVE-2024-4577, Parameter Injection
+    Vulnerability). (CVE-2024-8926) (nielsdos)
+  . Fixed bug GHSA-94p6-54jq-9mwp (cgi.force_redirect configuration is
+    bypassable due to the environment variable collision). (CVE-2024-8927)
+    (nielsdos)
+
 - Core:
   . Fixed bug GH-16040 (Use-after-free of object released in hook). (ilutov)
   . Fixed bug GH-16054 (Segmentation fault when resizing hash table iterator
@@ -12,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
     ext/dom/parentnode/tree.c). (nielsdos)
 
+- FPM:
+  . Fixed bug GHSA-865w-9rf3-2wh5 (Logs from childrens may be altered).
+    (CVE-2024-9026) (Jakub Zelenka)
+
 - LDAP:
   . Fixed bug GH-16032 (Various NULL pointer dereferencements in
     ldap_modify_batch()). (Girgias)
@@ -19,6 +30,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-16009 (Segmentation fault with frameless functions and
     undefined CVs). (nielsdos)
+
+- SAPI:
+  . Fixed bug GHSA-9pqp-7h25-4f32 (Erroneous parsing of multipart form data).
+    (CVE-2024-8925) (Arnaud)
 
 26 Sep 2024, PHP 8.4.0RC1
 
