@@ -360,6 +360,7 @@ static int date_interval_compare_objects(zval *o1, zval *o2);
 static zval *date_interval_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 static zval *date_interval_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
+static int date_period_has_property(zend_object *object, zend_string *name, int type, void **cache_slot);
 static zval *date_period_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv);
 static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot);
 static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot);
@@ -1796,6 +1797,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_period.clone_obj = date_object_clone_period;
 	date_object_handlers_period.get_gc = date_object_get_gc_period;
 	date_object_handlers_period.get_property_ptr_ptr = date_period_get_property_ptr_ptr;
+	date_object_handlers_period.has_property = date_period_has_property;
 	date_object_handlers_period.read_property = date_period_read_property;
 	date_object_handlers_period.write_property = date_period_write_property;
 	date_object_handlers_period.get_properties_for = date_period_get_properties_for;
@@ -5925,6 +5927,44 @@ PHP_METHOD(DatePeriod, __wakeup)
 	restore_custom_dateperiod_properties(object, myht);
 }
 /* }}} */
+
+static int date_period_has_property(zend_object *object, zend_string *name, int type, void **cache_slot)
+{
+	zval rv;
+	zval *prop;
+
+	if (!date_period_is_internal_property(name)) {
+		return zend_std_has_property(object, name, type, cache_slot);
+	}
+
+	php_period_obj *period_obj = php_period_obj_from_obj(object);
+	if (!period_obj->initialized) {
+		switch (type) {
+			case ZEND_PROPERTY_ISSET: /* Intentional fallthrough */
+			case ZEND_PROPERTY_NOT_EMPTY:
+				return 0;
+			case ZEND_PROPERTY_EXISTS:
+				return 1;
+			default:
+				ZEND_UNREACHABLE();
+				break;
+		}
+	}
+
+	if (type == ZEND_PROPERTY_EXISTS) {
+		return 1;
+	}
+
+	prop = date_period_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
+	ZEND_ASSERT(prop != &EG(uninitialized_zval));
+
+	if (type == ZEND_PROPERTY_NOT_EMPTY) {
+		return zend_is_true(prop);
+	}
+
+	ZEND_ASSERT(type == ZEND_PROPERTY_ISSET);
+	return (Z_TYPE_P(prop) != IS_NULL);
+}
 
 /* {{{ date_period_read_property */
 static zval *date_period_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
