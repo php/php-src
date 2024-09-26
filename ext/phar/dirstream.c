@@ -319,11 +319,10 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return NULL;
 	}
 
-	size_t host_len = ZSTR_LEN(resource->host);
 	phar_request_initialize();
 	internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
 
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), host_len, NULL, 0, &error)) {
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options, "%s", error);
 			efree(error);
@@ -436,9 +435,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	size_t host_len = ZSTR_LEN(resource->host);
-
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), host_len, NULL, 0, &error)) {
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", ZSTR_VAL(resource->path) + 1, ZSTR_VAL(resource->host), error);
 		efree(error);
 		php_url_free(resource);
@@ -567,9 +564,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		return 0;
 	}
 
-	size_t host_len = ZSTR_LEN(resource->host);
-
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), host_len, NULL, 0, &error)) {
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", error retrieving phar information: %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
 		efree(error);
 		php_url_free(resource);
