@@ -110,7 +110,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* }}} */
 
 /* {{{ xmlreader_get_property_ptr_ptr */
-zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+static zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	zval *retval = NULL;
 	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
@@ -124,7 +124,7 @@ zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int
 /* }}} */
 
 /* {{{ xmlreader_read_property */
-zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
+static zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	zval *retval = NULL;
 	xmlreader_object *obj = php_xmlreader_fetch_object(object);
@@ -145,7 +145,7 @@ zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, 
 /* }}} */
 
 /* {{{ xmlreader_write_property */
-zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
+static zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 
