@@ -8068,14 +8068,15 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 	}
 
 	if ((fn_flags & ZEND_ACC_ABSTRACT) &&
-		!(ce->ce_flags & (ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_TRAIT)) &&
-		!in_interface
+		!(ce->ce_flags & (ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_TRAIT|ZEND_ACC_INTERFACE))
 	) {
 		// Don't say that the class should be declared abstract if it is
-		// anonymous and can't be abstract
+		// anonymous or an enum and can't be abstract
 		const char *msg;
 		if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
 			msg = "Anonymous class %s cannot contain abstract method %s::%s";
+		} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+			msg = "Enum %s cannot contain abstract method %s::%s";
 		} else {
 			msg = "Class %s contains abstract method %s::%s and must therefore be declared abstract";
 		}
