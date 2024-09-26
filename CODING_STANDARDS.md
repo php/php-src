@@ -9,12 +9,10 @@ rewritten to comply with these rules.
 
 1. Document your code in source files and the manual. (tm)
 
-1. PHP is implemented in C99.
+1. PHP is implemented in C11.
     For instance, the optional fixed-width integers from
     stdint.h (int8_t, int16_t, int32_t, int64_t and their unsigned
     counterparts) are supposed to be available.
-    However, some features (most notably variable-length arrays) which are not
-    supported by all relevant compilers, must not be used.
 
 1. Functions that are given pointers to resources should not free them.
 
