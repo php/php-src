@@ -1247,7 +1247,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
 			if (JIT_G(opt_level) < ZEND_JIT_LEVEL_OPT_FUNC) {
-				if (p->func != (zend_function*)&zend_pass_function
+				if (p->func
+				 && p->func != (zend_function*)&zend_pass_function
 				 && (zend_string_equals_literal(p->func->common.function_name, "extract")
 				  || zend_string_equals_literal(p->func->common.function_name, "compact")
 				  || zend_string_equals_literal(p->func->common.function_name, "get_defined_vars"))) {
@@ -6221,7 +6222,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					goto jit_failure;
 				}
 				if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
-					if (opline->opcode == ZEND_NEW && ssa_op->result_def >= 0) {
+					if (opline->opcode == ZEND_NEW && opline->result_type != IS_UNUSED) {
 						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_OBJECT, 1);
 					}
 					if (zend_jit_may_be_polymorphic_call(opline) ||
