@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16040 (Use-after-free of object released in hook). (ilutov)
   . Fixed bug GH-16054 (Segmentation fault when resizing hash table iterator
     list while adding). (nielsdos)
+  . Fixed bug GH-15905 (Assertion failure for TRACK_VARS_SERVER). (cmb)
 
 - DOM:
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
