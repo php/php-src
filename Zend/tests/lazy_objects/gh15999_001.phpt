@@ -1,5 +1,5 @@
 --TEST--
-Lazy Objects: GH-15999: Object is released during initialization
+Lazy Objects: GH-15999 001: Object is released during initialization
 --FILE--
 <?php
 
@@ -18,9 +18,10 @@ $o = $r->newLazyGhost(function ($obj) {
     global $o;
     $o = null;
 });
+$p = new stdClass;
 
 try {
-    $o->s = $o;
+    $o->s = $p;
 } catch (Error $e) {
     printf("%s: %s\n", $e::class, $e->getMessage());
 }
@@ -32,9 +33,10 @@ $o = $r->newLazyProxy(function ($obj) {
     $o = null;
     return new C();
 });
+$p = new stdClass;
 
 try {
-    $o->s = $o;
+    $o->s = $p;
 } catch (Error $e) {
     printf("%s: %s\n", $e::class, $e->getMessage());
 }
@@ -47,8 +49,9 @@ $o = $r->newLazyGhost(function ($obj) {
     $o = null;
     gc_collect_cycles();
 });
+$p = new stdClass;
 
-$o->s = $o;
+$o->s = $p;
 gc_collect_cycles();
 
 print "# Nested error (ghost):\n";
@@ -60,9 +63,10 @@ $o = $r->newLazyGhost(function ($obj) {
     $o = null;
     return new stdClass;
 });
+$p = new stdClass;
 
 try {
-    $o->s = $o;
+    $o->s = $p;
 } catch (Error $e) {
     do {
         printf("%s: %s\n", $e::class, $e->getMessage());
@@ -78,9 +82,10 @@ $o = $r->newLazyProxy(function ($obj) {
     $o = null;
     return new stdClass;
 });
+$p = new stdClass;
 
 try {
-    $o->s = $o;
+    $o->s = $p;
 } catch (Error $e) {
     do {
         printf("%s: %s\n", $e::class, $e->getMessage());
