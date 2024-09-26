@@ -1369,7 +1369,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
 			if (JIT_G(opt_level) < ZEND_JIT_LEVEL_OPT_FUNC) {
-				if (p->func != (zend_function*)&zend_pass_function
+				if (p->func
+				 && p->func != (zend_function*)&zend_pass_function
 				 && (zend_string_equals_literal(p->func->common.function_name, "extract")
 				  || zend_string_equals_literal(p->func->common.function_name, "compact")
 				  || zend_string_equals_literal(p->func->common.function_name, "get_defined_vars"))) {
