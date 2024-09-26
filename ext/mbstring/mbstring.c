@@ -3219,7 +3219,7 @@ PHP_FUNCTION(mb_levenshtein)
 
 	zend_long c0, c1, c2;
 
-	p1 = safe_emalloc(strlen_1 + 1, sizeof(zend_long), 0);
+	p1 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
 	p2 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
 
 	for (i2 = 0; i2 <= strlen_2; i2++) {
