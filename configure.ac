@@ -1615,7 +1615,7 @@ PHP_INSTALL_HEADERS([Zend/], m4_normalize([
   zend_call_stack.h
   zend_closures.h
   zend_compile.h
-  zend_config.w32.h
+  zend_config.h
   zend_constants.h
   zend_cpuinfo.h
   zend_dtrace.h
