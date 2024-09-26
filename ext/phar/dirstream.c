@@ -348,7 +348,8 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return NULL;
 	}
 
-	if (NULL != (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, strlen(internal_file))) && !entry->is_dir) {
+	size_t internal_file_len = strlen(internal_file);
+	if (NULL != (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len)) && !entry->is_dir) {
 		php_url_free(resource);
 		return NULL;
 	} else if (entry && entry->is_dir) {
@@ -360,15 +361,13 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		php_url_free(resource);
 		return phar_make_dirstream(internal_file, &phar->manifest);
 	} else {
-		size_t i_len = strlen(internal_file);
 		zend_string *str_key;
 
 		/* search for directory */
 		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->manifest, str_key) {
-			if (zend_string_starts_with_cstr(str_key, internal_file, i_len)) {
+			if (zend_string_starts_with_cstr(str_key, internal_file, internal_file_len)) {
 				/* directory found */
-				internal_file = estrndup(internal_file,
-						i_len);
+				internal_file = estrndup(internal_file, internal_file_len);
 				php_url_free(resource);
 				return phar_make_dirstream(internal_file, &phar->manifest);
 			}
