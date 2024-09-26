@@ -71,7 +71,6 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
     ])])
 
   PHP_INSTALL_HEADERS([ext/mysqlnd/], m4_normalize([
-    config-win.h
     mysqlnd.h
     mysqlnd_alloc.h
     mysqlnd_auth.h

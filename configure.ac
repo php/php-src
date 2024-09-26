@@ -1689,7 +1689,6 @@ PHP_INSTALL_HEADERS([Zend/], m4_normalize([
 ]))
 PHP_INSTALL_HEADERS([TSRM/], m4_normalize([
   TSRM.h
-  tsrm_win32.h
 ]))
 PHP_INSTALL_HEADERS([main/], m4_normalize([
   fastcgi.h
