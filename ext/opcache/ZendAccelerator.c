@@ -3860,10 +3860,12 @@ file_cache_fallback:
 		zend_inheritance_cache_add = zend_accel_inheritance_cache_add;
 
 #if HAVE_FFI
-		zend_ffi_cache_type_get = accel_ffi_cache_type_get;
-		zend_ffi_cache_type_add = accel_ffi_cache_type_add;
-		zend_ffi_cache_scope_get = accel_ffi_cache_scope_get;
-		zend_ffi_cache_scope_add = accel_ffi_cache_scope_add;
+		if (zend_ffi_api) {
+			zend_ffi_api->cache_type_get = accel_ffi_cache_type_get;
+			zend_ffi_api->cache_type_add = accel_ffi_cache_type_add;
+			zend_ffi_api->cache_scope_get = accel_ffi_cache_scope_get;
+			zend_ffi_api->cache_scope_add = accel_ffi_cache_scope_add;
+		}
 #endif
 	}
 
@@ -3920,10 +3922,12 @@ void accel_shutdown(void)
 	zend_inheritance_cache_add = accelerator_orig_inheritance_cache_add;
 
 #if HAVE_FFI
-	zend_ffi_cache_type_get = NULL;
-	zend_ffi_cache_type_add = NULL;
-	zend_ffi_cache_scope_get = NULL;
-	zend_ffi_cache_scope_add = NULL;
+	if (zend_ffi_api) {
+		zend_ffi_api->cache_type_get = NULL;
+		zend_ffi_api->cache_type_add = NULL;
+		zend_ffi_api->cache_scope_get = NULL;
+		zend_ffi_api->cache_scope_add = NULL;
+	}
 #endif
 
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
