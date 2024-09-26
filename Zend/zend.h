@@ -408,20 +408,7 @@ extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern ZEND_API zend_utility_values zend_uv;
 
 /* FFI/OPCache interopability API */
-extern ZEND_API zend_class_entry *zend_ffi_ce;
-extern ZEND_API zend_class_entry *zend_ffi_cdata_ce;
-
-typedef struct _zend_ffi_dcl   zend_ffi_dcl;
-typedef struct _zend_ffi_scope zend_ffi_scope;
-typedef struct _zend_ffi_cdata zend_ffi_cdata;
-typedef struct _zend_ffi_type  zend_ffi_type;
-
-ZEND_API extern zend_ffi_cdata* (*zend_ffi_cdata_create)(void *ptr, zend_ffi_type *type);
-ZEND_API extern zend_ffi_dcl*   (*zend_ffi_cache_type_get)(zend_string *str, void *context);
-ZEND_API extern zend_ffi_dcl*   (*zend_ffi_cache_type_add)(zend_string *str, zend_ffi_dcl *dcl, void *context);
-ZEND_API extern zend_ffi_scope* (*zend_ffi_cache_scope_get)(zend_string *str);
-ZEND_API extern zend_ffi_scope* (*zend_ffi_cache_scope_add)(zend_string *str, zend_ffi_scope *scope);
-ZEND_API extern void            (*zend_ffi_type_print)(FILE *f, const zend_ffi_type *type);
+extern ZEND_API struct _zend_ffi_api *zend_ffi_api;
 
 /* If DTrace is available and enabled */
 extern ZEND_API bool zend_dtrace_enabled;
