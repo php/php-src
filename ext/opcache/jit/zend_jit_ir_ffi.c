@@ -123,6 +123,14 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 	}
 	ZEND_ASSERT(opline->op2.num > 0 && opline->op2.num <= TRACE_FRAME_NUM_ARGS(call));
 
+	if (op1_info & MAY_BE_REF) {
+		op1_addr = jit_ZVAL_DEREF(jit, op1_addr);
+		op1_info &= ~MAY_BE_REF;
+		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			// TODO: dtor ???
+		}
+	}
+
 	if (opline->op2.num - 1 < zend_hash_num_elements(type->func.args)) {
 		type = zend_hash_index_find_ptr(type->func.args, opline->op2.num - 1);
 		type = ZEND_FFI_TYPE(type);
@@ -241,9 +249,14 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 						arg_flags |= ZREG_FFI_ZVAL_DTOR;
 					}
+				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_NULL) {
+					arg_type = IS_NULL;
+					ref = IR_NULL;
 				} else if (op1_ffi_type
 				 && op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER
-				 && ZEND_FFI_TYPE(type->pointer.type) == ZEND_FFI_TYPE(op1_ffi_type->pointer.type)) {
+				 && (ZEND_FFI_TYPE(type->pointer.type) == ZEND_FFI_TYPE(op1_ffi_type->pointer.type)
+				  || zend_ffi_api->is_compatible_type(ZEND_FFI_TYPE(op1_ffi_type->pointer.type), ZEND_FFI_TYPE(type->pointer.type)))) {
+					// TODO: guards ???
 					arg_type = IS_OBJECT;
 					ref = jit_Z_PTR(jit, op1_addr);
 					arg_flags |= ZREG_FFI_PTR_LOAD;
@@ -252,7 +265,9 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 					}
 				} else if (op1_ffi_type
 				 && op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY
-				 && ZEND_FFI_TYPE(type->pointer.type) == ZEND_FFI_TYPE(op1_ffi_type->array.type)) {
+				 && (ZEND_FFI_TYPE(type->pointer.type) == ZEND_FFI_TYPE(op1_ffi_type->array.type)
+				  || zend_ffi_api->is_compatible_type(ZEND_FFI_TYPE(op1_ffi_type->pointer.type), ZEND_FFI_TYPE(type->pointer.type)))) {
+					// TODO: guards ???
 					arg_type = IS_OBJECT;
 					ref = jit_Z_PTR(jit, op1_addr);
 					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
