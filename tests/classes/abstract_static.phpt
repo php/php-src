@@ -31,4 +31,4 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call to function show()
 
-Fatal error: Class fail contains 1 abstract method and must therefore be declared abstract or implement the remaining method (fail::func) in %sabstract_static.php(%d) : eval()'d code on line %d
+Fatal error: Class fail contains abstract method fail::func and must therefore be declared abstract in %sabstract_static.php(%d) : eval()'d code on line %d
