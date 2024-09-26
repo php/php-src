@@ -83,13 +83,6 @@ jobs:
         uses: actions/checkout@v4
       - name: apt
         uses: ./.github/actions/apt-x64
-      - name: LLVM 16 (ASAN-only)
-        if: ${{ matrix.asan }}
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y lsb-release wget software-properties-common gnupg
-          wget https://apt.llvm.org/llvm.sh
-          chmod u+x llvm.sh
-          sudo ./llvm.sh 16
       - name: System info
         run: |
           echo "::group::Show host CPU info"
