@@ -531,8 +531,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	char *error, *arch, *entry2;
 	size_t arch_len, entry_len;
 	php_url *resource = NULL;
-	zend_string *str_key;
-	zend_ulong unused;
 
 	/* pre-readonly check, we need to know if this is a data phar */
 	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
@@ -592,13 +590,13 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	}
 
 	if (!entry->is_deleted) {
-		for (zend_hash_internal_pointer_reset(&phar->manifest);
-			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->manifest, &str_key, &unused);
-			zend_hash_move_forward(&phar->manifest)
-		) {
-			if (ZSTR_LEN(str_key) > path_len &&
-				memcmp(ZSTR_VAL(str_key), ZSTR_VAL(resource->path)+1, path_len) == 0 &&
-				IS_SLASH(ZSTR_VAL(str_key)[path_len])) {
+		zend_string *str_key;
+
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->manifest, str_key) {
+			if (
+				zend_string_starts_with_cstr(str_key, ZSTR_VAL(resource->path)+1, path_len)
+				&& IS_SLASH(ZSTR_VAL(str_key)[path_len])
+			) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
 					efree(entry->filename);
@@ -607,15 +605,14 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 				php_url_free(resource);
 				return 0;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 
-		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->virtual_dirs, &str_key, &unused);
-			zend_hash_move_forward(&phar->virtual_dirs)) {
-
-			if (ZSTR_LEN(str_key) > path_len &&
-				memcmp(ZSTR_VAL(str_key), ZSTR_VAL(resource->path)+1, path_len) == 0 &&
-				IS_SLASH(ZSTR_VAL(str_key)[path_len])) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->virtual_dirs, str_key) {
+			ZEND_ASSERT(str_key);
+			if (
+				zend_string_starts_with_cstr(str_key, ZSTR_VAL(resource->path)+1, path_len)
+				&& IS_SLASH(ZSTR_VAL(str_key)[path_len])
+			) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
 					efree(entry->filename);
@@ -624,7 +621,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 				php_url_free(resource);
 				return 0;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (entry->is_temp_dir) {
