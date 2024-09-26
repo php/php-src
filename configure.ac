@@ -1695,6 +1695,7 @@ PHP_INSTALL_HEADERS([main/], m4_normalize([
   http_status_codes.h
   php.h
   php_compat.h
+  php_config.h
   php_content_types.h
   php_getopt.h
   php_globals.h
