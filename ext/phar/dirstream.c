@@ -291,8 +291,6 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	php_url *resource = NULL;
 	php_stream *ret;
 	char *internal_file, *error;
-	zend_string *str_key;
-	zend_ulong unused;
 	phar_archive_data *phar;
 	phar_entry_info *entry = NULL;
 
@@ -363,25 +361,18 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return phar_make_dirstream(internal_file, &phar->manifest);
 	} else {
 		size_t i_len = strlen(internal_file);
+		zend_string *str_key;
 
 		/* search for directory */
-		zend_hash_internal_pointer_reset(&phar->manifest);
-		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
-			if (HASH_KEY_NON_EXISTENT !=
-					zend_hash_get_current_key(&phar->manifest, &str_key, &unused)) {
-				if (ZSTR_LEN(str_key) > i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
-					/* directory found */
-					internal_file = estrndup(internal_file,
-							i_len);
-					php_url_free(resource);
-					return phar_make_dirstream(internal_file, &phar->manifest);
-				}
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->manifest, str_key) {
+			if (zend_string_starts_with_cstr(str_key, internal_file, i_len)) {
+				/* directory found */
+				internal_file = estrndup(internal_file,
+						i_len);
+				php_url_free(resource);
+				return phar_make_dirstream(internal_file, &phar->manifest);
 			}
-
-			if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
-				break;
-			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	php_url_free(resource);
