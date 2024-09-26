@@ -45,7 +45,14 @@ PHP                                                                        NEWS
 - Windows:
   . Fixed minimal Windows version. (cmb)
 
-12 Sep 2024, PHP 8.3.12
+26 Sep 2024, PHP 8.3.12
+
+- CGI:
+  . Fixed bug GHSA-p99j-rfp4-xqvq (Bypass of CVE-2024-4577, Parameter Injection
+    Vulnerability). (CVE-2024-8926) (nielsdos)
+  . Fixed bug GHSA-94p6-54jq-9mwp (cgi.force_redirect configuration is
+    bypassable due to the environment variable collision). (CVE-2024-8927)
+    (nielsdos)
 
 - Core:
   . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
@@ -73,6 +80,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15752 (Incorrect error message for finfo_file
     with an empty filename argument). (DanielEScherzer)
 
+- FPM:
+  . Fixed bug GHSA-865w-9rf3-2wh5 (Logs from childrens may be altered).
+    (CVE-2024-9026) (Jakub Zelenka)
+
 - MySQLnd:
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
@@ -82,6 +93,10 @@ PHP                                                                        NEWS
     Zend/Optimizer/zend_inference.c). (nielsdos)
   . Fixed bug GH-15658 (Segmentation fault in Zend/zend_vm_execute.h).
     (nielsdos)
+
+- SAPI:
+  . Fixed bug GHSA-9pqp-7h25-4f32 (Erroneous parsing of multipart form data).
+    (CVE-2024-8925) (Arnaud)
 
 - Standard:
   . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
