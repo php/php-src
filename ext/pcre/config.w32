@@ -9,7 +9,16 @@ AC_DEFINE('HAVE_BUNDLED_PCRE', 1, 'Define to 1 if PHP uses the bundled PCRE libr
 AC_DEFINE('PCRE2_CODE_UNIT_WIDTH', 8, 'Number of bits in non-UTF mode for PCRE library.');
 AC_DEFINE("PCRE2_STATIC", 1, "Define to 1 if PCRE library is built statically.");
 PHP_PCRE="yes";
-PHP_INSTALL_HEADERS("ext/pcre", "php_pcre.h pcre2lib/");
+PHP_INSTALL_HEADERS("ext/pcre", "php_pcre.h");
+PHP_INSTALL_HEADERS("ext/pcre/pcre2lib", "\
+	config.h\
+	pcre2.h\
+	pcre2_internal.h\
+	pcre2_intmodedep.h\
+	pcre2_jit_neon_inc.h\
+	pcre2_jit_simd_inc.h\
+	pcre2_ucp.h\
+");
 ADD_FLAG("CFLAGS_PCRE", " /D HAVE_CONFIG_H /D HAVE_MEMMOVE");
 
 ARG_WITH("pcre-jit", "Enable PCRE JIT support", "yes");

@@ -41,6 +41,34 @@ if (PHP_MYSQLND != "no") {
 				ADD_EXTENSION_DEP('mysqlnd', 'hash');
 			}
 		}
-		PHP_INSTALL_HEADERS("", "ext/mysqlnd");
+		PHP_INSTALL_HEADERS("ext/mysqlnd", "\
+			config-win.h\
+			mysqlnd.h\
+			mysqlnd_alloc.h\
+			mysqlnd_auth.h\
+			mysqlnd_block_alloc.h\
+			mysqlnd_charset.h\
+			mysqlnd_commands.h\
+			mysqlnd_connection.h\
+			mysqlnd_debug.h\
+			mysqlnd_enum_n_def.h\
+			mysqlnd_ext_plugin.h\
+			mysqlnd_libmysql_compat.h\
+			mysqlnd_plugin.h\
+			mysqlnd_portability.h\
+			mysqlnd_priv.h\
+			mysqlnd_protocol_frame_codec.h\
+			mysqlnd_ps.h\
+			mysqlnd_read_buffer.h\
+			mysqlnd_result.h\
+			mysqlnd_result_meta.h\
+			mysqlnd_reverse_api.h\
+			mysqlnd_statistics.h\
+			mysqlnd_structs.h\
+			mysqlnd_vio.h\
+			mysqlnd_wireprotocol.h\
+			mysql_float_to_double.h\
+			php_mysqlnd.h\
+		");
 	}
 }

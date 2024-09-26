@@ -285,7 +285,24 @@ dnl Various checks for GD features
       [-Wno-strict-prototypes -I@ext_srcdir@/libgd])
     PHP_ADD_BUILD_DIR([$ext_builddir/libgd])
 
-    PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
+    PHP_INSTALL_HEADERS([ext/gd], m4_normalize([php_gd.h]))
+    PHP_INSTALL_HEADERS([ext/gd/libgd/], m4_normalize([
+      bmp.h
+      gd.h
+      gdcache.h
+      gdfontg.h
+      gdfontl.h
+      gdfontmb.h
+      gdfonts.h
+      gdfontt.h
+      gdhelpers.h
+      gd_errors.h
+      gd_intern.h
+      gd_io.h
+      gd_tga.h
+      jisx0208.h
+      wbmp.h
+    ]))
 
     dnl Sanity check.
     AC_CACHE_CHECK([whether build works], [php_cv_lib_gd_works], [

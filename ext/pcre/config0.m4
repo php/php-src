@@ -130,5 +130,14 @@ else
     [no],,
     [$PHP_PCRE_CFLAGS])
   PHP_ADD_BUILD_DIR([$ext_builddir/pcre2lib])
-  PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcre2lib/])
+  PHP_INSTALL_HEADERS([ext/pcre], m4_normalize([php_pcre.h]))
+  PHP_INSTALL_HEADERS([ext/pcre/pcre2lib], m4_normalize([
+    config.h
+    pcre2.h
+    pcre2_internal.h
+    pcre2_intmodedep.h
+    pcre2_jit_neon_inc.h
+    pcre2_jit_simd_inc.h
+    pcre2_ucp.h
+  ]))
 fi
