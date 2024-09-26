@@ -514,4 +514,5 @@ PHP_INSTALL_HEADERS([ext/standard/], m4_normalize([
   streamsfuncs.h
   url.h
   url_scanner_ex.h
+  winver.h
 ]))
