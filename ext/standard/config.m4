@@ -461,7 +461,6 @@ PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/], m4_normalize([
   base64.h
   basic_functions.h
-  basic_functions_arginfo.h
   crc32.h
   crc32_x86.h
   credits.h
@@ -471,12 +470,9 @@ PHP_INSTALL_HEADERS([ext/standard/], m4_normalize([
   crypt_freesec.h
   css.h
   datetime.h
-  dir_arginfo.h
   dl.h
-  dl_arginfo.h
   exec.h
   file.h
-  file_arginfo.h
   flock_compat.h
   fsock.h
   head.h
@@ -486,7 +482,6 @@ PHP_INSTALL_HEADERS([ext/standard/], m4_normalize([
   md5.h
   pack.h
   pageinfo.h
-  password_arginfo.h
   php_array.h
   php_assert.h
   php_browscap.h
@@ -520,6 +515,5 @@ PHP_INSTALL_HEADERS([ext/standard/], m4_normalize([
   streamsfuncs.h
   url.h
   url_scanner_ex.h
-  user_filters_arginfo.h
   winver.h
 ]))

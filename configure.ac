@@ -1609,35 +1609,27 @@ PHP_INSTALL_HEADERS([Zend/], m4_normalize([
   zend_ast.h
   zend_atomic.h
   zend_attributes.h
-  zend_attributes_arginfo.h
   zend_bitset.h
   zend_build.h
   zend_builtin_functions.h
-  zend_builtin_functions_arginfo.h
   zend_call_stack.h
   zend_closures.h
-  zend_closures_arginfo.h
   zend_compile.h
   zend_config.w32.h
   zend_constants.h
-  zend_constants_arginfo.h
   zend_cpuinfo.h
   zend_dtrace.h
   zend_enum.h
-  zend_enum_arginfo.h
   zend_errors.h
   zend_exceptions.h
-  zend_exceptions_arginfo.h
   zend_execute.h
   zend_extensions.h
   zend_fibers.h
-  zend_fibers_arginfo.h
   zend_float.h
   zend_frameless_function.h
   zend_gc.h
   zend_gdb.h
   zend_generators.h
-  zend_generators_arginfo.h
   zend_globals.h
   zend_globals_macros.h
   zend_hash.h
@@ -1647,7 +1639,6 @@ PHP_INSTALL_HEADERS([Zend/], m4_normalize([
   zend_ini.h
   zend_ini_scanner.h
   zend_interfaces.h
-  zend_interfaces_arginfo.h
   zend_iterators.h
   zend_language_scanner.h
   zend_lazy_objects.h
@@ -1695,7 +1686,6 @@ PHP_INSTALL_HEADERS([Zend/], m4_normalize([
   zend_vm_trace_lines.h
   zend_vm_trace_map.h
   zend_weakrefs.h
-  zend_weakrefs_arginfo.h
 ]))
 PHP_INSTALL_HEADERS([TSRM/], m4_normalize([
   TSRM.h
@@ -1705,7 +1695,6 @@ PHP_INSTALL_HEADERS([main/], m4_normalize([
   fastcgi.h
   fopen_wrappers.h
   http_status_codes.h
-  main_arginfo.h
   php.h
   php_compat.h
   php_content_types.h
@@ -1740,7 +1729,6 @@ PHP_INSTALL_HEADERS([main/streams/], m4_normalize([
   php_stream_plain_wrapper.h
   php_stream_transport.h
   php_stream_userspace.h
-  userspace_arginfo.h
 ]))
 PHP_INSTALL_HEADERS([Zend/Optimizer], m4_normalize([
   zend_call_graph.h
