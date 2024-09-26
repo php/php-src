@@ -413,6 +413,18 @@ typedef struct _zend_ffi {
 #define ZEND_FFI_TYPE_MAKE_OWNED(t) \
 	((zend_ffi_type*)(((uintptr_t)(t)) | ZEND_FFI_TYPE_OWNED))
 
-PHP_FFI_API bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *src_type);
+struct _zend_ffi_api {
+	zend_class_entry *scope_ce;
+	zend_class_entry *cdata_ce;
+
+	zend_ffi_cdata* (*cdata_create)(void *ptr, zend_ffi_type *type);
+	void            (*type_print)(FILE *f, const zend_ffi_type *type);
+	bool            (*is_compatible_type)(zend_ffi_type *dst_type, zend_ffi_type *src_type);
+
+	zend_ffi_dcl*   (*cache_type_get)(zend_string *str, void *context);
+	zend_ffi_dcl*   (*cache_type_add)(zend_string *str, zend_ffi_dcl *dcl, void *context);
+	zend_ffi_scope* (*cache_scope_get)(zend_string *str);
+	zend_ffi_scope* (*cache_scope_add)(zend_string *str, zend_ffi_scope *scope);
+};
 
 #endif	/* PHP_FFI_H */
