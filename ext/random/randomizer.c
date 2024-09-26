@@ -356,7 +356,7 @@ PHP_METHOD(Random_Randomizer, shuffleArray)
 		Z_PARAM_ARRAY(array)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_DUP(return_value, array);
+	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
 	if (!php_array_data_shuffle(randomizer->engine, return_value)) {
 		RETURN_THROWS();
 	}
