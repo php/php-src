@@ -150,10 +150,9 @@ static int phar_compare_dir_name(Bucket *f, Bucket *s)  /* {{{ */
  * files in a phar and retrieving its relative path.  From this, construct
  * a list of files/directories that are "in" the directory represented by dir
  */
-static php_stream *phar_make_dirstream(char *dir, const HashTable *manifest) /* {{{ */
+static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const HashTable *manifest) /* {{{ */
 {
 	HashTable *data;
-	size_t dirlen = strlen(dir);
 	char *entry;
 
 	ALLOC_HASHTABLE(data);
@@ -162,7 +161,6 @@ static php_stream *phar_make_dirstream(char *dir, const HashTable *manifest) /* 
 	if ((*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) || (dirlen >= sizeof(".phar")-1 && !memcmp(dir, ".phar", sizeof(".phar")-1))) {
 		/* make empty root directory for empty phar */
 		/* make empty directory for .phar magic directory */
-		efree(dir);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	}
 
@@ -240,11 +238,9 @@ PHAR_ADD_ENTRY:
 	} ZEND_HASH_FOREACH_END();
 
 	if (FAILURE != zend_hash_has_more_elements(data)) {
-		efree(dir);
 		zend_hash_sort(data, phar_compare_dir_name, 0);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	} else {
-		efree(dir);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	}
 }
@@ -256,10 +252,8 @@ PHAR_ADD_ENTRY:
 php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
-	php_stream *ret;
-	char *internal_file, *error;
+	char *error;
 	phar_archive_data *phar;
-	phar_entry_info *entry = NULL;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar url \"%s\" is unknown", path);
@@ -285,7 +279,6 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	}
 
 	phar_request_initialize();
-	internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
 
 	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
 		if (error) {
@@ -302,12 +295,10 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		efree(error);
 	}
 
-	if (*internal_file == '\0') {
+	if (zend_string_equals(resource->path, ZSTR_CHAR('/'))) {
 		/* root directory requested */
-		internal_file = estrndup(internal_file - 1, 1);
-		ret = phar_make_dirstream(internal_file, &phar->manifest);
 		php_url_free(resource);
-		return ret;
+		return phar_make_dirstream("/", strlen("/"), &phar->manifest);
 	}
 
 	if (!HT_IS_INITIALIZED(&phar->manifest)) {
@@ -315,18 +306,23 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return NULL;
 	}
 
-	size_t internal_file_len = strlen(internal_file);
-	if (NULL != (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len)) && !entry->is_dir) {
+	const char *internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
+	size_t internal_file_len = ZSTR_LEN(resource->path) - 1;
+	phar_entry_info *entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len);
+	php_stream *ret;
+
+	if (NULL != entry && !entry->is_dir) {
 		php_url_free(resource);
 		return NULL;
 	} else if (entry && entry->is_dir) {
 		if (entry->is_mounted) {
+			ret = php_stream_opendir(entry->tmp, options, context);
 			php_url_free(resource);
-			return php_stream_opendir(entry->tmp, options, context);
+			return ret;
 		}
-		internal_file = estrdup(internal_file);
+		ret = phar_make_dirstream(internal_file, internal_file_len, &phar->manifest);
 		php_url_free(resource);
-		return phar_make_dirstream(internal_file, &phar->manifest);
+		return ret;
 	} else {
 		zend_string *str_key;
 
@@ -334,9 +330,9 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->manifest, str_key) {
 			if (zend_string_starts_with_cstr(str_key, internal_file, internal_file_len)) {
 				/* directory found */
-				internal_file = estrndup(internal_file, internal_file_len);
+				ret = phar_make_dirstream(internal_file, internal_file_len, &phar->manifest);
 				php_url_free(resource);
-				return phar_make_dirstream(internal_file, &phar->manifest);
+				return ret;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
