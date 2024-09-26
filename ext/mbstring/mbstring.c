@@ -3244,31 +3244,17 @@ PHP_FUNCTION(mb_levenshtein)
 			}
 			if (tmp_wchar_len_2 == 0) {
 				/* Insertion process when there is a surplus of 128 code points. */
-				for (i2 = 0; i2 < tmp_wchar_len_1 && len_2 != 0; i2++) {
-					/* for overflow */
-					if (len_2 < tmp_wchar_len_1) {
-						c0 = p1[i2] + cost_rep;
-						c1 = p1[i2 + 1] + cost_del;
-					} else {
-						c0 = p1[i2 + (len_2 - tmp_wchar_len_1)] + cost_rep;
-						c1 = p1[i2 + (len_2 - tmp_wchar_len_1) + 1] + cost_del;
-					}
+				for (i2 = 0; i2 < tmp_wchar_len_1; i2++) {
+					c0 = p1[i2 + (len_2 - tmp_wchar_len_1)] + cost_rep;
+					c1 = p1[i2 + (len_2 - tmp_wchar_len_1) + 1] + cost_del;
 					if (c1 < c0) {
 						c0 = c1;
 					}
-					if (len_2 < tmp_wchar_len_1) {
-						c2 = p2[i2] + cost_ins;
-					} else {
-						c2 = p2[i2] + cost_ins;
-					}
+					c2 = p2[i2] + cost_ins;
 					if (c2 < c0) {
 						c0 = c2;
 					}
-					if (len_2 < tmp_wchar_len_1) {
-						p2[i2 + 1] = c0;
-					} else {
-						p2[i2 + (len_2 - tmp_wchar_len_1) + 1] = c0;
-					}
+					p2[i2 + (len_2 - tmp_wchar_len_1) + 1] = c0;
 				}
 			} else {
 				for (i2 = 0; i2 < tmp_wchar_len_2; i2++) {
