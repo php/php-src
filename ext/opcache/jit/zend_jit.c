@@ -42,6 +42,10 @@
 
 #include "jit/zend_jit_internal.h"
 
+#if HAVE_FFI
+# include "ext/ffi/php_ffi.h"
+#endif
+
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 #include <pthread.h>
 #endif

@@ -12724,6 +12724,90 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 	return 1;
 }
 
+#ifdef HAVE_FFI
+static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
+                                       const zend_op      *opline,
+                                       zend_ssa           *ssa,
+                                       const zend_ssa_op  *ssa_op,
+                                       uint32_t            op1_info,
+                                       zend_jit_addr       op1_addr,
+                                       bool                op1_avoid_refcounting,
+                                       uint32_t            op2_info,
+                                       zend_jit_addr       op2_addr,
+                                       zend_ssa_range     *op2_range,
+                                       uint32_t            res_info,
+                                       zend_jit_addr       res_addr,
+                                       zend_ffi_type      *op1_ffi_type)
+{
+	uint32_t res_type;
+	zend_ffi_type *el_type = ZEND_FFI_TYPE(op1_ffi_type->array.type);
+
+	// TODO: ce guard ???
+	// TODO: ffi type guard ???
+	if (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY) {
+		// TODO: array bounds check ???
+	}
+	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
+	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
+
+	switch (el_type->kind) {
+		case ZEND_FFI_TYPE_FLOAT:
+			jit_set_Z_DVAL(jit, res_addr, ir_F2D(ir_LOAD_F(ptr)));
+			res_type = IS_DOUBLE;
+			break;
+		case ZEND_FFI_TYPE_DOUBLE:
+			jit_set_Z_DVAL(jit, res_addr, ir_LOAD_D(ptr));
+			res_type = IS_DOUBLE;
+			break;
+		case ZEND_FFI_TYPE_UINT8:
+			jit_set_Z_LVAL(jit, res_addr, ir_ZEXT_L(ir_LOAD_U8(ptr)));
+			res_type = IS_LONG;
+			break;
+		case ZEND_FFI_TYPE_SINT8:
+			jit_set_Z_LVAL(jit, res_addr, ir_SEXT_L(ir_LOAD_I8(ptr)));
+			res_type = IS_LONG;
+			break;
+		case ZEND_FFI_TYPE_UINT16:
+			jit_set_Z_LVAL(jit, res_addr, ir_ZEXT_L(ir_LOAD_U16(ptr)));
+			res_type = IS_LONG;
+			break;
+		case ZEND_FFI_TYPE_SINT16:
+			jit_set_Z_LVAL(jit, res_addr, ir_SEXT_L(ir_LOAD_I16(ptr)));
+			res_type = IS_LONG;
+			break;
+		case ZEND_FFI_TYPE_UINT32:
+			jit_set_Z_LVAL(jit, res_addr, ir_ZEXT_L(ir_LOAD_U32(ptr)));
+			res_type = IS_LONG;
+			break;
+		case ZEND_FFI_TYPE_SINT32:
+			jit_set_Z_LVAL(jit, res_addr, ir_SEXT_L(ir_LOAD_I32(ptr)));
+			res_type = IS_LONG;
+			break;
+		case ZEND_FFI_TYPE_UINT64:
+			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_U32(ptr));
+			res_type = IS_LONG;
+			break;
+		case ZEND_FFI_TYPE_SINT64:
+			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_I32(ptr));
+			res_type = IS_LONG;
+			break;
+		default:
+			ZEND_UNREACHABLE();
+	}
+	if (Z_MODE(res_addr) != IS_REG) {
+		jit_set_Z_TYPE_INFO(jit, res_addr, res_type);
+	}
+
+	if (res_info & MAY_BE_GUARD) {
+		// TODO: ???
+		ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+	}
+
+	return 1;
+}
+#endif
+
 static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
                                                    const zend_op  *opline,
                                                    uint32_t       *op1_info_ptr,
@@ -13387,6 +13471,111 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 	return 1;
 }
 
+#ifdef HAVE_FFI
+static int zend_jit_ffi_assign_dim(zend_jit_ctx  *jit,
+                                   const zend_op *opline,
+                                   uint32_t       op1_info,
+                                   zend_jit_addr  op1_addr,
+                                   uint32_t       op2_info,
+                                   zend_jit_addr  op2_addr,
+                                   zend_ssa_range *op2_range,
+                                   uint32_t       val_info,
+                                   zend_jit_addr  op3_addr,
+                                   zend_jit_addr  op3_def_addr,
+                                   zend_jit_addr  res_addr,
+                                   zend_ffi_type  *op1_ffi_type)
+{
+	zend_ffi_type *el_type = ZEND_FFI_TYPE(op1_ffi_type->array.type);
+
+	// TODO: ce guard ???
+	// TODO: ffi type guard ???
+	if (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY) {
+		// TODO: array bounds check ???
+	}
+	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
+	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
+
+
+	ZEND_ASSERT(!res_addr);
+
+	switch (el_type->kind) {
+		case ZEND_FFI_TYPE_FLOAT:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_INT2F(jit_Z_LVAL(jit, op3_addr)));
+			} else if (val_info == MAY_BE_DOUBLE) {
+				ir_STORE(ptr, ir_D2F(jit_Z_DVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_DOUBLE:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_INT2D(jit_Z_LVAL(jit, op3_addr)));
+			} else if (val_info == MAY_BE_DOUBLE) {
+				ir_STORE(ptr, jit_Z_DVAL(jit, op3_addr));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT8:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_TRUNC_U8(jit_Z_LVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT8:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_TRUNC_I8(jit_Z_LVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT16:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_TRUNC_U16(jit_Z_LVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT16:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_TRUNC_I16(jit_Z_LVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT32:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_TRUNC_U32(jit_Z_LVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT32:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_TRUNC_I32(jit_Z_LVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT64:
+		case ZEND_FFI_TYPE_SINT64:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, jit_Z_LVAL(jit, op3_addr));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		default:
+			ZEND_UNREACHABLE();
+	}
+
+	return 1;
+}
+#endif
+
 static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
                                   const zend_op  *opline,
                                   uint32_t        op1_info,
@@ -13600,6 +13789,111 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 
 	return 1;
 }
+
+#ifdef HAVE_FFI
+static int zend_jit_ffi_assign_dim_op(zend_jit_ctx   *jit,
+                                      const zend_op  *opline,
+                                      uint32_t        op1_info,
+                                      uint32_t        op1_def_info,
+                                      zend_jit_addr   op1_addr,
+                                      uint32_t        op2_info,
+                                      zend_jit_addr   op2_addr,
+                                      zend_ssa_range *op2_range,
+                                      uint32_t        op1_data_info,
+                                      zend_jit_addr   op3_addr,
+                                      zend_ssa_range *op1_data_range,
+                                      zend_ffi_type  *op1_ffi_type)
+{
+	zend_ffi_type *el_type = ZEND_FFI_TYPE(op1_ffi_type->array.type);
+
+	// TODO: ce guard ???
+	// TODO: ffi type guard ???
+	if (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY) {
+		// TODO: array bounds check ???
+	}
+	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
+	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
+
+
+	ZEND_ASSERT(opline->extended_value == ZEND_ADD);
+
+	switch (el_type->kind) {
+		case ZEND_FFI_TYPE_FLOAT:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_F(ir_LOAD_F(ptr), ir_INT2F(jit_Z_LVAL(jit, op3_addr))));
+			} else if (op1_data_info == MAY_BE_DOUBLE) {
+				ir_STORE(ptr, ir_ADD_F(ir_LOAD_F(ptr), ir_D2F(jit_Z_DVAL(jit, op3_addr))));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_DOUBLE:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_D(ir_LOAD_D(ptr), ir_INT2D(jit_Z_LVAL(jit, op3_addr))));
+			} else if (op1_data_info == MAY_BE_DOUBLE) {
+				ir_STORE(ptr, ir_ADD_D(ir_LOAD_D(ptr), jit_Z_DVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT8:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_U8(ir_LOAD_U8(ptr), ir_TRUNC_U8(jit_Z_LVAL(jit, op3_addr))));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT8:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_I8(ir_LOAD_I8(ptr), ir_TRUNC_I8(jit_Z_LVAL(jit, op3_addr))));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT16:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_U16(ir_LOAD_U16(ptr), ir_TRUNC_U16(jit_Z_LVAL(jit, op3_addr))));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT16:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_I16(ir_LOAD_I16(ptr), ir_TRUNC_I16(jit_Z_LVAL(jit, op3_addr))));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT32:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_U32(ir_LOAD_U32(ptr), ir_TRUNC_U32(jit_Z_LVAL(jit, op3_addr))));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT32:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_I32(ir_LOAD_I32(ptr), ir_TRUNC_I32(jit_Z_LVAL(jit, op3_addr))));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT64:
+		case ZEND_FFI_TYPE_SINT64:
+			if (op1_data_info == MAY_BE_LONG) {
+				ir_STORE(ptr, ir_ADD_I64(ir_LOAD_I64(ptr), jit_Z_LVAL(jit, op3_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+		default:
+			ZEND_UNREACHABLE();
+	}
+
+	return 1;
+}
+#endif
 
 static int zend_jit_fe_reset(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info)
 {
@@ -17352,9 +17646,26 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_ARRAY) {
 				op1_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY);
 			}
-			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
-					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
-					 ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING));
+			if (((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY)
+			 && (((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG)
+			  || ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING))) {
+				return 1;
+			}
+#ifdef HAVE_FFI
+			if (trace
+			 && (trace+1)->op == ZEND_JIT_TRACE_OP1_TYPE
+			 && (trace+2)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
+				zend_ffi_type *op1_ffi_type = (zend_ffi_type*)(trace+2)->ptr;
+				if (op1_ffi_type
+				 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
+				 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind >= ZEND_FFI_TYPE_FLOAT
+				 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind <= ZEND_FFI_TYPE_ENUM
+				 && op2_info == MAY_BE_LONG) {
+					return 1;
+				}
+			}
+#endif
+			return 0;
 		case ZEND_ASSIGN_DIM_OP:
 			if (opline->result_type != IS_UNUSED) {
 				return 0;
@@ -17394,9 +17705,26 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 					return 0;
 				}
 			}
-			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
-					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
-					 ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING));
+			if (((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY)
+			 && (((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG)
+			  || ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING))) {
+				return 1;
+			}
+#ifdef HAVE_FFI
+			if (trace
+			 && (trace+1)->op == ZEND_JIT_TRACE_OP1_TYPE
+			 && (trace+2)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
+				zend_ffi_type *op1_ffi_type = (zend_ffi_type*)(trace+2)->ptr;
+				if (op1_ffi_type
+				 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
+				 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind >= ZEND_FFI_TYPE_FLOAT
+				 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind <= ZEND_FFI_TYPE_ENUM
+				 && op2_info == MAY_BE_LONG) {
+					return 1;
+				}
+			}
+#endif
+			return 0;
 		case ZEND_ASSIGN_OBJ_OP:
 			if (opline->result_type != IS_UNUSED) {
 				return 0;
