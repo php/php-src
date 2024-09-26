@@ -42,10 +42,12 @@ foreach($src_filenames as $src_filename) {
   unlink($dest_filename);
 }
 
-// clean the temp dir and file
-rmdir("$file_path/rename_variation");
-
 echo "Done\n";
+?>
+--CLEAN--
+<?php
+$file_path = __DIR__;
+@rmdir("$file_path/rename_variation");
 ?>
 --EXPECTF--
 *** Testing rename() : rename files across directories ***

@@ -1847,7 +1847,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 		}
 
 		fclose(tmp);
-		VCWD_UNLINK((const char *)ZSTR_VAL(path)); /* make sure that the temporary file is removed */
+		VCWD_UNLINK(ZSTR_VAL(path), ZSTR_LEN(path)); /* make sure that the temporary file is removed */
 		zend_string_release_ex(path, 0);
 	}
 	RETURN_TRUE;
