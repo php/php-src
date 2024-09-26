@@ -3383,8 +3383,8 @@ static void ZEND_FASTCALL zend_jit_zval_ffi_ptr(zval *zv, zend_ffi_type *type, v
 		GC_SET_REFCOUNT(&cdata->std, 1);
 		GC_TYPE_INFO(&cdata->std) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
 		cdata->std.extra_flags = 0;
-		cdata->std.ce = zend_ffi_cdata_ce;
-		cdata->std.handlers = zend_ffi_cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
+		cdata->std.ce = zend_ffi_api->cdata_ce;
+		cdata->std.handlers = zend_ffi_api->cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
 		cdata->std.properties = NULL;
 		zend_objects_store_put(&cdata->std);
 		cdata->type = type;
@@ -3409,8 +3409,8 @@ static void ZEND_FASTCALL zend_jit_zval_ffi_obj(zval *zv, zend_ffi_type *type, v
 		GC_SET_REFCOUNT(&cdata->std, 1);
 		GC_TYPE_INFO(&cdata->std) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
 		cdata->std.extra_flags = 0;
-		cdata->std.ce = zend_ffi_cdata_ce;
-		cdata->std.handlers = zend_ffi_cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
+		cdata->std.ce = zend_ffi_api->cdata_ce;
+		cdata->std.handlers = zend_ffi_api->cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
 		cdata->std.properties = NULL;
 		zend_objects_store_put(&cdata->std);
 		cdata->type = type;
