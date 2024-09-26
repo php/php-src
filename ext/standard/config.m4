@@ -488,7 +488,6 @@ PHP_INSTALL_HEADERS([ext/standard/], m4_normalize([
   php_crypt.h
   php_crypt_r.h
   php_dir.h
-  php_dir_int.h
   php_dns.h
   php_ext_syslog.h
   php_filestat.h

@@ -1670,7 +1670,6 @@ PHP_INSTALL_HEADERS([Zend/], m4_normalize([
   zend_stream.h
   zend_string.h
   zend_strtod.h
-  zend_strtod_int.h
   zend_system_id.h
   zend_types.h
   zend_type_info.h
@@ -1720,7 +1719,6 @@ PHP_INSTALL_HEADERS([main/], m4_normalize([
   spprintf.h
 ]))
 PHP_INSTALL_HEADERS([main/streams/], m4_normalize([
-  php_streams_int.h
   php_stream_context.h
   php_stream_filter_api.h
   php_stream_glob_wrapper.h
