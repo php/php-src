@@ -3063,14 +3063,18 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_OPT_X_KEEPALIVE_INTERVAL:
 #endif
 		{
-			int val;
+			bool failed = false;
+			zend_long lval = zval_try_get_long(newval, &failed);
+			if (failed) {
+				zend_argument_type_error(3, "must be of type int for the given option, %s given", zend_zval_value_name(newval));
+				RETURN_THROWS();
+			}
 
-			convert_to_long(newval);
-			if (ZEND_LONG_EXCEEDS_INT(Z_LVAL_P(newval))) {
+			if (ZEND_LONG_EXCEEDS_INT(lval)) {
 				zend_argument_value_error(3, "is too large");
 				RETURN_THROWS();
 			}
-			val = (int)Z_LVAL_P(newval);
+			int val = (int)lval;
 			if (ldap_set_option(ldap, option, &val)) {
 				RETURN_FALSE;
 			}
@@ -3079,9 +3083,13 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_OPT_NETWORK_TIMEOUT:
 		{
 			struct timeval timeout;
-
-			convert_to_long(newval);
-			timeout.tv_sec = Z_LVAL_P(newval);
+			bool failed = false;
+			zend_long lval = zval_try_get_long(newval, &failed);
+			if (failed) {
+				zend_argument_type_error(3, "must be of type int for the LDAP_OPT_NETWORK_TIMEOUT option, %s given", zend_zval_value_name(newval));
+				RETURN_THROWS();
+			}
+			timeout.tv_sec = lval;
 			timeout.tv_usec = 0;
 			if (ldap_set_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
 				RETURN_FALSE;
@@ -3091,9 +3099,13 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_X_OPT_CONNECT_TIMEOUT:
 		{
 			int timeout;
-
-			convert_to_long(newval);
-			timeout = 1000 * Z_LVAL_P(newval); /* Convert to milliseconds */
+			bool failed = false;
+			zend_long lval = zval_try_get_long(newval, &failed);
+			if (failed) {
+				zend_argument_type_error(3, "must be of type int for the LDAP_X_OPT_CONNECT_TIMEOUT option, %s given", zend_zval_value_name(newval));
+				RETURN_THROWS();
+			}
+			timeout = 1000 * lval; /* Convert to milliseconds */
 			if (ldap_set_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
 				RETURN_FALSE;
 			}
@@ -3104,8 +3116,13 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			struct timeval timeout;
 
-			convert_to_long(newval);
-			timeout.tv_sec = Z_LVAL_P(newval);
+			bool failed = false;
+			zend_long lval = zval_try_get_long(newval, &failed);
+			if (failed) {
+				zend_argument_type_error(3, "must be of type int for the LDAP_OPT_TIMEOUT option, %s given", zend_zval_value_name(newval));
+				RETURN_THROWS();
+			}
+			timeout.tv_sec = lval;
 			timeout.tv_usec = 0;
 			if (ldap_set_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
 				RETURN_FALSE;
@@ -3141,9 +3158,8 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_OPT_MATCHED_DN:
 #endif
 		{
-			zend_string *val;
-			val = zval_get_string(newval);
-			if (EG(exception)) {
+			zend_string *val = zval_try_get_string(newval);
+			if (val == NULL) {
 				RETURN_THROWS();
 			}
 			if (ldap_set_option(ldap, option, ZSTR_VAL(val))) {
@@ -3161,8 +3177,7 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_OPT_X_SASL_NOCANON:
 #endif
 		{
-			void *val;
-			val = zend_is_true(newval) ? LDAP_OPT_ON : LDAP_OPT_OFF;
+			void *val = zend_is_true(newval) ? LDAP_OPT_ON : LDAP_OPT_OFF;
 			if (ldap_set_option(ldap, option, val)) {
 				RETURN_FALSE;
 			}
