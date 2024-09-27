@@ -2533,112 +2533,110 @@ PHP_FUNCTION(ldap_modify_batch)
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
 	/* perform validation */
-	{
-		/* make sure the DN contains no NUL bytes */
-		if (zend_char_has_nul_byte(dn, dn_len)) {
-			zend_argument_value_error(2, "must not contain null bytes");
-			RETURN_THROWS();
-		}
-
-		/* make sure the top level is a normal array */
-		if (zend_hash_num_elements(modifications) == 0) {
-			zend_argument_must_not_be_empty_error(3);
-			RETURN_THROWS();
-		}
-		if (!zend_array_is_list(modifications)) {
-			zend_argument_value_error(3, "must be a list");
-			RETURN_THROWS();
-		}
-
-		zval *modification_zv = NULL;
-		ZEND_HASH_FOREACH_VAL(modifications, modification_zv) {
-			if (Z_TYPE_P(modification_zv) != IS_ARRAY) {
-				zend_argument_type_error(3, "must only contain arrays");
-				RETURN_THROWS();
-			}
-
-			SEPARATE_ARRAY(modification_zv);
-			const HashTable *modification = Z_ARRVAL_P(modification_zv);
-			uint32_t modification_size = zend_hash_num_elements(modification);
-
-			if (modification_size != 2 && modification_size != 3) {
-				zend_argument_value_error(3, "a modification entry must only contain the keys "
-					"\"" LDAP_MODIFY_BATCH_ATTRIB "\", \"" LDAP_MODIFY_BATCH_MODTYPE "\", and \"" LDAP_MODIFY_BATCH_VALUES "\"");
-				RETURN_THROWS();
-			}
-
-			const zval *attrib = zend_hash_str_find(modification, LDAP_MODIFY_BATCH_ATTRIB, strlen(LDAP_MODIFY_BATCH_ATTRIB));
-			if (UNEXPECTED(attrib == NULL)) {
-				zend_argument_value_error(3, "a modification entry must contain the \"" LDAP_MODIFY_BATCH_ATTRIB "\" option");
-				RETURN_THROWS();
-			}
-			if (UNEXPECTED(Z_TYPE_P(attrib) != IS_STRING)) {
-				zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must be of type string, %s given", zend_zval_value_name(attrib));
-				RETURN_THROWS();
-			}
-			if (zend_str_has_nul_byte(Z_STR_P(attrib))) {
-				zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must not contain null bytes");
-				RETURN_THROWS();
-			}
-
-			const zval *modtype_zv = zend_hash_str_find(modification, LDAP_MODIFY_BATCH_MODTYPE, strlen(LDAP_MODIFY_BATCH_MODTYPE));
-			if (UNEXPECTED(modtype_zv == NULL)) {
-				zend_argument_value_error(3, "a modification entry must contain the \"" LDAP_MODIFY_BATCH_MODTYPE "\" option");
-				RETURN_THROWS();
-			}
-			if (UNEXPECTED(Z_TYPE_P(modtype_zv) != IS_LONG)) {
-				zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be of type int, %s given", zend_zval_value_name(attrib));
-				RETURN_THROWS();
-			}
-			zend_long modtype = Z_LVAL_P(modtype_zv);
-			if (
-				modtype != LDAP_MODIFY_BATCH_ADD &&
-				modtype != LDAP_MODIFY_BATCH_REMOVE &&
-				modtype != LDAP_MODIFY_BATCH_REPLACE &&
-				modtype != LDAP_MODIFY_BATCH_REMOVE_ALL
-			) {
-				zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be"
-					" LDAP_MODIFY_BATCH_ADD, LDAP_MODIFY_BATCH_REMOVE, LDAP_MODIFY_BATCH_REPLACE,"
-					" or LDAP_MODIFY_BATCH_REMOVE_ALL");
-				RETURN_THROWS();
-			}
-			/* We assume that the modification array is well-formed and only ever contains an extra "values" key */
-			if (modtype == LDAP_MODIFY_BATCH_REMOVE_ALL && modification_size == 3) {
-				zend_argument_value_error(3, "a modification entry must not contain the "
-					"\"" LDAP_MODIFY_BATCH_VALUES "\" option when option \"" LDAP_MODIFY_BATCH_MODTYPE "\" "
-					"is LDAP_MODIFY_BATCH_REMOVE_ALL");
-				RETURN_THROWS();
-			}
-
-			zval *modification_values_zv = zend_hash_str_find(modification, LDAP_MODIFY_BATCH_VALUES, strlen(LDAP_MODIFY_BATCH_VALUES));
-			if (modification_values_zv == NULL) {
-				if (modtype != LDAP_MODIFY_BATCH_REMOVE_ALL) {
-					zend_argument_value_error(3, "a modification entry must contain the "
-						"\"" LDAP_MODIFY_BATCH_VALUES "\" option when the \"" LDAP_MODIFY_BATCH_MODTYPE "\" option "
-						"is not LDAP_MODIFY_BATCH_REMOVE_ALL");
-					RETURN_THROWS();
-				}
-				continue;
-			}
-			if (Z_TYPE_P(modification_values_zv) != IS_ARRAY) {
-				zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be of type array, %s given", zend_zval_value_name(attrib));
-				RETURN_THROWS();
-			}
-
-			SEPARATE_ARRAY(modification_values_zv);
-			const HashTable *modification_values = Z_ARRVAL_P(modification_values_zv);
-			/* is the array not empty? */
-			uint32_t num_modvals = zend_hash_num_elements(modification_values);
-			if (num_modvals == 0) {
-				zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must not be empty");
-				RETURN_THROWS();
-			}
-			if (!zend_array_is_list(modification_values)) {
-				zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be a list");
-				RETURN_THROWS();
-			}
-		} ZEND_HASH_FOREACH_END();
+	/* make sure the DN contains no NUL bytes */
+	if (zend_char_has_nul_byte(dn, dn_len)) {
+		zend_argument_value_error(2, "must not contain null bytes");
+		RETURN_THROWS();
 	}
+
+	/* make sure the top level is a normal array */
+	if (zend_hash_num_elements(modifications) == 0) {
+		zend_argument_must_not_be_empty_error(3);
+		RETURN_THROWS();
+	}
+	if (!zend_array_is_list(modifications)) {
+		zend_argument_value_error(3, "must be a list");
+		RETURN_THROWS();
+	}
+
+	zval *modification_zv = NULL;
+	ZEND_HASH_FOREACH_VAL(modifications, modification_zv) {
+		if (Z_TYPE_P(modification_zv) != IS_ARRAY) {
+			zend_argument_type_error(3, "must only contain arrays");
+			RETURN_THROWS();
+		}
+
+		SEPARATE_ARRAY(modification_zv);
+		const HashTable *modification = Z_ARRVAL_P(modification_zv);
+		uint32_t modification_size = zend_hash_num_elements(modification);
+
+		if (modification_size != 2 && modification_size != 3) {
+			zend_argument_value_error(3, "a modification entry must only contain the keys "
+				"\"" LDAP_MODIFY_BATCH_ATTRIB "\", \"" LDAP_MODIFY_BATCH_MODTYPE "\", and \"" LDAP_MODIFY_BATCH_VALUES "\"");
+			RETURN_THROWS();
+		}
+
+		const zval *attrib = zend_hash_str_find(modification, LDAP_MODIFY_BATCH_ATTRIB, strlen(LDAP_MODIFY_BATCH_ATTRIB));
+		if (UNEXPECTED(attrib == NULL)) {
+			zend_argument_value_error(3, "a modification entry must contain the \"" LDAP_MODIFY_BATCH_ATTRIB "\" option");
+			RETURN_THROWS();
+		}
+		if (UNEXPECTED(Z_TYPE_P(attrib) != IS_STRING)) {
+			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must be of type string, %s given", zend_zval_value_name(attrib));
+			RETURN_THROWS();
+		}
+		if (zend_str_has_nul_byte(Z_STR_P(attrib))) {
+			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must not contain null bytes");
+			RETURN_THROWS();
+		}
+
+		const zval *modtype_zv = zend_hash_str_find(modification, LDAP_MODIFY_BATCH_MODTYPE, strlen(LDAP_MODIFY_BATCH_MODTYPE));
+		if (UNEXPECTED(modtype_zv == NULL)) {
+			zend_argument_value_error(3, "a modification entry must contain the \"" LDAP_MODIFY_BATCH_MODTYPE "\" option");
+			RETURN_THROWS();
+		}
+		if (UNEXPECTED(Z_TYPE_P(modtype_zv) != IS_LONG)) {
+			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be of type int, %s given", zend_zval_value_name(attrib));
+			RETURN_THROWS();
+		}
+		zend_long modtype = Z_LVAL_P(modtype_zv);
+		if (
+			modtype != LDAP_MODIFY_BATCH_ADD &&
+			modtype != LDAP_MODIFY_BATCH_REMOVE &&
+			modtype != LDAP_MODIFY_BATCH_REPLACE &&
+			modtype != LDAP_MODIFY_BATCH_REMOVE_ALL
+		) {
+			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be"
+				" LDAP_MODIFY_BATCH_ADD, LDAP_MODIFY_BATCH_REMOVE, LDAP_MODIFY_BATCH_REPLACE,"
+				" or LDAP_MODIFY_BATCH_REMOVE_ALL");
+			RETURN_THROWS();
+		}
+		/* We assume that the modification array is well-formed and only ever contains an extra "values" key */
+		if (modtype == LDAP_MODIFY_BATCH_REMOVE_ALL && modification_size == 3) {
+			zend_argument_value_error(3, "a modification entry must not contain the "
+				"\"" LDAP_MODIFY_BATCH_VALUES "\" option when option \"" LDAP_MODIFY_BATCH_MODTYPE "\" "
+				"is LDAP_MODIFY_BATCH_REMOVE_ALL");
+			RETURN_THROWS();
+		}
+
+		zval *modification_values_zv = zend_hash_str_find(modification, LDAP_MODIFY_BATCH_VALUES, strlen(LDAP_MODIFY_BATCH_VALUES));
+		if (modification_values_zv == NULL) {
+			if (modtype != LDAP_MODIFY_BATCH_REMOVE_ALL) {
+				zend_argument_value_error(3, "a modification entry must contain the "
+					"\"" LDAP_MODIFY_BATCH_VALUES "\" option when the \"" LDAP_MODIFY_BATCH_MODTYPE "\" option "
+					"is not LDAP_MODIFY_BATCH_REMOVE_ALL");
+				RETURN_THROWS();
+			}
+			continue;
+		}
+		if (Z_TYPE_P(modification_values_zv) != IS_ARRAY) {
+			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be of type array, %s given", zend_zval_value_name(attrib));
+			RETURN_THROWS();
+		}
+
+		SEPARATE_ARRAY(modification_values_zv);
+		const HashTable *modification_values = Z_ARRVAL_P(modification_values_zv);
+		/* is the array not empty? */
+		uint32_t num_modvals = zend_hash_num_elements(modification_values);
+		if (num_modvals == 0) {
+			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must not be empty");
+			RETURN_THROWS();
+		}
+		if (!zend_array_is_list(modification_values)) {
+			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be a list");
+			RETURN_THROWS();
+		}
+	} ZEND_HASH_FOREACH_END();
 	/* validation was successful */
 
 	/* allocate array of modifications */
@@ -2647,7 +2645,6 @@ PHP_FUNCTION(ldap_modify_batch)
 
 	/* for each modification */
 	zend_ulong modification_index = 0;
-	zval *modification_zv = NULL;
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(modifications, modification_index, modification_zv) {
 		ldap_mods[modification_index] = safe_emalloc(1, sizeof(LDAPMod), 0);
 
