@@ -2549,27 +2549,27 @@ PHP_FUNCTION(ldap_modify_batch)
 	uint32_t oper;
 
 	/*
-	$mods = array(
-		array(
+	$mods = [
+		[
 			"attrib" => "unicodePwd",
 			"modtype" => LDAP_MODIFY_BATCH_REMOVE,
-			"values" => array($oldpw)
-		),
-		array(
+			"values" => [$old_pwd]
+		],
+		[
 			"attrib" => "unicodePwd",
 			"modtype" => LDAP_MODIFY_BATCH_ADD,
-			"values" => array($newpw)
-		),
-		array(
+			"values" => [$new_pwd]
+		],
+		[
 			"attrib" => "userPrincipalName",
 			"modtype" => LDAP_MODIFY_BATCH_REPLACE,
-			"values" => array("janitor@corp.contoso.com")
-		),
-		array(
+			"values" => ["janitor@corp.contoso.com"]
+		],
+		[
 			"attrib" => "userCert",
 			"modtype" => LDAP_MODIFY_BATCH_REMOVE_ALL
-		)
-	);
+		],
+	];
 	*/
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osa/|a!", &link, ldap_link_ce, &dn, &dn_len, &mods, &serverctrls) != SUCCESS) {
