@@ -5,42 +5,42 @@ xmlreader
 --FILE--
 <?php
 
-$di = new XMLReader();
+$reader = new XMLReader();
 
-var_dump(isset($di->attributeCount));
-var_dump(empty($di->attributeCount));
-var_dump(property_exists($di, "attributeCount"));
+var_dump(isset($reader->attributeCount));
+var_dump(empty($reader->attributeCount));
+var_dump(property_exists($reader, "attributeCount"));
 
-var_dump(isset($di->baseURI));
-var_dump(empty($di->baseURI));
-var_dump(property_exists($di, "baseURI"));
+var_dump(isset($reader->baseURI));
+var_dump(empty($reader->baseURI));
+var_dump(property_exists($reader, "baseURI"));
 
-var_dump(isset($di->depth));
-var_dump(empty($di->depth));
-var_dump(property_exists($di, "depth"));
+var_dump(isset($reader->depth));
+var_dump(empty($reader->depth));
+var_dump(property_exists($reader, "depth"));
 
-var_dump(isset($di->hasAttributes));
-var_dump(empty($di->hasAttributes));
-var_dump(property_exists($di, "hasAttributes"));
+var_dump(isset($reader->hasAttributes));
+var_dump(empty($reader->hasAttributes));
+var_dump(property_exists($reader, "hasAttributes"));
 
-var_dump(isset($di->hasValue));
-var_dump(empty($di->hasValue));
-var_dump(property_exists($di, "hasValue"));
+var_dump(isset($reader->hasValue));
+var_dump(empty($reader->hasValue));
+var_dump(property_exists($reader, "hasValue"));
 
 ?>
---EXPECTF--
-bool(true)
-bool(false)
+--EXPECT--
 bool(true)
 bool(true)
-bool(false)
 bool(true)
 bool(true)
-bool(false)
 bool(true)
 bool(true)
-bool(false)
 bool(true)
 bool(true)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 bool(true)

@@ -129,13 +129,21 @@ static int xmlreader_has_property(zend_object *object, zend_string *name, int ty
 	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 
 	if (hnd != NULL) {
+		if (type == ZEND_PROPERTY_EXISTS) {
+			return 1;
+		}
+
 		zval rv;
 		if (xmlreader_property_reader(obj, hnd, &rv) == FAILURE) {
 			return 0;
-		} else {
-			zval_ptr_dtor(&rv);
-			return 1;
 		}
+
+		if (type == ZEND_PROPERTY_NOT_EMPTY) {
+			return zend_is_true(&rv);
+		}
+
+		ZEND_ASSERT(type == ZEND_PROPERTY_ISSET);
+		return (Z_TYPE(rv) != IS_NULL);
 	}
 
 	return zend_std_has_property(object, name, type, cache_slot);
@@ -177,6 +185,18 @@ zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *val
 	return value;
 }
 /* }}} */
+
+void xmlreader_unset_property(zend_object *object, zend_string *name, void **cache_slot)
+{
+	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+
+	if (hnd != NULL) {
+		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		return;
+	}
+
+	zend_std_unset_property(object, name, cache_slot);
+}
 
 /* {{{ */
 static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name, const zval *key)
@@ -1315,6 +1335,7 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_object_handlers.has_property = xmlreader_has_property;
 	xmlreader_object_handlers.read_property = xmlreader_read_property;
 	xmlreader_object_handlers.write_property = xmlreader_write_property;
+	xmlreader_object_handlers.unset_property = xmlreader_unset_property;
 	xmlreader_object_handlers.get_property_ptr_ptr = xmlreader_get_property_ptr_ptr;
 	xmlreader_object_handlers.get_method = xmlreader_get_method;
 	xmlreader_object_handlers.clone_obj = NULL;
