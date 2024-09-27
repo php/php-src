@@ -2687,25 +2687,25 @@ PHP_FUNCTION(ldap_modify_batch)
 			ldap_mods[modification_index]->mod_bvalues = safe_emalloc((num_modification_values+1), sizeof(struct berval *), 0);
 
 			/* for each value */
-			for (uint32_t j = 0; j < num_modification_values; j++) {
-				/* fetch it */
-				zval *fetched = zend_hash_index_find(Z_ARRVAL_P(modification_values), j);
-				zend_string *modval = zval_get_string(fetched);
+			zend_ulong value_index = 0;
+			zval *modification_value_zv = NULL;
+			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(modification_values), value_index, modification_value_zv) {
+				zend_string *modval = zval_get_string(modification_value_zv);
 				if (EG(exception)) {
 					RETVAL_FALSE;
-					ldap_mods[modification_index]->mod_bvalues[j] = NULL;
+					ldap_mods[modification_index]->mod_bvalues[value_index] = NULL;
 					num_mods = modification_index + 1;
 					goto cleanup;
 				}
 
 				/* allocate the data struct */
-				ldap_mods[modification_index]->mod_bvalues[j] = safe_emalloc(1, sizeof(struct berval), 0);
+				ldap_mods[modification_index]->mod_bvalues[value_index] = safe_emalloc(1, sizeof(struct berval), 0);
 
 				/* fill it */
-				ldap_mods[modification_index]->mod_bvalues[j]->bv_len = ZSTR_LEN(modval);
-				ldap_mods[modification_index]->mod_bvalues[j]->bv_val = estrndup(ZSTR_VAL(modval), ZSTR_LEN(modval));
+				ldap_mods[modification_index]->mod_bvalues[value_index]->bv_len = ZSTR_LEN(modval);
+				ldap_mods[modification_index]->mod_bvalues[value_index]->bv_val = estrndup(ZSTR_VAL(modval), ZSTR_LEN(modval));
 				zend_string_release(modval);
-			}
+			} ZEND_HASH_FOREACH_END();
 
 			/* NULL-terminate values */
 			ldap_mods[modification_index]->mod_bvalues[num_modification_values] = NULL;
