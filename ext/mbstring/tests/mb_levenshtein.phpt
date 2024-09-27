@@ -1,5 +1,7 @@
 --TEST--
 mb_levenshtein() function test
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 
