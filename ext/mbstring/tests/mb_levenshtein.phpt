@@ -34,6 +34,8 @@ var_dump(mb_levenshtein('111', '121', 2, 3, 2));
 echo '--- Very expensive replacement ---' . \PHP_EOL;
 var_dump(mb_levenshtein('111', '121', 2, 9, 2));
 
+echo '--- 128 codepoints ---' . \PHP_EOL;
+var_dump(mb_levenshtein(str_repeat("a", 128), str_repeat("a", 125) . "abc"));
 echo '--- 128 codepoints over ---' . \PHP_EOL;
 var_dump(mb_levenshtein(str_repeat("a", 128) . "abc", str_repeat("a", 128) . "aaa"));
 echo '--- 128 codepoints over only $string1 ---' . \PHP_EOL;
@@ -47,6 +49,10 @@ echo '--- 128 codepoints over Hiragana in Shift_JIS ---' . \PHP_EOL;
 $hiragana_a = mb_convert_encoding("あ", "SJIS", "UTF-8");
 $hiragana_aiu = mb_convert_encoding("あいう", "SJIS", "UTF-8");
 var_dump(mb_levenshtein(str_repeat($hiragana_a, 128 + 3), str_repeat($hiragana_a, 128) . $hiragana_aiu, encoding: "SJIS"));
+
+echo '--- café in ISO-8859-1 ---' . \PHP_EOL;
+$cafe = mb_convert_encoding("café", "ISO-8859-1", "UTF-8");
+var_dump(mb_levenshtein("cafe", $cafe, encoding: "ISO-8859-1"));
 
 echo '--- Usecase of userland code ---' . \PHP_EOL;
 /* from: https://qiita.com/mpyw/items/2b636827730e06c71e3d */
@@ -113,6 +119,8 @@ int(10)
 int(3)
 --- Very expensive replacement ---
 int(4)
+--- 128 codepoints ---
+int(2)
 --- 128 codepoints over ---
 int(2)
 --- 128 codepoints over only $string1 ---
@@ -123,6 +131,8 @@ int(130)
 int(2)
 --- 128 codepoints over Hiragana in Shift_JIS ---
 int(2)
+--- café in ISO-8859-1 ---
+int(1)
 --- Usecase of userland code ---
 string(30) "おはようございまーす"
 int(4)
