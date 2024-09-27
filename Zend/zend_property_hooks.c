@@ -172,7 +172,6 @@ static void zho_dynamic_it_fetch_current(zend_object_iterator *iter)
 	}
 
 	if (hooked_iter->by_ref && Z_TYPE(bucket->val) != IS_REFERENCE) {
-		ZEND_ASSERT(Z_TYPE(bucket->val) != IS_UNDEF);
 		ZVAL_MAKE_REF(&bucket->val);
 	}
 	ZVAL_COPY(&hooked_iter->current_data, &bucket->val);
@@ -275,9 +274,8 @@ static void zho_it_rewind(zend_object_iterator *iter)
 	zend_array *properties = Z_ARR(hooked_iter->declared_props);
 	zend_hash_internal_pointer_reset(properties);
 	hooked_iter->dynamic_props_done = false;
-	if (hooked_iter->dynamic_prop_it != (uint32_t) -1) {
-		EG(ht_iterators)[hooked_iter->dynamic_prop_it].pos = zho_num_backed_props(Z_OBJ(iter->data));
-	}
+	ZEND_ASSERT(hooked_iter->dynamic_prop_it != (uint32_t) -1);
+	EG(ht_iterators)[hooked_iter->dynamic_prop_it].pos = zho_num_backed_props(Z_OBJ(iter->data));
 }
 
 static HashTable *zho_it_get_gc(zend_object_iterator *iter, zval **table, int *n)

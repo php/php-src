@@ -210,7 +210,7 @@ static int zlo_hash_remove_dyn_props_func(zval *pDest)
 
 static bool zlo_is_iterating(zend_object *object)
 {
-	if (object->properties && object->properties->u.v.nIteratorsCount) {
+	if (object->properties && HT_ITERATORS_COUNT(object->properties)) {
 		return true;
 	}
 	if (zend_object_is_lazy_proxy(object)
