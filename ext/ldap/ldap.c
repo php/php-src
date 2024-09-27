@@ -2680,12 +2680,7 @@ PHP_FUNCTION(ldap_modify_batch)
 			case LDAP_MODIFY_BATCH_REPLACE:
 				ldap_operation = LDAP_MOD_REPLACE;
 				break;
-			default:
-				zend_throw_error(NULL, "Unknown and uncaught modification type.");
-				RETVAL_FALSE;
-				efree(ldap_mods[i]);
-				num_mods = i;
-				goto cleanup;
+			EMPTY_SWITCH_DEFAULT_CASE();
 		}
 
 		/* fill in the basic info */
