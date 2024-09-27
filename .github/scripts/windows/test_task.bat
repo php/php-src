@@ -83,9 +83,12 @@ set OPENSSL_CONF=
 rem set SSLEAY_CONF=
 
 rem prepare for OPcache
+set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
+if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
+
 if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=64M -d opcache.jit=tracing
 rem work-around for failing to dl(mysqli) with OPcache (https://github.com/php/php-src/issues/8508)
-if "%OPCACHE%" equ "1" set OPCACHE_OPTS=%OPCACHE_OPTS% -d extension=mysqli
+if "%OPCACHE%" equ "1" set OPCACHE_OPTS=%OPCACHE_OPTS% -d extension=mysqli -d extension_dir=%PHP_BUILD_DIR%
 
 rem prepare for enchant
 mkdir %~d0\usr\local\lib\enchant-2
@@ -105,9 +108,6 @@ rem prepare for snmp
 set MIBDIRS=%DEPS_DIR%\share\mibs
 sed -i "s/exec HexTest .*/exec HexTest cscript\.exe \/nologo %GITHUB_WORKSPACE:\=\/%\/ext\/snmp\/tests\/bigtest\.js/g" %GITHUB_WORKSPACE%\ext\snmp\tests\snmpd.conf
 start %DEPS_DIR%\bin\snmpd.exe -C -c %GITHUB_WORKSPACE%\ext\snmp\tests\snmpd.conf -Ln
-
-set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
-if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
 
 rem prepare for mail
 curl -sLo hMailServer.exe https://www.hmailserver.com/download_file/?downloadid=271
