@@ -3202,15 +3202,15 @@ PHP_FUNCTION(ldap_set_option)
 /* {{{ Extract information from result */
 PHP_FUNCTION(ldap_parse_result)
 {
-	zval *link, *result, *errcode, *matcheddn, *errmsg, *referrals, *serverctrls;
+	zval *link, *result, *errcode, *matcheddn = NULL, *errmsg = NULL, *referrals = NULL, *serverctrls = NULL;
 	ldap_linkdata *ld;
 	ldap_resultdata *ldap_result;
 	LDAPControl **lserverctrls = NULL;
 	char **lreferrals, **refp;
 	char *lmatcheddn, *lerrmsg;
-	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
+	int rc, lerrcode;
 
-	if (zend_parse_parameters(myargcount, "OOz|zzzz", &link, ldap_link_ce, &result, ldap_result_ce, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OOz|zzzz", &link, ldap_link_ce, &result, ldap_result_ce, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -3221,10 +3221,10 @@ PHP_FUNCTION(ldap_parse_result)
 	VERIFY_LDAP_RESULT_OPEN(ldap_result);
 
 	rc = ldap_parse_result(ld->link, ldap_result->result, &lerrcode,
-				myargcount > 3 ? &lmatcheddn : NULL,
-				myargcount > 4 ? &lerrmsg : NULL,
-				myargcount > 5 ? &lreferrals : NULL,
-				myargcount > 6 ? &lserverctrls : NULL,
+				matcheddn ? &lmatcheddn : NULL,
+				errmsg ? &lerrmsg : NULL,
+				referrals ? &lreferrals : NULL,
+				serverctrls ? &lserverctrls : NULL,
 				0);
 	if (rc != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Unable to parse result: %s", ldap_err2string(rc));
@@ -3233,41 +3233,40 @@ PHP_FUNCTION(ldap_parse_result)
 
 	ZEND_TRY_ASSIGN_REF_LONG(errcode, lerrcode);
 
-	/* Reverse -> fall through */
-	switch (myargcount) {
-		case 7:
-			_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
-			ZEND_FALLTHROUGH;
-		case 6:
-			referrals = zend_try_array_init(referrals);
-			if (!referrals) {
-				RETURN_THROWS();
-			}
-			if (lreferrals != NULL) {
-				refp = lreferrals;
-				while (*refp) {
-					add_next_index_string(referrals, *refp);
-					refp++;
-				}
-				ldap_memvfree((void**)lreferrals);
-			}
-			ZEND_FALLTHROUGH;
-		case 5:
-			if (lerrmsg == NULL) {
-				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(errmsg);
-			} else {
-				ZEND_TRY_ASSIGN_REF_STRING(errmsg, lerrmsg);
-				ldap_memfree(lerrmsg);
-			}
-			ZEND_FALLTHROUGH;
-		case 4:
-			if (lmatcheddn == NULL) {
-				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(matcheddn);
-			} else {
-				ZEND_TRY_ASSIGN_REF_STRING(matcheddn, lmatcheddn);
-				ldap_memfree(lmatcheddn);
-			}
+	if (serverctrls) {
+		_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 	}
+	if (referrals) {
+		referrals = zend_try_array_init(referrals);
+		if (!referrals) {
+			RETURN_THROWS();
+		}
+		if (lreferrals != NULL) {
+			refp = lreferrals;
+			while (*refp) {
+				add_next_index_string(referrals, *refp);
+				refp++;
+			}
+			ldap_memvfree((void**)lreferrals);
+		}
+	}
+	if (errmsg) {
+		if (lerrmsg == NULL) {
+			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(errmsg);
+		} else {
+			ZEND_TRY_ASSIGN_REF_STRING(errmsg, lerrmsg);
+			ldap_memfree(lerrmsg);
+		}
+	}
+	if (matcheddn) {
+		if (lmatcheddn == NULL) {
+			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(matcheddn);
+		} else {
+			ZEND_TRY_ASSIGN_REF_STRING(matcheddn, lmatcheddn);
+			ldap_memfree(lmatcheddn);
+		}
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
