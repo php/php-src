@@ -1076,6 +1076,7 @@ do_repeat:
 					object_init_ex(&ref, pce);
 
 					memset(&execute_data, 0, sizeof(zend_execute_data));
+					execute_data.func = (zend_function *) &zend_pass_function;
 					EG(current_execute_data) = &execute_data;
 					zend_call_known_instance_method_with_1_params(
 						pce->constructor, Z_OBJ(ref), NULL, &arg);
