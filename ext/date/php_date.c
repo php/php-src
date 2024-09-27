@@ -5945,9 +5945,7 @@ static int date_period_has_property(zend_object *object, zend_string *name, int 
 				return 0;
 			case ZEND_PROPERTY_EXISTS:
 				return 1;
-			default:
-				ZEND_UNREACHABLE();
-				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
 
@@ -5958,12 +5956,19 @@ static int date_period_has_property(zend_object *object, zend_string *name, int 
 	prop = date_period_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 	ZEND_ASSERT(prop != &EG(uninitialized_zval));
 
+	bool result;
+
 	if (type == ZEND_PROPERTY_NOT_EMPTY) {
-		return zend_is_true(prop);
+		result = zend_is_true(prop);
+	} else if (type == ZEND_PROPERTY_ISSET) {
+		result = Z_TYPE_P(prop) != IS_NULL;
+	} else {
+		ZEND_UNREACHABLE();
 	}
 
-	ZEND_ASSERT(type == ZEND_PROPERTY_ISSET);
-	return (Z_TYPE_P(prop) != IS_NULL);
+	zval_ptr_dtor(prop);
+
+	return result;
 }
 
 /* {{{ date_period_read_property */
