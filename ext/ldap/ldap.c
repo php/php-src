@@ -1102,18 +1102,6 @@ static int _get_lderrno(LDAP *ldap)
 }
 /* }}} */
 
-/* {{{ _set_lderrno */
-static void _set_lderrno(LDAP *ldap, int lderr)
-{
-#if LDAP_API_VERSION > 2000 || defined(HAVE_ORALDAP)
-	/* New versions of OpenLDAP do it this way */
-	ldap_set_option(ldap, LDAP_OPT_ERROR_NUMBER, &lderr);
-#else
-	ldap->ld_errno = lderr;
-#endif
-}
-/* }}} */
-
 /* {{{ Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
 {
@@ -1123,24 +1111,12 @@ PHP_FUNCTION(ldap_bind)
 	ldap_linkdata *ld;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!s!", &link, ldap_link_ce, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!p!", &link, ldap_link_ce, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
-
-	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
-		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
-		zend_argument_type_error(2, "must not contain null bytes");
-		RETURN_THROWS();
-	}
-
-	if (ldap_bind_pw != NULL && memchr(ldap_bind_pw, '\0', ldap_bind_pwlen) != NULL) {
-		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
-		zend_argument_type_error(3, "must not contain null bytes");
-		RETURN_THROWS();
-	}
 
 	{
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
@@ -1179,24 +1155,12 @@ PHP_FUNCTION(ldap_bind_ext)
 	LDAPMessage *ldap_res;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!s!a!", &link, ldap_link_ce, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!p!a!", &link, ldap_link_ce, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
-
-	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
-		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
-		zend_argument_type_error(2, "must not contain null bytes");
-		RETURN_THROWS();
-	}
-
-	if (ldap_bind_pw != NULL && memchr(ldap_bind_pw, '\0', ldap_bind_pwlen) != NULL) {
-		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
-		zend_argument_type_error(3, "must not contain null bytes");
-		RETURN_THROWS();
-	}
 
 	if (serverctrls) {
 		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 4);
@@ -1342,7 +1306,18 @@ PHP_FUNCTION(ldap_sasl_bind)
 	size_t rc, dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
 	php_ldap_bictx *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!s!s!s!s!s!s!", &link, ldap_link_ce, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!p!p!p!p!p!p!",
+		&link, ldap_link_ce,
+		&binddn, &dn_len,
+		&passwd, &passwd_len,
+		&sasl_mech, &mech_len,
+		&sasl_realm, &realm_len,
+		&sasl_authc_id,
+		&authc_id_len,
+		&sasl_authz_id,
+		&authz_id_len,
+		&props, &props_len
+	) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1521,6 +1496,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				ret = 0;
 				goto cleanup;
 			}
+			// TODO check filter does not have any nul bytes
 		}
 
 		if (filter_ht) {
@@ -1534,6 +1510,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		} else {
 			nfilters = 0; /* this means string, not array */
 			ldap_filter = zend_string_copy(filter_str);
+			// TODO check filter does not have any nul bytes
 		}
 
 		lds = safe_emalloc(nlinks, sizeof(ldap_linkdata), 0);
@@ -1564,6 +1541,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					ret = 0;
 					goto cleanup_parallel;
 				}
+				// TODO check dn does not have any nul bytes
 			}
 			if (nfilters != 0) { /* filter an array? */
 				entry = zend_hash_get_current_data(filter_ht);
@@ -1573,6 +1551,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					ret = 0;
 					goto cleanup_parallel;
 				}
+				// TODO check filter does not have any nul bytes
 			}
 
 			if (serverctrls) {
@@ -2059,7 +2038,7 @@ PHP_FUNCTION(ldap_get_values_len)
 	int i, num_values;
 	size_t attr_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OOs", &link, ldap_link_ce, &result_entry, ldap_result_entry_ce, &attr, &attr_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OOp", &link, ldap_link_ce, &result_entry, ldap_result_entry_ce, &attr, &attr_len) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2125,7 +2104,7 @@ PHP_FUNCTION(ldap_explode_dn)
 	int i, count;
 	size_t dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &dn, &dn_len, &with_attrib) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl", &dn, &dn_len, &with_attrib) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2155,7 +2134,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 	char *dn, *ufn;
 	size_t dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &dn, &dn_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &dn, &dn_len) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2193,7 +2172,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	zend_ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osa/|a!", &link, ldap_link_ce, &dn, &dn_len, &entry, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opa/|a!", &link, ldap_link_ce, &dn, &dn_len, &entry, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2428,7 +2407,7 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	int rc, msgid;
 	size_t dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|a!", &link, ldap_link_ce, &dn, &dn_len, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op|a!", &link, ldap_link_ce, &dn, &dn_len, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2525,7 +2504,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	];
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osh/|a!", &link, ldap_link_ce, &dn, &dn_len, &modifications, &server_controls_zv) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oph/|a!", &link, ldap_link_ce, &dn, &dn_len, &modifications, &server_controls_zv) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2533,12 +2512,6 @@ PHP_FUNCTION(ldap_modify_batch)
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
 	/* perform validation */
-	/* make sure the DN contains no NUL bytes */
-	if (zend_char_has_nul_byte(dn, dn_len)) {
-		zend_argument_value_error(2, "must not contain null bytes");
-		RETURN_THROWS();
-	}
-
 	/* make sure the top level is a normal array */
 	if (zend_hash_num_elements(modifications) == 0) {
 		zend_argument_must_not_be_empty_error(3);
@@ -2819,14 +2792,20 @@ PHP_FUNCTION(ldap_compare)
 {
 	zval *serverctrls = NULL;
 	zval *link;
-	char *dn, *attr, *value;
-	size_t dn_len, attr_len, value_len;
+	char *dn, *attr;
+	size_t dn_len, attr_len;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
 	int ldap_errno;
 	struct berval lvalue;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osss|a!", &link, ldap_link_ce, &dn, &dn_len, &attr, &attr_len, &value, &value_len, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opps|a!",
+		&link, ldap_link_ce,
+		&dn, &dn_len,
+		&attr, &attr_len,
+		&lvalue.bv_val, &lvalue.bv_len,
+		&serverctrls
+	) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2840,9 +2819,6 @@ PHP_FUNCTION(ldap_compare)
 			goto cleanup;
 		}
 	}
-
-	lvalue.bv_val = value;
-	lvalue.bv_len = value_len;
 
 	ldap_errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, lserverctrls, NULL);
 
@@ -3489,7 +3465,7 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	size_t dn_len, newrdn_len, newparent_len;
 	bool deleteoldrdn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osssb|a!", &link, ldap_link_ce, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opppb|a!", &link, ldap_link_ce, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -3827,7 +3803,7 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 		}
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS|S!a!zz", &link, ldap_link_ce, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|S!a!zz", &link, ldap_link_ce, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
 		RETURN_THROWS();
 	}
 

@@ -255,7 +255,7 @@ try {
 
 ?>
 --EXPECT--
-ValueError: ldap_modify_batch(): Argument #2 ($dn) must not contain null bytes
+ValueError: ldap_modify_batch(): Argument #2 ($dn) must not contain any null bytes
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must not be empty
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must be a list
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must be a list
