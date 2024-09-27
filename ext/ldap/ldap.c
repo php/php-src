@@ -2509,21 +2509,6 @@ static size_t _ldap_str_equal_to_const(const char *str, size_t str_len, const ch
 }
 /* }}} */
 
-/* {{{ _ldap_strlen_max */
-static size_t _ldap_strlen_max(const char *str, size_t max_len)
-{
-	size_t i;
-
-	for (i = 0; i < max_len; ++i) {
-		if (str[i] == '\0') {
-			return i;
-		}
-	}
-
-	return max_len;
-}
-/* }}} */
-
 /* {{{ _ldap_hash_fetch */
 static void _ldap_hash_fetch(zval *hashTbl, const char *key, zval **out)
 {
@@ -2588,8 +2573,8 @@ PHP_FUNCTION(ldap_modify_batch)
 		zend_ulong tmpUlong;
 
 		/* make sure the DN contains no NUL bytes */
-		if (_ldap_strlen_max(dn, dn_len) != dn_len) {
-			zend_argument_type_error(2, "must not contain null bytes");
+		if (zend_char_has_nul_byte(dn, dn_len)) {
+			zend_argument_value_error(2, "must not contain null bytes");
 			RETURN_THROWS();
 		}
 
@@ -2652,8 +2637,8 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_THROWS();
 					}
 
-					if (Z_STRLEN_P(modinfo) != _ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
-						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_ATTRIB "\" cannot contain null-bytes", get_active_function_name());
+					if (zend_str_has_nul_byte(Z_STR_P(modinfo))) {
+						zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must not contain null bytes");
 						RETURN_THROWS();
 					}
 				}
