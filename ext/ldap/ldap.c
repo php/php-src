@@ -3278,14 +3278,14 @@ PHP_FUNCTION(ldap_parse_result)
 /* {{{ Extract information from extended operation result */
 PHP_FUNCTION(ldap_parse_exop)
 {
-	zval *link, *result, *retdata, *retoid;
+	zval *link, *result, *retdata = NULL, *retoid = NULL;
 	ldap_linkdata *ld;
 	ldap_resultdata *ldap_result;
 	char *lretoid;
 	struct berval *lretdata;
-	int rc, myargcount = ZEND_NUM_ARGS();
+	int rc;
 
-	if (zend_parse_parameters(myargcount, "OO|zz", &link, ldap_link_ce, &result, ldap_result_ce, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO|zz", &link, ldap_link_ce, &result, ldap_result_ce, &retdata, &retoid) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -3296,34 +3296,34 @@ PHP_FUNCTION(ldap_parse_exop)
 	VERIFY_LDAP_RESULT_OPEN(ldap_result);
 
 	rc = ldap_parse_extended_result(ld->link, ldap_result->result,
-				myargcount > 3 ? &lretoid: NULL,
-				myargcount > 2 ? &lretdata: NULL,
+				retoid ? &lretoid: NULL,
+				retdata ? &lretdata: NULL,
 				0);
 	if (rc != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Unable to parse extended operation result: %s", ldap_err2string(rc));
 		RETURN_FALSE;
 	}
 
-	/* Reverse -> fall through */
-	switch (myargcount) {
-		case 4:
-			if (lretoid == NULL) {
-				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retoid);
-			} else {
-				ZEND_TRY_ASSIGN_REF_STRING(retoid, lretoid);
-				ldap_memfree(lretoid);
-			}
-			ZEND_FALLTHROUGH;
-		case 3:
-			/* use arg #3 as the data returned by the server */
-			if (lretdata == NULL) {
-				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retdata);
-			} else {
-				ZEND_TRY_ASSIGN_REF_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
-				ldap_memfree(lretdata->bv_val);
-				ldap_memfree(lretdata);
-			}
+	if (retoid) {
+		if (lretoid == NULL) {
+			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retoid);
+		} else {
+			ZEND_TRY_ASSIGN_REF_STRING(retoid, lretoid);
+			ldap_memfree(lretoid);
+		}
 	}
+
+	if (retdata) {
+		/* use arg #3 as the data returned by the server */
+		if (lretdata == NULL) {
+			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retdata);
+		} else {
+			ZEND_TRY_ASSIGN_REF_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+			ldap_memfree(lretdata->bv_val);
+			ldap_memfree(lretdata);
+		}
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
