@@ -3,7 +3,7 @@ SOAP Server 12: WSDL generation
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === "Windows") {
-    die("skip current unsupported on Windows");
+    die("skip currently unsupported on Windows");
 }
 ?>
 --EXTENSIONS--
