@@ -24,7 +24,7 @@ install-phpdbg: $(BUILD_BINARY)
 	@echo "Installing phpdbg binary:         $(INSTALL_ROOT)$(bindir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
-	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/run
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(runstatedir)
 	@$(INSTALL) -m 0755 $(BUILD_BINARY) $(INSTALL_ROOT)$(bindir)/$(program_prefix)phpdbg$(program_suffix)$(EXEEXT)
 	@echo "Installing phpdbg man page:       $(INSTALL_ROOT)$(mandir)/man1/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1

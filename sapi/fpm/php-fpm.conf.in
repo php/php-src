@@ -139,4 +139,4 @@
 ; Relative path can also be used. They will be prefixed by:
 ;  - the global prefix if it's been set (-p argument)
 ;  - @prefix@ otherwise
-include=@php_fpm_sysconfdir@/php-fpm.d/*.conf
+include=@EXPANDED_SYSCONFDIR@/php-fpm.d/*.conf
