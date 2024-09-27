@@ -41,7 +41,43 @@ if "%PLATFORM%" == "x86" (
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
 	--disable-debug-pack ^
-	--enable-com-dotnet=shared ^
+	--with-bz2 ^
+	--enable-com-dotnet ^
+	--with-curl ^
+	--with-dba ^
+	--with-qdbm ^
+	--with-lmdb ^
+	--enable-dl-test ^
+	--with-ffi ^
+	--enable-ftp ^
+	--with-gettext ^
+	--with-gmp ^
+	--with-mhash ^
+	--with-ldap ^
+	--with-openssl ^
+	--with-openssl-argon2 ^
+	--enable-shmop ^
+	--enable-sockets ^
+	--with-sodium ^
+	--with-sqlite3 ^
+	--with-password-argon2 ^
+	--enable-sysvshm ^
+	--with-tidy ^
+	--enable-zend-test ^
+	--enable-mbstring ^
+	--enable-mbregex ^
+	--enable-exif ^
+	--enable-fileinfo ^
+	--enable-intl ^
+	--with-mysqli ^
+	--enable-pdo ^
+	--with-pdo-firebird ^
+	--with-pdo-mysql ^
+	--with-pdo-odbc ^
+	--with-pdo-pgsql ^
+	--with-pgsql ^
+	--with-snmp ^
+	--with-xsl ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
