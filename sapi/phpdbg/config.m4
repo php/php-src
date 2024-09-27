@@ -90,8 +90,8 @@ if test "$PHP_PHPDBG" != "no"; then
     ]),
     [$PHP_PHPDBG_CFLAGS])
 
-  BUILD_BINARY="sapi/phpdbg/phpdbg"
-  BUILD_SHARED="sapi/phpdbg/libphpdbg.la"
+  SAPI_PHPDBG_PATH="sapi/phpdbg/phpdbg"
+  SAPI_PHPDBG_SHARED_PATH="sapi/phpdbg/libphpdbg.la"
 
   BUILD_PHPDBG="\$(LIBTOOL) --tag=CC --mode=link \
         \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
@@ -102,7 +102,7 @@ if test "$PHP_PHPDBG" != "no"; then
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
                 \$(PHP_FRAMEWORKS) \
-         -o \$(BUILD_BINARY)"
+         -o \$(SAPI_PHPDBG_PATH)"
 
   BUILD_PHPDBG_SHARED="\$(LIBTOOL) --tag=CC --mode=link \
         \$(CC) -shared -Wl,-soname,libphpdbg.so -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
@@ -112,11 +112,11 @@ if test "$PHP_PHPDBG" != "no"; then
                 \$(EXTRA_LIBS) \
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
-         -o \$(BUILD_SHARED)"
+         -o \$(SAPI_PHPDBG_SHARED_PATH)"
 
   PHP_SUBST([PHPDBG_EXTRA_LIBS])
-  PHP_SUBST([BUILD_BINARY])
-  PHP_SUBST([BUILD_SHARED])
+  PHP_SUBST([SAPI_PHPDBG_PATH])
+  PHP_SUBST([SAPI_PHPDBG_SHARED_PATH])
   PHP_SUBST([BUILD_PHPDBG])
   PHP_SUBST([BUILD_PHPDBG_SHARED])
 
