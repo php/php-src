@@ -3907,7 +3907,7 @@ PHP_FUNCTION(ldap_exop_sync)
 /* {{{ Passwd modify extended operation */
 PHP_FUNCTION(ldap_exop_passwd)
 {
-	zval *link, *serverctrls;
+	zval *link, *serverctrls = NULL;
 	struct berval luser = { 0L, NULL };
 	struct berval loldpw = { 0L, NULL };
 	struct berval lnewpw = { 0L, NULL };
@@ -3915,22 +3915,22 @@ PHP_FUNCTION(ldap_exop_passwd)
 	LDAPControl *ctrl, **lserverctrls = NULL, *requestctrls[2] = { NULL, NULL };
 	LDAPMessage* ldap_res = NULL;
 	ldap_linkdata *ld;
-	int rc, myargcount = ZEND_NUM_ARGS(), msgid, err;
+	int rc, msgid, err;
 	char* errmsg = NULL;
 
-	if (zend_parse_parameters(myargcount, "O|sssz/", &link, ldap_link_ce, &luser.bv_val, &luser.bv_len, &loldpw.bv_val, &loldpw.bv_len, &lnewpw.bv_val, &lnewpw.bv_len, &serverctrls) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|sssz/", &link, ldap_link_ce, &luser.bv_val, &luser.bv_len, &loldpw.bv_val, &loldpw.bv_len, &lnewpw.bv_val, &lnewpw.bv_len, &serverctrls) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
-	switch (myargcount) {
-		case 5:
-			/* ldap_create_passwordpolicy_control() allocates ctrl */
-			if (ldap_create_passwordpolicy_control(ld->link, &ctrl) == LDAP_SUCCESS) {
-				requestctrls[0] = ctrl;
-			}
+	if (serverctrls) {
+		/* ldap_create_passwordpolicy_control() allocates ctrl */
+		if (ldap_create_passwordpolicy_control(ld->link, &ctrl) == LDAP_SUCCESS) {
+			requestctrls[0] = ctrl;
+		}
+		// TODO Should this warn?
 	}
 
 	/* asynchronous call to get result and controls */
@@ -3965,14 +3965,14 @@ PHP_FUNCTION(ldap_exop_passwd)
 		goto cleanup;
 	}
 
-	rc = ldap_parse_result(ld->link, ldap_res, &err, NULL, &errmsg, NULL, (myargcount > 4 ? &lserverctrls : NULL), 0);
+	rc = ldap_parse_result(ld->link, ldap_res, &err, NULL, &errmsg, NULL, (serverctrls ? &lserverctrls : NULL), 0);
 	if( rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
 		RETVAL_FALSE;
 		goto cleanup;
 	}
 
-	if (myargcount > 4) {
+	if (serverctrls) {
 		_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 	}
 
