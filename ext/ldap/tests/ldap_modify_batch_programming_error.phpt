@@ -255,7 +255,7 @@ try {
 
 ?>
 --EXPECT--
-TypeError: ldap_modify_batch(): Argument #2 ($dn) must not contain null bytes
+ValueError: ldap_modify_batch(): Argument #2 ($dn) must not contain null bytes
 TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) must be integer-indexed
 TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) must be integer-indexed
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must have consecutive integer indices starting from 0
@@ -263,7 +263,7 @@ ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must only con
 TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) must only contain string-indexed arrays
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must contain arrays only containing the "attrib", "modtype" and "values" keys
 TypeError: ldap_modify_batch(): Option "attrib" must be of type string, int given
-TypeError: ldap_modify_batch(): Option "attrib" cannot contain null-bytes
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "attrib" must not contain null bytes
 TypeError: ldap_modify_batch(): Option "modtype" must be of type int, stdClass given
 ValueError: ldap_modify_batch(): Option "modtype" must be one of the LDAP_MODIFY_BATCH_* constants
 ValueError: ldap_modify_batch(): If option "modtype" is LDAP_MODIFY_BATCH_REMOVE_ALL, option "values" cannot be provided
