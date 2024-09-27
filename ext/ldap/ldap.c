@@ -3009,7 +3009,8 @@ PHP_FUNCTION(ldap_get_option)
 	case LDAP_OPT_API_FEATURE_INFO:
 */
 	default:
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be a valid LDAP option");
+		RETURN_THROWS();
 	}
 	RETURN_TRUE;
 }
@@ -3207,7 +3208,8 @@ PHP_FUNCTION(ldap_set_option)
 			}
 		} break;
 	default:
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be a valid LDAP option");
+		RETURN_THROWS();
 	}
 	RETURN_TRUE;
 }
