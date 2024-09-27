@@ -76,7 +76,7 @@ cmd /c configure.bat ^
 	--with-pdo-odbc ^
 	--with-pdo-pgsql ^
 	--with-pgsql ^
-	--with-snmp ^
+	--with-snmp=shared ^
 	--with-xsl ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
