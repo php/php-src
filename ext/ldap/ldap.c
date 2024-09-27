@@ -2495,12 +2495,10 @@ PHP_FUNCTION(ldap_delete_ext)
 PHP_FUNCTION(ldap_modify_batch)
 {
 	zval *serverctrls = NULL;
-	zval *link, *mods, *mod;
-	zval *fetched;
+	zval *link;
 	char *dn;
 	size_t dn_len;
-	int i, j;
-	int num_mods;
+	HashTable *modifications;
 	LDAPControl **lserverctrls = NULL;
 
 	/*
@@ -2527,7 +2525,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	];
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osa/|a!", &link, ldap_link_ce, &dn, &dn_len, &mods, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osh/|a!", &link, ldap_link_ce, &dn, &dn_len, &modifications, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2543,22 +2541,17 @@ PHP_FUNCTION(ldap_modify_batch)
 		}
 
 		/* make sure the top level is a normal array */
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(mods));
-		if (zend_hash_get_current_key_type(Z_ARRVAL_P(mods)) != HASH_KEY_IS_LONG) {
-			zend_argument_type_error(3, "must be integer-indexed");
+		if (zend_hash_num_elements(modifications) == 0) {
+			zend_argument_must_not_be_empty_error(3);
+			RETURN_THROWS();
+		}
+		if (!zend_array_is_list(modifications)) {
+			zend_argument_value_error(3, "must be a list");
 			RETURN_THROWS();
 		}
 
-		num_mods = zend_hash_num_elements(Z_ARRVAL_P(mods));
-
-		for (i = 0; i < num_mods; i++) {
-			/* is the numbering consecutive? */
-			if ((fetched = zend_hash_index_find(Z_ARRVAL_P(mods), i)) == NULL) {
-				zend_argument_value_error(3, "must have consecutive integer indices starting from 0");
-				RETURN_THROWS();
-			}
-			zval *modification_zv = fetched;
-
+		zval *modification_zv = NULL;
+		ZEND_HASH_FOREACH_VAL(modifications, modification_zv) {
 			if (Z_TYPE_P(modification_zv) != IS_ARRAY) {
 				zend_argument_type_error(3, "must only contain arrays");
 				RETURN_THROWS();
@@ -2644,27 +2637,25 @@ PHP_FUNCTION(ldap_modify_batch)
 				zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be a list");
 				RETURN_THROWS();
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* validation was successful */
 
 	/* allocate array of modifications */
+	uint32_t num_mods = zend_hash_num_elements(modifications);
 	LDAPMod **ldap_mods = safe_emalloc((num_mods+1), sizeof(LDAPMod *), 0);
 
 	/* for each modification */
-	for (i = 0; i < num_mods; i++) {
-		/* allocate the modification struct */
-		ldap_mods[i] = safe_emalloc(1, sizeof(LDAPMod), 0);
+	zend_ulong modification_index = 0;
+	zval *modification_zv = NULL;
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(modifications, modification_index, modification_zv) {
+		ldap_mods[modification_index] = safe_emalloc(1, sizeof(LDAPMod), 0);
 
-		/* fetch the relevant data */
-		fetched = zend_hash_index_find(Z_ARRVAL_P(mods), i);
-		mod = fetched;
-
-		zval *attrib_zv = zend_hash_str_find(Z_ARRVAL_P(mod), LDAP_MODIFY_BATCH_ATTRIB, strlen(LDAP_MODIFY_BATCH_ATTRIB));
+		zval *attrib_zv = zend_hash_str_find(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_ATTRIB, strlen(LDAP_MODIFY_BATCH_ATTRIB));
 		ZEND_ASSERT(Z_TYPE_P(attrib_zv) == IS_STRING);
-		zval *modtype_zv = zend_hash_str_find(Z_ARRVAL_P(mod), LDAP_MODIFY_BATCH_MODTYPE, strlen(LDAP_MODIFY_BATCH_MODTYPE));
+		zval *modtype_zv = zend_hash_str_find(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_MODTYPE, strlen(LDAP_MODIFY_BATCH_MODTYPE));
 		ZEND_ASSERT(Z_TYPE_P(modtype_zv) == IS_LONG);
-		zval *modification_values = zend_hash_str_find(Z_ARRVAL_P(mod), LDAP_MODIFY_BATCH_VALUES, strlen(LDAP_MODIFY_BATCH_VALUES));
+		zval *modification_values = zend_hash_str_find(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_VALUES, strlen(LDAP_MODIFY_BATCH_VALUES));
 		ZEND_ASSERT(modification_values == NULL || Z_TYPE_P(modification_values) == IS_ARRAY);
 
 		/* map the modification type */
@@ -2684,43 +2675,42 @@ PHP_FUNCTION(ldap_modify_batch)
 		}
 
 		/* fill in the basic info */
-		ldap_mods[i]->mod_op = ldap_operation | LDAP_MOD_BVALUES;
-		ldap_mods[i]->mod_type = estrndup(Z_STRVAL_P(attrib_zv), Z_STRLEN_P(attrib_zv));
+		ldap_mods[modification_index]->mod_op = ldap_operation | LDAP_MOD_BVALUES;
+		ldap_mods[modification_index]->mod_type = estrndup(Z_STRVAL_P(attrib_zv), Z_STRLEN_P(attrib_zv));
 
 		if (Z_LVAL_P(modtype_zv) == LDAP_MODIFY_BATCH_REMOVE_ALL) {
 			/* no values */
-			ldap_mods[i]->mod_bvalues = NULL;
-		}
-		else {
+			ldap_mods[modification_index]->mod_bvalues = NULL;
+		} else {
 			/* allocate space for the values as part of this modification */
 			uint32_t num_modification_values = zend_hash_num_elements(Z_ARRVAL_P(modification_values));
-			ldap_mods[i]->mod_bvalues = safe_emalloc((num_modification_values+1), sizeof(struct berval *), 0);
+			ldap_mods[modification_index]->mod_bvalues = safe_emalloc((num_modification_values+1), sizeof(struct berval *), 0);
 
 			/* for each value */
-			for (j = 0; j < num_modification_values; j++) {
+			for (uint32_t j = 0; j < num_modification_values; j++) {
 				/* fetch it */
-				fetched = zend_hash_index_find(Z_ARRVAL_P(modification_values), j);
+				zval *fetched = zend_hash_index_find(Z_ARRVAL_P(modification_values), j);
 				zend_string *modval = zval_get_string(fetched);
 				if (EG(exception)) {
 					RETVAL_FALSE;
-					ldap_mods[i]->mod_bvalues[j] = NULL;
-					num_mods = i + 1;
+					ldap_mods[modification_index]->mod_bvalues[j] = NULL;
+					num_mods = modification_index + 1;
 					goto cleanup;
 				}
 
 				/* allocate the data struct */
-				ldap_mods[i]->mod_bvalues[j] = safe_emalloc(1, sizeof(struct berval), 0);
+				ldap_mods[modification_index]->mod_bvalues[j] = safe_emalloc(1, sizeof(struct berval), 0);
 
 				/* fill it */
-				ldap_mods[i]->mod_bvalues[j]->bv_len = ZSTR_LEN(modval);
-				ldap_mods[i]->mod_bvalues[j]->bv_val = estrndup(ZSTR_VAL(modval), ZSTR_LEN(modval));
+				ldap_mods[modification_index]->mod_bvalues[j]->bv_len = ZSTR_LEN(modval);
+				ldap_mods[modification_index]->mod_bvalues[j]->bv_val = estrndup(ZSTR_VAL(modval), ZSTR_LEN(modval));
 				zend_string_release(modval);
 			}
 
 			/* NULL-terminate values */
-			ldap_mods[i]->mod_bvalues[num_modification_values] = NULL;
+			ldap_mods[modification_index]->mod_bvalues[num_modification_values] = NULL;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	/* NULL-terminate modifications */
 	ldap_mods[num_mods] = NULL;
@@ -2744,13 +2734,13 @@ PHP_FUNCTION(ldap_modify_batch)
 
 	/* clean up */
 	cleanup: {
-		for (i = 0; i < num_mods; i++) {
+		for (uint32_t i = 0; i < num_mods; i++) {
 			/* attribute */
 			efree(ldap_mods[i]->mod_type);
 
 			if (ldap_mods[i]->mod_bvalues != NULL) {
 				/* each BER value */
-				for (j = 0; ldap_mods[i]->mod_bvalues[j] != NULL; j++) {
+				for (int j = 0; ldap_mods[i]->mod_bvalues[j] != NULL; j++) {
 					/* free the data bytes */
 					efree(ldap_mods[i]->mod_bvalues[j]->bv_val);
 
