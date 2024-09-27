@@ -19,6 +19,10 @@ PHP 8.5 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- LDAP:
+  . ldap_get_option() and ldap_set_option() now throw a ValueError when
+    passing an invalid option.
+
 - SPL:
   . ArrayObject no longer accepts enums, as modifying the $name or $value
     properties can break engine assumptions.
