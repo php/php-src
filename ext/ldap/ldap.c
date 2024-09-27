@@ -2734,10 +2734,13 @@ PHP_FUNCTION(ldap_modify_batch)
 	}
 
 	/* perform (finally) */
-	if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL)) != LDAP_SUCCESS) {
-		php_error_docref(NULL, E_WARNING, "Batch Modify: %s", ldap_err2string(i));
+	int ldap_status = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL);
+	if (ldap_status != LDAP_SUCCESS) {
+		php_error_docref(NULL, E_WARNING, "Batch Modify: %s", ldap_err2string(ldap_status));
 		RETVAL_FALSE;
-	} else RETVAL_TRUE;
+	} else {
+		RETVAL_TRUE;
+	}
 
 	/* clean up */
 	cleanup: {
