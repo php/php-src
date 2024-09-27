@@ -45,7 +45,7 @@ function get_matrix_include(array $branches) {
             'debug' => true,
             'zts' => true,
             'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'",
-            'run_tests_parameters' => '--asan',
+            'run_tests_parameters' => '--asan --repeat 2',
             'test_function_jit' => false,
             'asan' => true,
         ];
