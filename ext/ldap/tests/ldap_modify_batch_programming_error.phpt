@@ -269,8 +269,8 @@ ValueError: ldap_modify_batch(): Option "modtype" must be one of the LDAP_MODIFY
 ValueError: ldap_modify_batch(): If option "modtype" is LDAP_MODIFY_BATCH_REMOVE_ALL, option "values" cannot be provided
 ValueError: ldap_modify_batch(): If option "modtype" is not LDAP_MODIFY_BATCH_REMOVE_ALL, option "values" must be provided
 TypeError: ldap_modify_batch(): Option "values" must be of type array, string given
-ValueError: ldap_modify_batch(): Option "values" must not be empty
-ValueError: ldap_modify_batch(): Option "values" must be integer-indexed
-ValueError: ldap_modify_batch(): Option "values" must have consecutive integer indices starting from 0
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must not be empty
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must be a list
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must be a list
 ValueError: ldap_modify_batch(): Required option "attrib" is missing
 ValueError: ldap_modify_batch(): Required option "modtype" is missing
