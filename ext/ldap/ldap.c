@@ -2527,7 +2527,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	zval *fetched;
 	char *dn;
 	size_t dn_len;
-	int i, j, k;
+	int i, j;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
 	LDAPControl **lserverctrls = NULL;
@@ -2682,26 +2682,16 @@ PHP_FUNCTION(ldap_modify_batch)
 					}
 
 					SEPARATE_ARRAY(modinfo);
+					const HashTable *modification_values = Z_ARRVAL_P(modinfo);
 					/* is the array not empty? */
-					zend_hash_internal_pointer_reset(Z_ARRVAL_P(modinfo));
-					num_modvals = zend_hash_num_elements(Z_ARRVAL_P(modinfo));
-					if (num_modvals == 0) {
-						zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_VALUES "\" must not be empty", get_active_function_name());
+					uint32_t num_modification_values = zend_hash_num_elements(modification_values);
+					if (num_modification_values == 0) {
+						zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must not be empty");
 						RETURN_THROWS();
 					}
-
-					/* are its keys integers? */
-					if (zend_hash_get_current_key_type(Z_ARRVAL_P(modinfo)) != HASH_KEY_IS_LONG) {
-						zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_VALUES "\" must be integer-indexed", get_active_function_name());
+					if (!zend_array_is_list(modification_values)) {
+						zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be a list");
 						RETURN_THROWS();
-					}
-
-					/* are the keys consecutive? */
-					for (k = 0; k < num_modvals; k++) {
-						if ((fetched = zend_hash_index_find(Z_ARRVAL_P(modinfo), k)) == NULL) {
-							zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_VALUES "\" must have consecutive integer indices starting from 0", get_active_function_name());
-							RETURN_THROWS();
-						}
 					}
 				}
 
