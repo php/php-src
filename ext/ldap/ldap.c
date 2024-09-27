@@ -2101,7 +2101,6 @@ PHP_FUNCTION(ldap_explode_dn)
 {
 	zend_long with_attrib;
 	char *dn, **ldap_value;
-	int i, count;
 	size_t dn_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl", &dn, &dn_len, &with_attrib) != SUCCESS) {
@@ -2113,16 +2112,12 @@ PHP_FUNCTION(ldap_explode_dn)
 		RETURN_FALSE;
 	}
 
-	i=0;
-	while (ldap_value[i] != NULL) i++;
-	count = i;
-
 	array_init(return_value);
-
-	add_assoc_long(return_value, "count", count);
-	for (i = 0; i<count; i++) {
+	int i;
+	for (i = 0; ldap_value[i] != NULL; i++) {
 		add_index_string(return_value, i, ldap_value[i]);
 	}
+	add_assoc_long(return_value, "count", i);
 
 	ldap_memvfree((void **)ldap_value);
 }
