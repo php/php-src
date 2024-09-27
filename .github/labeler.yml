@@ -245,6 +245,8 @@
 "ABI break":
 - 'TSRM/*.h'
 - 'Zend/*.h'
+- '!Zend/zend_vm_def.h'
+- '!Zend/zend_vm_execute.h'
 - 'Zend/Optimizer/zend_call_graph.h'
 - 'Zend/Optimizer/zend_cfg.h'
 - 'Zend/Optimizer/zend_dump.h'
