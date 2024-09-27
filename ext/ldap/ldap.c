@@ -2509,13 +2509,6 @@ static size_t _ldap_str_equal_to_const(const char *str, size_t str_len, const ch
 }
 /* }}} */
 
-/* {{{ _ldap_hash_fetch */
-static void _ldap_hash_fetch(zval *hashTbl, const char *key, zval **out)
-{
-	*out = zend_hash_str_find(Z_ARRVAL_P(hashTbl), key, strlen(key));
-}
-/* }}} */
-
 /* {{{ Perform multiple modifications as part of one operation */
 PHP_FUNCTION(ldap_modify_batch)
 {
@@ -2715,12 +2708,12 @@ PHP_FUNCTION(ldap_modify_batch)
 		fetched = zend_hash_index_find(Z_ARRVAL_P(mods), i);
 		mod = fetched;
 
-		zval *attrib_zv;
-		zval *modtype_zv;
-		zval *vals;
-		_ldap_hash_fetch(mod, LDAP_MODIFY_BATCH_ATTRIB, &attrib_zv);
-		_ldap_hash_fetch(mod, LDAP_MODIFY_BATCH_MODTYPE, &modtype_zv);
-		_ldap_hash_fetch(mod, LDAP_MODIFY_BATCH_VALUES, &vals);
+		zval *attrib_zv = zend_hash_str_find(Z_ARRVAL_P(mod), LDAP_MODIFY_BATCH_ATTRIB, strlen(LDAP_MODIFY_BATCH_ATTRIB));
+		ZEND_ASSERT(Z_TYPE_P(attrib_zv) == IS_STRING);
+		zval *modtype_zv = zend_hash_str_find(Z_ARRVAL_P(mod), LDAP_MODIFY_BATCH_MODTYPE, strlen(LDAP_MODIFY_BATCH_MODTYPE));
+		ZEND_ASSERT(Z_TYPE_P(modtype_zv) == IS_LONG);
+		zval *modification_values = zend_hash_str_find(Z_ARRVAL_P(mod), LDAP_MODIFY_BATCH_VALUES, strlen(LDAP_MODIFY_BATCH_VALUES));
+		ZEND_ASSERT(modification_values == NULL || Z_TYPE_P(modification_values) == IS_ARRAY);
 
 		/* map the modification type */
 		int ldap_operation;
@@ -2753,13 +2746,13 @@ PHP_FUNCTION(ldap_modify_batch)
 		}
 		else {
 			/* allocate space for the values as part of this modification */
-			uint32_t num_modification_values = zend_hash_num_elements(Z_ARRVAL_P(vals));
+			uint32_t num_modification_values = zend_hash_num_elements(Z_ARRVAL_P(modification_values));
 			ldap_mods[i]->mod_bvalues = safe_emalloc((num_modification_values+1), sizeof(struct berval *), 0);
 
 			/* for each value */
 			for (j = 0; j < num_modification_values; j++) {
 				/* fetch it */
-				fetched = zend_hash_index_find(Z_ARRVAL_P(vals), j);
+				fetched = zend_hash_index_find(Z_ARRVAL_P(modification_values), j);
 				zend_string *modval = zval_get_string(fetched);
 				if (EG(exception)) {
 					RETVAL_FALSE;
