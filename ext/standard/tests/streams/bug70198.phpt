@@ -36,7 +36,7 @@ if (!\$socket) {
 SRV;
 file_put_contents($srv_fl, $srv_fl_cont);
 $dummy0 = $dummy1 = array();
-$srv_proc = proc_open(getenv('TEST_PHP_EXECUTABLE_ESCAPED') . " -n $srv_fl_escaped", $dummy0, $dummy1);
+$srv_proc = proc_open([getenv('TEST_PHP_EXECUTABLE'), "-n", $srv_fl], $dummy0, $dummy1);
 
 $i = 0;
 /* wait a bit for the server startup */

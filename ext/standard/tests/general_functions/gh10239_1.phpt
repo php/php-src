@@ -7,7 +7,7 @@ if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 ?>
 --FILE--
 <?php
-$p = proc_open('sleep 1', array(), $foo);
+$p = proc_open(['sleep', '1'], array(), $foo);
 do {
     usleep(100000);
     $s = proc_get_status($p);
