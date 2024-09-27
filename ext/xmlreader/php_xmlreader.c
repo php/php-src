@@ -138,12 +138,19 @@ static int xmlreader_has_property(zend_object *object, zend_string *name, int ty
 			return 0;
 		}
 
+		bool result;
+
 		if (type == ZEND_PROPERTY_NOT_EMPTY) {
-			return zend_is_true(&rv);
+			result = zend_is_true(&rv);
+		} else if (type == ZEND_PROPERTY_ISSET) {
+			result = (Z_TYPE(rv) != IS_NULL);
+		} else {
+			ZEND_UNREACHABLE();
 		}
 
-		ZEND_ASSERT(type == ZEND_PROPERTY_ISSET);
-		return (Z_TYPE(rv) != IS_NULL);
+		zval_ptr_dtor(&rv);
+
+		return result;
 	}
 
 	return zend_std_has_property(object, name, type, cache_slot);
