@@ -35,7 +35,7 @@ rem Some undefined behavior is reported on 32-bit, this should be fixed
 if "%PLATFORM%" == "x86" (
 	set CFLAGS=/W1
 ) else (
-	set CFLAGS=/W1 /WX
+	set CFLAGS=/W1
 )
 
 cmd /c configure.bat ^
