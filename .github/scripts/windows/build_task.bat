@@ -53,7 +53,7 @@ cmd /c configure.bat ^
 	--with-gettext ^
 	--with-gmp ^
 	--with-mhash ^
-	--with-ldap ^
+	--with-ldap=shared ^
 	--with-openssl ^
 	--with-openssl-argon2 ^
 	--enable-shmop ^

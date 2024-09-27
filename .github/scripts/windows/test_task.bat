@@ -124,9 +124,9 @@ rem work-around for some spawned PHP processes requiring OpenSSL
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
-@REM for %%i in (ldap) do (
-@REM 	del %PHP_BUILD_DIR%\php_%%i.dll
-@REM )
+for %%i in (ldap) do (
+	del %PHP_BUILD_DIR%\php_%%i.dll
+)
 
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
