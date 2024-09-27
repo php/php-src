@@ -292,10 +292,6 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
 #define DBL_MAX 1.7014118346046923e+38
 #endif
 
-#ifndef LONG_MAX
-#define LONG_MAX 2147483647
-#endif
-
 #else /* ifndef Bad_float_h */
 #include "float.h"
 #endif /* Bad_float_h */
