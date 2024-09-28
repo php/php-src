@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - LDAP:
   . Fixed bug GH-16032 (Various NULL pointer dereferencements in
     ldap_modify_batch()). (Girgias)
+  . Fixed bug GH-16101 (Segfault in ldap_list(), ldap_read(), and ldap_search()
+    when LDAPs array is not a list). (Girgias)
 
 - PHPDBG:
   . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
