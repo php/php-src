@@ -1486,12 +1486,12 @@ process:
 
 	/* parallel search? */
 	if (Z_TYPE_P(link) == IS_ARRAY) {
-		int i, nlinks, nbases, nfilters, *rcs;
+		int i, *rcs;
 		ldap_linkdata **lds;
 		zval *entry, object;
 
-		nlinks = zend_hash_num_elements(Z_ARRVAL_P(link));
-		if (nlinks == 0) {
+		uint32_t num_links = zend_hash_num_elements(Z_ARRVAL_P(link));
+		if (num_links == 0) {
 			zend_argument_must_not_be_empty_error(1);
 			ret = 0;
 			goto cleanup;
@@ -1502,43 +1502,57 @@ process:
 			goto cleanup;
 		}
 
+		uint32_t num_base_dns = 0; /* If 0 this means we are working with a unique base dn */
 		if (base_dn_ht) {
-			nbases = zend_hash_num_elements(base_dn_ht);
-			if (nbases != nlinks) {
-				zend_argument_value_error(2, "must have the same number of elements as the links array");
+			if (!zend_array_is_list(base_dn_ht)) {
+				zend_argument_value_error(2, "must be a list");
+				ret = 0;
+				goto cleanup;
+			}
+			num_base_dns = zend_hash_num_elements(base_dn_ht);
+			if (num_base_dns != num_links) {
+				zend_argument_value_error(2, "must be the same size as argument #1");
 				ret = 0;
 				goto cleanup;
 			}
 			zend_hash_internal_pointer_reset(base_dn_ht);
 		} else {
-			nbases = 0; /* this means string, not array */
-			ldap_base_dn = zend_string_copy(base_dn_str);
-			if (EG(exception)) {
+			if (zend_str_has_nul_byte(base_dn_str)) {
+				zend_argument_value_error(2, "must not contain null bytes");
 				ret = 0;
 				goto cleanup;
 			}
-			// TODO check filter does not have any nul bytes
+			ldap_base_dn = zend_string_copy(base_dn_str);
 		}
 
+		uint32_t num_filters = 0; /* If 0 this means we are working with a unique base dn */
 		if (filter_ht) {
-			nfilters = zend_hash_num_elements(filter_ht);
-			if (nfilters != nlinks) {
-				zend_argument_value_error(3, "must have the same number of elements as the links array");
+			if (!zend_array_is_list(filter_ht)) {
+				zend_argument_value_error(3, "must be a list");
+				ret = 0;
+				goto cleanup;
+			}
+			num_filters = zend_hash_num_elements(filter_ht);
+			if (num_filters != num_links) {
+				zend_argument_value_error(3, "must be the same size as argument #1");
 				ret = 0;
 				goto cleanup;
 			}
 			zend_hash_internal_pointer_reset(filter_ht);
 		} else {
-			nfilters = 0; /* this means string, not array */
+			if (zend_str_has_nul_byte(filter_str)) {
+				zend_argument_value_error(3, "must not contain null bytes");
+				ret = 0;
+				goto cleanup;
+			}
 			ldap_filter = zend_string_copy(filter_str);
-			// TODO check filter does not have any nul bytes
 		}
 
-		lds = safe_emalloc(nlinks, sizeof(ldap_linkdata), 0);
-		rcs = safe_emalloc(nlinks, sizeof(*rcs), 0);
+		lds = safe_emalloc(num_links, sizeof(ldap_linkdata), 0);
+		rcs = safe_emalloc(num_links, sizeof(*rcs), 0);
 
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(link));
-		for (i=0; i<nlinks; i++) {
+		for (i=0; i<num_links; i++) {
 			entry = zend_hash_get_current_data(Z_ARRVAL_P(link));
 
 			if (Z_TYPE_P(entry) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(entry), ldap_link_ce)) {
@@ -1554,7 +1568,7 @@ process:
 				goto cleanup_parallel;
 			}
 
-			if (nbases != 0) { /* base_dn an array? */
+			if (num_base_dns != 0) { /* base_dn an array? */
 				entry = zend_hash_get_current_data(base_dn_ht);
 				zend_hash_move_forward(base_dn_ht);
 				ldap_base_dn = zval_get_string(entry);
@@ -1564,7 +1578,7 @@ process:
 				}
 				// TODO check dn does not have any nul bytes
 			}
-			if (nfilters != 0) { /* filter an array? */
+			if (num_filters != 0) { /* filter an array? */
 				entry = zend_hash_get_current_data(filter_ht);
 				zend_hash_move_forward(filter_ht);
 				ldap_filter = zval_get_string(entry);
@@ -1596,7 +1610,7 @@ process:
 		array_init(return_value);
 
 		/* Collect results from the searches */
-		for (i=0; i<nlinks; i++) {
+		for (i=0; i<num_links; i++) {
 			if (rcs[i] != -1) {
 				rcs[i] = ldap_result(lds[i]->link, LDAP_RES_ANY, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 			}
