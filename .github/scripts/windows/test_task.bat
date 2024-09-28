@@ -85,7 +85,7 @@ rem set SSLEAY_CONF=
 rem prepare for OPcache
 if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=64M -d opcache.jit=tracing
 rem work-around for failing to dl(mysqli) with OPcache (https://github.com/php/php-src/issues/8508)
-if "%OPCACHE%" equ "1" set OPCACHE_OPTS=%OPCACHE_OPTS% -d extension=mysqli
+@REM if "%OPCACHE%" equ "1" set OPCACHE_OPTS=%OPCACHE_OPTS% -d extension=mysqli
 
 rem prepare for enchant
 mkdir %~d0\usr\local\lib\enchant-2
@@ -124,9 +124,9 @@ rem work-around for some spawned PHP processes requiring OpenSSL
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
-for %%i in (ldap) do (
-	del %PHP_BUILD_DIR%\php_%%i.dll
-)
+@REM for %%i in (ldap) do (
+@REM 	del %PHP_BUILD_DIR%\php_%%i.dll
+@REM )
 
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
