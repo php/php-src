@@ -294,14 +294,15 @@ PHP_FUNCTION(setrawcookie)
 /* {{{ Returns true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
-	zval *arg1 = NULL, *arg2 = NULL;
-	const char *file="";
-	int line=0;
+	zval *by_ref_filename = NULL;
+	zval *by_ref_line = NULL;
+	const char *file = "";
+	int line = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(arg1)
-		Z_PARAM_ZVAL(arg2)
+		Z_PARAM_ZVAL(by_ref_filename)
+		Z_PARAM_ZVAL(by_ref_line)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (SG(headers_sent)) {
@@ -309,24 +310,18 @@ PHP_FUNCTION(headers_sent)
 		file = php_output_get_start_filename();
 	}
 
-	switch(ZEND_NUM_ARGS()) {
-	case 2:
-		ZEND_TRY_ASSIGN_REF_LONG(arg2, line);
-		ZEND_FALLTHROUGH;
-	case 1:
+	if (by_ref_filename) {
 		if (file) {
-			ZEND_TRY_ASSIGN_REF_STRING(arg1, file);
+			ZEND_TRY_ASSIGN_REF_STRING(by_ref_filename, file);
 		} else {
-			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(arg1);
+			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(by_ref_filename);
 		}
-		break;
+	}
+	if (by_ref_line) {
+		ZEND_TRY_ASSIGN_REF_LONG(by_ref_line, line);
 	}
 
-	if (SG(headers_sent)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(SG(headers_sent));
 }
 /* }}} */
 
