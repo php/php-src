@@ -18,12 +18,12 @@ $file_handle = fopen($file_path."/file_put_contents_error.tmp", "w");
 
 echo "\n-- Testing for invalid negative maxlen values --\n";
 try {
-    file_get_contents($file_path."/file1.tmp", FALSE, $file_handle, 0, -5);
+    file_get_contents($file_path."/file_get_contents_error1.tmp", FALSE, $file_handle, 0, -5);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
-delete_files($file_path, 1);
+delete_files($file_path, 1, "file_get_contents_error", 1);
 fclose($file_handle);
 unlink($file_path."/file_put_contents_error.tmp");
 
