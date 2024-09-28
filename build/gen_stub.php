@@ -3097,7 +3097,7 @@ class PropertyInfo extends VariableLike
             $code .= $defaultValue->initializeZval($zvalName);
         }
 
-        [$stringInit, $nameCode, $stringRelease] = $this->getString( $propertyName );
+        [$stringInit, $nameCode, $stringRelease] = $this->getString($propertyName);
         $code .= $stringInit;
 
         if ($this->exposedDocComment) {
@@ -3143,7 +3143,7 @@ class PropertyInfo extends VariableLike
      * @param string $propName
      * @return string[]
      */
-    private function getString( string $propName ): array {
+    private function getString(string $propName): array {
         // Generally strings will not be known
         $nameCode = "property_{$propName}_name";
         $result = [
@@ -3153,27 +3153,27 @@ class PropertyInfo extends VariableLike
         ];
         // If not set, use the current latest version
         $allVersions = ALL_PHP_VERSION_IDS;
-        $minPhp = $phpVersionIdMinimumCompatibility ?? end( $allVersions );
-        if ( $minPhp < PHP_80_VERSION_ID ) {
+        $minPhp = $phpVersionIdMinimumCompatibility ?? end($allVersions);
+        if ($minPhp < PHP_80_VERSION_ID) {
             // No known strings in 7.0
             return $result;
         }
         $include = self::PHP_80_KNOWN;
-        switch ( $minPhp ) {
+        switch ($minPhp) {
             case PHP_84_VERSION_ID:
-                $include = array_merge( $include, self::PHP_84_KNOWN );
+                $include = array_merge($include, self::PHP_84_KNOWN);
                 // Intentional fall through
 
             case PHP_83_VERSION_ID:
             case PHP_82_VERSION_ID:
-                $include = array_merge( $include, self::PHP_82_KNOWN );
+                $include = array_merge($include, self::PHP_82_KNOWN);
                 // Intentional fall through
 
             case PHP_81_VERSION_ID:
-                $include = array_merge( $include, self::PHP_81_KNOWN );
+                $include = array_merge($include, self::PHP_81_KNOWN);
                 break;
         }
-        if ( array_key_exists( $propName, $include ) ) {
+        if (array_key_exists($propName,$include)) {
             $knownStr = $include[$propName];
             return [
                 '',
