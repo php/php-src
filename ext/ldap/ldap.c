@@ -1403,10 +1403,11 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
 	zval *link, *attrs = NULL, *serverctrls = NULL;
-	zend_string *base_dn_str, *filter_str;
-	HashTable *base_dn_ht, *filter_ht;
+	HashTable *base_dn_ht = NULL;
+	zend_string *base_dn_str = NULL;
+	HashTable *filter_ht = NULL;
+	zend_string *filter_str = NULL;
 	zend_long attrsonly, sizelimit, timelimit, deref;
-	zend_string *ldap_filter = NULL, *ldap_base_dn = NULL;
 	char **ldap_attrs = NULL;
 	ldap_linkdata *ld = NULL;
 	ldap_resultdata *result;
@@ -1486,6 +1487,8 @@ process:
 
 	/* parallel search? */
 	if (Z_TYPE_P(link) == IS_ARRAY) {
+		const zend_string *ldap_base_dn = NULL;
+		const zend_string *ldap_filter = NULL;
 		uint32_t num_links = zend_hash_num_elements(Z_ARRVAL_P(link));
 		if (num_links == 0) {
 			zend_argument_must_not_be_empty_error(1);
@@ -1517,7 +1520,7 @@ process:
 				ret = 0;
 				goto cleanup;
 			}
-			ldap_base_dn = zend_string_copy(base_dn_str);
+			ldap_base_dn = base_dn_str;
 		}
 
 		uint32_t num_filters = 0; /* If 0 this means we are working with a unique base dn */
@@ -1539,7 +1542,7 @@ process:
 				ret = 0;
 				goto cleanup;
 			}
-			ldap_filter = zend_string_copy(filter_str);
+			ldap_filter = filter_str;
 		}
 
 		int *rcs;
@@ -1573,7 +1576,7 @@ process:
 					ret = 0;
 					goto cleanup_parallel;
 				}
-				ldap_base_dn = zend_string_copy(Z_STR_P(base_dn_zv));
+				ldap_base_dn = Z_STR_P(base_dn_zv);
 				if (zend_str_has_nul_byte(ldap_base_dn)) {
 					zend_argument_value_error(2, "must not contain null bytes");
 					ret = 0;
@@ -1589,7 +1592,7 @@ process:
 					ret = 0;
 					goto cleanup_parallel;
 				}
-				ldap_filter = zend_string_copy(Z_STR_P(filter_zv));
+				ldap_filter = Z_STR_P(filter_zv);
 				if (zend_str_has_nul_byte(ldap_filter)) {
 					zend_argument_value_error(3, "must not contain null bytes");
 					ret = 0;
@@ -1651,14 +1654,12 @@ cleanup_parallel:
 			ret = 0;
 			goto cleanup;
 		}
-		ldap_base_dn = zend_string_copy(base_dn_str);
 
 		if (!filter_str) {
 			zend_argument_type_error(3, "must be of type string when argument #1 ($ldap) is an LDAP instance");
 			ret = 0;
 			goto cleanup;
 		}
-		ldap_filter = zend_string_copy(filter_str);
 
 		if (serverctrls) {
 			lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 9);
@@ -1671,7 +1672,7 @@ cleanup_parallel:
 		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 		/* Run the actual search */
-		ldap_errno = ldap_search_ext_s(ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &ldap_res);
+		ldap_errno = ldap_search_ext_s(ld->link, ZSTR_VAL(base_dn_str), scope, ZSTR_VAL(filter_str), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &ldap_res);
 
 		if (ldap_errno != LDAP_SUCCESS
 			&& ldap_errno != LDAP_SIZELIMIT_EXCEEDED
@@ -1710,12 +1711,6 @@ cleanup:
 	if (ld) {
 		/* Restoring previous options */
 		php_set_opts(ld->link, old_ldap_sizelimit, old_ldap_timelimit, old_ldap_deref, &ldap_sizelimit, &ldap_timelimit, &ldap_deref);
-	}
-	if (ldap_filter) {
-		zend_string_release(ldap_filter);
-	}
-	if (ldap_base_dn) {
-		zend_string_release(ldap_base_dn);
 	}
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
