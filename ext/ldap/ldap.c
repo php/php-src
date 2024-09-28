@@ -1486,10 +1486,6 @@ process:
 
 	/* parallel search? */
 	if (Z_TYPE_P(link) == IS_ARRAY) {
-		int i, *rcs;
-		ldap_linkdata **lds;
-		zval *entry, object;
-
 		uint32_t num_links = zend_hash_num_elements(Z_ARRVAL_P(link));
 		if (num_links == 0) {
 			zend_argument_must_not_be_empty_error(1);
@@ -1515,7 +1511,6 @@ process:
 				ret = 0;
 				goto cleanup;
 			}
-			zend_hash_internal_pointer_reset(base_dn_ht);
 		} else {
 			if (zend_str_has_nul_byte(base_dn_str)) {
 				zend_argument_value_error(2, "must not contain null bytes");
@@ -1538,7 +1533,6 @@ process:
 				ret = 0;
 				goto cleanup;
 			}
-			zend_hash_internal_pointer_reset(filter_ht);
 		} else {
 			if (zend_str_has_nul_byte(filter_str)) {
 				zend_argument_value_error(3, "must not contain null bytes");
@@ -1548,73 +1542,90 @@ process:
 			ldap_filter = zend_string_copy(filter_str);
 		}
 
+		int *rcs;
+		ldap_linkdata **lds;
 		lds = safe_emalloc(num_links, sizeof(ldap_linkdata), 0);
 		rcs = safe_emalloc(num_links, sizeof(*rcs), 0);
 
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(link));
-		for (i=0; i<num_links; i++) {
-			entry = zend_hash_get_current_data(Z_ARRVAL_P(link));
-
-			if (Z_TYPE_P(entry) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(entry), ldap_link_ce)) {
-				zend_argument_value_error(1, "must only contain objects of type LDAP");
+		zend_ulong ldap_link_index = 0;
+		zval *link_zv = NULL;
+		ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(link), ldap_link_index, link_zv) {
+			ZVAL_DEREF(link_zv);
+			if (Z_TYPE_P(link_zv) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(link_zv), ldap_link_ce)) {
+				zend_argument_value_error(1, "must be a list of LDAP\\Connection");
 				ret = 0;
 				goto cleanup_parallel;
 			}
 
-			ld = Z_LDAP_LINK_P(entry);
-			if (!ld->link) {
+			ldap_linkdata *current_ld = Z_LDAP_LINK_P(link_zv);
+			if (!current_ld->link) {
 				zend_throw_error(NULL, "LDAP connection has already been closed");
 				ret = 0;
 				goto cleanup_parallel;
 			}
 
 			if (num_base_dns != 0) { /* base_dn an array? */
-				entry = zend_hash_get_current_data(base_dn_ht);
-				zend_hash_move_forward(base_dn_ht);
-				ldap_base_dn = zval_get_string(entry);
-				if (EG(exception)) {
+				zval *base_dn_zv = zend_hash_index_find(base_dn_ht, ldap_link_index);
+				ZEND_ASSERT(base_dn_zv);
+				ZVAL_DEREF(base_dn_zv);
+				if (Z_TYPE_P(base_dn_zv) != IS_STRING) {
+					zend_argument_type_error(2, "must be a list of strings, %s given", zend_zval_value_name(base_dn_zv));
 					ret = 0;
 					goto cleanup_parallel;
 				}
-				// TODO check dn does not have any nul bytes
+				ldap_base_dn = zend_string_copy(Z_STR_P(base_dn_zv));
+				if (zend_str_has_nul_byte(ldap_base_dn)) {
+					zend_argument_value_error(2, "must not contain null bytes");
+					ret = 0;
+					goto cleanup_parallel;
+				}
 			}
 			if (num_filters != 0) { /* filter an array? */
-				entry = zend_hash_get_current_data(filter_ht);
-				zend_hash_move_forward(filter_ht);
-				ldap_filter = zval_get_string(entry);
-				if (EG(exception)) {
+				zval *filter_zv = zend_hash_index_find(filter_ht, ldap_link_index);
+				ZEND_ASSERT(filter_zv);
+				ZVAL_DEREF(filter_zv);
+				if (Z_TYPE_P(filter_zv) != IS_STRING) {
+					zend_argument_type_error(3, "must be a list of strings, %s given", zend_zval_value_name(filter_zv));
 					ret = 0;
 					goto cleanup_parallel;
 				}
-				// TODO check filter does not have any nul bytes
+				ldap_filter = zend_string_copy(Z_STR_P(filter_zv));
+				if (zend_str_has_nul_byte(ldap_filter)) {
+					zend_argument_value_error(3, "must not contain null bytes");
+					ret = 0;
+					goto cleanup_parallel;
+				}
 			}
 
 			if (serverctrls) {
 				/* We have to parse controls again for each link as they use it */
 				_php_ldap_controls_free(&lserverctrls);
-				lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 9);
+				lserverctrls = _php_ldap_controls_from_array(current_ld->link, serverctrls, 9);
 				if (lserverctrls == NULL) {
-					rcs[i] = -1;
+					rcs[ldap_link_index] = -1;
+					// TODO Throw an exception/cleanup?
 					continue;
 				}
 			}
 
-			php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
+			php_set_opts(current_ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 			/* Run the actual search */
-			ldap_search_ext(ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &rcs[i]);
-			lds[i] = ld;
-			zend_hash_move_forward(Z_ARRVAL_P(link));
-		}
+			ldap_search_ext(current_ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &rcs[ldap_link_index]);
+			lds[ldap_link_index] = current_ld;
+
+			// TODO Reset the options of the link?
+		} ZEND_HASH_FOREACH_END();
 
 		array_init(return_value);
 
 		/* Collect results from the searches */
-		for (i=0; i<num_links; i++) {
+		for (uint32_t i = 0; i < num_links; i++) {
 			if (rcs[i] != -1) {
 				rcs[i] = ldap_result(lds[i]->link, LDAP_RES_ANY, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 			}
 			if (rcs[i] != -1) {
+				zval object;
 				object_init_ex(&object, ldap_result_ce);
 				result = Z_LDAP_RESULT_P(&object);
 				result->result = ldap_res;
