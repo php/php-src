@@ -5,4 +5,7 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
 
+- Random:
+  . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
