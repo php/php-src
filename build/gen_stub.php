@@ -3097,7 +3097,7 @@ class PropertyInfo extends VariableLike
             $code .= $defaultValue->initializeZval($zvalName);
         }
 
-        [ $stringInit, $nameCode, $stringRelease ] = $this->getString( $propertyName );
+        [$stringInit, $nameCode, $stringRelease] = $this->getString( $propertyName );
         $code .= $stringInit;
 
         if ($this->exposedDocComment) {
@@ -3151,7 +3151,8 @@ class PropertyInfo extends VariableLike
             $nameCode,
             "\tzend_string_release($nameCode);\n"
         ];
-        $minPhp = $phpVersionIdMinimumCompatibility ?? PHP_84_VERSION_ID;
+        // If not set, use the current latest version
+        $minPhp = $phpVersionIdMinimumCompatibility ?? end( ALL_PHP_VERSION_IDS );
         if ( $minPhp < PHP_80_VERSION_ID ) {
             // No known strings in 7.0
             return $result;
