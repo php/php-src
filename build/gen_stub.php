@@ -3152,7 +3152,8 @@ class PropertyInfo extends VariableLike
             "\tzend_string_release($nameCode);\n"
         ];
         // If not set, use the current latest version
-        $minPhp = $phpVersionIdMinimumCompatibility ?? end( ALL_PHP_VERSION_IDS );
+        $allVersions = ALL_PHP_VERSION_IDS;
+        $minPhp = $phpVersionIdMinimumCompatibility ?? end( $allVersions );
         if ( $minPhp < PHP_80_VERSION_ID ) {
             // No known strings in 7.0
             return $result;
