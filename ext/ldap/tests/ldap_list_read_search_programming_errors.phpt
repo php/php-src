@@ -11,6 +11,24 @@ $ldap = ldap_connect('ldap://127.0.0.1:3333');
 $valid_dn = "cn=userA,something";
 $valid_filter = "";
 
+try {
+    var_dump(ldap_list(42, $valid_dn, $valid_filter));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+try {
+    var_dump(ldap_list($ldap, [$valid_dn], $valid_filter));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+try {
+    var_dump(ldap_list($ldap, $valid_dn, [$valid_filter]));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
 $not_list = [
     "attrib1",
     "wat" => "attrib2",
@@ -59,6 +77,9 @@ try {
 
 ?>
 --EXPECT--
+TypeError: ldap_list(): Argument #1 ($ldap) must be of type LDAP\Connection|array, int given
+TypeError: ldap_list(): Argument #2 ($base) must be of type string when argument #1 ($ldap) is an LDAP\Connection instance
+TypeError: ldap_list(): Argument #3 ($filter) must be of type string when argument #1 ($ldap) is an LDAP\Connection instance
 ValueError: ldap_list(): Argument #4 ($attributes) must be a list
 TypeError: ldap_list(): Argument #4 ($attributes) must be a list of strings, int given
 ValueError: ldap_list(): Argument #4 ($attributes) must not contain strings with any null bytes

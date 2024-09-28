@@ -64,5 +64,5 @@ ldap_search(): Argument #4 ($attributes) must be a list
 ldap_search(): Argument #1 ($ldap) must not be empty
 ldap_search(): Argument #2 ($base) must be the same size as argument #1
 ldap_search(): Argument #3 ($filter) must be the same size as argument #1
-ldap_search(): Argument #2 ($base) must be of type string when argument #1 ($ldap) is an LDAP instance
-ldap_search(): Argument #3 ($filter) must be of type string when argument #1 ($ldap) is an LDAP instance
+ldap_search(): Argument #2 ($base) must be of type string when argument #1 ($ldap) is an LDAP\Connection instance
+ldap_search(): Argument #3 ($filter) must be of type string when argument #1 ($ldap) is an LDAP\Connection instance
