@@ -1402,7 +1402,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 /* {{{ php_ldap_do_search */
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
-	zval *link, *attrs = NULL, *attr, *serverctrls = NULL;
+	zval *link, *attrs = NULL, *serverctrls = NULL;
 	zend_string *base_dn_str, *filter_str;
 	HashTable *base_dn_ht, *filter_ht;
 	zend_long attrsonly, sizelimit, timelimit, deref;
@@ -1414,7 +1414,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	LDAPControl **lserverctrls = NULL;
 	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;
-	int num_attribs = 0, ret = 1, i, ldap_errno, argcount = ZEND_NUM_ARGS();
+	int ret = 1, ldap_errno, argcount = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(3, 9)
 		Z_PARAM_ZVAL(link)
@@ -1444,29 +1444,45 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		case 5:
 			ldap_attrsonly = attrsonly;
 			ZEND_FALLTHROUGH;
-		case 4:
-			num_attribs = zend_hash_num_elements(Z_ARRVAL_P(attrs));
-			ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
-
-			for (i = 0; i<num_attribs; i++) {
-				if ((attr = zend_hash_index_find(Z_ARRVAL_P(attrs), i)) == NULL) {
-					php_error_docref(NULL, E_WARNING, "Array initialization wrong");
-					ret = 0;
-					goto cleanup;
-				}
-
-				convert_to_string(attr);
-				if (EG(exception)) {
-					ret = 0;
-					goto cleanup;
-				}
-				ldap_attrs[i] = Z_STRVAL_P(attr);
-			}
-			ldap_attrs[num_attribs] = NULL;
-			ZEND_FALLTHROUGH;
 		default:
 			break;
 	}
+
+	if (attrs) {
+		const HashTable *attributes = Z_ARRVAL_P(attrs);
+		uint32_t num_attribs = zend_hash_num_elements(attributes);
+
+		if (num_attribs == 0) {
+			/* We don't allocate ldap_attrs for an empty array */
+			goto process;
+		}
+		if (!zend_array_is_list(attributes)) {
+			zend_argument_value_error(4, "must be a list");
+			RETURN_THROWS();
+		}
+		/* Allocate +1 as we need an extra entry to NULL terminate the list */
+		ldap_attrs = safe_emalloc(num_attribs+1, sizeof(char *), 0);
+
+		zend_ulong attribute_index = 0;
+		zval *attribute_zv = NULL;
+		ZEND_HASH_FOREACH_NUM_KEY_VAL(attributes, attribute_index, attribute_zv) {
+			ZVAL_DEREF(attribute_zv);
+			if (Z_TYPE_P(attribute_zv) != IS_STRING) {
+				zend_argument_type_error(4, "must be a list of strings, %s given", zend_zval_value_name(attribute_zv));
+				ret = 0;
+				goto cleanup;
+			}
+			zend_string *attribute = Z_STR_P(attribute_zv);
+			if (zend_str_has_nul_byte(attribute)) {
+				zend_argument_value_error(4, "must not contain strings with any null bytes");
+				ret = 0;
+				goto cleanup;
+			}
+			ldap_attrs[attribute_index] = ZSTR_VAL(attribute);
+		} ZEND_HASH_FOREACH_END();
+		ldap_attrs[num_attribs] = NULL;
+	}
+process:
 
 	/* parallel search? */
 	if (Z_TYPE_P(link) == IS_ARRAY) {
