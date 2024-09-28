@@ -147,6 +147,10 @@ jobs:
       MYSQL_TEST_HOST: mysql
       PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
       PDO_MYSQL_TEST_HOST: mysql
+      PDO_FIREBIRD_TEST_DATABASE: test.fdb
+      PDO_FIREBIRD_TEST_DSN: firebird:dbname=localhost:test.fdb
+      PDO_FIREBIRD_TEST_PASS: test
+      PDO_FIREBIRD_TEST_USER: test
     services:
       mysql:
         image: mysql:8.3
