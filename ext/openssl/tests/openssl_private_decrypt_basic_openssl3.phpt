@@ -1,10 +1,10 @@
 --TEST--
-openssl_private_decrypt() tests (OpenSSL < 3.0)
+openssl_private_decrypt() tests (OpenSSL >= 3.0)
 --EXTENSIONS--
 openssl
 --SKIPIF--
 <?php
-if (OPENSSL_VERSION_NUMBER >= 0x30000000) die('skip For OpenSSL < 3.0');
+if (OPENSSL_VERSION_NUMBER < 0x30000000) die('skip For OpenSSL >= 3.0');
 ?>
 --FILE--
 <?php
@@ -38,8 +38,8 @@ string(32) "Testing openssl_public_decrypt()"
 Warning: openssl_private_decrypt(): key parameter is not a valid private key in %s on line %d
 bool(false)
 NULL
-bool(false)
-NULL
+bool(true)
+string(%d) "%a"
 Key array must be of the form array(0 => key, 1 => phrase)
 bool(true)
 string(32) "Testing openssl_public_decrypt()"
