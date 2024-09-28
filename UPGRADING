@@ -19,6 +19,12 @@ PHP 8.5 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- BZ2:
+  . bzcompress() now throws a ValueError when $block_size is not between
+    1 and 9.
+  . bzcompress() now throws a ValueError when work_factor is not between
+    0 and 250.
+
 - LDAP:
   . ldap_get_option() and ldap_set_option() now throw a ValueError when
     passing an invalid option.
