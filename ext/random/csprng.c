@@ -86,7 +86,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_
 		return FAILURE;
 	}
 #elif defined(HAVE_ARC4RANDOM_BUF) && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001 && __NetBSD_Version__ < 1000000000) || \
-  defined(__APPLE__))
+  defined(__APPLE__) || defined(__HAIKU__))
 	/*
 	 * OpenBSD until there is a valid equivalent
 	 * or NetBSD before the 10.x release
