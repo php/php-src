@@ -1505,6 +1505,11 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			ret = 0;
 			goto cleanup;
 		}
+		if (!zend_array_is_list(Z_ARRVAL_P(link))) {
+			zend_argument_value_error(1, "must be a list");
+			ret = 0;
+			goto cleanup;
+		}
 
 		if (base_dn_ht) {
 			nbases = zend_hash_num_elements(base_dn_ht);
