@@ -1650,13 +1650,13 @@ cleanup_parallel:
 		}
 
 		if (!base_dn_str) {
-			zend_argument_type_error(2, "must be of type string when argument #1 ($ldap) is an LDAP instance");
+			zend_argument_type_error(2, "must be of type string when argument #1 ($ldap) is an LDAP\\Connection instance");
 			ret = 0;
 			goto cleanup;
 		}
 
 		if (!filter_str) {
-			zend_argument_type_error(3, "must be of type string when argument #1 ($ldap) is an LDAP instance");
+			zend_argument_type_error(3, "must be of type string when argument #1 ($ldap) is an LDAP\\Connection instance");
 			ret = 0;
 			goto cleanup;
 		}
@@ -1704,7 +1704,7 @@ cleanup_parallel:
 			result->result = ldap_res;
 		}
 	} else {
-		zend_argument_type_error(1, "must be of type LDAP|array, %s given", zend_zval_value_name(link));
+		zend_argument_type_error(1, "must be of type LDAP\\Connection|array, %s given", zend_zval_value_name(link));
 	}
 
 cleanup:
