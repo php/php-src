@@ -35,49 +35,13 @@ rem Some undefined behavior is reported on 32-bit, this should be fixed
 if "%PLATFORM%" == "x86" (
 	set CFLAGS=/W1
 ) else (
-	set CFLAGS=/W1
+	set CFLAGS=/W1 /WX
 )
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
 	--disable-debug-pack ^
-	--with-bz2 ^
-	--enable-com-dotnet ^
-	--with-curl ^
-	--with-dba ^
-	--with-qdbm ^
-	--with-lmdb ^
-	--enable-dl-test ^
-	--with-ffi ^
-	--enable-ftp ^
-	--with-gettext ^
-	--with-gmp ^
-	--with-mhash ^
-	--with-ldap=shared ^
-	--with-openssl ^
-	--with-openssl-argon2 ^
-	--enable-shmop ^
-	--enable-sockets ^
-	--with-sodium ^
-	--with-sqlite3 ^
-	--with-password-argon2 ^
-	--enable-sysvshm ^
-	--with-tidy ^
-	--enable-zend-test ^
-	--enable-mbstring ^
-	--enable-mbregex ^
-	--enable-exif ^
-	--enable-fileinfo ^
-	--enable-intl ^
-	--with-mysqli ^
-	--enable-pdo ^
-	--with-pdo-firebird ^
-	--with-pdo-mysql ^
-	--with-pdo-odbc ^
-	--with-pdo-pgsql ^
-	--with-pgsql ^
-	--with-snmp=shared ^
-	--with-xsl ^
+	--enable-com-dotnet=shared ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
