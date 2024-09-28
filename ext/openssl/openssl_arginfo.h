@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 62716ca2f10c7df42529a9140d80bd7cbc2dc481 */
+ * Stub hash: 32bd0ec5db046bfe3bba8a5d3fe1c0c51ff89e00 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -93,7 +93,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_sign, 0, 4, Open
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, serial_hex, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_new, 0, 2, OpenSSLCertificateSigningRequest, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_new, 0, 2, OpenSSLCertificateSigningRequest, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, distinguished_names, IS_ARRAY, 0)
 	ZEND_ARG_INFO(1, private_key)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
