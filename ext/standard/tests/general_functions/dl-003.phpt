@@ -3,14 +3,13 @@ dl(): Loaded extensions support ini_set()
 --SKIPIF--
 <?php
 include dirname(__DIR__, 3) . "/dl_test/tests/skip.inc";
+if (extension_loaded('dl_test')) {
+    die('skip dl_test is already loaded');
+}
 if (getenv('SKIP_ASAN')) die('skip fails intermittently on ASAN');
 ?>
 --FILE--
 <?php
-
-if (extension_loaded('dl_test')) {
-    exit('Error: dl_test is already loaded');
-}
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     $loaded = dl('php_dl_test.dll');
 } else {

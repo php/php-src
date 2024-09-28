@@ -1,14 +1,14 @@
 --TEST--
 Bug GH-8466: ini_get() is optimized out when the option does not exist during compilation
 --SKIPIF--
-<?php include dirname(__DIR__, 2) . "/dl_test/tests/skip.inc"; ?>
+<?php
+include dirname(__DIR__, 2) . "/dl_test/tests/skip.inc";
+if (extension_loaded('dl_test')) {
+    die('skip dl_test is already loaded');
+}
+?>
 --FILE--
 <?php
-
-if (extension_loaded('dl_test')) {
-    exit('Error: dl_test is already loaded');
-}
-
 if (PHP_OS_FAMILY === 'Windows') {
     $loaded = dl('php_dl_test.dll');
 } else {
