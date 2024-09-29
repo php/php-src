@@ -21,6 +21,7 @@ runs:
             --prefix=/usr \
             --enable-phpdbg \
             --enable-fpm \
+            --enable-address-sanitizer \
             --enable-intl \
             --with-pdo-mysql=mysqlnd \
             --with-mysqli=mysqlnd \
