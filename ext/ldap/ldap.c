@@ -2524,6 +2524,7 @@ PHP_FUNCTION(ldap_modify_batch)
 
 	zval *modification_zv = NULL;
 	ZEND_HASH_FOREACH_VAL(modifications, modification_zv) {
+		ZVAL_DEREF(modification_zv);
 		if (Z_TYPE_P(modification_zv) != IS_ARRAY) {
 			zend_argument_type_error(3, "must only contain arrays");
 			RETURN_THROWS();
@@ -2544,6 +2545,8 @@ PHP_FUNCTION(ldap_modify_batch)
 			zend_argument_value_error(3, "a modification entry must contain the \"" LDAP_MODIFY_BATCH_ATTRIB "\" option");
 			RETURN_THROWS();
 		}
+
+		ZVAL_DEREF(attrib);
 		if (UNEXPECTED(Z_TYPE_P(attrib) != IS_STRING)) {
 			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must be of type string, %s given", zend_zval_value_name(attrib));
 			RETURN_THROWS();
@@ -2558,6 +2561,8 @@ PHP_FUNCTION(ldap_modify_batch)
 			zend_argument_value_error(3, "a modification entry must contain the \"" LDAP_MODIFY_BATCH_MODTYPE "\" option");
 			RETURN_THROWS();
 		}
+
+		ZVAL_DEREF(modtype_zv);
 		if (UNEXPECTED(Z_TYPE_P(modtype_zv) != IS_LONG)) {
 			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be of type int, %s given", zend_zval_value_name(attrib));
 			RETURN_THROWS();
@@ -2592,6 +2597,8 @@ PHP_FUNCTION(ldap_modify_batch)
 			}
 			continue;
 		}
+
+		ZVAL_DEREF(modification_values_zv);
 		if (Z_TYPE_P(modification_values_zv) != IS_ARRAY) {
 			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be of type array, %s given", zend_zval_value_name(attrib));
 			RETURN_THROWS();
