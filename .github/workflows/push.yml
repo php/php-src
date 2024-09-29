@@ -247,10 +247,18 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup-windows
+      - name: Find target branch
+        id: branch
+        run: .github/scripts/windows/find-target-branch.bat
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          key: ${{ env.PHP_BUILD_SDK_BRANCH }}-deps-${{ steps.branch.outputs.branch }}-${{ env.PHP_BUILD_CRT }}-${{ env.PLATFORM }}
+          path: ${{ env.PHP_BUILD_CACHE_BASE_DIR }}
       - name: Build
-        run: .github/scripts/windows/build.bat
+        run: .github/scripts/windows/build.bat ${{ steps.branch.outputs.branch }}
       - name: Test
-        run: .github/scripts/windows/test.bat
+        run: .github/scripts/windows/test.bat ${{ steps.branch.outputs.branch }}
   BENCHMARKING:
     name: BENCHMARKING
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
