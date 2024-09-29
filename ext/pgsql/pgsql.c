@@ -6280,15 +6280,15 @@ PHP_FUNCTION(pg_close_stmt)
 
 	pgsql_result = PQclosePrepared(link->conn, ZSTR_VAL(stmt));
 
-	if (!pgsql_result) {
+	if (PQresultStatus(pgsql_result) != PGRES_COMMAND_OK) {
 		RETURN_FALSE;
 	} else {
-		pgsql_result_handle *pg_result;
+		pgsql_result_handle *pg_handle;
 		object_init_ex(return_value, pgsql_result_ce);
-		pg_result = Z_PGSQL_RESULT_P(return_value);
-		pg_result->conn = link->conn;
-		pg_result->result = pgsql_result;
-		pg_result->row = 0;
+		pg_handle = Z_PGSQL_RESULT_P(return_value);
+		pg_handle->conn = link->conn;
+		pg_handle->result = pgsql_result;
+		pg_handle->row = 0;
 	}
 }
 #endif
