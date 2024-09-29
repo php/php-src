@@ -4756,23 +4756,18 @@ PHP_FUNCTION(exif_thumbnail)
 #endif
 
 	RETVAL_STRINGL(ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size);
-	if (z_width) {
-		if (!ImageInfo.Thumbnail.width) {
-			if (!exif_scan_thumbnail(&ImageInfo)) {
-				ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
-			}
+	if ((z_width || z_height) && (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height)) {
+		if (!exif_scan_thumbnail(&ImageInfo)) {
+			ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
 		}
+	}
+	if (z_width) {
 		ZEND_TRY_ASSIGN_REF_LONG(z_width,  ImageInfo.Thumbnail.width);
 	}
 	if (z_height) {
-		if (!ImageInfo.Thumbnail.height) {
-			if (!exif_scan_thumbnail(&ImageInfo)) {
-				ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
-			}
-		}
 		ZEND_TRY_ASSIGN_REF_LONG(z_height, ImageInfo.Thumbnail.height);
 	}
-	if (z_imagetype)	{
+	if (z_imagetype) {
 		ZEND_TRY_ASSIGN_REF_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
