@@ -4699,7 +4699,6 @@ PHP_FUNCTION(exif_read_data)
 PHP_FUNCTION(exif_thumbnail)
 {
 	bool ret;
-	int arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
 	zval *stream;
 	zval *z_width = NULL, *z_height = NULL, *z_imagetype = NULL;
@@ -4731,7 +4730,7 @@ PHP_FUNCTION(exif_thumbnail)
 			RETURN_THROWS();
 		}
 
-		if (CHECK_NULL_PATH(Z_STRVAL_P(stream), Z_STRLEN_P(stream))) {
+		if (zend_str_has_nul_byte(Z_STR_P(stream))) {
 			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
@@ -4756,17 +4755,19 @@ PHP_FUNCTION(exif_thumbnail)
 	exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Returning thumbnail(%d)", ImageInfo.Thumbnail.size);
 #endif
 
-	ZVAL_STRINGL(return_value, ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size);
-	if (arg_c >= 3) {
-		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
-			if (!exif_scan_thumbnail(&ImageInfo)) {
-				ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
-			}
+	RETVAL_STRINGL(ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size);
+	if ((z_width || z_height) && (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height)) {
+		if (!exif_scan_thumbnail(&ImageInfo)) {
+			ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
 		}
+	}
+	if (z_width) {
 		ZEND_TRY_ASSIGN_REF_LONG(z_width,  ImageInfo.Thumbnail.width);
+	}
+	if (z_height) {
 		ZEND_TRY_ASSIGN_REF_LONG(z_height, ImageInfo.Thumbnail.height);
 	}
-	if (arg_c >= 4)	{
+	if (z_imagetype) {
 		ZEND_TRY_ASSIGN_REF_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
