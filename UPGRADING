@@ -37,6 +37,14 @@ PHP 8.5 UPGRADE NOTES
 2. New Features
 ========================================
 
+- XSL:
+  . The $namespace argument of XSLTProcessor::getParameter(),
+    XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()
+    now actually works instead of being treated as empty.
+    This only works if the $name argument does not use Clark notation
+    and is not a QName because in those cases the namespace is taken
+    from the namespace href or prefix respectively.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
