@@ -7,9 +7,6 @@ openssl
 if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl help', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
-if(substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not suitable for Windows');
-}
 ?>
 --FILE--
 <?php
@@ -74,7 +71,8 @@ $clientCode = <<<'CODE'
     phpt_wait();
 
     $cmd = 'openssl s_client -connect 127.0.0.1:64321';
-    $descriptorSpec = [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]];
+    $type = PHP_OS_FAMILY !== "Windows" ? "pipe" : "socket";
+    $descriptorSpec = [[$type, "r"], [$type, "w"], [$type, "w"]];
     $process = proc_open($cmd, $descriptorSpec, $pipes);
 
     list($stdin, $stdout, $stderr) = $pipes;
