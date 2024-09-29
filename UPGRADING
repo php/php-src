@@ -95,3 +95,6 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+- XMLWriter:
+  . Improved performance and reduce memory consumption.

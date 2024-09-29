@@ -19,4 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)
 
+- XMLWriter:
+  . Improved performance and reduce memory consumption. (nielsdos)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
