@@ -63,6 +63,9 @@ PHP 8.5 UPGRADE NOTES
     PDO::ATTR_PREFETCH sets to 0 which set to lazy fetch mode.
     In this mode, statements cannot be run parallely.
 
+- PGSQL:
+  . pg_copy_from also supports inputs as Iterable.
+
 ========================================
 6. New Functions
 ========================================

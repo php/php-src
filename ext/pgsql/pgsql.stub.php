@@ -847,7 +847,7 @@ namespace {
      */
     function pg_copy_to(PgSql\Connection $connection, string $table_name, string $separator = "\t", string $null_as = "\\\\N"): array|false {}
 
-    function pg_copy_from(PgSql\Connection $connection, string $table_name, array $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
+    function pg_copy_from(PgSql\Connection $connection, string $table_name, array|Traversable $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
 
     /**
      * @param PgSql\Connection|string $connection

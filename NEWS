@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing
     its name to be reused. (David Carlier)
+  . Added Iterable support for pgsql_copy_from. (David Carlier)
 
 - Random:
   . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
