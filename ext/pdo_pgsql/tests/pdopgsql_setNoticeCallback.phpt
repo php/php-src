@@ -1,7 +1,6 @@
 --TEST--
 Pdo\Pgsql::setNoticeCallback()
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
