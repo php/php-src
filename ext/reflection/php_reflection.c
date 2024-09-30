@@ -3584,13 +3584,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, inNamespace)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if ((fptr->common.fn_flags & (ZEND_ACC_CLOSURE | ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
-		zend_string *name = fptr->common.function_name;
-		const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-		RETURN_BOOL(backslash);
+	if ((fptr->common.fn_flags & (ZEND_ACC_CLOSURE | ZEND_ACC_FAKE_CLOSURE)) == ZEND_ACC_CLOSURE) {
+		RETURN_FALSE;
 	}
 
-	RETURN_FALSE;
+	zend_string *name = fptr->common.function_name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	RETURN_BOOL(backslash);
 }
 /* }}} */
 
