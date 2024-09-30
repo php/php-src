@@ -1,5 +1,5 @@
 --TEST--
-CLI setcookie() create header
+CLI session create header
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --INI--
