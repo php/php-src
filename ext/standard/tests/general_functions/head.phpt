@@ -29,17 +29,17 @@ echo "Done\n";
 bool(false)
 array(1) {
   [0]=>
-  string(27) "X-Powered-By: PHP/%s"
+  string(%d) "X-Powered-By: PHP/%s"
 }
 array(2) {
   [0]=>
-  string(27) "X-Powered-By: PHP/%s"
+  string(%d) "X-Powered-By: PHP/%s"
   [1]=>
   string(8) "HTTP 1.1"
 }
 array(3) {
   [0]=>
-  string(27) "X-Powered-By: PHP/%s"
+  string(%d) "X-Powered-By: PHP/%s"
   [1]=>
   string(8) "HTTP 1.1"
   [2]=>
