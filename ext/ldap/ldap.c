@@ -2251,29 +2251,30 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 		value = zend_hash_get_current_data(Z_ARRVAL_P(entry));
 
 		ZVAL_DEREF(value);
+		/* If the attribute takes a single value it can be passed directly instead of as a list with one element */
+		/* allow for arrays with one element, no allowance for arrays with none but probably not required, gerrit thomson. */
 		if (Z_TYPE_P(value) != IS_ARRAY) {
-			num_values = 1;
-		} else {
-			SEPARATE_ARRAY(value);
-			num_values = zend_hash_num_elements(Z_ARRVAL_P(value));
-		}
-
-		num_berval[i] = num_values;
-		ldap_mods[i]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
-
-/* allow for arrays with one element, no allowance for arrays with none but probably not required, gerrit thomson. */
-		if ((num_values == 1) && (Z_TYPE_P(value) != IS_ARRAY)) {
 			convert_to_string(value);
 			if (EG(exception)) {
 				RETVAL_FALSE;
 				num_berval[i] = 0;
 				num_attribs = i + 1;
+				ldap_mods[i]->mod_bvalues = NULL;
 				goto cleanup;
 			}
+			num_berval[i] = 1;
+			ldap_mods[i]->mod_bvalues = safe_emalloc(2, sizeof(struct berval *), 0);
 			ldap_mods[i]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
 			ldap_mods[i]->mod_bvalues[0]->bv_val = Z_STRVAL_P(value);
 			ldap_mods[i]->mod_bvalues[0]->bv_len = Z_STRLEN_P(value);
+			ldap_mods[i]->mod_bvalues[1] = NULL;
 		} else {
+			SEPARATE_ARRAY(value);
+			num_values = zend_hash_num_elements(Z_ARRVAL_P(value));
+
+			num_berval[i] = num_values;
+			ldap_mods[i]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
+
 			for (j = 0; j < num_values; j++) {
 				if ((ivalue = zend_hash_index_find(Z_ARRVAL_P(value), j)) == NULL) {
 					zend_argument_value_error(3, "must contain arrays with consecutive integer indices starting from 0");
@@ -2293,8 +2294,9 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				ldap_mods[i]->mod_bvalues[j]->bv_val = Z_STRVAL_P(ivalue);
 				ldap_mods[i]->mod_bvalues[j]->bv_len = Z_STRLEN_P(ivalue);
 			}
+			ldap_mods[i]->mod_bvalues[num_values] = NULL;
 		}
-		ldap_mods[i]->mod_bvalues[num_values] = NULL;
+
 		zend_hash_move_forward(Z_ARRVAL_P(entry));
 	}
 	ldap_mods[num_attribs] = NULL;
