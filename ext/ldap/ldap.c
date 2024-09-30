@@ -2202,7 +2202,6 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	LDAPControl **lserverctrls = NULL;
 	ldap_resultdata *result;
 	LDAPMessage *ldap_res;
-	int i, msgid;
 	size_t dn_len;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
@@ -2314,19 +2313,21 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 		}
 	}
 
-/* check flag to see if do_mod was called to perform full add , gerrit thomson */
+	/* check flag to see if do_mod was called to perform full add , gerrit thomson */
+	int ldap_status_code = LDAP_SUCCESS;
+	int msgid;
 	if (is_full_add == 1) {
 		if (ext) {
-			i = ldap_add_ext(ld->link, dn, ldap_mods, lserverctrls, NULL, &msgid);
+			ldap_status_code = ldap_add_ext(ld->link, dn, ldap_mods, lserverctrls, NULL, &msgid);
 		} else {
-			i = ldap_add_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL);
+			ldap_status_code = ldap_add_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL);
 		}
-		if (i != LDAP_SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Add: %s", ldap_err2string(i));
+		if (ldap_status_code != LDAP_SUCCESS) {
+			php_error_docref(NULL, E_WARNING, "Add: %s", ldap_err2string(ldap_status_code));
 			RETVAL_FALSE;
 		} else if (ext) {
-			i = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
-			if (i == -1) {
+			ldap_status_code = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
+			if (ldap_status_code == -1) {
 				php_error_docref(NULL, E_WARNING, "Add operation failed");
 				RETVAL_FALSE;
 				goto cleanup;
@@ -2339,16 +2340,16 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 		} else RETVAL_TRUE;
 	} else {
 		if (ext) {
-			i = ldap_modify_ext(ld->link, dn, ldap_mods, lserverctrls, NULL, &msgid);
+			ldap_status_code = ldap_modify_ext(ld->link, dn, ldap_mods, lserverctrls, NULL, &msgid);
 		} else {
-			i = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL);
+			ldap_status_code = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL);
 		}
-		if (i != LDAP_SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Modify: %s", ldap_err2string(i));
+		if (ldap_status_code != LDAP_SUCCESS) {
+			php_error_docref(NULL, E_WARNING, "Modify: %s", ldap_err2string(ldap_status_code));
 			RETVAL_FALSE;
 		} else if (ext) {
-			i = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
-			if (i == -1) {
+			ldap_status_code = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
+			if (ldap_status_code == -1) {
 				php_error_docref(NULL, E_WARNING, "Modify operation failed");
 				RETVAL_FALSE;
 				goto cleanup;
