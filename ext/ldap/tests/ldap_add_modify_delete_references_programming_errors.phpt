@@ -76,9 +76,7 @@ try {
 ?>
 --EXPECTF--
 Error: Object of class stdClass could not be converted to string
-
-Warning: ldap_add(): Add: Can't contact LDAP server in %s on line %d
-bool(false)
+ValueError: ldap_add(): Argument #3 ($entry) list of attribute values must not be empty
 
 Warning: Array to string conversion in %s on line %d
 
