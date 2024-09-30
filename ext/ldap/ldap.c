@@ -2239,6 +2239,11 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+		if (ZSTR_LEN(attribute) == 0) {
+			zend_argument_value_error(3, "key must not be empty");
+			RETVAL_FALSE;
+			goto cleanup;
+		}
 		if (zend_str_has_nul_byte(attribute)) {
 			zend_argument_value_error(3, "key must not contain any null bytes");
 			RETVAL_FALSE;
