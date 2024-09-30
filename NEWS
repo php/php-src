@@ -23,6 +23,10 @@ PHP                                                                        NEWS
     ldap_modify_batch()). (Girgias)
   . Fixed bug GH-16101 (Segfault in ldap_list(), ldap_read(), and ldap_search()
     when LDAPs array is not a list). (Girgias)
+  . Fix GH-16132 (php_ldap_do_modify() attempts to free pointer not allocated
+    by ZMM.). (Girgias)
+  . Fix GH-16136 (Memory leak in php_ldap_do_modify() when entry is not a
+    proper dictionary). (Girgias)
 
 - OpenSSL:
   . Fixed stub for openssl_csr_new. (Jakub Zelenka)
