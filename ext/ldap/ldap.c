@@ -2271,6 +2271,14 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 		} else {
 			SEPARATE_ARRAY(value);
 			num_values = zend_hash_num_elements(Z_ARRVAL_P(value));
+			if (num_values == 0) {
+				zend_argument_value_error(3, "list of attribute values must not be empty");
+				RETVAL_FALSE;
+				num_berval[i] = 0;
+				num_attribs = i + 1;
+				ldap_mods[i]->mod_bvalues = NULL;
+				goto cleanup;
+			}
 
 			num_berval[i] = num_values;
 			ldap_mods[i]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
