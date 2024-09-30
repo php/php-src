@@ -2312,12 +2312,12 @@ static void zend_ffi_free_obj(zend_object *object) /* {{{ */
 		ffi->lib = NULL;
 	}
 
-	if (ffi->symbols) {
+	if (ffi->symbols && !(GC_FLAGS(ffi->symbols) & IS_ARRAY_IMMUTABLE)) {
 		zend_hash_destroy(ffi->symbols);
 		efree(ffi->symbols);
 	}
 
-	if (ffi->tags) {
+	if (ffi->tags && !(GC_FLAGS(ffi->tags) & IS_ARRAY_IMMUTABLE)) {
 		zend_hash_destroy(ffi->tags);
 		efree(ffi->tags);
 	}
@@ -3496,7 +3496,6 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 				}
 				FFI_G(symbols) = cached_scope->symbols;
 				FFI_G(tags) = cached_scope->tags;
-				persistent = true;
 			}
 		}
 
