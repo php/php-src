@@ -134,9 +134,7 @@ try {
 --EXPECTF--
 ValueError: ldap_add(): Argument #3 ($entry) must not be empty
 ValueError: ldap_add(): Argument #3 ($entry) must be an associative array of attribute => values
-
-Warning: ldap_add(): Add: Can't contact LDAP server in %s on line %d
-bool(false)
+ValueError: ldap_add(): Argument #3 ($entry) key must not be empty
 ValueError: ldap_add(): Argument #3 ($entry) key must not contain any null bytes
 Error: Object of class stdClass could not be converted to string
 ValueError: ldap_add(): Argument #3 ($entry) list of attribute values must not be empty
