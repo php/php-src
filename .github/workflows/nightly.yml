@@ -147,6 +147,8 @@ jobs:
         uses: ./.github/actions/setup-mssql
       - name: apt
         uses: ./.github/actions/apt-x64
+        with:
+          asan: ${{ matrix.asan && 'true' || 'false' }}
       - name: System info
         run: |
           echo "::group::Show host CPU info"

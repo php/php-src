@@ -6,6 +6,9 @@ inputs:
   skipSlow:
     default: false
     required: false
+  asan:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
@@ -28,7 +31,7 @@ runs:
           --enable-gd \
           --with-jpeg \
           --with-webp \
-          ${{ inputs.skipSlow == 'false' && '--with-avif' || '' }} \
+          ${{ inputs.asan == 'false' && '--with-avif' || '' }} \
           --with-freetype \
           --with-xpm \
           --enable-exif \
