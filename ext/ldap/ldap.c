@@ -2181,6 +2181,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			convert_to_string(value);
 			if (EG(exception)) {
 				RETVAL_FALSE;
+				num_berval[i] = 0;
+				num_attribs = i + 1;
 				goto cleanup;
 			}
 			ldap_mods[i]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
@@ -2197,6 +2199,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				}
 				convert_to_string(ivalue);
 				if (EG(exception)) {
+					num_berval[i] = j;
+					num_attribs = i + 1;
 					RETVAL_FALSE;
 					goto cleanup;
 				}
