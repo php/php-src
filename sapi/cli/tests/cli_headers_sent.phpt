@@ -2,8 +2,6 @@
 CLI headers_sent()
 --SKIPIF--
 <?php include "skipif.inc" ?>
---INI--
-expose_php=On
 --FILE--
 <?php
 $sent1 = headers_sent();
