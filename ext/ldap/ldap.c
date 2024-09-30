@@ -2201,9 +2201,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	LDAPControl **lserverctrls = NULL;
 	ldap_resultdata *result;
 	LDAPMessage *ldap_res;
-	int i, j, num_attribs, msgid;
+	int i, num_attribs, msgid;
 	size_t dn_len;
-	int *num_berval;
 	zend_string *attribute;
 	zend_ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
@@ -2222,7 +2221,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	}
 
 	ldap_mods = safe_emalloc((num_attribs+1), sizeof(LDAPMod *), 0);
-	num_berval = safe_emalloc(num_attribs, sizeof(int), 0);
+	/* Zero out the list */
+	memset(ldap_mods, 0, sizeof(LDAPMod *) * (num_attribs+1));
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(entry));
 
 	/* added by gerrit thomson to fix ldap_add using ldap_mod_add */
@@ -2242,8 +2242,6 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 		} else {
 			php_error_docref(NULL, E_WARNING, "Unknown attribute in the data");
 			RETVAL_FALSE;
-			num_berval[i] = 0;
-			num_attribs = i + 1;
 			ldap_mods[i]->mod_bvalues = NULL;
 			goto cleanup;
 		}
@@ -2257,12 +2255,9 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			convert_to_string(value);
 			if (EG(exception)) {
 				RETVAL_FALSE;
-				num_berval[i] = 0;
-				num_attribs = i + 1;
 				ldap_mods[i]->mod_bvalues = NULL;
 				goto cleanup;
 			}
-			num_berval[i] = 1;
 			ldap_mods[i]->mod_bvalues = safe_emalloc(2, sizeof(struct berval *), 0);
 			ldap_mods[i]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
 			ldap_mods[i]->mod_bvalues[0]->bv_val = Z_STRVAL_P(value);
@@ -2274,30 +2269,25 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			if (num_values == 0) {
 				zend_argument_value_error(3, "list of attribute values must not be empty");
 				RETVAL_FALSE;
-				num_berval[i] = 0;
-				num_attribs = i + 1;
 				ldap_mods[i]->mod_bvalues = NULL;
 				goto cleanup;
 			}
 			if (!zend_array_is_list(Z_ARRVAL_P(value))) {
 				zend_argument_value_error(3, "must be a list of attribute values");
 				RETVAL_FALSE;
-				num_berval[i] = 0;
-				num_attribs = i + 1;
 				ldap_mods[i]->mod_bvalues = NULL;
 				goto cleanup;
 			}
 
-			num_berval[i] = num_values;
 			ldap_mods[i]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
+			/* Zero out the list */
+			memset(ldap_mods[i]->mod_bvalues, 0, sizeof(struct berval *) * (num_values+1));
 
 			zend_ulong attribute_value_index = 0;
 			zval *attribute_value = NULL;
 			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(value), attribute_value_index, attribute_value) {
 				convert_to_string(attribute_value);
 				if (EG(exception)) {
-					num_berval[i] = (int)attribute_value_index;
-					num_attribs = i + 1;
 					RETVAL_FALSE;
 					goto cleanup;
 				}
@@ -2368,15 +2358,19 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	}
 
 cleanup:
-	for (i = 0; i < num_attribs; i++) {
-		efree(ldap_mods[i]->mod_type);
-		for (j = 0; j < num_berval[i]; j++) {
-			efree(ldap_mods[i]->mod_bvalues[j]);
+	for (LDAPMod **ptr = ldap_mods; *ptr != NULL; ptr++) {
+		LDAPMod *mod = *ptr;
+		if (mod->mod_type) {
+			efree(mod->mod_type);
 		}
-		efree(ldap_mods[i]->mod_bvalues);
-		efree(ldap_mods[i]);
+		if (mod->mod_bvalues != NULL) {
+			for (struct berval **bval_ptr = mod->mod_bvalues; *bval_ptr != NULL; bval_ptr++) {
+				efree(*bval_ptr);
+			}
+			efree(mod->mod_bvalues);
+		}
+		efree(mod);
 	}
-	efree(num_berval);
 	efree(ldap_mods);
 
 	if (lserverctrls) {
