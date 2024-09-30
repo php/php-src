@@ -87,7 +87,7 @@ static void register_libxml_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_FATAL", XML_ERR_FATAL, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_libxml_disable_entity_loader_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "libxml_disable_entity_loader", sizeof("libxml_disable_entity_loader") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_libxml_disable_entity_loader_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "libxml_disable_entity_loader", strlen("libxml_disable_entity_loader")), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0;
 	zend_string *attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str);
@@ -109,7 +109,7 @@ static zend_class_entry *register_class_LibXMLError(void)
 
 	zval property_level_default_value;
 	ZVAL_UNDEF(&property_level_default_value);
-	zend_string *property_level_name = zend_string_init("level", sizeof("level") - 1, 1);
+	zend_string *property_level_name = zend_string_init("level", strlen("level"), 1);
 	zend_declare_typed_property(class_entry, property_level_name, &property_level_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_level_name);
 
@@ -119,7 +119,7 @@ static zend_class_entry *register_class_LibXMLError(void)
 
 	zval property_column_default_value;
 	ZVAL_UNDEF(&property_column_default_value);
-	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, 1);
+	zend_string *property_column_name = zend_string_init("column", strlen("column"), 1);
 	zend_declare_typed_property(class_entry, property_column_name, &property_column_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_column_name);
 
