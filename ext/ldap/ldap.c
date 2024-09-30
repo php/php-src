@@ -2216,6 +2216,11 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
 	num_attribs = zend_hash_num_elements(Z_ARRVAL_P(entry));
+	if (num_attribs == 0) {
+		zend_argument_must_not_be_empty_error(3);
+		RETURN_THROWS();
+	}
+
 	ldap_mods = safe_emalloc((num_attribs+1), sizeof(LDAPMod *), 0);
 	num_berval = safe_emalloc(num_attribs, sizeof(int), 0);
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(entry));
