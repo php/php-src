@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16009 (Segmentation fault with frameless functions and
     undefined CVs). (nielsdos)
 
+- Reflection:
+  . Fixed bug GH-16122 (The return value of ReflectionFunction::getNamespaceName()
+    and ReflectionFunction::inNamespace() for closures is incorrect). (timwolla)
+
 - SAPI:
   . Fixed bug GHSA-9pqp-7h25-4f32 (Erroneous parsing of multipart form data).
     (CVE-2024-8925) (Arnaud)
