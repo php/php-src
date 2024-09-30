@@ -2194,27 +2194,26 @@ PHP_FUNCTION(ldap_dn2ufn)
 static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 {
 	zval *serverctrls = NULL;
-	zval *link, *entry;
+	zval *link;
 	ldap_linkdata *ld;
 	char *dn;
+	HashTable *attributes_ht;
 	LDAPMod **ldap_mods;
 	LDAPControl **lserverctrls = NULL;
 	ldap_resultdata *result;
 	LDAPMessage *ldap_res;
-	int i, num_attribs, msgid;
+	int i, msgid;
 	size_t dn_len;
-	zend_string *attribute;
-	zend_ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opa/|a!", &link, ldap_link_ce, &dn, &dn_len, &entry, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oph/|a!", &link, ldap_link_ce, &dn, &dn_len, &attributes_ht, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
-	num_attribs = zend_hash_num_elements(Z_ARRVAL_P(entry));
+	uint32_t num_attribs = zend_hash_num_elements(attributes_ht);
 	if (num_attribs == 0) {
 		zend_argument_must_not_be_empty_error(3);
 		RETURN_THROWS();
@@ -2223,7 +2222,6 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	ldap_mods = safe_emalloc((num_attribs+1), sizeof(LDAPMod *), 0);
 	/* Zero out the list */
 	memset(ldap_mods, 0, sizeof(LDAPMod *) * (num_attribs+1));
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(entry));
 
 	/* added by gerrit thomson to fix ldap_add using ldap_mod_add */
 	if (oper == PHP_LD_FULL_ADD) {
@@ -2232,74 +2230,70 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	}
 	/* end additional , gerrit thomson */
 
-	for (i = 0; i < num_attribs; i++) {
-		ldap_mods[i] = emalloc(sizeof(LDAPMod));
-		ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
-		ldap_mods[i]->mod_type = NULL;
-
-		if (zend_hash_get_current_key(Z_ARRVAL_P(entry), &attribute, &index) == HASH_KEY_IS_STRING) {
-			ldap_mods[i]->mod_type = estrndup(ZSTR_VAL(attribute), ZSTR_LEN(attribute));
-		} else {
+	const zend_string *attribute = NULL;
+	zval *attribute_values = NULL;
+	unsigned int attribute_index = 0;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(attributes_ht, attribute, attribute_values) {
+		if (attribute == NULL) {
 			php_error_docref(NULL, E_WARNING, "Unknown attribute in the data");
 			RETVAL_FALSE;
-			ldap_mods[i]->mod_bvalues = NULL;
 			goto cleanup;
 		}
 
-		zval *value = zend_hash_get_current_data(Z_ARRVAL_P(entry));
+		ldap_mods[attribute_index] = emalloc(sizeof(LDAPMod));
+		ldap_mods[attribute_index]->mod_op = oper | LDAP_MOD_BVALUES;
+		ldap_mods[attribute_index]->mod_type = estrndup(ZSTR_VAL(attribute), ZSTR_LEN(attribute));
+		ldap_mods[attribute_index]->mod_bvalues = NULL;
 
-		ZVAL_DEREF(value);
+		ZVAL_DEREF(attribute_values);
 		/* If the attribute takes a single value it can be passed directly instead of as a list with one element */
 		/* allow for arrays with one element, no allowance for arrays with none but probably not required, gerrit thomson. */
-		if (Z_TYPE_P(value) != IS_ARRAY) {
-			convert_to_string(value);
+		if (Z_TYPE_P(attribute_values) != IS_ARRAY) {
+			convert_to_string(attribute_values);
 			if (EG(exception)) {
 				RETVAL_FALSE;
-				ldap_mods[i]->mod_bvalues = NULL;
 				goto cleanup;
 			}
-			ldap_mods[i]->mod_bvalues = safe_emalloc(2, sizeof(struct berval *), 0);
-			ldap_mods[i]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
-			ldap_mods[i]->mod_bvalues[0]->bv_val = Z_STRVAL_P(value);
-			ldap_mods[i]->mod_bvalues[0]->bv_len = Z_STRLEN_P(value);
-			ldap_mods[i]->mod_bvalues[1] = NULL;
+			ldap_mods[attribute_index]->mod_bvalues = safe_emalloc(2, sizeof(struct berval *), 0);
+			ldap_mods[attribute_index]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
+			ldap_mods[attribute_index]->mod_bvalues[0]->bv_val = Z_STRVAL_P(attribute_values);
+			ldap_mods[attribute_index]->mod_bvalues[0]->bv_len = Z_STRLEN_P(attribute_values);
+			ldap_mods[attribute_index]->mod_bvalues[1] = NULL;
 		} else {
-			SEPARATE_ARRAY(value);
-			int num_values = zend_hash_num_elements(Z_ARRVAL_P(value));
+			SEPARATE_ARRAY(attribute_values);
+			uint32_t num_values = zend_hash_num_elements(Z_ARRVAL_P(attribute_values));
 			if (num_values == 0) {
 				zend_argument_value_error(3, "list of attribute values must not be empty");
 				RETVAL_FALSE;
-				ldap_mods[i]->mod_bvalues = NULL;
 				goto cleanup;
 			}
-			if (!zend_array_is_list(Z_ARRVAL_P(value))) {
+			if (!zend_array_is_list(Z_ARRVAL_P(attribute_values))) {
 				zend_argument_value_error(3, "must be a list of attribute values");
 				RETVAL_FALSE;
-				ldap_mods[i]->mod_bvalues = NULL;
 				goto cleanup;
 			}
 
-			ldap_mods[i]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
+			ldap_mods[attribute_index]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
 			/* Zero out the list */
-			memset(ldap_mods[i]->mod_bvalues, 0, sizeof(struct berval *) * (num_values+1));
+			memset(ldap_mods[attribute_index]->mod_bvalues, 0, sizeof(struct berval *) * (num_values+1));
 
 			zend_ulong attribute_value_index = 0;
 			zval *attribute_value = NULL;
-			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(value), attribute_value_index, attribute_value) {
+			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(attribute_values), attribute_value_index, attribute_value) {
 				convert_to_string(attribute_value);
 				if (EG(exception)) {
 					RETVAL_FALSE;
 					goto cleanup;
 				}
-				ldap_mods[i]->mod_bvalues[attribute_value_index] = (struct berval *) emalloc (sizeof(struct berval));
-				ldap_mods[i]->mod_bvalues[attribute_value_index]->bv_val = Z_STRVAL_P(attribute_value);
-				ldap_mods[i]->mod_bvalues[attribute_value_index]->bv_len = Z_STRLEN_P(attribute_value);
+				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index] = (struct berval *) emalloc (sizeof(struct berval));
+				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_val = Z_STRVAL_P(attribute_value);
+				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_len = Z_STRLEN_P(attribute_value);
 			} ZEND_HASH_FOREACH_END();
-			ldap_mods[i]->mod_bvalues[num_values] = NULL;
+			ldap_mods[attribute_index]->mod_bvalues[num_values] = NULL;
 		}
 
-		zend_hash_move_forward(Z_ARRVAL_P(entry));
-	}
+		attribute_index++;
+	} ZEND_HASH_FOREACH_END();
 	ldap_mods[num_attribs] = NULL;
 
 	if (serverctrls) {
@@ -2360,9 +2354,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 cleanup:
 	for (LDAPMod **ptr = ldap_mods; *ptr != NULL; ptr++) {
 		LDAPMod *mod = *ptr;
-		if (mod->mod_type) {
-			efree(mod->mod_type);
-		}
+		efree(mod->mod_type);
 		if (mod->mod_bvalues != NULL) {
 			for (struct berval **bval_ptr = mod->mod_bvalues; *bval_ptr != NULL; bval_ptr++) {
 				efree(*bval_ptr);
