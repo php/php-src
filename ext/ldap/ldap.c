@@ -2194,14 +2194,14 @@ PHP_FUNCTION(ldap_dn2ufn)
 static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 {
 	zval *serverctrls = NULL;
-	zval *link, *entry, *value;
+	zval *link, *entry;
 	ldap_linkdata *ld;
 	char *dn;
 	LDAPMod **ldap_mods;
 	LDAPControl **lserverctrls = NULL;
 	ldap_resultdata *result;
 	LDAPMessage *ldap_res;
-	int i, j, num_attribs, num_values, msgid;
+	int i, j, num_attribs, msgid;
 	size_t dn_len;
 	int *num_berval;
 	zend_string *attribute;
@@ -2248,7 +2248,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			goto cleanup;
 		}
 
-		value = zend_hash_get_current_data(Z_ARRVAL_P(entry));
+		zval *value = zend_hash_get_current_data(Z_ARRVAL_P(entry));
 
 		ZVAL_DEREF(value);
 		/* If the attribute takes a single value it can be passed directly instead of as a list with one element */
@@ -2270,7 +2270,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			ldap_mods[i]->mod_bvalues[1] = NULL;
 		} else {
 			SEPARATE_ARRAY(value);
-			num_values = zend_hash_num_elements(Z_ARRVAL_P(value));
+			int num_values = zend_hash_num_elements(Z_ARRVAL_P(value));
 			if (num_values == 0) {
 				zend_argument_value_error(3, "list of attribute values must not be empty");
 				RETVAL_FALSE;
