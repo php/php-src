@@ -9,11 +9,20 @@ ldap
 $ldap = ldap_connect('ldap://127.0.0.1:3333');
 $valid_dn = "cn=userA,something";
 
-$attrib = "attrib1";
-$r =& $attrib;
+$empty_list = [];
+$modification_reference = [
+    &$empty_list,
+];
+try {
+    var_dump(ldap_modify_batch($ldap, $valid_dn, $modification_reference));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+$attrib = "attrib\0with\0nul\0byte";
 $modification_attrib_reference_string = [
     [
-        "attrib"  => $r,
+        "attrib"  => &$attrib,
         "modtype" => LDAP_MODIFY_BATCH_ADD,
         "values"  => ["value1"],
     ],
@@ -24,12 +33,11 @@ try {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
-$modtype = LDAP_MODIFY_BATCH_ADD;
-$r =& $modtype;
+$modtype = -10;
 $modification_modtype_reference_int = [
     [
         "attrib"  => "attrib1",
-        "modtype" => $r,
+        "modtype" => &$modtype,
         "values"  => ["value1"],
     ],
 ];
@@ -40,13 +48,12 @@ try {
 }
 
 
-$values = ["value1"];
-$r =& $values;
+$values = [];
 $modification_values_reference_array = [
     [
         "attrib"  => "attrib1",
         "modtype" => LDAP_MODIFY_BATCH_ADD,
-        "values"  => $r,
+        "values"  => &$values,
     ],
 ];
 try {
@@ -56,12 +63,8 @@ try {
 }
 
 ?>
---EXPECTF--
-Warning: ldap_modify_batch(): Batch Modify: Can't contact LDAP server in %s on line %d
-bool(false)
-
-Warning: ldap_modify_batch(): Batch Modify: Can't contact LDAP server in %s on line %d
-bool(false)
-
-Warning: ldap_modify_batch(): Batch Modify: Can't contact LDAP server in %s on line %d
-bool(false)
+--EXPECT--
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) a modification entry must only contain the keys "attrib", "modtype", and "values"
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "attrib" must not contain null bytes
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "modtype" must be LDAP_MODIFY_BATCH_ADD, LDAP_MODIFY_BATCH_REMOVE, LDAP_MODIFY_BATCH_REPLACE, or LDAP_MODIFY_BATCH_REMOVE_ALL
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must not be empty
