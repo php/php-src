@@ -38,7 +38,7 @@ PHP 8.4 UPGRADE NOTES
     readonly initialization, and was an oversight in the "readonly
     reinitialization during cloning" implementation.
   . The exit (and die) language constructs now behave more like a function.
-    They can be passed liked callables, are affected by the strict_types
+    They can be passed like callables, are affected by the strict_types
     declare statement, and now perform the usual type coercions instead of
     casting any non-integer value to a string.
     As such, passing invalid types to exit/die may now result in a TypeError
