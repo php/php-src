@@ -1,10 +1,12 @@
 --TEST--
 GH-15937 (stream overflow on timeout setting)
+--SKIPIF--
+<?php if (getenv("SKIP_ONLINE_TESTS")) die("skip online test"); ?>
 --FILE--
 <?php
 $config = [
     'http' => [
-        'timeout'		=> PHP_INT_MAX,
+        'timeout' => PHP_INT_MAX,
     ],
 ];
 $ctx = stream_context_create($config);
