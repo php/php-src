@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug GHSA-865w-9rf3-2wh5 (Logs from childrens may be altered).
     (CVE-2024-9026) (Jakub Zelenka)
 
+- JSON:
+  . Fixed bug GH-15168 (stack overflow in json_encode()). (nielsdos)
+
 - LDAP:
   . Fixed bug GH-16032 (Various NULL pointer dereferencements in
     ldap_modify_batch()). (Girgias)
