@@ -2291,20 +2291,20 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			num_berval[i] = num_values;
 			ldap_mods[i]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
 
-			for (j = 0; j < num_values; j++) {
-				zval *ivalue = zend_hash_index_find(Z_ARRVAL_P(value), j);
-				ZEND_ASSERT(ivalue != NULL);
-				convert_to_string(ivalue);
+			zend_ulong attribute_value_index = 0;
+			zval *attribute_value = NULL;
+			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(value), attribute_value_index, attribute_value) {
+				convert_to_string(attribute_value);
 				if (EG(exception)) {
-					num_berval[i] = j;
+					num_berval[i] = (int)attribute_value_index;
 					num_attribs = i + 1;
 					RETVAL_FALSE;
 					goto cleanup;
 				}
-				ldap_mods[i]->mod_bvalues[j] = (struct berval *) emalloc (sizeof(struct berval));
-				ldap_mods[i]->mod_bvalues[j]->bv_val = Z_STRVAL_P(ivalue);
-				ldap_mods[i]->mod_bvalues[j]->bv_len = Z_STRLEN_P(ivalue);
-			}
+				ldap_mods[i]->mod_bvalues[attribute_value_index] = (struct berval *) emalloc (sizeof(struct berval));
+				ldap_mods[i]->mod_bvalues[attribute_value_index]->bv_val = Z_STRVAL_P(attribute_value);
+				ldap_mods[i]->mod_bvalues[attribute_value_index]->bv_len = Z_STRLEN_P(attribute_value);
+			} ZEND_HASH_FOREACH_END();
 			ldap_mods[i]->mod_bvalues[num_values] = NULL;
 		}
 
