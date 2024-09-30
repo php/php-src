@@ -3584,9 +3584,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, inNamespace)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	zend_string *name = fptr->common.function_name;
-	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	RETURN_BOOL(backslash);
+	if ((fptr->common.fn_flags & (ZEND_ACC_CLOSURE | ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
+		zend_string *name = fptr->common.function_name;
+		const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+		RETURN_BOOL(backslash);
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -3602,11 +3606,14 @@ ZEND_METHOD(ReflectionFunctionAbstract, getNamespaceName)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	zend_string *name = fptr->common.function_name;
-	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash) {
-		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
+	if ((fptr->common.fn_flags & (ZEND_ACC_CLOSURE | ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
+		zend_string *name = fptr->common.function_name;
+		const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+		if (backslash) {
+			RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
+		}
 	}
+
 	RETURN_EMPTY_STRING();
 }
 /* }}} */
