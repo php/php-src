@@ -144,7 +144,7 @@ Warning: ldap_add(): Add: Can't contact LDAP server in %s on line %d
 bool(false)
 Error: Object of class stdClass could not be converted to string
 ValueError: ldap_add(): Argument #3 ($entry) list of attribute values must not be empty
-ValueError: ldap_add(): Argument #3 ($entry) must contain arrays with consecutive integer indices starting from 0
+ValueError: ldap_add(): Argument #3 ($entry) must be a list of attribute values
 
 Warning: Array to string conversion in %s on line %d
 
