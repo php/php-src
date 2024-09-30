@@ -163,7 +163,7 @@ static void register_xml_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("XML_SAX_IMPL", PHP_XML_SAX_IMPL, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_xml_set_object_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "xml_set_object", sizeof("xml_set_object") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_xml_set_object_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "xml_set_object", strlen("xml_set_object")), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_xml_set_object_0_arg0;
 	zend_string *attribute_Deprecated_func_xml_set_object_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_xml_set_object_0_arg0, attribute_Deprecated_func_xml_set_object_0_arg0_str);

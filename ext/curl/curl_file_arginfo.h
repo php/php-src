@@ -64,13 +64,13 @@ static zend_class_entry *register_class_CURLFile(void)
 
 	zval property_mime_default_value;
 	ZVAL_EMPTY_STRING(&property_mime_default_value);
-	zend_string *property_mime_name = zend_string_init("mime", sizeof("mime") - 1, 1);
+	zend_string *property_mime_name = zend_string_init("mime", strlen("mime"), 1);
 	zend_declare_typed_property(class_entry, property_mime_name, &property_mime_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_mime_name);
 
 	zval property_postname_default_value;
 	ZVAL_EMPTY_STRING(&property_postname_default_value);
-	zend_string *property_postname_name = zend_string_init("postname", sizeof("postname") - 1, 1);
+	zend_string *property_postname_name = zend_string_init("postname", strlen("postname"), 1);
 	zend_declare_typed_property(class_entry, property_postname_name, &property_postname_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_postname_name);
 
@@ -86,19 +86,19 @@ static zend_class_entry *register_class_CURLStringFile(void)
 
 	zval property_data_default_value;
 	ZVAL_UNDEF(&property_data_default_value);
-	zend_string *property_data_name = zend_string_init("data", sizeof("data") - 1, 1);
+	zend_string *property_data_name = zend_string_init("data", strlen("data"), 1);
 	zend_declare_typed_property(class_entry, property_data_name, &property_data_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_data_name);
 
 	zval property_postname_default_value;
 	ZVAL_UNDEF(&property_postname_default_value);
-	zend_string *property_postname_name = zend_string_init("postname", sizeof("postname") - 1, 1);
+	zend_string *property_postname_name = zend_string_init("postname", strlen("postname"), 1);
 	zend_declare_typed_property(class_entry, property_postname_name, &property_postname_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_postname_name);
 
 	zval property_mime_default_value;
 	ZVAL_UNDEF(&property_mime_default_value);
-	zend_string *property_mime_name = zend_string_init("mime", sizeof("mime") - 1, 1);
+	zend_string *property_mime_name = zend_string_init("mime", strlen("mime"), 1);
 	zend_declare_typed_property(class_entry, property_mime_name, &property_mime_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_mime_name);
 

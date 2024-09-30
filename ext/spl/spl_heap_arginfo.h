@@ -166,19 +166,19 @@ static zend_class_entry *register_class_SplPriorityQueue(zend_class_entry *class
 
 	zval const_EXTR_BOTH_value;
 	ZVAL_LONG(&const_EXTR_BOTH_value, SPL_PQUEUE_EXTR_BOTH);
-	zend_string *const_EXTR_BOTH_name = zend_string_init_interned("EXTR_BOTH", sizeof("EXTR_BOTH") - 1, 1);
+	zend_string *const_EXTR_BOTH_name = zend_string_init_interned("EXTR_BOTH", strlen("EXTR_BOTH"), 1);
 	zend_declare_typed_class_constant(class_entry, const_EXTR_BOTH_name, &const_EXTR_BOTH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXTR_BOTH_name);
 
 	zval const_EXTR_PRIORITY_value;
 	ZVAL_LONG(&const_EXTR_PRIORITY_value, SPL_PQUEUE_EXTR_PRIORITY);
-	zend_string *const_EXTR_PRIORITY_name = zend_string_init_interned("EXTR_PRIORITY", sizeof("EXTR_PRIORITY") - 1, 1);
+	zend_string *const_EXTR_PRIORITY_name = zend_string_init_interned("EXTR_PRIORITY", strlen("EXTR_PRIORITY"), 1);
 	zend_declare_typed_class_constant(class_entry, const_EXTR_PRIORITY_name, &const_EXTR_PRIORITY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXTR_PRIORITY_name);
 
 	zval const_EXTR_DATA_value;
 	ZVAL_LONG(&const_EXTR_DATA_value, SPL_PQUEUE_EXTR_DATA);
-	zend_string *const_EXTR_DATA_name = zend_string_init_interned("EXTR_DATA", sizeof("EXTR_DATA") - 1, 1);
+	zend_string *const_EXTR_DATA_name = zend_string_init_interned("EXTR_DATA", strlen("EXTR_DATA"), 1);
 	zend_declare_typed_class_constant(class_entry, const_EXTR_DATA_name, &const_EXTR_DATA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXTR_DATA_name);
 

@@ -264,13 +264,13 @@ static zend_class_entry *register_class_ArrayObject(zend_class_entry *class_entr
 
 	zval const_STD_PROP_LIST_value;
 	ZVAL_LONG(&const_STD_PROP_LIST_value, SPL_ARRAY_STD_PROP_LIST);
-	zend_string *const_STD_PROP_LIST_name = zend_string_init_interned("STD_PROP_LIST", sizeof("STD_PROP_LIST") - 1, 1);
+	zend_string *const_STD_PROP_LIST_name = zend_string_init_interned("STD_PROP_LIST", strlen("STD_PROP_LIST"), 1);
 	zend_declare_typed_class_constant(class_entry, const_STD_PROP_LIST_name, &const_STD_PROP_LIST_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_STD_PROP_LIST_name);
 
 	zval const_ARRAY_AS_PROPS_value;
 	ZVAL_LONG(&const_ARRAY_AS_PROPS_value, SPL_ARRAY_ARRAY_AS_PROPS);
-	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", sizeof("ARRAY_AS_PROPS") - 1, 1);
+	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", strlen("ARRAY_AS_PROPS"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ARRAY_AS_PROPS_name);
 
@@ -287,13 +287,13 @@ static zend_class_entry *register_class_ArrayIterator(zend_class_entry *class_en
 
 	zval const_STD_PROP_LIST_value;
 	ZVAL_LONG(&const_STD_PROP_LIST_value, SPL_ARRAY_STD_PROP_LIST);
-	zend_string *const_STD_PROP_LIST_name = zend_string_init_interned("STD_PROP_LIST", sizeof("STD_PROP_LIST") - 1, 1);
+	zend_string *const_STD_PROP_LIST_name = zend_string_init_interned("STD_PROP_LIST", strlen("STD_PROP_LIST"), 1);
 	zend_declare_typed_class_constant(class_entry, const_STD_PROP_LIST_name, &const_STD_PROP_LIST_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_STD_PROP_LIST_name);
 
 	zval const_ARRAY_AS_PROPS_value;
 	ZVAL_LONG(&const_ARRAY_AS_PROPS_value, SPL_ARRAY_ARRAY_AS_PROPS);
-	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", sizeof("ARRAY_AS_PROPS") - 1, 1);
+	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", strlen("ARRAY_AS_PROPS"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ARRAY_AS_PROPS_name);
 
@@ -310,7 +310,7 @@ static zend_class_entry *register_class_RecursiveArrayIterator(zend_class_entry 
 
 	zval const_CHILD_ARRAYS_ONLY_value;
 	ZVAL_LONG(&const_CHILD_ARRAYS_ONLY_value, SPL_ARRAY_CHILD_ARRAYS_ONLY);
-	zend_string *const_CHILD_ARRAYS_ONLY_name = zend_string_init_interned("CHILD_ARRAYS_ONLY", sizeof("CHILD_ARRAYS_ONLY") - 1, 1);
+	zend_string *const_CHILD_ARRAYS_ONLY_name = zend_string_init_interned("CHILD_ARRAYS_ONLY", strlen("CHILD_ARRAYS_ONLY"), 1);
 	zend_declare_typed_class_constant(class_entry, const_CHILD_ARRAYS_ONLY_name, &const_CHILD_ARRAYS_ONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CHILD_ARRAYS_ONLY_name);
 

@@ -36,61 +36,61 @@ static zend_class_entry *register_class_Normalizer(void)
 
 	zval const_FORM_D_value;
 	ZVAL_LONG(&const_FORM_D_value, NORMALIZER_FORM_D);
-	zend_string *const_FORM_D_name = zend_string_init_interned("FORM_D", sizeof("FORM_D") - 1, 1);
+	zend_string *const_FORM_D_name = zend_string_init_interned("FORM_D", strlen("FORM_D"), 1);
 	zend_declare_typed_class_constant(class_entry, const_FORM_D_name, &const_FORM_D_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FORM_D_name);
 
 	zval const_NFD_value;
 	ZVAL_LONG(&const_NFD_value, NORMALIZER_NFD);
-	zend_string *const_NFD_name = zend_string_init_interned("NFD", sizeof("NFD") - 1, 1);
+	zend_string *const_NFD_name = zend_string_init_interned("NFD", strlen("NFD"), 1);
 	zend_declare_typed_class_constant(class_entry, const_NFD_name, &const_NFD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_NFD_name);
 
 	zval const_FORM_KD_value;
 	ZVAL_LONG(&const_FORM_KD_value, NORMALIZER_FORM_KD);
-	zend_string *const_FORM_KD_name = zend_string_init_interned("FORM_KD", sizeof("FORM_KD") - 1, 1);
+	zend_string *const_FORM_KD_name = zend_string_init_interned("FORM_KD", strlen("FORM_KD"), 1);
 	zend_declare_typed_class_constant(class_entry, const_FORM_KD_name, &const_FORM_KD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FORM_KD_name);
 
 	zval const_NFKD_value;
 	ZVAL_LONG(&const_NFKD_value, NORMALIZER_NFKD);
-	zend_string *const_NFKD_name = zend_string_init_interned("NFKD", sizeof("NFKD") - 1, 1);
+	zend_string *const_NFKD_name = zend_string_init_interned("NFKD", strlen("NFKD"), 1);
 	zend_declare_typed_class_constant(class_entry, const_NFKD_name, &const_NFKD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_NFKD_name);
 
 	zval const_FORM_C_value;
 	ZVAL_LONG(&const_FORM_C_value, NORMALIZER_FORM_C);
-	zend_string *const_FORM_C_name = zend_string_init_interned("FORM_C", sizeof("FORM_C") - 1, 1);
+	zend_string *const_FORM_C_name = zend_string_init_interned("FORM_C", strlen("FORM_C"), 1);
 	zend_declare_typed_class_constant(class_entry, const_FORM_C_name, &const_FORM_C_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FORM_C_name);
 
 	zval const_NFC_value;
 	ZVAL_LONG(&const_NFC_value, NORMALIZER_NFC);
-	zend_string *const_NFC_name = zend_string_init_interned("NFC", sizeof("NFC") - 1, 1);
+	zend_string *const_NFC_name = zend_string_init_interned("NFC", strlen("NFC"), 1);
 	zend_declare_typed_class_constant(class_entry, const_NFC_name, &const_NFC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_NFC_name);
 
 	zval const_FORM_KC_value;
 	ZVAL_LONG(&const_FORM_KC_value, NORMALIZER_FORM_KC);
-	zend_string *const_FORM_KC_name = zend_string_init_interned("FORM_KC", sizeof("FORM_KC") - 1, 1);
+	zend_string *const_FORM_KC_name = zend_string_init_interned("FORM_KC", strlen("FORM_KC"), 1);
 	zend_declare_typed_class_constant(class_entry, const_FORM_KC_name, &const_FORM_KC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FORM_KC_name);
 
 	zval const_NFKC_value;
 	ZVAL_LONG(&const_NFKC_value, NORMALIZER_NFKC);
-	zend_string *const_NFKC_name = zend_string_init_interned("NFKC", sizeof("NFKC") - 1, 1);
+	zend_string *const_NFKC_name = zend_string_init_interned("NFKC", strlen("NFKC"), 1);
 	zend_declare_typed_class_constant(class_entry, const_NFKC_name, &const_NFKC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_NFKC_name);
 
 	zval const_FORM_KC_CF_value;
 	ZVAL_LONG(&const_FORM_KC_CF_value, NORMALIZER_FORM_KC_CF);
-	zend_string *const_FORM_KC_CF_name = zend_string_init_interned("FORM_KC_CF", sizeof("FORM_KC_CF") - 1, 1);
+	zend_string *const_FORM_KC_CF_name = zend_string_init_interned("FORM_KC_CF", strlen("FORM_KC_CF"), 1);
 	zend_declare_typed_class_constant(class_entry, const_FORM_KC_CF_name, &const_FORM_KC_CF_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FORM_KC_CF_name);
 
 	zval const_NFKC_CF_value;
 	ZVAL_LONG(&const_NFKC_CF_value, NORMALIZER_NFKC_CF);
-	zend_string *const_NFKC_CF_name = zend_string_init_interned("NFKC_CF", sizeof("NFKC_CF") - 1, 1);
+	zend_string *const_NFKC_CF_name = zend_string_init_interned("NFKC_CF", strlen("NFKC_CF"), 1);
 	zend_declare_typed_class_constant(class_entry, const_NFKC_CF_name, &const_NFKC_CF_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_NFKC_CF_name);
 

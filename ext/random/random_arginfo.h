@@ -229,7 +229,7 @@ static void register_random_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_PERSISTENT | CONST_DEPRECATED);
 
 
-	zend_attribute *attribute_Deprecated_func_lcg_value_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "lcg_value", sizeof("lcg_value") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_lcg_value_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "lcg_value", strlen("lcg_value")), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_lcg_value_0_arg0;
 	zend_string *attribute_Deprecated_func_lcg_value_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0_arg0, attribute_Deprecated_func_lcg_value_0_arg0_str);
@@ -316,8 +316,8 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 
 	zval property_engine_default_value;
 	ZVAL_UNDEF(&property_engine_default_value);
-	zend_string *property_engine_name = zend_string_init("engine", sizeof("engine") - 1, 1);
-	zend_string *property_engine_class_Random_Engine = zend_string_init("Random\\Engine", sizeof("Random\\Engine")-1, 1);
+	zend_string *property_engine_name = zend_string_init("engine", strlen("engine"), 1);
+	zend_string *property_engine_class_Random_Engine = zend_string_init("Random\\Engine", strlen("Random\\Engine"), 1);
 	zend_declare_typed_property(class_entry, property_engine_name, &property_engine_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_engine_class_Random_Engine, 0, 0));
 	zend_string_release(property_engine_name);
 

@@ -52,7 +52,7 @@ static const zend_function_entry ext_functions[] = {
 static void register_shmop_symbols(int module_number)
 {
 
-	zend_attribute *attribute_Deprecated_func_shmop_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "shmop_close", sizeof("shmop_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_shmop_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "shmop_close", strlen("shmop_close")), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_shmop_close_0_arg0;
 	zend_string *attribute_Deprecated_func_shmop_close_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_shmop_close_0_arg0, attribute_Deprecated_func_shmop_close_0_arg0_str);

@@ -2445,7 +2445,7 @@ abstract class VariableLike
                     foreach ($arginfoType->classTypes as $classType) {
                         $escapedClassName = $classType->toEscapedName();
                         $varEscapedClassName = $classType->toVarEscapedName();
-                        $code .= "\tzend_string *{$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\") - 1, 1);\n";
+                        $code .= "\tzend_string *{$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", strlen(\"{$escapedClassName}\"), 1);\n";
                     }
 
                     $classTypeCount = count($arginfoType->classTypes);
@@ -2468,7 +2468,7 @@ abstract class VariableLike
                 } else {
                     $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
                     $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
-                    $code .= "\tzend_string *{$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\")-1, 1);\n";
+                    $code .= "\tzend_string *{$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", strlen(\"{$escapedClassName}\"), 1);\n";
 
                     $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName}, 0, " . $arginfoType->toTypeMask() . ")";
                 }
@@ -2772,7 +2772,7 @@ class ConstInfo extends VariableLike
 
         $code = "\n" . $zvalCode;
 
-        $code .= "\tzend_string *const_{$constName}_name = zend_string_init_interned(\"$constName\", sizeof(\"$constName\") - 1, 1);\n";
+        $code .= "\tzend_string *const_{$constName}_name = zend_string_init_interned(\"$constName\", strlen(\"$constName\"), 1);\n";
         $nameCode = "const_{$constName}_name";
 
         if ($this->exposedDocComment) {
@@ -3149,7 +3149,7 @@ class PropertyInfo extends VariableLike
         // Generally strings will not be known
         $nameCode = "property_{$propName}_name";
         $result = [
-            "\tzend_string *$nameCode = zend_string_init(\"$propName\", sizeof(\"$propName\") - 1, 1);\n",
+            "\tzend_string *$nameCode = zend_string_init(\"$propName\", strlen(\"$propName\"), 1);\n",
             $nameCode,
             "\tzend_string_release($nameCode);\n"
         ];
@@ -3297,7 +3297,7 @@ class AttributeInfo {
         if (isset($knowns[$escapedAttributeName])) {
             $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, ZSTR_KNOWN({$knowns[$escapedAttributeName]}), " . count($this->args) . ");\n";
         } else {
-            $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init_interned(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
+            $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init_interned(\"" . addcslashes($this->class, "\\") . "\", strlen(\"" . addcslashes($this->class, "\\") . "\"), 1);\n";
             $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
             $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
         }
@@ -3310,7 +3310,7 @@ class AttributeInfo {
                 if (isset($knowns[$arg->name->name])) {
                     $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = ZSTR_KNOWN({$knowns[$arg->name->name]});\n";
                 } else {
-                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init_interned(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init_interned(\"{$arg->name->name}\", strlen(\"{$arg->name->name}\"), 1);\n";
                 }
             }
         }
@@ -5382,7 +5382,7 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
 
             foreach ($funcInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
-                    "zend_add_function_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1)",
+                    "zend_add_function_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", strlen(\"" . $funcInfo->name->getNameForAttributes() . "\"))",
                     "func_" . $funcInfo->name->getNameForAttributes() . "_$key",
                     $allConstInfos,
                     $phpVersionIdMinimumCompatibility
@@ -5392,7 +5392,7 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
             foreach ($funcInfo->args as $index => $arg) {
                 foreach ($arg->attributes as $key => $attribute) {
                     $code .= $attribute->generateCode(
-                        "zend_add_parameter_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1), $index",
+                        "zend_add_parameter_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", strlen(\"" . $funcInfo->name->getNameForAttributes() . "\")), $index",
                         "func_{$funcInfo->name->getNameForAttributes()}_arg{$index}_$key",
                         $allConstInfos,
                         $phpVersionIdMinimumCompatibility

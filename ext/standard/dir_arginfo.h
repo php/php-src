@@ -66,7 +66,7 @@ static zend_class_entry *register_class_Directory(void)
 
 	zval property_handle_default_value;
 	ZVAL_UNDEF(&property_handle_default_value);
-	zend_string *property_handle_name = zend_string_init("handle", sizeof("handle") - 1, 1);
+	zend_string *property_handle_name = zend_string_init("handle", strlen("handle"), 1);
 	zend_declare_typed_property(class_entry, property_handle_name, &property_handle_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release(property_handle_name);
 

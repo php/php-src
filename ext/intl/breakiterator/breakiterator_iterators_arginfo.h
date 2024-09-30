@@ -25,19 +25,19 @@ static zend_class_entry *register_class_IntlPartsIterator(zend_class_entry *clas
 
 	zval const_KEY_SEQUENTIAL_value;
 	ZVAL_LONG(&const_KEY_SEQUENTIAL_value, PARTS_ITERATOR_KEY_SEQUENTIAL);
-	zend_string *const_KEY_SEQUENTIAL_name = zend_string_init_interned("KEY_SEQUENTIAL", sizeof("KEY_SEQUENTIAL") - 1, 1);
+	zend_string *const_KEY_SEQUENTIAL_name = zend_string_init_interned("KEY_SEQUENTIAL", strlen("KEY_SEQUENTIAL"), 1);
 	zend_declare_typed_class_constant(class_entry, const_KEY_SEQUENTIAL_name, &const_KEY_SEQUENTIAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_KEY_SEQUENTIAL_name);
 
 	zval const_KEY_LEFT_value;
 	ZVAL_LONG(&const_KEY_LEFT_value, PARTS_ITERATOR_KEY_LEFT);
-	zend_string *const_KEY_LEFT_name = zend_string_init_interned("KEY_LEFT", sizeof("KEY_LEFT") - 1, 1);
+	zend_string *const_KEY_LEFT_name = zend_string_init_interned("KEY_LEFT", strlen("KEY_LEFT"), 1);
 	zend_declare_typed_class_constant(class_entry, const_KEY_LEFT_name, &const_KEY_LEFT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_KEY_LEFT_name);
 
 	zval const_KEY_RIGHT_value;
 	ZVAL_LONG(&const_KEY_RIGHT_value, PARTS_ITERATOR_KEY_RIGHT);
-	zend_string *const_KEY_RIGHT_name = zend_string_init_interned("KEY_RIGHT", sizeof("KEY_RIGHT") - 1, 1);
+	zend_string *const_KEY_RIGHT_name = zend_string_init_interned("KEY_RIGHT", strlen("KEY_RIGHT"), 1);
 	zend_declare_typed_class_constant(class_entry, const_KEY_RIGHT_name, &const_KEY_RIGHT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_KEY_RIGHT_name);
 
