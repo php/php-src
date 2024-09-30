@@ -5,6 +5,9 @@ GH-15168 (stack overflow in json_encode())
 if (ini_get('zend.max_allowed_stack_size') === false) {
     die('skip No stack limit support');
 }
+if (getenv('SKIP_ASAN')) {
+    die('skip ASAN needs different stack limit setting due to more stack space usage');
+}
 ?>
 --INI--
 zend.max_allowed_stack_size=512K
