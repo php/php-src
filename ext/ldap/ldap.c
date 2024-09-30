@@ -2235,7 +2235,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	unsigned int attribute_index = 0;
 	ZEND_HASH_FOREACH_STR_KEY_VAL(attributes_ht, attribute, attribute_values) {
 		if (attribute == NULL) {
-			php_error_docref(NULL, E_WARNING, "Unknown attribute in the data");
+			zend_argument_value_error(3, "must be an associative array of attribute => values");
 			RETVAL_FALSE;
 			goto cleanup;
 		}
