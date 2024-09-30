@@ -2236,17 +2236,11 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			ldap_mods[i]->mod_type = estrndup(ZSTR_VAL(attribute), ZSTR_LEN(attribute));
 		} else {
 			php_error_docref(NULL, E_WARNING, "Unknown attribute in the data");
-			/* Free allocated memory */
-			while (i >= 0) {
-				if (ldap_mods[i]->mod_type) {
-					efree(ldap_mods[i]->mod_type);
-				}
-				efree(ldap_mods[i]);
-				i--;
-			}
-			efree(num_berval);
-			efree(ldap_mods);
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			num_berval[i] = 0;
+			num_attribs = i + 1;
+			ldap_mods[i]->mod_bvalues = NULL;
+			goto cleanup;
 		}
 
 		value = zend_hash_get_current_data(Z_ARRVAL_P(entry));
@@ -2267,6 +2261,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			convert_to_string(value);
 			if (EG(exception)) {
 				RETVAL_FALSE;
+				num_berval[i] = 0;
+				num_attribs = i + 1;
 				goto cleanup;
 			}
 			ldap_mods[i]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
@@ -2283,6 +2279,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				}
 				convert_to_string(ivalue);
 				if (EG(exception)) {
+					num_berval[i] = j;
+					num_attribs = i + 1;
 					RETVAL_FALSE;
 					goto cleanup;
 				}
