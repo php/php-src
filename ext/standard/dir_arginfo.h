@@ -62,9 +62,7 @@ static zend_class_entry *register_class_Directory(void)
 
 	zval property_path_default_value;
 	ZVAL_UNDEF(&property_path_default_value);
-	zend_string *property_path_name = zend_string_init("path", sizeof("path") - 1, 1);
-	zend_declare_typed_property(class_entry, property_path_name, &property_path_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_path_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PATH), &property_path_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_handle_default_value;
 	ZVAL_UNDEF(&property_handle_default_value);

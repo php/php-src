@@ -1874,9 +1874,7 @@ static zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_name_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_entities_default_value;
 	ZVAL_UNDEF(&property_entities_default_value);
@@ -2293,9 +2291,7 @@ static zend_class_entry *register_class_DOMAttr(zend_class_entry *class_entry_DO
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_name_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_specified_default_value;
 	ZVAL_UNDEF(&property_specified_default_value);
@@ -2305,9 +2301,7 @@ static zend_class_entry *register_class_DOMAttr(zend_class_entry *class_entry_DO
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);
-	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
-	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_value_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_VALUE), &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_ownerElement_default_value;
 	ZVAL_UNDEF(&property_ownerElement_default_value);
@@ -2552,9 +2546,7 @@ static zend_class_entry *register_class_DOMException(zend_class_entry *class_ent
 
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);
-	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
-	zend_declare_typed_property(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
-	zend_string_release(property_code_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CODE), &property_code_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 
 	return class_entry;
 }
@@ -3124,15 +3116,11 @@ static zend_class_entry *register_class_Dom_Attr(zend_class_entry *class_entry_D
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_name_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);
-	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
-	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_value_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_VALUE), &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_ownerElement_default_value;
 	ZVAL_UNDEF(&property_ownerElement_default_value);
@@ -3249,9 +3237,7 @@ static zend_class_entry *register_class_Dom_DocumentType(zend_class_entry *class
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_name_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_entities_default_value;
 	ZVAL_UNDEF(&property_entities_default_value);
@@ -3541,9 +3527,7 @@ static zend_class_entry *register_class_Dom_TokenList(zend_class_entry *class_en
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);
-	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
-	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_value_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_VALUE), &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	return class_entry;
 }

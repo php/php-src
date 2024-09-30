@@ -2918,6 +2918,100 @@ class PropertyInfo extends VariableLike
     public bool $isDocReadonly;
     public bool $isVirtual;
 
+    // Map possible variable names to the known string constant, see
+    // ZEND_KNOWN_STRINGS
+    private const PHP_80_KNOWN = [
+        "file" => "ZEND_STR_FILE",
+        "line" => "ZEND_STR_LINE",
+        "function" => "ZEND_STR_FUNCTION",
+        "class" => "ZEND_STR_CLASS",
+        "object" => "ZEND_STR_OBJECT",
+        "type" => "ZEND_STR_TYPE",
+        // ZEND_STR_OBJECT_OPERATOR and ZEND_STR_PAAMAYIM_NEKUDOTAYIM are
+        // not valid variable names
+        "args" => "ZEND_STR_ARGS",
+        "unknown" => "ZEND_STR_UNKNOWN",
+        "eval" => "ZEND_STR_EVAL",
+        "include" => "ZEND_STR_INCLUDE",
+        "require" => "ZEND_STR_REQUIRE",
+        "include_once" => "ZEND_STR_INCLUDE_ONCE",
+        "require_once" => "ZEND_STR_REQUIRE_ONCE",
+        "scalar" => "ZEND_STR_SCALAR",
+        "error_reporting" => "ZEND_STR_ERROR_REPORTING",
+        "static" => "ZEND_STR_STATIC",
+        // ZEND_STR_THIS cannot be used since $this cannot be reassigned
+        "value" => "ZEND_STR_VALUE",
+        "key" => "ZEND_STR_KEY",
+        "__invoke" => "ZEND_STR_MAGIC_INVOKE",
+        "previous" => "ZEND_STR_PREVIOUS",
+        "code" => "ZEND_STR_CODE",
+        "message" => "ZEND_STR_MESSAGE",
+        "severity" => "ZEND_STR_SEVERITY",
+        "string" => "ZEND_STR_STRING",
+        "trace" => "ZEND_STR_TRACE",
+        "scheme" => "ZEND_STR_SCHEME",
+        "host" => "ZEND_STR_HOST",
+        "port" => "ZEND_STR_PORT",
+        "user" => "ZEND_STR_USER",
+        "pass" => "ZEND_STR_PASS",
+        "path" => "ZEND_STR_PATH",
+        "query" => "ZEND_STR_QUERY",
+        "fragment" => "ZEND_STR_FRAGMENT",
+        "NULL" => "ZEND_STR_NULL",
+        "boolean" => "ZEND_STR_BOOLEAN",
+        "integer" => "ZEND_STR_INTEGER",
+        "double" => "ZEND_STR_DOUBLE",
+        "array" => "ZEND_STR_ARRAY",
+        "resource" => "ZEND_STR_RESOURCE",
+        // ZEND_STR_CLOSED_RESOURCE has a space in it
+        "name" => "ZEND_STR_NAME",
+        // ZEND_STR_ARGV and ZEND_STR_ARGC are superglobals that wouldn't be
+        // variable names
+        "Array" => "ZEND_STR_ARRAY_CAPITALIZED",
+        "bool" => "ZEND_STR_BOOL",
+        "int" => "ZEND_STR_INT",
+        "float" => "ZEND_STR_FLOAT",
+        "callable" => "ZEND_STR_CALLABLE",
+        "iterable" => "ZEND_STR_ITERABLE",
+        "void" => "ZEND_STR_VOID",
+        "false" => "ZEND_STR_FALSE",
+        "null" => "ZEND_STR_NULL_LOWERCASE",
+        "mixed" => "ZEND_STR_MIXED",
+    ];
+
+    // NEW in 8.1
+    private const PHP_81_KNOWN = [
+        "Unknown" => "ZEND_STR_UNKNOWN_CAPITALIZED",
+        "never" => "ZEND_STR_NEVER",
+        "__sleep" => "ZEND_STR_SLEEP",
+        "__wakeup" => "ZEND_STR_WAKEUP",
+        "cases" => "ZEND_STR_CASES",
+        "from" => "ZEND_STR_FROM",
+        "tryFrom" => "ZEND_STR_TRYFROM",
+        "tryfrom" => "ZEND_STR_TRYFROM_LOWERCASE",
+        // Omit ZEND_STR_AUTOGLOBAL_(SERVER|ENV|REQUEST)
+    ];
+
+    // NEW in 8.2
+    private const PHP_82_KNOWN = [
+        "true" => "ZEND_STR_TRUE",
+        "Traversable" => "ZEND_STR_TRAVERSABLE",
+        "count" => "ZEND_STR_COUNT",
+        "SensitiveParameter" => "ZEND_STR_SENSITIVEPARAMETER",
+    ];
+
+    // Only new string in 8.3 is ZEND_STR_CONST_EXPR_PLACEHOLDER which is
+    // not a valid variable name ("[constant expression]")
+
+    // NEW in 8.4
+    private const PHP_84_KNOWN = [
+        "exit" => "ZEND_STR_EXIT",
+        "Deprecated" => "ZEND_STR_DEPRECATED_CAPITALIZED",
+        "since" => "ZEND_STR_SINCE",
+        "get" => "ZEND_STR_GET",
+        "set" => "ZEND_STR_SET",
+    ];
+
     /**
      * @var AttributeInfo[] $attributes
      */
@@ -3003,8 +3097,8 @@ class PropertyInfo extends VariableLike
             $code .= $defaultValue->initializeZval($zvalName);
         }
 
-        $code .= "\tzend_string *property_{$propertyName}_name = zend_string_init(\"$propertyName\", sizeof(\"$propertyName\") - 1, 1);\n";
-        $nameCode = "property_{$propertyName}_name";
+        [$stringInit, $nameCode, $stringRelease] = $this->getString($propertyName);
+        $code .= $stringInit;
 
         if ($this->exposedDocComment) {
             $commentCode = "property_{$propertyName}_comment";
@@ -3035,9 +3129,59 @@ class PropertyInfo extends VariableLike
         );
         $code .= implode("", $flagsCode);
 
-        $code .= "\tzend_string_release(property_{$propertyName}_name);\n";
+        $code .= $stringRelease;
 
         return $code;
+    }
+
+    /**
+     * Get an array of three strings:
+     *   - declaration of zend_string, if needed, or empty otherwise
+     *   - usage of that zend_string, or usage with ZSTR_KNOWN()
+     *   - freeing the zend_string, if needed
+     *
+     * @param string $propName
+     * @return string[]
+     */
+    private function getString(string $propName): array {
+        // Generally strings will not be known
+        $nameCode = "property_{$propName}_name";
+        $result = [
+            "\tzend_string *$nameCode = zend_string_init(\"$propName\", sizeof(\"$propName\") - 1, 1);\n",
+            $nameCode,
+            "\tzend_string_release($nameCode);\n"
+        ];
+        // If not set, use the current latest version
+        $allVersions = ALL_PHP_VERSION_IDS;
+        $minPhp = $phpVersionIdMinimumCompatibility ?? end($allVersions);
+        if ($minPhp < PHP_80_VERSION_ID) {
+            // No known strings in 7.0
+            return $result;
+        }
+        $include = self::PHP_80_KNOWN;
+        switch ($minPhp) {
+            case PHP_84_VERSION_ID:
+                $include = array_merge($include, self::PHP_84_KNOWN);
+                // Intentional fall through
+
+            case PHP_83_VERSION_ID:
+            case PHP_82_VERSION_ID:
+                $include = array_merge($include, self::PHP_82_KNOWN);
+                // Intentional fall through
+
+            case PHP_81_VERSION_ID:
+                $include = array_merge($include, self::PHP_81_KNOWN);
+                break;
+        }
+        if (array_key_exists($propName,$include)) {
+            $knownStr = $include[$propName];
+            return [
+                '',
+                "ZSTR_KNOWN($knownStr)",
+                '',
+            ];
+        }
+        return $result;
     }
 
     /**
