@@ -7,7 +7,7 @@ $list1 = headers_list();
 
 header("HTTP 1.1", true, 200);
 $list2 = headers_list();
-header("HTTP blah");
+header("Date: Mon, 25 Mar 1985 00:20:00 GMT");
 $list3 = headers_list();
 
 header_remove();
@@ -29,21 +29,21 @@ echo "Done\n";
 bool(false)
 array(1) {
   [0]=>
-  string(24) "X-Powered-By: PHP/%s"
+  string(27) "X-Powered-By: PHP/%s"
 }
 array(2) {
   [0]=>
-  string(24) "X-Powered-By: PHP/%s"
+  string(27) "X-Powered-By: PHP/%s"
   [1]=>
   string(8) "HTTP 1.1"
 }
 array(3) {
   [0]=>
-  string(24) "X-Powered-By: PHP/%s"
+  string(27) "X-Powered-By: PHP/%s"
   [1]=>
   string(8) "HTTP 1.1"
   [2]=>
-  string(9) "HTTP blah"
+  string(35) "Date: Mon, 25 Mar 1985 00:20:00 GMT"
 }
 array(0) {
 }
