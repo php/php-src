@@ -2194,7 +2194,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 {
 	zval *serverctrls = NULL;
-	zval *link, *entry, *value, *ivalue;
+	zval *link, *entry, *value;
 	ldap_linkdata *ld;
 	char *dn;
 	LDAPMod **ldap_mods;
@@ -2279,18 +2279,21 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				ldap_mods[i]->mod_bvalues = NULL;
 				goto cleanup;
 			}
+			if (!zend_array_is_list(Z_ARRVAL_P(value))) {
+				zend_argument_value_error(3, "must be a list of attribute values");
+				RETVAL_FALSE;
+				num_berval[i] = 0;
+				num_attribs = i + 1;
+				ldap_mods[i]->mod_bvalues = NULL;
+				goto cleanup;
+			}
 
 			num_berval[i] = num_values;
 			ldap_mods[i]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
 
 			for (j = 0; j < num_values; j++) {
-				if ((ivalue = zend_hash_index_find(Z_ARRVAL_P(value), j)) == NULL) {
-					zend_argument_value_error(3, "must contain arrays with consecutive integer indices starting from 0");
-					num_berval[i] = j;
-					num_attribs = i + 1;
-					RETVAL_FALSE;
-					goto cleanup;
-				}
+				zval *ivalue = zend_hash_index_find(Z_ARRVAL_P(value), j);
+				ZEND_ASSERT(ivalue != NULL);
 				convert_to_string(ivalue);
 				if (EG(exception)) {
 					num_berval[i] = j;
