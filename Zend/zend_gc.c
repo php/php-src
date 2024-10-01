@@ -86,13 +86,16 @@
 #endif
 
 /* GC_INFO layout */
-#define GC_ADDRESS  0x0fffffu
-#define GC_COLOR    0x300000u
+#define GC_COLOR_BITS 2
+#define GC_ADDRESS_BITS (GC_INFO_BITS - GC_COLOR_BITS)
 
-#define GC_BLACK    0x000000u /* must be zero */
-#define GC_WHITE    0x100000u
-#define GC_GREY     0x200000u
-#define GC_PURPLE   0x300000u
+#define GC_ADDRESS ((1 << GC_ADDRESS_BITS) - 1)
+#define GC_COLOR (((1 << (GC_COLOR_BITS + GC_ADDRESS_BITS)) - 1) & (~GC_ADDRESS))
+
+#define GC_BLACK   (0U << GC_ADDRESS_BITS)      // 0x000000 (black)
+#define GC_WHITE   (1U << GC_ADDRESS_BITS)      // 0x100000 (white)
+#define GC_GREY    (2U << GC_ADDRESS_BITS)      // 0x200000 (grey)
+#define GC_PURPLE  (3U << GC_ADDRESS_BITS)      // 0x300000 (purple)
 
 /* Debug tracing */
 #if ZEND_GC_DEBUG > 1

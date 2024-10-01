@@ -733,11 +733,20 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 		} \
 	} while (0)
 
-#define GC_TYPE_MASK				0x0000000f
-#define GC_FLAGS_MASK				0x000003f0
-#define GC_INFO_MASK				0xfffffc00
-#define GC_FLAGS_SHIFT				0
-#define GC_INFO_SHIFT				10
+// Define the bit sizes for each field based on the original layout
+#define GC_TYPE_BITS    4       // Number of bits for the type field
+#define GC_FLAGS_BITS   6       // Number of bits for the flags field
+#define GC_INFO_BITS    22      // Number of bits for the info field
+
+// Calculate the dynamic shifts based on the bit sizes
+#define GC_TYPE_SHIFT   0       // Type starts at bit 0
+#define GC_FLAGS_SHIFT  0       // For legacy reasons, flags start at bit 0
+#define GC_INFO_SHIFT   (GC_TYPE_BITS + GC_FLAGS_BITS) // Info starts after the flags field (bit 10)
+
+// Define the masks (shifted into place), cast to unsigned and avoid negative shifts
+#define GC_TYPE_MASK    (((1 << GC_TYPE_BITS) - 1) << GC_TYPE_SHIFT)  // 0x0000000F
+#define GC_FLAGS_MASK   (((1 << GC_FLAGS_BITS) - 1) << (GC_FLAGS_SHIFT + GC_TYPE_BITS)) // 0x000003F0
+#define GC_INFO_MASK    ((~((1 << GC_INFO_SHIFT) - 1)) & 0xFFFFFFFF)  // 0xFFFFFC00
 
 static zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
