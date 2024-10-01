@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     ext/dom/parentnode/tree.c). (nielsdos)
   . Fixed bug GH-16149 (Null pointer dereference in
     DOMElement->getAttributeNames()). (nielsdos)
+  . Fixed bug GH-16151 (Assertion failure in ext/dom/parentnode/tree.c).
+    (nielsdos)
 
 - FPM:
   . Fixed bug GHSA-865w-9rf3-2wh5 (Logs from childrens may be altered).
