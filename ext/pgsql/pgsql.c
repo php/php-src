@@ -3400,7 +3400,7 @@ PHP_FUNCTION(pg_copy_from)
 	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 		Z_PARAM_PATH_STR(table_name)
-		Z_PARAM_ARRAY_OR_OBJECT(pg_rows)
+		Z_PARAM_ITERABLE(pg_rows)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(pg_delimiter)
 		Z_PARAM_STRING(pg_null_as, pg_null_as_len)
@@ -3414,10 +3414,6 @@ PHP_FUNCTION(pg_copy_from)
 		pg_delimiter = ZSTR_CHAR('\t');
 	} else if (ZSTR_LEN(pg_delimiter) != 1) {
 		zend_argument_value_error(4, "must be one character");
-		RETURN_THROWS();
-	}
-	if (Z_TYPE_P(pg_rows) == IS_OBJECT && !instanceof_function(Z_OBJCE_P(pg_rows), zend_ce_traversable)) {
-		zend_argument_type_error(3, "must be of type Traversable");
 		RETURN_THROWS();
 	}
 	if (!pg_null_as) {
@@ -3455,9 +3451,13 @@ PHP_FUNCTION(pg_copy_from)
 						}
 					} ZEND_HASH_FOREACH_END();
 				} else {
-					zend_object_iterator *iter = Z_OBJ_P(pg_rows)->ce->get_iterator(Z_OBJCE_P(pg_rows), pg_rows, 0);
+					zend_object_iterator *iter = Z_OBJCE_P(pg_rows)->get_iterator(Z_OBJCE_P(pg_rows), pg_rows, 0);
 					if (UNEXPECTED(EG(exception) || iter == NULL)) {
 						RETURN_THROWS();
+					}
+
+					if (iter->funcs->rewind) {
+						iter->funcs->rewind(iter);
 					}
 
 					while (iter->funcs->valid(iter) == SUCCESS && EG(exception) == NULL) {

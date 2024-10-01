@@ -57,6 +57,6 @@ $db = pg_connect($conn_str);
 pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
-pg_copy_from(): Argument #3 ($rows) must be of type Traversable
+pg_copy_from(): Argument #3 ($rows) must be of type Traversable|array, stdClass given
 bool(true)
 bool(true)
