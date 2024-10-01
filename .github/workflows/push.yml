@@ -200,6 +200,8 @@ jobs:
         include:
           - os: 14
             arch: ARM64
+          - os: 15
+            arch: ARM64
     name: MACOS_${{ matrix.arch }}_DEBUG_NTS
     runs-on: macos-${{ matrix.os }}
     timeout-minutes: 50
