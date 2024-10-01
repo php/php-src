@@ -56,6 +56,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-16053 (Assertion failure in Zend/zend_hash.c). (Arnaud)
+  . Fixed bug GH-15169 (stack overflow when var serialization in
+    ext/standard/var). (nielsdos)
 
 - Streams:
   . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
