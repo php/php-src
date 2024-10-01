@@ -737,7 +737,7 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 /// the following layout (from MSB to LSB):
 /// - 4 bits for the type
 ///   - these are IS_UNDEF, IS_NULL, IS_ARRAY, etc.
-/// - 8 bits for the flags
+/// - 6 bits for the flags
 ///   - special flags for GC such as GC_IMMUTABLE, GC_PERSISTENT, etc.
 ///   - other custom flags such as IS_STR_INTERNED, IS_ARRAY_IMMUTABLE, etc.
 ///   - GC lifecycle flags such as IS_OBJ_DESTRUCTOR_CALLED and IS_OBJ_FREE_CALLED
