@@ -712,9 +712,13 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			iter = Z_OBJ_P(pg_rows)->ce->get_iterator(Z_OBJCE_P(pg_rows), pg_rows, 0);
+			iter = Z_OBJCE_P(pg_rows)->get_iterator(Z_OBJCE_P(pg_rows), pg_rows, 0);
 			if (iter == NULL || EG(exception)) {
 				RETURN_THROWS();
+			}
+
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
 			}
 
 			for (; iter->funcs->valid(iter) == SUCCESS && EG(exception) == NULL; iter->funcs->move_forward(iter)) {
