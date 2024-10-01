@@ -3212,6 +3212,13 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_uninit_static_prop(const zend_property_info *property_info)
+{
+	zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
+		ZSTR_VAL(property_info->ce->name),
+		zend_get_unmangled_property_name(property_info->name));
+}
+
 static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
 {
 	ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
