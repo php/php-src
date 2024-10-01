@@ -59,7 +59,10 @@ var_dump(mb_levenshtein("cafe", $cafe, encoding: "ISO-8859-1"));
 echo '--- Usecase of userland code ---' . \PHP_EOL;
 
 for ($i = 0; $i < 100; $i++) {
-	$bytes = implode("", array_map(function ($byte) { return mb_chr(intval(bin2hex($byte), 16), "UTF-8"); }, str_split(random_bytes(10))));
+	$bytes = "";
+	for ($j = 0; $j < 10; $j++) {
+		$bytes .= mb_chr(mt_rand(0, 0x10FFF));
+	}
 	$compare = "あいうえおABCDEF";
 	if (mb_levenshtein($bytes, $compare) !== keinos_mb_levenshtein($bytes, $compare)) {
 		throw Exception("mb_levenshtein compare error: {$bytes}");
