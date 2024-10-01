@@ -176,6 +176,10 @@ array(3) {
   string(11) "Hello world"
 }
 -- Iteration 8 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(3) {
   ["a"]=>
   string(1) "1"
@@ -184,6 +188,10 @@ array(3) {
   ["c"]=>
   string(1) "3"
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(5) {
   [11]=>
   object(classA)#%d (0) {

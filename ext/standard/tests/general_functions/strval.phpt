@@ -268,8 +268,12 @@ string(0) ""
 -- Iteration 1 --
 string(6) "Object"
 -- Iteration 2 --
+
+Warning: Resource to string conversion in %s on line %d
 string(14) "Resource id #%d"
 -- Iteration 3 --
+
+Warning: Resource to string conversion in %s on line %d
 string(14) "Resource id #%d"
 -- Iteration 4 --
 

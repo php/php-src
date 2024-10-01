@@ -168,6 +168,10 @@ array(1) {
   string(11) "Hello world"
 }
 -- Iteration 10 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(2) {
   [11]=>
   object(classA)#%d (0) {
@@ -175,6 +179,14 @@ array(2) {
   ["resource"]=>
   resource(%d) of type (stream)
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(2) {
   [11]=>
   object(classA)#%d (0) {
@@ -183,6 +195,10 @@ array(2) {
   resource(%d) of type (stream)
 }
 -- Iteration 11 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(4) {
   [222]=>
   string(5) "fruit"
@@ -193,6 +209,14 @@ array(4) {
   ["heredoc"]=>
   string(11) "Hello world"
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(4) {
   [222]=>
   string(5) "fruit"

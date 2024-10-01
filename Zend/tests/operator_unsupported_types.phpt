@@ -1047,6 +1047,7 @@ No error for [] . []
 Warning: Array to string conversion
 Object of class stdClass could not be converted to string
 Warning: Array to string conversion
+Warning: Resource to string conversion
 No error for [] . STDOUT
 Warning: Array to string conversion
 No error for [] . "foo"
@@ -1056,13 +1057,19 @@ Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Warning: Array to string conversion
+Warning: Resource to string conversion
 No error for STDOUT . []
+Warning: Resource to string conversion
 Object of class stdClass could not be converted to string
+Warning: Resource to string conversion
+Warning: Resource to string conversion
 No error for STDOUT . STDOUT
+Warning: Resource to string conversion
 No error for STDOUT . "foo"
 Warning: Array to string conversion
 No error for "foo" . []
 Object of class stdClass could not be converted to string
+Warning: Resource to string conversion
 No error for "foo" . STDOUT
 No error for "foo" . "foo"
 Warning: Array to string conversion
@@ -1107,19 +1114,33 @@ Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
+Warning: Resource to string conversion
 No error for STDOUT . null
+Warning: Resource to string conversion
 No error for null . STDOUT
+Warning: Resource to string conversion
 No error for STDOUT . true
+Warning: Resource to string conversion
 No error for true . STDOUT
+Warning: Resource to string conversion
 No error for STDOUT . false
+Warning: Resource to string conversion
 No error for false . STDOUT
+Warning: Resource to string conversion
 No error for STDOUT . 2
+Warning: Resource to string conversion
 No error for 2 . STDOUT
+Warning: Resource to string conversion
 No error for STDOUT . 3.5
+Warning: Resource to string conversion
 No error for 3.5 . STDOUT
+Warning: Resource to string conversion
 No error for STDOUT . "123"
+Warning: Resource to string conversion
 No error for "123" . STDOUT
+Warning: Resource to string conversion
 No error for STDOUT . "123foo"
+Warning: Resource to string conversion
 No error for "123foo" . STDOUT
 No error for "foo" . null
 No error for null . "foo"
@@ -2001,6 +2022,7 @@ No error for [] .= []
 Warning: Array to string conversion
 Object of class stdClass could not be converted to string
 Warning: Array to string conversion
+Warning: Resource to string conversion
 No error for [] .= STDOUT
 Warning: Array to string conversion
 No error for [] .= "foo"
@@ -2008,14 +2030,20 @@ Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
+Warning: Resource to string conversion
 Warning: Array to string conversion
 No error for STDOUT .= []
+Warning: Resource to string conversion
 Object of class stdClass could not be converted to string
+Warning: Resource to string conversion
+Warning: Resource to string conversion
 No error for STDOUT .= STDOUT
+Warning: Resource to string conversion
 No error for STDOUT .= "foo"
 Warning: Array to string conversion
 No error for "foo" .= []
 Object of class stdClass could not be converted to string
+Warning: Resource to string conversion
 No error for "foo" .= STDOUT
 No error for "foo" .= "foo"
 Warning: Array to string conversion
@@ -2060,19 +2088,33 @@ Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
+Warning: Resource to string conversion
 No error for STDOUT .= null
+Warning: Resource to string conversion
 No error for null .= STDOUT
+Warning: Resource to string conversion
 No error for STDOUT .= true
+Warning: Resource to string conversion
 No error for true .= STDOUT
+Warning: Resource to string conversion
 No error for STDOUT .= false
+Warning: Resource to string conversion
 No error for false .= STDOUT
+Warning: Resource to string conversion
 No error for STDOUT .= 2
+Warning: Resource to string conversion
 No error for 2 .= STDOUT
+Warning: Resource to string conversion
 No error for STDOUT .= 3.5
+Warning: Resource to string conversion
 No error for 3.5 .= STDOUT
+Warning: Resource to string conversion
 No error for STDOUT .= "123"
+Warning: Resource to string conversion
 No error for "123" .= STDOUT
+Warning: Resource to string conversion
 No error for STDOUT .= "123foo"
+Warning: Resource to string conversion
 No error for "123foo" .= STDOUT
 No error for "foo" .= null
 No error for null .= "foo"

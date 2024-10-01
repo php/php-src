@@ -176,6 +176,8 @@ string(0) ""
 string(7) "MyClass"
 
 -- Iteration 29 --
+
+Warning: Resource to string conversion in %s on line %d
 string(%d) "Resource id #%d"
 
 -- Iteration 30 --
