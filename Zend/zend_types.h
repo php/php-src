@@ -733,6 +733,20 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 		} \
 	} while (0)
 
+/// GC is controlled through a data structure that is front-loaded onto zvals. This structure is 32-bits wide and follows
+/// the following layout (from MSB to LSB):
+/// - 4 bits for the type
+///   - these are IS_UNDEF, IS_NULL, IS_ARRAY, etc.
+/// - 8 bits for the flags
+///   - special flags for GC such as GC_IMMUTABLE, GC_PERSISTENT, etc.
+///   - other custom flags such as IS_STR_INTERNED, IS_ARRAY_IMMUTABLE, etc.
+///   - GC lifecycle flags such as IS_OBJ_DESTRUCTOR_CALLED and IS_OBJ_FREE_CALLED
+/// - 22 bits for the info
+///   - 20 bits for GC_ADDRESS: the address for GC ref-counting
+///   - 2 bits for GC_COLOR: the current color during GC cycles
+/// Updating the *_BITS flags below will automatically restructure this layout, sacrificing GC_ADDRESS bits. Please keep
+/// this in mind when adding a new flag.
+
 // Define the bit sizes for each field based on the original layout
 #define GC_TYPE_BITS    4       // Number of bits for the type field
 #define GC_FLAGS_BITS   6       // Number of bits for the flags field

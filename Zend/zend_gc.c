@@ -90,7 +90,7 @@
 #define GC_ADDRESS_BITS (GC_INFO_BITS - GC_COLOR_BITS)
 
 #define GC_ADDRESS ((1 << GC_ADDRESS_BITS) - 1)
-#define GC_COLOR (((1 << (GC_COLOR_BITS + GC_ADDRESS_BITS)) - 1) & (~GC_ADDRESS))
+#define GC_COLOR   (((1 << (GC_COLOR_BITS + GC_ADDRESS_BITS)) - 1) & (~GC_ADDRESS))
 
 #define GC_BLACK   (0U << GC_ADDRESS_BITS)      // 0x000000 (black)
 #define GC_WHITE   (1U << GC_ADDRESS_BITS)      // 0x100000 (white)
