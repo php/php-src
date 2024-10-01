@@ -2,6 +2,7 @@
 header() and friends
 --FILE--
 <?php
+
 $sent1 = headers_sent();
 $list1 = headers_list();
 
