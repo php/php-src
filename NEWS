@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
     ext/dom/parentnode/tree.c). (nielsdos)
+  . Fixed bug GH-16151 (Assertion failure in ext/dom/parentnode/tree.c).
+    (nielsdos)
 
 - LDAP:
   . Fixed bug GH-16032 (Various NULL pointer dereferencements in

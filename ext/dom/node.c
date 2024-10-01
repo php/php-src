@@ -843,6 +843,39 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 }
 /* }}} */
 
+static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNodePtr child, bool stricterror)
+{
+	if (dom_node_is_read_only(parentp) == SUCCESS ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		return false;
+	}
+
+	if (dom_hierarchy(parentp, child) == FAILURE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return false;
+	}
+
+	if (child->doc != parentp->doc && child->doc != NULL) {
+		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
+		return false;
+	}
+
+	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+		/* TODO Drop Warning? */
+		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
+		return false;
+	}
+
+	/* In old DOM only text nodes and entity nodes can be added as children to attributes. */
+	if (parentp->type == XML_ATTRIBUTE_NODE && child->type != XML_TEXT_NODE && child->type != XML_ENTITY_REF_NODE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return false;
+	}
+
+	return true;
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
 */
@@ -870,25 +903,7 @@ PHP_METHOD(DOMNode, insertBefore)
 
 	stricterror = dom_get_strict_error(intern->document);
 
-	if (dom_node_is_read_only(parentp) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (dom_hierarchy(parentp, child) == FAILURE) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (child->doc != parentp->doc && child->doc != NULL) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
-		/* TODO Drop Warning? */
-		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
+	if (!dom_node_check_legacy_insertion_validity(parentp, child, stricterror)) {
 		RETURN_FALSE;
 	}
 
@@ -1170,25 +1185,7 @@ PHP_METHOD(DOMNode, appendChild)
 
 	stricterror = dom_get_strict_error(intern->document);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (dom_hierarchy(nodep, child) == FAILURE) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (!(child->doc == NULL || child->doc == nodep->doc)) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
-		/* TODO Drop Warning? */
-		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
+	if (!dom_node_check_legacy_insertion_validity(nodep, child, stricterror)) {
 		RETURN_FALSE;
 	}
 
