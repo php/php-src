@@ -339,7 +339,11 @@ PHP_METHOD(DOMElement, getAttributeNames)
 
 	for (xmlNsPtr nsptr = nodep->nsDef; nsptr; nsptr = nsptr->next) {
 		const char *prefix = (const char *) nsptr->prefix;
-		ZVAL_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+		if (prefix == NULL) {
+			ZVAL_STRING(&tmp, "xmlns");
+		} else {
+			ZVAL_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+		}
 		zend_hash_next_index_insert(ht, &tmp);
 	}
 

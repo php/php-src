@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
     ext/dom/parentnode/tree.c). (nielsdos)
+  . Fixed bug GH-16149 (Null pointer dereference in
+    DOMElement->getAttributeNames()). (nielsdos)
 
 - JSON:
   . Fixed bug GH-15168 (stack overflow in json_encode()). (nielsdos)
