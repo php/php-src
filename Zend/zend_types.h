@@ -758,9 +758,9 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define GC_INFO_SHIFT   (GC_TYPE_BITS + GC_FLAGS_BITS) // Info starts after the flags field (bit 10)
 
 // Define the masks (shifted into place), cast to unsigned and avoid negative shifts
-#define GC_TYPE_MASK    (((1 << GC_TYPE_BITS) - 1) << GC_TYPE_SHIFT)  // 0x0000000F
-#define GC_FLAGS_MASK   (((1 << GC_FLAGS_BITS) - 1) << (GC_FLAGS_SHIFT + GC_TYPE_BITS)) // 0x000003F0
-#define GC_INFO_MASK    ((~((1 << GC_INFO_SHIFT) - 1)) & 0xFFFFFFFF)  // 0xFFFFFC00
+#define GC_TYPE_MASK    (((1U << GC_TYPE_BITS) - 1) << GC_TYPE_SHIFT)  // 0x0000000F
+#define GC_FLAGS_MASK   (((1U << GC_FLAGS_BITS) - 1) << (GC_FLAGS_SHIFT + GC_TYPE_BITS)) // 0x000003F0
+#define GC_INFO_MASK    ((~((1U << GC_INFO_SHIFT) - 1)) & 0xFFFFFFFF)  // 0xFFFFFC00
 
 static zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
