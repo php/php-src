@@ -3650,7 +3650,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_property
 	return result;
 }
 
-ZEND_API zval* zend_fetch_static_property(zend_execute_data *ex, int fetch_type) {
+ZEND_API zval* ZEND_FASTCALL zend_fetch_static_property(zend_execute_data *ex, int fetch_type) {
 	zval *result;
 	zend_property_info *property_info;
 #if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))

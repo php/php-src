@@ -15770,7 +15770,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 
 	ir_IF_FALSE_cold(if_cached);
 	jit_SET_EX_OPLINE(jit, opline);
-	ref2 = ir_CALL_2(IR_ADDR, ir_CONST_FUNC(zend_fetch_static_property), jit_FP(jit), ir_CONST_I32(fetch_type));
+	ref2 = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_fetch_static_property), jit_FP(jit), ir_CONST_I32(fetch_type));
 	zend_jit_check_exception_undef_result(jit, opline);
 	cold_path = ir_END();
 
