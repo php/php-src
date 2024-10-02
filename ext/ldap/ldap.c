@@ -745,18 +745,17 @@ static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* arr
 	ldap_controls_free(ctrls);
 }
 
-static LDAPControl** _php_ldap_controls_from_array(LDAP *ld, zval* array, uint32_t arg_num)
+static LDAPControl** php_ldap_controls_from_array(LDAP *ld, const HashTable *controls, uint32_t arg_num)
 {
-	int ncontrols;
 	LDAPControl** ctrlp, **ctrls = NULL;
 	zval* ctrlarray;
 	int error = 0;
 
-	ncontrols = zend_hash_num_elements(Z_ARRVAL_P(array));
-	ctrls = safe_emalloc((1 + ncontrols), sizeof(*ctrls), 0);
+	uint32_t num_controls = zend_hash_num_elements(controls);
+	ctrls = safe_emalloc((1 + num_controls), sizeof(*ctrls), 0);
 	*ctrls = NULL;
 	ctrlp = ctrls;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), ctrlarray) {
+	ZEND_HASH_FOREACH_VAL(controls, ctrlarray) {
 		if (Z_TYPE_P(ctrlarray) != IS_ARRAY) {
 			zend_argument_type_error(arg_num, "must contain only arrays, where each array is a control");
 			error = 1;
@@ -1145,25 +1144,25 @@ PHP_FUNCTION(ldap_bind)
 /* {{{ Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind_ext)
 {
-	zval *serverctrls = NULL;
 	zval *link;
 	char *ldap_bind_dn = NULL, *ldap_bind_pw = NULL;
 	size_t ldap_bind_dnlen, ldap_bind_pwlen;
+	HashTable *server_controls_ht = NULL;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
 	ldap_resultdata *result;
 	LDAPMessage *ldap_res;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!p!a!", &link, ldap_link_ce, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!p!h!", &link, ldap_link_ce, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &server_controls_ht) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
-	if (serverctrls) {
-		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 4);
+	if (server_controls_ht) {
+		lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 4);
 		if (lserverctrls == NULL) {
 			RETVAL_FALSE;
 			goto cleanup;
@@ -1402,12 +1401,13 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 /* {{{ php_ldap_do_search */
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
-	zval *link, *attrs = NULL, *serverctrls = NULL;
+	zval *link, *attrs = NULL;
 	HashTable *base_dn_ht = NULL;
 	zend_string *base_dn_str = NULL;
 	HashTable *filter_ht = NULL;
 	zend_string *filter_str = NULL;
 	zend_long attrsonly, sizelimit, timelimit, deref;
+	HashTable *server_controls_ht = NULL;
 	char **ldap_attrs = NULL;
 	ldap_linkdata *ld = NULL;
 	ldap_resultdata *result;
@@ -1427,7 +1427,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		Z_PARAM_LONG(sizelimit)
 		Z_PARAM_LONG(timelimit)
 		Z_PARAM_LONG(deref)
-		Z_PARAM_ARRAY_EX(serverctrls, 1, 1)
+		Z_PARAM_ARRAY_HT_EX(server_controls_ht, 1, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Reverse -> fall through */
@@ -1600,10 +1600,10 @@ process:
 				}
 			}
 
-			if (serverctrls) {
+			if (server_controls_ht) {
 				/* We have to parse controls again for each link as they use it */
 				_php_ldap_controls_free(&lserverctrls);
-				lserverctrls = _php_ldap_controls_from_array(current_ld->link, serverctrls, 9);
+				lserverctrls = php_ldap_controls_from_array(current_ld->link, server_controls_ht, 9);
 				if (lserverctrls == NULL) {
 					rcs[ldap_link_index] = -1;
 					// TODO Throw an exception/cleanup?
@@ -1661,8 +1661,8 @@ cleanup_parallel:
 			goto cleanup;
 		}
 
-		if (serverctrls) {
-			lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 9);
+		if (server_controls_ht) {
+			lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 9);
 			if (lserverctrls == NULL) {
 				ret = 0;
 				goto cleanup;
@@ -2193,11 +2193,11 @@ PHP_FUNCTION(ldap_dn2ufn)
 /* {{{ php_ldap_do_modify */
 static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 {
-	zval *serverctrls = NULL;
 	zval *link;
 	ldap_linkdata *ld;
 	char *dn;
 	HashTable *attributes_ht;
+	HashTable *server_controls_ht = NULL;
 	LDAPMod **ldap_mods;
 	LDAPControl **lserverctrls = NULL;
 	ldap_resultdata *result;
@@ -2205,7 +2205,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	size_t dn_len;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oph/|a!", &link, ldap_link_ce, &dn, &dn_len, &attributes_ht, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oph/|h!", &link, ldap_link_ce, &dn, &dn_len, &attributes_ht, &server_controls_ht) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2305,8 +2305,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	} ZEND_HASH_FOREACH_END();
 	ldap_mods[num_attribs] = NULL;
 
-	if (serverctrls) {
-		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 4);
+	if (server_controls_ht) {
+		lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 4);
 		if (lserverctrls == NULL) {
 			RETVAL_FALSE;
 			goto cleanup;
@@ -2446,8 +2446,8 @@ PHP_FUNCTION(ldap_mod_del_ext)
 /* {{{ php_ldap_do_delete */
 static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 {
-	zval *serverctrls = NULL;
 	zval *link;
+	HashTable *server_controls_ht = NULL;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
 	ldap_resultdata *result;
@@ -2456,15 +2456,15 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	int rc, msgid;
 	size_t dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op|a!", &link, ldap_link_ce, &dn, &dn_len, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op|h!", &link, ldap_link_ce, &dn, &dn_len, &server_controls_ht) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
-	if (serverctrls) {
-		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 3);
+	if (server_controls_ht) {
+		lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 3);
 		if (lserverctrls == NULL) {
 			RETVAL_FALSE;
 			goto cleanup;
@@ -2522,11 +2522,11 @@ PHP_FUNCTION(ldap_delete_ext)
 /* {{{ Perform multiple modifications as part of one operation */
 PHP_FUNCTION(ldap_modify_batch)
 {
-	zval *server_controls_zv = NULL;
 	zval *link;
 	char *dn;
 	size_t dn_len;
 	HashTable *modifications;
+	HashTable *server_controls_ht = NULL;
 	LDAPControl **lserverctrls = NULL;
 
 	/*
@@ -2553,7 +2553,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	];
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oph/|a!", &link, ldap_link_ce, &dn, &dn_len, &modifications, &server_controls_zv) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oph/|h!", &link, ldap_link_ce, &dn, &dn_len, &modifications, &server_controls_ht) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -2669,8 +2669,8 @@ PHP_FUNCTION(ldap_modify_batch)
 	/* validation of modifications array was successful */
 
 	/* Check that the LDAP server controls array is valid */
-	if (server_controls_zv) {
-		lserverctrls = _php_ldap_controls_from_array(ld->link, server_controls_zv, 4);
+	if (server_controls_ht) {
+		lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 4);
 		if (lserverctrls == NULL) {
 			_php_ldap_controls_free(&lserverctrls);
 			RETURN_FALSE;
@@ -2846,21 +2846,21 @@ PHP_FUNCTION(ldap_error)
 /* {{{ Determine if an entry has a specific value for one of its attributes */
 PHP_FUNCTION(ldap_compare)
 {
-	zval *serverctrls = NULL;
 	zval *link;
 	char *dn, *attr;
 	size_t dn_len, attr_len;
+	HashTable *server_controls_ht = NULL;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
 	int ldap_errno;
 	struct berval lvalue;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opps|a!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opps|h!",
 		&link, ldap_link_ce,
 		&dn, &dn_len,
 		&attr, &attr_len,
 		&lvalue.bv_val, &lvalue.bv_len,
-		&serverctrls
+		&server_controls_ht
 	) != SUCCESS) {
 		RETURN_THROWS();
 	}
@@ -2868,8 +2868,8 @@ PHP_FUNCTION(ldap_compare)
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
-	if (serverctrls) {
-		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 5);
+	if (server_controls_ht) {
+		lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 5);
 		if (lserverctrls == NULL) {
 			RETVAL_FALSE;
 			goto cleanup;
@@ -3251,7 +3251,7 @@ PHP_FUNCTION(ldap_set_option)
 				RETURN_THROWS();
 			}
 
-			ctrls = _php_ldap_controls_from_array(ldap, newval, 3);
+			ctrls = php_ldap_controls_from_array(ldap, Z_ARRVAL_P(newval), 3);
 
 			if (ctrls == NULL) {
 				RETURN_FALSE;
@@ -3526,7 +3526,6 @@ PHP_FUNCTION(ldap_parse_reference)
 /* {{{ php_ldap_do_rename */
 static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 {
-	zval *serverctrls = NULL;
 	zval *link;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
@@ -3536,8 +3535,9 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	char *dn, *newrdn, *newparent;
 	size_t dn_len, newrdn_len, newparent_len;
 	bool deleteoldrdn;
+	HashTable *server_controls_ht = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opppb|a!", &link, ldap_link_ce, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opppb|h!", &link, ldap_link_ce, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &server_controls_ht) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -3549,8 +3549,8 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	}
 
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
-	if (serverctrls) {
-		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 6);
+	if (server_controls_ht) {
+		lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 6);
 		if (lserverctrls == NULL) {
 			RETVAL_FALSE;
 			goto cleanup;
@@ -3857,10 +3857,10 @@ PHP_FUNCTION(ldap_8859_to_t61)
 /* {{{ Extended operations, Pierangelo Masarati */
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
 static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
-	zval *serverctrls = NULL;
 	zval *link, *retdata = NULL, *retoid = NULL;
 	char *lretoid = NULL;
 	zend_string *reqoid, *reqdata = NULL;
+	HashTable *server_controls_ht = NULL;
 	struct berval lreqdata, *lretdata = NULL;
 	ldap_linkdata *ld;
 	ldap_resultdata *result;
@@ -3875,7 +3875,7 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 		}
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|S!a!zz", &link, ldap_link_ce, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|S!h!zz", &link, ldap_link_ce, &reqoid, &reqdata, &server_controls_ht, &retdata, &retoid) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -3889,8 +3889,8 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 		lreqdata.bv_len = 0;
 	}
 
-	if (serverctrls) {
-		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls, 4);
+	if (server_controls_ht) {
+		lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 4);
 		if (lserverctrls == NULL) {
 			RETVAL_FALSE;
 			goto cleanup;
