@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-15851 (Segfault when printing backtrace during cleanup of
     nested generator frame). (ilutov)
   . Fixed bug GH-16026 (Reuse of dtor fiber during shutdown). (Arnaud)
+  . Fixed bug GH-15999 (zend_std_write_property() assertion failure with lazy
+    objects). (Arnaud)
 
 - DOM:
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
