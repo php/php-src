@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16026 (Reuse of dtor fiber during shutdown). (Arnaud)
   . Fixed bug GH-15999 (zend_std_write_property() assertion failure with lazy
     objects). (Arnaud)
+  . Fixed bug GH-15866 (Core dumped in Zend/zend_generators.c). (Arnaud)
 
 - DOM:
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
