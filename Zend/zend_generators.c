@@ -218,43 +218,30 @@ static zend_always_inline void clear_link_to_root(zend_generator *generator) {
 	}
 }
 
-/* In the context of zend_generator_dtor_storage during shutdown, check if
- * the intermediate node 'generator' is running in a fiber */
+/* Check if the node 'generator' is running in a fiber */
 static inline bool check_node_running_in_fiber(zend_generator *generator) {
-	ZEND_ASSERT(EG(flags) & EG_FLAGS_IN_SHUTDOWN);
 	ZEND_ASSERT(generator->execute_data);
 
-	if (generator->flags & ZEND_GENERATOR_IN_FIBER) {
+	if (EXPECTED(generator->flags & ZEND_GENERATOR_IN_FIBER)) {
 		return true;
 	}
 
-	if (generator->node.children == 0) {
+	if (EXPECTED(generator->node.children == 0)) {
 		return false;
 	}
-
-	if (generator->flags & ZEND_GENERATOR_DTOR_VISITED) {
-		return false;
-	}
-	generator->flags |= ZEND_GENERATOR_DTOR_VISITED;
 
 	if (generator->node.children == 1) {
-		if (check_node_running_in_fiber(generator->node.child.single)) {
-			goto in_fiber;
-		}
-		return false;
+		return check_node_running_in_fiber(generator->node.child.single);
 	}
 
 	zend_generator *child;
 	ZEND_HASH_FOREACH_PTR(generator->node.child.ht, child) {
 		if (check_node_running_in_fiber(child)) {
-			goto in_fiber;
+			return true;
 		}
 	} ZEND_HASH_FOREACH_END();
-	return false;
 
-in_fiber:
-	generator->flags |= ZEND_GENERATOR_IN_FIBER;
-	return true;
+	return false;
 }
 
 static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
