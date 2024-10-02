@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     exception). (ilutov)
   . Fixed bug GH-15851 (Segfault when printing backtrace during cleanup of
     nested generator frame). (ilutov)
+  . Fixed bug GH-15866 (Core dumped in Zend/zend_generators.c). (Arnaud)
 
 - Date:
   . Fixed bug GH-15582: Crash when not calling parent constructor of
