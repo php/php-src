@@ -19,7 +19,6 @@
 */
 
 #include "phar_internal.h"
-#include "php_phar.h"
 #include "ext/hash/php_hash.h" /* Needed for PHP_HASH_API in ext/hash/php_hash_sha.h */
 #include "ext/hash/php_hash_sha.h"
 #include "ext/standard/md5.h"
@@ -972,18 +971,6 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 		return NULL;
 	}
 	return entry;
-}
-/* }}} */
-
-PHP_PHAR_API zend_result phar_resolve_alias(char *alias, size_t alias_len, char **filename, size_t *filename_len) /* {{{ */ {
-	phar_archive_data *fd_ptr;
-	if (HT_IS_INITIALIZED(&PHAR_G(phar_alias_map))
-			&& NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-		*filename = fd_ptr->fname;
-		*filename_len = fd_ptr->fname_len;
-		return SUCCESS;
-	}
-	return FAILURE;
 }
 /* }}} */
 
