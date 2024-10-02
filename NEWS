@@ -54,6 +54,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15918 (Assertion failure in ext/spl/spl_fixedarray.c).
     (nielsdos)
 
+- Standard:
+  . Fixed bug GH-16053 (Assertion failure in Zend/zend_hash.c). (Arnaud)
+
 - Streams:
   . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
     (nielsdos)
