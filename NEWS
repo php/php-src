@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     exception). (ilutov)
   . Fixed bug GH-15851 (Segfault when printing backtrace during cleanup of
     nested generator frame). (ilutov)
+  . Fixed bug GH-16026 (Reuse of dtor fiber during shutdown). (Arnaud)
 
 - DOM:
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
