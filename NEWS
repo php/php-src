@@ -52,6 +52,7 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fixed bug GH-15937 (overflow on stream timeout option value).
     (David Carlier)
+  . Fixed bug GH-16053 (Assertion failure in Zend/zend_hash.c). (Arnaud)
 
 - Streams:
   . Fixed bugs GH-15908 and GH-15026 (leak / assertion failure in streams.c).
