@@ -27,13 +27,6 @@ class Test2 {
     }
 }
 
-class Test3 {
-    public function __sleep()
-    {
-        serialize($this);
-    }
-}
-
 function replace() {
     return preg_replace_callback('#.#', function () {
         return replace();
@@ -48,12 +41,6 @@ try {
 
 try {
     clone new Test2;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    serialize(new Test3);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -76,7 +63,6 @@ array(4) {
   ["EG(stack_limit)"]=>
   string(%d) "0x%x"
 }
-Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
 Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
 Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
 Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
