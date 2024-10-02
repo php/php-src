@@ -87,7 +87,7 @@ static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 
 PHP_METHOD(Pdo_Mysql, __construct)
 {
-	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
 }
 
 /* Returns the number of SQL warnings during the execution of the last statement */

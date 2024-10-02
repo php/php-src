@@ -64,7 +64,7 @@ zend_ulong pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 
 PHP_METHOD(Pdo_Odbc, __construct)
 {
-	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
 }
 
 /* {{{ PHP_MINIT_FUNCTION */

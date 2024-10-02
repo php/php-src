@@ -268,7 +268,7 @@ static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_e
 
 	if (ce_based_on_driver_name) {
 		if (called_scope != pdo_dbh_ce) {
-			/* A driver-specific implementation is instantiated of a wrong driver class */
+			/* A driver-specific implementation is instantiated with a wrong driver class */
 			zend_throw_exception_ex(pdo_exception_ce, 0,
 				"%s::%s() cannot be called when connecting to the \"%s\" driver, "
 				"either call %s::%s() or PDO::%s() instead",
@@ -282,7 +282,6 @@ static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_e
 			return false;
 		}
 
-		/* A driver-specific implementation was instantiated via PDO::__construct() */
 		if (new_object) {
 			object_init_ex(new_object, ce_based_on_driver_name);
 		}
@@ -294,7 +293,7 @@ static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_e
 	return true;
 }
 
-PDO_API void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zend_object *object, zend_class_entry *current_scope, zval *new_zval_object)
+PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zend_object *object, zend_class_entry *current_scope, zval *new_zval_object)
 {
 	pdo_dbh_t *dbh = NULL;
 	bool is_persistent = 0;
@@ -517,14 +516,14 @@ options:
 /* {{{ */
 PHP_METHOD(PDO, __construct)
 {
-	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
 }
 /* }}} */
 
 /* {{{ */
 PHP_METHOD(PDO, connect)
 {
-	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), EX(This).value.ce, return_value);
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), EX(This).value.ce, return_value);
 }
 /* }}} */
 

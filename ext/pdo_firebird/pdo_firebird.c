@@ -104,7 +104,7 @@ PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 
 PHP_METHOD(Pdo_Firebird, __construct)
 {
-	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
 }
 
 PHP_METHOD(Pdo_Firebird, getApiVersion)

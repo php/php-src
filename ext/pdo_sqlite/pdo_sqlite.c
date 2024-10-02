@@ -371,7 +371,7 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 
 PHP_METHOD(Pdo_Sqlite, __construct)
 {
-	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
 }
 
 PHP_METHOD(Pdo_Sqlite, createAggregate)
