@@ -26,6 +26,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
+#include "zend_attributes.h"
 #include "pdo_pgsql_arginfo.h"
 
 static zend_class_entry *PdoPgsql_ce;
@@ -56,6 +57,11 @@ zend_module_entry pdo_pgsql_module_entry = {
 #ifdef COMPILE_DL_PDO_PGSQL
 ZEND_GET_MODULE(pdo_pgsql)
 #endif
+
+PHP_METHOD(Pdo_Pgsql, __construct)
+{
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+}
 
 /* Escape an identifier for insertion into a text field	*/
 PHP_METHOD(Pdo_Pgsql, escapeIdentifier)

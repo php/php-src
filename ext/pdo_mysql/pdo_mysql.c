@@ -26,6 +26,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
+#include "zend_attributes.h"
 #include "pdo_mysql_arginfo.h"
 
 static zend_class_entry *pdo_mysql_ce;
@@ -83,6 +84,11 @@ static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 	pdo_mysql_convert_zv_to_mysqlnd
 };
 #endif
+
+PHP_METHOD(Pdo_Mysql, __construct)
+{
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+}
 
 /* Returns the number of SQL warnings during the execution of the last statement */
 PHP_METHOD(Pdo_Mysql, getWarningCount)

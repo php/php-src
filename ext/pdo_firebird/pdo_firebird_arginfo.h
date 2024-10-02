@@ -1,12 +1,21 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d36b2055abc48ae91c3442dda68fa2a28eb6d25b */
+ * Stub hash: 4ff48695884d450781e164a3dcbdf627917bb789 */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Firebird___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Firebird_getApiVersion, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_METHOD(Pdo_Firebird, __construct);
 ZEND_METHOD(Pdo_Firebird, getApiVersion);
 
 static const zend_function_entry class_Pdo_Firebird_methods[] = {
+	ZEND_ME(Pdo_Firebird, __construct, arginfo_class_Pdo_Firebird___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Firebird, getApiVersion, arginfo_class_Pdo_Firebird_getApiVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
@@ -65,6 +74,9 @@ static zend_class_entry *register_class_Pdo_Firebird(zend_class_entry *class_ent
 	zend_string *const_WRITABLE_TRANSACTION_name = zend_string_init_interned("WRITABLE_TRANSACTION", sizeof("WRITABLE_TRANSACTION") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_WRITABLE_TRANSACTION_name, &const_WRITABLE_TRANSACTION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_WRITABLE_TRANSACTION_name);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

@@ -27,6 +27,7 @@
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
 #include "pdo_sqlite_arginfo.h"
 
 static zend_class_entry *pdosqlite_ce;
@@ -366,6 +367,11 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 	zval_ptr_dtor(&zargs[1]);
 
 	return ret;
+}
+
+PHP_METHOD(Pdo_Sqlite, __construct)
+{
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
 }
 
 PHP_METHOD(Pdo_Sqlite, createAggregate)
