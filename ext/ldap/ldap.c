@@ -410,7 +410,6 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 {
 	zval* val;
 	zend_string *control_oid;
-	int control_iscritical = 0, rc = LDAP_SUCCESS;
 	char** ldap_attrs = NULL;
 	LDAPSortKey** sort_keys = NULL;
 	zend_string *tmpstring = NULL, **tmpstrings1 = NULL, **tmpstrings2 = NULL;
@@ -426,15 +425,15 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 		return -1;
 	}
 
+	bool control_iscritical = false;
 	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "iscritical", sizeof("iscritical") - 1)) != NULL) {
 		control_iscritical = zend_is_true(val);
-	} else {
-		control_iscritical = 0;
 	}
 
 	BerElement *ber = NULL;
 	struct berval control_value = { 0L, NULL };
-	int control_value_alloc = 0;
+	bool control_value_alloc = false;
+	int rc = LDAP_SUCCESS;
 
 	if ((val = zend_hash_find(Z_ARRVAL_P(array), ZSTR_KNOWN(ZEND_STR_VALUE))) != NULL) {
 		if (Z_TYPE_P(val) != IS_ARRAY) {
