@@ -62,7 +62,7 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->query('DROP TABLE IF EXISTS test_copy_from_traversable CASCADE');
 ?>
 --EXPECT--
-PDO::pgsqlCopyFromArray(): Argument #2 ($rows) must be of type array or Traversable
+PDO::pgsqlCopyFromArray(): Argument #2 ($rows) must be of type Traversable|array, stdClass given
 array (
   0 => 1,
   1 => 1,
