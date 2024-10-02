@@ -254,6 +254,11 @@ static zend_string* php_ldap_try_get_ldap_value_from_zval(zval *zv) {
 	}
 }
 
+/* The char pointer MUST refer to the char* of a zend_string struct */
+static void php_ldap_zend_string_release_from_char_pointer(char *ptr) {
+	zend_string_release((zend_string*) (ptr - XtOffsetOf(zend_string, val)));
+}
+
 /* {{{ Parse controls from and to arrays */
 static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array, int request)
 {
@@ -2278,15 +2283,16 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 		/* If the attribute takes a single value it can be passed directly instead of as a list with one element */
 		/* allow for arrays with one element, no allowance for arrays with none but probably not required, gerrit thomson. */
 		if (Z_TYPE_P(attribute_values) != IS_ARRAY) {
-			convert_to_string(attribute_values);
-			if (EG(exception)) {
+			zend_string *value = php_ldap_try_get_ldap_value_from_zval(attribute_values);
+			if (UNEXPECTED(value == NULL)) {
 				RETVAL_FALSE;
 				goto cleanup;
 			}
 			ldap_mods[attribute_index]->mod_bvalues = safe_emalloc(2, sizeof(struct berval *), 0);
 			ldap_mods[attribute_index]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
-			ldap_mods[attribute_index]->mod_bvalues[0]->bv_val = Z_STRVAL_P(attribute_values);
-			ldap_mods[attribute_index]->mod_bvalues[0]->bv_len = Z_STRLEN_P(attribute_values);
+			/* The string will be free by php_ldap_zend_string_release_from_char_pointer() during cleanup */
+			ldap_mods[attribute_index]->mod_bvalues[0]->bv_val = ZSTR_VAL(value);
+			ldap_mods[attribute_index]->mod_bvalues[0]->bv_len = ZSTR_LEN(value);
 			ldap_mods[attribute_index]->mod_bvalues[1] = NULL;
 		} else {
 			SEPARATE_ARRAY(attribute_values);
@@ -2309,14 +2315,15 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			zend_ulong attribute_value_index = 0;
 			zval *attribute_value = NULL;
 			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(attribute_values), attribute_value_index, attribute_value) {
-				convert_to_string(attribute_value);
-				if (EG(exception)) {
+				zend_string *value = php_ldap_try_get_ldap_value_from_zval(attribute_value);
+				if (UNEXPECTED(value == NULL)) {
 					RETVAL_FALSE;
 					goto cleanup;
 				}
 				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index] = (struct berval *) emalloc (sizeof(struct berval));
-				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_val = Z_STRVAL_P(attribute_value);
-				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_len = Z_STRLEN_P(attribute_value);
+				/* The string will be free by php_ldap_zend_string_release_from_char_pointer() during cleanup */
+				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_val = ZSTR_VAL(value);
+				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_len = ZSTR_LEN(value);
 			} ZEND_HASH_FOREACH_END();
 			ldap_mods[attribute_index]->mod_bvalues[num_values] = NULL;
 		}
@@ -2388,7 +2395,9 @@ cleanup:
 		efree(mod->mod_type);
 		if (mod->mod_bvalues != NULL) {
 			for (struct berval **bval_ptr = mod->mod_bvalues; *bval_ptr != NULL; bval_ptr++) {
-				efree(*bval_ptr);
+				struct berval *bval = *bval_ptr;
+				php_ldap_zend_string_release_from_char_pointer(bval->bv_val);
+				efree(bval);
 			}
 			efree(mod->mod_bvalues);
 		}

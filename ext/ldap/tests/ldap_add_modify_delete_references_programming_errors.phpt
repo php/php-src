@@ -74,12 +74,8 @@ try {
 /* We don't check that values have nul bytes as the length of the string is passed to LDAP */
 
 ?>
---EXPECTF--
+--EXPECT--
 Error: Object of class stdClass could not be converted to string
 ValueError: ldap_add(): Argument #3 ($entry) list of attribute values must not be empty
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: ldap_add(): Add: Can't contact LDAP server in %s on line %d
-bool(false)
-Error: Object of class stdClass could not be converted to string
+TypeError: LDAP value must be of type string|int|bool, array given
+TypeError: LDAP value must be of type string|int|bool, stdClass given
