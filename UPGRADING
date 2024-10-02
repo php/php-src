@@ -954,6 +954,9 @@ PHP 8.4 UPGRADE NOTES
   . New RequestParseBodyException.
     RFC: https://wiki.php.net/rfc/rfc1867-non-post
 
+- DBA:
+  . Dba\Connection opaque object replacing DBA resources
+
 - DOM:
   . Implemented DOM HTML5 parsing and serialization.
     RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
