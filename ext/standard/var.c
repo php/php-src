@@ -1033,12 +1033,26 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, HashTable *ht, 
 }
 /* }}} */
 
+static zend_always_inline bool php_serialize_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash, bool in_rcn_array, bool is_root) /* {{{ */
 {
 	zend_long var_already;
 	HashTable *myht;
 
 	if (EG(exception)) {
+		return;
+	}
+
+	if (UNEXPECTED(php_serialize_check_stack_limit())) {
+		zend_throw_error(NULL, "Maximum call stack size reached. Infinite recursion?");
 		return;
 	}
 

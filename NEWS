@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-16053 (Assertion failure in Zend/zend_hash.c). (Arnaud)
+  . Fixed bug GH-15169 (stack overflow when var serialization in
+    ext/standard/var). (nielsdos)
 
 26 Sep 2024, PHP 8.4.0RC1
 
