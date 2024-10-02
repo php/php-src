@@ -60,6 +60,9 @@ PHP                                                                        NEWS
   . Fixed bug GHSA-9pqp-7h25-4f32 (Erroneous parsing of multipart form data).
     (CVE-2024-8925) (Arnaud)
 
+- Standard:
+  . Fixed bug GH-16053 (Assertion failure in Zend/zend_hash.c). (Arnaud)
+
 26 Sep 2024, PHP 8.4.0RC1
 
 - BcMath:
