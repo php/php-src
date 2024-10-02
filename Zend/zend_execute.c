@@ -3565,7 +3565,7 @@ static zend_never_inline zval* zend_fetch_static_property_address_ex(zend_proper
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		if (EXPECTED(op1_type == IS_CONST) && EXPECTED(CACHED_PTR(cache_slot + sizeof(void *)) == ce)) {
+		if (EXPECTED(op1_type == IS_CONST) && EXPECTED(CACHED_PTR(cache_slot) == ce)) {
 			result = CACHED_PTR(cache_slot + sizeof(void *));
 			*prop_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
 			return result;
