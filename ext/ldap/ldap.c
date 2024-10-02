@@ -2254,7 +2254,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	}
 	/* end additional , gerrit thomson */
 
-	const zend_string *attribute = NULL;
+	zend_string *attribute = NULL;
 	zval *attribute_values = NULL;
 	unsigned int attribute_index = 0;
 	ZEND_HASH_FOREACH_STR_KEY_VAL(attributes_ht, attribute, attribute_values) {
@@ -2276,7 +2276,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 
 		ldap_mods[attribute_index] = emalloc(sizeof(LDAPMod));
 		ldap_mods[attribute_index]->mod_op = oper | LDAP_MOD_BVALUES;
-		ldap_mods[attribute_index]->mod_type = estrndup(ZSTR_VAL(attribute), ZSTR_LEN(attribute));
+		/* No need to duplicate the string as it is not consumed and the zend_string will not be released */
+		ldap_mods[attribute_index]->mod_type = ZSTR_VAL(attribute);
 		ldap_mods[attribute_index]->mod_bvalues = NULL;
 
 		ZVAL_DEREF(attribute_values);
@@ -2392,7 +2393,6 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 cleanup:
 	for (LDAPMod **ptr = ldap_mods; *ptr != NULL; ptr++) {
 		LDAPMod *mod = *ptr;
-		efree(mod->mod_type);
 		if (mod->mod_bvalues != NULL) {
 			for (struct berval **bval_ptr = mod->mod_bvalues; *bval_ptr != NULL; bval_ptr++) {
 				struct berval *bval = *bval_ptr;
