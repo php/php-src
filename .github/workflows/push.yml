@@ -226,7 +226,7 @@ jobs:
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    name: WINDOWS_X64_ZTS
+    name: WINDOWS_X86_ZTS
     runs-on: windows-2022
     timeout-minutes: 50
     env:
@@ -235,7 +235,7 @@ jobs:
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
       PHP_BUILD_CRT: vs17
-      PLATFORM: x64
+      PLATFORM: x86
       THREAD_SAFE: "1"
       INTRINSICS: AVX2
       PARALLEL: -j2
