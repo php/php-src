@@ -420,7 +420,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 			}
 			control_value.bv_val = ZSTR_VAL(tmpstring);
 			control_value.bv_len = ZSTR_LEN(tmpstring);
-		} else if (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_PAGEDRESULTS) == 0) {
+		} else if (zend_string_equals_literal(control_oid, LDAP_CONTROL_PAGEDRESULTS)) {
 			zval* tmp;
 			int pagesize = 1;
 			struct berval cookie = { 0L, NULL };
@@ -442,7 +442,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 			if (rc != LDAP_SUCCESS) {
 				php_error_docref(NULL, E_WARNING, "Failed to create paged result control value: %s (%d)", ldap_err2string(rc), rc);
 			}
-		} else if (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_ASSERT) == 0) {
+		} else if (zend_string_equals_literal(control_oid, LDAP_CONTROL_ASSERT)) {
 			zval* tmp;
 			zend_string* assert;
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "filter", sizeof("filter") - 1)) == NULL) {
@@ -466,7 +466,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				}
 				zend_string_release(assert);
 			}
-		} else if (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_VALUESRETURNFILTER) == 0) {
+		} else if (zend_string_equals_literal(control_oid, LDAP_CONTROL_VALUESRETURNFILTER)) {
 			zval* tmp;
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "filter", sizeof("filter") - 1)) == NULL) {
 				rc = -1;
@@ -490,7 +490,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					}
 				}
 			}
-		} else if ((strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_PRE_READ) == 0) || (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_POST_READ) == 0)) {
+		} else if (zend_string_equals_literal(control_oid, LDAP_CONTROL_PRE_READ) || zend_string_equals_literal(control_oid, LDAP_CONTROL_POST_READ)) {
 			zval* tmp;
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "attrs", sizeof("attrs") - 1)) == NULL) {
 				rc = -1;
@@ -542,7 +542,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					}
 				}
 			}
-		} else if (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_SORTREQUEST) == 0) {
+		} else if (zend_string_equals_literal(control_oid, LDAP_CONTROL_SORTREQUEST)) {
 			int num_keys, i;
 			zval *sortkey, *tmp;
 
@@ -599,7 +599,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 			if (rc != LDAP_SUCCESS) {
 				php_error_docref(NULL, E_WARNING, "Failed to create sort control value: %s (%d)", ldap_err2string(rc), rc);
 			}
-		} else if (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_VLVREQUEST) == 0) {
+		} else if (zend_string_equals_literal(control_oid, LDAP_CONTROL_VLVREQUEST)) {
 			zval* tmp;
 			LDAPVLVInfo vlvInfo;
 			struct berval attrValue;
