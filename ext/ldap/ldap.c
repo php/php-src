@@ -406,7 +406,7 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 	}
 }
 
-static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* array)
+static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashTable *control_ht)
 {
 	zval* val;
 	zend_string *control_oid;
@@ -415,7 +415,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	zend_string *tmpstring = NULL, **tmpstrings1 = NULL, **tmpstrings2 = NULL;
 	size_t num_tmpstrings1 = 0, num_tmpstrings2 = 0;
 
-	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "oid", sizeof("oid") - 1)) == NULL) {
+	if ((val = zend_hash_str_find(control_ht, "oid", sizeof("oid") - 1)) == NULL) {
 		zend_value_error("%s(): Control must have an \"oid\" key", get_active_function_name());
 		return -1;
 	}
@@ -426,7 +426,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	}
 
 	bool control_iscritical = false;
-	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "iscritical", sizeof("iscritical") - 1)) != NULL) {
+	if ((val = zend_hash_str_find(control_ht, "iscritical", sizeof("iscritical") - 1)) != NULL) {
 		control_iscritical = zend_is_true(val);
 	}
 
@@ -435,7 +435,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	bool control_value_alloc = false;
 	int rc = LDAP_SUCCESS;
 
-	if ((val = zend_hash_find(Z_ARRVAL_P(array), ZSTR_KNOWN(ZEND_STR_VALUE))) != NULL) {
+	if ((val = zend_hash_find(control_ht, ZSTR_KNOWN(ZEND_STR_VALUE))) != NULL) {
 		if (Z_TYPE_P(val) != IS_ARRAY) {
 			tmpstring = zval_get_string(val);
 			if (EG(exception)) {
@@ -786,7 +786,7 @@ static LDAPControl** php_ldap_controls_from_array(LDAP *ld, const HashTable *con
 			break;
 		}
 
-		if (_php_ldap_control_from_array(ld, ctrlp, ctrlarray) == LDAP_SUCCESS) {
+		if (php_ldap_control_from_array(ld, ctrlp, Z_ARRVAL_P(ctrlarray)) == LDAP_SUCCESS) {
 			++ctrlp;
 		} else {
 			error = 1;
