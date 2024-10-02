@@ -15717,14 +15717,12 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 				ir_IF_FALSE(if_typed);
 				ir_END_list(merge);
 				ir_IF_TRUE(if_typed);
-			} else {
-				prop_info_ref = ir_CONST_ADDR(known_prop_info);
 			}
 			// JIT:	zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 			//			ZSTR_VAL(property_info->ce->name),
 			//			zend_get_unmangled_property_name(property_info->name));
 			jit_SET_EX_OPLINE(jit, opline);
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_uninit_static_prop), prop_info_ref);
+			ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_uninit_static_prop));
 			ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler_undef));
 
 			ir_IF_TRUE(if_def);
