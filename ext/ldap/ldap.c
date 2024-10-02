@@ -234,6 +234,26 @@ static void ldap_result_entry_free_obj(zend_object *obj)
 	} \
 }
 
+/* An LDAP value must be a string, however it defines a format for integer and
+ * booleans, thus we parse zvals to the corresponding string if possible
+ * See RFC 4517: https://datatracker.ietf.org/doc/html/rfc4517 */
+static zend_string* php_ldap_try_get_ldap_value_from_zval(zval *zv) {
+	switch (Z_TYPE_P(zv)) {
+		case IS_STRING:
+		case IS_LONG:
+		/* Object might be stringable */
+		case IS_OBJECT:
+			return zval_try_get_string(zv);
+		case IS_TRUE:
+			return ZSTR_INIT_LITERAL("TRUE", false);
+		case IS_FALSE:
+			return ZSTR_INIT_LITERAL("FALSE", false);
+		default:
+			zend_type_error("LDAP value must be of type string|int|bool, %s given", zend_zval_value_name(zv));
+			return NULL;
+	}
+}
+
 /* {{{ Parse controls from and to arrays */
 static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array, int request)
 {
