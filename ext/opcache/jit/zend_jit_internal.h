@@ -647,7 +647,12 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_ret_trace_helper(ZEND_OPCODE_HAND
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 int ZEND_FASTCALL zend_jit_trace_hot_root(zend_execute_data *execute_data, const zend_op *opline);
-zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *execute_data, const zend_op *opline, zend_jit_trace_rec *trace_buffer, uint8_t start, uint32_t is_megamorphc);
+zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *execute_data,
+                                                         const zend_op      *opline,
+                                                         zend_jit_trace_rec *trace_buffer,
+                                                         uint8_t             start,
+                                                         uint32_t            is_megamorphc,
+                                                         int                 ret_depth);
 
 static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit_trace_rec *trace, const zend_op *opline, bool *exit_if_true)
 {

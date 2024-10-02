@@ -575,7 +575,7 @@ static int zend_jit_trace_subtrace(zend_jit_trace_rec *trace_buffer, int start, 
  * +--------+----------+----------+----------++----------+----------+----------+
  * | RETURN |INNER_LOOP|          |  rec-ret ||   LINK   |          |   LINK   |
  * +--------+----------+----------+----------++----------+----------+----------+
- * | SIDE   |  unroll  |          |  return  ||   LINK   |   LINK   |   LINK   |
+ * | SIDE   |  unroll  |          | side-ret ||   LINK   |   LINK   |   LINK   |
  * +--------+----------+----------+----------++----------+----------+----------+
  *
  * loop:       LOOP if "cycle" and level == 0, otherwise INNER_LOOP
@@ -586,10 +586,16 @@ static int zend_jit_trace_subtrace(zend_jit_trace_rec *trace_buffer, int start, 
  * loop-ret:   LOOP_EXIT if level == 0, otherwise continue (wait for loop)
  * return:     RETURN if level == 0
  * rec_ret:    RECURSIVE_RET if "cycle" and ret_level > N, otherwise continue
+ * side_ret:   RETURN if level == 0 && ret_level == ret_depth, otherwise continue
  *
  */
 
-zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, const zend_op *op, zend_jit_trace_rec *trace_buffer, uint8_t start, uint32_t is_megamorphic)
+zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
+                                                         const zend_op      *op,
+                                                         zend_jit_trace_rec *trace_buffer,
+                                                         uint8_t             start,
+                                                         uint32_t            is_megamorphic,
+                                                         int                 ret_depth)
 
 {
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -1060,6 +1066,20 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 							ZEND_JIT_TRACE_STOP_RECURSION_EXIT) {
 						stop = ZEND_JIT_TRACE_STOP_RECURSION_EXIT;
 						break;
+					} else if ((start & ZEND_JIT_TRACE_START_SIDE)
+					 && ret_level < ret_depth) {
+						TRACE_RECORD(ZEND_JIT_TRACE_BACK, 0, op_array);
+						ret_level++;
+						last_loop_opline = NULL;
+
+						if (prev_call) {
+							int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, 0);
+							if (ret < 0) {
+								stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
+								break;
+							}
+							idx = ret;
+						}
 					} else {
 						stop = ZEND_JIT_TRACE_STOP_RETURN;
 						break;

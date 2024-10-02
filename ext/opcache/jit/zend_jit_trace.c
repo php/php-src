@@ -8066,7 +8066,7 @@ repeat:
 
 	JIT_G(tracing) = 1;
 	stop = zend_jit_trace_execute(execute_data, opline, trace_buffer,
-		ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_START_MASK, 0);
+		ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_START_MASK, 0, 0);
 	JIT_G(tracing) = 0;
 
 	if (stop & ZEND_JIT_TRACE_HALT) {
@@ -8390,6 +8390,8 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	zend_jit_trace_rec trace_buffer[ZEND_JIT_TRACE_MAX_LENGTH];
 	uint32_t is_megamorphic = 0;
 	uint32_t polymorphism = 0;
+	uint32_t root;
+	int ret_depth = 0;
 
 	trace_num = ZEND_JIT_TRACE_NUM;
 
@@ -8414,7 +8416,8 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 		goto abort;
 	}
 
-	if (zend_jit_traces[zend_jit_traces[parent_num].root].child_count >= JIT_G(max_side_traces)) {
+	root = zend_jit_traces[parent_num].root;
+	if (zend_jit_traces[root].child_count >= JIT_G(max_side_traces)) {
 		stop = ZEND_JIT_TRACE_STOP_TOO_MANY_CHILDREN;
 		goto abort;
 	}
@@ -8434,8 +8437,29 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 		}
 	}
 
+	/* Check if this is a side trace of a root LOOP trace */
+	if ((zend_jit_traces[root].flags & ZEND_JIT_TRACE_LOOP)
+	 && zend_jit_traces[root].op_array != &EX(func)->op_array) {
+		const zend_op_array *op_array = zend_jit_traces[root].op_array;
+		const zend_op *opline = zend_jit_traces[root].opline;
+		zend_jit_op_array_trace_extension *jit_extension =
+				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+
+		if (jit_extension->trace_info[opline - op_array->opcodes].trace_flags & ZEND_JIT_TRACE_START_LOOP) {
+			zend_execute_data *ex = execute_data;
+			int n = 0;
+			do {
+				ex = ex->prev_execute_data;
+				n++;
+			} while (ex && zend_jit_traces[root].op_array != &ex->func->op_array);
+			if (ex && n <= ZEND_JIT_TRACE_MAX_RET_DEPTH) {
+				ret_depth = n;
+			}
+		}
+	}
+
 	JIT_G(tracing) = 1;
-	stop = zend_jit_trace_execute(execute_data, EX(opline), trace_buffer, ZEND_JIT_TRACE_START_SIDE, is_megamorphic);
+	stop = zend_jit_trace_execute(execute_data, EX(opline), trace_buffer, ZEND_JIT_TRACE_START_SIDE, is_megamorphic, ret_depth);
 	JIT_G(tracing) = 0;
 
 	if (stop & ZEND_JIT_TRACE_HALT) {
