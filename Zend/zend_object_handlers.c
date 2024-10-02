@@ -1183,13 +1183,21 @@ write_std_property:
 exit:
 	return variable_ptr;
 
-lazy_init:
+lazy_init:;
+	/* backup value as it may change during initialization */
+	zval backup;
+	ZVAL_COPY(&backup, value);
+
 	zobj = zend_lazy_object_init(zobj);
 	if (UNEXPECTED(!zobj)) {
 		variable_ptr = &EG(error_zval);
+		zval_ptr_dtor(&backup);
 		goto exit;
 	}
-	return zend_std_write_property(zobj, name, value, cache_slot);
+
+	variable_ptr = zend_std_write_property(zobj, name, &backup, cache_slot);
+	zval_ptr_dtor(&backup);
+	return variable_ptr;
 }
 /* }}} */
 
