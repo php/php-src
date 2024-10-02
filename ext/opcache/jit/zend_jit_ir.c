@@ -15688,8 +15688,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 		case ZEND_FETCH_STATIC_PROP_UNSET:
 			fetch_type = BP_VAR_UNSET;
 			break;
-		default:
-			ZEND_UNREACHABLE();
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	// JIT: result = CACHED_PTR(cache_slot + sizeof(void *));
