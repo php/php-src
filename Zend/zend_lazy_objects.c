@@ -199,6 +199,15 @@ ZEND_API bool zend_class_can_be_lazy(zend_class_entry *ce)
 	return true;
 }
 
+static int zlo_hash_remove_dyn_props_func(zval *pDest)
+{
+	if (Z_TYPE_P(pDest) == IS_INDIRECT) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+
+	return ZEND_HASH_APPLY_REMOVE;
+}
+
 /* Make object 'obj' lazy. If 'obj' is NULL, create a lazy instance of
  * class 'reflection_ce' */
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
@@ -278,9 +287,17 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 
 		GC_DEL_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
 
-		/* unset() dynamic properties */
-		zend_object_dtor_dynamic_properties(obj);
-		obj->properties = NULL;
+		/* unset() dynamic properties. Do not NULL out obj->properties, as this
+		 * would be unexpected. */
+		if (obj->properties) {
+			if (UNEXPECTED(GC_REFCOUNT(obj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(obj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_DELREF(obj->properties);
+				}
+				obj->properties = zend_array_dup(obj->properties);
+			}
+			zend_hash_reverse_apply(obj->properties, zlo_hash_remove_dyn_props_func);
+		}
 
 		/* unset() declared properties */
 		for (int i = 0; i < reflection_ce->default_properties_count; i++) {
