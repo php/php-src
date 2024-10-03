@@ -51,13 +51,6 @@ static uint32_t zho_num_backed_props(zend_object *zobj)
 
 static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access, bool include_dynamic_props)
 {
-	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-		zobj = zend_lazy_object_init(zobj);
-		if (UNEXPECTED(!zobj)) {
-			return zend_new_array(0);
-		}
-	}
-
 	zend_class_entry *ce = zobj->ce;
 	zend_array *properties = zend_new_array(ce->default_properties_count);
 	zend_hash_real_init_mixed(properties);
@@ -93,23 +86,22 @@ static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access,
 
 ZEND_API zend_array *zend_hooked_object_build_properties(zend_object *zobj)
 {
+	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
+		zobj = zend_lazy_object_init(zobj);
+		if (UNEXPECTED(!zobj)) {
+			return (zend_array*) &zend_empty_array;
+		}
+	}
+
 	return zho_build_properties_ex(zobj, false, true);
 }
 
-static bool zho_dynamic_it_init(zend_hooked_object_iterator *hooked_iter)
+static void zho_dynamic_it_init(zend_hooked_object_iterator *hooked_iter)
 {
-	if (hooked_iter->dynamic_prop_it != (uint32_t) -1) {
-		return true;
-	}
-
 	zend_object *zobj = Z_OBJ_P(&hooked_iter->it.data);
-	if (!zobj->properties || zho_num_backed_props(zobj) == zobj->properties->nNumUsed) {
-		hooked_iter->dynamic_props_done = true;
-		return false;
-	}
-
-	hooked_iter->dynamic_prop_it = zend_hash_iterator_add(zobj->properties, zho_num_backed_props(zobj));
-	return true;
+	zend_array *properties = zobj->handlers->get_properties(zobj);
+	hooked_iter->dynamic_props_done = false;
+	hooked_iter->dynamic_prop_it = zend_hash_iterator_add(properties, zho_num_backed_props(zobj));
 }
 
 static void zho_it_get_current_key(zend_object_iterator *iter, zval *key);
@@ -163,10 +155,13 @@ static void zho_declared_it_fetch_current(zend_object_iterator *iter)
 static void zho_dynamic_it_fetch_current(zend_object_iterator *iter)
 {
 	zend_hooked_object_iterator *hooked_iter = (zend_hooked_object_iterator*)iter;
-	ZEND_ASSERT(hooked_iter->dynamic_prop_it != (uint32_t) -1);
-
 	zend_array *properties = Z_OBJ(iter->data)->properties;
 	HashPosition pos = zend_hash_iterator_pos(hooked_iter->dynamic_prop_it, properties);
+
+	if (pos >= properties->nNumUsed) {
+		hooked_iter->dynamic_props_done = true;
+		return;
+	}
 
 	Bucket *bucket = properties->arData + pos;
 
@@ -196,7 +191,7 @@ static void zho_it_fetch_current(zend_object_iterator *iter)
 	while (true) {
 		if (!hooked_iter->declared_props_done) {
 			zho_declared_it_fetch_current(iter);
-		} else if (!hooked_iter->dynamic_props_done && zho_dynamic_it_init(hooked_iter)) {
+		} else if (!hooked_iter->dynamic_props_done) {
 			zho_dynamic_it_fetch_current(iter);
 		} else {
 			break;
@@ -215,9 +210,7 @@ static void zho_it_dtor(zend_object_iterator *iter)
 	zval_ptr_dtor(&hooked_iter->declared_props);
 	zval_ptr_dtor_nogc(&hooked_iter->current_key);
 	zval_ptr_dtor(&hooked_iter->current_data);
-	if (hooked_iter->dynamic_prop_it != (uint32_t) -1) {
-		zend_hash_iterator_del(hooked_iter->dynamic_prop_it);
-	}
+	zend_hash_iterator_del(hooked_iter->dynamic_prop_it);
 }
 
 static zend_result zho_it_valid(zend_object_iterator *iter)
@@ -256,14 +249,11 @@ static void zho_it_move_forward(zend_object_iterator *iter)
 		if (zend_hash_has_more_elements(properties) != SUCCESS) {
 			hooked_iter->declared_props_done = true;
 		}
-	} else if (!hooked_iter->dynamic_props_done && zho_dynamic_it_init(hooked_iter)) {
+	} else if (!hooked_iter->dynamic_props_done) {
 		zend_array *properties = Z_OBJ(iter->data)->properties;
 		HashPosition pos = zend_hash_iterator_pos(hooked_iter->dynamic_prop_it, properties);
 		pos++;
 		EG(ht_iterators)[hooked_iter->dynamic_prop_it].pos = pos;
-		if (pos >= properties->nNumUsed) {
-			hooked_iter->dynamic_props_done = true;
-		}
 	}
 }
 
@@ -280,9 +270,7 @@ static void zho_it_rewind(zend_object_iterator *iter)
 	zend_array *properties = Z_ARR(hooked_iter->declared_props);
 	zend_hash_internal_pointer_reset(properties);
 	hooked_iter->dynamic_props_done = false;
-	if (hooked_iter->dynamic_prop_it != (uint32_t) -1) {
-		EG(ht_iterators)[hooked_iter->dynamic_prop_it].pos = zho_num_backed_props(Z_OBJ(iter->data));
-	}
+	EG(ht_iterators)[hooked_iter->dynamic_prop_it].pos = zho_num_backed_props(Z_OBJ(iter->data));
 }
 
 static HashTable *zho_it_get_gc(zend_object_iterator *iter, zval **table, int *n)
@@ -309,17 +297,24 @@ static const zend_object_iterator_funcs zend_hooked_object_it_funcs = {
 
 ZEND_API zend_object_iterator *zend_hooked_object_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
+	zend_object *zobj = Z_OBJ_P(object);
+	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
+		zobj = zend_lazy_object_init(zobj);
+		if (UNEXPECTED(!zobj)) {
+			return NULL;
+		}
+	}
+
 	zend_hooked_object_iterator *iterator = emalloc(sizeof(zend_hooked_object_iterator));
 	zend_iterator_init(&iterator->it);
 
-	ZVAL_OBJ_COPY(&iterator->it.data, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&iterator->it.data, zobj);
 	iterator->it.funcs = &zend_hooked_object_it_funcs;
 	iterator->by_ref = by_ref;
 	iterator->declared_props_done = false;
-	zend_array *properties = zho_build_properties_ex(Z_OBJ_P(object), true, false);
+	zend_array *properties = zho_build_properties_ex(zobj, true, false);
 	ZVAL_ARR(&iterator->declared_props, properties);
-	iterator->dynamic_props_done = false;
-	iterator->dynamic_prop_it = (uint32_t) -1;
+	zho_dynamic_it_init(iterator);
 	ZVAL_UNDEF(&iterator->current_key);
 	ZVAL_UNDEF(&iterator->current_data);
 

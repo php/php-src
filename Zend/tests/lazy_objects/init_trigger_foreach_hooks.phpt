@@ -6,49 +6,79 @@ Lazy objects: Foreach initializes object
 #[AllowDynamicProperties]
 class C {
     public int $a;
+    private int $_b;
     public int $b {
-        get { return $this->b; }
-        set(int $value) { $this->b = $value; }
+        &get { $ref = &$this->_b; return $ref; }
     }
-    public int $c {
-        get { return $this->a + 2; }
-    }
-    public function __construct() {
+    public function __construct(bool $addDynamic = true) {
         var_dump(__METHOD__);
         $this->a = 1;
-        $this->b = 2;
-        $this->d = 4;
+        $this->_b = 2;
+        if ($addDynamic) {
+            $this->c = 3;
+            $this->d = 4;
+            unset($this->c);
+        }
     }
 }
 
 $reflector = new ReflectionClass(C::class);
 
-print "# Ghost:\n";
+function test(string $name, object $obj) {
+    printf("# %s:\n", $name);
+    foreach ($obj as $prop => $value) {
+        var_dump($prop, $value);
+    }
+    foreach ($obj as $prop => &$value) {
+        var_dump($prop, $value);
+    }
+}
 
 $obj = $reflector->newLazyGhost(function ($obj) {
     var_dump("initializer");
     $obj->__construct();
 });
 
-foreach ($obj as $prop => $value) {
-    var_dump($prop, $value);
-}
-
-print "# Proxy:\n";
+test('Ghost', $obj);
 
 $obj = $reflector->newLazyProxy(function ($obj) {
     var_dump("initializer");
     return new C();
 });
 
-foreach ($obj as $prop => $value) {
-    var_dump($prop, $value);
-}
+test('Proxy', $obj);
+
+$obj = $reflector->newLazyGhost(function ($obj) {
+    var_dump("initializer");
+    $obj->__construct(addDynamic: false);
+});
+
+test('Ghost (no dynamic)', $obj);
+
+$obj = $reflector->newLazyProxy(function ($obj) {
+    var_dump("initializer");
+    return new C(addDynamic: false);
+});
+
+test('Proxy (no dynamic)', $obj);
+
+print "# Proxy of proxy (initialization)\n";
+
+$obj = $reflector->newLazyProxy(function ($obj) use (&$obj2, $reflector) {
+    var_dump("initializer");
+    return $obj2 = new C();
+});
+$reflector->initializeLazyObject($obj);
+$reflector->resetAsLazyProxy($obj2, function () {
+    return new C();
+});
+
+test('Proxy of proxy', $obj);
 
 print "# Ghost (init exception):\n";
 
 $obj = $reflector->newLazyGhost(function ($obj) {
-    throw new \Exception();
+    throw new \Exception("initializer");
 });
 
 try {
@@ -60,7 +90,7 @@ try {
 print "# Proxy (init exception):\n";
 
 $obj = $reflector->newLazyProxy(function ($obj) {
-    throw new \Exception();
+    throw new \Exception("initializer");
 });
 
 try {
@@ -77,8 +107,12 @@ string(1) "a"
 int(1)
 string(1) "b"
 int(2)
-string(1) "c"
-int(3)
+string(1) "d"
+int(4)
+string(1) "a"
+int(1)
+string(1) "b"
+int(2)
 string(1) "d"
 int(4)
 # Proxy:
@@ -88,9 +122,54 @@ string(1) "a"
 int(1)
 string(1) "b"
 int(2)
-string(1) "c"
-int(3)
+string(1) "d"
+int(4)
+string(1) "a"
+int(1)
+string(1) "b"
+int(2)
+string(1) "d"
+int(4)
+# Ghost (no dynamic):
+string(11) "initializer"
+string(14) "C::__construct"
+string(1) "a"
+int(1)
+string(1) "b"
+int(2)
+string(1) "a"
+int(1)
+string(1) "b"
+int(2)
+# Proxy (no dynamic):
+string(11) "initializer"
+string(14) "C::__construct"
+string(1) "a"
+int(1)
+string(1) "b"
+int(2)
+string(1) "a"
+int(1)
+string(1) "b"
+int(2)
+# Proxy of proxy (initialization)
+string(11) "initializer"
+string(14) "C::__construct"
+# Proxy of proxy:
+string(14) "C::__construct"
+string(1) "a"
+int(1)
+string(1) "b"
+int(2)
+string(1) "d"
+int(4)
+string(1) "a"
+int(1)
+string(1) "b"
+int(2)
+string(1) "d"
+int(4)
 # Ghost (init exception):
-Exception: 
+Exception: initializer
 # Proxy (init exception):
-Exception:
+Exception: initializer
