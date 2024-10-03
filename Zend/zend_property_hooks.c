@@ -169,8 +169,12 @@ static void zho_dynamic_it_fetch_current(zend_object_iterator *iter)
 	HashPosition pos = zend_hash_iterator_pos(hooked_iter->dynamic_prop_it, properties);
 
 	Bucket *bucket = properties->arData + pos;
+
+	if (UNEXPECTED(Z_TYPE(bucket->val) == IS_UNDEF)) {
+		return;
+	}
+
 	if (hooked_iter->by_ref && Z_TYPE(bucket->val) != IS_REFERENCE) {
-		ZEND_ASSERT(Z_TYPE(bucket->val) != IS_UNDEF);
 		ZVAL_MAKE_REF(&bucket->val);
 	}
 	ZVAL_COPY(&hooked_iter->current_data, &bucket->val);
