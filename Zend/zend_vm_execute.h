@@ -5411,6 +5411,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(array_ptr);
 		if (!zobj->ce->get_iterator) {
+			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
+				zobj = zend_lazy_object_init(zobj);
+				if (UNEXPECTED(EG(exception))) {
+					UNDEF_RESULT();
+
+					HANDLE_EXCEPTION();
+				}
+			}
 			HashTable *properties = zobj->properties;
 			if (properties) {
 				if (UNEXPECTED(GC_REFCOUNT(properties) > 1)) {
@@ -5497,7 +5505,16 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_
 		ZEND_VM_NEXT_OPCODE();
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
+			zend_object *zobj = Z_OBJ_P(array_ptr);
 			HashTable *properties;
+			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
+				zobj = zend_lazy_object_init(zobj);
+				if (UNEXPECTED(EG(exception))) {
+					UNDEF_RESULT();
+
+					HANDLE_EXCEPTION();
+				}
+			}
 			if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 				if (array_ptr == array_ref) {
 					ZVAL_NEW_REF(array_ref, array_ref);
@@ -20117,6 +20134,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZE
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(array_ptr);
 		if (!zobj->ce->get_iterator) {
+			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
+				zobj = zend_lazy_object_init(zobj);
+				if (UNEXPECTED(EG(exception))) {
+					UNDEF_RESULT();
+
+					HANDLE_EXCEPTION();
+				}
+			}
 			HashTable *properties = zobj->properties;
 			if (properties) {
 				if (UNEXPECTED(GC_REFCOUNT(properties) > 1)) {
@@ -20204,7 +20229,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 		ZEND_VM_NEXT_OPCODE();
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
+			zend_object *zobj = Z_OBJ_P(array_ptr);
 			HashTable *properties;
+			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
+				zobj = zend_lazy_object_init(zobj);
+				if (UNEXPECTED(EG(exception))) {
+					UNDEF_RESULT();
+
+					HANDLE_EXCEPTION();
+				}
+			}
 			if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 				if (array_ptr == array_ref) {
 					ZVAL_NEW_REF(array_ref, array_ref);
@@ -22769,6 +22803,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZE
 	} else if (IS_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(array_ptr);
 		if (!zobj->ce->get_iterator) {
+			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
+				zobj = zend_lazy_object_init(zobj);
+				if (UNEXPECTED(EG(exception))) {
+					UNDEF_RESULT();
+					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+					HANDLE_EXCEPTION();
+				}
+			}
 			HashTable *properties = zobj->properties;
 			if (properties) {
 				if (UNEXPECTED(GC_REFCOUNT(properties) > 1)) {
@@ -22857,7 +22899,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 		ZEND_VM_NEXT_OPCODE();
 	} else if (IS_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
+			zend_object *zobj = Z_OBJ_P(array_ptr);
 			HashTable *properties;
+			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
+				zobj = zend_lazy_object_init(zobj);
+				if (UNEXPECTED(EG(exception))) {
+					UNDEF_RESULT();
+					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+					HANDLE_EXCEPTION();
+				}
+			}
 			if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 				if (array_ptr == array_ref) {
 					ZVAL_NEW_REF(array_ref, array_ref);
@@ -41067,6 +41118,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(array_ptr);
 		if (!zobj->ce->get_iterator) {
+			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
+				zobj = zend_lazy_object_init(zobj);
+				if (UNEXPECTED(EG(exception))) {
+					UNDEF_RESULT();
+
+					HANDLE_EXCEPTION();
+				}
+			}
 			HashTable *properties = zobj->properties;
 			if (properties) {
 				if (UNEXPECTED(GC_REFCOUNT(properties) > 1)) {
@@ -41153,7 +41212,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 		ZEND_VM_NEXT_OPCODE();
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
+			zend_object *zobj = Z_OBJ_P(array_ptr);
 			HashTable *properties;
+			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
+				zobj = zend_lazy_object_init(zobj);
+				if (UNEXPECTED(EG(exception))) {
+					UNDEF_RESULT();
+
+					HANDLE_EXCEPTION();
+				}
+			}
 			if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 				if (array_ptr == array_ref) {
 					ZVAL_NEW_REF(array_ref, array_ref);
