@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 
 - PHPDBG:
   . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
+  . Fixed bug GH-16181 (phpdbg: exit in exception handler reports fatal error).
+    (cmb)
 
 - SimpleXML:
   . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
