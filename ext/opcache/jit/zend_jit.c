@@ -1286,6 +1286,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	bool ce_is_instanceof;
 	bool on_this;
 
+	ZEND_ASSERT(!(op_array->fn_flags & ZEND_ACC_CLOSURE) || !(op_array->scope));
+
 	if (JIT_G(bisect_limit)) {
 		jit_bisect_pos++;
 		if (jit_bisect_pos >= JIT_G(bisect_limit)) {
@@ -2818,6 +2820,18 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 	/* Build SSA */
 	memset(&ssa, 0, sizeof(zend_ssa));
 
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC) {
+			zend_jit_op_array_extension *jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
+			op_array = (zend_op_array*) jit_extension->op_array;
+		} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS) {
+			zend_jit_op_array_hot_extension *jit_extension = (zend_jit_op_array_hot_extension*)ZEND_FUNC_INFO(op_array);
+			op_array = (zend_op_array*) jit_extension->op_array;
+		} else {
+			ZEND_ASSERT(!op_array->scope);
+		}
+	}
+
 	if (zend_jit_op_array_analyze1(op_array, script, &ssa) != SUCCESS) {
 		goto jit_failure;
 	}
@@ -3035,6 +3049,7 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	}
 	memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 	jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_HOT_COUNTERS;
+	jit_extension->op_array = op_array;
 	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) & (ZEND_HOT_COUNTERS_COUNT - 1)];
 	for (i = 0; i < op_array->last; i++) {
 		jit_extension->orig_handlers[i] = op_array->opcodes[i].handler;
@@ -3079,6 +3094,7 @@ int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		}
 		memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 		jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_FIRST_EXEC;
+		jit_extension->op_array = op_array;
 		jit_extension->orig_handler = (void*)opline->handler;
 		ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 		opline->handler = (const void*)zend_jit_runtime_jit_handler;
@@ -3108,6 +3124,7 @@ int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 			}
 			memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 			jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_PROF_REQUEST;
+			jit_extension->op_array = op_array;
 			jit_extension->orig_handler = (void*)opline->handler;
 			ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 			opline->handler = (const void*)zend_jit_profile_jit_handler;
