@@ -571,6 +571,10 @@ class ReflectionProperty implements Reflector
     public function getHook(PropertyHookType $type): ?ReflectionMethod {}
 
     public function isFinal(): bool {}
+
+    public function isReadable(?object $object = null, ?string $scope = 'static'): bool {}
+
+    public function isWritable(?object $object = null, ?string $scope = 'static'): bool {}
 }
 
 /** @not-serializable */
