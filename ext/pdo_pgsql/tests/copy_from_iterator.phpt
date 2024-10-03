@@ -42,6 +42,12 @@ $iterator = new class implements Iterator{
     }
 };
 
+try {
+	$db->pgsqlCopyFromArray('test_copy_from_traversable',new stdClass());
+} catch (\TypeError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
 $db->pgsqlCopyFromArray('test_copy_from_traversable',$iterator);
 
 $stmt = $db->query("select * from test_copy_from_traversable order by 1");
@@ -56,6 +62,7 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->query('DROP TABLE IF EXISTS test_copy_from_traversable CASCADE');
 ?>
 --EXPECT--
+PDO::pgsqlCopyFromArray(): Argument #2 ($rows) must be of type Traversable|array, stdClass given
 array (
   0 => 1,
   1 => 1,

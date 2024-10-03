@@ -657,16 +657,14 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sA|sss!",
-		&table_name, &table_name_len, &pg_rows,
-		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if ((Z_TYPE_P(pg_rows) != IS_ARRAY && !instanceof_function(Z_OBJCE_P(pg_rows), zend_ce_traversable))) {
-		zend_argument_type_error(2, "must be of type array or Traversable");
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STRING(table_name, table_name_len)
+		Z_PARAM_ITERABLE(pg_rows)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(pg_delim, pg_delim_len)
+		Z_PARAM_STRING(pg_null_as, pg_null_as_len)
+		Z_PARAM_STRING_OR_NULL(pg_fields, pg_fields_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
@@ -712,9 +710,16 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			iter = Z_OBJ_P(pg_rows)->ce->get_iterator(Z_OBJCE_P(pg_rows), pg_rows, 0);
+			iter = Z_OBJCE_P(pg_rows)->get_iterator(Z_OBJCE_P(pg_rows), pg_rows, 0);
 			if (iter == NULL || EG(exception)) {
 				RETURN_THROWS();
+			}
+
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 			}
 
 			for (; iter->funcs->valid(iter) == SUCCESS && EG(exception) == NULL; iter->funcs->move_forward(iter)) {
