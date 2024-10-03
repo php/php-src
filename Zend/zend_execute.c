@@ -2500,7 +2500,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_s
 }
 
 #ifdef ZEND_CHECK_STACK_LIMIT
-zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_call_stack_size_error(void)
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_call_stack_size_error(void)
 {
 	size_t max_stack_size = 0;
 	if ((uintptr_t) EG(stack_base) > (uintptr_t) EG(stack_limit)) {
