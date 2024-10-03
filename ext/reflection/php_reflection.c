@@ -477,7 +477,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 
 		count = 0;
 		if (properties && zend_hash_num_elements(properties)) {
-			ZEND_HASH_MAP_FOREACH_STR_KEY(properties, prop_name) {
+			ZEND_HASH_FOREACH_STR_KEY(properties, prop_name) {
 				if (prop_name && ZSTR_LEN(prop_name) && ZSTR_VAL(prop_name)[0]) { /* skip all private and protected properties */
 					if (!zend_hash_exists(&ce->properties_info, prop_name)) {
 						count++;
