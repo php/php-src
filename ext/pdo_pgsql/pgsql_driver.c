@@ -662,8 +662,8 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_ITERABLE(pg_rows)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(pg_delim, pg_delim_len)
-		Z_PARAM_STRING_OR_NULL(pg_null_as, pg_null_as_len)
-		Z_PARAM_STRING(pg_fields, pg_fields_len)
+		Z_PARAM_STRING(pg_null_as, pg_null_as_len)
+		Z_PARAM_STRING_OR_NULL(pg_fields, pg_fields_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -717,6 +717,9 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 			if (iter->funcs->rewind) {
 				iter->funcs->rewind(iter);
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 			}
 
 			for (; iter->funcs->valid(iter) == SUCCESS && EG(exception) == NULL; iter->funcs->move_forward(iter)) {
