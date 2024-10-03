@@ -6617,6 +6617,147 @@ ZEND_METHOD(ReflectionProperty, isFinal)
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
 }
 
+static zend_result get_ce_from_scope_name(zend_class_entry **scope, zend_string *scope_name, zend_execute_data *execute_data)
+{
+	if (!scope_name) {
+		*scope = NULL;
+		return SUCCESS;
+	}
+	if (zend_string_equals(scope_name, ZSTR_KNOWN(ZEND_STR_STATIC))) {
+		*scope = EX(prev_execute_data)->func->common.scope;
+		return SUCCESS;
+	}
+
+	*scope = zend_lookup_class(scope_name);
+	if (!*scope) {
+		zend_throw_error(NULL, "Class \"%s\" not found", ZSTR_VAL(scope_name));
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+static zend_always_inline uint32_t set_visibility_to_visibility(uint32_t set_visibility)
+{
+	switch (set_visibility) {
+		case ZEND_ACC_PUBLIC_SET:
+			return ZEND_ACC_PUBLIC;
+		case ZEND_ACC_PROTECTED_SET:
+			return ZEND_ACC_PROTECTED;
+		case ZEND_ACC_PRIVATE_SET:
+			return ZEND_ACC_PRIVATE;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
+static bool check_visibility(uint32_t visibility, zend_class_entry *ce, zend_class_entry *scope)
+{
+	if (!(visibility & ZEND_ACC_PUBLIC) && (scope != ce)) {
+		if (!scope) {
+			return false;
+		}
+		if (visibility & ZEND_ACC_PRIVATE) {
+			return false;
+		}
+		ZEND_ASSERT(visibility & ZEND_ACC_PROTECTED);
+		if (!instanceof_function(scope, ce) && !instanceof_function(ce, scope)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+ZEND_METHOD(ReflectionProperty, isReadable)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_string *scope_name = ZSTR_KNOWN(ZEND_STR_STATIC);
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(scope_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+	zend_property_info *prop = ref->prop;
+	if (!prop) {
+		_DO_THROW("May not use isReadable on dynamic properties");
+		RETURN_THROWS();
+	}
+
+	zend_class_entry *scope;
+	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
+		RETURN_FALSE;
+	}
+
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
+		ZEND_ASSERT(prop->hooks);
+		if (!prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+			RETURN_FALSE;
+		}
+	}
+
+	RETURN_TRUE;
+}
+
+ZEND_METHOD(ReflectionProperty, isWritable)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_object *obj;
+	zend_string *scope_name = ZSTR_KNOWN(ZEND_STR_STATIC);
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJ(obj)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(scope_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+	zend_property_info *prop = ref->prop;
+	if (!prop) {
+		_DO_THROW("May not use isReadable on dynamic properties");
+		RETURN_THROWS();
+	}
+
+	zend_class_entry *scope;
+	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (!instanceof_function(obj->ce, prop->ce)) {
+		_DO_THROW("Given object is not an instance of the class this property was declared in");
+		RETURN_THROWS();
+	}
+
+	uint32_t set_visibility = prop->flags & ZEND_ACC_PPP_SET_MASK;
+	if (!set_visibility) {
+		set_visibility = zend_visibility_to_set_visibility(prop->flags & ZEND_ACC_PPP_MASK);
+	}
+	if (!check_visibility(set_visibility_to_visibility(set_visibility), prop->ce, scope)) {
+		RETURN_FALSE;
+	}
+
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
+		ZEND_ASSERT(prop->hooks);
+		if (!prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+			RETURN_FALSE;
+		}
+	}
+
+	if (prop->flags & ZEND_ACC_READONLY) {
+		ZEND_ASSERT(prop->offset != ZEND_VIRTUAL_PROPERTY_OFFSET);
+		zval *prop_val = OBJ_PROP(obj, prop->offset);
+		if (Z_TYPE_P(prop_val) != IS_UNDEF && !(Z_PROP_FLAG_P(prop_val) & IS_PROP_REINITABLE)) {
+			RETURN_FALSE;
+		}
+	}
+
+	RETURN_TRUE;
+}
+
 /* {{{ Constructor. Throws an Exception in case the given extension does not exist */
 ZEND_METHOD(ReflectionExtension, __construct)
 {
