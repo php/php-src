@@ -965,14 +965,19 @@ function GREP_HEADER(header_name, regex, path_to_check)
 
 	if (!c) {
 		/* look in the include path */
+		if (path_to_check == null) {
+			path_to_check = php_usual_include_suspects;
+		} else {
+			path_to_check += ";" + php_usual_include_suspects;
+		}
 
 		var p = search_paths(header_name, path_to_check, "INCLUDE");
 		if (typeof(p) == "string") {
-			c = file_get_contents(p);
+			c = file_get_contents(p + "\\" + header_name);
 		} else if (p == false) {
 			p = search_paths(header_name, PHP_EXTRA_INCLUDES, null);
 			if (typeof(p) == "string") {
-				c = file_get_contents(p);
+				c = file_get_contents(p + "\\" + header_name);
 			}
 		}
 		if (!c) {
