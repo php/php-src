@@ -81,7 +81,7 @@ typedef enum _php_output_handler_hook_t {
 } php_output_handler_hook_t;
 
 #define PHP_OUTPUT_HANDLER_INITBUF_SIZE(s) \
-( ((s) > 1) ? \
+( ((s) > 0) ? \
 	((s) + PHP_OUTPUT_HANDLER_ALIGNTO_SIZE - 1) & ~(PHP_OUTPUT_HANDLER_ALIGNTO_SIZE - 1) : \
 	PHP_OUTPUT_HANDLER_DEFAULT_SIZE \
 )
