@@ -436,6 +436,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer);
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield);
 ZEND_API zval* ZEND_FASTCALL zend_fetch_static_property(zend_execute_data *ex, int fetch_type);
+ZEND_API void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc);
 
 ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data);
 
