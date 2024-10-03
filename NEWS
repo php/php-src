@@ -58,6 +58,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16009 (Segmentation fault with frameless functions and
     undefined CVs). (nielsdos)
 
+- PCRE:
+  . Fixed bug GH-16184 (UBSan address overflowed in ext/pcre/php_pcre.c).
+    (nielsdos)
+
 - PHPDBG:
   . Fixed bug GH-16181 (phpdbg: exit in exception handler reports fatal error).
     (cmb)

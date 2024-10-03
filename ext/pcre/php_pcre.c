@@ -1754,8 +1754,10 @@ matched:
 						}
 						if (preg_get_backref(&walk, &backref)) {
 							if (backref < count) {
-								match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-								walkbuf = zend_mempcpy(walkbuf, subject + offsets[backref << 1], match_len);
+								if (offsets[backref<<1] < SIZE_MAX) {
+									match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
+									walkbuf = zend_mempcpy(walkbuf, subject + offsets[backref << 1], match_len);
+								}
 							}
 							continue;
 						}
