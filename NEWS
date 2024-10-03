@@ -52,6 +52,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16009 (Segmentation fault with frameless functions and
     undefined CVs). (nielsdos)
 
+- PHPDBG:
+  . Fixed bug GH-16181 (phpdbg: exit in exception handler reports fatal error).
+    (cmb)
+
 - Reflection:
   . Fixed bug GH-16122 (The return value of ReflectionFunction::getNamespaceName()
     and ReflectionFunction::inNamespace() for closures is incorrect). (timwolla)
