@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     bypassable due to the environment variable collision). (CVE-2024-8927)
     (nielsdos)
 
+- CLI:
+  . Fixed bug GH-16137: duplicate http headers when set several times by
+    the client. (David Carlier)
+
 - Core:
   . Fixed bug GH-16040 (Use-after-free of object released in hook). (ilutov)
   . Fixed bug GH-16054 (Segmentation fault when resizing hash table iterator
