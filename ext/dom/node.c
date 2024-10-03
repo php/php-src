@@ -740,11 +740,43 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 
 /* }}} */
 
+/* Returns true if the node was changed, false otherwise. */
+static bool dom_set_document_ref_obj_single(xmlNodePtr node, xmlDocPtr doc, php_libxml_ref_obj *document)
+{
+	dom_object *childobj = php_dom_object_get_data(node);
+	if (childobj && !childobj->document) {
+		childobj->document = document;
+		document->refcount++;
+		return true;
+	}
+	return false;
+}
+
+static void dom_set_document_pointers(xmlNodePtr node, xmlDocPtr doc, php_libxml_ref_obj *document)
+{
+	/* Applies the document to the entire subtree. */
+	xmlSetTreeDoc(node, doc);
+
+	if (!dom_set_document_ref_obj_single(node, doc, document)) {
+		return;
+	}
+
+	xmlNodePtr base = node;
+	node = node->children;
+	while (node != NULL) {
+		ZEND_ASSERT(node != base);
+
+		if (!dom_set_document_ref_obj_single(node, doc, document)) {
+			break;
+		}
+
+		node = php_dom_next_in_tree_order(node, base);
+	}
+}
+
 static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern) /* {{{ */
 {
-	xmlNodePtr newchild, node;
-
-	newchild = fragment->children;
+	xmlNodePtr newchild = fragment->children;
 
 	if (newchild) {
 		if (prevsib == NULL) {
@@ -760,17 +792,10 @@ static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlN
 			nextsib->prev = fragment->last;
 		}
 
-		node = newchild;
+		/* Assign parent node pointer */
+		xmlNodePtr node = newchild;
 		while (node != NULL) {
 			node->parent = nodep;
-			if (node->doc != nodep->doc) {
-				xmlSetTreeDoc(node, nodep->doc);
-				dom_object *childobj = node->_private;
-				if (childobj != NULL) {
-					childobj->document = intern->document;
-					php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
-				}
-			}
 			if (node == fragment->last) {
 				break;
 			}
@@ -835,8 +860,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 	}
 
 	if (child->doc == NULL && parentp->doc != NULL) {
-		childobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
+		dom_set_document_pointers(child, parentp->doc, intern->document);
 	}
 
 	php_libxml_invalidate_node_list_cache(intern->document);
@@ -856,9 +880,6 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 
 		if (child->type == XML_TEXT_NODE && (refp->type == XML_TEXT_NODE ||
 			(refp->prev != NULL && refp->prev->type == XML_TEXT_NODE))) {
-			if (child->doc == NULL) {
-				xmlSetTreeDoc(child, parentp->doc);
-			}
 			new_child = child;
 			new_child->parent = refp->parent;
 			new_child->next = refp;
@@ -910,9 +931,6 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 		}
 		if (child->type == XML_TEXT_NODE && parentp->last != NULL && parentp->last->type == XML_TEXT_NODE) {
 			child->parent = parentp;
-			if (child->doc == NULL) {
-				xmlSetTreeDoc(child, parentp->doc);
-			}
 			new_child = child;
 			if (parentp->children == NULL) {
 				parentp->children = child;
@@ -1155,6 +1173,10 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 		}
 	}
 
+	if (newchild->doc == NULL && nodep->doc != NULL) {
+		dom_set_document_pointers(newchild, nodep->doc, intern->document);
+	}
+
 	if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
 		xmlNodePtr prevsib, nextsib;
 		prevsib = oldchild->prev;
@@ -1171,11 +1193,6 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 		xmlDtdPtr intSubset = xmlGetIntSubset(nodep->doc);
 		bool replacedoctype = (intSubset == (xmlDtd *) oldchild);
 
-		if (newchild->doc == NULL && nodep->doc != NULL) {
-			xmlSetTreeDoc(newchild, nodep->doc);
-			newchildobj->document = intern->document;
-			php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
-		}
 		xmlReplaceNode(oldchild, newchild);
 		if (!modern) {
 			dom_reconcile_ns(nodep->doc, newchild);
@@ -1265,8 +1282,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 	}
 
 	if (child->doc == NULL && nodep->doc != NULL) {
-		childobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
+		dom_set_document_pointers(child, nodep->doc, intern->document);
 	}
 
 	if (child->parent != NULL){
@@ -1275,9 +1291,6 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 
 	if (child->type == XML_TEXT_NODE && nodep->last != NULL && nodep->last->type == XML_TEXT_NODE) {
 		child->parent = nodep;
-		if (child->doc == NULL) {
-			xmlSetTreeDoc(child, nodep->doc);
-		}
 		new_child = child;
 		if (nodep->children == NULL) {
 			nodep->children = child;

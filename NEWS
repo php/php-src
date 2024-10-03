@@ -33,6 +33,9 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-16190 (Using reflection to call Dom\Node::__construct
     causes assertion failure). (nielsdos)
+  . Fixed bug GH-16150 (Use after free in php_dom.c). (nielsdos)
+  . Fixed bug GH-16152 (Memory leak in DOMProcessingInstruction/DOMDocument).
+    (nielsdos)
 
 - FPM:
   . Fixed bug GHSA-865w-9rf3-2wh5 (Logs from childrens may be altered).
