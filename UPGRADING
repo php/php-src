@@ -253,6 +253,9 @@ PHP 8.4 UPGRADE NOTES
   . The "allowed_classes" option for unserialize() now throws TypeErrors and
     ValueErrors if it is not an array of class names.
   . http_build_query() now correctly handles backed enums.
+  . stream_bucket_make_writeable() and stream_bucket_new() will now return a
+    StreamBucket instance instead of an instance of stdClass.
+    RFC: https://wiki.php.net/rfc/dedicated_stream_bucket
 
 - Tidy:
   . Failures in the constructor now throw exceptions rather than emitting
@@ -343,13 +346,6 @@ PHP 8.4 UPGRADE NOTES
     value can also be retrieved by passing CURLINFO_POSTTRANSFER_TIME_T to the
     curl_getinfo() $option parameter. This requires libcurl 8.10.0 or later.
 
-- Date:
-  . Added static methods
-    DateTime[Immutable]::createFromTimestamp(int|float $timestamp): static.
-  . Added method DateTime[Immutable]::getMicrosecond(): int.
-  . Added method
-    DateTime[Immutable]::setMicrosecond(int $microsecond): static.
-
 - DOM:
   . Added constant DOMNode::DOCUMENT_POSITION_DISCONNECTED.
   . Added constant DOMNode::DOCUMENT_POSITION_PRECEDING.
@@ -363,9 +359,6 @@ PHP 8.4 UPGRADE NOTES
 - FPM:
   . Flushing headers without a body will now succeed. See GH-12785.
   . Status page has a new field to display a memory peak.
-
-- Hash:
-  . Added HashContext::__debugInfo().
 
 - Intl:
   . NumberFormatter::ROUND_HALFODD added to complement existing
@@ -403,14 +396,7 @@ PHP 8.4 UPGRADE NOTES
     - two-dashes and non-nested C-style comments.
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
-- PDO_DBLIB:
-  . Added class Pdo\DbLib.
-
-- PDO_FIREBIRD:
-  . Added class Pdo\Firebird.
-
 - PDO_MYSQL:
-  . Added class Pdo\Mysql.
   . Added custom parser supporting:
     - single and double-quoted literals, with doubling and backslash as escaping
       mechanism
@@ -419,11 +405,7 @@ PHP 8.4 UPGRADE NOTES
       and hash-comments
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
-- PDO_ODBC:
-  . Added class Pdo\Odbc.
-
 - PDO_PGSQL:
-  . Added class Pdo\Pgsql.
   . Added custom parser supporting:
     - single and double quoted literals, with doubling as escaping mechanism
     - C-style "escape" string literals (E'string')
@@ -433,22 +415,14 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
 - PDO_SQLITE:
-  . Added class Pdo\Sqlite.
   . Added custom parser supporting:
     - single, double quoted, and backtick literals, with doubling as escaping mechanism
     - square brackets quoting for identifiers
     - two-dashes and C-style comments (non-nested)
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
-- PgSQL:
-  . Added pg_result_memory_size to get the visibility the memory used by a query result.
-
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
-
-- POSIX:
-  . Added constant POSIX_SC_CHILD_MAX
-  . Added constant POSIX_SC_CLK_TCK
 
 - Readfile:
   . Added ability to change .php_history path through PHP_HISTFILE env variable.
@@ -458,9 +432,6 @@ PHP 8.4 UPGRADE NOTES
     experience.
   . ReflectionClassConstant::__toString() and ReflectionProperty::__toString()
     now returns the attached doc comments.
-  . ReflectionConstant was introduced.
-  . ReflectionClassConstant::isDeprecated() was introduced.
-  . ReflectionGenerator::isClosed() was introduced.
   . Multiple methods and constants related to lazy objects were introduced:
     - ReflectionClass::newLazyGhost()
     - ReflectionClass::newLazyProxy()
@@ -475,7 +446,6 @@ PHP 8.4 UPGRADE NOTES
     - ReflectionClass::SKIP_INITIALIZATION_ON_SERIALIZE
     - ReflectionClass::SKIP_DESTRUCTOR
     RFC: https://wiki.php.net/rfc/lazy-objects
-  . ReflectionProperty::isDynamic() was introduced.
 
 - SOAP:
   . Added support for clark notation for namespaces in class map.
@@ -488,9 +458,6 @@ PHP 8.4 UPGRADE NOTES
   . Session persistence now works with a shared session module.
 
 - Standard:
-  . stream_bucket_make_writeable() and stream_bucket_new() will now return a
-    StreamBucket instance instead of an instance of stdClass.
-    RFC: https://wiki.php.net/rfc/dedicated_stream_bucket
   . Added a new RoundingMode enum with clearer naming and improved discoverability
     compared to the PHP_ROUND_* constants.
     RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum
@@ -742,7 +709,7 @@ PHP 8.4 UPGRADE NOTES
     Along with these, five constants (Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL,
     Pdo\Firebird::READ_COMMITTED, Pdo\Firebird::REPEATABLE_READ,
     Pdo\Firebird::SERIALIZABLE, Pdo\Firebird::WRITABLE_TRANSACTION) have been added.
-  . When using persistent connections, there is now a liveness check in the
+  . When using persistent connections, there is now a liveliness check in the
     constructor.
   . The content that is built changes depending on the value of FB_API_VER in
     ibase.h, so added static method Pdo\Firebird::getApiVersion() to obtain that
@@ -826,12 +793,23 @@ PHP 8.4 UPGRADE NOTES
   . Added bcdivmod().
     RFC: https://wiki.php.net/rfc/add_bcdivmod_to_bcmath
 
+- Date:
+  . Added static methods
+    DateTime[Immutable]::createFromTimestamp(int|float $timestamp): static.
+  . Added method DateTime[Immutable]::getMicrosecond(): int.
+  . Added method
+    DateTime[Immutable]::setMicrosecond(int $microsecond): static.
+
 - DOM:
   . Added DOMNode::compareDocumentPosition().
   . Added DOMXPath::registerPhpFunctionNS().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
   . Added DOMXPath::quote() to quote a string for use in an XPath expression.
     Example usage: "//span[contains(text()," . $xpath->quote($string) . ")]"
+  . DOMNode::compareDocumentPosition()
+
+- Hash:
+  . Added HashContext::__debugInfo().
 
 - Intl:
   . Added IntlDateFormatter::getIanaID()/intltz_get_iana_id() to
@@ -880,6 +858,7 @@ PHP 8.4 UPGRADE NOTES
   . Added pg_jit to get informations on the server JIT support.
   . Added pg_set_chunked_rows_size to allow to fetch results in chunk of
     max N rows.
+  . Added pg_result_memory_size to get the visibility the memory used by a query result.
 
 - Reflection:
   . Multiple methods related to lazy objects were introduced:
@@ -894,6 +873,9 @@ PHP 8.4 UPGRADE NOTES
     - ReflectionProperty::skipLazyInitialization()
     - ReflectionProperty::setRawValueWithoutLazyInitialization()
     RFC: https://wiki.php.net/rfc/lazy-objects
+  . ReflectionClassConstant::isDeprecated() was introduced.
+  . ReflectionGenerator::isClosed() was introduced.
+  . ReflectionProperty::isDynamic() was introduced.
 
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
@@ -951,8 +933,10 @@ PHP 8.4 UPGRADE NOTES
     https://wiki.php.net/rfc/fix_up_bcmath_number_class
 
 - Core:
-  . New RequestParseBodyException.
+  . RequestParseBodyException.
     RFC: https://wiki.php.net/rfc/rfc1867-non-post
+  . #[\Deprecated] attribute.
+    RFC: https://wiki.php.net/rfc/deprecated_attribute
 
 - DBA:
   . Dba\Connection opaque object replacing DBA resources
@@ -974,6 +958,38 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/opt_in_dom_spec_compliance
   . Implemented "New ext-dom features in PHP 8.4" RFC.
     RFC: https://wiki.php.net/rfc/dom_additions_84
+
+- ODBC:
+  . Odbc\Connection
+  . Odbc\Result
+
+- PDO_DBLIB:
+  . Pdo\DbLib.
+
+- PDO_FIREBIRD:
+  . Pdo\Firebird.
+
+- PDO_MYSQL:
+  . Pdo\Mysql.
+
+- PDO_ODBC:
+  . Pdo\Odbc.
+
+- PDO_PGSQL:
+  . Pdo\Pgsql.
+
+- PDO_SQLITE:
+  . Pdo\Sqlite.
+
+- Reflection:
+  . ReflectionConstant
+
+- SOAP:
+  . Soap\Url
+  . Soap\Sdl
+
+- Standard:
+  . StreamBucket
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -1108,6 +1124,10 @@ PHP 8.4 UPGRADE NOTES
 
 - PgSQL:
   . PGSQL_TUPLES_CHUNK
+
+- POSIX:
+  . POSIX_SC_CHILD_MAX
+  . POSIX_SC_CLK_TCK
 
 - Sockets:
   . SO_EXCLUSIVEADDRUSE (Windows only).
