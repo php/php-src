@@ -3,6 +3,7 @@ env:
 
 freebsd_task:
   name: FREEBSD_DEBUG_NTS
+  skip: "changesIncludeOnly('NEWS', 'EXTENSIONS', 'UPGRADING', 'UPGRADING.INTERNALS', '**.md', 'docs/*', 'docs-old/*')"
   freebsd_instance:
     image_family: freebsd-13-3
   env:
