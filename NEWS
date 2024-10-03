@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.13
 
+- CLI:
+  . Fixed bug GH-16137: duplicate http headers when set several times by
+    the client. (David Carlier)
+
 - Core:
   . Fixed bug GH-16054 (Segmentation fault when resizing hash table iterator
     list while adding). (nielsdos)
