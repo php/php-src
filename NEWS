@@ -100,6 +100,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15657 (Segmentation fault in dasm_x86.h). (nielsdos)
   . Added opcache_jit_blacklist() function. (Bob)
 
+- PCRE:
+  . Fixed GH-16189 (underflow on offset argument). (David Carlier)
+
 - PHPDBG:
   . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
 
