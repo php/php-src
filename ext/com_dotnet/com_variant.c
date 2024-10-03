@@ -24,39 +24,35 @@
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 
-/* create an automation SafeArray from a PHP array.
+/* create an automation SafeArray from a PHP array (HashTable).
  * Only creates a single-dimensional array of variants.
  * The keys of the PHP hash MUST be numeric. */
-static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
+static void safe_array_from_hashtable(VARIANT *v, HashTable *ht, int codepage)
 {
 	SAFEARRAY *sa = NULL;
 	SAFEARRAYBOUND bound;
-	HashPosition pos;
-	int keytype;
-	zend_string *strindex;
-	zend_ulong intindex = 0;
 	VARIANT *va;
-	zval *item;
 
 	/* find the largest array index, and assert that all keys are integers */
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(z), &pos);
-	for (;; zend_hash_move_forward_ex(Z_ARRVAL_P(z), &pos)) {
+	if (!zend_array_is_list(ht)) {
+		// TODO: Make this a ValueError
+		php_error_docref(NULL, E_WARNING, "COM: converting from PHP array to VARIANT array; only arrays with numeric keys are allowed");
+		V_VT(v) = VT_NULL;
+		return;
+	}
+	// TODO: Check not empty?
 
-		keytype = zend_hash_get_current_key_ex(Z_ARRVAL_P(z), &strindex, &intindex, &pos);
-
-		if (HASH_KEY_IS_STRING == keytype) {
-			goto bogus;
-		} else if (HASH_KEY_NON_EXISTENT == keytype) {
-			break;
-		} else if (intindex > UINT_MAX) {
-			php_error_docref(NULL, E_WARNING, "COM: max number %u of elements in safe array exceeded", UINT_MAX);
-			break;
-		}
+	uint32_t nb_values = zend_hash_num_elements(ht);
+	if (nb_values > UINT_MAX) {
+		// TODO: Make this a ValueError?
+		php_error_docref(NULL, E_WARNING, "COM: max number %u of elements in safe array exceeded", UINT_MAX);
+		V_VT(v) = VT_NULL;
+		return;
 	}
 
 	/* allocate the structure */
 	bound.lLbound = 0;
-	bound.cElements = zend_hash_num_elements(Z_ARRVAL_P(z));
+	bound.cElements = nb_values;
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
 
 	/* get a lock on the array itself */
@@ -64,33 +60,18 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	va = (VARIANT*)sa->pvData;
 
 	/* now fill it in */
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(z), &pos);
-	for (;; zend_hash_move_forward_ex(Z_ARRVAL_P(z), &pos)) {
-		if (NULL == (item = zend_hash_get_current_data_ex(Z_ARRVAL_P(z), &pos))) {
-			break;
+	zend_ulong index = 0;
+	zval *value;
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(ht, index, value) {
+		if (index < bound.cElements) {
+			php_com_variant_from_zval(&va[index], value, codepage);
 		}
-		zend_hash_get_current_key_ex(Z_ARRVAL_P(z), &strindex, &intindex, &pos);
-		if (intindex < bound.cElements) {
-			php_com_variant_from_zval(&va[intindex], item, codepage);
-		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	/* Unlock it and stuff it into our variant */
 	SafeArrayUnaccessData(sa);
 	V_VT(v) = VT_ARRAY|VT_VARIANT;
 	V_ARRAY(v) = sa;
-
-	return;
-
-bogus:
-	php_error_docref(NULL, E_WARNING, "COM: converting from PHP array to VARIANT array; only arrays with numeric keys are allowed");
-
-	V_VT(v) = VT_NULL;
-
-	if (sa) {
-		SafeArrayUnlock(sa);
-		SafeArrayDestroy(sa);
-	}
 }
 
 static void php_com_variant_from_zval_ex(VARIANT *v, zval *z, int codepage, VARTYPE vt)
@@ -142,7 +123,7 @@ static void php_com_variant_from_zval_ex(VARIANT *v, zval *z, int codepage, VART
 
 		case IS_ARRAY:
 			/* map as safe array */
-			safe_array_from_zval(v, z, codepage);
+			safe_array_from_hashtable(v, Z_ARRVAL_P(z), codepage);
 			break;
 
 		case IS_LONG:
