@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     DOMElement->getAttributeNames()). (nielsdos)
   . Fixed bug GH-16151 (Assertion failure in ext/dom/parentnode/tree.c).
     (nielsdos)
+  . Fixed bug GH-16190 (Using reflection to call Dom\Node::__construct
+    causes assertion failure). (nielsdos)
 
 - FPM:
   . Fixed bug GHSA-865w-9rf3-2wh5 (Logs from childrens may be altered).
