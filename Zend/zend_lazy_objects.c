@@ -199,6 +199,27 @@ ZEND_API bool zend_class_can_be_lazy(zend_class_entry *ce)
 	return true;
 }
 
+static int zlo_hash_remove_dyn_props_func(zval *pDest)
+{
+	if (Z_TYPE_P(pDest) == IS_INDIRECT) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+
+	return ZEND_HASH_APPLY_REMOVE;
+}
+
+static bool zlo_is_iterating(zend_object *object)
+{
+	if (object->properties && HT_ITERATORS_COUNT(object->properties)) {
+		return true;
+	}
+	if (zend_object_is_lazy_proxy(object)
+			&& zend_lazy_object_initialized(object)) {
+		return zlo_is_iterating(zend_lazy_object_get_instance(object));
+	}
+	return false;
+}
+
 /* Make object 'obj' lazy. If 'obj' is NULL, create a lazy instance of
  * class 'reflection_ce' */
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
@@ -251,6 +272,10 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 			}
 		}
 	} else {
+		if (zlo_is_iterating(obj)) {
+			zend_throw_error(NULL, "Can not reset an object during property iteration");
+			return NULL;
+		}
 		if (zend_object_is_lazy(obj)) {
 			ZEND_ASSERT(zend_object_is_lazy_proxy(obj) && zend_lazy_object_initialized(obj));
 			OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY);
@@ -278,9 +303,17 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 
 		GC_DEL_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
 
-		/* unset() dynamic properties */
-		zend_object_dtor_dynamic_properties(obj);
-		obj->properties = NULL;
+		/* unset() dynamic properties. Do not NULL out obj->properties, as this
+		 * would be unexpected. */
+		if (obj->properties) {
+			if (UNEXPECTED(GC_REFCOUNT(obj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(obj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_DELREF(obj->properties);
+				}
+				obj->properties = zend_array_dup(obj->properties);
+			}
+			zend_hash_reverse_apply(obj->properties, zlo_hash_remove_dyn_props_func);
+		}
 
 		/* unset() declared properties */
 		for (int i = 0; i < reflection_ce->default_properties_count; i++) {
@@ -527,6 +560,9 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 		ZEND_ASSERT(zend_object_is_lazy_proxy(obj));
 		zend_lazy_object_info *info = zend_lazy_object_get_info(obj);
 		ZEND_ASSERT(info->flags & ZEND_LAZY_OBJECT_INITIALIZED);
+		if (zend_object_is_lazy(info->u.instance)) {
+			return zend_lazy_object_init(info->u.instance);
+		}
 		return info->u.instance;
 	}
 
