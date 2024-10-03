@@ -1191,7 +1191,7 @@ static zend_result dom_saveHTML_write_string_len(void *application_data, const c
 	const lxb_char_t *buf_end = buf_ref + len;
 
 	do {
-		decode_status = output->decoding_data->decode(output->decode, &buf_ref, buf_end);
+		decode_status = lxb_encoding_decode_utf_8(output->decode, &buf_ref, buf_end);
 
 		const lxb_codepoint_t *codepoints_ref = output->codepoints;
 		const lxb_codepoint_t *codepoints_end = codepoints_ref + lxb_encoding_decode_buf_used(output->decode);
