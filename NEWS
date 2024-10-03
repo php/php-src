@@ -37,6 +37,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16188 (Assertion failure in Zend/zend_exceptions.c). (Arnaud)
   . Fixed bug GH-16233 (Observer segfault when calling user function in
     internal function via trampoline). (nielsdos)
+  . Fixed bug GH-16185 (Various hooked object iterator issues). (ilutov)
 
 - DOM:
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
