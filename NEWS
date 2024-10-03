@@ -56,6 +56,7 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-16181 (phpdbg: exit in exception handler reports fatal error).
     (cmb)
+  . Fixed bug GH-16041 (Support stack limit in phpdbg). (Arnaud)
 
 - Reflection:
   . Fixed bug GH-16122 (The return value of ReflectionFunction::getNamespaceName()
