@@ -38,7 +38,9 @@ PHP                                                                        NEWS
   . Fixed stub for openssl_csr_new. (Jakub Zelenka)
 
 - PCRE:
-  . Fixed GH-16189 (underflow on offset argument). (David Carlier)
+  . Fixed bug GH-16189 (underflow on offset argument). (David Carlier)
+  . Fixed bug GH-16184 (UBSan address overflowed in ext/pcre/php_pcre.c).
+    (nielsdos)
 
 - PHPDBG:
   . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
