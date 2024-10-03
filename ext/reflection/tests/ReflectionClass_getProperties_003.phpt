@@ -14,12 +14,8 @@ class C {
     static public  $pubs2;
     static private  $privs1;
     static private  $privs2;
-    public  $pubVirt1 { get {} set {} }
-    public  $pubVirt2 { get {} }
-    public  $pubVirt3 { set {} }
-    private  $privVirt1 { get {} set {} }
-    private  $privVirt2 { get {} }
-    private  $privVirt3 { set {} }
+    public $hookNoVirt { set { $this->hookNoVirt = strtoupper( $value ); } }
+    public $hookVirt { get { return 42; } }
 }
 
 $rc = new ReflectionClass("C");
@@ -49,7 +45,7 @@ var_dump($rc->getProperties($virtFlag));
 --EXPECTF--
 No properties:array(0) {
 }
-Public properties:array(7) {
+Public properties:array(6) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
@@ -81,26 +77,19 @@ Public properties:array(7) {
   [4]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
-    string(8) "pubVirt1"
+    string(10) "hookNoVirt"
     ["class"]=>
     string(1) "C"
   }
   [5]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
-    string(8) "pubVirt2"
-    ["class"]=>
-    string(1) "C"
-  }
-  [6]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(8) "pubVirt3"
+    string(8) "hookVirt"
     ["class"]=>
     string(1) "C"
   }
 }
-Private properties:array(7) {
+Private properties:array(4) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
@@ -129,29 +118,8 @@ Private properties:array(7) {
     ["class"]=>
     string(1) "C"
   }
-  [4]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt1"
-    ["class"]=>
-    string(1) "C"
-  }
-  [5]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt2"
-    ["class"]=>
-    string(1) "C"
-  }
-  [6]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt3"
-    ["class"]=>
-    string(1) "C"
-  }
 }
-Public or static properties:array(9) {
+Public or static properties:array(8) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
@@ -197,26 +165,19 @@ Public or static properties:array(9) {
   [6]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
-    string(8) "pubVirt1"
+    string(10) "hookNoVirt"
     ["class"]=>
     string(1) "C"
   }
   [7]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
-    string(8) "pubVirt2"
-    ["class"]=>
-    string(1) "C"
-  }
-  [8]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(8) "pubVirt3"
+    string(8) "hookVirt"
     ["class"]=>
     string(1) "C"
   }
 }
-Private or static properties:array(9) {
+Private or static properties:array(6) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
@@ -259,68 +220,12 @@ Private or static properties:array(9) {
     ["class"]=>
     string(1) "C"
   }
-  [6]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt1"
-    ["class"]=>
-    string(1) "C"
-  }
-  [7]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt2"
-    ["class"]=>
-    string(1) "C"
-  }
-  [8]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt3"
-    ["class"]=>
-    string(1) "C"
-  }
 }
-Virtual properties:array(6) {
+Virtual properties:array(1) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
     ["name"]=>
-    string(8) "pubVirt1"
-    ["class"]=>
-    string(1) "C"
-  }
-  [1]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(8) "pubVirt2"
-    ["class"]=>
-    string(1) "C"
-  }
-  [2]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(8) "pubVirt3"
-    ["class"]=>
-    string(1) "C"
-  }
-  [3]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt1"
-    ["class"]=>
-    string(1) "C"
-  }
-  [4]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt2"
-    ["class"]=>
-    string(1) "C"
-  }
-  [5]=>
-  object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(9) "privVirt3"
+    string(8) "hookVirt"
     ["class"]=>
     string(1) "C"
   }
