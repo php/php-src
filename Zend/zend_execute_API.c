@@ -793,6 +793,26 @@ zend_result _call_user_function_impl(zval *object, zval *function_name, zval *re
 }
 /* }}} */
 
+ZEND_API void zend_exit_function_impl(zend_string *str, zend_long status)
+{
+	if (str) {
+		size_t len = ZSTR_LEN(str);
+		if (len != 0) {
+			/* An exception might be emitted by an output handler */
+			zend_write(ZSTR_VAL(str), len);
+			if (EG(exception)) {
+				ZEND_ASSERT(EG(exception));
+				return;
+			}
+		}
+	} else {
+		EG(exit_status) = status;
+	}
+
+	ZEND_ASSERT(!EG(exception));
+	zend_throw_unwind_exit();
+}
+
 zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /* {{{ */
 {
 	uint32_t i;

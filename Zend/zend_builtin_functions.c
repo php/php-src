@@ -73,27 +73,12 @@ ZEND_FUNCTION(exit)
 {
 	zend_string *str = NULL;
 	zend_long status = 0;
-
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG(str, status)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (str) {
-		size_t len = ZSTR_LEN(str);
-		if (len != 0) {
-			/* An exception might be emitted by an output handler */
-			zend_write(ZSTR_VAL(str), len);
-			if (EG(exception)) {
-				RETURN_THROWS();
-			}
-		}
-	} else {
-		EG(exit_status) = status;
-	}
-
-	ZEND_ASSERT(!EG(exception));
-	zend_throw_unwind_exit();
+	zend_exit(str, status);
 }
 
 /* {{{ Get the version of the Zend Engine */

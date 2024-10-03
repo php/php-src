@@ -88,6 +88,7 @@ ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 ZEND_API void (*zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
+ZEND_API void (*zend_exit)(zend_string *str, zend_long status);
 void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
@@ -994,6 +995,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	/* Set up the default garbage collection implementation. */
 	gc_collect_cycles = zend_gc_collect_cycles;
+	zend_exit = zend_exit_function_impl;
 
 	zend_vm_init();
 
