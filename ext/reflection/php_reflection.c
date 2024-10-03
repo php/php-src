@@ -6182,7 +6182,7 @@ static zend_result reflection_property_check_lazy_compatible(reflection_object *
 	return SUCCESS;
 }
 
-/* {{{ Set property value withtout triggering initializer while skipping hooks if any */
+/* {{{ Set property value without triggering initializer while skipping hooks if any */
 ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 {
 	reflection_object *intern;
