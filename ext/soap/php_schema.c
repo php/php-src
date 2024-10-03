@@ -2155,46 +2155,47 @@ static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashTable *ht)
 {
 	sdlTypePtr tmp;
-	sdlAttributePtr tmp_attr;
 
 	if (attr->ref != NULL) {
 		if (ctx->attributeGroups != NULL) {
 			tmp = (sdlTypePtr)schema_find_by_ref(ctx->attributeGroups, attr->ref);
 			if (tmp) {
 				if (tmp->attributes) {
-					zend_hash_internal_pointer_reset(tmp->attributes);
-					while ((tmp_attr = zend_hash_get_current_data_ptr(tmp->attributes)) != NULL) {
-						if (zend_hash_get_current_key_type(tmp->attributes) == HASH_KEY_IS_STRING) {
-							zend_string* _key;
-							sdlAttributePtr newAttr;
-
+					zend_string *str_key;
+					zend_ulong index;
+					sdlAttributePtr tmp_attr;zend_hash_internal_pointer_reset(tmp->attributes);
+					ZEND_HASH_FOREACH_KEY_PTR(tmp->attributes, index, str_key, tmp_attr) {
+						if (str_key != NULL) {
 							schema_attribute_fixup(ctx, tmp_attr);
 
-							newAttr = emalloc(sizeof(sdlAttribute));
+							sdlAttributePtr newAttr = emalloc(sizeof(sdlAttribute));
 							memcpy(newAttr, tmp_attr, sizeof(sdlAttribute));
-							if (newAttr->def) {newAttr->def = estrdup(newAttr->def);}
-							if (newAttr->fixed) {newAttr->fixed = estrdup(newAttr->fixed);}
-							if (newAttr->namens) {newAttr->namens = estrdup(newAttr->namens);}
-							if (newAttr->name) {newAttr->name = estrdup(newAttr->name);}
+
+							if (newAttr->def) {
+								newAttr->def = estrdup(newAttr->def);
+							}
+							if (newAttr->fixed) {
+								newAttr->fixed = estrdup(newAttr->fixed);
+							}
+							if (newAttr->namens) {
+								newAttr->namens = estrdup(newAttr->namens);
+							}
+							if (newAttr->name) {
+								newAttr->name = estrdup(newAttr->name);
+							}
 							if (newAttr->extraAttributes) {
-								HashTable *ht = emalloc(sizeof(HashTable));
-								zend_hash_init(ht, zend_hash_num_elements(newAttr->extraAttributes), NULL, delete_extra_attribute, 0);
-								zend_hash_copy(ht, newAttr->extraAttributes, copy_extra_attribute);
-								newAttr->extraAttributes = ht;
+								HashTable *extra_attributes_ht = emalloc(sizeof(HashTable));
+								zend_hash_init(extra_attributes_ht, zend_hash_num_elements(newAttr->extraAttributes), NULL, delete_extra_attribute, false);
+								zend_hash_copy(extra_attributes_ht, newAttr->extraAttributes, copy_extra_attribute);
+								newAttr->extraAttributes = extra_attributes_ht;
 							}
 
-							zend_hash_get_current_key(tmp->attributes, &_key, NULL);
-							zend_hash_add_ptr(ht, _key, newAttr);
-
-							zend_hash_move_forward(tmp->attributes);
+							zend_hash_add_ptr(ht, str_key, newAttr);
 						} else {
-							zend_ulong index;
-
 							schema_attributegroup_fixup(ctx, tmp_attr, ht);
-							zend_hash_get_current_key(tmp->attributes, NULL, &index);
 							zend_hash_index_del(tmp->attributes, index);
 						}
-					}
+					} ZEND_HASH_FOREACH_END();
 				}
 			}
 		}
@@ -2251,7 +2252,6 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 {
 	sdlTypePtr tmp;
-	sdlAttributePtr attr;
 
 	if (type->ref != NULL) {
 		if (ctx->sdl->elements != NULL) {
@@ -2287,23 +2287,17 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 		schema_content_model_fixup(ctx, type->model);
 	}
 	if (type->attributes) {
-		HashPosition pos;
-		zend_hash_internal_pointer_reset_ex(type->attributes, &pos);
-
-		while ((attr = zend_hash_get_current_data_ptr_ex(type->attributes, &pos)) != NULL) {
-			zend_string *str_key;
-			zend_ulong index;
-
-			if (zend_hash_get_current_key_ex(type->attributes, &str_key, &index, &pos) == HASH_KEY_IS_STRING) {
+		zend_string *str_key;
+		zend_ulong index;
+		sdlAttributePtr attr;
+		ZEND_HASH_FOREACH_KEY_PTR(type->attributes, index, str_key, attr) {
+			if (str_key != NULL) {
 				schema_attribute_fixup(ctx, attr);
-				zend_result result = zend_hash_move_forward_ex(type->attributes, &pos);
-				ZEND_ASSERT(result == SUCCESS);
 			} else {
 				schema_attributegroup_fixup(ctx, attr, type->attributes);
-				zend_result result = zend_hash_index_del(type->attributes, index);
-				ZEND_ASSERT(result == SUCCESS);
+				zend_hash_index_del(type->attributes, index);
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 
