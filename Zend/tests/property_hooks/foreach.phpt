@@ -86,8 +86,30 @@ testByVal(new ByVal);
 testByVal(new ByRef);
 testByRef(new ByRef);
 
+class A {
+    private $changed { get => 'A'; }
+    protected $promoted { get => 'A'; }
+
+    public function test() {
+        foreach ($this as $k => $v) {
+            var_dump($k, $v);
+        }
+    }
+}
+
+class B extends A {
+    public $changed { get => 'B'; }
+    public $promoted { get => 'B'; }
+}
+
+(new B)->test();
+
 ?>
 --EXPECTF--
+plain => plain
+ByRef::$virtualByRef::get
+virtualByRef => virtualByRef
+ByRef::$virtualByRef::set
 ByVal::$virtualByVal::get
 virtualByVal => virtualByVal
 ByVal::$virtualByVal::set
@@ -97,10 +119,6 @@ ByVal::$backed::set
 ByVal::$backedUninitialized::get
 backedUninitialized => backedUninitialized
 ByVal::$backedUninitialized::set
-plain => plain
-ByRef::$virtualByRef::get
-virtualByRef => virtualByRef
-ByRef::$virtualByRef::set
 dynamic => dynamic
 object(ByVal)#%d (6) {
   ["plain"]=>
@@ -141,3 +159,7 @@ object(ByRef)#%d (3) {
   ["dynamic"]=>
   string(7) "DYNAMIC"
 }
+string(7) "changed"
+string(1) "A"
+string(8) "promoted"
+string(1) "B"
