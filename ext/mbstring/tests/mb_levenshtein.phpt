@@ -40,6 +40,7 @@ echo '--- 128 codepoints ---' . \PHP_EOL;
 var_dump(mb_levenshtein(str_repeat("a", 128), str_repeat("a", 125) . "abc"));
 echo '--- 128 codepoints over ---' . \PHP_EOL;
 var_dump(mb_levenshtein(str_repeat("a", 128) . "abc", str_repeat("a", 128) . "aaa"));
+var_dump(mb_levenshtein(str_repeat("a", 256) . "abc", "aaa"));
 echo '--- 128 codepoints over only $string1 ---' . \PHP_EOL;
 var_dump(mb_levenshtein(str_repeat("a", 128) . "abc", "aaa"));
 echo '--- 128 codepoints over only $string2 ---' . \PHP_EOL;
@@ -58,14 +59,16 @@ var_dump(mb_levenshtein("cafe", $cafe, encoding: "ISO-8859-1"));
 
 echo '--- Usecase of userland code ---' . \PHP_EOL;
 
+$bytes = "";
 for ($i = 0; $i < 100; $i++) {
-	$bytes = "";
 	for ($j = 0; $j < 10; $j++) {
-		$bytes .= mb_chr(mt_rand(0, 0x10FFF));
+		$bytes .= mb_chr(mt_rand(0, 0xFFFF));
 	}
 	$compare = "あいうえおABCDEF";
-	if (mb_levenshtein($bytes, $compare) !== keinos_mb_levenshtein($bytes, $compare)) {
-		throw Exception("mb_levenshtein compare error: {$bytes}");
+	$mb_levenshtein_score = mb_levenshtein($bytes, $compare, encoding: "UTF-8");
+	$watchstate_mb_levenshtein_score = watchstate_mb_levenshtein($bytes, $compare);
+	if ($mb_levenshtein_score !== $watchstate_mb_levenshtein_score) {
+		throw new Exception("mb_levenshtein compare error: {$mb_levenshtein_score} !== {$keinos_mb_levenshtein_score} param: {$bytes} vs {$compare}");
 	}
 }
 echo "OK" . PHP_EOL;
@@ -100,6 +103,7 @@ int(4)
 int(2)
 --- 128 codepoints over ---
 int(2)
+int(256)
 --- 128 codepoints over only $string1 ---
 int(128)
 --- 128 codepoints over only $string2 ---

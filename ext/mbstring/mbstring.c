@@ -3197,12 +3197,11 @@ PHP_FUNCTION(mb_levenshtein)
 		string2 = tmp;
 	}
 
-	uint32_t wchar_buf_1[128], wchar_buf_2[128];
+	uint32_t wchar_buf_1[1], wchar_buf_2[1];
 	size_t i1, i2;
 	zend_long *p1, *p2, *tmp;
 	size_t strlen_1 = mb_get_strlen(string1, enc);
 	size_t strlen_2 = mb_get_strlen(string2, enc);
-	size_t len_2 = 0;
 	size_t in_len_1 = ZSTR_LEN(string1);
 	size_t in_len_2 = ZSTR_LEN(string2);
 	unsigned char *in_1 = (unsigned char*)ZSTR_VAL(string1);
@@ -3225,56 +3224,31 @@ PHP_FUNCTION(mb_levenshtein)
 	for (i2 = 0; i2 <= strlen_2; i2++) {
 		p1[i2] = i2 * cost_ins;
 	}
+	zend_long tmp_wchar_len;
 
-	zend_long tmp_wchar_len_1 = 0;
-	zend_long tmp_wchar_len_2 = 0;
-	bool first = true;
-
-	while (in_len_1) {
-		tmp_wchar_len_1 = enc->to_wchar(&in_1, &in_len_1, wchar_buf_1, 128, &state);
-		ZEND_ASSERT(tmp_wchar_len_1 <= 128);
-		tmp_wchar_len_2 = enc->to_wchar(&in_2, &in_len_2, wchar_buf_2, 128, &state);
-		len_2 += tmp_wchar_len_2;
-		ZEND_ASSERT(tmp_wchar_len_2 <= 128);
-
-		for (i1 = 0; i1 < tmp_wchar_len_1; i1++) {
-			/* First loop that does not cross a 128 code points */
-			if (first) {
-				p2[0] = p1[0] + cost_del;
+	for (i1 = 0; i1 < strlen_1; i1++) {
+		tmp_wchar_len = enc->to_wchar(&in_1, &in_len_1, wchar_buf_1, 1, &state);
+		ZEND_ASSERT(tmp_wchar_len <= 1);
+		p2[0] = p1[0] + cost_del;
+		for (i2 = 0; i2 < strlen_2; i2++) {
+			tmp_wchar_len = enc->to_wchar(&in_2, &in_len_2, wchar_buf_2, 1, &state);
+			ZEND_ASSERT(tmp_wchar_len <= 1);
+			c0 = p1[i2] + (wchar_buf_1[0] == wchar_buf_2[0] ? 0 : cost_rep);
+			c1 = p1[i2 + 1] + cost_del;
+			if (c1 < c0) {
+				c0 = c1;
 			}
-			if (tmp_wchar_len_2 == 0) {
-				/* Insertion process when there is a surplus of 128 code points. */
-				for (i2 = 0; i2 < tmp_wchar_len_1; i2++) {
-					c0 = p1[i2 + (len_2 - tmp_wchar_len_1)] + cost_rep;
-					c1 = p1[i2 + (len_2 - tmp_wchar_len_1) + 1] + cost_del;
-					if (c1 < c0) {
-						c0 = c1;
-					}
-					c2 = p2[i2] + cost_ins;
-					if (c2 < c0) {
-						c0 = c2;
-					}
-					p2[i2 + (len_2 - tmp_wchar_len_1) + 1] = c0;
-				}
-			} else {
-				for (i2 = 0; i2 < tmp_wchar_len_2; i2++) {
-					c0 = p1[i2 + (len_2 - tmp_wchar_len_2)] + (wchar_buf_1[i1] == wchar_buf_2[i2] ? 0 : cost_rep);
-					c1 = p1[i2 + (len_2 - tmp_wchar_len_2) + 1] + cost_del;
-					if (c1 < c0) {
-						c0 = c1;
-					}
-					c2 = p2[i2 + (len_2 - tmp_wchar_len_2)] + cost_ins;
-					if (c2 < c0) {
-						c0 = c2;
-					}
-					p2[i2 + (len_2 - tmp_wchar_len_2) + 1] = c0;
-				}
+			c2 = p2[i2] + cost_ins;
+			if (c2 < c0) {
+				c0 = c2;
 			}
-			tmp = p1;
-			p1 = p2;
-			p2 = tmp;
+			p2[i2 + 1] = c0;
 		}
-		first = false;
+		in_2 = (unsigned char*)ZSTR_VAL(string2);
+		in_len_2 = ZSTR_LEN(string2);
+		tmp = p1;
+		p1 = p2;
+		p2 = tmp;
 	}
 
 	c0 = p1[strlen_2];
