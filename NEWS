@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
 
+- Output:
+  . Fixed calculation of aligned buffer size. (cmb)
+
 - PDO_PGSQL:
   . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
   . Implement GH-15387 Pdo\Pgsql::setAttribute(PDO::ATTR_PREFETCH, 0) or
