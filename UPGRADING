@@ -48,6 +48,9 @@ PHP 8.4 UPGRADE NOTES
     removed.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
 
+- Date:
+  . The class constants are typed now.
+
 - DBA:
   . dba_open() and dba_popen() will now return a Dba\Connection
     object rather than a resource. Return value checks using is_resource()
@@ -69,6 +72,8 @@ PHP 8.4 UPGRADE NOTES
   . DOMDocument::$actualEncoding, DOMDocument::config, DOMEntity::$actualEncoding,
     DOMEntity::$encoding, DOMEntity::$version have been deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#formally_deprecate_soft-deprecated_domdocument_and_domentity_properties
+  . Removed DOMImplementation::getFeature().
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_domimplementationgetfeature_feature_version
 
 - GMP:
   . The GMP class is now final and cannot be extended anymore.
@@ -83,6 +88,7 @@ PHP 8.4 UPGRADE NOTES
     - TypeError for invalid offset types
     - ValueError for an empty string
     - ValueError if the integer index does not fit in a signed 32 bit integer
+  . The class constants are typed now.
 
 - MBString:
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
@@ -97,6 +103,19 @@ PHP 8.4 UPGRADE NOTES
     refer to the indices of the Unicode codepoints which are produced when the string
     is converted to Unicode. This is significant because around 40 SJIS-Mac characters
     convert to a sequence of multiple Unicode codepoints.
+
+- Mysqli:
+  . The unused and undocumented constant MYSQLI_SET_CHARSET_DIR
+    has been removed.
+  . The MYSQLI_STMT_ATTR_PREFETCH_ROWS constant has been removed.
+    The feature is unavailable with mysqlnd.
+  . The MYSQLI_CURSOR_TYPE_FOR_UPDATE and MYSQLI_CURSOR_TYPE_SCROLLABLE
+    constants have been removed. This functionality was never implemented,
+    neither with mysqlnd nor with libmysql.
+  . The unused MYSQLI_TYPE_INTERVAL constant, which is currently a stub
+    and an alias for MYSQLI_TYPE_ENUM, has been removed. There are no
+    plans to add such data type to MySQL yet, so it's unclear what its value
+    would finally be.
 
 - MySQLnd:
   . The error code reported for MySQL server wait timeouts has been changed from 2006
@@ -149,6 +168,9 @@ PHP 8.4 UPGRADE NOTES
     has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
     for a full changelog.
 
+- PDO:
+  . The class constants are typed now.
+
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
     have been changed to set value as a bool.
@@ -180,6 +202,7 @@ PHP 8.4 UPGRADE NOTES
     ReflectionClass::SKIP_*.
     If you have a method or constant with the same name, you might encounter
     errors if the declaration is incompatible.
+  . The class constants are typed now.
 
 - SimpleXML:
   . Get methods called, or casting to a string on a SimpleXMLElement will no
@@ -211,6 +234,10 @@ PHP 8.4 UPGRADE NOTES
     OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
     is a child class of RuntimeException, code that uses RuntimeException
     continues to function.
+  . The class constants are typed now.
+
+- Sqlite:
+  . The class constants are typed now.
 
 - Standard:
   . round() now validates the value of the $mode parameter and throws a ValueError
@@ -246,6 +273,7 @@ PHP 8.4 UPGRADE NOTES
   . Passing an invalid character encoding to XMLReader::open() or
     XMLReader::XML() now throws a ValueError. Passing a string containing NULL
     bytes previously emitted a warning and now throws a ValueError as well.
+  . The class constants are typed now.
 
 - XMLWriter:
   . Passing a string containing NULL bytes previously emitted a warning and
@@ -670,6 +698,9 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
   . ResourceBundle::get() now has a tentative return type of:
     ResourceBundle|array|string|int|null
+  . The idn_to_ascii() and idn_to_utf8() now always throw ValueErrors if the
+    $domain name is empty or too long, and if $variant is not
+    INTL_IDNA_VARIANT_UTS46.
 
 - LibXML:
   . libxml_set_streams_context() now immediately throws a TypeError when a
@@ -923,6 +954,9 @@ PHP 8.4 UPGRADE NOTES
   . New RequestParseBodyException.
     RFC: https://wiki.php.net/rfc/rfc1867-non-post
 
+- DBA:
+  . Dba\Connection opaque object replacing DBA resources
+
 - DOM:
   . Implemented DOM HTML5 parsing and serialization.
     RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
@@ -971,21 +1005,10 @@ PHP 8.4 UPGRADE NOTES
     effect, and is silently ignored. This underlying feature was
     deprecated in libcurl 7.11.1 and removed in 7.62.0.
 
-- Date:
-  . The class constants are typed now.
-
-- DOM:
-  . Removed DOMImplementation::getFeature().
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_domimplementationgetfeature_feature_version
-
 - Intl:
-  . The class constants are typed now.
   . The behaviour of Intl class has been normalized to always throw Error
     exceptions when attempting to use a non-initialized object,
     or when cloning fails.
-  . The idn_to_ascii() and idn_to_utf8() now always throw ValueErrors if the
-    $domain name is empty or too long, and if $variant is not
-    INTL_IDNA_VARIANT_UTS46.
 
 - LibXML:
   . The libxml extension now requires at least libxml2 2.9.4.
@@ -993,46 +1016,17 @@ PHP 8.4 UPGRADE NOTES
 - MBString:
   . Unicode data tables have been updated to Unicode 16.0.
 
-- Mysqli:
-  . The unused and undocumented constant MYSQLI_SET_CHARSET_DIR
-    has been removed.
-  . The MYSQLI_STMT_ATTR_PREFETCH_ROWS constant has been removed.
-    The feature is unavailable with mysqlnd.
-  . The MYSQLI_CURSOR_TYPE_FOR_UPDATE and MYSQLI_CURSOR_TYPE_SCROLLABLE
-    constants have been removed. This functionality was never implemented,
-    neither with mysqlnd nor with libmysql.
-  . The unused MYSQLI_TYPE_INTERVAL constant, which is currently a stub
-    and an alias for MYSQLI_TYPE_ENUM, has been removed. There are no
-    plans to add such data type to MySQL yet, so it's unclear what its value
-    would finally be.
-  . A new constant has been added: MYSQLI_TYPE_VECTOR.
-
 - Mysqlnd:
   . Support for the new VECTOR data type from MySQL 9.
 
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL 1.1.1.
 
-- PDO:
-  . The class constants are typed now.
-
 - PDO_PGSQL:
   . The pdo_pgsql extension now requires at least libpq 10.0.
 
 - PgSQL:
   . The pgsql extension now requires at least libpq 10.0.
-
-- Reflection:
-  . The class constants are typed now.
-
-- Spl:
-  . The class constants are typed now.
-
-- Sqlite:
-  . The class constants are typed now.
-
-- XMLReader:
-  . The class constants are typed now.
 
 - XSL:
   . The typed properties XSLTProcessor::$cloneDocument and
