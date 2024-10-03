@@ -2014,7 +2014,7 @@ function generate_tmp_php_ini()
 		var INI = FSO.CreateTextFile(PHP_TEST_INI_PATH, true);
 	}
 
-	var ext_list = PHP_TEST_INI_EXT_EXCLUDE.split(",");
+	var ext_list = ("dl_test," + PHP_TEST_INI_EXT_EXCLUDE).split(",");
 	INI.WriteLine("extension_dir=" + ini_dir);
 	for (var i in extensions_enabled) {
 		if ("shared" != extensions_enabled[i][1]) {
