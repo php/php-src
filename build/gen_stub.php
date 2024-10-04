@@ -1291,6 +1291,9 @@ class FuncInfo {
         $this->attributes = $attributes;
         $this->framelessFunctionInfos = $framelessFunctionInfos;
         $this->exposedDocComment = $exposedDocComment;
+        if ($return->tentativeReturnType && $this->isFinalMethod()) {
+            throw new Exception("Tentative return inapplicable for final method");
+        }
     }
 
     public function isMethod(): bool

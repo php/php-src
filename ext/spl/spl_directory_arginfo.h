@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3ed3a9f6609e1b8fa642f1e4cfaa1de40e3cc11e */
+ * Stub hash: c8c3c642d6f8c19a83f6a94ede5b6138a969bc12 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -83,7 +83,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo___debugInfo, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo__bad_state_ex, 0, 0, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo__bad_state_ex, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DirectoryIterator___construct, 0, 0, 1)
@@ -98,7 +98,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_isDot arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_DirectoryIterator_rewind arginfo_class_SplFileInfo__bad_state_ex
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_rewind, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_valid arginfo_class_SplFileInfo_isWritable
 
@@ -107,7 +108,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_current arginfo_class_DirectoryIterator_key
 
-#define arginfo_class_DirectoryIterator_next arginfo_class_SplFileInfo__bad_state_ex
+#define arginfo_class_DirectoryIterator_next arginfo_class_DirectoryIterator_rewind
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_seek, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
@@ -120,7 +121,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_FilesystemIterator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_FilesystemIterator_rewind arginfo_class_SplFileInfo__bad_state_ex
+#define arginfo_class_FilesystemIterator_rewind arginfo_class_DirectoryIterator_rewind
 
 #define arginfo_class_FilesystemIterator_key arginfo_class_SplFileInfo_getPath
 
@@ -167,7 +168,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject___construct, 0, 0, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_rewind arginfo_class_SplFileInfo__bad_state_ex
+#define arginfo_class_SplFileObject_rewind arginfo_class_DirectoryIterator_rewind
 
 #define arginfo_class_SplFileObject_eof arginfo_class_SplFileInfo_isWritable
 
@@ -240,7 +241,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFileObject_key arginfo_class_FilesystemIterator_getFlags
 
-#define arginfo_class_SplFileObject_next arginfo_class_SplFileInfo__bad_state_ex
+#define arginfo_class_SplFileObject_next arginfo_class_DirectoryIterator_rewind
 
 #define arginfo_class_SplFileObject_setFlags arginfo_class_FilesystemIterator_setFlags
 
