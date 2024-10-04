@@ -130,15 +130,10 @@ set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
 mkdir c:\tests_tmp
 
-nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
 
 set EXIT_CODE=%errorlevel%
 
 taskkill /f /im snmpd.exe
-
-if %EXIT_CODE% GEQ 1 (
-	git checkout ext\pgsql\tests\config.inc
-	git diff > bless_tests.patch
-)
 
 exit /b %EXIT_CODE%
