@@ -31,5 +31,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECT--
-Maximum call stack size reached. Infinite recursion?
+--EXPECTF--
+Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
