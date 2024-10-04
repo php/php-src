@@ -45,6 +45,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16150 (Use after free in php_dom.c). (nielsdos)
   . Fixed bug GH-16152 (Memory leak in DOMProcessingInstruction/DOMDocument).
     (nielsdos)
+  . Fix edge-case in DOM parsing decoding. (nielsdos)
 
 - FPM:
   . Fixed bug GHSA-865w-9rf3-2wh5 (Logs from childrens may be altered).
