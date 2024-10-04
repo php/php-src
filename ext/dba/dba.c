@@ -478,8 +478,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (key_ht) {
 		key_str = php_dba_make_key(key_ht);
 		if (!key_str) {
-			// TODO ValueError?
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1003,8 +1002,7 @@ PHP_FUNCTION(dba_exists)
 	if (key_ht) {
 		key_str = php_dba_make_key(key_ht);
 		if (!key_str) {
-			// TODO ValueError?
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1050,8 +1048,7 @@ PHP_FUNCTION(dba_fetch)
 	if (key_ht) {
 		key_str = php_dba_make_key(key_ht);
 		if (!key_str) {
-			// TODO ValueError?
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1184,8 +1181,7 @@ PHP_FUNCTION(dba_delete)
 	if (key_ht) {
 		key_str = php_dba_make_key(key_ht);
 		if (!key_str) {
-			// TODO ValueError?
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 
