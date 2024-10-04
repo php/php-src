@@ -643,13 +643,11 @@ ZEND_METHOD(Exception, getTraceAsString)
 /* {{{ Return previous Throwable or NULL. */
 ZEND_METHOD(Exception, getPrevious)
 {
-	zval *prop, rv;
+	zval rv;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_PREVIOUS);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	ZVAL_COPY_DEREF(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_PREVIOUS));
 } /* }}} */
 
 /* {{{ Obtain the string representation of the Exception object */
