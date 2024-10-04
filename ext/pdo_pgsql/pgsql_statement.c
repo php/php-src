@@ -702,11 +702,22 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 	return 1;
 }
 
-static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGconn *conn)
+static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, pdo_pgsql_db_handle *H)
 {
+	PGconn *conn = H->server;
 	char *table_name = NULL;
 	PGresult *tmp_res;
 	char *querystr = NULL;
+
+	if (oid == H->cached_table_oid) {
+		return H->cached_table_name;
+	}
+
+	if (H->cached_table_name) {
+		efree(H->cached_table_name);
+		H->cached_table_name = NULL;
+		H->cached_table_oid = InvalidOid;
+	}
 
 	spprintf(&querystr, 0, "SELECT RELNAME FROM PG_CLASS WHERE OID=%d", oid);
 
@@ -724,6 +735,8 @@ static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGcon
 		return 0;
 	}
 
+	H->cached_table_oid = oid;
+	H->cached_table_name = estrdup(table_name);
 	table_name = estrdup(table_name);
 
 	PQclear(tmp_res);
@@ -752,10 +765,9 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
 	table_oid = PQftable(S->result, colno);
 	add_assoc_long(return_value, "pgsql:table_oid", table_oid);
-	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
+	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H);
 	if (table_name) {
-		add_assoc_string(return_value, "table", table_name);
-		efree(table_name);
+		add_assoc_string(return_value, "table", S->H->cached_table_name);
 	}
 
 	switch (S->cols[colno].pgsql_type) {

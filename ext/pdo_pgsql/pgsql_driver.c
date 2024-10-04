@@ -258,6 +258,10 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 			PQfinish(H->server);
 			H->server = NULL;
 		}
+		if (H->cached_table_name) {
+			efree(H->cached_table_name);
+			H->cached_table_name = NULL;
+		}
 		if (H->einfo.errmsg) {
 			pefree(H->einfo.errmsg, dbh->is_persistent);
 			H->einfo.errmsg = NULL;
@@ -1461,6 +1465,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 
 	H->attached = 1;
 	H->pgoid = -1;
+	H->cached_table_oid = InvalidOid;
 
 	dbh->methods = &pgsql_methods;
 	dbh->alloc_own_columns = 1;
