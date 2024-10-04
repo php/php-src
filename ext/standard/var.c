@@ -1052,7 +1052,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_
 	}
 
 	if (UNEXPECTED(php_serialize_check_stack_limit())) {
-		zend_throw_error(NULL, "Maximum call stack size reached. Infinite recursion?");
+		zend_call_stack_size_error();
 		return;
 	}
 
