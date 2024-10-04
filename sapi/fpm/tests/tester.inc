@@ -762,6 +762,7 @@ class Tester
         string|array $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
+        array $params = null,
     ): Response {
         if ($this->hasError()) {
             return $this->createResponse(expectInvalid: true);
@@ -771,7 +772,7 @@ class Tester
             $stdin = $this->parseStdin($stdin, $headers);
         }
 
-        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin);
+        $params = $params ?? $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin);
         $this->trace('Request params', $params);
 
         try {

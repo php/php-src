@@ -34,7 +34,7 @@ PHP                                                                        NEWS
     ext/dom/parentnode/tree.c). (nielsdos)
   . Fixed bug GH-16151 (Assertion failure in ext/dom/parentnode/tree.c).
     (nielsdos)
-
+  
 - GD:
   . Fixed bug GH-16232 (bitshift overflow on wbmp file content reading /
     fix backport from upstream). (David Carlier)
@@ -67,6 +67,10 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-16187 (Assertion failure in ext/reflection/php_reflection.c).
     (DanielEScherzer)
+
+- SAPI:
+  . Fixed bug GH-15395 (php-fpm: zend_mm_heap corrupted with cgi-fcgi request).
+    (Jakub Zelenka, David Carlier)
 
 - SimpleXML:
   . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
