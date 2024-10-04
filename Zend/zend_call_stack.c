@@ -77,6 +77,10 @@ typedef int boolean_t;
 # include <valgrind/valgrind.h>
 #endif
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
 #ifdef ZEND_CHECK_STACK_LIMIT
 
 /* Called once per process or thread */
@@ -224,6 +228,11 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 	}
 
 	while (fgets(buffer, sizeof(buffer), f) && sscanf(buffer, "%" SCNxPTR "-%" SCNxPTR, &start, &end) == 2) {
+#if __has_feature(memory_sanitizer)
+		/* Are initialised above */
+		__msan_unpoison(&start, sizeof(start));
+		__msan_unpoison(&end, sizeof(end));
+#endif
 		if (start <= addr_on_stack && end >= addr_on_stack) {
 			found = true;
 			break;
