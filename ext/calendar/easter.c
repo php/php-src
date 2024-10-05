@@ -48,6 +48,11 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 		}
 	}
 
+	if (year < 0 || year > (ZEND_LONG_MAX - 1)) {
+		zend_argument_value_error(1, "must be between 0 and " ZEND_LONG_FMT, (ZEND_LONG_MAX - 1));
+		RETURN_THROWS();
+	}
+
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */
 		zend_argument_value_error(1, "must be between 1970 and 2037 (inclusive)");
 		RETURN_THROWS();
