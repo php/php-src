@@ -3,8 +3,10 @@ readline_write_history(): Basic test
 --EXTENSIONS--
 readline
 --SKIPIF--
-<?php if (!function_exists('readline_add_history')) die("skip");
-if (READLINE_LIB == "libedit") die("skip readline only");
+<?php
+if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+    die('skip not for windows');
+}
 if (getenv('SKIP_REPEAT')) die("skip readline has global state");
 ?>
 --FILE--
@@ -23,7 +25,8 @@ unlink($name);
 
 ?>
 --EXPECT--
-string(7) "foo
+string(20) "_HiStOrY_V2_
+foo
 
 1
 "

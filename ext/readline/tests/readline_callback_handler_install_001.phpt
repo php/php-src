@@ -1,11 +1,14 @@
 --TEST--
 readline_callback_handler_install(): Basic test
+lsan disabled due to a leak on ubuntu focal only.
 --EXTENSIONS--
 readline
 --SKIPIF--
-<?php if (!function_exists('readline_callback_handler_install')) die("skip");
-if (READLINE_LIB == "libedit") die("skip readline only");
-?>
+<?php if (!function_exists('readline_callback_handler_install')) die("skip readline_callback_handler_install not available"); ?>
+--INI--
+zend.signal_check=0
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 
@@ -16,11 +19,11 @@ function foo() {
 var_dump(readline_callback_handler_install('testing: ', 'foo'));
 try {
     var_dump(readline_callback_handler_install('testing: ', 'foobar!'));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-testing: bool(true)
+bool(true)
 readline_callback_handler_install(): Argument #2 ($callback) must be a valid callback, function "foobar!" not found or invalid function name

@@ -2,12 +2,6 @@
 
 /** @generate-class-entries */
 
-/**
- * @var string
- * @cvalue READLINE_LIB
- */
-const READLINE_LIB = UNKNOWN;
-
 function readline(?string $prompt = null): string|false {}
 
 /** @param int|string|bool|null $value */

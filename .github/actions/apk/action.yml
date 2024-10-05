@@ -38,7 +38,7 @@ runs:
             libzip-dev \
             oniguruma-dev \
             openssl-dev \
-            readline-dev \
+            libedit-dev \
             sqlite-dev \
             tidyhtml-dev \
             gdbm-dev \
