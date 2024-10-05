@@ -74,6 +74,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-16122 (The return value of ReflectionFunction::getNamespaceName()
     and ReflectionFunction::inNamespace() for closures is incorrect). (timwolla)
+  . Fixed bug GH-16187 (Assertion failure in ext/reflection/php_reflection.c).
+    (DanielEScherzer)
 
 - SAPI:
   . Fixed bug GHSA-9pqp-7h25-4f32 (Erroneous parsing of multipart form data).
