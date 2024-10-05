@@ -34,6 +34,7 @@ typedef unsigned long long php_timeout_ull;
 #include "win32/select.h"
 #include "win32/sockets.h"
 #include "win32/console.h"
+#include "win32/time.h"
 typedef unsigned __int64 php_timeout_ull;
 #endif
 
@@ -99,7 +100,6 @@ PHP_FUNCTION(stream_socket_client)
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	double timeout;
 	bool timeout_is_null = 1;
-	php_timeout_ull conv;
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
@@ -129,24 +129,23 @@ PHP_FUNCTION(stream_socket_client)
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
-	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
-		spprintf(&hashkey, 0, "stream_socket_client__%s", ZSTR_VAL(host));
-	}
-
 	/* prepare the timeout value for use */
 	struct timeval *tv_pointer;
-	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
+	if (timeout < 0.0) {
+		php_error_docref(NULL, E_WARNING, "timeout must greater than or equal to 0");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 		tv_pointer = NULL;
 	} else {
-		conv = (php_timeout_ull) (timeout * 1000000.0);
-#ifdef PHP_WIN32
-		tv.tv_sec = (long)(conv / 1000000);
-		tv.tv_usec = (long)(conv % 1000000);
-#else
-		tv.tv_sec = conv / 1000000;
-		tv.tv_usec = conv % 1000000;
-#endif
+		php_timeout_ull conv = (php_timeout_ull) (timeout * 1000000.0);
+		tv.tv_sec = (time_t) (conv / 1000000);
+		tv.tv_usec = (suseconds_t) (conv % 1000000);
 		tv_pointer = &tv;
+	}
+
+	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
+		spprintf(&hashkey, 0, "stream_socket_client__%s", ZSTR_VAL(host));
 	}
 
 	if (zerrno) {
@@ -262,7 +261,6 @@ PHP_FUNCTION(stream_socket_accept)
 	bool timeout_is_null = 1;
 	zval *zpeername = NULL;
 	zend_string *peername = NULL;
-	php_timeout_ull conv;
 	struct timeval tv;
 	php_stream *stream = NULL, *clistream = NULL;
 	zval *zstream;
@@ -286,17 +284,16 @@ PHP_FUNCTION(stream_socket_accept)
 
 	/* prepare the timeout value for use */
 	struct timeval *tv_pointer;
-	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
+	if (timeout < 0.0) {
+		php_error_docref(NULL, E_WARNING, "timeout must greater than or equal to 0");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 		tv_pointer = NULL;
 	} else {
-		conv = (php_timeout_ull) (timeout * 1000000.0);
-#ifdef PHP_WIN32
-		tv.tv_sec = (long)(conv / 1000000);
-		tv.tv_usec = (long)(conv % 1000000);
-#else
-		tv.tv_sec = conv / 1000000;
-		tv.tv_usec = conv % 1000000;
-#endif
+		php_timeout_ull conv = (php_timeout_ull) (timeout * 1000000.0);
+		tv.tv_sec = (time_t) (conv / 1000000);
+		tv.tv_usec = (suseconds_t) (conv % 1000000);
 		tv_pointer = &tv;
 	}
 
@@ -830,11 +827,16 @@ PHP_FUNCTION(stream_select)
 		} else if (usec < 0) {
 			zend_argument_value_error(5, "must be greater than or equal to 0");
 			RETURN_THROWS();
+		} else if (usec >= 1000000) {
+			php_error_docref(NULL, E_WARNING, "must be less than 1000000");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 		}
 
 		/* Windows, Solaris and BSD do not like microsecond values which are >= 1 sec */
-		tv.tv_sec = (long)(sec + (usec / 1000000));
-		tv.tv_usec = (long)(usec % 1000000);
+		tv.tv_sec = (time_t)(sec + (usec / 1000000));
+		tv.tv_usec = (suseconds_t)(usec % 1000000);
 		tv_p = &tv;
 	}
 
@@ -1419,7 +1421,6 @@ PHP_FUNCTION(stream_set_timeout)
 	zend_long seconds, microseconds = 0;
 	struct timeval t;
 	php_stream *stream;
-	int argc = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_RESOURCE(socket)
@@ -1430,25 +1431,25 @@ PHP_FUNCTION(stream_set_timeout)
 
 	php_stream_from_zval(stream, socket);
 
-#ifdef PHP_WIN32
-	t.tv_sec = (long)seconds;
-
-	if (argc == 3) {
-		t.tv_usec = (long)(microseconds % 1000000);
-		t.tv_sec +=(long)(microseconds / 1000000);
-	} else {
-		t.tv_usec = 0;
+	if (seconds < 0) {
+		php_error_docref(NULL, E_WARNING, "must be greater than or equal to 0");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
-#else
-	t.tv_sec = seconds;
-
-	if (argc == 3) {
-		t.tv_usec = microseconds % 1000000;
-		t.tv_sec += microseconds / 1000000;
-	} else {
-		t.tv_usec = 0;
+	if (microseconds < 0 || microseconds >= 1000000) {
+		php_error_docref(NULL, E_WARNING, "must be between 0 and 999999");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+		if (microseconds >= 1000000) {
+			seconds += microseconds / 1000000;
+			microseconds %= 1000000;
+		}
 	}
-#endif
+
+	t.tv_sec = (time_t) seconds;
+	t.tv_usec = (suseconds_t) microseconds;
 
 	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t)) {
 		RETURN_TRUE;
