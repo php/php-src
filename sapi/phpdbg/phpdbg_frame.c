@@ -283,13 +283,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 			phpdbg_out(" (internal function)\n");
 		}
 
-		zval *file_zv = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FILE));
-		if (file_zv) {
-			ZEND_ASSERT(Z_TYPE_P(file_zv) == IS_STRING);
-			file = Z_STR_P(file_zv);
-		} else {
-			file = NULL;
-		}
+		file = zend_hash_find_ptr(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FILE));
 		zval *line_zv = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_LINE));
 		if (line_zv) {
 			line = Z_LVAL_P(line_zv);
