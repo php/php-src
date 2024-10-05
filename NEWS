@@ -74,6 +74,7 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #62900 (Wrong namespace on xsd import error message). (nielsdos)
   . Fixed bug GH-16237 (Segmentation fault when cloning SoapServer). (nielsdos)
+  . Fix Soap leaking http_msg on error. (nielsdos)
 
 - Standard:
   . Fixed bug GH-15613 (overflow on unpack call hex string repeater).
