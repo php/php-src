@@ -306,17 +306,17 @@ class SimpleType {
             case "NULL":
                 return SimpleType::null();
             case "boolean":
-                return SimpleType::bool();
+                return new SimpleType("bool", true);
             case "integer":
-                return SimpleType::int();
+                return new SimpleType("int", true);
             case "double":
-                return SimpleType::float();
+                return new SimpleType("float", true);
             case "string":
-                return SimpleType::string();
+                return new SimpleType("string", true);
             case "array":
-                return SimpleType::array();
+                return new SimpleType("array", true);
             case "object":
-                return SimpleType::object();
+                return new SimpleType("object", true);
             default:
                 throw new Exception("Type \"" . gettype($value) . "\" cannot be inferred based on value");
         }
@@ -325,36 +325,6 @@ class SimpleType {
     public static function null(): SimpleType
     {
         return new SimpleType("null", true);
-    }
-
-    public static function bool(): SimpleType
-    {
-        return new SimpleType("bool", true);
-    }
-
-    public static function int(): SimpleType
-    {
-        return new SimpleType("int", true);
-    }
-
-    public static function float(): SimpleType
-    {
-        return new SimpleType("float", true);
-    }
-
-    public static function string(): SimpleType
-    {
-        return new SimpleType("string", true);
-    }
-
-    public static function array(): SimpleType
-    {
-        return new SimpleType("array", true);
-    }
-
-    public static function object(): SimpleType
-    {
-        return new SimpleType("object", true);
     }
 
     protected function __construct(string $name, bool $isBuiltin) {
