@@ -365,11 +365,6 @@ class SimpleType {
         return new SimpleType("object", true);
     }
 
-    public static function void(): SimpleType
-    {
-        return new SimpleType("void", true);
-    }
-
     protected function __construct(string $name, bool $isBuiltin) {
         $this->name = $name;
         $this->isBuiltin = $isBuiltin;
