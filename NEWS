@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.25
 
+- Calendar:
+  . Fixed GH-16240: jdtounix overflow on argument value. (David Carlier)
+
 - CLI:
   . Fixed bug GH-16137: duplicate http headers when set several times by
     the client. (David Carlier)
