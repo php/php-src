@@ -76,6 +76,7 @@ PHP                                                                        NEWS
   . Fixed bug #62900 (Wrong namespace on xsd import error message). (nielsdos)
   . Fixed bug GH-15711 (SoapClient can't convert BackedEnum to scalar value).
     (nielsdos)
+  . Fixed bug GH-16237 (Segmentation fault when cloning SoapServer). (nielsdos)
 
 - SPL:
   . Fixed bug GH-15918 (Assertion failure in ext/spl/spl_fixedarray.c).
