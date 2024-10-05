@@ -9,6 +9,9 @@ PHP                                                                        NEWS
     bypassable due to the environment variable collision). (CVE-2024-8927)
     (nielsdos)
 
+- Calendar:
+  . Fixed GH-16240: jdtounix overflow on argument value. (David Carlier)
+
 - CLI:
   . Fixed bug GH-16137: duplicate http headers when set several times by
     the client. (David Carlier)
