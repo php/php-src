@@ -188,7 +188,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	 * and returns a PGRES_FATAL_ERROR when PQgetResult gets called for stmt 2 if DEALLOCATE
 	 * was called for stmt 1 inbetween
 	 * (maybe it will change with pipeline mode in libpq 14?) */
-	if (S->is_unbuffered && H->running_stmt) {
+	if (H->running_stmt && H->running_stmt->is_unbuffered) {
 		pgsql_stmt_finish(H->running_stmt, FIN_CLOSE);
 		H->running_stmt = NULL;
 	}
@@ -713,6 +713,12 @@ static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, pdo_p
 		return H->cached_table_name;
 	}
 
+	if (H->running_stmt && H->running_stmt->is_unbuffered) {
+		/* in single-row mode, libpq forbids passing a new query
+		 * while we're still flushing the current one's result */
+		return NULL;
+	}
+
 	if (H->cached_table_name) {
 		efree(H->cached_table_name);
 		H->cached_table_name = NULL;
@@ -806,6 +812,10 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 			break;
 		default:
 			/* Fetch metadata from Postgres system catalogue */
+			if (S->H->running_stmt && S->H->running_stmt->is_unbuffered) {
+				/* libpq forbids calling a query while we're still reading the preceding one's */
+				break;
+			}
 			spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
 			res = PQexec(S->H->server, q);
 			efree(q);
