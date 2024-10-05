@@ -2351,16 +2351,6 @@ abstract class VariableLike
 
     abstract public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void;
 
-    protected function addTypeToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
-    {
-        $type = $this->phpDocType ?? $this->type;
-
-        if ($type) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
-            $fieldsynopsisElement->appendChild($type->getTypeForDoc($doc));
-        }
-    }
-
     /**
      * @return array<int, string[]>
      */
@@ -2439,7 +2429,11 @@ abstract class VariableLike
 
         $this->addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
 
-        $this->addTypeToFieldSynopsis($doc, $fieldsynopsisElement);
+        $type = $this->phpDocType ?? $this->type;
+        if ($type) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($type->getTypeForDoc($doc));
+        }
 
         $varnameElement = $doc->createElement("varname", $this->getFieldSynopsisName());
         if ($this->link) {
