@@ -2389,8 +2389,6 @@ abstract class VariableLike
         $this->exposedDocComment = $exposedDocComment;
     }
 
-    abstract protected function getVariableTypeCode(): string;
-
     abstract protected function getVariableTypeName(): string;
 
     abstract protected function getFieldSynopsisDefaultLinkend(): string;
@@ -2603,11 +2601,6 @@ class ConstInfo extends VariableLike
     protected function getVariableTypeName(): string
     {
         return "constant";
-    }
-
-    protected function getVariableTypeCode(): string
-    {
-        return "const";
     }
 
     protected function getFieldSynopsisDefaultLinkend(): string
@@ -3040,11 +3033,6 @@ class PropertyInfo extends VariableLike
         $this->isDocReadonly = $isDocReadonly;
         $this->isVirtual = $isVirtual;
         parent::__construct($flags, $type, $phpDocType, $link, $phpVersionIdMinimumCompatibility, $attributes, $exposedDocComment);
-    }
-
-    protected function getVariableTypeCode(): string
-    {
-        return "property";
     }
 
     protected function getVariableTypeName(): string
