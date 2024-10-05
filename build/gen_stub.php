@@ -634,28 +634,19 @@ class Type {
         return false;
     }
 
-    public function getWithoutNull(): Type {
-        return new Type(
-            array_values(
-                array_filter(
-                    $this->types,
-                    function(SimpleType $type) {
-                        return !$type->isNull();
-                    }
-                )
-            ),
-            false
-        );
-    }
-
     public function tryToSimpleType(): ?SimpleType {
-        $withoutNull = $this->getWithoutNull();
+        $nonNullTypes = array_filter(
+            $this->types,
+            function(SimpleType $type) {
+                return !$type->isNull();
+            }
+        );
         /* type has only null */
-        if (count($withoutNull->types) === 0) {
+        if (count($nonNullTypes) === 0) {
             return $this->types[0];
         }
-        if (count($withoutNull->types) === 1) {
-            return $withoutNull->types[0];
+        if (count($nonNullTypes) === 1) {
+            return reset($nonNullTypes);
         }
         return null;
     }
