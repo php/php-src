@@ -21,6 +21,6 @@ try {
 }
 ?>
 --EXPECTF--
-easter_days(): Argument #1 ($year) must be between 0 and %d
-easter_days(): Argument #1 ($year) must be between 0 and %d
-easter_date(): Argument #1 ($year) must be between 0 and %d
+easter_days(): Argument #1 ($year) must be between 1 and %d
+easter_days(): Argument #1 ($year) must be between 1 and %d
+easter_date(): Argument #1 ($year) must be between 1 and %d
