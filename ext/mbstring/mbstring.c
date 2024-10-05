@@ -4607,7 +4607,7 @@ PHP_FUNCTION(mb_send_mail)
 	smart_str str = {0};
 	bool empty = true;
 
-	if (str_headers != NULL) {
+	if (str_headers != NULL && ZSTR_LEN(str_headers) > 0) {
 		/* Strip trailing CRLF from `str_headers`; we will add CRLF back if necessary */
 		size_t len = ZSTR_LEN(str_headers);
 		if (ZSTR_VAL(str_headers)[len-1] == '\n') {
