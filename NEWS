@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Calendar:
   . Fixed GH-16240: jdtounix overflow on argument value. (David Carlier)
+  . Fixed GH-16241: easter_days/easter_date overflow on year argument.
+    (David Carlier)
 
 - CLI:
   . Fixed bug GH-16137: duplicate http headers when set several times by
