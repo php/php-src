@@ -37,6 +37,9 @@ PHP 8.5 UPGRADE NOTES
 2. New Features
 ========================================
 
+- DOM:
+  . Added Dom\Element::$outerHTML.
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()
