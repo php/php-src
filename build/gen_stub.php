@@ -811,7 +811,8 @@ class ArgInfo {
         $this->name = $name;
         $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
-        $this->setTypes($type, $phpDocType);
+        $this->type = $type;
+        $this->phpDocType = $phpDocType;
         $this->defaultValue = $defaultValue;
         $this->attributes = $attributes;
     }
@@ -875,12 +876,6 @@ class ArgInfo {
         }
 
         return $this->defaultValue;
-    }
-
-    private function setTypes(?Type $type, ?Type $phpDocType): void
-    {
-        $this->type = $type;
-        $this->phpDocType = $phpDocType;
     }
 }
 
@@ -1137,7 +1132,9 @@ class ReturnInfo {
 
     public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType, ?string $refcount) {
         $this->byRef = $byRef;
-        $this->setTypes($type, $phpDocType, $tentativeReturnType);
+        $this->type = $type;
+        $this->phpDocType = $phpDocType;
+        $this->tentativeReturnType = $tentativeReturnType;
         $this->setRefcount($refcount);
     }
 
@@ -1149,13 +1146,6 @@ class ReturnInfo {
 
     public function getMethodSynopsisType(): ?Type {
         return $this->type ?? $this->phpDocType;
-    }
-
-    private function setTypes(?Type $type, ?Type $phpDocType, bool $tentativeReturnType): void
-    {
-        $this->type = $type;
-        $this->phpDocType = $phpDocType;
-        $this->tentativeReturnType = $tentativeReturnType;
     }
 
     private function setRefcount(?string $refcount): void
