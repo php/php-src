@@ -782,12 +782,12 @@ class ArginfoType {
 }
 
 class ArgInfo {
-    const SEND_BY_VAL = 0;
-    const SEND_BY_REF = 1;
-    const SEND_PREFER_REF = 2;
+    const SEND_BY_VAL = "0";
+    const SEND_BY_REF = "1";
+    const SEND_PREFER_REF = "ZEND_SEND_PREFER_REF";
 
     public string $name;
-    public int $sendBy;
+    public string $sendBy;
     public bool $isVariadic;
     public ?Type $type;
     public ?Type $phpDocType;
@@ -800,7 +800,7 @@ class ArgInfo {
      */
     public function __construct(
         string $name,
-        int $sendBy,
+        string $sendBy,
         bool $isVariadic,
         ?Type $type,
         ?Type $phpDocType,
@@ -822,18 +822,6 @@ class ArgInfo {
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type)
             && $this->defaultValue === $other->defaultValue;
-    }
-
-    public function getSendByString(): string {
-        switch ($this->sendBy) {
-        case self::SEND_BY_VAL:
-            return "0";
-        case self::SEND_BY_REF:
-            return "1";
-        case self::SEND_PREFER_REF:
-            return "ZEND_SEND_PREFER_REF";
-        }
-        throw new Exception("Invalid sendBy value");
     }
 
     public function getMethodSynopsisType(): Type {
@@ -5035,14 +5023,14 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
                 if ($simpleArgType->isBuiltin) {
                     $code .= sprintf(
                         "\tZEND_%s_TYPE_INFO%s(%s, %s, %s, %d%s)\n",
-                        $argKind, $argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                        $argKind, $argDefaultKind, $argInfo->sendBy, $argInfo->name,
                         $simpleArgType->toTypeCode(), $argType->isNullable(),
                         $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
                 } else {
                     $code .= sprintf(
                         "\tZEND_%s_OBJ_INFO%s(%s, %s, %s, %d%s)\n",
-                        $argKind,$argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                        $argKind,$argDefaultKind, $argInfo->sendBy, $argInfo->name,
                         $simpleArgType->toEscapedName(), $argType->isNullable(),
                         $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
@@ -5052,14 +5040,14 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
                 if ($arginfoType->hasClassType()) {
                     $code .= sprintf(
                         "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s%s)\n",
-                        $argKind, $argInfo->getSendByString(), $argInfo->name,
+                        $argKind, $argInfo->sendBy, $argInfo->name,
                         $arginfoType->toClassTypeString(), $arginfoType->toTypeMask(),
                         !$argInfo->isVariadic ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
                 } else {
                     $code .= sprintf(
                         "\tZEND_%s_TYPE_MASK(%s, %s, %s, %s)\n",
-                        $argKind, $argInfo->getSendByString(), $argInfo->name,
+                        $argKind, $argInfo->sendBy, $argInfo->name,
                         $arginfoType->toTypeMask(),
                         $argInfo->getDefaultValueAsArginfoString()
                     );
@@ -5068,7 +5056,7 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
         } else {
             $code .= sprintf(
                 "\tZEND_%s_INFO%s(%s, %s%s)\n",
-                $argKind, $argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                $argKind, $argDefaultKind, $argInfo->sendBy, $argInfo->name,
                 $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
             );
         }
