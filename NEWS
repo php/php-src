@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed GH-16241: easter_days/easter_date overflow on year argument.
     (David Carlier)
   . Fixed GH-16263: jddayofweek overflow. (cmb)
+  . Fixed GH-16234: jewishtojd overflow. (nielsdos)
 
 - CLI:
   . Fixed bug GH-16137: duplicate http headers when set several times by
