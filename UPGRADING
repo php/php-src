@@ -1171,6 +1171,8 @@ PHP 8.4 UPGRADE NOTES
 * Building with Visual Studio now requires at least Visual Studio 2019 (Visual
   Studio 2022 is recommended, though).
 
+* AVX(2) CPU support is now properly detected for MSVC builds.
+
 * Native AVX-512 builds are now supported (--enable-native-intrinsics=avx512).
 
 ========================================
