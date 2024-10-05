@@ -102,6 +102,10 @@ PHP 8.5 UPGRADE NOTES
 12. Windows Support
 ========================================
 
+* The configuration variables PHP_VERSION, PHP_MINOR_VERSION, and
+  PHP_RELEASE_VERSION are now always numbers.  Previously, they have been
+  strings for buildconf builds.
+
 ========================================
 13. Other Changes
 ========================================

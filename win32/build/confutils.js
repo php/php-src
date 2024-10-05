@@ -108,9 +108,9 @@ function get_version_numbers()
 	var regex = /AC_INIT.+(\d+)\.(\d+)\.(\d+)([^\,^\]]*).+/g;
 
 	if (cin.match(new RegExp(regex))) {
-		PHP_VERSION = RegExp.$1;
-		PHP_MINOR_VERSION = RegExp.$2;
-		PHP_RELEASE_VERSION = RegExp.$3;
+		PHP_VERSION = +RegExp.$1;
+		PHP_MINOR_VERSION = +RegExp.$2;
+		PHP_RELEASE_VERSION = +RegExp.$3;
 		PHP_EXTRA_VERSION = RegExp.$4;
 	}
 
