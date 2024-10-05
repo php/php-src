@@ -271,7 +271,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	 * and returns a PGRES_FATAL_ERROR when PQgetResult gets called for stmt 2 if DEALLOCATE
 	 * was called for stmt 1 inbetween
 	 * (maybe it will change with pipeline mode in libpq 14?) */
-	if (S->is_unbuffered && H->running_stmt) {
+	if (H->running_stmt && H->running_stmt->is_unbuffered) {
 		pgsql_stmt_finish(H->running_stmt, FIN_CLOSE);
 		H->running_stmt = NULL;
 	}
