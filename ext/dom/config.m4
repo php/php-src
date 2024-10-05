@@ -206,7 +206,7 @@ if test "$PHP_DOM" != "no"; then
         html5_parser.c
         html5_serializer.c
         infra.c
-        inner_html_mixin.c
+        inner_outer_html_mixin.c
         namednodemap.c
         namespace_compat.c
         node.c
