@@ -4179,7 +4179,8 @@ PHP_FUNCTION(mb_send_mail)
 #define PHP_MBSTR_MAIL_MIME_HEADER2 "Content-Type: text/plain"
 #define PHP_MBSTR_MAIL_MIME_HEADER3 "; charset="
 #define PHP_MBSTR_MAIL_MIME_HEADER4 "Content-Transfer-Encoding: "
-	if (str_headers != NULL) {
+
+	if (str_headers != NULL && ZSTR_LEN(str_headers) > 0) {
 		p = ZSTR_VAL(str_headers);
 		n = ZSTR_LEN(str_headers);
 		mbfl_memory_device_strncat(&device, p, n);
