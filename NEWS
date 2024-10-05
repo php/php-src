@@ -53,6 +53,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16181 (phpdbg: exit in exception handler reports fatal error).
     (cmb)
 
+- Reflection:
+  . Fixed bug GH-16187 (Assertion failure in ext/reflection/php_reflection.c).
+    (DanielEScherzer)
+
 - SimpleXML:
   . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
     (nielsdos)
