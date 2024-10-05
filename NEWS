@@ -90,6 +90,9 @@ PHP                                                                        NEWS
   . Fixed bug GHSA-9pqp-7h25-4f32 (Erroneous parsing of multipart form data).
     (CVE-2024-8925) (Arnaud)
 
+- SOAP:
+  . Fixed bug GH-16237 (Segmentation fault when cloning SoapServer). (nielsdos)
+
 - Standard:
   . Fixed bug GH-16053 (Assertion failure in Zend/zend_hash.c). (Arnaud)
   . Fixed bug GH-15169 (stack overflow when var serialization in
