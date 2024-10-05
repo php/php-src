@@ -1813,6 +1813,7 @@ function run_test(string $php, $file, array $env): string
     global $slow_min_ms;
     global $preload, $file_cache;
     global $num_repeats;
+    global $exts_to_test;
     // Parallel testing
     global $workerID;
     global $show_progress;
@@ -2027,6 +2028,9 @@ TEST $file
     $extensions = [];
     if ($test->hasSection('EXTENSIONS')) {
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
+        if (in_array("*", $extensions, true)) {
+            $extensions = array_diff($exts_to_test, ["php8apache2_4", "php8phpdbg", "php8ts_debug"]);
+        }
     }
     if (is_array($IN_REDIRECT) && $IN_REDIRECT['EXTENSIONS'] != []) {
         $extensions = array_merge($extensions, $IN_REDIRECT['EXTENSIONS']);
