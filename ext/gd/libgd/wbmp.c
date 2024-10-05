@@ -37,7 +37,8 @@
 int
 getmbi (int (*getin) (void *in), void *in)
 {
-  int i, mbi = 0;
+  unsigned int mbi = 0;
+  int i;
 
   do
     {

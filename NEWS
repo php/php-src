@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16151 (Assertion failure in ext/dom/parentnode/tree.c).
     (nielsdos)
 
+- GD:
+  . Fixed bug 16232 (bitshift overflow on wbmp file content reading /
+    fix backport from upstream). (David Carlier)
+
 - LDAP:
   . Fixed bug GH-16032 (Various NULL pointer dereferencements in
     ldap_modify_batch()). (Girgias)
