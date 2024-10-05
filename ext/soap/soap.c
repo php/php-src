@@ -508,6 +508,7 @@ PHP_MINIT_FUNCTION(soap)
 	memcpy(&soap_server_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	soap_server_object_handlers.offset = XtOffsetOf(soap_server_object, std);
 	soap_server_object_handlers.free_obj = soap_server_object_free;
+	soap_server_object_handlers.clone_obj = NULL;
 
 	/* Register SoapFault class */
 	soap_fault_class_entry = register_class_SoapFault(zend_ce_exception);
