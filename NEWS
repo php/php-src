@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.27
 
+- Calendar:
+  . Fixed jdtogregorian overflow. (David Carlier)
+
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
