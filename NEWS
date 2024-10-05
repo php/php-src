@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     nested generator frame). (ilutov)
   . Fixed bug GH-15866 (Core dumped in Zend/zend_generators.c). (Arnaud)
   . Fixed bug GH-16188 (Assertion failure in Zend/zend_exceptions.c). (Arnaud)
+  . Fixed bug GH-16233 (Observer segfault when calling user function in
+    internal function via trampoline). (nielsdos)
 
 - Date:
   . Fixed bug GH-15582: Crash when not calling parent constructor of
