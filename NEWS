@@ -74,6 +74,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
     (nielsdos)
 
+- Sockets:
+  . Fixed bug GH-16267 (socket_strerror overflow on errno argument).
+    (David Carlier)
+
 - SOAP:
   . Fixed bug #73182 (PHP SOAPClient does not support stream context HTTP
     headers in array form). (nielsdos)
