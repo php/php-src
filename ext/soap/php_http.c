@@ -456,6 +456,7 @@ try_again:
 		}
 		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL);
 		smart_str_free(&soap_headers_z);
+		efree(http_msg);
 		return FALSE;
 	}
 
@@ -469,6 +470,7 @@ try_again:
 		}
 		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL);
 		smart_str_free(&soap_headers_z);
+		efree(http_msg);
 		return FALSE;
 	}
 
@@ -482,6 +484,7 @@ try_again:
 		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL);
 		PG(allow_url_fopen) = old_allow_url_fopen;
 		smart_str_free(&soap_headers_z);
+		efree(http_msg);
 		return FALSE;
 	}
 
@@ -536,6 +539,7 @@ try_again:
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL);
 			PG(allow_url_fopen) = old_allow_url_fopen;
 			smart_str_free(&soap_headers_z);
+			efree(http_msg);
 			return FALSE;
 		}
 	}
@@ -687,6 +691,7 @@ try_again:
 					convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 					smart_str_free(&soap_headers_z);
 					smart_str_free(&soap_headers);
+					efree(http_msg);
 					return FALSE;
 				}
 
@@ -904,12 +909,14 @@ try_again:
 			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL);
 			smart_str_free(&soap_headers_z);
+			efree(http_msg);
 			return FALSE;
 		}
 		smart_str_free(&soap_headers);
 	} else {
 		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL);
 		smart_str_free(&soap_headers_z);
+		efree(http_msg);
 		return FALSE;
 	}
 
@@ -926,6 +933,7 @@ try_again:
 				convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
 				smart_str_free(&soap_headers_z);
+				efree(http_msg);
 				return FALSE;
 			}
 
@@ -1173,6 +1181,7 @@ try_again:
 				if (--redirect_max < 1) {
 					add_soap_fault(this_ptr, "HTTP", "Redirection limit reached, aborting", NULL, NULL);
 					smart_str_free(&soap_headers_z);
+					efree(http_msg);
 					return FALSE;
 				}
 
