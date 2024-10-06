@@ -1211,7 +1211,7 @@ PHP_FUNCTION(socket_strerror)
 		RETURN_THROWS();
 	}
 
-	if (arg1 < INT_MIN || arg1 > INT_MAX) {
+	if (ZEND_LONG_EXCEEDS_INT(arg1)) {
 		zend_argument_value_error(1, "must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_THROWS();
 	}
