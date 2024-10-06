@@ -954,20 +954,20 @@ static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImage
 	unsigned int x;
 
     for (x = 0; x < dst_width; x++) {
-        double r = 0, g = 0, b = 0, a = 0;
+	    double r = 0, g = 0, b = 0, a = 0;
         const int left = contrib->ContribRow[x].Left;
         const int right = contrib->ContribRow[x].Right;
-        int i;
+	int i;
 
 	/* Accumulate each channel */
-        for (i = left; i <= right; i++) {
-            const int left_channel = i - left;
-            r += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i]));
-            g += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i]));
-            b += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i]));
-	    a += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetAlpha(p_src_row[i]));
-        }
-        p_dst_row[x] = gdTrueColorAlpha(uchar_clamp(r), uchar_clamp(g), uchar_clamp(b), uchar_clamp(a));
+	for (i = left; i <= right; i++) {
+		const int left_channel = i - left;
+		r += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i]));
+		g += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i]));
+		b += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i]));
+		a += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetAlpha(p_src_row[i]));
+	}
+	p_dst_row[x] = gdTrueColorAlpha(uchar_clamp(r), uchar_clamp(g), uchar_clamp(b), uchar_clamp(a));
     }
 }
 
