@@ -4,8 +4,8 @@ GH-16258 (jddayofweek overflow on argument)
 calendar
 --FILE--
 <?php
-jddayofweek(9223372036854775807, 1);
-jddayofweek(-9223372036854775806, 1);
+jddayofweek(PHP_INT_MAX, 1);
+jddayofweek(PHP_INT_MIN, 1);
 echo "DONE";
 ?>
 --EXPECT--

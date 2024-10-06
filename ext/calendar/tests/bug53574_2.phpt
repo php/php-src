@@ -25,7 +25,7 @@ array(9) {
   ["year"]=>
   int(0)
   ["dow"]=>
-  int(0)
+  int(3)
   ["abbrevdayname"]=>
   string(3) "Wed"
   ["dayname"]=>

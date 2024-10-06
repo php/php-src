@@ -35,15 +35,11 @@ int DayOfWeek(
 {
 	int dow;
 
-	if ((sdn + 1) > INT_MAX) {
-		return (0);
-	}
-
-	dow = (sdn + 1) % 7;
+	dow = (int)(sdn % 7 + 1);
 	if (dow >= 0) {
-		return (dow);
+		return (dow % 7);
 	} else {
-		return (dow + 7);
+		return (dow + 7) % 7;
 	}
 }
 
