@@ -34,7 +34,7 @@ PHP                                                                        NEWS
     ext/dom/parentnode/tree.c). (nielsdos)
   . Fixed bug GH-16151 (Assertion failure in ext/dom/parentnode/tree.c).
     (nielsdos)
-  
+
 - GD:
   . Fixed bug GH-16232 (bitshift overflow on wbmp file content reading /
     fix backport from upstream). (David Carlier)
