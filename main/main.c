@@ -2680,7 +2680,9 @@ PHPAPI int php_handle_auth_data(const char *auth)
 			if (pass) {
 				*pass++ = '\0';
 				SG(request_info).auth_user = estrndup(ZSTR_VAL(user), ZSTR_LEN(user));
-				SG(request_info).auth_password = estrdup(pass);
+				if (strlen(pass) > 0) {
+					SG(request_info).auth_password = estrdup(pass);
+				}
 				ret = 0;
 			}
 			zend_string_free(user);
