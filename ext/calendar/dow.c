@@ -33,14 +33,7 @@
 int DayOfWeek(
 				 zend_long sdn)
 {
-	int dow;
-
-	dow = (int)(sdn % 7 + 1);
-	if (dow >= 0) {
-		return (dow % 7);
-	} else {
-		return (dow + 7) % 7;
-	}
+	return (int)(sdn % 7 + 8) % 7;
 }
 
 const char * const DayNameShort[7] =
