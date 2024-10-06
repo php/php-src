@@ -95,6 +95,12 @@ extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const
 
 extern const struct pdo_stmt_methods pgsql_stmt_methods;
 
+#define FIN_DISCARD 0x1
+#define FIN_CLOSE   0x2
+#define FIN_ABORT   0x4
+
+extern void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode);
+
 #define pdo_pgsql_sqlstate(r) PQresultErrorField(r, PG_DIAG_SQLSTATE)
 
 enum {

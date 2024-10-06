@@ -56,14 +56,14 @@
 #define FLOAT8LABEL "float8"
 #define FLOAT8OID 701
 
-#define FIN_DISCARD 0x1
-#define FIN_CLOSE   0x2
-#define FIN_ABORT   0x4
 
 
-
-static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
+void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 {
+	if (!S) {
+		return;
+	}
+
 	pdo_pgsql_db_handle *H = S->H;
 
 	if (S->is_running_unbuffered && S->result && (fin_mode & FIN_ABORT)) {
