@@ -866,7 +866,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         $exts = get_loaded_extensions();
         $ext_dir = ini_get('extension_dir');
         foreach (scandir($ext_dir) as $file) {
-            if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+            if (preg_match('/^(?:php_)([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
                 if (!extension_loaded($matches[1])) {
                     $exts[] = $matches[1];
                 }
@@ -2029,7 +2029,7 @@ TEST $file
     if ($test->hasSection('EXTENSIONS')) {
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
         if (in_array("*", $extensions, true)) {
-            $extensions = array_diff($exts_to_test, ["php8apache2_4", "php8phpdbg", "php8ts_debug"]);
+            $extensions = $exts_to_test;
         }
     }
     if (is_array($IN_REDIRECT) && $IN_REDIRECT['EXTENSIONS'] != []) {
