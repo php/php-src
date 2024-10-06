@@ -57,13 +57,11 @@ typedef struct {
 
 #define SA_FETCH(zv)			(php_com_saproxy*)Z_OBJ_P(zv)
 
-zend_object *php_com_saproxy_create_object(zend_class_entry *class_type) {
-	php_com_saproxy *intern = zend_object_alloc(sizeof(php_com_saproxy), class_type);
-	memset((char*)intern + sizeof(zend_object), 0, sizeof(php_com_saproxy) - sizeof(zend_object));
-
+zend_object *php_com_saproxy_create_object(zend_class_entry *class_type)
+{
+	php_com_saproxy *intern = emalloc(sizeof(*intern));
+	memset(intern, 0, sizeof(*intern));
 	zend_object_std_init(&intern->std, class_type);
-	object_properties_init(&intern->std, class_type);
-
 	return &intern->std;
 }
 
