@@ -1195,6 +1195,11 @@ PHP_FUNCTION(imagerotate)
 		RETURN_THROWS();
 	}
 
+	if (degrees < (double)(INT_MIN / 100) || degrees > (double)(INT_MAX / 100)) {
+		zend_argument_value_error(2, "must be between %d and %d", (INT_MIN / 100), (INT_MAX / 100));
+		RETURN_THROWS();
+	}
+
 	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
 	im_dst = gdImageRotateInterpolated(im_src, (const float)degrees, color);
 
