@@ -50,7 +50,12 @@ set ODBC_TEST_DSN=Driver={ODBC Driver 17 for SQL Server};Server=^(local^)\SQLEXP
 set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 
 rem setup Firebird related exts
-curl -sLo Firebird.zip https://github.com/FirebirdSQL/firebird/releases/download/v4.0.4/Firebird-4.0.4.3010-0-x64.zip
+if "%PLATFORM%" == "x64" (
+	set PHP_FIREBIRD_DOWNLOAD_URL=https://github.com/FirebirdSQL/firebird/releases/download/v4.0.4/Firebird-4.0.4.3010-0-x64.zip
+) else (
+	set PHP_FIREBIRD_DOWNLOAD_URL=https://github.com/FirebirdSQL/firebird/releases/download/v4.0.4/Firebird-4.0.4.3010-0-Win32.zip
+)
+curl -sLo Firebird.zip %PHP_FIREBIRD_DOWNLOAD_URL%
 7z x -oC:\Firebird Firebird.zip
 set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
 set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
