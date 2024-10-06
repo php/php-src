@@ -10,6 +10,10 @@ zend_test.observer.fiber_init=1
 zend_test.observer.fiber_switch=1
 zend_test.observer.fiber_destroy=1
 memory_limit=100M
+--SKIPIF--
+<?php
+if (getenv("USE_ZEND_ALLOC") === "0") die("skip requires ZendMM because it uses the memory limit");
+?>
 --FILE--
 <?php
 
