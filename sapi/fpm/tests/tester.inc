@@ -838,7 +838,7 @@ class Tester
         int $readLimit = -1,
         int $writeDelay = 0,
         ?string $method = null,
-        array $params = null,
+        ?array $params = null,
     ): Response {
         if ($this->hasError()) {
             return $this->createResponse(expectInvalid: true);
