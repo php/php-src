@@ -36,8 +36,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15168 (stack overflow in json_encode()). (nielsdos)
 
 - GD:
-  . Fixed bug 16232 (bitshift overflow on wbmp file content reading /
+  . Fixed bug GH-16232 (bitshift overflow on wbmp file content reading /
     fix backport from upstream). (David Carlier)
+  . Fixed bug GH-12264 (overflow/underflow on imagerotate degrees value)
+    (David Carlier)
 
 - LDAP:
   . Fixed bug GH-16032 (Various NULL pointer dereferencements in
