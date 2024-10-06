@@ -439,8 +439,7 @@ static void MoladOfMetonicCycle(
 	r1 = NEW_MOON_OF_CREATION;
 	chk = (zend_long)metonicCycle;
 
-	if (chk > ((ZEND_LONG_MAX / (HALAKIM_PER_METONIC_CYCLE & 0xFFFF)) - NEW_MOON_OF_CREATION) ||
-	    chk > (((ZEND_LONG_MAX / ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF))) - (NEW_MOON_OF_CREATION >> 16))) {
+	if (chk > (ZEND_LONG_MAX - NEW_MOON_OF_CREATION) / (HALAKIM_PER_METONIC_CYCLE & 0xFFFF)) {
 		*pMoladDay = 0;
 		*pMoladHalakim = 0;
 		return;
@@ -450,6 +449,13 @@ static void MoladOfMetonicCycle(
 	 * bits of the result will be in r2 and the lower 16 bits will be
 	 * in r1. */
 	r1 += chk * (HALAKIM_PER_METONIC_CYCLE & 0xFFFF);
+
+	if (chk > (ZEND_LONG_MAX - (r1 >> 16)) / ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF)) {
+		*pMoladDay = 0;
+		*pMoladHalakim = 0;
+		return;
+	}
+
 	r2 = r1 >> 16;
 	r2 += chk * ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF);
 
