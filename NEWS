@@ -80,6 +80,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-15711 (SoapClient can't convert BackedEnum to scalar value).
     (nielsdos)
   . Fixed bug GH-16237 (Segmentation fault when cloning SoapServer). (nielsdos)
+  . Fix Soap leaking http_msg on error. (nielsdos)
 
 - SPL:
   . Fixed bug GH-15918 (Assertion failure in ext/spl/spl_fixedarray.c).
