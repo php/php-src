@@ -1248,6 +1248,11 @@ PHP_FUNCTION(socket_strerror)
 		Z_PARAM_LONG(arg1)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (ZEND_LONG_EXCEEDS_INT(arg1)) {
+		zend_argument_value_error(1, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
+
 	RETURN_STRING(sockets_strerror(arg1));
 }
 /* }}} */
