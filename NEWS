@@ -91,6 +91,8 @@ PHP                                                                        NEWS
   . Fix Soap leaking http_msg on error. (nielsdos)
   . Fixed bug GH-16256 (Assertion failure in ext/soap/php_encoding.c:460).
     (nielsdos)
+  . Fixed bug GH-16259 (Soap segfault when classmap instantiation fails).
+    (nielsdos)
 
 - Standard:
   . Fixed bug GH-15613 (overflow on unpack call hex string repeater).
