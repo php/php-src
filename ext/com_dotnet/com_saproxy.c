@@ -373,7 +373,7 @@ static void saproxy_free_storage(zend_object *object)
 //???		}
 //???	}
 
-	if (&proxy->obj->zo != NULL) {
+	if (proxy->obj != NULL) {
 		OBJ_RELEASE(&proxy->obj->zo);
 	}
 
