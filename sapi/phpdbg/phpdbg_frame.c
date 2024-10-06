@@ -245,12 +245,10 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 
 void phpdbg_dump_backtrace(size_t num) /* {{{ */
 {
-	HashPosition position;
 	zval zbacktrace;
 	zval *tmp;
-	zval startline, startfile;
-	const char *startfilename;
-	zval *file = &startfile, *line = &startline;
+	zend_string *file = NULL;
+	zend_long line = 0;
 	int i = 0, limit = num;
 
 	PHPDBG_OUTPUT_BACKUP();
@@ -269,18 +267,15 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 		return;
 	} phpdbg_end_try_access();
 
-	Z_LVAL(startline) = zend_get_executed_lineno();
-	startfilename = zend_get_executed_filename();
-	Z_STR(startfile) = zend_string_init(startfilename, strlen(startfilename), 0);
-
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
+	line = zend_get_executed_lineno();
+	file = zend_get_executed_filename_ex();
 
 	zval *function_name = NULL;
-	while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position))) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(zbacktrace), tmp) {
 		if (file) { /* userland */
 			phpdbg_out("frame #%d: ", i);
 			phpdbg_dump_prototype(tmp);
-			phpdbg_out(" at %s:"ZEND_LONG_FMT"\n", Z_STRVAL_P(file), Z_LVAL_P(line));
+			phpdbg_out(" at %s:"ZEND_LONG_FMT"\n", ZSTR_VAL(file), line);
 			i++;
 		} else {
 			phpdbg_out(" => ");
@@ -288,23 +283,23 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 			phpdbg_out(" (internal function)\n");
 		}
 
-		file = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FILE));
-		line = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_LINE));
+		file = zend_hash_find_ptr(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FILE));
+		zval *line_zv = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_LINE));
+		if (line_zv) {
+			line = Z_LVAL_P(line_zv);
+		}
 		function_name = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FUNCTION));
-
-		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	/* This is possible for fibers' start closure for example, which have a frame that doesn't contain the info
 	 * of which location stated the fiber if that stack frame is already torn down. same behaviour with debug_backtrace(). */
 	if (file == NULL) {
 		phpdbg_writeln(" => %s (internal function)", Z_STRVAL_P(function_name));
 	} else {
-		phpdbg_writeln("frame #%d: {main} at %s:"ZEND_LONG_FMT, i, Z_STRVAL_P(file), Z_LVAL_P(line));
+		phpdbg_writeln("frame #%d: {main} at %s:"ZEND_LONG_FMT, i, ZSTR_VAL(file), line);
 	}
 
 	zval_ptr_dtor_nogc(&zbacktrace);
-	zend_string_release(Z_STR(startfile));
 
 	PHPDBG_OUTPUT_BACKUP_RESTORE();
 } /* }}} */
