@@ -3289,7 +3289,7 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 		if (ret != NULL) {
 			zval_ptr_dtor(orig_var);
 			// TODO: avoid reallocation ???
-			ZVAL_STRINGL(orig_var, (char *)ret->val, ret->len);
+			ZVAL_STRINGL(orig_var, (const char *) ret->val, ret->len);
 			efree(ret->val);
 		}
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
@@ -3305,7 +3305,22 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 
 		ht = HASH_OF(var);
 		if (ht != NULL) {
-			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
+			ZEND_HASH_FOREACH_VAL(ht, entry) {
+				/* Can be a typed property declaration, in which case we need to remove the reference from the source list.
+				 * Just using ZEND_TRY_ASSIGN_STRINGL is not sufficient because that would not unwrap the reference
+				 * and change values through references (see bug #26639). */
+				if (Z_TYPE_P(entry) == IS_INDIRECT) {
+					ZEND_ASSERT(Z_TYPE_P(var) == IS_OBJECT);
+
+					entry = Z_INDIRECT_P(entry);
+					if (Z_ISREF_P(entry) && Z_TYPE_P(Z_REFVAL_P(entry)) == IS_STRING) {
+						zend_property_info *info = zend_get_typed_property_info_for_slot(Z_OBJ_P(var), entry);
+						if (info) {
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(entry), info);
+						}
+					}
+				}
+
 				if (mb_recursive_convert_variable(convd, entry)) {
 					if (Z_REFCOUNTED_P(var)) {
 						Z_UNPROTECT_RECURSION_P(var);
