@@ -96,6 +96,7 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug GH-16237 (Segmentation fault when cloning SoapServer). (nielsdos)
+  . Fix Soap leaking http_msg on error. (nielsdos)
 
 - Standard:
   . Fixed bug GH-16053 (Assertion failure in Zend/zend_hash.c). (Arnaud)
