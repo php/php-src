@@ -838,6 +838,7 @@ class Tester
         int $readLimit = -1,
         int $writeDelay = 0,
         ?string $method = null,
+        array $params = null,
     ): Response {
         if ($this->hasError()) {
             return $this->createResponse(expectInvalid: true);
@@ -847,7 +848,7 @@ class Tester
             $stdin = $this->parseStdin($stdin, $headers);
         }
 
-        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin, $method);
+        $params = $params ?? $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin, $method);
         $this->trace('Request params', $params);
 
         try {
