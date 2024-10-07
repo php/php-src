@@ -1036,7 +1036,10 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, HashTable *ht, 
 static zend_always_inline bool php_serialize_check_stack_limit(void)
 {
 #ifdef ZEND_CHECK_STACK_LIMIT
-	return zend_call_stack_overflowed(EG(stack_limit));
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return true;
+	}
 #else
 	return false;
 #endif
@@ -1052,9 +1055,6 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_
 	}
 
 	if (UNEXPECTED(php_serialize_check_stack_limit())) {
-#ifdef ZEND_CHECK_STACK_LIMIT
-		zend_call_stack_size_error();
-#endif
 		return;
 	}
 
