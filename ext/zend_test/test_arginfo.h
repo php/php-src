@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 127c7004a014495353135df6d0b6658446ae040b */
+ * Stub hash: 4b349d5ac8e8daba565b57a091fc463d3132d37d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -197,6 +197,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestMagicCall___call,
 	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class__ZendTestMagicCallForward___call arginfo_class__ZendTestMagicCall___call
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class__ZendTestChildClass_returnsThrowable, 0, 0, Exception, 0)
 ZEND_END_ARG_INFO()
 
@@ -296,6 +298,7 @@ static ZEND_METHOD(_ZendTestClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestClass, variadicTest);
 static ZEND_METHOD(_ZendTestClass, takesUnionType);
 static ZEND_METHOD(_ZendTestMagicCall, __call);
+static ZEND_METHOD(_ZendTestMagicCallForward, __call);
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable);
 static ZEND_METHOD(ZendAttributeTest, testMethod);
 static ZEND_METHOD(_ZendTestTrait, testMethod);
@@ -393,6 +396,12 @@ static const zend_function_entry class__ZendTestClass_methods[] = {
 
 static const zend_function_entry class__ZendTestMagicCall_methods[] = {
 	ZEND_ME(_ZendTestMagicCall, __call, arginfo_class__ZendTestMagicCall___call, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class__ZendTestMagicCallForward_methods[] = {
+	ZEND_ME(_ZendTestMagicCallForward, __call, arginfo_class__ZendTestMagicCallForward___call, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -647,6 +656,16 @@ static zend_class_entry *register_class__ZendTestMagicCall(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "_ZendTestMagicCall", class__ZendTestMagicCall_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestMagicCallForward(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestMagicCallForward", class__ZendTestMagicCallForward_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	return class_entry;
