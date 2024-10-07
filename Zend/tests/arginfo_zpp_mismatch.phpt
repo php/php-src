@@ -9,7 +9,7 @@ if (getenv('SKIP_MSAN')) die("skip msan misses interceptors for some functions")
 *
 --FILE--
 <?php
-
+var_dump(get_loaded_extensions());
 require __DIR__ . "/arginfo_zpp_mismatch.inc";
 
 function test($function) {
