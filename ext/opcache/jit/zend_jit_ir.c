@@ -9243,7 +9243,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 			if (op_array->fn_flags & ZEND_ACC_STATIC) {
 				scope_ref = ir_LOAD_A(jit_EX(This.value.ref));
 			} else {
-				scope_ref = ir_LOAD_A(ir_ADD_OFFSET(jit_EX(This.value.ref), offsetof(zend_object, ce)));
+				scope_ref = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce)));
 			}
 		}
 		if (!zend_jit_push_call_frame(jit, opline, op_array, func, 0, 0, checked_stack, func_ref, scope_ref)) {
