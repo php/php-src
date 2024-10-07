@@ -77,6 +77,10 @@ PHP                                                                        NEWS
   . Fix GH-16136 (Memory leak in php_ldap_do_modify() when entry is not a
     proper dictionary). (Girgias)
 
+- MBString:
+  . Fixed bug GH-16261 (Reference invariant broken in mb_convert_variables()).
+    (nielsdos)
+
 - Opcache:
   . Fixed bug GH-16009 (Segmentation fault with frameless functions and
     undefined CVs). (nielsdos)
