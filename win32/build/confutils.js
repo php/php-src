@@ -1367,8 +1367,8 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 			ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR_DEV)\\lib");
 			ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR_DEV)\\lib\\php_" + dependson + ".lib");
 		} else {
-			ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
-			ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
+			ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)\\ext");
+			ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\ext\\php_" + dependson + ".lib");
 		}
 
 	} else {
@@ -1453,9 +1453,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		}
 		var libname = dllname.substring(0, dllname.length-4) + ".lib";
 
-		var resname = generate_version_info_resource(dllname, extname, configure_module_dirname, false);
+		var resname = generate_version_info_resource((MODE_PHPIZE ? "" : "ext\\") + dllname, extname, configure_module_dirname, false);
 		var ld = CMD_MOD1 + '"$(LINK)"';
-		var manifest_name = generate_version_info_manifest(dllname);
+		var manifest_name = generate_version_info_manifest((MODE_PHPIZE ? "" : "ext\\") + dllname);
 
 		ldflags = "";
 		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
@@ -1474,14 +1474,14 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
 		}
 
-		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
+		MFO.WriteLine("$(BUILD_DIR)\\ext\\" + libname + ": $(BUILD_DIR)\\ext\\" + dllname);
 		MFO.WriteBlankLines(1);
 		if (MODE_PHPIZE) {
 			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		} else {
-			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
-			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
+			MFO.WriteLine("$(BUILD_DIR)\\ext\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
+			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\ext\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		}
 		MFO.WriteLine("\t-" + CMD_MOD2 + "$(_VC_MANIFEST_EMBED_DLL)");
 		MFO.WriteBlankLines(1);
@@ -1491,7 +1491,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		} else {
 			ADD_FLAG("EXT_TARGETS", dllname);
 		}
-		MFO.WriteLine(dllname + ": $(BUILD_DIR)\\" + dllname);
+		MFO.WriteLine(dllname + ": $(BUILD_DIR)\\ext\\" + dllname);
 		MFO.WriteLine("\t" + CMD_MOD2 + "echo EXT " + extname + " build complete");
 		MFO.WriteBlankLines(1);
 
@@ -2020,7 +2020,7 @@ function generate_tmp_php_ini()
 	}
 
 	var ext_list = ("dl_test," + PHP_TEST_INI_EXT_EXCLUDE).split(",");
-	INI.WriteLine("extension_dir=" + ini_dir);
+	INI.WriteLine("extension_dir=" + ini_dir + "\\ext");
 	for (var i in extensions_enabled) {
 		if ("shared" != extensions_enabled[i][1]) {
 			continue;
