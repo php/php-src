@@ -32,6 +32,7 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_property_hooks.h"
+#include "zend_observer.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -1627,7 +1628,8 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	 * value so that it doesn't contain garbage when the engine allocates space for the next stack
 	 * frame. This didn't cause any issues until now due to "lucky" structure layout. */
 	func->last_var = 0;
-	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
+	uint32_t min_T = 2 + ZEND_OBSERVER_ENABLED;
+	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, min_T) : min_T;
 	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : ZSTR_EMPTY_ALLOC();
 	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
 	func->line_end = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_end : 0;

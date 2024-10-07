@@ -1091,6 +1091,23 @@ static ZEND_METHOD(_ZendTestMagicCall, __call)
 	RETURN_ARR(zend_new_pair(&name_zv, arguments));
 }
 
+static ZEND_METHOD(_ZendTestMagicCallForward, __call)
+{
+	zend_string *name;
+	zval *arguments;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(name)
+		Z_PARAM_ARRAY(arguments)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_IGNORE_VALUE(arguments);
+
+	zval func;
+	ZVAL_STR(&func, name);
+	call_user_function(NULL, NULL, &func, return_value, 0, NULL);
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -1279,6 +1296,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_int_enum = register_class_ZendTestIntEnum();
 
 	zend_test_magic_call = register_class__ZendTestMagicCall();
+
+	register_class__ZendTestMagicCallForward();
 
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
