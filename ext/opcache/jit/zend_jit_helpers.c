@@ -189,14 +189,100 @@ static zend_function* ZEND_FASTCALL zend_jit_find_method_tmp_helper(zend_object 
 	return fbc;
 }
 
-static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_metod_call_frame(zend_object *obj, zend_function *fbc, uint32_t num_args)
+
+static zend_class_entry* ZEND_FASTCALL zend_jit_find_class_helper(zend_execute_data *execute_data)
+{
+	const zend_op *opline = EX(opline);
+	zend_class_entry *ce;
+
+	if (opline->op1_type == IS_CONST) {
+		/* no function found. try a static method in class */
+		ce = CACHED_PTR(opline->result.num);
+		if (UNEXPECTED(ce == NULL)) {
+			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+		}
+	} else if (opline->op1_type == IS_UNUSED) {
+		ce = zend_fetch_class(NULL, opline->op1.num);
+	} else {
+		ce = Z_CE_P(EX_VAR(opline->op1.var));
+	}
+	return ce;
+}
+
+static zend_function* ZEND_FASTCALL zend_jit_find_static_method_helper(zend_execute_data *execute_data, zend_class_entry *ce)
+{
+	const zend_op *opline = EX(opline);
+	zend_function *fbc;
+
+	ZEND_ASSERT(opline->op2_type == IS_CONST);
+
+	if (opline->op1_type == IS_CONST &&
+	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
+		/* nothing to do */
+	} else if (opline->op1_type != IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
+	} else if (opline->op2_type != IS_UNUSED) {
+		zval *function_name = RT_CONSTANT(opline, opline->op2);
+
+		ZEND_ASSERT(Z_TYPE_P(function_name) == IS_STRING);
+		if (ce->get_static_method) {
+			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
+		} else {
+			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), RT_CONSTANT(opline, opline->op2) + 1);
+		}
+		if (UNEXPECTED(fbc == NULL)) {
+			if (EXPECTED(!EG(exception))) {
+				zend_undefined_method(ce, Z_STR_P(function_name));
+			}
+			return NULL;
+		}
+		if (EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
+			EXPECTED(!(fbc->common.scope->ce_flags & ZEND_ACC_TRAIT))) {
+			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
+		}
+		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+			zend_init_func_run_time_cache(&fbc->op_array);
+		}
+	} else {
+		if (UNEXPECTED(ce->constructor == NULL)) {
+			zend_throw_error(NULL, "Cannot call constructor");
+			return NULL;
+		}
+		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			return NULL;;
+		}
+		fbc = ce->constructor;
+		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+			zend_init_func_run_time_cache(&fbc->op_array);
+		}
+	}
+
+	return fbc;
+}
+
+static zend_execute_data* ZEND_FASTCALL zend_jit_push_this_method_call_frame(zend_class_entry *scope, zend_function *fbc, uint32_t num_args)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+
+	if (Z_TYPE(EX(This)) != IS_OBJECT || !instanceof_function(Z_OBJCE(EX(This)), scope)) {
+		zend_non_static_method_call(fbc);
+		return NULL;
+	}
+
+	scope = (zend_class_entry*)Z_OBJ(EX(This));
+	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS, fbc, num_args, scope);
+}
+
+static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_method_call_frame(zend_object *obj, zend_function *fbc, uint32_t num_args)
 {
 	zend_class_entry *scope = obj->ce;
 
 	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, num_args, scope);
 }
 
-static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_metod_call_frame_tmp(zend_object *obj, zend_function *fbc, uint32_t num_args)
+static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_method_call_frame_tmp(zend_object *obj, zend_function *fbc, uint32_t num_args)
 {
 	zend_class_entry *scope = obj->ce;
 

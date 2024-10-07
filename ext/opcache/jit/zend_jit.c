@@ -558,6 +558,43 @@ static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
 	return c && (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 }
 
+static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, const zend_op *opline, uint8_t op_type, znode_op op)
+{
+	zend_class_entry *ce = NULL;
+
+	if (op_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(opline, op);
+		zend_string *class_name;
+
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+		class_name = Z_STR_P(zv);
+		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		if (ce && (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename)) {
+			ce = NULL;
+		}
+	} else {
+		ZEND_ASSERT(op_type == IS_UNUSED);
+		if ((op.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = op_array->scope;
+		} else {
+			ZEND_ASSERT((op.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT);
+			ce = op_array->scope;
+			if (ce) {
+				if (ce->parent) {
+					ce = ce->parent;
+					if (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename) {
+						ce = NULL;
+					}
+				} else {
+					ce = NULL;
+				}
+			}
+		}
+	}
+
+	return ce;
+}
+
 static zend_property_info* zend_get_known_property_info(const zend_op_array *op_array, zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
 {
 	zend_property_info *info = NULL;
@@ -2517,6 +2554,19 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								NULL, 0,
 								-1, -1,
 								0)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_INIT_STATIC_METHOD_CALL:
+						if (!(opline->op2_type == IS_CONST
+						 && (opline->op1_type == IS_CONST
+						  || (opline->op1_type == IS_UNUSED
+						   && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
+						    || (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT))))) {
+							break;
+						}
+						if (!zend_jit_init_static_method_call(&ctx, opline, b, op_array, ssa, ssa_op, call_level,
+								NULL, 0)) {
 							goto jit_failure;
 						}
 						goto done;

@@ -2454,7 +2454,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(z
 		Z_STRVAL_P(function_name), zend_zval_value_name(object));
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc)
+ZEND_API void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc)
 {
 	zend_throw_error(
 		zend_ce_error,
