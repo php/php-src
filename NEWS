@@ -84,6 +84,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-16009 (Segmentation fault with frameless functions and
     undefined CVs). (nielsdos)
+  . Fixed bug GH-16186 (Assertion failure in Zend/zend_operators.c). (Arnaud)
 
 - PCRE:
   . Fixed bug GH-16184 (UBSan address overflowed in ext/pcre/php_pcre.c).
