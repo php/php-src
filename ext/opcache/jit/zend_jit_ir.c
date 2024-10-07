@@ -3018,11 +3018,11 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_invalid_method_call_tmp);
 	REGISTER_HELPER(zend_jit_find_method_helper);
 	REGISTER_HELPER(zend_jit_find_method_tmp_helper);
-	REGISTER_HELPER(zend_jit_push_static_metod_call_frame);
-	REGISTER_HELPER(zend_jit_push_static_metod_call_frame_tmp);
+	REGISTER_HELPER(zend_jit_push_static_method_call_frame);
+	REGISTER_HELPER(zend_jit_push_static_method_call_frame_tmp);
 	REGISTER_HELPER(zend_jit_find_class_helper);
 	REGISTER_HELPER(zend_jit_find_static_method_helper);
-	REGISTER_HELPER(zend_jit_push_this_metod_call_frame);
+	REGISTER_HELPER(zend_jit_push_this_method_call_frame);
 	REGISTER_HELPER(zend_jit_free_trampoline_helper);
 	REGISTER_HELPER(zend_jit_verify_return_slow);
 	REGISTER_HELPER(zend_jit_deprecated_helper);
@@ -9021,12 +9021,12 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 		ir_ref ret;
 
 		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !delayed_fetch_this) {
-			ret = ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_push_static_metod_call_frame_tmp),
+			ret = ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_push_static_method_call_frame_tmp),
 					this_ref,
 					func_ref,
 					ir_CONST_U32(opline->extended_value));
 		} else {
-			ret = ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_push_static_metod_call_frame),
+			ret = ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_push_static_method_call_frame),
 					this_ref,
 					func_ref,
 					ir_CONST_U32(opline->extended_value));
@@ -9223,7 +9223,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 			ir_IF_FALSE_cold(if_static);
 		}
 
-		ref = ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_push_this_metod_call_frame),
+		ref = ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_push_this_method_call_frame),
 				scope_ref,
 				func_ref,
 				ir_CONST_U32(opline->extended_value));

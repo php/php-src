@@ -262,7 +262,7 @@ static zend_function* ZEND_FASTCALL zend_jit_find_static_method_helper(zend_exec
 	return fbc;
 }
 
-static zend_execute_data* ZEND_FASTCALL zend_jit_push_this_metod_call_frame(zend_class_entry *scope, zend_function *fbc, uint32_t num_args)
+static zend_execute_data* ZEND_FASTCALL zend_jit_push_this_method_call_frame(zend_class_entry *scope, zend_function *fbc, uint32_t num_args)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 
@@ -275,14 +275,14 @@ static zend_execute_data* ZEND_FASTCALL zend_jit_push_this_metod_call_frame(zend
 	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS, fbc, num_args, scope);
 }
 
-static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_metod_call_frame(zend_object *obj, zend_function *fbc, uint32_t num_args)
+static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_method_call_frame(zend_object *obj, zend_function *fbc, uint32_t num_args)
 {
 	zend_class_entry *scope = obj->ce;
 
 	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, num_args, scope);
 }
 
-static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_metod_call_frame_tmp(zend_object *obj, zend_function *fbc, uint32_t num_args)
+static zend_execute_data* ZEND_FASTCALL zend_jit_push_static_method_call_frame_tmp(zend_object *obj, zend_function *fbc, uint32_t num_args)
 {
 	zend_class_entry *scope = obj->ce;
 
