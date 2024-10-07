@@ -123,6 +123,7 @@ static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_
 
 typedef struct _zend_jit_op_array_extension {
 	zend_func_info func_info;
+	const zend_op_array *op_array;
 	const void *orig_handler;
 } zend_jit_op_array_extension;
 
@@ -160,6 +161,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 
 typedef struct _zend_jit_op_array_hot_extension {
 	zend_func_info func_info;
+	const zend_op_array *op_array;
 	int16_t    *counter;
 	const void *orig_handlers[1];
 } zend_jit_op_array_hot_extension;
