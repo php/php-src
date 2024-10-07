@@ -13,10 +13,10 @@ runs:
           -d gvenzl/oracle-xe:slim
 
         mkdir /opt/oracle
-        wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip
-        unzip instantclient-basiclite-linuxx64.zip && rm instantclient-basiclite-linuxx64.zip
-        wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
-        unzip instantclient-sdk-linuxx64.zip && rm instantclient-sdk-linuxx64.zip
+        wget -nv https://download.oracle.com/otn_software/linux/instantclient/2114000/instantclient-basiclite-linux.x64-21.14.0.0.0dbru.zip
+        unzip instantclient-basiclite-linux.x64-21.14.0.0.0dbru.zip && rm instantclient-basiclite-linux.x64-21.14.0.0.0dbru.zip
+        wget -nv https://download.oracle.com/otn_software/linux/instantclient/2114000/instantclient-sdk-linux.x64-21.14.0.0.0dbru.zip
+        unzip instantclient-sdk-linux.x64-21.14.0.0.0dbru.zip && rm instantclient-sdk-linux.x64-21.14.0.0.0dbru.zip
         mv instantclient_*_* /opt/oracle/instantclient
         # interferes with libldap2 headers
         rm /opt/oracle/instantclient/sdk/include/ldap.h
