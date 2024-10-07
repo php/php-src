@@ -120,7 +120,7 @@ static zend_result lexbor_read_port(void *uri_object_internal, zval *retval)
 {
 	lxb_url_t *lxb_url = (lxb_url_t *) uri_object_internal;
 
-	if (lxb_url->has_port) {
+	if (lxb_url->has_port && lxb_url->port != 0) {
 		ZVAL_LONG(retval, lxb_url->port);
 	} else {
 		ZVAL_NULL(retval);
@@ -133,16 +133,8 @@ static zend_result lexbor_read_path(void *uri_object_internal, zval *retval)
 {
 	lxb_url_t *lxb_url = (lxb_url_t *) uri_object_internal;
 
-	if (lxb_url->path.length && (lxb_url->path.list[0]->length || lxb_url->path.length > 1)) {
-		smart_str str = {0};
-
-		smart_str_appendl(&str, (const char *) lxb_url->path.list[0]->data, lxb_url->path.list[0]->length);
-		for (int i = 1; i < lxb_url->path.length; i++) {
-			smart_str_appends(&str, "/");
-			smart_str_appendl(&str, (const char *) lxb_url->path.list[i]->data, lxb_url->path.list[i]->length);
-		}
-
-		ZVAL_STR(retval, smart_str_extract(&str));
+	if (lxb_url->path.length) {
+		ZVAL_STRINGL(retval, (const char *) lxb_url->path.str.data, lxb_url->path.str.length);
 	} else {
 		ZVAL_NULL(retval);
 	}

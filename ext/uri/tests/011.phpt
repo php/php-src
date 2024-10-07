@@ -23,7 +23,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(4) "path"
+  string(5) "/path"
   ["query"]=>
   string(15) "query=foo%20bar"
   ["fragment"]=>

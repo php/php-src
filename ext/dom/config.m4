@@ -8,7 +8,7 @@ if test "$PHP_DOM" != "no"; then
   PHP_SETUP_LIBXML([DOM_SHARED_LIBADD], [
     AC_DEFINE([HAVE_DOM], [1],
       [Define to 1 if the PHP extension 'dom' is available.])
-    PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/lexbor -DLEXBOR_STATIC -Wno-uninitialized"
+    PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/lexbor -DLEXBOR_STATIC -Wno-uninitialized -Wno-int-conversion"
     LEXBOR_DIR="lexbor/lexbor"
     LEXBOR_SOURCES=m4_normalize(["
       $LEXBOR_DIR/core/array_obj.c
