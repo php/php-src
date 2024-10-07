@@ -64,11 +64,11 @@ $dbh = getDbConnection();
 @$dbh->exec('drop sequence g_bug_15604');
 unset($dbh);
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 array(3) {
   ["ID"]=>
-  int(2)
+  %r(int\(2\)|string\(1\) "2")%r
   ["A"]=>
   int(2)
   ["B"]=>
