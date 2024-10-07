@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ad354b7dc9caadc2bb5ed810964ebf83acd27f1d */
+ * Stub hash: 1cdf310b94e2297a4e426bd4c0c1ab4d5995936d */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -1604,6 +1604,12 @@ static zend_class_entry *register_class_ReflectionProperty(zend_class_entry *cla
 	zend_string *const_IS_PRIVATE_SET_name = zend_string_init_interned("IS_PRIVATE_SET", sizeof("IS_PRIVATE_SET") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_IS_PRIVATE_SET_name, &const_IS_PRIVATE_SET_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IS_PRIVATE_SET_name);
+
+	zval const_IS_VIRTUAL_value;
+	ZVAL_LONG(&const_IS_VIRTUAL_value, ZEND_ACC_VIRTUAL);
+	zend_string *const_IS_VIRTUAL_name = zend_string_init_interned("IS_VIRTUAL", sizeof("IS_VIRTUAL") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IS_VIRTUAL_name, &const_IS_VIRTUAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IS_VIRTUAL_name);
 
 	zval const_IS_FINAL_value;
 	ZVAL_LONG(&const_IS_FINAL_value, ZEND_ACC_FINAL);

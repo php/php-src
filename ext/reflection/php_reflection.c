@@ -1595,6 +1595,9 @@ ZEND_METHOD(Reflection, getModifierNames)
 	if (modifiers & ZEND_ACC_FINAL) {
 		add_next_index_stringl(return_value, "final", sizeof("final")-1);
 	}
+	if (modifiers & ZEND_ACC_VIRTUAL) {
+		add_next_index_stringl(return_value, "virtual", sizeof("virtual")-1);
+	}
 
 	/* These are mutually exclusive */
 	switch (modifiers & ZEND_ACC_PPP_MASK) {

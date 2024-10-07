@@ -464,6 +464,8 @@ class ReflectionProperty implements Reflector
     public const int IS_PROTECTED_SET = UNKNOWN;
     /** @cvalue ZEND_ACC_PRIVATE_SET */
     public const int IS_PRIVATE_SET = UNKNOWN;
+    /** @cvalue ZEND_ACC_VIRTUAL */
+    public const int IS_VIRTUAL = UNKNOWN;
     /** @cvalue ZEND_ACC_FINAL */
     public const int IS_FINAL = UNKNOWN;
 
