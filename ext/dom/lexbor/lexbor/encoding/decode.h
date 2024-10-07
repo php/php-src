@@ -306,6 +306,10 @@ LXB_API lxb_codepoint_t
 lxb_encoding_decode_valid_utf_8_single(const lxb_char_t **data,
                                        const lxb_char_t *end);
 
+LXB_API lxb_codepoint_t
+lxb_encoding_decode_valid_utf_8_single_reverse(const lxb_char_t **end,
+                                               const lxb_char_t *begin);
+
 LXB_API uint8_t
 lxb_encoding_decode_utf_8_length(lxb_char_t data);
 
