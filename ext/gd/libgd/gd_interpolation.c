@@ -929,6 +929,24 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
 	return res;
 }
 
+static inline unsigned char
+uchar_clamp(double clr) {
+	unsigned short result;
+	assert(fabs(clr) <= SHRT_MAX);
+	/* Casting a negative float to an unsigned short is undefined.
+	 * However, casting a float to a signed truncates toward zero and
+	 * casting a negative signed value to an unsigned of the same size
+	 * results in a bit-identical value (assuming twos-complement
+	 * arithmetic).	 This is what we want: all legal negative values
+	 * for clr will be greater than 255. */
+	/* Convert and clamp. */
+	result = (unsigned short)(short)(clr + 0.5);
+	if (result > 255) {
+		result = (clr < 0) ? 0 : 255;
+	}/* if */
+	return result;
+}/* uchar_clamp*/
+
 static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImagePtr dst, unsigned int dst_width, unsigned int row, LineContribType *contrib)
 {
     int *p_src_row = pSrc->tpixels[row];
@@ -936,20 +954,20 @@ static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImage
 	unsigned int x;
 
     for (x = 0; x < dst_width; x++) {
-		register unsigned char r = 0, g = 0, b = 0, a = 0;
+	    double r = 0, g = 0, b = 0, a = 0;
         const int left = contrib->ContribRow[x].Left;
         const int right = contrib->ContribRow[x].Right;
-		int i;
+	int i;
 
-		/* Accumulate each channel */
-        for (i = left; i <= right; i++) {
-			const int left_channel = i - left;
-            r += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i])));
-            g += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i])));
-            b += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i])));
-			a += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetAlpha(p_src_row[i])));
-        }
-        p_dst_row[x] = gdTrueColorAlpha(r, g, b, a);
+	/* Accumulate each channel */
+	for (i = left; i <= right; i++) {
+		const int left_channel = i - left;
+		r += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i]));
+		g += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i]));
+		b += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i]));
+		a += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetAlpha(p_src_row[i]));
+	}
+	p_dst_row[x] = gdTrueColorAlpha(uchar_clamp(r), uchar_clamp(g), uchar_clamp(b), uchar_clamp(a));
     }
 }
 
@@ -982,7 +1000,7 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 {
 	unsigned int y;
 	for (y = 0; y < dst_height; y++) {
-		register unsigned char r = 0, g = 0, b = 0, a = 0;
+		double r = 0, g = 0, b = 0, a = 0;
 		const int iLeft = contrib->ContribRow[y].Left;
 		const int iRight = contrib->ContribRow[y].Right;
 		int i;
@@ -991,12 +1009,12 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 		for (i = iLeft; i <= iRight; i++) {
 			const int pCurSrc = pSrc->tpixels[i][uCol];
 			const int i_iLeft = i - iLeft;
-			r += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc)));
-			g += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc)));
-			b += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc)));
-			a += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetAlpha(pCurSrc)));
+			r += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc));
+			g += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc));
+			b += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc));
+			a += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetAlpha(pCurSrc));
 		}
-		pRes->tpixels[y][uCol] = gdTrueColorAlpha(r, g, b, a);
+		pRes->tpixels[y][uCol] = gdTrueColorAlpha(uchar_clamp(r), uchar_clamp(g), uchar_clamp(b), uchar_clamp(a));
 	}
 }
 
