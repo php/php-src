@@ -1707,6 +1707,9 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 		func = (zend_function *)(uintptr_t)ecalloc(1, sizeof(zend_internal_function));
 	}
 	func->type = ZEND_INTERNAL_FUNCTION;
+	/* This trampoline does not use the call_trampoline_op, so it won't reuse the call frame,
+	 * which means we don't even need to reserve a temporary for observers. */
+	func->common.T = 0;
 	func->common.arg_flags[0] = 0;
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
