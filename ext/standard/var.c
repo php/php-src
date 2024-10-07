@@ -1052,7 +1052,9 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_
 	}
 
 	if (UNEXPECTED(php_serialize_check_stack_limit())) {
+#ifdef ZEND_CHECK_STACK_LIMIT
 		zend_call_stack_size_error();
+#endif
 		return;
 	}
 
