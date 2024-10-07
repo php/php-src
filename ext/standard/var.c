@@ -1040,9 +1040,8 @@ static zend_always_inline bool php_serialize_check_stack_limit(void)
 		zend_call_stack_size_error();
 		return true;
 	}
-#else
-	return false;
 #endif
+	return false;
 }
 
 static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash, bool in_rcn_array, bool is_root) /* {{{ */
