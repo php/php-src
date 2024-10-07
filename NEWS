@@ -34,6 +34,7 @@ PHP                                                                        NEWS
     objects). (Arnaud)
   . Fixed bug GH-15866 (Core dumped in Zend/zend_generators.c). (Arnaud)
   . Fixed bug GH-15960 (Foreach edge cases with lazy objects). (Arnaud)
+  . Fixed bug GH-16188 (Assertion failure in Zend/zend_exceptions.c). (Arnaud)
 
 - DOM:
   . Fixed bug GH-16039 (Segmentation fault (access null pointer) in
