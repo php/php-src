@@ -61,6 +61,8 @@ PHP                                                                        NEWS
     fix backport from upstream). (David Carlier)
   . Fixed bug GH-12264 (overflow/underflow on imagerotate degrees value)
     (David Carlier)
+  . Fixed bug GH-16274 (imagescale underflow on RBG channels /
+    fix backport from upstream). (David Carlier)
 
 - LDAP:
   . Fixed bug GH-16032 (Various NULL pointer dereferencements in
