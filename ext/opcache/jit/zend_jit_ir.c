@@ -9079,7 +9079,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_call_info *call_info = NULL;
-	zend_class_entry *ce = NULL;
+	zend_class_entry *ce;
 	zend_function *func = NULL;
 	ir_ref func_ref, func_ref2, scope_ref, scope_ref2, if_cached, cold_path, ref;
 	ir_ref if_static = IR_UNUSED;
@@ -9094,36 +9094,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 		}
 	}
 
-	if (opline->op1_type == IS_CONST) {
-		zval *zv = RT_CONSTANT(opline, opline->op1);
-		zend_string *class_name;
-
-		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
-		class_name = Z_STR_P(zv);
-		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-		if (ce && (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename)) {
-			ce = NULL;
-		}
-	} else {
-		ZEND_ASSERT(opline->op1_type == IS_UNUSED);
-		if ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
-			ce = op_array->scope;
-		} else {
-			ZEND_ASSERT((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT);
-			ce = op_array->scope;
-			if (ce) {
-				if (ce->parent) {
-					ce = ce->parent;
-					if (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename) {
-						ce = NULL;
-					}
-				} else {
-					ce = NULL;
-				}
-			}
-		}
-	}
-
+	ce = zend_get_known_class(op_array, opline, opline->op1_type, opline->op1);
 	if (!func && ce) {
 		zval *zv = RT_CONSTANT(opline, opline->op2);
 		zend_string *method_name;
@@ -15826,38 +15797,9 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	ir_ref ref, ref2, if_cached, fast_path, cold_path, prop_info_ref, if_typed, if_def;
 	int fetch_type;
 	zend_property_info *known_prop_info = NULL;
-	zend_class_entry *ce = NULL;
+	zend_class_entry *ce;
 
-	if (opline->op2_type == IS_CONST) {
-		zval *zv = RT_CONSTANT(opline, opline->op2);
-		zend_string *class_name;
-
-		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
-		class_name = Z_STR_P(zv);
-		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-		if (ce && (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename)) {
-			ce = NULL;
-		}
-	} else {
-		ZEND_ASSERT(opline->op2_type == IS_UNUSED);
-		if (opline->op2.num == ZEND_FETCH_CLASS_SELF) {
-			ce = op_array->scope;
-		} else {
-			ZEND_ASSERT(opline->op2.num == ZEND_FETCH_CLASS_PARENT);
-			ce = op_array->scope;
-			if (ce) {
-				if (ce->parent) {
-					ce = ce->parent;
-					if (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename) {
-						ce = NULL;
-					}
-				} else {
-					ce = NULL;
-				}
-			}
-		}
-	}
-
+	ce = zend_get_known_class(op_array, opline, opline->op2_type, opline->op2);
 	if (ce) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zend_string *prop_name;
