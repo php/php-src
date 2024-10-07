@@ -116,11 +116,11 @@ rem prepare for mail
 curl -sLo hMailServer.exe https://www.hmailserver.com/download_file/?downloadid=271
 hMailServer.exe /verysilent
 cd %APPVEYOR_BUILD_FOLDER%
-%PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet .github\setup_hmailserver.php
+%PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR%\ext -dextension=com_dotnet .github\setup_hmailserver.php
 
 mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
-echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
+echo extension_dir=%PHP_BUILD_DIR%\ext > %PHP_BUILD_DIR%\php.ini
 echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\php.ini
 if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\php.ini
 rem work-around for some spawned PHP processes requiring OpenSSL
