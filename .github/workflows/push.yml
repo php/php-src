@@ -249,6 +249,9 @@ jobs:
         uses: ./.github/actions/setup-windows
       - name: Build
         run: .github/scripts/windows/build.bat
+      - name: Show all DLLs
+        run: dir /s ${{ env.PHP_BUILD_OBJ_DIR }}\*.dll
+        shell: cmd
       - name: Test
         run: .github/scripts/windows/test.bat
   BENCHMARKING:
