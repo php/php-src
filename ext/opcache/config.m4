@@ -100,7 +100,7 @@ if test "$PHP_OPCACHE" != "no"; then
     PHP_SUBST([DASM_FLAGS])
     PHP_SUBST([DASM_ARCH])
 
-    JIT_CFLAGS="-I@ext_builddir@/jit/ir -D$IR_TARGET -DIR_PHP"
+    JIT_CFLAGS="-I@ext_builddir@/jit/ir -D$IR_TARGET -DIR_PHP -DIR_EXTERNAL_GDB_ENTRY"
     AS_VAR_IF([ZEND_DEBUG], [yes], [JIT_CFLAGS="$JIT_CFLAGS -DIR_DEBUG"])
   ])
 
