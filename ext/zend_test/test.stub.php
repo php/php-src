@@ -75,6 +75,11 @@ namespace {
         public function __call(string $name, array $args): mixed {}
     }
 
+    class _ZendTestMagicCallForward
+    {
+        public function __call(string $name, array $args): mixed {}
+    }
+
     class _ZendTestChildClass extends _ZendTestClass
     {
         public function returnsThrowable(): Exception {}
