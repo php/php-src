@@ -61,7 +61,7 @@
 
 #ifdef __GNUC__
 /* don't complain about deprecated CURLOPT_* we're exposing to PHP; we
-   need to keep using those to avoid breaking PHP API compatibiltiy */
+   need to keep using those to avoid breaking PHP API compatibility */
 # pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 

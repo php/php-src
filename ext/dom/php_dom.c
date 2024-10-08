@@ -960,7 +960,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "resolveExternals", dom_document_resolve_externals_read, dom_document_resolve_externals_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "preserveWhiteSpace", dom_document_preserve_whitespace_read, dom_document_preserve_whitespace_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "recover", dom_document_recover_read, dom_document_recover_write);
-	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "substituteEntities", dom_document_substitue_entities_read, dom_document_substitue_entities_write);
+	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "substituteEntities", dom_document_substitute_entities_read, dom_document_substitute_entities_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "firstElementChild", dom_parent_node_first_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "lastElementChild", dom_parent_node_last_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "childElementCount", dom_parent_node_child_element_count, NULL);
@@ -2095,7 +2095,7 @@ int dom_validate_and_extract(const zend_string *namespace, const zend_string *qn
 	*localName = xmlSplitQName2(BAD_CAST ZSTR_VAL(qname), prefix);
 
 	/* 6. If prefix is non-null and namespace is null, then throw a "NamespaceError" DOMException.
-	 *    Note that null namespace means empty string here becaue of step 1. */
+	 *    Note that null namespace means empty string here because of step 1. */
 	if (*prefix != NULL && ZSTR_VAL(namespace)[0] == '\0') {
 		return NAMESPACE_ERR;
 	}

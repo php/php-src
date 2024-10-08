@@ -353,7 +353,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 						xmlNsPtr original = (xmlNsPtr) node;
 
 						/* Make sure parent dom object exists, so we can take an extra reference. */
-						zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+						zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
 						php_dom_create_object(nsparent, &parent_zval, &intern->dom);
 						dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
 
