@@ -73,7 +73,8 @@ static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access,
 			if (prop_info->flags & ZEND_ACC_PROTECTED) {
 				const char *tmp = zend_get_unmangled_property_name(property_name);
 				zend_string *unmangled_name = zend_string_init(tmp, strlen(tmp), false);
-				if (zend_hash_exists(&ce->properties_info, unmangled_name)) {
+				zend_property_info *child_prop_info = zend_hash_find_ptr(&ce->properties_info, unmangled_name);
+				if (child_prop_info && (child_prop_info->flags & ZEND_ACC_PUBLIC)) {
 					property_name = unmangled_name;
 				} else {
 					zend_string_release(unmangled_name);

@@ -89,6 +89,7 @@ testByRef(new ByRef);
 class A {
     private $changed { get => 'A'; }
     protected $promoted { get => 'A'; }
+    protected $protected { get => 'A'; }
 
     public function test() {
         foreach ($this as $k => $v) {
@@ -163,3 +164,5 @@ string(7) "changed"
 string(1) "A"
 string(8) "promoted"
 string(1) "B"
+string(9) "protected"
+string(1) "A"
