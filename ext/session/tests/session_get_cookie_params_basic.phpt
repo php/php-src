@@ -35,7 +35,7 @@ var_dump(session_get_cookie_params());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing session_get_cookie_params() : basic functionality ***
 array(6) {
   ["lifetime"]=>
@@ -66,18 +66,20 @@ array(6) {
   ["samesite"]=>
   string(0) ""
 }
-bool(true)
+
+Warning: session_set_cookie_params(): CookieLifetime must be between 0 and %d in %s on line %d
+bool(false)
 array(6) {
   ["lifetime"]=>
-  int(1234567890)
+  int(3600)
   ["path"]=>
-  string(5) "/guff"
+  string(5) "/path"
   ["domain"]=>
-  string(3) "foo"
+  string(4) "blah"
   ["secure"]=>
-  bool(true)
+  bool(false)
   ["httponly"]=>
-  bool(true)
+  bool(false)
   ["samesite"]=>
   string(0) ""
 }
