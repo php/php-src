@@ -734,10 +734,6 @@ class Type {
     }
 
     public function __toString() {
-        if ($this->types === null) {
-            return 'mixed';
-        }
-
         $char = $this->isIntersection ? '&' : '|';
         return implode($char, array_map(
             function ($type) { return $type->name; },
