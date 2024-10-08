@@ -1121,7 +1121,13 @@ PHP_METHOD(XMLReader, expand)
 	}
 
 	if (basenode != NULL) {
-		NODE_GET_OBJ(node, basenode, xmlNodePtr, domobj);
+		/* Note: cannot use NODE_GET_OBJ here because of the wrong return type */
+		domobj = Z_LIBXML_NODE_P(basenode);
+		if (UNEXPECTED(domobj->node == NULL)) {
+			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(Z_OBJCE_P(basenode)->name));
+			RETURN_FALSE;
+		}
+		node = domobj->node->node;
 		docp = node->doc;
 	}
 
