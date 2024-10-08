@@ -89,7 +89,7 @@ struct _php_curl_send_headers {
 struct _php_curl_free {
 	zend_llist post;
 	zend_llist stream;
-	HashTable *slist;
+	HashTable slist;
 };
 
 typedef struct {
