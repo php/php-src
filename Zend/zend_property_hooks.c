@@ -175,6 +175,12 @@ static void zho_declared_it_fetch_current(zend_object_iterator *iter)
 		if (!hooked_iter->by_ref) {
 			ZVAL_DEREF(property);
 		} else if (Z_TYPE_P(property) != IS_REFERENCE) {
+			if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+				zend_throw_error(NULL,
+					"Cannot acquire reference to readonly property %s::$%s",
+					ZSTR_VAL(prop_info->ce->name), zend_get_unmangled_property_name(prop_info->name));
+				return;
+			}
 			ZVAL_MAKE_REF(property);
 			if (ZEND_TYPE_IS_SET(prop_info->type)) {
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(property), prop_info);
@@ -205,6 +211,11 @@ static void zho_dynamic_it_fetch_current(zend_object_iterator *iter)
 	Bucket *bucket = properties->arData + pos;
 
 	if (UNEXPECTED(Z_TYPE(bucket->val) == IS_UNDEF)) {
+		return;
+	}
+
+	zend_object *zobj = Z_OBJ_P(&hooked_iter->it.data);
+	if (bucket->key && zend_check_property_access(zobj, bucket->key, true) != SUCCESS) {
 		return;
 	}
 
@@ -305,9 +316,9 @@ static void zho_it_rewind(zend_object_iterator *iter)
 	zval_ptr_dtor_nogc(&hooked_iter->current_key);
 	ZVAL_UNDEF(&hooked_iter->current_key);
 
-	hooked_iter->declared_props_done = false;
 	zend_array *properties = Z_ARR(hooked_iter->declared_props);
 	zend_hash_internal_pointer_reset(properties);
+	hooked_iter->declared_props_done = !zend_hash_num_elements(properties);
 	hooked_iter->dynamic_props_done = false;
 	EG(ht_iterators)[hooked_iter->dynamic_prop_it].pos = zho_num_backed_props(Z_OBJ(iter->data));
 }
@@ -350,9 +361,9 @@ ZEND_API zend_object_iterator *zend_hooked_object_get_iterator(zend_class_entry 
 	ZVAL_OBJ_COPY(&iterator->it.data, zobj);
 	iterator->it.funcs = &zend_hooked_object_it_funcs;
 	iterator->by_ref = by_ref;
-	iterator->declared_props_done = false;
 	zend_array *properties = zho_build_properties_ex(zobj, true, true, false);
 	ZVAL_ARR(&iterator->declared_props, properties);
+	iterator->declared_props_done = !zend_hash_num_elements(properties);
 	zho_dynamic_it_init(iterator);
 	ZVAL_UNDEF(&iterator->current_key);
 	ZVAL_UNDEF(&iterator->current_data);

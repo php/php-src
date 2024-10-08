@@ -90,6 +90,7 @@ class A {
     private $changed { get => 'A'; }
     protected $promoted { get => 'A'; }
     protected $protected { get => 'A'; }
+    private $shadowed = 'A';
 
     public function test() {
         foreach ($this as $k => $v) {
@@ -98,12 +99,15 @@ class A {
     }
 }
 
+#[AllowDynamicProperties]
 class B extends A {
     public $changed { get => 'B'; }
     public $promoted { get => 'B'; }
 }
 
-(new B)->test();
+$b = new B;
+$b->shadowed = 'Global';
+$b->test();
 
 ?>
 --EXPECTF--
@@ -165,4 +169,6 @@ string(1) "A"
 string(8) "promoted"
 string(1) "B"
 string(9) "protected"
+string(1) "A"
+string(8) "shadowed"
 string(1) "A"
