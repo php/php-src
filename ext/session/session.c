@@ -40,7 +40,6 @@
 #include "ext/standard/php_var.h"
 #include "ext/date/php_date.h"
 #include "ext/standard/url_scanner_ex.h"
-#include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "ext/standard/url.h"
@@ -695,7 +694,7 @@ static PHP_INI_MH(OnUpdateCookieLifetime) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
-	const zend_long maxcookie = ZEND_LONG_MAX - (PHP_TIMEOUT_ULL_MAX / 1000000);
+	const zend_long maxcookie = ZEND_LONG_MAX / 2 ;
 	zend_long v = (zend_long)atol(ZSTR_VAL(new_value));
 	if (v < 0 || v > maxcookie) {
 		php_error_docref(NULL, E_WARNING, "CookieLifetime must be between 0 and " ZEND_LONG_FMT, maxcookie);
