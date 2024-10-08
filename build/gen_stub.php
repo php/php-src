@@ -2099,9 +2099,6 @@ OUPUT_EXAMPLE
         foreach ($this->framelessFunctionInfos as $key => $framelessFunctionInfo) {
             $this->framelessFunctionInfos[$key] = clone $framelessFunctionInfo;
         }
-        if ($this->exposedDocComment) {
-            $this->exposedDocComment = clone $this->exposedDocComment;
-        }
     }
 }
 
@@ -3146,9 +3143,6 @@ class PropertyInfo extends VariableLike
         foreach ($this->attributes as $key => $attribute) {
             $this->attributes[$key] = clone $attribute;
         }
-        if ($this->exposedDocComment) {
-            $this->exposedDocComment = clone $this->exposedDocComment;
-        }
     }
 }
 
@@ -4011,10 +4005,6 @@ class ClassInfo {
         foreach ($this->attributes as $key => $attribute) {
             $this->attributes[$key] = clone $attribute;
         }
-
-        if ($this->exposedDocComment) {
-            $this->exposedDocComment = clone $this->exposedDocComment;
-        }
     }
 
     /**
@@ -4190,8 +4180,10 @@ class DocCommentTag {
     }
 }
 
+// Instances of ExposedDocComment are immutable and do not need to be cloned
+// when held by an object that is cloned
 class ExposedDocComment {
-    private string $docComment;
+    private /* readonly */ string $docComment;
 
     public function __construct(string $docComment) {
         $this->docComment = $docComment;
