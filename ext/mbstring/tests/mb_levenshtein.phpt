@@ -57,6 +57,16 @@ echo '--- café in ISO-8859-1 ---' . \PHP_EOL;
 $cafe = mb_convert_encoding("café", "ISO-8859-1", "UTF-8");
 var_dump(mb_levenshtein("cafe", $cafe, encoding: "ISO-8859-1"));
 
+echo '--- Variable selector ---' . \PHP_EOL;
+$ka = "カ́";
+var_dump(mb_levenshtein("カ", $ka, encoding: "UTF-8"));
+// variable $nabe and $nabe_E0100 is seems nothing different.
+// However, $nabe_E0100 is variable selector in U+908A U+E0100.
+// Therfore, this result is 1.
+$nabe = '邊';
+$nabe_E0100 = "邊󠄀";
+var_dump(mb_levenshtein($nabe, $nabe_E0100, encoding: "UTF-8"));
+
 echo '--- Usecase of userland code ---' . \PHP_EOL;
 
 $bytes = "";
@@ -113,6 +123,9 @@ int(2)
 --- 128 codepoints over Hiragana in Shift_JIS ---
 int(2)
 --- café in ISO-8859-1 ---
+int(1)
+--- Variable selector ---
+int(1)
 int(1)
 --- Usecase of userland code ---
 OK
