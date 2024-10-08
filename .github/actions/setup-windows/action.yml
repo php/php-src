@@ -9,7 +9,7 @@ runs:
         key: mariadb-10.5.26-winx64
         path: C:\MariaDB
     - name: Setup MariaDB
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache-mariadb.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         curl -sLo MariaDB.zip https://downloads.mariadb.org/rest-api/mariadb/10.5.26/mariadb-10.5.26-winx64.zip
@@ -18,9 +18,9 @@ runs:
         start /b C:\MariDB\bin\mysqld.exe --port=3306
         C:\MariaDB\bin\mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Start MariaDB
-      if: steps.cache.outputs.cache-hit == 'true'
+      if: steps.cache-mariadb.outputs.cache-hit == 'true'
       shell: cmd
-      run: start /b C:\MariDB\bin\mysqld.exe --port=3306
+      run: start /b C:\MariaDB\bin\mysqld.exe --port=3306
     - name: Setup MSSQL
       shell: pwsh
       run: |
