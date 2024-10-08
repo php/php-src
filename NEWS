@@ -35,6 +35,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug GH-16385 (Unexpected null returned by session_set_cookie_params).
     (nielsdos)
+  . Fixed bug GH-16290 (overflow on cookie_lifetime ini value).
+    (David Carlier)
 
 - Sockets:
   . Fixed bug with overflow socket_recvfrom $length argument. (David Carlier)
