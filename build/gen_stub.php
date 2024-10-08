@@ -1264,7 +1264,7 @@ class FuncInfo {
         return $result;
     }
 
-    public function hasParamWithUnknownDefaultValue(): bool
+    private function hasParamWithUnknownDefaultValue(): bool
     {
         foreach ($this->args as $arg) {
             if ($arg->defaultValue && !$arg->hasProperDefaultValue()) {
@@ -1344,7 +1344,7 @@ class FuncInfo {
         return $code;
     }
 
-    public function getFramelessFunctionInfosName(): string {
+    private function getFramelessFunctionInfosName(): string {
         return $this->name->getFramelessFunctionInfosName();
     }
 
@@ -3822,7 +3822,7 @@ class ClassInfo {
         return strtolower(str_replace("_", "-", implode('-', $name->getParts())));
     }
 
-    public static function getClassSynopsisReference(Name $name): string {
+    private static function getClassSynopsisReference(Name $name): string {
         return "class." . self::getClassSynopsisFilename($name);
     }
 
