@@ -60,7 +60,7 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	__intern = Z_LIBXML_NODE_P(__id); \
 	if (UNEXPECTED(__intern->node == NULL)) { \
 		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", \
-			ZSTR_VAL(__intern->std.ce->name));\
+			ZSTR_VAL(Z_OBJCE_P(__zv)->name));\
 		RETURN_NULL();\
 	} \
 	__ptr = (__prtype)__intern->node->node; \
