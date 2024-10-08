@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.13
+?? ??? ????, PHP 8.3.14
+
+
+24 Oct 2024, PHP 8.3.13
 
 - Calendar:
   . Fixed GH-16240: jdtounix overflow on argument value. (David Carlier)
