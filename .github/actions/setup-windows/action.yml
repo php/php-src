@@ -2,11 +2,25 @@ name: Setup
 runs:
   using: composite
   steps:
-    - name: Setup MySQL
-      shell: pwsh
+    - name: Cache MariaDB
+      id: cache-mariadb
+      uses: actions/cache@v4
+      with:
+        key: mariadb-10.5.26-winx64
+        path: C:\MariaDB
+    - name: Setup MariaDB
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: cmd
       run: |
-        choco install mysql -y --no-progress --params="/port:3306"
-        mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
+        curl -sLo MariaDB.zip https://downloads.mariadb.org/rest-api/mariadb/10.5.26/mariadb-10.5.26-winx64.zip
+        7z x -oC:\MariaDB MariaDB.zip
+        C:\MariaDB\mariadb-install-db.exe
+        start /b C:\MariDB\bin\mysqld.exe --port=3306
+        C:\MariaDB\bin\mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
+    - name: Start MariaDB
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: cmd
+      run: start /b C:\MariDB\bin\mysqld.exe --port=3306
     - name: Setup MSSQL
       shell: pwsh
       run: |
