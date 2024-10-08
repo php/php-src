@@ -14,7 +14,7 @@ runs:
       run: |
         curl -sLo MariaDB.zip https://downloads.mariadb.org/rest-api/mariadb/10.5.26/mariadb-10.5.26-winx64.zip
         7z x -oC:\MariaDB MariaDB.zip
-        C:\MariaDB\mariadb-install-db.exe
+        C:\MariaDB\bin\mariadb-install-db.exe
         start /b C:\MariDB\bin\mysqld.exe --port=3306
         C:\MariaDB\bin\mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Start MariaDB
