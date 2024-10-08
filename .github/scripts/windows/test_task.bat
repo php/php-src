@@ -103,7 +103,7 @@ mkdir %~d0\usr\local\share\enchant\hunspell
 if %errorlevel% neq 0 exit /b 3
 echo Fetching enchant dicts
 pushd %~d0\usr\local\share\enchant\hunspell
-powershell -Command wget http://windows.php.net/downloads/qa/appveyor/ext/enchant/dict.zip -OutFile dict.zip
+powershell -Command wget https://downloads.php.net/~windows/qa/appveyor/ext/enchant/dict.zip -OutFile dict.zip
 unzip dict.zip
 del /q dict.zip
 popd
