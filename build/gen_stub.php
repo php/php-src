@@ -965,7 +965,7 @@ class PropertyName implements VariableLikeName {
 
     public function getDeclarationName(): string
     {
-         return $this->property;
+        return $this->property;
     }
 }
 
@@ -2572,7 +2572,7 @@ class ConstInfo extends VariableLike
         return $termElement;
     }
 
-     public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel): DOMElement {
+    public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel): DOMElement {
         $indentation = str_repeat(" ", $indentationLevel);
 
         $entryElement = $doc->createElement("entry");
@@ -5073,7 +5073,7 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
 function generateCodeWithConditions(
     iterable $infos, string $separator, Closure $codeGenerator, ?string $parentCond = null): string {
     $code = "";
-    
+
     // For combining the conditional blocks of the infos with the same condition
     $openCondition = null;
     foreach ($infos as $info) {
