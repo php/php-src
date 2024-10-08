@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0RC2
+?? ??? ????, PHP 8.4.0RC3
+
+10 Oct 2024, PHP 8.4.0RC2
 
 - CGI:
   . Fixed bug GHSA-p99j-rfp4-xqvq (Bypass of CVE-2024-4577, Parameter Injection
