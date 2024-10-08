@@ -3706,7 +3706,6 @@ function uniqid(string $prefix = "", bool $more_entropy = false): string {}
 
 /**
  * @return int|string|array<string, int|string>|null|false
- * @compile-time-eval
  * @refcount 1
  */
 function parse_url(string $url, int $component = -1): int|string|array|null|false {}
