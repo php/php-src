@@ -59,6 +59,35 @@ lexbor_swar_seek4(const lxb_char_t *data, const lxb_char_t *end,
     return data;
 }
 
+lxb_inline const lxb_char_t *
+lexbor_swar_seek3(const lxb_char_t *data, const lxb_char_t *end,
+                  lxb_char_t c1, lxb_char_t c2, lxb_char_t c3)
+{
+    size_t bytes, matches, t1, t2, t3;
+
+    if (LEXBOR_SWAR_IS_LITTLE_ENDIAN) {
+        while (data + sizeof(size_t) <= end) {
+            memcpy(&bytes, data, sizeof(size_t));
+
+            t1 = bytes ^ LEXBOR_SWAR_REPEAT(c1);
+            t2 = bytes ^ LEXBOR_SWAR_REPEAT(c2);
+            t3 = bytes ^ LEXBOR_SWAR_REPEAT(c3);
+            matches =   LEXBOR_SWAR_HAS_ZERO(t1) | LEXBOR_SWAR_HAS_ZERO(t2)
+                       | LEXBOR_SWAR_HAS_ZERO(t3);
+
+            if (matches) {
+                data += ((((matches - 1) & LEXBOR_SWAR_ONES) * LEXBOR_SWAR_ONES)
+                         >> (sizeof(size_t) * 8 - 8)) - 1;
+                break;
+            } else {
+                data += sizeof(size_t);
+            }
+        }
+    }
+
+    return data;
+}
+
 
 #ifdef __cplusplus
 } /* extern "C" */
