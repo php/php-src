@@ -26,8 +26,7 @@
 
 /* create an automation SafeArray from a PHP array.
  * Only creates a single-dimensional array of variants.
- * The keys of the PHP hash MUST be numeric.  If the array
- * is sparse, then the gaps will be filled with NULL variants */
+ * The keys of the PHP hash MUST be numeric. */
 static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 {
 	SAFEARRAY *sa = NULL;
@@ -71,7 +70,9 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 			break;
 		}
 		zend_hash_get_current_key_ex(Z_ARRVAL_P(z), &strindex, &intindex, &pos);
-		php_com_variant_from_zval(&va[intindex], item, codepage);
+		if (intindex < bound.cElements) {
+			php_com_variant_from_zval(&va[intindex], item, codepage);
+		}
 	}
 
 	/* Unlock it and stuff it into our variant */

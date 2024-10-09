@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.14
 
+- COM:
+  . Fixed out of bound writes to SafeArray data. (cmb)
+
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
     curl_multi_add_handle fails). (timwolla)
