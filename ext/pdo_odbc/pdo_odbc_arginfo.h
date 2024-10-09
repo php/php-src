@@ -15,31 +15,31 @@ static zend_class_entry *register_class_Pdo_Odbc(zend_class_entry *class_entry_P
 
 	zval const_ATTR_USE_CURSOR_LIBRARY_value;
 	ZVAL_LONG(&const_ATTR_USE_CURSOR_LIBRARY_value, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
-	zend_string *const_ATTR_USE_CURSOR_LIBRARY_name = zend_string_init_interned("ATTR_USE_CURSOR_LIBRARY", sizeof("ATTR_USE_CURSOR_LIBRARY") - 1, 1);
+	zend_string *const_ATTR_USE_CURSOR_LIBRARY_name = zend_string_init_interned("ATTR_USE_CURSOR_LIBRARY", strlen("ATTR_USE_CURSOR_LIBRARY"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_USE_CURSOR_LIBRARY_name, &const_ATTR_USE_CURSOR_LIBRARY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_USE_CURSOR_LIBRARY_name);
 
 	zval const_ATTR_ASSUME_UTF8_value;
 	ZVAL_LONG(&const_ATTR_ASSUME_UTF8_value, PDO_ODBC_ATTR_ASSUME_UTF8);
-	zend_string *const_ATTR_ASSUME_UTF8_name = zend_string_init_interned("ATTR_ASSUME_UTF8", sizeof("ATTR_ASSUME_UTF8") - 1, 1);
+	zend_string *const_ATTR_ASSUME_UTF8_name = zend_string_init_interned("ATTR_ASSUME_UTF8", strlen("ATTR_ASSUME_UTF8"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_ASSUME_UTF8_name, &const_ATTR_ASSUME_UTF8_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_ASSUME_UTF8_name);
 
 	zval const_SQL_USE_IF_NEEDED_value;
 	ZVAL_LONG(&const_SQL_USE_IF_NEEDED_value, SQL_CUR_USE_IF_NEEDED);
-	zend_string *const_SQL_USE_IF_NEEDED_name = zend_string_init_interned("SQL_USE_IF_NEEDED", sizeof("SQL_USE_IF_NEEDED") - 1, 1);
+	zend_string *const_SQL_USE_IF_NEEDED_name = zend_string_init_interned("SQL_USE_IF_NEEDED", strlen("SQL_USE_IF_NEEDED"), 1);
 	zend_declare_typed_class_constant(class_entry, const_SQL_USE_IF_NEEDED_name, &const_SQL_USE_IF_NEEDED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SQL_USE_IF_NEEDED_name);
 
 	zval const_SQL_USE_DRIVER_value;
 	ZVAL_LONG(&const_SQL_USE_DRIVER_value, SQL_CUR_USE_DRIVER);
-	zend_string *const_SQL_USE_DRIVER_name = zend_string_init_interned("SQL_USE_DRIVER", sizeof("SQL_USE_DRIVER") - 1, 1);
+	zend_string *const_SQL_USE_DRIVER_name = zend_string_init_interned("SQL_USE_DRIVER", strlen("SQL_USE_DRIVER"), 1);
 	zend_declare_typed_class_constant(class_entry, const_SQL_USE_DRIVER_name, &const_SQL_USE_DRIVER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SQL_USE_DRIVER_name);
 
 	zval const_SQL_USE_ODBC_value;
 	ZVAL_LONG(&const_SQL_USE_ODBC_value, SQL_CUR_USE_ODBC);
-	zend_string *const_SQL_USE_ODBC_name = zend_string_init_interned("SQL_USE_ODBC", sizeof("SQL_USE_ODBC") - 1, 1);
+	zend_string *const_SQL_USE_ODBC_name = zend_string_init_interned("SQL_USE_ODBC", strlen("SQL_USE_ODBC"), 1);
 	zend_declare_typed_class_constant(class_entry, const_SQL_USE_ODBC_name, &const_SQL_USE_ODBC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SQL_USE_ODBC_name);
 
