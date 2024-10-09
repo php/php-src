@@ -175,7 +175,16 @@ again:
 			}
 			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 
-			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
+			// GH-16317: for user classes with __debugInfo() always call that
+			if (ce->type == ZEND_USER_CLASS && ce->__debugInfo != NULL) {
+				int is_temp;
+				myht = (std_object_handlers.get_debug_info)(zobj, &is_temp);
+				if (myht && !is_temp) {
+					GC_TRY_ADDREF(myht);
+				}
+			} else {
+				myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
+			}
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 			const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
 
