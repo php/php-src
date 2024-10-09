@@ -3420,4 +3420,117 @@ static void ZEND_FASTCALL zend_jit_zval_ffi_obj(zval *zv, zend_ffi_type *type, v
 		ZVAL_OBJ(zv, &cdata->std);
 	}
 }
+
+static zend_ffi_cdata* ZEND_FASTCALL zend_jit_zval_ffi_addr(zval *zv)
+{
+	zend_ffi_cdata *cdata, *new_cdata;
+	zend_ffi_type *type, *new_type;
+
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+	}
+	ZVAL_DEREF(zv);
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
+
+	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+	type = ZEND_FFI_TYPE(cdata->type);
+
+//	if (GC_REFCOUNT(&cdata->std) == 1 && Z_REFCOUNT_P(arg) == 1 && type->kind == ZEND_FFI_TYPE_POINTER
+//	 && cdata->ptr == &cdata->ptr_holder) {
+//		zend_throw_error(zend_ffi_exception_ce, "FFI::addr() cannot create a reference to a temporary pointer");
+//		return NULL;
+//	}
+
+	new_type = emalloc(sizeof(zend_ffi_type));
+	new_type->kind = ZEND_FFI_TYPE_POINTER;
+	new_type->attr = 0;
+	new_type->size = sizeof(void*);
+	new_type->align = _Alignof(void*);
+	/* life-time (source must relive the resulting pointer) ??? */
+	new_type->pointer.type = type;
+
+	new_cdata = emalloc(sizeof(zend_ffi_cdata));
+	// inlined zend_ffi_object_init()
+	GC_SET_REFCOUNT(&new_cdata->std, 1);
+	GC_TYPE_INFO(&new_cdata->std) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
+	new_cdata->std.extra_flags = 0;
+	new_cdata->std.ce = zend_ffi_api->cdata_ce;
+	new_cdata->std.handlers = zend_ffi_api->cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
+	new_cdata->std.properties = NULL;
+	zend_objects_store_put(&new_cdata->std);
+	new_cdata->type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
+	new_cdata->flags = 0;
+
+	new_cdata->ptr = (void*)&new_cdata->ptr_holder;
+	new_cdata->ptr_holder = cdata->ptr;
+
+	return new_cdata;
+}
+
+static zend_ffi_cdata* ZEND_FASTCALL zend_jit_zval_ffi_addr_var(zval *zv)
+{
+	zend_ffi_cdata *cdata, *new_cdata;
+	zend_ffi_type *type, *new_type;
+	zval *arg = zv;
+
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+	}
+	ZVAL_DEREF(zv);
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
+
+	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+	type = ZEND_FFI_TYPE(cdata->type);
+
+//	if (GC_REFCOUNT(&cdata->std) == 1 && Z_REFCOUNT_P(arg) == 1 && type->kind == ZEND_FFI_TYPE_POINTER
+//	 && cdata->ptr == &cdata->ptr_holder) {
+//		zend_throw_error(zend_ffi_exception_ce, "FFI::addr() cannot create a reference to a temporary pointer");
+//		return NULL;
+//	}
+
+	new_type = emalloc(sizeof(zend_ffi_type));
+	new_type->kind = ZEND_FFI_TYPE_POINTER;
+	new_type->attr = 0;
+	new_type->size = sizeof(void*);
+	new_type->align = _Alignof(void*);
+	/* life-time (source must relive the resulting pointer) ??? */
+	new_type->pointer.type = type;
+
+	new_cdata = emalloc(sizeof(zend_ffi_cdata));
+	// inlined zend_ffi_object_init()
+	GC_SET_REFCOUNT(&new_cdata->std, 1);
+	GC_TYPE_INFO(&new_cdata->std) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
+	new_cdata->std.extra_flags = 0;
+	new_cdata->std.ce = zend_ffi_api->cdata_ce;
+	new_cdata->std.handlers = zend_ffi_api->cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
+	new_cdata->std.properties = NULL;
+	zend_objects_store_put(&new_cdata->std);
+	new_cdata->type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
+	new_cdata->flags = 0;
+
+	new_cdata->ptr = (void*)&new_cdata->ptr_holder;
+	new_cdata->ptr_holder = cdata->ptr;
+
+	if (Z_REFCOUNTED_P(arg)) {
+		zend_refcounted *ref = Z_COUNTED_P(arg);
+
+		if (!GC_DELREF(ref)) {
+			if (ref == (zend_refcounted*)cdata || GC_REFCOUNT(&cdata->std) == 1) {
+				if (ZEND_FFI_TYPE_IS_OWNED(cdata->type)) {
+					/* transfer type ownership */
+					cdata->type = type;
+					new_type->pointer.type = ZEND_FFI_TYPE_MAKE_OWNED(type);
+				}
+				if (cdata->flags & ZEND_FFI_FLAG_OWNED) {
+					/* transfer ownership */
+					cdata->flags &= ~ZEND_FFI_FLAG_OWNED;
+					new_cdata->flags |= ZEND_FFI_FLAG_OWNED;
+				}
+			}
+			rc_dtor_func(ref);
+		}
+	}
+
+	return new_cdata;
+}
 #endif
