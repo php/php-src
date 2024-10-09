@@ -24,13 +24,8 @@ try {
 ?>
 ok
 --EXPECTF--
-Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
 FFI\ParserException: function type is not allowed at line 1
-
-Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
 FFI\ParserException: Struct/union can't contain an instance of itself at line 1
-
-Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
 object(FFI\CData:struct X)#%d (1) {
   ["ptr"]=>
   NULL
