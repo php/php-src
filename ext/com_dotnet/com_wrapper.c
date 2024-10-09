@@ -258,9 +258,11 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		 * and expose it as a COM exception */
 
 		if (wFlags & DISPATCH_PROPERTYGET) {
-			retval = zend_read_property(Z_OBJCE(disp->object), Z_OBJ(disp->object), Z_STRVAL_P(name), Z_STRLEN_P(name)+1, 1, &rv);
+			retval = zend_read_property(Z_OBJCE(disp->object), Z_OBJ(disp->object), Z_STRVAL_P(name), Z_STRLEN_P(name), 1, &rv);
+			ret = S_OK;
 		} else if (wFlags & DISPATCH_PROPERTYPUT) {
 			zend_update_property(Z_OBJCE(disp->object), Z_OBJ(disp->object), Z_STRVAL_P(name), Z_STRLEN_P(name), &params[0]);
+			ret = S_OK;
 		} else if (wFlags & DISPATCH_METHOD) {
 			zend_try {
 				retval = &rv;
@@ -305,7 +307,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 				VariantInit(pvarRes);
 				php_com_variant_from_zval(pvarRes, retval, COMG(code_page));
 			}
-			zval_ptr_dtor(retval);
+			// zval_ptr_dtor(retval); // TODO needed for function calls?
 		} else if (pvarRes) {
 			VariantInit(pvarRes);
 		}
@@ -425,7 +427,7 @@ static void generate_dispids(php_dispatchex *disp)
 	zend_string *name = NULL;
 	zval *tmp, tmp2;
 	int keytype;
-	zend_ulong pid;
+	zend_long pid;
 
 	if (disp->dispid_to_name == NULL) {
 		ALLOC_HASHTABLE(disp->dispid_to_name);
@@ -458,8 +460,8 @@ static void generate_dispids(php_dispatchex *disp)
 
 			/* add the mappings */
 			ZVAL_STR_COPY(&tmp2, name);
-			pid = zend_hash_next_free_element(disp->dispid_to_name);
-			zend_hash_index_update(disp->dispid_to_name, pid, &tmp2);
+			zend_hash_next_index_insert(disp->dispid_to_name, &tmp2);
+			pid = zend_hash_next_free_element(disp->dispid_to_name) - 1;
 
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
@@ -493,8 +495,8 @@ static void generate_dispids(php_dispatchex *disp)
 
 			/* add the mappings */
 			ZVAL_STR_COPY(&tmp2, name);
-			pid = zend_hash_next_free_element(disp->dispid_to_name);
-			zend_hash_index_update(disp->dispid_to_name, pid, &tmp2);
+			zend_hash_next_index_insert(disp->dispid_to_name, &tmp2);
+			pid = zend_hash_next_free_element(disp->dispid_to_name) - 1;
 
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
