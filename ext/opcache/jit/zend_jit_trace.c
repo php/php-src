@@ -5601,6 +5601,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						op1_info = OP1_INFO();
+#ifdef HAVE_FFI
+						if (JIT_G(current_frame)
+						 && JIT_G(current_frame)->call
+						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+							if (!zend_jit_ffi_send_val(&ctx, opline, op_array, ssa, ssa_op,
+									op1_info, OP1_REG_ADDR(), 0, op1_ffi_type)) {
+								goto jit_failure;
+							}
+							goto done;
+						}
+#endif
 						if (!zend_jit_send_ref(&ctx, opline, op_array,
 								op1_info, 0)) {
 							goto jit_failure;
@@ -6857,6 +6868,25 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						    || (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT))))) {
 							break;
 						}
+#ifdef HAVE_FFI
+						if (opline->op1_type == IS_CONST
+						 && opline->op2_type == IS_CONST) {
+							zval *zv = RT_CONSTANT(opline, opline->op1);
+							if (Z_TYPE_P(zv) == IS_STRING
+							 && (zend_string_equals_literal_ci(Z_STR_P(zv), "FFI")
+							  || zend_string_equals_literal_ci(Z_STR_P(zv), "\\FFI"))) {
+								zval *zv = RT_CONSTANT(opline, opline->op2);
+								if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal(Z_STR_P(zv), "addr")
+								 && opline->extended_value == 1) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_MASK_FFI_ADDR;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
+								}
+							}
+						}
+#endif
 						if (!zend_jit_init_static_method_call(&ctx, opline,
 								op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1,
 								op_array, ssa, ssa_op, frame->call_level,
@@ -7497,7 +7527,6 @@ done:
 			TRACE_FRAME_INIT(call, p->func, frame_flags, num_args);
 #ifdef HAVE_FFI
 			if (TRACE_FRAME_FFI(call)) {
-				ZEND_ASSERT(frame_ffi_func_type != NULL);
 				call->call_opline = (const zend_op*)(void*)frame_ffi_func_type;
 				call->ce = (zend_class_entry*)(intptr_t)frame_ffi_func_ref;
 			}

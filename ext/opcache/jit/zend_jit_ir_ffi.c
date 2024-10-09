@@ -115,6 +115,24 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 	uint8_t arg_type = IS_UNDEF;
 	uint8_t arg_flags = 0;
 
+	if (!type) {
+		ZEND_ASSERT(TRACE_FRAME_FFI_ADDR(call));
+		ZEND_ASSERT(opline->op2.num == 1);
+		ZEND_ASSERT(op1_ffi_type);
+
+		if (opline->op1_type == IS_VAR) {
+			ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_zval_ffi_addr_var),
+				jit_ZVAL_ADDR(jit, op1_addr));
+		} else {
+			ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_zval_ffi_addr),
+				jit_ZVAL_ADDR(jit, op1_addr));
+		}
+
+		SET_STACK_TYPE(stack, 0, IS_OBJECT, 0);
+		SET_STACK_REF_EX(stack, 0, ref, 0);
+
+		return 1;
+	}
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
 	if (type->attr & ZEND_FFI_ATTR_VARIADIC) {
 		ZEND_ASSERT(TRACE_FRAME_NUM_ARGS(call) >= zend_hash_num_elements(type->func.args));
@@ -318,12 +336,24 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
                                 zend_jit_addr         res_addr)
 {
 	zend_jit_trace_stack_frame *call = JIT_G(current_frame)->call;
+	zend_jit_trace_stack *stack = call->stack;
 	zend_ffi_type *type = (zend_ffi_type*)(void*)call->call_opline;
 	ir_ref func_ref = (intptr_t)(void*)call->ce;
 	uint32_t i, num_args;
 	ir_type ret_type = IR_VOID;
 	ir_ref ref = IR_UNUSED;
 	zend_ffi_type_kind type_kind;
+
+	if (!type) {
+		ZEND_ASSERT(TRACE_FRAME_FFI_ADDR(call));
+
+		ref = STACK_REF(stack, 0);
+
+		jit_set_Z_PTR(jit, res_addr, ref);
+		jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
+
+		return 1;
+	}
 
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
 
@@ -390,7 +420,6 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 	num_args = TRACE_FRAME_NUM_ARGS(call);
 	if (num_args) {
 		ir_ref *args = alloca(sizeof(ir_ref) * num_args);
-		zend_jit_trace_stack *stack = call->stack;
 
 		for (i = 0; i < num_args; i++) {
 			uint8_t type = STACK_TYPE(stack, i);

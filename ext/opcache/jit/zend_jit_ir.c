@@ -3104,6 +3104,8 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_zval_string);
 	REGISTER_HELPER(zend_jit_zval_ffi_ptr);
 	REGISTER_HELPER(zend_jit_zval_ffi_obj);
+	REGISTER_HELPER(zend_jit_zval_ffi_addr);
+	REGISTER_HELPER(zend_jit_zval_ffi_addr_var);
 #endif
 
 #ifndef ZTS
