@@ -349,14 +349,14 @@ zend_result dom_document_recover_write(dom_object *obj, zval *newval)
 /* {{{ substituteEntities	boolean
 readonly=no
 */
-zend_result dom_document_substitue_entities_read(dom_object *obj, zval *retval)
+zend_result dom_document_substitute_entities_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->substituteentities);
 	return SUCCESS;
 }
 
-zend_result dom_document_substitue_entities_write(dom_object *obj, zval *newval)
+zend_result dom_document_substitute_entities_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);

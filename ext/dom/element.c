@@ -1747,7 +1747,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 			if (follow_spec) {
 				xmlSetNsProp(thisp, NULL, BAD_CAST qname, NULL);
 			} else {
-				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browers behaviour.
+				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browsers' behaviour.
 				* It follows the same rules when you'd manually add an attribute using the other APIs. */
 				int len;
 				const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);

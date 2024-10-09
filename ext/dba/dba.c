@@ -1191,7 +1191,7 @@ PHP_FUNCTION(dba_delete)
 /* }}} */
 
 /* {{{ If not inifile: Insert value as key, return false, if key exists already
-   If inifile: Add vakue as key (next instance of key) */
+   If inifile: Add value as key (next instance of key) */
 PHP_FUNCTION(dba_insert)
 {
 	php_dba_update(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);

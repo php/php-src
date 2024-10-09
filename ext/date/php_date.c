@@ -2699,7 +2699,7 @@ PHP_METHOD(DateTime, createFromInterface)
 }
 /* }}} */
 
-/* {{{ Creates new DateTime object from given unix timetamp */
+/* {{{ Creates new DateTime object from given unix timestamp */
 PHP_METHOD(DateTime, createFromTimestamp)
 {
 	zval         *value;
