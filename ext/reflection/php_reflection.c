@@ -4014,9 +4014,8 @@ ZEND_METHOD(ReflectionClassConstant, getValue)
 	reflection_object *intern;
 	zend_class_constant *ref;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	zval *name = reflection_prop_name(ZEND_THIS);
@@ -6033,7 +6032,6 @@ ZEND_METHOD(ReflectionProperty, setValue)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *object;
 	zval *value;
 	zval *tmp;
 
@@ -6064,11 +6062,13 @@ ZEND_METHOD(ReflectionProperty, setValue)
 
 		zend_update_static_property_ex(intern->ce, ref->unmangled_name, value);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
-			RETURN_THROWS();
-		}
+		zend_object *object;
+		ZEND_PARSE_PARAMETERS_START(2, 2)
+			Z_PARAM_OBJ(object)
+			Z_PARAM_ZVAL(value)
+		ZEND_PARSE_PARAMETERS_END();
 
-		zend_update_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, value);
+		zend_update_property_ex(intern->ce, object, ref->unmangled_name, value);
 	}
 }
 /* }}} */
