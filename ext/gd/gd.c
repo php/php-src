@@ -3687,13 +3687,25 @@ PHP_FUNCTION(imageaffine)
 		if ((zval_affine_elem = zend_hash_index_find(Z_ARRVAL_P(z_affine), i)) != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
 				case IS_LONG:
-					affine[i]  = Z_LVAL_P(zval_affine_elem);
+					affine[i] = Z_LVAL_P(zval_affine_elem);
+					if (ZEND_LONG_EXCEEDS_INT(affine[i])) {
+						zend_argument_type_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
+						RETURN_THROWS();
+					}
 					break;
 				case IS_DOUBLE:
 					affine[i] = Z_DVAL_P(zval_affine_elem);
+					if (ZEND_LONG_EXCEEDS_INT(affine[i])) {
+						zend_argument_type_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
+						RETURN_THROWS();
+					}
 					break;
 				case IS_STRING:
 					affine[i] = zval_get_double(zval_affine_elem);
+					if (ZEND_LONG_EXCEEDS_INT(affine[i])) {
+						zend_argument_type_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
+						RETURN_THROWS();
+					}
 					break;
 				default:
 					zend_argument_type_error(3, "contains invalid type for element %i", i);
