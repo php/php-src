@@ -269,7 +269,7 @@ PHP_FUNCTION(passthru)
    Escape all chars that could possibly be used to
    break out of a shell command
 
-   This function allocates a new zend_string, remember to free it when done.
+   This function returns a zend_string, remember to release it when done.
 
    *NOT* safe for binary strings
 */
