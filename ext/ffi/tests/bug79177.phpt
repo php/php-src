@@ -33,7 +33,7 @@ echo "done\n";
 Warning: Uncaught RuntimeException: Not allowed in %s:%d
 Stack trace:
 #0 %s(%d): {closure:%s:%d}()
-#1 %s(%d): FFI->bug79177()
+#1 %s(%d): FFI\Scope->bug79177()
 #2 {main}
   thrown in %s on line %d
 
