@@ -60,21 +60,23 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
     (const xmlChar *) "http://www.w3.org/2000/xmlns/"
 
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = Z_LIBXML_NODE_P(__id); \
+	zval *__zv = (__id); \
+	__intern = Z_LIBXML_NODE_P(__zv); \
 	if (__intern->node == NULL || !(__ptr = (__prtype)__intern->node->node)) { \
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", \
-			ZSTR_VAL(__intern->std.ce->name));\
-  		RETURN_NULL();\
+		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", \
+			ZSTR_VAL(Z_OBJCE_P(__zv)->name));\
+		RETURN_NULL();\
   	} \
 }
 
 #define DOC_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = Z_LIBXML_NODE_P(__id); \
+	zval *__zv = (__id); \
+	__intern = Z_LIBXML_NODE_P(__zv); \
 	if (__intern->document != NULL) { \
 		if (!(__ptr = (__prtype)__intern->document->ptr)) { \
-  			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
-  			RETURN_NULL();\
-  		} \
+			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(Z_OBJCE_P(__zv)->name));\
+			RETURN_NULL();\
+		} \
 	} \
 }
 
