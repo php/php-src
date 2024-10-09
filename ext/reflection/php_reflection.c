@@ -639,13 +639,19 @@ static int format_default_value(smart_str *str, zval *value) {
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
 	} else if (Z_TYPE_P(value) == IS_OBJECT) {
-		/* This branch may only be reached for default properties, which don't support arbitrary objects. */
+		/* This branch may only be reached for default properties; show enum names,
+			or the type of non-enums (GH-15902) */
 		zend_object *obj = Z_OBJ_P(value);
 		zend_class_entry *class = obj->ce;
-		ZEND_ASSERT(class->ce_flags & ZEND_ACC_ENUM);
-		smart_str_append(str, class->name);
-		smart_str_appends(str, "::");
-		smart_str_append(str, Z_STR_P(zend_enum_fetch_case_name(obj)));
+		if (class->ce_flags & ZEND_ACC_ENUM) {
+			smart_str_append(str, class->name);
+			smart_str_appends(str, "::");
+			smart_str_append(str, Z_STR_P(zend_enum_fetch_case_name(obj)));
+		} else {
+			smart_str_appends(str, "object(");
+			smart_str_append(str, class->name);
+			smart_str_appends(str, ")");
+		}
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
 		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
