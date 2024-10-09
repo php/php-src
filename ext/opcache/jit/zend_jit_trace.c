@@ -6086,8 +6086,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!(opline->op1_type == IS_CONST
 						 && (opline->op2_type == IS_CONST
 						  || (opline->op2_type == IS_UNUSED
-						   && (opline->op2.num == ZEND_FETCH_CLASS_SELF
-						    || opline->op2.num == ZEND_FETCH_CLASS_PARENT))))) {
+						   && ((opline->op2.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
+						    || (opline->op2.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT))))) {
 							break;
 						}
 						if (!zend_jit_fetch_static_prop(&ctx, opline, op_array)) {
