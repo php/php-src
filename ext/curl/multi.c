@@ -97,11 +97,13 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	_php_curl_cleanup_handle(ch);
 
-	Z_ADDREF_P(z_ch);
-	zend_llist_add_element(&mh->easyh, z_ch);
-
 	error = curl_multi_add_handle(mh->multi, ch->cp);
 	SAVE_CURLM_ERROR(mh, error);
+
+	if (error == CURLM_OK) {
+		Z_ADDREF_P(z_ch);
+		zend_llist_add_element(&mh->easyh, z_ch);
+	}
 
 	RETURN_LONG((zend_long) error);
 }
@@ -164,9 +166,11 @@ PHP_FUNCTION(curl_multi_remove_handle)
 	error = curl_multi_remove_handle(mh->multi, ch->cp);
 	SAVE_CURLM_ERROR(mh, error);
 
-	RETVAL_LONG((zend_long) error);
-	zend_llist_del_element(&mh->easyh, z_ch, (int (*)(void *, void *))curl_compare_objects);
+	if (error == CURLM_OK) {
+		zend_llist_del_element(&mh->easyh, z_ch, (int (*)(void *, void *))curl_compare_objects);
+	}
 
+	RETURN_LONG((zend_long) error);
 }
 /* }}} */
 
