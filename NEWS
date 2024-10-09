@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- COM:
+  . Fix property access of PHP objects wrapped in variant. (cmb)
+
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
 
