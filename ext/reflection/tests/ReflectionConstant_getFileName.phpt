@@ -5,28 +5,28 @@ ReflectionConstant::getFileName()
 
 include "included5.inc";
 
-function testConstant( string $name ): void {
-    $ref = new ReflectionConstant( $name );
+function testConstant(string $name): void {
+    $ref = new ReflectionConstant($name);
     echo "$name: ";
-    var_dump( $ref->getFileName() );
+    var_dump($ref->getFileName());
 }
 
 define('IN_CURRENT_FILE_DEFINED', 42);
 const IN_CURRENT_FILE_AST = 123;
 
 echo "From PHP:\n";
-testConstant( 'PHP_VERSION' );
-testConstant( 'STDIN' );
-testConstant( 'STDOUT' );
-testConstant( 'STDERR' );
+testConstant('PHP_VERSION');
+testConstant('STDIN');
+testConstant('STDOUT');
+testConstant('STDERR');
 
 echo "\nFrom the current file:\n";
-testConstant( 'IN_CURRENT_FILE_DEFINED' );
-testConstant( 'IN_CURRENT_FILE_AST' );
+testConstant('IN_CURRENT_FILE_DEFINED');
+testConstant('IN_CURRENT_FILE_AST');
 
 echo "\nFrom an included file:\n";
-testConstant( 'INCLUDED_CONSTANT_DEFINED' );
-testConstant( 'INCLUDED_CONSTANT_AST' );
+testConstant('INCLUDED_CONSTANT_DEFINED');
+testConstant('INCLUDED_CONSTANT_AST');
 ?>
 --EXPECTF--
 From PHP:
