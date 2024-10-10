@@ -28,7 +28,7 @@ $ffi->new("int");
   <!-- init FFI::cdef() -->
   <FFI::cdef>
   </FFI::cdef>
-  <!-- init FFI::new() -->
-  <FFI::new>
-  </FFI::new>
+  <!-- init FFI\Scope::new() -->
+  <FFI\Scope::new>
+  </FFI\Scope::new>
 </file '%sgh12905.php'>
