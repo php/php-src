@@ -2969,7 +2969,7 @@ static zend_always_inline bool zend_ffi_validate_api_restriction(zend_execute_da
 	} while (0)
 
 #ifdef PHP_WIN32
-#define NUM_MODULES 1024
+# define NUM_MODULES 1024
 /* A rough approximation of dlysm(RTLD_DEFAULT) */
 static void *dlsym_loaded(char *symbol)
 {
@@ -2988,6 +2988,7 @@ static void *dlsym_loaded(char *symbol)
 	}
 	return addr;
 }
+# undef DL_FETCH_SYMBOL
 # define DL_FETCH_SYMBOL(h, s) (h == NULL ? dlsym_loaded(s) : GetProcAddress(h, s))
 #endif
 
