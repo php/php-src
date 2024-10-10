@@ -1,5 +1,5 @@
 --TEST--
-Testing __debugInfo() magic method with bad returns STRING
+Testing __debugInfo() magic method with bad returns ZERO (float)
 --FILE--
 <?php
 
@@ -13,8 +13,8 @@ class C {
   }
 }
 
-$c = new C("foo");
+$c = new C(0.0);
 var_dump($c);
 ?>
 --EXPECTF--
-Fatal error: __debuginfo() must return an array in %s%eZend%etests%edebug_info-error-str.php on line %d
+Fatal error: __debuginfo() must return an array in %s on line %d
