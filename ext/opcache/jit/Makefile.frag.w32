@@ -33,6 +33,7 @@ $(BUILD_DIR)\ext\opcache\jit\ir\ir.obj: \
 
 $(BUILD_DIR)\ext\opcache\jit\zend_jit.obj: \
 	ext\opcache\jit\zend_jit_ir.c \
+	ext\opcache\jit\zend_jit_ir_ffi.c \
 	ext\opcache\jit\zend_jit_helpers.c \
 	ext\opcache\jit\ir\ir.h \
 	ext\opcache\jit\ir\ir_builder.h
