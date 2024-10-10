@@ -2968,6 +2968,29 @@ static zend_always_inline bool zend_ffi_validate_api_restriction(zend_execute_da
 		} \
 	} while (0)
 
+#ifdef PHP_WIN32
+#define NUM_MODULES 1024
+/* A rough approximation of dlysm(RTLD_DEFAULT) */
+static void *dlsym_loaded(char *symbol)
+{
+	HMODULE modules[NUM_MODULES];
+	DWORD num, i;
+	void * addr;
+	if (!EnumProcessModules(GetCurrentProcess(), modules, sizeof modules, &num)) {
+		return NULL;
+	}
+	if (num >= NUM_MODULES) {
+		num = NUM_MODULES - 1;
+	}
+	for (i = 0; i < num; i++) {
+		addr = GetProcAddress(modules[i], symbol);
+		if (addr != NULL) break;
+	}
+	return addr;
+}
+# define DL_FETCH_SYMBOL(h, s) (h == NULL ? dlsym_loaded(s) : GetProcAddress(h, s))
+#endif
+
 ZEND_METHOD(FFI, cdef) /* {{{ */
 {
 	zend_string *code = NULL;
