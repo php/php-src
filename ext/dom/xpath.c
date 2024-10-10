@@ -264,6 +264,11 @@ int dom_xpath_document_read(dom_object *obj, zval *retval)
 		docp = (xmlDocPtr) ctx->doc;
 	}
 
+	if (UNEXPECTED(!docp)) {
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		return FAILURE;
+	}
+
 	php_dom_create_object((xmlNodePtr) docp, retval, obj);
 	return SUCCESS;
 }
