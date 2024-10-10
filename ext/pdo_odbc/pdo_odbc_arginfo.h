@@ -1,5 +1,19 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9136c911494c9e3462c49b3e58f4bcc15ebb2a9c */
+ * Stub hash: 2b73b46d5c52265edac1756dd209020bc7444e50 */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Odbc___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_METHOD(Pdo_Odbc, __construct);
+
+static const zend_function_entry class_Pdo_Odbc_methods[] = {
+	ZEND_ME(Pdo_Odbc, __construct, arginfo_class_Pdo_Odbc___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
 
 static void register_pdo_odbc_symbols(int module_number)
 {
@@ -10,7 +24,7 @@ static zend_class_entry *register_class_Pdo_Odbc(zend_class_entry *class_entry_P
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Odbc", NULL);
+	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Odbc", class_Pdo_Odbc_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_USE_CURSOR_LIBRARY_value;
@@ -42,6 +56,9 @@ static zend_class_entry *register_class_Pdo_Odbc(zend_class_entry *class_entry_P
 	zend_string *const_SQL_USE_ODBC_name = zend_string_init_interned("SQL_USE_ODBC", sizeof("SQL_USE_ODBC") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_SQL_USE_ODBC_name, &const_SQL_USE_ODBC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SQL_USE_ODBC_name);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }
