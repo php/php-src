@@ -4697,15 +4697,15 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
+						op1_indirect = 0;
 						if (opline->op1_type == IS_VAR) {
 							if (orig_op1_type != IS_UNKNOWN
 							 && (orig_op1_type & IS_TRACE_INDIRECT)) {
+								op1_indirect = 1;
 								if (!zend_jit_fetch_indirect_var(&ctx, opline, orig_op1_type,
 										&op1_info, &op1_addr, !ssa->var_info[ssa_op->op1_use].indirect_reference)) {
 									goto jit_failure;
 								}
-							} else {
-								break;
 							}
 						}
 						if (orig_op1_type != IS_UNKNOWN
@@ -4727,7 +4727,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP1_DATA_TRACE_TYPE();
 						op1_def_info = OP1_DEF_INFO();
 						if (!zend_jit_assign_dim_op(&ctx, opline,
-								op1_info, op1_def_info, op1_addr,
+								op1_info, op1_def_info, op1_addr, op1_indirect,
 								op2_info, (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
 								(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
 								op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_RANGE(), val_type,
@@ -5009,6 +5009,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_ASSIGN_DIM:
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
+						op1_indirect = 0;
 						if (opline->op1_type == IS_CV
 						 && (opline+1)->op1_type == IS_CV
 						 && (opline+1)->op1.var == opline->op1.var) {
@@ -5017,14 +5018,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (opline->op1_type == IS_VAR) {
 							if (orig_op1_type != IS_UNKNOWN
-							 && (orig_op1_type & IS_TRACE_INDIRECT)
-							 && opline->result_type == IS_UNUSED) {
+							 && (orig_op1_type & IS_TRACE_INDIRECT)) {
+								op1_indirect = 1;
 								if (!zend_jit_fetch_indirect_var(&ctx, opline, orig_op1_type,
 										&op1_info, &op1_addr, !ssa->var_info[ssa_op->op1_use].indirect_reference)) {
 									goto jit_failure;
 								}
-							} else {
-								break;
 							}
 						}
 						if (orig_op1_type != IS_UNKNOWN
@@ -5045,7 +5044,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_data_info = OP1_DATA_INFO();
 						CHECK_OP1_DATA_TRACE_TYPE();
 						if (!zend_jit_assign_dim(&ctx, opline,
-								op1_info, op1_addr,
+								op1_info, op1_addr, op1_indirect,
 								op2_info, (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
 								(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
 								op1_data_info, OP1_DATA_REG_ADDR(),
