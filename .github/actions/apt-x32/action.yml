@@ -40,6 +40,7 @@ runs:
           libxpm-dev:i386 \
           libxslt1-dev:i386 \
           libzip-dev:i386 \
+          firebird-dev:i386 \
           locales \
           make \
           pkg-config:i386 \
