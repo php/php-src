@@ -17,7 +17,6 @@
 #include <config.w32.h>
 
 #include <php.h>
-#include <win32/ioutil.h>
 
 #ifdef HAVE_LIBXML
 #include <libxml/threads.h>
@@ -34,16 +33,11 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 {
 	BOOL ret = TRUE;
 
+#if 0 /* prepared */
 	switch (reason)
 	{
 		case DLL_PROCESS_ATTACH:
-			ret = ret && php_win32_ioutil_init();
-			if (!ret) {
-				fprintf(stderr, "ioutil initialization failed");
-				return ret;
-			}
 			break;
-#if 0 /* prepared */
 		case DLL_PROCESS_DETACH:
 			/* pass */
 			break;
@@ -55,8 +49,8 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 		case DLL_THREAD_DETACH:
 			/* pass */
 			break;
-#endif
 	}
+#endif
 
 #ifdef HAVE_LIBXML
 	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM.

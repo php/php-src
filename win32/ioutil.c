@@ -67,10 +67,6 @@
 #include <winnls.h>
 */
 
-typedef HRESULT (__stdcall *MyPathCchCanonicalizeEx)(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags);
-
-static MyPathCchCanonicalizeEx canonicalize_path_w = NULL;
-
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts)
 {/*{{{*/
 	int current_umask;
@@ -619,7 +615,7 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 		}
 	}
 
-	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, _tmp, PATHCCH_ALLOW_LONG_PATHS)) {
+	if (S_OK != PathCchCanonicalizeEx(canonicalw, MAXPATHLEN, _tmp, PATHCCH_ALLOW_LONG_PATHS)) {
 		/* Length unchanged. */
 		*new_len = len;
 		return PHP_WIN32_IOUTIL_NORM_PARTIAL;
@@ -641,27 +637,6 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 	*new_len = ret_len;
 
 	return PHP_WIN32_IOUTIL_NORM_OK;
-}/*}}}*/
-
-static HRESULT __stdcall MyPathCchCanonicalizeExFallback(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags)
-{/*{{{*/
-	return -42;
-}/*}}}*/
-
-BOOL php_win32_ioutil_init(void)
-{/*{{{*/
-	HMODULE hMod = GetModuleHandle("api-ms-win-core-path-l1-1-0");
-
-	if (hMod) {
-		canonicalize_path_w = (MyPathCchCanonicalizeEx)GetProcAddress(hMod, "PathCchCanonicalizeEx");
-		if (!canonicalize_path_w) {
-			canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
-		}
-	} else {
-		canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
-	}
-
-	return TRUE;
 }/*}}}*/
 
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)

@@ -169,11 +169,6 @@ typedef enum {
 } while (0);
 
 PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len);
-#ifdef PHP_EXPORTS
-/* This symbols are needed only for the DllMain, but should not be exported
-	or be available when used with PHP binaries. */
-BOOL php_win32_ioutil_init(void);
-#endif
 
 /* Keep these functions aliased for case some additional handling
    is needed later. */
