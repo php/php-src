@@ -811,8 +811,6 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 					zend_string **end, **ptr = strings - 1;
 
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						size_t i;
-
 						*++ptr = zval_get_string(cur);
 						ZEND_ASSERT(*ptr);
 						if (ZSTR_LEN(*ptr) == 0 || EG(exception)) {
