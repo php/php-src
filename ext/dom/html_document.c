@@ -30,6 +30,7 @@
 #include <Zend/zend_smart_string.h>
 #include <lexbor/html/encoding.h>
 #include <lexbor/encoding/encoding.h>
+#include <lexbor/core/swar.h>
 
 /* Implementation defined, but as HTML5 defaults in all other cases to UTF-8, we'll do the same. */
 #define DOM_FALLBACK_ENCODING_ID LXB_ENCODING_UTF_8
@@ -517,6 +518,30 @@ static bool dom_process_parse_chunk(
 	return true;
 }
 
+/* This seeks, using SWAR techniques, to the first non-ASCII byte in a UTF-8 input.
+ * Returns true if the entire input was consumed without encountering non-ASCII, false otherwise. */
+static zend_always_inline bool dom_seek_utf8_non_ascii(const lxb_char_t **data, const lxb_char_t *end)
+{
+	while (*data + sizeof(size_t) <= end) {
+		size_t bytes;
+		memcpy(&bytes, *data, sizeof(bytes));
+		/* If the top bit is set, it's not ASCII. */
+		if ((bytes & LEXBOR_SWAR_REPEAT(0x80)) != 0) {
+			return false;
+		}
+		*data += sizeof(size_t);
+	}
+
+	while (*data < end) {
+		if (**data & 0x80) {
+			return false;
+		}
+		(*data)++;
+	}
+
+	return true;
+}
+
 static bool dom_decode_encode_fast_path(
 	lexbor_libxml2_bridge_parse_context *ctx,
 	lxb_html_document_t *document,
@@ -534,13 +559,13 @@ static bool dom_decode_encode_fast_path(
 	const lxb_char_t *last_output = buf_ref;
 	while (buf_ref != buf_end) {
 		/* Fast path converts non-validated UTF-8 -> validated UTF-8 */
-		if (decoding_encoding_ctx->decode.u.utf_8.need == 0 && *buf_ref < 0x80) {
+		if (decoding_encoding_ctx->decode.u.utf_8.need == 0) {
 			/* Fast path within the fast path: try to skip non-mb bytes in bulk if we are not in a state where we
-			 * need more UTF-8 bytes to complete a sequence.
-			 * It might be tempting to use SIMD here, but it turns out that this is less efficient because
-			 * we need to process the same byte multiple times sometimes when mixing ASCII with multibyte. */
-			buf_ref++;
-			continue;
+			 * need more UTF-8 bytes to complete a sequence. */
+			if (dom_seek_utf8_non_ascii(&buf_ref, buf_end)) {
+				ZEND_ASSERT(buf_ref == buf_end);
+				break;
+			}
 		}
 		const lxb_char_t *buf_ref_backup = buf_ref;
 		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
