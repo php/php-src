@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 273777e0bc50a3d5059bb2db7b0a1e293b26e338 */
+ * Stub hash: 6380876b0a397b3e67bf94ed67b59834322b0f9c */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -397,6 +397,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_skipLazyInitialization, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_getRawValueWithoutLazyInitialization, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
+	ZEND_ARG_TYPE_INFO(1, isLazy, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_isInitialized, 0, 0, _IS_BOOL, 0)
@@ -843,6 +848,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue);
 ZEND_METHOD(ReflectionProperty, setRawValue);
 ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization);
 ZEND_METHOD(ReflectionProperty, skipLazyInitialization);
+ZEND_METHOD(ReflectionProperty, getRawValueWithoutLazyInitialization);
 ZEND_METHOD(ReflectionProperty, isInitialized);
 ZEND_METHOD(ReflectionProperty, isPublic);
 ZEND_METHOD(ReflectionProperty, isPrivate);
@@ -1140,6 +1146,7 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, setRawValue, arginfo_class_ReflectionProperty_setRawValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, setRawValueWithoutLazyInitialization, arginfo_class_ReflectionProperty_setRawValueWithoutLazyInitialization, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, skipLazyInitialization, arginfo_class_ReflectionProperty_skipLazyInitialization, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getRawValueWithoutLazyInitialization, arginfo_class_ReflectionProperty_getRawValueWithoutLazyInitialization, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isInitialized, arginfo_class_ReflectionProperty_isInitialized, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isPublic, arginfo_class_ReflectionProperty_isPublic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isPrivate, arginfo_class_ReflectionProperty_isPrivate, ZEND_ACC_PUBLIC)
