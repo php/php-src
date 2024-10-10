@@ -6073,6 +6073,26 @@ ZEND_METHOD(ReflectionProperty, setValue)
 }
 /* }}} */
 
+static void reflection_property_get_raw_value(property_reference *ref, reflection_object *intern, zend_object *object, zval *return_value)
+{
+	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+		zval rv;
+		zval *member_p = zend_read_property_ex(intern->ce, object, ref->unmangled_name, 0, &rv);
+
+		if (member_p != &rv) {
+			RETURN_COPY_DEREF(member_p);
+		} else {
+			if (Z_ISREF_P(member_p)) {
+				zend_unwrap_reference(member_p);
+			}
+			RETURN_COPY_VALUE(member_p);
+		}
+	} else {
+		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_GET, ref->unmangled_name);
+		zend_call_known_instance_method_with_0_params(func, object, return_value);
+	}
+}
+
 ZEND_METHOD(ReflectionProperty, getRawValue)
 {
 	reflection_object *intern;
@@ -6095,22 +6115,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 		RETURN_THROWS();
 	}
 
-	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
-		zval rv;
-		zval *member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
-
-		if (member_p != &rv) {
-			RETURN_COPY_DEREF(member_p);
-		} else {
-			if (Z_ISREF_P(member_p)) {
-				zend_unwrap_reference(member_p);
-			}
-			RETURN_COPY_VALUE(member_p);
-		}
-	} else {
-		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_GET, ref->unmangled_name);
-		zend_call_known_instance_method_with_0_params(func, Z_OBJ_P(object), return_value);
-	}
+	reflection_property_get_raw_value(ref, intern, Z_OBJ_P(object), return_value);
 }
 
 static void reflection_property_set_raw_value(property_reference *ref, reflection_object *intern, zend_object *object, zval *value)
@@ -6269,6 +6274,83 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 			zend_lazy_object_realize(object);
 		}
 	}
+}
+
+ZEND_METHOD(ReflectionProperty, getRawValueWithoutLazyInitialization)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_object *object;
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	ZEND_PARSE_PARAMETERS_START(1, 1) {
+		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
+	} ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_object_is_lazy_proxy(object)
+			&& zend_lazy_object_initialized(object)) {
+		object = zend_lazy_object_get_instance(object);
+	}
+
+	/* Fallback to getRawValue() if object is not lazy and has custom handlers.
+	 * Lazy objects with custom handlers are possible if an extension overrides
+	 * std handlers. */
+	if (UNEXPECTED(object->handlers != &std_object_handlers)
+			&& !zend_object_is_lazy(object)) {
+		goto get_raw_value;
+	}
+
+	/* Fallback to getRawValue() for dynamic or virtual properties as these can
+	 * not be lazy and code below does not support these. */
+	if (!ref->prop || ref->prop->flags & ZEND_ACC_VIRTUAL) {
+		goto get_raw_value;
+	}
+
+	if (UNEXPECTED(ref->prop->flags & ZEND_ACC_STATIC)) {
+		_DO_THROW("May not use getRawValueWithoutLazyInitialization on static properties");
+		RETURN_THROWS();
+	}
+
+	zval *prop = OBJ_PROP(object, ref->prop->offset);
+
+	if (Z_PROP_FLAG_P(prop) & IS_PROP_LAZY) {
+		RETURN_NULL();
+	}
+
+	/* Fallback to getRawValue() for uninitialized properties */
+	if (UNEXPECTED(Z_TYPE_P(prop) == IS_UNDEF)) {
+		goto get_raw_value;
+	}
+
+	RETURN_COPY_DEREF(prop);
+
+get_raw_value:
+	reflection_property_get_raw_value(ref, intern, object, return_value);
+}
+
+ZEND_METHOD(ReflectionProperty, isLazy)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_object *object;
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	ZEND_PARSE_PARAMETERS_START(1, 1) {
+		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
+	} ZEND_PARSE_PARAMETERS_END();
+
+	if (!ref->prop || ref->prop->flags & (ZEND_ACC_STATIC | ZEND_ACC_VIRTUAL)) {
+		RETURN_FALSE;
+	}
+
+	if (zend_object_is_lazy_proxy(object)
+			&& zend_lazy_object_initialized(object)) {
+		object = zend_lazy_object_get_instance(object);
+	}
+
+	RETURN_BOOL(Z_PROP_FLAG_P(OBJ_PROP(object, ref->prop->offset)) & IS_PROP_LAZY);
 }
 
 /* {{{ Returns true if property was initialized */
