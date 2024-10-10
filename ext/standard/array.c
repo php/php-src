@@ -445,7 +445,6 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 			} else {
 				return php_array_data_compare_numeric;
 			}
-			break;
 
 		case PHP_SORT_STRING:
 			if (sort_type & PHP_SORT_FLAG_CASE) {
@@ -461,7 +460,6 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 					return php_array_data_compare_string;
 				}
 			}
-			break;
 
 		case PHP_SORT_NATURAL:
 			if (sort_type & PHP_SORT_FLAG_CASE) {
@@ -477,7 +475,6 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 					return php_array_natural_compare;
 				}
 			}
-			break;
 
 		case PHP_SORT_LOCALE_STRING:
 			if (reverse) {
@@ -485,7 +482,6 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 			} else {
 				return php_array_data_compare_string_locale;
 			}
-			break;
 
 		case PHP_SORT_REGULAR:
 		default:
@@ -494,9 +490,8 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 			} else {
 				return php_array_data_compare;
 			}
-			break;
 	}
-	return NULL;
+	ZEND_UNREACHABLE();
 }
 /* }}} */
 
@@ -509,7 +504,6 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 			} else {
 				return php_array_data_compare_numeric_unstable;
 			}
-			break;
 
 		case PHP_SORT_STRING:
 			if (sort_type & PHP_SORT_FLAG_CASE) {
@@ -525,7 +519,6 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 					return php_array_data_compare_string_unstable;
 				}
 			}
-			break;
 
 		case PHP_SORT_NATURAL:
 			if (sort_type & PHP_SORT_FLAG_CASE) {
@@ -541,7 +534,6 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 					return php_array_natural_compare_unstable;
 				}
 			}
-			break;
 
 		case PHP_SORT_LOCALE_STRING:
 			if (reverse) {
@@ -549,7 +541,6 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 			} else {
 				return php_array_data_compare_string_locale_unstable;
 			}
-			break;
 
 		case PHP_SORT_REGULAR:
 		default:
@@ -558,9 +549,8 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 			} else {
 				return php_array_data_compare_unstable;
 			}
-			break;
 	}
-	return NULL;
+	ZEND_UNREACHABLE();
 }
 /* }}} */
 

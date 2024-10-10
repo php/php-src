@@ -693,11 +693,6 @@ static void init_startup_info(STARTUPINFOW *si, descriptorspec_item *descriptors
 	}
 }
 
-static void init_process_info(PROCESS_INFORMATION *pi)
-{
-	memset(&pi, 0, sizeof(pi));
-}
-
 static zend_result convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 {
 	size_t len = sizeof(COMSPEC_NT) + sizeof(" /s /c ") + cmdw_len + 3;
@@ -1270,7 +1265,7 @@ PHP_FUNCTION(proc_open)
 	}
 
 	init_startup_info(&si, descriptors, ndesc);
-	init_process_info(&pi);
+	memset(&pi, 0, sizeof(pi));
 
 	if (suppress_errors) {
 		old_error_mode = SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);

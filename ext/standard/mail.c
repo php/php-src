@@ -109,7 +109,7 @@ static php_mail_header_value_error_type php_mail_build_headers_check_field_value
 }
 
 
-static bool php_mail_build_headers_check_field_name(zend_string *key)
+static zend_result php_mail_build_headers_check_field_name(zend_string *key)
 {
 	size_t len = 0;
 
@@ -151,10 +151,8 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 				case CONTAINS_NULL:
 					zend_value_error("Header \"%s\" contains NULL character that is not allowed in the header", ZSTR_VAL(key));
 					return;
-				default:
-					// fallback
-					zend_value_error("Header \"%s\" has invalid format, or contains invalid characters", ZSTR_VAL(key));
-					return;
+				// All cases of php_mail_header_value_error_type enum handled
+				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			smart_str_append(s, key);
 			smart_str_appendl(s, ": ", 2);
@@ -616,7 +614,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		MAIL_RET(false);
 	}
 
-	MAIL_RET(true); /* never reached */
+	ZEND_UNREACHABLE();
 }
 /* }}} */
 
