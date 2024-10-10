@@ -682,6 +682,11 @@ static int format_default_value(smart_str *str, zval *value) {
 			format_default_value(str, zv);
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
+	} else if (Z_TYPE_P(value) == IS_OBJECT) {
+		// Show a consistent output with the type of the object, GH-15902
+		smart_str_appends(str, "object(");
+		smart_str_append(str, Z_OBJCE_P(value)->name);
+		smart_str_appends(str, ")");
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
 		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
