@@ -1879,7 +1879,6 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
 			ZEND_ASSERT(arg_name != NULL);
 			zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
-			zend_string_release(arg_name);
 			/* Do not call destructor, free object, and set arg to IS_UNDEF */
 			zend_object_store_ctor_failed(obj);
 			zval_ptr_dtor(arg);
