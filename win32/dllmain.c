@@ -33,25 +33,6 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 {
 	BOOL ret = TRUE;
 
-#if 0 /* prepared */
-	switch (reason)
-	{
-		case DLL_PROCESS_ATTACH:
-			break;
-		case DLL_PROCESS_DETACH:
-			/* pass */
-			break;
-
-		case DLL_THREAD_ATTACH:
-			/* pass */
-			break;
-
-		case DLL_THREAD_DETACH:
-			/* pass */
-			break;
-	}
-#endif
-
 #ifdef HAVE_LIBXML
 	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM.
 		If that changes, this place will need some rework.
