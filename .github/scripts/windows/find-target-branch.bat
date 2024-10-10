@@ -6,3 +6,5 @@ for /f "usebackq tokens=3" %%i in (`findstr PHP_MINOR_VERSION main\php_version.h
 if /i "%BRANCH%" equ "8.5" (
 	set BRANCH=master
 )
+
+echo branch=%BRANCH%>> %GITHUB_OUTPUT%
