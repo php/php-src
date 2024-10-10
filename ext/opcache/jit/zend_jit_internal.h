@@ -248,8 +248,11 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSIVE_CALL,    "recursive call") \
 	_(RECURSIVE_RET,     "recursive return") \
 	_(RETURN,            "return") \
-	_(INTERPRETER,       "exit to VM interpreter") \
 	_(LINK,              "link to another trace") \
+	_(INTERPRETER,       "exit to VM interpreter") \
+	_(TRAMPOLINE,        "trampoline call") \
+	_(PROP_HOOK_CALL,    "property hook call") \
+	_(BAD_FUNC,          "bad function call") \
 	/* compilation and linking successful */ \
 	_(COMPILED,          "compiled") \
 	_(ALREADY_DONE,      "already prcessed") \
@@ -267,9 +270,6 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(BLACK_LIST,        "trace blacklisted") \
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
 	_(COMPILED_LOOP,     "compiled loop") \
-	_(TRAMPOLINE,        "trampoline call") \
-	_(PROP_HOOK_CALL,    "property hook call") \
-	_(BAD_FUNC,          "bad function call") \
 	_(COMPILER_ERROR,    "JIT compilation error") \
 	/* no recoverable error (blacklist immediately) */ \
 	_(NO_SHM,            "insufficient shared memory") \
@@ -379,6 +379,12 @@ typedef enum _zend_jit_trace_op {
 
 #define ZEND_JIT_TRACE_FAKE_INFO(level) \
 	(((level) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT) | ZEND_JIT_TRACE_FAKE_INIT_CALL)
+
+#define ZEND_JIT_TRACE_NUM_ARGS_INFO(count) \
+	((count) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
+
+#define ZEND_JIT_TRACE_NUM_ARGS(info) \
+	(((info) & ZEND_JIT_TRACE_FAKE_LEVEL_MASK) >> ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
 
 #define ZEND_JIT_TRACE_SET_FIRST_SSA_VAR(_info, var) do { \
 		_info |= (var << ZEND_JIT_TRACE_SSA_VAR_SHIFT); \
