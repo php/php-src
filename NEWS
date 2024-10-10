@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16385 (Unexpected null returned by session_set_cookie_params).
     (nielsdos)
 
+- SOAP:
+  . Fixed bug GH-16318 (Recursive array segfaults soap encoding). (nielsdos)
+
 - Sockets:
   . Fixed bug with overflow socket_recvfrom $length argument. (David Carlier)
 
