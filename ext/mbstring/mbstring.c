@@ -3166,6 +3166,98 @@ PHP_FUNCTION(mb_rtrim)
 	php_do_mb_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_RTRIM);
 }
 
+PHP_FUNCTION(mb_levenshtein)
+{
+	zend_string *string1, *string2, *enc_name = NULL;
+	zend_long cost_ins = 1;
+	zend_long cost_rep = 1;
+	zend_long cost_del = 1;
+
+	ZEND_PARSE_PARAMETERS_START(2, 6)
+		Z_PARAM_STR(string1)
+		Z_PARAM_STR(string2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(cost_ins)
+		Z_PARAM_LONG(cost_rep)
+		Z_PARAM_LONG(cost_del)
+		Z_PARAM_STR_OR_NULL(enc_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 6);
+	if (!enc) {
+		RETURN_THROWS();
+	}
+
+	/* When all costs are equal, levenshtein fulfills the requirements of a metric, which means
+	 * that the distance is symmetric. If string1 is shorter than string 2 we can save memory (and CPU time)
+	 * by having shorter rows (p1 & p2). */
+	if (ZSTR_LEN(string1) < ZSTR_LEN(string2) && cost_ins == cost_rep && cost_rep == cost_del) {
+		zend_string *tmp = string1;
+		string1 = string2;
+		string2 = tmp;
+	}
+
+	uint32_t wchar_buf_1[1], wchar_buf_2[1];
+	size_t i1, i2;
+	zend_long *p1, *p2, *tmp;
+	size_t strlen_1 = mb_get_strlen(string1, enc);
+	size_t strlen_2 = mb_get_strlen(string2, enc);
+	size_t in_len_1 = ZSTR_LEN(string1);
+	size_t in_len_2 = ZSTR_LEN(string2);
+	unsigned char *in_1 = (unsigned char*)ZSTR_VAL(string1);
+	unsigned char *in_2 = (unsigned char*)ZSTR_VAL(string2);
+	unsigned int state = 0;
+
+	if (strlen_1 == 0) {
+		RETURN_LONG(strlen_2 * cost_ins);
+	}
+
+	if (strlen_2 == 0) {
+		RETURN_LONG(strlen_1 * cost_ins);
+	}
+
+	zend_long c0, c1, c2;
+
+	p1 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
+	p2 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
+
+	for (i2 = 0; i2 <= strlen_2; i2++) {
+		p1[i2] = i2 * cost_ins;
+	}
+	zend_long tmp_wchar_len;
+
+	for (i1 = 0; i1 < strlen_1; i1++) {
+		tmp_wchar_len = enc->to_wchar(&in_1, &in_len_1, wchar_buf_1, 1, &state);
+		ZEND_ASSERT(tmp_wchar_len <= 1);
+		p2[0] = p1[0] + cost_del;
+		for (i2 = 0; i2 < strlen_2; i2++) {
+			tmp_wchar_len = enc->to_wchar(&in_2, &in_len_2, wchar_buf_2, 1, &state);
+			ZEND_ASSERT(tmp_wchar_len <= 1);
+			c0 = p1[i2] + (wchar_buf_1[0] == wchar_buf_2[0] ? 0 : cost_rep);
+			c1 = p1[i2 + 1] + cost_del;
+			if (c1 < c0) {
+				c0 = c1;
+			}
+			c2 = p2[i2] + cost_ins;
+			if (c2 < c0) {
+				c0 = c2;
+			}
+			p2[i2 + 1] = c0;
+		}
+		in_2 = (unsigned char*)ZSTR_VAL(string2);
+		in_len_2 = ZSTR_LEN(string2);
+		tmp = p1;
+		p1 = p2;
+		p2 = tmp;
+	}
+
+	c0 = p1[strlen_2];
+	efree(p1);
+	efree(p2);
+
+	RETURN_LONG(c0);
+}
+
 static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t size)
 {
 	const mbfl_encoding **new_elist = safe_emalloc(size, sizeof(mbfl_encoding*), 0);
