@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
   . Add missing hierarchy checks to replaceChild. (nielsdos)
+  . Fixed bug GH-16336 (Attribute intern document mismanagement). (nielsdos)
+  . Fixed bug GH-16338 (Null-dereference in ext/dom/node.c). (nielsdos)
 
 - EXIF:
   . Fixed bug GH-16409 (Segfault in exif_thumbnail when not dealing with a

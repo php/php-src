@@ -820,11 +820,14 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 
 /* }}} */
 
-/* Returns true if the node was changed, false otherwise. */
-static bool dom_set_document_ref_obj_single(xmlNodePtr node, xmlDocPtr doc, php_libxml_ref_obj *document)
+/* Returns true if the node had the same document reference, false otherwise. */
+static bool dom_set_document_ref_obj_single(xmlNodePtr node, php_libxml_ref_obj *document)
 {
 	dom_object *childobj = php_dom_object_get_data(node);
-	if (childobj && !childobj->document) {
+	if (!childobj) {
+		return true;
+	}
+	if (!childobj->document) {
 		childobj->document = document;
 		document->refcount++;
 		return true;
@@ -832,13 +835,41 @@ static bool dom_set_document_ref_obj_single(xmlNodePtr node, xmlDocPtr doc, php_
 	return false;
 }
 
-/* TODO: on 8.4 replace the loop with the tree walk helper function. */
-static void dom_set_document_pointers(xmlNodePtr node, xmlDocPtr doc, php_libxml_ref_obj *document)
+void dom_set_document_ref_pointers_attr(xmlAttrPtr attr, php_libxml_ref_obj *document)
 {
-	/* Applies the document to the entire subtree. */
-	xmlSetTreeDoc(node, doc);
+	ZEND_ASSERT(document != NULL);
 
-	if (!dom_set_document_ref_obj_single(node, doc, document)) {
+	dom_set_document_ref_obj_single((xmlNodePtr) attr, document);
+	for (xmlNodePtr attr_child = attr->children; attr_child; attr_child = attr_child->next) {
+		dom_set_document_ref_obj_single(attr_child, document);
+	}
+}
+
+static bool dom_set_document_ref_pointers_node(xmlNodePtr node, php_libxml_ref_obj *document)
+{
+	ZEND_ASSERT(document != NULL);
+
+	if (!dom_set_document_ref_obj_single(node, document)) {
+		return false;
+	}
+
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			dom_set_document_ref_pointers_attr(attr, document);
+		}
+	}
+
+	return true;
+}
+
+/* TODO: on 8.4 replace the loop with the tree walk helper function. */
+void dom_set_document_ref_pointers(xmlNodePtr node, php_libxml_ref_obj *document)
+{
+	if (!document) {
+		return;
+	}
+
+	if (!dom_set_document_ref_pointers_node(node, document)) {
 		return;
 	}
 
@@ -847,7 +878,7 @@ static void dom_set_document_pointers(xmlNodePtr node, xmlDocPtr doc, php_libxml
 	while (node != NULL) {
 		ZEND_ASSERT(node != base);
 
-		if (!dom_set_document_ref_obj_single(node, doc, document)) {
+		if (!dom_set_document_ref_pointers_node(node, document)) {
 			break;
 		}
 
@@ -974,7 +1005,7 @@ PHP_METHOD(DOMNode, insertBefore)
 	}
 
 	if (child->doc == NULL && parentp->doc != NULL) {
-		dom_set_document_pointers(child, parentp->doc, intern->document);
+		dom_set_document_ref_pointers(child, intern->document);
 	}
 
 	php_libxml_invalidate_node_list_cache(intern->document);
@@ -1137,7 +1168,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	}
 
 	if (newchild->doc == NULL && nodep->doc != NULL) {
-		dom_set_document_pointers(newchild, nodep->doc, intern->document);
+		dom_set_document_ref_pointers(newchild, intern->document);
 	}
 
 	if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
@@ -1240,7 +1271,7 @@ PHP_METHOD(DOMNode, appendChild)
 	}
 
 	if (child->doc == NULL && nodep->doc != NULL) {
-		dom_set_document_pointers(child, nodep->doc, intern->document);
+		dom_set_document_ref_pointers(child, intern->document);
 	}
 
 	if (child->parent != NULL){
