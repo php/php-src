@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - COM:
   . Fixed out of bound writes to SafeArray data. (cmb)
 
+- Core:
+  . Fixed bug GH-16168 (php 8.1 and earlier crash immediately when compiled
+    with Xcode 16 clang on macOS 15). (nielsdos)
+
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
     curl_multi_add_handle fails). (timwolla)
