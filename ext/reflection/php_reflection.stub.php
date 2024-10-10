@@ -502,6 +502,8 @@ class ReflectionProperty implements Reflector
 
     public function skipLazyInitialization(object $object): void {}
 
+    public function isLazy(object $object): bool {}
+
     /** @tentative-return-type */
     public function isInitialized(?object $object = null): bool {}
 

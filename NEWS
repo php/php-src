@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16577 (EG(strtod_state).freelist leaks with opcache.preload).
     (nielsdos)
   . Fixed bug GH-16615 (Assertion failure in zend_std_read_property). (Arnaud)
+  . Fixed bug GH-16342 (Added ReflectionProperty::isLazy()). (Arnaud)
 
 - DOM:
   . Fixed bug GH-16594 (Assertion failure in DOM -> before). (nielsdos)
