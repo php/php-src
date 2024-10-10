@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.2
 
+- Core:
+  . Fixed bug GH-16344 (setRawValueWithoutLazyInitialization() and
+    skipLazyInitialization() may change initialized proxy). (Arnaud)
+
 - DOM:
   . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
     (nielsdos)
