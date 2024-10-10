@@ -154,6 +154,8 @@ bool php_dom_is_node_connected(const xmlNode *node);
 bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, xmlDocPtr new_document);
 xmlNsPtr dom_get_ns_resolve_prefix_conflict(xmlNodePtr tree, const char *uri);
 xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr reference);
+void dom_set_document_ref_pointers(xmlNodePtr node, php_libxml_ref_obj *document);
+void dom_set_document_ref_pointers_attr(xmlAttrPtr attr, php_libxml_ref_obj *document);
 
 /* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
