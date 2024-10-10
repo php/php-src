@@ -288,7 +288,7 @@ static void zend_test_execute_internal(zend_execute_data *execute_data, zval *re
 		} else {
 			php_printf("%*s<!-- internal enter %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
-	} else {
+	} else if (ZEND_USER_CODE(fbc->type)) {
 		php_printf("%*s<!-- internal enter '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
 	}
 
