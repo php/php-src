@@ -36,6 +36,19 @@ $obj = $reflector->newLazyProxy(function () {
 
 test('Proxy', $obj);
 
+$real = new C('foo');
+$obj = $reflector->newLazyProxy(function () use ($real) {
+    return $real;
+});
+$reflector->initializeLazyObject($obj);
+$reflector->resetAsLazyProxy($real, function () {
+    var_dump("initializer");
+    return new C('bar');
+});
+$reflector->initializeLazyObject($real);
+
+test('Nested Proxy', $obj);
+
 ?>
 --EXPECTF--
 # Ghost
@@ -48,7 +61,7 @@ object(C)#%d (2) {
   NULL
 }
 # Proxy
-int(1)
+int(2)
 bool(true)
 lazy proxy object(C)#%d (1) {
   ["instance"]=>
@@ -57,5 +70,21 @@ lazy proxy object(C)#%d (1) {
     int(2)
     ["b"]=>
     NULL
+  }
+}
+string(11) "initializer"
+# Nested Proxy
+int(2)
+bool(true)
+lazy proxy object(C)#%d (1) {
+  ["instance"]=>
+  lazy proxy object(C)#%d (1) {
+    ["instance"]=>
+    object(C)#%d (2) {
+      ["a"]=>
+      int(2)
+      ["b"]=>
+      NULL
+    }
   }
 }
