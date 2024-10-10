@@ -814,28 +814,24 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 						size_t i;
 
 						*++ptr = zval_get_string(cur);
-						if (!*ptr || ZSTR_LEN(*ptr) == 0 || EG(exception)) {
-							if (*ptr) {
+						ZEND_ASSERT(*ptr);
+						if (ZSTR_LEN(*ptr) == 0 || EG(exception)) {
+							do {
 								zend_string_release(*ptr);
-							}
-							while (--ptr >= strings) {
-								zend_string_release(*ptr);
-							}
+							} while (--ptr >= strings);
 							efree(strings);
 							if (!EG(exception)) {
 								zend_argument_value_error(2, "must not contain empty strings");
 							}
 							return 0;
 						}
-						for (i = 0; i < ZSTR_LEN(*ptr); i++) {
-							if (ZSTR_VAL(*ptr)[i] == 0) {
-								do {
-									zend_string_release(*ptr);
-								} while (--ptr >= strings);
-								efree(strings);
-								zend_argument_value_error(2, "must not contain strings with null bytes");
-								return 0;
-							}
+						if (zend_str_has_nul_byte(*ptr)) {
+							do {
+								zend_string_release(*ptr);
+							} while (--ptr >= strings);
+							efree(strings);
+							zend_argument_value_error(2, "must not contain strings with null bytes");
+							return 0;
 						}
 
 						*dictlen += ZSTR_LEN(*ptr) + 1;
