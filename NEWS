@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
     curl_multi_add_handle fails). (timwolla)
 
+- DOM:
+  . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
+    (nielsdos)
+
 - PHPDBG:
   . Fixed bug GH-16174 (Empty string is an invalid expression for ev). (cmb)
 
