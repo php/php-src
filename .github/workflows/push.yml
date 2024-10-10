@@ -30,6 +30,7 @@ on:
       - .circleci/**
     branches:
       - '**'
+  workflow_dispatch: ~
 permissions:
   contents: read
 concurrency:
