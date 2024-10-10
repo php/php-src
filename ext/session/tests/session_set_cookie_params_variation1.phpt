@@ -43,6 +43,8 @@ bool(false)
 string(4) "3600"
 bool(true)
 string(4) "3600"
-bool(true)
-string(10) "1234567890"
+
+Warning: session_set_cookie_params(): CookieLifetime must be between 0 and %d in %s on line %d
+bool(false)
+string(4) "3600"
 Done
