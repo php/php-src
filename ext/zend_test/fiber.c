@@ -91,6 +91,7 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 		execute_data = (zend_execute_data *) stack->top;
 
 		memset(execute_data, 0, sizeof(zend_execute_data));
+		execute_data->func = (zend_function *) &zend_pass_function;
 
 		EG(current_execute_data) = execute_data;
 		EG(jit_trace_num) = 0;
