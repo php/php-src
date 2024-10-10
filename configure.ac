@@ -1331,11 +1331,18 @@ fi
 dnl Check whether syscall to create shadow stack exists, should be a better way, but...
 AC_CACHE_CHECK([whether syscall to create shadow stack exists], ac_cv_syscall_shadow_stack_exists,
 [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <sys/syscall.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#ifndef SYS_map_shadow_stack
+# define SYS_map_shadow_stack 453
+#endif
+#ifndef SHADOW_STACK_SET_TOKEN
+# define SHADOW_STACK_SET_TOKEN 0x1
+#endif
 int main(void) {
-  /* test if syscall 451, i.e., map_shadow_stack is available */
-  void* base = (void *)syscall(451, 0, 0x20000, 0x1);
+  /* test if map_shadow_stack is available */
+  void* base = (void *)syscall(SYS_map_shadow_stack, 0, 0x20000, SHADOW_STACK_SET_TOKEN);
   if (base != (void*)-1) {
     munmap(base, 0x20000);
     return 0;
