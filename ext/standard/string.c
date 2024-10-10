@@ -32,6 +32,9 @@
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
+#include "zend_string.h"
+#include "charrepr.h"
+#include "php_globals.h"
 #include "basic_functions.h"
 #include "zend_smart_str.h"
 #include <Zend/zend_exceptions.h>
@@ -3831,6 +3834,38 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, const char 
 	return new_str;
 }
 /* }}} */
+
+/* {{{ php_repr_str */
+PHPAPI zend_string *php_repr_str(const char *str, size_t len) {
+	size_t newlen;
+	// allocate enough memory for the worst case scenario
+	// in which every character is a control character
+	// and we need to represent it as \x00 (4 bytes)
+	// so we need 4 bytes for each character
+	// plus 2 byte for the leading quote and the trailing quote
+	// plus 1 byte for the null terminator
+	int alloc_len = len * 4 + 2 + 1;
+	zend_string *new_str = zend_string_alloc(alloc_len, 0);
+	char *target = ZSTR_VAL(new_str);
+	// add the leading quote
+	*target++ = '"';
+	for (size_t i = 0; i < len; i++) {
+		const char *repr = char_reprs[(unsigned char)str[i]].repr;
+		size_t repr_len = char_reprs[(unsigned char)str[i]].len;
+		memcpy(target, repr, repr_len);
+		target += repr_len;
+	}
+	// add the trailing quote
+	*target++ = '"';
+	// add the null terminator
+	*target = '\0';
+	newlen = target - ZSTR_VAL(new_str);
+	if (newlen < alloc_len) {
+		new_str = zend_string_truncate(new_str, newlen, 0);
+	}
+	return new_str;
+}
+
 
 /* {{{ php_addcslashes */
 PHPAPI zend_string *php_addcslashes(zend_string *str, const char *what, size_t wlength)
