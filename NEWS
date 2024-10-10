@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - COM:
   . Fixed out of bound writes to SafeArray data. (cmb)
 
+- Core:
+  . Fixed bug OSS-Fuzz #371445205 (Heap-use-after-free in attr_free).
+    (nielsdos)
+
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
     curl_multi_add_handle fails). (timwolla)
