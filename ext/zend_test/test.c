@@ -647,6 +647,10 @@ static zend_object *zend_test_class_new(zend_class_entry *class_type)
 	return obj;
 }
 
+static zend_internal_arg_info arginfo_ZendTestClass___call[] = {
+	{"foo", {0}, NULL},
+};
+
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key)
 {
 	if (zend_string_equals_literal_ci(name, "test")) {
@@ -659,7 +663,8 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 	    }
 	    memset(fptr, 0, sizeof(zend_internal_function));
 	    fptr->type = ZEND_INTERNAL_FUNCTION;
-	    fptr->num_args = 1;
+		fptr->num_args = sizeof(arginfo_ZendTestClass___call) / sizeof(zend_internal_arg_info);
+		fptr->arg_info = arginfo_ZendTestClass___call;
 	    fptr->scope = (*object)->ce;
 	    fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 	    fptr->function_name = zend_string_copy(name);
@@ -682,7 +687,8 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 		}
 		memset(fptr, 0, sizeof(zend_internal_function));
 		fptr->type = ZEND_INTERNAL_FUNCTION;
-		fptr->num_args = 1;
+		fptr->num_args = sizeof(arginfo_ZendTestClass___call) / sizeof(zend_internal_arg_info);
+		fptr->arg_info = arginfo_ZendTestClass___call;
 		fptr->scope = ce;
 		fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
 		fptr->function_name = zend_string_copy(name);
