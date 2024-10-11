@@ -1297,6 +1297,39 @@ typedef struct _zend_tssa {
 
 static const zend_op _nop_opcode = {0};
 
+static uint32_t find_trampoline_num_args(zend_jit_trace_rec *start, zend_jit_trace_rec *p)
+{
+	int inline_level = 0, call_level = 0;
+
+	p--;
+	while (p != start) {
+		if (p->op == ZEND_JIT_TRACE_INIT_CALL) {
+			if (inline_level == 0) {
+				if (call_level == 0) {
+					ZEND_ASSERT(!p->op_array);
+					return ZEND_JIT_TRACE_NUM_ARGS(p->info);
+				} else {
+					call_level--;
+				}
+			}
+		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
+			if (inline_level == 0) {
+				call_level++;
+			}
+		} else if (p->op == ZEND_JIT_TRACE_ENTER) {
+			if (inline_level) {
+				inline_level--;
+			} else {
+				return 0;
+			}
+		} else if (p->op == ZEND_JIT_TRACE_BACK) {
+			inline_level++;
+		}
+		p--;
+	}
+	return 0;
+}
+
 static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num, zend_script *script, const zend_op_array **op_arrays, int *num_op_arrays_ptr)
 {
 	zend_ssa *tssa;
@@ -1368,6 +1401,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				stack_size = stack_top;
 			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
+			uint32_t num_args = 0;
 			if (JIT_G(opt_level) < ZEND_JIT_LEVEL_OPT_FUNC) {
 				if (p->func
 				 && p->func != (zend_function*)&zend_pass_function
@@ -1377,7 +1411,11 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
 			}
-			frame_size = zend_jit_trace_frame_size(p->op_array, ZEND_JIT_TRACE_NUM_ARGS(p->info));
+			if (!p->func) {
+				/* Find num_args in the corresponding ZEND_JIT_TRACE_INIT_CALL record */
+				num_args = find_trampoline_num_args(trace_buffer + ZEND_JIT_TRACE_START_REC_SIZE, p);
+			}
+			frame_size = zend_jit_trace_frame_size(p->op_array, num_args);
 			if (call_level == 0) {
 				if (stack_top + frame_size > stack_size) {
 					stack_size = stack_top + frame_size;
