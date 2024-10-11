@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
+  . Add missing hierarchy checks to replaceChild. (nielsdos)
 
 - GD:
   . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
