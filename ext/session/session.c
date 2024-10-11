@@ -2644,7 +2644,14 @@ PHP_FUNCTION(session_start)
 	 * module is unable to rewrite output.
 	 */
 	if (PS(use_cookies) && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session cannot be started after headers have already been sent");
+		/* It's the header sent to blame, not the session in this case */
+		const char *output_start_filename = php_output_get_start_filename();
+		int output_start_lineno = php_output_get_start_lineno();
+		if (output_start_filename != NULL) {
+			php_error_docref(NULL, E_NOTICE, "Session cannot be started after headers have already been sent (started from %s on line %d)", output_start_filename, output_start_lineno);
+		} else {
+			php_error_docref(NULL, E_NOTICE, "Session cannot be started after headers have already been sent");
+		}
 		RETURN_FALSE;
 	}
 
