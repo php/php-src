@@ -989,13 +989,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				}
 
 				if (EX(func)->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-					/* TODO: Can we continue recording ??? */
 					stop = ZEND_JIT_TRACE_STOP_TRAMPOLINE;
 					break;
 				}
 
 				if (EX(func)->op_array.prop_info) {
-					/* TODO: Can we continue recording ??? */
 					stop = ZEND_JIT_TRACE_STOP_PROP_HOOK_CALL;
 					break;
 				}
