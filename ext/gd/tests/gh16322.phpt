@@ -4,11 +4,9 @@ GH-16322 (imageaffine overflow/underflow on affine matrix)
 gd
 --INI--
 memory_limit=-1
---SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die('skip this test is for 64bit platforms only'); ?>
 --FILE--
 <?php
-$matrix = [PHP_INT_MAX, 1, 1, 1, 1, 1];
+$matrix = [INF, 1, 1, 1, 1, 1];
 $src = imagecreatetruecolor(8, 8);
 
 try {
@@ -17,7 +15,7 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 $matrix[0] = 1;
-$matrix[3] = PHP_INT_MIN;
+$matrix[3] = -INF;
 try {
 	imageaffine($src, $matrix);
 } catch (\ValueError $e) {
