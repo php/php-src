@@ -8,7 +8,7 @@ foreach ($env as $k => $v) {
 
 class MySQLPDOTest extends PDOTest {
 
-    static function factory($classname = PDO::class, $mydsn = null, $myAttr = null) {
+    static function factory($classname = PDO::class, $mydsn = null, $myAttr = null, bool $useConnectMethod = false) {
         $dsn 	= self::getDSN($mydsn);
         $user	= PDO_MYSQL_TEST_USER;
         $pass	= PDO_MYSQL_TEST_PASS;
@@ -20,7 +20,12 @@ class MySQLPDOTest extends PDOTest {
             $attr = is_string($attr) && strlen($attr) ? unserialize($attr) : null;
         }
 
-        $db = new $classname($dsn, $user, $pass, $attr);
+        if ($useConnectMethod) {
+            $db = $classname::connect($dsn, $user, $pass, $attr);
+        } else {
+            $db = new $classname($dsn, $user, $pass, $attr);
+        }
+
         if (!$db) {
             die("Could not create PDO object (DSN=$dsn, user=$user)\n");
         }
