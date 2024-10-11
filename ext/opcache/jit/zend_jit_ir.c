@@ -8431,11 +8431,19 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 			used_stack_ref);
 
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			bool may_be_trampoline = !func && (opline->opcode == ZEND_INIT_METHOD_CALL);
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline,
+				may_be_trampoline ?
+					(ZEND_JIT_EXIT_TO_VM | ZEND_JIT_EXIT_METHOD_CALL) : ZEND_JIT_EXIT_TO_VM);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 			if (!exit_addr) {
 				return 0;
+			}
+
+			if (may_be_trampoline) {
+				jit->trace->exit_info[exit_point].poly_func_ref = func_ref;
+				jit->trace->exit_info[exit_point].poly_this_ref = this_ref;
 			}
 
 			ir_GUARD(ref, ir_CONST_ADDR(exit_addr));
