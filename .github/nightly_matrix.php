@@ -102,7 +102,7 @@ function get_macos_matrix_include(array $branches) {
                     'branch' => $branch,
                     'debug' => $debug,
                     'zts' => $zts,
-                    'os' => $branch['name'] === 'master' ? '13' : '12',
+                    'os' => in_array($branch['name'], ['master', 'PHP-8.4'], true) ? '13' : '12',
                     'arch' => 'X64',
                     'test_jit' => true,
                 ];
