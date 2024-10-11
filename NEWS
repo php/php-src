@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
 
+- GD:
+  . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
+    (David Carlier)
+
 - MBstring:
   . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
     (David Carlier)
