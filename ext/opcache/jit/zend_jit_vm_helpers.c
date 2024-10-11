@@ -916,7 +916,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			if (EX(call)->func->type == ZEND_INTERNAL_FUNCTION) {
 				zend_function *func = EX(call)->func;
 
-				if (func->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+				if ((func->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
+				 || (func->common.fn_flags & ZEND_ACC_NEVER_CACHE)
+				 || func->common.prop_info) {
 					/* continue recording */
 					func = NULL;
 				} else if (func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) {
@@ -1132,7 +1134,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				opline = EX(opline);
 #endif
 
-				if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+				if ((func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
+				 || (func->common.fn_flags & ZEND_ACC_NEVER_CACHE)
+				 || func->common.prop_info) {
 					/* continue recording */
 					func = NULL;
 				} else if (JIT_G(max_polymorphic_calls) == 0
