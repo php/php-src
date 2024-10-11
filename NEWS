@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- Curl:
+  . Added curl_multi_get_handles(). (timwolla)
+
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
 
