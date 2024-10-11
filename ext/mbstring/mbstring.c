@@ -2172,6 +2172,16 @@ PHP_FUNCTION(mb_substr)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (from == ZEND_LONG_MIN) {
+		zend_argument_value_error(2, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (ZEND_LONG_MIN + 1), ZEND_LONG_MAX);
+		RETURN_THROWS();
+	}
+
+	if (!len_is_null && len == ZEND_LONG_MIN) {
+		zend_argument_value_error(3, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (ZEND_LONG_MIN + 1), ZEND_LONG_MAX);
+		RETURN_THROWS();
+	}
+
 	string.encoding = php_mb_get_encoding(encoding, 4);
 	if (!string.encoding) {
 		RETURN_THROWS();
