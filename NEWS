@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
     curl_multi_add_handle fails). (timwolla)
+  . Fixed bug GH-16359 (crash with curl_setopt* CURLOPT_WRITEFUNCTION
+    without null callback). (David Carlier)
 
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
