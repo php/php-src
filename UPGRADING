@@ -116,6 +116,11 @@ PHP 8.5 UPGRADE NOTES
   PHP_RELEASE_VERSION are now always numbers.  Previously, they have been
   strings for buildconf builds.
 
+* FFI:
+  . It is no longer necessary to specify the library when using FFI::cdef()
+    and FFI::load(). However, this convenience feature should not be used in
+    production.
+
 ========================================
 13. Other Changes
 ========================================
