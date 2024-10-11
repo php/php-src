@@ -915,7 +915,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			}
 			if (EX(call)->func->type == ZEND_INTERNAL_FUNCTION) {
 				zend_function *func = EX(call)->func;
-				uint32_t info = 0;
 
 				if (func->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 					/* continue recording */
@@ -924,7 +923,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 					stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
 					break;
 				}
-				TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, info, func);
+				TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, 0, func);
 			}
 		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL
 				|| opline->opcode == ZEND_CALLABLE_CONVERT) {
