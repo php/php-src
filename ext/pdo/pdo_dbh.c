@@ -436,8 +436,16 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 
 		if (pdbh) {
 			efree(dbh);
+
+			pdo_dbh_object_t *pdo_obj;
+			if (new_zval_object) {
+				pdo_obj = Z_PDO_OBJECT_P(new_zval_object);
+			} else {
+				pdo_obj = php_pdo_dbh_fetch_object(current_object);
+			}
+
 			/* switch over to the persistent one */
-			php_pdo_dbh_fetch_object(current_object)->inner = pdbh;
+			pdo_obj->inner = pdbh;
 			pdbh->refcount++;
 			dbh = pdbh;
 		}
