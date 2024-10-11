@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
 
+- MBstring:
+  . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
+    (David Carlier)
+
 - PHPDBG:
   . Fixed bug GH-16174 (Empty string is an invalid expression for ev). (cmb)
 
