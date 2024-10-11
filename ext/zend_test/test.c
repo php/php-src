@@ -280,16 +280,39 @@ static ZEND_FUNCTION(zend_get_current_func_name)
 }
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
+
+/* This test relies on deprecated code to modify the global state of libxml.
+ * We cannot include the libxml header here as that would create a dependency on libxml from zend_test.
+ * On 8.2+ this uses ZEND_DIAGNOSTIC_IGNORED_START, but this doesn't exist on 8.1 */
+#if defined(__clang__)
+# define PHP_LIBXML_IGNORE_DEPRECATIONS_START \
+	_Pragma("clang diagnostic push") \
+	_Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+# define PHP_LIBXML_IGNORE_DEPRECATIONS_END \
+	_Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+# define PHP_LIBXML_IGNORE_DEPRECATIONS_START \
+	_Pragma("GCC diagnostic push") \
+	_Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+# define PHP_LIBXML_IGNORE_DEPRECATIONS_END \
+	_Pragma("GCC diagnostic pop")
+#else
+# define PHP_LIBXML_IGNORE_DEPRECATIONS_START
+# define PHP_LIBXML_IGNORE_DEPRECATIONS_END
+#endif
+
 static ZEND_FUNCTION(zend_test_override_libxml_global_state)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_LIBXML_IGNORE_DEPRECATIONS_START
 	xmlLoadExtDtdDefaultValue = 1;
 	xmlDoValidityCheckingDefaultValue = 1;
 	(void) xmlPedanticParserDefault(1);
 	(void) xmlSubstituteEntitiesDefault(1);
 	(void) xmlLineNumbersDefault(1);
 	(void) xmlKeepBlanksDefault(0);
+	PHP_LIBXML_IGNORE_DEPRECATIONS_END
 }
 #endif
 
