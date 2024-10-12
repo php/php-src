@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
     (David Carlier)
 
+- OpenSSL:
+  . Fixed bug GH-16357 (openssl may modify member types of certificate arrays).
+    (cmb)
+
 - PHPDBG:
   . Fixed bug GH-16174 (Empty string is an invalid expression for ev). (cmb)
 
