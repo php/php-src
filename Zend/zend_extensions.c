@@ -332,7 +332,13 @@ ZEND_API void zend_init_internal_run_time_cache(void) {
 		} ZEND_HASH_FOREACH_END();
 
 		size_t alloc_size = functions * rt_size;
+#ifndef ZTS
+		ZEND_IGNORE_LEAKS_BEGIN();
+#endif
 		char *ptr = pemalloc(alloc_size, 1);
+#ifndef ZTS
+		ZEND_IGNORE_LEAKS_END();
+#endif
 
 		CG(internal_run_time_cache) = ptr;
 		CG(internal_run_time_cache_size) = alloc_size;
