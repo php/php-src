@@ -2714,11 +2714,11 @@ PHP_FUNCTION(ldap_modify_batch)
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(modifications, modification_index, modification_zv) {
 		ldap_mods[modification_index] = safe_emalloc(1, sizeof(LDAPMod), 0);
 
-		zval *attrib_zv = zend_hash_str_find(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_ATTRIB, strlen(LDAP_MODIFY_BATCH_ATTRIB));
+		zval *attrib_zv = zend_hash_str_find_deref(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_ATTRIB, strlen(LDAP_MODIFY_BATCH_ATTRIB));
 		ZEND_ASSERT(Z_TYPE_P(attrib_zv) == IS_STRING);
-		zval *modtype_zv = zend_hash_str_find(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_MODTYPE, strlen(LDAP_MODIFY_BATCH_MODTYPE));
+		zval *modtype_zv = zend_hash_str_find_deref(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_MODTYPE, strlen(LDAP_MODIFY_BATCH_MODTYPE));
 		ZEND_ASSERT(Z_TYPE_P(modtype_zv) == IS_LONG);
-		zval *modification_values = zend_hash_str_find(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_VALUES, strlen(LDAP_MODIFY_BATCH_VALUES));
+		zval *modification_values = zend_hash_str_find_deref(Z_ARRVAL_P(modification_zv), LDAP_MODIFY_BATCH_VALUES, strlen(LDAP_MODIFY_BATCH_VALUES));
 		ZEND_ASSERT(modification_values == NULL || Z_TYPE_P(modification_values) == IS_ARRAY);
 
 		/* map the modification type */
