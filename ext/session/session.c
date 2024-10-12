@@ -1690,10 +1690,6 @@ PHP_FUNCTION(session_set_cookie_params)
 	zend_result result;
 	int found = 0;
 
-	if (!PS(use_cookies)) {
-		return;
-	}
-
 	ZEND_PARSE_PARAMETERS_START(1, 5)
 		Z_PARAM_ARRAY_HT_OR_LONG(options_ht, lifetime_long)
 		Z_PARAM_OPTIONAL
@@ -1702,6 +1698,11 @@ PHP_FUNCTION(session_set_cookie_params)
 		Z_PARAM_BOOL_OR_NULL(secure, secure_null)
 		Z_PARAM_BOOL_OR_NULL(httponly, httponly_null)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!PS(use_cookies)) {
+		php_error_docref(NULL, E_WARNING, "Session cookies cannot be used when session.use_cookies is disabled");
+		RETURN_FALSE;
+	}
 
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Session cookie parameters cannot be changed when a session is active");
