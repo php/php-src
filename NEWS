@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-16174 (Empty string is an invalid expression for ev). (cmb)
 
+- Session:
+  . Fixed bug GH-16385 (Unexpected null returned by session_set_cookie_params).
+    (nielsdos)
+
 - XMLReader:
   . Fixed bug GH-16292 (Segmentation fault in ext/xmlreader/php_xmlreader.c).
     (nielsdos)
