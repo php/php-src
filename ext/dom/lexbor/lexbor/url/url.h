@@ -371,6 +371,19 @@ LXB_API lxb_status_t
 lxb_url_serialize_fragment(const lxb_url_t *url,
                            lexbor_serialize_cb_f cb, void *ctx);
 
+/*
+ * Creates a clone of the object's URL.
+ *
+ * For lexbor_mraw_t *, use url->mraw or another lexbor_mraw_t * object.
+ *
+ * @param[in] lexbor_mraw_t *.
+ * @param[in] lxb_url_t *.
+ *
+ * @return a new URL object if successful, otherwise NULL value.
+ */
+LXB_API lxb_url_t *
+lxb_url_clone(lexbor_mraw_t *mraw, lxb_url_t *url);
+
 
 /*
  * Inline functions.

@@ -444,9 +444,18 @@ static zend_result parse_url_init_parser(void)
 	return SUCCESS;
 }
 
-static void parse_url_instantiate_uri(zval *zv)
+static zend_class_entry *parse_url_get_uri_ce(void)
 {
 	ZEND_UNREACHABLE();
+
+	return NULL;
+}
+
+static void *parse_url_clone_uri(void *uri_object_internal)
+{
+	ZEND_UNREACHABLE();
+
+	return NULL;
 }
 
 static void *parse_url_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors)
@@ -472,7 +481,8 @@ const uri_handler_t parse_url_uri_handler = {
 	"parse_url",
 	parse_url_init_parser,
 	parse_url_parse_uri,
-	parse_url_instantiate_uri,
+	parse_url_get_uri_ce,
+	parse_url_clone_uri,
 	parse_url_uri_to_string,
 	parse_url_free_uri,
 	parse_url_destroy_parser,

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e98dcd894d79251d1413c05721ea68ad4989934b */
+ * Stub hash: 20a7065d4fb21d878af78f4c21e36bdfd95b0656 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWgError___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, position, IS_STRING, 0)
@@ -20,20 +20,52 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_getScheme, 0, 0, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_withScheme, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Uri_Uri_getUser arginfo_class_Uri_Uri_getScheme
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_withUser, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Uri_getPassword arginfo_class_Uri_Uri_getScheme
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_withPassword, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Uri_Uri_getHost arginfo_class_Uri_Uri_getScheme
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_withHost, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_getPort, 0, 0, IS_LONG, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_withPort, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Uri_Uri_getPath arginfo_class_Uri_Uri_getScheme
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_withPath, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Uri_getQuery arginfo_class_Uri_Uri_getScheme
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_withQuery, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Uri_Uri_getFragment arginfo_class_Uri_Uri_getScheme
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri_withFragment, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, fragment, IS_STRING, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Uri___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -53,13 +85,21 @@ ZEND_METHOD(Uri_WhatWgError, __construct);
 ZEND_METHOD(Uri_Uri, fromRfc3986);
 ZEND_METHOD(Uri_Uri, fromWhatWg);
 ZEND_METHOD(Uri_Uri, getScheme);
+ZEND_METHOD(Uri_Uri, withScheme);
 ZEND_METHOD(Uri_Uri, getUser);
+ZEND_METHOD(Uri_Uri, withUser);
 ZEND_METHOD(Uri_Uri, getPassword);
+ZEND_METHOD(Uri_Uri, withPassword);
 ZEND_METHOD(Uri_Uri, getHost);
+ZEND_METHOD(Uri_Uri, withHost);
 ZEND_METHOD(Uri_Uri, getPort);
+ZEND_METHOD(Uri_Uri, withPort);
 ZEND_METHOD(Uri_Uri, getPath);
+ZEND_METHOD(Uri_Uri, withPath);
 ZEND_METHOD(Uri_Uri, getQuery);
+ZEND_METHOD(Uri_Uri, withQuery);
 ZEND_METHOD(Uri_Uri, getFragment);
+ZEND_METHOD(Uri_Uri, withFragment);
 ZEND_METHOD(Uri_Uri, __toString);
 ZEND_METHOD(Uri_Rfc3986Uri, __construct);
 ZEND_METHOD(Uri_WhatWgUri, __construct);
@@ -73,13 +113,21 @@ static const zend_function_entry class_Uri_Uri_methods[] = {
 	ZEND_ME(Uri_Uri, fromRfc3986, arginfo_class_Uri_Uri_fromRfc3986, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_Uri, fromWhatWg, arginfo_class_Uri_Uri_fromWhatWg, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_Uri, getScheme, arginfo_class_Uri_Uri_getScheme, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Uri, withScheme, arginfo_class_Uri_Uri_withScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Uri, getUser, arginfo_class_Uri_Uri_getUser, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Uri, withUser, arginfo_class_Uri_Uri_withUser, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Uri, getPassword, arginfo_class_Uri_Uri_getPassword, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Uri, withPassword, arginfo_class_Uri_Uri_withPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Uri, getHost, arginfo_class_Uri_Uri_getHost, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Uri, withHost, arginfo_class_Uri_Uri_withHost, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Uri, getPort, arginfo_class_Uri_Uri_getPort, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Uri, withPort, arginfo_class_Uri_Uri_withPort, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Uri, getPath, arginfo_class_Uri_Uri_getPath, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Uri, withPath, arginfo_class_Uri_Uri_withPath, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Uri, getQuery, arginfo_class_Uri_Uri_getQuery, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Uri, withQuery, arginfo_class_Uri_Uri_withQuery, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Uri, getFragment, arginfo_class_Uri_Uri_getFragment, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Uri, withFragment, arginfo_class_Uri_Uri_withFragment, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Uri, __toString, arginfo_class_Uri_Uri___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
@@ -300,15 +348,11 @@ static zend_class_entry *register_class_Uri_Uri(zend_class_entry *class_entry_Ur
 
 	zval property_scheme_default_value;
 	ZVAL_UNDEF(&property_scheme_default_value);
-	zend_string *property_scheme_name = zend_string_init("scheme", sizeof("scheme") - 1, 1);
-	zend_declare_typed_property(class_entry, property_scheme_name, &property_scheme_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_scheme_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_SCHEME), &property_scheme_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 	zval property_user_default_value;
 	ZVAL_UNDEF(&property_user_default_value);
-	zend_string *property_user_name = zend_string_init("user", sizeof("user") - 1, 1);
-	zend_declare_typed_property(class_entry, property_user_name, &property_user_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_user_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_USER), &property_user_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 	zval property_password_default_value;
 	ZVAL_UNDEF(&property_password_default_value);
@@ -318,33 +362,23 @@ static zend_class_entry *register_class_Uri_Uri(zend_class_entry *class_entry_Ur
 
 	zval property_host_default_value;
 	ZVAL_UNDEF(&property_host_default_value);
-	zend_string *property_host_name = zend_string_init("host", sizeof("host") - 1, 1);
-	zend_declare_typed_property(class_entry, property_host_name, &property_host_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_host_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_HOST), &property_host_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 	zval property_port_default_value;
 	ZVAL_UNDEF(&property_port_default_value);
-	zend_string *property_port_name = zend_string_init("port", sizeof("port") - 1, 1);
-	zend_declare_typed_property(class_entry, property_port_name, &property_port_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
-	zend_string_release(property_port_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PORT), &property_port_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
 
 	zval property_path_default_value;
 	ZVAL_UNDEF(&property_path_default_value);
-	zend_string *property_path_name = zend_string_init("path", sizeof("path") - 1, 1);
-	zend_declare_typed_property(class_entry, property_path_name, &property_path_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_path_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PATH), &property_path_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 	zval property_query_default_value;
 	ZVAL_UNDEF(&property_query_default_value);
-	zend_string *property_query_name = zend_string_init("query", sizeof("query") - 1, 1);
-	zend_declare_typed_property(class_entry, property_query_name, &property_query_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_query_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_QUERY), &property_query_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 	zval property_fragment_default_value;
 	ZVAL_UNDEF(&property_fragment_default_value);
-	zend_string *property_fragment_name = zend_string_init("fragment", sizeof("fragment") - 1, 1);
-	zend_declare_typed_property(class_entry, property_fragment_name, &property_fragment_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_fragment_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_FRAGMENT), &property_fragment_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 	return class_entry;
 }

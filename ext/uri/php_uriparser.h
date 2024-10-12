@@ -20,13 +20,6 @@
 #include <uriparser/Uri.h>
 #include <php_uri_common.h>
 
-zend_result uriparser_init_parser(void);
-void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_url_str, zval *errors);
-void uriparser_instantiate_uri(zval *zv);
-zend_string *uriparser_uri_to_string(void *uri_object_internal);
-void uriparser_free_uri(void *uri_object_internal);
-zend_result uriparser_destroy_parser(void);
-
 extern const uri_handler_t uriparser_uri_handler;
 
 #endif

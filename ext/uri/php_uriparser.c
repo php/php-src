@@ -19,13 +19,22 @@
 #include "php_uri_common.h"
 #include "Zend/zend_smart_str.h"
 
+static zend_result uriparser_init_parser(void);
+static void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors);
+static zend_class_entry *uriparser_get_uri_ce(void);
+static void *uriparser_clone_uri(void *uri_object_internal);
+static zend_string *uriparser_uri_to_string(void *uri_object_internal);
+static void uriparser_free_uri(void *uri_object_internal);
+static zend_result uriparser_destroy_parser(void);
+
 HashTable uriparser_property_handlers;
 
 const uri_handler_t uriparser_uri_handler = {
 	"rfc3986",
 	uriparser_init_parser,
 	uriparser_parse_uri,
-	uriparser_instantiate_uri,
+	uriparser_get_uri_ce,
+	uriparser_clone_uri,
 	uriparser_uri_to_string,
 	uriparser_free_uri,
 	uriparser_destroy_parser,
@@ -41,6 +50,13 @@ static zend_result uriparser_read_scheme(void *uri_object_internal, zval *retval
 	} else {
 		ZVAL_NULL(retval);
 	}
+
+	return SUCCESS;
+}
+
+static zend_result uriparser_write_scheme(void *uri_object_internal, zval *value)
+{
+	// UriUriA *uri = (UriUriA *) uri_object_internal;
 
 	return SUCCESS;
 }
@@ -63,6 +79,13 @@ static zend_result uriparser_read_user(void *uri_object_internal, zval *retval)
 	return SUCCESS;
 }
 
+static zend_result uriparser_write_user(void *uri_object_internal, zval *value)
+{
+	// UriUriA *uri = (UriUriA *) uri_object_internal;
+
+	return SUCCESS;
+}
+
 static zend_result uriparser_read_password(void *uri_object_internal, zval *retval)
 {
 	UriUriA *uri = (UriUriA *) uri_object_internal;
@@ -81,6 +104,13 @@ static zend_result uriparser_read_password(void *uri_object_internal, zval *retv
 	return SUCCESS;
 }
 
+static zend_result uriparser_write_password(void *uri_object_internal, zval *value)
+{
+	// UriUriA *uri = (UriUriA *) uri_object_internal;
+
+	return SUCCESS;
+}
+
 static zend_result uriparser_read_host(void *uri_object_internal, zval *retval)
 {
 	UriUriA *uri = (UriUriA *) uri_object_internal;
@@ -94,6 +124,13 @@ static zend_result uriparser_read_host(void *uri_object_internal, zval *retval)
 	return SUCCESS;
 }
 
+static zend_result uriparser_write_host(void *uri_object_internal, zval *value)
+{
+	// UriUriA *uri = (UriUriA *) uri_object_internal;
+
+	return SUCCESS;
+}
+
 static zend_result uriparser_read_port(void *uri_object_internal, zval *retval)
 {
 	UriUriA *uri = (UriUriA *) uri_object_internal;
@@ -103,6 +140,13 @@ static zend_result uriparser_read_port(void *uri_object_internal, zval *retval)
 	} else {
 		ZVAL_NULL(retval);
 	}
+
+	return SUCCESS;
+}
+
+static zend_result uriparser_write_port(void *uri_object_internal, zval *value)
+{
+	// UriUriA *uri = (UriUriA *) uri_object_internal;
 
 	return SUCCESS;
 }
@@ -130,6 +174,13 @@ static zend_result uriparser_read_path(void *uri_object_internal, zval *retval)
 	return SUCCESS;
 }
 
+static zend_result uriparser_write_path(void *uri_object_internal, zval *value)
+{
+	// UriUriA *uri = (UriUriA *) uri_object_internal;
+
+	return SUCCESS;
+}
+
 static zend_result uriparser_read_query(void *uri_object_internal, zval *retval)
 {
 	UriUriA *uri = (UriUriA *) uri_object_internal;
@@ -139,6 +190,13 @@ static zend_result uriparser_read_query(void *uri_object_internal, zval *retval)
 	} else {
 		ZVAL_NULL(retval);
 	}
+
+	return SUCCESS;
+}
+
+static zend_result uriparser_write_query(void *uri_object_internal, zval *value)
+{
+	// UriUriA *uri = (UriUriA *) uri_object_internal;
 
 	return SUCCESS;
 }
@@ -156,23 +214,30 @@ static zend_result uriparser_read_fragment(void *uri_object_internal, zval *retv
 	return SUCCESS;
 }
 
-zend_result uriparser_init_parser(void)
+static zend_result uriparser_write_fragment(void *uri_object_internal, zval *value)
 {
-	zend_hash_init(&uriparser_property_handlers, 0, NULL, NULL, true);
-
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), uriparser_read_scheme);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), uriparser_read_user);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PASSWORD), uriparser_read_password);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_HOST), uriparser_read_host);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PORT), uriparser_read_port);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PATH), uriparser_read_path);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_QUERY), uriparser_read_query);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_FRAGMENT), uriparser_read_fragment);
+	// UriUriA *uri = (UriUriA *) uri_object_internal;
 
 	return SUCCESS;
 }
 
-void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors)
+static zend_result uriparser_init_parser(void)
+{
+	zend_hash_init(&uriparser_property_handlers, 0, NULL, NULL, true);
+
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), uriparser_read_scheme, uriparser_write_scheme);
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), uriparser_read_user, uriparser_write_user);
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PASSWORD), uriparser_read_password, uriparser_write_password);
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_HOST), uriparser_read_host, uriparser_write_host);
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PORT), uriparser_read_port, uriparser_write_port);
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PATH), uriparser_read_path, uriparser_write_path);
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_QUERY), uriparser_read_query, uriparser_write_query);
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_FRAGMENT), uriparser_read_fragment, uriparser_write_fragment);
+
+	return SUCCESS;
+}
+
+static void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors)
 {
 	UriUriA *uri = emalloc(sizeof(UriUriA));
 
@@ -212,12 +277,22 @@ void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_ur
 	}
 }
 
-void uriparser_instantiate_uri(zval *zv)
+static zend_class_entry *uriparser_get_uri_ce(void)
 {
-	object_init_ex(zv, rfc3986_uri_ce);
+	return rfc3986_uri_ce;
 }
 
-zend_string *uriparser_uri_to_string(void *uri_object_internal)
+static void *uriparser_clone_uri(void *uri_object_internal)
+{
+	UriUriA *uri = (UriUriA *) uri_object_internal;
+
+	UriUriA *new_uri = ecalloc(1, sizeof(UriUriA));
+	memcpy(new_uri, uri, sizeof(UriUriA));
+
+	return new_uri;
+}
+
+static zend_string *uriparser_uri_to_string(void *uri_object_internal)
 {
 	UriUriA *uri = (UriUriA *) uri_object_internal;
 	int charsRequired;
@@ -236,7 +311,7 @@ zend_string *uriparser_uri_to_string(void *uri_object_internal)
 	return uri_string;
 }
 
-void uriparser_free_uri(void *uri_object_internal)
+static void uriparser_free_uri(void *uri_object_internal)
 {
 	UriUriA *uri = (UriUriA *) uri_object_internal;
 
@@ -244,7 +319,7 @@ void uriparser_free_uri(void *uri_object_internal)
 	efree(uri);
 }
 
-zend_result uriparser_destroy_parser(void)
+static zend_result uriparser_destroy_parser(void)
 {
 	zend_hash_destroy(&uriparser_property_handlers);
 

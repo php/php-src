@@ -36,6 +36,8 @@ zend_class_entry *whatwg_error_ce;
 
 static zend_array uri_handlers;
 
+static zend_object *uri_clone_obj_handler(zend_object *obj);
+
 ZEND_DECLARE_MODULE_GLOBALS(uri)
 
 static uri_handler_t *uri_handler_by_name(const zend_string *handler_name)
@@ -55,17 +57,83 @@ static uri_property_handler_t *uri_property_handler_from_uri_object(const uri_ob
 	return uri_property_handler_from_uri_handler(uri_object->handler, name);
 }
 
+#define URI_CHECK_INITIALIZATION_RETURN_THROWS(uri_object, object) do { \
+    ZEND_ASSERT(uri_object != NULL); \
+	if (UNEXPECTED(uri_object->uri == NULL)) { \
+        zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+    	RETURN_THROWS(); \
+    } \
+} while (0)
+
+#define URI_CHECK_INITIALIZATION_RETURN(uri_object, object, return_on_failure) do { \
+    ZEND_ASSERT(uri_object != NULL); \
+	if (UNEXPECTED(uri_object->uri == NULL)) { \
+        zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+    	return return_on_failure; \
+    } \
+} while (0)
+
+#define URI_CHECK_INITIALIZATION_RETURN_VOID(uri_object, object) do { \
+    ZEND_ASSERT(uri_object != NULL); \
+	if (UNEXPECTED(uri_object->uri == NULL)) { \
+        zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+    	return; \
+    } \
+} while (0)
+
 #define URI_GETTER(property_name) do { \
     ZEND_PARSE_PARAMETERS_NONE(); \
     uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS); \
-    ZEND_ASSERT(uri_object != NULL); \
-    if (uri_object->handler == NULL) { \
-        zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name)); \
-    	RETURN_THROWS(); \
-    } \
+    URI_CHECK_INITIALIZATION_RETURN_THROWS(uri_object, Z_OBJ_P(ZEND_THIS)); \
     const uri_property_handler_t *property_handler = uri_property_handler_from_uri_object(uri_object, property_name); \
     ZEND_ASSERT(property_handler != NULL); \
-    property_handler->read_func(uri_object->uri, return_value); \
+    if (property_handler->read_func(uri_object->uri, return_value) == FAILURE) { \
+    	zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
+    	RETURN_THROWS(); \
+    } \
+} while (0)
+
+#define URI_WITHER_COMMON(property_name, property_zv, return_value) \
+	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS); \
+    URI_CHECK_INITIALIZATION_RETURN_THROWS(uri_object, Z_OBJ_P(ZEND_THIS)); \
+    const uri_property_handler_t *property_handler = uri_property_handler_from_uri_object(uri_object, property_name); \
+    ZEND_ASSERT(property_handler != NULL); \
+    zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS)); \
+    uri_object_t *new_uri_object = uri_object_from_obj(new_object); \
+    URI_CHECK_INITIALIZATION_RETURN_THROWS(new_uri_object, Z_OBJ_P(ZEND_THIS)); \
+    if (property_handler->write_func == NULL || property_handler->write_func(new_uri_object->uri, property_zv) == FAILURE) { \
+        zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
+    	RETURN_THROWS(); \
+    } \
+	ZVAL_OBJ(return_value, new_object);
+
+#define URI_WITHER_STR(property_name) do { \
+    zend_string *value; \
+    ZEND_PARSE_PARAMETERS_START(1, 1) \
+    	Z_PARAM_STR_OR_NULL(value) \
+    ZEND_PARSE_PARAMETERS_END(); \
+	zval zv; \
+    if (value == NULL) { \
+    	ZVAL_NULL(&zv); \
+	} else { \
+        ZVAL_STR_COPY(&zv, value); \
+    } \
+	URI_WITHER_COMMON(property_name, &zv, return_value) \
+} while (0)
+
+#define URI_WITHER_LONG(property_name) do { \
+    zend_long value; \
+    bool value_is_null; \
+    ZEND_PARSE_PARAMETERS_START(1, 1) \
+    	Z_PARAM_LONG_OR_NULL(value, value_is_null) \
+    ZEND_PARSE_PARAMETERS_END(); \
+	zval zv; \
+    if (value_is_null) {\
+		ZVAL_NULL(&zv); \
+    } else { \
+     	ZVAL_LONG(&zv, value); \
+	} \
+	URI_WITHER_COMMON(property_name, &zv, return_value); \
 } while (0)
 
 PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *handler_name)
@@ -179,7 +247,7 @@ static void instantiate_uri(INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *h
 	const zend_string *uri_str, const zend_string *base_url_str, zval *errors, bool is_constructor
 ) {
 	void *uri = handler->parse_uri(uri_str, base_url_str, errors);
-	if (uri == NULL) {
+	if (UNEXPECTED(uri == NULL)) {
 		if (is_constructor) {
 			zend_argument_value_error(1, "must be a valid URI");
 			RETURN_THROWS();
@@ -189,7 +257,7 @@ static void instantiate_uri(INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *h
 	}
 
 	if (!is_constructor) {
-		handler->instantiate_uri(return_value);
+		object_init_ex(return_value, handler->get_uri_ce());
 	}
 
 	uri_object_t *uri_object = Z_URI_OBJECT_P(is_constructor ? ZEND_THIS : return_value);
@@ -260,9 +328,19 @@ PHP_METHOD(Uri_Uri, getScheme)
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_SCHEME));
 }
 
+PHP_METHOD(Uri_Uri, withScheme)
+{
+	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_SCHEME));
+}
+
 PHP_METHOD(Uri_Uri, getUser)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USER));
+}
+
+PHP_METHOD(Uri_Uri, withUser)
+{
+	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_USER));
 }
 
 PHP_METHOD(Uri_Uri, getPassword)
@@ -270,9 +348,19 @@ PHP_METHOD(Uri_Uri, getPassword)
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PASSWORD));
 }
 
+PHP_METHOD(Uri_Uri, withPassword)
+{
+	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_PASSWORD));
+}
+
 PHP_METHOD(Uri_Uri, getHost)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST));
+}
+
+PHP_METHOD(Uri_Uri, withHost)
+{
+	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_HOST));
 }
 
 PHP_METHOD(Uri_Uri, getPort)
@@ -280,9 +368,19 @@ PHP_METHOD(Uri_Uri, getPort)
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PORT));
 }
 
+PHP_METHOD(Uri_Uri, withPort)
+{
+	URI_WITHER_LONG(ZSTR_KNOWN(ZEND_STR_PORT));
+}
+
 PHP_METHOD(Uri_Uri, getPath)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PATH));
+}
+
+PHP_METHOD(Uri_Uri, withPath)
+{
+	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_PATH));
 }
 
 PHP_METHOD(Uri_Uri, getQuery)
@@ -290,9 +388,19 @@ PHP_METHOD(Uri_Uri, getQuery)
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_QUERY));
 }
 
+PHP_METHOD(Uri_Uri, withQuery)
+{
+	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_QUERY));
+}
+
 PHP_METHOD(Uri_Uri, getFragment)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_FRAGMENT));
+}
+
+PHP_METHOD(Uri_Uri, withFragment)
+{
+	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_FRAGMENT));
 }
 
 PHP_METHOD(Uri_Uri, __toString)
@@ -301,11 +409,7 @@ PHP_METHOD(Uri_Uri, __toString)
 
 	zend_object *this_obj = Z_OBJ_P(ZEND_THIS);
 	uri_object_t *uri_object = uri_object_from_obj(this_obj);
-	ZEND_ASSERT(uri_object != NULL);
-	if (UNEXPECTED(uri_object->handler == NULL)) {
-		zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(this_obj->ce->name));
-		RETURN_THROWS();
-	}
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(uri_object, this_obj);
 
 	RETURN_STR(uri_object->handler->uri_to_string(uri_object->uri));
 }
@@ -337,7 +441,7 @@ static void uri_free_obj_handler(zend_object *object)
 {
 	uri_object_t *uri_object = uri_object_from_obj(object);
 	ZEND_ASSERT(uri_object != NULL);
-	if (UNEXPECTED(uri_object->handler != NULL)) {
+	if (UNEXPECTED(uri_object->uri != NULL)) {
 		uri_object->handler->free_uri(uri_object->uri);
 		uri_object->handler = NULL;
 		uri_object->uri = NULL;
@@ -350,71 +454,142 @@ static int uri_has_property_handler(zend_object *object, zend_string *name, int 
 {
 	uri_object_t *uri_object = uri_object_from_obj(object);
 	ZEND_ASSERT(uri_object != NULL);
-	if (UNEXPECTED(uri_object->handler == NULL)) {
-		return 0;
+	if (UNEXPECTED(uri_object->uri == NULL)) {
+		if (check_empty == ZEND_PROPERTY_EXISTS) {
+			zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name));
+		}
+		return false;
 	}
 
-	bool retval = 0;
-
 	uri_property_handler_t *property_handler = zend_hash_find_ptr(uri_object->handler->property_handlers, name);
-	if (property_handler) {
-		zval tmp;
+	if (!property_handler) {
+		return zend_std_has_property(object, name, check_empty, cache_slot);
+	}
 
-		if (check_empty == 2) {
-			retval = 1;
-		} else if (property_handler->read_func(uri_object->uri, &tmp) == SUCCESS) {
-			if (check_empty == 1) {
-				retval = zend_is_true(&tmp);
-			} else if (check_empty == 0) {
-				retval = (Z_TYPE(tmp) != IS_NULL);
-			}
-			zval_ptr_dtor(&tmp);
-		}
+	if (check_empty == ZEND_PROPERTY_EXISTS) {
+		return true;
+	}
+
+	zval tmp;
+
+	if (property_handler->read_func(uri_object->uri, &tmp) == FAILURE) {
+		return false;
+	}
+
+	bool retval;
+
+	if (check_empty == ZEND_PROPERTY_NOT_EMPTY) {
+		retval = zend_is_true(&tmp);
+	} else if (check_empty == ZEND_PROPERTY_ISSET) {
+		retval = (Z_TYPE(tmp) != IS_NULL);
 	} else {
-		retval = zend_std_has_property(object, name, check_empty, cache_slot);
+		ZEND_UNREACHABLE();
+	}
+
+	zval_ptr_dtor(&tmp);
+
+	return retval;
+}
+
+static zval *uri_read_property_handler(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
+{
+	uri_object_t *uri_object = uri_object_from_obj(object);
+	URI_CHECK_INITIALIZATION_RETURN(uri_object, object, &EG(uninitialized_zval));
+
+	uri_property_handler_t *property_handler = uri_property_handler_from_uri_object(uri_object, name);
+	if (UNEXPECTED(property_handler == NULL)) {
+		return zend_std_read_property(object, name, type, cache_slot, rv);
+	}
+
+	zval *retval;
+	zend_result result = property_handler->read_func(uri_object->uri, rv);
+	if (result == SUCCESS) {
+		retval = rv;
+	} else {
+		retval = &EG(uninitialized_zval);
 	}
 
 	return retval;
 }
 
-static zval *uri_read_property_handler(zend_object *obj, zend_string *name, int type, void **cache_slot, zval *rv)
+static zval *uri_write_property_handler(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	zval *retval;
-	uri_object_t *uri_object = uri_object_from_obj(obj);
-	ZEND_ASSERT(uri_object != NULL);
-	if (UNEXPECTED(uri_object->handler == NULL)) {
-		zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(obj->ce->name));
+	uri_object_t *uri_object = uri_object_from_obj(object);
+	URI_CHECK_INITIALIZATION_RETURN(uri_object, object, &EG(uninitialized_zval));
+
+	uri_property_handler_t *property_handler = uri_property_handler_from_uri_object(uri_object, name);
+	if (UNEXPECTED(property_handler == NULL)) {
+		return zend_std_write_property(object, name, value, cache_slot);
+	}
+
+	if (UNEXPECTED(property_handler->write_func == NULL)) {
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 		return &EG(uninitialized_zval);
 	}
 
-	uri_property_handler_t *property_handler = uri_property_handler_from_uri_object(uri_object, name);
-	if (property_handler != NULL) {
-		zend_result result = property_handler->read_func(uri_object->uri, rv);
-		if (result == SUCCESS) {
-			retval = rv;
-		} else {
-			retval = &EG(uninitialized_zval);
-		}
-	} else {
-		retval = zend_std_read_property(obj, name, type, cache_slot, rv);
+	zval tmp;
+	ZVAL_COPY(&tmp, value);
+
+	// TODO: Check type
+
+	zend_result result = property_handler->write_func(uri_object->uri, &tmp);
+	zval_ptr_dtor(&tmp);
+	if (result == FAILURE) {
+		return &EG(uninitialized_zval);
 	}
 
-	return retval;
+	return value;
 }
 
-static zval *uri_get_property_ptr_ptr_handler(zend_object *obj, zend_string *name, int type, void **cache_slot)
+static zval *uri_get_property_ptr_ptr_handler(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
-	const uri_object_t *uri_object = uri_object_from_obj(obj);
-	ZEND_ASSERT(uri_object != NULL);
-	if (UNEXPECTED(uri_object->handler == NULL)) {
-		return NULL;
+	const uri_object_t *uri_object = uri_object_from_obj(object);
+	URI_CHECK_INITIALIZATION_RETURN(uri_object, object, NULL);
+
+	if (zend_hash_exists(uri_object->handler->property_handlers, name)) {
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		return &EG(error_zval);
 	}
 
-	if (!zend_hash_exists(uri_object->handler->property_handlers, name)) {
-		return zend_std_get_property_ptr_ptr(obj, name, type, cache_slot);
+	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+}
+
+static void uri_unset_property_handler(zend_object *object, zend_string *name, void **cache_slot)
+{
+	const uri_object_t *uri_object = uri_object_from_obj(object);
+	URI_CHECK_INITIALIZATION_RETURN_VOID(uri_object, object);
+
+	if (zend_hash_exists(uri_object->handler->property_handlers, name)) {
+		zend_throw_error(NULL, "Cannot unset readonly property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		return;
 	}
 
-	return NULL;
+	zend_std_unset_property(object, name, cache_slot);
+}
+
+static zend_object *uri_clone_obj_handler(zend_object *object)
+{
+	uri_object_t *uri_object = uri_object_from_obj(object);
+
+	zend_object *new_object = uri_create_object_handler(object->ce);
+	ZEND_ASSERT(new_object != NULL);
+	uri_object_t *new_uri_object = uri_object_from_obj(new_object);
+
+	URI_CHECK_INITIALIZATION_RETURN(uri_object, object, &new_uri_object->std);
+
+	new_uri_object->handler = uri_object->handler;
+
+	void *uri = uri_object->handler->clone_uri(uri_object->uri);
+	if (UNEXPECTED(uri == NULL)) {
+		zend_throw_error(NULL, "Failed to clone %s", ZSTR_VAL(object->ce->name));
+		return &new_uri_object->std;
+	}
+
+	new_uri_object->uri = uri;
+
+	zend_objects_clone_members(&new_uri_object->std, &uri_object->std);
+
+	return &new_uri_object->std;
 }
 
 static HashTable *uri_get_debug_info_handler(zend_object *obj, int *is_temp)
@@ -423,7 +598,7 @@ static HashTable *uri_get_debug_info_handler(zend_object *obj, int *is_temp)
 
 	uri_object_t *uri_object = uri_object_from_obj(obj);
 	ZEND_ASSERT(uri_object != NULL);
-	if (UNEXPECTED(uri_object->handler == NULL)) {
+	if (UNEXPECTED(uri_object->uri == NULL)) {
 		return NULL;
 	}
 
@@ -481,6 +656,9 @@ void uri_register_symbols(void)
 	uri_object_handlers.has_property = uri_has_property_handler;
 	uri_object_handlers.get_property_ptr_ptr = uri_get_property_ptr_ptr_handler;
 	uri_object_handlers.read_property = uri_read_property_handler;
+	uri_object_handlers.write_property = uri_write_property_handler;
+	uri_object_handlers.unset_property = uri_unset_property_handler;
+	uri_object_handlers.clone_obj = uri_clone_obj_handler;
 	uri_object_handlers.get_debug_info = uri_get_debug_info_handler;
 	uri_object_handlers.get_gc = uri_get_gc_handler;
 
@@ -497,7 +675,8 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler)
 	ZEND_ASSERT(uri_handler->name != NULL);
 	ZEND_ASSERT(uri_handler->init_parser != NULL);
 	ZEND_ASSERT(uri_handler->parse_uri != NULL);
-	ZEND_ASSERT(uri_handler->instantiate_uri != NULL);
+	ZEND_ASSERT(uri_handler->get_uri_ce != NULL);
+	ZEND_ASSERT(uri_handler->clone_uri != NULL);
 	ZEND_ASSERT(uri_handler->uri_to_string != NULL);
 	ZEND_ASSERT(uri_handler->free_uri != NULL);
 	ZEND_ASSERT(uri_handler->destroy_parser != NULL);

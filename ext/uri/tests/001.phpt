@@ -13,7 +13,7 @@ $t2 = hrtime(true);
 
 $t3 = hrtime(true);
 for ($i = 0; $i < 1000; $i++) {
-    \Uri\Uri::fromWhatWg("https://example.com");
+    \Uri\Uri::fromWhatWg("https://example.com/");
 }
 $t4 = hrtime(true);
 

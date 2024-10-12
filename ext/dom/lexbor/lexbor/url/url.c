@@ -4398,3 +4398,63 @@ lxb_url_serialize_fragment(const lxb_url_t *url,
 
     return LXB_STATUS_OK;
 }
+
+lxb_url_t *
+lxb_url_clone(lexbor_mraw_t *mraw, lxb_url_t *url)
+{
+	lxb_status_t status;
+	lxb_url_t *new_url;
+
+	new_url = lexbor_mraw_calloc(mraw, sizeof(lxb_url_t));
+	if (new_url == NULL) {
+		return NULL;
+	}
+
+	new_url->mraw = mraw;
+
+	status = lxb_url_scheme_copy(&url->scheme, &new_url->scheme, mraw);
+	if (status != LXB_STATUS_OK) {
+		goto failed;
+	}
+
+	status = lxb_url_username_copy(&url->username, &new_url->username, mraw);
+	if (status != LXB_STATUS_OK) {
+		goto failed;
+	}
+
+	status = lxb_url_password_copy(&url->password, &new_url->password, mraw);
+	if (status != LXB_STATUS_OK) {
+		goto failed;
+	}
+
+	status = lxb_url_host_copy(&url->host, &new_url->host, mraw);
+	if (status != LXB_STATUS_OK) {
+		goto failed;
+	}
+
+	new_url->port = url->port;
+	new_url->has_port = url->has_port;
+
+	status = lxb_url_path_copy(url, new_url);
+	if (status != LXB_STATUS_OK) {
+		goto failed;
+	}
+
+	status = lxb_url_query_copy(&url->query, &new_url->query, mraw);
+	if (status != LXB_STATUS_OK) {
+		goto failed;
+	}
+
+	status = lxb_url_str_copy(&url->fragment, &new_url->fragment, mraw);
+	if (status != LXB_STATUS_OK) {
+		goto failed;
+	}
+
+	return new_url;
+
+	failed:
+
+	lxb_url_destroy(new_url);
+
+	return NULL;
+}

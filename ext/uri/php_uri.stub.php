@@ -99,19 +99,35 @@ readonly abstract class Uri implements Stringable
 
     public function getScheme(): ?string {}
 
+    public function withScheme(?string $scheme): static {}
+
     public function getUser(): ?string {}
+
+    public function withUser(?string $user): static {}
 
     public function getPassword(): ?string {}
 
+    public function withPassword(?string $password): static {}
+
     public function getHost(): ?string {}
+
+    public function withHost(?string $host): static {}
 
     public function getPort(): ?int {}
 
+    public function withPort(?int $port): static {}
+
     public function getPath(): ?string {}
+
+    public function withPath(?string $path): static {}
 
     public function getQuery(): ?string {}
 
+    public function withQuery(?string $query): static {}
+
     public function getFragment(): ?string {}
+
+    public function withFragment(?string $fragment): static {}
 
     public function __toString(): string {}
 }

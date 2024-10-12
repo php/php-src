@@ -20,13 +20,6 @@
 #include <php_uri_common.h>
 #include <lexbor/url/url.h>
 
-zend_result lexbor_init_parser(void);
-void *lexbor_parse_uri(const zend_string *url_str, const zend_string *base_url_str, zval *errors);
-void lexbor_instantiate_uri(zval *zv);
-zend_string *lexbor_to_string(void *uri_object_internal);
-void lexbor_free_uri(void *uri_object_internal);
-zend_result lexbor_destroy_parser(void);
-
 extern const uri_handler_t lexbor_uri_handler;
 
 #endif
