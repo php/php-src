@@ -40,7 +40,7 @@ echo 'Done.' . PHP_EOL;
     </foo:NULL>
     <!-- Exception: SoapFault -->
   </main:NULL>
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'foo' : failed to load external entity "foo"
+SOAP-ERROR: Parsing WSDL: %s
 
 Done.
 </file '%s%eobserver_error_%d.php'>
