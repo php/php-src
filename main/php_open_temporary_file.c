@@ -131,8 +131,9 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 
 	new_state.cwd = estrdup(cwd);
 	new_state.cwd_length = strlen(cwd);
+	size_t path_length = strlen(path);
 
-	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
+	if (virtual_file_ex(&new_state, path, path_length, NULL, CWD_REALPATH)) {
 		efree(new_state.cwd);
 		return -1;
 	}

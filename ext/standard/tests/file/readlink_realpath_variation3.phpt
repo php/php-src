@@ -4,49 +4,34 @@ Test readlink() and realpath() functions: usage variation - invalid args
 <?php
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
 
-echo "\n*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***\n";
-$link_string = array (
-  /* linkname as spaces */
-  " ",
-  ' ',
+echo "\n*** Testing readlink() and realpath() with link name as empty string, NULL and single space ***\n";
 
-  /* empty linkname */
-  "",
-  '',
- );
-for($loop_counter = 0; $loop_counter < count($link_string); $loop_counter++) {
-  echo "-- Iteration";
-  echo $loop_counter + 1;
-  echo " --\n";
+echo 'readlink with link as spaces', PHP_EOL;
+var_dump(readlink(' '));
+echo 'realpath with link as spaces', PHP_EOL;
+var_dump(realpath(' '));
 
-  var_dump( readlink($link_string[$loop_counter]) );
-  var_dump( realpath($link_string[$loop_counter]) );
-}
+echo 'readlink with link as empty string', PHP_EOL;
+var_dump(readlink(''));
+echo 'realpath with link as empty string', PHP_EOL;
+var_dump(realpath(''));
 
 echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing readlink() and realpath() : usage variations ***
 
-*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***
--- Iteration1 --
+*** Testing readlink() and realpath() with link name as empty string, NULL and single space ***
+readlink with link as spaces
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
-%s
--- Iteration2 --
+realpath with link as spaces
+bool(false)
+readlink with link as empty string
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
-%s
--- Iteration3 --
-
-Warning: readlink(): %s in %s on line %d
-bool(false)
-string(%d) "%s"
--- Iteration4 --
-
-Warning: readlink(): %s in %s on line %d
-bool(false)
+realpath with link as empty string
 string(%d) "%s"
 Done

@@ -662,7 +662,7 @@ free_resource:
 /**
  * Unlink a file within a phar archive
  */
-static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
+static bool phar_wrapper_unlink(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context) /* {{{ */
 {
 	php_url *resource;
 	char *internal_file, *error;
@@ -670,22 +670,22 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	phar_entry_data *idata;
 	phar_archive_data *pphar;
 
-	if ((resource = phar_parse_url(wrapper, url, "rb", options)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, ZSTR_VAL(url), "rb", options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: unlink failed");
-		return 0;
+		return false;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\"", url);
-		return 0;
+		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\"", ZSTR_VAL(url));
+		return false;
 	}
 
 	if (!zend_string_equals_literal_ci(resource->scheme, "phar")) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", url);
-		return 0;
+		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", ZSTR_VAL(url));
+		return false;
 	}
 
 	phar_request_initialize();
@@ -703,14 +703,14 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	if (FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, internal_file_len, "r", 0, &error, 1)) {
 		/* constraints of fp refcount were not met */
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed: %s", url, error);
+			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed: %s", ZSTR_VAL(url), error);
 			efree(error);
 		} else {
-			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed, file does not exist", url);
+			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed, file does not exist", ZSTR_VAL(url));
 		}
 		efree(internal_file);
 		php_url_free(resource);
-		return 0;
+		return false;
 	}
 	if (error) {
 		efree(error);
@@ -721,7 +721,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		efree(internal_file);
 		php_url_free(resource);
 		phar_entry_delref(idata);
-		return 0;
+		return false;
 	}
 	php_url_free(resource);
 	efree(internal_file);
@@ -730,11 +730,11 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		php_stream_wrapper_log_error(wrapper, options, "%s", error);
 		efree(error);
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context) /* {{{ */
+static bool phar_wrapper_rename(php_stream_wrapper *wrapper, const zend_string *url_from, const zend_string *url_to, int options, php_stream_context *context) /* {{{ */
 {
 	php_url *resource_from, *resource_to;
 	char *error;
@@ -745,8 +745,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 	error = NULL;
 
-	if ((resource_from = phar_parse_url(wrapper, url_from, "wb", options|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_from);
+	if ((resource_from = phar_parse_url(wrapper, ZSTR_VAL(url_from), "wb", options|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", ZSTR_VAL(url_from), ZSTR_VAL(url_to), ZSTR_VAL(url_from));
 		return 0;
 	}
 	if (SUCCESS != phar_get_archive(&pfrom, ZSTR_VAL(resource_from->host), ZSTR_LEN(resource_from->host), NULL, 0, &error)) {
@@ -761,9 +761,9 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		return 0;
 	}
 
-	if ((resource_to = phar_parse_url(wrapper, url_to, "wb", options|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
+	if ((resource_to = phar_parse_url(wrapper, ZSTR_VAL(url_to), "wb", options|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
 		php_url_free(resource_from);
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_to);
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", ZSTR_VAL(url_from), ZSTR_VAL(url_to), ZSTR_VAL(url_to));
 		return 0;
 	}
 	if (SUCCESS != phar_get_archive(&pto, ZSTR_VAL(resource_to->host), ZSTR_LEN(resource_to->host), NULL, 0, &error)) {
@@ -782,7 +782,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	if (!zend_string_equals(resource_from->host, resource_to->host)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\", not within the same phar archive", url_from, url_to);
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\", not within the same phar archive", ZSTR_VAL(url_from), ZSTR_VAL(url_to));
 		return 0;
 	}
 
@@ -790,35 +790,35 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	if (!resource_from->scheme || !resource_from->host || !resource_from->path) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_from);
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", ZSTR_VAL(url_from), ZSTR_VAL(url_to), ZSTR_VAL(url_from));
 		return 0;
 	}
 
 	if (!resource_to->scheme || !resource_to->host || !resource_to->path) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_to);
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", ZSTR_VAL(url_from), ZSTR_VAL(url_to), ZSTR_VAL(url_to));
 		return 0;
 	}
 
 	if (!zend_string_equals_literal_ci(resource_from->scheme, "phar")) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", url_from, url_to, url_from);
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", ZSTR_VAL(url_from), ZSTR_VAL(url_to), ZSTR_VAL(url_from));
 		return 0;
 	}
 
 	if (!zend_string_equals_literal_ci(resource_to->scheme, "phar")) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", url_from, url_to, url_to);
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", ZSTR_VAL(url_from), ZSTR_VAL(url_to), ZSTR_VAL(url_to));
 		return 0;
 	}
 
 	if (SUCCESS != phar_get_archive(&phar, ZSTR_VAL(resource_from->host), ZSTR_LEN(resource_from->host), NULL, 0, &error)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", ZSTR_VAL(url_from), ZSTR_VAL(url_to), error);
 		efree(error);
 		return 0;
 	}
@@ -826,7 +826,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": could not make cached phar writeable", url_from, url_to);
+		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": could not make cached phar writeable", ZSTR_VAL(url_from), ZSTR_VAL(url_to));
 		return 0;
 	}
 
@@ -837,7 +837,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		if (entry->is_deleted) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);
-			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source has been deleted", url_from, url_to);
+			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source has been deleted", ZSTR_VAL(url_from), ZSTR_VAL(url_to));
 			return 0;
 		}
 		/* transfer all data over to the new entry */
@@ -857,7 +857,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		if (FAILURE == phar_copy_entry_fp(source, entry, &error)) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);
-			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", ZSTR_VAL(url_from), ZSTR_VAL(url_to), error);
 			efree(error);
 			zend_hash_str_del(&(phar->manifest), entry->filename, strlen(entry->filename));
 			return 0;
@@ -872,7 +872,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 			/* file does not exist */
 			php_url_free(resource_from);
 			php_url_free(resource_to);
-			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source does not exist", url_from, url_to);
+			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source does not exist", ZSTR_VAL(url_from), ZSTR_VAL(url_to));
 			return 0;
 
 		}
@@ -953,7 +953,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		if (error) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);
-			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", ZSTR_VAL(url_from), ZSTR_VAL(url_to), error);
 			efree(error);
 			return 0;
 		}

@@ -509,7 +509,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 		}
 		if (data->temp_name) {
 #ifdef PHP_WIN32
-			php_win32_ioutil_unlink(ZSTR_VAL(data->temp_name));
+			php_win32_ioutil_unlink(ZSTR_VAL(data->temp_name), ZSTR_LEN(data->temp_name));
 #else
 			unlink(ZSTR_VAL(data->temp_name));
 #endif
@@ -1240,66 +1240,69 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, const char *u
 		return VCWD_STAT(url, &ssb->sb);
 }
 
-static int php_plain_files_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
+static bool php_plain_files_unlink(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context)
 {
-	int ret;
-
-	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
-		url += sizeof("file://") - 1;
+	const char *url_ptr = ZSTR_VAL(url);
+	size_t url_len = ZSTR_LEN(url);
+	if (zend_string_starts_with_literal_ci(url, "file://")) {
+		url_ptr += strlen("file://");
+		url_len -= strlen("file://");
 	}
 
-	if (php_check_open_basedir(url)) {
-		return 0;
+	if (php_check_open_basedir(ZSTR_VAL(url))) {
+		return false;
 	}
 
-	ret = VCWD_UNLINK(url);
-	if (ret == -1) {
+	zend_result ret = VCWD_UNLINK(url_ptr, url_len);
+	if (ret == FAILURE) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref1(NULL, url, E_WARNING, "%s", strerror(errno));
+			php_error_docref1(NULL, ZSTR_VAL(url), E_WARNING, "%s", strerror(errno));
 		}
-		return 0;
+		return false;
 	}
 
 	/* Clear stat cache (and realpath cache) */
 	php_clear_stat_cache(1, NULL, 0);
 
-	return 1;
+	return true;
 }
 
-static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context)
+static bool php_plain_files_rename(php_stream_wrapper *wrapper, const zend_string *url_from, const zend_string *url_to, int options, php_stream_context *context)
 {
-	int ret;
-
 	if (!url_from || !url_to) {
-		return 0;
+		return false;
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
-		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
-		return 0;
+	if (!php_win32_check_trailing_space(ZSTR_VAL(url_from), ZSTR_LEN(url_from))) {
+		php_win32_docref2_from_error(ERROR_INVALID_NAME, ZSTR_VAL(url_from), ZSTR_VAL(url_to));
+		return false;
 	}
-	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
-		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
-		return 0;
+	if (!php_win32_check_trailing_space(ZSTR_VAL(url_to), ZSTR_LEN(url_to))) {
+		php_win32_docref2_from_error(ERROR_INVALID_NAME, ZSTR_VAL(url_from), ZSTR_VAL(url_to));
+		return false;
 	}
 #endif
 
-	if (strncasecmp(url_from, "file://", sizeof("file://") - 1) == 0) {
-		url_from += sizeof("file://") - 1;
+	const char *url_from_ptr = ZSTR_VAL(url_from);
+	size_t url_from_len = ZSTR_LEN(url_from);
+	if (zend_string_starts_with_literal_ci(url_from, "file://")) {
+		url_from_ptr += strlen("file://");
+		url_from_len -= strlen("file://");
 	}
 
-	if (strncasecmp(url_to, "file://", sizeof("file://") - 1) == 0) {
-		url_to += sizeof("file://") - 1;
+	const char *url_to_ptr = ZSTR_VAL(url_to);
+	size_t url_to_len = ZSTR_LEN(url_to);
+	if (zend_string_starts_with_literal_ci(url_to, "file://")) {
+		url_to_ptr += strlen("file://");
+		url_to_len -= strlen("file://");
 	}
 
-	if (php_check_open_basedir(url_from) || php_check_open_basedir(url_to)) {
-		return 0;
+	if (php_check_open_basedir(url_from_ptr) || php_check_open_basedir(url_to_ptr)) {
+		return false;
 	}
 
-	ret = VCWD_RENAME(url_from, url_to);
-
-	if (ret == -1) {
+	if (VCWD_RENAME(url_from_ptr, url_from_len, url_to_ptr, url_to_len) == FAILURE) {
 #ifndef PHP_WIN32
 # ifdef EXDEV
 		if (errno == EXDEV) {
@@ -1308,10 +1311,10 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 			/* not sure what to do in ZTS case, umask is not thread-safe */
 			int oldmask = umask(077);
 # endif
-			int success = 0;
-			if (php_copy_file(url_from, url_to) == SUCCESS) {
-				if (VCWD_STAT(url_from, &sb) == 0) {
-					success = 1;
+			bool success = false;
+			if (php_copy_file(url_from_ptr, url_to_ptr) == SUCCESS) {
+				if (VCWD_STAT(url_from_ptr, &sb) == 0) {
+					success = true;
 #  ifndef TSRM_WIN32
 					/*
 					 * Try to set user and permission info on the target.
@@ -1320,30 +1323,30 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 					 * on the system environment to have proper umask to not allow
 					 * access to the file in the meantime.
 					 */
-					if (VCWD_CHOWN(url_to, sb.st_uid, sb.st_gid)) {
-						php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+					if (VCWD_CHOWN(url_to_ptr, sb.st_uid, sb.st_gid)) {
+						php_error_docref2(NULL, ZSTR_VAL(url_from), ZSTR_VAL(url_to), E_WARNING, "%s", strerror(errno));
 						if (errno != EPERM) {
-							success = 0;
+							success = false;
 						}
 					}
 
 					if (success) {
-						if (VCWD_CHMOD(url_to, sb.st_mode)) {
-							php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+						if (VCWD_CHMOD(url_to_ptr, sb.st_mode)) {
+							php_error_docref2(NULL, ZSTR_VAL(url_from), ZSTR_VAL(url_to), E_WARNING, "%s", strerror(errno));
 							if (errno != EPERM) {
-								success = 0;
+								success = false;
 							}
 						}
 					}
 #  endif
 					if (success) {
-						VCWD_UNLINK(url_from);
+						VCWD_UNLINK(url_from_ptr, url_from_len);
 					}
 				} else {
-					php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+					php_error_docref2(NULL, ZSTR_VAL(url_from), ZSTR_VAL(url_to), E_WARNING, "%s", strerror(errno));
 				}
 			} else {
-				php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+				php_error_docref2(NULL, ZSTR_VAL(url_from), ZSTR_VAL(url_to), E_WARNING, "%s", strerror(errno));
 			}
 #  if !defined(ZTS) && !defined(TSRM_WIN32)
 			umask(oldmask);
@@ -1354,17 +1357,17 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 #endif
 
 #ifdef PHP_WIN32
-		php_win32_docref2_from_error(GetLastError(), url_from, url_to);
+		php_win32_docref2_from_error(GetLastError(), ZSTR_VAL(url_from), ZSTR_VAL(url_to));
 #else
-		php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+		php_error_docref2(NULL, ZSTR_VAL(url_from), ZSTR_VAL(url_to), E_WARNING, "%s", strerror(errno));
 #endif
-		return 0;
+		return false;
 	}
 
 	/* Clear stat cache (and realpath cache) */
 	php_clear_stat_cache(1, NULL, 0);
 
-	return 1;
+	return true;
 }
 
 static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, int mode, int options, php_stream_context *context)
@@ -1469,32 +1472,35 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	}
 }
 
-static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
+static bool php_plain_files_rmdir(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context)
 {
-	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
-		url += sizeof("file://") - 1;
+	const char *url_ptr = ZSTR_VAL(url);
+	size_t url_len = ZSTR_LEN(url);
+	if (zend_string_starts_with_literal_ci(url, "file://")) {
+		url_ptr += strlen("file://");
+		url_len -= strlen("file://");
 	}
 
-	if (php_check_open_basedir(url)) {
-		return 0;
+	if (php_check_open_basedir(url_ptr)) {
+		return false;
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url, strlen(url))) {
-		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(ENOENT));
-		return 0;
+	if (!php_win32_check_trailing_space(url_ptr, url_len)) {
+		php_error_docref1(NULL, ZSTR_VAL(url), E_WARNING, "%s", strerror(ENOENT));
+		return false;
 	}
 #endif
 
-	if (VCWD_RMDIR(url) < 0) {
-		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(errno));
-		return 0;
+	if (VCWD_RMDIR(url_ptr, url_len) < 0) {
+		php_error_docref1(NULL, ZSTR_VAL(url), E_WARNING, "%s", strerror(errno));
+		return false;
 	}
 
 	/* Clear stat cache (and realpath cache) */
-	php_clear_stat_cache(1, NULL, 0);
+	php_clear_stat_cache(true, NULL, 0);
 
-	return 1;
+	return true;
 }
 
 static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context)

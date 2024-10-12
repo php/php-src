@@ -8,12 +8,12 @@ $file_path = __DIR__;
 require("file.inc");
 
 /* create temp directory */
-mkdir("$file_path/lstat_stat_variation1/");  // temp dir
+mkdir("$file_path/lstat_stat_variation2/");  // temp dir
 
 // renaming a directory and check stat
 echo "*** Testing stat() for directory after being renamed ***\n";
-$old_dirname = "$file_path/lstat_stat_variation1";
-$new_dirname = "$file_path/lstat_stat_variation1a";
+$old_dirname = "$file_path/lstat_stat_variation2";
+$new_dirname = "$file_path/lstat_stat_variation2a";
 $old_stat = stat($old_dirname);
 clearstatcache();
 var_dump( rename($old_dirname, $new_dirname) );
@@ -36,7 +36,8 @@ echo "\n--- Done ---";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-rmdir("$file_path/lstat_stat_variation1a");
+@rmdir("$file_path/lstat_stat_variation2");
+@rmdir("$file_path/lstat_stat_variation2a");
 ?>
 --EXPECT--
 *** Testing stat() for directory after being renamed ***

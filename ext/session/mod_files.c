@@ -315,12 +315,13 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 				memcpy(buf + ZSTR_LEN(dirname) + 1, entry->d_name, entry_len);
 
 				/* NUL terminate it and */
-				buf[ZSTR_LEN(dirname) + entry_len + 1] = '\0';
+				size_t buf_len = ZSTR_LEN(dirname) + entry_len + 1;
+				buf[buf_len] = '\0';
 
 				/* check whether its last access was more than maxlifetime ago */
 				if (VCWD_STAT(buf, &sbuf) == 0 &&
 						(now - sbuf.st_mtime) > maxlifetime) {
-					VCWD_UNLINK(buf);
+					VCWD_UNLINK(buf, buf_len);
 					nrdels++;
 				}
 			}
@@ -602,7 +603,8 @@ PS_DESTROY_FUNC(files)
 	if (data->fd != -1) {
 		ps_files_close(data);
 
-		if (VCWD_UNLINK(buf) == -1) {
+		size_t buf_len = strlen(buf);
+		if (VCWD_UNLINK(buf, buf_len) == FAILURE) {
 			/* This is a little safety check for instances when we are dealing with a regenerated session
 			 * that was not yet written to disk. */
 			if (!VCWD_ACCESS(buf, F_OK)) {

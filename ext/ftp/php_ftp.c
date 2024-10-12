@@ -682,11 +682,12 @@ PHP_FUNCTION(ftp_get)
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	php_stream	*outstream;
-	char		*local, *remote;
-	size_t		local_len, remote_len;
+	zend_string *local;
+	char *remote;
+	size_t remote_len;
 	zend_long		mode=FTPTYPE_IMAGE, resumepos=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opp|ll", &z_ftp, php_ftp_ce, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OPp|ll", &z_ftp, php_ftp_ce, &local, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_FTPBUF(ftp, z_ftp);
@@ -702,9 +703,9 @@ PHP_FUNCTION(ftp_get)
 #endif
 
 	if (ftp->autoseek && resumepos) {
-		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt+" : "rb+", REPORT_ERRORS, NULL);
+		outstream = php_stream_open_wrapper(ZSTR_VAL(local), mode == FTPTYPE_ASCII ? "rt+" : "rb+", REPORT_ERRORS, NULL);
 		if (outstream == NULL) {
-			outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
+			outstream = php_stream_open_wrapper(ZSTR_VAL(local), mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
 		}
 		if (outstream != NULL) {
 			/* if autoresume is wanted seek to end */
@@ -716,17 +717,17 @@ PHP_FUNCTION(ftp_get)
 			}
 		}
 	} else {
-		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
+		outstream = php_stream_open_wrapper(ZSTR_VAL(local), mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
 	}
 
 	if (outstream == NULL)	{
-		php_error_docref(NULL, E_WARNING, "Error opening %s", local);
+		php_error_docref(NULL, E_WARNING, "Error opening %s", ZSTR_VAL(local));
 		RETURN_FALSE;
 	}
 
 	if (!ftp_get(ftp, outstream, remote, remote_len, xtype, resumepos)) {
 		php_stream_close(outstream);
-		VCWD_UNLINK(local);
+		VCWD_UNLINK(ZSTR_VAL(local), ZSTR_LEN(local));
 		if (*ftp->inbuf) {
 			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		}
@@ -745,12 +746,13 @@ PHP_FUNCTION(ftp_nb_get)
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	php_stream	*outstream;
-	char		*local, *remote;
-	size_t		local_len, remote_len;
+	zend_string *local;
+	char *remote;
+	size_t remote_len;
 	int ret;
 	zend_long		mode=FTPTYPE_IMAGE, resumepos=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oss|ll", &z_ftp, php_ftp_ce, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OSs|ll", &z_ftp, php_ftp_ce, &local, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_FTPBUF(ftp, z_ftp);
@@ -764,9 +766,9 @@ PHP_FUNCTION(ftp_nb_get)
 	mode = FTPTYPE_IMAGE;
 #endif
 	if (ftp->autoseek && resumepos) {
-		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt+" : "rb+", REPORT_ERRORS, NULL);
+		outstream = php_stream_open_wrapper(ZSTR_VAL(local), mode == FTPTYPE_ASCII ? "rt+" : "rb+", REPORT_ERRORS, NULL);
 		if (outstream == NULL) {
-			outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
+			outstream = php_stream_open_wrapper(ZSTR_VAL(local), mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
 		}
 		if (outstream != NULL) {
 			/* if autoresume is wanted seek to end */
@@ -778,11 +780,11 @@ PHP_FUNCTION(ftp_nb_get)
 			}
 		}
 	} else {
-		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
+		outstream = php_stream_open_wrapper(ZSTR_VAL(local), mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
 	}
 
 	if (outstream == NULL)	{
-		php_error_docref(NULL, E_WARNING, "Error opening %s", local);
+		php_error_docref(NULL, E_WARNING, "Error opening %s", ZSTR_VAL(local));
 		RETURN_FALSE;
 	}
 
@@ -793,7 +795,7 @@ PHP_FUNCTION(ftp_nb_get)
 	if ((ret = ftp_nb_get(ftp, outstream, remote, remote_len, xtype, resumepos)) == PHP_FTP_FAILED) {
 		php_stream_close(outstream);
 		ftp->stream = NULL;
-		VCWD_UNLINK(local);
+		VCWD_UNLINK(ZSTR_VAL(local), ZSTR_LEN(local));
 		if (*ftp->inbuf) {
 			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
 		}
