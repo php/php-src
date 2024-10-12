@@ -1402,7 +1402,8 @@ PHP_FUNCTION(socket_recvfrom)
 
 	/* overflow check */
 	/* Shouldthrow ? */
-	if ((arg3 + 2) < 3) {
+
+	if (arg3 <= 0 || arg3 > ZEND_LONG_MAX - 1) {
 		RETURN_FALSE;
 	}
 
