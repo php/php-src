@@ -32,6 +32,7 @@
 #define PTR_HEAP_BLOCK_SIZE 64
 
 #define SPL_HEAP_CORRUPTED       0x00000001
+#define SPL_HEAP_WRITE_LOCKED    0x00000002
 
 zend_object_handlers spl_handler_SplHeap;
 zend_object_handlers spl_handler_SplPriorityQueue;
@@ -278,11 +279,15 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userda
 		heap->max_size *= 2;
 	}
 
+	heap->flags |= SPL_HEAP_WRITE_LOCKED;
+
 	/* sifting up */
 	for (i = heap->count; i > 0 && heap->cmp(spl_heap_elem(heap, (i-1)/2), elem, cmp_userdata) < 0; i = (i-1)/2) {
 		spl_heap_elem_copy(heap, spl_heap_elem(heap, i), spl_heap_elem(heap, (i-1)/2));
 	}
 	heap->count++;
+
+	heap->flags &= ~SPL_HEAP_WRITE_LOCKED;
 
 	if (EG(exception)) {
 		/* exception thrown during comparison */
@@ -311,6 +316,8 @@ static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void 
 		return FAILURE;
 	}
 
+	heap->flags |= SPL_HEAP_WRITE_LOCKED;
+
 	if (elem) {
 		spl_heap_elem_copy(heap, elem, spl_heap_elem(heap, 0));
 	} else {
@@ -333,6 +340,8 @@ static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void 
 			break;
 		}
 	}
+
+	heap->flags &= ~SPL_HEAP_WRITE_LOCKED;
 
 	if (EG(exception)) {
 		/* exception thrown during comparison */
@@ -379,9 +388,13 @@ static void spl_ptr_heap_destroy(spl_ptr_heap *heap) { /* {{{ */
 
 	int i;
 
+	heap->flags |= SPL_HEAP_WRITE_LOCKED;
+
 	for (i = 0; i < heap->count; ++i) {
 		heap->dtor(spl_heap_elem(heap, i));
 	}
+
+	heap->flags &= ~SPL_HEAP_WRITE_LOCKED;
 
 	efree(heap->elements);
 	efree(heap);
@@ -601,6 +614,21 @@ PHP_METHOD(SplHeap, isEmpty)
 }
 /* }}} */
 
+static zend_result spl_heap_consistency_validations(const spl_heap_object *intern, bool write)
+{
+	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+		return FAILURE;
+	}
+
+	if (write && (intern->heap->flags & SPL_HEAP_WRITE_LOCKED)) {
+		zend_throw_exception(spl_ce_RuntimeException, "Heap cannot be changed when it is already being modified.", 0);
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 /* {{{ Push $value on the heap */
 PHP_METHOD(SplHeap, insert)
 {
@@ -613,8 +641,7 @@ PHP_METHOD(SplHeap, insert)
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
-	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, true) != SUCCESS)) {
 		RETURN_THROWS();
 	}
 
@@ -636,8 +663,7 @@ PHP_METHOD(SplHeap, extract)
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
-	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, true) != SUCCESS)) {
 		RETURN_THROWS();
 	}
 
@@ -662,8 +688,7 @@ PHP_METHOD(SplPriorityQueue, insert)
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
-	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, true) != SUCCESS)) {
 		RETURN_THROWS();
 	}
 
@@ -703,8 +728,7 @@ PHP_METHOD(SplPriorityQueue, extract)
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
-	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, true) != SUCCESS)) {
 		RETURN_THROWS();
 	}
 
@@ -730,8 +754,7 @@ PHP_METHOD(SplPriorityQueue, top)
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
-	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, false) != SUCCESS)) {
 		RETURN_THROWS();
 	}
 
@@ -841,8 +864,7 @@ PHP_METHOD(SplHeap, top)
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
-	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, false) != SUCCESS)) {
 		RETURN_THROWS();
 	}
 
@@ -906,8 +928,7 @@ static zval *spl_heap_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 
-	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(object, false) != SUCCESS)) {
 		return NULL;
 	}
 
@@ -924,8 +945,7 @@ static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter) /* {{{ *
 	zend_user_iterator *user_it = (zend_user_iterator *) iter;
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 
-	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(object, false) != SUCCESS)) {
 		return NULL;
 	}
 
@@ -953,8 +973,7 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 
-	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
+	if (UNEXPECTED(spl_heap_consistency_validations(object, false) != SUCCESS)) {
 		return;
 	}
 
