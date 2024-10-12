@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
+  . Add missing hierarchy checks to replaceChild. (nielsdos)
 
 - GD:
   . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
@@ -33,6 +34,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug GH-16385 (Unexpected null returned by session_set_cookie_params).
     (nielsdos)
+
+- SPL:
+  . Fixed bug GH-16337 (Use-after-free in SplHeap). (nielsdos)
 
 - XMLReader:
   . Fixed bug GH-16292 (Segmentation fault in ext/xmlreader/php_xmlreader.c).
