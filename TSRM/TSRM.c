@@ -65,6 +65,8 @@ static MUTEX_T tsrm_env_mutex; /* tsrm environ mutex */
 /* New thread handlers */
 static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler = NULL;
 static tsrm_thread_end_func_t tsrm_new_thread_end_handler = NULL;
+static tsrm_thread_free_begin_func_t tsrm_free_thread_begin_handler = NULL;
+static tsrm_thread_free_end_func_t tsrm_free_thread_end_handler = NULL;
 static tsrm_shutdown_func_t tsrm_shutdown_handler = NULL;
 
 /* Debug support */
@@ -228,6 +230,8 @@ TSRM_API void tsrm_shutdown(void)
 	}
 	tsrm_new_thread_begin_handler = NULL;
 	tsrm_new_thread_end_handler = NULL;
+	tsrm_free_thread_begin_handler = NULL;
+	tsrm_free_thread_end_handler = NULL;
 	tsrm_shutdown_handler = NULL;
 
 	tsrm_reserved_pos  = 0;
@@ -516,6 +520,10 @@ void ts_free_thread(void)
 
 	TSRM_ASSERT(!in_main_thread);
 
+	if (tsrm_free_thread_begin_handler) {
+		tsrm_free_thread_begin_handler(thread_id);
+	}
+
 	tsrm_mutex_lock(tsmm_mutex);
 	hash_value = THREAD_HASH_OF(thread_id, tsrm_tls_table_size);
 	thread_resources = tsrm_tls_table[hash_value];
@@ -538,6 +546,10 @@ void ts_free_thread(void)
 		thread_resources = thread_resources->next;
 	}
 	tsrm_mutex_unlock(tsmm_mutex);
+
+	if (tsrm_free_thread_end_handler) {
+		tsrm_free_thread_end_handler(thread_id);
+	}
 }/*}}}*/
 
 /* deallocates all occurrences of a given id */
@@ -707,6 +719,24 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 	void *retval = (void *) tsrm_new_thread_end_handler;
 
 	tsrm_new_thread_end_handler = new_thread_end_handler;
+	return retval;
+}/*}}}*/
+
+
+TSRM_API void *tsrm_set_free_thread_begin_handler(tsrm_thread_free_begin_func_t free_thread_begin_handler)
+{/*{{{*/
+	void *retval = (void *) tsrm_free_thread_begin_handler;
+
+	tsrm_free_thread_begin_handler = free_thread_begin_handler;
+	return retval;
+}/*}}}*/
+
+
+TSRM_API void *tsrm_set_free_thread_end_handler(tsrm_thread_free_end_func_t free_thread_end_handler)
+{/*{{{*/
+	void *retval = (void *) tsrm_free_thread_end_handler;
+
+	tsrm_free_thread_end_handler = free_thread_end_handler;
 	return retval;
 }/*}}}*/
 
