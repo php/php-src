@@ -142,7 +142,6 @@ const opt_struct OPTIONS[] = {
 	{'H', 0, "hide-args"},
 	{'r', 1, "run"},
 	{'s', 0, "syntax-highlight"},
-	{'s', 0, "syntax-highlighting"},
 	{'S', 1, "server"},
 	{'t', 1, "docroot"},
 	{'w', 0, "strip"},
