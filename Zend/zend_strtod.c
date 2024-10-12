@@ -3613,11 +3613,11 @@ rv_alloc(i) int i;
 rv_alloc(int i)
 #endif
 {
-	int k, *r;
+	int j, k, *r;
 
-	size_t j = sizeof(ULong);
+	j = sizeof(ULong);
 	for(k = 0;
-		sizeof(Bigint) - sizeof(ULong) - sizeof(int) + j <= (size_t)i;
+		j <= (INT_MAX >> 1) && sizeof(Bigint) - sizeof(ULong) - sizeof(int) + j <= (size_t)i;
 		j <<= 1)
 			k++;
 	r = (int*)Balloc(k);
