@@ -6,15 +6,17 @@ gmp
 <?php
 $g = gmp_init(256);
 
-var_dump(gmp_pow($g, PHP_INT_MAX));
-var_dump(gmp_pow(256, PHP_INT_MAX));
+try {
+	gmp_pow($g, PHP_INT_MAX);
+} catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+try {
+	gmp_pow(256, PHP_INT_MAX);
+} catch (\ValueError $e) {
+	echo $e->getMessage();
+}
 ?>
---EXPECTF--
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(%d) "%s"
-}
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(%d) "%s"
-}
+--EXPECT--
+base and exponent overflow
+base and exponent overflow
