@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16385 (Unexpected null returned by session_set_cookie_params).
     (nielsdos)
 
+- Sockets:
+  . Fixed bug with overflow socket_recvfrom $length argument. (David Carlier)
+
 - SPL:
   . Fixed bug GH-16337 (Use-after-free in SplHeap). (nielsdos)
 
