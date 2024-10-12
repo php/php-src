@@ -119,9 +119,6 @@ PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)() = NULL;
-#endif
-
-#if PHP_SIGCHILD
 	sig_handler = signal (SIGCHLD, SIG_DFL);
 #endif
 
@@ -272,8 +269,7 @@ PHP_FUNCTION(passthru)
    Escape all chars that could possibly be used to
    break out of a shell command
 
-   This function emalloc's a string and returns the pointer.
-   Remember to efree it when done with it.
+   This function allocates a new zend_string, remember to free it when done.
 
    *NOT* safe for binary strings
 */

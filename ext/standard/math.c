@@ -389,77 +389,38 @@ PHP_FUNCTION(round)
 }
 /* }}} */
 
-/* {{{ Returns the sine of the number in radians */
-PHP_FUNCTION(sin)
-{
-	double num;
+// Lots of the PHP function are just wrappers around a C math function; if they
+// - are named the same as the C implementatino
+// - take a single parameter, a double
+// - return a double
+// then they can use this macro for de-duplication
+#define MATH_PHP_FUNCTION_WRAPPER(name) \
+	PHP_FUNCTION(name) \
+	{ \
+		double num; \
+		ZEND_PARSE_PARAMETERS_START(1, 1) \
+			Z_PARAM_DOUBLE(num) \
+		ZEND_PARSE_PARAMETERS_END(); \
+		RETURN_DOUBLE(name(num)); \
+	}
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(sin(num));
-}
-/* }}} */
+/* Returns the sine of the number in radians */
+MATH_PHP_FUNCTION_WRAPPER(sin)
 
-/* {{{ Returns the cosine of the number in radians */
-PHP_FUNCTION(cos)
-{
-	double num;
+/* Returns the cosine of the number in radians */
+MATH_PHP_FUNCTION_WRAPPER(cos)
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(cos(num));
-}
-/* }}} */
+/* Returns the tangent of the number in radians */
+MATH_PHP_FUNCTION_WRAPPER(tan)
 
-/* {{{ Returns the tangent of the number in radians */
-PHP_FUNCTION(tan)
-{
-	double num;
+/* Returns the arc sine of the number in radians */
+MATH_PHP_FUNCTION_WRAPPER(asin)
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(tan(num));
-}
-/* }}} */
+/* Return the arc cosine of the number in radians */
+MATH_PHP_FUNCTION_WRAPPER(acos)
 
-/* {{{ Returns the arc sine of the number in radians */
-PHP_FUNCTION(asin)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(asin(num));
-}
-/* }}} */
-
-/* {{{ Return the arc cosine of the number in radians */
-PHP_FUNCTION(acos)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(acos(num));
-}
-/* }}} */
-
-/* {{{ Returns the arc tangent of the number in radians */
-PHP_FUNCTION(atan)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(atan(num));
-}
-/* }}} */
+/* Returns the arc tangent of the number in radians */
+MATH_PHP_FUNCTION_WRAPPER(atan)
 
 /* {{{ Returns the arc tangent of y/x, with the resulting quadrant determined by the signs of y and x */
 PHP_FUNCTION(atan2)
@@ -474,77 +435,23 @@ PHP_FUNCTION(atan2)
 }
 /* }}} */
 
-/* {{{ Returns the hyperbolic sine of the number, defined as (exp(number) - exp(-number))/2 */
-PHP_FUNCTION(sinh)
-{
-	double num;
+/* Returns the hyperbolic sine of the number, defined as (exp(number) - exp(-number))/2 */
+MATH_PHP_FUNCTION_WRAPPER(sinh)
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(sinh(num));
-}
-/* }}} */
+/* Returns the hyperbolic cosine of the number, defined as (exp(number) + exp(-number))/2 */
+MATH_PHP_FUNCTION_WRAPPER(cosh)
 
-/* {{{ Returns the hyperbolic cosine of the number, defined as (exp(number) + exp(-number))/2 */
-PHP_FUNCTION(cosh)
-{
-	double num;
+/* Returns the hyperbolic tangent of the number, defined as sinh(number)/cosh(number) */
+MATH_PHP_FUNCTION_WRAPPER(tanh)
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(cosh(num));
-}
-/* }}} */
+/* Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
+MATH_PHP_FUNCTION_WRAPPER(asinh)
 
-/* {{{ Returns the hyperbolic tangent of the number, defined as sinh(number)/cosh(number) */
-PHP_FUNCTION(tanh)
-{
-	double num;
+/* Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
+MATH_PHP_FUNCTION_WRAPPER(acosh)
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(tanh(num));
-}
-/* }}} */
-
-/* {{{ Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
-PHP_FUNCTION(asinh)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(asinh(num));
-}
-/* }}} */
-
-/* {{{ Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
-PHP_FUNCTION(acosh)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(acosh(num));
-}
-/* }}} */
-
-/* {{{ Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
-PHP_FUNCTION(atanh)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(atanh(num));
-}
-/* }}} */
+/* Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
+MATH_PHP_FUNCTION_WRAPPER(atanh)
 
 /* {{{ Returns an approximation of pi */
 PHP_FUNCTION(pi)
@@ -605,44 +512,14 @@ PHP_FUNCTION(pow)
 }
 /* }}} */
 
-/* {{{ Returns e raised to the power of the number */
-PHP_FUNCTION(exp)
-{
-	double num;
+/* Returns e raised to the power of the number */
+MATH_PHP_FUNCTION_WRAPPER(exp)
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
+/* Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero */
+MATH_PHP_FUNCTION_WRAPPER(expm1)
 
-	RETURN_DOUBLE(exp(num));
-}
-/* }}} */
-
-/* {{{ Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero */
-PHP_FUNCTION(expm1)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_DOUBLE(expm1(num));
-}
-/* }}} */
-
-/* {{{ Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */
-PHP_FUNCTION(log1p)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_DOUBLE(log1p(num));
-}
-/* }}} */
+/* Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */
+MATH_PHP_FUNCTION_WRAPPER(log1p)
 
 /* {{{ Returns the natural logarithm of the number, or the base log if base is specified */
 PHP_FUNCTION(log)
@@ -680,31 +557,13 @@ PHP_FUNCTION(log)
 }
 /* }}} */
 
-/* {{{ Returns the base-10 logarithm of the number */
-PHP_FUNCTION(log10)
-{
-	double num;
+/* Returns the base-10 logarithm of the number */
+MATH_PHP_FUNCTION_WRAPPER(log10)
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
+/* Returns the square root of the number */
+MATH_PHP_FUNCTION_WRAPPER(sqrt)
 
-	RETURN_DOUBLE(log10(num));
-}
-/* }}} */
-
-/* {{{ Returns the square root of the number */
-PHP_FUNCTION(sqrt)
-{
-	double num;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_DOUBLE(sqrt(num));
-}
-/* }}} */
+#undef MATH_PHP_FUNCTION_WRAPPER
 
 /* {{{ Returns sqrt(num1*num1 + num2*num2) */
 PHP_FUNCTION(hypot)
