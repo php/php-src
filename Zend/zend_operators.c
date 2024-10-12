@@ -1018,6 +1018,10 @@ try_again:
 		case IS_TRUE:
 			return ZSTR_CHAR('1');
 		case IS_RESOURCE:
+			zend_error(E_WARNING, "Resource to string conversion");
+			if (try && UNEXPECTED(EG(exception))) {
+				return NULL;
+			}
 			return zend_strpprintf(0, "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
 		case IS_LONG:
 			return zend_long_to_str(Z_LVAL_P(op));
