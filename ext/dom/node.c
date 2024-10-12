@@ -1152,6 +1152,10 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			RETURN_FALSE;
 		}
 
+		if (!nodep->children) {
+			RETURN_FALSE;
+		}
+
 		if (!dom_node_check_legacy_insertion_validity(nodep, newchild, stricterror, false)) {
 			RETURN_FALSE;
 		}
