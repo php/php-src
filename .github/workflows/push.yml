@@ -111,7 +111,7 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++ --disable-opcache-jit' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++ --disable-opcache-jit' || 'CFLAGS="-fcf-protection=full" LDFLAGS="-Wl,-z,cet-report=error"' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
@@ -124,6 +124,8 @@ jobs:
         if: matrix.asan == false
         uses: ./.github/actions/test-linux
       - name: Test ${{ matrix.asan && 'OpCache' || 'Tracing JIT' }}
+        env:
+          GLIBC_TUNABLES: ${{ !matrix.asan && 'glibc.cpu.hwcaps=SHSTK' || '' }}
         uses: ./.github/actions/test-linux
         with:
           jitType: ${{ matrix.asan && 'disable' || 'tracing' }}

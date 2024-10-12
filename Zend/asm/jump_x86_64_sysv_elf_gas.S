@@ -70,14 +70,6 @@ jump_fcontext:
     /* read the current SSP and store it */
     rdsspq  %rcx
     movq  %rcx, (%rsp)
-#endif
-
-#if BOOST_CONTEXT_SHADOW_STACK
-    /* grow the stack to reserve space for shadow stack pointer(SSP) */
-    leaq  -0x8(%rsp), %rsp
-    /* read the current SSP and store it */
-    rdsspq  %rcx
-    movq  %rcx, (%rsp)
 # endif
 
     /* store RSP (pointing to context-data) in RAX */

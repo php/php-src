@@ -59,7 +59,7 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-        configuration_parameters: ['']
+        configuration_parameters: ['CFLAGS="-fcf-protection=full" LDFLAGS="-Wl,-z,cet-report=error"']
         debug: [true, false]
         name: ['']
         run_tests_parameters: ['']
@@ -112,12 +112,16 @@ jobs:
         uses: ./.github/actions/setup-x64
       - name: Test
         uses: ./.github/actions/test-linux
+        env:
+          GLIBC_TUNABLES: 'glibc.cpu.hwcaps=SHSTK'
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
           idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
+        env:
+          GLIBC_TUNABLES: 'glibc.cpu.hwcaps=SHSTK'
         with:
           jitType: tracing
           runTestsParameters: >-
