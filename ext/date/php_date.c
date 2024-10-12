@@ -4808,9 +4808,9 @@ PHP_METHOD(DatePeriod, __construct)
 		}
 	}
 
-	if (dpobj->end == NULL && recurrences < 1) {
+	if (dpobj->end == NULL && (recurrences < 1 || ZEND_LONG_INT_OVFL(recurrences))) {
 		zend_string *func = get_active_function_or_method_name();
-		zend_throw_exception_ex(NULL, 0, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
+		zend_throw_exception_ex(NULL, 0, "%s(): Recurrence count must be between 1 and %d", ZSTR_VAL(func), INT_MAX);
 		zend_string_release(func);
 		RETURN_THROWS();
 	}
@@ -4819,8 +4819,17 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->include_start_date = !(options & PHP_DATE_PERIOD_EXCLUDE_START_DATE);
 	dpobj->include_end_date = options & PHP_DATE_PERIOD_INCLUDE_END_DATE;
 
-	/* recurrrences */
-	dpobj->recurrences = recurrences + dpobj->include_start_date + dpobj->include_end_date;
+	recurrences += dpobj->include_start_date + dpobj->include_end_date;
+
+	if (UNEXPECTED(ZEND_LONG_INT_OVFL(recurrences))) {
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_exception_ex(NULL, 0, "%s(): Recurrence count must be between 1 and %d (including options)", ZSTR_VAL(func), INT_MAX);
+		zend_string_release(func);
+		RETURN_THROWS();
+	}
+
+	/* recurrences */
+	dpobj->recurrences = (int)recurrences;
 
 	dpobj->initialized = 1;
 
