@@ -218,3 +218,53 @@ PHP_FUNCTION(crypt)
 	RETURN_STR(result);
 }
 /* }}} */
+
+/* {{{ Generates a salt for algo */
+PHP_FUNCTION(crypt_gensalt)
+{
+	char salt[CRYPT_GENSALT_OUTPUT_SIZE + 1];
+	char *prefix = NULL;
+	size_t prefix_len = 0;
+	zend_long count = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(prefix, prefix_len)
+		Z_PARAM_LONG(count)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (crypt_gensalt_rn(prefix, (unsigned long)count, NULL, 0, salt, CRYPT_GENSALT_OUTPUT_SIZE)) {
+		RETURN_STRING(salt);
+	}
+	RETURN_NULL();
+}
+/* }}} */
+
+/* {{{ Get preferred hasing method prefix */
+PHP_FUNCTION(crypt_preferred_method)
+{
+	const char *prefix;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	prefix = crypt_preferred_method();
+	if (prefix) {
+		RETURN_STRING(prefix);
+	}
+	RETURN_NULL();
+}
+/* }}} */
+
+/* {{{ Determine whether the user's passphrase should be re-hashed using the currently preferred hashing method */
+PHP_FUNCTION(crypt_checksalt)
+{
+	char *prefix;
+	size_t prefix_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(prefix, prefix_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(crypt_checksalt(prefix));
+}
+/* }}} */
