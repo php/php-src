@@ -19,14 +19,6 @@ PHP 8.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- CLI:
-  . The builtin server looks for an index file recursively by traversing parent
-    directories in case the specified file cannot be located. This process was
-    previously skipped if the path looked like it was referring to a file, i.e.
-    if the last path component contained a period. In that case, a 404 error was
-    returned. The behavior has been changed to look for an index file in all
-    cases.
-
 - Core:
   . The type of PHP_DEBUG and PHP_ZTS constants changed to bool.
   . The name of uploaded files and files created by the tempnam() function are
@@ -57,10 +49,6 @@ PHP 8.4 UPGRADE NOTES
     should be replaced with checks for `false`.
 
 - DOM:
-  . Added DOMNode::compareDocumentPosition() and DOMNode::DOCUMENT_POSITION_*
-    constants.
-    If you have a method or constant with the same name, you might encounter errors
-    if the declaration is incompatible.
   . Some DOM methods previously returned false or a PHP_ERR DOMException if a new
     node could not be allocated. They consistently throw an INVALID_STATE_ERR
     DOMException now. This situation is extremely unlikely though and probably
@@ -69,18 +57,12 @@ PHP 8.4 UPGRADE NOTES
   . Previously, DOMXPath objects could be cloned, but resulted in an unusable
     object. This is no longer possible, and cloning a DOMXPath object now throws
     an error.
-  . DOMDocument::$actualEncoding, DOMDocument::config, DOMEntity::$actualEncoding,
-    DOMEntity::$encoding, DOMEntity::$version have been deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#formally_deprecate_soft-deprecated_domdocument_and_domentity_properties
   . Removed DOMImplementation::getFeature().
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_domimplementationgetfeature_feature_version
 
 - GMP:
   . The GMP class is now final and cannot be extended anymore.
     RFC: https://wiki.php.net/rfc/gmp-final
-  . Casting a GMP object to bool changed so that 0 becomes false and everything else
-    becomes true.
-    RFC: https://wiki.php.net/rfc/fix_up_bcmath_number_class
 
 - Intl:
   . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
@@ -193,18 +175,6 @@ PHP 8.4 UPGRADE NOTES
     constructor counterparts, being closer to the documentation states.
 
 - Reflection:
-  . Added methods ReflectionClass::newLazyGhost(),
-    ReflectionClass::newLazyProxy(), ReflectionClass::resetAsLazyGhost(),
-    ReflectionClass::resetAsLazyProxy(),
-    ReflectionClass::isUninitializedLazyObject(),
-    ReflectionClass::initializeLazyObject(),
-    ReflectionClass::markLazyObjectAsInitialized(),
-    ReflectionClass::getLazyInitializer(),
-    ReflectionProperty::skipLazyInitialization(),
-    ReflectionProperty::setRawValueWithoutLazyInitialization() and constants
-    ReflectionClass::SKIP_*.
-    If you have a method or constant with the same name, you might encounter
-    errors if the declaration is incompatible.
   . The class constants are typed now.
 
 - SimpleXML:
@@ -233,10 +203,6 @@ PHP 8.4 UPGRADE NOTES
     To solve this, either don't use rtld-now or load the session extension.
 
 - SPL:
-  . Out of bounds accesses in SplFixedArray now throw an exception of type
-    OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
-    is a child class of RuntimeException, code that uses RuntimeException
-    continues to function.
   . The class constants are typed now.
 
 - Sqlite:
@@ -350,6 +316,7 @@ PHP 8.4 UPGRADE NOTES
     curl_getinfo() $option parameter. This requires libcurl 8.10.0 or later.
 
 - DOM:
+  . Added DOMNode::compareDocumentPosition()
   . Added constant DOMNode::DOCUMENT_POSITION_DISCONNECTED.
   . Added constant DOMNode::DOCUMENT_POSITION_PRECEDING.
   . Added constant DOMNode::DOCUMENT_POSITION_FOLLOWING.
@@ -484,6 +451,14 @@ PHP 8.4 UPGRADE NOTES
   . Support for EOL Apache 2.0 and 2.2 has been removed. Minimum required Apache
     version is now 2.4.
 
+- CLI:
+  . The builtin server looks for an index file recursively by traversing parent
+    directories in case the specified file cannot be located. This process was
+    previously skipped if the path looked like it was referring to a file, i.e.
+    if the last path component contained a period. In that case, a 404 error was
+    returned. The behavior has been changed to look for an index file in all
+    cases.
+
 - FPM:
   . /dev/poll events.mechanism setting for Solaris/Illumos had been retired.
 
@@ -498,6 +473,11 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_e_user_error_to_trigger_error
   . Using "_" as a class name is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_using_a_single_underscore_as_a_class_name
+  . Raising zero to the power of negative number is deprecated.
+    RFC: https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number
+  . The E_STRICT constant was deprecated and its corresponding error level was
+    removed.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
 
 - Curl:
   . The CURLOPT_BINARYTRANSFER constant is deprecated.
@@ -517,6 +497,9 @@ PHP 8.4 UPGRADE NOTES
 - DOM:
   . Deprecated DOM_PHP_ERR constant.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_dom_php_err_constant
+  . DOMDocument::$actualEncoding, DOMDocument::config, DOMEntity::$actualEncoding,
+    DOMEntity::$encoding, DOMEntity::$version have been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#formally_deprecate_soft-deprecated_domdocument_and_domentity_properties
 
 - Hash:
   . Deprecated passing incorrect data types for options to ext/hash functions.
@@ -608,8 +591,6 @@ PHP 8.4 UPGRADE NOTES
 - Standard:
   . Calling stream_context_set_option() with 2 arguments is deprecated.
     Use stream_context_set_options() instead.
-  . Raising zero to the power of negative number is deprecated.
-    RFC: https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number
   . Unserializing strings using the uppercase 'S' tag is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#unserialize_s_s_tag
   . Using the default value for $escape parameter of:
@@ -790,6 +771,9 @@ PHP 8.4 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Core:
+  . request_parse_body()
+
 - BCMath:
   . Added bcfloor(), bcceil(), bcround().
     RFC: https://wiki.php.net/rfc/adding_bcround_bcfloor_bcceil_to_bcmath
@@ -809,7 +793,6 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
   . Added DOMXPath::quote() to quote a string for use in an XPath expression.
     Example usage: "//span[contains(text()," . $xpath->quote($string) . ")]"
-  . DOMNode::compareDocumentPosition()
 
 - Hash:
   . Added HashContext::__debugInfo().
@@ -1024,6 +1007,12 @@ PHP 8.4 UPGRADE NOTES
     effect, and is silently ignored. This underlying feature was
     deprecated in libcurl 7.11.1 and removed in 7.62.0.
 
+- GMP:
+  . Casting a GMP object to bool is now possible instead of emitting a
+    E_RECOVERABLE_ERROR. The casting behaviour is overloaded such that a GMP
+    object representing the value 0 is cast to false.
+    RFC: https://wiki.php.net/rfc/fix_up_bcmath_number_class
+
 - Intl:
   . The behaviour of Intl class has been normalized to always throw Error
     exceptions when attempting to use a non-initialized object,
@@ -1046,6 +1035,12 @@ PHP 8.4 UPGRADE NOTES
 
 - PgSQL:
   . The pgsql extension now requires at least libpq 10.0.
+
+- SPL:
+  . Out of bounds accesses in SplFixedArray now throw an exception of type
+    OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
+    is a child class of RuntimeException, code that uses RuntimeException
+    continues to function.
 
 - XSL:
   . The typed properties XSLTProcessor::$cloneDocument and
