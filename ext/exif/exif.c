@@ -4419,7 +4419,7 @@ static bool exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, 
 	ImageInfo->FileName			= NULL;
 
 	if (php_stream_is(ImageInfo->infile, PHP_STREAM_IS_STDIO)) {
-		if (VCWD_STAT(stream->orig_path, &st) >= 0) {
+		if (stream->orig_path && VCWD_STAT(stream->orig_path, &st) >= 0) {
 			zend_string *base;
 			if ((st.st_mode & S_IFMT) != S_IFREG) {
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Not a file");
