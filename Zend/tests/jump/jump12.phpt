@@ -1,5 +1,5 @@
 --TEST--
-jump 09: goto in declare statement
+jump 12: goto in declare statement
 --FILE--
 <?php
 a: print "ok!\n";
