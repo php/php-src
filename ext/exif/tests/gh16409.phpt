@@ -2,10 +2,6 @@
 GH-16409 (Segfault in exif_thumbnail when not dealing with a real file)
 --EXTENSIONS--
 exif
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY === "Windows") die("skip *nix only");
-?>
 --FILE--
 <?php
 $stream = popen('echo 1', 'r');
