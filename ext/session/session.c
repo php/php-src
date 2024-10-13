@@ -708,9 +708,18 @@ static PHP_INI_MH(OnUpdateCookieLifetime) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
-	if (atol(ZSTR_VAL(new_value)) < 0) {
+
+#ifdef ZEND_ENABLE_ZVAL_LONG64
+	const zend_long maxcookie = ZEND_LONG_MAX - INT_MAX - 1;
+#else
+	const zend_long maxcookie = ZEND_LONG_MAX / 2 - 1;
+#endif
+	zend_long v = (zend_long)atol(ZSTR_VAL(new_value));
+	if (v < 0) {
 		php_error_docref(NULL, E_WARNING, "CookieLifetime cannot be negative");
 		return FAILURE;
+	} else if (v > maxcookie) {
+		return SUCCESS;
 	}
 	return OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
