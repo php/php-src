@@ -184,7 +184,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
 			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR && conn->error_info->error_no != CR_CLIENT_INTERACTION_TIMEOUT) {
-				php_error_docref(NULL, E_WARNING, "Error reading result set's header");
+				SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Error reading result set's header");
 			}
 			break;
 		}
