@@ -147,9 +147,9 @@ typedef struct _php_ps_globals {
 	zend_long cookie_lifetime;
 	zend_string *cookie_path;
 	zend_string *cookie_domain;
+	zend_string *cookie_samesite;
 	bool  cookie_secure;
 	bool  cookie_httponly;
-	zend_string *cookie_samesite;
 	const ps_module *mod;
 	const ps_module *default_mod;
 	void *mod_data;
@@ -198,7 +198,7 @@ typedef struct _php_ps_globals {
 	bool rfc1867_enabled; /* session.upload_progress.enabled */
 	bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 
-	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
+	bool use_strict_mode; /* whether PHP accepts unknown session ids */
 	bool lazy_write; /* omit session write when it is possible */
 	bool in_save_handler; /* state if session is in save handler or not */
 	bool set_handler;     /* state if session module i setting handler or not */
