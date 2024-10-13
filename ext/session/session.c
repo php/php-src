@@ -969,7 +969,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.use_cookies",      "1",         PHP_INI_ALL, OnUpdateSessionBool,   use_cookies,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies", "1",         PHP_INI_ALL, OnUpdateUseOnlyCookies,   use_only_cookies,   php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_strict_mode",  "0",         PHP_INI_ALL, OnUpdateSessionBool,   use_strict_mode,    php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateSessionStr,    extern_referer_chk, php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateRefererCheck,    extern_referer_chk, php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateSessionStr,    cache_limiter,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateSessionLong,   cache_expire,       php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_trans_sid",    "0",         PHP_INI_ALL, OnUpdateUseTransSid,   use_trans_sid,      php_ps_globals,    ps_globals)
@@ -1652,7 +1652,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 {
 	zval *ppid;
 	zval *data;
-	char *p, *value;
+	char *value;
 
 	switch (PS(session_status)) {
 		case php_session_active:
@@ -1716,21 +1716,6 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 				ZVAL_DEREF(data);
 				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_find(Z_ARRVAL_P(data), PS(session_name)))) {
 					ppid2sid(ppid);
-				}
-			}
-			/* Check the REQUEST_URI symbol for a string of the form
-			 * '<session-name>=<session-id>' to allow URLs of the form
-			 * http://yoursite/<session-name>=<session-id>/script.php */
-			if (!PS(id) && zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER)) == SUCCESS &&
-				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
-				Z_TYPE_P(data) == IS_STRING &&
-				(p = strstr(Z_STRVAL_P(data), ZSTR_VAL(PS(session_name)))) &&
-				p[ZSTR_LEN(PS(session_name))] == '='
-				) {
-				char *q;
-				p += ZSTR_LEN(PS(session_name));
-				if ((q = strpbrk(p, "/?\\"))) {
-					PS(id) = zend_string_init(p, q - p, 0);
 				}
 			}
 			/* Check whether the current request was referred to by
