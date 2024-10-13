@@ -183,9 +183,6 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
-			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR && conn->error_info->error_no != CR_CLIENT_INTERACTION_TIMEOUT) {
-				SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Error reading result set's header");
-			}
 			break;
 		}
 
