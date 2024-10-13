@@ -38,6 +38,7 @@ EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	streamsfuncs.c http.c flock_compat.c hrtime.c", false /* never shared */,
 	'/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 ADD_SOURCES("ext/standard/libavifinfo", "avifinfo.c", "standard");
+ADD_SOURCES("ext/standard/yescrypt", "yescrypt-opt.c yescrypt-common.c yescrypt-config.c sha256.c", "standard");
 PHP_STANDARD = "yes";
 ADD_MAKEFILE_FRAGMENT();
 PHP_INSTALL_HEADERS("", "ext/standard");

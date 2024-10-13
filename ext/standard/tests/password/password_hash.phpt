@@ -8,8 +8,11 @@ Test normal operation of password_hash()
 
 var_dump(password_hash("foo", PASSWORD_BCRYPT));
 
+var_dump(password_hash("foo", PASSWORD_YESCRYPT));
+
 $algos = [
   PASSWORD_BCRYPT,
+  PASSWORD_YESCRYPT,
   '2y',
   1,
 ];
@@ -23,6 +26,8 @@ echo "OK!";
 ?>
 --EXPECTF--
 string(60) "$2y$12$%s"
+string(73) "$y$j9T$%s"
+bool(true)
 bool(true)
 bool(true)
 bool(true)
