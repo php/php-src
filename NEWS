@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
     (David Carlier)
 
+- GMP:
+  . Fixed floating point exception bug with gmp_pow when using
+    large exposant values. (David Carlier).
+
 - MBstring:
   . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
     (David Carlier)
