@@ -18,6 +18,10 @@ PHP                                                                        NEWS
     (nielsdos)
   . Add missing hierarchy checks to replaceChild. (nielsdos)
 
+- EXIF:
+  . Fixed bug GH-16409 (Segfault in exif_thumbnail when not dealing with a
+    real file). (nielsdos, cmb)
+
 - GD:
   . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
     (David Carlier)
