@@ -2615,7 +2615,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 		const enum mysqlnd_packet_type ok_packet,
-		const bool silent,
+		const bool silent, /* This is a dead parameter */
 		const enum php_mysqlnd_server_command command,
 		const bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 
@@ -2638,11 +2638,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 			break;
 		default:
 			SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
-			php_error_docref(NULL, E_ERROR, "Wrong response packet %u passed to the function", ok_packet);
 			break;
-	}
-	if (!silent && error_info->error_no == CR_MALFORMED_PACKET) {
-		php_error_docref(NULL, E_WARNING, "Error while reading %s's response packet. PID=%d", mysqlnd_command_to_text[command], getpid());
 	}
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
 	DBG_RETURN(ret);
