@@ -50,6 +50,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16292 (Segmentation fault in ext/xmlreader/php_xmlreader.c).
     (nielsdos)
 
+- Zlib:
+  . Fixed bug GH-16326 (Memory management is broken for bad dictionaries.)
+    (cmb)
+
 24 Oct 2024, PHP 8.3.13
 
 - Calendar:
