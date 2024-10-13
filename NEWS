@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
     (David Carlier)
 
+- Opcache:
+  . Fixed bug GH-16408 (Array to string conversion warning emitted in
+    optimizer). (ilutov)
+
 - OpenSSL:
   . Fixed bug GH-16357 (openssl may modify member types of certificate arrays).
     (cmb)
