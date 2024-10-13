@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.26
 
+- Cli:
+  . Fixed bug GH-16373 (Shebang is not skipped for router script in cli-server
+    started through shebang). (ilutov)
+
 - COM:
   . Fixed out of bound writes to SafeArray data. (cmb)
 
