@@ -136,6 +136,9 @@ Options:
 
     --bless     Bless failed tests using scripts/dev/bless_tests.php.
 
+    --quiet
+                Produce minimal output
+
 HELP;
 }
 
@@ -162,7 +165,7 @@ function main(): void
            $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
            $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats,
-           $bless, $show_progress;
+           $bless, $show_progress, $quiet;
     // Parallel testing
     global $workers, $workerID;
     global $context_line_count;
@@ -364,6 +367,7 @@ function main(): void
     $context_line_count = 3;
     $num_repeats = 1;
     $show_progress = true;
+    $quiet = false;
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -614,6 +618,9 @@ function main(): void
                 case '--version':
                     echo '$Id$' . "\n";
                     exit(1);
+                case '--quiet':
+                    $quiet = true;
+                    break;
 
                 default:
                     echo "Illegal switch '$switch' specified!\n";
@@ -700,14 +707,18 @@ function main(): void
     $test_cnt = count($test_files);
 
     verify_config();
-    write_information();
+    if (!$quiet) {
+        write_information();
+    }
 
     if ($test_cnt) {
         putenv('NO_INTERACTION=1');
         usort($test_files, "test_sort");
         $start_time = time();
 
-        echo "Running selected tests.\n";
+        if (!$quiet) {
+            echo "Running selected tests.\n";
+        }
 
         $test_idx = 0;
         run_all_tests($test_files, $environment);
@@ -766,7 +777,9 @@ function main(): void
         usort($test_files, "test_sort");
 
         $start_time = time();
-        show_start($start_time);
+        if (!$quiet) {
+            show_start($start_time);
+        }
 
         $test_cnt = count($test_files);
         $test_idx = 0;
@@ -790,7 +803,9 @@ function main(): void
 
         compute_summary();
 
-        show_end($end_time);
+        if (!$quiet) {
+            show_end($end_time);
+        }
         show_summary();
 
         save_results($output_file, /* prompt_to_save_results: */ true);
@@ -1348,7 +1363,7 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
 {
     global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind, $show_progress;
 
-    global $junit;
+    global $junit, $quiet;
 
     // The PHP binary running run-tests.php, and run-tests.php itself
     // This PHP executable is *not* necessarily the same as the tested version
@@ -1405,7 +1420,9 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
     // Don't start more workers than test files.
     $workers = max(1, min($workers, count($test_files)));
 
-    echo "Spawning $workers workers... ";
+    if (!$quiet) {
+        echo "Spawning $workers workers... ";
+    }
 
     // We use sockets rather than STDIN/STDOUT for comms because on Windows,
     // those can't be non-blocking for some reason.
@@ -1485,9 +1502,11 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
         $workerID = $reply["workerID"];
         $workerSocks[$workerID] = $workerSock;
     }
-    printf("Done in %.2fs\n", microtime(true) - $startTime);
-    echo "=====================================================================\n";
-    echo "\n";
+    if (!$quiet) {
+        printf("Done in %.2fs\n", microtime(true) - $startTime);
+        echo "=====================================================================\n";
+        echo "\n";
+    }
 
     $rawMessageBuffers = [];
     $testsInProgress = 0;
