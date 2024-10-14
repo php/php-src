@@ -796,62 +796,65 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 				*dict = emalloc(ZSTR_LEN(str));
 				memcpy(*dict, ZSTR_VAL(str), ZSTR_LEN(str));
 				*dictlen = ZSTR_LEN(str);
-			} break;
+
+				return 1;
+			}
 
 			case IS_ARRAY: {
 				HashTable *dictionary = Z_ARR_P(option_buffer);
+				bool result = 1;
 
 				if (zend_hash_num_elements(dictionary) > 0) {
-					char *dictptr;
-					zval *cur;
 					zend_string **strings = safe_emalloc(zend_hash_num_elements(dictionary), sizeof(zend_string *), 0);
-					zend_string **end, **ptr = strings - 1;
+					size_t total = 0;
 
+					zval *cur;
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						*++ptr = zval_get_string(cur);
-						ZEND_ASSERT(*ptr);
-						if (ZSTR_LEN(*ptr) == 0 || EG(exception)) {
-							do {
-								zend_string_release(*ptr);
-							} while (--ptr >= strings);
-							efree(strings);
-							if (!EG(exception)) {
-								zend_argument_value_error(2, "must not contain empty strings");
-							}
-							return 0;
+						zend_string *string = zval_get_string(cur);
+						ZEND_ASSERT(string);
+						if (EG(exception)) {
+							result = 0;
+							break;
 						}
-						if (zend_str_has_nul_byte(*ptr)) {
-							do {
-								zend_string_release(*ptr);
-							} while (--ptr >= strings);
-							efree(strings);
+						if (ZSTR_LEN(string) == 0) {
+							result = 0;
+							zend_argument_value_error(2, "must not contain empty strings");
+							break;
+						}
+						if (zend_str_has_nul_byte(string)) {
+							result = 0;
 							zend_argument_value_error(2, "must not contain strings with null bytes");
-							return 0;
+							break;
 						}
 
-						*dictlen += ZSTR_LEN(*ptr) + 1;
+						*dictlen += ZSTR_LEN(string) + 1;
+						strings[total] = string;
+						total++;
 					} ZEND_HASH_FOREACH_END();
 
-					dictptr = *dict = emalloc(*dictlen);
-					ptr = strings;
-					end = strings + zend_hash_num_elements(dictionary);
-					do {
-						memcpy(dictptr, ZSTR_VAL(*ptr), ZSTR_LEN(*ptr));
-						dictptr += ZSTR_LEN(*ptr);
+					char *dictptr = emalloc(*dictlen);
+					*dict = dictptr;
+					for (size_t i = 0; i < total; i++) {
+						zend_string *string = strings[i];
+						dictptr = zend_mempcpy(dictptr, ZSTR_VAL(string), ZSTR_LEN(string));
 						*dictptr++ = 0;
-						zend_string_release_ex(*ptr, 0);
-					} while (++ptr != end);
+						zend_string_release(string);
+					}
 					efree(strings);
+					if (!result) {
+						efree(*dict);
+						*dict = NULL;
+					}
 				}
-			} break;
+
+				return result;
+			}
 
 			default:
 				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_zval_value_name(option_buffer));
 				return 0;
 		}
 	}
-
-	return 1;
 }
 
 /* {{{ Initialize an incremental inflate context with the specified encoding */
