@@ -2268,8 +2268,8 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 
 		iter = ce->get_iterator(ce, data, 0);
 
-		if (EG(exception)) {
-			goto iterator_done;
+		if (!iter) {
+			goto iterator_failed_to_get;
 		}
 
 		if (iter->funcs->rewind) {
@@ -2309,6 +2309,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		}
 iterator_done:
 		OBJ_RELEASE(&iter->std);
+iterator_failed_to_get:
 		if (EG(exception)) {
 			zval_ptr_dtor(&array_copy);
 			ZVAL_UNDEF(&array_copy);
