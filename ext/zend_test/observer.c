@@ -304,6 +304,9 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
 	zend_string *funcname;
 	zend_function *func;
+	if (!ZT_G(observer_enabled)) {
+		return FAILURE;
+	}
 	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 		ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
 			if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
