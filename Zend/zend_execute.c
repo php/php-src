@@ -3612,7 +3612,12 @@ static zend_never_inline zend_result zend_fetch_static_property_address_ex(zval 
 static zend_always_inline zend_result zend_fetch_static_property_address(zval **retval, zend_property_info **prop_info, uint32_t cache_slot, int fetch_type, int flags OPLINE_DC EXECUTE_DATA_DC) {
 	zend_property_info *property_info;
 
-	if (opline->op1_type == IS_CONST && (opline->op2_type == IS_CONST || (opline->op2_type == IS_UNUSED && (opline->op2.num == ZEND_FETCH_CLASS_SELF || opline->op2.num == ZEND_FETCH_CLASS_PARENT))) && EXPECTED(CACHED_PTR(cache_slot) != NULL)) {
+	if (opline->op1_type == IS_CONST
+	 && (opline->op2_type == IS_CONST
+	  || (opline->op2_type == IS_UNUSED
+	   && (opline->op2.num == ZEND_FETCH_CLASS_SELF
+	    || opline->op2.num == ZEND_FETCH_CLASS_PARENT)))
+	 && EXPECTED(CACHED_PTR(cache_slot) != NULL)) {
 		*retval = CACHED_PTR(cache_slot + sizeof(void *));
 		property_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
 
