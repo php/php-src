@@ -34,6 +34,12 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
+#define TO_STRING_NOWARN(val) do { \
+	if (Z_TYPE_P(val) < IS_ARRAY) { \
+		convert_to_string(val); \
+	} \
+} while (0)
+
 static void replace_by_const_or_qm_assign(zend_op_array *op_array, zend_op *opline, zval *result) {
 	if (opline->op1_type == IS_CONST) {
 		literal_dtor(&ZEND_OP1_LITERAL(opline));
@@ -64,10 +70,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 			if (opline->op1_type == IS_CONST && Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
-				convert_to_string(&ZEND_OP1_LITERAL(opline));
+				TO_STRING_NOWARN(&ZEND_OP1_LITERAL(opline));
 			}
 			if (opline->op2_type == IS_CONST && Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
-				convert_to_string(&ZEND_OP2_LITERAL(opline));
+				TO_STRING_NOWARN(&ZEND_OP2_LITERAL(opline));
 			}
 			ZEND_FALLTHROUGH;
 		case ZEND_ADD:
@@ -100,7 +106,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_ASSIGN_OP:
 			if (opline->extended_value == ZEND_CONCAT && opline->op2_type == IS_CONST
 					&& Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
-				convert_to_string(&ZEND_OP2_LITERAL(opline));
+				TO_STRING_NOWARN(&ZEND_OP2_LITERAL(opline));
 			}
 			break;
 
