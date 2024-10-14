@@ -2280,6 +2280,7 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 		}
 
 		ZVAL_UNDEF(&retval);
+		CG(skip_shebang) = true;
 		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE, &retval, 1, &zfd)) {
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				decline = Z_TYPE(retval) == IS_FALSE;
