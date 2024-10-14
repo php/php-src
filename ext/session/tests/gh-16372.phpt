@@ -16,4 +16,4 @@ session_start();
 --EXPECTF--
 Sent headers
 
-Warning: session_start(): Session cannot be started after headers have already been sent (started from %s on line %d) in %s on line %d
+Warning: session_start(): Session cannot be started after headers have already been sent (sent from %s on line %d) in %s on line %d
