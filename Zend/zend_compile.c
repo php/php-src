@@ -3627,6 +3627,17 @@ static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_no
 }
 /* }}} */
 
+static void zend_cast_to_string_if_concat(uint32_t opcode, zend_ast *expr, znode *result)
+{
+	/* For .=, if the expression may contain objects, cast to a string before
+	 * compiling the lhs W fetches. Otherwise, __toString() may cause the
+	 * volatile zval storage to go away. */
+	if (opcode == ZEND_CONCAT && expr->kind != ZEND_AST_ZVAL) {
+		zend_op *cast_opline = zend_emit_op_tmp(result, ZEND_CAST, result, NULL);
+		cast_opline->extended_value = IS_STRING;
+	}
+}
+
 static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -3669,6 +3680,7 @@ static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_dim(result, var_ast, BP_VAR_RW, /* by_ref */ false);
 			zend_compile_expr_with_potential_assign_to_self(&expr_node, expr_ast, var_ast);
+			zend_cast_to_string_if_concat(opcode, expr_ast, &expr_node);
 
 			opline = zend_delayed_compile_end(offset);
 			opline->opcode = ZEND_ASSIGN_DIM_OP;
@@ -3683,6 +3695,7 @@ static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_prop(result, var_ast, BP_VAR_RW);
 			zend_compile_expr(&expr_node, expr_ast);
+			zend_cast_to_string_if_concat(opcode, expr_ast, &expr_node);
 
 			opline = zend_delayed_compile_end(offset);
 			cache_slot = opline->extended_value;
