@@ -317,6 +317,8 @@ PHP 8.5 UPGRADE NOTES
 - Intl:
   . Added locale_is_right_to_left/Locale::isRightToLeft, returns true if
     the locale is written right to left (after its enrichment with likely subtags).
+  . Added grapheme_levenshtein() function.
+    RFC: https://wiki.php.net/rfc/grapheme_levenshtein
 
 - Pdo\Sqlite:
   . Added support for Pdo\Sqlite::setAuthorizer(), which is the equivalent of
