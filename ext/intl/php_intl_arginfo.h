@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7a1b6eb454be08742ba45131de8ec57ec70a88c7 */
+ * Stub hash: 84d27d32b4df20a06004ba9747dd5432ed58fae8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -489,6 +489,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_str_split, 0, 1, MAY_BE
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_levenshtein, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, insertion_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, replacement_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deletion_cost, IS_LONG, 0, "1")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -905,6 +913,7 @@ ZEND_FUNCTION(grapheme_substr);
 ZEND_FUNCTION(grapheme_strstr);
 ZEND_FUNCTION(grapheme_stristr);
 ZEND_FUNCTION(grapheme_str_split);
+ZEND_FUNCTION(grapheme_levenshtein);
 ZEND_FUNCTION(grapheme_extract);
 ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
@@ -1096,6 +1105,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(grapheme_strstr, arginfo_grapheme_strstr)
 	ZEND_FE(grapheme_stristr, arginfo_grapheme_stristr)
 	ZEND_FE(grapheme_str_split, arginfo_grapheme_str_split)
+	ZEND_FE(grapheme_levenshtein, arginfo_grapheme_levenshtein)
 	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
 	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
