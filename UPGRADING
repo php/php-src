@@ -60,6 +60,11 @@ PHP 8.5 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Zlib:
+  . The "use_include_path" argument for the 
+    gzfile, gzopen and readgzfile functions had been changed
+    from int to boolean.
+
 - PDO_PGSQL:
   . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
   . Pdo\Pgsql::setAttribute and Pdo\Pgsql::prepare supports
