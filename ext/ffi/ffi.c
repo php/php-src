@@ -2938,6 +2938,12 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 }
 /* }}} */
 
+static int zend_fake_compare_objects(zval *o1, zval *o2)
+{
+	zend_throw_error(zend_ffi_exception_ce, "Cannot compare FFI objects");
+	return ZEND_UNCOMPARABLE;
+}
+
 static zend_never_inline int zend_ffi_disabled(void) /* {{{ */
 {
 	zend_throw_error(zend_ffi_exception_ce, "FFI API is restricted by \"ffi.enable\" configuration directive");
@@ -5443,7 +5449,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.has_dimension        = zend_fake_has_dimension;
 	zend_ffi_handlers.unset_dimension      = zend_fake_unset_dimension;
 	zend_ffi_handlers.get_method           = zend_ffi_get_func;
-	zend_ffi_handlers.compare              = NULL;
+	zend_ffi_handlers.compare              = zend_fake_compare_objects;
 	zend_ffi_handlers.cast_object          = zend_fake_cast_object;
 	zend_ffi_handlers.get_debug_info       = NULL;
 	zend_ffi_handlers.get_closure          = NULL;
