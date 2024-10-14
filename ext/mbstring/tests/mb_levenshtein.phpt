@@ -82,6 +82,9 @@ for ($i = 0; $i < 100; $i++) {
 	}
 }
 echo "OK" . PHP_EOL;
+echo '--- Usecase of Emoji ---' . \PHP_EOL;
+var_dump(mb_levenshtein("🙇‍♀️", "🙇‍♂️"));
+var_dump(mb_levenshtein("🙇", "🙇‍♂️"));
 ?>
 --EXPECT--
 --- Equal ---
@@ -129,3 +132,6 @@ int(1)
 int(1)
 --- Usecase of userland code ---
 OK
+--- Usecase of Emoji ---
+int(1)
+int(3)
