@@ -1112,7 +1112,10 @@ static inheritance_status do_inheritance_check_on_method(
 
 #define SEPARATE_METHOD() do { \
 			if ((flags & ZEND_INHERITANCE_LAZY_CHILD_CLONE) \
-			 && child_scope != ce && child->type == ZEND_USER_FUNCTION) { \
+			 && child_scope != ce \
+			 /* Trait scopes are fixed after inheritance. However, they are always duplicated. */ \
+			 && !(child_scope->ce_flags & ZEND_ACC_TRAIT) \
+			 && child->type == ZEND_USER_FUNCTION) { \
 				/* op_array wasn't duplicated yet */ \
 				zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array)); \
 				memcpy(new_function, child, sizeof(zend_op_array)); \
