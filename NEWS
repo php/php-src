@@ -55,6 +55,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16290 (overflow on cookie_lifetime ini value).
     (David Carlier)
 
+- SOAP:
+  . Fixed bug GH-16429 (Segmentation fault access null pointer in SoapClient).
+    (nielsdos)
+
 - Sockets:
   . Fixed bug with overflow socket_recvfrom $length argument. (David Carlier)
 
