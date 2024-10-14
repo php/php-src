@@ -810,9 +810,8 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 
 					zval *cur;
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						zend_string *string = zval_get_string(cur);
-						ZEND_ASSERT(string);
-						if (EG(exception)) {
+						zend_string *string = zval_try_get_string(cur);
+						if (string == NULL) {
 							result = 0;
 							break;
 						}
@@ -855,6 +854,7 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 				return 0;
 		}
 	}
+	return 1;
 }
 
 /* {{{ Initialize an incremental inflate context with the specified encoding */
