@@ -2612,7 +2612,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 }
 /* }}} */
 
-static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry **traits, HashTable **exclude_tables, zend_class_entry **aliases, bool verify_abstract) /* {{{ */
+static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry **traits, HashTable **exclude_tables, zend_class_entry **aliases, bool verify_abstract, bool *contains_abstract_methods) /* {{{ */
 {
 	uint32_t i;
 	zend_string *key;
@@ -2624,6 +2624,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 				/* copies functions, applies defined aliasing, and excludes unused trait methods */
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->function_table, key, fn) {
 					if (verify_abstract != (bool) (fn->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+						*contains_abstract_methods = true;
 						continue;
 					}
 					zend_traits_copy_functions(key, fn, ce, exclude_tables[i], aliases);
@@ -2641,6 +2642,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 			if (traits[i]) {
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->function_table, key, fn) {
 					if (verify_abstract != (bool) (fn->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+						*contains_abstract_methods = true;
 						continue;
 					}
 					zend_traits_copy_functions(key, fn, ce, NULL, aliases);
@@ -2925,29 +2927,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 				ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 			}
 		} ZEND_HASH_FOREACH_END();
-	}
-}
-/* }}} */
-
-static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits, bool verify_abstract) /* {{{ */
-{
-	HashTable **exclude_tables;
-	zend_class_entry **aliases;
-
-	ZEND_ASSERT(ce->num_traits > 0);
-
-	/* complete initialization of trait structures in ce */
-	zend_traits_init_trait_structures(ce, traits, &exclude_tables, &aliases);
-
-	/* Flatten all methods into the class */
-	zend_do_traits_method_binding(ce, traits, exclude_tables, aliases, verify_abstract);
-
-	if (aliases) {
-		efree(aliases);
-	}
-
-	if (exclude_tables) {
-		efree(exclude_tables);
 	}
 }
 /* }}} */
@@ -3560,8 +3539,12 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_enum_register_funcs(ce);
 		}
 
+		HashTable **trait_exclude_tables;
+		zend_class_entry **trait_aliases;
+		bool trait_contains_abstract_methods = false;
 		if (ce->num_traits) {
-			zend_do_bind_traits(ce, traits_and_interfaces, false);
+			zend_traits_init_trait_structures(ce, traits_and_interfaces, &trait_exclude_tables, &trait_aliases);
+			zend_do_traits_method_binding(ce, traits_and_interfaces, trait_exclude_tables, trait_aliases, false, &trait_contains_abstract_methods);
 			zend_do_traits_constant_binding(ce, traits_and_interfaces);
 			zend_do_traits_property_binding(ce, traits_and_interfaces);
 		}
@@ -3572,7 +3555,24 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_do_inheritance(ce, parent);
 		}
 		if (ce->num_traits) {
-			zend_do_bind_traits(ce, traits_and_interfaces, true);
+			if (trait_contains_abstract_methods) {
+				zend_do_traits_method_binding(ce, traits_and_interfaces, trait_exclude_tables, trait_aliases, true, &trait_contains_abstract_methods);
+			}
+
+			if (trait_exclude_tables) {
+				for (i = 0; i < ce->num_traits; i++) {
+					if (traits_and_interfaces[i]) {
+						if (trait_exclude_tables[i]) {
+							zend_hash_destroy(trait_exclude_tables[i]);
+							FREE_HASHTABLE(trait_exclude_tables[i]);
+						}
+					}
+				}
+				efree(trait_exclude_tables);
+			}
+			if (trait_aliases) {
+				efree(trait_aliases);
+			}
 
 			zend_function *fn;
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
