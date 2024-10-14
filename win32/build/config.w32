@@ -355,15 +355,15 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
+ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
+ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 if (CLANG_TOOLSET) {
-	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
 		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
 		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +
 		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
 	}
 
-	ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 500) {
 			ERROR("Clang at least 5.0.0 required for sanitation plugins");
