@@ -2266,6 +2266,7 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 		int sg_options_back = SG(options);
 		/* Don't chdir to the router script because the file path may be relative. */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		CG(skip_shebang) = true;
 		bool result = php_execute_script_ex(&zfd, &retval);
 		SG(options) = sg_options_back;
 		if (result) {
