@@ -2,6 +2,8 @@
 GH-16414 (zend_test.observer.observe_function_names may segfault)
 --EXTENSIONS--
 zend_test
+--INI--
+zend_test.observer.enabled=0
 --FILE--
 <?php
 function bar() {}
