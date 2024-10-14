@@ -1,5 +1,5 @@
 --TEST--
-jump 10: goto with try blocks
+jump 13: goto with try blocks
 --FILE--
 <?php
 goto a;
