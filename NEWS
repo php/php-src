@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug GH-16318 (Recursive array segfaults soap encoding). (nielsdos)
+  . Fixed bug GH-16429 (Segmentation fault access null pointer in SoapClient).
+    (nielsdos)
 
 - Sockets:
   . Fixed bug with overflow socket_recvfrom $length argument. (David Carlier)
