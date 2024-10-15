@@ -710,23 +710,6 @@ static PHP_INI_MH(OnUpdateCookieLifetime) /* {{{ */
 }
 /* }}} */
 
-static PHP_INI_MH(OnUpdateCacheExpire)
-{
-	SESSION_CHECK_ACTIVE_STATE;
-	SESSION_CHECK_OUTPUT_STATE;
-
-#ifdef ZEND_ENABLE_ZVAL_LONG64
-	const zend_long maxexpire = ((ZEND_LONG_MAX - INT_MAX) / 60) - 1;
-#else
-	const zend_long maxexpire = ((ZEND_LONG_MAX / 2) / 60) - 1;
-#endif
-	zend_long v = (zend_long)atol(ZSTR_VAL(new_value));
-	if (v < 0 || v > maxexpire) {
-		return SUCCESS;
-	}
-	return OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-}
-
 
 static PHP_INI_MH(OnUpdateSessionLong) /* {{{ */
 {
@@ -835,7 +818,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.use_strict_mode",  "0",         PHP_INI_ALL, OnUpdateSessionBool,   use_strict_mode,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateSessionString, extern_referer_chk, php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateSessionString, cache_limiter,      php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateCacheExpire,   cache_expire,       php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateSessionLong,   cache_expire,       php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_trans_sid",    "0",         PHP_INI_ALL, OnUpdateSessionBool,   use_trans_sid,      php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.sid_length",             "32",        PHP_INI_ALL, OnUpdateSidLength)
 	PHP_INI_ENTRY("session.sid_bits_per_character", "4",         PHP_INI_ALL, OnUpdateSidBits)
@@ -1192,10 +1175,24 @@ CACHE_LIMITER_FUNC(public) /* {{{ */
 {
 	char buf[MAX_STR + 1];
 	struct timeval tv;
-	time_t now;
+	time_t now, max;
 
 	gettimeofday(&tv, NULL);
-	now = tv.tv_sec + PS(cache_expire) * 60;
+	zend_long cache_expire = PS(cache_expire);
+
+	if (sizeof(time_t) == 8 || sizeof(time_t) == 4) {
+		max = (time_t)((zend_ulong)~0 >> 1);
+	} else {
+		max = (time_t)((~(time_t)0) >> 1);
+	}
+
+	if (cache_expire < 0) {
+		now = tv.tv_sec;
+	} else if ((cache_expire / 60) > (max - (zend_long)max)) {
+		now = max;
+	} else {
+		now = tv.tv_sec + cache_expire * 60;
+	}
 	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_HEADER(buf);
