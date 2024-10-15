@@ -128,10 +128,10 @@ PHP 8.4 UPGRADE NOTES
   . XMLReader:
     . Passing an invalid character encoding to XMLReader::open() or
       XMLReader::XML() now throws a ValueError.
-    . Passing a string containing NULL bytes previously emitted a
+    . Passing a string containing null bytes previously emitted a
       warning and now throws a ValueError as well.
   . XMLWriter:
-    . Passing a string containing NULL bytes previously emitted a
+    . Passing a string containing null bytes previously emitted a
       warning and now throws a ValueError as well.
   . XSL:
     . XSLTProcessor::setParameter() will now throw a ValueError when its
