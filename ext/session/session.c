@@ -132,6 +132,18 @@ static inline void php_session_headers_already_sent_error(int severity, const ch
 }
 /* }}} */
 
+static inline void php_session_session_already_started_error(int severity, const char *message) { /* {{{ */
+	if (PS(session_started_filename) != NULL) {
+		php_error_docref(NULL, severity, "%s (started from %s on line %"PRIu32")", message, ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
+	} else if (PS(auto_start)) {
+		/* This option can't be changed at runtime, so we can assume it's because of this */
+		php_error_docref(NULL, severity, "%s (session started automatically)", message);
+	} else {
+		php_error_docref(NULL, severity, "%s", message);
+	}
+}
+/* }}} */
+
 static inline void php_session_cleanup_filename(void) /* {{{ */
 {
 	if (PS(session_started_filename)) {
@@ -1603,14 +1615,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 
 	switch (PS(session_status)) {
 		case php_session_active:
-			if (PS(session_started_filename)) {
-				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started (started from %s on line %"PRIu32")", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
-			} else if (PS(auto_start)) {
-				/* This option can't be changed at runtime, so we can assume it's because of this */
-				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started automatically");
-			} else {
-				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
-			}
+			php_session_session_already_started_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
 			return FAILURE;
 			break;
 
@@ -2634,14 +2639,7 @@ PHP_FUNCTION(session_start)
 	}
 
 	if (PS(session_status) == php_session_active) {
-		if (PS(session_started_filename)) {
-			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active (started from %s on line %"PRIu32")", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
-		} else if (PS(auto_start)) {
-			/* This option can't be changed at runtime, so we can assume it's because of this */
-			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already automatically active");
-		} else {
-			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active");
-		}
+		php_session_session_already_started_error(E_NOTICE, "Ignoring session_start() because a session is already active");
 		RETURN_TRUE;
 	}
 
