@@ -42,7 +42,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_tim
 {
 	void **run_time_cache;
 
-	if (!RUN_TIME_CACHE(op_array)) {
+	if (op_array->type == ZEND_USER_FUNCTION && !RUN_TIME_CACHE(op_array)) {
 		run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 		memset(run_time_cache, 0, op_array->cache_size);
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
