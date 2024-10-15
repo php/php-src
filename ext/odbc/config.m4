@@ -428,11 +428,16 @@ if test -n "$ODBC_TYPE"; then
 
   AC_DEFINE([HAVE_UODBC], [1],
     [Define to 1 if the PHP extension 'odbc' is available.])
+  AC_DEFINE_UNQUOTED([PHP_ODBC_CFLAGS], ["$ODBC_CFLAGS"],
+    [The compile options that PHP odbc extension was built with.])
+  AC_DEFINE_UNQUOTED([PHP_ODBC_LIBS], ["$ODBC_LIBS"],
+    [The libraries linker flags that PHP odbc extension was built with.])
+  AC_DEFINE_UNQUOTED([PHP_ODBC_LFLAGS], ["$ODBC_LFLAGS"],
+    [The linker flags that PHP odbc extension was built with.])
+  AC_DEFINE_UNQUOTED([PHP_ODBC_TYPE], ["$ODBC_TYPE"],
+    [The ODBC library used in the PHP odbc extension.])
+
   PHP_SUBST([ODBC_SHARED_LIBADD])
-  AC_SUBST([ODBC_CFLAGS])
-  AC_SUBST([ODBC_LIBS])
-  AC_SUBST([ODBC_LFLAGS])
-  AC_SUBST([ODBC_TYPE])
 
   PHP_NEW_EXTENSION([odbc],
     [php_odbc.c odbc_utils.c],
