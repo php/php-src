@@ -9108,6 +9108,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 			if (fn->common.scope == op_array->scope
 			 || (fn->common.fn_flags & ZEND_ACC_PUBLIC)
 			 || ((fn->common.fn_flags & ZEND_ACC_PROTECTED)
+			  && op_array->scope
 			  && instanceof_function_slow(op_array->scope, fn->common.scope))) {
 				func = fn;
 			}
@@ -15823,6 +15824,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 				if (prop_info->ce == op_array->scope
 				 || (prop_info->flags & ZEND_ACC_PUBLIC)
 				 || ((prop_info->flags & ZEND_ACC_PROTECTED)
+				  && op_array->scope
 				  && instanceof_function_slow(op_array->scope, prop_info->ce))) {
 					known_prop_info = prop_info;
 				}
