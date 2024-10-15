@@ -3002,6 +3002,18 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 					const zend_function *fn = prop_info->hooks[i];
 					if (fn && (fn->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 						zend_verify_abstract_class_function(fn, &ai);
+						// Short-circuit on enums that cannot have hooked
+						// properties
+						if (ce->ce_flags & ZEND_ACC_ENUM) {
+							zend_error_noreturn(
+								E_ERROR,
+								"Enum %s cannot implement interface %s that contains hooked property %s::$%s",
+								ZSTR_VAL(ce->name),
+								ZSTR_VAL(prop_info->ce->name),
+								ZSTR_VAL(prop_info->ce->name),
+								ZSTR_VAL(prop_info->name)
+							);
+						}
 					}
 				}
 			}
