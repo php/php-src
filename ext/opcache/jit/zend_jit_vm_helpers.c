@@ -508,15 +508,6 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 		}
 
 		func = call->func;
-		if (func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)) {
-			/* TODO: Can we continue recording ??? */
-			return -1;
-		}
-		/* Function is a property hook. */
-		if (func->common.prop_info) {
-			/* TODO: Can we continue recording ??? */
-			return -1;
-		}
 		if (func->type == ZEND_INTERNAL_FUNCTION
 		 && (func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE))) {
 			return -1;
@@ -524,7 +515,7 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 		if (func->type == ZEND_USER_FUNCTION) {
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&func->op_array);
-            if (UNEXPECTED(!jit_extension && (func->op_array.fn_flags & ZEND_ACC_CLOSURE))
+			if (UNEXPECTED(!jit_extension && (func->op_array.fn_flags & ZEND_ACC_CLOSURE))
 			 || (jit_extension && !(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))
 			 || (func->op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 				return -1;
@@ -533,7 +524,13 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 				func = (zend_function*)jit_extension->op_array;
 			}
 		}
-		if (is_megamorphic == ZEND_JIT_EXIT_POLYMORPHISM
+
+		if ((func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
+		 || (func->common.fn_flags & ZEND_ACC_NEVER_CACHE)
+		 || func->common.prop_info) {
+			/* continue recording */
+			func = NULL;
+		} else if (is_megamorphic == ZEND_JIT_EXIT_POLYMORPHISM
 		 /* TODO: use more accurate check ??? */
 		 && ((ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
 		  || func->common.scope)) {
