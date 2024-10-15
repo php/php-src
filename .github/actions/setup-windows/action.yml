@@ -12,18 +12,17 @@ runs:
       if: steps.cache-mariadb.outputs.cache-hit != 'true'
       shell: cmd
       run: |
-        curl -sLo MariaDB.zip https://downloads.mariadb.org/rest-api/mariadb/10.5.26/mariadb-10.5.26-winx64.zip
-        7z x -oC:\MariaDB MariaDB.zip
-        C:\MariaDB\bin\mariadb-install-db.exe
-        start /b C:\MariaDB\bin\mysqld.exe --port=3306
-        C:\MariaDB\bin\mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
-        echo MariaDB setup and running
+        curl -sLO https://downloads.mariadb.org/rest-api/mariadb/10.5.26/mariadb-10.5.26-winx64.zip
+        7z x -oC: -spe mariadb-10.5.26-winx64.zip
+        C:\mariadb-10.5.26-winx64\bin\mariadb-install-db.exe
+        start /b C:\mariadb-10.5.26-winx64\bin\mysqld.exe --port=3306
+        C:\mariadb-10.5.26-winx64\bin\mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
+        taskkill /f /im mysqld.exe
+        ren C:\mariadb-10.5.26-winx64 MariaDB
     - name: Start MariaDB
-      if: steps.cache-mariadb.outputs.cache-hit == 'true'
       shell: cmd
       run: |
         start /b C:\MariaDB\bin\mysqld.exe --port=3306
-        echo MariaDB running
     - name: Setup MSSQL
       shell: pwsh
       run: |
