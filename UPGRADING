@@ -96,8 +96,8 @@ PHP 8.4 UPGRADE NOTES
     . mb_http_output() now checks that the $encoding parameter does not
       contain any null bytes. If it does, a ValueError is now thrown.
   . ODBC:
-    . odbc_fetch_row() returns false when a value less than or equal to 0 is
-      passed for parameter $row. Now, a warning is emitted in this case.
+    . odbc_fetch_row() now emits a warning when a value less than or equal to 0 is
+      passed for parameter $row.
   . PCNTL:
     . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
       pcntl_sigtimedwait() now throw:
