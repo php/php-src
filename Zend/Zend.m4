@@ -1,6 +1,29 @@
 dnl This file contains Zend specific autoconf macros.
 
 dnl
+dnl ZEND_CHECK_TYPEDEF_REDECL
+dnl
+dnl Check whether the compiler supports typedef redeclaractions. For example,
+dnl GCC 4.2 on Mac OS X 10.6 emits a redefinition of typedef error by default.
+dnl
+AC_DEFUN([ZEND_CHECK_TYPEDEF_REDECL], [dnl
+AC_CACHE_CHECK([if compiler allows typedef redeclarations],
+  [php_cv_have_typedef_redecl],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([], [dnl
+    typedef int mytype;
+    typedef int mytype;
+    mytype var;
+    (void)var;
+  ])],
+  [php_cv_have_typedef_redecl=yes],
+  [php_cv_have_typedef_redecl=no])])
+AS_VAR_IF([php_cv_have_typedef_redecl], [no],
+  [AC_MSG_FAILURE(m4_text_wrap([
+    Compiler does not support typedef redeclarations. Does it support C11?
+  ]))])
+])
+
+dnl
 dnl ZEND_CHECK_FLOAT_PRECISION
 dnl
 dnl x87 floating point internal precision control checks
@@ -160,6 +183,7 @@ AC_CHECK_FUNC([sigsetjmp],,
     [AC_MSG_FAILURE([Required sigsetjmp not found.])],
     [#include <setjmp.h>])])
 
+ZEND_CHECK_TYPEDEF_REDECL
 ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
 ZEND_DLSYM_CHECK
@@ -208,6 +232,10 @@ AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes],
   [-Werror])
 AX_CHECK_COMPILE_FLAG([-fno-common],
   [CFLAGS="-fno-common $CFLAGS"],,
+  [-Werror])
+dnl Suppress the Clang typedef redefinition warnings if it has enabled C99 mode.
+AX_CHECK_COMPILE_FLAG([-Wno-typedef-redefinition],
+  [CFLAGS="$CFLAGS -Wno-typedef-redefinition"],,
   [-Werror])
 
 ZEND_CHECK_ALIGNMENT
