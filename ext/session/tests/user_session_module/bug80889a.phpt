@@ -33,6 +33,6 @@ var_dump($initHandler, $setHandler);
 --EXPECTF--
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 
-Warning: session_set_save_handler(): Session save handler cannot be changed after headers have already been sent in %s on line %d
+Warning: session_set_save_handler(): Session save handler cannot be changed after headers have already been sent (sent from %s on line %d) in %s on line %d
 string(8) "whatever"
 string(8) "whatever"

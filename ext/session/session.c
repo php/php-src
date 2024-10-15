@@ -89,7 +89,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 
 #define SESSION_CHECK_OUTPUT_STATE										\
 	if (SG(headers_sent) && stage != ZEND_INI_STAGE_DEACTIVATE) {												\
-		php_error_docref(NULL, E_WARNING, "Session ini settings cannot be changed after headers have already been sent");	\
+		php_session_headers_already_sent_error(E_WARNING, "Session ini settings cannot be changed after headers have already been sent");	\
 		return FAILURE;													\
 	}
 
@@ -118,6 +118,17 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	PS(session_vars) = NULL;
 	PS(module_number) = my_module_number;
 	ZVAL_UNDEF(&PS(http_session_vars));
+}
+/* }}} */
+
+static inline void php_session_headers_already_sent_error(int severity, const char *message) { /* {{{ */
+	const char *output_start_filename = php_output_get_start_filename();
+	int output_start_lineno = php_output_get_start_lineno();
+	if (output_start_filename != NULL) {
+		php_error_docref(NULL, severity, "%s (sent from %s on line %d)", message, output_start_filename, output_start_lineno);
+	} else {
+		php_error_docref(NULL, severity, "%s", message);
+	}
 }
 /* }}} */
 
@@ -1327,15 +1338,8 @@ static int php_session_cache_limiter(void) /* {{{ */
 	if (PS(session_status) != php_session_active) return -1;
 
 	if (SG(headers_sent)) {
-		const char *output_start_filename = php_output_get_start_filename();
-		int output_start_lineno = php_output_get_start_lineno();
-
 		php_session_abort();
-		if (output_start_filename) {
-			php_error_docref(NULL, E_WARNING, "Session cache limiter cannot be sent after headers have already been sent (output started at %s:%d)", output_start_filename, output_start_lineno);
-		} else {
-			php_error_docref(NULL, E_WARNING, "Session cache limiter cannot be sent after headers have already been sent");
-		}
+		php_session_headers_already_sent_error(E_WARNING, "Session cache limiter cannot be sent after headers have already been sent");
 		return -2;
 	}
 
@@ -1404,14 +1408,7 @@ static zend_result php_session_send_cookie(void) /* {{{ */
 	zend_string *e_id;
 
 	if (SG(headers_sent)) {
-		const char *output_start_filename = php_output_get_start_filename();
-		int output_start_lineno = php_output_get_start_lineno();
-
-		if (output_start_filename) {
-			php_error_docref(NULL, E_WARNING, "Session cookie cannot be sent after headers have already been sent (output started at %s:%d)", output_start_filename, output_start_lineno);
-		} else {
-			php_error_docref(NULL, E_WARNING, "Session cookie cannot be sent after headers have already been sent");
-		}
+		php_session_headers_already_sent_error(E_WARNING, "Session cookie cannot be sent after headers have already been sent");
 		return FAILURE;
 	}
 
@@ -1801,7 +1798,7 @@ PHP_FUNCTION(session_set_cookie_params)
 	}
 
 	if (SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session cookie parameters cannot be changed after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session cookie parameters cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -1973,7 +1970,7 @@ PHP_FUNCTION(session_name)
 	}
 
 	if (name && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session name cannot be changed after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session name cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2003,7 +2000,7 @@ PHP_FUNCTION(session_module_name)
 	}
 
 	if (name && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session save handler module cannot be changed after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session save handler module cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2044,7 +2041,7 @@ static bool can_session_handler_be_changed(void) {
 	}
 
 	if (SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session save handler cannot be changed after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session save handler cannot be changed after headers have already been sent");
 		return false;
 	}
 
@@ -2284,7 +2281,7 @@ PHP_FUNCTION(session_save_path)
 	}
 
 	if (name && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session save path cannot be changed after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session save path cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2313,7 +2310,7 @@ PHP_FUNCTION(session_id)
 	}
 
 	if (name && PS(use_cookies) && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session ID cannot be changed after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session ID cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2355,7 +2352,7 @@ PHP_FUNCTION(session_regenerate_id)
 	}
 
 	if (SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session ID cannot be regenerated after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session ID cannot be regenerated after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2526,7 +2523,7 @@ PHP_FUNCTION(session_cache_limiter)
 	}
 
 	if (limiter && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session cache limiter cannot be changed after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session cache limiter cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2556,7 +2553,7 @@ PHP_FUNCTION(session_cache_expire)
 	}
 
 	if (!expires_is_null && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session cache expiration cannot be changed after headers have already been sent");
+		php_session_headers_already_sent_error(E_WARNING, "Session cache expiration cannot be changed after headers have already been sent");
 		RETURN_FALSE;
 	}
 
@@ -2654,14 +2651,7 @@ PHP_FUNCTION(session_start)
 	 * module is unable to rewrite output.
 	 */
 	if (PS(use_cookies) && SG(headers_sent)) {
-		/* It's the header sent to blame, not the session in this case */
-		const char *output_start_filename = php_output_get_start_filename();
-		int output_start_lineno = php_output_get_start_lineno();
-		if (output_start_filename != NULL) {
-			php_error_docref(NULL, E_WARNING, "Session cannot be started after headers have already been sent (sent from %s on line %d)", output_start_filename, output_start_lineno);
-		} else {
-			php_error_docref(NULL, E_WARNING, "Session cannot be started after headers have already been sent");
-		}
+		php_session_headers_already_sent_error(E_WARNING, "Session cannot be started after headers have already been sent");
 		RETURN_FALSE;
 	}
 
