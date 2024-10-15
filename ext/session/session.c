@@ -83,7 +83,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 
 #define SESSION_CHECK_ACTIVE_STATE	\
 	if (PS(session_status) == php_session_active) {	\
-		php_error_docref(NULL, E_WARNING, "Session ini settings cannot be changed when a session is active");	\
+		php_session_session_already_started_error(E_WARNING, "Session ini settings cannot be changed when a session is active");	\
 		return FAILURE;	\
 	}
 
@@ -1798,7 +1798,7 @@ PHP_FUNCTION(session_set_cookie_params)
 	}
 
 	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session cookie parameters cannot be changed when a session is active");
+		php_session_session_already_started_error(E_WARNING, "Session cookie parameters cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
@@ -1970,7 +1970,7 @@ PHP_FUNCTION(session_name)
 	}
 
 	if (name && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session name cannot be changed when a session is active");
+		php_session_session_already_started_error(E_WARNING, "Session name cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
@@ -2000,7 +2000,7 @@ PHP_FUNCTION(session_module_name)
 	}
 
 	if (name && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session save handler module cannot be changed when a session is active");
+		php_session_session_already_started_error(E_WARNING, "Session save handler module cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
@@ -2041,7 +2041,7 @@ PHP_FUNCTION(session_module_name)
 
 static bool can_session_handler_be_changed(void) {
 	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session save handler cannot be changed when a session is active");
+		php_session_session_already_started_error(E_WARNING, "Session save handler cannot be changed when a session is active");
 		return false;
 	}
 
@@ -2281,7 +2281,7 @@ PHP_FUNCTION(session_save_path)
 	}
 
 	if (name && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session save path cannot be changed when a session is active");
+		php_session_session_already_started_error(E_WARNING, "Session save path cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
@@ -2310,7 +2310,7 @@ PHP_FUNCTION(session_id)
 	}
 
 	if (name && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session ID cannot be changed when a session is active");
+		php_session_session_already_started_error(E_WARNING, "Session ID cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
@@ -2352,7 +2352,7 @@ PHP_FUNCTION(session_regenerate_id)
 	}
 
 	if (PS(session_status) != php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session ID cannot be regenerated when there is no active session");
+		php_session_session_already_started_error(E_WARNING, "Session ID cannot be regenerated when there is no active session");
 		RETURN_FALSE;
 	}
 
@@ -2523,7 +2523,7 @@ PHP_FUNCTION(session_cache_limiter)
 	}
 
 	if (limiter && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session cache limiter cannot be changed when a session is active");
+		php_session_session_already_started_error(E_WARNING, "Session cache limiter cannot be changed when a session is active");
 		RETURN_FALSE;
 	}
 
@@ -2553,7 +2553,7 @@ PHP_FUNCTION(session_cache_expire)
 	}
 
 	if (!expires_is_null && PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Session cache expiration cannot be changed when a session is active");
+		php_session_session_already_started_error(E_WARNING, "Session cache expiration cannot be changed when a session is active");
 		RETURN_LONG(PS(cache_expire));
 	}
 
