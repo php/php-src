@@ -649,6 +649,10 @@ static void zend_weakmap_iterator_get_current_key(zend_object_iterator *obj_iter
 	zend_string *string_key;
 	zend_ulong num_key;
 	int key_type = zend_hash_get_current_key_ex(&wm->ht, &string_key, &num_key, pos);
+	if (key_type == HASH_KEY_NON_EXISTENT) {
+		ZVAL_NULL(key);
+		return;
+	}
 	if (key_type != HASH_KEY_IS_LONG) {
 		ZEND_ASSERT(0 && "Must have integer key");
 	}
