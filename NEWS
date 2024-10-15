@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - GMP:
   . Fixed floating point exception bug with gmp_pow when using
     large exposant values. (David Carlier).
+  . Fixed bug GH-16411 (gmp_export() can cause overflow). (cmb)
 
 - MBstring:
   . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
