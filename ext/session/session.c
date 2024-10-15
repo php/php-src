@@ -1175,16 +1175,16 @@ CACHE_LIMITER_FUNC(public) /* {{{ */
 {
 	char buf[MAX_STR + 1];
 	struct timeval tv;
-	time_t now, max;
+	time_t now;
 
 	gettimeofday(&tv, NULL);
 	zend_long cache_expire = PS(cache_expire);
 
-	if (sizeof(time_t) == 8 || sizeof(time_t) == 4) {
-		max = (time_t)((zend_ulong)~0 >> 1);
-	} else {
-		max = (time_t)((~(time_t)0) >> 1);
-	}
+#if SIZEOF_TIME_T == 4 || SIZEOF_TIME_T == 8
+	const time_t max = (time_t)((zend_ulong)~0 >> 1);
+#else
+	const time_t max = (time_t)((~(time_t)0) >> 1);
+#endif
 
 	if (cache_expire < 0) {
 		now = tv.tv_sec;
