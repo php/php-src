@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-16168 (php 8.1 and earlier crash immediately when compiled
     with Xcode 16 clang on macOS 15). (nielsdos)
+  . Fixed bug GH-16371 (Assertion failure in Zend/zend_weakrefs.c:646). (Arnaud)
 
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
