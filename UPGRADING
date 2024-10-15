@@ -53,77 +53,93 @@ PHP 8.4 UPGRADE NOTES
   Return value checks using is_resource() should be replaced with checks
   for `false`, unless specified otherwise.
   . DBA:
-    > dba_open() and dba_popen() will now return Dba\Connection
+    . dba_open() and dba_popen() will now return Dba\Connection
   . ODBC:
-    > odbc_connect() and odbc_pconnect() will now return Odbc\Connection
-    > odbc_prepare(), odbc_exec(), and various other functions will now return
+    . odbc_connect() and odbc_pconnect() will now return Odbc\Connection
+    . odbc_prepare(), odbc_exec(), and various other functions will now return
       Odbc\Result
   . SOAP:
-    > SoapClient::$httpurl is now a Soap\Url object rather than a resource.
+    . SoapClient::$httpurl is now a Soap\Url object rather than a resource.
       Checks using is_resource() (i.e. is_resource($client->httpurl)) should be
       replaced with checks for null (i.e. $client->httpurl !== null).
-    > SoapClient::$sdl is now a Soap\Sdl object rather than a resource.
+    . SoapClient::$sdl is now a Soap\Sdl object rather than a resource.
       Checks using is_resource() (i.e. is_resource($client->sdl)) should be
       replaced with checks for null (i.e. $client->sdl !== null).
 
 - New warnings and exceptions:
+  . Curl:
+    . curl_multi_select throws a ValueError if the timeout argument if it's negative
+      or greater than PHP_INT_MAX.
+  . GD:
+    . imagejpeg/imagewebp/imagepng/imageavif throws an exception if an invalid
+      quality parameter value is passed. In addition, imageavif will throw an exception
+      if an invalid speed parameter value is passed.
+    . imagescale throws an exception if the width/height argument underflows/overflows or
+      if the mode argument is invalid.
+      imagefilter with IMG_FILTER_SCATTER throws an exception if the sub/plus arguments
+      underflows/overflows.
+  . Gettext:
+    . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
+      if the domain argument is empty.
   . Intl:
-    > resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
+    . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
       ResourceBundle object now throw:
       - TypeError for invalid offset types
       - ValueError for an empty string
       - ValueError if the integer index does not fit in a signed 32 bit integer
+    . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
+    . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
   . MBString:
-    > mb_encode_numericentity() and mb_decode_numericentity() now check that
+    . mb_encode_numericentity() and mb_decode_numericentity() now check that
       the $map is only composed of integers, if not a ValueError is thrown.
-    > mb_http_input() now always throws a ValueError if the $type is invalid.
-    > mb_http_output() now checks that the $encoding parameter does not
+    . mb_http_input() now always throws a ValueError if the $type is invalid.
+    . mb_http_output() now checks that the $encoding parameter does not
       contain any null bytes. If it does, a ValueError is now thrown.
   . ODBC:
-    > odbc_fetch_row() returns false when a value less than or equal to 0 is
+    . odbc_fetch_row() returns false when a value less than or equal to 0 is
       passed for parameter $row. Now, a warning is emitted in this case.
   . PCNTL:
-    > The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
+    . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
       pcntl_sigtimedwait() now throw:
       - A ValueError if the $signals array is empty (except for
         pcntl_sigprocmask() if the $mode is SIG_SETMASK).
       - A TypeError if a value of the $signals array is not an integer
       - A ValueError if a value of the $signals array is not a valid signal number
-    > The function pcntl_sigprocmask() now throw:
+    . The function pcntl_sigprocmask() now throw:
       - A ValueError if $mode is not one of SIG_BLOCK, SIG_UNBLOCK, or SIG_SETMASK
-    > The function pcntl_sigtimedwait() now throw:
+    . The function pcntl_sigtimedwait() now throw:
       - A ValueError if $seconds is less than 0
       - A ValueError if $nanoseconds is less than 0 or greater than 1e9
       - A ValueError if both $seconds and $nanoseconds are 0
   . SimpleXML:
-    > Calling simplexml_import_dom() with a non-XML object now throws a
+    . Calling simplexml_import_dom() with a non-XML object now throws a
       TypeError instead of a ValueError.
   . Standard:
-    > round() now validates the value of the $mode parameter and throws a
+    . round() now validates the value of the $mode parameter and throws a
       ValueError for invalid modes. Previously invalid modes would have been
       interpreted as PHP_ROUND_HALF_UP.
-    > The str_getcsv() function now throws ValueErrors when the $separator and
+    . The str_getcsv() function now throws ValueErrors when the $separator and
       $enclosure arguments are not one byte long, or if the $escape is not one
       byte long or the empty string. This aligns the behaviour to be identical
       to that of fputcsv() and fgetcsv().
-    > php_uname() now throws ValueErrors if the $move parameter is invalid.
-    > The "allowed_classes" option for unserialize() now throws TypeErrors and
+    . php_uname() now throws ValueErrors if the $move parameter is invalid.
+    . The "allowed_classes" option for unserialize() now throws TypeErrors and
       ValueErrors if it is not an array of class names.
   . XMLReader:
-    > Passing an invalid character encoding to XMLReader::open() or
+    . Passing an invalid character encoding to XMLReader::open() or
       XMLReader::XML() now throws a ValueError.
-    > Passing a string containing NULL bytes previously emitted a
+    . Passing a string containing NULL bytes previously emitted a
       warning and now throws a ValueError as well.
   . XMLWriter:
-    > Passing a string containing NULL bytes previously emitted a
+    . Passing a string containing NULL bytes previously emitted a
       warning and now throws a ValueError as well.
   . XSL:
-    > XSLTProcessor::setParameter() will now throw a ValueError when its
+    . XSLTProcessor::setParameter() will now throw a ValueError when its
       arguments contain null bytes. This never actually worked correctly in
       the first place, which is why it throws an exception nowadays.
-    > Calling XSLTProcessor::importStyleSheet() with a non-XML object now
+    . Calling XSLTProcessor::importStyleSheet() with a non-XML object now
       throws a TypeError instead of a ValueError.
-    > Failure to call a PHP function callback during evaluation now throws
+    . Failure to call a PHP function callback during evaluation now throws
       instead of emitting a warning.
       RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
@@ -607,34 +623,15 @@ PHP 8.4 UPGRADE NOTES
   . trigger_error() and user_error() now have a return type of true instead of
     bool.
 
-- Curl:
-  . curl_multi_select throws a ValueError if the timeout argument if it's negative
-    or greater than PHP_INT_MAX.
-
 - DOM:
   . DOMDocument::registerNodeClass() now has a tentative return type of true.
     Previously, the return type was bool but only true could be returned in practice.
-
-- GD:
-  . imagejpeg/imagewebp/imagepng/imageavif throws an exception if an invalid
-    quality parameter value is passed. In addition, imageavif will throw an exception
-    if an invalid speed parameter value is passed.
-  . imagescale throws an exception if the width/height argument underflows/overflows or
-    if the mode argument is invalid.
-    imagefilter with IMG_FILTER_SCATTER throws an exception if the sub/plus arguments
-    underflows/overflows.
-
-- Gettext:
-  . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
-    if the domain argument is empty.
 
 - Hash:
   . Changed the return type of hash_update() to true. It was already the case that only
     true could be returned, but the stub was not updated yet.
 
 - Intl:
-  . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
-  . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
   . NumberFormatter::ROUND_TOWARD_ZERO and NumberFormatter::ROUND_AWAY_FROM_ZERO
     have been added as aliases for NumberFormatter::ROUND_DOWN and
     NumberFormatter::ROUND_UP to be consistent with the new PHP_ROUND_* modes.
