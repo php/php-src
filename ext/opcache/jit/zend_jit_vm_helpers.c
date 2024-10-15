@@ -510,22 +510,21 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 		func = call->func;
 		if (func->type == ZEND_INTERNAL_FUNCTION
 		 && (func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE))) {
-			return -1;
-		}
-		if (func->type == ZEND_USER_FUNCTION) {
+			func = NULL;
+		} else if (func->type == ZEND_USER_FUNCTION) {
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&func->op_array);
 			if (UNEXPECTED(!jit_extension && (func->op_array.fn_flags & ZEND_ACC_CLOSURE))
 			 || (jit_extension && !(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))
 			 || (func->op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
-				return -1;
-			}
-			if (func->op_array.fn_flags & ZEND_ACC_CLOSURE) {
+				func = NULL;
+			} else if (func->op_array.fn_flags & ZEND_ACC_CLOSURE) {
 				func = (zend_function*)jit_extension->op_array;
 			}
 		}
 
-		if ((func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
+		if (!func
+		 || (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
 		 || (func->common.fn_flags & ZEND_ACC_NEVER_CACHE)
 		 || func->common.prop_info) {
 			/* continue recording */
@@ -961,7 +960,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			if (UNEXPECTED(!jit_extension)
-			 || UNEXPECTED(!(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))) {
+			 || UNEXPECTED(!(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))
+			 || (op_array->fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 				stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 				break;
 			}
@@ -1108,19 +1108,15 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				func = EX(call)->func;
 				if (func->type == ZEND_INTERNAL_FUNCTION
 				 && (func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE))) {
-					stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
-					break;
-				}
-				if (func->type == ZEND_USER_FUNCTION) {
+					func = NULL;
+				} else if (func->type == ZEND_USER_FUNCTION) {
 					jit_extension =
 						(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&func->op_array);
 					if (UNEXPECTED(!jit_extension && (func->op_array.fn_flags & ZEND_ACC_CLOSURE))
 					 || (jit_extension && !(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))
 					 || (func->op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
-						stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
-						break;
-					}
-					if (func->op_array.fn_flags & ZEND_ACC_CLOSURE) {
+						func = NULL;
+					} else if (func->op_array.fn_flags & ZEND_ACC_CLOSURE) {
 						func = (zend_function*)jit_extension->op_array;
 					}
 				}
@@ -1129,7 +1125,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				opline = EX(opline);
 #endif
 
-				if ((func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
+				if (!func
+				 || (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
 				 || (func->common.fn_flags & ZEND_ACC_NEVER_CACHE)
 				 || func->common.prop_info) {
 					/* continue recording */
