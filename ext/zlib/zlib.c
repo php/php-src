@@ -815,6 +815,8 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 							result = 0;
 							break;
 						}
+						*dictlen += ZSTR_LEN(string) + 1;
+						strings[total++] = string;
 						if (ZSTR_LEN(string) == 0) {
 							result = 0;
 							zend_argument_value_error(2, "must not contain empty strings");
@@ -825,10 +827,6 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 							zend_argument_value_error(2, "must not contain strings with null bytes");
 							break;
 						}
-
-						*dictlen += ZSTR_LEN(string) + 1;
-						strings[total] = string;
-						total++;
 					} ZEND_HASH_FOREACH_END();
 
 					char *dictptr = emalloc(*dictlen);
