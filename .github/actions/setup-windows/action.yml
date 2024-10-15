@@ -14,11 +14,11 @@ runs:
       run: |
         curl -sLO https://downloads.mariadb.org/rest-api/mariadb/10.5.26/mariadb-10.5.26-winx64.zip
         7z x -oC: -spe mariadb-10.5.26-winx64.zip
-        C:\mariadb-10.5.26-winx64\bin\mariadb-install-db.exe
-        start /b C:\mariadb-10.5.26-winx64\bin\mysqld.exe --port=3306
-        C:\mariadb-10.5.26-winx64\bin\mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
-        taskkill /f /im mysqld.exe
         ren C:\mariadb-10.5.26-winx64 MariaDB
+        C:\MariaDB\bin\mariadb-install-db.exe
+        start /b C:\MariaDB\bin\mysqld.exe --port=3306
+        C:\MariaDB\bin\mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
+        taskkill /f /im mysqld.exe
     - name: Start MariaDB
       shell: cmd
       run: |
