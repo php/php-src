@@ -4213,16 +4213,19 @@ static void zend_jit_cleanup_func_info(zend_op_array *op_array)
 	}
 }
 
-static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, const zend_op *rt_opline)
+static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, const zend_op *rt_opline, uint8_t trigger)
 {
 	zend_ssa ssa;
 	void *checkpoint;
 	zend_func_info *func_info;
+	uint8_t orig_trigger;
 
 	if (*dasm_ptr == dasm_end) {
 		return FAILURE;
 	}
 
+	orig_trigger = JIT_G(trigger);
+	JIT_G(trigger) = trigger;
 	checkpoint = zend_arena_checkpoint(CG(arena));
 
 	/* Build SSA */
@@ -4255,11 +4258,13 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 
 	zend_jit_cleanup_func_info(op_array);
 	zend_arena_release(&CG(arena), checkpoint);
+	JIT_G(trigger) = orig_trigger;
 	return SUCCESS;
 
 jit_failure:
 	zend_jit_cleanup_func_info(op_array);
 	zend_arena_release(&CG(arena), checkpoint);
+	JIT_G(trigger) = orig_trigger;
 	return FAILURE;
 }
 
@@ -4290,7 +4295,7 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 			opline->handler = jit_extension->orig_handler;
 
 			/* perform real JIT for this function */
-			zend_real_jit_func(op_array, NULL, NULL);
+			zend_real_jit_func(op_array, NULL, NULL, ZEND_JIT_ON_FIRST_EXEC);
 		} zend_catch {
 			do_bailout = true;
 		} zend_end_try();
@@ -4336,7 +4341,7 @@ void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
 			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
 			opline->handler = jit_extension->orig_handler;
 			if (((double)counter / (double)zend_jit_profile_counter) > JIT_G(prof_threshold)) {
-				zend_real_jit_func(op_array, NULL, NULL);
+				zend_real_jit_func(op_array, NULL, NULL, ZEND_JIT_ON_PROF_REQUEST);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -4362,7 +4367,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 			}
 
 			/* perform real JIT for this function */
-			zend_real_jit_func(op_array, NULL, opline);
+			zend_real_jit_func(op_array, NULL, opline, ZEND_JIT_ON_HOT_COUNTERS);
 		} zend_catch {
 			do_bailout = 1;
 		} zend_end_try();
@@ -4530,7 +4535,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 		return zend_jit_setup_hot_trace_counters(op_array);
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD) {
-		return zend_real_jit_func(op_array, script, NULL);
+		return zend_real_jit_func(op_array, script, NULL, ZEND_JIT_ON_SCRIPT_LOAD);
 	} else {
 		ZEND_UNREACHABLE();
 	}
