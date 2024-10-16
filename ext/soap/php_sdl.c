@@ -810,7 +810,6 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 				if (tmpbinding->bindingType == BINDING_SOAP) {
 					sdlSoapBindingPtr soapBinding;
 					xmlNodePtr soapBindingNode;
-					xmlAttrPtr tmp;
 
 					soapBinding = emalloc(sizeof(sdlSoapBinding));
 					memset(soapBinding, 0, sizeof(sdlSoapBinding));
@@ -818,14 +817,14 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 					soapBindingNode = get_node_ex(binding->children, "binding", wsdl_soap_namespace);
 					if (soapBindingNode) {
-						tmp = get_attribute(soapBindingNode->properties, "style");
-						if (tmp && !strncmp((char*)tmp->children->content, "rpc", sizeof("rpc"))) {
+						xmlAttrPtr styleAttribute = get_attribute(soapBindingNode->properties, "style");
+						if (styleAttribute && !strncmp((char*)styleAttribute->children->content, "rpc", sizeof("rpc"))) {
 							soapBinding->style = SOAP_RPC;
 						}
 
-						tmp = get_attribute(soapBindingNode->properties, "transport");
-						if (tmp) {
-							if (strncmp((char*)tmp->children->content, WSDL_HTTP_TRANSPORT, sizeof(WSDL_HTTP_TRANSPORT)) == 0) {
+						xmlAttrPtr transportAttribute = get_attribute(soapBindingNode->properties, "transport");
+						if (transportAttribute) {
+							if (strncmp((char*)transportAttribute->children->content, WSDL_HTTP_TRANSPORT, sizeof(WSDL_HTTP_TRANSPORT)) == 0) {
 								soapBinding->transport = SOAP_TRANSPORT_HTTP;
 							} else {
 								/* try the next binding */
@@ -913,7 +912,6 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						sdlSoapBindingFunctionPtr soapFunctionBinding;
 						sdlSoapBindingPtr soapBinding;
 						xmlNodePtr soapOperation;
-						xmlAttrPtr tmp;
 
 						soapFunctionBinding = emalloc(sizeof(sdlSoapBindingFunction));
 						memset(soapFunctionBinding, 0, sizeof(sdlSoapBindingFunction));
@@ -922,14 +920,14 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 						soapOperation = get_node_ex(operation->children, "operation", wsdl_soap_namespace);
 						if (soapOperation) {
-							tmp = get_attribute(soapOperation->properties, "soapAction");
-							if (tmp) {
-								soapFunctionBinding->soapAction = estrdup((char*)tmp->children->content);
+							xmlAttrPtr soapActionAttribute = get_attribute(soapOperation->properties, "soapAction");
+							if (soapActionAttribute) {
+								soapFunctionBinding->soapAction = estrdup((char*)soapActionAttribute->children->content);
 							}
 
-							tmp = get_attribute(soapOperation->properties, "style");
-							if (tmp) {
-								if (!strncmp((char*)tmp->children->content, "rpc", sizeof("rpc"))) {
+							xmlAttrPtr styleAttribute = get_attribute(soapOperation->properties, "style");
+							if (styleAttribute) {
+								if (!strncmp((char*)styleAttribute->children->content, "rpc", sizeof("rpc"))) {
 									soapFunctionBinding->style = SOAP_RPC;
 								} else {
 									soapFunctionBinding->style = SOAP_DOCUMENT;
@@ -1013,11 +1011,11 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					fault = portTypeOperation->children;
 					while (fault != NULL) {
 						if (node_is_equal_ex(fault, "fault", WSDL_NAMESPACE)) {
-							xmlAttrPtr message, name;
+							xmlAttrPtr message;
 							sdlFaultPtr f;
 
-							name = get_attribute(fault->properties, "name");
-							if (name == NULL) {
+							xmlAttrPtr faultNameAttribute = get_attribute(fault->properties, "name");
+							if (faultNameAttribute == NULL) {
 								soap_error1(E_ERROR, "Parsing WSDL: Missing name for <fault> of '%s'", op_name->children->content);
 							}
 							message = get_attribute(fault->properties, "message");
@@ -1028,54 +1026,53 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 							f = emalloc(sizeof(sdlFault));
 							memset(f, 0, sizeof(sdlFault));
 
-							f->name = estrdup((char*)name->children->content);
+							f->name = estrdup((char*)faultNameAttribute->children->content);
 							f->details = wsdl_message(&ctx, message->children->content);
 							if (f->details == NULL || zend_hash_num_elements(f->details) > 1) {
 								soap_error1(E_ERROR, "Parsing WSDL: The fault message '%s' must have a single part", message->children->content);
 							}
 
 							if (tmpbinding->bindingType == BINDING_SOAP) {
-								xmlNodePtr soap_fault = get_node_with_attribute_ex(operation->children, "fault", WSDL_NAMESPACE, "name", f->name, NULL);
-								if (soap_fault != NULL) {
-									xmlNodePtr trav = soap_fault->children;
-									while (trav != NULL) {
-										if (node_is_equal_ex(trav, "fault", wsdl_soap_namespace)) {
-											xmlAttrPtr tmp;
-										  sdlSoapBindingFunctionFaultPtr binding;
+								xmlNodePtr soapFault = get_node_with_attribute_ex(operation->children, "fault", WSDL_NAMESPACE, "name", f->name, NULL);
+								if (soapFault != NULL) {
+									xmlNodePtr faultNodes = soapFault->children;
+									while (faultNodes != NULL) {
+										if (node_is_equal_ex(faultNodes, "fault", wsdl_soap_namespace)) {
+											sdlSoapBindingFunctionFaultPtr faultBinding;
 
-											binding = f->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunctionFault));
+											faultBinding = f->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunctionFault));
 											memset(f->bindingAttributes, 0, sizeof(sdlSoapBindingFunctionFault));
 
-											tmp = get_attribute(trav->properties, "use");
-											if (tmp && !strncmp((char*)tmp->children->content, "encoded", sizeof("encoded"))) {
-												binding->use = SOAP_ENCODED;
+											xmlAttrPtr faultUseAttribute = get_attribute(faultNodes->properties, "use");
+											if (faultUseAttribute && !strncmp((char*)faultUseAttribute->children->content, "encoded", sizeof("encoded"))) {
+												faultBinding->use = SOAP_ENCODED;
 											} else {
-												binding->use = SOAP_LITERAL;
+												faultBinding->use = SOAP_LITERAL;
 											}
 
-											tmp = get_attribute(trav->properties, "namespace");
-											if (tmp) {
-												binding->ns = estrdup((char*)tmp->children->content);
+											xmlAttrPtr faultNamespaceAttribute = get_attribute(faultNodes->properties, "namespace");
+											if (faultNamespaceAttribute) {
+												faultBinding->ns = estrdup((char*)faultNamespaceAttribute->children->content);
 											}
 
-											if (binding->use == SOAP_ENCODED) {
-												tmp = get_attribute(trav->properties, "encodingStyle");
-												if (tmp) {
-													if (strncmp((char*)tmp->children->content, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)) == 0) {
-														binding->encodingStyle = SOAP_ENCODING_1_1;
-													} else if (strncmp((char*)tmp->children->content, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
-														binding->encodingStyle = SOAP_ENCODING_1_2;
+											if (faultBinding->use == SOAP_ENCODED) {
+												xmlAttrPtr faultEncodingStyleAttribute = get_attribute(faultNodes->properties, "encodingStyle");
+												if (faultEncodingStyleAttribute) {
+													if (strncmp((char*)faultEncodingStyleAttribute->children->content, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)) == 0) {
+														faultBinding->encodingStyle = SOAP_ENCODING_1_1;
+													} else if (strncmp((char*)faultEncodingStyleAttribute->children->content, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
+														faultBinding->encodingStyle = SOAP_ENCODING_1_2;
 													} else {
-														soap_error1(E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", tmp->children->content);
+														soap_error1(E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", faultEncodingStyleAttribute->children->content);
 													}
 												} else {
 													soap_error0(E_ERROR, "Parsing WSDL: Unspecified encodingStyle");
 												}
 											}
-										} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-											soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
+										} else if (is_wsdl_element(faultNodes) && !node_is_equal(faultNodes,"documentation")) {
+											soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(faultNodes->name));
 										}
-										trav = trav->next;
+										faultNodes = faultNodes->next;
 									}
 								}
 							}
@@ -1093,24 +1090,24 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					function->binding = tmpbinding;
 
 					{
-						char *tmp = estrdup(function->functionName);
-						size_t len = strlen(tmp);
+						size_t function_name_len = strlen(function->functionName);
+						char *lc_function_name = zend_str_tolower_dup(function->functionName, function_name_len);
 
-						zend_str_tolower(tmp, len);
-						if (zend_hash_str_add_ptr(&ctx.sdl->functions, tmp, len, function) == NULL) {
+						if (zend_hash_str_add_ptr(&ctx.sdl->functions, lc_function_name, function_name_len, function) == NULL) {
 							zend_hash_next_index_insert_ptr(&ctx.sdl->functions, function);
 						}
-						efree(tmp);
+						efree(lc_function_name);
+
 						if (function->requestName != NULL && strcmp(function->requestName,function->functionName) != 0) {
 							if (ctx.sdl->requests == NULL) {
 								ctx.sdl->requests = emalloc(sizeof(HashTable));
 								zend_hash_init(ctx.sdl->requests, 0, NULL, NULL, 0);
 							}
-							tmp = estrdup(function->requestName);
-							len = strlen(tmp);
-							zend_str_tolower(tmp, len);
-							zend_hash_str_add_ptr(ctx.sdl->requests, tmp, len, function);
-							efree(tmp);
+
+							size_t request_name_len = strlen(function->requestName);
+							char *lc_request_name = zend_str_tolower_dup(function->requestName, request_name_len);
+							zend_hash_str_add_ptr(ctx.sdl->requests, lc_request_name, request_name_len, function);
+							efree(lc_request_name);
 						}
 					}
 					trav2 = trav2->next;
