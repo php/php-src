@@ -4674,8 +4674,8 @@ PHP_FUNCTION(array_column)
 				continue;
 			}
 
-			zval rv;
-			zval *keyval = array_column_fetch_prop(data, index_str, index_long, cache_slot_index, &rv);
+			zval ignored_rv;
+			zval *keyval = array_column_fetch_prop(data, index_str, index_long, cache_slot_index, &ignored_rv);
 			if (keyval) {
 				array_set_zval_key(Z_ARRVAL_P(return_value), keyval, colval);
 				zval_ptr_dtor(colval);
