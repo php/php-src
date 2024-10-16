@@ -52,6 +52,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug GH-16357 (openssl may modify member types of certificate arrays).
     (cmb)
+  . Fixed bug GH-16433 (Large values for openssl_csr_sign() $days overflow).
+    (cmb)
 
 - PHPDBG:
   . Fixed bug GH-16174 (Empty string is an invalid expression for ev). (cmb)
