@@ -294,7 +294,7 @@ void sdl_restore_uri_credentials(sdlCtx *ctx)
 
 #define SAFE_STR(a) ((a)?((const char *)a):"")
 
-static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
+static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include)
 {
 	sdlPtr tmpsdl = ctx->sdl;
 	xmlDocPtr wsdl;
@@ -363,7 +363,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 			xmlAttrPtr tmp = get_attribute(trav->properties, "location");
 			if (tmp) {
 				xmlChar *uri = schema_location_construct_uri(tmp);
-				load_wsdl_ex(this_ptr, (char*)uri, ctx, 1);
+				load_wsdl_ex(this_ptr, (char*)uri, ctx, true);
 				xmlFree(uri);
 			}
 
@@ -556,7 +556,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 				zend_hash_init(&ht, 0, NULL, delete_parameter, 0);
 				while (*parts) {
 					sdlParamPtr param;
-					int found = 0;
+					bool found = false;
 					char *end;
 
 					while (*parts == ' ') ++parts;
@@ -571,7 +571,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 					  	*x_param = *param;
 					  	param->paramName = NULL;
 					  	zend_hash_next_index_insert_ptr(&ht, x_param);
-					  	found = 1;
+					  	found = true;
 					  	break;
 						}
 					} ZEND_HASH_FOREACH_END();
@@ -708,7 +708,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
 	zend_try {
-	load_wsdl_ex(this_ptr, struri, &ctx, 0);
+	load_wsdl_ex(this_ptr, struri, &ctx, false);
 	schema_pass2(&ctx);
 
 	uint32_t n = zend_hash_num_elements(&ctx.services);
@@ -717,7 +717,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 		for (uint32_t i = 0; i < n; i++) {
 			xmlNodePtr service, tmp;
 			xmlNodePtr trav, port;
-			int has_soap_port = 0;
+			bool has_soap_port = false;
 
 			service = tmp = zend_hash_get_current_data_ptr(&ctx.services);
 
@@ -787,7 +787,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						soap_error0(E_ERROR, "Parsing WSDL: No address associated with <port>");
 					}
 				}
-				has_soap_port = 1;
+				has_soap_port = true;
 
 				location = get_attribute(address->properties, "location");
 				if (!location) {
