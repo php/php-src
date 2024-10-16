@@ -708,11 +708,14 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
 	zend_try {
-	load_wsdl_ex(this_ptr, struri, &ctx, false);
-	schema_pass2(&ctx);
+		load_wsdl_ex(this_ptr, struri, &ctx, false);
+		schema_pass2(&ctx);
 
-	uint32_t n = zend_hash_num_elements(&ctx.services);
-	if (n > 0) {
+		uint32_t n = zend_hash_num_elements(&ctx.services);
+		if (n == 0) {
+			soap_error0(E_ERROR, "Parsing WSDL: Couldn't bind to service");
+		}
+
 		zend_hash_internal_pointer_reset(&ctx.services);
 		for (uint32_t i = 0; i < n; i++) {
 			xmlNodePtr service, tmp;
@@ -1126,13 +1129,10 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 			zend_hash_move_forward(&ctx.services);
 		}
-	} else {
-		soap_error0(E_ERROR, "Parsing WSDL: Couldn't bind to service");
-	}
 
-	if (ctx.sdl->bindings == NULL || ctx.sdl->bindings->nNumOfElements == 0) {
-		soap_error0(E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
-	}
+		if (ctx.sdl->bindings == NULL || ctx.sdl->bindings->nNumOfElements == 0) {
+			soap_error0(E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
+		}
 
 	} zend_catch {
 		/* Avoid persistent memory leak. */
