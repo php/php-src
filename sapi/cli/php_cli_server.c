@@ -2396,7 +2396,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 			 do {
 				if (waitpid(php_cli_server_workers[php_cli_server_worker],
 						   &php_cli_server_worker_status,
-						   0) == FAILURE) {
+						   0) == (pid_t) -1) {
 					/* an extremely bad thing happened */
 					break;
 				}
