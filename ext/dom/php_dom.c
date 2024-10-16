@@ -1473,7 +1473,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 	const xmlChar* tmp;
 
 	if (local) {
-		int len = local_len > INT_MAX ? -1 : (int) local_len;
+		int len = (int) local_len;
 		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)local, len)) != NULL) {
 			mapptr->local = BAD_CAST tmp;
 		} else {
@@ -1481,15 +1481,11 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 			mapptr->free_local = true;
 		}
 		mapptr->local_lower = BAD_CAST estrdup(local);
-		if (len < 0) {
-			zend_str_tolower((char *) mapptr->local_lower, strlen((const char *) mapptr->local_lower));
-		} else {
-			zend_str_tolower((char *) mapptr->local_lower, len);
-		}
+		zend_str_tolower((char *) mapptr->local_lower, len);
 	}
 
 	if (ns) {
-		int len = ns_len > INT_MAX ? -1 : (int) ns_len;
+		int len = (int) ns_len;
 		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ns, len)) != NULL) {
 			mapptr->ns = BAD_CAST tmp;
 		} else {
