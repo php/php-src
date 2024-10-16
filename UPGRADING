@@ -78,6 +78,11 @@ PHP 8.5 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Curl:
+  . curl_multi_get_handles() allows retrieving all CurlHandles current
+    attached to a CurlMultiHandle. This includes both handles added using
+    curl_multi_add_handle() and handles accepted by CURLMOPT_PUSHFUNCTION.
+
 - PGSQL:
   . pg_close_stmt offers an alternative way to close a prepared
     statement from the DEALLOCATE sql command in that we can reuse

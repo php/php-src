@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6a6a7461b475bb10cef3048ee2c11ab0dd32f328 */
+ * Stub hash: e2800e5ecc33f092576c7afcdb98d89825809669 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -58,6 +58,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_add_handle, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, multi_handle, CurlMultiHandle, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_get_handles, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, multi_handle, CurlMultiHandle, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_close, 0, 1, IS_VOID, 0)
@@ -153,6 +157,7 @@ ZEND_FUNCTION(curl_init);
 ZEND_FUNCTION(curl_upkeep);
 #endif
 ZEND_FUNCTION(curl_multi_add_handle);
+ZEND_FUNCTION(curl_multi_get_handles);
 ZEND_FUNCTION(curl_multi_close);
 ZEND_FUNCTION(curl_multi_errno);
 ZEND_FUNCTION(curl_multi_exec);
@@ -190,6 +195,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_upkeep, arginfo_curl_upkeep)
 #endif
 	ZEND_FE(curl_multi_add_handle, arginfo_curl_multi_add_handle)
+	ZEND_FE(curl_multi_get_handles, arginfo_curl_multi_get_handles)
 	ZEND_FE(curl_multi_close, arginfo_curl_multi_close)
 	ZEND_FE(curl_multi_errno, arginfo_curl_multi_errno)
 	ZEND_FE(curl_multi_exec, arginfo_curl_multi_exec)

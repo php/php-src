@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - COM:
   . Fix property access of PHP objects wrapped in variant. (cmb)
 
+- Curl:
+  . Added curl_multi_get_handles(). (timwolla)
+
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
 

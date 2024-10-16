@@ -174,6 +174,29 @@ PHP_FUNCTION(curl_multi_remove_handle)
 }
 /* }}} */
 
+PHP_FUNCTION(curl_multi_get_handles)
+{
+	zval      *z_mh;
+	php_curlm *mh;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(z_mh, curl_multi_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	mh = Z_CURL_MULTI_P(z_mh);
+
+	array_init(return_value);
+	zend_llist_position pos;
+	zval	*pz_ch;
+
+	for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
+		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+
+		Z_TRY_ADDREF_P(pz_ch);
+		add_next_index_zval(return_value, pz_ch);
+	}
+}
+
 /* {{{ Get all the sockets associated with the cURL extension, which can then be "selected" */
 PHP_FUNCTION(curl_multi_select)
 {

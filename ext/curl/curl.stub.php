@@ -3702,6 +3702,8 @@ function curl_upkeep(CurlHandle $handle): bool {}
 
 function curl_multi_add_handle(CurlMultiHandle $multi_handle, CurlHandle $handle): int {}
 
+function curl_multi_get_handles(CurlMultiHandle $multi_handle): array {}
+
 function curl_multi_close(CurlMultiHandle $multi_handle): void {}
 
 function curl_multi_errno(CurlMultiHandle $multi_handle): int {}
