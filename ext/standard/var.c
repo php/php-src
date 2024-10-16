@@ -786,10 +786,10 @@ static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ 
 }
 /* }}} */
 
-static inline void php_var_serialize_string(smart_str *buf, char *str, size_t len) /* {{{ */
+static inline void php_var_serialize_string(smart_str *buf, const char *str, size_t len) /* {{{ */
 {
 	char b[32];
-	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, len);
+	char *s = zend_print_ulong_to_buf(b + sizeof(b) - 1, len);
 	size_t l = b + sizeof(b) - 1 - s;
 	char *res = smart_str_extend(buf, 2 + l + 2 + len + 2);
 	res = zend_mempcpy(res, "s:", 2);
@@ -807,7 +807,7 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
 	size_t class_name_len = ZSTR_LEN(class_name);
-	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, class_name_len);
+	char *s = zend_print_ulong_to_buf(b + sizeof(b) - 1, class_name_len);
 	size_t l = b + sizeof(b) - 1 - s;
 	char *res = smart_str_extend(buf, 2 + l + 2 + class_name_len + 2);
 	res = zend_mempcpy(res, "O:", 2);
