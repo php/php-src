@@ -82,6 +82,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug GH-16337 (Use-after-free in SplHeap). (nielsdos)
+  . Fixed bug GH-16464 (Use-after-free in SplDoublyLinkedList::offsetSet()).
+    (ilutov)
 
 - Standard:
   . Fixed bug GH-16293 (Failed assertion when throwing in assert() callback with
