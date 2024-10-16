@@ -2874,11 +2874,10 @@ static zend_function *zend_ffi_scope_get_func(zend_object **obj, zend_string *na
 	zend_ffi_symbol *sym = NULL;
 	zend_function   *func;
 	zend_ffi_type   *type;
-	zval *zv;
 
-	zv = zend_hash_find(&zend_ffi_scope_ce->function_table, name);
-	if (zv) {
-		return (zend_function*)Z_PTR_P(zv);
+	func = zend_hash_find_ptr_lc(&zend_ffi_scope_ce->function_table, name);
+	if (func) {
+		return func;
 	}
 
 	if (ffi->symbols) {
