@@ -960,8 +960,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			if (UNEXPECTED(!jit_extension)
-			 || UNEXPECTED(!(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))
-			 || (op_array->fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+			 || UNEXPECTED(!(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))) {
 				stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 				break;
 			}
@@ -992,6 +991,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 
 				if (EX(func)->op_array.prop_info) {
 					stop = ZEND_JIT_TRACE_STOP_PROP_HOOK_CALL;
+					break;
+				}
+
+				if (EX(func)->op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+					stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 					break;
 				}
 
