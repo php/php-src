@@ -1767,7 +1767,6 @@ PHP_FUNCTION(highlight_file)
 {
 	char *filename;
 	size_t filename_len;
-	int ret;
 	zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 	bool i = 0;
 
@@ -1787,7 +1786,7 @@ PHP_FUNCTION(highlight_file)
 
 	php_get_highlight_struct(&default_syntax_highlighter_ini);
 
-	ret = highlight_file(filename, &default_syntax_highlighter_ini);
+	zend_result ret = highlight_file(filename, &default_syntax_highlighter_ini);
 
 	if (ret == FAILURE) {
 		if (i) {
