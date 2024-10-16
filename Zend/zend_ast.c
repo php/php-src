@@ -564,6 +564,8 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
 	return r;
 }
 
+#include "Zend/zend_closures.h"
+
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 	zval *result,
 	zend_ast *ast,
@@ -988,6 +990,14 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 				return FAILURE;
 			}
 			return SUCCESS;
+		}
+		case ZEND_AST_CLOSURE_CONSTEXPR:
+		{
+			zend_ast *child = ast->child[0];
+			zval *z = zend_ast_get_zval(child);
+
+			zend_create_closure(result, Z_PTR_P(z), NULL, NULL, NULL);
+			return SUCCESS;	
 		}
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
