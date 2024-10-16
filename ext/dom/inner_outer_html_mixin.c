@@ -392,12 +392,15 @@ zend_result dom_element_outer_html_read(dom_object *obj, zval *retval)
 	element.doc = this->doc;
 
 	xmlNodePtr old_parent = this->parent;
+	xmlNodePtr old_next = this->next;
 	this->parent = &element;
+	this->next = NULL;
 
 	/* 2. Return the result of running fragment serializing algorithm steps with element and true. */
 	zend_string *serialization = dom_element_html_fragment_serialize(obj, &element);
 
 	this->parent = old_parent;
+	this->next = old_next;
 
 	if (serialization == NULL) {
 		return FAILURE;

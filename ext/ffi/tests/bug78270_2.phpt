@@ -6,6 +6,7 @@ zend_test
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
+if (PHP_DEBUG || getenv('SKIP_ASAN')) die("xfail: FFI cleanup after parser error is not implemented");
 
 require_once('utils.inc');
 try {

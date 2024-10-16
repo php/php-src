@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 68008c87b5dd1895761f51bff8f63df4b517a54b */
+ * Stub hash: ab66d2fff7ac7556d4244582a2bd3e83a3f95243 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -286,7 +286,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RecursiveRegexIte
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_OBJ_TYPE_MASK(0, iterator, RecursiveIterator|IteratorAggregate, 0, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "RecursiveTreeIterator::BYPASS_KEY")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cachingIteratorFlags, IS_LONG, 0, "CachingIterator::CATCH_GET_CHILD")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "RecursiveTreeIterator::SELF_FIRST")

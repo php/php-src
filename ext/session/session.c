@@ -707,9 +707,18 @@ static PHP_INI_MH(OnUpdateCookieLifetime) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
-	if (atol(ZSTR_VAL(new_value)) < 0) {
+
+#ifdef ZEND_ENABLE_ZVAL_LONG64
+	const zend_long maxcookie = ZEND_LONG_MAX - INT_MAX - 1;
+#else
+	const zend_long maxcookie = ZEND_LONG_MAX / 2 - 1;
+#endif
+	zend_long v = (zend_long)atol(ZSTR_VAL(new_value));
+	if (v < 0) {
 		php_error_docref(NULL, E_WARNING, "CookieLifetime cannot be negative");
 		return FAILURE;
+	} else if (v > maxcookie) {
+		return SUCCESS;
 	}
 	return OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
@@ -1772,10 +1781,6 @@ PHP_FUNCTION(session_set_cookie_params)
 	zend_result result;
 	int found = 0;
 
-	if (!PS(use_cookies)) {
-		return;
-	}
-
 	ZEND_PARSE_PARAMETERS_START(1, 5)
 		Z_PARAM_ARRAY_HT_OR_LONG(options_ht, lifetime_long)
 		Z_PARAM_OPTIONAL
@@ -1784,6 +1789,11 @@ PHP_FUNCTION(session_set_cookie_params)
 		Z_PARAM_BOOL_OR_NULL(secure, secure_null)
 		Z_PARAM_BOOL_OR_NULL(httponly, httponly_null)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!PS(use_cookies)) {
+		php_error_docref(NULL, E_WARNING, "Session cookies cannot be used when session.use_cookies is disabled");
+		RETURN_FALSE;
+	}
 
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Session cookie parameters cannot be changed when a session is active");
@@ -2644,7 +2654,14 @@ PHP_FUNCTION(session_start)
 	 * module is unable to rewrite output.
 	 */
 	if (PS(use_cookies) && SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Session cannot be started after headers have already been sent");
+		/* It's the header sent to blame, not the session in this case */
+		const char *output_start_filename = php_output_get_start_filename();
+		int output_start_lineno = php_output_get_start_lineno();
+		if (output_start_filename != NULL) {
+			php_error_docref(NULL, E_WARNING, "Session cannot be started after headers have already been sent (sent from %s on line %d)", output_start_filename, output_start_lineno);
+		} else {
+			php_error_docref(NULL, E_WARNING, "Session cannot be started after headers have already been sent");
+		}
 		RETURN_FALSE;
 	}
 

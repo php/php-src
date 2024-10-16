@@ -238,6 +238,11 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(bail)) {
+		if (EG(exception)) {
+			/* The callback might have thrown. Use E_WARNING to print the
+			 * exception so we can avoid bailout and use unwind_exit. */
+			zend_exception_error(EG(exception), E_WARNING);
+		}
 		zend_throw_unwind_exit();
 		RETURN_THROWS();
 	} else {

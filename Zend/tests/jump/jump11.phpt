@@ -1,5 +1,5 @@
 --TEST--
-jump 08: goto inside switch in constructor
+jump 11: goto inside switch in constructor
 --FILE--
 <?php
 class foobar {

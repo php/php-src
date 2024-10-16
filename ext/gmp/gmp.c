@@ -1012,8 +1012,14 @@ ZEND_FUNCTION(gmp_export)
 	if (mpz_sgn(gmpnumber) == 0) {
 		RETVAL_EMPTY_STRING();
 	} else {
-		size_t bits_per_word = size * 8;
-		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
+		ZEND_ASSERT(size > 0);
+		size_t size_in_base_2 = mpz_sizeinbase(gmpnumber, 2);
+		if (size > ZEND_LONG_MAX / 4 || size_in_base_2 > SIZE_MAX - (size_t) size * 8 + 1) {
+			zend_argument_value_error(2, "is too large for argument #1 ($num)");
+			RETURN_THROWS();
+		}
+		size_t bits_per_word = (size_t) size * 8;
+		size_t count = (size_in_base_2 + bits_per_word - 1) / bits_per_word;
 
 		zend_string *out_string = zend_string_safe_alloc(count, size, 0, 0);
 		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);
@@ -1288,12 +1294,37 @@ ZEND_FUNCTION(gmp_pow)
 
 	if (Z_TYPE_P(base_arg) == IS_LONG && Z_LVAL_P(base_arg) >= 0) {
 		INIT_GMP_RETVAL(gmpnum_result);
-		mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
+		if (exp >= INT_MAX) {
+			mpz_t base_num, exp_num, mod;
+			mpz_init(base_num);
+			mpz_init(exp_num);
+			mpz_init(mod);
+			mpz_set_si(base_num, Z_LVAL_P(base_arg));
+			mpz_set_si(exp_num, exp);
+			mpz_set_ui(mod, UINT_MAX);
+			mpz_powm(gmpnum_result, base_num, exp_num, mod);
+			mpz_clear(mod);
+			mpz_clear(exp_num);
+			mpz_clear(base_num);
+		} else {
+			mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
+		}
 	} else {
 		mpz_ptr gmpnum_base;
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base, 1);
 		INIT_GMP_RETVAL(gmpnum_result);
-		mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
+		if (exp >= INT_MAX) {
+			mpz_t exp_num, mod;
+			mpz_init(exp_num);
+			mpz_init(mod);
+			mpz_set_si(exp_num, exp);
+			mpz_set_ui(mod, UINT_MAX);
+			mpz_powm(gmpnum_result, gmpnum_base, exp_num, mod);
+			mpz_clear(mod);
+			mpz_clear(exp_num);
+		} else {
+			mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
+		}
 		FREE_GMP_TEMP(temp_base);
 	}
 }

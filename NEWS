@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- COM:
+  . Fix property access of PHP objects wrapped in variant. (cmb)
+
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
 
@@ -34,5 +37,10 @@ PHP                                                                        NEWS
 
 - XSL:
   . Implement request #30622 (make $namespace parameter functional). (nielsdos)
+
+- Zlib:
+  . gzfile, gzopen and readgzfile, their "use_include_path" argument
+    is now a boolean. (David Carlier)
+
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

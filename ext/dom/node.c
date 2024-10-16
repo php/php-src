@@ -810,7 +810,7 @@ static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlN
 }
 /* }}} */
 
-static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNodePtr child, bool stricterror)
+static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNodePtr child, bool stricterror, bool warn_empty_fragment)
 {
 	if (dom_node_is_read_only(parentp) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
@@ -828,7 +828,7 @@ static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNode
 		return false;
 	}
 
-	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+	if (warn_empty_fragment && child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
 		/* TODO Drop Warning? */
 		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
 		return false;
@@ -855,7 +855,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 	xmlNodePtr new_child = NULL;
 	bool stricterror = dom_get_strict_error(intern->document);
 
-	if (!dom_node_check_legacy_insertion_validity(parentp, child, stricterror)) {
+	if (!dom_node_check_legacy_insertion_validity(parentp, child, stricterror, true)) {
 		RETURN_FALSE;
 	}
 
@@ -1156,14 +1156,7 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			RETURN_FALSE;
 		}
 
-		if (dom_node_is_read_only(nodep) == SUCCESS ||
-			(newchild->parent != NULL && dom_node_is_read_only(newchild->parent) == SUCCESS)) {
-			php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-			RETURN_FALSE;
-		}
-
-		if (dom_hierarchy(nodep, newchild) == FAILURE) {
-			php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		if (!dom_node_check_legacy_insertion_validity(nodep, newchild, stricterror, false)) {
 			RETURN_FALSE;
 		}
 
@@ -1277,7 +1270,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 
 	bool stricterror = dom_get_strict_error(intern->document);
 
-	if (!dom_node_check_legacy_insertion_validity(nodep, child, stricterror)) {
+	if (!dom_node_check_legacy_insertion_validity(nodep, child, stricterror, true)) {
 		RETURN_FALSE;
 	}
 

@@ -2,6 +2,12 @@
 Test posix_getgroups() function : basic functionality
 --EXTENSIONS--
 posix
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
+?>
 --FILE--
 <?php
   echo "Basic test of POSIX getgroups\n";
