@@ -623,27 +623,26 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 	}
 }
 
-static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
+static HashTable* wsdl_message(const sdlCtx *ctx, const xmlChar* message_name)
 {
-	xmlNodePtr trav, message = NULL, tmp;
 	HashTable* parameters = NULL;
-	char *ctype;
 
-	ctype = strrchr((char*)message_name,':');
+	const char *ctype = strrchr((const char*)message_name,':');
 	if (ctype == NULL) {
-		ctype = (char*)message_name;
+		ctype = (const char*)message_name;
 	} else {
 		++ctype;
 	}
-	if ((tmp = zend_hash_str_find_ptr(&ctx->messages, ctype, strlen(ctype))) == NULL) {
-		soap_error1(E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", message_name);
+
+	xmlNodePtr message = zend_hash_str_find_ptr(&ctx->messages, ctype, strlen(ctype));
+	if (message == NULL) {
+		soap_error1(E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", (const char*)message_name);
 	}
-	message = tmp;
 
 	parameters = emalloc(sizeof(HashTable));
 	zend_hash_init(parameters, 0, NULL, delete_parameter, 0);
 
-	trav = message->children;
+	xmlNodePtr trav = message->children;
 	while (trav != NULL) {
 		xmlAttrPtr type, name;
 		sdlParamPtr param;
