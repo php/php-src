@@ -737,6 +737,9 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	compiler_globals->map_ptr_size = 0;
 	compiler_globals->map_ptr_last = global_map_ptr_last;
+#if ZEND_DEBUG
+	compiler_globals->map_ptr_locked = false;
+#endif
 	compiler_globals->internal_run_time_cache = NULL;
 	if (compiler_globals->map_ptr_last || zend_map_ptr_static_size) {
 		/* Allocate map_ptr table */
@@ -788,6 +791,9 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_real_base = NULL;
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		compiler_globals->map_ptr_size = 0;
+#if ZEND_DEBUG
+		compiler_globals->map_ptr_locked = false;
+#endif
 	}
 	if (compiler_globals->internal_run_time_cache) {
 		pefree(compiler_globals->internal_run_time_cache, 1);
@@ -1204,6 +1210,9 @@ void zend_shutdown(void) /* {{{ */
 		CG(map_ptr_real_base) = NULL;
 		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		CG(map_ptr_size) = 0;
+# if ZEND_DEBUG
+		CG(map_ptr_locked) = false;
+# endif
 	}
 	if (CG(script_encoding_list)) {
 		free(ZEND_VOIDP(CG(script_encoding_list)));
@@ -2011,6 +2020,10 @@ ZEND_API void *zend_map_ptr_new(void)
 {
 	void **ptr;
 
+#if ZEND_DEBUG
+	ZEND_ASSERT((!startup_done || CG(in_compilation) || CG(map_ptr_locked)) && "Can not allocate map ptrs outside of startup and compilation");
+#endif
+
 	if (CG(map_ptr_last) >= CG(map_ptr_size)) {
 		/* Grow map_ptr table */
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
@@ -2026,6 +2039,10 @@ ZEND_API void *zend_map_ptr_new(void)
 ZEND_API void *zend_map_ptr_new_static(void)
 {
 	void **ptr;
+
+#if ZEND_DEBUG
+	ZEND_ASSERT(!startup_done && "Can not allocate static map ptrs after startup");
+#endif
 
 	if (zend_map_ptr_static_last >= zend_map_ptr_static_size) {
 		zend_map_ptr_static_size += 4096;
