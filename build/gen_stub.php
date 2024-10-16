@@ -1118,12 +1118,20 @@ class MethodName implements FunctionOrMethodName {
         return implode('_', $this->className->getParts());
     }
 
+    public function getDeclarationName(): string {
+        return "{$this->getDeclarationClassName()}_{$this->methodName}";
+    }
+
     public function getDeclaration(): string {
         return "ZEND_METHOD({$this->getDeclarationClassName()}, $this->methodName);\n";
     }
 
     public function getArgInfoName(): string {
         return "arginfo_class_{$this->getDeclarationClassName()}_{$this->methodName}";
+    }
+
+    public function getFramelessFunctionInfosName(): string {
+        return "frameless_function_infos_{$this->className}_{$this->methodName}";
     }
 
     public function getMethodSynopsisFilename(): string
@@ -1396,12 +1404,12 @@ class FuncInfo {
         }
 
         foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
-            $code .= "ZEND_FRAMELESS_FUNCTION({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity});\n";
+            $code .= "ZEND_FRAMELESS_FUNCTION({$this->name->getDeclarationName()}, {$framelessFunctionInfo->arity});\n";
         }
 
         $code .= 'static const zend_frameless_function_info ' . $this->getFramelessFunctionInfosName() . "[] = {\n";
         foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
-            $code .= "\t{ ZEND_FRAMELESS_FUNCTION_NAME({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity}), {$framelessFunctionInfo->arity} },\n";
+            $code .= "\t{ ZEND_FRAMELESS_FUNCTION_NAME({$this->name->getDeclarationName()}, {$framelessFunctionInfo->arity}), {$framelessFunctionInfo->arity} },\n";
         }
         $code .= "\t{ 0 },\n";
         $code .= "};\n";
@@ -1427,10 +1435,10 @@ class FuncInfo {
         $functionEntryCode = null;
 
         if (!empty($this->framelessFunctionInfos)) {
-            if ($this->isMethod()) {
-                throw new Exception('Frameless methods are not supported yet');
+            if ($this->isMethod() && !($this->flags & Modifiers::STATIC)) {
+                throw new Exception('Frameless methods must be static');
             }
-            if ($this->name->getNamespace()) {
+            if (!$this->isMethod() && $this->name->getNamespace()) {
                 throw new Exception('Namespaced direct calls to frameless functions are not supported yet');
             }
             if ($this->alias) {
@@ -5175,7 +5183,7 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
 function generateCodeWithConditions(
     iterable $infos, string $separator, Closure $codeGenerator, ?string $parentCond = null): string {
     $code = "";
-    
+
     // For combining the conditional blocks of the infos with the same condition
     $openCondition = null;
     foreach ($infos as $info) {
