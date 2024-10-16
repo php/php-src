@@ -564,15 +564,14 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 					end = strchr(parts, ' ');
 					if (end) *end = '\0';
 					ZEND_HASH_FOREACH_PTR(params, param) {
-						if (param->paramName &&
-						    strcmp(parts, param->paramName) == 0) {
-					  	sdlParamPtr x_param;
-					  	x_param = emalloc(sizeof(sdlParam));
-					  	*x_param = *param;
-					  	param->paramName = NULL;
-					  	zend_hash_next_index_insert_ptr(&ht, x_param);
-					  	found = true;
-					  	break;
+						if (param->paramName && strcmp(parts, param->paramName) == 0) {
+					  		sdlParamPtr x_param;
+					  		x_param = emalloc(sizeof(sdlParam));
+					  		*x_param = *param;
+					  		param->paramName = NULL;
+					  		zend_hash_next_index_insert_ptr(&ht, x_param);
+					  		found = true;
+					  		break;
 						}
 					} ZEND_HASH_FOREACH_END();
 					if (!found) {
