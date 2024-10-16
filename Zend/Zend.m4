@@ -206,9 +206,6 @@ AX_CHECK_COMPILE_FLAG([-Wformat-truncation],
 AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes],
   [CFLAGS="-Wstrict-prototypes $CFLAGS"],,
   [-Werror])
-AX_CHECK_COMPILE_FLAG([-Wshadow],
-  [CFLAGS="-Wshadow $CFLAGS"],,
-  [-Werror])
 AX_CHECK_COMPILE_FLAG([-fno-common],
   [CFLAGS="-fno-common $CFLAGS"],,
   [-Werror])
