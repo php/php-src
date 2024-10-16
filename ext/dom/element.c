@@ -816,7 +816,12 @@ static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, b
 	dom_object *intern, *namednode;
 	char *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &name, &name_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (name_len > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
 
@@ -1239,7 +1244,17 @@ static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS
 	dom_object *intern, *namednode;
 	char *uri, *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!p", &uri, &uri_len, &name, &name_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (uri_len > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
+	}
+
+	if (name_len > INT_MAX) {
+		zend_argument_value_error(2, "is too long");
 		RETURN_THROWS();
 	}
 
