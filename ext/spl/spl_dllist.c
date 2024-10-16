@@ -737,8 +737,10 @@ PHP_METHOD(SplDoublyLinkedList, offsetSet)
 		if (element != NULL) {
 			/* the element is replaced, delref the old one as in
 			 * SplDoublyLinkedList::pop() */
-			zval_ptr_dtor(&element->data);
+			zval garbage;
+			ZVAL_COPY_VALUE(&garbage, &element->data);
 			ZVAL_COPY(&element->data, value);
+			zval_ptr_dtor(&garbage);
 		} else {
 			zval_ptr_dtor(value);
 			zend_argument_error(spl_ce_OutOfRangeException, 1, "is an invalid offset");
