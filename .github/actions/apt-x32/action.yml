@@ -45,6 +45,7 @@ runs:
           libxslt1-dev:i386 \
           libzip-dev:i386 \
           locales \
+          lsof \
           make \
           pkg-config:i386 \
           re2c \
