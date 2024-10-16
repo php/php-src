@@ -3663,21 +3663,17 @@ process_double:
  * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
  */
 static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char *needle, size_t needle_len, int reverse) /* {{{ */ {
-	int i;
-
-	for (i = 0; i < 256; i++) {
+	for (unsigned int i = 0; i < 256; i++) {
 		td[i] = needle_len + 1;
 	}
 
 	if (reverse) {
-		for (i = needle_len - 1; i >= 0; i--) {
-			td[(unsigned char)needle[i]] = i + 1;
+		for (size_t i = needle_len; i > 0; i--) {
+			td[(unsigned char)needle[i-1]] = i;
 		}
 	} else {
-		size_t i;
-
-		for (i = 0; i < needle_len; i++) {
-			td[(unsigned char)needle[i]] = (int)needle_len - i;
+		for (size_t i = 0; i < needle_len; i++) {
+			td[(unsigned char)needle[i]] = needle_len - i;
 		}
 	}
 }

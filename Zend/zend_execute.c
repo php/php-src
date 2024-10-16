@@ -1590,18 +1590,18 @@ static void frameless_observed_call_copy(zend_execute_data *call, uint32_t arg, 
 
 ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data)
 {
-	const zend_op *opline = EX(opline);
-	uint8_t num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
-	zend_function *fbc = ZEND_FLF_FUNC(opline);
-	zval *result = EX_VAR(opline->result.var);
+	const zend_op *opline_ptr = EX(opline);
+	uint8_t num_args = ZEND_FLF_NUM_ARGS(opline_ptr->opcode);
+	zend_function *fbc = ZEND_FLF_FUNC(opline_ptr);
+	zval *result = EX_VAR(opline_ptr->result.var);
 
 	zend_execute_data *call = zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(num_args, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, num_args, NULL);
 	call->prev_execute_data = execute_data;
 
 	switch (num_args) {
-		case 3: frameless_observed_call_copy(call, 2, zend_get_zval_ptr(opline+1, (opline+1)->op1_type, &(opline+1)->op1, execute_data)); ZEND_FALLTHROUGH;
-		case 2: frameless_observed_call_copy(call, 1, zend_get_zval_ptr(opline, opline->op2_type, &opline->op2, execute_data)); ZEND_FALLTHROUGH;
-		case 1: frameless_observed_call_copy(call, 0, zend_get_zval_ptr(opline, opline->op1_type, &opline->op1, execute_data));
+		case 3: frameless_observed_call_copy(call, 2, zend_get_zval_ptr(opline_ptr+1, (opline_ptr+1)->op1_type, &(opline_ptr+1)->op1, execute_data)); ZEND_FALLTHROUGH;
+		case 2: frameless_observed_call_copy(call, 1, zend_get_zval_ptr(opline_ptr, opline_ptr->op2_type, &opline_ptr->op2, execute_data)); ZEND_FALLTHROUGH;
+		case 1: frameless_observed_call_copy(call, 0, zend_get_zval_ptr(opline_ptr, opline_ptr->op1_type, &opline_ptr->op1, execute_data));
 	}
 
 	EG(current_execute_data) = call;
@@ -1770,13 +1770,13 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 {
 	const char *msg = NULL;
 	const zend_execute_data *execute_data = EG(current_execute_data);
-	const zend_op *opline = execute_data->opline;
+	const zend_op *opline_ptr = execute_data->opline;
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		return;
 	}
 
-	switch (opline->opcode) {
+	switch (opline_ptr->opcode) {
 		case ZEND_ASSIGN_DIM_OP:
 			msg = "Cannot use assign-op operators with string offsets";
 			break;
@@ -1787,7 +1787,7 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 		case ZEND_FETCH_DIM_RW:
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
-			switch (opline->extended_value) {
+			switch (opline_ptr->extended_value) {
 				case ZEND_FETCH_DIM_REF:
 					msg = "Cannot create references to/from string offsets";
 					break;
@@ -4444,21 +4444,21 @@ static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DAT
 
 ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf) /* {{{ */
 {
-	zend_op *opline = EX(func)->op_array.opcodes + op_num;
+	zend_op *opline_ptr = EX(func)->op_array.opcodes + op_num;
 	int level;
 	int do_exit;
 	uint32_t num_args;
 
-	if (UNEXPECTED(opline->opcode == ZEND_INIT_FCALL ||
-		opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-		opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-		opline->opcode == ZEND_INIT_DYNAMIC_CALL ||
-		opline->opcode == ZEND_INIT_USER_CALL ||
-		opline->opcode == ZEND_INIT_METHOD_CALL ||
-		opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-		opline->opcode == ZEND_NEW)) {
+	if (UNEXPECTED(opline_ptr->opcode == ZEND_INIT_FCALL ||
+		opline_ptr->opcode == ZEND_INIT_FCALL_BY_NAME ||
+		opline_ptr->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
+		opline_ptr->opcode == ZEND_INIT_DYNAMIC_CALL ||
+		opline_ptr->opcode == ZEND_INIT_USER_CALL ||
+		opline_ptr->opcode == ZEND_INIT_METHOD_CALL ||
+		opline_ptr->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
+		opline_ptr->opcode == ZEND_NEW)) {
 		ZEND_ASSERT(op_num);
-		opline--;
+		opline_ptr--;
 	}
 
 	do {
@@ -4467,7 +4467,7 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 		do_exit = 0;
 		num_args = ZEND_CALL_NUM_ARGS(call);
 		do {
-			switch (opline->opcode) {
+			switch (opline_ptr->opcode) {
 				case ZEND_DO_FCALL:
 				case ZEND_DO_ICALL:
 				case ZEND_DO_UCALL:
@@ -4500,8 +4500,8 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 				case ZEND_SEND_USER:
 					if (level == 0) {
 						/* For named args, the number of arguments is up to date. */
-						if (opline->op2_type != IS_CONST) {
-							num_args = opline->op2.num;
+						if (opline_ptr->op2_type != IS_CONST) {
+							num_args = opline_ptr->op2.num;
 						}
 						do_exit = 1;
 					}
@@ -4515,7 +4515,7 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 					break;
 			}
 			if (!do_exit) {
-				opline--;
+				opline_ptr--;
 			}
 		} while (!do_exit);
 		if (call->prev_execute_data) {
@@ -4523,7 +4523,7 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 			level = 0;
 			do_exit = 0;
 			do {
-				switch (opline->opcode) {
+				switch (opline_ptr->opcode) {
 					case ZEND_DO_FCALL:
 					case ZEND_DO_ICALL:
 					case ZEND_DO_UCALL:
@@ -4545,7 +4545,7 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 						level--;
 						break;
 				}
-				opline--;
+				opline_ptr--;
 			} while (!do_exit);
 		}
 
@@ -4578,21 +4578,21 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 {
 	if (UNEXPECTED(EX(call))) {
 		zend_execute_data *call = EX(call);
-		zend_op *opline = EX(func)->op_array.opcodes + op_num;
+		zend_op *opline_ptr = EX(func)->op_array.opcodes + op_num;
 		int level;
 		int do_exit;
 
-		if (UNEXPECTED(opline->opcode == ZEND_INIT_FCALL ||
-			opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
-			opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
-			opline->opcode == ZEND_INIT_DYNAMIC_CALL ||
-			opline->opcode == ZEND_INIT_USER_CALL ||
-			opline->opcode == ZEND_INIT_METHOD_CALL ||
-			opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
-			opline->opcode == ZEND_INIT_PARENT_PROPERTY_HOOK_CALL ||
-			opline->opcode == ZEND_NEW)) {
+		if (UNEXPECTED(opline_ptr->opcode == ZEND_INIT_FCALL ||
+			opline_ptr->opcode == ZEND_INIT_FCALL_BY_NAME ||
+			opline_ptr->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
+			opline_ptr->opcode == ZEND_INIT_DYNAMIC_CALL ||
+			opline_ptr->opcode == ZEND_INIT_USER_CALL ||
+			opline_ptr->opcode == ZEND_INIT_METHOD_CALL ||
+			opline_ptr->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
+			opline_ptr->opcode == ZEND_INIT_PARENT_PROPERTY_HOOK_CALL ||
+			opline_ptr->opcode == ZEND_NEW)) {
 			ZEND_ASSERT(op_num);
-			opline--;
+			opline_ptr--;
 		}
 
 		do {
@@ -4603,7 +4603,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 			level = 0;
 			do_exit = 0;
 			do {
-				switch (opline->opcode) {
+				switch (opline_ptr->opcode) {
 					case ZEND_DO_FCALL:
 					case ZEND_DO_ICALL:
 					case ZEND_DO_UCALL:
@@ -4637,8 +4637,8 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 					case ZEND_SEND_USER:
 						if (level == 0) {
 							/* For named args, the number of arguments is up to date. */
-							if (opline->op2_type != IS_CONST) {
-								ZEND_CALL_NUM_ARGS(call) = opline->op2.num;
+							if (opline_ptr->op2_type != IS_CONST) {
+								ZEND_CALL_NUM_ARGS(call) = opline_ptr->op2.num;
 							}
 							do_exit = 1;
 						}
@@ -4652,7 +4652,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 						break;
 				}
 				if (!do_exit) {
-					opline--;
+					opline_ptr--;
 				}
 			} while (!do_exit);
 			if (call->prev_execute_data) {
@@ -4660,7 +4660,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 				level = 0;
 				do_exit = 0;
 				do {
-					switch (opline->opcode) {
+					switch (opline_ptr->opcode) {
 						case ZEND_DO_FCALL:
 						case ZEND_DO_ICALL:
 						case ZEND_DO_UCALL:
@@ -4683,7 +4683,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 							level--;
 							break;
 					}
-					opline--;
+					opline_ptr--;
 				} while (!do_exit);
 			}
 
@@ -5386,10 +5386,10 @@ zval * ZEND_FASTCALL zend_handle_named_arg(
 	return arg;
 }
 
-static zend_execute_data *start_fake_frame(zend_execute_data *call, const zend_op *opline) {
+static zend_execute_data *start_fake_frame(zend_execute_data *call, const zend_op *opline_ptr) {
 	zend_execute_data *old_prev_execute_data = call->prev_execute_data;
 	call->prev_execute_data = EG(current_execute_data);
-	call->opline = opline;
+	call->opline = opline_ptr;
 	EG(current_execute_data) = call;
 	return old_prev_execute_data;
 }
@@ -5414,9 +5414,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 				continue;
 			}
 
-			zend_op *opline = &op_array->opcodes[i];
-			if (EXPECTED(opline->opcode == ZEND_RECV_INIT)) {
-				zval *default_value = RT_CONSTANT(opline, opline->op2);
+			zend_op *opline_ptr = &op_array->opcodes[i];
+			if (EXPECTED(opline_ptr->opcode == ZEND_RECV_INIT)) {
+				zval *default_value = RT_CONSTANT(opline_ptr, opline_ptr->op2);
 				if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {
 					if (UNEXPECTED(!RUN_TIME_CACHE(op_array))) {
 						init_func_run_time_cache(op_array);
@@ -5434,7 +5434,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 						 * value is not accessible through back traces. */
 						zval tmp;
 						ZVAL_COPY(&tmp, default_value);
-						zend_execute_data *old = start_fake_frame(call, opline);
+						zend_execute_data *old = start_fake_frame(call, opline_ptr);
 						zend_result ret = zval_update_constant_ex(&tmp, fbc->op_array.scope);
 						end_fake_frame(call, old);
 						if (UNEXPECTED(ret == FAILURE)) {
@@ -5450,8 +5450,8 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 					ZVAL_COPY(arg, default_value);
 				}
 			} else {
-				ZEND_ASSERT(opline->opcode == ZEND_RECV);
-				zend_execute_data *old = start_fake_frame(call, opline);
+				ZEND_ASSERT(opline_ptr->opcode == ZEND_RECV);
+				zend_execute_data *old = start_fake_frame(call, opline_ptr);
 				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");
 				end_fake_frame(call, old);
 				return FAILURE;

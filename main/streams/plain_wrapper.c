@@ -746,7 +746,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 #ifdef HAVE_MMAP
 			{
 				php_stream_mmap_range *range = (php_stream_mmap_range*)ptrparam;
-				int prot, flags;
+				int prot, range_flags;
 
 				switch (value) {
 					case PHP_STREAM_MMAP_SUPPORTED:
@@ -766,24 +766,24 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						switch (range->mode) {
 							case PHP_STREAM_MAP_MODE_READONLY:
 								prot = PROT_READ;
-								flags = MAP_PRIVATE;
+								range_flags = MAP_PRIVATE;
 								break;
 							case PHP_STREAM_MAP_MODE_READWRITE:
 								prot = PROT_READ | PROT_WRITE;
-								flags = MAP_PRIVATE;
+								range_flags = MAP_PRIVATE;
 								break;
 							case PHP_STREAM_MAP_MODE_SHARED_READONLY:
 								prot = PROT_READ;
-								flags = MAP_SHARED;
+								range_flags = MAP_SHARED;
 								break;
 							case PHP_STREAM_MAP_MODE_SHARED_READWRITE:
 								prot = PROT_READ | PROT_WRITE;
-								flags = MAP_SHARED;
+								range_flags = MAP_SHARED;
 								break;
 							default:
 								return PHP_STREAM_OPTION_RETURN_ERR;
 						}
-						range->mapped = (char*)mmap(NULL, range->length, prot, flags, fd, range->offset);
+						range->mapped = (char*)mmap(NULL, range->length, prot, range_flags, fd, range->offset);
 						if (range->mapped == (char*)MAP_FAILED) {
 							range->mapped = NULL;
 							return PHP_STREAM_OPTION_RETURN_ERR;

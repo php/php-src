@@ -1752,13 +1752,13 @@ PHPAPI bool append_user_shutdown_function(php_shutdown_function_entry *shutdown_
 }
 /* }}} */
 
-ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini) /* {{{ */
+ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini_ptr) /* {{{ */
 {
-	syntax_highlighter_ini->highlight_comment = INI_STR("highlight.comment");
-	syntax_highlighter_ini->highlight_default = INI_STR("highlight.default");
-	syntax_highlighter_ini->highlight_html    = INI_STR("highlight.html");
-	syntax_highlighter_ini->highlight_keyword = INI_STR("highlight.keyword");
-	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
+	syntax_highlighter_ini_ptr->highlight_comment = INI_STR("highlight.comment");
+	syntax_highlighter_ini_ptr->highlight_default = INI_STR("highlight.default");
+	syntax_highlighter_ini_ptr->highlight_html    = INI_STR("highlight.html");
+	syntax_highlighter_ini_ptr->highlight_keyword = INI_STR("highlight.keyword");
+	syntax_highlighter_ini_ptr->highlight_string  = INI_STR("highlight.string");
 }
 /* }}} */
 
@@ -1768,7 +1768,7 @@ PHP_FUNCTION(highlight_file)
 	char *filename;
 	size_t filename_len;
 	int ret;
-	zend_syntax_highlighter_ini syntax_highlighter_ini;
+	zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 	bool i = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1785,9 +1785,9 @@ PHP_FUNCTION(highlight_file)
 		php_output_start_default();
 	}
 
-	php_get_highlight_struct(&syntax_highlighter_ini);
+	php_get_highlight_struct(&default_syntax_highlighter_ini);
 
-	ret = highlight_file(filename, &syntax_highlighter_ini);
+	ret = highlight_file(filename, &default_syntax_highlighter_ini);
 
 	if (ret == FAILURE) {
 		if (i) {
@@ -1842,7 +1842,7 @@ PHP_FUNCTION(php_strip_whitespace)
 PHP_FUNCTION(highlight_string)
 {
 	zend_string *str;
-	zend_syntax_highlighter_ini syntax_highlighter_ini;
+	zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 	char *hicompiled_string_description;
 	bool i = 0;
 	int old_error_reporting = EG(error_reporting);
@@ -1859,11 +1859,11 @@ PHP_FUNCTION(highlight_string)
 
 	EG(error_reporting) = E_ERROR;
 
-	php_get_highlight_struct(&syntax_highlighter_ini);
+	php_get_highlight_struct(&default_syntax_highlighter_ini);
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
 
-	highlight_string(str, &syntax_highlighter_ini, hicompiled_string_description);
+	highlight_string(str, &default_syntax_highlighter_ini, hicompiled_string_description);
 	efree(hicompiled_string_description);
 
 	EG(error_reporting) = old_error_reporting;

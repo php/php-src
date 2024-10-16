@@ -1328,9 +1328,9 @@ static inheritance_status verify_property_type_compatibility(
 		if (parent_info->hooks[ZEND_PROPERTY_HOOK_SET]
 		 && (!child_info->hooks || !child_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
 			zend_type set_type = parent_info->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0].type;
-			inheritance_status result = zend_perform_covariant_type_check(
+			inheritance_status hook_result = zend_perform_covariant_type_check(
 				parent_info->ce, set_type, child_info->ce, child_info->type);
-			if ((result == INHERITANCE_ERROR && throw_on_error) || (result == INHERITANCE_UNRESOLVED && throw_on_unresolved)) {
+			if ((hook_result == INHERITANCE_ERROR && throw_on_error) || (hook_result == INHERITANCE_UNRESOLVED && throw_on_unresolved)) {
 				emit_set_hook_type_error(child_info, parent_info);
 			}
 		}
@@ -2900,9 +2900,9 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 				zend_function **hooks = new_prop->hooks =
 					zend_arena_alloc(&CG(arena), ZEND_PROPERTY_HOOK_STRUCT_SIZE);
 				memcpy(hooks, property_info->hooks, ZEND_PROPERTY_HOOK_STRUCT_SIZE);
-				for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
-					if (hooks[i]) {
-						zend_function *old_fn = hooks[i];
+				for (uint32_t hook_index = 0; hook_index < ZEND_PROPERTY_HOOK_COUNT; hook_index++) {
+					if (hooks[hook_index]) {
+						const zend_function *old_fn = hooks[hook_index];
 
 						/* Hooks are not yet supported for internal properties. */
 						ZEND_ASSERT(ZEND_USER_CODE(old_fn->type));
@@ -2917,7 +2917,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 						zend_fixup_trait_method(new_fn, ce);
 
-						hooks[i] = new_fn;
+						hooks[hook_index] = new_fn;
 					}
 				}
 				ce->ce_flags |= ZEND_ACC_USE_GUARDS;
@@ -3293,7 +3293,7 @@ static zend_op_array *zend_lazy_method_load(
 static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 {
 	zend_class_entry *ce;
-	Bucket *p, *end;
+	Bucket *p;
 
 	ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	memcpy(ce, pce, sizeof(zend_class_entry));
@@ -3325,8 +3325,8 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 		memcpy(p, HT_GET_DATA_ADDR(&ce->function_table), HT_USED_SIZE(&ce->function_table));
 		HT_SET_DATA_ADDR(&ce->function_table, p);
 		p = ce->function_table.arData;
-		end = p + ce->function_table.nNumUsed;
-		for (; p != end; p++) {
+
+		for (const Bucket *end = p + ce->function_table.nNumUsed; p != end; p++) {
 			zend_op_array *op_array = Z_PTR(p->val);
 			zend_op_array *new_op_array = Z_PTR(p->val) = zend_lazy_method_load(op_array, ce, pce);
 
@@ -3365,8 +3365,8 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 		memcpy(p, HT_GET_DATA_ADDR(&ce->properties_info), HT_USED_SIZE(&ce->properties_info));
 		HT_SET_DATA_ADDR(&ce->properties_info, p);
 		p = ce->properties_info.arData;
-		end = p + ce->properties_info.nNumUsed;
-		for (; p != end; p++) {
+
+		for (const Bucket *end = p + ce->properties_info.nNumUsed; p != end; p++) {
 			zend_property_info *prop_info, *new_prop_info;
 
 			prop_info = Z_PTR(p->val);
@@ -3401,8 +3401,8 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 		memcpy(p, HT_GET_DATA_ADDR(&ce->constants_table), HT_USED_SIZE(&ce->constants_table));
 		HT_SET_DATA_ADDR(&ce->constants_table, p);
 		p = ce->constants_table.arData;
-		end = p + ce->constants_table.nNumUsed;
-		for (; p != end; p++) {
+
+		for (const Bucket *end = p + ce->constants_table.nNumUsed; p != end; p++) {
 			zend_class_constant *c, *new_c;
 
 			c = Z_PTR(p->val);

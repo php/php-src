@@ -75,11 +75,11 @@ ZEND_API void zend_html_puts(const char *s, size_t len)
 }
 
 
-ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini)
+ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini_ptr)
 {
 	zval token;
 	int token_type;
-	char *last_color = syntax_highlighter_ini->highlight_html;
+	char *last_color = syntax_highlighter_ini_ptr->highlight_html;
 	char *next_color;
 
 	zend_printf("<pre><code style=\"color: %s\">", last_color);
@@ -87,11 +87,11 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	while ((token_type=lex_scan(&token, NULL))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
-				next_color = syntax_highlighter_ini->highlight_html;
+				next_color = syntax_highlighter_ini_ptr->highlight_html;
 				break;
 			case T_COMMENT:
 			case T_DOC_COMMENT:
-				next_color = syntax_highlighter_ini->highlight_comment;
+				next_color = syntax_highlighter_ini_ptr->highlight_comment;
 				break;
 			case T_OPEN_TAG:
 			case T_OPEN_TAG_WITH_ECHO:
@@ -105,12 +105,12 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			case T_PROPERTY_C:
 			case T_NS_C:
 			case T_CLASS_C:
-				next_color = syntax_highlighter_ini->highlight_default;
+				next_color = syntax_highlighter_ini_ptr->highlight_default;
 				break;
 			case '"':
 			case T_ENCAPSED_AND_WHITESPACE:
 			case T_CONSTANT_ENCAPSED_STRING:
-				next_color = syntax_highlighter_ini->highlight_string;
+				next_color = syntax_highlighter_ini_ptr->highlight_string;
 				break;
 			case T_WHITESPACE:
 				zend_html_puts((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));  /* no color needed */
@@ -119,19 +119,19 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				break;
 			default:
 				if (Z_TYPE(token) == IS_UNDEF) {
-					next_color = syntax_highlighter_ini->highlight_keyword;
+					next_color = syntax_highlighter_ini_ptr->highlight_keyword;
 				} else {
-					next_color = syntax_highlighter_ini->highlight_default;
+					next_color = syntax_highlighter_ini_ptr->highlight_default;
 				}
 				break;
 		}
 
 		if (last_color != next_color) {
-			if (last_color != syntax_highlighter_ini->highlight_html) {
+			if (last_color != syntax_highlighter_ini_ptr->highlight_html) {
 				zend_printf("</span>");
 			}
 			last_color = next_color;
-			if (last_color != syntax_highlighter_ini->highlight_html) {
+			if (last_color != syntax_highlighter_ini_ptr->highlight_html) {
 				zend_printf("<span style=\"color: %s\">", last_color);
 			}
 		}
@@ -155,7 +155,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		ZVAL_UNDEF(&token);
 	}
 
-	if (last_color != syntax_highlighter_ini->highlight_html) {
+	if (last_color != syntax_highlighter_ini_ptr->highlight_html) {
 		zend_printf("</span>");
 	}
 	zend_printf("</code></pre>");

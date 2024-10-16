@@ -107,11 +107,11 @@ PHPAPI unsigned int php_version_id(void)
 	return PHP_VERSION_ID;
 }
 
-PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
+PHPAPI char *php_get_version(sapi_module_struct *sapi_module_ptr)
 {
 	char *version_info;
 	spprintf(&version_info, 0, "PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
-		PHP_VERSION, sapi_module->name, __DATE__, __TIME__,
+		PHP_VERSION, sapi_module_ptr->name, __DATE__, __TIME__,
 #ifdef ZTS
 		"ZTS"
 #else
@@ -141,9 +141,9 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 	return version_info;
 }
 
-PHPAPI void php_print_version(sapi_module_struct *sapi_module)
+PHPAPI void php_print_version(sapi_module_struct *sapi_module_ptr)
 {
-	char *version_info = php_get_version(sapi_module);
+	char *version_info = php_get_version(sapi_module_ptr);
 	php_printf("%s", version_info);
 	efree(version_info);
 }
@@ -2025,20 +2025,20 @@ static void core_globals_ctor(php_core_globals *core_globals)
 #endif
 
 /* {{{ core_globals_dtor */
-static void core_globals_dtor(php_core_globals *core_globals)
+static void core_globals_dtor(php_core_globals *core_globals_ptr)
 {
 	/* These should have been freed earlier. */
-	ZEND_ASSERT(!core_globals->last_error_message);
-	ZEND_ASSERT(!core_globals->last_error_file);
+	ZEND_ASSERT(!core_globals_ptr->last_error_message);
+	ZEND_ASSERT(!core_globals_ptr->last_error_file);
 
-	if (core_globals->disable_classes) {
-		free(core_globals->disable_classes);
+	if (core_globals_ptr->disable_classes) {
+		free(core_globals_ptr->disable_classes);
 	}
-	if (core_globals->php_binary) {
-		free(core_globals->php_binary);
+	if (core_globals_ptr->php_binary) {
+		free(core_globals_ptr->php_binary);
 	}
 
-	php_shutdown_ticks(core_globals);
+	php_shutdown_ticks(core_globals_ptr);
 }
 /* }}} */
 
@@ -2412,7 +2412,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 /* }}} */
 
 /* {{{ php_module_shutdown_wrapper */
-int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
+int php_module_shutdown_wrapper(sapi_module_struct *sapi_module_ptr)
 {
 	php_module_shutdown();
 	return SUCCESS;

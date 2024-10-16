@@ -820,7 +820,7 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename, 
 }
 
 
-zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
+zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini_ptr)
 {
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle;
@@ -833,7 +833,7 @@ zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *sy
 		zend_restore_lexical_state(&original_lex_state);
 		return FAILURE;
 	}
-	zend_highlight(syntax_highlighter_ini);
+	zend_highlight(syntax_highlighter_ini_ptr);
 	if (SCNG(script_filtered)) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
@@ -843,7 +843,7 @@ zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *sy
 	return SUCCESS;
 }
 
-void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, const char *filename)
+void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_highlighter_ini_ptr, const char *filename)
 {
 	zend_lex_state original_lex_state;
 	zval str_zv;
@@ -853,7 +853,7 @@ void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_high
 	zend_prepare_string_for_scanning(&str_zv, filename_str);
 	zend_string_release(filename_str);
 	BEGIN(INITIAL);
-	zend_highlight(syntax_highlighter_ini);
+	zend_highlight(syntax_highlighter_ini_ptr);
 	if (SCNG(script_filtered)) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
@@ -1124,12 +1124,12 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 skip_escape_conversion:
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
-		unsigned char *str;
+		unsigned char *output_str;
 		// TODO: avoid realocation ???
 		s = Z_STRVAL_P(zendlval);
-		SCNG(output_filter)(&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
+		SCNG(output_filter)(&output_str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
 		zval_ptr_dtor(zendlval);
-		ZVAL_STRINGL(zendlval, (char *) str, sz);
+		ZVAL_STRINGL(zendlval, (char *) output_str, sz);
 		efree(str);
 	}
 	return SUCCESS;

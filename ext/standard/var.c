@@ -103,12 +103,7 @@ static const char *php_var_dump_object_prefix(zend_object *obj) {
 PHPAPI void php_var_dump(zval *struc, int level) /* {{{ */
 {
 	HashTable *myht;
-	zend_string *class_name;
 	int is_ref = 0;
-	zend_ulong num;
-	zend_string *key;
-	zval *val;
-	uint32_t count;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -136,7 +131,7 @@ again:
 			PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
 			PUTS("\"\n");
 			break;
-		case IS_ARRAY:
+		case IS_ARRAY: {
 			myht = Z_ARRVAL_P(struc);
 			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				if (GC_IS_RECURSIVE(myht)) {
@@ -146,8 +141,11 @@ again:
 				GC_ADDREF(myht);
 				GC_PROTECT_RECURSION(myht);
 			}
-			count = zend_hash_num_elements(myht);
+			uint32_t count = zend_hash_num_elements(myht);
 			php_printf("%sarray(%d) {\n", COMMON, count);
+			zend_ulong num;
+			zend_string *key;
+			zval *val;
 			ZEND_HASH_FOREACH_KEY_VAL(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level);
 			} ZEND_HASH_FOREACH_END();
@@ -160,6 +158,7 @@ again:
 			}
 			PUTS("}\n");
 			break;
+		}
 		case IS_OBJECT: {
 			zend_class_entry *ce = Z_OBJCE_P(struc);
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
@@ -176,7 +175,7 @@ again:
 			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
-			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
+			zend_string *class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 			const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
 
 			php_printf("%s%sobject(%s)#%d (%d) {\n", COMMON, prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
@@ -616,8 +615,8 @@ again:
 				smart_str_appendc(buf, '\\');
 				smart_str_append(buf, ce->name);
 				if (is_enum) {
-					zend_object *zobj = Z_OBJ_P(struc);
-					zval *case_name_zval = zend_enum_fetch_case_name(zobj);
+					zend_object *enum_obj = Z_OBJ_P(struc);
+					zval *case_name_zval = zend_enum_fetch_case_name(enum_obj);
 					smart_str_appendl(buf, "::", 2);
 					smart_str_append(buf, Z_STR_P(case_name_zval));
 				} else {

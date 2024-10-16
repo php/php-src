@@ -49,16 +49,16 @@ static void _type_dtor(zval *zv)
 	free(Z_PTR_P(zv));
 }
 
-static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
+static void sapi_globals_ctor(sapi_globals_struct *sapi_globals_ptr)
 {
-	memset(sapi_globals, 0, sizeof(*sapi_globals));
-	zend_hash_init(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1);
+	memset(sapi_globals_ptr, 0, sizeof(*sapi_globals_ptr));
+	zend_hash_init(&sapi_globals_ptr->known_post_content_types, 8, NULL, _type_dtor, 1);
 	php_setup_sapi_content_types();
 }
 
-static void sapi_globals_dtor(sapi_globals_struct *sapi_globals)
+static void sapi_globals_dtor(sapi_globals_struct *sapi_globals_ptr)
 {
-	zend_hash_destroy(&sapi_globals->known_post_content_types);
+	zend_hash_destroy(&sapi_globals_ptr->known_post_content_types);
 }
 
 /* True globals (no need for thread safety) */

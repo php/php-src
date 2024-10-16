@@ -3161,25 +3161,25 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		if (nullsafe) {
 			if (obj_node.op_type == IS_TMP_VAR) {
 				/* Flush delayed oplines */
-				zend_op *opline = NULL, *oplines = zend_stack_base(&CG(delayed_oplines_stack));
+				zend_op *delayed_opline = NULL, *delayed_oplines = zend_stack_base(&CG(delayed_oplines_stack));
 				uint32_t var = obj_node.u.op.var;
 				uint32_t count = zend_stack_count(&CG(delayed_oplines_stack));
 				uint32_t i = count;
 
-				while (i > 0 && oplines[i-1].result_type == IS_TMP_VAR && oplines[i-1].result.var == var) {
+				while (i > 0 && delayed_oplines[i-1].result_type == IS_TMP_VAR && delayed_oplines[i-1].result.var == var) {
 					i--;
-					if (oplines[i].op1_type == IS_TMP_VAR) {
-						var = oplines[i].op1.var;
+					if (delayed_oplines[i].op1_type == IS_TMP_VAR) {
+						var = delayed_oplines[i].op1.var;
 					} else {
 						break;
 					}
 				}
 				for (; i < count; ++i) {
-					if (oplines[i].opcode != ZEND_NOP) {
-						opline = get_next_op();
-						memcpy(opline, &oplines[i], sizeof(zend_op));
-						oplines[i].opcode = ZEND_NOP;
-						oplines[i].extended_value = opline - CG(active_op_array)->opcodes;
+					if (delayed_oplines[i].opcode != ZEND_NOP) {
+						delayed_opline = get_next_op();
+						memcpy(delayed_opline, &delayed_oplines[i], sizeof(zend_op));
+						delayed_oplines[i].opcode = ZEND_NOP;
+						delayed_oplines[i].extended_value = delayed_opline - CG(active_op_array)->opcodes;
 					}
 				}
 			}
@@ -4280,7 +4280,6 @@ static void zend_compile_init_user_func(zend_ast *name_ast, uint32_t num_args, z
 static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcname) /* {{{ */
 {
 	znode arg_node;
-	zend_op *opline;
 
 	if (args->children != 2) {
 		return FAILURE;
@@ -4322,7 +4321,8 @@ static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, ze
 	zend_compile_expr(&arg_node, args->child[1]);
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL);
 	zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
-	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+
+	zend_op *opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 	opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 
 	return SUCCESS;
@@ -4384,9 +4384,9 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 			if (args->child[0]->kind == ZEND_AST_NAMED_ARG) {
 				/* If the original argument was named, add the new argument as named as well,
 				 * as mixing named and positional is not allowed. */
-				zend_ast *name = zend_ast_create_zval_from_str(
+				zend_ast *name_arg = zend_ast_create_zval_from_str(
 					ZSTR_INIT_LITERAL("description", 0));
-				arg = zend_ast_create(ZEND_AST_NAMED_ARG, name, arg);
+				arg = zend_ast_create(ZEND_AST_NAMED_ARG, name_arg, arg);
 			}
 			zend_ast_list_add((zend_ast *) args, arg);
 		}
@@ -7146,13 +7146,13 @@ static zend_type zend_compile_typename_ex(
 				type_list->types[type_list->num_types++] = single_type;
 
 				/* Check for trivially redundant class types */
-				for (size_t i = 0; i < type_list->num_types - 1; i++) {
-					if (ZEND_TYPE_IS_INTERSECTION(type_list->types[i])) {
-						zend_are_intersection_types_redundant(single_type, type_list->types[i]);
+				for (size_t type_index = 0; type_index < type_list->num_types - 1; type_index++) {
+					if (ZEND_TYPE_IS_INTERSECTION(type_list->types[type_index])) {
+						zend_are_intersection_types_redundant(single_type, type_list->types[type_index]);
 						continue;
 					}
 					/* Type from type list is a simple type */
-					zend_is_intersection_type_redundant_by_single_type(single_type, type_list->types[i]);
+					zend_is_intersection_type_redundant_by_single_type(single_type, type_list->types[type_index]);
 				}
 				continue;
 			}
@@ -7206,10 +7206,10 @@ static zend_type zend_compile_typename_ex(
 		}
 
 		if (type_list->num_types) {
-			zend_type_list *list = zend_arena_alloc(
+			zend_type_list *type_list_arena = zend_arena_alloc(
 				&CG(arena), ZEND_TYPE_LIST_SIZE(type_list->num_types));
-			memcpy(list, type_list, ZEND_TYPE_LIST_SIZE(type_list->num_types));
-			ZEND_TYPE_SET_LIST(type, list);
+			memcpy(type_list_arena, type_list, ZEND_TYPE_LIST_SIZE(type_list->num_types));
+			ZEND_TYPE_SET_LIST(type, type_list_arena);
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
 			/* Inform that the type list is a union type */
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_UNION_BIT;
@@ -7733,16 +7733,16 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		}
 
 		if (is_promoted) {
-			zend_op_array *op_array = CG(active_op_array);
-			zend_class_entry *scope = op_array->scope;
+			zend_op_array *promoted_prop_op_array = CG(active_op_array);
+			zend_class_entry *scope = promoted_prop_op_array->scope;
 
 			bool is_ctor =
-				scope && zend_is_constructor(op_array->function_name);
+				scope && zend_is_constructor(promoted_prop_op_array->function_name);
 			if (!is_ctor) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot declare promoted property outside a constructor");
 			}
-			if ((op_array->fn_flags & ZEND_ACC_ABSTRACT)
+			if ((promoted_prop_op_array->fn_flags & ZEND_ACC_ABSTRACT)
 					|| (scope->ce_flags & ZEND_ACC_INTERFACE)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot declare promoted property in an abstract constructor");
@@ -7993,22 +7993,18 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 {
 	zend_op_array *op_array = CG(active_op_array);
 	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i;
 
-	for (i = 0; i < list->children; ++i) {
+	for (uint32_t i = 0; i < list->children; ++i) {
 		uint32_t mode = ZEND_BIND_EXPLICIT;
 		zend_ast *var_ast = list->child[i];
 		zend_string *var_name = zend_ast_get_str(var_ast);
 		zval zv;
 		ZVAL_NULL(&zv);
 
-		{
-			int i;
-			for (i = 0; i < op_array->last_var; i++) {
-				if (zend_string_equals(op_array->vars[i], var_name)) {
-					zend_error_noreturn_unchecked(E_COMPILE_ERROR,
-						"Cannot use lexical variable $%S as a parameter name", var_name);
-				}
+		for (int var_index = 0; var_index < op_array->last_var; var_index++) {
+			if (zend_string_equals(op_array->vars[var_index], var_name)) {
+				zend_error_noreturn_unchecked(E_COMPILE_ERROR,
+				"Cannot use lexical variable $%S as a parameter name", var_name);
 			}
 		}
 

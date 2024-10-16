@@ -34,9 +34,9 @@ void php_deactivate_ticks(void)
 	zend_llist_clean(&PG(tick_functions));
 }
 
-void php_shutdown_ticks(php_core_globals *core_globals)
+void php_shutdown_ticks(php_core_globals *php_core_globals_ptr)
 {
-	zend_llist_destroy(&core_globals->tick_functions);
+	zend_llist_destroy(&php_core_globals_ptr->tick_functions);
 }
 
 static int php_compare_tick_functions(void *elem1, void *elem2)

@@ -4209,10 +4209,10 @@ static zend_always_inline void php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM
 
 
 	for (i = 0; i < argc; i++) {
-		zval *arg = args + i;
+		zval *check_arg = args + i;
 
-		if (Z_TYPE_P(arg) != IS_ARRAY) {
-			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(arg));
+		if (Z_TYPE_P(check_arg) != IS_ARRAY) {
+			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(check_arg));
 			RETURN_THROWS();
 		}
 	}
@@ -4264,13 +4264,13 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 	}
 
 	for (i = 0; i < argc; i++) {
-		zval *arg = args + i;
+		zval *check_arg = args + i;
 
-		if (Z_TYPE_P(arg) != IS_ARRAY) {
-			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(arg));
+		if (Z_TYPE_P(check_arg) != IS_ARRAY) {
+			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(check_arg));
 			RETURN_THROWS();
 		}
-		count += zend_hash_num_elements(Z_ARRVAL_P(arg));
+		count += zend_hash_num_elements(Z_ARRVAL_P(check_arg));
 	}
 
 	if (argc == 2) {
