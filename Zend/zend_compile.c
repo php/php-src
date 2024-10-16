@@ -59,6 +59,13 @@
 
 #define FC(member) (CG(file_context).member)
 
+#define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
+#define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
+#define literal_dtor(zv) do { \
+		zval_ptr_dtor_nogc(zv); \
+		ZVAL_NULL(zv); \
+	} while (0)
+
 typedef struct _zend_loop_var {
 	uint8_t opcode;
 	uint8_t var_type;
@@ -5336,6 +5343,7 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		}
 	}
 
+	uint32_t init_opnum = get_next_op_number();
 	opline = get_next_op();
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 
@@ -5375,6 +5383,22 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		if (ce) {
 			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op2) + 1);
 			fbc = zend_get_compatible_func_or_null(ce, lcname);
+		}
+	}
+
+	if (!(CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS)
+	 && fbc
+	 && (fbc->type == ZEND_INTERNAL_FUNCTION)
+	 && zend_ast_is_list(args_ast)
+	 && !zend_args_contain_unpack_or_named(zend_ast_get_list(args_ast))) {
+		if (zend_compile_frameless_icall(result, zend_ast_get_list(args_ast), fbc, type) != (uint32_t)-1) {
+			/* Update opline in case it got invalidated. */
+			zend_op_array *op_array = CG(active_op_array);
+			opline = &op_array->opcodes[init_opnum];
+			literal_dtor(&ZEND_OP1_LITERAL(opline));
+			literal_dtor(&ZEND_OP2_LITERAL(opline));
+			MAKE_NOP(opline);
+			return;
 		}
 	}
 

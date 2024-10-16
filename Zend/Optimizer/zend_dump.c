@@ -479,7 +479,10 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 
 	if (ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) {
 		zend_function *func = ZEND_FLF_FUNC(opline);
-		fprintf(stderr, "(%s)", ZSTR_VAL(func->common.function_name));
+		fprintf(stderr, "(%s%s%s)",
+			func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
+			func->common.scope ? "::" : "",
+			ZSTR_VAL(func->common.function_name));
 	}
 
 	if (ZEND_VM_EXT_NUM == (flags & ZEND_VM_EXT_MASK)) {
