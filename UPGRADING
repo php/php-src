@@ -122,6 +122,8 @@ PHP 8.5 UPGRADE NOTES
     it can be used to suppress warnings emitted by #[\NoDiscard] and possibly
     also diagnostics emitted by external IDEs or static analysis tools.
     RFC: https://wiki.php.net/rfc/marking_return_value_as_important
+  . Added asymmetric visibility support for static properties.
+    RFC: https://wiki.php.net/rfc/static-aviz
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
