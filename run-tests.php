@@ -1229,10 +1229,10 @@ function system_with_timeout(
         }
 
         if ($n > 0) {
-            if ($captureStdOut) {
-                $line = fread($pipes[1], 8192);
-            } elseif ($captureStdErr) {
-                $line = fread($pipes[2], 8192);
+            if ($captureStdOut && isset($r[1])) {
+                $line = fread($r[1], 8192);
+            } elseif ($captureStdErr && isset($r[2])) {
+                $line = fread($r[2], 8192);
             } else {
                 $line = '';
             }
