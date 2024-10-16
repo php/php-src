@@ -528,29 +528,28 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap_namespace, sdlSoapBindingFunctionBody *binding, HashTable* params)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr tmp;
 
 	trav = node->children;
 	while (trav != NULL) {
 		if (node_is_equal_ex(trav, "body", wsdl_soap_namespace)) {
 			xmlNodePtr body = trav;
 
-			tmp = get_attribute(body->properties, "use");
-			if (tmp && !strncmp((char*)tmp->children->content, "literal", sizeof("literal"))) {
+			xmlAttrPtr useAttribute = get_attribute(body->properties, "use");
+			if (useAttribute && !strncmp((char*)useAttribute->children->content, "literal", sizeof("literal"))) {
 				binding->use = SOAP_LITERAL;
 			} else {
 				binding->use = SOAP_ENCODED;
 			}
 
-			tmp = get_attribute(body->properties, "namespace");
-			if (tmp) {
-				binding->ns = estrdup((char*)tmp->children->content);
+			xmlAttrPtr namespaceAttribute = get_attribute(body->properties, "namespace");
+			if (namespaceAttribute) {
+				binding->ns = estrdup((char*)namespaceAttribute->children->content);
 			}
 
-			tmp = get_attribute(body->properties, "parts");
-			if (tmp) {
+			xmlAttrPtr partsAttribute = get_attribute(body->properties, "parts");
+			if (partsAttribute) {
 				HashTable    ht;
-				char *parts = (char*)tmp->children->content;
+				char *parts = (char*)partsAttribute->children->content;
 
 				/* Delete all parts those are not in the "parts" attribute */
 				zend_hash_init(&ht, 0, NULL, delete_parameter, 0);
@@ -585,14 +584,14 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			}
 
 			if (binding->use == SOAP_ENCODED) {
-				tmp = get_attribute(body->properties, "encodingStyle");
-				if (tmp) {
-					if (strncmp((char*)tmp->children->content, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)) == 0) {
+				xmlAttrPtr encodingStyleAttribute = get_attribute(body->properties, "encodingStyle");
+				if (encodingStyleAttribute) {
+					if (strncmp((char*)encodingStyleAttribute->children->content, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)) == 0) {
 						binding->encodingStyle = SOAP_ENCODING_1_1;
-					} else if (strncmp((char*)tmp->children->content, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
+					} else if (strncmp((char*)encodingStyleAttribute->children->content, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
 						binding->encodingStyle = SOAP_ENCODING_1_2;
 					} else {
-						soap_error1(E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", tmp->children->content);
+						soap_error1(E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", encodingStyleAttribute->children->content);
 					}
 				} else {
 					soap_error0(E_ERROR, "Parsing WSDL: Unspecified encodingStyle");
