@@ -7991,8 +7991,8 @@ static void compile_implicit_lexical_binds(
 
 static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 {
-	zend_op_array *op_array = CG(active_op_array);
-	zend_ast_list *list = zend_ast_get_list(ast);
+	const zend_op_array *op_array = CG(active_op_array);
+	const zend_ast_list *list = zend_ast_get_list(ast);
 
 	for (uint32_t i = 0; i < list->children; ++i) {
 		uint32_t mode = ZEND_BIND_EXPLICIT;

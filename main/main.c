@@ -107,7 +107,7 @@ PHPAPI unsigned int php_version_id(void)
 	return PHP_VERSION_ID;
 }
 
-PHPAPI char *php_get_version(sapi_module_struct *sapi_module_ptr)
+PHPAPI char *php_get_version(const sapi_module_struct *sapi_module_ptr)
 {
 	char *version_info;
 	spprintf(&version_info, 0, "PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
@@ -141,7 +141,7 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module_ptr)
 	return version_info;
 }
 
-PHPAPI void php_print_version(sapi_module_struct *sapi_module_ptr)
+PHPAPI void php_print_version(const sapi_module_struct *sapi_module_ptr)
 {
 	char *version_info = php_get_version(sapi_module_ptr);
 	php_printf("%s", version_info);

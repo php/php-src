@@ -75,12 +75,12 @@ ZEND_API void zend_html_puts(const char *s, size_t len)
 }
 
 
-ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini_ptr)
+ZEND_API void zend_highlight(const zend_syntax_highlighter_ini *syntax_highlighter_ini_ptr)
 {
 	zval token;
 	int token_type;
-	char *last_color = syntax_highlighter_ini_ptr->highlight_html;
-	char *next_color;
+	const char *last_color = syntax_highlighter_ini_ptr->highlight_html;
+	const char *next_color;
 
 	zend_printf("<pre><code style=\"color: %s\">", last_color);
 	/* highlight stuff coming back from zendlex() */
