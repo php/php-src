@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
   . Add missing hierarchy checks to replaceChild. (nielsdos)
+  . Fixed bug GH-16465 (Heap buffer overflow in DOMNode->getElementByTagName).
+    (nielsdos)
 
 - EXIF:
   . Fixed bug GH-16409 (Segfault in exif_thumbnail when not dealing with a
