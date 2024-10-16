@@ -783,6 +783,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_OP_SPEC_HAN
 		HANDLE_EXCEPTION();
 	}
 
+	if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
+	 && UNEXPECTED(!zend_asymmetric_property_has_set_access(prop_info))) {
+		zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
+		UNDEF_RESULT();
+		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+		HANDLE_EXCEPTION();
+	}
+
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
 	do {
@@ -826,6 +834,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_STATIC_PROP_SPEC_HANDL
 		HANDLE_EXCEPTION();
 	}
 
+	if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
+	 && UNEXPECTED(!zend_asymmetric_property_has_set_access(prop_info))) {
+		zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
 	zend_pre_incdec_property_zval(prop,
 		ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 
@@ -847,6 +862,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_STATIC_PROP_SPEC_HAND
 		HANDLE_EXCEPTION();
 	}
 
+	if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
+	 && UNEXPECTED(!zend_asymmetric_property_has_set_access(prop_info))) {
+		zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
 	zend_post_incdec_property_zval(prop,
 		ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 
@@ -858,18 +880,29 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_fetch_static_prop_helper_
 {
 	USE_OPLINE
 	zval *prop;
+	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 
 	prop = zend_fetch_static_property_address(
-		NULL, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type,
+		&prop_info, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type,
 		type == BP_VAR_W ? opline->extended_value : 0 OPLINE_CC EXECUTE_DATA_CC);
 	if (UNEXPECTED(!prop)) {
 		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS));
 		prop = &EG(uninitialized_zval);
+	} else if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
+	 && (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
+	 && UNEXPECTED(!zend_asymmetric_property_has_set_access(prop_info))) {
+		if (Z_TYPE_P(prop) == IS_OBJECT) {
+			goto copy_deref;
+		} else if (type != BP_VAR_UNSET || Z_TYPE_P(prop) != IS_UNDEF) {
+			zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
+		}
+		prop = &EG(uninitialized_zval);
 	}
 
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
+copy_deref:
 		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), prop);
 	} else {
 		ZVAL_INDIRECT(EX_VAR(opline->result.var), prop);
@@ -1100,6 +1133,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_HA
 
 	prop = zend_fetch_static_property_address(&prop_info, opline->extended_value & ~ZEND_RETURNS_FUNCTION, BP_VAR_W, 0 OPLINE_CC EXECUTE_DATA_CC);
 	if (UNEXPECTED(!prop)) {
+		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
+	 && UNEXPECTED(!zend_asymmetric_property_has_set_access(prop_info))) {
+		zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
