@@ -8138,7 +8138,13 @@ static uint32_t zend_add_dynamic_func_def(zend_op_array *def) {
 	return def_offset;
 }
 
-static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, bool toplevel) /* {{{ */
+enum func_decl_level {
+	FUNC_DECL_LEVEL_TOPLEVEL,
+	FUNC_DECL_LEVEL_NESTED,
+	FUNC_DECL_LEVEL_CONSTEXPR,
+};
+
+static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, enum func_decl_level level) /* {{{ */
 {
 	zend_string *unqualified_name, *name, *lcname;
 	zend_op *opline;
@@ -8208,25 +8214,34 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 	}
 
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
-	if (!toplevel) {
-		uint32_t func_ref = zend_add_dynamic_func_def(op_array);
-		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
-			opline->op2.num = func_ref;
-		} else {
-			opline = get_next_op();
-			opline->opcode = ZEND_DECLARE_FUNCTION;
-			opline->op1_type = IS_CONST;
-			LITERAL_STR(opline->op1, zend_string_copy(lcname));
-			opline->op2.num = func_ref;
+	switch (level) {
+		case FUNC_DECL_LEVEL_CONSTEXPR:
+			zend_add_dynamic_func_def(op_array);
+			break;
+		case FUNC_DECL_LEVEL_NESTED: {
+			uint32_t func_ref = zend_add_dynamic_func_def(op_array);
+			if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+				opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
+				opline->op2.num = func_ref;
+			} else {
+				opline = get_next_op();
+				opline->opcode = ZEND_DECLARE_FUNCTION;
+				opline->op1_type = IS_CONST;
+				LITERAL_STR(opline->op1, zend_string_copy(lcname));
+				opline->op2.num = func_ref;
+			}
+			break;
 		}
+		case FUNC_DECL_LEVEL_TOPLEVEL:
+			/* Nothing to do. */
+			break;
 	}
 	return lcname;
 }
 /* }}} */
 
 static zend_op_array *zend_compile_func_decl_ex(
-	znode *result, zend_ast *ast, bool toplevel,
+	znode *result, zend_ast *ast, enum func_decl_level level,
 	const zend_property_info *property_info,
 	zend_property_hook_kind hook_kind
 ) {
@@ -8272,7 +8287,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 		bool has_body = stmt_ast != NULL;
 		lcname = zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
-		lcname = zend_begin_func_decl(result, op_array, decl, toplevel);
+		lcname = zend_begin_func_decl(result, op_array, decl, level);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
 			find_implicit_binds(&info, params_ast, stmt_ast);
 			compile_implicit_lexical_binds(&info, result, op_array);
@@ -8320,7 +8335,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 		CG(active_class_entry) = NULL;
 	}
 
-	if (toplevel) {
+	if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		op_array->fn_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
@@ -8367,7 +8382,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 		CG(zend_lineno) = decl->start_lineno;
 		zend_check_magic_method_implementation(
 			CG(active_class_entry), (zend_function *) op_array, lcname, E_COMPILE_ERROR);
-	} else if (toplevel) {
+	} else if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		/* Only register the function after a successful compile */
 		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
 			CG(zend_lineno) = decl->start_lineno;
@@ -8387,7 +8402,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 	/* Pop the loop variable stack separator */
 	zend_stack_del_top(&CG(loop_var_stack));
 
-	if (toplevel) {
+	if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		zend_observer_function_declared_notify(op_array, lcname);
 	}
 
@@ -8401,9 +8416,9 @@ static zend_op_array *zend_compile_func_decl_ex(
 	return op_array;
 }
 
-static zend_op_array *zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel)
+static zend_op_array *zend_compile_func_decl(znode *result, zend_ast *ast, enum func_decl_level level)
 {
-	return zend_compile_func_decl_ex(result, ast, toplevel, /* property_info */ NULL, (zend_property_hook_kind)-1);
+	return zend_compile_func_decl_ex(result, ast, level, /* property_info */ NULL, (zend_property_hook_kind)-1);
 }
 
 zend_property_hook_kind zend_get_property_hook_kind_from_name(zend_string *name) {
@@ -8542,7 +8557,7 @@ static void zend_compile_property_hooks(
 		hook->name = zend_strpprintf(0, "$%s::%s", ZSTR_VAL(prop_name), ZSTR_VAL(name));
 
 		zend_function *func = (zend_function *) zend_compile_func_decl_ex(
-			NULL, (zend_ast *) hook, /* toplevel */ false, prop_info, hook_kind);
+			NULL, (zend_ast *) hook, FUNC_DECL_LEVEL_NESTED, prop_info, hook_kind);
 
 		func->common.prop_info = prop_info;
 
@@ -11049,7 +11064,8 @@ static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_CONST_ENUM_INIT
 		|| kind == ZEND_AST_NEW || kind == ZEND_AST_ARG_LIST
 		|| kind == ZEND_AST_NAMED_ARG
-		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP;
+		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP
+		|| kind == ZEND_AST_CLOSURE;
 }
 /* }}} */
 
@@ -11183,6 +11199,29 @@ static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 	class_ast->attr = fetch_type << ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT;
 }
 
+static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
+{
+	zend_ast_decl *closure_ast = (zend_ast_decl *) *ast_ptr;
+	zend_ast *uses_ast = closure_ast->child[1];
+	if (!(closure_ast->flags & ZEND_ACC_STATIC)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Closures in constant expressions must be static");
+	}
+	if (uses_ast) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use(...) variables in constant expression");
+	}
+
+	znode node;
+	zend_op_array *op = zend_compile_func_decl(&node, *ast_ptr, FUNC_DECL_LEVEL_CONSTEXPR);
+
+	zend_ast_destroy(*ast_ptr);
+	zval z;
+	ZVAL_PTR(&z, op);
+	*ast_ptr = zend_ast_create_zval(&z);
+	(*ast_ptr)->kind = ZEND_AST_OP_ARRAY;
+}
+
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)
 {
 	zend_ast_list *list = zend_ast_get_list(*ast_ptr);
@@ -11245,6 +11284,9 @@ static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 		case ZEND_AST_ARG_LIST:
 			zend_compile_const_expr_args(ast_ptr);
 			break;
+		case ZEND_AST_CLOSURE:
+			zend_compile_const_expr_closure(ast_ptr);
+			break;
 	}
 
 	zend_ast_apply(ast, zend_compile_const_expr, context);
@@ -11287,7 +11329,7 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 
 	if (ast->kind == ZEND_AST_FUNC_DECL) {
 		CG(zend_lineno) = ast->lineno;
-		zend_compile_func_decl(NULL, ast, 1);
+		zend_compile_func_decl(NULL, ast, FUNC_DECL_LEVEL_TOPLEVEL);
 		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
 	} else if (ast->kind == ZEND_AST_CLASS) {
 		CG(zend_lineno) = ast->lineno;
@@ -11369,7 +11411,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_METHOD:
-			zend_compile_func_decl(NULL, ast, 0);
+			zend_compile_func_decl(NULL, ast, FUNC_DECL_LEVEL_NESTED);
 			break;
 		case ZEND_AST_ENUM_CASE:
 			zend_compile_enum_case(ast);
@@ -11546,7 +11588,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_ARROW_FUNC:
-			zend_compile_func_decl(result, ast, 0);
+			zend_compile_func_decl(result, ast, FUNC_DECL_LEVEL_NESTED);
 			return;
 		case ZEND_AST_THROW:
 			zend_compile_throw(result, ast);

@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16665 (\array and \callable should not be usable in
     class_alias). (nielsdos)
   . Added PHP_BUILD_DATE constant. (cmb)
+  . Added support for Closures in constant expressions. (timwolla,
+    Volker Dusch)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
