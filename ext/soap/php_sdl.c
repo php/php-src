@@ -694,9 +694,8 @@ static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
 
 static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 {
-	sdlCtx ctx;
+	sdlCtx ctx = {0};
 
-	memset(&ctx,0,sizeof(ctx));
 	ctx.sdl = emalloc(sizeof(sdl));
 	memset(ctx.sdl, 0, sizeof(sdl));
 	ctx.sdl->source = estrdup(struri);
