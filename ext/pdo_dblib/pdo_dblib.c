@@ -27,6 +27,7 @@
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
 #include "pdo_dblib_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
@@ -240,4 +241,9 @@ PHP_MINFO_FUNCTION(pdo_dblib)
 		" DB-lib", "enabled");
 	php_info_print_table_row(2, "Flavour", PDO_DBLIB_FLAVOUR);
 	php_info_print_table_end();
+}
+
+PHP_METHOD(Pdo_Dblib, __construct)
+{
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
 }

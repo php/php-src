@@ -25,6 +25,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "zend_attributes.h"
 #include "pdo_firebird_arginfo.h"
 
 static zend_class_entry *PdoFirebird_ce;
@@ -100,6 +101,11 @@ PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 	php_info_print_table_end();
 }
 /* }}} */
+
+PHP_METHOD(Pdo_Firebird, __construct)
+{
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+}
 
 PHP_METHOD(Pdo_Firebird, getApiVersion)
 {

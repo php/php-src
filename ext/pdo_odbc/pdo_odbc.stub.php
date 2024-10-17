@@ -31,5 +31,7 @@ namespace Pdo {
 
         /** @cvalue SQL_CUR_USE_ODBC */
         public const int SQL_USE_ODBC = UNKNOWN;
+
+        public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
     }
 }
