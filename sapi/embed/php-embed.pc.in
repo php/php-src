@@ -1,0 +1,27 @@
+# The pkg-config .pc file for PHP Embed SAPI.
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@includedir@/php
+libdir=@orig_libdir@
+# PHP extension directory containing dynamically loadable PHP extensions.
+php_extension_dir=@EXTENSION_DIR@
+# PHP version as integer.
+php_vernum=@PHP_VERSION_ID@
+# The path where to scan for additional INI configuration files.
+php_ini_dir=@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@
+# The path in which to look for php.ini.
+php_ini_path=@EXPANDED_PHP_CONFIG_FILE_PATH@
+# Whether PHP is built in debug mode (yes) or not (no).
+php_debug=@ZEND_DEBUG@
+# Whether PHP is built with thread safety (yes) or not (no).
+php_zts=@PHP_THREAD_SAFETY@
+
+Name: PHP Embed SAPI
+Description: A lightweight SAPI to embed PHP into application using C bindings
+URL: https://www.php.net
+License: PHP
+Version: @PHP_VERSION@
+Cflags: -I${includedir} -I${includedir}/main -I${includedir}/TSRM -I${includedir}/Zend -I${includedir}/ext -I${includedir}/ext/date/lib
+Libs.private: @EXTRA_LIBS@ @ZEND_EXTRA_LIBS@
+Libs: -L${libdir} -lphp
