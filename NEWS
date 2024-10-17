@@ -32,6 +32,7 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-16336 (Attribute intern document mismanagement). (nielsdos)
   . Fixed bug GH-16338 (Null-dereference in ext/dom/node.c). (nielsdos)
+  . Fixed bug GH-16473 (dom_import_simplexml stub is wrong). (nielsdos)
 
 - EXIF:
   . Fixed bug GH-16409 (Segfault in exif_thumbnail when not dealing with a
