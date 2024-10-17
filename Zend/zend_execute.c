@@ -44,6 +44,7 @@
 #include "zend_system_id.h"
 #include "zend_call_stack.h"
 #include "zend_attributes.h"
+#include "ext/reflection/php_reflection.h"
 #include "Optimizer/zend_func_info.h"
 
 /* Virtual current working directory support */
