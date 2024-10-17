@@ -57,6 +57,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16433 (Large values for openssl_csr_sign() $days overflow).
     (cmb)
 
+- Phar:
+  . Fixed bug GH-16406 (Assertion failure in ext/phar/phar.c:2808). (nielsdos)
+
 - PHPDBG:
   . Fixed bug GH-16174 (Empty string is an invalid expression for ev). (cmb)
 
