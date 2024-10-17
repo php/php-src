@@ -47,6 +47,11 @@
 #include "../TSRM/TSRM.h"
 
 #include <stdio.h>
+#if ZEND_DEBUG
+# undef NDEBUG
+#elif !defined(NDEBUG)
+# define NDEBUG
+#endif
 #include <assert.h>
 #include <math.h>
 
