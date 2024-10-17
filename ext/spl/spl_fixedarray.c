@@ -484,8 +484,10 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 		return;
 	} else {
 		intern->array.should_rebuild_properties = true;
-		zval_ptr_dtor(&(intern->array.elements[index]));
+		zval garbage;
+		ZVAL_COPY_VALUE(&garbage, &intern->array.elements[index]);
 		ZVAL_NULL(&intern->array.elements[index]);
+		zval_ptr_dtor(&garbage);
 	}
 }
 
