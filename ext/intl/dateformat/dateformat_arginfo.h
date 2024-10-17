@@ -149,73 +149,73 @@ static zend_class_entry *register_class_IntlDateFormatter(void)
 
 	zval const_FULL_value;
 	ZVAL_LONG(&const_FULL_value, UDAT_FULL);
-	zend_string *const_FULL_name = zend_string_init_interned("FULL", sizeof("FULL") - 1, 1);
+	zend_string *const_FULL_name = zend_string_init_interned("FULL", strlen("FULL"), 1);
 	zend_declare_typed_class_constant(class_entry, const_FULL_name, &const_FULL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FULL_name);
 
 	zval const_LONG_value;
 	ZVAL_LONG(&const_LONG_value, UDAT_LONG);
-	zend_string *const_LONG_name = zend_string_init_interned("LONG", sizeof("LONG") - 1, 1);
+	zend_string *const_LONG_name = zend_string_init_interned("LONG", strlen("LONG"), 1);
 	zend_declare_typed_class_constant(class_entry, const_LONG_name, &const_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_LONG_name);
 
 	zval const_MEDIUM_value;
 	ZVAL_LONG(&const_MEDIUM_value, UDAT_MEDIUM);
-	zend_string *const_MEDIUM_name = zend_string_init_interned("MEDIUM", sizeof("MEDIUM") - 1, 1);
+	zend_string *const_MEDIUM_name = zend_string_init_interned("MEDIUM", strlen("MEDIUM"), 1);
 	zend_declare_typed_class_constant(class_entry, const_MEDIUM_name, &const_MEDIUM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_MEDIUM_name);
 
 	zval const_SHORT_value;
 	ZVAL_LONG(&const_SHORT_value, UDAT_SHORT);
-	zend_string *const_SHORT_name = zend_string_init_interned("SHORT", sizeof("SHORT") - 1, 1);
+	zend_string *const_SHORT_name = zend_string_init_interned("SHORT", strlen("SHORT"), 1);
 	zend_declare_typed_class_constant(class_entry, const_SHORT_name, &const_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SHORT_name);
 
 	zval const_NONE_value;
 	ZVAL_LONG(&const_NONE_value, UDAT_NONE);
-	zend_string *const_NONE_name = zend_string_init_interned("NONE", sizeof("NONE") - 1, 1);
+	zend_string *const_NONE_name = zend_string_init_interned("NONE", strlen("NONE"), 1);
 	zend_declare_typed_class_constant(class_entry, const_NONE_name, &const_NONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_NONE_name);
 
 	zval const_RELATIVE_FULL_value;
 	ZVAL_LONG(&const_RELATIVE_FULL_value, UDAT_FULL_RELATIVE);
-	zend_string *const_RELATIVE_FULL_name = zend_string_init_interned("RELATIVE_FULL", sizeof("RELATIVE_FULL") - 1, 1);
+	zend_string *const_RELATIVE_FULL_name = zend_string_init_interned("RELATIVE_FULL", strlen("RELATIVE_FULL"), 1);
 	zend_declare_typed_class_constant(class_entry, const_RELATIVE_FULL_name, &const_RELATIVE_FULL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_RELATIVE_FULL_name);
 
 	zval const_RELATIVE_LONG_value;
 	ZVAL_LONG(&const_RELATIVE_LONG_value, UDAT_LONG_RELATIVE);
-	zend_string *const_RELATIVE_LONG_name = zend_string_init_interned("RELATIVE_LONG", sizeof("RELATIVE_LONG") - 1, 1);
+	zend_string *const_RELATIVE_LONG_name = zend_string_init_interned("RELATIVE_LONG", strlen("RELATIVE_LONG"), 1);
 	zend_declare_typed_class_constant(class_entry, const_RELATIVE_LONG_name, &const_RELATIVE_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_RELATIVE_LONG_name);
 
 	zval const_RELATIVE_MEDIUM_value;
 	ZVAL_LONG(&const_RELATIVE_MEDIUM_value, UDAT_MEDIUM_RELATIVE);
-	zend_string *const_RELATIVE_MEDIUM_name = zend_string_init_interned("RELATIVE_MEDIUM", sizeof("RELATIVE_MEDIUM") - 1, 1);
+	zend_string *const_RELATIVE_MEDIUM_name = zend_string_init_interned("RELATIVE_MEDIUM", strlen("RELATIVE_MEDIUM"), 1);
 	zend_declare_typed_class_constant(class_entry, const_RELATIVE_MEDIUM_name, &const_RELATIVE_MEDIUM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_RELATIVE_MEDIUM_name);
 
 	zval const_RELATIVE_SHORT_value;
 	ZVAL_LONG(&const_RELATIVE_SHORT_value, UDAT_SHORT_RELATIVE);
-	zend_string *const_RELATIVE_SHORT_name = zend_string_init_interned("RELATIVE_SHORT", sizeof("RELATIVE_SHORT") - 1, 1);
+	zend_string *const_RELATIVE_SHORT_name = zend_string_init_interned("RELATIVE_SHORT", strlen("RELATIVE_SHORT"), 1);
 	zend_declare_typed_class_constant(class_entry, const_RELATIVE_SHORT_name, &const_RELATIVE_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_RELATIVE_SHORT_name);
 
 	zval const_PATTERN_value;
 	ZVAL_LONG(&const_PATTERN_value, UDAT_PATTERN);
-	zend_string *const_PATTERN_name = zend_string_init_interned("PATTERN", sizeof("PATTERN") - 1, 1);
+	zend_string *const_PATTERN_name = zend_string_init_interned("PATTERN", strlen("PATTERN"), 1);
 	zend_declare_typed_class_constant(class_entry, const_PATTERN_name, &const_PATTERN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_PATTERN_name);
 
 	zval const_GREGORIAN_value;
 	ZVAL_LONG(&const_GREGORIAN_value, UCAL_GREGORIAN);
-	zend_string *const_GREGORIAN_name = zend_string_init_interned("GREGORIAN", sizeof("GREGORIAN") - 1, 1);
+	zend_string *const_GREGORIAN_name = zend_string_init_interned("GREGORIAN", strlen("GREGORIAN"), 1);
 	zend_declare_typed_class_constant(class_entry, const_GREGORIAN_name, &const_GREGORIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_GREGORIAN_name);
 
 	zval const_TRADITIONAL_value;
 	ZVAL_LONG(&const_TRADITIONAL_value, UCAL_TRADITIONAL);
-	zend_string *const_TRADITIONAL_name = zend_string_init_interned("TRADITIONAL", sizeof("TRADITIONAL") - 1, 1);
+	zend_string *const_TRADITIONAL_name = zend_string_init_interned("TRADITIONAL", strlen("TRADITIONAL"), 1);
 	zend_declare_typed_class_constant(class_entry, const_TRADITIONAL_name, &const_TRADITIONAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TRADITIONAL_name);
 
