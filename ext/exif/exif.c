@@ -1284,6 +1284,18 @@ typedef struct {
 	mn_offset_mode_t offset_mode;
 } maker_note_type;
 
+#define FOURCC(id) (((uint32_t)(id[0])<<24) | (id[1]<<16) | (id[2]<<8) | (id[3]))
+
+typedef struct {
+	uint64_t	size;
+	uint32_t	type;
+} isobmff_box_type;
+
+typedef struct {
+	uint32_t	offset;
+	uint32_t	size;
+} isobmff_item_pos_type;
+
 /* Some maker notes (e.g. DJI info tag) require custom parsing */
 #define REQUIRES_CUSTOM_PARSING NULL
 
@@ -4281,11 +4293,128 @@ static bool exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offs
 	return result;
 }
 
+static int exif_isobmff_parse_box(unsigned char *buf, isobmff_box_type *box)
+{
+	box->size = php_ifd_get32u(buf, 1);
+	buf += 4;
+	box->type = php_ifd_get32u(buf, 1);
+	if (box->size != 1) {
+		return 8;
+	}
+	buf += 4;
+	box->size = php_ifd_get64u(buf, 1);
+	return 16;
+}
+
+static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, isobmff_item_pos_type *pos)
+{
+	isobmff_box_type box, item;
+	unsigned char *box_offset, *p, *p2;
+	int header_size, exif_id = -1, version, item_count, i;
+
+	for (box_offset = data + 4; box_offset < end; box_offset += box.size) {
+		header_size = exif_isobmff_parse_box(box_offset, &box);
+		if (box.type == FOURCC("iinf")) {
+			p = box_offset + header_size;
+			version = p[0];
+			p += 4;
+			if (version < 2) {
+				item_count = php_ifd_get16u(p, 1);
+				p += 2;
+			} else {
+				item_count = php_ifd_get32u(p, 1);
+				p += 4;
+			}
+			for (i=0; i < item_count; i++) {
+				header_size = exif_isobmff_parse_box(p, &item);
+				if (!memcmp(p + header_size + 8, "Exif", 4)) {
+					exif_id = php_ifd_get16u(p + header_size + 4, 1);
+					break;
+				}
+				p += item.size;
+			}
+			if (exif_id < 0) {
+				break;
+			}
+		}
+		else if (box.type == FOURCC("iloc")) {
+			p = box_offset + header_size;
+			version = p[0];
+			p += 6;
+			if (version < 2) {
+				item_count = php_ifd_get16u(p, 1);
+				p += 2;
+			} else {
+				item_count = php_ifd_get32u(p, 1);
+				p += 4;
+			}
+			for (i=0, p2=p; i<item_count; i++, p2 += 16) {
+				if (php_ifd_get16u(p2, 1) == exif_id) {
+					pos->offset = php_ifd_get32u(p2 + 8, 1);
+					pos->size = php_ifd_get32u(p2 + 12, 1);
+					break;
+				}
+			}
+			break;
+		}
+	}
+}
+
+static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf)
+{
+	isobmff_box_type box;
+	isobmff_item_pos_type pos;
+	unsigned char *data;
+	off_t offset;
+	uint64_t limit;
+	int box_header_size, remain;
+	bool ret = false;
+
+	pos.size = 0;
+	for (offset = php_ifd_get32u(buf, 1); ImageInfo->FileSize > offset + 16; offset += box.size) {
+		if ((php_stream_seek(ImageInfo->infile, offset, SEEK_SET) < 0) ||
+			(exif_read_from_stream_file_looped(ImageInfo->infile, (char*)buf, 16) != 16)) {
+			break;
+		}
+		box_header_size = exif_isobmff_parse_box(buf, &box);
+		if (box.type == FOURCC("meta")) {
+			limit = box.size - box_header_size;
+			data = (unsigned char *)emalloc(limit);
+			remain = 16 - box_header_size;
+			if (remain) {
+				memcpy(data, buf + box_header_size, remain);
+			}
+			if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(data + remain), limit - remain) == limit - remain) {
+				exif_isobmff_parse_meta(data, data + limit, &pos);
+			}
+			if ((pos.size) &&
+				(ImageInfo->FileSize >= pos.offset + pos.size) &&
+				(php_stream_seek(ImageInfo->infile, pos.offset + 2, SEEK_SET) >= 0)) {
+				if (limit >= pos.size - 2) {
+					limit = pos.size - 2;
+				} else {
+					limit = pos.size - 2;
+					efree(data);
+					data = (unsigned char *)emalloc(limit);
+				}
+				if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)data, limit) == limit) {
+					exif_process_APP1(ImageInfo, (char*)data, limit, pos.offset + 2);
+					ret = true;
+				}
+			}
+			efree(data);
+			break;
+		}
+	}
+
+	return ret;
+}
+
 /* {{{ exif_scan_FILE_header
  * Parse the marker stream until SOS or EOI is seen; */
 static bool exif_scan_FILE_header(image_info_type *ImageInfo)
 {
-	unsigned char file_header[8];
+	unsigned char file_header[16];
 	bool ret = false;
 
 	ImageInfo->FileType = IMAGE_FILETYPE_UNKNOWN;
@@ -4334,6 +4463,16 @@ static bool exif_scan_FILE_header(image_info_type *ImageInfo)
 				} else {
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");
 				}
+			} else if ((ImageInfo->FileSize > 12) &&
+				(!memcmp(file_header + 4, "ftyp", 4)) &&
+				(exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(file_header + 8), 4) == 4) &&
+				((!memcmp(file_header + 8, "heic", 4)) || (!memcmp(file_header + 8, "heix", 4)) || (!memcmp(file_header + 8, "mif1", 4)))) {
+					if (exif_scan_HEIF_header(ImageInfo, file_header)) {
+						ImageInfo->FileType = IMAGE_FILETYPE_HEIF;
+						ret = true;
+					} else {
+						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid HEIF file");
+					}
 			} else {
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File not supported");
 				return false;
