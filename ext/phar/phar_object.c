@@ -2308,6 +2308,9 @@ no_copy:
 			newentry.tar_type = (entry->is_dir ? TAR_DIR : TAR_FILE);
 		}
 
+		/* The header offset is only used for unmodified zips.
+		 * Once modified, phar_zip_changed_apply_int() will update the header_offset. */
+		newentry.header_offset = 0;
 		newentry.is_modified = 1;
 		newentry.phar = phar;
 		newentry.old_flags = newentry.flags & ~PHAR_ENT_COMPRESSION_MASK; /* remove compression from old_flags */
