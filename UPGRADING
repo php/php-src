@@ -88,6 +88,9 @@ PHP 8.5 UPGRADE NOTES
     statement from the DEALLOCATE sql command in that we can reuse
     its name afterwards.
 
+- Reflection:
+  . ReflectionConstant::getFileName() was introduced.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
