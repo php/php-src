@@ -1234,7 +1234,7 @@ namespace
     }
 #endif
 
-    function dom_import_simplexml(object $node): DOMElement {}
+    function dom_import_simplexml(object $node): DOMAttr|DOMElement {}
 }
 
 namespace Dom
@@ -2171,5 +2171,5 @@ namespace Dom
     }
 #endif
 
-    function import_simplexml(object $node): Element {}
+    function import_simplexml(object $node): Attr|Element {}
 }
