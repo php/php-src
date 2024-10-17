@@ -371,18 +371,18 @@ void zend_signal_deactivate(void)
 }
 /* }}} */
 
-static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals) /* {{{ */
+static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals_ptr) /* {{{ */
 {
 	size_t x;
 
-	memset(zend_signal_globals, 0, sizeof(*zend_signal_globals));
-	zend_signal_globals->reset = 1;
+	memset(zend_signal_globals_ptr, 0, sizeof(*zend_signal_globals_ptr));
+	zend_signal_globals_ptr->reset = 1;
 
-	for (x = 0; x < sizeof(zend_signal_globals->pstorage) / sizeof(*zend_signal_globals->pstorage); ++x) {
-		zend_signal_queue_t *queue = &zend_signal_globals->pstorage[x];
+	for (x = 0; x < sizeof(zend_signal_globals_ptr->pstorage) / sizeof(*zend_signal_globals_ptr->pstorage); ++x) {
+		zend_signal_queue_t *queue = &zend_signal_globals_ptr->pstorage[x];
 		queue->zend_signal.signo = 0;
-		queue->next = zend_signal_globals->pavail;
-		zend_signal_globals->pavail = queue;
+		queue->next = zend_signal_globals_ptr->pavail;
+		zend_signal_globals_ptr->pavail = queue;
 	}
 }
 /* }}} */

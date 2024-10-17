@@ -1073,9 +1073,9 @@ get_chunk:
 				}
 #if ZEND_MM_STAT
 				do {
-					size_t size = heap->real_size + ZEND_MM_CHUNK_SIZE;
-					size_t peak = MAX(heap->real_peak, size);
-					heap->real_size = size;
+					size_t new_real_size = heap->real_size + ZEND_MM_CHUNK_SIZE;
+					size_t peak = MAX(heap->real_peak, new_real_size);
+					heap->real_size = new_real_size;
 					heap->real_peak = peak;
 				} while (0);
 #elif ZEND_MM_LIMIT
@@ -1130,9 +1130,9 @@ static zend_always_inline void *zend_mm_alloc_large_ex(zend_mm_heap *heap, size_
 #endif
 #if ZEND_MM_STAT
 	do {
-		size_t size = heap->size + pages_count * ZEND_MM_PAGE_SIZE;
-		size_t peak = MAX(heap->peak, size);
-		heap->size = size;
+		size_t mem_size = heap->size + pages_count * ZEND_MM_PAGE_SIZE;
+		size_t peak = MAX(heap->peak, mem_size);
+		heap->size = mem_size;
 		heap->peak = peak;
 	} while (0);
 #endif
@@ -1799,9 +1799,9 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 					    zend_mm_bitset_is_free_range(chunk->free_map, page_num + old_pages_count, new_pages_count - old_pages_count)) {
 #if ZEND_MM_STAT
 						do {
-							size_t size = heap->size + (new_size - old_size);
-							size_t peak = MAX(heap->peak, size);
-							heap->size = size;
+							size_t new_real_size = heap->size + (new_size - old_size);
+							size_t peak = MAX(heap->peak, new_real_size);
+							heap->size = new_real_size;
 							heap->peak = peak;
 						} while (0);
 #endif
@@ -1970,15 +1970,15 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #endif
 #if ZEND_MM_STAT
 	do {
-		size_t size = heap->real_size + new_size;
-		size_t peak = MAX(heap->real_peak, size);
-		heap->real_size = size;
+		size_t new_real_size = heap->real_size + new_size;
+		size_t peak = MAX(heap->real_peak, new_real_size);
+		heap->real_size = new_real_size;
 		heap->real_peak = peak;
 	} while (0);
 	do {
-		size_t size = heap->size + new_size;
-		size_t peak = MAX(heap->peak, size);
-		heap->size = size;
+		size_t new_heap_size = heap->size + new_size;
+		size_t peak = MAX(heap->peak, new_heap_size);
+		heap->size = new_heap_size;
 		heap->peak = peak;
 	} while (0);
 #elif ZEND_MM_LIMIT
@@ -3021,7 +3021,7 @@ static void tracked_free_all(zend_mm_heap *heap) {
 }
 #endif
 
-static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
+static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_ptr)
 {
 	char *tmp;
 
@@ -3029,7 +3029,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 	tmp = getenv("USE_ZEND_ALLOC");
 	if (tmp && !ZEND_ATOL(tmp)) {
 		bool tracked = (tmp = getenv("USE_TRACKED_ALLOC")) && ZEND_ATOL(tmp);
-		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
+		zend_mm_heap *mm_heap = alloc_globals_ptr->mm_heap = malloc(sizeof(zend_mm_heap));
 		memset(mm_heap, 0, sizeof(zend_mm_heap));
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
 		mm_heap->limit = (size_t)Z_L(-1) >> 1;
@@ -3056,13 +3056,13 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 	if (tmp && ZEND_ATOL(tmp)) {
 		zend_mm_use_huge_pages = true;
 	}
-	alloc_globals->mm_heap = zend_mm_init();
+	alloc_globals_ptr->mm_heap = zend_mm_init();
 }
 
 #ifdef ZTS
-static void alloc_globals_dtor(zend_alloc_globals *alloc_globals)
+static void alloc_globals_dtor(zend_alloc_globals *alloc_globals_ptr)
 {
-	zend_mm_shutdown(alloc_globals->mm_heap, 1, 1);
+	zend_mm_shutdown(alloc_globals_ptr->mm_heap, 1, 1);
 }
 #endif
 

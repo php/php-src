@@ -1329,19 +1329,19 @@ matched:
 						 * arrays with NULLs or empty strings.
 						 */
 						if (count < num_subpats) {
-							for (int i = count; i < num_subpats; i++) {
+							for (int subpattern = count; subpattern < num_subpats; subpattern++) {
 								if (offset_capture) {
 									add_offset_pair(
-										match_sets[i], NULL, PCRE2_UNSET, PCRE2_UNSET,
+										match_sets[subpattern], NULL, PCRE2_UNSET, PCRE2_UNSET,
 										NULL, unmatched_as_null);
 								} else if (unmatched_as_null) {
 									zval tmp;
 									ZVAL_NULL(&tmp);
-									zend_hash_next_index_insert_new(match_sets[i], &tmp);
+									zend_hash_next_index_insert_new(match_sets[subpattern], &tmp);
 								} else {
 									zval tmp;
 									ZVAL_EMPTY_STRING(&tmp);
-									zend_hash_next_index_insert_new(match_sets[i], &tmp);
+									zend_hash_next_index_insert_new(match_sets[subpattern], &tmp);
 								}
 							}
 						}

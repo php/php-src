@@ -470,47 +470,47 @@ static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 	GC_BENCH_DEC(root_buf_length);
 }
 
-static void root_buffer_dtor(zend_gc_globals *gc_globals)
+static void root_buffer_dtor(zend_gc_globals *gc_globals_ptr)
 {
-	if (gc_globals->buf) {
-		free(gc_globals->buf);
-		gc_globals->buf = NULL;
+	if (gc_globals_ptr->buf) {
+		free(gc_globals_ptr->buf);
+		gc_globals_ptr->buf = NULL;
 	}
 }
 
-static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
+static void gc_globals_ctor_ex(zend_gc_globals *gc_globals_ptr)
 {
-	gc_globals->gc_enabled = 0;
-	gc_globals->gc_active = 0;
-	gc_globals->gc_protected = 1;
-	gc_globals->gc_full = 0;
+	gc_globals_ptr->gc_enabled = 0;
+	gc_globals_ptr->gc_active = 0;
+	gc_globals_ptr->gc_protected = 1;
+	gc_globals_ptr->gc_full = 0;
 
-	gc_globals->buf = NULL;
-	gc_globals->unused = GC_INVALID;
-	gc_globals->first_unused = GC_INVALID;
-	gc_globals->gc_threshold = GC_INVALID;
-	gc_globals->buf_size = GC_INVALID;
-	gc_globals->num_roots = 0;
+	gc_globals_ptr->buf = NULL;
+	gc_globals_ptr->unused = GC_INVALID;
+	gc_globals_ptr->first_unused = GC_INVALID;
+	gc_globals_ptr->gc_threshold = GC_INVALID;
+	gc_globals_ptr->buf_size = GC_INVALID;
+	gc_globals_ptr->num_roots = 0;
 
-	gc_globals->gc_runs = 0;
-	gc_globals->collected = 0;
-	gc_globals->collector_time = 0;
-	gc_globals->dtor_time = 0;
-	gc_globals->free_time = 0;
-	gc_globals->activated_at = 0;
+	gc_globals_ptr->gc_runs = 0;
+	gc_globals_ptr->collected = 0;
+	gc_globals_ptr->collector_time = 0;
+	gc_globals_ptr->dtor_time = 0;
+	gc_globals_ptr->free_time = 0;
+	gc_globals_ptr->activated_at = 0;
 
-	gc_globals->dtor_idx = GC_FIRST_ROOT;
-	gc_globals->dtor_end = 0;
-	gc_globals->dtor_fiber = NULL;
-	gc_globals->dtor_fiber_running = false;
+	gc_globals_ptr->dtor_idx = GC_FIRST_ROOT;
+	gc_globals_ptr->dtor_end = 0;
+	gc_globals_ptr->dtor_fiber = NULL;
+	gc_globals_ptr->dtor_fiber_running = false;
 
 #if GC_BENCH
-	gc_globals->root_buf_length = 0;
-	gc_globals->root_buf_peak = 0;
-	gc_globals->zval_possible_root = 0;
-	gc_globals->zval_buffered = 0;
-	gc_globals->zval_remove_from_buffer = 0;
-	gc_globals->zval_marked_grey = 0;
+	gc_globals_ptr->root_buf_length = 0;
+	gc_globals_ptr->root_buf_peak = 0;
+	gc_globals_ptr->zval_possible_root = 0;
+	gc_globals_ptr->zval_buffered = 0;
+	gc_globals_ptr->zval_remove_from_buffer = 0;
+	gc_globals_ptr->zval_marked_grey = 0;
 #endif
 }
 
@@ -917,11 +917,11 @@ handle_zvals:
 						zv++;
 						while (--n) {
 							if (Z_REFCOUNTED_P(zv)) {
-								zend_refcounted *ref = Z_COUNTED_P(zv);
-								GC_ADDREF(ref);
-								if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
-									GC_REF_SET_BLACK(ref);
-									GC_STACK_PUSH(ref);
+								zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+								GC_ADDREF(tmp_ref);
+								if (!GC_REF_CHECK_COLOR(tmp_ref, GC_BLACK)) {
+									GC_REF_SET_BLACK(tmp_ref);
+									GC_STACK_PUSH(tmp_ref);
 								}
 							}
 							zv++;
@@ -960,11 +960,11 @@ handle_ht:
 							zv = Z_INDIRECT_P(zv);
 						}
 						if (Z_REFCOUNTED_P(zv)) {
-							zend_refcounted *ref = Z_COUNTED_P(zv);
-							GC_ADDREF(ref);
-							if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
-								GC_REF_SET_BLACK(ref);
-								GC_STACK_PUSH(ref);
+							zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+							GC_ADDREF(tmp_ref);
+							if (!GC_REF_CHECK_COLOR(tmp_ref, GC_BLACK)) {
+								GC_REF_SET_BLACK(tmp_ref);
+								GC_STACK_PUSH(tmp_ref);
 							}
 						}
 						p++;
@@ -1092,11 +1092,11 @@ handle_zvals:
 						zv++;
 						while (--n) {
 							if (Z_REFCOUNTED_P(zv)) {
-								zend_refcounted *ref = Z_COUNTED_P(zv);
-								GC_DELREF(ref);
-								if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-									GC_REF_SET_COLOR(ref, GC_GREY);
-									GC_STACK_PUSH(ref);
+								zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+								GC_DELREF(tmp_ref);
+								if (!GC_REF_CHECK_COLOR(tmp_ref, GC_GREY)) {
+									GC_REF_SET_COLOR(tmp_ref, GC_GREY);
+									GC_STACK_PUSH(tmp_ref);
 								}
 							}
 							zv++;
@@ -1135,11 +1135,11 @@ handle_ht:
 							zv = Z_INDIRECT_P(zv);
 						}
 						if (Z_REFCOUNTED_P(zv)) {
-							zend_refcounted *ref = Z_COUNTED_P(zv);
-							GC_DELREF(ref);
-							if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-								GC_REF_SET_COLOR(ref, GC_GREY);
-								GC_STACK_PUSH(ref);
+							zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+							GC_DELREF(tmp_ref);
+							if (!GC_REF_CHECK_COLOR(tmp_ref, GC_GREY)) {
+								GC_REF_SET_COLOR(tmp_ref, GC_GREY);
+								GC_STACK_PUSH(tmp_ref);
 							}
 						}
 						p++;
@@ -1304,10 +1304,10 @@ handle_zvals:
 						zv++;
 						while (--n) {
 							if (Z_REFCOUNTED_P(zv)) {
-								zend_refcounted *ref = Z_COUNTED_P(zv);
-								if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-									GC_REF_SET_COLOR(ref, GC_WHITE);
-									GC_STACK_PUSH(ref);
+								zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+								if (GC_REF_CHECK_COLOR(tmp_ref, GC_GREY)) {
+									GC_REF_SET_COLOR(tmp_ref, GC_WHITE);
+									GC_STACK_PUSH(tmp_ref);
 								}
 							}
 							zv++;
@@ -1346,10 +1346,10 @@ handle_ht:
 							zv = Z_INDIRECT_P(zv);
 						}
 						if (Z_REFCOUNTED_P(zv)) {
-							zend_refcounted *ref = Z_COUNTED_P(zv);
-							if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
-								GC_REF_SET_COLOR(ref, GC_WHITE);
-								GC_STACK_PUSH(ref);
+							zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+							if (GC_REF_CHECK_COLOR(tmp_ref, GC_GREY)) {
+								GC_REF_SET_COLOR(tmp_ref, GC_WHITE);
+								GC_STACK_PUSH(tmp_ref);
 							}
 						}
 						p++;
@@ -1541,11 +1541,11 @@ handle_zvals:
 						zv++;
 						while (--n) {
 							if (Z_REFCOUNTED_P(zv)) {
-								zend_refcounted *ref = Z_COUNTED_P(zv);
-								GC_ADDREF(ref);
-								if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
-									GC_REF_SET_BLACK(ref);
-									GC_STACK_PUSH(ref);
+								zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+								GC_ADDREF(tmp_ref);
+								if (GC_REF_CHECK_COLOR(tmp_ref, GC_WHITE)) {
+									GC_REF_SET_BLACK(tmp_ref);
+									GC_STACK_PUSH(tmp_ref);
 								}
 							}
 							zv++;
@@ -1588,11 +1588,11 @@ handle_ht:
 							zv = Z_INDIRECT_P(zv);
 						}
 						if (Z_REFCOUNTED_P(zv)) {
-							zend_refcounted *ref = Z_COUNTED_P(zv);
-							GC_ADDREF(ref);
-							if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
-								GC_REF_SET_BLACK(ref);
-								GC_STACK_PUSH(ref);
+							zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+							GC_ADDREF(tmp_ref);
+							if (GC_REF_CHECK_COLOR(tmp_ref, GC_WHITE)) {
+								GC_REF_SET_BLACK(tmp_ref);
+								GC_STACK_PUSH(tmp_ref);
 							}
 						}
 						p++;
@@ -1737,8 +1737,8 @@ handle_zvals:
 					zv++;
 					while (--n) {
 						if (Z_REFCOUNTED_P(zv)) {
-							zend_refcounted *ref = Z_COUNTED_P(zv);
-							GC_STACK_PUSH(ref);
+							zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+							GC_STACK_PUSH(tmp_ref);
 						}
 						zv++;
 					}
@@ -1772,8 +1772,8 @@ handle_ht:
 						zv = Z_INDIRECT_P(zv);
 					}
 					if (Z_REFCOUNTED_P(zv)) {
-						zend_refcounted *ref = Z_COUNTED_P(zv);
-						GC_STACK_PUSH(ref);
+						zend_refcounted *tmp_ref = Z_COUNTED_P(zv);
+						GC_STACK_PUSH(tmp_ref);
 					}
 					p++;
 				}

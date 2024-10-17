@@ -110,17 +110,17 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_FRAMELESS_ICALL_2:
 			case ZEND_FRAMELESS_ICALL_3: {
 				func = ZEND_FLF_FUNC(opline);
-				zend_call_info *call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info));
-				call_info->caller_op_array = op_array;
-				call_info->caller_init_opline = opline;
-				call_info->caller_call_opline = NULL;
-				call_info->callee_func = func;
-				call_info->num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
-				call_info->next_callee = func_info->callee_info;
-				call_info->is_prototype = false;
-				call_info->is_frameless = true;
-				call_info->next_caller = NULL;
-				func_info->callee_info = call_info;
+				zend_call_info *frameless_call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info));
+				frameless_call_info->caller_op_array = op_array;
+				frameless_call_info->caller_init_opline = opline;
+				frameless_call_info->caller_call_opline = NULL;
+				frameless_call_info->callee_func = func;
+				frameless_call_info->num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
+				frameless_call_info->next_callee = func_info->callee_info;
+				frameless_call_info->is_prototype = false;
+				frameless_call_info->is_frameless = true;
+				frameless_call_info->next_caller = NULL;
+				func_info->callee_info = frameless_call_info;
 				break;
 			}
 			case ZEND_DO_FCALL:
