@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a20d21c1796ebb43028856f0ec2d53dcaded6cc0 */
+ * Stub hash: 4ce58367281bbbefffe2925d34830c717b6b4208 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
