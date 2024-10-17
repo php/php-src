@@ -2047,13 +2047,7 @@ PHP_METHOD(SplFileObject, __construct)
 	size_t path_len;
 	zend_error_handling error_handling;
 
-	intern->u.file.open_mode = ZSTR_CHAR('r');
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|Sbr!",
-			&intern->file_name, &open_mode,
-			&use_include_path, &intern->u.file.zcontext) == FAILURE) {
-		intern->u.file.open_mode = NULL;
-		intern->file_name = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|Sbr!", &intern->file_name, &open_mode, &use_include_path, &intern->u.file.zcontext) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2093,6 +2087,12 @@ PHP_METHOD(SplTempFileObject, __construct)
 	zend_error_handling error_handling;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &max_memory) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	/* Prevent reinitialization of Object */
+	if (intern->u.file.stream) {
+		zend_throw_error(NULL, "cannot call constructor twice");
 		RETURN_THROWS();
 	}
 
