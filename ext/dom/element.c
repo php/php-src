@@ -734,9 +734,8 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 		xmlUnlinkNode((xmlNodePtr) attrp);
 	}
 
-	if (attrp->doc == NULL && nodep->doc != NULL) {
-		attrobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)attrobj, NULL);
+	if (attrp->doc == NULL && nodep->doc != NULL && intern->document != NULL) {
+		dom_set_document_ref_pointers_attr(attrp, intern->document);
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
