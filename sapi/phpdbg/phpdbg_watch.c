@@ -310,9 +310,9 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context) {
 # if defined(__GNUC__) && !defined(__clang__)
 __attribute__((no_sanitize_address))
 # endif
-void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals) {
+void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals_ptr) {
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	zend_phpdbg_globals *globals = (zend_phpdbg_globals *) phpdbg_globals;
+	zend_phpdbg_globals *globals = (zend_phpdbg_globals *) phpdbg_globals_ptr;
 
 	struct uffd_msg fault_msg = {0};
 	while (read(globals->watch_userfaultfd, &fault_msg, sizeof(fault_msg)) == sizeof(fault_msg)) {
