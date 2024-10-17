@@ -787,7 +787,7 @@ PHP 8.4 UPGRADE NOTES
   . Added HashContext::__debugInfo().
 
 - Intl:
-  . Added IntlDateFormatter::getIanaID()/intltz_get_iana_id() to
+  . Added IntlTimeZone::getIanaID()/intltz_get_iana_id() to
     the IANA identifier from a given timezone.
   . Added grapheme_str_split which allow to support emoji and Variation
     Selectors.
