@@ -33,6 +33,8 @@ class Pgsql extends \PDO
     /** @cvalue PGSQL_TRANSACTION_UNKNOWN */
     public const int TRANSACTION_UNKNOWN = UNKNOWN;
 
+    public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
+
     public function escapeIdentifier(string $input): string {}
 
     public function copyFromArray(string $tableName, array $rows, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}

@@ -34,5 +34,7 @@ class Firebird extends \PDO
     /** @cvalue PDO_FB_WRITABLE_TRANSACTION */
     public const int WRITABLE_TRANSACTION = UNKNOWN;
 
+    public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
+
     public static function getApiVersion(): int {}
 }

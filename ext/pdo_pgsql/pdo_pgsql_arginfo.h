@@ -1,5 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 225cbb077d441f93b7c6bdb9826ab3e8f634b79d */
+ * Stub hash: b69486a4fae92395620c04b178167391176eee6e */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Pgsql___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Pgsql_escapeIdentifier, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -54,6 +61,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Pgsql_setNoticeCallbac
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_METHOD(Pdo_Pgsql, __construct);
 ZEND_METHOD(Pdo_Pgsql, escapeIdentifier);
 ZEND_METHOD(Pdo_Pgsql, copyFromArray);
 ZEND_METHOD(Pdo_Pgsql, copyFromFile);
@@ -67,6 +75,7 @@ ZEND_METHOD(Pdo_Pgsql, getPid);
 ZEND_METHOD(Pdo_Pgsql, setNoticeCallback);
 
 static const zend_function_entry class_Pdo_Pgsql_methods[] = {
+	ZEND_ME(Pdo_Pgsql, __construct, arginfo_class_Pdo_Pgsql___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Pgsql, escapeIdentifier, arginfo_class_Pdo_Pgsql_escapeIdentifier, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Pgsql, copyFromArray, arginfo_class_Pdo_Pgsql_copyFromArray, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Pgsql, copyFromFile, arginfo_class_Pdo_Pgsql_copyFromFile, ZEND_ACC_PUBLIC)
@@ -131,6 +140,9 @@ static zend_class_entry *register_class_Pdo_Pgsql(zend_class_entry *class_entry_
 	zend_string *const_TRANSACTION_UNKNOWN_name = zend_string_init_interned("TRANSACTION_UNKNOWN", sizeof("TRANSACTION_UNKNOWN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_UNKNOWN_name, &const_TRANSACTION_UNKNOWN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TRANSACTION_UNKNOWN_name);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

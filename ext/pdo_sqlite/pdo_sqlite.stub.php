@@ -33,6 +33,8 @@ class Sqlite extends \PDO
     /** @cvalue PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES */
     public const int ATTR_EXTENDED_RESULT_CODES = UNKNOWN;
 
+    public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
+
     // Registers an aggregating User Defined Function for use in SQL statements
     public function createAggregate(
         string $name,

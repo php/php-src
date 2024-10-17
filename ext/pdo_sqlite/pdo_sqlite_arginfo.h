@@ -1,5 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7ceaf5fc8e9c92bf192e824084a706794395ce1a */
+ * Stub hash: 85ded90902c3140db463bf5c8b1ba421aef6b445 */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Sqlite___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -34,6 +41,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Sqlite_openBlob, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Pdo\\Sqlite::OPEN_READONLY")
 ZEND_END_ARG_INFO()
 
+ZEND_METHOD(Pdo_Sqlite, __construct);
 ZEND_METHOD(Pdo_Sqlite, createAggregate);
 ZEND_METHOD(Pdo_Sqlite, createCollation);
 ZEND_METHOD(Pdo_Sqlite, createFunction);
@@ -43,6 +51,7 @@ ZEND_METHOD(Pdo_Sqlite, loadExtension);
 ZEND_METHOD(Pdo_Sqlite, openBlob);
 
 static const zend_function_entry class_Pdo_Sqlite_methods[] = {
+	ZEND_ME(Pdo_Sqlite, __construct, arginfo_class_Pdo_Sqlite___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Sqlite, createAggregate, arginfo_class_Pdo_Sqlite_createAggregate, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Sqlite, createCollation, arginfo_class_Pdo_Sqlite_createCollation, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Sqlite, createFunction, arginfo_class_Pdo_Sqlite_createFunction, ZEND_ACC_PUBLIC)
@@ -103,6 +112,9 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_string *const_ATTR_EXTENDED_RESULT_CODES_name = zend_string_init_interned("ATTR_EXTENDED_RESULT_CODES", sizeof("ATTR_EXTENDED_RESULT_CODES") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_EXTENDED_RESULT_CODES_name, &const_ATTR_EXTENDED_RESULT_CODES_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_EXTENDED_RESULT_CODES_name);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

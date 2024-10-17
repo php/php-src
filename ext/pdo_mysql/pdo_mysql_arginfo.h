@@ -1,12 +1,21 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 05487a0b7668688c1885a14a8ce02493b96f63bb */
+ * Stub hash: 88fb80b96476fc92049650b4825448d54bf4d20a */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Mysql___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Mysql_getWarningCount, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_METHOD(Pdo_Mysql, __construct);
 ZEND_METHOD(Pdo_Mysql, getWarningCount);
 
 static const zend_function_entry class_Pdo_Mysql_methods[] = {
+	ZEND_ME(Pdo_Mysql, __construct, arginfo_class_Pdo_Mysql___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Mysql, getWarningCount, arginfo_class_Pdo_Mysql_getWarningCount, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
@@ -143,6 +152,9 @@ static zend_class_entry *register_class_Pdo_Mysql(zend_class_entry *class_entry_
 	zend_declare_typed_class_constant(class_entry, const_ATTR_LOCAL_INFILE_DIRECTORY_name, &const_ATTR_LOCAL_INFILE_DIRECTORY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_LOCAL_INFILE_DIRECTORY_name);
 #endif
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }
