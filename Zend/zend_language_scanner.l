@@ -1124,12 +1124,12 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 skip_escape_conversion:
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
-		unsigned char *output_str;
+		unsigned char *str;
 		// TODO: avoid realocation ???
 		s = Z_STRVAL_P(zendlval);
-		SCNG(output_filter)(&output_str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
+		SCNG(output_filter)(&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
 		zval_ptr_dtor(zendlval);
-		ZVAL_STRINGL(zendlval, (char *) output_str, sz);
+		ZVAL_STRINGL(zendlval, (char *) str, sz);
 		efree(str);
 	}
 	return SUCCESS;
