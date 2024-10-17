@@ -2042,16 +2042,22 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 PHP_METHOD(SplFileObject, __construct)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
+	zend_string *file_name = NULL;
 	zend_string *open_mode = ZSTR_CHAR('r');
+	zval *stream_context = NULL;
 	bool use_include_path = 0;
 	size_t path_len;
 	zend_error_handling error_handling;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|Sbr!", &intern->file_name, &open_mode, &use_include_path, &intern->u.file.zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|Sbr!", &file_name, &open_mode, &use_include_path, &stream_context) == FAILURE) {
 		RETURN_THROWS();
 	}
 
+	// TODO This should probably take a copy:
+	// intern->file_name = zend_string_copy(file_name);
+	intern->file_name = file_name;
 	intern->u.file.open_mode = zend_string_copy(open_mode);
+	intern->u.file.zcontext = stream_context;
 
 	/* spl_filesystem_file_open() can generate E_WARNINGs which we want to promote to exceptions */
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
