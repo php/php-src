@@ -8794,6 +8794,14 @@ jit_SET_EX_OPLINE(jit, opline);
 		delayed_call_chain = 1;
 	}
 
+	if (trace
+	 && trace->op == ZEND_JIT_TRACE_END
+	 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
+		if (!zend_jit_set_ip(jit, opline + 1)) {
+			return 0;
+		}
+	}
+
 	return 1;
 }
 
@@ -9055,6 +9063,14 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 		ZEND_ASSERT(call_level > 0);
 		delayed_call_chain = 1;
 		jit->delayed_call_level = call_level;
+	}
+
+	if (trace
+	 && trace->op == ZEND_JIT_TRACE_END
+	 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
+		if (!zend_jit_set_ip(jit, opline + 1)) {
+			return 0;
+		}
 	}
 
 	return 1;
