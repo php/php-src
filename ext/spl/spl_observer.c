@@ -744,8 +744,10 @@ PHP_METHOD(SplObjectStorage, setInfo)
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
 		RETURN_NULL();
 	}
-	zval_ptr_dtor(&element->inf);
+	zval garbage;
+	ZVAL_COPY_VALUE(&garbage, &element->inf);
 	ZVAL_COPY(&element->inf, inf);
+	zval_ptr_dtor(&garbage);
 } /* }}} */
 
 /* {{{ Moves position forward */
