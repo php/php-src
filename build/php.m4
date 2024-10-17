@@ -2002,6 +2002,25 @@ $2],
 ]))])])
 ])
 
+dnl
+dnl
+dnl PHP_SETUP_EDIT([shared-add], [action-if-found], [action-if-not-found], [not-extension])
+dnl
+dnl Common setup macro for linking libedit library. If "not-extension" argument
+dnl is passed, the found library is appended to the "shared-add" variable
+dnl unconditionally (for SAPIs).
+dnl
+AC_DEFUN([PHP_SETUP_EDIT], [
+PKG_CHECK_MODULES([EDIT], [libedit], [
+  PHP_EVAL_INCLINE([$EDIT_CFLAGS])
+  PHP_EVAL_LIBLINE([$EDIT_LIBS], [$1], [$4])
+  AC_DEFINE([HAVE_LIBEDIT], [1],
+    [Define to 1 if 'libedit' library is available.])
+  $2
+],
+[$3])
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Misc. macros
 dnl ----------------------------------------------------------------------------
