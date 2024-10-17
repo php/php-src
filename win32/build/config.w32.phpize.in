@@ -143,3 +143,5 @@ ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations
 	might not work properly, if the optimizations are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
+
+ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');
