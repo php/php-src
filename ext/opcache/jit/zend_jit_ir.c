@@ -16811,6 +16811,9 @@ static int zend_jit_trace_end_loop(zend_jit_ctx *jit, int loop_ref, const void *
 
 static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const zend_op *opline)
 {
+	if (!original_handler && jit->reuse_ip) {
+		zend_jit_set_ip(jit, opline);
+	}
 	if (GCC_GLOBAL_REGS) {
 		if (!original_handler) {
 			ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
