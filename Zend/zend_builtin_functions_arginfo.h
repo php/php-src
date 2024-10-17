@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3dbc84896823c9aaa9ac8aeef8841266920c3e50 */
+ * Stub hash: 3437a70925f1bb521ee264aba4a5b32af42c2f17 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_exit, 0, 0, IS_NEVER, 0)
 	ZEND_ARG_TYPE_MASK(0, status, MAY_BE_STRING|MAY_BE_LONG, "0")
@@ -160,6 +160,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_get_declared_interfaces arginfo_func_get_args
 
+#define arginfo_get_declared_enums arginfo_func_get_args
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_defined_functions, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, exclude_disabled, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
@@ -277,6 +279,7 @@ ZEND_FUNCTION(restore_exception_handler);
 ZEND_FUNCTION(get_declared_classes);
 ZEND_FUNCTION(get_declared_traits);
 ZEND_FUNCTION(get_declared_interfaces);
+ZEND_FUNCTION(get_declared_enums);
 ZEND_FUNCTION(get_defined_functions);
 ZEND_FUNCTION(get_defined_vars);
 ZEND_FUNCTION(get_resource_type);
@@ -341,6 +344,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_declared_classes, arginfo_get_declared_classes)
 	ZEND_FE(get_declared_traits, arginfo_get_declared_traits)
 	ZEND_FE(get_declared_interfaces, arginfo_get_declared_interfaces)
+	ZEND_FE(get_declared_enums, arginfo_get_declared_enums)
 	ZEND_FE(get_defined_functions, arginfo_get_defined_functions)
 	ZEND_FE(get_defined_vars, arginfo_get_defined_vars)
 	ZEND_FE(get_resource_type, arginfo_get_resource_type)

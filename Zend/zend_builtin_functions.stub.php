@@ -141,6 +141,12 @@ function get_declared_traits(): array {}
 function get_declared_interfaces(): array {}
 
 /**
+ * @return array<int, string>
+ * @refcount 1
+ */
+function get_declared_enums(): array {}
+
+/**
  * @return array<string, array>
  * @refcount 1
  */
