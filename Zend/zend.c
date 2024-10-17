@@ -738,7 +738,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->map_ptr_size = 0;
 	compiler_globals->map_ptr_last = global_map_ptr_last;
 #if ZEND_DEBUG
-	compiler_globals->map_ptr_locked = false;
+	compiler_globals->map_ptr_protected = true;
 #endif
 	compiler_globals->internal_run_time_cache = NULL;
 	if (compiler_globals->map_ptr_last || zend_map_ptr_static_size) {
@@ -792,7 +792,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		compiler_globals->map_ptr_size = 0;
 #if ZEND_DEBUG
-		compiler_globals->map_ptr_locked = false;
+		compiler_globals->map_ptr_protected = true;
 #endif
 	}
 	if (compiler_globals->internal_run_time_cache) {
@@ -1039,6 +1039,10 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	zend_hash_destroy(executor_globals->zend_constants);
 	*executor_globals->zend_constants = *GLOBAL_CONSTANTS_TABLE;
+
+# if ZEND_DEBUG
+	compiler_globals->map_ptr_protected = false;
+# endif
 #else
 	ini_scanner_globals_ctor(&ini_scanner_globals);
 	php_scanner_globals_ctor(&language_scanner_globals);
@@ -1051,6 +1055,9 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	CG(map_ptr_size) = 0;
 	CG(map_ptr_last) = 0;
+# if ZEND_DEBUG
+	CG(map_ptr_protected) = false;
+# endif
 #endif /* ZTS */
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -1130,6 +1137,9 @@ zend_result zend_post_startup(void) /* {{{ */
 	}
 	compiler_globals->map_ptr_real_base = NULL;
 	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
+# if ZEND_DEBUG
+	compiler_globals->map_ptr_protected = true;
+# endif
 	if (compiler_globals->internal_run_time_cache) {
 		pefree(compiler_globals->internal_run_time_cache, 1);
 	}
@@ -1148,6 +1158,9 @@ zend_result zend_post_startup(void) /* {{{ */
 	zend_copy_ini_directives();
 #else
 	global_map_ptr_last = CG(map_ptr_last);
+# if ZEND_DEBUG
+	CG(map_ptr_protected) = true;
+# endif
 #endif
 
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -1211,7 +1224,7 @@ void zend_shutdown(void) /* {{{ */
 		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		CG(map_ptr_size) = 0;
 # if ZEND_DEBUG
-		CG(map_ptr_locked) = false;
+		CG(map_ptr_protected) = true;
 # endif
 	}
 	if (CG(script_encoding_list)) {
@@ -2021,7 +2034,7 @@ ZEND_API void *zend_map_ptr_new(void)
 	void **ptr;
 
 #if ZEND_DEBUG
-	ZEND_ASSERT((!startup_done || CG(in_compilation) || CG(map_ptr_locked)) && "Can not allocate map ptrs outside of startup and compilation");
+	ZEND_ASSERT(!CG(map_ptr_protected) && "Can not allocate map ptrs after startup");
 #endif
 
 	if (CG(map_ptr_last) >= CG(map_ptr_size)) {
@@ -2095,6 +2108,12 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 		return;
 	}
 
+#if ZEND_DEBUG
+	/* This use of ZEND_MAP_PTR_NEW_OFFSET() is safe */
+	bool orig_map_ptr_protected = CG(map_ptr_protected);
+	CG(map_ptr_protected) = false;
+#endif
+
 	/* We use the refcount to keep map_ptr of corresponding type */
 	uint32_t ret;
 	do {
@@ -2102,4 +2121,8 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 	} while (ret <= 2);
 	GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 	GC_SET_REFCOUNT(type_name, ret);
+
+#if ZEND_DEBUG
+	CG(map_ptr_protected) = orig_map_ptr_protected;
+#endif
 }

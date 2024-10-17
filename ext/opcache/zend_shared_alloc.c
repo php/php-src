@@ -516,7 +516,7 @@ void zend_shared_alloc_lock(void)
 
 	ZCG(locked) = 1;
 #if ZEND_DEBUG
-	CG(map_ptr_locked) = true;
+	CG(map_ptr_protected) = false;
 #endif
 }
 
@@ -534,7 +534,7 @@ void zend_shared_alloc_unlock(void)
 #endif
 
 #if ZEND_DEBUG
-	CG(map_ptr_locked) = false;
+	CG(map_ptr_protected) = true;
 #endif
 	ZCG(locked) = 0;
 
