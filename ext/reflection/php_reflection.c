@@ -6271,6 +6271,31 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 	}
 }
 
+/* {{{ Returns whether property is uninitialized and lazy */
+ZEND_METHOD(ReflectionProperty, isUninitializedLazy)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_object *object;
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	ZEND_PARSE_PARAMETERS_START(1, 1) {
+		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
+	} ZEND_PARSE_PARAMETERS_END();
+
+	if (!ref->prop || ref->prop->flags & (ZEND_ACC_STATIC | ZEND_ACC_VIRTUAL)) {
+		RETURN_FALSE;
+	}
+
+	if (zend_object_is_lazy_proxy(object)
+			&& zend_lazy_object_initialized(object)) {
+		object = zend_lazy_object_get_instance(object);
+	}
+
+	RETURN_BOOL(Z_PROP_FLAG_P(OBJ_PROP(object, ref->prop->offset)) & IS_PROP_LAZY);
+}
+
 /* {{{ Returns true if property was initialized */
 ZEND_METHOD(ReflectionProperty, isInitialized)
 {
