@@ -37,7 +37,7 @@ if (PHP_MYSQLND != "no") {
 			AC_DEFINE("MYSQLND_COMPRESSION_ENABLED", 1, "Define to 1 if mysqlnd has compressed protocol support.");
 			AC_DEFINE("MYSQLND_SSL_SUPPORTED", 1, "Define to 1 if mysqlnd core SSL is enabled.");
 			if (CHECK_LIB("crypt32.lib", "mysqlnd")) {
-				AC_DEFINE("MYSQLND_HAVE_SSL", 1, "Define to 1 if mysqlnd extended SSL is enabled through OpenSSL.");
+				AC_DEFINE("MYSQLND_HAVE_SSL", 1, "Define to 1 if mysqlnd extended SSL is enabled through a system library.");
 				ADD_EXTENSION_DEP('mysqlnd', 'hash');
 			}
 		}
