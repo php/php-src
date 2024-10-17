@@ -57,6 +57,10 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-16174 (Empty string is an invalid expression for ev). (cmb)
 
+- Reflection:
+  . Fixed bug GH-15902 (Core dumped in ext/reflection/php_reflection.c).
+    (DanielEScherzer)
+
 - Session:
   . Fixed bug GH-16385 (Unexpected null returned by session_set_cookie_params).
     (nielsdos)
