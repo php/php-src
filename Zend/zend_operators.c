@@ -3668,8 +3668,8 @@ static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char
 	}
 
 	if (reverse) {
-		for (size_t i = needle_len; i > 0; i--) {
-			td[(unsigned char)needle[i-1]] = i;
+		for (int i = needle_len - 1; i >= 0; i--) {
+			td[(unsigned char)needle[i]] = i + 1;
 		}
 	} else {
 		for (size_t i = 0; i < needle_len; i++) {
