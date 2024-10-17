@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
+  . Fixed bug GH-16473 (dom_import_simplexml stub is wrong). (nielsdos)
 
 - EXIF:
   . Fixed bug GH-16409 (Segfault in exif_thumbnail when not dealing with a
