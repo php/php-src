@@ -1124,8 +1124,8 @@ int main(int argc, char **argv) /* {{{ */
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *sapi_name;
 	struct php_ini_builder ini_builder;
-	char **zend_extensions = NULL;
-	zend_ulong zend_extensions_len = 0L;
+	char **zend_extensions_list = NULL;
+	size_t zend_extensions_len = 0;
 	bool ini_ignore;
 	char *ini_override;
 	char *exec = NULL;
@@ -1177,8 +1177,6 @@ phpdbg_main:
 	php_ini_builder_init(&ini_builder);
 	ini_ignore = 0;
 	ini_override = NULL;
-	zend_extensions = NULL;
-	zend_extensions_len = 0L;
 	init_file = NULL;
 	init_file_len = 0;
 	init_file_default = 1;
@@ -1216,10 +1214,12 @@ phpdbg_main:
 
 			case 'z':
 				zend_extensions_len++;
-				if (zend_extensions) {
-					zend_extensions = realloc(zend_extensions, sizeof(char*) * zend_extensions_len);
-				} else zend_extensions = malloc(sizeof(char*) * zend_extensions_len);
-				zend_extensions[zend_extensions_len-1] = strdup(php_optarg);
+				if (zend_extensions_list) {
+					zend_extensions_list = realloc(zend_extensions_list, sizeof(char*) * zend_extensions_len);
+				} else {
+					zend_extensions_list = malloc(sizeof(char*) * zend_extensions_len);
+				}
+				zend_extensions_list[zend_extensions_len-1] = strdup(php_optarg);
 			break;
 
 			/* begin phpdbg options */
@@ -1316,19 +1316,19 @@ phpdbg_main:
 	php_ini_builder_prepend_literal(&ini_builder, phpdbg_ini_hardcoded);
 
 	if (zend_extensions_len) {
-		zend_ulong zend_extension = 0L;
+		size_t zend_extension_index = 0;
 
-		while (zend_extension < zend_extensions_len) {
-			const char *ze = zend_extensions[zend_extension];
+		while (zend_extension_index < zend_extensions_len) {
+			const char *ze = zend_extensions_list[zend_extension_index];
 			size_t ze_len = strlen(ze);
 
 			php_ini_builder_unquoted(&ini_builder, "zend_extension", strlen("zend_extension"), ze, ze_len);
 
-			free(zend_extensions[zend_extension]);
-			zend_extension++;
+			free(zend_extensions_list[zend_extension_index]);
+			zend_extension_index++;
 		}
 
-		free(zend_extensions);
+		free(zend_extensions_list);
 	}
 
 	phpdbg->ini_entries = php_ini_builder_finish(&ini_builder);

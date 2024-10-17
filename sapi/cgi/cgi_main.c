@@ -968,9 +968,9 @@ static int sapi_cgi_deactivate(void)
 	return SUCCESS;
 }
 
-static int php_cgi_startup(sapi_module_struct *sapi_module)
+static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 {
-	return php_module_startup(sapi_module, &cgi_module_entry);
+	return php_module_startup(sapi_module_ptr, &cgi_module_entry);
 }
 
 /* {{{ sapi_module_struct cgi_sapi_module */
@@ -1518,23 +1518,23 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor */
-static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
+static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals_ptr)
 {
 #if defined(ZTS) && defined(PHP_WIN32)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	php_cgi_globals->rfc2616_headers = 0;
-	php_cgi_globals->nph = 0;
-	php_cgi_globals->check_shebang_line = 1;
-	php_cgi_globals->force_redirect = 1;
-	php_cgi_globals->redirect_status_env = NULL;
-	php_cgi_globals->fix_pathinfo = 1;
-	php_cgi_globals->discard_path = 0;
-	php_cgi_globals->fcgi_logging = 1;
+	php_cgi_globals_ptr->rfc2616_headers = 0;
+	php_cgi_globals_ptr->nph = 0;
+	php_cgi_globals_ptr->check_shebang_line = 1;
+	php_cgi_globals_ptr->force_redirect = 1;
+	php_cgi_globals_ptr->redirect_status_env = NULL;
+	php_cgi_globals_ptr->fix_pathinfo = 1;
+	php_cgi_globals_ptr->discard_path = 0;
+	php_cgi_globals_ptr->fcgi_logging = 1;
 #ifdef PHP_WIN32
-	php_cgi_globals->impersonate = 0;
+	php_cgi_globals_ptr->impersonate = 0;
 #endif
-	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals_ptr->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
 }
 /* }}} */
 
@@ -2548,11 +2548,11 @@ do_repeat:
 					break;
 				case PHP_MODE_HIGHLIGHT:
 					{
-						zend_syntax_highlighter_ini syntax_highlighter_ini;
+						zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 
 						if (open_file_for_scanning(&file_handle) == SUCCESS) {
-							php_get_highlight_struct(&syntax_highlighter_ini);
-							zend_highlight(&syntax_highlighter_ini);
+							php_get_highlight_struct(&default_syntax_highlighter_ini);
+							zend_highlight(&default_syntax_highlighter_ini);
 						}
 					}
 					break;

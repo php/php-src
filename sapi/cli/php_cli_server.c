@@ -510,9 +510,9 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE_END
 };
 
-static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module, &cli_server_module_entry);
+	return php_module_startup(sapi_module_ptr, &cli_server_module_entry);
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -2353,14 +2353,14 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 }
 /* }}} */
 
-static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map_ptr) /* {{{ */
 {
 	const php_cli_server_ext_mime_type_pair *pair;
 
 	zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1);
 	GC_MAKE_PERSISTENT_LOCAL(&server->extension_mime_types);
 
-	for (pair = mime_type_map; pair->ext; pair++) {
+	for (pair = mime_type_map_ptr; pair->ext; pair++) {
 		size_t ext_len = strlen(pair->ext);
 		zend_hash_str_add_ptr(&server->extension_mime_types, pair->ext, ext_len, (void*)pair->mime_type);
 	}
@@ -2396,7 +2396,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 			 do {
 				if (waitpid(php_cli_server_workers[php_cli_server_worker],
 						   &php_cli_server_worker_status,
-						   0) == FAILURE) {
+						   0) == (pid_t) -1) {
 					/* an extremely bad thing happened */
 					break;
 				}
