@@ -5111,6 +5111,10 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 	}
 	altitude = 90 - zenith;
 
+	if (!zend_finite(latitude) || !zend_finite(longitude)) {
+		RETURN_FALSE;
+	}
+
 	/* Initialize time struct */
 	tzi = get_timezone_info();
 	if (!tzi) {
@@ -5187,6 +5191,15 @@ PHP_FUNCTION(date_sun_info)
 		Z_PARAM_DOUBLE(latitude)
 		Z_PARAM_DOUBLE(longitude)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_finite(latitude)) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+	if (!zend_finite(longitude)) {
+		zend_argument_value_error(3, "must be finite");
+		RETURN_THROWS();
+	}
 
 	/* Initialize time struct */
 	tzi = get_timezone_info();
