@@ -2961,6 +2961,11 @@ PHP_METHOD(AppendIterator, append)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
+	if (Z_OBJ_P(ZEND_THIS) == Z_OBJ_P(it)) {
+		zend_argument_value_error(1, "must be different than the iterator being appended to");
+		RETURN_THROWS();
+	}
+
 	if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator) == SUCCESS && spl_dual_it_valid(intern) != SUCCESS) {
 		spl_array_iterator_append(&intern->u.append.zarrayit, it);
 		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
