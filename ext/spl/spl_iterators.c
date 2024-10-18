@@ -2965,6 +2965,17 @@ PHP_METHOD(AppendIterator, append)
 		zend_argument_value_error(1, "must be different than the iterator being appended to");
 		RETURN_THROWS();
 	}
+	if (instanceof_function(Z_OBJCE_P(it), spl_ce_AppendIterator)) {
+		// Make sure that the iterator being appended doesn't contain the
+		// iterator being appended to, GH-15911
+		// call spl_dual_it_from_obj(it.value.obj)
+		spl_dual_it_object *other_iterator = Z_SPLDUAL_IT_P(it);
+		ZEND_ASSERT(other_iterator->dit_type == DIT_AppendIterator);
+		if (spl_array_iterator_contains(&other_iterator->u.append.zarrayit, ZEND_THIS)) {	
+			zend_argument_value_error(1, "must not contain the iterator being appended to");
+			RETURN_THROWS();
+		}
+	}
 
 	if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator) == SUCCESS && spl_dual_it_valid(intern) != SUCCESS) {
 		spl_array_iterator_append(&intern->u.append.zarrayit, it);

@@ -3,7 +3,7 @@ GH-15911 (Infinite recursion when appending AppendIterator to itself)
 --FILE--
 <?php
 
-$iterator = new \AppendIterator();
+$iterator = new AppendIterator();
 
 $iterator->append($iterator);
 ?>
