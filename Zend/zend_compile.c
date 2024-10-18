@@ -11034,7 +11034,8 @@ static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_CONST_ENUM_INIT
 		|| kind == ZEND_AST_NEW || kind == ZEND_AST_ARG_LIST
 		|| kind == ZEND_AST_NAMED_ARG
-		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP;
+		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP
+		|| kind == ZEND_AST_CLOSURE;
 }
 /* }}} */
 
@@ -11168,6 +11169,28 @@ static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 	class_ast->attr = fetch_type << ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT;
 }
 
+static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
+{
+	zend_ast_decl *closure_ast = (zend_ast_decl *) *ast_ptr;
+	zend_ast *uses_ast = closure_ast->child[1];
+	if (!(closure_ast->flags & ZEND_ACC_STATIC)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Closures in constant expressions must be \"static\"");
+	}
+	if (uses_ast) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot \"use(...)\" variables in constant expression");
+	}
+
+	znode node;
+	zend_op_array *op = zend_compile_func_decl(&node, *ast_ptr, 1);
+
+	zend_ast_destroy(*ast_ptr);
+	zval z;
+	ZVAL_PTR(&z, op);
+	*ast_ptr = zend_ast_create(ZEND_AST_CLOSURE_CONSTEXPR, zend_ast_create_zval(&z));
+}
+
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)
 {
 	zend_ast_list *list = zend_ast_get_list(*ast_ptr);
@@ -11229,6 +11252,9 @@ static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 			break;
 		case ZEND_AST_ARG_LIST:
 			zend_compile_const_expr_args(ast_ptr);
+			break;
+		case ZEND_AST_CLOSURE:
+			zend_compile_const_expr_closure(ast_ptr);
 			break;
 	}
 
