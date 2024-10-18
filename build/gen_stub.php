@@ -1227,6 +1227,8 @@ class FuncInfo {
     public ?string $aliasType;
     public ?FunctionOrMethodName $alias;
     public bool $isDeprecated;
+    public ?string $deprecatedSince;
+    public ?string $deprecationMessage;
     public bool $supportsCompileTimeEval;
     public bool $verify;
     /** @var ArgInfo[] */
@@ -1254,6 +1256,8 @@ class FuncInfo {
         ?string $aliasType,
         ?FunctionOrMethodName $alias,
         bool $isDeprecated,
+        ?string $deprecatedSince,
+        ?string $deprecationMessage,
         bool $supportsCompileTimeEval,
         bool $verify,
         array $args,
@@ -1272,6 +1276,8 @@ class FuncInfo {
         $this->aliasType = $aliasType;
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
+        $this->deprecatedSince = $deprecatedSince;
+        $this->deprecationMessage = $deprecationMessage;
         $this->supportsCompileTimeEval = $supportsCompileTimeEval;
         $this->verify = $verify;
         $this->args = $args;
@@ -1587,13 +1593,6 @@ class FuncInfo {
             $flags[] = "ZEND_ACC_DEPRECATED";
         }
 
-        foreach ($this->attributes as $attr) {
-            if ($attr->class === "Deprecated") {
-                $flags[] = "ZEND_ACC_DEPRECATED";
-                break;
-            }
-        }
-
         $php82AndAboveFlags = $flags;
         if ($this->isMethod() === false && $this->supportsCompileTimeEval) {
             $php82AndAboveFlags[] = "ZEND_ACC_COMPILE_TIME_EVAL";
@@ -1673,6 +1672,11 @@ class FuncInfo {
 
         $refnamediv->appendChild(new DOMText("\n "));
         $refentry->append($refnamediv, $REFSEC1_SEPERATOR);
+
+        /* Creation of <refsynopsisdiv> */
+        if ($this->deprecatedSince) {
+            $refentry->append($this->createDeprecationWarning($doc, $aliasMap), "\n\n ");
+        }
 
         /* Creation of <refsect1 role="description"> */
         $descriptionRefSec = $this->generateRefSect1($doc, 'description');
@@ -1866,6 +1870,28 @@ ENDCOMMENT
         $parametersPara->appendChild(new DOMText("\n  "));
         $parametersRefSec->appendChild(new DOMText("\n "));
         return $parametersRefSec;
+    }
+
+    /** @param array<string, FuncInfo> $aliasMap */
+    public function createDeprecationWarning(DOMDocument $doc, array $aliasMap): DOMElement {
+        /* Creation of <refsynopsisdiv> */
+        $refsynopsisDiv = $doc->createElement('refsynopsisdiv');
+        $deprecationEntity = $doc->createEntityReference(
+            'warn.deprecated.' . (isset($aliasMap[$this->name->__toString()]) ? 'alias' : 'function') . '-' .
+            str_replace(".", "-", $this->deprecatedSince) . "-0"
+        );
+        $refsynopsisDiv->appendChild(new DOMText("\n  "));
+        $refsynopsisDiv->appendChild($deprecationEntity);
+        $refsynopsisDiv->appendChild(new DOMText("\n " . ($this->deprecationMessage ? " " : "")));
+
+        if ($this->deprecationMessage) {
+            $simparaElement = $doc->createElement('simpara');
+            $simparaElement->appendChild(new DOMText("\n   " . ucfirst($this->deprecationMessage) . ".\n  "));
+            $refsynopsisDiv->appendChild($simparaElement);
+            $refsynopsisDiv->appendChild(new DOMText("\n "));
+        }
+
+        return $refsynopsisDiv;
     }
 
     private function getReturnValueSection(DOMDocument $doc): DOMElement {
@@ -4333,6 +4359,8 @@ function parseFunctionLike(
         $aliasType = null;
         $alias = null;
         $isDeprecated = false;
+        $deprecatedSince = null;
+        $deprecationMessage = null;
         $supportsCompileTimeEval = false;
         $verify = true;
         $docReturnType = null;
@@ -4486,6 +4514,21 @@ function parseFunctionLike(
             $refcount
         );
 
+        $attributes = createAttributes($func->attrGroups);
+        foreach ($attributes as $attr) {
+            if ($attr->class === "Deprecated") {
+                $isDeprecated = true;
+                foreach ($attr->args as $attrArg) {
+                    if ($attrArg->name->toLowerString() === "since") {
+                        $deprecatedSince = $attrArg->value->value;
+                    } elseif ($attrArg->name->toLowerString() === "message") {
+                        $deprecationMessage = $attrArg->value->value;
+                    }
+                }
+                break;
+            }
+        }
+
         return new FuncInfo(
             $name,
             $classFlags,
@@ -4493,6 +4536,8 @@ function parseFunctionLike(
             $aliasType,
             $alias,
             $isDeprecated,
+            $deprecatedSince,
+            $deprecationMessage,
             $supportsCompileTimeEval,
             $verify,
             $args,
@@ -4501,7 +4546,7 @@ function parseFunctionLike(
             $cond,
             $isUndocumentable,
             $minimumPhpVersionIdCompatibility,
-            createAttributes($func->attrGroups),
+            $attributes,
             $framelessFunctionInfos,
             createExposedDocComment($comments)
         );
@@ -6019,7 +6064,31 @@ function replaceMethodSynopses(
 
             // Check if there is any change - short circuit if there is not any.
 
-            if (replaceAndCompareXmls($doc, $methodSynopsis, $newMethodSynopsis)) {
+            $isUnmodified = replaceAndCompareXmls($doc, $methodSynopsis, $newMethodSynopsis);
+
+            // Update deprecation warning
+
+            if ($funcInfo->deprecatedSince) {
+                foreach ($doc->getElementsByTagName("refentry") as $refentryElement) {
+                    foreach ($refentryElement->getElementsByTagName("refnamediv") as $refnameDivElement) {
+                        if (count($refnameDivElement->getElementsByTagName("refname")) !== 1) {
+                            continue;
+                        }
+
+                        if (
+                            $refnameDivElement->nextSibling === null ||
+                            $refnameDivElement->nextSibling->nextSibling instanceof DOMElement === false ||
+                            $refnameDivElement->nextSibling->nextSibling->localName !== "refsynopsisdiv"
+                        ) {
+                            $refsynopsisDiv = $funcInfo->createDeprecationWarning($doc, $aliasMap);
+                            $refnameDivElement->after("\n\n ", $refsynopsisDiv);
+                            $isUnmodified = false;
+                        }
+                    }
+                }
+            }
+
+            if ($isUnmodified) {
                 continue;
             }
 
@@ -6265,7 +6334,6 @@ foreach ($fileInfos as $fileInfo) {
     foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
         $funcMap[$funcInfo->name->__toString()] = $funcInfo;
 
-        // TODO: Don't use aliasMap for methodsynopsis?
         if ($funcInfo->aliasType === "alias") {
             $aliasMap[$funcInfo->alias->__toString()] = $funcInfo;
         }
