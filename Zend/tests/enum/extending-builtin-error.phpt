@@ -7,4 +7,4 @@ class Demo extends RoundingMode {}
 
 ?>
 --EXPECTF--
-Fatal error: Class Demo cannot extend enum RoundingMode in %s on line 3
+Fatal error: Class Demo cannot extend enum RoundingMode in %s on line %d
