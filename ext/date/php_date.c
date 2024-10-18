@@ -2336,7 +2336,7 @@ static void add_common_properties(HashTable *myht, zend_object *zobj)
 
 	common = zend_std_get_properties(zobj);
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL_IND(common, name, prop) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(common, name, prop) {
 		if (zend_hash_add(myht, name, prop) != NULL) {
 			Z_TRY_ADDREF_P(prop);
 		}
@@ -2869,7 +2869,7 @@ static void restore_custom_datetime_properties(zval *object, HashTable *myht)
 	zend_string      *prop_name;
 	zval             *prop_val;
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
 		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_time_is_internal_property(prop_name)) {
 			continue;
 		}
@@ -3982,7 +3982,7 @@ static void restore_custom_datetimezone_properties(zval *object, HashTable *myht
 	zend_string      *prop_name;
 	zval             *prop_val;
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
 		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_timezone_is_internal_property(prop_name)) {
 			continue;
 		}
@@ -4619,7 +4619,7 @@ static void restore_custom_dateinterval_properties(zval *object, HashTable *myht
 	zend_string      *prop_name;
 	zval             *prop_val;
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
 		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_interval_is_internal_property(prop_name)) {
 			continue;
 		}
@@ -5692,7 +5692,7 @@ static void restore_custom_dateperiod_properties(zval *object, HashTable *myht)
 	zend_string      *prop_name;
 	zval             *prop_val;
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
 		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_period_is_internal_property(prop_name)) {
 			continue;
 		}
