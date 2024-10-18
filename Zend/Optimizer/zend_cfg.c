@@ -673,7 +673,7 @@ ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, ze
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
-	int j, k, changed;
+	int j, changed;
 
 	if (cfg->blocks_count == 1) {
 		blocks[0].level = 0;
@@ -697,7 +697,7 @@ ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, ze
 			if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 				continue;
 			}
-			for (k = 0; k < blocks[j].predecessors_count; k++) {
+			for (int k = 0; k < blocks[j].predecessors_count; k++) {
 				int pred = cfg->predecessors[blocks[j].predecessor_offset + k];
 
 				if (blocks[pred].idom >= 0) {

@@ -2012,8 +2012,6 @@ not_frameless_call:
 			zend_execute_data *prev_call = prev;
 
 			while (prev_call) {
-				zend_execute_data *prev;
-
 				if (prev_call &&
 					prev_call->func &&
 					!ZEND_USER_CODE(prev_call->func->common.type) &&
@@ -2021,15 +2019,14 @@ not_frameless_call:
 					break;
 				}
 
-				prev = prev_call->prev_execute_data;
-				if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
-					ZVAL_STR_COPY(&tmp, prev->func->op_array.filename);
+				prev_call = prev_call->prev_execute_data;
+				if (prev_call && prev_call->func && ZEND_USER_CODE(prev_call->func->common.type)) {
+					ZVAL_STR_COPY(&tmp, prev_call->func->op_array.filename);
 					_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
-					ZVAL_LONG(&tmp, prev->opline->lineno);
+					ZVAL_LONG(&tmp, prev_call->opline->lineno);
 					_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_LINE), &tmp, 1);
 					break;
 				}
-				prev_call = prev;
 			}
 			filename = NULL;
 		}

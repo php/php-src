@@ -269,8 +269,10 @@ typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 
 #define zend_try												\
 	{															\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		JMP_BUF *__orig_bailout = EG(bailout);					\
 		JMP_BUF __bailout;										\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 																\
 		EG(bailout) = &__bailout;								\
 		if (SETJMP(__bailout)==0) {

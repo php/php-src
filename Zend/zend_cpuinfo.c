@@ -31,11 +31,11 @@ static zend_cpu_info cpuinfo = {0};
 #if (defined(__GNUC__) || defined(__clang__)) && (defined(__i386__) || defined(__x86_64__))
 # if defined(HAVE_CPUID_H) && defined(HAVE_CPUID_COUNT) /* use cpuid.h functions */
 #  include <cpuid.h>
-static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
-	__cpuid_count(func, subfunc, cpuinfo->eax, cpuinfo->ebx, cpuinfo->ecx, cpuinfo->edx);
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo_ptr) {
+	__cpuid_count(func, subfunc, cpuinfo_ptr->eax, cpuinfo_ptr->ebx, cpuinfo_ptr->ecx, cpuinfo_ptr->edx);
 }
 # else /* use inline asm */
-static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo_ptr) {
 #  if defined(__i386__) && (defined(__pic__) || defined(__PIC__))
 	/* PIC on i386 uses %ebx, so preserve it. */
 	__asm__ __volatile__ (
@@ -43,13 +43,13 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 		"cpuid\n"
 		"mov    %%ebx,%1\n"
 		"popl   %%ebx"
-		: "=a"(cpuinfo->eax), "=r"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
+		: "=a"(cpuinfo_ptr->eax), "=r"(cpuinfo_ptr->ebx), "=c"(cpuinfo_ptr->ecx), "=d"(cpuinfo_ptr->edx)
 		: "a"(func), "c"(subfunc)
 	);
 #  else
 	__asm__ __volatile__ (
 		"cpuid"
-		: "=a"(cpuinfo->eax), "=b"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
+		: "=a"(cpuinfo_ptr->eax), "=b"(cpuinfo_ptr->ebx), "=c"(cpuinfo_ptr->ecx), "=d"(cpuinfo_ptr->edx)
 		: "a"(func), "c"(subfunc)
 	);
 #  endif
@@ -57,19 +57,19 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 # endif
 #elif defined(_MSC_VER) && !defined(__clang__) && (defined(_M_X64) || defined(_M_IX86)) /* use MSVC __cpuidex intrin */
 # include <intrin.h>
-static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo_ptr) {
 	int regs[4];
 
 	__cpuidex(regs, func, subfunc);
 
-	cpuinfo->eax = regs[0];
-	cpuinfo->ebx = regs[1];
-	cpuinfo->ecx = regs[2];
-	cpuinfo->edx = regs[3];
+	cpuinfo_ptr->eax = regs[0];
+	cpuinfo_ptr->ebx = regs[1];
+	cpuinfo_ptr->ecx = regs[2];
+	cpuinfo_ptr->edx = regs[3];
 }
 #else /* fall back to zero */
-static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
-	cpuinfo->eax = 0;
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo_ptr) {
+	cpuinfo_ptr->eax = 0;
 }
 #endif
 

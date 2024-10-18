@@ -209,8 +209,10 @@ typedef struct {
 
 /* This iterates over a zend_type_list. */
 #define ZEND_TYPE_LIST_FOREACH(list, type_ptr) do { \
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 	zend_type *_list = (list)->types; \
 	zend_type *_end = _list + (list)->num_types; \
+	ZEND_DIAGNOSTIC_IGNORED_END \
 	for (; _list < _end; _list++) { \
 		type_ptr = _list;
 
@@ -221,9 +223,13 @@ typedef struct {
 /* This iterates over any zend_type. If it's a type list, all list elements will
  * be visited. If it's a single type, only the single type is visited. */
 #define ZEND_TYPE_FOREACH(type, type_ptr) do { \
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 	zend_type *_cur, *_end; \
+	ZEND_DIAGNOSTIC_IGNORED_END \
 	if (ZEND_TYPE_HAS_LIST(type)) { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_type_list *_list = ZEND_TYPE_LIST(type); \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		_cur = _list->types; \
 		_end = _cur + _list->num_types; \
 	} else { \
@@ -485,9 +491,11 @@ struct _zend_array {
 	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(zval)))
 #if defined(__AVX2__)
 # define HT_HASH_RESET(ht) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
 		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
 		__m256i ymm0 = _mm256_setzero_si256(); \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ymm0 = _mm256_cmpeq_epi64(ymm0, ymm0); \
 		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
 		do { \
@@ -499,9 +507,11 @@ struct _zend_array {
 	} while (0)
 #elif defined(__SSE2__)
 # define HT_HASH_RESET(ht) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
 		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
 		__m128i xmm0 = _mm_setzero_si128(); \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		xmm0 = _mm_cmpeq_epi8(xmm0, xmm0); \
 		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
 		do { \
@@ -515,9 +525,11 @@ struct _zend_array {
 	} while (0)
 #elif defined(__aarch64__) || defined(_M_ARM64)
 # define HT_HASH_RESET(ht) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
 		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
 		int32x4_t t = vdupq_n_s32(-1); \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
 		do { \
 			vst1q_s32((int32_t*)p, t); \
@@ -715,7 +727,9 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 
 #define GC_DTOR(p) \
 	do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_refcounted_h *_p = &(p)->gc; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		if (zend_gc_delref(_p) == 0) { \
 			rc_dtor_func((zend_refcounted *)_p); \
 		} else { \
@@ -725,7 +739,9 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 
 #define GC_DTOR_NO_REF(p) \
 	do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_refcounted_h *_p = &(p)->gc; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		if (zend_gc_delref(_p) == 0) { \
 			rc_dtor_func((zend_refcounted *)_p); \
 		} else { \
@@ -1064,20 +1080,26 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_LONG(z, l) do {			\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);				\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_LVAL_P(__z) = l;				\
 		Z_TYPE_INFO_P(__z) = IS_LONG;	\
 	} while (0)
 
 #define ZVAL_DOUBLE(z, d) do {			\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);				\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_DVAL_P(__z) = d;				\
 		Z_TYPE_INFO_P(__z) = IS_DOUBLE;	\
 	} while (0)
 
 #define ZVAL_STR(z, s) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);						\
 		zend_string *__s = (s);					\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_STR_P(__z) = __s;						\
 		/* interned strings support */			\
 		Z_TYPE_INFO_P(__z) = ZSTR_IS_INTERNED(__s) ? \
@@ -1086,22 +1108,28 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_INTERNED_STR(z, s) do {				\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);							\
 		zend_string *__s = (s);						\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_STR_P(__z) = __s;							\
 		Z_TYPE_INFO_P(__z) = IS_INTERNED_STRING_EX;	\
 	} while (0)
 
 #define ZVAL_NEW_STR(z, s) do {					\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);						\
 		zend_string *__s = (s);					\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_STR_P(__z) = __s;						\
 		Z_TYPE_INFO_P(__z) = IS_STRING_EX;		\
 	} while (0)
 
 #define ZVAL_STR_COPY(z, s) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);								\
 		zend_string *__s = (s);							\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_STR_P(__z) = __s;								\
 		/* interned strings support */					\
 		if (ZSTR_IS_INTERNED(__s)) {					\
@@ -1113,44 +1141,56 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_ARR(z, a) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_array *__arr = (a);				\
 		zval *__z = (z);						\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_ARR_P(__z) = __arr;					\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;		\
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_ARR(z) do {							\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);										\
 		zend_array *_arr =										\
 		(zend_array *) malloc(sizeof(zend_array));				\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_ARR_P(__z) = _arr;									\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
 
 #define ZVAL_OBJ(z, o) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);						\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_OBJ_P(__z) = (o);						\
 		Z_TYPE_INFO_P(__z) = IS_OBJECT_EX;		\
 	} while (0)
 
 #define ZVAL_OBJ_COPY(z, o) do {				\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);						\
 		zend_object *__o = (o);					\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		GC_ADDREF(__o);							\
 		Z_OBJ_P(__z) = __o;						\
 		Z_TYPE_INFO_P(__z) = IS_OBJECT_EX;		\
 	} while (0)
 
 #define ZVAL_RES(z, r) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);						\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_RES_P(__z) = (r);						\
 		Z_TYPE_INFO_P(__z) = IS_RESOURCE_EX;	\
 	} while (0)
 
 #define ZVAL_NEW_RES(z, h, p, t) do {							\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_resource *_res =									\
 		(zend_resource *) emalloc(sizeof(zend_resource));		\
 		zval *__z;												\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		GC_SET_REFCOUNT(_res, 1);								\
 		GC_TYPE_INFO(_res) = GC_RESOURCE;						\
 		_res->handle = (h);										\
@@ -1162,9 +1202,11 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_RES(z, h, p, t) do {				\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_resource *_res =									\
 		(zend_resource *) malloc(sizeof(zend_resource));		\
 		zval *__z;												\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		GC_SET_REFCOUNT(_res, 1);								\
 		GC_TYPE_INFO(_res) = GC_RESOURCE |						\
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
@@ -1177,14 +1219,18 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_REF(z, r) do {										\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);										\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_REF_P(__z) = (r);										\
 		Z_TYPE_INFO_P(__z) = IS_REFERENCE_EX;					\
 	} while (0)
 
 #define ZVAL_NEW_EMPTY_REF(z) do {								\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_reference *_ref =									\
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
 		_ref->sources.ptr = NULL;									\
@@ -1193,8 +1239,10 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_NEW_REF(z, r) do {									\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_reference *_ref =									\
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
@@ -1204,9 +1252,11 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_MAKE_REF_EX(z, refcount) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_z = (z);											\
 		zend_reference *_ref =									\
 			(zend_reference *) emalloc(sizeof(zend_reference));	\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		GC_SET_REFCOUNT(_ref, (refcount));						\
 		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, _z);						\
@@ -1216,8 +1266,10 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_REF(z, r) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zend_reference *_ref =									\
 		(zend_reference *) malloc(sizeof(zend_reference));		\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = GC_REFERENCE |						\
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
@@ -1228,7 +1280,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_AST(z, ast) do {									\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__z = (z);										\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		Z_AST_P(__z) = ast;										\
 		Z_TYPE_INFO_P(__z) = IS_CONSTANT_AST_EX;				\
 	} while (0)
@@ -1402,19 +1456,23 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define ZVAL_COPY_VALUE(z, v)							\
 	do {												\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_z1 = (z);								\
 		const zval *_z2 = (v);							\
 		zend_refcounted *_gc = Z_COUNTED_P(_z2);		\
 		uint32_t _t = Z_TYPE_INFO_P(_z2);				\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
 	} while (0)
 
 #define ZVAL_COPY(z, v)									\
 	do {												\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_z1 = (z);								\
 		const zval *_z2 = (v);							\
 		zend_refcounted *_gc = Z_COUNTED_P(_z2);		\
 		uint32_t _t = Z_TYPE_INFO_P(_z2);				\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
 		if (Z_TYPE_INFO_REFCOUNTED(_t)) {				\
 			GC_ADDREF(_gc);								\
@@ -1423,10 +1481,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define ZVAL_DUP(z, v)									\
 	do {												\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_z1 = (z);								\
 		const zval *_z2 = (v);							\
 		zend_refcounted *_gc = Z_COUNTED_P(_z2);		\
 		uint32_t _t = Z_TYPE_INFO_P(_z2);				\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		if ((_t & Z_TYPE_MASK) == IS_ARRAY) {			\
 			ZVAL_ARR(_z1, zend_array_dup((zend_array*)_gc));\
 		} else {										\
@@ -1443,10 +1503,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
  */
 #define ZVAL_COPY_OR_DUP(z, v)											\
 	do {																\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_z1 = (z);												\
 		const zval *_z2 = (v);											\
 		zend_refcounted *_gc = Z_COUNTED_P(_z2);						\
 		uint32_t _t = Z_TYPE_INFO_P(_z2);								\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);							\
 		if (Z_TYPE_INFO_REFCOUNTED(_t)) {								\
 			/* Objects reuse PERSISTENT as WEAKLY_REFERENCED */			\
@@ -1478,15 +1540,19 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	} while (0)
 
 #define ZVAL_MAKE_REF(zv) do {							\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__zv = (zv);								\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		if (!Z_ISREF_P(__zv)) {							\
 			ZVAL_NEW_REF(__zv, __zv);					\
 		}												\
 	} while (0)
 
 #define ZVAL_UNREF(z) do {								\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_z = (z);									\
 		zend_reference *ref;							\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZEND_ASSERT(Z_ISREF_P(_z));						\
 		ref = Z_REF_P(_z);								\
 		ZVAL_COPY_VALUE(_z, &ref->val);					\
@@ -1494,7 +1560,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	} while (0)
 
 #define ZVAL_COPY_DEREF(z, v) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_z3 = (v);								\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		if (Z_OPT_REFCOUNTED_P(_z3)) {					\
 			if (UNEXPECTED(Z_OPT_ISREF_P(_z3))) {		\
 				_z3 = Z_REFVAL_P(_z3);					\
@@ -1510,7 +1578,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 
 #define SEPARATE_STRING(zv) do {						\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_zv = (zv);								\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		if (Z_REFCOUNT_P(_zv) > 1) {					\
 			zend_string *_str = Z_STR_P(_zv);			\
 			ZEND_ASSERT(Z_REFCOUNTED_P(_zv));			\
@@ -1522,8 +1592,10 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	} while (0)
 
 #define SEPARATE_ARRAY(zv) do {							\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *__zv = (zv);								\
 		zend_array *_arr = Z_ARR_P(__zv);				\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
 			ZVAL_ARR(__zv, zend_array_dup(_arr));		\
 			GC_TRY_DELREF(_arr);						\
@@ -1531,7 +1603,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	} while (0)
 
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_zv = (zv);								\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
 		if (Z_TYPE_P(_zv) == IS_ARRAY) {				\
 			SEPARATE_ARRAY(_zv);						\
@@ -1539,9 +1613,13 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	} while (0)
 
 #define SEPARATE_ZVAL(zv) do {							\
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		zval *_zv = (zv);								\
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		if (Z_ISREF_P(_zv)) {							\
+			ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 			zend_reference *_r = Z_REF_P(_zv);			\
+			ZEND_DIAGNOSTIC_IGNORED_END \
 			ZVAL_COPY_VALUE(_zv, &_r->val);				\
 			if (GC_DELREF(_r) == 0) {					\
 				efree_size(_r, sizeof(zend_reference));	\
