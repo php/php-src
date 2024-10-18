@@ -87,7 +87,11 @@ const SCANDIR_SORT_DESCENDING = UNKNOWN;
  */
 const SCANDIR_SORT_NONE = UNKNOWN;
 
-class Directory
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class Directory
 {
     public readonly string $path;
 
