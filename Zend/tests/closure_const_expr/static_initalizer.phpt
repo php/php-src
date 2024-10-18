@@ -4,7 +4,7 @@ Closure in static initializer
 <?php
 
 function foo() {
-    static $closure = function () {
+    static $closure = static function () {
         echo "called", PHP_EOL;
     };
 

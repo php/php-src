@@ -11169,9 +11169,13 @@ static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 {
 	zend_ast_decl *closure_ast = (zend_ast_decl *) *ast_ptr;
 	zend_ast *uses_ast = closure_ast->child[1];
+	if (!(closure_ast->flags & ZEND_ACC_STATIC)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Closures in constant expressions must be \"static\"");
+	}
 	if (uses_ast) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot use(...) variables in constant expression");
+			"Cannot \"use(...)\" variables in constant expression");
 	}
 
 	znode node;

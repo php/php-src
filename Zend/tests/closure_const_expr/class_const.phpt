@@ -4,7 +4,7 @@ Allow defining Closures in class constants.
 <?php
 
 class C {
-    const Closure = function () {
+    const Closure = static function () {
         echo "called", PHP_EOL;
     };
 }

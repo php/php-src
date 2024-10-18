@@ -5,7 +5,7 @@ Disallows using variables.
 
 $foo = "bar";
 
-const Closure = function () use ($foo) {
+const Closure = static function () use ($foo) {
     echo $foo, PHP_EOL;
 };
 
@@ -14,4 +14,4 @@ var_dump(Closure);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use(...) variables in constant expression in %s on line %d
+Fatal error: Cannot "use(...)" variables in constant expression in %s on line %d

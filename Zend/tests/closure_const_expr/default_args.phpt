@@ -4,7 +4,7 @@ Closures in default argument
 <?php
 
 function test(
-    Closure $name = function () {
+    Closure $name = static function () {
         echo "default", PHP_EOL;
     },
 ) {

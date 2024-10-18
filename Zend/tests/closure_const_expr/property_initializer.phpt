@@ -4,7 +4,7 @@ Closure in property initializer
 <?php
 
 class C {
-    public Closure $d = function () {
+    public Closure $d = static function () {
         echo "called", PHP_EOL;
     };
 }

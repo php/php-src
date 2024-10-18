@@ -3,7 +3,7 @@ Allow defining Closures in const expressions.
 --FILE--
 <?php
 
-const Closure = function () {
+const Closure = static function () {
     echo "called", PHP_EOL;
 };
 
