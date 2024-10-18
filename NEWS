@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-16454 (Unhandled INF in date_sunset() with tiny $utcOffset).
     (cmb)
+  . Fixed bug GH-16037 (Assertion failure in ext/date/php_date.c). (Derick)
 
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
