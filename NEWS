@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
     curl_multi_add_handle fails). (timwolla)
 
+- Date:
+  . Fixed bug GH-16454 (Unhandled INF in date_sunset() with tiny $utcOffset).
+    (cmb)
+
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
