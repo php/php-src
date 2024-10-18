@@ -995,8 +995,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 		{
 			zend_ast *child = ast->child[0];
 			zval *z = zend_ast_get_zval(child);
+			zend_function *func = Z_PTR_P(z);
 
-			zend_create_closure(result, Z_PTR_P(z), NULL, NULL, NULL);
+			zend_create_closure(result, func, scope, scope, NULL);
 			return SUCCESS;	
 		}
 		case ZEND_AST_PROP:
