@@ -7225,10 +7225,10 @@ done:
 			}
 			zend_jit_trace_link_to_root(&ctx, &zend_jit_traces[t->link], timeout_exit_addr);
 		} else {
-			zend_jit_trace_return(&ctx, 0, NULL);
+			zend_jit_trace_return(&ctx, 0, p->opline);
 		}
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_RETURN) {
-		zend_jit_trace_return(&ctx, 0, NULL);
+		zend_jit_trace_return(&ctx, 0, p->opline);
 	} else {
 		// TODO: not implemented ???
 		ZEND_ASSERT(0 && p->stop);
