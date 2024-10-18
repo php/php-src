@@ -30,4 +30,6 @@ class Dblib extends \PDO
 
     /** @cvalue PDO_DBLIB_ATTR_DATETIME_CONVERT */
     public const int ATTR_DATETIME_CONVERT = UNKNOWN;
+
+    public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
 }

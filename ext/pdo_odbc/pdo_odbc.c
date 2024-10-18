@@ -25,6 +25,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
+#include "zend_attributes.h"
 #include "pdo_odbc_arginfo.h"
 
 static zend_class_entry *pdo_odbc_ce;
@@ -60,6 +61,11 @@ ZEND_GET_MODULE(pdo_odbc)
 zend_ulong pdo_odbc_pool_on = SQL_CP_OFF;
 zend_ulong pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 #endif
+
+PHP_METHOD(Pdo_Odbc, __construct)
+{
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), execute_data->func->common.scope, NULL);
+}
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_odbc)

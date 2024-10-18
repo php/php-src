@@ -1,11 +1,25 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 95f297028aee0675523d6984c03a518e4fc431df */
+ * Stub hash: a7a3dc52d786e04db3f38ef8b397e4f56d7d0414 */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Dblib___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_METHOD(Pdo_Dblib, __construct);
+
+static const zend_function_entry class_Pdo_Dblib_methods[] = {
+	ZEND_ME(Pdo_Dblib, __construct, arginfo_class_Pdo_Dblib___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
 
 static zend_class_entry *register_class_Pdo_Dblib(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Dblib", NULL);
+	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Dblib", class_Pdo_Dblib_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_CONNECTION_TIMEOUT_value;
@@ -49,6 +63,9 @@ static zend_class_entry *register_class_Pdo_Dblib(zend_class_entry *class_entry_
 	zend_string *const_ATTR_DATETIME_CONVERT_name = zend_string_init_interned("ATTR_DATETIME_CONVERT", sizeof("ATTR_DATETIME_CONVERT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_DATETIME_CONVERT_name, &const_ATTR_DATETIME_CONVERT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_DATETIME_CONVERT_name);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

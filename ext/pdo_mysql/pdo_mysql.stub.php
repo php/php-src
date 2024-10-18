@@ -73,5 +73,7 @@ class Mysql extends \PDO
     public const int ATTR_LOCAL_INFILE_DIRECTORY = UNKNOWN;
 #endif
 
+    public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
+
     public function getWarningCount(): int {}
 }
