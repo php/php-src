@@ -23,6 +23,9 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug GH-16037 (Assertion failure in ext/date/php_date.c). (Derick)
 
+- DBA:
+  . Fixed bug GH-16390 (dba_open() can segfault for "pathless" streams). (cmb)
+
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)

@@ -772,11 +772,18 @@ restart:
 			info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, &opened_path);
 			if (info->lock.fp) {
 				if (is_db_lock) {
-					/* replace the path info with the real path of the opened file */
-					pefree(info->path, persistent);
-					info->path = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
+					if (opened_path) {
+						/* replace the path info with the real path of the opened file */
+						pefree(info->path, persistent);
+						info->path = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
+					} else {
+						error = "Unable to determine path for locking";
+					}
 				}
+			}
+			if (opened_path) {
 				zend_string_release_ex(opened_path, 0);
+				opened_path = NULL;
 			}
 		}
 		if (!is_db_lock) {
@@ -788,10 +795,10 @@ restart:
 			FREE_PERSISTENT_RESOURCE_KEY();
 			RETURN_FALSE;
 		}
-		if (!php_stream_supports_lock(info->lock.fp)) {
+		if (!error && !php_stream_supports_lock(info->lock.fp)) {
 			error = "Stream does not support locking";
 		}
-		if (php_stream_lock(info->lock.fp, lock_mode)) {
+		if (!error && php_stream_lock(info->lock.fp, lock_mode)) {
 			error = "Unable to establish lock"; /* force failure exit */
 		}
 	}
