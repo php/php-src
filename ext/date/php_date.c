@@ -5555,6 +5555,9 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 	if (N > 24 || N < 0) {
 		N -= floor(N / 24) * 24;
 	}
+	if (N > 24 || N < 0) {
+		RETURN_FALSE;
+	}
 
 	switch (retformat) {
 		case SUNFUNCS_RET_STRING:

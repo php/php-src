@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16359 (crash with curl_setopt* CURLOPT_WRITEFUNCTION
     without null callback). (David Carlier)
 
+- Date:
+  . Fixed bug GH-16454 (Unhandled INF in date_sunset() with tiny $utcOffset).
+    (cmb)
+
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
