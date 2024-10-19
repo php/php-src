@@ -8,5 +8,5 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---EXPECTF--
-The supplied range exceeds the maximum array size: start=-%d end=0 step=1
+--EXPECT--
+The supplied range exceeds the maximum array size by %d elements: start=-%d, end=0, step=1. Calculated size: %d, Maximum size: %d.
