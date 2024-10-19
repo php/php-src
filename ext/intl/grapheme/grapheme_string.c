@@ -917,4 +917,185 @@ PHP_FUNCTION(grapheme_str_split)
 	ubrk_close(bi);
 }
 
+PHP_FUNCTION(grapheme_levenshtein)
+{
+	zend_string *string1, *string2;
+	zend_long cost_ins = 1;
+	zend_long cost_rep = 1;
+	zend_long cost_del = 1;
+
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STR(string1)
+		Z_PARAM_STR(string2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(cost_ins)
+		Z_PARAM_LONG(cost_rep)
+		Z_PARAM_LONG(cost_del)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (cost_ins <= 0 || cost_ins > UINT_MAX / 4) {
+		zend_argument_value_error(3, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
+		RETURN_THROWS();
+	}
+
+	if (cost_rep <= 0 || cost_rep > UINT_MAX / 4) {
+		zend_argument_value_error(4, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
+		RETURN_THROWS();
+	}
+
+	if (cost_del <= 0 || cost_del > UINT_MAX / 4) {
+		zend_argument_value_error(5, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
+		RETURN_THROWS();
+	}
+
+	zend_long *p1, *p2, *tmp;
+	zend_long c0, c1, c2;
+	zend_long retval;
+	size_t i2;
+	char *pstr1, *pstr2;
+
+	UChar *ustring1 = NULL;
+	UChar *ustring2 = NULL;
+
+	int32_t ustring1_len = 0;
+	int32_t ustring2_len = 0;
+
+	UErrorCode ustatus1 = U_ZERO_ERROR;
+	UErrorCode ustatus2 = U_ZERO_ERROR;
+
+	/* When all costs are equal, levenshtein fulfills the requirements of a metric, which means
+	 * that the distance is symmetric. If string1 is shorter than string 2 we can save memory (and CPU time)
+	 * by having shorter rows (p1 & p2). */
+	if (ZSTR_LEN(string1) < ZSTR_LEN(string2) && cost_ins == cost_rep && cost_rep == cost_del) {
+		zend_string *tmp = string1;
+		string1 = string2;
+		string2 = tmp;
+	}
+
+	pstr1 = ZSTR_VAL(string1);
+	pstr2 = ZSTR_VAL(string2);
+
+	intl_convert_utf8_to_utf16(&ustring1, &ustring1_len, pstr1, ZSTR_LEN(string1), &ustatus1);
+
+	if ( U_FAILURE( ustatus1 ) ) {
+		/* Set global error code. */
+		intl_error_set_code( NULL, ustatus1 );
+
+		/* Set error messages. */
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
+		if (ustring1) {
+			efree( ustring1 );
+		}
+		RETURN_FALSE;
+	}
+
+	intl_convert_utf8_to_utf16(&ustring2, &ustring2_len, pstr2, ZSTR_LEN(string2), &ustatus2);
+
+	if ( U_FAILURE( ustatus2 ) ) {
+		/* Set global error code. */
+		intl_error_set_code( NULL, ustatus2 );
+
+		/* Set error messages. */
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
+		if (ustring2) {
+			efree( ustring2 );
+		}
+		if (ustring1) {
+			efree( ustring1 );
+		}
+		RETURN_FALSE;
+	}
+
+	UText *ut1 = NULL;
+	UText *ut2 = NULL;
+	UBreakIterator *bi1, *bi2;
+
+	int32_t strlen_1, strlen_2;
+	strlen_1 = grapheme_split_string(ustring1, ustring1_len, NULL, 0 );
+	strlen_2 = grapheme_split_string(ustring2, ustring2_len, NULL, 0 );
+
+	if (strlen_1 == 0) {
+		efree(ustring1);
+		efree(ustring2);
+		RETURN_LONG(strlen_2 * cost_ins);
+	}
+	if (strlen_2 == 0) {
+		efree(ustring1);
+		efree(ustring2);
+		RETURN_LONG(strlen_1 * cost_del);
+	}
+
+	unsigned char u_break_iterator_buffer1[U_BRK_SAFECLONE_BUFFERSIZE];
+	unsigned char u_break_iterator_buffer2[U_BRK_SAFECLONE_BUFFERSIZE];
+	bi1 = grapheme_get_break_iterator((void*)u_break_iterator_buffer1, &ustatus1 );
+	bi2 = grapheme_get_break_iterator((void*)u_break_iterator_buffer2, &ustatus2 );
+
+	ut1 = utext_openUTF8(ut1, pstr1, ZSTR_LEN(string1), &ustatus1);
+	ubrk_setUText(bi1, ut1, &ustatus1);
+	ut2 = utext_openUTF8(ut2, pstr2, ZSTR_LEN(string2), &ustatus2);
+	ubrk_setUText(bi2, ut2, &ustatus2);
+
+	p1 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
+	p2 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
+
+	for (i2 = 0; i2 <= strlen_2; i2++) {
+		p1[i2] = i2 * cost_ins;
+	}
+
+	int32_t current1 = 0;
+	int32_t current2 = 0;
+	int32_t pos1 = 0;
+	int32_t pos2 = 0;
+	int32_t usrch_pos = 0;
+	for ( ; pos1 != UBRK_DONE; ) {
+		current1 = ubrk_current(bi1);
+		pos1 = ubrk_next(bi1);
+		if (pos1 == UBRK_DONE) {
+			break;
+		}
+		p2[0] = p1[0] + cost_del;
+		for (i2 = 0, pos2 = 0; pos2 != UBRK_DONE; i2++) {
+			current2 = ubrk_current(bi2);
+			pos2 = ubrk_next(bi2);
+			if (pos2 == UBRK_DONE) {
+				break;
+			}
+			usrch_pos = grapheme_strpos_utf16(pstr1 + current1, pos1 - current1, pstr2 + current2, pos2 - current2, 0, NULL, 0, 0);
+			if (usrch_pos == 0) {
+				c0 = p1[i2];
+			} else {
+				c0 = p1[i2] + cost_rep;
+			}
+			c1 = p1[i2 + 1] + cost_del;
+			if (c1 < c0) {
+				c0 = c1;
+			}
+			c2 = p2[i2] + cost_ins;
+			if (c2 < c0) {
+				c0 = c2;
+			}
+			p2[i2 + 1] = c0;
+		}
+		ubrk_first(bi2);
+		tmp = p1;
+		p1 = p2;
+		p2 = tmp;
+	}
+
+	utext_close(ut1);
+	utext_close(ut2);
+
+	ubrk_close(bi1);
+	ubrk_close(bi2);
+
+	efree(ustring1);
+	efree(ustring2);
+
+	retval = p1[strlen_2];
+
+	efree(p1);
+	efree(p2);
+	RETURN_LONG(retval);
+}
+
 /* }}} */
