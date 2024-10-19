@@ -2880,7 +2880,7 @@ PHP_FUNCTION(array_fill_keys)
 			zend_value_error(\
 				"The supplied range exceeds the maximum array size by %lu elements: " \
 				"start=" ZEND_LONG_FMT ", end=" ZEND_LONG_FMT ", step=" ZEND_LONG_FMT ". " \
-				"Calculated size: %lu, Maximum size: %lu.", \
+				"Calculated size: " ZEND_LONG_FMT ", Maximum size: " ZEND_LONG_FMT ".", \
 				__excess, end, start, (_step), __calc_size + 1, (zend_ulong)HT_MAX_SIZE); \
 			RETURN_THROWS(); \
 		} \
