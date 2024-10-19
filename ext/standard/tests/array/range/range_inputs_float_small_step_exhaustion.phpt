@@ -14,5 +14,5 @@ try {
 }
 ?>
 --EXPECTF--
-The supplied range exceeds the maximum array size: start=0.0 end=100000000000.0 step=0.1
-The supplied range exceeds the maximum array size: start=-%d end=%d step=1
+The supplied range exceeds the maximum array size by %f elements: start=0.0, end=%f, step=0.1. Max size: %d
+The supplied range exceeds the maximum array size by %f elements: start=-%f, end=%f, step=1. Calculated size: %d, Maximum size: %d.
