@@ -1803,15 +1803,21 @@ ZEND_FUNCTION(gmp_random_bits)
 		RETURN_THROWS();
 	}
 
-	if (bits <= 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 1");
+#if SIZEOF_SIZE_T == 4
+	const zend_long maxbits = ULONG_MAX / GMP_NUMB_BITS;
+#else
+	const zend_long maxbits = INT_MAX;
+#endif
+
+	if (bits <= 0 || bits > maxbits) {
+		zend_argument_value_error(1, "must be between 1 and " ZEND_LONG_FMT, maxbits);
 		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	gmp_init_random();
 
-	mpz_urandomb(gmpnum_result, GMPG(rand_state), bits);
+	mpz_urandomb(gmpnum_result, GMPG(rand_state), (mp_bitcnt_t)bits);
 }
 /* }}} */
 
