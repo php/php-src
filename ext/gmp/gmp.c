@@ -521,6 +521,21 @@ exit:
 }
 /* }}} */
 
+static void *gmp_alloc(size_t size)
+{
+	return emalloc(size);
+}
+
+static void *gmp_realloc(void *ptr, size_t old_size, size_t new_size)
+{
+	return erealloc(ptr, new_size);
+}
+
+static void gmp_free(void *ptr, size_t size)
+{
+	efree(ptr);
+}
+
 /* {{{ ZEND_GINIT_FUNCTION */
 static ZEND_GINIT_FUNCTION(gmp)
 {
@@ -550,6 +565,8 @@ ZEND_MINIT_FUNCTION(gmp)
 	gmp_object_handlers.compare = gmp_compare;
 
 	register_gmp_symbols(module_number);
+
+	mp_set_memory_functions(gmp_alloc, gmp_realloc, gmp_free);
 
 	return SUCCESS;
 }
