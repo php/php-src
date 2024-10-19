@@ -2881,7 +2881,7 @@ PHP_FUNCTION(array_fill_keys)
 				"The supplied range exceeds the maximum array size by %lu elements: " \
 				"start=" ZEND_LONG_FMT ", end=" ZEND_LONG_FMT ", step=" ZEND_LONG_FMT ". " \
 				"Calculated size: %lu, Maximum size: %lu.", \
-				__excess, end, start, (_step), __calc_size + 1, HT_MAX_SIZE); \
+				__excess, end, start, (_step), __calc_size + 1, (zend_ulong)HT_MAX_SIZE); \
 			RETURN_THROWS(); \
 		} \
 		size = (uint32_t)(__calc_size + 1); \
