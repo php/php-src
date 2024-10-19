@@ -2861,8 +2861,11 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end, _step) do { \
 		double __calc_size = ((start - end) / (_step)) + 1; \
 		if (__calc_size >= (double)HT_MAX_SIZE) { \
+			double __exceed_by = __calc_size - (double)HT_MAX_SIZE; \
 			zend_value_error(\
-					"The supplied range exceeds the maximum array size: start=%0.1f end=%0.1f step=%0.1f", end, start, (_step)); \
+				"The supplied range exceeds the maximum array size by %.1f elements: " \
+				"start=%.1f, end=%.1f, step=%.1f. Max size: %.0f", \
+				__exceed_by, end, start, (_step), (double)HT_MAX_SIZE); \
 			RETURN_THROWS(); \
 		} \
 		size = (uint32_t)_php_math_round(__calc_size, 0, PHP_ROUND_HALF_UP); \
@@ -2873,8 +2876,12 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end, _step) do { \
 		zend_ulong __calc_size = ((zend_ulong) start - end) / (_step); \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
+			zend_ulong __excess = __calc_size - (HT_MAX_SIZE - 1); \
 			zend_value_error(\
-					"The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT " step=" ZEND_LONG_FMT, end, start, (_step)); \
+				"The supplied range exceeds the maximum array size by %lu elements: " \
+				"start=" ZEND_LONG_FMT ", end=" ZEND_LONG_FMT ", step=" ZEND_LONG_FMT ". " \
+				"Calculated size: %lu, Maximum size: %lu.", \
+				__excess, end, start, (_step), __calc_size + 1, HT_MAX_SIZE); \
 			RETURN_THROWS(); \
 		} \
 		size = (uint32_t)(__calc_size + 1); \
