@@ -1210,6 +1210,10 @@ void zend_shutdown(void) /* {{{ */
 		CG(script_encoding_list) = NULL;
 		CG(script_encoding_list_size) = 0;
 	}
+	if (CG(internal_run_time_cache)) {
+		pefree(CG(internal_run_time_cache), 1);
+		CG(internal_run_time_cache) = NULL;
+	}
 #endif
 	zend_map_ptr_static_last = 0;
 	zend_map_ptr_static_size = 0;
