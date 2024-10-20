@@ -2975,6 +2975,7 @@ static zend_always_inline bool zend_ffi_validate_api_restriction(zend_execute_da
 	} while (0)
 
 #ifdef PHP_WIN32
+# include <Psapi.h>
 # ifndef DWORD_MAX
 #  define DWORD_MAX ULONG_MAX
 # endif
