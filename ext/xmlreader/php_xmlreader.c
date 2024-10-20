@@ -334,7 +334,10 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, siz
 			(xmlRelaxNGValidityWarningFunc) warn_func,
 			parser);
 	}
+	ZEND_IGNORE_LEAKS_BEGIN();
 	sptr = xmlRelaxNGParse(parser);
+	ZEND_IGNORE_LEAKS_END();
+	
 	xmlRelaxNGFreeParserCtxt(parser);
 	PHP_LIBXML_RESTORE_GLOBALS(parse);
 

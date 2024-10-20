@@ -2023,7 +2023,9 @@ static void dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 		(xmlRelaxNGValidityErrorFunc) php_libxml_error_handler,
 		(xmlRelaxNGValidityWarningFunc) php_libxml_error_handler,
 		parser);
+	ZEND_IGNORE_LEAKS_BEGIN();
 	sptr = xmlRelaxNGParse(parser);
+	ZEND_IGNORE_LEAKS_END();
 	xmlRelaxNGFreeParserCtxt(parser);
 	PHP_LIBXML_RESTORE_GLOBALS(parse);
 	if (!sptr) {
