@@ -434,7 +434,7 @@ function main(): void
                     break;
                 case 'r':
                 case 'l':
-                    $test_list = file($argv[++$i]);
+                    $test_list = [$argv[++$i]];
                     if ($test_list) {
                         foreach ($test_list as $test) {
                             $matches = [];
@@ -445,11 +445,11 @@ function main(): void
                             }
                         }
                     }
-                    if ($switch != 'l') {
+                    if ($switch != 'l' || !isset($argv[$i])) {
                         break;
                     }
-                    $i--;
-                // no break
+                    $failed_tests_file = fopen($argv[$i], 'a+t');
+                    break;
                 case 'w':
                     $failed_tests_file = fopen($argv[++$i], 'w+t');
                     break;
