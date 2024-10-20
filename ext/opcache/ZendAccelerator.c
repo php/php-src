@@ -3408,6 +3408,8 @@ void accel_shutdown(void)
 		/* Delay SHM detach */
 		orig_post_shutdown_cb = zend_post_shutdown_cb;
 		zend_post_shutdown_cb = accel_post_shutdown;
+	} else {
+		free(accel_shared_globals);
 	}
 
 	zend_compile_file = accelerator_orig_compile_file;
