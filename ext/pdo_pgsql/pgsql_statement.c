@@ -113,9 +113,10 @@ void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		}
 
 		S->is_prepared = false;
-		if (H->running_stmt == S) {
-			H->running_stmt = NULL;
-		}
+	}
+
+	if (H->running_stmt == S && (fin_mode & (FIN_CLOSE|FIN_ABORT))) {
+		H->running_stmt = NULL;
 	}
 }
 
@@ -190,7 +191,6 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	 * (maybe it will change with pipeline mode in libpq 14?) */
 	if (H->running_stmt && H->running_stmt->is_unbuffered) {
 		pgsql_stmt_finish(H->running_stmt, FIN_CLOSE);
-		H->running_stmt = NULL;
 	}
 	/* ensure that we free any previous unfetched results */
 	pgsql_stmt_finish(S, 0);
