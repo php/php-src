@@ -733,8 +733,11 @@ extern "C++" {
 #endif
 
 #if defined(ZEND_WIN32) && defined(_DEBUG)
-# define ZEND_IGNORE_LEAKS_BEGIN() _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) & ~_CRTDBG_ALLOC_MEM_DF)
-# define ZEND_IGNORE_LEAKS_END() _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_ALLOC_MEM_DF)
+# define ZEND_IGNORE_LEAKS_BEGIN() \
+	int zend_crtDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG); \
+	_CrtSetDbgFlag(zend_crtDbgFlag & ~_CRTDBG_ALLOC_MEM_DF)
+# define ZEND_IGNORE_LEAKS_END() \
+	_CrtSetDbgFlag(zend_crtDbgFlag)
 #else
 # define ZEND_IGNORE_LEAKS_BEGIN()
 # define ZEND_IGNORE_LEAKS_END()

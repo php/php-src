@@ -337,7 +337,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, siz
 	ZEND_IGNORE_LEAKS_BEGIN();
 	sptr = xmlRelaxNGParse(parser);
 	ZEND_IGNORE_LEAKS_END();
-	
+
 	xmlRelaxNGFreeParserCtxt(parser);
 	PHP_LIBXML_RESTORE_GLOBALS(parse);
 
@@ -1085,7 +1085,9 @@ PHP_METHOD(XMLReader, setSchema)
 	intern = Z_XMLREADER_P(id);
 	if (intern && intern->ptr) {
 		PHP_LIBXML_SANITIZE_GLOBALS(schema);
+		ZEND_IGNORE_LEAKS_BEGIN();
 		retval = xmlTextReaderSchemaValidate(intern->ptr, source);
+		ZEND_IGNORE_LEAKS_END();
 		PHP_LIBXML_RESTORE_GLOBALS(schema);
 
 		if (retval == 0) {
