@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16454 (Unhandled INF in date_sunset() with tiny $utcOffset).
     (cmb)
 
+- DBA:
+  . Fixed bug GH-16390 (dba_open() can segfault for "pathless" streams). (cmb)
+
 - DOM:
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
