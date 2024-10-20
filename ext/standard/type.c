@@ -465,3 +465,94 @@ PHP_FUNCTION(is_countable)
 	RETURN_BOOL(zend_is_countable(var));
 }
 /* }}} */
+
+PHP_FUNCTION(coerce_to_string)
+{
+	zval *var;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(var)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (EXPECTED(Z_TYPE_P(var) == IS_STRING)) {
+		RETURN_STR_COPY(Z_STR_P(var));
+	} else if (Z_TYPE_P(var) == IS_NULL) {
+		RETURN_NULL();
+	} else {
+		zend_string *dest = NULL;
+		/* arg_num is irrelevant, it's only used in the NULL path which is handled above. */
+		if (zend_parse_arg_str_weak(var, &dest, /* arg_num */ 0)) {
+			RETURN_STR_COPY(dest);
+		} else {
+			RETURN_NULL();
+		}
+	}
+}
+
+PHP_FUNCTION(coerce_to_int)
+{
+	zval *var;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(var)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (EXPECTED(Z_TYPE_P(var) == IS_LONG)) {
+		RETURN_LONG(Z_LVAL_P(var));
+	} else if (Z_TYPE_P(var) == IS_NULL) {
+		RETURN_NULL();
+	} else {
+		zend_long dest;
+		if (zend_parse_arg_long_weak(var, &dest, /* arg_num */ 0)) {
+			RETURN_LONG(dest);
+		} else {
+			RETURN_NULL();
+		}
+	}
+}
+
+PHP_FUNCTION(coerce_to_float)
+{
+	zval *var;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(var)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (EXPECTED(Z_TYPE_P(var) == IS_DOUBLE)) {
+		RETURN_DOUBLE(Z_DVAL_P(var));
+	} else if (Z_TYPE_P(var) == IS_NULL) {
+		RETURN_NULL();
+	} else {
+		double dest;
+		if (zend_parse_arg_double_weak(var, &dest, /* arg_num */ 0)) {
+			RETURN_DOUBLE(dest);
+		} else {
+			RETURN_NULL();
+		}
+	}
+}
+
+PHP_FUNCTION(coerce_to_bool)
+{
+	zval *var;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(var)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (EXPECTED(Z_TYPE_P(var) == IS_TRUE)) {
+		RETURN_TRUE;
+	} else if (EXPECTED(Z_TYPE_P(var) == IS_FALSE)) {
+		RETURN_FALSE;
+	} else if (Z_TYPE_P(var) == IS_NULL) {
+		RETURN_NULL();
+	} else {
+		bool dest;
+		if (zend_parse_arg_bool_weak(var, &dest, /* arg_num */ 0)) {
+			RETURN_BOOL(dest);
+		} else {
+			RETURN_NULL();
+		}
+	}
+}

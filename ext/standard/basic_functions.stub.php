@@ -3695,6 +3695,26 @@ function is_iterable(mixed $value): bool {}
  */
 function is_countable(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
+function coerce_to_string(mixed $var): ?string {}
+
+/**
+ * @compile-time-eval
+ */
+function coerce_to_int(mixed $var): ?int {}
+
+/**
+ * @compile-time-eval
+ */
+function coerce_to_float(mixed $var): ?float {}
+
+/**
+ * @compile-time-eval
+ */
+function coerce_to_bool(mixed $var): ?bool {}
+
 /* uniqid.c */
 
 #ifdef HAVE_GETTIMEOFDAY
