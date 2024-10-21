@@ -423,10 +423,11 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 			(xmlStrncmp(BAD_CAST uri->scheme, BAD_CAST "file", 4) == 0))) {
 		resolved_path = xmlURIUnescapeString(filename, 0, NULL);
 		isescaped = 1;
-#if LIBXML_VERSION >= 20902 && defined(PHP_WIN32)
+#if LIBXML_VERSION >= 20902 && LIBXML_VERSION < 21300 && defined(PHP_WIN32)
 		/* Libxml 2.9.2 prefixes local paths with file:/ instead of file://,
 			thus the php stream wrapper will fail on a valid case. For this
-			reason the prefix is rather better cut off. */
+			reason the prefix is rather better cut off.
+			As of libxml 2.13.0 this issue is resolved. */
 		{
 			size_t pre_len = sizeof("file:/") - 1;
 
