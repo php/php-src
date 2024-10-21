@@ -342,6 +342,10 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 
 HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 {
+	/* GH-16317: allow subclasses to use __debugInfo() */
+	if (object->ce->__debugInfo != NULL) {
+		return zend_std_get_debug_info(object, is_temp);
+	}
 	mysqli_object *obj = php_mysqli_fetch_object(object);
 	HashTable *retval, *props = obj->prop_handler;
 	mysqli_prop_handler *entry;
