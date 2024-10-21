@@ -11184,7 +11184,8 @@ static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 	zend_ast_destroy(*ast_ptr);
 	zval z;
 	ZVAL_PTR(&z, op);
-	*ast_ptr = zend_ast_create(ZEND_AST_CLOSURE_CONSTEXPR, zend_ast_create_zval(&z));
+	*ast_ptr = zend_ast_create_zval(&z);
+	(*ast_ptr)->kind = ZEND_AST_CLOSURE_CONSTEXPR;
 }
 
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)

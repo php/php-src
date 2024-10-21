@@ -79,7 +79,7 @@ static void zend_persist_ast_calc(zend_ast *ast)
 
 	if (ast->kind == ZEND_AST_CLOSURE_CONSTEXPR) {
 		ADD_SIZE(sizeof(zend_ast_zval));
-		zend_persist_op_array_calc(zend_ast_get_zval(ast->child[0]));
+		zend_persist_op_array_calc(&((zend_ast_zval*)(ast))->val);
 	} else if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		ADD_SIZE(sizeof(zend_ast_zval));
 		zend_persist_zval_calc(&((zend_ast_zval*)(ast))->val);
