@@ -42,6 +42,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16397 (Segmentation fault when comparing FFI object).
     (nielsdos)
 
+- Filter:
+  . Fixed bug GH-16523 (FILTER_FLAG_HOSTNAME accepts ending hyphen). (cmb)
+
 - GD:
   . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
     (David Carlier)
