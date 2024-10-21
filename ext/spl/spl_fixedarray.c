@@ -225,6 +225,16 @@ static HashTable* spl_fixedarray_object_get_properties_for(zend_object *obj, zen
 	/* This has __serialize, so the purpose is not ZEND_PROP_PURPOSE_SERIALIZE, which would expect a non-null return value */
 	ZEND_ASSERT(purpose != ZEND_PROP_PURPOSE_SERIALIZE);
 
+	/* GH-16317: allow subclasses to use __debugInfo() */
+	if (purpose == ZEND_PROP_PURPOSE_DEBUG && obj->ce->__debugInfo != NULL) {
+		int is_temp = 0;
+		HashTable *ht = zend_std_get_debug_info(obj, &is_temp);
+		if (ht && !is_temp) {
+			GC_TRY_ADDREF(ht);
+		}
+		return ht;
+	}
+
 	const spl_fixedarray_object *intern = spl_fixed_array_from_obj(obj);
 	/*
 	 * SplFixedArray can be subclassed or have dynamic properties (With or without AllowDynamicProperties in subclasses).
