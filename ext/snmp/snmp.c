@@ -1997,6 +1997,13 @@ PHP_MINIT_FUNCTION(snmp)
 {
 	netsnmp_log_handler *logh;
 
+	/* Disable logging, use exit status'es and related variabled to detect errors */
+	shutdown_snmp_logging();
+	logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_NONE, LOG_ERR);
+	if (logh) {
+		logh->pri_max = LOG_ERR;
+	}
+
 	init_snmp("snmpapp");
 	/* net-snmp corrupts the CTYPE locale during initialization. */
 	zend_reset_lc_ctype_locale();
@@ -2005,13 +2012,6 @@ PHP_MINIT_FUNCTION(snmp)
 	/* Prevent update of the snmpapp.conf file */
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PERSIST_STATE, 1);
 #endif
-
-	/* Disable logging, use exit status'es and related variabled to detect errors */
-	shutdown_snmp_logging();
-	logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_NONE, LOG_ERR);
-	if (logh) {
-		logh->pri_max = LOG_ERR;
-	}
 
 	memcpy(&php_snmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_snmp_object_handlers.read_property = php_snmp_read_property;
