@@ -5304,6 +5304,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 			}
 		}
 	} else {
+		ZEND_ASSERT(num_args == 0 || fbc->internal_function.arg_info);
 		for (uint32_t i = 0; i < num_args; i++) {
 			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
 			size_t len = strlen(arg_info->name);
