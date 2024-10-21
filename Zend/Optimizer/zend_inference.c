@@ -3959,6 +3959,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 			} else {
 				zend_arg_info *ret_info = op_array->arg_info - 1;
 				tmp = zend_fetch_arg_info_type(script, ret_info, &ce);
+				if ((tmp & MAY_BE_NULL) && opline->op1_type == IS_CV) {
+					tmp |= MAY_BE_UNDEF;
+				}
 				tmp |= (t1 & MAY_BE_INDIRECT);
 
 				// TODO: We could model more precisely how illegal types are converted.
