@@ -1072,7 +1072,7 @@ static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(zen
 		zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
 					op_array ? ZSTR_VAL(op_array->function_name) : ZSTR_VAL(old_function->common.function_name),
 					ZSTR_VAL(old_function->op_array.filename),
-					old_function->op_array.opcodes[0].lineno);
+					old_function->op_array.line_start);
 	} else {
 		zend_error_noreturn(error_level, "Cannot redeclare %s()",
 			op_array ? ZSTR_VAL(op_array->function_name) : ZSTR_VAL(old_function->common.function_name));
@@ -7516,6 +7516,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	} else if (toplevel) {
 		/* Only register the function after a successful compile */
 		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
+			CG(zend_lineno) = decl->start_lineno;
 			do_bind_function_error(lcname, op_array, true);
 		}
 	}

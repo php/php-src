@@ -170,13 +170,13 @@ failure:
 	function2 = Z_PTR_P(t);
 	CG(in_compilation) = 1;
 	zend_set_compiled_filename(function1->op_array.filename);
-	CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
+	CG(zend_lineno) = function1->op_array.line_start;
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
 		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
 				   ZSTR_VAL(function1->common.function_name),
 				   ZSTR_VAL(function2->op_array.filename),
-				   (int)function2->op_array.opcodes[0].lineno);
+				   (int)function2->op_array.line_start);
 	} else {
 		zend_error(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
 	}

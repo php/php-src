@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16371 (Assertion failure in Zend/zend_weakrefs.c:646). (Arnaud)
   . Fixed bug GH-16515 (Incorrect propagation of ZEND_ACC_RETURN_REFERENCE for
     call trampoline). (ilutov)
+  . Fixed bug GH-16509 (Incorrect line number in function redeclaration error).
+    (ilutov)
 
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
