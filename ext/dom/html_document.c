@@ -570,12 +570,11 @@ static bool dom_decode_encode_fast_path(
 		const lxb_char_t *buf_ref_backup = buf_ref;
 		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
 		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
-			size_t skip = buf_ref - buf_ref_backup; /* Skip invalid data, it's replaced by the UTF-8 replacement bytes */
 			if (!dom_process_parse_chunk(
 				ctx,
 				document,
 				parser,
-				buf_ref - last_output - skip,
+				buf_ref_backup - last_output,
 				last_output,
 				buf_ref - last_output,
 				tokenizer_error_offset,
@@ -1208,6 +1207,68 @@ static zend_result dom_write_output_stream(void *application_data, const char *b
 	return SUCCESS;
 }
 
+/* Fast path when the output encoding is UTF-8 */
+static zend_result dom_saveHTML_write_string_len_utf8_output(void *application_data, const char *buf, size_t len)
+{
+	dom_output_ctx *output = (dom_output_ctx *) application_data;
+
+	output->decode->status = LXB_STATUS_OK;
+
+	const lxb_char_t *buf_ref = (const lxb_char_t *) buf;
+	const lxb_char_t *last_output = buf_ref;
+	const lxb_char_t *buf_end = buf_ref + len;
+
+	while (buf_ref != buf_end) {
+		const lxb_char_t *buf_ref_backup = buf_ref;
+		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(output->decode, &buf_ref, buf_end);
+		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
+			if (UNEXPECTED(output->write_output(
+				output->output_data,
+				(const char *) last_output,
+				buf_ref_backup - last_output
+			) != SUCCESS)) {
+				return FAILURE;
+			}
+
+			if (codepoint == LXB_ENCODING_DECODE_CONTINUE) {
+				ZEND_ASSERT(buf_ref == buf_end);
+				/* The decoder needs more data but the entire buffer is consumed.
+				 * All valid data is outputted, and if the remaining data for the code point
+				 * is invalid, the next call will output the replacement bytes. */
+				output->decode->status = LXB_STATUS_CONTINUE;
+				return SUCCESS;
+			}
+
+			if (UNEXPECTED(output->write_output(
+				output->output_data,
+				(const char *) LXB_ENCODING_REPLACEMENT_BYTES,
+				LXB_ENCODING_REPLACEMENT_SIZE
+			) != SUCCESS)) {
+				return FAILURE;
+			}
+
+			last_output = buf_ref;
+		}
+	}
+
+	if (buf_ref != last_output) {
+		if (UNEXPECTED(output->write_output(
+			output->output_data,
+			(const char *) last_output,
+			buf_ref - last_output
+		) != SUCCESS)) {
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
+static zend_result dom_saveHTML_write_string_utf8_output(void *application_data, const char *buf)
+{
+	return dom_saveHTML_write_string_len_utf8_output(application_data, buf, strlen(buf));
+}
+
 static zend_result dom_saveHTML_write_string_len(void *application_data, const char *buf, size_t len)
 {
 	dom_output_ctx *output = (dom_output_ctx *) application_data;
@@ -1216,7 +1277,7 @@ static zend_result dom_saveHTML_write_string_len(void *application_data, const c
 	const lxb_char_t *buf_end = buf_ref + len;
 
 	do {
-		decode_status = output->decoding_data->decode(output->decode, &buf_ref, buf_end);
+		decode_status = lxb_encoding_decode_utf_8(output->decode, &buf_ref, buf_end);
 
 		const lxb_codepoint_t *codepoints_ref = output->codepoints;
 		const lxb_codepoint_t *codepoints_end = codepoints_ref + lxb_encoding_decode_buf_used(output->decode);
@@ -1272,8 +1333,15 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, dom_object *inter
 	output_ctx->encoding_output = encoding_output;
 
 	dom_html5_serialize_context ctx;
-	ctx.write_string_len = dom_saveHTML_write_string_len;
-	ctx.write_string = dom_saveHTML_write_string;
+	if (encoding_data->encoding == LXB_ENCODING_UTF_8) {
+		/* Fast path */
+		ctx.write_string_len = dom_saveHTML_write_string_len_utf8_output;
+		ctx.write_string = dom_saveHTML_write_string_utf8_output;
+	} else {
+		/* Slow path */
+		ctx.write_string_len = dom_saveHTML_write_string_len;
+		ctx.write_string = dom_saveHTML_write_string;
+	}
 	ctx.application_data = output_ctx;
 	ctx.private_data = php_dom_get_private_data(intern);
 	if (UNEXPECTED(dom_html5_serialize_outer(&ctx, node) != SUCCESS)) {
