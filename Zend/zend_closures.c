@@ -845,7 +845,7 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 
 		memset(&trampoline, 0, sizeof(zend_internal_function));
 		trampoline.type = ZEND_INTERNAL_FUNCTION;
-		trampoline.fn_flags = mptr->common.fn_flags & ZEND_ACC_STATIC;
+		trampoline.fn_flags = mptr->common.fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_RETURN_REFERENCE);
 		trampoline.handler = zend_closure_call_magic;
 		trampoline.function_name = mptr->common.function_name;
 		trampoline.scope = mptr->common.scope;
