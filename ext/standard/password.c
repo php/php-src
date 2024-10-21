@@ -30,6 +30,7 @@
 #ifdef HAVE_ARGON2LIB
 #include "argon2.h"
 #endif
+#include "yescrypt/yescrypt.h"
 
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
@@ -151,7 +152,8 @@ static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array
 	return old_cost != new_cost;
 }
 
-static bool php_password_bcrypt_verify(const zend_string *password, const zend_string *hash) {
+/* Password verification using the crypt() API, works for both bcrypt and yescrypt. */
+static bool php_password_crypt_verify(const zend_string *password, const zend_string *hash) {
 	int status = 0;
 	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
 
@@ -224,10 +226,213 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 const php_password_algo php_password_algo_bcrypt = {
 	"bcrypt",
 	php_password_bcrypt_hash,
-	php_password_bcrypt_verify,
+	php_password_crypt_verify,
 	php_password_bcrypt_needs_rehash,
 	php_password_bcrypt_get_info,
 	php_password_bcrypt_valid,
+};
+
+/* yescrypt implementation */
+
+static void php_password_yescrypt_expect_long(const char *parameter_name) {
+	if (!EG(exception)) {
+		zend_value_error("Parameter \"%s\" cannot be converted to int", parameter_name);
+	}
+}
+
+static zend_string *php_password_yescrypt_hash(const zend_string *password, zend_array *options) {
+	zend_long block_count = PHP_PASSWORD_YESCRYPT_DEFAULT_BLOCK_COUNT;
+	zend_long block_size = PHP_PASSWORD_YESCRYPT_DEFAULT_BLOCK_SIZE;
+	zend_long parallelism = PHP_PASSWORD_YESCRYPT_DEFAULT_PARALLELISM;
+	zend_long time = PHP_PASSWORD_YESCRYPT_DEFAULT_TIME;
+
+	if (UNEXPECTED(ZEND_LONG_INT_OVFL(ZSTR_LEN(password)))) {
+		zend_value_error("Password is too long");
+		return NULL;
+	}
+
+	if (options) {
+		bool failed;
+		const zval *option;
+
+		option = zend_hash_str_find(options, ZEND_STRL("block_count"));
+		if (option) {
+			block_count = zval_try_get_long(option, &failed);
+			if (UNEXPECTED(failed)) {
+				php_password_yescrypt_expect_long("block_count");
+				return NULL;
+			}
+
+			if (block_count < 4 || block_count > UINT32_MAX) {
+				zend_value_error("Parameter \"block_count\" must be between 4 and %u", UINT32_MAX);
+				return NULL;
+			}
+		}
+
+		option = zend_hash_str_find(options, ZEND_STRL("block_size"));
+		if (option) {
+			block_size = zval_try_get_long(option, &failed);
+			if (UNEXPECTED(failed)) {
+				php_password_yescrypt_expect_long("block_size");
+				return NULL;
+			}
+
+			if (block_size < 1) {
+				zend_value_error("Parameter \"block_size\" must be greater than 0");
+				return NULL;
+			}
+		}
+
+		option = zend_hash_str_find(options, ZEND_STRL("parallelism"));
+		if (option) {
+			parallelism = zval_try_get_long(option, &failed);
+			if (UNEXPECTED(failed)) {
+				php_password_yescrypt_expect_long("parallelism");
+				return NULL;
+			}
+
+			if (parallelism < 1) {
+				zend_value_error("Parameter \"parallelism\" must be greater than 0");
+				return NULL;
+			}
+		}
+
+		option = zend_hash_str_find(options, ZEND_STRL("time"));
+		if (option) {
+			time = zval_try_get_long(option, &failed);
+			if (UNEXPECTED(failed)) {
+				php_password_yescrypt_expect_long("time");
+				return NULL;
+			}
+
+			if (time < 0) {
+				zend_value_error("Parameter \"time\" must be greater than or equal to 0");
+				return NULL;
+			}
+		}
+
+		if ((uint64_t) block_size * (uint64_t) parallelism >= (1U << 30)) {
+			zend_value_error("Parameter \"block_size\" * parameter \"parallelism\" must be less than 2**30");
+			return NULL;
+		}
+	}
+
+	zend_string *salt = php_password_get_salt(NULL, Z_UL(16), options);
+	if (UNEXPECTED(!salt)) {
+		return NULL;
+	}
+	ZSTR_VAL(salt)[ZSTR_LEN(salt)] = 0;
+
+	uint8_t prefix_buffer[PREFIX_LEN + 1];
+	yescrypt_params_t params = {
+		.flags = YESCRYPT_DEFAULTS,
+		.N = block_count, .r = block_size, .p = parallelism, .t = time,
+		.g = 0, .NROM = 0
+	};
+	uint8_t *prefix = yescrypt_encode_params_r(
+		&params,
+		(const uint8_t *) ZSTR_VAL(salt),
+		ZSTR_LEN(salt),
+		prefix_buffer,
+		sizeof(prefix_buffer)
+	);
+
+	zend_string_release_ex(salt, false);
+
+	if (UNEXPECTED(prefix == NULL)) {
+		return NULL;
+	}
+
+	return php_crypt(
+		ZSTR_VAL(password),
+		/* This cast is safe because we check that the password length fits in an int at the start. */
+		(int) ZSTR_LEN(password),
+		(const char *) prefix_buffer,
+		/* The following cast is safe because the prefix buffer size is always below INT_MAX. */
+		(int) strlen((const char *) prefix_buffer),
+		true
+	);
+}
+
+static bool php_password_yescrypt_valid(const zend_string *hash) {
+	const char *h = ZSTR_VAL(hash);
+	/* Note: $7$-style is longer */
+	return (ZSTR_LEN(hash) >= 3 /* "$y$" */ + 3 /* 3 parameters that must be encoded */ + 2 /* $salt$ */ + HASH_LEN
+			&& ZSTR_LEN(hash) <= PREFIX_LEN + 1 + HASH_LEN)
+			&& (h[0] == '$') && h[1] == 'y' && (h[2] == '$');
+}
+
+static bool php_password_yescrypt_needs_rehash(const zend_string *hash, zend_array *options) {
+	zend_long block_count = PHP_PASSWORD_YESCRYPT_DEFAULT_BLOCK_COUNT;
+	zend_long block_size = PHP_PASSWORD_YESCRYPT_DEFAULT_BLOCK_SIZE;
+	zend_long parallelism = PHP_PASSWORD_YESCRYPT_DEFAULT_PARALLELISM;
+	zend_long time = PHP_PASSWORD_YESCRYPT_DEFAULT_TIME;
+
+	if (!php_password_yescrypt_valid(hash)) {
+		/* Should never get called this way. */
+		return true;
+	}
+
+	yescrypt_params_t params = { .p = 1 };
+	const uint8_t *src = yescrypt_parse_settings((const uint8_t *) ZSTR_VAL(hash), &params, NULL);
+	if (!src) {
+		return true;
+	}
+
+	if (options) {
+		const zval *option;
+
+		option = zend_hash_str_find(options, ZEND_STRL("block_count"));
+		if (option) {
+			block_count = zval_get_long(option);
+		}
+
+		option = zend_hash_str_find(options, ZEND_STRL("block_size"));
+		if (option) {
+			block_size = zval_get_long(option);
+		}
+
+		option = zend_hash_str_find(options, ZEND_STRL("parallelism"));
+		if (option) {
+			parallelism = zval_get_long(option);
+		}
+
+		option = zend_hash_str_find(options, ZEND_STRL("time"));
+		if (option) {
+			time = zval_get_long(option);
+		}
+	}
+
+	return block_count != params.N || block_size != params.r || parallelism != params.p || time != params.t;
+}
+
+static int php_password_yescrypt_get_info(zval *return_value, const zend_string *hash) {
+	if (!php_password_yescrypt_valid(hash)) {
+		/* Should never get called this way. */
+		return FAILURE;
+	}
+
+	yescrypt_params_t params = { .p = 1 };
+	const uint8_t *src = yescrypt_parse_settings((const uint8_t *) ZSTR_VAL(hash), &params, NULL);
+	if (!src) {
+		return FAILURE;
+	}
+
+	add_assoc_long(return_value, "block_count", (zend_long) params.N);
+	add_assoc_long(return_value, "block_size", (zend_long) params.r);
+	add_assoc_long(return_value, "parallelism", (zend_long) params.p);
+	add_assoc_long(return_value, "time", (zend_long) params.t);
+
+	return SUCCESS;
+}
+
+const php_password_algo php_password_algo_yescrypt = {
+	"yescrypt",
+	php_password_yescrypt_hash,
+	php_password_crypt_verify,
+	php_password_yescrypt_needs_rehash,
+	php_password_yescrypt_get_info,
+	php_password_yescrypt_valid,
 };
 
 
@@ -424,6 +629,10 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	register_password_symbols(module_number);
 
 	if (FAILURE == php_password_algo_register("2y", &php_password_algo_bcrypt)) {
+		return FAILURE;
+	}
+
+	if (FAILURE == php_password_algo_register("y", &php_password_algo_yescrypt)) {
 		return FAILURE;
 	}
 
