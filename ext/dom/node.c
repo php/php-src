@@ -872,6 +872,11 @@ static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNode
 		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 		return false;
 	}
+	/* Attributes must be in elements. */
+	if (child->type == XML_ATTRIBUTE_NODE && parentp->type != XML_ELEMENT_NODE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return false;
+	}
 
 	return true;
 }

@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16316 (DOMXPath breaks when not initialized properly).
     (nielsdos)
   . Fixed bug GH-16473 (dom_import_simplexml stub is wrong). (nielsdos)
+  . Fixed bug GH-16533 (Segfault when adding attribute to parent that is not
+    an element). (nielsdos)
 
 - EXIF:
   . Fixed bug GH-16409 (Segfault in exif_thumbnail when not dealing with a
