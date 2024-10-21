@@ -884,7 +884,10 @@ static zval *property_get_default(zend_property_info *prop_info) {
 		ZVAL_DEINDIRECT(prop);
 		return prop;
 	} else {
-		return &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+		if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+			return &EG(uninitialized_zval);
+		}
+		return &CE_DEFAULT_PROPERTIES_TABLE(ce)[OBJ_PROP_TO_NUM(prop_info->offset)];
 	}
 }
 
