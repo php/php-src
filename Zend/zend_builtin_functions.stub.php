@@ -91,7 +91,7 @@ function trait_exists(string $trait, bool $autoload = true): bool {}
 
 function enum_exists(string $enum, bool $autoload = true): bool {}
 
-function function_exists(string $function): bool {}
+function function_exists(string $function, bool $autoload = true): bool {}
 
 function class_alias(string $class, string $alias, bool $autoload = true): bool {}
 
