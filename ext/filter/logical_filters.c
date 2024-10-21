@@ -542,7 +542,7 @@ static int _php_filter_validate_domain(char * domain, size_t len, zend_long flag
 			/* Reset label length counter */
 			i = 1;
 		} else {
-			if (i > 63 || (hostname && *s != '-' && !isalnum((int)*(unsigned char *)s))) {
+			if (i > 63 || (hostname && (*s != '-' || *(s + 1) == '\0') && !isalnum((int)*(unsigned char *)s))) {
 				return 0;
 			}
 
