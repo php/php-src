@@ -694,6 +694,8 @@ PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
 PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count);
 
+PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zend_object *current_object, zend_class_entry *called_scope, zval *new_zval_object);
+
 /* Normalization for fetching long param for driver attributes */
 PDO_API bool pdo_get_long_param(zend_long *lval, zval *value);
 PDO_API bool pdo_get_bool_param(bool *bval, zval *value);
