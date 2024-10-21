@@ -5397,6 +5397,24 @@ ZEND_METHOD(ReflectionClass, getExtensionName)
 }
 /* }}} */
 
+static const char *_class_get_namespace_backslash(const zend_class_entry *ce)
+{
+	const zend_string *name = ce->name;
+	size_t name_length;
+
+	if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+		/* Paths may contain backslashes. This is true on Linux and especially on Windows.
+		 * Search first for '@' and then look for the first '\' before that. */
+		const char *at = zend_memrchr(ZSTR_VAL(name), '@', ZSTR_LEN(name));
+		ZEND_ASSERT(at != NULL);
+		name_length = at - ZSTR_VAL(name);
+	} else {
+		name_length = ZSTR_LEN(name);
+	}
+
+	return zend_memrchr(ZSTR_VAL(name), '\\', name_length);
+}
+
 /* {{{ Returns whether this class is defined in namespace */
 ZEND_METHOD(ReflectionClass, inNamespace)
 {
@@ -5410,7 +5428,7 @@ ZEND_METHOD(ReflectionClass, inNamespace)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_string *name = ce->name;
-	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	const char *backslash = _class_get_namespace_backslash(ce);
 	RETURN_BOOL(backslash && backslash > ZSTR_VAL(name));
 }
 /* }}} */
@@ -5428,7 +5446,7 @@ ZEND_METHOD(ReflectionClass, getNamespaceName)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_string *name = ce->name;
-	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	const char *backslash = _class_get_namespace_backslash(ce);
 	if (backslash && backslash > ZSTR_VAL(name)) {
 		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
 	}
@@ -5449,7 +5467,7 @@ ZEND_METHOD(ReflectionClass, getShortName)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_string *name = ce->name;
-	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	const char *backslash = _class_get_namespace_backslash(ce);
 	if (backslash && backslash > ZSTR_VAL(name)) {
 		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
 	}
