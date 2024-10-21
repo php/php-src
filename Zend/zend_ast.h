@@ -34,6 +34,7 @@
 enum _zend_ast_kind {
 	/* special nodes */
 	ZEND_AST_ZVAL = 1 << ZEND_AST_SPECIAL_SHIFT,
+	ZEND_AST_OP_ARRAY,
 	ZEND_AST_CONSTANT,
 	ZEND_AST_ZNODE,
 
