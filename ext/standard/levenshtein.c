@@ -20,7 +20,7 @@
  * reference implementation, only optimized for memory usage, not speed */
 static zend_long reference_levdist(const zend_string *string1, const zend_string *string2, zend_long cost_ins, zend_long cost_rep, zend_long cost_del )
 {
-	zend_long *p1, *p2, *tmp;
+	zend_long *p1, *p2;
 	zend_long c0, c1, c2;
 	size_t i1, i2;
 
@@ -61,7 +61,7 @@ static zend_long reference_levdist(const zend_string *string1, const zend_string
 			}
 			p2[i2 + 1] = c0;
 		}
-		tmp = p1;
+		zend_long *tmp = p1;
 		p1 = p2;
 		p2 = tmp;
 	}

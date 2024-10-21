@@ -39,14 +39,14 @@ PHPAPI unsigned int php_version_id(void);
 /* Prints the PHP version string for the -v option. It's in main/ so that
  * it can be shared between SAPIs.
  */
-PHPAPI char *php_get_version(sapi_module_struct *sapi_module);
-PHPAPI void php_print_version(sapi_module_struct *sapi_module);
+PHPAPI char *php_get_version(const sapi_module_struct *sapi_module_ptr);
+PHPAPI void php_print_version(const sapi_module_struct *sapi_module_ptr);
 
 PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);
 PHPAPI void php_module_shutdown(void);
-PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
+PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_module_ptr);
 
 PHPAPI zend_result php_register_extensions(zend_module_entry * const * ptr, int count);
 
