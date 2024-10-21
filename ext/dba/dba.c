@@ -823,14 +823,10 @@ restart:
 		} else {
 			spprintf(&lock_name, 0, "%s.lck", ZSTR_VAL(connection->info->path));
 			if (!strcmp(file_mode, "r")) {
-				zend_string *opened_path = NULL;
 				/* when in read only mode try to use existing .lck file first */
 				/* do not log errors for .lck file while in read only mode on .lck file */
 				lock_file_mode = "rb";
-				connection->info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, &opened_path);
-				if (opened_path) {
-					zend_string_release_ex(opened_path, 0);
-				}
+				connection->info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, NULL);
 			}
 			if (!connection->info->lock.fp) {
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
