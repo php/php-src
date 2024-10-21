@@ -3429,7 +3429,7 @@ function toolset_setup_common_libs()
 function toolset_setup_build_mode()
 {
 	if (PHP_DEBUG == "yes") {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /D ZEND_DEBUG=1 " +
+		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /U NDebug /U NDEBUG /D ZEND_DEBUG=1 " +
 			(TARGET_ARCH == 'x86'?"/ZI":"/Zi"));
 		ADD_FLAG("LDFLAGS", "/debug");
 		// Avoid problems when linking to release libraries that use the release
