@@ -1078,7 +1078,8 @@ static xmlNodePtr to_xml_double(encodeTypePtr type, zval *data, int style, xmlNo
 
 	ZVAL_DOUBLE(&tmp, zval_get_double(data));
 
-	str = (char *) safe_emalloc(EG(precision) >= 0 ? EG(precision) : 17, 1, MAX_LENGTH_OF_DOUBLE + 1);
+	/* We need at least 5 bytes for the -INF exceptional case. */
+	str = (char *) safe_emalloc(EG(precision) >= 0 ? MAX(EG(precision), 5) : 17, 1, MAX_LENGTH_OF_DOUBLE + 1);
 	zend_gcvt(Z_DVAL(tmp), EG(precision), '.', 'E', str);
 	xmlNodeSetContentLen(ret, BAD_CAST(str), strlen(str));
 	efree(str);
