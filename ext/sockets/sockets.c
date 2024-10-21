@@ -2034,17 +2034,39 @@ PHP_FUNCTION(socket_set_option)
 				opt_ptr = &ov;
 				optname = SO_DETACH_BPF;
 			} else {
+				/**
+				 * This socket flag offers a tigher control over the SO_REUSEPORT's algorithm,
+				 * here binding a socket to a particular cpu set as opposed to the Round-Robin
+				 * default one.
+				 */
 				uint32_t k = (uint32_t)Z_LVAL_P(arg4);
 				static struct sock_filter cbpf[8] = {0};
 				static struct sock_fprog bpfprog;
 
+				// TODO: Might be a good enough approximation, more native api could be used potentially tough.
+				long onln = sysconf(_SC_NPROCESSORS_ONLN);
+
+				if (onln == -1) {
+					php_error_docref(NULL, E_WARNING, "Online cores fetching failed");
+					RETURN_FALSE;
+				}
+
 				switch (k) {
 					case SKF_AD_CPU:
 					case SKF_AD_QUEUE:
+						/**
+						 * We are putting the current socket's filter operation into `A`
+						 * instead of the current core, we are dispatching (modulo)
+						 * among `onln` cores as opposed to bind it via the raw_smp_processor_id()
+						 * kernel call.
+						 * Then the sock's filter returns `A`
+						 */
 						cbpf[0].code = (BPF_LD|BPF_W|BPF_ABS);
 						cbpf[0].k = (uint32_t)(SKF_AD_OFF + k);
-						cbpf[1].code = (BPF_RET|BPF_A);
-						bpfprog.len = 2;
+						cbpf[1].code = (BPF_ALU | BPF_MOD);
+						cbpf[1].k = (uint32_t)(onln);
+						cbpf[2].code = (BPF_RET|BPF_A);
+						bpfprog.len = 3;
 					break;
 					default:
 						php_error_docref(NULL, E_WARNING, "Unsupported CBPF filter");
