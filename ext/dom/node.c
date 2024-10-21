@@ -873,6 +873,12 @@ static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNode
 		return false;
 	}
 
+	/* Documents can never be a child. */
+	if (child->type == XML_DOCUMENT_NODE || child->type == XML_HTML_DOCUMENT_NODE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return false;
+	}
+
 	return true;
 }
 
