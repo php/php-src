@@ -712,7 +712,12 @@ zend_object *zend_lazy_object_clone(zend_object *old_obj)
 		/* Clone handler must always return an object. It is discarded later due
 		 * to the exception. */
 		zval zv;
-		object_init_ex(&zv, old_obj->ce);
+		if (object_init_ex(&zv, old_obj->ce) == FAILURE) {
+			// Since the return is just going to be discarded, and we couldn't
+			// create a new instance of the cloned class, just return the
+			// current instance
+			return old_obj;
+		}
 		GC_ADD_FLAGS(Z_OBJ(zv), IS_OBJ_DESTRUCTOR_CALLED);
 		return Z_OBJ(zv);
 	}
