@@ -1112,7 +1112,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	int count = 0;
 	int is_negative = 0;
 
-	if (d < 0) {
+	if (d < 0 && !zend_isinf(d)) {
 		is_negative = 1;
 		d = -d;
 	}

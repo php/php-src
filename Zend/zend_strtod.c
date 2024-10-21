@@ -3771,8 +3771,8 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sig
 #endif
 
 	u.d = dd;
-	if (word0(&u) & Sign_bit) {
-		/* set sign for everything, including 0's and NaNs */
+	if (!zend_isnan(dd) && word0(&u) & Sign_bit) {
+		/* set sign for everything, including 0's */
 		*sign = 1;
 		word0(&u) &= ~Sign_bit;	/* clear sign bit */
 		}
@@ -3783,7 +3783,7 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sig
 #ifdef IEEE_Arith
 	if ((word0(&u) & Exp_mask) == Exp_mask)
 #else
-	if (word0(&u)  == 0x8000)
+	if (word0(&u) == 0x8000)
 #endif
 		{
 		/* Infinity or NaN */

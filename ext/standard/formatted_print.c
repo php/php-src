@@ -239,17 +239,12 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 	}
 
 	if (zend_isnan(number)) {
-		is_negative = (number<0);
-		php_sprintf_appendstring(buffer, pos, "NaN", 3, 0, padding,
-								 alignment, 3, is_negative, 0, always_sign);
-		return;
+		always_sign = 0;
+		padding = ' ';
 	}
 
 	if (zend_isinf(number)) {
-		is_negative = (number<0);
-		php_sprintf_appendstring(buffer, pos, "INF", 3, 0, padding,
-								 alignment, 3, is_negative, 0, always_sign);
-		return;
+		padding = ' ';
 	}
 
 	switch (fmt) {

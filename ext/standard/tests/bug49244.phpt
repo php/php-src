@@ -10,23 +10,23 @@ for ($i = 0; $i < 10; $i++) {
 
 ?>
 --EXPECT--
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
-{NaN} NaN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN
+{NAN} NAN

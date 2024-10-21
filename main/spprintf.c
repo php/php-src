@@ -583,8 +583,13 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 						s = "nan";
 						s_len = 3;
 					} else if (zend_isinf(fp_num)) {
-						s = "inf";
-						s_len = 3;
+						if (fp_num > 0) {
+							s = "inf";
+							s_len = 3;
+						} else {
+							s = "-inf";
+							s_len = 4;
+						}
 					} else {
 #ifdef ZTS
 						localeconv_r(&lconv);
