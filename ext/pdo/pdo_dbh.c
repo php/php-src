@@ -219,7 +219,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_entry *called_scope, zval *new_object)
+static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_entry *called_scope, zval *new_zval_object)
 {
 	zend_class_entry *ce;
 	zend_class_entry *ce_based_on_driver_name = NULL, *ce_based_on_called_object = NULL;
@@ -235,47 +235,70 @@ static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_e
 
 	if (ce_based_on_called_object) {
 		if (ce_based_on_driver_name) {
-			if (instanceof_function(ce_based_on_called_object, ce_based_on_driver_name) == false) {
+			if (!instanceof_function(ce_based_on_called_object, ce_based_on_driver_name)) {
 				zend_throw_exception_ex(pdo_exception_ce, 0,
-					"%s::connect() cannot be called when connecting to the \"%s\" driver, "
-					"either %s::connect() or PDO::connect() must be called instead",
-					ZSTR_VAL(called_scope->name), driver->driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
+					"%s::%s() cannot be used for connecting to the \"%s\" driver, "
+					"either call %s::%s() or PDO::%s() instead",
+					ZSTR_VAL(called_scope->name),
+					new_zval_object ? "connect" : "__construct",
+					driver->driver_name,
+					ZSTR_VAL(ce_based_on_driver_name->name),
+					new_zval_object ? "connect" : "__construct",
+					new_zval_object ? "connect" : "__construct"
+				);
 				return false;
 			}
 
-			/* A driver-specific implementation was instantiated via the connect() method of the appropriate driver class */
-			object_init_ex(new_object, ce_based_on_called_object);
+			/* A driver-specific implementation is instantiated with the appropriate driver class */
+			if (new_zval_object) {
+				object_init_ex(new_zval_object, called_scope);
+			}
 			return true;
 		} else {
 			zend_throw_exception_ex(pdo_exception_ce, 0,
-				"%s::connect() cannot be called when connecting to an unknown driver, "
-				"PDO::connect() must be called instead",
-				ZSTR_VAL(called_scope->name));
+				"%s::%s() cannot be used for connecting to an unknown driver, "
+				"call PDO::%s() instead",
+				ZSTR_VAL(called_scope->name),
+				new_zval_object ? "connect" : "__construct",
+				new_zval_object ? "connect" : "__construct"
+			);
 			return false;
 		}
 	}
 
+	/* A non-driver specific PDO subclass is instantiated via the constructor. This results in the legacy behavior. */
+	if (called_scope != pdo_dbh_ce && new_zval_object == NULL) {
+		return true;
+	}
+
 	if (ce_based_on_driver_name) {
 		if (called_scope != pdo_dbh_ce) {
-			/* A driver-specific implementation was instantiated via the connect method of a wrong driver class */
+			/* A driver-specific implementation is instantiated with a wrong driver class */
 			zend_throw_exception_ex(pdo_exception_ce, 0,
-				"%s::connect() cannot be called when connecting to the \"%s\" driver, "
-				"either %s::connect() or PDO::connect() must be called instead",
-				ZSTR_VAL(called_scope->name), driver->driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
+				"%s::%s() cannot be used for connecting to the \"%s\" driver, "
+				"either call %s::%s() or PDO::%s() instead",
+				ZSTR_VAL(called_scope->name),
+				new_zval_object ? "connect" : "__construct",
+				driver->driver_name,
+				ZSTR_VAL(ce_based_on_driver_name->name),
+				new_zval_object ? "connect" : "__construct",
+				new_zval_object ? "connect" : "__construct"
+			);
 			return false;
 		}
 
-		/* A driver-specific implementation was instantiated via PDO::__construct() */
-		object_init_ex(new_object, ce_based_on_driver_name);
-	} else {
+		if (new_zval_object) {
+			object_init_ex(new_zval_object, ce_based_on_driver_name);
+		}
+	} else if (new_zval_object) {
 		/* No driver-specific implementation found */
-		object_init_ex(new_object, called_scope);
+		object_init_ex(new_zval_object, called_scope);
 	}
 
 	return true;
 }
 
-static void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zend_object *object, zend_class_entry *current_scope, zval *new_zval_object)
+PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zend_object *current_object, zend_class_entry *called_scope, zval *new_zval_object)
 {
 	pdo_dbh_t *dbh = NULL;
 	bool is_persistent = 0;
@@ -343,15 +366,16 @@ static void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zend_object *object
 		RETURN_THROWS();
 	}
 
-	if (new_zval_object != NULL) {
-		ZEND_ASSERT((driver->driver_name != NULL) && "PDO driver name is null");
-		if (!create_driver_specific_pdo_object(driver, current_scope, new_zval_object)) {
-			RETURN_THROWS();
-		}
+	ZEND_ASSERT((driver->driver_name != NULL) && "PDO driver name is null");
 
+	if (!create_driver_specific_pdo_object(driver, called_scope, new_zval_object)) {
+		RETURN_THROWS();
+	}
+
+	if (new_zval_object) {
 		dbh = Z_PDO_DBH_P(new_zval_object);
 	} else {
-		dbh = php_pdo_dbh_fetch_inner(object);
+		dbh = php_pdo_dbh_fetch_inner(current_object);
 	}
 
 	/* is this supposed to be a persistent connection ? */
@@ -413,7 +437,7 @@ static void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zend_object *object
 		if (pdbh) {
 			efree(dbh);
 			/* switch over to the persistent one */
-			php_pdo_dbh_fetch_object(object)->inner = pdbh;
+			php_pdo_dbh_fetch_object(current_object)->inner = pdbh;
 			pdbh->refcount++;
 			dbh = pdbh;
 		}
@@ -497,14 +521,14 @@ options:
 /* {{{ */
 PHP_METHOD(PDO, __construct)
 {
-	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), EX(This).value.ce, NULL);
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), NULL);
 }
 /* }}} */
 
 /* {{{ */
 PHP_METHOD(PDO, connect)
 {
-	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), EX(This).value.ce, return_value);
+	php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, Z_CE_P(ZEND_THIS), return_value);
 }
 /* }}} */
 
