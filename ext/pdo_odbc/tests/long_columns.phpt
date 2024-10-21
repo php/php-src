@@ -4,10 +4,8 @@ PDO ODBC "long" columns
 pdo_odbc
 --SKIPIF--
 <?php
-// make sure there is an ODBC driver and a DSN, or the test will fail
-include 'ext/pdo/tests/pdo_test.inc';
-$config = PDOTest::get_config('ext/pdo_odbc/tests/common.phpt');
-if (!isset($config['ENV']['PDOTEST_DSN']) || $config['ENV']['PDOTEST_DSN']===false) print 'skip';
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+ODBCPDOTest::skip();
 ?>
 --FILE--
 <?php
@@ -42,13 +40,15 @@ if (!isset($config['ENV']['PDOTEST_DSN']) || $config['ENV']['PDOTEST_DSN']===fal
 // configure --disable-all --enable-cli --enable-pdo --with-pdo-odbc=unixODBC,/usr,/usr --with-unixODBC=/usr --enable-debug
 //
 
-require 'ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory('ext/pdo_odbc/tests/common.phpt');
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+$db = ODBCPDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-if (false === $db->exec('CREATE TABLE test_long_columns (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
-    if (false === $db->exec('CREATE TABLE test_long_columns (id INT NOT NULL PRIMARY KEY, data longtext)')) {
-        if (false === $db->exec('CREATE TABLE test_long_columns (id INT NOT NULL PRIMARY KEY, data varchar(4000))')) {
+$table_name = 'test_long_columns_pdo_odbc';
+
+if (false === $db->exec("CREATE TABLE {$table_name} (id INT NOT NULL PRIMARY KEY, data CLOB)")) {
+    if (false === $db->exec("CREATE TABLE {$table_name} (id INT NOT NULL PRIMARY KEY, data longtext)")) {
+        if (false === $db->exec("CREATE TABLE {$table_name} (id INT NOT NULL PRIMARY KEY, data varchar(4000))")) {
             die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
         }
     }
@@ -74,11 +74,11 @@ function alpha_repeat($len) {
 // this test does - nice to be able to test using MS SQL server
 foreach ($sizes as $num) {
     $text = alpha_repeat($num);
-    $db->exec("INSERT INTO test_long_columns VALUES($num, '$text')");
+    $db->exec("INSERT INTO {$table_name} VALUES($num, '$text')");
 }
 
 // verify data
-foreach ($db->query('SELECT id, data from test_long_columns ORDER BY LEN(data) ASC') as $row) {
+foreach ($db->query("SELECT id, data FROM {$table_name} ORDER BY LEN(data) ASC") as $row) {
     $expect = alpha_repeat($row[0]);
     if (strcmp($expect, $row[1])) {
         echo "Failed on size $row[id]:\n";
@@ -94,9 +94,9 @@ echo "Finished\n";
 ?>
 --CLEAN--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
-$db->exec("DROP TABLE IF EXISTS test_long_columns");
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+$db = ODBCPDOTest::factory();
+$db->exec("DROP TABLE IF EXISTS test_long_columns_pdo_odbc");
 ?>
 --EXPECT--
 Passed on size 32

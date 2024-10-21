@@ -4,13 +4,13 @@ Bug #44643 (bound parameters ignore explicit type definitions)
 pdo_odbc
 --SKIPIF--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+ODBCPDOTest::skip();
 ?>
 --FILE--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+$db = ODBCPDOTest::factory();
 $sql = "SELECT * FROM (SELECT 'test' = :id1) a WHERE a.test = :id2";
 $stmt = $db->prepare($sql);
 $id1 = 1;
