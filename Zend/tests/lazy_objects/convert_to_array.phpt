@@ -1,5 +1,5 @@
 --TEST--
-Lazy objects: Convertion to array
+Lazy objects: Conversion to array
 --FILE--
 <?php
 

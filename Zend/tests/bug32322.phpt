@@ -44,7 +44,7 @@ class test
         {
             echo "Class " . $this -> myname . " destroyed at script end\n";
         } else {
-            echo "Class " . $this -> myname . " destroyed beforce script end\n";
+            echo "Class " . $this -> myname . " destroyed before script end\n";
         }
     }
 }

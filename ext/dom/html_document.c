@@ -30,6 +30,7 @@
 #include <Zend/zend_smart_string.h>
 #include <lexbor/html/encoding.h>
 #include <lexbor/encoding/encoding.h>
+#include <lexbor/core/swar.h>
 
 /* Implementation defined, but as HTML5 defaults in all other cases to UTF-8, we'll do the same. */
 #define DOM_FALLBACK_ENCODING_ID LXB_ENCODING_UTF_8
@@ -104,9 +105,7 @@ zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retva
 
 static void dom_decoding_encoding_ctx_init(dom_decoding_encoding_ctx *ctx)
 {
-	ctx->encode_data = lxb_encoding_data(LXB_ENCODING_UTF_8);
-	ctx->decode_data = NULL;
-	/* Set fast path on by default so that the decoder finishing is skipped if this was never initialised properly. */
+	ctx->decode_data = ctx->encode_data = lxb_encoding_data(LXB_ENCODING_UTF_8);
 	ctx->fast_path = true;
 	(void) lxb_encoding_encode_init(
 		&ctx->encode,
@@ -115,6 +114,13 @@ static void dom_decoding_encoding_ctx_init(dom_decoding_encoding_ctx *ctx)
 		sizeof(ctx->encoding_output) / sizeof(*ctx->encoding_output)
 	);
 	(void) lxb_encoding_encode_replace_set(&ctx->encode, LXB_ENCODING_REPLACEMENT_BYTES, LXB_ENCODING_REPLACEMENT_SIZE);
+	(void) lxb_encoding_decode_init(
+		&ctx->decode,
+		ctx->decode_data,
+		ctx->codepoints,
+		sizeof(ctx->codepoints) / sizeof(*ctx->codepoints)
+	);
+	(void) lxb_encoding_decode_replace_set(&ctx->decode, LXB_ENCODING_REPLACEMENT_BUFFER, LXB_ENCODING_REPLACEMENT_BUFFER_LEN);
 }
 
 static const char *dom_lexbor_tokenizer_error_code_to_string(lxb_html_tokenizer_error_id_t id)
@@ -512,6 +518,30 @@ static bool dom_process_parse_chunk(
 	return true;
 }
 
+/* This seeks, using SWAR techniques, to the first non-ASCII byte in a UTF-8 input.
+ * Returns true if the entire input was consumed without encountering non-ASCII, false otherwise. */
+static zend_always_inline bool dom_seek_utf8_non_ascii(const lxb_char_t **data, const lxb_char_t *end)
+{
+	while (*data + sizeof(size_t) <= end) {
+		size_t bytes;
+		memcpy(&bytes, *data, sizeof(bytes));
+		/* If the top bit is set, it's not ASCII. */
+		if ((bytes & LEXBOR_SWAR_REPEAT(0x80)) != 0) {
+			return false;
+		}
+		*data += sizeof(size_t);
+	}
+
+	while (*data < end) {
+		if (**data & 0x80) {
+			return false;
+		}
+		(*data)++;
+	}
+
+	return true;
+}
+
 static bool dom_decode_encode_fast_path(
 	lexbor_libxml2_bridge_parse_context *ctx,
 	lxb_html_document_t *document,
@@ -523,17 +553,19 @@ static bool dom_decode_encode_fast_path(
 	size_t *tree_error_offset
 )
 {
+	decoding_encoding_ctx->decode.status = LXB_STATUS_OK;
+
 	const lxb_char_t *buf_ref = *buf_ref_ref;
 	const lxb_char_t *last_output = buf_ref;
 	while (buf_ref != buf_end) {
 		/* Fast path converts non-validated UTF-8 -> validated UTF-8 */
-		if (decoding_encoding_ctx->decode.u.utf_8.need == 0 && *buf_ref < 0x80) {
+		if (decoding_encoding_ctx->decode.u.utf_8.need == 0) {
 			/* Fast path within the fast path: try to skip non-mb bytes in bulk if we are not in a state where we
-			 * need more UTF-8 bytes to complete a sequence.
-			 * It might be tempting to use SIMD here, but it turns out that this is less efficient because
-			 * we need to process the same byte multiple times sometimes when mixing ASCII with multibyte. */
-			buf_ref++;
-			continue;
+			 * need more UTF-8 bytes to complete a sequence. */
+			if (dom_seek_utf8_non_ascii(&buf_ref, buf_end)) {
+				ZEND_ASSERT(buf_ref == buf_end);
+				break;
+			}
 		}
 		const lxb_char_t *buf_ref_backup = buf_ref;
 		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
@@ -551,6 +583,17 @@ static bool dom_decode_encode_fast_path(
 			)) {
 				goto fail_oom;
 			}
+
+			if (codepoint == LXB_ENCODING_DECODE_CONTINUE) {
+				ZEND_ASSERT(buf_ref == buf_end);
+				/* The decoder needs more data but the entire buffer is consumed.
+				 * All valid data is outputted, and if the remaining data for the code point
+				 * is invalid, the next call will output the replacement bytes. */
+				*buf_ref_ref = buf_ref;
+				decoding_encoding_ctx->decode.status = LXB_STATUS_CONTINUE;
+				return true;
+			}
+
 			if (!dom_process_parse_chunk(
 				ctx,
 				document,
@@ -563,6 +606,7 @@ static bool dom_decode_encode_fast_path(
 			)) {
 				goto fail_oom;
 			}
+
 			last_output = buf_ref;
 		}
 	}
@@ -676,29 +720,22 @@ static bool dom_parse_decode_encode_finish(
 	size_t *tree_error_offset
 )
 {
-	if (!decoding_encoding_ctx->fast_path) {
-		/* Fast path handles codepoints one by one, so this part is not applicable in that case */
-		(void) lxb_encoding_decode_finish(&decoding_encoding_ctx->decode);
-		size_t decoding_buffer_size = lxb_encoding_decode_buf_used(&decoding_encoding_ctx->decode);
-		if (decoding_buffer_size > 0) {
-			const lxb_codepoint_t *codepoints_ref = (const lxb_codepoint_t *) decoding_encoding_ctx->codepoints;
-			const lxb_codepoint_t *codepoints_end = codepoints_ref + decoding_buffer_size;
-			(void) decoding_encoding_ctx->encode_data->encode(&decoding_encoding_ctx->encode, &codepoints_ref, codepoints_end);
-			if (!dom_process_parse_chunk(
-				ctx,
-				document,
-				parser,
-				lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode),
-				decoding_encoding_ctx->encoding_output,
-				decoding_buffer_size,
-				tokenizer_error_offset,
-				tree_error_offset
-			)) {
-				return false;
-			}
-		}
+	lxb_status_t status;
+
+	status = lxb_encoding_decode_finish(&decoding_encoding_ctx->decode);
+	ZEND_ASSERT(status == LXB_STATUS_OK);
+
+	size_t decoding_buffer_size = lxb_encoding_decode_buf_used(&decoding_encoding_ctx->decode);
+	if (decoding_buffer_size > 0) {
+		const lxb_codepoint_t *codepoints_ref = (const lxb_codepoint_t *) decoding_encoding_ctx->codepoints;
+		const lxb_codepoint_t *codepoints_end = codepoints_ref + decoding_buffer_size;
+		status = decoding_encoding_ctx->encode_data->encode(&decoding_encoding_ctx->encode, &codepoints_ref, codepoints_end);
+		ZEND_ASSERT(status == LXB_STATUS_OK);
+		/* No need to produce output here, as we finish the encoder below and pass the chunk. */
 	}
-	(void) lxb_encoding_encode_finish(&decoding_encoding_ctx->encode);
+
+	status = lxb_encoding_encode_finish(&decoding_encoding_ctx->encode);
+	ZEND_ASSERT(status == LXB_STATUS_OK);
 	if (lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode)
 		&& !dom_process_parse_chunk(
 			ctx,

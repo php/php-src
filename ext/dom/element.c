@@ -361,7 +361,11 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	if (!php_dom_follow_spec_intern(intern)) {
 		for (xmlNsPtr nsptr = nodep->nsDef; nsptr; nsptr = nsptr->next) {
 			const char *prefix = (const char *) nsptr->prefix;
-			ZVAL_NEW_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+			if (prefix == NULL) {
+				ZVAL_STRING(&tmp, "xmlns");
+			} else {
+				ZVAL_NEW_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+			}
 			zend_hash_next_index_insert(ht, &tmp);
 		}
 	}
@@ -683,7 +687,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	dom_object *intern, *attrobj, *oldobj;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_get_node_ce(modern)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_get_attr_ce(modern)) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -730,9 +734,8 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 		xmlUnlinkNode((xmlNodePtr) attrp);
 	}
 
-	if (attrp->doc == NULL && nodep->doc != NULL) {
-		attrobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)attrobj, NULL);
+	if (attrp->doc == NULL && nodep->doc != NULL && intern->document != NULL) {
+		dom_set_document_ref_pointers_attr(attrp, intern->document);
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
@@ -812,7 +815,12 @@ static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, b
 	dom_object *intern, *namednode;
 	char *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &name, &name_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (name_len > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
 
@@ -1235,7 +1243,17 @@ static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS
 	dom_object *intern, *namednode;
 	char *uri, *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!p", &uri, &uri_len, &name, &name_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (uri_len > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
+	}
+
+	if (name_len > INT_MAX) {
+		zend_argument_value_error(2, "is too long");
 		RETURN_THROWS();
 	}
 
@@ -1743,7 +1761,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 			if (follow_spec) {
 				xmlSetNsProp(thisp, NULL, BAD_CAST qname, NULL);
 			} else {
-				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browers behaviour.
+				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browsers' behaviour.
 				* It follows the same rules when you'd manually add an attribute using the other APIs. */
 				int len;
 				const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);

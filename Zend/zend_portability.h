@@ -444,14 +444,6 @@ char *alloca();
 # define ZTS_V 0
 #endif
 
-#ifndef LONG_MAX
-# define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-# define LONG_MIN (- LONG_MAX - 1)
-#endif
-
 #define MAX_LENGTH_OF_DOUBLE 32
 
 #undef MIN

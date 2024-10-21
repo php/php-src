@@ -1,5 +1,5 @@
 --TEST--
-Bug #39297 (Memory corryption because of indirect modification of overloaded array)
+Bug #39297 (Memory corruption because of indirect modification of overloaded array)
 --FILE--
 <?php
 function compareByRef(&$first, &$second) {
@@ -18,15 +18,15 @@ class MyTree implements ArrayAccess {
 
     public function offsetSet($offset, $value): void {
         echo "offsetSet()\n";
-        $cannonicalName = strtolower($offset);
-        $this->children[$cannonicalName] = $value;
+        $canonicalName = strtolower($offset);
+        $this->children[$canonicalName] = $value;
         $value->parent = $this;
     }
 
     public function offsetGet($offset): mixed {
         echo "offsetGet()\n";
-        $cannonicalName = strtolower($offset);
-        return $this->children[$cannonicalName];
+        $canonicalName = strtolower($offset);
+        return $this->children[$canonicalName];
     }
 
 }

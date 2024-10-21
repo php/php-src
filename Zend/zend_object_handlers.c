@@ -32,6 +32,7 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_property_hooks.h"
+#include "zend_observer.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -828,8 +829,8 @@ try_again:
 
 		if (EXPECTED(cache_slot
 		 && zend_execute_ex == execute_ex
-		 && zobj->ce->default_object_handlers->read_property == zend_std_read_property
-		 && !zobj->ce->create_object
+		 && ce->default_object_handlers->read_property == zend_std_read_property
+		 && !ce->create_object
 		 && !zend_is_in_hook(prop_info)
 		 && !(prop_info->hooks[ZEND_PROPERTY_HOOK_GET]->common.fn_flags & ZEND_ACC_RETURN_REFERENCE))) {
 			ZEND_SET_PROPERTY_HOOK_SIMPLE_GET(cache_slot);
@@ -1183,13 +1184,21 @@ write_std_property:
 exit:
 	return variable_ptr;
 
-lazy_init:
+lazy_init:;
+	/* backup value as it may change during initialization */
+	zval backup;
+	ZVAL_COPY(&backup, value);
+
 	zobj = zend_lazy_object_init(zobj);
 	if (UNEXPECTED(!zobj)) {
 		variable_ptr = &EG(error_zval);
+		zval_ptr_dtor(&backup);
 		goto exit;
 	}
-	return zend_std_write_property(zobj, name, value, cache_slot);
+
+	variable_ptr = zend_std_write_property(zobj, name, &backup, cache_slot);
+	zval_ptr_dtor(&backup);
+	return variable_ptr;
 }
 /* }}} */
 
@@ -1619,7 +1628,8 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	 * value so that it doesn't contain garbage when the engine allocates space for the next stack
 	 * frame. This didn't cause any issues until now due to "lucky" structure layout. */
 	func->last_var = 0;
-	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
+	uint32_t min_T = 2 + ZEND_OBSERVER_ENABLED;
+	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, min_T) : min_T;
 	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : ZSTR_EMPTY_ALLOC();
 	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
 	func->line_end = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_end : 0;
@@ -2208,6 +2218,15 @@ found:
 		}
 	} else if (IS_HOOKED_PROPERTY_OFFSET(property_offset)) {
 		zend_function *get = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
+
+		if (has_set_exists == ZEND_PROPERTY_EXISTS) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				return true;
+			}
+			property_offset = prop_info->offset;
+			goto try_again;
+		}
+
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
 				zend_throw_error(NULL, "Property %s::$%s is write-only",
@@ -2219,19 +2238,12 @@ found:
 			}
 		}
 
-		if (has_set_exists == ZEND_PROPERTY_EXISTS) {
-			return 1;
-		}
-
 		zval rv;
 		if (!zend_call_get_hook(prop_info, name, get, zobj, &rv)) {
 			if (EG(exception)) {
 				return 0;
 			}
 			property_offset = prop_info->offset;
-			if (!ZEND_TYPE_IS_SET(prop_info->type)) {
-				prop_info = NULL;
-			}
 			goto try_again;
 		}
 

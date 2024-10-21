@@ -1109,30 +1109,6 @@ PHPAPI PHP_FUNCTION(fseek)
 }
 /* }}} */
 
-/* {{{ php_mkdir */
-
-/* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options)
-{
-	int ret;
-
-	if (php_check_open_basedir(dir)) {
-		return -1;
-	}
-
-	if ((ret = VCWD_MKDIR(dir, (mode_t)mode)) < 0 && (options & REPORT_ERRORS)) {
-		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-	}
-
-	return ret;
-}
-
-PHPAPI int php_mkdir(const char *dir, zend_long mode)
-{
-	return php_mkdir_ex(dir, mode, REPORT_ERRORS);
-}
-/* }}} */
-
 /* {{{ Create a directory */
 PHP_FUNCTION(mkdir)
 {
@@ -1677,6 +1653,28 @@ quit_loop:
 }
 /* }}} */
 
+PHPAPI int php_csv_handle_escape_argument(const zend_string *escape_str, uint32_t arg_num)
+{
+	if (escape_str != NULL) {
+		if (ZSTR_LEN(escape_str) > 1) {
+			zend_argument_value_error(arg_num, "must be empty or a single character");
+			return PHP_CSV_ESCAPE_ERROR;
+		}
+		if (ZSTR_LEN(escape_str) < 1) {
+			return PHP_CSV_NO_ESCAPE;
+		} else {
+			/* use first character from string */
+			return (unsigned char) ZSTR_VAL(escape_str)[0];
+		}
+	} else {
+		php_error_docref(NULL, E_DEPRECATED, "the $escape parameter must be provided as its default value will change");
+		if (UNEXPECTED(EG(exception))) {
+			return PHP_CSV_ESCAPE_ERROR;
+		}
+		return (unsigned char) '\\';
+	}
+}
+
 #define FPUTCSV_FLD_CHK(c) memchr(ZSTR_VAL(field_str), c, ZSTR_LEN(field_str))
 
 /* {{{ Format line as CSV and write to file pointer */
@@ -1684,12 +1682,12 @@ PHP_FUNCTION(fputcsv)
 {
 	char delimiter = ',';					/* allow this to be set as parameter */
 	char enclosure = '"';					/* allow this to be set as parameter */
-	int escape_char = (unsigned char) '\\';	/* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
 	ssize_t ret;
-	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
-	size_t delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
+	char *delimiter_str = NULL, *enclosure_str = NULL;
+	zend_string *escape_str = NULL;
+	size_t delimiter_str_len = 0, enclosure_str_len = 0;
 	zend_string *eol_str = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 6)
@@ -1698,7 +1696,7 @@ PHP_FUNCTION(fputcsv)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(delimiter_str, delimiter_str_len)
 		Z_PARAM_STRING(enclosure_str, enclosure_str_len)
-		Z_PARAM_STRING(escape_str, escape_str_len)
+		Z_PARAM_STR(escape_str)
 		Z_PARAM_STR_OR_NULL(eol_str)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1722,21 +1720,9 @@ PHP_FUNCTION(fputcsv)
 		enclosure = *enclosure_str;
 	}
 
-	if (escape_str != NULL) {
-		if (escape_str_len > 1) {
-			zend_argument_value_error(5, "must be empty or a single character");
-			RETURN_THROWS();
-		}
-		if (escape_str_len < 1) {
-			escape_char = PHP_CSV_NO_ESCAPE;
-		} else {
-			php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
-			if (UNEXPECTED(EG(exception))) {
-				RETURN_THROWS();
-			}
-			/* use first character from string */
-			escape_char = (unsigned char) *escape_str;
-		}
+	int escape_char = php_csv_handle_escape_argument(escape_str, 5);
+	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
+		RETURN_THROWS();
 	}
 
 	PHP_STREAM_FROM_ZVAL(stream, fp);
@@ -1819,79 +1805,63 @@ PHP_FUNCTION(fgetcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
-	int escape = (unsigned char) '\\';
 
 	zend_long len = 0;
 	size_t buf_len;
 	char *buf;
 	php_stream *stream;
 
-	{
-		zval *fd;
-		bool len_is_null = 1;
-		char *delimiter_str = NULL;
-		size_t delimiter_str_len = 0;
-		char *enclosure_str = NULL;
-		size_t enclosure_str_len = 0;
-		char *escape_str = NULL;
-		size_t escape_str_len = 0;
+	zval *fd;
+	bool len_is_null = 1;
+	char *delimiter_str = NULL;
+	size_t delimiter_str_len = 0;
+	char *enclosure_str = NULL;
+	size_t enclosure_str_len = 0;
+	zend_string *escape_str = NULL;
 
-		ZEND_PARSE_PARAMETERS_START(1, 5)
-			Z_PARAM_RESOURCE(fd)
-			Z_PARAM_OPTIONAL
-			Z_PARAM_LONG_OR_NULL(len, len_is_null)
-			Z_PARAM_STRING(delimiter_str, delimiter_str_len)
-			Z_PARAM_STRING(enclosure_str, enclosure_str_len)
-			Z_PARAM_STRING(escape_str, escape_str_len)
-		ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_START(1, 5)
+		Z_PARAM_RESOURCE(fd)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(len, len_is_null)
+		Z_PARAM_STRING(delimiter_str, delimiter_str_len)
+		Z_PARAM_STRING(enclosure_str, enclosure_str_len)
+		Z_PARAM_STR(escape_str)
+	ZEND_PARSE_PARAMETERS_END();
 
-		if (delimiter_str != NULL) {
-			/* Make sure that there is at least one character in string */
-			if (delimiter_str_len != 1) {
-				zend_argument_value_error(3, "must be a single character");
-				RETURN_THROWS();
-			}
-
-			/* use first character from string */
-			delimiter = delimiter_str[0];
-		}
-
-		if (enclosure_str != NULL) {
-			if (enclosure_str_len != 1) {
-				zend_argument_value_error(4, "must be a single character");
-				RETURN_THROWS();
-			}
-
-			/* use first character from string */
-			enclosure = enclosure_str[0];
-		}
-
-		if (escape_str != NULL) {
-			if (escape_str_len > 1) {
-				zend_argument_value_error(5, "must be empty or a single character");
-				RETURN_THROWS();
-			}
-
-			if (escape_str_len < 1) {
-				escape = PHP_CSV_NO_ESCAPE;
-			} else {
-				php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
-				if (UNEXPECTED(EG(exception))) {
-					RETURN_THROWS();
-				}
-				escape = (unsigned char) escape_str[0];
-			}
-		}
-
-		if (len_is_null || len == 0) {
-			len = -1;
-		} else if (len < 0 || len > (ZEND_LONG_MAX - 1)) {
-			zend_argument_value_error(2, "must be between 0 and " ZEND_LONG_FMT, (ZEND_LONG_MAX - 1));
+	if (delimiter_str != NULL) {
+		/* Make sure that there is at least one character in string */
+		if (delimiter_str_len != 1) {
+			zend_argument_value_error(3, "must be a single character");
 			RETURN_THROWS();
 		}
 
-		PHP_STREAM_FROM_ZVAL(stream, fd);
+		/* use first character from string */
+		delimiter = delimiter_str[0];
 	}
+
+	if (enclosure_str != NULL) {
+		if (enclosure_str_len != 1) {
+			zend_argument_value_error(4, "must be a single character");
+			RETURN_THROWS();
+		}
+
+		/* use first character from string */
+		enclosure = enclosure_str[0];
+	}
+
+	int escape_char = php_csv_handle_escape_argument(escape_str, 5);
+	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
+		RETURN_THROWS();
+	}
+
+	if (len_is_null || len == 0) {
+		len = -1;
+	} else if (len < 0 || len > (ZEND_LONG_MAX - 1)) {
+		zend_argument_value_error(2, "must be between 0 and " ZEND_LONG_FMT, (ZEND_LONG_MAX - 1));
+		RETURN_THROWS();
+	}
+
+	PHP_STREAM_FROM_ZVAL(stream, fd);
 
 	if (len < 0) {
 		if ((buf = php_stream_get_line(stream, NULL, 0, &buf_len)) == NULL) {
@@ -1905,7 +1875,7 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 
-	HashTable *values = php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf);
+	HashTable *values = php_fgetcsv(stream, delimiter, enclosure, escape_char, buf_len, buf);
 	if (values == NULL) {
 		values = php_bc_fgetcsv_empty_line();
 	}

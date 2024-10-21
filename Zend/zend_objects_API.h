@@ -96,8 +96,21 @@ static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_en
 	return obj;
 }
 
+/* Use when 'slot' was obtained directly from obj->properties_table, or when
+ * 'obj' can not be lazy. Otherwise, use zend_get_property_info_for_slot(). */
+static inline zend_property_info *zend_get_property_info_for_slot_self(zend_object *obj, zval *slot)
+{
+	zend_property_info **table = obj->ce->properties_info_table;
+	intptr_t prop_num = slot - obj->properties_table;
+	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);
+	return table[prop_num];
+}
+
 static inline zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
 {
+	if (UNEXPECTED(zend_object_is_lazy_proxy(obj))) {
+		return zend_lazy_object_get_property_info_for_slot(obj, slot);
+	}
 	zend_property_info **table = obj->ce->properties_info_table;
 	intptr_t prop_num = slot - obj->properties_table;
 	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);

@@ -1369,10 +1369,6 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 				error_type_str = "Notice";
 				syslog_type_int = LOG_NOTICE;
 				break;
-			case E_STRICT:
-				error_type_str = "Strict Standards";
-				syslog_type_int = LOG_INFO;
-				break;
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 				error_type_str = "Deprecated";
@@ -2316,6 +2312,9 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	/* freeze the list of observer fcall_init handlers */
 	zend_observer_post_startup();
 
+	/* freeze the list of persistent internal functions */
+	zend_init_internal_run_time_cache();
+
 	/* Extensions that add engine hooks after this point do so at their own peril */
 	zend_finalize_system_id();
 
@@ -2681,7 +2680,9 @@ PHPAPI int php_handle_auth_data(const char *auth)
 			if (pass) {
 				*pass++ = '\0';
 				SG(request_info).auth_user = estrndup(ZSTR_VAL(user), ZSTR_LEN(user));
-				SG(request_info).auth_password = estrdup(pass);
+				if (strlen(pass) > 0) {
+					SG(request_info).auth_password = estrdup(pass);
+				}
 				ret = 0;
 			}
 			zend_string_free(user);

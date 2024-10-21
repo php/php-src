@@ -146,14 +146,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_EnchantBroker_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_EnchantDictionary_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_enchant_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_PERSISTENT | CONST_DEPRECATED);
@@ -163,7 +155,7 @@ static void register_enchant_symbols(int module_number)
 #endif
 
 
-	zend_attribute *attribute_Deprecated_func_enchant_broker_free_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_broker_free", sizeof("enchant_broker_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_enchant_broker_free_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_broker_free", sizeof("enchant_broker_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_enchant_broker_free_0_arg0;
 	zend_string *attribute_Deprecated_func_enchant_broker_free_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_enchant_broker_free_0_arg0, attribute_Deprecated_func_enchant_broker_free_0_arg0_str);
@@ -175,21 +167,21 @@ static void register_enchant_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_enchant_broker_free_0->args[1].value, &attribute_Deprecated_func_enchant_broker_free_0_arg1);
 	attribute_Deprecated_func_enchant_broker_free_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_enchant_broker_set_dict_path_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_broker_set_dict_path", sizeof("enchant_broker_set_dict_path") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zend_attribute *attribute_Deprecated_func_enchant_broker_set_dict_path_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_broker_set_dict_path", sizeof("enchant_broker_set_dict_path") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	zval attribute_Deprecated_func_enchant_broker_set_dict_path_0_arg0;
 	zend_string *attribute_Deprecated_func_enchant_broker_set_dict_path_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_enchant_broker_set_dict_path_0_arg0, attribute_Deprecated_func_enchant_broker_set_dict_path_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_enchant_broker_set_dict_path_0->args[0].value, &attribute_Deprecated_func_enchant_broker_set_dict_path_0_arg0);
 	attribute_Deprecated_func_enchant_broker_set_dict_path_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
-	zend_attribute *attribute_Deprecated_func_enchant_broker_get_dict_path_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_broker_get_dict_path", sizeof("enchant_broker_get_dict_path") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zend_attribute *attribute_Deprecated_func_enchant_broker_get_dict_path_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_broker_get_dict_path", sizeof("enchant_broker_get_dict_path") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	zval attribute_Deprecated_func_enchant_broker_get_dict_path_0_arg0;
 	zend_string *attribute_Deprecated_func_enchant_broker_get_dict_path_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_enchant_broker_get_dict_path_0_arg0, attribute_Deprecated_func_enchant_broker_get_dict_path_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_enchant_broker_get_dict_path_0->args[0].value, &attribute_Deprecated_func_enchant_broker_get_dict_path_0_arg0);
 	attribute_Deprecated_func_enchant_broker_get_dict_path_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
-	zend_attribute *attribute_Deprecated_func_enchant_broker_free_dict_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_broker_free_dict", sizeof("enchant_broker_free_dict") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_enchant_broker_free_dict_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_broker_free_dict", sizeof("enchant_broker_free_dict") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_enchant_broker_free_dict_0_arg0;
 	zend_string *attribute_Deprecated_func_enchant_broker_free_dict_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_enchant_broker_free_dict_0_arg0, attribute_Deprecated_func_enchant_broker_free_dict_0_arg0_str);
@@ -201,7 +193,7 @@ static void register_enchant_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_enchant_broker_free_dict_0->args[1].value, &attribute_Deprecated_func_enchant_broker_free_dict_0_arg1);
 	attribute_Deprecated_func_enchant_broker_free_dict_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_enchant_dict_add_to_personal_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_dict_add_to_personal", sizeof("enchant_dict_add_to_personal") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_enchant_dict_add_to_personal_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_dict_add_to_personal", sizeof("enchant_dict_add_to_personal") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_enchant_dict_add_to_personal_0_arg0;
 	zend_string *attribute_Deprecated_func_enchant_dict_add_to_personal_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_enchant_dict_add_to_personal_0_arg0, attribute_Deprecated_func_enchant_dict_add_to_personal_0_arg0_str);
@@ -213,7 +205,7 @@ static void register_enchant_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_enchant_dict_add_to_personal_0->args[1].value, &attribute_Deprecated_func_enchant_dict_add_to_personal_0_arg1);
 	attribute_Deprecated_func_enchant_dict_add_to_personal_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_enchant_dict_is_in_session_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_dict_is_in_session", sizeof("enchant_dict_is_in_session") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_enchant_dict_is_in_session_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "enchant_dict_is_in_session", sizeof("enchant_dict_is_in_session") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_enchant_dict_is_in_session_0_arg0;
 	zend_string *attribute_Deprecated_func_enchant_dict_is_in_session_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_enchant_dict_is_in_session_0_arg0, attribute_Deprecated_func_enchant_dict_is_in_session_0_arg0_str);
@@ -230,7 +222,7 @@ static zend_class_entry *register_class_EnchantBroker(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "EnchantBroker", class_EnchantBroker_methods);
+	INIT_CLASS_ENTRY(ce, "EnchantBroker", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -240,7 +232,7 @@ static zend_class_entry *register_class_EnchantDictionary(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "EnchantDictionary", class_EnchantDictionary_methods);
+	INIT_CLASS_ENTRY(ce, "EnchantDictionary", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

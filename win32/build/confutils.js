@@ -50,7 +50,7 @@ var PHP_MAKEFILE_FRAGMENTS = PHP_SRC_DIR + "\\Makefile.fragments.w32";
 
 /* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in
    and manifest. */
-var WINVER = "0x0601"; /* 7/2008r2 */
+var WINVER = "0x0602"; /* 8/2012 */
 
 // There's a minimum requirement for bison.
 var MINBISON = "3.0.0";
@@ -95,10 +95,10 @@ if (typeof(CWD) == "undefined") {
 if (!MODE_PHPIZE) {
 	/* defaults; we pick up the precise versions from configure.ac */
 	var PHP_VERSION = 8;
-	var PHP_MINOR_VERSION = 4;
+	var PHP_MINOR_VERSION = 5;
 	var PHP_RELEASE_VERSION = 0;
 	var PHP_EXTRA_VERSION = "";
-	var PHP_VERSION_STRING = "8.4.0";
+	var PHP_VERSION_STRING = "8.5.0";
 }
 
 /* Get version numbers and DEFINE as a string */
@@ -108,9 +108,9 @@ function get_version_numbers()
 	var regex = /AC_INIT.+(\d+)\.(\d+)\.(\d+)([^\,^\]]*).+/g;
 
 	if (cin.match(new RegExp(regex))) {
-		PHP_VERSION = RegExp.$1;
-		PHP_MINOR_VERSION = RegExp.$2;
-		PHP_RELEASE_VERSION = RegExp.$3;
+		PHP_VERSION = +RegExp.$1;
+		PHP_MINOR_VERSION = +RegExp.$2;
+		PHP_RELEASE_VERSION = +RegExp.$3;
 		PHP_EXTRA_VERSION = RegExp.$4;
 	}
 
@@ -456,7 +456,7 @@ can be built that way. \
 	var snapshot_build_exclusions = new Array(
 		'debug', 'lzf-better-compression', 'php-build', 'snapshot-template', 'zts',
 		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer',
-		'phpdbg-debug'
+		'phpdbg-debug', 'openssl-legacy-provider'
 	);
 	var force;
 
@@ -965,14 +965,19 @@ function GREP_HEADER(header_name, regex, path_to_check)
 
 	if (!c) {
 		/* look in the include path */
+		if (path_to_check == null) {
+			path_to_check = php_usual_include_suspects;
+		} else {
+			path_to_check += ";" + php_usual_include_suspects;
+		}
 
 		var p = search_paths(header_name, path_to_check, "INCLUDE");
 		if (typeof(p) == "string") {
-			c = file_get_contents(p);
+			c = file_get_contents(p + "\\" + header_name);
 		} else if (p == false) {
 			p = search_paths(header_name, PHP_EXTRA_INCLUDES, null);
 			if (typeof(p) == "string") {
-				c = file_get_contents(p);
+				c = file_get_contents(p + "\\" + header_name);
 			}
 		}
 		if (!c) {
@@ -2014,7 +2019,7 @@ function generate_tmp_php_ini()
 		var INI = FSO.CreateTextFile(PHP_TEST_INI_PATH, true);
 	}
 
-	var ext_list = PHP_TEST_INI_EXT_EXCLUDE.split(",");
+	var ext_list = ("dl_test," + PHP_TEST_INI_EXT_EXCLUDE).split(",");
 	INI.WriteLine("extension_dir=" + ini_dir);
 	for (var i in extensions_enabled) {
 		if ("shared" != extensions_enabled[i][1]) {
@@ -2096,7 +2101,9 @@ function generate_files()
 
 	if (INVALID_CONFIG_ARGS.length) {
 		STDOUT.WriteLine('WARNING');
-		STDOUT.WriteLine('The following arguments is invalid, and therefore ignored:');
+		STDOUT.WriteLine('The following ' +
+			(INVALID_CONFIG_ARGS.length > 1 ? 'arguments are' : 'argument is') +
+			' invalid, and therefore ignored:');
 
 		for (var i = 0; i < INVALID_CONFIG_ARGS.length; ++i) {
 			STDOUT.WriteLine(' ' + INVALID_CONFIG_ARGS[i]);
@@ -2891,9 +2898,6 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 // and you can then build everything, ignoring fatal errors within a module
 // by running "nmake snap"
 PHP_SNAPSHOT_BUILD = "no";
-if (!MODE_PHPIZE) {
-	ARG_ENABLE('snapshot-build', 'Build a snapshot; turns on everything it can and ignores build errors', 'no');
-}
 
 function toolset_option_handle()
 {
@@ -3419,13 +3423,13 @@ function toolset_setup_common_ldlags()
 function toolset_setup_common_libs()
 {
 	// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
-	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib");
+	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib Pathcch.lib");
 }
 
 function toolset_setup_build_mode()
 {
 	if (PHP_DEBUG == "yes") {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /D _DEBUG /D ZEND_DEBUG=1 " +
+		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /D ZEND_DEBUG=1 " +
 			(TARGET_ARCH == 'x86'?"/ZI":"/Zi"));
 		ADD_FLAG("LDFLAGS", "/debug");
 		// Avoid problems when linking to release libraries that use the release
@@ -3758,10 +3762,4 @@ function setup_verbosity()
 		CMD_MOD1 = "@";
 		CMD_MOD2 = "@";
 	}
-}
-
-try {
-	ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');
-} catch (e) {
-	STDOUT.WriteLine("problem: " + e);
 }

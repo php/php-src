@@ -4037,7 +4037,6 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				}
 
 				ZEND_ASSERT(!Z_ISREF_P(dest_entry) || Z_REFCOUNT_P(dest_entry) > 1);
-				SEPARATE_ZVAL(dest_entry);
 				dest_zval = dest_entry;
 
 				if (Z_TYPE_P(dest_zval) == IS_NULL) {
@@ -4046,6 +4045,8 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				} else {
 					convert_to_array(dest_zval);
 				}
+				SEPARATE_ZVAL(dest_zval);
+
 				ZVAL_UNDEF(&tmp);
 				if (Z_TYPE_P(src_zval) == IS_OBJECT) {
 					ZVAL_COPY(&tmp, src_zval);
@@ -6628,7 +6629,7 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 
 			if (retval_true) {
 				if (result_value != NULL) {
-					ZVAL_COPY(result_value, &args[0]);
+					ZVAL_COPY_DEREF(result_value, &args[0]);
 				}
 
 				if (result_key != NULL) {

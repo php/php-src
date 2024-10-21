@@ -1234,7 +1234,7 @@ namespace
     }
 #endif
 
-    function dom_import_simplexml(object $node): DOMElement {}
+    function dom_import_simplexml(object $node): DOMAttr|DOMElement {}
 }
 
 namespace Dom
@@ -1687,6 +1687,9 @@ namespace Dom
 
         /** @virtual */
         public string $innerHTML;
+
+        /** @virtual */
+        public string $outerHTML;
 
         /** @virtual */
         public string $substitutedNodeValue;
@@ -2168,5 +2171,5 @@ namespace Dom
     }
 #endif
 
-    function import_simplexml(object $node): Element {}
+    function import_simplexml(object $node): Attr|Element {}
 }

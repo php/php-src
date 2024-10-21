@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::get{Get,Set}() inheritance
+ReflectionClass::getHook() inheritance
 --FILE--
 <?php
 

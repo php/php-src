@@ -22,7 +22,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20230901
+#define PHP_API_VERSION 20240925
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -224,14 +224,6 @@ typedef unsigned int socklen_t;
 #endif
 
 #include <limits.h>
-
-#ifndef LONG_MAX
-#define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-#define LONG_MIN (- LONG_MAX - 1)
-#endif
 
 #ifndef INT_MAX
 #define INT_MAX 2147483647

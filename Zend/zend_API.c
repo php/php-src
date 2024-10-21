@@ -1879,7 +1879,6 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
 			ZEND_ASSERT(arg_name != NULL);
 			zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
-			zend_string_release(arg_name);
 			/* Do not call destructor, free object, and set arg to IS_UNDEF */
 			zend_object_store_ctor_failed(obj);
 			zval_ptr_dtor(arg);
@@ -2958,7 +2957,11 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
 			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 		} else {
-			ZEND_MAP_PTR_NEW(internal_function->run_time_cache);
+#ifdef ZTS
+			ZEND_MAP_PTR_NEW_STATIC(internal_function->run_time_cache);
+#else
+			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, NULL);
+#endif
 		}
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
@@ -3567,7 +3570,7 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		zend_str_tolower_copy(ZSTR_VAL(lcname), name, name_len);
 	}
 
-	zend_assert_valid_class_name(lcname);
+	zend_assert_valid_class_name(lcname, "a class alias");
 
 	lcname = zend_new_interned_string(lcname);
 

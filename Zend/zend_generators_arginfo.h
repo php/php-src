@@ -50,10 +50,6 @@ static const zend_function_entry class_Generator_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_ClosedGeneratorException_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_Generator(zend_class_entry *class_entry_Iterator)
 {
 	zend_class_entry ce, *class_entry;
@@ -69,7 +65,7 @@ static zend_class_entry *register_class_ClosedGeneratorException(zend_class_entr
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", class_ClosedGeneratorException_methods);
+	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;

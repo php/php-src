@@ -156,10 +156,6 @@ static const zend_function_entry class_SimpleXMLElement_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_SimpleXMLIterator_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_SimpleXMLElement(zend_class_entry *class_entry_Stringable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_RecursiveIterator)
 {
 	zend_class_entry ce, *class_entry;
@@ -175,7 +171,7 @@ static zend_class_entry *register_class_SimpleXMLIterator(zend_class_entry *clas
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SimpleXMLIterator", class_SimpleXMLIterator_methods);
+	INIT_CLASS_ENTRY(ce, "SimpleXMLIterator", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SimpleXMLElement, 0);
 
 	return class_entry;

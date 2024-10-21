@@ -68,6 +68,7 @@ typedef struct {
 	zend_fcall_info_cache progress;
 	zend_fcall_info_cache xferinfo;
 	zend_fcall_info_cache fnmatch;
+	zend_fcall_info_cache debug;
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
 	zend_fcall_info_cache prereq;
 #endif
@@ -88,7 +89,7 @@ struct _php_curl_send_headers {
 struct _php_curl_free {
 	zend_llist post;
 	zend_llist stream;
-	HashTable *slist;
+	HashTable slist;
 };
 
 typedef struct {

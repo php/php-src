@@ -1,5 +1,5 @@
 --TEST--
-Dtor may throw exception furing FE_FETCH assignment
+Dtor may throw exception during FE_FETCH assignment
 --FILE--
 <?php
 

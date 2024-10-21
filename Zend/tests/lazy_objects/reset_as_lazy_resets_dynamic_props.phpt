@@ -47,7 +47,7 @@ var_dump($obj);
 --EXPECTF--
 # Ghost:
 string(18) "Canary::__destruct"
-lazy ghost object(C)#%d (0) {
+lazy ghost object(C)#%d (%d) {
 }
 string(11) "initializer"
 object(Canary)#%d (0) {
@@ -62,7 +62,7 @@ object(C)#%d (2) {
 # Proxy:
 string(18) "Canary::__destruct"
 string(18) "Canary::__destruct"
-lazy proxy object(C)#%d (0) {
+lazy proxy object(C)#%d (%d) {
 }
 string(11) "initializer"
 object(Canary)#%d (0) {

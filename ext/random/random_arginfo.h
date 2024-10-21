@@ -207,10 +207,6 @@ static const zend_function_entry class_Random_Engine_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Random_CryptoSafeEngine_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, __construct, arginfo_class_Random_Randomizer___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, nextInt, arginfo_class_Random_Randomizer_nextInt, ZEND_ACC_PUBLIC)
@@ -227,29 +223,13 @@ static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Random_IntervalBoundary_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_RandomError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_BrokenRandomEngineError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_RandomException_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_random_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_PERSISTENT | CONST_DEPRECATED);
 
 
-	zend_attribute *attribute_Deprecated_func_lcg_value_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "lcg_value", sizeof("lcg_value") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_lcg_value_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "lcg_value", sizeof("lcg_value") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_lcg_value_0_arg0;
 	zend_string *attribute_Deprecated_func_lcg_value_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0_arg0, attribute_Deprecated_func_lcg_value_0_arg0_str);
@@ -320,7 +300,7 @@ static zend_class_entry *register_class_Random_CryptoSafeEngine(zend_class_entry
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "CryptoSafeEngine", class_Random_CryptoSafeEngine_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "CryptoSafeEngine", NULL);
 	class_entry = zend_register_internal_interface(&ce);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
@@ -346,7 +326,7 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 
 static zend_class_entry *register_class_Random_IntervalBoundary(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, class_Random_IntervalBoundary_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, NULL);
 
 	zend_enum_add_case_cstr(class_entry, "ClosedOpen", NULL);
 
@@ -363,7 +343,7 @@ static zend_class_entry *register_class_Random_RandomError(zend_class_entry *cla
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", class_Random_RandomError_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -373,7 +353,7 @@ static zend_class_entry *register_class_Random_BrokenRandomEngineError(zend_clas
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", class_Random_BrokenRandomEngineError_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Random_RandomError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -383,7 +363,7 @@ static zend_class_entry *register_class_Random_RandomException(zend_class_entry 
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", class_Random_RandomException_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;

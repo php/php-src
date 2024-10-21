@@ -324,13 +324,9 @@ STDOUT.WriteBlankLines(1);
 /* Can we build with IPv6 support? */
 ARG_ENABLE("ipv6", "Disable IPv6 support (default is turn it on if available)", "yes");
 
-var main_network_has_ipv6 = 0;
+AC_DEFINE('HAVE_GAI_STRERROR', 1);
 if (PHP_IPV6 == "yes") {
-	main_network_has_ipv6 = CHECK_HEADER_ADD_INCLUDE("wspiapi.h", "CFLAGS") ? 1 : 0;
-}
-if (main_network_has_ipv6) {
 	STDOUT.WriteLine("Enabling IPv6 support");
-	AC_DEFINE('HAVE_GAI_STRERROR', 1);
 	AC_DEFINE('HAVE_IPV6', 1);
 }
 
@@ -359,15 +355,15 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
+ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
+ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 if (CLANG_TOOLSET) {
-	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
 		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
 		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +
 		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
 	}
 
-	ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 500) {
 			ERROR("Clang at least 5.0.0 required for sanitation plugins");
@@ -400,3 +396,7 @@ ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations
 	might not work properly, if the chosen instruction sets are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
+
+ARG_ENABLE('snapshot-build', 'Build a snapshot: turns on everything it can and ignores build errors', 'no');
+
+ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');

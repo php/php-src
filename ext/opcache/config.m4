@@ -26,7 +26,7 @@ PHP_ARG_WITH([capstone],
   [no])
 
 if test "$PHP_OPCACHE" != "no"; then
-  dnl Always build as shared extension
+  dnl Always build as shared extension.
   ext_shared=yes
 
   AS_VAR_IF([PHP_HUGE_CODE_PAGES], [yes],
@@ -313,15 +313,15 @@ int main(void) {
       [php_cv_shm_mmap_posix=no],
       [php_cv_shm_mmap_posix=no])
     ])
-
-    AS_VAR_IF([php_cv_shm_mmap_posix], [yes], [
-      AS_VAR_IF([ac_cv_search_shm_open], ["none required"],,
-        [OPCACHE_SHARED_LIBADD="$OPCACHE_SHARED_LIBADD $ac_cv_search_shm_open"])
-      AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
-        [Define to 1 if you have the POSIX mmap() SHM support.])
-    ])
   ])
   LIBS=$LIBS_save
+
+  AS_VAR_IF([php_cv_shm_mmap_posix], [yes], [
+    AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
+      [Define to 1 if you have the POSIX mmap() SHM support.])
+    AS_CASE([$ac_cv_search_shm_open], ["none required"|no], [],
+      [PHP_EVAL_LIBLINE([$ac_cv_search_shm_open], [OPCACHE_SHARED_LIBADD])])
+  ])
 
   PHP_NEW_EXTENSION([opcache], m4_normalize([
       shared_alloc_mmap.c
@@ -339,7 +339,7 @@ int main(void) {
       ZendAccelerator.c
       $ZEND_JIT_SRC
     ]),
-    [shared],,
+    [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $JIT_CFLAGS],,
     [yes])
 

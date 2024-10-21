@@ -1524,11 +1524,13 @@ static X509 *php_openssl_x509_from_zval(
 
 	*free_cert = 1;
 
-	if (!try_convert_to_string(val)) {
+	zend_string *str = zval_try_get_string(val);
+	if (str == NULL) {
 		return NULL;
 	}
-
-	return php_openssl_x509_from_str(Z_STR_P(val), arg_num, is_from_array, option_name);
+	X509 *cert = php_openssl_x509_from_str(str, arg_num, is_from_array, option_name);
+	zend_string_release(str);
+	return cert;
 }
 /* }}} */
 
@@ -3279,6 +3281,11 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
+	if (num_days < 0 || num_days > LONG_MAX / 86400) {
+		php_error_docref(NULL, E_WARNING, "Days must be between 0 and %ld", LONG_MAX / 86400);
+		goto cleanup;
+	}
+
 	if (PHP_SSL_REQ_PARSE(&req, args) == FAILURE) {
 		goto cleanup;
 	}
@@ -3347,7 +3354,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 	X509_gmtime_adj(X509_getm_notBefore(new_cert), 0);
-	X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*(long)num_days);
+	X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days);
 	i = X509_set_pubkey(new_cert, key);
 	if (!i) {
 		php_openssl_store_errors();

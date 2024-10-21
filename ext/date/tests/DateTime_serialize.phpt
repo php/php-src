@@ -12,7 +12,7 @@ var_dump($serialized);
 
 $date2 = unserialize($serialized);
 var_dump($date2);
-// Try to use unserialzied object
+// Try to use unserialized object
 var_dump( $date2->format( "F j, Y, g:i a") );
 
 ?>

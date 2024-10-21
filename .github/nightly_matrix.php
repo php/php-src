@@ -1,7 +1,8 @@
 <?php
 
 const BRANCHES = [
-    ['name' => 'master', 'ref' => 'master', 'version' => ['major' => 8, 'minor' => 4]],
+    ['name' => 'master', 'ref' => 'master', 'version' => ['major' => 8, 'minor' => 5]],
+    ['name' => 'PHP-8.4', 'ref' => 'PHP-8.4', 'version' => ['major' => 8, 'minor' => 4]],
     ['name' => 'PHP-8.3', 'ref' => 'PHP-8.3', 'version' => ['major' => 8, 'minor' => 3]],
     ['name' => 'PHP-8.2', 'ref' => 'PHP-8.2', 'version' => ['major' => 8, 'minor' => 2]],
     ['name' => 'PHP-8.1', 'ref' => 'PHP-8.1', 'version' => ['major' => 8, 'minor' => 1]],
@@ -101,7 +102,7 @@ function get_macos_matrix_include(array $branches) {
                     'branch' => $branch,
                     'debug' => $debug,
                     'zts' => $zts,
-                    'os' => $branch['name'] === 'master' ? '13' : '12',
+                    'os' => in_array($branch['name'], ['master', 'PHP-8.4'], true) ? '13' : '12',
                     'arch' => 'X64',
                     'test_jit' => true,
                 ];

@@ -968,9 +968,9 @@ static int sapi_cgi_deactivate(void)
 	return SUCCESS;
 }
 
-static int php_cgi_startup(sapi_module_struct *sapi_module)
+static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 {
-	return php_module_startup(sapi_module, &cgi_module_entry);
+	return php_module_startup(sapi_module_ptr, &cgi_module_entry);
 }
 
 /* {{{ sapi_module_struct cgi_sapi_module */
@@ -1518,23 +1518,23 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor */
-static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
+static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals_ptr)
 {
 #if defined(ZTS) && defined(PHP_WIN32)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	php_cgi_globals->rfc2616_headers = 0;
-	php_cgi_globals->nph = 0;
-	php_cgi_globals->check_shebang_line = 1;
-	php_cgi_globals->force_redirect = 1;
-	php_cgi_globals->redirect_status_env = NULL;
-	php_cgi_globals->fix_pathinfo = 1;
-	php_cgi_globals->discard_path = 0;
-	php_cgi_globals->fcgi_logging = 1;
+	php_cgi_globals_ptr->rfc2616_headers = 0;
+	php_cgi_globals_ptr->nph = 0;
+	php_cgi_globals_ptr->check_shebang_line = 1;
+	php_cgi_globals_ptr->force_redirect = 1;
+	php_cgi_globals_ptr->redirect_status_env = NULL;
+	php_cgi_globals_ptr->fix_pathinfo = 1;
+	php_cgi_globals_ptr->discard_path = 0;
+	php_cgi_globals_ptr->fcgi_logging = 1;
 #ifdef PHP_WIN32
-	php_cgi_globals->impersonate = 0;
+	php_cgi_globals_ptr->impersonate = 0;
 #endif
-	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals_ptr->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
 }
 /* }}} */
 
@@ -1749,7 +1749,6 @@ int main(int argc, char *argv[])
 	int status = 0;
 #endif
 	char *query_string;
-	char *decoded_query_string;
 	int skip_getopt = 0;
 
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1804,10 +1803,15 @@ int main(int argc, char *argv[])
 	 * the executable. Ideally we skip argument parsing when we're in cgi or fastcgi mode,
 	 * but that breaks PHP scripts on Linux with a hashbang: `#!/php-cgi -d option=value`.
 	 * Therefore, this code only prevents passing arguments if the query string starts with a '-'.
-	 * Similarly, scripts spawned in subprocesses on Windows may have the same issue. */
+	 * Similarly, scripts spawned in subprocesses on Windows may have the same issue.
+	 * However, Windows has lots of conversion rules and command line parsing rules that
+	 * are too difficult and dangerous to reliably emulate. */
 	if((query_string = getenv("QUERY_STRING")) != NULL && strchr(query_string, '=') == NULL) {
+#ifdef PHP_WIN32
+		skip_getopt = cgi || fastcgi;
+#else
 		unsigned char *p;
-		decoded_query_string = strdup(query_string);
+		char *decoded_query_string = strdup(query_string);
 		php_url_decode(decoded_query_string, strlen(decoded_query_string));
 		for (p = (unsigned char *)decoded_query_string; *p &&  *p <= ' '; p++) {
 			/* skip all leading spaces */
@@ -1816,22 +1820,8 @@ int main(int argc, char *argv[])
 			skip_getopt = 1;
 		}
 
-		/* On Windows we have to take into account the "best fit" mapping behaviour. */
-#ifdef PHP_WIN32
-		if (*p >= 0x80) {
-			wchar_t wide_buf[1];
-			wide_buf[0] = *p;
-			char char_buf[4];
-			size_t wide_buf_len = sizeof(wide_buf) / sizeof(wide_buf[0]);
-			size_t char_buf_len = sizeof(char_buf) / sizeof(char_buf[0]);
-			if (WideCharToMultiByte(CP_ACP, 0, wide_buf, wide_buf_len, char_buf, char_buf_len, NULL, NULL) == 0
-				|| char_buf[0] == '-') {
-				skip_getopt = 1;
-			}
-		}
-#endif
-
 		free(decoded_query_string);
+#endif
 	}
 
 	php_ini_builder_init(&ini_builder);
@@ -1898,18 +1888,17 @@ int main(int argc, char *argv[])
 
 	/* check force_cgi after startup, so we have proper output */
 	if (cgi && CGIG(force_redirect)) {
-		/* Apache will generate REDIRECT_STATUS,
-		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
-		 * redirect.so and installation instructions available from
-		 * http://www.koehntopp.de/php.
-		 *   -- kk@netuse.de
-		 */
-		if (!getenv("REDIRECT_STATUS") &&
-			!getenv ("HTTP_REDIRECT_STATUS") &&
-			/* this is to allow a different env var to be configured
-			 * in case some server does something different than above */
-			(!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
-		) {
+		/* This is to allow a different environment variable to be configured
+		 * in case the we cannot auto-detect which environment variable to use.
+		 * Checking this first to allow user overrides in case the environment
+		 * variable can be set by an untrusted party. */
+		const char *redirect_status_env = CGIG(redirect_status_env);
+		if (!redirect_status_env) {
+			/* Apache will generate REDIRECT_STATUS. */
+			redirect_status_env = "REDIRECT_STATUS";
+		}
+
+		if (!getenv(redirect_status_env)) {
 			zend_try {
 				SG(sapi_headers).http_response_code = 400;
 				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
@@ -2559,11 +2548,11 @@ do_repeat:
 					break;
 				case PHP_MODE_HIGHLIGHT:
 					{
-						zend_syntax_highlighter_ini syntax_highlighter_ini;
+						zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 
 						if (open_file_for_scanning(&file_handle) == SUCCESS) {
-							php_get_highlight_struct(&syntax_highlighter_ini);
-							zend_highlight(&syntax_highlighter_ini);
+							php_get_highlight_struct(&default_syntax_highlighter_ini);
+							zend_highlight(&default_syntax_highlighter_ini);
 						}
 					}
 					break;

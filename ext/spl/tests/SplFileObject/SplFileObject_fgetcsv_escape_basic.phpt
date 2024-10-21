@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::fgetcsv with alternative delimiter
+SplFileObject::fgetcsv with alternative escape
 --FILE--
 <?php
 $fp = fopen('SplFileObject__fgetcsv6.csv', 'w+');
@@ -14,7 +14,6 @@ var_dump($fo->fgetcsv(',', '"', '"'));
 unlink('SplFileObject__fgetcsv6.csv');
 ?>
 --EXPECTF--
-Deprecated: SplFileObject::fgetcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 array(3) {
   [0]=>
   string(3) "aaa"

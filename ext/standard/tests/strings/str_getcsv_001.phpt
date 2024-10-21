@@ -4,13 +4,13 @@ str_getcsv(): Testing using various arguments
 <?php
 
 // string input[, string delimiter[, string enclosure[, string escape]]]
-var_dump(str_getcsv('"f", "o", ""'));
+var_dump(str_getcsv('"f", "o", ""', escape: ''));
 print "-----\n";
-var_dump(str_getcsv('foo||bar', '|'));
+var_dump(str_getcsv('foo||bar', '|', escape: ''));
 print "-----\n";
-var_dump(str_getcsv('foo|bar', '|'));
+var_dump(str_getcsv('foo|bar', '|', escape: ''));
 print "-----\n";
-var_dump(str_getcsv('|foo|-|bar|', '-', '|'));
+var_dump(str_getcsv('|foo|-|bar|', '-', '|', escape: ''));
 print "-----\n";
 var_dump(str_getcsv('|f.|.|bar|.|-|-.|', '.', '|', '-'));
 print "-----\n";
@@ -18,9 +18,9 @@ var_dump(str_getcsv('.foo..bar.', '.', '.', '.'));
 print "-----\n";
 var_dump(str_getcsv('.foo  . .  bar  .', ' ', '.', ''));
 print "-----\n";
-var_dump(str_getcsv('" "" "', ' '));
+var_dump(str_getcsv('" "" "', ' ', escape: ''));
 print "-----\n";
-var_dump(str_getcsv(''));
+var_dump(str_getcsv('', escape: ''));
 print "-----\n";
 
 ?>
@@ -57,8 +57,6 @@ array(2) {
   string(3) "bar"
 }
 -----
-
-Deprecated: str_getcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 array(3) {
   [0]=>
   string(2) "f."
@@ -68,8 +66,6 @@ array(3) {
   string(4) "-|-."
 }
 -----
-
-Deprecated: str_getcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 array(1) {
   [0]=>
   string(7) "foo.bar"

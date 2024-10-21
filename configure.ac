@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.4.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
+AC_INIT([PHP],[8.5.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -664,28 +664,25 @@ AS_VAR_IF([php_cv_func_getaddrinfo], [yes],
 dnl on FreeBSD, copy_file_range() works only with the undocumented flag 0x01000000;
 dnl until the problem is fixed properly, copy_file_range() is used only on Linux
 AC_CACHE_CHECK([for copy_file_range], [php_cv_func_copy_file_range],
-[AC_RUN_IFELSE([AC_LANG_SOURCE([
-#ifdef __linux__
+[AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#ifndef __linux__
+# error "unsupported platform"
+#endif
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE
+# define _GNU_SOURCE
 #endif
 #include <linux/version.h>
-#include <unistd.h>
-
-int main(void) {
-(void)copy_file_range(-1, 0, -1, 0, 0, 0);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
-#error "kernel too old"
-#else
-return 0;
+# error "kernel too old"
 #endif
+#include <unistd.h>
+int main(void)
+{
+  (void)copy_file_range(-1, 0, -1, 0, 0, 0);
+  return 0;
 }
-#else
-#error "unsupported platform"
-#endif
 ])],
 [php_cv_func_copy_file_range=yes],
-[php_cv_func_copy_file_range=no],
 [php_cv_func_copy_file_range=no])
 ])
 AS_VAR_IF([php_cv_func_copy_file_range], [yes],
@@ -785,11 +782,7 @@ AS_VAR_IF([PHP_GCOV], [yes], [
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/build/Makefile.gcov], [$abs_srcdir])
 
   dnl Remove all optimization flags from CFLAGS.
-  changequote({,})
-  dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
-  CFLAGS=$(echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
-  CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
-  changequote([,])
+  PHP_REMOVE_OPTIMIZATION_FLAGS
 
   dnl Add the special gcc flags.
   CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
@@ -806,11 +799,7 @@ PHP_ARG_ENABLE([debug],
 AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
-  changequote({,})
-  dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
-  CFLAGS=$(echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
-  CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
-  changequote([,])
+  PHP_REMOVE_OPTIMIZATION_FLAGS
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
     CFLAGS="$CFLAGS -O0"
@@ -1334,6 +1323,10 @@ datadir=$(eval eval echo $datadir)
 dnl Build extension directory path.
 ZEND_MODULE_API_NO=$($EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|"${SED}" 's/#define ZEND_MODULE_API_NO //')
 
+AC_ARG_VAR([EXTENSION_DIR],
+  [Default directory for dynamically loadable PHP extensions. If left empty, it
+  is determined automatically. Can be overridden using the PHP 'extension_dir'
+  INI directive.])
 AS_VAR_IF([EXTENSION_DIR],, [
   extbasedir=$ZEND_MODULE_API_NO
   AS_VAR_IF([oldstyleextdir], [yes], [
@@ -1533,11 +1526,12 @@ AS_VAR_IF([PHP_UNDEFINED_SANITIZER], [yes],
     AC_CACHE_CHECK([whether to add -fno-sanitize=function],
     [php_cv_ubsan_no_function],
     [AC_RUN_IFELSE([AC_LANG_SOURCE([
-void foo(char *string) {}
-int main(void) {
-  void (*f)(void *) = (void (*)(void *))foo;
-  f("foo");
-}
+      void foo(char *string) { (void)string; }
+      int main(void) {
+        void (*f)(void *) = (void (*)(void *))foo;
+        f("foo");
+        return 0;
+      }
     ])],
     [php_cv_ubsan_no_function=no],
     [php_cv_ubsan_no_function=yes],

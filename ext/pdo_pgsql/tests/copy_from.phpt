@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL pgsqlCopyFromArray and pgsqlCopyFromFile
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

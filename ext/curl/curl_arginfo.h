@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5aa5f230880f8373ef8ec378f7e600247332136e */
+ * Stub hash: e2800e5ecc33f092576c7afcdb98d89825809669 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -58,6 +58,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_add_handle, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, multi_handle, CurlMultiHandle, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_get_handles, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, multi_handle, CurlMultiHandle, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_close, 0, 1, IS_VOID, 0)
@@ -153,6 +157,7 @@ ZEND_FUNCTION(curl_init);
 ZEND_FUNCTION(curl_upkeep);
 #endif
 ZEND_FUNCTION(curl_multi_add_handle);
+ZEND_FUNCTION(curl_multi_get_handles);
 ZEND_FUNCTION(curl_multi_close);
 ZEND_FUNCTION(curl_multi_errno);
 ZEND_FUNCTION(curl_multi_exec);
@@ -190,6 +195,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_upkeep, arginfo_curl_upkeep)
 #endif
 	ZEND_FE(curl_multi_add_handle, arginfo_curl_multi_add_handle)
+	ZEND_FE(curl_multi_get_handles, arginfo_curl_multi_get_handles)
 	ZEND_FE(curl_multi_close, arginfo_curl_multi_close)
 	ZEND_FE(curl_multi_errno, arginfo_curl_multi_errno)
 	ZEND_FE(curl_multi_exec, arginfo_curl_multi_exec)
@@ -210,18 +216,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_share_strerror, arginfo_curl_share_strerror)
 	ZEND_FE(curl_strerror, arginfo_curl_strerror)
 	ZEND_FE(curl_version, arginfo_curl_version)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_CurlHandle_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_CurlMultiHandle_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_CurlShareHandle_methods[] = {
 	ZEND_FE_END
 };
 
@@ -324,6 +318,13 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURLOPT_WRITEFUNCTION", CURLOPT_WRITEFUNCTION, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_WRITEHEADER", CURLOPT_WRITEHEADER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_XFERINFOFUNCTION", CURLOPT_XFERINFOFUNCTION, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLOPT_DEBUGFUNCTION", CURLOPT_DEBUGFUNCTION, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLINFO_TEXT", CURLINFO_TEXT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLINFO_HEADER_IN", CURLINFO_HEADER_IN, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLINFO_DATA_IN", CURLINFO_DATA_IN, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLINFO_DATA_OUT", CURLINFO_DATA_OUT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLINFO_SSL_DATA_OUT", CURLINFO_SSL_DATA_OUT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLINFO_SSL_DATA_IN", CURLINFO_SSL_DATA_IN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLE_ABORTED_BY_CALLBACK", CURLE_ABORTED_BY_CALLBACK, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLE_BAD_CALLING_ORDER", CURLE_BAD_CALLING_ORDER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLE_BAD_CONTENT_ENCODING", CURLE_BAD_CONTENT_ENCODING, CONST_PERSISTENT);
@@ -804,6 +805,9 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURLINFO_REDIRECT_TIME_T", CURLINFO_REDIRECT_TIME_T, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLINFO_STARTTRANSFER_TIME_T", CURLINFO_STARTTRANSFER_TIME_T, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLINFO_TOTAL_TIME_T", CURLINFO_TOTAL_TIME_T, CONST_PERSISTENT);
+#if LIBCURL_VERSION_NUM >= 0x080a00 /* Available since 8.10.0 */
+	REGISTER_LONG_CONSTANT("CURLINFO_POSTTRANSFER_TIME_T", CURLINFO_POSTTRANSFER_TIME_T, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("CURLOPT_DISALLOW_USERNAME_IN_URL", CURLOPT_DISALLOW_USERNAME_IN_URL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_PROXY_TLS13_CIPHERS", CURLOPT_PROXY_TLS13_CIPHERS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_TLS13_CIPHERS", CURLOPT_TLS13_CIPHERS, CONST_PERSISTENT);
@@ -1108,7 +1112,7 @@ static zend_class_entry *register_class_CurlHandle(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "CurlHandle", class_CurlHandle_methods);
+	INIT_CLASS_ENTRY(ce, "CurlHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -1118,7 +1122,7 @@ static zend_class_entry *register_class_CurlMultiHandle(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "CurlMultiHandle", class_CurlMultiHandle_methods);
+	INIT_CLASS_ENTRY(ce, "CurlMultiHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -1128,7 +1132,7 @@ static zend_class_entry *register_class_CurlShareHandle(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "CurlShareHandle", class_CurlShareHandle_methods);
+	INIT_CLASS_ENTRY(ce, "CurlShareHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

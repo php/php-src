@@ -45,7 +45,7 @@ typedef struct {
 PHP_HASH_API void PHP_SHA256InitArgs(PHP_SHA256_CTX *, ZEND_ATTRIBUTE_UNUSED HashTable *);
 PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, size_t);
 
-#ifdef _MSC_VER
+#if defined(__cplusplus) || defined(_MSC_VER)
 # define PHP_STATIC_RESTRICT
 #else
 # define PHP_STATIC_RESTRICT static restrict
@@ -55,10 +55,10 @@ PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, size
 void SHA256_Transform_sse2(uint32_t state[PHP_STATIC_RESTRICT 8], const uint8_t block[PHP_STATIC_RESTRICT 64], uint32_t W[PHP_STATIC_RESTRICT 64], uint32_t S[PHP_STATIC_RESTRICT 8]);
 #endif
 
-#if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IMMINTRIN_H)
+#if ((defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IMMINTRIN_H)) || defined(_M_X64) || defined(_M_IX86)
 # if defined(__SSSE3__) && defined(__SHA__)
 #  define PHP_HASH_INTRIN_SHA_NATIVE 1
-# elif defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+# elif defined(HAVE_FUNC_ATTRIBUTE_TARGET) || defined(_M_X64) || defined(_M_IX86)
 #  define PHP_HASH_INTRIN_SHA_RESOLVER 1
 # endif
 #endif

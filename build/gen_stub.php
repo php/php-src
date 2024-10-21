@@ -83,14 +83,9 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             }
         }
 
-        /* Because exit() and die() are proper token/keywords we need to hack-around */
-        $hasSpecialExitAsFunctionHandling = str_ends_with($stubFile, 'zend_builtin_functions.stub.php');
         if (!$fileInfo = $context->parsedFiles[$stubFile] ?? null) {
             initPhpParser();
             $stubContent = $stubCode ?? file_get_contents($stubFile);
-            if ($hasSpecialExitAsFunctionHandling) {
-                $stubContent = str_replace(['exit', 'die'], ['exit_dummy', 'die_dummy'], $stubContent);
-            }
             $fileInfo = parseStubFile($stubContent);
             $context->parsedFiles[$stubFile] = $fileInfo;
 
@@ -124,9 +119,6 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $context->allConstInfos,
             $stubHash
         );
-        if ($hasSpecialExitAsFunctionHandling) {
-            $arginfoCode = str_replace(['exit_dummy', 'die_dummy'], ['exit', 'die'], $arginfoCode);
-        }
         if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($arginfoFile, $arginfoCode)) {
             echo "Saved $arginfoFile\n";
         }
@@ -1291,6 +1283,9 @@ class FuncInfo {
         $this->attributes = $attributes;
         $this->framelessFunctionInfos = $framelessFunctionInfos;
         $this->exposedDocComment = $exposedDocComment;
+        if ($return->tentativeReturnType && $this->isFinalMethod()) {
+            throw new Exception("Tentative return inapplicable for final method");
+        }
     }
 
     public function isMethod(): bool
@@ -2918,6 +2913,100 @@ class PropertyInfo extends VariableLike
     public bool $isDocReadonly;
     public bool $isVirtual;
 
+    // Map possible variable names to the known string constant, see
+    // ZEND_KNOWN_STRINGS
+    private const PHP_80_KNOWN = [
+        "file" => "ZEND_STR_FILE",
+        "line" => "ZEND_STR_LINE",
+        "function" => "ZEND_STR_FUNCTION",
+        "class" => "ZEND_STR_CLASS",
+        "object" => "ZEND_STR_OBJECT",
+        "type" => "ZEND_STR_TYPE",
+        // ZEND_STR_OBJECT_OPERATOR and ZEND_STR_PAAMAYIM_NEKUDOTAYIM are
+        // not valid variable names
+        "args" => "ZEND_STR_ARGS",
+        "unknown" => "ZEND_STR_UNKNOWN",
+        "eval" => "ZEND_STR_EVAL",
+        "include" => "ZEND_STR_INCLUDE",
+        "require" => "ZEND_STR_REQUIRE",
+        "include_once" => "ZEND_STR_INCLUDE_ONCE",
+        "require_once" => "ZEND_STR_REQUIRE_ONCE",
+        "scalar" => "ZEND_STR_SCALAR",
+        "error_reporting" => "ZEND_STR_ERROR_REPORTING",
+        "static" => "ZEND_STR_STATIC",
+        // ZEND_STR_THIS cannot be used since $this cannot be reassigned
+        "value" => "ZEND_STR_VALUE",
+        "key" => "ZEND_STR_KEY",
+        "__invoke" => "ZEND_STR_MAGIC_INVOKE",
+        "previous" => "ZEND_STR_PREVIOUS",
+        "code" => "ZEND_STR_CODE",
+        "message" => "ZEND_STR_MESSAGE",
+        "severity" => "ZEND_STR_SEVERITY",
+        "string" => "ZEND_STR_STRING",
+        "trace" => "ZEND_STR_TRACE",
+        "scheme" => "ZEND_STR_SCHEME",
+        "host" => "ZEND_STR_HOST",
+        "port" => "ZEND_STR_PORT",
+        "user" => "ZEND_STR_USER",
+        "pass" => "ZEND_STR_PASS",
+        "path" => "ZEND_STR_PATH",
+        "query" => "ZEND_STR_QUERY",
+        "fragment" => "ZEND_STR_FRAGMENT",
+        "NULL" => "ZEND_STR_NULL",
+        "boolean" => "ZEND_STR_BOOLEAN",
+        "integer" => "ZEND_STR_INTEGER",
+        "double" => "ZEND_STR_DOUBLE",
+        "array" => "ZEND_STR_ARRAY",
+        "resource" => "ZEND_STR_RESOURCE",
+        // ZEND_STR_CLOSED_RESOURCE has a space in it
+        "name" => "ZEND_STR_NAME",
+        // ZEND_STR_ARGV and ZEND_STR_ARGC are superglobals that wouldn't be
+        // variable names
+        "Array" => "ZEND_STR_ARRAY_CAPITALIZED",
+        "bool" => "ZEND_STR_BOOL",
+        "int" => "ZEND_STR_INT",
+        "float" => "ZEND_STR_FLOAT",
+        "callable" => "ZEND_STR_CALLABLE",
+        "iterable" => "ZEND_STR_ITERABLE",
+        "void" => "ZEND_STR_VOID",
+        "false" => "ZEND_STR_FALSE",
+        "null" => "ZEND_STR_NULL_LOWERCASE",
+        "mixed" => "ZEND_STR_MIXED",
+    ];
+
+    // NEW in 8.1
+    private const PHP_81_KNOWN = [
+        "Unknown" => "ZEND_STR_UNKNOWN_CAPITALIZED",
+        "never" => "ZEND_STR_NEVER",
+        "__sleep" => "ZEND_STR_SLEEP",
+        "__wakeup" => "ZEND_STR_WAKEUP",
+        "cases" => "ZEND_STR_CASES",
+        "from" => "ZEND_STR_FROM",
+        "tryFrom" => "ZEND_STR_TRYFROM",
+        "tryfrom" => "ZEND_STR_TRYFROM_LOWERCASE",
+        // Omit ZEND_STR_AUTOGLOBAL_(SERVER|ENV|REQUEST)
+    ];
+
+    // NEW in 8.2
+    private const PHP_82_KNOWN = [
+        "true" => "ZEND_STR_TRUE",
+        "Traversable" => "ZEND_STR_TRAVERSABLE",
+        "count" => "ZEND_STR_COUNT",
+        "SensitiveParameter" => "ZEND_STR_SENSITIVEPARAMETER",
+    ];
+
+    // Only new string in 8.3 is ZEND_STR_CONST_EXPR_PLACEHOLDER which is
+    // not a valid variable name ("[constant expression]")
+
+    // NEW in 8.4
+    private const PHP_84_KNOWN = [
+        "exit" => "ZEND_STR_EXIT",
+        "Deprecated" => "ZEND_STR_DEPRECATED_CAPITALIZED",
+        "since" => "ZEND_STR_SINCE",
+        "get" => "ZEND_STR_GET",
+        "set" => "ZEND_STR_SET",
+    ];
+
     /**
      * @var AttributeInfo[] $attributes
      */
@@ -3003,8 +3092,8 @@ class PropertyInfo extends VariableLike
             $code .= $defaultValue->initializeZval($zvalName);
         }
 
-        $code .= "\tzend_string *property_{$propertyName}_name = zend_string_init(\"$propertyName\", sizeof(\"$propertyName\") - 1, 1);\n";
-        $nameCode = "property_{$propertyName}_name";
+        [$stringInit, $nameCode, $stringRelease] = $this->getString($propertyName);
+        $code .= $stringInit;
 
         if ($this->exposedDocComment) {
             $commentCode = "property_{$propertyName}_comment";
@@ -3035,9 +3124,59 @@ class PropertyInfo extends VariableLike
         );
         $code .= implode("", $flagsCode);
 
-        $code .= "\tzend_string_release(property_{$propertyName}_name);\n";
+        $code .= $stringRelease;
 
         return $code;
+    }
+
+    /**
+     * Get an array of three strings:
+     *   - declaration of zend_string, if needed, or empty otherwise
+     *   - usage of that zend_string, or usage with ZSTR_KNOWN()
+     *   - freeing the zend_string, if needed
+     *
+     * @param string $propName
+     * @return string[]
+     */
+    private function getString(string $propName): array {
+        // Generally strings will not be known
+        $nameCode = "property_{$propName}_name";
+        $result = [
+            "\tzend_string *$nameCode = zend_string_init(\"$propName\", sizeof(\"$propName\") - 1, 1);\n",
+            $nameCode,
+            "\tzend_string_release($nameCode);\n"
+        ];
+        // If not set, use the current latest version
+        $allVersions = ALL_PHP_VERSION_IDS;
+        $minPhp = $phpVersionIdMinimumCompatibility ?? end($allVersions);
+        if ($minPhp < PHP_80_VERSION_ID) {
+            // No known strings in 7.0
+            return $result;
+        }
+        $include = self::PHP_80_KNOWN;
+        switch ($minPhp) {
+            case PHP_84_VERSION_ID:
+                $include = array_merge($include, self::PHP_84_KNOWN);
+                // Intentional fall through
+
+            case PHP_83_VERSION_ID:
+            case PHP_82_VERSION_ID:
+                $include = array_merge($include, self::PHP_82_KNOWN);
+                // Intentional fall through
+
+            case PHP_81_VERSION_ID:
+                $include = array_merge($include, self::PHP_81_KNOWN);
+                break;
+        }
+        if (array_key_exists($propName,$include)) {
+            $knownStr = $include[$propName];
+            return [
+                '',
+                "ZSTR_KNOWN($knownStr)",
+                '',
+            ];
+        }
+        return $result;
     }
 
     /**
@@ -3142,7 +3281,7 @@ class AttributeInfo {
             $knowns["SensitiveParameter"] = "ZEND_STR_SENSITIVEPARAMETER";
         }
         if ($php84MinimumCompatibility) {
-            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED";
+            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED_CAPITALIZED";
             $knowns["since"] = "ZEND_STR_SINCE";
         }
 
@@ -3285,11 +3424,12 @@ class ClassInfo {
         $flagCodes = generateVersionDependentFlagCode("%s", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
         $flags = implode("", $flagCodes);
 
+        $classMethods = ($this->funcInfos === []) ? 'NULL' : "class_{$escapedName}_methods";
         if ($this->type === "enum") {
             $name = addslashes((string) $this->name);
             $backingType = $this->enumBackingType
                 ? $this->enumBackingType->toTypeCode() : "IS_UNDEF";
-            $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, class_{$escapedName}_methods);\n";
+            $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, $classMethods);\n";
             if ($flags !== "") {
                 $code .= "\tclass_entry->ce_flags |= $flags\n";
             }
@@ -3299,9 +3439,9 @@ class ClassInfo {
                 $className = $this->name->getLast();
                 $namespace = addslashes((string) $this->name->slice(0, -1));
 
-                $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
+                $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", $classMethods);\n";
             } else {
-                $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", class_{$escapedName}_methods);\n";
+                $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", $classMethods);\n";
             }
 
             if ($this->type === "class" || $this->type === "trait") {
@@ -5021,20 +5161,47 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
 function generateCodeWithConditions(
     iterable $infos, string $separator, Closure $codeGenerator, ?string $parentCond = null): string {
     $code = "";
+    
+    // For combining the conditional blocks of the infos with the same condition
+    $openCondition = null;
     foreach ($infos as $info) {
         $infoCode = $codeGenerator($info);
         if ($infoCode === null) {
             continue;
         }
 
-        $code .= $separator;
         if ($info->cond && $info->cond !== $parentCond) {
-            $code .= "#if {$info->cond}\n";
+            if ($openCondition !== null
+                && $info->cond !== $openCondition
+            ) {
+                // Changing condition, end old
+                $code .= "#endif\n";
+                $code .= $separator;
+                $code .= "#if {$info->cond}\n";
+                $openCondition = $info->cond;
+            } elseif ($openCondition === null) {
+                // New condition with no existing one
+                $code .= $separator;
+                $code .= "#if {$info->cond}\n";
+                $openCondition = $info->cond;
+            } else {
+                // Staying in the same condition
+                $code .= $separator;
+            }
             $code .= $infoCode;
-            $code .= "#endif\n";
         } else {
+            if ($openCondition !== null) {
+                // Ending the condition
+                $code .= "#endif\n";
+                $openCondition = null;
+            }
+            $code .= $separator;
             $code .= $infoCode;
         }
+    }
+    // The last info might have been in a conditional block
+    if ($openCondition !== null) {
+        $code .= "#endif\n";
     }
 
     return $code;
@@ -5103,9 +5270,7 @@ function generateArgInfoCode(
             }
         );
 
-        if (!empty($fileInfo->funcInfos)) {
-            $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
-        }
+        $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
 
         foreach ($fileInfo->classInfos as $classInfo) {
             $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos, $classInfo->cond);
@@ -5156,6 +5321,11 @@ function generateClassEntryCode(FileInfo $fileInfo, array $allConstInfos): strin
 
 /** @param FuncInfo[] $funcInfos */
 function generateFunctionEntries(?Name $className, array $funcInfos, ?string $cond = null): string {
+    // No need to add anything if there are no function entries
+    if ($funcInfos === []) {
+        return '';
+    }
+
     $code = "\n";
 
     if ($cond) {
@@ -5974,7 +6144,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "5.0.0";
+    $version = "5.3.1";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);

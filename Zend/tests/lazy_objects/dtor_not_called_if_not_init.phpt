@@ -1,5 +1,5 @@
 --TEST--
-Lazy objects: destructor of lazy objets is not called if not initialized
+Lazy objects: destructor of lazy objects is not called if not initialized
 --FILE--
 <?php
 

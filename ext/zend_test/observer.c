@@ -288,7 +288,7 @@ static void zend_test_execute_internal(zend_execute_data *execute_data, zval *re
 		} else {
 			php_printf("%*s<!-- internal enter %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
-	} else {
+	} else if (ZEND_USER_CODE(fbc->type)) {
 		php_printf("%*s<!-- internal enter '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
 	}
 
@@ -304,9 +304,12 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
 	zend_string *funcname;
 	zend_function *func;
+	if (!ZT_G(observer_enabled)) {
+		return FAILURE;
+	}
 	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 		ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
-			if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
+			if ((func = zend_hash_find_ptr(EG(function_table), funcname)) && ZEND_OBSERVER_DATA(func) != NULL) {
 				void *old_handler;
 				zend_observer_remove_begin_handler(func, observer_begin, (zend_observer_fcall_begin_handler *)&old_handler);
 				zend_observer_remove_end_handler(func, observer_end, (zend_observer_fcall_end_handler *)&old_handler);
@@ -329,7 +332,7 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 		zend_string_release(str);
 		if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 			ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
-				if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
+				if ((func = zend_hash_find_ptr(EG(function_table), funcname)) && ZEND_OBSERVER_DATA(func) != NULL) {
 					zend_observer_add_begin_handler(func, observer_begin);
 					zend_observer_add_end_handler(func, observer_end);
 				}

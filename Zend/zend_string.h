@@ -560,6 +560,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 }
 
+// When adding a new string here, please also update build/gen_stub.php to the
+// known strings to be used in property registration; see gh-15751
 #define ZEND_KNOWN_STRINGS(_) \
 	_(ZEND_STR_FILE,                   "file") \
 	_(ZEND_STR_LINE,                   "line") \
@@ -634,7 +636,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_COUNT,                  "count") \
 	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
-	_(ZEND_STR_DEPRECATED,             "Deprecated") \
+	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \
 	_(ZEND_STR_SINCE,                  "since") \
 	_(ZEND_STR_GET,                    "get") \
 	_(ZEND_STR_SET,                    "set") \

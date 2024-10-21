@@ -736,9 +736,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_windows_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_id_for_windows_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
@@ -970,8 +968,6 @@ ZEND_FUNCTION(intltz_get_tz_data_version);
 ZEND_FUNCTION(intltz_get_unknown);
 #if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_windows_id);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_id_for_windows_id);
 #endif
 ZEND_FUNCTION(intltz_has_same_rules);
@@ -1163,8 +1159,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intltz_get_unknown, arginfo_intltz_get_unknown)
 #if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_FE(intltz_get_windows_id, arginfo_intltz_get_windows_id)
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_FE(intltz_get_id_for_windows_id, arginfo_intltz_get_id_for_windows_id)
 #endif
 	ZEND_FE(intltz_has_same_rules, arginfo_intltz_has_same_rules)
@@ -1180,10 +1174,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(transliterator_transliterate, arginfo_transliterator_transliterate)
 	ZEND_FE(transliterator_get_error_code, arginfo_transliterator_get_error_code)
 	ZEND_FE(transliterator_get_error_message, arginfo_transliterator_get_error_message)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_IntlException_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1220,7 +1210,7 @@ static void register_php_intl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_intlcal_set_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlcal_set", sizeof("intlcal_set") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_intlcal_set_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlcal_set", sizeof("intlcal_set") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_intlcal_set_0_arg0;
 	zend_string *attribute_Deprecated_func_intlcal_set_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0_arg0, attribute_Deprecated_func_intlcal_set_0_arg0_str);
@@ -1232,7 +1222,7 @@ static void register_php_intl_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlcal_set_0->args[1].value, &attribute_Deprecated_func_intlcal_set_0_arg1);
 	attribute_Deprecated_func_intlcal_set_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_intlgregcal_create_instance_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlgregcal_create_instance", sizeof("intlgregcal_create_instance") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_intlgregcal_create_instance_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlgregcal_create_instance", sizeof("intlgregcal_create_instance") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_intlgregcal_create_instance_0_arg0;
 	zend_string *attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0_arg0, attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str);
@@ -1249,7 +1239,7 @@ static zend_class_entry *register_class_IntlException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "IntlException", class_IntlException_methods);
+	INIT_CLASS_ENTRY(ce, "IntlException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;

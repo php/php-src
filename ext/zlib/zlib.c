@@ -609,10 +609,10 @@ PHP_FUNCTION(gzfile)
 	int flags = REPORT_ERRORS;
 	char buf[8192] = {0};
 	int i = 0;
-	zend_long use_include_path = 0;
+	bool use_include_path = false;
 	php_stream *stream;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename, &filename_len, &use_include_path)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &filename, &filename_len, &use_include_path)) {
 		RETURN_THROWS();
 	}
 
@@ -649,9 +649,9 @@ PHP_FUNCTION(gzopen)
 	size_t filename_len, mode_len;
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
-	zend_long use_include_path = 0;
+	bool use_include_path = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps|l", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps|b", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -676,9 +676,9 @@ PHP_FUNCTION(readgzfile)
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
 	size_t size;
-	zend_long use_include_path = 0;
+	bool use_include_path = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename, &filename_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &filename, &filename_len, &use_include_path) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -796,67 +796,62 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 				*dict = emalloc(ZSTR_LEN(str));
 				memcpy(*dict, ZSTR_VAL(str), ZSTR_LEN(str));
 				*dictlen = ZSTR_LEN(str);
-			} break;
+
+				return 1;
+			}
 
 			case IS_ARRAY: {
 				HashTable *dictionary = Z_ARR_P(option_buffer);
+				bool result = 1;
 
 				if (zend_hash_num_elements(dictionary) > 0) {
-					char *dictptr;
+					zend_string **strings = safe_emalloc(zend_hash_num_elements(dictionary), sizeof(zend_string *), 0);
+					size_t total = 0;
+
 					zval *cur;
-					zend_string **strings = emalloc(sizeof(zend_string *) * zend_hash_num_elements(dictionary));
-					zend_string **end, **ptr = strings - 1;
-
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						size_t i;
-
-						*++ptr = zval_get_string(cur);
-						if (!*ptr || ZSTR_LEN(*ptr) == 0 || EG(exception)) {
-							if (*ptr) {
-								efree(*ptr);
-							}
-							while (--ptr >= strings) {
-								efree(ptr);
-							}
-							efree(strings);
-							if (!EG(exception)) {
-								zend_argument_value_error(2, "must not contain empty strings");
-							}
-							return 0;
+						zend_string *string = zval_try_get_string(cur);
+						if (string == NULL) {
+							result = 0;
+							break;
 						}
-						for (i = 0; i < ZSTR_LEN(*ptr); i++) {
-							if (ZSTR_VAL(*ptr)[i] == 0) {
-								do {
-									efree(ptr);
-								} while (--ptr >= strings);
-								efree(strings);
-								zend_argument_value_error(2, "must not contain strings with null bytes");
-								return 0;
-							}
+						*dictlen += ZSTR_LEN(string) + 1;
+						strings[total++] = string;
+						if (ZSTR_LEN(string) == 0) {
+							result = 0;
+							zend_argument_value_error(2, "must not contain empty strings");
+							break;
 						}
-
-						*dictlen += ZSTR_LEN(*ptr) + 1;
+						if (zend_str_has_nul_byte(string)) {
+							result = 0;
+							zend_argument_value_error(2, "must not contain strings with null bytes");
+							break;
+						}
 					} ZEND_HASH_FOREACH_END();
 
-					dictptr = *dict = emalloc(*dictlen);
-					ptr = strings;
-					end = strings + zend_hash_num_elements(dictionary);
-					do {
-						memcpy(dictptr, ZSTR_VAL(*ptr), ZSTR_LEN(*ptr));
-						dictptr += ZSTR_LEN(*ptr);
+					char *dictptr = emalloc(*dictlen);
+					*dict = dictptr;
+					for (size_t i = 0; i < total; i++) {
+						zend_string *string = strings[i];
+						dictptr = zend_mempcpy(dictptr, ZSTR_VAL(string), ZSTR_LEN(string));
 						*dictptr++ = 0;
-						zend_string_release_ex(*ptr, 0);
-					} while (++ptr != end);
+						zend_string_release(string);
+					}
 					efree(strings);
+					if (!result) {
+						efree(*dict);
+						*dict = NULL;
+					}
 				}
-			} break;
+
+				return result;
+			}
 
 			default:
 				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_zval_value_name(option_buffer));
 				return 0;
 		}
 	}
-
 	return 1;
 }
 

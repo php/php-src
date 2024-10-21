@@ -193,8 +193,10 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
 #define phpdbg_try_access \
 	{                                                            \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		JMP_BUF *__orig_bailout = PHPDBG_G(sigsegv_bailout); \
 		JMP_BUF __bailout;                                   \
+		ZEND_DIAGNOSTIC_IGNORED_END \
                                                                      \
 		PHPDBG_G(sigsegv_bailout) = &__bailout;              \
 		if (SETJMP(__bailout) == 0) {

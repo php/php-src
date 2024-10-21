@@ -1,5 +1,5 @@
 --TEST--
-Lazy objects: clone is independant of the original object
+Lazy objects: clone is independent of the original object
 --FILE--
 <?php
 

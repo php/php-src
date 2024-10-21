@@ -112,6 +112,25 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 		bb = &ctx->cfg_blocks[b];
 		if (bb->loop_depth < loop_depth) {
 			if (!bb->loop_depth) {
+#if 1
+				/* Avoid LICM if LOOP doesn't have a pre-header block */
+				ir_block *loop_bb = &ctx->cfg_blocks[best];
+
+				if (!(loop_bb->flags & IR_BB_LOOP_HEADER)) {
+					loop_bb = &ctx->cfg_blocks[loop_bb->loop_header];
+				}
+				if (loop_bb->predecessors_count > 2) {
+					int n = loop_bb->predecessors_count;
+					uint32_t *p = ctx->cfg_edges + loop_bb->predecessors;
+
+					while (n && *p != b) {
+						n--; p++;
+					}
+					if (!n) {
+						break;
+					}
+				}
+#endif
 				best = b;
 				break;
 			}

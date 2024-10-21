@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0b89a48c27c6682542312391f10a3ab8fb719ef8 */
+ * Stub hash: 824e5aa07fd6753b5bc7821a39ccb76768f2470b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -318,7 +318,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_copy_from, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, rows, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, rows, Traversable, MAY_BE_ARRAY, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\"\\t\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, null_as, IS_STRING, 0, "\"\\\\\\\\N\"")
 ZEND_END_ARG_INFO()
@@ -495,6 +495,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_chunked_rows_size, 0, 2, 
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PG_CLOSE_STMT)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_close_stmt, 0, 2, Pgsql\\Result, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, connection, Pgsql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
 ZEND_FUNCTION(pg_connect_poll);
@@ -597,6 +604,9 @@ ZEND_FUNCTION(pg_put_copy_end);
 ZEND_FUNCTION(pg_socket_poll);
 #if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
 ZEND_FUNCTION(pg_set_chunked_rows_size);
+#endif
+#if defined(HAVE_PG_CLOSE_STMT)
+ZEND_FUNCTION(pg_close_stmt);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -726,18 +736,9 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
 	ZEND_FE(pg_set_chunked_rows_size, arginfo_pg_set_chunked_rows_size)
 #endif
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_PgSql_Connection_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_PgSql_Result_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_PgSql_Lob_methods[] = {
+#if defined(HAVE_PG_CLOSE_STMT)
+	ZEND_FE(pg_close_stmt, arginfo_pg_close_stmt)
+#endif
 	ZEND_FE_END
 };
 
@@ -851,7 +852,7 @@ static void register_pgsql_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ALWAYS", PQSHOW_CONTEXT_ALWAYS, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_pg_errormessage_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_errormessage", sizeof("pg_errormessage") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_errormessage_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_errormessage", sizeof("pg_errormessage") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_errormessage_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_errormessage_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_errormessage_0_arg0, attribute_Deprecated_func_pg_errormessage_0_arg0_str);
@@ -863,7 +864,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_errormessage_0->args[1].value, &attribute_Deprecated_func_pg_errormessage_0_arg1);
 	attribute_Deprecated_func_pg_errormessage_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_numrows_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_numrows", sizeof("pg_numrows") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_numrows_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_numrows", sizeof("pg_numrows") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_numrows_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_numrows_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_numrows_0_arg0, attribute_Deprecated_func_pg_numrows_0_arg0_str);
@@ -875,7 +876,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_numrows_0->args[1].value, &attribute_Deprecated_func_pg_numrows_0_arg1);
 	attribute_Deprecated_func_pg_numrows_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_numfields_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_numfields", sizeof("pg_numfields") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_numfields_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_numfields", sizeof("pg_numfields") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_numfields_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_numfields_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_numfields_0_arg0, attribute_Deprecated_func_pg_numfields_0_arg0_str);
@@ -887,7 +888,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_numfields_0->args[1].value, &attribute_Deprecated_func_pg_numfields_0_arg1);
 	attribute_Deprecated_func_pg_numfields_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_cmdtuples_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_cmdtuples", sizeof("pg_cmdtuples") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_cmdtuples_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_cmdtuples", sizeof("pg_cmdtuples") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_cmdtuples_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_cmdtuples_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_cmdtuples_0_arg0, attribute_Deprecated_func_pg_cmdtuples_0_arg0_str);
@@ -899,7 +900,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_cmdtuples_0->args[1].value, &attribute_Deprecated_func_pg_cmdtuples_0_arg1);
 	attribute_Deprecated_func_pg_cmdtuples_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_fieldname_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldname", sizeof("pg_fieldname") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_fieldname_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldname", sizeof("pg_fieldname") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_fieldname_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_fieldname_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_fieldname_0_arg0, attribute_Deprecated_func_pg_fieldname_0_arg0_str);
@@ -911,7 +912,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldname_0->args[1].value, &attribute_Deprecated_func_pg_fieldname_0_arg1);
 	attribute_Deprecated_func_pg_fieldname_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_fieldsize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldsize", sizeof("pg_fieldsize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_fieldsize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldsize", sizeof("pg_fieldsize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_fieldsize_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_fieldsize_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_fieldsize_0_arg0, attribute_Deprecated_func_pg_fieldsize_0_arg0_str);
@@ -923,7 +924,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldsize_0->args[1].value, &attribute_Deprecated_func_pg_fieldsize_0_arg1);
 	attribute_Deprecated_func_pg_fieldsize_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_fieldtype_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldtype", sizeof("pg_fieldtype") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_fieldtype_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldtype", sizeof("pg_fieldtype") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_fieldtype_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_fieldtype_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_fieldtype_0_arg0, attribute_Deprecated_func_pg_fieldtype_0_arg0_str);
@@ -935,7 +936,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldtype_0->args[1].value, &attribute_Deprecated_func_pg_fieldtype_0_arg1);
 	attribute_Deprecated_func_pg_fieldtype_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_fieldnum_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldnum", sizeof("pg_fieldnum") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_fieldnum_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldnum", sizeof("pg_fieldnum") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_fieldnum_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_fieldnum_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_fieldnum_0_arg0, attribute_Deprecated_func_pg_fieldnum_0_arg0_str);
@@ -947,7 +948,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldnum_0->args[1].value, &attribute_Deprecated_func_pg_fieldnum_0_arg1);
 	attribute_Deprecated_func_pg_fieldnum_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_result_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_result", sizeof("pg_result") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_result_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_result", sizeof("pg_result") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_result_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_result_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_result_0_arg0, attribute_Deprecated_func_pg_result_0_arg0_str);
@@ -959,7 +960,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_result_0->args[1].value, &attribute_Deprecated_func_pg_result_0_arg1);
 	attribute_Deprecated_func_pg_result_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_fieldprtlen_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldprtlen", sizeof("pg_fieldprtlen") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_fieldprtlen_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldprtlen", sizeof("pg_fieldprtlen") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_fieldprtlen_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_fieldprtlen_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_fieldprtlen_0_arg0, attribute_Deprecated_func_pg_fieldprtlen_0_arg0_str);
@@ -971,7 +972,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldprtlen_0->args[1].value, &attribute_Deprecated_func_pg_fieldprtlen_0_arg1);
 	attribute_Deprecated_func_pg_fieldprtlen_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_fieldisnull_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldisnull", sizeof("pg_fieldisnull") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_fieldisnull_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldisnull", sizeof("pg_fieldisnull") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_fieldisnull_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_fieldisnull_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_fieldisnull_0_arg0, attribute_Deprecated_func_pg_fieldisnull_0_arg0_str);
@@ -983,7 +984,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldisnull_0->args[1].value, &attribute_Deprecated_func_pg_fieldisnull_0_arg1);
 	attribute_Deprecated_func_pg_fieldisnull_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_freeresult_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_freeresult", sizeof("pg_freeresult") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_freeresult_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_freeresult", sizeof("pg_freeresult") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_freeresult_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_freeresult_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_freeresult_0_arg0, attribute_Deprecated_func_pg_freeresult_0_arg0_str);
@@ -995,7 +996,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_freeresult_0->args[1].value, &attribute_Deprecated_func_pg_freeresult_0_arg1);
 	attribute_Deprecated_func_pg_freeresult_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_getlastoid_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_getlastoid", sizeof("pg_getlastoid") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_getlastoid_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_getlastoid", sizeof("pg_getlastoid") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_getlastoid_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_getlastoid_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_getlastoid_0_arg0, attribute_Deprecated_func_pg_getlastoid_0_arg0_str);
@@ -1007,7 +1008,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_getlastoid_0->args[1].value, &attribute_Deprecated_func_pg_getlastoid_0_arg1);
 	attribute_Deprecated_func_pg_getlastoid_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_locreate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_locreate", sizeof("pg_locreate") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_locreate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_locreate", sizeof("pg_locreate") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_locreate_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_locreate_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_locreate_0_arg0, attribute_Deprecated_func_pg_locreate_0_arg0_str);
@@ -1019,7 +1020,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_locreate_0->args[1].value, &attribute_Deprecated_func_pg_locreate_0_arg1);
 	attribute_Deprecated_func_pg_locreate_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_lounlink_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_lounlink", sizeof("pg_lounlink") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_lounlink_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_lounlink", sizeof("pg_lounlink") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_lounlink_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_lounlink_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_lounlink_0_arg0, attribute_Deprecated_func_pg_lounlink_0_arg0_str);
@@ -1031,7 +1032,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_lounlink_0->args[1].value, &attribute_Deprecated_func_pg_lounlink_0_arg1);
 	attribute_Deprecated_func_pg_lounlink_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_loopen_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loopen", sizeof("pg_loopen") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_loopen_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loopen", sizeof("pg_loopen") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_loopen_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_loopen_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_loopen_0_arg0, attribute_Deprecated_func_pg_loopen_0_arg0_str);
@@ -1043,7 +1044,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loopen_0->args[1].value, &attribute_Deprecated_func_pg_loopen_0_arg1);
 	attribute_Deprecated_func_pg_loopen_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_loclose_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loclose", sizeof("pg_loclose") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_loclose_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loclose", sizeof("pg_loclose") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_loclose_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_loclose_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_loclose_0_arg0, attribute_Deprecated_func_pg_loclose_0_arg0_str);
@@ -1055,7 +1056,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loclose_0->args[1].value, &attribute_Deprecated_func_pg_loclose_0_arg1);
 	attribute_Deprecated_func_pg_loclose_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_loread_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loread", sizeof("pg_loread") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_loread_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loread", sizeof("pg_loread") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_loread_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_loread_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_loread_0_arg0, attribute_Deprecated_func_pg_loread_0_arg0_str);
@@ -1067,7 +1068,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loread_0->args[1].value, &attribute_Deprecated_func_pg_loread_0_arg1);
 	attribute_Deprecated_func_pg_loread_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_lowrite_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_lowrite", sizeof("pg_lowrite") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_lowrite_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_lowrite", sizeof("pg_lowrite") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_lowrite_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_lowrite_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_lowrite_0_arg0, attribute_Deprecated_func_pg_lowrite_0_arg0_str);
@@ -1079,7 +1080,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_lowrite_0->args[1].value, &attribute_Deprecated_func_pg_lowrite_0_arg1);
 	attribute_Deprecated_func_pg_lowrite_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_loreadall_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loreadall", sizeof("pg_loreadall") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_loreadall_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loreadall", sizeof("pg_loreadall") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_loreadall_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_loreadall_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_loreadall_0_arg0, attribute_Deprecated_func_pg_loreadall_0_arg0_str);
@@ -1091,7 +1092,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loreadall_0->args[1].value, &attribute_Deprecated_func_pg_loreadall_0_arg1);
 	attribute_Deprecated_func_pg_loreadall_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_loimport_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loimport", sizeof("pg_loimport") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_loimport_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loimport", sizeof("pg_loimport") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_loimport_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_loimport_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_loimport_0_arg0, attribute_Deprecated_func_pg_loimport_0_arg0_str);
@@ -1103,7 +1104,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loimport_0->args[1].value, &attribute_Deprecated_func_pg_loimport_0_arg1);
 	attribute_Deprecated_func_pg_loimport_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_loexport_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loexport", sizeof("pg_loexport") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_loexport_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loexport", sizeof("pg_loexport") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_loexport_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_loexport_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_loexport_0_arg0, attribute_Deprecated_func_pg_loexport_0_arg0_str);
@@ -1115,7 +1116,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loexport_0->args[1].value, &attribute_Deprecated_func_pg_loexport_0_arg1);
 	attribute_Deprecated_func_pg_loexport_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_setclientencoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_setclientencoding", sizeof("pg_setclientencoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_setclientencoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_setclientencoding", sizeof("pg_setclientencoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_setclientencoding_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_setclientencoding_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_setclientencoding_0_arg0, attribute_Deprecated_func_pg_setclientencoding_0_arg0_str);
@@ -1127,7 +1128,7 @@ static void register_pgsql_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_setclientencoding_0->args[1].value, &attribute_Deprecated_func_pg_setclientencoding_0_arg1);
 	attribute_Deprecated_func_pg_setclientencoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_pg_clientencoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_clientencoding", sizeof("pg_clientencoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_pg_clientencoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_clientencoding", sizeof("pg_clientencoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_pg_clientencoding_0_arg0;
 	zend_string *attribute_Deprecated_func_pg_clientencoding_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_pg_clientencoding_0_arg0, attribute_Deprecated_func_pg_clientencoding_0_arg0_str);
@@ -1146,7 +1147,7 @@ static zend_class_entry *register_class_PgSql_Connection(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Connection", class_PgSql_Connection_methods);
+	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -1156,7 +1157,7 @@ static zend_class_entry *register_class_PgSql_Result(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Result", class_PgSql_Result_methods);
+	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Result", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -1166,7 +1167,7 @@ static zend_class_entry *register_class_PgSql_Lob(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Lob", class_PgSql_Lob_methods);
+	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Lob", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

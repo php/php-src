@@ -78,7 +78,6 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	bool jit;
 #endif
-	bool per_request_cache;
 	php_pcre_error_code error_code;
 	/* Used for unmatched subpatterns in OFFSET_CAPTURE mode */
 	zval unmatched_null_pair;

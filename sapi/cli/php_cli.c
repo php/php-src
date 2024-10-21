@@ -392,9 +392,9 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 }
 /* }}} */
 
-static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int php_cli_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module, NULL);
+	return php_module_startup(sapi_module_ptr, NULL);
 }
 /* }}} */
 
@@ -951,11 +951,11 @@ do_repeat:
 			break;
 		case PHP_CLI_MODE_HIGHLIGHT:
 			{
-				zend_syntax_highlighter_ini syntax_highlighter_ini;
+				zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 
 				if (open_file_for_scanning(&file_handle) == SUCCESS) {
-					php_get_highlight_struct(&syntax_highlighter_ini);
-					zend_highlight(&syntax_highlighter_ini);
+					php_get_highlight_struct(&default_syntax_highlighter_ini);
+					zend_highlight(&default_syntax_highlighter_ini);
 				}
 				goto out;
 			}
@@ -1045,6 +1045,7 @@ do_repeat:
 				object_init_ex(&ref, pce);
 
 				memset(&execute_data, 0, sizeof(zend_execute_data));
+				execute_data.func = (zend_function *) &zend_pass_function;
 				EG(current_execute_data) = &execute_data;
 				zend_call_known_instance_method_with_1_params(
 					pce->constructor, Z_OBJ(ref), NULL, &arg);
@@ -1154,7 +1155,7 @@ int main(int argc, char *argv[])
 	char *ini_path_override = NULL;
 	struct php_ini_builder ini_builder;
 	int ini_ignore = 0;
-	sapi_module_struct *sapi_module = &cli_sapi_module;
+	sapi_module_struct *sapi_module_ptr = &cli_sapi_module;
 
 	/*
 	 * Do not move this initialization. It needs to happen before argv is used
@@ -1233,7 +1234,7 @@ int main(int argc, char *argv[])
 				break;
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
 			case 'S':
-				sapi_module = &cli_server_sapi_module;
+				sapi_module_ptr = &cli_server_sapi_module;
 				cli_server_sapi_module.additional_functions = server_additional_functions;
 				break;
 #endif
@@ -1246,7 +1247,7 @@ int main(int argc, char *argv[])
 				exit_status = 1;
 				goto out;
 			case 'i': case 'v': case 'm':
-				sapi_module = &cli_sapi_module;
+				sapi_module_ptr = &cli_sapi_module;
 				goto exit_loop;
 			case 'e': /* enable extended info output */
 				use_extended_info = 1;
@@ -1255,25 +1256,25 @@ int main(int argc, char *argv[])
 	}
 exit_loop:
 
-	sapi_module->ini_defaults = sapi_cli_ini_defaults;
-	sapi_module->php_ini_path_override = ini_path_override;
-	sapi_module->phpinfo_as_text = 1;
-	sapi_module->php_ini_ignore_cwd = 1;
-	sapi_startup(sapi_module);
+	sapi_module_ptr->ini_defaults = sapi_cli_ini_defaults;
+	sapi_module_ptr->php_ini_path_override = ini_path_override;
+	sapi_module_ptr->phpinfo_as_text = 1;
+	sapi_module_ptr->php_ini_ignore_cwd = 1;
+	sapi_startup(sapi_module_ptr);
 	sapi_started = 1;
 
-	sapi_module->php_ini_ignore = ini_ignore;
+	sapi_module_ptr->php_ini_ignore = ini_ignore;
 
-	sapi_module->executable_location = argv[0];
+	sapi_module_ptr->executable_location = argv[0];
 
-	if (sapi_module == &cli_sapi_module) {
+	if (sapi_module_ptr == &cli_sapi_module) {
 		php_ini_builder_prepend_literal(&ini_builder, HARDCODED_INI);
 	}
 
-	sapi_module->ini_entries = php_ini_builder_finish(&ini_builder);
+	sapi_module_ptr->ini_entries = php_ini_builder_finish(&ini_builder);
 
 	/* startup after we get the above ini override so we get things right */
-	if (sapi_module->startup(sapi_module) == FAILURE) {
+	if (sapi_module_ptr->startup(sapi_module_ptr) == FAILURE) {
 		/* there is no way to see if we must call zend_ini_deactivate()
 		 * since we cannot check if EG(ini_directives) has been initialized
 		 * because the executor's constructor does not set initialize it.
@@ -1304,7 +1305,7 @@ exit_loop:
 
 	zend_first_try {
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
-		if (sapi_module == &cli_sapi_module) {
+		if (sapi_module_ptr == &cli_sapi_module) {
 #endif
 			exit_status = do_cli(argc, argv);
 #ifndef PHP_CLI_WIN32_NO_CONSOLE

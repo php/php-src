@@ -379,6 +379,11 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 			newNodeObj = Z_DOMOBJ_P(&nodes[i]);
 			newNode = dom_object_get_node(newNodeObj);
 
+			if (UNEXPECTED(!newNode)) {
+				php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+				goto err;
+			}
+
 			if (!dom_is_pre_insert_valid_without_step_1(document, node, newNode, NULL, documentNode)) {
 				goto err;
 			}

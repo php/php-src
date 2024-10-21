@@ -364,6 +364,7 @@ EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net> (2001 - 2013)
                      Nikita Popov <nikic@php.net> (2017 - 2020)
                      Alex Dowad <alexinbeijing@gmail.com> (2021 - 2024)
+                     Yuya Hamada <youkidearitai@gmail.com> (2024 - 2024)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------

@@ -4,8 +4,11 @@ PHP_ARG_ENABLE([dl-test],
     [Enable dl_test extension])])
 
 if test "$PHP_DL_TEST" != "no"; then
+  dnl Always build as shared extension.
+  ext_shared=yes
+
   PHP_NEW_EXTENSION([dl_test],
     [dl_test.c],
-    [shared],,
+    [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 fi

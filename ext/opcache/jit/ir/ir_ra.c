@@ -2007,7 +2007,7 @@ int ir_coalesce(ir_ctx *ctx)
 							if (ctx->binding) {
 								ir_ref b1 = ir_binding_find(ctx, i);
 								ir_ref b2 = ir_binding_find(ctx, insn->op1);
-								if (b1 != b2) {
+								if (b1 && b1 != b2) {
 									continue;
 								}
 							}

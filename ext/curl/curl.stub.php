@@ -486,6 +486,48 @@ const CURLOPT_WRITEHEADER = UNKNOWN;
  */
 const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue CURLOPT_DEBUGFUNCTION
+ */
+const CURLOPT_DEBUGFUNCTION = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_TEXT
+ */
+const CURLINFO_TEXT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_HEADER_IN
+ */
+const CURLINFO_HEADER_IN = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_DATA_IN
+ */
+const CURLINFO_DATA_IN = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_DATA_OUT
+ */
+const CURLINFO_DATA_OUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_SSL_DATA_OUT
+ */
+const CURLINFO_SSL_DATA_OUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_SSL_DATA_IN
+ */
+const CURLINFO_SSL_DATA_IN = UNKNOWN;
+
 /* */
 /**
  * @var int
@@ -3012,6 +3054,13 @@ const CURLINFO_STARTTRANSFER_TIME_T = UNKNOWN;
  * @cvalue CURLINFO_TOTAL_TIME_T
  */
 const CURLINFO_TOTAL_TIME_T = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080a00 /* Available since 8.10.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_POSTTRANSFER_TIME_T
+ */
+const CURLINFO_POSTTRANSFER_TIME_T = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLOPT_DISALLOW_USERNAME_IN_URL
@@ -3652,6 +3701,8 @@ function curl_upkeep(CurlHandle $handle): bool {}
 #endif
 
 function curl_multi_add_handle(CurlMultiHandle $multi_handle, CurlHandle $handle): int {}
+
+function curl_multi_get_handles(CurlMultiHandle $multi_handle): array {}
 
 function curl_multi_close(CurlMultiHandle $multi_handle): void {}
 

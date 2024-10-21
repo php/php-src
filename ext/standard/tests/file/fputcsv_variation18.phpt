@@ -42,29 +42,12 @@ $file = __DIR__ . '/fputcsv_variation18.csv';
 @unlink($file);
 ?>
 --EXPECTF--
-Deprecated: fputcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
-
-Deprecated: fputcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
-
-Deprecated: fputcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
-
-Deprecated: fputcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 $list = array (
   0 => 'aaa,"""/"bbb",ccc',
   1 => '"aaa""/"a""","""bbb"""',
   2 => '"""/"""","""aaa"""',
   3 => '"""/"""""",aaa',
 );
-
-Deprecated: fgetcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
-
-Deprecated: fgetcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
-
-Deprecated: fgetcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
-
-Deprecated: fgetcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
-
-Deprecated: fgetcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 $list = array (
   0 => 'aaa,"/"bbb,ccc',
   1 => 'aaa"/"a","bbb"',

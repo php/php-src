@@ -2326,6 +2326,16 @@ PHP_FUNCTION(mb_substr)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (from == ZEND_LONG_MIN) {
+		zend_argument_value_error(2, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (ZEND_LONG_MIN + 1), ZEND_LONG_MAX);
+		RETURN_THROWS();
+	}
+
+	if (!len_is_null && len == ZEND_LONG_MIN) {
+		zend_argument_value_error(3, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (ZEND_LONG_MIN + 1), ZEND_LONG_MAX);
+		RETURN_THROWS();
+	}
+
 	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 4);
 	if (!enc) {
 		RETURN_THROWS();
@@ -3770,7 +3780,22 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 
 		HashTable *ht = HASH_OF(var);
 		if (ht != NULL) {
-			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
+			ZEND_HASH_FOREACH_VAL(ht, entry) {
+				/* Can be a typed property declaration, in which case we need to remove the reference from the source list.
+				 * Just using ZEND_TRY_ASSIGN_STRINGL is not sufficient because that would not unwrap the reference
+				 * and change values through references (see bug #26639). */
+				if (Z_TYPE_P(entry) == IS_INDIRECT) {
+					ZEND_ASSERT(Z_TYPE_P(var) == IS_OBJECT);
+
+					entry = Z_INDIRECT_P(entry);
+					if (Z_ISREF_P(entry) && Z_TYPE_P(Z_REFVAL_P(entry)) == IS_STRING) {
+						zend_property_info *info = zend_get_typed_property_info_for_slot(Z_OBJ_P(var), entry);
+						if (info) {
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(entry), info);
+						}
+					}
+				}
+
 				if (mb_recursive_convert_variable(entry, from_encoding, to_encoding)) {
 					if (Z_REFCOUNTED_P(var)) {
 						Z_UNPROTECT_RECURSION_P(var);
@@ -4607,7 +4632,7 @@ PHP_FUNCTION(mb_send_mail)
 	smart_str str = {0};
 	bool empty = true;
 
-	if (str_headers != NULL) {
+	if (str_headers != NULL && ZSTR_LEN(str_headers) > 0) {
 		/* Strip trailing CRLF from `str_headers`; we will add CRLF back if necessary */
 		size_t len = ZSTR_LEN(str_headers);
 		if (ZSTR_VAL(str_headers)[len-1] == '\n') {

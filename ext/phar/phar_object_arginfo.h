@@ -465,10 +465,6 @@ ZEND_METHOD(PharFileInfo, isCompressed);
 ZEND_METHOD(PharFileInfo, isCRCChecked);
 ZEND_METHOD(PharFileInfo, setMetadata);
 
-static const zend_function_entry class_PharException_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Phar_methods[] = {
 	ZEND_ME(Phar, __construct, arginfo_class_Phar___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Phar, __destruct, arginfo_class_Phar___destruct, ZEND_ACC_PUBLIC)
@@ -612,7 +608,7 @@ static zend_class_entry *register_class_PharException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PharException", class_PharException_methods);
+	INIT_CLASS_ENTRY(ce, "PharException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;

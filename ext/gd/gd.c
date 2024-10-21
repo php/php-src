@@ -1237,6 +1237,11 @@ PHP_FUNCTION(imagerotate)
 		Z_PARAM_LONG(color)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (degrees < (double)(INT_MIN / 100) || degrees > (double)(INT_MAX / 100)) {
+		zend_argument_value_error(2, "must be between %d and %d", (INT_MIN / 100), (INT_MAX / 100));
+		RETURN_THROWS();
+	}
+
 	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
 	im_dst = gdImageRotateInterpolated(im_src, (const float)degrees, color);
 
@@ -4037,13 +4042,25 @@ PHP_FUNCTION(imageaffine)
 		if ((zval_affine_elem = zend_hash_index_find(Z_ARRVAL_P(z_affine), i)) != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
 				case IS_LONG:
-					affine[i]  = Z_LVAL_P(zval_affine_elem);
+					affine[i] = Z_LVAL_P(zval_affine_elem);
+					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
+						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
+						RETURN_THROWS();
+					}
 					break;
 				case IS_DOUBLE:
 					affine[i] = Z_DVAL_P(zval_affine_elem);
+					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
+						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
+						RETURN_THROWS();
+					}
 					break;
 				case IS_STRING:
 					affine[i] = zval_get_double(zval_affine_elem);
+					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
+						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
+						RETURN_THROWS();
+					}
 					break;
 				default:
 					zend_argument_type_error(3, "contains invalid type for element %i", i);

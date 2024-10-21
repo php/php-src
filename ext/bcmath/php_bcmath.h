@@ -45,4 +45,14 @@ ZEND_TSRMLS_CACHE_EXTERN()
 ZEND_EXTERN_MODULE_GLOBALS(bcmath)
 #define BCG(v) ZEND_MODULE_GLOBALS_ACCESSOR(bcmath, v)
 
+/* Maximum number of digits to extend when scale needs to be extended, such as in undivisible division */
+#define BC_MATH_NUMBER_EXPAND_SCALE 10
+
+typedef struct _bcmath_number_obj_t {
+	zend_string *value;
+	size_t scale;
+	bc_num num;
+	zend_object std;
+} bcmath_number_obj_t;
+
 #endif /* PHP_BCMATH_H */

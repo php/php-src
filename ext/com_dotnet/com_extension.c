@@ -182,6 +182,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	php_com_saproxy_class_entry = register_class_com_safearray_proxy();
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
+	php_com_saproxy_class_entry->create_object = php_com_saproxy_create_object;
 	php_com_saproxy_class_entry->default_object_handlers = &php_com_saproxy_handlers;
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 

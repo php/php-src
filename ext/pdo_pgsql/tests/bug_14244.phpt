@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #14244 (Postgres sees parameters in a dollar-delimited string)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

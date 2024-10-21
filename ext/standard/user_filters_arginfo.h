@@ -25,10 +25,6 @@ static const zend_function_entry class_php_user_filter_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_StreamBucket_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_user_filters_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("PSFS_PASS_ON", PSFS_PASS_ON, CONST_PERSISTENT);
@@ -71,7 +67,7 @@ static zend_class_entry *register_class_StreamBucket(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "StreamBucket", class_StreamBucket_methods);
+	INIT_CLASS_ENTRY(ce, "StreamBucket", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_bucket_default_value;

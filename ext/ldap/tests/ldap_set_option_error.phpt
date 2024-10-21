@@ -33,11 +33,9 @@ foreach ($controls as $control) {
     }
 }
 
-var_dump(ldap_set_option($link, 999999, 999999));
 ?>
 --EXPECT--
 bool(false)
 ValueError: ldap_set_option(): Control must have an "oid" key
 TypeError: ldap_set_option(): Argument #3 ($value) must contain only arrays, where each array is a control
 TypeError: ldap_set_option(): Argument #3 ($value) must be of type array for the LDAP_OPT_CLIENT_CONTROLS option, string given
-bool(false)

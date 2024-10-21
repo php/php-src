@@ -78,6 +78,68 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers)
 	return 0;
 }
 
+static void http_context_add_header(const char *s,
+									bool has_authorization,
+									bool has_proxy_authorization,
+									bool has_cookies,
+									smart_str *soap_headers)
+{
+	const char *p;
+	int name_len;
+
+	while (*s) {
+		/* skip leading newlines and spaces */
+		while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
+			s++;
+		}
+		/* extract header name */
+		p = s;
+		name_len = -1;
+		while (*p) {
+			if (*p == ':') {
+				if (name_len < 0) name_len = p - s;
+				break;
+			} else if (*p == ' ' || *p == '\t') {
+				if (name_len < 0) name_len = p - s;
+			} else if (*p == '\r' || *p == '\n') {
+				break;
+			}
+			p++;
+		}
+		if (*p == ':') {
+			/* extract header value */
+			while (*p && *p != '\r' && *p != '\n') {
+				p++;
+			}
+			/* skip some predefined headers */
+			if ((name_len != sizeof("host")-1 ||
+				 strncasecmp(s, "host", sizeof("host")-1) != 0) &&
+				(name_len != sizeof("connection")-1 ||
+				 strncasecmp(s, "connection", sizeof("connection")-1) != 0) &&
+				(name_len != sizeof("user-agent")-1 ||
+				 strncasecmp(s, "user-agent", sizeof("user-agent")-1) != 0) &&
+				(name_len != sizeof("content-length")-1 ||
+				 strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
+				(name_len != sizeof("content-type")-1 ||
+				 strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
+				(!has_cookies ||
+				 name_len != sizeof("cookie")-1 ||
+				 strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
+				(!has_authorization ||
+				 name_len != sizeof("authorization")-1 ||
+				 strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
+				(!has_proxy_authorization ||
+				 name_len != sizeof("proxy-authorization")-1 ||
+				 strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
+				/* add header */
+				smart_str_appendl(soap_headers, s, p-s);
+				smart_str_append_const(soap_headers, "\r\n");
+			}
+		}
+		s = (*p) ? (p + 1) : p;
+	}
+}
+
 /* Additional HTTP headers */
 void http_context_headers(php_stream_context* context,
                           bool has_authorization,
@@ -86,64 +148,16 @@ void http_context_headers(php_stream_context* context,
                           smart_str* soap_headers)
 {
 	zval *tmp;
-
-	if (context &&
-		(tmp = php_stream_context_get_option(context, "http", "header")) != NULL &&
-		Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp)) {
-		char *s = Z_STRVAL_P(tmp);
-		char *p;
-		int name_len;
-
-		while (*s) {
-			/* skip leading newlines and spaces */
-			while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
-				s++;
-			}
-			/* extract header name */
-			p = s;
-			name_len = -1;
-			while (*p) {
-				if (*p == ':') {
-					if (name_len < 0) name_len = p - s;
-					break;
-				} else if (*p == ' ' || *p == '\t') {
-					if (name_len < 0) name_len = p - s;
-				} else if (*p == '\r' || *p == '\n') {
-					break;
+	if (context && (tmp = php_stream_context_get_option(context, "http", "header")) != NULL) {
+		if (Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp)) {
+			http_context_add_header(Z_STRVAL_P(tmp), has_authorization, has_proxy_authorization, has_cookies, soap_headers);
+		} else if (Z_TYPE_P(tmp) == IS_ARRAY) {
+			zval *value;
+			ZEND_HASH_FOREACH_VAL(Z_ARR_P(tmp), value) {
+				if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value)) {
+					http_context_add_header(Z_STRVAL_P(value), has_authorization, has_proxy_authorization, has_cookies, soap_headers);
 				}
-				p++;
-			}
-			if (*p == ':') {
-				/* extract header value */
-				while (*p && *p != '\r' && *p != '\n') {
-					p++;
-				}
-				/* skip some predefined headers */
-				if ((name_len != sizeof("host")-1 ||
-				     strncasecmp(s, "host", sizeof("host")-1) != 0) &&
-				    (name_len != sizeof("connection")-1 ||
-				     strncasecmp(s, "connection", sizeof("connection")-1) != 0) &&
-				    (name_len != sizeof("user-agent")-1 ||
-				     strncasecmp(s, "user-agent", sizeof("user-agent")-1) != 0) &&
-				    (name_len != sizeof("content-length")-1 ||
-				     strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
-				    (name_len != sizeof("content-type")-1 ||
-				     strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
-				    (!has_cookies ||
-				     name_len != sizeof("cookie")-1 ||
-				     strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
-				    (!has_authorization ||
-				     name_len != sizeof("authorization")-1 ||
-				     strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
-				    (!has_proxy_authorization ||
-				     name_len != sizeof("proxy-authorization")-1 ||
-				     strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
-				    /* add header */
-					smart_str_appendl(soap_headers, s, p-s);
-					smart_str_append_const(soap_headers, "\r\n");
-				}
-			}
-			s = (*p) ? (p + 1) : p;
+			} ZEND_HASH_FOREACH_END();
 		}
 	}
 }
@@ -442,6 +456,7 @@ try_again:
 		}
 		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL);
 		smart_str_free(&soap_headers_z);
+		efree(http_msg);
 		return FALSE;
 	}
 
@@ -455,6 +470,7 @@ try_again:
 		}
 		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL);
 		smart_str_free(&soap_headers_z);
+		efree(http_msg);
 		return FALSE;
 	}
 
@@ -468,6 +484,7 @@ try_again:
 		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL);
 		PG(allow_url_fopen) = old_allow_url_fopen;
 		smart_str_free(&soap_headers_z);
+		efree(http_msg);
 		return FALSE;
 	}
 
@@ -522,6 +539,7 @@ try_again:
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL);
 			PG(allow_url_fopen) = old_allow_url_fopen;
 			smart_str_free(&soap_headers_z);
+			efree(http_msg);
 			return FALSE;
 		}
 	}
@@ -673,6 +691,7 @@ try_again:
 					convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 					smart_str_free(&soap_headers_z);
 					smart_str_free(&soap_headers);
+					efree(http_msg);
 					return FALSE;
 				}
 
@@ -890,12 +909,14 @@ try_again:
 			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL);
 			smart_str_free(&soap_headers_z);
+			efree(http_msg);
 			return FALSE;
 		}
 		smart_str_free(&soap_headers);
 	} else {
 		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL);
 		smart_str_free(&soap_headers_z);
+		efree(http_msg);
 		return FALSE;
 	}
 
@@ -912,6 +933,7 @@ try_again:
 				convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
 				smart_str_free(&soap_headers_z);
+				efree(http_msg);
 				return FALSE;
 			}
 
@@ -980,7 +1002,7 @@ try_again:
 	*/
 	cookie_itt = ZSTR_VAL(http_headers);
 
-	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, "Set-Cookie: ", &cookie_len))) {
+	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, "Set-Cookie:", &cookie_len))) {
 		zval *cookies = Z_CLIENT_COOKIES_P(this_ptr);
 		SEPARATE_ARRAY(cookies);
 
@@ -1049,7 +1071,7 @@ try_again:
 	if (http_1_1) {
 		http_close = FALSE;
 		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(ZSTR_VAL(http_headers), "Proxy-Connection: ");
+			connection = get_http_header_value(ZSTR_VAL(http_headers), "Proxy-Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
 					http_close = TRUE;
@@ -1058,7 +1080,7 @@ try_again:
 			}
 		}
 		if (http_close == FALSE) {
-			connection = get_http_header_value(ZSTR_VAL(http_headers), "Connection: ");
+			connection = get_http_header_value(ZSTR_VAL(http_headers), "Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
 					http_close = TRUE;
@@ -1069,7 +1091,7 @@ try_again:
 	} else {
 		http_close = TRUE;
 		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(ZSTR_VAL(http_headers), "Proxy-Connection: ");
+			connection = get_http_header_value(ZSTR_VAL(http_headers), "Proxy-Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 					http_close = FALSE;
@@ -1078,7 +1100,7 @@ try_again:
 			}
 		}
 		if (http_close == TRUE) {
-			connection = get_http_header_value(ZSTR_VAL(http_headers), "Connection: ");
+			connection = get_http_header_value(ZSTR_VAL(http_headers), "Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 					http_close = FALSE;
@@ -1121,7 +1143,7 @@ try_again:
 	if (http_status >= 300 && http_status < 400) {
 		char *loc;
 
-		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location: ")) != NULL) {
+		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
 			php_url *new_url  = php_url_parse(loc);
 
 			if (new_url != NULL) {
@@ -1159,6 +1181,7 @@ try_again:
 				if (--redirect_max < 1) {
 					add_soap_fault(this_ptr, "HTTP", "Redirection limit reached, aborting", NULL, NULL);
 					smart_str_free(&soap_headers_z);
+					efree(http_msg);
 					return FALSE;
 				}
 
@@ -1170,7 +1193,7 @@ try_again:
 		zval *digest = Z_CLIENT_DIGEST_P(this_ptr);
 		zval *login = Z_CLIENT_LOGIN_P(this_ptr);
 		zval *password = Z_CLIENT_PASSWORD_P(this_ptr);
-		char *auth = get_http_header_value(ZSTR_VAL(http_headers), "WWW-Authenticate: ");
+		char *auth = get_http_header_value(ZSTR_VAL(http_headers), "WWW-Authenticate:");
 		if (auth && strstr(auth, "Digest") == auth && Z_TYPE_P(digest) != IS_ARRAY
 				&& Z_TYPE_P(login) == IS_STRING && Z_TYPE_P(password) == IS_STRING) {
 			char *s;
@@ -1240,7 +1263,7 @@ try_again:
 	smart_str_free(&soap_headers_z);
 
 	/* Check and see if the server even sent a xml document */
-	content_type = get_http_header_value(ZSTR_VAL(http_headers), "Content-Type: ");
+	content_type = get_http_header_value(ZSTR_VAL(http_headers), "Content-Type:");
 	if (content_type) {
 		char *pos = NULL;
 		int cmplen;
@@ -1270,7 +1293,7 @@ try_again:
 	}
 
 	/* Decompress response */
-	content_encoding = get_http_header_value(ZSTR_VAL(http_headers), "Content-Encoding: ");
+	content_encoding = get_http_header_value(ZSTR_VAL(http_headers), "Content-Encoding:");
 	if (content_encoding) {
 		zval func;
 		zval retval;
@@ -1430,18 +1453,18 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 	int header_close = close, header_chunked = 0, header_length = 0, http_buf_size = 0;
 
 	if (!close) {
-		header = get_http_header_value(headers, "Connection: ");
+		header = get_http_header_value(headers, "Connection:");
 		if (header) {
 			if(!strncasecmp(header, "close", sizeof("close")-1)) header_close = 1;
 			efree(header);
 		}
 	}
-	header = get_http_header_value(headers, "Transfer-Encoding: ");
+	header = get_http_header_value(headers, "Transfer-Encoding:");
 	if (header) {
 		if(!strncasecmp(header, "chunked", sizeof("chunked")-1)) header_chunked = 1;
 		efree(header);
 	}
-	header = get_http_header_value(headers, "Content-Length: ");
+	header = get_http_header_value(headers, "Content-Length:");
 	if (header) {
 		header_length = atoi(header);
 		efree(header);

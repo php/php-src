@@ -292,10 +292,6 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
 #define DBL_MAX 1.7014118346046923e+38
 #endif
 
-#ifndef LONG_MAX
-#define LONG_MAX 2147483647
-#endif
-
 #else /* ifndef Bad_float_h */
 #include "float.h"
 #endif /* Bad_float_h */
@@ -3609,11 +3605,11 @@ rv_alloc(i) int i;
 rv_alloc(int i)
 #endif
 {
-	int j, k, *r;
+	int k, *r;
 
-	j = sizeof(ULong);
+	size_t j = sizeof(ULong);
 	for(k = 0;
-		sizeof(Bigint) - sizeof(ULong) - sizeof(int) + (size_t)j <= (size_t)i;
+		sizeof(Bigint) - sizeof(ULong) - sizeof(int) + j <= (size_t)i;
 		j <<= 1)
 			k++;
 	r = (int*)Balloc(k);

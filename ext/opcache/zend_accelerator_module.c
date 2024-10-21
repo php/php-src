@@ -24,6 +24,7 @@
 #include "php.h"
 #include "ZendAccelerator.h"
 #include "zend_API.h"
+#include "zend_closures.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
 #include "php_ini.h"
@@ -922,6 +923,23 @@ ZEND_FUNCTION(opcache_invalidate)
 	} else {
 		RETURN_FALSE;
 	}
+}
+
+/* {{{ Prevents JIT on function. Call it before the first invocation of the given function. */
+ZEND_FUNCTION(opcache_jit_blacklist)
+{
+	zval *closure;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &closure, zend_ce_closure) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+#ifdef HAVE_JIT
+	const zend_function *func = zend_get_closure_method_def(Z_OBJ_P(closure));
+	if (ZEND_USER_CODE(func->type)) {
+		zend_jit_blacklist_function((zend_op_array *)&func->op_array);
+	}
+#endif
 }
 
 ZEND_FUNCTION(opcache_compile_file)

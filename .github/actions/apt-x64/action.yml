@@ -1,4 +1,8 @@
 name: apt
+inputs:
+  asan:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
@@ -39,6 +43,7 @@ runs:
           libsqlite3-dev \
           libsqlite3-mod-spatialite \
           libwebp-dev \
+          ${{ inputs.asan == 'false' && 'libavif-dev' || '' }} \
           libonig-dev \
           libcurl4-openssl-dev \
           libxml2-dev \
@@ -47,7 +52,7 @@ runs:
           libedit-dev \
           libldap2-dev \
           libsodium-dev \
-          libargon2-0-dev \
+          libargon2-dev \
           libmm-dev \
           libsnmp-dev \
           postgresql \

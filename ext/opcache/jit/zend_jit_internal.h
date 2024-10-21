@@ -123,6 +123,7 @@ static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_
 
 typedef struct _zend_jit_op_array_extension {
 	zend_func_info func_info;
+	const zend_op_array *op_array;
 	const void *orig_handler;
 } zend_jit_op_array_extension;
 
@@ -160,6 +161,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 
 typedef struct _zend_jit_op_array_hot_extension {
 	zend_func_info func_info;
+	const zend_op_array *op_array;
 	int16_t    *counter;
 	const void *orig_handlers[1];
 } zend_jit_op_array_hot_extension;
@@ -231,6 +233,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
 bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D);
+void ZEND_FASTCALL zend_jit_undefined_long_key_ex(zend_long key EXECUTE_DATA_DC);
 void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D);
 
 zend_constant* ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
@@ -245,8 +248,11 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSIVE_CALL,    "recursive call") \
 	_(RECURSIVE_RET,     "recursive return") \
 	_(RETURN,            "return") \
-	_(INTERPRETER,       "exit to VM interpreter") \
 	_(LINK,              "link to another trace") \
+	_(INTERPRETER,       "exit to VM interpreter") \
+	_(TRAMPOLINE,        "trampoline call") \
+	_(PROP_HOOK_CALL,    "property hook call") \
+	_(BAD_FUNC,          "bad function call") \
 	/* compilation and linking successful */ \
 	_(COMPILED,          "compiled") \
 	_(ALREADY_DONE,      "already prcessed") \
@@ -264,9 +270,6 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(BLACK_LIST,        "trace blacklisted") \
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
 	_(COMPILED_LOOP,     "compiled loop") \
-	_(TRAMPOLINE,        "trampoline call") \
-	_(PROP_HOOK_CALL,    "property hook call") \
-	_(BAD_FUNC,          "bad function call") \
 	_(COMPILER_ERROR,    "JIT compilation error") \
 	/* no recoverable error (blacklist immediately) */ \
 	_(NO_SHM,            "insufficient shared memory") \
@@ -376,6 +379,12 @@ typedef enum _zend_jit_trace_op {
 
 #define ZEND_JIT_TRACE_FAKE_INFO(level) \
 	(((level) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT) | ZEND_JIT_TRACE_FAKE_INIT_CALL)
+
+#define ZEND_JIT_TRACE_NUM_ARGS_INFO(count) \
+	((count) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
+
+#define ZEND_JIT_TRACE_NUM_ARGS(info) \
+	(((info) & ZEND_JIT_TRACE_FAKE_LEVEL_MASK) >> ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
 
 #define ZEND_JIT_TRACE_SET_FIRST_SSA_VAR(_info, var) do { \
 		_info |= (var << ZEND_JIT_TRACE_SSA_VAR_SHIFT); \
@@ -646,7 +655,12 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_ret_trace_helper(ZEND_OPCODE_HAND
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 int ZEND_FASTCALL zend_jit_trace_hot_root(zend_execute_data *execute_data, const zend_op *opline);
-zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *execute_data, const zend_op *opline, zend_jit_trace_rec *trace_buffer, uint8_t start, uint32_t is_megamorphc);
+zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *execute_data,
+                                                         const zend_op      *opline,
+                                                         zend_jit_trace_rec *trace_buffer,
+                                                         uint8_t             start,
+                                                         uint32_t            is_megamorphc,
+                                                         int                 ret_depth);
 
 static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit_trace_rec *trace, const zend_op *opline, bool *exit_if_true)
 {

@@ -451,12 +451,9 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 static int dom_property_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
 	dom_object *obj = php_dom_obj_from_obj(object);
-	dom_prop_handler *hnd = NULL;
 	bool retval = false;
+	const dom_prop_handler *hnd = dom_get_prop_handler(obj, name, cache_slot);
 
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	}
 	if (hnd) {
 		zval tmp;
 
@@ -477,6 +474,18 @@ static int dom_property_exists(zend_object *object, zend_string *name, int check
 	return retval;
 }
 /* }}} */
+
+static void dom_unset_property(zend_object *object, zend_string *member, void **cache_slot)
+{
+	dom_object *obj = php_dom_obj_from_obj(object);
+
+	if (obj->prop_handler != NULL && zend_hash_exists(obj->prop_handler, member)) {
+		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		return;
+	}
+
+	zend_std_unset_property(object, member, cache_slot);
+}
 
 static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /* {{{ */
 {
@@ -755,6 +764,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
+	dom_object_handlers.unset_property = dom_unset_property;
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.has_property = dom_property_exists;
 	dom_object_handlers.get_debug_info = dom_get_debug_info;
@@ -950,7 +960,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "resolveExternals", dom_document_resolve_externals_read, dom_document_resolve_externals_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "preserveWhiteSpace", dom_document_preserve_whitespace_read, dom_document_preserve_whitespace_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "recover", dom_document_recover_read, dom_document_recover_write);
-	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "substituteEntities", dom_document_substitue_entities_read, dom_document_substitue_entities_write);
+	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "substituteEntities", dom_document_substitute_entities_read, dom_document_substitute_entities_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "firstElementChild", dom_parent_node_first_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "lastElementChild", dom_parent_node_last_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "childElementCount", dom_parent_node_child_element_count, NULL);
@@ -1111,6 +1121,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "previousElementSibling", dom_node_previous_element_sibling_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "nextElementSibling", dom_node_next_element_sibling_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "innerHTML", dom_element_inner_html_read, dom_element_inner_html_write);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "outerHTML", dom_element_outer_html_read, dom_element_outer_html_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "substitutedNodeValue", dom_modern_element_substituted_node_value_read, dom_modern_element_substituted_node_value_write);
 	zend_hash_merge(&dom_modern_element_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_element_prop_handlers, "textContent", dom_node_text_content_read, dom_node_text_content_write);
@@ -1463,7 +1474,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 	const xmlChar* tmp;
 
 	if (local) {
-		int len = local_len > INT_MAX ? -1 : (int) local_len;
+		int len = (int) local_len;
 		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)local, len)) != NULL) {
 			mapptr->local = BAD_CAST tmp;
 		} else {
@@ -1471,15 +1482,11 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 			mapptr->free_local = true;
 		}
 		mapptr->local_lower = BAD_CAST estrdup(local);
-		if (len < 0) {
-			zend_str_tolower((char *) mapptr->local_lower, strlen((const char *) mapptr->local_lower));
-		} else {
-			zend_str_tolower((char *) mapptr->local_lower, len);
-		}
+		zend_str_tolower((char *) mapptr->local_lower, len);
 	}
 
 	if (ns) {
-		int len = ns_len > INT_MAX ? -1 : (int) ns_len;
+		int len = (int) ns_len;
 		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ns, len)) != NULL) {
 			mapptr->ns = BAD_CAST tmp;
 		} else {
@@ -2084,7 +2091,7 @@ int dom_validate_and_extract(const zend_string *namespace, const zend_string *qn
 	*localName = xmlSplitQName2(BAD_CAST ZSTR_VAL(qname), prefix);
 
 	/* 6. If prefix is non-null and namespace is null, then throw a "NamespaceError" DOMException.
-	 *    Note that null namespace means empty string here becaue of step 1. */
+	 *    Note that null namespace means empty string here because of step 1. */
 	if (*prefix != NULL && ZSTR_VAL(namespace)[0] == '\0') {
 		return NAMESPACE_ERR;
 	}

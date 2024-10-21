@@ -2428,8 +2428,21 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 		} ZEND_HASH_FOREACH_END();
 		ZCG(mem) = (char*)ZCG(mem) + zend_hash_num_elements(dependencies) * sizeof(zend_class_dependency);
 	}
+
+	/* See GH-15657: `zend_persist_class_entry` can JIT property hook code via
+	 * `zend_persist_property_info`, but the inheritance cache should not
+	 * JIT those at this point in time. */
+#ifdef HAVE_JIT
+	bool jit_on_old = JIT_G(on);
+	JIT_G(on) = false;
+#endif
+
 	entry->ce = new_ce = zend_persist_class_entry(ce);
 	zend_update_parent_ce(new_ce);
+
+#ifdef HAVE_JIT
+	JIT_G(on) = jit_on_old;
+#endif
 
 	entry->num_warnings = EG(num_errors);
 	entry->warnings = zend_persist_warnings(EG(num_errors), EG(errors));
@@ -2597,10 +2610,6 @@ static void zend_reset_cache_vars(void)
 static void accel_reset_pcre_cache(void)
 {
 	Bucket *p;
-
-	if (PCRE_G(per_request_cache)) {
-		return;
-	}
 
 	ZEND_HASH_MAP_FOREACH_BUCKET(&PCRE_G(pcre_cache), p) {
 		/* Remove PCRE cache entries with inconsistent keys */
@@ -3422,6 +3431,11 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 		/* don't schedule twice */
 		return;
 	}
+
+	if (UNEXPECTED(zend_accel_schedule_restart_hook)) {
+		zend_accel_schedule_restart_hook(reason);
+	}
+
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled! Reason: %s",
 			zend_accel_restart_reason_text[reason]);
 

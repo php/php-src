@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 66221c42416635403ee6d49c12884e94073b67f2 */
+ * Stub hash: 7712aba90b16090fbe7c124c1e3f26b2cc3e2ab2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -84,6 +84,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SoapServer_handl
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SoapServer___getLastResponse, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_SoapClient___construct arginfo_class_SoapServer___construct
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SoapClient___call, 0, 2, IS_MIXED, 0)
@@ -152,6 +155,7 @@ ZEND_METHOD(SoapServer, setObject);
 ZEND_METHOD(SoapServer, getFunctions);
 ZEND_METHOD(SoapServer, addFunction);
 ZEND_METHOD(SoapServer, handle);
+ZEND_METHOD(SoapServer, __getLastResponse);
 ZEND_METHOD(SoapClient, __construct);
 ZEND_METHOD(SoapClient, __call);
 ZEND_METHOD(SoapClient, __soapCall);
@@ -170,14 +174,6 @@ ZEND_METHOD(SoapClient, __setLocation);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(use_soap_error_handler, arginfo_use_soap_error_handler)
 	ZEND_FE(is_soap_fault, arginfo_is_soap_fault)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Soap_Url_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Soap_Sdl_methods[] = {
 	ZEND_FE_END
 };
 
@@ -212,6 +208,7 @@ static const zend_function_entry class_SoapServer_methods[] = {
 	ZEND_ME(SoapServer, getFunctions, arginfo_class_SoapServer_getFunctions, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoapServer, addFunction, arginfo_class_SoapServer_addFunction, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoapServer, handle, arginfo_class_SoapServer_handle, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, __getLastResponse, arginfo_class_SoapServer___getLastResponse, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -322,7 +319,7 @@ static zend_class_entry *register_class_Soap_Url(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Soap", "Url", class_Soap_Url_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Soap", "Url", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -332,7 +329,7 @@ static zend_class_entry *register_class_Soap_Sdl(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Soap", "Sdl", class_Soap_Sdl_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Soap", "Sdl", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -375,9 +372,7 @@ static zend_class_entry *register_class_SoapHeader(void)
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_name_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_data_default_value;
 	ZVAL_NULL(&property_data_default_value);
@@ -548,9 +543,7 @@ static zend_class_entry *register_class_SoapClient(void)
 
 	zval property_trace_default_value;
 	ZVAL_FALSE(&property_trace_default_value);
-	zend_string *property_trace_name = zend_string_init("trace", sizeof("trace") - 1, 1);
-	zend_declare_typed_property(class_entry, property_trace_name, &property_trace_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_trace_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_TRACE), &property_trace_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 
 	zval property_compression_default_value;
 	ZVAL_NULL(&property_compression_default_value);

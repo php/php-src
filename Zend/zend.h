@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.4.0-dev"
+#define ZEND_VERSION "4.5.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -341,7 +341,22 @@ extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PT
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(zend_string *filename, zend_string **opened_path);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
+
+/* Called by the VM in certain places like at the loop header, user function
+ * entry, and after internal function calls, if EG(vm_interrupt) has been set.
+ *
+ * If this is used to switch the EG(current_execute_data), such as implementing
+ * a coroutine scheduler, then it needs to check the top frame to see if it's
+ * an internal function. If an internal function is on top, then the frame
+ * shouldn't be switched away.
+ *
+ * Prior to PHP 8.0, this check was not necessary. In PHP 8.0,
+ * zend_call_function started calling zend_interrupt_function, and in 8.4 the
+ * DO_*CALL* opcodes started calling the zend_interrupt_function while the
+ * internal frame is still on top.
+ */
 extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
+
 extern ZEND_API void (*zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
@@ -361,6 +376,8 @@ extern ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
+
+extern ZEND_API void (*zend_accel_schedule_restart_hook)(int reason);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);

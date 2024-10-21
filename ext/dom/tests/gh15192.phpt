@@ -10,8 +10,8 @@ $element = $dom2->firstChild;
 $dom = new DomDocument();
 var_dump($element);
 ?>
---EXPECTF--
-object(Dom\HTMLElement)#3 (29) {
+--EXPECT--
+object(Dom\HTMLElement)#3 (30) {
   ["namespaceURI"]=>
   string(28) "http://www.w3.org/1999/xhtml"
   ["prefix"]=>
@@ -40,6 +40,8 @@ object(Dom\HTMLElement)#3 (29) {
   NULL
   ["innerHTML"]=>
   string(36) "<head></head><body><p>foo</p></body>"
+  ["outerHTML"]=>
+  string(49) "<html><head></head><body><p>foo</p></body></html>"
   ["substitutedNodeValue"]=>
   string(3) "foo"
   ["nodeType"]=>

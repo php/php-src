@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* Lazy objects are standard zend_object whose initialization is defered until
+/* Lazy objects are standard zend_object whose initialization is deferred until
  * one of their properties backing store is accessed for the first time.
  *
  * This is implemented by using the same fallback mechanism as __get and __set
@@ -199,6 +199,27 @@ ZEND_API bool zend_class_can_be_lazy(zend_class_entry *ce)
 	return true;
 }
 
+static int zlo_hash_remove_dyn_props_func(zval *pDest)
+{
+	if (Z_TYPE_P(pDest) == IS_INDIRECT) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+
+	return ZEND_HASH_APPLY_REMOVE;
+}
+
+static bool zlo_is_iterating(zend_object *object)
+{
+	if (object->properties && HT_ITERATORS_COUNT(object->properties)) {
+		return true;
+	}
+	if (zend_object_is_lazy_proxy(object)
+			&& zend_lazy_object_initialized(object)) {
+		return zlo_is_iterating(zend_lazy_object_get_instance(object));
+	}
+	return false;
+}
+
 /* Make object 'obj' lazy. If 'obj' is NULL, create a lazy instance of
  * class 'reflection_ce' */
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
@@ -251,6 +272,10 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 			}
 		}
 	} else {
+		if (zlo_is_iterating(obj)) {
+			zend_throw_error(NULL, "Can not reset an object during property iteration");
+			return NULL;
+		}
 		if (zend_object_is_lazy(obj)) {
 			ZEND_ASSERT(zend_object_is_lazy_proxy(obj) && zend_lazy_object_initialized(obj));
 			OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY);
@@ -278,9 +303,17 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 
 		GC_DEL_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
 
-		/* unset() dynamic properties */
-		zend_object_dtor_dynamic_properties(obj);
-		obj->properties = NULL;
+		/* unset() dynamic properties. Do not NULL out obj->properties, as this
+		 * would be unexpected. */
+		if (obj->properties) {
+			if (UNEXPECTED(GC_REFCOUNT(obj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(obj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_DELREF(obj->properties);
+				}
+				obj->properties = zend_array_dup(obj->properties);
+			}
+			zend_hash_reverse_apply(obj->properties, zlo_hash_remove_dyn_props_func);
+		}
 
 		/* unset() declared properties */
 		for (int i = 0; i < reflection_ce->default_properties_count; i++) {
@@ -303,7 +336,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 	}
 
 	/* Objects become non-lazy if all properties are made non-lazy before
-	 * initialization is triggerd. If the object has no properties to begin
+	 * initialization is triggered. If the object has no properties to begin
 	 * with, this happens immediately. */
 	if (UNEXPECTED(!lazy_properties_count)) {
 		return obj;
@@ -429,6 +462,9 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	ZEND_ASSERT(zend_object_is_lazy_proxy(obj));
 	ZEND_ASSERT(!zend_lazy_object_initialized(obj));
 
+	/* Prevent object from being released during initialization */
+	GC_ADDREF(obj);
+
 	zend_lazy_object_info *info = zend_lazy_object_get_info(obj);
 
 	/* prevent reentrant initialization */
@@ -440,6 +476,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	zval zobj;
 	HashTable *named_params = NULL;
 	zend_fcall_info_cache *initializer = &info->u.initializer.fcc;
+	zend_object *instance = NULL;
 
 	ZVAL_OBJ(&zobj, obj);
 
@@ -447,7 +484,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 
 	if (UNEXPECTED(EG(exception))) {
 		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
-		return NULL;
+		goto exit;
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT)) {
@@ -456,8 +493,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 				ZSTR_VAL(obj->ce->name),
 				zend_zval_value_name(&retval));
 		zval_ptr_dtor(&retval);
-		return NULL;
-
+		goto exit;
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT || !zend_lazy_object_compatible(Z_OBJ(retval), obj))) {
@@ -466,14 +502,14 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 				zend_zval_value_name(&retval),
 				ZSTR_VAL(obj->ce->name));
 		zval_ptr_dtor(&retval);
-		return NULL;
+		goto exit;
 	}
 
 	if (UNEXPECTED(Z_OBJ(retval) == obj || zend_object_is_lazy(Z_OBJ(retval)))) {
 		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		zend_throw_error(NULL, "Lazy proxy factory must return a non-lazy object");
 		zval_ptr_dtor(&retval);
-		return NULL;
+		goto exit;
 	}
 
 	zend_fcc_dtor(&info->u.initializer.fcc);
@@ -495,7 +531,18 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 		}
 	}
 
-	return Z_OBJ(retval);
+	instance = Z_OBJ(retval);
+
+exit:
+	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+		zend_throw_error(NULL, "Lazy object was released during initialization");
+		zend_objects_store_del(obj);
+		instance = NULL;
+	} else {
+		gc_check_possible_root((zend_refcounted*) obj);
+	}
+
+	return instance;
 }
 
 /* Initialize a lazy object. */
@@ -513,6 +560,9 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 		ZEND_ASSERT(zend_object_is_lazy_proxy(obj));
 		zend_lazy_object_info *info = zend_lazy_object_get_info(obj);
 		ZEND_ASSERT(info->flags & ZEND_LAZY_OBJECT_INITIALIZED);
+		if (zend_object_is_lazy(info->u.instance)) {
+			return zend_lazy_object_init(info->u.instance);
+		}
 		return info->u.instance;
 	}
 
@@ -528,6 +578,9 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	if (zend_object_is_lazy_proxy(obj)) {
 		return zend_lazy_object_init_proxy(obj);
 	}
+
+	/* Prevent object from being released during initialization */
+	GC_ADDREF(obj);
 
 	zend_fcall_info_cache *initializer = zend_lazy_object_get_initializer_fcc(obj);
 
@@ -562,6 +615,7 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	int argc = 1;
 	zval zobj;
 	HashTable *named_params = NULL;
+	zend_object *instance = NULL;
 
 	ZVAL_OBJ(&zobj, obj);
 
@@ -569,14 +623,14 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 
 	if (EG(exception)) {
 		zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
-		return NULL;
+		goto exit;
 	}
 
 	if (Z_TYPE(retval) != IS_NULL) {
 		zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
 		zval_ptr_dtor(&retval);
 		zend_type_error("Lazy object initializer must return NULL or no value");
-		return NULL;
+		goto exit;
 	}
 
 	if (properties_table_snapshot) {
@@ -598,7 +652,18 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	 * zend_lazy_object_has_stale_info() check */
 	zend_lazy_object_del_info(obj);
 
-	return obj;
+	instance = obj;
+
+exit:
+	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+		zend_throw_error(NULL, "Lazy object was released during initialization");
+		zend_objects_store_del(obj);
+		instance = NULL;
+	} else {
+		gc_check_possible_root((zend_refcounted*) obj);
+	}
+
+	return instance;
 }
 
 /* Mark an object as non-lazy (after all properties were initialized) */
@@ -624,8 +689,10 @@ ZEND_API HashTable *zend_lazy_object_get_properties(zend_object *object)
 
 	zend_object *tmp = zend_lazy_object_init(object);
 	if (UNEXPECTED(!tmp)) {
-		ZEND_ASSERT(!object->properties || object->properties == &zend_empty_array);
-		return object->properties = (zend_array*) &zend_empty_array;
+		if (object->properties) {
+			return object->properties;
+		}
+		return object->properties = zend_new_array(0);
 	}
 
 	object = tmp;
@@ -733,4 +800,22 @@ HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n)
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 	return NULL;
+}
+
+zend_property_info *zend_lazy_object_get_property_info_for_slot(zend_object *obj, zval *slot)
+{
+	ZEND_ASSERT(zend_object_is_lazy_proxy(obj));
+
+	zend_property_info **table = obj->ce->properties_info_table;
+	intptr_t prop_num = slot - obj->properties_table;
+	if (prop_num >= 0 && prop_num < obj->ce->default_properties_count) {
+		return table[prop_num];
+	}
+
+	if (!zend_lazy_object_initialized(obj)) {
+		return NULL;
+	}
+
+	obj = zend_lazy_object_get_instance(obj);
+	return zend_get_property_info_for_slot(obj, slot);
 }

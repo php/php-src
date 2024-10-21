@@ -10,13 +10,12 @@ on:
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
       - .cirrus.yml
-      - .travis.yml
-      - travis/**
       - .circleci/**
     branches:
       - PHP-8.1
       - PHP-8.2
       - PHP-8.3
+      - PHP-8.4
       - master
   pull_request:
     paths-ignore:
@@ -28,11 +27,10 @@ on:
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
       - .cirrus.yml
-      - .travis.yml
-      - travis/**
       - .circleci/**
     branches:
       - '**'
+  workflow_dispatch: ~
 permissions:
   contents: read
 concurrency:
@@ -80,21 +78,13 @@ jobs:
             zts: true
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-${{ !matrix.asan && '22' || '20' }}.04
-    container:
-      image: ${{ matrix.asan && 'ubuntu:23.04' || null }}
+    runs-on: ubuntu-${{ !matrix.asan && '22' || '24' }}.04
+    timeout-minutes: 50
     steps:
       - name: git checkout
         uses: actions/checkout@v4
       - name: apt
         uses: ./.github/actions/apt-x64
-      - name: LLVM 16 (ASAN-only)
-        if: ${{ matrix.asan }}
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y lsb-release wget software-properties-common gnupg
-          wget https://apt.llvm.org/llvm.sh
-          chmod u+x llvm.sh
-          sudo ./llvm.sh 16
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -123,7 +113,7 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang-16 CXX=clang++-16' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++' || '' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
@@ -150,6 +140,7 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
+    timeout-minutes: 50
     container:
       image: ubuntu:20.04
     env:
@@ -203,6 +194,7 @@ jobs:
             arch: ARM64
     name: MACOS_${{ matrix.arch }}_DEBUG_NTS
     runs-on: macos-${{ matrix.os }}
+    timeout-minutes: 50
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -237,6 +229,7 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
     runs-on: windows-2022
+    timeout-minutes: 50
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
@@ -263,6 +256,7 @@ jobs:
     name: BENCHMARKING
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
+    timeout-minutes: 50
     steps:
       - name: git checkout
         uses: actions/checkout@v4

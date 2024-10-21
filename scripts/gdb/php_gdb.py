@@ -67,6 +67,12 @@ class ZendStringPrettyPrinter(gdb.printing.PrettyPrinter):
 
 pp_set.add_printer('zend_string', '^_zend_string$', ZendStringPrettyPrinter)
 
+def zendStringPointerPrinter(ptr):
+    "Given a pointer to a zend_string, show the contents (if non-NULL)"
+    if int(ptr) == 0:
+        return '0x0'
+    return ZendStringPrettyPrinter(ptr.dereference()).to_string()
+
 class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
     "Print a zend_type"
 
@@ -289,6 +295,52 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
 
 pp_set.add_printer('zval', '^_zval_struct$', ZvalPrettyPrinter)
 
+class ZendClassEntryPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_class_entry"
+
+    # String pointers, show the string contents if possible
+    STRING_FIELDS = [ 'name', 'doc_comment' ]
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return zendStringPointerPrinter(self.val['name'])
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name is not None:
+                if field.name in self.STRING_FIELDS:
+                    yield (field.name, zendStringPointerPrinter(self.val[field.name]))
+                else:
+                    yield (field.name, self.val[field.name])
+            else:
+                # Don't break on the union fields. Unfortunately, pretty
+                # printers done in python cannot match the default formatting of
+                # C anonymous fields, which omit the name entirely, see
+                # binutils-gdb/gdb/cp-valprint.c#248 (as of commit
+                # b6532accdd8e24329cc69bb58bc2883796008776)
+                yield ('<anonymous>', self.val[field])
+
+pp_set.add_printer('zend_class_entry', '^_zend_class_entry$', ZendClassEntryPrettyPrinter)
+
+class ZendClassConstantPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_class_constant"
+
+    def __init__(self, val):
+        self.val = val
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name == 'doc_comment':
+                yield ('doc_comment', zendStringPointerPrinter(self.val['doc_comment']))
+            elif field.name == 'ce':
+                yield ('ce', zendStringPointerPrinter(self.val['ce']['name']))
+            else:
+                yield (field.name, self.val[field.name])
+
+pp_set.add_printer('zend_class_constant', '^_zend_class_constant$', ZendClassConstantPrettyPrinter)
+
 type_bit_to_name = None
 type_name_to_bit = None
 
@@ -301,7 +353,7 @@ def load_type_bits():
 
     (symbol,_) = gdb.lookup_symbol("zend_gc_refcount")
     if symbol == None:
-        raise "Could not find zend_types.h: symbol zend_gc_refcount not found"
+        raise Exception("Could not find zend_types.h: symbol zend_gc_refcount not found")
     filename = symbol.symtab.fullname()
 
     bits = {}

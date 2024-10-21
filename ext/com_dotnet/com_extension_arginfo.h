@@ -222,14 +222,6 @@ static const zend_function_entry class_dotnet_methods[] = {
 };
 #endif
 
-static const zend_function_entry class_com_safearray_proxy_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_com_exception_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_com_extension_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("CLSCTX_INPROC_SERVER", CLSCTX_INPROC_SERVER, CONST_PERSISTENT);
@@ -331,7 +323,7 @@ static zend_class_entry *register_class_com_safearray_proxy(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", class_com_safearray_proxy_methods);
+	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
@@ -341,7 +333,7 @@ static zend_class_entry *register_class_com_exception(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "com_exception", class_com_exception_methods);
+	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_FINAL);
 
 	return class_entry;

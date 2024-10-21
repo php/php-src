@@ -19,6 +19,12 @@ if test "$PHP_PDO_PGSQL" != "no"; then
       or later).])],,
     [$PGSQL_LIBS])
 
+  PHP_CHECK_LIBRARY([pq], [PQclosePrepared],
+    [AC_DEFINE([HAVE_PQCLOSEPREPARED], [1],
+      [Define to 1 if libpq has the 'PQclosePrepared' function (PostgreSQL 17
+      or later).])],,
+    [$PGSQL_LIBS])
+
   PHP_CHECK_PDO_INCLUDES
 
   PHP_NEW_EXTENSION([pdo_pgsql],

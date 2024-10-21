@@ -116,15 +116,18 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 	ex = &zv;
 	do {
 		ancestor = zend_read_property_ex(i_get_exception_base(add_previous), add_previous, ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
+		ZVAL_DEREF(ancestor);
 		while (Z_TYPE_P(ancestor) == IS_OBJECT) {
 			if (Z_OBJ_P(ancestor) == Z_OBJ_P(ex)) {
 				OBJ_RELEASE(add_previous);
 				return;
 			}
 			ancestor = zend_read_property_ex(i_get_exception_base(Z_OBJ_P(ancestor)), Z_OBJ_P(ancestor), ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
+			ZVAL_DEREF(ancestor);
 		}
 		base_ce = i_get_exception_base(Z_OBJ_P(ex));
 		previous = zend_read_property_ex(base_ce, Z_OBJ_P(ex), ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
+		ZVAL_DEREF(previous);
 		if (Z_TYPE_P(previous) == IS_NULL) {
 			zend_update_property_ex(base_ce, Z_OBJ_P(ex), ZSTR_KNOWN(ZEND_STR_PREVIOUS), &pv);
 			GC_DELREF(add_previous);
@@ -295,7 +298,7 @@ static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* 
 /* {{{ Clone the exception object */
 ZEND_COLD ZEND_METHOD(Exception, __clone)
 {
-	/* Should never be executable */
+	/* __clone() is private but this is reachable with reflection */
 	zend_throw_exception(NULL, "Cannot clone object using __clone()", 0);
 }
 /* }}} */
@@ -626,6 +629,7 @@ ZEND_METHOD(Exception, getTraceAsString)
 		RETURN_THROWS();
 	}
 
+	ZVAL_DEREF(trace);
 	/* Type should be guaranteed by property type. */
 	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
 	RETURN_NEW_STR(zend_trace_to_string(Z_ARRVAL_P(trace), /* include_main */ true));
@@ -639,7 +643,7 @@ ZEND_METHOD(Exception, getPrevious)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_PREVIOUS));
+	ZVAL_COPY_DEREF(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_PREVIOUS));
 } /* }}} */
 
 /* {{{ Obtain the string representation of the Exception object */
@@ -713,7 +717,8 @@ ZEND_METHOD(Exception, __toString)
 
 		Z_PROTECT_RECURSION_P(exception);
 		exception = GET_PROPERTY(exception, ZEND_STR_PREVIOUS);
-		if (exception && Z_TYPE_P(exception) == IS_OBJECT && Z_IS_RECURSIVE_P(exception)) {
+		ZVAL_DEREF(exception);
+		if (Z_TYPE_P(exception) == IS_OBJECT && Z_IS_RECURSIVE_P(exception)) {
 			break;
 		}
 	}
@@ -721,13 +726,14 @@ ZEND_METHOD(Exception, __toString)
 
 	exception = ZEND_THIS;
 	/* Reset apply counts */
-	while (exception && Z_TYPE_P(exception) == IS_OBJECT && (base_ce = i_get_exception_base(Z_OBJ_P(exception))) && instanceof_function(Z_OBJCE_P(exception), base_ce)) {
+	while (Z_TYPE_P(exception) == IS_OBJECT && (base_ce = i_get_exception_base(Z_OBJ_P(exception))) && instanceof_function(Z_OBJCE_P(exception), base_ce)) {
 		if (Z_IS_RECURSIVE_P(exception)) {
 			Z_UNPROTECT_RECURSION_P(exception);
 		} else {
 			break;
 		}
 		exception = GET_PROPERTY(exception, ZEND_STR_PREVIOUS);
+		ZVAL_DEREF(exception);
 	}
 
 	exception = ZEND_THIS;

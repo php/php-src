@@ -33,6 +33,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 	struct tm te;
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
+	const zend_long max_year = (zend_long)(ZEND_LONG_MAX / 5) * 4;
 	bool year_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
@@ -51,6 +52,11 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 		} else {
 			year = 1900 + b.tm_year;
 		}
+	}
+
+	if (year <= 0 || year > max_year) {
+		zend_argument_value_error(1, "must be between 1 and " ZEND_LONG_FMT, max_year);
+		RETURN_THROWS();
 	}
 
 	#ifdef ZEND_ENABLE_ZVAL_LONG64

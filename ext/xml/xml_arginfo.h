@@ -131,10 +131,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_XMLParser_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_xml_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("XML_ERROR_NONE", XML_ERROR_NONE, CONST_PERSISTENT);
@@ -167,7 +163,7 @@ static void register_xml_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("XML_SAX_IMPL", PHP_XML_SAX_IMPL, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_xml_set_object_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "xml_set_object", sizeof("xml_set_object") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_xml_set_object_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "xml_set_object", sizeof("xml_set_object") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_xml_set_object_0_arg0;
 	zend_string *attribute_Deprecated_func_xml_set_object_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_xml_set_object_0_arg0, attribute_Deprecated_func_xml_set_object_0_arg0_str);
@@ -184,7 +180,7 @@ static zend_class_entry *register_class_XMLParser(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "XMLParser", class_XMLParser_methods);
+	INIT_CLASS_ENTRY(ce, "XMLParser", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

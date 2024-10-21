@@ -38,6 +38,7 @@
 #include "php_globals.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
+#include "zend_interfaces.h"
 #include "php_network.h"
 
 #ifdef HAVE_PGSQL
@@ -3357,6 +3358,29 @@ PHP_FUNCTION(pg_copy_to)
 }
 /* }}} */
 
+static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, zval *value)
+{
+	zend_string *tmp = zval_try_get_string(value);
+	if (UNEXPECTED(!tmp)) {
+		return FAILURE;
+	}
+	zend_string *zquery = zend_string_alloc(ZSTR_LEN(tmp) + 1, false);
+	memcpy(ZSTR_VAL(zquery), ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 1);
+	ZSTR_LEN(zquery) = ZSTR_LEN(tmp);
+	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(zquery)[ZSTR_LEN(tmp)]  != '\n') {
+		ZSTR_VAL(zquery)[ZSTR_LEN(tmp)] = '\n';
+		ZSTR_LEN(zquery) ++;
+	}
+	if (PQputCopyData(pgsql, ZSTR_VAL(zquery), ZSTR_LEN(zquery)) != 1) {
+		zend_string_release_ex(zquery, false);
+		zend_string_release(tmp);
+		return FAILURE;
+	}
+	zend_string_release_ex(zquery, false);
+	zend_string_release(tmp);
+	return SUCCESS;
+}
+
 /* {{{ Copy table from array */
 PHP_FUNCTION(pg_copy_from)
 {
@@ -3376,7 +3400,7 @@ PHP_FUNCTION(pg_copy_from)
 	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 		Z_PARAM_PATH_STR(table_name)
-		Z_PARAM_ARRAY(pg_rows)
+		Z_PARAM_ITERABLE(pg_rows)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(pg_delimiter)
 		Z_PARAM_STRING(pg_null_as, pg_null_as_len)
@@ -3417,30 +3441,36 @@ PHP_FUNCTION(pg_copy_from)
 	switch (status) {
 		case PGRES_COPY_IN:
 			if (pgsql_result) {
-				int command_failed = 0;
 				PQclear(pgsql_result);
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
-					zend_string *tmp = zval_try_get_string(value);
-					if (UNEXPECTED(!tmp)) {
-						return;
+				bool command_failed = false;
+				if (Z_TYPE_P(pg_rows) == IS_ARRAY) {
+					ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
+						if (pgsql_copy_from_query(pgsql, pgsql_result, value) == FAILURE) {
+							PHP_PQ_ERROR("copy failed: %s", pgsql);
+							RETURN_FALSE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					zend_object_iterator *iter = Z_OBJCE_P(pg_rows)->get_iterator(Z_OBJCE_P(pg_rows), pg_rows, 0);
+					if (UNEXPECTED(EG(exception) || iter == NULL)) {
+						RETURN_THROWS();
 					}
-					zend_string *zquery = zend_string_alloc(ZSTR_LEN(tmp) + 1, false);
-					memcpy(ZSTR_VAL(zquery), ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 1);
-					ZSTR_LEN(zquery) = ZSTR_LEN(tmp);
-					if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(zquery)[ZSTR_LEN(tmp)]  != '\n') {
-						ZSTR_VAL(zquery)[ZSTR_LEN(tmp)] = '\n';
-						ZSTR_LEN(zquery) ++;
-					}
-					if (PQputCopyData(pgsql, ZSTR_VAL(zquery), ZSTR_LEN(zquery)) != 1) {
-						zend_string_release_ex(zquery, false);
-						zend_string_release(tmp);
-						PHP_PQ_ERROR("copy failed: %s", pgsql);
-						RETURN_FALSE;
-					}
-					zend_string_release_ex(zquery, false);
-					zend_string_release(tmp);
-				} ZEND_HASH_FOREACH_END();
 
+					if (iter->funcs->rewind) {
+						iter->funcs->rewind(iter);
+					}
+
+					while (iter->funcs->valid(iter) == SUCCESS && EG(exception) == NULL) {
+						zval *value = iter->funcs->get_current_data(iter);
+						if (pgsql_copy_from_query(pgsql, pgsql_result, value) == FAILURE) {
+							zend_iterator_dtor(iter);
+							PHP_PQ_ERROR("copy failed: %s", pgsql);
+							RETURN_FALSE;
+						}
+						iter->funcs->move_forward(iter);
+					}
+					zend_iterator_dtor(iter);
+				}
 				if (PQputCopyEnd(pgsql, NULL) != 1) {
 					PHP_PQ_ERROR("putcopyend failed: %s", pgsql);
 					RETURN_FALSE;
@@ -3448,7 +3478,7 @@ PHP_FUNCTION(pg_copy_from)
 				while ((pgsql_result = PQgetResult(pgsql))) {
 					if (PGRES_COMMAND_OK != PQresultStatus(pgsql_result)) {
 						PHP_PQ_ERROR("Copy command failed: %s", pgsql);
-						command_failed = 1;
+						command_failed = true;
 					}
 					PQclear(pgsql_result);
 				}
@@ -6254,5 +6284,41 @@ PHP_FUNCTION(pg_set_chunked_rows_size)
 	/** can still fail if it is not allowed e.g. already fetched results **/
 
 	RETURN_BOOL(PQsetChunkedRowsMode(link->conn, (int)size) == 1);
+}
+#endif
+
+#if defined(HAVE_PG_CLOSE_STMT)
+PHP_FUNCTION(pg_close_stmt)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+	PGresult *pgsql_result;
+	zend_string *stmt;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+		Z_PARAM_STR(stmt)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(stmt) == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	pgsql_result = PQclosePrepared(link->conn, ZSTR_VAL(stmt));
+
+	if (PQresultStatus(pgsql_result) != PGRES_COMMAND_OK) {
+		RETURN_FALSE;
+	} else {
+		pgsql_result_handle *pg_handle;
+		object_init_ex(return_value, pgsql_result_ce);
+		pg_handle = Z_PGSQL_RESULT_P(return_value);
+		pg_handle->conn = link->conn;
+		pg_handle->result = pgsql_result;
+		pg_handle->row = 0;
+	}
 }
 #endif
