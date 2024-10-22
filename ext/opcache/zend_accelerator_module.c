@@ -172,9 +172,9 @@ static ZEND_INI_MH(OnUpdateFileCache)
 			    zend_stat(ZSTR_VAL(new_value), &buf) != 0 ||
 			    !S_ISDIR(buf.st_mode) ||
 #ifndef ZEND_WIN32
-				access(ZSTR_VAL(new_value), R_OK | W_OK | X_OK) != 0) {
+				access(ZSTR_VAL(new_value), R_OK | X_OK) != 0) {
 #else
-				_access(ZSTR_VAL(new_value), 06) != 0) {
+				_access(ZSTR_VAL(new_value), 04) != 0) {
 #endif
 				zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache must be a full path of accessible directory.\n");
 				new_value = NULL;
@@ -311,9 +311,10 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.mmap_base", NULL, PHP_INI_SYSTEM,	OnUpdateString,	                             accel_directives.mmap_base,                 zend_accel_globals, accel_globals)
 #endif
 
-	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache,         accel_directives.file_cache,                    zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("opcache.file_cache_read_only"          , "0"   , PHP_INI_SYSTEM, OnUpdateBool,            accel_directives.file_cache_read_only,          zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	           accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	           accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
 #if ENABLE_FILE_CACHE_FALLBACK
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_fallback"           , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_fallback,           zend_accel_globals, accel_globals)
 #endif
@@ -823,6 +824,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 #endif
 
 	add_assoc_string(&directives, "opcache.file_cache",                    ZCG(accel_directives).file_cache ? ZCG(accel_directives).file_cache : "");
+	add_assoc_bool(&directives,   "opcache.file_cache_read_only",          ZCG(accel_directives).file_cache_read_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_only",               ZCG(accel_directives).file_cache_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_consistency_checks", ZCG(accel_directives).file_cache_consistency_checks);
 #if ENABLE_FILE_CACHE_FALLBACK

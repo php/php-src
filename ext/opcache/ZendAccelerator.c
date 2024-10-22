@@ -1411,6 +1411,9 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 	}
 
 	if (ZCG(accel_directives).file_cache) {
+		if (ZCG(accel_directives).file_cache_read_only) {
+			return FAILURE;
+		}
 		zend_file_cache_invalidate(realpath);
 	}
 
@@ -3300,6 +3303,39 @@ static zend_result accel_post_startup(void)
 #endif
 		accel_shared_globals = calloc(1, sizeof(zend_accel_shared_globals));
 	}
+
+	/* opcache.file_cache_read_only should only be enabled when all script files are read-only */
+	if (ZCG(accel_directives).file_cache_read_only) {
+		if (!ZCG(accel_directives).file_cache) {
+			accel_startup_ok = false;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache_read_only is set without a proper setting of opcache.file_cache");
+			return SUCCESS;
+		}
+		if (ZCG(accel_directives).revalidate_freq != 0) {
+			accel_startup_ok = false;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache_read_only cannot be enabled when opcache.revalidate_freq is not 0.");
+			return SUCCESS;
+		}
+		if (ZCG(accel_directives).validate_timestamps) {
+			accel_startup_ok = false;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache_read_only cannot be enabled when opcache.validate_timestamps is enabled.");
+			return SUCCESS;
+		}
+	} else {
+		/* opcache.file_cache isn't read only, so ensure the directory is writable */
+		if ( ZCG(accel_directives).file_cache &&
+#ifndef ZEND_WIN32
+				access(ZCG(accel_directives).file_cache, R_OK | W_OK | X_OK) != 0
+#else
+				_access(ZCG(accel_directives).file_cache, 06) != 0
+#endif
+		) {
+			accel_startup_ok = false;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache must be a full path of an accessible, writable directory");
+			return SUCCESS;
+		}
+	}
+
 #if ENABLE_FILE_CACHE_FALLBACK
 file_cache_fallback:
 #endif
