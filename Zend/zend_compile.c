@@ -7881,6 +7881,11 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				zend_compile_attributes(
 					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 			}
+
+			zend_attribute *override_attribute = zend_get_attribute_str(prop->attributes, "override", sizeof("override")-1);
+			if (override_attribute) {
+				prop->flags |= ZEND_ACC_OVERRIDE;
+			}
 		}
 	}
 
@@ -8857,6 +8862,11 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 
 		if (attr_ast) {
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
+		}
+
+		zend_attribute *override_attribute = zend_get_attribute_str(info->attributes, "override", sizeof("override")-1);
+		if (override_attribute) {
+			info->flags |= ZEND_ACC_OVERRIDE;
 		}
 
 		CG(context).active_property_info_name = old_active_property_info_name;
