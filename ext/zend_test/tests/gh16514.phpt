@@ -4,6 +4,7 @@ GH-16514: Nested generator in zend_test observer
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.show_init_backtrace=1
 --FILE--
 <?php
