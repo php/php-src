@@ -3410,6 +3410,8 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 		CG(current_linking_class) = is_cacheable ? ce : NULL;
 
 		zend_try{
+			CG(zend_lineno) = ce->info.user.line_start;
+
 			if (is_cacheable) {
 				zend_begin_record_errors();
 			}
