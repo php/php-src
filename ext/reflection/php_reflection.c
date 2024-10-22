@@ -7809,6 +7809,26 @@ ZEND_METHOD(ReflectionConstant, getShortName)
 	}
 }
 
+ZEND_METHOD(ReflectionConstant, getType)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+
+	zend_type fake_type;
+	if (Z_TYPE(const_->value) == IS_OBJECT) {
+		fake_type = (zend_type) ZEND_TYPE_INIT_CLASS(Z_OBJCE(const_->value)->name, false, 0);
+	} else {
+		fake_type = (zend_type) ZEND_TYPE_INIT_CODE(Z_TYPE(const_->value), false, 0);
+	}
+	reflection_type_factory(fake_type, return_value, 1);
+}
+
 ZEND_METHOD(ReflectionConstant, getValue)
 {
 	reflection_object *intern;

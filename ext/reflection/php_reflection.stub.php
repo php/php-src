@@ -910,6 +910,8 @@ final class ReflectionConstant implements Reflector
 
     public function getShortName(): string {}
 
+    public function getType(): ?ReflectionType {}
+
     public function getValue(): mixed {}
 
     public function isDeprecated(): bool {}
