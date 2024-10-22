@@ -7185,6 +7185,18 @@ done:
 					 || opline->opcode == ZEND_FE_RESET_R) {
 						/* keep old value */
 						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
+#ifdef HAVE_FFI
+					} else if (JIT_G(current_frame)
+					 && JIT_G(current_frame)->call
+					 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)
+					 && (opline->opcode == ZEND_SEND_VAR_EX
+					  || opline->opcode == ZEND_SEND_VAR_NO_REF
+					  || opline->opcode == ZEND_SEND_VAR_NO_REF_EX
+					  || opline->opcode == ZEND_SEND_FUNC_ARG)
+					 && opline->op2_type != IS_CONST) {
+						/* keep old value */
+						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
+#endif
 					}
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type,
 						(gen_handler || type == IS_UNKNOWN || !ra ||
