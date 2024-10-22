@@ -428,7 +428,7 @@ static zend_result parse_url_read_fragment(const uri_internal_t *internal_uri, z
 
 static zend_result parse_url_init_parser(void)
 {
-	zend_hash_init(&parse_url_property_handlers, 0, NULL, NULL, true);
+	zend_hash_init(&parse_url_property_handlers, 8, NULL, NULL, true);
 
 	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), parse_url_read_scheme);
 	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), parse_url_read_user);

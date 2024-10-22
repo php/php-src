@@ -18,6 +18,6 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Uri\Rfc3986Uri::__construct(): Argument #1 ($uri) must be a valid URI
 Uri\WhatWgUri::__construct(): Argument #1 ($uri) must be a valid URI

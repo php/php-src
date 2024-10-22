@@ -26,7 +26,7 @@ $uri = Uri\WhatWgUri::create("https://username:password@www.google.com:8080/path
 callGetters($uri);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "https"
 string(8) "username"
 string(8) "password"

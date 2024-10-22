@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 505d14700aaaafc347a16bd9f7cc6cb32bfa0cae */
+ * Stub hash: 0ac9ba734539b67009e61b97ed828fa0166b3b16 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWgError___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, position, IS_STRING, 0)
@@ -103,6 +103,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Rfc3986Uri___toString arginfo_class_Uri_UriInterface___toString
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986Uri___serialize, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986Uri___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWgUri_create, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
@@ -149,6 +156,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWgUri___toString arginfo_class_Uri_UriInterface___toString
 
+#define arginfo_class_Uri_WhatWgUri___serialize arginfo_class_Uri_Rfc3986Uri___serialize
+
+#define arginfo_class_Uri_WhatWgUri___unserialize arginfo_class_Uri_Rfc3986Uri___unserialize
+
 ZEND_METHOD(Uri_WhatWgError, __construct);
 ZEND_METHOD(Uri_Rfc3986Uri, create);
 ZEND_METHOD(Uri_Rfc3986Uri, __construct);
@@ -169,8 +180,11 @@ ZEND_METHOD(Uri_Rfc3986Uri, withQuery);
 ZEND_METHOD(Uri_Rfc3986Uri, getFragment);
 ZEND_METHOD(Uri_Rfc3986Uri, withFragment);
 ZEND_METHOD(Uri_Rfc3986Uri, __toString);
+ZEND_METHOD(Uri_Rfc3986Uri, __serialize);
+ZEND_METHOD(Uri_Rfc3986Uri, __unserialize);
 ZEND_METHOD(Uri_WhatWgUri, create);
 ZEND_METHOD(Uri_WhatWgUri, __construct);
+ZEND_METHOD(Uri_WhatWgUri, __unserialize);
 
 static const zend_function_entry class_Uri_WhatWgError_methods[] = {
 	ZEND_ME(Uri_WhatWgError, __construct, arginfo_class_Uri_WhatWgError___construct, ZEND_ACC_PUBLIC)
@@ -218,6 +232,8 @@ static const zend_function_entry class_Uri_Rfc3986Uri_methods[] = {
 	ZEND_ME(Uri_Rfc3986Uri, getFragment, arginfo_class_Uri_Rfc3986Uri_getFragment, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986Uri, withFragment, arginfo_class_Uri_Rfc3986Uri_withFragment, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986Uri, __toString, arginfo_class_Uri_Rfc3986Uri___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986Uri, __serialize, arginfo_class_Uri_Rfc3986Uri___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986Uri, __unserialize, arginfo_class_Uri_Rfc3986Uri___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -241,6 +257,8 @@ static const zend_function_entry class_Uri_WhatWgUri_methods[] = {
 	ZEND_RAW_FENTRY("getFragment", zim_Uri_Rfc3986Uri_getFragment, arginfo_class_Uri_WhatWgUri_getFragment, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withFragment", zim_Uri_Rfc3986Uri_withFragment, arginfo_class_Uri_WhatWgUri_withFragment, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("__toString", zim_Uri_Rfc3986Uri___toString, arginfo_class_Uri_WhatWgUri___toString, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("__serialize", zim_Uri_Rfc3986Uri___serialize, arginfo_class_Uri_WhatWgUri___serialize, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Uri_WhatWgUri, __unserialize, arginfo_class_Uri_WhatWgUri___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
