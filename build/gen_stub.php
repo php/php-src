@@ -1686,7 +1686,7 @@ class FuncInfo {
         $undocumentedEntity = $doc->createEntityReference('warn.undocumented.func');
         $descriptionRefSec->appendChild($undocumentedEntity);
         $descriptionRefSec->appendChild(new DOMText("\n  "));
-        $returnDescriptionPara = $doc->createElement('para');
+        $returnDescriptionPara = $doc->createElement('simpara');
         $returnDescriptionPara->appendChild(new DOMText("\n   Description.\n  "));
         $descriptionRefSec->appendChild($returnDescriptionPara);
 
@@ -1709,7 +1709,7 @@ class FuncInfo {
         $errorsDescriptionParaConstantTag->append('E_*');
         $errorsDescriptionParaExceptionTag = $doc->createElement('exceptionname');
         $errorsDescriptionParaExceptionTag->append('Exception');
-        $errorsDescriptionPara = $doc->createElement('para');
+        $errorsDescriptionPara = $doc->createElement('simpara');
         $errorsDescriptionPara->append(
             "\n   When does this function issue ",
             $errorsDescriptionParaConstantTag,
@@ -1813,7 +1813,7 @@ ENDCOMMENT
             $parametersRefSec->appendChild($noParamEntity);
             return $parametersRefSec;
         } else {
-            $parametersPara = $doc->createElement('para');
+            $parametersPara = $doc->createElement('simpara');
             $parametersRefSec->appendChild($parametersPara);
 
             $parametersPara->appendChild(new DOMText("\n   "));
@@ -1824,9 +1824,9 @@ ENDCOMMENT
             <varlistentry>
              <term><parameter>name</parameter></term>
              <listitem>
-              <para>
+              <simpara>
                Description.
-              </para>
+              </simpara>
              </listitem>
             </varlistentry>
             */
@@ -1835,7 +1835,7 @@ ENDCOMMENT
                 $parameterTerm = $doc->createElement('term');
                 $parameterTerm->appendChild($parameter);
 
-                $listItemPara = $doc->createElement('para');
+                $listItemPara = $doc->createElement('simpara');
                 $listItemPara->append(
                     "\n       ",
                     "Description.",
@@ -1871,7 +1871,7 @@ ENDCOMMENT
     private function getReturnValueSection(DOMDocument $doc): DOMElement {
         $returnRefSec = $this->generateRefSect1($doc, 'returnvalues');
 
-        $returnDescriptionPara = $doc->createElement('para');
+        $returnDescriptionPara = $doc->createElement('simpara');
         $returnDescriptionPara->appendChild(new DOMText("\n   "));
 
         $returnType = $this->return->getMethodSynopsisType();
@@ -2010,7 +2010,7 @@ ENDCOMMENT
 
         $example->append("\n   ", $title);
 
-        $para = $doc->createElement('para');
+        $para = $doc->createElement('simpara');
         $para->append("\n    ", "Description.", "\n   ");
         $example->append("\n   ", $para);
 
