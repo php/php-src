@@ -972,14 +972,13 @@ cleanup_args:
 	}
 
 	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
-		uint32_t call_info;
+		uint32_t closure_call_info = ZEND_CALL_CLOSURE;
 
 		GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
-		call_info = ZEND_CALL_CLOSURE;
 		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
-			call_info |= ZEND_CALL_FAKE_CLOSURE;
+			closure_call_info |= ZEND_CALL_FAKE_CLOSURE;
 		}
-		ZEND_ADD_CALL_FLAG(call, call_info);
+		ZEND_ADD_CALL_FLAG(call, closure_call_info);
 	}
 
 	if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
