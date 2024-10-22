@@ -46,6 +46,7 @@
 /ext/random @TimWolla @zeriyoshi
 /ext/session @Girgias
 /ext/simplexml @nielsdos
+/ext/soap @nielsdos
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
