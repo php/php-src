@@ -164,6 +164,50 @@ static bool zend_jit_ffi_compatible_addr_op(zend_ffi_type *dst_type, uint32_t sr
 	}
 	return false;
 }
+
+static uint32_t zend_jit_ffi_type_info(zend_ffi_type *type)
+{
+	uint32_t type_kind = type->kind;
+	uint32_t info = MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
+
+	if (type_kind == ZEND_FFI_TYPE_ENUM) {
+		type_kind = type->enumeration.kind;
+	}
+	switch (type_kind) {
+		case ZEND_FFI_TYPE_VOID:
+			info = MAY_BE_NULL;
+			break;
+		case ZEND_FFI_TYPE_FLOAT:
+		case ZEND_FFI_TYPE_DOUBLE:
+			info = MAY_BE_DOUBLE;
+			break;
+		case ZEND_FFI_TYPE_UINT8:
+		case ZEND_FFI_TYPE_SINT8:
+		case ZEND_FFI_TYPE_UINT16:
+		case ZEND_FFI_TYPE_SINT16:
+		case ZEND_FFI_TYPE_UINT32:
+		case ZEND_FFI_TYPE_SINT32:
+		case ZEND_FFI_TYPE_UINT64:
+		case ZEND_FFI_TYPE_SINT64:
+			info = MAY_BE_LONG;
+			break;
+		case ZEND_FFI_TYPE_BOOL:
+			info = MAY_BE_FALSE|MAY_BE_TRUE;
+			break;
+		case ZEND_FFI_TYPE_CHAR:
+			info = MAY_BE_STRING;
+			break;
+		case ZEND_FFI_TYPE_POINTER:
+			if ((type->attr & ZEND_FFI_ATTR_CONST)
+			 && ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
+				info = IS_STRING;
+			}
+			break;
+		default:
+			break;
+	}
+	return info;
+}
 #endif
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP

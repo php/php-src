@@ -1804,6 +1804,11 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		max_used_stack = used_stack = -1;
 	}
 
+#ifdef HAVE_FFI
+	uint32_t frame_flags = 0;
+	zend_ffi_type *frame_ffi_func_type = NULL;
+#endif
+
 	p = trace_buffer + ZEND_JIT_TRACE_START_REC_SIZE;
 	idx = 0;
 	level = 0;
@@ -1814,6 +1819,19 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			uint8_t val_type = IS_UNKNOWN;
 //			zend_class_entry *op1_ce = NULL;
 			zend_class_entry *op2_ce = NULL;
+//			zend_class_entry *op3_ce = NULL;
+#ifdef HAVE_FFI
+			zend_ffi_type *op1_ffi_type = NULL;
+			zend_ffi_type *op2_ffi_type = NULL;
+			zend_ffi_type *op3_ffi_type = NULL;
+			zend_ffi_type holder1, holder2, holder3;
+			HashTable *op1_ffi_symbols = NULL;
+			(void)op2_ffi_type;
+			(void)op3_ffi_type;
+
+			frame_flags = 0;
+			frame_ffi_func_type = NULL;
+#endif
 
 			opline = p->opline;
 
@@ -1837,10 +1855,44 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 //				op1_ce = (zend_class_entry*)(p+1)->ce;
 				p++;
 			}
+#ifdef HAVE_FFI
+			if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
+				op1_ffi_type = (zend_ffi_type*)(p+1)->ptr;
+				if (ZEND_FFI_TYPE_IS_OWNED(op1_ffi_type)) {
+					op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &holder1);
+				}
+				p++;
+			} else if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_SYMBOLS) {
+				op1_ffi_symbols = (HashTable*)(p+1)->ptr;
+				p++;
+			}
+#endif
 			if ((p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
 				op2_ce = (zend_class_entry*)(p+1)->ce;
 				p++;
 			}
+#ifdef HAVE_FFI
+			if ((p+1)->op == ZEND_JIT_TRACE_OP2_FFI_TYPE) {
+				op2_ffi_type = (zend_ffi_type*)(p+1)->ptr;
+				if (ZEND_FFI_TYPE_IS_OWNED(op2_ffi_type)) {
+					op2_ffi_type = zend_jit_ffi_type_pointer_to(op2_ffi_type, &holder2);
+				}
+				p++;
+			}
+#endif
+			if ((p+1)->op == ZEND_JIT_TRACE_OP3_TYPE) {
+//				op3_ce = (zend_class_entry*)(p+1)->ce;
+				p++;
+			}
+#ifdef HAVE_FFI
+			if ((p+1)->op == ZEND_JIT_TRACE_OP3_FFI_TYPE) {
+				op3_ffi_type = (zend_ffi_type*)(p+1)->ptr;
+				if (ZEND_FFI_TYPE_IS_OWNED(op3_ffi_type)) {
+					op3_ffi_type = zend_jit_ffi_type_pointer_to(op3_ffi_type, &holder3);
+				}
+				p++;
+			}
+#endif
 			if ((p+1)->op == ZEND_JIT_TRACE_VAL_INFO) {
 				val_type = (p+1)->op1_type;
 				p++;
@@ -2249,6 +2301,18 @@ propagate_arg:
 						break;
 					}
 					ADD_OP1_TRACE_GUARD();
+#ifdef HAVE_FFI
+					if (op1_ffi_symbols) {
+						zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
+							Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+						if (sym
+						 && sym->kind == ZEND_FFI_SYM_FUNC
+						 && zend_jit_ffi_supported_func(ZEND_FFI_TYPE(sym->type))) {
+							frame_flags = TRACE_FRAME_MASK_FFI;
+							frame_ffi_func_type = ZEND_FFI_TYPE(sym->type);
+						}
+					}
+#endif
 					break;
 				case ZEND_INIT_DYNAMIC_CALL:
 					if (orig_op2_type == IS_OBJECT && op2_ce == zend_ce_closure) {
@@ -2346,6 +2410,11 @@ propagate_arg:
 					}
 				}
 			}
+
+#ifdef HAVE_FFI
+			zend_ssa_op *ssa_op = ssa_ops +idx;
+#endif
+
 			if (opline->opcode == ZEND_RECV_INIT
 			 && !(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 				/* RECV_INIT always copy the constant */
@@ -2355,6 +2424,38 @@ propagate_arg:
 				if (ssa_ops[idx].op2_use >= 0 && ssa_ops[idx].op2_def >= 0) {
 					ssa_var_info[ssa_ops[idx].op2_def] = ssa_var_info[ssa_ops[idx].op2_use];
 				}
+#ifdef HAVE_FFI
+			} else if (opline->opcode == ZEND_DO_FCALL
+					&& RETURN_VALUE_USED(opline)
+					&& frame
+					&& frame->call
+					&& TRACE_FRAME_FFI(frame->call)) {
+				zend_ffi_type *type = (zend_ffi_type*)frame->call->call_opline;
+
+				ssa_var_info[ssa_ops[idx].result_def].type =
+					zend_jit_ffi_type_info(ZEND_FFI_TYPE(type->func.ret_type));
+			} else if (op1_ffi_type
+					&& (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
+					&& (opline->opcode == ZEND_FETCH_DIM_R
+					 || opline->opcode == ZEND_FETCH_DIM_IS
+					 || opline->opcode == ZEND_FETCH_LIST_R)
+					&& (OP2_INFO() & MAY_BE_ANY) == MAY_BE_LONG
+					&& ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_VOID
+					&& zend_jit_ffi_supported_type(ZEND_FFI_TYPE(op1_ffi_type->array.type))) {
+				ssa_var_info[ssa_ops[idx].result_def].type =
+					zend_jit_ffi_type_info(ZEND_FFI_TYPE(op1_ffi_type->array.type));
+			} else if (ssa_ops[idx].op1_def >= 0
+					&& frame
+					&& frame->call
+					&& TRACE_FRAME_FFI(frame->call)
+					&& (opline->opcode == ZEND_SEND_VAR_EX
+					 || opline->opcode == ZEND_SEND_VAR_NO_REF
+					 || opline->opcode == ZEND_SEND_VAR_NO_REF_EX
+					 || opline->opcode == ZEND_SEND_FUNC_ARG)
+					&& opline->op2_type != IS_CONST) {
+				ssa_var_info[ssa_ops[idx].op1_def] = ssa_var_info[ssa_ops[idx].op1_use];
+				ssa_var_info[ssa_ops[idx].op1_def].type &= ~MAY_BE_GUARD;
+#endif
 			} else {
 				if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
 					// TODO:
@@ -2607,7 +2708,12 @@ propagate_arg:
 
 		} else if (p->op == ZEND_JIT_TRACE_INIT_CALL) {
 			call = top;
-			TRACE_FRAME_INIT(call, p->func, 0, 0);
+			TRACE_FRAME_INIT(call, p->func, frame_flags, 0);
+#ifdef HAVE_FFI
+			if (TRACE_FRAME_FFI(call)) {
+				call->call_opline = (const zend_op*)(void*)frame_ffi_func_type;
+			}
+#endif
 			call->prev = frame->call;
 			call->used_stack = 0;
 			frame->call = call;
