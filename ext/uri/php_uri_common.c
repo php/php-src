@@ -24,7 +24,7 @@ void uri_register_property_handler(HashTable *property_handlers, zend_string *na
 	zend_string_release_ex(name, true);
 }
 
-uri_property_handler_t *uri_property_handler_from_uri_handler(const uri_handler_t *uri_handler, zend_string *name)
+uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name)
 {
-	return zend_hash_find_ptr(uri_handler->property_handlers, name);
+	return zend_hash_find_ptr(internal_uri->handler->property_handlers, name);
 }
