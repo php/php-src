@@ -80,7 +80,7 @@ typedef struct uri_property_handler_t {
 void uri_register_property_handler(HashTable *property_handlers, zend_string *name, const uri_property_handler_t *handler);
 zend_result uri_handler_register(const uri_handler_t *uri_handler);
 
-uri_property_handler_t *uri_property_handler_from_uri_handler(const uri_handler_t *uri_handler, zend_string *name);
+uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name);
 
 #define URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, object) do { \
     ZEND_ASSERT(internal_uri != NULL); \
@@ -110,7 +110,7 @@ uri_property_handler_t *uri_property_handler_from_uri_handler(const uri_handler_
     ZEND_PARSE_PARAMETERS_NONE(); \
     uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS); \
     URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, Z_OBJ_P(ZEND_THIS)); \
-    const uri_property_handler_t *property_handler = uri_property_handler_from_uri_handler(internal_uri->handler, property_name); \
+    const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
     ZEND_ASSERT(property_handler != NULL); \
     if (property_handler->read_func(internal_uri, return_value) == FAILURE) { \
     	zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
@@ -121,7 +121,7 @@ uri_property_handler_t *uri_property_handler_from_uri_handler(const uri_handler_
 #define URI_WITHER_COMMON(property_name, property_zv, return_value) \
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS); \
     URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, Z_OBJ_P(ZEND_THIS)); \
-    const uri_property_handler_t *property_handler = uri_property_handler_from_uri_handler(internal_uri->handler, property_name); \
+    const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
     ZEND_ASSERT(property_handler != NULL); \
     zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS)); \
     uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object); \

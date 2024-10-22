@@ -500,7 +500,7 @@ static zend_result uriparser_write_fragment(uri_internal_t *internal_uri, zval *
 
 static zend_result uriparser_init_parser(void)
 {
-	zend_hash_init(&uriparser_property_handlers, 0, NULL, NULL, true);
+	zend_hash_init(&uriparser_property_handlers, 8, NULL, NULL, true);
 
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), uriparser_read_scheme, uriparser_write_scheme);
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), uriparser_read_user, uriparser_write_user);

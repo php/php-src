@@ -166,6 +166,10 @@ final readonly class Rfc3986Uri implements \Uri\UriInterface
     public function withFragment(?string $fragment): static {}
 
     public function __toString(): string {}
+
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
 }
 
 /** @strict-properties */
@@ -244,4 +248,9 @@ final readonly class WhatWgUri implements \Uri\UriInterface
 
     /** @implementation-alias Uri\Rfc3986Uri::__toString */
     public function __toString(): string {}
+
+    /** @implementation-alias Uri\Rfc3986Uri::__serialize */
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 }
