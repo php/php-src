@@ -17,4 +17,4 @@ abstract class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Class Test2 contains 1 abstract method and must therefore be declared abstract or implement the remaining method (Test::foo) in %s on line 5
+Fatal error: Class Test2 contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Test::foo) in %s on line 5
