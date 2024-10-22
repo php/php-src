@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 
 - OPcache:
   . Fixed ZTS OPcache build on Cygwin. (cmb)
+  . Added opcache.file_cache_read_only. (Samuel Melrose)
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
