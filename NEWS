@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     call trampoline). (ilutov)
   . Fixed bug GH-16509 (Incorrect line number in function redeclaration error).
     (ilutov)
+  . Fixed bug GH-16508 (Incorrect line number in inheritance errors of delayed
+    early bound classes). (ilutov)
 
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
