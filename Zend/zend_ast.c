@@ -2023,6 +2023,9 @@ simple_list:
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;
+		case ZEND_AST_DEFAULT:
+			smart_str_appends(str, "default");
+			break;
 
 		/* 1 child node */
 		case ZEND_AST_VAR:
