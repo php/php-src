@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug OSS-Fuzz #71407 (Null-dereference WRITE in
     zend_lazy_object_clone). (Arnaud)
+  . Fixed bug GH-16515 (Incorrect propagation of ZEND_ACC_RETURN_REFERENCE for
+    call trampoline). (ilutov)
 
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
