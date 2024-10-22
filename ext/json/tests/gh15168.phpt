@@ -31,6 +31,10 @@ var_dump(json_encode($firstNode, depth: 500000));
 var_dump(json_last_error());
 var_dump(json_last_error_msg());
 
+while ($next = $firstNode->next) {
+    $firstNode->next = $next->next;
+}
+
 ?>
 --EXPECT--
 bool(false)

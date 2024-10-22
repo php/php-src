@@ -30,6 +30,11 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
+while ($next = $firstNode->next) {
+    $firstNode->next = $next->next;
+}
+
 ?>
 --EXPECT--
 Maximum call stack size reached. Infinite recursion?
