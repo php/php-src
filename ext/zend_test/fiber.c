@@ -247,7 +247,14 @@ static ZEND_METHOD(_ZendTestFiber, start)
 		Z_PARAM_VARIADIC_WITH_NAMED(params, param_count, named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_INIT);
+	if (fiber->context.status != ZEND_FIBER_STATUS_INIT) {
+		zend_string *fiber_error_name = ZSTR_INIT_LITERAL("fibererror", false);
+		zend_class_entry *fiber_error_ce = zend_lookup_class_ex(fiber_error_name, fiber_error_name, 0);
+		ZEND_ASSERT(fiber_error_ce);
+		zend_throw_error(fiber_error_ce, "Cannot start a fiber that has already been started");
+		zend_string_release_ex(fiber_error_name, false);
+		RETURN_THROWS();
+	}
 
 	if (fiber->previous != NULL) {
 		zend_throw_error(NULL, "Cannot start a fiber that is the target of another fiber");
