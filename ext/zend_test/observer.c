@@ -20,6 +20,7 @@
 #include "zend_observer.h"
 #include "zend_smart_str.h"
 #include "ext/standard/php_var.h"
+#include "zend_generators.h"
 
 static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data);
 
@@ -163,6 +164,11 @@ static void observer_show_init_backtrace(zend_execute_data *execute_data)
 	zend_execute_data *ex = execute_data;
 	php_printf("%*s<!--\n", 2 * ZT_G(observer_nesting_depth), "");
 	do {
+		if (UNEXPECTED(!ex->func)) {
+			ex = zend_generator_check_placeholder_frame(ex);
+			ZEND_ASSERT(ex->func);
+		}
+
 		zend_function *fbc = ex->func;
 		int indent = 2 * ZT_G(observer_nesting_depth) + 4;
 		if (fbc->common.function_name) {
