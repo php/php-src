@@ -44,6 +44,51 @@ static uri_handler_t *uri_handler_by_name(const char *handler_name, size_t handl
 	return zend_hash_str_find_ptr(&uri_handlers, handler_name, handler_name_len);
 }
 
+static HashTable *uri_get_properties(zend_object *object, bool is_debug)
+{
+	uri_internal_t *internal_uri = uri_internal_from_obj(object);
+	ZEND_ASSERT(internal_uri != NULL);
+	if (UNEXPECTED(internal_uri->uri == NULL)) {
+		if (!is_debug) {
+			zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name));
+		}
+		return NULL;
+	}
+
+	zend_string *string_key;
+	uri_property_handler_t *property_handler;
+
+	HashTable *std_properties = zend_std_get_properties(object);
+	HashTable *result = zend_array_dup(std_properties);
+
+	zend_string *object_str = is_debug ? ZSTR_INIT_LITERAL("(object value omitted)", false) : NULL;
+
+	const HashTable *property_handlers = internal_uri->handler->property_handlers;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(property_handlers, string_key, property_handler) {
+		zval value;
+
+		ZEND_ASSERT(string_key != NULL);
+
+		if (property_handler->read_func(internal_uri, &value) == FAILURE) {
+			continue;
+		}
+
+		if (is_debug && Z_TYPE(value) == IS_OBJECT) {
+			zval_ptr_dtor(&value);
+			ZVAL_NEW_STR(&value, object_str);
+			zend_string_addref(object_str);
+		}
+
+		zend_hash_update(result, string_key, &value);
+	} ZEND_HASH_FOREACH_END();
+
+	if (is_debug) {
+		zend_string_release_ex(object_str, false);
+	}
+
+	return result;
+}
+
 PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name)
 {
 	if (uri_handler_name == NULL) {
@@ -75,7 +120,7 @@ PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_stri
 
 static zend_result php_uri_get_property(const uri_internal_t *internal_uri, zend_string *name, zval *zv)
 {
-	uri_property_handler_t *property_handler = uri_property_handler_from_uri_handler(internal_uri->handler, name);
+	uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, name);
 	if (property_handler == NULL) {
 		return FAILURE;
 	}
@@ -327,6 +372,83 @@ PHP_METHOD(Uri_Rfc3986Uri, __toString)
 	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri));
 }
 
+PHP_METHOD(Uri_Rfc3986Uri, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+
+	HashTable *ht = uri_get_properties(this_object, false);
+	ZVAL_ARR(return_value, ht);
+}
+
+static void uri_restore_custom_properties(zend_object *object, uri_internal_t *internal_uri, HashTable *ht)
+{
+	zend_string *prop_name;
+	zval *prop_val;
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, prop_name, prop_val) {
+		if (!prop_name || Z_TYPE_P(prop_val) == IS_REFERENCE || uri_property_handler_from_internal_uri(internal_uri, prop_name)) {
+			continue;
+		}
+
+		zend_update_property_ex(object->ce, object, prop_name, prop_val);
+		if (EG(exception)) {
+			break;
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_METHOD(Uri_Rfc3986Uri, __unserialize)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(ht)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(object);
+
+	/*if (!php_date_initialize_from_hash(&dateobj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+		RETURN_THROWS();
+	}*/
+
+	zend_string *str = zend_string_init("https://example.com", sizeof("https://example.com") - 1, false);
+
+	internal_uri->handler = uri_handler_by_name("rfc3986", sizeof("rfc3986") - 1);
+	internal_uri->uri = internal_uri->handler->parse_uri(str, NULL, NULL);
+
+	uri_restore_custom_properties(object, internal_uri, ht);
+}
+
+PHP_METHOD(Uri_WhatWgUri, __unserialize)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(ht)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(object);
+
+	/*if (!php_date_initialize_from_hash(&dateobj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+		RETURN_THROWS();
+	}*/
+
+	zend_string *str = zend_string_init("https://example.com", sizeof("https://example.com") - 1, false);
+
+	internal_uri->handler = uri_handler_by_name("whatwg", sizeof("whatwg") - 1);
+	internal_uri->uri = internal_uri->handler->parse_uri(str, NULL, NULL);
+
+	uri_restore_custom_properties(object, internal_uri, ht);
+}
+
 static zend_object *uri_create_object_handler(zend_class_entry *class_type)
 {
 	uri_object_t *uri_object = zend_object_alloc(sizeof(uri_object_t), class_type);
@@ -366,7 +488,7 @@ static int uri_has_property_handler(zend_object *object, zend_string *name, int 
 	}
 
 	uri_property_handler_t *property_handler = zend_hash_find_ptr(internal_uri->handler->property_handlers, name);
-	if (!property_handler) {
+	if (UNEXPECTED(property_handler == NULL)) {
 		return zend_std_has_property(object, name, check_empty, cache_slot);
 	}
 
@@ -400,7 +522,7 @@ static zval *uri_read_property_handler(zend_object *object, zend_string *name, i
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	URI_CHECK_INITIALIZATION_RETURN(internal_uri, object, &EG(uninitialized_zval));
 
-	uri_property_handler_t *property_handler = uri_property_handler_from_uri_handler(internal_uri->handler, name);
+	uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, name);
 	if (UNEXPECTED(property_handler == NULL)) {
 		return zend_std_read_property(object, name, type, cache_slot, rv);
 	}
@@ -426,13 +548,13 @@ static zval *uri_write_property_handler(zend_object *object, zend_string *name, 
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	URI_CHECK_INITIALIZATION_RETURN(internal_uri, object, &EG(error_zval));
 
-	uri_property_handler_t *property_handler = uri_property_handler_from_uri_handler(internal_uri->handler, name);
-	if (UNEXPECTED(property_handler != NULL)) {
-		zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
-		return &EG(error_zval);
+	uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, name);
+	if (UNEXPECTED(property_handler == NULL)) {
+		return zend_std_write_property(object, name, value, cache_slot);
 	}
 
-	return zend_std_write_property(object, name, value, cache_slot);
+	zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+	return &EG(error_zval);
 }
 
 static zval *uri_get_property_ptr_ptr_handler(zend_object *object, zend_string *name, int type, void **cache_slot)
@@ -440,12 +562,12 @@ static zval *uri_get_property_ptr_ptr_handler(zend_object *object, zend_string *
 	const uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	URI_CHECK_INITIALIZATION_RETURN(internal_uri, object, NULL);
 
-	if (uri_property_handler_from_uri_handler(internal_uri->handler, name)) {
-		zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
-		return &EG(error_zval);
+	if (UNEXPECTED(uri_property_handler_from_internal_uri(internal_uri, name) == NULL)) {
+		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
 
-	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+	zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+	return &EG(error_zval);
 }
 
 static void uri_unset_property_handler(zend_object *object, zend_string *name, void **cache_slot)
@@ -453,12 +575,11 @@ static void uri_unset_property_handler(zend_object *object, zend_string *name, v
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	URI_CHECK_INITIALIZATION_RETURN_VOID(internal_uri, object);
 
-	if (uri_property_handler_from_uri_handler(internal_uri->handler, name)) {
-		zend_throw_error(NULL, "Cannot unset readonly property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
-		return;
+	if (UNEXPECTED(uri_property_handler_from_internal_uri(internal_uri, name) == NULL)) {
+		zend_std_unset_property(object, name, cache_slot);
 	}
 
-	zend_std_unset_property(object, name, cache_slot);
+	zend_throw_error(NULL, "Cannot unset readonly property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 }
 
 static zend_object *uri_clone_obj_handler(zend_object *object)
@@ -489,46 +610,9 @@ static zend_object *uri_clone_obj_handler(zend_object *object)
 
 static HashTable *uri_get_debug_info_handler(zend_object *object, int *is_temp)
 {
-	HashTable *debug_info, *std_properties;
-
-	uri_internal_t *internal_uri = uri_internal_from_obj(object);
-	ZEND_ASSERT(internal_uri != NULL);
-	if (UNEXPECTED(internal_uri->uri == NULL)) {
-		return NULL;
-	}
-
-	const HashTable *property_handlers = internal_uri->handler->property_handlers;
-	zend_string *string_key;
-	uri_property_handler_t *property_handler;
-
 	*is_temp = 1;
 
-	std_properties = zend_std_get_properties(object);
-	debug_info = zend_array_dup(std_properties);
-
-	zend_string *object_str = ZSTR_INIT_LITERAL("(object value omitted)", false);
-
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(property_handlers, string_key, property_handler) {
-		zval value;
-
-		ZEND_ASSERT(string_key != NULL);
-
-		if (property_handler->read_func(internal_uri, &value) == FAILURE) {
-			continue;
-		}
-
-		if (Z_TYPE(value) == IS_OBJECT) {
-			zval_ptr_dtor(&value);
-			ZVAL_NEW_STR(&value, object_str);
-			zend_string_addref(object_str);
-		}
-
-		zend_hash_update(debug_info, string_key, &value);
-	} ZEND_HASH_FOREACH_END();
-
-	zend_string_release_ex(object_str, false);
-
-	return debug_info;
+	return uri_get_properties(object, true);
 }
 
 static HashTable *uri_get_gc_handler(zend_object *object, zval **table, int *n)
@@ -537,6 +621,18 @@ static HashTable *uri_get_gc_handler(zend_object *object, zval **table, int *n)
 	*n = 0;
 
 	return zend_std_get_properties(object);
+}
+
+static HashTable *uri_get_properties_for_handler(zend_object *object, zend_prop_purpose purpose)
+{
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+			return uri_get_properties(object, false);
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
 }
 
 PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers)
@@ -554,6 +650,7 @@ PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zen
 	object_handlers->clone_obj = uri_clone_obj_handler;
 	object_handlers->get_debug_info = uri_get_debug_info_handler;
 	object_handlers->get_gc = uri_get_gc_handler;
+	object_handlers->get_properties_for = uri_get_properties_for_handler;
 }
 
 void uri_register_symbols(void)

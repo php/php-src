@@ -254,7 +254,7 @@ static zend_result lexbor_init_parser(void)
 	lexbor_parser = parser;
 	lexbor_urls = 0;
 
-	zend_hash_init(&lexbor_property_handlers, 0, NULL, NULL, true);
+	zend_hash_init(&lexbor_property_handlers, 8, NULL, NULL, true);
 
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&lexbor_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), lexbor_read_scheme, lexbor_write_scheme);
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&lexbor_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), lexbor_read_user, lexbor_write_user);
