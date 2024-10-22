@@ -184,7 +184,8 @@ SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           soap
 PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2004 - 2018)
-MAINTENANCE:         Maintained
+                     Niels Dossche <nielsdos@php.net> (2024 - 2024)
+MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xml
