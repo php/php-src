@@ -13,4 +13,4 @@ class derived extends base {
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Class derived contains abstract method derived::show and must therefore be declared abstract in %sabstract_derived.php on line %d
+Fatal error: Class derived declares abstract method show() and must therefore be declared abstract in %sabstract_derived.php on line %d

@@ -16,4 +16,4 @@ class fail extends pass {
 echo "Done\n"; // Shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Class fail contains abstract method fail::show and must therefore be declared abstract in %sabstract_redeclare.php on line %d
+Fatal error: Class fail declares abstract method show() and must therefore be declared abstract in %sabstract_redeclare.php on line %d

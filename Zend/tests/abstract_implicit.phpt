@@ -16,4 +16,4 @@ class NotAbstract {
 }
 ?>
 --EXPECTF--
-Fatal error: Class NotAbstract contains abstract method NotAbstract::bar and must therefore be declared abstract in %s on line %d
+Fatal error: Class NotAbstract declares abstract method bar() and must therefore be declared abstract in %s on line %d

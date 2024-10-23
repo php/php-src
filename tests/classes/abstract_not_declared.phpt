@@ -10,4 +10,4 @@ class fail {
 echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Class fail contains abstract method fail::show and must therefore be declared abstract in %s on line %d
+Fatal error: Class fail declares abstract method show() and must therefore be declared abstract in %s on line %d

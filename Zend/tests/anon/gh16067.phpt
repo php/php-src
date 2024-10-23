@@ -8,4 +8,4 @@ $c = new class {
 }
 ?>
 --EXPECTF--
-Fatal error: Anonymous class class@anonymous cannot contain abstract method class@anonymous::f in %s on line 4
+Fatal error: Anonymous class method f() must not be abstract in %s on line 4

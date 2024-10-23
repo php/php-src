@@ -9,4 +9,4 @@ enum Example {
 
 ?>
 --EXPECTF--
-Fatal error: Enum Example cannot contain abstract method Example::foo in %s on line 4
+Fatal error: Enum method Example::foo() must not be abstract in %s on line 4
