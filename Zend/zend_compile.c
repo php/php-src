@@ -8067,6 +8067,22 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
 	}
 
+	if ((fn_flags & ZEND_ACC_ABSTRACT)
+	 && !(ce->ce_flags & (ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_TRAIT))) {
+		// Don't say that the class should be declared abstract if it is
+		// anonymous or an enum and can't be abstract
+		if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Anonymous class method %s() must not be abstract",
+				ZSTR_VAL(name));
+		} else if (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_INTERFACE)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "%s method %s::%s() must not be abstract",
+				zend_get_object_type_case(ce, true), ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s declares abstract method %s() and must therefore be declared abstract",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+	}
+
 	if (in_interface) {
 		if (!(fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method "
@@ -8075,10 +8091,6 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 		if (fn_flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Interface method "
 				"%s::%s() must not be final", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-		}
-		if (fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Interface method "
-				"%s::%s() must not be abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 		op_array->fn_flags |= ZEND_ACC_ABSTRACT;
 	}
