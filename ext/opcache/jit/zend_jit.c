@@ -200,7 +200,7 @@ static uint32_t zend_jit_ffi_type_info(zend_ffi_type *type)
 		case ZEND_FFI_TYPE_POINTER:
 			if ((type->attr & ZEND_FFI_ATTR_CONST)
 			 && ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
-				info = IS_STRING;
+				info = MAY_BE_STRING;
 			}
 			break;
 		default:
