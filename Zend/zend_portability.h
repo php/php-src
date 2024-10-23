@@ -400,11 +400,7 @@ char *alloca();
 # define JMP_BUF sigjmp_buf
 #else
 # define SETJMP(a) setjmp(a)
-# define LONGJMP(a,b) do { \
-	SETJMP_FLOAT128 *__jmpbuf = *EG(bailout); \
-	__jmpbuf->Part[0] = 0; \
-	longjmp(a, b); \
-} while(0)
+# define LONGJMP(a,b) longjmp(a, b)
 # define JMP_BUF jmp_buf
 #endif
 
