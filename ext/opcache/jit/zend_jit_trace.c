@@ -1804,8 +1804,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		max_used_stack = used_stack = -1;
 	}
 
-#ifdef HAVE_FFI
 	uint32_t frame_flags = 0;
+#ifdef HAVE_FFI
 	zend_ffi_type *frame_ffi_func_type = NULL;
 #endif
 
