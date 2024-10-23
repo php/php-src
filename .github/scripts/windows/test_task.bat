@@ -124,7 +124,7 @@ echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
 echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\php.ini
 if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\php.ini
 rem work-around for some spawned PHP processes requiring OpenSSL
-echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
+@REM echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
 for %%i in (ldap) do (
