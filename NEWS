@@ -57,6 +57,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
     (David Carlier)
   . Fixed bug GH-16427 (Unchecked libavif return values). (cmb)
+  . Fixed bug GH-16559 (UBSan abort in ext/gd/libgd/gd_interpolation.c:1007).
+    (nielsdos)
 
 - GMP:
   . Fixed floating point exception bug with gmp_pow when using
