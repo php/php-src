@@ -39,7 +39,6 @@ cmd /c configure.bat ^
 	--enable-com-dotnet=shared ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
-	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^
 	--disable-test-ini
 if %errorlevel% neq 0 exit /b 3
