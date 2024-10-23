@@ -3450,7 +3450,7 @@ function toolset_setup_build_mode()
 		}
 
 		// if you have VS.Net /GS hardens the binary against buffer overruns
-		// ADD_FLAG("CFLAGS", "/GS");
+		ADD_FLAG("CFLAGS", "/GS-");
 	}
 }
 
