@@ -6271,8 +6271,7 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 	}
 }
 
-/* {{{ Returns whether property is uninitialized and lazy */
-ZEND_METHOD(ReflectionProperty, isUninitializedLazy)
+ZEND_METHOD(ReflectionProperty, isLazy)
 {
 	reflection_object *intern;
 	property_reference *ref;

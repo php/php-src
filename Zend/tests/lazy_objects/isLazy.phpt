@@ -1,5 +1,5 @@
 --TEST--
-Lazy Objects: ReflectionProperty::isUninitializedLazy()
+Lazy Objects: ReflectionProperty::isLazy()
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ function testProps(ReflectionClass $reflector, object $obj) {
         } else {
             $pr = $reflector->getProperty($name);
         }
-        printf("%s: %d\n", $name, $pr->isUninitializedLazy($obj));
+        printf("%s: %d\n", $name, $pr->isLazy($obj));
     }
 }
 
@@ -36,7 +36,7 @@ testProps($reflector, $obj);
 
 $pr = $reflector->getProperty('typed');
 $pr->skipLazyInitialization($obj);
-printf("typed (skipped): %d\n", $pr->isUninitializedLazy($obj));
+printf("typed (skipped): %d\n", $pr->isLazy($obj));
 
 print "# Initialized Ghost\n";
 
@@ -54,7 +54,7 @@ testProps($reflector, $obj);
 
 $pr = $reflector->getProperty('typed');
 $pr->skipLazyInitialization($obj);
-printf("typed (skipped prop): %d\n", $pr->isUninitializedLazy($obj));
+printf("typed (skipped prop): %d\n", $pr->isLazy($obj));
 
 print "# Initialized Proxy\n";
 
@@ -67,7 +67,7 @@ print "# Internal\n";
 $obj = (new DateTime())->diff(new DateTime());
 $reflector = new ReflectionClass(DateInterval::class);
 $pr = new ReflectionProperty($obj, 'y');
-printf("y: %d\n", $pr->isUninitializedLazy($obj));
+printf("y: %d\n", $pr->isLazy($obj));
 
 ?>
 --EXPECT--
