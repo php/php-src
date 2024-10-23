@@ -6,6 +6,9 @@ inputs:
   skipSlow:
     default: false
     required: false
+  asan:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
