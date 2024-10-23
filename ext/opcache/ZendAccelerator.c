@@ -3329,16 +3329,22 @@ static zend_result accel_post_startup(void)
 #endif
 	}
 
-	if ( ZCG(accel_directives).file_cache &&
+	if ( ZCG(accel_directives).file_cache ){
+		zend_stat_t buf = {0};
+
+		if (!IS_ABSOLUTE_PATH(ZCG(accel_directives).file_cache, strlen(ZCG(accel_directives).file_cache)) ||
+			zend_stat(ZCG(accel_directives).file_cache, &buf) != 0 ||
+			!S_ISDIR(buf.st_mode) ||
 #ifndef ZEND_WIN32
 			access(ZCG(accel_directives).file_cache, file_cache_access_mode) != 0
 #else
 			_access(ZCG(accel_directives).file_cache, file_cache_access_mode) != 0
 #endif
-		) {
-		accel_startup_ok = false;
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache must be a full path of an accessible directory");
-		return SUCCESS;
+			) {
+			accel_startup_ok = false;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache must be a full path of an accessible directory");
+			return SUCCESS;
+		}
 	}
 
 #if ENABLE_FILE_CACHE_FALLBACK
