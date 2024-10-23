@@ -6287,7 +6287,7 @@ ZEND_METHOD(ReflectionProperty, isLazy)
 		RETURN_FALSE;
 	}
 
-	if (zend_object_is_lazy_proxy(object)
+	while (zend_object_is_lazy_proxy(object)
 			&& zend_lazy_object_initialized(object)) {
 		object = zend_lazy_object_get_instance(object);
 	}

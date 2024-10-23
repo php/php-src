@@ -62,6 +62,33 @@ $reflector->initializeLazyObject($obj);
 
 testProps($reflector, $obj);
 
+print "# Nested Proxy\n";
+
+$nested = new C();
+$obj = $reflector->newLazyProxy(function () use ($nested) {
+    return $nested;
+});
+$reflector->initializeLazyObject($obj);
+$reflector->resetAsLazyProxy($nested, function () {
+    return new C();
+});
+
+testProps($reflector, $obj);
+
+print "# Nested Proxy (nested initialized)\n";
+
+$nested = new C();
+$obj = $reflector->newLazyProxy(function () use ($nested) {
+    return $nested;
+});
+$reflector->initializeLazyObject($obj);
+$reflector->resetAsLazyProxy($nested, function () {
+    return new C();
+});
+$reflector->initializeLazyObject($nested);
+
+testProps($reflector, $obj);
+
 print "# Internal\n";
 
 $obj = (new DateTime())->diff(new DateTime());
@@ -92,6 +119,18 @@ virtual: 0
 dynamic: 0
 typed (skipped prop): 0
 # Initialized Proxy
+staticProp: 0
+typed: 0
+untyped: 0
+virtual: 0
+dynamic: 0
+# Nested Proxy
+staticProp: 0
+typed: 1
+untyped: 1
+virtual: 0
+dynamic: 0
+# Nested Proxy (nested initialized)
 staticProp: 0
 typed: 0
 untyped: 0
