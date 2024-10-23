@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Calendar:
   . Fixed jdtogregorian overflow. (David Carlier)
 
+- FPM:
+  . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
+
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
