@@ -41,5 +41,6 @@ PHP_MINIT_FUNCTION(spl_array);
 
 extern void spl_array_iterator_append(zval *object, zval *append_value);
 extern void spl_array_iterator_key(zval *object, zval *return_value);
+extern bool spl_array_iterator_contains(zval *object, zval *to_find);
 
 #endif /* SPL_ARRAY_H */

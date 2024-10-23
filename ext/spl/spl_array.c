@@ -100,6 +100,20 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /*
 }
 /* }}} */
 
+bool spl_array_iterator_contains(zval *object, zval *to_find) {
+	zend_object *obj_to_find = Z_OBJ_P(to_find);
+	spl_array_object *intern = Z_SPLARRAY_P(object);
+	// call spl_array_get_hash_table($40)
+	HashTable *ht = spl_array_get_hash_table(intern);
+	zval *iter = NULL;
+	ZEND_HASH_FOREACH_VAL(ht, iter) {
+		if (Z_OBJ_P(iter) == obj_to_find) {
+			return true;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return false;
+}
+
 static inline bool spl_array_is_object(spl_array_object *intern) /* {{{ */
 {
 	while (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
