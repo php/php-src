@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-MyPDO::connect() cannot be called when connecting to the "sqlite" driver, either Pdo\Sqlite::connect() or PDO::connect() must be called instead
+MyPDO::connect() cannot be used for connecting to the "sqlite" driver, either call Pdo\Sqlite::connect() or PDO::connect() instead
