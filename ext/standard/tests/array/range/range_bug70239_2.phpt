@@ -8,5 +8,5 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---EXPECT--
-The supplied range exceeds the maximum array size by 9223372035781033984 elements: start=0, end=9223372036854775807, step=1. Calculated size: 9223372036854775807. Maximum size: 1073741824.
+--EXPECTF--
+The supplied range exceeds the maximum array size by %d elements: start=0, end=%d, step=1. Calculated size: %d. Maximum size: %d.
