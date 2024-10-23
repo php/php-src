@@ -339,7 +339,23 @@ static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 /* }}} */
 
 static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2, uint8_t opcode) {
-	zend_long shift = zval_get_long(op2);
+	bool failed = true;
+	zend_long shift = zval_try_get_long(op2, &failed);
+	if (failed) {
+		const char *operator_sigil;
+		if (opcode == ZEND_POW) {
+			operator_sigil = "**";
+		} else if (opcode == ZEND_SL) {
+			operator_sigil = "<<";
+		} else {
+			ZEND_ASSERT(opcode == ZEND_SR);
+			operator_sigil = ">>";
+		}
+
+		zend_type_error("Unsupported operand types: GMP %s %s", operator_sigil, zend_zval_value_name(op2));
+		ZVAL_UNDEF(return_value);
+		return;
+	}
 
 	if (shift < 0) {
 		zend_throw_error(
