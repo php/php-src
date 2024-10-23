@@ -2880,7 +2880,7 @@ PHP_FUNCTION(array_fill_keys)
 			zend_value_error(\
 				"The supplied range exceeds the maximum array size by %" PRIu64 " elements: " \
 				"start=" ZEND_LONG_FMT ", end=" ZEND_LONG_FMT ", step=" ZEND_LONG_FMT ". " \
-				"Calculated size: %" PRIu64 ", Maximum size: %" PRIu64 ".", \
+				"Calculated size: %" PRIu64 ". Maximum size: %" PRIu64 ".", \
 				__excess, end, start, (_step), (uint64_t)__calc_size, (uint64_t)HT_MAX_SIZE); \
 			RETURN_THROWS(); \
 		} \
