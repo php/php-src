@@ -1766,6 +1766,15 @@ ldap.max_links = -1
 ; SHM reset. The default "" disables file based caching.
 ;opcache.file_cache=
 
+; Enables or disables read-only mode for the second level cache directory.
+; It should improve performance for read-only containers,
+; when the cache is pre-warmed and packaged alongside the application.
+; Best used with `opcache.validate_timestamps=0`, `opcache.enable_file_override=1`
+; and `opcache.file_cache_consistency_checks=0`.
+; Note: A cache generated with a different build of PHP, a different file path,
+; or different settings (including which extensions are loaded), may be ignored.
+;opcache.file_cache_read_only=0
+
 ; Enables or disables opcode caching in shared memory.
 ;opcache.file_cache_only=0
 
