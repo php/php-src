@@ -60,7 +60,7 @@ static size_t tsrm_reserved_pos  = 0;
 static size_t tsrm_reserved_size = 0;
 
 static MUTEX_T tsmm_mutex;	  /* thread-safe memory manager mutex */
-static MUTEX_T tsrm_env_mutex; /* tsrm environ mutex */
+static RWLOCK_T tsrm_env_mutex; /* tsrm environ mutex */
 
 /* New thread handlers */
 static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler = NULL;
@@ -156,7 +156,7 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 	tsrm_reserved_pos  = 0;
 	tsrm_reserved_size = 0;
 
-	tsrm_env_mutex = tsrm_mutex_alloc();
+	tsrm_env_mutex = tsrm_rwlock_alloc();
 
 	return 1;
 }/*}}}*/
@@ -212,7 +212,7 @@ TSRM_API void tsrm_shutdown(void)
 	free(tsrm_tls_table);
 	free(resource_types_table);
 	tsrm_mutex_free(tsmm_mutex);
-	tsrm_mutex_free(tsrm_env_mutex);
+	tsrm_rwlock_free(tsrm_env_mutex);
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Shutdown TSRM"));
 	if (tsrm_error_file!=stderr) {
 		fclose(tsrm_error_file);
@@ -236,12 +236,20 @@ TSRM_API void tsrm_shutdown(void)
 
 /* {{{ */
 /* environ lock api */
-TSRM_API void tsrm_env_lock(void) {
-	tsrm_mutex_lock(tsrm_env_mutex);
+TSRM_API void tsrm_env_lock(bool write) {
+	if (write) {
+		tsrm_rwlock_wrlock(tsrm_env_mutex);
+	} else {
+		tsrm_rwlock_rlock(tsrm_env_mutex);
+	}
 }
 
-TSRM_API void tsrm_env_unlock(void) {
-	tsrm_mutex_unlock(tsrm_env_mutex);
+TSRM_API void tsrm_env_unlock(bool write) {
+	if (write) {
+		tsrm_rwlock_wrunlock(tsrm_env_mutex);
+	} else {
+		tsrm_rwlock_runlock(tsrm_env_mutex);
+	}
 } /* }}} */
 
 /* enlarge the arrays for the already active threads */
@@ -648,6 +656,47 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 #endif
 }/*}}}*/
 
+/* Allocate a read-write lock */
+TSRM_API RWLOCK_T tsrm_rwlock_alloc(void)
+{/*{{{*/
+    RWLOCK_T rwlock;
+#ifdef TSRM_WIN32
+    rwlock = malloc(sizeof(SRWLOCK));
+    if (!rwlock) {
+        fprintf(stderr, "Failed to allocate SRWLOCK\n");
+        return NULL;
+    }
+    InitializeSRWLock(rwlock);
+#else
+    rwlock = (pthread_rwlock_t *)malloc(sizeof(pthread_rwlock_t));
+    if (!rwlock) {
+        fprintf(stderr, "Failed to allocate pthread_rwlock_t\n");
+        return NULL;
+    }
+    pthread_rwlock_init(rwlock, NULL);
+#endif
+#ifdef THR_DEBUG
+    printf("Read-Write Lock created thread: %d\n", mythreadid());
+#endif
+    return rwlock;
+}/*}}}*/
+
+/* Free a read-write lock */
+TSRM_API void tsrm_rwlock_free(RWLOCK_T rwlock)
+{/*{{{*/
+    if (rwlock) {
+#ifdef TSRM_WIN32
+        // No explicit free function for SRWLOCK, but we still free the memory.
+        free(rwlock);
+#else
+        pthread_rwlock_destroy(rwlock);
+        free(rwlock);
+#endif
+    }
+#ifdef THR_DEBUG
+    printf("Read-Write Lock freed thread: %d\n", mythreadid());
+#endif
+}/*}}}*/
 
 /*
   Lock a mutex.
@@ -664,6 +713,65 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 #endif
 }/*}}}*/
 
+/*
+  Lock a mutex for writing.
+  A return value of 0 indicates success
+*/
+TSRM_API int tsrm_rwlock_wrlock(RWLOCK_T rwlock)
+{/*{{{*/
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Write locked thread: %ld", tsrm_thread_id()));
+#ifdef TSRM_WIN32
+	AcquireSRWLockExclusive(rwlock);
+	return 0;
+#else
+	return pthread_rwlock_wrlock(rwlock);
+#endif
+}/*}}}*/
+
+/*
+  Lock a mutex for reading.
+  A return value of 0 indicates success
+*/
+TSRM_API int tsrm_rwlock_rlock(RWLOCK_T rwlock)
+{/*{{{*/
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Read locked thread: %ld", tsrm_thread_id()));
+#ifdef TSRM_WIN32
+	AcquireSRWLockShared(rwlock);
+	return 0;
+#else
+	return pthread_rwlock_rdlock(rwlock);
+#endif
+}/*}}}*/
+
+/*
+  Unlock a mutex for reading.
+  A return value of 0 indicates success
+*/
+TSRM_API int tsrm_rwlock_runlock(RWLOCK_T rwlock)
+{/*{{{*/
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Read unlocked thread: %ld", tsrm_thread_id()));
+#ifdef TSRM_WIN32
+	ReleaseSRWLockShared(rwlock);
+	return 0;
+#else
+	return pthread_rwlock_unlock(rwlock);
+#endif
+}/*}}}*/
+
+/*
+  Unlock a mutex for writing.
+  A return value of 0 indicates success
+*/
+TSRM_API int tsrm_rwlock_wrunlock(RWLOCK_T rwlock)
+{/*{{{*/
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Write unlocked thread: %ld", tsrm_thread_id()));
+#ifdef TSRM_WIN32
+	ReleaseSRWLockExclusive(rwlock);
+	return 0;
+#else
+	return pthread_rwlock_unlock(rwlock);
+#endif
+}/*}}}*/
 
 /*
   Unlock a mutex.
