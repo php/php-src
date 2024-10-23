@@ -34,4 +34,4 @@ curl_multi_close($mh);
 --EXPECTF--
 int(1)
 int(1)
-string(%d) "Protocol %Sunknown%S not supported or disabled in libcurl"
+string(%d) "Protocol %Sunknown%S %rnot supported( or disabled in libcurl)?%r"

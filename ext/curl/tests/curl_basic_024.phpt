@@ -25,7 +25,7 @@ var_dump(0 === curl_getinfo($ch, CURLINFO_PROXY_SSL_VERIFYRESULT));
 var_dump(curl_getinfo($ch, CURLINFO_SCHEME));
 curl_close($ch);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
-string(4) "HTTP"
+string(4) "%r(HTTP|http)%r"
