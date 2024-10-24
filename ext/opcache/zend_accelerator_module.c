@@ -160,6 +160,17 @@ static ZEND_INI_MH(OnEnable)
 	}
 }
 
+static ZEND_INI_MH(OnUpdateFileCache)
+{
+	if (new_value) {
+		if (!ZSTR_LEN(new_value)) {
+			new_value = NULL;
+		}
+	}
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	return SUCCESS;
+}
+
 #ifdef HAVE_JIT
 static ZEND_INI_MH(OnUpdateJit)
 {
@@ -286,7 +297,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.mmap_base", NULL, PHP_INI_SYSTEM,	OnUpdateString,	                             accel_directives.mmap_base,                 zend_accel_globals, accel_globals)
 #endif
 
-	STD_PHP_INI_ENTRY("opcache.file_cache"                      , NULL  , PHP_INI_SYSTEM, OnUpdateStringUnempty,  accel_directives.file_cache,             zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_read_only"          , "0"   , PHP_INI_SYSTEM, OnUpdateBool,    accel_directives.file_cache_read_only,          zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
