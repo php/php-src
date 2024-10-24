@@ -8,7 +8,7 @@ PHP                                                                        NEWS
 
 - PDO:
   . Fixed bug GH-16167 (Prevent mixing PDO sub-classes with different DSN).
-  (kocsismate)
+    (kocsismate)
 
 24 Oct 2024, PHP 8.4.0RC3
 
