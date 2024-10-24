@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0RC4
 
+- Core:
+  . Fixed bug GH-16574 (Incorrect error "undefined method" messages).
+    (nielsdos)
+
 - GD:
   . Fixed bug GH-16559 (UBSan abort in ext/gd/libgd/gd_interpolation.c:1007).
     (nielsdos)
