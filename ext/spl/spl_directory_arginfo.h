@@ -488,7 +488,7 @@ static zend_class_entry *register_class_SplFileInfo(zend_class_entry *class_entr
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 
-	zend_attribute *attribute_Deprecated_func__bad_state_ex_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "_bad_state_ex", sizeof("_bad_state_ex") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	zend_attribute *attribute_Deprecated_func__bad_state_ex_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "_bad_state_ex", strlen("_bad_state_ex")), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	zval attribute_Deprecated_func__bad_state_ex_0_arg0;
 	zend_string *attribute_Deprecated_func__bad_state_ex_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
 	ZVAL_STR(&attribute_Deprecated_func__bad_state_ex_0_arg0, attribute_Deprecated_func__bad_state_ex_0_arg0_str);
@@ -518,73 +518,73 @@ static zend_class_entry *register_class_FilesystemIterator(zend_class_entry *cla
 
 	zval const_CURRENT_MODE_MASK_value;
 	ZVAL_LONG(&const_CURRENT_MODE_MASK_value, SPL_FILE_DIR_CURRENT_MODE_MASK);
-	zend_string *const_CURRENT_MODE_MASK_name = zend_string_init_interned("CURRENT_MODE_MASK", sizeof("CURRENT_MODE_MASK") - 1, 1);
+	zend_string *const_CURRENT_MODE_MASK_name = zend_string_init_interned("CURRENT_MODE_MASK", strlen("CURRENT_MODE_MASK"), 1);
 	zend_declare_typed_class_constant(class_entry, const_CURRENT_MODE_MASK_name, &const_CURRENT_MODE_MASK_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CURRENT_MODE_MASK_name);
 
 	zval const_CURRENT_AS_PATHNAME_value;
 	ZVAL_LONG(&const_CURRENT_AS_PATHNAME_value, SPL_FILE_DIR_CURRENT_AS_PATHNAME);
-	zend_string *const_CURRENT_AS_PATHNAME_name = zend_string_init_interned("CURRENT_AS_PATHNAME", sizeof("CURRENT_AS_PATHNAME") - 1, 1);
+	zend_string *const_CURRENT_AS_PATHNAME_name = zend_string_init_interned("CURRENT_AS_PATHNAME", strlen("CURRENT_AS_PATHNAME"), 1);
 	zend_declare_typed_class_constant(class_entry, const_CURRENT_AS_PATHNAME_name, &const_CURRENT_AS_PATHNAME_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CURRENT_AS_PATHNAME_name);
 
 	zval const_CURRENT_AS_FILEINFO_value;
 	ZVAL_LONG(&const_CURRENT_AS_FILEINFO_value, SPL_FILE_DIR_CURRENT_AS_FILEINFO);
-	zend_string *const_CURRENT_AS_FILEINFO_name = zend_string_init_interned("CURRENT_AS_FILEINFO", sizeof("CURRENT_AS_FILEINFO") - 1, 1);
+	zend_string *const_CURRENT_AS_FILEINFO_name = zend_string_init_interned("CURRENT_AS_FILEINFO", strlen("CURRENT_AS_FILEINFO"), 1);
 	zend_declare_typed_class_constant(class_entry, const_CURRENT_AS_FILEINFO_name, &const_CURRENT_AS_FILEINFO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CURRENT_AS_FILEINFO_name);
 
 	zval const_CURRENT_AS_SELF_value;
 	ZVAL_LONG(&const_CURRENT_AS_SELF_value, SPL_FILE_DIR_CURRENT_AS_SELF);
-	zend_string *const_CURRENT_AS_SELF_name = zend_string_init_interned("CURRENT_AS_SELF", sizeof("CURRENT_AS_SELF") - 1, 1);
+	zend_string *const_CURRENT_AS_SELF_name = zend_string_init_interned("CURRENT_AS_SELF", strlen("CURRENT_AS_SELF"), 1);
 	zend_declare_typed_class_constant(class_entry, const_CURRENT_AS_SELF_name, &const_CURRENT_AS_SELF_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CURRENT_AS_SELF_name);
 
 	zval const_KEY_MODE_MASK_value;
 	ZVAL_LONG(&const_KEY_MODE_MASK_value, SPL_FILE_DIR_KEY_MODE_MASK);
-	zend_string *const_KEY_MODE_MASK_name = zend_string_init_interned("KEY_MODE_MASK", sizeof("KEY_MODE_MASK") - 1, 1);
+	zend_string *const_KEY_MODE_MASK_name = zend_string_init_interned("KEY_MODE_MASK", strlen("KEY_MODE_MASK"), 1);
 	zend_declare_typed_class_constant(class_entry, const_KEY_MODE_MASK_name, &const_KEY_MODE_MASK_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_KEY_MODE_MASK_name);
 
 	zval const_KEY_AS_PATHNAME_value;
 	ZVAL_LONG(&const_KEY_AS_PATHNAME_value, SPL_FILE_DIR_KEY_AS_PATHNAME);
-	zend_string *const_KEY_AS_PATHNAME_name = zend_string_init_interned("KEY_AS_PATHNAME", sizeof("KEY_AS_PATHNAME") - 1, 1);
+	zend_string *const_KEY_AS_PATHNAME_name = zend_string_init_interned("KEY_AS_PATHNAME", strlen("KEY_AS_PATHNAME"), 1);
 	zend_declare_typed_class_constant(class_entry, const_KEY_AS_PATHNAME_name, &const_KEY_AS_PATHNAME_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_KEY_AS_PATHNAME_name);
 
 	zval const_FOLLOW_SYMLINKS_value;
 	ZVAL_LONG(&const_FOLLOW_SYMLINKS_value, SPL_FILE_DIR_FOLLOW_SYMLINKS);
-	zend_string *const_FOLLOW_SYMLINKS_name = zend_string_init_interned("FOLLOW_SYMLINKS", sizeof("FOLLOW_SYMLINKS") - 1, 1);
+	zend_string *const_FOLLOW_SYMLINKS_name = zend_string_init_interned("FOLLOW_SYMLINKS", strlen("FOLLOW_SYMLINKS"), 1);
 	zend_declare_typed_class_constant(class_entry, const_FOLLOW_SYMLINKS_name, &const_FOLLOW_SYMLINKS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FOLLOW_SYMLINKS_name);
 
 	zval const_KEY_AS_FILENAME_value;
 	ZVAL_LONG(&const_KEY_AS_FILENAME_value, SPL_FILE_DIR_KEY_AS_FILENAME);
-	zend_string *const_KEY_AS_FILENAME_name = zend_string_init_interned("KEY_AS_FILENAME", sizeof("KEY_AS_FILENAME") - 1, 1);
+	zend_string *const_KEY_AS_FILENAME_name = zend_string_init_interned("KEY_AS_FILENAME", strlen("KEY_AS_FILENAME"), 1);
 	zend_declare_typed_class_constant(class_entry, const_KEY_AS_FILENAME_name, &const_KEY_AS_FILENAME_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_KEY_AS_FILENAME_name);
 
 	zval const_NEW_CURRENT_AND_KEY_value;
 	ZVAL_LONG(&const_NEW_CURRENT_AND_KEY_value, SPL_FILE_NEW_CURRENT_AND_KEY);
-	zend_string *const_NEW_CURRENT_AND_KEY_name = zend_string_init_interned("NEW_CURRENT_AND_KEY", sizeof("NEW_CURRENT_AND_KEY") - 1, 1);
+	zend_string *const_NEW_CURRENT_AND_KEY_name = zend_string_init_interned("NEW_CURRENT_AND_KEY", strlen("NEW_CURRENT_AND_KEY"), 1);
 	zend_declare_typed_class_constant(class_entry, const_NEW_CURRENT_AND_KEY_name, &const_NEW_CURRENT_AND_KEY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_NEW_CURRENT_AND_KEY_name);
 
 	zval const_OTHER_MODE_MASK_value;
 	ZVAL_LONG(&const_OTHER_MODE_MASK_value, SPL_FILE_DIR_OTHERS_MASK);
-	zend_string *const_OTHER_MODE_MASK_name = zend_string_init_interned("OTHER_MODE_MASK", sizeof("OTHER_MODE_MASK") - 1, 1);
+	zend_string *const_OTHER_MODE_MASK_name = zend_string_init_interned("OTHER_MODE_MASK", strlen("OTHER_MODE_MASK"), 1);
 	zend_declare_typed_class_constant(class_entry, const_OTHER_MODE_MASK_name, &const_OTHER_MODE_MASK_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OTHER_MODE_MASK_name);
 
 	zval const_SKIP_DOTS_value;
 	ZVAL_LONG(&const_SKIP_DOTS_value, SPL_FILE_DIR_SKIPDOTS);
-	zend_string *const_SKIP_DOTS_name = zend_string_init_interned("SKIP_DOTS", sizeof("SKIP_DOTS") - 1, 1);
+	zend_string *const_SKIP_DOTS_name = zend_string_init_interned("SKIP_DOTS", strlen("SKIP_DOTS"), 1);
 	zend_declare_typed_class_constant(class_entry, const_SKIP_DOTS_name, &const_SKIP_DOTS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SKIP_DOTS_name);
 
 	zval const_UNIX_PATHS_value;
 	ZVAL_LONG(&const_UNIX_PATHS_value, SPL_FILE_DIR_UNIXPATHS);
-	zend_string *const_UNIX_PATHS_name = zend_string_init_interned("UNIX_PATHS", sizeof("UNIX_PATHS") - 1, 1);
+	zend_string *const_UNIX_PATHS_name = zend_string_init_interned("UNIX_PATHS", strlen("UNIX_PATHS"), 1);
 	zend_declare_typed_class_constant(class_entry, const_UNIX_PATHS_name, &const_UNIX_PATHS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_UNIX_PATHS_name);
 
@@ -625,25 +625,25 @@ static zend_class_entry *register_class_SplFileObject(zend_class_entry *class_en
 
 	zval const_DROP_NEW_LINE_value;
 	ZVAL_LONG(&const_DROP_NEW_LINE_value, SPL_FILE_OBJECT_DROP_NEW_LINE);
-	zend_string *const_DROP_NEW_LINE_name = zend_string_init_interned("DROP_NEW_LINE", sizeof("DROP_NEW_LINE") - 1, 1);
+	zend_string *const_DROP_NEW_LINE_name = zend_string_init_interned("DROP_NEW_LINE", strlen("DROP_NEW_LINE"), 1);
 	zend_declare_typed_class_constant(class_entry, const_DROP_NEW_LINE_name, &const_DROP_NEW_LINE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_DROP_NEW_LINE_name);
 
 	zval const_READ_AHEAD_value;
 	ZVAL_LONG(&const_READ_AHEAD_value, SPL_FILE_OBJECT_READ_AHEAD);
-	zend_string *const_READ_AHEAD_name = zend_string_init_interned("READ_AHEAD", sizeof("READ_AHEAD") - 1, 1);
+	zend_string *const_READ_AHEAD_name = zend_string_init_interned("READ_AHEAD", strlen("READ_AHEAD"), 1);
 	zend_declare_typed_class_constant(class_entry, const_READ_AHEAD_name, &const_READ_AHEAD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_READ_AHEAD_name);
 
 	zval const_SKIP_EMPTY_value;
 	ZVAL_LONG(&const_SKIP_EMPTY_value, SPL_FILE_OBJECT_SKIP_EMPTY);
-	zend_string *const_SKIP_EMPTY_name = zend_string_init_interned("SKIP_EMPTY", sizeof("SKIP_EMPTY") - 1, 1);
+	zend_string *const_SKIP_EMPTY_name = zend_string_init_interned("SKIP_EMPTY", strlen("SKIP_EMPTY"), 1);
 	zend_declare_typed_class_constant(class_entry, const_SKIP_EMPTY_name, &const_SKIP_EMPTY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SKIP_EMPTY_name);
 
 	zval const_READ_CSV_value;
 	ZVAL_LONG(&const_READ_CSV_value, SPL_FILE_OBJECT_READ_CSV);
-	zend_string *const_READ_CSV_name = zend_string_init_interned("READ_CSV", sizeof("READ_CSV") - 1, 1);
+	zend_string *const_READ_CSV_name = zend_string_init_interned("READ_CSV", strlen("READ_CSV"), 1);
 	zend_declare_typed_class_constant(class_entry, const_READ_CSV_name, &const_READ_CSV_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_READ_CSV_name);
 

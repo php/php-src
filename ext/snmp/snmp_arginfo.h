@@ -270,121 +270,121 @@ static zend_class_entry *register_class_SNMP(void)
 
 	zval const_VERSION_1_value;
 	ZVAL_LONG(&const_VERSION_1_value, SNMP_VERSION_1);
-	zend_string *const_VERSION_1_name = zend_string_init_interned("VERSION_1", sizeof("VERSION_1") - 1, 1);
+	zend_string *const_VERSION_1_name = zend_string_init_interned("VERSION_1", strlen("VERSION_1"), 1);
 	zend_declare_typed_class_constant(class_entry, const_VERSION_1_name, &const_VERSION_1_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_VERSION_1_name);
 
 	zval const_VERSION_2c_value;
 	ZVAL_LONG(&const_VERSION_2c_value, SNMP_VERSION_2c);
-	zend_string *const_VERSION_2c_name = zend_string_init_interned("VERSION_2c", sizeof("VERSION_2c") - 1, 1);
+	zend_string *const_VERSION_2c_name = zend_string_init_interned("VERSION_2c", strlen("VERSION_2c"), 1);
 	zend_declare_typed_class_constant(class_entry, const_VERSION_2c_name, &const_VERSION_2c_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_VERSION_2c_name);
 
 	zval const_VERSION_2C_value;
 	ZVAL_LONG(&const_VERSION_2C_value, SNMP_VERSION_2c);
-	zend_string *const_VERSION_2C_name = zend_string_init_interned("VERSION_2C", sizeof("VERSION_2C") - 1, 1);
+	zend_string *const_VERSION_2C_name = zend_string_init_interned("VERSION_2C", strlen("VERSION_2C"), 1);
 	zend_declare_typed_class_constant(class_entry, const_VERSION_2C_name, &const_VERSION_2C_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_VERSION_2C_name);
 
 	zval const_VERSION_3_value;
 	ZVAL_LONG(&const_VERSION_3_value, SNMP_VERSION_3);
-	zend_string *const_VERSION_3_name = zend_string_init_interned("VERSION_3", sizeof("VERSION_3") - 1, 1);
+	zend_string *const_VERSION_3_name = zend_string_init_interned("VERSION_3", strlen("VERSION_3"), 1);
 	zend_declare_typed_class_constant(class_entry, const_VERSION_3_name, &const_VERSION_3_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_VERSION_3_name);
 
 	zval const_ERRNO_NOERROR_value;
 	ZVAL_LONG(&const_ERRNO_NOERROR_value, PHP_SNMP_ERRNO_NOERROR);
-	zend_string *const_ERRNO_NOERROR_name = zend_string_init_interned("ERRNO_NOERROR", sizeof("ERRNO_NOERROR") - 1, 1);
+	zend_string *const_ERRNO_NOERROR_name = zend_string_init_interned("ERRNO_NOERROR", strlen("ERRNO_NOERROR"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ERRNO_NOERROR_name, &const_ERRNO_NOERROR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERRNO_NOERROR_name);
 
 	zval const_ERRNO_ANY_value;
 	ZVAL_LONG(&const_ERRNO_ANY_value, PHP_SNMP_ERRNO_ANY);
-	zend_string *const_ERRNO_ANY_name = zend_string_init_interned("ERRNO_ANY", sizeof("ERRNO_ANY") - 1, 1);
+	zend_string *const_ERRNO_ANY_name = zend_string_init_interned("ERRNO_ANY", strlen("ERRNO_ANY"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ERRNO_ANY_name, &const_ERRNO_ANY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERRNO_ANY_name);
 
 	zval const_ERRNO_GENERIC_value;
 	ZVAL_LONG(&const_ERRNO_GENERIC_value, PHP_SNMP_ERRNO_GENERIC);
-	zend_string *const_ERRNO_GENERIC_name = zend_string_init_interned("ERRNO_GENERIC", sizeof("ERRNO_GENERIC") - 1, 1);
+	zend_string *const_ERRNO_GENERIC_name = zend_string_init_interned("ERRNO_GENERIC", strlen("ERRNO_GENERIC"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ERRNO_GENERIC_name, &const_ERRNO_GENERIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERRNO_GENERIC_name);
 
 	zval const_ERRNO_TIMEOUT_value;
 	ZVAL_LONG(&const_ERRNO_TIMEOUT_value, PHP_SNMP_ERRNO_TIMEOUT);
-	zend_string *const_ERRNO_TIMEOUT_name = zend_string_init_interned("ERRNO_TIMEOUT", sizeof("ERRNO_TIMEOUT") - 1, 1);
+	zend_string *const_ERRNO_TIMEOUT_name = zend_string_init_interned("ERRNO_TIMEOUT", strlen("ERRNO_TIMEOUT"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ERRNO_TIMEOUT_name, &const_ERRNO_TIMEOUT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERRNO_TIMEOUT_name);
 
 	zval const_ERRNO_ERROR_IN_REPLY_value;
 	ZVAL_LONG(&const_ERRNO_ERROR_IN_REPLY_value, PHP_SNMP_ERRNO_ERROR_IN_REPLY);
-	zend_string *const_ERRNO_ERROR_IN_REPLY_name = zend_string_init_interned("ERRNO_ERROR_IN_REPLY", sizeof("ERRNO_ERROR_IN_REPLY") - 1, 1);
+	zend_string *const_ERRNO_ERROR_IN_REPLY_name = zend_string_init_interned("ERRNO_ERROR_IN_REPLY", strlen("ERRNO_ERROR_IN_REPLY"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ERRNO_ERROR_IN_REPLY_name, &const_ERRNO_ERROR_IN_REPLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERRNO_ERROR_IN_REPLY_name);
 
 	zval const_ERRNO_OID_NOT_INCREASING_value;
 	ZVAL_LONG(&const_ERRNO_OID_NOT_INCREASING_value, PHP_SNMP_ERRNO_OID_NOT_INCREASING);
-	zend_string *const_ERRNO_OID_NOT_INCREASING_name = zend_string_init_interned("ERRNO_OID_NOT_INCREASING", sizeof("ERRNO_OID_NOT_INCREASING") - 1, 1);
+	zend_string *const_ERRNO_OID_NOT_INCREASING_name = zend_string_init_interned("ERRNO_OID_NOT_INCREASING", strlen("ERRNO_OID_NOT_INCREASING"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ERRNO_OID_NOT_INCREASING_name, &const_ERRNO_OID_NOT_INCREASING_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERRNO_OID_NOT_INCREASING_name);
 
 	zval const_ERRNO_OID_PARSING_ERROR_value;
 	ZVAL_LONG(&const_ERRNO_OID_PARSING_ERROR_value, PHP_SNMP_ERRNO_OID_PARSING_ERROR);
-	zend_string *const_ERRNO_OID_PARSING_ERROR_name = zend_string_init_interned("ERRNO_OID_PARSING_ERROR", sizeof("ERRNO_OID_PARSING_ERROR") - 1, 1);
+	zend_string *const_ERRNO_OID_PARSING_ERROR_name = zend_string_init_interned("ERRNO_OID_PARSING_ERROR", strlen("ERRNO_OID_PARSING_ERROR"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ERRNO_OID_PARSING_ERROR_name, &const_ERRNO_OID_PARSING_ERROR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERRNO_OID_PARSING_ERROR_name);
 
 	zval const_ERRNO_MULTIPLE_SET_QUERIES_value;
 	ZVAL_LONG(&const_ERRNO_MULTIPLE_SET_QUERIES_value, PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES);
-	zend_string *const_ERRNO_MULTIPLE_SET_QUERIES_name = zend_string_init_interned("ERRNO_MULTIPLE_SET_QUERIES", sizeof("ERRNO_MULTIPLE_SET_QUERIES") - 1, 1);
+	zend_string *const_ERRNO_MULTIPLE_SET_QUERIES_name = zend_string_init_interned("ERRNO_MULTIPLE_SET_QUERIES", strlen("ERRNO_MULTIPLE_SET_QUERIES"), 1);
 	zend_declare_typed_class_constant(class_entry, const_ERRNO_MULTIPLE_SET_QUERIES_name, &const_ERRNO_MULTIPLE_SET_QUERIES_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERRNO_MULTIPLE_SET_QUERIES_name);
 
 	zval property_info_default_value;
 	ZVAL_UNDEF(&property_info_default_value);
-	zend_string *property_info_name = zend_string_init("info", sizeof("info") - 1, 1);
+	zend_string *property_info_name = zend_string_init("info", strlen("info"), 1);
 	zend_declare_typed_property(class_entry, property_info_name, &property_info_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release(property_info_name);
 
 	zval property_max_oids_default_value;
 	ZVAL_UNDEF(&property_max_oids_default_value);
-	zend_string *property_max_oids_name = zend_string_init("max_oids", sizeof("max_oids") - 1, 1);
+	zend_string *property_max_oids_name = zend_string_init("max_oids", strlen("max_oids"), 1);
 	zend_declare_typed_property(class_entry, property_max_oids_name, &property_max_oids_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
 	zend_string_release(property_max_oids_name);
 
 	zval property_valueretrieval_default_value;
 	ZVAL_UNDEF(&property_valueretrieval_default_value);
-	zend_string *property_valueretrieval_name = zend_string_init("valueretrieval", sizeof("valueretrieval") - 1, 1);
+	zend_string *property_valueretrieval_name = zend_string_init("valueretrieval", strlen("valueretrieval"), 1);
 	zend_declare_typed_property(class_entry, property_valueretrieval_name, &property_valueretrieval_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_valueretrieval_name);
 
 	zval property_quick_print_default_value;
 	ZVAL_UNDEF(&property_quick_print_default_value);
-	zend_string *property_quick_print_name = zend_string_init("quick_print", sizeof("quick_print") - 1, 1);
+	zend_string *property_quick_print_name = zend_string_init("quick_print", strlen("quick_print"), 1);
 	zend_declare_typed_property(class_entry, property_quick_print_name, &property_quick_print_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_quick_print_name);
 
 	zval property_enum_print_default_value;
 	ZVAL_UNDEF(&property_enum_print_default_value);
-	zend_string *property_enum_print_name = zend_string_init("enum_print", sizeof("enum_print") - 1, 1);
+	zend_string *property_enum_print_name = zend_string_init("enum_print", strlen("enum_print"), 1);
 	zend_declare_typed_property(class_entry, property_enum_print_name, &property_enum_print_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_enum_print_name);
 
 	zval property_oid_output_format_default_value;
 	ZVAL_UNDEF(&property_oid_output_format_default_value);
-	zend_string *property_oid_output_format_name = zend_string_init("oid_output_format", sizeof("oid_output_format") - 1, 1);
+	zend_string *property_oid_output_format_name = zend_string_init("oid_output_format", strlen("oid_output_format"), 1);
 	zend_declare_typed_property(class_entry, property_oid_output_format_name, &property_oid_output_format_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_oid_output_format_name);
 
 	zval property_oid_increasing_check_default_value;
 	ZVAL_UNDEF(&property_oid_increasing_check_default_value);
-	zend_string *property_oid_increasing_check_name = zend_string_init("oid_increasing_check", sizeof("oid_increasing_check") - 1, 1);
+	zend_string *property_oid_increasing_check_name = zend_string_init("oid_increasing_check", strlen("oid_increasing_check"), 1);
 	zend_declare_typed_property(class_entry, property_oid_increasing_check_name, &property_oid_increasing_check_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_oid_increasing_check_name);
 
 	zval property_exceptions_enabled_default_value;
 	ZVAL_UNDEF(&property_exceptions_enabled_default_value);
-	zend_string *property_exceptions_enabled_name = zend_string_init("exceptions_enabled", sizeof("exceptions_enabled") - 1, 1);
+	zend_string *property_exceptions_enabled_name = zend_string_init("exceptions_enabled", strlen("exceptions_enabled"), 1);
 	zend_declare_typed_property(class_entry, property_exceptions_enabled_name, &property_exceptions_enabled_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_exceptions_enabled_name);
 
