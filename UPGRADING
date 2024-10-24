@@ -56,6 +56,11 @@ PHP 8.5 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Hash:
+  The MHASH_* constants have been deprecated.  These have been overlooked
+  when the mhash*() function family has been deprecated per
+  https://wiki.php.net/rfc/deprecations_php_8_1#mhash_function_family
+
 ========================================
 5. Changed Functions
 ========================================
