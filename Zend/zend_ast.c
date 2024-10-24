@@ -564,6 +564,8 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
 	return r;
 }
 
+#include "Zend/zend_closures.h"
+
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 	zval *result,
 	zend_ast *ast,
@@ -989,6 +991,13 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			}
 			return SUCCESS;
 		}
+		case ZEND_AST_OP_ARRAY:
+		{
+			zend_function *func = Z_PTR_P(&((zend_ast_zval*)(ast))->val);
+
+			zend_create_closure(result, func, scope, scope, NULL);
+			return SUCCESS;	
+		}
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 		{
@@ -1068,7 +1077,7 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 {
 	size_t size;
 
-	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_OP_ARRAY) {
 		size = sizeof(zend_ast_zval);
 	} else if (zend_ast_is_list(ast)) {
 		uint32_t i;
@@ -1095,7 +1104,14 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 
 static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 {
-	if (ast->kind == ZEND_AST_ZVAL) {
+	if (ast->kind == ZEND_AST_OP_ARRAY) {
+		zend_ast_zval *new = (zend_ast_zval*)buf;
+		new->kind = ZEND_AST_OP_ARRAY;
+		new->attr = ast->attr;
+		ZVAL_COPY(&new->val, &((zend_ast_zval *) ast)->val);
+		Z_LINENO(new->val) = zend_ast_get_lineno(ast);
+		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
+	} else if (ast->kind == ZEND_AST_ZVAL) {
 		zend_ast_zval *new = (zend_ast_zval*)buf;
 		new->kind = ZEND_AST_ZVAL;
 		new->attr = ast->attr;
@@ -1176,6 +1192,8 @@ tail_call:
 		goto tail_call;
 	} else if (EXPECTED(ast->kind == ZEND_AST_ZVAL)) {
 		zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
+	} else if (EXPECTED(ast->kind == ZEND_AST_OP_ARRAY)) {
+		zval_ptr_dtor_nogc(&((zend_ast_zval*)(ast))->val);
 	} else if (EXPECTED(zend_ast_is_list(ast))) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		if (list->children) {

@@ -169,12 +169,18 @@ static void zend_hash_persist(HashTable *ht)
 	}
 }
 
+static void zend_persist_op_array(zval *zv);
+
 static zend_ast *zend_persist_ast(zend_ast *ast)
 {
 	uint32_t i;
 	zend_ast *node;
 
-	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
+	if (ast->kind == ZEND_AST_OP_ARRAY) {
+		zend_ast_zval *copy = zend_shared_memdup(ast, sizeof(zend_ast_zval));
+		zend_persist_op_array(&copy->val);
+		node = (zend_ast *) copy;
+	} else if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		zend_ast_zval *copy = zend_shared_memdup(ast, sizeof(zend_ast_zval));
 		zend_persist_zval(&copy->val);
 		node = (zend_ast *) copy;
