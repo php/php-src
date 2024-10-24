@@ -9887,6 +9887,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	if ((!func || func->type == ZEND_USER_FUNCTION)
 	 && opline->opcode != ZEND_DO_ICALL) {
 		bool recursive_call_through_jmp = 0;
+		uint32_t num_args;
 
 		// JIT: EX(call) = NULL;
 		ir_STORE(jit_CALL(rx, call), IR_NULL);
@@ -9951,8 +9952,6 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			if (call_num_args <= func->op_array.num_args) {
 				if (!trace || (trace->op == ZEND_JIT_TRACE_END
 				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
-					uint32_t num_args;
-
 					if ((func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0) {
 						if (trace) {
 							num_args = 0;
@@ -10148,7 +10147,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					ir_insn *insn;
 
 					/* attempt to convert direct recursive call into loop */
-					begin = jit->bb_start_ref[call_num_args];
+					begin = jit->bb_start_ref[num_args];
 					ZEND_ASSERT(begin != IR_UNUSED);
 					insn = &jit->ctx.ir_base[begin];
 					if (insn->op == IR_BEGIN) {
