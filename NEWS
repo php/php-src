@@ -7,8 +7,10 @@ PHP                                                                        NEWS
     (nielsdos)
 
 - PDO:
-  . Fixed bug GH-16167 (Prevent mixing PDO sub-classes with different DSN).
+  . Fixed bug GH-16131 (Prevent mixing PDO sub-classes with different DSN).
   (kocsismate)
+  . Fixed bug GH-16314 ("Pdo\Mysql object is uninitialized" when opening a
+  persistent connection). (kocsismate)
 
 24 Oct 2024, PHP 8.4.0RC3
 
