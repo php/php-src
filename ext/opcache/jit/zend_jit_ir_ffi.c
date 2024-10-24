@@ -507,7 +507,7 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 			case ZEND_FFI_TYPE_BOOL:
 				jit_set_Z_TYPE_INFO(jit, res_addr,
 					ir_ADD_U32(ir_ZEXT_U32(ref), ir_CONST_U32(IS_FALSE)));
-				return 1;
+				goto cleanup;
 			case ZEND_FFI_TYPE_CHAR:
 				jit_set_Z_PTR(jit, res_addr, ir_LOAD_A(
 					ir_ADD_A(ir_CONST_ADDR(zend_one_char_string),
@@ -518,11 +518,11 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 				 if ((ret_type->attr & ZEND_FFI_ATTR_CONST)
 				  && ZEND_FFI_TYPE(ret_type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
 					ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_zval_string), jit_ZVAL_ADDR(jit, res_addr), ref);
-					return 1;
+					goto cleanup;
 				 } else {
 					ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_zval_ffi_ptr),
 						jit_ZVAL_ADDR(jit, res_addr), ir_CONST_ADDR(ret_type), ref);
-					return 1;
+					goto cleanup;
 				 }
 				 break;
 			default:
@@ -534,6 +534,7 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 		}
 	}
 
+cleanup:
 	if (num_args) {
 		zend_jit_trace_stack *stack = call->stack;
 
