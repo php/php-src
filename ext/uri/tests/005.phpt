@@ -1,0 +1,31 @@
+--TEST--
+Parse multibyte URLs
+--EXTENSIONS--
+uri
+--FILE--
+<?php
+
+var_dump(Uri\Rfc3986Uri::create("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor"));
+var_dump(Uri\WhatWgUri::create("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor"));
+
+?>
+--EXPECTF--
+NULL
+object(Uri\WhatWgUri)#%d (%d) {
+  ["scheme"]=>
+  string(4) "http"
+  ["user"]=>
+  string(8) "username"
+  ["password"]=>
+  string(8) "password"
+  ["host"]=>
+  string(18) "xn--hostname-b1aaa"
+  ["port"]=>
+  int(9090)
+  ["path"]=>
+  string(4) "path"
+  ["query"]=>
+  string(14) "arg=va%C3%A9ue"
+  ["fragment"]=>
+  string(6) "anchor"
+}
