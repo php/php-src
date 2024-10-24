@@ -177,6 +177,7 @@ typedef struct _zend_accel_directives {
 	char          *lockfile_path;
 #endif
 	char          *file_cache;
+	bool      file_cache_read_only;
 	bool      file_cache_only;
 	bool      file_cache_consistency_checks;
 #if ENABLE_FILE_CACHE_FALLBACK

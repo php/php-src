@@ -1100,6 +1100,10 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	}
 #endif
 
+	if (ZCG(accel_directives).file_cache_read_only) {
+		return FAILURE;
+	}
+
 	filename = zend_file_cache_get_bin_file_path(script->script.filename);
 
 	if (zend_file_cache_mkdir(filename, strlen(ZCG(accel_directives).file_cache)) != SUCCESS) {
