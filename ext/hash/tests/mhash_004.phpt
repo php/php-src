@@ -12,6 +12,7 @@ var_dump($algo);
 
 ?>
 --EXPECTF--
+Deprecated: Constant MHASH_MD5 is deprecated in %s on line %d
 int(1)
 
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
