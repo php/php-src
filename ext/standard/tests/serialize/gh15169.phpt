@@ -30,6 +30,11 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
+while ($next = $firstNode->next) {
+    $firstNode->next = $next->next;
+}
+
 ?>
 --EXPECTF--
 Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
