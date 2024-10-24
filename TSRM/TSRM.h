@@ -136,7 +136,9 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler);
 
 TSRM_API void *tsrm_get_ls_cache(void);
+#ifdef HAVE_JIT
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
+#endif
 TSRM_API bool tsrm_is_main_thread(void);
 TSRM_API bool tsrm_is_shutdown(void);
 TSRM_API const char *tsrm_api_name(void);

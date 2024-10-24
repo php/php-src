@@ -770,6 +770,7 @@ TSRM_API void *tsrm_get_ls_cache(void)
 	return tsrm_tls_get();
 }/*}}}*/
 
+#ifdef HAVE_JIT
 /* Returns offset of tsrm_ls_cache slot from Thread Control Block address */
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 {/*{{{*/
@@ -820,6 +821,7 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 	return 0;
 #endif
 }/*}}}*/
+#endif
 
 TSRM_API bool tsrm_is_main_thread(void)
 {/*{{{*/
