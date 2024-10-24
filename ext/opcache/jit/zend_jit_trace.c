@@ -6983,9 +6983,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							  || zend_string_equals_literal_ci(Z_STR_P(zv), "\\FFI"))) {
 								zval *zv = RT_CONSTANT(opline, opline->op2);
 								if (Z_TYPE_P(zv) == IS_STRING
-								 && zend_string_equals_literal(Z_STR_P(zv), "addr")
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "addr")
 								 && opline->extended_value == 1) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_MASK_FFI_ADDR;
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_ADDR;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
+								} else if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "string")
+								 && (opline->extended_value == 1 || opline->extended_value == 2)) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_STRING;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
