@@ -3709,6 +3709,7 @@ static uint32_t zend_get_arg_num(zend_function *fn, zend_string *arg_name) {
 			}
 		}
 	} else {
+		ZEND_ASSERT(fn->common.num_args == 0 || fn->internal_function.arg_info);
 		for (uint32_t i = 0; i < fn->common.num_args; i++) {
 			zend_internal_arg_info *arg_info = &fn->internal_function.arg_info[i];
 			size_t len = strlen(arg_info->name);
