@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16559 (UBSan abort in ext/gd/libgd/gd_interpolation.c:1007).
     (nielsdos)
 
+- Opcache:
+  . Fixed bug GH-16572 (Incorrect result with reflection in low-trigger JIT).
+    (nielsdos)
+
 - PDO:
   . Fixed bug GH-16167 (Prevent mixing PDO sub-classes with different DSN).
     (kocsismate)
