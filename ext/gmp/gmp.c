@@ -1282,20 +1282,22 @@ ZEND_FUNCTION(gmp_pow)
 		RETURN_THROWS();
 	}
 
+    double powmax = log((double)ZEND_LONG_MAX);
+
 	if (Z_TYPE_P(base_arg) == IS_LONG && Z_LVAL_P(base_arg) >= 0) {
 		INIT_GMP_RETVAL(gmpnum_result);
-		if ((log10(Z_LVAL_P(base_arg)) * exp) > (double)ULONG_MAX) {
+		if ((log(Z_LVAL_P(base_arg)) * exp) > powmax) {
 			zend_value_error("base and exponent overflow");
 			RETURN_THROWS();
 		}
 		mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
 	} else {
 		mpz_ptr gmpnum_base;
-		unsigned long gmpnum;
+		unsigned long int gmpnum;
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base, 1);
 		INIT_GMP_RETVAL(gmpnum_result);
 		gmpnum = mpz_get_ui(gmpnum_base);
-		if ((log10(gmpnum) * exp) > (double)ULONG_MAX) {
+		if ((log(gmpnum) * exp) > powmax) {
 			FREE_GMP_TEMP(temp_base);
 			zend_value_error("base and exponent overflow");
 			RETURN_THROWS();
