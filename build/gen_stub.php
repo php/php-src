@@ -1155,12 +1155,13 @@ class MethodName implements FunctionOrMethodName {
 }
 
 class ReturnInfo {
-    const REFCOUNT_0 = "0";
+    // REFCOUNT_SCALAR (formerly REFCOUNT_0) is automatically applied for
+    // scalars, and not allowed for non-scalars
+    const REFCOUNT_SCALAR = "0";
     const REFCOUNT_1 = "1";
     const REFCOUNT_N = "N";
 
-    const REFCOUNTS = [
-        self::REFCOUNT_0,
+    const REFCOUNTS_NONSCALAR = [
         self::REFCOUNT_1,
         self::REFCOUNT_N,
     ];
@@ -1200,20 +1201,16 @@ class ReturnInfo {
         $isScalarType = $type !== null && $type->isScalar();
 
         if ($refcount === null) {
-            $this->refcount = $isScalarType ? self::REFCOUNT_0 : self::REFCOUNT_N;
+            $this->refcount = $isScalarType ? self::REFCOUNT_SCALAR : self::REFCOUNT_N;
             return;
         }
 
-        if (!in_array($refcount, ReturnInfo::REFCOUNTS, true)) {
-            throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
+        if ($isScalarType) {
+            throw new Exception("@refcount is not permitted on functions returning scalar values");
         }
 
-        if ($isScalarType && $refcount !== self::REFCOUNT_0) {
-            throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
-        }
-
-        if (!$isScalarType && $refcount === self::REFCOUNT_0) {
-            throw new Exception('A non-scalar return type of "' . $type->__toString() . '" cannot have a refcount of "' . self::REFCOUNT_0 . '"');
+        if (!in_array($refcount, ReturnInfo::REFCOUNTS_NONSCALAR, true)) {
+            throw new Exception("@refcount must have one of the following values: \"1\", \"N\", $refcount given");
         }
 
         $this->refcount = $refcount;
