@@ -3373,6 +3373,15 @@ static void ZEND_FASTCALL zend_jit_zval_string(zval *zv, const char *str)
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_zval_stringl(zval *zv, const char *str, size_t len)
+{
+	if (str) {
+		ZVAL_STRINGL(zv, str, len);
+	} else {
+		ZVAL_NULL(zv);
+	}
+}
+
 static void ZEND_FASTCALL zend_jit_zval_ffi_ptr(zval *zv, zend_ffi_type *type, void *ptr)
 {
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_POINTER);
@@ -3421,18 +3430,11 @@ static void ZEND_FASTCALL zend_jit_zval_ffi_obj(zval *zv, zend_ffi_type *type, v
 	}
 }
 
-static zend_ffi_cdata* ZEND_FASTCALL zend_jit_zval_ffi_addr(zval *zv)
+static zend_ffi_cdata* ZEND_FASTCALL zend_jit_zval_ffi_addr(zend_ffi_cdata *cdata)
 {
-	zend_ffi_cdata *cdata, *new_cdata;
+	zend_ffi_cdata *new_cdata;
 	zend_ffi_type *type, *new_type;
 
-	if (Z_TYPE_P(zv) == IS_INDIRECT) {
-		zv = Z_INDIRECT_P(zv);
-	}
-	ZVAL_DEREF(zv);
-	ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
-
-	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
 	type = ZEND_FFI_TYPE(cdata->type);
 
 //	if (GC_REFCOUNT(&cdata->std) == 1 && Z_REFCOUNT_P(arg) == 1 && type->kind == ZEND_FFI_TYPE_POINTER
@@ -3467,19 +3469,11 @@ static zend_ffi_cdata* ZEND_FASTCALL zend_jit_zval_ffi_addr(zval *zv)
 	return new_cdata;
 }
 
-static zend_ffi_cdata* ZEND_FASTCALL zend_jit_zval_ffi_addr_var(zval *zv)
+static zend_ffi_cdata* ZEND_FASTCALL zend_jit_zval_ffi_addr_var(zend_ffi_cdata *cdata)
 {
-	zend_ffi_cdata *cdata, *new_cdata;
+	zend_ffi_cdata *new_cdata;
 	zend_ffi_type *type, *new_type;
-	zval *arg = zv;
 
-	if (Z_TYPE_P(zv) == IS_INDIRECT) {
-		zv = Z_INDIRECT_P(zv);
-	}
-	ZVAL_DEREF(zv);
-	ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
-
-	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
 	type = ZEND_FFI_TYPE(cdata->type);
 
 //	if (GC_REFCOUNT(&cdata->std) == 1 && Z_REFCOUNT_P(arg) == 1 && type->kind == ZEND_FFI_TYPE_POINTER
@@ -3511,23 +3505,16 @@ static zend_ffi_cdata* ZEND_FASTCALL zend_jit_zval_ffi_addr_var(zval *zv)
 	new_cdata->ptr = (void*)&new_cdata->ptr_holder;
 	new_cdata->ptr_holder = cdata->ptr;
 
-	if (Z_REFCOUNTED_P(arg)) {
-		zend_refcounted *ref = Z_COUNTED_P(arg);
-
-		if (!GC_DELREF(ref)) {
-			if (ref == (zend_refcounted*)cdata || GC_REFCOUNT(&cdata->std) == 1) {
-				if (ZEND_FFI_TYPE_IS_OWNED(cdata->type)) {
-					/* transfer type ownership */
-					cdata->type = type;
-					new_type->pointer.type = ZEND_FFI_TYPE_MAKE_OWNED(type);
-				}
-				if (cdata->flags & ZEND_FFI_FLAG_OWNED) {
-					/* transfer ownership */
-					cdata->flags &= ~ZEND_FFI_FLAG_OWNED;
-					new_cdata->flags |= ZEND_FFI_FLAG_OWNED;
-				}
-			}
-			rc_dtor_func(ref);
+	if (GC_REFCOUNT(&cdata->std) == 1 /*&& Z_REFCOUNT_P(arg) == 1*/) {
+		if (ZEND_FFI_TYPE_IS_OWNED(cdata->type)) {
+			/* transfer type ownership */
+			cdata->type = type;
+			new_type->pointer.type = ZEND_FFI_TYPE_MAKE_OWNED(type);
+		}
+		if (cdata->flags & ZEND_FFI_FLAG_OWNED) {
+			/* transfer ownership */
+			cdata->flags &= ~ZEND_FFI_FLAG_OWNED;
+			new_cdata->flags |= ZEND_FFI_FLAG_OWNED;
 		}
 	}
 

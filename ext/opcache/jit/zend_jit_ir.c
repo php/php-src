@@ -3102,6 +3102,7 @@ static void zend_jit_setup_disasm(void)
 
 #ifdef HAVE_FFI
 	REGISTER_HELPER(zend_jit_zval_string);
+	REGISTER_HELPER(zend_jit_zval_stringl);
 	REGISTER_HELPER(zend_jit_zval_ffi_ptr);
 	REGISTER_HELPER(zend_jit_zval_ffi_obj);
 	REGISTER_HELPER(zend_jit_zval_ffi_addr);
