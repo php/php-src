@@ -31,6 +31,10 @@
 
 #include "zend_jit_internal.h"
 
+#ifdef HAVE_FFI
+# include "ext/ffi/php_ffi.h"
+#endif
+
 #ifdef HAVE_GCC_GLOBAL_REGS
 # pragma GCC diagnostic ignored "-Wvolatile-register-var"
 # if defined(__x86_64__)
@@ -609,7 +613,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 	size_t offset;
 	int idx, count;
 	uint8_t  trace_flags, op1_type, op2_type, op3_type;
-	zend_class_entry *ce1, *ce2;
+	zend_class_entry *ce1, *ce2, *ce3;
+#ifdef HAVE_FFI
+	zend_ffi_type *op1_ffi_type, *op2_ffi_type, *op3_ffi_type;
+	HashTable *op1_ffi_symbols;
+#endif
 	const zend_op *link_to_enter_opline = NULL;
 	int backtrack_link_to_enter = -1;
 	int backtrack_recursion = -1;
@@ -679,7 +687,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 	}
 
 	while (1) {
-		ce1 = ce2 = NULL;
+		ce1 = ce2 = ce3 = NULL;
+#ifdef HAVE_FFI
+		op1_ffi_type = op2_ffi_type = op3_ffi_type = NULL;
+		op1_ffi_symbols = NULL;
+#endif
 		op1_type = op2_type = op3_type = IS_UNKNOWN;
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))
 		 && opline->opcode != ZEND_ROPE_ADD
@@ -703,6 +715,33 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			}
 			if (Z_TYPE_P(zv) == IS_OBJECT) {
 				ce1 = Z_OBJCE_P(zv);
+#ifdef HAVE_FFI
+				if (zend_ffi_api && ce1 == zend_ffi_api->cdata_ce) {
+					zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+					zend_ffi_type *ffi_type = cdata->type;
+					if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+						if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+							op1_ffi_type = ffi_type;
+						}
+					} else {
+						ffi_type = ZEND_FFI_TYPE(ffi_type);
+						if (ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+							ffi_type = ffi_type->pointer.type;
+							if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+								if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+									/* OWNED flag means POINTER TO */
+									op1_ffi_type = ZEND_FFI_TYPE_MAKE_OWNED(ffi_type);
+								}
+							}
+						}
+					}
+				} else if (zend_ffi_api && ce1 == zend_ffi_api->scope_ce) {
+					zend_ffi *ffi = (zend_ffi*)Z_OBJ_P(zv);
+					if (ffi->persistent && ffi->symbols) {
+						op1_ffi_symbols = ffi->symbols;
+					}
+				}
+#endif
 			} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 				if (HT_IS_PACKED(Z_ARRVAL_P(zv))) {
 					flags |= IS_TRACE_PACKED;
@@ -752,6 +791,28 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			}
 			if (Z_TYPE_P(zv) == IS_OBJECT) {
 				ce2 = Z_OBJCE_P(zv);
+#ifdef HAVE_FFI
+				if (zend_ffi_api && ce2 == zend_ffi_api->cdata_ce) {
+					zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+					zend_ffi_type *ffi_type = cdata->type;
+					if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+						if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+							op2_ffi_type = ffi_type;
+						}
+					} else {
+						ffi_type = ZEND_FFI_TYPE(ffi_type);
+						if (ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+							ffi_type = ffi_type->pointer.type;
+							if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+								if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+									/* OWNED flag means POINTER TO */
+									op2_ffi_type = ZEND_FFI_TYPE_MAKE_OWNED(ffi_type);
+								}
+							}
+						}
+					}
+				}
+#endif
 			}
 			op2_type |= flags;
 		}
@@ -778,6 +839,31 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 					op3_type = Z_TYPE_P(zv);
 					flags |= IS_TRACE_REFERENCE;
 				}
+				if (Z_TYPE_P(zv) == IS_OBJECT) {
+					ce3 = Z_OBJCE_P(zv);
+#ifdef HAVE_FFI
+					if (zend_ffi_api && ce3 == zend_ffi_api->cdata_ce) {
+						zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+						zend_ffi_type *ffi_type = cdata->type;
+						if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+							if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+								op3_ffi_type = ffi_type;
+							}
+						} else {
+							ffi_type = ZEND_FFI_TYPE(ffi_type);
+							if (ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+								ffi_type = ffi_type->pointer.type;
+								if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+									if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+										/* OWNED flag means POINTER TO */
+										op3_ffi_type = ZEND_FFI_TYPE_MAKE_OWNED(ffi_type);
+									}
+								}
+							}
+						}
+					}
+#endif
+				}
 				op3_type |= flags;
 			}
 		}
@@ -786,10 +872,31 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 
 		if (ce1) {
 			TRACE_RECORD(ZEND_JIT_TRACE_OP1_TYPE, 0, ce1);
+#ifdef HAVE_FFI
+			if (op1_ffi_type) {
+				TRACE_RECORD(ZEND_JIT_TRACE_OP1_FFI_TYPE, 0, op1_ffi_type);
+			} else if (op1_ffi_symbols) {
+				TRACE_RECORD(ZEND_JIT_TRACE_OP1_FFI_SYMBOLS, 0, op1_ffi_symbols);
+			}
+#endif
 		}
 
 		if (ce2) {
 			TRACE_RECORD(ZEND_JIT_TRACE_OP2_TYPE, 0, ce2);
+#ifdef HAVE_FFI
+			if (op2_ffi_type) {
+				TRACE_RECORD(ZEND_JIT_TRACE_OP2_FFI_TYPE, 0, op2_ffi_type);
+			}
+#endif
+		}
+
+		if (ce3) {
+			TRACE_RECORD(ZEND_JIT_TRACE_OP3_TYPE, 0, ce3);
+#ifdef HAVE_FFI
+			if (op3_ffi_type) {
+				TRACE_RECORD(ZEND_JIT_TRACE_OP3_FFI_TYPE, 0, op3_ffi_type);
+			}
+#endif
 		}
 
 		switch (opline->opcode) {
@@ -1145,6 +1252,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 					func = NULL;
 					ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_MEGAMORPHIC);
 				}
+
 				if (!func) {
 					info = ZEND_JIT_TRACE_NUM_ARGS_INFO(ZEND_CALL_NUM_ARGS(EX(call)));
 				}

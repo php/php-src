@@ -349,6 +349,11 @@ typedef enum _zend_jit_trace_op {
 	ZEND_JIT_TRACE_VM,
 	ZEND_JIT_TRACE_OP1_TYPE,
 	ZEND_JIT_TRACE_OP2_TYPE,
+	ZEND_JIT_TRACE_OP3_TYPE,
+	ZEND_JIT_TRACE_OP1_FFI_TYPE,
+	ZEND_JIT_TRACE_OP2_FFI_TYPE,
+	ZEND_JIT_TRACE_OP3_FFI_TYPE,
+	ZEND_JIT_TRACE_OP1_FFI_SYMBOLS,
 	ZEND_JIT_TRACE_VAL_INFO,
 	ZEND_JIT_TRACE_INIT_CALL,
 	ZEND_JIT_TRACE_DO_ICALL,
@@ -569,6 +574,22 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_MASK_CLOSURE_CALL         0x00000200
 #define TRACE_FRAME_MASK_ALWAYS_RELEASE_THIS  0x00000400
 
+#define TRACE_FRAME_MASK_FFI                  0x00000800
+#define TRACE_FRAME_MASK_FFI_FUNC             0x0000f000
+
+#define TRACE_FRAME_FFI_FUNC_NEW              0x00001000
+#define TRACE_FRAME_FFI_FUNC_FREE             0x00002000
+#define TRACE_FRAME_FFI_FUNC_CAST             0x00003000
+#define TRACE_FRAME_FFI_FUNC_TYPEOF           0x00004000
+#define TRACE_FRAME_FFI_FUNC_ARRAY_TYPE       0x00005000
+#define TRACE_FRAME_FFI_FUNC_ADDR             0x00006000
+#define TRACE_FRAME_FFI_FUNC_SIZEOF           0x00007000
+#define TRACE_FRAME_FFI_FUNC_MEMCPY           0x00008000
+#define TRACE_FRAME_FFI_FUNC_MEMCMP           0x00009000
+#define TRACE_FRAME_FFI_FUNC_MEMSET           0x0000a000
+#define TRACE_FRAME_FFI_FUNC_STRING           0x0000b000
+#define TRACE_FRAME_FFI_FUNC_IS_NULL          0x0000c000
+
 
 #define TRACE_FRAME_INIT(frame, _func, _flags, num_args) do { \
 		zend_jit_trace_stack_frame *_frame = (frame); \
@@ -607,6 +628,10 @@ struct _zend_jit_trace_stack_frame {
 	((frame)->_info & TRACE_FRAME_MASK_CLOSURE_CALL)
 #define TRACE_FRAME_ALWAYS_RELEASE_THIS(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_ALWAYS_RELEASE_THIS)
+#define TRACE_FRAME_FFI(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_FFI)
+#define TRACE_FRAME_FFI_FUNC(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_FFI_FUNC)
 
 #define TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(frame) do { \
 		(frame)->_info |= (0xffffu << TRACE_FRAME_SHIFT_NUM_ARGS); \
