@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5ba6aceffff4e81330182eb84014928630fc9cdd */
+ * Stub hash: 67a29207972b2368ff1625c53013c43a5abc181f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -199,6 +199,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_takesUnionT
 	ZEND_ARG_OBJ_TYPE_MASK(0, arg, stdclass|Iterator, 0, NULL)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_framelessStaticMethod, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, lhs, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, rhs, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestMagicCall___call, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
@@ -249,6 +254,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
 
 #define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_void_return
+
+
+#if (PHP_VERSION_ID >= 80400)
+ZEND_FRAMELESS_FUNCTION(_ZendTestClass_framelessStaticMethod, 2);
+static const zend_frameless_function_info frameless_function_infos__ZendTestClass_framelessStaticMethod[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(_ZendTestClass_framelessStaticMethod, 2), 2 },
+	{ 0 },
+};
+#endif
 
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
@@ -308,6 +322,7 @@ static ZEND_METHOD(_ZendTestClass, returnsStatic);
 static ZEND_METHOD(_ZendTestClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestClass, variadicTest);
 static ZEND_METHOD(_ZendTestClass, takesUnionType);
+static ZEND_METHOD(_ZendTestClass, framelessStaticMethod);
 static ZEND_METHOD(_ZendTestMagicCall, __call);
 static ZEND_METHOD(_ZendTestMagicCallForward, __call);
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable);
@@ -452,6 +467,11 @@ static const zend_function_entry class__ZendTestClass_methods[] = {
 	ZEND_ME(_ZendTestClass, returnsThrowable, arginfo_class__ZendTestClass_returnsThrowable, ZEND_ACC_PUBLIC)
 	ZEND_ME(_ZendTestClass, variadicTest, arginfo_class__ZendTestClass_variadicTest, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(_ZendTestClass, takesUnionType, arginfo_class__ZendTestClass_takesUnionType, ZEND_ACC_PUBLIC)
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("framelessStaticMethod", zim__ZendTestClass_framelessStaticMethod, arginfo_class__ZendTestClass_framelessStaticMethod, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, frameless_function_infos__ZendTestClass_framelessStaticMethod, NULL)
+#else
+	ZEND_RAW_FENTRY("framelessStaticMethod", zim__ZendTestClass_framelessStaticMethod, arginfo_class__ZendTestClass_framelessStaticMethod, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+#endif
 	ZEND_FE_END
 };
 
