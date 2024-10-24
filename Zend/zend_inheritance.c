@@ -2281,7 +2281,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		 * of where it is coming from there is no conflict and we do not need to add it again */
 		if (existing_fn->op_array.opcodes == fn->op_array.opcodes &&
 			(existing_fn->common.fn_flags & ZEND_ACC_PPP_MASK) == (fn->common.fn_flags & ZEND_ACC_PPP_MASK) &&
-			(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+			(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
 			return;
 		}
 
@@ -2347,7 +2347,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 
 static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* {{{ */
 {
-	if ((fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+	if (fn->common.scope->ce_flags & ZEND_ACC_TRAIT) {
 
 		fn->common.scope = ce;
 

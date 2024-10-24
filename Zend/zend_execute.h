@@ -505,8 +505,8 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 		}                                                \
 	} while (0)
 
-#define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
-#define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS) == ZEND_ACC_HAS_READONLY_PROPS)
+#define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))
+#define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS))
 
 
 ZEND_API bool zend_verify_class_constant_type(zend_class_constant *c, const zend_string *name, zval *constant);
