@@ -1229,9 +1229,9 @@ function system_with_timeout(
         }
 
         if ($n > 0) {
-            if ($captureStdOut) {
+            if ($captureStdOut && \in_array($pipes[1], $r)) {
                 $line = fread($pipes[1], 8192);
-            } elseif ($captureStdErr) {
+            } elseif ($captureStdErr && in_array($pipes[2], $r)) {
                 $line = fread($pipes[2], 8192);
             } else {
                 $line = '';
