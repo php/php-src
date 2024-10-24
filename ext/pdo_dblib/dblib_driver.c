@@ -148,7 +148,7 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	bool use_national_character_set = 0;
 	size_t i;
 	char *q;
-	size_t quotedlen = 0;
+	size_t quotedlen = 0, extralen = 0;
 	zend_string *quoted_str;
 
 	if (H->assume_national_character_set_strings) {
@@ -163,7 +163,7 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 
 	/* Detect quoted length, adding extra char for doubled single quotes */
 	for (i = 0; i < ZSTR_LEN(unquoted); i++) {
-		if (ZSTR_VAL(unquoted)[i] == '\'') ++quotedlen;
+		if (ZSTR_VAL(unquoted)[i] == '\'') ++extralen;
 		++quotedlen;
 	}
 
@@ -171,6 +171,12 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	if (use_national_character_set) {
 		++quotedlen; /* N prefix */
 	}
+
+	if (UNEXPECTED(quotedlen > ZSTR_MAX_LEN - extralen)) {
+		return NULL;
+	}
+
+	quotedlen += extralen;
 	quoted_str = zend_string_alloc(quotedlen, 0);
 	q = ZSTR_VAL(quoted_str);
 	if (use_national_character_set) {
