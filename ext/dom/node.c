@@ -893,7 +893,7 @@ Since:
 PHP_METHOD(DOMNode, insertBefore)
 {
 	zval *id, *node, *ref = NULL;
-	xmlNodePtr child, new_child, parentp, refp;
+	xmlNodePtr child, new_child, parentp, refp = NULL;
 	dom_object *intern, *childobj, *refpobj;
 	int ret, stricterror;
 
@@ -918,18 +918,21 @@ PHP_METHOD(DOMNode, insertBefore)
 		RETURN_FALSE;
 	}
 
-	if (child->doc == NULL && parentp->doc != NULL) {
-		childobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
-	}
-
+	/* Fetch and perform sanity checks before modifying reference pointers. */
 	if (ref != NULL) {
 		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
 		if (refp->parent != parentp) {
 			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 			RETURN_FALSE;
 		}
+	}
 
+	if (child->doc == NULL && parentp->doc != NULL) {
+		childobj->document = intern->document;
+		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
+	}
+
+	if (ref != NULL) {
 		if (child->parent != NULL) {
 			xmlUnlinkNode(child);
 		}
