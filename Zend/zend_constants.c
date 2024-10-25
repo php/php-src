@@ -132,7 +132,6 @@ ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int
 	ZVAL_NULL(&c.value);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -143,7 +142,6 @@ ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, boo
 	ZVAL_BOOL(&c.value, bval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -154,7 +152,6 @@ ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zen
 	ZVAL_LONG(&c.value, lval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -166,7 +163,6 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 	ZVAL_DOUBLE(&c.value, dval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -178,7 +174,6 @@ ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, 
 	ZVAL_STR(&c.value, zend_string_init_interned(strval, strlen, flags & CONST_PERSISTENT));
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -507,6 +502,13 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 		name = lowercase_name;
 	} else {
 		name = c->name;
+	}
+
+	zend_string *filename = zend_get_executed_filename_ex();
+	if (filename == NULL) {
+		c->filename = NULL;
+	} else {
+		c->filename = zend_string_copy(filename);
 	}
 
 	/* Check if the user is trying to define any special constant */

@@ -546,17 +546,14 @@ static void cli_register_file_handles(void)
 
 	Z_CONSTANT_FLAGS(ic.value) = 0;
 	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
-	ic.filename = NULL;
 	zend_register_constant(&ic);
 
 	Z_CONSTANT_FLAGS(oc.value) = 0;
 	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
-	oc.filename = NULL;
 	zend_register_constant(&oc);
 
 	Z_CONSTANT_FLAGS(ec.value) = 0;
 	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
-	ec.filename = NULL;
 	zend_register_constant(&ec);
 }
 

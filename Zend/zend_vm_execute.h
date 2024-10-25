@@ -7981,13 +7981,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(Z_STR_P(name));
 
-	zend_string *filename = zend_get_executed_filename_ex();
-	if (filename == NULL) {
-		c.filename = NULL;
-	} else {
-		c.filename = zend_string_copy(filename);
-	}
-
 	if (zend_register_constant(&c) == FAILURE) {
 	}
 
