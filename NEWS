@@ -102,6 +102,7 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-16479 (Use-after-free in SplObjectStorage::setInfo()). (ilutov)
   . Fixed bug GH-16478 (Use-after-free in SplFixedArray::unset()). (ilutov)
+  . Fixed bug GH-16588 (UAF in Observer->serialize). (nielsdos)
 
 - Standard:
   . Fixed bug GH-16293 (Failed assertion when throwing in assert() callback with
