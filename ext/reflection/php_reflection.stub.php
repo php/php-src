@@ -918,5 +918,9 @@ final class ReflectionConstant implements Reflector
 
     public function getFileName(): string|false {}
 
+    public function getExtension(): ?ReflectionExtension {}
+
+    public function getExtensionName(): string|false {}
+
     public function __toString(): string {}
 }

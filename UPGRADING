@@ -90,6 +90,8 @@ PHP 8.5 UPGRADE NOTES
 
 - Reflection:
   . ReflectionConstant::getFileName() was introduced.
+  . ReflectionConstant::getExtension() and
+    ReflectionConstant::getExtensionName() were introduced.
 
 ========================================
 7. New Classes and Interfaces
