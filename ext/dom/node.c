@@ -893,7 +893,7 @@ Since:
 PHP_METHOD(DOMNode, insertBefore)
 {
 	zval *id, *node, *ref = NULL;
-	xmlNodePtr child, new_child, parentp, refp;
+	xmlNodePtr child, new_child, parentp, refp = NULL;
 	dom_object *intern, *childobj, *refpobj;
 	int ret, stricterror;
 
