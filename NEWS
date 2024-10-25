@@ -79,6 +79,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16433 (Large values for openssl_csr_sign() $days overflow).
     (cmb)
 
+- PDO_ODBC:
+  . Fixed bug GH-16450 (PDO_ODBC can inject garbage into field values). (cmb)
+
 - Phar:
   . Fixed bug GH-16406 (Assertion failure in ext/phar/phar.c:2808). (nielsdos)
 
