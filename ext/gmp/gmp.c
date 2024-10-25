@@ -1292,39 +1292,27 @@ ZEND_FUNCTION(gmp_pow)
 		RETURN_THROWS();
 	}
 
+    double powmax = log((double)ZEND_LONG_MAX);
+
 	if (Z_TYPE_P(base_arg) == IS_LONG && Z_LVAL_P(base_arg) >= 0) {
 		INIT_GMP_RETVAL(gmpnum_result);
-		if (exp >= INT_MAX) {
-			mpz_t base_num, exp_num, mod;
-			mpz_init(base_num);
-			mpz_init(exp_num);
-			mpz_init(mod);
-			mpz_set_si(base_num, Z_LVAL_P(base_arg));
-			mpz_set_si(exp_num, exp);
-			mpz_set_ui(mod, UINT_MAX);
-			mpz_powm(gmpnum_result, base_num, exp_num, mod);
-			mpz_clear(mod);
-			mpz_clear(exp_num);
-			mpz_clear(base_num);
-		} else {
-			mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
+		if ((log(Z_LVAL_P(base_arg)) * exp) > powmax) {
+			zend_value_error("base and exponent overflow");
+			RETURN_THROWS();
 		}
+		mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
 	} else {
 		mpz_ptr gmpnum_base;
+		zend_ulong gmpnum;
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base, 1);
 		INIT_GMP_RETVAL(gmpnum_result);
-		if (exp >= INT_MAX) {
-			mpz_t exp_num, mod;
-			mpz_init(exp_num);
-			mpz_init(mod);
-			mpz_set_si(exp_num, exp);
-			mpz_set_ui(mod, UINT_MAX);
-			mpz_powm(gmpnum_result, gmpnum_base, exp_num, mod);
-			mpz_clear(mod);
-			mpz_clear(exp_num);
-		} else {
-			mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
+		gmpnum = mpz_get_ui(gmpnum_base);
+		if ((log(gmpnum) * exp) > powmax) {
+			FREE_GMP_TEMP(temp_base);
+			zend_value_error("base and exponent overflow");
+			RETURN_THROWS();
 		}
+		mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
 		FREE_GMP_TEMP(temp_base);
 	}
 }
