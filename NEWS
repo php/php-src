@@ -66,6 +66,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16411 (gmp_export() can cause overflow). (cmb)
   . Fixed bug GH-16501 (gmp_random_bits() can cause overflow).
     (David Carlier)
+  . Fixed gmp_pow() overflow bug with large base/exponents.
+    (David Carlier)
 
 - MBstring:
   . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
