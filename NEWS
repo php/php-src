@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-16574 (Incorrect error "undefined method" messages).
     (nielsdos)
+  . Fixed bug GH-16577 (EG(strtod_state).freelist leaks with opcache.preload).
+    (nielsdos)
 
 - GD:
   . Fixed bug GH-16559 (UBSan abort in ext/gd/libgd/gd_interpolation.c:1007).
