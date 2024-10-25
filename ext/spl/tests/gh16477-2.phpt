@@ -15,5 +15,5 @@ $obj->__debugInfo();
 ?>
 DONE
 --EXPECT--
-Error: cannot call constructor twice
+Error: Cannot call constructor twice
 DONE
