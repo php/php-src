@@ -3,7 +3,7 @@ gmp_pow() basic tests
 --EXTENSIONS--
 gmp
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
+<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
 --FILE--
 <?php
 
@@ -18,19 +18,33 @@ try {
     echo $exception->getMessage() . "\n";
 }
 var_dump(gmp_strval(gmp_pow("-2",10)));
-var_dump(gmp_strval(gmp_pow(20,10)));
-var_dump(gmp_strval(gmp_pow(50,10)));
+try {
+    gmp_pow(20,10);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+try {
+    gmp_pow(50,10);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 try {
     gmp_pow(50,-5);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
-
-$n = gmp_init("20");
-var_dump(gmp_strval(gmp_pow($n,10)));
-$n = gmp_init("-20");
-var_dump(gmp_strval(gmp_pow($n,10)));
-
+try {
+    $n = gmp_init("20");
+    gmp_pow($n,10);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+try {
+    $n = gmp_init("-20");
+    gmp_pow($n,10);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 try {
     var_dump(gmp_pow(2,array()));
 } catch (TypeError $e) {
@@ -53,11 +67,11 @@ string(4) "1024"
 string(1) "1"
 gmp_pow(): Argument #2 ($exponent) must be greater than or equal to 0
 string(4) "1024"
-string(14) "10240000000000"
-string(17) "97656250000000000"
+base and exponent overflow
+base and exponent overflow
 gmp_pow(): Argument #2 ($exponent) must be greater than or equal to 0
-string(14) "10240000000000"
-string(14) "10240000000000"
+base and exponent overflow
+base and exponent overflow
 gmp_pow(): Argument #2 ($exponent) must be of type int, array given
 gmp_pow(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done
