@@ -339,7 +339,22 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		if (UNEXPECTED(!IS_GMP(op2))) {
-			goto typeof_op_failure;
+			// For PHP 8.3 and up use zend_try_get_long()
+			switch (Z_TYPE_P(op2)) {
+				case IS_DOUBLE:
+					shift = zval_get_long(op2);
+					if (UNEXPECTED(EG(exception))) {
+						return FAILURE;
+					}
+					break;
+				case IS_STRING:
+					if (is_numeric_str_function(Z_STR_P(op2), &shift, NULL) != IS_LONG) {
+						goto valueof_op_failure;
+					}
+					break;
+				default:
+					goto typeof_op_failure;
+			}
 		} else {
 			// TODO We shouldn't cast the GMP object to int here
 			shift = zval_get_long(op2);
@@ -398,6 +413,9 @@ typeof_op_failure: ;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	zend_type_error("Unsupported operand types: %s %s %s", zend_zval_type_name(op1), op_sigil, zend_zval_type_name(op2));
+	return FAILURE;
+valueof_op_failure:
+	zend_value_error("Number is not an integer string");
 	return FAILURE;
 }
 
