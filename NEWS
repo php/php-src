@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16167 (Prevent mixing PDO sub-classes with different DSN).
     (kocsismate)
 
+- SPL:
+  . Fixed bug GH-16588 (UAF in Observer->serialize). (nielsdos)
+
 24 Oct 2024, PHP 8.4.0RC3
 
 - Cli:
