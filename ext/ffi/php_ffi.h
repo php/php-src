@@ -416,8 +416,10 @@ typedef struct _zend_ffi {
 struct _zend_ffi_api {
 	zend_class_entry *scope_ce;
 	zend_class_entry *cdata_ce;
+	zend_class_entry *ctype_ce;
 
 	zend_ffi_cdata* (*cdata_create)(void *ptr, zend_ffi_type *type);
+	zend_ffi_ctype* (*ctype_create)(zend_ffi_type *type);
 	void            (*type_print)(FILE *f, const zend_ffi_type *type);
 	bool            (*is_compatible_type)(zend_ffi_type *dst_type, zend_ffi_type *src_type);
 

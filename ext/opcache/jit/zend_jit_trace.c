@@ -6996,6 +6996,37 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
+#if 0
+// TODO: add support for FFI::CType argument ???
+								} else if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "alignof")
+								 && opline->extended_value == 1) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_ALIGNOF;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
+								} else if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "sizeof")
+								 && opline->extended_value == 1) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_SIZEOF;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
+#endif
+								} else if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "typeof")
+								 && opline->extended_value == 1) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_TYPEOF;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
+								} else if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "isnull")
+								 && opline->extended_value == 1) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_IS_NULL;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
 								}
 							}
 						}

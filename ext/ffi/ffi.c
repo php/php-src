@@ -372,6 +372,16 @@ static zend_ffi_cdata* zend_ffi_cdata_create(void *ptr, zend_ffi_type *type) /* 
 }
 /* }}} */
 
+static zend_ffi_ctype* zend_ffi_ctype_create(zend_ffi_type *type) /* {{{ */
+{
+	zend_ffi_ctype *ctype = emalloc(sizeof(zend_ffi_ctype));
+
+	zend_ffi_object_init(&ctype->std, zend_ffi_ctype_ce);
+	ctype->type = type;
+	return ctype;
+}
+/* }}} */
+
 static zend_never_inline zend_ffi_cdata *zend_ffi_cdata_to_zval_slow(void *ptr, zend_ffi_type *type, zend_ffi_flags flags) /* {{{ */
 {
 	zend_ffi_cdata *cdata = emalloc(sizeof(zend_ffi_cdata));
@@ -5611,8 +5621,10 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	ffi_api.scope_ce = zend_ffi_ce;
 	ffi_api.cdata_ce = zend_ffi_cdata_ce;
+	ffi_api.ctype_ce = zend_ffi_ctype_ce;
 
 	ffi_api.cdata_create       = zend_ffi_cdata_create;
+	ffi_api.ctype_create       = zend_ffi_ctype_create;
 	ffi_api.type_print         = zend_ffi_type_print;
 	ffi_api.is_compatible_type = zend_ffi_is_compatible_type;
 
