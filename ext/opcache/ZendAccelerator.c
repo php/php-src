@@ -3329,7 +3329,7 @@ static zend_result accel_post_startup(void)
 #endif
 	}
 
-	if ( ZCG(accel_directives).file_cache ){
+	if ( ZCG(accel_directives).file_cache ) {
 		zend_stat_t buf = {0};
 
 		if (!IS_ABSOLUTE_PATH(ZCG(accel_directives).file_cache, strlen(ZCG(accel_directives).file_cache)) ||

@@ -105,6 +105,10 @@ PHP 8.5 UPGRADE NOTES
     readline_callback_handler_install() have been changed to true, rather
     than bool.
 
+- opcache:
+  . Introduce opcache.file_cache_read_only to support a read-only
+    opcache.file_cache directory, for use with read-only Docker containers.
+
 ========================================
 10. New Global Constants
 ========================================
