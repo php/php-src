@@ -1093,6 +1093,13 @@ PHP_METHOD(DOMNode, replaceChild)
 		RETURN_FALSE;
 	}
 
+	/* This is already disallowed by libxml, but we should check it here to avoid
+	 * breaking assumptions and assertions. */
+	if ((oldchild->type == XML_ATTRIBUTE_NODE) != (newchild->type == XML_ATTRIBUTE_NODE)) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		RETURN_FALSE;
+	}
+
 	if (oldchild->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;

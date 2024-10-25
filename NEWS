@@ -39,6 +39,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16533 (Segfault when adding attribute to parent that is not
     an element). (nielsdos)
   . Fixed bug GH-16535 (UAF when using document as a child). (nielsdos)
+  . Fixed bug GH-16593 (Assertion failure in DOM->replaceChild). (nielsdos)
 
 - EXIF:
   . Fixed bug GH-16409 (Segfault in exif_thumbnail when not dealing with a
