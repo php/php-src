@@ -7,31 +7,20 @@ gmp
 --FILE--
 <?php
 
-var_dump(gmp_prevprime(-1));
-var_dump(gmp_prevprime(1));
-var_dump(gmp_prevprime(3));
-var_dump(gmp_prevprime(gmp_init("3")));
-var_dump(gmp_prevprime(gmp_init(PHP_INT_MAX)));
+var_dump(gmp_strval(gmp_prevprime(-1)));
+var_dump(gmp_strval(gmp_prevprime(1)));
+var_dump(gmp_strval(gmp_prevprime(3)));
+var_dump(gmp_strval(gmp_prevprime(gmp_init("3"))));
+var_dump(gmp_strval(gmp_prevprime(gmp_init("10003"))));
+var_dump(gmp_strval(gmp_prevprime(gmp_init("-10003"))));
+var_dump(gmp_strval(gmp_prevprime(gmp_init(PHP_INT_MAX))));
 
 ?>
 --EXPECTF--
-object(GMP)#1 (1) {
-  ["num"]=>
-  string(1) "0"
-}
-object(GMP)#1 (1) {
-  ["num"]=>
-  string(1) "0"
-}
-object(GMP)#1 (1) {
-  ["num"]=>
-  string(1) "2"
-}
-object(GMP)#1 (1) {
-  ["num"]=>
-  string(1) "2"
-}
-object(GMP)#1 (1) {
-  ["num"]=>
-  string(19) "%d"
-}
+string(1) "0"
+string(1) "0"
+string(1) "2"
+string(1) "2"
+string(4) "9973"
+string(1) "0"
+string(%d) "%d"
