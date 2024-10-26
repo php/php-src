@@ -27,7 +27,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name);
-PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str);
+PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str, zval *errors);
 PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, zval *zv);
 PHPAPI zend_result php_uri_get_user(const uri_internal_t *internal_uri, zval *zv);
 PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, zval *zv);
@@ -40,7 +40,7 @@ PHPAPI void php_uri_free(uri_internal_t *internal_uri);
 
 PHPAPI void php_uri_instantiate_uri(
 	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_string *base_url_str,
-	zval *errors, bool is_constructor
+	bool is_constructor, bool return_errors
 );
 PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers);
 
