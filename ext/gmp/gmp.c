@@ -554,7 +554,7 @@ static void gmp_free(void *ptr, size_t size)
 	if (gmp_request_allocator) {
 		efree_size(ptr, size);
 	} else {
-		return gmp_old_free(ptr, size);
+		gmp_old_free(ptr, size);
 	}
 }
 
