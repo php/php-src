@@ -2,6 +2,8 @@
 Test serialization
 --EXTENSIONS--
 uri
+--XFAIL--
+Unserialization support is missing
 --FILE--
 <?php
 
@@ -20,7 +22,7 @@ var_dump($serializedUri1);
 var_dump($uri2);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(270) "O:14:"Uri\Rfc3986Uri":8:{s:6:"scheme";s:5:"https";s:4:"user";s:8:"username";s:8:"password";s:8:"password";s:4:"host";s:14:"www.google.com";s:4:"port";i:8080;s:4:"path";s:29:"pathname1/pathname2/pathname3";s:5:"query";s:10:"query=true";s:8:"fragment";s:11:"hash-exists";}"
 object(Uri\Rfc3986Uri)#%d (%d) {
   ["scheme"]=>

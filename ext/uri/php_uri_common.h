@@ -22,6 +22,8 @@ extern zend_class_entry *rfc3986_uri_ce;
 extern zend_object_handlers rfc3986_uri_object_handlers;
 extern zend_class_entry *whatwg_uri_ce;
 extern zend_object_handlers whatwg_uri_object_handlers;
+extern zend_class_entry *uri_exception_ce;
+extern zend_class_entry *invalid_uri_exception_ce;
 extern zend_class_entry *whatwg_error_ce;
 
 typedef struct uri_handler_t {
@@ -60,7 +62,7 @@ static inline uri_internal_t *uri_internal_from_obj(zend_object *object) {
 
 typedef zend_result (*uri_read_t)(const uri_internal_t *internal_uri, zval *retval);
 
-typedef zend_result (*uri_write_t)(uri_internal_t *internal_uri, zval *value);
+typedef zend_result (*uri_write_t)(uri_internal_t *internal_uri, zval *value, zval *errors);
 
 typedef struct uri_property_handler_t {
 	uri_read_t read_func;
@@ -79,8 +81,8 @@ typedef struct uri_property_handler_t {
 
 void uri_register_property_handler(HashTable *property_handlers, zend_string *name, const uri_property_handler_t *handler);
 zend_result uri_handler_register(const uri_handler_t *uri_handler);
-
 uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name);
+void throw_invalid_uri_exception(zval *errors);
 
 #define URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, object) do { \
     ZEND_ASSERT(internal_uri != NULL); \
@@ -126,16 +128,24 @@ uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_interna
     zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS)); \
     uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object); \
     URI_CHECK_INITIALIZATION_RETURN_THROWS(new_internal_uri, Z_OBJ_P(ZEND_THIS)); \
-    if (property_handler->write_func == NULL || property_handler->write_func(new_internal_uri, property_zv) == FAILURE) { \
+    if (property_handler->write_func == NULL) { \
         zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
     	RETURN_THROWS(); \
     } \
+    zval errors; \
+    ZVAL_UNDEF(&errors); \
+	if (property_handler->write_func(new_internal_uri, property_zv, &errors) == FAILURE) { \
+		throw_invalid_uri_exception(&errors); \
+		zval_ptr_dtor(&errors); \
+    	RETURN_THROWS(); \
+    } \
+    ZEND_ASSERT(Z_TYPE(errors) == IS_UNDEF); \
 	ZVAL_OBJ(return_value, new_object);
 
 #define URI_WITHER_STR(property_name) do { \
     zend_string *value; \
     ZEND_PARSE_PARAMETERS_START(1, 1) \
-    	Z_PARAM_STR_OR_NULL(value) \
+    	Z_PARAM_PATH_STR_OR_NULL(value) \
     ZEND_PARSE_PARAMETERS_END(); \
 	zval zv; \
     if (value == NULL) { \
