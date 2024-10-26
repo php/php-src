@@ -1,5 +1,5 @@
 --TEST--
-Test manual Uri child instance creation error cases
+Test URI creation errors
 --EXTENSIONS--
 uri
 --FILE--
@@ -7,17 +7,41 @@ uri
 
 try {
     new Uri\Rfc3986Uri("https://example.com:8080@username:password/path?q=r#fragment");
-} catch (Error $e) {
+} catch (Uri\InvalidUriException $e) {
     echo $e->getMessage() . "\n";
+    var_dump($e->errors);
 }
 
 try {
     new Uri\WhatWgUri("https://example.com:8080@username:password/path?q=r#fragment");
-} catch (Error $e) {
+} catch (Uri\InvalidUriException $e) {
     echo $e->getMessage() . "\n";
+    var_dump($e->errors);
 }
 
 ?>
---EXPECT--
-Uri\Rfc3986Uri::__construct(): Argument #1 ($uri) must be a valid URI
-Uri\WhatWgUri::__construct(): Argument #1 ($uri) must be a valid URI
+--EXPECTF--
+URI parsing failed
+array(%d) {
+}
+URI parsing failed
+array(%d) {
+  [0]=>
+  object(Uri\WhatWgError)#%d (%d) {
+    ["uri"]=>
+    string(60) "https://example.com:8080@username:password/path?q=r#fragment"
+    ["position"]=>
+    string(26) "password/path?q=r#fragment"
+    ["errorCode"]=>
+    int(26)
+  }
+  [1]=>
+  object(Uri\WhatWgError)#%d (%d) {
+    ["uri"]=>
+    string(60) "https://example.com:8080@username:password/path?q=r#fragment"
+    ["position"]=>
+    string(36) "@username:password/path?q=r#fragment"
+    ["errorCode"]=>
+    int(23)
+  }
+}

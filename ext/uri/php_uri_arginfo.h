@@ -1,7 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0ac9ba734539b67009e61b97ed828fa0166b3b16 */
+ * Stub hash: 5b884d4a72c5c8ac64c44149b709577c318b4545 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWgError___construct, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWgError___construct, 0, 0, 3)
+	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, position, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, errorCode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -110,17 +111,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986Uri___unseriali
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWgUri_create, 0, 1, IS_STATIC, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Uri_WhatWgUri_create, 0, 1, MAY_BE_STATIC|MAY_BE_ARRAY)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errors, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWgUri___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errors, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_WhatWgUri___construct arginfo_class_Uri_Rfc3986Uri___construct
 
 #define arginfo_class_Uri_WhatWgUri_getScheme arginfo_class_Uri_UriInterface_getScheme
 
@@ -261,6 +257,32 @@ static const zend_function_entry class_Uri_WhatWgUri_methods[] = {
 	ZEND_ME(Uri_WhatWgUri, __unserialize, arginfo_class_Uri_WhatWgUri___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_Uri_UriException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Uri", "UriException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_ABSTRACT|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_InvalidUriException(zend_class_entry *class_entry_Uri_UriException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Uri", "InvalidUriException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Uri_UriException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zval property_errors_default_value;
+	ZVAL_UNDEF(&property_errors_default_value);
+	zend_string *property_errors_name = zend_string_init("errors", sizeof("errors") - 1, 1);
+	zend_declare_typed_property(class_entry, property_errors_name, &property_errors_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_errors_name);
+
+	return class_entry;
+}
 
 static zend_class_entry *register_class_Uri_WhatWgError(void)
 {
@@ -442,6 +464,12 @@ static zend_class_entry *register_class_Uri_WhatWgError(void)
 	zend_string *const_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST_name = zend_string_init_interned("ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST", sizeof("ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST_name, &const_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST_name);
+
+	zval property_uri_default_value;
+	ZVAL_UNDEF(&property_uri_default_value);
+	zend_string *property_uri_name = zend_string_init("uri", sizeof("uri") - 1, 1);
+	zend_declare_typed_property(class_entry, property_uri_name, &property_uri_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_uri_name);
 
 	zval property_position_default_value;
 	ZVAL_UNDEF(&property_position_default_value);
