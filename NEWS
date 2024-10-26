@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Fix GH-16477 (Segmentation fault when calling __debugInfo() after failed
     SplFileObject::__constructor). (Girgias)
 
+- SysVShm:
+  . Fixed bug GH-16591 (Assertion error in shm_put_var). (nielsdos, cmb)
+
 24 Oct 2024, PHP 8.4.0RC3
 
 - Cli:
