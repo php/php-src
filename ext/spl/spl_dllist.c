@@ -44,9 +44,12 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 	efree(elem); \
 }
 
-#define SPL_LLIST_CHECK_DELREF(elem) if ((elem) && !--SPL_LLIST_RC(elem)) { \
+#define SPL_LLIST_CHECK_DELREF_EX(elem, on_free) if ((elem) && !--SPL_LLIST_RC(elem)) { \
 	efree(elem); \
+	on_free \
 }
+
+#define SPL_LLIST_CHECK_DELREF(elem) SPL_LLIST_CHECK_DELREF_EX(elem, ;)
 
 #define SPL_LLIST_ADDREF(elem) SPL_LLIST_RC(elem)++
 #define SPL_LLIST_CHECK_ADDREF(elem) if (elem) SPL_LLIST_RC(elem)++
@@ -1024,7 +1027,11 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 		smart_str_appendc(&buf, ':');
 		next = current->next;
 
+		SPL_LLIST_CHECK_ADDREF(next);
+
 		php_var_serialize(&buf, &current->data, &var_hash);
+
+		SPL_LLIST_CHECK_DELREF_EX(next, break;);
 
 		current = next;
 	}
