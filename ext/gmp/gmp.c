@@ -2080,6 +2080,31 @@ ZEND_FUNCTION(gmp_scan1)
 }
 /* }}} */
 
+#ifdef HAVE___GMPZ_PREVPRIME
+ZEND_FUNCTION(gmp_prevprime)
+{
+	zval *a_arg;
+	mpz_ptr gmpnum_a, gmpnum_result;
+	gmp_temp_t temp_a;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
+		RETURN_THROWS();
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	INIT_GMP_RETVAL(gmpnum_result);
+
+	/*
+	 * If it leads to a prime number the resulting
+	 * GMP instance will reflect the change anyway ;
+	 * on certainty (returning 2) or probability (1).
+	 */
+	(void)mpz_prevprime(gmpnum_result, gmpnum_a);
+
+	FREE_GMP_TEMP(temp_a);
+}
+#endif
+
 ZEND_METHOD(GMP, __construct)
 {
 	zend_string *arg_str = NULL;
