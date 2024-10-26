@@ -70,7 +70,7 @@ static zend_result lexbor_read_scheme(const uri_internal_t *internal_uri, zval *
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_scheme(uri_internal_t *internal_uri, zval *value)
+static zend_result lexbor_write_scheme(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	//lxb_url_t *lexbor_uri = (lxb_url_t *) uri_object_internal;
 
@@ -90,7 +90,7 @@ static zend_result lexbor_read_user(const uri_internal_t *internal_uri, zval *re
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_user(uri_internal_t *internal_uri, zval *value)
+static zend_result lexbor_write_user(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	//lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
@@ -110,7 +110,7 @@ static zend_result lexbor_read_password(const uri_internal_t *internal_uri, zval
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_password(uri_internal_t *internal_uri, zval *value)
+static zend_result lexbor_write_password(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	//lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
@@ -146,7 +146,7 @@ static zend_result lexbor_read_host(const uri_internal_t *internal_uri, zval *re
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_host(uri_internal_t *internal_uri, zval *value)
+static zend_result lexbor_write_host(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	//lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
@@ -166,7 +166,7 @@ static zend_result lexbor_read_port(const uri_internal_t *internal_uri, zval *re
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_port(uri_internal_t *internal_uri, zval *value)
+static zend_result lexbor_write_port(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	//lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
@@ -188,7 +188,7 @@ static zend_result lexbor_read_path(const uri_internal_t *internal_uri, zval *re
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_path(uri_internal_t *internal_uri, zval *value)
+static zend_result lexbor_write_path(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	//lxb_url_t *lexbor_uri = (lxb_url_t *) uri_object_internal;
 
@@ -208,7 +208,7 @@ static zend_result lexbor_read_query(const uri_internal_t *internal_uri, zval *r
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_query(uri_internal_t *internal_uri, zval *value)
+static zend_result lexbor_write_query(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	//lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
@@ -228,7 +228,7 @@ static zend_result lexbor_read_fragment(const uri_internal_t *internal_uri, zval
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_fragment(uri_internal_t *internal_uri, zval *value)
+static zend_result lexbor_write_fragment(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	//lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
@@ -268,27 +268,24 @@ static zend_result lexbor_init_parser(void)
 	return SUCCESS;
 }
 
-void fill_errors(zval *errors)
+void fill_errors(zval *errors, const zend_string *uri)
 {
 	if (!errors || lexbor_parser->log == NULL) {
 		return;
 	}
 
-	zval errors_tmp;
-	array_init(&errors_tmp);
+	array_init(errors);
 
 	lexbor_plog_entry_t *lxb_error;
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser->log->list)) != NULL) {
 		zval error;
 		object_init_ex(&error, whatwg_error_ce);
+		zend_update_property_string(whatwg_error_ce, Z_OBJ(error), "uri", sizeof("uri") - 1, ZSTR_VAL(uri));
 		zend_update_property_string(whatwg_error_ce, Z_OBJ(error), "position", sizeof("position") - 1, (const char *) lxb_error->data);
 		zend_update_property_long(whatwg_error_ce, Z_OBJ(error), "errorCode", sizeof("errorCode") - 1, lxb_error->id);
 
-		add_next_index_zval(&errors_tmp, &error);
+		add_next_index_zval(errors, &error);
 	}
-
-	ZEND_TRY_ASSIGN_REF_COPY(errors, &errors_tmp);
-	zval_ptr_dtor(&errors_tmp);
 }
 
 static void *lexbor_parse_uri(const zend_string *url_str, const zend_string *base_url_str, zval *errors)
@@ -299,7 +296,7 @@ static void *lexbor_parse_uri(const zend_string *url_str, const zend_string *bas
 
 	if (base_url_str) {
 		if ((base_url = lxb_url_parse(lexbor_parser, NULL, (unsigned char *) ZSTR_VAL(base_url_str), ZSTR_LEN(base_url_str))) == NULL) {
-			fill_errors(errors);
+			fill_errors(errors, base_url_str);
 			return NULL;
 		}
 
@@ -307,7 +304,7 @@ static void *lexbor_parse_uri(const zend_string *url_str, const zend_string *bas
 	}
 
 	if ((url = lxb_url_parse(lexbor_parser, base_url, (unsigned char *) ZSTR_VAL(url_str), ZSTR_LEN(url_str))) == NULL) {
-		fill_errors(errors);
+		fill_errors(errors, url_str);
 		return NULL;
 	}
 

@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "Zend/zend_interfaces.h"
+#include "Zend/zend_exceptions.h"
 #include "main/php_ini.h"
 
 #include "php_uri.h"
@@ -33,6 +34,8 @@ zend_class_entry *rfc3986_uri_ce;
 zend_object_handlers rfc3986_uri_object_handlers;
 zend_class_entry *whatwg_uri_ce;
 zend_object_handlers whatwg_uri_object_handlers;
+zend_class_entry *uri_exception_ce;
+zend_class_entry *invalid_uri_exception_ce;
 zend_class_entry *whatwg_error_ce;
 
 static zend_array uri_handlers;
@@ -98,7 +101,7 @@ PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name)
 	return uri_handler_by_name(ZSTR_VAL(uri_handler_name), ZSTR_LEN(uri_handler_name));
 }
 
-PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str)
+PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str, zval *errors)
 {
 	ZEND_ASSERT(uri_handler != NULL);
 
@@ -108,7 +111,7 @@ PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_stri
 
 	uri_internal_t *internal_uri = emalloc(sizeof(uri_internal_t));
 	internal_uri->handler = uri_handler;
-	internal_uri->uri = uri_handler->parse_uri(uri_str, NULL, NULL);
+	internal_uri->uri = uri_handler->parse_uri(uri_str, NULL, errors);
 
 	if (UNEXPECTED(internal_uri->uri == NULL)) {
 		efree(internal_uri);
@@ -178,31 +181,45 @@ PHPAPI void php_uri_free(uri_internal_t *internal_uri)
 
 PHP_METHOD(Uri_WhatWgError, __construct)
 {
-	zend_string *position;
+	zend_string *uri, *position;
 	zend_long error;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(uri)
 		Z_PARAM_STR(position)
 		Z_PARAM_LONG(error)
 	ZEND_PARSE_PARAMETERS_END();
 
+	zend_update_property_str(whatwg_error_ce, Z_OBJ_P(ZEND_THIS), "uri", sizeof("uri") - 1, uri);
 	zend_update_property_str(whatwg_error_ce, Z_OBJ_P(ZEND_THIS), "position", sizeof("position") - 1, position);
 	zend_update_property_long(whatwg_error_ce, Z_OBJ_P(ZEND_THIS), "error", sizeof("error") - 1, error);
 }
 
 PHPAPI void php_uri_instantiate_uri(
 	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_string *base_url_str,
-	zval *errors, bool is_constructor
+	bool is_constructor, bool return_errors
 ) {
-	void *uri = handler->parse_uri(uri_str, base_url_str, errors);
+	zval errors;
+	ZVAL_UNDEF(&errors);
+
+	void *uri = handler->parse_uri(uri_str, base_url_str, &errors);
 	if (UNEXPECTED(uri == NULL)) {
 		if (is_constructor) {
-			zend_argument_value_error(1, "must be a valid URI");
+			throw_invalid_uri_exception(&errors);
+			zval_ptr_dtor(&errors);
 			RETURN_THROWS();
 		} else {
+			if (return_errors && Z_TYPE(errors) == IS_ARRAY) {
+				RETURN_ZVAL(&errors, false, false);
+			}
+
+			zval_ptr_dtor(&errors);
+
 			RETURN_NULL();
 		}
 	}
+
+	ZEND_ASSERT(Z_TYPE(errors) == IS_UNDEF);
 
 	if (!is_constructor) {
 		object_init_ex(return_value, handler->get_uri_ce());
@@ -233,7 +250,7 @@ static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor
 		RETURN_THROWS();
 	}
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_handler, uri_str, base_url_str, NULL, is_constructor);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_handler, uri_str, base_url_str, is_constructor, false);
 }
 
 PHP_METHOD(Uri_Rfc3986Uri, create)
@@ -249,13 +266,11 @@ PHP_METHOD(Uri_Rfc3986Uri, __construct)
 static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
 	zend_string *uri_str, *base_url_str = NULL;
-	zval *errors = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(1, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH_STR(uri_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_PATH_STR_OR_NULL(base_url_str)
-		Z_PARAM_ZVAL(errors)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(uri_str) == 0) {
@@ -268,7 +283,7 @@ static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 		RETURN_THROWS();
 	}
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_handler, uri_str, base_url_str, errors, is_constructor);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_handler, uri_str, base_url_str, is_constructor, true);
 }
 
 PHP_METHOD(Uri_WhatWgUri, create)
@@ -412,15 +427,21 @@ PHP_METHOD(Uri_Rfc3986Uri, __unserialize)
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 
-	/*if (!php_date_initialize_from_hash(&dateobj, myht)) {
-		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
-		RETURN_THROWS();
-	}*/
-
 	zend_string *str = zend_string_init("https://example.com", sizeof("https://example.com") - 1, false);
 
+	zval errors;
+	ZVAL_UNDEF(&errors);
+
 	internal_uri->handler = uri_handler_by_name("rfc3986", sizeof("rfc3986") - 1);
-	internal_uri->uri = internal_uri->handler->parse_uri(str, NULL, NULL);
+	internal_uri->uri = internal_uri->handler->parse_uri(str, NULL, &errors);
+	if (internal_uri->uri == NULL) {
+		throw_invalid_uri_exception(&errors);
+		zval_ptr_dtor(&errors);
+		zend_string_release(str);
+		RETURN_THROWS();
+	}
+	ZEND_ASSERT(Z_TYPE(errors) == IS_UNDEF);
+	//zend_string_release(str); TODO Fix memory leak
 
 	uri_restore_custom_properties(object, internal_uri, ht);
 }
@@ -436,15 +457,21 @@ PHP_METHOD(Uri_WhatWgUri, __unserialize)
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 
-	/*if (!php_date_initialize_from_hash(&dateobj, myht)) {
-		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
-		RETURN_THROWS();
-	}*/
-
 	zend_string *str = zend_string_init("https://example.com", sizeof("https://example.com") - 1, false);
 
+	zval errors;
+	ZVAL_UNDEF(&errors);
+
 	internal_uri->handler = uri_handler_by_name("whatwg", sizeof("whatwg") - 1);
-	internal_uri->uri = internal_uri->handler->parse_uri(str, NULL, NULL);
+	internal_uri->uri = internal_uri->handler->parse_uri(str, NULL, &errors);
+	if (internal_uri->uri == NULL) {
+		throw_invalid_uri_exception(&errors);
+		zval_ptr_dtor(&errors);
+		zend_string_release(str);
+		RETURN_THROWS();
+	}
+	ZEND_ASSERT(Z_TYPE(errors) == IS_UNDEF);
+	//zend_string_release(str); TODO Fix memory leak
 
 	uri_restore_custom_properties(object, internal_uri, ht);
 }
@@ -663,6 +690,8 @@ void uri_register_symbols(void)
 	whatwg_uri_ce = register_class_Uri_WhatWgUri(uri_interface_ce);
 	php_uri_implementation_set_object_handlers(whatwg_uri_ce, &whatwg_uri_object_handlers);
 
+	uri_exception_ce = register_class_Uri_UriException(zend_ce_exception);
+	invalid_uri_exception_ce = register_class_Uri_InvalidUriException(uri_exception_ce);
 	whatwg_error_ce = register_class_Uri_WhatWgError();
 }
 

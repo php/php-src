@@ -2620,7 +2620,7 @@ static char *php_openssl_get_url_name(const char *resourcename,
 	uri_handler_t *uri_handler = php_uri_get_handler(NULL);
 
 	zend_string *resource = zend_string_init(resourcename, resourcenamelen, false);
-	uri_internal_t *internal_uri = php_uri_parse(uri_handler, resource);
+	uri_internal_t *internal_uri = php_uri_parse(uri_handler, resource, NULL);
 	if (internal_uri == NULL) {
 		zend_string_release(resource);
 		return NULL;

@@ -32,7 +32,7 @@ object(Uri\WhatWgUri)#%d (%d) {
   ["fragment"]=>
   string(6) "anchor"
 }
-object(Uri\Rfc3986Uri)#1 (8) {
+object(Uri\Rfc3986Uri)#%d (%d) {
   ["scheme"]=>
   NULL
   ["user"]=>
@@ -50,4 +50,14 @@ object(Uri\Rfc3986Uri)#1 (8) {
   ["fragment"]=>
   NULL
 }
-NULL
+array(1) {
+  [0]=>
+  object(Uri\WhatWgError)#%d (%d) {
+    ["uri"]=>
+    string(7) "/page:1"
+    ["position"]=>
+    string(7) "/page:1"
+    ["errorCode"]=>
+    int(21)
+  }
+}

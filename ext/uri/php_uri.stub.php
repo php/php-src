@@ -5,6 +5,17 @@
 namespace Uri;
 
 /** @strict-properties */
+abstract class UriException extends \Exception
+{
+}
+
+/** @strict-properties */
+class InvalidUriException extends \Uri\UriException
+{
+    public readonly array $errors;
+}
+
+/** @strict-properties */
 final readonly class WhatWgError
 {
     /** @cvalue LXB_URL_ERROR_TYPE_DOMAIN_TO_ASCII */
@@ -66,10 +77,11 @@ final readonly class WhatWgError
     /** @cvalue LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST */
     public const int ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST = UNKNOWN;
 
+    public string $uri;
     public string $position;
     public int $errorCode;
 
-    public function __construct(string $position, int $errorCode) {}
+    public function __construct(string $uri, string $position, int $errorCode) {}
 }
 
 interface UriInterface extends \Stringable
@@ -193,10 +205,9 @@ final readonly class WhatWgUri implements \Uri\UriInterface
     private ?string $fragment;
 
     /** @param array $errors */
-    public static function create(string $uri, ?string $baseUrl = null, &$errors = null): ?static {}
+    public static function create(string $uri, ?string $baseUrl = null): static|array {}
 
-    /** @param array $errors */
-    public function __construct(string $uri, ?string $baseUrl = null, &$errors = null) {}
+    public function __construct(string $uri, ?string $baseUrl = null) {}
 
     /** @implementation-alias Uri\Rfc3986Uri::getScheme */
     public function getScheme(): ?string {}

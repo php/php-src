@@ -614,7 +614,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	/* Use parse_url - if it returns false, we return NULL */
-	uri_internal_t *internal_uri = php_uri_parse(uri_handler, Z_STR_P(value));
+	uri_internal_t *internal_uri = php_uri_parse(uri_handler, Z_STR_P(value), NULL);
 	if (internal_uri == NULL) {
 		RETURN_VALIDATION_FAILED
 	}
