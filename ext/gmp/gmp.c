@@ -59,14 +59,14 @@ zend_module_entry gmp_module_entry = {
 	ext_functions,
 	ZEND_MODULE_STARTUP_N(gmp),
 	NULL,
-	NULL,
+	ZEND_MODULE_ACTIVATE_N(gmp),
 	ZEND_MODULE_DEACTIVATE_N(gmp),
 	ZEND_MODULE_INFO_N(gmp),
 	PHP_GMP_VERSION,
 	ZEND_MODULE_GLOBALS(gmp),
 	ZEND_GINIT(gmp),
 	NULL,
-	NULL,
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(gmp),
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
@@ -80,6 +80,16 @@ ZEND_GET_MODULE(gmp)
 
 static zend_class_entry *gmp_ce;
 static zend_object_handlers gmp_object_handlers;
+
+/* Allocator state: `gmp_request_allocator` is a true TLS global
+ * to indicate whether this thread is currently working on a PHP request.
+ * Just checking EG() is not enough because other modules may be loaded in the webserver. */
+static TSRM_TLS bool gmp_request_allocator = false;
+/* True globals for the old allocator, as these are global state in gmplib,
+ * this doesn't need to be TLS. */
+static void *(*gmp_old_alloc)(size_t);
+static void *(*gmp_old_realloc)(void *, size_t, size_t);
+static void  (*gmp_old_free)(void *, size_t);
 
 PHP_GMP_API zend_class_entry *php_gmp_class_entry(void) {
 	return gmp_ce;
@@ -521,6 +531,33 @@ exit:
 }
 /* }}} */
 
+static void *gmp_alloc(size_t size)
+{
+	if (gmp_request_allocator) {
+		return emalloc(size);
+	} else {
+		return gmp_old_alloc(size);
+	}
+}
+
+static void *gmp_realloc(void *ptr, size_t old_size, size_t new_size)
+{
+	if (gmp_request_allocator) {
+		return erealloc(ptr, new_size);
+	} else {
+		return gmp_old_realloc(ptr, old_size, new_size);
+	}
+}
+
+static void gmp_free(void *ptr, size_t size)
+{
+	if (gmp_request_allocator) {
+		efree_size(ptr, size);
+	} else {
+		return gmp_old_free(ptr, size);
+	}
+}
+
 /* {{{ ZEND_GINIT_FUNCTION */
 static ZEND_GINIT_FUNCTION(gmp)
 {
@@ -551,9 +588,18 @@ ZEND_MINIT_FUNCTION(gmp)
 
 	register_gmp_symbols(module_number);
 
+	mp_get_memory_functions(&gmp_old_alloc, &gmp_old_realloc, &gmp_old_free);
+	mp_set_memory_functions(gmp_alloc, gmp_realloc, gmp_free);
+
 	return SUCCESS;
 }
 /* }}} */
+
+ZEND_MODULE_ACTIVATE_D(gmp)
+{
+	gmp_request_allocator = true;
+	return SUCCESS;
+}
 
 /* {{{ ZEND_RSHUTDOWN_FUNCTION */
 ZEND_MODULE_DEACTIVATE_D(gmp)
@@ -566,6 +612,13 @@ ZEND_MODULE_DEACTIVATE_D(gmp)
 	return SUCCESS;
 }
 /* }}} */
+
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(gmp)
+{
+	/* We have to deactivate it after all request state has been freed. */
+	gmp_request_allocator = false;
+	return SUCCESS;
+}
 
 /* {{{ ZEND_MINFO_FUNCTION */
 ZEND_MODULE_INFO_D(gmp)
