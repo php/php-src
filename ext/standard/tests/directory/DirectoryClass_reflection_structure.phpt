@@ -12,9 +12,9 @@ $rc = new ReflectionClass("Directory");
 echo $rc;
 
 ?>
---EXPECTF--
+--EXPECT--
 Structure of Directory class:
-Class [ <internal%s> final class Directory ] {
+Class [ <internal:standard> final class Directory ] {
 
   - Constants [0] {
   }
@@ -35,21 +35,21 @@ Class [ <internal%s> final class Directory ] {
 
       - Parameters [0] {
       }
-      - Tentative return [ void ]
+      - Return [ void ]
     }
 
     Method [ <internal:standard> public method rewind ] {
 
       - Parameters [0] {
       }
-      - Tentative return [ void ]
+      - Return [ void ]
     }
 
     Method [ <internal:standard> public method read ] {
 
       - Parameters [0] {
       }
-      - Tentative return [ string|false ]
+      - Return [ string|false ]
     }
   }
 }
