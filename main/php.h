@@ -109,13 +109,6 @@ typedef int pid_t;
 # endif
 #endif
 
-#if PHP_DEBUG
-#undef NDEBUG
-#else
-#ifndef NDEBUG
-#define NDEBUG
-#endif
-#endif
 #include <assert.h>
 
 #ifdef HAVE_UNIX_H

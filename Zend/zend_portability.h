@@ -47,6 +47,9 @@
 #include "../TSRM/TSRM.h"
 
 #include <stdio.h>
+#if ZEND_DEBUG && defined(NDEBUG)
+# error "NDEBUG must not be defined when ZEND_DEBUG is enabled"
+#endif
 #include <assert.h>
 #include <math.h>
 
