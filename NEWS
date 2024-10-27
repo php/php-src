@@ -112,6 +112,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16588 (UAF in Observer->serialize). (nielsdos)
   . Fix GH-16477 (Segmentation fault when calling __debugInfo() after failed
     SplFileObject::__constructor). (Girgias)
+  . Fixed bug GH-16589 (UAF in SplDoublyLinked->serialize()). (nielsdos)
 
 - Standard:
   . Fixed bug GH-16293 (Failed assertion when throwing in assert() callback with
