@@ -43,9 +43,12 @@
 #undef iconv
 #endif
 
-#if defined(__NetBSD__)
+#if defined(__NetBSD__) || (defined(__sun) && !defined(_XPG6))
 // unfortunately, netbsd has still the old non posix conformant signature
 // libiconv tends to match the eventual system's iconv too.
+//
+// When the SUSv3 API is enabled, it switches to the alternative
+// iconv api signature.
 #define ICONV_CONST const
 #else
 #define ICONV_CONST
