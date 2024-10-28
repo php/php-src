@@ -895,6 +895,16 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 		RETURN_FALSE;
 	}
 
+	xmlNodePtr refp = NULL;
+	if (ref != NULL) {
+		dom_object *refpobj;
+		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
+		if (refp->parent != parentp) {
+			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+			RETURN_FALSE;
+		}
+	}
+
 	if (child->doc == NULL && parentp->doc != NULL) {
 		dom_set_document_ref_pointers(child, intern->document);
 	}
@@ -902,14 +912,6 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 	php_libxml_invalidate_node_list_cache(intern->document);
 
 	if (ref != NULL) {
-		xmlNodePtr refp;
-		dom_object *refpobj;
-		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
-		if (refp->parent != parentp) {
-			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-			RETURN_FALSE;
-		}
-
 		if (child->parent != NULL) {
 			xmlUnlinkNode(child);
 		}
@@ -1193,6 +1195,13 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 		}
 
 		if (!dom_node_check_legacy_insertion_validity(nodep, newchild, stricterror, false)) {
+			RETURN_FALSE;
+		}
+
+		/* This is already disallowed by libxml, but we should check it here to avoid
+		 * breaking assumptions and assertions. */
+		if ((oldchild->type == XML_ATTRIBUTE_NODE) != (newchild->type == XML_ATTRIBUTE_NODE)) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 			RETURN_FALSE;
 		}
 
