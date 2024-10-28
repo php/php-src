@@ -4464,6 +4464,12 @@ static zend_result accel_preload(const char *config, bool in_child)
 		/* Release stored values to avoid dangling pointers */
 		zend_shutdown_executor_values(/* fast_shutdown */ false);
 
+		/* On ZTS we execute `executor_globals_ctor` which reset the freelist and p5s pointers, while on NTS we don't.
+		 * We have to clean up the memory before the actual request takes place to avoid a memory leak. */
+#ifdef ZTS
+		zend_shutdown_strtod();
+#endif
+
 		/* We don't want to preload constants.
 		 * Check that  zend_shutdown_executor_values() also destroys constants. */
 		ZEND_ASSERT(zend_hash_num_elements(EG(zend_constants)) == EG(persistent_constants_count));
