@@ -636,7 +636,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	}
 	if (intern->type == SPL_FS_DIR) {
 #ifdef HAVE_GLOB
-		if (php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
+		if (intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
 			ZVAL_STR_COPY(&tmp, intern->path);
 		} else {
 			ZVAL_FALSE(&tmp);
