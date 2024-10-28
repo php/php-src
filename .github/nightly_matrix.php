@@ -154,7 +154,10 @@ function get_current_version(): array {
 
 $trigger = $argv[1] ?? 'schedule';
 $attempt = (int) ($argv[2] ?? 1);
-$discard_cache = ($trigger === 'schedule' && $attempt !== 1) || $trigger === 'workflow_dispatch';
+$monday = date('w', time()) === '1';
+$discard_cache = $monday
+    || ($trigger === 'schedule' && $attempt !== 1)
+    || $trigger === 'workflow_dispatch';
 if ($discard_cache) {
     @unlink(get_branch_commit_cache_file_path());
 }
