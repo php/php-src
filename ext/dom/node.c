@@ -990,7 +990,7 @@ Since:
 PHP_METHOD(DOMNode, insertBefore)
 {
 	zval *id, *node, *ref = NULL;
-	xmlNodePtr child, new_child, parentp, refp;
+	xmlNodePtr child, new_child, parentp, refp = NULL;
 	dom_object *intern, *childobj, *refpobj;
 	int ret, stricterror;
 
@@ -1015,6 +1015,14 @@ PHP_METHOD(DOMNode, insertBefore)
 		RETURN_FALSE;
 	}
 
+	if (ref != NULL) {
+		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
+		if (refp->parent != parentp) {
+			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+			RETURN_FALSE;
+		}
+	}
+
 	if (child->doc == NULL && parentp->doc != NULL) {
 		dom_set_document_ref_pointers(child, intern->document);
 	}
@@ -1022,12 +1030,6 @@ PHP_METHOD(DOMNode, insertBefore)
 	php_libxml_invalidate_node_list_cache(intern->document);
 
 	if (ref != NULL) {
-		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
-		if (refp->parent != parentp) {
-			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-			RETURN_FALSE;
-		}
-
 		if (child->parent != NULL) {
 			xmlUnlinkNode(child);
 		}
@@ -1170,6 +1172,13 @@ PHP_METHOD(DOMNode, replaceChild)
 	stricterror = dom_get_strict_error(intern->document);
 
 	if (!dom_node_check_legacy_insertion_validity(nodep, newchild, stricterror, false)) {
+		RETURN_FALSE;
+	}
+
+	/* This is already disallowed by libxml, but we should check it here to avoid
+	 * breaking assumptions and assertions. */
+	if ((oldchild->type == XML_ATTRIBUTE_NODE) != (newchild->type == XML_ATTRIBUTE_NODE)) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 		RETURN_FALSE;
 	}
 
