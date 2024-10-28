@@ -22,7 +22,6 @@ runs:
           enchant \
           libffi \
           intltool \
-          icu4c \
           libiconv \
           t1lib \
           libxml2 \
