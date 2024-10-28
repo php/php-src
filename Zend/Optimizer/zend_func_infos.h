@@ -11,6 +11,7 @@ static const func_info_t func_infos[] = {
 	F1("get_declared_classes", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("get_declared_traits", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("get_declared_interfaces", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+	F1("get_declared_enums", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("get_defined_functions", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ARRAY),
 	F1("get_defined_vars", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("get_resource_type", MAY_BE_STRING),
