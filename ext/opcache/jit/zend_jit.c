@@ -115,51 +115,55 @@ static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, 
 	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
 			|| (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE) {
 		return dst_type->kind < ZEND_FFI_TYPE_POINTER && dst_type->kind != ZEND_FFI_TYPE_VOID;
-	} else if (src_info == MAY_BE_FALSE || src_info == MAY_BE_TRUE || src_info == (MAY_BE_FALSE|MAY_BE_TRUE)) {
+	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_FALSE
+	 || (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_TRUE
+	 || (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == (MAY_BE_FALSE|MAY_BE_TRUE)) {
 		return dst_type->kind == ZEND_FFI_TYPE_BOOL;
+	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING) {
+		return dst_type->kind == ZEND_FFI_TYPE_CHAR;
+	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_NULL) {
+		return dst_type->kind == ZEND_FFI_TYPE_POINTER;
 	} else if (src_type) {
 		if (!zend_jit_ffi_supported_type(src_type)) {
 			return false;
 		}
-		if (src_type->kind >= ZEND_FFI_TYPE_POINTER) {
-			return false;
-		}
 		if (dst_type == src_type
-// TODO: calls between shared extensions doesn't work on Windows
-//		 || zend_ffi_is_compatible_type(dst_type, src_type)
-		) {
+		 || zend_ffi_api->is_compatible_type(dst_type, src_type)) {
 			return true;
 		}
 	}
 	return false;
 }
 
-static bool zend_jit_ffi_compatible_addr(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type)
+static bool zend_jit_ffi_compatible_op(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type, uint8_t op)
 {
-	if (dst_type->kind == ZEND_FFI_TYPE_POINTER) {
-		if (src_info == MAY_BE_NULL) {
-			return true;
-		} else if (src_type
-		 && src_type->kind == ZEND_FFI_TYPE_POINTER
-		 && (dst_type == src_type
-		  || ZEND_FFI_TYPE(dst_type->pointer.type) == ZEND_FFI_TYPE(src_type->pointer.type)
-		  || ZEND_FFI_TYPE(dst_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID
-		  || ZEND_FFI_TYPE(src_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID
-// TODO: calls between shared extensions doesn't work on Windows
-//		  || zend_ffi_is_compatible_type(dst_type, src_type)
-		)) {
-			return true;
-		}
-	}
-	return false;
-}
-
-static bool zend_jit_ffi_compatible_addr_op(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type, uint8_t opcode)
-{
-	if (dst_type->kind == ZEND_FFI_TYPE_POINTER
+	dst_type = ZEND_FFI_TYPE(dst_type);
+	if (!zend_jit_ffi_supported_type(dst_type)) {
+		return false;
+	} else if (dst_type->kind == ZEND_FFI_TYPE_FLOAT || dst_type->kind == ZEND_FFI_TYPE_DOUBLE) {
+		return (op == ZEND_ADD || op == ZEND_SUB || op == ZEND_MUL)
+			&& ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE
+			 || (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG);
+	} else if (dst_type->kind == ZEND_FFI_TYPE_BOOL) {
+		return (op == ZEND_BW_AND || op == ZEND_BW_OR)
+			&& (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG;
+	} else if (dst_type->kind == ZEND_FFI_TYPE_UINT8
+			|| dst_type->kind == ZEND_FFI_TYPE_UINT16
+			|| dst_type->kind == ZEND_FFI_TYPE_UINT32
+			|| dst_type->kind == ZEND_FFI_TYPE_UINT64
+			|| dst_type->kind == ZEND_FFI_TYPE_SINT8
+			|| dst_type->kind == ZEND_FFI_TYPE_SINT16
+			|| dst_type->kind == ZEND_FFI_TYPE_SINT32
+			|| dst_type->kind == ZEND_FFI_TYPE_SINT64
+			|| dst_type->kind == ZEND_FFI_TYPE_CHAR) {
+		return (op == ZEND_ADD || op == ZEND_SUB || op == ZEND_MUL
+			 || op == ZEND_BW_AND || op == ZEND_BW_OR || op == ZEND_BW_XOR
+			 || op == ZEND_SL || op == ZEND_SR || op == ZEND_MOD)
+			&& (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG;
+	} else if (dst_type->kind == ZEND_FFI_TYPE_POINTER
 	 && ZEND_FFI_TYPE(dst_type->pointer.type)->size != 0
 	 && src_info == MAY_BE_LONG
-	 && (opcode == ZEND_ADD || opcode == ZEND_SUB)) {
+	 && (op == ZEND_ADD || op == ZEND_SUB)) {
 		return true;
 	}
 	return false;

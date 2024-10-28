@@ -1292,6 +1292,11 @@ static int zend_jit_ffi_write(zend_jit_ctx  *jit,
 			  || ZEND_FFI_TYPE(val_ffi_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID
 			  || ZEND_FFI_TYPE(ffi_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID)) {
 				ref = ir_LOAD_A(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
+			} else if (val_ffi_type
+			 && val_ffi_type->kind == ZEND_FFI_TYPE_ARRAY
+			 && (ZEND_FFI_TYPE(val_ffi_type->pointer.type) == ZEND_FFI_TYPE(ffi_type->pointer.type)
+			  || ZEND_FFI_TYPE(ffi_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID)) {
+				ref = jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr));
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -1302,6 +1307,18 @@ static int zend_jit_ffi_write(zend_jit_ctx  *jit,
 			}
 			break;
 		default:
+			if (val_ffi_type
+			 && (val_ffi_type == ffi_type
+			  || (zend_ffi_api->is_compatible_type(ffi_type, val_ffi_type)
+			   && ffi_type->size == val_ffi_type->size))) {
+				ref = jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr));
+				ir_CALL_3(IR_ADDR, ir_CONST_FUNC(memcpy), ptr, ref, ir_CONST_LONG(ffi_type->size));
+				if (res_addr) {
+					ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_zval_ffi_obj),
+						jit_ZVAL_ADDR(jit, res_addr), ir_CONST_ADDR(ffi_type), ref);
+				}
+				break;
+			}
 			ZEND_UNREACHABLE();
 	}
 
