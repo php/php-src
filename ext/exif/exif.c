@@ -330,7 +330,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_BITS_PER_SAMPLE             0x0102
 #define TAG_COMPRESSION                 0x0103
 #define TAG_PHOTOMETRIC_INTERPRETATION  0x0106
-#define TAG_TRESHHOLDING                0x0107
+#define TAG_THRESHOLDING                0x0107
 #define TAG_CELL_WIDTH                  0x0108
 #define TAG_CELL_HEIGHT                 0x0109
 #define TAG_FILL_ORDER                  0x010A
@@ -343,7 +343,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_SAMPLES_PER_PIXEL           0x0115
 #define TAG_ROWS_PER_STRIP              0x0116
 #define TAG_STRIP_BYTE_COUNTS           0x0117
-#define TAG_MIN_SAMPPLE_VALUE           0x0118
+#define TAG_MIN_SAMPLE_VALUE            0x0118
 #define TAG_MAX_SAMPLE_VALUE            0x0119
 #define TAG_X_RESOLUTION                0x011A
 #define TAG_Y_RESOLUTION                0x011B
@@ -372,7 +372,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_TILE_OFFSETS                0x0144
 #define TAG_TILE_BYTE_COUNTS            0x0145
 #define TAG_SUB_IFD                     0x014A
-#define TAG_INK_SETMPUTER               0x014C
+#define TAG_INK_SET                     0x014C
 #define TAG_INK_NAMES                   0x014D
 #define TAG_NUMBER_OF_INKS              0x014E
 #define TAG_DOT_RANGE                   0x0150
@@ -412,7 +412,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_EXIF_IFD_POINTER            0x8769
 #define TAG_ICC_PROFILE                 0x8773
 #define TAG_EXPOSURE_PROGRAM            0x8822
-#define TAG_SPECTRAL_SENSITY            0x8824
+#define TAG_SPECTRAL_SENSITIVITY        0x8824
 #define TAG_GPS_IFD_POINTER             0x8825
 #define TAG_ISOSPEED                    0x8827
 #define TAG_OPTOELECTRIC_CONVERSION_F   0x8828
@@ -685,7 +685,7 @@ static tag_info_array tag_table_IFD = {
   { 0x8769, "Exif_IFD_Pointer"},
   { 0x8773, "ICC_Profile"},
   { 0x8822, "ExposureProgram"},
-  { 0x8824, "SpectralSensity"},
+  { 0x8824, "SpectralSensitivity"},
   { 0x8825, "GPS_IFD_Pointer"},
   { 0x8827, "ISOSpeedRatings"},
   { 0x8828, "OECF"},
@@ -3206,7 +3206,7 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 
 	/* It can be that motorola_intel is wrongly mapped, let's try inverting it */
 	if ((2+NumDirEntries*12) > value_len) {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Potentially invalid endianess, trying again with different endianness before imminent failure.");
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Potentially invalid endianness, trying again with different endianness before imminent failure.");
 
 		ImageInfo->motorola_intel = ImageInfo->motorola_intel == 0 ? 1 : 0;
 		NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
@@ -3479,7 +3479,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 				break;
 
 			case TAG_SUBJECT_DISTANCE:
-				/* Inidcates the distacne the autofocus camera is focused to.
+				/* Indicates the distance the autofocus camera is focused to.
 				   Tends to be less accurate as distance increases. */
 				REQUIRE_NON_EMPTY();
 				ImageInfo->Distance = (float)exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel);
@@ -3497,7 +3497,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 						break;
 
 					case 3: ImageInfo->FocalplaneUnits = 10;   break;  /* centimeter */
-					case 4: ImageInfo->FocalplaneUnits = 1;    break;  /* milimeter  */
+					case 4: ImageInfo->FocalplaneUnits = 1;    break;  /* millimeter */
 					case 5: ImageInfo->FocalplaneUnits = .001; break;  /* micrometer */
 				}
 				break;
@@ -4122,7 +4122,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 					}
 				} else {
 					entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
-					/* if entry needs expading ifd cache and entry is at end of current ifd cache. */
+					/* if entry needs expanding ifd cache and entry is at end of current ifd cache. */
 					/* otherwise there may be huge holes between two entries */
 					if (entry_offset + entry_length > dir_offset + ifd_size
 					  && entry_offset == dir_offset + ifd_size) {
