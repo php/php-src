@@ -9,7 +9,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/gh14687.phar.zip';
 $phar = new Phar($fname);
 class HasDestructor {
   public function __destruct() {
@@ -21,6 +21,11 @@ $s[$phar] = new HasDestructor();
 register_shutdown_function(function() {
 	global $s;
 });
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . '/gh14687.phar.zip');
+?>
 --EXPECT--
 object(SplObjectStorage)#2 (1) {
   ["storage":"SplObjectStorage":private]=>
