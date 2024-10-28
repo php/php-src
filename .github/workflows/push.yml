@@ -181,7 +181,7 @@ jobs:
             -d opcache.enable_cli=1
   MACOS_DEBUG_NTS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - name: git checkout
         uses: actions/checkout@v4

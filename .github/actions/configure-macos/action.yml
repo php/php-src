@@ -20,6 +20,7 @@ runs:
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig"
         ./buildconf --force
         ./configure \
+          CFLAGS="-Wno-strict-prototypes -Wno-unused-but-set-variable -Wno-single-bit-bitfield-constant-conversion" \
           --enable-option-checking=fatal \
           --prefix=/usr/local \
           --enable-fpm \
