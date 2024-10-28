@@ -70,7 +70,7 @@ static bool zend_jit_ffi_supported_type(zend_ffi_type *type)
 {
 	if (sizeof(void*) == 4) {
 		if (ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_UINT64
-		 ||	ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_SINT64) {
+		 || ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_SINT64) {
 			return false;
 		}
 	}
