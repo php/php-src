@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug GH-16594 (Assertion failure in DOM -> before). (nielsdos)
+  . Fixed bug GH-16593 (Assertion failure in DOM->replaceChild). (nielsdos)
+  . Fixed bug GH-16595 (Another UAF in DOM -> cloneNode). (nielsdos)
 
 - GD:
   . Fixed bug GH-16559 (UBSan abort in ext/gd/libgd/gd_interpolation.c:1007).
