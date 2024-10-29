@@ -1056,6 +1056,7 @@ PS_SERIALIZER_ENCODE_FUNC(php) /* {{{ */
 {
 	smart_str buf = {0};
 	php_serialize_data_t var_hash;
+	bool fail = false;
 	PS_ENCODE_VARS;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
@@ -1065,11 +1066,16 @@ PS_SERIALIZER_ENCODE_FUNC(php) /* {{{ */
 		if (memchr(ZSTR_VAL(key), PS_DELIMITER, ZSTR_LEN(key))) {
 			PHP_VAR_SERIALIZE_DESTROY(var_hash);
 			smart_str_free(&buf);
-			return NULL;
+			fail = true;
+			break;
 		}
 		smart_str_appendc(&buf, PS_DELIMITER);
 		php_var_serialize(&buf, struc, &var_hash);
 	);
+
+	if (fail) {
+		return NULL;
+	}
 
 	smart_str_0(&buf);
 

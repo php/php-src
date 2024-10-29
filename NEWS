@@ -49,6 +49,9 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-16601 (Memory leak in Reflection constructors). (nielsdos)
 
+- Session:
+  . Fixed bug GH-16590 (UAF in session_encode()). (nielsdos)
+
 - SPL:
   . Fixed bug GH-16588 (UAF in Observer->serialize). (nielsdos)
   . Fix GH-16477 (Segmentation fault when calling __debugInfo() after failed

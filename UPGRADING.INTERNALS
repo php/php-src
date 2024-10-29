@@ -391,6 +391,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      needing to create a zend_string.
    - The ext/session/php_session.h doesn't transitively include the
      ext/hash/php_hash.h header anymore.
+   - It is no longer allowed to return out of the PS_ENCODE_LOOP macro.
+     Instead, you should break out of the loop instead.
 
  i. ext/xml
    - Made the expat compatibility wrapper XML_GetCurrentByteIndex return a long
