@@ -291,8 +291,13 @@ PHPAPI zend_result php_session_reset_id(void);
 	zend_ulong num_key;													\
 	zval *struc;
 
+/* Do not use a return statement in `code` because that may leak memory.
+ * Break out of the loop instead. */
 #define PS_ENCODE_LOOP(code) do {									\
-	HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
+	zval _zv;														\
+	/* protect against user interference */							\
+	ZVAL_COPY(&_zv, Z_REFVAL(PS(http_session_vars)));				\
+	HashTable *_ht = Z_ARRVAL(_zv);									\
 	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
 		if (key == NULL) {											\
 			php_error_docref(NULL, E_WARNING,						\
@@ -303,6 +308,7 @@ PHPAPI zend_result php_session_reset_id(void);
 			code;		 											\
 		} 															\
 	} ZEND_HASH_FOREACH_END();										\
+	zval_ptr_dtor(&_zv);											\
 } while(0)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
