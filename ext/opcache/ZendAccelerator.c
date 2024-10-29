@@ -3307,6 +3307,8 @@ static zend_result accel_post_startup(void)
 	int file_cache_access_mode = 0;
 
 	if (ZCG(accel_directives).file_cache_read_only) {
+		zend_accel_error_noreturn(ACCEL_LOG_INFO, "opcache.file_cache is in read-only mode");
+
 		if (!ZCG(accel_directives).file_cache) {
 			accel_startup_ok = false;
 			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache_read_only is set without a proper setting of opcache.file_cache");
