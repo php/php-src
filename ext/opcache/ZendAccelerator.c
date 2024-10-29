@@ -1411,10 +1411,9 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 	}
 
 	if (ZCG(accel_directives).file_cache) {
-		if (ZCG(accel_directives).file_cache_read_only) {
-			return FAILURE;
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_invalidate(realpath);
 		}
-		zend_file_cache_invalidate(realpath);
 	}
 
 	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath);

@@ -1847,7 +1847,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (info)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		efree(filename);
 		return NULL;
 	}
@@ -1857,7 +1859,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong header)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		efree(filename);
 		return NULL;
 	}
@@ -1865,7 +1869,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong \"system_id\")\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		efree(filename);
 		return NULL;
 	}
@@ -1877,7 +1883,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
 		}
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		efree(filename);
 		return NULL;
 	}
@@ -1895,7 +1903,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (mem)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
@@ -1909,7 +1919,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if (ZCG(accel_directives).file_cache_consistency_checks &&
 	    (actual_checksum = zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size)) != info.checksum) {
 		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s' excepted checksum: 0x%08x actual checksum: 0x%08x\n", filename, info.checksum, actual_checksum);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
