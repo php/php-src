@@ -1,53 +1,37 @@
-name: Nightly
+name: Test suite
 on:
-  schedule:
-   - cron: "0 1 * * *"
-  workflow_dispatch: ~
+  workflow_call:
+    inputs:
+      asan_ubuntu_version:
+        required: true
+        type: string
+      branch:
+        required: true
+        type: string
+      community_verify_type_inference:
+        required: true
+        type: boolean
+      libmysqlclient_with_mysqli:
+        required: true
+        type: boolean
+      run_alpine:
+        required: true
+        type: boolean
+      run_macos_arm64:
+        required: true
+        type: boolean
+      ubuntu_version:
+        required: true
+        type: string
+      windows_version:
+        required: true
+        type: string
 permissions:
   contents: read
 jobs:
-  GENERATE_MATRIX:
-    name: Generate Matrix
-    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    outputs:
-      branches: ${{ steps.set-matrix.outputs.branches }}
-      matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
-      windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
-      macos-matrix-include: ${{ steps.set-matrix.outputs.macos-matrix-include }}
-      alpine-matrix-include: ${{ steps.set-matrix.outputs.alpine-matrix-include }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # Set fetch-depth to 0 to clone the full repository
-          # including all branches. This is required to find
-          # the correct commit hashes.
-          fetch-depth: 0
-      - name: Grab the commit mapping
-        uses: actions/cache@v4
-        with:
-          path: branch-commit-cache.json
-          # The cache key needs to change every time for the
-          # cache to be updated after this job finishes.
-          key: nightly-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: |
-            nightly-
-      - name: Generate Matrix
-        id: set-matrix
-        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   ALPINE:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.alpine-matrix-include) }}
-    name: "${{ matrix.branch.name }}_ALPINE_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    if: inputs.run_alpine
+    name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
     runs-on: ubuntu-22.04
     container:
       image: 'alpine:3.20.1'
@@ -55,11 +39,10 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: apk
         uses: ./.github/actions/apk
       - name: LLVM 17 (ASAN-only)
-        if: ${{ matrix.asan }}
         # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17:
         # https://pkgs.alpinelinux.org/contents?file=libclang_rt.asan-x86_64.a&path=&name=&branch=v3.20
         run: |
@@ -76,21 +59,23 @@ jobs:
         uses: ./.github/actions/configure-alpine
         with:
           configurationParameters: >-
-            ${{ matrix.configuration_parameters }}
-            --${{ matrix.debug && 'enable' || 'disable' }}-debug
-            --${{ matrix.zts && 'enable' || 'disable' }}-zts
-          skipSlow: ${{ matrix.asan }}
+            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
+            CC=clang-17
+            CXX=clang++-17
+            --enable-debug
+            --enable-zts
+          skipSlow: true # FIXME: This should likely include slow extensions
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         uses: ./.github/actions/install-alpine
       - name: Test Tracing JIT
-        if: matrix.test_jit
         uses: ./.github/actions/test-alpine
         with:
           jitType: tracing
           runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
+            --asan -x
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Notify Slack
@@ -100,8 +85,6 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
 
   LINUX_X64:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
     services:
       mysql:
         image: mysql:8.3
@@ -128,21 +111,45 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
         configuration_parameters: ['']
         debug: [true, false]
         name: ['']
         run_tests_parameters: ['']
         test_function_jit: [true]
         zts: [true, false]
-        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
-    name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-${{ (matrix.branch.version.minor >= 3 && !matrix.asan) && '22.04' || '20.04' }}
+        include:
+          - name: _ASAN_UBSAN
+            debug: true
+            zts: true
+            configuration_parameters: >-
+              CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC"
+              LDFLAGS="-fsanitize=undefined,address"
+            run_tests_parameters: '--asan'
+            test_function_jit: false
+            asan: true
+          - name: _REPEAT
+            debug: true
+            zts: false
+            run_tests_parameters: --repeat 2
+            timeout_minutes: 360
+            test_function_jit: true
+            asan: false
+          - name: _VARIATION
+            debug: true
+            zts: true
+            configuration_parameters: >-
+              CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"
+            run_tests_parameters: -d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0
+            timeout_minutes: 360
+            test_function_jit: true
+            asan: false
+    name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: ubuntu-${{ matrix.asan && inputs.asan_ubuntu_version || inputs.ubuntu_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: apt
@@ -211,18 +218,15 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LINUX_X32:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
         debug: [true, false]
         zts: [true, false]
-    name: "${{ matrix.branch.name }}_LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
+      image: ubuntu:${{ inputs.ubuntu_version }}
     services:
       mysql:
         image: mysql:8.3
@@ -235,7 +239,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: System info
@@ -290,19 +294,21 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MACOS:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.macos-matrix-include) }}
-    name: "${{ matrix.branch.name }}_MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+        debug: [true, false]
+        zts: [true, false]
+        os: ['13', '14']
+        exclude:
+          - os: ${{ !inputs.run_macos_arm64 && '14' || '*never*' }}
+    name: "MACOS_${{ matrix.os == '13' && 'X64' || 'ARM64' }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: brew
         uses: ./.github/actions/brew
       - name: ./configure
@@ -320,7 +326,7 @@ jobs:
       - name: Test
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: matrix.test_jit
+        if: matrix.os != '14' || !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: tracing
@@ -334,7 +340,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
-        if: matrix.test_jit
+        if: matrix.os != '14' || !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: function
@@ -349,7 +355,7 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COVERAGE_DEBUG_NTS:
-    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
+    if: inputs.branch == 'master'
     services:
       mysql:
         image: mysql:8.3
@@ -377,6 +383,8 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: apt
@@ -413,20 +421,14 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COMMUNITY:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
         type: ['asan', 'verify_type_inference']
-        # These branches don't include type verification
         exclude:
-          - { branch: { name: 'PHP-8.1', ref: 'PHP-8.1', major: 8, minor: 1 }, type: 'verify_type_inference' }
-          - { branch: { name: 'PHP-8.2', ref: 'PHP-8.2', major: 8, minor: 2 }, type: 'verify_type_inference' }
-          - { branch: { name: 'PHP-8.3', ref: 'PHP-8.3', major: 8, minor: 3 }, type: 'verify_type_inference' }
-    name: "${{ matrix.branch.name }}_COMMUNITY_${{ matrix.type }}"
-    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
+          - type: ${{ !inputs.community_verify_type_inference && 'verify_type_inference' || '*never*' }}
+    name: "COMMUNITY_${{ matrix.type }}"
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
     env:
       ASAN_OPTIONS: exitcode=139
       UBSAN_OPTIONS: print_stacktrace=1
@@ -436,7 +438,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -601,8 +603,6 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   OPCACHE_VARIATION:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
     services:
       mysql:
         image: mysql:8.3
@@ -626,17 +626,13 @@ jobs:
           FIREBIRD_DATABASE: test.fdb
           FIREBIRD_USER: test
           FIREBIRD_PASSWORD: test
-    strategy:
-      fail-fast: false
-      matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-    name: "${{ matrix.branch.name }}_OPCACHE_VARIATION"
-    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
+    name: OPCACHE_VARIATION
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: apt
@@ -698,19 +694,13 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MSAN:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-    name: "${{ matrix.branch.name }}_MSAN"
-    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
+    name: MSAN
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -796,19 +786,13 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LIBMYSQLCLIENT:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-    name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
-    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
+    name: LIBMYSQLCLIENT
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: apt
         run: |
           sudo apt-get update -y | true
@@ -823,20 +807,20 @@ jobs:
         uses: ./.github/actions/build-libmysqlclient
         with:
           libmysql: mysql-8.0.37-linux-glibc2.28-x86_64.tar.xz
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Test mysql-8.0
         uses: ./.github/actions/test-libmysqlclient
         with:
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Build mysql-8.4
         uses: ./.github/actions/build-libmysqlclient
         with:
           libmysql: mysql-8.4.0-linux-glibc2.28-x86_64.tar.xz
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Test mysql-8.4
         uses: ./.github/actions/test-libmysqlclient
         with:
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -845,7 +829,7 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   PECL:
-    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
+    if: inputs.branch == 'master'
     runs-on: ubuntu-22.04
     env:
       CC: ccache gcc
@@ -855,6 +839,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: php
+          ref: ${{ inputs.branch }}
       - name: git checkout apcu
         uses: actions/checkout@v4
         with:
@@ -956,20 +941,24 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   WINDOWS:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.windows-matrix-include) }}
-    name: "${{ matrix.branch.name }}_WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ${{ (matrix.branch.version.minor >= 4) && 'windows-2022' || 'windows-2019' }}
+        include:
+          - x64: true
+            zts: true
+            opcache: true
+          - x64: false
+            zts: false
+            opcache: false
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: windows-${{ inputs.windows_version }}
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
-      PHP_BUILD_CRT: ${{ (matrix.branch.version.minor >= 4) && 'vs17' || 'vs16' }}
+      PHP_BUILD_CRT: ${{ inputs.windows_version == '2022' && 'vs17' || 'vs16' }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
@@ -981,7 +970,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build

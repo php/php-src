@@ -1,0 +1,113 @@
+name: Nightly
+on:
+  schedule:
+   - cron: "0 1 * * *"
+  workflow_dispatch: ~
+permissions:
+  contents: read
+jobs:
+  GENERATE_MATRIX:
+    name: Generate Matrix
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      branches: ${{ steps.set-matrix.outputs.branches }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Set fetch-depth to 0 to clone the full repository
+          # including all branches. This is required to find
+          # the correct commit hashes.
+          fetch-depth: 0
+      - name: Grab the commit mapping
+        uses: actions/cache@v4
+        with:
+          path: branch-commit-cache.json
+          # The cache key needs to change every time for the
+          # cache to be updated after this job finishes.
+          key: nightly-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            nightly-
+      - name: Generate Matrix
+        id: set-matrix
+        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  NIGHTLY_MASTER:
+    name: master
+    needs: GENERATE_MATRIX
+    if: contains(needs.GENERATE_MATRIX.outputs.branches, 'master')
+    uses: ./.github/workflows/nightly.yml
+    with:
+      asan_ubuntu_version: '20.04'
+      branch: master
+      community_verify_type_inference: true
+      libmysqlclient_with_mysqli: false
+      run_alpine: true
+      run_macos_arm64: true
+      ubuntu_version: '22.04'
+      windows_version: '2022'
+    secrets: inherit
+  NIGHTLY_84:
+    name: PHP-8.4
+    needs: GENERATE_MATRIX
+    if: contains(needs.GENERATE_MATRIX.outputs.branches, 'PHP-8.4')
+    uses: ./.github/workflows/nightly.yml
+    with:
+      asan_ubuntu_version: '20.04'
+      branch: PHP-8.4
+      community_verify_type_inference: true
+      libmysqlclient_with_mysqli: false
+      run_alpine: true
+      run_macos_arm64: true
+      ubuntu_version: '22.04'
+      windows_version: '2022'
+    secrets: inherit
+  NIGHTLY_83:
+    name: PHP-8.3
+    needs: GENERATE_MATRIX
+    if: contains(needs.GENERATE_MATRIX.outputs.branches, 'PHP-8.3')
+    uses: ./.github/workflows/nightly.yml
+    with:
+      asan_ubuntu_version: '20.04'
+      branch: PHP-8.3
+      community_verify_type_inference: false
+      libmysqlclient_with_mysqli: false
+      run_alpine: false
+      run_macos_arm64: false
+      ubuntu_version: '22.04'
+      windows_version: '2019'
+    secrets: inherit
+  NIGHTLY_82:
+    name: PHP-8.2
+    needs: GENERATE_MATRIX
+    if: contains(needs.GENERATE_MATRIX.outputs.branches, 'PHP-8.2')
+    uses: ./.github/workflows/nightly.yml
+    with:
+      asan_ubuntu_version: '20.04'
+      branch: PHP-8.2
+      community_verify_type_inference: false
+      libmysqlclient_with_mysqli: false
+      run_alpine: false
+      run_macos_arm64: false
+      ubuntu_version: '20.04'
+      windows_version: '2019'
+    secrets: inherit
+  NIGHTLY_81:
+    name: PHP-8.2
+    needs: GENERATE_MATRIX
+    if: contains(needs.GENERATE_MATRIX.outputs.branches, 'PHP-8.1')
+    uses: ./.github/workflows/nightly.yml
+    with:
+      asan_ubuntu_version: '20.04'
+      branch: PHP-8.1
+      community_verify_type_inference: false
+      libmysqlclient_with_mysqli: true
+      run_alpine: false
+      run_macos_arm64: false
+      ubuntu_version: '20.04'
+      windows_version: '2019'
+    secrets: inherit
