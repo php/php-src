@@ -2064,7 +2064,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_FETCH_DIM_FUNC_ARG:
 					if (!frame
 					 || !frame->call
-					 || !frame->call->func
+//???					 || !frame->call->func
 					 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(frame->call)) {
 						break;
 					}
@@ -2259,8 +2259,17 @@ propagate_arg:
 					break;
 				case ZEND_CHECK_FUNC_ARG:
 					if (!frame
-					 || !frame->call
-					 || !frame->call->func) {
+					 || !frame->call) {
+						break;
+					}
+#ifdef HAVE_FFI
+					if (TRACE_FRAME_FFI(frame->call)) {
+						/* FFI arguments alwyas sent by value ??? */
+						TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame->call);
+						break;
+					}
+#endif
+					if (!frame->call->func) {
 						break;
 					}
 					if (opline->op2_type == IS_CONST
@@ -2278,7 +2287,7 @@ propagate_arg:
 				case ZEND_FETCH_OBJ_FUNC_ARG:
 					if (!frame
 					 || !frame->call
-					 || !frame->call->func
+//???					 || !frame->call->func
 					 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(frame->call)) {
 						break;
 					}
