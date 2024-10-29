@@ -66,6 +66,11 @@ static int zend_jit_ffi_init_call_sym(zend_jit_ctx         *jit,
 		return 0;
 	}
 
+	if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+		// TODO: usually the object is released only after the call ???
+		jit_GC_DELREF(jit, jit_Z_PTR(jit, op1_addr));
+	}
+
 	if (type->func.abi == ZEND_FFI_ABI_FASTCALL) {
 		*ffi_func_ref = ir_CONST_FC_FUNC(sym->addr);
 	} else {
