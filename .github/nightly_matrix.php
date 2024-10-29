@@ -1,7 +1,8 @@
 <?php
 
 const BRANCHES = [
-    ['name' => 'master', 'ref' => 'master', 'version' => ['major' => 8, 'minor' => 4]],
+    ['name' => 'master', 'ref' => 'master', 'version' => ['major' => 8, 'minor' => 5]],
+    ['name' => 'PHP-8.4', 'ref' => 'PHP-8.4', 'version' => ['major' => 8, 'minor' => 4]],
     ['name' => 'PHP-8.3', 'ref' => 'PHP-8.3', 'version' => ['major' => 8, 'minor' => 3]],
     ['name' => 'PHP-8.2', 'ref' => 'PHP-8.2', 'version' => ['major' => 8, 'minor' => 2]],
     ['name' => 'PHP-8.1', 'ref' => 'PHP-8.1', 'version' => ['major' => 8, 'minor' => 1]],
@@ -153,7 +154,10 @@ function get_current_version(): array {
 
 $trigger = $argv[1] ?? 'schedule';
 $attempt = (int) ($argv[2] ?? 1);
-$discard_cache = ($trigger === 'schedule' && $attempt !== 1) || $trigger === 'workflow_dispatch';
+$monday = date('w', time()) === '1';
+$discard_cache = $monday
+    || ($trigger === 'schedule' && $attempt !== 1)
+    || $trigger === 'workflow_dispatch';
 if ($discard_cache) {
     @unlink(get_branch_commit_cache_file_path());
 }
