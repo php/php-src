@@ -791,7 +791,7 @@ try_again:
 			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 				/* As hooked properties can't be unset, the only way to end up with an undef
 				 * value is via an uninitialized property. */
-				ZEND_ASSERT(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT);
+				ZEND_ASSERT(Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT);
 				goto uninit_error;
 			}
 
