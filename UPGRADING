@@ -107,11 +107,11 @@ PHP 8.5 UPGRADE NOTES
 
 - Opcache:
   . Introduce opcache.file_cache_read_only to support a read-only
-    opcache.file_cache directory, for use with read-only Docker containers.
+    `opcache.file_cache` directory, for use with read-only Docker containers.
     Best used with `opcache.validate_timestamps=0`, `opcache.enable_file_override=1`
-    and `opcache.file_cache_consistency_checks=false`.
-    Note: A cache generated with a different build of PHP, or different settings
-    (including which extensions are loaded) may be ignored.
+    and `opcache.file_cache_consistency_checks=0`.
+    Note: A cache generated with a different build of PHP, a different file path,
+    or different settings (including which extensions are loaded), may be ignored.
 
 ========================================
 10. New Global Constants
