@@ -500,7 +500,7 @@ static void dom_insert_node_list_cleanup(xmlNodePtr node)
 		xmlFreeNode(node);
 	} else {
 		/* Must have been a directly-passed node. */
-		ZEND_ASSERT(node->_private != NULL);
+		ZEND_UNREACHABLE();
 	}
 }
 
