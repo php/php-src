@@ -359,6 +359,9 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 		}
 	}
 
+	ZEND_ASSERT(obj->document != NULL);
+	php_libxml_invalidate_node_list_cache(obj->document);
+
 	dom_remove_all_children(context_node);
 	return php_dom_pre_insert(obj->document, fragment, context_node, NULL) ? SUCCESS : FAILURE;
 }

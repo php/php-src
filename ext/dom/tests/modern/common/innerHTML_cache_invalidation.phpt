@@ -24,4 +24,4 @@ object(Dom\HTMLCollection)#2 (1) {
   ["length"]=>
   int(0)
 }
-string(1) "a"
+NULL
