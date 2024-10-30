@@ -31,6 +31,10 @@ runs:
         export PDO_OCI_TEST_USER="system"
         export PDO_OCI_TEST_PASS="pass"
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
+        export PGSQL_TEST_CONNSTR="host=localhost dbname=test port=5432 user=postgres password=postgres"
+        if [[ -z "$PDO_PGSQL_TEST_DSN" ]]; then
+          export PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres"
+        fi
         export SKIP_IO_CAPTURE_TESTS=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -d opcache.jit=${{ inputs.jitType }} \
