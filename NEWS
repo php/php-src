@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
+- Reflection:
+  . Fixed the name of the second parameter of
+    ReflectionClass::resetAsLazyGhost(). (Arnaud)
+
 - Standard:
   . Fixed parameter names of fpow() to be identical to pow(). (Girgias)
 

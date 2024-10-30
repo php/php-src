@@ -354,7 +354,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
 
       - Parameters [3] {
         Parameter #0 [ <required> object $object ]
-        Parameter #1 [ <required> callable $factory ]
+        Parameter #1 [ <required> callable $initializer ]
         Parameter #2 [ <optional> int $options = 0 ]
       }
       - Return [ void ]
