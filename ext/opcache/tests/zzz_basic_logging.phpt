@@ -6,6 +6,7 @@ outputs the correct logging at the highest log_verbosity_level
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
+opcache.file_cache=
 opcache.file_cache_only=0
 opcache.error_log=
 opcache.log_verbosity_level=4
