@@ -2,7 +2,25 @@ name: Nightly
 on:
   schedule:
    - cron: "0 1 * * *"
-  workflow_dispatch: ~
+  workflow_dispatch:
+    inputs:
+      job:
+        required: false
+        default: '*'
+        type: choice
+        options:
+        - '*'
+        - ALPINE
+        - LINUX_X64
+        - LINUX_X32
+        - MACOS
+        - COVERAGE_DEBUG_NTS
+        - COMMUNITY
+        - OPCACHE_VARIATION
+        - MSAN
+        - LIBMYSQLCLIENT
+        - PECL
+        - WINDOWS
 permissions:
   contents: read
 jobs:
@@ -42,7 +60,7 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   ALPINE:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'ALPINE')
     strategy:
       fail-fast: false
       matrix:
@@ -101,7 +119,7 @@ jobs:
 
   LINUX_X64:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'LINUX_X64')
     services:
       mysql:
         image: mysql:8.3
@@ -212,7 +230,7 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LINUX_X32:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'LINUX_X32')
     strategy:
       fail-fast: false
       matrix:
@@ -291,7 +309,7 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MACOS:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'MACOS')
     strategy:
       fail-fast: false
       matrix:
@@ -349,7 +367,7 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COVERAGE_DEBUG_NTS:
-    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
+    if: (github.repository == 'php/php-src') && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'COVERAGE_DEBUG_NTS')
     services:
       mysql:
         image: mysql:8.3
@@ -414,7 +432,7 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COMMUNITY:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'COMMUNITY')
     strategy:
       fail-fast: false
       matrix:
@@ -602,7 +620,7 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   OPCACHE_VARIATION:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'OPCACHE_VARIATION')
     services:
       mysql:
         image: mysql:8.3
@@ -699,7 +717,7 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MSAN:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'MSAN')
     strategy:
       fail-fast: false
       matrix:
@@ -797,7 +815,7 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LIBMYSQLCLIENT:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'LIBMYSQLCLIENT')
     strategy:
       fail-fast: false
       matrix:
@@ -847,7 +865,7 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   PECL:
-    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
+    if: (github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'PECL')
     runs-on: ubuntu-22.04
     env:
       CC: ccache gcc
@@ -959,7 +977,7 @@ jobs:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   WINDOWS:
     needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    if: needs.GENERATE_MATRIX.outputs.branches != '[]' && (github.event_name != 'workflow_dispatch' || inputs.job == '*' || inputs.job == 'WINDOWS')
     strategy:
       fail-fast: false
       matrix:
