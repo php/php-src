@@ -555,13 +555,15 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 			if (Z_TYPE_P(data) == IS_INDIRECT) {
 				data = Z_INDIRECT_P(data);
 				if (Z_TYPE_P(data) != IS_UNDEF) {
-					zval_ptr_dtor(data);
+					zval garbage;
+					ZVAL_COPY_VALUE(&garbage, data);
 					ZVAL_UNDEF(data);
 					HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
 					zend_hash_move_forward_ex(ht, spl_array_get_pos_ptr(ht, intern));
 					if (spl_array_is_object(intern)) {
 						spl_array_skip_protected(intern, ht);
 					}
+					zval_ptr_dtor(&garbage);
 				}
 			} else {
 				zend_hash_del(ht, key.key);
