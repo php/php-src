@@ -46,6 +46,7 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 #include "zend_file_cache.h"
+#include "zend_system_id.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/basic_functions.h"
 
@@ -3307,7 +3308,7 @@ static zend_result accel_post_startup(void)
 	int file_cache_access_mode = 0;
 
 	if (ZCG(accel_directives).file_cache_read_only) {
-		zend_accel_error_noreturn(ACCEL_LOG_INFO, "opcache.file_cache is in read-only mode");
+		zend_accel_error(ACCEL_LOG_INFO, "opcache.file_cache is in read-only mode");
 
 		if (!ZCG(accel_directives).file_cache) {
 			accel_startup_ok = false;
@@ -3331,6 +3332,8 @@ static zend_result accel_post_startup(void)
 	}
 
 	if ( ZCG(accel_directives).file_cache ) {
+		zend_accel_error(ACCEL_LOG_INFO, "opcache.file_cache running with PHP build ID: %s", zend_system_id);
+
 		zend_stat_t buf = {0};
 
 		if (!IS_ABSOLUTE_PATH(ZCG(accel_directives).file_cache, strlen(ZCG(accel_directives).file_cache)) ||
