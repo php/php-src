@@ -43,6 +43,22 @@ env:
 jobs:
   LINUX_X64:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    services:
+      mysql:
+        image: mysql:8.3
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+      postgres:
+        image: postgres
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
     strategy:
       fail-fast: false
       matrix:
