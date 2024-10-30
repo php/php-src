@@ -1054,8 +1054,10 @@ static HashTable *spl_array_it_get_gc(zend_object_iterator *iter, zval **table, 
 static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, bool just_array) {
 	/* Handled by ZPP prior to this, or for __unserialize() before passing to here */
 	ZEND_ASSERT(Z_TYPE_P(array) == IS_ARRAY || Z_TYPE_P(array) == IS_OBJECT);
+	zval garbage;
+	ZVAL_UNDEF(&garbage);
 	if (Z_TYPE_P(array) == IS_ARRAY) {
-		zval_ptr_dtor(&intern->array);
+		ZVAL_COPY_VALUE(&garbage, &intern->array);
 		if (Z_REFCOUNT_P(array) == 1) {
 			ZVAL_COPY(&intern->array, array);
 		} else {
@@ -1073,7 +1075,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		}
 	} else {
 		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator) {
-			zval_ptr_dtor(&intern->array);
+			ZVAL_COPY_VALUE(&garbage, &intern->array);
 			if (just_array)	{
 				spl_array_object *other = Z_SPLARRAY_P(array);
 				ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
@@ -1091,9 +1093,10 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
 					"Overloaded object of type %s is not compatible with %s",
 					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
 				return;
 			}
-			zval_ptr_dtor(&intern->array);
+			ZVAL_COPY_VALUE(&garbage, &intern->array);
 			ZVAL_COPY(&intern->array, array);
 		}
 	}
@@ -1104,6 +1107,8 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		zend_hash_iterator_del(intern->ht_iter);
 		intern->ht_iter = (uint32_t)-1;
 	}
+
+	zval_ptr_dtor(&garbage);
 }
 /* }}} */
 
