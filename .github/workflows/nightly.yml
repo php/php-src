@@ -806,6 +806,7 @@ jobs:
       - name: Build mysql-8.0
         uses: ./.github/actions/build-libmysqlclient
         with:
+          configurationParameters: --enable-werror
           libmysql: mysql-8.0.37-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Test mysql-8.0
@@ -815,6 +816,7 @@ jobs:
       - name: Build mysql-8.4
         uses: ./.github/actions/build-libmysqlclient
         with:
+          configurationParameters: --enable-werror
           libmysql: mysql-8.4.0-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Test mysql-8.4
