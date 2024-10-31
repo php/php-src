@@ -178,6 +178,141 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 				SET_STACK_TYPE(stack, 1, IS_LONG, 0);
 				SET_STACK_REF_EX(stack, 1, ref, 0);
 			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMCPY) {
+			if (opline->op2.num == 1) {
+				ZEND_ASSERT(op1_ffi_type);
+				if (op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+					arg_flags |= ZREG_FFI_PTR_LOAD;
+				}
+				if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+					arg_flags |= ZREG_FFI_ZVAL_DTOR;
+				}
+				if (op1_info & MAY_BE_REF) {
+					arg_flags |= ZREG_FFI_ZVAL_DEREF;
+				}
+				ref = jit_Z_PTR(jit, op1_addr);
+				SET_STACK_TYPE(stack, 0, IS_OBJECT, 0);
+				SET_STACK_REF_EX(stack, 0, ref, arg_flags);
+			} else if (opline->op2.num == 2) {
+				if (op1_ffi_type) {
+					if (op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+						arg_flags |= ZREG_FFI_PTR_LOAD;
+					}
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
+					if (op1_info & MAY_BE_REF) {
+						arg_flags |= ZREG_FFI_ZVAL_DEREF;
+					}
+					ref = jit_Z_PTR(jit, op1_addr);
+					SET_STACK_TYPE(stack, 1, IS_OBJECT, 0);
+					SET_STACK_REF_EX(stack, 1, ref, arg_flags);
+				} else {
+					ZEND_ASSERT((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING);
+					if (op1_info & MAY_BE_REF) {
+						arg_flags |= ZREG_FFI_ZVAL_DEREF;
+					}
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
+					ref = jit_Z_PTR(jit, op1_addr);
+					SET_STACK_TYPE(stack, 1, IS_STRING, 0);
+					SET_STACK_REF_EX(stack, 1, ref, arg_flags);
+				}
+			} else {
+				ZEND_ASSERT(opline->op2.num == 3);
+				ZEND_ASSERT(op1_info == MAY_BE_LONG);
+				ref = jit_Z_LVAL(jit, op1_addr);
+				SET_STACK_TYPE(stack, 2, IS_LONG, 0);
+				SET_STACK_REF_EX(stack, 2, ref, 0);
+			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMCMP) {
+			if (opline->op2.num == 1) {
+				if (op1_ffi_type) {
+					if (op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+						arg_flags |= ZREG_FFI_PTR_LOAD;
+					}
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
+					if (op1_info & MAY_BE_REF) {
+						arg_flags |= ZREG_FFI_ZVAL_DEREF;
+					}
+					ref = jit_Z_PTR(jit, op1_addr);
+					SET_STACK_TYPE(stack, 0, IS_OBJECT, 0);
+					SET_STACK_REF_EX(stack, 0, ref, arg_flags);
+				} else {
+					ZEND_ASSERT((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING);
+					if (op1_info & MAY_BE_REF) {
+						arg_flags |= ZREG_FFI_ZVAL_DEREF;
+					}
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
+					ref = jit_Z_PTR(jit, op1_addr);
+					SET_STACK_TYPE(stack, 0, IS_STRING, 0);
+					SET_STACK_REF_EX(stack, 0, ref, arg_flags);
+				}
+			} else if (opline->op2.num == 2) {
+				if (op1_ffi_type) {
+					if (op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+						arg_flags |= ZREG_FFI_PTR_LOAD;
+					}
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
+					if (op1_info & MAY_BE_REF) {
+						arg_flags |= ZREG_FFI_ZVAL_DEREF;
+					}
+					ref = jit_Z_PTR(jit, op1_addr);
+					SET_STACK_TYPE(stack, 1, IS_OBJECT, 0);
+					SET_STACK_REF_EX(stack, 1, ref, arg_flags);
+				} else {
+					ZEND_ASSERT((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING);
+					if (op1_info & MAY_BE_REF) {
+						arg_flags |= ZREG_FFI_ZVAL_DEREF;
+					}
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
+					ref = jit_Z_PTR(jit, op1_addr);
+					SET_STACK_TYPE(stack, 1, IS_STRING, 0);
+					SET_STACK_REF_EX(stack, 1, ref, arg_flags);
+				}
+			} else {
+				ZEND_ASSERT(opline->op2.num == 3);
+				ZEND_ASSERT(op1_info == MAY_BE_LONG);
+				ref = jit_Z_LVAL(jit, op1_addr);
+				SET_STACK_TYPE(stack, 2, IS_LONG, 0);
+				SET_STACK_REF_EX(stack, 2, ref, 0);
+			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMSET) {
+			if (opline->op2.num == 1) {
+				ZEND_ASSERT(op1_ffi_type);
+				if (op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+					arg_flags |= ZREG_FFI_PTR_LOAD;
+				}
+				if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+					arg_flags |= ZREG_FFI_ZVAL_DTOR;
+				}
+				if (op1_info & MAY_BE_REF) {
+					arg_flags |= ZREG_FFI_ZVAL_DEREF;
+				}
+				ref = jit_Z_PTR(jit, op1_addr);
+				SET_STACK_TYPE(stack, 0, IS_OBJECT, 0);
+				SET_STACK_REF_EX(stack, 0, ref, arg_flags);
+			} else if (opline->op2.num == 2) {
+				ZEND_ASSERT(op1_info == MAY_BE_LONG);
+				ref = jit_Z_LVAL(jit, op1_addr);
+				SET_STACK_TYPE(stack, 1, IS_LONG, 0);
+				SET_STACK_REF_EX(stack, 1, ref, 0);
+			} else {
+				ZEND_ASSERT(opline->op2.num == 3);
+				ZEND_ASSERT(op1_info == MAY_BE_LONG);
+				ref = jit_Z_LVAL(jit, op1_addr);
+				SET_STACK_TYPE(stack, 2, IS_LONG, 0);
+				SET_STACK_REF_EX(stack, 2, ref, 0);
+			}
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -493,6 +628,108 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 				ZEND_ASSERT(STACK_TYPE(stack, 1) == IS_LONG);
 				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_zval_stringl),
 					jit_ZVAL_ADDR(jit, res_addr), ref, STACK_REF(stack, 1));
+			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMCPY) {
+			ir_ref ref2;
+
+			ref = STACK_REF(stack, 0);
+			if (STACK_FLAGS(stack, 0) & ZREG_FFI_ZVAL_DEREF) {
+				// TODO: try to remove this dereference ???
+				ref = zend_jit_gc_deref(jit, ref);
+			}
+			ref = jit_FFI_CDATA_PTR(jit, ref);
+			if (STACK_FLAGS(stack, 0) & ZREG_FFI_PTR_LOAD) {
+				ref = ir_LOAD_A(ref);
+			}
+
+			if (STACK_TYPE(stack, 1) == IS_OBJECT) {
+				ref2 = STACK_REF(stack, 1);
+				if (STACK_FLAGS(stack, 1) & ZREG_FFI_ZVAL_DEREF) {
+					// TODO: try to remove this dereference ???
+					ref2 = zend_jit_gc_deref(jit, ref2);
+				}
+				ref2 = jit_FFI_CDATA_PTR(jit, ref2);
+				if (STACK_FLAGS(stack, 1) & ZREG_FFI_PTR_LOAD) {
+					ref2 = ir_LOAD_A(ref2);
+				}
+			} else {
+				ZEND_ASSERT(STACK_TYPE(stack, 1) == IS_STRING);
+				ref2 = STACK_REF(stack, 1);
+				if (STACK_FLAGS(stack, 1) & ZREG_FFI_ZVAL_DEREF) {
+					// TODO: try to remove this dereference ???
+					ref2 = zend_jit_gc_deref(jit, ref2);
+				}
+				ref2 = ir_ADD_OFFSET(ref2, offsetof(zend_string, val));
+			}
+
+			ir_CALL_3(IR_VOID, ir_CONST_FUNC(memcpy), ref, ref2, STACK_REF(stack, 2));
+			if (res_addr) {
+				jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMCMP) {
+			ir_ref ref2;
+
+			if (STACK_TYPE(stack, 0) == IS_OBJECT) {
+				ref = STACK_REF(stack, 0);
+				if (STACK_FLAGS(stack, 0) & ZREG_FFI_ZVAL_DEREF) {
+					// TODO: try to remove this dereference ???
+					ref = zend_jit_gc_deref(jit, ref);
+				}
+				ref = jit_FFI_CDATA_PTR(jit, ref);
+				if (STACK_FLAGS(stack, 0) & ZREG_FFI_PTR_LOAD) {
+					ref = ir_LOAD_A(ref);
+				}
+			} else {
+				ZEND_ASSERT(STACK_TYPE(stack, 0) == IS_STRING);
+				ref = STACK_REF(stack, 0);
+				if (STACK_FLAGS(stack, 0) & ZREG_FFI_ZVAL_DEREF) {
+					// TODO: try to remove this dereference ???
+					ref = zend_jit_gc_deref(jit, ref);
+				}
+				ref = ir_ADD_OFFSET(ref, offsetof(zend_string, val));
+			}
+
+			if (STACK_TYPE(stack, 1) == IS_OBJECT) {
+				ref2 = STACK_REF(stack, 1);
+				if (STACK_FLAGS(stack, 1) & ZREG_FFI_ZVAL_DEREF) {
+					// TODO: try to remove this dereference ???
+					ref2 = zend_jit_gc_deref(jit, ref2);
+				}
+				ref2 = jit_FFI_CDATA_PTR(jit, ref2);
+				if (STACK_FLAGS(stack, 1) & ZREG_FFI_PTR_LOAD) {
+					ref2 = ir_LOAD_A(ref2);
+				}
+			} else {
+				ZEND_ASSERT(STACK_TYPE(stack, 1) == IS_STRING);
+				ref2 = STACK_REF(stack, 1);
+				if (STACK_FLAGS(stack, 1) & ZREG_FFI_ZVAL_DEREF) {
+					// TODO: try to remove this dereference ???
+					ref2 = zend_jit_gc_deref(jit, ref2);
+				}
+				ref2 = ir_ADD_OFFSET(ref2, offsetof(zend_string, val));
+			}
+
+			ref = ir_CALL_3(IR_I32, ir_CONST_FUNC(memcmp), ref, ref2, STACK_REF(stack, 2));
+			if (res_addr) {
+				/* (-1, 0, 1) = (ret > 0) - (ret < 0) */
+				ref = ir_SUB_L(ir_SEXT_L(ir_GT(ref, ir_CONST_I32(0))), ir_SEXT_L(ir_LT(ref, ir_CONST_I32(0))));
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMSET) {
+			ref = STACK_REF(stack, 0);
+			if (STACK_FLAGS(stack, 0) & ZREG_FFI_ZVAL_DEREF) {
+				// TODO: try to remove this dereference ???
+				ref = zend_jit_gc_deref(jit, ref);
+			}
+			ref = jit_FFI_CDATA_PTR(jit, ref);
+			if (STACK_FLAGS(stack, 0) & ZREG_FFI_PTR_LOAD) {
+				ref = ir_LOAD_A(ref);
+			}
+
+			ir_CALL_3(IR_VOID, ir_CONST_FUNC(memset), ref, STACK_REF(stack, 1), STACK_REF(stack, 2));
+			if (res_addr) {
+				jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 			}
 		} else {
 			ZEND_UNREACHABLE();

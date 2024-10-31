@@ -5849,7 +5849,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (JIT_G(current_frame)
 						 && JIT_G(current_frame)->call
 						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
-							if (!zend_jit_ffi_do_call(&ctx, opline, op_array, ssa, ssa_op, RES_REG_ADDR())) {
+							if (!zend_jit_ffi_do_call(&ctx, opline, op_array, ssa, ssa_op,
+									(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0 )) {
 								goto jit_failure;
 							}
 							goto done;
@@ -7031,6 +7032,27 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "isnull")
 								 && opline->extended_value == 1) {
 									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_IS_NULL;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
+								} else if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "memcpy")
+								 && opline->extended_value == 3) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_MEMCPY;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
+								} else if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "memcmp")
+								 && opline->extended_value == 3) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_MEMCMP;
+									frame_ffi_func_type = NULL;
+									frame_ffi_func_ref = IR_UNUSED;
+									goto done;
+								} else if (Z_TYPE_P(zv) == IS_STRING
+								 && zend_string_equals_literal_ci(Z_STR_P(zv), "memset")
+								 && opline->extended_value == 3) {
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_MEMSET;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
