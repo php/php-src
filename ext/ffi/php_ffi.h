@@ -418,11 +418,13 @@ struct _zend_ffi_api {
 	zend_class_entry *cdata_ce;
 	zend_class_entry *ctype_ce;
 
+	/* ext/ffi interface for ext/opcache */
 	zend_ffi_cdata* (*cdata_create)(void *ptr, zend_ffi_type *type);
 	zend_ffi_ctype* (*ctype_create)(zend_ffi_type *type);
 	void            (*type_print)(FILE *f, const zend_ffi_type *type);
 	bool            (*is_compatible_type)(zend_ffi_type *dst_type, zend_ffi_type *src_type);
 
+	/* ext/opcache interface for ext/ffi */
 	zend_ffi_dcl*   (*cache_type_get)(zend_string *str, void *context);
 	zend_ffi_dcl*   (*cache_type_add)(zend_string *str, zend_ffi_dcl *dcl, void *context);
 	zend_ffi_scope* (*cache_scope_get)(zend_string *str);
