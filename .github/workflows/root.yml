@@ -97,7 +97,7 @@ jobs:
       windows_version: '2019'
     secrets: inherit
   NIGHTLY_81:
-    name: PHP-8.2
+    name: PHP-8.1
     needs: GENERATE_MATRIX
     if: contains(needs.GENERATE_MATRIX.outputs.branches, 'PHP-8.1')
     uses: ./.github/workflows/nightly.yml
