@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16167 (Prevent mixing PDO sub-classes with different DSN).
     (kocsismate)
 
+- PDO_ODBC:
+  . Fixed bug GH-16450 (PDO_ODBC can inject garbage into field values). (cmb)
+
 - SPL:
   . Fixed bug GH-16588 (UAF in Observer->serialize). (nielsdos)
   . Fix GH-16477 (Segmentation fault when calling __debugInfo() after failed
