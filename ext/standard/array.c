@@ -705,9 +705,9 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (fold_case) {
-		zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0);
+		zend_array_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0);
 	} else {
-		zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0);
+		zend_array_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0);
 	}
 
 	RETURN_TRUE;
@@ -743,7 +743,7 @@ PHP_FUNCTION(asort)
 
 	cmp = php_get_data_compare_func(sort_type, 0);
 
-	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
+	zend_array_sort(Z_ARRVAL_P(array), cmp, 0);
 
 	RETURN_TRUE;
 }
@@ -764,7 +764,7 @@ PHP_FUNCTION(arsort)
 
 	cmp = php_get_data_compare_func(sort_type, 1);
 
-	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
+	zend_array_sort(Z_ARRVAL_P(array), cmp, 0);
 
 	RETURN_TRUE;
 }
@@ -785,7 +785,7 @@ PHP_FUNCTION(sort)
 
 	cmp = php_get_data_compare_func(sort_type, 0);
 
-	zend_hash_sort(Z_ARRVAL_P(array), cmp, 1);
+	zend_array_sort(Z_ARRVAL_P(array), cmp, 1);
 
 	RETURN_TRUE;
 }
@@ -806,7 +806,7 @@ PHP_FUNCTION(rsort)
 
 	cmp = php_get_data_compare_func(sort_type, 1);
 
-	zend_hash_sort(Z_ARRVAL_P(array), cmp, 1);
+	zend_array_sort(Z_ARRVAL_P(array), cmp, 1);
 
 	RETURN_TRUE;
 }
@@ -904,7 +904,7 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 	/* Copy array, so the in-place modifications will not be visible to the callback function */
 	arr = zend_array_dup(arr);
 
-	zend_hash_sort(arr, compare_func, renumber);
+	zend_array_sort(arr, compare_func, renumber);
 
 	zval garbage;
 	ZVAL_COPY_VALUE(&garbage, array);

@@ -2863,13 +2863,12 @@ ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q)
 	q->h = h;
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
+static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
 {
 	Bucket *p;
 	uint32_t i, j;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT_RC1(ht);
 
 	if (!(ht->nNumOfElements>1) && !(renumber && ht->nNumOfElements>0)) {
 		/* Doesn't require sorting */
@@ -2953,6 +2952,33 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, b
 		} else {
 			zend_hash_rehash(ht);
 		}
+	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
+{
+	HT_ASSERT_RC1(ht);
+	zend_hash_sort_internal(ht, sort, compar, renumber);
+}
+
+ZEND_API void ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
+{
+	HT_ASSERT_RC1(ht);
+
+	/* Unpack the array early to avoid RCn assertion failures. */
+	if (HT_IS_PACKED(ht)) {
+		zend_hash_packed_to_hash(ht);
+	}
+
+	/* Adding a refcount prevents the array from going away. */
+	GC_ADDREF(ht);
+
+	zend_hash_sort_internal(ht, sort, compar, renumber);
+
+	if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+		zend_array_destroy(ht);
+	} else {
+		gc_check_possible_root((zend_refcounted *)ht);
 	}
 }
 
