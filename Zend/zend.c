@@ -817,6 +817,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->record_errors = false;
 	executor_globals->num_errors = 0;
 	executor_globals->errors = NULL;
+	executor_globals->filename_override = NULL;
+	executor_globals->lineno_override = -1;
 #ifdef ZEND_CHECK_STACK_LIMIT
 	executor_globals->stack_limit = (void*)0;
 	executor_globals->stack_base = (void*)0;
