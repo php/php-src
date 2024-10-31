@@ -2064,7 +2064,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_FETCH_DIM_FUNC_ARG:
 					if (!frame
 					 || !frame->call
-//???					 || !frame->call->func
 					 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(frame->call)) {
 						break;
 					}
@@ -2287,7 +2286,6 @@ propagate_arg:
 				case ZEND_FETCH_OBJ_FUNC_ARG:
 					if (!frame
 					 || !frame->call
-//???					 || !frame->call->func
 					 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(frame->call)) {
 						break;
 					}
@@ -6267,7 +6265,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FETCH_DIM_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
-//???						 || !JIT_G(current_frame)->call->func
 						 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 							break;
 						}
@@ -6507,7 +6504,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
-//???						 || !JIT_G(current_frame)->call->func
 						 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 							break;
 						}
