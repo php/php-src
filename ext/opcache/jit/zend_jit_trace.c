@@ -2324,9 +2324,17 @@ propagate_arg:
 #endif
 					break;
 				case ZEND_INIT_DYNAMIC_CALL:
-					if (orig_op2_type == IS_OBJECT && op2_ce == zend_ce_closure) {
-						ADD_OP2_TRACE_GUARD();
+#ifdef HAVE_FFI
+					if (orig_op2_type != IS_OBJECT
+					 || (op2_ce != zend_ce_closure && !op2_ffi_type)) {
+						break;
 					}
+#else
+					if (orig_op2_type != IS_OBJECT || op2_ce != zend_ce_closure) {
+						break;
+					}
+#endif
+					ADD_OP2_TRACE_GUARD();
 					break;
 				case ZEND_SEND_ARRAY:
 				case ZEND_SEND_UNPACK:
