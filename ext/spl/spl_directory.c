@@ -2053,6 +2053,12 @@ PHP_METHOD(SplFileObject, __construct)
 		RETURN_THROWS();
 	}
 
+	/* Prevent reinitialization of Object */
+	if (UNEXPECTED(intern->u.file.stream)) {
+		zend_throw_error(NULL, "Cannot call constructor twice");
+		RETURN_THROWS();
+	}
+
 	intern->u.file.open_mode = zend_string_copy(open_mode);
 	/* file_name and zcontext are copied by spl_filesystem_file_open() */
 	intern->file_name = file_name;
@@ -2096,7 +2102,7 @@ PHP_METHOD(SplTempFileObject, __construct)
 	}
 
 	/* Prevent reinitialization of Object */
-	if (intern->u.file.stream) {
+	if (UNEXPECTED(intern->u.file.stream)) {
 		zend_throw_error(NULL, "Cannot call constructor twice");
 		RETURN_THROWS();
 	}
