@@ -7,7 +7,7 @@ not clear yet with which values exactly.
 intl
 --SKIPIF--
 <?php
-if (!defined('INTL_IDNA_VARIANT_UTS46')) die('skip no UTS #46 API');
+if (!defined('INTL_IDNA_VARIANT_UTS46')) echo 'skip no UTS #46 API';
 ?>
 --FILE--
 <?php

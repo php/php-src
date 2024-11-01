@@ -7,7 +7,7 @@ intl
 /* INF being an invalid offset depends on UB in float->int cast behavior. */
 $arch = php_uname('m');
 if ($arch != 'x86_64' && $arch != 'i386')
-    die('skip requires x86');
+    echo 'skip requires x86';
 ?>
 --FILE--
 <?php

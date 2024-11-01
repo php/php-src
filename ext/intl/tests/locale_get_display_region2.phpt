@@ -3,7 +3,7 @@ locale_get_display_region() icu >= 4.8 && icu < 51.2
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU <= 50.1.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) echo 'skip for ICU <= 50.1.2'; ?>
 --FILE--
 <?php
 

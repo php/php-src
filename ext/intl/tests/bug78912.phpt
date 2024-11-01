@@ -4,7 +4,7 @@ Request #78912 (INTL Support for accounting format)
 intl
 --SKIPIF--
 <?php
-if (version_compare(INTL_ICU_VERSION, '53.0') < 0) die('skip for ICU >= 53.0');
+if (version_compare(INTL_ICU_VERSION, '53.0') < 0) echo 'skip for ICU >= 53.0';
 ?>
 --FILE--
 <?php

@@ -3,8 +3,8 @@ IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject()
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '58.1') >= 0) die('skip for ICU <= 57.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) echo 'skip for ICU >= 54.1'; ?>
+<?php if (version_compare(INTL_ICU_VERSION, '58.1') >= 0) echo 'skip for ICU <= 57.1'; ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

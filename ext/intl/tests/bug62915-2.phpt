@@ -5,7 +5,7 @@ intl
 --SKIPIF--
 <?php
 if (!class_exists('Spoofchecker'))
-        die('skip intl extension does not have spoof checker');
+        echo 'skip intl extension does not have spoof checker';
 ?>
 --FILE--
 <?php

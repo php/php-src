@@ -3,8 +3,8 @@ collator_get_sort_key()
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) die('skip for ICU < 53.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) echo 'skip for ICU >= 51.2'; ?>
+<?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) echo 'skip for ICU < 53.1'; ?>
 --FILE--
 <?php
 
@@ -70,7 +70,7 @@ source: а
 key: 5c0a01050105
 source: z
 key: 5901050105
-source: 
+source:
 key: 0101
 source: 3
 key: 1801050105

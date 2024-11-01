@@ -3,7 +3,7 @@ numfmt_get/set_text_attribute() ICU < 56.1
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '56.1') >=  0) die('skip for ICU < 56.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '56.1') >=  0) echo 'skip for ICU < 56.1'; ?>
 --FILE--
 <?php
 
