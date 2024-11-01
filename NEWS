@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16615 (Assertion failure in zend_std_read_property). (Arnaud)
   . Fixed bug GH-16342 (Added ReflectionProperty::isLazy()). (Arnaud)
 
+- Date:
+  . Fixed bug GH-14732 (date_sun_info() fails for non-finite values). (cmb)
+
 - DOM:
   . Fixed bug GH-16594 (Assertion failure in DOM -> before). (nielsdos)
   . Fixed bug GH-16593 (Assertion failure in DOM->replaceChild). (nielsdos)
