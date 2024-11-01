@@ -5689,7 +5689,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && JIT_G(current_frame)->call
 						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
 							if (!zend_jit_ffi_send_val(&ctx, opline, op_array, ssa, ssa_op,
-									op1_info, OP1_REG_ADDR(), 0, op1_ffi_type)) {
+									op1_info, OP1_REG_ADDR(), 0, op1_ce, op1_ffi_type)) {
 								goto jit_failure;
 							}
 							goto done;
@@ -5721,7 +5721,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && JIT_G(current_frame)->call
 						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
 							if (!zend_jit_ffi_send_val(&ctx, opline, op_array, ssa, ssa_op,
-									op1_info, OP1_REG_ADDR(), 0, op1_ffi_type)) {
+									op1_info, OP1_REG_ADDR(), 0, op1_ce, op1_ffi_type)) {
 								goto jit_failure;
 							}
 							goto done;
@@ -5763,7 +5763,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && JIT_G(current_frame)->call
 						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
 							if (!zend_jit_ffi_send_val(&ctx, opline, op_array, ssa, ssa_op,
-									op1_info, op1_addr, op1_def_addr, op1_ffi_type)) {
+									op1_info, op1_addr, op1_def_addr, op1_ce, op1_ffi_type)) {
 								goto jit_failure;
 							}
 							goto done;
@@ -7004,8 +7004,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
-#if 0
-// TODO: add support for FFI::CType argument ???
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "alignof")
 								 && opline->extended_value == 1) {
@@ -7020,7 +7018,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
-#endif
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "typeof")
 								 && opline->extended_value == 1) {

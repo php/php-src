@@ -26,6 +26,11 @@ static ir_ref jit_FFI_CDATA_TYPE(zend_jit_ctx *jit, ir_ref obj_ref)
 	return ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, type)));
 }
 
+static ir_ref jit_FFI_CTYPE_TYPE(zend_jit_ctx *jit, ir_ref obj_ref)
+{
+	return ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_ctype, type)));
+}
+
 static int zend_jit_ffi_symbols_guard(zend_jit_ctx       *jit,
                                       const zend_op      *opline,
                                       zend_ssa           *ssa,
@@ -119,6 +124,7 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
                                  uint32_t              op1_info,
                                  zend_jit_addr         op1_addr,
                                  zend_jit_addr         op1_def_addr,
+                                 zend_class_entry     *op1_ce,
                                  zend_ffi_type        *op1_ffi_type)
 {
 	zend_jit_trace_stack_frame *call = JIT_G(current_frame)->call;
@@ -130,8 +136,6 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 
 	if (TRACE_FRAME_FFI_FUNC(call)) {
 		if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_ADDR
-		 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_ALIGNOF
-		 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_SIZEOF
 		 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPEOF
 		 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_IS_NULL) {
 			ZEND_ASSERT(opline->op2.num == 1);
@@ -147,6 +151,23 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 			}
 			if (op1_info & MAY_BE_REF) {
 				arg_flags |= ZREG_FFI_ZVAL_DEREF;
+			}
+			ref = jit_Z_PTR(jit, op1_addr);
+			SET_STACK_TYPE(stack, 0, IS_OBJECT, 0);
+			SET_STACK_REF_EX(stack, 0, ref, arg_flags);
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_ALIGNOF
+				|| TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_SIZEOF) {
+			ZEND_ASSERT(opline->op2.num == 1);
+
+			if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+				arg_flags |= ZREG_FFI_ZVAL_DTOR;
+			}
+			if (op1_info & MAY_BE_REF) {
+				arg_flags |= ZREG_FFI_ZVAL_DEREF;
+			}
+			ZEND_ASSERT(op1_ffi_type || op1_ce == zend_ffi_api->ctype_ce);
+			if (!op1_ffi_type && op1_ce == zend_ffi_api->ctype_ce) {
+				arg_flags |= ZREG_FFI_CTYPE;
 			}
 			ref = jit_Z_PTR(jit, op1_addr);
 			SET_STACK_TYPE(stack, 0, IS_OBJECT, 0);
@@ -564,7 +585,11 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 				// TODO: try to remove this dereference ???
 				ref = zend_jit_gc_deref(jit, ref);
 			}
-			ref = jit_FFI_CDATA_TYPE(jit, ref);
+			if (STACK_FLAGS(stack, 0) & ZREG_FFI_CTYPE) {
+				ref = jit_FFI_CTYPE_TYPE(jit, ref);
+			} else {
+				ref = jit_FFI_CDATA_TYPE(jit, ref);
+			}
 			// TODO: type flags ???
 			ref = ir_LOAD_U32(ir_ADD_OFFSET(ref, offsetof(zend_ffi_type, align)));
 			if (sizeof(void*) == 8) {
@@ -578,7 +603,11 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 				// TODO: try to remove this dereference ???
 				ref = zend_jit_gc_deref(jit, ref);
 			}
-			ref = jit_FFI_CDATA_TYPE(jit, ref);
+			if (STACK_FLAGS(stack, 0) & ZREG_FFI_CTYPE) {
+				ref = jit_FFI_CTYPE_TYPE(jit, ref);
+			} else {
+				ref = jit_FFI_CDATA_TYPE(jit, ref);
+			}
 			// TODO: type flags ???
 			ref = ir_LOAD_U32(ir_ADD_OFFSET(ref, offsetof(zend_ffi_type, size)));
 			if (sizeof(void*) == 8) {
