@@ -120,6 +120,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16589 (UAF in SplDoublyLinked->serialize()). (nielsdos)
   . Fixed bug GH-14687 (segfault on SplObjectIterator instance).
     (David Carlier)
+  . Fixed bug GH-16604 (Memory leaks in SPL constructors). (nielsdos)
 
 - Standard:
   . Fixed bug GH-16293 (Failed assertion when throwing in assert() callback with
