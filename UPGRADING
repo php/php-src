@@ -246,6 +246,15 @@ PHP 8.5 UPGRADE NOTES
     ignored. This change affects only the sendmail transport.
   . getimagesize() now supports HEIF/HEIC images.
 
+- Standard:
+  . getimagesize() now supports SVG images when ext-libxml is also loaded.
+    Similarly, image_type_to_extension() and image_type_to_extension()
+    now also handle IMAGETYPE_SVG.
+  . The array returned by getimagesize() now has two additional entries:
+    "width_unit" and "height_unit" to indicate in which units the dimensions
+    are expressed. These units are px by default. They are not necessarily
+    the same (just to give one example: one may be cm and the other may be px).
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()
@@ -565,6 +574,9 @@ PHP 8.5 UPGRADE NOTES
 - Tokenizer:
   . T_VOID_CAST.
   . T_PIPE.
+
+- Standard:
+  . IMAGETYPE_SVG when libxml is loaded.
 
 ========================================
 11. Changes to INI File Handling

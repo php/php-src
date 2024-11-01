@@ -134,6 +134,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . The php_std_date() function has been removed. Use php_format_date() with
     the "D, d M Y H:i:s \\G\\M\\T" format instead.
   . Added php_url_encode_to_smart_str() to encode a URL to a smart_str buffer.
+  . The functionality of getimagesize(), image_type_to_mime_type(),
+    and image_type_to_extension() is now extensible using the internal APIs
+    php_image_register_handler() and php_image_unregister_handler() in
+    php_image.h.
 
 ========================
 4. OpCode changes
