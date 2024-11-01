@@ -56,7 +56,7 @@ void free_zend_constant(zval *zv)
 			zend_string_release_ex(c->name, 1);
 		}
 		if (c->filename) {
-			zend_string_release_ex(c->filename, 1);
+			zend_string_release(c->filename);
 		}
 		free(c);
 	}
