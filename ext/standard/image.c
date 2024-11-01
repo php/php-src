@@ -56,6 +56,9 @@ PHPAPI const char php_sig_mif1[4] = {'m', 'i', 'f', '1'};
 PHPAPI const char php_sig_heic[4] = {'h', 'e', 'i', 'c'};
 PHPAPI const char php_sig_heix[4] = {'h', 'e', 'i', 'x'};
 
+static zend_array php_image_handlers;
+static int php_image_handler_next_id = IMAGE_FILETYPE_FIXED_COUNT;
+
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
 
@@ -1214,7 +1217,7 @@ bool php_is_image_avif(php_stream* stream) {
 
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
-PHPAPI char * php_image_type_to_mime_type(int image_type)
+PHPAPI const char * php_image_type_to_mime_type(int image_type)
 {
 	switch( image_type) {
 		case IMAGE_FILETYPE_GIF:
@@ -1251,7 +1254,13 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/avif";
 		case IMAGE_FILETYPE_HEIF:
 			return "image/heif";
-		default:
+		default: {
+			const struct php_image_handler *handler = zend_hash_index_find_ptr(&php_image_handlers, (zend_ulong) image_type);
+			if (handler) {
+				return handler->mime_type;
+			}
+			ZEND_FALLTHROUGH;
+		}
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
 	}
@@ -1267,7 +1276,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 		Z_PARAM_LONG(p_image_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(p_image_type));
+	ZVAL_STRING(return_value, php_image_type_to_mime_type(p_image_type));
 }
 /* }}} */
 
@@ -1339,7 +1348,13 @@ PHP_FUNCTION(image_type_to_extension)
 		case IMAGE_FILETYPE_HEIF:
 			imgext = ".heif";
 			break;
-	break;
+		default: {
+			const struct php_image_handler *handler = zend_hash_index_find_ptr(&php_image_handlers, (zend_ulong) image_type);
+			if (handler) {
+				imgext = handler->extension;
+			}
+			break;
+		}
 	}
 
 	if (imgext) {
@@ -1447,6 +1462,15 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 		return IMAGE_FILETYPE_XBM;
 	}
 
+	zend_ulong h;
+	zval *zv;
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(&php_image_handlers, h, zv) {
+		const struct php_image_handler *handler = Z_PTR_P(zv);
+		if (handler->identify(stream) == SUCCESS) {
+			return (int) h;
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	return IMAGE_FILETYPE_UNKNOWN;
 }
 /* }}} */
@@ -1455,6 +1479,7 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 {
 	int itype = 0;
 	struct php_gfxinfo *result = NULL;
+	const char *mime_type = NULL;
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -1479,6 +1504,7 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			result = php_handle_swf(stream);
 			break;
 		case IMAGE_FILETYPE_SWC:
+			/* TODO: with the new php_image_register_handler() APIs, this restriction could be solved */
 #if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 			result = php_handle_swc(stream);
 #else
@@ -1526,19 +1552,36 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 				result = php_handle_avif(stream);
 			}
 			break;
-		default:
+		default: {
+			struct php_image_handler* handler = zend_hash_index_find_ptr(&php_image_handlers, (zend_ulong) itype);
+			if (handler) {
+				result = handler->get_info(stream);
+				mime_type = handler->mime_type;
+				break;
+			}
+			ZEND_FALLTHROUGH;
+		}
 		case IMAGE_FILETYPE_UNKNOWN:
 			break;
 	}
 
 	if (result) {
-		char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
 		array_init(return_value);
-		add_index_long(return_value, 0, result->width);
-		add_index_long(return_value, 1, result->height);
+		if (result->width_str) {
+			add_index_str(return_value, 0, result->width_str);
+			add_index_str(return_value, 1, result->height_str);
+		} else {
+			add_index_long(return_value, 0, result->width);
+			add_index_long(return_value, 1, result->height);
+		}
 		add_index_long(return_value, 2, itype);
-		snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
-		add_index_string(return_value, 3, temp);
+		if (result->width_str) {
+			add_index_str(return_value, 3, zend_strpprintf_unchecked(0, "width=\"%S\" height=\"%S\"", result->width_str, result->height_str));
+		} else {
+			char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
+			snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
+			add_index_string(return_value, 3, temp);
+		}
 
 		if (result->bits != 0) {
 			add_assoc_long(return_value, "bits", result->bits);
@@ -1546,7 +1589,7 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 		if (result->channels != 0) {
 			add_assoc_long(return_value, "channels", result->channels);
 		}
-		add_assoc_string(return_value, "mime", (char*)php_image_type_to_mime_type(itype));
+		add_assoc_string(return_value, "mime", mime_type ? mime_type : php_image_type_to_mime_type(itype));
 		efree(result);
 	} else {
 		RETURN_FALSE;
@@ -1609,3 +1652,36 @@ PHP_FUNCTION(getimagesizefromstring)
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);
 }
 /* }}} */
+
+PHP_MINIT_FUNCTION(image)
+{
+	zend_hash_init(&php_image_handlers, 4, NULL, NULL, true);
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(image)
+{
+#ifdef ZTS
+	if (!tsrm_is_main_thread()) {
+		return SUCCESS;
+	}
+#endif
+	zend_hash_destroy(&php_image_handlers);
+	return SUCCESS;
+}
+
+extern zend_module_entry basic_functions_module;
+
+int php_image_register_handler(const struct php_image_handler *handler)
+{
+	zend_hash_index_add_ptr(&php_image_handlers, (zend_ulong) php_image_handler_next_id, (void *) handler);
+	zend_register_long_constant(handler->const_name, strlen(handler->const_name), php_image_handler_next_id, CONST_PERSISTENT, basic_functions_module.module_number);
+	Z_LVAL_P(zend_get_constant_str(ZEND_STRL("IMAGETYPE_COUNT")))++;
+	return php_image_handler_next_id++;
+}
+
+zend_result php_image_unregister_handler(int image_type)
+{
+	ZEND_ASSERT(image_type >= IMAGE_FILETYPE_FIXED_COUNT);
+	return zend_hash_index_del(&php_image_handlers, (zend_ulong) image_type);
+}
