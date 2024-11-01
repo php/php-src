@@ -1094,7 +1094,7 @@ function test_sort($a, $b): int
 }
 
 //
-//  Write the given text to a temporary file, and return the filename.
+//  Write the given text to a temporary file.
 //
 
 function save_text(string $filename, string $text, ?string $filename_copy = null): void
