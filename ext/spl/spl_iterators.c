@@ -655,16 +655,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->iterators[0].getchildren = NULL;
 
 	if (EG(exception)) {
-		// TODO: use spl_RecursiveIteratorIterator_free_iterators
-		zend_object_iterator *sub_iter;
-
-		while (intern->level >= 0) {
-			sub_iter = intern->iterators[intern->level].iterator;
-			zend_iterator_dtor(sub_iter);
-			zval_ptr_dtor(&intern->iterators[intern->level--].zobject);
-		}
-		efree(intern->iterators);
-		intern->iterators = NULL;
+		spl_RecursiveIteratorIterator_free_iterators(intern);
 	}
 }
 
