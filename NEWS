@@ -27,6 +27,7 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-16454 (Unhandled INF in date_sunset() with tiny $utcOffset).
     (cmb)
+  . Fixed bug GH-14732 (date_sun_info() fails for non-finite values). (cmb)
 
 - DBA:
   . Fixed bug GH-16390 (dba_open() can segfault for "pathless" streams). (cmb)
