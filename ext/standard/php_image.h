@@ -63,8 +63,8 @@ PHPAPI bool php_is_image_avif(php_stream *stream);
 struct php_gfxinfo {
 	unsigned int width;
 	unsigned int height;
-	zend_string *width_str;
-	zend_string *height_str;
+	zend_string *width_unit;
+	zend_string *height_unit;
 	unsigned int bits;
 	unsigned int channels;
 };
