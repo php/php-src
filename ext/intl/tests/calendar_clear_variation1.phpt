@@ -7,7 +7,7 @@ intl
 --SKIPIF--
 <?php
 if (version_compare(INTL_ICU_VERSION, '73.1') >= 0 && version_compare(INTL_ICU_VERSION, '74.1') < 0) {
-    die('skip Broken for ICU >= 73.1 and < 74.1, see https://github.com/php/php-src/issues/11128');
+    echo 'skip Broken for ICU >= 73.1 and < 74.1, see https://github.com/php/php-src/issues/11128';
 }
 ?>
 --FILE--

@@ -3,8 +3,8 @@ numfmt_format() icu >= 56.1 && icu < 61.1
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '61.1') >= 0) die('skip for ICU < 61.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '56.1') < 0) die('skip for ICU >= 56.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '61.1') >= 0) echo 'skip for ICU < 61.1'; ?>
+<?php if (version_compare(INTL_ICU_VERSION, '56.1') < 0) echo 'skip for ICU >= 56.1'; ?>
 --FILE--
 <?php
 

@@ -3,7 +3,7 @@ IntlDateFormatter: several forms of the calendar arg
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '58.1') < 0) die('skip for ICU >= 58.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '58.1') < 0) echo 'skip for ICU >= 58.1'; ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

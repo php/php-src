@@ -4,7 +4,7 @@ IntlBreakIterator::getPartsIterator(): basic test, ICU <= 57.1
 intl
 --SKIPIF--
 <?php
-if (version_compare(INTL_ICU_VERSION, '57.1') > 0) die('skip for ICU <= 57.1');
+if (version_compare(INTL_ICU_VERSION, '57.1') > 0) echo 'skip for ICU <= 57.1';
 ?>
 --FILE--
 <?php
@@ -31,7 +31,7 @@ string(26) "IntlRuleBasedBreakIterator"
 Array
 (
     [0] => foo
-    [1] =>  
+    [1] =>
     [2] => bar
 )
 int(0)

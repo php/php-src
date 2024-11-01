@@ -5,7 +5,7 @@ intl
 --SKIPIF--
 <?php
     if (!defined('INTL_IDNA_VARIANT_UTS46'))
-        die('skip no UTS #46 API');
+        echo 'skip no UTS #46 API';
 ?>
 --FILE--
 <?php

@@ -3,7 +3,7 @@ IntlRuleBasedBreakIterator::getBinaryRules(): basic test
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '61.1') >=  0) die('skip for ICU < 61.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '61.1') >=  0) echo 'skip for ICU < 61.1'; ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

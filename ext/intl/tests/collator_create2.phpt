@@ -3,7 +3,7 @@ create() icu >= 4.8 && icu < 53.1
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) die('skip for ICU < 53.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) echo 'skip for ICU < 53.1'; ?>
 --FILE--
 <?php
 

@@ -4,7 +4,7 @@ MessageFormat accepts IntlCalendar args
 intl
 --SKIPIF--
 <?php
-if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1');
+if (version_compare(INTL_ICU_VERSION, '54.1') < 0) echo 'skip for ICU >= 54.1';
 if (str_contains(PHP_OS, 'FreeBSD')) {
     die('xfail Fails on FreeBSD for unknown reason');
 }
