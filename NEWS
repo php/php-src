@@ -35,6 +35,7 @@ PHP                                                                        NEWS
   . Fix GH-16477 (Segmentation fault when calling __debugInfo() after failed
     SplFileObject::__constructor). (Girgias)
   . Fixed bug GH-16589 (UAF in SplDoublyLinked->serialize()). (nielsdos)
+  . Fixed bug GH-16604 (Memory leaks in SPL constructors). (nielsdos)
 
 - SysVShm:
   . Fixed bug GH-16591 (Assertion error in shm_put_var). (nielsdos, cmb)
