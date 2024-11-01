@@ -92,6 +92,11 @@ PHP 8.5 UPGRADE NOTES
 - DOM:
   . Added Dom\Element::$outerHTML.
 
+- Standard:
+  . getimagesize() now supports SVG images when ext-libxml is also loaded.
+    Similarly, image_type_to_extension() and image_type_to_extension()
+    now also handle IMAGETYPE_SVG.
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()
@@ -260,6 +265,9 @@ PHP 8.5 UPGRADE NOTES
   . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
   . TCP_BBR_ALGORITHM (FreeBSD only).
   . AF_PACKET (Linux only).
+
+- Standard:
+  . IMAGETYPE_SVG when libxml is loaded.
 
 ========================================
 11. Changes to INI File Handling
