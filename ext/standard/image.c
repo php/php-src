@@ -59,20 +59,11 @@ PHPAPI const char php_sig_heix[4] = {'h', 'e', 'i', 'x'};
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
 
-/* return info as a struct, to make expansion easier */
-
-struct gfxinfo {
-	unsigned int width;
-	unsigned int height;
-	unsigned int bits;
-	unsigned int channels;
-};
-
 /* {{{ php_handle_gif
  * routine to handle GIF files. If only everything were that easy... ;} */
-static struct gfxinfo *php_handle_gif (php_stream * stream)
+static struct php_gfxinfo *php_handle_gif (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[5];
 
 	if (php_stream_seek(stream, 3, SEEK_CUR))
@@ -81,7 +72,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream)
 	if (php_stream_read(stream, (char*)dim, sizeof(dim)) != sizeof(dim))
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 	result->width    = (unsigned int)dim[0] | (((unsigned int)dim[1])<<8);
 	result->height   = (unsigned int)dim[2] | (((unsigned int)dim[3])<<8);
 	result->bits     = dim[4]&0x80 ? ((((unsigned int)dim[4])&0x07) + 1) : 0;
@@ -92,9 +83,9 @@ static struct gfxinfo *php_handle_gif (php_stream * stream)
 /* }}} */
 
 /* {{{ php_handle_psd */
-static struct gfxinfo *php_handle_psd (php_stream * stream)
+static struct php_gfxinfo *php_handle_psd (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[8];
 
 	if (php_stream_seek(stream, 11, SEEK_CUR))
@@ -103,7 +94,7 @@ static struct gfxinfo *php_handle_psd (php_stream * stream)
 	if (php_stream_read(stream, (char*)dim, sizeof(dim)) != sizeof(dim))
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 	result->height   =  (((unsigned int)dim[0]) << 24) + (((unsigned int)dim[1]) << 16) + (((unsigned int)dim[2]) << 8) + ((unsigned int)dim[3]);
 	result->width    =  (((unsigned int)dim[4]) << 24) + (((unsigned int)dim[5]) << 16) + (((unsigned int)dim[6]) << 8) + ((unsigned int)dim[7]);
 
@@ -112,9 +103,9 @@ static struct gfxinfo *php_handle_psd (php_stream * stream)
 /* }}} */
 
 /* {{{ php_handle_bmp */
-static struct gfxinfo *php_handle_bmp (php_stream * stream)
+static struct php_gfxinfo *php_handle_bmp (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[16];
 	int size;
 
@@ -126,12 +117,12 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream)
 
 	size   = (((unsigned int)dim[ 3]) << 24) + (((unsigned int)dim[ 2]) << 16) + (((unsigned int)dim[ 1]) << 8) + ((unsigned int) dim[ 0]);
 	if (size == 12) {
-		result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
+		result = (struct php_gfxinfo *) ecalloc (1, sizeof(struct php_gfxinfo));
 		result->width    =  (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[ 7]) << 8) + ((unsigned int) dim[ 6]);
 		result->bits     =  ((unsigned int)dim[11]);
 	} else if (size > 12 && (size <= 64 || size == 108 || size == 124)) {
-		result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
+		result = (struct php_gfxinfo *) ecalloc (1, sizeof(struct php_gfxinfo));
 		result->width    =  (((unsigned int)dim[ 7]) << 24) + (((unsigned int)dim[ 6]) << 16) + (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[11]) << 24) + (((unsigned int)dim[10]) << 16) + (((unsigned int)dim[ 9]) << 8) + ((unsigned int) dim[ 8]);
 		result->height   =  abs((int32_t)result->height);
@@ -162,9 +153,9 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 
 #if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 /* {{{ php_handle_swc */
-static struct gfxinfo *php_handle_swc(php_stream * stream)
+static struct php_gfxinfo *php_handle_swc(php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 
 	long bits;
 	unsigned char a[64];
@@ -231,7 +222,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	}
 
 	if (!status) {
-		result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
+		result = (struct php_gfxinfo *) ecalloc (1, sizeof (struct php_gfxinfo));
 		bits = php_swf_get_bits (b, 0, 5);
 		result->width = (php_swf_get_bits (b, 5 + bits, bits) -
 			php_swf_get_bits (b, 5, bits)) / 20;
@@ -248,9 +239,9 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 #endif
 
 /* {{{ php_handle_swf */
-static struct gfxinfo *php_handle_swf (php_stream * stream)
+static struct php_gfxinfo *php_handle_swf (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	long bits;
 	unsigned char a[32];
 
@@ -260,7 +251,7 @@ static struct gfxinfo *php_handle_swf (php_stream * stream)
 	if (php_stream_read(stream, (char*)a, sizeof(a)) != sizeof(a))
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc (1, sizeof (struct php_gfxinfo));
 	bits = php_swf_get_bits (a, 0, 5);
 	result->width = (php_swf_get_bits (a, 5 + bits, bits) -
 		php_swf_get_bits (a, 5, bits)) / 20;
@@ -274,9 +265,9 @@ static struct gfxinfo *php_handle_swf (php_stream * stream)
 
 /* {{{ php_handle_png
  * routine to handle PNG files */
-static struct gfxinfo *php_handle_png (php_stream * stream)
+static struct php_gfxinfo *php_handle_png (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[9];
 /* Width:              4 bytes
  * Height:             4 bytes
@@ -293,7 +284,7 @@ static struct gfxinfo *php_handle_png (php_stream * stream)
 	if((php_stream_read(stream, (char*)dim, sizeof(dim))) < sizeof(dim))
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 	result->width  = (((unsigned int)dim[0]) << 24) + (((unsigned int)dim[1]) << 16) + (((unsigned int)dim[2]) << 8) + ((unsigned int)dim[3]);
 	result->height = (((unsigned int)dim[4]) << 24) + (((unsigned int)dim[5]) << 16) + (((unsigned int)dim[6]) << 8) + ((unsigned int)dim[7]);
 	result->bits   = (unsigned int)dim[8];
@@ -452,9 +443,9 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 /* {{{ php_handle_jpeg
    main loop to parse JPEG structure */
-static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
+static struct php_gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned int marker = M_PSEUDO;
 	unsigned short length, ff_read=1;
 
@@ -477,7 +468,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 			case M_SOF15:
 				if (result == NULL) {
 					/* handle SOFn block */
-					result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+					result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 					length = php_read2(stream);
 					result->bits     = php_stream_getc(stream);
 					result->height   = php_read2(stream);
@@ -580,9 +571,9 @@ static unsigned int php_read4(php_stream * stream)
 
 /* {{{ php_handle_jpc
    Main loop to parse JPEG2000 raw codestream structure */
-static struct gfxinfo *php_handle_jpc(php_stream * stream)
+static struct php_gfxinfo *php_handle_jpc(php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	int highest_bit_depth, bit_depth;
 	unsigned char first_marker_id;
 	unsigned int i;
@@ -603,7 +594,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 		return NULL;
 	}
 
-	result = (struct gfxinfo *)ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *)ecalloc(1, sizeof(struct php_gfxinfo));
 
 	php_read2(stream); /* Lsiz */
 	php_read2(stream); /* Rsiz */
@@ -651,9 +642,9 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 
 /* {{{ php_handle_jp2
    main loop to parse JPEG 2000 JP2 wrapper format structure */
-static struct gfxinfo *php_handle_jp2(php_stream *stream)
+static struct php_gfxinfo *php_handle_jp2(php_stream *stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned int box_length;
 	unsigned int box_type;
 	char jp2c_box_id[] = {(char)0x6a, (char)0x70, (char)0x32, (char)0x63};
@@ -777,9 +768,9 @@ static unsigned php_ifd_get32u(void *Long, int motorola_intel)
 
 /* {{{ php_handle_tiff
    main loop to parse TIFF structure */
-static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int motorola_intel)
+static struct php_gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int motorola_intel)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	int i, num_entries;
 	unsigned char *dir_entry;
 	size_t ifd_size, dir_size, entry_value, width=0, height=0, ifd_addr;
@@ -845,7 +836,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 	efree(ifd_data);
 	if ( width && height) {
 		/* not the same when in for-loop */
-		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+		result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 		result->height   = height;
 		result->width    = width;
 		result->bits     = 0;
@@ -857,9 +848,9 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 /* }}} */
 
 /* {{{ php_handle_psd */
-static struct gfxinfo *php_handle_iff(php_stream * stream)
+static struct php_gfxinfo *php_handle_iff(php_stream * stream)
 {
-	struct gfxinfo * result;
+	struct php_gfxinfo * result;
 	unsigned char a[10];
 	int chunkId;
 	int size;
@@ -893,7 +884,7 @@ static struct gfxinfo *php_handle_iff(php_stream * stream)
 			height = php_ifd_get16s(a+2, 1);
 			bits   = a[8] & 0xff;
 			if (width > 0 && height > 0 && bits > 0 && bits < 33) {
-				result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+				result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 				result->width    = width;
 				result->height   = height;
 				result->bits     = bits;
@@ -918,7 +909,7 @@ static struct gfxinfo *php_handle_iff(php_stream * stream)
  * int Number of columns
  * int Number of rows
  */
-static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
+static int php_get_wbmp(php_stream *stream, struct php_gfxinfo **result, int check)
 {
 	int i, width = 0, height = 0;
 
@@ -979,9 +970,9 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 /* }}} */
 
 /* {{{ php_handle_wbmp */
-static struct gfxinfo *php_handle_wbmp(php_stream * stream)
+static struct php_gfxinfo *php_handle_wbmp(php_stream * stream)
 {
-	struct gfxinfo *result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	struct php_gfxinfo *result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 
 	if (!php_get_wbmp(stream, &result, 0)) {
 		efree(result);
@@ -993,7 +984,7 @@ static struct gfxinfo *php_handle_wbmp(php_stream * stream)
 /* }}} */
 
 /* {{{ php_get_xbm */
-static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
+static int php_get_xbm(php_stream *stream, struct php_gfxinfo **result)
 {
 	char *fline;
 	char *iname;
@@ -1040,7 +1031,7 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 
 	if (width && height) {
 		if (result) {
-			*result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+			*result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 			(*result)->width = width;
 			(*result)->height = height;
 		}
@@ -1052,18 +1043,18 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 /* }}} */
 
 /* {{{ php_handle_xbm */
-static struct gfxinfo *php_handle_xbm(php_stream * stream)
+static struct php_gfxinfo *php_handle_xbm(php_stream * stream)
 {
-	struct gfxinfo *result;
+	struct php_gfxinfo *result;
 	php_get_xbm(stream, &result);
 	return result;
 }
 /* }}} */
 
 /* {{{ php_handle_ico */
-static struct gfxinfo *php_handle_ico(php_stream * stream)
+static struct php_gfxinfo *php_handle_ico(php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[16];
 	int num_icons = 0;
 
@@ -1075,7 +1066,7 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 	if (num_icons < 1 || num_icons > 255)
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 
 	while (num_icons > 0)
 	{
@@ -1102,9 +1093,9 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 /* }}} */
 
 /* {{{ php_handle_webp */
-static struct gfxinfo *php_handle_webp(php_stream * stream)
+static struct php_gfxinfo *php_handle_webp(php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	const char sig[3] = {'V', 'P', '8'};
 	unsigned char buf[18];
 	char format;
@@ -1125,7 +1116,7 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 			return NULL;
 	}
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 
 	switch (format) {
 		case ' ':
@@ -1187,14 +1178,14 @@ static void php_avif_stream_skip(void* stream, size_t num_bytes) {
  * declared as invalid. Around 450 bytes are usually enough.
  * Transforms such as mirror and rotation are not applied on width and height.
  */
-static struct gfxinfo *php_handle_avif(php_stream * stream) {
-	struct gfxinfo* result = NULL;
+static struct php_gfxinfo *php_handle_avif(php_stream * stream) {
+	struct php_gfxinfo* result = NULL;
 	AvifInfoFeatures features;
 	struct php_avif_stream avif_stream;
 	avif_stream.stream = stream;
 
 	if (AvifInfoGetFeaturesStream(&avif_stream, php_avif_stream_read, php_avif_stream_skip, &features) == kAvifInfoOk) {
-		result = (struct gfxinfo*)ecalloc(1, sizeof(struct gfxinfo));
+		result = (struct php_gfxinfo*)ecalloc(1, sizeof(struct php_gfxinfo));
 		result->width = features.width;
 		result->height = features.height;
 		result->bits = features.bit_depth;
@@ -1463,7 +1454,7 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	int itype = 0;
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 
 	if (!stream) {
 		RETURN_FALSE;

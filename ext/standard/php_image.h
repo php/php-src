@@ -56,4 +56,14 @@ PHPAPI char * php_image_type_to_mime_type(int image_type);
 
 PHPAPI bool php_is_image_avif(php_stream *stream);
 
+/* return info as a struct, to make expansion easier */
+struct php_gfxinfo {
+	unsigned int width;
+	unsigned int height;
+	zend_string *width_str;
+	zend_string *height_str;
+	unsigned int bits;
+	unsigned int channels;
+};
+
 #endif /* PHP_IMAGE_H */
