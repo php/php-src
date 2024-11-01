@@ -524,6 +524,20 @@ static zend_result spl_get_iterator_from_aggregate(zval *retval, zend_class_entr
 	return SUCCESS;
 }
 
+static void spl_RecursiveIteratorIterator_free_iterators(spl_recursive_it_object *object)
+{
+	if (object->iterators) {
+		while (object->level >= 0) {
+			zend_object_iterator *sub_iter = object->iterators[object->level].iterator;
+			zend_iterator_dtor(sub_iter);
+			zval_ptr_dtor(&object->iterators[object->level].zobject);
+			object->level--;
+		}
+		efree(object->iterators);
+		object->iterators = NULL;
+	}
+}
+
 static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, recursive_it_it_type rit_type)
 {
 	zval *object = ZEND_THIS;
@@ -594,6 +608,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	}
 
 	intern = Z_SPLRECURSIVE_IT_P(object);
+	spl_RecursiveIteratorIterator_free_iterators(intern);
 	intern->iterators = emalloc(sizeof(spl_sub_iterator));
 	intern->level = 0;
 	intern->mode = mode;
@@ -640,6 +655,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->iterators[0].getchildren = NULL;
 
 	if (EG(exception)) {
+		// TODO: use spl_RecursiveIteratorIterator_free_iterators
 		zend_object_iterator *sub_iter;
 
 		while (intern->level >= 0) {
@@ -912,16 +928,7 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 {
 	spl_recursive_it_object *object = spl_recursive_it_from_obj(_object);
 
-	if (object->iterators) {
-		while (object->level >= 0) {
-			zend_object_iterator *sub_iter = object->iterators[object->level].iterator;
-			zend_iterator_dtor(sub_iter);
-			zval_ptr_dtor(&object->iterators[object->level].zobject);
-			object->level--;
-		}
-		efree(object->iterators);
-		object->iterators = NULL;
-	}
+	spl_RecursiveIteratorIterator_free_iterators(object);
 
 	zend_object_std_dtor(&object->std);
 	for (size_t i = 0; i < 6; i++) {
