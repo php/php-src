@@ -3,8 +3,7 @@ collator_get_sort_key() icu >= 62.1
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '62.1') < 0) die('skip for ICU >= 62.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '76.1') >=  0) die('skip for ICU < 76.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '76.1') < 0) die('skip for ICU >= 76.1'); ?>
 --FILE--
 <?php
 
@@ -59,40 +58,40 @@ ut_run();
 ?>
 --EXPECT--
 source: abc
-key: 2a2c2e01070107
+key: 2b2d2f01070107
 source: abd
-key: 2a2c3001070107
+key: 2b2d3101070107
 source: aaa
-key: 2a2a2a01070107
+key: 2b2b2b01070107
 source: аа
-key: 61060601060106
+key: 62060601060106
 source: а
-key: 610601050105
+key: 620601050105
 source: z
-key: 5c01050105
+key: 5d01050105
 source: 
 key: 0101
 source: 3
-key: 1901050105
+key: 1801050105
 source: y
-key: 5a01050105
+key: 5b01050105
 source: i
-key: 3a01050105
+key: 3b01050105
 source: k
-key: 3e01050105
+key: 3f01050105
 source: абг
-key: 27060c1001070107
+key: 28060c1001070107
 source: абв
-key: 27060c0e01070107
+key: 28060c0e01070107
 source: жжж
-key: 272c2c2c01070107
+key: 282c2c2c01070107
 source: эюя
-key: 27eef0f401070107
+key: 28eef0f401070107
 source: абг
-key: 61060c1001070107
+key: 62060c1001070107
 source: абв
-key: 61060c0e01070107
+key: 62060c0e01070107
 source: жжж
-key: 612c2c2c01070107
+key: 622c2c2c01070107
 source: эюя
-key: 61eef0f401070107
+key: 62eef0f401070107

@@ -3,8 +3,7 @@ IntlTimeZone::getIDForWindowsID basic test
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '58.1') < 0) die('skip for ICU >= 58.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '76.1') >= 0) die('skip for ICU <= 76.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '76.1') < 0) die('skip for ICU >= 76.1'); ?>
 --FILE--
 <?php
 
@@ -36,7 +35,7 @@ string(19) "America/Los_Angeles"
 string(17) "America/Vancouver"
 string(19) "America/Los_Angeles"
 string(19) "America/Los_Angeles"
-string(7) "PST8PDT"
+string(19) "America/Los_Angeles"
 ** Romance Standard Time
 string(12) "Europe/Paris"
 string(15) "Europe/Brussels"
