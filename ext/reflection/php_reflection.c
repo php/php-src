@@ -217,18 +217,26 @@ static void _free_function(zend_function *fptr) /* {{{ */
 }
 /* }}} */
 
+static void reflection_free_property_reference(property_reference *reference)
+{
+	zend_string_release_ex(reference->unmangled_name, 0);
+	efree(reference);
+}
+
+static void reflection_free_parameter_reference(parameter_reference *reference)
+{
+	_free_function(reference->fptr);
+	efree(reference);
+}
+
 static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 {
 	reflection_object *intern = reflection_object_from_obj(object);
-	parameter_reference *reference;
-	property_reference *prop_reference;
 
 	if (intern->ptr) {
 		switch (intern->ref_type) {
 		case REF_TYPE_PARAMETER:
-			reference = (parameter_reference*)intern->ptr;
-			_free_function(reference->fptr);
-			efree(intern->ptr);
+			reflection_free_parameter_reference(intern->ptr);
 			break;
 		case REF_TYPE_TYPE:
 		{
@@ -243,9 +251,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			_free_function(intern->ptr);
 			break;
 		case REF_TYPE_PROPERTY:
-			prop_reference = (property_reference*)intern->ptr;
-			zend_string_release_ex(prop_reference->unmangled_name, 0);
-			efree(intern->ptr);
+			reflection_free_property_reference(intern->ptr);
 			break;
 		case REF_TYPE_ATTRIBUTE: {
 			attribute_reference *attr_ref = intern->ptr;
@@ -2546,6 +2552,10 @@ ZEND_METHOD(ReflectionParameter, __construct)
 		}
 	}
 
+	if (intern->ptr) {
+		reflection_free_parameter_reference(intern->ptr);
+	}
+
 	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	ref->arg_info = &arg_info[position];
 	ref->offset = (uint32_t)position;
@@ -2555,11 +2565,15 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	intern->ptr = ref;
 	intern->ref_type = REF_TYPE_PARAMETER;
 	intern->ce = ce;
+	zval_ptr_dtor(&intern->obj);
 	if (reference && is_closure) {
 		ZVAL_COPY_VALUE(&intern->obj, reference);
+	} else {
+		ZVAL_UNDEF(&intern->obj);
 	}
 
 	prop_name = reflection_prop_name(object);
+	zval_ptr_dtor(prop_name);
 	if (has_internal_arg_info(fptr)) {
 		ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)[position].name);
 	} else {
@@ -4015,10 +4029,12 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
+	/* Note: class entry name is interned, no need to destroy them */
 	if (arg_obj) {
 		ZVAL_STR_COPY(reflection_prop_name(object), arg_obj->ce->name);
 		intern->ptr = arg_obj->ce;
 		if (is_object) {
+			zval_ptr_dtor(&intern->obj);
 			ZVAL_OBJ_COPY(&intern->obj, arg_obj);
 		}
 	} else {
@@ -5510,11 +5526,18 @@ ZEND_METHOD(ReflectionProperty, __construct)
 		}
 	}
 
-	ZVAL_STR_COPY(reflection_prop_name(object), name);
+	zval *prop_name = reflection_prop_name(object);
+	zval_ptr_dtor(prop_name);
+	ZVAL_STR_COPY(prop_name, name);
+	/* Note: class name are always interned, no need to destroy them */
 	if (dynam_prop == 0) {
 		ZVAL_STR_COPY(reflection_prop_class(object), property_info->ce->name);
 	} else {
 		ZVAL_STR_COPY(reflection_prop_class(object), ce->name);
+	}
+
+	if (intern->ptr) {
+		reflection_free_property_reference(intern->ptr);
 	}
 
 	reference = (property_reference*) emalloc(sizeof(property_reference));
@@ -5949,7 +5972,9 @@ ZEND_METHOD(ReflectionExtension, __construct)
 		RETURN_THROWS();
 	}
 	free_alloca(lcname, use_heap);
-	ZVAL_STRING(reflection_prop_name(object), module->name);
+	zval *prop_name = reflection_prop_name(object);
+	zval_ptr_dtor(prop_name);
+	ZVAL_STRING(prop_name, module->name);
 	intern->ptr = module;
 	intern->ref_type = REF_TYPE_OTHER;
 	intern->ce = NULL;
