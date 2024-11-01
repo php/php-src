@@ -6,7 +6,7 @@ Sanjay Mantoor <sanjay.mantoor@gmail.com>
 <?php
 echo "*** Testing image_type_to_mime_type() : usage variations ***\n";
 
-for($imagetype = 0; $imagetype <= 19; ++$imagetype) {
+for($imagetype = 0; $imagetype <= 20; ++$imagetype) {
   echo "\n-- Iteration $imagetype --\n";
   var_dump(image_type_to_mime_type($imagetype));
 }
@@ -78,10 +78,7 @@ string(10) "image/webp"
 string(10) "image/avif"
 
 -- Iteration 20 --
-string\(10\) "image\/heif"
-
--- Iteration 21 --
-string\(24\) "application\/octet-stream"
+string(10) "image/heif"
 
 -- Iteration 999 --
 string(24) "application/octet-stream"
