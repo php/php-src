@@ -56,6 +56,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug GH-16523 (FILTER_FLAG_HOSTNAME accepts ending hyphen). (cmb)
 
+- FPM:
+  . Fixed bug GH-16628 (FPM logs are getting corrupted with this log
+    statement). (nielsdos)
+
 - GD:
   . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
     (David Carlier)
@@ -96,6 +100,9 @@ PHP                                                                        NEWS
 
 - PHPDBG:
   . Fixed bug GH-16174 (Empty string is an invalid expression for ev). (cmb)
+
+- Reflection:
+  . Fixed bug GH-16601 (Memory leak in Reflection constructors). (nielsdos)
 
 - Session:
   . Fixed bug GH-16385 (Unexpected null returned by session_set_cookie_params).

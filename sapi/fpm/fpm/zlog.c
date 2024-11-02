@@ -153,6 +153,7 @@ static inline void zlog_external(
 }
 /* }}} */
 
+/* Returns the length if the print were complete, this can be larger than buf_size. */
 static size_t zlog_buf_prefix(
 		const char *function, int line, int flags,
 		char *buf, size_t buf_size, int use_syslog) /* {{{ */
@@ -189,6 +190,7 @@ static size_t zlog_buf_prefix(
 		}
 	}
 
+	/* Important: snprintf returns the number of bytes if the print were complete. */
 	return len;
 }
 /* }}} */
@@ -411,6 +413,7 @@ static inline ssize_t zlog_stream_unbuffered_write(
 static inline ssize_t zlog_stream_buf_copy_cstr(
 		struct zlog_stream *stream, const char *str, size_t str_len) /* {{{ */
 {
+	ZEND_ASSERT(stream->len <= stream->buf.size);
 	if (stream->buf.size - stream->len <= str_len &&
 			!zlog_stream_buf_alloc_ex(stream, str_len + stream->len)) {
 		return -1;
@@ -425,6 +428,7 @@ static inline ssize_t zlog_stream_buf_copy_cstr(
 
 static inline ssize_t zlog_stream_buf_copy_char(struct zlog_stream *stream, char c) /* {{{ */
 {
+	ZEND_ASSERT(stream->len <= stream->buf.size);
 	if (stream->buf.size - stream->len < 1 && !zlog_stream_buf_alloc_ex(stream, 1)) {
 		return -1;
 	}
@@ -681,6 +685,17 @@ ssize_t zlog_stream_prefix_ex(struct zlog_stream *stream, const char *function, 
 		len = zlog_buf_prefix(
 				function, line, stream->flags,
 				stream->buf.data, stream->buf.size, stream->use_syslog);
+		if (!EXPECTED(len + 1 <= stream->buf.size)) {
+			/* If the buffer was not large enough, try with a larger buffer.
+			 * Note that this may still truncate if the zlog_limit is reached. */
+			len = MIN(len + 1, zlog_limit);
+			if (!zlog_stream_buf_alloc_ex(stream, len)) {
+				return -1;
+			}
+			zlog_buf_prefix(
+				function, line, stream->flags,
+				stream->buf.data, stream->buf.size, stream->use_syslog);
+		}
 		stream->len = stream->prefix_len = len;
 		if (stream->msg_prefix != NULL) {
 			zlog_stream_buf_copy_cstr(stream, stream->msg_prefix, stream->msg_prefix_len);
@@ -692,8 +707,8 @@ ssize_t zlog_stream_prefix_ex(struct zlog_stream *stream, const char *function, 
 	} else {
 		char sbuf[1024];
 		ssize_t written;
-		len = zlog_buf_prefix(function, line, stream->flags, sbuf, 1024, stream->use_syslog);
-		written = zlog_stream_direct_write(stream, sbuf, len);
+		len = zlog_buf_prefix(function, line, stream->flags, sbuf, sizeof(sbuf), stream->use_syslog);
+		written = zlog_stream_direct_write(stream, sbuf, MIN(len, sizeof(sbuf)));
 		if (stream->msg_prefix != NULL) {
 			written += zlog_stream_direct_write(
 					stream, stream->msg_prefix, stream->msg_prefix_len);
