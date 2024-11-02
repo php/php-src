@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - COM:
   . Fix property access of PHP objects wrapped in variant. (cmb)
 
+- Core:
+  . Fixed bug GH-16665 (\array and \callable should not be usable in
+    class_alias). (nielsdos)
+
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
 
