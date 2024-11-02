@@ -15,7 +15,8 @@ it is expected to replace various mediums like:
 
 ```bash
 pip install sphinx sphinx-design sphinxawesome-theme
-make html
+chmod a+x make.sh
+./make.sh html
 ```
 
 That's it! You can view the documentation under `./build/html/index.html` in your browser.
