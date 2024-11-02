@@ -639,6 +639,17 @@ static ZEND_FUNCTION(zend_test_is_zend_ptr)
 	RETURN_BOOL(is_zend_ptr((void*)addr));
 }
 
+static ZEND_FUNCTION(zend_test_log_err_debug)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str);
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);
