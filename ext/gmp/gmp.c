@@ -333,8 +333,34 @@ static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 }
 /* }}} */
 
-static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2, uint8_t opcode) {
-	zend_long shift = zval_get_long(op2);
+static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2, uint8_t opcode) {
+	zend_long shift = 0;
+
+	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
+		if (UNEXPECTED(!IS_GMP(op2))) {
+			// For PHP 8.3 and up use zend_try_get_long()
+			switch (Z_TYPE_P(op2)) {
+				case IS_DOUBLE:
+					shift = zval_get_long(op2);
+					if (UNEXPECTED(EG(exception))) {
+						return FAILURE;
+					}
+					break;
+				case IS_STRING:
+					if (is_numeric_str_function(Z_STR_P(op2), &shift, NULL) != IS_LONG) {
+						goto valueof_op_failure;
+					}
+					break;
+				default:
+					goto typeof_op_failure;
+			}
+		} else {
+			// TODO We shouldn't cast the GMP object to int here
+			shift = zval_get_long(op2);
+		}
+	} else {
+		shift = Z_LVAL_P(op2);
+	}
 
 	if (shift < 0) {
 		zend_throw_error(
@@ -342,16 +368,54 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 			opcode == ZEND_POW ? "Exponent" : "Shift"
 		);
 		ZVAL_UNDEF(return_value);
-		return;
+		return FAILURE;
 	} else {
 		mpz_ptr gmpnum_op, gmpnum_result;
 		gmp_temp_t temp;
 
-		FETCH_GMP_ZVAL(gmpnum_op, op1, temp, 1);
+		/* We do not use FETCH_GMP_ZVAL(...); here as we don't use convert_to_gmp()
+		 * as we want to handle the emitted exception ourself.  */
+		if (UNEXPECTED(!IS_GMP(op1))) {
+			if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
+				goto typeof_op_failure;
+			}
+			mpz_init(temp.num);
+			mpz_set_si(temp.num, Z_LVAL_P(op1));
+			temp.is_used = 1;
+			gmpnum_op = temp.num;
+		} else {
+			gmpnum_op = GET_GMP_FROM_ZVAL(op1);
+			temp.is_used = 0;
+		}
 		INIT_GMP_RETVAL(gmpnum_result);
 		op(gmpnum_result, gmpnum_op, (gmp_ulong) shift);
 		FREE_GMP_TEMP(temp);
+		return SUCCESS;
 	}
+
+typeof_op_failure: ;
+	/* Returning FAILURE without throwing an exception would emit the
+	 * Unsupported operand types: GMP OP TypeOfOp2
+	 * However, this leads to the engine trying to interpret the GMP object as an integer
+	 * and doing the operation that way, which is not something we want. */
+	const char *op_sigil;
+	switch (opcode) {
+		case ZEND_POW:
+			op_sigil = "**";
+			break;
+		case ZEND_SL:
+			op_sigil = "<<";
+			break;
+		case ZEND_SR:
+			op_sigil = ">>";
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	zend_type_error("Unsupported operand types: %s %s %s", zend_zval_type_name(op1), op_sigil, zend_zval_type_name(op2));
+	return FAILURE;
+valueof_op_failure:
+	zend_value_error("Number is not an integer string");
+	return FAILURE;
 }
 
 #define DO_BINARY_UI_OP_EX(op, uop, check_b_zero) \
@@ -380,18 +444,15 @@ static zend_result gmp_do_operation_ex(uint8_t opcode, zval *result, zval *op1, 
 	case ZEND_MUL:
 		DO_BINARY_UI_OP(mpz_mul);
 	case ZEND_POW:
-		shift_operator_helper(mpz_pow_ui, result, op1, op2, opcode);
-		return SUCCESS;
+		return shift_operator_helper(mpz_pow_ui, result, op1, op2, opcode);
 	case ZEND_DIV:
 		DO_BINARY_UI_OP_EX(mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
 		DO_BINARY_UI_OP_EX(mpz_mod, gmp_mpz_mod_ui, 1);
 	case ZEND_SL:
-		shift_operator_helper(mpz_mul_2exp, result, op1, op2, opcode);
-		return SUCCESS;
+		return shift_operator_helper(mpz_mul_2exp, result, op1, op2, opcode);
 	case ZEND_SR:
-		shift_operator_helper(mpz_fdiv_q_2exp, result, op1, op2, opcode);
-		return SUCCESS;
+		return shift_operator_helper(mpz_fdiv_q_2exp, result, op1, op2, opcode);
 	case ZEND_BW_OR:
 		DO_BINARY_OP(mpz_ior);
 	case ZEND_BW_AND:
@@ -619,6 +680,13 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 	case IS_STRING: {
 		return convert_zstr_to_gmp(gmpnumber, Z_STR_P(val), base, arg_pos);
 	}
+	case IS_NULL:
+		/* Just reject null for operator overloading */
+		if (arg_pos == 0) {
+			zend_type_error("Number must be of type GMP|string|int, %s given", zend_zval_type_name(val));
+			return FAILURE;
+		}
+		ZEND_FALLTHROUGH;
 	default: {
 		zend_long lval;
 		if (!zend_parse_arg_long_slow(val, &lval, arg_pos)) {

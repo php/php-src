@@ -71,6 +71,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fixed gmp_pow() overflow bug with large base/exponents.
     (David Carlier)
+  . Fixed segfaults and other issues related to operator overloading with
+    GMP objects. (Girgias)
 
 - MBstring:
   . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
