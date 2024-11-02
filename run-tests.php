@@ -156,8 +156,10 @@ function main(): void
            $test_files, $test_idx, $test_results, $testfile,
            $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats,
            $show_progress;
-    // Parallel testing
-    global $workers, $workerID;
+
+    global $workerContext;
+    $workerContext = new WorkerContext();
+
     global $context_line_count;
 
     // Temporary for the duration of refactoring
@@ -166,9 +168,9 @@ function main(): void
 
     define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
 
-    $workerID = 0;
+    $workerContext->workerID = 0;
     if (getenv("TEST_PHP_WORKER")) {
-        $workerID = intval(getenv("TEST_PHP_WORKER"));
+        $workerContext->workerID = intval(getenv("TEST_PHP_WORKER"));
         run_worker();
         return;
     }
@@ -251,7 +253,7 @@ function main(): void
         $DETAILED = 0;
     }
 
-    $junit = new JUnit($environment, $workerID);
+    $junit = new JUnit($environment, $workerContext->workerID);
 
     if (getenv('SHOW_ONLY_GROUPS')) {
         $SHOW_ONLY_GROUPS = explode(",", getenv('SHOW_ONLY_GROUPS'));
@@ -350,7 +352,7 @@ function main(): void
     $file_cache = null;
     $shuffle = false;
     $bless = false;
-    $workers = null;
+    $workerContext->workers = null;
     $context_line_count = 3;
     $num_repeats = 1;
     $show_progress = true;
@@ -421,6 +423,7 @@ function main(): void
                     if ($workers === 1) {
                         $workers = null;
                     }
+                    $workerContext->workers = $workers;
                     break;
                 case 'r':
                 case 'l':
@@ -1229,13 +1232,14 @@ function system_with_timeout(
     proc_close($proc);
     return $data;
 }
-
 function run_all_tests(array $test_files, array $env, ?string $redir_tested = null): void
 {
     global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
     global $preload;
-    // Parallel testing
-    global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
+    global $PHP_FAILED_TESTS;
+
+    /** @var WorkerContext $workerContext */
+    global $workerContext;
 
     if ($file_cache !== null || $preload) {
         /* Automatically skip opcache tests in --file-cache and --preload mode,
@@ -1255,7 +1259,7 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
     }
 
     /* Ignore -jN if there is only one file to analyze. */
-    if ($workers !== null && count($test_files) > 1 && !$workerID) {
+    if ($workerContext->workers !== null && count($test_files) > 1 && !$workerContext->workerID) {
         run_all_tests_parallel($test_files, $env, $redir_tested);
         return;
     }
@@ -1274,19 +1278,19 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
         }
         $test_idx++;
 
-        if ($workerID) {
+        if ($workerContext->workerID) {
             $PHP_FAILED_TESTS = ['BORKED' => [], 'FAILED' => [], 'WARNED' => [], 'LEAKED' => [], 'XFAILED' => [], 'XLEAKED' => [], 'SLOW' => []];
             ob_start();
         }
 
         $result = run_test($php, $name, $env);
-        if ($workerID) {
+        if ($workerContext->workerID) {
             $resultText = ob_get_clean();
         }
 
         if (!is_array($name) && $result != 'REDIR') {
-            if ($workerID) {
-                send_message($workerSock, [
+            if ($workerContext->workerID) {
+                send_message($workerContext->workerSock, [
                     "type" => "test_result",
                     "name" => $name,
                     "index" => $index,
@@ -1310,9 +1314,12 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
 
 function run_all_tests_parallel(array $test_files, array $env, ?string $redir_tested): void
 {
-    global $workers, $test_idx, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $valgrind, $show_progress;
+    global $test_idx, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $valgrind, $show_progress;
 
     global $junit;
+
+    /** @var WorkerContext $workerContext */
+    global $workerContext;
 
     // The PHP binary running run-tests.php, and run-tests.php itself
     // This PHP executable is *not* necessarily the same as the tested version
@@ -1367,9 +1374,9 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
     }
 
     // Don't start more workers than test files.
-    $workers = max(1, min($workers, count($test_files)));
+    $workerContext->workers = max(1, min($workerContext->workers, count($test_files)));
 
-    echo "Spawning $workers workers... ";
+    echo "Spawning ". $workerContext->workers ." workers... ";
 
     // We use sockets rather than STDIN/STDOUT for comms because on Windows,
     // those can't be non-blocking for some reason.
@@ -1386,7 +1393,7 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
     $totalFileCount = count($test_files);
 
     $startTime = microtime(true);
-    for ($i = 1; $i <= $workers; $i++) {
+    for ($i = 1; $i <= $workerContext->workers; $i++) {
         $proc = proc_open(
             [$thisPHP, $thisScript],
             [], // Inherit our stdin, stdout and stderr
@@ -1408,7 +1415,7 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
         $workerProcs[$i] = $proc;
     }
 
-    for ($i = 1; $i <= $workers; $i++) {
+    for ($i = 1; $i <= $workerContext->workers; $i++) {
         $workerSock = stream_socket_accept($listenSock, 5);
         if ($workerSock === false) {
             kill_children($workerProcs);
@@ -1567,7 +1574,7 @@ escape:
                             echo $resultText;
 
                             if ($show_progress) {
-                                show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
+                                show_test($test_idx, count($workerProcs) . "/".$workerContext->workers ." concurrent test workers running");
                             }
 
                             if (!is_array($name) && $result != 'REDIR') {
@@ -1662,6 +1669,9 @@ function safe_fwrite($stream, string $data)
     return $bytes_written;
 }
 
+/**
+ * @param resource $stream
+ */
 function send_message($stream, array $message): void
 {
     $blocking = stream_get_meta_data($stream)["blocked"];
@@ -1681,23 +1691,24 @@ function kill_children(array $children): void
 
 function run_worker(): void
 {
-    global $workerID, $workerSock;
+    /** @var WorkerContext $workerContext */
+    global $workerContext;
 
     global $junit;
 
     $sockUri = getenv("TEST_PHP_URI");
 
-    $workerSock = stream_socket_client($sockUri, $_, $_, 5) or error("Couldn't connect to $sockUri");
+    $workerContext->workerSock = stream_socket_client($sockUri, $_, $_, 5) or error("Couldn't connect to $sockUri");
 
-    $greeting = fgets($workerSock);
+    $greeting = fgets($workerContext->workerSock);
     $greeting = unserialize(base64_decode($greeting)) or die("Could not decode greeting\n");
     if ($greeting["type"] !== "hello") {
         error("Unexpected greeting of type $greeting[type]");
     }
 
-    set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) use ($workerSock): bool {
+    set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) use ($workerContext): bool {
         if (error_reporting() & $errno) {
-            send_message($workerSock, compact('errno', 'errstr', 'errfile', 'errline') + [
+            send_message($workerContext->workerSock, compact('errno', 'errstr', 'errfile', 'errline') + [
                 'type' => 'php_error'
             ]);
         }
@@ -1706,7 +1717,7 @@ function run_worker(): void
     });
 
     foreach ($greeting["GLOBALS"] as $var => $value) {
-        if ($var !== "workerID" && $var !== "workerSock" && $var !== "GLOBALS") {
+        if ($var !== "workerContext" && $var !== "GLOBALS") {
             $GLOBALS[$var] = $value;
         }
     }
@@ -1714,29 +1725,29 @@ function run_worker(): void
         define($const, $value);
     }
 
-    send_message($workerSock, [
+    send_message($workerContext->workerSock, [
         "type" => "hello_reply",
-        "workerID" => $workerID
+        "workerID" => $workerContext->workerID
     ]);
 
-    send_message($workerSock, [
+    send_message($workerContext->workerSock, [
         "type" => "ready"
     ]);
 
-    while (($command = fgets($workerSock))) {
+    while (($command = fgets($workerContext->workerSock))) {
         $command = unserialize(base64_decode($command));
 
         switch ($command["type"]) {
             case "run_tests":
                 run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
-                send_message($workerSock, [
+                send_message($workerContext->workerSock, [
                     "type" => "tests_finished",
                     "junit" => $junit->isEnabled() ? $junit : null,
                 ]);
                 $junit->clear();
                 break;
             default:
-                send_message($workerSock, [
+                send_message($workerContext->workerSock, [
                     "type" => "error",
                     "msg" => "Unrecognised message type: $command[type]"
                 ]);
@@ -1796,9 +1807,10 @@ function run_test(string $php, $file, array $env): string
     global $slow_min_ms;
     global $preload, $file_cache;
     global $num_repeats;
-    // Parallel testing
-    global $workerID;
     global $show_progress;
+
+    /** @var WorkerContext $workerContext */
+    global $workerContext;
 
     // Temporary
     /** @var JUnit $junit */
@@ -1913,7 +1925,7 @@ TEST $file
         }
     }
 
-    if ($show_progress && !$workerID) {
+    if ($show_progress && !$workerContext->workerID) {
         show_test($test_idx, $shortname);
     }
 
@@ -2004,7 +2016,7 @@ TEST $file
     }
 
     // Default ini settings
-    $ini_settings = $workerID ? ['opcache.cache_id' => "worker$workerID"] : [];
+    $ini_settings = $workerContext->workerID ? ['opcache.cache_id' => "worker".$workerContext->workers] : [];
 
     // Additional required extensions
     $extensions = [];
@@ -3217,10 +3229,10 @@ function show_test(int $test_idx, string $shortname): void
 function clear_show_test(): void
 {
     global $line_length;
-    // Parallel testing
-    global $workerID;
+    /** @var WorkerContext $workerContext */
+    global $workerContext;
 
-    if (!$workerID && isset($line_length)) {
+    if (!$workerContext->workerID && isset($line_length)) {
         // Write over the last line to avoid random trailing chars on next echo
         echo str_repeat(" ", $line_length), "\r";
     }
@@ -4169,6 +4181,21 @@ class DiffOutputBuilder
 
         return $diff;
     }
+}
+
+class WorkerContext {
+    /**
+     * @var int|null number of workers to use, null for non-parallel testing.
+     */
+    public $workers;
+    /**
+     * @var int
+     */
+    public $workerID;
+    /**
+     * @var resource
+     */
+    public $workerSock;
 }
 
 main();
