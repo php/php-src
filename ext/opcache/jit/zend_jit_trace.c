@@ -2152,6 +2152,9 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 //				case ZEND_FETCH_DIM_UNSET:
 				case ZEND_FETCH_LIST_W:
 					if (opline->op1_type != IS_CV
+#ifdef HAVE_FFI
+					 && !op1_ffi_type
+#endif
 					 && (orig_op1_type == IS_UNKNOWN
 					  || !(orig_op1_type & IS_TRACE_INDIRECT))) {
 						break;
@@ -6350,6 +6353,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 //					case ZEND_FETCH_DIM_UNSET:
 					case ZEND_FETCH_LIST_W:
 						if (opline->op1_type != IS_CV
+#ifdef HAVE_FFI
+						 && !op1_ffi_type
+#endif
 						 && (orig_op1_type == IS_UNKNOWN
 						  || !(orig_op1_type & IS_TRACE_INDIRECT))) {
 							break;
@@ -6365,8 +6371,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 										&op1_info, &op1_addr, !ssa->var_info[ssa_op->op1_use].indirect_reference)) {
 									goto jit_failure;
 								}
-							} else {
-								break;
 							}
 						}
 						if (orig_op1_type != IS_UNKNOWN
