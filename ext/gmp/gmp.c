@@ -135,22 +135,6 @@ typedef struct _gmp_temp {
 		mpz_clear(temp.num); \
 	}
 
-#define FETCH_GMP_ZVAL_DEP_DEP(gmpnumber, zval, temp, dep1, dep2, arg_pos) \
-if (IS_GMP(zval)) {                                               \
-	gmpnumber = GET_GMP_FROM_ZVAL(zval);                          \
-	temp.is_used = 0;                                             \
-} else {                                                          \
-	mpz_init(temp.num);                                           \
-	if (convert_to_gmp(temp.num, zval, 0, arg_pos) == FAILURE) {  \
-		mpz_clear(temp.num);                                      \
-		FREE_GMP_TEMP(dep1);                                      \
-		FREE_GMP_TEMP(dep2);                                      \
-		RETURN_THROWS();                                          \
-	}                                                             \
-	temp.is_used = 1;                                             \
-	gmpnumber = temp.num;                                         \
-}
-
 #define FETCH_GMP_ZVAL_DEP(gmpnumber, zval, temp, dep, arg_pos)   \
 if (IS_GMP(zval)) {                                               \
 	gmpnumber = GET_GMP_FROM_ZVAL(zval);                          \
