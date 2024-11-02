@@ -693,7 +693,6 @@ function main(): void
     if ($test_cnt) {
         putenv('NO_INTERACTION=1');
         usort($test_files, "test_sort");
-        $start_timestamp = time();
         $start_time = hrtime(true);
 
         echo "Running selected tests.\n";
@@ -3634,11 +3633,6 @@ class RuntestsValgrind
     protected bool $version_3_8_0;
     protected string $tool;
 
-    public function getHeader(): string
-    {
-        return $this->header;
-    }
-
     public function __construct(array $environment, string $tool = 'memcheck')
     {
         $this->tool = $tool;
@@ -3654,20 +3648,6 @@ class RuntestsValgrind
         }
         $this->header = sprintf("%s (%s)", trim($header), $this->tool);
         $this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
-    }
-
-    public function wrapCommand(string $cmd, string $memcheck_filename, bool $check_all): string
-    {
-        $vcmd = "valgrind -q --tool={$this->tool} --trace-children=yes";
-        if ($check_all) {
-            $vcmd .= ' --smc-check=all';
-        }
-
-        /* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
-        if ($this->version_3_8_0) {
-            return "$vcmd --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
-        }
-        return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
     }
 }
 
