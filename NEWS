@@ -54,6 +54,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug GH-16523 (FILTER_FLAG_HOSTNAME accepts ending hyphen). (cmb)
 
+- FPM:
+  . Fixed bug GH-16628 (FPM logs are getting corrupted with this log
+    statement). (nielsdos)
+
 - GD:
   . Fixed bug GH-16334 (imageaffine overflow on matrix elements).
     (David Carlier)
