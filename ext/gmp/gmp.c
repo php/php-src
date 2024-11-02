@@ -271,21 +271,6 @@ static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_
 static void gmp_mpz_tdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 	mpz_tdiv_q_ui(a, b, c);
 }
-static void gmp_mpz_tdiv_r_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
-	mpz_tdiv_r_ui(a, b, c);
-}
-static void gmp_mpz_fdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
-	mpz_fdiv_q_ui(a, b, c);
-}
-static void gmp_mpz_fdiv_r_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
-	mpz_fdiv_r_ui(a, b, c);
-}
-static void gmp_mpz_cdiv_r_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
-	mpz_cdiv_r_ui(a, b, c);
-}
-static void gmp_mpz_cdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
-	mpz_cdiv_q_ui(a, b, c);
-}
 static void gmp_mpz_mod_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 	mpz_mod_ui(a, b, c);
 }
@@ -1164,72 +1149,85 @@ ZEND_FUNCTION(gmp_div_qr)
 	}
 }
 
-/* {{{ Divide a by b, returns reminder only */
+/* Divide a by b, returns reminder only */
 ZEND_FUNCTION(gmp_div_r)
 {
-	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result;
 	zend_long round = GMP_ROUND_ZERO;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_ZVAL(a_arg)
-		Z_PARAM_ZVAL(b_arg)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(round)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (round) {
-	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op(
-			return_value, a_arg, b_arg, mpz_tdiv_r, gmp_mpz_tdiv_r_ui, 1, /* is_operator */ false);
-		break;
-	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op(
-			return_value, a_arg, b_arg, mpz_cdiv_r, gmp_mpz_cdiv_r_ui, 1, /* is_operator */ false);
-		break;
-	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op(
-			return_value, a_arg, b_arg, mpz_fdiv_r, gmp_mpz_fdiv_r_ui, 1, /* is_operator */ false);
-		break;
-	default:
-		zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
+	if (mpz_cmp_ui(gmpnum_b, 0) == 0) {
+		zend_argument_error(zend_ce_division_by_zero_error, 2, "Division by zero");
 		RETURN_THROWS();
 	}
-}
-/* }}} */
 
-/* {{{ Divide a by b, returns quotient only */
+	switch (round) {
+		case GMP_ROUND_ZERO: {
+			INIT_GMP_RETVAL(gmpnum_result);
+			mpz_tdiv_r(gmpnum_result, gmpnum_a, gmpnum_b);
+			return;
+		}
+		case GMP_ROUND_PLUSINF: {
+			INIT_GMP_RETVAL(gmpnum_result);
+			mpz_cdiv_r(gmpnum_result, gmpnum_a, gmpnum_b);
+			return;
+		}
+		case GMP_ROUND_MINUSINF: {
+			INIT_GMP_RETVAL(gmpnum_result);
+			mpz_fdiv_r(gmpnum_result, gmpnum_a, gmpnum_b);
+			return;
+		}
+		default:
+			zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
+			RETURN_THROWS();
+	}
+}
+
+/* Divide a by b, returns quotient only */
 ZEND_FUNCTION(gmp_div_q)
 {
-	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result;
 	zend_long round = GMP_ROUND_ZERO;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_ZVAL(a_arg)
-		Z_PARAM_ZVAL(b_arg)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(round)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (round) {
-	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op(
-			return_value, a_arg, b_arg, mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1, /* is_operator */ false);
-		break;
-	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op(
-			return_value, a_arg, b_arg, mpz_cdiv_q, gmp_mpz_cdiv_q_ui, 1, /* is_operator */ false);
-		break;
-	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op(
-			return_value, a_arg, b_arg, mpz_fdiv_q, gmp_mpz_fdiv_q_ui, 1, /* is_operator */ false);
-		break;
-	default:
-		zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
+	if (mpz_cmp_ui(gmpnum_b, 0) == 0) {
+		zend_argument_error(zend_ce_division_by_zero_error, 2, "Division by zero");
 		RETURN_THROWS();
 	}
 
+	switch (round) {
+		case GMP_ROUND_ZERO: {
+			INIT_GMP_RETVAL(gmpnum_result);
+			mpz_tdiv_q(gmpnum_result, gmpnum_a, gmpnum_b);
+			return;
+		}
+		case GMP_ROUND_PLUSINF: {
+			INIT_GMP_RETVAL(gmpnum_result);
+			mpz_cdiv_q(gmpnum_result, gmpnum_a, gmpnum_b);
+			return;
+		}
+		case GMP_ROUND_MINUSINF: {
+			INIT_GMP_RETVAL(gmpnum_result);
+			mpz_fdiv_q(gmpnum_result, gmpnum_a, gmpnum_b);
+			return;
+		}
+		default:
+			zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
+			RETURN_THROWS();
+	}
 }
-/* }}} */
 
 /* {{{ Computes a modulo b */
 ZEND_FUNCTION(gmp_mod)

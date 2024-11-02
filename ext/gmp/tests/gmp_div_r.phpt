@@ -46,7 +46,7 @@ object(GMP)#1 (1) {
   ["num"]=>
   string(1) "0"
 }
-Division by zero
+gmp_div_r(): Argument #2 ($num2) Division by zero
 object(GMP)#3 (1) {
   ["num"]=>
   string(5) "12653"
