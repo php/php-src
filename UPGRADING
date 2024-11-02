@@ -117,6 +117,9 @@ PHP 8.5 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- POSIX:
+  . POSIX_SC_OPEN_MAX.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
