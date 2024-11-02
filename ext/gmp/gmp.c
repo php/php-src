@@ -275,11 +275,6 @@ static void gmp_mpz_mod_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 	mpz_mod_ui(a, b, c);
 }
 
-/* Binary operations */
-#define gmp_binary_op(op)         _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, NULL, 0)
-#define gmp_binary_ui_op_no_zero(op, uop) \
-	_gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop, 1)
-
 static void gmp_free_object_storage(zend_object *obj) /* {{{ */
 {
 	gmp_object *intern = GET_GMP_OBJECT_FROM_OBJ(obj);
@@ -878,21 +873,6 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 }
 /* }}} */
 
-/* {{{ _gmp_binary_ui_op */
-static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero)
-{
-	zval *a_arg, *b_arg;
-
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(a_arg)
-		Z_PARAM_ZVAL(b_arg)
-	ZEND_PARSE_PARAMETERS_END();
-
-	gmp_zval_binary_ui_op(
-		return_value, a_arg, b_arg, gmp_op, gmp_ui_op, check_b_zero, /* is_operator */ false);
-}
-/* }}} */
-
 /* Unary operations */
 
 /* {{{ gmp_zval_unary_op */
@@ -1232,14 +1212,40 @@ ZEND_FUNCTION(gmp_div_q)
 /* {{{ Computes a modulo b */
 ZEND_FUNCTION(gmp_mod)
 {
-	gmp_binary_ui_op_no_zero(mpz_mod, gmp_mpz_mod_ui);
+	mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (mpz_cmp_ui(gmpnum_b, 0) == 0) {
+		zend_argument_error(zend_ce_division_by_zero_error, 2, "Modulo by zero");
+		RETURN_THROWS();
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	mpz_mod(gmpnum_result, gmpnum_a, gmpnum_b);
 }
 /* }}} */
 
 /* {{{ Divide a by b using exact division algorithm */
 ZEND_FUNCTION(gmp_divexact)
 {
-	gmp_binary_ui_op_no_zero(mpz_divexact, NULL);
+	mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (mpz_cmp_ui(gmpnum_b, 0) == 0) {
+		zend_argument_error(zend_ce_division_by_zero_error, 2, "Division by zero");
+		RETURN_THROWS();
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	mpz_divexact(gmpnum_result, gmpnum_a, gmpnum_b);
 }
 /* }}} */
 
