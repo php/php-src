@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16593 (Assertion failure in DOM->replaceChild). (nielsdos)
   . Fixed bug GH-16595 (Another UAF in DOM -> cloneNode). (nielsdos)
 
+- FPM:
+  . Fixed bug GH-16628 (FPM logs are getting corrupted with this log
+    statement). (nielsdos)
+
 - GD:
   . Fixed bug GH-16559 (UBSan abort in ext/gd/libgd/gd_interpolation.c:1007).
     (nielsdos)
@@ -36,6 +40,9 @@ PHP                                                                        NEWS
 
 - PDO_ODBC:
   . Fixed bug GH-16450 (PDO_ODBC can inject garbage into field values). (cmb)
+
+- Reflection:
+  . Fixed bug GH-16601 (Memory leak in Reflection constructors). (nielsdos)
 
 - SPL:
   . Fixed bug GH-16588 (UAF in Observer->serialize). (nielsdos)
