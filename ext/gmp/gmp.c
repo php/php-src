@@ -194,7 +194,6 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg, bool is_operat
  * include parameter parsing.
  */
 typedef void (*gmp_unary_op_t)(mpz_ptr, mpz_srcptr);
-typedef mp_bitcnt_t (*gmp_unary_opl_t)(mpz_srcptr);
 
 typedef void (*gmp_unary_ui_op_t)(mpz_ptr, gmp_ulong);
 
@@ -241,7 +240,6 @@ static void gmp_mpz_gcd_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 
 /* Unary operations */
 #define gmp_unary_op(op)         _gmp_unary_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
-#define gmp_unary_opl(op)         _gmp_unary_opl(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 
 static void gmp_free_object_storage(zend_object *obj) /* {{{ */
 {
@@ -925,23 +923,6 @@ static inline void _gmp_unary_op(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_op_t gm
 	ZEND_PARSE_PARAMETERS_END();
 
 	gmp_zval_unary_op(return_value, a_arg, gmp_op);
-}
-/* }}} */
-
-/* {{{ _gmp_unary_opl */
-static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t gmp_op)
-{
-	zval *a_arg;
-	mpz_ptr gmpnum_a;
-	gmp_temp_t temp_a;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(a_arg)
-	ZEND_PARSE_PARAMETERS_END();
-
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
-	RETVAL_LONG(gmp_op(gmpnum_a));
-	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
 
@@ -1841,7 +1822,6 @@ ZEND_FUNCTION(gmp_cmp)
 /* {{{ Gets the sign of the number */
 ZEND_FUNCTION(gmp_sign)
 {
-	/* Can't use gmp_unary_opl here, because mpz_sgn is a macro */
 	zval *a_arg;
 	mpz_ptr gmpnum_a;
 	gmp_temp_t temp_a;
@@ -2110,7 +2090,17 @@ ZEND_FUNCTION(gmp_testbit)
 /* {{{ Calculates the population count of a */
 ZEND_FUNCTION(gmp_popcount)
 {
-	gmp_unary_opl(mpz_popcount);
+	zval *a_arg;
+	mpz_ptr gmpnum_a;
+	gmp_temp_t temp_a;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(a_arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	RETVAL_LONG(mpz_popcount(gmpnum_a));
+	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
 
