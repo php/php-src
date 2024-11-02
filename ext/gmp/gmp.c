@@ -1262,33 +1262,23 @@ GMP_BINARY_OP_FUNCTION_EX(gmp_or, mpz_ior);
 /* {{{ Calculates factorial function */
 ZEND_FUNCTION(gmp_fact)
 {
-	zval *a_arg;
+	mpz_ptr gmpnum;
 	mpz_ptr gmpnum_result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(a_arg)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(a_arg) == IS_LONG) {
-		if (Z_LVAL_P(a_arg) < 0) {
-			zend_argument_value_error(1, "must be greater than or equal to 0");
-			RETURN_THROWS();
-		}
-	} else {
-		mpz_ptr gmpnum;
-		gmp_temp_t temp_a;
-
-		FETCH_GMP_ZVAL(gmpnum, a_arg, temp_a, 1);
-		FREE_GMP_TEMP(temp_a);
-
-		if (mpz_sgn(gmpnum) < 0) {
-			zend_argument_value_error(1, "must be greater than or equal to 0");
-			RETURN_THROWS();
-		}
+	if (mpz_sgn(gmpnum) < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
+	// TODO: Check that we don't an int that is larger than an unsigned long?
+	// Could use mpz_fits_slong_p() if we revert to using mpz_get_si()
+
 	INIT_GMP_RETVAL(gmpnum_result);
-	mpz_fac_ui(gmpnum_result, zval_get_long(a_arg));
+	mpz_fac_ui(gmpnum_result, mpz_get_ui(gmpnum));
 }
 /* }}} */
 
