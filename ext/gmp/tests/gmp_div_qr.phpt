@@ -60,8 +60,8 @@ array(2) {
     string(1) "0"
   }
 }
-Division by zero
-Division by zero
+gmp_div_qr(): Argument #2 ($num2) Division by zero
+gmp_div_qr(): Argument #2 ($num2) Division by zero
 array(2) {
   [0]=>
   object(GMP)#2 (1) {

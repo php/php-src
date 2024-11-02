@@ -23,4 +23,4 @@ try {
 10 + 0 = 10
 10 + "0" = 10
 Division by zero
-Division by zero
+gmp_div_qr(): Argument #2 ($num2) Division by zero

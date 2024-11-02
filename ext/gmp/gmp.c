@@ -266,7 +266,6 @@ typedef void (*gmp_binary_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, mpz_srcptr);
 typedef gmp_ulong (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, gmp_ulong);
 
 static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, bool check_b_zero, bool is_operator);
-static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero);
 static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_op_t gmp_op);
 
 static void gmp_mpz_tdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
@@ -894,58 +893,6 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 }
 /* }}} */
 
-/* {{{ gmp_zval_binary_ui_op2
-   Execute GMP binary operation which returns 2 values.
-*/
-static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero)
-{
-	mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result1, gmpnum_result2;
-	gmp_temp_t temp_a, temp_b;
-	zval result1, result2;
-
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
-
-	if (gmp_ui_op && Z_TYPE_P(b_arg) == IS_LONG && Z_LVAL_P(b_arg) >= 0) {
-		gmpnum_b = NULL;
-		temp_b.is_used = 0;
-	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
-	}
-
-	if (check_b_zero) {
-		int b_is_zero = 0;
-		if (!gmpnum_b) {
-			b_is_zero = (Z_LVAL_P(b_arg) == 0);
-		} else {
-			b_is_zero = !mpz_cmp_ui(gmpnum_b, 0);
-		}
-
-		if (b_is_zero) {
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
-			FREE_GMP_TEMP(temp_a);
-			FREE_GMP_TEMP(temp_b);
-			RETURN_THROWS();
-		}
-	}
-
-	gmp_create(&result1, &gmpnum_result1);
-	gmp_create(&result2, &gmpnum_result2);
-
-	array_init(return_value);
-	add_next_index_zval(return_value, &result1);
-	add_next_index_zval(return_value, &result2);
-
-	if (!gmpnum_b) {
-		gmp_ui_op(gmpnum_result1, gmpnum_result2, gmpnum_a, (gmp_ulong) Z_LVAL_P(b_arg));
-	} else {
-		gmp_op(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
-	}
-
-	FREE_GMP_TEMP(temp_a);
-	FREE_GMP_TEMP(temp_b);
-}
-/* }}} */
-
 /* {{{ _gmp_binary_ui_op */
 static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero)
 {
@@ -1174,32 +1121,48 @@ ZEND_FUNCTION(gmp_strval)
 /* {{{ Divide a by b, returns quotient and reminder */
 ZEND_FUNCTION(gmp_div_qr)
 {
-	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b;
 	zend_long round = GMP_ROUND_ZERO;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_ZVAL(a_arg)
-		Z_PARAM_ZVAL(b_arg)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(round)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (round) {
-	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_tdiv_qr, mpz_tdiv_qr_ui, 1);
-		break;
-	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_cdiv_qr, mpz_cdiv_qr_ui, 1);
-		break;
-	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_fdiv_qr, mpz_fdiv_qr_ui, 1);
-		break;
-	default:
+	if (mpz_cmp_ui(gmpnum_b, 0) == 0) {
+		zend_argument_error(zend_ce_division_by_zero_error, 2, "Division by zero");
+		RETURN_THROWS();
+	}
+
+	if (round != GMP_ROUND_ZERO && round != GMP_ROUND_PLUSINF && round != GMP_ROUND_MINUSINF) {
 		zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
 		RETURN_THROWS();
 	}
+
+	zval result1, result2;
+	mpz_ptr gmpnum_result1, gmpnum_result2;
+	gmp_create(&result1, &gmpnum_result1);
+	gmp_create(&result2, &gmpnum_result2);
+
+	array_init(return_value);
+	add_next_index_zval(return_value, &result1);
+	add_next_index_zval(return_value, &result2);
+
+	switch (round) {
+		case GMP_ROUND_ZERO:
+			mpz_tdiv_qr(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
+			break;
+		case GMP_ROUND_PLUSINF:
+			mpz_cdiv_qr(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
+			break;
+		case GMP_ROUND_MINUSINF:
+			mpz_fdiv_qr(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
 }
-/* }}} */
 
 /* {{{ Divide a by b, returns reminder only */
 ZEND_FUNCTION(gmp_div_r)
