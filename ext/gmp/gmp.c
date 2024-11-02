@@ -231,6 +231,9 @@ static bool gmp_zend_parse_arg_into_mpz(
  */
 typedef void (*gmp_unary_op_t)(mpz_ptr, mpz_srcptr);
 
+#define GMP_FN_NAME(name) gmp_##name
+#define GMP_MPZ_FN_NAME(name) mpz_##name
+
 #define GMP_UNARY_OP_FUNCTION(name) \
 	ZEND_FUNCTION(gmp_##name) { \
 		mpz_ptr gmpnum_a, gmpnum_result; \
@@ -238,8 +241,21 @@ typedef void (*gmp_unary_op_t)(mpz_ptr, mpz_srcptr);
 			GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a) \
 		ZEND_PARSE_PARAMETERS_END(); \
 		INIT_GMP_RETVAL(gmpnum_result); \
-		mpz_##name(gmpnum_result, gmpnum_a); \
+		GMP_MPZ_FN_NAME(name)(gmpnum_result, gmpnum_a); \
 	}
+
+#define GMP_BINARY_OP_FUNCTION_EX(gmp_name, mpz_name) \
+	ZEND_FUNCTION(gmp_name) { \
+		mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result; \
+		ZEND_PARSE_PARAMETERS_START(2, 2) \
+			GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a) \
+			GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b) \
+		ZEND_PARSE_PARAMETERS_END(); \
+		INIT_GMP_RETVAL(gmpnum_result); \
+		mpz_name(gmpnum_result, gmpnum_a, gmpnum_b); \
+	}
+
+#define GMP_BINARY_OP_FUNCTION(name) GMP_BINARY_OP_FUNCTION_EX(GMP_FN_NAME(name), GMP_MPZ_FN_NAME(name))
 
 typedef void (*gmp_unary_ui_op_t)(mpz_ptr, gmp_ulong);
 
@@ -274,12 +290,8 @@ static void gmp_mpz_cdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 static void gmp_mpz_mod_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 	mpz_mod_ui(a, b, c);
 }
-static void gmp_mpz_gcd_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
-	mpz_gcd_ui(a, b, c);
-}
 
 /* Binary operations */
-#define gmp_binary_ui_op(op, uop) _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop, 0)
 #define gmp_binary_op(op)         _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, NULL, 0)
 #define gmp_binary_ui_op_no_zero(op, uop) \
 	_gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop, 1)
@@ -1159,27 +1171,6 @@ ZEND_FUNCTION(gmp_strval)
 }
 /* }}} */
 
-/* {{{ Add a and b */
-ZEND_FUNCTION(gmp_add)
-{
-	gmp_binary_ui_op(mpz_add, mpz_add_ui);
-}
-/* }}} */
-
-/* {{{ Subtract b from a */
-ZEND_FUNCTION(gmp_sub)
-{
-	gmp_binary_ui_op(mpz_sub, mpz_sub_ui);
-}
-/* }}} */
-
-/* {{{ Multiply a and b */
-ZEND_FUNCTION(gmp_mul)
-{
-	gmp_binary_ui_op(mpz_mul, mpz_mul_ui);
-}
-/* }}} */
-
 /* {{{ Divide a by b, returns quotient and reminder */
 ZEND_FUNCTION(gmp_div_qr)
 {
@@ -1299,6 +1290,23 @@ GMP_UNARY_OP_FUNCTION(abs);
 GMP_UNARY_OP_FUNCTION(com);
 /* {{{ Finds next prime of a */
 GMP_UNARY_OP_FUNCTION(nextprime);
+
+/* Add a and b */
+GMP_BINARY_OP_FUNCTION(add);
+/* Subtract b from a */
+GMP_BINARY_OP_FUNCTION(sub);
+/* Multiply a and b */
+GMP_BINARY_OP_FUNCTION(mul);
+/* Computes greatest common denominator (gcd) of a and b */
+GMP_BINARY_OP_FUNCTION(gcd);
+/* Computes least common multiple (lcm) of a and b */
+GMP_BINARY_OP_FUNCTION(lcm);
+/* {Calculates logical AND of a and b */
+GMP_BINARY_OP_FUNCTION(and);
+/* Calculates logical exclusive OR of a and b */
+GMP_BINARY_OP_FUNCTION(xor);
+/* Calculates logical OR of a and b */
+GMP_BINARY_OP_FUNCTION_EX(gmp_or, mpz_ior);
 
 /* {{{ Calculates factorial function */
 ZEND_FUNCTION(gmp_fact)
@@ -1564,20 +1572,6 @@ ZEND_FUNCTION(gmp_prob_prime)
 }
 /* }}} */
 
-/* {{{ Computes greatest common denominator (gcd) of a and b */
-ZEND_FUNCTION(gmp_gcd)
-{
-	gmp_binary_ui_op(mpz_gcd, gmp_mpz_gcd_ui);
-}
-/* }}} */
-
-/* {{{ Computes least common multiple (lcm) of a and b */
-ZEND_FUNCTION(gmp_lcm)
-{
-	gmp_binary_ui_op(mpz_lcm, mpz_lcm_ui);
-}
-/* }}} */
-
 /* {{{ Computes G, S, and T, such that AS + BT = G = `gcd' (A, B) */
 ZEND_FUNCTION(gmp_gcdext)
 {
@@ -1819,27 +1813,6 @@ ZEND_FUNCTION(gmp_random_range)
 		FREE_GMP_TEMP(temp_b);
 		FREE_GMP_TEMP(temp_a);
 	}
-}
-/* }}} */
-
-/* {{{ Calculates logical AND of a and b */
-ZEND_FUNCTION(gmp_and)
-{
-	gmp_binary_op(mpz_and);
-}
-/* }}} */
-
-/* {{{ Calculates logical OR of a and b */
-ZEND_FUNCTION(gmp_or)
-{
-	gmp_binary_op(mpz_ior);
-}
-/* }}} */
-
-/* {{{ Calculates logical exclusive OR of a and b */
-ZEND_FUNCTION(gmp_xor)
-{
-	gmp_binary_op(mpz_xor);
 }
 /* }}} */
 
