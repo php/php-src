@@ -2866,19 +2866,6 @@ function expectf_to_regex(?string $wanted): string
         '%0' => '\x00',
     ]);
 }
-
-/**
- * @return bool|int
- */
-function comp_line(string $l1, string $l2, bool $is_reg)
-{
-    if ($is_reg) {
-        return preg_match('/^' . $l1 . '$/s', $l2);
-    }
-
-    return !strcmp($l1, $l2);
-}
-
 /**
  * Map "Zend OPcache" to "opcache" and convert all ext names to lowercase.
  */
