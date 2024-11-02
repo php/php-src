@@ -1666,14 +1666,14 @@ ZEND_FUNCTION(gmp_kronecker)
 /* {{{ Compares two numbers */
 ZEND_FUNCTION(gmp_cmp)
 {
-	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(a_arg)
-		Z_PARAM_ZVAL(b_arg)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
 	ZEND_PARSE_PARAMETERS_END();
 
-	gmp_cmp(return_value, a_arg, b_arg, /* is_operator */ false);
+	RETURN_LONG(mpz_cmp(gmpnum_a, gmpnum_b));
 }
 /* }}} */
 
