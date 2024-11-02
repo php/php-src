@@ -1751,68 +1751,27 @@ ZEND_FUNCTION(gmp_random_bits)
 /* {{{ Gets a random number in the range min to max */
 ZEND_FUNCTION(gmp_random_range)
 {
-	zval *min_arg, *max_arg;
-	mpz_ptr gmpnum_max, gmpnum_result;
-	mpz_t gmpnum_range;
-	gmp_temp_t temp_a, temp_b;
+	mpz_ptr gmpnum_min, gmpnum_max, gmpnum_result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(min_arg)
-		Z_PARAM_ZVAL(max_arg)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_min)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_max)
 	ZEND_PARSE_PARAMETERS_END();
 
 	gmp_init_random();
-
-	FETCH_GMP_ZVAL(gmpnum_max, max_arg, temp_a, 2);
-
-	if (Z_TYPE_P(min_arg) == IS_LONG && Z_LVAL_P(min_arg) >= 0) {
-		if (mpz_cmp_ui(gmpnum_max, Z_LVAL_P(min_arg)) <= 0) {
-			FREE_GMP_TEMP(temp_a);
-			zend_argument_value_error(1, "must be less than argument #2 ($maximum)");
-			RETURN_THROWS();
-		}
-
-		INIT_GMP_RETVAL(gmpnum_result);
-		mpz_init(gmpnum_range);
-
-		if (Z_LVAL_P(min_arg) != 0) {
-			mpz_sub_ui(gmpnum_range, gmpnum_max, Z_LVAL_P(min_arg) - 1);
-		} else {
-			mpz_add_ui(gmpnum_range, gmpnum_max, 1);
-		}
-
-		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_range);
-
-		if (Z_LVAL_P(min_arg) != 0) {
-			mpz_add_ui(gmpnum_result, gmpnum_result, Z_LVAL_P(min_arg));
-		}
-
-		mpz_clear(gmpnum_range);
-		FREE_GMP_TEMP(temp_a);
-	} else {
-		mpz_ptr gmpnum_min;
-
-		FETCH_GMP_ZVAL_DEP(gmpnum_min, min_arg, temp_b, temp_a, 1);
-
-		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
-			FREE_GMP_TEMP(temp_b);
-			FREE_GMP_TEMP(temp_a);
-			zend_argument_value_error(1, "must be less than argument #2 ($maximum)");
-			RETURN_THROWS();
-		}
-
-		INIT_GMP_RETVAL(gmpnum_result);
-		mpz_init(gmpnum_range);
-
-		mpz_sub(gmpnum_range, gmpnum_max, gmpnum_min);
-		mpz_add_ui(gmpnum_range, gmpnum_range, 1);
-		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_range);
-		mpz_add(gmpnum_result, gmpnum_result, gmpnum_min);
-
-		mpz_clear(gmpnum_range);
-		FREE_GMP_TEMP(temp_b);
-		FREE_GMP_TEMP(temp_a);
+	if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
+		zend_argument_value_error(1, "must be less than argument #2 ($maximum)");
+		RETURN_THROWS();
 	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+
+	/* Use available 3rd ZPP slot for range num to prevent allocation and freeing */
+	mpz_ptr gmpnum_range = GMPG(zpp_arg[2]);
+	mpz_sub(gmpnum_range, gmpnum_max, gmpnum_min);
+	mpz_add_ui(gmpnum_range, gmpnum_range, 1);
+	mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_range);
+	mpz_add(gmpnum_result, gmpnum_result, gmpnum_min);
 }
 /* }}} */
 
