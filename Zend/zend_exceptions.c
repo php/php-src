@@ -529,7 +529,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 }
 /* }}} */
 
-static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* {{{ */
+static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t num) /* {{{ */
 {
 	zval *file, *tmp;
 
@@ -539,16 +539,18 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 
 	file = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_FILE));
 	if (file) {
-		if (Z_TYPE_P(file) != IS_STRING) {
+		if (UNEXPECTED(Z_TYPE_P(file) != IS_STRING)) {
+			/* This is a typed property and can only happen if modified via ArrayObject */
 			zend_error(E_WARNING, "File name is not a string");
 			smart_str_appends(str, "[unknown file]: ");
 		} else{
 			zend_long line = 0;
 			tmp = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_LINE));
 			if (tmp) {
-				if (Z_TYPE_P(tmp) == IS_LONG) {
+				if (EXPECTED(Z_TYPE_P(tmp) == IS_LONG)) {
 					line = Z_LVAL_P(tmp);
 				} else {
+					/* This is a typed property and can only happen if modified via ArrayObject */
 					zend_error(E_WARNING, "Line is not an int");
 				}
 			}
@@ -566,7 +568,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	smart_str_appendc(str, '(');
 	tmp = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
 	if (tmp) {
-		if (Z_TYPE_P(tmp) == IS_ARRAY) {
+		if (EXPECTED(Z_TYPE_P(tmp) == IS_ARRAY)) {
 			size_t last_len = ZSTR_LEN(str->s);
 			zend_string *name;
 			zval *arg;
@@ -583,6 +585,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
 			}
 		} else {
+			/* The trace property is typed and private */
 			zend_error(E_WARNING, "args element is not an array");
 		}
 	}
@@ -590,14 +593,14 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 }
 /* }}} */
 
-ZEND_API zend_string *zend_trace_to_string(HashTable *trace, bool include_main) {
+ZEND_API zend_string *zend_trace_to_string(const HashTable *trace, bool include_main) {
 	zend_ulong index;
 	zval *frame;
 	uint32_t num = 0;
 	smart_str str = {0};
 
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(trace, index, frame) {
-		if (Z_TYPE_P(frame) != IS_ARRAY) {
+		if (UNEXPECTED(Z_TYPE_P(frame) != IS_ARRAY)) {
 			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
 			continue;
 		}
@@ -624,7 +627,7 @@ ZEND_METHOD(Exception, getTraceAsString)
 	zval *object = ZEND_THIS;
 	zend_class_entry *base_ce = i_get_exception_base(Z_OBJ_P(object));
 	zval rv;
-	zval *trace = zend_read_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
+	const zval *trace = zend_read_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
@@ -859,14 +862,13 @@ ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception
 ZEND_API ZEND_COLD zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, zend_long code, const char *format, ...) /* {{{ */
 {
 	va_list arg;
-	char *message;
 	zend_object *obj;
 
 	va_start(arg, format);
-	zend_vspprintf(&message, 0, format, arg);
+	zend_string *msg_str = zend_vstrpprintf(0, format, arg);
 	va_end(arg);
-	obj = zend_throw_exception(exception_ce, message, code);
-	efree(message);
+	obj = zend_throw_exception_zstr(exception_ce, msg_str, code);
+	zend_string_release(msg_str);
 	return obj;
 }
 /* }}} */
