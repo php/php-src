@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16559 (UBSan abort in ext/gd/libgd/gd_interpolation.c:1007).
     (nielsdos)
 
+- GMP:
+  . Fixed segfaults and other issues related to operator overloading with
+    GMP objects. (Girgias)
+
 - Opcache:
   . Fixed bug GH-16572 (Incorrect result with reflection in low-trigger JIT).
     (nielsdos)
