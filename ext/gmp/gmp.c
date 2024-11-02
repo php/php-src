@@ -231,6 +231,16 @@ static bool gmp_zend_parse_arg_into_mpz(
  */
 typedef void (*gmp_unary_op_t)(mpz_ptr, mpz_srcptr);
 
+#define GMP_UNARY_OP_FUNCTION(name) \
+	ZEND_FUNCTION(gmp_##name) { \
+		mpz_ptr gmpnum_a, gmpnum_result; \
+		ZEND_PARSE_PARAMETERS_START(1, 1) \
+			GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a) \
+		ZEND_PARSE_PARAMETERS_END(); \
+		INIT_GMP_RETVAL(gmpnum_result); \
+		mpz_##name(gmpnum_result, gmpnum_a); \
+	}
+
 typedef void (*gmp_unary_ui_op_t)(mpz_ptr, gmp_ulong);
 
 typedef void (*gmp_binary_op_t)(mpz_ptr, mpz_srcptr, mpz_srcptr);
@@ -273,9 +283,6 @@ static void gmp_mpz_gcd_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 #define gmp_binary_op(op)         _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, NULL, 0)
 #define gmp_binary_ui_op_no_zero(op, uop) \
 	_gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop, 1)
-
-/* Unary operations */
-#define gmp_unary_op(op)         _gmp_unary_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 
 static void gmp_free_object_storage(zend_object *obj) /* {{{ */
 {
@@ -959,19 +966,6 @@ static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_
 }
 /* }}} */
 
-/* {{{ _gmp_unary_op */
-static inline void _gmp_unary_op(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_op_t gmp_op)
-{
-	zval *a_arg;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(a_arg)
-	ZEND_PARSE_PARAMETERS_END();
-
-	gmp_zval_unary_op(return_value, a_arg, gmp_op);
-}
-/* }}} */
-
 static bool gmp_verify_base(zend_long base, uint32_t arg_num)
 {
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
@@ -1298,18 +1292,13 @@ ZEND_FUNCTION(gmp_divexact)
 /* }}} */
 
 /* {{{ Negates a number */
-ZEND_FUNCTION(gmp_neg)
-{
-	gmp_unary_op(mpz_neg);
-}
-/* }}} */
-
+GMP_UNARY_OP_FUNCTION(neg);
 /* {{{ Calculates absolute value */
-ZEND_FUNCTION(gmp_abs)
-{
-	gmp_unary_op(mpz_abs);
-}
-/* }}} */
+GMP_UNARY_OP_FUNCTION(abs);
+/* {{{ Calculates one's complement of a */
+GMP_UNARY_OP_FUNCTION(com);
+/* {{{ Finds next prime of a */
+GMP_UNARY_OP_FUNCTION(nextprime);
 
 /* {{{ Calculates factorial function */
 ZEND_FUNCTION(gmp_fact)
@@ -1844,20 +1833,6 @@ ZEND_FUNCTION(gmp_and)
 ZEND_FUNCTION(gmp_or)
 {
 	gmp_binary_op(mpz_ior);
-}
-/* }}} */
-
-/* {{{ Calculates one's complement of a */
-ZEND_FUNCTION(gmp_com)
-{
-	gmp_unary_op(mpz_com);
-}
-/* }}} */
-
-/* {{{ Finds next prime of a */
-ZEND_FUNCTION(gmp_nextprime)
-{
-	gmp_unary_op(mpz_nextprime);
 }
 /* }}} */
 
