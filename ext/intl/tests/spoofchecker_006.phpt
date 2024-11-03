@@ -4,7 +4,6 @@ spoofchecker suspicious character checker
 intl
 --SKIPIF--
 <?php if(!class_exists("Spoofchecker")) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '57.1') < 0) die('skip for ICU >= 57.1'); ?>
 --FILE--
 <?php
 

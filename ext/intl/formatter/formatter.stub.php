@@ -27,10 +27,8 @@ class NumberFormatter
     public const int PATTERN_RULEBASED = UNKNOWN;
     /** @cvalue UNUM_IGNORE */
     public const int IGNORE = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 53
     /** @cvalue UNUM_CURRENCY_ACCOUNTING */
     public const int CURRENCY_ACCOUNTING = UNKNOWN;
-#endif
     /** @cvalue UNUM_DEFAULT */
     public const int DEFAULT_STYLE = UNKNOWN;
 

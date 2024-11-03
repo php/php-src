@@ -157,7 +157,6 @@ class IntlTimeZone
      */
     public static function getUnknown(): IntlTimeZone {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
     /**
      * @tentative-return-type
      * @alias intltz_get_windows_id
@@ -169,7 +168,7 @@ class IntlTimeZone
      * @alias intltz_get_id_for_windows_id
      */
     public static function getIDForWindowsID(string $timezoneId, ?string $region = null): string|false {}
-#endif
+
     /**
      * @tentative-return-type
      * @alias intltz_has_same_rules

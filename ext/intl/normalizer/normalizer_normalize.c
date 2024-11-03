@@ -17,18 +17,13 @@
 #endif
 
 #include "php_intl.h"
-#if U_ICU_VERSION_MAJOR_NUM < 56
-#include "unicode/unorm.h"
-#else
 #include <unicode/unorm2.h>
-#endif
 #include "normalizer.h"
 #include "normalizer_class.h"
 #include "intl_convert.h"
 #include <unicode/utf8.h>
 
 
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 static const UNormalizer2 *intl_get_normalizer(zend_long form, UErrorCode *err)
 {/*{{{*/
 	switch (form)
@@ -74,7 +69,6 @@ static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uin
 
 	return unorm2_isNormalized(norm, uinput, uinput_len, err);
 }/*}}}*/
-#endif
 
 /* {{{ Normalize a string. */
 PHP_FUNCTION( normalizer_normalize )
@@ -116,9 +110,7 @@ PHP_FUNCTION( normalizer_normalize )
 			break;
 		case NORMALIZER_FORM_C:
 		case NORMALIZER_FORM_KC:
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 		case NORMALIZER_FORM_KC_CF:
-#endif
 			break;
 		default:
 			zend_argument_value_error(2, "must be a a valid normalization form");
@@ -151,11 +143,7 @@ PHP_FUNCTION( normalizer_normalize )
 	uret_buf = eumalloc( uret_len + 1 );
 
 	/* normalize */
-#if U_ICU_VERSION_MAJOR_NUM < 56
-	size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
-#else
 	size_needed = intl_normalize(form, uinput, uinput_len, uret_buf, uret_len, &status);
-#endif
 
 	/* Bail out if an unexpected error occurred.
 	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
@@ -179,11 +167,7 @@ PHP_FUNCTION( normalizer_normalize )
 		status = U_ZERO_ERROR;
 
 		/* try normalize again */
-#if U_ICU_VERSION_MAJOR_NUM < 56
-		size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
-#else
 		size_needed = intl_normalize(form, uinput, uinput_len, uret_buf, uret_len, &status);
-#endif
 
 		/* Bail out if an unexpected error occurred. */
 		if( U_FAILURE(status)  ) {
@@ -243,9 +227,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 		case NORMALIZER_FORM_KD:
 		case NORMALIZER_FORM_C:
 		case NORMALIZER_FORM_KC:
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 		case NORMALIZER_FORM_KC_CF:
-#endif
 			break;
 		default:
 			zend_argument_value_error(2, "must be a a valid normalization form");
@@ -275,11 +257,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 
 
 	/* test string */
-#if U_ICU_VERSION_MAJOR_NUM < 56
-	uret = unorm_isNormalizedWithOptions( uinput, uinput_len, form, (int32_t) 0 /* options */, &status);
-#else
 	uret = intl_is_normalized(form, uinput, uinput_len, &status);
-#endif
 
 	efree( uinput );
 
@@ -298,7 +276,6 @@ PHP_FUNCTION( normalizer_is_normalized )
 /* }}} */
 
 /* {{{ Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. */
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 PHP_FUNCTION( normalizer_get_raw_decomposition )
 {
 	char* input = NULL;
@@ -344,5 +321,4 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 
 	RETVAL_NEW_STR(intl_convert_utf16_to_utf8(decomposition, decomposition_length, &status));
 }
-#endif
 /* }}} */
