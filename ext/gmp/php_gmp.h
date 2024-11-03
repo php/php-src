@@ -32,6 +32,7 @@ ZEND_MODULE_INFO_D(gmp);
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	bool rand_initialized;
 	gmp_randstate_t rand_state;
+	mpz_t zpp_arg[3];
 ZEND_END_MODULE_GLOBALS(gmp)
 
 #define GMPG(v) ZEND_MODULE_GLOBALS_ACCESSOR(gmp, v)

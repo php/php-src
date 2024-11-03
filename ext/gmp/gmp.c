@@ -55,6 +55,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(gmp)
 static ZEND_GINIT_FUNCTION(gmp);
+static ZEND_GSHUTDOWN_FUNCTION(gmp);
 
 /* {{{ gmp_module_entry */
 zend_module_entry gmp_module_entry = {
@@ -69,7 +70,7 @@ zend_module_entry gmp_module_entry = {
 	PHP_GMP_VERSION,
 	ZEND_MODULE_GLOBALS(gmp),
 	ZEND_GINIT(gmp),
-	NULL,
+	ZEND_GSHUTDOWN(gmp),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
@@ -179,13 +180,48 @@ if (IS_GMP(zval)) {                                               \
 	gmpnumber = temp.num;                                         \
 }
 
-#define INIT_GMP_RETVAL(gmpnumber) \
-	gmp_create(return_value, &gmpnumber)
-
 static void gmp_strval(zval *result, mpz_t gmpnum, int base);
 static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val, zend_long base, uint32_t arg_pos);
 static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg, bool is_operator);
+
+static bool gmp_zend_parse_arg_into_mpz(
+	zval *arg,
+	mpz_ptr *destination_mpz_ptr,
+	uint32_t arg_num
+) {
+	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		if (EXPECTED(instanceof_function(Z_OBJCE_P(arg), gmp_ce))) {
+			*destination_mpz_ptr = GET_GMP_FROM_ZVAL(arg);
+			return true;
+		}
+		return false;
+	}
+
+	*destination_mpz_ptr = GMPG(zpp_arg[arg_num-1]);
+	if (Z_TYPE_P(arg) == IS_STRING) {
+		return convert_zstr_to_gmp(*destination_mpz_ptr, Z_STR_P(arg), /* base */ 0, arg_num) != FAILURE;
+	}
+
+	if (Z_TYPE_P(arg) == IS_LONG) {
+		mpz_set_si(*destination_mpz_ptr, Z_LVAL_P(arg));
+		return true;
+	}
+	return false;
+}
+
+#define GMP_Z_PARAM_INTO_MPZ_PTR(destination_mpz_ptr) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!gmp_zend_parse_arg_into_mpz(_arg, &destination_mpz_ptr, _i))) { \
+		_error_code = ZPP_ERROR_FAILURE; \
+		if (!EG(exception)) { \
+			zend_argument_type_error(_i, "must be of type GMP|string|int, %s given", zend_zval_value_name(_arg)); \
+		} \
+		break; \
+	}
+
+#define INIT_GMP_RETVAL(gmpnumber) \
+	gmp_create(return_value, &gmpnumber)
 
 /*
  * The gmp_*_op functions provide an implementation for several common types
@@ -591,8 +627,18 @@ static ZEND_GINIT_FUNCTION(gmp)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	gmp_globals->rand_initialized = 0;
+	mpz_init(gmp_globals->zpp_arg[0]);
+	mpz_init(gmp_globals->zpp_arg[1]);
+	mpz_init(gmp_globals->zpp_arg[2]);
 }
 /* }}} */
+
+static ZEND_GSHUTDOWN_FUNCTION(gmp)
+{
+	mpz_clear(gmp_globals->zpp_arg[0]);
+	mpz_clear(gmp_globals->zpp_arg[1]);
+	mpz_clear(gmp_globals->zpp_arg[2]);
+}
 
 /* {{{ ZEND_MINIT_FUNCTION */
 ZEND_MINIT_FUNCTION(gmp)
