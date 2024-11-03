@@ -3525,6 +3525,7 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 		} else {
 			ZVAL_COPY(&tmp, zphrase);
 			if (!try_convert_to_string(&tmp)) {
+				zval_ptr_dtor(&tmp);
 				return NULL;
 			}
 
