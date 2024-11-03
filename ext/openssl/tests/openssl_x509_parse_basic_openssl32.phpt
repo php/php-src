@@ -17,9 +17,16 @@ var_dump(openssl_x509_parse($cert, false));
 ?>
 --EXPECTF--
 bool(true)
-array(16) {
+array(17) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
+  ["publicKey"]=>
+  array(2) {
+    ["bits"]=>
+    int(1024)
+    ["type"]=>
+    string(3) "RSA"
+  }
   ["subject"]=>
   array(5) {
     ["C"]=>
@@ -173,9 +180,16 @@ serial:AE:C5:56:CC:72:37:50:A2%A"
     string(7) "CA:TRUE"
   }
 }
-array(16) {
+array(17) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
+  ["publicKey"]=>
+  array(2) {
+    ["bits"]=>
+    int(1024)
+    ["type"]=>
+    string(3) "RSA"
+  }
   ["subject"]=>
   array(5) {
     ["countryName"]=>

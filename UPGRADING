@@ -40,6 +40,12 @@ PHP 8.5 UPGRADE NOTES
 - DOM:
   . Added Dom\Element::$outerHTML.
 
+- OpenSSL:
+  . openssl_x509_parse() now outputs information about the public key.
+    The output contains an additional subarray "publicKey" with the entries
+    "bits", "type", and "groupName". The last one is only applicable for
+    public keys that have a group.
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()

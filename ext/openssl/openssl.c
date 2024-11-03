@@ -2136,6 +2136,30 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_string(return_value, "name", cert_name);
 	OPENSSL_free(cert_name);
 
+	const EVP_PKEY *public_key = X509_get0_pubkey(cert);
+	if (public_key) {
+		char gname[64];
+		size_t gname_length;
+		zval public_key_zv;
+		array_init(&public_key_zv);
+
+		int group_name_read = EVP_PKEY_get_group_name(public_key, gname, sizeof(gname), &gname_length);
+		int bits = EVP_PKEY_get_bits(public_key);
+		const char *type = EVP_PKEY_get0_type_name(public_key);
+
+		if (bits > 0 && type) {
+			add_assoc_long(&public_key_zv, "bits", bits);
+			add_assoc_string(&public_key_zv, "type", type);
+			if (group_name_read == 1) {
+				/* Does not exist on all key types */
+				add_assoc_stringl(&public_key_zv, "groupName", gname, gname_length);
+			}
+			add_assoc_zval(return_value, "publicKey", &public_key_zv);
+		} else {
+			zval_ptr_dtor(&public_key_zv);
+		}
+	}
+
 	php_openssl_add_assoc_name_entry(return_value, "subject", subject_name, useshortnames);
 	/* hash as used in CA directories to lookup cert by subject name */
 	{
