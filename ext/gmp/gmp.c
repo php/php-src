@@ -169,10 +169,11 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg, bool is_operator);
 
-static bool gmp_zend_parse_arg_into_mpz(
+static bool gmp_zend_parse_arg_into_mpz_ex(
 	zval *arg,
 	mpz_ptr *destination_mpz_ptr,
-	uint32_t arg_num
+	uint32_t arg_num,
+	bool is_operator
 ) {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		if (EXPECTED(instanceof_function(Z_OBJCE_P(arg), gmp_ce))) {
@@ -184,7 +185,7 @@ static bool gmp_zend_parse_arg_into_mpz(
 
 	*destination_mpz_ptr = GMPG(zpp_arg[arg_num-1]);
 	if (Z_TYPE_P(arg) == IS_STRING) {
-		return convert_zstr_to_gmp(*destination_mpz_ptr, Z_STR_P(arg), /* base */ 0, arg_num) != FAILURE;
+		return convert_zstr_to_gmp(*destination_mpz_ptr, Z_STR_P(arg), /* base */ 0, is_operator ? 0 : arg_num) != FAILURE;
 	}
 
 	if (Z_TYPE_P(arg) == IS_LONG) {
@@ -192,6 +193,11 @@ static bool gmp_zend_parse_arg_into_mpz(
 		return true;
 	}
 	return false;
+}
+
+static bool gmp_zend_parse_arg_into_mpz(zval *arg, mpz_ptr *destination_mpz_ptr, uint32_t arg_num)
+{
+	return gmp_zend_parse_arg_into_mpz_ex(arg, destination_mpz_ptr, arg_num, false);
 }
 
 #define GMP_Z_PARAM_INTO_MPZ_PTR(destination_mpz_ptr) \
@@ -250,7 +256,6 @@ typedef void (*gmp_binary_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, mpz_srcptr);
 typedef gmp_ulong (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, gmp_ulong);
 
 static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, bool check_b_zero, bool is_operator);
-static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_op_t gmp_op);
 
 static void gmp_mpz_tdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 	mpz_tdiv_q_ui(a, b, c);
@@ -452,15 +457,9 @@ valueof_op_failure:
 #define DO_BINARY_UI_OP(op) DO_BINARY_UI_OP_EX(op, op ## _ui, 0)
 #define DO_BINARY_OP(op) DO_BINARY_UI_OP_EX(op, NULL, 0)
 
-#define DO_UNARY_OP(op)                 \
-	gmp_zval_unary_op(result, op1, op); \
-	if (UNEXPECTED(EG(exception))) {    \
-		return FAILURE;                 \
-	}                                   \
-	return SUCCESS;
-
 static zend_result gmp_do_operation_ex(uint8_t opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
+	mpz_ptr gmp_op1, gmp_result;
 	switch (opcode) {
 	case ZEND_ADD:
 		DO_BINARY_UI_OP(mpz_add);
@@ -484,8 +483,14 @@ static zend_result gmp_do_operation_ex(uint8_t opcode, zval *result, zval *op1, 
 		DO_BINARY_OP(mpz_and);
 	case ZEND_BW_XOR:
 		DO_BINARY_OP(mpz_xor);
-	case ZEND_BW_NOT:
-		DO_UNARY_OP(mpz_com);
+	case ZEND_BW_NOT: {
+		if (!gmp_zend_parse_arg_into_mpz_ex(op1, &gmp_op1, 1, false)) {
+			return FAILURE;
+		}
+		gmp_create(result, &gmp_result);
+		mpz_com(gmp_result, gmp_op1);
+		return SUCCESS;
+	}
 
 	default:
 		return FAILURE;
@@ -854,23 +859,6 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
-}
-/* }}} */
-
-/* Unary operations */
-
-/* {{{ gmp_zval_unary_op */
-static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_op_t gmp_op)
-{
-	mpz_ptr gmpnum_a, gmpnum_result;
-	gmp_temp_t temp_a;
-
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
-
-	INIT_GMP_RETVAL(gmpnum_result);
-	gmp_op(gmpnum_result, gmpnum_a);
-
-	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
 
