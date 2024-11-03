@@ -90,11 +90,6 @@ PHP_GMP_API zend_class_entry *php_gmp_class_entry(void) {
 	return gmp_ce;
 }
 
-typedef struct _gmp_temp {
-	mpz_t num;
-	bool is_used;
-} gmp_temp_t;
-
 #define GMP_MAX_BASE 62
 
 #define GMP_51_OR_NEWER \
@@ -111,63 +106,8 @@ typedef struct _gmp_temp {
 #define GET_GMP_FROM_ZVAL(zval) \
 	GET_GMP_OBJECT_FROM_OBJ(Z_OBJ_P(zval))->num
 
-/* The FETCH_GMP_ZVAL_* family of macros is used to fetch a gmp number
- * (mpz_ptr) from a zval. If the zval is not a GMP instance, then we
- * try to convert the value to a temporary gmp number using convert_to_gmp.
- * This temporary number is stored in the temp argument, which is of type
- * gmp_temp_t. This temporary value needs to be freed lateron using the
- * FREE_GMP_TEMP macro.
- *
- * If the conversion to a gmp number fails, the macros RETURN_THROWS() due to TypeError.
- * The _DEP / _DEP_DEP variants additionally free the temporary values
- * passed in the last / last two arguments.
- *
- * If one zval can sometimes be fetched as a long you have to set the
- * is_used member of the corresponding gmp_temp_t value to 0, otherwise
- * the FREE_GMP_TEMP and *_DEP macros will not work properly.
- *
- * The three FETCH_GMP_ZVAL_* macros below are mostly copy & paste code
- * as I couldn't find a way to combine them.
- */
-
-#define FREE_GMP_TEMP(temp)  \
-	if (temp.is_used) {      \
-		mpz_clear(temp.num); \
-	}
-
-#define FETCH_GMP_ZVAL_DEP(gmpnumber, zval, temp, dep, arg_pos)   \
-if (IS_GMP(zval)) {                                               \
-	gmpnumber = GET_GMP_FROM_ZVAL(zval);                          \
-	temp.is_used = 0;                                             \
-} else {                                                          \
-	mpz_init(temp.num);                                           \
-	if (convert_to_gmp(temp.num, zval, 0, arg_pos) == FAILURE) {  \
-		mpz_clear(temp.num);                                      \
-		FREE_GMP_TEMP(dep);                                       \
-		RETURN_THROWS();                                          \
-	}                                                             \
-	temp.is_used = 1;                                             \
-	gmpnumber = temp.num;                                         \
-}
-
-#define FETCH_GMP_ZVAL(gmpnumber, zval, temp, arg_pos)            \
-if (IS_GMP(zval)) {                                               \
-	gmpnumber = GET_GMP_FROM_ZVAL(zval);                          \
-	temp.is_used = 0;                                             \
-} else {                                                          \
-	mpz_init(temp.num);                                           \
-	if (convert_to_gmp(temp.num, zval, 0, arg_pos) == FAILURE) {  \
-		mpz_clear(temp.num);                                      \
-		RETURN_THROWS();                                          \
-	}                                                             \
-	temp.is_used = 1;                                             \
-	gmpnumber = temp.num;                                         \
-}
-
 static void gmp_strval(zval *result, mpz_t gmpnum, int base);
 static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val, zend_long base, uint32_t arg_pos);
-static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
-static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg, bool is_operator);
 
 static bool gmp_zend_parse_arg_into_mpz_ex(
 	zval *arg,
@@ -524,18 +464,24 @@ static zend_result gmp_do_operation(uint8_t opcode, zval *result, zval *op1, zva
 
 static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 {
-	zval result;
+	mpz_ptr gmp_op1, gmp_op2;
+	bool status = false;
 
-	gmp_cmp(&result, op1, op2, /* is_operator */ true);
-
-	/* An error/exception occurs if one of the operands is not a numeric string
-	 * or an object which is different from GMP */
-	if (EG(exception)) {
-		return 1;
+	status = gmp_zend_parse_arg_into_mpz_ex(op1, &gmp_op1, 1, true);
+	if (!status) {
+		if (!EG(exception)) {
+			zend_type_error("Number must be of type GMP|string|int, %s given", zend_zval_value_name(op1));
+		}
+		return ZEND_UNCOMPARABLE;
 	}
-	/* result can only be a zend_long if gmp_cmp hasn't thrown an Error */
-	ZEND_ASSERT(Z_TYPE(result) == IS_LONG);
-	return Z_LVAL(result);
+	status = gmp_zend_parse_arg_into_mpz_ex(op2, &gmp_op2, 2, true);
+	if (!status) {
+		if (!EG(exception)) {
+			zend_type_error("Number must be of type GMP|string|int, %s given", zend_zval_value_name(op2));
+		}
+		return ZEND_UNCOMPARABLE;
+	}
+	return mpz_cmp(gmp_op1, gmp_op2);
 }
 /* }}} */
 
@@ -719,44 +665,6 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	return SUCCESS;
 }
 
-/* {{{ convert_to_gmp
- * Convert zval to be gmp number */
-static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos)
-{
-	switch (Z_TYPE_P(val)) {
-	case IS_LONG:
-		mpz_set_si(gmpnumber, Z_LVAL_P(val));
-		return SUCCESS;
-	case IS_STRING: {
-		return convert_zstr_to_gmp(gmpnumber, Z_STR_P(val), base, arg_pos);
-	}
-	case IS_NULL:
-		/* Just reject null for operator overloading */
-		if (arg_pos == 0) {
-			zend_type_error("Number must be of type GMP|string|int, %s given", zend_zval_type_name(val));
-			return FAILURE;
-		}
-		ZEND_FALLTHROUGH;
-	default: {
-		zend_long lval;
-		if (!zend_parse_arg_long_slow(val, &lval, arg_pos)) {
-			if (arg_pos == 0) {
-				zend_type_error(
-					"Number must be of type GMP|string|int, %s given", zend_zval_value_name(val));
-			} else {
-				zend_argument_type_error(arg_pos,
-					"must be of type GMP|string|int, %s given", zend_zval_value_name(val));
-			}
-			return FAILURE;
-		}
-
-		mpz_set_si(gmpnumber, lval);
-		return SUCCESS;
-	}
-	}
-}
-/* }}} */
-
 static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 {
 	size_t num_len;
@@ -785,35 +693,6 @@ static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 	}
 
 	ZVAL_NEW_STR(result, str);
-}
-/* }}} */
-
-static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg, bool is_operator) /* {{{ */
-{
-	mpz_ptr gmpnum_a, gmpnum_b;
-	gmp_temp_t temp_a, temp_b;
-	bool use_si = 0;
-	zend_long res;
-
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, is_operator ? 0 : 1);
-
-	if (Z_TYPE_P(b_arg) == IS_LONG) {
-		use_si = 1;
-		temp_b.is_used = 0;
-	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, is_operator ? 0 : 2);
-	}
-
-	if (use_si) {
-		res = mpz_cmp_si(gmpnum_a, Z_LVAL_P(b_arg));
-	} else {
-		res = mpz_cmp(gmpnum_a, gmpnum_b);
-	}
-
-	FREE_GMP_TEMP(temp_a);
-	FREE_GMP_TEMP(temp_b);
-
-	RETURN_LONG(res);
 }
 /* }}} */
 
