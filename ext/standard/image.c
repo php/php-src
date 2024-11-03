@@ -1567,17 +1567,11 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 
 	if (result) {
 		array_init(return_value);
-		if (result->width_str) {
-			add_index_str(return_value, 0, result->width_str);
-			add_index_str(return_value, 1, result->height_str);
-		} else {
-			add_index_long(return_value, 0, result->width);
-			add_index_long(return_value, 1, result->height);
-		}
+		add_index_long(return_value, 0, result->width);
+		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
-		if (result->width_str) {
-			add_index_str(return_value, 3, zend_strpprintf_unchecked(0, "width=\"%S\" height=\"%S\"", result->width_str, result->height_str));
-		} else {
+		if ((!result->width_unit || zend_string_equals_literal(result->width_unit, "px"))
+			&& (!result->height_unit || zend_string_equals_literal(result->height_unit, "px"))) {
 			char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
 			snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
 			add_index_string(return_value, 3, temp);
@@ -1590,6 +1584,18 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			add_assoc_long(return_value, "channels", result->channels);
 		}
 		add_assoc_string(return_value, "mime", mime_type ? mime_type : php_image_type_to_mime_type(itype));
+
+		if (result->width_unit) {
+			add_assoc_str(return_value, "width_unit", result->width_unit);
+		} else {
+			add_assoc_string(return_value, "width_unit", "px");
+		}
+		if (result->height_unit) {
+			add_assoc_str(return_value, "height_unit", result->height_unit);
+		} else {
+			add_assoc_string(return_value, "height_unit", "px");
+		}
+
 		efree(result);
 	} else {
 		RETURN_FALSE;
