@@ -136,6 +136,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16293 (Failed assertion when throwing in assert() callback with
     bail enabled). (ilutov)
 
+- SysVMsg:
+  . Fixed bug GH-16592 (msg_send() crashes when a type does not properly
+    serialized). (David Carlier / cmb)
+
 - SysVShm:
   . Fixed bug GH-16591 (Assertion error in shm_put_var). (nielsdos, cmb)
 
