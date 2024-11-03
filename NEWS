@@ -86,6 +86,8 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug GH-16433 (Large values for openssl_csr_sign() $days overflow).
     (cmb)
+  . Fix various memory leaks on error conditions in openssl_x509_parse().
+    (nielsdos)
 
 - PDO_ODBC:
   . Fixed bug GH-16450 (PDO_ODBC can inject garbage into field values). (cmb)
