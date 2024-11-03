@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Prevent unexpected array entry conversion when reading key. (nielsdos)
   . Fix various memory leaks related to openssl exports. (nielsdos)
+  . Fix memory leak in php_openssl_pkey_from_zval(). (nielsdos)
 
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
