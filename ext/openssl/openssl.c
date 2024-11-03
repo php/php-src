@@ -2143,9 +2143,17 @@ PHP_FUNCTION(openssl_x509_parse)
 		zval public_key_zv;
 		array_init(&public_key_zv);
 
+#if PHP_OPENSSL_API_VERSION >= 0x30000
 		int group_name_read = EVP_PKEY_get_group_name(public_key, gname, sizeof(gname), &gname_length);
-		int bits = EVP_PKEY_get_bits(public_key);
 		const char *type = EVP_PKEY_get0_type_name(public_key);
+#else
+		int group_name_read = 0;
+		(void) gname;
+		gname_length = 0;
+		const char *type = OBJ_nid2sn(EVP_PKEY_base_id(public_key));
+#endif
+
+		int bits = EVP_PKEY_bits(public_key);
 
 		if (bits > 0 && type) {
 			add_assoc_long(&public_key_zv, "bits", bits);

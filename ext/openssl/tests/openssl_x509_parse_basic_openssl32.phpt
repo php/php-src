@@ -25,7 +25,7 @@ array(17) {
     ["bits"]=>
     int(1024)
     ["type"]=>
-    string(3) "RSA"
+    string(%d) "%r(RSA|rsaEncryption)%r"
   }
   ["subject"]=>
   array(5) {
@@ -188,7 +188,7 @@ array(17) {
     ["bits"]=>
     int(1024)
     ["type"]=>
-    string(3) "RSA"
+    string(%d) "%r(RSA|rsaEncryption)%r"
   }
   ["subject"]=>
   array(5) {
