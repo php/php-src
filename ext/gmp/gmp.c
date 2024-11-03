@@ -427,25 +427,13 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 		return FAILURE;
 	} else {
 		mpz_ptr gmpnum_op, gmpnum_result;
-		gmp_temp_t temp;
 
-		/* We do not use FETCH_GMP_ZVAL(...); here as we don't use convert_to_gmp()
-		 * as we want to handle the emitted exception ourself.  */
-		if (UNEXPECTED(!IS_GMP(op1))) {
-			if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-				goto typeof_op_failure;
-			}
-			mpz_init(temp.num);
-			mpz_set_si(temp.num, Z_LVAL_P(op1));
-			temp.is_used = 1;
-			gmpnum_op = temp.num;
-		} else {
-			gmpnum_op = GET_GMP_FROM_ZVAL(op1);
-			temp.is_used = 0;
+		if (!gmp_zend_parse_arg_into_mpz_ex(op1, &gmpnum_op, 1, true)) {
+			goto typeof_op_failure;
 		}
+
 		INIT_GMP_RETVAL(gmpnum_result);
 		op(gmpnum_result, gmpnum_op, (gmp_ulong) shift);
-		FREE_GMP_TEMP(temp);
 		return SUCCESS;
 	}
 
