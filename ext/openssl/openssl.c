@@ -1495,7 +1495,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	}
 
 	if (!php_openssl_check_path(filename, filename_len, file_path, 2)) {
-		return;
+		goto exit_cleanup_cert;
 	}
 
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
@@ -1513,12 +1513,13 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
 	}
 
-	if (cert_str) {
-		X509_free(cert);
-	}
-
 	if (!BIO_free(bio_out)) {
 		php_openssl_store_errors();
+	}
+
+exit_cleanup_cert:
+	if (cert_str) {
+		X509_free(cert);
 	}
 }
 /* }}} */
@@ -3064,7 +3065,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	}
 
 	if (!php_openssl_check_path(filename, filename_len, file_path, 2)) {
-		return;
+		goto exit_cleanup;
 	}
 
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
@@ -3084,6 +3085,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 		php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
 	}
 
+exit_cleanup:
 	if (csr_str) {
 		X509_REQ_free(csr);
 	}
@@ -4555,7 +4557,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	}
 
 	if (!php_openssl_check_path(filename, filename_len, file_path, 2)) {
-		RETURN_FALSE;
+		goto clean_exit_key;
 	}
 
 	PHP_SSL_REQ_INIT(&req);
@@ -4591,8 +4593,9 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 
 clean_exit:
 	PHP_SSL_REQ_DISPOSE(&req);
-	EVP_PKEY_free(key);
 	BIO_free(bio_out);
+clean_exit_key:
+	EVP_PKEY_free(key);
 }
 /* }}} */
 
