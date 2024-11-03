@@ -37,18 +37,34 @@ static int php_libxml_svg_stream_read(void *context, char *buffer, int len)
 
 /* Sanity check that the input only contains characters valid for a dimension (numbers with units, e.g. 5cm).
  * This also protects the user against injecting XSS.
- * Only accept [0-9a-zA-Z] */
-static bool php_libxml_valid_dimension(const xmlChar *input)
+ * Only accept [0-9]+[a-zA-Z]* */
+static bool php_libxml_parse_dimension(const xmlChar *input, const xmlChar **unit_position)
 {
-	if (*input == '\0') {
+	if (!(*input >= '0' && *input <= '9')) {
 		return false;
 	}
+
+	input++;
+
 	while (*input) {
-		if (!((*input >= '0' && *input <= '9') || (*input >= 'a' && *input <= 'z') || (*input >= 'A' && *input <= 'Z'))) {
+		if (!(*input >= '0' && *input <= '9')) {
+			if ((*input >= 'a' && *input <= 'z') || (*input >= 'A' && *input <= 'Z')) {
+				break;
+			}
 			return false;
 		}
 		input++;
 	}
+
+	*unit_position = input;
+
+	while (*input) {
+		if (!((*input >= 'a' && *input <= 'z') || (*input >= 'A' && *input <= 'Z'))) {
+			return false;
+		}
+		input++;
+	}
+
 	return true;
 }
 
@@ -93,7 +109,10 @@ zend_result php_libxml_svg_image_handle(php_stream *stream, struct php_gfxinfo *
 
 			xmlChar *width = xmlTextReaderGetAttribute(reader, BAD_CAST "width");
 			xmlChar *height = xmlTextReaderGetAttribute(reader, BAD_CAST "height");
-			if (!width || !height || !php_libxml_valid_dimension(width) || !php_libxml_valid_dimension(height)) {
+			const xmlChar *width_unit_position, *height_unit_position;
+			if (!width || !height
+				|| !php_libxml_parse_dimension(width, &width_unit_position)
+				|| !php_libxml_parse_dimension(height, &height_unit_position)) {
 				xmlFree(width);
 				xmlFree(height);
 				break;
@@ -102,8 +121,16 @@ zend_result php_libxml_svg_image_handle(php_stream *stream, struct php_gfxinfo *
 			is_svg = true;
 			if (result) {
 				*result = ecalloc(1, sizeof(**result));
-				(*result)->width_str = zend_string_init((const char *) width, xmlStrlen(width), false);
-				(*result)->height_str = zend_string_init((const char *) height, xmlStrlen(height), false);
+				(*result)->width = ZEND_STRTOL((const char *) width, NULL, 10);
+				(*result)->height = ZEND_STRTOL((const char *) height, NULL, 10);
+				if (*width_unit_position) {
+					(*result)->width_unit = zend_string_init((const char*) width_unit_position,
+															 xmlStrlen(width_unit_position), false);
+				}
+				if (*height_unit_position) {
+					(*result)->height_unit = zend_string_init((const char*) height_unit_position,
+															  xmlStrlen(height_unit_position), false);
+				}
 			}
 
 			xmlFree(width);
