@@ -192,6 +192,24 @@ static bool gmp_zend_parse_arg_into_mpz_ex(
 		mpz_set_si(*destination_mpz_ptr, Z_LVAL_P(arg));
 		return true;
 	}
+
+	/* This function is also used by the do_operation object hook,
+	 * but operator overloading with objects should behave as if a
+	 * method was called, thus strict types should apply. */
+	if (!ZEND_ARG_USES_STRICT_TYPES()) {
+		zend_long lval = 0;
+		if (is_operator && Z_TYPE_P(arg) == IS_NULL) {
+			return false;
+		}
+		if (!zend_parse_arg_long_weak(arg, &lval, arg_num)) {
+			return false;
+		}
+
+		mpz_set_si(*destination_mpz_ptr, lval);
+
+		return true;
+	}
+
 	return false;
 }
 
