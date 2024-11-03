@@ -2,8 +2,6 @@
 locale_get_display_script()  icu >= 52.1
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php if(version_compare(INTL_ICU_VERSION, '52.1') < 0) print 'skip for ICU >= 52.1'; ?>
 --FILE--
 <?php
 
