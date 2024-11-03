@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
 
+- OpenSSL:
+  . Prevent unexpected array entry conversion when reading key. (nielsdos)
+
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 

@@ -3577,19 +3577,21 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 		if (!(Z_TYPE_P(val) == IS_STRING || Z_TYPE_P(val) == IS_OBJECT)) {
 			TMP_CLEAN;
 		}
-		if (!try_convert_to_string(val)) {
+		zend_string *val_str = zval_try_get_string(val);
+		if (!val_str) {
 			TMP_CLEAN;
 		}
 
-		if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
-			if (!php_openssl_check_path_str(Z_STR_P(val), file_path, arg_num)) {
+		if (ZSTR_LEN(val_str) > 7 && memcmp(ZSTR_VAL(val_str), "file://", sizeof("file://") - 1) == 0) {
+			if (!php_openssl_check_path_str(val_str, file_path, arg_num)) {
+				zend_string_release_ex(val_str, false);
 				TMP_CLEAN;
 			}
 			is_file = true;
 		}
 		/* it's an X509 file/cert of some kind, and we need to extract the data from that */
 		if (public_key) {
-			cert = php_openssl_x509_from_str(Z_STR_P(val), arg_num, false, NULL);
+			cert = php_openssl_x509_from_str(val_str, arg_num, false, NULL);
 
 			if (cert) {
 				free_cert = 1;
@@ -3599,10 +3601,11 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 				if (is_file) {
 					in = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 				} else {
-					in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
+					in = BIO_new_mem_buf(ZSTR_VAL(val_str), (int)ZSTR_LEN(val_str));
 				}
 				if (in == NULL) {
 					php_openssl_store_errors();
+					zend_string_release_ex(val_str, false);
 					TMP_CLEAN;
 				}
 				key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
@@ -3615,10 +3618,11 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 			if (is_file) {
 				in = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 			} else {
-				in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
+				in = BIO_new_mem_buf(ZSTR_VAL(val_str), (int)ZSTR_LEN(val_str));
 			}
 
 			if (in == NULL) {
+				zend_string_release_ex(val_str, false);
 				TMP_CLEAN;
 			}
 			if (passphrase == NULL) {
@@ -3631,6 +3635,8 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 			}
 			BIO_free(in);
 		}
+
+		zend_string_release_ex(val_str, false);
 	}
 
 	if (key == NULL) {
