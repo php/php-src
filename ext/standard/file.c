@@ -1136,13 +1136,12 @@ PHP_FUNCTION(mkdir)
 /* {{{ Remove a directory */
 PHP_FUNCTION(rmdir)
 {
-	char *dir;
-	size_t dir_len;
+	zend_string *dir;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_PATH(dir, dir_len)
+		Z_PARAM_PATH_STR(dir)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1233,20 +1232,19 @@ PHPAPI PHP_FUNCTION(fpassthru)
 /* {{{ Rename a file */
 PHP_FUNCTION(rename)
 {
-	char *old_name, *new_name;
-	size_t old_name_len, new_name_len;
+	zend_string *old_name, *new_name;
 	zval *zcontext = NULL;
 	php_stream_wrapper *wrapper;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_PATH(old_name, old_name_len)
-		Z_PARAM_PATH(new_name, new_name_len)
+		Z_PARAM_PATH_STR(old_name)
+		Z_PARAM_PATH_STR(new_name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
+	wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(old_name), NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
 		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
@@ -1258,7 +1256,7 @@ PHP_FUNCTION(rename)
 		RETURN_FALSE;
 	}
 
-	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0)) {
+	if (wrapper != php_stream_locate_url_wrapper(ZSTR_VAL(new_name), NULL, 0)) {
 		php_error_docref(NULL, E_WARNING, "Cannot rename a file across wrapper types");
 		RETURN_FALSE;
 	}
@@ -1272,21 +1270,20 @@ PHP_FUNCTION(rename)
 /* {{{ Delete a file */
 PHP_FUNCTION(unlink)
 {
-	char *filename;
-	size_t filename_len;
+	zend_string *filename;
 	php_stream_wrapper *wrapper;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
+	wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
 		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");

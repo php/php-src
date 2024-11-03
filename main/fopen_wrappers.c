@@ -834,7 +834,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	new_state.cwd = estrdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
-	if (virtual_file_ex(&new_state, filepath, NULL, realpath_mode)) {
+	if (virtual_file_ex(&new_state, filepath, path_len, NULL, realpath_mode)) {
 		efree(new_state.cwd);
 		return NULL;
 	}

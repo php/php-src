@@ -4151,7 +4151,7 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 	new_state.cwd[0] = DEFAULT_SLASH;
 	new_state.cwd[1] = '\0';
 	new_state.cwd_length = 1;
-	if (virtual_file_ex(&new_state, entry->filename, NULL, CWD_EXPAND) != 0 ||
+	if (virtual_file_ex(&new_state, entry->filename, entry->filename_len, NULL, CWD_EXPAND) != 0 ||
 			new_state.cwd_length <= 1) {
 		if (EINVAL == errno && entry->filename_len > 50) {
 			char *tmp = estrndup(entry->filename, 50);

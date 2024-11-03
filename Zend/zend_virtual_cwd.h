@@ -173,19 +173,19 @@ CWD_API void virtual_cwd_deactivate(void);
 CWD_API char *virtual_getcwd_ex(size_t *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API zend_result virtual_chdir(const char *path);
-CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path));
+CWD_API zend_result virtual_chdir_file(const char *path, size_t path_len, int (*p_chdir)(const char *path));
 CWD_API int virtual_filepath(const char *path, char **filepath);
 CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path);
 CWD_API char *virtual_realpath(const char *path, char *real_path);
 CWD_API FILE *virtual_fopen(const char *path, const char *mode);
 CWD_API int virtual_open(const char *path, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode);
-CWD_API int virtual_rename(const char *oldname, const char *newname);
+CWD_API zend_result virtual_rename(const char *old_name, size_t old_name_len, const char *new_name, size_t new_name_len);
 CWD_API int virtual_stat(const char *path, zend_stat_t *buf);
 CWD_API int virtual_lstat(const char *path, zend_stat_t *buf);
-CWD_API int virtual_unlink(const char *path);
+CWD_API zend_result virtual_unlink(const char *path, size_t path_len);
 CWD_API int virtual_mkdir(const char *pathname, mode_t mode);
-CWD_API int virtual_rmdir(const char *pathname);
+CWD_API zend_result virtual_rmdir(const char *path, size_t path_len);
 CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
 CWD_API int virtual_access(const char *pathname, int mode);
@@ -206,7 +206,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 #define CWD_FILEPATH 1 /* resolve symlinks if file is exist otherwise expand */
 #define CWD_REALPATH 2 /* call realpath(), resolve symlinks. File must exist */
 
-CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, size_t path_length, verify_path_func verify_path, int use_realpath);
 
 CWD_API char *tsrm_realpath(const char *path, char *real_path);
 
@@ -254,6 +254,20 @@ CWD_API zend_long realpath_cache_size(void);
 CWD_API zend_long realpath_cache_max_buckets(void);
 CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
+
+static zend_always_inline zend_result virtual_rename_native(const char *old_name,
+	ZEND_ATTRIBUTE_UNUSED size_t old_name_len, const char *new_name, ZEND_ATTRIBUTE_UNUSED size_t new_name_len) {
+	return (rename(old_name, new_name) == 0) ? SUCCESS : FAILURE;
+}
+
+static zend_always_inline zend_result virtual_unlink_native(const char *path, ZEND_ATTRIBUTE_UNUSED size_t path_len) {
+	return (unlink(path) == 0) ? SUCCESS : FAILURE;
+}
+
+static zend_always_inline zend_result virtual_rmdir_native(const char *path, ZEND_ATTRIBUTE_UNUSED size_t path_len) {
+	return (rmdir(path) == 0) ? SUCCESS : FAILURE;
+}
+
 #ifdef CWD_EXPORTS
 extern void virtual_cwd_main_cwd_init(uint8_t);
 #endif
@@ -272,15 +286,15 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #define VCWD_OPEN_MODE(path, flags, mode) virtual_open(path, flags, mode)
 #define VCWD_CREAT(path, mode) virtual_creat(path, mode)
 #define VCWD_CHDIR(path) virtual_chdir(path)
-#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, (int (*)(const char *)) virtual_chdir)
+#define VCWD_CHDIR_FILE(path, path_len) virtual_chdir_file(path, path_len, (int (*)(const char *)) virtual_chdir)
 #define VCWD_GETWD(buf)
 #define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path)
-#define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname)
+#define VCWD_RENAME(old_name, old_name_length, new_name, new_name_length) virtual_rename(old_name, old_name_length, new_name, new_name_length)
 #define VCWD_STAT(path, buff) virtual_stat(path, buff)
 # define VCWD_LSTAT(path, buff) virtual_lstat(path, buff)
-#define VCWD_UNLINK(path) virtual_unlink(path)
-#define VCWD_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
-#define VCWD_RMDIR(pathname) virtual_rmdir(pathname)
+#define VCWD_UNLINK(path, path_len) virtual_unlink(path, path_len)
+#define VCWD_MKDIR(path, mode) virtual_mkdir(path, mode)
+#define VCWD_RMDIR(path, path_len) virtual_rmdir(path, path_len)
 #define VCWD_OPENDIR(pathname) virtual_opendir(pathname)
 #define VCWD_POPEN(command, type) virtual_popen(command, type)
 #define VCWD_ACCESS(pathname, mode) virtual_access(pathname, mode)
@@ -304,10 +318,10 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #define VCWD_FOPEN(path, mode)  php_win32_ioutil_fopen(path, mode)
 #define VCWD_OPEN(path, flags) php_win32_ioutil_open(path, flags)
 #define VCWD_OPEN_MODE(path, flags, mode) php_win32_ioutil_open(path, flags, mode)
-# define VCWD_RENAME(oldname, newname) php_win32_ioutil_rename(oldname, newname)
-#define VCWD_MKDIR(pathname, mode) php_win32_ioutil_mkdir(pathname, mode)
-#define VCWD_RMDIR(pathname) php_win32_ioutil_rmdir(pathname)
-#define VCWD_UNLINK(path) php_win32_ioutil_unlink(path)
+#define VCWD_RENAME(old_name, old_name_length, new_name, new_name_length) php_win32_ioutil_rename(old_name, old_name_length, new_name, new_name_length)
+#define VCWD_MKDIR(path, mode) php_win32_ioutil_mkdir(path, mode)
+#define VCWD_RMDIR(path, path_length) php_win32_ioutil_rmdir(path, path_length)
+#define VCWD_UNLINK(path, path_length) php_win32_ioutil_unlink(path, path_length)
 #define VCWD_CHDIR(path) php_win32_ioutil_chdir(path)
 #define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
 #define VCWD_GETCWD(buff, size) php_win32_ioutil_getcwd(buff, size)
@@ -316,17 +330,17 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #define VCWD_FOPEN(path, mode)  fopen(path, mode)
 #define VCWD_OPEN(path, flags) open(path, flags)
 #define VCWD_OPEN_MODE(path, flags, mode)	open(path, flags, mode)
-# define VCWD_RENAME(oldname, newname) rename(oldname, newname)
-#define VCWD_MKDIR(pathname, mode) mkdir(pathname, mode)
-#define VCWD_RMDIR(pathname) rmdir(pathname)
-#define VCWD_UNLINK(path) unlink(path)
+#define VCWD_RENAME(old_name, old_name_len, new_name, new_name_len) virtual_rename_native(old_name, old_name_len, new_name, new_name_len)
+#define VCWD_MKDIR(path, mode) mkdir(path, mode)
+#define VCWD_RMDIR(path, path_len) virtual_rmdir_native(path, path_len)
+#define VCWD_UNLINK(path, path_len) virtual_unlink_native(path, path_len)
 #define VCWD_CHDIR(path) chdir(path)
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
 #define VCWD_GETCWD(buff, size) getcwd(buff, size)
 #define VCWD_CHMOD(path, mode) chmod(path, mode)
 #endif
 
-#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
+#define VCWD_CHDIR_FILE(path, path_len) virtual_chdir_file(path, path_len, chdir)
 #define VCWD_GETWD(buf) getwd(buf)
 #define VCWD_STAT(path, buff) php_sys_stat(path, buff)
 #define VCWD_LSTAT(path, buff) lstat(path, buff)

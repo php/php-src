@@ -2534,7 +2534,7 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 #else
 			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
 #endif
-			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
+			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename), ZSTR_LEN(primary_file->filename));
 		}
 
 		/* Only lookup the real file path and add it to the included_files list if already opened
@@ -2637,7 +2637,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 
 		if (primary_file->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
 			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
-			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
+			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename), ZSTR_LEN(primary_file->filename));
 		}
 		zend_execute_scripts(ZEND_REQUIRE, ret, 1, primary_file);
 	} zend_end_try();

@@ -427,7 +427,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				PHPDBG_G(exec) = res;
 				PHPDBG_G(exec_len) = res_len;
 
-				VCWD_CHDIR_FILE(res);
+				VCWD_CHDIR_FILE(res, res_len);
 
 				*SG(request_info).argv = estrndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
 				php_build_argv(NULL, &PG(http_globals)[TRACK_VARS_SERVER]);

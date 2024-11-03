@@ -231,7 +231,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		 * failed.
 		 */
 		if (opened_path && !bz_file && mode[0] == 'w') {
-			VCWD_UNLINK(ZSTR_VAL(*opened_path));
+			VCWD_UNLINK(ZSTR_VAL(*opened_path), ZSTR_LEN(*opened_path));
 		}
 	}
 

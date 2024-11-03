@@ -2073,7 +2073,7 @@ static void sdl_serialize_soap_body(const sdlSoapBindingFunctionBodyPtr body, co
 	}
 }
 
-static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr sdl)
+static void add_sdl_to_cache(const char *fn, size_t fn_len, const char *uri, time_t t, sdlPtr sdl)
 {
 	smart_str buf = {0};
 	smart_str *out = &buf;
@@ -2348,8 +2348,8 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	/* Make sure that incomplete files (e.g. due to disk space issues, see bug #66150) are not utilised. */
 	if (valid_file) {
 		/* This is allowed to fail, this means that another process was raced to create the file. */
-		if (VCWD_RENAME(ZSTR_VAL(temp_file_path), fn) < 0) {
-			VCWD_UNLINK(ZSTR_VAL(temp_file_path));
+		if (VCWD_RENAME(ZSTR_VAL(temp_file_path), ZSTR_LEN(temp_file_path), fn, fn_len) < 0) {
+			VCWD_UNLINK(ZSTR_VAL(temp_file_path), ZSTR_LEN(temp_file_path));
 		}
 	}
 
@@ -3314,7 +3314,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 	if ((cache_wsdl & WSDL_CACHE_DISK) && key) {
 		if (sdl) {
-			add_sdl_to_cache(key, uri, t, sdl);
+			// TODO Is it possible to know key_len before?
+			add_sdl_to_cache(key, strlen(key), uri, t, sdl);
 		}
 		efree(key);
 	}

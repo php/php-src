@@ -474,7 +474,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 /**
  * Remove a directory within a phar archive
  */
-int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
+bool phar_wrapper_rmdir(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context) /* {{{ */
 {
 	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;
@@ -483,8 +483,8 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	php_url *resource = NULL;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\", no phar archive specified, or phar archive does not exist", url);
+	if (FAILURE == phar_split_fname(ZSTR_VAL(url), ZSTR_LEN(url), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\", no phar archive specified, or phar archive does not exist", ZSTR_VAL(url));
 		return 0;
 	}
 
@@ -496,24 +496,24 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	efree(entry2);
 
 	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot rmdir directory \"%s\", write operations disabled", url);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot rmdir directory \"%s\", write operations disabled", ZSTR_VAL(url));
 		return 0;
 	}
 
-	if ((resource = phar_parse_url(wrapper, url, "w", options)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, ZSTR_VAL(url), "w", options)) == NULL) {
 		return 0;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\"", url);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\"", ZSTR_VAL(url));
 		return 0;
 	}
 
 	if (!zend_string_equals_literal_ci(resource->scheme, "phar")) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", url);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", ZSTR_VAL(url));
 		return 0;
 	}
 

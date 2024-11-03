@@ -171,7 +171,7 @@ PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
 
 	ZEND_HASH_MAP_FOREACH_VAL(SG(rfc1867_uploaded_files), el) {
 		zend_string *filename = Z_STR_P(el);
-		VCWD_UNLINK(ZSTR_VAL(filename));
+		VCWD_UNLINK(ZSTR_VAL(filename), ZSTR_LEN(filename));
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
@@ -1096,6 +1096,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			if (cancel_upload) {
 				if (temp_filename) {
 					if (cancel_upload != PHP_UPLOAD_ERROR_E) { /* file creation failed */
+						// TODO Should this use VCWD_UNLINK()?
 						unlink(ZSTR_VAL(temp_filename));
 					}
 					zend_string_release_ex(temp_filename, 0);
