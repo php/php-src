@@ -1774,7 +1774,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 				return phar_parse_zipfile(fp, fname, fname_len, alias, alias_len, pphar, error);
 			}
 
-			if (got > 512) {
+			if (got >= 512) {
 				if (phar_is_tar(pos, fname)) {
 					php_stream_rewind(fp);
 					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, pphar, is_data, compression, error);
