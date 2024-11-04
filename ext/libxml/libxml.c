@@ -722,7 +722,10 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 
 	/* no custom user-land callback set up; delegate to original loader */
 	if (!ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
-		return _php_libxml_default_entity_loader(URL, ID, context);
+		ZEND_IGNORE_LEAKS_BEGIN();
+		ret = _php_libxml_default_entity_loader(URL, ID, context);
+		ZEND_IGNORE_LEAKS_END();
+		return ret;
 	}
 
 	if (ID != NULL) {
