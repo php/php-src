@@ -2698,7 +2698,7 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *ptr 
 
 typedef struct _zend_alloc_globals {
 	zend_mm_heap *mm_heap;
-	int use_input_zone;
+	uint32_t      use_input_zone;
 } zend_alloc_globals;
 
 #ifdef ZTS
