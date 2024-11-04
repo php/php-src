@@ -292,7 +292,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	INTL_G( current_collator ) = co->ucoll;
 
 	/* Sort specified array. */
-	zend_hash_sort(hash, collator_compare_func, renumber);
+	zend_array_sort(hash, collator_compare_func, renumber);
 
 	/* Restore saved collator. */
 	INTL_G( current_collator ) = saved_collator;
