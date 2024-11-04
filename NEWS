@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0RC4
 
+- BcMath:
+  . Fixed bug GH-16265 (Added early return case when result is 0)
+    (Saki Takamachi).
+
 - Core:
   . Fixed bug GH-16574 (Incorrect error "undefined method" messages).
     (nielsdos)
