@@ -1802,7 +1802,7 @@ zend_result php_request_startup(void)
 {
 	zend_result retval = SUCCESS;
 
-	ZEND_ASSERT(zend_mm_check_in_input());
+	ZEND_ASSERT(zend_mm_check_in_userinput());
 
 	zend_interned_strings_activate();
 
@@ -1879,7 +1879,7 @@ zend_result php_request_startup(void)
 
 	SG(sapi_started) = 1;
 
-	zend_mm_input_end();
+	zend_mm_userinput_end();
 
 	return retval;
 }
