@@ -233,7 +233,7 @@ typedef zend_mm_bitset zend_mm_page_map[ZEND_MM_PAGE_MAP_LEN];     /* 64B */
 		zend_mm_heap *__heap = (_heap);                                 \
 		zend_mm_zone *__zone = &__heap->zones[0];                       \
 		zend_mm_zone *__end = &__heap->zones[ZEND_MM_ZONES];            \
-		for (; __zone!= __end; __zone++) {                              \
+		for (; __zone != __end; __zone++) {                             \
 			_zone = __zone;
 
 # define ZEND_MM_ZONE_FOREACH_END()                                     \
