@@ -3071,7 +3071,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, b
 	zend_hash_sort_internal(ht, sort, compar, renumber);
 }
 
-void ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
+ZEND_API void ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
 {
 	HT_ASSERT_RC1(ht);
 
