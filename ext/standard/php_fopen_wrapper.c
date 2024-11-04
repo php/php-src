@@ -28,6 +28,7 @@
 #include "php_memory_streams.h"
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
+#include "zend_exceptions.h"
 
 static ssize_t php_stream_output_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
@@ -146,13 +147,22 @@ static const php_stream_ops php_stream_input_ops = {
 	NULL  /* set_option */
 };
 
+static const char max_stream_filters = 5;
+
 static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain) /* {{{ */
 {
 	char *p, *token = NULL;
 	php_stream_filter *temp_filter;
+	char nb_filters = 0;
 
 	p = php_strtok_r(filterlist, "|", &token);
 	while (p) {
+		if (nb_filters >= max_stream_filters) {
+			zend_throw_exception_ex(NULL, 0, "Unable to apply filter, maximum number (%d) reached", max_stream_filters);
+			return;
+		}
+		nb_filters++;
+
 		php_url_decode(p, strlen(p));
 		if (read_chain) {
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream)))) {
