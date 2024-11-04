@@ -434,7 +434,7 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 			numerator_bottom_extension -= scale_diff;
 		} else {
 			numerator_bottom_extension = 0;
-			numeratorend -= scale_diff - numerator_bottom_extension;
+			numeratorend -= scale_diff > numerator_top_extension ? scale_diff - numerator_top_extension : 0;
 		}
 	} else {
 		numerator_bottom_extension += scale - numerator_scale;
