@@ -615,7 +615,10 @@ PHP_FUNCTION(bcpow)
 		goto cleanup;
 	}
 
-	bc_raise(first, exponent, &result, scale);
+	if (!bc_raise(first, exponent, &result, scale)) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+		goto cleanup;
+	}
 
 	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 

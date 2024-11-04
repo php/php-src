@@ -6,7 +6,35 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
-require(__DIR__ . "/run_bcmath_tests_function.inc");
+// slightly modified run_bcmath_tests_function.inc for bcpow testing
+const STRING_PADDING = 30;
+function run_bcmath_tests(
+    $firstTerms,
+    $secondTerms,
+    $symbol,
+    $bcmath_function
+) {
+    $scales = [0, 10];
+    foreach ($scales as $scale) {
+        foreach ($firstTerms as $firstTerm) {
+            echo "Number \"$firstTerm\" (scale $scale)\n";
+            foreach ($secondTerms as $secondTerm) {
+                if (in_array($firstTerm, ['0', '-0'], true) && $secondTerm[0] === '-') {
+                    $ret = 'skip negative power of zero';
+                } else {
+                    $ret = $bcmath_function($firstTerm, $secondTerm, $scale);
+                }
+                echo $firstTerm,
+                    " $symbol ",
+                    str_pad($secondTerm, STRING_PADDING),
+                    " = ",
+                    $ret,
+                    "\n";
+            }
+            echo "\n";
+        }
+    }
+}
 
 $exponents = ["15", "-15", "1", "-9", "0", "-0"];
 $baseNumbers = array_merge($exponents, [
@@ -60,19 +88,19 @@ Number "-9" (scale 0)
 
 Number "0" (scale 0)
 0 ** 15                             = 0
-0 ** -15                            = 0
+0 ** -15                            = skip negative power of zero
 0 ** 1                              = 0
-0 ** -9                             = 0
+0 ** -9                             = skip negative power of zero
 0 ** 0                              = 1
-0 ** -0                             = 1
+0 ** -0                             = skip negative power of zero
 
 Number "-0" (scale 0)
 -0 ** 15                             = 0
--0 ** -15                            = 0
+-0 ** -15                            = skip negative power of zero
 -0 ** 1                              = 0
--0 ** -9                             = 0
+-0 ** -9                             = skip negative power of zero
 -0 ** 0                              = 1
--0 ** -0                             = 1
+-0 ** -0                             = skip negative power of zero
 
 Number "14.14" (scale 0)
 14.14 ** 15                             = 180609729388653367
@@ -188,19 +216,19 @@ Number "-9" (scale 10)
 
 Number "0" (scale 10)
 0 ** 15                             = 0.0000000000
-0 ** -15                            = 0.0000000000
+0 ** -15                            = skip negative power of zero
 0 ** 1                              = 0.0000000000
-0 ** -9                             = 0.0000000000
+0 ** -9                             = skip negative power of zero
 0 ** 0                              = 1.0000000000
-0 ** -0                             = 1.0000000000
+0 ** -0                             = skip negative power of zero
 
 Number "-0" (scale 10)
 -0 ** 15                             = 0.0000000000
--0 ** -15                            = 0.0000000000
+-0 ** -15                            = skip negative power of zero
 -0 ** 1                              = 0.0000000000
--0 ** -9                             = 0.0000000000
+-0 ** -9                             = skip negative power of zero
 -0 ** 0                              = 1.0000000000
--0 ** -0                             = 1.0000000000
+-0 ** -0                             = skip negative power of zero
 
 Number "14.14" (scale 10)
 14.14 ** 15                             = 180609729388653367.2586094856
