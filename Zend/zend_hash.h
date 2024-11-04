@@ -1004,23 +1004,28 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	((zval*)(((char*)(_el)) - (_size)))
 
 #define _ZEND_HASH_FOREACH_VAL(_ht) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		const HashTable *__ht = (_ht); \
 		uint32_t _count = __ht->nNumUsed; \
 		size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht); \
 		zval *_z = __ht->arPacked; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		for (; _count > 0; _z = ZEND_HASH_NEXT_ELEMENT(_z, _size), _count--) { \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
 
 #define _ZEND_HASH_REVERSE_FOREACH_VAL(_ht) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		const HashTable *__ht = (_ht); \
 		uint32_t _idx = __ht->nNumUsed; \
 		size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht); \
 		zval *_z = ZEND_HASH_ELEMENT_EX(__ht, _idx, _size); \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		for (;_idx > 0; _idx--) { \
 			_z = ZEND_HASH_PREV_ELEMENT(_z, _size); \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
 
 #define ZEND_HASH_FOREACH_FROM(_ht, indirect, _from) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		const HashTable *__ht = (_ht); \
 		zend_ulong __h; \
 		zend_string *__key = NULL; \
@@ -1028,14 +1033,19 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht); \
 		zval *__z = ZEND_HASH_ELEMENT_EX(__ht, _idx, _size); \
 		uint32_t _count = __ht->nNumUsed - _idx; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		for (;_count > 0; _count--) { \
+			ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 			zval *_z = __z; \
+			ZEND_DIAGNOSTIC_IGNORED_END \
 			if (HT_IS_PACKED(__ht)) { \
 				__z++; \
 				__h = _idx; \
 				_idx++; \
 			} else { \
+				ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 				Bucket *_p = (Bucket*)__z; \
+				ZEND_DIAGNOSTIC_IGNORED_END \
 				__z = &(_p + 1)->val; \
 				__h = _p->h; \
 				__key = _p->key; \
@@ -1049,6 +1059,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_FOREACH(_ht, indirect) ZEND_HASH_FOREACH_FROM(_ht, indirect, 0)
 
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		const HashTable *__ht = (_ht); \
 		uint32_t _idx = __ht->nNumUsed; \
 		zval *_z; \
@@ -1056,13 +1067,16 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		zend_string *__key = NULL; \
 		size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht); \
 		zval *__z = ZEND_HASH_ELEMENT_EX(__ht, _idx, _size); \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		for (;_idx > 0; _idx--) { \
 			if (HT_IS_PACKED(__ht)) { \
 				__z--; \
 				_z = __z; \
 				__h = _idx - 1; \
 			} else { \
+				ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 				Bucket *_p = (Bucket*)__z; \
+				ZEND_DIAGNOSTIC_IGNORED_END \
 				_p--; \
 				__z = &_p->val; \
 				_z = __z; \
@@ -1238,12 +1252,16 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 /* Hash array iterators */
 #define ZEND_HASH_MAP_FOREACH_FROM(_ht, indirect, _from) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		const HashTable *__ht = (_ht); \
 		Bucket *_p = __ht->arData + (_from); \
 		const Bucket *_end = __ht->arData + __ht->nNumUsed; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZEND_ASSERT(!HT_IS_PACKED(__ht)); \
 		for (; _p != _end; _p++) { \
+			ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 			zval *_z = &_p->val; \
+			ZEND_DIAGNOSTIC_IGNORED_END \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
 			} \
@@ -1252,10 +1270,12 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_MAP_FOREACH(_ht, indirect) ZEND_HASH_MAP_FOREACH_FROM(_ht, indirect, 0)
 
 #define ZEND_HASH_MAP_REVERSE_FOREACH(_ht, indirect) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		/* const */ HashTable *__ht = (_ht); \
 		uint32_t _idx = __ht->nNumUsed; \
 		Bucket *_p = __ht->arData + _idx; \
 		zval *_z; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZEND_ASSERT(!HT_IS_PACKED(__ht)); \
 		for (_idx = __ht->nNumUsed; _idx > 0; _idx--) { \
 			_p--; \
@@ -1269,11 +1289,15 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 			ZEND_ASSERT(!HT_IS_PACKED(__ht)); \
 			__ht->nNumOfElements--; \
 			do { \
+				ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 				uint32_t j = HT_IDX_TO_HASH(_idx - 1); \
 				uint32_t nIndex = _p->h | __ht->nTableMask; \
 				uint32_t i = HT_HASH(__ht, nIndex); \
+				ZEND_DIAGNOSTIC_IGNORED_END \
 				if (UNEXPECTED(j != i)) { \
+					ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 					Bucket *prev = HT_HASH_TO_BUCKET(__ht, i); \
+					ZEND_DIAGNOSTIC_IGNORED_END \
 					while (Z_NEXT(prev->val) != j) { \
 						i = Z_NEXT(prev->val); \
 						prev = HT_HASH_TO_BUCKET(__ht, i); \
@@ -1446,10 +1470,12 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 /* Packed array iterators */
 #define ZEND_HASH_PACKED_FOREACH_FROM(_ht, _from) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		const HashTable *__ht = (_ht); \
 		zend_ulong _idx = (_from); \
 		zval *_z = __ht->arPacked + (_from); \
 		zval *_end = __ht->arPacked + __ht->nNumUsed; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZEND_ASSERT(HT_IS_PACKED(__ht)); \
 		for (;_z != _end; _z++, _idx++) { \
 			(void) _idx; \
@@ -1458,9 +1484,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_PACKED_FOREACH(_ht) ZEND_HASH_PACKED_FOREACH_FROM(_ht, 0)
 
 #define ZEND_HASH_PACKED_REVERSE_FOREACH(_ht) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		const HashTable *__ht = (_ht); \
 		zend_ulong _idx = __ht->nNumUsed; \
 		zval *_z = __ht->arPacked + _idx; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZEND_ASSERT(HT_IS_PACKED(__ht)); \
 		while (_idx > 0) { \
 			_z--; \
@@ -1518,9 +1546,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
  * (HashTable must have enough free buckets).
  */
 #define ZEND_HASH_FILL_PACKED(ht) do { \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		HashTable *__fill_ht = (ht); \
 		zval *__fill_val = __fill_ht->arPacked + __fill_ht->nNumUsed; \
 		uint32_t __fill_idx = __fill_ht->nNumUsed; \
+		ZEND_DIAGNOSTIC_IGNORED_END \
 		ZEND_ASSERT(HT_IS_PACKED(__fill_ht));
 
 #define ZEND_HASH_FILL_GROW() do { \

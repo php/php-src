@@ -286,11 +286,11 @@ next_step:
 				if (object->callHasChildren) {
 					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callHasChildren, "callHasChildren", &retval);
 				} else {
-					zend_class_entry *ce = object->iterators[object->level].ce;
+					zend_class_entry *ce_scope = object->iterators[object->level].ce;
 					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
 					zend_function **cache = &object->iterators[object->level].haschildren;
 
-					zend_call_method_with_0_params(obj, ce, cache, "haschildren", &retval);
+					zend_call_method_with_0_params(obj, ce_scope, cache, "haschildren", &retval);
 				}
 				if (EG(exception)) {
 					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
@@ -350,11 +350,11 @@ next_step:
 				if (object->callGetChildren) {
 					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callGetChildren, "callGetChildren", &child);
 				} else {
-					zend_class_entry *ce = object->iterators[object->level].ce;
+					zend_class_entry *ce_scope = object->iterators[object->level].ce;
 					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
 					zend_function **cache = &object->iterators[object->level].getchildren;
 
-					zend_call_method_with_0_params(obj, ce, cache, "getchildren", &child);
+					zend_call_method_with_0_params(obj, ce_scope, cache, "getchildren", &child);
 				}
 
 				if (EG(exception)) {
@@ -2807,20 +2807,20 @@ PHP_METHOD(AppendIterator, __construct)
 /* {{{ Append an iterator */
 PHP_METHOD(AppendIterator, append)
 {
-	spl_dual_it_object   *intern;
-	zval *it;
+	spl_dual_it_object *intern;
+	zval *iterator;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &it, zend_ce_iterator) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &iterator, zend_ce_iterator) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator) == SUCCESS && spl_dual_it_valid(intern) != SUCCESS) {
-		spl_array_iterator_append(&intern->u.append.zarrayit, it);
+		spl_array_iterator_append(&intern->u.append.zarrayit, iterator);
 		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
 	}else{
-		spl_array_iterator_append(&intern->u.append.zarrayit, it);
+		spl_array_iterator_append(&intern->u.append.zarrayit, iterator);
 	}
 
 	if (!intern->inner.iterator || spl_dual_it_valid(intern) != SUCCESS) {
@@ -2829,7 +2829,7 @@ PHP_METHOD(AppendIterator, append)
 		}
 		do {
 			spl_append_it_next_iterator(intern);
-		} while (Z_OBJ(intern->inner.zobject) != Z_OBJ_P(it));
+		} while (Z_OBJ(intern->inner.zobject) != Z_OBJ_P(iterator));
 		spl_append_it_fetch(intern);
 	}
 } /* }}} */

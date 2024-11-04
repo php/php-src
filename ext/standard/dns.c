@@ -576,10 +576,10 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 			{
 				int l1 = 0, l2 = 0;
 				zval entries;
-				zend_string *tp;
+				zend_string *tp_str;
 
 				add_assoc_string(subarray, "type", "TXT");
-				tp = zend_string_alloc(dlen, 0);
+				tp_str = zend_string_alloc(dlen, 0);
 
 				array_init(&entries);
 
@@ -590,17 +590,17 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 						n = dlen - (l1 + 1);
 					}
 					if (n) {
-						memcpy(ZSTR_VAL(tp) + l2 , cp + l1 + 1, n);
+						memcpy(ZSTR_VAL(tp_str) + l2 , cp + l1 + 1, n);
 						add_next_index_stringl(&entries, (char *) cp + l1 + 1, n);
 					}
 					l1 = l1 + n + 1;
 					l2 = l2 + n;
 				}
-				ZSTR_VAL(tp)[l2] = '\0';
-				ZSTR_LEN(tp) = l2;
+				ZSTR_VAL(tp_str)[l2] = '\0';
+				ZSTR_LEN(tp_str) = l2;
 				cp += dlen;
 
-				add_assoc_str(subarray, "txt", tp);
+				add_assoc_str(subarray, "txt", tp_str);
 				add_assoc_zval(subarray, "entries", &entries);
 			}
 			break;

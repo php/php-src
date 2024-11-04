@@ -3808,14 +3808,14 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			ret = 1;
 		}
 	} else if ((ce = zend_lookup_class(name)) != NULL) {
-		zend_class_entry *scope = get_scope(frame);
+		const zend_class_entry *frame_scope = get_scope(frame);
 		fcc->calling_scope = ce;
-		if (scope && !fcc->object) {
+		if (frame_scope && !fcc->object) {
 			zend_object *object = zend_get_this_object(frame);
 
 			if (object &&
-			    instanceof_function(object->ce, scope) &&
-			    instanceof_function(scope, ce)) {
+			    instanceof_function(object->ce, frame_scope) &&
+			    instanceof_function(frame_scope, ce)) {
 				fcc->object = object;
 				fcc->called_scope = object->ce;
 			} else {

@@ -19,7 +19,7 @@
 
 int php_startup_ticks(void);
 void php_deactivate_ticks(void);
-void php_shutdown_ticks(php_core_globals *core_globals);
+void php_shutdown_ticks(php_core_globals *php_core_globals_ptr);
 void php_run_ticks(int count);
 
 BEGIN_EXTERN_C()

@@ -820,7 +820,7 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename, 
 }
 
 
-zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
+zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini_ptr)
 {
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle;
@@ -833,7 +833,7 @@ zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *sy
 		zend_restore_lexical_state(&original_lex_state);
 		return FAILURE;
 	}
-	zend_highlight(syntax_highlighter_ini);
+	zend_highlight(syntax_highlighter_ini_ptr);
 	if (SCNG(script_filtered)) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
@@ -843,7 +843,7 @@ zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *sy
 	return SUCCESS;
 }
 
-void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, const char *filename)
+void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_highlighter_ini_ptr, const char *filename)
 {
 	zend_lex_state original_lex_state;
 	zval str_zv;
@@ -853,7 +853,7 @@ void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_high
 	zend_prepare_string_for_scanning(&str_zv, filename_str);
 	zend_string_release(filename_str);
 	BEGIN(INITIAL);
-	zend_highlight(syntax_highlighter_ini);
+	zend_highlight(syntax_highlighter_ini_ptr);
 	if (SCNG(script_filtered)) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;

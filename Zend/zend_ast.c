@@ -2253,9 +2253,9 @@ simple_list:
 		case ZEND_AST_NEW:
 			smart_str_appends(str, "new ");
 			if (ast->child[0]->kind == ZEND_AST_CLASS) {
-				zend_ast_decl *decl = (zend_ast_decl *) ast->child[0];
-				if (decl->child[3]) {
-					zend_ast_export_attributes(str, decl->child[3], indent, 0);
+				zend_ast_decl *class_decl = (zend_ast_decl *) ast->child[0];
+				if (class_decl->child[3]) {
+					zend_ast_export_attributes(str, class_decl->child[3], indent, 0);
 				}
 				smart_str_appends(str, "class");
 				if (!zend_ast_is_list(ast->child[1])
@@ -2264,7 +2264,7 @@ simple_list:
 					zend_ast_export_ex(str, ast->child[1], 0, indent);
 					smart_str_appendc(str, ')');
 				}
-				zend_ast_export_class_no_header(str, decl, indent);
+				zend_ast_export_class_no_header(str, class_decl, indent);
 			} else {
 				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 				smart_str_appendc(str, '(');

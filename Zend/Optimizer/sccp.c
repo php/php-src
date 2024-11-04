@@ -1671,14 +1671,14 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 
 			for (i = 0; i < call->num_args; i++) {
-				zend_op *opline = call->arg_info[i].opline;
-				if (opline->opcode != ZEND_SEND_VAL && opline->opcode != ZEND_SEND_VAR) {
+				zend_op *arg_info_opline = call->arg_info[i].opline;
+				if (arg_info_opline->opcode != ZEND_SEND_VAL && arg_info_opline->opcode != ZEND_SEND_VAR) {
 					SET_RESULT_BOT(result);
 					return;
 				}
 
-				args[i] = get_op1_value(ctx, opline,
-					&ctx->scdf.ssa->ops[opline - ctx->scdf.op_array->opcodes]);
+				args[i] = get_op1_value(ctx, arg_info_opline,
+					&ctx->scdf.ssa->ops[arg_info_opline - ctx->scdf.op_array->opcodes]);
 				if (args[i]) {
 					if (IS_BOT(args[i]) || IS_PARTIAL_ARRAY(args[i])) {
 						SET_RESULT_BOT(result);
