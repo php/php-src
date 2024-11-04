@@ -507,6 +507,9 @@ static void php_cli_usage(char *argv0)
 				"  --rz <name>      Show information about Zend extension <name>.\n"
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
+				"  --repeat <count> Repeat script execution <count> times. For internal purposes\n"
+				"                   only.\n"
+				"\n"
 				, prog, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
