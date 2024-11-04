@@ -234,6 +234,7 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 			if (dir_len > 0) {
 				size_t len = GetCurrentDirectoryW(dir_len, dst);
 				if (len == 0 || len + 1 != dir_len) {
+					free(ret);
 					free(mb);
 					return NULL;
 				}
