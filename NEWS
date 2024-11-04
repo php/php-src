@@ -51,6 +51,8 @@ PHP                                                                        NEWS
     SplFileObject::__constructor). (Girgias)
   . Fixed bug GH-16589 (UAF in SplDoublyLinked->serialize()). (nielsdos)
   . Fixed bug GH-16604 (Memory leaks in SPL constructors). (nielsdos)
+  . Fixed bug GH-16646 (UAF in ArrayObject::unset() and
+    ArrayObject::exchangeArray()). (ilutov)
 
 - SysVShm:
   . Fixed bug GH-16591 (Assertion error in shm_put_var). (nielsdos, cmb)
