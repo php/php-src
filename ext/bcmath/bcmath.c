@@ -1141,7 +1141,10 @@ static zend_result bcmath_number_pow_internal(
 		}
 		return FAILURE;
 	}
-	bc_raise(n1, exponent, ret, *scale);
+	if (!bc_raise(n1, exponent, ret, *scale)) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+		return FAILURE;
+	}
 	bc_rm_trailing_zeros(*ret);
 	if (scale_expand) {
 		size_t diff = *scale - (*ret)->n_scale;
