@@ -40,6 +40,10 @@ PHP                                                                        NEWS
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)
 
+- Windows:
+  . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
+    nielsdos)
+
 - XMLWriter:
   . Improved performance and reduce memory consumption. (nielsdos)
 
