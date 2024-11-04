@@ -125,6 +125,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-14687 (segfault on SplObjectIterator instance).
     (David Carlier)
   . Fixed bug GH-16604 (Memory leaks in SPL constructors). (nielsdos)
+  . Fixed bug GH-16646 (UAF in ArrayObject::unset() and
+    ArrayObject::exchangeArray()). (ilutov)
 
 - Standard:
   . Fixed bug GH-16293 (Failed assertion when throwing in assert() callback with
