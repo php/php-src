@@ -40,10 +40,10 @@ void bc_square_ex(bc_num n1, bc_num *result, size_t scale_min) {
 	*(result) = square_ex;
 }
 
-/* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.
-   Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
+/* Raise "base" to the "exponent" power.  The result is placed in RESULT.
+   Maximum exponent is LONG_MAX.  If a "exponent" is not an integer,
    only the integer part is used.  */
-bool bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale) {
+bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 	bc_num temp, power;
 	size_t rscale;
 	size_t pwrscale;
@@ -64,12 +64,12 @@ bool bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale) {
 		rscale = scale;
 	} else {
 		is_neg = false;
-		rscale = MIN (num1->n_scale * exponent, MAX(scale, num1->n_scale));
+		rscale = MIN (base->n_scale * exponent, MAX(scale, base->n_scale));
 	}
 
 	/* Set initial value of temp. */
-	power = bc_copy_num(num1);
-	pwrscale = num1->n_scale;
+	power = bc_copy_num(base);
+	pwrscale = base->n_scale;
 	while ((exponent & 1) == 0) {
 		pwrscale = 2 * pwrscale;
 		bc_square_ex(power, &power, pwrscale);
