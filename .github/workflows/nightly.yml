@@ -17,6 +17,9 @@ on:
       run_alpine:
         required: true
         type: boolean
+      run_linux_ppc64:
+        required: true
+        type: boolean
       run_macos_arm64:
         required: true
         type: boolean
@@ -35,6 +38,53 @@ on:
 permissions:
   contents: read
 jobs:
+  LINUX_PPC64:
+    needs: GENERATE_MATRIX
+    if: inputs.run_linux_ppc64
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.alpine-matrix-include) }}
+    name: LINUX_PPC64_ASAN_UBSAN_DEBUG_ZTS
+    runs-on: [self-hosted, gentoo, ppc64]
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch.ref }}
+      - name: emerge
+        uses: ./.github/actions/emerge
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed packages"
+          cat /var/lib/portage/world
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-gentoo
+        with:
+          configurationParameters: >-
+            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
+            --enable-debug
+            --enable-zts
+          skipSlow: true # FIXME: This should likely include slow extensions
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      # Skip an install action for now
+      - name: Tests
+        uses: ./.github/actions/test-gentoo
+        # There is no PPC JIT, so rip this out
+        with:
+          runTestsParameters: >-
+            --asan -x
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   ALPINE:
     if: inputs.run_alpine
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS

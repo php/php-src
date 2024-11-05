@@ -1,0 +1,51 @@
+name: emerge
+runs:
+  using: composite
+  steps:
+    - shell: sh
+      # Omitting libiconv from glibc system
+      # XXX: mysql-client needed? IMAP i don't think so anymore either
+      # XXX: Set USE flags appropriately to i.e. avoid installing servers
+      # (though if they're masked it doesn't matter)
+      # XXX: For now this is nopped out since it doesn't run in a container yet
+      run: |
+        emerge --noreplace \
+            sys-apps/util-linux \
+            app-shells/bash \
+            app-admin/sudo \
+            dev-build/autoconf \
+            app-arch/unzip \
+            app-arch/tar \
+            sys-devel/bison \
+            dev-util/re2c \
+            dev-util/pkgconf \
+            app-arch/bzip2 \
+            net-misc/curl \
+            media-libs/freetype \
+            sys-devel/gettext \
+            dev-libs/gmp \
+            dev-libs/icu \
+            media-libs/libjpeg-turbo \
+            dev-libs/libffi \
+            media-libs/libpng \
+            dev-libs/libsodium \
+            media-libs/libwebp \
+            dev-libs/libxml2 \
+            x11-libs/libXpm \
+            dev-libs/libxslt \
+            dev-libs/libzip \
+            dev-libs/oniguruma \
+            dev-libs/openssl \
+            dev-libs/libedit \
+            dev-db/sqlite \
+            app-text/htmltidy \
+            sys-libs/gdbm \
+            dev-db/lmdb \
+            app-crypt/argon2 \
+            app-text/enchant \
+            dev-db/freetds \
+            net-analyzer/net-snmp \
+            net-nds/openldap \
+            dev-db/unixODBC \
+            dev-db/postgresql
+            || true
