@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.26
+?? ??? ????, PHP 8.2.27
+
+
+21 Nov 2024, PHP 8.2.26
 
 - Cli:
   . Fixed bug GH-16373 (Shebang is not skipped for router script in cli-server
