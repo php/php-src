@@ -334,7 +334,11 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 				SET_STACK_TYPE(stack, 2, IS_LONG, 0);
 				SET_STACK_REF_EX(stack, 2, ref, 0);
 			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_NEW) {
+			ZEND_ASSERT(opline->op2.num == 1);
+			/* nothing to do */
 		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPE) {
+			ZEND_ASSERT(opline->op2.num == 1);
 			/* nothing to do */
 		} else {
 			ZEND_UNREACHABLE();
@@ -762,11 +766,31 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 			if (res_addr) {
 				jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_NEW) {
+			if (res_addr) {
+#if ZEND_DEBUG
+				ref = ir_CALL_6(IR_ADDR, ir_CONST_FC_FUNC(_ecalloc),
+					ir_CONST_LONG(1),
+					ir_CONST_ADDR(type->size),
+					op_array->filename ? ir_CONST_ADDR(op_array->filename->val) : IR_NULL,
+					ir_CONST_U32(opline ? opline->lineno : 0),
+					IR_NULL,
+					ir_CONST_U32(0));
+#else
+				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(_ecalloc), ir_CONST_LONG(1), ir_CONST_ADDR(type->size));
+#endif
+				ref = ir_CALL_2(IR_ADDR, ir_CONST_FUNC(zend_ffi_api->cdata_create), ref, ir_CONST_ADDR(type));
+				ir_STORE(ir_ADD_OFFSET(ref, offsetof(zend_ffi_cdata, flags)), ir_CONST_U32(ZEND_FFI_FLAG_OWNED));
+				jit_set_Z_PTR(jit, res_addr, ref);
+				jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
+			}
 		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPE) {
-			ref = ir_CONST_ADDR(type);
-			ref = ir_CALL_1(IR_ADDR, ir_CONST_FUNC(zend_ffi_api->ctype_create), ref);
-			jit_set_Z_PTR(jit, res_addr, ref);
-			jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
+			if (res_addr) {
+				ref = ir_CONST_ADDR(type);
+				ref = ir_CALL_1(IR_ADDR, ir_CONST_FUNC(zend_ffi_api->ctype_create), ref);
+				jit_set_Z_PTR(jit, res_addr, ref);
+				jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
+			}
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -987,9 +1011,11 @@ cleanup:
 		}
 	}
 
-	if (!TRACE_FRAME_FFI_FUNC(call)) {
+	if (!TRACE_FRAME_FFI_FUNC(call)
+	 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_NEW
+	 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPE) {
 		func_ref = (intptr_t)(void*)call->ce;
-		if (!IR_IS_CONST_REF(func_ref)) {
+		if (func_ref && !IR_IS_CONST_REF(func_ref)) {
 			ir_ref if_not_zero = ir_IF(jit_GC_DELREF(jit, func_ref));
 			ir_IF_FALSE(if_not_zero);
 			jit_ZVAL_DTOR(jit, func_ref, MAY_BE_OBJECT, opline);
