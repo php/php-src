@@ -47,6 +47,8 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug GH-16167 (Prevent mixing PDO sub-classes with different DSN).
     (kocsismate)
+  . Fixed bug GH-16314 ("Pdo\Mysql object is uninitialized" when opening a
+    persistent connection). (kocsismate)
 
 - PDO_ODBC:
   . Fixed bug GH-16450 (PDO_ODBC can inject garbage into field values). (cmb)
