@@ -11,7 +11,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 class TestStmt extends PDOStatement
 {
     public $name;
