@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.27
 
+- PDO:
+  . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
 21 Nov 2024, PHP 8.2.26
 
