@@ -22,6 +22,9 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- ext/libxml
+  . The refcount APIs now return an `unsigned int` instead of an `int`.
+
 ========================
 4. OpCode changes
 ========================
