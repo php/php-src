@@ -451,7 +451,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		return NULL;
 	}
 
-	/* logic copied from php_stream_stat, but we only want to fail
+	/* logic copied from _php_stream_stat, but we only want to fail
 	   if the wrapper supports stat, otherwise, figure it out from
 	   the open.  This logic is only to support hiding warnings
 	   that the streams layer puts out at times, but for libxml we
