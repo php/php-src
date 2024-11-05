@@ -39,19 +39,14 @@ permissions:
   contents: read
 jobs:
   LINUX_PPC64:
-    needs: GENERATE_MATRIX
     if: inputs.run_linux_ppc64
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.alpine-matrix-include) }}
     name: LINUX_PPC64_ASAN_UBSAN_DEBUG_ZTS
     runs-on: [self-hosted, gentoo, ppc64]
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ branch }}
       - name: emerge
         uses: ./.github/actions/emerge
       - name: System info
