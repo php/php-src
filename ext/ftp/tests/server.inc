@@ -431,7 +431,7 @@ if ($pid) {
             }
 
         } elseif (preg_match('/^EPSV/', $buf, $matches)) {
-            fputs($s, "550 Extended passsive mode not supported.\r\n");
+            fputs($s, "550 Extended passive mode not supported.\r\n");
         } elseif (preg_match('/^SITE EXEC/', $buf, $matches)) {
             fputs($s, "200 OK\r\n");
 

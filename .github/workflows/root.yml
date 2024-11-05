@@ -1,0 +1,57 @@
+name: Nightly
+on:
+  schedule:
+   - cron: "0 1 * * *"
+  workflow_dispatch: ~
+permissions:
+  contents: read
+jobs:
+  GENERATE_MATRIX:
+    name: Generate Matrix
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      branches: ${{ steps.set-matrix.outputs.branches }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Set fetch-depth to 0 to clone the full repository
+          # including all branches. This is required to find
+          # the correct commit hashes.
+          fetch-depth: 0
+      - name: Grab the commit mapping
+        uses: actions/cache@v4
+        with:
+          path: branch-commit-cache.json
+          # The cache key needs to change every time for the
+          # cache to be updated after this job finishes.
+          key: nightly-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            nightly-
+      - name: Generate Matrix
+        id: set-matrix
+        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  NIGHTLY:
+    needs: GENERATE_MATRIX
+    name: ${{ matrix.branch.ref }}
+    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    uses: ./.github/workflows/nightly.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+    with:
+      asan_ubuntu_version: '20.04'
+      branch: ${{ matrix.branch.ref }}
+      community_verify_type_inference: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
+      libmysqlclient_with_mysqli: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1) }}
+      run_alpine: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
+      run_macos_arm64: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
+      ubuntu_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 3) || matrix.branch.version[0] >= 9) && '22.04' || '20.04' }}
+      windows_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9) && '2022' || '2019' }}
+    secrets: inherit

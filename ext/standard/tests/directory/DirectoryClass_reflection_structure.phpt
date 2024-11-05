@@ -11,20 +11,10 @@ echo "Structure of Directory class:\n";
 $rc = new ReflectionClass("Directory");
 echo $rc;
 
-echo "Cannot instantiate a valid Directory directly:\n";
-$d = new Directory(getcwd());
-var_dump($d);
-
-try {
-    var_dump($d->read());
-} catch (\Error $e) {
-    echo $e->getMessage() . "\n";
-}
-
 ?>
---EXPECTF--
+--EXPECT--
 Structure of Directory class:
-Class [ <internal%s> class Directory ] {
+Class [ <internal:standard> final class Directory ] {
 
   - Constants [0] {
   }
@@ -45,29 +35,21 @@ Class [ <internal%s> class Directory ] {
 
       - Parameters [0] {
       }
-      - Tentative return [ void ]
+      - Return [ void ]
     }
 
     Method [ <internal:standard> public method rewind ] {
 
       - Parameters [0] {
       }
-      - Tentative return [ void ]
+      - Return [ void ]
     }
 
     Method [ <internal:standard> public method read ] {
 
       - Parameters [0] {
       }
-      - Tentative return [ string|false ]
+      - Return [ string|false ]
     }
   }
 }
-Cannot instantiate a valid Directory directly:
-object(Directory)#%d (0) {
-  ["path"]=>
-  uninitialized(string)
-  ["handle"]=>
-  uninitialized(mixed)
-}
-Unable to find my handle property

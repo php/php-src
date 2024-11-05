@@ -1,11 +1,11 @@
 <?php
 
 const BRANCHES = [
-    ['name' => 'master', 'ref' => 'master', 'version' => ['major' => 8, 'minor' => 5]],
-    ['name' => 'PHP-8.4', 'ref' => 'PHP-8.4', 'version' => ['major' => 8, 'minor' => 4]],
-    ['name' => 'PHP-8.3', 'ref' => 'PHP-8.3', 'version' => ['major' => 8, 'minor' => 3]],
-    ['name' => 'PHP-8.2', 'ref' => 'PHP-8.2', 'version' => ['major' => 8, 'minor' => 2]],
-    ['name' => 'PHP-8.1', 'ref' => 'PHP-8.1', 'version' => ['major' => 8, 'minor' => 1]],
+    ['ref' => 'master', 'version' => [8, 5]],
+    ['ref' => 'PHP-8.4', 'version' => [8, 4]],
+    ['ref' => 'PHP-8.3', 'version' => [8, 3]],
+    ['ref' => 'PHP-8.2', 'version' => [8, 2]],
+    ['ref' => 'PHP-8.1', 'version' => [8, 1]],
 ];
 
 function get_branch_commit_cache_file_path(): string {
@@ -36,142 +36,30 @@ function get_branches() {
     return $changed_branches;
 }
 
-function get_matrix_include(array $branches) {
-    $jobs = [];
-    foreach ($branches as $branch) {
-        $jobs[] = [
-            'name' => '_ASAN_UBSAN',
-            'branch' => $branch,
-            'debug' => true,
-            'zts' => true,
-            'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'",
-            'run_tests_parameters' => '--asan',
-            'test_function_jit' => false,
-            'asan' => true,
-        ];
-        $jobs[] = [
-            'name' => '_REPEAT',
-            'branch' => $branch,
-            'debug' => true,
-            'zts' => false,
-            'run_tests_parameters' => '--repeat 2',
-            'timeout_minutes' => 360,
-            'test_function_jit' => true,
-            'asan' => false,
-        ];
-        $jobs[] = [
-            'name' => '_VARIATION',
-            'branch' => $branch,
-            'debug' => true,
-            'zts' => true,
-            'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE'",
-                'run_tests_parameters' => '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0',
-            'timeout_minutes' => 360,
-            'test_function_jit' => true,
-            'asan' => false,
-        ];
-    }
-    return $jobs;
-}
-
-function get_windows_matrix_include(array $branches) {
-    $jobs = [];
-    foreach ($branches as $branch) {
-        $jobs[] = [
-            'branch' => $branch,
-            'x64' => true,
-            'zts' => true,
-            'opcache' => true,
-        ];
-        $jobs[] = [
-            'branch' => $branch,
-            'x64' => false,
-            'zts' => false,
-            'opcache' => false,
-        ];
-    }
-    return $jobs;
-}
-
-function get_macos_matrix_include(array $branches) {
-    $jobs = [];
-    foreach ($branches as $branch) {
-        foreach([true, false] as $debug) {
-            foreach([true, false] as $zts) {
-                $jobs[] = [
-                    'branch' => $branch,
-                    'debug' => $debug,
-                    'zts' => $zts,
-                    'os' => in_array($branch['name'], ['master', 'PHP-8.4'], true) ? '13' : '12',
-                    'arch' => 'X64',
-                    'test_jit' => true,
-                ];
-                if ($branch['version']['minor'] >= 4 || $branch['version']['major'] >= 9) {
-                    $jobs[] = [
-                        'branch' => $branch,
-                        'debug' => $debug,
-                        'zts' => $zts,
-                        'os' => '14',
-                        'arch' => 'ARM64',
-                        'test_jit' => !$zts,
-                    ];
-                }
-            }
-        }
-    }
-    return $jobs;
-}
-
-function get_alpine_matrix_include(array $branches) {
-    $jobs = [];
-    foreach ($branches as $branch) {
-        if ([$branch['version']['major'], $branch['version']['minor']] < [8, 4]) {
-            continue;
-        }
-        $jobs[] = [
-            'name' => '_ASAN_UBSAN',
-            'branch' => $branch,
-            'debug' => true,
-            'zts' => true,
-            'asan' => true,
-            'test_jit' => true,
-            'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address -fno-sanitize=function' CC=clang-17 CXX=clang++-17",
-            'run_tests_parameters' => '--asan -x',
-        ];
-    }
-    return $jobs;
-}
-
 function get_current_version(): array {
     $file = dirname(__DIR__) . '/main/php_version.h';
     $content = file_get_contents($file);
     preg_match('(^#define PHP_MAJOR_VERSION (?<num>\d+)$)m', $content, $matches);
-    $major = $matches['num'];
+    $major = (int) $matches['num'];
     preg_match('(^#define PHP_MINOR_VERSION (?<num>\d+)$)m', $content, $matches);
-    $minor = $matches['num'];
-    return ['major' => $major, 'minor' => $minor];
+    $minor = (int) $matches['num'];
+    return [$major, $minor];
 }
 
 $trigger = $argv[1] ?? 'schedule';
 $attempt = (int) ($argv[2] ?? 1);
-$discard_cache = ($trigger === 'schedule' && $attempt !== 1) || $trigger === 'workflow_dispatch';
+$monday = date('w', time()) === '1';
+$discard_cache = $monday
+    || ($trigger === 'schedule' && $attempt !== 1)
+    || $trigger === 'workflow_dispatch';
 if ($discard_cache) {
     @unlink(get_branch_commit_cache_file_path());
 }
 $branch = $argv[3] ?? 'master';
-
 $branches = $branch === 'master'
     ? get_branches()
-    : [['name' => strtoupper($branch), 'ref' => $branch, 'version' => get_current_version()]];
-$matrix_include = get_matrix_include($branches);
-$windows_matrix_include = get_windows_matrix_include($branches);
-$macos_matrix_include = get_macos_matrix_include($branches);
-$alpine_matrix_include = get_alpine_matrix_include($branches);
+    : [['ref' => $branch, 'version' => get_current_version()]];
 
 $f = fopen(getenv('GITHUB_OUTPUT'), 'a');
 fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
-fwrite($f, 'matrix-include=' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
-fwrite($f, 'windows-matrix-include=' . json_encode($windows_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
-fwrite($f, 'macos-matrix-include=' . json_encode($macos_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
-fwrite($f, 'alpine-matrix-include=' . json_encode($alpine_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fclose($f);

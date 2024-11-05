@@ -18,7 +18,7 @@ if (getenv('PDOTEST_DSN') === false) {
 class PDOTest {
     // create an instance of the PDO driver, based on
     // the current environment
-    static function factory($classname = PDO::class) {
+    static function factory($classname = PDO::class, bool $useConnectMethod = false) {
         $dsn = getenv('PDOTEST_DSN');
         $user = getenv('PDOTEST_USER');
         $pass = getenv('PDOTEST_PASS');
@@ -32,7 +32,11 @@ class PDOTest {
         if ($user === false) $user = NULL;
         if ($pass === false) $pass = NULL;
 
-        $db = new $classname($dsn, $user, $pass, $attr);
+        if ($useConnectMethod) {
+            $db = $classname::connect($dsn, $user, $pass, $attr);
+        } else {
+            $db = new $classname($dsn, $user, $pass, $attr);
+        }
 
         if (!$db) {
             die("Could not create PDO object (DSN=$dsn, user=$user)\n");
@@ -54,12 +58,12 @@ class PDOTest {
         }
     }
 
-    static function test_factory($file, $classname = PDO::class) {
+    static function test_factory($file, $classname = PDO::class, bool $useConnectMethod = false) {
         $config = self::get_config($file);
         foreach ($config['ENV'] as $k => $v) {
             putenv("$k=$v");
         }
-        return self::factory($classname);
+        return self::factory($classname, $useConnectMethod);
     }
 
     static function get_config($file) {

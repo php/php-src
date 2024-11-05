@@ -38,12 +38,6 @@
 #include "zend_exceptions.h"
 #include "zend_mm_custom_handlers.h"
 
-// `php.h` sets `NDEBUG` when not `PHP_DEBUG` which will make `assert()` from
-// assert.h a no-op. In order to have `assert()` working on NDEBUG builds, we
-// undefine `NDEBUG` and re-include assert.h
-#undef NDEBUG
-#include "assert.h"
-
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
 # include <libxml/parser.h>
@@ -828,6 +822,17 @@ static ZEND_FUNCTION(zend_test_is_zend_ptr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_BOOL(is_zend_ptr((void*)addr));
+}
+
+static ZEND_FUNCTION(zend_test_log_err_debug)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str);
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
 }
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)

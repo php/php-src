@@ -1860,11 +1860,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					ADD_OP2_TRACE_GUARD();
 					break;
 				case ZEND_ASSIGN_DIM_OP:
-					if (opline->extended_value == ZEND_POW
-					 || opline->extended_value == ZEND_DIV) {
-						// TODO: check for division by zero ???
-						break;
-					}
 					if (opline->result_type != IS_UNUSED) {
 						break;
 					}
@@ -1875,23 +1870,18 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ZEND_FALLTHROUGH;
 				case ZEND_ASSIGN_DIM:
-					if (opline->op1_type == IS_CV) {
-						if ((opline+1)->op1_type == IS_CV
-						 && (opline+1)->op1.var == opline->op1.var) {
-							/* skip $a[x] = $a; */
-							break;
-						}
-						ADD_OP1_DATA_TRACE_GUARD();
-						ADD_OP2_TRACE_GUARD();
-						ADD_OP1_TRACE_GUARD();
-					} else if (orig_op1_type != IS_UNKNOWN
-					        && (orig_op1_type & IS_TRACE_INDIRECT)
-					        && opline->result_type == IS_UNUSED) {
-						if (opline->opcode == ZEND_ASSIGN_DIM_OP) {
-							ADD_OP1_DATA_TRACE_GUARD();
-						}
-						ADD_OP2_TRACE_GUARD();
+					if (opline->opcode == ZEND_ASSIGN_DIM
+					 && opline->op1_type == IS_CV
+					 && (opline+1)->op1_type == IS_CV
+					 && (opline+1)->op1.var == opline->op1.var) {
+						/* skip $a[x] = $a; */
+						break;
 					}
+					if (opline->op1_type == IS_CV || opline->opcode == ZEND_ASSIGN_DIM_OP) {
+						ADD_OP1_DATA_TRACE_GUARD();
+					}
+					ADD_OP2_TRACE_GUARD();
+					ADD_OP1_TRACE_GUARD();
 					if (op1_type == IS_ARRAY
 					 && ((opline->op2_type == IS_CONST
 					   && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG)
@@ -4773,6 +4763,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									op1_info, op2_info, op1_data_info, val_type))) {
 							goto jit_failure;
 						}
+						if (opline->op1_type == IS_VAR && !(op1_info & (MAY_BE_ANY-MAY_BE_NULL))) {
+							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_ARRAY, 1);
+						}
 						goto done;
 					case ZEND_PRE_INC_OBJ:
 					case ZEND_PRE_DEC_OBJ:
@@ -5096,6 +5089,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && (ssa_op+1)->op1_def >= 0
 						 && ssa->vars[(ssa_op+1)->op1_def].alias == NO_ALIAS) {
 							ssa->var_info[(ssa_op+1)->op1_def].guarded_reference = ssa->var_info[(ssa_op+1)->op1_use].guarded_reference;
+						}
+						if (opline->op1_type == IS_VAR && !(op1_info & (MAY_BE_ANY-MAY_BE_NULL))) {
+							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_ARRAY, 1);
 						}
 						goto done;
 					case ZEND_ASSIGN:

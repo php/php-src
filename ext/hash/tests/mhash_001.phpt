@@ -35,55 +35,77 @@ foreach ($supported_hash_al as $hash=>$wanted) {
 }
 ?>
 --EXPECTF--
+Deprecated: Constant MHASH_MD5 is deprecated in %s on line %d
+
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_MD5
 ok
 
+
+Deprecated: Constant MHASH_SHA1 is deprecated in %s on line %d
 
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_SHA1
 ok
 
 
+Deprecated: Constant MHASH_HAVAL256 is deprecated in %s on line %d
+
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_HAVAL256
 ok
 
+
+Deprecated: Constant MHASH_HAVAL192 is deprecated in %s on line %d
 
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_HAVAL192
 ok
 
 
+Deprecated: Constant MHASH_HAVAL224 is deprecated in %s on line %d
+
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_HAVAL224
 ok
 
+
+Deprecated: Constant MHASH_HAVAL160 is deprecated in %s on line %d
 
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_HAVAL160
 ok
 
 
+Deprecated: Constant MHASH_RIPEMD160 is deprecated in %s on line %d
+
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_RIPEMD160
 ok
 
+
+Deprecated: Constant MHASH_GOST is deprecated in %s on line %d
 
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_GOST
 ok
 
 
+Deprecated: Constant MHASH_TIGER is deprecated in %s on line %d
+
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_TIGER
 ok
 
 
+Deprecated: Constant MHASH_CRC32 is deprecated in %s on line %d
+
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_CRC32
 ok
 
+
+Deprecated: Constant MHASH_CRC32B is deprecated in %s on line %d
 
 Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 MHASH_CRC32B

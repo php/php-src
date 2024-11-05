@@ -374,6 +374,9 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 		}
 	}
 
+	ZEND_ASSERT(obj->document != NULL);
+	php_libxml_invalidate_node_list_cache(obj->document);
+
 	/* 5. Replace all with fragment within context. */
 	dom_remove_all_children(context_node);
 	return php_dom_pre_insert(obj->document, fragment, context_node, NULL) ? SUCCESS : FAILURE;
@@ -450,6 +453,9 @@ zend_result dom_element_outer_html_write(dom_object *obj, zval *newval)
 		}
 		return FAILURE;
 	}
+
+	ZEND_ASSERT(obj->document != NULL);
+	php_libxml_invalidate_node_list_cache(obj->document);
 
 	/* 7. Replace this with fragment within this's parent. */
 	if (!php_dom_pre_insert(obj->document, fragment, this->parent, this)) {

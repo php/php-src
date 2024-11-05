@@ -370,11 +370,19 @@ PHP_FUNCTION(msg_send)
 		php_var_serialize(&msg_var, message, &var_hash);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
+		if (UNEXPECTED(EG(exception))) {
+			smart_str_free(&msg_var);
+			RETURN_THROWS();
+		}
+
+
+		zend_string *str = smart_str_extract(&msg_var);
+		message_len = ZSTR_LEN(str);
 		/* NB: php_msgbuf is 1 char bigger than a long, so there is no need to
 		 * allocate the extra byte. */
-		messagebuffer = safe_emalloc(ZSTR_LEN(msg_var.s), 1, sizeof(struct php_msgbuf));
-		memcpy(messagebuffer->mtext, ZSTR_VAL(msg_var.s), ZSTR_LEN(msg_var.s) + 1);
-		message_len = ZSTR_LEN(msg_var.s);
+		messagebuffer = safe_emalloc(message_len, 1, sizeof(struct php_msgbuf));
+		memcpy(messagebuffer->mtext, ZSTR_VAL(str), message_len + 1);
+		zend_string_release_ex(str, false);
 		smart_str_free(&msg_var);
 	} else {
 		char *p;

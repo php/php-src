@@ -434,7 +434,7 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 			numerator_bottom_extension -= scale_diff;
 		} else {
 			numerator_bottom_extension = 0;
-			numeratorend -= scale_diff - numerator_bottom_extension;
+			numeratorend -= scale_diff > numerator_top_extension ? scale_diff - numerator_top_extension : 0;
 		}
 	} else {
 		numerator_bottom_extension += scale - numerator_scale;
@@ -443,6 +443,11 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 
 	/* Length of numerator data that can be read */
 	size_t numerator_readable_len = numeratorend - numeratorptr + 1;
+
+	if (divisor_len > numerator_readable_len + numerator_bottom_extension) {
+		*quot = bc_copy_num(BCG(_zero_));
+		return true;
+	}
 
 	/* If divisor is 1 here, return the result of adjusting the decimal point position of numerator. */
 	if (divisor_len == 1 && *divisorptr == 1) {

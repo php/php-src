@@ -4,7 +4,7 @@ IntlBreakIterator::preceding(): basic test, ICU >= 58.1
 intl
 --SKIPIF--
 <?php
-if (version_compare(INTL_ICU_VERSION, '57.1') <= 0) die('skip for ICU >= 58.1');
+if (version_compare(INTL_ICU_VERSION, '57.1') <= 0) die('skip for ICU > 57.1');
 ?>
 --FILE--
 <?php

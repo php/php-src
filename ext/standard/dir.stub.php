@@ -87,7 +87,11 @@ const SCANDIR_SORT_DESCENDING = UNKNOWN;
  */
 const SCANDIR_SORT_NONE = UNKNOWN;
 
-class Directory
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class Directory
 {
     public readonly string $path;
 
@@ -95,19 +99,16 @@ class Directory
     public readonly mixed $handle;
 
     /**
-     * @tentative-return-type
      * @implementation-alias closedir
      */
     public function close(): void {}
 
     /**
-     * @tentative-return-type
      * @implementation-alias rewinddir
      */
     public function rewind(): void {}
 
     /**
-     * @tentative-return-type
      * @implementation-alias readdir
      */
     public function read(): string|false {}

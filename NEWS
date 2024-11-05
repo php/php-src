@@ -25,6 +25,10 @@ PHP                                                                        NEWS
     its name to be reused. (David Carlier)
   . Added Iterable support for pgsql_copy_from. (David Carlier)
 
+- POSIX:
+  . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
+    a process can handle. (David Carlier)
+
 - Random:
   . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
 

@@ -56,6 +56,11 @@ PHP 8.5 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Hash:
+  The MHASH_* constants have been deprecated.  These have been overlooked
+  when the mhash*() function family has been deprecated per
+  https://wiki.php.net/rfc/deprecations_php_8_1#mhash_function_family
+
 ========================================
 5. Changed Functions
 ========================================
@@ -88,6 +93,9 @@ PHP 8.5 UPGRADE NOTES
     statement from the DEALLOCATE sql command in that we can reuse
     its name afterwards.
 
+- Reflection:
+  . ReflectionConstant::getFileName() was introduced.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -116,6 +124,9 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- POSIX:
+  . POSIX_SC_OPEN_MAX.
 
 ========================================
 11. Changes to INI File Handling

@@ -636,7 +636,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	}
 	if (intern->type == SPL_FS_DIR) {
 #ifdef HAVE_GLOB
-		if (php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
+		if (intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
 			ZVAL_STR_COPY(&tmp, intern->path);
 		} else {
 			ZVAL_FALSE(&tmp);
@@ -2027,6 +2027,12 @@ PHP_METHOD(SplFileObject, __construct)
 		RETURN_THROWS();
 	}
 
+	/* Prevent reinitialization of Object */
+	if (UNEXPECTED(intern->u.file.stream)) {
+		zend_throw_error(NULL, "Cannot call constructor twice");
+		RETURN_THROWS();
+	}
+
 	intern->u.file.open_mode = zend_string_copy(open_mode);
 	/* file_name and zcontext are copied by spl_filesystem_file_open() */
 	intern->file_name = file_name;
@@ -2070,7 +2076,7 @@ PHP_METHOD(SplTempFileObject, __construct)
 	}
 
 	/* Prevent reinitialization of Object */
-	if (intern->u.file.stream) {
+	if (UNEXPECTED(intern->u.file.stream)) {
 		zend_throw_error(NULL, "Cannot call constructor twice");
 		RETURN_THROWS();
 	}
