@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0RC4
+07 Nov 2024, PHP 8.4.0RC4
 
 - BcMath:
   . Fixed bug GH-16265 (Added early return case when result is 0)
