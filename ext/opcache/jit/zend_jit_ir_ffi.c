@@ -165,8 +165,8 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 			if (op1_info & MAY_BE_REF) {
 				arg_flags |= ZREG_FFI_ZVAL_DEREF;
 			}
-			ZEND_ASSERT(op1_ffi_type || op1_ce == zend_ffi_api->ctype_ce);
-			if (!op1_ffi_type && op1_ce == zend_ffi_api->ctype_ce) {
+			ZEND_ASSERT(op1_ffi_type);
+			if (op1_ce == zend_ffi_api->ctype_ce) {
 				arg_flags |= ZREG_FFI_CTYPE;
 			}
 			ref = jit_Z_PTR(jit, op1_addr);
