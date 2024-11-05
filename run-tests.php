@@ -1225,7 +1225,7 @@ function system_with_timeout(
             /* timed out */
             $data .= "\n ** ERROR: process timed out **\n";
             proc_terminate($proc, 9);
-            return $data;
+            break;
         }
 
         if ($n > 0) {
