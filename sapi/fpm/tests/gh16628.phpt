@@ -32,7 +32,7 @@ for ($i = 1; $i < 100; $i++) {
 EOT;
 
 $tester = new FPM\Tester($cfg, $code);
-$tester->start();
+$tester->start(extensions: ['zend_test']);
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
 for ($i = 1; $i < 100; $i++) {
