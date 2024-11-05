@@ -590,6 +590,7 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_FFI_FUNC_MEMSET           0x0000b000
 #define TRACE_FRAME_FFI_FUNC_STRING           0x0000c000
 #define TRACE_FRAME_FFI_FUNC_IS_NULL          0x0000d000
+#define TRACE_FRAME_FFI_FUNC_TYPE             0x0000e000
 
 
 #define TRACE_FRAME_INIT(frame, _func, _flags, num_args) do { \

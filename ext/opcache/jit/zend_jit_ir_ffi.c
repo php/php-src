@@ -334,6 +334,8 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 				SET_STACK_TYPE(stack, 2, IS_LONG, 0);
 				SET_STACK_REF_EX(stack, 2, ref, 0);
 			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPE) {
+			/* nothing to do */
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -760,6 +762,11 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 			if (res_addr) {
 				jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 			}
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPE) {
+			ref = ir_CONST_ADDR(type);
+			ref = ir_CALL_1(IR_ADDR, ir_CONST_FUNC(zend_ffi_api->ctype_create), ref);
+			jit_set_Z_PTR(jit, res_addr, ref);
+			jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
 		} else {
 			ZEND_UNREACHABLE();
 		}
