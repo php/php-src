@@ -21,7 +21,10 @@ $db = new PDO(
     getenv('PDOTEST_DSN'),
     getenv('PDOTEST_USER') ?: null,
     getenv('PDOTEST_PASS') ?: null,
-    [PDO::ATTR_STATEMENT_CLASS => [TestStmt::class]],
+    [
+        PDO::ATTR_CASE => PDO::CASE_LOWER,
+        PDO::ATTR_STATEMENT_CLASS => [TestStmt::class],
+    ],
 );
 
 $db->exec('CREATE TABLE gh16703 (name varchar(255))');
@@ -35,6 +38,8 @@ echo "done!\n";
 ?>
 --CLEAN--
 <?php
+if (getenv('PDOTEST_DSN') === 'sqlite::memory:') return;
+
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->exec('DROP TABLE gh16703');
