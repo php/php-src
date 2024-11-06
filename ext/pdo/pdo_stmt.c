@@ -2071,6 +2071,23 @@ out:
 	return fbc;
 }
 
+static HashTable *dbstmt_get_gc(zend_object *object, zval **gc_data, int *gc_count)
+{
+	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
+	*gc_data = &stmt->fetch.into;
+	*gc_count = 1;
+
+	/**
+	 * If there are no dynamic properties and the default property is 1 (that is, there is only one property
+	 * of string that does not participate in GC), there is no need to call zend_std_get_properties().
+	 */
+	if (object->properties == NULL && object->ce->default_properties_count <= 1) {
+		return NULL;
+	} else {
+		return zend_std_get_properties(object);
+	}
+}
+
 zend_object_handlers pdo_dbstmt_object_handlers;
 zend_object_handlers pdo_row_object_handlers;
 
@@ -2488,6 +2505,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_object_handlers.get_method = dbstmt_method_get;
 	pdo_dbstmt_object_handlers.compare = zend_objects_not_comparable;
 	pdo_dbstmt_object_handlers.clone_obj = NULL;
+	pdo_dbstmt_object_handlers.get_gc = dbstmt_get_gc;
 
 	pdo_row_ce = register_class_PDORow();
 	pdo_row_ce->create_object = pdo_row_new;
