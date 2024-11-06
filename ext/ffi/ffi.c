@@ -3926,22 +3926,12 @@ ZEND_METHOD(FFI, new) /* {{{ */
 }
 /* }}} */
 
-ZEND_METHOD(FFI, free) /* {{{ */
+static bool zend_ffi_cdata_free(zend_ffi_cdata *cdata) /* {{{ */
 {
-	zval *zv;
-	zend_ffi_cdata *cdata;
-
-	ZEND_FFI_VALIDATE_API_RESTRICTION();
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS_EX(zv, zend_ffi_cdata_ce, 0, 1);
-	ZEND_PARSE_PARAMETERS_END();
-
-	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
-
 	if (ZEND_FFI_TYPE(cdata->type)->kind == ZEND_FFI_TYPE_POINTER) {
 		if (!cdata->ptr) {
 			zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-			RETURN_THROWS();
+			return false;
 		}
 		if (cdata->ptr != (void*)&cdata->ptr_holder) {
 			pefree(*(void**)cdata->ptr, cdata->flags & ZEND_FFI_FLAG_PERSISTENT);
@@ -3956,6 +3946,25 @@ ZEND_METHOD(FFI, free) /* {{{ */
 		cdata->std.handlers = &zend_ffi_cdata_free_handlers;
 	} else {
 		zend_throw_error(zend_ffi_exception_ce, "free() non a C pointer");
+		return false;
+	}
+	return true;
+}
+/* }}} */
+
+ZEND_METHOD(FFI, free) /* {{{ */
+{
+	zval *zv;
+	zend_ffi_cdata *cdata;
+
+	ZEND_FFI_VALIDATE_API_RESTRICTION();
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS_EX(zv, zend_ffi_cdata_ce, 0, 1);
+	ZEND_PARSE_PARAMETERS_END();
+
+	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+	if (!zend_ffi_cdata_free(cdata)) {
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -5618,6 +5627,7 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	ffi_api.cdata_create       = zend_ffi_cdata_create;
 	ffi_api.ctype_create       = zend_ffi_ctype_create;
+	ffi_api.cdata_free         = zend_ffi_cdata_free;
 	ffi_api.type_print         = zend_ffi_type_print;
 	ffi_api.is_compatible_type = zend_ffi_is_compatible_type;
 

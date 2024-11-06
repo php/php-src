@@ -421,6 +421,7 @@ struct _zend_ffi_api {
 	/* ext/ffi interface for ext/opcache */
 	zend_ffi_cdata* (*cdata_create)(void *ptr, zend_ffi_type *type);
 	zend_ffi_ctype* (*ctype_create)(zend_ffi_type *type);
+	bool            (*cdata_free)(zend_ffi_cdata *cdata);
 	void            (*type_print)(FILE *f, const zend_ffi_type *type);
 	bool            (*is_compatible_type)(zend_ffi_type *dst_type, zend_ffi_type *src_type);
 

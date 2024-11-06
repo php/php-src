@@ -137,7 +137,8 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 	if (TRACE_FRAME_FFI_FUNC(call)) {
 		if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_ADDR
 		 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPEOF
-		 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_IS_NULL) {
+		 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_IS_NULL
+		 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_FREE) {
 			ZEND_ASSERT(opline->op2.num == 1);
 			ZEND_ASSERT(op1_ffi_type);
 
@@ -667,6 +668,16 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 			}
 			ref = ir_ADD_U32(ir_ZEXT_U32(ir_EQ(ref, IR_NULL)), ir_CONST_U32(IS_FALSE));
 			jit_set_Z_TYPE_INFO_ex(jit, res_addr, ref);
+		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_FREE) {
+			ref = STACK_REF(stack, 0);
+			if (STACK_FLAGS(stack, 0) & ZREG_FFI_ZVAL_DEREF) {
+				// TODO: try to remove this dereference ???
+				ref = zend_jit_gc_deref(jit, ref);
+			}
+			ir_CALL_1(IR_VOID, ir_CONST_FUNC(zend_ffi_api->cdata_free), ref);
+			if (res_addr) {
+				jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+			}
 		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_STRING) {
 			ZEND_ASSERT(num_args > 0 && STACK_TYPE(stack, 0) == IS_OBJECT);
 			ref = STACK_REF(stack, 0);
