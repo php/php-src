@@ -1589,6 +1589,7 @@ int main(int argc, char *argv[])
 	zend_signal_startup();
 
 	sapi_startup(&cgi_sapi_module);
+    php_ini_builder_prepend_literal(&ini_builder, HARDCODED_INI);
 	cgi_sapi_module.php_ini_path_override = NULL;
 	cgi_sapi_module.php_ini_ignore_cwd = 1;
 

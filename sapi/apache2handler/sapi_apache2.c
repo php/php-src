@@ -49,6 +49,7 @@
 #include "http_core.h"
 #include "ap_mpm.h"
 
+#include "php_ini_builder.h"
 #include "php_apache.h"
 
 /* UnixWare define shutdown to _shutdown, which causes problems later
@@ -60,6 +61,9 @@
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
 #define PHP_SCRIPT "php-script"
+
+static const char HARDCODED_INI[] =
+	"register_argc_argv=0\n";
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
@@ -466,6 +470,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 {
 	void *data = NULL;
 	const char *userdata_key = "apache2hook_post_config";
+	struct php_ini_builder ini_builder;
 
 	/* Apache will load, unload and then reload a DSO module. This
 	 * prevents us from starting PHP until the second load. */
@@ -480,6 +485,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 		return OK;
 	}
 
+	php_ini_builder_init(&ini_builder);
 	/* Set up our overridden path. */
 	if (apache2_php_ini_path_override) {
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
@@ -499,6 +505,8 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	zend_signal_startup();
 
 	sapi_startup(&apache2_sapi_module);
+    php_ini_builder_prepend_literal(&ini_builder, HARDCODED_INI);
+
 	if (apache2_sapi_module.startup(&apache2_sapi_module) != SUCCESS) {
 		return DONE;
 	}

@@ -125,7 +125,7 @@
 ;   Production Value: 4096
 
 ; register_argc_argv
-;   Default Value: On
+;   Default Value: Off
 ;   Development Value: Off
 ;   Production Value: Off
 
