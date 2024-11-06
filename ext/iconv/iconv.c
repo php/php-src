@@ -43,7 +43,7 @@
 #undef iconv
 #endif
 
-#if defined(__NetBSD__) || (defined(__sun) && !defined(_XPG6))
+#if defined(__NetBSD__) || defined(__sun)
 // unfortunately, netbsd has still the old non posix conformant signature
 // libiconv tends to match the eventual system's iconv too.
 //
