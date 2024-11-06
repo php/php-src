@@ -6946,66 +6946,24 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							zend_string *name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 
 							if (zend_string_equals_literal_ci(name, "new")) {
-								if (opline->extended_value == 1
-								 // TODO: support for FFI::new() with 2 and 3 arguments ???
-								 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL
-								 && (p+2)->op == ZEND_JIT_TRACE_VM) {
-									if (((p+2)->opline->opcode == ZEND_SEND_VAL
-									  || (p+2)->opline->opcode == ZEND_SEND_VAL_EX)
-									 && (p+2)->opline->op1_type == IS_CONST) {
-										zval *zv = RT_CONSTANT((p+2)->opline, (p+2)->opline->op1);
-
-										if (Z_TYPE_P(zv) == IS_STRING) {
-											zend_ffi_dcl *dcl = zend_ffi_api->cache_type_get(Z_STR_P(zv), op1_ffi_symbols);
-
-											if (dcl
-											 && !ZEND_FFI_TYPE_IS_OWNED(dcl->type)
-											 && (dcl->type->attr & ZEND_FFI_ATTR_PERSISTENT)
-											 && dcl->type->size != 0) {
-												if (!ffi_info) {
-													ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
-												}
-												if (!zend_jit_ffi_symbols_guard(&ctx, opline, ssa,
-														ssa_op->op1_use, -1, op1_info, op1_addr, op1_ffi_symbols, ffi_info)) {
-													goto jit_failure;
-												}
-												frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_NEW;
-												frame_ffi_func_type = dcl->type;
-												if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-													frame_ffi_func_ref = jit_Z_PTR(jit, op1_addr);
-												} else {
-													frame_ffi_func_ref = IR_UNUSED;
-												}
-												goto done;
-											}
-										}
-									} else if ((p+2)->opline->opcode == ZEND_SEND_VAR_EX
-											&& (p+3)->op == ZEND_JIT_TRACE_OP1_TYPE
-											&& (p+3)->ce == zend_ffi_api->ctype_ce
-											&& (p+4)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
-										zend_ffi_type *type = (zend_ffi_type*)(p+4)->ptr;
-
-										if (!ZEND_FFI_TYPE_IS_OWNED(type)
-										 && (type->attr & ZEND_FFI_ATTR_PERSISTENT)
-										 && type->size != 0) {
-											if (!ffi_info) {
-												ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
-											}
-											if (!zend_jit_ffi_symbols_guard(&ctx, opline, ssa,
-													ssa_op->op1_use, -1, op1_info, op1_addr, op1_ffi_symbols, ffi_info)) {
-												goto jit_failure;
-											}
-											// TODO: Guard for FFI::CType argument
-											frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_NEW;
-											frame_ffi_func_type = type;
-											if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-												frame_ffi_func_ref = jit_Z_PTR(jit, op1_addr);
-											} else {
-												frame_ffi_func_ref = IR_UNUSED;
-											}
-											goto done;
-										}
+								zend_ffi_type *type = zend_jit_ffi_supported_new(opline, op1_ffi_symbols, p);
+								if (type) {
+									if (!ffi_info) {
+										ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 									}
+									if (!zend_jit_ffi_symbols_guard(&ctx, opline, ssa,
+											ssa_op->op1_use, -1, op1_info, op1_addr, op1_ffi_symbols, ffi_info)) {
+										goto jit_failure;
+									}
+									// TODO: Guard for FFI::CType argument ???
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_NEW;
+									frame_ffi_func_type = type;
+									if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+										frame_ffi_func_ref = jit_Z_PTR(jit, op1_addr);
+									} else {
+										frame_ffi_func_ref = IR_UNUSED;
+									}
+									goto done;
 								}
 							} else if (zend_string_equals_literal_ci(name, "type")) {
 								if (opline->extended_value == 1

@@ -335,11 +335,34 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 				SET_STACK_REF_EX(stack, 2, ref, 0);
 			}
 		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_NEW) {
-			ZEND_ASSERT(opline->op2.num == 1);
-			/* nothing to do */
+			if (opline->op2.num == 1) {
+				if (op1_ffi_type && (opline->op1_type & (IS_VAR|IS_TMP_VAR))) {
+					arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					if (op1_info & MAY_BE_REF) {
+						arg_flags |= ZREG_FFI_ZVAL_DEREF;
+					}
+					ref = jit_Z_PTR(jit, op1_addr);
+					SET_STACK_TYPE(stack, 0, IS_OBJECT, 0);
+					SET_STACK_REF_EX(stack, 0, ref, arg_flags);
+				}
+			} else if (opline->op2.num == 2) {
+				ZEND_ASSERT(opline->op1_type == IS_CONST);
+				SET_STACK_TYPE(stack, 1, zend_is_true(RT_CONSTANT(opline, opline->op1)) ? IS_TRUE : IS_FALSE, 0);
+			} else if (opline->op2.num == 3) {
+				ZEND_ASSERT(opline->op1_type == IS_CONST);
+				SET_STACK_TYPE(stack, 2, zend_is_true(RT_CONSTANT(opline, opline->op1)) ? IS_TRUE : IS_FALSE, 0);
+			}
 		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPE) {
 			ZEND_ASSERT(opline->op2.num == 1);
-			/* nothing to do */
+			if (op1_ffi_type && (opline->op1_type & (IS_VAR|IS_TMP_VAR))) {
+				arg_flags |= ZREG_FFI_ZVAL_DTOR;
+				if (op1_info & MAY_BE_REF) {
+					arg_flags |= ZREG_FFI_ZVAL_DEREF;
+				}
+				ref = jit_Z_PTR(jit, op1_addr);
+				SET_STACK_TYPE(stack, 0, IS_OBJECT, 0);
+				SET_STACK_REF_EX(stack, 0, ref, arg_flags);
+			}
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -768,19 +791,32 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 			}
 		} else if (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_NEW) {
 			if (res_addr) {
+				uint32_t flags = ZEND_FFI_FLAG_OWNED;
+
+				if (num_args > 1 && STACK_TYPE(stack, 1) == IS_FALSE) {
+					flags &= ~ZEND_FFI_FLAG_OWNED;
+				}
+				if (num_args > 2 && STACK_TYPE(stack, 2) == IS_TRUE) {
+					flags |= ZEND_FFI_FLAG_PERSISTENT;
+				}
+				// TODO: ZEND_FFI_FLAG_CONST flag ???
+				if (flags & ZEND_FFI_FLAG_PERSISTENT) {
+					ref = ir_CALL_2(IR_ADDR, ir_CONST_FUNC(calloc), ir_CONST_LONG(1), ir_CONST_ADDR(type->size));
+				} else {
 #if ZEND_DEBUG
-				ref = ir_CALL_6(IR_ADDR, ir_CONST_FC_FUNC(_ecalloc),
-					ir_CONST_LONG(1),
-					ir_CONST_ADDR(type->size),
-					op_array->filename ? ir_CONST_ADDR(op_array->filename->val) : IR_NULL,
-					ir_CONST_U32(opline ? opline->lineno : 0),
-					IR_NULL,
-					ir_CONST_U32(0));
+					ref = ir_CALL_6(IR_ADDR, ir_CONST_FC_FUNC(_ecalloc),
+						ir_CONST_LONG(1),
+						ir_CONST_ADDR(type->size),
+						op_array->filename ? ir_CONST_ADDR(op_array->filename->val) : IR_NULL,
+						ir_CONST_U32(opline ? opline->lineno : 0),
+						IR_NULL,
+						ir_CONST_U32(0));
 #else
-				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(_ecalloc), ir_CONST_LONG(1), ir_CONST_ADDR(type->size));
+					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(_ecalloc), ir_CONST_LONG(1), ir_CONST_ADDR(type->size));
 #endif
+                }
 				ref = ir_CALL_2(IR_ADDR, ir_CONST_FUNC(zend_ffi_api->cdata_create), ref, ir_CONST_ADDR(type));
-				ir_STORE(ir_ADD_OFFSET(ref, offsetof(zend_ffi_cdata, flags)), ir_CONST_U32(ZEND_FFI_FLAG_OWNED));
+				ir_STORE(ir_ADD_OFFSET(ref, offsetof(zend_ffi_cdata, flags)), ir_CONST_U32(flags));
 				jit_set_Z_PTR(jit, res_addr, ref);
 				jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
 			}
