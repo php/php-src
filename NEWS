@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     (frankenphp)). (nielsdos)
   . Fixed bug GH-16799 (Assertion failure at Zend/zend_vm_execute.h:7469).
     (nielsdos)
+  . Fixed bug GH-16630 (UAF in lexer with encoding translation and heredocs).
+    (nielsdos)
 
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
