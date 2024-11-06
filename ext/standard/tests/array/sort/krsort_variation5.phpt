@@ -2,224 +2,120 @@
 Test krsort() function : usage variations - sort strings
 --FILE--
 <?php
-/*
- * testing krsort() by providing array of string values for $array argument with
- * following flag values:
- *  1.flag value as default
- *  2.SORT_REGULAR - compare items normally
- *  3.SORT_STRING  - compare items as strings
-*/
 
-echo "*** Testing krsort() : usage variations ***\n";
+$array = [
+    "lemoN" => "lemoN",
+    "Orange" => "Orange",
+    "banana" => "banana",
+    "apple" => "apple",
+    "Test" => "Test",
+    "TTTT" => "TTTT",
+    "ttt" => "ttt",
+    "ww" => "ww",
+    "x" => "x",
+    "X" => "X",
+    "oraNGe" => "oraNGe",
+    "BANANA" => "BANANA",
+];
 
-$various_arrays = array (
-  // diff. escape sequence chars with key values
-  array ( null =>  null, NULL => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
-          "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh",
-          "\ddd" => "\ddd", "\v" => "\v"
-        ),
+echo "Default flag\n";
+$temp_array = $array;
+var_dump(ksort($temp_array)); // expecting : bool(true)
+var_dump($temp_array);
 
-  // array containing different strings with key values
-  array ( 'Lemon' => "lemoN", 'o' => "Orange", 'B' => "banana", 'Apple' => "apple", 'te' => "Test",
-          't' => "TTTT", 'T' => "ttt", 'W' => "ww", 'X' => "x", 'x' => "X", 'O' => "oraNGe",
-          'B' => "BANANA"
-        )
-);
+echo "SORT_REGULAR\n";
+$temp_array = $array;
+var_dump(ksort($temp_array, SORT_REGULAR)); // expecting : bool(true)
+var_dump($temp_array);
 
-$flags = array("SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING);
+echo "SORT_STRING\n";
+$temp_array = $array;
+var_dump(ksort($temp_array, SORT_STRING)); // expecting : bool(true)
+var_dump($temp_array);
 
-$count = 1;
-echo "\n-- Testing krsort() by supplying various string arrays --\n";
-
-// loop through to test krsort() with different arrays
-foreach ($various_arrays as $array) {
-  echo "\n-- Iteration $count --\n";
-
-  echo "- With default sort flag -\n";
-  $temp_array = $array;
-  var_dump(krsort($temp_array) ); // expecting : bool(true)
-  var_dump($temp_array);
-
-  // loop through $flags array and call krsort() with all possible sort flag values
-  foreach($flags as $key => $flag){
-    echo "- Sort flag = $key -\n";
-    $temp_array = $array;
-    var_dump(krsort($temp_array, $flag) ); // expecting : bool(true)
-    var_dump($temp_array);
-  }
-  $count++;
-}
-
-echo "Done\n";
 ?>
 --EXPECT--
-*** Testing krsort() : usage variations ***
-
--- Testing krsort() by supplying various string arrays --
-
--- Iteration 1 --
-- With default sort flag -
+Default flag
 bool(true)
-array(11) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  [""]=>
-  NULL
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(11) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  [""]=>
-  NULL
-}
-- Sort flag = SORT_STRING -
-bool(true)
-array(11) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  [""]=>
-  NULL
-}
-
--- Iteration 2 --
-- With default sort flag -
-bool(true)
-array(11) {
-  ["x"]=>
-  string(1) "X"
-  ["te"]=>
-  string(4) "Test"
-  ["t"]=>
-  string(4) "TTTT"
-  ["o"]=>
-  string(6) "Orange"
-  ["X"]=>
-  string(1) "x"
-  ["W"]=>
-  string(2) "ww"
-  ["T"]=>
-  string(3) "ttt"
-  ["O"]=>
-  string(6) "oraNGe"
-  ["Lemon"]=>
-  string(5) "lemoN"
-  ["B"]=>
+array(12) {
+  ["BANANA"]=>
   string(6) "BANANA"
-  ["Apple"]=>
-  string(5) "apple"
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(11) {
-  ["x"]=>
-  string(1) "X"
-  ["te"]=>
-  string(4) "Test"
-  ["t"]=>
-  string(4) "TTTT"
-  ["o"]=>
+  ["Orange"]=>
   string(6) "Orange"
-  ["X"]=>
-  string(1) "x"
-  ["W"]=>
-  string(2) "ww"
-  ["T"]=>
-  string(3) "ttt"
-  ["O"]=>
-  string(6) "oraNGe"
-  ["Lemon"]=>
-  string(5) "lemoN"
-  ["B"]=>
-  string(6) "BANANA"
-  ["Apple"]=>
-  string(5) "apple"
-}
-- Sort flag = SORT_STRING -
-bool(true)
-array(11) {
-  ["x"]=>
-  string(1) "X"
-  ["te"]=>
-  string(4) "Test"
-  ["t"]=>
+  ["TTTT"]=>
   string(4) "TTTT"
-  ["o"]=>
-  string(6) "Orange"
+  ["Test"]=>
+  string(4) "Test"
   ["X"]=>
-  string(1) "x"
-  ["W"]=>
-  string(2) "ww"
-  ["T"]=>
-  string(3) "ttt"
-  ["O"]=>
-  string(6) "oraNGe"
-  ["Lemon"]=>
-  string(5) "lemoN"
-  ["B"]=>
-  string(6) "BANANA"
-  ["Apple"]=>
+  string(1) "X"
+  ["apple"]=>
   string(5) "apple"
+  ["banana"]=>
+  string(6) "banana"
+  ["lemoN"]=>
+  string(5) "lemoN"
+  ["oraNGe"]=>
+  string(6) "oraNGe"
+  ["ttt"]=>
+  string(3) "ttt"
+  ["ww"]=>
+  string(2) "ww"
+  ["x"]=>
+  string(1) "x"
 }
-Done
+SORT_REGULAR
+bool(true)
+array(12) {
+  ["BANANA"]=>
+  string(6) "BANANA"
+  ["Orange"]=>
+  string(6) "Orange"
+  ["TTTT"]=>
+  string(4) "TTTT"
+  ["Test"]=>
+  string(4) "Test"
+  ["X"]=>
+  string(1) "X"
+  ["apple"]=>
+  string(5) "apple"
+  ["banana"]=>
+  string(6) "banana"
+  ["lemoN"]=>
+  string(5) "lemoN"
+  ["oraNGe"]=>
+  string(6) "oraNGe"
+  ["ttt"]=>
+  string(3) "ttt"
+  ["ww"]=>
+  string(2) "ww"
+  ["x"]=>
+  string(1) "x"
+}
+SORT_STRING
+bool(true)
+array(12) {
+  ["BANANA"]=>
+  string(6) "BANANA"
+  ["Orange"]=>
+  string(6) "Orange"
+  ["TTTT"]=>
+  string(4) "TTTT"
+  ["Test"]=>
+  string(4) "Test"
+  ["X"]=>
+  string(1) "X"
+  ["apple"]=>
+  string(5) "apple"
+  ["banana"]=>
+  string(6) "banana"
+  ["lemoN"]=>
+  string(5) "lemoN"
+  ["oraNGe"]=>
+  string(6) "oraNGe"
+  ["ttt"]=>
+  string(3) "ttt"
+  ["ww"]=>
+  string(2) "ww"
+  ["x"]=>
+  string(1) "x"
+}

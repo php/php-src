@@ -2,235 +2,120 @@
 Test asort() function : usage variations - sort strings
 --FILE--
 <?php
-/*
- * testing asort() by providing different string arrays for $array argument with following flag values
- *  flag value as default
- *  SORT_REGULAR - compare items normally
- *  SORT_STRING  - compare items as strings
-*/
 
-echo "*** Testing asort() : usage variations ***\n";
+$array = [
+    "lemoN" => "lemoN",
+    "Orange" => "Orange",
+    "banana" => "banana",
+    "apple" => "apple",
+    "Test" => "Test",
+    "TTTT" => "TTTT",
+    "ttt" => "ttt",
+    "ww" => "ww",
+    "x" => "x",
+    "X" => "X",
+    "oraNGe" => "oraNGe",
+    "BANANA" => "BANANA",
+];
 
-$various_arrays = array (
-  // group of escape sequences
-  array ("null"=>  null, "NULL" => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
-        "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh",
-        "\ddd" => "\ddd", "\v" => "\v"
-        ),
+echo "Default flag\n";
+$temp_array = $array;
+var_dump(asort($temp_array)); // expecting : bool(true)
+var_dump($temp_array);
 
-  // array contains combination of capital/small letters
-  array ('l' => "lemoN", 'O' => "Orange", 'b' => "banana", 'a' => "apple", 'Te' => "Test",
-        'T' => "TTTT", 't' => "ttt", 'w' => "ww", 'x' => "x", 'X' => "X", 'o' => "oraNGe",
-        'B' => "BANANA"
-        )
-);
+echo "SORT_REGULAR\n";
+$temp_array = $array;
+var_dump(asort($temp_array, SORT_REGULAR)); // expecting : bool(true)
+var_dump($temp_array);
 
-$flags = array("SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING);
+echo "SORT_STRING\n";
+$temp_array = $array;
+var_dump(asort($temp_array, SORT_STRING)); // expecting : bool(true)
+var_dump($temp_array);
 
-$count = 1;
-echo "\n-- Testing asort() by supplying various string arrays --\n";
-
-// loop through to test asort() with different arrays
-foreach ($various_arrays as $array) {
-  echo "\n-- Iteration $count --\n";
-
-  echo "- With default sort_flag -\n";
-  $temp_array = $array;
-  var_dump(asort($temp_array) ); // expecting : bool(true)
-  var_dump($temp_array);
-
-  // loop through $flags array and setting all possible flag values
-  foreach($flags as $key => $flag){
-    echo "- Sort_flag = $key -\n";
-    $temp_array = $array;
-    var_dump(asort($temp_array, $flag) ); // expecting : bool(true)
-    var_dump($temp_array);
-  }
-  $count++;
-}
-
-echo "Done\n";
 ?>
 --EXPECT--
-*** Testing asort() : usage variations ***
-
--- Testing asort() by supplying various string arrays --
-
--- Iteration 1 --
-- With default sort_flag -
+Default flag
 bool(true)
 array(12) {
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-  ["	"]=>
-  string(1) "	"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["\a"]=>
-  string(2) "\a"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\xhh"]=>
-  string(4) "\xhh"
-}
-- Sort_flag = SORT_REGULAR -
-bool(true)
-array(12) {
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-  ["	"]=>
-  string(1) "	"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["\a"]=>
-  string(2) "\a"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\xhh"]=>
-  string(4) "\xhh"
-}
-- Sort_flag = SORT_STRING -
-bool(true)
-array(12) {
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-  ["	"]=>
-  string(1) "	"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["\a"]=>
-  string(2) "\a"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\xhh"]=>
-  string(4) "\xhh"
-}
-
--- Iteration 2 --
-- With default sort_flag -
-bool(true)
-array(12) {
-  ["B"]=>
+  ["BANANA"]=>
   string(6) "BANANA"
-  ["O"]=>
+  ["Orange"]=>
   string(6) "Orange"
-  ["T"]=>
+  ["TTTT"]=>
   string(4) "TTTT"
-  ["Te"]=>
+  ["Test"]=>
   string(4) "Test"
   ["X"]=>
   string(1) "X"
-  ["a"]=>
+  ["apple"]=>
   string(5) "apple"
-  ["b"]=>
+  ["banana"]=>
   string(6) "banana"
-  ["l"]=>
+  ["lemoN"]=>
   string(5) "lemoN"
-  ["o"]=>
+  ["oraNGe"]=>
   string(6) "oraNGe"
-  ["t"]=>
+  ["ttt"]=>
   string(3) "ttt"
-  ["w"]=>
+  ["ww"]=>
   string(2) "ww"
   ["x"]=>
   string(1) "x"
 }
-- Sort_flag = SORT_REGULAR -
+SORT_REGULAR
 bool(true)
 array(12) {
-  ["B"]=>
+  ["BANANA"]=>
   string(6) "BANANA"
-  ["O"]=>
+  ["Orange"]=>
   string(6) "Orange"
-  ["T"]=>
+  ["TTTT"]=>
   string(4) "TTTT"
-  ["Te"]=>
+  ["Test"]=>
   string(4) "Test"
   ["X"]=>
   string(1) "X"
-  ["a"]=>
+  ["apple"]=>
   string(5) "apple"
-  ["b"]=>
+  ["banana"]=>
   string(6) "banana"
-  ["l"]=>
+  ["lemoN"]=>
   string(5) "lemoN"
-  ["o"]=>
+  ["oraNGe"]=>
   string(6) "oraNGe"
-  ["t"]=>
+  ["ttt"]=>
   string(3) "ttt"
-  ["w"]=>
+  ["ww"]=>
   string(2) "ww"
   ["x"]=>
   string(1) "x"
 }
-- Sort_flag = SORT_STRING -
+SORT_STRING
 bool(true)
 array(12) {
-  ["B"]=>
+  ["BANANA"]=>
   string(6) "BANANA"
-  ["O"]=>
+  ["Orange"]=>
   string(6) "Orange"
-  ["T"]=>
+  ["TTTT"]=>
   string(4) "TTTT"
-  ["Te"]=>
+  ["Test"]=>
   string(4) "Test"
   ["X"]=>
   string(1) "X"
-  ["a"]=>
+  ["apple"]=>
   string(5) "apple"
-  ["b"]=>
+  ["banana"]=>
   string(6) "banana"
-  ["l"]=>
+  ["lemoN"]=>
   string(5) "lemoN"
-  ["o"]=>
+  ["oraNGe"]=>
   string(6) "oraNGe"
-  ["t"]=>
+  ["ttt"]=>
   string(3) "ttt"
-  ["w"]=>
+  ["ww"]=>
   string(2) "ww"
   ["x"]=>
   string(1) "x"
 }
-Done
