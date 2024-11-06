@@ -1283,10 +1283,7 @@ PHP_METHOD(DOMDocument, __construct)
 		}
 	}
 	intern->document = NULL;
-	if (php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp) == -1) {
-		/* docp is always non-null so php_libxml_increment_doc_ref() never returns -1 */
-		ZEND_UNREACHABLE();
-	}
+	php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)docp, (void *)intern);
 }
 /* }}} end DOMDocument::__construct */
@@ -1495,9 +1492,7 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 			}
 		}
 		intern->document = NULL;
-		if (php_libxml_increment_doc_ref((php_libxml_node_object *)intern, newdoc) == -1) {
-			RETURN_FALSE;
-		}
+		php_libxml_increment_doc_ref((php_libxml_node_object *)intern, newdoc);
 		intern->document->doc_props = doc_prop;
 		intern->document->class_type = class_type;
 	}

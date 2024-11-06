@@ -1291,9 +1291,9 @@ PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object)
 	return node;
 }
 
-PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data)
+PHP_LIBXML_API unsigned int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data)
 {
-	int ret_refcount = -1;
+	unsigned int ret_refcount = 0;
 
 	if (object != NULL && node != NULL) {
 		if (object->node != NULL) {
@@ -1323,11 +1323,11 @@ PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object,
 	return ret_refcount;
 }
 
-PHP_LIBXML_API int php_libxml_decrement_node_ptr_ref(php_libxml_node_ptr *ptr)
+PHP_LIBXML_API unsigned int php_libxml_decrement_node_ptr_ref(php_libxml_node_ptr *ptr)
 {
 	ZEND_ASSERT(ptr != NULL);
 
-	int ret_refcount = --ptr->refcount;
+	unsigned int ret_refcount = --ptr->refcount;
 	if (ret_refcount == 0) {
 		if (ptr->node != NULL) {
 			ptr->node->_private = NULL;
@@ -1341,17 +1341,17 @@ PHP_LIBXML_API int php_libxml_decrement_node_ptr_ref(php_libxml_node_ptr *ptr)
 	return ret_refcount;
 }
 
-PHP_LIBXML_API int php_libxml_decrement_node_ptr(php_libxml_node_object *object)
+PHP_LIBXML_API unsigned int php_libxml_decrement_node_ptr(php_libxml_node_object *object)
 {
 	if (object != NULL && object->node != NULL) {
 		return php_libxml_decrement_node_ptr_ref(object->node);
 	}
-	return -1;
+	return 0;
 }
 
-PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp)
+PHP_LIBXML_API unsigned int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp)
 {
-	int ret_refcount = -1;
+	unsigned int ret_refcount = 0;
 
 	if (object->document != NULL) {
 		object->document->refcount++;
@@ -1372,9 +1372,9 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 	return ret_refcount;
 }
 
-PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document)
+PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document)
 {
-	int ret_refcount = --document->refcount;
+	unsigned int ret_refcount = --document->refcount;
 	if (ret_refcount == 0) {
 		if (document->private_data != NULL) {
 			document->private_data->dtor(document->private_data);
@@ -1395,9 +1395,9 @@ PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *doc
 	return ret_refcount;
 }
 
-PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object)
+PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref(php_libxml_node_object *object)
 {
-	int ret_refcount = -1;
+	unsigned int ret_refcount = 0;
 
 	if (object != NULL && object->document != NULL) {
 		ret_refcount = php_libxml_decrement_doc_ref_directly(object->document);
@@ -1445,7 +1445,7 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 	if (object != NULL && object->node != NULL) {
 		php_libxml_node_ptr *obj_node = (php_libxml_node_ptr *) object->node;
 		xmlNodePtr nodep = obj_node->node;
-		int ret_refcount = php_libxml_decrement_node_ptr(object);
+		unsigned int ret_refcount = php_libxml_decrement_node_ptr(object);
 		if (ret_refcount == 0) {
 			php_libxml_node_free_resource(nodep);
 		} else {
