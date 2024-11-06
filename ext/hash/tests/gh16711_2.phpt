@@ -2,8 +2,6 @@
 GH-16711: Segmentation fault in mhash()
 --SKIPIF--
 <?php if(!function_exists('mhash')) { die('skip mhash compatibility layer not available'); } ?>
---XFAIL--
-SEGFAULT
 --FILE--
 <?php
 
@@ -97,4 +95,4 @@ array(40) {
 }
 
 Deprecated: Function mhash() is deprecated in %s on line %d
-SEGFAULT
+bool(false)
