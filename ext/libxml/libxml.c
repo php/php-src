@@ -49,11 +49,11 @@
 #include "libxml_arginfo.h"
 
 /* a true global for initialization */
-static int _php_libxml_initialized = 0;
-static int _php_libxml_per_request_initialization = 1;
-static xmlExternalEntityLoader _php_libxml_default_entity_loader;
+static int php_libxml_initialized = 0;
+static int php_libxml_per_request_initialization = 1;
+static xmlExternalEntityLoader php_libxml_default_entity_loader;
 
-typedef struct _php_libxml_func_handler {
+typedef struct php_libxml_func_handler {
 	php_libxml_export_node export_func;
 } php_libxml_func_handler;
 
@@ -601,16 +601,16 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	return(ret);
 }
 
-static void _php_libxml_free_error(void *ptr)
+static void php_libxml_free_error(void *ptr)
 {
 	/* This will free the libxml alloc'd memory */
 	xmlResetError((xmlErrorPtr) ptr);
 }
 
 #if LIBXML_VERSION >= 21200
-static void _php_list_set_error_structure(const xmlError *error, const char *msg, int line, int column)
+static void php_list_set_error_structure(const xmlError *error, const char *msg, int line, int column)
 #else
-static void _php_list_set_error_structure(xmlError *error, const char *msg, int line, int column)
+static void php_list_set_error_structure(xmlError *error, const char *msg, int line, int column)
 #endif
 {
 	xmlError error_copy;
@@ -655,7 +655,7 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg, in
 void php_libxml_issue_error(int level, const char *msg)
 {
 	if (LIBXML(error_list)) {
-		_php_list_set_error_structure(NULL, msg, 0, 0);
+		php_list_set_error_structure(NULL, msg, 0, 0);
 	} else {
 		php_error_docref(NULL, level, "%s", msg);
 	}
@@ -681,7 +681,7 @@ static void php_libxml_internal_error_handler_ex(php_libxml_error_level error_ty
 
 	if (output) {
 		if (LIBXML(error_list)) {
-			_php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s), line, column);
+			php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s), line, column);
 		} else if (!EG(exception)) {
 			/* Don't throw additional notices/warnings if an exception has already been thrown. */
 			switch (error_type) {
@@ -712,7 +712,7 @@ PHP_LIBXML_API void php_libxml_error_handler_va(php_libxml_error_level error_typ
 	php_libxml_internal_error_handler_ex(error_type, ctx, msg, ap, line, column);
 }
 
-static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
+static xmlParserInputPtr php_libxml_external_entity_loader(const char *URL,
 		const char *ID, xmlParserCtxtPtr context)
 {
 	xmlParserInputPtr	ret			= NULL;
@@ -722,7 +722,7 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 
 	/* no custom user-land callback set up; delegate to original loader */
 	if (!ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
-		return _php_libxml_default_entity_loader(URL, ID, context);
+		return php_libxml_default_entity_loader(URL, ID, context);
 	}
 
 	if (ID != NULL) {
@@ -821,7 +821,7 @@ is_string:
 	return ret;
 }
 
-static xmlParserInputPtr _php_libxml_pre_ext_ent_loader(const char *URL,
+static xmlParserInputPtr php_libxml_pre_ext_ent_loader(const char *URL,
 		const char *ID, xmlParserCtxtPtr context)
 {
 
@@ -833,11 +833,11 @@ static xmlParserInputPtr _php_libxml_pre_ext_ent_loader(const char *URL,
 	 * we don't even have a resource list by then), but then whether one
 	 * extension would be using the custom external entity loader or not
 	 * could depend on extension loading order
-	 * (if _php_libxml_per_request_initialization */
+	 * (if php_libxml_per_request_initialization */
 	if (xmlGenericError == php_libxml_error_handler && PG(modules_activated)) {
-		return _php_libxml_external_entity_loader(URL, ID, context);
+		return php_libxml_external_entity_loader(URL, ID, context);
 	} else {
-		return _php_libxml_default_entity_loader(URL, ID, context);
+		return php_libxml_default_entity_loader(URL, ID, context);
 	}
 }
 
@@ -879,7 +879,7 @@ static void php_libxml_structured_error_handler(void *userData, const xmlError *
 static void php_libxml_structured_error_handler(void *userData, xmlErrorPtr error)
 #endif
 {
-	_php_list_set_error_structure(error, NULL, 0, 0);
+	php_list_set_error_structure(error, NULL, 0, 0);
 }
 
 PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
@@ -897,32 +897,32 @@ static void php_libxml_exports_dtor(zval *zv)
 
 PHP_LIBXML_API void php_libxml_initialize(void)
 {
-	if (!_php_libxml_initialized) {
+	if (!php_libxml_initialized) {
 		/* we should be the only one's to ever init!! */
 		ZEND_IGNORE_LEAKS_BEGIN();
 		xmlInitParser();
 		ZEND_IGNORE_LEAKS_END();
 
-		_php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
-		xmlSetExternalEntityLoader(_php_libxml_pre_ext_ent_loader);
+		php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
+		xmlSetExternalEntityLoader(php_libxml_pre_ext_ent_loader);
 
 		zend_hash_init(&php_libxml_exports, 0, NULL, php_libxml_exports_dtor, 1);
 
-		_php_libxml_initialized = 1;
+		php_libxml_initialized = 1;
 	}
 }
 
 PHP_LIBXML_API void php_libxml_shutdown(void)
 {
-	if (_php_libxml_initialized) {
+	if (php_libxml_initialized) {
 #if defined(LIBXML_SCHEMAS_ENABLED) && LIBXML_VERSION < 21000
 		xmlRelaxNGCleanupTypes();
 #endif
 		/* xmlCleanupParser(); */
 		zend_hash_destroy(&php_libxml_exports);
 
-		xmlSetExternalEntityLoader(_php_libxml_default_entity_loader);
-		_php_libxml_initialized = 0;
+		xmlSetExternalEntityLoader(php_libxml_default_entity_loader);
+		php_libxml_initialized = 0;
 	}
 }
 
@@ -954,13 +954,13 @@ static PHP_MINIT_FUNCTION(libxml)
 
 		for (sapi_name = supported_sapis; *sapi_name; sapi_name++) {
 			if (strcmp(sapi_module.name, *sapi_name) == 0) {
-				_php_libxml_per_request_initialization = 0;
+				php_libxml_per_request_initialization = 0;
 				break;
 			}
 		}
 	}
 
-	if (!_php_libxml_per_request_initialization) {
+	if (!php_libxml_per_request_initialization) {
 		/* report errors via handler rather than stderr */
 		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
 		xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
@@ -973,7 +973,7 @@ static PHP_MINIT_FUNCTION(libxml)
 
 static PHP_RINIT_FUNCTION(libxml)
 {
-	if (_php_libxml_per_request_initialization) {
+	if (php_libxml_per_request_initialization) {
 		/* report errors via handler rather than stderr */
 		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
 		xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
@@ -1000,7 +1000,7 @@ static PHP_RSHUTDOWN_FUNCTION(libxml)
 
 static PHP_MSHUTDOWN_FUNCTION(libxml)
 {
-	if (!_php_libxml_per_request_initialization) {
+	if (!php_libxml_per_request_initialization) {
 		xmlSetGenericErrorFunc(NULL, NULL);
 
 		xmlParserInputBufferCreateFilenameDefault(NULL);
@@ -1014,7 +1014,7 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 static zend_result php_libxml_post_deactivate(void)
 {
 	/* reset libxml generic error handling */
-	if (_php_libxml_per_request_initialization) {
+	if (php_libxml_per_request_initialization) {
 		xmlSetGenericErrorFunc(NULL, NULL);
 
 		xmlParserInputBufferCreateFilenameDefault(NULL);
@@ -1097,7 +1097,7 @@ PHP_FUNCTION(libxml_use_internal_errors)
 		xmlSetStructuredErrorFunc(NULL, php_libxml_structured_error_handler);
 		if (LIBXML(error_list) == NULL) {
 			LIBXML(error_list) = (zend_llist *) emalloc(sizeof(zend_llist));
-			zend_llist_init(LIBXML(error_list), sizeof(xmlError), _php_libxml_free_error, 0);
+			zend_llist_init(LIBXML(error_list), sizeof(xmlError), php_libxml_free_error, 0);
 		}
 	}
 	RETURN_BOOL(retval);
