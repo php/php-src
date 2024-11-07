@@ -2,6 +2,11 @@
 Test file_put_contents() function : usage variation - various absolute and relative paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip Not for Windows");
+?>
 --FILE--
 <?php
 echo "*** Testing file_put_contents() : usage variation ***\n";
