@@ -3613,13 +3613,20 @@ rv_alloc(i) int i;
 rv_alloc(int i)
 #endif
 {
-	int k, *r;
 
-	size_t j = sizeof(ULong);
+	int j, k, *r;
+	size_t rem;
+
+	rem = sizeof(Bigint) - sizeof(ULong) - sizeof(int);
+
+
+	j = sizeof(ULong);
+	if (i > ((INT_MAX >> 2) + rem))
+		zend_error_noreturn(E_ERROR, "rv_alloc() allocation overflow %d", i);
 	for(k = 0;
-		sizeof(Bigint) - sizeof(ULong) - sizeof(int) + j <= (size_t)i;
-		j <<= 1)
+		rem + j <= (size_t)i; j <<= 1)
 			k++;
+
 	r = (int*)Balloc(k);
 	*r = k;
 	return
