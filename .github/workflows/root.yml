@@ -46,7 +46,9 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     with:
-      asan_ubuntu_version: '20.04'
+      asan_ubuntu_version: ${{
+        (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9) && '24.04')
+        || '20.04' }}
       branch: ${{ matrix.branch.ref }}
       community_verify_type_inference: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
       libmysqlclient_with_mysqli: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1) }}
