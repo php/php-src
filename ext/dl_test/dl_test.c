@@ -94,6 +94,8 @@ PHP_MINIT_FUNCTION(dl_test)
 		fprintf(stderr, "DL TEST MINIT\n");
 	}
 
+	register_dl_test_symbols(module_number);
+
 	return SUCCESS;
 }
 /* }}} */

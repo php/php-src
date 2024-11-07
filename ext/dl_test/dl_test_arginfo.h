@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 547ddbc21e9aa853b491cb17e902bbbb9cc2df00 */
+ * Stub hash: e1154d736a190512ecf51e30719d53e685ca5513 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_test1, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -16,3 +16,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dl_test_test2, arginfo_dl_test_test2)
 	ZEND_FE_END
 };
+
+static void register_dl_test_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("DL_TEST_CONST", 42, CONST_PERSISTENT);
+}
