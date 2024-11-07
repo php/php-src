@@ -33,13 +33,11 @@ runs:
           libsodium-dev:i386 \
           libsqlite3-dev:i386 \
           libssl-dev:i386 \
-          libtidy-dev:i386 \
           libwebp-dev:i386 \
           libxml2-dev:i386 \
           libxml2-dev:i386 \
           libxpm-dev:i386 \
           libxslt1-dev:i386 \
-          libzip-dev:i386 \
           locales \
           make \
           pkg-config:i386 \
