@@ -41,7 +41,7 @@ SED=${SED:-sed}
 MAKE=${MAKE:-make}
 
 # Go to project root.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)" || exit
 
 # Check required bison version from the configure.ac file.
 required_bison_version=$($SED -n 's/PHP_PROG_BISON(\[\([0-9\.]*\)\].*/\1/p' configure.ac)
