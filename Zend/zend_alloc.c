@@ -227,6 +227,8 @@ typedef zend_mm_bitset zend_mm_page_map[ZEND_MM_PAGE_MAP_LEN];     /* 64B */
 
 #if ZEND_MM_HEAP_PROTECTION
 
+/* How may zones to use. Each zone has a separate freelist and chunks, so that
+ * allocation from a zone does not affect the layout of other zones. */
 # define ZEND_MM_ZONES 2
 
 # define ZEND_MM_ZONE_FOREACH(_heap, _zone) do {                        \
