@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Calendar:
   . Fixed jdtogregorian overflow. (David Carlier)
 
+- Core:
+  . Fail early in *nix configuration build script. (hakre)
+
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
 
