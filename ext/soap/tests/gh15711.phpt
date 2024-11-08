@@ -33,7 +33,7 @@ class TestSoapClient extends SoapClient {
     }
 }
 
-$client = new TestSoapClient('ext/soap/tests/gh15711.wsdl', ['classmap' => ['book' => 'book']]);
+$client = new TestSoapClient(__DIR__ . '/gh15711.wsdl', ['classmap' => ['book' => 'book']]);
 
 echo "--- Test with backed enum ---\n";
 
