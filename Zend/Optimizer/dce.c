@@ -111,6 +111,8 @@ static inline bool may_have_side_effects(
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
 		case ZEND_INIT_ARRAY:
+		case ZEND_ARRAY_DUP:
+		case ZEND_ARRAY_SET_PLACEHOLDER:
 		case ZEND_SPACESHIP:
 		case ZEND_STRLEN:
 		case ZEND_COUNT:

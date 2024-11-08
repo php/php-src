@@ -359,6 +359,12 @@ static bool opline_supports_assign_contraction(
 			&& (opline->op2_type != IS_CV || opline->op2.var != cv_var);
 	}
 
+	if (opline->opcode == ZEND_ARRAY_DUP) {
+		/* FIXME: Is this ok? Array initialization might be incomplete if value
+		 * evaluation fails, but this is no different from ZEND_INIT_ARRAY. */
+		return false;
+	}
+
 	if (opline->opcode == ZEND_CAST
 			&& (opline->extended_value == IS_ARRAY || opline->extended_value == IS_OBJECT)) {
 		/* CAST to array/object may initialize the result to an empty array/object before

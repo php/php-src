@@ -6243,6 +6243,45 @@ ZEND_VM_C_LABEL(num_index):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(211, ZEND_ARRAY_SET_PLACEHOLDER, CONST|TMP|VAR|CV, UNUSED|NUM, REF)
+{
+	USE_OPLINE
+	zval *expr_ptr, new_expr, *element;
+	zend_array *array;
+
+	SAVE_OPLINE();
+
+	expr_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (OP1_TYPE == IS_TMP_VAR) {
+		/* pass */
+	} else if (OP1_TYPE == IS_CONST) {
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else if (OP1_TYPE == IS_CV) {
+		ZVAL_DEREF(expr_ptr);
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else /* if (OP1_TYPE == IS_VAR) */ {
+		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
+			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
+
+			expr_ptr = Z_REFVAL_P(expr_ptr);
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
+				expr_ptr = &new_expr;
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
+				Z_ADDREF_P(expr_ptr);
+			}
+		}
+	}
+
+	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
+	element = (zval*)((uintptr_t)array->arData + opline->op2.num);
+	ZVAL_COPY_VALUE(element, expr_ptr);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(147, ZEND_ADD_ARRAY_UNPACK, ANY, ANY)
 {
 	USE_OPLINE
@@ -6396,6 +6435,17 @@ ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|CV|UNUSED, CONST|TMPVAR|UNUSE
 		ZVAL_ARR(array, zend_new_array(0));
 		ZEND_VM_NEXT_OPCODE();
 	}
+}
+
+ZEND_VM_HANDLER(210, ZEND_ARRAY_DUP, CONST, UNUSED)
+{
+	zend_array *copy;
+	USE_OPLINE
+
+	copy = zend_array_dup(Z_ARRVAL_P(GET_OP1_ZVAL_PTR(BP_VAR_R)));
+	ZVAL_ARR(EX_VAR(opline->result.var), copy);
+
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
@@ -8167,6 +8217,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		switch (throw_op->opcode) {
 			case ZEND_ADD_ARRAY_ELEMENT:
 			case ZEND_ADD_ARRAY_UNPACK:
+			case ZEND_ARRAY_SET_PLACEHOLDER:
 			case ZEND_ROPE_INIT:
 			case ZEND_ROPE_ADD:
 				break; /* exception while building structures, live range handling will free those */
@@ -10416,6 +10467,7 @@ ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 			 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
 			 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
 			 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
+			 && throw_op->opcode != ZEND_ARRAY_SET_PLACEHOLDER
 			 && throw_op->opcode != ZEND_ROPE_INIT
 			 && throw_op->opcode != ZEND_ROPE_ADD) {
 				ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));

@@ -726,6 +726,14 @@ add_op1_def:
 				goto add_op1_def;
 			}
 			break;
+		case ZEND_ARRAY_SET_PLACEHOLDER:
+			ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+			ZEND_FALLTHROUGH;
+		case ZEND_ARRAY_DUP:
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
 		case ZEND_YIELD:
 			if (opline->op1_type == IS_CV
 					&& ((op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)

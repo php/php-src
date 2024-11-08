@@ -3443,6 +3443,12 @@ static zend_always_inline zend_result _zend_update_type_info(
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			}
 			break;
+		case ZEND_ARRAY_DUP:
+		case ZEND_ARRAY_SET_PLACEHOLDER:
+			/* FIXME: This can of course be more specific. However, one challenge
+			 * will be removing filled NULL slots from type inference. */
+			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
+			break;
 		case ZEND_ADD_ARRAY_UNPACK:
 			tmp = ssa_var_info[ssa_op->result_use].type;
 			ZEND_ASSERT(tmp & MAY_BE_ARRAY);
@@ -3662,6 +3668,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 							case ZEND_YIELD:
 							case ZEND_INIT_ARRAY:
 							case ZEND_ADD_ARRAY_ELEMENT:
+							case ZEND_ARRAY_DUP:
+							case ZEND_ARRAY_SET_PLACEHOLDER:
 							case ZEND_RETURN_BY_REF:
 							case ZEND_VERIFY_RETURN_TYPE:
 							case ZEND_MAKE_REF:
@@ -5024,6 +5032,8 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_COPY_TMP:
 		case ZEND_JMP_NULL:
 		case ZEND_JMP_FRAMELESS:
+		case ZEND_ARRAY_DUP:
+		case ZEND_ARRAY_SET_PLACEHOLDER:
 			return 0;
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:

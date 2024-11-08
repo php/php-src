@@ -93,7 +93,7 @@ ZEND_API zend_executor_globals executor_globals;
 #endif
 
 static zend_op *zend_emit_op(znode *result, uint8_t opcode, znode *op1, znode *op2);
-static bool zend_try_ct_eval_array(zval *result, zend_ast *ast);
+static bool zend_try_ct_eval_array(zval *result, zend_ast *ast, bool allow_template);
 static void zend_eval_const_expr(zend_ast **ast_ptr);
 
 static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bool by_ref);
@@ -4434,7 +4434,7 @@ static zend_result zend_compile_func_in_array(znode *result, zend_ast_list *args
 	}
 
 	if (args->child[1]->kind != ZEND_AST_ARRAY
-	 || !zend_try_ct_eval_array(&array.u.constant, args->child[1])) {
+	 || !zend_try_ct_eval_array(&array.u.constant, args->child[1], false)) {
 		return FAILURE;
 	}
 
@@ -9779,12 +9779,20 @@ static inline void zend_ct_eval_greater(zval *result, zend_ast_kind kind, zval *
 }
 /* }}} */
 
-static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
+static bool terminate_array_template(zend_ast *elem_ast)
+{
+	return elem_ast->kind == ZEND_AST_UNPACK
+		|| (elem_ast->child[1] && elem_ast->child[1]->kind != ZEND_AST_ZVAL)
+		|| elem_ast->attr /* by_ref */;
+}
+
+static bool zend_try_ct_eval_array(zval *result, zend_ast *ast, bool allow_template) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_ast *last_elem_ast = NULL;
 	uint32_t i;
 	bool is_constant = 1;
+	bool use_template = true;
 
 	if (ast->attr == ZEND_ARRAY_SYNTAX_LIST) {
 		zend_error(E_COMPILE_ERROR, "Cannot use list() as standalone expression");
@@ -9814,15 +9822,26 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		} else {
 			zend_eval_const_expr(&elem_ast->child[0]);
 
-			if (elem_ast->child[0]->kind != ZEND_AST_ZVAL) {
-				is_constant = 0;
-			}
+			// FIXME: Reimplement
+			// if (elem_ast->child[0]->kind != ZEND_AST_ZVAL) {
+			// 	is_constant = 0;
+			// }
+			is_constant = 0;
+		}
+
+		if (terminate_array_template(elem_ast)) {
+			use_template = false;
 		}
 
 		last_elem_ast = elem_ast;
 	}
 
-	if (!is_constant) {
+	if (!is_constant
+	 && (!allow_template
+	  || !use_template
+	  /* Array templates are slower for n=1 arrays. */
+	  || list->children <= 1)) {
+		ZVAL_UNDEF(result);
 		return 0;
 	}
 
@@ -9837,8 +9856,22 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		zend_ast *value_ast = elem_ast->child[0];
 		zend_ast *key_ast;
 
-		zval *value = zend_ast_get_zval(value_ast);
+		if (terminate_array_template(elem_ast)) {
+			// FIXME: Fill the remainder with 0? This would prevent resizing.
+			break;
+		}
+
+		zval tmp;
+		zval *value;
+		if (value_ast->kind != ZEND_AST_ZVAL) {
+			ZVAL_NULL(&tmp);
+			value = &tmp;
+		} else {
+			value = zend_ast_get_zval(value_ast);
+		}
+
 		if (elem_ast->kind == ZEND_AST_UNPACK) {
+			ZEND_UNREACHABLE(); // FIXME: Reimplement
 			if (Z_TYPE_P(value) == IS_ARRAY) {
 				HashTable *ht = Z_ARRVAL_P(value);
 				zval *val;
@@ -9849,6 +9882,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 						zend_hash_update(Z_ARRVAL_P(result), key, val);
 					} else if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
 						zval_ptr_dtor(result);
+						ZVAL_UNDEF(result);
 						return 0;
 					}
 					Z_TRY_ADDREF_P(val);
@@ -9878,6 +9912,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 						zval_ptr_dtor_nogc(value);
 						zval_ptr_dtor(result);
+						ZVAL_UNDEF(result);
 						return 0;
 					}
 					zend_hash_index_update(Z_ARRVAL_P(result), lval, value);
@@ -9899,11 +9934,12 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		} else if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), value)) {
 			zval_ptr_dtor_nogc(value);
 			zval_ptr_dtor(result);
+			ZVAL_UNDEF(result);
 			return 0;
 		}
 	}
 
-	return 1;
+	return is_constant;
 }
 /* }}} */
 
@@ -10655,16 +10691,27 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_op *opline;
 	uint32_t i, opnum_init = -1;
-	bool packed = 1;
+	bool packed = 1, use_template = false;
 
-	if (zend_try_ct_eval_array(&result->u.constant, ast)) {
-		result->op_type = IS_CONST;
+	znode template_node;
+	template_node.op_type = IS_CONST;
+	if (zend_try_ct_eval_array(&template_node.u.constant, ast, true)) {
+		*result = template_node;
 		return;
 	}
 
 	/* Empty arrays are handled at compile-time */
 	ZEND_ASSERT(list->children > 0);
 
+	zend_array *template = NULL;
+	if (Z_TYPE(template_node.u.constant) == IS_ARRAY) {
+		opnum_init = get_next_op_number();
+		zend_emit_op_tmp(result, ZEND_ARRAY_DUP, &template_node, NULL);
+		use_template = true;
+		template = Z_ARRVAL(template_node.u.constant);
+	}
+
+	zend_long next_free_element = ZEND_LONG_MIN;
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *value_ast, *key_ast;
@@ -10675,11 +10722,15 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
 		}
 
+		if (terminate_array_template(elem_ast)) {
+			use_template = false;
+		}
+
 		value_ast = elem_ast->child[0];
 
 		if (elem_ast->kind == ZEND_AST_UNPACK) {
 			zend_compile_expr(&value_node, value_ast);
-			if (i == 0) {
+			if (opnum_init == -1) {
 				opnum_init = get_next_op_number();
 				opline = zend_emit_op_tmp(result, ZEND_INIT_ARRAY, NULL, NULL);
 			}
@@ -10691,7 +10742,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		key_ast = elem_ast->child[1];
 		by_ref = elem_ast->attr;
 
-		if (key_ast) {
+		if (key_ast && !use_template) {
 			zend_compile_expr(&key_node, key_ast);
 			zend_handle_numeric_op(&key_node);
 			key_node_ptr = &key_node;
@@ -10704,7 +10755,71 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_expr(&value_node, value_ast);
 		}
 
-		if (i == 0) {
+		if (use_template) {
+			zval *element;
+			if (key_ast) {
+				zval *key = zend_ast_get_zval(key_ast);
+				zend_ulong index;
+				switch (Z_TYPE_P(key)) {
+					case IS_LONG:
+						index = Z_LVAL_P(key);
+handle_index:
+						element = zend_hash_index_find(template, index);
+						if ((zend_long)index >= next_free_element) {
+							next_free_element = (zend_long)index < ZEND_LONG_MAX ? index + 1 : ZEND_LONG_MAX;
+						}
+						break;
+					case IS_STRING: {
+						// FIXME: Why is this unsigned?
+						if (ZEND_HANDLE_NUMERIC(Z_STR_P(key), index)) {
+							goto handle_index;
+						} else {
+							element = zend_hash_find(template, Z_STR_P(key));
+						}
+						break;
+					}
+					case IS_DOUBLE: {
+						index = zend_dval_to_lval(Z_DVAL_P(key));
+						/* Should be handled in zend_try_ct_eval_array(). */
+						ZEND_ASSERT(zend_is_long_compatible(Z_DVAL_P(key), index));
+						goto handle_index;
+					}
+					case IS_FALSE:
+						index = 0;
+						goto handle_index;
+					case IS_TRUE:
+						index = 1;
+						goto handle_index;
+					case IS_NULL:
+						element = zend_hash_find(template, ZSTR_EMPTY_ALLOC());
+						break;
+					default:
+						ZEND_UNREACHABLE();
+						break;
+				}
+			} else {
+				if (next_free_element == ZEND_LONG_MIN) {
+					next_free_element = 0;
+				}
+				element = zend_hash_index_find(template, next_free_element++);
+				// FIXME: Handle overflow?
+				// if ((zend_long)index >= next_free_element) {
+				// 	next_free_element = (zend_long)index < ZEND_LONG_MAX ? index + 1 : ZEND_LONG_MAX;
+				// }
+			}
+
+			if (use_template && value_ast->kind == ZEND_AST_ZVAL) {
+				zval_ptr_dtor(&value_node.u.constant);
+				if (key_node_ptr) {
+					zval_ptr_dtor(&key_node_ptr->u.constant);
+				}
+				continue;
+			}
+
+			opline = zend_emit_op(NULL, ZEND_ARRAY_SET_PLACEHOLDER, &value_node, NULL);
+			opline->op2.num = (uintptr_t) element - (HT_IS_PACKED(template) ? (uintptr_t) template->arPacked : (uintptr_t) template->arData);
+			SET_NODE(opline->result, result);
+		} else if (opnum_init == -1) {
 			opnum_init = get_next_op_number();
 			opline = zend_emit_op_tmp(result, ZEND_INIT_ARRAY, &value_node, key_node_ptr);
 			opline->extended_value = list->children << ZEND_ARRAY_SIZE_SHIFT;
@@ -10713,6 +10828,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 				&value_node, key_node_ptr);
 			SET_NODE(opline->result, result);
 		}
+
 		opline->extended_value |= by_ref;
 
 		if (key_ast && key_node.op_type == IS_CONST && Z_TYPE(key_node.u.constant) == IS_STRING) {
@@ -10721,7 +10837,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	/* Add a flag to INIT_ARRAY if we know this array cannot be packed */
-	if (!packed) {
+	if (!packed && !template) {
 		ZEND_ASSERT(opnum_init != (uint32_t)-1);
 		opline = &CG(active_op_array)->opcodes[opnum_init];
 		opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
@@ -11850,7 +11966,7 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			break;
 		}
 		case ZEND_AST_ARRAY:
-			if (!zend_try_ct_eval_array(&result, ast)) {
+			if (!zend_try_ct_eval_array(&result, ast, false)) {
 				return;
 			}
 			break;

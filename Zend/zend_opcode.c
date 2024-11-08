@@ -745,6 +745,7 @@ static void emit_live_range(
 		/* These should never be the first def. */
 		case ZEND_ADD_ARRAY_ELEMENT:
 		case ZEND_ADD_ARRAY_UNPACK:
+		case ZEND_ARRAY_SET_PLACEHOLDER:
 		case ZEND_ROPE_ADD:
 			ZEND_UNREACHABLE();
 			return;
@@ -884,7 +885,8 @@ static bool is_fake_def(zend_op *opline) {
 	/* These opcodes only modify the result, not create it. */
 	return opline->opcode == ZEND_ROPE_ADD
 		|| opline->opcode == ZEND_ADD_ARRAY_ELEMENT
-		|| opline->opcode == ZEND_ADD_ARRAY_UNPACK;
+		|| opline->opcode == ZEND_ADD_ARRAY_UNPACK
+		|| opline->opcode == ZEND_ARRAY_SET_PLACEHOLDER;
 }
 
 static bool keeps_op1_alive(zend_op *opline) {

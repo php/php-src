@@ -155,6 +155,7 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 	if (ssa_op->result_def == var) {
 		switch (opline->opcode) {
 			case ZEND_INIT_ARRAY:
+			case ZEND_ARRAY_DUP:
 				return 1;
 			case ZEND_NEW: {
 			    /* objects with destructors should escape */
@@ -227,6 +228,8 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 		switch (opline->opcode) {
 			case ZEND_INIT_ARRAY:
 			case ZEND_ADD_ARRAY_ELEMENT:
+			case ZEND_ARRAY_DUP:
+			case ZEND_ARRAY_SET_PLACEHOLDER:
 			case ZEND_QM_ASSIGN:
 			case ZEND_ASSIGN:
 				return 1;
@@ -312,6 +315,8 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 				if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
 					return 1;
 				}
+				ZEND_FALLTHROUGH;
+			case ZEND_ARRAY_SET_PLACEHOLDER:
 				if (OP1_INFO() & MAY_BE_OBJECT) {
 					/* object aliasing */
 					return 1;
@@ -369,6 +374,8 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 			case ZEND_QM_ASSIGN:
 			case ZEND_INIT_ARRAY:
 			case ZEND_ADD_ARRAY_ELEMENT:
+			case ZEND_ARRAY_DUP:
+			case ZEND_ARRAY_SET_PLACEHOLDER:
 				break;
 			default:
 				return 1;
@@ -488,7 +495,8 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 							    (op-1)->op1_use >= 0) {
 								enclosing_root = ees[(op-1)->op1_use];
 							} else if ((opline->opcode == ZEND_INIT_ARRAY ||
-							     opline->opcode == ZEND_ADD_ARRAY_ELEMENT) &&
+							     opline->opcode == ZEND_ADD_ARRAY_ELEMENT ||
+								 opline->opcode == ZEND_ARRAY_SET_PLACEHOLDER) &&
 							    op->op1_use == i &&
 							    op->result_def >= 0) {
 								enclosing_root = ees[op->result_def];

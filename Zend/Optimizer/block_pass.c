@@ -911,6 +911,7 @@ optimize_const_unary_op:
 						src->opcode != ZEND_COPY_TMP &&
 						src->opcode != ZEND_ADD_ARRAY_ELEMENT &&
 						src->opcode != ZEND_ADD_ARRAY_UNPACK &&
+						src->opcode != ZEND_ARRAY_SET_PLACEHOLDER &&
 						(src->opcode != ZEND_DECLARE_LAMBDA_FUNCTION ||
 						 src == opline -1)) {
 						src->result.var = opline->result.var;
@@ -1474,6 +1475,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 				switch (opline->opcode) {
 					case ZEND_ADD_ARRAY_ELEMENT:
 					case ZEND_ADD_ARRAY_UNPACK:
+					case ZEND_ARRAY_SET_PLACEHOLDER:
 					case ZEND_ROPE_ADD:
 						/* these opcodes use the result as argument */
 						if (!zend_bitset_in(defined_here, var_num)) {
@@ -1568,6 +1570,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 							break;
 						case ZEND_ADD_ARRAY_ELEMENT:
 						case ZEND_ADD_ARRAY_UNPACK:
+						case ZEND_ARRAY_SET_PLACEHOLDER:
 						case ZEND_ROPE_ADD:
 							zend_bitset_incl(usage, VAR_NUM(opline->result.var));
 							break;
@@ -1576,6 +1579,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 					switch (opline->opcode) {
 						case ZEND_ADD_ARRAY_ELEMENT:
 						case ZEND_ADD_ARRAY_UNPACK:
+						case ZEND_ARRAY_SET_PLACEHOLDER:
 						case ZEND_ROPE_ADD:
 							break;
 						default:

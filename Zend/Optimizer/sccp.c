@@ -1182,6 +1182,67 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			return;
 		}
+		case ZEND_ARRAY_DUP: {
+			SET_RESULT(result, op1);
+			return;
+		}
+		case ZEND_ARRAY_SET_PLACEHOLDER: {
+			zval *result = &ctx->values[ssa_op->result_use];
+
+			SKIP_IF_TOP(result);
+			SKIP_IF_TOP(op1);
+
+#if 1
+			/* FIXME: See below. */
+			if (IS_BOT(result)) {
+				SET_RESULT_BOT(result);
+				return;
+			}
+#else
+			ZEND_ASSERT(!IS_BOT(result));
+#endif
+
+			/* FIXME: Avoid dup-ing the array in every step. */
+			zend_array *array = zend_array_dup(Z_ARRVAL_P(result));
+			zval *element = (zval*)((uintptr_t)array->arData + opline->op2.num);
+
+			zval tmp;
+			ZVAL_ARR(&tmp, array);
+
+			if (IS_BOT(op1)) {
+#if 1
+				/* FIXME: Handle partial arrays. Deleting hashes is problematic
+				 * because it changes the offsets for the placeholders. */
+				SET_RESULT_BOT(result);
+				zval_ptr_dtor_nogc(&tmp);
+				return;
+#else
+				/* Remove unknown index and mark array as partial. */
+				if (HT_IS_PACKED(array)) {
+					zval_ptr_dtor(element);
+					ZVAL_UNDEF(element);
+				} else {
+					Bucket *bucket = (Bucket *)((uintptr_t)element - XtOffsetOf(Bucket, val));
+					if (bucket->key) {
+						zend_hash_del(array, bucket->key);
+					} else {
+						zend_hash_index_del(array, bucket->h);
+					}
+				}
+				MAKE_PARTIAL_ARRAY(&tmp);
+#endif
+			} else {
+				ZVAL_COPY(element, op1);
+				if (IS_PARTIAL_ARRAY(op1)) {
+					MAKE_PARTIAL_ARRAY(&tmp);
+				}
+			}
+
+
+			SET_RESULT(result, &tmp);
+			zval_ptr_dtor_nogc(&tmp);
+			return;
+		}
 		case ZEND_ADD_ARRAY_UNPACK: {
 			zval *result = &ctx->values[ssa_op->result_use];
 			if (IS_BOT(result) || IS_BOT(op1)) {
@@ -2196,7 +2257,9 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						&& opline->opcode != ZEND_ROPE_ADD
 						&& opline->opcode != ZEND_INIT_ARRAY
 						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
-						&& opline->opcode != ZEND_ADD_ARRAY_UNPACK) {
+						&& opline->opcode != ZEND_ADD_ARRAY_UNPACK
+						&& opline->opcode != ZEND_ARRAY_DUP
+						&& opline->opcode != ZEND_ARRAY_SET_PLACEHOLDER) {
 					/* Replace with QM_ASSIGN */
 					uint8_t old_type = opline->result_type;
 					uint32_t old_var = opline->result.var;
