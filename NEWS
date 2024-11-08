@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Calendar:
   . Fixed jdtogregorian overflow. (David Carlier)
 
+- Curl:
+  . Fixed bug GH-16723 (CURLMOPT_PUSHFUNCTION issues). (cmb)
+
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
