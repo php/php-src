@@ -18,7 +18,7 @@ $query =
 //	"insert into #php_pdo values ?;" .
 //	"drop table #php_pdo;";
 
-$db = new PDO($dsn, $user, $pass);
+$db = getDbConnection();
 
 $stmt = $db->prepare($query);
 // PARAM_LOB gets converted to a binary literal instead of a string literal
