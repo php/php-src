@@ -18,7 +18,7 @@ class PDO
     /** @cvalue LONG_CONST(PDO_PARAM_STMT) */
     public const int PARAM_STMT = 4;
     /** @cvalue LONG_CONST(PDO_PARAM_BINARY) */
-    public const int PARAM_BINARY = 4;
+    public const int PARAM_BINARY = 6;
     /** @cvalue LONG_CONST(PDO_PARAM_INPUT_OUTPUT) */
     public const int PARAM_INPUT_OUTPUT = UNKNOWN;
     /** @cvalue LONG_CONST(PDO_PARAM_STR_NATL) */
