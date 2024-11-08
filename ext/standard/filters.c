@@ -996,6 +996,9 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} break;
 
 			case 5: {
+				if (icnt == 0) {
+					goto out;
+				}
 				if (!inst->lbchars && lb_cnt == 1 && *ps == '\n') {
 					/* auto-detect soft line breaks, found network line break */
 					lb_cnt = lb_ptr = 0;
@@ -1009,15 +1012,13 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					/* soft line break */
 					lb_cnt = lb_ptr = 0;
 					scan_stat = 0;
-				} else if (icnt > 0) {
+				} else {
 					if (*ps == (unsigned char)inst->lbchars[lb_cnt]) {
 						lb_cnt++;
 						ps++, icnt--;
 					} else {
 						scan_stat = 6; /* no break for short-cut */
 					}
-				} else {
-					goto out;
 				}
 			} break;
 
