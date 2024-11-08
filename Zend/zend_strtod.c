@@ -3614,7 +3614,7 @@ rv_alloc(int i)
 
 	j = sizeof(ULong);
 	if (i > ((INT_MAX >> 2) + rem))
-		zend_error_noreturn(E_ERROR, "rv_alloc() allocation overflow %d", i);
+		i = (INT_MAX >> 2) + rem;
 	for(k = 0;
 		rem + j <= (size_t)i; j <<= 1)
 			k++;
