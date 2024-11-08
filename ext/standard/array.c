@@ -6699,7 +6699,7 @@ PHP_FUNCTION(array_find_key)
 }
 /* }}} */
 
-/* {{{ Search within an array and returns true if an element is found. */
+/* {{{ Checks if at least one array element satisfies a callback function. */
 PHP_FUNCTION(array_any)
 {
 	zval *array = NULL;
@@ -6719,7 +6719,7 @@ PHP_FUNCTION(array_any)
 }
 /* }}} */
 
-/* {{{ Search within an array and returns true if an element is found. */
+/* {{{ Checks if all array elements satisfy a callback function. */
 PHP_FUNCTION(array_all)
 {
 	zval *array = NULL;
