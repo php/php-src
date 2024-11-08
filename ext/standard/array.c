@@ -6719,7 +6719,7 @@ PHP_FUNCTION(array_any)
 }
 /* }}} */
 
-/* {{{ Search within an array and returns true if an element is found. */
+/* {{{ Search within an array and returns true only if all elements are found. */
 PHP_FUNCTION(array_all)
 {
 	zval *array = NULL;
