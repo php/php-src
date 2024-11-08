@@ -183,6 +183,11 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			return NULL;
 		}
 
+		/* Should we send the entire path in the request line, default to no. */
+		if (context && (tmpzval = php_stream_context_get_option(context, "http", "request_fulluri")) != NULL) {
+			request_fulluri = zend_is_true(tmpzval);
+		}
+
 		use_ssl = resource->scheme && (ZSTR_LEN(resource->scheme) > 4) && ZSTR_VAL(resource->scheme)[4] == 's';
 		/* choose default ports */
 		if (use_ssl && resource->port == 0)
@@ -199,6 +204,13 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		} else {
 			transport_string = zend_strpprintf(0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
 		}
+	}
+
+	if (request_fulluri && (strchr(path, '\n') != NULL || strchr(path, '\r') != NULL)) {
+		php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper full URI path does not allow CR or LF characters");
+		php_url_free(resource);
+		zend_string_release(transport_string);
+		return NULL;
 	}
 
 	if (context && (tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "timeout")) != NULL) {
@@ -379,12 +391,6 @@ finish:
 
 	if (!custom_request_method) {
 		smart_str_appends(&req_buf, "GET ");
-	}
-
-	/* Should we send the entire path in the request line, default to no. */
-	if (!request_fulluri && context &&
-		(tmpzval = php_stream_context_get_option(context, "http", "request_fulluri")) != NULL) {
-		request_fulluri = zend_is_true(tmpzval);
 	}
 
 	if (request_fulluri) {
