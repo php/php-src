@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
+- SOAP:
+  . Fix make check being invoked in ext/soap. (Ma27)
+
 07 Nov 2024, PHP 8.3.14RC1
 
 - Cli:
