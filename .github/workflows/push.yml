@@ -169,7 +169,7 @@ jobs:
         uses: ./.github/actions/configure-x32
         with:
           configurationParameters: >-
-            --enable-debug
+            --disable-debug
             --enable-zts
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
