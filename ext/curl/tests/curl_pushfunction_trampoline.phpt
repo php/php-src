@@ -60,6 +60,7 @@ sort($responses);
 print_r($responses);
 ?>
 --EXPECT--
+Trampoline for trampoline
 Array
 (
     [0] => main response

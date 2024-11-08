@@ -1284,13 +1284,13 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	ch->handlers.read->res = source->handlers.read->res;
 
 	if (ZEND_FCC_INITIALIZED(source->handlers.read->fcc)) {
-		zend_fcc_dup(&source->handlers.read->fcc, &source->handlers.read->fcc);
+		zend_fcc_dup(&ch->handlers.read->fcc, &source->handlers.read->fcc);
 	}
 	if (ZEND_FCC_INITIALIZED(source->handlers.write->fcc)) {
-		zend_fcc_dup(&source->handlers.write->fcc, &source->handlers.write->fcc);
+		zend_fcc_dup(&ch->handlers.write->fcc, &source->handlers.write->fcc);
 	}
 	if (ZEND_FCC_INITIALIZED(source->handlers.write_header->fcc)) {
-		zend_fcc_dup(&source->handlers.write_header->fcc, &source->handlers.write_header->fcc);
+		zend_fcc_dup(&ch->handlers.write_header->fcc, &source->handlers.write_header->fcc);
 	}
 
 	curl_easy_setopt(ch->cp, CURLOPT_ERRORBUFFER,       ch->err.str);
