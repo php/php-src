@@ -1330,6 +1330,31 @@ static uint32_t find_trampoline_num_args(zend_jit_trace_rec *start, zend_jit_tra
 	return 0;
 }
 
+#ifdef HAVE_FFI
+static bool zend_jit_ffi_is_send_by_ref(zend_jit_trace_stack_frame *call, uint32_t arg_num)
+{
+	if (TRACE_FRAME_FFI_FUNC(call)) {
+		if (((TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_FREE
+		   || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPEOF
+		   || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_ADDR
+		   || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_SIZEOF
+		   || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_ALIGNOF
+		   || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMSET
+		   || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_STRING
+		   || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_IS_NULL)
+		  && arg_num == 1)
+		 || (TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_CAST
+		  && arg_num == 2)
+		 || ((TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMCPY
+		   || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_MEMCMP)
+		  && (arg_num == 1 || arg_num == 2))) {
+			return true;
+		}
+	}
+	return false;
+}
+#endif
+
 static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num, zend_script *script, const zend_op_array **op_arrays, int *num_op_arrays_ptr)
 {
 	zend_ssa *tssa;
@@ -2195,7 +2220,26 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						/* Named parameters not supported in JIT */
 						break;
 					}
+#ifdef HAVE_FFI
+					if (!op1_ffi_type
+					 || !frame->call->func
+					 || !ARG_SHOULD_BE_SENT_BY_REF(frame->call->func, opline->op2.num)) {
+						ADD_OP1_TRACE_GUARD();
+					}
+#else
 					ADD_OP1_TRACE_GUARD();
+#endif
+/*
+					if (!frame->call->func
+					 || (tssa->ops[idx].op1_use >= 0
+					  && !(tssa->var_info[tssa->ops[idx].op1_use].type & MAY_BE_NULL))
+#ifdef HAVE_FFI
+					 || (TRACE_FRAME_FFI(frame->call) && !TRACE_FRAME_FFI_FUNC(frame->call))
+#endif
+					 ) {
+						ADD_OP1_TRACE_GUARD();
+					}
+*/
 propagate_arg:
 					/* Propagate argument type */
 					if (frame->call
@@ -2266,6 +2310,10 @@ propagate_arg:
 					}
 #ifdef HAVE_FFI
 					if (TRACE_FRAME_FFI(frame->call)) {
+						if (zend_jit_ffi_is_send_by_ref(frame->call, opline->op2.num)) {
+							TRACE_FRAME_SET_LAST_SEND_BY_REF(frame->call);
+							break;
+						}
 						/* FFI arguments alwyas sent by value ??? */
 						TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame->call);
 						break;
@@ -5817,6 +5865,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 #ifdef HAVE_FFI
 						if (TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+							if (zend_jit_ffi_is_send_by_ref(JIT_G(current_frame)->call, opline->op2.num)) {
+								TRACE_FRAME_SET_LAST_SEND_BY_REF(JIT_G(current_frame)->call);
+								goto done;
+							}
 							/* FFI arguments alwyas sent by value ??? */
 							TRACE_FRAME_SET_LAST_SEND_BY_VAL(JIT_G(current_frame)->call);
 							goto done;
@@ -6957,6 +7009,26 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									}
 									// TODO: Guard for FFI::CType argument ???
 									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_NEW;
+									frame_ffi_func_type = type;
+									if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+										frame_ffi_func_ref = jit_Z_PTR(jit, op1_addr);
+									} else {
+										frame_ffi_func_ref = IR_UNUSED;
+									}
+									goto done;
+								}
+							} else if (zend_string_equals_literal_ci(name, "cast")) {
+								zend_ffi_type *type = zend_jit_ffi_supported_cast(opline, op1_ffi_symbols, p);
+								if (type) {
+									if (!ffi_info) {
+										ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+									}
+									if (!zend_jit_ffi_symbols_guard(&ctx, opline, ssa,
+											ssa_op->op1_use, -1, op1_info, op1_addr, op1_ffi_symbols, ffi_info)) {
+										goto jit_failure;
+									}
+									// TODO: Guard for FFI::CType argument ???
+									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_CAST;
 									frame_ffi_func_type = type;
 									if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 										frame_ffi_func_ref = jit_Z_PTR(jit, op1_addr);

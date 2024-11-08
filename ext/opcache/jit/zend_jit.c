@@ -169,6 +169,45 @@ static zend_ffi_type* zend_jit_ffi_supported_new(const zend_op *opline, HashTabl
 	return NULL;
 }
 
+static zend_ffi_type* zend_jit_ffi_supported_cast(const zend_op *opline, HashTable *ffi_symbols, const zend_jit_trace_rec *p)
+{
+	zend_ffi_type *type = NULL;
+
+	if (opline->extended_value == 2
+	 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL
+	 && (p+2)->op == ZEND_JIT_TRACE_VM) {
+		if (((p+2)->opline->opcode == ZEND_SEND_VAL
+		  || (p+2)->opline->opcode == ZEND_SEND_VAL_EX)
+		 && (p+2)->opline->op1_type == IS_CONST) {
+			zval *zv = RT_CONSTANT((p+2)->opline, (p+2)->opline->op1);
+
+			if (Z_TYPE_P(zv) == IS_STRING) {
+				zend_ffi_dcl *dcl = zend_ffi_api->cache_type_get(Z_STR_P(zv), ffi_symbols);
+
+				if (dcl) {
+					type = dcl->type;
+					p += 3;
+				}
+			}
+		} else if ((p+2)->opline->opcode == ZEND_SEND_VAR_EX
+				&& (p+3)->op == ZEND_JIT_TRACE_OP1_TYPE
+				&& (p+3)->ce == zend_ffi_api->ctype_ce
+				&& (p+4)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
+			type = (zend_ffi_type*)(p+4)->ptr;
+			p += 5;
+		}
+	}
+
+	if (type
+	 && !ZEND_FFI_TYPE_IS_OWNED(type)
+	 && (type->attr & ZEND_FFI_ATTR_PERSISTENT)
+	 && type->size != 0) {
+		return type;
+	}
+
+	return NULL;
+}
+
 static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type)
 {
 	dst_type = ZEND_FFI_TYPE(dst_type);

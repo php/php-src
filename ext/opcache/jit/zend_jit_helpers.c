@@ -3382,24 +3382,31 @@ static void ZEND_FASTCALL zend_jit_zval_stringl(zval *zv, const char *str, size_
 	}
 }
 
+static zend_ffi_cdata* ZEND_FASTCALL zend_jit_ffi_create_ptr(zend_ffi_type *type, void *ptr)
+{
+	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_POINTER);
+	zend_ffi_cdata *cdata = emalloc(sizeof(zend_ffi_cdata));
+
+	// inlined zend_ffi_object_init()
+	GC_SET_REFCOUNT(&cdata->std, 1);
+	GC_TYPE_INFO(&cdata->std) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
+	cdata->std.extra_flags = 0;
+	cdata->std.ce = zend_ffi_api->cdata_ce;
+	cdata->std.handlers = zend_ffi_api->cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
+	cdata->std.properties = NULL;
+	zend_objects_store_put(&cdata->std);
+	cdata->type = type;
+	cdata->flags = 0;
+	cdata->ptr = (void*)&cdata->ptr_holder;
+	cdata->ptr_holder = ptr;
+	return cdata;
+}
+
 static void ZEND_FASTCALL zend_jit_zval_ffi_ptr(zval *zv, zend_ffi_type *type, void *ptr)
 {
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_POINTER);
 	if (ptr) {
-		zend_ffi_cdata *cdata = emalloc(sizeof(zend_ffi_cdata));
-
-		// inlined zend_ffi_object_init()
-		GC_SET_REFCOUNT(&cdata->std, 1);
-		GC_TYPE_INFO(&cdata->std) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
-		cdata->std.extra_flags = 0;
-		cdata->std.ce = zend_ffi_api->cdata_ce;
-		cdata->std.handlers = zend_ffi_api->cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
-		cdata->std.properties = NULL;
-		zend_objects_store_put(&cdata->std);
-		cdata->type = type;
-		cdata->flags = 0;
-		cdata->ptr = (void*)&cdata->ptr_holder;
-		cdata->ptr_holder = ptr;
+		zend_ffi_cdata *cdata = zend_jit_ffi_create_ptr(type, ptr);
 		ZVAL_OBJ(zv, &cdata->std);
 	} else {
 		ZVAL_NULL(zv);
