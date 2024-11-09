@@ -1944,6 +1944,8 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
 	if (NULL != (val = zend_hash_str_find(&client->request.headers, "content-type", sizeof("content-type")-1))) {
 		request_info->content_type = Z_STRVAL_P(val);
+	} else {
+		request_info->content_type = NULL;
 	}
 } /* }}} */
 
