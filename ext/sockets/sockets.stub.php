@@ -1647,6 +1647,20 @@ const SOL_UDP = UNKNOWN;
  */
 const SOL_UDPLITE = UNKNOWN;
 #endif
+#ifdef IPPROTO_ICMP
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMP
+ */
+const IPPROTO_ICMP = UNKNOWN;
+#endif
+#ifdef IPPROTO_ICMPV6
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMPV6
+ */
+const IPPROTO_ICMPV6 = UNKNOWN;
+#endif
 
 #ifdef HAVE_IPV6
 /**
