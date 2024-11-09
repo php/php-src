@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
+- Phar:
+  . Fixed bug GH-16695 (phar:// tar parser and zero-length file header blocks).
+    (nielsdos)
+
 - SOAP:
   . Fix make check being invoked in ext/soap. (Ma27)
 

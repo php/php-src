@@ -247,9 +247,8 @@ int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alia
 	entry.is_tar = 1;
 	entry.is_crc_checked = 1;
 	entry.phar = myphar;
-	pos += sizeof(buf);
 
-	do {
+	while (true) {
 		phar_entry_info *newentry;
 
 		pos = php_stream_tell(fp);
@@ -590,6 +589,11 @@ next:
 			}
 		}
 
+		/* Only read next header if we're not yet at the end */
+		if (php_stream_tell(fp) == totalsize) {
+			break;
+		}
+
 		read = php_stream_read(fp, buf, sizeof(buf));
 
 		if (read != sizeof(buf)) {
@@ -600,7 +604,7 @@ next:
 			phar_destroy_phar_data(myphar);
 			return FAILURE;
 		}
-	} while (!php_stream_eof(fp));
+	}
 
 	if (zend_hash_str_exists(&(myphar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 		myphar->is_data = 0;
