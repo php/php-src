@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Calendar:
   . Fixed jdtogregorian overflow. (David Carlier)
 
+- Core:
+  . Fail early in *nix configuration build script. (hakre)
+
 - Curl:
   . Fixed bug GH-16723 (CURLMOPT_PUSHFUNCTION issues). (cmb)
 
