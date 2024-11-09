@@ -21,7 +21,7 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fixed bug GH-16695 (phar:// tar parser and zero-length file header blocks).
-    (nielsdos)
+    (nielsdos, Hans Krentel)
 
 21 Nov 2024, PHP 8.2.26
 
