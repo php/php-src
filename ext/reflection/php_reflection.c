@@ -2827,7 +2827,7 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
 }
 
-/* {{{ Returns whether this parameter is an optional parameter */
+/* {{{ Returns the index of the parameter, starting from 0 */
 ZEND_METHOD(ReflectionParameter, getPosition)
 {
 	reflection_object *intern;
