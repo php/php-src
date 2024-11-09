@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eaaabc9b557a4b0488bf21fe528c24224e438aa6 */
+ * Stub hash: 4fdd210a2de6f3b5df10caf5ac7fefa6aa71926c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -945,10 +945,10 @@ static void register_sockets_symbols(int module_number)
 #if defined(IPPROTO_UDPLITE)
 	REGISTER_LONG_CONSTANT("SOL_UDPLITE", IPPROTO_UDPLITE, CONST_PERSISTENT);
 #endif
-#if defined(IPPROTO_ICMP)
+#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("IPPROTO_ICMP", IPPROTO_ICMP, CONST_PERSISTENT);
 #endif
-#if defined(IPPROTO_ICMPV6)
+#if defined(IPPROTO_ICMPV6) || defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("IPPROTO_ICMPV6", IPPROTO_ICMPV6, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_IPV6)

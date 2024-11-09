@@ -6,7 +6,7 @@ sockets
 <?php
 if (!defined("IPPROTO_ICMP")) die("skip IPPROTO_ICMP not available");
 // IPPROTO_ICMP* functions with raw sockets, thus requiring administrative role.
-if (!function_exists("posix_getuid") || posix_getuid() != 0) die('skip IPPROTO_ICMP requires root permissions.');
+if (PHP_OS_FAMILY !== "Windows" && (!function_exists("posix_getuid") || posix_getuid() != 0)) die('skip IPPROTO_ICMP requires root permissions.');
 ?>
 --FILE--
 <?php
