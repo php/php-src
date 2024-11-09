@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
+  . Added Dom\Element::insertAdjacentHTML(). (nielsdos)
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)

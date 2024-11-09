@@ -1632,6 +1632,7 @@ namespace Dom
 
         public function insertAdjacentElement(AdjacentPosition $where, Element $element): ?Element {}
         public function insertAdjacentText(AdjacentPosition $where, string $data): void {}
+        public function insertAdjacentHTML(AdjacentPosition $where, string $string): void {}
 
         /**
          * @readonly
