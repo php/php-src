@@ -1325,10 +1325,21 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 }
 /* }}} */
 
+/* {{{ reflection_extension_factory_ex */
+static void reflection_extension_factory_ex(zval *object, zend_module_entry *module)
+{
+	reflection_instantiate(reflection_extension_ptr, object);
+	reflection_object *intern = Z_REFLECTION_P(object);
+	intern->ptr = module;
+	intern->ref_type = REF_TYPE_OTHER;
+	intern->ce = NULL;
+	ZVAL_STRING(reflection_prop_name(object), module->name);
+}
+/* }}} */
+
 /* {{{ reflection_extension_factory */
 static void reflection_extension_factory(zval *object, const char *name_str)
 {
-	reflection_object *intern;
 	size_t name_len = strlen(name_str);
 	zend_string *lcname;
 	struct _zend_module_entry *module;
@@ -1341,12 +1352,7 @@ static void reflection_extension_factory(zval *object, const char *name_str)
 		return;
 	}
 
-	reflection_instantiate(reflection_extension_ptr, object);
-	intern = Z_REFLECTION_P(object);
-	intern->ptr = module;
-	intern->ref_type = REF_TYPE_OTHER;
-	intern->ce = NULL;
-	ZVAL_STRINGL(reflection_prop_name(object), module->name, name_len);
+	reflection_extension_factory_ex(object, module);
 }
 /* }}} */
 
@@ -7591,6 +7597,59 @@ ZEND_METHOD(ReflectionConstant, getFileName)
 	}
 	RETURN_FALSE;
 }
+
+static void reflection_constant_find_ext(INTERNAL_FUNCTION_PARAMETERS, bool only_name)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+	int module_number = ZEND_CONSTANT_MODULE_NUMBER(const_);
+	if (module_number == PHP_USER_CONSTANT) {
+		// For user constants, ReflectionConstant::getExtension() returns null,
+		// ReflectionConstant::getExtensionName() returns false
+		if (only_name) {
+			RETURN_FALSE;
+		}
+		RETURN_NULL();
+	}
+	zend_module_entry *module;
+	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
+		if (module->module_number != module_number) {
+			continue;
+		}
+		if (only_name) {
+			RETURN_STRING(module->name);
+		}
+		reflection_extension_factory_ex(return_value, module);
+		return;
+	} ZEND_HASH_FOREACH_END();
+
+	zend_throw_exception_ex(
+		reflection_exception_ptr,
+		0,
+		"Unable to locate extension with module_number %d that provides constant %s",
+		module_number,
+		ZSTR_VAL(const_->name)
+	);
+	RETURN_THROWS();
+}
+
+/* {{{ Returns NULL or the extension the constant belongs to */
+ZEND_METHOD(ReflectionConstant, getExtension)
+{
+	reflection_constant_find_ext(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+/* }}} */
+
+/* {{{ Returns false or the name of the extension the constant belongs to */
+ZEND_METHOD(ReflectionConstant, getExtensionName)
+{
+	reflection_constant_find_ext(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+/* }}} */
 
 ZEND_METHOD(ReflectionConstant, __toString)
 {
