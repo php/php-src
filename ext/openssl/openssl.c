@@ -1562,7 +1562,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	}
 
 	if (!php_openssl_check_path(filename, filename_len, file_path, 2)) {
-		return;
+		goto exit_cleanup_cert;
 	}
 
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
@@ -1580,12 +1580,13 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
 	}
 
-	if (cert_str) {
-		X509_free(cert);
-	}
-
 	if (!BIO_free(bio_out)) {
 		php_openssl_store_errors();
+	}
+
+exit_cleanup_cert:
+	if (cert_str) {
+		X509_free(cert);
 	}
 }
 /* }}} */
@@ -3143,7 +3144,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	}
 
 	if (!php_openssl_check_path(filename, filename_len, file_path, 2)) {
-		return;
+		goto exit_cleanup;
 	}
 
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
@@ -3163,6 +3164,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 		php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
 	}
 
+exit_cleanup:
 	if (csr_str) {
 		X509_REQ_free(csr);
 	}
@@ -3629,6 +3631,7 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 		} else {
 			ZVAL_COPY(&tmp, zphrase);
 			if (!try_convert_to_string(&tmp)) {
+				zval_ptr_dtor(&tmp);
 				return NULL;
 			}
 
@@ -3675,12 +3678,14 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 		if (!(Z_TYPE_P(val) == IS_STRING || Z_TYPE_P(val) == IS_OBJECT)) {
 			TMP_CLEAN;
 		}
-		if (!try_convert_to_string(val)) {
+		zend_string *val_str = zval_try_get_string(val);
+		if (!val_str) {
 			TMP_CLEAN;
 		}
 
-		if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
-			if (!php_openssl_check_path_str(Z_STR_P(val), file_path, arg_num)) {
+		if (ZSTR_LEN(val_str) > 7 && memcmp(ZSTR_VAL(val_str), "file://", sizeof("file://") - 1) == 0) {
+			if (!php_openssl_check_path_str(val_str, file_path, arg_num)) {
+				zend_string_release_ex(val_str, false);
 				TMP_CLEAN;
 			}
 			is_file = true;
@@ -3699,10 +3704,11 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 				if (is_file) {
 					in = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 				} else {
-					in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
+					in = BIO_new_mem_buf(ZSTR_VAL(val_str), (int)ZSTR_LEN(val_str));
 				}
 				if (in == NULL) {
 					php_openssl_store_errors();
+					zend_string_release_ex(val_str, false);
 					TMP_CLEAN;
 				}
 				key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
@@ -3715,10 +3721,11 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 			if (is_file) {
 				in = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 			} else {
-				in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
+				in = BIO_new_mem_buf(ZSTR_VAL(val_str), (int)ZSTR_LEN(val_str));
 			}
 
 			if (in == NULL) {
+				zend_string_release_ex(val_str, false);
 				TMP_CLEAN;
 			}
 			if (passphrase == NULL) {
@@ -3731,6 +3738,8 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 			}
 			BIO_free(in);
 		}
+
+		zend_string_release_ex(val_str, false);
 	}
 
 	if (key == NULL) {
@@ -4909,7 +4918,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	}
 
 	if (!php_openssl_check_path(filename, filename_len, file_path, 2)) {
-		RETURN_FALSE;
+		goto clean_exit_key;
 	}
 
 	PHP_SSL_REQ_INIT(&req);
@@ -4945,8 +4954,9 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 
 clean_exit:
 	PHP_SSL_REQ_DISPOSE(&req);
-	EVP_PKEY_free(key);
 	BIO_free(bio_out);
+clean_exit_key:
+	EVP_PKEY_free(key);
 }
 /* }}} */
 
