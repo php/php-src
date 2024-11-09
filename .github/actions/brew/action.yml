@@ -26,4 +26,5 @@ runs:
           t1lib \
           libxml2 \
           libjpeg \
-          libxslt
+          libxslt \
+          openldap
