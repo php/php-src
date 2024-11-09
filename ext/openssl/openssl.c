@@ -3635,7 +3635,7 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 		/* it's an X509 file/cert of some kind, and we need to extract the data from that */
 		if (public_key) {
             php_openssl_errors_set_mark();
-			cert = php_openssl_x509_from_str(Z_STR_P(val), arg_num, false, NULL);
+			cert = php_openssl_x509_from_str(val_str, arg_num, false, NULL);
 
 			if (cert) {
 				free_cert = 1;
