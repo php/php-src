@@ -37,6 +37,10 @@ PHP                                                                        NEWS
 - Random:
   . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
 
+- Reflection:
+  . Added ReflectionConstant::getExtension() and ::getExtensionName().
+    (DanielEScherzer)
+
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)
