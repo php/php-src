@@ -19,7 +19,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: pip install sphinx-design sphinxawesome-theme rstfmt
+        run: pip install -r docs/requirements.txt
       - name: Check formatting
         run: make -C docs check-formatting
       - name: Publish
