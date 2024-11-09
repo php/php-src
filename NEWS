@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)
 
+- Sockets:
+  . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
+    (David Carlier)
+
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).

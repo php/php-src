@@ -1647,6 +1647,20 @@ const SOL_UDP = UNKNOWN;
  */
 const SOL_UDPLITE = UNKNOWN;
 #endif
+#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMP
+ */
+const IPPROTO_ICMP = UNKNOWN;
+#endif
+#if defined(IPPROTO_ICMPV6) || defined(PHP_WIN32)
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMPV6
+ */
+const IPPROTO_ICMPV6 = UNKNOWN;
+#endif
 
 #ifdef HAVE_IPV6
 /**

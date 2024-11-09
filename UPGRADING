@@ -129,6 +129,9 @@ PHP 8.5 UPGRADE NOTES
 - POSIX:
   . POSIX_SC_OPEN_MAX.
 
+- Sockets:
+  . IPPROTO_ICMP/IPPROTO_ICMPV6.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
