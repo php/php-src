@@ -301,13 +301,6 @@ static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ 
 }
 /* }}} */
 
-static zval *reflection_instantiate(zend_class_entry *pce, zval *object) /* {{{ */
-{
-	object_init_ex(object, pce);
-	return object;
-}
-/* }}} */
-
 static void _const_string(smart_str *str, const char *name, zval *value, const char *indent);
 static void _function_string(smart_str *str, zend_function *fptr, zend_class_entry *scope, const char* indent);
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, const char* indent);
@@ -1168,7 +1161,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reflection_object *intern;
 	attribute_reference *reference;
 
-	reflection_instantiate(reflection_attribute_ptr, object);
+	object_init_ex(object, reflection_attribute_ptr);
 	intern  = Z_REFLECTION_P(object);
 	reference = (attribute_reference*) emalloc(sizeof(attribute_reference));
 	reference->attributes = attributes;
@@ -1316,7 +1309,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 
 	zend_class_entry *reflection_ce =
 		ce->ce_flags & ZEND_ACC_ENUM ? reflection_enum_ptr : reflection_class_ptr;
-	reflection_instantiate(reflection_ce, object);
+	object_init_ex(object, reflection_ce);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = ce;
 	intern->ref_type = REF_TYPE_OTHER;
@@ -1328,7 +1321,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 /* {{{ reflection_extension_factory_ex */
 static void reflection_extension_factory_ex(zval *object, zend_module_entry *module)
 {
-	reflection_instantiate(reflection_extension_ptr, object);
+	object_init_ex(object, reflection_extension_ptr);
 	reflection_object *intern = Z_REFLECTION_P(object);
 	intern->ptr = module;
 	intern->ref_type = REF_TYPE_OTHER;
@@ -1363,7 +1356,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	parameter_reference *reference;
 	zval *prop_name;
 
-	reflection_instantiate(reflection_parameter_ptr, object);
+	object_init_ex(object, reflection_parameter_ptr);
 	intern = Z_REFLECTION_P(object);
 	reference = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	reference->arg_info = arg_info;
@@ -1438,13 +1431,13 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 
 	switch (type_kind) {
 		case INTERSECTION_TYPE:
-			reflection_instantiate(reflection_intersection_type_ptr, object);
+			object_init_ex(object, reflection_intersection_type_ptr);
 			break;
 		case UNION_TYPE:
-			reflection_instantiate(reflection_union_type_ptr, object);
+			object_init_ex(object, reflection_union_type_ptr);
 			break;
 		case NAMED_TYPE:
-			reflection_instantiate(reflection_named_type_ptr, object);
+			object_init_ex(object, reflection_named_type_ptr);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
@@ -1471,7 +1464,7 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 static void reflection_function_factory(zend_function *function, zval *closure_object, zval *object)
 {
 	reflection_object *intern;
-	reflection_instantiate(reflection_function_ptr, object);
+	object_init_ex(object, reflection_function_ptr);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = function;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -1488,7 +1481,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 {
 	reflection_object *intern;
 
-	reflection_instantiate(reflection_method_ptr, object);
+	object_init_ex(object, reflection_method_ptr);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = method;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -1508,7 +1501,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 	reflection_object *intern;
 	property_reference *reference;
 
-	reflection_instantiate(reflection_property_ptr, object);
+	object_init_ex(object, reflection_property_ptr);
 	intern = Z_REFLECTION_P(object);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->prop = prop;
@@ -1533,7 +1526,7 @@ static void reflection_class_constant_factory(zend_string *name_str, zend_class_
 {
 	reflection_object *intern;
 
-	reflection_instantiate(reflection_class_constant_ptr, object);
+	object_init_ex(object, reflection_class_constant_ptr);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = constant;
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
@@ -1551,7 +1544,7 @@ static void reflection_enum_case_factory(zend_class_entry *ce, zend_string *name
 	zend_class_entry *case_reflection_class = ce->enum_backing_type == IS_UNDEF
 		? reflection_enum_unit_case_ptr
 		: reflection_enum_backed_case_ptr;
-	reflection_instantiate(case_reflection_class, object);
+	object_init_ex(object, case_reflection_class);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = constant;
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
