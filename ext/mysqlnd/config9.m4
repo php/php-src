@@ -66,7 +66,7 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   AS_VAR_IF([PHP_MYSQLND_SSL], [no],,
     [PHP_SETUP_OPENSSL([MYSQLND_SHARED_LIBADD], [
       AC_DEFINE([MYSQLND_HAVE_SSL], [1],
-        [Define to 1 if mysqlnd extended SSL is enabled through OpenSSL.])
+        [Define to 1 if mysqlnd extended SSL is enabled through a system library.])
       PHP_ADD_EXTENSION_DEP(mysqlnd, hash)
     ])])
 
