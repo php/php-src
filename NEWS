@@ -16,6 +16,9 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fix is_zend_ptr() huge block comparison. (nielsdos)
 
+- Curl:
+  . Fix various memory leaks in curl mime handling. (nielsdos)
+
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
 
