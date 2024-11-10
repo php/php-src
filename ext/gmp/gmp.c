@@ -481,7 +481,8 @@ static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 		}
 		return ZEND_UNCOMPARABLE;
 	}
-	return mpz_cmp(gmp_op1, gmp_op2);
+
+	return ZEND_THREEWAY_COMPARE(mpz_cmp(gmp_op1, gmp_op2), 0);
 }
 /* }}} */
 
@@ -1436,7 +1437,7 @@ ZEND_FUNCTION(gmp_cmp)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG(mpz_cmp(gmpnum_a, gmpnum_b));
+	RETURN_LONG(ZEND_THREEWAY_COMPARE(mpz_cmp(gmpnum_a, gmpnum_b), 0));
 }
 /* }}} */
 
