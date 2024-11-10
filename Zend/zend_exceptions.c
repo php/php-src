@@ -540,7 +540,6 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 	file = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_FILE));
 	if (file) {
 		if (UNEXPECTED(Z_TYPE_P(file) != IS_STRING)) {
-			/* This is a typed property and can only happen if modified via ArrayObject */
 			zend_error(E_WARNING, "File name is not a string");
 			smart_str_appends(str, "[unknown file]: ");
 		} else{
@@ -550,7 +549,6 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 				if (EXPECTED(Z_TYPE_P(tmp) == IS_LONG)) {
 					line = Z_LVAL_P(tmp);
 				} else {
-					/* This is a typed property and can only happen if modified via ArrayObject */
 					zend_error(E_WARNING, "Line is not an int");
 				}
 			}
@@ -585,7 +583,6 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
 			}
 		} else {
-			/* The trace property is typed and private */
 			zend_error(E_WARNING, "args element is not an array");
 		}
 	}
