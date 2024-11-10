@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed bug GH-16723 (CURLMOPT_PUSHFUNCTION issues). (cmb)
 
+- Hash:
+  . Fixed GH-16711: Segfault in mhash(). (Girgias)
+
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
