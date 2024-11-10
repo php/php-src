@@ -1212,7 +1212,11 @@ PHP_FUNCTION(mhash)
 		struct mhash_bc_entry algorithm_lookup = mhash_to_hash[algorithm];
 		if (algorithm_lookup.hash_name) {
 			algo = zend_string_init(algorithm_lookup.hash_name, strlen(algorithm_lookup.hash_name), 0);
+		} else {
+			RETURN_FALSE;
 		}
+	} else {
+		RETURN_FALSE;
 	}
 
 	if (key) {
