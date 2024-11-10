@@ -36,7 +36,7 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #else
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type);
+static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type);
 #endif
 
 /* for links to relative location, prepend cwd of the entry */
@@ -1427,14 +1427,23 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature)
 /* }}} */
 
 #ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type) /* {{{ */
+static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type) /* {{{ */
 {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zval retval, zp[4], openssl;
+	zval retval, zp[4];
 	zend_string *str;
 
-	ZVAL_STRINGL(&openssl, is_sign ? "openssl_sign" : "openssl_verify", is_sign ? sizeof("openssl_sign")-1 : sizeof("openssl_verify")-1);
+	zend_function *fn = NULL;
+	if (is_sign) {
+		fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("openssl_sign"));
+	} else {
+		fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("openssl_verify"));
+	}
+
+	/* OpenSSL is not available, even as a shared module */
+	if (fn == NULL) {
+		return FAILURE;
+	}
+
 	if (*signature_len) {
 		ZVAL_STRINGL(&zp[1], *signature, *signature_len);
 	} else {
@@ -1461,20 +1470,9 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 		zval_ptr_dtor_str(&zp[0]);
 		zval_ptr_dtor_str(&zp[1]);
 		zval_ptr_dtor_str(&zp[2]);
-		zval_ptr_dtor_str(&openssl);
 		return FAILURE;
 	}
 
-	if (FAILURE == zend_fcall_info_init(&openssl, 0, &fci, &fcc, NULL, NULL)) {
-		zval_ptr_dtor_str(&zp[0]);
-		zval_ptr_dtor_str(&zp[1]);
-		zval_ptr_dtor_str(&zp[2]);
-		zval_ptr_dtor_str(&openssl);
-		return FAILURE;
-	}
-
-	fci.param_count = 4;
-	fci.params = zp;
 	Z_ADDREF(zp[0]);
 	if (is_sign) {
 		ZVAL_NEW_REF(&zp[1], &zp[1]);
@@ -1483,17 +1481,8 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	}
 	Z_ADDREF(zp[2]);
 
-	fci.retval = &retval;
+	zend_call_known_function(fn, NULL, NULL, &retval, /* param_count */ 4, zp, NULL);
 
-	if (FAILURE == zend_call_function(&fci, &fcc)) {
-		zval_ptr_dtor_str(&zp[0]);
-		zval_ptr_dtor(&zp[1]);
-		zval_ptr_dtor_str(&zp[2]);
-		zval_ptr_dtor_str(&openssl);
-		return FAILURE;
-	}
-
-	zval_ptr_dtor_str(&openssl);
 	Z_DELREF(zp[0]);
 
 	if (is_sign) {
@@ -1507,7 +1496,6 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	zval_ptr_dtor_str(&zp[2]);
 
 	switch (Z_TYPE(retval)) {
-		default:
 		case IS_LONG:
 			zval_ptr_dtor(&zp[1]);
 			if (1 == Z_LVAL(retval)) {
@@ -1520,6 +1508,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 			zval_ptr_dtor(&zp[1]);
 			return SUCCESS;
 		case IS_FALSE:
+		default:
 			zval_ptr_dtor(&zp[1]);
 			return FAILURE;
 	}
@@ -1585,7 +1574,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 #ifndef PHAR_HAVE_OPENSSL
 			tempsig = sig_len;
 
-			if (FAILURE == phar_call_openssl_signverify(0, fp, end_of_phar, ZSTR_VAL(pubkey), ZSTR_LEN(pubkey), &sig, &tempsig, sig_type)) {
+			if (FAILURE == phar_call_openssl_signverify(false, fp, end_of_phar, ZSTR_VAL(pubkey), ZSTR_LEN(pubkey), &sig, &tempsig, sig_type)) {
 				zend_string_release_ex(pubkey, 0);
 
 				if (error) {
@@ -1975,7 +1964,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 			siglen = 0;
 			php_stream_seek(fp, 0, SEEK_END);
 
-			if (FAILURE == phar_call_openssl_signverify(1, fp, php_stream_tell(fp), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen, phar->sig_flags)) {
+			if (FAILURE == phar_call_openssl_signverify(true, fp, php_stream_tell(fp), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen, phar->sig_flags)) {
 				if (error) {
 					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
 				}
