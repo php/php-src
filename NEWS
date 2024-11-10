@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
 
+- Hash:
+  . Fixed GH-16711: Segfault in mhash(). (Girgias)
+
 - OpenSSL:
   . Prevent unexpected array entry conversion when reading key. (nielsdos)
   . Fix various memory leaks related to openssl exports. (nielsdos)
