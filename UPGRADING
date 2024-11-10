@@ -129,6 +129,9 @@ PHP 8.5 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Core:
+  . PHP_BUILD_DATE.
+
 - POSIX:
   . POSIX_SC_OPEN_MAX.
 

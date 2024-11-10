@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-16665 (\array and \callable should not be usable in
     class_alias). (nielsdos)
+  . Added PHP_BUILD_DATE constant. (cmb)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
