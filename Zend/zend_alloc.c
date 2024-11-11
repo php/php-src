@@ -378,7 +378,8 @@ struct _zend_mm_chunk {
 	uint32_t           free_pages;				/* number of free pages */
 	uint32_t           free_tail;               /* number of free pages at the end of chunk */
 	uint32_t           num;
-	char               reserve[64 - (sizeof(void*) * 3 + sizeof(uint32_t) * 3)];
+	/* align heap_slot to cache line boundary (assumed to be 64 bytes) */
+	char               reserve[64 - (sizeof(void*) * 4 + sizeof(uint32_t) * 3)];
 	zend_mm_heap       heap_slot;               /* used only in main chunk */
 #if ZEND_MM_HEAP_PROTECTION
 	zend_mm_zone      *zone;
