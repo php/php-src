@@ -23,7 +23,7 @@ static zend_result uriparser_init_parser(void);
 static void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors);
 static zend_class_entry *uriparser_get_uri_ce(void);
 static void *uriparser_clone_uri(void *uri);
-static zend_string *uriparser_uri_to_string(void *uri);
+static zend_string *uriparser_uri_to_string(void *uri, bool exclude_fragment);
 static void uriparser_free_uri(void *uri);
 static zend_result uriparser_destroy_parser(void);
 
@@ -117,7 +117,7 @@ static void uriparser_append_scheme(const uri_internal_t *internal_uri, smart_st
 	uriparser_read_scheme(internal_uri, &tmp);
 	if (Z_TYPE(tmp) == IS_STRING) {
 		smart_str_append(uri_str, Z_STR(tmp));
-		smart_str_appendl(uri_str, "://", sizeof("://") - 1);
+		smart_str_appendl(uri_str, "://", sizeof("://") - 1); // TODO apply the algorithm at https://datatracker.ietf.org/doc/html/rfc3986#section-5.3
 	}
 
 	zval_ptr_dtor(&tmp);
@@ -441,6 +441,9 @@ static zend_result uriparser_write_query(uri_internal_t *internal_uri, zval *val
 	uriparser_append_path(internal_uri, &uri_str);
 
 	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) {
+		if (!zend_string_starts_with_literal(Z_STR_P(value), "?")) {
+			smart_str_appendc(&uri_str, '?');
+		}
 		smart_str_append(&uri_str, Z_STR_P(value));
 	}
 
@@ -556,7 +559,7 @@ static void *uriparser_clone_uri(void *uri)
 	return new_uriparser_uri;
 }
 
-static zend_string *uriparser_uri_to_string(void *uri)
+static zend_string *uriparser_uri_to_string(void *uri, bool exclude_fragment)
 {
 	UriUriA *uriparser_uri = (UriUriA *) uri;
 	int charsRequired;
@@ -571,6 +574,13 @@ static zend_string *uriparser_uri_to_string(void *uri)
 	if (uriToStringA(ZSTR_VAL(uri_string), uriparser_uri, charsRequired, NULL) != URI_SUCCESS) {
 		zend_string_release(uri_string);
 		return NULL;
+	}
+
+	if (exclude_fragment) {
+		char *pos = strrchr(ZSTR_VAL(uri_string), '#');
+		if (pos != NULL) {
+			uri_string = zend_string_truncate(uri_string, (pos - ZSTR_VAL(uri_string)), false);
+		}
 	}
 
 	return uri_string;

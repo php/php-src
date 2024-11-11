@@ -28,8 +28,6 @@ URI parsing failed
 array(%d) {
   [0]=>
   object(Uri\WhatWgError)#%d (%d) {
-    ["uri"]=>
-    string(60) "https://example.com:8080@username:password/path?q=r#fragment"
     ["position"]=>
     string(26) "password/path?q=r#fragment"
     ["errorCode"]=>
@@ -37,8 +35,6 @@ array(%d) {
   }
   [1]=>
   object(Uri\WhatWgError)#%d (%d) {
-    ["uri"]=>
-    string(60) "https://example.com:8080@username:password/path?q=r#fragment"
     ["position"]=>
     string(36) "@username:password/path?q=r#fragment"
     ["errorCode"]=>

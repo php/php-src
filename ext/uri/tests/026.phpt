@@ -29,19 +29,17 @@ var_dump($uri2->__toString());
 
 $uri1 = Uri\WhatWgUri::create("https://example.com");
 $uri2 = $uri1->withHost("test.com");
-$uri3 = $uri2->withHost(null);
 
 var_dump($uri1->__toString());
 var_dump($uri2->__toString());
-var_dump($uri3->__toString());
+
+try {
+    $uri2->withHost(null);
+} catch (Uri\InvalidUriException $e) {
+    echo $e->getMessage() . "\n";
+}
 
 $uri1 = Uri\WhatWgUri::create("ftp://foo.com?query=abc#foo");
-$uri2 = $uri1->withHost("test.com");
-
-var_dump($uri1->__toString());
-var_dump($uri2->__toString());
-
-$uri1 = Uri\WhatWgUri::create("/path?query=abc#foo");
 $uri2 = $uri1->withHost("test.com");
 
 var_dump($uri1->__toString());
@@ -54,3 +52,8 @@ string(16) "https://test.com"
 string(8) "https://"
 string(27) "ftp://foo.com?query=abc#foo"
 string(28) "ftp://test.com?query=abc#foo"
+string(20) "https://example.com/"
+string(17) "https://test.com/"
+URI parsing failed
+string(28) "ftp://foo.com/?query=abc#foo"
+string(29) "ftp://test.com/?query=abc#foo"

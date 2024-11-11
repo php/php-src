@@ -2,8 +2,6 @@
 Test unsetting URI properties
 --EXTENSIONS--
 uri
---XFAIL--
-URI implementations are final classes for now
 --FILE--
 <?php
 
@@ -52,7 +50,7 @@ Cannot unset readonly property MyRfc3986Uri::$port
 Cannot unset readonly property MyRfc3986Uri::$path
 Cannot unset readonly property MyRfc3986Uri::$query
 Cannot unset readonly property MyRfc3986Uri::$fragment
-Cannot unset protected(set) readonly property MyRfc3986Uri::$foo from global scope
+Cannot unset readonly property MyRfc3986Uri::$foo
 Cannot unset readonly property MyWhatWgUri::$scheme
 Cannot unset readonly property MyWhatWgUri::$user
 Cannot unset readonly property MyWhatWgUri::$password
@@ -61,4 +59,4 @@ Cannot unset readonly property MyWhatWgUri::$port
 Cannot unset readonly property MyWhatWgUri::$path
 Cannot unset readonly property MyWhatWgUri::$query
 Cannot unset readonly property MyWhatWgUri::$fragment
-Cannot unset protected(set) readonly property MyWhatWgUri::$foo from global scope
+Cannot unset readonly property MyWhatWgUri::$foo

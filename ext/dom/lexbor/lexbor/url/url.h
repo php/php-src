@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2023 Alexander Borisov
  *
@@ -296,6 +297,19 @@ lxb_url_parse_basic(lxb_url_parser_t *parser, lxb_url_t *url,
                     lxb_url_state_t override_state, lxb_encoding_t encoding);
 
 /*
+ * Erase URL.
+ *
+ * Frees all internal memory occupied by the URL object, but does not destroy
+ * the object.
+ *
+ * @param[in] lxb_url_t *.
+ *
+ * @return NULL.
+ */
+LXB_API void
+lxb_url_erase(lxb_url_t *url);
+
+/*
  * Destroys URL.
  *
  * @param[in] lxb_url_t *.
@@ -321,6 +335,70 @@ lxb_url_destroy(lxb_url_t *url);
  */
 LXB_API void
 lxb_url_memory_destroy(lxb_url_t *url);
+
+
+/*
+ * Below is an API for modifying the URL object according to the
+ * https://url.spec.whatwg.org/#api specification.
+ *
+ * It is not necessary to pass the lxb_url_parser_t object to API functions.
+ * You need to pass the parser if you want to have logs of parsing.
+ *
+ * All API functions can be passed NULL as "const lxb_char_t *" data.
+ */
+
+LXB_API lxb_status_t
+lxb_url_api_href_set(lxb_url_t *url, lxb_url_parser_t *parser,
+                     const lxb_char_t *href, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_protocol_set(lxb_url_t *url, lxb_url_parser_t *parser,
+                         const lxb_char_t *protocol, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_username_set(lxb_url_t *url,
+                         const lxb_char_t *username, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_password_set(lxb_url_t *url,
+                         const lxb_char_t *password, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_host_set(lxb_url_t *url, lxb_url_parser_t *parser,
+                     const lxb_char_t *host, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_hostname_set(lxb_url_t *url, lxb_url_parser_t *parser,
+                         const lxb_char_t *hostname, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_port_set(lxb_url_t *url, lxb_url_parser_t *parser,
+                     const lxb_char_t *port, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_pathname_set(lxb_url_t *url, lxb_url_parser_t *parser,
+                         const lxb_char_t *pathname, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_search_set(lxb_url_t *url, lxb_url_parser_t *parser,
+                       const lxb_char_t *search, size_t length);
+
+LXB_API lxb_status_t
+lxb_url_api_hash_set(lxb_url_t *url, lxb_url_parser_t *parser,
+                     const lxb_char_t *hash, size_t length);
+
+
+/*
+ * Below are functions for serializing a URL object and its individual
+ * parameters.
+ *
+ * Note that the callback may be called more than once.
+ * For example, the lxb_url_serialize() function will callback multiple times:
+ * 1. http
+ * 2. ://
+ * 3. example.com
+ * and so on.
+ */
 
 LXB_API lxb_status_t
 lxb_url_serialize(const lxb_url_t *url, lexbor_serialize_cb_f cb, void *ctx,
@@ -383,7 +461,6 @@ lxb_url_serialize_fragment(const lxb_url_t *url,
  */
 LXB_API lxb_url_t *
 lxb_url_clone(lexbor_mraw_t *mraw, lxb_url_t *url);
-
 
 /*
  * Inline functions.

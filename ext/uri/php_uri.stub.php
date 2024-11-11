@@ -4,8 +4,25 @@
 
 namespace Uri;
 
+/**
+ * @var string
+ * @cvalue URI_PARSER_RFC3986
+ */
+const URI_PARSER_RFC3986 = UNKNOWN;
+
+/**
+ * @var string
+ * @cvalue URI_PARSER_WHATWG
+ */
+const URI_PARSER_WHATWG = UNKNOWN;
+
 /** @strict-properties */
 abstract class UriException extends \Exception
+{
+}
+
+/** @strict-properties */
+class UninitializedUriException extends \Uri\UriException
 {
 }
 
@@ -77,7 +94,6 @@ final readonly class WhatWgError
     /** @cvalue LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST */
     public const int ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST = UNKNOWN;
 
-    public string $uri;
     public string $position;
     public int $errorCode;
 
@@ -118,11 +134,13 @@ interface UriInterface extends \Stringable
 
     public function withFragment(?string $fragment): static {}
 
+    public function equalsTo(\Uri\UriInterface $uri, bool $excludeFragment = true): bool {}
+
     public function __toString(): string {}
 }
 
 /** @strict-properties */
-final readonly class Rfc3986Uri implements \Uri\UriInterface
+readonly class Rfc3986Uri implements \Uri\UriInterface
 {
     /** @virtual */
     private ?string $scheme;
@@ -177,6 +195,8 @@ final readonly class Rfc3986Uri implements \Uri\UriInterface
 
     public function withFragment(?string $fragment): static {}
 
+    public function equalsTo(\Uri\UriInterface $uri, bool $excludeFragment = true): bool {}
+
     public function __toString(): string {}
 
     public function __serialize(): array;
@@ -185,7 +205,7 @@ final readonly class Rfc3986Uri implements \Uri\UriInterface
 }
 
 /** @strict-properties */
-final readonly class WhatWgUri implements \Uri\UriInterface
+readonly class WhatWgUri implements \Uri\UriInterface
 {
     /** @virtual */
     private ?string $scheme;
@@ -204,7 +224,6 @@ final readonly class WhatWgUri implements \Uri\UriInterface
     /** @virtual */
     private ?string $fragment;
 
-    /** @param array $errors */
     public static function create(string $uri, ?string $baseUrl = null): static|array {}
 
     public function __construct(string $uri, ?string $baseUrl = null) {}
@@ -256,6 +275,9 @@ final readonly class WhatWgUri implements \Uri\UriInterface
 
     /** @implementation-alias Uri\Rfc3986Uri::withFragment */
     public function withFragment(?string $fragment): static {}
+
+    /** @implementation-alias Uri\Rfc3986Uri::equalsTo */
+    public function equalsTo(\Uri\UriInterface $uri, bool $excludeFragment = true): bool {}
 
     /** @implementation-alias Uri\Rfc3986Uri::__toString */
     public function __toString(): string {}

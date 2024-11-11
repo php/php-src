@@ -2769,28 +2769,28 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 /* {{{ SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
-	zend_string *buf;
-	char      *location, *action;
-	size_t     location_size, action_size;
+	zend_string *buf, *location, *uri_parser_name = NULL;
+	char       *action;
+	size_t     action_size;
 	zend_long  version;
 	bool  one_way = 0;
 	zval      *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSsl|bS!",
 	    &buf,
-	    &location, &location_size,
+	    &location,
 	    &action, &action_size,
-	    &version, &one_way) == FAILURE) {
+	    &version, &one_way, &uri_parser_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (SOAP_GLOBAL(features) & SOAP_WAIT_ONE_WAY_CALLS) {
 		one_way = 0;
 	}
 	if (one_way) {
-		if (make_http_soap_request(this_ptr, buf, location, action, version, NULL)) {
+		if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_name, NULL)) {
 			RETURN_EMPTY_STRING();
 		}
-	} else if (make_http_soap_request(this_ptr, buf, location, action, version,
+	} else if (make_http_soap_request(this_ptr, buf, location, action, uri_parser_name, version,
 	    return_value)) {
 		return;
 	}

@@ -6,7 +6,10 @@ uri
 <?php
 
 var_dump(Uri\Rfc3986Uri::create("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor"));
-var_dump(Uri\WhatWgUri::create("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor"));
+
+$uri = Uri\WhatWgUri::create("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor");
+var_dump($uri);
+var_dump($uri->__toString());
 
 ?>
 --EXPECTF--
@@ -29,3 +32,4 @@ object(Uri\WhatWgUri)#%d (%d) {
   ["fragment"]=>
   string(6) "anchor"
 }
+string(75) "http://username:password@xn--hostname-b1aaa:9090/path?arg=va%C3%A9ue#anchor"

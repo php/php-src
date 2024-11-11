@@ -43,3 +43,13 @@ var_dump($uri2->__toString());
 
 ?>
 --EXPECT--
+string(27) "https://example.com/foo/bar"
+string(23) "https://example.com/foo"
+string(19) "https://example.com"
+string(19) "https://example.com"
+string(23) "https://example.com/foo"
+string(27) "https://example.com/foo/bar"
+string(23) "https://example.com/foo"
+string(20) "https://example.com/"
+string(20) "https://example.com/"
+string(23) "https://example.com/foo"

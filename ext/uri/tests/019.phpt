@@ -18,8 +18,6 @@ NULL
 array(1) {
   [0]=>
   object(Uri\WhatWgError)#%d (%d) {
-    ["uri"]=>
-    string(4) "🐘"
     ["position"]=>
     string(4) "🐘"
     ["errorCode"]=>

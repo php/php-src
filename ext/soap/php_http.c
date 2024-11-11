@@ -18,6 +18,7 @@
 
 #include "php_soap.h"
 #include "ext/hash/php_hash.h" /* For php_hash_bin2hex() */
+#include "ext/uri/php_uri.h"
 
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
 static char *get_http_header_value(char *headers, char *type);
@@ -335,18 +336,20 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 	}
 }
 
-int make_http_soap_request(zval        *this_ptr,
-                           zend_string *buf,
-                           char        *location,
-                           char        *soapaction,
-                           int          soap_version,
-                           zval        *return_value)
+int make_http_soap_request(zval              *this_ptr,
+                           zend_string       *buf,
+                           zend_string       *location,
+                           char              *soapaction,
+                           int               soap_version,
+                           const zend_string *uri_parser_name,
+                           zval              *return_value)
 {
 	zend_string *request;
 	smart_str soap_headers = {0};
 	smart_str soap_headers_z = {0};
 	size_t err;
 	php_url *phpurl = NULL;
+	uri_internal_t *uri_internal = NULL;
 	php_stream *stream;
 	zval *tmp;
 	int use_proxy = 0;
@@ -432,8 +435,14 @@ int make_http_soap_request(zval        *this_ptr,
 		stream = NULL;
 	}
 
-	if (location != NULL && location[0] != '\000') {
-		phpurl = php_url_parse(location);
+	if (location != NULL && ZSTR_VAL(location)[0] != '\000') {
+		uri_handler_t *uri_handler = php_uri_get_handler(uri_parser_name);
+		if (uri_handler == NULL) {
+			zend_argument_value_error(6, "must be a valid URI parser name");
+			return FALSE;
+		}
+		uri_internal = php_uri_parse(uri_handler, location, NULL);
+		phpurl = php_url_parse(ZSTR_VAL(location));
 	}
 
 	tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
@@ -450,8 +459,11 @@ int make_http_soap_request(zval        *this_ptr,
 	}
 
 try_again:
-	if (phpurl == NULL || phpurl->host == NULL) {
-	  if (phpurl != NULL) {php_url_free(phpurl);}
+	if (uri_internal == NULL || phpurl->host == NULL) {
+		if (phpurl != NULL) {
+			php_url_free(phpurl);
+			php_uri_free(uri_internal);
+		}
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
@@ -479,6 +491,7 @@ try_again:
 	PG(allow_url_fopen) = 1;
 	if (use_ssl && php_stream_locate_url_wrapper("https://", NULL, STREAM_LOCATE_WRAPPERS_ONLY) == NULL) {
 		php_url_free(phpurl);
+		php_uri_free(uri_internal);
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
@@ -534,6 +547,7 @@ try_again:
 			ZVAL_LONG(Z_CLIENT_USE_PROXY_P(this_ptr), use_proxy);
 		} else {
 			php_url_free(phpurl);
+			php_uri_free(uri_internal);
 			if (request != buf) {
 				zend_string_release_ex(request, 0);
 			}
@@ -1145,13 +1159,31 @@ try_again:
 		char *loc;
 
 		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
-			php_url *new_url  = php_url_parse(loc);
+			uri_handler_t *uri_handler = php_uri_get_handler(uri_parser_name);
+			if (uri_handler == NULL) {
+				zend_argument_value_error(6, "must be a valid URI parser name");
+				return FALSE;
+			}
 
-			if (new_url != NULL) {
+			zend_string *loc_str = zend_string_init(loc, strlen(loc), false);
+			php_url *new_url = php_url_parse(loc);
+			uri_internal_t *new_uri_internal = php_uri_parse(uri_handler, loc_str, NULL);
+			zend_string_release(loc_str);
+
+			zval new_uri_scheme, new_uri_host, new_uri_port, new_uri_path;
+			zend_result new_scheme_result = php_uri_get_scheme(new_uri_internal, &new_uri_scheme);
+			zend_result new_host_result = php_uri_get_host(new_uri_internal, &new_uri_host);
+			zend_result new_port_result = php_uri_get_port(new_uri_internal, &new_uri_port);
+			zend_result new_path_result = php_uri_get_path(new_uri_internal, &new_uri_path);
+
+			if (new_uri_internal != NULL && new_scheme_result == SUCCESS && new_host_result == SUCCESS &&
+				new_port_result == SUCCESS && new_path_result == SUCCESS
+			) {
 				zend_string_release_ex(http_headers, 0);
 				zend_string_release_ex(http_body, 0);
 				efree(loc);
-				if (new_url->scheme == NULL && new_url->path != NULL) {
+
+				if (Z_TYPE(new_uri_scheme) == IS_NULL && Z_TYPE(new_uri_path) == IS_STRING) {
 					new_url->scheme = phpurl->scheme ? zend_string_copy(phpurl->scheme) : NULL;
 					new_url->host = phpurl->host ? zend_string_copy(phpurl->host) : NULL;
 					new_url->port = phpurl->port;

@@ -2,8 +2,6 @@
 Test cloning userland properties
 --EXTENSIONS--
 uri
---XFAIL--
-URI implementations are final classes for now
 --FILE--
 <?php
 
