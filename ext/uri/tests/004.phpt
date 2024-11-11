@@ -90,8 +90,6 @@ object(Uri\Rfc3986Uri)#%d (%d) {
 array(%d) {
   [0]=>
   object(Uri\WhatWgError)#%d (%d) {
-    ["uri"]=>
-    string(20) "192.168/contact.html"
     ["position"]=>
     string(20) "192.168/contact.html"
     ["errorCode"]=>
@@ -102,8 +100,6 @@ NULL
 array(%d) {
   [0]=>
   object(Uri\WhatWgError)#%d (%d) {
-    ["uri"]=>
-    string(67) "http://RuPaul's Drag Race All Stars 7 Winners Cast on This Season's"
     ["position"]=>
     string(52) " drag race all stars 7 winners cast on this season's"
     ["errorCode"]=>

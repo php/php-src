@@ -15,11 +15,15 @@ var_dump($uri3->__toString());
 
 $uri1 = Uri\WhatWgUri::create("https://example.com");
 $uri2 = $uri1->withScheme("http");
-$uri3 = $uri2->withScheme(null);
 
 var_dump($uri1->__toString());
 var_dump($uri2->__toString());
-var_dump($uri3->__toString());
+
+try {
+    $uri2->withScheme(null);
+} catch (Uri\InvalidUriException $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 --EXPECT--
@@ -27,5 +31,5 @@ string(19) "https://example.com"
 string(18) "http://example.com"
 string(11) "example.com"
 string(20) "https://example.com/"
-string(20) "https://example.com/"
-string(20) "https://example.com/"
+string(19) "http://example.com/"
+URI parsing failed
