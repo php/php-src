@@ -23,6 +23,7 @@ extern zend_object_handlers rfc3986_uri_object_handlers;
 extern zend_class_entry *whatwg_uri_ce;
 extern zend_object_handlers whatwg_uri_object_handlers;
 extern zend_class_entry *uri_exception_ce;
+extern zend_class_entry *uninitialized_uri_exception_ce;
 extern zend_class_entry *invalid_uri_exception_ce;
 extern zend_class_entry *whatwg_error_ce;
 
@@ -33,7 +34,7 @@ typedef struct uri_handler_t {
 	void *(*parse_uri)(const zend_string *uri_str, const zend_string *base_url_str, zval *errors);
 	zend_class_entry *(*get_uri_ce)(void);
 	void *(*clone_uri)(void *uri);
-	zend_string *(*uri_to_string)(void *uri);
+	zend_string *(*uri_to_string)(void *uri, bool exclude_fragment);
 	void (*free_uri)(void *uri);
 	zend_result (*destroy_parser)(void);
 	HashTable *property_handlers;
@@ -59,6 +60,9 @@ static inline uri_internal_t *uri_internal_from_obj(zend_object *object) {
 
 #define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
 #define Z_URI_INTERNAL_P(zv) uri_internal_from_obj(Z_OBJ_P((zv)))
+
+#define URI_PARSER_RFC3986 "rfc3986"
+#define URI_PARSER_WHATWG "whatwg"
 
 typedef zend_result (*uri_read_t)(const uri_internal_t *internal_uri, zval *retval);
 
@@ -87,7 +91,7 @@ void throw_invalid_uri_exception(zval *errors);
 #define URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, object) do { \
     ZEND_ASSERT(internal_uri != NULL); \
 	if (UNEXPECTED(internal_uri->uri == NULL)) { \
-        zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+        zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
     	RETURN_THROWS(); \
     } \
 } while (0)
@@ -95,7 +99,7 @@ void throw_invalid_uri_exception(zval *errors);
 #define URI_CHECK_INITIALIZATION_RETURN(internal_uri, object, return_on_failure) do { \
     ZEND_ASSERT(internal_uri != NULL); \
 	if (UNEXPECTED(internal_uri->uri == NULL)) { \
-        zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+        zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
     	return return_on_failure; \
     } \
 } while (0)
@@ -103,7 +107,7 @@ void throw_invalid_uri_exception(zval *errors);
 #define URI_CHECK_INITIALIZATION_RETURN_VOID(internal_uri, object) do { \
     ZEND_ASSERT(internal_uri != NULL); \
 	if (UNEXPECTED(internal_uri->uri == NULL)) { \
-        zend_throw_error(NULL, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+        zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
     	return; \
     } \
 } while (0)
