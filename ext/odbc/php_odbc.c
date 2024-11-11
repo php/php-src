@@ -545,7 +545,6 @@ PHP_MINIT_FUNCTION(odbc)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(odbc)
 {
-	ODBCG(defConn) = -1;
 	ODBCG(num_links) = ODBCG(num_persistent);
 	memset(ODBCG(laststate), '\0', 6);
 	memset(ODBCG(lasterrormsg), '\0', SQL_MAX_MESSAGE_LENGTH);
