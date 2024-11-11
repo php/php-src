@@ -676,8 +676,8 @@ PHP 8.4 UPGRADE NOTES
   . getAttribute, enabled to get the value of ATTR_STRINGIFY_FETCHES.
 
 - PDO_FIREBIRD:
-  . getAttribute, enabled to get values of FB_ATTR_DATE_FORMAT, FB_ATTR_TIME_FORMAT,
-    FB_ATTR_TIMESTAMP_FORMAT.
+  . Added new attributes to get values of Pdo\Firebird::ATTR_DATE_FORMAT, Pdo\Firebird::ATTR_TIME_FORMAT,
+    Pdo\Firebird::ATTR_TIMESTAMP_FORMAT.
   . Added new attributes to specify transaction isolation level and access mode.
     Along with these, five constants (Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL,
     Pdo\Firebird::READ_COMMITTED, Pdo\Firebird::REPEATABLE_READ,
