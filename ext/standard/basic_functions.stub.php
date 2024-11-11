@@ -3276,7 +3276,7 @@ function fdiv(float $num1, float $num2): float {}
 /**
  * @compile-time-eval
  */
-function fpow(float $num1, float $num2): float {}
+function fpow(float $num, float $exponent): float {}
 
 /* microtime.c */
 

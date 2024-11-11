@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 583e2f348efe048b71eb313ca2a4b8bbb8fc7a9a */
+ * Stub hash: e277d3a5699db6aeedb08642720be841dc37d683 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1724,7 +1724,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_fdiv arginfo_fmod
 
-#define arginfo_fpow arginfo_fmod
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fpow, 0, 2, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, exponent, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_microtime, 0, 0, MAY_BE_STRING|MAY_BE_DOUBLE)
