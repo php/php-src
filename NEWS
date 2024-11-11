@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fail early in *nix configuration build script. (hakre)
+  . Fixed bug GH-16727 (Opcache bad signal 139 crash in ZTS bookworm
+    (frankenphp)). (nielsdos)
 
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
