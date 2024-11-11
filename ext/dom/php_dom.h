@@ -147,7 +147,7 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 void php_dom_create_implementation(zval *retval, bool modern);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
-int dom_node_is_read_only(const xmlNode *node);
+bool dom_node_is_read_only(const xmlNode *node);
 bool dom_node_children_valid(const xmlNode *node);
 void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type, bool modern);
 void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len);
