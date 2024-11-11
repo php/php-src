@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
+- Standard:
+  . Fixed parameter names of fpow() to be identical to pow(). (Girgias)
+
 07 Nov 2024, PHP 8.4.0RC4
 
 - BcMath:
