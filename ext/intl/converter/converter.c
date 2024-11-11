@@ -27,7 +27,6 @@
 
 typedef struct _php_converter_object {
 	UConverter *src, *dest;
-	zend_fcall_info to_cb, from_cb;
 	zend_fcall_info_cache to_cache, from_cache;
 	intl_error error;
 	zend_object obj;
@@ -230,13 +229,9 @@ static void php_converter_to_u_callback(const void *context,
 	ZVAL_LONG(&zargs[3], *pErrorCode);
 	ZVAL_MAKE_REF(&zargs[3]);
 
-	objval->to_cb.param_count    = 4;
-	objval->to_cb.params = zargs;
-	objval->to_cb.retval = &retval;
-	if (zend_call_function(&(objval->to_cb), &(objval->to_cache)) == FAILURE) {
-		/* Unlikely */
-		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Unexpected failure calling toUCallback()");
-	} else if (!Z_ISUNDEF(retval)) {
+	zend_call_known_fcc(&objval->to_cache, &retval, 4, zargs, NULL);
+	/* When no exception is thrown */
+	if (EXPECTED(!Z_ISUNDEF(retval))) {
 		php_converter_append_toUnicode_target(&retval, args, objval);
 		zval_ptr_dtor(&retval);
 	}
@@ -297,11 +292,10 @@ static void php_converter_from_u_callback(const void *context,
 	php_converter_object *objval = (php_converter_object*)context;
 	zval retval;
 	zval zargs[4];
-	int i;
 
 	ZVAL_LONG(&zargs[0], reason);
 	array_init(&zargs[1]);
-	i = 0;
+	int i = 0;
 	while (i < length) {
 		UChar32 c;
 		U16_NEXT(codeUnits, i, length, c);
@@ -311,13 +305,9 @@ static void php_converter_from_u_callback(const void *context,
 	ZVAL_LONG(&zargs[3], *pErrorCode);
 	ZVAL_MAKE_REF(&zargs[3]);
 
-	objval->from_cb.param_count = 4;
-	objval->from_cb.params = zargs;
-	objval->from_cb.retval = &retval;
-	if (zend_call_function(&(objval->from_cb), &(objval->from_cache)) == FAILURE) {
-		/* Unlikely */
-		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Unexpected failure calling fromUCallback()");
-	} else if (!Z_ISUNDEF(retval)) {
+	zend_call_known_fcc(&objval->from_cache, &retval, 4, zargs, NULL);
+	/* When no exception is thrown */
+	if (EXPECTED(!Z_ISUNDEF(retval))) {
 		php_converter_append_fromUnicode_target(&retval, args, objval);
 		zval_ptr_dtor(&retval);
 	}
@@ -503,26 +493,20 @@ PHP_METHOD(UConverter, getDestinationType) {
 /* }}} */
 
 /* {{{ php_converter_resolve_callback */
-static void php_converter_resolve_callback(zval *zobj,
-                                           php_converter_object *objval,
-                                           const char *callback_name,
-                                           zend_fcall_info *finfo,
-                                           zend_fcall_info_cache *fcache) {
-	char *errstr = NULL;
-	zval caller;
+static void php_converter_resolve_callback(
+	zend_fcall_info_cache *fcc,
+	zend_object *obj,
+	const char *callback_name,
+	size_t callback_name_len
+) {
+	zend_function *fn = zend_hash_str_find_ptr_lc(&obj->ce->function_table, callback_name, callback_name_len);
+	ZEND_ASSERT(fn != NULL);
 
-	array_init(&caller);
-	Z_ADDREF_P(zobj);
-	add_index_zval(&caller, 0, zobj);
-	add_index_string(&caller, 1, callback_name);
-	if (zend_fcall_info_init(&caller, 0, finfo, fcache, NULL, &errstr) == FAILURE) {
-		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Error setting converter callback: %s", errstr);
-	}
-	zend_array_destroy(Z_ARR(caller));
-	ZVAL_UNDEF(&finfo->function_name);
-	if (errstr) {
-		efree(errstr);
-	}
+	fcc->function_handler = fn;
+	fcc->object = obj;
+	fcc->called_scope = obj->ce;
+	fcc->calling_scope = NULL;
+	fcc->closure = NULL;
 }
 /* }}} */
 
@@ -544,8 +528,8 @@ PHP_METHOD(UConverter, __construct) {
 
 	php_converter_set_encoding(objval, &(objval->src),  src,  src_len );
 	php_converter_set_encoding(objval, &(objval->dest), dest, dest_len);
-	php_converter_resolve_callback(ZEND_THIS, objval, "toUCallback",   &(objval->to_cb),   &(objval->to_cache));
-	php_converter_resolve_callback(ZEND_THIS, objval, "fromUCallback", &(objval->from_cb), &(objval->from_cache));
+	php_converter_resolve_callback(&objval->to_cache, Z_OBJ_P(ZEND_THIS), ZEND_STRL("toUCallback"));
+	php_converter_resolve_callback(&objval->from_cache, Z_OBJ_P(ZEND_THIS), ZEND_STRL("fromUCallback"));
 }
 /* }}} */
 
