@@ -3,8 +3,6 @@ Test instantiation without calling constructor
 --EXTENSIONS--
 reflection
 uri
---XFAIL--
-URI implementations are final classes for now
 --FILE--
 <?php
 
@@ -12,7 +10,7 @@ function handleException(Uri\UriInterface $uri, Closure $callback)
 {
     try {
         $callback($uri);
-    } catch (Error $e) {
+    } catch (Uri\UninitializedUriException $e) {
         echo $e->getMessage() . "\n";
     }
 }
@@ -38,6 +36,8 @@ function callMembers(Uri\UriInterface $uri)
     handleException($uri, function (Uri\UriInterface $uri) {$uri->getQuery();});
     handleException($uri, function (Uri\UriInterface $uri) {$uri->fragment;});
     handleException($uri, function (Uri\UriInterface $uri) {$uri->getFragment();});
+    handleException($uri, function (Uri\UriInterface $uri) {json_encode($uri);});
+    handleException($uri, function (Uri\UriInterface $uri) {$uri->__serialize();});
     handleException($uri, function (Uri\UriInterface $uri) {$uri->__toString();});
 }
 
@@ -74,11 +74,15 @@ Uri\Rfc3986Uri object is not correctly initialized
 Uri\Rfc3986Uri object is not correctly initialized
 Uri\Rfc3986Uri object is not correctly initialized
 Uri\Rfc3986Uri object is not correctly initialized
+Uri\Rfc3986Uri object is not correctly initialized
+Uri\Rfc3986Uri object is not correctly initialized
 
 object(Uri\WhatWgUri)#%d (%d) {
 }
 bool(false)
 bool(true)
+Uri\WhatWgUri object is not correctly initialized
+Uri\WhatWgUri object is not correctly initialized
 Uri\WhatWgUri object is not correctly initialized
 Uri\WhatWgUri object is not correctly initialized
 Uri\WhatWgUri object is not correctly initialized
