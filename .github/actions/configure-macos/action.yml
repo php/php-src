@@ -10,6 +10,8 @@ runs:
       run: |
         set -x
         BREW_OPT="$(brew --prefix)"/opt
+        ls "$BREW_OPT/curl/lib/pkgconfig"
+        cat "$BREW_OPT/curl/lib/pkgconfig/libcurl.pc"
         export PATH="$BREW_OPT/bison/bin:$PATH"
         export PKG_CONFIG_PATH="$BREW_OPT/openssl@3/lib/pkgconfig:$PKG_CONFIG_PATH"
         export PKG_CONFIG_PATH="$BREW_OPT/curl/lib/pkgconfig:$PKG_CONFIG_PATH"
@@ -19,6 +21,8 @@ runs:
         export PKG_CONFIG_PATH="$BREW_OPT/zlib/lib/pkgconfig:$PKG_CONFIG_PATH"
         export PKG_CONFIG_PATH="$BREW_OPT/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH"
         export PKG_CONFIG_PATH="$BREW_OPT/openldap/lib/pkgconfig:$PKG_CONFIG_PATH"
+        pkg-config --modversion libcurl
+        pkg-config --libs libcurl
         brew deps --tree --installed
         ./buildconf --force
         ./configure \
