@@ -5904,8 +5904,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (JIT_G(current_frame)
 						 && JIT_G(current_frame)->call
 						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+							if (!ffi_info) {
+								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+							}
 							if (!zend_jit_ffi_do_call(&ctx, opline, op_array, ssa, ssa_op,
-									(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0 )) {
+									(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0, ffi_info)) {
 								goto jit_failure;
 							}
 							goto done;
