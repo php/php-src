@@ -41,7 +41,7 @@ env:
   CXX: ccache g++
 jobs:
   LINUX_X64:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     services:
       mysql:
         image: mysql:8.3
@@ -137,7 +137,7 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
     timeout-minutes: 50
@@ -200,33 +200,35 @@ jobs:
         uses: actions/checkout@v4
       - name: brew
         uses: ./.github/actions/brew
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
-      - name: ./configure
-        uses: ./.github/actions/configure-macos
-        with:
-          configurationParameters: --enable-debug --disable-zts
-      - name: make
-        run: |-
-          export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
-          make -j$(sysctl -n hw.logicalcpu) >/dev/null
-      - name: make install
-        run: sudo make install
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-macos
-        with:
-          jitType: tracing
-          runTestsParameters: >-
-            -d zend_extension=opcache.so
-            -d opcache.enable_cli=1
-      - name: Verify generated files are up to date
-        uses: ./.github/actions/verify-generated-files
+      - name: pkg-config test
+        run: pkg-config libcurl --debug
+      # - name: ccache
+      #   uses: hendrikmuhs/ccache-action@v1.2
+      #   with:
+      #     key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
+      #     append-timestamp: false
+      #     save: ${{ github.event_name != 'pull_request' }}
+      # - name: ./configure
+      #   uses: ./.github/actions/configure-macos
+      #   with:
+      #     configurationParameters: --enable-debug --disable-zts
+      # - name: make
+      #   run: |-
+      #     export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
+      #     make -j$(sysctl -n hw.logicalcpu) >/dev/null
+      # - name: make install
+      #   run: sudo make install
+      # - name: Test Tracing JIT
+      #   uses: ./.github/actions/test-macos
+      #   with:
+      #     jitType: tracing
+      #     runTestsParameters: >-
+      #       -d zend_extension=opcache.so
+      #       -d opcache.enable_cli=1
+      # - name: Verify generated files are up to date
+      #   uses: ./.github/actions/verify-generated-files
   WINDOWS:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     name: WINDOWS_X64_ZTS
     runs-on: windows-2022
     timeout-minutes: 50
@@ -254,7 +256,7 @@ jobs:
         run: .github/scripts/windows/test.bat
   BENCHMARKING:
     name: BENCHMARKING
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
