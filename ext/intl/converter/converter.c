@@ -307,7 +307,7 @@ static void php_converter_from_u_callback(const void *context,
 
 	zend_call_known_fcc(&objval->from_cache, &retval, 4, zargs, NULL);
 	/* When no exception is thrown */
-	if (!Z_ISUNDEF(retval)) {
+	if (EXPECTED(!Z_ISUNDEF(retval))) {
 		php_converter_append_fromUnicode_target(&retval, args, objval);
 		zval_ptr_dtor(&retval);
 	}
