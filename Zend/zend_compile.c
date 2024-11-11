@@ -9146,7 +9146,13 @@ link_unbound:
 	}
 
 	opline->op1_type = IS_CONST;
-	LITERAL_STR(opline->op1, lcname);
+	/* It's possible that `lcname` is not an interned string because it was not yet in the interned string table.
+	 * However, by this point another thread may have caused `lcname` to be added in the interned string table.
+	 * This will cause `lcname` to get freed once it is found in the interned string table. If we were to use
+	 * LITERAL_STR() here we would not change the `lcname` pointer to the new value, and it would point to the
+	 * now-freed string. This will cause issues when we use `lcname` in the code below. We solve this by using
+	 * zend_add_literal_string() which gives us the new value. */
+	opline->op1.constant = zend_add_literal_string(&lcname);
 
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
 		opline->opcode = ZEND_DECLARE_ANON_CLASS;
