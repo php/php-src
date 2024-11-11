@@ -24,6 +24,10 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
+- PDO_PGSQL:
+  . Remove PGSQL_ATTR_RESULT_MEMORY_SIZE constant as it is provided by
+    the new PDO Subclass as Pdo\Pgsql::ATTR_RESULT_MEMORY_SIZE. (Girgias)
+
 - Readline:
   . Fixed UAF with readline_info(). (David Carlier)
 
