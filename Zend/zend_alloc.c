@@ -70,8 +70,6 @@
 # include <wincrypt.h>
 # include <process.h>
 # include "win32/winutil.h"
-# define getpid _getpid
-typedef int pid_t;
 #endif
 
 #include <stdio.h>
@@ -317,7 +315,6 @@ struct _zend_mm_heap {
 		} debug;
 	};
 #endif
-	pid_t pid;
 	zend_random_bytes_insecure_state rand_state;
 };
 
@@ -1310,13 +1307,18 @@ static zend_always_inline zend_mm_free_slot* zend_mm_encode_free_slot(const zend
 #endif
 }
 
-static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot(zend_mm_heap *heap, zend_mm_free_slot *slot)
+static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot_key(uintptr_t shadow_key, zend_mm_free_slot *slot)
 {
 #ifdef WORDS_BIGENDIAN
-	return (zend_mm_free_slot*)((uintptr_t)slot ^ heap->shadow_key);
+	return (zend_mm_free_slot*)((uintptr_t)slot ^ shadow_key);
 #else
-	return (zend_mm_free_slot*)(BSWAPPTR((uintptr_t)slot ^ heap->shadow_key));
+	return (zend_mm_free_slot*)(BSWAPPTR((uintptr_t)slot ^ shadow_key));
 #endif
+}
+
+static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot(zend_mm_heap *heap, zend_mm_free_slot *slot)
+{
+	return zend_mm_decode_free_slot_key(heap->shadow_key, slot);
 }
 
 static zend_always_inline void zend_mm_set_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot *slot, zend_mm_free_slot *next)
@@ -2027,6 +2029,30 @@ static void zend_mm_init_key(zend_mm_heap *heap)
 	zend_mm_refresh_key(heap);
 }
 
+static void zend_mm_refresh_key_child(zend_mm_heap *heap)
+{
+	uintptr_t old_key = heap->shadow_key;
+
+	zend_mm_init_key(heap);
+
+	/* Update shadow pointers with new key */
+	for (int i = 0; i < ZEND_MM_BINS; i++) {
+		zend_mm_free_slot *slot = heap->free_slot[i];
+		if (!slot) {
+			continue;
+		}
+		zend_mm_free_slot *next;
+		while ((next = slot->next_free_slot)) {
+			zend_mm_free_slot *shadow = ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, i);
+			if (UNEXPECTED(next != zend_mm_decode_free_slot_key(old_key, shadow))) {
+				zend_mm_panic("zend_mm_heap corrupted");
+			}
+			zend_mm_set_next_free_slot(heap, i, slot, next);
+			slot = next;
+		}
+	}
+}
+
 static zend_mm_heap *zend_mm_init(void)
 {
 	zend_mm_chunk *chunk = (zend_mm_chunk*)zend_mm_chunk_alloc_int(ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
@@ -2075,7 +2101,6 @@ static zend_mm_heap *zend_mm_init(void)
 	heap->storage = NULL;
 #endif
 	heap->huge_list = NULL;
-	heap->pid = getpid();
 	return heap;
 }
 
@@ -2535,13 +2560,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		p->free_map[0] = (1L << ZEND_MM_FIRST_PAGE) - 1;
 		p->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
 
-		pid_t pid = getpid();
-		if (heap->pid != pid) {
-			zend_mm_init_key(heap);
-			heap->pid = pid;
-		} else {
-			zend_mm_refresh_key(heap);
-		}
+		zend_mm_refresh_key(heap);
 	}
 }
 
@@ -2947,6 +2966,11 @@ ZEND_API void zend_memory_reset_peak_usage(void)
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 {
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
+}
+
+ZEND_API void refresh_memory_manager(void)
+{
+	zend_mm_refresh_key_child(AG(mm_heap));
 }
 
 static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
@@ -3506,7 +3530,6 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 		memcpy(storage->data, data, data_size);
 	}
 	heap->storage = storage;
-	heap->pid = getpid();
 	return heap;
 #else
 	return NULL;

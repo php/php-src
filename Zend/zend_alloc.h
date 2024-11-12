@@ -220,6 +220,7 @@ ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
 
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown);
+ZEND_API void refresh_memory_manager(void);
 ZEND_API bool is_zend_mm(void);
 ZEND_API bool is_zend_ptr(const void *ptr);
 
