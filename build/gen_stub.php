@@ -1813,12 +1813,11 @@ ENDCOMMENT
             $parametersRefSec->appendChild($noParamEntity);
             return $parametersRefSec;
         } else {
-            $parametersPara = $doc->createElement('simpara');
-            $parametersRefSec->appendChild($parametersPara);
+            $parametersContainer = $doc->createDocumentFragment();
 
-            $parametersPara->appendChild(new DOMText("\n   "));
+            $parametersContainer->appendChild(new DOMText("\n  "));
             $parametersList = $doc->createElement('variablelist');
-            $parametersPara->appendChild($parametersList);
+            $parametersContainer->appendChild($parametersList);
 
             /*
             <varlistentry>
@@ -1837,33 +1836,34 @@ ENDCOMMENT
 
                 $listItemPara = $doc->createElement('simpara');
                 $listItemPara->append(
-                    "\n       ",
-                    "Description.",
                     "\n      ",
+                    "Description.",
+                    "\n     ",
                 );
 
                 $parameterEntryListItem = $doc->createElement('listitem');
                 $parameterEntryListItem->append(
-                    "\n      ",
-                    $listItemPara,
                     "\n     ",
+                    $listItemPara,
+                    "\n    ",
                 );
 
                 $parameterEntry = $doc->createElement('varlistentry');
                 $parameterEntry->append(
-                    "\n     ",
-                    $parameterTerm,
-                    "\n     ",
-                    $parameterEntryListItem,
                     "\n    ",
+                    $parameterTerm,
+                    "\n    ",
+                    $parameterEntryListItem,
+                    "\n   ",
                 );
 
-                $parametersList->appendChild(new DOMText("\n    "));
+                $parametersList->appendChild(new DOMText("\n   "));
                 $parametersList->appendChild($parameterEntry);
             }
-            $parametersList->appendChild(new DOMText("\n   "));
+            $parametersList->appendChild(new DOMText("\n  "));
         }
-        $parametersPara->appendChild(new DOMText("\n  "));
+        $parametersContainer->appendChild(new DOMText("\n "));
+        $parametersRefSec->appendChild($parametersContainer);
         $parametersRefSec->appendChild(new DOMText("\n "));
         return $parametersRefSec;
     }
