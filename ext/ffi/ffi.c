@@ -3295,7 +3295,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 	zend_ffi_symbol *sym;
 	zend_ffi_tag *tag;
 	void *addr;
-	bool persistent = false;
+	bool persistent = false, old_persistent;
 
 	if (stat(filename, &buf) != 0) {
 		if (preload) {
@@ -3342,6 +3342,8 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 		}
 	}
 
+	old_persistent = FFI_G(persistent);
+
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
 	FFI_G(persistent) = preload;
@@ -3355,7 +3357,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 	code_pos = zend_ffi_parse_directives(filename, ZSTR_VAL(code), &scope_name, &lib, preload);
 	if (!code_pos) {
 		zend_string_release(code);
-		FFI_G(persistent) = 0;
+		FFI_G(persistent) = old_persistent;
 		return NULL;
 	}
 	code_size -= code_pos - ZSTR_VAL(code);
@@ -3553,7 +3555,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 	zend_string_release(code);
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
-	FFI_G(persistent) = persistent;
+	FFI_G(persistent) = old_persistent;
 
 	return ffi;
 
