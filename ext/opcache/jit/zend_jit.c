@@ -692,6 +692,69 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 	return 0;
 }
 
+static bool zend_jit_class_may_be_modified(const zend_class_entry *ce, const zend_op_array *called_from)
+{
+	uint32_t i;
+
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+#ifdef _WIN32
+		/* ASLR */
+		return 1;
+#else
+		return 0;
+#endif
+	} else if (ce->type == ZEND_USER_CLASS) {
+		if (ce->ce_flags & ZEND_ACC_PRELOADED) {
+			return 0;
+		}
+		if (ce->info.user.filename == called_from->filename) {
+			if (ce->parent && zend_jit_class_may_be_modified(ce->parent, called_from)) {
+				return 1;
+			}
+			if (ce->num_interfaces) {
+				for (i = 0; i < ce->num_interfaces; i++) {
+					if (zend_jit_class_may_be_modified(ce->interfaces[i], called_from)) {
+						return 1;
+					}
+				}
+			}
+			if (ce->num_traits) {
+				for (i=0; i < ce->num_traits; i++) {
+					zend_class_entry *trait = zend_fetch_class_by_name(ce->trait_names[i].name,
+						ce->trait_names[i].lc_name, ZEND_FETCH_CLASS_TRAIT);
+					if (zend_jit_class_may_be_modified(trait, called_from)) {
+						return 1;
+					}
+				}
+			}
+			return 0;
+		}
+	}
+	return 1;
+}
+
+static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
+{
+	if (func->type == ZEND_INTERNAL_FUNCTION) {
+#ifdef _WIN32
+		/* ASLR */
+		return 1;
+#else
+		return 0;
+#endif
+	} else if (func->type == ZEND_USER_FUNCTION) {
+		if (func->common.fn_flags & ZEND_ACC_PRELOADED) {
+			return 0;
+		}
+		if (func->op_array.filename == called_from->filename
+		 && (!func->op_array.scope
+		  || !zend_jit_class_may_be_modified(func->op_array.scope, called_from))) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
 #define OP_RANGE(ssa_op, opN) \
 	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
 	  ssa->var_info && \
