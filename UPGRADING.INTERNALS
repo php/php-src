@@ -73,6 +73,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . EG(fake_scope) now is a _const_ zend_class_entry*.
   . zend_begin_record_errors() or EG(record_errors)=true cause errors to be
     delayed. Before, errors would be recorded but not delayed.
+  . zend_mm_refresh_key_child() must be called on any zend_mm_heap inherited
+    from the parent process after a fork().
 
 ========================
 2. Build system changes
@@ -148,3 +150,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+- SAPIs must now call php_child_init() after a fork. If php-src code was
+  executed in other threads than the one initiating the fork,
+  refresh_memory_manager() must be called in every such thread.

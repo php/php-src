@@ -253,6 +253,9 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		limit_extensions = wp->limit_extensions;
 		wp->limit_extensions = NULL;
 	}
+
+	php_child_init();
+
 	return 0;
 }
 /* }}} */
