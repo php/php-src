@@ -1797,6 +1797,11 @@ static void sigchld_handler(int apar)
 /* }}} */
 #endif
 
+PHPAPI void php_child_init(void)
+{
+	refresh_memory_manager();
+}
+
 /* {{{ php_request_startup */
 zend_result php_request_startup(void)
 {
