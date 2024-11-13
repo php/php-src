@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     `__callStatic` is allowed). (timwolla)
   . Fixed bug GH-17797 (zend_test_compile_string crash on invalid
     script path). (David Carlier)
+  . Fixed GHSA-rwp7-7vc6-8477 (Reference counting in php_request_shutdown
+    causes Use-After-Free). (CVE-2024-11235) (ilutov)
 
 - DOM:
   . Fixed bug GH-17847 (xinclude destroys live node). (nielsdos)
