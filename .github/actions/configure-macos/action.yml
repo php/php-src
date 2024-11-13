@@ -9,6 +9,7 @@ runs:
     - shell: bash
       run: |
         set -x
+        BREW_OPT="$(brew --prefix)"/opt
         export PATH="/usr/local/opt/bison/bin:$PATH"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl@1.1/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/curl/lib/pkgconfig"
