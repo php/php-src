@@ -57,9 +57,9 @@ $options = [
 
 class BugSoapClient extends SoapClient
 {
-    public function __doRequest($request, $location, $action, $version, $one_way = null): string
+    public function __doRequest($request, $location, $action, $version, $one_way = null, ?string $uriParserName = null): string
     {
-        $response = parent::__doRequest($request, $location, $action, $version, $one_way);
+        $response = parent::__doRequest($request, $location, $action, $version, $one_way, $uriParserName);
 
         var_dump(strlen($response));
 
