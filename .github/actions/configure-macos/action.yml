@@ -9,6 +9,7 @@ runs:
     - shell: bash
       run: |
         set -x
+        BREW_OPT="$(brew --prefix)"/opt
         export PATH="/usr/local/opt/bison/bin:$PATH"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl@1.1/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/curl/lib/pkgconfig"
@@ -18,9 +19,7 @@ runs:
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxslt/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/zlib/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig"
-        if test -f "$BREW_OPT/curl/lib/pkgconfig/libcurl.pc"; then
-          sed -i -e 's/Requires.private:.*//g' "$BREW_OPT/curl/lib/pkgconfig/libcurl.pc"
-        fi
+        sed -i -e 's/Requires.private:.*//g' "$BREW_OPT/curl/lib/pkgconfig/libcurl.pc"
         ./buildconf --force
         ./configure \
           CFLAGS="-Wno-strict-prototypes -Wno-unused-but-set-variable -Wno-single-bit-bitfield-constant-conversion" \
