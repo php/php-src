@@ -21,7 +21,6 @@ runs:
           webp \
           freetype \
           intltool \
-          icu4c \
           libiconv \
           zlib \
           t1lib \
