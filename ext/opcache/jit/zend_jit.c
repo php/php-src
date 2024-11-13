@@ -708,10 +708,15 @@ static bool zend_jit_class_may_be_modified(const zend_class_entry *ce, const zen
 			return 0;
 		}
 		if (ce->info.user.filename == called_from->filename) {
-			if (ce->parent && zend_jit_class_may_be_modified(ce->parent, called_from)) {
+			if (ce->parent
+			 && (!(ce->ce_flags & ZEND_ACC_LINKED)
+			  || zend_jit_class_may_be_modified(ce->parent, called_from))) {
 				return 1;
 			}
 			if (ce->num_interfaces) {
+				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+					return 1;
+				}
 				for (i = 0; i < ce->num_interfaces; i++) {
 					if (zend_jit_class_may_be_modified(ce->interfaces[i], called_from)) {
 						return 1;
@@ -719,10 +724,14 @@ static bool zend_jit_class_may_be_modified(const zend_class_entry *ce, const zen
 				}
 			}
 			if (ce->num_traits) {
+				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+					return 1;
+				}
 				for (i=0; i < ce->num_traits; i++) {
 					zend_class_entry *trait = zend_fetch_class_by_name(ce->trait_names[i].name,
-						ce->trait_names[i].lc_name, ZEND_FETCH_CLASS_TRAIT);
-					if (zend_jit_class_may_be_modified(trait, called_from)) {
+						ce->trait_names[i].lc_name,
+						ZEND_FETCH_CLASS_TRAIT | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
+					if (!trait || zend_jit_class_may_be_modified(trait, called_from)) {
 						return 1;
 					}
 				}
