@@ -33,4 +33,5 @@ runs:
           libjpeg \
           libxslt \
           postgresql
+        brew reinstall icu4c@74
         brew link icu4c gettext --force
