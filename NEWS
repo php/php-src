@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed GH-16711: Segfault in mhash(). (Girgias)
 
+- Opcache:
+  . Fixed bug GH-16770 (Tracing JIT type mismatch when returning UNDEF).
+    (nielsdos, Dmitry)
+
 - OpenSSL:
   . Prevent unexpected array entry conversion when reading key. (nielsdos)
   . Fix various memory leaks related to openssl exports. (nielsdos)
