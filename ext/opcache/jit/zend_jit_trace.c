@@ -4754,7 +4754,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
 							on_this = 1;
@@ -4848,7 +4848,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
 							on_this = 1;
@@ -4931,7 +4931,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
 							on_this = 1;
@@ -6002,7 +6002,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
 							on_this = 1;
@@ -6285,7 +6285,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
 							on_this = 1;

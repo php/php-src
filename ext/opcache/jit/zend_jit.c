@@ -1751,7 +1751,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
 							on_this = 1;
@@ -1802,7 +1802,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
 							on_this = 1;
@@ -1846,7 +1846,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
 							on_this = 1;
@@ -2324,7 +2324,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							on_this = 1;
 						} else {
@@ -2478,7 +2478,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							ce = op_array->scope;
 							/* scope is NULL for closures. */
 							if (ce) {
-								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							on_this = 1;
 						} else {
