@@ -10,10 +10,12 @@ runs:
       run: |
         set -x
         BREW_OPT="$(brew --prefix)"/opt
+        brew --cellar
+        ls -l $BREW_OPT/bin
         export PATH="$BREW_OPT/bison/bin:$PATH"
-        export PATH="/usr/local/Cellar/pkgconf/2.3.0/bin:$PATH"
-        ls -l /usr/local/Cellar/pkgconf/2.3.0/bin
-        ln /usr/local/Cellar/pkgconf/2.3.0/bin/pkgconf /usr/local/Cellar/pkgconf/2.3.0/bin/pkg-config
+        export PATH="$(brew --cellar)/pkgconf/2.3.0/bin:$PATH"
+        ls -l $(brew --cellar)/pkgconf/2.3.0/bin
+        ln $(brew --cellar)/pkgconf/2.3.0/bin/pkgconf $(brew --cellar)/pkgconf/2.3.0/bin/pkg-config
         export PKG_CONFIG_PATH="$BREW_OPT/openssl@3/lib/pkgconfig:$PKG_CONFIG_PATH"
         export PKG_CONFIG_PATH="$BREW_OPT/curl/lib/pkgconfig:$PKG_CONFIG_PATH"
         export PKG_CONFIG_PATH="$BREW_OPT/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
@@ -25,6 +27,7 @@ runs:
         pkg-config --version
         pkg-config --modversion libcurl
         pkg-config --libs libcurl
+        exit 1
         ./buildconf --force
         ./configure \
           --enable-option-checking=fatal \
