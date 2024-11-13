@@ -24,6 +24,7 @@ extern zend_class_entry *whatwg_uri_ce;
 extern zend_object_handlers whatwg_uri_object_handlers;
 extern zend_class_entry *uri_exception_ce;
 extern zend_class_entry *uninitialized_uri_exception_ce;
+extern zend_class_entry *uri_operation_exception_ce;
 extern zend_class_entry *invalid_uri_exception_ce;
 extern zend_class_entry *whatwg_error_ce;
 
@@ -34,6 +35,7 @@ typedef struct uri_handler_t {
 	void *(*parse_uri)(const zend_string *uri_str, const zend_string *base_url_str, zval *errors);
 	zend_class_entry *(*get_uri_ce)(void);
 	void *(*clone_uri)(void *uri);
+	zend_result (*normalize_uri)(void *uri);
 	zend_string *(*uri_to_string)(void *uri, bool exclude_fragment);
 	void (*free_uri)(void *uri);
 	zend_result (*destroy_parser)(void);
@@ -130,6 +132,9 @@ void throw_invalid_uri_exception(zval *errors);
     const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
     ZEND_ASSERT(property_handler != NULL); \
     zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS)); \
+	if (UNEXPECTED(EG(exception) != NULL)) { \
+		RETURN_THROWS(); \
+	} \
     uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object); \
     URI_CHECK_INITIALIZATION_RETURN_THROWS(new_internal_uri, Z_OBJ_P(ZEND_THIS)); \
     if (property_handler->write_func == NULL) { \

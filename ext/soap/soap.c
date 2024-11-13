@@ -2790,7 +2790,7 @@ PHP_METHOD(SoapClient, __doRequest)
 		if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_name, NULL)) {
 			RETURN_EMPTY_STRING();
 		}
-	} else if (make_http_soap_request(this_ptr, buf, location, action, uri_parser_name, version,
+	} else if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_name,
 	    return_value)) {
 		return;
 	}
