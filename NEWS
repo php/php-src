@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed bug GH-16723 (CURLMOPT_PUSHFUNCTION issues). (cmb)
 
+- GD:
+  . Fixed GH-16776 (imagecreatefromstring overflow). (David Carlier)
+
 - Hash:
   . Fixed GH-16711: Segfault in mhash(). (Girgias)
 
