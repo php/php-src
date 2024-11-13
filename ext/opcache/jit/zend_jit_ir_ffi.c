@@ -110,11 +110,6 @@ static int zend_jit_ffi_init_call_sym(zend_jit_ctx         *jit,
 		return 0;
 	}
 
-	if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-		// TODO: usually the object is released only after the call ???
-		jit_GC_DELREF(jit, jit_Z_PTR(jit, op1_addr));
-	}
-
 	if (type->func.abi == ZEND_FFI_ABI_FASTCALL) {
 		*ffi_func_ref = ir_CONST_FC_FUNC(sym->addr);
 	} else {
@@ -752,7 +747,7 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 	zend_jit_trace_stack_frame *call = JIT_G(current_frame)->call;
 	zend_jit_trace_stack *stack = call->stack;
 	zend_ffi_type *type = (zend_ffi_type*)(void*)call->call_opline;
-	ir_ref func_ref = (intptr_t)(void*)call->ce;
+	ir_ref func_ref = call->ffi_func_ref;
 	uint32_t i, num_args = TRACE_FRAME_NUM_ARGS(call);;
 	ir_type ret_type = IR_VOID;
 	ir_ref ref = IR_UNUSED;
@@ -1251,11 +1246,20 @@ cleanup:
 	 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_NEW
 	 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_CAST
 	 || TRACE_FRAME_FFI_FUNC(call) == TRACE_FRAME_FFI_FUNC_TYPE) {
-		func_ref = (intptr_t)(void*)call->ce;
+		func_ref = call->ffi_func_ref;
 		if (func_ref && !IR_IS_CONST_REF(func_ref)) {
 			ir_ref if_not_zero = ir_IF(jit_GC_DELREF(jit, func_ref));
 			ir_IF_FALSE(if_not_zero);
 			jit_ZVAL_DTOR(jit, func_ref, MAY_BE_OBJECT, opline);
+			ir_MERGE_WITH_EMPTY_TRUE(if_not_zero); /* don't add to GC roots */
+		}
+		if (TRACE_FRAME_FFI_OBJ_DTOR(call)) {
+			ir_ref obj_ref = call->ffi_obj_ref;
+
+			ZEND_ASSERT(obj_ref && !IR_IS_CONST_REF(obj_ref));
+			ir_ref if_not_zero = ir_IF(jit_GC_DELREF(jit, obj_ref));
+			ir_IF_FALSE(if_not_zero);
+			jit_ZVAL_DTOR(jit, obj_ref, MAY_BE_OBJECT, opline);
 			ir_MERGE_WITH_EMPTY_TRUE(if_not_zero); /* don't add to GC roots */
 		}
 	}

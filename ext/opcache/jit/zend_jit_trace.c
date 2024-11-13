@@ -4299,6 +4299,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifdef HAVE_FFI
 	zend_jit_ffi_info *ffi_info = NULL;
 	zend_ffi_type *frame_ffi_func_type = NULL;
+	uint32_t frame_ffi_info = 0;
+	ir_ref frame_ffi_obj_ref = IR_UNUSED;
 	ir_ref frame_ffi_func_ref = IR_UNUSED;
 #endif
 
@@ -4647,6 +4649,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			frame_flags = 0;
 #ifdef HAVE_FFI
 			frame_ffi_func_type = NULL;
+			frame_ffi_info = 0;
+			frame_ffi_obj_ref = IR_UNUSED;
 			frame_ffi_func_ref = IR_UNUSED;
 #endif
 
@@ -7011,12 +7015,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 										goto jit_failure;
 									}
 									// TODO: Guard for FFI::CType argument ???
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_NEW;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_NEW;
 									frame_ffi_func_type = type;
+									frame_ffi_func_ref = IR_UNUSED;
+									frame_ffi_obj_ref = jit_Z_PTR(jit, op1_addr);
 									if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-										frame_ffi_func_ref = jit_Z_PTR(jit, op1_addr);
-									} else {
-										frame_ffi_func_ref = IR_UNUSED;
+										frame_ffi_info |= TRACE_FRAME_MASK_FFI_OBJ_DTOR;
 									}
 									goto done;
 								}
@@ -7031,12 +7036,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 										goto jit_failure;
 									}
 									// TODO: Guard for FFI::CType argument ???
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_CAST;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_CAST;
 									frame_ffi_func_type = type;
+									frame_ffi_func_ref = IR_UNUSED;
+									frame_ffi_obj_ref = jit_Z_PTR(jit, op1_addr);
 									if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-										frame_ffi_func_ref = jit_Z_PTR(jit, op1_addr);
-									} else {
-										frame_ffi_func_ref = IR_UNUSED;
+										frame_ffi_info |= TRACE_FRAME_MASK_FFI_OBJ_DTOR;
 									}
 									goto done;
 								}
@@ -7062,12 +7068,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 													ssa_op->op1_use, -1, op1_info, op1_addr, op1_ffi_symbols, ffi_info)) {
 												goto jit_failure;
 											}
-											frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_TYPE;
+											frame_flags = TRACE_FRAME_MASK_FFI;
+											frame_ffi_info = TRACE_FRAME_FFI_FUNC_TYPE;
 											frame_ffi_func_type = dcl->type;
+											frame_ffi_func_ref = IR_UNUSED;
+											frame_ffi_obj_ref = jit_Z_PTR(jit, op1_addr);
 											if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-												frame_ffi_func_ref = jit_Z_PTR(jit, op1_addr);
-											} else {
-												frame_ffi_func_ref = IR_UNUSED;
+												frame_ffi_info |= TRACE_FRAME_MASK_FFI_OBJ_DTOR;
 											}
 											goto done;
 										}
@@ -7093,6 +7100,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									frame_flags = TRACE_FRAME_MASK_FFI;
 									frame_ffi_func_type = ZEND_FFI_TYPE(sym->type);
 									frame_ffi_func_ref = ffi_func_ref;
+									frame_ffi_obj_ref = jit_Z_PTR(jit, op1_addr);
+									if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+										frame_ffi_info |= TRACE_FRAME_MASK_FFI_OBJ_DTOR;
+									}
 									goto done;
 								}
 							}
@@ -7130,70 +7141,80 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "addr")
 								 && opline->extended_value == 1) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_ADDR;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_ADDR;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "string")
 								 && (opline->extended_value == 1 || opline->extended_value == 2)) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_STRING;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_STRING;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "alignof")
 								 && opline->extended_value == 1) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_ALIGNOF;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_ALIGNOF;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "sizeof")
 								 && opline->extended_value == 1) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_SIZEOF;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_SIZEOF;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "typeof")
 								 && opline->extended_value == 1) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_TYPEOF;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_TYPEOF;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "isnull")
 								 && opline->extended_value == 1) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_IS_NULL;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_IS_NULL;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "memcpy")
 								 && opline->extended_value == 3) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_MEMCPY;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_MEMCPY;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "memcmp")
 								 && opline->extended_value == 3) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_MEMCMP;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_MEMCMP;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "memset")
 								 && opline->extended_value == 3) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_MEMSET;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_MEMSET;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
 								} else if (Z_TYPE_P(zv) == IS_STRING
 								 && zend_string_equals_literal_ci(Z_STR_P(zv), "free")
 								 && opline->extended_value == 1) {
-									frame_flags = TRACE_FRAME_MASK_FFI | TRACE_FRAME_FFI_FUNC_FREE;
+									frame_flags = TRACE_FRAME_MASK_FFI;
+									frame_ffi_info = TRACE_FRAME_FFI_FUNC_FREE;
 									frame_ffi_func_type = NULL;
 									frame_ffi_func_ref = IR_UNUSED;
 									goto done;
@@ -7854,7 +7875,9 @@ done:
 #ifdef HAVE_FFI
 			if (TRACE_FRAME_FFI(call)) {
 				call->call_opline = (const zend_op*)(void*)frame_ffi_func_type;
-				call->ce = (zend_class_entry*)(intptr_t)frame_ffi_func_ref;
+				call->ffi_info = frame_ffi_info;
+				call->ffi_obj_ref = frame_ffi_obj_ref;
+				call->ffi_func_ref = frame_ffi_func_ref;
 			}
 #endif
 			call->prev = frame->call;
