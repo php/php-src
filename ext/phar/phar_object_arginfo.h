@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 00f5d4fc74e8b7dc67da6f12180c9fae343954cc */
+ * Stub hash: 031dc8f07d2d9bac4a5f82f4ac2c5b3da5995405 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -38,7 +38,8 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_compressFil
 	ZEND_ARG_TYPE_INFO(0, compression, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_decompressFiles arginfo_class_Phar___destruct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_decompressFiles, 0, 0, IS_TRUE, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_compress, 0, 1, Phar, 1)
 	ZEND_ARG_TYPE_INFO(0, compression, IS_LONG, 0)
@@ -61,7 +62,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_convertToDat
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extension, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_copy, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_copy, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -70,11 +71,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_count, 0, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "COUNT_NORMAL")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_delete, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_delete, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_delMetadata arginfo_class_Phar___destruct
+#define arginfo_class_Phar_delMetadata arginfo_class_Phar_decompressFiles
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_extractTo, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
@@ -132,11 +133,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetUnset
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setAlias, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setAlias, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setDefaultStub, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setDefaultStub, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, webIndex, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -150,7 +151,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setSignatur
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, privateKey, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setStub, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setStub, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_INFO(0, stub)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -211,7 +212,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_mungServer, 0, 1, IS_
 	ZEND_ARG_TYPE_INFO(0, variables, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_unlinkArchive, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_unlinkArchive, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -244,7 +245,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_compressFiles arginfo_class_Phar_compressFiles
 
-#define arginfo_class_PharData_decompressFiles arginfo_class_Phar___destruct
+#define arginfo_class_PharData_decompressFiles arginfo_class_Phar_decompressFiles
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_PharData_compress, 0, 1, PharData, 1)
 	ZEND_ARG_TYPE_INFO(0, compression, IS_LONG, 0)
@@ -265,7 +266,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_delete arginfo_class_Phar_delete
 
-#define arginfo_class_PharData_delMetadata arginfo_class_Phar___destruct
+#define arginfo_class_PharData_delMetadata arginfo_class_Phar_decompressFiles
 
 #define arginfo_class_PharData_extractTo arginfo_class_Phar_extractTo
 
@@ -301,15 +302,23 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_offsetUnset arginfo_class_Phar_offsetUnset
 
-#define arginfo_class_PharData_setAlias arginfo_class_Phar_setAlias
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharData_setAlias, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_PharData_setDefaultStub arginfo_class_Phar_setDefaultStub
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharData_setDefaultStub, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, webIndex, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_setMetadata arginfo_class_Phar_setMetadata
 
 #define arginfo_class_PharData_setSignatureAlgorithm arginfo_class_Phar_setSignatureAlgorithm
 
-#define arginfo_class_PharData_setStub arginfo_class_Phar_setStub
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PharData_setStub, 0, 1, IS_TRUE, 0)
+	ZEND_ARG_INFO(0, stub)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_startBuffering arginfo_class_Phar_startBuffering
 
@@ -355,13 +364,13 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharFileInfo_chm
 	ZEND_ARG_TYPE_INFO(0, perms, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharFileInfo_compress, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharFileInfo_compress, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, compression, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_PharFileInfo_decompress arginfo_class_Phar___destruct
+#define arginfo_class_PharFileInfo_decompress arginfo_class_Phar_decompressFiles
 
-#define arginfo_class_PharFileInfo_delMetadata arginfo_class_Phar___destruct
+#define arginfo_class_PharFileInfo_delMetadata arginfo_class_Phar_decompressFiles
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharFileInfo_getCompressedSize, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -383,7 +392,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_PharFileInfo_isCRCChecked arginfo_class_Phar_getModified
 
 #define arginfo_class_PharFileInfo_setMetadata arginfo_class_Phar_setMetadata
-
 
 ZEND_METHOD(Phar, __construct);
 ZEND_METHOD(Phar, __destruct);
@@ -457,12 +465,6 @@ ZEND_METHOD(PharFileInfo, isCompressed);
 ZEND_METHOD(PharFileInfo, isCRCChecked);
 ZEND_METHOD(PharFileInfo, setMetadata);
 
-
-static const zend_function_entry class_PharException_methods[] = {
-	ZEND_FE_END
-};
-
-
 static const zend_function_entry class_Phar_methods[] = {
 	ZEND_ME(Phar, __construct, arginfo_class_Phar___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Phar, __destruct, arginfo_class_Phar___destruct, ZEND_ACC_PUBLIC)
@@ -523,67 +525,65 @@ static const zend_function_entry class_Phar_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_PharData_methods[] = {
-	ZEND_MALIAS(Phar, __construct, __construct, arginfo_class_PharData___construct, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, __destruct, __destruct, arginfo_class_PharData___destruct, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, addEmptyDir, addEmptyDir, arginfo_class_PharData_addEmptyDir, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, addFile, addFile, arginfo_class_PharData_addFile, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, addFromString, addFromString, arginfo_class_PharData_addFromString, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, buildFromDirectory, buildFromDirectory, arginfo_class_PharData_buildFromDirectory, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, buildFromIterator, buildFromIterator, arginfo_class_PharData_buildFromIterator, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, compressFiles, compressFiles, arginfo_class_PharData_compressFiles, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, decompressFiles, decompressFiles, arginfo_class_PharData_decompressFiles, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, compress, compress, arginfo_class_PharData_compress, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, decompress, decompress, arginfo_class_PharData_decompress, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, convertToExecutable, convertToExecutable, arginfo_class_PharData_convertToExecutable, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, convertToData, convertToData, arginfo_class_PharData_convertToData, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, copy, copy, arginfo_class_PharData_copy, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, count, count, arginfo_class_PharData_count, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, delete, delete, arginfo_class_PharData_delete, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, delMetadata, delMetadata, arginfo_class_PharData_delMetadata, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, extractTo, extractTo, arginfo_class_PharData_extractTo, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, getAlias, getAlias, arginfo_class_PharData_getAlias, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, getPath, getPath, arginfo_class_PharData_getPath, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, getMetadata, getMetadata, arginfo_class_PharData_getMetadata, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, getModified, getModified, arginfo_class_PharData_getModified, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, getSignature, getSignature, arginfo_class_PharData_getSignature, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, getStub, getStub, arginfo_class_PharData_getStub, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, getVersion, getVersion, arginfo_class_PharData_getVersion, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, hasMetadata, hasMetadata, arginfo_class_PharData_hasMetadata, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, isBuffering, isBuffering, arginfo_class_PharData_isBuffering, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, isCompressed, isCompressed, arginfo_class_PharData_isCompressed, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, isFileFormat, isFileFormat, arginfo_class_PharData_isFileFormat, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, isWritable, isWritable, arginfo_class_PharData_isWritable, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, offsetExists, offsetExists, arginfo_class_PharData_offsetExists, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, offsetGet, offsetGet, arginfo_class_PharData_offsetGet, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, offsetSet, offsetSet, arginfo_class_PharData_offsetSet, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, offsetUnset, offsetUnset, arginfo_class_PharData_offsetUnset, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, setAlias, setAlias, arginfo_class_PharData_setAlias, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, setDefaultStub, setDefaultStub, arginfo_class_PharData_setDefaultStub, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, setMetadata, setMetadata, arginfo_class_PharData_setMetadata, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, setSignatureAlgorithm, setSignatureAlgorithm, arginfo_class_PharData_setSignatureAlgorithm, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, setStub, setStub, arginfo_class_PharData_setStub, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, startBuffering, startBuffering, arginfo_class_PharData_startBuffering, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, stopBuffering, stopBuffering, arginfo_class_PharData_stopBuffering, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Phar, apiVersion, apiVersion, arginfo_class_PharData_apiVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, canCompress, canCompress, arginfo_class_PharData_canCompress, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, canWrite, canWrite, arginfo_class_PharData_canWrite, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, createDefaultStub, createDefaultStub, arginfo_class_PharData_createDefaultStub, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, getSupportedCompression, getSupportedCompression, arginfo_class_PharData_getSupportedCompression, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, getSupportedSignatures, getSupportedSignatures, arginfo_class_PharData_getSupportedSignatures, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, interceptFileFuncs, interceptFileFuncs, arginfo_class_PharData_interceptFileFuncs, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, isValidPharFilename, isValidPharFilename, arginfo_class_PharData_isValidPharFilename, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, loadPhar, loadPhar, arginfo_class_PharData_loadPhar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, mapPhar, mapPhar, arginfo_class_PharData_mapPhar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, running, running, arginfo_class_PharData_running, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, mount, mount, arginfo_class_PharData_mount, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, mungServer, mungServer, arginfo_class_PharData_mungServer, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, unlinkArchive, unlinkArchive, arginfo_class_PharData_unlinkArchive, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Phar, webPhar, webPhar, arginfo_class_PharData_webPhar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	ZEND_RAW_FENTRY("__construct", zim_Phar___construct, arginfo_class_PharData___construct, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("__destruct", zim_Phar___destruct, arginfo_class_PharData___destruct, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("addEmptyDir", zim_Phar_addEmptyDir, arginfo_class_PharData_addEmptyDir, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("addFile", zim_Phar_addFile, arginfo_class_PharData_addFile, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("addFromString", zim_Phar_addFromString, arginfo_class_PharData_addFromString, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("buildFromDirectory", zim_Phar_buildFromDirectory, arginfo_class_PharData_buildFromDirectory, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("buildFromIterator", zim_Phar_buildFromIterator, arginfo_class_PharData_buildFromIterator, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("compressFiles", zim_Phar_compressFiles, arginfo_class_PharData_compressFiles, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("decompressFiles", zim_Phar_decompressFiles, arginfo_class_PharData_decompressFiles, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("compress", zim_Phar_compress, arginfo_class_PharData_compress, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("decompress", zim_Phar_decompress, arginfo_class_PharData_decompress, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("convertToExecutable", zim_Phar_convertToExecutable, arginfo_class_PharData_convertToExecutable, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("convertToData", zim_Phar_convertToData, arginfo_class_PharData_convertToData, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("copy", zim_Phar_copy, arginfo_class_PharData_copy, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("count", zim_Phar_count, arginfo_class_PharData_count, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("delete", zim_Phar_delete, arginfo_class_PharData_delete, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("delMetadata", zim_Phar_delMetadata, arginfo_class_PharData_delMetadata, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("extractTo", zim_Phar_extractTo, arginfo_class_PharData_extractTo, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getAlias", zim_Phar_getAlias, arginfo_class_PharData_getAlias, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getPath", zim_Phar_getPath, arginfo_class_PharData_getPath, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getMetadata", zim_Phar_getMetadata, arginfo_class_PharData_getMetadata, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getModified", zim_Phar_getModified, arginfo_class_PharData_getModified, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getSignature", zim_Phar_getSignature, arginfo_class_PharData_getSignature, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getStub", zim_Phar_getStub, arginfo_class_PharData_getStub, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getVersion", zim_Phar_getVersion, arginfo_class_PharData_getVersion, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("hasMetadata", zim_Phar_hasMetadata, arginfo_class_PharData_hasMetadata, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isBuffering", zim_Phar_isBuffering, arginfo_class_PharData_isBuffering, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isCompressed", zim_Phar_isCompressed, arginfo_class_PharData_isCompressed, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isFileFormat", zim_Phar_isFileFormat, arginfo_class_PharData_isFileFormat, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isWritable", zim_Phar_isWritable, arginfo_class_PharData_isWritable, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetExists", zim_Phar_offsetExists, arginfo_class_PharData_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetGet", zim_Phar_offsetGet, arginfo_class_PharData_offsetGet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetSet", zim_Phar_offsetSet, arginfo_class_PharData_offsetSet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetUnset", zim_Phar_offsetUnset, arginfo_class_PharData_offsetUnset, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setAlias", zim_Phar_setAlias, arginfo_class_PharData_setAlias, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setDefaultStub", zim_Phar_setDefaultStub, arginfo_class_PharData_setDefaultStub, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setMetadata", zim_Phar_setMetadata, arginfo_class_PharData_setMetadata, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setSignatureAlgorithm", zim_Phar_setSignatureAlgorithm, arginfo_class_PharData_setSignatureAlgorithm, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setStub", zim_Phar_setStub, arginfo_class_PharData_setStub, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startBuffering", zim_Phar_startBuffering, arginfo_class_PharData_startBuffering, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("stopBuffering", zim_Phar_stopBuffering, arginfo_class_PharData_stopBuffering, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("apiVersion", zim_Phar_apiVersion, arginfo_class_PharData_apiVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("canCompress", zim_Phar_canCompress, arginfo_class_PharData_canCompress, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("canWrite", zim_Phar_canWrite, arginfo_class_PharData_canWrite, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("createDefaultStub", zim_Phar_createDefaultStub, arginfo_class_PharData_createDefaultStub, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getSupportedCompression", zim_Phar_getSupportedCompression, arginfo_class_PharData_getSupportedCompression, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getSupportedSignatures", zim_Phar_getSupportedSignatures, arginfo_class_PharData_getSupportedSignatures, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("interceptFileFuncs", zim_Phar_interceptFileFuncs, arginfo_class_PharData_interceptFileFuncs, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("isValidPharFilename", zim_Phar_isValidPharFilename, arginfo_class_PharData_isValidPharFilename, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("loadPhar", zim_Phar_loadPhar, arginfo_class_PharData_loadPhar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("mapPhar", zim_Phar_mapPhar, arginfo_class_PharData_mapPhar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("running", zim_Phar_running, arginfo_class_PharData_running, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("mount", zim_Phar_mount, arginfo_class_PharData_mount, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("mungServer", zim_Phar_mungServer, arginfo_class_PharData_mungServer, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("unlinkArchive", zim_Phar_unlinkArchive, arginfo_class_PharData_unlinkArchive, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("webPhar", zim_Phar_webPhar, arginfo_class_PharData_webPhar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_PharFileInfo_methods[] = {
 	ZEND_ME(PharFileInfo, __construct, arginfo_class_PharFileInfo___construct, ZEND_ACC_PUBLIC)
@@ -608,8 +608,8 @@ static zend_class_entry *register_class_PharException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PharException", class_PharException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	INIT_CLASS_ENTRY(ce, "PharException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }
@@ -619,7 +619,7 @@ static zend_class_entry *register_class_Phar(zend_class_entry *class_entry_Recur
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Phar", class_Phar_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
 
 	zval const_BZ2_value;
@@ -726,7 +726,7 @@ static zend_class_entry *register_class_PharData(zend_class_entry *class_entry_R
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharData", class_PharData_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
 
 	return class_entry;
@@ -737,7 +737,7 @@ static zend_class_entry *register_class_PharFileInfo(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", class_PharFileInfo_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplFileInfo);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplFileInfo, 0);
 
 	return class_entry;
 }

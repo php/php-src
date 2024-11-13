@@ -28,7 +28,20 @@
 #include <stdint.h>
 
 #ifdef HAVE_IEEEFP_H
-#include <ieeefp.h>
+/**
+ * On FreeBSD with ubsan/clang we get the following:
+ * `/usr/include/machine/ieeefp.h:161:17: runtime error: left shift of negative value -1`
+ * `SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/include/machine/ieeefp.h:161:17`
+ * ...
+ * `_newcw |= (~_m << FP_MSKS_OFF) & FP_MSKS_FLD;`
+**/
+# if __has_feature(undefined_behavior_sanitizer) && defined(__FreeBSD__) && defined(__clang__)
+#  pragma clang attribute push (__attribute__((no_sanitize("undefined"))), apply_to=function)
+# endif
+# include <ieeefp.h>
+# if __has_feature(undefined_behavior_sanitizer) && defined(__FreeBSD__) && defined(__clang__)
+#  pragma clang attribute pop
+# endif
 #endif
 
 #include "zend_portability.h"
@@ -372,7 +385,7 @@ static zend_always_inline bool try_convert_to_string(zval *op) {
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op)); }
 
 
-ZEND_API int ZEND_FASTCALL zend_is_true(const zval *op);
+ZEND_API bool ZEND_FASTCALL zend_is_true(const zval *op);
 ZEND_API bool ZEND_FASTCALL zend_object_is_true(const zval *op);
 
 #define zval_is_true(op) \
@@ -484,10 +497,10 @@ ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable 
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
 ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 
-/** Deprecatd in favor of ZEND_STRTOL() */
+/** Deprecated in favor of ZEND_STRTOL() */
 ZEND_ATTRIBUTE_DEPRECATED ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len);
 
-/** Deprecatd in favor of ZEND_STRTOL() */
+/** Deprecated in favor of ZEND_STRTOL() */
 ZEND_ATTRIBUTE_DEPRECATED ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 
 #define convert_to_null_ex(zv) convert_to_null(zv)
@@ -550,7 +563,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
-#elif PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SADDL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
 		/* switch to double */
@@ -558,7 +571,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	} else {
 		Z_LVAL_P(op1) = lresult;
 	}
-#elif PHP_HAVE_BUILTIN_SADDLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SADDLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
 		/* switch to double */
@@ -613,7 +626,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
-#elif PHP_HAVE_BUILTIN_SSUBL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SSUBL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
 		/* switch to double */
@@ -621,7 +634,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	} else {
 		Z_LVAL_P(op1) = lresult;
 	}
-#elif PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
 		/* switch to double */
@@ -697,14 +710,14 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
-#elif PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SADDL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, lresult);
 	}
-#elif PHP_HAVE_BUILTIN_SADDLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SADDLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
@@ -785,14 +798,14 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
-#elif PHP_HAVE_BUILTIN_SSUBL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SSUBL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, lresult);
 	}
-#elif PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));

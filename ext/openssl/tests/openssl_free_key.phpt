@@ -65,11 +65,11 @@ Creating private key
 Export key to file
 Load key from file - array syntax
 
-Deprecated: Function openssl_free_key() is deprecated in %s on line %d
+Deprecated: Function openssl_free_key() is deprecated since 8.0, as OpenSSLAsymmetricKey objects are freed automatically in %s on line %d
 Load key using direct syntax
 
-Deprecated: Function openssl_free_key() is deprecated in %s on line %d
+Deprecated: Function openssl_free_key() is deprecated since 8.0, as OpenSSLAsymmetricKey objects are freed automatically in %s on line %d
 Load key manually and use string syntax
 
-Deprecated: Function openssl_free_key() is deprecated in %s on line %d
+Deprecated: Function openssl_free_key() is deprecated since 8.0, as OpenSSLAsymmetricKey objects are freed automatically in %s on line %d
 OK!

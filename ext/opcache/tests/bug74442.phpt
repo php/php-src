@@ -7,14 +7,14 @@ opcache
 --FILE--
 <?php
 class Schema_Base {
-    public function addField($typeclass, array $params = null) {
+    public function addField($typeclass, ?array $params = null) {
         $field = new $typeclass($params);
         return $field;
     }
 }
 
 class Field_Base {
-    public function __construct(array $params = null) {
+    public function __construct(?array $params = null) {
         if (! is_array($params)) {
             $params = (array) $params;
         }

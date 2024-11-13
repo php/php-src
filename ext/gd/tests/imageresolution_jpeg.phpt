@@ -22,6 +22,13 @@ imageresolution($exp, 71, 299);
 imagejpeg($exp, $filename);
 $act = imagecreatefromjpeg($filename);
 var_dump(imageresolution($act));
+imageresolution($exp, 71, 299);
+
+try {
+	imagejpeg($exp, $filename, 101);
+} catch (\ValueError $e) {
+	echo $e->getMessage();
+}
 ?>
 --EXPECT--
 array(2) {
@@ -36,6 +43,7 @@ array(2) {
   [1]=>
   int(299)
 }
+imagejpeg(): Argument #3 ($quality) must be at between -1 and 100
 --CLEAN--
 <?php
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'imageresolution_jpeg.jpeg');

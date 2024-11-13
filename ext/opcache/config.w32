@@ -1,9 +1,8 @@
 ARG_ENABLE("opcache", "whether to enable Zend OPcache support", "yes");
+ARG_ENABLE("opcache-jit", "whether to enable JIT", "yes");
 
 
 if (PHP_OPCACHE != "no") {
-
-	ARG_ENABLE("opcache-jit", "whether to enable JIT", "yes");
 
 	ZEND_EXTENSION('opcache', "\
 		ZendAccelerator.c \
@@ -18,6 +17,10 @@ if (PHP_OPCACHE != "no") {
 		zend_shared_alloc.c \
 		shared_alloc_win32.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
+	ADD_EXTENSION_DEP('opcache', 'date');
+	ADD_EXTENSION_DEP('opcache', 'hash');
+	ADD_EXTENSION_DEP('opcache', 'pcre');
+
 	if (PHP_OPCACHE_JIT == "yes") {
 		if (CHECK_HEADER_ADD_INCLUDE("ir/ir.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
 			var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";
@@ -29,8 +32,7 @@ if (PHP_OPCACHE != "no") {
 			DEFINE("DASM_FLAGS", dasm_flags);
 			DEFINE("DASM_ARCH", "x86");
 
-			AC_DEFINE('HAVE_JIT', 1, 'Define to enable JIT');
-			AC_DEFINE('ZEND_JIT_IR', 1, 'Use JIT IR framework');
+			AC_DEFINE('HAVE_JIT', 1, 'Define to 1 to enable JIT.');
 
 			ADD_FLAG("CFLAGS_OPCACHE", "/I \"ext\\opcache\\jit\\ir\" /D "+ir_target+" /D IR_PHP");
 			if (PHP_DEBUG == "yes") {
@@ -39,7 +41,7 @@ if (PHP_OPCACHE != "no") {
 
 			if (CHECK_HEADER_ADD_INCLUDE("capstone\\capstone.h", "CFLAGS_OPCACHE", PHP_OPCACHE+ ";" + PHP_PHP_BUILD + "\\include") &&
 				CHECK_LIB("capstone.lib", "opcache", PHP_OPCACHE)) {
-				AC_DEFINE('HAVE_CAPSTONE', 1, 'capstone support enabled');
+				AC_DEFINE('HAVE_CAPSTONE', 1, 'Define to 1 if Capstone is available.');
 				ir_src += " ir_disasm.c";
 			}
 

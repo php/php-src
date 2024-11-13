@@ -52,9 +52,9 @@ bool(false)
 Warning: file_get_contents(1): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 2 --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 -- Iteration 3 --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 -- Iteration 4 --
 
 Warning: file_get_contents( ): Failed to open stream: No such file or directory in %s on line %d

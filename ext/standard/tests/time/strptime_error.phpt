@@ -23,5 +23,5 @@ var_dump( strptime('foo', $format) );
 
 -- Testing strptime() function on failure --
 
-Deprecated: Function strptime() is deprecated in %s on line %d
+Deprecated: Function strptime() is deprecated since 8.2, use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead in %s on line %d
 bool(false)

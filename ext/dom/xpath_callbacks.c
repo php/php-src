@@ -17,7 +17,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -46,6 +46,9 @@ PHP_DOM_EXPORT void php_dom_xpath_callback_ns_dtor(php_dom_xpath_callback_ns *ns
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_ctor(php_dom_xpath_callbacks *registry)
 {
+	registry->php_ns = NULL;
+	registry->namespaces = NULL;
+	registry->node_list = NULL;
 }
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_node_list(php_dom_xpath_callbacks *registry)
@@ -64,8 +67,9 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_argument_stack(xmlXPathParserC
 		xmlXPathFreeObject(obj);
 	}
 
-	/* Push sentinel value */
-	valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
+	/* Don't push a sentinel value here. If this is called from an error situation, then by *not* pushing a sentinel
+	 * the execution will halt. If this is called from a regular situation, then it is the caller's responsibility
+	 * to ensure the stack remains balanced. */
 }
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_dtor(php_dom_xpath_callbacks *registry)
@@ -138,7 +142,7 @@ static bool php_dom_xpath_is_callback_name_valid(const zend_string *name, php_do
 	}
 
 	if (name_validation == PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME) {
-		if (xmlValidateNCName((xmlChar *) ZSTR_VAL(name), /* pass 0 to disallow spaces */ 0) != 0) {
+		if (xmlValidateNCName(BAD_CAST ZSTR_VAL(name), /* pass 0 to disallow spaces */ 0) != 0) {
 			return false;
 		}
 	}
@@ -346,7 +350,7 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 								xmlNsPtr original = (xmlNsPtr) node;
 
 								/* Make sure parent dom object exists, so we can take an extra reference. */
-								zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+								zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
 								php_dom_create_object(nsparent, &parent_zval, intern);
 								dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
 
@@ -361,9 +365,12 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 					}
 				}
 				break;
-			default:
-				ZVAL_STRING(param, (char *)xmlXPathCastToString(obj));
+			default: {
+				char *str = (char *)xmlXPathCastToString(obj);
+				ZVAL_STRING(param, str);
+				xmlFree(str);
 				break;
+			}
 		}
 		xmlXPathFreeObject(obj);
 	}
@@ -437,7 +444,7 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 			return FAILURE;
 		} else {
 			zend_string *str = zval_get_string(&callback_retval);
-			valuePush(ctxt, xmlXPathNewString((xmlChar *) ZSTR_VAL(str)));
+			valuePush(ctxt, xmlXPathNewString(BAD_CAST ZSTR_VAL(str)));
 			zend_string_release_ex(str, 0);
 		}
 		zval_ptr_dtor(&callback_retval);

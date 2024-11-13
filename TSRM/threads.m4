@@ -126,7 +126,7 @@ if test "$pthreads_working" != "yes"; then
 fi
 ])
 
-if test "x$ac_cv_pthreads_cflags" != "x" -o "x$ac_cv_pthreads_lib" != "x"; then
+if test "x$ac_cv_pthreads_cflags" != "x" || test "x$ac_cv_pthreads_lib" != "x"; then
   pthreads_working="yes"
 fi
 ])

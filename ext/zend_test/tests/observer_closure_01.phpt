@@ -4,6 +4,7 @@ Observer: Basic observability of closures
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 opcache.optimization_level=0x7FFFBFFF & ~0x0080
 --FILE--
@@ -26,11 +27,11 @@ echo 'DONE' . PHP_EOL;
 --EXPECTF--
 <!-- init '%s' -->
 <file '%s'>
-  <!-- init {closure}() -->
-  <{closure}>
+  <!-- init {closure:%s:%d}() -->
+  <{closure:%s:%d}>
 Answer
-    <!-- init {closure}() -->
-    <{closure}>
+    <!-- init {closure:%s:%d}() -->
+    <{closure:%s:%d}>
       <!-- init array_sum() -->
       <array_sum>
       </array_sum>
@@ -38,27 +39,27 @@ Answer
       <var_dump>
 int(42)
       </var_dump>
-    </{closure}>
-  </{closure}>
-  <{closure}>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
+  <{closure:%s:%d}>
 Answer
-    <{closure}>
+    <{closure:%s:%d}>
       <array_sum>
       </array_sum>
       <var_dump>
 int(42)
       </var_dump>
-    </{closure}>
-  </{closure}>
-  <{closure}>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
+  <{closure:%s:%d}>
 Answer
-    <{closure}>
+    <{closure:%s:%d}>
       <array_sum>
       </array_sum>
       <var_dump>
 int(42)
       </var_dump>
-    </{closure}>
-  </{closure}>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
 DONE
 </file '%s'>

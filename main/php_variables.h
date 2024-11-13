@@ -27,11 +27,11 @@
 #define PARSE_STRING 3
 #define PARSE_ENV 4
 #define PARSE_SERVER 5
-#define PARSE_SESSION 6
 
 BEGIN_EXTERN_C()
 void php_startup_auto_globals(void);
 extern PHPAPI void (*php_import_environment_variables)(zval *array_ptr);
+extern PHPAPI void (*php_load_environment_variables)(zval *array_ptr);
 PHPAPI void php_register_variable(const char *var, const char *val, zval *track_vars_array);
 /* binary-safe version */
 PHPAPI void php_register_variable_safe(const char *var, const char *val, size_t val_len, zval *track_vars_array);

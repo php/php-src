@@ -5,7 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) die('skip requires mysqlnd');
 ?>
 --FILE--
 <?php
@@ -19,7 +18,7 @@ $mysqli->query('INSERT INTO test VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9)');
 
 $mysqli->real_query("SELECT * FROM test");
 
-$result = $mysqli->store_result(MYSQLI_STORE_RESULT_COPY_DATA);
+$result = $mysqli->store_result();
 
 $field = $result->fetch_field();
 var_dump($field->name);

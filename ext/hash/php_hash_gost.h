@@ -17,8 +17,6 @@
 #ifndef PHP_HASH_GOST_H
 #define PHP_HASH_GOST_H
 
-#include "ext/standard/basic_functions.h"
-
 /* GOST context */
 typedef struct {
 	uint32_t state[16];

@@ -23,10 +23,8 @@ runs:
           libffi-dev:i386 \
           libfreetype6-dev:i386 \
           libgmp-dev:i386 \
-          libgssapi-krb5-2:i386 \
           libicu-dev:i386 \
           libjpeg-dev:i386 \
-          libkrb5-dev:i386 \
           libonig-dev:i386 \
           libpng-dev:i386 \
           libpq-dev:i386 \
@@ -35,13 +33,11 @@ runs:
           libsodium-dev:i386 \
           libsqlite3-dev:i386 \
           libssl-dev:i386 \
-          libtidy-dev:i386 \
           libwebp-dev:i386 \
           libxml2-dev:i386 \
           libxml2-dev:i386 \
           libxpm-dev:i386 \
           libxslt1-dev:i386 \
-          libzip-dev:i386 \
           locales \
           make \
           pkg-config:i386 \

@@ -2,12 +2,27 @@
 
 ARG_WITH("openssl", "OpenSSL support", "no,shared");
 
+ARG_WITH("openssl-legacy-provider", "OPENSSL: Load legacy algorithm provider in addition to default provider", "no");
+
+ARG_WITH("openssl-argon2", "OPENSSL: Enable argon2 password hashing (requires OpenSSL >= 3.2)", "no");
+
 if (PHP_OPENSSL != "no") {
 	var ret = SETUP_OPENSSL("openssl", PHP_OPENSSL);
 
-	if (ret > 0) {
-		EXTENSION("openssl", "openssl.c xp_ssl.c");
-		AC_DEFINE("HAVE_OPENSSL_EXT", PHP_OPENSSL_SHARED ? 0 : 1, "Have openssl");
-		AC_DEFINE("HAVE_OPENSSL", 1);
+	if (ret >= 2) {
+		EXTENSION("openssl", "openssl.c openssl_pwhash.c xp_ssl.c");
+		AC_DEFINE("HAVE_OPENSSL_EXT", 1, "Define to 1 if the PHP extension 'openssl' is available.");
+		if (PHP_OPENSSL_LEGACY_PROVIDER != "no") {
+			AC_DEFINE("LOAD_OPENSSL_LEGACY_PROVIDER", 1, "Define to 1 to load the OpenSSL legacy algorithm provider in addition to the default provider.");
+		}
+		if (PHP_OPENSSL_ARGON2 != "no") {
+			if (PHP_ZTS != "no") {
+				WARNING("OpenSSL argon2 hashing not supported in ZTS mode for now");
+			} else if (!CHECK_FUNC_IN_HEADER("openssl/thread.h", "OSSL_set_max_threads", PHP_PHP_BUILD + "\\include")) {
+				WARNING("OpenSSL argon2 hashing requires OpenSSL >= 3.2");
+			} else {
+				AC_DEFINE("HAVE_OPENSSL_ARGON2", 1, "Define to 1 to enable OpenSSL argon2 password hashing.");
+			}
+		}
 	}
 }

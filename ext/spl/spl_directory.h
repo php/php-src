@@ -18,7 +18,6 @@
 #define SPL_DIRECTORY_H
 
 #include "php.h"
-#include "php_spl.h"
 
 extern PHPAPI zend_class_entry *spl_ce_SplFileInfo;
 extern PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
@@ -36,7 +35,7 @@ typedef struct _spl_filesystem_object  spl_filesystem_object;
 typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object);
 typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst);
 
-PHPAPI zend_string *spl_filesystem_object_get_path(spl_filesystem_object *intern);
+PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *intern);
 
 typedef struct _spl_other_handler {
 	spl_foreign_dtor_t     dtor;
@@ -75,8 +74,7 @@ struct _spl_filesystem_object {
 			zval               *zcontext;
 			zend_string        *open_mode;
 			zval               current_zval;
-			char               *current_line;
-			size_t             current_line_len;
+			zend_string       *current_line;
 			size_t             max_line_len;
 			zend_long               current_line_num;
 			zval               zresource;
@@ -84,6 +82,7 @@ struct _spl_filesystem_object {
 			char               delimiter;
 			char               enclosure;
 			int                escape;
+			bool               is_escape_default;
 		} file;
 	} u;
 	zend_object        std;

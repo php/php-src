@@ -15,7 +15,10 @@
  */
 
 #include "php.h"
+#include "zend_long.h"
 #include "php_open_temporary_file.h"
+#include "ext/random/php_random.h"
+#include "zend_operators.h"
 
 #include <errno.h>
 #include <sys/types.h>
@@ -31,7 +34,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #endif
@@ -84,16 +87,22 @@
  * SUCH DAMAGE.
  */
 
+static const char base32alphabet[] = "0123456789abcdefghijklmnopqrstuv";
+
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
 #ifdef PHP_WIN32
 	char *opened_path = NULL;
 	size_t opened_path_len;
-	wchar_t *cwdw, *pfxw, pathw[MAXPATHLEN];
+	wchar_t *cwdw, *random_prefix_w, pathw[MAXPATHLEN];
 #else
 	char opened_path[MAXPATHLEN];
 	char *trailing_slash;
 #endif
+	uint64_t random;
+	char *random_prefix;
+	char *p;
+	size_t len;
 	char cwd[MAXPATHLEN];
 	cwd_state new_state;
 	int fd = -1;
@@ -128,6 +137,23 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		return -1;
 	}
 
+	/* Extend the prefix to increase randomness */
+	if (php_random_bytes_silent(&random, sizeof(random)) == FAILURE) {
+		random = php_random_generate_fallback_seed();
+	}
+
+	/* Use a compact encoding to not increase the path len too much, but do not
+	 * mix case to avoid losing randomness on case-insensitive file systems */
+	len = strlen(pfx) + 13 /* log(2**64)/log(strlen(base32alphabet)) */ + 1;
+	random_prefix = emalloc(len);
+	p = zend_mempcpy(random_prefix, pfx, strlen(pfx));
+	while (p + 1 < random_prefix + len) {
+		*p = base32alphabet[random % strlen(base32alphabet)];
+		p++;
+		random /= strlen(base32alphabet);
+	}
+	*p = '\0';
+
 #ifndef PHP_WIN32
 	if (IS_SLASH(new_state.cwd[new_state.cwd_length - 1])) {
 		trailing_slash = "";
@@ -135,7 +161,8 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		trailing_slash = "/";
 	}
 
-	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
+	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, random_prefix) >= MAXPATHLEN) {
+		efree(random_prefix);
 		efree(new_state.cwd);
 		return -1;
 	}
@@ -143,19 +170,21 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 
 #ifdef PHP_WIN32
 	cwdw = php_win32_ioutil_any_to_w(new_state.cwd);
-	pfxw = php_win32_ioutil_any_to_w(pfx);
-	if (!cwdw || !pfxw) {
+	random_prefix_w = php_win32_ioutil_any_to_w(random_prefix);
+	if (!cwdw || !random_prefix_w) {
 		free(cwdw);
-		free(pfxw);
+		free(random_prefix_w);
+		efree(random_prefix);
 		efree(new_state.cwd);
 		return -1;
 	}
 
-	if (GetTempFileNameW(cwdw, pfxw, 0, pathw)) {
+	if (GetTempFileNameW(cwdw, random_prefix_w, 0, pathw)) {
 		opened_path = php_win32_ioutil_conv_w_to_any(pathw, PHP_WIN32_CP_IGNORE_LEN, &opened_path_len);
 		if (!opened_path || opened_path_len >= MAXPATHLEN) {
 			free(cwdw);
-			free(pfxw);
+			free(random_prefix_w);
+			efree(random_prefix);
 			efree(new_state.cwd);
 			return -1;
 		}
@@ -165,7 +194,8 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		 * which means that opening it will fail... */
 		if (VCWD_CHMOD(opened_path, 0600)) {
 			free(cwdw);
-			free(pfxw);
+			free(random_prefix_w);
+			efree(random_prefix);
 			efree(new_state.cwd);
 			free(opened_path);
 			return -1;
@@ -174,7 +204,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	}
 
 	free(cwdw);
-	free(pfxw);
+	free(random_prefix_w);
 #elif defined(HAVE_MKSTEMP)
 	fd = mkstemp(opened_path);
 #else
@@ -194,6 +224,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	}
 #endif
 	efree(new_state.cwd);
+	efree(random_prefix);
 	return fd;
 }
 /* }}} */

@@ -20,12 +20,17 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "main/php_network.h"
 #include "ext/standard/info.h"
+
+#ifdef PHP_WIN32
+// avoid conflicting declarations of (v)asprintf()
+# define HAVE_ASPRINTF
+#endif
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
@@ -528,7 +533,7 @@ retry:
 								buf2[0] = '\0';
 								count = rootlen;
 								while(count < vars->name_length){
-									sprintf(buf, "%lu.", vars->name[count]);
+									snprintf(buf, sizeof(buf), "%lu.", vars->name[count]);
 									strcat(buf2, buf);
 									count++;
 								}
@@ -668,7 +673,7 @@ static bool php_snmp_parse_oid(
 		objid_query->count++;
 	} else if (oid_ht) { /* we got objid array */
 		if (zend_hash_num_elements(oid_ht) == 0) {
-			zend_value_error("Array of object IDs cannot be empty");
+			zend_value_error("Array of object IDs must not be empty");
 			return false;
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
@@ -873,8 +878,9 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 
 	/* put back non-standard SNMP port */
 	if (remote_port != SNMP_PORT) {
-		pptr = session->peername + strlen(session->peername);
-		sprintf(pptr, ":%d", remote_port);
+		size_t peername_length = strlen(session->peername);
+		pptr = session->peername + peername_length;
+		snprintf(pptr, MAX_NAME_LEN - peername_length, ":%d", remote_port);
 	}
 
 	php_network_freeaddresses(psal);

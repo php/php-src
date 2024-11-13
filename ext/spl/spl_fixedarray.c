@@ -16,29 +16,21 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
+#include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
 
-#include "php_spl.h"
 #include "spl_fixedarray_arginfo.h"
-#include "spl_functions.h"
-#include "spl_engine.h"
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
-#include "spl_iterators.h"
-#include "ext/json/php_json.h"
+#include "ext/json/php_json.h" /* For php_json_serializable_ce */
 
-zend_object_handlers spl_handler_SplFixedArray;
+static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
-
-#ifdef COMPILE_DL_SPL_FIXEDARRAY
-ZEND_GET_MODULE(spl_fixedarray)
-#endif
 
 /* Check if the object is an instance of a subclass of SplFixedArray that overrides method's implementation.
  * Expect subclassing SplFixedArray to be rare and check that first. */
@@ -89,6 +81,7 @@ static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 {
 	array->size = 0;
 	array->elements = NULL;
+	array->cached_resize = -1;
 }
 
 /* Initializes the range [from, to) to null. Does not dtor existing elements. */
@@ -107,6 +100,7 @@ static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, zend_lon
 	array->size = 0; /* reset size in case ecalloc() fails */
 	array->elements = size ? safe_emalloc(size, sizeof(zval), 0) : NULL;
 	array->size = size;
+	array->cached_resize = -1;
 }
 
 static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
@@ -117,7 +111,6 @@ static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 	} else {
 		spl_fixedarray_default_ctor(array);
 	}
-	array->cached_resize = -1;
 }
 
 /* Copies the range [begin, end) into the fixedarray, beginning at `offset`.
@@ -466,8 +459,10 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return;
 	} else {
-		zval_ptr_dtor(&(intern->array.elements[index]));
+		zval garbage;
+		ZVAL_COPY_VALUE(&garbage, &intern->array.elements[index]);
 		ZVAL_NULL(&intern->array.elements[index]);
+		zval_ptr_dtor(&garbage);
 	}
 }
 

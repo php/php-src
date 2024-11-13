@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 82caf527a8ec686bc450e5d782bb79275d5a13e3 */
+ * Stub hash: 25e0aa769d72988ebca07fff96c8ed1fcb6b7d5e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -185,7 +185,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_fpathconf, 0, 2, MAY_BE_LO
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(posix_kill);
 ZEND_FUNCTION(posix_getpid);
 ZEND_FUNCTION(posix_getppid);
@@ -259,7 +258,6 @@ ZEND_FUNCTION(posix_pathconf);
 ZEND_FUNCTION(posix_fpathconf);
 #endif
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(posix_kill, arginfo_posix_kill)
 	ZEND_FE(posix_getpid, arginfo_posix_getpid)
@@ -322,7 +320,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(posix_setrlimit, arginfo_posix_setrlimit)
 #endif
 	ZEND_FE(posix_get_last_error, arginfo_posix_get_last_error)
-	ZEND_FALIAS(posix_errno, posix_get_last_error, arginfo_posix_errno)
+	ZEND_RAW_FENTRY("posix_errno", zif_posix_get_last_error, arginfo_posix_errno, 0, NULL, NULL)
 	ZEND_FE(posix_strerror, arginfo_posix_strerror)
 #if defined(HAVE_INITGROUPS)
 	ZEND_FE(posix_initgroups, arginfo_posix_initgroups)
@@ -462,5 +460,8 @@ static void register_posix_symbols(int module_number)
 #endif
 #if defined(_PC_SYMLINK_MAX)
 	REGISTER_LONG_CONSTANT("POSIX_PC_SYMLINK_MAX", _PC_SYMLINK_MAX, CONST_PERSISTENT);
+#endif
+#if defined(_SC_OPEN_MAX)
+	REGISTER_LONG_CONSTANT("POSIX_SC_OPEN_MAX", _SC_OPEN_MAX, CONST_PERSISTENT);
 #endif
 }

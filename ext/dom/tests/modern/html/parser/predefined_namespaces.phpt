@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
 <head>
@@ -28,7 +28,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 HTML);
 
 echo "--- Namespaces ---\n";
-$xpath = new DOMXPath($dom);
+$xpath = new Dom\XPath($dom);
 foreach ($xpath->query("//*[name()='body']//*") as $node) {
     echo $node->nodeName, " ", $node->namespaceURI ?? "(NONE)", "\n";
     foreach ($node->attributes as $attribute) {
@@ -37,9 +37,9 @@ foreach ($xpath->query("//*[name()='body']//*") as $node) {
 }
 
 echo "--- HTML serialization ---\n";
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 echo "--- XML serialization ---\n";
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--
@@ -54,8 +54,8 @@ rect http://www.w3.org/2000/svg
   Attribute: y (NONE)
   Attribute: width (NONE)
   Attribute: height (NONE)
-div http://www.w3.org/1999/xhtml
-p http://www.w3.org/1999/xhtml
+DIV http://www.w3.org/1999/xhtml
+P http://www.w3.org/1999/xhtml
 math http://www.w3.org/1998/Math/MathML
 mtable http://www.w3.org/1998/Math/MathML
   Attribute: id (NONE)

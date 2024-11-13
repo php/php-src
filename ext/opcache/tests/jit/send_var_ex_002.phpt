@@ -12,7 +12,7 @@ for ($i = 0; $i < 3; $i++ ) {
 	var_dump($x);
 }	
 
-function test(&$a = null, SomeType &$b = null) {
+function test(&$a = null, ?SomeType &$b = null) {
     $a++;
 }
 ?>

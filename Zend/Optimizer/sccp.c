@@ -789,14 +789,10 @@ static bool can_ct_eval_func_call(zend_function *func, zend_string *name, uint32
 /* The functions chosen here are simple to implement and either likely to affect a branch,
  * or just happened to be commonly used with constant operands in WP (need to test other
  * applications as well, of course). */
-static inline zend_result ct_eval_func_call(
-		zend_op_array *op_array, zval *result, zend_string *name, uint32_t num_args, zval **args) {
+static inline zend_result ct_eval_func_call_ex(
+		zend_op_array *op_array, zval *result, zend_function *func, uint32_t num_args, zval **args) {
 	uint32_t i;
-	zend_function *func = zend_hash_find_ptr(CG(function_table), name);
-	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
-		return FAILURE;
-	}
-
+	zend_string *name = func->common.function_name;
 	if (num_args == 1 && Z_TYPE_P(args[0]) == IS_STRING &&
 			zend_optimizer_eval_special_func_call(result, name, Z_STR_P(args[0])) == SUCCESS) {
 		return SUCCESS;
@@ -853,6 +849,15 @@ static inline zend_result ct_eval_func_call(
 	efree(execute_data);
 	EG(current_execute_data) = prev_execute_data;
 	return retval;
+}
+
+static inline zend_result ct_eval_func_call(
+		zend_op_array *op_array, zval *result, zend_string *name, uint32_t num_args, zval **args) {
+	zend_function *func = zend_hash_find_ptr(CG(function_table), name);
+	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
+		return FAILURE;
+	}
+	return ct_eval_func_call_ex(op_array, result, func, num_args, args);
 }
 
 #define SET_RESULT(op, zv) do { \
@@ -1708,6 +1713,51 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SET_RESULT_BOT(result);
 			break;
 		}
+		case ZEND_FRAMELESS_ICALL_0:
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3: {
+			/* We already know it can't be evaluated, don't bother checking again */
+			if (ssa_op->result_def < 0 || IS_BOT(&ctx->values[ssa_op->result_def])) {
+				break;
+			}
+
+			zval *args[3] = {NULL};
+			zend_function *func = ZEND_FLF_FUNC(opline);
+			uint32_t num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
+
+			switch (num_args) {
+	 			case 3: {
+					zend_op *op_data = opline + 1;
+					args[2] = get_op1_value(ctx, op_data, &ctx->scdf.ssa->ops[op_data - ctx->scdf.op_array->opcodes]);
+					ZEND_FALLTHROUGH;
+				}
+				case 2:
+					args[1] = get_op2_value(ctx, opline, &ctx->scdf.ssa->ops[opline - ctx->scdf.op_array->opcodes]);
+					ZEND_FALLTHROUGH;
+				case 1:
+					args[0] = get_op1_value(ctx, opline, &ctx->scdf.ssa->ops[opline - ctx->scdf.op_array->opcodes]);
+					break;
+			}
+			for (uint32_t i = 0; i < num_args; i++) {
+				if (!args[i]) {
+					SET_RESULT_BOT(result);
+					return;
+				} else if (IS_BOT(args[i]) || IS_PARTIAL_ARRAY(args[i])) {
+					SET_RESULT_BOT(result);
+					return;
+				} else if (IS_TOP(args[i])) {
+					return;
+				}
+			}
+			if (ct_eval_func_call_ex(scdf->op_array, &zv, func, num_args, args) == SUCCESS) {
+				SET_RESULT(result, &zv);
+				zval_ptr_dtor_nogc(&zv);
+				break;
+			}
+			SET_RESULT_BOT(result);
+			break;
+		}
 		default:
 		{
 			/* If we have no explicit implementation return BOT */
@@ -2155,7 +2205,13 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					if (opline->opcode == ZEND_DO_ICALL) {
 						removed_ops = remove_call(ctx, opline, ssa_op) - 1;
 					} else {
+						bool has_op_data = opline->opcode == ZEND_FRAMELESS_ICALL_3;
 						zend_ssa_remove_instr(ssa, opline, ssa_op);
+						removed_ops++;
+						if (has_op_data) {
+							zend_ssa_remove_instr(ssa, opline + 1, ssa_op + 1);
+							removed_ops++;
+						}
 					}
 					ssa_op->result_def = var_num;
 					opline->opcode = ZEND_QM_ASSIGN;
@@ -2191,8 +2247,13 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				if (opline->opcode == ZEND_DO_ICALL) {
 					removed_ops = remove_call(ctx, opline, ssa_op);
 				} else {
+					bool has_op_data = opline->opcode == ZEND_FRAMELESS_ICALL_3;
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					removed_ops++;
+					if (has_op_data) {
+						zend_ssa_remove_instr(ssa, opline + 1, ssa_op + 1);
+						removed_ops++;
+					}
 				}
 			}
 		} else if (ssa_op->op1_def == var_num) {

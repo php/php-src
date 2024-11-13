@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifndef PHP_PDO_FIREBIRD_INT_H
 #define PHP_PDO_FIREBIRD_INT_H
 
@@ -42,12 +44,6 @@
 
 /* Firebird API has a couple of missing const decls in its API */
 #define const_cast(s) ((char*)(s))
-
-#ifdef PHP_WIN32
-typedef void (__stdcall *info_func_t)(char*);
-#else
-typedef void (*info_func_t)(char*);
-#endif
 
 #ifndef min
 #define min(a,b) ((a)<(b)?(a):(b))

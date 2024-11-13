@@ -16,15 +16,31 @@ $responses = array(
 
 ['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
+var_dump(http_get_last_response_headers());
+
 $f = file_get_contents($uri);
 var_dump($f);
 var_dump($http_response_header);
+var_dump(http_get_last_response_headers());
 
 http_server_kill($pid);
 
 ?>
 --EXPECT--
+NULL
 string(4) "Body"
+array(5) {
+  [0]=>
+  string(18) "HTTP/1.0 302 Found"
+  [1]=>
+  string(12) "Some: Header"
+  [2]=>
+  string(20) "Location: /try-again"
+  [3]=>
+  string(15) "HTTP/1.0 200 Ok"
+  [4]=>
+  string(12) "Some: Header"
+}
 array(5) {
   [0]=>
   string(18) "HTTP/1.0 302 Found"

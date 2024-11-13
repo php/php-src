@@ -33,253 +33,259 @@
 #include <stddef.h>
 #include <assert.h>
 #include <stdbool.h>
-#include "private.h" /* For _bc_rm_leading_zeros() */
+#include "private.h"
+#include "convert.h"
 #include "zend_alloc.h"
 
-/* Recursive vs non-recursive multiply crossover ranges. */
-#if defined(MULDIGITS)
-#include "muldigits.h"
-#else
-#define MUL_BASE_DIGITS 80
-#endif
-
-int mul_base_digits = MUL_BASE_DIGITS;
-#define MUL_SMALL_DIGITS mul_base_digits/4
 
 /* Multiply utility routines */
 
-static bc_num new_sub_num(size_t length, size_t scale, char *value)
+static inline void bc_mul_carry_calc(BC_VECTOR *prod_vector, size_t prod_arr_size)
 {
-	bc_num temp = (bc_num) emalloc(sizeof(bc_struct));
-
-	temp->n_sign = PLUS;
-	temp->n_len = length;
-	temp->n_scale = scale;
-	temp->n_refs = 1;
-	temp->n_ptr = NULL;
-	temp->n_value = value;
-	return temp;
-}
-
-static void _bc_simp_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod)
-{
-	char *n1ptr, *n2ptr, *pvptr;
-	char *n1end, *n2end;        /* To the end of n1 and n2. */
-	int sum = 0;
-
-	int prodlen = n1len + n2len + 1;
-
-	*prod = bc_new_num (prodlen, 0);
-
-	n1end = (char *) (n1->n_value + n1len - 1);
-	n2end = (char *) (n2->n_value + n2len - 1);
-	pvptr = (char *) ((*prod)->n_value + prodlen - 1);
-
-	/* Here is the loop... */
-	for (int index = 0; index < prodlen - 1; index++) {
-		n1ptr = (char *) (n1end - MAX(0, index - n2len + 1));
-		n2ptr = (char *) (n2end - MIN(index, n2len - 1));
-		while ((n1ptr >= n1->n_value) && (n2ptr <= n2end)) {
-			sum += *n1ptr * *n2ptr;
-			n1ptr--;
-			n2ptr++;
-		}
-		*pvptr-- = sum % BASE;
-		sum = sum / BASE;
-	}
-	*pvptr = sum;
-}
-
-
-/* A special adder/subtractor for the recursive divide and conquer
-   multiply algorithm.  Note: if sub is called, accum must
-   be larger that what is being subtracted.  Also, accum and val
-   must have n_scale = 0.  (e.g. they must look like integers. *) */
-static void _bc_shift_addsub(bc_num accum, bc_num val, int shift, bool sub)
-{
-	signed char *accp, *valp;
-	unsigned int carry = 0;
-	size_t count = val->n_len;
-
-	if (val->n_value[0] == 0) {
-		count--;
-	}
-	assert(accum->n_len + accum->n_scale >= shift + count);
-
-	/* Set up pointers and others */
-	accp = (signed char *) (accum->n_value + accum->n_len + accum->n_scale - shift - 1);
-	valp = (signed char *) (val->n_value + val->n_len - 1);
-
-	if (sub) {
-		/* Subtraction, carry is really borrow. */
-		while (count--) {
-			*accp -= *valp-- + carry;
-			if (*accp < 0) {
-				carry = 1;
-				*accp-- += BASE;
-			} else {
-				carry = 0;
-				accp--;
-			}
-		}
-		while (carry) {
-			*accp -= carry;
-			if (*accp < 0) {
-				*accp-- += BASE;
-			} else {
-				carry = 0;
-			}
-		}
-	} else {
-		/* Addition */
-		while (count--) {
-			*accp += *valp-- + carry;
-			if (*accp > (BASE - 1)) {
-				carry = 1;
-				*accp-- -= BASE;
-			} else {
-				carry = 0;
-				accp--;
-			}
-		}
-		while (carry) {
-			*accp += carry;
-			if (*accp > (BASE - 1)) {
-				*accp-- -= BASE;
-			} else {
-				carry = 0;
-			}
-		}
+	for (size_t i = 0; i < prod_arr_size - 1; i++) {
+		prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
+		prod_vector[i] %= BC_VECTOR_BOUNDARY_NUM;
 	}
 }
 
-/* Recursive divide and conquer multiply algorithm.
-   Based on
-   Let u = u0 + u1*(b^n)
-   Let v = v0 + v1*(b^n)
-   Then uv = (B^2n+B^n)*u1*v1 + B^n*(u1-u0)*(v0-v1) + (B^n+1)*u0*v0
-
-   B is the base of storage, number of digits in u1,u0 close to equal.
-*/
-static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *prod)
+/*
+ * If the n_values of n1 and n2 are both 4 (32-bit) or 8 (64-bit) digits or less,
+ * the calculation will be performed at high speed without using an array.
+ */
+static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
 {
-	bc_num u0, u1, v0, v1;
-	bc_num m1, m2, m3, d1, d2;
-	size_t n;
-	bool m1zero;
+	const char *n1end = n1->n_value + n1len - 1;
+	const char *n2end = n2->n_value + n2len - 1;
 
-	/* Base case? */
-	if ((ulen + vlen) < mul_base_digits
-		|| ulen < MUL_SMALL_DIGITS
-		|| vlen < MUL_SMALL_DIGITS
-	) {
-		_bc_simp_mul(u, ulen, v, vlen, prod);
-		return;
+	BC_VECTOR n1_vector = bc_partial_convert_to_vector(n1end, n1len);
+	BC_VECTOR n2_vector = bc_partial_convert_to_vector(n2end, n2len);
+	BC_VECTOR prod_vector = n1_vector * n2_vector;
+
+	size_t prodlen = n1len + n2len;
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
+	char *pptr = (*prod)->n_value;
+	char *pend = pptr + prodlen - 1;
+
+	while (pend >= pptr) {
+		*pend-- = prod_vector % BASE;
+		prod_vector /= BASE;
 	}
-
-	/* Calculate n -- the u and v split point in digits. */
-	n = (MAX(ulen, vlen) + 1) / 2;
-
-	/* Split u and v. */
-	if (ulen < n) {
-		u1 = bc_copy_num(BCG(_zero_));
-		u0 = new_sub_num(ulen, 0, u->n_value);
-	} else {
-		u1 = new_sub_num(ulen - n, 0, u->n_value);
-		u0 = new_sub_num(n, 0, u->n_value + ulen - n);
-	}
-	if (vlen < n) {
-		v1 = bc_copy_num(BCG(_zero_));
-		v0 = new_sub_num(vlen, 0, v->n_value);
-	} else {
-		v1 = new_sub_num(vlen - n, 0, v->n_value);
-		v0 = new_sub_num(n, 0, v->n_value + vlen - n);
-	}
-	_bc_rm_leading_zeros(u1);
-	_bc_rm_leading_zeros(u0);
-	_bc_rm_leading_zeros(v1);
-	_bc_rm_leading_zeros(v0);
-
-	m1zero = bc_is_zero(u1) || bc_is_zero(v1);
-
-	/* Calculate sub results ... */
-
-	bc_init_num(&d1);
-	bc_init_num(&d2);
-	bc_sub(u1, u0, &d1, 0);
-	bc_sub(v0, v1, &d2, 0);
-
-
-	/* Do recursive multiplies and shifted adds. */
-	if (m1zero) {
-		m1 = bc_copy_num(BCG(_zero_));
-	} else {
-		_bc_rec_mul(u1, u1->n_len, v1, v1->n_len, &m1);
-	}
-
-	if (bc_is_zero(d1) || bc_is_zero(d2)) {
-		m2 = bc_copy_num(BCG(_zero_));
-	} else {
-		_bc_rec_mul(d1, d1->n_len, d2, d2->n_len, &m2);
-	}
-
-	if (bc_is_zero(u0) || bc_is_zero(v0)) {
-		m3 = bc_copy_num(BCG(_zero_));
-	} else {
-		_bc_rec_mul(u0, u0->n_len, v0, v0->n_len, &m3);
-	}
-
-	/* Initialize product */
-	*prod = bc_new_num(ulen + vlen + 1, 0);
-
-	if (!m1zero) {
-		_bc_shift_addsub(*prod, m1, 2 * n, false);
-		_bc_shift_addsub(*prod, m1, n, false);
-	}
-	_bc_shift_addsub(*prod, m3, n, false);
-	_bc_shift_addsub(*prod, m3, 0, false);
-	_bc_shift_addsub(*prod, m2, n, d1->n_sign != d2->n_sign);
-
-	/* Now clean up! */
-	bc_free_num (&u1);
-	bc_free_num (&u0);
-	bc_free_num (&v1);
-	bc_free_num (&m1);
-	bc_free_num (&v0);
-	bc_free_num (&m2);
-	bc_free_num (&m3);
-	bc_free_num (&d1);
-	bc_free_num (&d2);
 }
 
-/* The multiply routine.  N2 times N1 is put int PROD with the scale of
+/*
+ * Equivalent of bc_fast_mul for small numbers to perform computations
+ * without using array.
+ */
+static inline void bc_fast_square(bc_num n1, size_t n1len, bc_num *prod)
+{
+	const char *n1end = n1->n_value + n1len - 1;
+
+	BC_VECTOR n1_vector = bc_partial_convert_to_vector(n1end, n1len);
+	BC_VECTOR prod_vector = n1_vector * n1_vector;
+
+	size_t prodlen = n1len + n1len;
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
+	char *pptr = (*prod)->n_value;
+	char *pend = pptr + prodlen - 1;
+
+	while (pend >= pptr) {
+		*pend-- = prod_vector % BASE;
+		prod_vector /= BASE;
+	}
+}
+
+/* Common part of functions bc_standard_mul and bc_standard_square
+ * that takes a vector and converts it to a bc_num 	*/
+static inline void bc_mul_finish_from_vector(BC_VECTOR *prod_vector, size_t prod_arr_size, size_t prodlen, bc_num *prod) {
+	/*
+	 * Move a value exceeding 4/8 digits by carrying to the next digit.
+	 * However, the last digit does nothing.
+	 */
+	bc_mul_carry_calc(prod_vector, prod_arr_size);
+
+	/* Convert to bc_num */
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
+	char *pptr = (*prod)->n_value;
+	char *pend = pptr + prodlen - 1;
+	size_t i = 0;
+	while (i < prod_arr_size - 1) {
+#if BC_VECTOR_SIZE == 4
+		bc_write_bcd_representation(prod_vector[i], pend - 3);
+		pend -= 4;
+#else
+		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
+		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
+		pend -= 8;
+#endif
+		i++;
+	}
+
+	/*
+	 * The last digit may carry over.
+	 * Also need to fill it to the end with zeros, so loop until the end of the string.
+	 */
+	while (pend >= pptr) {
+		*pend-- = prod_vector[i] % BASE;
+		prod_vector[i] /= BASE;
+	}
+}
+
+/*
+ * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
+ * The array is generated starting with the smaller digits.
+ * e.g. 12345678901234567890 => {34567890, 56789012, 1234}
+ *
+ * Multiply and add these groups of numbers to perform multiplication fast.
+ * How much to shift the digits when adding values can be calculated from the index of the array.
+ */
+static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
+{
+	size_t i;
+	const char *n1end = n1->n_value + n1len - 1;
+	const char *n2end = n2->n_value + n2len - 1;
+	size_t prodlen = n1len + n2len;
+
+	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+
+	/*
+	 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
+	 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
+	 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
+	 */
+	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
+
+	BC_VECTOR *n1_vector = buf;
+	BC_VECTOR *n2_vector = buf + n1_arr_size;
+	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
+
+	for (i = 0; i < prod_arr_size; i++) {
+		prod_vector[i] = 0;
+	}
+
+	/* Convert to BC_VECTOR[] */
+	bc_convert_to_vector(n1_vector, n1end, n1len);
+	bc_convert_to_vector(n2_vector, n2end, n2len);
+
+	/* Multiplication and addition */
+	size_t count = 0;
+	for (i = 0; i < n1_arr_size; i++) {
+		/*
+		 * This calculation adds the result multiple times to the array entries.
+		 * When multiplying large numbers of digits, there is a possibility of
+		 * overflow, so digit adjustment is performed beforehand.
+		 */
+		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
+			bc_mul_carry_calc(prod_vector, prod_arr_size);
+			count = 0;
+		}
+		count++;
+		for (size_t j = 0; j < n2_arr_size; j++) {
+			prod_vector[i + j] += n1_vector[i] * n2_vector[j];
+		}
+	}
+
+	bc_mul_finish_from_vector(prod_vector, prod_arr_size, prodlen, prod);
+
+	efree(buf);
+}
+
+/** This is bc_standard_mul implementation for square */
+static void bc_standard_square(bc_num n1, size_t n1len, bc_num *prod)
+{
+	size_t i;
+	const char *n1end = n1->n_value + n1len - 1;
+	size_t prodlen = n1len + n1len;
+
+	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+
+	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n1_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
+
+	BC_VECTOR *n1_vector = buf;
+	BC_VECTOR *prod_vector = n1_vector + n1_arr_size + n1_arr_size;
+
+	for (i = 0; i < prod_arr_size; i++) {
+		prod_vector[i] = 0;
+	}
+
+	/* Convert to BC_VECTOR[] */
+	bc_convert_to_vector(n1_vector, n1end, n1len);
+
+	/* Multiplication and addition */
+	size_t count = 0;
+	for (i = 0; i < n1_arr_size; i++) {
+		/*
+		 * This calculation adds the result multiple times to the array entries.
+		 * When multiplying large numbers of digits, there is a possibility of
+		 * overflow, so digit adjustment is performed beforehand.
+		 */
+		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
+			bc_mul_carry_calc(prod_vector, prod_arr_size);
+			count = 0;
+		}
+		count++;
+		for (size_t j = 0; j < n1_arr_size; j++) {
+			prod_vector[i + j] += n1_vector[i] * n1_vector[j];
+		}
+	}
+
+	bc_mul_finish_from_vector(prod_vector, prod_arr_size, prodlen, prod);
+
+	efree(buf);
+}
+
+/* The multiply routine. N2 times N1 is put int PROD with the scale of
    the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).
    */
 
-void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
+bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 {
-	bc_num pval;
-	size_t len1, len2;
-	size_t full_scale, prod_scale;
+	bc_num prod;
 
 	/* Initialize things. */
-	len1 = n1->n_len + n1->n_scale;
-	len2 = n2->n_len + n2->n_scale;
-	full_scale = n1->n_scale + n2->n_scale;
-	prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
+	size_t len1 = n1->n_len + n1->n_scale;
+	size_t len2 = n2->n_len + n2->n_scale;
+	size_t full_scale = n1->n_scale + n2->n_scale;
+	size_t prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
 
 	/* Do the multiply */
-	_bc_rec_mul(n1, len1, n2, len2, &pval);
+	if (len1 <= BC_VECTOR_SIZE && len2 <= BC_VECTOR_SIZE) {
+		bc_fast_mul(n1, len1, n2, len2, &prod);
+	} else {
+		bc_standard_mul(n1, len1, n2, len2, &prod);
+	}
 
 	/* Assign to prod and clean up the number. */
-	pval->n_sign = (n1->n_sign == n2->n_sign ? PLUS : MINUS);
-	pval->n_value = pval->n_ptr;
-	pval->n_len = len2 + len1 + 1 - full_scale;
-	pval->n_scale = prod_scale;
-	_bc_rm_leading_zeros(pval);
-	if (bc_is_zero(pval)) {
-		pval->n_sign = PLUS;
+	prod->n_sign = (n1->n_sign == n2->n_sign ? PLUS : MINUS);
+	prod->n_len -= full_scale;
+	prod->n_scale = prod_scale;
+	_bc_rm_leading_zeros(prod);
+	if (bc_is_zero(prod)) {
+		prod->n_sign = PLUS;
 	}
-	bc_free_num(prod);
-	*prod = pval;
+	return prod;
+}
+
+bc_num bc_square(bc_num n1, size_t scale)
+{
+	bc_num prod;
+
+	size_t len1 = n1->n_len + n1->n_scale;
+	size_t full_scale = n1->n_scale + n1->n_scale;
+	size_t prod_scale = MIN(full_scale, MAX(scale, n1->n_scale));
+
+	if (len1 <= BC_VECTOR_SIZE) {
+		bc_fast_square(n1, len1, &prod);
+	} else {
+		bc_standard_square(n1, len1, &prod);
+	}
+
+	prod->n_sign = PLUS;
+	prod->n_len -= full_scale;
+	prod->n_scale = prod_scale;
+	_bc_rm_leading_zeros(prod);
+
+	return prod;
 }

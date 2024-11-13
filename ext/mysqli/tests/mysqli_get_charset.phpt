@@ -24,12 +24,8 @@ require_once 'skipifconnectfailure.inc';
 
     if (!$res = mysqli_query($link, $sql = sprintf("SHOW CHARACTER SET LIKE '%s'", $character_set_connection)))
         printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    $tmp = mysqli_fetch_assoc($res);
-    if (empty($tmp))
+    if (!mysqli_fetch_assoc($res))
         printf("[010] Cannot fetch Maxlen and/or Comment, test will fail: $sql\n");
-
-    $maxlen = (isset($tmp['Maxlen'])) ? $tmp['Maxlen'] : '';
-    $comment = (isset($tmp['Description'])) ? $tmp['Description'] : '';
 
     if (!$res = mysqli_query($link, sprintf("SHOW COLLATION LIKE '%s'", $collation_connection)))
         printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -49,12 +45,12 @@ require_once 'skipifconnectfailure.inc';
         printf("[015] Expecting object/std_class, got %s/%s\n", gettype($charset), $charset);
 
     if (!isset($charset->charset) ||
-        !in_array(gettype($charset->charset), array("string", "unicode")) ||
-        ($character_set_connection !== $charset->charset))
+        !is_string($charset->charset) ||
+        $character_set_connection !== $charset->charset)
         printf("[016] Expecting string/%s, got %s/%s\n", $character_set_connection, gettype($charset->charset), $charset->charset);
     if (!isset($charset->collation) ||
-        !in_array(gettype($charset->collation), array("string", "unicode")) ||
-        ($collation_connection !== $charset->collation))
+        !is_string($charset->collation) ||
+        $collation_connection !== $charset->collation)
         printf("[017] Expecting string/%s, got %s/%s\n", $collation_connection, gettype($charset->collation), $charset->collation);
 
     if (!isset($charset->dir) ||

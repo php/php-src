@@ -39,35 +39,32 @@
    N1 is added to N2 and the result placed into RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-void bc_add(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
+bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num sum = NULL;
 
 	if (n1->n_sign == n2->n_sign) {
-		sum = _bc_do_add(n1, n2, scale_min);
+		sum = _bc_do_add(n1, n2);
 		sum->n_sign = n1->n_sign;
 	} else {
 		/* subtraction must be done. */
 		/* Compare magnitudes. */
-		switch (_bc_do_compare(n1, n2, false, false)) {
-			case -1:
+		switch (_bc_do_compare(n1, n2, scale_min, false)) {
+			case BCMATH_RIGHT_GREATER:
 				/* n1 is less than n2, subtract n1 from n2. */
-				sum = _bc_do_sub(n2, n1, scale_min);
+				sum = _bc_do_sub(n2, n1);
 				sum->n_sign = n2->n_sign;
 				break;
-			case 0:
+			case BCMATH_EQUAL:
 				/* They are equal! return zero with the correct scale! */
 				sum = bc_new_num (1, MAX(scale_min, MAX(n1->n_scale, n2->n_scale)));
-				memset(sum->n_value, 0, sum->n_scale + 1);
 				break;
-			case 1:
+			case BCMATH_LEFT_GREATER:
 				/* n2 is less than n1, subtract n2 from n1. */
-				sum = _bc_do_sub(n1, n2, scale_min);
+				sum = _bc_do_sub(n1, n2);
 				sum->n_sign = n1->n_sign;
 		}
 	}
 
-	/* Clean up and return. */
-	bc_free_num (result);
-	*result = sum;
+	return sum;
 }

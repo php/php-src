@@ -21,18 +21,41 @@ var_dump($result2);
 
 odbc_close_all();
 
-var_dump($conn1);
-var_dump($conn2);
-var_dump($result1);
-var_dump($result2);
+try {
+    odbc_columns($conn1, '', '', '', '');
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    odbc_columns($conn2, '', '', '', '');
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    odbc_num_rows($result1);
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    odbc_num_rows($result2);
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 --EXPECTF--
-resource(%d) of type (odbc link)
-resource(%d) of type (odbc link persistent)
-resource(%d) of type (odbc result)
-resource(%d) of type (odbc result)
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
+object(Odbc\Connection)#%d (%d) {
+}
+object(Odbc\Connection)#%d (%d) {
+}
+object(Odbc\Result)#%d (%d) {
+}
+object(Odbc\Result)#%d (%d) {
+}
+ODBC connection has already been closed
+ODBC connection has already been closed
+ODBC result has already been closed
+ODBC result has already been closed

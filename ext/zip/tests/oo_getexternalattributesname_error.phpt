@@ -20,4 +20,4 @@ try {
 }
 ?>
 --EXPECT--
-ZipArchive::getExternalAttributesName(): Argument #1 ($name) cannot be empty
+ZipArchive::getExternalAttributesName(): Argument #1 ($name) must not be empty

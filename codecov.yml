@@ -1,3 +1,11 @@
 ignore:
-  - "ext/dom/lexbor/lexbor" # bundled library
-  - "ext/pcre/pcre2lib" # bundled library
+  # bundled libraries
+  - "ext/dom/lexbor/lexbor/core"
+  - "ext/dom/lexbor/lexbor/css"
+  - "ext/dom/lexbor/lexbor/dom"
+  - "ext/dom/lexbor/lexbor/encoding"
+  - "ext/dom/lexbor/lexbor/html"
+  - "ext/dom/lexbor/lexbor/ns"
+  - "ext/dom/lexbor/lexbor/ports"
+  - "ext/dom/lexbor/lexbor/tag"
+  - "ext/pcre/pcre2lib"

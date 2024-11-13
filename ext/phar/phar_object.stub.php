@@ -95,8 +95,8 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     /** @tentative-return-type */
     public function compressFiles(int $compression): void {}
 
-    /** @return bool */
-    public function decompressFiles() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function decompressFiles(): true {}
 
     /** @tentative-return-type */
     public function compress(int $compression, ?string $extension = null): ?Phar {}
@@ -110,17 +110,17 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     /** @tentative-return-type */
     public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null): ?PharData {}
 
-    /** @return bool */
-    public function copy(string $from, string $to) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function copy(string $from, string $to): true {}
 
     /** @tentative-return-type */
     public function count(int $mode = COUNT_NORMAL): int {}
 
-    /** @return bool */
-    public function delete(string $localName) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function delete(string $localName): true {}
 
-    /** @return bool */
-    public function delMetadata() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function delMetadata(): true {}
 
     /** @tentative-return-type */
     public function extractTo(string $directory, array|string|null $files = null, bool $overwrite = false): bool {}
@@ -187,10 +187,10 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function offsetUnset($localName): void {}
 
     /** @tentative-return-type */
-    public function setAlias(string $alias): bool {}
+    public function setAlias(string $alias): true {}
 
     /** @tentative-return-type */
-    public function setDefaultStub(?string $index = null, ?string $webIndex = null): bool {}
+    public function setDefaultStub(?string $index = null, ?string $webIndex = null): true {}
 
     /** @tentative-return-type */
     public function setMetadata(mixed $metadata): void {}
@@ -200,9 +200,9 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 
     /**
      * @param resource|string $stub
-     * @return bool
+     * @tentative-return-type
      */
-    public function setStub($stub, int $length = UNKNOWN) {} // TODO make return type void
+    public function setStub($stub, int $length = UNKNOWN): true {}
 
     /** @tentative-return-type */
     public function startBuffering(): void {}
@@ -236,7 +236,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 
     final public static function mungServer(array $variables): void {}
 
-    final public static function unlinkArchive(string $filename): bool {} // TODO make return type void
+    final public static function unlinkArchive(string $filename): true {}
 
     final public static function webPhar(
         ?string $alias = null, ?string $index = null, ?string $fileNotFoundScript = null,
@@ -245,10 +245,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 
 class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 {
-    /**
-     * @implementation-alias Phar::__construct
-     * @no-verify PharData constructor accepts extra $format argument
-     */
+    /** @implementation-alias Phar::__construct */
     public function __construct(string $filename, int $flags = FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS, ?string $alias = null, int $format = 0) {}
 
     /** @implementation-alias Phar::__destruct */
@@ -291,22 +288,20 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     public function compressFiles(int $compression): void {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @implementation-alias Phar::decompressFiles
      */
-    public function decompressFiles() {} // TODO make return type void
+    public function decompressFiles(): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias Phar::compress
-     * @no-verify
      */
     public function compress(int $compression, ?string $extension = null): ?PharData {}
 
     /**
      * @tentative-return-type
      * @implementation-alias Phar::decompress
-     * @no-verify
      */
     public function decompress(?string $extension = null): ?PharData {}
 
@@ -323,10 +318,10 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null): ?PharData {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @implementation-alias Phar::copy
      */
-    public function copy(string $from, string $to) {} // TODO make return type void
+    public function copy(string $from, string $to): true {}
 
     /**
      * @tentative-return-type
@@ -335,16 +330,16 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     public function count(int $mode = COUNT_NORMAL): int {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @implementation-alias Phar::delete
      */
-    public function delete(string $localName) {} // TODO make return type void
+    public function delete(string $localName): true {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @implementation-alias Phar::delMetadata
      */
-    public function delMetadata() {} // TODO make return type void
+    public function delMetadata(): true {}
 
     /**
      * @tentative-return-type
@@ -479,10 +474,9 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
 
     /**
      * @param resource|string $stub
-     * @return bool
      * @implementation-alias Phar::setStub
      */
-    public function setStub($stub, int $length = UNKNOWN) {} // TODO make return type void
+    public function setStub($stub, int $length = UNKNOWN): true {}
 
     /**
      * @tentative-return-type
@@ -536,7 +530,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     final public static function mungServer(array $variables): void {}
 
     /** @implementation-alias Phar::unlinkArchive */
-    final public static function unlinkArchive(string $filename): bool {} // TODO make return type void
+    final public static function unlinkArchive(string $filename): true {}
 
     /** @implementation-alias Phar::webPhar */
     final public static function webPhar(
@@ -553,14 +547,14 @@ class PharFileInfo extends SplFileInfo
     /** @tentative-return-type */
     public function chmod(int $perms): void {}
 
-    /** @return bool */
-    public function compress(int $compression) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function compress(int $compression): true {}
 
-    /** @return bool */
-    public function decompress() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function decompress(): true {}
 
-    /** @return bool */
-    public function delMetadata() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function delMetadata(): true {}
 
     /** @tentative-return-type */
     public function getCompressedSize(): int {}

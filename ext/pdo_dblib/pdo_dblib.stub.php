@@ -2,11 +2,13 @@
 
 /** @generate-class-entries */
 
+namespace Pdo;
+
 /**
  * @strict-properties
  * @not-serializable
  */
-class PdoDblib extends PDO
+class Dblib extends \PDO
 {
     /** @cvalue PDO_DBLIB_ATTR_CONNECTION_TIMEOUT */
     public const int ATTR_CONNECTION_TIMEOUT = UNKNOWN;

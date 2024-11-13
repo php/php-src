@@ -52,7 +52,7 @@ if (mysqli_get_server_version($link) < 50503) {
         if (!mysqli_stmt_close($stmt))
             printf("[012] Cannot close statement, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-        if (!$res = $link->query("SELECT 1"))
+        if (false === $link->query("SELECT 1"))
             printf("[013] [%d] %s\n", $link->errno, $link->error);
 
     } else {

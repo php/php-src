@@ -26,6 +26,35 @@ function phpt_has_sslv3() {
     return $result;
 }
 
+function phpt_extract_tls_records($rawData) {
+    $records = [];
+    $offset = 0;
+    $dataLength = strlen($rawData);
+
+    while ($offset < $dataLength) {
+        // Ensure there's enough data left for the header.
+        if ($offset + 5 > $dataLength) {
+            break;
+        }
+
+        // Extract the length of the current record.
+        $length = unpack("n", substr($rawData, $offset + 3, 2))[1];
+
+        // Check if the total length is within the bounds of the rawData.
+        if ($offset + 5 + $length > $dataLength) {
+            break;
+        }
+
+        // Extract the record and add it to the records array.
+        $records[] = substr($rawData, $offset, 5 + $length);
+
+        // Move the offset past the current record.
+        $offset += 5 + $length;
+    }
+
+    return $records;
+}
+
 /**
  * This is a singleton to let the wait/notify functions work
  * I know it's horrible, but it's a means to an end

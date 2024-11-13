@@ -2,6 +2,8 @@
 CLI -a and libedit
 --EXTENSIONS--
 readline
+--ENV--
+PHP_HISTFILE=
 --SKIPIF--
 <?php
 include "skipif.inc";
@@ -11,9 +13,18 @@ if (readline_info('done') !== NULL) {
 ?>
 --FILE--
 <?php
-$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
-$ini = getenv('TEST_PHP_EXTRA_ARGS');
-$descriptorspec = [['pipe', 'r'], STDOUT, STDERR];
+function runReplCodes($codes) {
+    $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
+    $ini = getenv('TEST_PHP_EXTRA_ARGS');
+    $descriptorspec = [['pipe', 'r'], STDOUT, STDERR];
+    foreach ($codes as $key => $code) {
+        echo "\n--------------\nSnippet no. $key:\n--------------\n";
+        $proc = proc_open("$php $ini -a", $descriptorspec, $pipes);
+        fwrite($pipes[0], $code);
+        fclose($pipes[0]);
+        proc_close($proc);
+    }
+}
 
 $codes = array();
 
@@ -52,15 +63,26 @@ function a_function_with_some_name() {
 a_function_w	);
 EOT;
 
-foreach ($codes as $key => $code) {
-    echo "\n--------------\nSnippet no. $key:\n--------------\n";
-    $proc = proc_open("$php $ini -a", $descriptorspec, $pipes);
-    fwrite($pipes[0], $code);
-    fclose($pipes[0]);
-    proc_close($proc);
-}
-
+runReplCodes($codes);
 echo "\nDone\n";
+
+$dir = PHP_OS_FAMILY == 'Windows' ? getenv("USERPROFILE") : getenv("HOME");
+var_dump(file_exists($dir . '/.php_history'));
+
+$php_history_tmp = sprintf('%s%s%s', sys_get_temp_dir(), DIRECTORY_SEPARATOR, 'php_history');
+putenv('PHP_HISTFILE=' . $php_history_tmp);
+var_dump(file_exists($php_history_tmp));
+
+$last[6] = <<<EOT
+echo 'Hello World';
+exit
+EOT;
+runReplCodes($last);
+echo "\nDone\n";
+
+$php_history_path = PHP_OS_FAMILY == 'Windows' ? getenv("USERPROFILE") : $php_history_tmp;
+var_dump(file_exists($php_history_path));
+@unlink($php_history_tmp);
 ?>
 --EXPECT--
 --------------
@@ -105,3 +127,15 @@ Interactive shell
 Parse error: Unmatched ')' in php shell code on line 1
 
 Done
+bool(true)
+bool(false)
+
+--------------
+Snippet no. 6:
+--------------
+Interactive shell
+
+Hello World
+
+Done
+bool(true)

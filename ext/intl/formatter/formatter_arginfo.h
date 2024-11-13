@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3f8b9961bc62392c50e3871c88ea4d0934d62c6a */
+ * Stub hash: 79398fd5abd2d1f5176388b67423d937d0e25da4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -79,7 +79,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_NumberFormatter_getErrorMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(NumberFormatter, __construct);
 ZEND_FUNCTION(numfmt_create);
 ZEND_FUNCTION(numfmt_format);
@@ -98,25 +97,24 @@ ZEND_FUNCTION(numfmt_get_locale);
 ZEND_FUNCTION(numfmt_get_error_code);
 ZEND_FUNCTION(numfmt_get_error_message);
 
-
 static const zend_function_entry class_NumberFormatter_methods[] = {
 	ZEND_ME(NumberFormatter, __construct, arginfo_class_NumberFormatter___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(create, numfmt_create, arginfo_class_NumberFormatter_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(format, numfmt_format, arginfo_class_NumberFormatter_format, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(parse, numfmt_parse, arginfo_class_NumberFormatter_parse, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(formatCurrency, numfmt_format_currency, arginfo_class_NumberFormatter_formatCurrency, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(parseCurrency, numfmt_parse_currency, arginfo_class_NumberFormatter_parseCurrency, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setAttribute, numfmt_set_attribute, arginfo_class_NumberFormatter_setAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getAttribute, numfmt_get_attribute, arginfo_class_NumberFormatter_getAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setTextAttribute, numfmt_set_text_attribute, arginfo_class_NumberFormatter_setTextAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getTextAttribute, numfmt_get_text_attribute, arginfo_class_NumberFormatter_getTextAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setSymbol, numfmt_set_symbol, arginfo_class_NumberFormatter_setSymbol, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getSymbol, numfmt_get_symbol, arginfo_class_NumberFormatter_getSymbol, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setPattern, numfmt_set_pattern, arginfo_class_NumberFormatter_setPattern, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getPattern, numfmt_get_pattern, arginfo_class_NumberFormatter_getPattern, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getLocale, numfmt_get_locale, arginfo_class_NumberFormatter_getLocale, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getErrorCode, numfmt_get_error_code, arginfo_class_NumberFormatter_getErrorCode, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getErrorMessage, numfmt_get_error_message, arginfo_class_NumberFormatter_getErrorMessage, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("create", zif_numfmt_create, arginfo_class_NumberFormatter_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("format", zif_numfmt_format, arginfo_class_NumberFormatter_format, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("parse", zif_numfmt_parse, arginfo_class_NumberFormatter_parse, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("formatCurrency", zif_numfmt_format_currency, arginfo_class_NumberFormatter_formatCurrency, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("parseCurrency", zif_numfmt_parse_currency, arginfo_class_NumberFormatter_parseCurrency, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setAttribute", zif_numfmt_set_attribute, arginfo_class_NumberFormatter_setAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getAttribute", zif_numfmt_get_attribute, arginfo_class_NumberFormatter_getAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setTextAttribute", zif_numfmt_set_text_attribute, arginfo_class_NumberFormatter_setTextAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getTextAttribute", zif_numfmt_get_text_attribute, arginfo_class_NumberFormatter_getTextAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setSymbol", zif_numfmt_set_symbol, arginfo_class_NumberFormatter_setSymbol, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getSymbol", zif_numfmt_get_symbol, arginfo_class_NumberFormatter_getSymbol, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setPattern", zif_numfmt_set_pattern, arginfo_class_NumberFormatter_setPattern, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getPattern", zif_numfmt_get_pattern, arginfo_class_NumberFormatter_getPattern, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getLocale", zif_numfmt_get_locale, arginfo_class_NumberFormatter_getLocale, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorCode", zif_numfmt_get_error_code, arginfo_class_NumberFormatter_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorMessage", zif_numfmt_get_error_message, arginfo_class_NumberFormatter_getErrorMessage, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -125,8 +123,7 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "NumberFormatter", class_NumberFormatter_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_PATTERN_DECIMAL_value;
 	ZVAL_LONG(&const_PATTERN_DECIMAL_value, UNUM_PATTERN_DECIMAL);
@@ -591,8 +588,16 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zval const_TYPE_CURRENCY_value;
 	ZVAL_LONG(&const_TYPE_CURRENCY_value, FORMAT_TYPE_CURRENCY);
 	zend_string *const_TYPE_CURRENCY_name = zend_string_init_interned("TYPE_CURRENCY", sizeof("TYPE_CURRENCY") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_TYPE_CURRENCY_name, &const_TYPE_CURRENCY_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_TYPE_CURRENCY = zend_declare_typed_class_constant(class_entry, const_TYPE_CURRENCY_name, &const_TYPE_CURRENCY_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TYPE_CURRENCY_name);
+
+
+	zend_attribute *attribute_Deprecated_const_TYPE_CURRENCY_0 = zend_add_class_constant_attribute(class_entry, const_TYPE_CURRENCY, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	zval attribute_Deprecated_const_TYPE_CURRENCY_0_arg0;
+	zend_string *attribute_Deprecated_const_TYPE_CURRENCY_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_TYPE_CURRENCY_0_arg0, attribute_Deprecated_const_TYPE_CURRENCY_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_TYPE_CURRENCY_0->args[0].value, &attribute_Deprecated_const_TYPE_CURRENCY_0_arg0);
+	attribute_Deprecated_const_TYPE_CURRENCY_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	return class_entry;
 }

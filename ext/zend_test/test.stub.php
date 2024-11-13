@@ -20,6 +20,11 @@ namespace {
     interface _ZendTestInterface
     {
         /** @var int */
+        /** @genstubs-expose-comment-block
+         * "Lorem ipsum"
+         * @see https://www.php.net
+         * @since 8.2
+         */
         public const DUMMY = 0;
     }
 
@@ -32,6 +37,14 @@ namespace {
          * @cvalue 1
          */
         public const int|string TYPED_CLASS_CONST3 = UNKNOWN;
+
+        /**
+         * @deprecated
+         */
+        public const int ZEND_TEST_DEPRECATED = 42;
+
+        #[\Deprecated(message: "custom message")]
+        public const int ZEND_TEST_DEPRECATED_ATTR = 42;
 
         /** @var mixed */
         public static $_StaticProp;
@@ -58,6 +71,11 @@ namespace {
     }
 
     class _ZendTestMagicCall
+    {
+        public function __call(string $name, array $args): mixed {}
+    }
+
+    class _ZendTestMagicCallForward
     {
         public function __call(string $name, array $args): mixed {}
     }
@@ -94,6 +112,13 @@ namespace {
     final class ZendTestAttribute {
     }
 
+    #[Attribute(Attribute::TARGET_ALL)]
+    final class ZendTestAttributeWithArguments {
+        public readonly mixed $arg;
+
+        public function __construct(mixed $arg) {}
+    }
+
     #[Attribute(Attribute::TARGET_ALL|Attribute::IS_REPEATABLE)]
     final class ZendTestRepeatableAttribute {
     }
@@ -105,8 +130,18 @@ namespace {
         public function __construct(string $parameter) {}
     }
 
+    /** @genstubs-expose-comment-block
+     * "Lorem ipsum"
+     * @see https://www.php.net
+     * @since 8.1
+     */
     #[Attribute(Attribute::TARGET_PROPERTY)]
     final class ZendTestPropertyAttribute {
+        /** @genstubs-expose-comment-block
+         * "Lorem ipsum"
+         * @see https://www.php.net
+         * @since 8.4
+         */
         public string $parameter;
 
         public function __construct(string $parameter) {}
@@ -161,6 +196,15 @@ namespace {
 
     function zend_test_array_return(): array {}
 
+    /** @genstubs-expose-comment-block
+     * "Lorem ipsum"
+     * @see https://www.php.net
+     * @since 8.3
+     */
+     /**
+     * @internal
+     * @compile-time-eval
+     */
     function zend_test_nullable_array_return(): null|array {}
 
     function zend_test_void_return(): void {}
@@ -169,6 +213,9 @@ namespace {
 
     /** @deprecated */
     function zend_test_deprecated(mixed $arg = null): void {}
+
+    #[\Deprecated(message: "custom message")]
+    function zend_test_deprecated_attr(): void {}
 
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}
@@ -214,9 +261,14 @@ namespace {
         string $parameter
     ): int {}
 
+    #[ZendTestAttributeWithArguments(arg: "foo")]
+    function zend_test_attribute_with_named_argument(): void {}
+
     function zend_get_current_func_name(): string {}
 
     function zend_call_method(object|string $obj_or_class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
+
+    function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
 
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
@@ -246,6 +298,17 @@ function zend_test_override_libxml_global_state(): void {}
 #endif
 
     function zend_test_is_pcre_bundled(): bool {}
+
+#if defined(PHP_WIN32)
+    function zend_test_set_fmode(bool $binary): void {}
+#endif
+
+    /** @param resource $stream */
+    function zend_test_cast_fread($stream): void {}
+
+    function zend_test_is_zend_ptr(int $addr): bool {}
+
+    function zend_test_log_err_debug(string $str): void {}
 }
 
 namespace ZendTestNS {

@@ -3,6 +3,7 @@ opcache_invalidate() should invalidate deleted file
 --EXTENSIONS--
 opcache
 --INI--
+opcache.enable=1
 opcache.enable_cli=1
 opcache.validate_timestamps=0
 --FILE--

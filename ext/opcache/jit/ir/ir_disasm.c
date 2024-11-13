@@ -29,6 +29,10 @@
 #include <capstone/capstone.h>
 #define HAVE_CAPSTONE_ITER
 
+#ifndef IR_DISASM_INTEL_SYNTAX
+# define IR_DISASM_INTEL_SYNTAX 0
+#endif
+
 typedef struct _ir_sym_node {
 	uint64_t             addr;
 	uint64_t             end;
@@ -365,7 +369,7 @@ int ir_disasm(const char    *name,
 	}
 #  endif
 	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
-#  if DISASM_INTEL_SYNTAX
+#  if IR_DISASM_INTEL_SYNTAX
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_INTEL);
 #  else
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
@@ -545,6 +549,30 @@ int ir_disasm(const char    *name,
 						}
 						continue;
 					}
+				}
+			} else if ((sym = ir_disasm_resolver(addr, &offset))) {
+				r = q = strstr(p, "(%rip)");
+				if (r && r > p) {
+					r--;
+					while (r > p && ((*r >= '0' && *r <= '9') || (*r >= 'a' && *r <= 'f') || (*r >= 'A' && *r <= 'F'))) {
+						r--;
+					}
+					if (r > p && *r == 'x' && *(r - 1) == '0') {
+						r -= 2;
+					}
+					if (r > p) {
+						fwrite(p, 1, r - p, f);
+					}
+					fputs(sym, f);
+					if (offset != 0) {
+						if (offset > 0) {
+							fprintf(f, "+0x%" PRIx64, offset);
+						} else {
+							fprintf(f, "-0x%" PRIx64, -offset);
+						}
+					}
+					fprintf(f, "%s\n", q);
+					continue;
 				}
 			}
 		}

@@ -122,7 +122,7 @@ require_once 'skipifconnectfailure.inc';
     var_dump($obj = new mysqli_fetch_object_private_constructor(1, 2));
     This does not fail.
     */
-    $obj = mysqli_fetch_object($res, 'mysqli_fetch_object_private_constructor', array('a', 'b'));
+    mysqli_fetch_object($res, 'mysqli_fetch_object_private_constructor', array('a', 'b'));
     mysqli_free_result($res);
 
     try {

@@ -16,6 +16,10 @@ echo "*** Testing session_create_id() : basic functionality ***\n";
 
 // No session
 var_dump(session_create_id());
+var_dump(session_create_id(''));
+var_dump(session_create_id(','));
+var_dump(session_create_id('-'));
+var_dump(session_create_id('0123456789'));
 var_dump(session_create_id('ABCD'));
 
 ini_set('session.use_strict_mode', true);
@@ -42,6 +46,10 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_create_id() : basic functionality ***
 string(32) "%s"
+string(32) "%s"
+string(33) ",%s"
+string(33) "-%s"
+string(42) "0123456789%s"
 string(36) "ABCD%s"
 string(35) "XYZ%s"
 string(0) ""

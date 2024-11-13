@@ -20,7 +20,7 @@ interface SplSubject
     public function notify(): void;
 }
 
-class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
+class SplObjectStorage implements Countable, SeekableIterator, Serializable, ArrayAccess
 {
     /** @tentative-return-type */
     public function attach(object $object, mixed $info = null): void {}
@@ -64,6 +64,8 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /** @tentative-return-type */
     public function next(): void {}
 
+    public function seek(int $offset): void {}
+
     /** @tentative-return-type */
     public function unserialize(string $data): void {}
 
@@ -88,7 +90,6 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
      * @param object $object
      * @tentative-return-type
      * @implementation-alias SplObjectStorage::attach
-     * @no-verify Cannot specify arg type because ArrayAccess does not
      */
     public function offsetSet($object, mixed $info = null): void {}
 
@@ -96,7 +97,6 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
      * @param object $object
      * @tentative-return-type
      * @implementation-alias SplObjectStorage::detach
-     * @no-verify Cannot specify arg type because ArrayAccess does not
      */
     public function offsetUnset($object): void {}
 

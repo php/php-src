@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-foreach (['DOM\HTMLDocument', 'DOM\XMLDocument'] as $class) {
+foreach (['Dom\HTMLDocument', 'Dom\XMLDocument'] as $class) {
     try {
         $rc = new ReflectionClass($class);
         $rc->newInstanceWithoutConstructor();
@@ -16,5 +16,5 @@ foreach (['DOM\HTMLDocument', 'DOM\XMLDocument'] as $class) {
 
 ?>
 --EXPECT--
-Class DOM\HTMLDocument is an internal class marked as final that cannot be instantiated without invoking its constructor
-Class DOM\XMLDocument is an internal class marked as final that cannot be instantiated without invoking its constructor
+Class Dom\HTMLDocument is an internal class marked as final that cannot be instantiated without invoking its constructor
+Class Dom\XMLDocument is an internal class marked as final that cannot be instantiated without invoking its constructor

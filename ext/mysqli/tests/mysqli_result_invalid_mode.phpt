@@ -15,7 +15,6 @@ require_once 'skipifconnectfailure.inc';
         exit(1);
     }
 
-    $valid = array(MYSQLI_STORE_RESULT, MYSQLI_USE_RESULT);
     $invalidModes = [-1, 152];
     foreach ($invalidModes as $mode) {
         try {

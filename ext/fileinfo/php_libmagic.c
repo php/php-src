@@ -19,7 +19,7 @@
 
 zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options)
 {
-	int i, j;
+	size_t i, j;
 	zend_string *t;
 
 	for (i = j = 0; i < len; i++) {

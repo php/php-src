@@ -226,7 +226,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 		}
 	}
 
-	pglob = ecalloc(sizeof(*pglob), 1);
+	pglob = ecalloc(1, sizeof(*pglob));
 
 	if (0 != (ret = glob(path, pglob->flags & GLOB_FLAGMASK, NULL, &pglob->glob))) {
 #ifdef GLOB_NOMATCH

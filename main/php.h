@@ -22,7 +22,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20230901
+#define PHP_API_VERSION 20240925
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -109,24 +109,17 @@ typedef int pid_t;
 # endif
 #endif
 
-#if PHP_DEBUG
-#undef NDEBUG
-#else
-#ifndef NDEBUG
-#define NDEBUG
-#endif
-#endif
 #include <assert.h>
 
 #ifdef HAVE_UNIX_H
 #include <unix.h>
 #endif
 
-#if HAVE_ALLOCA_H
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
 
-#if HAVE_BUILD_DEFS_H
+#ifdef HAVE_BUILD_DEFS_H
 #include <build-defs.h>
 #endif
 
@@ -201,15 +194,9 @@ typedef unsigned int socklen_t;
 #define SET_MUTEX(a)
 #define FREE_MUTEX(a)
 
-/*
- * Then the ODBC support can use both iodbc and Solid,
- * uncomment this.
- * #define HAVE_ODBC (HAVE_IODBC|HAVE_SOLID)
- */
-
 #include <stdlib.h>
 #include <ctype.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -220,7 +207,7 @@ typedef unsigned int socklen_t;
 #include "zend_stack.h"
 #include <string.h>
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 # ifdef PHP_WIN32
 #include "win32/param.h"
 # else
@@ -230,14 +217,6 @@ typedef unsigned int socklen_t;
 #endif
 
 #include <limits.h>
-
-#ifndef LONG_MAX
-#define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-#define LONG_MIN (- LONG_MAX - 1)
-#endif
 
 #ifndef INT_MAX
 #define INT_MAX 2147483647

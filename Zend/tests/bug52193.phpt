@@ -35,43 +35,85 @@ array(0) {
 }
 array(1) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (3) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
   }
 }
 int(2)
 array(1) {
   [0]=>
-  object(Closure)#%d (1) {
+  object(Closure)#%d (4) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
     ["static"]=>
     array(1) {
       ["h"]=>
       &array(1) {
         [0]=>
-        object(Closure)#%d (0) {
+        object(Closure)#%d (3) {
+          ["name"]=>
+          string(%d) "{closure:%s:%d}"
+          ["file"]=>
+          string(%d) "%s"
+          ["line"]=>
+          int(%d)
         }
       }
     }
   }
 }
-object(Closure)#%d (1) {
+object(Closure)#%d (4) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["static"]=>
   array(1) {
     ["h"]=>
     &array(1) {
       [0]=>
-      object(Closure)#%d (0) {
+      object(Closure)#%d (3) {
+        ["name"]=>
+        string(%d) "{closure:%s:%d}"
+        ["file"]=>
+        string(%d) "%s"
+        ["line"]=>
+        int(%d)
       }
     }
   }
 }
 array(1) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (3) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
   }
 }
 array(2) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (3) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
   }
   [1]=>
   int(5)

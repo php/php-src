@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifdef PHP_WIN32
 # define PDO_ODBC_TYPE	"Win32"
 #endif
@@ -112,7 +114,7 @@
 typedef struct {
 	char last_state[6];
 	char last_err_msg[SQL_MAX_MESSAGE_LENGTH];
-	SDWORD last_error;
+	SQLINTEGER last_error;
 	const char *file, *what;
 	int line;
 } pdo_odbc_errinfo;
@@ -129,7 +131,7 @@ typedef struct {
 	char *data;
 	zend_ulong datalen;
 	SQLLEN fetched_len;
-	SWORD	coltype;
+	SQLSMALLINT coltype;
 	char colname[128];
 	unsigned is_long;
 	unsigned is_unicode:1;

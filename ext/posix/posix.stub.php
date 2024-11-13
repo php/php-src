@@ -303,6 +303,13 @@ const POSIX_PC_ALLOC_SIZE_MIN = UNKNOWN;
  */
 const POSIX_PC_SYMLINK_MAX = UNKNOWN;
 #endif
+#ifdef _SC_OPEN_MAX
+/**
+ * @var int
+ * @cvalue _SC_OPEN_MAX
+ */
+const POSIX_SC_OPEN_MAX = UNKNOWN;
+#endif
 
 function posix_kill(int $process_id, int $signal): bool {}
 

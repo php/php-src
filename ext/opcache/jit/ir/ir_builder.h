@@ -514,6 +514,7 @@ extern "C" {
 #define ir_CALL_3(type, func, a1, a2, a3)          _ir_CALL_3(_ir_CTX, type, func, a1, a2, a3)
 #define ir_CALL_4(type, func, a1, a2, a3, a4)      _ir_CALL_4(_ir_CTX, type, func, a1, a2, a3, a4)
 #define ir_CALL_5(type, func, a1, a2, a3, a4, a5)  _ir_CALL_5(_ir_CTX, type, func, a1, a2, a3, a4, a5)
+#define ir_CALL_6(type, func, a, b, c, d, e, f)    _ir_CALL_6(_ir_CTX, type, func, a, b, c, d, e, f)
 #define ir_CALL_N(type, func, count, args)         _ir_CALL_N(_ir_CTX, type, func, count, args)
 
 #define ir_TAILCALL(type, func)                       _ir_TAILCALL(_ir_CTX, type, func)
@@ -522,6 +523,7 @@ extern "C" {
 #define ir_TAILCALL_3(type, func, a1, a2, a3)         _ir_TAILCALL_3(_ir_CTX, type, func, a1, a2, a3)
 #define ir_TAILCALL_4(type, func, a1, a2, a3, a4)     _ir_TAILCALL_4(_ir_CTX, type, func, a1, a2, a3, a4)
 #define ir_TAILCALL_5(type, func, a1, a2, a3, a4, a5) _ir_TAILCALL_5(_ir_CTX, type, func, a1, a2, a3, a4, a5)
+#define ir_TAILCALL_6(type, func, a, b, c, d, e, f)   _ir_TAILCALL_6(_ir_CTX, type, func, a, b, c, d, e, f)
 #define ir_TAILCALL_N(type, func, count, args)        _ir_TAILCALL_N(_ir_CTX, type, func, count, args)
 
 #define ir_ALLOCA(_size)                  _ir_ALLOCA(_ir_CTX, (_size))
@@ -577,6 +579,9 @@ extern "C" {
 
 #define ir_FRAME_ADDR()                   ir_fold0(_ir_CTX, IR_OPT(IR_FRAME_ADDR, IR_ADDR))
 
+#define ir_BLOCK_BEGIN()                  _ir_BLOCK_BEGIN(_ir_CTX)
+#define ir_BLOCK_END(_val)                do {_ir_CTX->control = ir_emit2(_ir_CTX, IR_BLOCK_END, _ir_CTX->control, (_val));} while (0)
+
 #define ir_VA_START(_list)                _ir_VA_START(_ir_CTX, _list)
 #define ir_VA_END(_list)                  _ir_VA_END(_ir_CTX, _list)
 #define ir_VA_COPY(_dst, _src)            _ir_VA_COPY(_ir_CTX, _dst, _src)
@@ -614,6 +619,9 @@ extern "C" {
 #define ir_END_list(_list)                do { _list = _ir_END_LIST(_ir_CTX, _list); } while (0)
 #define ir_MERGE_list(_list)              _ir_MERGE_LIST(_ir_CTX, (_list))
 
+#define ir_END_PHI_list(_list, _val)      do { _list = _ir_END_PHI_LIST(_ir_CTX, _list, _val); } while (0)
+#define ir_PHI_list(_list)                _ir_PHI_LIST(_ir_CTX, (_list))
+
 #define ir_MERGE_WITH(_src2)              do {ir_ref end = ir_END(); ir_MERGE_2(end, _src2);} while (0)
 #define ir_MERGE_WITH_EMPTY_TRUE(_if)     do {ir_ref end = ir_END(); ir_IF_TRUE(_if); ir_MERGE_2(end, ir_END());} while (0)
 #define ir_MERGE_WITH_EMPTY_FALSE(_if)    do {ir_ref end = ir_END(); ir_IF_FALSE(_if); ir_MERGE_2(end, ir_END());} while (0)
@@ -630,6 +638,7 @@ ir_ref _ir_CALL_2(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref ar
 ir_ref _ir_CALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3);
 ir_ref _ir_CALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
 ir_ref _ir_CALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
+ir_ref _ir_CALL_6(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5, ir_ref atg6);
 ir_ref _ir_CALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_ref *args);
 void   _ir_TAILCALL(ir_ctx *ctx, ir_type type, ir_ref func);
 void   _ir_TAILCALL_1(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1);
@@ -637,6 +646,7 @@ void   _ir_TAILCALL_2(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_re
 void   _ir_TAILCALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3);
 void   _ir_TAILCALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
 void   _ir_TAILCALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
+void   _ir_TAILCALL_6(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5, ir_ref arg6);
 ir_ref _ir_TAILCALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_ref *args);
 ir_ref _ir_ALLOCA(ir_ctx *ctx, ir_ref size);
 void   _ir_AFREE(ir_ctx *ctx, ir_ref size);
@@ -655,6 +665,7 @@ void   _ir_ENTRY(ir_ctx *ctx, ir_ref src, ir_ref num);
 void   _ir_BEGIN(ir_ctx *ctx, ir_ref src);
 ir_ref _ir_END(ir_ctx *ctx);
 ir_ref _ir_END_LIST(ir_ctx *ctx, ir_ref list);
+ir_ref _ir_END_PHI_LIST(ir_ctx *ctx, ir_ref list, ir_ref val);
 ir_ref _ir_IF(ir_ctx *ctx, ir_ref condition);
 void   _ir_IF_TRUE(ir_ctx *ctx, ir_ref if_ref);
 void   _ir_IF_TRUE_cold(ir_ctx *ctx, ir_ref if_ref);
@@ -664,6 +675,7 @@ void   _ir_MERGE_2(ir_ctx *ctx, ir_ref src1, ir_ref src2);
 void   _ir_MERGE_N(ir_ctx *ctx, ir_ref n, ir_ref *inputs);
 void   _ir_MERGE_SET_OP(ir_ctx *ctx, ir_ref merge, ir_ref pos, ir_ref src);
 void   _ir_MERGE_LIST(ir_ctx *ctx, ir_ref list);
+ir_ref _ir_PHI_LIST(ir_ctx *ctx, ir_ref list);
 ir_ref _ir_LOOP_BEGIN(ir_ctx *ctx, ir_ref src1);
 ir_ref _ir_LOOP_END(ir_ctx *ctx);
 ir_ref _ir_TLS(ir_ctx *ctx, ir_ref index, ir_ref offset);
@@ -675,6 +687,7 @@ void   _ir_RETURN(ir_ctx *ctx, ir_ref val);
 void   _ir_IJMP(ir_ctx *ctx, ir_ref addr);
 void   _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr);
 void   _ir_GUARD_NOT(ir_ctx *ctx, ir_ref condition, ir_ref addr);
+ir_ref _ir_BLOCK_BEGIN(ir_ctx *ctx);
 ir_ref _ir_SNAPSHOT(ir_ctx *ctx, ir_ref n);
 void   _ir_SNAPSHOT_SET_OP(ir_ctx *ctx, ir_ref snapshot, ir_ref pos, ir_ref val);
 ir_ref _ir_EXITCALL(ir_ctx *ctx, ir_ref func);

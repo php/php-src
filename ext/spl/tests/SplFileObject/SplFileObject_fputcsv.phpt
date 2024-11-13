@@ -4,6 +4,8 @@ SplFileObject::fputcsv(): functionality tests
 <?php
 $file = __DIR__ . '/SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
+// Suppress deprecation notice
+$fo->setCsvControl(escape: '\\');
 
 $list = array (
   0 => 'aaa,bbb',
@@ -42,7 +44,7 @@ echo '$list = ';var_export($res);echo ";\n";
 
 $fp = fopen($file, "r");
 $res = array();
-while($l=fgetcsv($fp))
+while($l=fgetcsv($fp, escape: '\\'))
 {
     $res[] = join(',',$l);
 }

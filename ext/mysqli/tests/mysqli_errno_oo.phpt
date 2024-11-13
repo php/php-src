@@ -10,9 +10,6 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'connect.inc';
 
-    $tmp    = NULL;
-    $link   = NULL;
-
     $mysqli = new mysqli();
     if (0 !== ($tmp = @$mysqli->errno))
         printf("[001] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);

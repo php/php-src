@@ -22,7 +22,7 @@ extern "C" {
 
 #ifdef _WIN32
 /* TODO Handle ARM, too. */
-# if defined(_M_X64)
+# if defined(_M_X64) || defined(_M_ARM64)
 #  define __SIZEOF_SIZE_T__ 8
 # elif defined(_M_IX86)
 #  define __SIZEOF_SIZE_T__ 4
@@ -33,6 +33,21 @@ extern "C" {
 # define __BYTE_ORDER__ __ORDER_LITTLE_ENDIAN__
 # ifndef __has_builtin
 #  define __has_builtin(arg) (0)
+# endif
+#endif
+
+/* target auto detection */
+#if !defined(IR_TARGET_X86) && !defined(IR_TARGET_X64) && !defined(IR_TARGET_AARCH64)
+# if defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+#  define IR_TARGET_X64
+# elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_M_IX86)
+#  define IR_TARGET_X86
+# elif defined(__aarch64__) || defined(_M_ARM64)
+#  define IR_TARGET_AARCH64
+# elif defined (_WIN64)
+#  define IR_TARGET_X64
+# elif defined (_WIN32)
+#  define IR_TARGET_X86
 # endif
 #endif
 
@@ -141,11 +156,15 @@ typedef enum _ir_type {
 # define IR_SSIZE_T    IR_I64
 # define IR_UINTPTR_T  IR_U64
 # define IR_INTPTR_T   IR_I64
+# define IR_C_UINTPTR  IR_U64
+# define IR_C_INTPTR   IR_I64
 #else
 # define IR_SIZE_T     IR_U32
 # define IR_SSIZE_T    IR_I32
 # define IR_UINTPTR_T  IR_U32
 # define IR_INTPTR_T   IR_I32
+# define IR_C_UINTPTR  IR_U32
+# define IR_C_INTPTR   IR_I32
 #endif
 
 /* List of IR opcodes
@@ -297,6 +316,8 @@ typedef enum _ir_type {
 	/* memory reference and load/store ops                              */ \
 	_(ALLOCA,       a2,   src, def, ___) /* alloca(def)                 */ \
 	_(AFREE,        a2,   src, def, ___) /* revert alloca(def)          */ \
+	_(BLOCK_BEGIN,  a1,   src, ___, ___) /* stacksave                   */ \
+	_(BLOCK_END,    a2,   src, def, ___) /* stackrestore                */ \
 	_(VADDR,        d1,   var, ___, ___) /* load address of local var   */ \
 	_(VLOAD,        l2,   src, var, ___) /* load value of local var     */ \
 	_(VSTORE,       s3,   src, var, def) /* store value to local var    */ \
@@ -492,6 +513,9 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_EXTERN              (1<<5)
 #define IR_CONST               (1<<6)
 
+#define IR_INITIALIZED         (1<<7) /* sym data flag: constant or an initialized variable */
+#define IR_CONST_STRING        (1<<8) /* sym data flag: constant string */
+
 #define IR_SKIP_PROLOGUE       (1<<8) /* Don't generate function prologue. */
 #define IR_USE_FRAME_POINTER   (1<<9)
 #define IR_PREALLOCATED_STACK  (1<<10)
@@ -501,20 +525,23 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_GEN_ENDBR           (1<<14)
 #define IR_MERGE_EMPTY_ENTRIES (1<<15)
 
-#define IR_OPT_FOLDING         (1<<16)
-#define IR_OPT_CFG             (1<<17) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_CODEGEN         (1<<18)
-#define IR_GEN_NATIVE          (1<<19)
-#define IR_GEN_CODE            (1<<20) /* C or LLVM */
+#define IR_OPT_INLINE          (1<<16)
+#define IR_OPT_FOLDING         (1<<17)
+#define IR_OPT_CFG             (1<<18) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
+#define IR_OPT_CODEGEN         (1<<19)
+#define IR_GEN_NATIVE          (1<<20)
+#define IR_GEN_CODE            (1<<21) /* C or LLVM */
 
-#define IR_GEN_CACHE_DEMOTE    (1<<21) /* Demote the generated code from closest CPU caches */
+#define IR_GEN_CACHE_DEMOTE    (1<<22) /* Demote the generated code from closest CPU caches */
 
 /* debug related */
 #ifdef IR_DEBUG
-# define IR_DEBUG_SCCP         (1<<27)
-# define IR_DEBUG_GCM          (1<<28)
+# define IR_DEBUG_SCCP         (1<<26)
+# define IR_DEBUG_GCM          (1<<27)
+# define IR_DEBUG_GCM_SPLIT    (1<<28)
 # define IR_DEBUG_SCHEDULE     (1<<29)
 # define IR_DEBUG_RA           (1<<30)
+# define IR_DEBUG_BB_SCHEDULE  (1U<<31)
 #endif
 
 typedef struct _ir_ctx           ir_ctx;
@@ -562,6 +589,7 @@ struct _ir_ctx {
 	ir_block          *cfg_blocks;              /* list of basic blocks (starts from 1) */
 	uint32_t          *cfg_edges;               /* the actual basic blocks predecessors and successors edges */
 	uint32_t          *cfg_map;                 /* map of instructions to basic block number */
+	uint32_t          *cfg_schedule;            /* BB order for code generation */
 	uint32_t          *rules;                   /* array of target specific code-generation rules (for each instruction) */
 	uint32_t          *vregs;
 	ir_ref             vregs_count;
@@ -801,11 +829,12 @@ struct _ir_loader {
                                uint32_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types);
 	bool (*forward_func_dcl)  (ir_loader *loader, const char *name,
                                uint32_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types);
-	bool (*sym_dcl)           (ir_loader *loader, const char *name, uint32_t flags, size_t size, bool has_data);
+	bool (*sym_dcl)           (ir_loader *loader, const char *name, uint32_t flags, size_t size);
 	bool (*sym_data)          (ir_loader *loader, ir_type type, uint32_t count, const void *data);
+	bool (*sym_data_str)      (ir_loader *loader, const char *str, size_t len);
 	bool (*sym_data_pad)      (ir_loader *loader, size_t offset);
 	bool (*sym_data_ref)      (ir_loader *loader, ir_op op, const char *ref, uintptr_t offset);
-	bool (*sym_data_end)      (ir_loader *loader);
+	bool (*sym_data_end)      (ir_loader *loader, uint32_t flags);
 	bool (*func_init)         (ir_loader *loader, ir_ctx *ctx, const char *name);
 	bool (*func_process)      (ir_loader *loader, ir_ctx *ctx, const char *name);
 	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, bool add_thunk);
@@ -822,8 +851,14 @@ int ir_load_llvm_bitcode(ir_loader *loader, const char *filename);
 int ir_load_llvm_asm(ir_loader *loader, const char *filename);
 
 /* IR save API (implementation in ir_save.c) */
+#define IR_SAVE_CFG       (1<<0) /* add info about CFG */
+#define IR_SAVE_CFG_MAP   (1<<1) /* add info about CFG block assignment */
+#define IR_SAVE_USE_LISTS (1<<2) /* add info about def->use lists */
+#define IR_SAVE_RULES     (1<<3) /* add info about selected code-generation rules */
+#define IR_SAVE_REGS      (1<<4) /* add info about selected registers */
+
 void ir_print_proto(const ir_ctx *ctx, ir_ref proto, FILE *f);
-void ir_save(const ir_ctx *ctx, FILE *f);
+void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f);
 
 /* IR debug dump API (implementation in ir_dump.c) */
 void ir_dump(const ir_ctx *ctx, FILE *f);
@@ -837,12 +872,12 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f);
 /* IR to C conversion (implementation in ir_emit_c.c) */
 int ir_emit_c(ir_ctx *ctx, const char *name, FILE *f);
 void ir_emit_c_func_decl(const char *name, uint32_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f);
-void ir_emit_c_sym_decl(const char *name, uint32_t flags, bool has_data, FILE *f);
+void ir_emit_c_sym_decl(const char *name, uint32_t flags, FILE *f);
 
 /* IR to LLVM conversion (implementation in ir_emit_llvm.c) */
 int ir_emit_llvm(ir_ctx *ctx, const char *name, FILE *f);
 void ir_emit_llvm_func_decl(const char *name, uint32_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f);
-void ir_emit_llvm_sym_decl(const char *name, uint32_t flags, bool has_data, FILE *f);
+void ir_emit_llvm_sym_decl(const char *name, uint32_t flags, FILE *f);
 
 /* IR verification API (implementation in ir_check.c) */
 bool ir_check(const ir_ctx *ctx);

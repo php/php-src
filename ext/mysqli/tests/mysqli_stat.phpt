@@ -17,7 +17,7 @@ require_once 'skipifconnectfailure.inc';
 
     if ((!is_string($tmp = mysqli_stat($link))) || ('' === $tmp))
         printf("[004] Expecting non empty string, got %s/'%s', [%d] %s\n",
-            gettype($tmp), $tmp, mysqli_errno($link), mysql_error($link));
+            gettype($tmp), $tmp, mysqli_errno($link), mysqli_error($link));
 
     mysqli_close($link);
 

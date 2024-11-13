@@ -1,19 +1,19 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 167d0e30af99bd31c46ea1649c661b6aa38eaccb */
+ * Stub hash: 7ceaf5fc8e9c92bf192e824084a706794395ce1a */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createAggregate, 0, 3, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, step, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, finalize, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, numArgs, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createCollation, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createCollation, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createFunction, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createFunction, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, function_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, num_args, IS_LONG, 0, "-1")
@@ -21,47 +21,44 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createFunction, 
 ZEND_END_ARG_INFO()
 
 #if !defined(PDO_SQLITE_OMIT_LOAD_EXTENSION)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_loadExtension, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_loadExtension, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PdoSqlite_openBlob, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Sqlite_openBlob, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, table, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, rowid, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dbname, IS_STRING, 1, "\"main\"")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "PdoSqlite::OPEN_READONLY")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Pdo\\Sqlite::OPEN_READONLY")
 ZEND_END_ARG_INFO()
 
-
-ZEND_METHOD(PdoSqlite, createAggregate);
-ZEND_METHOD(PdoSqlite, createCollation);
-ZEND_METHOD(PdoSqlite, createFunction);
+ZEND_METHOD(Pdo_Sqlite, createAggregate);
+ZEND_METHOD(Pdo_Sqlite, createCollation);
+ZEND_METHOD(Pdo_Sqlite, createFunction);
 #if !defined(PDO_SQLITE_OMIT_LOAD_EXTENSION)
-ZEND_METHOD(PdoSqlite, loadExtension);
+ZEND_METHOD(Pdo_Sqlite, loadExtension);
 #endif
-ZEND_METHOD(PdoSqlite, openBlob);
+ZEND_METHOD(Pdo_Sqlite, openBlob);
 
-
-static const zend_function_entry class_PdoSqlite_methods[] = {
-	ZEND_ME(PdoSqlite, createAggregate, arginfo_class_PdoSqlite_createAggregate, ZEND_ACC_PUBLIC)
-	ZEND_ME(PdoSqlite, createCollation, arginfo_class_PdoSqlite_createCollation, ZEND_ACC_PUBLIC)
-	ZEND_ME(PdoSqlite, createFunction, arginfo_class_PdoSqlite_createFunction, ZEND_ACC_PUBLIC)
+static const zend_function_entry class_Pdo_Sqlite_methods[] = {
+	ZEND_ME(Pdo_Sqlite, createAggregate, arginfo_class_Pdo_Sqlite_createAggregate, ZEND_ACC_PUBLIC)
+	ZEND_ME(Pdo_Sqlite, createCollation, arginfo_class_Pdo_Sqlite_createCollation, ZEND_ACC_PUBLIC)
+	ZEND_ME(Pdo_Sqlite, createFunction, arginfo_class_Pdo_Sqlite_createFunction, ZEND_ACC_PUBLIC)
 #if !defined(PDO_SQLITE_OMIT_LOAD_EXTENSION)
-	ZEND_ME(PdoSqlite, loadExtension, arginfo_class_PdoSqlite_loadExtension, ZEND_ACC_PUBLIC)
+	ZEND_ME(Pdo_Sqlite, loadExtension, arginfo_class_Pdo_Sqlite_loadExtension, ZEND_ACC_PUBLIC)
 #endif
-	ZEND_ME(PdoSqlite, openBlob, arginfo_class_PdoSqlite_openBlob, ZEND_ACC_PUBLIC)
+	ZEND_ME(Pdo_Sqlite, openBlob, arginfo_class_Pdo_Sqlite_openBlob, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_PdoSqlite(zend_class_entry *class_entry_PDO)
+static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PdoSqlite", class_PdoSqlite_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Sqlite", class_Pdo_Sqlite_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 #if defined(SQLITE_DETERMINISTIC)
 
 	zval const_DETERMINISTIC_value;

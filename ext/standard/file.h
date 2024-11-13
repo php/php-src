@@ -37,18 +37,18 @@ PHPAPI PHP_FUNCTION(fpassthru);
 PHP_MINIT_FUNCTION(user_streams);
 
 PHPAPI int php_le_stream_context(void);
-PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
-PHPAPI int php_copy_file(const char *src, const char *dest);
-PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk);
-PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx);
-PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options);
-PHPAPI int php_mkdir(const char *dir, zend_long mode);
+PHPAPI zend_result php_copy_file(const char *src, const char *dest);
+PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags);
+PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx);
 PHPAPI void php_fstat(php_stream *stream, zval *return_value);
 PHPAPI void php_flock_common(php_stream *stream, zend_long operation, uint32_t operation_arg_num,
 	zval *wouldblock, zval *return_value);
 
 #define PHP_CSV_NO_ESCAPE EOF
+#define PHP_CSV_ESCAPE_ERROR -500
+
 PHPAPI HashTable *php_bc_fgetcsv_empty_line(void);
+PHPAPI int php_csv_handle_escape_argument(const zend_string *escape_str, uint32_t arg_num);
 PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf);
 PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str);
 
@@ -59,6 +59,12 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 #define PHP_FILE_SKIP_EMPTY_LINES (1 << 2)
 #define PHP_FILE_APPEND (1 << 3)
 #define PHP_FILE_NO_DEFAULT_CONTEXT (1 << 4)
+
+#ifndef _WIN32
+#define PHP_TIMEOUT_ULL_MAX ULLONG_MAX
+#else
+#define PHP_TIMEOUT_ULL_MAX UINT64_MAX
+#endif
 
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,

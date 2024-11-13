@@ -34,13 +34,16 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+void bc_square_ex(bc_num n1, bc_num *result, size_t scale_min) {
+	bc_num square_ex = bc_square(n1, scale_min);
+	bc_free_num(result);
+	*(result) = square_ex;
+}
 
 /* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.
    Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
    only the integer part is used.  */
-
-void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
-{
+void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale) {
 	bc_num temp, power;
 	size_t rscale;
 	size_t pwrscale;
@@ -69,7 +72,7 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	pwrscale = num1->n_scale;
 	while ((exponent & 1) == 0) {
 		pwrscale = 2 * pwrscale;
-		bc_multiply(power, power, &power, pwrscale);
+		bc_square_ex(power, &power, pwrscale);
 		exponent = exponent >> 1;
 	}
 	temp = bc_copy_num(power);
@@ -79,10 +82,10 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	/* Do the calculation. */
 	while (exponent > 0) {
 		pwrscale = 2 * pwrscale;
-		bc_multiply(power, power, &power, pwrscale);
+		bc_square_ex(power, &power, pwrscale);
 		if ((exponent & 1) == 1) {
 			calcscale = pwrscale + calcscale;
-			bc_multiply(temp, power, &temp, calcscale);
+			bc_multiply_ex(temp, power, &temp, calcscale);
 		}
 		exponent = exponent >> 1;
 	}
@@ -94,16 +97,13 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	} else {
 		bc_free_num (result);
 		*result = temp;
-		if ((*result)->n_scale > rscale) {
-			(*result)->n_scale = rscale;
-		}
+		(*result)->n_scale = MIN(scale, (*result)->n_scale);
 	}
 	bc_free_num (&power);
 }
 
 /* This is used internally by BCMath */
-void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale)
-{
+void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale) {
 	/* Exponent must not have fractional part */
 	assert(expo->n_scale == 0);
 

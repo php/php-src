@@ -28,7 +28,7 @@ var_dump($lsb->getErrorMessage());
 int(0)
 string(12) "U_ZERO_ERROR"
 
-Warning: IntlTimeZone::getOffset(): intltz_get_offset: error obtaining offset in %s on line %d
+Warning: IntlTimeZone::getOffset(): error obtaining offset in %s on line %d
 bool(false)
 int(1)
-string(67) "intltz_get_offset: error obtaining offset: U_ILLEGAL_ARGUMENT_ERROR"
+string(48) "error obtaining offset: U_ILLEGAL_ARGUMENT_ERROR"

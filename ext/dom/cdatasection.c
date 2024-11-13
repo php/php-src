@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -42,10 +42,10 @@ PHP_METHOD(DOMCdataSection, __construct)
 		RETURN_THROWS();
 	}
 
-	nodep = xmlNewCDataBlock(NULL, (xmlChar *) value, value_len);
+	nodep = xmlNewCDataBlock(NULL, BAD_CAST value, value_len);
 
 	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 

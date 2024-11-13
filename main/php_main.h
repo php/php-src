@@ -36,6 +36,12 @@ PHPAPI const char *php_version(void);
  */
 PHPAPI unsigned int php_version_id(void);
 
+/* Prints the PHP version string for the -v option. It's in main/ so that
+ * it can be shared between SAPIs.
+ */
+PHPAPI char *php_get_version(sapi_module_struct *sapi_module);
+PHPAPI void php_print_version(sapi_module_struct *sapi_module);
+
 PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);
@@ -45,6 +51,7 @@ PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 PHPAPI zend_result php_register_extensions(zend_module_entry * const * ptr, int count);
 
 PHPAPI bool php_execute_script(zend_file_handle *primary_file);
+PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval);
 PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);
 PHPAPI zend_result php_lint_script(zend_file_handle *file);
 

@@ -31,7 +31,7 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOM\Document::relaxNGValidateSource(): xmlRelaxNGParseElement: element has no content in %s on line %d
+Warning: DOMDocument::relaxNGValidateSource(): xmlRelaxNGParseElement: element has no content in %s on line %d
 
-Warning: DOM\Document::relaxNGValidateSource(): Invalid RelaxNG in %s on line %d
+Warning: DOMDocument::relaxNGValidateSource(): Invalid RelaxNG in %s on line %d
 bool(false)

@@ -15,15 +15,15 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "SAPI.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
@@ -61,14 +61,14 @@ ZEND_GET_MODULE(pdo_sqlite)
 /* proto bool PdoSqlite::createFunction(string $function_name, callable $callback, int $num_args = -1, int $flags = 0)
     Creates a function that can be used in a query
 */
-PHP_METHOD(PdoSqlite, createFunction)
+PHP_METHOD(Pdo_Sqlite, createFunction)
 {
 	pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 #ifndef PDO_SQLITE_OMIT_LOAD_EXTENSION
 /* Attempts to load an SQLite extension library. */
-PHP_METHOD(PdoSqlite, loadExtension)
+PHP_METHOD(Pdo_Sqlite, loadExtension)
 {
 	char *extension, *errtext = NULL;
 	char fullpath[MAXPATHLEN];
@@ -82,7 +82,7 @@ PHP_METHOD(PdoSqlite, loadExtension)
 	}
 
 	if (extension_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -284,7 +284,7 @@ static const php_stream_ops php_stream_pdosqlite3_ops = {
 };
 
 /* Open a blob as a stream which we can read / write to. */
-PHP_METHOD(PdoSqlite, openBlob)
+PHP_METHOD(Pdo_Sqlite, openBlob)
 {
 	char *table, *column, *dbname = "main", *mode = "rb";
 	size_t table_len, column_len, dbname_len;
@@ -335,25 +335,18 @@ PHP_METHOD(PdoSqlite, openBlob)
 static int php_sqlite_collation_callback(void *context, int string1_len, const void *string1,
 	int string2_len, const void *string2)
 {
-	int ret;
+	int ret = 0;
 	zval zargs[2];
 	zval retval;
 	struct pdo_sqlite_collation *collation = (struct pdo_sqlite_collation*) context;
 
-	collation->fc.fci.size = sizeof(collation->fc.fci);
-	ZVAL_COPY_VALUE(&collation->fc.fci.function_name, &collation->callback);
-	collation->fc.fci.object = NULL;
-	collation->fc.fci.retval = &retval;
-
 	// Prepare the arguments.
 	ZVAL_STRINGL(&zargs[0], (char *) string1, string1_len);
 	ZVAL_STRINGL(&zargs[1], (char *) string2, string2_len);
-	collation->fc.fci.param_count = 2;
-	collation->fc.fci.params = zargs;
 
-	if ((ret = zend_call_function(&collation->fc.fci, &collation->fc.fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
-	} else if (!Z_ISUNDEF(retval)) {
+	zend_call_known_fcc(&collation->callback, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
+
+	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			zend_string *func_name = get_active_function_or_method_name();
 			zend_type_error("%s(): Return value of the callback must be of type int, %s returned",
@@ -361,7 +354,6 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 			zend_string_release(func_name);
 			return FAILURE;
 		}
-		ret = 0;
 		if (Z_LVAL(retval) > 0) {
 			ret = 1;
 		} else if (Z_LVAL(retval) < 0) {
@@ -376,12 +368,12 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 	return ret;
 }
 
-PHP_METHOD(PdoSqlite, createAggregate)
+PHP_METHOD(Pdo_Sqlite, createAggregate)
 {
 	pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-PHP_METHOD(PdoSqlite, createCollation)
+PHP_METHOD(Pdo_Sqlite, createCollation)
 {
 	pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite_collation_callback);
 }
@@ -400,7 +392,7 @@ PHP_MINIT_FUNCTION(pdo_sqlite)
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_READONLY_STATEMENT", (zend_long)PDO_SQLITE_ATTR_READONLY_STATEMENT);
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_EXTENDED_RESULT_CODES", (zend_long)PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES);
 
-	pdosqlite_ce = register_class_PdoSqlite(pdo_dbh_ce);
+	pdosqlite_ce = register_class_Pdo_Sqlite(pdo_dbh_ce);
 	pdosqlite_ce->create_object = pdo_dbh_new;
 
 	if (php_pdo_register_driver(&pdo_sqlite_driver) == FAILURE) {

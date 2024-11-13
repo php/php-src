@@ -16,12 +16,13 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMProcessingInstruction extends DOMNode
@@ -43,16 +44,16 @@ PHP_METHOD(DOMProcessingInstruction, __construct)
 		RETURN_THROWS();
 	}
 
-	name_valid = xmlValidateName((xmlChar *) name, 0);
+	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
-	nodep = xmlNewPI((xmlChar *) name, (xmlChar *) value);
+	nodep = xmlNewPI(BAD_CAST name, BAD_CAST value);
 
 	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -72,15 +73,8 @@ Since:
 */
 zend_result dom_processinginstruction_target_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
-
-	ZVAL_STRING(retval, (char *) (nodep->name));
-
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+	ZVAL_STRING(retval, (const char *) nodep->name);
 	return SUCCESS;
 }
 
@@ -93,32 +87,20 @@ Since:
 */
 zend_result dom_processinginstruction_data_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
-
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 	php_dom_get_content_into_zval(nodep, retval, false);
-
 	return SUCCESS;
 }
 
 zend_result dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 	zend_string *str = Z_STR_P(newval);
 
-	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+	xmlNodeSetContentLen(nodep, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
 
 	return SUCCESS;
 }

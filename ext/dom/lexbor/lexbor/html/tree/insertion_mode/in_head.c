@@ -175,7 +175,7 @@ lxb_html_tree_insertion_mode_in_head_open(lxb_html_tree_t *tree,
          * We can create function for this, but...
          *
          * The "in head noscript" insertion mode use this
-         * is you change this code, please, change it in in head noscript" mode
+         * is you change this code, please, change it in head noscript" mode
          */
         case LXB_TAG__TEXT: {
             lxb_html_token_t ws_token = {0};
@@ -252,16 +252,7 @@ lxb_html_tree_insertion_mode_in_head_script(lxb_html_tree_t *tree,
         return lxb_html_tree_process_abort(tree);
     }
 
-    if (ipos == LXB_HTML_TREE_INSERTION_POSITION_CHILD) {
-        element = lxb_html_tree_create_element_for_token(tree, token,
-                                                         LXB_NS_HTML, ap_node);
-    }
-    else {
-        element = lxb_html_tree_create_element_for_token(tree, token,
-                                                         LXB_NS_HTML,
-                                                         ap_node->parent);
-    }
-
+    element = lxb_html_tree_create_element_for_token(tree, token, LXB_NS_HTML);
     if (element == NULL) {
         tree->status = LXB_STATUS_ERROR_MEMORY_ALLOCATION;
 

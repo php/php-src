@@ -15,6 +15,7 @@
 #define LEXBOR_STR_RES_MAP_HEX
 #define LEXBOR_STR_RES_MAP_NUM
 #include "lexbor/core/str_res.h"
+#include "lexbor/core/swar.h"
 
 #define LXB_HTML_TOKENIZER_RES_ENTITIES_SBST
 #include "lexbor/html/tokenizer/res.h"
@@ -225,6 +226,8 @@ lxb_html_tokenizer_state_data(lxb_html_tokenizer_t *tkz,
                               const lxb_char_t *data, const lxb_char_t *end)
 {
     lxb_html_tokenizer_state_begin_set(tkz, data);
+
+    data = lexbor_swar_seek4(data, end, 0x3C, 0x26, 0x0D, 0x00);
 
     while (data != end) {
         switch (*data) {
@@ -905,6 +908,8 @@ lxb_html_tokenizer_state_attribute_value_double_quoted(lxb_html_tokenizer_t *tkz
     }
 
     lxb_html_tokenizer_state_begin_set(tkz, data);
+
+    data = lexbor_swar_seek4(data, end, 0x22, 0x26, 0x0D, 0x00);
 
     while (data != end) {
         switch (*data) {

@@ -24,7 +24,7 @@
 #endif
 #include <stddef.h>
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 # ifdef PHP_WIN32
 #  include <sys/utime.h>
 # else
@@ -798,7 +798,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 
 /* parse the return value from one of the stat functions and store the
  * relevant fields into the statbuf provided */
-static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
+static void statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 {
 	zval *elem;
 
@@ -816,7 +816,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 	STAT_PROP_ENTRY(nlink);
 	STAT_PROP_ENTRY(uid);
 	STAT_PROP_ENTRY(gid);
-#if HAVE_STRUCT_STAT_ST_RDEV
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 	STAT_PROP_ENTRY(rdev);
 #endif
 	STAT_PROP_ENTRY(size);
@@ -832,7 +832,6 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 
 #undef STAT_PROP_ENTRY
 #undef STAT_PROP_ENTRY_EX
-	return SUCCESS;
 }
 
 static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
@@ -848,8 +847,8 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
 	call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) == IS_ARRAY) {
-		if (SUCCESS == statbuf_from_array(&retval, ssb))
-			ret = 0;
+		statbuf_from_array(&retval, ssb);
+		ret = 0;
 	} else {
 		if (call_result == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_STAT " is not implemented!",
@@ -1287,8 +1286,8 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) == IS_ARRAY) {
 		/* We got the info we needed */
-		if (SUCCESS == statbuf_from_array(&zretval, ssb))
-			ret = 0;
+		statbuf_from_array(&zretval, ssb);
+		ret = 0;
 	} else {
 		if (call_result == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_STATURL " is not implemented!",

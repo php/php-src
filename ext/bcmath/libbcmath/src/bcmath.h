@@ -39,16 +39,11 @@ typedef enum {PLUS, MINUS} sign;
 typedef struct bc_struct *bc_num;
 
 typedef struct bc_struct {
-	sign   n_sign;
-	size_t n_len;   /* The number of digits before the decimal point. */
-	size_t n_scale; /* The number of digits after the decimal point. */
-	int    n_refs;  /* The number of pointers to this number. */
-	char  *n_ptr;   /* The pointer to the actual storage.
-	                  If NULL, n_value points to the inside of another number
-	                  (bc_multiply...) and should not be "freed." */
-	char  *n_value; /* The number. Not zero char terminated.
-	                   May not point to the same place as n_ptr as
-	                   in the case of leading zeros generated. */
+	size_t        n_len;   /* The number of digits before the decimal point. */
+	size_t        n_scale; /* The number of digits after the decimal point. */
+	char         *n_value; /* The number. Not zero char terminated. */
+	unsigned int  n_refs;  /* The number of pointers to this number. */
+	sign          n_sign;
 } bc_struct;
 
 #ifdef HAVE_CONFIG_H
@@ -58,7 +53,9 @@ typedef struct bc_struct {
 #include "zend.h"
 #include <stdbool.h>
 #include "zend_string.h"
-#include "../../php_bcmath.h" /* Needed for BCG() macro */
+
+/* Needed for BCG() macro and PHP_ROUND_XXX */
+#include "../../php_bcmath.h"
 
 /* The base used in storing the numbers in n_value above.
    Currently, this MUST be 10. */
@@ -76,12 +73,6 @@ typedef struct bc_struct {
 #endif
 #define MAX(a, b)      ((a)>(b)?(a):(b))
 #define MIN(a, b)      ((a)>(b)?(b):(a))
-#define ODD(a)        ((a)&1)
-
-#ifndef LONG_MAX
-#define LONG_MAX 0x7ffffff
-#endif
-
 
 /* Function Prototypes */
 
@@ -89,13 +80,22 @@ void bc_init_numbers(void);
 
 bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent);
 
+bc_num _bc_new_num_nonzeroed_ex(size_t length, size_t scale, bool persistent);
+
 void _bc_free_num_ex(bc_num *num, bool persistent);
 
-bc_num bc_copy_num(bc_num num);
+/* Make a copy of a number! Just increments the reference count! */
+static inline bc_num bc_copy_num(bc_num num)
+{
+	num->n_refs++;
+	return num;
+}
 
 void bc_init_num(bc_num *num);
 
-bool bc_str2num(bc_num *num, char *str, size_t scale);
+bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, size_t *full_scale, bool auto_scale);
+
+bc_num bc_long2num(zend_long lval);
 
 zend_string *bc_num2str_ex(bc_num num, size_t scale);
 
@@ -103,7 +103,13 @@ void bc_int2num(bc_num *num, int val);
 
 long bc_num2long(bc_num num);
 
-int bc_compare(bc_num n1, bc_num n2);
+typedef enum {
+	BCMATH_EQUAL = 0,
+	BCMATH_LEFT_GREATER = 1,
+	BCMATH_RIGHT_GREATER = -1
+} bcmath_compare_result;
+
+bcmath_compare_result bc_compare(bc_num n1, bc_num n2, size_t scale);
 
 bool bc_is_zero(bc_num num);
 
@@ -113,17 +119,43 @@ bool bc_is_near_zero(bc_num num, size_t scale);
 
 bool bc_is_neg(bc_num num);
 
-void bc_add(bc_num n1, bc_num n2, bc_num *result, size_t scale_min);
+void bc_rm_trailing_zeros(bc_num num);
 
-void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min);
+bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min);
 
-void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale);
+#define bc_add_ex(n1, n2, result, scale_min) do {	\
+	bc_num add_ex = bc_add(n1, n2, scale_min);		\
+	bc_free_num (result);                           \
+	*(result) = add_ex;                             \
+} while (0)
 
-bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale);
+bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min);
+
+#define bc_sub_ex(n1, n2, result, scale_min) do {	\
+	bc_num sub_ex = bc_sub(n1, n2, scale_min);		\
+	bc_free_num (result);                           \
+	*(result) = sub_ex;                             \
+} while (0)
+
+bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale);
+
+#define bc_multiply_ex(n1, n2, result, scale_min) do {	\
+	bc_num mul_ex = bc_multiply(n1, n2, scale_min); \
+	bc_free_num (result);                           \
+	*(result) = mul_ex;                             \
+} while (0)
+
+bc_num bc_square(bc_num n1, size_t scale);
+
+bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale);
 
 bool bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
 
 bool bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale);
+
+bc_num bc_floor_or_ceil(bc_num num, bool is_floor);
+
+void bc_round(bc_num num, zend_long places, zend_long mode, bc_num *result);
 
 typedef enum {
 	OK,
@@ -142,11 +174,10 @@ void bc_raise_bc_exponent(bc_num base, bc_num exponent, bc_num *resul, size_t sc
 
 bool bc_sqrt(bc_num *num, size_t scale);
 
-void bc_out_num(bc_num num, int o_base, void (* out_char)(char), bool leading_zero);
-
 /* Prototypes needed for external utility routines. */
-#define bc_new_num(length, scale)	_bc_new_num_ex((length), (scale), 0)
-#define bc_free_num(num)			_bc_free_num_ex((num), 0)
-#define bc_num2str(num)				bc_num2str_ex((num), (num->n_scale))
+#define bc_new_num(length, scale)			_bc_new_num_ex((length), (scale), 0)
+#define bc_new_num_nonzeroed(length, scale)	_bc_new_num_nonzeroed_ex((length), (scale), 0)
+#define bc_free_num(num)					_bc_free_num_ex((num), 0)
+#define bc_num2str(num)						bc_num2str_ex((num), (num->n_scale))
 
 #endif

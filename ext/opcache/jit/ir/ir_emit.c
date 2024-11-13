@@ -41,7 +41,7 @@
 
 #define DASM_M_FREE(ctx, p, sz) ir_mem_free(p)
 
-#if IR_DEBUG
+#ifdef IR_DEBUG
 # define DASM_CHECKS
 #endif
 
@@ -304,17 +304,36 @@ void *ir_resolve_sym_name(const char *name)
 	IR_SNAPSHOT_HANDLER_DCL();
 #endif
 
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+static void* ir_sym_addr(ir_ctx *ctx, const ir_insn *addr_insn)
+{
+	const char *name = ir_get_str(ctx, addr_insn->val.name);
+	void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+		ctx->loader->resolve_sym_name(ctx->loader, name, 0) :
+		ir_resolve_sym_name(name);
+
+	return addr;
+}
+#endif
+
+static void* ir_sym_val(ir_ctx *ctx, const ir_insn *addr_insn)
+{
+	const char *name = ir_get_str(ctx, addr_insn->val.name);
+	void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+		ctx->loader->resolve_sym_name(ctx->loader, name, addr_insn->op == IR_FUNC) :
+		ir_resolve_sym_name(name);
+
+	IR_ASSERT(addr);
+	return addr;
+}
+
 static void *ir_call_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 {
 	void *addr;
 
 	IR_ASSERT(addr_insn->type == IR_ADDR);
 	if (addr_insn->op == IR_FUNC) {
-		const char* name = ir_get_str(ctx, addr_insn->val.name);
-		addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-			ctx->loader->resolve_sym_name(ctx->loader, name, 1) :
-			ir_resolve_sym_name(name);
-		IR_ASSERT(addr);
+		addr = ir_sym_val(ctx, addr_insn);
 	} else {
 		IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 		addr = (void*)addr_insn->val.addr;
@@ -604,7 +623,13 @@ static void ir_emit_dessa_move(ir_ctx *ctx, ir_type type, ir_ref to, ir_ref from
 	IR_ASSERT(from != to);
 	if (to < IR_REG_NUM) {
 		if (IR_IS_CONST_REF(from)) {
-			ir_emit_load(ctx, type, to, from);
+			if (-from < ctx->consts_count) {
+				/* constant reference */
+				ir_emit_load(ctx, type, to, from);
+			} else {
+				/* local variable address */
+				ir_load_local_addr(ctx, to, -from - ctx->consts_count);
+			}
 		} else if (from < IR_REG_NUM) {
 			if (IR_IS_TYPE_INT(type)) {
 				ir_emit_mov(ctx, type, to, from);
@@ -618,18 +643,27 @@ static void ir_emit_dessa_move(ir_ctx *ctx, ir_type type, ir_ref to, ir_ref from
 	} else {
 		mem_to = ir_vreg_spill_slot(ctx, to - IR_REG_NUM);
 		if (IR_IS_CONST_REF(from)) {
+			if (-from < ctx->consts_count) {
+				/* constant reference */
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-			if (IR_IS_TYPE_INT(type)
-			 && !IR_IS_SYM_CONST(ctx->ir_base[from].op)
-			 && (ir_type_size[type] != 8 || IR_IS_SIGNED_32BIT(ctx->ir_base[from].val.i64))) {
-				ir_emit_store_mem_imm(ctx, type, mem_to, ctx->ir_base[from].val.i32);
-				return;
-			}
+				if (IR_IS_TYPE_INT(type)
+				 && !IR_IS_SYM_CONST(ctx->ir_base[from].op)
+				 && (ir_type_size[type] != 8 || IR_IS_SIGNED_32BIT(ctx->ir_base[from].val.i64))) {
+					ir_emit_store_mem_imm(ctx, type, mem_to, ctx->ir_base[from].val.i32);
+					return;
+				}
 #endif
-			ir_reg tmp = IR_IS_TYPE_INT(type) ?  tmp_reg : tmp_fp_reg;
-			IR_ASSERT(tmp != IR_REG_NONE);
-			ir_emit_load(ctx, type, tmp, from);
-			ir_emit_store_mem(ctx, type, mem_to, tmp);
+				ir_reg tmp = IR_IS_TYPE_INT(type) ?  tmp_reg : tmp_fp_reg;
+				IR_ASSERT(tmp != IR_REG_NONE);
+				ir_emit_load(ctx, type, tmp, from);
+				ir_emit_store_mem(ctx, type, mem_to, tmp);
+			} else {
+				/* local variable address */
+				IR_ASSERT(IR_IS_TYPE_INT(type));
+				IR_ASSERT(tmp_reg != IR_REG_NONE);
+				ir_load_local_addr(ctx, tmp_reg, -from - ctx->consts_count);
+				ir_emit_store_mem(ctx, type, mem_to, tmp_reg);
+			}
 		} else if (from < IR_REG_NUM) {
 			ir_emit_store_mem(ctx, type, mem_to, from);
 		} else {
@@ -643,14 +677,16 @@ static void ir_emit_dessa_move(ir_ctx *ctx, ir_type type, ir_ref to, ir_ref from
 	}
 }
 
-IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t *loc, ir_bitset todo, ir_type type, int32_t to, ir_reg tmp_reg, ir_reg tmp_fp_reg)
+IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t *loc, int8_t *types, ir_bitset todo, int32_t to, ir_reg tmp_reg, ir_reg tmp_fp_reg)
 {
-	ir_reg from;
+	ir_ref from;
 	ir_mem tmp_spill_slot;
+	ir_type type;
 
 	IR_MEM_VAL(tmp_spill_slot) = 0;
 	IR_ASSERT(!IR_IS_CONST_REF(to));
 	from = pred[to];
+	type = types[from];
 	IR_ASSERT(!IR_IS_CONST_REF(from));
 	IR_ASSERT(from != to);
 	IR_ASSERT(loc[from] == from);
@@ -659,6 +695,9 @@ IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t
 #ifdef IR_HAVE_SWAP_INT
 		if (pred[from] == to && to < IR_REG_NUM && from < IR_REG_NUM) {
 			/* a simple cycle from 2 elements */
+			if (ir_type_size[types[to]] > ir_type_size[type]) {
+				type = types[to];
+			}
 			ir_emit_swap(ctx, type, to, from);
 			ir_bitset_excl(todo, from);
 			ir_bitset_excl(todo, to);
@@ -677,7 +716,7 @@ IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t
 		}
 	} else {
 #ifdef IR_HAVE_SWAP_FP
-		if (pred[from] == to && to < IR_REG_NUM && from < IR_REG_NUM) {
+		if (pred[from] == to && to < IR_REG_NUM && from < IR_REG_NUM && types[to] == type) {
 			/* a simple cycle from 2 elements */
 			ir_emit_swap_fp(ctx, type, to, from);
 			IR_REGSET_EXCL(todo, from);
@@ -702,6 +741,7 @@ IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t
 
 		from = pred[to];
 		r = loc[from];
+		type = types[to];
 
 		if (from == r && ir_bitset_in(todo, from)) {
 			/* Memory to memory move inside an isolated or "blocked" cycle requres an additional temporary register */
@@ -724,6 +764,8 @@ IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t
 			break;
 		}
 	}
+
+	type = types[to];
 	if (IR_MEM_VAL(tmp_spill_slot)) {
 		ir_emit_load_mem(ctx, type, IR_IS_TYPE_INT(type) ? tmp_reg : tmp_fp_reg, tmp_spill_slot);
 	}
@@ -811,11 +853,12 @@ static int ir_dessa_parallel_copy(ir_ctx *ctx, ir_dessa_copy *copies, int count,
 		to = pred[to];
 		while (!IR_IS_CONST_REF(to) && ir_bitset_in(ready, to)) {
 			to = pred[to];
-			if (!IR_IS_CONST_REF(to) && ir_bitset_in(visited, to)) {
+			if (IR_IS_CONST_REF(to)) {
+				break;
+			} else if (ir_bitset_in(visited, to)) {
 				/* We found a cycle. Resolve it. */
 				ir_bitset_incl(visited, to);
-				type = types[to];
-				ir_dessa_resolve_cycle(ctx, pred, loc, todo, type, to, tmp_reg, tmp_fp_reg);
+				ir_dessa_resolve_cycle(ctx, pred, loc, types, todo, to, tmp_reg, tmp_fp_reg);
 				break;
 			}
 			ir_bitset_incl(visited, to);
@@ -884,6 +927,9 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 			IR_ASSERT(dst == IR_REG_NONE || !IR_REG_SPILLED(dst));
 			if (IR_IS_CONST_REF(input)) {
 				from = input;
+			} else if (ir_rule(ctx, input) == IR_STATIC_ALLOCA) {
+				/* encode local variable address */
+				from = -(ctx->consts_count + input);
 			} else {
 				from = (src != IR_REG_NONE && !IR_REG_SPILLED(src)) ?
 					(ir_ref)src : (ir_ref)(IR_REG_NUM + ctx->vregs[input]);
@@ -891,6 +937,14 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 			to = (dst != IR_REG_NONE) ?
 				(ir_ref)dst : (ir_ref)(IR_REG_NUM + ctx->vregs[ref]);
 			if (to != from) {
+				if (to >= IR_REG_NUM
+				 && from >= IR_REG_NUM
+				 && IR_MEM_VAL(ir_vreg_spill_slot(ctx, from - IR_REG_NUM)) ==
+						IR_MEM_VAL(ir_vreg_spill_slot(ctx, to - IR_REG_NUM))) {
+					/* It's possible that different virtual registers share the same special spill slot */
+					// TODO: See ext/opcache/tests/jit/gh11917.phpt failure on Linux 32-bit
+					continue;
+				}
 				copies[n].type = insn->type;
 				copies[n].from = from;
 				copies[n].to = to;

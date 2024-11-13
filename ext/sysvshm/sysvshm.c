@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -29,7 +29,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "php_ini.h"
 
 /* SysvSharedMemory class */
 
@@ -256,6 +255,12 @@ PHP_FUNCTION(shm_put_var)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&shm_var, arg_var, &var_hash);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+
+	if (UNEXPECTED(!shm_list_ptr->ptr)) {
+		smart_str_free(&shm_var);
+		zend_throw_error(NULL, "Shared memory block has been destroyed by the serialization function");
+		RETURN_THROWS();
+	}
 
 	/* insert serialized variable into shared memory */
 	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s? ZSTR_VAL(shm_var.s) : NULL, shm_var.s? ZSTR_LEN(shm_var.s) : 0);

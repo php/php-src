@@ -73,6 +73,7 @@ void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
 
 	op_array->scope = NULL;
 	op_array->prototype = NULL;
+	op_array->prop_info = NULL;
 
 	op_array->live_range = NULL;
 	op_array->try_catch_array = NULL;
@@ -161,6 +162,11 @@ ZEND_API void zend_function_dtor(zval *zv)
 				zend_hash_release(function->common.attributes);
 				function->common.attributes = NULL;
 			}
+		}
+
+		if (function->common.doc_comment) {
+			zend_string_release_ex(function->common.doc_comment, 1);
+			function->common.doc_comment = NULL;
 		}
 
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
@@ -337,8 +343,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_string_release_ex(ce->name, 0);
 				zend_string_release_ex(ce->info.user.filename, 0);
 
-				if (ce->info.user.doc_comment) {
-					zend_string_release_ex(ce->info.user.doc_comment, 0);
+				if (ce->doc_comment) {
+					zend_string_release_ex(ce->doc_comment, 0);
 				}
 
 				if (ce->attributes) {
@@ -391,6 +397,13 @@ ZEND_API void destroy_zend_class(zval *zv)
 						zend_hash_release(prop_info->attributes);
 					}
 					zend_type_release(prop_info->type, /* persistent */ 0);
+					if (prop_info->hooks) {
+						for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+							if (prop_info->hooks[i]) {
+								destroy_op_array(&prop_info->hooks[i]->op_array);
+							}
+						}
+					}
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
@@ -419,6 +432,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
+			if (ce->doc_comment) {
+				zend_string_release_ex(ce->doc_comment, 1);
+			}
+
 			if (ce->backed_enum_table) {
 				zend_hash_release(ce->backed_enum_table);
 			}
@@ -777,6 +794,7 @@ static void emit_live_range(
 					case ZEND_INIT_USER_CALL:
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 					case ZEND_NEW:
 						level++;
 						break;
@@ -1118,6 +1136,7 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET_RW:
 			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_ASSERT_CHECK:

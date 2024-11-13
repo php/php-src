@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 
@@ -71,6 +71,8 @@
 #include <ext/standard/info.h>
 
 #include "php_ini.h"
+
+#include "zend_attributes.h"
 
 #include "php_intl_arginfo.h"
 

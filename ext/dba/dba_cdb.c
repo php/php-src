@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -30,7 +30,7 @@
 #endif
 #include <fcntl.h>
 
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 # include "libcdb/cdb.h"
 # include "libcdb/cdb_make.h"
 # include "libcdb/uint32.h"
@@ -45,7 +45,7 @@
 
 typedef struct {
 	struct cdb c;
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	struct cdb_make m;
 	php_stream *file;
 	int make;
@@ -58,7 +58,7 @@ typedef struct {
 
 DBA_OPEN_FUNC(cdb)
 {
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	php_stream* file = 0;
 	int make;
 #else
@@ -69,7 +69,7 @@ DBA_OPEN_FUNC(cdb)
 
 	switch (info->mode) {
 		case DBA_READER:
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 			make = 0;
 			file = info->fp;
 #else
@@ -80,7 +80,7 @@ DBA_OPEN_FUNC(cdb)
 			}
 #endif
 			break;
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 		case DBA_TRUNC:
 			make = 1;
 			file = info->fp;
@@ -98,7 +98,7 @@ DBA_OPEN_FUNC(cdb)
 	cdb = pemalloc(sizeof(dba_cdb), info->flags&DBA_PERSISTENT);
 	memset(cdb, 0, sizeof(dba_cdb));
 
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	if (make) {
 		cdb_make_start(&cdb->m, file);
 	} else {
@@ -119,7 +119,7 @@ DBA_CLOSE_FUNC(cdb)
 	CDB_INFO;
 
 	/* cdb_free does not close associated file */
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	if (cdb->make) {
 		cdb_make_finish(&cdb->m);
 	} else {
@@ -132,7 +132,7 @@ DBA_CLOSE_FUNC(cdb)
 	pefree(cdb, info->flags&DBA_PERSISTENT);
 }
 
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 # define php_cdb_read(cdb, buf, len, pos) cdb_read(cdb, buf, len, pos)
 # define php_cdb_findnext(cdb, key, len) cdb_findnext(cdb, key, len)
 # define php_cdb_find(cdb, key, len) cdb_find(cdb, key, len)
@@ -148,7 +148,7 @@ DBA_FETCH_FUNC(cdb)
 	zend_string *fetched_val = NULL;
 	unsigned int len;
 
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	if (cdb->make)
 		return NULL; /* database was opened writeonly */
 #endif
@@ -173,7 +173,7 @@ DBA_FETCH_FUNC(cdb)
 
 DBA_UPDATE_FUNC(cdb)
 {
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	CDB_INFO;
 
 	if (!cdb->make)
@@ -190,7 +190,7 @@ DBA_EXISTS_FUNC(cdb)
 {
 	CDB_INFO;
 
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	if (cdb->make)
 		return FAILURE; /* database was opened writeonly */
 #endif
@@ -205,7 +205,7 @@ DBA_DELETE_FUNC(cdb)
 }
 
 /* {{{ cdb_file_read */
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 # define cdb_file_read(fildes, buf, size) php_stream_read(fildes, buf, size)
 #else
 # define cdb_file_read(fildes, buf, size) read(fildes, buf, size)
@@ -218,7 +218,7 @@ DBA_DELETE_FUNC(cdb)
 
 /* {{{ cdb_file_lseek
  php_stream_seek does not return actual position */
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 zend_off_t cdb_file_lseek(php_stream *fp, zend_off_t offset, int whence) {
 	php_stream_seek(fp, offset, whence);
 	return php_stream_tell(fp);
@@ -243,7 +243,7 @@ DBA_FIRSTKEY_FUNC(cdb)
 	char buf[8];
 	zend_string *key;
 
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	if (cdb->make)
 		return NULL; /* database was opened writeonly */
 #endif
@@ -283,7 +283,7 @@ DBA_NEXTKEY_FUNC(cdb)
 	char buf[8];
 	zend_string *key;
 
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	if (cdb->make)
 		return NULL; /* database was opened writeonly */
 #endif
@@ -319,7 +319,7 @@ DBA_SYNC_FUNC(cdb)
 
 DBA_INFO_FUNC(cdb)
 {
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	if (!strcmp(hnd->name, "cdb")) {
 		return estrdup(cdb_version());
 	} else {

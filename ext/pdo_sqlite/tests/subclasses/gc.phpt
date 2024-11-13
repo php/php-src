@@ -14,8 +14,8 @@ class Obj {
 $obj = new Obj;
 $obj->a = Pdo::connect('sqlite::memory:');
 
-if (!$obj->a instanceof PdoSqlite) {
-    echo "Wrong class type. Should be PdoSqlite but is " . get_class($obj->a) . "]\n";
+if (!$obj->a instanceof Pdo\Sqlite) {
+    echo "Wrong class type. Should be Pdo\Sqlite but is " . get_class($obj->a) . "]\n";
 }
 
 $obj->a->createFunction('func1', function() use ($obj) {}, 1);

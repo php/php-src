@@ -12,5 +12,5 @@ call_user_func_array(function(&$a) {}, $args);
 echo strval("okey");
 ?>
 --EXPECTF--
-Warning: {closure}(): Argument #1 ($a) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #1 ($a) must be passed by reference, value given in %s on line %d
 okey

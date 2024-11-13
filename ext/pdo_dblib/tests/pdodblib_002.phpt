@@ -1,5 +1,5 @@
 --TEST--
-PdoDblib create through PDO::connect
+Pdo\Dblib create through PDO::connect
 --EXTENSIONS--
 pdo_dblib
 --SKIPIF--
@@ -13,8 +13,8 @@ getDbConnection();
 require __DIR__ . '/config.inc';
 
 $db = connectToDb();
-if (!$db instanceof PdoDblib) {
-    echo "Wrong class type. Should be PdoDblib but is " . get_class($db) . "\n";
+if (!$db instanceof Pdo\Dblib) {
+    echo "Wrong class type. Should be Pdo\Dblib but is " . get_class($db) . "\n";
 }
 
 $db->query("CREATE TABLE #pdo_dblib_002(name VARCHAR(32))");

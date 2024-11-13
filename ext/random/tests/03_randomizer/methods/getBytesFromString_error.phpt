@@ -24,5 +24,5 @@ try {
 
 ?>
 --EXPECTF--
-Random\Randomizer::getBytesFromString(): Argument #1 ($string) cannot be empty
+Random\Randomizer::getBytesFromString(): Argument #1 ($string) must not be empty
 Random\Randomizer::getBytesFromString(): Argument #2 ($length) must be greater than 0

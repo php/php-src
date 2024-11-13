@@ -28,11 +28,11 @@ if (PHP_XSL != "no") {
 		if (ext_xsl_lib_found && CHECK_HEADER_ADD_INCLUDE("libxslt\\xslt.h", "CFLAGS_XSL")) {
 			if (ext_exslt_lib_found) {
 				if (CHECK_HEADER_ADD_INCLUDE("libexslt\\exslt.h", "CFLAGS_XSL")) {
-					AC_DEFINE("HAVE_XSL_EXSLT", 1, "");
+					AC_DEFINE("HAVE_XSL_EXSLT", 1, "Define to 1 if the system has the EXSLT extension library for XSLT.");
 				}
 			}
 			EXTENSION("xsl", "php_xsl.c xsltprocessor.c", PHP_XSL_SHARED);
-			AC_DEFINE("HAVE_XSL", 1, "Define if xsl extension is enabled");
+			AC_DEFINE("HAVE_XSL", 1, "Define to 1 if the PHP extension 'xsl' is available.");
 			if (! PHP_XSL_SHARED) {
 				ADD_FLAG("CFLAGS_XSL", "/D DOM_EXPORTS /D LIBXML_STATIC");
 			} else {

@@ -61,6 +61,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_INIT_FCALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
 					script, op_array, opline, &is_prototype);
@@ -73,11 +74,13 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 					call_info->num_args = opline->extended_value;
 					call_info->next_callee = func_info->callee_info;
 					call_info->is_prototype = is_prototype;
+					call_info->is_frameless = false;
 					func_info->callee_info = call_info;
 
 					if (build_flags & ZEND_CALL_TREE) {
 						call_info->next_caller = NULL;
-					} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+					} else if (func->type == ZEND_INTERNAL_FUNCTION
+					 || func->op_array.filename != script->filename) {
 						call_info->next_caller = NULL;
 					} else {
 						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
@@ -102,6 +105,24 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 				call_info = NULL;
 				call++;
 				break;
+			case ZEND_FRAMELESS_ICALL_0:
+			case ZEND_FRAMELESS_ICALL_1:
+			case ZEND_FRAMELESS_ICALL_2:
+			case ZEND_FRAMELESS_ICALL_3: {
+				func = ZEND_FLF_FUNC(opline);
+				zend_call_info *call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info));
+				call_info->caller_op_array = op_array;
+				call_info->caller_init_opline = opline;
+				call_info->caller_call_opline = NULL;
+				call_info->callee_func = func;
+				call_info->num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
+				call_info->next_callee = func_info->callee_info;
+				call_info->is_prototype = false;
+				call_info->is_frameless = true;
+				call_info->next_caller = NULL;
+				func_info->callee_info = call_info;
+				break;
+			}
 			case ZEND_DO_FCALL:
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
@@ -141,10 +162,6 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 				if (call_info) {
 					call_info->send_unpack = 1;
 				}
-				break;
-			case ZEND_EXIT:
-				/* In this case the DO_CALL opcode may have been dropped
-				 * and caller_call_opline will be NULL. */
 				break;
 		}
 		opline++;
@@ -260,9 +277,11 @@ ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info
 		if (call->caller_call_opline) {
 			map[call->caller_call_opline - op_array->opcodes] = call;
 		}
-		for (i = 0; i < call->num_args; i++) {
-			if (call->arg_info[i].opline) {
-				map[call->arg_info[i].opline - op_array->opcodes] = call;
+		if (!call->is_frameless) {
+			for (i = 0; i < call->num_args; i++) {
+				if (call->arg_info[i].opline) {
+					map[call->arg_info[i].opline - op_array->opcodes] = call;
+				}
 			}
 		}
 	}

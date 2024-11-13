@@ -11,11 +11,11 @@ require_once 'skipifconnectfailure.inc';
     require 'table.inc';
 
     if (false !== ($tmp = mysqli_prepare($link, false)))
-        printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
+        printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), var_export($tmp, true));
     printf("a) [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (false !== ($tmp = mysqli_prepare($link, '')))
-        printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
+        printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), var_export($tmp, true));
     printf("b) [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     mysqli_close($link);
@@ -23,11 +23,11 @@ require_once 'skipifconnectfailure.inc';
     $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (false !== ($tmp = $mysqli->prepare(false)))
-        printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
+        printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), var_export($tmp, true));
     printf("c) [%d] %s\n", $mysqli->errno, $mysqli->error);
 
     if (false !== ($tmp = $mysqli->prepare('')))
-        printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
+        printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), var_export($tmp, true));
     printf("c) [%d] %s\n", $mysqli->errno, $mysqli->error);
 
     print "done!";

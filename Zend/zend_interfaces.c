@@ -21,6 +21,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces_arginfo.h"
+#include "zend_property_hooks.h"
 
 ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
@@ -303,7 +304,9 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 	funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(
 		&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
 
-	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_new_iterator) {
+	if (class_type->get_iterator
+	 && class_type->get_iterator != zend_user_it_get_new_iterator
+	 && class_type->get_iterator != zend_hooked_object_get_iterator) {
 		/* get_iterator was explicitly assigned for an internal class. */
 		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
 			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
@@ -350,7 +353,9 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 	funcs_ptr->zf_next = zend_hash_str_find_ptr(
 		&class_type->function_table, "next", sizeof("next") - 1);
 
-	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_iterator) {
+	if (class_type->get_iterator
+	 && class_type->get_iterator != zend_user_it_get_iterator
+	 && class_type->get_iterator != zend_hooked_object_get_iterator) {
 		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
 			/* get_iterator was explicitly assigned for an internal class. */
 			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
@@ -473,6 +478,10 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 	if (!(class_type->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)
 			&& (!class_type->__serialize || !class_type->__unserialize)) {
 		zend_error(E_DEPRECATED, "%s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary)", ZSTR_VAL(class_type->name));
+		if (EG(exception)) {
+			zend_exception_uncaught_error(
+				"During inheritance of %s, while implementing Serializable", ZSTR_VAL(class_type->name));
+		}
 	}
 	return SUCCESS;
 }
@@ -666,6 +675,7 @@ ZEND_API void zend_register_interfaces(void)
 
 	memcpy(&zend_internal_iterator_handlers, zend_get_std_object_handlers(),
 		sizeof(zend_object_handlers));
+	zend_internal_iterator_handlers.clone_obj = NULL;
 	zend_internal_iterator_handlers.free_obj = zend_internal_iterator_free;
 }
 /* }}} */

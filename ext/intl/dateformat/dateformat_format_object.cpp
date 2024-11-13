@@ -66,7 +66,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 {
 	zval				*object,
 						*format = NULL;
-	const char			*locale_str	= NULL;
+	char			       *locale_str	= NULL;
 	size_t				locale_len;
 	bool				pattern		= false;
 	UDate				date;
@@ -77,13 +77,15 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	DateFormat::EStyle	dateStyle = DateFormat::kDefault,
 						timeStyle = DateFormat::kDefault;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|zs!",
-			&object, &format, &locale_str, &locale_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_OBJECT(object)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(format)
+		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!locale_str) {
-		locale_str = intl_locale_get_default();
+		locale_str = (char *)intl_locale_get_default();
 	}
 
 	if (format == NULL || Z_TYPE_P(format) == IS_NULL) {

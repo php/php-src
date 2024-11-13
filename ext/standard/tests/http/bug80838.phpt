@@ -23,14 +23,26 @@ $options = [
 
 $ctx = stream_context_create($options);
 
+var_dump(http_get_last_response_headers());
+
 $fd = fopen($uri, 'rb', false, $ctx);
 fclose($fd);
 var_dump($http_response_header);
+var_dump(http_get_last_response_headers());
 
 http_server_kill($pid);
 
 ?>
 --EXPECT--
+NULL
+array(3) {
+  [0]=>
+  string(32) "HTTP/1.1 101 Switching Protocols"
+  [1]=>
+  string(15) "Header1: Value1"
+  [2]=>
+  string(15) "Header2: Value2"
+}
 array(3) {
   [0]=>
   string(32) "HTTP/1.1 101 Switching Protocols"

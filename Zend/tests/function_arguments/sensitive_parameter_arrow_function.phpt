@@ -17,7 +17,7 @@ array(1) {
     ["line"]=>
     int(5)
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(1) {
       [0]=>

@@ -44,10 +44,10 @@
 
 const php_stream_ops php_stream_generic_socket_ops;
 PHPAPI const php_stream_ops php_stream_socket_ops;
-const php_stream_ops php_stream_udp_socket_ops;
+static const php_stream_ops php_stream_udp_socket_ops;
 #ifdef AF_UNIX
-const php_stream_ops php_stream_unix_socket_ops;
-const php_stream_ops php_stream_unixdg_socket_ops;
+static const php_stream_ops php_stream_unix_socket_ops;
+static const php_stream_ops php_stream_unixdg_socket_ops;
 #endif
 
 
@@ -373,13 +373,17 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 #else
 					ssize_t ret;
 #endif
-					int err;
 
 					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT);
-					err = php_socket_errno();
-					if (0 == ret || /* the counterpart did properly shutdown*/
-						(0 > ret && err != EWOULDBLOCK && err != EAGAIN && err != EMSGSIZE)) { /* there was an unrecoverable error */
+					if (0 == ret) {
+						/* the counterpart did properly shutdown */
 						alive = 0;
+					} else if (0 > ret) {
+						int err = php_socket_errno();
+						if (err != EWOULDBLOCK && err != EMSGSIZE && err != EAGAIN) {
+							/* there was an unrecoverable error */
+							alive = 0;
+						}
 					}
 				}
 				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
@@ -546,7 +550,7 @@ const php_stream_ops php_stream_socket_ops = {
 	php_tcp_sockop_set_option,
 };
 
-const php_stream_ops php_stream_udp_socket_ops = {
+static const php_stream_ops php_stream_udp_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"udp_socket",
@@ -557,7 +561,7 @@ const php_stream_ops php_stream_udp_socket_ops = {
 };
 
 #ifdef AF_UNIX
-const php_stream_ops php_stream_unix_socket_ops = {
+static const php_stream_ops php_stream_unix_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"unix_socket",
@@ -566,7 +570,7 @@ const php_stream_ops php_stream_unix_socket_ops = {
 	php_sockop_stat,
 	php_tcp_sockop_set_option,
 };
-const php_stream_ops php_stream_unixdg_socket_ops = {
+static const php_stream_ops php_stream_unixdg_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"udg_socket",
@@ -586,18 +590,23 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 	memset(unix_addr, 0, sizeof(*unix_addr));
 	unix_addr->sun_family = AF_UNIX;
 
+	/* Abstract namespace does not need to be NUL-terminated, while path-based
+	 * sockets should be. */
+	bool is_abstract_ns = xparam->inputs.namelen > 0 && xparam->inputs.name[0] == '\0';
+	unsigned long max_length = is_abstract_ns ? sizeof(unix_addr->sun_path) : sizeof(unix_addr->sun_path) - 1;
+
 	/* we need to be binary safe on systems that support an abstract
 	 * namespace */
-	if (xparam->inputs.namelen >= sizeof(unix_addr->sun_path)) {
+	if (xparam->inputs.namelen > max_length) {
 		/* On linux, when the path begins with a NUL byte we are
 		 * referring to an abstract namespace.  In theory we should
 		 * allow an extra byte below, since we don't need the NULL.
 		 * BUT, to get into this branch of code, the name is too long,
 		 * so we don't care. */
-		xparam->inputs.namelen = sizeof(unix_addr->sun_path) - 1;
+		xparam->inputs.namelen = max_length;
 		php_error_docref(NULL, E_NOTICE,
 			"socket path exceeded the maximum allowed length of %lu bytes "
-			"and was truncated", (unsigned long)sizeof(unix_addr->sun_path));
+			"and was truncated", max_length);
 	}
 
 	memcpy(unix_addr->sun_path, xparam->inputs.name, xparam->inputs.namelen);

@@ -1,5 +1,5 @@
 --TEST--
-Bug #36513 (comment will be outputed in last line)
+Bug #36513 (comment will be output in last line)
 --FILE--
 <?php
 function test($s) {

@@ -77,7 +77,7 @@ static int create_segments(size_t requested_size, zend_shared_segment_posix ***s
 	shared_segment = (zend_shared_segment_posix *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
-	sprintf(shared_segment_name, "/ZendAccelerator.%d", getpid());
+	snprintf(shared_segment_name, sizeof(shared_segment_name), "/ZendAccelerator.%d", getpid());
 #if defined(HAVE_SHM_CREATE_LARGEPAGE)
 	if (shared_segment_lg_index > 0) {
 		shared_segment->shm_fd =  shm_create_largepage(shared_segment_name, shared_segment_flags, shared_segment_lg_index, SHM_LARGEPAGE_ALLOC_DEFAULT, shared_segment_mode);

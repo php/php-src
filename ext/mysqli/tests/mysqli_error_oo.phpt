@@ -10,9 +10,6 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'connect.inc';
 
-    $tmp    = NULL;
-    $link   = NULL;
-
     $mysqli = new mysqli();
     if ('' !== ($tmp = @$mysqli->error))
         printf("[001] Expecting empty string, got %s/'%s'\n", gettype($tmp), $tmp);

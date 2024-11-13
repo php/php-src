@@ -7,7 +7,7 @@ if (PHP_ZLIB == "yes") {
 		CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)) {
 
 		EXTENSION("zlib", "zlib.c zlib_fopen_wrapper.c zlib_filter.c", PHP_ZLIB_SHARED, "/D ZLIB_EXPORTS /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		AC_DEFINE("HAVE_ZLIB", 1, "ZLIB support");
+		AC_DEFINE("HAVE_ZLIB", 1, "Define to 1 if the PHP extension 'zlib' is available.");
 
 		if (!PHP_ZLIB_SHARED) {
 			ADD_DEF_FILE("ext\\zlib\\php_zlib.def");

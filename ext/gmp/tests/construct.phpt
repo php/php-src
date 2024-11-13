@@ -46,6 +46,6 @@ object(GMP)#1 (1) {
   ["num"]=>
   string(1) "6"
 }
-GMP::__construct(): Argument #2 ($base) must be between 2 and 62
+GMP::__construct(): Argument #2 ($base) must be 0 or between 2 and 62
 GMP::__construct(): Argument #1 ($num) is not an integer string
 GMP::__construct(): Argument #1 ($num) is not an integer string

@@ -431,7 +431,7 @@ if ($pid) {
             }
 
         } elseif (preg_match('/^EPSV/', $buf, $matches)) {
-            fputs($s, "550 Extended passsive mode not supported.\r\n");
+            fputs($s, "550 Extended passive mode not supported.\r\n");
         } elseif (preg_match('/^SITE EXEC/', $buf, $matches)) {
             fputs($s, "200 OK\r\n");
 
@@ -470,7 +470,7 @@ if ($pid) {
             fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
             fputs($s, "226 Closing data Connection.\r\n");
             fclose($fs);
-            
+
             fputs($s, "226 Transfer complete\r\n");
         }elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
             fputs($s, "425 Error establishing connection\r\n");

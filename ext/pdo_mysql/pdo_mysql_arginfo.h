@@ -1,25 +1,22 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 015ebac642032d22ee5a8793993f84092bb6bf86 */
+ * Stub hash: 05487a0b7668688c1885a14a8ce02493b96f63bb */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoMysql_getWarningCount, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Mysql_getWarningCount, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_METHOD(Pdo_Mysql, getWarningCount);
 
-ZEND_METHOD(PdoMysql, getWarningCount);
-
-
-static const zend_function_entry class_PdoMysql_methods[] = {
-	ZEND_ME(PdoMysql, getWarningCount, arginfo_class_PdoMysql_getWarningCount, ZEND_ACC_PUBLIC)
+static const zend_function_entry class_Pdo_Mysql_methods[] = {
+	ZEND_ME(Pdo_Mysql, getWarningCount, arginfo_class_Pdo_Mysql_getWarningCount, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_PdoMysql(zend_class_entry *class_entry_PDO)
+static zend_class_entry *register_class_Pdo_Mysql(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PdoMysql", class_PdoMysql_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Mysql", class_Pdo_Mysql_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_USE_BUFFERED_QUERY_value;
 	ZVAL_LONG(&const_ATTR_USE_BUFFERED_QUERY_value, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);

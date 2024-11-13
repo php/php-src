@@ -44,8 +44,6 @@ function func_mysqli_fetch_all(
     $tmp = mysqli_fetch_all($result, MYSQLI_BOTH);
     $row = $tmp[0];
 
-    $fields = mysqli_fetch_fields($result);
-
     if ($regexp_comparison) {
         if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
             printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,

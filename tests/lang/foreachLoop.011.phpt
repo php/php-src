@@ -1,5 +1,5 @@
 --TEST--
-Changing from an interable type to a non iterable type during the iteration
+Changing from an iterable type to a non iterable type during the iteration
 --FILE--
 <?php
 echo "\nChange from array to non iterable:\n";

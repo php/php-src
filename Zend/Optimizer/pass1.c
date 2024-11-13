@@ -34,6 +34,12 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
+#define TO_STRING_NOWARN(val) do { \
+	if (Z_TYPE_P(val) < IS_ARRAY) { \
+		convert_to_string(val); \
+	} \
+} while (0)
+
 static void replace_by_const_or_qm_assign(zend_op_array *op_array, zend_op *opline, zval *result) {
 	if (opline->op1_type == IS_CONST) {
 		literal_dtor(&ZEND_OP1_LITERAL(opline));
@@ -64,10 +70,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 			if (opline->op1_type == IS_CONST && Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
-				convert_to_string(&ZEND_OP1_LITERAL(opline));
+				TO_STRING_NOWARN(&ZEND_OP1_LITERAL(opline));
 			}
 			if (opline->op2_type == IS_CONST && Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
-				convert_to_string(&ZEND_OP2_LITERAL(opline));
+				TO_STRING_NOWARN(&ZEND_OP2_LITERAL(opline));
 			}
 			ZEND_FALLTHROUGH;
 		case ZEND_ADD:
@@ -100,7 +106,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_ASSIGN_OP:
 			if (opline->extended_value == ZEND_CONCAT && opline->op2_type == IS_CONST
 					&& Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
-				convert_to_string(&ZEND_OP2_LITERAL(opline));
+				TO_STRING_NOWARN(&ZEND_OP2_LITERAL(opline));
 			}
 			break;
 
@@ -155,33 +161,26 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 
-		case ZEND_FETCH_CLASS_CONSTANT:
-			if (opline->op2_type == IS_CONST &&
-				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
-
-				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
-					ctx->script, op_array, opline);
-				if (ce) {
-					zend_class_constant *cc = zend_hash_find_ptr(
-						&ce->constants_table, Z_STR(ZEND_OP2_LITERAL(opline)));
-					if (cc && !(ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_DEPRECATED) && (ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
-						zval *c = &cc->value;
-						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
-							zend_ast *ast = Z_ASTVAL_P(c);
-							if (ast->kind != ZEND_AST_CONSTANT
-							 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &result, 1)
-							 || Z_TYPE(result) == IS_CONSTANT_AST) {
-								break;
-							}
-						} else {
-							ZVAL_COPY_OR_DUP(&result, c);
-						}
-
-						replace_by_const_or_qm_assign(op_array, opline, &result);
-					}
-				}
+		case ZEND_FETCH_CLASS_CONSTANT: {
+			bool is_prototype;
+			const zend_class_constant *cc = zend_fetch_class_const_info(ctx->script, op_array, opline, &is_prototype);
+			if (!cc || is_prototype) {
+				break;
 			}
+			const zval *c = &cc->value;
+			if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
+				zend_ast *ast = Z_ASTVAL_P(c);
+				if (ast->kind != ZEND_AST_CONSTANT
+				 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &result, 1)
+				 || Z_TYPE(result) == IS_CONSTANT_AST) {
+					break;
+				}
+			} else {
+				ZVAL_COPY_OR_DUP(&result, c);
+			}
+			replace_by_const_or_qm_assign(op_array, opline, &result);
 			break;
+		}
 
 		case ZEND_DO_ICALL: {
 			zend_op *send1_opline = opline - 1;
@@ -316,7 +315,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 			if (opline->op1_type == IS_CONST) {
-				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
+				bool should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
 
 				if (opline->opcode == ZEND_JMPZ) {
 					should_jmp = !should_jmp;
@@ -338,7 +337,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_RETURN:
 		case ZEND_RETURN_BY_REF:
 		case ZEND_GENERATOR_RETURN:
-		case ZEND_EXIT:
 		case ZEND_THROW:
 		case ZEND_MATCH_ERROR:
 		case ZEND_CATCH:
@@ -355,6 +353,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_JMP_NULL:
 		case ZEND_VERIFY_NEVER_TYPE:
 		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			collect_constants = 0;
 			break;
 		}

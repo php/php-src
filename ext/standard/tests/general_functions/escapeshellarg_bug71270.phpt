@@ -4,9 +4,15 @@ Test escapeshellarg() allowed argument length
 <?php
 ini_set('memory_limit', -1);
 $var_2  = str_repeat('A', 1024*1024*64);
-escapeshellarg($var_2);
+
+try {
+    escapeshellarg($var_2);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: escapeshellarg(): Argument exceeds the allowed length of %d bytes in %s on line %d
+ValueError: Argument exceeds the allowed length of %d bytes
+===DONE===

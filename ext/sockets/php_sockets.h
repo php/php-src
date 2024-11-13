@@ -20,11 +20,11 @@
 #ifndef PHP_SOCKETS_H
 #define PHP_SOCKETS_H
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
 
-#if HAVE_SOCKETS
+#ifdef HAVE_SOCKETS
 
 #include <php.h>
 #ifdef PHP_WIN32
@@ -41,7 +41,7 @@ extern zend_module_entry sockets_module_entry;
 #ifdef PHP_WIN32
 #include <Winsock2.h>
 #else
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #endif
@@ -132,7 +132,7 @@ PHP_SOCKETS_API bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket
 #define phpext_sockets_ptr NULL
 #endif
 
-#if defined(_AIX) && !defined(HAVE_SA_SS_FAMILY)
+#if defined(_AIX) && !defined(HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY)
 # define ss_family __ss_family
 #endif
 
@@ -153,31 +153,31 @@ PHP_SOCKETS_API bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket
 #define PHP_NORMAL_READ 0x0001
 #define PHP_BINARY_READ 0x0002
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EINTR WSAEINTR
 #elif defined(EINTR)
 #define PHP_SOCKET_EINTR EINTR
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EBADF WSAEBADF
 #elif defined(EBADF)
 #define PHP_SOCKET_EBADF EBADF
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EACCES WSAEACCES
 #elif defined(EACCES)
 #define PHP_SOCKET_EACCES EACCES
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EFAULT WSAEFAULT
 #elif defined(EFAULT)
 #define PHP_SOCKET_EFAULT EFAULT
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EINVAL WSAEINVAL
 #elif defined(EINVAL)
 #define PHP_SOCKET_EINVAL EINVAL
@@ -187,217 +187,217 @@ PHP_SOCKETS_API bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket
 #define PHP_SOCKET_ENFILE ENFILE
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EMFILE WSAEMFILE
 #elif defined(EMFILE)
 #define PHP_SOCKET_EMFILE EMFILE
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EWOULDBLOCK WSAEWOULDBLOCK
 #elif defined(EWOULDBLOCK)
 #define PHP_SOCKET_EWOULDBLOCK EWOULDBLOCK
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EINPROGRESS WSAEINPROGRESS
 #elif defined(EINPROGRESS)
 #define PHP_SOCKET_EINPROGRESS EINPROGRESS
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EALREADY WSAEALREADY
 #elif defined(EALREADY)
 #define PHP_SOCKET_EALREADY EALREADY
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENOTSOCK WSAENOTSOCK
 #elif defined(ENOTSOCK)
 #define PHP_SOCKET_ENOTSOCK ENOTSOCK
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EDESTADDRREQ WSAEDESTADDRREQ
 #elif defined(EDESTADDRREQ)
 #define PHP_SOCKET_EDESTADDRREQ EDESTADDRREQ
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EMSGSIZE WSAEMSGSIZE
 #elif defined(EMSGSIZE)
 #define PHP_SOCKET_EMSGSIZE EMSGSIZE
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EPROTOTYPE WSAEPROTOTYPE
 #elif defined(EPROTOTYPE)
 #define PHP_SOCKET_EPROTOTYPE EPROTOTYPE
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENOPROTOOPT WSAENOPROTOOPT
 #elif defined(ENOPROTOOPT)
 #define PHP_SOCKET_ENOPROTOOPT ENOPROTOOPT
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EPROTONOSUPPORT WSAEPROTONOSUPPORT
 #elif defined(EPROTONOSUPPORT)
 #define PHP_SOCKET_EPROTONOSUPPORT EPROTONOSUPPORT
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
 #elif defined(ESOCKTNOSUPPORT)
 #define PHP_SOCKET_ESOCKTNOSUPPORT ESOCKTNOSUPPORT
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EOPNOTSUPP WSAEOPNOTSUPP
 #elif defined(EOPNOTSUPP)
 #define PHP_SOCKET_EOPNOTSUPP EOPNOTSUPP
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EPFNOSUPPORT WSAEPFNOSUPPORT
 #elif defined(EPFNOSUPPORT)
 #define PHP_SOCKET_EPFNOSUPPORT EPFNOSUPPORT
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EAFNOSUPPORT WSAEAFNOSUPPORT
 #elif defined(EAFNOSUPPORT)
 #define PHP_SOCKET_EAFNOSUPPORT EAFNOSUPPORT
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EADDRINUSE WSAEADDRINUSE
 #elif defined(EADDRINUSE)
 #define PHP_SOCKET_EADDRINUSE EADDRINUSE
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EADDRNOTAVAIL WSAEADDRNOTAVAIL
 #elif defined(EADDRNOTAVAIL)
 #define PHP_SOCKET_EADDRNOTAVAIL EADDRNOTAVAIL
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENETDOWN WSAENETDOWN
 #elif defined(ENETDOWN)
 #define PHP_SOCKET_ENETDOWN ENETDOWN
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENETUNREACH WSAENETUNREACH
 #elif defined(ENETUNREACH)
 #define PHP_SOCKET_ENETUNREACH ENETUNREACH
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENETRESET WSAENETRESET
 #elif defined(ENETRESET)
 #define PHP_SOCKET_ENETRESET ENETRESET
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ECONNABORTED WSAECONNABORTED
 #elif defined(ECONNABORTED)
 #define PHP_SOCKET_ECONNABORTED ECONNABORTED
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ECONNRESET WSAECONNRESET
 #elif defined(ECONNRESET)
 #define PHP_SOCKET_ECONNRESET ECONNRESET
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENOBUFS WSAENOBUFS
 #elif defined(ENOBUFS)
 #define PHP_SOCKET_ENOBUFS ENOBUFS
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EISCONN WSAEISCONN
 #elif defined(EISCONN)
 #define PHP_SOCKET_EISCONN EISCONN
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENOTCONN WSAENOTCONN
 #elif defined(ENOTCONN)
 #define PHP_SOCKET_ENOTCONN ENOTCONN
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ESHUTDOWN WSAESHUTDOWN
 #elif defined(ESHUTDOWN)
 #define PHP_SOCKET_ESHUTDOWN ESHUTDOWN
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ETOOMANYREFS WSAETOOMANYREFS
 #elif defined(ETOOMANYREFS)
 #define PHP_SOCKET_ETOOMANYREFS ETOOMANYREFS
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ETIMEDOUT WSAETIMEDOUT
 #elif defined(ETIMEDOUT)
 #define PHP_SOCKET_ETIMEDOUT ETIMEDOUT
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ECONNREFUSED WSAECONNREFUSED
 #elif defined(ECONNREFUSED)
 #define PHP_SOCKET_ECONNREFUSED ECONNREFUSED
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ELOOP WSAELOOP
 #elif defined(ELOOP)
 #define PHP_SOCKET_ELOOP ELOOP
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENAMETOOLONG WSAENAMETOOLONG
 #elif defined(ENAMETOOLONG)
 #define PHP_SOCKET_ENAMETOOLONG ENAMETOOLONG
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EHOSTDOWN WSAEHOSTDOWN
 #elif defined(EHOSTDOWN)
 #define PHP_SOCKET_EHOSTDOWN EHOSTDOWN
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EHOSTUNREACH WSAEHOSTUNREACH
 #elif defined(EHOSTUNREACH)
 #define PHP_SOCKET_EHOSTUNREACH EHOSTUNREACH
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_ENOTEMPTY WSAENOTEMPTY
 #elif defined(ENOTEMPTY)
 #define PHP_SOCKET_ENOTEMPTY ENOTEMPTY
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EUSERS WSAEUSERS
 #elif defined(EUSERS)
 #define PHP_SOCKET_EUSERS EUSERS
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EDQUOT WSAEDQUOT
 #elif defined(EDQUOT)
 #define PHP_SOCKET_EDQUOT EDQUOT
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 #define PHP_SOCKET_EREMOTE WSAEREMOTE
 #elif defined(EREMOTE)
 #define PHP_SOCKET_EREMOTE EREMOTE

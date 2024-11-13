@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL PGSQL_ATTR_DISABLE_PREPARES
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

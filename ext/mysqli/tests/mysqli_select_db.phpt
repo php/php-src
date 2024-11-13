@@ -45,7 +45,7 @@ require_once 'skipifconnectfailure.inc';
     }
 
     if (!$link->select_db($db))
-        printf("[012] Failed to set '%s' as current DB; [%d] %s\n", $link->errno, $link->error);
+        printf("[012] Failed to set '%s' as current DB; [%d] %s\n", $db, $link->errno, $link->error);
 
     if (!$res = mysqli_query($link, "SELECT DATABASE() AS dbname"))
         printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -81,9 +81,9 @@ require_once 'skipifconnectfailure.inc';
 
 
     if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
-        printf("[018] [%d] %s\n");
+        printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    $row = $res->fetch_assoc();
+    $res->fetch_assoc();
     $res->free();
 
     mysqli_close($link);

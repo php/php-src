@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: encoding.c,v 1.39 2022/09/13 18:46:07 christos Exp $")
+FILE_RCSID("@(#)$File: encoding.c,v 1.42 2022/12/26 17:31:14 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -43,21 +43,21 @@ FILE_RCSID("@(#)$File: encoding.c,v 1.39 2022/09/13 18:46:07 christos Exp $")
 #include <stdlib.h>
 
 
-private int looks_ascii(const unsigned char *, size_t, file_unichar_t *,
+file_private int looks_ascii(const unsigned char *, size_t, file_unichar_t *,
     size_t *);
-private int looks_utf8_with_BOM(const unsigned char *, size_t, file_unichar_t *,
+file_private int looks_utf8_with_BOM(const unsigned char *, size_t, file_unichar_t *,
     size_t *);
-private int looks_utf7(const unsigned char *, size_t, file_unichar_t *,
+file_private int looks_utf7(const unsigned char *, size_t, file_unichar_t *,
     size_t *);
-private int looks_ucs16(const unsigned char *, size_t, file_unichar_t *,
+file_private int looks_ucs16(const unsigned char *, size_t, file_unichar_t *,
     size_t *);
-private int looks_ucs32(const unsigned char *, size_t, file_unichar_t *,
+file_private int looks_ucs32(const unsigned char *, size_t, file_unichar_t *,
     size_t *);
-private int looks_latin1(const unsigned char *, size_t, file_unichar_t *,
+file_private int looks_latin1(const unsigned char *, size_t, file_unichar_t *,
     size_t *);
-private int looks_extended(const unsigned char *, size_t, file_unichar_t *,
+file_private int looks_extended(const unsigned char *, size_t, file_unichar_t *,
     size_t *);
-private void from_ebcdic(const unsigned char *, size_t, unsigned char *);
+file_private void from_ebcdic(const unsigned char *, size_t, unsigned char *);
 
 #ifdef DEBUG_ENCODING
 #define DPRINTF(a) printf a
@@ -71,7 +71,7 @@ private void from_ebcdic(const unsigned char *, size_t, unsigned char *);
  * the text converted into one-file_unichar_t-per-character Unicode in
  * ubuf, and the number of characters converted in ulen.
  */
-protected int
+file_protected int
 file_encoding(struct magic_set *ms, const struct buffer *b,
     file_unichar_t **ubuf, size_t *ulen, const char **code,
     const char **code_mime, const char **type)
@@ -237,7 +237,7 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 #define I 2   /* character appears in ISO-8859 text */
 #define X 3   /* character appears in non-ISO extended ASCII (Mac, IBM PC) */
 
-private char text_chars[256] = {
+file_private char text_chars[256] = {
 	/*                  BEL BS HT LF VT FF CR    */
 	F, F, F, F, F, F, F, T, T, T, T, T, T, T, F, F,  /* 0x0X */
 	/*                              ESC          */
@@ -260,7 +260,7 @@ private char text_chars[256] = {
 };
 
 #define LOOKS(NAME, COND) \
-private int \
+file_private int \
 looks_ ## NAME(const unsigned char *buf, size_t nbytes, file_unichar_t *ubuf, \
     size_t *ulen) \
 { \
@@ -346,7 +346,7 @@ struct accept_range {
 	{ LOCB, 0x8F },
 };
 
-protected int
+file_protected int
 file_looks_utf8(const unsigned char *buf, size_t nbytes, file_unichar_t *ubuf,
     size_t *ulen)
 {
@@ -427,7 +427,7 @@ done:
  * BOM, return -1; otherwise return the result of looks_utf8 on the
  * rest of the text.
  */
-private int
+file_private int
 looks_utf8_with_BOM(const unsigned char *buf, size_t nbytes,
     file_unichar_t *ubuf, size_t *ulen)
 {
@@ -437,7 +437,7 @@ looks_utf8_with_BOM(const unsigned char *buf, size_t nbytes,
 		return -1;
 }
 
-private int
+file_private int
 looks_utf7(const unsigned char *buf, size_t nbytes, file_unichar_t *ubuf,
     size_t *ulen)
 {
@@ -461,7 +461,7 @@ looks_utf7(const unsigned char *buf, size_t nbytes, file_unichar_t *ubuf,
 #define UCS16_HISURR(c) ((c) >= 0xd800 && (c) <= 0xdbff)
 #define UCS16_LOSURR(c) ((c) >= 0xdc00 && (c) <= 0xdfff)
 
-private int
+file_private int
 looks_ucs16(const unsigned char *bf, size_t nbytes, file_unichar_t *ubf,
     size_t *ulen)
 {
@@ -521,7 +521,7 @@ looks_ucs16(const unsigned char *bf, size_t nbytes, file_unichar_t *ubf,
 	return 1 + bigend;
 }
 
-private int
+file_private int
 looks_ucs32(const unsigned char *bf, size_t nbytes, file_unichar_t *ubf,
     size_t *ulen)
 {
@@ -590,7 +590,7 @@ looks_ucs32(const unsigned char *bf, size_t nbytes, file_unichar_t *ubf,
  * between old-style and internationalized examples of text.
  */
 
-private unsigned char ebcdic_to_ascii[] = {
+file_private unsigned char ebcdic_to_ascii[] = {
   0,   1,   2,   3, 156,   9, 134, 127, 151, 141, 142,  11,  12,  13,  14,  15,
  16,  17,  18,  19, 157, 133,   8, 135,  24,  25, 146, 143,  28,  29,  30,  31,
 128, 129, 130, 131, 132,  10,  23,  27, 136, 137, 138, 139, 140,   5,   6,   7,
@@ -624,7 +624,7 @@ private unsigned char ebcdic_to_ascii[] = {
  * cases for the NEL character can be taken out of the code.
  */
 
-private unsigned char ebcdic_1047_to_8859[] = {
+file_private unsigned char ebcdic_1047_to_8859[] = {
 0x00,0x01,0x02,0x03,0x9C,0x09,0x86,0x7F,0x97,0x8D,0x8E,0x0B,0x0C,0x0D,0x0E,0x0F,
 0x10,0x11,0x12,0x13,0x9D,0x0A,0x08,0x87,0x18,0x19,0x92,0x8F,0x1C,0x1D,0x1E,0x1F,
 0x80,0x81,0x82,0x83,0x84,0x85,0x17,0x1B,0x88,0x89,0x8A,0x8B,0x8C,0x05,0x06,0x07,
@@ -647,7 +647,7 @@ private unsigned char ebcdic_1047_to_8859[] = {
 /*
  * Copy buf[0 ... nbytes-1] into out[], translating EBCDIC to ASCII.
  */
-private void
+file_private void
 from_ebcdic(const unsigned char *buf, size_t nbytes, unsigned char *out)
 {
 	size_t i;

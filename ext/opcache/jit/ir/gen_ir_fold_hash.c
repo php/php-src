@@ -15,25 +15,32 @@
 #define MAX_RULES 2048
 #define MAX_SLOTS (MAX_RULES * 4)
 
+#define USE_SEMI_PERFECT_HASH 1
+#define USE_SHL_HASH 1
+#define USE_ROL_HASH 0
+
 static ir_strtab strtab;
 
 void print_hash(uint32_t *mask, uint32_t count)
 {
 	uint32_t i;
 
-	printf("static const uint32_t _ir_fold_hash[%d] = {\n", count);
+	printf("static const uint32_t _ir_fold_hash[%d] = {\n", count + 1);
 	for (i = 0; i < count; i++) {
 		printf("\t0x%08x,\n", mask[i]);
 	}
+	printf("\t0x%08x\n", 0);
 	printf("};\n\n");
 }
 
+#if USE_SHL_HASH
 static uint32_t hash_shl2(uint32_t mask, uint32_t r1, uint32_t r2)
 {
 	return ((mask << r1) - mask) << r2;
 }
+#endif
 
-#if 0
+#if USE_ROL_HASH
 #define ir_rol(x, n)	(((x)<<(n)) | ((x)>>(-(int)(n)&(8*sizeof(x)-1))))
 #define ir_ror(x, n)	(((x)<<(-(int)(n)&(8*sizeof(x)-1))) | ((x)>>(n)))
 
@@ -50,29 +57,65 @@ int find_hash(uint32_t *mask, uint32_t count)
 	uint32_t n, r1, r2, i, h;
 
 	for (n = (count | 1); n < MAX_SLOTS; n += 2) {
+#if USE_SEMI_PERFECT_HASH
+		int semi_perfect = 0;
+#endif
+
 		for (r1 = 0; r1 < 31; r1++) {
 			for (r2 = 0; r2 < 32; r2++) {
+#if USE_SHL_HASH
 				memset(hash, 0, n * sizeof(uint32_t));
 				for (i = 0; i < count; i++) {
 					h = hash_shl2(mask[i] & 0x1fffff, r1, r2) % n;
-					if (hash[h]) break; /* collision */
+					if (hash[h]) {
+#if USE_SEMI_PERFECT_HASH
+						h++;
+						if (!hash[h]) {
+							hash[h] = mask[i];
+							semi_perfect = 1;
+							continue;
+						}
+#endif
+						break; /* collision */
+					}
 					hash[h] = mask[i];
 				}
 				if (i == count) {
 					print_hash(hash, n);
+#if USE_SEMI_PERFECT_HASH
+					if (semi_perfect) {
+						printf("#define IR_FOLD_SEMI_PERFECT_HASH\n\n");
+					}
+#endif
 					printf("static uint32_t _ir_fold_hashkey(uint32_t h)\n{\n\treturn (((h << %d) - h) << %d) %% %d;\n}\n", r1, r2, n);
 					return 1;
 				}
-#if 0
+#endif
+#if USE_ROL_HASH
 				memset(hash, 0, n * sizeof(uint32_t));
 				for (i = 0; i < count; i++) {
 					h = hash_rol2(mask[i] & 0x1fffff, r1, r2) % n;
-					if (hash[h]) break; /* collision */
+					if (hash[h]) {
+#if USE_SEMI_PERFECT_HASH
+						h++;
+						if (!hash[h]) {
+							hash[h] = mask[i];
+							semi_perfect = 1;
+							continue;
+						}
+#endif
+						break; /* collision */
+					}
 					hash[h] = mask[i];
 				}
 				if (i == count) {
 					print_hash(hash, n);
-					printf("static uint32_t _ir_fold_hashkey(uint32_t h)\n{\nreturn 0; /*rol2(%u,%u,%u)*/\n}\n", r1, r2, n);
+#if USE_SEMI_PERFECT_HASH
+					if (semi_perfect) {
+						printf("#define IR_FOLD_SEMI_PERFECT_HASH\n\n");
+					}
+#endif
+					printf("static uint32_t _ir_fold_hashkey(uint32_t h)\n{\nreturn ir_rol32((ir_rol32(h, %d) - h), %d) %% %d;\n}\n", r1, r2, n);
 					return 1;
 				}
 #endif
@@ -195,7 +238,7 @@ static int parse_rule(const char *buf)
 	return mask;
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	char buf[4096];
 	FILE *f = stdin;
@@ -211,6 +254,9 @@ int main()
 	ir_strtab_lookup(&strtab, #name, sizeof(#name) - 1, IR_ ## name + 1);
 
 	IR_OPS(IR_OP_ADD)
+
+	ir_strtab_lookup(&strtab, "C_INTPTR",  sizeof("C_INTPTR") - 1, IR_C_INTPTR + 1);
+	ir_strtab_lookup(&strtab, "C_UINTPTR", sizeof("C_IINTPTR") - 1, IR_C_UINTPTR + 1);
 
 	while (fgets(buf, sizeof(buf) - 1, f)) {
 		size_t len = strlen(buf);

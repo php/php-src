@@ -19,7 +19,7 @@ prompt> string(4) "test"
 prompt> [Stack in foo() (8 ops)]
 
 foo:
-     ; (lines=8, args=1, vars=1, tmps=2)
+     ; (lines=8, args=1, vars=1, tmps=%d)
      ; %s:14-16
 L0014 0000 CV0($baz) = RECV 1
 L0015 0001 INIT_FCALL %d %d string("var_dump")

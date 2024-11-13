@@ -78,8 +78,7 @@ mysqli
     if (1 !== ($tmp = mysqli_affected_rows($link)))
         printf("[025] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
-    $charsets = array('utf8');
-    foreach ($charsets as $k => $charset) {
+    foreach (['utf8'] as $charset) {
         if (!($res = mysqli_query($link, sprintf("SHOW CHARACTER SET LIKE '%s'", $charset))))
             continue;
         mysqli_free_result($res);

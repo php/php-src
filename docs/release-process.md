@@ -54,7 +54,6 @@ releases.
 
 3. Ensure that the relevant tests on CI are green.
 
-   - https://travis-ci.com/github/php/php-src
    - https://cirrus-ci.com/github/php/php-src
    - https://github.com/php/php-src/actions
 
@@ -239,7 +238,18 @@ slightly different steps. We'll call attention where the steps differ.
    git tag -s -u YOURKEYID php-X.Y.ZRCn -m "Tag for php-X.Y.ZRCn"
    ```
 
-9. 🔷 **For post-GA releases only,** switch back to the *version branch* for
+9. 🔸 **For pre-GA releases only,** switch back to the `master` (for alphas and betas),
+   or `PHP-X.Y` (for RCs), and update a `NEWS` for the new version. See
+   [Update NEWS for PHP 8.2.0 alpha2][] and [Update NEWS for PHP 8.2.0RC6][] for a real example.
+
+   Commit the changes to the `master` (or `PHP-X.Y`) branch.
+
+   ```shell
+   git add -p
+   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.Z alpha2"
+   ```
+
+   🔷 **For post-GA releases only,** switch back to the *version branch* for
    your release (e.g., `PHP-8.2`) and bump the version numbers in
    `main/php_version.h`, `Zend/zend.h`, `configure.ac` and `NEWS`. This prepares
    the version branch for the next version.
@@ -777,10 +787,10 @@ slightly different steps. We'll call attention where the steps differ.
    > want their email client to automatically send the reply to each list, as
    > often occurs.
 
-11. Coordinate with the social media team (i.e., Derick) to post a tweet with
-    the release announcement and link to the news entry on php.net.
-    ([@official_php](https://twitter.com/official_php))
-
+13. Coordinate with the social media team (i.e., Derick) to
+    [create a PR request](https://github.com/derickr/toot-together/blob/main/toots/README.md)
+    for posting the release announcement to Mastodon. Posts need to be
+    approved.
 
 ## Re-releasing the same version or a patch-level (i.e., `-plN`)
 
@@ -918,13 +928,13 @@ feature development that cannot go into the new version.
    All the changes that are already present in the previous version NEWS should be
    removed. It means all bug fixes that went to the previous version as well should
    have their entries removed. It is possible to use `grep` to compare the changes.
-   For exampe if `82/NEWS` is NEWS for PHP 8.2 and `83/NEWS` is NEWS file for PHP 8.3,
+   For example if `82/NEWS` is NEWS for PHP 8.2 and `83/NEWS` is NEWS file for PHP 8.3,
    then following command will show changes present in both files:
 
    ```sh
    grep -Fxf 82/NEWS 83/NEWS
    ```
-    
+
 
 5. On the announcement day for the initial stable version (or shortly before),
    update the `Expires` field in the <https://www.php.net/.well-known/security.txt>
@@ -943,7 +953,7 @@ feature development that cannot go into the new version.
    yearly cadence, coinciding with our X.Y.0 releases.
 
    Please see the instructions for
-   [making changes to security.txt](security-policies.md#making-changes-to-securitytxt).
+   [making changes to security.txt][security-txt].
 
 
 ## Prime the selection of release managers for the next version
@@ -971,12 +981,42 @@ volunteers to begin the selection process for the next release managers.
 
 ## New release manager checklist
 
-1. Email systems@php.net to get setup for access to downloads.php.net and to be
-   added to the release-managers@php.net distribution list.
+1. Request membership to the
+   [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-2. Request membership to the release managers group on GitHub.
+2. Subscribe to the php-announce@lists.php.net mailing list by emailing
+   php-announce+subscribe@lists.php.net
 
-3. Create a [GPG key][] for your @php.net address.
+3. Email systems@php.net to get setup for access to downloads.php.net, to be
+   added to the release-managers@php.net distribution list, and to be added to
+   the moderators for php-announce@lists.php.net so you are able to moderate
+   your release announcements.
+
+   Provide the following information in a single email:
+
+   - Preferred Unix username (will also become part of location to download RCs,
+     such as `https://downloads.php.net/~derick/`).
+   - An SSH public key, preferably a new unique one for PHP systems and
+     projects.
+   - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
+     up access to downloads.php.net through jump hosts, and provide a
+     `.google_authenticator` file for 2FA.
+   - Your @php.net email address to use for the release-managers@php.net
+     distribution list and php-announce@lists.php.net moderator address. This
+     should preferably not forward to a Gmail address.
+   - Your GitHub account name, so that your membership to the release managers
+     group may be approved.
+
+   A system admin will then contact you to go through with steps 5 through 8 of
+   [2FA setup instructions](https://wiki.php.net/systems#fa_setup_instructions).
+
+   > 💬 **Hint** \
+   > To send email from your @php.net address, you will need to use a custom
+   > SMTP server. If you use Gmail, you may
+   > "[Send emails from a different address or alias][]."
+
+
+4. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -1041,15 +1081,6 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-4. Request moderation access to php-announce@lists.php.net
-   so you are able to moderate your release announcements. All the announcements
-   should be sent from your @php.net address.
-
-   > 💬 **Hint** \
-   > To send email from your @php.net address, you will need to use a custom
-   > SMTP server. If you use Gmail, you may
-   > "[Send emails from a different address or alias][]."
-
 5. Make sure you have the following repositories cloned locally:
 
    * https://github.com/php/php-src
@@ -1065,6 +1096,8 @@ volunteers to begin the selection process for the next release managers.
 [Update versions for PHP 8.1.6RC1]: https://github.com/php/php-src/commit/40e8ced23898e3069340ca03ea5febc5361015ad
 [Update NEWS for PHP 8.1.6RC1]: https://github.com/php/php-src/commit/a4fdeaebe419b88e3b4a1f5aba845c2d4e81fd4e
 [Prepare for PHP 8.1.0RC1]: https://github.com/php/php-src/commit/5764414eb8900ae98020a3c20693f4fb793efa99
+[Update NEWS for PHP 8.2.0 alpha2]: https://github.com/php/php-src/commit/418f7211f71658d79d934861be20f277db96fe2c
+[Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
 [Bump for 8.1.8-dev]: https://github.com/php/php-src/commit/3b6ee1eb19c14c3339ebfcf5c967065a9f828971
 [GitHub command line tool]: https://cli.github.com
 [Announce 8.1.0RC3]: https://github.com/php/web-qa/commit/f264b711fd3827803b79bbb342959eae57ea502b
@@ -1084,3 +1117,4 @@ volunteers to begin the selection process for the next release managers.
 [Generating a new GPG key]: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 [sign your GPG key]: https://carouth.com/articles/signing-pgp-keys/
 [Send emails from a different address or alias]: https://support.google.com/mail/answer/22370?hl=en
+[security-txt]: https://github.com/php/policies/blob/main/security-policies.rst#making-changes-to-securitytxt

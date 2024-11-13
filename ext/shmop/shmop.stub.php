@@ -12,7 +12,7 @@ function shmop_open(int $key, string $mode, int $permissions, int $size): Shmop|
 
 function shmop_read(Shmop $shmop, int $offset, int $size): string {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.0', message: 'as Shmop objects are freed automatically')]
 function shmop_close(Shmop $shmop): void {}
 
 function shmop_size(Shmop $shmop): int {}

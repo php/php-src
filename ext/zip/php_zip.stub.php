@@ -4,64 +4,64 @@
 
 /**
  * @return resource|int|false
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::open() instead')]
 function zip_open(string $filename) {}
 
 /**
  * @param resource $zip
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::close() instead')]
 function zip_close($zip): void {}
 
 /**
  * @param resource $zip
  * @return resource|false
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_read($zip) {}
 
 /**
  * @param resource $zip_dp
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0')]
 function zip_entry_open($zip_dp, $zip_entry, string $mode = "rb"): bool {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0')]
 function zip_entry_close($zip_entry): bool {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::getFromIndex() instead')]
 function zip_entry_read($zip_entry, int $len = 1024): string|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_name($zip_entry): string|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_compressedsize($zip_entry): int|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_filesize($zip_entry): int|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_compressionmethod($zip_entry): string|false {}
 
 class ZipArchive implements Countable
@@ -109,8 +109,8 @@ class ZipArchive implements Countable
 #ifdef ZIP_FL_RECOMPRESS
     /**
      * @cvalue ZIP_FL_RECOMPRESS
-     * @deprecated
      */
+    #[\Deprecated(since: '8.3')]
     public const int FL_RECOMPRESS = UNKNOWN;
 #endif
     /**
@@ -443,6 +443,13 @@ class ZipArchive implements Countable
      * @cvalue ZIP_ER_NOT_ALLOWED
      */
     public const int ER_NOT_ALLOWED = UNKNOWN;
+#endif
+#ifdef ZIP_ER_TRUNCATED_ZIP
+    /**
+     * Possibly truncated or corrupted zip archive
+     * @cvalue ZIP_ER_TRUNCATED_ZIP
+     */
+    public const int ER_TRUNCATED_ZIP = UNKNOWN;
 #endif
 #ifdef ZIP_AFL_RDONLY
     /**

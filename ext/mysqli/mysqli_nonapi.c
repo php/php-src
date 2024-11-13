@@ -17,18 +17,16 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
-#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+#define ERROR_ARG_POS(arg_num) (hasThis() ? (arg_num-1) : (arg_num))
 
 #define SAFE_STR(a) ((a)?a:"")
 
@@ -574,7 +572,7 @@ PHP_FUNCTION(mysqli_query)
 	}
 
 	if (!query_len) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "cannot be empty");
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(2));
 		RETURN_THROWS();
 	}
 	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT &&
@@ -637,14 +635,12 @@ PHP_FUNCTION(mysqli_query)
 
 #include "php_network.h"
 /* {{{ mysqlnd_zval_array_to_mysqlnd_array functions */
-static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_array)
+static zend_result mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_array)
 {
 	zval *elem;
 	int i = 0, current = 0;
 
-	if (Z_TYPE_P(in_array) != IS_ARRAY) {
-		return SUCCESS;
-	}
+	ZEND_ASSERT(Z_TYPE_P(in_array) == IS_ARRAY);
 	*out_array = ecalloc(zend_hash_num_elements(Z_ARRVAL_P(in_array)) + 1, sizeof(MYSQLND *));
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(in_array), elem) {
 		i++;
@@ -1017,7 +1013,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 		RETURN_THROWS();
 	}
 	if (name && !name_len) {
-		zend_argument_value_error(ERROR_ARG_POS(3), "cannot be empty");
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(3));
 		RETURN_THROWS();
 	}
 
@@ -1041,7 +1037,7 @@ PHP_FUNCTION(mysqli_savepoint)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (name_len == 0) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "cannot be empty");
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(2));
 		RETURN_THROWS();
 	}
 
@@ -1065,7 +1061,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (name_len == 0) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "cannot be empty");
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(2));
 		RETURN_THROWS();
 	}
 	if (FAIL == mysqlnd_release_savepoint(mysql->mysql, name)) {

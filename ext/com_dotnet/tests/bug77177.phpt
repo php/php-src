@@ -2,6 +2,10 @@
 Bug #77177 (Serializing or unserializing COM objects crashes)
 --EXTENSIONS--
 com_dotnet
+--SKIPIF--
+<?php
+if (!class_exists("dotnet")) die("skip mscoree not available");
+?>
 --FILE--
 <?php
 $com = new COM("WScript.Shell");

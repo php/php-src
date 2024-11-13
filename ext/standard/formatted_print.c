@@ -16,14 +16,11 @@
 
 #include <math.h>				/* modf() */
 #include "php.h"
-#include "ext/standard/head.h"
-#include "php_string.h"
 #include "zend_execute.h"
-#include <stdio.h>
 
 #include <locale.h>
 #ifdef ZTS
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* for localeconv_r() */
 #define LCONV_DECIMAL_POINT (*lconv.decimal_point)
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)

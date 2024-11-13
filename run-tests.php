@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | https://php.net/license/3_01.txt                                     |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -75,9 +75,11 @@ Options:
 
     -s <file>   Write output to <file>.
 
-    -x          Sets 'SKIP_SLOW_TESTS' environmental variable.
+    -x          Sets 'SKIP_SLOW_TESTS' environment variable.
 
-    --offline   Sets 'SKIP_ONLINE_TESTS' environmental variable.
+    --online    Prevents setting the 'SKIP_ONLINE_TESTS' environment variable.
+
+    --offline   Sets 'SKIP_ONLINE_TESTS' environment variable (default).
 
     --verbose
     -v          Verbose mode.
@@ -306,8 +308,6 @@ function main(): void
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
-    define('TRAVIS_CI', (bool) getenv('TRAVIS'));
-
     // Determine the tests to be run.
 
     $test_files = [];
@@ -355,6 +355,7 @@ function main(): void
     $num_repeats = 1;
     $show_progress = true;
     $ignored_by_ext = [];
+    $online = null;
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -553,8 +554,11 @@ function main(): void
                 case 'x':
                     $environment['SKIP_SLOW_TESTS'] = 1;
                     break;
+                case '--online':
+                    $online = true;
+                    break;
                 case '--offline':
-                    $environment['SKIP_ONLINE_TESTS'] = 1;
+                    $online = false;
                     break;
                 case '--shuffle':
                     $shuffle = true;
@@ -635,6 +639,13 @@ function main(): void
                 die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
             }
         }
+    }
+
+    if ($online === null && !isset($environment['SKIP_ONLINE_TESTS'])) {
+        $online = false;
+    }
+    if ($online !== null) {
+        $environment['SKIP_ONLINE_TESTS'] = $online ? '0' : '1';
     }
 
     if ($selected_tests && count($test_files) === 0) {
@@ -773,23 +784,6 @@ function main(): void
     }
 }
 
-if (!function_exists("hrtime")) {
-    /**
-     * @return array|float|int
-     */
-    function hrtime(bool $as_num = false)
-    {
-        $t = microtime(true);
-
-        if ($as_num) {
-            return $t * 1000000000;
-        }
-
-        $s = floor($t);
-        return [0 => $s, 1 => ($t - $s) * 1000000000];
-    }
-}
-
 function verify_config(string $php): void
 {
     if (empty($php) || !file_exists($php)) {
@@ -856,7 +850,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         $ext_dir = ini_get('extension_dir');
         foreach (scandir($ext_dir) as $file) {
             if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
-                if (!extension_loaded($matches[1]) && @dl($matches[1])) {
+                if (!extension_loaded($matches[1])) {
                     $exts[] = $matches[1];
                 }
             }
@@ -903,7 +897,7 @@ function save_results(string $output_file, bool $prompt_to_save_results): void
 {
     global $sum_results, $failed_test_summary, $PHP_FAILED_TESTS, $php;
 
-    if (getenv('NO_INTERACTION') || TRAVIS_CI) {
+    if (getenv('NO_INTERACTION')) {
         return;
     }
 
@@ -1083,7 +1077,7 @@ function test_sort($a, $b): int
 }
 
 //
-//  Write the given text to a temporary file, and return the filename.
+//  Write the given text to a temporary file.
 //
 
 function save_text(string $filename, string $text, ?string $filename_copy = null): void
@@ -1145,7 +1139,7 @@ function system_with_timeout(
     // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
     // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
     if (IS_WINDOWS) {
-        $commandline = 'start "" /b /wait ' . $commandline;
+        $commandline = 'start "" /b /wait ' . $commandline . ' & exit';
     }
 
     $data = '';
@@ -1427,7 +1421,6 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
                 "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
-                "TRAVIS_CI" => TRAVIS_CI
             ]
         ])) . "\n";
 
@@ -1606,7 +1599,6 @@ escape:
                                 'E_USER_ERROR',
                                 'E_USER_WARNING',
                                 'E_USER_NOTICE',
-                                'E_STRICT', // TODO Cleanup when removed from Zend Engine.
                                 'E_RECOVERABLE_ERROR',
                                 'E_DEPRECATED',
                                 'E_USER_DEPRECATED'
@@ -2167,6 +2159,9 @@ TEST $file
         } elseif (!strncasecmp('xleak', $output, 5)) {
             // Pretend we have an XLEAK section
             $test->setSection('XLEAK', ltrim(substr($output, 5)));
+        } elseif (!strncasecmp('flaky', $output, 5)) {
+            // Pretend we have a FLAKY section
+            $test->setSection('FLAKY', ltrim(substr($output, 5)));
         } elseif ($output !== '') {
             show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF');
             $PHP_FAILED_TESTS['BORKED'][] = [
@@ -2324,7 +2319,9 @@ TEST $file
         }
 
         $env['CONTENT_LENGTH'] = strlen($request);
-        $env['REQUEST_METHOD'] = 'POST';
+        if (empty($env['REQUEST_METHOD'])) {
+            $env['REQUEST_METHOD'] = 'POST';
+        }
 
         if (empty($request)) {
             $junit->markTestAs('BORK', $shortname, $tested, null, 'empty $request');
@@ -2858,8 +2855,8 @@ function expectf_to_regex(?string $wanted): string
         '%e' => preg_quote(DIRECTORY_SEPARATOR, '/'),
         '%s' => '[^\r\n]+',
         '%S' => '[^\r\n]*',
-        '%a' => '.+',
-        '%A' => '.*',
+        '%a' => '.+?',
+        '%A' => '.*?',
         '%w' => '\s*',
         '%i' => '[+-]?\d+',
         '%d' => '\d+',
@@ -2869,19 +2866,6 @@ function expectf_to_regex(?string $wanted): string
         '%0' => '\x00',
     ]);
 }
-
-/**
- * @return bool|int
- */
-function comp_line(string $l1, string $l2, bool $is_reg)
-{
-    if ($is_reg) {
-        return preg_match('/^' . $l1 . '$/s', $l2);
-    }
-
-    return !strcmp($l1, $l2);
-}
-
 /**
  * Map "Zend OPcache" to "opcache" and convert all ext names to lowercase.
  */

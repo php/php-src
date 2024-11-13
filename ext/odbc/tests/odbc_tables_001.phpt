@@ -27,13 +27,17 @@ var_dump(odbc_fetch_row($result));
 
 ?>
 --EXPECTF--
-resource(%d) of type (odbc result)
+object(Odbc\Result)#%d (%d) {
+}
 bool(false)
-resource(%d) of type (odbc result)
+object(Odbc\Result)#%d (%d) {
+}
 bool(true)
 bool(true)
-resource(%d) of type (odbc result)
+object(Odbc\Result)#%d (%d) {
+}
 bool(true)
 bool(true)
-resource(%d) of type (odbc result)
+object(Odbc\Result)#%d (%d) {
+}
 bool(false)

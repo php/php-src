@@ -97,9 +97,9 @@ lxb_html_tree_error_id_t;
 
 typedef struct {
     lxb_html_tree_error_id_t id;
-    size_t                    line;
-    size_t                    column;
-    size_t                    length;
+    size_t                   line;
+    size_t                   column;
+    size_t                   length;
 }
 lxb_html_tree_error_t;
 
