@@ -23,6 +23,7 @@ static zend_result uriparser_init_parser(void);
 static void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors);
 static zend_class_entry *uriparser_get_uri_ce(void);
 static void *uriparser_clone_uri(void *uri);
+static zend_result uriparser_normalize_uri(void *uri);
 static zend_string *uriparser_uri_to_string(void *uri, bool exclude_fragment);
 static void uriparser_free_uri(void *uri);
 static zend_result uriparser_destroy_parser(void);
@@ -35,6 +36,7 @@ const uri_handler_t uriparser_uri_handler = {
 	uriparser_parse_uri,
 	uriparser_get_uri_ce,
 	uriparser_clone_uri,
+	uriparser_normalize_uri,
 	uriparser_uri_to_string,
 	uriparser_free_uri,
 	uriparser_destroy_parser,
@@ -557,6 +559,17 @@ static void *uriparser_clone_uri(void *uri)
 	memcpy(new_uriparser_uri, uriparser_uri, sizeof(UriUriA));
 
 	return new_uriparser_uri;
+}
+
+static zend_result uriparser_normalize_uri(void *uri)
+{
+	UriUriA *uriparser_uri = (UriUriA *) uri;
+
+	if (uriNormalizeSyntaxA(uriparser_uri) != URI_SUCCESS) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
 }
 
 static zend_string *uriparser_uri_to_string(void *uri, bool exclude_fragment)

@@ -27,6 +27,7 @@ static zend_result lexbor_init_parser(void);
 static void *lexbor_parse_uri(const zend_string *url_str, const zend_string *base_url_str, zval *errors);
 static zend_class_entry *lexbor_get_uri_ce(void);
 static void *lexbor_clone_uri(void *uri);
+static zend_result lexbor_normalize_uri(void *uri);
 static zend_string *lexbor_uri_to_string(void *uri, bool exclude_fragment);
 static void lexbor_free_uri(void *uri);
 static zend_result lexbor_destroy_parser(void);
@@ -42,6 +43,7 @@ const uri_handler_t lexbor_uri_handler = {
 	lexbor_parse_uri,
 	lexbor_get_uri_ce,
 	lexbor_clone_uri,
+	lexbor_normalize_uri,
 	lexbor_uri_to_string,
 	lexbor_free_uri,
 	lexbor_destroy_parser,
@@ -379,6 +381,11 @@ static void *lexbor_clone_uri(void *uri)
 	lxb_url_t *lexbor_uri = (lxb_url_t *) uri;
 
 	return lxb_url_clone(lexbor_parser->mraw, lexbor_uri);
+}
+
+static zend_result lexbor_normalize_uri(void *uri)
+{
+	return SUCCESS;
 }
 
 static lxb_status_t lexbor_serialize_callback(const lxb_char_t *data, size_t length, void *ctx)

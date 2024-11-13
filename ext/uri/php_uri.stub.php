@@ -27,6 +27,11 @@ class UninitializedUriException extends \Uri\UriException
 }
 
 /** @strict-properties */
+class UriOperationException extends \Uri\UriException
+{
+}
+
+/** @strict-properties */
 class InvalidUriException extends \Uri\UriException
 {
     public readonly array $errors;
@@ -136,6 +141,10 @@ interface UriInterface extends \Stringable
 
     public function equalsTo(\Uri\UriInterface $uri, bool $excludeFragment = true): bool {}
 
+    public function normalize(): static {}
+
+    public function toNormalizedString(): string {}
+
     public function __toString(): string {}
 }
 
@@ -196,6 +205,10 @@ readonly class Rfc3986Uri implements \Uri\UriInterface
     public function withFragment(?string $fragment): static {}
 
     public function equalsTo(\Uri\UriInterface $uri, bool $excludeFragment = true): bool {}
+
+    public function normalize(): static {}
+
+    public function toNormalizedString(): string {}
 
     public function __toString(): string {}
 
@@ -278,6 +291,12 @@ readonly class WhatWgUri implements \Uri\UriInterface
 
     /** @implementation-alias Uri\Rfc3986Uri::equalsTo */
     public function equalsTo(\Uri\UriInterface $uri, bool $excludeFragment = true): bool {}
+
+    /** @implementation-alias Uri\Rfc3986Uri::normalize */
+    public function normalize(): static {}
+
+    /** @implementation-alias Uri\Rfc3986Uri::toNormalizedString */
+    public function toNormalizedString(): string {}
 
     /** @implementation-alias Uri\Rfc3986Uri::__toString */
     public function __toString(): string {}

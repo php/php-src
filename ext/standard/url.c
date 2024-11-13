@@ -463,6 +463,11 @@ static void *parse_url_parse_uri(const zend_string *uri_str, const zend_string *
 	return php_url_parse_ex2(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), &has_port);
 }
 
+static zend_result parse_url_normalize_uri(void *uri)
+{
+	ZEND_UNREACHABLE();
+}
+
 static zend_string *parse_url_uri_to_string(void *uri, bool exclude_fragment)
 {
 	ZEND_UNREACHABLE();
@@ -481,6 +486,7 @@ const uri_handler_t parse_url_uri_handler = {
 	parse_url_parse_uri,
 	parse_url_get_uri_ce,
 	parse_url_clone_uri,
+	parse_url_normalize_uri,
 	parse_url_uri_to_string,
 	parse_url_free_uri,
 	parse_url_destroy_parser,

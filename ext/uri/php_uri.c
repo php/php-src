@@ -36,6 +36,7 @@ zend_class_entry *whatwg_uri_ce;
 zend_object_handlers whatwg_uri_object_handlers;
 zend_class_entry *uri_exception_ce;
 zend_class_entry *uninitialized_uri_exception_ce;
+zend_class_entry *uri_operation_exception_ce;
 zend_class_entry *invalid_uri_exception_ce;
 zend_class_entry *whatwg_error_ce;
 
@@ -382,11 +383,11 @@ PHP_METHOD(Uri_Rfc3986Uri, equalsTo)
 	zend_object *that_object;
 	bool exclude_fragment = true;
 
-    ZEND_PARSE_PARAMETERS_START(1, 2)
-    	Z_PARAM_OBJ_OF_CLASS(that_object, uri_interface_ce)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJ_OF_CLASS(that_object, uri_interface_ce)
 		Z_PARAM_OPTIONAL
-    	Z_PARAM_BOOL(exclude_fragment)
-    ZEND_PARSE_PARAMETERS_END();
+		Z_PARAM_BOOL(exclude_fragment)
+	ZEND_PARSE_PARAMETERS_END();
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *this_internal_uri = uri_internal_from_obj(this_object);
@@ -409,6 +410,53 @@ PHP_METHOD(Uri_Rfc3986Uri, equalsTo)
 
 	zend_string_release(this_str);
 	zend_string_release(that_str);
+}
+
+PHP_METHOD(Uri_Rfc3986Uri, normalize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+
+	zend_object *new_object = uri_clone_obj_handler(this_object);
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		RETURN_THROWS();
+	}
+	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+
+	if (UNEXPECTED(internal_uri->handler->normalize_uri(new_internal_uri->uri) == FAILURE)) {
+		zend_throw_error(uri_operation_exception_ce, "Failed to normalize %s", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
+
+	ZVAL_OBJ(return_value, new_object);
+}
+
+PHP_METHOD(Uri_Rfc3986Uri, toNormalizedString)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(object);
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, object);
+
+	void *new_uri = internal_uri->handler->clone_uri(internal_uri->uri);
+	if (UNEXPECTED(new_uri == NULL)) {
+		zend_throw_error(uri_operation_exception_ce, "Failed to normalize %s", ZSTR_VAL(object->ce->name));
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(internal_uri->handler->normalize_uri(new_uri) == FAILURE)) {
+		zend_throw_error(uri_operation_exception_ce, "Failed to normalize %s", ZSTR_VAL(object->ce->name));
+		internal_uri->handler->free_uri(new_uri);
+		RETURN_THROWS();
+	}
+
+	RETVAL_STR(internal_uri->handler->uri_to_string(new_uri, false));
+	internal_uri->handler->free_uri(new_uri);
 }
 
 PHP_METHOD(Uri_Rfc3986Uri, __toString)
@@ -445,7 +493,7 @@ static void uri_restore_custom_properties(zend_object *object, uri_internal_t *i
 		}
 
 		zend_update_property_ex(object->ce, object, prop_name, prop_val);
-		if (EG(exception)) {
+		if (UNEXPECTED(EG(exception) != NULL)) {
 			break;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -659,7 +707,7 @@ static zend_object *uri_clone_obj_handler(zend_object *object)
 
 	void *uri = internal_uri->handler->clone_uri(internal_uri->uri);
 	if (UNEXPECTED(uri == NULL)) {
-		zend_throw_error(NULL, "Failed to clone %s", ZSTR_VAL(object->ce->name));
+		zend_throw_error(uri_operation_exception_ce, "Failed to clone %s", ZSTR_VAL(object->ce->name));
 		return &new_uri_object->std;
 	}
 
@@ -724,6 +772,7 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler)
 	ZEND_ASSERT(uri_handler->parse_uri != NULL);
 	ZEND_ASSERT(uri_handler->get_uri_ce != NULL);
 	ZEND_ASSERT(uri_handler->clone_uri != NULL);
+	ZEND_ASSERT(uri_handler->normalize_uri != NULL);
 	ZEND_ASSERT(uri_handler->uri_to_string != NULL);
 	ZEND_ASSERT(uri_handler->free_uri != NULL);
 	ZEND_ASSERT(uri_handler->destroy_parser != NULL);
@@ -746,6 +795,7 @@ static PHP_MINIT_FUNCTION(uri)
 
 	uri_exception_ce = register_class_Uri_UriException(zend_ce_exception);
 	uninitialized_uri_exception_ce = register_class_Uri_UninitializedUriException(uri_exception_ce);
+	uri_operation_exception_ce = register_class_Uri_UriOperationException(uri_exception_ce);
 	invalid_uri_exception_ce = register_class_Uri_InvalidUriException(uri_exception_ce);
 	whatwg_error_ce = register_class_Uri_WhatWgError();
 
