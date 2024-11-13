@@ -11,7 +11,7 @@ runs:
         set -x
         BREW_OPT="$(brew --prefix)"/opt
         brew --cellar
-        ls -l $BREW_OPT/bin
+        ls -l $BREW_OPT
         export PATH="$BREW_OPT/bison/bin:$PATH"
         export PATH="$(brew --cellar)/pkgconf/2.3.0/bin:$PATH"
         ls -l $(brew --cellar)/pkgconf/2.3.0/bin
