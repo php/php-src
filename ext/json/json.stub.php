@@ -156,6 +156,8 @@ function json_encode(mixed $value, int $flags = 0, int $depth = 512): string|fal
 
 function json_decode(string $json, ?bool $associative = null, int $depth = 512, int $flags = 0): mixed {}
 
+function json_validate(string $json, int $depth = 512, int $flags = 0): bool {}
+
 function json_last_error(): int {}
 
 /** @refcount 1 */

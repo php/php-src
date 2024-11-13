@@ -64,10 +64,14 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
 __HALT_COMPILER();
 ?>
---EXPECT--
+--EXPECTF--
 <?php echo "first stub\n"; __HALT_COMPILER(); ?>
 <?php echo "second stub\n"; __HALT_COMPILER(); ?>
+
+Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
+
+Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>

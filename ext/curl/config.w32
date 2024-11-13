@@ -15,22 +15,20 @@ if (PHP_CURL != "no") {
 
 	if (CHECK_LIB("libcurl_a.lib;libcurl.lib", "curl", PHP_CURL) &&
 		CHECK_HEADER_ADD_INCLUDE("curl/easy.h", "CFLAGS_CURL") &&
-		SETUP_OPENSSL("curl", PHP_CURL) > 0 &&
+		SETUP_OPENSSL("curl", PHP_CURL) >= 2 &&
 		CHECK_LIB("winmm.lib", "curl", PHP_CURL) &&
 		CHECK_LIB("wldap32.lib", "curl", PHP_CURL) &&
 		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "curl", PHP_CURL))) ||
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "curl", PHP_CURL)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED))) &&
 		!isNaN(ver_num) &&
-		(ver_num <= parseInt("0x073b00") || ver_num > parseInt("0x073b00") &&
-			CHECK_LIB("normaliz.lib", "curl", PHP_CURL) &&
-			CHECK_LIB("libssh2.lib", "curl", PHP_CURL) &&
-			CHECK_LIB("nghttp2.lib", "curl", PHP_CURL))
+		(CHECK_LIB("normaliz.lib", "curl", PHP_CURL) &&
+		 CHECK_LIB("libssh2.lib", "curl", PHP_CURL) &&
+		 CHECK_LIB("nghttp2.lib", "curl", PHP_CURL))
 		) {
 		EXTENSION("curl", "interface.c multi.c share.c curl_file.c");
-		AC_DEFINE('HAVE_CURL', 1, 'Have cURL library');
+		AC_DEFINE('HAVE_CURL', 1, "Define to 1 if the PHP extension 'curl' is available.");
 		ADD_FLAG("CFLAGS_CURL", "/D CURL_STATICLIB /D PHP_CURL_EXPORTS=1");
 		PHP_INSTALL_HEADERS("ext/curl", "php_curl.h");
-		// TODO: check for curl_version_info
 	} else {
 		WARNING("curl not enabled; libraries and headers not found");
 	}

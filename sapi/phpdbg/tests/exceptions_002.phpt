@@ -17,13 +17,13 @@ prompt>
 Fatal error: Uncaught Error: Call to undefined function next_error() in eval()'d code:1
 Stack trace:
 #0 %s(16): unknown()
-#1 %s(20): {closure}()
+#1 %s(20): {closure:%s:%d}()
 #2 {main}
   thrown in eval()'d code on line 1
 prompt> [Uncaught Error in %s on line 16]
 Error: Call to undefined function foo() in %s:16
 Stack trace:
-#0 %s(20): {closure}()
+#0 %s(20): {closure:%s:%d}()
 #1 {main}
 [Script ended normally]
 prompt> [The stack contains nothing !]

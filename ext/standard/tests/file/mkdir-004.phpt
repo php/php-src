@@ -1,24 +1,20 @@
 --TEST--
-recursive mkdir() tests
---SKIPIF--
-<?php
-chdir("/");
-if (!@mkdir("testtmpskipifdir")) {
-    die("skip for root only");
-}
-rmdir("testtmpskipifdir");
-?>
+recursive mkdir() with unclean paths
 --FILE--
 <?php
+chdir(__DIR__);
+$dirpath = "./tmp/foo//bar/logs";
+mkdir($dirpath, 0777, true);
 
-var_dump(mkdir("/testdir/subdir", 0777, true));
-var_dump(rmdir("/testdir/subdir"));
-var_dump(rmdir("/testdir"));
-
-echo "Done\n";
+if (is_dir($dirpath)) {
+    echo "Ok.\n";
+} else {
+    echo "Failed.\n";
+}
+rmdir("./tmp/foo/bar/logs");
+rmdir("./tmp/foo/bar/");
+rmdir("./tmp/foo/");
+rmdir("./tmp/");
 ?>
 --EXPECT--
-bool(true)
-bool(true)
-bool(true)
-Done
+Ok.

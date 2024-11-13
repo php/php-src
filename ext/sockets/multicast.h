@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
  */
 
-#if defined(MCAST_JOIN_GROUP) && !defined(__APPLE__)
+// TODO using setsourcefilter api on freebsd to support both ipv4/ipv6.
+#if defined(MCAST_JOIN_GROUP) && !defined(__APPLE__) && !defined(__FreeBSD__)
 # define RFC3678_API 1
 /* has block/unblock and source membership, in this case for both IPv4 and IPv6 */
 # define HAS_MCAST_EXT 1
@@ -51,17 +52,17 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 								 int optname,
 								 zval *arg4);
 
-int php_if_index_to_addr4(
+zend_result php_if_index_to_addr4(
         unsigned if_index,
         php_socket *php_sock,
         struct in_addr *out_addr);
 
-int php_add4_to_if_index(
+zend_result php_add4_to_if_index(
         struct in_addr *addr,
         php_socket *php_sock,
         unsigned *if_index);
 
-int php_string_to_if_index(const char *val, unsigned *out);
+zend_result php_string_to_if_index(const char *val, unsigned *out);
 
 int php_mcast_join(
 	php_socket *sock,

@@ -29,54 +29,46 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
-
 
 /* Convert an integer VAL to a bc number NUM. */
 
-void
-bc_int2num (num, val)
-     bc_num *num;
-     int val;
+void bc_int2num(bc_num *num, int val)
 {
-  char buffer[30];
-  char *bptr, *vptr;
-  int  ix = 1;
-  char neg = 0;
+	char buffer[30];
+	char *bptr, *vptr;
+	int ix = 1;
+	char neg = 0;
 
-  /* Sign. */
-  if (val < 0)
-    {
-      neg = 1;
-      val = -val;
-    }
+	/* Sign. */
+	if (val < 0) {
+		neg = 1;
+		val = -val;
+	}
 
-  /* Get things going. */
-  bptr = buffer;
-  *bptr++ = val % BASE;
-  val = val / BASE;
+	/* Get things going. */
+	bptr = buffer;
+	*bptr++ = val % BASE;
+	val = val / BASE;
 
-  /* Extract remaining digits. */
-  while (val != 0)
-    {
-      *bptr++ = val % BASE;
-      val = val / BASE;
-      ix++; 		/* Count the digits. */
-    }
+	/* Extract remaining digits. */
+	while (val != 0) {
+		*bptr++ = val % BASE;
+		val = val / BASE;
+		/* Count the digits. */
+		ix++;
+	}
 
-  /* Make the number. */
-  bc_free_num (num);
-  *num = bc_new_num (ix, 0);
-  if (neg) (*num)->n_sign = MINUS;
+	/* Make the number. */
+	bc_free_num (num);
+	*num = bc_new_num (ix, 0);
+	if (neg) {
+		(*num)->n_sign = MINUS;
+	}
 
-  /* Assign the digits. */
-  vptr = (*num)->n_value;
-  while (ix-- > 0)
-    *vptr++ = *--bptr;
+	/* Assign the digits. */
+	vptr = (*num)->n_value;
+	while (ix-- > 0) {
+		*vptr++ = *--bptr;
+	}
 }

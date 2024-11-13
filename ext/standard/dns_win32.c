@@ -19,6 +19,7 @@
 #include <windows.h>
 #include <Winbase.h >
 #include <Windns.h>
+#include <Ws2tcpip.h>
 
 #include "php_dns.h"
 
@@ -107,7 +108,7 @@ PHP_FUNCTION(dns_check_record)
 	}
 
 	if (hostname_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -174,9 +175,14 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw
 	switch (type) {
 		case DNS_TYPE_A: {
 			IN_ADDR ipaddr;
+			char ip[INET_ADDRSTRLEN];
 			ipaddr.S_un.S_addr = (pRec->Data.A.IpAddress);
-			add_assoc_string(subarray, "type", "A");
-			add_assoc_string(subarray, "ip", inet_ntoa(ipaddr));
+			if (!inet_ntop(AF_INET, &ipaddr, ip, INET_ADDRSTRLEN)) {
+				ZVAL_UNDEF(subarray);
+			} else {
+				add_assoc_string(subarray, "type", "A");
+				add_assoc_string(subarray, "ip", ip);
+			}
 			break;
 		}
 
@@ -276,7 +282,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw
 							tp[0] = ':';
 							tp++;
 						}
-						tp += sprintf((char*)tp,"%x", out[i]);
+						tp += snprintf((char*)tp, sizeof(buf) - (tp - (char *) buf), "%x", out[i]);
 					} else {
 						if (!have_v6_break) {
 							have_v6_break = 1;

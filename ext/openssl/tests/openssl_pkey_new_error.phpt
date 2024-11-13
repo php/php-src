@@ -28,6 +28,6 @@ try {
 }
 ?>
 --EXPECT--
-openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given
-openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given
-openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given

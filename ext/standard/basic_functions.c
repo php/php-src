@@ -16,6 +16,8 @@
  */
 
 #include "php.h"
+#include "php_assert.h"
+#include "php_crypt.h"
 #include "php_streams.h"
 #include "php_main.h"
 #include "php_globals.h"
@@ -32,6 +34,7 @@
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
+#include "zend_enum.h"
 #include "zend_ini.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
@@ -66,8 +69,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #ifndef PHP_WIN32
 # include <netdb.h>
-#else
-#include "win32/inet.h"
 #endif
 
 #ifdef HAVE_ARPA_INET_H
@@ -80,6 +81,9 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #include <string.h>
 #include <locale.h>
+#ifdef HAVE_LANGINFO_H
+# include <langinfo.h>
+#endif
 
 #ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
@@ -110,7 +114,12 @@ PHPAPI php_basic_globals basic_globals;
 
 #include "php_fopen_wrappers.h"
 #include "streamsfuncs.h"
+#include "zend_frameless_function.h"
 #include "basic_functions_arginfo.h"
+
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
 
 typedef struct _user_tick_function_entry {
 	zend_fcall_info fci;
@@ -118,7 +127,7 @@ typedef struct _user_tick_function_entry {
 	bool calling;
 } user_tick_function_entry;
 
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 typedef struct {
 	char *putenv_string;
 	char *previous_value;
@@ -300,12 +309,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
-#ifdef ENABLE_TEST_CLASS
-	test_class_startup();
-#endif
-
-	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
-	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
+	rounding_mode_ce = register_class_RoundingMode();
 
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)
@@ -317,10 +321,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 #ifdef ZTS
 	BASIC_MINIT_SUBMODULE(localeconv)
-#endif
-
-#ifdef HAVE_NL_LANGINFO
-	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
 #ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
@@ -359,8 +359,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper);
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
-
-	BASIC_MINIT_SUBMODULE(hrtime)
 
 	return SUCCESS;
 }
@@ -427,6 +425,9 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	BASIC_RINIT_SUBMODULE(dir)
 	BASIC_RINIT_SUBMODULE(url_scanner_ex)
 
+	/* Initialize memory for last http headers */
+	ZVAL_UNDEF(&BG(last_http_headers));
+
 	/* Setup default context */
 	FG(default_context) = NULL;
 
@@ -491,6 +492,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_RSHUTDOWN_SUBMODULE(user_filters)
 	BASIC_RSHUTDOWN_SUBMODULE(browscap)
 
+	/* Free last http headers */
+	zval_ptr_dtor(&BG(last_http_headers));
+
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
 	return SUCCESS;
@@ -533,7 +537,6 @@ PHP_FUNCTION(constant)
 }
 /* }}} */
 
-#ifdef HAVE_INET_NTOP
 /* {{{ Converts a packed inet address to a human readable IP address string */
 PHP_FUNCTION(inet_ntop)
 {
@@ -562,9 +565,7 @@ PHP_FUNCTION(inet_ntop)
 	RETURN_STRING(buffer);
 }
 /* }}} */
-#endif /* HAVE_INET_NTOP */
 
-#ifdef HAVE_INET_PTON
 /* {{{ Converts a human readable IP address to a packed binary string */
 PHP_FUNCTION(inet_pton)
 {
@@ -597,42 +598,22 @@ PHP_FUNCTION(inet_pton)
 	RETURN_STRINGL(buffer, af == AF_INET ? 4 : 16);
 }
 /* }}} */
-#endif /* HAVE_INET_PTON */
 
 /* {{{ Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
 	char *addr;
 	size_t addr_len;
-#ifdef HAVE_INET_PTON
 	struct in_addr ip;
-#else
-	zend_ulong ip;
-#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(addr, addr_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef HAVE_INET_PTON
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ntohl(ip.s_addr));
-#else
-	if (addr_len == 0 || (ip = inet_addr(addr)) == INADDR_NONE) {
-		/* The only special case when we should return -1 ourselves,
-		 * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
-		 * not -1 or ~0 because of 32/64bit issues. */
-		if (addr_len == sizeof("255.255.255.255") - 1 &&
-			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)
-		) {
-			RETURN_LONG(0xFFFFFFFF);
-		}
-		RETURN_FALSE;
-	}
-	RETURN_LONG(ntohl(ip));
-#endif
 }
 /* }}} */
 
@@ -642,9 +623,7 @@ PHP_FUNCTION(long2ip)
 	zend_ulong ip;
 	zend_long sip;
 	struct in_addr myaddr;
-#ifdef HAVE_INET_PTON
 	char str[40];
-#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(sip)
@@ -654,15 +633,10 @@ PHP_FUNCTION(long2ip)
 	ip = (zend_ulong)sip;
 
 	myaddr.s_addr = htonl(ip);
-#ifdef HAVE_INET_PTON
-	if (inet_ntop(AF_INET, &myaddr, str, sizeof(str))) {
-		RETURN_STRING(str);
-	} else {
-		RETURN_FALSE;
-	}
-#else
-	RETURN_STRING(inet_ntoa(myaddr));
-#endif
+	const char* result = inet_ntop(AF_INET, &myaddr, str, sizeof(str));
+	ZEND_ASSERT(result != NULL);
+
+	RETURN_STRING(str);
 }
 /* }}} */
 
@@ -743,7 +717,7 @@ PHP_FUNCTION(getenv)
 
 	if (!str) {
 		array_init(return_value);
-		php_import_environment_variables(return_value);
+		php_load_environment_variables(return_value);
 		return;
 	}
 
@@ -1208,6 +1182,7 @@ PHP_FUNCTION(time_nanosleep)
 		RETURN_TRUE;
 	} else if (errno == EINTR) {
 		array_init(return_value);
+		MSAN_UNPOISON(php_rem);
 		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
 		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
 		return;
@@ -1228,6 +1203,7 @@ PHP_FUNCTION(time_sleep_until)
 	struct timespec php_req, php_rem;
 	uint64_t current_ns, target_ns, diff_ns;
 	const uint64_t ns_per_sec = 1000000000;
+	const double top_target_sec = (double)(UINT64_MAX / ns_per_sec);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(target_secs)
@@ -1235,6 +1211,11 @@ PHP_FUNCTION(time_sleep_until)
 
 	if (gettimeofday((struct timeval *) &tm, NULL) != 0) {
 		RETURN_FALSE;
+	}
+
+	if (UNEXPECTED(!(target_secs >= 0 && target_secs <= top_target_sec))) {
+		zend_argument_value_error(1, "must be between 0 and %" PRIu64, (uint64_t)top_target_sec);
+		RETURN_THROWS();
 	}
 
 	target_ns = (uint64_t) (target_secs * ns_per_sec);
@@ -1566,18 +1547,20 @@ PHP_FUNCTION(forward_static_call)
 /* {{{ Call a static method which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(forward_static_call_array)
 {
-	zval *params, retval;
+	zval retval;
+	HashTable *params;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 	zend_class_entry *called_scope;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_ARRAY(params)
+		Z_PARAM_ARRAY_HT(params)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_fcall_info_args(&fci, params);
 	fci.retval = &retval;
+	/* Add positional arguments */
+	fci.named_params = params;
 
 	called_scope = zend_get_called_scope(execute_data);
 	if (called_scope && fci_cache.calling_scope &&
@@ -1591,8 +1574,6 @@ PHP_FUNCTION(forward_static_call_array)
 		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
-
-	zend_fcall_info_args_clear(&fci, 1);
 }
 /* }}} */
 
@@ -2104,7 +2085,7 @@ PHP_FUNCTION(set_include_path)
 		RETVAL_FALSE;
 	}
 
-	key = zend_string_init("include_path", sizeof("include_path") - 1, 0);
+	key = ZSTR_INIT_LITERAL("include_path", 0);
 	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
 		zend_string_release_ex(key, 0);
 		zval_ptr_dtor_str(return_value);
@@ -2185,7 +2166,7 @@ PHP_FUNCTION(ignore_user_abort)
 	old_setting = (unsigned short)PG(ignore_user_abort);
 
 	if (!arg_is_null) {
-		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
+		zend_string *key = ZSTR_INIT_LITERAL("ignore_user_abort", 0);
 		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(key, 0);
 	}
@@ -2257,6 +2238,10 @@ PHP_FUNCTION(getservbyport)
 		RETURN_FALSE;
 	}
 
+	/* MSAN false positive, getservbyport() is not properly intercepted. */
+#if __has_feature(memory_sanitizer)
+	__msan_unpoison_string(serv->s_name);
+#endif
 	RETURN_STRING(serv->s_name);
 }
 /* }}} */
@@ -2524,7 +2509,7 @@ PHP_FUNCTION(parse_ini_file)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(filename) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

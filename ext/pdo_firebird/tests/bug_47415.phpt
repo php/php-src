@@ -4,22 +4,20 @@ Bug #47415 PDO_Firebird segfaults when passing lowercased column name to bindCol
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
+--XLEAK--
+A bug in firebird causes a memory leak when calling `isc_attach_database()`.
+See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require 'testdb.inc';
 
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-@$dbh->exec('DROP TABLE testz');
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$dbh->exec('CREATE TABLE testz (idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
-$dbh->exec('INSERT INTO testz VALUES(0, \'String0\')');
+$dbh->exec('CREATE TABLE test47415 (idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
+$dbh->exec('INSERT INTO test47415 VALUES(0, \'String0\')');
 
-$dbh->commit();
-
-$query = "SELECT idx, txt FROM testz ORDER by idx";
+$query = "SELECT idx, txt FROM test47415 ORDER by idx";
 $idx = $txt = 0;
 $stmt = $dbh->prepare($query);
 $stmt->bindColumn('idx', $idx);
@@ -30,12 +28,17 @@ var_dump($stmt->fetch());
 var_dump($stmt->rowCount());
 
 
-$stmt = $dbh->prepare('DELETE FROM testz');
+$stmt = $dbh->prepare('DELETE FROM test47415');
 $stmt->execute();
 
-$dbh->commit();
-
 unset($stmt);
+unset($dbh);
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh = getDbConnection();
+@$dbh->exec("DROP TABLE test47415");
 unset($dbh);
 ?>
 --EXPECT--

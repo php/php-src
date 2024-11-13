@@ -10,7 +10,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 // ldap_exop_passwd() allows to pass the DN, OLD and NEW passwords,
@@ -19,16 +19,16 @@ var_dump(
   $genpw = ldap_exop_passwd($link, "cn=userA,$base", "oops", "", $ctrls),
   $ctrls,
   $genpw = ldap_exop_passwd($link, "cn=userA,$base"),
-  test_bind($host, $port, "cn=userA,$base", $genpw, $protocol_version),
+  test_bind($uri, "cn=userA,$base", $genpw, $protocol_version),
   ldap_exop_passwd($link, "cn=userA,$base", $genpw, "newPassword"),
-  test_bind($host, $port, "cn=userA,$base", "newPassword", $protocol_version)
+  test_bind($uri, "cn=userA,$base", "newPassword", $protocol_version)
 );
 ?>
 --CLEAN--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 remove_dummy_data($link, $base);
 ?>

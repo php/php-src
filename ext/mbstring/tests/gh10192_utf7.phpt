@@ -75,7 +75,7 @@ foreach ($testcases as $title => $case) {
 --EXPECT--
 non-base64 character after +
 string(5) "UTF-8"
-string(5) "UTF-7"
+string(5) "UTF-8"
 bool(false)
 string(5) "UTF-7"
 bool(false)
@@ -93,7 +93,7 @@ int(0)
 
 base64 character before +
 string(5) "UTF-8"
-string(5) "UTF-7"
+string(5) "UTF-8"
 bool(false)
 string(5) "UTF-7"
 bool(false)
@@ -174,7 +174,7 @@ int(2)
 
 - and +
 string(5) "UTF-8"
-string(5) "UTF-7"
+string(5) "UTF-8"
 bool(false)
 string(5) "UTF-7"
 bool(false)
@@ -219,7 +219,7 @@ int(2)
 
 valid direct encoding character = after +
 string(5) "UTF-8"
-string(5) "UTF-7"
+string(5) "UTF-8"
 bool(false)
 string(5) "UTF-7"
 bool(false)
@@ -228,7 +228,7 @@ int(2)
 
 invalid direct encoding character ~ after +
 string(5) "UTF-8"
-string(5) "UTF-7"
+string(5) "UTF-8"
 bool(false)
 string(5) "UTF-7"
 bool(false)
@@ -237,7 +237,7 @@ int(2)
 
 invalid direct encoding character \ after +
 string(5) "UTF-8"
-string(5) "UTF-7"
+string(5) "UTF-8"
 bool(false)
 string(5) "UTF-7"
 bool(false)
@@ -246,7 +246,7 @@ int(2)
 
 invalid direct encoding character ESC after +
 string(5) "UTF-8"
-string(5) "UTF-7"
+string(5) "UTF-8"
 bool(false)
 string(5) "UTF-7"
 bool(false)

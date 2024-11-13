@@ -51,7 +51,7 @@ test.cdb
         echo "\n=";
         for ($i=0; $i < strlen($keys); $i++) {
             $key = substr($keys, $i, 1);
-            echo dba_fetch($key, $skip[$key], $db_file);
+            echo dba_fetch($key, $db_file, $skip[$key]);
             $skip[$key]++;
         }
         dba_close($db_file);

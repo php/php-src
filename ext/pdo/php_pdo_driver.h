@@ -24,6 +24,7 @@ typedef struct _pdo_dbh_t 		 pdo_dbh_t;
 typedef struct _pdo_dbh_object_t pdo_dbh_object_t;
 typedef struct _pdo_stmt_t		 pdo_stmt_t;
 typedef struct _pdo_row_t		 pdo_row_t;
+typedef	struct _pdo_scanner_t	 pdo_scanner_t;
 struct pdo_bound_param_data;
 
 #ifndef TRUE
@@ -33,7 +34,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20170320
+#define PDO_DRIVER_API	20240423
 
 /* Doctrine hardcodes these constants, avoid changing their values. */
 enum pdo_param_type {
@@ -275,6 +276,9 @@ typedef void (*pdo_dbh_request_shutdown)(pdo_dbh_t *dbh);
  * with any zvals in the driver_data that would be freed if the handle is destroyed. */
 typedef void (*pdo_dbh_get_gc_func)(pdo_dbh_t *dbh, zend_get_gc_buffer *buffer);
 
+/* driver specific re2s sql parser, overrides the default one if present */
+typedef int (*pdo_dbh_sql_scanner)(pdo_scanner_t *s);
+
 /* for adding methods to the dbh or stmt objects
 pointer to a list of driver specific functions. The convention is
 to prefix the function names using the PDO driver name; this will
@@ -307,6 +311,7 @@ struct pdo_dbh_methods {
 	/* if defined to NULL, PDO will use its internal transaction tracking state */
 	pdo_dbh_txn_func		in_transaction;
 	pdo_dbh_get_gc_func		get_gc;
+	pdo_dbh_sql_scanner		scanner;
 };
 
 /* }}} */
@@ -647,11 +652,20 @@ struct _pdo_row_t {
 	pdo_stmt_t *stmt;
 };
 
+struct _pdo_scanner_t {
+	const char *ptr, *cur, *tok, *end;
+};
+
 /* Call this in MINIT to register the PDO driver.
  * Registering the driver might fail and should be reported accordingly in MINIT. */
 PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver);
 /* call this in MSHUTDOWN to unregister your PDO driver */
 PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver);
+
+/* Call this in MINIT to register the PDO driver specific class entry.
+ * Registering the driver specific class entry might fail and should be reported accordingly in MINIT.
+ * Unregistering the class entry is not necessary, since php_pdo_unregister_driver() takes care of it. */
+PDO_API zend_result php_pdo_register_driver_specific_ce(const pdo_driver_t *driver, zend_class_entry *ce);
 
 /* For the convenience of drivers, this function will parse a data source
  * string, of the form "name=value; name2=value2" and populate variables
@@ -679,6 +693,8 @@ PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);
 
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
 PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count);
+
+PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zend_object *current_object, zend_class_entry *called_scope, zval *new_zval_object);
 
 /* Normalization for fetching long param for driver attributes */
 PDO_API bool pdo_get_long_param(zend_long *lval, zval *value);

@@ -13,30 +13,59 @@ function strstartswith($haystack, $needle) {
     return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== false;
 }
 
-if (false !== getenv('PDO_DBLIB_TEST_DSN')) {
-    $dsn = getenv('PDO_DBLIB_TEST_DSN');
-} else {
-    $dsn = 'dblib:host=localhost;dbname=test';
+function getCredentials() {
+    if (false !== getenv('PDO_DBLIB_TEST_DSN')) {
+        $dsn = getenv('PDO_DBLIB_TEST_DSN');
+    } else {
+        $dsn = 'dblib:host=localhost;dbname=test';
+    }
+
+    if (false !== getenv('PDO_DBLIB_TEST_USER')) {
+        $user = getenv('PDO_DBLIB_TEST_USER');
+    } else {
+        $user = 'php';
+    }
+
+    if (false !== getenv('PDO_DBLIB_TEST_PASS')) {
+        $pass = getenv('PDO_DBLIB_TEST_PASS');
+    } else {
+        $pass = 'password';
+    }
+
+    return [$dsn, $user, $pass];
 }
 
-if (false !== getenv('PDO_DBLIB_TEST_USER')) {
-    $user = getenv('PDO_DBLIB_TEST_USER');
-} else {
-    $user = 'php';
-}
-
-if (false !== getenv('PDO_DBLIB_TEST_PASS')) {
-    $pass = getenv('PDO_DBLIB_TEST_PASS');
-} else {
-    $pass = 'password';
-}
-
-try {
-    $db = new PDO($dsn, $user, $pass);
+function setAttributes(PDO $db) {
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-} catch (PDOException $e) {
-    die('skip ' . $e->getMessage());
+}
+
+function getDbConnection(string $class = PDO::class, ?array $attributes = null) {
+    [$dsn, $user, $pass] = getCredentials();
+
+    try {
+        $db = new $class($dsn, $user, $pass, $attributes);
+        if ($attributes === null) {
+            setAttributes($db);
+        }
+    } catch (PDOException $e) {
+        die('skip ' . $e->getMessage());
+    }
+
+    return $db;
+}
+
+function connectToDb() {
+    [$dsn, $user, $pass] = getCredentials();
+
+    try {
+        $db = PDO::connect($dsn, $user, $pass);
+        setAttributes($db);
+    } catch (PDOException $e) {
+        die('skip ' . $e->getMessage());
+    }
+
+    return $db;
 }
 
 ?>

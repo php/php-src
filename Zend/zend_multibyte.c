@@ -170,7 +170,7 @@ ZEND_API const zend_encoding *zend_multibyte_get_script_encoding(void)
 	return LANG_SCNG(script_encoding);
 }
 
-ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size)
+ZEND_API zend_result zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size)
 {
 	if (CG(script_encoding_list)) {
 		free((char*)CG(script_encoding_list));

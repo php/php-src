@@ -1,5 +1,5 @@
 --TEST--
-Bug #36224 (date(DATE_ATOM) gives wrong resulsts)
+Bug #36224 (date(DATE_ATOM) gives wrong results)
 --FILE--
 <?php
 date_default_timezone_set("Europe/Oslo");

@@ -16,11 +16,8 @@
 */
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_filestat.h"
-#include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
 #include "streamsfuncs.h"
@@ -33,13 +30,11 @@
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 typedef unsigned long long php_timeout_ull;
-#define PHP_TIMEOUT_ULL_MAX ULLONG_MAX
 #else
 #include "win32/select.h"
 #include "win32/sockets.h"
 #include "win32/console.h"
 typedef unsigned __int64 php_timeout_ull;
-#define PHP_TIMEOUT_ULL_MAX UINT64_MAX
 #endif
 
 #define GET_CTX_OPT(stream, wrapper, name, val) (PHP_STREAM_CONTEXT(stream) && NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), wrapper, name)))
@@ -74,14 +69,14 @@ PHP_FUNCTION(stream_socket_pair)
         close(pair[0]);
         close(pair[1]);
         php_error_docref(NULL, E_WARNING, "Failed to open stream from socketpair");
-        RETURN_FALSE;        
+        RETURN_FALSE;
     }
     s2 = php_stream_sock_open_from_socket(pair[1], 0);
     if (s2 == NULL) {
         php_stream_free(s1, PHP_STREAM_FREE_CLOSE);
         close(pair[1]);
         php_error_docref(NULL, E_WARNING, "Failed to open stream from socketpair");
-        RETURN_FALSE;        
+        RETURN_FALSE;
     }
 
     array_init(return_value);
@@ -127,6 +122,9 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (timeout_is_null) {
 		timeout = (double)FG(default_socket_timeout);
+	} else if (!zend_finite(timeout)) {
+		zend_argument_value_error(4, "must be a finite value");
+		RETURN_THROWS();
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
@@ -279,6 +277,9 @@ PHP_FUNCTION(stream_socket_accept)
 
 	if (timeout_is_null) {
 		timeout = (double)FG(default_socket_timeout);
+	} else if (!zend_finite(timeout)) {
+		zend_argument_value_error(2, "must be a finite value");
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, zstream);
@@ -908,11 +909,10 @@ static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
 	}
 }
 
-static int parse_context_options(php_stream_context *context, HashTable *options)
+static zend_result parse_context_options(php_stream_context *context, HashTable *options)
 {
 	zval *wval, *oval;
 	zend_string *wkey, *okey;
-	int ret = SUCCESS;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(options, wkey, wval) {
 		ZVAL_DEREF(wval);
@@ -930,12 +930,11 @@ static int parse_context_options(php_stream_context *context, HashTable *options
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return ret;
+	return SUCCESS;
 }
 
-static int parse_context_params(php_stream_context *context, HashTable *params)
+static zend_result parse_context_params(php_stream_context *context, HashTable *params)
 {
-	int ret = SUCCESS;
 	zval *tmp;
 
 	if (NULL != (tmp = zend_hash_str_find(params, "notification", sizeof("notification")-1))) {
@@ -959,7 +958,7 @@ static int parse_context_params(php_stream_context *context, HashTable *params)
 		}
 	}
 
-	return ret;
+	return SUCCESS;
 }
 
 /* given a zval which is either a stream or a context, return the underlying
@@ -1023,6 +1022,15 @@ PHP_FUNCTION(stream_context_set_option)
 	size_t optionname_len;
 	zval *zvalue = NULL;
 
+	if (ZEND_NUM_ARGS() == 2) {
+		zend_error(E_DEPRECATED, "Calling stream_context_set_option() with 2 arguments is deprecated, "
+			"use stream_context_set_options() instead"
+		);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_RESOURCE(zcontext)
 		Z_PARAM_ARRAY_HT_OR_STR(options, wrappername)
@@ -1048,7 +1056,11 @@ PHP_FUNCTION(stream_context_set_option)
 			RETURN_THROWS();
 		}
 
-		RETURN_BOOL(parse_context_options(context, options) == SUCCESS);
+		if (parse_context_options(context, options) == FAILURE) {
+			RETURN_THROWS();
+		}
+
+		RETURN_TRUE;
 	} else {
 		if (!optionname) {
 			zend_argument_value_error(3, "cannot be null when argument #2 ($wrapper_or_options) is a string");
@@ -1063,6 +1075,30 @@ PHP_FUNCTION(stream_context_set_option)
 	}
 }
 /* }}} */
+
+PHP_FUNCTION(stream_context_set_options)
+{
+	zval *zcontext = NULL;
+	php_stream_context *context;
+	HashTable *options;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_ARRAY_HT(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* figure out where the context is coming from exactly */
+	if (!(context = decode_context_param(zcontext))) {
+		zend_argument_type_error(1, "must be a valid stream/context");
+		RETURN_THROWS();
+	}
+
+	if (parse_context_options(context, options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_TRUE;
+}
 
 /* {{{ Set parameters for a file context */
 PHP_FUNCTION(stream_context_set_params)
@@ -1082,7 +1118,11 @@ PHP_FUNCTION(stream_context_set_params)
 		RETURN_THROWS();
 	}
 
-	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
+	if (parse_context_params(context, params) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1177,11 +1217,15 @@ PHP_FUNCTION(stream_context_create)
 	context = php_stream_context_alloc();
 
 	if (options) {
-		parse_context_options(context, options);
+		if (parse_context_options(context, options) == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (params) {
-		parse_context_params(context, params);
+		if (parse_context_params(context, params) == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 
 	RETURN_RES(context->res);
@@ -1593,9 +1637,6 @@ PHP_FUNCTION(stream_is_local)
 
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
 		php_stream_from_zval(stream, zstream);
-		if (stream == NULL) {
-			RETURN_FALSE;
-		}
 		wrapper = stream->wrapper;
 	} else {
 		if (!try_convert_to_string(zstream)) {
@@ -1645,10 +1686,14 @@ PHP_FUNCTION(stream_isatty)
 
 	php_stream_from_zval(stream, zsrc);
 
-	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
-	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
+	/* get the fd.
+	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
+	 * It is only used here so that the buffered data warning is not displayed.
+	 */
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&fileno, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&fileno, 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1656,7 +1701,7 @@ PHP_FUNCTION(stream_isatty)
 #ifdef PHP_WIN32
 	/* Check if the Windows standard handle is redirected to file */
 	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
-#elif HAVE_UNISTD_H
+#elif defined(HAVE_UNISTD_H)
 	/* Check if the file descriptor identifier is a terminal */
 	RETVAL_BOOL(isatty(fileno));
 #else
@@ -1686,13 +1731,15 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 
 	php_stream_from_zval(stream, zsrc);
 
-	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)&fileno, 0);
-	}
-	else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
-	}
-	else {
+	/* get the fd.
+	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
+	 * It is only used here so that the buffered data warning is not displayed.
+	 */
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&fileno, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&fileno, 0);
+	} else {
 		if (!enable_is_null) {
 			php_error_docref(
 				NULL,

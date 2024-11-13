@@ -20,6 +20,7 @@ $engines[] = new PcgOneseq128XslRr64();
 $engines[] = new Xoshiro256StarStar();
 $engines[] = new Secure();
 $engines[] = new TestShaEngine();
+$iterations = getenv("SKIP_SLOW_TESTS") ? 10 : 100;
 
 $array1 = []; // list
 $array2 = []; // associative array with only strings
@@ -38,7 +39,7 @@ foreach ($engines as $engine) {
 
     $randomizer = new Randomizer($engine);
 
-    for ($i = 1; $i < 100; $i++) {
+    for ($i = 1; $i < $iterations; $i++) {
         $result = $randomizer->pickArrayKeys($array1, $i);
 
         if (array_unique($result) !== $result) {
@@ -74,7 +75,10 @@ foreach ($engines as $engine) {
 die('success');
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant MT_RAND_PHP is deprecated in %s on line %d
+
+Deprecated: The MT_RAND_PHP variant of Mt19937 is deprecated in %s on line %d
 Random\Engine\Mt19937
 Random\Engine\Mt19937
 Random\Engine\PcgOneseq128XslRr64

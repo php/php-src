@@ -4,7 +4,7 @@ Bug #26938 (exec does not read consecutive long lines correctly)
 <?php
 $out = array();
 $status = -1;
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     exec($php . ' -n -r \''
          . '$lengths = array(10,20000,10000,5,10000,3);'

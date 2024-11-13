@@ -4,7 +4,7 @@ PostgreSQL import large object with given oid
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 $v = pg_version($conn);
 if (version_compare("8.4devel", $v["client"]) > 0) die("skip - requires pg client >= 8.4\n");
 if (version_compare("8.4devel", $v["server"]) > 0) die("skip - requires pg server >= 8.4\n");
@@ -12,33 +12,33 @@ if (version_compare("8.4devel", $v["server"]) > 0) die("skip - requires pg serve
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 
 echo "import LO from int\n";
-pg_exec($db, 'begin');
+pg_exec($db, 'BEGIN');
 $oid = pg_lo_import($db, __FILE__, 21003);
 if (!$oid) echo ("pg_lo_import() error\n");
 if ($oid != 21003) echo ("pg_lo_import() wrong id\n");
 pg_lo_unlink ($db, $oid);
-pg_exec($db, 'commit');
+pg_exec($db, 'COMMIT');
 
 echo "import LO from string\n";
-pg_exec($db, 'begin');
+pg_exec($db, 'BEGIN');
 $oid = pg_lo_import($db, __FILE__, "21004");
 if (!$oid) echo ("pg_lo_import() error\n");
 if ($oid != 21004) echo ("pg_lo_import() wrong id\n");
 pg_lo_unlink ($db, $oid);
-pg_exec($db, 'commit');
+pg_exec($db, 'COMMIT');
 
 echo "import LO using default connection\n";
-pg_exec('begin');
+pg_exec('BEGIN');
 $oid = pg_lo_import($db, __FILE__, 21005);
 if (!$oid) echo ("pg_lo_import() error\n");
 if ($oid != 21005) echo ("pg_lo_import() wrong id\n");
 pg_lo_unlink ($oid);
-pg_exec('commit');
+pg_exec('COMMIT');
 
 /* Invalide OID */
 try {
@@ -104,7 +104,7 @@ Invalid OID value passed
 Invalid OID value passed
 
 Deprecated: pg_lo_import(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
-OID value must be of type string|int, bool given
+OID value must be of type string|int, true given
 OID value must be of type string|int, array given
 OID value must be of type string|int, stdClass given
 OID value must be of type string|int, PgSql\Connection given

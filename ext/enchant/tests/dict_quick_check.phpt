@@ -6,7 +6,7 @@ marcosptf - <marcosptf@yahoo.com.br>
 enchant
 --SKIPIF--
 <?php
-if (getenv('SKIP_ASAN')) die('skip Known libenchant memory leak');
+if (getenv('SKIP_ASAN')) die('xleak Known libenchant memory leak');
 if (!is_object(enchant_broker_init())) {die("skip, resource dont load\n");}
 if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, no dictionary installed on this machine! \n");}
 

@@ -11,6 +11,7 @@ print "\n";
 $doc = $proc->transformToDoc($dom);
 print $doc->saveXML();
 print "\n";
+?>
 --EXPECT--
 Test 6: Transform To Doc
 <?xml version="1.0" encoding="iso-8859-1"?>

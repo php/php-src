@@ -44,4 +44,4 @@ preloaded
 PHP %s
 Copyright (c) The PHP Group
 Zend Engine %s
-    with Zend OPcache %s
+%A    with Zend OPcache %a

@@ -41,12 +41,8 @@
 #include <php_config.h>
 #endif
 #include "php_standard.h"
-#include "php_string.h"
 #include "SAPI.h"
 #include <locale.h>
-#ifdef HAVE_LANGINFO_H
-#include <langinfo.h>
-#endif
 
 #include <zend_hash.h>
 #include "html_tables.h"
@@ -455,7 +451,7 @@ static inline unsigned char unimap_bsearch(const uni_to_enc *table, unsigned cod
 /* }}} */
 
 /* {{{ map_from_unicode */
-static inline int map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
+static inline zend_result map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
 {
 	unsigned char found;
 	const uni_to_enc *table;
@@ -671,13 +667,13 @@ static inline int numeric_entity_is_allowed(unsigned uni_cp, int document_type)
  * On input, *buf should point to the first character after # and on output, it's the last
  * byte read, no matter if there was success or insuccess.
  */
-static inline int process_numeric_entity(const char **buf, unsigned *code_point)
+static inline zend_result process_numeric_entity(const char **buf, unsigned *code_point)
 {
 	zend_long code_l;
 	int hexadecimal = (**buf == 'x' || **buf == 'X'); /* TODO: XML apparently disallows "X" */
 	char *endptr;
 
-	if (hexadecimal && (**buf != '\0'))
+	if (hexadecimal)
 		(*buf)++;
 
 	/* strtol allows whitespace and other stuff in the beginning
@@ -707,14 +703,14 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 /* }}} */
 
 /* {{{ process_named_entity */
-static inline int process_named_entity_html(const char **buf, const char **start, size_t *length)
+static inline zend_result process_named_entity_html(const char **buf, const char **start, size_t *length)
 {
 	*start = *buf;
 
 	/* "&" is represented by a 0x26 in all supported encodings. That means
-	 * the byte after represents a character or is the leading byte of an
+	 * the byte after represents a character or is the leading byte of a
 	 * sequence of 8-bit code units. If in the ranges below, it represents
-	 * necessarily a alpha character because none of the supported encodings
+	 * necessarily an alpha character because none of the supported encodings
 	 * has an overlap with ASCII in the leading byte (only on the second one) */
 	while ((**buf >= 'a' && **buf <= 'z') ||
 			(**buf >= 'A' && **buf <= 'Z') ||
@@ -736,7 +732,7 @@ static inline int process_named_entity_html(const char **buf, const char **start
 /* }}} */
 
 /* {{{ resolve_named_entity_html */
-static int resolve_named_entity_html(const char *start, size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
+static zend_result resolve_named_entity_html(const char *start, size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
 {
 	const entity_cp_map *s;
 	zend_ulong hash = zend_inline_hash_func(start, length);
@@ -784,9 +780,7 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #if 0
 		return php_mb2_int_to_char(buf, code);
 #else
-#if ZEND_DEBUG
-		assert(code <= 0xFFU);
-#endif
+		ZEND_ASSERT(code <= 0xFFU);
 		*buf = code;
 		return 1;
 #endif
@@ -795,9 +789,7 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #if 0 /* idem */
 		return php_mb2_int_to_char(buf, code);
 #else
-#if ZEND_DEBUG
-		assert(code <= 0xFFU);
-#endif
+		ZEND_ASSERT(code <= 0xFFU);
 		*buf = code;
 		return 1;
 #endif
@@ -1335,27 +1327,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 }
 /* }}} */
 
-#define HTML_SPECIALCHARS 	0
-#define HTML_ENTITIES	 	1
-
-/* {{{ register_html_constants */
-void register_html_constants(INIT_FUNC_ARGS)
-{
-	REGISTER_LONG_CONSTANT("HTML_SPECIALCHARS", HTML_SPECIALCHARS, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("HTML_ENTITIES", HTML_ENTITIES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_COMPAT", ENT_COMPAT, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_QUOTES", ENT_QUOTES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_NOQUOTES", ENT_NOQUOTES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_IGNORE", ENT_IGNORE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_SUBSTITUTE", ENT_SUBSTITUTE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_DISALLOWED", ENT_DISALLOWED, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_HTML401", ENT_HTML401, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_XML1", ENT_XML1, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_XHTML", ENT_XHTML, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_HTML5", ENT_HTML5, CONST_PERSISTENT|CONST_CS);
-}
-/* }}} */
-
 /* {{{ Convert special characters to HTML entities */
 PHP_FUNCTION(htmlspecialchars)
 {
@@ -1467,7 +1438,7 @@ static inline void write_s3row_data(
 /* {{{ Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
-	zend_long all = HTML_SPECIALCHARS,
+	zend_long all = PHP_HTML_SPECIALCHARS,
 		 flags = ENT_QUOTES|ENT_SUBSTITUTE;
 	int doctype;
 	entity_table_opt entity_table;
@@ -1498,7 +1469,7 @@ PHP_FUNCTION(get_html_translation_table)
 		to_uni_table = enc_to_uni_index[charset];
 	}
 
-	if (all) { /* HTML_ENTITIES (actually, any non-zero value for 1st param) */
+	if (all) { /* PHP_HTML_ENTITIES (actually, any non-zero value for 1st param) */
 		const entity_stage1_row *ms_table = entity_table.ms_table;
 
 		if (CHARSET_UNICODE_COMPAT(charset)) {

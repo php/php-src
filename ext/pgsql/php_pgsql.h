@@ -20,8 +20,6 @@
 
 #ifdef HAVE_PGSQL
 
-#define PHP_PGSQL_API_VERSION 20140217
-
 extern zend_module_entry pgsql_module_entry;
 #define pgsql_module_ptr &pgsql_module_entry
 
@@ -46,10 +44,6 @@ extern zend_module_entry pgsql_module_entry;
 # else
 #  define PHP_PGSQL_API
 # endif
-#endif
-
-#ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
-const char * pg_encoding_to_char(int encoding);
 #endif
 
 PHP_MINIT_FUNCTION(pgsql);
@@ -87,7 +81,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
-static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
+static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bool nullable_row);
 static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS,int entry_type);
 
 static ssize_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count);
@@ -181,14 +175,17 @@ static const php_stream_ops php_stream_pgsql_fd_ops = {
 	php_pgsql_fd_set_option
 };
 
+#define PGSQL_MAX_REGEXES 11
+
 ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	zend_long num_links,num_persistent;
 	zend_long max_links,max_persistent;
 	bool allow_persistent;
-    int ignore_notices;
+	int ignore_notices;
 	zend_long auto_reset_persistent;
 	int log_notices;
 	zend_object *default_link; /* default link when connection is omitted */
+	zend_string *regexes[PGSQL_MAX_REGEXES];
 	HashTable field_oids;
 	HashTable table_oids;
 	HashTable connections;

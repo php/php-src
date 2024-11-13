@@ -119,7 +119,7 @@ ZEND_API void zend_stack_apply(zend_stack *stack, int type, int (*apply_function
 }
 
 
-ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg)
+ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, zend_stack_apply_direction type, int (*apply_function)(void *element, void *arg), void *arg)
 {
 	int i;
 

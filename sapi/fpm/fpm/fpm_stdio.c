@@ -153,7 +153,7 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		close(fpm_globals.error_log_fd);
 	}
 	fpm_globals.error_log_fd = -1;
-	zlog_set_fd(-1);
+	zlog_set_fd(-1, 0);
 
 	return 0;
 }
@@ -168,9 +168,8 @@ int fpm_stdio_flush_child(void)
 
 static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
-	static const int max_buf_size = 1024;
 	int fd = ev->fd;
-	char buf[max_buf_size];
+	char buf[1024];
 	struct fpm_child_s *child;
 	int is_stdout;
 	struct fpm_event_s *event;
@@ -216,7 +215,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 
 	while (1) {
 stdio_read:
-		in_buf = read(fd, buf, max_buf_size - 1);
+		in_buf = read(fd, buf, sizeof(buf) - 1);
 		if (in_buf <= 0) { /* no data */
 			if (in_buf == 0 || !PHP_IS_TRANSIENT_ERROR(errno)) {
 				/* pipe is closed or error */
@@ -229,7 +228,7 @@ stdio_read:
 			if 	((sizeof(FPM_STDIO_CMD_FLUSH) - cmd_pos) <= in_buf &&
 					!memcmp(buf, &FPM_STDIO_CMD_FLUSH[cmd_pos], sizeof(FPM_STDIO_CMD_FLUSH) - cmd_pos)) {
 				zlog_stream_finish(log_stream);
-				start = cmd_pos;
+				start = sizeof(FPM_STDIO_CMD_FLUSH) - cmd_pos;
 			} else {
 				zlog_stream_str(log_stream, &FPM_STDIO_CMD_FLUSH[0], cmd_pos);
 			}
@@ -375,13 +374,14 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 		php_openlog(fpm_global_config.syslog_ident, LOG_PID | LOG_CONS, fpm_global_config.syslog_facility);
 		fpm_globals.error_log_fd = ZLOG_SYSLOG;
 		if (fpm_use_error_log()) {
-			zlog_set_fd(fpm_globals.error_log_fd);
+			zlog_set_fd(fpm_globals.error_log_fd, 0);
 		}
 		return 0;
 	}
 #endif
 
 	fd = open(fpm_global_config.error_log, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
+
 	if (0 > fd) {
 		zlog(ZLOG_SYSERROR, "failed to open error_log (%s)", fpm_global_config.error_log);
 		return -1;
@@ -394,7 +394,11 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	} else {
 		fpm_globals.error_log_fd = fd;
 		if (fpm_use_error_log()) {
-			zlog_set_fd(fpm_globals.error_log_fd);
+			bool is_stderr = (
+				strcmp(fpm_global_config.error_log, "/dev/stderr") == 0 ||
+				strcmp(fpm_global_config.error_log, "/proc/self/fd/2") == 0
+			);
+			zlog_set_fd(fpm_globals.error_log_fd, is_stderr);
 		}
 	}
 	if (0 > fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC)) {

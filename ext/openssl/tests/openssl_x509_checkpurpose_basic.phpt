@@ -4,9 +4,6 @@ int openssl_x509_checkpurpose ( mixed $x509cert , int $purpose [, array $cainfo 
 marcosptf - <marcosptf@yahoo.com.br>
 --EXTENSIONS--
 openssl
---SKIPIF--
-<?php if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
-?>
 --FILE--
 <?php
 include 'CertificateGenerator.inc';
@@ -42,6 +39,8 @@ var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_SIGN));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_ENCRYPT));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_CRL_SIGN));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_ANY));
+var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_OCSP_HELPER));
+var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_TIMESTAMP_SIGN));
 
 /* int openssl_x509_checkpurpose ( mixed $x509cert , int $purpose [, array $cainfo = array() ] ); */
 var_dump(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT, array($cpca)));
@@ -65,6 +64,8 @@ var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_SIGN, array($cpca))
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_ENCRYPT, array($cpca)));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_CRL_SIGN, array($cpca)));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_ANY, array($cpca)));
+var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_OCSP_HELPER, array($cpca)));
+var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_TIMESTAMP_SIGN, array($cpca)));
 
 /* int openssl_x509_checkpurpose ( mixed $x509cert , int $purpose [, array $cainfo = array() [, string $untrustedfile ]] ); function */
 var_dump(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT, array($cpca), $utfl));
@@ -88,6 +89,8 @@ var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_SIGN, array($cpca),
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_ENCRYPT, array($cpca), $utfl));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_CRL_SIGN, array($cpca), $utfl));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_ANY, array($cpca), $utfl));
+var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_OCSP_HELPER, array($cpca), $utfl));
+var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_TIMESTAMP_SIGN, array($cpca), $utfl));
 ?>
 --CLEAN--
 <?php
@@ -122,25 +125,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-int(-1)
-int(-1)
-int(-1)
-int(-1)
-int(-1)
-int(-1)
-int(-1)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
 bool(false)
 bool(false)
 int(-1)
@@ -157,3 +141,28 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+int(-1)
+int(-1)
+int(-1)
+int(-1)
+int(-1)
+int(-1)
+int(-1)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)

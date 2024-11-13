@@ -47,7 +47,7 @@ CODE;
 $code_fn = "code.php";
 file_put_contents($code_fn, $code);
 
-print(shell_exec(getenv('TEST_PHP_EXECUTABLE') . " -nf code.php"));
+print(shell_exec(getenv('TEST_PHP_EXECUTABLE_ESCAPED') . " -nf code.php"));
 
 chdir($old_cwd);
 

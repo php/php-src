@@ -4,6 +4,7 @@ Match expression string jump table
 opcache.enable=1
 opcache.enable_cli=1
 opcache.opt_debug_level=0x20000
+zend_test.observer.enabled=0
 --EXTENSIONS--
 opcache
 --FILE--

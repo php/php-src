@@ -10,6 +10,7 @@ opcache.preload={PWD}/preload_enum.inc
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+?>
 --FILE--
 <?php
 

@@ -55,8 +55,8 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_init(void)
 	vm_interrupt_flag = &EG(vm_interrupt);
 	ZVAL_UNDEF(&ctrl_handler);
 
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_C", CTRL_C_EVENT, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_BREAK", CTRL_BREAK_EVENT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_C", CTRL_C_EVENT, CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_BREAK", CTRL_BREAK_EVENT, CONST_PERSISTENT);
 }/*}}}*/
 
 PHP_WINUTIL_API void php_win32_signal_ctrl_handler_shutdown(void)
@@ -97,7 +97,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 		RETURN_THROWS();
 	}
 
-#if ZTS
+#ifdef ZTS
 	if (!tsrm_is_main_thread()) {
 		zend_throw_error(NULL, "CTRL events can only be received on the main thread");
 		RETURN_THROWS();

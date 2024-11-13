@@ -21,7 +21,7 @@
 #endif
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #define access _access
 #ifndef R_OK
 #define R_OK 2

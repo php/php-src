@@ -4,7 +4,6 @@ Bug #77857 (Wrong result if executed with JIT)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=64
 opcache.jit=1205
 --EXTENSIONS--
 opcache

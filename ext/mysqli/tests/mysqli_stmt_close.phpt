@@ -4,13 +4,11 @@ mysqli_stmt_close()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -25,8 +23,7 @@ require_once('skipifconnectfailure.inc');
     if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test"))
         printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    if (true !== ($tmp = mysqli_stmt_close($stmt)))
-        printf("[006] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_close($stmt);
 
     try {
         mysqli_stmt_close($stmt);
@@ -48,14 +45,13 @@ require_once('skipifconnectfailure.inc');
     if (!mysqli_stmt_execute($stmt))
         printf("[011] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    mysqli_kill($link, mysqli_thread_id($link));
+    $link->query('KILL '.mysqli_thread_id($link));
 
-    if (true !== ($tmp = mysqli_stmt_close($stmt)))
-        printf("[012] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_close($stmt);
 
     mysqli_close($link);
 
-    require('table.inc');
+    require 'table.inc';
     if (!$stmt = mysqli_stmt_init($link))
         printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
@@ -69,16 +65,15 @@ require_once('skipifconnectfailure.inc');
     if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
         printf("[016] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    mysqli_kill($link, mysqli_thread_id($link));
+    $link->query('KILL '.mysqli_thread_id($link));
 
-    if (true !== ($tmp = mysqli_stmt_close($stmt)))
-        printf("[017] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_close($stmt);
 
     print "done!";
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 mysqli_stmt object is not fully initialized

@@ -10,10 +10,12 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $filename = __DIR__."/010.test.php";
+$filename_escaped = escapeshellarg($filename);
 $filename_txt = __DIR__."/010.test.txt";
+$filename_txt_escaped = escapeshellarg($filename_txt);
 
 $code = '
 <?php
@@ -29,7 +31,7 @@ hello';
 
 file_put_contents($filename_txt, $txt);
 
-var_dump(`cat "$filename_txt" | "$php" -n -F "$filename"`);
+var_dump(`cat $filename_txt_escaped | $php -n -F $filename_escaped`);
 
 ?>
 --CLEAN--

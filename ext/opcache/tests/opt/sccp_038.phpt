@@ -14,5 +14,6 @@ function foo() {
 foo();
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Increment on non-alphanumeric string is deprecated in %ssccp_038.php on line 5
 DONE

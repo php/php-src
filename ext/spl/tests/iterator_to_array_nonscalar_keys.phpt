@@ -21,4 +21,4 @@ try {
 ?>
 --EXPECTF--
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
-Illegal offset type
+Cannot access offset of type array on array

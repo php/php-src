@@ -6,7 +6,7 @@
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
 #  | available through the world-wide-web at the following url:           |
-#  | https://php.net/license/3_01.txt                                     |
+#  | https://www.php.net/license/3_01.txt                                 |
 #  | If you did not receive a copy of the PHP license and are unable to   |
 #  | obtain it through the world-wide-web, please send a note to          |
 #  | license@php.net so we can mail you a copy immediately.               |
@@ -35,13 +35,14 @@
 
 YACC=${YACC:-bison}
 YACC="$YACC -l"
+YFLAGS="-Wall"
 RE2C=${RE2C:-re2c}
-RE2C_FLAGS="-i"
+RE2C_FLAGS="--no-generation-date -i"
 SED=${SED:-sed}
 MAKE=${MAKE:-make}
 
 # Go to project root.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)" || exit
 
 # Check required bison version from the configure.ac file.
 required_bison_version=$($SED -n 's/PHP_PROG_BISON(\[\([0-9\.]*\)\].*/\1/p' configure.ac)
@@ -69,7 +70,7 @@ else
 fi
 
 # Check required re2c version from the configure.ac file.
-required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\(.*\)\])/\1/p' configure.ac)
+required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\([0-9.]*\)\][^)]*)*/\1/p' configure.ac)
 set -f; IFS='.'; set -- $required_re2c_version; set +f; IFS=' '
 required_re2c_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
@@ -94,13 +95,13 @@ else
 fi
 
 # Check if make exists.
-if ! test -x "$(command -v $MAKE)"; then
+if test ! -x "$(command -v $MAKE)"; then
   echo "genfiles: make not found. Please install make to generate files." >&2
   exit 1
 fi
 
 echo "genfiles: Generating Zend parser and lexer files"
-$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" SED="$SED" srcdir=Zend builddir=Zend top_srcdir=. \
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" YFLAGS="$YFLAGS" SED="$SED" srcdir=Zend builddir=Zend top_srcdir=. \
   -f Zend/Makefile.frag \
   Zend/zend_language_parser.c \
   Zend/zend_language_scanner.c \
@@ -108,13 +109,13 @@ $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" SED="$SED" srcdir=Zend 
   Zend/zend_ini_scanner.c
 
 echo "genfiles: Generating phpdbg parser and lexer files"
-$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=sapi/phpdbg builddir=sapi/phpdbg top_srcdir=. \
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" YFLAGS="$YFLAGS" srcdir=sapi/phpdbg builddir=sapi/phpdbg top_srcdir=. \
   -f sapi/phpdbg/Makefile.frag \
   sapi/phpdbg/phpdbg_parser.c \
   sapi/phpdbg/phpdbg_lexer.c
 
 echo "genfiles: Generating json extension parser and lexer files"
-$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=ext/json builddir=ext/json top_srcdir=. \
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" YFLAGS="$YFLAGS" srcdir=ext/json builddir=ext/json top_srcdir=. \
   -f ext/json/Makefile.frag \
   ext/json/json_parser.tab.c \
   ext/json/json_scanner.c
@@ -123,6 +124,21 @@ echo "genfiles: Generating PDO lexer file"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo builddir=ext/pdo top_srcdir=. \
   -f ext/pdo/Makefile.frag \
   ext/pdo/pdo_sql_parser.c
+
+echo "genfiles: Generating PDO_mysql lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_mysql builddir=ext/pdo_mysql top_srcdir=. \
+  -f ext/pdo_mysql/Makefile.frag \
+  ext/pdo_mysql/mysql_sql_parser.c
+
+echo "genfiles: Generating PDO_pgsql lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_pgsql builddir=ext/pdo_pgsql top_srcdir=. \
+  -f ext/pdo_pgsql/Makefile.frag \
+  ext/pdo_pgsql/pgsql_sql_parser.c
+
+echo "genfiles: Generating PDO_sqlite lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_sqlite builddir=ext/pdo_sqlite top_srcdir=. \
+  -f ext/pdo_sqlite/Makefile.frag \
+  ext/pdo_sqlite/sqlite_sql_parser.c
 
 echo "genfiles: Generating standard extension lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/standard builddir=ext/standard top_srcdir=. \

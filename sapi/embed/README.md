@@ -49,7 +49,7 @@ $  gcc \
 If all goes to plan you should be able to run the program.
 
 ```bash
-$ ./a.out 
+$ ./a.out
 Number of functions loaded: 1046
 ```
 

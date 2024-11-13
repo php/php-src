@@ -4,8 +4,9 @@ PDO_Firebird: Bug #76488 Memory leak when fetching a BLOB field
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
+--XLEAK--
+A bug in firebird causes a memory leak when calling `isc_attach_database()`.
+See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require 'testdb.inc';
@@ -21,15 +22,17 @@ select n,
 from r
 ';
 
-    for ($i = 0; $i < 10; $i++) {
-        $sth = $dbh->prepare($sql);
-        $sth->execute();
-        $rows = $sth->fetchAll();
-        unset($rows);
-        unset($sth);
-    }
-    unset($dbh);
-    echo "OK";
+$dbh = getDbConnection();
+
+for ($i = 0; $i < 10; $i++) {
+    $sth = $dbh->prepare($sql);
+    $sth->execute();
+    $rows = $sth->fetchAll();
+    unset($rows);
+    unset($sth);
+}
+unset($dbh);
+echo "OK";
 ?>
 --EXPECT--
 OK

@@ -4,7 +4,7 @@ PAM auth plugin
 mysqli
 --SKIPIF--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -98,8 +98,8 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pamtest@'%%'"
 max_execution_time=240
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     if (!$link = my_mysqli_connect($host, 'pamtest', 'pamtest', $db, $port, $socket)) {
         printf("[001] Cannot connect to the server using host=%s, user=pamtest, passwd=pamtest dbname=%s, port=%s, socket=%s\n",
@@ -125,7 +125,7 @@ max_execution_time=240
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 	mysqli_query($link, 'DROP USER pamtest');
 	mysqli_query($link, 'DROP USER pamtest@localhost');
 ?>

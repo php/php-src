@@ -5,7 +5,7 @@ opcache
 --FILE--
 <?php
 
-function test(\SplObjectStorage $definitions = null) {
+function test(?\SplObjectStorage $definitions = null) {
     $argument = new stdClass;
     $definitions[$argument] = 1;
     $definitions[$argument] += 1;

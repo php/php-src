@@ -55,6 +55,7 @@ $text = new DOMText('some text characters');
 
 echo "Whole Text: ".$text->wholeText."\n";
 $text2 = $text->splitText(9);
+echo "Is Whitespace?: ", $text2->isElementContentWhitespace()?'YES':'NO', "\n";
 
 echo "Split text: ".$text2->wholeText."\n";
 $text3 = $text2->splitText(1);
@@ -71,5 +72,6 @@ Comment Value: instructions
 New Comment Value: some more instructions
 Updated Comment Value: some more comment strings
 Whole Text: some text characters
+Is Whitespace?: NO
 Split text:  characters
 Is Whitespace?: YES

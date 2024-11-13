@@ -4,25 +4,26 @@ MySQL PDO->prepare(), native PS, named placeholder
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db);
+
+    $table = 'pdo_mysql_prepare_native_column';
+    MySQLPDOTest::createTestTable($table, $db);
 
     $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
     if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
         printf("[002] Unable to turn off emulated prepared statements\n");
 
-    $stmt = $db->prepare("SELECT :param FROM test ORDER BY id ASC LIMIT 1");
+    $stmt = $db->prepare("SELECT :param FROM {$table} ORDER BY id ASC LIMIT 1");
     $stmt->execute(array(':param' => 'id'));
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-    $db->prepare('SELECT :placeholder FROM test WHERE :placeholder > :placeholder');
+    $db->prepare("SELECT :placeholder FROM {$table} WHERE :placeholder > :placeholder");
     $stmt->execute(array(':placeholder' => 'test'));
 
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -31,9 +32,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_prepare_native_column');
 ?>
 --EXPECTF--
 array(1) {

@@ -84,7 +84,7 @@ if (MODE_PHPIZE) {
 
 // Find the php_build dir - it contains headers and libraries
 // that we need
-ARG_WITH('php-build', 'Path to where you extracted the development libraries (http://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
+ARG_WITH('php-build', 'Path to where you extracted the development libraries (https://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
 php_build_option_handle();
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
@@ -143,3 +143,5 @@ ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations
 	might not work properly, if the optimizations are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
+
+ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');

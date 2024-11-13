@@ -64,6 +64,9 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *
 		if (enc->details.type_str) {
 			efree(enc->details.type_str);
 		}
+		if (enc->details.clark_notation) {
+			zend_string_release_ex(enc->details.clark_notation, 0);
+		}
 	} else {
 		enc_ptr = NULL;
 		enc = emalloc(sizeof(encode));
@@ -73,6 +76,9 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *
 	enc->details.ns = estrdup((char*)ns);
 	enc->details.type_str = estrdup((char*)type);
 	enc->details.sdl_type = cur_type;
+	if (enc->details.ns != NULL){
+		enc->details.clark_notation = zend_strpprintf(0, "{%s}%s", enc->details.ns, enc->details.type_str);
+	}
 	enc->to_xml = sdl_guess_convert_xml;
 	enc->to_zval = sdl_guess_convert_zval;
 
@@ -92,6 +98,13 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlCh
 	return enc;
 }
 
+/* Necessary for some error paths to avoid leaking persistent memory. */
+static void requestify_string(xmlChar **str) {
+	xmlChar *copy = (xmlChar *) estrdup((const char *) *str);
+	xmlFree(*str);
+	*str = copy;
+}
+
 static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import) {
 	if (location != NULL &&
 	    !zend_hash_str_exists(&ctx->docs, (char*)location, xmlStrlen(location))) {
@@ -104,22 +117,35 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		sdl_restore_uri_credentials(ctx);
 
 		if (doc == NULL) {
+			requestify_string(&location);
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
 		schema = get_node(doc->children, "schema");
 		if (schema == NULL) {
+			requestify_string(&location);
 			xmlFreeDoc(doc);
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
 		new_tns = get_attribute(schema->properties, "targetNamespace");
 		if (import) {
 			if (ns != NULL && (new_tns == NULL || xmlStrcmp(ns->children->content, new_tns->children->content) != 0)) {
-				xmlFreeDoc(doc);
-				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, ns->children->content);
+				requestify_string(&location);
+				if (new_tns == NULL) {
+					xmlFreeDoc(doc);
+					soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', missing 'targetNamespace', expected '%s'", location, ns->children->content);
+				} else {
+					/* Have to make a copy to avoid a UAF after freeing `doc` */
+					const char *target_ns_copy = estrdup((const char *) new_tns->children->content);
+					xmlFreeDoc(doc);
+					soap_error3(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s', expected '%s'", location, target_ns_copy, ns->children->content);
+				}
 			}
 			if (ns == NULL && new_tns != NULL) {
+				requestify_string(&location);
+				/* Have to make a copy to avoid a UAF after freeing `doc` */
+				const char *target_ns_copy = estrdup((const char *) new_tns->children->content);
 				xmlFreeDoc(doc);
-				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, new_tns->children->content);
+				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s', expected no 'targetNamespace'", location, target_ns_copy);
 			}
 		} else {
 			new_tns = get_attribute(schema->properties, "targetNamespace");
@@ -128,6 +154,7 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 					xmlSetProp(schema, BAD_CAST("targetNamespace"), tns->children->content);
 				}
 			} else if (tns != NULL && xmlStrcmp(tns->children->content, new_tns->children->content) != 0) {
+				requestify_string(&location);
 				xmlFreeDoc(doc);
 				soap_error1(E_ERROR, "Parsing Schema: can't include schema from '%s', different 'targetNamespace'", location);
 			}
@@ -135,6 +162,22 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		zend_hash_str_add_ptr(&ctx->docs, (char*)location, xmlStrlen(location), doc);
 		load_schema(ctx, schema);
 	}
+}
+
+/* Returned uri must be freed by the caller. */
+xmlChar *schema_location_construct_uri(const xmlAttr *attribute)
+{
+	xmlChar *uri;
+	xmlChar *base = xmlNodeGetBase(attribute->doc, attribute->parent);
+
+	if (base == NULL) {
+		uri = xmlBuildURI(attribute->children->content, attribute->doc->URL);
+	} else {
+		uri = xmlBuildURI(attribute->children->content, base);
+		xmlFree(base);
+	}
+
+	return uri;
 }
 
 /*
@@ -190,15 +233,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 			if (location == NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: include has no 'schemaLocation' attribute");
 			} else {
-				xmlChar *uri;
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				xmlChar *uri = schema_location_construct_uri(location);
 				schema_load_file(ctx, NULL, uri, tns, 0);
 				xmlFree(uri);
 			}
@@ -210,15 +245,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 			if (location == NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: redefine has no 'schemaLocation' attribute");
 			} else {
-			  xmlChar *uri;
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				xmlChar *uri = schema_location_construct_uri(location);
 				schema_load_file(ctx, NULL, uri, tns, 0);
 				xmlFree(uri);
 				/* TODO: <redefine> support */
@@ -239,14 +266,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 				}
 			}
 			if (location) {
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				uri = schema_location_construct_uri(location);
 			}
 			schema_load_file(ctx, ns, uri, tns, 1);
 			if (uri != NULL) {xmlFree(uri);}
@@ -335,6 +355,9 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, 
 		memset(cur_type->encode, 0, sizeof(encode));
 		cur_type->encode->details.ns = estrdup(newType->namens);
 		cur_type->encode->details.type_str = estrdup(newType->name);
+		if (cur_type->encode->details.ns) {
+			cur_type->encode->details.clark_notation = zend_strpprintf(0, "{%s}%s", cur_type->encode->details.ns, cur_type->encode->details.type_str);
+		}
 		cur_type->encode->details.sdl_type = ptr;
 		cur_type->encode->to_xml = sdl_guess_convert_xml;
 		cur_type->encode->to_zval = sdl_guess_convert_zval;
@@ -412,7 +435,8 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 
 	itemType = get_attribute(listType->properties, "itemType");
 	if (itemType != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(itemType->children->content, &type, &ns);
@@ -434,7 +458,6 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 			}
 			zend_hash_next_index_insert_ptr(cur_type->elements, newType);
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	}
 
@@ -496,7 +519,8 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 	memberTypes = get_attribute(unionType->properties, "memberTypes");
 	if (memberTypes != NULL) {
 		char *str, *start, *end, *next;
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		str = estrdup((char*)memberTypes->children->content);
@@ -530,7 +554,6 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				}
 				zend_hash_next_index_insert_ptr(cur_type->elements, newType);
 			}
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 
 			start = next;
@@ -639,7 +662,8 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 
 	base = get_attribute(restType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -647,7 +671,6 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else if (!simpleType) {
 		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
@@ -744,7 +767,8 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 
 	base = get_attribute(restType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -752,7 +776,6 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
@@ -869,7 +892,8 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 
 	base = get_attribute(extType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -877,7 +901,6 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
@@ -924,7 +947,8 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 
 	base = get_attribute(extType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -932,7 +956,6 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
@@ -1073,7 +1096,8 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 		smart_str key = {0};
 
 		if (ref) {
-			char *type, *ns;
+			const char *type;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &type, &ns);
@@ -1097,7 +1121,6 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			newModel->kind = XSD_CONTENT_GROUP_REF;
 			newModel->u.group_ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
 
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 		} else {
 			newModel = emalloc(sizeof(sdlContentModel));
@@ -1390,6 +1413,9 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, s
 		memset(cur_type->encode, 0, sizeof(encode));
 		cur_type->encode->details.ns = estrdup(newType->namens);
 		cur_type->encode->details.type_str = estrdup(newType->name);
+		if (cur_type->encode->details.ns) {
+			cur_type->encode->details.clark_notation = zend_strpprintf(0, "{%s}%s", cur_type->encode->details.ns, cur_type->encode->details.type_str);
+		}
 		cur_type->encode->details.sdl_type = ptr;
 		cur_type->encode->to_xml = sdl_guess_convert_xml;
 		cur_type->encode->to_zval = sdl_guess_convert_zval;
@@ -1508,7 +1534,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 
 		if (ref) {
 			smart_str nscat = {0};
-			char *type, *ns;
+			const char *type;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &type, &ns);
@@ -1529,7 +1556,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			smart_str_appends(&nscat, type);
 			newType->name = estrdup(type);
 			smart_str_0(&nscat);
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 			newType->ref = estrndup(ZSTR_VAL(nscat.s), ZSTR_LEN(nscat.s));
 			smart_str_free(&nscat);
@@ -1653,7 +1679,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	/* type = QName */
 	type = get_attribute(attrs, "type");
 	if (type) {
-		char *cptype, *str_ns;
+		const char *cptype;
+		char *str_ns;
 		xmlNsPtr nsptr;
 
 		if (ref != NULL) {
@@ -1665,7 +1692,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
 		if (str_ns) {efree(str_ns);}
-		if (cptype) {efree(cptype);}
 	}
 
 	trav = element->children;
@@ -1740,7 +1766,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		memset(newAttr, 0, sizeof(sdlAttribute));
 
 		if (ref) {
-			char *attr_name, *ns;
+			const char *attr_name;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &attr_name, &ns);
@@ -1761,7 +1788,6 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			smart_str_appends(&key, attr_name);
 			smart_str_0(&key);
 			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
-			if (attr_name) {efree(attr_name);}
 			if (ns) {efree(ns);}
 		} else {
 			xmlAttrPtr ns;
@@ -1801,7 +1827,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 	/* type = QName */
 	type = get_attribute(attrType->properties, "type");
 	if (type) {
-		char *cptype, *str_ns;
+		const char *cptype;
+		char *str_ns;
 		xmlNsPtr nsptr;
 
 		if (ref != NULL) {
@@ -1813,7 +1840,6 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			newAttr->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
 		if (str_ns) {efree(str_ns);}
-		if (cptype) {efree(cptype);}
 	}
 
 	attr = attrType->properties;
@@ -1855,7 +1881,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				smart_str key2 = {0};
 				sdlExtraAttributePtr ext;
 				xmlNsPtr nsptr;
-				char *value, *ns;
+				const char *value;
+				char *ns;
 
 				ext = emalloc(sizeof(sdlExtraAttribute));
 				memset(ext, 0, sizeof(sdlExtraAttribute));
@@ -1868,7 +1895,6 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 					ext->val = estrdup((char*)attr->children->content);
 				}
 				if (ns) {efree(ns);}
-				efree(value);
 
 				if (!newAttr->extraAttributes) {
 					newAttr->extraAttributes = emalloc(sizeof(HashTable));
@@ -1981,7 +2007,8 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_free(&key);
 		} else if (ref) {
 			sdlAttributePtr newAttr;
-			char *group_name, *ns;
+			const char *group_name;
+			char *ns;
 			smart_str key = {0};
 			xmlNsPtr nsptr;
 
@@ -2001,7 +2028,6 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_appends(&key, group_name);
 			smart_str_0(&key);
 			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
-			if (group_name) {efree(group_name);}
 			if (ns) {efree(ns);}
 			smart_str_free(&key);
 

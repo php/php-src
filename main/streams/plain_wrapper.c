@@ -23,10 +23,10 @@
 #include "ext/standard/php_filestat.h"
 #include <stddef.h>
 #include <fcntl.h>
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_SYS_FILE_H
+#ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
 #ifdef HAVE_SYS_MMAN_H
@@ -40,6 +40,7 @@
 # include "win32/time.h"
 # include "win32/ioutil.h"
 # include "win32/readdir.h"
+# include <limits.h>
 #endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC)
@@ -53,7 +54,7 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
 
 #if defined(PHP_WIN32)
-# define PLAIN_WRAP_BUF_SIZE(st) (((st) > UINT_MAX) ? UINT_MAX : (unsigned int)(st))
+# define PLAIN_WRAP_BUF_SIZE(st) ((unsigned int)(st > INT_MAX ? INT_MAX : st))
 #define fsync _commit
 #define fdatasync fsync
 #else
@@ -258,9 +259,9 @@ static void detect_is_seekable(php_stdio_stream_data *self) {
 		self->is_pipe = S_ISFIFO(self->sb.st_mode);
 	}
 #elif defined(PHP_WIN32)
-	zend_uintptr_t handle = _get_osfhandle(self->fd);
+	uintptr_t handle = _get_osfhandle(self->fd);
 
-	if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
+	if (handle != (uintptr_t)INVALID_HANDLE_VALUE) {
 		DWORD file_type = GetFileType((HANDLE)handle);
 
 		self->is_seekable = !(file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR);
@@ -353,11 +354,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
-		ssize_t bytes_written;
-		if (ZEND_SIZE_T_UINT_OVFL(count)) {
-			count = UINT_MAX;
-		}
-		bytes_written = _write(data->fd, buf, (unsigned int)count);
+		ssize_t bytes_written = _write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
 #else
 		ssize_t bytes_written = write(data->fd, buf, count);
 #endif
@@ -539,7 +536,7 @@ static int php_stdiop_flush(php_stream *stream)
 
 	/*
 	 * stdio buffers data in user land. By calling fflush(3), this
-	 * data is send to the kernel using write(2). fsync'ing is
+	 * data is sent to the kernel using write(2). fsync'ing is
 	 * something completely different.
 	 */
 	if (data->file) {
@@ -733,7 +730,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				return -1;
 			}
 
-			if ((zend_uintptr_t) ptrparam == PHP_STREAM_LOCK_SUPPORTED) {
+			if ((uintptr_t) ptrparam == PHP_STREAM_LOCK_SUPPORTED) {
 				return 0;
 			}
 
@@ -1032,6 +1029,11 @@ static ssize_t php_plain_files_dirstream_read(php_stream *stream, char *buf, siz
 	result = readdir(dir);
 	if (result) {
 		PHP_STRLCPY(ent->d_name, result->d_name, sizeof(ent->d_name), strlen(result->d_name));
+#ifdef _DIRENT_HAVE_D_TYPE
+		ent->d_type = result->d_type;
+#else
+		ent->d_type = DT_UNKNOWN;
+#endif
 		return sizeof(php_stream_dirent);
 	}
 	return 0;
@@ -1372,7 +1374,17 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	}
 
 	if (!(options & PHP_STREAM_MKDIR_RECURSIVE)) {
-		return php_mkdir(dir, mode) == 0;
+		if (php_check_open_basedir(dir)) {
+			return 0;
+		}
+
+		int ret = VCWD_MKDIR(dir, (mode_t)mode);
+		if (ret < 0 && (options & REPORT_ERRORS)) {
+			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+			return 0;
+		}
+
+		return 1;
 	}
 
 	char buf[MAXPATHLEN];
@@ -1671,7 +1683,7 @@ not_relative_path:
 
 	/* check in provided path */
 	/* append the calling scripts' current working directory
-	 * as a fall back case
+	 * as a fallback case
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {

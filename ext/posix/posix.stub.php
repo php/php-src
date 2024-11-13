@@ -191,6 +191,125 @@ const POSIX_RLIMIT_NPTS = UNKNOWN;
  */
 const POSIX_RLIMIT_INFINITY = UNKNOWN;
 #endif
+#ifdef _SC_ARG_MAX
+/**
+ * @var int
+ * @cvalue _SC_ARG_MAX
+ */
+const POSIX_SC_ARG_MAX = UNKNOWN;
+#endif
+#ifdef _SC_CHILD_MAX
+/**
+ * @var int
+ * @cvalue _SC_CHILD_MAX
+ */
+const POSIX_SC_CHILD_MAX = UNKNOWN;
+#endif
+#ifdef _SC_CLK_TCK
+/**
+ * @var int
+ * @cvalue _SC_CLK_TCK
+ */
+const POSIX_SC_CLK_TCK = UNKNOWN;
+#endif
+#ifdef _SC_PAGESIZE
+/**
+ * @var int
+ * @cvalue _SC_PAGESIZE
+ */
+const POSIX_SC_PAGESIZE = UNKNOWN;
+#endif
+#ifdef _SC_NPROCESSORS_CONF
+/**
+ * @var int
+ * @cvalue _SC_NPROCESSORS_CONF
+ */
+const POSIX_SC_NPROCESSORS_CONF = UNKNOWN;
+#endif
+#ifdef _SC_NPROCESSORS_ONLN
+/**
+ * @var int
+ * @cvalue _SC_NPROCESSORS_ONLN
+ */
+const POSIX_SC_NPROCESSORS_ONLN = UNKNOWN;
+#endif
+#ifdef _PC_LINK_MAX
+/**
+ * @var int
+ * @cvalue _PC_LINK_MAX
+ */
+const POSIX_PC_LINK_MAX = UNKNOWN;
+#endif
+#ifdef _PC_MAX_CANON
+/**
+ * @var int
+ * @cvalue _PC_MAX_CANON
+ */
+const POSIX_PC_MAX_CANON = UNKNOWN;
+#endif
+#ifdef _PC_MAX_INPUT
+/**
+ * @var int
+ * @cvalue _PC_MAX_INPUT
+ */
+const POSIX_PC_MAX_INPUT = UNKNOWN;
+#endif
+#ifdef _PC_NAME_MAX
+/**
+ * @var int
+ * @cvalue _PC_NAME_MAX
+ */
+const POSIX_PC_NAME_MAX = UNKNOWN;
+#endif
+#ifdef _PC_PATH_MAX
+/**
+ * @var int
+ * @cvalue _PC_PATH_MAX
+ */
+const POSIX_PC_PATH_MAX = UNKNOWN;
+#endif
+#ifdef _PC_PIPE_BUF
+/**
+ * @var int
+ * @cvalue _PC_PIPE_BUF
+ */
+const POSIX_PC_PIPE_BUF = UNKNOWN;
+#endif
+#ifdef _PC_CHOWN_RESTRICTED
+/**
+ * @var int
+ * @cvalue _PC_CHOWN_RESTRICTED
+ */
+const POSIX_PC_CHOWN_RESTRICTED = UNKNOWN;
+#endif
+#ifdef _PC_NO_TRUNC
+/**
+ * @var int
+ * @cvalue _PC_NO_TRUNC
+ */
+const POSIX_PC_NO_TRUNC = UNKNOWN;
+#endif
+#ifdef _PC_ALLOC_SIZE_MIN
+/**
+ * @var int
+ * @cvalue _PC_ALLOC_SIZE_MIN
+ */
+const POSIX_PC_ALLOC_SIZE_MIN = UNKNOWN;
+#endif
+#ifdef _PC_SYMLINK_MAX
+/**
+ * @var int
+ * @cvalue _PC_SYMLINK_MAX
+ */
+const POSIX_PC_SYMLINK_MAX = UNKNOWN;
+#endif
+#ifdef _SC_OPEN_MAX
+/**
+ * @var int
+ * @cvalue _SC_OPEN_MAX
+ */
+const POSIX_SC_OPEN_MAX = UNKNOWN;
+#endif
 
 function posix_kill(int $process_id, int $signal): bool {}
 
@@ -281,6 +400,10 @@ function posix_mknod(string $filename, int $flags, int $major = 0, int $minor = 
 
 function posix_access(string $filename, int $flags = 0): bool {}
 
+#ifdef HAVE_EACCESS
+function posix_eaccess(string $filename, int $flags = 0): bool {}
+#endif
+
 /**
  * @return array<string, int|string|array|null>|false
  * @refcount 1
@@ -307,10 +430,10 @@ function posix_getpwuid(int $user_id): array|false {}
 
 #ifdef HAVE_GETRLIMIT
 /**
- * @return array<string, int|string>|false
+ * @return array<int|string, int|string>|false
  * @refcount 1
  */
-function posix_getrlimit(): array|false {}
+function posix_getrlimit(?int $resource = null): array|false {}
 #endif
 
 #ifdef HAVE_SETRLIMIT
@@ -326,4 +449,15 @@ function posix_strerror(int $error_code): string {}
 
 #ifdef HAVE_INITGROUPS
 function posix_initgroups(string $username, int $group_id): bool {}
+#endif
+
+function posix_sysconf(int $conf_id): int {}
+
+#ifdef HAVE_PATHCONF
+function posix_pathconf(string $path, int $name): int|false {}
+#endif
+
+#ifdef HAVE_FPATHCONF
+/** @param resource|int $file_descriptor */
+function posix_fpathconf($file_descriptor, int $name): int|false {}
 #endif

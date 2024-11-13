@@ -17,11 +17,10 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/info.h"
 #include "main/php_output.h"
 #include "SAPI.h"
@@ -58,20 +57,20 @@
 
 #ifdef PHP_ICONV_IMPL
 #define PHP_ICONV_IMPL_VALUE PHP_ICONV_IMPL
-#elif HAVE_LIBICONV
+#elif defined(HAVE_LIBICONV)
 #define PHP_ICONV_IMPL_VALUE "libiconv"
 #else
 #define PHP_ICONV_IMPL_VALUE "unknown"
 #endif
 
-char *get_iconv_version(void) {
+static char *get_iconv_version(void) {
 	char *version = "unknown";
 
 #ifdef HAVE_LIBICONV
 	static char buf[16];
 	snprintf(buf, sizeof(buf), "%d.%d", _libiconv_version >> 8, _libiconv_version & 0xff);
 	version = buf;
-#elif HAVE_GLIBC_ICONV
+#elif defined(HAVE_GLIBC_ICONV)
 	version = (char *) gnu_get_libc_version();
 #endif
 
@@ -155,9 +154,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 static php_iconv_err_t php_iconv_stream_filter_register_factory(void);
 static php_iconv_err_t php_iconv_stream_filter_unregister_factory(void);
 
-static int php_iconv_output_conflict(const char *handler_name, size_t handler_name_len);
+static zend_result php_iconv_output_conflict(const char *handler_name, size_t handler_name_len);
 static php_output_handler *php_iconv_output_handler_init(const char *name, size_t name_len, size_t chunk_size, int flags);
-static int php_iconv_output_handler(void **nothing, php_output_context *output_context);
+static zend_result php_iconv_output_handler(void **nothing, php_output_context *output_context);
 /* }}} */
 
 /* {{{ static globals */
@@ -281,7 +280,7 @@ static const char *get_output_encoding(void) {
 }
 
 
-static int php_iconv_output_conflict(const char *handler_name, size_t handler_name_len)
+static zend_result php_iconv_output_conflict(const char *handler_name, size_t handler_name_len)
 {
 	if (php_output_get_level()) {
 		if (php_output_handler_conflict(handler_name, handler_name_len, ZEND_STRL("ob_iconv_handler"))
@@ -297,7 +296,7 @@ static php_output_handler *php_iconv_output_handler_init(const char *handler_nam
 	return php_output_handler_create_internal(handler_name, handler_name_len, php_iconv_output_handler, chunk_size, flags);
 }
 
-static int php_iconv_output_handler(void **nothing, php_output_context *output_context)
+static zend_result php_iconv_output_handler(void **nothing, php_output_context *output_context)
 {
 	char *s, *content_type, *mimetype = NULL;
 	int output_status, mimetype_len = 0;
@@ -914,7 +913,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 	char *out_p;
 	size_t out_left;
 	zend_string *encoded = NULL;
-	static int qp_table[256] = {
+	static const int qp_table[256] = {
 		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, /* 0x00 */
 		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, /* 0x10 */
 		3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* 0x20 */
@@ -1986,7 +1985,7 @@ PHP_FUNCTION(iconv_mime_encode)
 	if (pref != NULL) {
 		zval *pzval;
 
-		if ((pzval = zend_hash_str_find_deref(Z_ARRVAL_P(pref), "scheme", sizeof("scheme") - 1)) != NULL) {
+		if ((pzval = zend_hash_find_deref(Z_ARRVAL_P(pref), ZSTR_KNOWN(ZEND_STR_SCHEME))) != NULL) {
 			if (Z_TYPE_P(pzval) == IS_STRING && Z_STRLEN_P(pzval) > 0) {
 				switch (Z_STRVAL_P(pzval)[0]) {
 					case 'B': case 'b':
@@ -2244,11 +2243,11 @@ PHP_FUNCTION(iconv_set_encoding)
 	}
 
 	if(zend_string_equals_literal_ci(type, "input_encoding")) {
-		name = zend_string_init("iconv.input_encoding", sizeof("iconv.input_encoding") - 1, 0);
+		name = ZSTR_INIT_LITERAL("iconv.input_encoding", 0);
 	} else if(zend_string_equals_literal_ci(type, "output_encoding")) {
-		name = zend_string_init("iconv.output_encoding", sizeof("iconv.output_encoding") - 1, 0);
+		name = ZSTR_INIT_LITERAL("iconv.output_encoding", 0);
 	} else if(zend_string_equals_literal_ci(type, "internal_encoding")) {
-		name = zend_string_init("iconv.internal_encoding", sizeof("iconv.internal_encoding") - 1, 0);
+		name = ZSTR_INIT_LITERAL("iconv.internal_encoding", 0);
 	} else {
 		RETURN_FALSE;
 	}

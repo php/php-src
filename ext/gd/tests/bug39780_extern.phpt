@@ -5,6 +5,9 @@ gd
 --SKIPIF--
 <?php
     if (GD_BUNDLED) die("skip requires extern GD\n");
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php

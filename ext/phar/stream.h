@@ -18,6 +18,7 @@
 */
 
 BEGIN_EXTERN_C()
+#include "ext/standard/url.h"
 
 php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options);
 void phar_entry_remove(phar_entry_data *idata, char **error);

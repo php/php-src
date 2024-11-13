@@ -7,3 +7,4 @@ ZEND_END_ARG_INFO()
 #define arginfo_apache_response_headers arginfo_apache_request_headers
 
 #define arginfo_getallheaders arginfo_apache_request_headers
+

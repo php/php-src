@@ -71,7 +71,7 @@ try {
 ?>
 --EXPECT--
 int(1)
-Unable to prepare statement: 23, not authorized
+Unable to prepare statement: not authorized
 bool(true)
 int(42)
 string(6) "SELECT"
@@ -98,7 +98,7 @@ string(28) "sqlite_master,rootpage,main,"
 string(4) "READ"
 string(28) "sqlite_master,rootpage,main,"
 bool(true)
-Unable to prepare statement: 23, not authorized
+Unable to prepare statement: not authorized
 The authorizer callback returned an invalid type: expected int
-Unable to prepare statement: 23, not authorized
-The authorizer callback returned an invalid value
+Unable to prepare statement: not authorized
+The authorizer callback returned an invalid value: 4200

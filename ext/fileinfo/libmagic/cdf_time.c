@@ -23,12 +23,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "php.h"
 
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf_time.c,v 1.19 2019/03/12 20:43:05 christos Exp $")
+FILE_RCSID("@(#)$File: cdf_time.c,v 1.24 2023/07/17 15:54:44 christos Exp $")
 #endif
 
 #include <time.h>
@@ -153,12 +152,12 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timespec *ts)
 #endif
 #ifdef notyet
 	struct tm tm;
-	if (php_gmtime_r(&ts->ts_sec, &tm) == NULL) {
+	if (gmtime_r(&ts->ts_sec, &tm) == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 	*t = (ts->ts_nsec / 100) * CDF_TIME_PREC;
-	*t = tm.tm_sec;
+	*t += tm.tm_sec;
 	*t += tm.tm_min * 60;
 	*t += tm.tm_hour * 60 * 60;
 	*t += tm.tm_mday * 60 * 60 * 24;
@@ -169,11 +168,16 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timespec *ts)
 char *
 cdf_ctime(const time_t *sec, char *buf)
 {
-	char *ptr = php_ctime_r(sec, buf);
+	char *ptr = *sec > MAX_CTIME ? NULL : ctime_r(sec, buf);
 	if (ptr != NULL)
 		return buf;
+#ifdef WIN32
+	(void)snprintf(buf, 26, "*Bad* 0x%16.16I64x\n",
+	    CAST(long long, *sec));
+#else
 	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 	    CAST(long long, *sec));
+#endif
 	return buf;
 }
 

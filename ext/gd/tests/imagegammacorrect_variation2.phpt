@@ -2,6 +2,12 @@
 Apply imagegammacorrect() to a step wedge
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 require __DIR__ . DIRECTORY_SEPARATOR . 'func.inc';

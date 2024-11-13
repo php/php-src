@@ -4,40 +4,42 @@ MySQL PDOStatement->closeCursor()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
     /* TODO the results look wrong, why do we get 2014 with buffered AND unbuffered queries */
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
+    $table = 'pdo_mysql_stmt_closecursor';
+
     function pdo_mysql_stmt_closecursor($db) {
+        global $table;
 
         // This one should fail. I let it fail to prove that closeCursor() makes a difference.
         // If no error messages gets printed do not know if proper usage of closeCursor() makes any
         // difference or not. That's why we need to cause an error here.
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-        $stmt1 = $db->query('SELECT id, label FROM test ORDER BY id ASC');
+        $stmt1 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
         // query() shall fail!
-        $stmt2 = $db->query('SELECT id, label FROM test ORDER BY id ASC');
+        $stmt2 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
         $stmt1->closeCursor();
 
         // This is proper usage of closeCursor(). It shall prevent any further error messages.
         if (MySQLPDOTest::isPDOMySQLnd()) {
-            $stmt1 = $db->query('SELECT id, label FROM test ORDER BY id ASC');
+            $stmt1 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
         } else {
             // see pdo_mysql_stmt_unbuffered_2050.phpt for an explanation
             unset($stmt1);
-            $stmt1 = $db->query('SELECT id, label FROM test ORDER BY id ASC');
+            $stmt1 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
         }
         // fetch only the first rows and let closeCursor() clean up
         $row1 = $stmt1->fetch(PDO::FETCH_ASSOC);
         $stmt1->closeCursor();
 
-        $stmt2 = $db->prepare('UPDATE test SET label = ? WHERE id = ?');
+        $stmt2 = $db->prepare("UPDATE {$table} SET label = ? WHERE id = ?");
         $stmt2->bindValue(1, "z");
 
         $stmt2->bindValue(2, $row1['id']);
@@ -54,18 +56,18 @@ $db = MySQLPDOTest::factory();
             printf("Expecting array(id => 1, label => z) got %s\n", var_export($row2, true));
         unset($stmt1);
 
-        $stmt1 = $db->query('SELECT id, label FROM test ORDER BY id ASC');
+        $stmt1 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
         // should work
-        $stmt2 = $db->query('SELECT id, label FROM test ORDER BY id ASC');
+        $stmt2 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
         $stmt1->closeCursor();
 
-        $stmt1 = $db->query('SELECT id, label FROM test ORDER BY id ASC');
+        $stmt1 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
         // fetch only the first rows and let closeCursor() clean up
         $row3 = $stmt1->fetch(PDO::FETCH_ASSOC);
         $stmt1->closeCursor();
         assert($row3 == $row2);
 
-        $stmt2 = $db->prepare('UPDATE test SET label = ? WHERE id = ?');
+        $stmt2 = $db->prepare("UPDATE {$table} SET label = ? WHERE id = ?");
         $stmt2->bindValue(1, "a");
         $stmt2->bindValue(2, $row1['id']);
         $stmt2->execute();
@@ -77,7 +79,7 @@ $db = MySQLPDOTest::factory();
         assert($row4 == $row1);
 
         $offset = 0;
-        $stmt = $db->prepare('SELECT id, label FROM test WHERE id > ? ORDER BY id ASC LIMIT 2');
+        $stmt = $db->prepare("SELECT id, label FROM {$table} WHERE id > ? ORDER BY id ASC LIMIT 2");
         $in = 0;
         if (!$stmt->bindParam(1, $in))
             printf("[%03d + 1] Cannot bind parameter, %s %s\n", $offset,
@@ -107,7 +109,6 @@ $db = MySQLPDOTest::factory();
 
 
     try {
-
         printf("Testing emulated PS...\n");
         $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
@@ -115,12 +116,12 @@ $db = MySQLPDOTest::factory();
 
         printf("Buffered...\n");
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         pdo_mysql_stmt_closecursor($db);
 
         printf("Unbuffered...\n");
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         pdo_mysql_stmt_closecursor($db);
 
         printf("Testing native PS...\n");
@@ -129,12 +130,12 @@ $db = MySQLPDOTest::factory();
             printf("[002] Unable to turn off emulated prepared statements\n");
 
         printf("Buffered...\n");
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
         pdo_mysql_stmt_closecursor($db);
 
         printf("Unbuffered...\n");
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         pdo_mysql_stmt_closecursor($db);
 
@@ -147,9 +148,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_closecursor');
 ?>
 --EXPECTF--
 Testing emulated PS...

@@ -9,7 +9,7 @@ for ($i=4; $i<100; $i++) {
 
     $m->aaa = array(1,2,&$u,4,5);
     $m->bbb = 1;
-    $m->ccc = &$u;
+    // $m->ccc = &$u;
     $m->ddd = str_repeat("A", $i);
 
     $z = serialize($m);

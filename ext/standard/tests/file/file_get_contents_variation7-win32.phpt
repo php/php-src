@@ -54,12 +54,21 @@ for($i = 0; $i<count($allDirs); $i++) {
   var_dump(file_get_contents($dir."\\".$filename));
 }
 
-unlink($absFile);
 chdir($old_dir_path);
-rmdir($absSubDir);
-rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$mainDir = "fileGetContentsVar7.dir";
+$subDir = "fileGetContentsVar7Sub";
+$absMainDir = __DIR__."/".$mainDir;
+$absSubDir = $absMainDir."/".$subDir;
+$filename = 'FileGetContentsVar7.tmp';
+$absFile = $absSubDir.'/'.$filename;
+unlink($absFile);
+rmdir($absSubDir);
+rmdir($absMainDir);
 ?>
 --EXPECTF--
 *** Testing file_get_contents() : variation ***

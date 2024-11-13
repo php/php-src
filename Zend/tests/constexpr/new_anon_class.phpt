@@ -1,10 +1,13 @@
 --TEST--
-New with anonymous class is not supported in constant expressions
+New with anonymous class works
 --FILE--
 <?php
 
 static $x = new class {};
 
+var_dump($x);
+
 ?>
---EXPECTF--
-Fatal error: Cannot use anonymous class in constant expression in %s on line %d
+--EXPECT--
+object(class@anonymous)#1 (0) {
+}

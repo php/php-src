@@ -4,14 +4,14 @@ PostgreSQL pg_select()
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_server_version('8.5dev', '>=');
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 $fields = array('num'=>'1234', 'str'=>'ABC', 'bin'=>'XYZ');

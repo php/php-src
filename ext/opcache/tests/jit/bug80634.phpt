@@ -4,7 +4,6 @@ Bug #80634 (write_property handler of internal classes is skipped on preloaded J
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 opcache.jit=function
 opcache.preload={PWD}/preload_bug80634.inc

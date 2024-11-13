@@ -32,8 +32,8 @@ try {
 
 ?>
 --EXPECT--
-Illegal offset type
-Illegal offset type
-Illegal offset type
-Illegal offset type in isset or empty
-Illegal offset type in unset
+Cannot access offset of type array on ArrayObject
+Cannot access offset of type array on ArrayObject
+Cannot access offset of type array on ArrayObject
+Cannot access offset of type array in isset or empty
+Cannot unset offset of type array on ArrayObject

@@ -20,6 +20,7 @@ EOC;
     if (strstr($output, "PTY (pseudoterminal) not supported on this system") !== false) {
         die("skip PTY pseudo terminals are not supported");
     }
+?>
 --FILE--
 <?php
 $cmd = '(echo "foo" ; exit 42;) 3>/dev/null; code=$?; echo $code >&3; exit $code';

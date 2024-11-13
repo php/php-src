@@ -31,8 +31,6 @@
 
 #include <windows.h>
 
-typedef unsigned int in_addr_t;
-
 struct sockaddr_un {
 	short   sun_family;
 	char    sun_path[MAXPATHLEN];
@@ -683,12 +681,7 @@ int fcgi_listen(const char *path, int backlog)
 		if (!*host || !strncmp(host, "*", sizeof("*")-1)) {
 			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
 		} else {
-#ifdef HAVE_INET_PTON
 			if (!inet_pton(AF_INET, host, &sa.sa_inet.sin_addr)) {
-#else
-			sa.sa_inet.sin_addr.s_addr = inet_addr(host);
-			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
-#endif
 				struct hostent *hep;
 
 				if(strlen(host) > MAXFQDNLEN) {
@@ -744,8 +737,8 @@ int fcgi_listen(const char *path, int backlog)
 		memset(&sa.sa_unix, 0, sizeof(sa.sa_unix));
 		sa.sa_unix.sun_family = AF_UNIX;
 		memcpy(sa.sa_unix.sun_path, path, path_len + 1);
-		sock_len = (size_t)(((struct sockaddr_un *)0)->sun_path)	+ path_len;
-#ifdef HAVE_SOCKADDR_UN_SUN_LEN
+		sock_len = XtOffsetOf(struct sockaddr_un, sun_path) + path_len;
+#ifdef HAVE_STRUCT_SOCKADDR_UN_SUN_LEN
 		sa.sa_unix.sun_len = sock_len;
 #endif
 		unlink(path);
@@ -965,9 +958,9 @@ static inline ssize_t safe_read(fcgi_request *req, const void *buf, size_t count
 		tmp = count - n;
 
 		if (!req->tcp) {
-			unsigned int in_len = tmp > UINT_MAX ? UINT_MAX : (unsigned int)tmp;
+			unsigned int in_len = tmp > INT_MAX ? INT_MAX : (unsigned int)tmp;
 
-			ret = read(req->fd, ((char*)buf)+n, in_len);
+			ret = _read(req->fd, ((char*)buf)+n, in_len);
 		} else {
 			int in_len = tmp > INT_MAX ? INT_MAX : (int)tmp;
 
@@ -1190,10 +1183,8 @@ static int fcgi_read_request(fcgi_request *req)
 				*p++ = (zlen >> 8) & 0xff;
 				*p++ = zlen & 0xff;
 			}
-			memcpy(p, q->var, q->var_len);
-			p += q->var_len;
-			memcpy(p, Z_STRVAL_P(value), zlen);
-			p += zlen;
+			p = zend_mempcpy(p, q->var, q->var_len);
+			p = zend_mempcpy(p, Z_STRVAL_P(value), zlen);
 			q = q->list_next;
 		}
 		len = (int)(p - buf - sizeof(fcgi_header));
@@ -1423,6 +1414,16 @@ int fcgi_accept_request(fcgi_request *req)
 					return -1;
 				}
 
+#if defined(F_SETFD) && defined(FD_CLOEXEC)
+				int fd_attrs = fcntl(req->fd, F_GETFD);
+				if (0 > fd_attrs) {
+					fcgi_log(FCGI_WARNING, "failed to get attributes of the connection socket");
+				}
+				if (0 > fcntl(req->fd, F_SETFD, fd_attrs | FD_CLOEXEC)) {
+					fcgi_log(FCGI_WARNING, "failed to change attribute of the connection socket");
+				}
+#endif
+
 #ifdef _WIN32
 				break;
 #else
@@ -1588,23 +1589,20 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		if (!req->out_hdr) {
 			open_packet(req, type);
 		}
-		memcpy(req->out_pos, str, len);
-		req->out_pos += len;
+		req->out_pos = zend_mempcpy(req->out_pos, str, len);
 	} else if (len - limit < (int)(sizeof(req->out_buf) - sizeof(fcgi_header))) {
 		if (limit > 0) {
 			if (!req->out_hdr) {
 				open_packet(req, type);
 			}
-			memcpy(req->out_pos, str, limit);
-			req->out_pos += limit;
+			req->out_pos = zend_mempcpy(req->out_pos, str, limit);
 		}
 		if (!fcgi_flush(req, 0)) {
 			return -1;
 		}
 		if (len > limit) {
 			open_packet(req, type);
-			memcpy(req->out_pos, str + limit, len - limit);
-			req->out_pos += len - limit;
+			req->out_pos = zend_mempcpy(req->out_pos, str + limit, len - limit);
 		}
 	} else {
 		int pos = 0;
@@ -1640,8 +1638,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		}
 		if (pad) {
 			open_packet(req, type);
-			memcpy(req->out_pos, str + len - rest,  rest);
-			req->out_pos += rest;
+			req->out_pos = zend_mempcpy(req->out_pos, str + len - rest, rest);
 		}
 	}
 #endif

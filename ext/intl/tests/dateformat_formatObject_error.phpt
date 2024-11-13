@@ -36,7 +36,7 @@ Warning: IntlDateFormatter::formatObject(): datefmt_format_object: bad IntlCalen
 bool(false)
 
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: error calling ::getTimeStamp() on the object in %s on line %d
-The DateTime object has not been correctly initialized by its constructor
+Object of type B (inheriting DateTime) has not been correctly initialized by calling parent::__construct() in its constructor
 
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the date/time format type is invalid in %s on line %d
 bool(false)

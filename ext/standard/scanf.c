@@ -361,8 +361,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			if (gotSequential) {
 				goto mixedXPG;
 			}
-			objIndex = value - 1;
-			if ((objIndex < 0) || (numVars && (objIndex >= numVars))) {
+			if ((value < 1) || (numVars && (value > numVars))) {
 				goto badIndex;
 			} else if (numVars == 0) {
 				/*
@@ -382,6 +381,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 
 				xpgSize = (xpgSize > value) ? xpgSize : value;
 			}
+			objIndex = value - 1;
 			goto xpgCheckDone;
 		}
 

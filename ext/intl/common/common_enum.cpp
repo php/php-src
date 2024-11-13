@@ -56,7 +56,7 @@ void zoi_with_current_dtor(zend_object_iterator *iter)
 	}
 }
 
-U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter)
+U_CFUNC zend_result zoi_with_current_valid(zend_object_iterator *iter)
 {
 	return Z_ISUNDEF(((zoi_with_current*)iter)->current)? FAILURE : SUCCESS;
 }
@@ -200,8 +200,6 @@ static zend_object *IntlIterator_object_create(zend_class_entry *ce)
 
 	intern->iterator = NULL;
 
-	intern->zo.handlers = &IntlIterator_handlers;
-
 	return &intern->zo;
 }
 
@@ -210,9 +208,7 @@ PHP_METHOD(IntlIterator, current)
 	zval *data;
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	data = ii->iterator->funcs->get_current_data(ii->iterator);
@@ -225,9 +221,7 @@ PHP_METHOD(IntlIterator, key)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
@@ -242,9 +236,7 @@ PHP_METHOD(IntlIterator, next)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	ii->iterator->funcs->move_forward(ii->iterator);
@@ -257,9 +249,7 @@ PHP_METHOD(IntlIterator, rewind)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	if (ii->iterator->funcs->rewind) {
@@ -274,9 +264,7 @@ PHP_METHOD(IntlIterator, valid)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	RETURN_BOOL(ii->iterator->funcs->valid(ii->iterator) == SUCCESS);
@@ -287,6 +275,7 @@ U_CFUNC void intl_register_common_symbols(int module_number)
 	/* Create and register 'IntlIterator' class. */
 	IntlIterator_ce_ptr = register_class_IntlIterator(zend_ce_iterator);
 	IntlIterator_ce_ptr->create_object = IntlIterator_object_create;
+	IntlIterator_ce_ptr->default_object_handlers = &IntlIterator_handlers;
 	IntlIterator_ce_ptr->get_iterator = IntlIterator_get_iterator;
 
 	memcpy(&IntlIterator_handlers, &std_object_handlers,

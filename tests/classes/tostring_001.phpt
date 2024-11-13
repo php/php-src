@@ -118,7 +118,7 @@ test2::__toString()
 Converted
 ====test7====
 test2::__toString()
-Illegal offset type
+Cannot access offset of type test2 on array
 ====test8====
 test2::__toString()
 string(9) "Converted"

@@ -4,11 +4,11 @@ Bug #31668 (multi_query works exactly every other time (multi_query was global, 
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
     $mysql->multi_query('SELECT 1;SELECT 2');

@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -25,27 +25,20 @@
 #define rl_completion_matches completion_matches
 #endif
 
-#include "php_globals.h"
-#include "php_variables.h"
 #include "zend_hash.h"
-#include "zend_modules.h"
 
 #include "SAPI.h"
 #include <locale.h>
 #include "zend.h"
-#include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
-#include "php_main.h"
-#include "fopen_wrappers.h"
-#include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
 #ifdef __riscos__
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 #include <editline/readline.h>
 #else
 #include <readline/readline.h>
@@ -343,6 +336,7 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 					case ' ':
 					case '\t':
 					case '\'':
+					case '"':
 						break;
 					case '\r':
 					case '\n':
@@ -617,7 +611,12 @@ static int readline_shell_run(void) /* {{{ */
 	}
 
 #ifndef PHP_WIN32
-	history_file = tilde_expand("~/.php_history");
+	const char *histfile_env_name = "PHP_HISTFILE";
+	if (getenv(histfile_env_name)) {
+		spprintf(&history_file, MAXPATHLEN, "%s", getenv(histfile_env_name));
+	} else {
+		spprintf(&history_file, MAXPATHLEN, "%s/.php_history", getenv("HOME"));
+	}
 #else
 	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
 #endif
@@ -688,7 +687,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		if (history_lines_to_write) {
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 			write_history(history_file);
 #else
 			append_history(history_lines_to_write, history_file);
@@ -717,11 +716,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		php_last_char = '\0';
 	}
-#ifdef PHP_WIN32
 	efree(history_file);
-#else
-	free(history_file);
-#endif
 	efree(code);
 	zend_string_release_ex(prompt, 0);
 	return EG(exit_status);
@@ -800,7 +795,7 @@ PHP_MSHUTDOWN_FUNCTION(cli_readline)
 PHP_MINFO_FUNCTION(cli_readline)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Readline Support", "enabled");
+	php_info_print_table_row(2, "Readline Support", "enabled");
 #ifdef PHP_WIN32
 	php_info_print_table_row(2, "Readline library", "WinEditLine");
 #else

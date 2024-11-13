@@ -13,11 +13,11 @@
 #ifndef TSRM_H
 #define TSRM_H
 
-#if !defined(__CYGWIN__) && defined(WIN32)
+#if !defined(__CYGWIN__) && defined(_WIN32)
 # define TSRM_WIN32
-# include "Zend/zend_config.w32.h"
+# include <Zend/zend_config.w32.h>
 #else
-# include "main/php_config.h"
+# include <main/php_config.h>
 #endif
 
 #include <stdint.h>
@@ -104,6 +104,9 @@ TSRM_API void ts_free_thread(void);
 /* deallocates all occurrences of a given id */
 TSRM_API void ts_free_id(ts_rsrc_id id);
 
+/* Runs a callback on all resources of the given id.
+ * The caller is responsible for ensuring the underlying resources don't data-race. */
+TSRM_API void ts_apply_for_id(ts_rsrc_id id, void (*cb)(void *));
 
 /* Debug support */
 #define TSRM_ERROR_LEVEL_ERROR	1
@@ -137,6 +140,7 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
 TSRM_API bool tsrm_is_main_thread(void);
 TSRM_API bool tsrm_is_shutdown(void);
 TSRM_API const char *tsrm_api_name(void);
+TSRM_API bool tsrm_is_managed_thread(void);
 
 #ifdef TSRM_WIN32
 # define TSRM_TLS __declspec(thread)
@@ -148,12 +152,15 @@ TSRM_API const char *tsrm_api_name(void);
 # define __has_attribute(x) 0
 #endif
 
-#if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__MUSL__) || defined(__HAIKU__)
+#if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__MUSL__) || defined(__HAIKU__)
 # define TSRM_TLS_MODEL_ATTR
+# define TSRM_TLS_MODEL_DEFAULT
 #elif __PIC__
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
+# define TSRM_TLS_MODEL_INITIAL_EXEC
 #else
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("local-exec")))
+# define TSRM_TLS_MODEL_LOCAL_EXEC
 #endif
 
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)

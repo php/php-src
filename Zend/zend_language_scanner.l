@@ -614,7 +614,7 @@ static zend_op_array *zend_compile(int type)
 		}
 
 		zend_file_context_begin(&original_file_context);
-		zend_oparray_context_begin(&original_oparray_context);
+		zend_oparray_context_begin(&original_oparray_context, op_array);
 		zend_compile_top_stmt(CG(ast));
 		CG(zend_lineno) = last_lineno;
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);
@@ -1329,7 +1329,7 @@ static zend_result check_nesting_at_end(void)
 	} while (0)
 
 #define RETURN_EXIT_NESTING_TOKEN(_token) do { \
-		if (exit_nesting(_token) && PARSER_MODE()) { \
+		if (exit_nesting(_token) != SUCCESS && PARSER_MODE()) { \
 			RETURN_TOKEN(T_ERROR); \
 		} else { \
 			RETURN_TOKEN(_token); \
@@ -1337,7 +1337,7 @@ static zend_result check_nesting_at_end(void)
 	} while(0)
 
 #define RETURN_END_TOKEN do { \
-		if (check_nesting_at_end() && PARSER_MODE()) { \
+		if (check_nesting_at_end() != SUCCESS && PARSER_MODE()) { \
 			RETURN_TOKEN(T_ERROR); \
 		} else { \
 			RETURN_TOKEN(END); \
@@ -1368,6 +1368,16 @@ TABS_AND_SPACES [ \t]*
 TOKENS [;:,.|^&+-/*=%!~$<>?@]
 ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
+OPTIONAL_WHITESPACE [ \n\r\t]*
+/* We don't use re2c with bounds checking, we just return 0 bytes if we read past the input.
+ * If we use wildcard matching for comments, we can read past the input, which crashes
+ * once we try to report a syntax error because the 0 bytes are not actually part of
+ * the token. We prevent this by not allowing 0 bytes, which already aren't valid anyway. */
+MULTI_LINE_COMMENT "/*"([^*\x00]*"*"+)([^*/\x00][^*\x00]*"*"+)*"/"
+SINGLE_LINE_COMMENT "//"[^\x00\n\r]*[\n\r]
+HASH_COMMENT "#"(([^[\x00][^\x00\n\r]*[\n\r])|[\n\r])
+WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_COMMENT}|{HASH_COMMENT})+
+OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_COMMENT}|{HASH_COMMENT})*
 
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
@@ -1401,7 +1411,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_ATTRIBUTE);
 }
 
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
+<ST_IN_SCRIPTING>"yield"{WHITESPACE_OR_COMMENTS}"from"[^a-zA-Z0-9_\x80-\xff] {
 	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN_WITH_IDENT(T_YIELD_FROM);
@@ -1543,11 +1553,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
  * The enum keyword must be followed by whitespace and another identifier.
  * This avoids the BC break of using enum in classes, namespaces, functions and constants.
  */
-<ST_IN_SCRIPTING>"enum"{WHITESPACE}("extends"|"implements") {
+<ST_IN_SCRIPTING>"enum"{WHITESPACE_OR_COMMENTS}("extends"|"implements") {
 	yyless(4);
 	RETURN_TOKEN_WITH_STR(T_STRING, 0);
 }
-<ST_IN_SCRIPTING>"enum"{WHITESPACE}[a-zA-Z_\x80-\xff] {
+<ST_IN_SCRIPTING>"enum"{WHITESPACE_OR_COMMENTS}[a-zA-Z_\x80-\xff] {
 	yyless(4);
 	RETURN_TOKEN_WITH_IDENT(T_ENUM);
 }
@@ -1585,12 +1595,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state();
 	RETURN_TOKEN_WITH_STR(T_STRING, 0);
-}
-
-<ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
-	yyless(0);
-	yy_pop_state();
-	goto restart;
 }
 
 <ST_IN_SCRIPTING>"::" {
@@ -1719,6 +1723,18 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"protected" {
 	RETURN_TOKEN_WITH_IDENT(T_PROTECTED);
+}
+
+<ST_IN_SCRIPTING>"public(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PUBLIC_SET);
+}
+
+<ST_IN_SCRIPTING>"protected(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PROTECTED_SET);
+}
+
+<ST_IN_SCRIPTING>"private(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PRIVATE_SET);
 }
 
 <ST_IN_SCRIPTING>"public" {
@@ -1869,7 +1885,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
-<ST_IN_SCRIPTING>"&"[ \t\r\n]*("$"|"...") {
+<ST_IN_SCRIPTING>"&"{OPTIONAL_WHITESPACE_OR_COMMENTS}("$"|"...") {
 	yyless(1);
 	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
 }
@@ -2184,6 +2200,10 @@ string:
 	RETURN_TOKEN_WITH_IDENT(T_FUNC_C);
 }
 
+<ST_IN_SCRIPTING>"__PROPERTY__" {
+	RETURN_TOKEN_WITH_IDENT(T_PROPERTY_C);
+}
+
 <ST_IN_SCRIPTING>"__METHOD__" {
 	RETURN_TOKEN_WITH_IDENT(T_METHOD_C);
 }
@@ -2375,7 +2395,7 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>"#"|"//" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>"#"|"//" {
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR++) {
 			case '\r':
@@ -2399,7 +2419,7 @@ inline_char_handler:
 	RETURN_OR_SKIP_TOKEN(T_COMMENT);
 }
 
-<ST_IN_SCRIPTING>"/*"|"/**"{WHITESPACE} {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>"/*"|"/**"{WHITESPACE} {
 	int doc_com;
 
 	if (yyleng > 2) {
@@ -2433,6 +2453,12 @@ inline_char_handler:
 	}
 
 	RETURN_OR_SKIP_TOKEN(T_COMMENT);
+}
+
+<ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
+	yyless(0);
+	yy_pop_state();
+	goto restart;
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {

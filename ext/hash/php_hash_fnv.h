@@ -18,12 +18,10 @@
 #define PHP_HASH_FNV_H
 
 #define PHP_FNV1_32_INIT ((uint32_t)0x811c9dc5)
-#define PHP_FNV1_32A_INIT PHP_FNV1_32_INIT
 
 #define PHP_FNV_32_PRIME ((uint32_t)0x01000193)
 
 #define PHP_FNV1_64_INIT ((uint64_t)0xcbf29ce484222325ULL)
-#define PHP_FNV1A_64_INIT FNV1_64_INIT
 
 #define PHP_FNV_64_PRIME ((uint64_t)0x100000001b3ULL)
 

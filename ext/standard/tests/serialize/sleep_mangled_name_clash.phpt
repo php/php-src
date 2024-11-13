@@ -12,5 +12,5 @@ $s = serialize(new Test);
 var_dump(str_replace("\0", '\0', $s));
 ?>
 --EXPECTF--
-Notice: serialize(): "priv" is returned from __sleep() multiple times in %s on line %d
+Warning: serialize(): "priv" is returned from __sleep() multiple times in %s on line %d
 string(37) "O:4:"Test":1:{s:10:"\0Test\0priv";N;}"

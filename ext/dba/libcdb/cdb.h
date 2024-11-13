@@ -48,6 +48,6 @@ int cdb_find(struct cdb *, char *, unsigned int);
 #define cdb_datapos(c) ((c)->dpos)
 #define cdb_datalen(c) ((c)->dlen)
 
-char *cdb_version(void);
+const char *cdb_version(void);
 
 #endif

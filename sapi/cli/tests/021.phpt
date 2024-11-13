@@ -7,6 +7,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die ("skip not for Windows");
 }
 
+if (str_contains(getenv('TEST_PHP_EXECUTABLE'), " ")) {
+    die("skip shebang cannot have spaces in its path");
+}
+
 if (strlen("#!".getenv('TEST_PHP_EXECUTABLE')) > 127) {
         die ("skip shebang is too long, see http://www.in-ulm.de/~mascheck/various/shebang/#results");
 }

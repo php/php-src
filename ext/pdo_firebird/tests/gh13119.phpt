@@ -12,6 +12,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 
 require("testdb.inc");
 
+$dbh = getDbConnection();
 $dbh->exec('CREATE TABLE gh13119 (f_val FLOAT, d_val DOUBLE PRECISION)');
 
 $dbh->exec('INSERT INTO gh13119 VALUES (0.1, 0.1)');
@@ -27,6 +28,7 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec('DROP TABLE gh13119');
 unset($dbh);
 ?>

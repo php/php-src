@@ -23,14 +23,29 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
+# ifdef __FreeBSD__
+# include <pthread_np.h>
+# endif
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_portability.h"
+
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
 
 // Musl Libc defines this macro, glibc does not
 // According to "man 2 timer_create" this field should always be available, but it's not: https://sourceware.org/bugzilla/show_bug.cgi?id=27417
 # ifndef sigev_notify_thread_id
 # define sigev_notify_thread_id _sigev_un._tid
+# endif
+
+// FreeBSD doesn't support CLOCK_BOOTTIME
+# ifdef __FreeBSD__
+# define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_MONOTONIC
+# else
+# define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_BOOTTIME
 # endif
 
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
@@ -45,14 +60,24 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	sev.sigev_notify = SIGEV_THREAD_ID;
 	sev.sigev_value.sival_ptr = &EG(max_execution_timer_timer);
 	sev.sigev_signo = SIGRTMIN;
+# ifdef __FreeBSD__
+	sev.sigev_notify_thread_id = pthread_getthreadid_np();
+# else
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
+# endif
+
+#if __has_feature(memory_sanitizer)
+	/* MSan does not intercept timer_create() */
+	__msan_unpoison(&EG(max_execution_timer_timer),
+					sizeof(EG(max_execution_timer_timer)));
+#endif
 
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
-	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(max_execution_timer_timer)) != 0) {
+	if (timer_create(ZEND_MAX_EXECUTION_TIMERS_CLOCK, &sev, &EG(max_execution_timer_timer)) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
 	}
 
-	EG(pid) = getpid();
+	EG(pid) = pid;
 
 # ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
@@ -70,6 +95,11 @@ void zend_max_execution_timer_settime(zend_long seconds) /* {{{ }*/
 	}
 
 	timer_t timer = EG(max_execution_timer_timer);
+
+	// Prevent EINVAL error
+	if (seconds < 0 || seconds > 999999999) {
+		seconds = 0;
+	}
 
 	struct itimerspec its;
 	its.it_value.tv_sec = seconds;

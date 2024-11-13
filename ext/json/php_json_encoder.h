@@ -35,6 +35,6 @@ static inline void php_json_encode_init(php_json_encoder *encoder)
 
 zend_result php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder);
 
-int php_json_escape_string(smart_str *buf, const char *s, size_t len, int options, php_json_encoder *encoder);
+zend_result php_json_escape_string(smart_str *buf, const char *s, size_t len, int options, php_json_encoder *encoder);
 
 #endif	/* PHP_JSON_ENCODER_H */

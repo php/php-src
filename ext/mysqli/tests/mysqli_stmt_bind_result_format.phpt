@@ -4,13 +4,13 @@ Playing with SELECT FORMAT(...) AS _format - see also bugs.php.net/42378
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 memory_limit=83886080
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     function create_table($link, $column, $min, $max, $engine, $offset) {
 
@@ -154,7 +154,7 @@ memory_limit=83886080
     test_format($link, 'FORMAT(1234.567, 4)', 'DUAL', null, '1,234.5670', 50);
 
     mysqli_close($link);
-    require_once('table.inc');
+    require_once 'table.inc';
 
     /* select from existing table */
     test_format($link, 'FORMAT(id, 0)', 'test', null, '1', 60);
@@ -335,7 +335,7 @@ memory_limit=83886080
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

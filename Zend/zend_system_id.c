@@ -26,7 +26,7 @@ ZEND_API char zend_system_id[32];
 static PHP_MD5_CTX context;
 static int finalized = 0;
 
-ZEND_API ZEND_RESULT_CODE zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
+ZEND_API zend_result zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
 {
 	if (finalized == 0) {
 		PHP_MD5Update(&context, module_name, strlen(module_name));
@@ -55,15 +55,16 @@ void zend_startup_system_id(void)
 	zend_system_id[0] = '\0';
 }
 
-#define ZEND_HOOK_AST_PROCESS      (1 << 0)
-#define ZEND_HOOK_COMPILE_FILE     (1 << 1)
-#define ZEND_HOOK_EXECUTE_EX       (1 << 2)
-#define ZEND_HOOK_EXECUTE_INTERNAL (1 << 3)
+#define ZEND_HOOK_AST_PROCESS        (1 << 0)
+#define ZEND_HOOK_COMPILE_FILE       (1 << 1)
+#define ZEND_HOOK_EXECUTE_EX         (1 << 2)
+#define ZEND_HOOK_EXECUTE_INTERNAL   (1 << 3)
+#define ZEND_HOOK_INTERRUPT_FUNCTION (1 << 4)
 
 void zend_finalize_system_id(void)
 {
 	unsigned char digest[16];
-	zend_uchar hooks = 0;
+	uint8_t hooks = 0;
 
 	if (zend_ast_process) {
 		hooks |= ZEND_HOOK_AST_PROCESS;
@@ -77,10 +78,13 @@ void zend_finalize_system_id(void)
 	if (zend_execute_internal) {
 		hooks |= ZEND_HOOK_EXECUTE_INTERNAL;
 	}
+	if (zend_interrupt_function) {
+		hooks |= ZEND_HOOK_INTERRUPT_FUNCTION;
+	}
 	PHP_MD5Update(&context, &hooks, sizeof hooks);
 
 	for (int16_t i = 0; i < 256; i++) {
-		if (zend_get_user_opcode_handler((zend_uchar) i) != NULL) {
+		if (zend_get_user_opcode_handler((uint8_t) i) != NULL) {
 			PHP_MD5Update(&context, &i, sizeof i);
 		}
 	}

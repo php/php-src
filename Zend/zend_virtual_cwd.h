@@ -32,12 +32,12 @@
 #include <stdarg.h>
 #include <limits.h>
 
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
 
 #ifndef MAXPATHLEN
-# if _WIN32
+# ifdef _WIN32
 #  include "win32/ioutil.h"
 #  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 # elif PATH_MAX
@@ -63,6 +63,8 @@
 #include <errno.h>
 #endif
 
+#include "zend_stream.h"
+
 #ifdef ZEND_WIN32
 #include "win32/readdir.h"
 #include <sys/utime.h>
@@ -87,6 +89,16 @@ typedef unsigned short mode_t;
 #else
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
+
+#ifndef DT_UNKNOWN
+# define DT_UNKNOWN 0
+#endif
+#ifndef DT_DIR
+# define DT_DIR 4
+#endif
+#ifndef DT_REG
+# define DT_REG 8
+#endif
 #endif
 
 #define DEFAULT_SLASH '/'
@@ -156,11 +168,11 @@ typedef int (*verify_path_func)(const cwd_state *);
 
 CWD_API void virtual_cwd_startup(void);
 CWD_API void virtual_cwd_shutdown(void);
-CWD_API int virtual_cwd_activate(void);
-CWD_API int virtual_cwd_deactivate(void);
+CWD_API void virtual_cwd_activate(void);
+CWD_API void virtual_cwd_deactivate(void);
 CWD_API char *virtual_getcwd_ex(size_t *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
-CWD_API int virtual_chdir(const char *path);
+CWD_API zend_result virtual_chdir(const char *path);
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path));
 CWD_API int virtual_filepath(const char *path, char **filepath);
 CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path);
@@ -178,7 +190,7 @@ CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
 CWD_API int virtual_access(const char *pathname, int mode);
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
 #endif
 CWD_API int virtual_chmod(const char *filename, mode_t mode);
@@ -260,7 +272,7 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #define VCWD_OPEN_MODE(path, flags, mode) virtual_open(path, flags, mode)
 #define VCWD_CREAT(path, mode) virtual_creat(path, mode)
 #define VCWD_CHDIR(path) virtual_chdir(path)
-#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, virtual_chdir)
+#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, (int (*)(const char *)) virtual_chdir)
 #define VCWD_GETWD(buf)
 #define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path)
 #define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname)
@@ -272,13 +284,13 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #define VCWD_OPENDIR(pathname) virtual_opendir(pathname)
 #define VCWD_POPEN(command, type) virtual_popen(command, type)
 #define VCWD_ACCESS(pathname, mode) virtual_access(pathname, mode)
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 #define VCWD_UTIME(path, time) virtual_utime(path, time)
 #endif
 #define VCWD_CHMOD(path, mode) virtual_chmod(path, mode)
 #if !defined(ZEND_WIN32)
 #define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0)
-#if HAVE_LCHOWN
+#ifdef HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1)
 #endif
 #endif
@@ -323,7 +335,7 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 
 #define VCWD_REALPATH(path, real_path) tsrm_realpath(path, real_path)
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 # ifdef ZEND_WIN32
 #  define VCWD_UTIME(path, time) win32_utime(path, time)
 # else
@@ -333,7 +345,7 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 
 #if !defined(ZEND_WIN32)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
-#if HAVE_LCHOWN
+#ifdef HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) lchown(path, owner, group)
 #endif
 #endif

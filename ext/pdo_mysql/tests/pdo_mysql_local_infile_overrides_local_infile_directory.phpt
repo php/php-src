@@ -4,9 +4,9 @@ PDO::MYSQL_ATTR_LOCAL_INFILE overrides PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipifinfilenotallowed.inc');
+MySQLPDOTest::skipInfileNotAllowed();
 if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
     die("skip No MYSQL_ATTR_LOCAL_INFILE_DIRECTORY support");
 }
@@ -31,23 +31,20 @@ if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
 		return true;
 	}
 
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-	putenv('PDOTEST_ATTR='.serialize([
+	require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+	$db = MySQLPDOTest::factoryWithAttr([
 		PDO::MYSQL_ATTR_LOCAL_INFILE=>true,
-		PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY=>__DIR__."/foo/bar"
-		]));
-	$db = MySQLPDOTest::factory();
-	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
+		PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY=>__DIR__."/foo/bar",
+	]);
 
 	try {
-		exec_and_count(1, $db, 'DROP TABLE IF EXISTS test', 0);
-		exec_and_count(2, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
+		exec_and_count(2, $db, sprintf('CREATE TABLE test_local_inifile_overrides(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
 
 		$filepath = str_replace('\\', '/', __DIR__.'/foo/foo.data');
 
-		$sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filepath));
+		$sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test_local_inifile_overrides FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filepath));
 		if (exec_and_count(3, $db, $sql, 3)) {
-			$stmt = $db->query('SELECT id, col1 FROM test ORDER BY id ASC');
+			$stmt = $db->query('SELECT id, col1 FROM test_local_inifile_overrides ORDER BY id ASC');
 			$expected = array(
 				array("id" => 1, "col1" => "one"),
 				array("id" => 2, "col1" => "two"),
@@ -78,9 +75,9 @@ if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_local_inifile_overrides');
 ?>
 --EXPECT--
 done!

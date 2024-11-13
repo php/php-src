@@ -50,6 +50,6 @@ OK
 OK
 NULL
 
-Deprecated: Function enchant_broker_free_dict() is deprecated in %s
+Deprecated: Function enchant_broker_free_dict() is deprecated since 8.0, as EnchantDictionary objects are freed automatically in %s
 OK
 OK

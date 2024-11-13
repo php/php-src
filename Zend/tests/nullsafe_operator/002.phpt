@@ -35,7 +35,7 @@ try {
 
 ?>
 --EXPECT--
-string(39) "Call to a member function bar() on bool"
+string(40) "Call to a member function bar() on false"
 string(40) "Call to a member function bar() on array"
 string(38) "Call to a member function bar() on int"
 string(40) "Call to a member function bar() on float"

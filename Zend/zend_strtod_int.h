@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed; FIXME but unfortunately is */
+
 #ifndef ZEND_STRTOD_INT_H
 #define ZEND_STRTOD_INT_H
 
@@ -43,22 +45,6 @@
 #define NO_HEX_FP 1
 
 #include <inttypes.h>
-
-#ifndef HAVE_INT32_T
-# if SIZEOF_INT == 4
-typedef int int32_t;
-# elif SIZEOF_LONG == 4
-typedef long int int32_t;
-# endif
-#endif
-
-#ifndef HAVE_UINT32_T
-# if SIZEOF_INT == 4
-typedef unsigned int uint32_t;
-# elif SIZEOF_LONG == 4
-typedef unsigned long int uint32_t;
-# endif
-#endif
 
 #ifdef USE_LOCALE
 #undef USE_LOCALE
@@ -118,26 +104,6 @@ typedef unsigned long int uint32_t;
 #ifndef uint32_t
 #define uint32_t unsigned __int32
 #endif
-#endif
-
-#ifdef ZTS
-#define MULTIPLE_THREADS 1
-
-#define  ACQUIRE_DTOA_LOCK(x) \
-	if (0 == x) { \
-		tsrm_mutex_lock(dtoa_mutex); \
-	} else if (1 == x) { \
-		tsrm_mutex_lock(pow5mult_mutex); \
-	}
-
-#define FREE_DTOA_LOCK(x) \
-	if (0 == x) { \
-		tsrm_mutex_unlock(dtoa_mutex); \
-	} else if (1 == x) { \
-		tsrm_mutex_unlock(pow5mult_mutex); \
-	}
-
-
 #endif
 
 #endif /* ZEND_STRTOD_INT_H */

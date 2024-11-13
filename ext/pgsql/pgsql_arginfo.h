@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 52d055086569456122f9d9a1264f7a3667127ea7 */
+ * Stub hash: 824e5aa07fd6753b5bc7821a39ccb76768f2470b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -12,7 +12,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_connect_poll, 0, 1, IS_LONG, 
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_close, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_close, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -36,12 +36,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_version, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
 ZEND_END_ARG_INFO()
 
+#define arginfo_pg_jit arginfo_pg_version
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_parameter_status, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_pg_ping arginfo_pg_close
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_ping, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_query, 0, 1, PgSql\\Result, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
@@ -198,6 +202,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_trace, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 0, "\"w\"")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, trace_mode, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_untrace arginfo_pg_close
@@ -296,7 +301,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pg_clientencoding arginfo_pg_dbname
 
-#define arginfo_pg_end_copy arginfo_pg_close
+#define arginfo_pg_end_copy arginfo_pg_ping
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_put_line, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, connection)
@@ -313,7 +318,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_copy_from, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, rows, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, rows, Traversable, MAY_BE_ARRAY, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\"\\t\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, null_as, IS_STRING, 0, "\"\\\\\\\\N\"")
 ZEND_END_ARG_INFO()
@@ -441,14 +446,61 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_delete, 0, 3, MAY_BE_STRING|M
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "PGSQL_DML_EXEC")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_select, 0, 3, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_select, 0, 2, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, conditions, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, conditions, IS_ARRAY, 0, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "PGSQL_DML_EXEC")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PGSQL_ASSOC")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_error_context_visibility, 0, 2, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, visibility, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_PG_RESULT_MEMORY_SIZE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_result_memory_size, 0, 1, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, result, PgSql\\Result, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_change_password, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_put_copy_data, 0, 2, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, cmd, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_put_copy_end, 0, 1, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_socket_poll, 0, 3, IS_LONG, 0)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_TYPE_INFO(0, read, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, write, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_chunked_rows_size, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, Pgsql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_PG_CLOSE_STMT)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_close_stmt, 0, 2, Pgsql\\Result, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, connection, Pgsql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
@@ -461,6 +513,7 @@ ZEND_FUNCTION(pg_port);
 ZEND_FUNCTION(pg_tty);
 ZEND_FUNCTION(pg_host);
 ZEND_FUNCTION(pg_version);
+ZEND_FUNCTION(pg_jit);
 ZEND_FUNCTION(pg_parameter_status);
 ZEND_FUNCTION(pg_ping);
 ZEND_FUNCTION(pg_query);
@@ -486,7 +539,9 @@ ZEND_FUNCTION(pg_fetch_all);
 ZEND_FUNCTION(pg_fetch_all_columns);
 ZEND_FUNCTION(pg_result_seek);
 ZEND_FUNCTION(pg_field_prtlen);
+ZEND_FUNCTION(pg_fieldprtlen);
 ZEND_FUNCTION(pg_field_is_null);
+ZEND_FUNCTION(pg_fieldisnull);
 ZEND_FUNCTION(pg_free_result);
 ZEND_FUNCTION(pg_last_oid);
 ZEND_FUNCTION(pg_trace);
@@ -539,7 +594,20 @@ ZEND_FUNCTION(pg_insert);
 ZEND_FUNCTION(pg_update);
 ZEND_FUNCTION(pg_delete);
 ZEND_FUNCTION(pg_select);
-
+ZEND_FUNCTION(pg_set_error_context_visibility);
+#if defined(HAVE_PG_RESULT_MEMORY_SIZE)
+ZEND_FUNCTION(pg_result_memory_size);
+#endif
+ZEND_FUNCTION(pg_change_password);
+ZEND_FUNCTION(pg_put_copy_data);
+ZEND_FUNCTION(pg_put_copy_end);
+ZEND_FUNCTION(pg_socket_poll);
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+ZEND_FUNCTION(pg_set_chunked_rows_size);
+#endif
+#if defined(HAVE_PG_CLOSE_STMT)
+ZEND_FUNCTION(pg_close_stmt);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_connect, arginfo_pg_connect)
@@ -548,38 +616,39 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_close, arginfo_pg_close)
 	ZEND_FE(pg_dbname, arginfo_pg_dbname)
 	ZEND_FE(pg_last_error, arginfo_pg_last_error)
-	ZEND_DEP_FALIAS(pg_errormessage, pg_last_error, arginfo_pg_errormessage)
+	ZEND_RAW_FENTRY("pg_errormessage", zif_pg_last_error, arginfo_pg_errormessage, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_options, arginfo_pg_options)
 	ZEND_FE(pg_port, arginfo_pg_port)
 	ZEND_FE(pg_tty, arginfo_pg_tty)
 	ZEND_FE(pg_host, arginfo_pg_host)
 	ZEND_FE(pg_version, arginfo_pg_version)
+	ZEND_FE(pg_jit, arginfo_pg_jit)
 	ZEND_FE(pg_parameter_status, arginfo_pg_parameter_status)
 	ZEND_FE(pg_ping, arginfo_pg_ping)
 	ZEND_FE(pg_query, arginfo_pg_query)
-	ZEND_FALIAS(pg_exec, pg_query, arginfo_pg_exec)
+	ZEND_RAW_FENTRY("pg_exec", zif_pg_query, arginfo_pg_exec, 0, NULL, NULL)
 	ZEND_FE(pg_query_params, arginfo_pg_query_params)
 	ZEND_FE(pg_prepare, arginfo_pg_prepare)
 	ZEND_FE(pg_execute, arginfo_pg_execute)
 	ZEND_FE(pg_num_rows, arginfo_pg_num_rows)
-	ZEND_DEP_FALIAS(pg_numrows, pg_num_rows, arginfo_pg_numrows)
+	ZEND_RAW_FENTRY("pg_numrows", zif_pg_num_rows, arginfo_pg_numrows, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_num_fields, arginfo_pg_num_fields)
-	ZEND_DEP_FALIAS(pg_numfields, pg_num_fields, arginfo_pg_numfields)
+	ZEND_RAW_FENTRY("pg_numfields", zif_pg_num_fields, arginfo_pg_numfields, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_affected_rows, arginfo_pg_affected_rows)
-	ZEND_DEP_FALIAS(pg_cmdtuples, pg_affected_rows, arginfo_pg_cmdtuples)
+	ZEND_RAW_FENTRY("pg_cmdtuples", zif_pg_affected_rows, arginfo_pg_cmdtuples, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_last_notice, arginfo_pg_last_notice)
 	ZEND_FE(pg_field_table, arginfo_pg_field_table)
 	ZEND_FE(pg_field_name, arginfo_pg_field_name)
-	ZEND_DEP_FALIAS(pg_fieldname, pg_field_name, arginfo_pg_fieldname)
+	ZEND_RAW_FENTRY("pg_fieldname", zif_pg_field_name, arginfo_pg_fieldname, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_field_size, arginfo_pg_field_size)
-	ZEND_DEP_FALIAS(pg_fieldsize, pg_field_size, arginfo_pg_fieldsize)
+	ZEND_RAW_FENTRY("pg_fieldsize", zif_pg_field_size, arginfo_pg_fieldsize, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_field_type, arginfo_pg_field_type)
-	ZEND_DEP_FALIAS(pg_fieldtype, pg_field_type, arginfo_pg_fieldtype)
+	ZEND_RAW_FENTRY("pg_fieldtype", zif_pg_field_type, arginfo_pg_fieldtype, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_field_type_oid, arginfo_pg_field_type_oid)
 	ZEND_FE(pg_field_num, arginfo_pg_field_num)
-	ZEND_DEP_FALIAS(pg_fieldnum, pg_field_num, arginfo_pg_fieldnum)
+	ZEND_RAW_FENTRY("pg_fieldnum", zif_pg_field_num, arginfo_pg_fieldnum, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_fetch_result, arginfo_pg_fetch_result)
-	ZEND_DEP_FALIAS(pg_result, pg_fetch_result, arginfo_pg_result)
+	ZEND_RAW_FENTRY("pg_result", zif_pg_fetch_result, arginfo_pg_result, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_fetch_row, arginfo_pg_fetch_row)
 	ZEND_FE(pg_fetch_assoc, arginfo_pg_fetch_assoc)
 	ZEND_FE(pg_fetch_array, arginfo_pg_fetch_array)
@@ -588,41 +657,41 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_fetch_all_columns, arginfo_pg_fetch_all_columns)
 	ZEND_FE(pg_result_seek, arginfo_pg_result_seek)
 	ZEND_FE(pg_field_prtlen, arginfo_pg_field_prtlen)
-	ZEND_DEP_FALIAS(pg_fieldprtlen, pg_field_prtlen, arginfo_pg_fieldprtlen)
+	ZEND_RAW_FENTRY("pg_fieldprtlen", zif_pg_fieldprtlen, arginfo_pg_fieldprtlen, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_field_is_null, arginfo_pg_field_is_null)
-	ZEND_DEP_FALIAS(pg_fieldisnull, pg_field_is_null, arginfo_pg_fieldisnull)
+	ZEND_RAW_FENTRY("pg_fieldisnull", zif_pg_fieldisnull, arginfo_pg_fieldisnull, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_free_result, arginfo_pg_free_result)
-	ZEND_DEP_FALIAS(pg_freeresult, pg_free_result, arginfo_pg_freeresult)
+	ZEND_RAW_FENTRY("pg_freeresult", zif_pg_free_result, arginfo_pg_freeresult, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_last_oid, arginfo_pg_last_oid)
-	ZEND_DEP_FALIAS(pg_getlastoid, pg_last_oid, arginfo_pg_getlastoid)
+	ZEND_RAW_FENTRY("pg_getlastoid", zif_pg_last_oid, arginfo_pg_getlastoid, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_trace, arginfo_pg_trace)
 	ZEND_FE(pg_untrace, arginfo_pg_untrace)
 	ZEND_FE(pg_lo_create, arginfo_pg_lo_create)
-	ZEND_DEP_FALIAS(pg_locreate, pg_lo_create, arginfo_pg_locreate)
+	ZEND_RAW_FENTRY("pg_locreate", zif_pg_lo_create, arginfo_pg_locreate, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_unlink, arginfo_pg_lo_unlink)
-	ZEND_DEP_FALIAS(pg_lounlink, pg_lo_unlink, arginfo_pg_lounlink)
+	ZEND_RAW_FENTRY("pg_lounlink", zif_pg_lo_unlink, arginfo_pg_lounlink, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_open, arginfo_pg_lo_open)
-	ZEND_DEP_FALIAS(pg_loopen, pg_lo_open, arginfo_pg_loopen)
+	ZEND_RAW_FENTRY("pg_loopen", zif_pg_lo_open, arginfo_pg_loopen, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_close, arginfo_pg_lo_close)
-	ZEND_DEP_FALIAS(pg_loclose, pg_lo_close, arginfo_pg_loclose)
+	ZEND_RAW_FENTRY("pg_loclose", zif_pg_lo_close, arginfo_pg_loclose, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_read, arginfo_pg_lo_read)
-	ZEND_DEP_FALIAS(pg_loread, pg_lo_read, arginfo_pg_loread)
+	ZEND_RAW_FENTRY("pg_loread", zif_pg_lo_read, arginfo_pg_loread, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_write, arginfo_pg_lo_write)
-	ZEND_DEP_FALIAS(pg_lowrite, pg_lo_write, arginfo_pg_lowrite)
+	ZEND_RAW_FENTRY("pg_lowrite", zif_pg_lo_write, arginfo_pg_lowrite, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_read_all, arginfo_pg_lo_read_all)
-	ZEND_DEP_FALIAS(pg_loreadall, pg_lo_read_all, arginfo_pg_loreadall)
+	ZEND_RAW_FENTRY("pg_loreadall", zif_pg_lo_read_all, arginfo_pg_loreadall, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_import, arginfo_pg_lo_import)
-	ZEND_DEP_FALIAS(pg_loimport, pg_lo_import, arginfo_pg_loimport)
+	ZEND_RAW_FENTRY("pg_loimport", zif_pg_lo_import, arginfo_pg_loimport, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_export, arginfo_pg_lo_export)
-	ZEND_DEP_FALIAS(pg_loexport, pg_lo_export, arginfo_pg_loexport)
+	ZEND_RAW_FENTRY("pg_loexport", zif_pg_lo_export, arginfo_pg_loexport, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_lo_seek, arginfo_pg_lo_seek)
 	ZEND_FE(pg_lo_tell, arginfo_pg_lo_tell)
 	ZEND_FE(pg_lo_truncate, arginfo_pg_lo_truncate)
 	ZEND_FE(pg_set_error_verbosity, arginfo_pg_set_error_verbosity)
 	ZEND_FE(pg_set_client_encoding, arginfo_pg_set_client_encoding)
-	ZEND_DEP_FALIAS(pg_setclientencoding, pg_set_client_encoding, arginfo_pg_setclientencoding)
+	ZEND_RAW_FENTRY("pg_setclientencoding", zif_pg_set_client_encoding, arginfo_pg_setclientencoding, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_client_encoding, arginfo_pg_client_encoding)
-	ZEND_DEP_FALIAS(pg_clientencoding, pg_client_encoding, arginfo_pg_clientencoding)
+	ZEND_RAW_FENTRY("pg_clientencoding", zif_pg_client_encoding, arginfo_pg_clientencoding, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_end_copy, arginfo_pg_end_copy)
 	ZEND_FE(pg_put_line, arginfo_pg_put_line)
 	ZEND_FE(pg_copy_to, arginfo_pg_copy_to)
@@ -656,21 +725,20 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_update, arginfo_pg_update)
 	ZEND_FE(pg_delete, arginfo_pg_delete)
 	ZEND_FE(pg_select, arginfo_pg_select)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_PgSql_Connection_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_PgSql_Result_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_PgSql_Lob_methods[] = {
+	ZEND_FE(pg_set_error_context_visibility, arginfo_pg_set_error_context_visibility)
+#if defined(HAVE_PG_RESULT_MEMORY_SIZE)
+	ZEND_FE(pg_result_memory_size, arginfo_pg_result_memory_size)
+#endif
+	ZEND_FE(pg_change_password, arginfo_pg_change_password)
+	ZEND_FE(pg_put_copy_data, arginfo_pg_put_copy_data)
+	ZEND_FE(pg_put_copy_end, arginfo_pg_put_copy_end)
+	ZEND_FE(pg_socket_poll, arginfo_pg_socket_poll)
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+	ZEND_FE(pg_set_chunked_rows_size, arginfo_pg_set_chunked_rows_size)
+#endif
+#if defined(HAVE_PG_CLOSE_STMT)
+	ZEND_FE(pg_close_stmt, arginfo_pg_close_stmt)
+#endif
 	ZEND_FE_END
 };
 
@@ -709,6 +777,12 @@ static void register_pgsql_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_TERSE", PQERRORS_TERSE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_DEFAULT", PQERRORS_DEFAULT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_VERBOSE", PQERRORS_VERBOSE, CONST_PERSISTENT);
+#if defined(HAVE_PQERRORS_SQLSTATE)
+	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_SQLSTATE", PQERRORS_SQLSTATE, CONST_PERSISTENT);
+#endif
+#if !(defined(HAVE_PQERRORS_SQLSTATE))
+	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_SQLSTATE", PQERRORS_TERSE, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_SET", SEEK_SET, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_CUR", SEEK_CUR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_END", SEEK_END, CONST_PERSISTENT);
@@ -717,6 +791,9 @@ static void register_pgsql_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PGSQL_EMPTY_QUERY", PGRES_EMPTY_QUERY, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_COMMAND_OK", PGRES_COMMAND_OK, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TUPLES_OK", PGRES_TUPLES_OK, CONST_PERSISTENT);
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+	REGISTER_LONG_CONSTANT("PGSQL_TUPLES_CHUNK", PGRES_TUPLES_CHUNK, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("PGSQL_COPY_OUT", PGRES_COPY_OUT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_COPY_IN", PGRES_COPY_IN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_BAD_RESPONSE", PGRES_BAD_RESPONSE, CONST_PERSISTENT);
@@ -764,15 +841,314 @@ static void register_pgsql_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PGSQL_DML_EXEC", PGSQL_DML_EXEC, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_DML_ASYNC", PGSQL_DML_ASYNC, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_DML_STRING", PGSQL_DML_STRING, CONST_PERSISTENT);
+#if defined(PQTRACE_SUPPPRESS_TIMESTAMPS)
+	REGISTER_LONG_CONSTANT("PGSQL_TRACE_SUPPRESS_TIMESTAMPS", PQTRACE_SUPPRESS_TIMESTAMPS, CONST_PERSISTENT);
+#endif
+#if defined(PQTRACE_REGRESS_MODE)
+	REGISTER_LONG_CONSTANT("PGSQL_TRACE_REGRESS_MODE", PQTRACE_REGRESS_MODE, CONST_PERSISTENT);
+#endif
+	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_NEVER", PQSHOW_CONTEXT_NEVER, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ERRORS", PQSHOW_CONTEXT_ERRORS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ALWAYS", PQSHOW_CONTEXT_ALWAYS, CONST_PERSISTENT);
+
+
+	zend_attribute *attribute_Deprecated_func_pg_errormessage_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_errormessage", sizeof("pg_errormessage") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_errormessage_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_errormessage_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_errormessage_0_arg0, attribute_Deprecated_func_pg_errormessage_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_errormessage_0->args[0].value, &attribute_Deprecated_func_pg_errormessage_0_arg0);
+	attribute_Deprecated_func_pg_errormessage_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_errormessage_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_errormessage_0_arg1_str = zend_string_init("use pg_last_error() instead", strlen("use pg_last_error() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_errormessage_0_arg1, attribute_Deprecated_func_pg_errormessage_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_errormessage_0->args[1].value, &attribute_Deprecated_func_pg_errormessage_0_arg1);
+	attribute_Deprecated_func_pg_errormessage_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_numrows_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_numrows", sizeof("pg_numrows") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_numrows_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_numrows_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_numrows_0_arg0, attribute_Deprecated_func_pg_numrows_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_numrows_0->args[0].value, &attribute_Deprecated_func_pg_numrows_0_arg0);
+	attribute_Deprecated_func_pg_numrows_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_numrows_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_numrows_0_arg1_str = zend_string_init("use pg_num_rows() instead", strlen("use pg_num_rows() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_numrows_0_arg1, attribute_Deprecated_func_pg_numrows_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_numrows_0->args[1].value, &attribute_Deprecated_func_pg_numrows_0_arg1);
+	attribute_Deprecated_func_pg_numrows_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_numfields_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_numfields", sizeof("pg_numfields") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_numfields_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_numfields_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_numfields_0_arg0, attribute_Deprecated_func_pg_numfields_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_numfields_0->args[0].value, &attribute_Deprecated_func_pg_numfields_0_arg0);
+	attribute_Deprecated_func_pg_numfields_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_numfields_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_numfields_0_arg1_str = zend_string_init("use pg_num_fields() instead", strlen("use pg_num_fields() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_numfields_0_arg1, attribute_Deprecated_func_pg_numfields_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_numfields_0->args[1].value, &attribute_Deprecated_func_pg_numfields_0_arg1);
+	attribute_Deprecated_func_pg_numfields_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_cmdtuples_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_cmdtuples", sizeof("pg_cmdtuples") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_cmdtuples_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_cmdtuples_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_cmdtuples_0_arg0, attribute_Deprecated_func_pg_cmdtuples_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_cmdtuples_0->args[0].value, &attribute_Deprecated_func_pg_cmdtuples_0_arg0);
+	attribute_Deprecated_func_pg_cmdtuples_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_cmdtuples_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_cmdtuples_0_arg1_str = zend_string_init("use pg_affected_rows() instead", strlen("use pg_affected_rows() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_cmdtuples_0_arg1, attribute_Deprecated_func_pg_cmdtuples_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_cmdtuples_0->args[1].value, &attribute_Deprecated_func_pg_cmdtuples_0_arg1);
+	attribute_Deprecated_func_pg_cmdtuples_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_fieldname_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldname", sizeof("pg_fieldname") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_fieldname_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_fieldname_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldname_0_arg0, attribute_Deprecated_func_pg_fieldname_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldname_0->args[0].value, &attribute_Deprecated_func_pg_fieldname_0_arg0);
+	attribute_Deprecated_func_pg_fieldname_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_fieldname_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_fieldname_0_arg1_str = zend_string_init("use pg_field_name() instead", strlen("use pg_field_name() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldname_0_arg1, attribute_Deprecated_func_pg_fieldname_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldname_0->args[1].value, &attribute_Deprecated_func_pg_fieldname_0_arg1);
+	attribute_Deprecated_func_pg_fieldname_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_fieldsize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldsize", sizeof("pg_fieldsize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_fieldsize_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_fieldsize_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldsize_0_arg0, attribute_Deprecated_func_pg_fieldsize_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldsize_0->args[0].value, &attribute_Deprecated_func_pg_fieldsize_0_arg0);
+	attribute_Deprecated_func_pg_fieldsize_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_fieldsize_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_fieldsize_0_arg1_str = zend_string_init("use pg_field_size() instead", strlen("use pg_field_size() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldsize_0_arg1, attribute_Deprecated_func_pg_fieldsize_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldsize_0->args[1].value, &attribute_Deprecated_func_pg_fieldsize_0_arg1);
+	attribute_Deprecated_func_pg_fieldsize_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_fieldtype_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldtype", sizeof("pg_fieldtype") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_fieldtype_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_fieldtype_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldtype_0_arg0, attribute_Deprecated_func_pg_fieldtype_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldtype_0->args[0].value, &attribute_Deprecated_func_pg_fieldtype_0_arg0);
+	attribute_Deprecated_func_pg_fieldtype_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_fieldtype_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_fieldtype_0_arg1_str = zend_string_init("use pg_field_type() instead", strlen("use pg_field_type() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldtype_0_arg1, attribute_Deprecated_func_pg_fieldtype_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldtype_0->args[1].value, &attribute_Deprecated_func_pg_fieldtype_0_arg1);
+	attribute_Deprecated_func_pg_fieldtype_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_fieldnum_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldnum", sizeof("pg_fieldnum") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_fieldnum_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_fieldnum_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldnum_0_arg0, attribute_Deprecated_func_pg_fieldnum_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldnum_0->args[0].value, &attribute_Deprecated_func_pg_fieldnum_0_arg0);
+	attribute_Deprecated_func_pg_fieldnum_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_fieldnum_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_fieldnum_0_arg1_str = zend_string_init("use pg_field_num() instead", strlen("use pg_field_num() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldnum_0_arg1, attribute_Deprecated_func_pg_fieldnum_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldnum_0->args[1].value, &attribute_Deprecated_func_pg_fieldnum_0_arg1);
+	attribute_Deprecated_func_pg_fieldnum_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_result_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_result", sizeof("pg_result") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_result_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_result_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_result_0_arg0, attribute_Deprecated_func_pg_result_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_result_0->args[0].value, &attribute_Deprecated_func_pg_result_0_arg0);
+	attribute_Deprecated_func_pg_result_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_result_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_result_0_arg1_str = zend_string_init("use pg_fetch_result() instead", strlen("use pg_fetch_result() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_result_0_arg1, attribute_Deprecated_func_pg_result_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_result_0->args[1].value, &attribute_Deprecated_func_pg_result_0_arg1);
+	attribute_Deprecated_func_pg_result_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_fieldprtlen_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldprtlen", sizeof("pg_fieldprtlen") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_fieldprtlen_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_fieldprtlen_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldprtlen_0_arg0, attribute_Deprecated_func_pg_fieldprtlen_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldprtlen_0->args[0].value, &attribute_Deprecated_func_pg_fieldprtlen_0_arg0);
+	attribute_Deprecated_func_pg_fieldprtlen_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_fieldprtlen_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_fieldprtlen_0_arg1_str = zend_string_init("use pg_field_prtlen() instead", strlen("use pg_field_prtlen() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldprtlen_0_arg1, attribute_Deprecated_func_pg_fieldprtlen_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldprtlen_0->args[1].value, &attribute_Deprecated_func_pg_fieldprtlen_0_arg1);
+	attribute_Deprecated_func_pg_fieldprtlen_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_fieldisnull_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_fieldisnull", sizeof("pg_fieldisnull") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_fieldisnull_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_fieldisnull_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldisnull_0_arg0, attribute_Deprecated_func_pg_fieldisnull_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldisnull_0->args[0].value, &attribute_Deprecated_func_pg_fieldisnull_0_arg0);
+	attribute_Deprecated_func_pg_fieldisnull_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_fieldisnull_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_fieldisnull_0_arg1_str = zend_string_init("use pg_field_is_null() instead", strlen("use pg_field_is_null() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_fieldisnull_0_arg1, attribute_Deprecated_func_pg_fieldisnull_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_fieldisnull_0->args[1].value, &attribute_Deprecated_func_pg_fieldisnull_0_arg1);
+	attribute_Deprecated_func_pg_fieldisnull_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_freeresult_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_freeresult", sizeof("pg_freeresult") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_freeresult_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_freeresult_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_freeresult_0_arg0, attribute_Deprecated_func_pg_freeresult_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_freeresult_0->args[0].value, &attribute_Deprecated_func_pg_freeresult_0_arg0);
+	attribute_Deprecated_func_pg_freeresult_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_freeresult_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_freeresult_0_arg1_str = zend_string_init("use pg_free_result() instead", strlen("use pg_free_result() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_freeresult_0_arg1, attribute_Deprecated_func_pg_freeresult_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_freeresult_0->args[1].value, &attribute_Deprecated_func_pg_freeresult_0_arg1);
+	attribute_Deprecated_func_pg_freeresult_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_getlastoid_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_getlastoid", sizeof("pg_getlastoid") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_getlastoid_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_getlastoid_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_getlastoid_0_arg0, attribute_Deprecated_func_pg_getlastoid_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_getlastoid_0->args[0].value, &attribute_Deprecated_func_pg_getlastoid_0_arg0);
+	attribute_Deprecated_func_pg_getlastoid_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_getlastoid_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_getlastoid_0_arg1_str = zend_string_init("use pg_last_oid() instead", strlen("use pg_last_oid() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_getlastoid_0_arg1, attribute_Deprecated_func_pg_getlastoid_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_getlastoid_0->args[1].value, &attribute_Deprecated_func_pg_getlastoid_0_arg1);
+	attribute_Deprecated_func_pg_getlastoid_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_locreate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_locreate", sizeof("pg_locreate") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_locreate_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_locreate_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_locreate_0_arg0, attribute_Deprecated_func_pg_locreate_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_locreate_0->args[0].value, &attribute_Deprecated_func_pg_locreate_0_arg0);
+	attribute_Deprecated_func_pg_locreate_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_locreate_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_locreate_0_arg1_str = zend_string_init("use pg_lo_create() instead", strlen("use pg_lo_create() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_locreate_0_arg1, attribute_Deprecated_func_pg_locreate_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_locreate_0->args[1].value, &attribute_Deprecated_func_pg_locreate_0_arg1);
+	attribute_Deprecated_func_pg_locreate_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_lounlink_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_lounlink", sizeof("pg_lounlink") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_lounlink_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_lounlink_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_lounlink_0_arg0, attribute_Deprecated_func_pg_lounlink_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_lounlink_0->args[0].value, &attribute_Deprecated_func_pg_lounlink_0_arg0);
+	attribute_Deprecated_func_pg_lounlink_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_lounlink_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_lounlink_0_arg1_str = zend_string_init("use pg_lo_unlink() instead", strlen("use pg_lo_unlink() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_lounlink_0_arg1, attribute_Deprecated_func_pg_lounlink_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_lounlink_0->args[1].value, &attribute_Deprecated_func_pg_lounlink_0_arg1);
+	attribute_Deprecated_func_pg_lounlink_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_loopen_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loopen", sizeof("pg_loopen") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_loopen_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_loopen_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loopen_0_arg0, attribute_Deprecated_func_pg_loopen_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loopen_0->args[0].value, &attribute_Deprecated_func_pg_loopen_0_arg0);
+	attribute_Deprecated_func_pg_loopen_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_loopen_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_loopen_0_arg1_str = zend_string_init("use pg_lo_open() instead", strlen("use pg_lo_open() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loopen_0_arg1, attribute_Deprecated_func_pg_loopen_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loopen_0->args[1].value, &attribute_Deprecated_func_pg_loopen_0_arg1);
+	attribute_Deprecated_func_pg_loopen_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_loclose_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loclose", sizeof("pg_loclose") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_loclose_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_loclose_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loclose_0_arg0, attribute_Deprecated_func_pg_loclose_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loclose_0->args[0].value, &attribute_Deprecated_func_pg_loclose_0_arg0);
+	attribute_Deprecated_func_pg_loclose_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_loclose_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_loclose_0_arg1_str = zend_string_init("use pg_lo_close() instead", strlen("use pg_lo_close() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loclose_0_arg1, attribute_Deprecated_func_pg_loclose_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loclose_0->args[1].value, &attribute_Deprecated_func_pg_loclose_0_arg1);
+	attribute_Deprecated_func_pg_loclose_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_loread_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loread", sizeof("pg_loread") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_loread_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_loread_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loread_0_arg0, attribute_Deprecated_func_pg_loread_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loread_0->args[0].value, &attribute_Deprecated_func_pg_loread_0_arg0);
+	attribute_Deprecated_func_pg_loread_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_loread_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_loread_0_arg1_str = zend_string_init("use pg_lo_read() instead", strlen("use pg_lo_read() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loread_0_arg1, attribute_Deprecated_func_pg_loread_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loread_0->args[1].value, &attribute_Deprecated_func_pg_loread_0_arg1);
+	attribute_Deprecated_func_pg_loread_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_lowrite_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_lowrite", sizeof("pg_lowrite") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_lowrite_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_lowrite_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_lowrite_0_arg0, attribute_Deprecated_func_pg_lowrite_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_lowrite_0->args[0].value, &attribute_Deprecated_func_pg_lowrite_0_arg0);
+	attribute_Deprecated_func_pg_lowrite_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_lowrite_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_lowrite_0_arg1_str = zend_string_init("use pg_lo_write() instead", strlen("use pg_lo_write() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_lowrite_0_arg1, attribute_Deprecated_func_pg_lowrite_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_lowrite_0->args[1].value, &attribute_Deprecated_func_pg_lowrite_0_arg1);
+	attribute_Deprecated_func_pg_lowrite_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_loreadall_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loreadall", sizeof("pg_loreadall") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_loreadall_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_loreadall_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loreadall_0_arg0, attribute_Deprecated_func_pg_loreadall_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loreadall_0->args[0].value, &attribute_Deprecated_func_pg_loreadall_0_arg0);
+	attribute_Deprecated_func_pg_loreadall_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_loreadall_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_loreadall_0_arg1_str = zend_string_init("use pg_lo_read_all() instead", strlen("use pg_lo_read_all() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loreadall_0_arg1, attribute_Deprecated_func_pg_loreadall_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loreadall_0->args[1].value, &attribute_Deprecated_func_pg_loreadall_0_arg1);
+	attribute_Deprecated_func_pg_loreadall_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_loimport_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loimport", sizeof("pg_loimport") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_loimport_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_loimport_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loimport_0_arg0, attribute_Deprecated_func_pg_loimport_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loimport_0->args[0].value, &attribute_Deprecated_func_pg_loimport_0_arg0);
+	attribute_Deprecated_func_pg_loimport_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_loimport_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_loimport_0_arg1_str = zend_string_init("use pg_lo_import() instead", strlen("use pg_lo_import() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loimport_0_arg1, attribute_Deprecated_func_pg_loimport_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loimport_0->args[1].value, &attribute_Deprecated_func_pg_loimport_0_arg1);
+	attribute_Deprecated_func_pg_loimport_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_loexport_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_loexport", sizeof("pg_loexport") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_loexport_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_loexport_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loexport_0_arg0, attribute_Deprecated_func_pg_loexport_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loexport_0->args[0].value, &attribute_Deprecated_func_pg_loexport_0_arg0);
+	attribute_Deprecated_func_pg_loexport_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_loexport_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_loexport_0_arg1_str = zend_string_init("use pg_lo_export() instead", strlen("use pg_lo_export() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_loexport_0_arg1, attribute_Deprecated_func_pg_loexport_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_loexport_0->args[1].value, &attribute_Deprecated_func_pg_loexport_0_arg1);
+	attribute_Deprecated_func_pg_loexport_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_setclientencoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_setclientencoding", sizeof("pg_setclientencoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_setclientencoding_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_setclientencoding_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_setclientencoding_0_arg0, attribute_Deprecated_func_pg_setclientencoding_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_setclientencoding_0->args[0].value, &attribute_Deprecated_func_pg_setclientencoding_0_arg0);
+	attribute_Deprecated_func_pg_setclientencoding_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_setclientencoding_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_setclientencoding_0_arg1_str = zend_string_init("use pg_set_client_encoding() instead", strlen("use pg_set_client_encoding() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_setclientencoding_0_arg1, attribute_Deprecated_func_pg_setclientencoding_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_setclientencoding_0->args[1].value, &attribute_Deprecated_func_pg_setclientencoding_0_arg1);
+	attribute_Deprecated_func_pg_setclientencoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_pg_clientencoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_clientencoding", sizeof("pg_clientencoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_pg_clientencoding_0_arg0;
+	zend_string *attribute_Deprecated_func_pg_clientencoding_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_clientencoding_0_arg0, attribute_Deprecated_func_pg_clientencoding_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_clientencoding_0->args[0].value, &attribute_Deprecated_func_pg_clientencoding_0_arg0);
+	attribute_Deprecated_func_pg_clientencoding_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_pg_clientencoding_0_arg1;
+	zend_string *attribute_Deprecated_func_pg_clientencoding_0_arg1_str = zend_string_init("use pg_client_encoding() instead", strlen("use pg_client_encoding() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_pg_clientencoding_0_arg1, attribute_Deprecated_func_pg_clientencoding_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_pg_clientencoding_0->args[1].value, &attribute_Deprecated_func_pg_clientencoding_0_arg1);
+	attribute_Deprecated_func_pg_clientencoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_change_password", sizeof("pg_change_password") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 }
 
 static zend_class_entry *register_class_PgSql_Connection(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Connection", class_PgSql_Connection_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Connection", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -781,9 +1157,8 @@ static zend_class_entry *register_class_PgSql_Result(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Result", class_PgSql_Result_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Result", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -792,9 +1167,8 @@ static zend_class_entry *register_class_PgSql_Lob(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Lob", class_PgSql_Lob_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Lob", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

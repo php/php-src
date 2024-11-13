@@ -4,11 +4,11 @@ Bug #73462 (Persistent connections don't set $connect_errno)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     /* Initial persistent connection */
     $mysql_1 = new mysqli('p:'.$host, $user, $passwd, $db, $port);

@@ -6,7 +6,7 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-    $p = FFI::new("
+    $p = FFI::cdef()->new("
     struct {
         int a;
         struct {

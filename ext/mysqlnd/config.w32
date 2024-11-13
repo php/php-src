@@ -34,10 +34,11 @@ if (PHP_MYSQLND != "no") {
 			CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
 			)
 		{
-			AC_DEFINE("MYSQLND_COMPRESSION_ENABLED", 1, "Compression support");
-			AC_DEFINE("MYSQLND_SSL_SUPPORTED", 1, "SSL support");
+			AC_DEFINE("MYSQLND_COMPRESSION_ENABLED", 1, "Define to 1 if mysqlnd has compressed protocol support.");
+			AC_DEFINE("MYSQLND_SSL_SUPPORTED", 1, "Define to 1 if mysqlnd core SSL is enabled.");
 			if (CHECK_LIB("crypt32.lib", "mysqlnd")) {
-				AC_DEFINE("MYSQLND_HAVE_SSL", 1, "Extended SSL support");
+				AC_DEFINE("MYSQLND_HAVE_SSL", 1, "Define to 1 if mysqlnd extended SSL is enabled through a system library.");
+				ADD_EXTENSION_DEP('mysqlnd', 'hash');
 			}
 		}
 		PHP_INSTALL_HEADERS("", "ext/mysqlnd");

@@ -23,7 +23,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
-	zend_string *jit_option = zend_string_init("opcache.jit", sizeof("opcache.jit") - 1, 1);
+	zend_string *jit_option = ZSTR_INIT_LITERAL("opcache.jit", 1);
 
 	/* First run without JIT to determine whether we bail out. We should not run JITed code if
 	 * we bail out here, as the JIT code may loop infinitely. */
@@ -62,12 +62,16 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"zend_extension=%s\n"
 		"opcache.validate_timestamps=0\n"
 		"opcache.file_update_protection=0\n"
-		"opcache.jit_buffer_size=256M\n"
+		"opcache.memory_consumption=1024\n"
+		"opcache.jit_buffer_size=128M\n"
 		"opcache.jit_hot_func=1\n"
 		"opcache.jit_hot_loop=1\n"
 		"opcache.jit_hot_return=1\n"
 		"opcache.jit_hot_side_exit=1\n"
-		"opcache.jit_max_root_traces=32768",
+		"opcache.jit_max_root_traces=100000\n"
+		"opcache.jit_max_side_traces=100000\n"
+		"opcache.jit_max_exit_counters=100000\n"
+		"opcache.protect_memory=1\n",
 		opcache_path);
 	free(opcache_path);
 

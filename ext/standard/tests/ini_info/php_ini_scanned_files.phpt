@@ -3,7 +3,7 @@ php_ini_scanned_files() function
 --FILE--
 <?php
     $inifile = __DIR__.DIRECTORY_SEPARATOR.'loaded.ini';
-    $php = sprintf('"%s" -c "%s"', getenv('TEST_PHP_EXECUTABLE'), $inifile);
+    $php = sprintf('%s -c %s', getenv('TEST_PHP_EXECUTABLE_ESCAPED'), escapeshellarg($inifile));
     $scandir = __DIR__.DIRECTORY_SEPARATOR.'scandir';
 
     // Empty env value disables any config option

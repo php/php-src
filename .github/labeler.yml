@@ -1,243 +1,497 @@
 "Category: Engine":
-- Zend/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - Zend/*
 
 "Category: Optimizer":
-- Zend/Optimizer/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - Zend/Optimizer/**/*
 
 "Category: Build System":
-- build/*
-- scripts/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - '**/*.m4'
+        - '**/*.w32'
+        - build/**/*
+        - buildconf
+        - buildconf.bat
+        - configure.ac
+        - scripts/**/*
+        - win32/build/**/*
 
 "Extension: bcmath":
-- ext/bcmath/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/bcmath/**/*
 
 "Extension: bz2":
-- ext/bz2/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/bz2/**/*
 
 "Extension: calendar":
-- ext/calendar/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/calendar/**/*
 
 "Extension: com_dotnet":
-- ext/com_dotnet/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/com_dotnet/**/*
 
 "Extension: ctype":
-- ext/ctype/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/ctype/**/*
 
 "Extension: curl":
-- ext/curl/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/curl/**/*
 
 "Extension: date":
-- ext/date/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/date/**/*
 
 "Extension: dba":
-- ext/dba/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/dba/**/*
 
 "Extension: dom":
-- ext/dom/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/dom/**/*
 
 "Extension: enchant":
-- ext/enchant/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/enchant/**/*
 
 "Extension: exif":
-- ext/exif/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/exif/**/*
 
 "Extension: ffi":
-- ext/ffi/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/ffi/**/*
 
 "Extension: fileinfo":
-- ext/fileinfo/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/fileinfo/**/*
 
 "Extension: filter":
-- ext/filter/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/filter/**/*
 
 "Extension: ftp":
-- ext/ftp/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/ftp/**/*
 
 "Extension: gd":
-- ext/gd/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/gd/**/*
 
 "Extension: gettext":
-- ext/gettext/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/gettext/**/*
 
 "Extension: gmp":
-- ext/gmp/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/gmp/**/*
 
 "Extension: hash":
-- ext/hash/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/hash/**/*
 
 "Extension: iconv":
-- ext/iconv/**/*
-
-"Extension: imap":
-- ext/imap/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/iconv/**/*
 
 "Extension: intl":
-- ext/intl/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/intl/**/*
 
 "Extension: json":
-- ext/json/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/json/**/*
 
 "Extension: ldap":
-- ext/ldap/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/ldap/**/*
 
 "Extension: libxml":
-- ext/libxml/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/libxml/**/*
 
 "Extension: mbstring":
-- ext/mbstring/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/mbstring/**/*
 
 "Extension: mysqli":
-- ext/mysqli/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/mysqli/**/*
 
 "Extension: mysqlnd":
-- ext/mysqlnd/**/*
-
-"Extension: oci8":
-- ext/oci8/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/mysqlnd/**/*
 
 "Extension: odbc":
-- ext/odbc/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/odbc/**/*
 
 "Extension: opcache":
-- ext/opcache/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/opcache/**/*
 
 "Extension: openssl":
-- ext/openssl/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/openssl/**/*
 
 "Extension: pcntl":
-- ext/pcntl/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pcntl/**/*
 
 "Extension: pcre":
-- ext/pcre/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pcre/**/*
 
 "Extension: pdo (core)":
-- ext/pdo/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pdo/**/*
 
 "Extension: pdo_dblib":
-- ext/pdo_dblib/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pdo_dblib/**/*
 
 "Extension: pdo_firebird":
-- ext/pdo_firebird/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pdo_firebird/**/*
 
 "Extension: pdo_mysql":
-- ext/pdo_mysql/**/*
-
-"Extension: pdo_oci":
-- ext/pdo_oci/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pdo_mysql/**/*
 
 "Extension: pdo_odbc":
-- ext/pdo_odbc/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pdo_odbc/**/*
 
 "Extension: pdo_pgsql":
-- ext/pdo_pgsql/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pdo_pgsql/**/*
 
 "Extension: pdo_sqlite":
-- ext/pdo_sqlite/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pdo_sqlite/**/*
 
 "Extension: pgsql":
-- ext/pgsql/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/pgsql/**/*
 
 "Extension: phar":
-- ext/phar/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/phar/**/*
 
 "Extension: posix":
-- ext/posix/**/*
-
-"Extension: pspell":
-- ext/pspell/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/posix/**/*
 
 "Extension: random":
-- ext/random/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/random/**/*
 
 "Extension: readline":
-- ext/readline/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/readline/**/*
 
 "Extension: reflection":
-- ext/reflection/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/reflection/**/*
 
 "Extension: session":
-- ext/session/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/session/**/*
 
 "Extension: shmop":
-- ext/shmop/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/shmop/**/*
 
 "Extension: simplexml":
-- ext/simplexml/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/simplexml/**/*
 
 "Extension: snmp":
-- ext/snmp/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/snmp/**/*
 
 "Extension: soap":
-- ext/soap/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/soap/**/*
 
 "Extension: sockets":
-- ext/sockets/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/sockets/**/*
 
 "Extension: sodium":
-- ext/sodium/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/sodium/**/*
 
 "Extension: spl":
-- ext/spl/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/spl/**/*
 
 "Extension: sqlite3":
-- ext/sqlite3/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/sqlite3/**/*
 
 "Extension: standard":
-- ext/standard/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/standard/**/*
 
 "Extension: sysvmsg":
-- ext/sysvmsg/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/sysvmsg/**/*
 
 "Extension: sysvsem":
-- ext/sysvsem/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/sysvsem/**/*
 
 "Extension: sysvshm":
-- ext/sysvshm/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/sysvshm/**/*
 
 "Extension: tidy":
-- ext/tidy/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/tidy/**/*
 
 "Extension: tokenizer":
-- ext/tokenizer/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/tokenizer/**/*
 
 "Extension: xml":
-- ext/xml/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/xml/**/*
 
 "Extension: xmlreader":
-- ext/xmlreader/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/xmlreader/**/*
 
 "Extension: xmlwriter":
-- ext/xmlwriter/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/xmlwriter/**/*
 
 "Extension: xsl":
-- ext/xsl/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/xsl/**/*
 
 "Extension: zend_test":
-- ext/zend_test/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/zend_test/**/*
 
 "Extension: zip":
-- ext/zip/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/zip/**/*
 
 "Extension: zlib":
-- ext/zlib/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - ext/zlib/**/*
 
 "SAPI: apache2handler":
-- sapi/apache2handler/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - sapi/apache2handler/**/*
 
 "SAPI: cgi":
-- sapi/cgi/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - sapi/cgi/**/*
 
 "SAPI: cli":
-- sapi/cli/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - sapi/cli/**/*
 
 "SAPI: fpm":
-- sapi/fpm/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - sapi/fpm/**/*
 
 "SAPI: fuzzer":
-- sapi/fuzzer/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - sapi/fuzzer/**/*
 
 "SAPI: litespeed":
-- sapi/litespeed/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - sapi/litespeed/**/*
 
 "SAPI: phpdbg":
-- sapi/phpdbg/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+        - sapi/phpdbg/**/*
+
+"ABI break":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'TSRM/*.h'
+      - 'Zend/*.h'
+      - 'Zend/Optimizer/zend_call_graph.h'
+      - 'Zend/Optimizer/zend_cfg.h'
+      - 'Zend/Optimizer/zend_dfg.h'
+      - 'Zend/Optimizer/zend_dump.h'
+      - 'Zend/Optimizer/zend_func_info.h'
+      - 'Zend/Optimizer/zend_inference.h'
+      - 'Zend/Optimizer/zend_optimizer.h'
+      - 'Zend/Optimizer/zend_ssa.h'
+      - 'Zend/Optimizer/zend_worklist.h'
+      - 'ext/curl/php_curl.h'
+      - 'ext/date/lib/timelib.h'
+      - 'ext/date/lib/timelib_config.h'
+      - 'ext/date/php_date.h'
+      - 'ext/dom/dom_ce.h'
+      - 'ext/dom/namespace_compat.h'
+      - 'ext/dom/xml_common.h'
+      - 'ext/dom/xpath_callbacks.h'
+      - 'ext/filter/php_filter.h'
+      - 'ext/gd/libgd/*.h'
+      - 'ext/gd/php_gd.h'
+      - 'ext/gmp/php_gmp_int.h'
+      - 'ext/hash/php_hash.h'
+      - 'ext/hash/php_hash_adler32.h'
+      - 'ext/hash/php_hash_crc32.h'
+      - 'ext/hash/php_hash_fnv.h'
+      - 'ext/hash/php_hash_gost.h'
+      - 'ext/hash/php_hash_haval.h'
+      - 'ext/hash/php_hash_joaat.h'
+      - 'ext/hash/php_hash_md.h'
+      - 'ext/hash/php_hash_murmur.h'
+      - 'ext/hash/php_hash_ripemd.h'
+      - 'ext/hash/php_hash_sha.h'
+      - 'ext/hash/php_hash_sha3.h'
+      - 'ext/hash/php_hash_snefru.h'
+      - 'ext/hash/php_hash_tiger.h'
+      - 'ext/hash/php_hash_whirlpool.h'
+      - 'ext/hash/php_hash_xxhash.h'
+      - 'ext/hash/xxhash/xxhash.h'
+      - 'ext/iconv/php_iconv.h'
+      - 'ext/json/php_json.h'
+      - 'ext/json/php_json_parser.h'
+      - 'ext/json/php_json_scanner.h'
+      - 'ext/libxml/php_libxml.h'
+      - 'ext/mbstring/libmbfl/config.h'
+      - 'ext/mbstring/libmbfl/mbfl/eaw_table.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfilter.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfilter_8bit.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfilter_pass.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfilter_wchar.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfl_consts.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfl_convert.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfl_defs.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfl_encoding.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfl_filter_output.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfl_language.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfl_memory_device.h'
+      - 'ext/mbstring/libmbfl/mbfl/mbfl_string.h'
+      - 'ext/mbstring/mbstring.h'
+      - 'ext/mbstring/php_mbregex.h'
+      - 'ext/mbstring/php_onig_compat.h'
+      - 'ext/mysqli/mysqli_mysqlnd.h'
+      - 'ext/mysqli/php_mysqli_structs.h'
+      - 'ext/mysqlnd/*.h'
+      - 'ext/pcre/pcre2lib/*.h'
+      - 'ext/pcre/php_pcre.h'
+      - 'ext/pdo/pdo_sql_parser.h'
+      - 'ext/pdo/php_pdo.h'
+      - 'ext/pdo/php_pdo_driver.h'
+      - 'ext/pdo/php_pdo_error.h'
+      - 'ext/phar/php_phar.h'
+      - 'ext/random/php_random.h'
+      - 'ext/random/php_random_csprng.h'
+      - 'ext/random/php_random_uint128.h'
+      - 'ext/session/mod_files.h'
+      - 'ext/session/mod_mm.h'
+      - 'ext/session/mod_user.h'
+      - 'ext/session/php_session.h'
+      - 'ext/simplexml/php_simplexml.h'
+      - 'ext/simplexml/php_simplexml_exports.h'
+      - 'ext/sockets/php_sockets.h'
+      - 'ext/sockets/windows_common.h'
+      - 'ext/sodium/php_libsodium.h'
+      - 'ext/spl/php_spl.h'
+      - 'ext/spl/spl_array.h'
+      - 'ext/spl/spl_directory.h'
+      - 'ext/spl/spl_dllist.h'
+      - 'ext/spl/spl_exceptions.h'
+      - 'ext/spl/spl_fixedarray.h'
+      - 'ext/spl/spl_functions.h'
+      - 'ext/spl/spl_heap.h'
+      - 'ext/spl/spl_iterators.h'
+      - 'ext/spl/spl_observer.h'
+      - 'ext/standard/*.h'
+      - 'ext/xml/expat_compat.h'
+      - 'ext/xml/php_xml.h'
+      - 'main/*.h'
+      - 'main/streams/*.h'
+      - 'sapi/cli/cli.h'
+      - 'sapi/embed/php_embed.h'
+      - 'win32/*.h'

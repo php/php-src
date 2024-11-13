@@ -4,14 +4,16 @@ PDO_Firebird: bug 73087 segfault binding blob parameter
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
+--XLEAK--
+A bug in firebird causes a memory leak when calling `isc_attach_database()`.
+See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require 'testdb.inc';
 
-$dbh->exec('recreate table atable (id integer not null, content blob sub_type 1 segment size 80)');
-$S = $dbh->prepare('insert into atable (id, content) values (:id, :content)');
+$dbh = getDbConnection();
+$dbh->exec('recreate table test73087 (id integer not null, content blob sub_type 1 segment size 80)');
+$S = $dbh->prepare('insert into test73087 (id, content) values (:id, :content)');
 for ($I = 1; $I < 10; $I++) {
     $Params = [
         'id' => $I,
@@ -24,6 +26,13 @@ for ($I = 1; $I < 10; $I++) {
 unset($S);
 unset($dbh);
 echo 'OK';
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh = getDbConnection();
+@$dbh->exec("DROP TABLE test73087");
+unset($dbh);
 ?>
 --EXPECT--
 OK

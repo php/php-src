@@ -201,12 +201,13 @@ function intlcal_after(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_before(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
-function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
+#[\Deprecated(since: '8.4', message: 'use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead')]
+function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): true {}
 
 /** @param int|bool $value */
 function intlcal_roll(IntlCalendar $calendar, int $field, $value): bool {}
 
-function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
+function intlcal_clear(IntlCalendar $calendar, ?int $field = null): true {}
 
 function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int|false {}
 
@@ -228,7 +229,7 @@ function intlcal_get_maximum(IntlCalendar $calendar, int $field): int|false {}
 
 function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int|false {}
 
-function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): bool {}
+function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): true {}
 
 function intlcal_get_minimum(IntlCalendar $calendar, int $field): int|false {}
 
@@ -248,9 +249,9 @@ function intlcal_is_equivalent_to(IntlCalendar $calendar, IntlCalendar $other): 
 
 function intlcal_is_weekend(IntlCalendar $calendar, ?float $timestamp = null): bool {}
 
-function intlcal_set_first_day_of_week(IntlCalendar $calendar, int $dayOfWeek): bool {}
+function intlcal_set_first_day_of_week(IntlCalendar $calendar, int $dayOfWeek): true {}
 
-function intlcal_set_lenient(IntlCalendar $calendar, bool $lenient): bool {}
+function intlcal_set_lenient(IntlCalendar $calendar, bool $lenient): true {}
 
 function intlcal_get_repeated_wall_time_option(IntlCalendar $calendar): int {}
 
@@ -258,9 +259,9 @@ function intlcal_equals(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_get_skipped_wall_time_option(IntlCalendar $calendar): int {}
 
-function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $option): bool {}
+function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $option): true {}
 
-function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): bool {}
+function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): true {}
 
 function intlcal_from_date_time(DateTime|string $datetime, ?string $locale = null): ?IntlCalendar {}
 
@@ -278,6 +279,7 @@ function intlcal_get_error_message(IntlCalendar $calendar): string|false {}
  * @param int $minute
  * @param int $second
  */
+#[\Deprecated(since: '8.4', message: 'use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead')]
 function intlgregcal_create_instance($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
 
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $calendar, float $timestamp): bool {}
@@ -298,7 +300,7 @@ function collator_set_attribute(Collator $object, int $attribute, int $value): b
 
 function collator_get_strength(Collator $object): int {}
 
-function collator_set_strength(Collator $object, int $strength): bool {}
+function collator_set_strength(Collator $object, int $strength): true {}
 
 function collator_sort(Collator $object, array &$array, int $flags = Collator::SORT_REGULAR): bool {}
 
@@ -351,7 +353,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $formatter): IntlCalendar
 function datefmt_get_timezone(IntlDateFormatter $formatter): IntlTimeZone|false {}
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): ?bool {}
+function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): bool {}
 
 function datefmt_set_pattern(IntlDateFormatter $formatter, string $pattern): bool {}
 
@@ -443,6 +445,8 @@ function grapheme_strstr(string $haystack, string $needle, bool $beforeNeedle = 
 
 function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle = false): string|false {}
 
+function grapheme_str_split(string $string, int $length = 1): array|false {}
+
 /** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR_COUNT, int $offset = 0, &$next = null): string|false {}
 
@@ -459,7 +463,7 @@ function idn_to_utf8(string $domain, int $flags = IDNA_DEFAULT, int $variant = I
 
 function locale_get_default(): string {}
 
-function locale_set_default(string $locale): bool {}
+function locale_set_default(string $locale): true {}
 
 function locale_get_primary_language(string $locale): ?string {}
 
@@ -541,8 +545,7 @@ function normalizer_get_raw_decomposition(string $string, int $form = Normalizer
 
 function resourcebundle_create(?string $locale, ?string $bundle, bool $fallback = true): ?ResourceBundle {}
 
-/** @param string|int $index */
-function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = true): mixed {}
+function resourcebundle_get(ResourceBundle $bundle, string|int $index, bool $fallback = true): ResourceBundle|array|string|int|null {}
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 
@@ -613,6 +616,10 @@ function intltz_has_same_rules(IntlTimeZone $timezone, IntlTimeZone $other): boo
 function intltz_to_date_time_zone(IntlTimeZone $timezone): DateTimeZone|false {}
 
 function intltz_use_daylight_time(IntlTimeZone $timezone): bool {}
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+function intltz_get_iana_id(string $timezoneId): string|false {}
+#endif
 
 /* transliterator */
 

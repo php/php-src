@@ -16,12 +16,13 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMProcessingInstruction extends DOMNode
@@ -43,16 +44,16 @@ PHP_METHOD(DOMProcessingInstruction, __construct)
 		RETURN_THROWS();
 	}
 
-	name_valid = xmlValidateName((xmlChar *) name, 0);
+	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
-	nodep = xmlNewPI((xmlChar *) name, (xmlChar *) value);
+	nodep = xmlNewPI(BAD_CAST name, BAD_CAST value);
 
 	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -70,17 +71,10 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1478689192
 Since:
 */
-int dom_processinginstruction_target_read(dom_object *obj, zval *retval)
+zend_result dom_processinginstruction_target_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
-
-	ZVAL_STRING(retval, (char *) (nodep->name));
-
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+	ZVAL_STRING(retval, (const char *) nodep->name);
 	return SUCCESS;
 }
 
@@ -91,46 +85,23 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-837822393
 Since:
 */
-int dom_processinginstruction_data_read(dom_object *obj, zval *retval)
+zend_result dom_processinginstruction_data_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep;
-	xmlChar *content;
-
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
-
-	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(retval, (char *) content);
-		xmlFree(content);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
-
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+	php_dom_get_content_into_zval(nodep, retval, false);
 	return SUCCESS;
 }
 
-int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
+zend_result dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-	zend_string *str;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	/* Typed property, this is already a string */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+	zend_string *str = Z_STR_P(newval);
 
-	str = zval_try_get_string(newval);
-	if (UNEXPECTED(!str)) {
-		return FAILURE;
-	}
+	xmlNodeSetContentLen(nodep, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
 
-	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 

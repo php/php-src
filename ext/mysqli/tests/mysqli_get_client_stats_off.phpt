@@ -4,10 +4,7 @@ mysqli_get_client_stats() - php_ini setting
 mysqli
 --SKIPIF--
 <?PHP
-require_once('skipifconnectfailure.inc');
-if (!function_exists('mysqli_get_client_stats')) {
-    die("skip only available with mysqlnd");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqlnd.collect_statistics=0
@@ -21,8 +18,8 @@ mysqlnd.collect_memory_statistics=0
     }
 
     // connect and table inc connect to mysql and create tables
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
     $after = mysqli_get_client_stats();
 
     if ($before !== $after) {
@@ -42,7 +39,7 @@ mysqlnd.collect_memory_statistics=0
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

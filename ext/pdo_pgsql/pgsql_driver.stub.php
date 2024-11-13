@@ -8,7 +8,7 @@
  */
 class PDO_PGSql_Ext {
     /** @tentative-return-type */
-    public function pgsqlCopyFromArray(string $tableName, array $rows, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}
+    public function pgsqlCopyFromArray(string $tableName, array | Traversable $rows, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}
 
     /** @tentative-return-type */
     public function pgsqlCopyFromFile(string $tableName, string $filename, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}
@@ -33,4 +33,8 @@ class PDO_PGSql_Ext {
 
     /** @tentative-return-type */
     public function pgsqlGetPid(): int {}
+
+    /* Do NOT add new methods here. See https://wiki.php.net/rfc/pdo_driver_specific_subclasses
+     * Any new feature should be declared only on Pdo\Pgsql.
+     */
 }

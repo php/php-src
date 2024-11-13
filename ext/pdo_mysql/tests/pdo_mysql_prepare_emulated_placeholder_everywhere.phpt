@@ -4,13 +4,13 @@ MySQL PDO->prepare(), emulated PS, anonymous placeholder
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 // TODO: This test is MySQL version specific - for whatever reason
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     try {
@@ -19,13 +19,12 @@ MySQLPDOTest::skip();
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to switch off emulated prepared statements, test will fail\n");
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec(sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-        $db->exec("INSERT INTO test(id, label) VALUES (1, 'row1')");
+        $db->exec(sprintf('CREATE TABLE test_prepare_emulated_placeholder_everywhere(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        $db->exec("INSERT INTO test_prepare_emulated_placeholder_everywhere(id, label) VALUES (1, 'row1')");
 
         // So, what will happen? More placeholder but values and
         // placeholders in interesting places...
-        $stmt = $db->prepare('SELECT ? FROM test WHERE ? > ?');
+        $stmt = $db->prepare('SELECT ? FROM test_prepare_emulated_placeholder_everywhere WHERE ? > ?');
         $stmt->execute(array('test'));
         if ('00000' !== $stmt->errorCode()) {
             printf("[003] Execute has failed, %s %s\n",
@@ -40,7 +39,7 @@ MySQLPDOTest::skip();
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[004] Unable to switch on emulated prepared statements, test will fail\n");
 
-        $stmt = $db->prepare('SELECT ? FROM test WHERE ? > ?');
+        $stmt = $db->prepare('SELECT ? FROM test_prepare_emulated_placeholder_everywhere WHERE ? > ?');
         $stmt->execute(array('test'));
         if ('00000' !== $stmt->errorCode())
             printf("[005] Execute has failed, %s %s\n",
@@ -57,9 +56,9 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_prepare_emulated_placeholder_everywhere');
 ?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d

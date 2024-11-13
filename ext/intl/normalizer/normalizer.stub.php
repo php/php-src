@@ -4,57 +4,27 @@
 
 class Normalizer
 {
-    /**
-     * @var int
-     * @cvalue NORMALIZER_FORM_D
-     */
-    public const FORM_D = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue NORMALIZER_NFD
-     */
-    public const NFD = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue NORMALIZER_FORM_KD
-     */
-    public const FORM_KD = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue NORMALIZER_NFKD
-     */
-    public const NFKD = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue NORMALIZER_FORM_C
-     */
-    public const FORM_C = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue NORMALIZER_NFC
-     */
-    public const NFC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue NORMALIZER_FORM_KC
-     */
-    public const FORM_KC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue NORMALIZER_NFKC
-     */
-    public const NFKC = UNKNOWN;
+    /** @cvalue NORMALIZER_FORM_D */
+    public const int FORM_D = UNKNOWN;
+    /** @cvalue NORMALIZER_NFD */
+    public const int NFD = UNKNOWN;
+    /** @cvalue NORMALIZER_FORM_KD */
+    public const int FORM_KD = UNKNOWN;
+    /** @cvalue NORMALIZER_NFKD */
+    public const int NFKD = UNKNOWN;
+    /** @cvalue NORMALIZER_FORM_C */
+    public const int FORM_C = UNKNOWN;
+    /** @cvalue NORMALIZER_NFC */
+    public const int NFC = UNKNOWN;
+    /** @cvalue NORMALIZER_FORM_KC */
+    public const int FORM_KC = UNKNOWN;
+    /** @cvalue NORMALIZER_NFKC */
+    public const int NFKC = UNKNOWN;
 #if U_ICU_VERSION_MAJOR_NUM >= 56
-    /**
-     * @var int
-     * @cvalue NORMALIZER_FORM_KC_CF
-     */
-    public const FORM_KC_CF = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue NORMALIZER_NFKC_CF
-     */
-    public const NFKC_CF = UNKNOWN;
+    /** @cvalue NORMALIZER_FORM_KC_CF */
+    public const int FORM_KC_CF = UNKNOWN;
+    /** @cvalue NORMALIZER_NFKC_CF */
+    public const int NFKC_CF = UNKNOWN;
 #endif
 
     /**

@@ -23,6 +23,7 @@
 
 #include "zend_types.h"
 #include "zend_gc.h"
+#include "zend_hash.h"
 
 BEGIN_EXTERN_C()
 

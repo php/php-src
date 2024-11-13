@@ -486,7 +486,7 @@ PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err)
 {/*{{{*/
 #if PHP_LINKER_MAJOR == 14
 	/* Extend for other CRT if needed. */
-# if PHP_DEBUG
+# ifdef _DEBUG
 	const char *crt_name = "vcruntime140d.dll";
 # else
 	const char *crt_name = "vcruntime140.dll";

@@ -35,7 +35,7 @@ var_dump(session_get_cookie_params());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing session_get_cookie_params() : basic functionality ***
 array(6) {
   ["lifetime"]=>
@@ -69,7 +69,7 @@ array(6) {
 bool(true)
 array(6) {
   ["lifetime"]=>
-  int(1234567890)
+  int(%d)
   ["path"]=>
   string(5) "/guff"
   ["domain"]=>

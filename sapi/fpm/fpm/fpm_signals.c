@@ -267,7 +267,7 @@ int fpm_signals_init_mask(void)
 	/* Subset of signals from fpm_signals_init_main() and fpm_got_signal()
 		blocked to avoid unexpected death during early init
 		or during reload just after execvp() or fork */
-	int init_signal_array[] = { SIGUSR1, SIGUSR2, SIGCHLD };
+	static const int init_signal_array[] = { SIGUSR1, SIGUSR2, SIGCHLD };
 	size_t size = sizeof(init_signal_array)/sizeof(init_signal_array[0]);
 	size_t i = 0;
 	if (0 > sigemptyset(&block_sigset) ||

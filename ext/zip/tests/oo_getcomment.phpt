@@ -30,4 +30,4 @@ $zip->close();
 Zip archive comment
 string(11) "foo comment"
 string(11) "foo comment"
-ZipArchive::getCommentName(): Argument #1 ($name) cannot be empty
+ZipArchive::getCommentName(): Argument #1 ($name) must not be empty

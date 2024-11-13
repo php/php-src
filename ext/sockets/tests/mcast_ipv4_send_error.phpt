@@ -14,6 +14,7 @@ if ($s === false) {
 if (socket_set_option($s, $level, IP_MULTICAST_IF, 1) === false) {
     die("skip interface 1 either doesn't exist or has no ipv4 address");
 }
+?>
 --FILE--
 <?php
 $domain = AF_INET;

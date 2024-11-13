@@ -75,13 +75,11 @@ static char *create_name_with_username(char *name)
 	char *p = newname;
 	p += strlcpy(newname, name, MAXPATHLEN + 1);
 	*(p++) = '@';
-	memcpy(p, accel_uname_id, 32);
-	p += 32;
+	p = zend_mempcpy(p, accel_uname_id, 32);
 	*(p++) = '@';
 	p += strlcpy(p, sapi_module.name, 21);
 	*(p++) = '@';
-	memcpy(p, zend_system_id, 32);
-	p += 32;
+	p = zend_mempcpy(p, zend_system_id, 32);
 	*(p++) = '\0';
 	ZEND_ASSERT(p - newname <= sizeof(newname));
 
@@ -112,7 +110,7 @@ void zend_shared_alloc_unlock_win32(void)
 	ReleaseMutex(memory_mutex);
 }
 
-static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
+static int zend_shared_alloc_reattach(size_t requested_size, const char **error_in)
 {
 	int err;
 	void *wanted_mapping_base;
@@ -199,7 +197,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	return SUCCESSFULLY_REATTACHED;
 }
 
-static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	int err = 0, ret;
 	zend_shared_segment *shared_segment;
@@ -352,7 +350,7 @@ static size_t segment_type_size(void)
 	return sizeof(zend_shared_segment);
 }
 
-zend_shared_memory_handlers zend_alloc_win32_handlers = {
+const zend_shared_memory_handlers zend_alloc_win32_handlers = {
 	create_segments,
 	detach_segment,
 	segment_type_size

@@ -14,7 +14,7 @@ __();
 echo "ok\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: array_splice(): Argument #1 ($array) cannot be passed by reference in %s:%d
+Fatal error: Uncaught Error: array_splice(): Argument #1 ($array) could not be passed by reference in %s:%d
 Stack trace:
 #0 %s(%d): __()
 #1 {main}

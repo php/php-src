@@ -577,7 +577,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u persistent=%u state=%u",
 				hostname.s?hostname.s:"", username.s?username.s:"", database.s?database.s:"", port, mysql_flags,
-				conn? conn->persistent:0, conn? (int)GET_CONNECTION_STATE(&conn->state):-1);
+				conn->persistent, (int)GET_CONNECTION_STATE(&conn->state));
 
 	if (GET_CONNECTION_STATE(&conn->state) > CONN_ALLOCED) {
 		DBG_INF("Connecting on a connected handle.");
@@ -1046,17 +1046,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 /* }}} */
 
 
-/* {{{ mysqlnd_conn_data::shutdown */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint8_t level)
-{
-	DBG_ENTER("mysqlnd_conn_data::shutdown");
-	DBG_INF_FMT("conn=%" PRIu64 " level=%u", conn->thread_id, level);
-	DBG_RETURN(conn->command->shutdown(conn, level));
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_send_close */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
@@ -1455,10 +1444,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		}
 		case MYSQL_READ_DEFAULT_FILE:
 		case MYSQL_READ_DEFAULT_GROUP:
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_SET_CLIENT_IP:
-		case MYSQL_REPORT_DATA_TRUNCATION:
-#endif
 			/* currently not supported. Todo!! */
 			break;
 		case MYSQL_SET_CHARSET_NAME:
@@ -1486,18 +1471,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 				conn->options->protocol = *(unsigned int*) value;
 			}
 			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_SET_CHARSET_DIR:
-		case MYSQL_OPT_RECONNECT:
-			/* we don't need external character sets, all character sets are
-			   compiled in. For compatibility we just ignore this setting.
-			   Same for protocol, we don't support old protocol */
-		case MYSQL_OPT_USE_REMOTE_CONNECTION:
-		case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
-		case MYSQL_OPT_GUESS_CONNECTION:
-			/* todo: throw an error, we don't support embedded */
-			break;
-#endif
 		case MYSQLND_OPT_MAX_ALLOWED_PACKET:
 			if (*(unsigned int*) value > (1<<16)) {
 				conn->options->max_allowed_packet = *(unsigned int*) value;
@@ -1533,12 +1506,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 				DBG_INF_FMT("%d left", zend_hash_num_elements(conn->options->connect_attr));
 			}
 			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_SHARED_MEMORY_BASE_NAME:
-		case MYSQL_OPT_USE_RESULT:
-		case MYSQL_SECURE_AUTH:
-			/* not sure, todo ? */
-#endif
 		default:
 			ret = FAIL;
 	}
@@ -1955,7 +1922,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 
 	MYSQLND_METHOD(mysqlnd_conn_data, stmt_init),
 
-	MYSQLND_METHOD(mysqlnd_conn_data, shutdown),
 	MYSQLND_METHOD(mysqlnd_conn_data, refresh),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, ping),

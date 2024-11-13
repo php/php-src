@@ -4,11 +4,11 @@ Bug #33090 (mysql_prepare doesn't return an error)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include ("connect.inc");
+    include 'connect.inc';
 
     /*** test mysqli_connect 127.0.0.1 ***/
     $link = my_mysqli_connect($host, $user, $passwd, null, $port, $socket);

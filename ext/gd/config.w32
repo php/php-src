@@ -17,17 +17,21 @@ if (PHP_GD != "no") {
 		(CHECK_LIB("libiconv_a.lib;libiconv.lib", "gd", PHP_GD) || CHECK_LIB("iconv_a.lib;iconv.lib", "gd", PHP_GD)) &&
 		 CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_GD", PHP_GD) &&
 		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "gd", PHP_GD) )) ||
-			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "gd", PHP_GD)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED))) &&
-		CHECK_LIB("libXpm_a.lib", "gd", PHP_GD) &&
-		CHECK_HEADER_ADD_INCLUDE("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "gd", PHP_GD)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
 		) {
 
+		if (CHECK_LIB("libXpm_a.lib", "gd", PHP_GD) &&
+			CHECK_HEADER_ADD_INCLUDE("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
+		) {
+			AC_DEFINE('HAVE_XPM', 1, "Define to 1 if you have the xpm library.");
+			AC_DEFINE('HAVE_GD_XPM', 1, "Define to 1 if gd extension has XPM support.");
+		}
 		if (PHP_LIBWEBP != "no") {
 			if ((CHECK_LIB("libwebp_a.lib", "gd", PHP_GD) || CHECK_LIB("libwebp.lib", "gd", PHP_GD)) &&
 				CHECK_HEADER_ADD_INCLUDE("decode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
 				CHECK_HEADER_ADD_INCLUDE("encode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp")) {
-				AC_DEFINE("HAVE_LIBWEBP", 1, "WebP support");
-				AC_DEFINE("HAVE_GD_WEBP", 1, "WebP support");
+				AC_DEFINE("HAVE_LIBWEBP", 1, "Define to 1 if you have the libwebp library.");
+				AC_DEFINE("HAVE_GD_WEBP", 1, "Define to 1 if gd extension has WebP support.");
 			} else {
 				WARNING("libwebp not enabled; libraries and headers not found");
 			}
@@ -55,18 +59,15 @@ if (PHP_GD != "no") {
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
 			gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c gd_avif.c \
 			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
-		AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
-		AC_DEFINE('HAVE_GD_BUNDLED', 1, "Bundled GD");
-		AC_DEFINE('HAVE_GD_PNG', 1, "PNG support");
-		AC_DEFINE('HAVE_GD_BMP', 1, "BMP support");
-		AC_DEFINE('HAVE_GD_TGA', 1, "TGA support");
-		AC_DEFINE('HAVE_LIBPNG', 1, "PNG support");
-		AC_DEFINE('HAVE_LIBJPEG', 1, "JPEG support");
-		AC_DEFINE('HAVE_GD_JPG', 1, "JPEG support");
-		AC_DEFINE('HAVE_XPM', 1, "XPM support");
-		AC_DEFINE('HAVE_GD_XPM', 1, "XPM support");
-		AC_DEFINE('HAVE_LIBFREETYPE', 1, "Freetype support");
-		AC_DEFINE('HAVE_GD_FREETYPE', 1, "Freetype support");
+		AC_DEFINE('HAVE_GD_BUNDLED', 1, "Define to 1 if gd extension uses GD library bundled in PHP.");
+		AC_DEFINE('HAVE_GD_PNG', 1, "Define to 1 if gd extension has PNG support.");
+		AC_DEFINE('HAVE_GD_BMP', 1, "Define to 1 if gd extension has BMP support.");
+		AC_DEFINE('HAVE_GD_TGA', 1, "Define to 1 if gd extension has TGA support.");
+		AC_DEFINE('HAVE_LIBPNG', 1, "Define to 1 if you have the libpng library.");
+		AC_DEFINE('HAVE_LIBJPEG', 1, "Define to 1 if you have the libjpeg library.");
+		AC_DEFINE('HAVE_GD_JPG', 1, "Define to 1 if gd extension has JPEG support.");
+		AC_DEFINE('HAVE_LIBFREETYPE', 1, "Define to 1 if you have the FreeType library.");
+		AC_DEFINE('HAVE_GD_FREETYPE', 1, "Define to 1 if gd extension has FreeType support.");
 		ADD_FLAG("CFLAGS_GD", " \
 /D PHP_GD_EXPORTS=1 \
 /D HAVE_GD_GET_INTERPOLATION \
@@ -75,7 +76,7 @@ if (PHP_GD != "no") {
 			ADD_FLAG("LDFLAGS_GD", "/nodefaultlib:libcmt");
 		}
 
-		PHP_INSTALL_HEADERS("", "ext/gd ext/gd/libgd" );
+		PHP_INSTALL_HEADERS("ext/gd", "php_gd.h libgd/");
 	} else {
 		WARNING("gd not enabled; libraries and headers not found");
 	}

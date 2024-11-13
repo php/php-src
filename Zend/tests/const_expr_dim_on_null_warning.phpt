@@ -6,5 +6,5 @@ const C = (null)['foo'];
 var_dump(C);
 ?>
 --EXPECTF--
-Warning: Trying to access array offset on value of type null in %s on line %d
+Warning: Trying to access array offset on null in %s on line %d
 NULL

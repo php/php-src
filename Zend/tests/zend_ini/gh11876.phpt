@@ -19,6 +19,7 @@ var_dump(zend_test_zend_ini_parse_quantity('0g10'));
 var_dump(zend_test_zend_ini_parse_quantity('0m10'));
 var_dump(zend_test_zend_ini_parse_quantity('0k10'));
 
+?>
 --EXPECTF--
 Warning: Invalid quantity "0x0x12": no digits after base prefix, interpreting as "0" for backwards compatibility in %s on line %d
 int(0)

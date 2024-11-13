@@ -4,12 +4,12 @@ PDO_MYSQL: Defining a connection charset in the DSN
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     /* Connect to mysql to determine the current charset so we can diffinate it */
     $link 		= MySQLPDOTest::factory();
@@ -21,7 +21,7 @@ MySQLPDOTest::skip();
     /* Done with the original connection, create a second link to test the character set being defined */
     unset($link);
 
-    $link 		= MySQLPDOTest::factory('PDO', false, null, Array('charset' => $new_charset));
+    $link 		    = MySQLPDOTest::factory('PDO', ['charset' => $new_charset]);
     $conn_charset 	= $link->query("SHOW VARIABLES LIKE 'character_set_connection'")->fetchObject()->value;
 
     if ($charset !== $conn_charset) {

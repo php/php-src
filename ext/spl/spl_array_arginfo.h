@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 13e1f68463c2abc1a1ce0e1cff5f47a12407cfc1 */
+ * Stub hash: c52e89992bd3c04877daab47f4328af0b6ce619e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -40,19 +40,19 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_setF
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_asort, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_asort, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_ksort arginfo_class_ArrayObject_asort
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_uasort, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_uasort, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_uksort arginfo_class_ArrayObject_uasort
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_natsort, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_natsort, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_natcasesort arginfo_class_ArrayObject_natsort
@@ -139,7 +139,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayIterator_next arginfo_class_ArrayIterator_rewind
 
-#define arginfo_class_ArrayIterator_valid arginfo_class_ArrayObject_natsort
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayIterator_valid, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayIterator_seek, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
@@ -147,11 +148,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayIterator___debugInfo arginfo_class_ArrayObject_getArrayCopy
 
-#define arginfo_class_RecursiveArrayIterator_hasChildren arginfo_class_ArrayObject_natsort
+#define arginfo_class_RecursiveArrayIterator_hasChildren arginfo_class_ArrayIterator_valid
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RecursiveArrayIterator_getChildren, 0, 0, RecursiveArrayIterator, 1)
 ZEND_END_ARG_INFO()
-
 
 ZEND_METHOD(ArrayObject, __construct);
 ZEND_METHOD(ArrayObject, offsetExists);
@@ -188,7 +188,6 @@ ZEND_METHOD(ArrayIterator, seek);
 ZEND_METHOD(RecursiveArrayIterator, hasChildren);
 ZEND_METHOD(RecursiveArrayIterator, getChildren);
 
-
 static const zend_function_entry class_ArrayObject_methods[] = {
 	ZEND_ME(ArrayObject, __construct, arginfo_class_ArrayObject___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, offsetExists, arginfo_class_ArrayObject_offsetExists, ZEND_ACC_PUBLIC)
@@ -218,38 +217,36 @@ static const zend_function_entry class_ArrayObject_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ArrayIterator_methods[] = {
 	ZEND_ME(ArrayIterator, __construct, arginfo_class_ArrayIterator___construct, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, offsetExists, offsetExists, arginfo_class_ArrayIterator_offsetExists, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, offsetGet, offsetGet, arginfo_class_ArrayIterator_offsetGet, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, offsetSet, offsetSet, arginfo_class_ArrayIterator_offsetSet, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, offsetUnset, offsetUnset, arginfo_class_ArrayIterator_offsetUnset, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, append, append, arginfo_class_ArrayIterator_append, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, getArrayCopy, getArrayCopy, arginfo_class_ArrayIterator_getArrayCopy, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, count, count, arginfo_class_ArrayIterator_count, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, getFlags, getFlags, arginfo_class_ArrayIterator_getFlags, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, setFlags, setFlags, arginfo_class_ArrayIterator_setFlags, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, asort, asort, arginfo_class_ArrayIterator_asort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, ksort, ksort, arginfo_class_ArrayIterator_ksort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, uasort, uasort, arginfo_class_ArrayIterator_uasort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, uksort, uksort, arginfo_class_ArrayIterator_uksort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, natsort, natsort, arginfo_class_ArrayIterator_natsort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, natcasesort, natcasesort, arginfo_class_ArrayIterator_natcasesort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, unserialize, unserialize, arginfo_class_ArrayIterator_unserialize, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, serialize, serialize, arginfo_class_ArrayIterator_serialize, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, __serialize, __serialize, arginfo_class_ArrayIterator___serialize, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, __unserialize, __unserialize, arginfo_class_ArrayIterator___unserialize, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("offsetExists", zim_ArrayObject_offsetExists, arginfo_class_ArrayIterator_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetGet", zim_ArrayObject_offsetGet, arginfo_class_ArrayIterator_offsetGet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetSet", zim_ArrayObject_offsetSet, arginfo_class_ArrayIterator_offsetSet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetUnset", zim_ArrayObject_offsetUnset, arginfo_class_ArrayIterator_offsetUnset, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("append", zim_ArrayObject_append, arginfo_class_ArrayIterator_append, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getArrayCopy", zim_ArrayObject_getArrayCopy, arginfo_class_ArrayIterator_getArrayCopy, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("count", zim_ArrayObject_count, arginfo_class_ArrayIterator_count, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getFlags", zim_ArrayObject_getFlags, arginfo_class_ArrayIterator_getFlags, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setFlags", zim_ArrayObject_setFlags, arginfo_class_ArrayIterator_setFlags, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("asort", zim_ArrayObject_asort, arginfo_class_ArrayIterator_asort, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("ksort", zim_ArrayObject_ksort, arginfo_class_ArrayIterator_ksort, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("uasort", zim_ArrayObject_uasort, arginfo_class_ArrayIterator_uasort, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("uksort", zim_ArrayObject_uksort, arginfo_class_ArrayIterator_uksort, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("natsort", zim_ArrayObject_natsort, arginfo_class_ArrayIterator_natsort, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("natcasesort", zim_ArrayObject_natcasesort, arginfo_class_ArrayIterator_natcasesort, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("unserialize", zim_ArrayObject_unserialize, arginfo_class_ArrayIterator_unserialize, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("serialize", zim_ArrayObject_serialize, arginfo_class_ArrayIterator_serialize, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("__serialize", zim_ArrayObject___serialize, arginfo_class_ArrayIterator___serialize, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("__unserialize", zim_ArrayObject___unserialize, arginfo_class_ArrayIterator___unserialize, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(ArrayIterator, rewind, arginfo_class_ArrayIterator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayIterator, current, arginfo_class_ArrayIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayIterator, key, arginfo_class_ArrayIterator_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayIterator, next, arginfo_class_ArrayIterator_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayIterator, valid, arginfo_class_ArrayIterator_valid, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayIterator, seek, arginfo_class_ArrayIterator_seek, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, __debugInfo, __debugInfo, arginfo_class_ArrayIterator___debugInfo, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__debugInfo", zim_ArrayObject___debugInfo, arginfo_class_ArrayIterator___debugInfo, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_RecursiveArrayIterator_methods[] = {
 	ZEND_ME(RecursiveArrayIterator, hasChildren, arginfo_class_RecursiveArrayIterator_hasChildren, ZEND_ACC_PUBLIC)
@@ -262,19 +259,19 @@ static zend_class_entry *register_class_ArrayObject(zend_class_entry *class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ArrayObject", class_ArrayObject_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_IteratorAggregate, class_entry_ArrayAccess, class_entry_Serializable, class_entry_Countable);
 
 	zval const_STD_PROP_LIST_value;
 	ZVAL_LONG(&const_STD_PROP_LIST_value, SPL_ARRAY_STD_PROP_LIST);
 	zend_string *const_STD_PROP_LIST_name = zend_string_init_interned("STD_PROP_LIST", sizeof("STD_PROP_LIST") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_STD_PROP_LIST_name, &const_STD_PROP_LIST_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_STD_PROP_LIST_name, &const_STD_PROP_LIST_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_STD_PROP_LIST_name);
 
 	zval const_ARRAY_AS_PROPS_value;
 	ZVAL_LONG(&const_ARRAY_AS_PROPS_value, SPL_ARRAY_ARRAY_AS_PROPS);
 	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", sizeof("ARRAY_AS_PROPS") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ARRAY_AS_PROPS_name);
 
 	return class_entry;
@@ -285,19 +282,19 @@ static zend_class_entry *register_class_ArrayIterator(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ArrayIterator", class_ArrayIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_SeekableIterator, class_entry_ArrayAccess, class_entry_Serializable, class_entry_Countable);
 
 	zval const_STD_PROP_LIST_value;
 	ZVAL_LONG(&const_STD_PROP_LIST_value, SPL_ARRAY_STD_PROP_LIST);
 	zend_string *const_STD_PROP_LIST_name = zend_string_init_interned("STD_PROP_LIST", sizeof("STD_PROP_LIST") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_STD_PROP_LIST_name, &const_STD_PROP_LIST_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_STD_PROP_LIST_name, &const_STD_PROP_LIST_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_STD_PROP_LIST_name);
 
 	zval const_ARRAY_AS_PROPS_value;
 	ZVAL_LONG(&const_ARRAY_AS_PROPS_value, SPL_ARRAY_ARRAY_AS_PROPS);
 	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", sizeof("ARRAY_AS_PROPS") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ARRAY_AS_PROPS_name);
 
 	return class_entry;
@@ -308,13 +305,13 @@ static zend_class_entry *register_class_RecursiveArrayIterator(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveArrayIterator", class_RecursiveArrayIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ArrayIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ArrayIterator, 0);
 	zend_class_implements(class_entry, 1, class_entry_RecursiveIterator);
 
 	zval const_CHILD_ARRAYS_ONLY_value;
 	ZVAL_LONG(&const_CHILD_ARRAYS_ONLY_value, SPL_ARRAY_CHILD_ARRAYS_ONLY);
 	zend_string *const_CHILD_ARRAYS_ONLY_name = zend_string_init_interned("CHILD_ARRAYS_ONLY", sizeof("CHILD_ARRAYS_ONLY") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_CHILD_ARRAYS_ONLY_name, &const_CHILD_ARRAYS_ONLY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_CHILD_ARRAYS_ONLY_name, &const_CHILD_ARRAYS_ONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CHILD_ARRAYS_ONLY_name);
 
 	return class_entry;

@@ -10,6 +10,9 @@ gd
         die("skip test requires GD 2.2.2 or higher");
     }
     if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php

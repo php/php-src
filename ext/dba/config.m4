@@ -1,8 +1,16 @@
+dnl
+dnl PHP_DBA_STD_BEGIN
+dnl
 dnl Suppose we need FlatFile if no support or only CDB is used.
-AC_DEFUN([PHP_DBA_STD_BEGIN],[
-  unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX THIS_RESULT
-])
+dnl
+AC_DEFUN([PHP_DBA_STD_BEGIN],
+  [unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX THIS_RESULT])
 
+dnl
+dnl PHP_TEMP_LDFLAGS(ldflags, libs, action-to-execute)
+dnl
+dnl Save and restore linker flags.
+dnl
 AC_DEFUN([PHP_TEMP_LDFLAGS],[
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="$1 $LDFLAGS"
@@ -13,32 +21,45 @@ AC_DEFUN([PHP_TEMP_LDFLAGS],[
   LIBS=$old_LIBS
 ])
 
-dnl Assign INCLUDE/LFLAGS from PREFIX
+dnl
+dnl PHP_DBA_STD_ASSIGN
+dnl
+dnl Assign INCLUDE/LFLAGS from PREFIX.
+dnl
 AC_DEFUN([PHP_DBA_STD_ASSIGN],[
   if test -n "$THIS_PREFIX" && test "$THIS_PREFIX" != "/usr"; then
     THIS_LFLAGS=$THIS_PREFIX/$PHP_LIBDIR
   fi
 ])
 
-dnl Standard check
+dnl
+dnl PHP_DBA_STD_CHECK
+dnl
+dnl Check if includes and libraries are set.
+dnl
 AC_DEFUN([PHP_DBA_STD_CHECK],[
   THIS_RESULT=yes
-  if test -z "$THIS_INCLUDE"; then
-    AC_MSG_ERROR([DBA: Could not find necessary header file(s).])
-  fi
-  if test -z "$THIS_LIBS"; then
-    AC_MSG_ERROR([DBA: Could not find necessary library.])
-  fi
+  AS_VAR_IF([THIS_INCLUDE],,
+    [AC_MSG_ERROR([DBA: Could not find necessary header file(s).])])
+  AS_VAR_IF([THIS_LIBS],,
+    [AC_MSG_ERROR([DBA: Could not find necessary library.])])
 ])
 
-dnl Attach THIS_x to DBA_x
+dnl
+dnl PHP_DBA_STD_ATTACH
+dnl
+dnl Attach THIS_x to DBA_x.
+dnl
 AC_DEFUN([PHP_DBA_STD_ATTACH],[
-  PHP_ADD_LIBRARY_WITH_PATH($THIS_LIBS, $THIS_LFLAGS, DBA_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH([$THIS_LIBS], [$THIS_LFLAGS], [DBA_SHARED_LIBADD])
   unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX
 ])
 
-dnl Print the result message
-dnl parameters(name [, full name [, empty or error message]])
+dnl
+dnl PHP_DBA_STD_RESULT(name [, full name [, empty or error message]])
+dnl
+dnl Print the result message.
+dnl
 AC_DEFUN([PHP_DBA_STD_RESULT],[
   THIS_NAME=[]translit($1,a-z0-9-,A-Z0-9_)
   if test -n "$2"; then
@@ -48,14 +69,14 @@ AC_DEFUN([PHP_DBA_STD_RESULT],[
   fi
   AC_MSG_CHECKING([for $THIS_FULL_NAME support])
   if test -n "$3"; then
-    AC_MSG_ERROR($3)
+    AC_MSG_ERROR([$3])
   fi
   if test "$THIS_RESULT" = "yes" || test "$THIS_RESULT" = "builtin"; then
     HAVE_DBA=1
     eval HAVE_$THIS_NAME=1
     AC_MSG_RESULT([$THIS_RESULT])
   else
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT([no])
   fi
   unset THIS_RESULT THIS_NAME THIS_FULL_NAME
 ])
@@ -150,9 +171,11 @@ if test "$PHP_QDBM" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in qdbm; do
-      PHP_CHECK_LIBRARY($LIB, dpopen, [
-        AC_DEFINE_UNQUOTED(QDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_QDBM, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [dpopen], [
+        AC_DEFINE_UNQUOTED([QDBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The QDBM handler header file.])
+        AC_DEFINE([DBA_QDBM], [1],
+          [Define to 1 if the dba extension uses the QDBM handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -165,14 +188,15 @@ if test "$PHP_QDBM" != "no"; then
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
-PHP_DBA_STD_RESULT(qdbm)
+PHP_DBA_STD_RESULT([qdbm])
 
 dnl GDBM
 if test "$PHP_GDBM" != "no"; then
   PHP_DBA_STD_BEGIN
-  if test "$HAVE_QDBM" = "1"; then
-    PHP_DBA_STD_RESULT(gdbm, gdbm, [You cannot combine --with-gdbm with --with-qdbm])
-  fi
+  AS_VAR_IF([HAVE_QDBM], [1],
+    [PHP_DBA_STD_RESULT([gdbm],
+      [gdbm],
+      [You cannot combine --with-gdbm with --with-qdbm])])
   for i in $PHP_GDBM /usr/local /usr; do
     if test -f "$i/include/gdbm.h"; then
       THIS_PREFIX=$i
@@ -182,9 +206,11 @@ if test "$PHP_GDBM" != "no"; then
   done
 
   if test -n "$THIS_INCLUDE"; then
-    PHP_CHECK_LIBRARY(gdbm, gdbm_open, [
-      AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-      AC_DEFINE(DBA_GDBM, 1, [ ])
+    PHP_CHECK_LIBRARY([gdbm], [gdbm_open], [
+      AC_DEFINE_UNQUOTED([GDBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
+        [The GDBM handler header file.])
+      AC_DEFINE([DBA_GDBM], [1],
+        [Define to 1 if the dba extension uses the GDBM handler.])
       THIS_LIBS=gdbm
     ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
   fi
@@ -193,7 +219,7 @@ if test "$PHP_GDBM" != "no"; then
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
-PHP_DBA_STD_RESULT(gdbm)
+PHP_DBA_STD_RESULT([gdbm])
 
 dnl NDBM
 if test "$PHP_NDBM" != "no"; then
@@ -212,9 +238,11 @@ if test "$PHP_NDBM" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in ndbm db1 c; do
-      PHP_CHECK_LIBRARY($LIB, dbm_open, [
-        AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_NDBM, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [dbm_open], [
+        AC_DEFINE_UNQUOTED([NDBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The NDBM handler header file.])
+        AC_DEFINE([DBA_NDBM], [1],
+          [Define to 1 if the dba extension uses the NDBM handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -227,86 +255,89 @@ if test "$PHP_NDBM" != "no"; then
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
-PHP_DBA_STD_RESULT(ndbm)
+PHP_DBA_STD_RESULT([ndbm])
 
 dnl TCADB
 if test "$PHP_TCADB" != "no"; then
   PHP_DBA_STD_BEGIN
   for i in $PHP_TCADB /usr/local /usr; do
-	if test -f "$i/include/tcadb.h"; then
-	  THIS_PREFIX=$i
-	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
-	  THIS_INCLUDE=$i/include/tcadb.h
-	  break
-	fi
+  if test -f "$i/include/tcadb.h"; then
+    THIS_PREFIX=$i
+    PHP_ADD_INCLUDE([$THIS_PREFIX/include])
+    THIS_INCLUDE=$i/include/tcadb.h
+    break
+  fi
   done
 
   if test -n "$THIS_INCLUDE"; then
-	for LIB in tokyocabinet; do
-	  PHP_CHECK_LIBRARY($LIB, tcadbopen, [
-		AC_DEFINE_UNQUOTED(TCADB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-		AC_DEFINE(DBA_TCADB, 1, [ ])
-		THIS_LIBS=$LIB
-	  ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
-	  if test -n "$THIS_LIBS"; then
-		break
-	  fi
-	done
+    for LIB in tokyocabinet; do
+      PHP_CHECK_LIBRARY([$LIB], [tcadbopen], [
+        AC_DEFINE_UNQUOTED([TCADB_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The Tokyo Cabinet handler header file.])
+        AC_DEFINE([DBA_TCADB], [1],
+          [Define to 1 if the dba extension uses the Tokyo Cabinet handler.])
+        THIS_LIBS=$LIB
+      ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
+      if test -n "$THIS_LIBS"; then
+        break
+      fi
+    done
   fi
 
   PHP_DBA_STD_ASSIGN
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
-PHP_DBA_STD_RESULT(tcadb)
+PHP_DBA_STD_RESULT([tcadb])
 
 dnl LMDB
 if test "$PHP_LMDB" != "no"; then
   PHP_DBA_STD_BEGIN
   for i in $PHP_LMDB /usr/local /usr; do
-	if test -f "$i/include/lmdb.h"; then
-	  THIS_PREFIX=$i
-	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
-	  THIS_INCLUDE=$i/include/lmdb.h
-	  break
-	fi
+    if test -f "$i/include/lmdb.h"; then
+      THIS_PREFIX=$i
+      PHP_ADD_INCLUDE([$THIS_PREFIX/include])
+      THIS_INCLUDE=$i/include/lmdb.h
+      break
+    fi
   done
 
   if test -n "$THIS_INCLUDE"; then
-	for LIB in lmdb; do
-	  PHP_CHECK_LIBRARY($LIB, mdb_env_open, [
-		AC_DEFINE_UNQUOTED(LMDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-		AC_DEFINE(DBA_LMDB, 1, [ ])
-		THIS_LIBS=$LIB
-	  ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
-	  if test -n "$THIS_LIBS"; then
-		break
-	  fi
-	done
+    for LIB in lmdb; do
+      PHP_CHECK_LIBRARY([$LIB], [mdb_env_open], [
+        AC_DEFINE_UNQUOTED([LMDB_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The LMDB handler header file.])
+        AC_DEFINE([DBA_LMDB], [1],
+          [Define to 1 if the dba extension uses the LMDB handler.])
+        THIS_LIBS=$LIB
+      ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
+      if test -n "$THIS_LIBS"; then
+        break
+      fi
+    done
   fi
 
   PHP_DBA_STD_ASSIGN
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
-PHP_DBA_STD_RESULT(lmdb)
+PHP_DBA_STD_RESULT([lmdb])
 
-dnl Berkeley specific (library and version test)
-dnl parameters(version, library list, function)
+dnl
+dnl PHP_DBA_DB_CHECK(version, library list, function)
+dnl
+dnl Berkeley specific (library and version test).
+dnl
 AC_DEFUN([PHP_DBA_DB_CHECK],[
-  if test -z "$THIS_INCLUDE"; then
-    AC_MSG_ERROR([DBA: Could not find necessary header file(s).])
-  fi
-  for LIB in $2; do
+  AS_VAR_IF([THIS_INCLUDE],,
+    [AC_MSG_ERROR([DBA: Could not find necessary header file(s).])])
+  for LIB in m4_normalize([$2]); do
     if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a || test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
       lib_found="";
-      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$LIB,[
-        AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-#include "$THIS_INCLUDE"
-        ]],[[
-          $3;
-        ]])],[
-          AC_EGREP_CPP(yes,[
+      PHP_TEMP_LDFLAGS([-L$THIS_PREFIX/$PHP_LIBDIR], [-l$LIB],
+        [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include "$THIS_INCLUDE"],
+          [$3;])],
+          [AC_EGREP_CPP([yes], [
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MAJOR == $1 || ($1 == 4 && DB_VERSION_MAJOR == 5)
             yes
@@ -314,53 +345,53 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
           ],[
             THIS_LIBS=$LIB
             lib_found=1
-          ])
-        ],[])
-      ])
+            ])],
+          [])])
       if test -n "$lib_found"; then
         lib_found="";
         break;
       fi
     fi
   done
-  if test -z "$THIS_LIBS"; then
-    AC_MSG_CHECKING([for DB$1 major version])
-    AC_MSG_ERROR([Header contains different version])
-  fi
+
+  AS_VAR_IF([THIS_LIBS],, [AC_MSG_FAILURE(m4_text_wrap([
+    DB$1 major version check failed: header contains different version
+  ]))])
+
   if test "$1" = "4"; then
     AC_MSG_CHECKING([for DB4 minor version and patch level])
-    AC_EGREP_CPP(yes,[
+    AC_EGREP_CPP([yes], [
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR != 1) || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 1 && DB_VERSION_PATCH >= 25)
       yes
 #endif
-    ],[
-      AC_MSG_RESULT(ok)
-    ],[
-      AC_MSG_ERROR([Version 4.1 requires patch level 25])
-    ])
+    ],
+    [AC_MSG_RESULT([ok])],
+    [AC_MSG_ERROR([Version 4.1 requires patch level 25])])
   fi
-  if test "$ext_shared" = "yes"; then
+  AS_VAR_IF([ext_shared], [yes], [
     AC_MSG_CHECKING([if dba can be used as shared extension])
-    AC_EGREP_CPP(yes,[
+    AC_EGREP_CPP([yes], [
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MAJOR > 3 || (DB_VERSION_MAJOR == 3 && DB_VERSION_MINOR > 2)
       yes
 #endif
-    ],[
-      AC_MSG_RESULT(yes)
-    ],[
-      AC_MSG_ERROR([At least version 3.3 is required])
-    ])
-  fi
-  if test -n "$THIS_LIBS"; then
-    AC_DEFINE(DBA_DB$1, 1, [ ])
-    if test -n "$THIS_INCLUDE"; then
-      AC_DEFINE_UNQUOTED(DB$1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-    fi
-  else
-    AC_MSG_ERROR([DBA: Could not find necessary library.])
-  fi
+    ],
+    [AC_MSG_RESULT([yes])],
+    [AC_MSG_ERROR([At least version 3.3 is required])])
+  ])
+
+  AS_VAR_IF([THIS_LIBS],,
+    [AC_MSG_ERROR([DBA: Could not find necessary library.])])
+
+  AC_DEFINE_UNQUOTED([DBA_DB$1], [1],
+    [Define to 1 if the dba extension uses the Berkeley DB version $1 (DB$1)
+    handler.])
+
+  AS_VAR_IF([THIS_INCLUDE],,,
+    [AC_DEFINE_UNQUOTED([DB$1_INCLUDE_FILE], ["$THIS_INCLUDE"],
+      [The DB$1 handler header file.])])
+
   THIS_RESULT=yes
   DB$1_LIBS=$THIS_LIBS
   DB$1_PREFIX=$THIS_PREFIX
@@ -374,7 +405,22 @@ if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
   dbdp4="/usr/local/BerkeleyDB.4."
   dbdp5="/usr/local/BerkeleyDB.5."
-  for i in $PHP_DB4 ${dbdp5}1 ${dbdp5}0 ${dbdp4}8 ${dbdp4}7 ${dbdp4}6 ${dbdp4}5 ${dbdp4}4 ${dbdp4}3 ${dbdp4}2 ${dbdp4}1 ${dbdp}0 /usr/local /usr; do
+  for i in \
+    $PHP_DB4 \
+    ${dbdp5}1 \
+    ${dbdp5}0 \
+    ${dbdp4}8 \
+    ${dbdp4}7 \
+    ${dbdp4}6 \
+    ${dbdp4}5 \
+    ${dbdp4}4 \
+    ${dbdp4}3 \
+    ${dbdp4}2 \
+    ${dbdp4}1 \
+    ${dbdp4}0 \
+    /usr/local \
+    /usr \
+  ; do
     if test -f "$i/db5/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db5/db.h
@@ -429,17 +475,44 @@ if test "$PHP_DB4" != "no"; then
       break
     fi
   done
-  PHP_DBA_DB_CHECK(4, db-5.3 db-5.1 db-5.0 db-4.8 db-4.7 db-4.6 db-4.5 db-4.4 db-4.3 db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
+  PHP_DBA_DB_CHECK([4],
+    [
+      db-5.3
+      db-5.1
+      db-5.0
+      db-4.8
+      db-4.7
+      db-4.6
+      db-4.5
+      db-4.4
+      db-4.3
+      db-4.2
+      db-4.1
+      db-4.0
+      db-4
+      db4
+      db
+    ],
+    [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
 fi
-PHP_DBA_STD_RESULT(db4,Berkeley DB4)
+PHP_DBA_STD_RESULT([db4], [Berkeley DB4])
 
 dnl DB3
 if test "$PHP_DB3" != "no"; then
   PHP_DBA_STD_BEGIN
-  if test "$HAVE_DB4" = "1"; then
-    PHP_DBA_STD_RESULT(db3, Berkeley DB3, [You cannot combine --with-db3 with --with-db4])
-  fi
-  for i in $PHP_DB3 /usr/local/BerkeleyDB.3.3 /usr/local/BerkeleyDB.3.2 /usr/local/BerkeleyDB.3.1 /usr/local/BerkeleyDB.3.0 /usr/local /usr; do
+  AS_VAR_IF([HAVE_DB4], [1],
+    [PHP_DBA_STD_RESULT([db3],
+      [Berkeley DB3],
+      [You cannot combine --with-db3 with --with-db4])])
+  for i in \
+    $PHP_DB3 \
+    /usr/local/BerkeleyDB.3.3 \
+    /usr/local/BerkeleyDB.3.2 \
+    /usr/local/BerkeleyDB.3.1 \
+    /usr/local/BerkeleyDB.3.0 \
+    /usr/local \
+    /usr \
+  ; do
     if test -f "$i/db3/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/db3/db.h
@@ -462,15 +535,19 @@ if test "$PHP_DB3" != "no"; then
       break
     fi
   done
-  PHP_DBA_DB_CHECK(3, db-3.3 db-3.2 db-3.1 db-3.0 db-3 db3 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
+  PHP_DBA_DB_CHECK([3],
+    [db-3.3 db-3.2 db-3.1 db-3.0 db-3 db3 db],
+    [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
 fi
-PHP_DBA_STD_RESULT(db3,Berkeley DB3)
+PHP_DBA_STD_RESULT([db3], [Berkeley DB3])
 
 dnl DB2
 if test "$PHP_DB2" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_DB3" = "1" || test "$HAVE_DB4" = "1"; then
-    PHP_DBA_STD_RESULT(db2, Berkeley DB2, [You cannot combine --with-db2 with --with-db3 or --with-db4])
+    PHP_DBA_STD_RESULT([db2],
+      [Berkeley DB2],
+      [You cannot combine --with-db2 with --with-db3 or --with-db4])
   fi
   for i in $PHP_DB2 $PHP_DB2/BerkeleyDB /usr/BerkeleyDB /usr/local /usr; do
     if test -f "$i/db2/db.h"; then
@@ -495,9 +572,11 @@ if test "$PHP_DB2" != "no"; then
       break
     fi
   done
-  PHP_DBA_DB_CHECK(2, db-2 db2 db,  [(void)db_appinit("", NULL, (DB_ENV*)0, 0)])
+  PHP_DBA_DB_CHECK([2],
+    [db-2 db2 db],
+    [(void)db_appinit("", NULL, (DB_ENV*)0, 0)])
 fi
-PHP_DBA_STD_RESULT(db2, Berkeley DB2)
+PHP_DBA_STD_RESULT([db2], [Berkeley DB2])
 
 dnl DB1
 if test "$PHP_DB1" != "no"; then
@@ -516,15 +595,22 @@ if test "$PHP_DB1" != "no"; then
     THIS_PREFIX=$DB2_PREFIX
   fi
   if test "$HAVE_DB4" = "1" || test "$HAVE_DB3" = "1" || test "$HAVE_DB2" = "1"; then
-    AC_DEFINE_UNQUOTED(DB1_VERSION, "Berkeley DB 1.85 emulation in DB$THIS_VERSION", [ ])
-    for i in db$THIS_VERSION/db_185.h include/db$THIS_VERSION/db_185.h include/db/db_185.h; do
+    AC_DEFINE_UNQUOTED([DB1_VERSION],
+      ["Berkeley DB 1.85 emulation in DB$THIS_VERSION"],
+      [The DB1 handler version information.])
+    for i in \
+      db$THIS_VERSION/db_185.h \
+      include/db$THIS_VERSION/db_185.h \
+      include/db/db_185.h \
+    ; do
       if test -f "$THIS_PREFIX/$i"; then
         THIS_INCLUDE=$THIS_PREFIX/$i
         break
       fi
     done
   else
-    AC_DEFINE_UNQUOTED(DB1_VERSION, "Unknown DB1", [ ])
+    AC_DEFINE([DB1_VERSION], ["Unknown DB1"],
+      [The DB1 handler version information.])
     for i in $PHP_DB1 /usr/local /usr; do
       if test -f "$i/db1/db.h"; then
         THIS_PREFIX=$i
@@ -546,32 +632,31 @@ if test "$PHP_DB1" != "no"; then
   AC_MSG_CHECKING([for DB1 in header])
   AC_MSG_RESULT([$THIS_INCLUDE])
   if test -n "$THIS_INCLUDE"; then
-    PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$THIS_LIBS,[
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-#include "$THIS_INCLUDE"
-      ]],[[
-        DB * dbp = dbopen("", 0, 0, DB_HASH, 0);
-      ]])],[
-        AC_DEFINE_UNQUOTED(DB1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_DB1, 1, [ ])
+    PHP_TEMP_LDFLAGS([-L$THIS_PREFIX/$PHP_LIBDIR], [-l$THIS_LIBS],
+      [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include "$THIS_INCLUDE"],
+        [DB * dbp = dbopen("", 0, 0, DB_HASH, 0);])],
+        [AC_DEFINE_UNQUOTED([DB1_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The DB1 handler header file.])
+        AC_DEFINE([DBA_DB1], [1],
+          [Define to 1 if the dba extension uses the Berkeley DB version 1 (DB1)
+          handler.])
         THIS_RESULT=yes
-      ],[
-        THIS_RESULT=no
-      ])
-    ])
+        ],
+        [THIS_RESULT=no])])
   fi
   PHP_DBA_STD_ASSIGN
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
-PHP_DBA_STD_RESULT(db1, DB1)
+PHP_DBA_STD_RESULT([db1], [DB1])
 
 dnl DBM
 if test "$PHP_DBM" != "no"; then
   PHP_DBA_STD_BEGIN
-  if test "$HAVE_QDBM" = "1"; then
-    PHP_DBA_STD_RESULT(dbm, dbm, [You cannot combine --with-dbm with --with-qdbm])
-  fi
+  AS_VAR_IF([HAVE_QDBM], [1],
+    [PHP_DBA_STD_RESULT([dbm],
+      [dbm],
+      [You cannot combine --with-dbm with --with-qdbm])])
   for i in $PHP_DBM /usr/local /usr; do
     if test -f "$i/include/dbm.h"; then
       THIS_PREFIX=$i
@@ -586,17 +671,21 @@ if test "$PHP_DBM" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in dbm c gdbm; do
-      PHP_CHECK_LIBRARY($LIB, dbminit, [
-        AC_MSG_CHECKING(for DBM using GDBM)
-        AC_DEFINE_UNQUOTED(DBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        if test "$LIB" = "gdbm"; then
-          AC_DEFINE_UNQUOTED(DBM_VERSION, "GDBM", [ ])
-          AC_MSG_RESULT(yes)
-        else
-          AC_DEFINE_UNQUOTED(DBM_VERSION, "DBM", [ ])
-          AC_MSG_RESULT(no)
-        fi
-        AC_DEFINE(DBA_DBM, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [dbminit], [
+        AC_MSG_CHECKING([for DBM using GDBM])
+        AC_DEFINE_UNQUOTED([DBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The DBM handler include file.])
+        AS_VAR_IF([LIB], [gdbm], [
+          AC_DEFINE([DBM_VERSION], ["GDBM"],
+            [The DBM handler version information.])
+          AC_MSG_RESULT([yes])
+        ], [
+          AC_DEFINE([DBM_VERSION], ["DBM"],
+            [The DBM handler version information.])
+          AC_MSG_RESULT([no])
+        ])
+        AC_DEFINE([DBA_DBM], [1],
+          [Define to 1 if the dba extension uses the DBM handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -609,7 +698,7 @@ if test "$PHP_DBM" != "no"; then
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
-PHP_DBA_STD_RESULT(dbm)
+PHP_DBA_STD_RESULT([dbm])
 
 dnl Bundled modules that should be enabled by default if any other option is
 dnl enabled
@@ -639,9 +728,10 @@ PHP_ARG_ENABLE([flatfile],,
 
 dnl CDB
 if test "$PHP_CDB" = "yes"; then
-  AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
-  AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
-  AC_DEFINE(DBA_CDB, 1, [ ])
+  AC_DEFINE([DBA_CDB_BUILTIN], [1],
+    [Define to 1 if the dba extension uses the PHP built-in cdb handler.])
+  AC_DEFINE([DBA_CDB], [1],
+    [Define to 1 if the dba extension uses the cdb handler.])
   cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
   THIS_RESULT="builtin"
 elif test "$PHP_CDB" != "no"; then
@@ -656,9 +746,11 @@ elif test "$PHP_CDB" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in cdb c; do
-      PHP_CHECK_LIBRARY($LIB, cdb_read, [
-        AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_CDB, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [cdb_read], [
+        AC_DEFINE_UNQUOTED([CDB_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The cdb handler header file.])
+        AC_DEFINE([DBA_CDB], [1],
+          [Define to 1 if the dba extension uses the cdb handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -671,40 +763,63 @@ elif test "$PHP_CDB" != "no"; then
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
-PHP_DBA_STD_RESULT(cdb)
+PHP_DBA_STD_RESULT([cdb])
 
 dnl INIFILE
 if test "$PHP_INIFILE" != "no"; then
-  AC_DEFINE(DBA_INIFILE, 1, [ ])
+  AC_DEFINE([DBA_INIFILE], [1],
+    [Define to 1 if the dba extension uses the bundled inifile handler.])
   ini_sources="libinifile/inifile.c"
   THIS_RESULT="builtin"
 fi
-PHP_DBA_STD_RESULT(inifile, [INI File])
+PHP_DBA_STD_RESULT([inifile], [INI File])
 
 dnl FLATFILE
 if test "$PHP_FLATFILE" != "no"; then
-  AC_DEFINE(DBA_FLATFILE, 1, [ ])
+  AC_DEFINE([DBA_FLATFILE], [1],
+    [Define to 1 if the dba extension uses the bundled flatfile handler.])
   flat_sources="libflatfile/flatfile.c"
   THIS_RESULT="builtin"
 fi
-PHP_DBA_STD_RESULT(FlatFile, FlatFile)
+PHP_DBA_STD_RESULT([FlatFile], [FlatFile])
 
 dnl
 dnl Extension setup
 dnl
 AC_MSG_CHECKING([whether to enable DBA interface])
-if test "$HAVE_DBA" = "1"; then
-  if test "$ext_shared" = "yes"; then
-    AC_MSG_RESULT([yes, shared])
-  else
-    AC_MSG_RESULT([yes])
-  fi
-  AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db1.c dba_db2.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c dba_qdbm.c dba_tcadb.c dba_lmdb.c $cdb_sources $flat_sources $ini_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-  PHP_ADD_BUILD_DIR($ext_builddir/libinifile)
-  PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
-  PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
-  PHP_SUBST(DBA_SHARED_LIBADD)
-else
-  AC_MSG_RESULT(no)
-fi
+AS_VAR_IF([HAVE_DBA], [1], [
+  AS_VAR_IF([ext_shared], [yes],
+    [AC_MSG_RESULT([yes, shared])],
+    [AC_MSG_RESULT([yes])])
+
+  AC_DEFINE([HAVE_DBA], [1],
+    [Define to 1 if the PHP extension 'dba' is available.])
+  PHP_NEW_EXTENSION([dba], m4_normalize([
+      dba_cdb.c
+      dba_db1.c
+      dba_db2.c
+      dba_db3.c
+      dba_db4.c
+      dba_dbm.c
+      dba_flatfile.c
+      dba_gdbm.c
+      dba_inifile.c
+      dba_lmdb.c
+      dba_ndbm.c
+      dba_qdbm.c
+      dba_tcadb.c
+      dba.c
+      $cdb_sources
+      $flat_sources
+      $ini_sources
+    ]),
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  PHP_ADD_BUILD_DIR([
+    $ext_builddir/libcdb
+    $ext_builddir/libflatfile
+    $ext_builddir/libinifile
+  ])
+  PHP_SUBST([DBA_SHARED_LIBADD])
+],
+[AC_MSG_RESULT([no])])

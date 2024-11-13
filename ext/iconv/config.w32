@@ -9,15 +9,15 @@ if (PHP_ICONV != "no") {
 
 		EXTENSION("iconv", "iconv.c", PHP_ICONV_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
-		AC_DEFINE("HAVE_ICONV", 1, "Define if iconv extension is enabled");
-		AC_DEFINE("HAVE_LIBICONV", 1, "Define if libiconv is available");
-		AC_DEFINE("ICONV_ALIASED_LIBICONV", 1, "The iconv function is called iconv() in libiconv");
-		AC_DEFINE("PHP_ICONV_IMPL", "\"libiconv\"", "Which iconv implementation to use");
+		AC_DEFINE("HAVE_ICONV", 1, "Define to 1 if the PHP extension 'iconv' is available.");
+		AC_DEFINE("HAVE_LIBICONV", 1, "Define to 1 if you have the 'libiconv' function.");
+		AC_DEFINE("ICONV_ALIASED_LIBICONV", 1, "Define to 1 if 'iconv()' is aliased to 'libiconv()'.");
+		AC_DEFINE("PHP_ICONV_IMPL", "\"libiconv\"", "The iconv implementation.");
 		ADD_FLAG("CFLAGS_ICONV", "/D PHP_ICONV_EXPORTS ");
 		if (!PHP_ICONV_SHARED) {
 			ADD_DEF_FILE("ext\\iconv\\php_iconv.def");
 		}
-		PHP_INSTALL_HEADERS("", "ext/iconv");
+		PHP_INSTALL_HEADERS("ext/iconv", "php_iconv.h");
 	} else {
 		WARNING("iconv support can't be enabled, libraries or headers are missing")
 		PHP_ICONV = "no";

@@ -20,12 +20,17 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "main/php_network.h"
 #include "ext/standard/info.h"
+
+#ifdef PHP_WIN32
+// avoid conflicting declarations of (v)asprintf()
+# define HAVE_ASPRINTF
+#endif
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
@@ -91,7 +96,7 @@ ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
 
 /* constant - can be shared among threads */
-static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
+static const oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 /* Handlers */
 static zend_object_handlers php_snmp_object_handlers;
@@ -184,8 +189,6 @@ static zend_object *php_snmp_object_new(zend_class_entry *class_type) /* {{{ */
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
-
-	intern->zo.handlers = &php_snmp_object_handlers;
 
 	return &intern->zo;
 
@@ -399,7 +402,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	php_snmp_error(getThis(), PHP_SNMP_ERRNO_NOERROR, "");
 
 	if (st & SNMP_CMD_WALK) { /* remember root OID */
-		memmove((char *)root, (char *)(objid_query->vars[0].name), (objid_query->vars[0].name_length) * sizeof(oid));
+		memcpy((char *)root, (char *)(objid_query->vars[0].name), (objid_query->vars[0].name_length) * sizeof(oid));
 		rootlen = objid_query->vars[0].name_length;
 		objid_query->offset = objid_query->count;
 	}
@@ -530,7 +533,7 @@ retry:
 								buf2[0] = '\0';
 								count = rootlen;
 								while(count < vars->name_length){
-									sprintf(buf, "%lu.", vars->name[count]);
+									snprintf(buf, sizeof(buf), "%lu.", vars->name[count]);
 									strcat(buf2, buf);
 									count++;
 								}
@@ -553,7 +556,7 @@ retry:
 							php_snmp_error(getThis(), PHP_SNMP_ERRNO_OID_NOT_INCREASING, "Error: OID not increasing: %s", buf2);
 							keepwalking = false;
 						} else {
-							memmove((char *)(objid_query->vars[0].name), (char *)vars->name, vars->name_length * sizeof(oid));
+							memcpy((char *)(objid_query->vars[0].name), (char *)vars->name, vars->name_length * sizeof(oid));
 							objid_query->vars[0].name_length = vars->name_length;
 							keepwalking = true;
 						}
@@ -670,7 +673,7 @@ static bool php_snmp_parse_oid(
 		objid_query->count++;
 	} else if (oid_ht) { /* we got objid array */
 		if (zend_hash_num_elements(oid_ht) == 0) {
-			zend_value_error("Array of object IDs cannot be empty");
+			zend_value_error("Array of object IDs must not be empty");
 			return false;
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
@@ -767,7 +770,7 @@ static bool php_snmp_parse_oid(
 				return false;
 			}
 		} else {
-			memmove((char *)objid_query->vars[0].name, (char *)objid_mib, sizeof(objid_mib));
+			memmove((char *)objid_query->vars[0].name, (const char *)objid_mib, sizeof(objid_mib));
 			objid_query->vars[0].name_length = sizeof(objid_mib) / sizeof(oid);
 		}
 	} else {
@@ -845,7 +848,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
-#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6) && defined(HAVE_INET_NTOP)
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 		if (force_ipv6 && (*res)->sa_family != AF_INET6) {
 			res++;
 			continue;
@@ -861,12 +864,6 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 			res++;
 			continue;
 		}
-#else
-		if ((*res)->sa_family != AF_INET) {
-			res++;
-			continue;
-		}
-		strcat(pptr, inet_ntoa(((struct sockaddr_in*)(*res))->sin_addr));
 #endif
 		break;
 	}
@@ -881,8 +878,9 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 
 	/* put back non-standard SNMP port */
 	if (remote_port != SNMP_PORT) {
-		pptr = session->peername + strlen(session->peername);
-		sprintf(pptr, ":%d", remote_port);
+		size_t peername_length = strlen(session->peername);
+		pptr = session->peername + peername_length;
+		snprintf(pptr, MAX_NAME_LEN - peername_length, ":%d", remote_port);
 	}
 
 	php_network_freeaddresses(psal);
@@ -2024,6 +2022,7 @@ PHP_MINIT_FUNCTION(snmp)
 	/* Register SNMP Class */
 	php_snmp_ce = register_class_SNMP();
 	php_snmp_ce->create_object = php_snmp_object_new;
+	php_snmp_ce->default_object_handlers = &php_snmp_object_handlers;
 	php_snmp_object_handlers.offset = XtOffsetOf(php_snmp_object, zo);
 	php_snmp_object_handlers.clone_obj = NULL;
 	php_snmp_object_handlers.free_obj = php_snmp_object_free_storage;

@@ -4,36 +4,36 @@ MySQL PDO:query() vs. PDO::prepare() and MySQL error 2050
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 if (MYSQLPDOTest::isPDOMySQLnd())
     die("skip libmysql only test");
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
-    try {
+    $table = 'pdo_mysql_stmt_unbuffered_2050';
 
+    try {
         printf("Native PS...\n");
         $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[004] Unable to turn off emulated prepared statements\n");
 
         printf("Buffered...\n");
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-        $stmt = $db->query('SELECT id, label FROM test WHERE id = 1');
+        $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-        $stmt = $db->query('SELECT id, label FROM test WHERE id = 1');
+        $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
         printf("Unbuffered...\n");
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-        $stmt = $db->query('SELECT id, label FROM test WHERE id = 1');
+        $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         /*
         NOTE - this will cause an error and it OK
@@ -85,23 +85,23 @@ if (MYSQLPDOTest::isPDOMySQLnd())
                 - fix PDO::query() [not the driver, fix PDO itself]
         */
 
-        $stmt = $db->query('SELECT id, label FROM test WHERE id = 1');
+        $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-        $stmt = $db->prepare('SELECT id, label FROM test WHERE id = 1');
+        $stmt = $db->prepare("SELECT id, label FROM {$table} WHERE id = 1");
         $stmt->execute();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-        $stmt = $db->prepare('SELECT id, label FROM test WHERE id = 1');
+        $stmt = $db->prepare("SELECT id, label FROM {$table} WHERE id = 1");
         $stmt->execute();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
         unset($stmt);
-        $stmt = $db->query('SELECT id, label FROM test WHERE id = 1');
+        $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
         unset($stmt);
-        $stmt = $db->query('SELECT id, label FROM test WHERE id = 1');
+        $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
     } catch (PDOException $e) {
@@ -113,8 +113,9 @@ if (MYSQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_unbuffered_2050');
 ?>
 --EXPECTF--
 Native PS...

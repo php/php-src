@@ -421,7 +421,7 @@ typedef struct buf_area buffy;
  *      bep points to the end-of-buffer+1
  * While using this macro, note that the nextb pointer is NOT updated.
  *
- * NOTE: Evaluation of the c argument should not have any side-effects
+ * NOTE: Evaluation of the c argument should not have any side effects
  */
 #define INS_CHAR(c, sp, bep, cc) \
 	{                            \

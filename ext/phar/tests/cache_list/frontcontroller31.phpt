@@ -5,6 +5,10 @@ default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller31.php
 --EXTENSIONS--
 phar
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN')) die('xleak LSan crashes for this test');
+?>
 --ENV--
 SCRIPT_NAME=/frontcontroller31.php
 REQUEST_URI=/frontcontroller31.php

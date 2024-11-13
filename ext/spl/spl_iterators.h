@@ -18,7 +18,6 @@
 #define SPL_ITERATORS_H
 
 #include "php.h"
-#include "php_spl.h"
 
 extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
 extern PHPAPI zend_class_entry *spl_ce_CachingIterator;
@@ -114,6 +113,6 @@ typedef enum {
 
 typedef int (*spl_iterator_apply_func_t)(zend_object_iterator *iter, void *puser);
 
-PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser);
+PHPAPI zend_result spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser);
 
 #endif /* SPL_ITERATORS_H */

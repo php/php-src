@@ -12,7 +12,7 @@ if (version_compare(MB_ONIGURUMA_VERSION, '6.9.3') < 0) {
 ?>
 --FILE--
 <?php
-function mb_trim( $string, $chars = "", $chars_array = array() )
+function mb_trim_regex( $string, $chars = "", $chars_array = array() )
 {
     for( $x=0; $x<iconv_strlen( $chars ); $x++ ) $chars_array[] = preg_quote( iconv_substr( $chars, $x, 1 ) );
     $encoded_char_list = implode( "|", array_merge( array( "\s","\t","\n","\r", "\0", "\x0B" ), $chars_array ) );
@@ -23,7 +23,7 @@ function mb_trim( $string, $chars = "", $chars_array = array() )
 }
 
 ini_set('mbstring.regex_stack_limit', 10000);
-var_dump(mb_trim(str_repeat(' ', 10000)));
+var_dump(mb_trim_regex(str_repeat(' ', 10000)));
 
 echo 'OK';
 ?>

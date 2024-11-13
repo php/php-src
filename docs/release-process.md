@@ -6,10 +6,9 @@ repository available according to the release schedule.
 The release schedule for each version is published on the
 [PHP wiki](https://wiki.php.net):
 
+- [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
 - [PHP 8.1](https://wiki.php.net/todo/php81)
-- [PHP 8.0](https://wiki.php.net/todo/php80)
-- [PHP 7.4](https://wiki.php.net/todo/php74)
 
 The PHP project publishes builds every two weeks.
 
@@ -55,9 +54,8 @@ releases.
 
 3. Ensure that the relevant tests on CI are green.
 
-   - https://travis-ci.com/github/php/php-src
-   - https://dev.azure.com/phpazuredevops/PHP/
    - https://cirrus-ci.com/github/php/php-src
+   - https://github.com/php/php-src/actions
 
    > 💡 **Tip** \
    > We recommend checking the build status a couple of days before packaging day
@@ -240,7 +238,18 @@ slightly different steps. We'll call attention where the steps differ.
    git tag -s -u YOURKEYID php-X.Y.ZRCn -m "Tag for php-X.Y.ZRCn"
    ```
 
-9. 🔷 **For post-GA releases only,** switch back to the *version branch* for
+9. 🔸 **For pre-GA releases only,** switch back to the `master` (for alphas and betas),
+   or `PHP-X.Y` (for RCs), and update a `NEWS` for the new version. See
+   [Update NEWS for PHP 8.2.0 alpha2][] and [Update NEWS for PHP 8.2.0RC6][] for a real example.
+
+   Commit the changes to the `master` (or `PHP-X.Y`) branch.
+
+   ```shell
+   git add -p
+   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.Z alpha2"
+   ```
+
+   🔷 **For post-GA releases only,** switch back to the *version branch* for
    your release (e.g., `PHP-8.2`) and bump the version numbers in
    `main/php_version.h`, `Zend/zend.h`, `configure.ac` and `NEWS`. This prepares
    the version branch for the next version.
@@ -321,7 +330,7 @@ slightly different steps. We'll call attention where the steps differ.
 15. Now the tarballs and signatures may be found at
     `https://downloads.php.net/~yourname/`, e.g. https://downloads.php.net/~derick/.
 
-16. Once the release is tagged, contact the release-managers@ distribution
+16. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -425,7 +434,6 @@ slightly different steps. We'll call attention where the steps differ.
    * `internals@lists.php.net`
    * `php-general@lists.php.net`
    * `php-qa@lists.php.net`
-   * `primary-qa-tester@lists.php.net`
 
    In the announcement message, point out the location of the release and the
    possible release date of either the next RC or the final release. Also
@@ -463,7 +471,8 @@ slightly different steps. We'll call attention where the steps differ.
 
    > 💬 **Hint** \
    > You should have created this branch when packaging the non-stable release
-   > candidate for this version.
+   > candidate for this version. If it is for a PHP-X.Y.0 version, then just
+   > create and push this branch.
 
 2. If a CVE commit needs to be merged to the release, have it committed to
    the base branches and [merged upwards as usual][] (e.g. commit the CVE fix
@@ -604,7 +613,7 @@ slightly different steps. We'll call attention where the steps differ.
     git fetch --all
     git pull --rebase upstream master
     cd ..
-    git commit distributions
+    git commit distributions -m "X.Y.Z tarballs"
     git push upstream master
     ```
 
@@ -616,7 +625,7 @@ slightly different steps. We'll call attention where the steps differ.
     > will be available from `https://www.php.net/distributions/php-X.Y.Z.tar.gz`,
     > etc.
 
-15. Once the release is tagged, contact the release-managers@ distribution
+15. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -643,7 +652,9 @@ slightly different steps. We'll call attention where the steps differ.
 
 ## Announcing a stable release
 
-1. Switch to your local clone of `web-php` and add the information for the
+1. This steps applies only for releases after PHP-X.Y.0.
+
+   Switch to your local clone of `web-php` and add the information for the
    previous release to `include/releases.inc`.
 
    For example, if you are preparing to announce version 8.2.2, then the
@@ -663,17 +674,18 @@ slightly different steps. We'll call attention where the steps differ.
    > for the previous release from `include/version.inc` into
    > `include/releases.inc`.
 
-2. Update the version information for the new release in `include/version.inc`.
+3. Update the version information for the new release in `include/version.inc`.
 
    Find the part of the `$data` array that is related to your version (e.g.,
-   `$data['8.2']` for 8.2.x releases), and make the following edits:
+   `$data['8.2']` for 8.2.x releases) or create a new section if releasing
+   PHP-X.Y.0 version, and make the following edits / additions:
 
    * Set `version` to the full version number (e.g. '8.2.1')
    * Set `date` to the release date in `j M Y` format (e.g. '5 Jan 2021')
    * Update the `tags` array to include `'security'` if this is a security release
-   * Update the `sha256` array with the hashes for each of the release tarballs
+   * Set the `sha256` array with the hashes for each of the release tarballs
 
-3. Create the release file and news entry for the new version.
+5. Create the release file and news entry for the new version.
 
    ```shell
    ./bin/createReleaseEntry -v X.Y.Z -r # --security for security releases
@@ -686,13 +698,21 @@ slightly different steps. We'll call attention where the steps differ.
    Within these files, it will generate standard messages for the new version.
    You may edit the generated files to expand on the base message, if needed.
 
-4. Update the ChangeLog file for the given major version (e.g., `ChangeLog-8.php`).
+   The edits are necessary for PHP-X.Y.0 version where the format is different.
+   See for example [PHP-8.2 announcement](https://github.com/php/web-php/commit/c966868202caafa880213055f4e3e97c0483119b)
+
+7. Update the ChangeLog file for the given major version (e.g., `ChangeLog-8.php`).
+
+   If PHP-X.Y.0 is released, modify the `ChangeLog-X.php` (where `X` is the major
+   version) file manually first. The `$MINOR_VERSIONS` field needs to be extended
+   with the new version and initial anchor (e.g. `<a id="PHP_8_4"></a>` if added
+   for PHP 8.4) added above the first anchor of the previous version.
 
    ```shell
    ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'ChangeLog-X.php'
    ```
 
-5. Review all the changes in `web-php`, commit, and push them.
+9. Review all the changes in `web-php`, commit, and push them.
 
    ```shell
    git add -p
@@ -703,7 +723,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    See [Announce PHP 8.1.6][] for an example commit.
 
-6. Switch to your local clone of the `web-qa` repository and update the
+10. Switch to your local clone of the `web-qa` repository and update the
    information in the `$QA_RELEASES` array in `include/release-qa.php`.
 
    The array probably contains information about the RC released two weeks ago
@@ -723,7 +743,7 @@ slightly different steps. We'll call attention where the steps differ.
    git push upstream master
    ```
 
-7. 🚨 **Before sending announcement emails, check to make sure the websites have
+11. 🚨 **Before sending announcement emails, check to make sure the websites have
    synced.**
 
    * Make sure the tarballs are available from, e.g.,
@@ -740,10 +760,10 @@ slightly different steps. We'll call attention where the steps differ.
 
    Keep in mind it may take up to an hour for the websites to sync.
 
-8. Please note down the sha256 and the PGP signature (.asc). These *must* be
+11. Please note down the sha256 and the PGP signature (.asc). These *must* be
    included in the release mail.
 
-9. Send *separate* announcement emails to:
+12. Send *separate* announcement emails to:
 
    * `php-announce@lists.php.net`
    * `php-general@lists.php.net`
@@ -767,10 +787,10 @@ slightly different steps. We'll call attention where the steps differ.
    > want their email client to automatically send the reply to each list, as
    > often occurs.
 
-10. Coordinate with the social media team (i.e., Derick) to post a tweet with
-    the release announcement and link to the news entry on php.net.
-    ([@official_php](https://twitter.com/official_php))
-
+13. Coordinate with the social media team (i.e., Derick) to
+    [create a PR request](https://github.com/derickr/toot-together/blob/main/toots/README.md)
+    for posting the release announcement to Mastodon. Posts need to be
+    approved.
 
 ## Re-releasing the same version or a patch-level (i.e., `-plN`)
 
@@ -905,6 +925,36 @@ feature development that cannot go into the new version.
    there is only a single section about PHP X.Y.0, instead of individual
    sections for each pre-release.
 
+   All the changes that are already present in the previous version NEWS should be
+   removed. It means all bug fixes that went to the previous version as well should
+   have their entries removed. It is possible to use `grep` to compare the changes.
+   For example if `82/NEWS` is NEWS for PHP 8.2 and `83/NEWS` is NEWS file for PHP 8.3,
+   then following command will show changes present in both files:
+
+   ```sh
+   grep -Fxf 82/NEWS 83/NEWS
+   ```
+
+
+5. On the announcement day for the initial stable version (or shortly before),
+   update the `Expires` field in the <https://www.php.net/.well-known/security.txt>
+   file. The `Expires` field should be set to the expected date of the next X.Y.0
+   release (following the one currently being prepared), which is usually the
+   fourth Thursday of November in the next year.
+
+   Following the recommendation of [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116),
+   we maintain an `Expires` time of about a year for our security policies. This
+   provides security researchers with confidence they are using our most
+   up-to-date reporting policies.
+
+   The `security.txt` file is located in the [web-php repository](https://github.com/php/web-php)
+   under the `.well-known/` directory. We may make changes to this file at other
+   times, as needed, but we will always advance the `Expires` timestamp on a
+   yearly cadence, coinciding with our X.Y.0 releases.
+
+   Please see the instructions for
+   [making changes to security.txt][security-txt].
+
 
 ## Prime the selection of release managers for the next version
 
@@ -931,12 +981,42 @@ volunteers to begin the selection process for the next release managers.
 
 ## New release manager checklist
 
-1. Email systems@php.net to get setup for access to downloads.php.net and to be
-   added to the release-managers@ distribution list.
+1. Request membership to the
+   [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-2. Request membership to the release managers group on GitHub.
+2. Subscribe to the php-announce@lists.php.net mailing list by emailing
+   php-announce+subscribe@lists.php.net
 
-3. Create a [GPG key][] for your @php.net address.
+3. Email systems@php.net to get setup for access to downloads.php.net, to be
+   added to the release-managers@php.net distribution list, and to be added to
+   the moderators for php-announce@lists.php.net so you are able to moderate
+   your release announcements.
+
+   Provide the following information in a single email:
+
+   - Preferred Unix username (will also become part of location to download RCs,
+     such as `https://downloads.php.net/~derick/`).
+   - An SSH public key, preferably a new unique one for PHP systems and
+     projects.
+   - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
+     up access to downloads.php.net through jump hosts, and provide a
+     `.google_authenticator` file for 2FA.
+   - Your @php.net email address to use for the release-managers@php.net
+     distribution list and php-announce@lists.php.net moderator address. This
+     should preferably not forward to a Gmail address.
+   - Your GitHub account name, so that your membership to the release managers
+     group may be approved.
+
+   A system admin will then contact you to go through with steps 5 through 8 of
+   [2FA setup instructions](https://wiki.php.net/systems#fa_setup_instructions).
+
+   > 💬 **Hint** \
+   > To send email from your @php.net address, you will need to use a custom
+   > SMTP server. If you use Gmail, you may
+   > "[Send emails from a different address or alias][]."
+
+
+4. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -960,7 +1040,7 @@ volunteers to begin the selection process for the next release managers.
    public key to a keyserver:
 
    ```shell
-   gpg --keyserver pgp.mit.edu --send-keys YOURKEYID
+   gpg --keyserver keys.openpgp.org --send-keys YOURKEYID
    gpg --keyserver keyserver.ubuntu.com --send-keys YOURKEYID
    ```
 
@@ -987,25 +1067,19 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-4. Request moderation access to php-announce@lists.php.net and
-   primary-qa-tester@lists.php.net lists, so you are able to moderate your
-   release announcements. All the announcements should be sent from your
-   @php.net address.
+   `web-php-distributions` is a submodule of `web-php`. You'll now have to update
+   the commit reference to reflect the change made in web-php-distributions.
 
-   > 💬 **Hint** \
-   > To send email from your @php.net address, you will need to use a custom
-   > SMTP server. If you use Gmail, you may
-   > "[Send emails from a different address or alias][]."
-
-   > 💡 **Tip** \
-   > Make sure that you are set as a moderator for
-   > `primary-qa-tester@lists.php.net` by having someone (Hannes, Dan, Derick)
-   > run the following commands for you:
-   >
-   > ```shell
-   > ssh lists.php.net
-   > sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester mod moderator-email-address
-   > ```
+   ```shell
+   cd /path/to/repos/php/web-php
+   git submodule update
+   cd distributions           # This is the submodule referring to web-php-distributions
+   git pull origin master
+   cd ..
+   git add distributions
+   git commit --gpg-sign=YOURKEYID -m "Update php-keyring.gpg in distributions"
+   git push
+   ```
 
 5. Make sure you have the following repositories cloned locally:
 
@@ -1022,6 +1096,8 @@ volunteers to begin the selection process for the next release managers.
 [Update versions for PHP 8.1.6RC1]: https://github.com/php/php-src/commit/40e8ced23898e3069340ca03ea5febc5361015ad
 [Update NEWS for PHP 8.1.6RC1]: https://github.com/php/php-src/commit/a4fdeaebe419b88e3b4a1f5aba845c2d4e81fd4e
 [Prepare for PHP 8.1.0RC1]: https://github.com/php/php-src/commit/5764414eb8900ae98020a3c20693f4fb793efa99
+[Update NEWS for PHP 8.2.0 alpha2]: https://github.com/php/php-src/commit/418f7211f71658d79d934861be20f277db96fe2c
+[Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
 [Bump for 8.1.8-dev]: https://github.com/php/php-src/commit/3b6ee1eb19c14c3339ebfcf5c967065a9f828971
 [GitHub command line tool]: https://cli.github.com
 [Announce 8.1.0RC3]: https://github.com/php/web-qa/commit/f264b711fd3827803b79bbb342959eae57ea502b
@@ -1041,3 +1117,4 @@ volunteers to begin the selection process for the next release managers.
 [Generating a new GPG key]: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 [sign your GPG key]: https://carouth.com/articles/signing-pgp-keys/
 [Send emails from a different address or alias]: https://support.google.com/mail/answer/22370?hl=en
+[security-txt]: https://github.com/php/policies/blob/main/security-policies.rst#making-changes-to-securitytxt

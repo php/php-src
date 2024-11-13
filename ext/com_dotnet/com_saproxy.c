@@ -22,7 +22,7 @@
  * */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -56,6 +56,14 @@ typedef struct {
 } php_com_saproxy_iter;
 
 #define SA_FETCH(zv)			(php_com_saproxy*)Z_OBJ_P(zv)
+
+zend_object *php_com_saproxy_create_object(zend_class_entry *class_type)
+{
+	php_com_saproxy *intern = emalloc(sizeof(*intern));
+	memset(intern, 0, sizeof(*intern));
+	zend_object_std_init(&intern->std, class_type);
+	return &intern->std;
+}
 
 static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, int ndims)
 {
@@ -317,7 +325,7 @@ static zend_function *saproxy_method_get(zend_object **object, zend_string *name
 
 static zend_function *saproxy_constructor_get(zend_object *object)
 {
-	/* user cannot instantiate */
+	zend_throw_error(NULL, "Cannot directly construct com_safeproxy_array; it is for internal usage only");
 	return NULL;
 }
 
@@ -365,7 +373,9 @@ static void saproxy_free_storage(zend_object *object)
 //???		}
 //???	}
 
-	OBJ_RELEASE(&proxy->obj->zo);
+	if (proxy->obj != NULL) {
+		OBJ_RELEASE(&proxy->obj->zo);
+	}
 
 	zend_object_std_dtor(object);
 
@@ -440,7 +450,6 @@ void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *inde
 	ZVAL_DUP(&proxy->indices[proxy->dimensions-1], index);
 
 	zend_object_std_init(&proxy->std, php_com_saproxy_class_entry);
-	proxy->std.handlers = &php_com_saproxy_handlers;
 	ZVAL_OBJ(proxy_out, &proxy->std);
 }
 
@@ -456,7 +465,7 @@ static void saproxy_iter_dtor(zend_object_iterator *iter)
 	efree(I);
 }
 
-static int saproxy_iter_valid(zend_object_iterator *iter)
+static zend_result saproxy_iter_valid(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 

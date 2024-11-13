@@ -44,10 +44,10 @@
 
 const php_stream_ops php_stream_generic_socket_ops;
 PHPAPI const php_stream_ops php_stream_socket_ops;
-const php_stream_ops php_stream_udp_socket_ops;
+static const php_stream_ops php_stream_udp_socket_ops;
 #ifdef AF_UNIX
-const php_stream_ops php_stream_unix_socket_ops;
-const php_stream_ops php_stream_unixdg_socket_ops;
+static const php_stream_ops php_stream_unix_socket_ops;
+static const php_stream_ops php_stream_unixdg_socket_ops;
 #endif
 
 
@@ -120,10 +120,10 @@ retry:
 	return didwrite;
 }
 
-static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock)
+static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock, bool has_buffered_data)
 {
 	int retval;
-	struct timeval *ptimeout;
+	struct timeval *ptimeout, zero_timeout;
 
 	if (!sock || sock->socket == -1) {
 		return;
@@ -131,10 +131,16 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 
 	sock->timeout_event = 0;
 
-	if (sock->timeout.tv_sec == -1)
+	if (has_buffered_data) {
+		/* If there is already buffered data, use no timeout. */
+		zero_timeout.tv_sec = 0;
+		zero_timeout.tv_usec = 0;
+		ptimeout = &zero_timeout;
+	} else if (sock->timeout.tv_sec == -1) {
 		ptimeout = NULL;
-	else
+	} else {
 		ptimeout = &sock->timeout;
+	}
 
 	while(1) {
 		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
@@ -153,21 +159,37 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	ssize_t nr_bytes = 0;
-	int err;
 
 	if (!sock || sock->socket == -1) {
 		return -1;
 	}
 
+	int recv_flags = 0;
+	/* Special handling for blocking read. */
 	if (sock->is_blocked) {
-		php_sock_stream_wait_for_data(stream, sock);
-		if (sock->timeout_event)
-			return -1;
+		/* Find out if there is any data buffered from the previous read. */
+		bool has_buffered_data = stream->has_buffered_data;
+		/* No need to wait if there is any data buffered or no timeout. */
+		bool dont_wait = has_buffered_data ||
+				(sock->timeout.tv_sec == 0 && sock->timeout.tv_usec == 0);
+		/* Set MSG_DONTWAIT if no wait is needed or there is unlimited timeout which was
+		 * added by fix for #41984 committed in 9343c5404. */
+		if (dont_wait || sock->timeout.tv_sec != -1) {
+			recv_flags = MSG_DONTWAIT;
+		}
+		/* If the wait is needed or it is a platform without MSG_DONTWAIT support (e.g. Windows),
+		 * then poll for data. */
+		if (!dont_wait || MSG_DONTWAIT == 0) {
+			php_sock_stream_wait_for_data(stream, sock, has_buffered_data);
+			if (sock->timeout_event) {
+				/* It is ok to timeout if there is any data buffered so return 0, otherwise -1. */
+				return has_buffered_data ? 0 : -1;
+			}
+		}
 	}
 
-	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
-	err = php_socket_errno();
+	ssize_t nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), recv_flags);
+	int err = php_socket_errno();
 
 	if (nr_bytes < 0) {
 		if (PHP_IS_TRANSIENT_ERROR(err)) {
@@ -351,13 +373,17 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 #else
 					ssize_t ret;
 #endif
-					int err;
 
 					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT);
-					err = php_socket_errno();
-					if (0 == ret || /* the counterpart did properly shutdown*/
-						(0 > ret && err != EWOULDBLOCK && err != EAGAIN && err != EMSGSIZE)) { /* there was an unrecoverable error */
+					if (0 == ret) {
+						/* the counterpart did properly shutdown */
 						alive = 0;
+					} else if (0 > ret) {
+						int err = php_socket_errno();
+						if (err != EWOULDBLOCK && err != EMSGSIZE && err != EAGAIN) {
+							/* there was an unrecoverable error */
+							alive = 0;
+						}
 					}
 				}
 				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
@@ -524,7 +550,7 @@ const php_stream_ops php_stream_socket_ops = {
 	php_tcp_sockop_set_option,
 };
 
-const php_stream_ops php_stream_udp_socket_ops = {
+static const php_stream_ops php_stream_udp_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"udp_socket",
@@ -535,7 +561,7 @@ const php_stream_ops php_stream_udp_socket_ops = {
 };
 
 #ifdef AF_UNIX
-const php_stream_ops php_stream_unix_socket_ops = {
+static const php_stream_ops php_stream_unix_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"unix_socket",
@@ -544,7 +570,7 @@ const php_stream_ops php_stream_unix_socket_ops = {
 	php_sockop_stat,
 	php_tcp_sockop_set_option,
 };
-const php_stream_ops php_stream_unixdg_socket_ops = {
+static const php_stream_ops php_stream_unixdg_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"udg_socket",
@@ -564,18 +590,23 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 	memset(unix_addr, 0, sizeof(*unix_addr));
 	unix_addr->sun_family = AF_UNIX;
 
+	/* Abstract namespace does not need to be NUL-terminated, while path-based
+	 * sockets should be. */
+	bool is_abstract_ns = xparam->inputs.namelen > 0 && xparam->inputs.name[0] == '\0';
+	unsigned long max_length = is_abstract_ns ? sizeof(unix_addr->sun_path) : sizeof(unix_addr->sun_path) - 1;
+
 	/* we need to be binary safe on systems that support an abstract
 	 * namespace */
-	if (xparam->inputs.namelen >= sizeof(unix_addr->sun_path)) {
+	if (xparam->inputs.namelen > max_length) {
 		/* On linux, when the path begins with a NUL byte we are
 		 * referring to an abstract namespace.  In theory we should
 		 * allow an extra byte below, since we don't need the NULL.
 		 * BUT, to get into this branch of code, the name is too long,
 		 * so we don't care. */
-		xparam->inputs.namelen = sizeof(unix_addr->sun_path) - 1;
+		xparam->inputs.namelen = max_length;
 		php_error_docref(NULL, E_NOTICE,
 			"socket path exceeded the maximum allowed length of %lu bytes "
-			"and was truncated", (unsigned long)sizeof(unix_addr->sun_path));
+			"and was truncated", max_length);
 	}
 
 	memcpy(unix_addr->sun_path, xparam->inputs.name, xparam->inputs.namelen);
@@ -942,10 +973,6 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	if (stream == NULL)	{
 		pefree(sock, persistent_id ? 1 : 0);
 		return NULL;
-	}
-
-	if (flags == 0) {
-		return stream;
 	}
 
 	return stream;

@@ -5,6 +5,9 @@ gd
 --SKIPIF--
 <?php
     if (!function_exists('imagepolygon')) die('skip imagepolygon() not available');
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php

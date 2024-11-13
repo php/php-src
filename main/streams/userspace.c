@@ -24,13 +24,14 @@
 #endif
 #include <stddef.h>
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 # ifdef PHP_WIN32
 #  include <sys/utime.h>
 # else
 #  include <utime.h>
 # endif
 #endif
+#include "userspace_arginfo.h"
 
 static int le_protocols;
 
@@ -82,35 +83,8 @@ PHP_MINIT_FUNCTION(user_streams)
 	if (le_protocols == FAILURE)
 		return FAILURE;
 
-	REGISTER_LONG_CONSTANT("STREAM_USE_PATH", 			USE_PATH, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_IGNORE_URL", 		IGNORE_URL, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_REPORT_ERRORS", 		REPORT_ERRORS, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_MUST_SEEK", 			STREAM_MUST_SEEK, CONST_CS|CONST_PERSISTENT);
+	register_userspace_symbols(module_number);
 
-	REGISTER_LONG_CONSTANT("STREAM_URL_STAT_LINK", 		PHP_STREAM_URL_STAT_LINK,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_URL_STAT_QUIET", 	PHP_STREAM_URL_STAT_QUIET,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_MKDIR_RECURSIVE",	PHP_STREAM_MKDIR_RECURSIVE,		CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_IS_URL",	PHP_STREAM_IS_URL,		CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_OPTION_BLOCKING",	PHP_STREAM_OPTION_BLOCKING,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_OPTION_READ_TIMEOUT",	PHP_STREAM_OPTION_READ_TIMEOUT,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_OPTION_READ_BUFFER",	PHP_STREAM_OPTION_READ_BUFFER,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_OPTION_WRITE_BUFFER",	PHP_STREAM_OPTION_WRITE_BUFFER,		CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_BUFFER_NONE",		PHP_STREAM_BUFFER_NONE,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_BUFFER_LINE",		PHP_STREAM_BUFFER_LINE,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_BUFFER_FULL",		PHP_STREAM_BUFFER_FULL,			CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_CAST_AS_STREAM",		PHP_STREAM_AS_STDIO,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_CAST_FOR_SELECT",	PHP_STREAM_AS_FD_FOR_SELECT,		CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_META_TOUCH",			PHP_STREAM_META_TOUCH,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_OWNER",			PHP_STREAM_META_OWNER,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_OWNER_NAME",	PHP_STREAM_META_OWNER_NAME,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_GROUP",			PHP_STREAM_META_GROUP,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_GROUP_NAME",	PHP_STREAM_META_GROUP_NAME,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_ACCESS",		PHP_STREAM_META_ACCESS,			CONST_CS|CONST_PERSISTENT);
 	return SUCCESS;
 }
 
@@ -503,7 +477,6 @@ PHP_FUNCTION(stream_wrapper_register)
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
 	uwrap->wrapper.is_url = ((flags & PHP_STREAM_IS_URL) != 0);
-	uwrap->resource = NULL;
 
 	rsrc = zend_register_resource(uwrap, le_protocols);
 
@@ -825,7 +798,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 
 /* parse the return value from one of the stat functions and store the
  * relevant fields into the statbuf provided */
-static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
+static void statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 {
 	zval *elem;
 
@@ -843,7 +816,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 	STAT_PROP_ENTRY(nlink);
 	STAT_PROP_ENTRY(uid);
 	STAT_PROP_ENTRY(gid);
-#if HAVE_STRUCT_STAT_ST_RDEV
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 	STAT_PROP_ENTRY(rdev);
 #endif
 	STAT_PROP_ENTRY(size);
@@ -859,7 +832,6 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 
 #undef STAT_PROP_ENTRY
 #undef STAT_PROP_ENTRY_EX
-	return SUCCESS;
 }
 
 static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
@@ -875,8 +847,8 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
 	call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) == IS_ARRAY) {
-		if (SUCCESS == statbuf_from_array(&retval, ssb))
-			ret = 0;
+		statbuf_from_array(&retval, ssb);
+		ret = 0;
 	} else {
 		if (call_result == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_STAT " is not implemented!",
@@ -1314,8 +1286,8 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) == IS_ARRAY) {
 		/* We got the info we needed */
-		if (SUCCESS == statbuf_from_array(&zretval, ssb))
-			ret = 0;
+		statbuf_from_array(&zretval, ssb);
+		ret = 0;
 	} else {
 		if (call_result == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_STATURL " is not implemented!",
@@ -1355,6 +1327,7 @@ static ssize_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t co
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
 		convert_to_string(&retval);
 		PHP_STRLCPY(ent->d_name, Z_STRVAL(retval), sizeof(ent->d_name), Z_STRLEN(retval));
+		ent->d_type = DT_UNKNOWN;
 
 		didread = sizeof(php_stream_dirent);
 	} else if (call_result == FAILURE) {
@@ -1416,6 +1389,8 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	php_stream * intstream = NULL;
 	int call_result;
 	int ret = FAILURE;
+	/* If we are checking if the stream can cast, no return pointer is provided, so do not emit errors */
+	bool report_errors = retptr;
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_CAST, sizeof(USERSTREAM_CAST)-1);
 
@@ -1432,8 +1407,10 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 
 	do {
 		if (call_result == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " is not implemented!",
-					ZSTR_VAL(us->wrapper->ce->name));
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " is not implemented!",
+						ZSTR_VAL(us->wrapper->ce->name));
+			}
 			break;
 		}
 		if (!zend_is_true(&retval)) {
@@ -1441,13 +1418,17 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 		}
 		php_stream_from_zval_no_verify(intstream, &retval);
 		if (!intstream) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must return a stream resource",
-					ZSTR_VAL(us->wrapper->ce->name));
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must return a stream resource",
+						ZSTR_VAL(us->wrapper->ce->name));
+			}
 			break;
 		}
 		if (intstream == stream) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must not return itself",
-					ZSTR_VAL(us->wrapper->ce->name));
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must not return itself",
+						ZSTR_VAL(us->wrapper->ce->name));
+			}
 			intstream = NULL;
 			break;
 		}

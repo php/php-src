@@ -5,6 +5,7 @@ gd
 --SKIPIF--
 <?php
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstream not yet fixed');
+if (!(imagetypes() & IMG_BMP)) die('skip BMP support required');
 ?>
 --FILE--
 <?php

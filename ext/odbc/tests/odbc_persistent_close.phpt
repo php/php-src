@@ -5,6 +5,10 @@ odbc
 --SKIPIF--
 <?php
 
+if (getenv('SKIP_ASAN')) {
+    die('skip libmsodbcsql leaks, see https://github.com/php/php-src/pull/12132#issuecomment-1710392299.');
+}
+
 include 'skipif.inc';
 
 // The test can affect multiple drivers, but testing it is driver-specific.

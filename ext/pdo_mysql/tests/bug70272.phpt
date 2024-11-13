@@ -4,21 +4,19 @@ Bug #70272 (Segfault in pdo_mysql)
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
---INI--
-report_memleaks=off
 --FILE--
 <?php
-$a = new Stdclass();
+$a = new stdClass();
 $a->a = &$a;
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
-$dummy = new StdClass();
+$dummy = new stdClass();
 
-$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
-$dummy = NULL;
+$db = MySQLPDOTest::factory();
+$dummy = null;
 
 $a->c = $db;
 $a->b = $db->prepare("select 1");

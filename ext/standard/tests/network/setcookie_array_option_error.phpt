@@ -57,6 +57,7 @@ if (PHP_INT_SIZE == 8) {
 }
 
 var_dump(headers_list());
+?>
 --EXPECTHEADERS--
 
 --EXPECTF--

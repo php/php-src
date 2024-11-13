@@ -175,22 +175,10 @@ The PHP-FPM CGI daemon will work well with most popular webservers, including Ap
 .PD 1
 .P
 .SH SEE ALSO
-The PHP-FPM website:
+For a more or less complete description of PHP-FPM look here:
 .PD 0
 .P
-.B http://php-fpm.org
-.PD 1
-.P
-For a more or less complete description of PHP look here:
-.PD 0
-.P
-.B http://www.php.net/manual/
-.PD 1
-.P
-A nice introduction to PHP by Stig Bakken can be found here:
-.PD 0
-.P
-.B http://www.zend.com/zend/art/intro.php
+.B https://www.php.net/fpm
 .PD 1
 .SH BUGS
 You can view the list of known bugs or report any new bug you
@@ -207,7 +195,7 @@ The PHP Group: Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam 
 A List of active developers can be found here:
 .PD 0
 .P
-.B http://www.php.net/credits.php
+.B https://www.php.net/credits.php
 .PD 1
 .P
 And last but not least PHP was developed with the help of a huge amount of

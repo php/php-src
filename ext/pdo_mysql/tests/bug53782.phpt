@@ -1,19 +1,16 @@
 --TEST--
 PDO MySQL Bug #53782 (foreach throws irrelevant exception)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$conn = PDOTest::test_factory(__DIR__ . '/common.phpt');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$conn = MySQLPDOTest::factory();
 
 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -30,11 +27,6 @@ foreach ($res as $k => $v) {
 }
 
 echo "DONE";
-?>
---CLEAN--
-<?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Caught: SQLSTATE[42000]: %s

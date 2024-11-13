@@ -20,7 +20,7 @@
 #include "fopen_wrappers.h"
 #include "file.h"
 #include "php_dir.h"
-#include "php_string.h"
+#include "php_dir_int.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
 #include "dir_arginfo.h"
@@ -33,15 +33,6 @@
 
 #ifdef PHP_WIN32
 #include "win32/readdir.h"
-#endif
-
-
-#ifdef HAVE_GLOB
-#ifndef PHP_WIN32
-#include <glob.h>
-#else
-#include "win32/glob.h"
-#endif
 #endif
 
 typedef struct {
@@ -57,9 +48,16 @@ php_dir_globals dir_globals;
 #endif
 
 static zend_class_entry *dir_class_entry_ptr;
+static zend_object_handlers dir_class_object_handlers;
 
 #define Z_DIRECTORY_PATH_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
 #define Z_DIRECTORY_HANDLE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+
+static zend_function *dir_class_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct Directory, use dir() instead");
+	return NULL;
+}
 
 #define FETCH_DIRP() \
 	myself = getThis(); \
@@ -115,79 +113,25 @@ PHP_RINIT_FUNCTION(dir)
 
 PHP_MINIT_FUNCTION(dir)
 {
-	static char dirsep_str[2], pathsep_str[2];
+	dirsep_str[0] = DEFAULT_SLASH;
+	dirsep_str[1] = '\0';
+
+	pathsep_str[0] = ZEND_PATHS_SEPARATOR;
+	pathsep_str[1] = '\0';
+
+	register_dir_symbols(module_number);
 
 	dir_class_entry_ptr = register_class_Directory();
+	dir_class_entry_ptr->default_object_handlers = &dir_class_object_handlers;
+
+	memcpy(&dir_class_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	dir_class_object_handlers.get_constructor = dir_class_get_constructor;
+	dir_class_object_handlers.clone_obj = NULL;
+	dir_class_object_handlers.compare = zend_objects_not_comparable;
 
 #ifdef ZTS
 	ts_allocate_id(&dir_globals_id, sizeof(php_dir_globals), NULL, NULL);
 #endif
-
-	dirsep_str[0] = DEFAULT_SLASH;
-	dirsep_str[1] = '\0';
-	REGISTER_STRING_CONSTANT("DIRECTORY_SEPARATOR", dirsep_str, CONST_CS|CONST_PERSISTENT);
-
-	pathsep_str[0] = ZEND_PATHS_SEPARATOR;
-	pathsep_str[1] = '\0';
-	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("SCANDIR_SORT_ASCENDING",  PHP_SCANDIR_SORT_ASCENDING,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SCANDIR_SORT_DESCENDING", PHP_SCANDIR_SORT_DESCENDING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SCANDIR_SORT_NONE",       PHP_SCANDIR_SORT_NONE,       CONST_CS | CONST_PERSISTENT);
-
-#ifdef HAVE_GLOB
-
-#ifdef GLOB_BRACE
-	REGISTER_LONG_CONSTANT("GLOB_BRACE", GLOB_BRACE, CONST_CS | CONST_PERSISTENT);
-#else
-# define GLOB_BRACE 0
-#endif
-
-#ifdef GLOB_MARK
-	REGISTER_LONG_CONSTANT("GLOB_MARK", GLOB_MARK, CONST_CS | CONST_PERSISTENT);
-#else
-# define GLOB_MARK 0
-#endif
-
-#ifdef GLOB_NOSORT
-	REGISTER_LONG_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_CS | CONST_PERSISTENT);
-#else
-# define GLOB_NOSORT 0
-#endif
-
-#ifdef GLOB_NOCHECK
-	REGISTER_LONG_CONSTANT("GLOB_NOCHECK", GLOB_NOCHECK, CONST_CS | CONST_PERSISTENT);
-#else
-# define GLOB_NOCHECK 0
-#endif
-
-#ifdef GLOB_NOESCAPE
-	REGISTER_LONG_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_CS | CONST_PERSISTENT);
-#else
-# define GLOB_NOESCAPE 0
-#endif
-
-#ifdef GLOB_ERR
-	REGISTER_LONG_CONSTANT("GLOB_ERR", GLOB_ERR, CONST_CS | CONST_PERSISTENT);
-#else
-# define GLOB_ERR 0
-#endif
-
-#ifndef GLOB_ONLYDIR
-# define GLOB_ONLYDIR (1<<30)
-# define GLOB_EMULATE_ONLYDIR
-# define GLOB_FLAGMASK (~GLOB_ONLYDIR)
-#else
-# define GLOB_FLAGMASK (~0)
-#endif
-
-/* This is used for checking validity of passed flags (passing invalid flags causes segfault in glob()!! */
-#define GLOB_AVAILABLE_FLAGS (0 | GLOB_BRACE | GLOB_MARK | GLOB_NOSORT | GLOB_NOCHECK | GLOB_NOESCAPE | GLOB_ERR | GLOB_ONLYDIR)
-
-	REGISTER_LONG_CONSTANT("GLOB_ONLYDIR", GLOB_ONLYDIR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GLOB_AVAILABLE_FLAGS", GLOB_AVAILABLE_FLAGS, CONST_CS | CONST_PERSISTENT);
-
-#endif /* HAVE_GLOB */
 
 	return SUCCESS;
 }
@@ -536,7 +480,7 @@ PHP_FUNCTION(scandir)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (dirn_len < 1) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

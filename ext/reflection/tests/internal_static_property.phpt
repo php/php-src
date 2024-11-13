@@ -6,7 +6,7 @@ zend_test
 <?php
 
 $rp = new ReflectionProperty('_ZendTestClass', '_StaticProp');
-$rp->setValue(42);
+$rp->setValue(new _ZendTestClass(), 42);
 var_dump($rp->getValue());
 
 ?>

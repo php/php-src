@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<data>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="xincluded.xml" parse="xml"/>
+</data>

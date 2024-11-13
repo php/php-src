@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.2.17-dev"
+#define ZEND_VERSION "4.5.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -183,6 +183,8 @@ struct _zend_class_entry {
 	zend_function *__serialize;
 	zend_function *__unserialize;
 
+	const zend_object_handlers *default_object_handlers;
+
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
 	zend_class_iterator_funcs *iterator_funcs_ptr;
 	/* allocated only if class implements ArrayAccess interface */
@@ -202,6 +204,8 @@ struct _zend_class_entry {
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
+	uint32_t num_hooked_props;
+	uint32_t num_hooked_prop_variance_checks;
 
 	/* class_entry or string(s) depending on ZEND_ACC_LINKED */
 	union {
@@ -217,12 +221,13 @@ struct _zend_class_entry {
 	uint32_t enum_backing_type;
 	HashTable *backed_enum_table;
 
+	zend_string *doc_comment;
+
 	union {
 		struct {
 			zend_string *filename;
 			uint32_t line_start;
 			uint32_t line_end;
-			zend_string *doc_comment;
 		} user;
 		struct {
 			const struct _zend_function_entry *builtin_functions;
@@ -230,6 +235,11 @@ struct _zend_class_entry {
 		} internal;
 	} info;
 };
+
+typedef union {
+	zend_max_align_t align;
+	uint64_t opaque[5];
+} zend_random_bytes_insecure_state;
 
 typedef struct _zend_utility_functions {
 	void (*error_function)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -245,6 +255,8 @@ typedef struct _zend_utility_functions {
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
 	char *(*getenv_function)(const char *name, size_t name_len);
 	zend_string *(*resolve_path_function)(zend_string *filename);
+	zend_result (*random_bytes_function)(void *bytes, size_t size, char *errstr, size_t errstr_size);
+	void (*random_bytes_insecure_function)(zend_random_bytes_insecure_state *state, void *bytes, size_t size);
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
@@ -277,6 +289,7 @@ void zend_shutdown(void);
 void zend_register_standard_ini_entries(void);
 zend_result zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
+void zend_unload_modules(void);
 
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno);
 ZEND_API size_t zend_get_page_size(void);
@@ -328,7 +341,22 @@ extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PT
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(zend_string *filename, zend_string **opened_path);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
+
+/* Called by the VM in certain places like at the loop header, user function
+ * entry, and after internal function calls, if EG(vm_interrupt) has been set.
+ *
+ * If this is used to switch the EG(current_execute_data), such as implementing
+ * a coroutine scheduler, then it needs to check the top frame to see if it's
+ * an internal function. If an internal function is on top, then the frame
+ * shouldn't be switched away.
+ *
+ * Prior to PHP 8.0, this check was not necessary. In PHP 8.0,
+ * zend_call_function started calling zend_interrupt_function, and in 8.4 the
+ * DO_*CALL* opcodes started calling the zend_interrupt_function while the
+ * internal frame is still on top.
+ */
 extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
+
 extern ZEND_API void (*zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
@@ -336,13 +364,24 @@ extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
+/* Generate 'size' random bytes into 'bytes' with the OS CSPRNG. */
+extern ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(
+		void *bytes, size_t size, char *errstr, size_t errstr_size);
+/* Generate 'size' random bytes into 'bytes' with a general purpose PRNG (not
+ * crypto safe). 'state' must be zeroed before the first call and can be reused.
+ */
+extern ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(
+		zend_random_bytes_insecure_state *state, void *bytes, size_t size);
 
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
 
+extern ZEND_API void (*zend_accel_schedule_restart_hook)(int reason);
+
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...);
 /* For custom format specifiers like H */
 ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...);
 /* If filename is NULL the default filename is used. */
@@ -355,6 +394,8 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+/* type should be one of the BP_VAR_* constants, only special messages happen for isset/empty and unset */
+ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *container, const zval *offset, int type);
 
 ZEND_COLD void zenderror(const char *error);
 

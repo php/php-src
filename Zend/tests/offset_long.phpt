@@ -25,30 +25,30 @@ var_dump($long[$arr]);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 Done

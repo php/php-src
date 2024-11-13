@@ -4,8 +4,9 @@ GH-10908 (Bus error with PDO Firebird on RPI with 64 bit kernel and 32 bit userl
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
+--XLEAK--
+A bug in firebird causes a memory leak when calling `isc_attach_database()`.
+See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 
@@ -28,6 +29,7 @@ CREATE TABLE gh10908(
   MYBOOL BOOLEAN
 );
 EOT;
+$dbh = getDbConnection();
 $dbh->exec($sql);
 $dbh->exec("INSERT INTO gh10908 VALUES(1, 'ABC', 12.34, 1.0, 2.0, '2023-03-24 17:39', '2023-03-24', '17:39', 'abcdefg', 32767, 200000, 'azertyuiop', false);");
 
@@ -56,7 +58,9 @@ echo "Did not crash\n";
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE gh10908");
+$dbh = getDbConnection();
+@$dbh->exec("DROP TABLE gh10908");
+unset($dbh);
 ?>
 --EXPECT--
 Array

@@ -8,6 +8,7 @@ var_dump(parse_ini_string("
 2M[]=2
 "));
 
+?>
 --EXPECT--
 array(2) {
   [1]=>

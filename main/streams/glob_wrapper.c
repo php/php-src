@@ -150,6 +150,7 @@ static ssize_t php_glob_stream_read(php_stream *stream, char *buf, size_t count)
 			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[index], pglob->flags & GLOB_APPEND, &path);
 			++pglob->index;
 			PHP_STRLCPY(ent->d_name, path, sizeof(ent->d_name), strlen(path));
+			ent->d_type = DT_UNKNOWN;
 			return sizeof(php_stream_dirent);
 		}
 		pglob->index = glob_result_count;
@@ -225,7 +226,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 		}
 	}
 
-	pglob = ecalloc(sizeof(*pglob), 1);
+	pglob = ecalloc(1, sizeof(*pglob));
 
 	if (0 != (ret = glob(path, pglob->flags & GLOB_FLAGMASK, NULL, &pglob->glob))) {
 #ifdef GLOB_NOMATCH

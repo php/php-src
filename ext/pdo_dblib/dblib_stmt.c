@@ -22,8 +22,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
@@ -41,7 +41,7 @@ static char *pdo_dblib_get_field_name(int type)
 	 * (example: varchar is reported as char by dbprtype)
 	 *
 	 * FIX ME: Cache datatypes from server systypes table in pdo_dblib_handle_factory()
-	 * 		   to make this future proof.
+	 * 		   to make this future-proof.
 	 */
 
 	switch (type) {
@@ -243,7 +243,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 			len = snprintf(buf, sizeof(buf), "computed%d", S->computed_column_name_count);
 			col->name = zend_string_init(buf, len, 0);
 		} else {
-			col->name = zend_string_init("computed", strlen("computed"), 0);
+			col->name = ZSTR_INIT_LITERAL("computed", 0);
 		}
 
 		S->computed_column_name_count++;

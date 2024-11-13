@@ -57,9 +57,9 @@ static bool will_rejoin(
 	return 0;
 }
 
-static bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
+static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const zend_ssa *ssa, int from, int to, int var) /* {{{ */
 {
-	zend_basic_block *from_block, *to_block;
+	const zend_basic_block *from_block, *to_block;
 	int other_successor;
 
 	if (!DFG_ISSET(dfg->in, dfg->size, to, var)) {
@@ -142,7 +142,7 @@ static void pi_range(
 	constraint->range.underflow = underflow;
 	constraint->range.overflow = overflow;
 	constraint->negative = negative ? NEG_INIT : NEG_NONE;
-	phi->has_range_constraint = 1;
+	phi->has_range_constraint = true;
 }
 /* }}} */
 
@@ -160,7 +160,7 @@ static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
 }
 
 static void pi_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
-	phi->has_range_constraint = 0;
+	phi->has_range_constraint = false;
 	phi->constraint.type.ce = NULL;
 	phi->constraint.type.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
 	phi->constraint.type.type_mask |= type_mask;
@@ -607,7 +607,7 @@ add_op1_def:
 			}
 			break;
 		case ZEND_ASSIGN_OBJ_REF:
-			if (opline->op1_type == IS_CV) {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
 				ssa_ops[k].op1_def = ssa_vars_count;
 				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
 				ssa_vars_count++;
@@ -679,6 +679,7 @@ add_op1_def:
 		case ZEND_POST_DEC:
 		case ZEND_BIND_GLOBAL:
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_VAR_NO_REF_EX:
 		case ZEND_SEND_VAR_EX:
@@ -765,6 +766,35 @@ add_op1_def:
 				//NEW_SSA_VAR(opline->op1.var)
 			}
 			break;
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3: {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
+				ssa_ops[k].op1_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op1.var)
+			}
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
+				ssa_ops[k].op2_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op2.var)
+			}
+			if (opline->opcode == ZEND_FRAMELESS_ICALL_3) {
+				next = opline + 1;
+				if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+					//USE_SSA_VAR(op_array->last_var + next->op1.var);
+					if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
+						ssa_ops[k + 1].op1_def = ssa_vars_count;
+						var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
+						ssa_vars_count++;
+						//NEW_SSA_VAR(next->op1.var)
+					}
+				}
+			}
+		}
 		default:
 			break;
 	}

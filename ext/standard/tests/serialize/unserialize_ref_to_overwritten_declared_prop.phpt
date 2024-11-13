@@ -8,5 +8,5 @@ STR;
 var_dump(unserialize($str));
 ?>
 --EXPECTF--
-Notice: unserialize(): Error at offset 36 of 52 bytes in %s on line %d
+Warning: unserialize(): Error at offset 36 of 52 bytes in %s on line %d
 bool(false)

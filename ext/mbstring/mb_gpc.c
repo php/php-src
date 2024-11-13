@@ -17,20 +17,12 @@
 
 /* {{{ includes */
 #include "php.h"
-#include "php_ini.h"
 #include "php_variables.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
 #include "mbstring.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/php_mail.h"
 #include "ext/standard/url.h"
-#include "main/php_output.h"
-#include "ext/standard/info.h"
 
 #include "php_globals.h"
-#include "rfc1867.h"
-#include "php_content_types.h"
-#include "SAPI.h"
 #include "TSRM.h"
 
 #include "mb_gpc.h"
@@ -177,7 +169,6 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	size_t n, num = 1, *len_list = NULL;
 	size_t new_val_len;
 	const mbfl_encoding *from_encoding = NULL;
-	mbfl_encoding_detector *identd = NULL;
 
 	if (!res || *res == '\0') {
 		goto out;
@@ -222,8 +213,9 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
 	}
 
-	if (ZEND_SIZE_T_GT_ZEND_LONG(n, (PG(max_input_vars) * 2))) {
-		php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+	zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
+	if (ZEND_SIZE_T_GT_ZEND_LONG(n, max_input_vars * 2)) {
+		php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", max_input_vars);
 		goto out;
 	}
 
@@ -235,23 +227,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	} else if (info->num_from_encodings == 1) {
 		from_encoding = info->from_encodings[0];
 	} else {
-		/* auto detect */
-		from_encoding = NULL;
-		identd = mbfl_encoding_detector_new(info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
-		if (identd != NULL) {
-			n = 0;
-			while (n < num) {
-				mbfl_string string;
-				string.val = (unsigned char *)val_list[n];
-				string.len = len_list[n];
-				if (mbfl_encoding_detector_feed(identd, &string)) {
-					break;
-				}
-				n++;
-			}
-			from_encoding = mbfl_encoding_detector_judge(identd);
-			mbfl_encoding_detector_delete(identd);
-		}
+		from_encoding = mb_guess_encoding_for_strings((const unsigned char**)val_list, len_list, num, info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection), false);
 		if (!from_encoding) {
 			if (info->report_errors) {
 				php_error_docref(NULL, E_WARNING, "Unable to detect encoding");

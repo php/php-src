@@ -4,11 +4,11 @@ mysqli_stmt_bind_param() - binding variable twice
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     function bind_twice($link, $engine, $sql_type1, $sql_type2, $bind_type1, $bind_type2, $bind_value1, $bind_value2, $offset) {
 
@@ -121,7 +121,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

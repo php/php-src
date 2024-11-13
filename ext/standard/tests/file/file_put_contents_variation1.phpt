@@ -21,9 +21,13 @@ file_put_contents($filename, $data);
 echo filesize($filename)."\n";
 readfile($filename);
 echo "\n";
+
+
+?>
+--CLEAN--
+<?php
+$filename = "FilePutContentsVar1.tmp";
 unlink($filename);
-
-
 ?>
 --EXPECT--
 *** Testing file_put_contents() : variation ***

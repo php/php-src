@@ -4,11 +4,11 @@ Bug #73949 (leak in mysqli_fetch_object)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 
 class cc{
     function __construct($c=null){

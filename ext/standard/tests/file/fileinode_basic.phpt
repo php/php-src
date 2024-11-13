@@ -17,6 +17,7 @@ print( fileinode(".") )."\n";
 print( fileinode("./..") )."\n";
 
 echo "\n*** Done ***";
+?>
 --CLEAN--
 <?php
 unlink (__DIR__."/inode.tmp");

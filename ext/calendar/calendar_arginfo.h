@@ -74,7 +74,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_unixtojd, 0, 0, MAY_BE_LONG|MAY_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(cal_days_in_month);
 ZEND_FUNCTION(cal_from_jd);
 ZEND_FUNCTION(cal_info);
@@ -93,7 +92,6 @@ ZEND_FUNCTION(jdtounix);
 ZEND_FUNCTION(jewishtojd);
 ZEND_FUNCTION(juliantojd);
 ZEND_FUNCTION(unixtojd);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(cal_days_in_month, arginfo_cal_days_in_month)

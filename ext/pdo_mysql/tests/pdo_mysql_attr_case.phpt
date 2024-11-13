@@ -4,23 +4,24 @@ PDO::ATTR_CASE
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-    MySQLPDOTest::createTestTable($db);
+
+    $table = 'pdo_mysql_attr_case';
+    MySQLPDOTest::createTestTable($table, $db);
 
     $default =  $db->getAttribute(PDO::ATTR_CASE);
-    $known = array(
+    $known = [
         PDO::CASE_LOWER => 'PDO::CASE_LOWER',
         PDO::CASE_UPPER => 'PDO::CASE_UPPER',
         PDO::CASE_NATURAL => 'PDO::CASE_NATURAL'
-    );
+    ];
     if (!isset($known[$default]))
         printf("[001] getAttribute(PDO::ATTR_CASE) returns unknown value '%s'\n",
             var_export($default, true));
@@ -28,7 +29,7 @@ $db = MySQLPDOTest::factory();
         var_dump($known[$default]);
 
     // lets see what the default is...
-    if (!is_object($stmt = $db->query("SELECT id, id AS 'ID_UPPER', label FROM test ORDER BY id ASC LIMIT 2")))
+    if (!is_object($stmt = $db->query("SELECT id, id AS 'ID_UPPER', label FROM {$table} ORDER BY id ASC LIMIT 2")))
         printf("[002] %s - %s\n",
             var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
@@ -42,15 +43,15 @@ $db = MySQLPDOTest::factory();
         printf("[004] getAttribute(PDO::ATTR_CASE) returns wrong value '%s'\n",
             var_export($tmp, true));
 
-    if (true === $db->exec('ALTER TABLE test ADD MiXeD CHAR(1)'))
+    if (true === $db->exec("ALTER TABLE {$table} ADD MiXeD CHAR(1)"))
         printf("[005] Cannot add column %s - %s\n",
             var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
-    if (false === $db->exec('ALTER TABLE test ADD MYUPPER CHAR(1)'))
+    if (false === $db->exec("ALTER TABLE {$table} ADD MYUPPER CHAR(1)"))
         printf("[006] Cannot add column %s - %s\n",
             var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
-    if (!is_object($stmt = $db->query("SELECT id, id AS 'ID_UPPER', label, MiXeD, MYUPPER FROM test ORDER BY id ASC LIMIT 2")))
+    if (!is_object($stmt = $db->query("SELECT id, id AS 'ID_UPPER', label, MiXeD, MYUPPER FROM {$table} ORDER BY id ASC LIMIT 2")))
         printf("[007] %s - %s\n",
             var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
@@ -64,7 +65,7 @@ $db = MySQLPDOTest::factory();
         printf("[009] getAttribute(PDO::ATTR_CASE) returns wrong value '%s'\n",
             var_export($tmp, true));
 
-    if (!is_object($stmt = $db->query("SELECT id, label, MiXeD, MYUPPER, MYUPPER AS 'lower' FROM test ORDER BY id ASC LIMIT 1")))
+    if (!is_object($stmt = $db->query("SELECT id, label, MiXeD, MYUPPER, MYUPPER AS 'lower' FROM {$table} ORDER BY id ASC LIMIT 1")))
         printf("[010] %s - %s\n",
             var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
@@ -78,7 +79,7 @@ $db = MySQLPDOTest::factory();
         printf("[012] getAttribute(PDO::ATTR_CASE) returns wrong value '%s'\n",
             var_export($tmp, true));
 
-    if (!is_object($stmt = $db->query("SELECT id, label, MiXeD, MYUPPER, id AS 'ID' FROM test ORDER BY id ASC LIMIT 1")))
+    if (!is_object($stmt = $db->query("SELECT id, label, MiXeD, MYUPPER, id AS 'ID' FROM {$table} ORDER BY id ASC LIMIT 1")))
         printf("[013] %s - %s\n",
             var_export($db->errorInfo(), true), var_export($db->errorCode(), true));
 
@@ -88,8 +89,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS pdo_mysql_attr_case');
 ?>
 --EXPECT--
 string(15) "PDO::CASE_LOWER"

@@ -7,6 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip.. only for Windows');
 }
+?>
 --FILE--
 <?php
 $workDir = "touchVar5.tmp";

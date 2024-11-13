@@ -26,9 +26,17 @@ $u = unserialize($s);
 var_dump($i, str_replace(chr(0), '!', $s), $u);
 ?>
 --EXPECTF--
-object(I)#1 (11) {
+object(I)#%d (%d) {
+  ["var1":"I":private]=>
+  int(1)
+  ["var2":"I":private]=>
+  int(2)
+  ["var3":protected]=>
+  int(3)
+  ["var4":protected]=>
+  int(4)
   ["start"]=>
-  object(DateTimeImmutable)#5 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "2023-03-03 16:24:00.000000"
     ["timezone_type"]=>
@@ -39,7 +47,7 @@ object(I)#1 (11) {
   ["current"]=>
   NULL
   ["end"]=>
-  object(DateTimeImmutable)#6 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "2023-03-09 16:24:00.000000"
     ["timezone_type"]=>
@@ -48,7 +56,7 @@ object(I)#1 (11) {
     string(3) "UTC"
   }
   ["interval"]=>
-  object(DateInterval)#7 (10) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -76,19 +84,19 @@ object(I)#1 (11) {
   bool(true)
   ["include_end_date"]=>
   bool(false)
-  ["var1":"I":private]=>
-  int(1)
-  ["var2":"I":private]=>
-  int(2)
-  ["var3":protected]=>
-  int(3)
-  ["var4":protected]=>
-  int(4)
 }
 string(631) "O:1:"I":11:{s:5:"start";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"2023-03-03 16:24:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:3:"UTC";}s:7:"current";N;s:3:"end";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"2023-03-09 16:24:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:3:"UTC";}s:8:"interval";O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:1;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;}s:11:"recurrences";i:1;s:18:"include_start_date";b:1;s:16:"include_end_date";b:0;s:7:"!I!var1";i:1;s:7:"!I!var2";i:2;s:7:"!*!var3";i:3;s:7:"!*!var4";i:4;}"
-object(I)#2 (11) {
+object(I)#%d (%d) {
+  ["var1":"I":private]=>
+  int(1)
+  ["var2":"I":private]=>
+  int(2)
+  ["var3":protected]=>
+  int(3)
+  ["var4":protected]=>
+  int(4)
   ["start"]=>
-  object(DateTimeImmutable)#9 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "2023-03-03 16:24:00.000000"
     ["timezone_type"]=>
@@ -99,7 +107,7 @@ object(I)#2 (11) {
   ["current"]=>
   NULL
   ["end"]=>
-  object(DateTimeImmutable)#10 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "2023-03-09 16:24:00.000000"
     ["timezone_type"]=>
@@ -108,7 +116,7 @@ object(I)#2 (11) {
     string(3) "UTC"
   }
   ["interval"]=>
-  object(DateInterval)#11 (10) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -136,12 +144,4 @@ object(I)#2 (11) {
   bool(true)
   ["include_end_date"]=>
   bool(false)
-  ["var1":"I":private]=>
-  int(1)
-  ["var2":"I":private]=>
-  int(2)
-  ["var3":protected]=>
-  int(3)
-  ["var4":protected]=>
-  int(4)
 }

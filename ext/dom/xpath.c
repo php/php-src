@@ -16,12 +16,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "namespace_compat.h"
+#include "private_data.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -32,233 +34,153 @@
 
 #ifdef LIBXML_XPATH_ENABLED
 
-static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
+void dom_xpath_objects_free_storage(zend_object *object)
 {
-	zval retval;
-	int result, i;
-	int error = 0;
-	zend_fcall_info fci;
-	xmlXPathObjectPtr obj;
-	char *str;
-	zend_string *callable = NULL;
-	dom_xpath_object *intern;
+	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
 
+	zend_object_std_dtor(&intern->dom.std);
 
-	if (! zend_is_executing()) {
+	if (intern->dom.ptr != NULL) {
+		xmlXPathFreeContext((xmlXPathContextPtr) intern->dom.ptr);
+		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
+	}
+
+	php_dom_xpath_callbacks_dtor(&intern->xpath_callbacks);
+}
+
+HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n)
+{
+	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
+	return php_dom_xpath_callbacks_get_gc_for_whole_object(&intern->xpath_callbacks, object, table, n);
+}
+
+static void dom_xpath_proxy_factory(xmlNodePtr node, zval *child, dom_object *intern, xmlXPathParserContextPtr ctxt)
+{
+	ZEND_IGNORE_VALUE(ctxt);
+
+	ZEND_ASSERT(node->type != XML_NAMESPACE_DECL);
+
+	php_dom_create_object(node, child, intern);
+}
+
+static dom_xpath_object *dom_xpath_ext_fetch_intern(xmlXPathParserContextPtr ctxt)
+{
+	if (UNEXPECTED(!zend_is_executing())) {
 		xmlGenericError(xmlGenericErrorContext,
 		"xmlExtFunctionTest: Function called from outside of PHP\n");
-		error = 1;
+		return NULL;
+	}
+
+	dom_xpath_object *intern = (dom_xpath_object *) ctxt->context->userData;
+	if (UNEXPECTED(intern == NULL)) {
+		xmlGenericError(xmlGenericErrorContext,
+		"xmlExtFunctionTest: failed to get the internal object\n");
+		return NULL;
+	}
+
+	return intern;
+}
+
+static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_dom_xpath_nodeset_evaluation_mode evaluation_mode) /* {{{ */
+{
+	dom_xpath_object *intern = dom_xpath_ext_fetch_intern(ctxt);
+	if (!intern) {
+		php_dom_xpath_callbacks_clean_argument_stack(ctxt, nargs);
 	} else {
-		intern = (dom_xpath_object *) ctxt->context->userData;
-		if (intern == NULL) {
-			xmlGenericError(xmlGenericErrorContext,
-			"xmlExtFunctionTest: failed to get the internal object\n");
-			error = 1;
-		}
-		else if (intern->registerPhpFunctions == 0) {
-			xmlGenericError(xmlGenericErrorContext,
-			"xmlExtFunctionTest: PHP Object did not register PHP functions\n");
-			error = 1;
-		}
-	}
-
-	if (error == 1) {
-		for (i = nargs - 1; i >= 0; i--) {
-			obj = valuePop(ctxt);
-			xmlXPathFreeObject(obj);
-		}
-		return;
-	}
-
-	if (UNEXPECTED(nargs == 0)) {
-		zend_throw_error(NULL, "Function name must be passed as the first argument");
-		return;
-	}
-
-	fci.param_count = nargs - 1;
-	if (fci.param_count > 0) {
-		fci.params = safe_emalloc(fci.param_count, sizeof(zval), 0);
-	}
-	/* Reverse order to pop values off ctxt stack */
-	for (i = fci.param_count - 1; i >= 0; i--) {
-		obj = valuePop(ctxt);
-		switch (obj->type) {
-			case XPATH_STRING:
-				ZVAL_STRING(&fci.params[i],  (char *)obj->stringval);
-				break;
-			case XPATH_BOOLEAN:
-				ZVAL_BOOL(&fci.params[i],  obj->boolval);
-				break;
-			case XPATH_NUMBER:
-				ZVAL_DOUBLE(&fci.params[i], obj->floatval);
-				break;
-			case XPATH_NODESET:
-				if (type == 1) {
-					str = (char *)xmlXPathCastToString(obj);
-					ZVAL_STRING(&fci.params[i], str);
-					xmlFree(str);
-				} else if (type == 2) {
-					int j;
-					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
-						array_init(&fci.params[i]);
-						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
-							xmlNodePtr node = obj->nodesetval->nodeTab[j];
-							zval child;
-							/* not sure, if we need this... it's copied from xpath.c */
-							if (node->type == XML_NAMESPACE_DECL) {
-								xmlNodePtr nsparent = node->_private;
-								xmlNsPtr original = (xmlNsPtr) node;
-
-								/* Make sure parent dom object exists, so we can take an extra reference. */
-								zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
-								php_dom_create_object(nsparent, &parent_zval, &intern->dom);
-								dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
-
-								node = php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
-							} else {
-								php_dom_create_object(node, &child, &intern->dom);
-							}
-							add_next_index_zval(&fci.params[i], &child);
-						}
-					} else {
-						ZVAL_EMPTY_ARRAY(&fci.params[i]);
-					}
-				}
-				break;
-			default:
-			ZVAL_STRING(&fci.params[i], (char *)xmlXPathCastToString(obj));
-		}
-		xmlXPathFreeObject(obj);
-	}
-
-	fci.size = sizeof(fci);
-
-	/* Last element of the stack is the function name */
-	obj = valuePop(ctxt);
-	if (obj->stringval == NULL) {
-		zend_type_error("Handler name must be a string");
-		xmlXPathFreeObject(obj);
-		goto cleanup_no_callable;
-	}
-	ZVAL_STRING(&fci.function_name, (char *) obj->stringval);
-	xmlXPathFreeObject(obj);
-
-	fci.object = NULL;
-	fci.named_params = NULL;
-	fci.retval = &retval;
-
-	if (!zend_make_callable(&fci.function_name, &callable)) {
-		zend_throw_error(NULL, "Unable to call handler %s()", ZSTR_VAL(callable));
-		goto cleanup;
-	} else if (intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable) == 0) {
-		zend_throw_error(NULL, "Not allowed to call handler '%s()'.", ZSTR_VAL(callable));
-		goto cleanup;
-	} else {
-		result = zend_call_function(&fci, NULL);
-		if (result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-			if (Z_TYPE(retval) == IS_OBJECT && instanceof_function(Z_OBJCE(retval), dom_node_class_entry)) {
-				xmlNode *nodep;
-				dom_object *obj;
-				if (intern->node_list == NULL) {
-					intern->node_list = zend_new_array(0);
-				}
-				Z_ADDREF(retval);
-				zend_hash_next_index_insert(intern->node_list, &retval);
-				obj = Z_DOMOBJ_P(&retval);
-				nodep = dom_object_get_node(obj);
-				valuePush(ctxt, xmlXPathNewNodeSet(nodep));
-			} else if (Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE) {
-				valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(retval) == IS_TRUE));
-			} else if (Z_TYPE(retval) == IS_OBJECT) {
-				zend_type_error("A PHP Object cannot be converted to a XPath-string");
-				return;
-			} else {
-				zend_string *str = zval_get_string(&retval);
-				valuePush(ctxt, xmlXPathNewString((xmlChar *) ZSTR_VAL(str)));
-				zend_string_release_ex(str, 0);
-			}
-			zval_ptr_dtor(&retval);
-		}
-	}
-cleanup:
-	zend_string_release_ex(callable, 0);
-	zval_ptr_dtor_nogc(&fci.function_name);
-cleanup_no_callable:
-	if (fci.param_count > 0) {
-		for (i = 0; i < nargs - 1; i++) {
-			zval_ptr_dtor(&fci.params[i]);
-		}
-		efree(fci.params);
+		php_dom_xpath_callbacks_call_php_ns(&intern->xpath_callbacks, ctxt, nargs, evaluation_mode, &intern->dom, dom_xpath_proxy_factory);
 	}
 }
 /* }}} */
 
 static void dom_xpath_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
 {
-	dom_xpath_ext_function_php(ctxt, nargs, 1);
+	dom_xpath_ext_function_php(ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_STRING);
 }
 /* }}} */
 
 static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
 {
-	dom_xpath_ext_function_php(ctxt, nargs, 2);
+	dom_xpath_ext_function_php(ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_NODESET);
 }
 /* }}} */
 
+static void dom_xpath_ext_function_trampoline(xmlXPathParserContextPtr ctxt, int nargs)
+{
+	dom_xpath_object *intern = dom_xpath_ext_fetch_intern(ctxt);
+	if (!intern) {
+		php_dom_xpath_callbacks_clean_argument_stack(ctxt, nargs);
+	} else {
+		php_dom_xpath_callbacks_call_custom_ns(&intern->xpath_callbacks, ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_NODESET, &intern->dom, dom_xpath_proxy_factory);
+	}
+}
+
 /* {{{ */
-PHP_METHOD(DOMXPath, __construct)
+static void dom_xpath_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *document_ce)
 {
 	zval *doc;
-	bool register_node_ns = 1;
+	bool register_node_ns = true;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
-	dom_xpath_object *intern;
-	xmlXPathContextPtr ctx, oldctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_document_class_entry, &register_node_ns) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, document_ce, &register_node_ns) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, doc, xmlDocPtr, docobj);
 
-	ctx = xmlXPathNewContext(docp);
+	xmlXPathContextPtr ctx = xmlXPathNewContext(docp);
 	if (ctx == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
-	intern = Z_XPATHOBJ_P(ZEND_THIS);
-	if (intern != NULL) {
-		oldctx = (xmlXPathContextPtr)intern->dom.ptr;
-		if (oldctx != NULL) {
-			php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
-			xmlXPathFreeContext(oldctx);
-		}
-
-		xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "functionString",
-					   (const xmlChar *) "http://php.net/xpath",
-					   dom_xpath_ext_function_string_php);
-		xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "function",
-					   (const xmlChar *) "http://php.net/xpath",
-					   dom_xpath_ext_function_object_php);
-
-		intern->dom.ptr = ctx;
-		ctx->userData = (void *)intern;
-		intern->dom.document = docobj->document;
-		intern->register_node_ns = register_node_ns;
-		php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp);
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+	xmlXPathContextPtr oldctx = intern->dom.ptr;
+	if (oldctx != NULL) {
+		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
+		xmlXPathFreeContext(oldctx);
+		php_dom_xpath_callbacks_dtor(&intern->xpath_callbacks);
+		php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 	}
+
+	xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "functionString",
+					(const xmlChar *) "http://php.net/xpath",
+					dom_xpath_ext_function_string_php);
+	xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "function",
+					(const xmlChar *) "http://php.net/xpath",
+					dom_xpath_ext_function_object_php);
+
+	intern->dom.ptr = ctx;
+	ctx->userData = (void *)intern;
+	intern->dom.document = docobj->document;
+	intern->register_node_ns = register_node_ns;
+	php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp);
+}
+
+PHP_METHOD(DOMXPath, __construct)
+{
+	dom_xpath_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_document_class_entry);
+}
+
+PHP_METHOD(Dom_XPath, __construct)
+{
+	dom_xpath_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_abstract_base_document_class_entry);
 }
 /* }}} end DOMXPath::__construct */
 
 /* {{{ document DOMDocument*/
-int dom_xpath_document_read(dom_object *obj, zval *retval)
+zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = NULL;
 	xmlXPathContextPtr ctx = (xmlXPathContextPtr) obj->ptr;
 
 	if (ctx) {
 		docp = (xmlDocPtr) ctx->doc;
+	}
+
+	if (UNEXPECTED(!docp)) {
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		return FAILURE;
 	}
 
 	php_dom_create_object((xmlNodePtr) docp, retval, obj);
@@ -271,14 +193,14 @@ static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
 	return (dom_xpath_object*)((char*)(obj) - XtOffsetOf(dom_xpath_object, dom));
 }
 
-int dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
+zend_result dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
 {
 	ZVAL_BOOL(retval, php_xpath_obj_from_dom_obj(obj)->register_node_ns);
 
 	return SUCCESS;
 }
 
-int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
+zend_result dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 {
 	php_xpath_obj_from_dom_obj(obj)->register_node_ns = zend_is_true(newval);
 
@@ -289,20 +211,16 @@ int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 /* {{{ */
 PHP_METHOD(DOMXPath, registerNamespace)
 {
-	zval *id;
-	xmlXPathContextPtr ctxp;
 	size_t prefix_len, ns_uri_len;
-	dom_xpath_object *intern;
 	unsigned char *prefix, *ns_uri;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	intern = Z_XPATHOBJ_P(id);
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 
-	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
+	xmlXPathContextPtr ctxp = intern->dom.ptr;
 	if (ctxp == NULL) {
 		zend_throw_error(NULL, "Invalid XPath Context");
 		RETURN_THROWS();
@@ -324,38 +242,36 @@ static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
 }
 /* }}} */
 
-static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
+static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) /* {{{ */
 {
-	zval *id, retval, *context = NULL;
-	xmlXPathContextPtr ctxp;
+	zval *context = NULL;
 	xmlNodePtr nodep = NULL;
-	xmlXPathObjectPtr xpathobjp;
-	size_t expr_len, nsnbr = 0, xpath_type;
-	dom_xpath_object *intern;
+	size_t expr_len, xpath_type;
 	dom_object *nodeobj;
 	char *expr;
-	xmlDoc *docp = NULL;
-	xmlNsPtr *ns = NULL;
-	bool register_node_ns;
 
-	id = ZEND_THIS;
-	intern = Z_XPATHOBJ_P(id);
-	register_node_ns = intern->register_node_ns;
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+	bool register_node_ns = intern->register_node_ns;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, modern ? dom_modern_node_class_entry : dom_node_class_entry, &register_node_ns) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
+	xmlXPathContextPtr ctxp = intern->dom.ptr;
 	if (ctxp == NULL) {
 		zend_throw_error(NULL, "Invalid XPath Context");
 		RETURN_THROWS();
 	}
 
-	docp = (xmlDocPtr) ctxp->doc;
+	xmlDocPtr docp = ctxp->doc;
 	if (docp == NULL) {
-		php_error_docref(NULL, E_WARNING, "Invalid XPath Document Pointer");
-		RETURN_FALSE;
+		if (modern) {
+			zend_throw_error(NULL, "Invalid XPath Document Pointer");
+			RETURN_THROWS();
+		} else {
+			php_error_docref(NULL, E_WARNING, "Invalid XPath Document Pointer");
+			RETURN_FALSE;
+		}
 	}
 
 	if (context != NULL) {
@@ -373,32 +289,37 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	ctxp->node = nodep;
 
-	if (register_node_ns) {
-		/* Register namespaces in the node */
-		ns = xmlGetNsList(docp, nodep);
-
-		if (ns != NULL) {
-			while (ns[nsnbr] != NULL)
-			nsnbr++;
+	php_dom_in_scope_ns in_scope_ns;
+	if (register_node_ns && nodep != NULL) {
+		if (modern) {
+			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(&intern->dom);
+			in_scope_ns = php_dom_get_in_scope_ns(ns_mapper, nodep, false);
+		} else {
+			in_scope_ns = php_dom_get_in_scope_ns_legacy(nodep);
 		}
+		ctxp->namespaces = in_scope_ns.list;
+		ctxp->nsNr = in_scope_ns.count;
 	}
 
-
-	ctxp->namespaces = ns;
-	ctxp->nsNr = nsnbr;
-
-	xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
+	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression(BAD_CAST expr, ctxp);
 	ctxp->node = NULL;
 
-	if (ns != NULL) {
-		xmlFree(ns);
+	if (register_node_ns && nodep != NULL) {
+		php_dom_in_scope_ns_destroy(&in_scope_ns);
 		ctxp->namespaces = NULL;
 		ctxp->nsNr = 0;
 	}
 
 	if (! xpathobjp) {
-		/* TODO Add Warning? */
-		RETURN_FALSE;
+		if (modern) {
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Could not evaluate XPath expression");
+			}
+			RETURN_THROWS();
+		} else {
+			/* Should have already emit a warning by libxml */
+			RETURN_FALSE;
+		}
 	}
 
 	if (type == PHP_DOM_XPATH_QUERY) {
@@ -411,22 +332,33 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 		case  XPATH_NODESET:
 		{
-			int i;
 			xmlNodeSetPtr nodesetp;
+			zval retval;
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
-
-				array_init(&retval);
-				for (i = 0; i < nodesetp->nodeNr; i++) {
+				array_init_size(&retval, nodesetp->nodeNr);
+				zend_hash_real_init_packed(Z_ARRVAL_P(&retval));
+				for (int i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
 
 					if (node->type == XML_NAMESPACE_DECL) {
+						if (modern) {
+							if (!EG(exception)) {
+								php_dom_throw_error_with_message(NOT_SUPPORTED_ERR,
+									"The namespace axis is not well-defined in the living DOM specification. "
+									"Use Dom\\Element::getInScopeNamespaces() or Dom\\Element::getDescendantNamespaces() instead.",
+									/* strict */ true
+								);
+							}
+							break;
+						}
+
 						xmlNodePtr nsparent = node->_private;
 						xmlNsPtr original = (xmlNsPtr) node;
 
 						/* Make sure parent dom object exists, so we can take an extra reference. */
-						zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+						zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
 						php_dom_create_object(nsparent, &parent_zval, &intern->dom);
 						dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
 
@@ -439,7 +371,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
-			php_dom_create_iterator(return_value, DOM_NODELIST);
+			php_dom_create_iterator(return_value, DOM_NODELIST, modern);
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;
@@ -469,49 +401,136 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 /* {{{ */
 PHP_METHOD(DOMXPath, query)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, false);
+}
+
+PHP_METHOD(Dom_XPath, query)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, true);
 }
 /* }}} end dom_xpath_query */
 
 /* {{{ */
 PHP_METHOD(DOMXPath, evaluate)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, false);
+}
+
+PHP_METHOD(Dom_XPath, evaluate)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, true);
 }
 /* }}} end dom_xpath_evaluate */
 
 /* {{{ */
 PHP_METHOD(DOMXPath, registerPhpFunctions)
 {
-	zval *id = ZEND_THIS;
-	dom_xpath_object *intern = Z_XPATHOBJ_P(id);
-	zval *entry, new_string;
-	zend_string *name = NULL;
-	HashTable *ht = NULL;
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+
+	zend_string *callable_name = NULL;
+	HashTable *callable_ht = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(ht, name)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(callable_ht, callable_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ht) {
-		ZEND_HASH_FOREACH_VAL(ht, entry) {
-			zend_string *str = zval_get_string(entry);
-			ZVAL_LONG(&new_string, 1);
-			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
-			zend_string_release_ex(str, 0);
-		} ZEND_HASH_FOREACH_END();
-		intern->registerPhpFunctions = 2;
-	} else if (name) {
-		ZVAL_LONG(&new_string, 1);
-		zend_hash_update(intern->registered_phpfunctions, name, &new_string);
-		intern->registerPhpFunctions = 2;
-	} else {
-		intern->registerPhpFunctions = 1;
-	}
-
+	php_dom_xpath_callbacks_update_method_handler(
+		&intern->xpath_callbacks,
+		intern->dom.ptr,
+		NULL,
+		callable_name,
+		callable_ht,
+		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NULLS,
+		NULL
+	);
 }
 /* }}} end dom_xpath_register_php_functions */
+
+static void dom_xpath_register_func_in_ctx(void *ctxt, const zend_string *ns, const zend_string *name)
+{
+	xmlXPathRegisterFuncNS((xmlXPathContextPtr) ctxt, (const xmlChar *) ZSTR_VAL(name), (const xmlChar *) ZSTR_VAL(ns), dom_xpath_ext_function_trampoline);
+}
+
+PHP_METHOD(DOMXPath, registerPhpFunctionNS)
+{
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+
+	zend_string *namespace, *name;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_PATH_STR(namespace)
+		Z_PARAM_PATH_STR(name)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) {
+		zend_release_fcall_info_cache(&fcc);
+		zend_argument_value_error(1, "must not be \"http://php.net/xpath\" because it is reserved by PHP");
+		RETURN_THROWS();
+	}
+
+	if (php_dom_xpath_callbacks_update_single_method_handler(
+		&intern->xpath_callbacks,
+		intern->dom.ptr,
+		namespace,
+		name,
+		&fcc,
+		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
+		dom_xpath_register_func_in_ctx
+	) != SUCCESS) {
+		zend_release_fcall_info_cache(&fcc);
+	}
+}
+
+/* {{{ */
+PHP_METHOD(DOMXPath, quote) {
+	const char *input;
+	size_t input_len;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &input, &input_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (memchr(input, '\'', input_len) == NULL) {
+		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
+		ZSTR_VAL(output)[0] = '\'';
+		memcpy(ZSTR_VAL(output) + 1, input, input_len);
+		ZSTR_VAL(output)[input_len + 1] = '\'';
+		ZSTR_VAL(output)[input_len + 2] = '\0';
+		RETURN_STR(output);
+	} else if (memchr(input, '"', input_len) == NULL) {
+		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
+		ZSTR_VAL(output)[0] = '"';
+		memcpy(ZSTR_VAL(output) + 1, input, input_len);
+		ZSTR_VAL(output)[input_len + 1] = '"';
+		ZSTR_VAL(output)[input_len + 2] = '\0';
+		RETURN_STR(output);
+	} else {
+		smart_str output = {0};
+		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
+		smart_str_appendl(&output, ZEND_STRL("concat("));
+		const char *ptr = input;
+		const char *const end = input + input_len;
+		while (ptr < end) {
+			const char *const single_quote_ptr = memchr(ptr, '\'', end - ptr);
+			const char *const double_quote_ptr = memchr(ptr, '"', end - ptr);
+			const size_t distance_to_single_quote = single_quote_ptr ? single_quote_ptr - ptr : end - ptr;
+			const size_t distance_to_double_quote = double_quote_ptr ? double_quote_ptr - ptr : end - ptr;
+			const size_t bytes_until_quote = MAX(distance_to_single_quote, distance_to_double_quote);
+			const char quote_method = (distance_to_single_quote > distance_to_double_quote) ? '\'' : '"';
+			smart_str_appendc(&output, quote_method);
+			smart_str_appendl(&output, ptr, bytes_until_quote);
+			smart_str_appendc(&output, quote_method);
+			ptr += bytes_until_quote;
+			smart_str_appendc(&output, ',');
+		}
+		ZEND_ASSERT(ptr == end);
+		ZSTR_VAL(output.s)[output.s->len - 1] = ')';
+		RETURN_STR(smart_str_extract(&output));
+	}
+}
+/* }}} */
 
 #endif /* LIBXML_XPATH_ENABLED */
 

@@ -6,7 +6,7 @@ Francesco Fullone ff@ideato.it
 --EXTENSIONS--
 curl
 --DESCRIPTION--
-the only way to test if a option is setten on a curl handle is using the curl_getinfo() function.
+the only way to test if a option is set on a curl handle is using the curl_getinfo() function.
 but this can only check on a limited amount of options...
 --FILE--
 <?php

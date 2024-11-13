@@ -58,7 +58,7 @@ foreach ($xpath->query("/container/child2/namespace::*") as $ns) {
   </child2>
 </container>
 --- Namespaces of child1 ---
-object(DOMNameSpaceNode)#4 (8) {
+object(DOMNameSpaceNode)#4 (10) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
   ["nodeValue"]=>
@@ -71,13 +71,17 @@ object(DOMNameSpaceNode)#4 (8) {
   string(3) "xml"
   ["namespaceURI"]=>
   string(36) "http://www.w3.org/XML/1998/namespace"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["parentElement"]=>
   string(22) "(object value omitted)"
 }
 --- Namespaces of child1/foo (both nodes) ---
-object(DOMNameSpaceNode)#5 (8) {
+object(DOMNameSpaceNode)#5 (10) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
   ["nodeValue"]=>
@@ -90,12 +94,16 @@ object(DOMNameSpaceNode)#5 (8) {
   string(3) "xml"
   ["namespaceURI"]=>
   string(36) "http://www.w3.org/XML/1998/namespace"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["parentElement"]=>
   string(22) "(object value omitted)"
 }
-object(DOMNameSpaceNode)#8 (8) {
+object(DOMNameSpaceNode)#8 (10) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
   ["nodeValue"]=>
@@ -108,13 +116,17 @@ object(DOMNameSpaceNode)#8 (8) {
   string(3) "xml"
   ["namespaceURI"]=>
   string(36) "http://www.w3.org/XML/1998/namespace"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["parentElement"]=>
   string(22) "(object value omitted)"
 }
 --- Namespaces of child2 ---
-object(DOMNameSpaceNode)#9 (8) {
+object(DOMNameSpaceNode)#9 (10) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
   ["nodeValue"]=>
@@ -127,12 +139,16 @@ object(DOMNameSpaceNode)#9 (8) {
   string(3) "xml"
   ["namespaceURI"]=>
   string(36) "http://www.w3.org/XML/1998/namespace"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
   string(22) "(object value omitted)"
+  ["parentElement"]=>
+  string(22) "(object value omitted)"
 }
-object(DOMNameSpaceNode)#5 (8) {
+object(DOMNameSpaceNode)#5 (10) {
   ["nodeName"]=>
   string(7) "xmlns:x"
   ["nodeValue"]=>
@@ -145,8 +161,12 @@ object(DOMNameSpaceNode)#5 (8) {
   string(1) "x"
   ["namespaceURI"]=>
   string(38) "http://symfony.com/schema/dic/services"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["parentElement"]=>
   string(22) "(object value omitted)"
 }

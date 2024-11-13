@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e2d66473e8e2436652b78abd9c237e1a50c3d0dc */
+ * Stub hash: a846c9dd240b6f0666cd5e805abfacabe360cf4c */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -58,6 +58,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplObjectStorage_next arginfo_class_SplSubject_notify
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_seek, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
@@ -133,7 +137,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_MultipleIterator___debugInfo arginfo_class_SplObjectStorage___serialize
 
-
 ZEND_METHOD(SplObjectStorage, attach);
 ZEND_METHOD(SplObjectStorage, detach);
 ZEND_METHOD(SplObjectStorage, contains);
@@ -148,6 +151,7 @@ ZEND_METHOD(SplObjectStorage, valid);
 ZEND_METHOD(SplObjectStorage, key);
 ZEND_METHOD(SplObjectStorage, current);
 ZEND_METHOD(SplObjectStorage, next);
+ZEND_METHOD(SplObjectStorage, seek);
 ZEND_METHOD(SplObjectStorage, unserialize);
 ZEND_METHOD(SplObjectStorage, serialize);
 ZEND_METHOD(SplObjectStorage, offsetGet);
@@ -168,20 +172,17 @@ ZEND_METHOD(MultipleIterator, key);
 ZEND_METHOD(MultipleIterator, current);
 ZEND_METHOD(MultipleIterator, next);
 
-
 static const zend_function_entry class_SplObserver_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SplObserver, update, arginfo_class_SplObserver_update, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_RAW_FENTRY("update", NULL, arginfo_class_SplObserver_update, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplSubject_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SplSubject, attach, arginfo_class_SplSubject_attach, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SplSubject, detach, arginfo_class_SplSubject_detach, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SplSubject, notify, arginfo_class_SplSubject_notify, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_RAW_FENTRY("attach", NULL, arginfo_class_SplSubject_attach, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("detach", NULL, arginfo_class_SplSubject_detach, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("notify", NULL, arginfo_class_SplSubject_notify, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplObjectStorage_methods[] = {
 	ZEND_ME(SplObjectStorage, attach, arginfo_class_SplObjectStorage_attach, ZEND_ACC_PUBLIC)
@@ -198,19 +199,19 @@ static const zend_function_entry class_SplObjectStorage_methods[] = {
 	ZEND_ME(SplObjectStorage, key, arginfo_class_SplObjectStorage_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, current, arginfo_class_SplObjectStorage_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, next, arginfo_class_SplObjectStorage_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplObjectStorage, seek, arginfo_class_SplObjectStorage_seek, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, unserialize, arginfo_class_SplObjectStorage_unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, serialize, arginfo_class_SplObjectStorage_serialize, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplObjectStorage, offsetExists, contains, arginfo_class_SplObjectStorage_offsetExists, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("offsetExists", zim_SplObjectStorage_contains, arginfo_class_SplObjectStorage_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SplObjectStorage, offsetGet, arginfo_class_SplObjectStorage_offsetGet, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplObjectStorage, offsetSet, attach, arginfo_class_SplObjectStorage_offsetSet, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplObjectStorage, offsetUnset, detach, arginfo_class_SplObjectStorage_offsetUnset, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("offsetSet", zim_SplObjectStorage_attach, arginfo_class_SplObjectStorage_offsetSet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetUnset", zim_SplObjectStorage_detach, arginfo_class_SplObjectStorage_offsetUnset, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SplObjectStorage, getHash, arginfo_class_SplObjectStorage_getHash, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, __serialize, arginfo_class_SplObjectStorage___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, __unserialize, arginfo_class_SplObjectStorage___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, __debugInfo, arginfo_class_SplObjectStorage___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_MultipleIterator_methods[] = {
 	ZEND_ME(MultipleIterator, __construct, arginfo_class_MultipleIterator___construct, ZEND_ACC_PUBLIC)
@@ -225,7 +226,7 @@ static const zend_function_entry class_MultipleIterator_methods[] = {
 	ZEND_ME(MultipleIterator, key, arginfo_class_MultipleIterator_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, current, arginfo_class_MultipleIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, next, arginfo_class_MultipleIterator_next, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplObjectStorage, __debugInfo, __debugInfo, arginfo_class_MultipleIterator___debugInfo, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__debugInfo", zim_SplObjectStorage___debugInfo, arginfo_class_MultipleIterator___debugInfo, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -249,13 +250,13 @@ static zend_class_entry *register_class_SplSubject(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_Iterator, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_ArrayAccess)
+static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_SeekableIterator, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_ArrayAccess)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplObjectStorage", class_SplObjectStorage_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_Iterator, class_entry_Serializable, class_entry_ArrayAccess);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_ArrayAccess);
 
 	return class_entry;
 }
@@ -265,31 +266,31 @@ static zend_class_entry *register_class_MultipleIterator(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "MultipleIterator", class_MultipleIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	zval const_MIT_NEED_ANY_value;
 	ZVAL_LONG(&const_MIT_NEED_ANY_value, MIT_NEED_ANY);
 	zend_string *const_MIT_NEED_ANY_name = zend_string_init_interned("MIT_NEED_ANY", sizeof("MIT_NEED_ANY") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_MIT_NEED_ANY_name, &const_MIT_NEED_ANY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_MIT_NEED_ANY_name, &const_MIT_NEED_ANY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_MIT_NEED_ANY_name);
 
 	zval const_MIT_NEED_ALL_value;
 	ZVAL_LONG(&const_MIT_NEED_ALL_value, MIT_NEED_ALL);
 	zend_string *const_MIT_NEED_ALL_name = zend_string_init_interned("MIT_NEED_ALL", sizeof("MIT_NEED_ALL") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_MIT_NEED_ALL_name, &const_MIT_NEED_ALL_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_MIT_NEED_ALL_name, &const_MIT_NEED_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_MIT_NEED_ALL_name);
 
 	zval const_MIT_KEYS_NUMERIC_value;
 	ZVAL_LONG(&const_MIT_KEYS_NUMERIC_value, MIT_KEYS_NUMERIC);
 	zend_string *const_MIT_KEYS_NUMERIC_name = zend_string_init_interned("MIT_KEYS_NUMERIC", sizeof("MIT_KEYS_NUMERIC") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_MIT_KEYS_NUMERIC_name, &const_MIT_KEYS_NUMERIC_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_NUMERIC_name, &const_MIT_KEYS_NUMERIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_MIT_KEYS_NUMERIC_name);
 
 	zval const_MIT_KEYS_ASSOC_value;
 	ZVAL_LONG(&const_MIT_KEYS_ASSOC_value, MIT_KEYS_ASSOC);
 	zend_string *const_MIT_KEYS_ASSOC_name = zend_string_init_interned("MIT_KEYS_ASSOC", sizeof("MIT_KEYS_ASSOC") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_MIT_KEYS_ASSOC_name, &const_MIT_KEYS_ASSOC_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_ASSOC_name, &const_MIT_KEYS_ASSOC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_MIT_KEYS_ASSOC_name);
 
 	return class_entry;

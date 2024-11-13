@@ -4,17 +4,16 @@ MySQL PDO->__construct(), libmysql only options
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 if (MySQLPDOTest::isPDOMySQLnd())
     die("skip libmysql only options")
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     function set_option_and_check($offset, $option, $value, $option_desc, $ignore_diff = false) {
-
         $dsn = MySQLPDOTest::getDSN();
         $user = PDO_MYSQL_TEST_USER;
         $pass = PDO_MYSQL_TEST_PASS;
@@ -36,7 +35,7 @@ if (MySQLPDOTest::isPDOMySQLnd())
     $user = PDO_MYSQL_TEST_USER;
     $pass = PDO_MYSQL_TEST_PASS;
 
-    $valid_options = array();
+    $valid_options = [];
     $valid_options[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = 'PDO::MYSQL_ATTR_MAX_BUFFER_SIZE';
     $valid_options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'PDO::MYSQL_ATTR_INIT_COMMAND';
     $valid_options[PDO::MYSQL_ATTR_READ_DEFAULT_FILE] = 'PDO::MYSQL_ATTR_READ_DEFAULT_FILE';

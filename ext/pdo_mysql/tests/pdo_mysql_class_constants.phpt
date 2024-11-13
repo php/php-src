@@ -6,13 +6,13 @@ pdo_mysql
 <?php
 if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
     /* Need connection to detect library version */
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     MySQLPDOTest::skip();
 }
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     function get_client_version() {
         if (extension_loaded('mysqli')) {
@@ -24,8 +24,8 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
         return MySQLPDOTest::getClientVersion(MySQLPDOTest::factory());
     }
 
-    $expected = array(
-        'MYSQL_ATTR_USE_BUFFERED_QUERY'		=> true,
+    $expected = [
+        'MYSQL_ATTR_USE_BUFFERED_QUERY'	        	=> true,
         'MYSQL_ATTR_LOCAL_INFILE'					=> true,
         'MYSQL_ATTR_DIRECT_QUERY'					=> true,
         'MYSQL_ATTR_FOUND_ROWS'						=> true,
@@ -37,8 +37,8 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
         "MYSQL_ATTR_SSL_CAPATH"						=> true,
         "MYSQL_ATTR_SSL_CIPHER"						=> true,
         "MYSQL_ATTR_COMPRESS"						=> true,
-        "MYSQL_ATTR_MULTI_STATEMENTS"					=> true,
-    );
+        "MYSQL_ATTR_MULTI_STATEMENTS"				=> true,
+    ];
 
     if (!MySQLPDOTest::isPDOMySQLnd()) {
         $expected['MYSQL_ATTR_MAX_BUFFER_SIZE']			= true;
@@ -71,12 +71,12 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
     */
     $ref = new ReflectionClass('PDO');
     $constants = $ref->getConstants();
-    $values = array();
+    $values = [];
 
     foreach ($constants as $name => $value)
         if (substr($name, 0, 11) == 'MYSQL_ATTR_') {
             if (!isset($values[$value]))
-                $values[$value] = array($name);
+                $values[$value] = [$name];
             else
                 $values[$value][] = $name;
 

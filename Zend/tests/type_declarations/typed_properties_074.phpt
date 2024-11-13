@@ -32,7 +32,7 @@ object(Test)#1 (1) {
   ["val"]=>
   uninitialized(int)
 }
-Cannot assign string to property Test::$val of type int
+Value of type string returned from Test::__get() must be compatible with unset property Test::$val of type int
 object(Test)#1 (1) {
   ["prop"]=>
   &string(1) "x"

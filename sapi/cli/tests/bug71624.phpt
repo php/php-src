@@ -7,9 +7,10 @@ include "skipif.inc";
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $filename_txt = __DIR__ . DIRECTORY_SEPARATOR . "bug71624.test.txt";
+$filename_txt_escaped = escapeshellarg($filename_txt);
 
 $txt = 'foo
 test
@@ -21,9 +22,9 @@ file_put_contents($filename_txt, $txt);
 $test_args = ['$argi', '$argn'];
 foreach ($test_args as $test_arg) {
     if (substr(PHP_OS, 0, 3) == 'WIN') {
-        var_dump(`type "$filename_txt" | "$php" -n -R "echo $test_arg . PHP_EOL;"`);
+        var_dump(`type $filename_txt_escaped | $php -n -R "echo $test_arg . PHP_EOL;"`);
     } else {
-        var_dump(`cat "$filename_txt" | "$php" -n -R 'echo $test_arg . PHP_EOL;'`);
+        var_dump(`cat $filename_txt_escaped | $php -n -R 'echo $test_arg . PHP_EOL;'`);
     }
 }
 

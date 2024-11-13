@@ -6,7 +6,7 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-$ctype = \FFI::type('int');
+$ctype = \FFI::cdef()->type('int');
 $ref = \WeakReference::create($ctype);
 var_dump($ref->get() === $ctype);
 unset($ctype);

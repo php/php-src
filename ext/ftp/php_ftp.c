@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -99,17 +99,6 @@ static void ftp_object_destroy(zend_object *zobj) {
 
 PHP_MINIT_FUNCTION(ftp)
 {
-#ifdef HAVE_FTP_SSL
-#if OPENSSL_VERSION_NUMBER < 0x10101000 && !defined(LIBRESSL_VERSION_NUMBER)
-	SSL_library_init();
-	OpenSSL_add_all_ciphers();
-	OpenSSL_add_all_digests();
-	OpenSSL_add_all_algorithms();
-
-	SSL_load_error_strings();
-#endif
-#endif
-
 	php_ftp_ce = register_class_FTP_Connection();
 	php_ftp_ce->create_object = ftp_object_create;
 
@@ -1248,7 +1237,7 @@ PHP_FUNCTION(ftp_set_option)
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			if (Z_TYPE_P(z_value) != IS_LONG) {
-				zend_argument_type_error(3, "must be of type int for the FTP_TIMEOUT_SEC option, %s given", zend_zval_type_name(z_value));
+				zend_argument_type_error(3, "must be of type int for the FTP_TIMEOUT_SEC option, %s given", zend_zval_value_name(z_value));
 				RETURN_THROWS();
 			}
 			if (Z_LVAL_P(z_value) <= 0) {
@@ -1260,7 +1249,7 @@ PHP_FUNCTION(ftp_set_option)
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				zend_argument_type_error(3, "must be of type bool for the FTP_AUTOSEEK option, %s given", zend_zval_type_name(z_value));
+				zend_argument_type_error(3, "must be of type bool for the FTP_AUTOSEEK option, %s given", zend_zval_value_name(z_value));
 				RETURN_THROWS();
 			}
 			ftp->autoseek = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
@@ -1268,7 +1257,7 @@ PHP_FUNCTION(ftp_set_option)
 			break;
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				zend_argument_type_error(3, "must be of type bool for the FTP_USEPASVADDRESS option, %s given", zend_zval_type_name(z_value));
+				zend_argument_type_error(3, "must be of type bool for the FTP_USEPASVADDRESS option, %s given", zend_zval_value_name(z_value));
 				RETURN_THROWS();
 			}
 			ftp->usepasvaddress = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;

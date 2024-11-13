@@ -19,8 +19,8 @@ var_dump( strftime($format) );
 --EXPECTF--
 *** Testing strftime() : basic functionality ***
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(20) "Aug 08 2008 08:08:08"
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%s %d %d %d:%d:%d"

@@ -21,8 +21,17 @@ var_dump(
     // Get the new response code
     http_response_code()
 );
+echo "Now we've sent the headers\n";
+var_dump(
+    // This should fail
+    http_response_code(500)
+);
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(true)
 int(201)
+Now we've sent the headers
+
+Warning: http_response_code(): Cannot set response code - headers already sent (output started at %s:%d) in %s on line %d
+bool(false)

@@ -19,5 +19,5 @@ var_dump(Foo::Bar->value);
 
 ?>
 --EXPECT--
-Cannot modify readonly property Foo::$value
+Cannot indirectly modify readonly property Foo::$value
 int(0)

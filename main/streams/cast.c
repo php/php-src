@@ -42,11 +42,18 @@ typedef struct {
 	int (*writer)(void *, const char *, int);
 	PHP_FPOS_T (*seeker)(void *, PHP_FPOS_T, int);
 	int (*closer)(void *);
-} COOKIE_IO_FUNCTIONS_T;
+} cookie_io_functions_t;
 
-FILE *fopencookie(void *cookie, const char *mode, COOKIE_IO_FUNCTIONS_T *funcs)
+FILE *fopencookie(void *cookie, const char *mode, cookie_io_functions_t *funcs)
 {
-	return funopen(cookie, funcs->reader, funcs->writer, funcs->seeker, funcs->closer);
+	FILE *file = funopen(cookie, funcs->reader, funcs->writer, funcs->seeker, funcs->closer);
+	if (file) {
+		/* Buffering of FILE handles is stateful.
+		 * A bailout during these can corrupt the state of the FILE handle
+		 * and cause memory corruption errors. See GH-11078. */
+		setvbuf(file, NULL, _IONBF, 0);
+	}
+	return file;
 }
 # define HAVE_FOPENCOOKIE 1
 # define PHP_EMULATE_FOPENCOOKIE 1
@@ -104,6 +111,9 @@ static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t siz
 
 # ifdef COOKIE_SEEKER_USES_OFF64_T
 static int stream_cookie_seeker(void *cookie, off64_t *position, int whence)
+# else
+static int stream_cookie_seeker(void *cookie, off_t *position, int whence)
+# endif
 {
 
 	*position = php_stream_seek((php_stream *)cookie, (zend_off_t)*position, whence);
@@ -113,13 +123,6 @@ static int stream_cookie_seeker(void *cookie, off64_t *position, int whence)
 	}
 	return 0;
 }
-# else
-static int stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
-{
-
-	return php_stream_seek((php_stream *)cookie, position, whence);
-}
-# endif
 
 static int stream_cookie_closer(void *cookie)
 {
@@ -132,8 +135,8 @@ static int stream_cookie_closer(void *cookie)
 }
 #endif /* elif defined(HAVE_FOPENCOOKIE) */
 
-#if HAVE_FOPENCOOKIE
-static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
+#ifdef HAVE_FOPENCOOKIE
+static cookie_io_functions_t stream_cookie_functions =
 {
 	stream_cookie_reader, stream_cookie_writer,
 	stream_cookie_seeker, stream_cookie_closer
@@ -224,7 +227,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			goto exit_success;
 		}
 
-#if HAVE_FOPENCOOKIE
+#ifdef HAVE_FOPENCOOKIE
 		/* if just checking, say yes we can be a FILE*, but don't actually create it yet */
 		if (ret == NULL) {
 			goto exit_success;

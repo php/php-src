@@ -6,6 +6,7 @@ dom
 --SKIPIF--
 <?php
 if (LIBXML_VERSION < 20912) die('skip For libxml2 >= 2.9.12 only');
+?>
 --FILE--
 <?php
 
@@ -36,9 +37,9 @@ echo "Done\n";
 --EXPECTF--
 bool(true)
 
-Deprecated: Function libxml_disable_entity_loader() is deprecated in %s on line %d
+Deprecated: Function libxml_disable_entity_loader() is deprecated since 8.0, as external entity loading is disabled by default in %s on line %d
 bool(false)
 
-Warning: DOMDocument::loadXML(): %Sfailed to load external entity "%s" in %s on line %d
+%s: DOMDocument::loadXML(): %Sfailed to load %s
 bool(true)
 Done

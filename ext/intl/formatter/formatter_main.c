@@ -13,10 +13,11 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <unicode/ustring.h>
+#include <unicode/uloc.h>
 
 #include "php_intl.h"
 #include "formatter_class.h"
@@ -25,7 +26,7 @@
 /* {{{ */
 static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
 {
-	const char* locale;
+	char*       locale;
 	char*       pattern = NULL;
 	size_t      locale_len = 0, pattern_len = 0;
 	zend_long   style;
@@ -33,12 +34,12 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 	int32_t     spattern_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
-	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s!",
-		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
-	{
-		return FAILURE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_LONG(style)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(pattern, pattern_len)
+	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
 
 	if (error_handling != NULL) {
 		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
@@ -60,7 +61,12 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 	}
 
 	if(locale_len == 0) {
-		locale = intl_locale_get_default();
+		locale = (char *)intl_locale_get_default();
+	}
+
+	if (strlen(uloc_getISO3Language(locale)) == 0) {
+		zend_argument_value_error(1, "\"%s\" is invalid", locale);
+		return FAILURE;
 	}
 
 	/* Create an ICU number formatter. */

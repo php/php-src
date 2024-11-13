@@ -10,5 +10,6 @@ function foo(X&Y $foo = null) {
 foo(null);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: foo(): Implicitly marking parameter $foo as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 NULL

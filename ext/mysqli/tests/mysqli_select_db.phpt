@@ -4,12 +4,12 @@ mysqli_select_db()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once("table.inc");
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -45,7 +45,7 @@ require_once('skipifconnectfailure.inc');
     }
 
     if (!$link->select_db($db))
-        printf("[012] Failed to set '%s' as current DB; [%d] %s\n", $link->errno, $link->error);
+        printf("[012] Failed to set '%s' as current DB; [%d] %s\n", $db, $link->errno, $link->error);
 
     if (!$res = mysqli_query($link, "SELECT DATABASE() AS dbname"))
         printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -81,9 +81,9 @@ require_once('skipifconnectfailure.inc');
 
 
     if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
-        printf("[018] [%d] %s\n");
+        printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    $row = $res->fetch_assoc();
+    $res->fetch_assoc();
     $res->free();
 
     mysqli_close($link);
@@ -97,7 +97,7 @@ require_once('skipifconnectfailure.inc');
     print "done!\n";
 ?>
 --CLEAN--
-<?php require_once("clean_table.inc"); ?>
+<?php require_once 'clean_table.inc'; ?>
 --EXPECT--
 mysqli object is already closed
 done!

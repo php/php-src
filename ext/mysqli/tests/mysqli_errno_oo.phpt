@@ -4,14 +4,11 @@ $mysqli->errno
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp    = NULL;
-    $link   = NULL;
+    require_once 'connect.inc';
 
     $mysqli = new mysqli();
     if (0 !== ($tmp = @$mysqli->errno))

@@ -4,12 +4,12 @@ Bug #74779 (x() and y() truncating floats to integers)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 if (!setlocale(LC_NUMERIC, "de_DE", "de_DE.UTF-8", "de-DE")) die('skip locale not available');
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",

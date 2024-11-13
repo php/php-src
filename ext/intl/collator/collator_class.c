@@ -50,8 +50,6 @@ zend_object *Collator_object_create(zend_class_entry *ce )
 	zend_object_std_init(&intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
 
-	intern->zo.handlers = &Collator_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -70,6 +68,7 @@ void collator_register_Collator_symbols(int module_number)
 	/* Create and register 'Collator' class. */
 	Collator_ce_ptr = register_class_Collator();
 	Collator_ce_ptr->create_object = Collator_object_create;
+	Collator_ce_ptr->default_object_handlers = &Collator_handlers;
 
 	memcpy(&Collator_handlers, &std_object_handlers,
 		sizeof Collator_handlers);
@@ -78,15 +77,6 @@ void collator_register_Collator_symbols(int module_number)
 	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
 	Collator_handlers.clone_obj = NULL;
 	Collator_handlers.free_obj = Collator_objects_free;
-
-	/* Declare 'Collator' class properties. */
-	if( !Collator_ce_ptr )
-	{
-		zend_error( E_ERROR,
-			"Collator: attempt to create properties "
-			"on a non-registered class." );
-		return;
-	}
 }
 /* }}} */
 

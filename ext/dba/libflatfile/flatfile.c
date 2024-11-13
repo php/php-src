@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -276,7 +276,7 @@ datum flatfile_nextkey(flatfile *dba) {
 /* }}} */
 
 /* {{{ flatfile_version */
-char *flatfile_version()
+const char *flatfile_version(void)
 {
 	return "1.0, $Id$";
 }

@@ -20,6 +20,8 @@ var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH)); //28
 
 ?>
 --EXPECTF--
+Deprecated: Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
+
 Deprecated: IntlCalendar::roll(): Passing bool is deprecated, use 1 or -1 instead in %s on line %d
 bool(true)
 int(1)

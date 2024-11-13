@@ -77,36 +77,36 @@ php_canonicalize_version(const char *version)
 
 typedef struct {
 	const char *name;
+	uint8_t name_len;
 	int order;
 } special_forms_t;
 
-static int
-compare_special_version_forms(char *form1, char *form2)
+static int compare_special_version_forms(char *form1, char *form2)
 {
 	int found1 = -1, found2 = -1;
 	special_forms_t special_forms[11] = {
-		{"dev", 0},
-		{"alpha", 1},
-		{"a", 1},
-		{"beta", 2},
-		{"b", 2},
-		{"RC", 3},
-		{"rc", 3},
-		{"#", 4},
-		{"pl", 5},
-		{"p", 5},
-		{NULL, 0},
+		{ZEND_STRL("dev"), 0},
+		{ZEND_STRL("alpha"), 1},
+		{ZEND_STRL("a"), 1},
+		{ZEND_STRL("beta"), 2},
+		{ZEND_STRL("b"), 2},
+		{ZEND_STRL("RC"), 3},
+		{ZEND_STRL("rc"), 3},
+		{ZEND_STRL("#"), 4},
+		{ZEND_STRL("pl"), 5},
+		{ZEND_STRL("p"), 5},
+		{NULL, 0, 0},
 	};
 	special_forms_t *pp;
 
 	for (pp = special_forms; pp && pp->name; pp++) {
-		if (strncmp(form1, pp->name, strlen(pp->name)) == 0) {
+		if (strncmp(form1, pp->name, pp->name_len) == 0) {
 			found1 = pp->order;
 			break;
 		}
 	}
 	for (pp = special_forms; pp && pp->name; pp++) {
-		if (strncmp(form2, pp->name, strlen(pp->name)) == 0) {
+		if (strncmp(form2, pp->name, pp->name_len) == 0) {
 			found2 = pp->order;
 			break;
 		}

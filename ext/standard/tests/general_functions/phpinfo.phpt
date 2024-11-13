@@ -16,21 +16,22 @@ phpinfo()
 PHP Version => %s
 
 System => %s
-Build Date => %s%a
+Build Date => %r(.+?)%r
 Configure Command => %s
 Server API => Command Line Interface
 Virtual Directory Support => %s
 Configuration File (php.ini) Path => %s
-Loaded Configuration File => %a
-Scan this dir for additional .ini files => %a
-Additional .ini files parsed => %a
+Loaded Configuration File => %r(.+?)%r
+Scan this dir for additional .ini files => %r(.+?)%r
+Additional .ini files parsed => %r(.+?)%r
 PHP API => %d
 PHP Extension => %d
 Zend Extension => %d
 Zend Extension Build => API%s
 PHP Extension Build => API%s
+PHP Integer Size => %d bits
 Debug Build => %s
-Thread Safety => %s%A
+Thread Safety => %r(.+?)%r
 Zend Signal Handling => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
@@ -42,22 +43,22 @@ Registered PHP Streams => %s
 Registered Stream Socket Transports => %s
 Registered Stream Filters => %s
 
-%a
+%r(.+?)%r
  _______________________________________________________________________
 
 
 Configuration
-%A
+%r(.*?)%r
 Core
-%A
+%r(.*?)%r
 Additional Modules
-%A
+%r(.*?)%r
 Environment
-%A
+%r(.*?)%r
 PHP Variables
-%A
+%r(.*?)%r
 PHP License
-%A
+%r(.*?)%r
 bool(true)
 --
 phpinfo()
@@ -66,5 +67,5 @@ bool(true)
 phpinfo()
 
 PHP License
-%a
+%r(.+?)%r
 bool(true)

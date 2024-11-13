@@ -4,7 +4,7 @@ MySQL PDO->__construct() - URI
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 /* TODO - fix this limitation */
 if (getenv('PDO_MYSQL_TEST_DSN') !== "mysql:dbname=phptest;unix_socket=/tmp/mysql.sock")
@@ -14,7 +14,7 @@ if (getenv('PDO_MYSQL_TEST_DSN') !== "mysql:dbname=phptest;unix_socket=/tmp/mysq
 pdo.dsn.mysql="mysql:dbname=phptest;socket=/tmp/mysql.sock"
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     $found = false;
     $values = ini_get_all();

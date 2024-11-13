@@ -18,7 +18,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -354,7 +354,7 @@ PHP_FUNCTION(juliantojd)
 
 /* {{{ heb_number_to_chars*/
 /*
-caution: the Hebrew format produces non unique result.
+caution: the Hebrew format produces non-unique result.
 for example both: year '5' and year '5000' produce 'ה'.
 use the numeric one for calculations.
  */
@@ -398,7 +398,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 		n -= 400;
 	}
 
-/* meot (hundreads) case */
+/* meot (hundreds) case */
 	if (n >= 100) {
 		*p = alef_bet[18 + n / 100];
 		p++;

@@ -1,9 +1,6 @@
 // vim:ft=javascript
 
 // Note: The extension name is "mysqli", you enable it with "--with-mysqli".
-// Passing value "mysqlnd" to it enables the bundled
-// client library to connect to the MySQL server, i.e. no external MySQL
-// client library is needed to perform the build.
 
 ARG_WITH("mysqli", "MySQLi support", "no");
 
@@ -19,9 +16,8 @@ if (PHP_MYSQLI != "no") {
 		"mysqli_report.c " +
 		"mysqli_warning.c";
 
-	if (PHP_MYSQLI != "no") {
-		EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		ADD_EXTENSION_DEP('mysqli', 'mysqlnd', true);
-		PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h");
-	}
+	EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	ADD_EXTENSION_DEP('mysqli', 'mysqlnd');
+	ADD_EXTENSION_DEP('mysqli', 'spl');
+	PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h mysqli_mysqlnd.h");
 }

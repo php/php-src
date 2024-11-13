@@ -74,10 +74,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/un.h>
+#include <php_config.h>
 
 #include "lsapilib.h"
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+#ifdef HAVE_PRCTL
 #include <sys/prctl.h>
 #endif
 
@@ -381,7 +382,7 @@ static void lsapi_enable_core_dump(void)
 
 #endif
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+#ifdef HAVE_PRCTL
     if (prctl(PR_SET_DUMPABLE, s_enable_core_dump,0,0,0) == -1)
         perror( "prctl: Failed to set dumpable, "
                     "core dump may not be available!");
@@ -2687,12 +2688,7 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
             ((struct sockaddr_in *)pAddr)->sin_addr.s_addr = htonl( INADDR_LOOPBACK );
         else
         {
-#ifdef HAVE_INET_PTON
             if (!inet_pton(AF_INET, p, &((struct sockaddr_in *)pAddr)->sin_addr))
-#else
-            ((struct sockaddr_in *)pAddr)->sin_addr.s_addr = inet_addr( p );
-            if ( ((struct sockaddr_in *)pAddr)->sin_addr.s_addr == INADDR_BROADCAST)
-#endif
             {
                 doAddrInfo = 1;
             }

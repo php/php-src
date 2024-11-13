@@ -23,6 +23,10 @@
 # include "valgrind/callgrind.h"
 #endif
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
 ZEND_API zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API zend_string_init_interned_func_t zend_string_init_interned;
 ZEND_API zend_string_init_existing_interned_func_t zend_string_init_existing_interned;
@@ -102,11 +106,15 @@ ZEND_API void zend_interned_strings_init(void)
 	str = zend_string_alloc(sizeof("")-1, 1);
 	ZSTR_VAL(str)[0] = '\000';
 	zend_empty_string = zend_new_interned_string_permanent(str);
+	GC_ADD_FLAGS(zend_empty_string, IS_STR_VALID_UTF8);
 
 	s[1] = 0;
 	for (i = 0; i < 256; i++) {
 		s[0] = i;
 		zend_one_char_string[i] = zend_new_interned_string_permanent(zend_string_init(s, 1, 1));
+		if (i < 0x80) {
+			GC_ADD_FLAGS(zend_one_char_string[i], IS_STR_VALID_UTF8);
+		}
 	}
 
 	/* known strings */
@@ -114,6 +122,7 @@ ZEND_API void zend_interned_strings_init(void)
 	for (i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
 		str = zend_string_init(known_strings[i], strlen(known_strings[i]), 1);
 		zend_known_strings[i] = zend_new_interned_string_permanent(str);
+		GC_ADD_FLAGS(zend_known_strings[i], IS_STR_VALID_UTF8);
 	}
 }
 
@@ -186,6 +195,17 @@ ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_str
 	return zend_interned_string_ht_lookup(str, &interned_strings_permanent);
 }
 
+static zend_string* ZEND_FASTCALL zend_init_string_for_interning(zend_string *str, bool persistent)
+{
+	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(str);
+	zend_ulong h = ZSTR_H(str);
+	zend_string_delref(str);
+	str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), persistent);
+	GC_ADD_FLAGS(str, flags);
+	ZSTR_H(str) = h;
+	return str;
+}
+
 static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str)
 {
 	zend_string *ret;
@@ -203,10 +223,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string
 
 	ZEND_ASSERT(GC_FLAGS(str) & GC_PERSISTENT);
 	if (GC_REFCOUNT(str) > 1) {
-		zend_ulong h = ZSTR_H(str);
-		zend_string_delref(str);
-		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 1);
-		ZSTR_H(str) = h;
+		str = zend_init_string_for_interning(str, true);
 	}
 
 	return zend_add_interned_string(str, &interned_strings_permanent, IS_STR_PERMANENT);
@@ -244,10 +261,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *
 	}
 #endif
 	if (GC_REFCOUNT(str) > 1) {
-		zend_ulong h = ZSTR_H(str);
-		zend_string_delref(str);
-		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-		ZSTR_H(str) = h;
+		str = zend_init_string_for_interning(str, false);
 	}
 
 	ret = zend_add_interned_string(str, &CG(interned_strings), 0);
@@ -388,32 +402,32 @@ ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_va
 ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);
-	size_t delta = (const char*)s2 - (const char*)s1;
+	uintptr_t delta = (uintptr_t) s2 - (uintptr_t) s1;
 	size_t len = ZSTR_LEN(s1);
 	zend_ulong ret;
 
 	__asm__ (
-		".LL0%=:\n\t"
+		"0:\n\t"
 		"movl (%2,%3), %0\n\t"
 		"xorl (%2), %0\n\t"
-		"jne .LL1%=\n\t"
+		"jne 1f\n\t"
 		"addl $0x4, %2\n\t"
 		"subl $0x4, %1\n\t"
-		"ja .LL0%=\n\t"
+		"ja 0b\n\t"
 		"movl $0x1, %0\n\t"
-		"jmp .LL3%=\n\t"
-		".LL1%=:\n\t"
+		"jmp 3f\n\t"
+		"1:\n\t"
 		"cmpl $0x4,%1\n\t"
-		"jb .LL2%=\n\t"
+		"jb 2f\n\t"
 		"xorl %0, %0\n\t"
-		"jmp .LL3%=\n\t"
-		".LL2%=:\n\t"
+		"jmp 3f\n\t"
+		"2:\n\t"
 		"negl %1\n\t"
 		"lea 0x20(,%1,8), %1\n\t"
 		"shll %b1, %0\n\t"
 		"sete %b0\n\t"
 		"movzbl %b0, %0\n\t"
-		".LL3%=:\n"
+		"3:\n"
 		: "=&a"(ret),
 		  "+c"(len),
 		  "+r"(ptr)
@@ -426,32 +440,32 @@ ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const 
 ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);
-	size_t delta = (const char*)s2 - (const char*)s1;
+	uintptr_t delta = (uintptr_t) s2 - (uintptr_t) s1;
 	size_t len = ZSTR_LEN(s1);
 	zend_ulong ret;
 
 	__asm__ (
-		".LL0%=:\n\t"
+		"0:\n\t"
 		"movq (%2,%3), %0\n\t"
 		"xorq (%2), %0\n\t"
-		"jne .LL1%=\n\t"
+		"jne 1f\n\t"
 		"addq $0x8, %2\n\t"
 		"subq $0x8, %1\n\t"
-		"ja .LL0%=\n\t"
+		"ja 0b\n\t"
 		"movq $0x1, %0\n\t"
-		"jmp .LL3%=\n\t"
-		".LL1%=:\n\t"
+		"jmp 3f\n\t"
+		"1:\n\t"
 		"cmpq $0x8,%1\n\t"
-		"jb .LL2%=\n\t"
+		"jb 2f\n\t"
 		"xorq %0, %0\n\t"
-		"jmp .LL3%=\n\t"
-		".LL2%=:\n\t"
+		"jmp 3f\n\t"
+		"2:\n\t"
 		"negq %1\n\t"
 		"lea 0x40(,%1,8), %1\n\t"
 		"shlq %b1, %0\n\t"
 		"sete %b0\n\t"
 		"movzbq %b0, %0\n\t"
-		".LL3%=:\n"
+		"3:\n"
 		: "=&a"(ret),
 		  "+c"(len),
 		  "+r"(ptr)
@@ -490,3 +504,27 @@ ZEND_API zend_string *zend_string_concat3(
 
 	return res;
 }
+
+/* strlcpy and strlcat are not intercepted by msan, so we need to do it ourselves. */
+#if __has_feature(memory_sanitizer)
+static size_t (*libc_strlcpy)(char *__restrict, const char *__restrict, size_t);
+size_t strlcpy(char *__restrict dest, const char *__restrict src, size_t n)
+{
+	if (!libc_strlcpy) {
+		libc_strlcpy = dlsym(RTLD_NEXT, "strlcpy");
+	}
+	size_t result = libc_strlcpy(dest, src, n);
+	__msan_unpoison_string(dest);
+	return result;
+}
+static size_t (*libc_strlcat)(char *__restrict, const char *__restrict, size_t);
+size_t strlcat (char *__restrict dest, const char *restrict src, size_t n)
+{
+	if (!libc_strlcat) {
+		libc_strlcat = dlsym(RTLD_NEXT, "strlcat");
+	}
+	size_t result = libc_strlcat(dest, src, n);
+	__msan_unpoison_string(dest);
+	return result;
+}
+#endif

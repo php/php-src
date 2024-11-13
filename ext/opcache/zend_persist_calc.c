@@ -26,6 +26,7 @@
 #include "zend_shared_alloc.h"
 #include "zend_operators.h"
 #include "zend_attributes.h"
+#include "zend_constants.h"
 
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
@@ -87,7 +88,7 @@ static void zend_persist_ast_calc(zend_ast *ast)
 		}
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
-		ADD_SIZE(sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children);
+		ADD_SIZE(zend_ast_size(children));
 		for (i = 0; i < children; i++) {
 			if (ast->child[i]) {
 				zend_persist_ast_calc(ast->child[i]);
@@ -328,9 +329,8 @@ static void zend_persist_op_array_calc(zval *zv)
 	}
 }
 
-static void zend_persist_class_method_calc(zval *zv)
+static void zend_persist_class_method_calc(zend_op_array *op_array)
 {
-	zend_op_array *op_array = Z_PTR_P(zv);
 	zend_op_array *old_op_array;
 
 	if (op_array->type != ZEND_USER_FUNCTION) {
@@ -339,7 +339,7 @@ static void zend_persist_class_method_calc(zval *zv)
 			old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 			if (!old_op_array) {
 				ADD_SIZE(sizeof(zend_internal_function));
-				zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
+				zend_shared_alloc_register_xlat_entry(op_array, op_array);
 			}
 		}
 		return;
@@ -355,8 +355,8 @@ static void zend_persist_class_method_calc(zval *zv)
 	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 	if (!old_op_array) {
 		ADD_SIZE(sizeof(zend_op_array));
-		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
-		zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
+		zend_persist_op_array_calc_ex(op_array);
+		zend_shared_alloc_register_xlat_entry(op_array, op_array);
 	} else {
 		/* If op_array is shared, the function name refcount is still incremented for each use,
 		 * so we need to release it here. We remembered the original function name in xlat. */
@@ -379,6 +379,14 @@ static void zend_persist_property_info_calc(zend_property_info *prop)
 	if (prop->attributes) {
 		zend_persist_attributes_calc(prop->attributes);
 	}
+	if (prop->hooks) {
+		ADD_SIZE(ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			if (prop->hooks[i]) {
+				zend_persist_class_method_calc(&prop->hooks[i]->op_array);
+			}
+		}
+	}
 }
 
 static void zend_persist_class_constant_calc(zval *zv)
@@ -386,6 +394,11 @@ static void zend_persist_class_constant_calc(zval *zv)
 	zend_class_constant *c = Z_PTR_P(zv);
 
 	if (!zend_shared_alloc_get_xlat_entry(c)) {
+		if (((c->ce->ce_flags & ZEND_ACC_IMMUTABLE) && !(Z_CONSTANT_FLAGS(c->value) & CONST_OWNED))
+		 || c->ce->type == ZEND_INTERNAL_CLASS) {
+			/* Class constant comes from a different file in shm or internal class, keep existing pointer. */
+			return;
+		}
 		if (!ZCG(current_persistent_script)->corrupted
 		 && zend_accel_in_shm(Z_PTR_P(zv))) {
 			return;
@@ -399,6 +412,7 @@ static void zend_persist_class_constant_calc(zval *zv)
 		if (c->attributes) {
 			zend_persist_attributes_calc(c->attributes);
 		}
+		zend_persist_type_calc(&c->type);
 	}
 }
 
@@ -426,7 +440,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
-			zend_persist_class_method_calc(&p->val);
+			zend_persist_class_method_calc(Z_PTR(p->val));
 		} ZEND_HASH_FOREACH_END();
 		if (ce->default_properties_table) {
 		    int i;
@@ -486,8 +500,8 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			ADD_STRING(ce->info.user.filename);
 		}
 
-		if (ZCG(accel_directives).save_comments && ce->info.user.doc_comment) {
-			ADD_STRING(ce->info.user.doc_comment);
+		if (ZCG(accel_directives).save_comments && ce->doc_comment) {
+			ADD_STRING(ce->doc_comment);
 		}
 
 		if (ce->attributes) {

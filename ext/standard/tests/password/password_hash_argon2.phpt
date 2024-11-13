@@ -4,6 +4,7 @@ Test normal operation of password_hash() with Argon2i and Argon2id
 <?php
 if (!defined('PASSWORD_ARGON2I')) die('skip password_hash not built with Argon2');
 if (!defined('PASSWORD_ARGON2ID')) die('skip password_hash not built with Argon2');
+?>
 --FILE--
 <?php
 

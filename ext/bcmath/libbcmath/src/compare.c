@@ -29,131 +29,117 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
+#include <stdbool.h>
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 
 
 /* Compare two bc numbers.  Return value is 0 if equal, -1 if N1 is less
    than N2 and +1 if N1 is greater than N2.  If USE_SIGN is false, just
    compare the magnitudes. */
 
- int
-_bc_do_compare (n1, n2, use_sign, ignore_last)
-     bc_num n1, n2;
-     int use_sign;
-     int ignore_last;
+bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool use_sign)
 {
-  char *n1ptr, *n2ptr;
-  int  count;
+	char *n1ptr, *n2ptr;
 
-  /* First, compare signs. */
-  if (use_sign && n1->n_sign != n2->n_sign)
-    {
-      if (n1->n_sign == PLUS)
-	return (1);	/* Positive N1 > Negative N2 */
-      else
-	return (-1);	/* Negative N1 < Positive N1 */
-    }
+	/* First, compare signs. */
+	if (use_sign && n1->n_sign != n2->n_sign) {
+		if (n1->n_sign == PLUS) {
+			/* Positive N1 > Negative N2 */
+			return BCMATH_LEFT_GREATER;
+		} else {
+			/* Negative N1 < Positive N1 */
+			return BCMATH_RIGHT_GREATER;
+		}
+	}
 
-  /* Now compare the magnitude. */
-  if (n1->n_len != n2->n_len)
-    {
-      if (n1->n_len > n2->n_len)
-	{
-	  /* Magnitude of n1 > n2. */
-	  if (!use_sign || n1->n_sign == PLUS)
-	    return (1);
-	  else
-	    return (-1);
+	/* Now compare the magnitude. */
+	if (n1->n_len != n2->n_len) {
+		if (n1->n_len > n2->n_len) {
+			/* Magnitude of n1 > n2. */
+			if (!use_sign || n1->n_sign == PLUS) {
+				return BCMATH_LEFT_GREATER;
+			} else {
+				return BCMATH_RIGHT_GREATER;
+			}
+		} else {
+			/* Magnitude of n1 < n2. */
+			if (!use_sign || n1->n_sign == PLUS) {
+				return BCMATH_RIGHT_GREATER;
+			} else {
+				return BCMATH_LEFT_GREATER;
+			}
+		}
 	}
-      else
-	{
-	  /* Magnitude of n1 < n2. */
-	  if (!use_sign || n1->n_sign == PLUS)
-	    return (-1);
-	  else
-	    return (1);
-	}
-    }
 
-  /* If we get here, they have the same number of integer digits.
-     check the integer part and the equal length part of the fraction. */
-  count = n1->n_len + MIN (n1->n_scale, n2->n_scale);
-  n1ptr = n1->n_value;
-  n2ptr = n2->n_value;
+	size_t n1_scale = MIN(n1->n_scale, scale);
+	size_t n2_scale = MIN(n2->n_scale, scale);
 
-  while ((count > 0) && (*n1ptr == *n2ptr))
-    {
-      n1ptr++;
-      n2ptr++;
-      count--;
-    }
-  if (ignore_last && count == 1 && n1->n_scale == n2->n_scale)
-    return (0);
-  if (count != 0)
-    {
-      if (*n1ptr > *n2ptr)
-	{
-	  /* Magnitude of n1 > n2. */
-	  if (!use_sign || n1->n_sign == PLUS)
-	    return (1);
-	  else
-	    return (-1);
-	}
-      else
-	{
-	  /* Magnitude of n1 < n2. */
-	  if (!use_sign || n1->n_sign == PLUS)
-	    return (-1);
-	  else
-	    return (1);
-	}
-    }
+	/* If we get here, they have the same number of integer digits.
+	   check the integer part and the equal length part of the fraction. */
+	size_t count = n1->n_len + MIN (n1_scale, n2_scale);
+	n1ptr = n1->n_value;
+	n2ptr = n2->n_value;
 
-  /* They are equal up to the last part of the equal part of the fraction. */
-  if (n1->n_scale != n2->n_scale)
-    {
-      if (n1->n_scale > n2->n_scale)
-	{
-	  for (count = n1->n_scale-n2->n_scale; count>0; count--)
-	    if (*n1ptr++ != 0)
-	      {
-		/* Magnitude of n1 > n2. */
-		if (!use_sign || n1->n_sign == PLUS)
-		  return (1);
-		else
-		  return (-1);
-	      }
+	while ((count > 0) && (*n1ptr == *n2ptr)) {
+		n1ptr++;
+		n2ptr++;
+		count--;
 	}
-      else
-	{
-	  for (count = n2->n_scale-n1->n_scale; count>0; count--)
-	    if (*n2ptr++ != 0)
-	      {
-		/* Magnitude of n1 < n2. */
-		if (!use_sign || n1->n_sign == PLUS)
-		  return (-1);
-		else
-		  return (1);
-	      }
-	}
-    }
 
-  /* They must be equal! */
-  return (0);
+	if (count != 0) {
+		if (*n1ptr > *n2ptr) {
+			/* Magnitude of n1 > n2. */
+			if (!use_sign || n1->n_sign == PLUS) {
+				return BCMATH_LEFT_GREATER;
+			} else {
+				return BCMATH_RIGHT_GREATER;
+			}
+		} else {
+			/* Magnitude of n1 < n2. */
+			if (!use_sign || n1->n_sign == PLUS) {
+				return BCMATH_RIGHT_GREATER;
+			} else {
+				return BCMATH_LEFT_GREATER;
+			}
+		}
+	}
+
+	/* They are equal up to the last part of the equal part of the fraction. */
+	if (n1_scale != n2_scale) {
+		if (n1_scale > n2_scale) {
+			for (count = n1_scale - n2_scale; count > 0; count--) {
+				if (*n1ptr++ != 0) {
+					/* Magnitude of n1 > n2. */
+					if (!use_sign || n1->n_sign == PLUS) {
+						return BCMATH_LEFT_GREATER;
+					} else {
+						return BCMATH_RIGHT_GREATER;
+					}
+				}
+			}
+		} else {
+			for (count = n2_scale - n1_scale; count > 0; count--) {
+				if (*n2ptr++ != 0) {
+					/* Magnitude of n1 < n2. */
+					if (!use_sign || n1->n_sign == PLUS) {
+						return BCMATH_RIGHT_GREATER;
+					} else {
+						return BCMATH_LEFT_GREATER;
+					}
+				}
+			}
+		}
+	}
+
+	/* They must be equal! */
+	return BCMATH_EQUAL;
 }
 
 
 /* This is the "user callable" routine to compare numbers N1 and N2. */
-
-int
-bc_compare (n1, n2)
-     bc_num n1, n2;
+bcmath_compare_result bc_compare(bc_num n1, bc_num n2, size_t scale)
 {
-  return _bc_do_compare (n1, n2, TRUE, FALSE);
+	return _bc_do_compare(n1, n2, scale, true);
 }

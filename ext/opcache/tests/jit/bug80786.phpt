@@ -3,7 +3,6 @@ Bug #80786: PHP crash using JIT
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
 opcache.jit=function
 --EXTENSIONS--
 opcache

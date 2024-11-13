@@ -80,6 +80,23 @@ foreach (['SJIS', 'SJIS-2004', 'MacJapanese', 'SJIS-Mobile#DOCOMO', 'SJIS-Mobile
     echo "$encoding: [" . implode(', ', array_map('bin2hex', $array)) . "]\n";
 }
 
+/*
+Some MacJapanese characters map to a sequence of several Unicode codepoints. Examples:
+
+0x85AB  0xF862+0x0058+0x0049+0x0049+0x0049  # roman numeral thirteen
+0x85AC  0xF861+0x0058+0x0049+0x0056 # roman numeral fourteen
+0x85AD  0xF860+0x0058+0x0056    # roman numeral fifteen
+0x85BF  0xF862+0x0078+0x0069+0x0069+0x0069  # small roman numeral thirteen
+0x85C0  0xF861+0x0078+0x0069+0x0076 # small roman numeral fourteen
+0x85C1  0xF860+0x0078+0x0076    # small roman numeral fifteen
+
+Even though they map to multiple codepoints, mb_str_split treats these as ONE character each
+*/
+
+echo "== MacJapanese characters which map to 3-5 codepoints each ==\n";
+echo "[", implode(', ', array_map('bin2hex', mb_str_split("abc\x85\xAB\x85\xAC\x85\xAD", 1, 'MacJapanese'))), "]\n";
+echo "[", implode(', ', array_map('bin2hex', mb_str_split("abc\x85\xBF\x85\xC0\x85\xC1", 2, 'MacJapanese'))), "]\n";
+
 ?>
 --EXPECT--
 BIG-5: a4e9 a5bb
@@ -104,3 +121,6 @@ SJIS-Mobile#KDDI: [80a1, 6162, 6380, a1]
 SJIS-Mobile#KDDI: [6162, 63fd, feff, 6162, fdfe, ff]
 SJIS-Mobile#SoftBank: [80a1, 6162, 6380, a1]
 SJIS-Mobile#SoftBank: [6162, 63fd, feff, 6162, fdfe, ff]
+== MacJapanese characters which map to 3-5 codepoints each ==
+[61, 62, 63, 85ab, 85ac, 85ad]
+[6162, 6385bf, 85c085c1]

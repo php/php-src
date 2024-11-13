@@ -12,12 +12,19 @@ const AF_UNIX = UNKNOWN;
  * @cvalue AF_INET
  */
 const AF_INET = UNKNOWN;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue AF_INET6
  */
 const AF_INET6 = UNKNOWN;
+#endif
+#ifdef AF_DIVERT
+/**
+ * @var int
+ * @cvalue AF_DIVERT
+ */
+const AF_DIVERT = UNKNOWN;
 #endif
 /**
  * @var int
@@ -45,6 +52,35 @@ const SOCK_SEQPACKET = UNKNOWN;
  * @cvalue SOCK_RDM
  */
 const SOCK_RDM = UNKNOWN;
+#endif
+#ifdef SOCK_CONN_DGRAM
+/**
+ * @var int
+ * @cvalue SOCK_CONN_DGRAM
+ */
+const SOCK_CONN_DGRAM = UNKNOWN;
+#endif
+#ifdef SOCK_DCCP
+/**
+ * is an alias of SOCK_CONN_DGRAM on some platforms
+ * @var int
+ * @cvalue SOCK_DCCP
+ */
+const SOCK_DCCP = UNKNOWN;
+#endif
+#ifdef SOCK_CLOEXEC
+/**
+ * @var int
+ * @cvalue SOCK_CLOEXEC
+ */
+const SOCK_CLOEXEC = UNKNOWN;
+#endif
+#ifdef SOCK_NONBLOCK
+/**
+ * @var int
+ * @cvalue SOCK_NONBLOCK
+ */
+const SOCK_NONBLOCK = UNKNOWN;
 #endif
 
 /**
@@ -166,6 +202,13 @@ const SO_REUSEADDR = UNKNOWN;
  */
 const SO_REUSEPORT = UNKNOWN;
 #endif
+#ifdef SO_REUSEPORT_LB
+/**
+ * @var int
+ * @cvalue SO_REUSEPORT_LB
+ */
+const SO_REUSEPORT_LB = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_KEEPALIVE
@@ -181,6 +224,13 @@ const SO_DONTROUTE = UNKNOWN;
  * @cvalue SO_LINGER
  */
 const SO_LINGER = UNKNOWN;
+#ifdef SO_LINGER_SEC
+/**
+ * @var int
+ * @cvalue SO_LINGER_SEC
+ */
+const SO_LINGER_SEC = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_BROADCAST
@@ -245,6 +295,13 @@ const SO_ERROR = UNKNOWN;
  */
 const SO_BINDTODEVICE = UNKNOWN;
 #endif
+#ifdef SO_BINDTOIFINDEX
+/**
+ * @var int
+ * @cvalue SO_BINDTOIFINDEX
+ */
+const SO_BINDTOIFINDEX = UNKNOWN;
+#endif
 #ifdef SO_USER_COOKIE
 /**
  * @var int
@@ -285,6 +342,27 @@ const SO_SETFIB = UNKNOWN;
  * @cvalue SO_ACCEPTFILTER
  */
 const SO_ACCEPTFILTER = UNKNOWN;
+#endif
+#ifdef SO_RERROR
+/**
+ * @var int
+ * @cvalue SO_RERROR
+ */
+const SO_RERROR = UNKNOWN;
+#endif
+#ifdef SO_SOPLICE
+/**
+ * @var int
+ * @cvalue SO_SPLICE
+ */
+const SO_SPLICE = UNKNOWN;
+#endif
+#ifdef SO_ZEROIZE
+/**
+ * @var int
+ * @cvalue SO_ZEROIZE
+ */
+const SO_ZEROIZE = UNKNOWN;
 #endif
 #ifdef SOL_FILTER
 /**
@@ -361,6 +439,13 @@ const SO_MEMINFO = UNKNOWN;
  * @cvalue SO_BPF_EXTENSIONS
  */
 const SO_BPF_EXTENSIONS = UNKNOWN;
+#endif
+#ifdef SO_EXCLBIND
+/**
+ * @var int
+ * @cvalue SO_EXCLBIND
+ */
+const SO_EXCLBIND = UNKNOWN;
 #endif
 #ifdef SKF_AD_OFF
 /**
@@ -496,6 +581,13 @@ const SKF_AD_MAX = UNKNOWN;
  */
 const TCP_CONGESTION = UNKNOWN;
 #endif
+#ifdef TCP_SYNCNT
+/**
+ * @var int
+ * @cvalue TCP_SYNCNT
+ */
+const TCP_SYNCNT = UNKNOWN;
+#endif
 #ifdef SO_ZEROCOPY
 /**
  * @var int
@@ -607,7 +699,14 @@ const IP_MULTICAST_TTL = UNKNOWN;
  * @cvalue IP_MULTICAST_LOOP
  */
 const IP_MULTICAST_LOOP = UNKNOWN;
-#if HAVE_IPV6
+#ifdef IP_BIND_ADDRESS_NO_PORT
+/**
+ * @var int
+ * @cvalue IP_BIND_ADDRESS_NO_PORT
+ */
+const IP_BIND_ADDRESS_NO_PORT = UNKNOWN;
+#endif
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPV6_MULTICAST_IF
@@ -631,6 +730,29 @@ const IPV6_MULTICAST_LOOP = UNKNOWN;
  * @cvalue IPV6_V6ONLY
  */
 const IPV6_V6ONLY = UNKNOWN;
+#endif
+
+#ifdef IP_PORTRANGE
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE
+ */
+const IP_PORTRANGE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_DEFAULT
+ */
+const IP_PORTRANGE_DEFAULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_HIGH
+ */
+const IP_PORTRANGE_HIGH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_LOW
+ */
+const IP_PORTRANGE_LOW = UNKNOWN;
 #endif
 
 #ifdef EPERM
@@ -1442,7 +1564,7 @@ const SOCKET_ENOMEDIUM = UNKNOWN;
 const SOCKET_EMEDIUMTYPE = UNKNOWN;
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 /**
  * @var int
  * @cvalue WSAESTALE
@@ -1500,7 +1622,7 @@ const SOCKET_NO_ADDRESS = UNKNOWN;
  * @cvalue IPPROTO_IP
  */
 const IPPROTO_IP = UNKNOWN;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPPROTO_IPV6
@@ -1518,8 +1640,29 @@ const SOL_TCP = UNKNOWN;
  * @cvalue IPPROTO_UDP
  */
 const SOL_UDP = UNKNOWN;
+#ifdef IPPROTO_UDPLITE
+/**
+ * @var int
+ * @cvalue IPPROTO_UDPLITE
+ */
+const SOL_UDPLITE = UNKNOWN;
+#endif
+#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMP
+ */
+const IPPROTO_ICMP = UNKNOWN;
+#endif
+#if defined(IPPROTO_ICMPV6) || defined(PHP_WIN32)
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMPV6
+ */
+const IPPROTO_ICMPV6 = UNKNOWN;
+#endif
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPV6_UNICAST_HOPS
@@ -1542,14 +1685,14 @@ const AI_CANONNAME = UNKNOWN;
  * @cvalue AI_NUMERICHOST
  */
 const AI_NUMERICHOST = UNKNOWN;
-#if HAVE_AI_V4MAPPED
+#ifdef AI_V4MAPPED
 /**
  * @var int
  * @cvalue AI_V4MAPPED
  */
 const AI_V4MAPPED = UNKNOWN;
 #endif
-#if HAVE_AI_ALL
+#ifdef AI_ALL
 /**
  * @var int
  * @cvalue AI_ALL
@@ -1561,7 +1704,7 @@ const AI_ALL = UNKNOWN;
  * @cvalue AI_ADDRCONFIG
  */
 const AI_ADDRCONFIG = UNKNOWN;
-#if HAVE_AI_IDN
+#ifdef AI_IDN
 /**
  * @var int
  * @cvalue AI_IDN
@@ -1588,7 +1731,7 @@ const AI_NUMERICSERV = UNKNOWN;
 const SOL_LOCAL = UNKNOWN;
 #endif
 
-#if (defined(IPV6_RECVPKTINFO) && HAVE_IPV6)
+#if (defined(IPV6_RECVPKTINFO) && defined(HAVE_IPV6))
 /**
  * IPv6 ancillary data
  * @var int
@@ -1601,7 +1744,7 @@ const IPV6_RECVPKTINFO = UNKNOWN;
  */
 const IPV6_PKTINFO = UNKNOWN;
 #endif
-#if (defined(IPV6_RECVHOPLIMIT) && HAVE_IPV6)
+#if (defined(IPV6_RECVHOPLIMIT) && defined(HAVE_IPV6))
 /**
  * @var int
  * @cvalue IPV6_RECVHOPLIMIT
@@ -1614,7 +1757,7 @@ const IPV6_RECVHOPLIMIT = UNKNOWN;
 const IPV6_HOPLIMIT = UNKNOWN;
 #endif
 
-#if (defined(IPV6_RECVTCLASS) && HAVE_IPV6)
+#if (defined(IPV6_RECVTCLASS) && defined(HAVE_IPV6))
 /**
  * @var int
  * @cvalue IPV6_RECVTCLASS
@@ -1678,6 +1821,125 @@ const SCM_CREDS = UNKNOWN;
  */
 const LOCAL_CREDS = UNKNOWN;
 #endif
+#if defined(SO_ATTACH_REUSEPORT_CBPF)
+/**
+ * @var int
+ * @cvalue SO_ATTACH_REUSEPORT_CBPF
+ */
+const SO_ATTACH_REUSEPORT_CBPF = UNKNOWN;
+#endif
+#if defined(SO_DETACH_FILTER)
+/**
+ * @var int
+ * @cvalue SO_DETACH_FILTER
+ */
+const SO_DETACH_FILTER = UNKNOWN;
+#endif
+#if defined(SO_DETACH_BPF)
+/**
+ * @var int
+ * @cvalue SO_DETACH_BPF
+ */
+const SO_DETACH_BPF = UNKNOWN;
+#endif
+#if defined(SO_EXCLUSIVEADDRUSE)
+/**
+ * @var int
+ * @cvalue SO_EXCLUSIVEADDRUSE
+ */
+const SO_EXCLUSIVEADDRUSE = UNKNOWN;
+#endif
+#if defined(SO_NOSIGPIPE)
+/**
+ * @var int
+ * @cvalue SO_NOSIGPIPE
+ */
+const SO_NOSIGPIPE = UNKNOWN;
+#endif
+#if defined(TCP_QUICKACK)
+/**
+ * @var int
+ * @cvalue TCP_QUICKACK
+ */
+const TCP_QUICKACK = UNKNOWN;
+#endif
+#if defined(TCP_REPAIR)
+/**
+ * @var int
+ * @cvalue TCP_REPAIR
+ */
+const TCP_REPAIR = UNKNOWN;
+#endif
+#if defined(IP_DONTFRAG)
+/**
+ * @var int
+ * @cvalue IP_DONTFRAG
+ */
+const IP_DONTFRAG = UNKNOWN;
+#endif
+#if defined(IP_MTU_DISCOVER)
+/**
+ * @var int
+ * @cvalue IP_MTU_DISCOVER
+ */
+const IP_MTU_DISCOVER = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_DO)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_DO
+ */
+const IP_PMTUDISC_DO = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_DONT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_DONT
+ */
+const IP_PMTUDISC_DONT = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_WANT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_WANT
+ */
+const IP_PMTUDISC_WANT = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_PROBE)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_PROBE
+ */
+const IP_PMTUDISC_PROBE = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_INTERFACE)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_INTERFACE
+ */
+const IP_PMTUDISC_INTERFACE = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_OMIT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_OMIT
+ */
+const IP_PMTUDISC_OMIT = UNKNOWN;
+#endif
+#if defined(UDPLITE_SEND_CSCOV)
+/**
+ * @var int
+ * @cvalue UDPLITE_SEND_CSCOV
+ */
+const UDPLITE_SEND_CSCOV = UNKNOWN;
+#endif
+#if defined(UDPLITE_RECV_CSCOV)
+/**
+ * @var int
+ * @cvalue UDPLITE_RECV_CSCOV
+ */
+const UDPLITE_RECV_CSCOV = UNKNOWN;
+#endif
 
 /**
  * @strict-properties
@@ -1697,7 +1959,7 @@ final class AddressInfo
 
 function socket_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
 
-function socket_create_listen(int $port, int $backlog = 128): Socket|false {}
+function socket_create_listen(int $port, int $backlog = SOMAXCONN): Socket|false {}
 
 function socket_accept(Socket $socket): Socket|false {}
 
@@ -1775,6 +2037,10 @@ function socket_create_pair(int $domain, int $type, int $protocol, &$pair): bool
 
 #ifdef HAVE_SHUTDOWN
 function socket_shutdown(Socket $socket, int $mode = 2): bool {}
+#endif
+
+#ifdef HAVE_SOCKATMARK
+function socket_atmark(Socket $socket): bool {}
 #endif
 
 function socket_last_error(?Socket $socket = null): int {}

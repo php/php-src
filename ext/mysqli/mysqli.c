@@ -17,7 +17,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
@@ -25,7 +25,6 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_mysqli.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
@@ -49,7 +48,7 @@ static PHP_GINIT_FUNCTION(mysqli);
 	} \
 }
 
-#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+#define ERROR_ARG_POS(arg_num) (hasThis() ? (arg_num-1) : (arg_num))
 
 static HashTable classes;
 static zend_object_handlers mysqli_object_handlers;
@@ -72,8 +71,8 @@ zend_class_entry *mysqli_warning_class_entry;
 zend_class_entry *mysqli_exception_class_entry;
 
 
-typedef int (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
-typedef int (*mysqli_write_t)(mysqli_object *obj, zval *newval);
+typedef zend_result (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
+typedef zend_result (*mysqli_write_t)(mysqli_object *obj, zval *newval);
 
 typedef struct _mysqli_prop_handler {
 	zend_string *name;
@@ -228,7 +227,7 @@ static void mysqli_warning_free_storage(zend_object *object)
 /* }}} */
 
 /* {{{ mysqli_read_na */
-static int mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
 {
 	if (!quiet) {
 		zend_throw_error(NULL, "Cannot read property");
@@ -307,19 +306,19 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 {
 	mysqli_object *obj = php_mysqli_fetch_object(object);
 	mysqli_prop_handler	*p;
-	int ret = 0;
+	bool has_property = false;
 
 	if ((p = zend_hash_find_ptr(obj->prop_handler, name)) != NULL) {
 		switch (has_set_exists) {
 			case ZEND_PROPERTY_EXISTS:
-				ret = 1;
+				has_property = true;
 				break;
 			case ZEND_PROPERTY_NOT_EMPTY: {
 				zval rv;
 				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					convert_to_boolean(value);
-					ret = Z_TYPE_P(value) == IS_TRUE ? 1 : 0;
+					has_property = Z_TYPE_P(value) == IS_TRUE;
 				}
 				break;
 			}
@@ -327,7 +326,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				zval rv;
 				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
-					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;
+					has_property = Z_TYPE_P(value) != IS_NULL;
 					zval_ptr_dtor(value);
 				}
 				break;
@@ -335,10 +334,10 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 			EMPTY_SWITCH_DEFAULT_CASE();
 		}
 	} else {
-		ret = zend_std_has_property(object, name, has_set_exists, cache_slot);
+		has_property = zend_std_has_property(object, name, has_set_exists, cache_slot);
 	}
 
-	return ret;
+	return has_property;
 } /* }}} */
 
 HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
@@ -588,7 +587,7 @@ PHP_MINFO_FUNCTION(mysqli)
 	char buf[32];
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "MysqlI Support", "enabled");
+	php_info_print_table_row(2, "MysqlI Support", "enabled");
 	php_info_print_table_row(2, "Client API library version", mysql_get_client_info());
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_active_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
@@ -731,7 +730,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	/* TODO: We don't have access to the connection object at this point, so we use low-level
 	 * mysqlnd APIs to access the error information. We should try to pass through the connection
 	 * object instead. */
-	if (MyG(report_mode) & MYSQLI_REPORT_ERROR) {
+	if (MyG(report_mode) & MYSQLI_REPORT_ERROR && result->conn) {
 		MYSQLND_CONN_DATA *conn = result->conn;
 		unsigned error_no = conn->m->get_error_no(conn);
 		if (error_no) {
@@ -749,11 +748,11 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	MYSQL_RES		*result;
 	zval			*mysql_result;
 	zend_long			fetchtype;
-	zval			*ctor_params = NULL;
+	HashTable			*ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ca", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ch", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (ce == NULL) {
@@ -787,9 +786,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	php_mysqli_fetch_into_hash_aux(return_value, result, fetchtype);
 
 	if (into_object && Z_TYPE_P(return_value) == IS_ARRAY) {
-		zval dataset, retval;
-		zend_fcall_info fci;
-		zend_fcall_info_cache fcc;
+		zval dataset;
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 
@@ -804,32 +801,10 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		}
 
 		if (ce->constructor) {
-			fci.size = sizeof(fci);
-			ZVAL_UNDEF(&fci.function_name);
-			fci.object = Z_OBJ_P(return_value);
-			fci.retval = &retval;
-			fci.params = NULL;
-			fci.param_count = 0;
-			fci.named_params = NULL;
-
-			if (ctor_params) {
-				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
-					ZEND_UNREACHABLE();
-				}
-			}
-
-			fcc.function_handler = ce->constructor;
-			fcc.called_scope = Z_OBJCE_P(return_value);
-			fcc.object = Z_OBJ_P(return_value);
-
-			if (zend_call_function(&fci, &fcc) == FAILURE) {
-				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
-			} else {
-				zval_ptr_dtor(&retval);
-			}
-			zend_fcall_info_args_clear(&fci, 1);
-		} else if (ctor_params && zend_hash_num_elements(Z_ARRVAL_P(ctor_params)) > 0) {
-			zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
+			zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
+				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
+		} else if (ctor_params && zend_hash_num_elements(ctor_params) > 0) {
+			zend_argument_value_error(ERROR_ARG_POS(3),
 				"must be empty when the specified class (%s) does not have a constructor",
 				ZSTR_VAL(ce->name)
 			);

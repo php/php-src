@@ -20,6 +20,7 @@ class Foo {
 var_dump(class_exists("Test"));
 var_dump(Test::X);
 var_dump(Test::Y);
+?>
 --EXPECT--
 bool(true)
 int(1)

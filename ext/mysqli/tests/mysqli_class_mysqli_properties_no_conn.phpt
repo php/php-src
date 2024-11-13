@@ -4,18 +4,18 @@ Interface of the class mysqli
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     function dump_properties($mysqli) {
 
         printf("\nClass variables:\n");
         $variables = array_keys(get_class_vars(get_class($mysqli)));
         sort($variables);
-        foreach ($variables as $k => $var) {
+        foreach ($variables as $var) {
             try {
                 printf("%s = '%s'\n", $var, var_export($mysqli->$var, true));
             } catch (Error $exception) {
@@ -25,7 +25,7 @@ require_once('skipifconnectfailure.inc');
 
         printf("\nObject variables:\n");
         $variables = array_keys(get_object_vars($mysqli));
-        foreach ($variables as $k => $var) {
+        foreach ($variables as $var) {
             try {
                 printf("%s = '%s'\n", $var, var_export($mysqli->$var, true));
             } catch (Error $exception) {
@@ -233,7 +233,7 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 ?>
 --CLEAN--
-<?php require_once("clean_table.inc"); ?>
+<?php require_once 'clean_table.inc'; ?>
 --EXPECTF--
 Without RS
 

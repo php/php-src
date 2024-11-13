@@ -16,8 +16,10 @@ var_dump(intlcal_set($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH, 3));
 var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH));
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 int(2)
+
+Deprecated: Function intlcal_set() is deprecated since 8.4, use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead in %s on line %d
 bool(true)
-int(3)
+int(3)

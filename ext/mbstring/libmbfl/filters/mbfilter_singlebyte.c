@@ -87,6 +87,7 @@ static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int
 		&vtbl_wchar_##id, \
 		mb_##id##_to_wchar, \
 		mb_wchar_to_##id, \
+		NULL, \
 		NULL \
 	}
 

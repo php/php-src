@@ -25,7 +25,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing readlink() on a non-existent link ***
 
-Warning: readlink(): readlink failed to read the symbolic link (%s, error %d) in %s on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%s), error %d in %s on line %d
 bool(false)
 
 *** Testing readlink() on existing file ***

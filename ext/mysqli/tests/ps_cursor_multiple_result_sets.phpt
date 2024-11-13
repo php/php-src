@@ -4,11 +4,11 @@ PS using cursor and returning multiple result sets
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . '/connect.inc');
+require_once __DIR__ . '/connect.inc';
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $db = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);

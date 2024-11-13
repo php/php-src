@@ -122,6 +122,7 @@ add_op1_def:
 			}
 			break;
 		case ZEND_ASSIGN_STATIC_PROP_OP:
+		case ZEND_FRAMELESS_ICALL_3:
 			next = opline + 1;
 			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 				var_num = EX_VAR_TO_NUM(next->op1.var);
@@ -150,6 +151,7 @@ add_op1_def:
 		case ZEND_POST_DEC:
 		case ZEND_BIND_GLOBAL:
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_VAR_NO_REF_EX:
 		case ZEND_SEND_VAR_EX:

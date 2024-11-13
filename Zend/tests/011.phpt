@@ -89,7 +89,7 @@ bool(false)
 property_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 property_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 property_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
-property_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
+property_exists(): Argument #1 ($object_or_class) must be of type object|string, true given
 property_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 bool(true)
 bool(true)

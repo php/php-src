@@ -15,11 +15,10 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
 #include "sysvmsg_arginfo.h"
@@ -79,7 +78,6 @@ static zend_object *sysvmsg_queue_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &sysvmsg_queue_object_handlers;
 
 	return &intern->std;
 }
@@ -102,6 +100,7 @@ PHP_MINIT_FUNCTION(sysvmsg)
 {
 	sysvmsg_queue_ce = register_class_SysvMessageQueue();
 	sysvmsg_queue_ce->create_object = sysvmsg_queue_create_object;
+	sysvmsg_queue_ce->default_object_handlers = &sysvmsg_queue_object_handlers;
 
 	memcpy(&sysvmsg_queue_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvmsg_queue_object_handlers.offset = XtOffsetOf(sysvmsg_queue_t, std);
@@ -371,11 +370,19 @@ PHP_FUNCTION(msg_send)
 		php_var_serialize(&msg_var, message, &var_hash);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
+		if (UNEXPECTED(EG(exception))) {
+			smart_str_free(&msg_var);
+			RETURN_THROWS();
+		}
+
+
+		zend_string *str = smart_str_extract(&msg_var);
+		message_len = ZSTR_LEN(str);
 		/* NB: php_msgbuf is 1 char bigger than a long, so there is no need to
 		 * allocate the extra byte. */
-		messagebuffer = safe_emalloc(ZSTR_LEN(msg_var.s), 1, sizeof(struct php_msgbuf));
-		memcpy(messagebuffer->mtext, ZSTR_VAL(msg_var.s), ZSTR_LEN(msg_var.s) + 1);
-		message_len = ZSTR_LEN(msg_var.s);
+		messagebuffer = safe_emalloc(message_len, 1, sizeof(struct php_msgbuf));
+		memcpy(messagebuffer->mtext, ZSTR_VAL(str), message_len + 1);
+		zend_string_release_ex(str, false);
 		smart_str_free(&msg_var);
 	} else {
 		char *p;
@@ -398,7 +405,7 @@ PHP_FUNCTION(msg_send)
 				break;
 
 			default:
-				zend_argument_type_error(3, "must be of type string|int|float|bool, %s given", zend_zval_type_name(message));
+				zend_argument_type_error(3, "must be of type string|int|float|bool, %s given", zend_zval_value_name(message));
 				RETURN_THROWS();
 		}
 

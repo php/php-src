@@ -29,42 +29,34 @@
  * apprentice - make one pass through /etc/magic, learning its secrets.
  */
 
-#include "php.h"
-
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: apprentice.c,v 1.301 2021/02/23 00:51:11 christos Exp $")
+FILE_RCSID("@(#)$File: apprentice.c,v 1.342 2023/07/17 14:38:35 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
 #include <stdlib.h>
-
-#if defined(__hpux) && !defined(HAVE_STRTOULL)
-#if SIZEOF_LONG == 8
-# define strtoull strtoul
-#else
-# define strtoull __strtoull
-#endif
-#endif
-
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#define strtoull _strtoui64
-#else
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#endif
+#include <stddef.h>
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
-
-#ifndef SSIZE_MAX
-#define MAXMAGIC_SIZE        ((ssize_t)0x7fffffff)
-#else
-#define MAXMAGIC_SIZE        SSIZE_MAX
+#ifdef QUICK
+#include <sys/mman.h>
+#endif
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+#include <limits.h>
+#ifdef HAVE_BYTESWAP_H
+#include <byteswap.h>
+#endif
+#ifdef HAVE_SYS_BSWAP_H
+#include <sys/bswap.h>
 #endif
 
 
@@ -80,10 +72,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.301 2021/02/23 00:51:11 christos Exp $")
 #ifdef MAP_FAILED
 #undef MAP_FAILED
 #endif
-#endif
-
-#ifndef offsetof
-#define offsetof(STRUCTURE,FIELD) ((int)((char*)&((STRUCTURE*)0)->FIELD))
 #endif
 
 #ifndef MAP_FAILED
@@ -126,50 +114,62 @@ const size_t file_nformats = FILE_NAMES_SIZE;
 const char *file_names[FILE_NAMES_SIZE];
 const size_t file_nnames = FILE_NAMES_SIZE;
 
-private int getvalue(struct magic_set *ms, struct magic *, const char **, int);
-private int hextoint(int);
-private const char *getstr(struct magic_set *, struct magic *, const char *,
+file_private int getvalue(struct magic_set *ms, struct magic *, const char **, int);
+file_private int hextoint(int);
+file_private const char *getstr(struct magic_set *, struct magic *, const char *,
     int);
-private int parse(struct magic_set *, struct magic_entry *, const char *,
+file_private int parse(struct magic_set *, struct magic_entry *, const char *,
     size_t, int);
-private void eatsize(const char **);
-private int apprentice_1(struct magic_set *, const char *, int);
-private size_t apprentice_magic_strength(const struct magic *);
-private int apprentice_sort(const void *, const void *);
-private void apprentice_list(struct mlist *, int );
-private struct magic_map *apprentice_load(struct magic_set *,
+file_private void eatsize(const char **);
+file_private int apprentice_1(struct magic_set *, const char *, int);
+file_private ssize_t apprentice_magic_strength_1(const struct magic *);
+file_private int apprentice_sort(const void *, const void *);
+file_private void apprentice_list(struct mlist *, int );
+file_private struct magic_map *apprentice_load(struct magic_set *,
     const char *, int);
-private struct mlist *mlist_alloc(void);
-private void mlist_free_all(struct magic_set *);
-private void mlist_free(struct mlist *);
-private void byteswap(struct magic *, uint32_t);
-private void bs1(struct magic *);
-private uint16_t swap2(uint16_t);
-private uint32_t swap4(uint32_t);
-private uint64_t swap8(uint64_t);
-private char *mkdbname(struct magic_set *, const char *, int);
-private struct magic_map *apprentice_map(struct magic_set *, const char *);
-private void apprentice_unmap(struct magic_map *);
-private int apprentice_compile(struct magic_set *, struct magic_map *,
+file_private struct mlist *mlist_alloc(void);
+file_private void mlist_free_all(struct magic_set *);
+file_private void mlist_free(struct mlist *);
+file_private void byteswap(struct magic *, uint32_t);
+file_private void bs1(struct magic *);
+
+#if defined(HAVE_BYTESWAP_H)
+#define swap2(x)	bswap_16(x)
+#define swap4(x)	bswap_32(x)
+#define swap8(x)	bswap_64(x)
+#elif defined(HAVE_SYS_BSWAP_H)
+#define swap2(x)	bswap16(x)
+#define swap4(x)	bswap32(x)
+#define swap8(x)	bswap64(x)
+#else
+file_private uint16_t swap2(uint16_t);
+file_private uint32_t swap4(uint32_t);
+file_private uint64_t swap8(uint64_t);
+#endif
+
+file_private char *mkdbname(struct magic_set *, const char *, int);
+file_private struct magic_map *apprentice_map(struct magic_set *, const char *);
+file_private void apprentice_unmap(struct magic_map *);
+file_private int apprentice_compile(struct magic_set *, struct magic_map *,
     const char *);
-private int check_format_type(const char *, int, const char **);
-private int check_format(struct magic_set *, struct magic *);
-private int get_op(char);
-private int parse_mime(struct magic_set *, struct magic_entry *, const char *,
+file_private int check_format_type(const char *, int, const char **);
+file_private int check_format(struct magic_set *, struct magic *);
+file_private int get_op(char);
+file_private int parse_mime(struct magic_set *, struct magic_entry *, const char *,
     size_t);
-private int parse_strength(struct magic_set *, struct magic_entry *,
+file_private int parse_strength(struct magic_set *, struct magic_entry *,
     const char *, size_t);
-private int parse_apple(struct magic_set *, struct magic_entry *, const char *,
+file_private int parse_apple(struct magic_set *, struct magic_entry *, const char *,
     size_t);
-private int parse_ext(struct magic_set *, struct magic_entry *, const char *,
+file_private int parse_ext(struct magic_set *, struct magic_entry *, const char *,
     size_t);
 
 
-private size_t magicsize = sizeof(struct magic);
+file_private size_t magicsize = sizeof(struct magic);
 
-private const char usg_hdr[] = "cont\toffset\ttype\topcode\tmask\tvalue\tdesc";
+file_private const char usg_hdr[] = "cont\toffset\ttype\topcode\tmask\tvalue\tdesc";
 
-private struct {
+file_private struct {
 	const char *name;
 	size_t len;
 	int (*fun)(struct magic_set *, struct magic_entry *, const char *,
@@ -185,6 +185,39 @@ private struct {
 };
 
 #include "../data_file.c"
+
+#ifdef COMPILE_ONLY
+
+int main(int, char *[]);
+
+int
+main(int argc, char *argv[])
+{
+	int ret;
+	struct magic_set *ms;
+	char *progname;
+
+	if ((progname = strrchr(argv[0], '/')) != NULL)
+		progname++;
+	else
+		progname = argv[0];
+
+	if (argc != 2) {
+		(void)fprintf(stderr, "Usage: %s file\n", progname);
+		return 1;
+	}
+
+	if ((ms = magic_open(MAGIC_CHECK)) == NULL) {
+		(void)fprintf(stderr, "%s: %s\n", progname, strerror(errno));
+		return 1;
+	}
+	ret = magic_compile(ms, argv[1]) == -1 ? 1 : 0;
+	if (ret == 1)
+		(void)fprintf(stderr, "%s: %s\n", progname, magic_error(ms));
+	magic_close(ms);
+	return ret;
+}
+#endif /* COMPILE_ONLY */
 
 struct type_tbl_s {
 	const char name[16];
@@ -254,6 +287,15 @@ static const struct type_tbl_s type_tbl[] = {
 	{ XX("der"),		FILE_DER,		FILE_FMT_STR },
 	{ XX("guid"),		FILE_GUID,		FILE_FMT_STR },
 	{ XX("offset"),		FILE_OFFSET,		FILE_FMT_QUAD },
+	{ XX("bevarint"),	FILE_BEVARINT,		FILE_FMT_STR },
+	{ XX("levarint"),	FILE_LEVARINT,		FILE_FMT_STR },
+	{ XX("msdosdate"),	FILE_MSDOSDATE,		FILE_FMT_STR },
+	{ XX("lemsdosdate"),	FILE_LEMSDOSDATE,	FILE_FMT_STR },
+	{ XX("bemsdosdate"),	FILE_BEMSDOSDATE,	FILE_FMT_STR },
+	{ XX("msdostime"),	FILE_MSDOSTIME,		FILE_FMT_STR },
+	{ XX("lemsdostime"),	FILE_LEMSDOSTIME,	FILE_FMT_STR },
+	{ XX("bemsdostime"),	FILE_BEMSDOSTIME,	FILE_FMT_STR },
+	{ XX("octal"),		FILE_OCTAL,		FILE_FMT_STR },
 	{ XX_NULL,		FILE_INVALID,		FILE_FMT_NONE },
 };
 
@@ -265,12 +307,13 @@ static const struct type_tbl_s special_tbl[] = {
 	{ XX("der"),		FILE_DER,		FILE_FMT_STR },
 	{ XX("name"),		FILE_NAME,		FILE_FMT_STR },
 	{ XX("use"),		FILE_USE,		FILE_FMT_STR },
+	{ XX("octal"),		FILE_OCTAL,		FILE_FMT_STR },
 	{ XX_NULL,		FILE_INVALID,		FILE_FMT_NONE },
 };
 # undef XX
 # undef XX_NULL
 
-private int
+file_private int
 get_type(const struct type_tbl_s *tbl, const char *l, const char **t)
 {
 	const struct type_tbl_s *p;
@@ -285,7 +328,7 @@ get_type(const struct type_tbl_s *tbl, const char *l, const char **t)
 	return p->type;
 }
 
-private off_t
+file_private off_t
 maxoff_t(void) {
 	if (/*CONSTCOND*/sizeof(off_t) == sizeof(int))
 		return CAST(off_t, INT_MAX);
@@ -294,7 +337,7 @@ maxoff_t(void) {
 	return 0x7fffffff;
 }
 
-private int
+file_private int
 get_standard_integer_type(const char *l, const char **t)
 {
 	int type;
@@ -379,7 +422,7 @@ get_standard_integer_type(const char *l, const char **t)
 	return type;
 }
 
-private void
+file_private void
 init_file_tables(void)
 {
 	static int done = 0;
@@ -397,7 +440,7 @@ init_file_tables(void)
 	assert(p - type_tbl == FILE_NAMES_SIZE);
 }
 
-private int
+file_private int
 add_mlist(struct mlist *mlp, struct magic_map *map, size_t idx)
 {
 	struct mlist *ml;
@@ -420,12 +463,11 @@ add_mlist(struct mlist *mlp, struct magic_map *map, size_t idx)
 /*
  * Handle one file or directory.
  */
-private int
+file_private int
 apprentice_1(struct magic_set *ms, const char *fn, int action)
 {
 	struct magic_map *map;
 #ifndef COMPILE_ONLY
-	struct mlist *ml;
 	size_t i;
 #endif
 
@@ -447,7 +489,7 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 	map = apprentice_map(ms, fn);
 	if (map == NULL) {
 		if (ms->flags & MAGIC_CHECK)
-			file_magwarn(ms, "using regular magic file `%s'", fn);
+			file_magwarn(NULL, "using regular magic file `%s'", fn);
 		map = apprentice_load(ms, fn, action);
 		if (map == NULL)
 			return -1;
@@ -460,7 +502,7 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 				apprentice_unmap(map);
 			else
 				mlist_free_all(ms);
-			file_oomem(ms, sizeof(*ml));
+			file_oomem(ms, sizeof(*ms->mlist[0]));
 			return -1;
 		}
 	}
@@ -480,7 +522,7 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 #endif /* COMPILE_ONLY */
 }
 
-protected void
+file_protected void
 file_ms_free(struct magic_set *ms)
 {
 	size_t i;
@@ -497,17 +539,20 @@ file_ms_free(struct magic_set *ms)
 	if (ms->c.li) {
 		efree(ms->c.li);
 	}
+#ifdef USE_C_LOCALE
+	freelocale(ms->c_lc_ctype);
+#endif
 	efree(ms);
 }
 
-protected struct magic_set *
+file_protected struct magic_set *
 file_ms_alloc(int flags)
 {
 	struct magic_set *ms;
 	size_t i, len;
 
 	if ((ms = CAST(struct magic_set *, ecalloc(CAST(size_t, 1u),
-	    sizeof(struct magic_set)))) == NULL)
+	    sizeof(*ms)))) == NULL)
 		return NULL;
 
 	if (magic_setflags(ms, flags) == -1) {
@@ -531,18 +576,23 @@ file_ms_alloc(int flags)
 	ms->indir_max = FILE_INDIR_MAX;
 	ms->name_max = FILE_NAME_MAX;
 	ms->elf_shnum_max = FILE_ELF_SHNUM_MAX;
+	ms->elf_shsize_max = FILE_ELF_SHSIZE_MAX;
 	ms->elf_phnum_max = FILE_ELF_PHNUM_MAX;
 	ms->elf_notes_max = FILE_ELF_NOTES_MAX;
 	ms->regex_max = FILE_REGEX_MAX;
 	ms->bytes_max = FILE_BYTES_MAX;
 	ms->encoding_max = FILE_ENCODING_MAX;
+#ifdef USE_C_LOCALE
+	ms->c_lc_ctype = newlocale(LC_CTYPE_MASK, "C", 0);
+	assert(ms->c_lc_ctype != NULL);
+#endif
 	return ms;
 free:
 	efree(ms);
 	return NULL;
 }
 
-private void
+file_private void
 apprentice_unmap(struct magic_map *map)
 {
 	if (map == NULL)
@@ -562,7 +612,7 @@ apprentice_unmap(struct magic_map *map)
 	efree(map);
 }
 
-private struct mlist *
+file_private struct mlist *
 mlist_alloc(void)
 {
 	struct mlist *mlist;
@@ -573,7 +623,7 @@ mlist_alloc(void)
 	return mlist;
 }
 
-private void
+file_private void
 mlist_free_all(struct magic_set *ms)
 {
 	size_t i;
@@ -584,7 +634,7 @@ mlist_free_all(struct magic_set *ms)
 	}
 }
 
-private void
+file_private void
 mlist_free_one(struct mlist *ml)
 {
 	if (ml->map)
@@ -592,7 +642,7 @@ mlist_free_one(struct mlist *ml)
 	efree(ml);
 }
 
-private void
+file_private void
 mlist_free(struct mlist *mlist)
 {
 	struct mlist *ml, *next;
@@ -609,7 +659,7 @@ mlist_free(struct mlist *mlist)
 }
 
 /* const char *fn: list of magic files and directories */
-protected int
+file_protected int
 file_apprentice(struct magic_set *ms, const char *fn, int action)
 {
 	char *p, *mfn;
@@ -647,7 +697,7 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 	for (i = 0; i < MAGIC_SETS; i++) {
 		mlist_free(ms->mlist[i]);
 		if ((ms->mlist[i] = mlist_alloc()) == NULL) {
-			file_oomem(ms, sizeof(*ms->mlist[i]));
+			file_oomem(ms, sizeof(*ms->mlist[0]));
 			for (j = 0; j < i; j++) {
 				mlist_free(ms->mlist[j]);
 				ms->mlist[j] = NULL;
@@ -659,7 +709,7 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 	fn = mfn;
 
 	while (fn) {
-		p = strchr(fn, PATHSEP);
+		p = CCAST(char *, strchr(fn, PATHSEP));
 		if (p)
 			*p++ = '\0';
 		if (*fn == '\0')
@@ -715,7 +765,7 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
  *	- regular characters or escaped magic characters count 1
  *	- 0 length expressions count as one
  */
-private size_t
+file_private size_t
 nonmagic(const char *str)
 {
 	const char *p;
@@ -755,7 +805,7 @@ nonmagic(const char *str)
 }
 
 
-private size_t
+file_private size_t
 typesize(int type)
 {
 	switch (type) {
@@ -765,6 +815,12 @@ typesize(int type)
 	case FILE_SHORT:
 	case FILE_LESHORT:
 	case FILE_BESHORT:
+	case FILE_MSDOSDATE:
+	case FILE_BEMSDOSDATE:
+	case FILE_LEMSDOSDATE:
+	case FILE_MSDOSTIME:
+	case FILE_BEMSDOSTIME:
+	case FILE_LEMSDOSTIME:
 		return 2;
 
 	case FILE_LONG:
@@ -784,6 +840,8 @@ typesize(int type)
 	case FILE_FLOAT:
 	case FILE_BEFLOAT:
 	case FILE_LEFLOAT:
+	case FILE_BEID3:
+	case FILE_LEID3:
 		return 4;
 
 	case FILE_QUAD:
@@ -802,6 +860,8 @@ typesize(int type)
 	case FILE_BEDOUBLE:
 	case FILE_LEDOUBLE:
 	case FILE_OFFSET:
+	case FILE_BEVARINT:
+	case FILE_LEVARINT:
 		return 8;
 
 	case FILE_GUID:
@@ -815,8 +875,8 @@ typesize(int type)
 /*
  * Get weight of this magic entry, for sorting purposes.
  */
-private size_t
-apprentice_magic_strength(const struct magic *m)
+file_private ssize_t
+apprentice_magic_strength_1(const struct magic *m)
 {
 #define MULT 10U
 	size_t ts, v;
@@ -824,8 +884,10 @@ apprentice_magic_strength(const struct magic *m)
 
 	switch (m->type) {
 	case FILE_DEFAULT:	/* make sure this sorts last */
-		if (m->factor_op != FILE_FACTOR_OP_NONE)
-			abort();
+		if (m->factor_op != FILE_FACTOR_OP_NONE) {
+			file_magwarn(NULL, "Usupported factor_op in default %d",
+			    m->factor_op);
+		}
 		return 0;
 
 	case FILE_BYTE:
@@ -862,16 +924,30 @@ apprentice_magic_strength(const struct magic *m)
 	case FILE_DOUBLE:
 	case FILE_BEDOUBLE:
 	case FILE_LEDOUBLE:
+	case FILE_BEVARINT:
+	case FILE_LEVARINT:
 	case FILE_GUID:
+	case FILE_BEID3:
+	case FILE_LEID3:
 	case FILE_OFFSET:
+	case FILE_MSDOSDATE:
+	case FILE_BEMSDOSDATE:
+	case FILE_LEMSDOSDATE:
+	case FILE_MSDOSTIME:
+	case FILE_BEMSDOSTIME:
+	case FILE_LEMSDOSTIME:
 		ts = typesize(m->type);
-		if (ts == FILE_BADSIZE)
+		if (ts == FILE_BADSIZE) {
+			(void)fprintf(stderr, "Bad size for type %d\n",
+			    m->type);
 			abort();
+		}
 		val += ts * MULT;
 		break;
 
 	case FILE_PSTRING:
 	case FILE_STRING:
+	case FILE_OCTAL:
 		val += m->vallen * MULT;
 		break;
 
@@ -894,6 +970,7 @@ apprentice_magic_strength(const struct magic *m)
 	case FILE_INDIRECT:
 	case FILE_NAME:
 	case FILE_USE:
+	case FILE_CLEAR:
 		break;
 
 	case FILE_DER:
@@ -930,6 +1007,34 @@ apprentice_magic_strength(const struct magic *m)
 		abort();
 	}
 
+	return val;
+}
+
+
+/*ARGSUSED*/
+file_protected size_t
+file_magic_strength(const struct magic *m,
+    size_t nmagic __attribute__((__unused__)))
+{
+	ssize_t val = apprentice_magic_strength_1(m);
+
+#ifdef notyet
+	if (m->desc[0] == '\0') {
+		size_t i;
+		/*
+		 * Magic entries with no description get their continuations
+		 * added
+		 */
+		for (i = 1; m[i].cont_level != 0 && i < MIN(nmagic, 3); i++) {
+			ssize_t v = apprentice_magic_strength_1(&m[i]) >>
+			    (i + 1);
+			val += v;
+			if (m[i].desc[0] != '\0')
+				break;
+		}
+	}
+#endif
+
 	switch (m->factor_op) {
 	case FILE_FACTOR_OP_NONE:
 		break;
@@ -946,31 +1051,35 @@ apprentice_magic_strength(const struct magic *m)
 		val /= m->factor;
 		break;
 	default:
+		(void)fprintf(stderr, "Bad factor_op %u\n", m->factor_op);
 		abort();
 	}
 
 	if (val <= 0)	/* ensure we only return 0 for FILE_DEFAULT */
 		val = 1;
 
+#ifndef notyet
 	/*
 	 * Magic entries with no description get a bonus because they depend
 	 * on subsequent magic entries to print something.
 	 */
 	if (m->desc[0] == '\0')
 		val++;
+#endif
+
 	return val;
 }
 
 /*
  * Sort callback for sorting entries by "strength" (basically length)
  */
-private int
+file_private int
 apprentice_sort(const void *a, const void *b)
 {
 	const struct magic_entry *ma = CAST(const struct magic_entry *, a);
 	const struct magic_entry *mb = CAST(const struct magic_entry *, b);
-	size_t sa = apprentice_magic_strength(ma->mp);
-	size_t sb = apprentice_magic_strength(mb->mp);
+	size_t sa = file_magic_strength(ma->mp, ma->cont_count);
+	size_t sb = file_magic_strength(mb->mp, mb->cont_count);
 	if (sa == sb)
 		return 0;
 	else if (sa > sb)
@@ -982,10 +1091,10 @@ apprentice_sort(const void *a, const void *b)
 /*
  * Shows sorted patterns list in the order which is used for the matching
  */
-private void
+file_private void
 apprentice_list(struct mlist *mlist, int mode)
 {
-	uint32_t magindex = 0;
+	uint32_t magindex, descindex, mimeindex, lineindex;
 	struct mlist *ml;
 	for (ml = mlist->next; ml != mlist; ml = ml->next) {
 		for (magindex = 0; magindex < ml->nmagic; magindex++) {
@@ -1002,22 +1111,29 @@ apprentice_list(struct mlist *mlist, int mode)
 			 * Try to iterate over the tree until we find item with
 			 * description/mimetype.
 			 */
-			while (magindex + 1 < ml->nmagic &&
-			       ml->magic[magindex + 1].cont_level != 0 &&
-			       *ml->magic[magindex].desc == '\0' &&
-			       *ml->magic[magindex].mimetype == '\0')
-				magindex++;
+			lineindex = descindex = mimeindex = magindex;
+			for (; magindex + 1 < ml->nmagic &&
+			   ml->magic[magindex + 1].cont_level != 0;
+			   magindex++) {
+				uint32_t mi = magindex + 1;
+				if (*ml->magic[descindex].desc == '\0'
+				    && *ml->magic[mi].desc)
+					descindex = mi;
+				if (*ml->magic[mimeindex].mimetype == '\0'
+				    && *ml->magic[mi].mimetype)
+					mimeindex = mi;
+			}
 
 			printf("Strength = %3" SIZE_T_FORMAT "u@%u: %s [%s]\n",
-			    apprentice_magic_strength(m),
-			    ml->magic[magindex].lineno,
-			    ml->magic[magindex].desc,
-			    ml->magic[magindex].mimetype);
+			    file_magic_strength(m, ml->nmagic - magindex),
+			    ml->magic[lineindex].lineno,
+			    ml->magic[descindex].desc,
+			    ml->magic[mimeindex].mimetype);
 		}
 	}
 }
 
-private void
+file_private void
 set_test_type(struct magic *mstart, struct magic *m)
 {
 	switch (m->type) {
@@ -1055,9 +1171,18 @@ set_test_type(struct magic *mstart, struct magic *m)
 	case FILE_DOUBLE:
 	case FILE_BEDOUBLE:
 	case FILE_LEDOUBLE:
+	case FILE_BEVARINT:
+	case FILE_LEVARINT:
 	case FILE_DER:
 	case FILE_GUID:
 	case FILE_OFFSET:
+	case FILE_MSDOSDATE:
+	case FILE_BEMSDOSDATE:
+	case FILE_LEMSDOSDATE:
+	case FILE_MSDOSTIME:
+	case FILE_BEMSDOSTIME:
+	case FILE_LEMSDOSTIME:
+	case FILE_OCTAL:
 		mstart->flag |= BINTEST;
 		break;
 	case FILE_STRING:
@@ -1099,24 +1224,26 @@ set_test_type(struct magic *mstart, struct magic *m)
 	}
 }
 
-private int
+file_private int
 addentry(struct magic_set *ms, struct magic_entry *me,
    struct magic_entry_set *mset)
 {
 	size_t i = me->mp->type == FILE_NAME ? 1 : 0;
-	if (mset[i].count == mset[i].max) {
+	if (mset[i].me == NULL || mset[i].count == mset[i].max) {
 		struct magic_entry *mp;
 
-		mset[i].max += ALLOC_INCR;
+		size_t incr = mset[i].max + ALLOC_INCR;
 		if ((mp = CAST(struct magic_entry *,
-		    erealloc(mset[i].me, sizeof(*mp) * mset[i].max))) ==
+		    erealloc(mset[i].me, sizeof(*mp) * incr))) ==
 		    NULL) {
-			file_oomem(ms, sizeof(*mp) * mset[i].max);
+			file_oomem(ms, sizeof(*mp) * incr);
 			return -1;
 		}
 		(void)memset(&mp[mset[i].count], 0, sizeof(*mp) *
 		    ALLOC_INCR);
 		mset[i].me = mp;
+		mset[i].max = CAST(uint32_t, incr);
+		assert(mset[i].max == incr);
 	}
 	mset[i].me[mset[i].count++] = *me;
 	memset(me, 0, sizeof(*me));
@@ -1126,7 +1253,7 @@ addentry(struct magic_set *ms, struct magic_entry *me,
 /*
  * Load and parse one file.
  */
-private void
+file_private void
 load_1(struct magic_set *ms, int action, const char *fn, int *errs,
    struct magic_entry_set *mset)
 {
@@ -1187,7 +1314,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 					continue;
 				}
 				if ((*bang[i].fun)(ms, &me,
-				    line + bang[i].len + 2,
+				    line + bang[i].len + 2, 
 				    len - bang[i].len - 2) != 0) {
 					(*errs)++;
 					continue;
@@ -1219,14 +1346,14 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
  * parse a file or directory of files
  * const char *fn: name of magic file or directory
  */
-private int
+file_private int
 cmpstrp(const void *p1, const void *p2)
 {
         return strcmp(*RCAST(char *const *, p1), *RCAST(char *const *, p2));
 }
 
 
-private uint32_t
+file_private uint32_t
 set_text_binary(struct magic_set *ms, struct magic_entry *me, uint32_t nme,
     uint32_t starttest)
 {
@@ -1259,7 +1386,7 @@ set_text_binary(struct magic_set *ms, struct magic_entry *me, uint32_t nme,
 	return i;
 }
 
-private void
+file_private void
 set_last_default(struct magic_set *ms, struct magic_entry *me, uint32_t nme)
 {
 	uint32_t i;
@@ -1280,7 +1407,7 @@ set_last_default(struct magic_set *ms, struct magic_entry *me, uint32_t nme)
 	}
 }
 
-private int
+file_private int
 coalesce_entries(struct magic_set *ms, struct magic_entry *me, uint32_t nme,
     struct magic **ma, uint32_t *nma)
 {
@@ -1289,6 +1416,12 @@ coalesce_entries(struct magic_set *ms, struct magic_entry *me, uint32_t nme,
 
 	for (i = 0; i < nme; i++)
 		mentrycount += me[i].cont_count;
+
+	if (mentrycount == 0) {
+		*ma = NULL;
+		*nma = 0;
+		return 0;
+	}
 
 	slen = sizeof(**ma) * mentrycount;
 	if ((*ma = CAST(struct magic *, emalloc(slen))) == NULL) {
@@ -1306,7 +1439,7 @@ coalesce_entries(struct magic_set *ms, struct magic_entry *me, uint32_t nme,
 	return 0;
 }
 
-private void
+file_private void
 magic_entry_free(struct magic_entry *me, uint32_t nme)
 {
 	uint32_t i;
@@ -1317,7 +1450,7 @@ magic_entry_free(struct magic_entry *me, uint32_t nme)
 	efree(me);
 }
 
-private struct magic_map *
+file_private struct magic_map *
 apprentice_load(struct magic_set *ms, const char *fn, int action)
 {
 	int errs = 0;
@@ -1407,7 +1540,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 			i = set_text_binary(ms, mset[j].me, mset[j].count, i);
 		}
 		if (mset[j].me)
-			qsort(mset[j].me, mset[j].count, sizeof(*mset[j].me),
+			qsort(mset[j].me, mset[j].count, sizeof(*mset[0].me),
 			    apprentice_sort);
 
 		/*
@@ -1441,7 +1574,7 @@ out:
 /*
  * extend the sign bit if the comparison is to be signed
  */
-protected uint64_t
+file_protected uint64_t
 file_signextend(struct magic_set *ms, struct magic *m, uint64_t v)
 {
 	if (!(m->flag & UNSIGNED)) {
@@ -1474,6 +1607,12 @@ file_signextend(struct magic_set *ms, struct magic *m, uint64_t v)
 		case FILE_FLOAT:
 		case FILE_BEFLOAT:
 		case FILE_LEFLOAT:
+		case FILE_MSDOSDATE:
+		case FILE_BEMSDOSDATE:
+		case FILE_LEMSDOSDATE:
+		case FILE_MSDOSTIME:
+		case FILE_BEMSDOSTIME:
+		case FILE_LEMSDOSTIME:
 			v = CAST(int32_t, v);
 			break;
 		case FILE_QUAD:
@@ -1492,6 +1631,8 @@ file_signextend(struct magic_set *ms, struct magic *m, uint64_t v)
 		case FILE_BEDOUBLE:
 		case FILE_LEDOUBLE:
 		case FILE_OFFSET:
+		case FILE_BEVARINT:
+		case FILE_LEVARINT:
 			v = CAST(int64_t, v);
 			break;
 		case FILE_STRING:
@@ -1507,6 +1648,7 @@ file_signextend(struct magic_set *ms, struct magic *m, uint64_t v)
 		case FILE_CLEAR:
 		case FILE_DER:
 		case FILE_GUID:
+		case FILE_OCTAL:
 			break;
 		default:
 			if (ms->flags & MAGIC_CHECK)
@@ -1518,7 +1660,7 @@ file_signextend(struct magic_set *ms, struct magic *m, uint64_t v)
 	return v;
 }
 
-private int
+file_private int
 string_modifier_check(struct magic_set *ms, struct magic *m)
 {
 	if ((ms->flags & MAGIC_CHECK) == 0)
@@ -1577,7 +1719,7 @@ string_modifier_check(struct magic_set *ms, struct magic *m)
 	return 0;
 }
 
-private int
+file_private int
 get_op(char c)
 {
 	switch (c) {
@@ -1603,7 +1745,7 @@ get_op(char c)
 }
 
 #ifdef ENABLE_CONDITIONALS
-private int
+file_private int
 get_cond(const char *l, const char **t)
 {
 	static const struct cond_tbl_s {
@@ -1629,7 +1771,7 @@ get_cond(const char *l, const char **t)
 	return p->cond;
 }
 
-private int
+file_private int
 check_cond(struct magic_set *ms, int cond, uint32_t cont_level)
 {
 	int last_cond;
@@ -1673,7 +1815,7 @@ check_cond(struct magic_set *ms, int cond, uint32_t cont_level)
 }
 #endif /* ENABLE_CONDITIONALS */
 
-private int
+file_private int
 parse_indirect_modifier(struct magic_set *ms, struct magic *m, const char **lp)
 {
 	const char *l = *lp;
@@ -1694,7 +1836,7 @@ parse_indirect_modifier(struct magic_set *ms, struct magic *m, const char **lp)
 	return 0;
 }
 
-private void
+file_private void
 parse_op_modifier(struct magic_set *ms, struct magic *m, const char **lp,
     int op)
 {
@@ -1711,7 +1853,7 @@ parse_op_modifier(struct magic_set *ms, struct magic *m, const char **lp,
 	*lp = l;
 }
 
-private int
+file_private int
 parse_string_modifier(struct magic_set *ms, struct magic *m, const char **lp)
 {
 	const char *l = *lp;
@@ -1755,6 +1897,9 @@ parse_string_modifier(struct magic_set *ms, struct magic *m, const char **lp)
 			break;
 		case CHAR_TRIM:
 			m->str_flags |= STRING_TRIM;
+			break;
+		case CHAR_FULL_WORD:
+			m->str_flags |= STRING_FULL_WORD;
 			break;
 		case CHAR_PSTRING_1_LE:
 #define SET_LENGTH(a) m->str_flags = (m->str_flags & ~PSTRING_LEN) | (a)
@@ -1815,7 +1960,7 @@ out:
 /*
  * parse one line from magic file, put into magic[index++] if valid
  */
-private int
+file_private int
 parse(struct magic_set *ms, struct magic_entry *me, const char *line,
     size_t lineno, int action)
 {
@@ -1977,6 +2122,9 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
 				break;
 			case 'I':
 				m->in_type = FILE_BEID3;
+				break;
+			case 'o':
+				m->in_type = FILE_OCTAL;
 				break;
 			case 'q':
 				m->in_type = FILE_LEQUAD;
@@ -2228,13 +2376,15 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
  * parse a STRENGTH annotation line from magic file, put into magic[index - 1]
  * if valid
  */
-private int
+/*ARGSUSED*/
+file_private int
 parse_strength(struct magic_set *ms, struct magic_entry *me, const char *line,
-    size_t len)
+    size_t len __attribute__((__unused__)))
 {
 	const char *l = line;
 	char *el;
 	unsigned long factor;
+	char sbuf[512];
 	struct magic *m = &me->mp[0];
 
 	if (m->factor_op != FILE_FACTOR_OP_NONE) {
@@ -2245,12 +2395,15 @@ parse_strength(struct magic_set *ms, struct magic_entry *me, const char *line,
 	}
 	if (m->type == FILE_NAME) {
 		file_magwarn(ms, "%s: Strength setting is not supported in "
-		    "\"name\" magic entries", m->value.s);
+		    "\"name\" magic entries",
+		    file_printable(ms, sbuf, sizeof(sbuf), m->value.s,
+		    sizeof(m->value.s)));
 		return -1;
 	}
 	EATAB;
 	switch (*l) {
 	case FILE_FACTOR_OP_NONE:
+		break;
 	case FILE_FACTOR_OP_PLUS:
 	case FILE_FACTOR_OP_MINUS:
 	case FILE_FACTOR_OP_TIMES:
@@ -2284,15 +2437,16 @@ out:
 	return -1;
 }
 
-private int
+file_private int
 goodchar(unsigned char x, const char *extra)
 {
 	return (isascii(x) && isalnum(x)) || strchr(extra, x);
 }
 
-private int
+file_private int
 parse_extra(struct magic_set *ms, struct magic_entry *me, const char *line,
-    size_t llen, zend_off_t off, size_t len, const char *name, const char *extra, int nt)
+    size_t llen, zend_off_t off, size_t len, const char *name, const char *extra,
+    int nt)
 {
 	size_t i;
 	const char *l = line;
@@ -2342,47 +2496,43 @@ parse_extra(struct magic_set *ms, struct magic_entry *me, const char *line,
  * Parse an Apple CREATOR/TYPE annotation from magic file and put it into
  * magic[index - 1]
  */
-private int
+file_private int
 parse_apple(struct magic_set *ms, struct magic_entry *me, const char *line,
     size_t len)
 {
-	struct magic *m = &me->mp[0];
-
 	return parse_extra(ms, me, line, len,
 	    CAST(off_t, offsetof(struct magic, apple)),
-	    sizeof(m->apple), "APPLE", "!+-./?", 0);
+	    sizeof(me->mp[0].apple), "APPLE", "!+-./?", 0);
 }
 
 /*
  * Parse a comma-separated list of extensions
  */
-private int
+file_private int
 parse_ext(struct magic_set *ms, struct magic_entry *me, const char *line,
     size_t len)
 {
-	struct magic *m = &me->mp[0];
-
 	return parse_extra(ms, me, line, len,
 	    CAST(off_t, offsetof(struct magic, ext)),
-	    sizeof(m->ext), "EXTENSION", ",!+-/@?_$", 0);
+	    sizeof(me->mp[0].ext), "EXTENSION", ",!+-/@?_$&~", 0);
+	    /* & for b&w */
+	    /* ~ for journal~ */
 }
 
 /*
  * parse a MIME annotation line from magic file, put into magic[index - 1]
  * if valid
  */
-private int
+file_private int
 parse_mime(struct magic_set *ms, struct magic_entry *me, const char *line,
     size_t len)
 {
-	struct magic *m = &me->mp[0];
-
 	return parse_extra(ms, me, line, len,
 	    CAST(off_t, offsetof(struct magic, mimetype)),
-	    sizeof(m->mimetype), "MIME", "+-/.$?:{}", 1);
+	    sizeof(me->mp[0].mimetype), "MIME", "+-/.$?:{}", 1);
 }
 
-private int
+file_private int
 check_format_type(const char *ptr, int type, const char **estr)
 {
 	int quad = 0, h;
@@ -2418,15 +2568,12 @@ check_format_type(const char *ptr, int type, const char **estr)
 				h = 0;
 				break;
 			default:
+				fprintf(stderr, "Bad number format %d", type);
 				abort();
 			}
 		} else
 			h = 0;
-		if (*ptr == '-')
-			ptr++;
-		if (*ptr == '.')
-			ptr++;
-		if (*ptr == '#')
+		while (*ptr && strchr("-.#", *ptr) != NULL)
 			ptr++;
 #define CHECKLEN() do { \
 	for (len = cnt = 0; isdigit(CAST(unsigned char, *ptr)); ptr++, cnt++) \
@@ -2564,10 +2711,12 @@ check_format_type(const char *ptr, int type, const char **estr)
 
 	default:
 		/* internal error */
+		fprintf(stderr, "Bad file format %d", type);
 		abort();
 	}
 invalid:
 	*estr = "not valid";
+	return -1;
 toolong:
 	*estr = "too long";
 	return -1;
@@ -2577,7 +2726,7 @@ toolong:
  * Check that the optional printf format in description matches
  * the type of the magic.
  */
-private int
+file_private int
 check_format(struct magic_set *ms, struct magic *m)
 {
 	char *ptr;
@@ -2633,11 +2782,12 @@ check_format(struct magic_set *ms, struct magic *m)
  * pointer, according to the magic type.  Update the string pointer to point
  * just after the number read.  Return 0 for success, non-zero for failure.
  */
-private int
+file_private int
 getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 {
 	char *ep;
 	uint64_t ull;
+	int y;
 
 	switch (m->type) {
 	case FILE_BESTRING16:
@@ -2649,6 +2799,7 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 	case FILE_NAME:
 	case FILE_USE:
 	case FILE_DER:
+	case FILE_OCTAL:
 		*p = getstr(ms, m, *p, action == FILE_COMPILE);
 		if (*p == NULL) {
 			if (ms->flags & MAGIC_CHECK)
@@ -2710,6 +2861,7 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 		m->value.q = file_signextend(ms, m, ull);
 		if (*p == ep) {
 			file_magwarn(ms, "Unparsable number `%s'", *p);
+			return -1;
 		} else {
 			size_t ts = typesize(m->type);
 			uint64_t x;
@@ -2719,31 +2871,38 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 				file_magwarn(ms,
 				    "Expected numeric type got `%s'",
 				    type_tbl[m->type].name);
+				return -1;
 			}
 			for (q = *p; isspace(CAST(unsigned char, *q)); q++)
 				continue;
-			if (*q == '-')
+			if (*q == '-' && ull != UINT64_MAX)
 				ull = -CAST(int64_t, ull);
 			switch (ts) {
 			case 1:
 				x = CAST(uint64_t, ull & ~0xffULL);
+				y = (x & ~0xffULL) != ~0xffULL;
 				break;
 			case 2:
 				x = CAST(uint64_t, ull & ~0xffffULL);
+				y = (x & ~0xffffULL) != ~0xffffULL;
 				break;
 			case 4:
 				x = CAST(uint64_t, ull & ~0xffffffffULL);
+				y = (x & ~0xffffffffULL) != ~0xffffffffULL;
 				break;
 			case 8:
 				x = 0;
+				y = 0;
 				break;
 			default:
+				fprintf(stderr, "Bad width %zu", ts);
 				abort();
 			}
-			if (x) {
+			if (x && y) {
 				file_magwarn(ms, "Overflow for numeric"
 				    " type `%s' value %#" PRIx64,
 				    type_tbl[m->type].name, ull);
+				return -1;
 			}
 		}
 		if (errno == 0) {
@@ -2760,7 +2919,7 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
  * Copy the converted version to "m->value.s", and the length in m->vallen.
  * Return updated scan pointer as function result. Warn if set.
  */
-private const char *
+file_private const char *
 getstr(struct magic_set *ms, struct magic *m, const char *s, int warn)
 {
 	const char *origs = s;
@@ -2770,6 +2929,7 @@ getstr(struct magic_set *ms, struct magic *m, const char *s, int warn)
 	char	*pmax = p + plen - 1;
 	int	c;
 	int	val;
+	size_t	bracket_nesting = 0;
 
 	while ((c = *s++) != '\0') {
 		if (isspace(CAST(unsigned char, c)))
@@ -2778,135 +2938,149 @@ getstr(struct magic_set *ms, struct magic *m, const char *s, int warn)
 			file_error(ms, 0, "string too long: `%s'", origs);
 			return NULL;
 		}
-		if (c == '\\') {
-			switch(c = *s++) {
+		if (c != '\\') {
+		    if (c == '[') {
+			    bracket_nesting++;
+		    }
+		    if (c == ']' && bracket_nesting > 0) {
+			    bracket_nesting--;
+		    }
+		    *p++ = CAST(char, c);
+		    continue;
+		}
+		switch(c = *s++) {
 
-			case '\0':
-				if (warn)
-					file_magwarn(ms, "incomplete escape");
-				s--;
-				goto out;
-
-			case '\t':
-				if (warn) {
-					file_magwarn(ms,
-					    "escaped tab found, use \\t instead");
-					warn = 0;	/* already did */
-				}
-				/*FALLTHROUGH*/
-			default:
-				if (warn) {
-					if (isprint(CAST(unsigned char, c))) {
-						/* Allow escaping of
-						 * ``relations'' */
-						if (strchr("<>&^=!", c) == NULL
-						    && (m->type != FILE_REGEX ||
-						    strchr("[]().*?^$|{}", c)
-						    == NULL)) {
-							file_magwarn(ms, "no "
-							    "need to escape "
-							    "`%c'", c);
-						}
-					} else {
-						file_magwarn(ms,
-						    "unknown escape sequence: "
-						    "\\%03o", c);
+		case '\0':
+			if (warn)
+				file_magwarn(ms, "incomplete escape");
+			s--;
+			goto out;
+		case '.':
+			if (m->type == FILE_REGEX &&
+			    bracket_nesting == 0 && warn) {
+				file_magwarn(ms, "escaped dot ('.') found, "
+				    "use \\\\. instead");
+			}
+			warn = 0; /* already did */
+			/*FALLTHROUGH*/
+		case '\t':
+			if (warn) {
+				file_magwarn(ms,
+				    "escaped tab found, use \\\\t instead");
+				warn = 0;	/* already did */
+			}
+			/*FALLTHROUGH*/
+		default:
+			if (warn) {
+				if (isprint(CAST(unsigned char, c))) {
+					/* Allow escaping of
+					 * ``relations'' */
+					if (strchr("<>&^=!", c) == NULL
+					    && (m->type != FILE_REGEX ||
+					    strchr("[]().*?^$|{}", c)
+					    == NULL)) {
+						file_magwarn(ms, "no "
+						    "need to escape "
+						    "`%c'", c);
 					}
+				} else {
+					file_magwarn(ms,
+					    "unknown escape sequence: "
+					    "\\%03o", c);
 				}
-				/*FALLTHROUGH*/
-			/* space, perhaps force people to use \040? */
-			case ' ':
+			}
+			/*FALLTHROUGH*/
+		/* space, perhaps force people to use \040? */
+		case ' ':
 #if 0
-			/*
-			 * Other things people escape, but shouldn't need to,
-			 * so we disallow them
-			 */
-			case '\'':
-			case '"':
-			case '?':
+		/*
+		 * Other things people escape, but shouldn't need to,
+		 * so we disallow them
+		 */
+		case '\'':
+		case '"':
+		case '?':
 #endif
-			/* Relations */
-			case '>':
-			case '<':
-			case '&':
-			case '^':
-			case '=':
-			case '!':
-			/* and baskslash itself */
-			case '\\':
-				*p++ = CAST(char, c);
-				break;
+		/* Relations */
+		case '>':
+		case '<':
+		case '&':
+		case '^':
+		case '=':
+		case '!':
+		/* and backslash itself */
+		case '\\':
+			*p++ = CAST(char, c);
+			break;
 
-			case 'a':
-				*p++ = '\a';
-				break;
+		case 'a':
+			*p++ = '\a';
+			break;
 
-			case 'b':
-				*p++ = '\b';
-				break;
+		case 'b':
+			*p++ = '\b';
+			break;
 
-			case 'f':
-				*p++ = '\f';
-				break;
+		case 'f':
+			*p++ = '\f';
+			break;
 
-			case 'n':
-				*p++ = '\n';
-				break;
+		case 'n':
+			*p++ = '\n';
+			break;
 
-			case 'r':
-				*p++ = '\r';
-				break;
+		case 'r':
+			*p++ = '\r';
+			break;
 
-			case 't':
-				*p++ = '\t';
-				break;
+		case 't':
+			*p++ = '\t';
+			break;
 
-			case 'v':
-				*p++ = '\v';
-				break;
+		case 'v':
+			*p++ = '\v';
+			break;
 
-			/* \ and up to 3 octal digits */
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-				val = c - '0';
-				c = *s++;  /* try for 2 */
-				if (c >= '0' && c <= '7') {
-					val = (val << 3) | (c - '0');
-					c = *s++;  /* try for 3 */
-					if (c >= '0' && c <= '7')
-						val = (val << 3) | (c-'0');
-					else
-						--s;
-				}
+		/* \ and up to 3 octal digits */
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+			val = c - '0';
+			c = *s++;  /* try for 2 */
+			if (c >= '0' && c <= '7') {
+				val = (val << 3) | (c - '0');
+				c = *s++;  /* try for 3 */
+				if (c >= '0' && c <= '7')
+					val = (val << 3) | (c-'0');
 				else
 					--s;
-				*p++ = CAST(char, val);
-				break;
-
-			/* \x and up to 2 hex digits */
-			case 'x':
-				val = 'x';	/* Default if no digits */
-				c = hextoint(*s++);	/* Get next char */
-				if (c >= 0) {
-					val = c;
-					c = hextoint(*s++);
-					if (c >= 0)
-						val = (val << 4) + c;
-					else
-						--s;
-				} else
-					--s;
-				*p++ = CAST(char, val);
-				break;
 			}
-		} else
-			*p++ = CAST(char, c);
+			else
+				--s;
+			*p++ = CAST(char, val);
+			break;
+
+		/* \x and up to 2 hex digits */
+		case 'x':
+			val = 'x';	/* Default if no digits */
+			c = hextoint(*s++);	/* Get next char */
+			if (c >= 0) {
+				val = c;
+				c = hextoint(*s++);
+				if (c >= 0)
+					val = (val << 4) + c;
+				else
+					--s;
+			} else
+				--s;
+			*p++ = CAST(char, val);
+			break;
+		}
 	}
 	--s;
 out:
@@ -2923,7 +3097,7 @@ out:
 
 
 /* Single hex char to int; -1 if not a hex char. */
-private int
+file_private int
 hextoint(int c)
 {
 	if (!isascii(CAST(unsigned char, c)))
@@ -2941,7 +3115,7 @@ hextoint(int c)
 /*
  * Print a string containing C character escapes.
  */
-protected void
+file_protected void
 file_showstr(FILE *fp, const char *s, size_t len)
 {
 	char	c;
@@ -3001,7 +3175,7 @@ file_showstr(FILE *fp, const char *s, size_t len)
 /*
  * eatsize(): Eat the size spec from a number [eg. 10UL]
  */
-private void
+file_private void
 eatsize(const char **p)
 {
 	const char *l = *p;
@@ -3028,7 +3202,7 @@ eatsize(const char **p)
  * handle a compiled file.
  */
 
-private struct magic_map *
+file_private struct magic_map *
 apprentice_map(struct magic_set *ms, const char *fn)
 {
 	uint32_t *ptr;
@@ -3174,11 +3348,12 @@ error:
 /*
  * handle an mmaped file.
  */
-private int
+file_private int
 apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 {
 	static const size_t nm = sizeof(*map->nmagic) * MAGIC_SETS;
 	static const size_t m = sizeof(**map->magic);
+	php_stream *stream;
 	size_t len;
 	char *dbname;
 	int rv = -1;
@@ -3187,7 +3362,6 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 		struct magic m;
 		uint32_t h[2 + MAGIC_SETS];
 	} hdr;
-	php_stream *stream;
 
 	dbname = mkdbname(ms, fn, 1);
 
@@ -3219,20 +3393,20 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 		}
 	}
 
+	rv = 0;
 	if (stream) {
 		php_stream_close(stream);
 	}
-	rv = 0;
 out:
 	efree(dbname);
 	return rv;
 }
 
-private const char ext[] = ".mgc";
+file_private const char ext[] = ".mgc";
 /*
  * make a dbname
  */
-private char *
+file_private char *
 mkdbname(struct magic_set *ms, const char *fn, int strip)
 {
 	const char *p, *q;
@@ -3280,7 +3454,7 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 /*
  * Byteswap an mmap'ed file if needed
  */
-private void
+file_private void
 byteswap(struct magic *magic, uint32_t nmagic)
 {
 	uint32_t i;
@@ -3288,10 +3462,11 @@ byteswap(struct magic *magic, uint32_t nmagic)
 		bs1(&magic[i]);
 }
 
+#if !defined(HAVE_BYTESWAP_H) && !defined(HAVE_SYS_BSWAP_H)
 /*
  * swap a short
  */
-private uint16_t
+file_private uint16_t
 swap2(uint16_t sv)
 {
 	uint16_t rv;
@@ -3305,7 +3480,7 @@ swap2(uint16_t sv)
 /*
  * swap an int
  */
-private uint32_t
+file_private uint32_t
 swap4(uint32_t sv)
 {
 	uint32_t rv;
@@ -3321,13 +3496,13 @@ swap4(uint32_t sv)
 /*
  * swap a quad
  */
-private uint64_t
+file_private uint64_t
 swap8(uint64_t sv)
 {
 	uint64_t rv;
 	uint8_t *s = RCAST(uint8_t *, RCAST(void *, &sv));
 	uint8_t *d = RCAST(uint8_t *, RCAST(void *, &rv));
-#if 0
+# if 0
 	d[0] = s[3];
 	d[1] = s[2];
 	d[2] = s[1];
@@ -3336,7 +3511,7 @@ swap8(uint64_t sv)
 	d[5] = s[6];
 	d[6] = s[5];
 	d[7] = s[4];
-#else
+# else
 	d[0] = s[7];
 	d[1] = s[6];
 	d[2] = s[5];
@@ -3345,14 +3520,45 @@ swap8(uint64_t sv)
 	d[5] = s[2];
 	d[6] = s[1];
 	d[7] = s[0];
-#endif
+# endif
 	return rv;
 }
+#endif
+
+file_protected uintmax_t 
+file_varint2uintmax_t(const unsigned char *us, int t, size_t *l)
+{
+        uintmax_t x = 0;
+        const unsigned char *c;
+        if (t == FILE_LEVARINT) {
+                for (c = us; *c; c++) {
+                        if ((*c & 0x80) == 0)
+                                break;
+                }
+		if (l)
+			*l = c - us + 1;
+                for (; c >= us; c--) {
+                        x |= *c & 0x7f;
+                        x <<= 7;
+                }
+        } else {
+                for (c = us; *c; c++) {
+			x |= *c & 0x7f;
+			if ((*c & 0x80) == 0)
+				break;
+			x <<= 7;
+                }
+		if (l)
+			*l = c - us + 1;
+        }
+	return x;
+}
+
 
 /*
  * byteswap a single magic entry
  */
-private void
+file_private void
 bs1(struct magic *m)
 {
 	m->cont_level = swap2(m->cont_level);
@@ -3369,7 +3575,7 @@ bs1(struct magic *m)
 	}
 }
 
-protected size_t
+file_protected size_t
 file_pstring_length_size(struct magic_set *ms, const struct magic *m)
 {
 	switch (m->str_flags & PSTRING_LEN) {
@@ -3388,7 +3594,7 @@ file_pstring_length_size(struct magic_set *ms, const struct magic *m)
 		return FILE_BADSIZE;
 	}
 }
-protected size_t
+file_protected size_t
 file_pstring_get_length(struct magic_set *ms, const struct magic *m,
     const char *ss)
 {
@@ -3441,7 +3647,7 @@ file_pstring_get_length(struct magic_set *ms, const struct magic *m,
 	return len;
 }
 
-protected int
+file_protected int
 file_magicfind(struct magic_set *ms, const char *name, struct mlist *v)
 {
 	uint32_t i, j;
@@ -3451,13 +3657,12 @@ file_magicfind(struct magic_set *ms, const char *name, struct mlist *v)
 
 	for (ml = mlist->next; ml != mlist; ml = ml->next) {
 		struct magic *ma = ml->magic;
-		uint32_t nma = ml->nmagic;
-		for (i = 0; i < nma; i++) {
+		for (i = 0; i < ml->nmagic; i++) {
 			if (ma[i].type != FILE_NAME)
 				continue;
 			if (strcmp(ma[i].value.s, name) == 0) {
 				v->magic = &ma[i];
-				for (j = i + 1; j < nma; j++)
+				for (j = i + 1; j < ml->nmagic; j++)
 				    if (ma[j].cont_level == 0)
 					    break;
 				v->nmagic = j - i;

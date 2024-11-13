@@ -13,11 +13,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_IntlDatePatternGenerator_g
 	ZEND_ARG_TYPE_INFO(0, skeleton, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(IntlDatePatternGenerator, __construct);
 ZEND_METHOD(IntlDatePatternGenerator, create);
 ZEND_METHOD(IntlDatePatternGenerator, getBestPattern);
-
 
 static const zend_function_entry class_IntlDatePatternGenerator_methods[] = {
 	ZEND_ME(IntlDatePatternGenerator, __construct, arginfo_class_IntlDatePatternGenerator___construct, ZEND_ACC_PUBLIC)
@@ -31,8 +29,7 @@ static zend_class_entry *register_class_IntlDatePatternGenerator(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlDatePatternGenerator", class_IntlDatePatternGenerator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

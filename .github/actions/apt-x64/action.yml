@@ -1,4 +1,8 @@
 name: apt
+inputs:
+  asan:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
@@ -6,8 +10,21 @@ runs:
       run: |
         set -x
 
-        sudo apt-get update
-        sudo apt-get install \
+        export DEBIAN_FRONTEND=noninteractive
+
+        # Install sudo in Docker for consistent actions
+        if ! type "sudo" > /dev/null; then
+          apt-get update -y | true
+          apt-get install -y sudo
+        fi
+
+        sudo apt-get update -y | true
+        sudo apt-get install -y \
+          autoconf \
+          gcc \
+          make \
+          curl \
+          unzip \
           bison \
           re2c \
           locales \
@@ -19,24 +36,23 @@ runs:
           libicu-dev \
           libtidy-dev \
           libenchant-2-dev \
-          libaspell-dev \
-          libpspell-dev \
+          libbz2-dev \
           libsasl2-dev \
           libxpm-dev \
           libzip-dev \
           libsqlite3-dev \
+          libsqlite3-mod-spatialite \
           libwebp-dev \
+          ${{ inputs.asan == 'false' && 'libavif-dev' || '' }} \
           libonig-dev \
-          libkrb5-dev \
-          libgssapi-krb5-2 \
           libcurl4-openssl-dev \
           libxml2-dev \
           libxslt1-dev \
           libpq-dev \
-          libreadline-dev \
+          libedit-dev \
           libldap2-dev \
           libsodium-dev \
-          libargon2-0-dev \
+          libargon2-dev \
           libmm-dev \
           libsnmp-dev \
           postgresql \
@@ -46,7 +62,7 @@ runs:
           freetds-dev \
           unixodbc-dev \
           llvm \
-          libc-client-dev \
+          clang \
           dovecot-core \
           dovecot-pop3d \
           dovecot-imapd \

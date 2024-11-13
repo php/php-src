@@ -28,11 +28,15 @@ function reflectClassConstant($base, $constant) {
     var_dump($constInfo->getDeclaringClass());
     echo "getDocComment():\n";
     var_dump($constInfo->getDocComment());
+    echo "hasType():\n";
+    var_dump($constInfo->hasType());
+    echo "getType():\n";
+    echo $constInfo->getType() ?? "NULL";
     echo "\n**********************************\n";
 }
 
 class TestClass {
-    public const /** My Doc comment */ PUB = true;
+    public const bool /** My Doc comment */ PUB = true;
     /** Another doc comment */
     protected const PROT = 4;
     private const PRIV = "keepOut";
@@ -53,7 +57,8 @@ reflectClassConstant($instance, "BAD_CONST");
 Reflecting on class constant TestClass::PUB
 
 __toString():
-string(35) "Constant [ public bool PUB ] { 1 }
+string(57) "/** My Doc comment */
+Constant [ public bool PUB ] { 1 }
 "
 getName():
 string(3) "PUB"
@@ -76,13 +81,17 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 string(21) "/** My Doc comment */"
-
+hasType():
+bool(true)
+getType():
+bool
 **********************************
 **********************************
 Reflecting on class constant TestClass::PROT
 
 __toString():
-string(38) "Constant [ protected int PROT ] { 4 }
+string(65) "/** Another doc comment */
+Constant [ protected int PROT ] { 4 }
 "
 getName():
 string(4) "PROT"
@@ -105,7 +114,10 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 string(26) "/** Another doc comment */"
-
+hasType():
+bool(false)
+getType():
+NULL
 **********************************
 **********************************
 Reflecting on class constant TestClass::PRIV
@@ -134,7 +146,10 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 bool(false)
-
+hasType():
+bool(false)
+getType():
+NULL
 **********************************
 **********************************
 Reflecting on class constant TestClass::FINAL
@@ -163,7 +178,10 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 bool(false)
-
+hasType():
+bool(false)
+getType():
+NULL
 **********************************
 **********************************
 Reflecting on class constant TestClass::PRIV
@@ -192,7 +210,10 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 bool(false)
-
+hasType():
+bool(false)
+getType():
+NULL
 **********************************
 
 Fatal error: Uncaught ReflectionException: Constant TestClass::BAD_CONST does not exist in %s:%d

@@ -339,6 +339,21 @@ const T_PROTECTED = UNKNOWN;
 const T_PUBLIC = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_PRIVATE_SET
+ */
+const T_PRIVATE_SET = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_PROTECTED_SET
+ */
+const T_PROTECTED_SET = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_PUBLIC_SET
+ */
+const T_PUBLIC_SET = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_READONLY
  */
 const T_READONLY = UNKNOWN;
@@ -452,6 +467,11 @@ const T_METHOD_C = UNKNOWN;
  * @cvalue T_FUNC_C
  */
 const T_FUNC_C = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_PROPERTY_C
+ */
+const T_PROPERTY_C = UNKNOWN;
 /**
  * @var int
  * @cvalue T_NS_C

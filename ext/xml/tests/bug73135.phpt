@@ -6,18 +6,20 @@ xml
 edgarsandi - <edgar.r.sandi@gmail.com>
 --FILE--
 <?php
-    function start_elem($parser, $xml) {
-        xml_parse($parser, $xml);
-    }
+function start_elem($parser, $xml) {
+    xml_parse($parser, $xml);
+}
 
-    $xml = <<<HERE
-    <a xmlns="ahihi">
-        <bar foo="ahihi"/>
-    </a>
+function dummy() {}
+
+$xml = <<<HERE
+<a xmlns="ahihi">
+    <bar foo="ahihi"/>
+</a>
 HERE;
 
     $parser = xml_parser_create_ns();
-    xml_set_element_handler($parser, 'start_elem', 'ahihi');
+    xml_set_element_handler($parser, 'start_elem', 'dummy');
     xml_parse($parser, $xml);
 ?>
 --EXPECTF--

@@ -20,6 +20,10 @@
 #ifndef ZEND_BUILTIN_FUNCTIONS_H
 #define ZEND_BUILTIN_FUNCTIONS_H
 
+#include "zend_types.h"
+
+typedef struct _zval_struct zval;
+
 zend_result zend_startup_builtin_functions(void);
 
 BEGIN_EXTERN_C()

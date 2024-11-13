@@ -23,7 +23,7 @@ domdocumentload_test_method.inc
 --EXPECTF--
 Warning: DOMDocument::load(): AttValue: " or ' expected in %s on line %d
 
-Warning: DOMDocument::load(): internal error: xmlParseStartTag: problem parsing attributes in %s on line %d
+Warning: DOMDocument::load():%sattributes%s
 
 Warning: DOMDocument::load(): Couldn't find end of Start Tag book line 4 in %s on line %d
 

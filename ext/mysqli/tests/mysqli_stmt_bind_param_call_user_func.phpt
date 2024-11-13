@@ -4,12 +4,12 @@ mysqli_stmt_bind_param used with call_user_func_array() (see also bug #43568)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('connect.inc');
-    require('table.inc');
+    require 'connect.inc';
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -309,7 +309,6 @@ require_once('skipifconnectfailure.inc');
     if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[050] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    $types = 'i';
     $id = 1;
     $params = array(
         0 => $stmt,
@@ -326,7 +325,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 Regular, procedural, using variables

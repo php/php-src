@@ -30,7 +30,7 @@
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
 
-const char HARDCODED_INI[] =
+static const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
@@ -80,7 +80,7 @@ static void send_header(sapi_header_struct *sapi_header, void *server_context)
 {
 }
 
-static char* read_cookies()
+static char* read_cookies(void)
 {
 	/* TODO: fuzz these! */
 	return NULL;
@@ -144,13 +144,12 @@ int fuzzer_init_php(const char *extra_ini)
 	if (extra_ini) {
 		ini_len += extra_ini_len + 1;
 	}
-	char *p = fuzzer_module.ini_entries = malloc(ini_len + 1);
-	memcpy(p, HARDCODED_INI, sizeof(HARDCODED_INI) - 1);
-	p += sizeof(HARDCODED_INI) - 1;
+	char *p = malloc(ini_len + 1);
+	fuzzer_module.ini_entries = p;
+	p = zend_mempcpy(p, HARDCODED_INI, sizeof(HARDCODED_INI) - 1);
 	if (extra_ini) {
 		*p++ = '\n';
-		memcpy(p, extra_ini, extra_ini_len);
-		p += extra_ini_len;
+		p = zend_mempcpy(p, extra_ini, extra_ini_len);
 	}
 	*p = '\0';
 
@@ -171,7 +170,7 @@ int fuzzer_init_php(const char *extra_ini)
 	return SUCCESS;
 }
 
-int fuzzer_request_startup()
+int fuzzer_request_startup(void)
 {
 	if (php_request_startup() == FAILURE) {
 		php_module_shutdown();
@@ -187,7 +186,7 @@ int fuzzer_request_startup()
 	return SUCCESS;
 }
 
-void fuzzer_request_shutdown()
+void fuzzer_request_shutdown(void)
 {
 	zend_try {
 		/* Destroy thrown exceptions. This does not happen as part of request shutdown. */
@@ -206,7 +205,7 @@ void fuzzer_request_shutdown()
 }
 
 /* Set up a dummy stack frame so that exceptions may be thrown. */
-void fuzzer_setup_dummy_frame()
+void fuzzer_setup_dummy_frame(void)
 {
 	static zend_execute_data execute_data;
 	static zend_function func;
@@ -234,7 +233,7 @@ int fuzzer_shutdown_php(void)
 	php_module_shutdown();
 	sapi_shutdown();
 
-	free(fuzzer_module.ini_entries);
+	free((void *)fuzzer_module.ini_entries);
 	return SUCCESS;
 }
 
@@ -261,7 +260,9 @@ int fuzzer_do_request_from_buffer(
 		zend_file_handle file_handle;
 		zend_stream_init_filename(&file_handle, filename);
 		file_handle.primary_script = 1;
-		file_handle.buf = estrndup(data, data_len);
+		file_handle.buf = emalloc(data_len + ZEND_MMAP_AHEAD);
+		memcpy(file_handle.buf, data, data_len);
+		memset(file_handle.buf + data_len, 0, ZEND_MMAP_AHEAD);
 		file_handle.len = data_len;
 		/* Avoid ZEND_HANDLE_FILENAME for opcache. */
 		file_handle.type = ZEND_HANDLE_STREAM;

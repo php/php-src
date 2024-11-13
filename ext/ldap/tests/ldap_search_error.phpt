@@ -11,7 +11,7 @@ ldap
 <?php
 include "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 $dn = "dc=not-found,$base";
 $filter = "(dc=*)";
@@ -19,8 +19,12 @@ $filter = "(dc=*)";
 $result = ldap_search($link, $dn, $filter);
 var_dump($result);
 
-$result = ldap_search($link, $dn, $filter, array(1 => 'top'));
-var_dump($result);
+try {
+    $result = ldap_search($link, $dn, $filter, array(1 => 'top'));
+    var_dump($result);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 try {
     ldap_search(array(), $dn, $filter, array('top'));
@@ -56,11 +60,9 @@ try {
 --EXPECTF--
 Warning: ldap_search(): Search: No such object in %s on line %d
 bool(false)
-
-Warning: ldap_search(): Array initialization wrong in %s on line %d
-bool(false)
-ldap_search(): Argument #1 ($ldap) cannot be empty
-ldap_search(): Argument #2 ($base) must have the same number of elements as the links array
-ldap_search(): Argument #3 ($filter) must have the same number of elements as the links array
-ldap_search(): Argument #2 ($base) must be of type string when argument #1 ($ldap) is an LDAP instance
-ldap_search(): Argument #3 ($filter) must be of type string when argument #1 ($ldap) is an LDAP instance
+ldap_search(): Argument #4 ($attributes) must be a list
+ldap_search(): Argument #1 ($ldap) must not be empty
+ldap_search(): Argument #2 ($base) must be the same size as argument #1
+ldap_search(): Argument #3 ($filter) must be the same size as argument #1
+ldap_search(): Argument #2 ($base) must be of type string when argument #1 ($ldap) is an LDAP\Connection instance
+ldap_search(): Argument #3 ($filter) must be of type string when argument #1 ($ldap) is an LDAP\Connection instance

@@ -11,6 +11,18 @@ try {
 } catch (DivisionByZeroError $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }
+try {
+    bcmod("10", "0.000");
+} catch (DivisionByZeroError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
+try {
+    bcmod("10", "-0.0");
+} catch (DivisionByZeroError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 ?>
 --EXPECT--
+Modulo by zero
+Modulo by zero
 Modulo by zero

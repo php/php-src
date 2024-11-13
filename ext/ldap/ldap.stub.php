@@ -203,7 +203,7 @@ namespace {
     const LDAP_OPT_X_SASL_USERNAME = UNKNOWN;
 #endif
 
-#ifdef ORALDAP
+#ifdef HAVE_ORALDAP
     /**
      * @var int
      * @cvalue GSLC_SSL_NO_AUTH
@@ -357,6 +357,20 @@ namespace {
      * @cvalue LDAP_OPT_X_TLS_PROTOCOL_TLS1_2
      */
     const LDAP_OPT_X_TLS_PROTOCOL_TLS1_2 = UNKNOWN;
+#endif
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
+    /**
+     * @var int
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
+     */
+    const LDAP_OPT_X_TLS_PROTOCOL_TLS1_3 = UNKNOWN;
+#endif
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MAX
+    /**
+     * @var int
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_MAX
+     */
+    const LDAP_OPT_X_TLS_PROTOCOL_MAX = UNKNOWN;
 #endif
 
 #ifdef LDAP_OPT_X_TLS_PACKAGE
@@ -609,11 +623,14 @@ namespace {
     const LDAP_CONTROL_VLVRESPONSE = UNKNOWN;
 #endif
 
-    #ifdef HAVE_ORALDAP
+#ifdef HAVE_ORALDAP
     function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNKNOWN, #[\SensitiveParameter] string $password = UNKNOWN, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
-    #else
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+    function ldap_connect_wallet(?string $uri = null, string $wallet, #[\SensitiveParameter] string $password, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
+#endif
+#else
     function ldap_connect(?string $uri = null, int $port = 389): LDAP\Connection|false {}
-    #endif
+#endif
 
     function ldap_unbind(LDAP\Connection $ldap): bool {}
 
@@ -773,7 +790,12 @@ namespace {
      * @param string $response_data
      * @param string $response_oid
      */
-    function ldap_exop(LDAP\Connection $ldap, string $request_oid, ?string $request_data = null, ?array $controls = NULL, &$response_data = UNKNOWN, &$response_oid = null): LDAP\Result|bool {}
+    function ldap_exop(LDAP\Connection $ldap, string $request_oid, ?string $request_data = null, ?array $controls = null, &$response_data = UNKNOWN, &$response_oid = null): LDAP\Result|bool {}
+    /**
+     * @param string $response_data
+     * @param string $response_oid
+     */
+    function ldap_exop_sync(LDAP\Connection $ldap, string $request_oid, ?string $request_data = null, ?array $controls = null, &$response_data = null, &$response_oid = null): LDAP\Result|bool {}
     #endif
 
     #ifdef HAVE_LDAP_PASSWD

@@ -11,7 +11,7 @@ class CountryMapping
     const CZ = 'CZ';
     const EN = 'EN';
 
-    public function get(string $countryIsoCode = null) : string // Works correctly if return type is removed
+    public function get(?string $countryIsoCode = null) : string // Works correctly if return type is removed
     {
         switch (strtoupper($countryIsoCode)) {
         case 'CZ':

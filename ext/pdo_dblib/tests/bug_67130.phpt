@@ -5,10 +5,13 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
+
+$db = getDbConnection();
 
 $stmt = $db->query('SELECT 1; SELECT 2; SELECT 3;');
 var_dump($stmt->fetch());

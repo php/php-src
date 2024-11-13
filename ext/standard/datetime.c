@@ -63,7 +63,7 @@ PHPAPI char *php_std_date(time_t t)
 /* }}} */
 
 #ifdef HAVE_STRPTIME
-#ifndef HAVE_STRPTIME_DECL_FAILS
+#ifndef HAVE_DECL_STRPTIME
 char *strptime(const char *s, const char *format, struct tm *tm);
 #endif
 

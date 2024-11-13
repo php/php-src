@@ -32,5 +32,6 @@ try {
     }
 }
 echo 'okey';
+?>
 --EXPECT--
 okey

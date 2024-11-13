@@ -7,9 +7,10 @@ if (substr(PHP_OS, 0, 3) == "WIN") die("skip non windows test");
 ?>
 --FILE--
 <?php
-$php = getenv("TEST_PHP_EXECUTABLE");
+$php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
 $cwd = getcwd();
 $ini_file = __DIR__ . "/023.ini";
+$ini_file_escaped = escapeshellarg($ini_file);
 file_put_contents($ini_file, <<<INI
 ; no sections should match as cli doesn't support any
 memory_limit = 40M
@@ -27,7 +28,7 @@ $desc = array(
     2 => array("pipe", "w"),
 );
 $pipes = array();
-$proc = proc_open("$php -c $ini_file -r 'echo ini_get(\"memory_limit\");'", $desc, $pipes);
+$proc = proc_open("$php -c $ini_file_escaped -r 'echo ini_get(\"memory_limit\");'", $desc, $pipes);
 if (!$proc) {
     exit(1);
 }
