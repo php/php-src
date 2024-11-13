@@ -6673,6 +6673,9 @@ done:
 			 && (p+1)->op == ZEND_JIT_TRACE_VM) {
 				const zend_op *opline = (p+1)->opline - 1;
 				if (opline->result_type != IS_UNUSED) {
+					if (res_type == IS_UNDEF) {
+						res_type = IS_NULL;
+					}
 				    SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), res_type, 1);
 				}
 			}
