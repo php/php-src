@@ -21,7 +21,6 @@ runs:
           webp \
           freetype \
           intltool \
-          icu4c \
           libiconv \
           zlib \
           t1lib \
@@ -33,4 +32,5 @@ runs:
           libjpeg \
           libxslt \
           postgresql
+        brew reinstall icu4c@74
         brew link icu4c gettext --force
