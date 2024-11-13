@@ -14,9 +14,7 @@ runs:
         # Some packages exist on x86 but not arm, or vice versa.
         # Install them with reinstall to avoid warnings.
         brew reinstall autoconf webp tidy-html5 libzip libsodium icu4c curl openldap
-        brew unlink pkg-config
         brew install \
-          pkgconf \
           bison \
           re2c
         brew install \
