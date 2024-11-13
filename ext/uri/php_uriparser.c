@@ -57,12 +57,12 @@ typedef enum {
 	UriUriA *new_uriparser_uri = uriparser_parse_uri(str, NULL, errors); \
 	if (new_uriparser_uri == NULL) { \
 		smart_str_free(&uri_str); \
-		zend_string_free(str); \
+		zend_string_release(str); \
 		return FAILURE; \
 	} \
 	uriparser_free_uri(uriparser_uri); \
 	internal_uri->uri = (void *) new_uriparser_uri; \
-    smart_str_free(&uri_str); \
+	smart_str_free(&uri_str); \
 	return SUCCESS; \
 } while (0)
 
@@ -119,7 +119,7 @@ static void uriparser_append_scheme(const uri_internal_t *internal_uri, smart_st
 	uriparser_read_scheme(internal_uri, &tmp);
 	if (Z_TYPE(tmp) == IS_STRING) {
 		smart_str_append(uri_str, Z_STR(tmp));
-		smart_str_appendl(uri_str, "://", sizeof("://") - 1); // TODO apply the algorithm at https://datatracker.ietf.org/doc/html/rfc3986#section-5.3
+		smart_str_appendl(uri_str, "://", sizeof("://") - 1); /* TODO apply the algorithm at https://datatracker.ietf.org/doc/html/rfc3986#section-5.3 */
 	}
 
 	zval_ptr_dtor(&tmp);

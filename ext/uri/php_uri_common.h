@@ -91,91 +91,98 @@ uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_interna
 void throw_invalid_uri_exception(zval *errors);
 
 #define URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, object) do { \
-    ZEND_ASSERT(internal_uri != NULL); \
+	ZEND_ASSERT(internal_uri != NULL); \
 	if (UNEXPECTED(internal_uri->uri == NULL)) { \
-        zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
-    	RETURN_THROWS(); \
-    } \
+		zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+		RETURN_THROWS(); \
+	} \
 } while (0)
 
 #define URI_CHECK_INITIALIZATION_RETURN(internal_uri, object, return_on_failure) do { \
-    ZEND_ASSERT(internal_uri != NULL); \
+	ZEND_ASSERT(internal_uri != NULL); \
 	if (UNEXPECTED(internal_uri->uri == NULL)) { \
-        zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
-    	return return_on_failure; \
+		zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+		return return_on_failure; \
     } \
 } while (0)
 
 #define URI_CHECK_INITIALIZATION_RETURN_VOID(internal_uri, object) do { \
-    ZEND_ASSERT(internal_uri != NULL); \
+	ZEND_ASSERT(internal_uri != NULL); \
 	if (UNEXPECTED(internal_uri->uri == NULL)) { \
-        zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
-    	return; \
+		zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
+		return; \
     } \
 } while (0)
 
 #define URI_GETTER(property_name) do { \
-    ZEND_PARSE_PARAMETERS_NONE(); \
-    uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS); \
-    URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, Z_OBJ_P(ZEND_THIS)); \
-    const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
-    ZEND_ASSERT(property_handler != NULL); \
-    if (property_handler->read_func(internal_uri, return_value) == FAILURE) { \
-    	zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
-    	RETURN_THROWS(); \
-    } \
+	ZEND_PARSE_PARAMETERS_NONE(); \
+	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS); \
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, Z_OBJ_P(ZEND_THIS)); \
+	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
+	ZEND_ASSERT(property_handler != NULL); \
+	if (UNEXPECTED(property_handler->read_func(internal_uri, return_value) == FAILURE)) { \
+		zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
+		RETURN_THROWS(); \
+	} \
 } while (0)
 
 #define URI_WITHER_COMMON(property_name, property_zv, return_value) \
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS); \
-    URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, Z_OBJ_P(ZEND_THIS)); \
-    const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
-    ZEND_ASSERT(property_handler != NULL); \
-    zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS)); \
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, Z_OBJ_P(ZEND_THIS)); \
+	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
+	ZEND_ASSERT(property_handler != NULL); \
+	zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS)); \
 	if (UNEXPECTED(EG(exception) != NULL)) { \
+		zend_object_release(new_object); \
+		zval_ptr_dtor(property_zv); \
 		RETURN_THROWS(); \
 	} \
-    uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object); \
-    URI_CHECK_INITIALIZATION_RETURN_THROWS(new_internal_uri, Z_OBJ_P(ZEND_THIS)); \
-    if (property_handler->write_func == NULL) { \
-        zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
-    	RETURN_THROWS(); \
-    } \
-    zval errors; \
-    ZVAL_UNDEF(&errors); \
+	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object); \
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(new_internal_uri, Z_OBJ_P(ZEND_THIS)); /* TODO fix memory leak of new_object */ \
+	if (property_handler->write_func == NULL) { \
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
+		zend_object_release(new_object); \
+		zval_ptr_dtor(property_zv); \
+		RETURN_THROWS(); \
+	} \
+	zval errors; \
+	ZVAL_UNDEF(&errors); \
 	if (property_handler->write_func(new_internal_uri, property_zv, &errors) == FAILURE) { \
 		throw_invalid_uri_exception(&errors); \
 		zval_ptr_dtor(&errors); \
-    	RETURN_THROWS(); \
-    } \
-    ZEND_ASSERT(Z_TYPE(errors) == IS_UNDEF); \
-	ZVAL_OBJ(return_value, new_object);
+		zend_object_release(new_object); \
+		zval_ptr_dtor(property_zv); \
+		RETURN_THROWS(); \
+	} \
+	ZEND_ASSERT(Z_TYPE(errors) == IS_UNDEF); \
+	ZVAL_OBJ(return_value, new_object); \
+	zval_ptr_dtor(property_zv);
 
 #define URI_WITHER_STR(property_name) do { \
-    zend_string *value; \
-    ZEND_PARSE_PARAMETERS_START(1, 1) \
-    	Z_PARAM_PATH_STR_OR_NULL(value) \
-    ZEND_PARSE_PARAMETERS_END(); \
+	zend_string *value; \
+	ZEND_PARSE_PARAMETERS_START(1, 1) \
+		Z_PARAM_PATH_STR_OR_NULL(value) \
+	ZEND_PARSE_PARAMETERS_END(); \
 	zval zv; \
-    if (value == NULL) { \
-    	ZVAL_NULL(&zv); \
+	if (value == NULL) { \
+		ZVAL_NULL(&zv); \
 	} else { \
-        ZVAL_STR_COPY(&zv, value); \
-    } \
+		ZVAL_STR_COPY(&zv, value); \
+	} \
 	URI_WITHER_COMMON(property_name, &zv, return_value) \
 } while (0)
 
 #define URI_WITHER_LONG(property_name) do { \
-    zend_long value; \
-    bool value_is_null; \
-    ZEND_PARSE_PARAMETERS_START(1, 1) \
-    	Z_PARAM_LONG_OR_NULL(value, value_is_null) \
-    ZEND_PARSE_PARAMETERS_END(); \
+	zend_long value; \
+	bool value_is_null; \
+	ZEND_PARSE_PARAMETERS_START(1, 1) \
+		Z_PARAM_LONG_OR_NULL(value, value_is_null) \
+	ZEND_PARSE_PARAMETERS_END(); \
 	zval zv; \
-    if (value_is_null) {\
+	if (value_is_null) {\
 		ZVAL_NULL(&zv); \
-    } else { \
-     	ZVAL_LONG(&zv, value); \
+	} else { \
+		ZVAL_LONG(&zv, value); \
 	} \
 	URI_WITHER_COMMON(property_name, &zv, return_value); \
 } while (0)

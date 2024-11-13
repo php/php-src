@@ -478,6 +478,7 @@ try_again:
 		use_ssl = 1;
 	} else if (phpurl->scheme == NULL || !zend_string_equals_literal(phpurl->scheme, "http")) {
 		php_url_free(phpurl);
+		php_uri_free(uri_internal);
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}

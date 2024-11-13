@@ -422,13 +422,16 @@ PHP_METHOD(Uri_Rfc3986Uri, normalize)
 
 	zend_object *new_object = uri_clone_obj_handler(this_object);
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_object_release(new_object);
 		RETURN_THROWS();
 	}
+
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+	URI_CHECK_INITIALIZATION_RETURN_THROWS(new_internal_uri, new_object); /* TODO fix memory leak of new_object */
 
 	if (UNEXPECTED(internal_uri->handler->normalize_uri(new_internal_uri->uri) == FAILURE)) {
 		zend_throw_error(uri_operation_exception_ce, "Failed to normalize %s", ZSTR_VAL(this_object->ce->name));
+		zend_object_release(new_object);
 		RETURN_THROWS();
 	}
 
