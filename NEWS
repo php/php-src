@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
 
+- GD:
+  . Fixed GH-16776 (imagecreatefromstring overflow). (David Carlier)
+
 - Hash:
   . Fixed GH-16711: Segfault in mhash(). (Girgias)
 

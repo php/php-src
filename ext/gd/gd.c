@@ -1322,7 +1322,7 @@ static int _php_ctx_getmbi(gdIOCtx *ctx)
 
 	do {
 		i = (ctx->getC)(ctx);
-		if (i < 0) {
+		if (i < 0 || mbi > (INT_MAX >> 7)) {
 			return -1;
 		}
 		mbi = (mbi << 7) | (i & 0x7f);
