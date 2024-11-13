@@ -125,7 +125,7 @@ jobs:
               CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC"
               LDFLAGS="-fsanitize=undefined,address"
             run_tests_parameters: '--asan --repeat 2'
-            test_function_jit: false
+            test_function_jit: true
             asan: true
           - name: _REPEAT
             debug: true
