@@ -1,11 +1,11 @@
 --TEST--
-Test PdoSqlite::createAggregate() trampoline callback
+Test Pdo\Sqlite::createAggregate() trampoline callback
 --EXTENSIONS--
 pdo_sqlite
 --FILE--
 <?php
 
-$db = new PdoSqlite('sqlite::memory:');
+$db = new Pdo\Sqlite('sqlite::memory:');
 
 $db->query('CREATE TABLE test_pdo_sqlite_createaggregate_trampoline (a INTEGER, b INTEGER)');
 

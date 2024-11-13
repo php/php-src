@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -71,7 +71,7 @@ zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const char *named, bool may_transform)
+xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const zend_string *named, bool may_transform)
 {
 	xmlNodePtr itemnode = NULL;
 	if (objmap != NULL) {
@@ -79,9 +79,9 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (const xmlChar *) named);
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, BAD_CAST ZSTR_VAL(named));
 				} else {
-					xmlNotationPtr notep = xmlHashLookup(objmap->ht, (const xmlChar *) named);
+					xmlNotationPtr notep = xmlHashLookup(objmap->ht, BAD_CAST ZSTR_VAL(named));
 					if (notep) {
 						if (may_transform) {
 							itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
@@ -94,19 +94,22 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 		} else {
 			xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasProp(nodep, (const xmlChar *) named);
+				if (php_dom_follow_spec_intern(objmap->baseobj)) {
+					itemnode = (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST ZSTR_VAL(named), ZSTR_LEN(named));
+				} else {
+					itemnode = (xmlNodePtr) xmlHasProp(nodep, BAD_CAST ZSTR_VAL(named));
+				}
 			}
 		}
 	}
 	return itemnode;
 }
 
-void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const char *named, zval *return_value)
+void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, zval *return_value)
 {
-	int ret;
 	xmlNodePtr itemnode = php_dom_named_node_map_get_named_item(objmap, named, true);
 	if (itemnode) {
-		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
+		DOM_RET_OBJ(itemnode, objmap->baseobj);
 	} else {
 		RETURN_NULL();
 	}
@@ -117,10 +120,9 @@ Since:
 */
 PHP_METHOD(DOMNamedNodeMap, getNamedItem)
 {
-	size_t namedlen;
-	char *named;
+	zend_string *named;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &named, &namedlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &named) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -137,11 +139,7 @@ xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_lon
 		if ((objmap->nodetype == XML_NOTATION_NODE) ||
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
-				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-				} else {
-					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-				}
+				itemnode = php_dom_libxml_hash_iter(objmap, index);
 			}
 		} else {
 			xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
@@ -161,10 +159,9 @@ xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_lon
 
 void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
 {
-	int ret;
 	xmlNodePtr itemnode = php_dom_named_node_map_get_item(objmap, index);
 	if (itemnode) {
-		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
+		DOM_RET_OBJ(itemnode, objmap->baseobj);
 	} else {
 		RETURN_NULL();
 	}
@@ -197,7 +194,6 @@ Since: DOM Level 2
 PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 {
 	zval *id;
-	int ret;
 	size_t namedlen=0, urilen=0;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
@@ -221,9 +217,9 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (xmlChar *) named);
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, BAD_CAST named);
 				} else {
-					notep = (xmlNotation *)xmlHashLookup(objmap->ht, (xmlChar *) named);
+					notep = (xmlNotation *)xmlHashLookup(objmap->ht, BAD_CAST named);
 					if (notep) {
 						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
 					}
@@ -232,14 +228,13 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, (xmlChar *) named, (xmlChar *) uri);
+				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, BAD_CAST named, BAD_CAST uri);
 			}
 		}
 	}
 
 	if (itemnode) {
-		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
-		return;
+		DOM_RET_OBJ(itemnode, objmap->baseobj);
 	} else {
 		RETVAL_NULL();
 	}

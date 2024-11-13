@@ -107,11 +107,7 @@ typedef struct _php_stream_statbuf {
 } php_stream_statbuf;
 
 typedef struct _php_stream_dirent {
-#ifdef NAME_MAX
-	char d_name[NAME_MAX + 1];
-#else
 	char d_name[MAXPATHLEN];
-#endif
 	unsigned char d_type;
 } php_stream_dirent;
 

@@ -5,7 +5,7 @@ jobs:
     resource_class: arm.medium
     docker:
       - image: cimg/base:current-22.04
-      - image: mysql:8
+      - image: mysql:8.3
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_ROOT_PASSWORD: ''
@@ -53,8 +53,6 @@ jobs:
               libsqlite3-dev \
               libwebp-dev \
               libonig-dev \
-              libkrb5-dev \
-              libgssapi-krb5-2 \
               libcurl4-openssl-dev \
               libxml2-dev \
               libxslt1-dev \
@@ -69,7 +67,6 @@ jobs:
               `#snmp-mibs-downloader` \
               freetds-dev \
               `#unixodbc-dev` \
-              libc-client-dev \
               dovecot-core \
               dovecot-pop3d \
               dovecot-imapd \
@@ -129,7 +126,6 @@ jobs:
               --enable-calendar \
               --enable-ftp \
               --with-enchant=/usr \
-              --with-kerberos \
               --enable-sysvmsg \
               --with-ffi \
               --enable-zend-test \
@@ -149,8 +145,6 @@ jobs:
               --with-snmp \
               `#--with-unixODBC` \
               `#--with-pdo-odbc=unixODBC,/usr` \
-              `#--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient` \
-              `#--with-oci8=shared,instantclient,/opt/oracle/instantclient` \
               --with-config-file-path=/etc \
               --with-config-file-scan-dir=/etc/php.d \
               --with-pdo-firebird \
@@ -177,6 +171,8 @@ jobs:
               -d opcache.enable_cli=1 \
               -d opcache.jit_buffer_size=64M \
               -d opcache.jit=tracing \
+              -d zend_test.observer.enabled=1 \
+              -d zend_test.observer.show_output=0 \
               -P -q -x -j2 \
               -g FAIL,BORK,LEAK,XLEAK \
               --no-progress \

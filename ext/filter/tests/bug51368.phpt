@@ -21,4 +21,4 @@ try {
 --EXPECT--
 float(1000)
 float(1234.567)
-filter_var(): "thousand" option cannot be empty
+filter_var(): "thousand" option must not be empty

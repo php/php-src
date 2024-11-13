@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL float value
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

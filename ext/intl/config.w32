@@ -8,6 +8,7 @@ if (PHP_INTL != "no") {
 		// always build as shared - zend_strtod.c/ICU type conflict
 		EXTENSION("intl", "php_intl.c intl_convert.c intl_convertcpp.cpp intl_error.c ", true,
 								"/I \"" + configure_module_dirname + "\" /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		ADD_EXTENSION_DEP('intl', 'date');
 		ADD_SOURCES(configure_module_dirname + "/collator", "\
 				collator_attr.c \
 				collator_class.c \
@@ -125,8 +126,7 @@ if (PHP_INTL != "no") {
 			ADD_FLAG("LIBS_INTL", "iculx.lib");
 		}
 
-		ADD_FLAG("CFLAGS_INTL", "/EHsc /DUNISTR_FROM_CHAR_EXPLICIT=explicit /DUNISTR_FROM_STRING_EXPLICIT=explicit /DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1 /DU_HIDE_OBSOLETE_UTF_OLD_H=1");
-		AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
+		ADD_FLAG("CFLAGS_INTL", "/std:c++17 /EHsc /DUNISTR_FROM_CHAR_EXPLICIT=explicit /DUNISTR_FROM_STRING_EXPLICIT=explicit /DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1 /DU_HIDE_OBSOLETE_UTF_OLD_H=1");
 	} else {
 		WARNING("intl not enabled; libraries and/or headers not found");
 	}

@@ -323,7 +323,6 @@ static char * _mysqlnd_pestrndup(const char * const ptr, size_t length, bool per
 
 
 #define SMART_STR_START_SIZE 2048
-#define SMART_STR_PREALLOC 512
 #include "zend_smart_str.h"
 
 

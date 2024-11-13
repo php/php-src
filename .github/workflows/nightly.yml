@@ -1,59 +1,434 @@
-name: Nightly
+name: Test suite
 on:
-  schedule:
-   - cron: "0 1 * * *"
-  workflow_dispatch: ~
+  workflow_call:
+    inputs:
+      asan_ubuntu_version:
+        required: true
+        type: string
+      branch:
+        required: true
+        type: string
+      community_verify_type_inference:
+        required: true
+        type: boolean
+      libmysqlclient_with_mysqli:
+        required: true
+        type: boolean
+      run_alpine:
+        required: true
+        type: boolean
+      run_macos_arm64:
+        required: true
+        type: boolean
+      ubuntu_version:
+        required: true
+        type: string
+      windows_version:
+        required: true
+        type: string
 permissions:
   contents: read
 jobs:
-  GENERATE_MATRIX:
-    name: Generate Matrix
-    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    outputs:
-      branches: ${{ steps.set-matrix.outputs.branches }}
-      matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
-      windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
-      macos-matrix-include: ${{ steps.set-matrix.outputs.macos-matrix-include }}
+  ALPINE:
+    if: inputs.run_alpine
+    name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
+    runs-on: ubuntu-22.04
+    container:
+      image: 'alpine:3.20.1'
     steps:
-      - uses: actions/checkout@v4
+      - name: git checkout
+        uses: actions/checkout@v4
         with:
-          # Set fetch-depth to 0 to clone the full repository
-          # including all branches. This is required to find
-          # the correct commit hashes.
-          fetch-depth: 0
-      - name: Grab the commit mapping
-        uses: actions/cache@v3
+          ref: ${{ inputs.branch }}
+      - name: apk
+        uses: ./.github/actions/apk
+      - name: LLVM 17 (ASAN-only)
+        # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17:
+        # https://pkgs.alpinelinux.org/contents?file=libclang_rt.asan-x86_64.a&path=&name=&branch=v3.20
+        run: |
+          apk add clang17 compiler-rt
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          apk list
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-alpine
         with:
-          path: branch-commit-cache.json
-          # The cache key needs to change every time for the
-          # cache to be updated after this job finishes.
-          key: nightly-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: |
-            nightly-
-      - name: Generate Matrix
-        id: set-matrix
-        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
+          configurationParameters: >-
+            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
+            CC=clang-17
+            CXX=clang++-17
+            --enable-debug
+            --enable-zts
+          skipSlow: true # FIXME: This should likely include slow extensions
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-alpine
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-alpine
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            --asan -x
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+
+  LINUX_X64:
+    services:
+      mysql:
+        image: mysql:8.3
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration_parameters: ['']
+        debug: [true, false]
+        name: ['']
+        run_tests_parameters: ['']
+        test_function_jit: [true]
+        zts: [true, false]
+        include:
+          - name: _ASAN_UBSAN
+            debug: true
+            zts: true
+            configuration_parameters: >-
+              CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC"
+              LDFLAGS="-fsanitize=undefined,address"
+            run_tests_parameters: '--asan'
+            test_function_jit: false
+            asan: true
+          - name: _REPEAT
+            debug: true
+            zts: false
+            run_tests_parameters: --repeat 2
+            timeout_minutes: 360
+            test_function_jit: true
+            asan: false
+          - name: _VARIATION
+            debug: true
+            zts: true
+            configuration_parameters: >-
+              CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"
+            run_tests_parameters: -d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0
+            timeout_minutes: 360
+            test_function_jit: true
+            asan: false
+    name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: ubuntu-${{ matrix.asan && inputs.asan_ubuntu_version || inputs.ubuntu_version }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: apt
+        uses: ./.github/actions/apt-x64
+        with:
+          asan: ${{ matrix.asan && 'true' || 'false' }}
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: >-
+            ${{ matrix.configuration_parameters }}
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+          asan: ${{ matrix.asan && 'true' || 'false' }}
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        uses: ./.github/actions/setup-x64
+      - name: Test
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+          idleCpu: ${{ matrix.asan && 'true' || 'false' }}
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Test OpCache
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Test Function JIT
+        # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
+        # avoid running into the 6 hour timeout by skipping the function JIT.
+        if: matrix.test_function_jit
+        uses: ./.github/actions/test-linux
+        with:
+          jitType: function
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  LINUX_X32:
+    strategy:
+      fail-fast: false
+      matrix:
+        debug: [true, false]
+        zts: [true, false]
+    name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:${{ inputs.ubuntu_version }}
+    services:
+      mysql:
+        image: mysql:8.3
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: apt
+        uses: ./.github/actions/apt-x32
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-x32
+        with:
+          configurationParameters: >-
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux-x32
+      - name: Test
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Test OpCache
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Test Function JIT
+        uses: ./.github/actions/test-linux
+        with:
+          jitType: function
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  MACOS:
+    strategy:
+      fail-fast: false
+      matrix:
+        debug: [true, false]
+        zts: [true, false]
+        os: ['13', '14']
+        exclude:
+          - os: ${{ !inputs.run_macos_arm64 && '14' || '*never*' }}
+    name: "MACOS_${{ matrix.os == '13' && 'X64' || 'ARM64' }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: macos-${{ matrix.os }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: brew
+        uses: ./.github/actions/brew
+      - name: ./configure
+        uses: ./.github/actions/configure-macos
+        with:
+          configurationParameters: >-
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+      - name: make
+        run: |-
+          export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
+          make -j$(sysctl -n hw.logicalcpu) >/dev/null
+      - name: make install
+        run: sudo make install
+      - name: Test
+        uses: ./.github/actions/test-macos
+      - name: Test Tracing JIT
+        if: matrix.os != '14' || !matrix.zts
+        uses: ./.github/actions/test-macos
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Test OpCache
+        uses: ./.github/actions/test-macos
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Test Function JIT
+        if: matrix.os != '14' || !matrix.zts
+        uses: ./.github/actions/test-macos
+        with:
+          jitType: function
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  COVERAGE_DEBUG_NTS:
+    if: inputs.branch == 'master'
+    services:
+      mysql:
+        image: mysql:8.3
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: Install gcovr
+        run: sudo -H pip install gcovr
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: --enable-debug --disable-zts --enable-gcov
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        uses: ./.github/actions/setup-x64
+      # We only test with OpCache, the difference in coverage is negligible
+      - name: Test OpCache
+        uses: ./.github/actions/test-linux
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COMMUNITY:
-    needs: GENERATE_MATRIX
-    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
         type: ['asan', 'verify_type_inference']
-        # These branches don't include type verification
         exclude:
-          - { branch: { name: 'PHP-8.1', ref: 'PHP-8.1', major: 8, minor: 1 }, type: 'verify_type_inference' }
-          - { branch: { name: 'PHP-8.2', ref: 'PHP-8.2', major: 8, minor: 2 }, type: 'verify_type_inference' }
-          - { branch: { name: 'PHP-8.3', ref: 'PHP-8.3', major: 8, minor: 3 }, type: 'verify_type_inference' }
-    name: "${{ matrix.branch.name }}_COMMUNITY_${{ matrix.type }}"
-    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
+          - type: ${{ !inputs.community_verify_type_inference && 'verify_type_inference' || '*never*' }}
+    name: "COMMUNITY_${{ matrix.type }}"
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
     env:
       ASAN_OPTIONS: exitcode=139
       UBSAN_OPTIONS: print_stacktrace=1
@@ -63,7 +438,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch.ref }}
+          ref: ${{ inputs.branch }}
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -83,8 +458,6 @@ jobs:
           sudo service mysql start
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
-          git fetch origin
-          git checkout origin/master .github/jit_check.php .github/nightly.php
       - name: Enable Opcache
         run: |
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
@@ -97,54 +470,22 @@ jobs:
           echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
           echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
       - name: Enable JIT
+        if: matrix.type != 'verify_type_inference'
         run: |
           echo opcache.jit=tracing >> /etc/php.d/opcache.ini
-          echo opcache.jit_buffer_size=128M >> /etc/php.d/opcache.ini
-          echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
-          echo opcache.jit_max_side_traces=100000 >> /etc/php.d/opcache.ini
-          echo opcache.jit_max_exit_counters=100000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+          echo opcache.jit_prof_threshold=0.000000001 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_root_traces=10000000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_side_traces=10000000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_exit_counters=10000000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_blacklist_root_trace=255 >> /etc/php.d/opcache.ini
+          echo opcache.jit_blacklist_side_trace=255 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_loop=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
           php -v
 
-      - name: Test PHPSeclib
-        if: always()
-        run: |
-          git clone https://github.com/phpseclib/phpseclib --branch=master
-          cd phpseclib
-          git checkout 259bd9f1e8af11726ed74acf527c2c046549061b
-          export ASAN_OPTIONS=exitcode=139
-          export PHPSECLIB_ALLOW_JIT=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
-
-      - name: Test Psalm
-        if: always()
-        run: |
-          git clone https://github.com/vimeo/psalm --depth 1
-          cd psalm
-          git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
-          # Needed to avoid overwriting JIT config
-          export PSALM_ALLOW_XDEBUG=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php ./psalm --no-cache || exit $?
-
-      - name: Test PHPStan
-        if: matrix.branch.ref != 'PHP-8.2'
-        run: |
-          git clone https://github.com/phpstan/phpstan-src --depth 1
-          cd phpstan-src
-          git rev-parse HEAD
-          sed -E 's/phpVersion(.*)max[^)]+/phpVersion\1max(89999/g' conf/parametersSchema.neon -i
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          sed -i 's/public const IS/public const int IS/g' vendor/ondrejmirtes/better-reflection/src/Reflection/Adapter/*php
-          export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan clear-result-cache
-          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan || exit $?
-          
       - name: Test multiple libraries and frameworks in parallel
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -152,16 +493,413 @@ jobs:
           
           php $GITHUB_WORKSPACE/.github/nightly.php || exit $?
 
+      - name: Test PHPSeclib
+        if: always()
+        run: |
+          git clone https://github.com/phpseclib/phpseclib --branch=master
+          cd phpseclib
+          export ASAN_OPTIONS=exitcode=139
+          export PHPSECLIB_ALLOW_JIT=1
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
+
+      - name: Test Psalm
+        run: |
+          git clone https://github.com/vimeo/psalm --depth 1
+          cd psalm
+          git rev-parse HEAD
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php ./phpunit || EXIT_CODE=$?
+          if [ ${EXIT_CODE:-0} -gt 128 ]; then
+            exit 1
+          fi
       - name: 'Symfony Preloading'
+        if: always()
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
           cd symfony_demo
           git rev-parse HEAD
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
           php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
-
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  OPCACHE_VARIATION:
+    services:
+      mysql:
+        image: mysql:8.3
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
+    name: OPCACHE_VARIATION
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: >-
+            --enable-debug --disable-zts
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        uses: ./.github/actions/setup-x64
+      - name: Test File Cache (prime shm)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-prime
+      - name: Test File Cache (prime shm, use shm)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-use
+      - name: Test File Cache (prime shm, use file)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-use
+            -d opcache.file_cache_only=1
+      - name: Test File Cache Only (prime)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-prime
+            -d opcache.file_cache_only=1
+      - name: Test File Cache Only (use)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-use
+            -d opcache.file_cache_only=1
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  MSAN:
+    name: MSAN
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: ./configure
+        run: |
+          export CC=clang
+          export CXX=clang++
+          export CFLAGS="-DZEND_TRACK_ARENA_ALLOC"
+          ./buildconf --force
+          # msan requires all used libraries to be instrumented,
+          # so we should avoiding linking against anything but libc here
+          ./configure \
+            --enable-debug \
+            --enable-zts \
+            --enable-option-checking=fatal \
+            --prefix=/usr \
+            --without-sqlite3 \
+            --without-pdo-sqlite \
+            --without-libxml \
+            --disable-dom \
+            --disable-simplexml \
+            --disable-xml \
+            --disable-xmlreader \
+            --disable-xmlwriter \
+            --without-pcre-jit \
+            --disable-opcache-jit \
+            --enable-phpdbg \
+            --enable-fpm \
+            --with-pdo-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --disable-mysqlnd-compression-support \
+            --without-pear \
+            --enable-exif \
+            --enable-sysvsem \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --enable-mbstring \
+            --disable-mbregex \
+            --enable-sockets \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --enable-zend-test \
+            --enable-werror \
+            --enable-memory-sanitizer \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d \
+            --enable-dl-test=shared
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        run: |
+          sudo make install
+          sudo mkdir -p /etc/php.d
+          sudo chmod 777 /etc/php.d
+          echo mysqli.default_socket=/var/run/mysqld/mysqld.sock    > /etc/php.d/mysqli.ini
+          echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/pdo_mysql.ini
+      - name: Setup
+        run: |
+          set -x
+          sudo service mysql start
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          # Ensure local_infile tests can run.
+          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+          sudo locale-gen de_DE
+      - name: Test
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            --msan
+      - name: Test Opcache
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            --msan
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  LIBMYSQLCLIENT:
+    name: LIBMYSQLCLIENT
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: apt
+        run: |
+          sudo apt-get update -y | true
+          sudo apt install bison re2c
+      - name: Setup
+        run: |
+          sudo service mysql start
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          # Ensure local_infile tests can run.
+          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+      - name: Build mysql-8.0
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          configurationParameters: ${{ !inputs.libmysqlclient_with_mysqli && '--enable-werror' || '' }}
+          libmysql: mysql-8.0.37-linux-glibc2.28-x86_64.tar.xz
+          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
+      - name: Test mysql-8.0
+        uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
+      - name: Build mysql-8.4
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          configurationParameters: ${{ !inputs.libmysqlclient_with_mysqli && '--enable-werror' || '' }}
+          libmysql: mysql-8.4.0-linux-glibc2.28-x86_64.tar.xz
+          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
+      - name: Test mysql-8.4
+        uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  PECL:
+    if: inputs.branch == 'master'
+    runs-on: ubuntu-22.04
+    env:
+      CC: ccache gcc
+      CXX: ccache g++
+    steps:
+      - name: git checkout PHP
+        uses: actions/checkout@v4
+        with:
+          path: php
+          ref: ${{ inputs.branch }}
+      - name: git checkout apcu
+        uses: actions/checkout@v4
+        with:
+          repository: krakjoe/apcu
+          path: apcu
+      - name: git checkout imagick
+        uses: actions/checkout@v4
+        with:
+          repository: Imagick/imagick
+          path: imagick
+      - name: git checkout memcached
+        uses: actions/checkout@v4
+        with:
+          repository: php-memcached-dev/php-memcached
+          path: memcached
+      - name: git checkout redis
+        uses: actions/checkout@v4
+        with:
+          repository: phpredis/phpredis
+          path: redis
+      - name: git checkout xdebug
+        if: false
+        uses: actions/checkout@v4
+        with:
+          repository: xdebug/xdebug
+          path: xdebug
+      - name: git checkout yaml
+        uses: actions/checkout@v4
+        with:
+          repository: php/pecl-file_formats-yaml
+          path: yaml
+      - name: apt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ccache \
+            libmemcached-dev \
+            bison \
+            re2c
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{github.job}}-${{hashFiles('php/main/php_version.h')}}"
+          append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
+      - name: build PHP
+        run: |
+          cd php
+          ./buildconf --force
+          ./configure \
+            --enable-option-checking=fatal \
+            --prefix=/opt/php \
+            --enable-cli \
+            --disable-all \
+            --enable-session \
+            --enable-werror
+          make -j$(/usr/bin/nproc)
+          sudo make install
+      - name: build apcu
+        run: |
+          cd apcu
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build imagick
+        run: |
+          cd imagick
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build memcached
+        run: |
+          cd memcached
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build redis
+        run: |
+          cd redis
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build xdebug
+        if: false
+        run: |
+          cd xdebug
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build yaml
+        run: |
+          cd yaml
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  WINDOWS:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - x64: true
+            zts: true
+            opcache: true
+          - x64: false
+            zts: false
+            opcache: false
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: windows-${{ inputs.windows_version }}
+    env:
+      PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
+      PHP_BUILD_OBJ_DIR: C:\obj
+      PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
+      PHP_BUILD_CRT: ${{ inputs.windows_version == '2022' && 'vs17' || 'vs16' }}
+      PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
+      THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
+      INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
+      PARALLEL: -j2
+      OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
+    steps:
+      - name: git config
+        run: git config --global core.autocrlf false && git config --global core.eol lf
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Setup
+        uses: ./.github/actions/setup-windows
+      - name: Build
+        run: .github/scripts/windows/build.bat
+      - name: Test
+        run: .github/scripts/windows/test.bat

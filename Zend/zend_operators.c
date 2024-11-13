@@ -122,7 +122,7 @@ static _locale_t current_locale = NULL;
 
 #define BLOCKCONV_LOAD(input) \
 	int8x16_t blconv_operand = vld1q_s8((const int8_t*)(input)); \
-	uint8x16_t blconv_mask = vcltq_s8(vaddq_s8(blconv_operand, blconv_offset), blconv_threshold);
+	uint8x16_t blconv_mask = vcltq_s8(vreinterpretq_s8_u8(vaddq_u8(vreinterpretq_u8_s8(blconv_operand), vreinterpretq_u8_s8(blconv_offset))), blconv_threshold);
 
 #define BLOCKCONV_FOUND() vmaxvq_u8(blconv_mask)
 
@@ -812,9 +812,7 @@ try_again:
 		case IS_OBJECT:
 			if (Z_OBJCE_P(op) == zend_ce_closure) {
 				convert_scalar_to_array(op);
-			} else if (Z_OBJ_P(op)->properties == NULL
-			 && Z_OBJ_HT_P(op)->get_properties_for == NULL
-			 && Z_OBJ_HT_P(op)->get_properties == zend_std_get_properties) {
+			} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(op)) {
 				/* Optimized version without rebuilding properties HashTable */
 				HashTable *ht = zend_std_build_object_properties_array(Z_OBJ_P(op));
 				OBJ_RELEASE(Z_OBJ_P(op));
@@ -1287,6 +1285,20 @@ ZEND_API zend_result ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
+static void ZEND_COLD zend_power_base_0_exponent_lt_0_error(void)
+{
+	zend_error(E_DEPRECATED, "Power of base 0 and negative exponent is deprecated");
+}
+
+static double safe_pow(double base, double exponent)
+{
+	if (UNEXPECTED(base == 0.0 && exponent < 0.0)) {
+		zend_power_base_0_exponent_lt_0_error();
+	}
+
+	return pow(base, exponent);
+}
+
 static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
@@ -1311,14 +1323,14 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 					--i;
 					ZEND_SIGNED_MULTIPLY_LONG(l1, l2, l1, dval, overflow);
 					if (overflow) {
-						ZVAL_DOUBLE(result, dval * pow(l2, i));
+						ZVAL_DOUBLE(result, dval * safe_pow(l2, i));
 						return SUCCESS;
 					}
 				} else {
 					i /= 2;
 					ZEND_SIGNED_MULTIPLY_LONG(l2, l2, l2, dval, overflow);
 					if (overflow) {
-						ZVAL_DOUBLE(result, (double)l1 * pow(dval, i));
+						ZVAL_DOUBLE(result, (double)l1 * safe_pow(dval, i));
 						return SUCCESS;
 					}
 				}
@@ -1326,17 +1338,17 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 			/* i == 0 */
 			ZVAL_LONG(result, l1);
 		} else {
-			ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
+			ZVAL_DOUBLE(result, safe_pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
 		}
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
-		ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), Z_DVAL_P(op2)));
+		ZVAL_DOUBLE(result, safe_pow(Z_DVAL_P(op1), Z_DVAL_P(op2)));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
-		ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
+		ZVAL_DOUBLE(result, safe_pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
-		ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
+		ZVAL_DOUBLE(result, safe_pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -1377,10 +1389,13 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-/* Returns SUCCESS/TYPES_NOT_HANDLED/DIV_BY_ZERO */
-#define TYPES_NOT_HANDLED 1
-#define DIV_BY_ZERO 2
-static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
+typedef enum {
+	DIV_SUCCESS,
+	DIV_BY_ZERO,
+	DIV_TYPES_NOT_HANDLED
+} zend_div_status;
+
+static zend_div_status ZEND_FASTCALL div_function_base(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
 	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -1390,34 +1405,34 @@ static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /
 		} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 			/* Prevent overflow error/crash */
 			ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
-			return SUCCESS;
+			return DIV_SUCCESS;
 		}
 		if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
 			ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
 		} else {
 			ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1)) / Z_LVAL_P(op2));
 		}
-		return SUCCESS;
+		return DIV_SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
 			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
-		return SUCCESS;
+		return DIV_SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
 			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
-		return SUCCESS;
+		return DIV_SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
 			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
-		return SUCCESS;
+		return DIV_SUCCESS;
 	} else {
-		return TYPES_NOT_HANDLED;
+		return DIV_TYPES_NOT_HANDLED;
 	}
 }
 /* }}} */
@@ -1427,8 +1442,8 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
-	int retval = div_function_base(result, op1, op2);
-	if (EXPECTED(retval == SUCCESS)) {
+	zend_div_status retval = div_function_base(result, op1, op2);
+	if (EXPECTED(retval == DIV_SUCCESS)) {
 		return SUCCESS;
 	}
 
@@ -1449,7 +1464,7 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 	}
 
 	retval = div_function_base(&result_copy, &op1_copy, &op2_copy);
-	if (retval == SUCCESS) {
+	if (retval == DIV_SUCCESS) {
 		if (result == op1) {
 			zval_ptr_dtor(result);
 		}
@@ -1458,7 +1473,7 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 	}
 
 div_by_zero:
-	ZEND_ASSERT(retval == DIV_BY_ZERO && "TYPES_NOT_HANDLED should not occur here");
+	ZEND_ASSERT(retval == DIV_BY_ZERO && "DIV_TYPES_NOT_HANDLED should not occur here");
 	if (result != op1) {
 		ZVAL_UNDEF(result);
 	}
@@ -2804,9 +2819,9 @@ try_again:
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_is_true(const zval *op) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_is_true(const zval *op) /* {{{ */
 {
-	return (int) i_zend_is_true(op);
+	return i_zend_is_true(op);
 }
 /* }}} */
 
@@ -2845,7 +2860,7 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 #elif defined(MB_CUR_MAX)
 	/* Check if current locale uses variable width encoding */
 	if (MB_CUR_MAX > 1) {
-#if HAVE_NL_LANGINFO
+#ifdef HAVE_NL_LANGINFO
 		const char *charmap = nl_langinfo(CODESET);
 #else
 		char buf[16];

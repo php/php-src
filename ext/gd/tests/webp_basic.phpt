@@ -37,6 +37,12 @@ $im_lossless = imagecreatefromwebp($filename);
 echo 'Does lossless conversion work? ';
 var_dump(calc_image_dissimilarity($im1, $im_lossless) == 0);
 
+try {
+	imagewebp($im1, $filename, -10);
+} catch (\ValueError $e) {
+	echo $e->getMessage();
+}
+
 ?>
 --CLEAN--
 <?php
@@ -45,3 +51,4 @@ var_dump(calc_image_dissimilarity($im1, $im_lossless) == 0);
 --EXPECT--
 Is lossy conversion close enough? bool(true)
 Does lossless conversion work? bool(true)
+imagewebp(): Argument #3 ($quality) must be greater than or equal to -1

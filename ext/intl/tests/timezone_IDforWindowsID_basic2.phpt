@@ -4,6 +4,7 @@ IntlTimeZone::getIDForWindowsID basic test
 intl
 --SKIPIF--
 <?php if (version_compare(INTL_ICU_VERSION, '58.1') < 0) die('skip for ICU >= 58.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '76.1') >= 0) die('skip for ICU <= 76.1'); ?>
 --FILE--
 <?php
 
@@ -27,7 +28,7 @@ foreach ($tzs as $tz => $regions) {
 --EXPECT--
 ** Gnomeregan
 bool(false)
-Error: intltz_get_windows_id: Unknown windows timezone: U_ILLEGAL_ARGUMENT_ERROR
+Error: unknown windows timezone: U_ILLEGAL_ARGUMENT_ERROR
 ** India Standard Time
 string(13) "Asia/Calcutta"
 ** Pacific Standard Time

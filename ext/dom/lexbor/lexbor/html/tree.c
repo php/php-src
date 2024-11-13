@@ -398,22 +398,16 @@ lxb_html_tree_insert_foreign_element(lxb_html_tree_t *tree,
     lxb_html_tree_insertion_position_t ipos;
 
     pos = lxb_html_tree_appropriate_place_inserting_node(tree, NULL, &ipos);
-
-    if (ipos == LXB_HTML_TREE_INSERTION_POSITION_CHILD) {
-        element = lxb_html_tree_create_element_for_token(tree, token, ns, pos);
-    }
-    else {
-        element = lxb_html_tree_create_element_for_token(tree, token, ns,
-                                                         pos->parent);
+    if (pos == NULL) {
+        return NULL;
     }
 
+    element = lxb_html_tree_create_element_for_token(tree, token, ns);
     if (element == NULL) {
         return NULL;
     }
 
-    if (pos != NULL) {
-        lxb_html_tree_insert_node(pos, lxb_dom_interface_node(element), ipos);
-    }
+    lxb_html_tree_insert_node(pos, lxb_dom_interface_node(element), ipos);
 
     status = lxb_html_tree_open_elements_push(tree,
                                               lxb_dom_interface_node(element));
@@ -426,8 +420,7 @@ lxb_html_tree_insert_foreign_element(lxb_html_tree_t *tree,
 
 lxb_html_element_t *
 lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
-                                       lxb_html_token_t *token, lxb_ns_id_t ns,
-                                       lxb_dom_node_t *parent)
+                                       lxb_html_token_t *token, lxb_ns_id_t ns)
 {
     lxb_dom_node_t *node = lxb_html_tree_create_node(tree, token->tag_id, ns);
     if (node == NULL) {
@@ -1560,8 +1553,7 @@ lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,
             fake_token.base_element = node;
 
             element = lxb_html_tree_create_element_for_token(tree, &fake_token,
-                                                             LXB_NS_HTML,
-                                                             common_ancestor);
+                                                             LXB_NS_HTML);
             if (element == NULL) {
                 *status = LXB_STATUS_ERROR_MEMORY_ALLOCATION;
 
@@ -1582,7 +1574,7 @@ lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,
 
             /* State 14.9 */
             if (last->parent != NULL) {
-                lxb_dom_node_remove(last);
+                lxb_dom_node_remove_wo_events(last);
             }
 
             lxb_dom_node_insert_child_wo_events(node, last);
@@ -1592,7 +1584,7 @@ lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,
         }
 
         if (last->parent != NULL) {
-            lxb_dom_node_remove(last);
+            lxb_dom_node_remove_wo_events(last);
         }
 
         /* State 15 */
@@ -1615,8 +1607,7 @@ lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,
         fake_token.base_element = formatting_element;
 
         element = lxb_html_tree_create_element_for_token(tree, &fake_token,
-                                                         LXB_NS_HTML,
-                                                         furthest_block);
+                                                         LXB_NS_HTML);
         if (element == NULL) {
             *status = LXB_STATUS_ERROR_MEMORY_ALLOCATION;
 
@@ -1630,7 +1621,7 @@ lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,
         while (node != NULL) {
             next = node->next;
 
-            lxb_dom_node_remove(node);
+            lxb_dom_node_remove_wo_events(node);
             lxb_dom_node_insert_child_wo_events(lxb_dom_interface_node(element),
                                                 node);
             node = next;

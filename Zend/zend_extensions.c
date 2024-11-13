@@ -23,6 +23,7 @@
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
 ZEND_API int zend_op_array_extension_handles = 0;
+ZEND_API int zend_internal_function_extension_handles = 0;
 static int last_resource_number;
 
 zend_result zend_load_extension(const char *path)
@@ -207,6 +208,7 @@ void zend_startup_extensions_mechanism(void)
 	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
 	zend_op_array_extension_handles = 0;
+	zend_internal_function_extension_handles = 0;
 	last_resource_number = 0;
 }
 
@@ -270,7 +272,7 @@ ZEND_API int zend_get_resource_handle(const char *module_name)
  *
  * The extension slot has been available since PHP 7.4 on user functions and
  * has been available since PHP 8.2 on internal functions.
- * 
+ *
  * # Safety
  * The extension slot made available by calling this function is initialized on
  * the first call made to the function in that request. If you need to
@@ -278,13 +280,13 @@ ZEND_API int zend_get_resource_handle(const char *module_name)
  *
  * The function cache slots are not available if the function is a trampoline,
  * which can be checked with something like:
- * 
+ *
  *     if (fbc->type == ZEND_USER_FUNCTION
  *         && !(fbc->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
  *     ) {
  *         // Use ZEND_OP_ARRAY_EXTENSION somehow
  *     }
- */  
+ */
 ZEND_API int zend_get_op_array_extension_handle(const char *module_name)
 {
 	int handle = zend_op_array_extension_handles++;
@@ -301,8 +303,23 @@ ZEND_API int zend_get_op_array_extension_handles(const char *module_name, int ha
 	return handle;
 }
 
+ZEND_API int zend_get_internal_function_extension_handle(const char *module_name)
+{
+	int handle = zend_internal_function_extension_handles++;
+	zend_add_system_entropy(module_name, "zend_get_internal_function_extension_handle", &zend_internal_function_extension_handles, sizeof(int));
+	return handle;
+}
+
+ZEND_API int zend_get_internal_function_extension_handles(const char *module_name, int handles)
+{
+	int handle = zend_internal_function_extension_handles;
+	zend_internal_function_extension_handles += handles;
+	zend_add_system_entropy(module_name, "zend_get_internal_function_extension_handle", &zend_internal_function_extension_handles, sizeof(int));
+	return handle;
+}
+
 ZEND_API size_t zend_internal_run_time_cache_reserved_size(void) {
-	return zend_op_array_extension_handles * sizeof(void *);
+	return zend_internal_function_extension_handles * sizeof(void *);
 }
 
 ZEND_API void zend_init_internal_run_time_cache(void) {
@@ -314,24 +331,33 @@ ZEND_API void zend_init_internal_run_time_cache(void) {
 			functions += zend_hash_num_elements(&ce->function_table);
 		} ZEND_HASH_FOREACH_END();
 
-		char *ptr = zend_arena_calloc(&CG(arena), functions, rt_size);
+		size_t alloc_size = functions * rt_size;
+		char *ptr = pemalloc(alloc_size, 1);
+
+		CG(internal_run_time_cache) = ptr;
+		CG(internal_run_time_cache_size) = alloc_size;
+
 		zend_internal_function *zif;
 		ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), zif) {
-			if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL)
-			{
+			if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL) {
 				ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
 				ptr += rt_size;
 			}
 		} ZEND_HASH_FOREACH_END();
 		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zif) {
-				if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL)
-				{
+				if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL) {
 					ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
 					ptr += rt_size;
 				}
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
+	}
+}
+
+ZEND_API void zend_reset_internal_run_time_cache(void) {
+	if (CG(internal_run_time_cache)) {
+		memset(CG(internal_run_time_cache), 0, CG(internal_run_time_cache_size));
 	}
 }
 

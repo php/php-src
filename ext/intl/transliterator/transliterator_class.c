@@ -128,46 +128,27 @@ static zend_object *Transliterator_object_create( zend_class_entry *ce )
 /* {{{ clone handler for Transliterator */
 static zend_object *Transliterator_clone_obj( zend_object *object )
 {
-	Transliterator_object *to_orig,
-	                      *to_new;
-	zend_object 		  *ret_val;
-	intl_error_reset( NULL );
-
-	to_orig = php_intl_transliterator_fetch_object( object );
-	intl_error_reset( INTL_DATA_ERROR_P( to_orig ) );
-	ret_val = Transliterator_ce_ptr->create_object( object->ce );
-	to_new  = php_intl_transliterator_fetch_object( ret_val );
+	Transliterator_object *to_orig = php_intl_transliterator_fetch_object(object);
+	zend_object           *ret_val = Transliterator_ce_ptr->create_object(object->ce);
+	Transliterator_object  *to_new = php_intl_transliterator_fetch_object(ret_val);
 
 	zend_objects_clone_members( &to_new->zo, &to_orig->zo );
-
-	if( to_orig->utrans != NULL )
-	{
+	if (to_orig->utrans != NULL) {
 		/* guaranteed to return NULL if it fails */
-		UTransliterator *utrans = utrans_clone( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to_orig ) );
+		UErrorCode error = U_ZERO_ERROR;
+		UTransliterator *utrans = utrans_clone( to_orig->utrans, &error);
 
-		if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to_orig ) ) ) {
-			zend_string *err_msg;
-
-			if( utrans != NULL )
-				transliterator_object_destroy( to_new );
-
-			/* set the error anyway, in case in the future we decide not to
-			 * throw an error. It also helps build the error message */
-			intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( to_orig ) );
-			intl_errors_set_custom_msg( TRANSLITERATOR_ERROR_P( to_orig ),
-				"Could not clone transliterator", 0 );
-
-			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) );
-			zend_throw_error( NULL, "%s", ZSTR_VAL(err_msg) );
-			zend_string_free( err_msg ); /* if it's changed into a warning */
+		if (U_FAILURE(error)) {
+			if (utrans != NULL) {
+				transliterator_object_destroy(to_new);
+			}
+			zend_throw_error(NULL, "Failed to clone Transliterator");
 		} else {
 			to_new->utrans = utrans;
 		}
-	}
-	else
-	{
+	} else {
 		/* We shouldn't have unconstructed objects in the first place */
-		zend_throw_error(NULL, "Unconstructed Transliterator object cannot be cloned");
+		zend_throw_error(NULL, "Cannot clone uninitialized Transliterator");
 	}
 
 	return ret_val;

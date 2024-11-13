@@ -301,28 +301,28 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 		/* In all cases, handle invalid characters early, as we assign special meaning to codepoints > 0xFFFFFF */
 		switch (case_mode) {
 		case PHP_UNICODE_CASE_UPPER_SIMPLE:
-			for (int i = 0; i < out_len; i++) {
+			for (size_t i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_toupper_simple(w, src_encoding);
 			}
 			break;
 
 		case PHP_UNICODE_CASE_LOWER_SIMPLE:
-			for (int i = 0; i < out_len; i++) {
+			for (size_t i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_tolower_simple(w, src_encoding);
 			}
 			break;
 
 		case PHP_UNICODE_CASE_FOLD_SIMPLE:
-			for (int i = 0; i < out_len; i++) {
+			for (size_t i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_tofold_simple(w, src_encoding);
 			}
 			break;
 
 		case PHP_UNICODE_CASE_TITLE_SIMPLE:
-			for (int i = 0; i < out_len; i++) {
+			for (size_t i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					*p++ = w;
@@ -336,7 +336,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 			break;
 
 		case PHP_UNICODE_CASE_UPPER:
-			for (int i = 0; i < out_len; i++) {
+			for (size_t i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					*p++ = w;
@@ -352,7 +352,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
-			for (int i = 0; i < out_len; i++) {
+			for (size_t i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					*p++ = w;
@@ -405,7 +405,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 			break;
 
 		case PHP_UNICODE_CASE_FOLD:
-			for (int i = 0; i < out_len; i++) {
+			for (size_t i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					*p++ = w;
@@ -421,7 +421,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 			break;
 
 		case PHP_UNICODE_CASE_TITLE:
-			for (int i = 0; i < out_len; i++) {
+			for (size_t i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					*p++ = w;

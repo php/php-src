@@ -82,7 +82,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCodePointBreakIterator_getLastCodePoint arginfo_class_IntlBreakIterator_current
 
-
 ZEND_METHOD(IntlBreakIterator, createCharacterInstance);
 ZEND_METHOD(IntlBreakIterator, createCodePointInstance);
 ZEND_METHOD(IntlBreakIterator, createLineInstance);
@@ -112,7 +111,6 @@ ZEND_METHOD(IntlRuleBasedBreakIterator, getRuleStatus);
 ZEND_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec);
 ZEND_METHOD(IntlCodePointBreakIterator, getLastCodePoint);
 
-
 static const zend_function_entry class_IntlBreakIterator_methods[] = {
 	ZEND_ME(IntlBreakIterator, createCharacterInstance, arginfo_class_IntlBreakIterator_createCharacterInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(IntlBreakIterator, createCodePointInstance, arginfo_class_IntlBreakIterator_createCodePointInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -139,7 +137,6 @@ static const zend_function_entry class_IntlBreakIterator_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_IntlRuleBasedBreakIterator_methods[] = {
 	ZEND_ME(IntlRuleBasedBreakIterator, __construct, arginfo_class_IntlRuleBasedBreakIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(IntlRuleBasedBreakIterator, getBinaryRules, arginfo_class_IntlRuleBasedBreakIterator_getBinaryRules, ZEND_ACC_PUBLIC)
@@ -148,7 +145,6 @@ static const zend_function_entry class_IntlRuleBasedBreakIterator_methods[] = {
 	ZEND_ME(IntlRuleBasedBreakIterator, getRuleStatusVec, arginfo_class_IntlRuleBasedBreakIterator_getRuleStatusVec, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_IntlCodePointBreakIterator_methods[] = {
 	ZEND_ME(IntlCodePointBreakIterator, getLastCodePoint, arginfo_class_IntlCodePointBreakIterator_getLastCodePoint, ZEND_ACC_PUBLIC)
@@ -160,8 +156,7 @@ static zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", class_IntlBreakIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval const_DONE_value;
@@ -286,8 +281,7 @@ static zend_class_entry *register_class_IntlRuleBasedBreakIterator(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator", class_IntlRuleBasedBreakIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlBreakIterator);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlBreakIterator, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -297,8 +291,7 @@ static zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator", class_IntlCodePointBreakIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlBreakIterator);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlBreakIterator, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

@@ -54,7 +54,7 @@ typedef struct _zend_weakmap_iterator {
 #define ZEND_WEAKREF_ENCODE(p, t) ((void *) (((uintptr_t) (p)) | (t)))
 
 zend_class_entry *zend_ce_weakref;
-zend_class_entry *zend_ce_weakmap;
+static zend_class_entry *zend_ce_weakmap;
 static zend_object_handlers zend_weakref_handlers;
 static zend_object_handlers zend_weakmap_handlers;
 
@@ -183,6 +183,13 @@ ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key) {
 	return FAILURE;
 }
 
+ZEND_API void zend_weakrefs_hash_clean(HashTable *ht) {
+	zend_ulong obj_key;
+	ZEND_HASH_FOREACH_NUM_KEY(ht, obj_key) {
+		zend_weakrefs_hash_del(ht, zend_weakref_key_to_object(obj_key));
+	} ZEND_HASH_FOREACH_END();
+}
+
 void zend_weakrefs_init(void) {
 	zend_hash_init(&EG(weakrefs), 8, NULL, NULL, 0);
 }
@@ -271,6 +278,25 @@ static void zend_weakref_free(zend_object *zo) {
 	zend_object_std_dtor(&wr->std);
 }
 
+static HashTable *zend_weakref_get_debug_info(zend_object *object, int *is_temp)
+{
+	*is_temp = 1;
+
+	HashTable *ht = zend_new_array(1);
+
+	zend_object *referent = zend_weakref_from(object)->referent;
+	zval value;
+	if (referent) {
+		ZVAL_OBJ_COPY(&value, referent);
+	} else {
+		ZVAL_NULL(&value);
+	}
+
+	zend_hash_update(ht, ZSTR_KNOWN(ZEND_STR_OBJECT), &value);
+
+	return ht;
+}
+
 ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 {
 	zend_throw_error(NULL, "Direct instantiation of WeakReference is not allowed, use WeakReference::create instead");
@@ -295,7 +321,7 @@ ZEND_METHOD(WeakReference, get)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_weakref_get(getThis(), return_value);
+	zend_weakref_get(ZEND_THIS, return_value);
 }
 
 static zend_object *zend_weakmap_create_object(zend_class_entry *ce)
@@ -386,6 +412,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 	zend_hash_index_add_new(&wm->ht, obj_key, value);
 }
 
+// todo: make zend_weakmap_has_dimension return bool as well
 /* int return and check_empty due to Object Handler API */
 static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
@@ -622,6 +649,10 @@ static void zend_weakmap_iterator_get_current_key(zend_object_iterator *obj_iter
 	zend_string *string_key;
 	zend_ulong num_key;
 	int key_type = zend_hash_get_current_key_ex(&wm->ht, &string_key, &num_key, pos);
+	if (key_type == HASH_KEY_NON_EXISTENT) {
+		ZVAL_NULL(key);
+		return;
+	}
 	if (key_type != HASH_KEY_IS_LONG) {
 		ZEND_ASSERT(0 && "Must have integer key");
 	}
@@ -674,12 +705,12 @@ ZEND_METHOD(WeakMap, offsetGet)
 	zval *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zval *zv = zend_weakmap_read_dimension(Z_OBJ_P(ZEND_THIS), key, BP_VAR_R, NULL);
 	if (!zv) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY(return_value, zv);
@@ -690,7 +721,7 @@ ZEND_METHOD(WeakMap, offsetSet)
 	zval *key, *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &key, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_weakmap_write_dimension(Z_OBJ_P(ZEND_THIS), key, value);
@@ -701,7 +732,7 @@ ZEND_METHOD(WeakMap, offsetExists)
 	zval *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(zend_weakmap_has_dimension(Z_OBJ_P(ZEND_THIS), key, /* check_empty */ 0));
@@ -712,7 +743,7 @@ ZEND_METHOD(WeakMap, offsetUnset)
 	zval *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_weakmap_unset_dimension(Z_OBJ_P(ZEND_THIS), key);
@@ -721,7 +752,7 @@ ZEND_METHOD(WeakMap, offsetUnset)
 ZEND_METHOD(WeakMap, count)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_long count;
@@ -732,7 +763,7 @@ ZEND_METHOD(WeakMap, count)
 ZEND_METHOD(WeakMap, getIterator)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
@@ -749,6 +780,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakref_handlers.offset = XtOffsetOf(zend_weakref, std);
 
 	zend_weakref_handlers.free_obj = zend_weakref_free;
+	zend_weakref_handlers.get_debug_info = zend_weakref_get_debug_info;
 	zend_weakref_handlers.clone_obj = NULL;
 
 	zend_ce_weakmap = register_class_WeakMap(zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);

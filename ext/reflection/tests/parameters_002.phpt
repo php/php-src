@@ -11,7 +11,7 @@ function test($nix, Array $ar, &$ref, stdClass $std,
 class test
 {
     function method($nix, Array $ar, &$ref, stdClass $std,
-        NonExistingClass $na, stdClass $opt = NULL, $def = "FooBar")
+        NonExistingClass $na, ?stdClass $opt = NULL, $def = "FooBar")
     {
     }
 }
@@ -73,16 +73,17 @@ check_params(ReflectionMethod::createFromMethodName('test::method'));
 
 ?>
 --EXPECTF--
+Deprecated: test(): Implicitly marking parameter $opt as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 #####test()#####
 ===0===
 getName: string(3) "nix"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: NULL
 getDeclaringClass: NULL
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
@@ -91,11 +92,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(2) "ar"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: NULL
 getDeclaringClass: NULL
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(true)
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -104,11 +105,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(3) "ref"
 isPassedByReference: bool(true)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: NULL
 getDeclaringClass: NULL
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
@@ -117,11 +118,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(3) "std"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: stdClass
 getDeclaringClass: NULL
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -130,11 +131,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(2) "na"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 Class "NonExistingClass" does not exist
 getDeclaringClass: NULL
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -143,11 +144,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(3) "opt"
 isPassedByReference: bool(true)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: stdClass
 getDeclaringClass: NULL
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
@@ -157,11 +158,11 @@ getDefaultValue: NULL
 getName: string(3) "def"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: NULL
 getDeclaringClass: NULL
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
@@ -172,11 +173,11 @@ getDefaultValue: string(6) "FooBar"
 getName: string(3) "nix"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: NULL
 getDeclaringClass: test
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
@@ -185,11 +186,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(2) "ar"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: NULL
 getDeclaringClass: test
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(true)
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -198,11 +199,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(3) "ref"
 isPassedByReference: bool(true)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: NULL
 getDeclaringClass: test
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
@@ -211,11 +212,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(3) "std"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: stdClass
 getDeclaringClass: test
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -224,11 +225,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(2) "na"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 Class "NonExistingClass" does not exist
 getDeclaringClass: test
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
@@ -237,11 +238,11 @@ isDefaultValueAvailable: bool(false)
 getName: string(3) "opt"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: stdClass
 getDeclaringClass: test
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
@@ -251,11 +252,11 @@ getDefaultValue: NULL
 getName: string(3) "def"
 isPassedByReference: bool(false)
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 getClass: NULL
 getDeclaringClass: test
 isArray: 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)

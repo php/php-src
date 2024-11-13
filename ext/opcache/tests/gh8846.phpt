@@ -33,7 +33,7 @@ echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/gh8846-index.php?s
 --EXPECTF--
 bool(true)
 <br />
-<b>Fatal error</b>:  Cannot declare class Foo, because the name is already in use in <b>%sgh8846-2.inc</b> on line <b>%d</b><br />
+<b>Fatal error</b>:  Cannot redeclare class Foo (previously declared in %sgh8846-1.inc:2) in <b>%sgh8846-2.inc</b> on line <b>%d</b><br />
 
 bool(true)
 Ok

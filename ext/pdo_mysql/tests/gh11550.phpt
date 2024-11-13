@@ -12,6 +12,8 @@ MySQLPDOTest::skip();
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
 
+$pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
+
 $pdo->exec(<<<'SQL'
 CREATE TABLE `test_gh11550`  (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -50,9 +52,9 @@ array(1) {
   [0]=>
   array(4) {
     ["id"]=>
-    int(1)
+    string(1) "1"
     [0]=>
-    int(1)
+    string(1) "1"
     ["name"]=>
     string(5) "test1"
     [1]=>
@@ -65,9 +67,9 @@ array(1) {
   [0]=>
   array(6) {
     ["id"]=>
-    int(1)
+    string(1) "1"
     [0]=>
-    int(1)
+    string(1) "1"
     ["name"]=>
     string(5) "test1"
     [1]=>

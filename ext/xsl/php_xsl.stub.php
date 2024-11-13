@@ -75,26 +75,30 @@ class XSLTProcessor
 
     public bool $cloneDocument = false;
 
+    public int $maxTemplateDepth;
+
+    public int $maxTemplateVars;
+
     /**
-     * @param DOM\Document|SimpleXMLElement $stylesheet
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $stylesheet
      * @tentative-return-type
      */
     public function importStylesheet(object $stylesheet): bool {}
 
     /**
-     * @param DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToDoc(object $document, ?string $returnClass = null): object|false {}
 
     /**
-     * @param DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToUri(object $document, string $uri): int {}
 
     /**
-     * @param DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToXml(object $document): string|null|false {}
@@ -116,8 +120,8 @@ class XSLTProcessor
 
     public function registerPHPFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
 
-    /** @return true */
-    public function setProfiling(?string $filename) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function setProfiling(?string $filename): true {}
 
     /** @tentative-return-type */
     public function setSecurityPrefs(int $preferences): int {}

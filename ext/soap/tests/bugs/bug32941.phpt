@@ -5,7 +5,7 @@ soap
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): string {
     return <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope

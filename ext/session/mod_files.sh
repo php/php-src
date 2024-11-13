@@ -5,7 +5,7 @@ if [[ "$2" = "" ]] || [[ "$3" = "" ]]; then
        echo "BASE_DIRECTORY will be created if it doesn't exist"
        echo "DEPTH must be an integer number >0"
        echo "BITS_PER_CHAR(session.sid_bits_per_character) should be one of 4, 5, or 6."
-       # http://php.net/manual/en/session.configuration.php#ini.session.sid-bits-per-character
+       # https://www.php.net/manual/en/session.configuration.php#ini.session.sid-bits-per-character
        exit 1
 fi
 

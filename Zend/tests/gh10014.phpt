@@ -7,6 +7,8 @@ GH-10014: Incorrect short-circuiting in constant expressions
 class y {
 }
 
+(new ReflectionClass(y::class))->getAttributes()[0]->newInstance();
+
 ?>
 --EXPECTF--
 Warning: Undefined array key 2 in %s on line %d

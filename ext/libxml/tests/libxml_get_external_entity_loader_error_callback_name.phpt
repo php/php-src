@@ -2,7 +2,8 @@
 libxml_get_external_entity_loader() display correct callable name
 --EXTENSIONS--
 dom
-dba
+--SKIPIF--
+<?php if (PHP_OS_FAMILY == 'Windows') die('skip PTY is not supported on Windows'); ?>
 --FILE--
 <?php
 
@@ -17,8 +18,9 @@ DTD;
 
 class Handler {
 	public function handle($public, $system, $context) {
-	    $file = __DIR__ . '/db.dba';
-		return dba_open($file, 'n');
+        $descriptors = [["pty"], ["pty"], ["pty"], ["pipe", "w"]];
+        $pipes = [];
+        return proc_open('echo "foo";', $descriptors, $pipes);
 	}
 }
 
@@ -33,11 +35,6 @@ try {
     var_dump($e->getMessage());
 }
 
-?>
---CLEAN--
-<?php
-$file = __DIR__ . '/db.dba';
-unlink($file);
 ?>
 --EXPECT--
 string(73) "DOMDocument::validate(): supplied resource is not a valid stream resource"

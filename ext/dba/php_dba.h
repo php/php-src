@@ -52,6 +52,12 @@ typedef struct dba_info {
 	dba_lock lock;
 } dba_info;
 
+typedef struct dba_connection {
+	dba_info *info;
+	zend_string *hash;
+	zend_object std;
+} dba_connection;
+
 #define DBA_DEFAULT_DRIVER_FLAGS -1
 
 #define DBA_LOCK_READER  (0x0001)

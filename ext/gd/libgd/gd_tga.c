@@ -191,7 +191,10 @@ int read_header_tga(gdIOCtx *ctx, oTga *tga)
 			return -1;
 		}
 
-		gdGetBuf(tga->ident, tga->identsize, ctx);
+		if (gdGetBuf(tga->ident, tga->identsize, ctx) != tga->identsize) {
+			gd_error("fail to read header ident");
+			return -1;
+		}
 	}
 
 	return 1;

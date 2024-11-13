@@ -62,6 +62,19 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	zend_long quantity_value;
 	zend_string *str_test;
 	zend_string *not_empty_str_test;
+	int zend_mm_custom_handlers_enabled;
+
+	// the previous heap that was found in ZendMM
+	zend_mm_heap* original_heap;
+	// the custom handlers that might have been found in the previous heap
+	void* (*custom_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+	void (*custom_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+	void* (*custom_realloc)(void *, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+	size_t (*custom_gc)(void);
+	void (*custom_shutdown)(bool, bool);
+	// this is our heap that we install our custom handlers on and inject into
+	// ZendMM
+	zend_mm_heap* observed_heap;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(zend_test)

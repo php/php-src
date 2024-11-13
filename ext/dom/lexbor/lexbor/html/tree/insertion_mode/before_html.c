@@ -63,8 +63,7 @@ lxb_html_tree_insertion_mode_before_html_open(lxb_html_tree_t *tree,
             lxb_html_element_t *element;
 
             element = lxb_html_tree_create_element_for_token(tree, token,
-                                            LXB_NS_HTML,
-                                            &tree->document->dom_document.node);
+                                            LXB_NS_HTML);
             if (element == NULL) {
                 tree->status = LXB_STATUS_ERROR_MEMORY_ALLOCATION;
 

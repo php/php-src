@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument::createFromFile() HTTP header Content-Type
+Dom\HTMLDocument::createFromFile() HTTP header Content-Type
 --EXTENSIONS--
 dom
 --SKIPIF--
@@ -62,8 +62,8 @@ foreach ($tests as $name => $headers) {
     $responses = array_map(fn ($header) => "data://text/plain,HTTP/1.1 200 OK\r\nContent-Type: " . $header . "\r\n\r\n" . "<p>\xE4\xF6\xFC</p>\n", $headers);
     ['pid' => $pid, 'uri' => $uri] = http_server($responses);
     for ($i = 0; $i < count($responses); $i++) {
-        $result = DOM\HTMLDocument::createFromFile($uri, LIBXML_NOERROR);
-        echo $result->textContent;
+        $result = Dom\HTMLDocument::createFromFile($uri, LIBXML_NOERROR);
+        echo $result->getElementsByTagName("p")[0]->textContent, "\n";
     }
     http_server_kill($pid);
 }

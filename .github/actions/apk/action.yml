@@ -1,0 +1,56 @@
+name: apk
+runs:
+  using: composite
+  steps:
+    - shell: sh
+      run: |
+        set -x
+
+        apk update -q
+        apk add \
+            util-linux \
+            bash \
+            sudo \
+            build-base \
+            autoconf \
+            unzip \
+            tar \
+            bison \
+            re2c \
+            pkgconf \
+            mysql-client \
+            bzip2-dev \
+            curl-dev \
+            freetype-dev \
+            gettext-dev \
+            gnu-libiconv-dev \
+            gmp-dev \
+            icu-dev \
+            icu-data-full \
+            jpeg-dev \
+            libffi-dev \
+            libpng-dev \
+            libsodium-dev \
+            libwebp-dev \
+            libxml2-dev \
+            libxpm-dev \
+            libxslt-dev \
+            libzip-dev \
+            oniguruma-dev \
+            openssl-dev \
+            readline-dev \
+            sqlite-dev \
+            tidyhtml-dev \
+            gdbm-dev \
+            lmdb-dev \
+            argon2-dev \
+            enchant2-dev \
+            freetds-dev \
+            imap-dev \
+            net-snmp-dev \
+            openldap-dev \
+            unixodbc-dev \
+            postgresql14-dev \
+            tzdata \
+            musl-locales \
+            musl-locales-lang

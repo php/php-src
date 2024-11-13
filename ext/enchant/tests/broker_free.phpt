@@ -23,5 +23,5 @@ echo "OK\n";
 --EXPECTF--
 OK
 
-Deprecated: Function enchant_broker_free() is deprecated in %s
+Deprecated: Function enchant_broker_free() is deprecated since 8.0, as EnchantBroker objects are freed automatically in %s
 OK

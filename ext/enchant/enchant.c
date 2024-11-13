@@ -16,14 +16,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
-#include "../spl/spl_exceptions.h"
 #include <enchant.h>
 #include "php_enchant.h"
 
@@ -343,7 +343,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 		RETURN_THROWS();
 	}
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
+#ifdef HAVE_ENCHANT_BROKER_SET_PARAM
 	enchant_broker *pbroker;
 	if (!value_len) {
 		RETURN_FALSE;
@@ -382,7 +382,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 		RETURN_THROWS();
 	}
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
+#ifdef HAVE_ENCHANT_BROKER_SET_PARAM
 	enchant_broker *pbroker;
 	char *value;
 	PHP_ENCHANT_GET_BROKER;
@@ -447,7 +447,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	PHP_ENCHANT_GET_BROKER;
 
 	if (taglen == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

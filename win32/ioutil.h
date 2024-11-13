@@ -169,29 +169,34 @@ typedef enum {
 } while (0);
 
 PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len);
-#ifdef PHP_EXPORTS
-/* This symbols are needed only for the DllMain, but should not be exported
-	or be available when used with PHP binaries. */
-BOOL php_win32_ioutil_init(void);
-#endif
 
 /* Keep these functions aliased for case some additional handling
    is needed later. */
 __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *mb, *ret;
-	size_t mb_len;
+	size_t mb_len, dir_len = 0;
 
 	mb = php_win32_cp_conv_any_to_w(in, in_len, &mb_len);
 	if (!mb) {
 		return NULL;
 	}
 
+#ifndef ZTS
+	if (!PHP_WIN32_IOUTIL_IS_ABSOLUTEW(mb, mb_len) && !PHP_WIN32_IOUTIL_IS_JUNCTION_PATHW(mb, mb_len) && !PHP_WIN32_IOUTIL_IS_UNC_PATHW(mb, mb_len)) {
+		dir_len = GetCurrentDirectoryW(0, NULL);
+		if (dir_len == 0) {
+			free(mb);
+			return NULL;
+		}
+	}
+#endif
+
 	/* Only prefix with long if it's needed. */
-	if (mb_len >= _MAX_PATH) {
+	if (dir_len + mb_len >= _MAX_PATH) {
 		size_t new_mb_len;
 
-		ret = (wchar_t *) malloc((mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+		ret = (wchar_t *) malloc((dir_len + mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
 		if (!ret) {
 			free(mb);
 			return NULL;
@@ -204,7 +209,7 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 		}
 
 		if (new_mb_len > mb_len) {
-			wchar_t *tmp = (wchar_t *) realloc(ret, (new_mb_len + 1) * sizeof(wchar_t));
+			wchar_t *tmp = (wchar_t *) realloc(ret, (dir_len + new_mb_len + 1) * sizeof(wchar_t));
 			if (!tmp) {
 				free(ret);
 				free(mb);
@@ -220,6 +225,18 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 		} else {
 			wchar_t *src = mb, *dst = ret + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 			memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+#ifndef ZTS
+			if (dir_len > 0) {
+				size_t len = GetCurrentDirectoryW(dir_len, dst);
+				if (len == 0 || len + 1 != dir_len) {
+					free(ret);
+					free(mb);
+					return NULL;
+				}
+				dst += len;
+				*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+			}
+#endif
 			while (src < mb + mb_len) {
 				if (*src == PHP_WIN32_IOUTIL_FW_SLASHW) {
 					*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
@@ -228,9 +245,9 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 					*dst++ = *src++;
 				}
 			}
-			ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW] = L'\0';
+			ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + dir_len] = L'\0';
 
-			mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+			mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + dir_len;
 		}
 
 		free(mb);
@@ -683,7 +700,7 @@ __forceinline static char *php_win32_ioutil_realpath(const char *path, char *res
 }/*}}}*/
 
 #include <sys/stat.h>
-#if _WIN64
+#ifdef _WIN64
 typedef unsigned __int64 php_win32_ioutil_dev_t;
 typedef unsigned __int64 php_win32_ioutil_ino_t;
 typedef __time64_t php_win32_ioutil_time_t;

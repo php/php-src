@@ -48,7 +48,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 Invalid $parser:
 TypeError: xml_set_processing_instruction_handler(): Argument #1 ($parser) must be of type XMLParser, stdClass given
 Invalid callable type true:
@@ -56,6 +56,12 @@ TypeError: xml_set_processing_instruction_handler(): Argument #2 ($handler) must
 Invalid callable type int:
 TypeError: xml_set_processing_instruction_handler(): Argument #2 ($handler) must be of type callable|string|null
 String not callable and no object set:
+
+Deprecated: xml_set_processing_instruction_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 ValueError: xml_set_processing_instruction_handler(): Argument #2 ($handler) an object must be set via xml_set_object() to be able to lookup method
 String non existent method on set object:
+
+Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
+
+Deprecated: xml_set_processing_instruction_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 ValueError: xml_set_processing_instruction_handler(): Argument #2 ($handler) method stdClass::nonexistent_method() does not exist

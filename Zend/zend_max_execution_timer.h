@@ -21,8 +21,10 @@
 
 #include "zend_long.h"
 
+BEGIN_EXTERN_C()
 /* Must be called after calls to fork() */
 ZEND_API void zend_max_execution_timer_init(void);
+END_EXTERN_C()
 void zend_max_execution_timer_settime(zend_long seconds);
 void zend_max_execution_timer_shutdown(void);
 

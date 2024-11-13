@@ -29,13 +29,13 @@ static void fpm_systemd(void)
 	}
 
 /*
-	zlog(ZLOG_DEBUG, "systemd %s (Processes active:%d, idle:%d, Requests:%lu, slow:%lu, Traffic:%.3greq/sec)",
+	zlog(ZLOG_DEBUG, "systemd %s (Processes active:%d, idle:%d, Requests:%lu, slow:%lu, Traffic:%.2freq/sec)",
 			fpm_global_config.systemd_watchdog ? "watchdog" : "heartbeat",
 			active, idle, requests, slow_req, ((float)requests - last) * 1000.0 / fpm_global_config.systemd_interval);
 */
 
 	if (0 > sd_notifyf(0, "READY=1\n%s"
-				"STATUS=Processes active: %d, idle: %d, Requests: %lu, slow: %lu, Traffic: %.3greq/sec",
+				"STATUS=Processes active: %d, idle: %d, Requests: %lu, slow: %lu, Traffic: %.2freq/sec",
 				fpm_global_config.systemd_watchdog ? "WATCHDOG=1\n" : "",
 				active, idle, requests, slow_req, ((float)requests - last) * 1000.0 / fpm_global_config.systemd_interval)) {
 		zlog(ZLOG_NOTICE, "failed to notify status to systemd");

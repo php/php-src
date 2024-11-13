@@ -608,7 +608,6 @@ int phpdbg_skip_line_helper(void) /* {{{ */ {
 		 || opline->opcode == ZEND_RETURN
 		 || opline->opcode == ZEND_FAST_RET
 		 || opline->opcode == ZEND_GENERATOR_RETURN
-		 || opline->opcode == ZEND_EXIT
 		 || opline->opcode == ZEND_YIELD
 		 || opline->opcode == ZEND_YIELD_FROM
 		) {
@@ -652,7 +651,6 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 			case ZEND_RETURN:
 			case ZEND_FAST_RET:
 			case ZEND_GENERATOR_RETURN:
-			case ZEND_EXIT:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
@@ -906,7 +904,7 @@ free_cmd:
 				}
 			} zend_end_try();
 
-			if (EG(exception)) {
+			if (EG(exception) && !zend_is_unwind_exit(EG(exception))) {
 				phpdbg_handle_exception();
 			}
 		}
@@ -1547,6 +1545,8 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 				ret = phpdbg_stack_execute(&stack, allow_async_unsafe);
 			} zend_catch {
 				phpdbg_stack_free(&stack);
+				phpdbg_destroy_input(&input);
+				/* TODO: should use proper unwinding instead of bailing out */
 				zend_bailout();
 			} zend_end_try();
 
@@ -1651,6 +1651,15 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 	}
 
 	PHPDBG_G(in_execution) = 1;
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		/* No opline was executed before exception */
+		EG(opline_before_exception) = NULL;
+		/* Fall through to handle exception below. */
+	}
+#endif /* ZEND_CHECK_STACK_LIMIT */
 
 	while (1) {
 		zend_object *exception = EG(exception);

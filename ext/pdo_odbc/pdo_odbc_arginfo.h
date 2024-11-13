@@ -1,25 +1,17 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3cc19acf5943c09a011f15d9ef6d0f443d4b8a71 */
-
-
-
-
-static const zend_function_entry class_PdoOdbc_methods[] = {
-	ZEND_FE_END
-};
+ * Stub hash: 9136c911494c9e3462c49b3e58f4bcc15ebb2a9c */
 
 static void register_pdo_odbc_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("PDO_ODBC_TYPE", PDO_ODBC_TYPE, CONST_PERSISTENT);
 }
 
-static zend_class_entry *register_class_PdoOdbc(zend_class_entry *class_entry_PDO)
+static zend_class_entry *register_class_Pdo_Odbc(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PdoOdbc", class_PdoOdbc_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Odbc", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_USE_CURSOR_LIBRARY_value;
 	ZVAL_LONG(&const_ATTR_USE_CURSOR_LIBRARY_value, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);

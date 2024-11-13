@@ -1,11 +1,11 @@
 --TEST--
-PdoSqlite::blobOpen stream test
+Pdo\Sqlite::blobOpen stream test
 --EXTENSIONS--
 pdo_sqlite
 --FILE--
 <?php
 
-$db = new PdoSqlite('sqlite::memory:');
+$db = new Pdo\Sqlite('sqlite::memory:');
 
 require_once(__DIR__ . '/stream_test.inc');
 
@@ -32,7 +32,7 @@ var_dump(fwrite($stream, 'ABCD'));
 echo "Closing Stream\n";
 var_dump(fclose($stream));
 echo "Opening stream in write mode\n";
-$stream = $db->openBlob('test', 'data', 1, 'main', PdoSqlite::OPEN_READWRITE);
+$stream = $db->openBlob('test', 'data', 1, 'main', Pdo\Sqlite::OPEN_READWRITE);
 var_dump($stream);
 echo "Writing to blob\n";
 var_dump(fwrite($stream, 'ABCD'));

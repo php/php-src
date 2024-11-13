@@ -24,7 +24,7 @@ PHP_MINIT_FUNCTION(var);
 
 PHPAPI void php_var_dump(zval *struc, int level);
 PHPAPI void php_var_export(zval *struc, int level);
-PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf);
+PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf);
 
 PHPAPI void php_debug_zval_dump(zval *struc, int level);
 

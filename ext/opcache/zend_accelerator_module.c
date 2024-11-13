@@ -24,6 +24,7 @@
 #include "php.h"
 #include "ZendAccelerator.h"
 #include "zend_API.h"
+#include "zend_closures.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
 #include "php_ini.h"
@@ -34,14 +35,24 @@
 #include "ext/date/php_date.h"
 #include "opcache_arginfo.h"
 
-#if HAVE_JIT
+#ifdef HAVE_JIT
 #include "jit/zend_jit.h"
 #endif
 
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
 #define MIN_ACCEL_FILES 200
 #define MAX_ACCEL_FILES 1000000
-#define MAX_INTERNED_STRINGS_BUFFER_SIZE ((zend_long)((UINT32_MAX-PLATFORM_ALIGNMENT-sizeof(zend_accel_shared_globals))/(1024*1024)))
+/* Max value of opcache.interned_strings_buffer */
+#define MAX_INTERNED_STRINGS_BUFFER_SIZE ((zend_long)MIN( \
+	MIN( \
+		/* STRTAB_STR_TO_POS() must not overflow (zend_string_table_pos_t) */ \
+		(ZEND_STRING_TABLE_POS_MAX - sizeof(zend_string_table)) / (1024 * 1024 / ZEND_STRING_TABLE_POS_ALIGNMENT), \
+		/* nTableMask must not overflow (uint32_t) */ \
+		UINT32_MAX / (32 * 1024 * sizeof(zend_string_table_pos_t)) \
+	), \
+	/* SHM allocation must not overflow (size_t) */ \
+	(SIZE_MAX - sizeof(zend_accel_shared_globals)) / (1024 * 1024) \
+))
 #define TOKENTOSTR(X) #X
 
 static zif_handler orig_file_exists = NULL;
@@ -313,7 +324,7 @@ ZEND_INI_BEGIN()
 #ifndef ZEND_WIN32
 	STD_PHP_INI_ENTRY("opcache.preload_user"                  , ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,    accel_directives.preload_user,           zend_accel_globals, accel_globals)
 #endif
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
 	STD_PHP_INI_ENTRY("opcache.cache_id"                      , ""    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.cache_id,               zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_JIT
@@ -470,7 +481,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "File Cache", "Disabled");
 	}
-#if HAVE_JIT
+#ifdef HAVE_JIT
 	if (JIT_G(enabled)) {
 		if (JIT_G(on)) {
 			php_info_print_table_row(2, "JIT", "On");
@@ -748,7 +759,7 @@ ZEND_FUNCTION(opcache_get_status)
 			add_assoc_zval(return_value, "scripts", &scripts);
 		}
 	}
-#if HAVE_JIT
+#ifdef HAVE_JIT
 	zend_jit_status(return_value);
 #endif
 }
@@ -828,7 +839,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 #ifndef ZEND_WIN32
 	add_assoc_string(&directives, "opcache.preload_user", STRING_NOT_NULL(ZCG(accel_directives).preload_user));
 #endif
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
 	add_assoc_string(&directives, "opcache.cache_id", STRING_NOT_NULL(ZCG(accel_directives).cache_id));
 #endif
 #ifdef HAVE_JIT
@@ -912,6 +923,23 @@ ZEND_FUNCTION(opcache_invalidate)
 	} else {
 		RETURN_FALSE;
 	}
+}
+
+/* {{{ Prevents JIT on function. Call it before the first invocation of the given function. */
+ZEND_FUNCTION(opcache_jit_blacklist)
+{
+	zval *closure;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &closure, zend_ce_closure) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+#ifdef HAVE_JIT
+	const zend_function *func = zend_get_closure_method_def(Z_OBJ_P(closure));
+	if (ZEND_USER_CODE(func->type)) {
+		zend_jit_blacklist_function((zend_op_array *)&func->op_array);
+	}
+#endif
 }
 
 ZEND_FUNCTION(opcache_compile_file)

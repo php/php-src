@@ -24,29 +24,30 @@
 #ifdef PHP_WIN32
 # include <process.h>
 # include <io.h>
+# include "win32/console.h"
 # include "win32/time.h"
 # include "win32/signal.h"
 # include "win32/php_registry.h"
 # include <sys/timeb.h>
 #else
-# include "php_config.h"
+# include <php_config.h>
 #endif
 
 #ifdef __riscos__
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #include <signal.h>
 #include <locale.h>
 
-#if HAVE_DLFCN_H
+#ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
 
@@ -94,7 +95,6 @@
 #include "zend_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_raw_url_decode() */
-#include "ext/standard/php_string.h" /* for php_dirname() */
 #include "ext/date/php_date.h" /* for php_format_date() */
 #include "php_network.h"
 
@@ -110,7 +110,7 @@
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0
 
-#if HAVE_FORK
+#ifdef HAVE_FORK
 # include <sys/wait.h>
 static pid_t	 php_cli_server_master;
 static pid_t	*php_cli_server_workers;
@@ -222,7 +222,7 @@ static const php_cli_server_http_response_status_code_pair template_map[] = {
 
 static int php_cli_server_log_level = 3;
 
-#if HAVE_UNISTD_H || defined(PHP_WIN32)
+#if defined(HAVE_UNISTD_H) || defined(PHP_WIN32)
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
 #endif
 
@@ -487,7 +487,7 @@ static PHP_MINFO_FUNCTION(cli_server)
 	DISPLAY_INI_ENTRIES();
 }
 
-zend_module_entry cli_server_module_entry = {
+static zend_module_entry cli_server_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cli_server",
 	NULL,
@@ -510,9 +510,9 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE_END
 };
 
-static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module, &cli_server_module_entry);
+	return php_module_startup(sapi_module_ptr, &cli_server_module_entry);
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -1164,7 +1164,7 @@ static bool php_cli_server_content_sender_pull(php_cli_server_content_sender *se
 	return true;
 } /* }}} */
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 static int php_cli_is_output_tty(void) /* {{{ */
 {
 	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
@@ -1199,7 +1199,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 		}
 	}
 
-#if HAVE_UNISTD_H || defined(PHP_WIN32)
+#if defined(HAVE_UNISTD_H) || defined(PHP_WIN32)
 	if (CLI_SERVER_G(color) && php_cli_is_output_tty() == OUTPUT_IS_TTY) {
 		if (effective_status >= 500) {
 			/* server error: red */
@@ -1302,7 +1302,7 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 		}
 
 		switch ((*p)->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 		case AF_INET6:
 			sa = pemalloc(sizeof(struct sockaddr_in6), 1);
 			*(struct sockaddr_in6 *)sa = *(struct sockaddr_in6 *)*p;
@@ -1348,7 +1348,7 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 				goto out;
 			}
 			switch (sa->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 			case AF_INET6:
 				*port = ntohs(((struct sockaddr_in6 *)sa)->sin6_port);
 				break;
@@ -1680,14 +1680,33 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 {
 	/* Wrap header value in a zval to add is to the HashTable which acts as an array */
 	zval tmp;
-	ZVAL_STR(&tmp, client->current_header_value);
 	/* strip off the colon */
 	zend_string *lc_header_name = zend_string_tolower_ex(client->current_header_name, /* persistent */ true);
 	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
 
-	/* Add the wrapped zend_string to the HashTable */
-	zend_hash_add(&client->request.headers, lc_header_name, &tmp);
-	zend_hash_add(&client->request.headers_original_case, client->current_header_name, &tmp);
+	zval *entry = zend_hash_find(&client->request.headers, lc_header_name);
+	bool with_comma = !zend_string_equals_literal(lc_header_name, "set-cookie");
+
+	/**
+	 * `Set-Cookie` HTTP header being the exception, they can have 1 or more values separated
+	 * by a comma while still possibly be set separately by the client.
+	 **/
+	if (!with_comma || entry == NULL) {
+		ZVAL_STR(&tmp, client->current_header_value);
+	} else {
+		zend_string *curval = Z_STR_P(entry);
+		zend_string *newval = zend_string_safe_alloc(1, ZSTR_LEN(curval),  ZSTR_LEN(client->current_header_value) + 2, /* persistent */true);
+
+		memcpy(ZSTR_VAL(newval), ZSTR_VAL(curval), ZSTR_LEN(curval));
+		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval), ", ", 2);
+		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval) + 2, ZSTR_VAL(client->current_header_value), ZSTR_LEN(client->current_header_value) + 1);
+
+		ZVAL_STR(&tmp, newval);
+	}
+
+	/* Add/Update the wrapped zend_string to the HashTable */
+	zend_hash_update(&client->request.headers, lc_header_name, &tmp);
+	zend_hash_update(&client->request.headers_original_case, client->current_header_name, &tmp);
 
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
 	zend_string_release_ex(client->current_header_name, /* persistent */ true);
@@ -2222,6 +2241,8 @@ static void php_cli_server_request_shutdown(php_cli_server *server, php_cli_serv
 	destroy_request_info(&SG(request_info));
 	SG(server_context) = NULL;
 	SG(rfc1867_uploaded_files) = NULL;
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 }
 /* }}} */
 
@@ -2241,20 +2262,14 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 
 	zend_try {
 		zval retval;
-
-		/* Normally php_execute_script restarts the timer with max_execution_time if it has
-		 * previously been initialized with max_input_time. We're not using php_execute_script here
-		 * because it does not provide a way to get the return value of the main script, so we need
-		 * to restart the timer manually. */
-		if (PG(max_input_time) != -1) {
-#ifdef PHP_WIN32
-			zend_unset_timeout();
-#endif
-			zend_set_timeout(INI_INT("max_execution_time"), 0);
-		}
-
 		ZVAL_UNDEF(&retval);
-		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE, &retval, 1, &zfd)) {
+		int sg_options_back = SG(options);
+		/* Don't chdir to the router script because the file path may be relative. */
+		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		CG(skip_shebang) = true;
+		bool result = php_execute_script_ex(&zfd, &retval);
+		SG(options) = sg_options_back;
+		if (result) {
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				decline = Z_TYPE(retval) == IS_FALSE;
 				zval_ptr_dtor(&retval);
@@ -2322,6 +2337,8 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 			sapi_module.send_headers = send_header_func;
 			SG(sapi_headers).send_default_content_type = 1;
 			SG(rfc1867_uploaded_files) = NULL;
+			SG(request_parse_body_context).throw_exceptions = false;
+			memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 		}
 		if (FAILURE == php_cli_server_begin_send_static(server, client)) {
 			php_cli_server_close_connection(server, client);
@@ -2336,14 +2353,14 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 }
 /* }}} */
 
-static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map_ptr) /* {{{ */
 {
 	const php_cli_server_ext_mime_type_pair *pair;
 
 	zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1);
 	GC_MAKE_PERSISTENT_LOCAL(&server->extension_mime_types);
 
-	for (pair = mime_type_map; pair->ext; pair++) {
+	for (pair = mime_type_map_ptr; pair->ext; pair++) {
 		size_t ext_len = strlen(pair->ext);
 		zend_hash_str_add_ptr(&server->extension_mime_types, pair->ext, ext_len, (void*)pair->mime_type);
 	}
@@ -2365,7 +2382,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 	if (server->router) {
 		pefree(server->router, 1);
 	}
-#if HAVE_FORK
+#ifdef HAVE_FORK
 	if (php_cli_server_workers_max > 1 &&
 		php_cli_server_workers &&
 		getpid() == php_cli_server_master) {
@@ -2379,7 +2396,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 			 do {
 				if (waitpid(php_cli_server_workers[php_cli_server_worker],
 						   &php_cli_server_worker_status,
-						   0) == FAILURE) {
+						   0) == (pid_t) -1) {
 					/* an extremely bad thing happened */
 					break;
 				}
@@ -2487,7 +2504,7 @@ static void php_cli_server_startup_workers(void) {
 		return;
 	}
 
-#if HAVE_FORK
+#ifdef HAVE_FORK
 	php_cli_server_workers_max = ZEND_ATOL(workers);
 	if (php_cli_server_workers_max > 1) {
 		zend_long php_cli_server_worker;
@@ -2843,9 +2860,9 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	} else {
 		char *ret = NULL;
 
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
 		ret = VCWD_GETCWD(document_root_buf, MAXPATHLEN);
-#elif HAVE_GETWD
+#elif defined(HAVE_GETWD)
 		ret = VCWD_GETWD(document_root_buf);
 #endif
 		document_root = ret ? document_root_buf: ".";

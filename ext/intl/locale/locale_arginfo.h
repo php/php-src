@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e446ff14fc14d08a6ac225af78cde931e381ee5b */
+ * Stub hash: 59861342e0075231d2a576afb2d5df6973d70684 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_setDefault, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_setDefault, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -62,7 +62,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_acceptFro
 	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(locale_get_default);
 ZEND_FUNCTION(locale_set_default);
 ZEND_FUNCTION(locale_get_primary_language);
@@ -82,26 +81,25 @@ ZEND_FUNCTION(locale_lookup);
 ZEND_FUNCTION(locale_canonicalize);
 ZEND_FUNCTION(locale_accept_from_http);
 
-
 static const zend_function_entry class_Locale_methods[] = {
-	ZEND_ME_MAPPING(getDefault, locale_get_default, arginfo_class_Locale_getDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(setDefault, locale_set_default, arginfo_class_Locale_setDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getPrimaryLanguage, locale_get_primary_language, arginfo_class_Locale_getPrimaryLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getScript, locale_get_script, arginfo_class_Locale_getScript, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getRegion, locale_get_region, arginfo_class_Locale_getRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getKeywords, locale_get_keywords, arginfo_class_Locale_getKeywords, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getDisplayScript, locale_get_display_script, arginfo_class_Locale_getDisplayScript, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getDisplayRegion, locale_get_display_region, arginfo_class_Locale_getDisplayRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getDisplayName, locale_get_display_name, arginfo_class_Locale_getDisplayName, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getDisplayLanguage, locale_get_display_language, arginfo_class_Locale_getDisplayLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getDisplayVariant, locale_get_display_variant, arginfo_class_Locale_getDisplayVariant, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(composeLocale, locale_compose, arginfo_class_Locale_composeLocale, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(parseLocale, locale_parse, arginfo_class_Locale_parseLocale, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getAllVariants, locale_get_all_variants, arginfo_class_Locale_getAllVariants, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(filterMatches, locale_filter_matches, arginfo_class_Locale_filterMatches, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(lookup, locale_lookup, arginfo_class_Locale_lookup, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(canonicalize, locale_canonicalize, arginfo_class_Locale_canonicalize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(acceptFromHttp, locale_accept_from_http, arginfo_class_Locale_acceptFromHttp, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("getDefault", zif_locale_get_default, arginfo_class_Locale_getDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setDefault", zif_locale_set_default, arginfo_class_Locale_setDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getPrimaryLanguage", zif_locale_get_primary_language, arginfo_class_Locale_getPrimaryLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getScript", zif_locale_get_script, arginfo_class_Locale_getScript, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getRegion", zif_locale_get_region, arginfo_class_Locale_getRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getKeywords", zif_locale_get_keywords, arginfo_class_Locale_getKeywords, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayScript", zif_locale_get_display_script, arginfo_class_Locale_getDisplayScript, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayRegion", zif_locale_get_display_region, arginfo_class_Locale_getDisplayRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayName", zif_locale_get_display_name, arginfo_class_Locale_getDisplayName, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayLanguage", zif_locale_get_display_language, arginfo_class_Locale_getDisplayLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayVariant", zif_locale_get_display_variant, arginfo_class_Locale_getDisplayVariant, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("composeLocale", zif_locale_compose, arginfo_class_Locale_composeLocale, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("parseLocale", zif_locale_parse, arginfo_class_Locale_parseLocale, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getAllVariants", zif_locale_get_all_variants, arginfo_class_Locale_getAllVariants, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("filterMatches", zif_locale_filter_matches, arginfo_class_Locale_filterMatches, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("lookup", zif_locale_lookup, arginfo_class_Locale_lookup, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("canonicalize", zif_locale_canonicalize, arginfo_class_Locale_canonicalize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("acceptFromHttp", zif_locale_accept_from_http, arginfo_class_Locale_acceptFromHttp, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -110,7 +108,7 @@ static zend_class_entry *register_class_Locale(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Locale", class_Locale_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval const_ACTUAL_LOCALE_value;
 	ZVAL_LONG(&const_ACTUAL_LOCALE_value, ULOC_ACTUAL_LOCALE);

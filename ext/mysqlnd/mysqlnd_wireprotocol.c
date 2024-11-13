@@ -267,6 +267,19 @@ mysqlnd_read_header(MYSQLND_PFC * pfc, MYSQLND_VIO * vio, MYSQLND_PACKET_HEADER 
 		pfc->data->packet_no++;
 		DBG_RETURN(PASS);
 	}
+	// @see https://dev.mysql.com/worklog/task/?id=12999
+	if (header->size > 0) {
+		zend_uchar *buf = mnd_emalloc(header->size);
+		if ((PASS == pfc->data->m.receive(pfc, vio, buf, header->size, conn_stats, error_info)) && buf[0] == ERROR_MARKER) {
+			php_mysqlnd_read_error_from_line(buf + 1, header->size - 1,
+			                                 error_info->error, sizeof(error_info->error),
+			                                 &error_info->error_no, error_info->sqlstate
+			);
+			mnd_efree(buf);
+			DBG_RETURN(FAIL);
+		}
+		mnd_efree(buf);
+	}
 
 	DBG_ERR_FMT("Logical link: packets out of order. Expected %u received %u. Packet size=%zu",
 				pfc->data->packet_no, header->packet_no, header->size);
@@ -294,7 +307,9 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 	DBG_INF_FMT("buf=%p size=%zu", buf, buf_size);
 	if (FAIL == mysqlnd_read_header(pfc, vio, packet_header, stats, error_info)) {
 		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
-		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+		if (error_info->error_no == 0) {
+			SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+		}
 		DBG_ERR_FMT("Can't read %s's header", packet_type_as_text);
 		DBG_RETURN(FAIL);
 	}
@@ -1468,6 +1483,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 					case MYSQL_TYPE_MEDIUM_BLOB:statistic = STAT_BINARY_TYPE_FETCHED_BLOB; break;
 					case MYSQL_TYPE_LONG_BLOB:	statistic = STAT_BINARY_TYPE_FETCHED_BLOB; break;
 					case MYSQL_TYPE_BLOB:		statistic = STAT_BINARY_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_VECTOR:		statistic = STAT_BINARY_TYPE_FETCHED_BLOB; break;
 					case MYSQL_TYPE_VAR_STRING:	statistic = STAT_BINARY_TYPE_FETCHED_STRING; break;
 					case MYSQL_TYPE_STRING:		statistic = STAT_BINARY_TYPE_FETCHED_STRING; break;
 					case MYSQL_TYPE_GEOMETRY:	statistic = STAT_BINARY_TYPE_FETCHED_GEOMETRY; break;
@@ -1553,6 +1569,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 					case MYSQL_TYPE_MEDIUM_BLOB:statistic = STAT_TEXT_TYPE_FETCHED_BLOB; break;
 					case MYSQL_TYPE_LONG_BLOB:	statistic = STAT_TEXT_TYPE_FETCHED_BLOB; break;
 					case MYSQL_TYPE_BLOB:		statistic = STAT_TEXT_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_VECTOR:		statistic = STAT_TEXT_TYPE_FETCHED_BLOB; break;
 					case MYSQL_TYPE_VAR_STRING:	statistic = STAT_TEXT_TYPE_FETCHED_STRING; break;
 					case MYSQL_TYPE_STRING:		statistic = STAT_TEXT_TYPE_FETCHED_STRING; break;
 					case MYSQL_TYPE_GEOMETRY:	statistic = STAT_TEXT_TYPE_FETCHED_GEOMETRY; break;
@@ -1574,7 +1591,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
 					/* we are using the text protocol, so convert to string */
 					char tmp[22];
-					const size_t tmp_len = sprintf((char *)&tmp, ZEND_ULONG_FMT, Z_LVAL_P(current_field));
+					const size_t tmp_len = snprintf(tmp, sizeof(tmp), ZEND_ULONG_FMT, Z_LVAL_P(current_field));
 					ZVAL_STRINGL(current_field, tmp, tmp_len);
 				} else if (Z_TYPE_P(current_field) == IS_STRING) {
 					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
@@ -2460,8 +2477,10 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 	payload_decoder_factory->m.init_ok_packet(&ok_response);
 	DBG_ENTER("mysqlnd_protocol::send_command_handle_OK");
 	if (FAIL == (ret = PACKET_READ(payload_decoder_factory->conn, &ok_response))) {
-		DBG_INF("Error while reading OK packet");
-		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		if (error_info->error_no != CR_SERVER_GONE_ERROR) {
+			DBG_INF("Error while reading OK packet");
+			SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		}
 		goto end;
 	}
 	DBG_INF_FMT("OK from server");

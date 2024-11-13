@@ -95,7 +95,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
         echo "IMG_FILTER_SCATTER failed\n";
     }
 ?>
---EXPECT--
+--EXPECTF--
 IMG_FILTER_NEGATE success
 IMG_FILTER_GRAYSCALE success
 IMG_FILTER_EDGEDETECT success

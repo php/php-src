@@ -99,8 +99,8 @@ struct st_mysqli_warning {
 typedef struct _mysqli_property_entry {
 	const char *pname;
 	size_t pname_length;
-	int (*r_func)(mysqli_object *obj, zval *retval, bool quiet);
-	int (*w_func)(mysqli_object *obj, zval *value);
+	zend_result (*r_func)(mysqli_object *obj, zval *retval, bool quiet);
+	zend_result (*w_func)(mysqli_object *obj, zval *value);
 } mysqli_property_entry;
 
 typedef struct {

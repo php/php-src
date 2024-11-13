@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument::createFromString() - parser warning via internal error
+Dom\HTMLDocument::createFromString() - parser warning via internal error
 --EXTENSIONS--
 dom
 --FILE--
@@ -8,7 +8,7 @@ dom
 libxml_use_internal_errors(true);
 
 $html = '<>x</> <!doctype html>';
-$dom = DOM\HTMLDocument::createFromString($html);
+$dom = Dom\HTMLDocument::createFromString($html);
 foreach (libxml_get_errors() as $error) {
     var_dump($error->message, $error->line, $error->column);
 }

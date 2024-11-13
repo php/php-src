@@ -86,6 +86,7 @@
 # ifndef O_NOFOLLOW
 #  define O_NOFOLLOW 0
 # endif
+#define SESS_FILE_BUF_SIZE(sz) ((unsigned int)(sz > INT_MAX ? INT_MAX : (unsigned int)sz))
 #endif
 
 typedef struct {
@@ -246,7 +247,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 	lseek(data->fd, 0, SEEK_SET);
 #ifdef PHP_WIN32
 	{
-		unsigned int to_write = ZSTR_LEN(val) > UINT_MAX ? UINT_MAX : (unsigned int)ZSTR_LEN(val);
+		unsigned int to_write = SESS_FILE_BUF_SIZE(ZSTR_LEN(val));
 		char *buf = ZSTR_VAL(val);
 		int wrote;
 
@@ -255,7 +256,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 
 			n += wrote;
 			buf = wrote > -1 ? buf + wrote : 0;
-			to_write = wrote > -1 ? (ZSTR_LEN(val) - n > UINT_MAX ? UINT_MAX : (unsigned int)(ZSTR_LEN(val) - n)): 0;
+			to_write = wrote > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(val) - n) : 0;
 
 		} while(wrote > 0);
 	}
@@ -493,7 +494,7 @@ PS_READ_FUNC(files)
 	lseek(data->fd, 0, SEEK_SET);
 #ifdef PHP_WIN32
 	{
-		unsigned int to_read = ZSTR_LEN(*val) > UINT_MAX ? UINT_MAX : (unsigned int)ZSTR_LEN(*val);
+		unsigned int to_read = SESS_FILE_BUF_SIZE(ZSTR_LEN(*val));
 		char *buf = ZSTR_VAL(*val);
 		int read_in;
 
@@ -502,7 +503,7 @@ PS_READ_FUNC(files)
 
 			n += read_in;
 			buf = read_in > -1 ? buf + read_in : 0;
-			to_read = read_in > -1 ? (ZSTR_LEN(*val) - n > UINT_MAX ? UINT_MAX : (unsigned int)(ZSTR_LEN(*val) - n)): 0;
+			to_read = read_in > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(*val) - n) : 0;
 
 		} while(read_in > 0);
 

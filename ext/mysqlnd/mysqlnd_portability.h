@@ -215,8 +215,8 @@ typedef union {
                   *(((char *)(T))+1) = (char)(((A) >> 8));\
                   *(((char *)(T))+2) = (char)(((A) >> 16));\
                   *(((char *)(T))+3) = (char)(((A) >> 24)); \
-                  *(((char *)(T))+4) = (char)(((A) >> 32)); } while (0)
-#define int8store(T,A)        { uint32_t def_temp= (uint32_t) (A), def_temp2= (uint32_t) ((A) >> 32); \
+                  *(((char *)(T))+4) = sizeof(A) == 4 ? 0 : (char)(((A) >> 32)); } while (0)
+#define int8store(T,A)        { uint32_t def_temp= (uint32_t) (A), def_temp2= sizeof(A) == 4 ? 0 : (uint32_t) ((A) >> 32); \
                   int4store((T),def_temp); \
                   int4store((T+4),def_temp2); \
                 }

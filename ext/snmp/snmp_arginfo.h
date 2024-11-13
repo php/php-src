@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 449ae0af39f24f3e5696b88a30d2a440628c409b */
+ * Stub hash: e2451ac3ea0fa5eb1158e8b7252e61c6794d514f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -163,7 +163,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SNMP_getError, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(snmpget);
 ZEND_FUNCTION(snmpgetnext);
 ZEND_FUNCTION(snmpwalk);
@@ -196,19 +195,18 @@ ZEND_METHOD(SNMP, set);
 ZEND_METHOD(SNMP, getErrno);
 ZEND_METHOD(SNMP, getError);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmpget, arginfo_snmpget)
 	ZEND_FE(snmpgetnext, arginfo_snmpgetnext)
 	ZEND_FE(snmpwalk, arginfo_snmpwalk)
 	ZEND_FE(snmprealwalk, arginfo_snmprealwalk)
-	ZEND_FALIAS(snmpwalkoid, snmprealwalk, arginfo_snmpwalkoid)
+	ZEND_RAW_FENTRY("snmpwalkoid", zif_snmprealwalk, arginfo_snmpwalkoid, 0, NULL, NULL)
 	ZEND_FE(snmpset, arginfo_snmpset)
 	ZEND_FE(snmp_get_quick_print, arginfo_snmp_get_quick_print)
 	ZEND_FE(snmp_set_quick_print, arginfo_snmp_set_quick_print)
 	ZEND_FE(snmp_set_enum_print, arginfo_snmp_set_enum_print)
 	ZEND_FE(snmp_set_oid_output_format, arginfo_snmp_set_oid_output_format)
-	ZEND_FALIAS(snmp_set_oid_numeric_print, snmp_set_oid_output_format, arginfo_snmp_set_oid_numeric_print)
+	ZEND_RAW_FENTRY("snmp_set_oid_numeric_print", zif_snmp_set_oid_output_format, arginfo_snmp_set_oid_numeric_print, 0, NULL, NULL)
 	ZEND_FE(snmp2_get, arginfo_snmp2_get)
 	ZEND_FE(snmp2_getnext, arginfo_snmp2_getnext)
 	ZEND_FE(snmp2_walk, arginfo_snmp2_walk)
@@ -225,7 +223,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SNMP_methods[] = {
 	ZEND_ME(SNMP, __construct, arginfo_class_SNMP___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(SNMP, close, arginfo_class_SNMP_close, ZEND_ACC_PUBLIC)
@@ -236,11 +233,6 @@ static const zend_function_entry class_SNMP_methods[] = {
 	ZEND_ME(SNMP, set, arginfo_class_SNMP_set, ZEND_ACC_PUBLIC)
 	ZEND_ME(SNMP, getErrno, arginfo_class_SNMP_getErrno, ZEND_ACC_PUBLIC)
 	ZEND_ME(SNMP, getError, arginfo_class_SNMP_getError, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_SNMPException_methods[] = {
 	ZEND_FE_END
 };
 
@@ -274,7 +266,7 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SNMP", class_SNMP_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval const_VERSION_1_value;
 	ZVAL_LONG(&const_VERSION_1_value, SNMP_VERSION_1);
@@ -403,8 +395,8 @@ static zend_class_entry *register_class_SNMPException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SNMPException", class_SNMPException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	INIT_CLASS_ENTRY(ce, "SNMPException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	return class_entry;
 }

@@ -30,13 +30,13 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include "private.h"
 #include <stddef.h>
 
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */
 raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale)
 {
 	bc_num power, exponent, modulus, parity, temp;
-	size_t rscale;
 
 	/* Check the base for scale digits. */
 	if (base->n_scale != 0) {
@@ -58,6 +58,13 @@ raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *resul
 		return MOD_IS_ZERO;
 	}
 
+	/* Any integer number mod 1 (or -1) must be equal to 0 */
+	if (_bc_do_compare(mod, BCG(_one_), mod->n_scale, false) == BCMATH_EQUAL) {
+		bc_free_num (result);
+		*result = bc_new_num(1, scale);
+		return OK;
+	}
+
 	/* Set initial values. */
 	power = bc_copy_num(base);
 	exponent = bc_copy_num(expo);
@@ -66,20 +73,14 @@ raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *resul
 	bc_init_num(&parity);
 
 	/* Do the calculation. */
-	rscale = MAX(scale, power->n_scale);
-	if (!bc_compare(modulus, BCG(_one_))) {
-		bc_free_num (&temp);
-		temp = bc_new_num (1, scale);
-	} else {
-		while (!bc_is_zero(exponent)) {
-			(void) bc_divmod(exponent, BCG(_two_), &exponent, &parity, 0);
-			if (!bc_is_zero(parity)) {
-				bc_multiply(temp, power, &temp, rscale);
-				(void) bc_modulo(temp, modulus, &temp, scale);
-			}
-			bc_multiply(power, power, &power, rscale);
-			(void) bc_modulo(power, modulus, &power, scale);
+	while (!bc_is_zero(exponent)) {
+		(void) bc_divmod(exponent, BCG(_two_), &exponent, &parity, 0);
+		if (!bc_is_zero(parity)) {
+			bc_multiply_ex(temp, power, &temp, scale);
+			(void) bc_modulo(temp, modulus, &temp, scale);
 		}
+		bc_multiply_ex(power, power, &power, scale);
+		(void) bc_modulo(power, modulus, &power, scale);
 	}
 
 	/* Assign the value. */

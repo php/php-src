@@ -25,11 +25,11 @@
 
 #include "Zend/zend_exceptions.h"
 
-static php_random_result generate(php_random_status *status)
+static php_random_result generate(void *state)
 {
 	zend_ulong r = 0;
 
-	php_random_bytes_throw(&r, sizeof(zend_ulong));
+	php_random_bytes_throw(&r, sizeof(r));
 
 	return (php_random_result){
 		.size = sizeof(zend_ulong),
@@ -37,7 +37,7 @@ static php_random_result generate(php_random_status *status)
 	};
 }
 
-static zend_long range(php_random_status *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
 	zend_long result = 0;
 
@@ -46,9 +46,8 @@ static zend_long range(php_random_status *status, zend_long min, zend_long max)
 	return result;
 }
 
-const php_random_algo php_random_algo_secure = {
+PHPAPI const php_random_algo php_random_algo_secure = {
 	0,
-	NULL,
 	generate,
 	range,
 	NULL,

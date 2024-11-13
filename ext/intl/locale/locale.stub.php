@@ -32,10 +32,10 @@ class Locale
     public static function getDefault(): string {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias locale_set_default
      */
-    public static function setDefault(string $locale) {} // TODO make return type void
+    public static function setDefault(string $locale): true {}
 
     /**
      * @tentative-return-type

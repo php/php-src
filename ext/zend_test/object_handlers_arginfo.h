@@ -15,38 +15,28 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumericCastableNoOperations___construct, 0,
 	ZEND_ARG_TYPE_MASK(0, val, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
-
 static ZEND_METHOD(DoOperationNoCast, __construct);
 static ZEND_METHOD(LongCastableNoOperations, __construct);
 static ZEND_METHOD(FloatCastableNoOperations, __construct);
 static ZEND_METHOD(NumericCastableNoOperations, __construct);
-
 
 static const zend_function_entry class_DoOperationNoCast_methods[] = {
 	ZEND_ME(DoOperationNoCast, __construct, arginfo_class_DoOperationNoCast___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_LongCastableNoOperations_methods[] = {
 	ZEND_ME(LongCastableNoOperations, __construct, arginfo_class_LongCastableNoOperations___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_FloatCastableNoOperations_methods[] = {
 	ZEND_ME(FloatCastableNoOperations, __construct, arginfo_class_FloatCastableNoOperations___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_NumericCastableNoOperations_methods[] = {
 	ZEND_ME(NumericCastableNoOperations, __construct, arginfo_class_NumericCastableNoOperations___construct, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_DimensionHandlersNoArrayAccess_methods[] = {
 	ZEND_FE_END
 };
 
@@ -55,8 +45,7 @@ static zend_class_entry *register_class_DoOperationNoCast(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DoOperationNoCast", class_DoOperationNoCast_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_val_default_value;
 	ZVAL_UNDEF(&property_val_default_value);
@@ -72,8 +61,7 @@ static zend_class_entry *register_class_LongCastableNoOperations(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "LongCastableNoOperations", class_LongCastableNoOperations_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_val_default_value;
 	ZVAL_UNDEF(&property_val_default_value);
@@ -89,8 +77,7 @@ static zend_class_entry *register_class_FloatCastableNoOperations(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "FloatCastableNoOperations", class_FloatCastableNoOperations_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_val_default_value;
 	ZVAL_UNDEF(&property_val_default_value);
@@ -106,8 +93,7 @@ static zend_class_entry *register_class_NumericCastableNoOperations(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "NumericCastableNoOperations", class_NumericCastableNoOperations_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_val_default_value;
 	ZVAL_UNDEF(&property_val_default_value);
@@ -122,8 +108,8 @@ static zend_class_entry *register_class_DimensionHandlersNoArrayAccess(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DimensionHandlersNoArrayAccess", class_DimensionHandlersNoArrayAccess_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	INIT_CLASS_ENTRY(ce, "DimensionHandlersNoArrayAccess", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_read_default_value;
 	ZVAL_FALSE(&property_read_default_value);

@@ -7,11 +7,11 @@ pdo_sqlite
 <?php
 
 try {
-    PdoPgSql::connect('sqlite::memory:');
+    Pdo\Pgsql::connect('sqlite::memory:');
 } catch (PDOException $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
 --EXPECT--
-PdoPgsql::connect() cannot be called when connecting to the "sqlite" driver, either PdoSqlite::connect() or PDO::connect() must be called instead
+Pdo\Pgsql::connect() cannot be used for connecting to the "sqlite" driver, either call Pdo\Sqlite::connect() or PDO::connect() instead

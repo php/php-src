@@ -210,6 +210,94 @@ static void ir_dump_dessa_moves(const ir_ctx *ctx, int b, ir_block *bb, FILE *f)
 	}
 }
 
+static void ir_dump_cfg_block(ir_ctx *ctx, FILE *f, uint32_t b, ir_block *bb)
+{
+	fprintf(f, "BB%d:\n", b);
+	fprintf(f, "\tstart=%d\n", bb->start);
+	fprintf(f, "\tend=%d\n", bb->end);
+	if (bb->successors_count) {
+		uint32_t i;
+
+		fprintf(f, "\tsuccessors(%d) [BB%d", bb->successors_count, ctx->cfg_edges[bb->successors]);
+		for (i = 1; i < bb->successors_count; i++) {
+			fprintf(f, ", BB%d", ctx->cfg_edges[bb->successors + i]);
+		}
+		fprintf(f, "]\n");
+	}
+	if (bb->predecessors_count) {
+		uint32_t i;
+
+		fprintf(f, "\tpredecessors(%d) [BB%d", bb->predecessors_count, ctx->cfg_edges[bb->predecessors]);
+		for (i = 1; i < bb->predecessors_count; i++) {
+			fprintf(f, ", BB%d", ctx->cfg_edges[bb->predecessors + i]);
+		}
+		fprintf(f, "]\n");
+	}
+	if (bb->dom_parent > 0) {
+		fprintf(f, "\tdom_parent=BB%d\n", bb->dom_parent);
+	}
+	fprintf(f, "\tdom_depth=%d\n", bb->dom_depth);
+	if (bb->dom_child > 0) {
+		int child = bb->dom_child;
+		fprintf(f, "\tdom_children [BB%d", child);
+		child = ctx->cfg_blocks[child].dom_next_child;
+		while (child > 0) {
+			fprintf(f, ", BB%d", child);
+			child = ctx->cfg_blocks[child].dom_next_child;
+		}
+		fprintf(f, "]\n");
+	}
+	if (bb->flags & IR_BB_ENTRY) {
+		fprintf(f, "\tENTRY\n");
+	}
+	if (bb->flags & IR_BB_UNREACHABLE) {
+		fprintf(f, "\tUNREACHABLE\n");
+	}
+	if (bb->flags & IR_BB_LOOP_HEADER) {
+		if (bb->flags & IR_BB_LOOP_WITH_ENTRY) {
+			fprintf(f, "\tLOOP_HEADER, LOOP_WITH_ENTRY\n");
+		} else {
+			fprintf(f, "\tLOOP_HEADER\n");
+		}
+	}
+	if (bb->flags & IR_BB_IRREDUCIBLE_LOOP) {
+		fprintf(stderr, "\tIRREDUCIBLE_LOOP\n");
+	}
+	if (bb->loop_header > 0) {
+		fprintf(f, "\tloop_header=BB%d\n", bb->loop_header);
+	}
+	if (bb->loop_depth != 0) {
+		fprintf(f, "\tloop_depth=%d\n", bb->loop_depth);
+	}
+	if (bb->flags & IR_BB_OSR_ENTRY_LOADS) {
+		ir_list *list = (ir_list*)ctx->osr_entry_loads;
+		uint32_t pos = 0, i, count;
+
+		IR_ASSERT(list);
+		while (1) {
+			i = ir_list_at(list, pos);
+			if (b == i) {
+				break;
+			}
+			IR_ASSERT(i != 0); /* end marker */
+			pos++;
+			count = ir_list_at(list, pos);
+			pos += count + 1;
+		}
+		pos++;
+		count = ir_list_at(list, pos);
+		pos++;
+
+		for (i = 0; i < count; i++, pos++) {
+			ir_ref ref = ir_list_at(list, pos);
+			fprintf(f, "\tOSR_ENTRY_LOAD=d_%d\n", ref);
+		}
+	}
+	if (bb->flags & IR_BB_DESSA_MOVES) {
+		ir_dump_dessa_moves(ctx, b, bb, f);
+	}
+}
+
 void ir_dump_cfg(ir_ctx *ctx, FILE *f)
 {
 	if (ctx->cfg_blocks) {
@@ -217,86 +305,15 @@ void ir_dump_cfg(ir_ctx *ctx, FILE *f)
 		ir_block *bb = ctx->cfg_blocks + 1;
 
 		fprintf(f, "{ # CFG\n");
-		for (b = 1; b <= bb_count; b++, bb++) {
-			fprintf(f, "BB%d:\n", b);
-			fprintf(f, "\tstart=%d\n", bb->start);
-			fprintf(f, "\tend=%d\n", bb->end);
-			if (bb->successors_count) {
-				fprintf(f, "\tsuccessors(%d) [BB%d", bb->successors_count, ctx->cfg_edges[bb->successors]);
-				for (i = 1; i < bb->successors_count; i++) {
-					fprintf(f, ", BB%d", ctx->cfg_edges[bb->successors + i]);
-				}
-				fprintf(f, "]\n");
+		if (ctx->cfg_schedule) {
+			for (i = 1; i <= bb_count; i++) {
+				b = ctx->cfg_schedule[i];
+				bb = &ctx->cfg_blocks[b];
+				ir_dump_cfg_block(ctx, f, b, bb);
 			}
-			if (bb->predecessors_count) {
-				fprintf(f, "\tpredecessors(%d) [BB%d", bb->predecessors_count, ctx->cfg_edges[bb->predecessors]);
-				for (i = 1; i < bb->predecessors_count; i++) {
-					fprintf(f, ", BB%d", ctx->cfg_edges[bb->predecessors + i]);
-				}
-				fprintf(f, "]\n");
-			}
-			if (bb->dom_parent > 0) {
-				fprintf(f, "\tdom_parent=BB%d\n", bb->dom_parent);
-			}
-			fprintf(f, "\tdom_depth=%d\n", bb->dom_depth);
-			if (bb->dom_child > 0) {
-				int child = bb->dom_child;
-				fprintf(f, "\tdom_children [BB%d", child);
-				child = ctx->cfg_blocks[child].dom_next_child;
-				while (child > 0) {
-					fprintf(f, ", BB%d", child);
-					child = ctx->cfg_blocks[child].dom_next_child;
-				}
-				fprintf(f, "]\n");
-			}
-			if (bb->flags & IR_BB_ENTRY) {
-				fprintf(f, "\tENTRY\n");
-			}
-			if (bb->flags & IR_BB_UNREACHABLE) {
-				fprintf(f, "\tUNREACHABLE\n");
-			}
-			if (bb->flags & IR_BB_LOOP_HEADER) {
-				if (bb->flags & IR_BB_LOOP_WITH_ENTRY) {
-					fprintf(f, "\tLOOP_HEADER, LOOP_WITH_ENTRY\n");
-				} else {
-					fprintf(f, "\tLOOP_HEADER\n");
-				}
-			}
-			if (bb->flags & IR_BB_IRREDUCIBLE_LOOP) {
-				fprintf(stderr, "\tIRREDUCIBLE_LOOP\n");
-			}
-			if (bb->loop_header > 0) {
-				fprintf(f, "\tloop_header=BB%d\n", bb->loop_header);
-			}
-			if (bb->loop_depth != 0) {
-				fprintf(f, "\tloop_depth=%d\n", bb->loop_depth);
-			}
-			if (bb->flags & IR_BB_OSR_ENTRY_LOADS) {
-				ir_list *list = (ir_list*)ctx->osr_entry_loads;
-				uint32_t pos = 0, i, count;
-
-				IR_ASSERT(list);
-				while (1) {
-					i = ir_list_at(list, pos);
-					if (b == i) {
-						break;
-					}
-					IR_ASSERT(i != 0); /* end marker */
-					pos++;
-					count = ir_list_at(list, pos);
-					pos += count + 1;
-				}
-				pos++;
-				count = ir_list_at(list, pos);
-				pos++;
-
-				for (i = 0; i < count; i++, pos++) {
-					ir_ref ref = ir_list_at(list, pos);
-					fprintf(f, "\tOSR_ENTRY_LOAD=d_%d\n", ref);
-				}
-			}
-			if (bb->flags & IR_BB_DESSA_MOVES) {
-				ir_dump_dessa_moves(ctx, b, bb, f);
+		} else {
+			for (b = 1; b <= bb_count; b++, bb++) {
+				ir_dump_cfg_block(ctx, f, b, bb);
 			}
 		}
 		fprintf(f, "}\n");
@@ -462,7 +479,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 {
 	ir_ref i, j, n, ref, *p;
 	ir_insn *insn;
-	uint32_t flags, b;
+	uint32_t flags, _b, b;
 	ir_block *bb;
 	bool first;
 
@@ -484,8 +501,56 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 		fprintf(f, ";\n");
 	}
 
-	for (b = 1, bb = ctx->cfg_blocks + b; b <= ctx->cfg_blocks_count; b++, bb++) {
-		fprintf(f, "#BB%d:\n", b);
+	for (_b = 1; _b <= ctx->cfg_blocks_count; _b++) {
+		if (ctx->cfg_schedule) {
+			b = ctx->cfg_schedule[_b];
+		} else {
+			b = _b;
+		}
+		bb = &ctx->cfg_blocks[b];
+		if ((bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) == IR_BB_EMPTY) {
+			continue;
+		}
+
+		fprintf(f, "#BB%d: end=l_%d", b, bb->end);
+		if (bb->flags & IR_BB_UNREACHABLE) {
+			fprintf(f, ", U");
+		}
+		if (bb->dom_parent > 0) {
+			fprintf(f, ", idom=BB%d(%d)", bb->dom_parent, bb->dom_depth);
+		}
+		if (bb->loop_depth != 0) {
+			if (bb->flags & IR_BB_LOOP_HEADER) {
+				if (bb->loop_header > 0) {
+					fprintf(f, ", loop=HDR,BB%d(%d)", bb->loop_header, bb->loop_depth);
+				} else {
+					IR_ASSERT(bb->loop_depth == 1);
+					fprintf(f, ", loop=HDR(%d)", bb->loop_depth);
+				}
+			} else {
+				IR_ASSERT(bb->loop_header > 0);
+				fprintf(f, ", loop=BB%d(%d)", bb->loop_header, bb->loop_depth);
+			}
+		}
+		if (bb->predecessors_count) {
+			uint32_t i;
+
+			fprintf(f, ", pred(%d)=[BB%d", bb->predecessors_count, ctx->cfg_edges[bb->predecessors]);
+			for (i = 1; i < bb->predecessors_count; i++) {
+				fprintf(f, ", BB%d", ctx->cfg_edges[bb->predecessors + i]);
+			}
+			fprintf(f, "]");
+		}
+		if (bb->successors_count) {
+			uint32_t i;
+
+			fprintf(f, ", succ(%d)=[BB%d", bb->successors_count, ctx->cfg_edges[bb->successors]);
+			for (i = 1; i < bb->successors_count; i++) {
+				fprintf(f, ", BB%d", ctx->cfg_edges[bb->successors + i]);
+			}
+			fprintf(f, "]");
+		}
+		fprintf(f, "\n");
 
 		for (i = bb->start, insn = ctx->ir_base + i; i <= bb->end;) {
 			flags = ir_op_flags[insn->op];
@@ -607,7 +672,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 			}
 			if (ctx->rules) {
 				uint32_t rule = ctx->rules[i];
-				uint32_t id = rule & ~(IR_FUSED_REG|IR_FUSED|IR_SKIPPED|IR_SIMPLE);
+				uint32_t id = rule & IR_RULE_MASK;
 
 				if (id < IR_LAST_OP) {
 					fprintf(f, " # RULE(%s", ir_op_name[id]);
@@ -655,23 +720,20 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 #endif
 				}
 			}
-			if (succ != b + 1) {
-				fprintf(f, "\t# GOTO BB%d\n", succ);
+			succ = ir_skip_empty_target_blocks(ctx, succ);
+			if (ctx->cfg_schedule) {
+				if (_b == ctx->cfg_blocks_count || succ != ctx->cfg_schedule[_b + 1]) {
+					fprintf(f, "\t# GOTO BB%d\n", succ);
+				}
+			} else {
+				if (succ != b + 1) {
+					fprintf(f, "\t# GOTO BB%d\n", succ);
+				}
 			}
 		} else if (insn->op == IR_IF) {
-			uint32_t true_block, false_block, *p;
+			uint32_t true_block, false_block;
 
-			p = &ctx->cfg_edges[bb->successors];
-			true_block = *p;
-			if (ctx->ir_base[ctx->cfg_blocks[true_block].start].op == IR_IF_TRUE) {
-				false_block = *(p+1);
-				IR_ASSERT(ctx->ir_base[ctx->cfg_blocks[false_block].start].op == IR_IF_FALSE);
-			} else {
-				false_block = true_block;
-				IR_ASSERT(ctx->ir_base[ctx->cfg_blocks[false_block].start].op == IR_IF_FALSE);
-				true_block = *(p+1);
-				IR_ASSERT(ctx->ir_base[ctx->cfg_blocks[true_block].start].op == IR_IF_TRUE);
-			}
+			ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 			fprintf(f, "\t# IF_TRUE BB%d, IF_FALSE BB%d\n", true_block, false_block);
 		} else if (insn->op == IR_SWITCH) {
 			fprintf(f, "\t# SWITCH ...\n");

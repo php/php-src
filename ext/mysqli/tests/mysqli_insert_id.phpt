@@ -13,25 +13,24 @@ require_once 'skipifconnectfailure.inc';
     if (0 !== ($tmp = mysqli_insert_id($link)))
         printf("[003] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (!$res = mysqli_query($link, "SELECT id, label FROM test ORDER BY id LIMIT 1")) {
+    if (false === mysqli_query($link, "SELECT id, label FROM test ORDER BY id LIMIT 1")) {
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (0 !== ($tmp = mysqli_insert_id($link)))
         printf("[005] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
-    mysqli_free_result($res);
 
     // no auto_increment column
-    if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'a')")) {
+    if (false === mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'a')")) {
         printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (0 !== ($tmp = mysqli_insert_id($link)))
         printf("[007] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (!$res = mysqli_query($link, "ALTER TABLE test MODIFY id INT NOT NULL AUTO_INCREMENT")) {
+    if (false === mysqli_query($link, "ALTER TABLE test MODIFY id INT NOT NULL AUTO_INCREMENT")) {
         printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
-    if (!$res = mysqli_query($link, "INSERT INTO test(label) VALUES ('a')")) {
+    if (false === mysqli_query($link, "INSERT INTO test(label) VALUES ('a')")) {
         printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (($last_id = mysqli_insert_id($link)) <= 0)
@@ -101,13 +100,13 @@ require_once 'skipifconnectfailure.inc';
         mysqli_query($link, "UNLOCK TABLE test");
     }
 
-    if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (1000, 'a')")) {
+    if (false === mysqli_query($link, "INSERT INTO test(id, label) VALUES (1000, 'a')")) {
         printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (1000 !== ($tmp = mysqli_insert_id($link)))
         printf("[021] Expecting int/1000, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (!$res = mysqli_query($link, "INSERT INTO test(label) VALUES ('b'), ('c')")) {
+    if (false === mysqli_query($link, "INSERT INTO test(label) VALUES ('b'), ('c')")) {
         printf("[022] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (1000 >= ($tmp = mysqli_insert_id($link)))

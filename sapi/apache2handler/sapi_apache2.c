@@ -388,7 +388,7 @@ static int php_apache2_startup(sapi_module_struct *sapi_module)
 
 static sapi_module_struct apache2_sapi_module = {
 	"apache2handler",
-	"Apache 2.0 Handler",
+	"Apache 2 Handler",
 
 	php_apache2_startup,				/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
@@ -486,13 +486,9 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	}
 #ifdef ZTS
 	int expected_threads;
-#ifdef AP_MPMQ_MAX_THREADS
 	if (ap_mpm_query(AP_MPMQ_MAX_THREADS, &expected_threads) != APR_SUCCESS) {
 		expected_threads = 1;
 	}
-#else
-	expected_threads = 1;
-#endif
 
 	php_tsrm_startup_ex(expected_threads);
 # ifdef PHP_WIN32

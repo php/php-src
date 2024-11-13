@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument: overrideEncoding with incompatible charset
+Dom\HTMLDocument: overrideEncoding with incompatible charset
 --EXTENSIONS--
 iconv
 dom
 --FILE--
 <?php
-$doc = DOM\HTMLDocument::createFromString(
+$doc = Dom\HTMLDocument::createFromString(
 	iconv(
 		'ISO-8859-1',
 		'UTF-8',
@@ -14,10 +14,10 @@ $doc = DOM\HTMLDocument::createFromString(
 			<html>
 				<head>
 					<meta charset="iso-8859-1">
-					<title>äöü</title>
+					<title>ï¿½ï¿½ï¿½</title>
 				</head>
 				<body>
-					äöü
+					ï¿½ï¿½ï¿½
 				</body>
 			</html>
 			DOC,
@@ -29,8 +29,8 @@ var_dump(iconv('UTF-8', 'ISO-8859-1', $doc->getElementsByTagName('title')->item(
 var_dump(iconv('UTF-8', 'ISO-8859-1', $doc->getElementsByTagName('body')->item(0)->textContent));
 ?>
 --EXPECT--
-string(3) "äöü"
-string(9) "
-		äöü
+string(9) "ï¿½ï¿½ï¿½"
+string(15) "
+		ï¿½ï¿½ï¿½
 	
 "

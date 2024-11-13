@@ -137,7 +137,7 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 	}
 }
 
-ZEND_API void zend_dump_var(const zend_op_array *op_array, uint8_t var_type, int var_num)
+ZEND_API void zend_dump_var(const zend_op_array *op_array, uint8_t var_type, uint32_t var_num)
 {
 	if (var_type == IS_CV && var_num < op_array->last_var) {
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
@@ -366,7 +366,7 @@ static void zend_dump_ssa_var_info(const zend_ssa *ssa, int ssa_var_num, uint32_
 		dump_flags);
 }
 
-ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, uint8_t var_type, int var_num, uint32_t dump_flags)
+ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, uint8_t var_type, uint32_t var_num, uint32_t dump_flags)
 {
 	if (ssa_var_num >= 0) {
 		fprintf(stderr, "#%d.", ssa_var_num);
@@ -461,6 +461,11 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 		fprintf(stderr, "%s", (name + 5));
 	} else {
 		fprintf(stderr, "OP_%d", (int)opline->opcode);
+	}
+
+	if (ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) {
+		zend_function *func = ZEND_FLF_FUNC(opline);
+		fprintf(stderr, "(%s)", ZSTR_VAL(func->common.function_name));
 	}
 
 	if (ZEND_VM_EXT_NUM == (flags & ZEND_VM_EXT_MASK)) {
@@ -924,7 +929,6 @@ void zend_dump_op_array_name(const zend_op_array *op_array)
 
 ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, const char *msg, const void *data)
 {
-	int i;
 	const zend_cfg *cfg = NULL;
 	const zend_ssa *ssa = NULL;
 	zend_func_info *func_info = NULL;
@@ -1010,7 +1014,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 	}
 
 	if (ssa && ssa->var_info) {
-		for (i = 0; i < op_array->last_var; i++) {
+		for (uint32_t i = 0; i < op_array->last_var; i++) {
 			fprintf(stderr, "     ; ");
 			zend_dump_ssa_var(op_array, ssa, i, IS_CV, i, dump_flags);
 			fprintf(stderr, "\n");
@@ -1038,7 +1042,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
-			for (i = 0; i < op_array->last_live_range; i++) {
+			for (int i = 0; i < op_array->last_live_range; i++) {
 				fprintf(stderr,
 					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
@@ -1065,7 +1069,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
-			for (i = 0; i < op_array->last_try_catch; i++) {
+			for (int i = 0; i < op_array->last_try_catch; i++) {
 				fprintf(stderr, "        BB%u",
 					cfg->map[op_array->try_catch_array[i].try_op]);
 				if (op_array->try_catch_array[i].catch_op) {
@@ -1098,7 +1102,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
-			for (i = 0; i < op_array->last_live_range; i++) {
+			for (int i = 0; i < op_array->last_live_range; i++) {
 				fprintf(stderr,
 					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
@@ -1125,7 +1129,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
-			for (i = 0; i < op_array->last_try_catch; i++) {
+			for (int i = 0; i < op_array->last_try_catch; i++) {
 				fprintf(stderr,
 					"     %04u",
 					op_array->try_catch_array[i].try_op);
@@ -1168,20 +1172,6 @@ void zend_dump_dominators(const zend_op_array *op_array, const zend_cfg *cfg)
 		if (b->flags & ZEND_BB_REACHABLE) {
 			zend_dump_block_info(cfg, j, 0);
 		}
-	}
-}
-
-void zend_dump_variables(const zend_op_array *op_array)
-{
-	int j;
-
-	fprintf(stderr, "\nCV Variables for \"");
-	zend_dump_op_array_name(op_array);
-	fprintf(stderr, "\"\n");
-	for (j = 0; j < op_array->last_var; j++) {
-		fprintf(stderr, "    ");
-		zend_dump_var(op_array, IS_CV, j);
-		fprintf(stderr, "\n");
 	}
 }
 

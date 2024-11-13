@@ -576,6 +576,27 @@ void ts_free_id(ts_rsrc_id id)
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully freed resource id %d", id));
 }/*}}}*/
 
+TSRM_API void ts_apply_for_id(ts_rsrc_id id, void (*cb)(void *))
+{
+	int rsrc_id = TSRM_UNSHUFFLE_RSRC_ID(id);
+
+	tsrm_mutex_lock(tsmm_mutex);
+
+	if (tsrm_tls_table && resource_types_table) {
+		for (int i = 0; i < tsrm_tls_table_size; i++) {
+			tsrm_tls_entry *p = tsrm_tls_table[i];
+
+			while (p) {
+				if (p->count > rsrc_id && p->storage[rsrc_id]) {
+					cb(p->storage[rsrc_id]);
+				}
+				p = p->next;
+			}
+		}
+	}
+
+	tsrm_mutex_unlock(tsmm_mutex);
+}
 
 /*
  * Utility Functions
@@ -756,14 +777,16 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
     // TODO: Implement support for fast JIT ZTS code ???
 	return 0;
 #elif defined(__x86_64__) && defined(__GNUC__) && !defined(__FreeBSD__) && \
-	!defined(__OpenBSD__) && !defined(__MUSL__) && !defined(__HAIKU__)
+	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__) && \
+	!defined(__HAIKU__)
 	size_t ret;
 
 	asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
           : "=r" (ret));
 	return ret;
 #elif defined(__i386__) && defined(__GNUC__) && !defined(__FreeBSD__) && \
-	!defined(__OpenBSD__) && !defined(__MUSL__) && !defined(__HAIKU__)
+	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__) && \
+	!defined(__HAIKU__)
 	size_t ret;
 
 	asm ("leal _tsrm_ls_cache@ntpoff,%0"
@@ -777,11 +800,20 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 	asm("adrp %0, #__tsrm_ls_cache@TLVPPAGE\n\t"
 	    "ldr %0, [%0, #__tsrm_ls_cache@TLVPPAGEOFF]"
 	     : "=r" (ret));
-# else
+# elif defined(TSRM_TLS_MODEL_DEFAULT)
+	/* Surplus Static TLS space isn't guaranteed. */
+	ret = 0;
+# elif defined(TSRM_TLS_MODEL_INITIAL_EXEC)
+	asm("adrp %0, :gottprel:_tsrm_ls_cache\n\t"
+		"ldr %0, [%0, #:gottprel_lo12:_tsrm_ls_cache]"
+		: "=r" (ret));
+# elif defined(TSRM_TLS_MODEL_LOCAL_EXEC)
 	asm("mov %0, xzr\n\t"
 	    "add %0, %0, #:tprel_hi12:_tsrm_ls_cache, lsl #12\n\t"
 	    "add %0, %0, #:tprel_lo12_nc:_tsrm_ls_cache"
 	     : "=r" (ret));
+# else
+#  error "TSRM TLS model not set"
 # endif
 	return ret;
 #else

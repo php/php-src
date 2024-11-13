@@ -141,7 +141,7 @@ string(27) "<?xml version="1.0"?>
 Not Supported Error
 -- Adopt a document (strict error off) --
 
-Warning: DOM\Document::adoptNode(): Not Supported Error in %s on line %d
+Warning: DOMDocument::adoptNode(): Not Supported Error in %s on line %d
 -- Adopt an attribute --
 bool(true)
 bool(true)

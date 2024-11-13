@@ -20,8 +20,6 @@
 #define PHP_SOAP_H
 
 #include "php.h"
-#include "php_globals.h"
-#include "ext/standard/info.h"
 #include "ext/standard/php_standard.h"
 #if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
@@ -39,8 +37,6 @@
 # define FALSE 0
 # define stricmp strcasecmp
 #endif
-
-extern int le_url;
 
 typedef struct _encodeType encodeType, *encodeTypePtr;
 typedef struct _encode encode, *encodePtr;
@@ -86,7 +82,7 @@ struct _soapService {
 	struct _soap_class {
 		zend_class_entry *ce;
 		zval *argv;
-		int argc;
+		uint32_t argc;
 		int persistence;
 	} soap_class;
 
@@ -100,8 +96,11 @@ struct _soapService {
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;
 	int        features;
+	int        send_errors;
 	struct _soapHeader **soap_headers_ptr;
-	int send_errors;
+
+	bool         trace;
+	zend_string *last_response_body;
 };
 
 #define SOAP_CLASS 1
@@ -159,10 +158,9 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	int        cur_uniq_ns;
 	int        soap_version;
 	sdlPtr     sdl;
-	bool  use_soap_error_handler;
 	char*      error_code;
 	zval       error_object;
-	char       cache;
+	bool       use_soap_error_handler;
 	char       cache_mode;
 	char       cache_enabled;
 	char*      cache_dir;
@@ -194,6 +192,8 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 extern zend_class_entry* soap_class_entry;
 extern zend_class_entry* soap_var_class_entry;
+extern zend_class_entry* soap_url_class_entry;
+extern zend_class_entry* soap_sdl_class_entry;
 
 void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
 
@@ -252,5 +252,22 @@ static zend_always_inline zval *php_soap_deref(zval *zv) {
 #define Z_CLIENT_LAST_RESPONSE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 33))
 #define Z_CLIENT_LAST_REQUEST_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 34))
 #define Z_CLIENT_LAST_RESPONSE_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 35))
+
+typedef struct soap_url_object {
+	php_url *url;
+	zend_object std;
+} soap_url_object;
+
+static inline soap_url_object *soap_url_object_fetch(zend_object *obj)
+{
+	return (soap_url_object *) ((char *) obj - XtOffsetOf(soap_url_object, std));
+}
+
+#define Z_SOAP_URL_P(zv) soap_url_object_fetch(Z_OBJ_P(zv))
+
+typedef struct soap_sdl_object {
+	sdl *sdl;
+	zend_object std;
+} soap_sdl_object;
 
 #endif

@@ -19,27 +19,23 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-#include "php_spl.h"
-#include "spl_functions.h"
 #include "spl_iterators.h"
 #include "spl_array.h"
 #include "spl_array_arginfo.h"
 #include "spl_exceptions.h"
+#include "spl_functions.h" /* For spl_set_private_debug_info_property() */
 
 /* Defined later in the file */
-zend_object_handlers spl_handler_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 
 /* ArrayObject class */
-zend_object_handlers spl_handler_ArrayObject;
+static zend_object_handlers spl_handler_ArrayObject;
 PHPAPI zend_class_entry  *spl_ce_ArrayObject;
 
 typedef struct _spl_array_object {
@@ -68,9 +64,8 @@ static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
 static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern) { /* {{{ */
 	//??? TODO: Delay duplication for arrays; only duplicate for write operations
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
-		if (!intern->std.properties) {
-			rebuild_object_properties(&intern->std);
-		}
+		/* rebuild properties */
+		zend_std_get_properties_ex(&intern->std);
 		return &intern->std.properties;
 	} else if (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
@@ -79,9 +74,9 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 		return &Z_ARRVAL(intern->array);
 	} else {
 		zend_object *obj = Z_OBJ(intern->array);
-		if (!obj->properties) {
-			rebuild_object_properties(obj);
-		} else if (GC_REFCOUNT(obj->properties) > 1) {
+		/* rebuild properties */
+		zend_std_get_properties_ex(obj);
+		if (GC_REFCOUNT(obj->properties) > 1) {
 			if (EXPECTED(!(GC_FLAGS(obj->properties) & IS_ARRAY_IMMUTABLE))) {
 				GC_DELREF(obj->properties);
 			}
@@ -165,11 +160,18 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		if (clone_orig) {
 			if (other->ar_flags & SPL_ARRAY_IS_SELF) {
 				ZVAL_UNDEF(&intern->array);
-			} else if (orig->handlers == &spl_handler_ArrayObject) {
+			} else if (instanceof_function(class_type, spl_ce_ArrayObject)) {
 				ZVAL_ARR(&intern->array,
 					zend_array_dup(spl_array_get_hash_table(other)));
 			} else {
-				ZEND_ASSERT(orig->handlers == &spl_handler_ArrayIterator);
+				#if ZEND_DEBUG
+				/* This is because the call to instanceof_function will remain because
+				 * the compiler can't prove in this compile unit that this function is
+				 * side-effect-free.
+				 * See https://github.com/php/php-src/pull/14518#discussion_r1638740932 */
+				ZEND_ASSERT(instanceof_function(class_type, spl_ce_ArrayIterator));
+				#endif
+
 				ZVAL_OBJ_COPY(&intern->array, orig);
 				intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 			}
@@ -551,13 +553,15 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 			if (Z_TYPE_P(data) == IS_INDIRECT) {
 				data = Z_INDIRECT_P(data);
 				if (Z_TYPE_P(data) != IS_UNDEF) {
-					zval_ptr_dtor(data);
+					zval garbage;
+					ZVAL_COPY_VALUE(&garbage, data);
 					ZVAL_UNDEF(data);
 					HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
 					zend_hash_move_forward_ex(ht, spl_array_get_pos_ptr(ht, intern));
 					if (spl_array_is_object(intern)) {
 						spl_array_skip_protected(intern, ht);
 					}
+					zval_ptr_dtor(&garbage);
 				}
 			} else {
 				zend_hash_del(ht, key.key);
@@ -766,31 +770,24 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 
 static inline HashTable* spl_array_get_debug_info(zend_object *obj) /* {{{ */
 {
-	zval *storage;
-	zend_string *zname;
-	zend_class_entry *base;
 	spl_array_object *intern = spl_array_from_obj(obj);
-
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
+	HashTable *properties = zend_std_get_properties_ex(&intern->std);
 
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
-		return zend_array_dup(intern->std.properties);
+		return zend_array_dup(properties);
 	} else {
 		HashTable *debug_info;
 
-		debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
-		zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
+		debug_info = zend_new_array(zend_hash_num_elements(properties) + 1);
+		zend_hash_copy(debug_info, properties, (copy_ctor_func_t) zval_add_ref);
 
-		storage = &intern->array;
+		zval *storage = &intern->array;
 		Z_TRY_ADDREF_P(storage);
 
-		base = obj->handlers == &spl_handler_ArrayIterator
+		const zend_class_entry *base_class_ce = instanceof_function(obj->ce, spl_ce_ArrayIterator)
 			? spl_ce_ArrayIterator : spl_ce_ArrayObject;
-		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
-		zend_symtable_update(debug_info, zname, storage);
-		zend_string_release_ex(zname, 0);
+
+		spl_set_private_debug_info_property(base_class_ce, "storage", strlen("storage"), debug_info, storage);
 
 		return debug_info;
 	}
@@ -936,8 +933,10 @@ static zend_result spl_array_skip_protected(spl_array_object *intern, HashTable 
 static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, bool just_array) {
 	/* Handled by ZPP prior to this, or for __unserialize() before passing to here */
 	ZEND_ASSERT(Z_TYPE_P(array) == IS_ARRAY || Z_TYPE_P(array) == IS_OBJECT);
+	zval garbage;
+	ZVAL_UNDEF(&garbage);
 	if (Z_TYPE_P(array) == IS_ARRAY) {
-		zval_ptr_dtor(&intern->array);
+		ZVAL_COPY_VALUE(&garbage, &intern->array);
 		if (Z_REFCOUNT_P(array) == 1) {
 			ZVAL_COPY(&intern->array, array);
 		} else {
@@ -954,8 +953,8 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		}
 	} else {
-		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator) {
-			zval_ptr_dtor(&intern->array);
+		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject) {
+			ZVAL_COPY_VALUE(&garbage, &intern->array);
 			if (just_array)	{
 				spl_array_object *other = Z_SPLARRAY_P(array);
 				ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
@@ -969,13 +968,21 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		} else {
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
-			if (handler != zend_std_get_properties) {
+			if (handler != zend_std_get_properties || Z_OBJ_HANDLER_P(array, get_properties_for)) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
 					"Overloaded object of type %s is not compatible with %s",
 					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
 				return;
 			}
-			zval_ptr_dtor(&intern->array);
+			if (UNEXPECTED(Z_OBJCE_P(array)->ce_flags & ZEND_ACC_ENUM)) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+					"Enums are not compatible with %s",
+					ZSTR_VAL(intern->std.ce->name));
+				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
+				return;
+			}
+			ZVAL_COPY_VALUE(&garbage, &intern->array);
 			ZVAL_COPY(&intern->array, array);
 		}
 	}
@@ -986,6 +993,8 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		zend_hash_iterator_del(intern->ht_iter);
 		intern->ht_iter = (uint32_t)-1;
 	}
+
+	zval_ptr_dtor(&garbage);
 }
 /* }}} */
 
@@ -1267,11 +1276,8 @@ PHP_METHOD(ArrayObject, serialize)
 
 	/* members */
 	smart_str_appendl(&buf, "m:", 2);
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
 
-	ZVAL_ARR(&members, intern->std.properties);
+	ZVAL_ARR(&members, zend_std_get_properties_ex(&intern->std));
 
 	php_var_serialize(&buf, &members, &var_hash); /* finishes the string */
 
@@ -1902,10 +1908,8 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	spl_ce_ArrayIterator = register_class_ArrayIterator(spl_ce_SeekableIterator, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
 	spl_ce_ArrayIterator->create_object = spl_array_object_new;
-	spl_ce_ArrayIterator->default_object_handlers = &spl_handler_ArrayIterator;
+	spl_ce_ArrayIterator->default_object_handlers = &spl_handler_ArrayObject;
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
-
-	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 
 	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;

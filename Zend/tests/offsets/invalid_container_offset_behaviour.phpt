@@ -36,13 +36,15 @@ empty():
 bool(true)
 null coalesce:
 string(7) "default"
+Reference to dimension:
+Cannot use a scalar value as an array
 unset():
 Cannot unset offset in a non-array variable
 Nested read:
 
-Warning: Trying to access array offset on $containerStr in %s on line 62
+Warning: Trying to access array offset on $containerStr in %s on line 74
 
-Warning: Trying to access array offset on null in %s on line 62
+Warning: Trying to access array offset on null in %s on line 74
 NULL
 Nested write:
 Cannot use a scalar value as an array
@@ -78,7 +80,27 @@ OUTPUT;
         }
         ++$testCasesTotal;
     }
+    /* Using offsets as references */
+    foreach ($offsets as $offset) {
+        $dimension = &$offset;
+        $error = $containerStr . '[&' . zend_test_var_export($dimension) . '] has different outputs' . "\n";
 
+        include $var_dim_filename;
+        $varOutput = ob_get_contents();
+        ob_clean();
+        $varOutput = str_replace(
+            [$var_dim_filename],
+            ['%s'],
+            $varOutput
+        );
+
+        if ($EXPECTED_OUTPUT !== $varOutput) {
+            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_invalid_container_{$failuresNb}.txt", $varOutput);
+            ++$failuresNb;
+            $failures[] = $error;
+        }
+        ++$testCasesTotal;
+    }
 }
 ob_end_clean();
 

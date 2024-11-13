@@ -10,7 +10,7 @@
 
 */
 
-CREDIT_LINE("Apache 2.0 Handler", "Ian Holsman, Justin Erenkrantz (based on Apache 2.0 Filter code)");
+CREDIT_LINE("Apache 2 Handler", "Ian Holsman, Justin Erenkrantz (based on Apache 2 Filter code)");
 CREDIT_LINE("CGI / FastCGI", "Rasmus Lerdorf, Stig Bakken, Shane Caraveo, Dmitry Stogov");
 CREDIT_LINE("CLI", "Edin Kadribasic, Marcus Boerger, Johannes Schlueter, Moriyoshi Koizumi, Xinchen Hui");
 CREDIT_LINE("Embed", "Edin Kadribasic");

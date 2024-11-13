@@ -503,8 +503,9 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 						keylen = spprintf(&key, 0, ZEND_ULONG_FMT, numkey);
 					}
 					propkey = phpdbg_get_property_key(key);
-					name = emalloc(i + keylen + 2);
-					namelen = sprintf(name, "%.*s%.*s%s", (int) i, input, (int) (keylen - (propkey - key)), propkey, input[len - 1] == ']'?"]":"");
+					namelen = i + keylen + 2;
+					name = emalloc(namelen);
+					namelen = snprintf(name, namelen, "%.*s%.*s%s", (int) i, input, (int) (keylen - (propkey - key)), propkey, input[len - 1] == ']'?"]":"");
 					if (!strkey) {
 						efree(key);
 					}

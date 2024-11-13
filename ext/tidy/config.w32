@@ -13,14 +13,14 @@ if (PHP_TIDY != "no") {
 			)) {
 
 		if (CHECK_HEADER_ADD_INCLUDE("tidybuffio.h", "CFLAGS_TIDY")) {
-			AC_DEFINE('HAVE_TIDYBUFFIO_H', 1, 'Have tidybuffio.h header file');
+			AC_DEFINE('HAVE_TIDYBUFFIO_H', 1, 'Define to 1 if you have the <tidybuffio.h> header file.');
 		}
 
 		EXTENSION("tidy", "tidy.c");
-		AC_DEFINE('HAVE_TIDY', 1, 'Have TIDY library');
-		AC_DEFINE('HAVE_TIDY_H', 1, "tidy include header")
-		AC_DEFINE('HAVE_TIDYOPTGETDOC', 1, "tidy_get_opt_doc function")
-		AC_DEFINE('HAVE_TIDYRELEASEDATE', 1, "tidy release date function")
+		AC_DEFINE('HAVE_TIDY', 1, "Define to 1 if the PHP extension 'tidy' is available.");
+		AC_DEFINE('HAVE_TIDY_H', 1, "Define to 1 if you have the <tidy.h> header file.")
+		AC_DEFINE('HAVE_TIDYOPTGETDOC', 1, "Define to 1 if Tidy library has the 'tidyOptGetDoc' function.")
+		AC_DEFINE('HAVE_TIDYRELEASEDATE', 1, "Define to 1 if Tidy library has the 'tidyReleaseDate' function.")
 		ADD_FLAG('CFLAGS_TIDY', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 		if (!PHP_TIDY_SHARED) {
 			ADD_DEF_FILE("ext\\tidy\\php_tidy.def");

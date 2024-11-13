@@ -46,7 +46,7 @@ static void zend_verify_type_inference(zval *value, uint32_t type_mask, uint8_t 
 
 	if (Z_TYPE_P(value) == IS_INDIRECT) {
 		if (!(type_mask & MAY_BE_INDIRECT)) {
-			ZEND_VERIFY_TYPE_INFERENCE_ERROR("mask 0x%x mising MAY_BE_INDIRECT", type_mask);
+			ZEND_VERIFY_TYPE_INFERENCE_ERROR("mask 0x%x missing MAY_BE_INDIRECT", type_mask);
 		}
 		value = Z_INDIRECT_P(value);
 	}

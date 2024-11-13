@@ -2,6 +2,10 @@
 registerPHPFunctionNS() function - legit cases
 --EXTENSIONS--
 xsl
+--SKIPIF--
+<?php
+require __DIR__.'/skip_upstream_issue113.inc';
+?>
 --FILE--
 <?php
 
@@ -45,7 +49,9 @@ echo "--- Legit cases: none ---\n";
 
 $proc = createProcessor(["foo:var_dump(string(@href))"]);
 try {
-    $proc->transformToXml($inputdom);
+    // Note: since libxml2 commit aca16fb3d45e0b2c45364ffc1cea8eb4abaca87d this only outputs 1 warning. This seems intentional.
+    // Easiest workaround is silencing the warnings
+    @$proc->transformToXml($inputdom);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -86,14 +92,6 @@ var_dump($proc->transformToXml($inputdom));
 ?>
 --EXPECTF--
 --- Legit cases: none ---
-
-Warning: XSLTProcessor::transformToXml(): xmlXPathCompOpEval: function var_dump not found in %s on line %d
-
-Warning: XSLTProcessor::transformToXml(): Unregistered function in %s on line %d
-
-Warning: XSLTProcessor::transformToXml(): runtime error: file %s line 6 element value-of in %s on line %d
-
-Warning: XSLTProcessor::transformToXml(): XPath evaluation returned no result. in %s on line %d
 --- Legit cases: global function callable ---
 string(15) "https://php.net"
 --- Legit cases: global string callable ---

@@ -17,7 +17,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
@@ -25,7 +25,6 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_mysqli.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
@@ -49,7 +48,7 @@ static PHP_GINIT_FUNCTION(mysqli);
 	} \
 }
 
-#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+#define ERROR_ARG_POS(arg_num) (hasThis() ? (arg_num-1) : (arg_num))
 
 static HashTable classes;
 static zend_object_handlers mysqli_object_handlers;
@@ -72,8 +71,8 @@ zend_class_entry *mysqli_warning_class_entry;
 zend_class_entry *mysqli_exception_class_entry;
 
 
-typedef int (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
-typedef int (*mysqli_write_t)(mysqli_object *obj, zval *newval);
+typedef zend_result (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
+typedef zend_result (*mysqli_write_t)(mysqli_object *obj, zval *newval);
 
 typedef struct _mysqli_prop_handler {
 	zend_string *name;
@@ -228,7 +227,7 @@ static void mysqli_warning_free_storage(zend_object *object)
 /* }}} */
 
 /* {{{ mysqli_read_na */
-static int mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
 {
 	if (!quiet) {
 		zend_throw_error(NULL, "Cannot read property");
@@ -307,19 +306,19 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 {
 	mysqli_object *obj = php_mysqli_fetch_object(object);
 	mysqli_prop_handler	*p;
-	int ret = 0;
+	bool has_property = false;
 
 	if ((p = zend_hash_find_ptr(obj->prop_handler, name)) != NULL) {
 		switch (has_set_exists) {
 			case ZEND_PROPERTY_EXISTS:
-				ret = 1;
+				has_property = true;
 				break;
 			case ZEND_PROPERTY_NOT_EMPTY: {
 				zval rv;
 				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					convert_to_boolean(value);
-					ret = Z_TYPE_P(value) == IS_TRUE ? 1 : 0;
+					has_property = Z_TYPE_P(value) == IS_TRUE;
 				}
 				break;
 			}
@@ -327,7 +326,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				zval rv;
 				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
-					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;
+					has_property = Z_TYPE_P(value) != IS_NULL;
 					zval_ptr_dtor(value);
 				}
 				break;
@@ -335,10 +334,10 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 			EMPTY_SWITCH_DEFAULT_CASE();
 		}
 	} else {
-		ret = zend_std_has_property(object, name, has_set_exists, cache_slot);
+		has_property = zend_std_has_property(object, name, has_set_exists, cache_slot);
 	}
 
-	return ret;
+	return has_property;
 } /* }}} */
 
 HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
@@ -731,7 +730,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	/* TODO: We don't have access to the connection object at this point, so we use low-level
 	 * mysqlnd APIs to access the error information. We should try to pass through the connection
 	 * object instead. */
-	if (MyG(report_mode) & MYSQLI_REPORT_ERROR) {
+	if (MyG(report_mode) & MYSQLI_REPORT_ERROR && result->conn) {
 		MYSQLND_CONN_DATA *conn = result->conn;
 		unsigned error_no = conn->m->get_error_no(conn);
 		if (error_no) {

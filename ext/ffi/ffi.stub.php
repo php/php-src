@@ -6,10 +6,7 @@ namespace {
 	/** @not-serializable */
     final class FFI
     {
-        /**
-         * @cvalue __BIGGEST_ALIGNMENT__
-         * @link ffi-ffi.constants.biggest-alignment
-         */
+        /** @cvalue __BIGGEST_ALIGNMENT__ */
         public const int __BIGGEST_ALIGNMENT__ = UNKNOWN;
 
         public static function cdef(string $code = "", ?string $lib = null): FFI {}
@@ -18,7 +15,7 @@ namespace {
 
         public static function scope(string $name): FFI {}
 
-        public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false): ?FFI\CData {}
+        public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false): FFI\CData {}
 
         /** @prefer-ref $ptr */
         public static function free(FFI\CData $ptr): void {}
@@ -27,9 +24,9 @@ namespace {
          * @param FFI\CData|int|float|bool|null $ptr
          * @prefer-ref $ptr
          */
-        public static function cast(FFI\CType|string $type, $ptr): ?FFI\CData {}
+        public static function cast(FFI\CType|string $type, $ptr): FFI\CData {}
 
-        public static function type(string $type): ?FFI\CType {}
+        public static function type(string $type): FFI\CType {}
 
         /** @prefer-ref $ptr */
         public static function typeof(FFI\CData $ptr): FFI\CType {}

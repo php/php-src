@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d74f65f808ec0f71ee0ae8c04e253c4412da885e */
+ * Stub hash: 4834be57a3f0cb74dbc4422e609846139f09f6cb */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -29,6 +29,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_set
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_setAllowedChars, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, patternOptions, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Spoofchecker, __construct);
 ZEND_METHOD(Spoofchecker, isSuspicious);
@@ -38,7 +42,7 @@ ZEND_METHOD(Spoofchecker, setChecks);
 #if U_ICU_VERSION_MAJOR_NUM >= 58
 ZEND_METHOD(Spoofchecker, setRestrictionLevel);
 #endif
-
+ZEND_METHOD(Spoofchecker, setAllowedChars);
 
 static const zend_function_entry class_Spoofchecker_methods[] = {
 	ZEND_ME(Spoofchecker, __construct, arginfo_class_Spoofchecker___construct, ZEND_ACC_PUBLIC)
@@ -49,6 +53,7 @@ static const zend_function_entry class_Spoofchecker_methods[] = {
 #if U_ICU_VERSION_MAJOR_NUM >= 58
 	ZEND_ME(Spoofchecker, setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC)
 #endif
+	ZEND_ME(Spoofchecker, setAllowedChars, arginfo_class_Spoofchecker_setAllowedChars, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -57,8 +62,7 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Spoofchecker", class_Spoofchecker_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_SINGLE_SCRIPT_CONFUSABLE_value;
 	ZVAL_LONG(&const_SINGLE_SCRIPT_CONFUSABLE_value, USPOOF_SINGLE_SCRIPT_CONFUSABLE);
@@ -164,6 +168,32 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	zend_string *const_HIDDEN_OVERLAY_name = zend_string_init_interned("HIDDEN_OVERLAY", sizeof("HIDDEN_OVERLAY") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_HIDDEN_OVERLAY_name, &const_HIDDEN_OVERLAY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_HIDDEN_OVERLAY_name);
+#endif
+
+	zval const_IGNORE_SPACE_value;
+	ZVAL_LONG(&const_IGNORE_SPACE_value, USET_IGNORE_SPACE);
+	zend_string *const_IGNORE_SPACE_name = zend_string_init_interned("IGNORE_SPACE", sizeof("IGNORE_SPACE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IGNORE_SPACE_name, &const_IGNORE_SPACE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IGNORE_SPACE_name);
+
+	zval const_CASE_INSENSITIVE_value;
+	ZVAL_LONG(&const_CASE_INSENSITIVE_value, USET_CASE_INSENSITIVE);
+	zend_string *const_CASE_INSENSITIVE_name = zend_string_init_interned("CASE_INSENSITIVE", sizeof("CASE_INSENSITIVE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CASE_INSENSITIVE_name, &const_CASE_INSENSITIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CASE_INSENSITIVE_name);
+
+	zval const_ADD_CASE_MAPPINGS_value;
+	ZVAL_LONG(&const_ADD_CASE_MAPPINGS_value, USET_ADD_CASE_MAPPINGS);
+	zend_string *const_ADD_CASE_MAPPINGS_name = zend_string_init_interned("ADD_CASE_MAPPINGS", sizeof("ADD_CASE_MAPPINGS") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ADD_CASE_MAPPINGS_name, &const_ADD_CASE_MAPPINGS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ADD_CASE_MAPPINGS_name);
+#if U_ICU_VERSION_MAJOR_NUM >= 73
+
+	zval const_SIMPLE_CASE_INSENSITIVE_value;
+	ZVAL_LONG(&const_SIMPLE_CASE_INSENSITIVE_value, USET_SIMPLE_CASE_INSENSITIVE);
+	zend_string *const_SIMPLE_CASE_INSENSITIVE_name = zend_string_init_interned("SIMPLE_CASE_INSENSITIVE", sizeof("SIMPLE_CASE_INSENSITIVE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_SIMPLE_CASE_INSENSITIVE_name, &const_SIMPLE_CASE_INSENSITIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_SIMPLE_CASE_INSENSITIVE_name);
 #endif
 
 	return class_entry;

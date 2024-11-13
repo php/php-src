@@ -16,14 +16,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 #include "pdo_mysql_arginfo.h"
@@ -43,7 +43,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
  The default socket location is sometimes defined by configure.
  With libmysql `mysql_config --socket` will fill PDO_MYSQL_UNIX_ADDR
  and the user can use --with-mysql-sock=SOCKET which will fill
- PDO_MYSQL_UNIX_ADDR. If both aren't set we're using mysqlnd and use
+ PHP_MYSQL_UNIX_SOCK_ADDR. If both aren't set we're using mysqlnd and use
  /tmp/mysql.sock as default on *nix and NULL for Windows (default
  named pipe name is set in mysqlnd).
 */
@@ -84,10 +84,8 @@ static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 };
 #endif
 
-/* proto string PDO::mysqlGetWarningCount()
- * Returns the number of SQL warnings during the execution of the last statement
- */
-PHP_METHOD(PdoMysql, getWarningCount)
+/* Returns the number of SQL warnings during the execution of the last statement */
+PHP_METHOD(Pdo_Mysql, getWarningCount)
 {
 	pdo_dbh_t *dbh;
 	pdo_mysql_db_handle *H;
@@ -151,7 +149,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 
-	pdo_mysql_ce = register_class_PdoMysql(pdo_dbh_ce);
+	pdo_mysql_ce = register_class_Pdo_Mysql(pdo_dbh_ce);
 	pdo_mysql_ce->create_object = pdo_dbh_new;
 
 	if (php_pdo_register_driver(&pdo_mysql_driver) == FAILURE) {

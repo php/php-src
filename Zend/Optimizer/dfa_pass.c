@@ -325,6 +325,19 @@ static bool opline_supports_assign_contraction(
 		return 0;
 	}
 
+	/* Frameless calls override the return value, but the return value may overlap with the arguments. */
+	switch (opline->opcode) {
+		case ZEND_FRAMELESS_ICALL_3:
+			if ((opline + 1)->op1_type == IS_CV && (opline + 1)->op1.var == cv_var) return 0;
+			ZEND_FALLTHROUGH;
+		case ZEND_FRAMELESS_ICALL_2:
+			if (opline->op2_type == IS_CV && opline->op2.var == cv_var) return 0;
+			ZEND_FALLTHROUGH;
+		case ZEND_FRAMELESS_ICALL_1:
+			if (opline->op1_type == IS_CV && opline->op1.var == cv_var) return 0;
+			return 1;
+	}
+
 	if (opline->opcode == ZEND_DO_ICALL || opline->opcode == ZEND_DO_UCALL
 			|| opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 		/* Function calls may dtor the return value after it has already been written -- allow
@@ -653,6 +666,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				if (ZEND_OP2_JMP_ADDR(opline) == op_array->opcodes + old->start) {
 					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, op_array->opcodes + dst->start);
 				}
@@ -1007,7 +1021,7 @@ optimize_nop:
 static bool zend_dfa_try_to_replace_result(zend_op_array *op_array, zend_ssa *ssa, int def, int cv_var)
 {
 	int result_var = ssa->ops[def].result_def;
-	int cv = EX_NUM_TO_VAR(ssa->vars[cv_var].var);
+	uint32_t cv = EX_NUM_TO_VAR(ssa->vars[cv_var].var);
 
 	if (result_var >= 0
 	 && !(ssa->var_info[cv_var].type & MAY_BE_REF)

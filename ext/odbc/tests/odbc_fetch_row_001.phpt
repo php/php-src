@@ -40,6 +40,7 @@ $conn = odbc_connect($dsn, $user, $pass);
 odbc_exec($conn, 'DROP TABLE fetch_row');
 ?>
 --EXPECTF--
+Warning: odbc_fetch_row(): Argument #3 ($row) must be greater than or equal to 1 in %s on line %d
 bool(false)
 bool(true)
 string(1) "1"

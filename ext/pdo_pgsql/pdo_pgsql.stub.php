@@ -2,14 +2,21 @@
 
 /** @generate-class-entries */
 
+namespace Pdo;
+
 /**
  * @strict-properties
  * @not-serializable
  */
-class PdoPgsql extends PDO
+class Pgsql extends \PDO
 {
     /** @cvalue PDO_PGSQL_ATTR_DISABLE_PREPARES */
     public const int ATTR_DISABLE_PREPARES = UNKNOWN;
+
+#ifdef HAVE_PG_RESULT_MEMORY_SIZE
+    /** @cvalue PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE */
+    public const int ATTR_RESULT_MEMORY_SIZE = UNKNOWN;
+#endif
 
     /** @cvalue PGSQL_TRANSACTION_IDLE */
     public const int TRANSACTION_IDLE = UNKNOWN;
@@ -38,13 +45,17 @@ class PdoPgsql extends PDO
 
     public function lobCreate(): string|false {}
 
-    // Opens an existing large object stream.  Must be called inside a transaction.
-    /** @return resource|false */
-    public function lobOpen(string $oid, string $mode = "rb"){}
+    /**
+     * Opens an existing large object stream. Must be called inside a transaction.
+     * @return resource|false
+     */
+    public function lobOpen(string $oid, string $mode = "rb") {}
 
     public function lobUnlink(string $oid): bool {}
 
-    public function getNotify(int $fetchMode = PDO::FETCH_DEFAULT, int $timeoutMilliseconds = 0): array|false {}
+    public function getNotify(int $fetchMode = \PDO::FETCH_DEFAULT, int $timeoutMilliseconds = 0): array|false {}
 
     public function getPid(): int {}
+
+    public function setNoticeCallback(?callable $callback): void {}
 }

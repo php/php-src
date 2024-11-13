@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECT--
-round(): Argument #3 ($mode) must be a valid rounding mode (PHP_ROUND_*)
+round(): Argument #3 ($mode) must be a valid rounding mode (RoundingMode::*)

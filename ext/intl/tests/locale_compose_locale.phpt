@@ -101,8 +101,6 @@ function ut_main()
         'loc12' => $loc_parts_arr12
     );
 
-    error_reporting( E_ERROR );
-
     $cnt  = 0;
     $res_str = '';
     foreach($loc_parts_arr as $key => $value ){

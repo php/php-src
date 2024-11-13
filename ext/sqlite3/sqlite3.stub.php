@@ -78,211 +78,100 @@ class SQLite3Exception extends \Exception
 /** @not-serializable */
 class SQLite3
 {
-    /**
-     * @cvalue SQLITE_OK
-     * @link sqlite3.class.constants.ok
-     */
+    /** @cvalue SQLITE_OK */
     public const int OK = UNKNOWN;
 
     /* Constants for authorizer return */
 
-    /**
-     * @cvalue SQLITE_DENY
-     * @link sqlite3.class.constants.deny
-     */
+    /** @cvalue SQLITE_DENY */
     public const int DENY = UNKNOWN;
-    /**
-     * @cvalue SQLITE_IGNORE
-     * @link sqlite3.class.constants.ignore
-     */
+    /** @cvalue SQLITE_IGNORE */
     public const int IGNORE = UNKNOWN;
 
     /* Constants for authorizer actions */
 
-    /**
-     * @cvalue SQLITE_CREATE_INDEX
-     * @link sqlite3.class.constants.create-index
-     */
+    /** @cvalue SQLITE_CREATE_INDEX */
     public const int CREATE_INDEX = UNKNOWN;
-    /**
-     * @cvalue SQLITE_CREATE_TABLE
-     * @link sqlite3.class.constants.create-table
-     */
+    /** @cvalue SQLITE_CREATE_TABLE */
     public const int CREATE_TABLE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_CREATE_TEMP_INDEX
-     * @link sqlite3.class.constants.create-temp-index
-     */
+    /** @cvalue SQLITE_CREATE_TEMP_INDEX */
     public const int CREATE_TEMP_INDEX = UNKNOWN;
-    /**
-     * @cvalue SQLITE_CREATE_TEMP_TABLE
-     * @link sqlite3.class.constants.create-temp-table
-     */
+    /** @cvalue SQLITE_CREATE_TEMP_TABLE */
     public const int CREATE_TEMP_TABLE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_CREATE_TEMP_TRIGGER
-     * @link sqlite3.class.constants.create-temp-trigger
-     */
+    /** @cvalue SQLITE_CREATE_TEMP_TRIGGER */
     public const int CREATE_TEMP_TRIGGER = UNKNOWN;
-    /**
-     * @cvalue SQLITE_CREATE_TEMP_VIEW
-     * @link sqlite3.class.constants.create-temp-view
-     */
+    /** @cvalue SQLITE_CREATE_TEMP_VIEW */
     public const int CREATE_TEMP_VIEW = UNKNOWN;
-    /**
-     * @cvalue SQLITE_CREATE_TRIGGER
-     * @link sqlite3.class.constants.create-trigger
-     */
+    /** @cvalue SQLITE_CREATE_TRIGGER */
     public const int CREATE_TRIGGER = UNKNOWN;
-    /**
-     * @cvalue SQLITE_CREATE_VIEW
-     * @link sqlite3.class.constants.create-view
-     */
+    /** @cvalue SQLITE_CREATE_VIEW */
     public const int CREATE_VIEW = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DELETE
-     * @link sqlite3.class.constants.delete
-     */
+    /** @cvalue SQLITE_DELETE */
     public const int DELETE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_INDEX
-     * @link sqlite3.class.constants.drop-index
-     */
+    /** @cvalue SQLITE_DROP_INDEX */
     public const int DROP_INDEX = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_TABLE
-     * @link sqlite3.class.constants.drop-table
-     */
+    /** @cvalue SQLITE_DROP_TABLE */
     public const int DROP_TABLE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_TEMP_INDEX
-     * @link sqlite3.class.constants.drop-temp-index
-     */
+    /** @cvalue SQLITE_DROP_TEMP_INDEX */
     public const int DROP_TEMP_INDEX = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_TEMP_TABLE
-     * @link sqlite3.class.constants.drop-temp-table
-     */
+    /** @cvalue SQLITE_DROP_TEMP_TABLE */
     public const int DROP_TEMP_TABLE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_TEMP_TRIGGER
-     * @link sqlite3.class.constants.drop-temp-trigger
-     */
+    /** @cvalue SQLITE_DROP_TEMP_TRIGGER */
     public const int DROP_TEMP_TRIGGER = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_TEMP_VIEW
-     * @link sqlite3.class.constants.drop-temp-view
-     */
+    /** @cvalue SQLITE_DROP_TEMP_VIEW */
     public const int DROP_TEMP_VIEW = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_TRIGGER
-     * @link sqlite3.class.constants.drop-trigger
-     */
+    /** @cvalue SQLITE_DROP_TRIGGER */
     public const int DROP_TRIGGER = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_VIEW
-     * @link sqlite3.class.constants.drop-view
-     */
+    /** @cvalue SQLITE_DROP_VIEW */
     public const int DROP_VIEW = UNKNOWN;
-    /**
-     * @cvalue SQLITE_INSERT
-     * @link sqlite3.class.constants.insert
-     */
+    /** @cvalue SQLITE_INSERT */
     public const int INSERT = UNKNOWN;
-    /**
-     * @cvalue SQLITE_PRAGMA
-     * @link sqlite3.class.constants.pragma
-     */
+    /** @cvalue SQLITE_PRAGMA */
     public const int PRAGMA = UNKNOWN;
-    /**
-     * @cvalue SQLITE_READ
-     * @link sqlite3.class.constants.read
-     */
+    /** @cvalue SQLITE_READ */
     public const int READ = UNKNOWN;
-    /**
-     * @cvalue SQLITE_SELECT
-     * @link sqlite3.class.constants.select
-     */
+    /** @cvalue SQLITE_SELECT */
     public const int SELECT = UNKNOWN;
-    /**
-     * @cvalue SQLITE_TRANSACTION
-     * @link sqlite3.class.constants.transaction
-     */
+    /** @cvalue SQLITE_TRANSACTION */
     public const int TRANSACTION = UNKNOWN;
-    /**
-     * @cvalue SQLITE_UPDATE
-     * @link sqlite3.class.constants.update
-     */
+    /** @cvalue SQLITE_UPDATE */
     public const int UPDATE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_ATTACH
-     * @link sqlite3.class.constants.attach
-     */
+    /** @cvalue SQLITE_ATTACH */
     public const int ATTACH = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DETACH
-     * @link sqlite3.class.constants.detach
-     */
+    /** @cvalue SQLITE_DETACH */
     public const int DETACH = UNKNOWN;
-    /**
-     * @cvalue SQLITE_ALTER_TABLE
-     * @link sqlite3.class.constants.alter-table
-     */
+    /** @cvalue SQLITE_ALTER_TABLE */
     public const int ALTER_TABLE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_REINDEX
-     * @link sqlite3.class.constants.reindex
-     */
+    /** @cvalue SQLITE_REINDEX */
     public const int REINDEX = UNKNOWN;
-    /**
-     * @cvalue SQLITE_ANALYZE
-     * @link sqlite3.class.constants.analyze
-     */
+    /** @cvalue SQLITE_ANALYZE */
     public const int ANALYZE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_CREATE_VTABLE
-     * @link sqlite3.class.constants.create-vtable
-     */
+    /** @cvalue SQLITE_CREATE_VTABLE */
     public const int CREATE_VTABLE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_DROP_VTABLE
-     * @link sqlite3.class.constants.drop-vtable
-     */
+    /** @cvalue SQLITE_DROP_VTABLE */
     public const int DROP_VTABLE = UNKNOWN;
-    /**
-     * @cvalue SQLITE_FUNCTION
-     * @link sqlite3.class.constants.function
-     */
+    /** @cvalue SQLITE_FUNCTION */
     public const int FUNCTION = UNKNOWN;
-    /**
-     * @cvalue SQLITE_SAVEPOINT
-     * @link sqlite3.class.constants.savepoint
-     */
+    /** @cvalue SQLITE_SAVEPOINT */
     public const int SAVEPOINT = UNKNOWN;
-    /**
-     * @cvalue SQLITE_COPY
-     * @link sqlite3.class.constants.copy
-     */
+    /** @cvalue SQLITE_COPY */
     public const int COPY = UNKNOWN;
 #ifdef SQLITE_RECURSIVE
-    /**
-     * @cvalue SQLITE_RECURSIVE
-     * @link sqlite3.class.constants.recursive
-     */
+    /** @cvalue SQLITE_RECURSIVE */
     public const int RECURSIVE = UNKNOWN;
 #endif
 
-    /**
-     * @implementation-alias SQLite3::open
-     * @no-verify SQLite3::open should really be static
-     */
+    /** @implementation-alias SQLite3::open */
     public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = "") {}
 
-    /** @tentative-return-type */
+    /**
+     * @tentative-return-type
+     * @todo SQLite3::open should really be static
+     */
     public function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = ""): void {}
 
-    /** @return bool */
-    public function close() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function close(): bool {}
 
     /** @tentative-return-type */
     public static function version(): array {}
@@ -367,7 +256,7 @@ class SQLite3Stmt
     public function clear(): bool {}
 
     /** @tentative-return-type */
-    public function close(): bool {}
+    public function close(): true {}
 
     /** @tentative-return-type */
     public function execute(): SQLite3Result|false {}
@@ -405,6 +294,6 @@ class SQLite3Result
     /** @tentative-return-type */
     public function reset(): bool {}
 
-    /** @return bool */
-    public function finalize() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function finalize(): true {}
 }

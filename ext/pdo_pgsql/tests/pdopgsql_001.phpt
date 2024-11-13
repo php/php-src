@@ -1,7 +1,6 @@
 --TEST--
-PdoPgsql subclass basic
+Pdo\Pgsql subclass basic
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
@@ -14,7 +13,7 @@ PDOTest::skip();
 
 require_once __DIR__ . "/config.inc";
 
-$db = new PdoPgsql($config['ENV']['PDOTEST_DSN']);
+$db = new Pdo\Pgsql($config['ENV']['PDOTEST_DSN']);
 
 $db->query('CREATE TABLE pdopgsql_001 (id INT, name TEXT)');
 $db->query("INSERT INTO pdopgsql_001 VALUES (NULL, 'PHP'), (NULL, 'PHP6')");

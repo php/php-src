@@ -1,5 +1,5 @@
 --TEST--
-Passing empty filename to exif_read_data() and exif_thumnail()
+Passing empty filename to exif_read_data() and exif_thumbnail()
 --EXTENSIONS--
 exif
 --FILE--
@@ -31,7 +31,7 @@ try {
 
 ?>
 --EXPECT--
-exif_read_data(): Argument #1 ($file) cannot be empty
-exif_thumbnail(): Argument #1 ($file) cannot be empty
+exif_read_data(): Argument #1 ($file) must not be empty
+exif_thumbnail(): Argument #1 ($file) must not be empty
 exif_read_data(): Argument #1 ($file) must not contain any null bytes
 exif_thumbnail(): Argument #1 ($file) must not contain any null bytes

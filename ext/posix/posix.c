@@ -15,13 +15,12 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include <unistd.h>
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_posix.h"
 
 #ifdef HAVE_POSIX
@@ -39,10 +38,9 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
-#ifdef HAVE_SYS_MKDEV_H
+#ifdef MAJOR_IN_MKDEV
 # include <sys/mkdev.h>
-#endif
-#ifdef HAVE_SYS_SYSMACROS_H
+#elif defined(MAJOR_IN_SYSMACROS)
 # include <sys/sysmacros.h>
 #endif
 
@@ -358,7 +356,7 @@ PHP_FUNCTION(posix_uname)
 	add_assoc_string(return_value, "version",  u.version);
 	add_assoc_string(return_value, "machine",  u.machine);
 
-#if defined(_GNU_SOURCE) && !defined(DARWIN) && defined(HAVE_UTSNAME_DOMAINNAME)
+#if defined(_GNU_SOURCE) && defined(HAVE_STRUCT_UTSNAME_DOMAINNAME)
 	add_assoc_string(return_value, "domainname", u.domainname);
 #endif
 }
@@ -417,14 +415,14 @@ PHP_FUNCTION(posix_ctermid)
 /* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static int php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
+static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 {
 	php_stream *stream;
 
 	php_stream_from_zval_no_verify(stream, zfp);
 
 	if (stream == NULL) {
-		return 0;
+		return FAILURE;
 	}
 
 	/* get the fd.
@@ -438,9 +436,9 @@ static int php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
-		return 0;
+		return FAILURE;
 	}
-	return 1;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -452,6 +450,7 @@ PHP_FUNCTION(posix_ttyname)
 	zend_long fd = 0;
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	zend_long buflen;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -459,7 +458,7 @@ PHP_FUNCTION(posix_ttyname)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -477,12 +476,23 @@ PHP_FUNCTION(posix_ttyname)
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	buflen = sysconf(_SC_TTY_NAME_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 32;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	p = emalloc(buflen);
 
-	if (ttyname_r(fd, p, buflen)) {
-		POSIX_G(last_error) = errno;
+try_again:
+	err = ttyname_r(fd, p, buflen);
+	if (err) {
+		if (err == ERANGE) {
+			buflen *= 2;
+			p = erealloc(p, buflen);
+			goto try_again;
+		}
+		POSIX_G(last_error) = err;
 		efree(p);
 		RETURN_FALSE;
 	}
@@ -509,7 +519,7 @@ PHP_FUNCTION(posix_isatty)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -522,11 +532,13 @@ PHP_FUNCTION(posix_isatty)
 
 	/* A valid file descriptor must fit in an int and be positive */
 	if (fd < 0 || fd > INT_MAX) {
+		POSIX_G(last_error) = EBADF;
 		RETURN_FALSE;
 	}
 	if (isatty(fd)) {
 		RETURN_TRUE;
 	} else {
+		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
 }
@@ -620,7 +632,7 @@ PHP_FUNCTION(posix_mknod)
 			zend_argument_value_error(3, "cannot be 0 for the POSIX_S_IFCHR and POSIX_S_IFBLK modes");
 			RETURN_THROWS();
 		} else {
-#if defined(HAVE_MAKEDEV) || defined(makedev)
+#ifdef HAVE_MAKEDEV
 			php_dev = makedev(major, minor);
 #else
 			php_error_docref(NULL, E_WARNING, "Cannot create a block or character device, creating a normal file instead");
@@ -734,7 +746,7 @@ PHP_FUNCTION(posix_eaccess)
 
 	path = expand_filepath(filename, NULL);
 	if (!path) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -775,6 +787,7 @@ PHP_FUNCTION(posix_getgrnam)
 	struct group gbuf;
 	long buflen;
 	char *buf;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -784,19 +797,24 @@ PHP_FUNCTION(posix_getgrnam)
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	buf = emalloc(buflen);
 try_again:
 	g = &gbuf;
 
-	if (getgrnam_r(name, g, buf, buflen, &g) || g == NULL) {
-		if (errno == ERANGE) {
+	err = getgrnam_r(name, g, buf, buflen, &g);
+	if (err || g == NULL) {
+		if (err == ERANGE) {
 			buflen *= 2;
 			buf = erealloc(buf, buflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = errno;
+		POSIX_G(last_error) = err;
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -824,7 +842,7 @@ PHP_FUNCTION(posix_getgrgid)
 {
 	zend_long gid;
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
-	int ret;
+	int err;
 	struct group _g;
 	struct group *retgrptr = NULL;
 	long grbuflen;
@@ -840,20 +858,24 @@ PHP_FUNCTION(posix_getgrgid)
 
 	grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	if (grbuflen < 1) {
-		RETURN_FALSE;
+		grbuflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	grbuflen = 1;
+#endif
 
 	grbuf = emalloc(grbuflen);
 
 try_again:
-	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
-	if (ret || retgrptr == NULL) {
-		if (errno == ERANGE) {
+	err = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
+	if (err || retgrptr == NULL) {
+		if (err == ERANGE) {
 			grbuflen *= 2;
 			grbuf = erealloc(grbuf, grbuflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = ret;
+		POSIX_G(last_error) = err;
 		efree(grbuf);
 		RETURN_FALSE;
 	}
@@ -905,6 +927,7 @@ PHP_FUNCTION(posix_getpwnam)
 	struct passwd pwbuf;
 	long buflen;
 	char *buf;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -914,20 +937,25 @@ PHP_FUNCTION(posix_getpwnam)
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	buf = emalloc(buflen);
-	pw = &pwbuf;
 
 try_again:
-	if (getpwnam_r(name, pw, buf, buflen, &pw) || pw == NULL) {
-		if (errno == ERANGE) {
+	pw = &pwbuf;
+	err = getpwnam_r(name, pw, buf, buflen, &pw);
+	if (err || pw == NULL) {
+		if (err == ERANGE) {
 			buflen *= 2;
 			buf = erealloc(buf, buflen);
 			goto try_again;
 		}
 		efree(buf);
-		POSIX_G(last_error) = errno;
+		POSIX_G(last_error) = err;
 		RETURN_FALSE;
 	}
 #else
@@ -958,7 +986,7 @@ PHP_FUNCTION(posix_getpwuid)
 	struct passwd *retpwptr = NULL;
 	long pwbuflen;
 	char *pwbuf;
-	int ret;
+	int err;
 #endif
 	struct passwd *pw;
 
@@ -969,19 +997,23 @@ PHP_FUNCTION(posix_getpwuid)
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (pwbuflen < 1) {
-		RETURN_FALSE;
+		pwbuflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	pwbuflen = 1;
+#endif
 	pwbuf = emalloc(pwbuflen);
 
 try_again:
-	ret = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
-	if (ret || retpwptr == NULL) {
-		if (errno == ERANGE) {
+	err = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
+	if (err || retpwptr == NULL) {
+		if (err == ERANGE) {
 			pwbuflen *= 2;
 			pwbuf = erealloc(pwbuf, pwbuflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = ret;
+		POSIX_G(last_error) = err;
 		efree(pwbuf);
 		RETURN_FALSE;
 	}
@@ -1011,7 +1043,7 @@ try_again:
 #define UNLIMITED_STRING "unlimited"
 
 /* {{{ posix_addlimit */
-static int posix_addlimit(int limit, const char *name, zval *return_value) {
+static zend_result posix_addlimit(int limit, const char *name, zval *return_value) {
 	int result;
 	struct rlimit rl;
 	char hard[80];
@@ -1253,7 +1285,7 @@ PHP_FUNCTION(posix_pathconf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (path_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	} else if (php_check_open_basedir(path)) {
 		php_error_docref(NULL, E_WARNING, "Invalid path supplied: %s", path);
@@ -1283,7 +1315,7 @@ PHP_FUNCTION(posix_fpathconf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {

@@ -7,4 +7,4 @@ interface stdClass { }
 
 ?>
 --EXPECTF--
-Fatal error: Cannot declare interface stdClass, because the name is already in use in %s on line %d
+Fatal error: Cannot redeclare class stdClass in %s on line %d

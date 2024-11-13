@@ -34,8 +34,8 @@ if (PHP_PHAR != "no") {
 			STDOUT.WriteLine('        Native OpenSSL support in Phar disabled');
 		}
 	}
-	ADD_EXTENSION_DEP('phar', 'spl', true);
-	PHP_INSTALL_HEADERS("ext/phar", "php_phar.h");
+	ADD_EXTENSION_DEP('phar', 'hash');
+	ADD_EXTENSION_DEP('phar', 'spl');
 
 	ADD_MAKEFILE_FRAGMENT();
 }

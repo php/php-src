@@ -18,7 +18,6 @@
 #define SPL_EXCEPTIONS_H
 
 #include "php.h"
-#include "php_spl.h"
 
 extern PHPAPI zend_class_entry *spl_ce_LogicException;
 extern PHPAPI zend_class_entry *spl_ce_BadFunctionCallException;

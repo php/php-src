@@ -297,18 +297,6 @@ class Tester
     }
 
     /**
-     * Skip if running on Travis.
-     *
-     * @param $message
-     */
-    static public function skipIfTravis($message)
-    {
-        if (getenv("TRAVIS")) {
-            die('skip Travis: ' . $message);
-        }
-    }
-
-    /**
      * Skip if not running as root.
      */
     static public function skipIfNotRoot()
@@ -355,7 +343,7 @@ class Tester
      * @param string $command
      * @param string|null $expectedPartOfOutput
      */
-    static public function skipIfShellCommandFails(string $command, string $expectedPartOfOutput = null)
+    static public function skipIfShellCommandFails(string $command, ?string $expectedPartOfOutput = null)
     {
         $result = exec("$command 2>&1", $output, $code);
         if ($result === false || $code) {
@@ -397,8 +385,8 @@ class Tester
         string|array $configTemplate,
         string $code = '',
         array $options = [],
-        string $fileName = null,
-        bool $debug = null,
+        ?string $fileName = null,
+        ?bool $debug = null,
         string $clientTransport = 'stream'
     ) {
         $this->configTemplate  = $configTemplate;
@@ -440,12 +428,22 @@ class Tester
      * @return null|array
      * @throws \Exception
      */
-    public function testConfig($silent = false, array|string|null $expectedPattern = null): ?array
-    {
-        $configFile = $this->createConfig();
-        $cmd        = self::findExecutable() . ' -n -tt -y ' . $configFile . ' 2>&1';
+    public function testConfig(
+        $silent = false,
+        array|string|null $expectedPattern = null,
+        $dumpConfig = true,
+        $printOutput = false
+    ): ?array {
+        $configFile    = $this->createConfig();
+        $configTestArg = $dumpConfig ? '-tt' : '-t';
+        $cmd           = self::findExecutable() . " -n $configTestArg -y $configFile 2>&1";
         $this->trace('Testing config using command', $cmd, true);
         exec($cmd, $output, $code);
+        if ($printOutput) {
+            foreach ($output as $outputLine) {
+                echo $outputLine . "\n";
+            }
+        }
         $found = 0;
         if ($expectedPattern !== null) {
             $expectedPatterns = is_array($expectedPattern) ? $expectedPattern : [$expectedPattern];
@@ -489,11 +487,12 @@ class Tester
     /**
      * Start PHP-FPM master process
      *
-     * @param array $extraArgs   Command extra arguments.
-     * @param bool  $forceStderr Whether to output to stderr so error log is used.
-     * @param bool  $daemonize   Whether to start FPM daemonized
-     * @param array $extensions  List of extension to add if shared build used.
-     * @param array $iniEntries  List of ini entries to use.
+     * @param array      $extraArgs   Command extra arguments.
+     * @param bool       $forceStderr Whether to output to stderr so error log is used.
+     * @param bool       $daemonize   Whether to start FPM daemonized
+     * @param array      $extensions  List of extension to add if shared build used.
+     * @param array      $iniEntries  List of ini entries to use.
+     * @param array|null $envVars     List of env variable to execute FPM with or null to use the current ones.
      *
      * @return bool
      * @throws \Exception
@@ -504,6 +503,7 @@ class Tester
         bool $daemonize = false,
         array $extensions = [],
         array $iniEntries = [],
+        ?array $envVars = null,
     ) {
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
@@ -537,7 +537,7 @@ class Tester
         $cmd = array_merge($cmd, $extraArgs);
         $this->trace('Starting FPM using command:', $cmd, true);
 
-        $this->masterProcess = proc_open($cmd, $desc, $pipes);
+        $this->masterProcess = proc_open($cmd, $desc, $pipes, null, $envVars);
         register_shutdown_function(
             function ($masterProcess) use ($configFile) {
                 @unlink($configFile);
@@ -589,7 +589,7 @@ class Tester
      */
     public function checkConnection(
         string $host = '127.0.0.1',
-        string $successMessage = null,
+        ?string $successMessage = null,
         ?string $errorMessage = 'Connection failed',
         int $attempts = 20,
         int $delay = 50000
@@ -626,8 +626,8 @@ class Tester
      */
     public function checkRequest(
         string $address,
-        string $successMessage = null,
-        string $errorMessage = null,
+        ?string $successMessage = null,
+        ?string $errorMessage = null,
         string $uri = '/ping',
         string $query = '',
         array $headers = []
@@ -663,7 +663,7 @@ class Tester
      */
     public function status(
         array $expectedFields,
-        string $address = null,
+        ?string $address = null,
         string $statusPath = '/status',
         $formats = ['plain', 'html', 'xml', 'json', 'openmetrics']
     ) {
@@ -694,10 +694,11 @@ class Tester
     private function getRequestParams(
         string $query = '',
         array $headers = [],
-        string $uri = null,
-        string $scriptFilename = null,
-        string $scriptName = null,
-        ?string $stdin = null
+        ?string $uri = null,
+        ?string $scriptFilename = null,
+        ?string $scriptName = null,
+        ?string $stdin = null,
+        ?string $method = null,
     ): array {
         if (is_null($scriptFilename)) {
             $scriptFilename = $this->makeSourceFile();
@@ -712,7 +713,7 @@ class Tester
         $params = array_merge(
             [
                 'GATEWAY_INTERFACE' => 'FastCGI/1.0',
-                'REQUEST_METHOD'    => is_null($stdin) ? 'GET' : 'POST',
+                'REQUEST_METHOD'    => $method ?? (is_null($stdin) ? 'GET' : 'POST'),
                 'SCRIPT_FILENAME'   => $scriptFilename === '' ? null : $scriptFilename,
                 'SCRIPT_NAME'       => $scriptName,
                 'QUERY_STRING'      => $query,
@@ -824,18 +825,20 @@ class Tester
     public function request(
         string $query = '',
         array $headers = [],
-        string $uri = null,
-        string $address = null,
-        string $successMessage = null,
-        string $errorMessage = null,
+        ?string $uri = null,
+        ?string $address = null,
+        ?string $successMessage = null,
+        ?string $errorMessage = null,
         bool $connKeepAlive = false,
         bool $socketKeepAlive = false,
-        string $scriptFilename = null,
-        string $scriptName = null,
-        string|array $stdin = null,
+        ?string $scriptFilename = null,
+        ?string $scriptName = null,
+        string|array|null $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
         int $writeDelay = 0,
+        ?string $method = null,
+        ?array $params = null,
     ): Response {
         if ($this->hasError()) {
             return $this->createResponse(expectInvalid: true);
@@ -845,7 +848,7 @@ class Tester
             $stdin = $this->parseStdin($stdin, $headers);
         }
 
-        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin);
+        $params = $params ?? $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin, $method);
         $this->trace('Request params', $params);
 
         try {
@@ -892,9 +895,9 @@ class Tester
      */
     public function multiRequest(
         int|array $requests,
-        string $address = null,
-        string $successMessage = null,
-        string $errorMessage = null,
+        ?string $address = null,
+        ?string $successMessage = null,
+        ?string $errorMessage = null,
         bool $connKeepAlive = false,
         bool $socketKeepAlive = false,
         int $readTimeout = 0,
@@ -965,7 +968,7 @@ class Tester
      * @throws \Exception
      */
     public function requestValues(
-        string $address = null,
+        ?string $address = null,
         bool $connKeepAlive = false,
         bool $socketKeepAlive = false
     ): ValuesResponse {
@@ -998,7 +1001,7 @@ class Tester
      * @return Client
      */
     private function getClient(
-        string $address = null,
+        ?string $address = null,
         bool $connKeepAlive = false,
         bool $socketKeepAlive = false
     ): Client {
@@ -1107,7 +1110,7 @@ class Tester
      *
      * @return string
      */
-    public function signal($signal, int $pid = null)
+    public function signal($signal, ?int $pid = null)
     {
         if (is_null($pid)) {
             $pid = $this->getPid();
@@ -1393,7 +1396,7 @@ class Tester
      *
      * @return string
      */
-    private function getFile(string $extension, string $dir = null, string $name = null): string
+    private function getFile(string $extension, ?string $dir = null, ?string $name = null): string
     {
         $fileName = (is_null($name) ? $this->fileName : $name . '.') . $extension;
 
@@ -1434,7 +1437,7 @@ class Tester
      *
      * @return string
      */
-    public function getPrefixedFile(string $extension, string $prefix = null): string
+    public function getPrefixedFile(string $extension, ?string $prefix = null): string
     {
         $fileName = rtrim($this->fileName, '.');
         if ( ! is_null($prefix)) {
@@ -1457,8 +1460,8 @@ class Tester
     private function makeFile(
         string $extension,
         string $content = '',
-        string $dir = null,
-        string $name = null,
+        ?string $dir = null,
+        ?string $name = null,
         bool $overwrite = true
     ): string {
         $filePath = $this->getFile($extension, $dir, $name);
@@ -1547,7 +1550,7 @@ class Tester
      *
      * @return false
      */
-    private function error(string $msg, \Exception $exception = null, bool $prefix = true): bool
+    private function error(string $msg, ?\Exception $exception = null, bool $prefix = true): bool
     {
         $this->error = $prefix ? 'ERROR: ' . $msg : ltrim($msg);
         if ($exception) {
@@ -1707,8 +1710,8 @@ class Tester
     public function expectLogPattern(
         string $pattern,
         bool $checkAllLogs = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null,
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null,
     ) {
         $this->logTool->expectPattern(
             $pattern,
@@ -1732,8 +1735,8 @@ class Tester
     public function expectNoLogPattern(
         string $pattern,
         bool $checkAllLogs = true,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null,
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null,
     ) {
         if (is_null($timeoutSeconds) && is_null($timeoutMicroseconds)) {
             $timeoutMicroseconds = 10;
@@ -1814,12 +1817,12 @@ class Tester
     private function expectLogEntry(
         string $type,
         string $message,
-        string $pool = null,
+        ?string $pool = null,
         int $count = 1,
         bool $checkAllLogs = false,
         bool $invert = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null,
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null,
         string $ignoreErrorFor = LogTool::DEBUG
     ): bool {
         for ($i = 0; $i < $count; $i++) {
@@ -1858,12 +1861,12 @@ class Tester
      */
     public function expectLogDebug(
         string $message,
-        string $pool = null,
+        ?string $pool = null,
         int $count = 1,
         bool $checkAllLogs = false,
         bool $invert = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         return $this->expectLogEntry(
             LogTool::DEBUG,
@@ -1894,12 +1897,12 @@ class Tester
      */
     public function expectLogNotice(
         string $message,
-        string $pool = null,
+        ?string $pool = null,
         int $count = 1,
         bool $checkAllLogs = false,
         bool $invert = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         return $this->expectLogEntry(
             LogTool::NOTICE,
@@ -1929,12 +1932,12 @@ class Tester
      */
     public function expectLogWarning(
         string $message,
-        string $pool = null,
+        ?string $pool = null,
         int $count = 1,
         bool $checkAllLogs = false,
         bool $invert = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         return $this->expectLogEntry(
             LogTool::WARNING,
@@ -1964,12 +1967,12 @@ class Tester
      */
     public function expectLogError(
         string $message,
-        string $pool = null,
+        ?string $pool = null,
         int $count = 1,
         bool $checkAllLogs = false,
         bool $invert = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         return $this->expectLogEntry(
             LogTool::ERROR,
@@ -1999,12 +2002,12 @@ class Tester
      */
     public function expectLogAlert(
         string $message,
-        string $pool = null,
+        ?string $pool = null,
         int $count = 1,
         bool $checkAllLogs = false,
         bool $invert = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         return $this->expectLogEntry(
             LogTool::ALERT,
@@ -2152,7 +2155,7 @@ class Tester
      * @return bool
      * @throws \Exception
      */
-    public function readAllLogEntries(string $type, string $message, string $pool = null): bool
+    public function readAllLogEntries(string $type, string $message, ?string $pool = null): bool
     {
         return $this->logTool->readAllEntries($type, $message, $pool);
     }
@@ -2166,7 +2169,7 @@ class Tester
      * @return bool
      * @throws \Exception
      */
-    public function readAllLogNotices(string $message, string $pool = null): bool
+    public function readAllLogNotices(string $message, ?string $pool = null): bool
     {
         return $this->readAllLogEntries(LogTool::NOTICE, $message, $pool);
     }
@@ -2193,7 +2196,7 @@ class Tester
      */
     private function trace(
         string $title,
-        string|array $message = null,
+        string|array|null $message = null,
         bool $isCommand = false,
         bool $isFile = false
     ): void {

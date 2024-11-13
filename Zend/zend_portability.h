@@ -47,6 +47,9 @@
 #include "../TSRM/TSRM.h"
 
 #include <stdio.h>
+#if ZEND_DEBUG && defined(NDEBUG)
+# error "NDEBUG must not be defined when ZEND_DEBUG is enabled"
+#endif
 #include <assert.h>
 #include <math.h>
 
@@ -89,13 +92,10 @@
 
 #if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
-#elif defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 13
-/* GCC emits a warning when __attribute__ appears directly after a label, so we need a do-while loop. */
-# define ZEND_ASSUME(c)	do { __attribute__((assume(c))); } while (0)
 #elif defined(__clang__) && __has_builtin(__builtin_assume)
 # pragma clang diagnostic ignored "-Wassume"
 # define ZEND_ASSUME(c)	__builtin_assume(c)
-#elif PHP_HAVE_BUILTIN_UNREACHABLE && PHP_HAVE_BUILTIN_EXPECT
+#elif defined(PHP_HAVE_BUILTIN_UNREACHABLE) && defined(PHP_HAVE_BUILTIN_EXPECT)
 # define ZEND_ASSUME(c)	do { \
 		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \
 	} while (0)
@@ -144,7 +144,7 @@
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
 
-# if __has_feature(address_sanitizer)
+# if __has_feature(address_sanitizer) && !defined(__SANITIZE_ADDRESS__)
 #  define __SANITIZE_ADDRESS__
 # endif
 
@@ -205,7 +205,7 @@ char *alloca();
 # endif
 #endif
 
-#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(__APPLE__)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	bool name;
@@ -272,6 +272,16 @@ char *alloca();
 # define ZEND_ATTRIBUTE_UNUSED
 #endif
 
+#if ZEND_GCC_VERSION >= 3003 || __has_attribute(nonnull)
+/* All pointer arguments must be non-null */
+# define ZEND_ATTRIBUTE_NONNULL  __attribute__((nonnull))
+/* Specified arguments must be non-null (1-based) */
+# define ZEND_ATTRIBUTE_NONNULL_ARGS(...)  __attribute__((nonnull(__VA_ARGS__)))
+#else
+# define ZEND_ATTRIBUTE_NONNULL
+# define ZEND_ATTRIBUTE_NONNULL_ARGS(...)
+#endif
+
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_COLD __attribute__((cold))
 # ifdef __OPTIMIZE__
@@ -299,13 +309,13 @@ char *alloca();
 # define ZEND_FASTCALL __attribute__((fastcall))
 #elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
 # define ZEND_FASTCALL __fastcall
-#elif defined(_MSC_VER) && _MSC_VER >= 1800 && !defined(__clang__)
+#elif defined(_MSC_VER) && _MSC_VER >= 1800
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __attribute__((noreturn))
 #elif defined(ZEND_WIN32)
@@ -321,7 +331,7 @@ char *alloca();
 # define ZEND_STACK_ALIGNED
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
 # define HAVE_ATTRIBUTE_WEAK
 #endif
@@ -387,7 +397,7 @@ char *alloca();
 # define XtOffsetOf(s_type, field) offsetof(s_type, field)
 #endif
 
-#ifdef HAVE_SIGSETJMP
+#ifndef ZEND_WIN32
 # define SETJMP(a) sigsetjmp(a, 0)
 # define LONGJMP(a,b) siglongjmp(a, b)
 # define JMP_BUF sigjmp_buf
@@ -435,14 +445,6 @@ char *alloca();
 # define ZTS_V 1
 #else
 # define ZTS_V 0
-#endif
-
-#ifndef LONG_MAX
-# define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-# define LONG_MIN (- LONG_MAX - 1)
 #endif
 
 #define MAX_LENGTH_OF_DOUBLE 32
@@ -511,6 +513,13 @@ extern "C++" {
 #if __has_feature(memory_sanitizer) || __has_feature(thread_sanitizer) || \
 	__has_feature(dataflow_sanitizer)
 # undef HAVE_FUNC_ATTRIBUTE_IFUNC
+#endif
+
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+# define MSAN_UNPOISON(value) __msan_unpoison(&(value), sizeof(value))
+#else
+# define MSAN_UNPOISON(value)
 #endif
 
 /* Only use ifunc resolvers if we have __builtin_cpu_supports() and __builtin_cpu_init(),
@@ -668,7 +677,7 @@ extern "C++" {
 # define ZEND_INTRIN_AVX2_FUNC_DECL(func)
 #endif
 
-#if PHP_HAVE_AVX512_SUPPORTS && defined(HAVE_FUNC_ATTRIBUTE_TARGET) || defined(ZEND_WIN32)
+#if defined(PHP_HAVE_AVX512_SUPPORTS) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) || defined(ZEND_WIN32)
 #define ZEND_INTRIN_AVX512_RESOLVER 1
 #endif
 
@@ -688,7 +697,7 @@ extern "C++" {
 # define ZEND_INTRIN_AVX512_FUNC_DECL(func)
 #endif
 
-#if PHP_HAVE_AVX512_VBMI_SUPPORTS && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#if defined(PHP_HAVE_AVX512_VBMI_SUPPORTS) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 #define ZEND_INTRIN_AVX512_VBMI_RESOLVER 1
 #endif
 
@@ -782,6 +791,78 @@ extern "C++" {
 # define ZEND_STATIC_ASSERT(c, m) _Static_assert((c), m)
 #else
 # define ZEND_STATIC_ASSERT(c, m)
+#endif
+
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) /* C11 */
+typedef max_align_t zend_max_align_t;
+#elif (defined(__cplusplus) && __cplusplus >= 201103L) /* C++11 */
+extern "C++" {
+# include <cstddef>
+}
+typedef std::max_align_t zend_max_align_t;
+#else
+typedef union {
+	char c;
+	short s;
+	int i;
+	long l;
+#if SIZEOF_LONG_LONG
+	long long ll;
+#endif
+	float f;
+	double d;
+	long double ld;
+	void *p;
+	void (*fun)(void);
+} zend_max_align_t;
+#endif
+
+/* Bytes swap */
+#ifdef _MSC_VER
+#  include <stdlib.h>
+#  define ZEND_BYTES_SWAP32(u) _byteswap_ulong(u)
+#  define ZEND_BYTES_SWAP64(u) _byteswap_uint64(u)
+#elif defined(HAVE_BYTESWAP_H)
+#  include <byteswap.h>
+#  define ZEND_BYTES_SWAP32(u) bswap_32(u)
+#  define ZEND_BYTES_SWAP64(u) bswap_64(u)
+#elif defined(HAVE_SYS_BSWAP_H)
+#  include <sys/bswap.h>
+#  define ZEND_BYTES_SWAP32(u) bswap32(u)
+#  define ZEND_BYTES_SWAP64(u) bswap64(u)
+#elif defined(__GNUC__)
+#  define ZEND_BYTES_SWAP32(u) __builtin_bswap32(u)
+#  define ZEND_BYTES_SWAP64(u) __builtin_bswap64(u)
+#elif defined(__has_builtin)
+#  if __has_builtin(__builtin_bswap32)
+#    define ZEND_BYTES_SWAP32(u) __builtin_bswap32(u)
+#  endif
+#  if __has_builtin(__builtin_bswap64)
+#    define ZEND_BYTES_SWAP64(u) __builtin_bswap64(u)
+#  endif
+#endif
+
+#ifndef ZEND_BYTES_SWAP32
+static zend_always_inline uint32_t ZEND_BYTES_SWAP32(uint32_t u)
+{
+  return (((u & 0xff000000) >> 24)
+          | ((u & 0x00ff0000) >>  8)
+          | ((u & 0x0000ff00) <<  8)
+          | ((u & 0x000000ff) << 24));
+}
+#endif
+#ifndef ZEND_BYTES_SWAP64
+static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
+{
+   return (((u & 0xff00000000000000ULL) >> 56)
+          | ((u & 0x00ff000000000000ULL) >> 40)
+          | ((u & 0x0000ff0000000000ULL) >> 24)
+          | ((u & 0x000000ff00000000ULL) >>  8)
+          | ((u & 0x00000000ff000000ULL) <<  8)
+          | ((u & 0x0000000000ff0000ULL) << 24)
+          | ((u & 0x000000000000ff00ULL) << 40)
+          | ((u & 0x00000000000000ffULL) << 56));
+}
 #endif
 
 #endif /* ZEND_PORTABILITY_H */

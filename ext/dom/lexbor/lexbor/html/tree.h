@@ -118,8 +118,7 @@ lxb_html_tree_insert_foreign_element(lxb_html_tree_t *tree,
 
 LXB_API lxb_html_element_t *
 lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
-                                       lxb_html_token_t *token, lxb_ns_id_t ns,
-                                       lxb_dom_node_t *parent);
+                                       lxb_html_token_t *token, lxb_ns_id_t ns);
 
 LXB_API lxb_status_t
 lxb_html_tree_append_attributes(lxb_html_tree_t *tree,

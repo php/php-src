@@ -13,5 +13,5 @@ try {
 
 ?>
 --EXPECTF--
-Deprecated: Optional parameter $a declared before required parameter $b is implicitly treated as a required parameter in %s on line %d
+Deprecated: test(): Optional parameter $a declared before required parameter $b is implicitly treated as a required parameter in %s on line %d
 test(): Argument #1 ($a) not passed

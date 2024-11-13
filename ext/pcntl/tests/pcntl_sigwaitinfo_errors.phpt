@@ -51,7 +51,7 @@ try {
 }
 ?>
 --EXPECTF--
-ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) cannot be empty
+ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) must not be empty
 ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be between 1 and %d
 ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be between 1 and %d
 TypeError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be of type int, string given

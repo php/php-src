@@ -56,8 +56,8 @@ typedef struct {
 	HashTable *properties;
 	xmlXPathContextPtr xpath;
 	struct {
-		xmlChar               *name;
-		xmlChar               *nsprefix;
+		zend_string           *name;
+		zend_string           *nsprefix;
 		int                   isprefix;
 		SXE_ITER              type;
 		zval                  data;

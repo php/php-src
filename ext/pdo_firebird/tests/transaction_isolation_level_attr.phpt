@@ -15,9 +15,9 @@ $dbh = getDbConnection();
 unset($dbh);
 
 $levelStrs = [
-    'PDO::FB_READ_COMMITTED',
-    'PDO::FB_REPEATABLE_READ',
-    'PDO::FB_SERIALIZABLE',
+    'Pdo\\Firebird::READ_COMMITTED',
+    'Pdo\\Firebird::REPEATABLE_READ',
+    'Pdo\\Firebird::SERIALIZABLE',
 ];
 
 echo "========== Set attr in construct ==========\n";
@@ -29,11 +29,11 @@ foreach ($levelStrs as $levelStr) {
         PDO_FIREBIRD_TEST_USER,
         PDO_FIREBIRD_TEST_PASS,
         [
-            PDO::FB_TRANSACTION_ISOLATION_LEVEL => $level,
+            Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL => $level,
         ],
     );
 
-    if ($dbh->getAttribute(PDO::FB_TRANSACTION_ISOLATION_LEVEL) === $level) {
+    if ($dbh->getAttribute(Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL) === $level) {
         echo "OK: {$levelStr}\n";
     } else {
         echo "NG: {$levelStr}\n";
@@ -49,7 +49,7 @@ try {
         PDO_FIREBIRD_TEST_USER,
         PDO_FIREBIRD_TEST_PASS,
         [
-            PDO::FB_TRANSACTION_ISOLATION_LEVEL => PDO::ATTR_AUTOCOMMIT, // Invalid value
+            Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL => PDO::ATTR_AUTOCOMMIT, // Invalid value
         ],
     );
 } catch (Throwable $e) {
@@ -70,9 +70,9 @@ $dbh = new PDO(
 foreach ($levelStrs as $levelStr) {
     $level = constant($levelStr);
 
-    var_dump($dbh->setAttribute(PDO::FB_TRANSACTION_ISOLATION_LEVEL, $level));
+    var_dump($dbh->setAttribute(Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL, $level));
 
-    if ($dbh->getAttribute(PDO::FB_TRANSACTION_ISOLATION_LEVEL) === $level) {
+    if ($dbh->getAttribute(Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL) === $level) {
         echo "OK: {$levelStr}\n";
     } else {
         echo "NG: {$levelStr}\n";
@@ -81,7 +81,7 @@ foreach ($levelStrs as $levelStr) {
 
 echo "Invalid value\n";
 try {
-    $dbh->setAttribute(PDO::FB_TRANSACTION_ISOLATION_LEVEL, PDO::ATTR_AUTOCOMMIT); // Invalid value
+    $dbh->setAttribute(Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL, PDO::ATTR_AUTOCOMMIT); // Invalid value
 } catch (Throwable $e) {
     echo $e->getMessage()."\n";
 }
@@ -90,18 +90,18 @@ unset($dbh);
 ?>
 --EXPECT--
 ========== Set attr in construct ==========
-OK: PDO::FB_READ_COMMITTED
-OK: PDO::FB_REPEATABLE_READ
-OK: PDO::FB_SERIALIZABLE
+OK: Pdo\Firebird::READ_COMMITTED
+OK: Pdo\Firebird::REPEATABLE_READ
+OK: Pdo\Firebird::SERIALIZABLE
 Invalid value
-PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level (PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)
+Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level (Pdo\Firebird::READ_COMMITTED, Pdo\Firebird::REPEATABLE_READ, or Pdo\Firebird::SERIALIZABLE)
 
 ========== Set attr in setAttribute ==========
 bool(true)
-OK: PDO::FB_READ_COMMITTED
+OK: Pdo\Firebird::READ_COMMITTED
 bool(true)
-OK: PDO::FB_REPEATABLE_READ
+OK: Pdo\Firebird::REPEATABLE_READ
 bool(true)
-OK: PDO::FB_SERIALIZABLE
+OK: Pdo\Firebird::SERIALIZABLE
 Invalid value
-PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level (PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)
+Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level (Pdo\Firebird::READ_COMMITTED, Pdo\Firebird::REPEATABLE_READ, or Pdo\Firebird::SERIALIZABLE)

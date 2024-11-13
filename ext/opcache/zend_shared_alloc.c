@@ -53,7 +53,7 @@
 static const zend_shared_memory_handlers *g_shared_alloc_handler = NULL;
 static const char *g_shared_model;
 /* pointer to globals allocated in SHM and shared across processes */
-zend_smm_shared_globals *smm_shared_globals;
+ZEND_EXT_API zend_smm_shared_globals *smm_shared_globals;
 
 #ifndef ZEND_WIN32
 #ifdef ZTS
@@ -366,15 +366,15 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 
 void *zend_shared_alloc(size_t size)
 {
-	ZEND_ASSERT(ZCG(locked));
-
 	int i;
-	unsigned int block_size = ZEND_ALIGNED_SIZE(size);
+	size_t block_size = ZEND_ALIGNED_SIZE(size);
 
-	if (UNEXPECTED(block_size < size)) {
-		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Possible integer overflow in shared memory allocation (%zu + %zu)", size, PLATFORM_ALIGNMENT);
+#if 1
+	if (!ZCG(locked)) {
+		ZEND_ASSERT(0 && "Shared memory lock not obtained");
+		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Shared memory lock not obtained");
 	}
-
+#endif
 	if (block_size > ZSMMG(shared_free)) { /* No hope to find a big-enough block */
 		SHARED_ALLOC_FAILED();
 		return NULL;

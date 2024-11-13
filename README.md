@@ -1,5 +1,5 @@
 <div align="center">
-    <a href="https://php.net">
+    <a href="https://www.php.net">
         <img
             alt="PHP"
             src="https://www.php.net/images/logos/new-php-logo.svg"
@@ -15,12 +15,11 @@ blog to the most popular websites in the world. PHP is distributed under the
 [PHP License v3.01](LICENSE).
 
 [![Push](https://github.com/php/php-src/actions/workflows/push.yml/badge.svg)](https://github.com/php/php-src/actions/workflows/push.yml)
-[![Build status](https://travis-ci.com/php/php-src.svg?branch=master)](https://travis-ci.com/github/php/php-src)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:php)
 
 ## Documentation
 
-The PHP manual is available at [php.net/docs](https://php.net/docs).
+The PHP manual is available at [php.net/docs](https://www.php.net/docs).
 
 ## Installation
 
@@ -32,7 +31,7 @@ For Windows, the PHP binaries can be obtained from
 [windows.php.net](https://windows.php.net). After extracting the archive the
 `*.exe` files are ready to use.
 
-For other systems, see the [installation chapter](https://php.net/install).
+For other systems, see the [installation chapter](https://www.php.net/install).
 
 ### Building PHP source code
 
@@ -131,10 +130,11 @@ contribute:
 
 - [Contributing to PHP](/CONTRIBUTING.md)
 - [PHP coding standards](/CODING_STANDARDS.md)
+- [Internal documentation](https://php.github.io/php-src/)
 - [Mailing list rules](/docs/mailinglist-rules.md)
 - [PHP release process](/docs/release-process.md)
 
 ## Credits
 
 For the list of people who've put work into PHP, please see the
-[PHP credits page](https://php.net/credits.php).
+[PHP credits page](https://www.php.net/credits.php).

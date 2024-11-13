@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -28,7 +28,7 @@
 /* {{{ com_create_instance - ctor for COM class */
 PHP_METHOD(com, __construct)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	zend_string *server_name = NULL;
 	HashTable *server_params = NULL;
 	php_com_dotnet_object *obj;
@@ -392,7 +392,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 			default:
 				desc = php_win32_error_to_msg(hr);
-				spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
+				spprintf(&msg, 0, "Error [0x%08lx] %s", hr, desc);
 				php_win32_error_msg_free(desc);
 				break;
 		}
@@ -639,7 +639,7 @@ zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
 
 	if (FAILED(hr)) {
 		char *winerr = php_win32_error_to_msg(hr);
-		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
+		spprintf(&msg, 0, "Unable to lookup `%s': %s", ZSTR_VAL(name), winerr);
 		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);

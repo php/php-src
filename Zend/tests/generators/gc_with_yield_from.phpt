@@ -27,21 +27,29 @@ gc_collect_cycles();
 print "end\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
 collect
 array(4) {
   [0]=>
-  object(Generator)#1 (0) {
+  object(Generator)#%d (1) {
+    ["function"]=>
+    string(3) "gen"
   }
   [1]=>
-  object(Generator)#2 (0) {
+  object(Generator)#%d (1) {
+    ["function"]=>
+    string(3) "gen"
   }
   [2]=>
-  object(Generator)#3 (0) {
+  object(Generator)#%d (1) {
+    ["function"]=>
+    string(3) "gen"
   }
   [3]=>
-  object(Generator)#4 (0) {
+  object(Generator)#%d (1) {
+    ["function"]=>
+    string(4) "root"
   }
 }
 end

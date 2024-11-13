@@ -28,8 +28,8 @@ Finally
 
 Fatal error: Uncaught Error: Cannot use "yield from" in a force-closed generator in %s:%d
 Stack trace:
-#0 [internal function]: {closure}()
+#0 [internal function]: {closure:%s:%d}()
 #1 %s(%d): Generator->current()
-#2 [internal function]: {closure}()
+#2 [internal function]: {closure:%s:%d}()
 #3 {main}
   thrown in %s on line %d

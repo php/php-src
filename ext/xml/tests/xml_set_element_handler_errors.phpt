@@ -74,7 +74,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 Invalid $parser:
 TypeError: xml_set_element_handler(): Argument #1 ($parser) must be of type XMLParser, stdClass given
 Invalid start callable type true:
@@ -86,10 +86,22 @@ TypeError: xml_set_element_handler(): Argument #2 ($start_handler) must be of ty
 Invalid end callable type int:
 TypeError: xml_set_element_handler(): Argument #3 ($end_handler) must be of type callable|string|null
 Invalid start callable, no object set and string not callable:
+
+Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 ValueError: xml_set_element_handler(): Argument #2 ($start_handler) an object must be set via xml_set_object() to be able to lookup method
 Invalid end callable, no object set and string not callable:
+
+Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 ValueError: xml_set_element_handler(): Argument #3 ($end_handler) an object must be set via xml_set_object() to be able to lookup method
 Invalid start callable, string non existent method on set object:
+
+Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
+
+Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 ValueError: xml_set_element_handler(): Argument #2 ($start_handler) method stdClass::nonexistent_method() does not exist
 Invalid end callable, string non existent method on set object:
+
+Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
+
+Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 ValueError: xml_set_element_handler(): Argument #3 ($end_handler) method stdClass::nonexistent_method() does not exist

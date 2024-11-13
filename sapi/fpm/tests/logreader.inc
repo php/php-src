@@ -166,10 +166,10 @@ class LogReader
      */
     public function readUntil(
         callable $matcher,
-        string $notFoundMessage = null,
+        ?string $notFoundMessage = null,
         bool $checkAllLogs = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         if (is_null($timeoutSeconds) && is_null($timeoutMicroseconds)) {
             $timeoutSeconds      = 3;

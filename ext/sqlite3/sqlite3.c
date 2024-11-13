@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -23,12 +23,11 @@
 #include "ext/standard/info.h"
 #include "php_sqlite3.h"
 #include "php_sqlite3_structs.h"
-#include "main/SAPI.h"
+#include "SAPI.h"
 
 #include <sqlite3.h>
 
 #include "zend_exceptions.h"
-#include "SAPI.h"
 #include "sqlite3_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(sqlite3)
@@ -40,6 +39,13 @@ static int php_sqlite3_compare_stmt_zval_free(php_sqlite3_free_list **free_list,
 
 #define SQLITE3_CHECK_INITIALIZED(db_obj, member, class_name) \
 	if (!(db_obj) || !(member)) { \
+		zend_throw_error(NULL, "The " #class_name " object has not been correctly initialised or is already closed"); \
+		RETURN_THROWS(); \
+	}
+
+#define SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, member, class_name, trampoline_fcc) \
+	if (!(db_obj) || !(member)) { \
+		zend_release_fcall_info_cache((trampoline_fcc)); \
 		zend_throw_error(NULL, "The " #class_name " object has not been correctly initialised or is already closed"); \
 		RETURN_THROWS(); \
 	}
@@ -65,9 +71,9 @@ static zend_object_handlers sqlite3_stmt_object_handlers;
 static zend_object_handlers sqlite3_result_object_handlers;
 
 /* Class entries */
-zend_class_entry *php_sqlite3_exception_ce;
-zend_class_entry *php_sqlite3_sc_entry;
-zend_class_entry *php_sqlite3_stmt_entry;
+static zend_class_entry *php_sqlite3_exception_ce;
+static zend_class_entry *php_sqlite3_sc_entry;
+static zend_class_entry *php_sqlite3_stmt_entry;
 zend_class_entry *php_sqlite3_result_entry;
 
 /* {{{ Error Handler */
@@ -415,7 +421,7 @@ PHP_METHOD(SQLite3, loadExtension)
 	}
 
 	if (extension_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -936,19 +942,22 @@ PHP_METHOD(SQLite3, createFunction)
 	php_sqlite3_func *func;
 	char *sql_func;
 	size_t sql_func_len;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	zend_long sql_func_num_args = -1;
 	zend_long flags = 0;
 	db_obj = Z_SQLITE3_DB_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sf|ll", &sql_func, &sql_func_len, &fci, &fcc, &sql_func_num_args, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sF|ll", &sql_func, &sql_func_len, &fci, &fcc, &sql_func_num_args, &flags) == FAILURE) {
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_THROWS();
 	}
 
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+	SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, db_obj->initialised, SQLite3, &fcc);
 
 	if (!sql_func_len) {
+		/* TODO Add warning/ValueError that name cannot be empty? */
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_FALSE;
 	}
 
@@ -956,13 +965,6 @@ PHP_METHOD(SQLite3, createFunction)
 
 	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, flags | SQLITE_UTF8, func, php_sqlite3_callback_func, NULL, NULL) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
-
-		if (!ZEND_FCC_INITIALIZED(fcc)) {
-			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
 		zend_fcc_dup(&func->func, &fcc);
 
 		func->argc = sql_func_num_args;
@@ -972,6 +974,7 @@ PHP_METHOD(SQLite3, createFunction)
 		RETURN_TRUE;
 	}
 	efree(func);
+	zend_release_fcall_info_cache(&fcc);
 
 	RETURN_FALSE;
 }
@@ -985,19 +988,26 @@ PHP_METHOD(SQLite3, createAggregate)
 	php_sqlite3_func *func;
 	char *sql_func;
 	size_t sql_func_len;
-	zend_fcall_info step_fci, fini_fci;
-	zend_fcall_info_cache step_fcc, fini_fcc;
+	zend_fcall_info step_fci = empty_fcall_info;
+	zend_fcall_info_cache step_fcc = empty_fcall_info_cache;
+	zend_fcall_info fini_fci = empty_fcall_info;
+	zend_fcall_info_cache fini_fcc = empty_fcall_info_cache;
 	zend_long sql_func_num_args = -1;
 	db_obj = Z_SQLITE3_DB_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sff|l", &sql_func, &sql_func_len, &step_fci, &step_fcc, &fini_fci, &fini_fcc, &sql_func_num_args) == FAILURE) {
-		RETURN_THROWS();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sFF|l", &sql_func, &sql_func_len, &step_fci, &step_fcc, &fini_fci, &fini_fcc, &sql_func_num_args) == FAILURE) {
+		goto error;
 	}
 
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+	/* Cannot use SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE() as we have 2 FCCs */
+	if (!db_obj || !db_obj->initialised) {
+		zend_throw_error(NULL, "The SQLite3 object has not been correctly initialised or is already closed");
+		goto error;
+	}
 
 	if (!sql_func_len) {
-		RETURN_FALSE;
+		/* TODO Add warning/ValueError that name cannot be empty? */
+		goto error;
 	}
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
@@ -1005,19 +1015,7 @@ PHP_METHOD(SQLite3, createAggregate)
 	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, SQLITE_UTF8, func, NULL, php_sqlite3_callback_step, php_sqlite3_callback_final) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
 
-		if (!ZEND_FCC_INITIALIZED(step_fcc)) {
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&step_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &step_fcc, NULL);
-		}
 		zend_fcc_dup(&func->step, &step_fcc);
-		if (!ZEND_FCC_INITIALIZED(fini_fcc)) {
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&fini_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fini_fcc, NULL);
-		}
 		zend_fcc_dup(&func->fini, &fini_fcc);
 
 		func->argc = sql_func_num_args;
@@ -1027,6 +1025,10 @@ PHP_METHOD(SQLite3, createAggregate)
 		RETURN_TRUE;
 	}
 	efree(func);
+
+	error:
+	zend_release_fcall_info_cache(&step_fcc);
+	zend_release_fcall_info_cache(&fini_fcc);
 
 	RETURN_FALSE;
 }
@@ -1040,17 +1042,19 @@ PHP_METHOD(SQLite3, createCollation)
 	php_sqlite3_collation *collation;
 	char *collation_name;
 	size_t collation_name_len;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	db_obj = Z_SQLITE3_DB_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sf", &collation_name, &collation_name_len, &fci, &fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sF", &collation_name, &collation_name_len, &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+	SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, db_obj->initialised, SQLite3, &fcc);
 
 	if (!collation_name_len) {
+		/* TODO Add warning/ValueError that name cannot be empty? */
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_FALSE;
 	}
 
@@ -1058,12 +1062,6 @@ PHP_METHOD(SQLite3, createCollation)
 	if (sqlite3_create_collation(db_obj->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_callback_compare) == SQLITE_OK) {
 		collation->collation_name = estrdup(collation_name);
 
-		if (!ZEND_FCC_INITIALIZED(fcc)) {
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
-		}
 		zend_fcc_dup(&collation->cmp_func, &fcc);
 
 		collation->next = db_obj->collations;
@@ -1072,6 +1070,7 @@ PHP_METHOD(SQLite3, createCollation)
 		RETURN_TRUE;
 	}
 	efree(collation);
+	zend_release_fcall_info_cache(&fcc);
 
 	RETURN_FALSE;
 }
@@ -1310,17 +1309,16 @@ PHP_METHOD(SQLite3, enableExceptions)
 /* {{{ Register a callback function to be used as an authorizer by SQLite. The callback should return SQLite3::OK, SQLite3::IGNORE or SQLite3::DENY. */
 PHP_METHOD(SQLite3, setAuthorizer)
 {
-	php_sqlite3_db_object *db_obj;
-	zval *object = ZEND_THIS;
-	db_obj = Z_SQLITE3_DB_P(object);
-	zend_fcall_info			fci;
-	zend_fcall_info_cache	fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+	php_sqlite3_db_object *db_obj = Z_SQLITE3_DB_P(ZEND_THIS);
+
+	SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, db_obj->initialised, SQLite3, &fcc);
 
 	/* Clear previously set callback */
 	if (ZEND_FCC_INITIALIZED(db_obj->authorizer_fcc)) {
@@ -1329,14 +1327,7 @@ PHP_METHOD(SQLite3, setAuthorizer)
 
 	/* Only enable userland authorizer if argument is not NULL */
 	if (ZEND_FCI_INITIALIZED(fci)) {
-		if (!ZEND_FCC_INITIALIZED(fcc)) {
-			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
-		db_obj->authorizer_fcc = fcc;
-		zend_fcc_addref(&db_obj->authorizer_fcc);
+		zend_fcc_dup(&db_obj->authorizer_fcc, &fcc);
 	}
 
 	RETURN_TRUE;
@@ -1612,7 +1603,7 @@ PHP_METHOD(SQLite3Stmt, getSQL)
 {
 	php_sqlite3_stmt *stmt_obj;
 	bool expanded = 0;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 	int bind_rc;
 
@@ -1664,7 +1655,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 			/* pre-increment for character + 1 for null */
 			zend_string *temp = zend_string_alloc(ZSTR_LEN(param->name) + 1, 0);
 			ZSTR_VAL(temp)[0] = ':';
-			memmove(ZSTR_VAL(temp) + 1, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1);
+			memcpy(ZSTR_VAL(temp) + 1, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1);
 			param->name = temp;
 		} else {
 			param->name = zend_string_copy(param->name);

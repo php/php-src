@@ -47,14 +47,16 @@ PHP_METHOD(SessionHandler, open)
 
 	PS_SANITY_CHECK;
 
-	PS(mod_user_is_open) = 1;
-
 	zend_try {
 		ret = PS(default_mod)->s_open(&PS(mod_data), save_path, session_name);
 	} zend_catch {
 		PS(session_status) = php_session_none;
 		zend_bailout();
 	} zend_end_try();
+
+	if (SUCCESS == ret) {
+		PS(mod_user_is_open) = 1;
+	}
 
 	RETURN_BOOL(SUCCESS == ret);
 }

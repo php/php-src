@@ -212,7 +212,7 @@ foreach ($repos as $dir => [$repo, $branch, $prepare, $command, $repeat]) {
 
     foreach ($commands as $idx => $cmd) {
         $cmd = array_merge([
-            'php',
+            PHP_BINARY,
             '--repeat',
             $repeat,
             '-f',

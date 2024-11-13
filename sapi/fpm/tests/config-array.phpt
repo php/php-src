@@ -29,7 +29,7 @@ $tester->start(['-tt']);
 $tester->expectLogConfigOptions([
     'access.suppress_path[] = /ping',
     'access.suppress_path[] = /health_check.php',
-    'php_value[error_reporting] = 32767',
+    'php_value[error_reporting] = 30719',
     'php_value[date.timezone] = Europe/London',
     'php_value[display_errors] = 1',
     'php_admin_value[disable_functions] = eval',

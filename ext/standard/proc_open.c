@@ -15,18 +15,17 @@
  */
 
 #include "php.h"
-#include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
-#include "php_string.h"
-#include "ext/standard/head.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
 #include "exec.h"
-#include "php_globals.h"
 #include "SAPI.h"
 #include "main/php_network.h"
 #include "zend_smart_str.h"
+#ifdef PHP_WIN32
+# include "win32/sockets.h"
+#endif
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -236,7 +235,7 @@ static void _php_free_envp(php_process_env env)
 }
 /* }}} */
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int options)
 {
 	if (proc->has_cached_exit_wait_status) {
@@ -536,11 +535,32 @@ static void append_backslashes(smart_str *str, size_t num_bs)
 	}
 }
 
-/* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments */
-static void append_win_escaped_arg(smart_str *str, zend_string *arg)
+const char *special_chars = "()!^\"<>&|%";
+
+static bool is_special_character_present(const zend_string *arg)
+{
+	for (size_t i = 0; i < ZSTR_LEN(arg); ++i) {
+		if (strchr(special_chars, ZSTR_VAL(arg)[i]) != NULL) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments and
+ * https://learn.microsoft.com/en-us/archive/blogs/twistylittlepassagesallalike/everyone-quotes-command-line-arguments-the-wrong-way */
+static void append_win_escaped_arg(smart_str *str, zend_string *arg, bool is_cmd_argument)
 {
 	size_t num_bs = 0;
+	bool has_special_character = false;
 
+	if (is_cmd_argument) {
+		has_special_character = is_special_character_present(arg);
+		if (has_special_character) {
+			/* Escape double quote with ^ if executed by cmd.exe. */
+			smart_str_appendc(str, '^');
+		}
+	}
 	smart_str_appendc(str, '"');
 	for (size_t i = 0; i < ZSTR_LEN(arg); ++i) {
 		char c = ZSTR_VAL(arg)[i];
@@ -554,18 +574,62 @@ static void append_win_escaped_arg(smart_str *str, zend_string *arg)
 			num_bs = num_bs * 2 + 1;
 		}
 		append_backslashes(str, num_bs);
+		if (has_special_character && strchr(special_chars, c) != NULL) {
+			/* Escape special chars with ^ if executed by cmd.exe. */
+			smart_str_appendc(str, '^');
+		}
 		smart_str_appendc(str, c);
 		num_bs = 0;
 	}
 	append_backslashes(str, num_bs * 2);
+	if (has_special_character) {
+		/* Escape double quote with ^ if executed by cmd.exe. */
+		smart_str_appendc(str, '^');
+	}
 	smart_str_appendc(str, '"');
+}
+
+static bool is_executed_by_cmd(const char *prog_name, size_t prog_name_length)
+{
+    size_t out_len;
+    WCHAR long_name[MAX_PATH];
+    WCHAR full_name[MAX_PATH];
+    LPWSTR file_part = NULL;
+
+    wchar_t *prog_name_wide = php_win32_cp_conv_any_to_w(prog_name, prog_name_length, &out_len);
+
+    if (GetLongPathNameW(prog_name_wide, long_name, MAX_PATH) == 0) {
+        /* This can fail for example with ERROR_FILE_NOT_FOUND (short path resolution only works for existing files)
+         * in which case we'll pass the path verbatim to the FullPath transformation. */
+        lstrcpynW(long_name, prog_name_wide, MAX_PATH);
+    }
+
+    free(prog_name_wide);
+    prog_name_wide = NULL;
+
+    if (GetFullPathNameW(long_name, MAX_PATH, full_name, &file_part) == 0 || file_part == NULL) {
+        return false;
+    }
+
+    bool uses_cmd = false;
+    if (_wcsicmp(file_part, L"cmd.exe") == 0 || _wcsicmp(file_part, L"cmd") == 0) {
+        uses_cmd = true;
+    } else {
+        const WCHAR *extension_dot = wcsrchr(file_part, L'.');
+        if (extension_dot && (_wcsicmp(extension_dot, L".bat") == 0 || _wcsicmp(extension_dot, L".cmd") == 0)) {
+            uses_cmd = true;
+        }
+    }
+
+    return uses_cmd;
 }
 
 static zend_string *create_win_command_from_args(HashTable *args)
 {
 	smart_str str = {0};
 	zval *arg_zv;
-	bool is_prog_name = 1;
+	bool is_prog_name = true;
+	bool is_cmd_execution = false;
 	int elem_num = 0;
 
 	ZEND_HASH_FOREACH_VAL(args, arg_zv) {
@@ -575,11 +639,13 @@ static zend_string *create_win_command_from_args(HashTable *args)
 			return NULL;
 		}
 
-		if (!is_prog_name) {
+		if (is_prog_name) {
+			is_cmd_execution = is_executed_by_cmd(ZSTR_VAL(arg_str), ZSTR_LEN(arg_str));
+		} else {
 			smart_str_appendc(&str, ' ');
 		}
 
-		append_win_escaped_arg(&str, arg_str);
+		append_win_escaped_arg(&str, arg_str, !is_prog_name && is_cmd_execution);
 
 		is_prog_name = 0;
 		zend_string_release(arg_str);
@@ -690,7 +756,7 @@ static zend_string* get_command_from_array(HashTable *array, char ***argv, int n
 static descriptorspec_item* alloc_descriptor_array(HashTable *descriptorspec)
 {
 	uint32_t ndescriptors = zend_hash_num_elements(descriptorspec);
-	return ecalloc(sizeof(descriptorspec_item), ndescriptors);
+	return ecalloc(ndescriptors, sizeof(descriptorspec_item));
 }
 
 static zend_string* get_string_parameter(zval *array, int index, char *param_name)
@@ -1251,7 +1317,9 @@ PHP_FUNCTION(proc_open)
 	if (newprocok == FALSE) {
 		DWORD dw = GetLastError();
 		close_all_descriptors(descriptors, ndesc);
-		php_error_docref(NULL, E_WARNING, "CreateProcess failed, error code: %u", dw);
+		char *msg = php_win32_error_to_msg(dw);
+		php_error_docref(NULL, E_WARNING, "CreateProcess failed: %s", msg);
+		php_win32_error_msg_free(msg);
 		goto exit_fail;
 	}
 
@@ -1289,7 +1357,7 @@ PHP_FUNCTION(proc_open)
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
 		goto exit_fail;
 	}
-#elif HAVE_FORK
+#elif defined(HAVE_FORK)
 	/* the Unix way */
 	child = fork();
 
@@ -1351,7 +1419,7 @@ PHP_FUNCTION(proc_open)
 	proc->childHandle = childHandle;
 #endif
 	proc->env = env;
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 	proc->has_cached_exit_wait_status = false;
 #endif
 

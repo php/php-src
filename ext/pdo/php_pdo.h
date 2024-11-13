@@ -55,10 +55,23 @@ PHP_MINFO_FUNCTION(pdo);
 
 #define LONG_CONST(c) (zend_long) c
 
+#define PDO_CONSTRUCT_CHECK_COND dbh->driver
+#define PDO_CONSTRUCT_CHECK_FAIL() \
+		{ \
+			zend_throw_error(NULL, "%s object is uninitialized", ZSTR_VAL(Z_OBJ(EX(This))->ce->name)); \
+		} \
+
 #define PDO_CONSTRUCT_CHECK \
-	if (!dbh->driver) { \
-		zend_throw_error(NULL, "%s object is uninitialized", ZSTR_VAL(Z_OBJ(EX(This))->ce->name)); \
+	if (!(PDO_CONSTRUCT_CHECK_COND)) { \
+		PDO_CONSTRUCT_CHECK_FAIL(); \
 		RETURN_THROWS(); \
+	} \
+
+
+#define PDO_CONSTRUCT_CHECK_WITH_CLEANUP(cleanup) \
+	if (!(PDO_CONSTRUCT_CHECK_COND)) { \
+		PDO_CONSTRUCT_CHECK_FAIL(); \
+		goto cleanup; \
 	} \
 
 

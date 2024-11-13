@@ -165,7 +165,7 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 	char max_workers[10 + 1]; /* 4294967295 */
 	int len;
 
-	len = sprintf(max_workers, "%u", (unsigned int) wp->config->pm_max_children);
+	len = snprintf(max_workers, sizeof(max_workers), "%u", (unsigned int) wp->config->pm_max_children);
 
 	fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, max_workers, len);
 	fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  max_workers, len);

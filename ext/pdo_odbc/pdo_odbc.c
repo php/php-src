@@ -15,14 +15,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 #include "pdo_odbc_arginfo.h"
@@ -107,7 +107,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_ODBC", SQL_CUR_USE_ODBC);
 
-	pdo_odbc_ce = register_class_PdoOdbc(pdo_dbh_ce);
+	pdo_odbc_ce = register_class_Pdo_Odbc(pdo_dbh_ce);
 	pdo_odbc_ce->create_object = pdo_dbh_new;
 
 	return php_pdo_register_driver_specific_ce(&pdo_odbc_driver, pdo_odbc_ce);
