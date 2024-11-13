@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed GH-16711: Segfault in mhash(). (Girgias)
 
+- PCNTL:
+  . Fixed bug GH-16769: (pcntl_sigwaitinfo aborts on signal value
+    as reference). (David Carlier)
+
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
