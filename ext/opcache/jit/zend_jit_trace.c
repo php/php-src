@@ -4652,7 +4652,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							op1_addr = 0;
 							on_this = 1;
 						} else {
@@ -4743,7 +4743,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							op1_addr = 0;
 							on_this = 1;
 						} else {
@@ -4823,7 +4823,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							op1_addr = 0;
 							on_this = 1;
 						} else {
@@ -5843,7 +5843,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							op1_addr = 0;
 							on_this = 1;
 						} else {
@@ -6122,7 +6122,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							op1_addr = 0;
 							on_this = 1;
 						} else {
