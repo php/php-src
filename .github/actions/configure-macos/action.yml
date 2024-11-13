@@ -25,7 +25,6 @@ runs:
         pkg-config --modversion libcurl
         pkg-config --libs libcurl
         pkg-config --cflags libcurl
-        exit 1
         ./buildconf --force
         ./configure \
           --enable-option-checking=fatal \
