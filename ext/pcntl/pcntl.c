@@ -874,6 +874,7 @@ static bool php_pcntl_set_user_signal_infos(
 	zval *user_signal_no;
 	ZEND_HASH_FOREACH_VAL(user_signals, user_signal_no) {
 		bool failed = true;
+		ZVAL_DEREF(user_signal_no);
 		zend_long tmp = zval_try_get_long(user_signal_no, &failed);
 
 		if (failed) {
