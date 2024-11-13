@@ -19,6 +19,12 @@ runs:
         export PKG_CONFIG_PATH="$BREW_OPT/libxslt/lib/pkgconfig:$PKG_CONFIG_PATH"
         export PKG_CONFIG_PATH="$BREW_OPT/zlib/lib/pkgconfig:$PKG_CONFIG_PATH"
         export PKG_CONFIG_PATH="$BREW_OPT/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH"
+        cat "$BREW_OPT/curl/lib/pkgconfig/libcurl.pc";
+        pkg-config --version
+        pkg-config --modversion libcurl
+        pkg-config --libs libcurl
+        pkg-config --cflags libcurl
+        exit 1
         ./buildconf --force
         ./configure \
           --enable-option-checking=fatal \
