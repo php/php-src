@@ -3629,7 +3629,7 @@ function ADD_MAKEFILE_FRAGMENT(src_file)
 function SETUP_ZLIB_LIB(target, path_to_check)
 {
 	return ((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check))) ||
-		(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", target, path_to_check)) ||
+		(PHP_ZLIB_SHARED && CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check)) ||
 		(PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED));
 }
 
