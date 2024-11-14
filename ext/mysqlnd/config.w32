@@ -30,8 +30,7 @@ if (PHP_MYSQLND != "no") {
 		EXTENSION("mysqlnd", mysqlnd_source, false, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		if (SETUP_ZLIB_LIB("mysqlnd", PHP_MYSQLND) &&
 			CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
-			)
-		{
+		) {
 			AC_DEFINE("MYSQLND_COMPRESSION_ENABLED", 1, "Define to 1 if mysqlnd has compressed protocol support.");
 			AC_DEFINE("MYSQLND_SSL_SUPPORTED", 1, "Define to 1 if mysqlnd core SSL is enabled.");
 			if (CHECK_LIB("crypt32.lib", "mysqlnd")) {
