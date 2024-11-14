@@ -1358,24 +1358,6 @@ PHP_FUNCTION(imagetypes)
 }
 /* }}} */
 
-/* {{{ _php_ctx_getmbi */
-
-static int _php_ctx_getmbi(gdIOCtx *ctx)
-{
-	int i, mbi = 0;
-
-	do {
-		i = (ctx->getC)(ctx);
-		if (i < 0 || mbi > (INT_MAX >> 7)) {
-			return -1;
-		}
-		mbi = (mbi << 7) | (i & 0x7f);
-	} while (i & 0x80);
-
-	return mbi;
-}
-/* }}} */
-
 /* {{{ _php_image_type
  * Based on ext/standard/image.c
  */
@@ -1413,15 +1395,8 @@ static int _php_image_type(zend_string *data)
 		}
 	}
 
-	gdIOCtx *io_ctx;
-	io_ctx = gdNewDynamicCtxEx(8, ZSTR_VAL(data), 0);
-	if (io_ctx) {
-		if (_php_ctx_getmbi(io_ctx) == 0 && _php_ctx_getmbi(io_ctx) >= 0) {
-			io_ctx->gd_free(io_ctx);
-			return PHP_GDIMG_TYPE_WBM;
-		} else {
-			io_ctx->gd_free(io_ctx);
-		}
+	if (ZSTR_VAL(data)[0] == 0) {
+		return PHP_GDIMG_TYPE_WBM;
 	}
 
 	return -1;
