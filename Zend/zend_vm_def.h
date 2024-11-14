@@ -8845,6 +8845,32 @@ ZEND_VM_C_LABEL(type_check_resource):
 	}
 }
 
+ZEND_VM_HOT_HANDLER(211, ZEND_TYPE_ASSERT, CONST, ANY, NUM)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zval *value = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+
+	zend_function *fbc;
+	{
+		zval *fname = (zval*)RT_CONSTANT(opline, opline->op1);
+		ZEND_ASSERT(Z_EXTRA_P(fname) != 0);
+		fbc = Z_FUNC(EG(function_table)->arData[Z_EXTRA_P(fname)].val);
+		ZEND_ASSERT(fbc->type != ZEND_USER_FUNCTION);
+	}
+
+	zend_arg_info *arginfo = &fbc->common.arg_info[opline->extended_value - 1];
+	if (UNEXPECTED(!ZEND_TYPE_CONTAINS_CODE(arginfo->type, Z_TYPE_P(value)))) {
+		const char *param_name = get_function_arg_name(fbc, opline->extended_value);
+		zend_string *expected = zend_type_to_string(arginfo->type);
+		zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), opline->extended_value, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
+		zend_string_release(expected);
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HOT_HANDLER(122, ZEND_DEFINED, CONST, ANY, CACHE_SLOT)
 {
 	USE_OPLINE
