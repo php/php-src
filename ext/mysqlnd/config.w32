@@ -28,9 +28,7 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_wireprotocol.c " +
 			"php_mysqlnd.c ";
 		EXTENSION("mysqlnd", mysqlnd_source, false, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		if ((((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "mysqlnd", PHP_MYSQLND))) ||
-			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "mysqlnd", PHP_MYSQLND)) ||
-			(PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED))) &&
+		if (SETUP_ZLIB_LIB("mysqlnd", PHP_MYSQLND) &&
 			CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
 			)
 		{
