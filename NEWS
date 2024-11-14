@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fail early in *nix configuration build script. (hakre)
+  . Fixed bug GH-16725 (Incorrect access check for non-hooked props in hooked
+    object iterator). (ilutov)
 
 - Curl:
   . Fixed bug GH-16723 (CURLMOPT_PUSHFUNCTION issues). (cmb)
