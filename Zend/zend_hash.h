@@ -30,12 +30,13 @@
 #define HASH_KEY_IS_LONG 2
 #define HASH_KEY_NON_EXISTENT 3
 
-#define HASH_UPDATE 			(1<<0)
-#define HASH_ADD				(1<<1)
-#define HASH_UPDATE_INDIRECT	(1<<2)
-#define HASH_ADD_NEW			(1<<3)
-#define HASH_ADD_NEXT			(1<<4)
-#define HASH_LOOKUP				(1<<5)
+#define HASH_UPDATE 			(1<<0) /* Create new entry, or update the existing one. */
+#define HASH_ADD				(1<<1) /* Create new entry, or fail if it exists. */
+#define HASH_UPDATE_INDIRECT	(1<<2) /* If the given ht entry is an indirect zval, unwrap it before writing to it. \
+										* When used with HASH_ADD, writing is allowed if the target zval is IS_UNDEF. */
+#define HASH_ADD_NEW			(1<<3) /* Used when the offset is known not to exist. */
+#define HASH_ADD_NEXT			(1<<4) /* Append to an array. (e.g. $array[] = 42;) */
+#define HASH_LOOKUP				(1<<5) /* Look up an existing entry, or create one with a NULL value. */
 
 #define HASH_FLAG_CONSISTENCY      ((1<<0) | (1<<1))
 #define HASH_FLAG_PACKED           (1<<2)
