@@ -1976,7 +1976,10 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
 #if LIBCURL_VERSION_NUM >= 0x075500 /* Available since 7.85.0 */
 			if ((option == CURLOPT_PROTOCOLS_STR || option == CURLOPT_REDIR_PROTOCOLS_STR) &&
-				(PG(open_basedir) && *PG(open_basedir)) && php_memnistr(ZSTR_VAL(str), "file", sizeof("file") - 1, ZSTR_VAL(str) + ZSTR_LEN(str)) != NULL) {
+				(PG(open_basedir) && *PG(open_basedir))
+					&& (php_memnistr(ZSTR_VAL(str), "file", sizeof("file") - 1, ZSTR_VAL(str) + ZSTR_LEN(str)) != NULL
+					 || php_memnistr(ZSTR_VAL(str), "all", sizeof("all") - 1, ZSTR_VAL(str) + ZSTR_LEN(str)) != NULL)) {
+					zend_tmp_string_release(tmp_str);
 					php_error_docref(NULL, E_WARNING, "The FILE protocol cannot be activated when an open_basedir is set");
 					return FAILURE;
 			}
