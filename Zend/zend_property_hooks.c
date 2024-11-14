@@ -89,7 +89,8 @@ static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access,
 				if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
 					HT_FLAGS(properties) |= HASH_FLAG_HAS_EMPTY_IND;
 				}
-				zend_hash_update_ind(properties, property_name, OBJ_PROP(zobj, prop_info->offset));
+				zval *tmp = zend_hash_lookup(properties, property_name);
+				ZVAL_INDIRECT(tmp, OBJ_PROP(zobj, prop_info->offset));
 			}
 skip_property:
 			if (property_name != prop_info->name) {
