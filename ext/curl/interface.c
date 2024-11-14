@@ -722,13 +722,13 @@ static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_local_ip, int conn_primary_port, int conn_local_port)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = CURL_PREREQFUNC_OK;
+	int rval = CURL_PREREQFUNC_ABORT;
 
-	// when CURLOPT_PREREQFUNCTION is set to null, curl_prereqfunction still
+	// When CURLOPT_PREREQFUNCTION is set to null, curl_prereqfunction still
 	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
 	// zend_call_known_fcc() with an uninitialized FCC.
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
-    	return rval;
+    	return CURL_PREREQFUNC_OK;
     }
 
 #if PHP_CURL_DEBUG
