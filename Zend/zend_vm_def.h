@@ -3806,6 +3806,15 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 	SAVE_OPLINE();
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
+		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		 * invoke a user error handler and throw an exception.
+		 * For the CONST and CV case we reuse the same exception block below
+		 * to make sure we don't increase VM size too much. */
+		if (!(OP2_TYPE & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
+			FREE_OP2();
+			HANDLE_EXCEPTION();
+		}
+
 		ZEND_ASSERT(!error);
 		func = fcc.function_handler;
 		object_or_called_scope = fcc.called_scope;
@@ -3827,10 +3836,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 		}
 
 		FREE_OP2();
-		/* Deprecation can be emitted from zend_is_callable_ex(), which can
-		 * invoke a user error handler and throw an exception; so we cannot
-		 * rely on OP2_TYPE. */
-		if (UNEXPECTED(EG(exception))) {
+		if ((OP2_TYPE & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
 			if (call_info & ZEND_CALL_CLOSURE) {
 				zend_object_release(ZEND_CLOSURE_OBJECT(func));
 			} else if (call_info & ZEND_CALL_RELEASE_THIS) {
