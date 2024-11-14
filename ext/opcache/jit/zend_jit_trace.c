@@ -5527,6 +5527,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							res_type = Z_TYPE_P(RT_CONSTANT(opline, opline->op1));
 						} else if (op1_type != IS_UNKNOWN) {
 							res_type = op1_type;
+							if (res_type == IS_UNDEF) {
+								res_type = IS_NULL;
+							}
 						}
 						if (op_array->type == ZEND_EVAL_CODE
 						 // TODO: support for top-level code
