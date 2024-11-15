@@ -1,5 +1,5 @@
 --TEST--
-GH-16799 (Assertion failure at Zend/zend_vm_execute.h:7469)
+GH-16799 (Assertion failure at Zend/zend_vm_execute.h)
 --FILE--
 <?php
 set_error_handler(function($_, $m) { throw new Exception($m); });
