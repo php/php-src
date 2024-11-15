@@ -446,7 +446,6 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 					 * as a result of that.
 					 */
 					if (!try_convert_to_string(elem)) {
-						EG(exception) = NULL;
 						continue;
 					}
 
