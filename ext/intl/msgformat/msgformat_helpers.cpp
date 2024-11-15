@@ -439,31 +439,31 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 			switch (argType) {
 			case Formattable::kString:
 				{
-					zend_string *str, *tmp_str;
-
 	string_arg:
 					/* This implicitly converts objects
 					 * Note that our vectors will leak if object conversion fails
 					 * and PHP ends up with a fatal error and calls longjmp
 					 * as a result of that.
 					 */
-					str = zval_get_tmp_string(elem, &tmp_str);
+					if (!try_convert_to_string(elem)) {
+						EG(exception) = NULL;
+						continue;
+					}
 
 					UnicodeString *text = new UnicodeString();
 					intl_stringFromChar(*text,
-						ZSTR_VAL(str), ZSTR_LEN(str), &err.code);
+						Z_STRVAL_P(elem), Z_STRLEN_P(elem), &err.code);
 
 					if (U_FAILURE(err.code)) {
 						char *message;
 						spprintf(&message, 0, "Invalid UTF-8 data in string argument: "
-							"'%s'", ZSTR_VAL(str));
+							"'%s'", Z_STRVAL_P(elem));
 						intl_errors_set(&err, err.code, message, 1);
 						efree(message);
 						delete text;
 						continue;
 					}
 					formattable.adoptString(text);
-					zend_tmp_string_release(tmp_str);
 					break;
 				}
 			case Formattable::kDouble:
