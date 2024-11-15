@@ -299,6 +299,7 @@ function main(): void
         'opcache.jit_max_root_traces=100000',
         'opcache.jit_max_side_traces=100000',
         'opcache.jit_max_exit_counters=100000',
+        'opcache.jit_prof_threshold=0.000000001',
         'opcache.protect_memory=1',
         'zend.assertions=1',
         'zend.exception_ignore_args=0',
