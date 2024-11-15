@@ -537,9 +537,7 @@ function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): s
 
 function normalizer_is_normalized(string $string, int $form = Normalizer::FORM_C): bool {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 function normalizer_get_raw_decomposition(string $string, int $form = Normalizer::FORM_C): ?string {}
-#endif
 
 /* resourceboundle */
 
@@ -605,11 +603,9 @@ function intltz_get_tz_data_version(): string|false {}
 
 function intltz_get_unknown(): IntlTimeZone {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 function intltz_get_windows_id(string $timezoneId): string|false {}
 
 function intltz_get_id_for_windows_id(string $timezoneId, ?string $region = null): string|false {}
-#endif
 
 function intltz_has_same_rules(IntlTimeZone $timezone, IntlTimeZone $other): bool {}
 

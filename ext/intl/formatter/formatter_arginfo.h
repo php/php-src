@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 79398fd5abd2d1f5176388b67423d937d0e25da4 */
+ * Stub hash: caaa6ff408bfd88ec9bb998ffd753f4de971ccff */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -184,14 +184,12 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_string *const_IGNORE_name = zend_string_init_interned("IGNORE", sizeof("IGNORE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_IGNORE_name, &const_IGNORE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IGNORE_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 53
 
 	zval const_CURRENCY_ACCOUNTING_value;
 	ZVAL_LONG(&const_CURRENCY_ACCOUNTING_value, UNUM_CURRENCY_ACCOUNTING);
 	zend_string *const_CURRENCY_ACCOUNTING_name = zend_string_init_interned("CURRENCY_ACCOUNTING", sizeof("CURRENCY_ACCOUNTING") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_CURRENCY_ACCOUNTING_name, &const_CURRENCY_ACCOUNTING_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CURRENCY_ACCOUNTING_name);
-#endif
 
 	zval const_DEFAULT_STYLE_value;
 	ZVAL_LONG(&const_DEFAULT_STYLE_value, UNUM_DEFAULT);

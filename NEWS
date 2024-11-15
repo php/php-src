@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Added Dom\Element::$outerHTML. (nielsdos)
   . Added Dom\Element::insertAdjacentHTML(). (nielsdos)
 
+- Intl:
+  . Bumped ICU requirement to ICU >= 57.1. (cmb)
+
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
 

@@ -618,7 +618,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_message)
 	RETURN_STR(message);
 }
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 /* {{{ Translate a system timezone (e.g. "America/Los_Angeles" into a
 Windows Timezone (e.g. "Pacific Standard Time")
  */
@@ -692,4 +691,3 @@ U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
 	RETURN_STR(id);
 }
 /* }}} */
-#endif
