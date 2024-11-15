@@ -1024,6 +1024,7 @@ PHP_METHOD(DOMNode, insertBefore)
 	}
 
 	if (child->doc == NULL && parentp->doc != NULL) {
+		xmlSetTreeDoc(child, parentp->doc);
 		dom_set_document_ref_pointers(child, intern->document);
 	}
 
@@ -1188,6 +1189,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	}
 
 	if (newchild->doc == NULL && nodep->doc != NULL) {
+		xmlSetTreeDoc(newchild, nodep->doc);
 		dom_set_document_ref_pointers(newchild, intern->document);
 	}
 
@@ -1291,6 +1293,7 @@ PHP_METHOD(DOMNode, appendChild)
 	}
 
 	if (child->doc == NULL && nodep->doc != NULL) {
+		xmlSetTreeDoc(child, nodep->doc);
 		dom_set_document_ref_pointers(child, intern->document);
 	}
 
