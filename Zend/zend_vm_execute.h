@@ -7423,6 +7423,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 	function_name = RT_CONSTANT(opline, opline->op2);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		ZEND_ASSERT(!error);
+
+		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		 * invoke a user error handler and throw an exception.
+		 * For the CONST and CV case we reuse the same exception block below
+		 * to make sure we don't increase VM size too much. */
+		if (!(IS_CONST & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
+
+			HANDLE_EXCEPTION();
+		}
+
 		func = fcc.function_handler;
 		object_or_called_scope = fcc.called_scope;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
@@ -9987,6 +9997,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 	function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		ZEND_ASSERT(!error);
+
+		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		 * invoke a user error handler and throw an exception.
+		 * For the CONST and CV case we reuse the same exception block below
+		 * to make sure we don't increase VM size too much. */
+		if (!((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			HANDLE_EXCEPTION();
+		}
+
 		func = fcc.function_handler;
 		object_or_called_scope = fcc.called_scope;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
@@ -12469,6 +12489,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 	function_name = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		ZEND_ASSERT(!error);
+
+		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		 * invoke a user error handler and throw an exception.
+		 * For the CONST and CV case we reuse the same exception block below
+		 * to make sure we don't increase VM size too much. */
+		if (!(IS_CV & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
+
+			HANDLE_EXCEPTION();
+		}
+
 		func = fcc.function_handler;
 		object_or_called_scope = fcc.called_scope;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
