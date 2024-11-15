@@ -155,7 +155,7 @@ typedef struct dom_prop_handler {
 	dom_write_t write_func;
 } dom_prop_handler;
 
-int dom_node_is_read_only(const xmlNode *node) {
+bool dom_node_is_read_only(const xmlNode *node) {
 	switch (node->type) {
 		case XML_ENTITY_REF_NODE:
 		case XML_ENTITY_NODE:
@@ -166,14 +166,9 @@ int dom_node_is_read_only(const xmlNode *node) {
 		case XML_ATTRIBUTE_DECL:
 		case XML_ENTITY_DECL:
 		case XML_NAMESPACE_DECL:
-			return SUCCESS;
-			break;
+			return true;
 		default:
-			if (node->doc == NULL) {
-				return SUCCESS;
-			} else {
-				return FAILURE;
-			}
+			return node->doc == NULL;
 	}
 }
 

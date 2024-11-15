@@ -281,7 +281,7 @@ PW32IO int php_win32_ioutil_close(int fd)
 
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
-	size_t path_len;
+	size_t path_len, dir_len = 0;
 	const wchar_t *my_path;
 
 	if (!path) {
@@ -292,7 +292,16 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	path_len = wcslen(path);
-	if (path_len < _MAX_PATH && path_len >= _MAX_PATH - 12) {
+#ifndef ZTS
+	if (!PHP_WIN32_IOUTIL_IS_ABSOLUTEW(path, path_len) && !PHP_WIN32_IOUTIL_IS_JUNCTION_PATHW(path, path_len) && !PHP_WIN32_IOUTIL_IS_UNC_PATHW(path, path_len)) {
+		dir_len = GetCurrentDirectoryW(0, NULL);
+		if (dir_len == 0) {
+			return -1;
+		}
+	}
+#endif
+
+	if (dir_len + path_len < _MAX_PATH && dir_len + path_len >= _MAX_PATH - 12) {
 		/* Special case here. From the doc:
 
 		 "When using an API to create a directory, the specified path cannot be
@@ -315,7 +324,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 		}
 
 		if (!PHP_WIN32_IOUTIL_IS_LONG_PATHW(tmp, path_len)) {
-			wchar_t *_tmp = (wchar_t *) malloc((path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+			wchar_t *_tmp = (wchar_t *) malloc((dir_len + path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
 			wchar_t *src, *dst;
 			if (!_tmp) {
 				SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
@@ -325,6 +334,18 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 			memmove(_tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
 			src = tmp;
 			dst = _tmp + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+#ifndef ZTS
+			if (dir_len > 0) {
+				size_t len = GetCurrentDirectoryW(dir_len, dst);
+				if (len == 0 || len + 1 != dir_len) {
+					free(tmp);
+					free(_tmp);
+					return -1;
+				}
+				dst += len;
+				*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+			}
+#endif
 			while (src < tmp + path_len) {
 				if (*src == PHP_WIN32_IOUTIL_FW_SLASHW) {
 					*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
@@ -333,7 +354,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 					*dst++ = *src++;
 				}
 			}
-			path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+			path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + dir_len;
 			_tmp[path_len] = L'\0';
 			free(tmp);
 			tmp = _tmp;

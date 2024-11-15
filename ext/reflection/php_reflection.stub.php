@@ -374,7 +374,7 @@ class ReflectionClass implements Reflector
 
     public function newLazyProxy(callable $factory, int $options = 0): object {}
 
-    public function resetAsLazyGhost(object $object, callable $factory, int $options = 0): void {}
+    public function resetAsLazyGhost(object $object, callable $initializer, int $options = 0): void {}
 
     public function resetAsLazyProxy(object $object, callable $factory, int $options = 0): void {}
 
@@ -917,6 +917,10 @@ final class ReflectionConstant implements Reflector
     public function isDeprecated(): bool {}
 
     public function getFileName(): string|false {}
+
+    public function getExtension(): ?ReflectionExtension {}
+
+    public function getExtensionName(): string|false {}
 
     public function __toString(): string {}
 }

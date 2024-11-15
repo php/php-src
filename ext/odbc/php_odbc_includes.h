@@ -187,10 +187,10 @@
 #endif
 
 typedef struct odbc_connection {
-    ODBC_SQL_ENV_T henv;
-    ODBC_SQL_CONN_T hdbc;
-    char laststate[6];
-    char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
+	ODBC_SQL_ENV_T henv;
+	ODBC_SQL_CONN_T hdbc;
+	char laststate[6];
+	char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
 	HashTable results;
 } odbc_connection;
 
@@ -239,12 +239,11 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
 	zend_long max_links;
 	zend_long num_persistent;
 	zend_long num_links;
-	int defConn;
-    zend_long defaultlrl;
-    zend_long defaultbinmode;
-    zend_long default_cursortype;
-    char laststate[6];
-    char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
+	zend_long defaultlrl;
+	zend_long defaultbinmode;
+	zend_long default_cursortype;
+	char laststate[6];
+	char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
 	/* Stores ODBC links throughout the duration of a request. The connection member may be either persistent or
 	 * non-persistent. In the former case, it is a pointer to an item in EG(persistent_list). This solution makes it
 	 * possible to properly free links during RSHUTDOWN (or when they are explicitly closed), while persistent

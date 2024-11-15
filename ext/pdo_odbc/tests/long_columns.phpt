@@ -4,10 +4,8 @@ PDO ODBC "long" columns
 pdo_odbc
 --SKIPIF--
 <?php
-// make sure there is an ODBC driver and a DSN, or the test will fail
-include 'ext/pdo/tests/pdo_test.inc';
-$config = PDOTest::get_config('ext/pdo_odbc/tests/common.phpt');
-if (!isset($config['ENV']['PDOTEST_DSN']) || $config['ENV']['PDOTEST_DSN']===false) print 'skip';
+require 'ext/pdo/tests/pdo_test.inc';
+PDOTest::skip();
 ?>
 --FILE--
 <?php

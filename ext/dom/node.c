@@ -837,8 +837,8 @@ static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlN
 
 static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNodePtr child, bool stricterror, bool warn_empty_fragment)
 {
-	if (dom_node_is_read_only(parentp) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+	if (dom_node_is_read_only(parentp) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
 		return false;
 	}
@@ -1279,8 +1279,8 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 		RETURN_FALSE;
 	}
 
-	if (dom_node_is_read_only(nodep) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+	if (dom_node_is_read_only(nodep) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
 		RETURN_FALSE;
 	}

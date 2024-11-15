@@ -342,7 +342,7 @@ static xmlNodePtr dom_xml_fragment_parsing_algorithm(dom_object *obj, const xmlN
 }
 
 /* https://w3c.github.io/DOM-Parsing/#dfn-fragment-parsing-algorithm */
-static xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input)
+xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input)
 {
 	if (context_node->doc->type == XML_DOCUMENT_NODE) {
 		return dom_xml_fragment_parsing_algorithm(obj, context_node, input);

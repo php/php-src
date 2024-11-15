@@ -504,11 +504,12 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 		name = c->name;
 	}
 
-	zend_string *filename = zend_get_executed_filename_ex();
-	if (filename == NULL) {
-		c->filename = NULL;
-	} else {
-		c->filename = zend_string_copy(filename);
+	c->filename = NULL;
+	if (ZEND_CONSTANT_MODULE_NUMBER(c) == PHP_USER_CONSTANT) {
+		zend_string *filename = zend_get_executed_filename_ex();
+		if (filename) {
+			c->filename = zend_string_copy(filename);
+		}
 	}
 
 	/* Check if the user is trying to define any special constant */

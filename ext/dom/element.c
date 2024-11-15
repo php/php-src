@@ -1715,6 +1715,98 @@ PHP_METHOD(Dom_Element, insertAdjacentText)
 }
 /* }}} end DOMElement::insertAdjacentText */
 
+/* https://html.spec.whatwg.org/#dom-element-insertadjacenthtml */
+PHP_METHOD(Dom_Element, insertAdjacentHTML)
+{
+	zval *where_zv;
+	zend_string *string;
+
+	dom_object *this_intern;
+	zval *id;
+	xmlNodePtr thisp;
+
+	bool created_context = false;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_STR(string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
+
+	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
+
+	/* 1. We don't do injection sinks. */
+
+	/* 2. Let context be NULL */
+	xmlNodePtr context = NULL;
+
+	/* 3. Use the first matching item from this list: (...) */
+	switch (ZSTR_LEN(where) + ZSTR_VAL(where)[2]) {
+		case sizeof("BeforeBegin") - 1 + 'f':
+		case sizeof("AfterEnd") - 1 + 't':
+			/* 1. Set context to this's parent. */
+			context = thisp->parent;
+
+			/* 2. If context is null or a Document, throw a "NoModificationAllowedError" DOMException. */
+			if (context == NULL || context->type == XML_DOCUMENT_NODE || context->type == XML_HTML_DOCUMENT_NODE) {
+				php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, true);
+				RETURN_THROWS();
+			}
+			break;
+		case sizeof("AfterBegin") - 1 + 't':
+		case sizeof("BeforeEnd") - 1 + 'f':
+			/* Set context to this. */
+			context = thisp;
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+	/* 4. If context is not an Element or all of the following are true: (...) */
+	if (context->type != XML_ELEMENT_NODE
+		|| (php_dom_ns_is_html_and_document_is_html(context) && xmlStrEqual(context->name, BAD_CAST "html"))) {
+		/* set context to the result of creating an element given this's node document, body, and the HTML namespace. */
+		xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(php_dom_get_ns_mapper(this_intern));
+
+		context = xmlNewDocNode(thisp->doc, html_ns, BAD_CAST "body", NULL);
+		created_context = true;
+		if (UNEXPECTED(context == NULL)) {
+			php_dom_throw_error(INVALID_STATE_ERR, true);
+			goto err;
+		}
+	}
+
+	/* 5. Let fragment be the result of invoking the fragment parsing algorithm steps with context and compliantString. */
+	xmlNodePtr fragment = dom_parse_fragment(this_intern, context, string);
+	if (fragment == NULL) {
+		goto err;
+	}
+
+	php_libxml_invalidate_node_list_cache(this_intern->document);
+
+	/* 6. Use the first matching item from this list: (...) */
+	switch (ZSTR_LEN(where) + ZSTR_VAL(where)[2]) {
+		case sizeof("BeforeBegin") - 1 + 'f':
+			php_dom_pre_insert(this_intern->document, fragment, thisp->parent, thisp);
+			break;
+		case sizeof("AfterEnd") - 1 + 't':
+			php_dom_pre_insert(this_intern->document, fragment, thisp->parent, thisp->next);
+			break;
+		case sizeof("AfterBegin") - 1 + 't':
+			php_dom_pre_insert(this_intern->document, fragment, thisp, thisp->children);
+			break;
+		case sizeof("BeforeEnd") - 1 + 'f':
+			php_dom_node_append(this_intern->document, fragment, thisp);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+err:
+	if (created_context) {
+		xmlFreeNode(context);
+	}
+}
+
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-toggleattribute
 Since:
 */
