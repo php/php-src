@@ -119,6 +119,11 @@
 ;   Development Value: 60 (60 seconds)
 ;   Production Value: 60 (60 seconds)
 
+; mysqlnd.collect_memory_statistics
+;   Default Value: Off
+;   Development Value: On
+;   Production Value: Off
+
 ; output_buffering
 ;   Default Value: Off
 ;   Development Value: 4096
@@ -1193,6 +1198,9 @@ mysqlnd.collect_statistics = On
 
 ; Enable / Disable collection of memory usage statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
+; Default Value: Off
+; Development Value: On
+; Production Value: Off
 mysqlnd.collect_memory_statistics = On
 
 ; Records communication from all extensions using mysqlnd to the specified log
