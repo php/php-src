@@ -317,14 +317,14 @@ disp_locale=fr :  display_name=anglais #États-Unis, attribute=islamcal#
 disp_locale=de :  display_name=Englisch #Vereinigte Staaten, attribute=islamcal#
 -----------------
 locale='zh-CN-a-myExt-x-private'
-disp_locale=en :  display_name=Chinese #China, a=myext, Private-Use=private#
-disp_locale=fr :  display_name=chinois #Chine, a=myext, usage privé=private#
-disp_locale=de :  display_name=Chinesisch #China, a=myext, Privatnutzung=private#
+disp_locale=en :  display_name=Chinese #China(, A_MYEXT_X_PRIVATE)?, a=myext, Private-Use=private#
+disp_locale=fr :  display_name=chinois #Chine(, A_MYEXT_X_PRIVATE)?, a=myext, usage privé=private#
+disp_locale=de :  display_name=Chinesisch #China(, A_MYEXT_X_PRIVATE)?, a=myext, Privatnutzung=private#
 -----------------
 locale='en-a-myExt-b-another'
-disp_locale=en :  display_name=English #a=myext, b=another#
-disp_locale=fr :  display_name=anglais #a=myext, b=another#
-disp_locale=de :  display_name=Englisch #a=myext, b=another#
+disp_locale=en :  display_name=English #(A_MYEXT_B_ANOTHER, )?a=myext, b=another#
+disp_locale=fr :  display_name=anglais #(A_MYEXT_B_ANOTHER, )?a=myext, b=another#
+disp_locale=de :  display_name=Englisch #(A_MYEXT_B_ANOTHER, )?a=myext, b=another#
 -----------------
 locale='de-419-DE'
 disp_locale=en :  display_name=German #Latin America, DE#
@@ -337,7 +337,7 @@ disp_locale=fr :  display_name=a #Allemagne#
 disp_locale=de :  display_name=a #Deutschland#
 -----------------
 locale='ar-a-aaa-b-bbb-a-ccc'
-disp_locale=en :  display_name=Arabic #a=aaa, b=bbb#
-disp_locale=fr :  display_name=arabe #a=aaa, b=bbb#
-disp_locale=de :  display_name=Arabisch #a=aaa, b=bbb#
+disp_locale=en :  display_name=Arabic #(A_AAA_B_BBB_A_CCC, )?a=aaa, b=bbb#
+disp_locale=fr :  display_name=arabe #(A_AAA_B_BBB_A_CCC, )?a=aaa, b=bbb#
+disp_locale=de :  display_name=Arabisch #(A_AAA_B_BBB_A_CCC, )?a=aaa, b=bbb#
 -----------------
