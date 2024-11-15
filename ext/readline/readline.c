@@ -200,7 +200,7 @@ PHP_FUNCTION(readline_info)
 					if (rl_line_buffer) {
 						free(rl_line_buffer);
 					}
-					rl_line_buffer = tmp;
+					oldstr = rl_line_buffer = tmp;
 				}
 #endif
 #if !defined(PHP_WIN32)
