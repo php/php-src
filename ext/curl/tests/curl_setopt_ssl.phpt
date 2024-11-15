@@ -9,6 +9,7 @@ exec('openssl version', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
 if (PHP_OS_FAMILY === 'Windows') die('skip not for Windows');
 if (PHP_OS_FAMILY === 'Darwin') die('skip Fails intermittently on macOS');
+if (PHP_OS === 'FreeBSD') die('skip proc_open seems to be stuck on FreeBSD');
 $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x074700) {
     die("skip: blob options not supported for curl < 7.71.0");
