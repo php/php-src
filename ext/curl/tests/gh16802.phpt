@@ -4,7 +4,6 @@ GH-16802 (open_basedir bypass using curl extension)
 curl
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY === "Windows") die("skip not for Windows");
 $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x075500) {
     die("skip: blob options not supported for curl < 7.85.0");
