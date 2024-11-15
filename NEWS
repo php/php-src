@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
 
+- MySQLnd:
+  . Added mysqlnd.collect_memory_statistics to ini quick reference.
+    (hauk92)
+
 - OPcache:
   . Fixed ZTS OPcache build on Cygwin. (cmb)
   . Added opcache.file_cache_read_only. (Samuel Melrose)
