@@ -5,9 +5,6 @@ readline
 --SKIPIF--
 <?php
 if (READLINE_LIB != "libedit") die("skip libedit only");
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-    die('skip not for windows');
-}
 if (getenv('SKIP_REPEAT')) die("skip readline has global state");
 ?>
 --FILE--
