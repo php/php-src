@@ -24,6 +24,9 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
 
+- Readline:
+  . Fixed UAF with readline_info(). (David Carlier)
+
 - Reflection:
   . Fixed the name of the second parameter of
     ReflectionClass::resetAsLazyGhost(). (Arnaud)
