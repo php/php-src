@@ -181,7 +181,7 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
 		if (zend_string_equals_literal_ci(what,"line_buffer")) {
-			oldstr = rl_line_buffer;
+			oldstr = strdup(rl_line_buffer ? rl_line_buffer : "");
 			if (value) {
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
@@ -191,7 +191,8 @@ PHP_FUNCTION(readline_info)
 					rl_line_buffer = malloc(Z_STRLEN_P(value) + 1);
 				} else if (strlen(oldstr) < Z_STRLEN_P(value)) {
 					rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
-					oldstr = rl_line_buffer;
+					free(oldstr);
+					oldstr = strdup(rl_line_buffer ? rl_line_buffer : "");
 				}
 				memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
 #else
@@ -200,7 +201,7 @@ PHP_FUNCTION(readline_info)
 					if (rl_line_buffer) {
 						free(rl_line_buffer);
 					}
-					oldstr = rl_line_buffer = tmp;
+					rl_line_buffer = tmp;
 				}
 #endif
 #if !defined(PHP_WIN32)
@@ -208,6 +209,7 @@ PHP_FUNCTION(readline_info)
 #endif
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
+			free(oldstr);
 		} else if (zend_string_equals_literal_ci(what, "point")) {
 			RETVAL_LONG(rl_point);
 #ifndef PHP_WIN32

@@ -16,4 +16,4 @@ readline_write_history(NULL);
 var_dump(readline_info('line_buffer', 'test'));
 ?>
 --EXPECT--
-string(4) "test"
+string(0) ""
