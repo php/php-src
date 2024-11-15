@@ -170,3 +170,11 @@ jobs:
         run: .github/scripts/windows/build.bat
       - name: Test
         run: .github/scripts/windows/test.bat
+  FREEBSD:
+    name: FREEBSD
+    runs-on: ubuntu-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: FreeBSD
+        uses: ./.github/actions/freebsd
