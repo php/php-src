@@ -2539,7 +2539,11 @@ static zval *php_sxe_iterator_current_data(zend_object_iterator *iter) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
-	return &iterator->sxe->iter.data;
+	zval *data = &iterator->sxe->iter.data;
+	if (Z_ISUNDEF_P(data)) {
+		return NULL;
+	}
+	return data;
 }
 /* }}} */
 
