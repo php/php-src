@@ -4,7 +4,6 @@ GH-16812 readline_info(): UAF
 readline
 --SKIPIF--
 <?php
-if (READLINE_LIB != "libedit") die("skip libedit only");
 if (getenv('SKIP_REPEAT')) die("skip readline has global state");
 ?>
 --FILE--
