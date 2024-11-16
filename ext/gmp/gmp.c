@@ -1303,7 +1303,7 @@ ZEND_FUNCTION(gmp_perfect_square)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL((mpz_perfect_square_p(gmpnum_a) != 0));
+	RETURN_BOOL(mpz_perfect_square_p(gmpnum_a) != 0);
 }
 /* }}} */
 
@@ -1316,7 +1316,7 @@ ZEND_FUNCTION(gmp_perfect_power)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL((mpz_perfect_power_p(gmpnum_a) != 0));
+	RETURN_BOOL(mpz_perfect_power_p(gmpnum_a) != 0);
 }
 /* }}} */
 
