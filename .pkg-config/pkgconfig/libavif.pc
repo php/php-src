@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/webp
+
+Name: libavif
+Description: winlibs libavif package
+Url: https://github.com/winlibs/libavif
+Version: 1.1.1
+Libs: -L${libdir} -lavif_a -laom_a
+Cflags: -I${includedir}

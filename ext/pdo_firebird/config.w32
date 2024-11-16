@@ -4,17 +4,13 @@ ARG_WITH("pdo-firebird", "Firebird support for PDO", "no");
 
 if (PHP_PDO_FIREBIRD != "no") {
 
-	if (CHECK_LIB("fbclient_ms.lib", "pdo_firebird", PHP_PHP_BUILD + "\\interbase\\lib_ms;" + PHP_PDO_FIREBIRD)
-		&& CHECK_HEADER_ADD_INCLUDE("ibase.h", "CFLAGS_PDO_FIREBIRD",
-			PHP_PHP_BUILD + "\\include\\interbase;" + PHP_PHP_BUILD + "\\interbase\\include;" + PHP_PDO_FIREBIRD)
-		&& CHECK_HEADER_ADD_INCLUDE("firebird\\Interface.h", "CFLAGS_PDO_FIREBIRD",
-			PHP_PHP_BUILD + "\\include\\interbase;" + PHP_PHP_BUILD + "\\interbase\\include;" + PHP_PDO_FIREBIRD)
-	) {
-
+	if (PKG_CHECK_MODULES("FBCLIENT", "fbclient >= 3.0")) {
+		PHP_EVAL_INCLINE(FBCLIENT_CFLAGS, "pdo_firebird");
+		PHP_EVAL_LIBLINE(FBCLIENT_LIBS, "pdo_firebird");
 		EXTENSION("pdo_firebird", "pdo_firebird.c firebird_driver.c firebird_statement.c pdo_firebird_utils.cpp");
 		ADD_FLAG("CFLAGS_PDO_FIREBIRD", "/EHsc");
 	} else {
-		WARNING("pdo_firebird not enabled; libraries and headers not found");
+		WARNING("pdo_firebird not enabled; fbclient package not found");
 	}
 	ADD_EXTENSION_DEP('pdo_firebird', 'pdo');
 }

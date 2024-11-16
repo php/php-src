@@ -3,12 +3,13 @@
 ARG_WITH("gmp", "Include GNU MP support.", "no");
 
 if (PHP_GMP != "no") {
-	if (CHECK_LIB("mpir_a.lib", "gmp", PHP_GMP) &&
-		CHECK_HEADER_ADD_INCLUDE("gmp.h", "CFLAGS_GMP", PHP_GMP +  ";" + PHP_PHP_BUILD + "\\include\\mpir")) {
+	if (PKG_CHECK_MODULES("MPIR", "mpir")) {
+		PHP_EVAL_INCLINE(MPIR_CFLAGS, "gmp");
+		PHP_EVAL_LIBLINE(MPIR_LIBS, "gmp");
 		EXTENSION("gmp", "gmp.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		PHP_INSTALL_HEADERS("ext/gmp", "php_gmp_int.h");
 		AC_DEFINE('HAVE_GMP', 1, "Define to 1 if the PHP extension 'gmp' is available.");
 	} else {
-		WARNING("GMP not enabled; libraries and headers not found");
+		WARNING("GMP not enabled; mpir package not found");
 	}
 }

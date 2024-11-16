@@ -1,0 +1,11 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/openldap
+
+Name: openldap
+Description: winlib openldap package
+URL: https://github.com/winlibs/openldap
+Version: 2.4.47
+Requires: cyrus-sasl openssl
+Libs: -L${libdir} -lolber32_a -loldap32_a
+Cflags: -I${includedir}

@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/qdbm
+
+Name: libqdbm
+Description: winlibs libqdbm package
+Url: https://github.com/winlibs/qdbm
+Version: 1.18.78
+Libs: -L${libdir} -lqdbm_a
+Cflags: -I${includedir}

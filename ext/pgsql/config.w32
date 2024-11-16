@@ -3,13 +3,14 @@
 ARG_WITH("pgsql", "PostgreSQL support", "no");
 
 if (PHP_PGSQL != "no") {
-	if (CHECK_LIB("libpq.lib", "pgsql", PHP_PGSQL) &&
-		CHECK_HEADER_ADD_INCLUDE("libpq-fe.h", "CFLAGS_PGSQL", PHP_PGSQL + "\\include;" + PHP_PHP_BUILD + "\\include\\pgsql;" + PHP_PHP_BUILD + "\\include\\libpq;" + PHP_PGSQL)) {
+	if (PKG_CHECK_MODULES("LIBPQ", "libpq")) {
+		PHP_EVAL_INCLINE(LIBPQ_CFLAGS, "pgsql");
+		PHP_EVAL_LIBLINE(LIBPQ_LIBS, "pgsql");
 		EXTENSION("pgsql", "pgsql.c", PHP_PGSQL_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE('HAVE_PGSQL', 1, "Define to 1 if the PHP extension 'pgsql' is available.");
 		ADD_FLAG("CFLAGS_PGSQL", "/D PGSQL_EXPORTS");
 		ADD_EXTENSION_DEP('pgsql', 'pcre');
 	} else {
-		WARNING("pgsql not enabled; libraries and headers not found");
+		WARNING("pgsql not enabled; libpq package not found");
 	}
 }

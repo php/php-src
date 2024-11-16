@@ -3,9 +3,9 @@
 ARG_WITH("iconv", "iconv support", "yes");
 
 if (PHP_ICONV != "no") {
-	if ((CHECK_LIB("libiconv_a.lib", "iconv", PHP_ICONV) || CHECK_LIB("libiconv.lib", "iconv", PHP_ICONV) ||
-			CHECK_LIB("iconv_a.lib", "iconv", PHP_ICONV) || CHECK_LIB("iconv.lib", "iconv", PHP_ICONV)) &&
-		CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_ICONV", PHP_ICONV)) {
+	if (PKG_CHECK_MODULES("ICONV", "libiconv")) {
+		PHP_EVAL_INCLINE(ICONV_CFLAGS, "iconv");
+		PHP_EVAL_LIBLINE(ICONV_LIBS, "iconv");
 
 		EXTENSION("iconv", "iconv.c", PHP_ICONV_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
@@ -19,7 +19,7 @@ if (PHP_ICONV != "no") {
 		}
 		PHP_INSTALL_HEADERS("ext/iconv", "php_iconv.h");
 	} else {
-		WARNING("iconv support can't be enabled, libraries or headers are missing")
+		WARNING("iconv not enabled, libiconv package not found")
 		PHP_ICONV = "no";
 	}
 }

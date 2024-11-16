@@ -25,12 +25,17 @@ if not exist "%DEPS_DIR%" (
 )
 if %errorlevel% neq 0 exit /b 3
 
+rem temporary work-around for missing pkg-config and .pc files
+copy .pkg-config\pkg-config.exe %PHP_BUILD_CACHE_SDK_DIR%\bin\pkg-config.exe
+copy .pkg-config\pkgconfig\* %DEPS_DIR%\lib\pkgconfig
+
 cmd /c buildconf.bat --force
 if %errorlevel% neq 0 exit /b 3
 
 if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 
+set PKG_CONFIG_PATH=%DEPS_DIR%\lib\pkgconfig
 set CFLAGS=/W1 /WX
 
 cmd /c configure.bat ^
@@ -38,7 +43,6 @@ cmd /c configure.bat ^
 	--disable-debug-pack ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
-	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^
 	--disable-test-ini
 if %errorlevel% neq 0 exit /b 3

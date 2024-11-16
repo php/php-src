@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/mpir
+
+Name: mpir
+Description: winlibs mpir package
+Url: https://github.com/winlibs/mpir
+Version: 3.0.0
+Libs: -L${libdir} -lmpir_a
+Cflags: -I${includedir}

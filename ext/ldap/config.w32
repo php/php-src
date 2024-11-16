@@ -3,13 +3,10 @@
 ARG_WITH("ldap", "LDAP support", "no");
 
 if (PHP_LDAP != "no") {
+	if (PKG_CHECK_MODULES("OPENLDAP", "openldap")) {
+		PHP_EVAL_INCLINE(OPENLDAP_CFLAGS, "ldap");
+		PHP_EVAL_LIBLINE(OPENLDAP_LIBS, "ldap");
 
-	if (CHECK_HEADER_ADD_INCLUDE("ldap.h", "CFLAGS_LDAP", PHP_PHP_BUILD + "\\include\\openldap;" + PHP_PHP_BUILD + "\\openldap\\include;" + PHP_LDAP) &&
-			CHECK_HEADER_ADD_INCLUDE("lber.h", "CFLAGS_LDAP", PHP_PHP_BUILD + "\\include\\openldap;" + PHP_PHP_BUILD + "\\openldap\\include;" + PHP_LDAP) &&
-			SETUP_OPENSSL("ldap", PHP_LDAP) >= 2 &&
-			CHECK_LIB("oldap32_a.lib", "ldap", PHP_LDAP) &&
-			CHECK_LIB("olber32_a.lib", "ldap", PHP_LDAP)&&
-			CHECK_LIB("libsasl.lib", "ldap", PHP_LDAP)) {
 		EXTENSION('ldap', 'ldap.c', null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 		AC_DEFINE('HAVE_LDAP_PARSE_RESULT', 1);

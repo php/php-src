@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/libpq
+
+Name: libpq
+Description: winlibs libpq package
+Url: https://github.com/winlibs/postgresql
+Version: 16.4
+Libs: -L${libdir} -llibpq
+Cflags: -I${includedir}

@@ -1,0 +1,10 @@
+prefix=C:/usr
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: ICU
+Description: winlibs ICU package
+Url: https://github.com/winlibs/icu4c
+Version: 75.1
+Libs: -L${libdir} -licuuc -licudt -licuin -licuio
+Cflags: -I${includedir} /std:c++17

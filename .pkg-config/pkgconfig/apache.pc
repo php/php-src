@@ -1,0 +1,9 @@
+prefix=C:/usr
+libdir=${prefix}/lib/apache2_4
+includedir=${prefix}/include/apache2_4
+
+Name: apache
+Description: winlibs apache package
+Version: 2.4.43
+Libs: -L${libdir} -llibhttpd -llibapr-1 -llibaprutil-1
+Cflags: -I${includedir}

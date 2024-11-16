@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: openssl
+Description: winlib openssl package
+URL: https://github.com/winlibs/openssl
+Version: 3.0.15pl1
+Libs: -L${libdir} -lcrypt32 -llibcrypto -llibssl
+Cflags: -I${includedir}

@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/freetype2
+
+Name: freetype
+Description: winlibs freetype package
+Url: https://github.com/winlibs/freetype
+Version: 2.13.3
+Libs: -L${libdir} -lfreetype_a
+Cflags: -I${includedir}

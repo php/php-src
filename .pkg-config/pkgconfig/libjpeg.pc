@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libjpeg
+Description: winlibs libjpeg package
+Url: https://github.com/winlibs/libjpeg
+Version: 3.0.3
+Libs: -L${libdir} -llibjpeg_a
+Cflags: -I${includedir}

@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: oniguruma
+Description: winlib oniguruma package
+URL: https://github.com/winlibs/oniguruma
+Version: 6.9.9
+Libs: -L${libdir} -lonig_a
+Cflags: -I${includedir}

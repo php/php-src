@@ -11,6 +11,6 @@ if (PHP_PDO_SQLITE != "no") {
 		AC_DEFINE("HAVE_SQLITE3_CLOSE_V2", 1, "Define to 1 if SQLite library has the 'sqlite3_close_v2' function.");
 		ADD_MAKEFILE_FRAGMENT();
 	} else {
-		WARNING("pdo_sqlite not enabled; libraries and/or headers not found");
+		WARNING("pdo_sqlite not enabled; sqlite3 package not found");
 	}
 }

@@ -23,25 +23,26 @@ if (PHP_DBA != "no") {
 	}
 
 	if (PHP_QDBM != "no") {
-		if (CHECK_LIB("qdbm_a.lib;qdbm.lib", "dba", PHP_DBA) &&
-			CHECK_HEADER_ADD_INCLUDE("depot.h", "CFLAGS_DBA", PHP_DBA + ";" + PHP_PHP_BUILD + "\\include\\qdbm")) {
+		if (PKG_CHECK_MODULES("QDBM", "libqdbm")) {
+			PHP_EVAL_INCLINE(QDBM_CFLAGS, "dba");
+			PHP_EVAL_LIBLINE(QDBM_LIBS, "dba");
 			ADD_SOURCES("ext/dba", "dba_qdbm.c", "dba");
 			AC_DEFINE("QDBM_INCLUDE_FILE", "<depot.h>", "The QDBM handler header file.", false);
 			AC_DEFINE("DBA_QDBM", 1, "Define to 1 if the dba extension uses the QDBM handler.");
 		} else {
-			WARNING("dba: qdbm handlers not enabled; libraries and headers not found");
+			WARNING("dba: qdbm handlers not enabled; libqdbm package not found");
 		}
 	}
 
 	if (PHP_LMDB != "no") {
-		if (CHECK_LIB("liblmdb_a.lib", "dba", PHP_DBA) &&
-			CHECK_HEADER_ADD_INCLUDE("lmdb.h", "CFLAGS_DBA") &&
-			CHECK_LIB("ntdll.lib", "dba", PHP_DBA)) {
+		if (PKG_CHECK_MODULES("LMDB", "liblmdb")) {
+			PHP_EVAL_INCLINE(LMDB_CFLAGS, "dba");
+			PHP_EVAL_LIBLINE(LMDB_LIBS, "dba");
 			ADD_SOURCES("ext/dba", "dba_lmdb.c", "dba");
 			AC_DEFINE("LMDB_INCLUDE_FILE", "<lmdb.h>", "The LMDB handler header file.", false);
 			AC_DEFINE("DBA_LMDB", 1, "Define to 1 if the dba extension uses the LMDB handler.");
 		} else {
-			WARNING("dba: lmdb handlers not enabled; libraries and headers not found");
+			WARNING("dba: lmdb handlers not enabled; liblmdb package not found");
 		}
 	}
 }
