@@ -504,6 +504,7 @@ jobs:
           php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
 
       - name: Test Psalm
+        if: always()
         run: |
           git clone https://github.com/vimeo/psalm --depth 1
           cd psalm
