@@ -503,17 +503,6 @@ jobs:
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
 
-      - name: Test Psalm
-        if: always()
-        run: |
-          git clone https://github.com/vimeo/psalm --depth 1
-          cd psalm
-          git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php vendor/bin/phpunit || EXIT_CODE=$?
-          if [ ${EXIT_CODE:-0} -gt 128 ]; then
-            exit 1
-          fi
       - name: 'Symfony Preloading'
         if: always()
         run: |

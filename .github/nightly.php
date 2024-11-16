@@ -26,12 +26,52 @@ $parallel = $parallel ?: 8;
 
 $repos = [];
 
+$repos["psalm"] = [
+    "https://github.com/vimeo/psalm",
+    "master",
+    null,
+    function (): iterable {
+        $it = new RecursiveDirectoryIterator("tests");
+        /** @var SplFileInfo $file */
+        foreach(new RecursiveIteratorIterator($it) as $file) {
+            if ($file->getExtension() == 'php' && ctype_upper($file->getBasename()[0])) {
+                yield [
+                    getcwd()."/vendor/bin/phpunit",
+                    $file->getRealPath(),
+                ];
+            }
+        }
+    },
+    2
+];
+
+$repos["phpseclib"] = [
+    "https://github.com/phpseclib/phpseclib",
+    "master",
+    null,
+    function (): iterable {
+        $it = new RecursiveDirectoryIterator("tests");
+        /** @var SplFileInfo $file */
+        foreach(new RecursiveIteratorIterator($it) as $file) {
+            if ($file->getExtension() == 'php' && ctype_upper($file->getBasename()[0])) {
+                yield [
+                    getcwd()."/vendor/bin/phpunit",
+                    '-c',
+                    getcwd()."/tests/phpunit.xml",
+                    $file->getRealPath(),
+                ];
+            }
+        }
+    },
+    2
+];
+
 $repos["phpunit"] = [
     "https://github.com/sebastianbergmann/phpunit.git",
     "main",
     null,
     ["./phpunit"],
-    1
+    2
 ];
 
 $repos["infection"] = [
@@ -39,7 +79,7 @@ $repos["infection"] = [
     "master",
     null,
     ["vendor/bin/phpunit"],
-    1
+    2
 ];
 
 $repos["wordpress"] = [
@@ -53,11 +93,11 @@ $repos["wordpress"] = [
         file_put_contents('wp-tests-config.php', $f);
     },
     ["vendor/bin/phpunit"],
-    1
+    2
 ];
 
 foreach (['amp', 'cache', 'dns', 'file', 'http', 'parallel', 'parser', 'pipeline', 'process', 'serialization', 'socket', 'sync', 'websocket-client', 'websocket-server'] as $repo) {
-    $repos["amphp-$repo"] = ["https://github.com/amphp/$repo.git", "", null, ["vendor/bin/phpunit"], 1];
+    $repos["amphp-$repo"] = ["https://github.com/amphp/$repo.git", "", null, ["vendor/bin/phpunit"], 2];
 }
 
 $repos["laravel"] = [
@@ -69,11 +109,11 @@ $repos["laravel"] = [
         file_put_contents("tests/Filesystem/FilesystemTest.php", $c);
     },
     ["vendor/bin/phpunit", "--exclude-group", "skip"],
-    1
+    2
 ];
 
 foreach (['async', 'cache', 'child-process', 'datagram', 'dns', 'event-loop', 'promise', 'promise-stream', 'promise-timer', 'stream'] as $repo) {
-    $repos["reactphp-$repo"] = ["https://github.com/reactphp/$repo.git", "", null, ["vendor/bin/phpunit"], 1];
+    $repos["reactphp-$repo"] = ["https://github.com/reactphp/$repo.git", "", null, ["vendor/bin/phpunit"], 2];
 }
 
 $repos["revolt"] = ["https://github.com/revoltphp/event-loop.git", "", null, ["vendor/bin/phpunit"], 2];
@@ -109,7 +149,7 @@ $repos["symfony"] = [
             }
         }
     },
-    1
+    2
 ];
 
 $finalStatus = 0;
