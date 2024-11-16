@@ -3,7 +3,7 @@
 ARG_WITH("bz2", "BZip2", "no");
 
 if (PHP_BZ2 != "no") {
-	if (PKG_CHECK_MODULES("BZIP2", "libbzip2 >= 2.0.0")) {
+	if (PKG_CHECK_MODULES("BZIP2", "libbzip2 >= 1.0.0")) {
 		PHP_EVAL_INCLINE(BZIP2_CFLAGS, "bz2");
 		PHP_EVAL_LIBLINE(BZIP2_LIBS, "bz2");
 		EXTENSION("bz2", "bz2.c bz2_filter.c");
