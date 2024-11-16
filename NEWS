@@ -40,6 +40,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16695 (phar:// tar parser and zero-length file header blocks).
     (nielsdos, Hans Krentel)
 
+- SimpleXML:
+  . Fixed bug GH-16808 (Segmentation fault in RecursiveIteratorIterator
+    ->current() with a xml element input). (nielsdos)
+
 - SOAP:
   . Fix make check being invoked in ext/soap. (Ma27)
 
