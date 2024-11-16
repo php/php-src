@@ -906,6 +906,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 	}
 
 	if (child->doc == NULL && parentp->doc != NULL) {
+		xmlSetTreeDoc(child, parentp->doc);
 		dom_set_document_ref_pointers(child, intern->document);
 	}
 
@@ -1212,6 +1213,7 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 	}
 
 	if (newchild->doc == NULL && nodep->doc != NULL) {
+		xmlSetTreeDoc(newchild, nodep->doc);
 		dom_set_document_ref_pointers(newchild, intern->document);
 	}
 
@@ -1320,6 +1322,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 	}
 
 	if (child->doc == NULL && nodep->doc != NULL) {
+		xmlSetTreeDoc(child, nodep->doc);
 		dom_set_document_ref_pointers(child, intern->document);
 	}
 
