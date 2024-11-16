@@ -510,7 +510,7 @@ jobs:
           cd psalm
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php ./phpunit || EXIT_CODE=$?
+          php vendor/bin/phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
