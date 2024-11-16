@@ -24,10 +24,10 @@ foreach ($tzs as $tz => $regions) {
   }
 }
 ?>
---EXPECT--
+--EXPECTF--
 ** Gnomeregan
 bool(false)
-Error: unknown windows timezone: U_ILLEGAL_ARGUMENT_ERROR
+Error: %snknown windows timezone: U_ILLEGAL_ARGUMENT_ERROR
 ** India Standard Time
 string(13) "Asia/Calcutta"
 ** Pacific Standard Time
