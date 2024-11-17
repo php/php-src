@@ -2415,7 +2415,7 @@ PHP_METHOD(DOMNode, getRootNode)
 }
 /* }}} */
 
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-comparedocumentposition (last check date 2023-07-24)
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-comparedocumentposition (last check date 2024-11-17)
 Since:
 */
 
