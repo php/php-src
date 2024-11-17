@@ -271,7 +271,9 @@ static char* php_get_windows_name()
 						major = "Windows 10";
 					}
 				} else {
-					if (osvi.dwBuildNumber >= 20348) {
+					if (osvi.dwBuildNumber >= 26100) {
+						major = "Windows Server 2025";
+					} else if (osvi.dwBuildNumber >= 20348) {
 						major = "Windows Server 2022";
 					} else if (osvi.dwBuildNumber >= 19042) {
 						major = "Windows Server, version 20H2";
