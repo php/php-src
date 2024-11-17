@@ -160,6 +160,10 @@ void SdnToGregorian(
 	/* Calculate the century (year/100). */
 	century = temp / DAYS_PER_400_YEARS;
 
+	if (century > ((INT_MAX / 100) - (temp / DAYS_PER_4_YEARS))) {
+		goto fail;
+	}
+
 	/* Calculate the year and day of year (1 <= dayOfYear <= 366). */
 	temp = ((temp % DAYS_PER_400_YEARS) / 4) * 4 + 3;
 	year = (century * 100) + (temp / DAYS_PER_4_YEARS);
