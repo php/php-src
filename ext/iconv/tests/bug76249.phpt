@@ -7,13 +7,13 @@ iconv
 $fh = fopen('php://memory', 'rw');
 fwrite($fh, "abc");
 rewind($fh);
-if (false === @stream_filter_append($fh, 'convert.iconv.ucs-2/utf8//IGNORE', STREAM_FILTER_READ, [])) {
-    stream_filter_append($fh, 'convert.iconv.ucs-2/utf-8//IGNORE', STREAM_FILTER_READ, []);
+if (false === @stream_filter_append($fh, 'convert.iconv.ucs-2/utf8', STREAM_FILTER_READ, [])) {
+    stream_filter_append($fh, 'convert.iconv.ucs-2/utf-8', STREAM_FILTER_READ, []);
 }
 var_dump(stream_get_contents($fh));
 ?>
 DONE
 --EXPECTF--
-Warning: stream_get_contents(): iconv stream filter ("ucs-2"=>"utf%A8//IGNORE"): invalid multibyte sequence in %sbug76249.php on line %d
+Warning: stream_get_contents(): iconv stream filter ("ucs-2"=>"utf%A8"): invalid multibyte sequence in %sbug76249.php on line %d
 string(0) ""
 DONE
