@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed GH-16711: Segfault in mhash(). (Girgias)
 
+- Opcache:
+  . Fixed GH-16839 (Error on building Opcache JIT for Windows ARM64). (cmb)
+
 - PCNTL:
   . Fixed bug GH-16769: (pcntl_sigwaitinfo aborts on signal value
     as reference). (David Carlier)
