@@ -83,34 +83,6 @@ int main(void) {
   AS_VAR_IF([php_cv_iconv_errno], [yes],,
     [AC_MSG_FAILURE([The iconv check failed, 'errno' is missing.])])
 
-  AC_CACHE_CHECK([if iconv supports //IGNORE], [php_cv_iconv_ignore],
-    [AC_RUN_IFELSE([AC_LANG_SOURCE([
-#include <iconv.h>
-#include <stdlib.h>
-
-int main(void) {
-  iconv_t cd = iconv_open( "UTF-8//IGNORE", "UTF-8" );
-  if(cd == (iconv_t)-1) {
-    return 1;
-  }
-  char *in_p = "\xC3\xC3\xC3\xB8";
-  size_t in_left = 4, out_left = 4096;
-  char *out = malloc(out_left);
-  char *out_p = out;
-  size_t result = iconv(cd, (char **) &in_p, &in_left, (char **) &out_p, &out_left);
-  if(result == (size_t)-1) {
-    return 1;
-  }
-  return 0;
-}
-    ])],
-    [php_cv_iconv_ignore=yes],
-    [php_cv_iconv_ignore=no],
-    [php_cv_iconv_ignore=no])])
-  AS_VAR_IF([php_cv_iconv_ignore], [no],
-    [AC_DEFINE([ICONV_BROKEN_IGNORE], [1],
-      [Define to 1 if iconv has broken IGNORE.])])
-
   LIBS=$save_LIBS
   CFLAGS=$save_CFLAGS
 
