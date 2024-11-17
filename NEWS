@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Calendar:
   . Fixed jdtogregorian overflow. (David Carlier)
+  . Fixed cal_to_jd julian_days argument overflow. (David Carlier)
 
 - Core:
   . Fail early in *nix configuration build script. (hakre)
