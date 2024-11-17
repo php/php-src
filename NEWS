@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 
 - Windows:
   . Fixed bug GH-16849 (Error dialog causes process to hang). (cmb)
+  . Windows Server 2025 is now properly reported. (cmb)
 
 21 Nov 2024, PHP 8.4.1
 
