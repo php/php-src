@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d82582ee301cdb3c1b3a14101e1a189141810262 */
+ * Stub hash: e2c069ed3efafce65c85e844b5be4a94dd4d9744 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWgError___construct, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -70,7 +70,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_UriInterface___toString arginfo_class_Uri_UriInterface_toNormalizedString
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986Uri_create, 0, 1, IS_STATIC, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -127,7 +127,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986Uri___unseriali
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Uri_WhatWgUri_create, 0, 1, MAY_BE_STATIC|MAY_BE_ARRAY)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Uri_WhatWgUri_parse, 0, 1, MAY_BE_STATIC|MAY_BE_ARRAY)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -179,7 +179,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Uri_WhatWgUri___unserialize arginfo_class_Uri_Rfc3986Uri___unserialize
 
 ZEND_METHOD(Uri_WhatWgError, __construct);
-ZEND_METHOD(Uri_Rfc3986Uri, create);
+ZEND_METHOD(Uri_Rfc3986Uri, parse);
 ZEND_METHOD(Uri_Rfc3986Uri, __construct);
 ZEND_METHOD(Uri_Rfc3986Uri, getScheme);
 ZEND_METHOD(Uri_Rfc3986Uri, withScheme);
@@ -203,7 +203,7 @@ ZEND_METHOD(Uri_Rfc3986Uri, toNormalizedString);
 ZEND_METHOD(Uri_Rfc3986Uri, __toString);
 ZEND_METHOD(Uri_Rfc3986Uri, __serialize);
 ZEND_METHOD(Uri_Rfc3986Uri, __unserialize);
-ZEND_METHOD(Uri_WhatWgUri, create);
+ZEND_METHOD(Uri_WhatWgUri, parse);
 ZEND_METHOD(Uri_WhatWgUri, __construct);
 ZEND_METHOD(Uri_WhatWgUri, __unserialize);
 
@@ -237,7 +237,7 @@ static const zend_function_entry class_Uri_UriInterface_methods[] = {
 };
 
 static const zend_function_entry class_Uri_Rfc3986Uri_methods[] = {
-	ZEND_ME(Uri_Rfc3986Uri, create, arginfo_class_Uri_Rfc3986Uri_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Uri_Rfc3986Uri, parse, arginfo_class_Uri_Rfc3986Uri_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_Rfc3986Uri, __construct, arginfo_class_Uri_Rfc3986Uri___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986Uri, getScheme, arginfo_class_Uri_Rfc3986Uri_getScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986Uri, withScheme, arginfo_class_Uri_Rfc3986Uri_withScheme, ZEND_ACC_PUBLIC)
@@ -265,7 +265,7 @@ static const zend_function_entry class_Uri_Rfc3986Uri_methods[] = {
 };
 
 static const zend_function_entry class_Uri_WhatWgUri_methods[] = {
-	ZEND_ME(Uri_WhatWgUri, create, arginfo_class_Uri_WhatWgUri_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Uri_WhatWgUri, parse, arginfo_class_Uri_WhatWgUri_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_WhatWgUri, __construct, arginfo_class_Uri_WhatWgUri___construct, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("getScheme", zim_Uri_Rfc3986Uri_getScheme, arginfo_class_Uri_WhatWgUri_getScheme, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withScheme", zim_Uri_Rfc3986Uri_withScheme, arginfo_class_Uri_WhatWgUri_withScheme, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -349,7 +349,7 @@ static zend_class_entry *register_class_Uri_WhatWgError(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Uri", "WhatWgError", class_Uri_WhatWgError_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
 
 	zval const_ERROR_TYPE_DOMAIN_TO_ASCII_value;
 	ZVAL_LONG(&const_ERROR_TYPE_DOMAIN_TO_ASCII_value, LXB_URL_ERROR_TYPE_DOMAIN_TO_ASCII);

@@ -7,13 +7,13 @@ uri
 
 $t1 = hrtime(true);
 for ($i = 0; $i < 1000; $i++) {
-   Uri\Rfc3986Uri::create("https://example.com");
+   Uri\Rfc3986Uri::parse("https://example.com");
 }
 $t2 = hrtime(true);
 
 $t3 = hrtime(true);
 for ($i = 0; $i < 1000; $i++) {
-    Uri\WhatWgUri::create("https://example.com/");
+    Uri\WhatWgUri::parse("https://example.com/");
 }
 $t4 = hrtime(true);
 
@@ -25,12 +25,12 @@ $t6 = hrtime(true);
 
 echo "RFC 3986 parser: https://example.com\n";
 var_dump(($t2 - $t1) / 1_000_000_000);
-var_dump(Uri\Rfc3986Uri::create("https://example.com"));
+var_dump(Uri\Rfc3986Uri::parse("https://example.com"));
 echo "------------------------\n";
 
 echo "WHATWG parser: https://example.com\n";
 var_dump(($t4 - $t3) / 1_000_000_000);
-var_dump(Uri\WhatWgUri::create("https://example.com"));
+var_dump(Uri\WhatWgUri::parse("https://example.com"));
 echo "------------------------\n";
 
 echo "PHP parser: https://example.com\n";

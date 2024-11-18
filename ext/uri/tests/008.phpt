@@ -17,12 +17,12 @@ function callGetters(Uri\UriInterface $uri)
     var_dump($uri->getFragment());
 }
 
-$uri = Uri\Rfc3986Uri::create("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+$uri = Uri\Rfc3986Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 callGetters($uri);
 
 echo "\n";
 
-$uri = Uri\WhatWgUri::create("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+$uri = Uri\WhatWgUri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 callGetters($uri);
 
 ?>
