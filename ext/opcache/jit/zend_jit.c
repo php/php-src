@@ -103,6 +103,8 @@ typedef struct _zend_jit_stub {
 #define JIT_STUB(name, offset, adjustment) \
 	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub, offset, adjustment}
 
+bool zend_jit_startup_failed = false;
+
 zend_ulong zend_jit_profile_counter = 0;
 int zend_jit_profile_counter_rid = -1;
 
@@ -4796,7 +4798,7 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 		return FAILURE;
 	}
 
-	if (zend_string_equals_literal_ci(jit, "disable")) {
+	if (zend_jit_startup_failed || zend_string_equals_literal_ci(jit, "disable")) {
 		JIT_G(enabled) = 0;
 		JIT_G(on) = 0;
 		return SUCCESS;
