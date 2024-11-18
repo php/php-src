@@ -3628,8 +3628,7 @@ function ADD_MAKEFILE_FRAGMENT(src_file)
 
 function SETUP_ZLIB_LIB(target, path_to_check)
 {
-	return ((PHP_ZLIB == "no" || PHP_ZLIB_SHARED) && CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check)) ||
-		(PHP_ZLIB == "yes" && !PHP_ZLIB_SHARED);
+	return (PHP_ZLIB != "no" && !PHP_ZLIB_SHARED) || CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check);
 }
 
 function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part, add_to_flag_only)
