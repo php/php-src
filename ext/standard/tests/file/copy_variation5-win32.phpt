@@ -22,9 +22,9 @@ fclose($file_handle);
 $dest_files = array(
 
   /* Checking case sensitiveness */
-  "COPY.tmp",
-  "COPY.TMP",
-  "CopY.TMP"
+  "COPY5.tmp",
+  "COPY5.TMP",
+  "CopY5.TMP"
 );
 
 echo "Size of the source file before copy operation => ";
@@ -80,25 +80,25 @@ Size of the source file before copy operation => int(1500)
 -- Iteration 1 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/COPY.tmp
+Destination file name => %s/COPY5.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 2 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/COPY.TMP
+Destination file name => %s/COPY5.TMP
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 3 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/CopY.TMP
+Destination file name => %s/CopY5.TMP
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
-Warning: unlink(%s/COPY.TMP): No such file or directory in %s on line %d
+Warning: unlink(%s/COPY5.TMP): No such file or directory in %s on line %d
 
-Warning: unlink(%s/CopY.TMP): No such file or directory in %s on line %d
+Warning: unlink(%s/CopY5.TMP): No such file or directory in %s on line %d
 *** Done ***
