@@ -4,6 +4,7 @@ on:
 
 jobs:
   triage:
+    if: github.repository == 'php/php-src'
     permissions:
       contents: read
       pull-requests: write
