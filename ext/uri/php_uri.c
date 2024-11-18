@@ -224,7 +224,7 @@ PHPAPI void php_uri_instantiate_uri(
 	ZEND_ASSERT(Z_TYPE(errors) == IS_UNDEF);
 
 	if (!is_constructor) {
-		object_init_ex(return_value, handler->get_uri_ce());
+		object_init_ex(return_value, Z_CE_P(ZEND_THIS));
 	}
 
 	uri_object_t *uri_object = Z_URI_OBJECT_P(is_constructor ? ZEND_THIS : return_value);
@@ -255,7 +255,7 @@ static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_handler, uri_str, base_url_str, is_constructor, false);
 }
 
-PHP_METHOD(Uri_Rfc3986Uri, create)
+PHP_METHOD(Uri_Rfc3986Uri, parse)
 {
 	create_rfc3986_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
@@ -288,7 +288,7 @@ static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_handler, uri_str, base_url_str, is_constructor, true);
 }
 
-PHP_METHOD(Uri_WhatWgUri, create)
+PHP_METHOD(Uri_WhatWgUri, parse)
 {
 	create_whatwg_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
@@ -403,13 +403,57 @@ PHP_METHOD(Uri_Rfc3986Uri, equalsTo)
 		RETURN_FALSE;
 	}
 
-	zend_string *this_str = this_internal_uri->handler->uri_to_string(this_internal_uri->uri, exclude_fragment);
+	void *this_uri, *that_uri;
+
+	if (this_internal_uri->handler->normalize_uri != NULL) {
+		this_uri = this_internal_uri->handler->clone_uri(this_internal_uri->uri);
+		if (UNEXPECTED(this_uri == NULL)) {
+			zend_throw_error(uri_operation_exception_ce, "Failed to normalize %s", ZSTR_VAL(this_object->ce->name));
+			RETURN_THROWS();
+		}
+
+		zend_result result = this_internal_uri->handler->normalize_uri(this_uri);
+		if (UNEXPECTED(result == FAILURE)) {
+			zend_throw_error(uri_operation_exception_ce, "Failed to normalize %s", ZSTR_VAL(this_object->ce->name));
+			this_internal_uri->handler->free_uri(this_uri);
+			RETURN_THROWS();
+		}
+	} else {
+		this_uri = this_internal_uri->uri;
+	}
+
+	if (that_internal_uri->handler->normalize_uri != NULL) {
+		that_uri = that_internal_uri->handler->clone_uri(that_internal_uri->uri);
+		if (UNEXPECTED(that_uri == NULL)) {
+			zend_throw_error(uri_operation_exception_ce, "Failed to normalize %s", ZSTR_VAL(that_object->ce->name));
+			RETURN_THROWS();
+		}
+
+		zend_result result = that_internal_uri->handler->normalize_uri(that_uri);
+		if (UNEXPECTED(result == FAILURE)) {
+			zend_throw_error(uri_operation_exception_ce, "Failed to normalize %s", ZSTR_VAL(that_object->ce->name));
+			that_internal_uri->handler->free_uri(that_uri);
+			RETURN_THROWS();
+		}
+	} else {
+		that_uri = that_internal_uri->uri;
+	}
+
+	zend_string *this_str = this_internal_uri->handler->uri_to_string(this_internal_uri->uri, exclude_fragment); // TODO what happens if the __clone() method is overridden?
 	zend_string *that_str = that_internal_uri->handler->uri_to_string(that_internal_uri->uri, exclude_fragment);
 
 	RETVAL_BOOL(zend_string_equals(this_str, that_str));
 
 	zend_string_release(this_str);
 	zend_string_release(that_str);
+
+	if (this_internal_uri->handler->normalize_uri != NULL) {
+		this_internal_uri->handler->free_uri(this_uri);
+	}
+
+	if (that_internal_uri->handler->normalize_uri != NULL) {
+		that_internal_uri->handler->free_uri(that_uri);
+	}
 }
 
 PHP_METHOD(Uri_Rfc3986Uri, normalize)
@@ -419,6 +463,10 @@ PHP_METHOD(Uri_Rfc3986Uri, normalize)
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+
+	if (internal_uri->handler->normalize_uri == NULL) {
+		RETURN_COPY(ZEND_THIS);
+	}
 
 	zend_object *new_object = uri_clone_obj_handler(this_object);
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -445,6 +493,10 @@ PHP_METHOD(Uri_Rfc3986Uri, toNormalizedString)
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, object);
+
+	if (internal_uri->handler->normalize_uri == NULL) {
+		RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, false));
+	}
 
 	void *new_uri = internal_uri->handler->clone_uri(internal_uri->uri);
 	if (UNEXPECTED(new_uri == NULL)) {
@@ -513,12 +565,13 @@ PHP_METHOD(Uri_Rfc3986Uri, __unserialize)
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 
-	zend_string *str = zend_string_init("https://example.com", sizeof("https://example.com") - 1, false);
+	zend_string *str = zend_string_init("https://example.com", sizeof("https://example.com") - 1, false); // TODO set URI components from ht
 
 	zval errors;
 	ZVAL_UNDEF(&errors);
 
 	internal_uri->handler = uri_handler_by_name(URI_PARSER_RFC3986, sizeof(URI_PARSER_RFC3986) - 1);
+	// TODO free current URI if any
 	internal_uri->uri = internal_uri->handler->parse_uri(str, NULL, &errors);
 	if (internal_uri->uri == NULL) {
 		throw_invalid_uri_exception(&errors);
@@ -543,12 +596,13 @@ PHP_METHOD(Uri_WhatWgUri, __unserialize)
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 
-	zend_string *str = zend_string_init("https://example.com", sizeof("https://example.com") - 1, false);
+	zend_string *str = zend_string_init("https://example.com", sizeof("https://example.com") - 1, false); // TODO set URI components from ht
 
 	zval errors;
 	ZVAL_UNDEF(&errors);
 
 	internal_uri->handler = uri_handler_by_name(URI_PARSER_WHATWG, sizeof(URI_PARSER_WHATWG) - 1);
+	// TODO free current URI if any
 	internal_uri->uri = internal_uri->handler->parse_uri(str, NULL, &errors);
 	if (internal_uri->uri == NULL) {
 		throw_invalid_uri_exception(&errors);
@@ -708,7 +762,7 @@ static zend_object *uri_clone_obj_handler(zend_object *object)
 
 	new_uri_object->internal.handler = internal_uri->handler;
 
-	void *uri = internal_uri->handler->clone_uri(internal_uri->uri);
+	void *uri = internal_uri->handler->clone_uri(internal_uri->uri);  // TODO what happens if the __clone() method is overridden?
 	if (UNEXPECTED(uri == NULL)) {
 		zend_throw_error(uri_operation_exception_ce, "Failed to clone %s", ZSTR_VAL(object->ce->name));
 		return &new_uri_object->std;
@@ -773,9 +827,8 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler)
 	ZEND_ASSERT(uri_handler->name != NULL);
 	ZEND_ASSERT(uri_handler->init_parser != NULL);
 	ZEND_ASSERT(uri_handler->parse_uri != NULL);
-	ZEND_ASSERT(uri_handler->get_uri_ce != NULL);
+	ZEND_ASSERT(uri_handler->get_uri_ce != NULL); // TODO unused handler, maybe remove?
 	ZEND_ASSERT(uri_handler->clone_uri != NULL);
-	ZEND_ASSERT(uri_handler->normalize_uri != NULL);
 	ZEND_ASSERT(uri_handler->uri_to_string != NULL);
 	ZEND_ASSERT(uri_handler->free_uri != NULL);
 	ZEND_ASSERT(uri_handler->destroy_parser != NULL);

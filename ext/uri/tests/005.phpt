@@ -5,9 +5,9 @@ uri
 --FILE--
 <?php
 
-var_dump(Uri\Rfc3986Uri::create("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor"));
+var_dump(Uri\Rfc3986Uri::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor"));
 
-$uri = Uri\WhatWgUri::create("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor");
+$uri = Uri\WhatWgUri::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor");
 var_dump($uri);
 var_dump($uri->__toString());
 

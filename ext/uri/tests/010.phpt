@@ -5,10 +5,10 @@ uri
 --FILE--
 <?php
 
-var_dump(Uri\Rfc3986Uri::create("http://example.com/path/to/file2", "https://test.com"));
-var_dump(Uri\Rfc3986Uri::create("/path/to/file2", "https://test.com"));
-var_dump(Uri\WhatWgUri::create("http://example.com/path/to/file1", "https://test.com"));
-var_dump(Uri\WhatWgUri::create("/path/to/file1", "https://test.com"));
+var_dump(Uri\Rfc3986Uri::parse("http://example.com/path/to/file2", "https://test.com"));
+var_dump(Uri\Rfc3986Uri::parse("/path/to/file2", "https://test.com"));
+var_dump(Uri\WhatWgUri::parse("http://example.com/path/to/file1", "https://test.com"));
+var_dump(Uri\WhatWgUri::parse("/path/to/file1", "https://test.com"));
 
 ?>
 --EXPECTF--
