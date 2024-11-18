@@ -82,7 +82,7 @@ runs:
             --with-config-file-scan-dir=/etc/php.d
           gmake -j2
           mkdir /etc/php.d
-          gmake install
+          gmake install > /dev/null
           echo opcache.enable_cli=1 > /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
           echo opcache.preload_user=root >> /etc/php.d/opcache.ini
@@ -95,7 +95,6 @@ runs:
           sapi/cli/php run-tests.php \
             -P -q -j2 \
             -g FAIL,BORK,LEAK,XLEAK \
-            --no-progress \
             --offline \
             --show-diff \
             --show-slow 1000 \
