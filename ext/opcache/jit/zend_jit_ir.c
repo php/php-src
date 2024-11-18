@@ -1826,6 +1826,9 @@ static void jit_ZVAL_PTR_DTOR(zend_jit_ctx  *jit,
 			ir_END_list(end_inputs);
 			ir_IF_FALSE(if_may_not_leak);
 
+			if (opline) {
+				jit_SET_EX_OPLINE(jit, opline);
+			}
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(gc_possible_root), ref);
 		}
 
@@ -6518,6 +6521,9 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 			if (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
 				ir_ref if_may_leak = jit_if_GC_MAY_NOT_LEAK(jit, ref);
 				ir_IF_FALSE(if_may_leak);
+				if (opline) {
+					jit_SET_EX_OPLINE(jit, opline);
+				}
 				ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(gc_possible_root), ref);
 
 				if (Z_MODE(var_addr) == IS_REG || Z_MODE(res_addr) == IS_REG) {
@@ -6545,6 +6551,9 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 			if (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
 				ir_ref if_may_leak = jit_if_GC_MAY_NOT_LEAK(jit, ref);
 				ir_IF_FALSE(if_may_leak);
+				if (opline) {
+					jit_SET_EX_OPLINE(jit, opline);
+				}
 				ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(gc_possible_root), ref);
 				ir_END_list(simple_inputs);
 				ir_IF_TRUE(if_may_leak);
@@ -11410,6 +11419,9 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 			ir_IF_TRUE(if_may_not_leak);
 			ir_END_list(end_inputs);
 			ir_IF_FALSE(if_may_not_leak);
+			if (opline) {
+				jit_SET_EX_OPLINE(jit, opline);
+			}
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(gc_possible_root), ref2);
 		}
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
