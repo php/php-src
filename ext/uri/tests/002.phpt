@@ -7,13 +7,13 @@ uri
 
 $t1 = hrtime(true);
 for ($i = 0; $i < 1000; $i++) {
-    Uri\Rfc3986Uri::create("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+    Uri\Rfc3986Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 }
 $t2 = hrtime(true);
 
 $t3 = hrtime(true);
 for ($i = 0; $i < 1000; $i++) {
-    Uri\WhatWgUri::create("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+    Uri\WhatWgUri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 }
 $t4 = hrtime(true);
 
@@ -25,12 +25,12 @@ $t6 = hrtime(true);
 
 echo "RFC 3986 parser:\n";
 var_dump(($t2 - $t1) / 1_000_000_000);
-var_dump(Uri\Rfc3986Uri::create("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
+var_dump(Uri\Rfc3986Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
 echo "------------------------\n";
 
 echo "WHATWG parser:\n";
 var_dump(($t4 - $t3) / 1_000_000_000);
-var_dump(Uri\WhatWgUri::create("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
+var_dump(Uri\WhatWgUri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
 echo "------------------------\n";
 
 echo "parse_url:\n";
