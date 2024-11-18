@@ -1,10 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.26
+21 Nov 2024, PHP 8.2.26
 
-- Cli:
+- CLI:
   . Fixed bug GH-16373 (Shebang is not skipped for router script in cli-server
     started through shebang). (ilutov)
+  . Fixed bug GHSA-4w77-75f9-2c8w (Heap-Use-After-Free in sapi_read_post_data
+    Processing in CLI SAPI Interface). (nielsdos)
 
 - COM:
   . Fixed out of bound writes to SafeArray data. (cmb)
@@ -77,9 +79,17 @@ PHP                                                                        NEWS
   . Fixed segfaults and other issues related to operator overloading with
     GMP objects. (Girgias)
 
+- LDAP:
+  . Fixed bug GHSA-g665-fm4p-vhff (OOB access in ldap_escape). (CVE-2024-8932)
+    (nielsdos)
+
 - MBstring:
   . Fixed bug GH-16361 (mb_substr overflow on start/length arguments).
     (David Carlier)
+
+- MySQLnd:
+  . Fixed bug GHSA-h35g-vwh6-m678 (Leak partial content of the heap through
+    heap buffer over-read). (CVE-2024-8929) (Jakub Zelenka)
 
 - OpenSSL:
   . Fixed bug GH-16357 (openssl may modify member types of certificate arrays).
@@ -89,7 +99,15 @@ PHP                                                                        NEWS
   . Fix various memory leaks on error conditions in openssl_x509_parse().
     (nielsdos)
 
-- PDO_ODBC:
+- PDO DBLIB:
+  . Fixed bug GHSA-5hqh-c84r-qjcv (Integer overflow in the dblib quoter causing
+    OOB writes). (CVE-2024-11236) (nielsdos)
+
+- PDO Firebird:
+  . Fixed bug GHSA-5hqh-c84r-qjcv (Integer overflow in the firebird quoter
+    causing OOB writes). (CVE-2024-11236) (nielsdos)
+
+- PDO ODBC:
   . Fixed bug GH-16450 (PDO_ODBC can inject garbage into field values). (cmb)
 
 - Phar:
@@ -133,6 +151,12 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-16293 (Failed assertion when throwing in assert() callback with
     bail enabled). (ilutov)
+
+- Streams:
+  . Fixed bug GHSA-c5f2-jwm7-mmq2 (Configuring a proxy in a stream context
+    might allow for CRLF injection in URIs). (CVE-2024-11234) (Jakub Zelenka)
+  . Fixed bug GHSA-r977-prxv-hc43 (Single byte overread with
+    convert.quoted-printable-decode filter). (CVE-2024-11233) (nielsdos)
 
 - SysVMsg:
   . Fixed bug GH-16592 (msg_send() crashes when a type does not properly
