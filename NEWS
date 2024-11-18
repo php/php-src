@@ -52,6 +52,8 @@ PHP                                                                        NEWS
 - Sockets:
   . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
     (David Carlier)
+  . Added TCP_FUNCTION_BLK to change the TCP stack algorithm on FreeBSD.
+    (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
