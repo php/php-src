@@ -275,7 +275,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename);
 
-	if (SCNG(script_filtered)) {
+	if (SCNG(script_filtered) && SCNG(script_filtered) != lex_state->script_filtered) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
 	}
