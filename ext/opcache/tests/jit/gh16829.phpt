@@ -6,8 +6,8 @@ opcache.jit_buffer_size=32M
 opcache
 --FILE--
 <?php
-touch('gh16829_1.inc');
-require_once('gh16829_1.inc');
+touch(__DIR__ . '/gh16829_1.inc');
+require_once(__DIR__ . '/gh16829_1.inc');
 ?>
 DONE
 --EXPECT--
