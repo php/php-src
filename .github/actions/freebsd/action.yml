@@ -78,7 +78,6 @@ runs:
             --enable-intl \
             --with-mhash \
             --with-sodium \
-            --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
           gmake -j2
