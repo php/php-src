@@ -640,6 +640,13 @@ const TCP_KEEPINTVL = UNKNOWN;
  */
 const TCP_KEEPCNT = UNKNOWN;
 #endif
+#ifdef TCP_FUNCTION_BLK
+/**
+ * @var int
+ * @cvalue TCP_FUNCTION_BLK
+ */
+const TCP_FUNCTION_BLK = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue PHP_NORMAL_READ

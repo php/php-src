@@ -1703,6 +1703,25 @@ PHP_FUNCTION(socket_get_option)
 			}
 		}
 #endif
+
+#ifdef TCP_FUNCTION_BLK
+		case TCP_FUNCTION_BLK: {
+
+			struct tcp_function_set tsf = {0};
+			optlen = sizeof(tsf);
+
+			if (getsockopt(php_sock->bsd_socket, level, optname, &tsf, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			}
+
+			array_init(return_value);
+
+			add_assoc_string(return_value, "function_set_name", tsf.function_set_name);
+			add_assoc_long(return_value, "pcbcnt", tsf.pcbcnt);
+			return;
+		}
+#endif
 		}
 	}
 
@@ -1915,6 +1934,27 @@ PHP_FUNCTION(socket_set_option)
 			RETURN_TRUE;
 		}
 #endif
+
+#ifdef TCP_FUNCTION_BLK
+		case TCP_FUNCTION_BLK: {
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				php_error_docref(NULL, E_WARNING, "Invalid tcp stack name argument type");
+				RETURN_FALSE;
+			}
+			struct tcp_function_set tfs = {0};
+			strlcpy(tfs.function_set_name, Z_STRVAL_P(arg4), TCP_FUNCTION_NAME_LEN_MAX);
+
+			optlen = sizeof(tfs);
+			opt_ptr = &tfs;
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+
 		}
 	}
 
