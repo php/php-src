@@ -12,7 +12,7 @@ try {
 }
 
 try {
-    Uri\Rfc3986Uri::create("");
+    Uri\Rfc3986Uri::parse("");
 } catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }
@@ -24,13 +24,13 @@ try {
 }
 
 try {
-    Uri\WhatWgUri::create("");
+    Uri\WhatWgUri::parse("");
 } catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    Uri\Rfc3986Uri::create("https://example.com", "");
+    Uri\Rfc3986Uri::parse("https://example.com", "");
 } catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }
@@ -48,27 +48,27 @@ try {
 }
 
 try {
-    Uri\WhatWgUri::create("https://example.com", "");
+    Uri\WhatWgUri::parse("https://example.com", "");
 } catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
-var_dump(Uri\Rfc3986Uri::create("192.168/contact.html"));
-var_dump(Uri\WhatWgUri::create("192.168/contact.html", null));
+var_dump(Uri\Rfc3986Uri::parse("192.168/contact.html"));
+var_dump(Uri\WhatWgUri::parse("192.168/contact.html", null));
 
-var_dump(Uri\Rfc3986Uri::create("http://RuPaul's Drag Race All Stars 7 Winners Cast on This Season's"));
-var_dump(Uri\WhatWgUri::create("http://RuPaul's Drag Race All Stars 7 Winners Cast on This Season's", null));
+var_dump(Uri\Rfc3986Uri::parse("http://RuPaul's Drag Race All Stars 7 Winners Cast on This Season's"));
+var_dump(Uri\WhatWgUri::parse("http://RuPaul's Drag Race All Stars 7 Winners Cast on This Season's", null));
 
 ?>
 --EXPECTF--
 Uri\Rfc3986Uri::__construct(): Argument #1 ($uri) cannot be empty
-Uri\Rfc3986Uri::create(): Argument #1 ($uri) cannot be empty
+Uri\Rfc3986Uri::parse(): Argument #1 ($uri) cannot be empty
 Uri\WhatWgUri::__construct(): Argument #1 ($uri) cannot be empty
-Uri\WhatWgUri::create(): Argument #1 ($uri) cannot be empty
-Uri\Rfc3986Uri::create(): Argument #2 ($baseUrl) cannot be empty
+Uri\WhatWgUri::parse(): Argument #1 ($uri) cannot be empty
+Uri\Rfc3986Uri::parse(): Argument #2 ($baseUrl) cannot be empty
 Uri\Rfc3986Uri::__construct(): Argument #2 ($baseUrl) cannot be empty
 Uri\WhatWgUri::__construct(): Argument #2 ($baseUrl) cannot be empty
-Uri\WhatWgUri::create(): Argument #2 ($baseUrl) cannot be empty
+Uri\WhatWgUri::parse(): Argument #2 ($baseUrl) cannot be empty
 object(Uri\Rfc3986Uri)#%d (%d) {
   ["scheme"]=>
   NULL

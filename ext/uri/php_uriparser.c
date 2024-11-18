@@ -341,7 +341,7 @@ static zend_result uriparser_write_port(uri_internal_t *internal_uri, zval *valu
 	uriparser_append_authority(internal_uri, &uri_str);
 	uriparser_append_host(internal_uri, &uri_str);
 
-	if (Z_TYPE_P(value) == IS_LONG && Z_LVAL_P(value) != 0) {
+	if (Z_TYPE_P(value) == IS_LONG) {
 		smart_str_appendc(&uri_str, ':');
 		smart_str_append_long(&uri_str, Z_LVAL_P(value));
 	}

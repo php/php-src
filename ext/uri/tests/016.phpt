@@ -16,7 +16,7 @@ function mutateProperty($uri, string $name, mixed $value)
     }
 }
 
-$uri = Uri\Rfc3986Uri::create("https://example.com");
+$uri = Uri\Rfc3986Uri::parse("https://example.com");
 mutateProperty($uri, "scheme", "");
 mutateProperty($uri, "user", "");
 mutateProperty($uri, "password", "");
@@ -26,7 +26,7 @@ mutateProperty($uri, "path", "");
 mutateProperty($uri, "query", "");
 mutateProperty($uri, "fragment", "");
 
-$uri = Uri\WhatWgUri::create("https://example.com");
+$uri = Uri\WhatWgUri::parse("https://example.com");
 mutateProperty($uri, "scheme", "");
 mutateProperty($uri, "user", "");
 mutateProperty($uri, "password", "");

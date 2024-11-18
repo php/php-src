@@ -5,7 +5,7 @@ uri
 --FILE--
 <?php
 
-$uri1 = Uri\Rfc3986Uri::create("https://example.com#fragment1");
+$uri1 = Uri\Rfc3986Uri::parse("https://example.com#fragment1");
 $uri2 = $uri1->withFragment("#fragment2");
 $uri3 = $uri2->withFragment(null);
 
@@ -13,13 +13,13 @@ var_dump($uri1->__toString());
 var_dump($uri2->__toString());
 var_dump($uri3->__toString());
 
-$uri1 = Uri\Rfc3986Uri::create("https://example.com?abc=def");
+$uri1 = Uri\Rfc3986Uri::parse("https://example.com?abc=def");
 $uri2 = $uri1->withFragment("#fragment");
 
 var_dump($uri1->__toString());
 var_dump($uri2->__toString());
 
-$uri1 = Uri\WhatWgUri::create("https://example.com#fragment1");
+$uri1 = Uri\WhatWgUri::parse("https://example.com#fragment1");
 $uri2 = $uri1->withFragment("#fragment2");
 $uri3 = $uri2->withFragment(null);
 
@@ -27,7 +27,7 @@ var_dump($uri1->__toString());
 var_dump($uri2->__toString());
 var_dump($uri3->__toString());
 
-$uri1 = Uri\WhatWgUri::create("https://example.com?abc=def");
+$uri1 = Uri\WhatWgUri::parse("https://example.com?abc=def");
 $uri2 = $uri1->withFragment("#fragment");
 
 var_dump($uri1->__toString());

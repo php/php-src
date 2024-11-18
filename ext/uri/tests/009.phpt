@@ -5,8 +5,8 @@ uri
 --FILE--
 <?php
 
-var_dump(Uri\Rfc3986Uri::create("chrome-extension://example.com"));
-var_dump(Uri\WhatWgUri::create("chrome-extension://example.com"));
+var_dump(Uri\Rfc3986Uri::parse("chrome-extension://example.com"));
+var_dump(Uri\WhatWgUri::parse("chrome-extension://example.com"));
 
 ?>
 --EXPECTF--

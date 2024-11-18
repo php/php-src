@@ -5,10 +5,10 @@ uri
 --FILE--
 <?php
 
-$uri = Uri\Rfc3986Uri::create("🐘");
+$uri = Uri\Rfc3986Uri::parse("🐘");
 var_dump($uri);
 
-$uri = Uri\WhatWgUri::create("🐘", null);
+$uri = Uri\WhatWgUri::parse("🐘", null);
 var_dump($uri);
 var_dump($uri[0]->errorCode === \Uri\WhatWgError::ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
 

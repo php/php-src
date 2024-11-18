@@ -5,11 +5,11 @@ uri
 --FILE--
 <?php
 
-var_dump(Uri\Rfc3986Uri::create("mailto:Joe@Example.COM"));
-var_dump(Uri\WhatWgUri::create("mailto:Joe@Example.COM"));
+var_dump(Uri\Rfc3986Uri::parse("mailto:Joe@Example.COM"));
+var_dump(Uri\WhatWgUri::parse("mailto:Joe@Example.COM"));
 
-var_dump(Uri\Rfc3986Uri::create("file:///E:/Documents%20and%20Settings"));
-var_dump(Uri\WhatWgUri::create("file:///E:\\Documents and Settings"));
+var_dump(Uri\Rfc3986Uri::parse("file:///E:/Documents%20and%20Settings"));
+var_dump(Uri\WhatWgUri::parse("file:///E:\\Documents and Settings"));
 
 ?>
 --EXPECTF--

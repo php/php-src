@@ -5,17 +5,17 @@ uri
 --FILE--
 <?php
 
-var_dump(Uri\Rfc3986Uri::create("http://example.com?foo=Hell%C3%B3+W%C3%B6rld"));
-var_dump(Uri\Rfc3986Uri::create("http://example.com?foo=Helló Wörld"));
+var_dump(Uri\Rfc3986Uri::parse("http://example.com?foo=Hell%C3%B3+W%C3%B6rld"));
+var_dump(Uri\Rfc3986Uri::parse("http://example.com?foo=Helló Wörld"));
 
-var_dump(Uri\WhatWgUri::create("http://example.com?foo=Hell%C3%B3+W%C3%B6rld"));
-var_dump(Uri\WhatWgUri::create("http://example.com?foo=Helló Wörld"));
+var_dump(Uri\WhatWgUri::parse("http://example.com?foo=Hell%C3%B3+W%C3%B6rld"));
+var_dump(Uri\WhatWgUri::parse("http://example.com?foo=Helló Wörld"));
 
-var_dump(Uri\Rfc3986Uri::create("http://example.com?foobar=%27%3Cscript%3E+%2B+%40"));
-var_dump(Uri\Rfc3986Uri::create("http://example.com?foobar='<script> + @"));
+var_dump(Uri\Rfc3986Uri::parse("http://example.com?foobar=%27%3Cscript%3E+%2B+%40"));
+var_dump(Uri\Rfc3986Uri::parse("http://example.com?foobar='<script> + @"));
 
-var_dump(Uri\WhatWgUri::create("http://example.com?foobar=%27%3Cscript%3E+%2B+%40"));
-var_dump(Uri\WhatWgUri::create("http://example.com?foobar='<script> + @"));
+var_dump(Uri\WhatWgUri::parse("http://example.com?foobar=%27%3Cscript%3E+%2B+%40"));
+var_dump(Uri\WhatWgUri::parse("http://example.com?foobar='<script> + @"));
 
 ?>
 --EXPECTF--

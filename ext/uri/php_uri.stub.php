@@ -38,7 +38,7 @@ class InvalidUriException extends \Uri\UriException
 }
 
 /** @strict-properties */
-final readonly class WhatWgError
+readonly class WhatWgError
 {
     /** @cvalue LXB_URL_ERROR_TYPE_DOMAIN_TO_ASCII */
     public const int ERROR_TYPE_DOMAIN_TO_ASCII = UNKNOWN;
@@ -168,7 +168,7 @@ readonly class Rfc3986Uri implements \Uri\UriInterface
     /** @virtual */
     private ?string $fragment;
 
-    public static function create(string $uri, ?string $baseUrl = null): ?static {}
+    public static function parse(string $uri, ?string $baseUrl = null): ?static {}
 
     public function __construct(string $uri, ?string $baseUrl = null) {}
 
@@ -237,7 +237,7 @@ readonly class WhatWgUri implements \Uri\UriInterface
     /** @virtual */
     private ?string $fragment;
 
-    public static function create(string $uri, ?string $baseUrl = null): static|array {}
+    public static function parse(string $uri, ?string $baseUrl = null): static|array {}
 
     public function __construct(string $uri, ?string $baseUrl = null) {}
 
