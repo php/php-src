@@ -455,8 +455,31 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	if (packet->server_capabilities & CLIENT_PLUGIN_AUTH) {
 		BAIL_IF_NO_MORE_DATA;
 		/* The server is 5.5.x and supports authentication plugins */
-		packet->auth_protocol = estrdup((char *)p);
-		p+= strlen(packet->auth_protocol) + 1; /* eat the '\0' */
+		size_t remaining_size = packet->header.size - (size_t)(p - buf);
+		if (remaining_size == 0) {
+			/* Might be better to fail but this will fail anyway */
+			packet->auth_protocol = estrdup("");
+		} else {
+			/* Check if NUL present */
+			char *null_terminator = memchr(p, '\0', remaining_size);
+			size_t auth_protocol_len;
+			if (null_terminator) {
+				/* If present, do basically estrdup */
+				auth_protocol_len = null_terminator - (char *)p;
+			} else {
+				/* If not present, copy the rest of the buffer */
+				auth_protocol_len = remaining_size;
+			}
+			char *auth_protocol = emalloc(auth_protocol_len + 1);
+			memcpy(auth_protocol, p, auth_protocol_len);
+			auth_protocol[auth_protocol_len] = '\0';
+			packet->auth_protocol = auth_protocol;
+
+			p += auth_protocol_len;
+			if (null_terminator) {
+				p++;
+			}
+		}
 	}
 
 	DBG_INF_FMT("proto=%u server=%s thread_id=%u",
