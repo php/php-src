@@ -1,6 +1,6 @@
 <?php
 # inline Reproducer class definition and segfaults will go away
-require_once('Reproducer.php');
+require_once(__DIR__ . '/gh16829_2.inc');
 
 # remove $someVar1\2 or $someVar3 and loop at the end of the file and segfaults will go away
 $someVar2 = null;
