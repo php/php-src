@@ -103,7 +103,7 @@ typedef struct _zend_jit_stub {
 #define JIT_STUB(name, offset, adjustment) \
 	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub, offset, adjustment}
 
-bool zend_jit_startup_failed = false;
+bool zend_jit_startup_ok = false;
 
 zend_ulong zend_jit_profile_counter = 0;
 int zend_jit_profile_counter_rid = -1;
@@ -5099,7 +5099,7 @@ static void zend_jit_reset_counters(void)
 ZEND_EXT_API void zend_jit_activate(void)
 {
 #ifdef ZTS
-	if (zend_jit_startup_failed) {
+	if (!zend_jit_startup_ok) {
 		JIT_G(enabled) = 0;
 		JIT_G(on) = 0;
 		return;
