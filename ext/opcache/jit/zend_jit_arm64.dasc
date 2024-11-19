@@ -1533,6 +1533,9 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 ||			}
 |			IF_GC_MAY_NOT_LEAK FCARG1x, >4, Rw(tmp_reg1), Rw(tmp_reg2)
 |			// gc_possible_root(Z_COUNTED_P(z))
+||			if (opline) {
+|				SET_EX_OPLINE opline, TMP1
+||			}
 |			EXT_CALL gc_possible_root, Rx(tmp_reg1)
 ||		}
 ||		if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT|MAY_BE_GUARD)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0) {
@@ -5972,6 +5975,9 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			if (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
 				|4:
 				|	IF_GC_MAY_NOT_LEAK FCARG1x, >8, TMP1w, TMP2w
+				if (opline) {
+					|	SET_EX_OPLINE opline, REG0
+				}
 				|	EXT_CALL gc_possible_root, REG0
 				if (in_cold) {
 					|	b >8
@@ -5999,6 +6005,9 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|	GET_ZVAL_PTR FCARG1x, var_use_addr, TMP1
 				|	GC_DELREF FCARG1x, TMP1w
 				|	IF_GC_MAY_NOT_LEAK FCARG1x, >5, TMP1w, TMP2w
+				if (opline) {
+					|	SET_EX_OPLINE opline, TMP1
+				}
 				|	EXT_CALL gc_possible_root, TMP1
 				if (Z_REG(var_use_addr) != ZREG_FP) {
 					|	ldr Rx(Z_REG(var_use_addr)), T1 // restore
@@ -11980,6 +11989,9 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 			|3:
 			|	// GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
 			|	IF_GC_MAY_NOT_LEAK FCARG1x, >5, TMP1w, TMP2w
+			if (opline) {
+				|	SET_EX_OPLINE opline, REG0
+			}
 			|	EXT_CALL gc_possible_root, REG0
 			|	b >5
 		}
