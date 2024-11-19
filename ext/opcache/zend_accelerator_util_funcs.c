@@ -373,6 +373,12 @@ static void zend_accel_do_delayed_early_binding(
 
 zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory)
 {
+	if (CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION) {
+		/* Not a pretty API, but we need to distinguish between successful and
+		 * unsuccessful compilations. */
+		return (void *) -1;
+	}
+
 	zend_op_array *op_array;
 
 	op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));

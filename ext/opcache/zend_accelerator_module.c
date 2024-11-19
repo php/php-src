@@ -981,9 +981,7 @@ ZEND_FUNCTION(opcache_compile_file)
 
 	CG(compiler_options) = orig_compiler_options;
 
-	if(op_array != NULL) {
-		destroy_op_array(op_array);
-		efree(op_array);
+	if (op_array == (void *) -1) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
