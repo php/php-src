@@ -7506,6 +7506,11 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 			t->polymorphism = 0;
 			t->jmp_table_size = 0;
 			t->op_array = trace_buffer[0].op_array;
+			if (!(t->op_array->fn_flags & ZEND_ACC_IMMUTABLE)) {
+				zend_jit_op_array_trace_extension *jit_extension =
+					(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(t->op_array);
+				t->op_array = jit_extension->op_array;
+			}
 			t->opline = trace_buffer[1].opline;
 			t->exit_info = exit_info;
 			t->stack_map = NULL;
