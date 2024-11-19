@@ -7,6 +7,7 @@ permissions:
 
 jobs:
   triage:
+    if: github.repository == 'php/php-src'
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
