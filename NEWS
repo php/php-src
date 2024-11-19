@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0
 
+- BcMath:
+  . Fixed GH-16236 (Fixed a bug in BcMath\Number::pow() and bcpow() when
+    raising negative powers of 0) (Saki Takamachi).
+
 - Calendar:
   . Fixed jdtogregorian overflow. (David Carlier)
   . Fixed cal_to_jd julian_days argument overflow. (David Carlier)
