@@ -15,4 +15,4 @@ class Bar extends Foo
 
 ?>
 --EXPECTF--
-Fatal error: Type of Bar::$property1 must not be defined (as in class Foo) in %s on line %d
+Fatal error: Type of Bar::$property1 be omitted to match the parent definition in class Foo in %s on line %d
