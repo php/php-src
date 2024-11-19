@@ -1507,7 +1507,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				}
 			} else if (UNEXPECTED(ZEND_TYPE_IS_SET(child_info->type) && !ZEND_TYPE_IS_SET(parent_info->type))) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-						"Type of %s::$%s must not be defined (because it is already differently defined in class %s)",
+						"Type of %s::$%s must not be defined (it must match the definition in class %s)",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(key),
 						ZSTR_VAL(parent_info->ce->name));
