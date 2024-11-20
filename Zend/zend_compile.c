@@ -847,7 +847,7 @@ static void zend_do_free(znode *op1) /* {{{ */
 /* }}} */
 
 
-static char *zend_modifier_token_to_string(uint32_t token)
+static const char *zend_modifier_token_to_string(uint32_t token)
 {
 	switch (token) {
 		case T_PUBLIC:
@@ -958,12 +958,20 @@ uint32_t zend_modifier_list_to_flags(zend_modifier_target target, zend_ast *modi
 	zend_ast_list *modifier_list = zend_ast_get_list(modifiers);
 
 	for (uint32_t i = 0; i < modifier_list->children; i++) {
-		uint32_t new_flag = zend_modifier_token_to_flag(target, (uint32_t) Z_LVAL_P(zend_ast_get_zval(modifier_list->child[i])));
+		uint32_t token = (uint32_t) Z_LVAL_P(zend_ast_get_zval(modifier_list->child[i]));
+		uint32_t new_flag = zend_modifier_token_to_flag(target, token);
 		if (!new_flag) {
 			return 0;
 		}
+		/* Don't error immediately for duplicate flags, we want to prioritize the errors from zend_add_member_modifier(). */
+		bool duplicate_flag = (flags & new_flag);
 		flags = zend_add_member_modifier(flags, new_flag, target);
 		if (!flags) {
+			return 0;
+		}
+		if (duplicate_flag) {
+			zend_throw_exception_ex(zend_ce_compile_error, 0,
+				"Multiple %s modifiers are not allowed", zend_modifier_token_to_string(token));
 			return 0;
 		}
 	}
@@ -1021,23 +1029,6 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifi
 	if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Multiple access type modifiers are not allowed", 0);
-		return 0;
-	}
-	if ((flags & ZEND_ACC_ABSTRACT) && (new_flag & ZEND_ACC_ABSTRACT)) {
-		zend_throw_exception(zend_ce_compile_error, "Multiple abstract modifiers are not allowed", 0);
-		return 0;
-	}
-	if ((flags & ZEND_ACC_STATIC) && (new_flag & ZEND_ACC_STATIC)) {
-		zend_throw_exception(zend_ce_compile_error, "Multiple static modifiers are not allowed", 0);
-		return 0;
-	}
-	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
-		zend_throw_exception(zend_ce_compile_error, "Multiple final modifiers are not allowed", 0);
-		return 0;
-	}
-	if ((flags & ZEND_ACC_READONLY) && (new_flag & ZEND_ACC_READONLY)) {
-		zend_throw_exception(zend_ce_compile_error,
-			"Multiple readonly modifiers are not allowed", 0);
 		return 0;
 	}
 	if (target == ZEND_MODIFIER_TARGET_METHOD && (new_flags & ZEND_ACC_ABSTRACT) && (new_flags & ZEND_ACC_FINAL)) {
