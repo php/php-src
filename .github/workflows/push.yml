@@ -359,3 +359,11 @@ jobs:
           name: profiles
           path: ${{ github.workspace }}/benchmark/profiles
           retention-days: 30
+  FREEBSD:
+    name: FREEBSD
+    runs-on: ubuntu-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: FreeBSD
+        uses: ./.github/actions/freebsd
