@@ -336,3 +336,11 @@ jobs:
             ${{ github.sha }} \
             $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
             > $GITHUB_STEP_SUMMARY
+  FREEBSD:
+    name: FREEBSD
+    runs-on: ubuntu-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: FreeBSD
+        uses: ./.github/actions/freebsd
