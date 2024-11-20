@@ -693,7 +693,6 @@ function main(): void
     if ($test_cnt) {
         putenv('NO_INTERACTION=1');
         usort($test_files, "test_sort");
-        $start_timestamp = time();
         $start_time = hrtime(true);
 
         echo "Running selected tests.\n";
