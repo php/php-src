@@ -135,8 +135,8 @@ typedef struct {
 } php_curlm;
 
 typedef struct _php_curlsh {
-	CURLSH	  *share;
-	zend_bool persistent;
+	CURLSH      *share;
+	zend_string *persistent_id;
 
 	struct {
 		int no;

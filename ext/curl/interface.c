@@ -217,10 +217,10 @@ zend_module_entry curl_module_entry = {
 	NULL,
 	PHP_MINFO(curl),
 	PHP_CURL_VERSION,
-    PHP_MODULE_GLOBALS(curl),
-    PHP_GINIT(curl),
+	PHP_MODULE_GLOBALS(curl),
+	PHP_GINIT(curl),
 	PHP_GSHUTDOWN(curl),
-    NULL,
+	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
@@ -422,13 +422,11 @@ PHP_MINIT_FUNCTION(curl)
 }
 /* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION */
 PHP_GINIT_FUNCTION(curl)
 {
 	zend_hash_init(&curl_globals->persistent_share_handles, 0, NULL, curl_share_free_persistent, true);
 	GC_MAKE_PERSISTENT_LOCAL(&curl_globals->persistent_share_handles);
 }
-/* }}} */
 
 PHP_GSHUTDOWN_FUNCTION(curl)
 {
@@ -747,8 +745,8 @@ static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_
 	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
 	// zend_call_known_fcc() with an uninitialized FCC.
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
-    	return rval;
-    }
+		return rval;
+	}
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_prereqfunction() called\n");

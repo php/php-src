@@ -3743,10 +3743,7 @@ function curl_share_close(CurlShareHandle $share_handle): void {}
 function curl_share_errno(CurlShareHandle $share_handle): int {}
 
 /** @refcount 1 */
-function curl_share_init(): CurlShareHandle {}
-
-/** @refcount 1 */
-function curl_share_init_persistent(string $persistent_id, array $shares): CurlShareHandle|false {}
+function curl_share_init(array $share_options = [], ?string $persistent_id = null): CurlShareHandle {}
 
 function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $value): bool {}
 
