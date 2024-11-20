@@ -100,6 +100,8 @@ typedef struct _zend_jit_trace_rec zend_jit_trace_rec;
 typedef struct _zend_jit_trace_stack_frame zend_jit_trace_stack_frame;
 typedef struct _sym_node zend_sym_node;
 
+extern bool zend_jit_startup_ok;
+
 typedef struct _zend_jit_globals {
 	bool enabled;
 	bool on;

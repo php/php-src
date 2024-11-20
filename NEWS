@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 8.4.2
+
+- Opcache:
+  . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
+    (dktapps)
+
 21 Nov 2024, PHP 8.4.1
 
 - BcMath:
