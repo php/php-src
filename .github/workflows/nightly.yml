@@ -814,12 +814,14 @@ jobs:
         with:
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Build mysql-8.4
+        if: ${{ !inputs.libmysqlclient_with_mysqli }}
         uses: ./.github/actions/build-libmysqlclient
         with:
           configurationParameters: ${{ !inputs.libmysqlclient_with_mysqli && '--enable-werror' || '' }}
           libmysql: mysql-8.4.0-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Test mysql-8.4
+        if: ${{ !inputs.libmysqlclient_with_mysqli }}
         uses: ./.github/actions/test-libmysqlclient
         with:
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
