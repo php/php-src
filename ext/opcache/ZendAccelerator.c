@@ -3258,6 +3258,8 @@ static zend_result accel_post_startup(void)
 				if (JIT_G(buffer_size) != 0) {
 					zend_accel_error(ACCEL_LOG_WARNING, "Could not enable JIT!");
 				}
+			} else {
+				zend_jit_startup_ok = true;
 			}
 		}
 #endif

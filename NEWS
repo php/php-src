@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-16770 (Tracing JIT type mismatch when returning UNDEF).
     (nielsdos, Dmitry)
+  . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
+    (dktapps)
 
 - OpenSSL:
   . Prevent unexpected array entry conversion when reading key. (nielsdos)
