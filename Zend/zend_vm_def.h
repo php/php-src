@@ -8051,6 +8051,10 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMPVAR|CV|UNUSED
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+        	zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+        }
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
