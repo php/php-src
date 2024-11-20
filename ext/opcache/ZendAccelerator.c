@@ -3282,6 +3282,7 @@ static zend_result accel_post_startup(void)
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
 			} else {
 				zend_jit_startup(ZSMMG(reserved), jit_size, reattached);
+				zend_jit_startup_ok = true;
 			}
 		}
 #endif

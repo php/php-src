@@ -69,6 +69,8 @@ zend_jit_globals jit_globals;
 #define JIT_STUB_PREFIX "JIT$$"
 #define TRACE_PREFIX    "TRACE-"
 
+bool zend_jit_startup_ok = false;
+
 zend_ulong zend_jit_profile_counter = 0;
 int zend_jit_profile_counter_rid = -1;
 
@@ -3772,6 +3774,13 @@ static void zend_jit_reset_counters(void)
 
 void zend_jit_activate(void)
 {
+#ifdef ZTS
+	if (!zend_jit_startup_ok) {
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
+		return;
+	}
+#endif
 	zend_jit_profile_counter = 0;
 	if (JIT_G(on)) {
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS) {
