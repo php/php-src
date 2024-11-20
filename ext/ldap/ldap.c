@@ -3783,13 +3783,23 @@ static zend_string* php_ldap_do_escape(const bool *map, const char *value, size_
 	zend_string *ret;
 
 	for (i = 0; i < valuelen; i++) {
-		len += (map[(unsigned char) value[i]]) ? 3 : 1;
+		size_t addend = (map[(unsigned char) value[i]]) ? 3 : 1;
+		if (len > ZSTR_MAX_LEN - addend) {
+			return NULL;
+		}
+		len += addend;
 	}
 	/* Per RFC 4514, a leading and trailing space must be escaped */
 	if ((flags & PHP_LDAP_ESCAPE_DN) && (value[0] == ' ')) {
+		if (len > ZSTR_MAX_LEN - 2) {
+			return NULL;
+		}
 		len += 2;
 	}
 	if ((flags & PHP_LDAP_ESCAPE_DN) && ((valuelen > 1) && (value[valuelen - 1] == ' '))) {
+		if (len > ZSTR_MAX_LEN - 2) {
+			return NULL;
+		}
 		len += 2;
 	}
 
@@ -3856,7 +3866,13 @@ PHP_FUNCTION(ldap_escape)
 		php_ldap_escape_map_set_chars(map, ignores, ignoreslen, 0);
 	}
 
-	RETURN_NEW_STR(php_ldap_do_escape(map, value, valuelen, flags));
+	zend_string *result = php_ldap_do_escape(map, value, valuelen, flags);
+	if (UNEXPECTED(!result)) {
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
+	}
+
+	RETURN_NEW_STR(result);
 }
 
 #ifdef STR_TRANSLATION
