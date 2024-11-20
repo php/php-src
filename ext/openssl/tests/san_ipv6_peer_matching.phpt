@@ -2,6 +2,8 @@
 IPv6 Peer verification matches SAN names
 --EXTENSIONS--
 openssl
+--CONFLICTS--
+port64324
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
