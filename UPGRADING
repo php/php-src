@@ -127,12 +127,12 @@ PHP 8.4 UPGRADE NOTES
       ValueErrors if it is not an array of class names.
   . XMLReader:
     . Passing an invalid character encoding to XMLReader::open() or
-      XMLReader::XML() now throws a ValueError.
-    . Passing a string containing null bytes previously emitted a
-      warning and now throws a ValueError as well.
+      XMLReader::XML() now throws a ValueError. Passing an encoding
+      containing null bytes previously emitted a warning and now throws
+      a ValueError as well.
   . XMLWriter:
-    . Passing a string containing null bytes previously emitted a
-      warning and now throws a ValueError as well.
+    . Passing an encoding containing null bytes previously emitted a
+      warning and now throws a ValueError.
   . XSL:
     . XSLTProcessor::setParameter() will now throw a ValueError when its
       arguments contain null bytes. This never actually worked correctly in
