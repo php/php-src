@@ -1361,7 +1361,6 @@ ZEND_FUNCTION(gmp_pow)
 		mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
 	} else {
 		mpz_ptr gmpnum_base;
-		zend_ulong gmpnum;
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base, 1);
 		INIT_GMP_RETVAL(gmpnum_result);
 		if ((mpz_sizeinbase(gmpnum_base, 16) / 2.0 * exp) > powmax) {
