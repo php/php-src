@@ -47,6 +47,12 @@
 #define GMP_BIG_ENDIAN    (1 << 3)
 #define GMP_NATIVE_ENDIAN (1 << 4)
 
+#if SIZEOF_SIZE_T == 4
+#define GMP_ALLOC_MAXBITS (ULONG_MAX / GMP_NUMB_BITS)
+#else
+#define GMP_ALLOC_MAXBITS INT_MAX
+#endif
+
 #include "gmp_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(gmp)
@@ -1276,21 +1282,17 @@ ZEND_FUNCTION(gmp_fact)
 {
 	zval *a_arg;
 	mpz_ptr gmpnum_result;
+	zend_long val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
 		RETURN_THROWS();
 	}
 
-#if SIZEOF_SIZE_T == 4
-	const zend_long maxbits = ULONG_MAX / GMP_NUMB_BITS;
-#else
-	const zend_long maxbits = INT_MAX;
-#endif
-
 
 	if (Z_TYPE_P(a_arg) == IS_LONG) {
-		if (Z_LVAL_P(a_arg) < 0 || Z_LVAL_P(a_arg) > maxbits) {
-			zend_argument_value_error(1, "must be between 0 and " ZEND_LONG_FMT, maxbits);
+		val = Z_LVAL_P(a_arg);
+		if (val < 0 || val > GMP_ALLOC_MAXBITS) {
+			zend_argument_value_error(1, "must be between 0 and " ZEND_LONG_FMT, GMP_ALLOC_MAXBITS);
 			RETURN_THROWS();
 		}
 	} else {
@@ -1298,17 +1300,18 @@ ZEND_FUNCTION(gmp_fact)
 		gmp_temp_t temp_a;
 
 		FETCH_GMP_ZVAL(gmpnum, a_arg, temp_a, 1);
-		long r = mpz_get_si(gmpnum);
 		FREE_GMP_TEMP(temp_a);
 
-		if (r < 0 || r > maxbits) {
-			zend_argument_value_error(1, "must be between 0 and " ZEND_LONG_FMT, maxbits);
+		(void)gmpnum;
+		val = zval_get_long(a_arg);
+		if (val < 0 || val > GMP_ALLOC_MAXBITS) {
+			zend_argument_value_error(1, "must be between 0 and " ZEND_LONG_FMT, GMP_ALLOC_MAXBITS);
 			RETURN_THROWS();
 		}
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
-	mpz_fac_ui(gmpnum_result, zval_get_long(a_arg));
+	mpz_fac_ui(gmpnum_result, val);
 }
 /* }}} */
 
@@ -1867,14 +1870,8 @@ ZEND_FUNCTION(gmp_random_bits)
 		RETURN_THROWS();
 	}
 
-#if SIZEOF_SIZE_T == 4
-	const zend_long maxbits = ULONG_MAX / GMP_NUMB_BITS;
-#else
-	const zend_long maxbits = INT_MAX;
-#endif
-
-	if (bits <= 0 || bits > maxbits) {
-		zend_argument_value_error(1, "must be between 1 and " ZEND_LONG_FMT, maxbits);
+	if (bits <= 0 || bits > GMP_ALLOC_MAXBITS) {
+		zend_argument_value_error(1, "must be between 1 and " ZEND_LONG_FMT, GMP_ALLOC_MAXBITS);
 		RETURN_THROWS();
 	}
 
