@@ -32,6 +32,10 @@
 /* Needed for gmp_random() */
 #include "ext/random/php_random.h"
 
+#ifndef mpz_fits_si_p
+# define mpz_fits_si_p mpz_fits_slong_p
+#endif
+
 #define GMP_ROUND_ZERO      0
 #define GMP_ROUND_PLUSINF   1
 #define GMP_ROUND_MINUSINF  2
