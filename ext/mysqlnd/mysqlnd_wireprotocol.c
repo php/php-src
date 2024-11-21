@@ -736,8 +736,7 @@ php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			/* p can get past packet size when getting field length so it needs to be checked first
 			 * and after that it can be checked that the net_len is not greater than the packet size */
 			if ((p - buf) > packet->header.size || packet->header.size - (p - buf) < net_len) {
-				DBG_ERR_FMT("OK packet message length is past the packet size");
-				php_error_docref(NULL, E_WARNING, "OK packet message length is past the packet size");
+				SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "OK packet message length is past the packet size");
 				DBG_RETURN(FAIL);
 			}
 			packet->message_len = net_len;
@@ -1120,12 +1119,7 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 				/* p can get past packet size when getting field length so it needs to be checked first
 				 * and after that it can be checked that the len is not greater than the packet size */
 				if ((p - buf) > packet->header.size || packet->header.size - (p - buf) < len) {
-					size_t local_file_name_over_read = ((p - buf) - packet->header.size) + len;
-					DBG_ERR_FMT("RSET_HEADER packet additional data length is past %zu bytes the packet size",
-						local_file_name_over_read);
-					php_error_docref(NULL, E_WARNING,
-						"RSET_HEADER packet additional data length is past %zu bytes the packet size",
-						local_file_name_over_read);
+					SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "RSET_HEADER packet additional data length is past the packet size");
 					DBG_RETURN(FAIL);
 				}
 				packet->info_or_local_file.s = mnd_emalloc(len + 1);
@@ -1278,10 +1272,7 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		(len = php_mysqlnd_net_field_length(&p)) &&
 		len != MYSQLND_NULL_LENGTH)
 	{
-		DBG_ERR_FMT("Protocol error. Server sent default for unsupported field list");
-		php_error_docref(NULL, E_WARNING,
-			"Protocol error. Server sent default for unsupported field list (mysqlnd_wireprotocol.c:%u)",
-			__LINE__);
+		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Server sent default for unsupported field list");
 		DBG_RETURN(FAIL);
 	}
 

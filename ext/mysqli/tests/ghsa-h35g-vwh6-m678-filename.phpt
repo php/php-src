@@ -17,7 +17,12 @@ $process->wait();
 $conn = new mysqli($servername, $username, $password, "", $port);
 echo "[*] Running query on the fake server...\n";
 
-$result = $conn->query("SELECT * from users");
+try {
+    $result = $conn->query("SELECT * from users");
+} catch (mysqli_sql_exception $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
+
 $info = mysqli_info($conn);
 
 var_dump($info);
@@ -35,9 +40,6 @@ print "done!";
 [*] Running query on the fake server...
 [*] Received: 140000000353454c454354202a2066726f6d207573657273
 [*] Sending - Malicious Tabular Response [Extract heap through buffer over-read]: 0900000100000000000000fa65
-
-Warning: mysqli::query(): RSET_HEADER packet additional data length is past 249 bytes the packet size in %s on line %d
-
-Warning: mysqli::query(): Error reading result set's header in %s on line %d
+RSET_HEADER packet additional data length is past the packet size
 NULL
 done!

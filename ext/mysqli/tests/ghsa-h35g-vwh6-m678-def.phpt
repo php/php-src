@@ -19,12 +19,10 @@ $conn = new mysqli($servername, $username, $password, "", $port);
 
 echo "[*] Running query on the fake server...\n";
 
-$result = $conn->query("SELECT * from users");
-
-if ($result) {
-    $all_fields = $result->fetch_fields();
-    var_dump($result->fetch_all(MYSQLI_ASSOC));
-    var_dump(get_object_vars($all_fields[0])["def"]);
+try {
+    $result = $conn->query("SELECT * from users");
+} catch (mysqli_sql_exception $exception) {
+    echo $exception->getMessage() . PHP_EOL;
 }
 
 $conn->close();
@@ -42,6 +40,5 @@ print "done!";
 [*] Running query on the fake server...
 [*] Received: 140000000353454c454354202a2066726f6d207573657273
 [*] Sending - Malicious Tabular Response [Extract heap through buffer over-read]: 01000001011e0000020164016401640164016401640c3f000b000000030350000000fd000001aa05000003fe00002200040000040135017405000005fe00002200
-
-Warning: mysqli::query(): Protocol error. Server sent default for unsupported field list (mysqlnd_wireprotocol.c:%d) in %s on line %d
+Server sent default for unsupported field list
 done!
