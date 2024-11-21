@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed GH-16776 (imagecreatefromstring overflow). (David Carlier)
 
+- GMP:
+  . Fixed bug GH-16890 (array_sum() with GMP can loose precision (LLP64)).
+    (cmb)
+
 - Hash:
   . Fixed GH-16711: Segfault in mhash(). (Girgias)
 
