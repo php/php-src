@@ -594,8 +594,7 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 	conn->payload_decoder_factory->m.init_greet_packet(&greet_packet);
 
 	if (FAIL == PACKET_READ(conn, &greet_packet)) {
-		DBG_ERR("Error while reading greeting packet");
-		php_error_docref(NULL, E_WARNING, "Error while reading greeting packet. PID=%d", getpid());
+		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Error while reading greeting packet");
 		goto err;
 	} else if (greet_packet.error_no) {
 		DBG_ERR_FMT("errorno=%u error=%s", greet_packet.error_no, greet_packet.error);
