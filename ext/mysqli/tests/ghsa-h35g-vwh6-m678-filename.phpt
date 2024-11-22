@@ -20,7 +20,7 @@ echo "[*] Running query on the fake server...\n";
 try {
     $result = $conn->query("SELECT * from users");
 } catch (mysqli_sql_exception $exception) {
-    echo $exception->getMessage() . PHP_EOL;
+    echo 'ERROR: ' . $exception->getMessage() . PHP_EOL;
 }
 
 $info = mysqli_info($conn);
@@ -40,6 +40,6 @@ print "done!";
 [*] Running query on the fake server...
 [*] Received: 140000000353454c454354202a2066726f6d207573657273
 [*] Sending - Malicious Tabular Response [Extract heap through buffer over-read]: 0900000100000000000000fa65
-RSET_HEADER packet additional data length is past the packet size
+ERROR: RSET_HEADER packet additional data length is past the packet size
 NULL
 done!
