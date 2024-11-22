@@ -83,6 +83,8 @@ int main(void) {
   AS_VAR_IF([php_cv_iconv_errno], [yes],,
     [AC_MSG_FAILURE([The iconv check failed, 'errno' is missing.])])
 
+  dnl iconv on some platforms (NetBSD pre-10, Solaris) may have a non-standard
+  dnl const input parameter; libiconv may imitate this on those platforms.
   AC_CACHE_CHECK([if iconv input parameter is const (non-standard)], [php_cv_iconv_const],
     [AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 #include <iconv.h>
@@ -91,8 +93,6 @@ size_t iconv(iconv_t cd, const char **src, size_t *srcleft, char **dst, size_t *
     ])],
     [php_cv_iconv_const=const],
     [php_cv_iconv_const=])])
-  AC_DEFINE_UNQUOTED([ICONV_CONST], [$php_cv_iconv_const],
-    [Define to const if iconv's input is const.])
 
   AC_CACHE_CHECK([if iconv supports //IGNORE], [php_cv_iconv_ignore],
     [AC_RUN_IFELSE([AC_LANG_SOURCE([
@@ -131,7 +131,7 @@ int main(void) {
   PHP_NEW_EXTENSION([iconv],
     [iconv.c],
     [$ext_shared],,
-    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DICONV_CONST=$php_cv_iconv_const])
   PHP_SUBST([ICONV_SHARED_LIBADD])
   PHP_INSTALL_HEADERS([ext/iconv], [php_iconv.h])
 fi
