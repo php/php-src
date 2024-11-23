@@ -96,6 +96,7 @@ char *get_token_type_name(int token_type)
 		case T_PROTECTED_SET: return "T_PROTECTED_SET";
 		case T_PUBLIC_SET: return "T_PUBLIC_SET";
 		case T_READONLY: return "T_READONLY";
+		case T_DATA: return "T_DATA";
 		case T_VAR: return "T_VAR";
 		case T_UNSET: return "T_UNSET";
 		case T_ISSET: return "T_ISSET";

@@ -2409,6 +2409,10 @@ ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) 
 			return (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||
 				zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1) == 0);
 		case IS_OBJECT:
+			// check the class entry for a ACC_DATA_CLASS flag
+			if (Z_OBJ_P(op1)->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+				return !Z_OBJ_HANDLER_P(op1, compare)((zval *)op1, (zval *)op2);
+			}
 			return (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 		default:
 			return 0;

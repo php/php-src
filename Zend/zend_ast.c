@@ -1898,6 +1898,9 @@ tail_call:
 				if (decl->flags & ZEND_ACC_READONLY_CLASS) {
 					smart_str_appends(str, "readonly ");
 				}
+				if (decl->flags & ZEND_ACC_DATA_CLASS) {
+					smart_str_appends(str, "data ");
+				}
 				smart_str_appends(str, "class ");
 			}
 			smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));

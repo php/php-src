@@ -354,6 +354,9 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 		if (ce->ce_flags & ZEND_ACC_READONLY_CLASS) {
 			smart_str_append_printf(str, "readonly ");
 		}
+		if (ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			smart_str_append_printf(str, "data ");
+		}
 		smart_str_append_printf(str, "class ");
 	}
 	smart_str_append_printf(str, "%s", ZSTR_VAL(ce->name));
@@ -1621,6 +1624,10 @@ ZEND_METHOD(Reflection, getModifierNames)
 
 	if (modifiers & (ZEND_ACC_READONLY | ZEND_ACC_READONLY_CLASS)) {
 		add_next_index_stringl(return_value, "readonly", sizeof("readonly")-1);
+	}
+
+	if (modifiers & ZEND_ACC_DATA_CLASS) {
+		add_next_index_stringl(return_value, "data", sizeof("data")-1);
 	}
 }
 /* }}} */
@@ -4877,6 +4884,11 @@ ZEND_METHOD(ReflectionClass, isReadOnly)
 	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_READONLY_CLASS);
 }
 
+ZEND_METHOD(ReflectionClass, isDataClass)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_DATA_CLASS);
+}
+
 /* {{{ Returns whether this class is abstract */
 ZEND_METHOD(ReflectionClass, isAbstract)
 {
@@ -4889,7 +4901,7 @@ ZEND_METHOD(ReflectionClass, getModifiers)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	uint32_t keep_flags = ZEND_ACC_FINAL | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_READONLY_CLASS;
+	uint32_t keep_flags = ZEND_ACC_FINAL | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_READONLY_CLASS | ZEND_ACC_DATA_CLASS;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
