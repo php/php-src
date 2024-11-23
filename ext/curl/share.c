@@ -21,6 +21,7 @@
 #endif
 
 #include "php.h"
+#include "Zend/zend_exceptions.h"
 
 #include "curl_private.h"
 
@@ -134,6 +135,109 @@ PHP_FUNCTION(curl_share_strerror)
 }
 /* }}} */
 
+/**
+ * Initialize a persistent curl share handle with the given share options, reusing an existing one if found.
+ *
+ * Throws an exception if the share options are invalid.
+ */
+PHP_FUNCTION(curl_persistent_share_init)
+{
+	zval *share_opts = NULL, *entry = NULL;
+	zend_ulong persistent_id = 0;
+
+	php_curlsh *sh;
+
+	CURLSHcode error;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(share_opts)
+	ZEND_PARSE_PARAMETERS_END();
+
+	object_init_ex(return_value, curl_persistent_share_ce);
+	sh = Z_CURL_SHARE_P(return_value);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
+		ZVAL_DEREF(entry);
+
+		zend_ulong option = zval_get_long_ex(entry, true);
+
+		if (option == CURL_LOCK_DATA_COOKIE) {
+			zend_throw_exception_ex(
+				NULL,
+				0,
+				"CURL_LOCK_DATA_COOKIE is not allowed with persistent curl share handles"
+			);
+
+			goto error;
+		}
+
+		// Ensure that each additional option results in a unique persistent ID.
+		persistent_id += 1 << option;
+	} ZEND_HASH_FOREACH_END();
+
+	if (persistent_id) {
+		zval *persisted = zend_hash_index_find(&CURL_G(persistent_curlsh), persistent_id);
+
+		if (persisted) {
+			sh->share = Z_PTR_P(persisted);
+
+			return;
+		}
+	}
+
+	// We could not find an existing share handle, so we'll have to create one.
+	sh->share = curl_share_init();
+
+	// Apply $share_options to the handle.
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
+		ZVAL_DEREF(entry);
+
+		error = curl_share_setopt(sh->share, CURLSHOPT_SHARE, zval_get_long(entry));
+
+		if (error != CURLSHE_OK) {
+			zend_throw_exception_ex(
+				NULL,
+				0,
+				"Could not construct persistent cURL share handle: %s",
+				curl_share_strerror(error)
+			);
+
+			goto error;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zend_hash_index_add_new_ptr(
+		&CURL_G(persistent_curlsh),
+		persistent_id,
+		sh->share
+	);
+
+	return;
+
+ error:
+	if (sh->share) {
+		curl_share_cleanup(sh->share);
+	}
+
+	RETURN_THROWS();
+}
+
+/**
+ * Free a persistent curl share handle from the module global HashTable.
+ *
+ * See PHP_GINIT_FUNCTION in ext/curl/interface.c.
+ */
+void curl_share_free_persistent_curlsh(zval *data)
+{
+	CURLSH *handle = Z_PTR_P(data);
+
+	if (!handle) {
+		return;
+	}
+
+	curl_share_cleanup(handle);
+}
+
 /* CurlShareHandle class */
 
 static zend_object *curl_share_create_object(zend_class_entry *class_type) {
@@ -170,4 +274,24 @@ void curl_share_register_handlers(void) {
 	curl_share_handlers.get_constructor = curl_share_get_constructor;
 	curl_share_handlers.clone_obj = NULL;
 	curl_share_handlers.compare = zend_objects_not_comparable;
+}
+
+/* CurlPersistentShareHandle class */
+
+static zend_function *curl_persistent_share_get_constructor(zend_object *object) {
+	zend_throw_error(NULL, "Cannot directly construct CurlPersistentShareHandle, use curl_persistent_share_init() instead");
+	return NULL;
+}
+
+static zend_object_handlers curl_persistent_share_handlers;
+
+void curl_persistent_share_register_handlers(void) {
+	curl_persistent_share_ce->create_object = curl_share_create_object;
+	curl_persistent_share_ce->default_object_handlers = &curl_persistent_share_handlers;
+
+	memcpy(&curl_persistent_share_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	curl_persistent_share_handlers.offset = XtOffsetOf(php_curlsh, std);
+	curl_persistent_share_handlers.get_constructor = curl_persistent_share_get_constructor;
+	curl_persistent_share_handlers.clone_obj = NULL;
+	curl_persistent_share_handlers.compare = zend_objects_not_comparable;
 }

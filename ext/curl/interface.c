@@ -67,6 +67,8 @@
 
 #include "curl_arginfo.h"
 
+ZEND_DECLARE_MODULE_GLOBALS(curl)
+
 #ifdef PHP_CURL_NEED_OPENSSL_TSL /* {{{ */
 static MUTEX_T *php_curl_openssl_tsl = NULL;
 
@@ -215,7 +217,11 @@ zend_module_entry curl_module_entry = {
 	NULL,
 	PHP_MINFO(curl),
 	PHP_CURL_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(curl),
+	PHP_GINIT(curl),
+	PHP_GSHUTDOWN(curl),
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -223,10 +229,22 @@ zend_module_entry curl_module_entry = {
 ZEND_GET_MODULE (curl)
 #endif
 
+PHP_GINIT_FUNCTION(curl)
+{
+	zend_hash_init(&curl_globals->persistent_curlsh, 0, NULL, curl_share_free_persistent_curlsh, true);
+	GC_MAKE_PERSISTENT_LOCAL(&curl_globals->persistent_curlsh);
+}
+
+PHP_GSHUTDOWN_FUNCTION(curl)
+{
+	zend_hash_destroy(&curl_globals->persistent_curlsh);
+}
+
 /* CurlHandle class */
 
 zend_class_entry *curl_ce;
 zend_class_entry *curl_share_ce;
+zend_class_entry *curl_persistent_share_ce;
 static zend_object_handlers curl_object_handlers;
 
 static zend_object *curl_create_object(zend_class_entry *class_type);
@@ -410,6 +428,10 @@ PHP_MINIT_FUNCTION(curl)
 
 	curl_share_ce = register_class_CurlShareHandle();
 	curl_share_register_handlers();
+
+	curl_persistent_share_ce = register_class_CurlPersistentShareHandle();
+	curl_persistent_share_register_handlers();
+
 	curlfile_register_class();
 
 	return SUCCESS;
@@ -2276,16 +2298,24 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 
 		case CURLOPT_SHARE:
 			{
-				if (Z_TYPE_P(zvalue) == IS_OBJECT && Z_OBJCE_P(zvalue) == curl_share_ce) {
-					php_curlsh *sh = Z_CURL_SHARE_P(zvalue);
-					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
-
-					if (ch->share) {
-						OBJ_RELEASE(&ch->share->std);
-					}
-					GC_ADDREF(&sh->std);
-					ch->share = sh;
+				if (Z_TYPE_P(zvalue) != IS_OBJECT) {
+					break;
 				}
+
+				if (Z_OBJCE_P(zvalue) != curl_share_ce && Z_OBJCE_P(zvalue) != curl_persistent_share_ce) {
+					break;
+				}
+
+				php_curlsh *sh = Z_CURL_SHARE_P(zvalue);
+
+				curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
+
+				if (ch->share) {
+					OBJ_RELEASE(&ch->share->std);
+				}
+
+				GC_ADDREF(&sh->std);
+				ch->share = sh;
 			}
 			break;
 

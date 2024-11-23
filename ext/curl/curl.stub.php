@@ -3668,6 +3668,14 @@ final class CurlShareHandle
 {
 }
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class CurlPersistentShareHandle
+{
+}
+
 function curl_close(CurlHandle $handle): void {}
 
 /** @refcount 1 */
@@ -3752,6 +3760,9 @@ function curl_share_strerror(int $error_code): ?string {}
 
 /** @refcount 1 */
 function curl_strerror(int $error_code): ?string {}
+
+/** @refcount 1 */
+function curl_persistent_share_init(array $share_options): CurlPersistentShareHandle {}
 
 /**
  * @return array<string, int|string|array>|false
