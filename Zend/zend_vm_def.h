@@ -6863,7 +6863,19 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_S
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if (OP2_TYPE != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}

@@ -26273,7 +26273,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDL
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if (IS_CONST != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -28892,7 +28904,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HAND
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -33443,7 +33467,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if (IS_CV != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -35803,7 +35839,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HA
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if (IS_CONST != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -37902,7 +37950,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_H
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -40650,7 +40710,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDL
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if (IS_CV != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -46064,7 +46136,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLE
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if (IS_CONST != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -49921,7 +50005,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDL
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -55618,7 +55714,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(Z
 				break;
 			}
 		}
-		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		// if this is a data class, we may need to CoW
+		zend_object *zobj = Z_OBJ_P(container);
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(container, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(zobj, name, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
 		if (IS_CV != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
