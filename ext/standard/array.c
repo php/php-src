@@ -1037,9 +1037,7 @@ static void ia_return_current(zval *return_value, HashTable *array)
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_P(entry) == IS_INDIRECT) {
-		entry = Z_INDIRECT_P(entry);
-	}
+	ZVAL_DEINDIRECT(entry);
 
 	/* Possible with an uninitialized typed property */
 	if (Z_TYPE_P(entry) == IS_UNDEF) {
