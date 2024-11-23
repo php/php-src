@@ -1029,19 +1029,31 @@ static inline HashTable *get_ht_for_iap(zval *zv, bool separate) {
 	return zobj->handlers->get_properties(zobj);
 }
 
-static void ia_return_current(zval *return_value, HashTable *array)
+static void ia_return_current(zval *return_value, HashTable *array, bool forward_direction)
 {
 	zval *entry;
 
-	if ((entry = zend_hash_get_current_data(array)) == NULL) {
-		RETURN_FALSE;
-	}
+	while (true) {
+		if ((entry = zend_hash_get_current_data(array)) == NULL) {
+			RETURN_FALSE;
+		}
 
-	ZVAL_DEINDIRECT(entry);
+		ZVAL_DEINDIRECT(entry);
 
-	/* Possible with an uninitialized typed property */
-	if (Z_TYPE_P(entry) == IS_UNDEF) {
-		RETURN_FALSE;
+		/* Possible with an uninitialized typed property */
+		if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
+			zend_result result;
+			if (forward_direction) {
+				result = zend_hash_move_forward(array);
+			} else {
+				result = zend_hash_move_backwards(array);
+			}
+			if (result != SUCCESS) {
+				RETURN_FALSE;
+			}
+		} else {
+			break;
+		}
 	}
 
 	RETURN_COPY_DEREF(entry);
@@ -1064,7 +1076,7 @@ PHP_FUNCTION(end)
 	zend_hash_internal_pointer_end(array);
 
 	if (USED_RET()) {
-		ia_return_current(return_value, array);
+		ia_return_current(return_value, array, false);
 	}
 }
 /* }}} */
@@ -1086,7 +1098,7 @@ PHP_FUNCTION(prev)
 	zend_hash_move_backwards(array);
 
 	if (USED_RET()) {
-		ia_return_current(return_value, array);
+		ia_return_current(return_value, array, false);
 	}
 }
 /* }}} */
@@ -1108,7 +1120,7 @@ PHP_FUNCTION(next)
 	zend_hash_move_forward(array);
 
 	if (USED_RET()) {
-		ia_return_current(return_value, array);
+		ia_return_current(return_value, array, true);
 	}
 }
 /* }}} */
@@ -1130,7 +1142,7 @@ PHP_FUNCTION(reset)
 	zend_hash_internal_pointer_reset(array);
 
 	if (USED_RET()) {
-		ia_return_current(return_value, array);
+		ia_return_current(return_value, array, true);
 	}
 }
 /* }}} */
@@ -1145,7 +1157,7 @@ PHP_FUNCTION(current)
 	ZEND_PARSE_PARAMETERS_END();
 
 	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false);
-	ia_return_current(return_value, array);
+	ia_return_current(return_value, array, true);
 }
 /* }}} */
 
