@@ -1041,6 +1041,19 @@ ZEND_VM_HANDLER(28, ZEND_ASSIGN_OBJ_OP, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, OP)
 ZEND_VM_C_LABEL(assign_op_object):
 		/* here we are sure we are dealing with an object */
 		zobj = Z_OBJ_P(object);
+
+		// if this is a data class, we may need to CoW
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(object, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
@@ -1310,6 +1323,19 @@ ZEND_VM_HANDLER(132, ZEND_PRE_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACH
 ZEND_VM_C_LABEL(pre_incdec_object):
 		/* here we are sure we are dealing with an object */
 		zobj = Z_OBJ_P(object);
+
+		// if this is a data class, we may need to CoW
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(object, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
@@ -1380,6 +1406,19 @@ ZEND_VM_HANDLER(134, ZEND_POST_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CAC
 ZEND_VM_C_LABEL(post_incdec_object):
 		/* here we are sure we are dealing with an object */
 		zobj = Z_OBJ_P(object);
+
+		// if this is a data class, we may need to CoW
+		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (GC_REFCOUNT(zobj) > 1) {
+				// clone the object
+				zend_object *new_obj = zend_objects_clone_obj(zobj);
+				// set the object zval to the new object
+				ZVAL_OBJ(object, new_obj);
+				GC_DELREF(zobj);
+				zobj = new_obj;
+			}
+		}
+
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
@@ -2558,6 +2597,22 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 
 	if (OP_DATA_TYPE == IS_CV || OP_DATA_TYPE == IS_VAR) {
 		ZVAL_DEREF(value);
+	}
+
+	// if this is a data class, we may need to CoW
+	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+          // skip if in a constructor
+          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+			// skip
+		  } else
+		if (GC_REFCOUNT(zobj) > 1) {
+			// clone the object
+			zend_object *new_obj = zend_objects_clone_obj(zobj);
+			// set the object zval to the new object
+			ZVAL_OBJ(object, new_obj);
+			GC_DELREF(zobj);
+			zobj = new_obj;
+		}
 	}
 
 	value = zobj->handlers->write_property(zobj, name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
