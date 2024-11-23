@@ -42,7 +42,7 @@
 
 ; The value can be a string, a number, a PHP constant (e.g. E_ALL or M_PI), one
 ; of the INI constants (On, Off, True, False, Yes, No and None) or an expression
-; (e.g. E_ALL & ~E_NOTICE), a quoted string ("bar"), or a reference to a
+; (e.g. E_ALL & ~), a quoted string ("bar"), or a reference to a
 ; previously set variable or directive (e.g. ${foo})
 
 ; Expressions in the INI file are limited to bitwise operators and parentheses:
@@ -444,11 +444,11 @@ memory_limit = 128M
 ; operators. The error level constants are below here for convenience as well as
 ; some common settings and their meanings.
 ; By default, PHP is set to take action on all errors, notices and warnings EXCEPT
-; those related to E_NOTICE, which together cover best practices and
-; recommended coding standards in PHP. For performance reasons, this is the
-; recommend error reporting setting. Your production server shouldn't be wasting
-; resources complaining about best practices and coding standards. That's what
-; development servers and development settings are for.
+; those related to E_NOTICE, which covers best practices and recommended coding
+; standards in PHP. For performance reasons, this is the recommended error
+; reporting setting. Your production server shouldn't be wasting resources
+; complaining about best practices and coding standards. That's what develoment
+; servers and development settings are for.
 ; Note: The php.ini-development file has this setting as E_ALL. This
 ; means it pretty much reports everything which is exactly what you want during
 ; development and early testing.
