@@ -23551,7 +23551,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -23784,7 +23785,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -23861,7 +23863,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -24192,11 +24195,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -24362,11 +24362,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -24532,11 +24529,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -24702,11 +24696,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -26276,7 +26267,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDL
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -26652,7 +26644,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -26887,7 +26880,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -26965,7 +26959,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -27298,11 +27293,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -27468,11 +27460,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -27638,11 +27627,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -27808,11 +27794,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -28907,7 +28890,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HAND
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -31125,7 +31109,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -31358,7 +31343,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -31435,7 +31421,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -31766,11 +31753,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -31936,11 +31920,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -32106,11 +32087,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -32276,11 +32254,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -33470,7 +33445,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -33909,7 +33885,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -34012,7 +33989,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -34089,7 +34067,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -34628,11 +34607,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -34798,11 +34774,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -34968,11 +34941,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -35138,11 +35108,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -35842,7 +35809,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HA
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -36195,7 +36163,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -36298,7 +36267,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -36376,7 +36346,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -36911,11 +36882,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -37081,11 +37049,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -37251,11 +37216,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -37421,11 +37383,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -37953,7 +37912,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_H
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -38958,7 +38918,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -39061,7 +39022,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -39138,7 +39100,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -39672,11 +39635,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -39842,11 +39802,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -40012,11 +39969,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -40182,11 +40136,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -40713,7 +40664,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDL
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -43226,7 +43178,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -43459,7 +43412,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -43536,7 +43490,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -44187,11 +44142,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -44357,11 +44309,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -44527,11 +44476,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -44697,11 +44643,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -46139,7 +46082,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLE
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -47294,7 +47238,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -47529,7 +47474,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -47607,7 +47553,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -48254,11 +48201,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -48424,11 +48368,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -48594,11 +48535,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -48764,11 +48702,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -50008,7 +49943,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDL
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -52912,7 +52848,8 @@ assign_op_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -53145,7 +53082,8 @@ pre_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -53222,7 +53160,8 @@ post_incdec_object:
 
 		// if this is a data class, we may need to CoW
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
@@ -53868,11 +53807,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -54038,11 +53974,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -54208,11 +54141,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -54378,11 +54308,8 @@ fast_assign_obj:
 
 	// if this is a data class, we may need to CoW
 	if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-          // skip if in a constructor
-          if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
-			// skip
-		  } else
-		if (GC_REFCOUNT(zobj) > 1) {
+		// skip if in a constructor or if the object is not shared
+		if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 			// clone the object
 			zend_object *new_obj = zend_objects_clone_obj(zobj);
 			// set the object zval to the new object
@@ -55717,7 +55644,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(Z
 		// if this is a data class, we may need to CoW
 		zend_object *zobj = Z_OBJ_P(container);
 		if (zobj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
-			if (GC_REFCOUNT(zobj) > 1) {
+			// skip if in a constructor or if the object is not shared
+			if (!(EX(func)->common.fn_flags & ZEND_ACC_CTOR) && GC_REFCOUNT(zobj) > 1) {
 				// clone the object
 				zend_object *new_obj = zend_objects_clone_obj(zobj);
 				// set the object zval to the new object
