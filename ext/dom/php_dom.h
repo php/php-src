@@ -89,6 +89,7 @@ typedef struct _dom_nnodemap_object {
 	php_libxml_cache_tag cache_tag;
 	dom_object *cached_obj;
 	zend_long cached_obj_index;
+	xmlDictPtr dict;
 	bool free_local : 1;
 	bool free_ns : 1;
 } dom_nnodemap_object;

@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-16777 (Calling the constructor again on a DOM object after it
     is in a document causes UAF). (nielsdos)
+  . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
+    (nielsdos)
 
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
