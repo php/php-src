@@ -12,8 +12,6 @@ runs:
         prepare: |
           cd $GITHUB_WORKSPACE
 
-          kldload accf_http
-          kldload tcp_bbr
           pkg install -y \
             autoconf \
             bison \
@@ -91,6 +89,8 @@ runs:
         run: |
           cd $GITHUB_WORKSPACE
 
+          kldload accf_http
+          kldload tcp_bbr
           export SKIP_IO_CAPTURE_TESTS=1
           export CI_NO_IPV6=1
           export STACK_LIMIT_DEFAULTS_CHECK=1
