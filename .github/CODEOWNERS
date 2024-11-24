@@ -30,7 +30,8 @@
 /ext/json @bukka
 /ext/libxml @nielsdos
 /ext/mbstring @alexdowad @youkidearitai
-/ext/mysqlnd @SakiTakamachi
+/ext/mysqli @bukka @kamil-tekiela
+/ext/mysqlnd @bukka @kamil-tekiela @SakiTakamachi
 /ext/odbc @NattyNarwhal
 /ext/opcache @dstogov
 /ext/openssl @bukka
@@ -38,7 +39,7 @@
 /ext/pdo @SakiTakamachi
 /ext/pdo_dblib @SakiTakamachi
 /ext/pdo_firebird @SakiTakamachi
-/ext/pdo_mysql @SakiTakamachi
+/ext/pdo_mysql @kamil-tekiela @SakiTakamachi
 /ext/pdo_odbc @NattyNarwhal @SakiTakamachi
 /ext/pdo_pgsql @devnexen @SakiTakamachi
 /ext/pdo_sqlite @SakiTakamachi
