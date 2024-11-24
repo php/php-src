@@ -611,6 +611,13 @@ class my_mysqli_fake_server_conn
         $packets = $this->packet_generator->server_query_execute_data_response($field_name);
         $this->send($this->packets_to_bytes($packets), "Query execute data $field_name");
     }
+
+    public function send_too_short_server_ok()
+    {
+        $packet = $this->packet_generator->server_ok();
+        $packet->packet_length = "060000";
+        $this->send($packet->to_bytes(), "Server OK");
+    }
 }
 
 class my_mysqli_fake_server_process
@@ -805,6 +812,18 @@ function my_mysqli_test_query_response_row_read_two_fields(my_mysqli_fake_server
         $conn->send_server_query_execute_data_response($field_name);
         $conn->read();
     }
+}
+
+function my_mysqli_test_invalid_greeting_packet(my_mysqli_fake_server_conn $conn): void
+{
+    // Send nothing at all to the client
+}
+
+function my_mysqli_test_ok_packet_too_short(my_mysqli_fake_server_conn $conn): void
+{
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_too_short_server_ok();
 }
 
 function run_fake_server(string $test_function, $port = 33305): void

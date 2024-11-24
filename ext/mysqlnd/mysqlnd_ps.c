@@ -307,6 +307,8 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s)
 	conn->payload_decoder_factory->m.init_prepare_response_packet(&prepare_resp);
 
 	if (FAIL == PACKET_READ(conn, &prepare_resp)) {
+		// There might have been a connection specific error which we must report as a statement error
+		COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 		goto done;
 	}
 

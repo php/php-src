@@ -491,9 +491,7 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_RETURN(PASS);
 premature_end:
-	DBG_ERR_FMT("GREET packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "GREET packet %zu bytes shorter than expected",
-					 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "GREET packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -738,8 +736,7 @@ php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			/* p can get past packet size when getting field length so it needs to be checked first
 			 * and after that it can be checked that the net_len is not greater than the packet size */
 			if ((p - buf) > packet->header.size || packet->header.size - (p - buf) < net_len) {
-				DBG_ERR_FMT("OK packet message length is past the packet size");
-				php_error_docref(NULL, E_WARNING, "OK packet message length is past the packet size");
+				SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "OK packet message length is past the packet size");
 				DBG_RETURN(FAIL);
 			}
 			packet->message_len = net_len;
@@ -756,9 +753,7 @@ php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_RETURN(PASS);
 premature_end:
-	DBG_ERR_FMT("OK packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "AUTH_RESPONSE packet %zu bytes shorter than expected",
-					 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "AUTH_RESPONSE packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -893,9 +888,7 @@ php_mysqlnd_ok_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_RETURN(PASS);
 premature_end:
-	DBG_ERR_FMT("OK packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "OK packet %zu bytes shorter than expected",
-					 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "OK packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -980,9 +973,7 @@ php_mysqlnd_eof_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_RETURN(PASS);
 premature_end:
-	DBG_ERR_FMT("EOF packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "EOF packet %zu bytes shorter than expected",
-					 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "EOF packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -1067,6 +1058,9 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_ENTER("php_mysqlnd_rset_header_read");
 
 	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, buf_len, "resultset header", PROT_RSET_HEADER_PACKET)) {
+		if (!error_info->error_no) {
+			SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Error reading result set's header");
+		}
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -1125,12 +1119,7 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 				/* p can get past packet size when getting field length so it needs to be checked first
 				 * and after that it can be checked that the len is not greater than the packet size */
 				if ((p - buf) > packet->header.size || packet->header.size - (p - buf) < len) {
-					size_t local_file_name_over_read = ((p - buf) - packet->header.size) + len;
-					DBG_ERR_FMT("RSET_HEADER packet additional data length is past %zu bytes the packet size",
-						local_file_name_over_read);
-					php_error_docref(NULL, E_WARNING,
-						"RSET_HEADER packet additional data length is past %zu bytes the packet size",
-						local_file_name_over_read);
+					SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "RSET_HEADER packet additional data length is past the packet size");
 					DBG_RETURN(FAIL);
 				}
 				packet->info_or_local_file.s = mnd_emalloc(len + 1);
@@ -1151,9 +1140,7 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_RETURN(ret);
 premature_end:
-	DBG_ERR_FMT("RSET_HEADER packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "RSET_HEADER packet %zu bytes shorter than expected",
-					 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "RSET_HEADER packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -1229,8 +1216,7 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		DBG_RETURN(PASS);
 	} else if (EODATA_MARKER == *p && packet->header.size < 8) {
 		/* Premature EOF. That should be COM_FIELD_LIST. But we don't support COM_FIELD_LIST anymore, thus this should not happen */
-		DBG_ERR("Premature EOF. That should be COM_FIELD_LIST");
-		php_error_docref(NULL, E_WARNING, "Premature EOF in result field metadata");
+		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Premature EOF in result field metadata");
 		DBG_RETURN(FAIL);
 	}
 
@@ -1245,12 +1231,10 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	/* 1 byte length */
 	if (UNEXPECTED(12 != *p)) {
-		DBG_ERR_FMT("Protocol error. Server sent false length. Expected 12 got %d", (int) *p);
-		php_error_docref(NULL, E_WARNING, "Protocol error. Server sent false length. Expected 12");
+		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Protocol error. Server sent false length. Expected 12");
 	}
 
 	if ((size_t)((p - begin) + 12) > packet->header.size) {
-		php_error_docref(NULL, E_WARNING, "Premature end of data (mysqlnd_wireprotocol.c:%u)", __LINE__);
 		goto premature_end;
 	}
 
@@ -1288,10 +1272,7 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		(len = php_mysqlnd_net_field_length(&p)) &&
 		len != MYSQLND_NULL_LENGTH)
 	{
-		DBG_ERR_FMT("Protocol error. Server sent default for unsupported field list");
-		php_error_docref(NULL, E_WARNING,
-			"Protocol error. Server sent default for unsupported field list (mysqlnd_wireprotocol.c:%u)",
-			__LINE__);
+		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Server sent default for unsupported field list");
 		DBG_RETURN(FAIL);
 	}
 
@@ -1349,14 +1330,10 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(PASS);
 
 faulty_or_fake:
-	DBG_ERR_FMT("Protocol error. Server sent NULL_LENGTH. The server is faulty");
-	php_error_docref(NULL, E_WARNING, "Protocol error. Server sent NULL_LENGTH."
-					 " The server is faulty");
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Protocol error. Server sent NULL_LENGTH. The server is faulty");
 	DBG_RETURN(FAIL);
 premature_end:
-	DBG_ERR_FMT("RSET field packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "Result set field packet %zu bytes "
-			 		"shorter than expected", p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Result set field packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -1862,9 +1839,9 @@ php_mysqlnd_prepare_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	if (data_size != PREPARE_RESPONSE_SIZE_41 &&
 		data_size != PREPARE_RESPONSE_SIZE_50 &&
-		!(data_size > PREPARE_RESPONSE_SIZE_50)) {
+		data_size <= PREPARE_RESPONSE_SIZE_50) {
 		DBG_ERR_FMT("Wrong COM_STMT_PREPARE response size. Received %u", data_size);
-		php_error(E_WARNING, "Wrong COM_STMT_PREPARE response size. Received %u", data_size);
+		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Wrong COM_STMT_PREPARE response size");
 		DBG_RETURN(FAIL);
 	}
 
@@ -1896,9 +1873,7 @@ php_mysqlnd_prepare_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_RETURN(PASS);
 premature_end:
-	DBG_ERR_FMT("PREPARE packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "PREPARE packet %zu bytes shorter than expected",
-					 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "PREPARE packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -1966,9 +1941,7 @@ php_mysqlnd_chg_user_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_RETURN(PASS);
 premature_end:
-	DBG_ERR_FMT("CHANGE_USER packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "CHANGE_USER packet %zu bytes shorter than expected",
-						 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "CHANGE_USER packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -2050,9 +2023,7 @@ php_mysqlnd_sha256_pk_request_response_read(MYSQLND_CONN_DATA * conn, void * _pa
 	DBG_RETURN(PASS);
 
 premature_end:
-	DBG_ERR_FMT("OK packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet %zu bytes shorter than expected",
-					 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "SHA256_PK_REQUEST_RESPONSE packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 /* }}} */
@@ -2163,9 +2134,7 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(PASS);
 
 premature_end:
-	DBG_ERR_FMT("OK packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet %zu bytes shorter than expected",
-					 p - begin - packet->header.size);
+	SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "SHA256_PK_REQUEST_RESPONSE packet is shorter than expected");
 	DBG_RETURN(FAIL);
 }
 
@@ -2615,7 +2584,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 		const enum mysqlnd_packet_type ok_packet,
-		const bool silent,
+		const bool silent, /* This is a dead parameter */
 		const enum php_mysqlnd_server_command command,
 		const bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 
@@ -2638,11 +2607,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 			break;
 		default:
 			SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
-			php_error_docref(NULL, E_ERROR, "Wrong response packet %u passed to the function", ok_packet);
 			break;
-	}
-	if (!silent && error_info->error_no == CR_MALFORMED_PACKET) {
-		php_error_docref(NULL, E_WARNING, "Error while reading %s's response packet. PID=%d", mysqlnd_command_to_text[command], getpid());
 	}
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
 	DBG_RETURN(ret);
