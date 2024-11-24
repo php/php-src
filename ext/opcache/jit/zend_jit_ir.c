@@ -3233,6 +3233,20 @@ static void zend_jit_setup(void)
 		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/22ca6db50f4e6bd75a141f57cf953d8de6531a06/lib/libc/gen/tls.c#L88) */
 		tsrm_tls_index = (tlsdesc->index + 1) * 8;
 	}
+# elif defined(__MUSL__)
+	if (tsrm_ls_cache_tcb_offset == 0) {
+		size_t **where;
+
+		__asm__(
+			"adrp %0, :tlsdesc:_tsrm_ls_cache\n"
+			"add %0, %0, :tlsdesc_lo12:_tsrm_ls_cache\n"
+			: "=r" (where));
+		/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst */
+		size_t *tlsdesc = where[1];
+
+		tsrm_tls_offset = tlsdesc[1];
+		tsrm_tls_index = tlsdesc[0] * 8;
+	}
 # else
 	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
 # endif
