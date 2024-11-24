@@ -1029,7 +1029,7 @@ static inline HashTable *get_ht_for_iap(zval *zv, bool separate) {
 	return zobj->handlers->get_properties(zobj);
 }
 
-enum ia_undef_strategy {
+enum php_array_iter_undef_strategy {
 	IA_MOVE_FORWARD,
 	IA_MOVE_BACKWARD,
 	IA_THROW,
@@ -1040,7 +1040,7 @@ static ZEND_COLD void ia_throw_undef_error(void)
 	zend_throw_error(NULL, "Internal iterator points to an uninitialized property");
 }
 
-static void ia_return_current(zval *return_value, HashTable *array, enum ia_undef_strategy undef_strategy)
+static void ia_return_current(zval *return_value, HashTable *array, enum php_array_iter_undef_strategy undef_strategy)
 {
 	zval *entry;
 
