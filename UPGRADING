@@ -181,6 +181,11 @@ PHP 8.5 UPGRADE NOTES
 - Sockets:
   . IPPROTO_ICMP/IPPROTO_ICMPV6.
   . TCP_FUNCTION_BLK (FreeBSD only).
+  . TCP_FUNCTION_ALIAS (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA_NODOM (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
+  . TCP_BBR_ALGORITHM (FreeBSD only).
 
 ========================================
 11. Changes to INI File Handling
