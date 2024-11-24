@@ -31,7 +31,19 @@ var_dump(prev($x));
 var_dump(value: key($x));
 
 $x = new TestAllUndef;
+try {
+	var_dump(current($x));
+} catch (Error $e) {
+	echo $e->getMessage(), "\n";
+}
+try {
+	var_dump(key($x));
+} catch (Error $e) {
+	echo $e->getMessage(), "\n";
+}
+$x->a = 1;
 var_dump(current($x));
+var_dump(key($x));
 
 ?>
 --EXPECTF--
@@ -60,4 +72,13 @@ Deprecated: key(): Calling key() on an object is deprecated in %s on line %d
 string(1) "b"
 
 Deprecated: current(): Calling current() on an object is deprecated in %s on line %d
-bool(false)
+Internal iterator points to an uninitialized property
+
+Deprecated: key(): Calling key() on an object is deprecated in %s on line %d
+Internal iterator points to an uninitialized property
+
+Deprecated: current(): Calling current() on an object is deprecated in %s on line %d
+int(1)
+
+Deprecated: key(): Calling key() on an object is deprecated in %s on line %d
+string(1) "a"

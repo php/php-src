@@ -1029,7 +1029,18 @@ static inline HashTable *get_ht_for_iap(zval *zv, bool separate) {
 	return zobj->handlers->get_properties(zobj);
 }
 
-static void ia_return_current(zval *return_value, HashTable *array, bool forward_direction)
+enum ia_undef_strategy {
+	IA_MOVE_FORWARD,
+	IA_MOVE_BACKWARD,
+	IA_THROW,
+};
+
+static ZEND_COLD void ia_throw_undef_error(void)
+{
+	zend_throw_error(NULL, "Internal iterator points to an uninitialized property");
+}
+
+static void ia_return_current(zval *return_value, HashTable *array, enum ia_undef_strategy undef_strategy)
 {
 	zval *entry;
 
@@ -1043,10 +1054,13 @@ static void ia_return_current(zval *return_value, HashTable *array, bool forward
 		/* Possible with an uninitialized typed property */
 		if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
 			zend_result result;
-			if (forward_direction) {
+			if (undef_strategy == IA_MOVE_FORWARD) {
 				result = zend_hash_move_forward(array);
-			} else {
+			} else if (undef_strategy == IA_MOVE_BACKWARD) {
 				result = zend_hash_move_backwards(array);
+			} else {
+				ia_throw_undef_error();
+				return;
 			}
 			if (result != SUCCESS) {
 				RETURN_FALSE;
@@ -1076,7 +1090,7 @@ PHP_FUNCTION(end)
 	zend_hash_internal_pointer_end(array);
 
 	if (USED_RET()) {
-		ia_return_current(return_value, array, false);
+		ia_return_current(return_value, array, IA_MOVE_BACKWARD);
 	}
 }
 /* }}} */
@@ -1098,7 +1112,7 @@ PHP_FUNCTION(prev)
 	zend_hash_move_backwards(array);
 
 	if (USED_RET()) {
-		ia_return_current(return_value, array, false);
+		ia_return_current(return_value, array, IA_MOVE_BACKWARD);
 	}
 }
 /* }}} */
@@ -1120,7 +1134,7 @@ PHP_FUNCTION(next)
 	zend_hash_move_forward(array);
 
 	if (USED_RET()) {
-		ia_return_current(return_value, array, true);
+		ia_return_current(return_value, array, IA_MOVE_FORWARD);
 	}
 }
 /* }}} */
@@ -1142,7 +1156,7 @@ PHP_FUNCTION(reset)
 	zend_hash_internal_pointer_reset(array);
 
 	if (USED_RET()) {
-		ia_return_current(return_value, array, true);
+		ia_return_current(return_value, array, IA_MOVE_FORWARD);
 	}
 }
 /* }}} */
@@ -1157,7 +1171,7 @@ PHP_FUNCTION(current)
 	ZEND_PARSE_PARAMETERS_END();
 
 	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false);
-	ia_return_current(return_value, array, true);
+	ia_return_current(return_value, array, IA_THROW);
 }
 /* }}} */
 
@@ -1171,6 +1185,16 @@ PHP_FUNCTION(key)
 	ZEND_PARSE_PARAMETERS_END();
 
 	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false);
+	if (Z_TYPE_P(array_zv) == IS_OBJECT) {
+		zval *data = zend_hash_get_current_data(array);
+		if (data) {
+			ZVAL_DEINDIRECT(data);
+			if (Z_ISUNDEF_P(data)) {
+				ia_throw_undef_error();
+				RETURN_THROWS();
+			}
+		}
+	}
 	zend_hash_get_current_key_zval(array, return_value);
 }
 /* }}} */
