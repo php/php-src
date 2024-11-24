@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4ce3dbe06ea07fb6724fd5c68f7426558ff32169 */
+ * Stub hash: c423f7216d0c75563556edfcf678e3111360ecfc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -1150,6 +1150,12 @@ static zend_class_entry *register_class_CurlPersistentShareHandle(void)
 
 	INIT_CLASS_ENTRY(ce, "CurlPersistentShareHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zval property_options_default_value;
+	ZVAL_UNDEF(&property_options_default_value);
+	zend_string *property_options_name = zend_string_init("options", sizeof("options") - 1, 1);
+	zend_declare_typed_property(class_entry, property_options_name, &property_options_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_options_name);
 
 	return class_entry;
 }

@@ -3674,6 +3674,7 @@ final class CurlShareHandle
  */
 final class CurlPersistentShareHandle
 {
+    public readonly array $options;
 }
 
 function curl_close(CurlHandle $handle): void {}

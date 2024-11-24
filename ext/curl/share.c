@@ -21,6 +21,7 @@
 #endif
 
 #include "php.h"
+#include "ext/standard/php_array.h"
 #include "Zend/zend_exceptions.h"
 
 #include "curl_private.h"
@@ -150,7 +151,7 @@ PHP_FUNCTION(curl_persistent_share_init)
 	CURLSHcode error;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(share_opts)
+		Z_PARAM_ARRAY_EX(share_opts, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
 	object_init_ex(return_value, curl_persistent_share_ce);
@@ -174,6 +175,9 @@ PHP_FUNCTION(curl_persistent_share_init)
 		// Ensure that each additional option results in a unique persistent ID.
 		persistent_id += 1 << option;
 	} ZEND_HASH_FOREACH_END();
+
+	zend_array_sort(Z_ARRVAL_P(share_opts), php_array_data_compare_unstable_i, 1);
+	zend_update_property(curl_persistent_share_ce, Z_OBJ_P(return_value), "options", sizeof("options") - 1, share_opts);
 
 	if (persistent_id) {
 		zval *persisted = zend_hash_index_find(&CURL_G(persistent_curlsh), persistent_id);

@@ -283,7 +283,7 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 }
 /* }}} */
 
-static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+PHPAPI zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	int result = zend_compare(&f->val, &s->val);
 	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
