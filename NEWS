@@ -74,6 +74,10 @@ PHP                                                                        NEWS
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).
 
+- Streams:
+  . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
+    (cmb)
+
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
     nielsdos)
