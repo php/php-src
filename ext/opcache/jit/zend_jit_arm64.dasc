@@ -504,7 +504,11 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 ||#else
 |	.long 0xd53bd051 // TODO: hard-coded: mrs TMP3, tpidr_el0
 ||	if (tsrm_ls_cache_tcb_offset == 0) {
+||#ifdef __MUSL__
+|		ldr TMP3, [TMP3, #-8]
+||#else
 |		ldr TMP3, [TMP3, #0]
+||#endif
 |		MEM_ACCESS_64_WITH_UOFFSET_64 ldr, TMP3, TMP3, tsrm_tls_index, TMP1
 |		MEM_ACCESS_64_WITH_UOFFSET_64 ldr, reg, TMP3, tsrm_tls_offset, TMP1
 ||	} else {
@@ -2789,6 +2793,20 @@ static int zend_jit_setup(void)
 		tsrm_tls_offset = tlsdesc->offset;
 		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/22ca6db50f4e6bd75a141f57cf953d8de6531a06/lib/libc/gen/tls.c#L88) */
 		tsrm_tls_index = (tlsdesc->index + 1) * 8;
+	}
+# elif defined(__MUSL__)
+	if (tsrm_ls_cache_tcb_offset == 0) {
+		size_t **where;
+
+		__asm__(
+			"adrp %0, :tlsdesc:_tsrm_ls_cache\n"
+			"add %0, %0, :tlsdesc_lo12:_tsrm_ls_cache\n"
+			: "=r" (where));
+		/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst */
+		size_t *tlsdesc = where[1];
+
+		tsrm_tls_offset = tlsdesc[1];
+		tsrm_tls_index = tlsdesc[0] * 8;
 	}
 # else
 	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
