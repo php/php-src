@@ -136,7 +136,10 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[i], 0)) {
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], rfds)) {
 							DWORD avail_read = 0;
-							if (!PeekNamedPipe(handles[i], NULL, 0, NULL, &avail_read, NULL) || avail_read > 0) {
+							if (GetFileType(handles[i]) != FILE_TYPE_PIPE
+								|| !PeekNamedPipe(handles[i], NULL, 0, NULL, &avail_read, NULL)
+								|| avail_read > 0
+							) {
 								FD_SET((uint32_t)handle_slot_to_fd[i], &aread);
 								retcode++;
 							}
