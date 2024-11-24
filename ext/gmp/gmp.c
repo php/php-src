@@ -1350,11 +1350,11 @@ ZEND_FUNCTION(gmp_pow)
 		RETURN_THROWS();
 	}
 
-	double powmax = 2000;
+	double max_bits = 16000; // TODO: value is very small, but passed current test suite
 
 	if (Z_TYPE_P(base_arg) == IS_LONG && Z_LVAL_P(base_arg) >= 0) {
 		INIT_GMP_RETVAL(gmpnum_result);
-		if ((log(Z_LVAL_P(base_arg)) / log(256) * exp) > powmax) {
+		if ((log2(Z_LVAL_P(base_arg)) * exp) > max_bits) {
 			zend_value_error("base and exponent overflow");
 			RETURN_THROWS();
 		}
@@ -1363,7 +1363,7 @@ ZEND_FUNCTION(gmp_pow)
 		mpz_ptr gmpnum_base;
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base, 1);
 		INIT_GMP_RETVAL(gmpnum_result);
-		if ((mpz_sizeinbase(gmpnum_base, 16) / 2.0 * exp) > powmax) {
+		if ((mpz_sizeinbase(gmpnum_base, 2) * exp) > max_bits) {
 			FREE_GMP_TEMP(temp_base);
 			zend_value_error("base and exponent overflow");
 			RETURN_THROWS();
