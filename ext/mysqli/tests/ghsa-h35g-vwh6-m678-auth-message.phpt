@@ -6,7 +6,7 @@ mysqli
 <?php
 require_once 'fake_server.inc';
 
-$port = 50001;
+$port = 33305;
 $servername = "127.0.0.1";
 $username = "root";
 $password = "";
@@ -34,5 +34,5 @@ print "done!";
 [*] Sending - Malicious OK Auth Response [Extract heap through buffer over-read]: 0900000200000002000000fcff
 
 Warning: mysqli::__construct(): OK packet message length is past the packet size in %s on line %d
-Unknown error while trying to connect via tcp://127.0.0.1:50001
+Unknown error while trying to connect via tcp://127.0.0.1:33305
 done!
