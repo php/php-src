@@ -1,0 +1,7 @@
+<?php
+$code = '<?php echo "Hello, World!"; ?>';  // The PHP code to execute
+ob_start();  // Start output buffering
+eval('?>' . $code);  // Evaluate the PHP code
+$output = ob_get_clean();  // Capture the output of the code
+echo $output;  // Display the output
+?> 
