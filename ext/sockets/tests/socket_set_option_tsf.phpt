@@ -17,17 +17,30 @@ if (!$socket) {
         die('Unable to create AF_INET socket [socket]');
 }
 socket_set_option( $socket, SOL_TCP, TCP_FUNCTION_BLK, "nochancetoexist");
-// TCP/RACK and other alternate stacks are not present by default, at least `freebsd` is.
-var_dump(socket_set_option( $socket, SOL_TCP, TCP_FUNCTION_BLK, "freebsd"));
+// TCP/RACK and other alternate stacks are not present by default, BBR should be available.
+var_dump(socket_set_option( $socket, SOL_TCP, TCP_FUNCTION_BLK, "bbr"));
+$bef = socket_get_option( $socket, SOL_TCP, TCP_BBR_ALGORITHM);
+var_dump($bef);
+// not failed, but unchanged
+var_dump(socket_set_option( $socket, SOL_TCP, TCP_BBR_ALGORITHM, 1024));
+$aft = socket_get_option( $socket, SOL_TCP, TCP_BBR_ALGORITHM);
+var_dump($bef === $aft);
+var_dump(socket_set_option( $socket, SOL_TCP, TCP_BBR_ALGORITHM, 0));
 var_dump(socket_get_option( $socket, SOL_TCP, TCP_FUNCTION_BLK));
+var_dump(socket_get_option( $socket, SOL_TCP, TCP_BBR_ALGORITHM));
 socket_close($socket);
 ?>
 --EXPECTF--
 Warning: socket_set_option(): Unable to set socket option [2]: No such file or directory in %s on line %d
 bool(true)
+int(%d)
+bool(true)
+bool(true)
+bool(true)
 array(2) {
   ["function_set_name"]=>
-  string(7) "freebsd"
+  string(3) "bbr"
   ["pcbcnt"]=>
   int(%d)
 }
+int(%d)

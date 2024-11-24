@@ -647,6 +647,37 @@ const TCP_KEEPCNT = UNKNOWN;
  */
 const TCP_FUNCTION_BLK = UNKNOWN;
 #endif
+#ifdef TCP_FUNCTION_ALIAS
+/**
+ * @var int
+ * @cvalue TCP_FUNCTION_ALIAS
+ */
+const TCP_FUNCTION_ALIAS = UNKNOWN;
+#endif
+#ifdef TCP_REUSPORT_LB_NUMA
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA
+ */
+const TCP_REUSPORT_LB_NUMA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA_NODOM
+ */
+const TCP_REUSPORT_LB_NUMA_NODOM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA_CURDOM
+ */
+const TCP_REUSPORT_LB_NUMA_CURDOM = UNKNOWN;
+#endif
+#ifdef TCP_BBR_ALGORITHM
+/**
+ * @var int
+ * @cvalue TCP_BBR_ALGORITHM
+ */
+const TCP_BBR_ALGORITHM = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue PHP_NORMAL_READ

@@ -1705,7 +1705,11 @@ PHP_FUNCTION(socket_get_option)
 #endif
 
 #ifdef TCP_FUNCTION_BLK
-		case TCP_FUNCTION_BLK: {
+		case TCP_FUNCTION_BLK:
+#ifdef TCP_FUNCTION_ALIAS
+		case TCP_FUNCTION_ALIAS:
+#endif
+		{
 
 			struct tcp_function_set tsf = {0};
 			optlen = sizeof(tsf);

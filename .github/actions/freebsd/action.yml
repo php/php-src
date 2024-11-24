@@ -13,6 +13,7 @@ runs:
           cd $GITHUB_WORKSPACE
 
           kldload accf_http
+          kldload tcp_bbr
           pkg install -y \
             autoconf \
             bison \
