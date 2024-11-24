@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.2
 
+- DOM:
+  . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
+    (nielsdos)
+
 - Opcache:
   . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
     (dktapps)
