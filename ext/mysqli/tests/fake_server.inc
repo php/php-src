@@ -552,8 +552,8 @@ class my_mysqli_fake_server_conn
 
     public function read($bytes_len = 1024)
     {
-        // wait 10ms to fill the buffer
-        usleep(10000);
+        // wait 20ms to fill the buffer
+        usleep(20000);
         $data = fread($this->conn, $bytes_len);
         if ($data) {
             fprintf(STDERR, "[*] Received: %s\n", bin2hex($data));
