@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
     (nielsdos)
 
+- GMP:
+  . Fixed bug GH-16890 (array_sum() with GMP can loose precision (LLP64)).
+    (cmb)
+
 - Opcache:
   . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
     (dktapps)
