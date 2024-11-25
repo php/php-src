@@ -23,7 +23,7 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 try {
-    gmp_pow(gmp_init(PHP_INT_MAX), 256);
+    gmp_pow(PHP_INT_MAX, 256);
 } catch (\ValueError $e) {
 	echo $e->getMessage();
 }

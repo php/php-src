@@ -1363,7 +1363,7 @@ ZEND_FUNCTION(gmp_pow)
 		mpz_ptr gmpnum_base;
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base, 1);
 		INIT_GMP_RETVAL(gmpnum_result);
-		if ((mpz_sizeinbase(gmpnum_base, 2) * exp) > max_bits) {
+		if (((mpz_sizeinbase(gmpnum_base, 2) - 1) * exp) > max_bits) {
 			FREE_GMP_TEMP(temp_base);
 			zend_value_error("base and exponent overflow");
 			RETURN_THROWS();
