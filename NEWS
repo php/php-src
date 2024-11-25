@@ -14,6 +14,7 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-16630 (UAF in lexer with encoding translation and heredocs).
     (nielsdos)
+  . Fix is_zend_ptr() huge block comparison. (nielsdos)
 
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
