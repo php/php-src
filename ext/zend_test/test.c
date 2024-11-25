@@ -1114,9 +1114,12 @@ static ZEND_METHOD(_ZendTestMagicCallForward, __call)
 
 	ZEND_IGNORE_VALUE(arguments);
 
-	zval func;
+	zval func, rv;
 	ZVAL_STR(&func, name);
-	call_user_function(NULL, NULL, &func, return_value, 0, NULL);
+	call_user_function(NULL, NULL, &func, &rv, 0, NULL);
+
+	ZVAL_COPY_DEREF(return_value, &rv);
+	zval_ptr_dtor(&rv);
 }
 
 PHP_INI_BEGIN()
