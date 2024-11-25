@@ -12,8 +12,6 @@ $cls->foo()->x ??= 42;
 --EXPECTF--
 Notice: Only variable references should be returned by reference in %s on line %d
 
-Notice: Only variable references should be returned by reference in %s on line %d
-
 Fatal error: Uncaught Error: Attempt to assign property "x" on null in %s:%d
 Stack trace:
 #0 {main}
