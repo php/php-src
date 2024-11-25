@@ -15,6 +15,9 @@ PHP                                                                        NEWS
     (dktapps)
   . Fixed bug GH-16902 (Set of opcache tests fail zts+aarch64). (nielsdos)
 
+- Windows:
+  . Fixed bug GH-16849 (Error dialog causes process to hang). (cmb)
+
 21 Nov 2024, PHP 8.4.1
 
 - BcMath:
