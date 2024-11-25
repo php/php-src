@@ -44,10 +44,7 @@ typedef struct {
 	pdo_pgsql_error_info	einfo;
 	Oid 		pgoid;
 	unsigned int	stmt_counter;
-	/* The following two variables have the same purpose. Unfortunately we need
-	   to keep track of two different attributes having the same effect. */
 	bool		emulate_prepares;
-	bool		disable_native_prepares; /* deprecated since 5.6 */
 	bool		disable_prepares;
 	HashTable       *lob_streams;
 	zend_fcall_info_cache *notice_callback;
