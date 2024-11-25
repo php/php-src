@@ -32,6 +32,10 @@
 #include "ext/random/php_random.h"
 #include "ext/random/php_random_csprng.h"
 
+#ifndef mpz_fits_si_p
+# define mpz_fits_si_p mpz_fits_slong_p
+#endif
+
 #define GMP_ROUND_ZERO      0
 #define GMP_ROUND_PLUSINF   1
 #define GMP_ROUND_MINUSINF  2
@@ -293,7 +297,7 @@ static zend_result gmp_cast_object(zend_object *readobj, zval *writeobj, int typ
 		return SUCCESS;
 	case _IS_NUMBER:
 		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
-		if (mpz_fits_slong_p(gmpnum)) {
+		if (mpz_fits_si_p(gmpnum)) {
 			ZVAL_LONG(writeobj, mpz_get_si(gmpnum));
 		} else {
 			ZVAL_DOUBLE(writeobj, mpz_get_d(gmpnum));
