@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
     (dktapps)
   . Fixed bug GH-16902 (Set of opcache tests fail zts+aarch64). (nielsdos)
+  . Fixed bug GH-16879 (JIT dead code skipping does not update call_level).
+    (nielsdos)
 
 - Windows:
   . Fixed bug GH-16849 (Error dialog causes process to hang). (cmb)
