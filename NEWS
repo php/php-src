@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
     (dktapps)
+  . Fixed bug GH-16902 (Set of opcache tests fail zts+aarch64). (nielsdos)
 
 21 Nov 2024, PHP 8.4.1
 
