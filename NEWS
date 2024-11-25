@@ -117,8 +117,6 @@ PHP                                                                        NEWS
     (nielsdos)
 
 - GMP:
-  . Fixed floating point exception bug with gmp_pow when using
-    large exposant values. (David Carlier).
   . Fixed bug GH-16411 (gmp_export() can cause overflow). (cmb)
   . Fixed bug GH-16501 (gmp_random_bits() can cause overflow).
     (David Carlier)
