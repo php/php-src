@@ -1092,6 +1092,22 @@ void ir_set_op(ir_ctx *ctx, ir_ref ref, int32_t n, ir_ref val)
 	ir_insn_set_op(insn, n, val);
 }
 
+ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n)
+{
+	ir_insn *insn = &ctx->ir_base[ref];
+
+#ifdef IR_DEBUG
+	if (n > 3) {
+		int32_t count;
+
+		IR_ASSERT(IR_OP_HAS_VAR_INPUTS(ir_op_flags[insn->op]));
+		count = insn->inputs_count;
+		IR_ASSERT(n <= count);
+	}
+#endif
+	return ir_insn_op(insn, n);
+}
+
 ir_ref ir_param(ir_ctx *ctx, ir_type type, ir_ref region, const char *name, int pos)
 {
 	return ir_emit(ctx, IR_OPT(IR_PARAM, type), region, ir_str(ctx, name), pos);
@@ -2820,6 +2836,10 @@ void _ir_VSTORE(ir_ctx *ctx, ir_ref var, ir_ref val)
 			}
 		} else if (insn->op == IR_VLOAD) {
 			if (insn->op2 == var) {
+				if (ref == val) {
+					/* dead STORE */
+					return;
+				}
 				break;
 			}
 		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
@@ -2910,6 +2930,10 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 			}
 		} else if (insn->op == IR_LOAD) {
 			if (insn->op2 == addr) {
+				if (ref == val) {
+					/* dead STORE */
+					return;
+				}
 				break;
 			}
 			type2 = insn->type;
