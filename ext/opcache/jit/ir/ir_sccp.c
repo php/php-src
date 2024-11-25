@@ -2213,7 +2213,7 @@ int ir_sccp(ir_ctx *ctx)
 				if (!may_benefit) {
 					IR_MAKE_BOTTOM(i);
 					if (insn->op == IR_FP2FP || insn->op == IR_FP2INT || insn->op == IR_TRUNC
-					 || insn->op == IR_ZEXT || insn->op == IR_SEXT) {
+					 || insn->op == IR_ZEXT || insn->op == IR_SEXT || insn->op == IR_EQ || insn->op == IR_NE) {
 						ir_bitqueue_add(&worklist2, i);
 					}
 				} else if (!ir_sccp_fold(ctx, _values, i, insn->opt, insn->op1, insn->op2, insn->op3)) {
@@ -2222,7 +2222,7 @@ int ir_sccp(ir_ctx *ctx)
 				} else if (_values[i].optx == IR_BOTTOM) {
 					insn = &ctx->ir_base[i];
 					if (insn->op == IR_FP2FP || insn->op == IR_FP2INT || insn->op == IR_TRUNC
-					 || insn->op == IR_ZEXT || insn->op == IR_SEXT) {
+					 || insn->op == IR_ZEXT || insn->op == IR_SEXT || insn->op == IR_EQ || insn->op == IR_NE) {
 						ir_bitqueue_add(&worklist2, i);
 					}
 				}

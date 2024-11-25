@@ -5247,6 +5247,14 @@ static void ir_emit_tls(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |		ldr Rx(reg), [Rx(reg), #insn->op2]
 |		ldr Rx(reg), [Rx(reg), #insn->op3]
 ||	}
+||# elif defined(__MUSL__)
+||	if (insn->op3 == IR_NULL) {
+|		ldr Rx(reg), [Rx(reg), #insn->op2]
+||	} else {
+|		ldr Rx(reg), [Rx(reg), #-8]
+|		ldr Rx(reg), [Rx(reg), #insn->op2]
+|		ldr Rx(reg), [Rx(reg), #insn->op3]
+||	}
 ||# else
 ||//???	IR_ASSERT(insn->op2 <= LDR_STR_PIMM64);
 |	ldr Rx(reg), [Rx(reg), #insn->op2]

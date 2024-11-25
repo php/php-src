@@ -720,6 +720,8 @@ IR_ALWAYS_INLINE void ir_set_op3(ir_ctx *ctx, ir_ref ref, ir_ref val)
 	ctx->ir_base[ref].op3 = val;
 }
 
+ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n);
+
 IR_ALWAYS_INLINE ir_ref ir_insn_op(const ir_insn *insn, int32_t n)
 {
 	const ir_ref *p = insn->ops + n;
