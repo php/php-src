@@ -2,8 +2,6 @@
 gmp_pow() basic tests
 --EXTENSIONS--
 gmp
---SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
 
