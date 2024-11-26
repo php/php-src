@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fixed bug GH-16802 (open_basedir bypass using curl extension). (nielsdos)
+  . Fix various memory leaks in curl mime handling. (nielsdos)
 
 - DOM:
   . Fixed bug GH-16777 (Calling the constructor again on a DOM object after it
