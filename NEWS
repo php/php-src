@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-16344 (setRawValueWithoutLazyInitialization() and
     skipLazyInitialization() may change initialized proxy). (Arnaud)
+  . Fix is_zend_ptr() huge block comparison. (nielsdos)
 
 - DOM:
   . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
