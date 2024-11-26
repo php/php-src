@@ -257,13 +257,10 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		/* TODO: if PHP raises an exception here, we should catch it
 		 * and expose it as a COM exception */
 
-		if (wFlags & DISPATCH_PROPERTYGET) {
-			retval = zend_read_property(Z_OBJCE(disp->object), Z_OBJ(disp->object), Z_STRVAL_P(name), Z_STRLEN_P(name), 1, &rv);
-			ret = S_OK;
-		} else if (wFlags & DISPATCH_PROPERTYPUT) {
+		if (wFlags & DISPATCH_PROPERTYPUT) {
 			zend_update_property(Z_OBJCE(disp->object), Z_OBJ(disp->object), Z_STRVAL_P(name), Z_STRLEN_P(name), &params[0]);
 			ret = S_OK;
-		} else if (wFlags & DISPATCH_METHOD) {
+		} else if (wFlags & DISPATCH_METHOD && zend_is_callable_ex(name, Z_OBJ(disp->object), 0, NULL, NULL, NULL)) {
 			zend_try {
 				retval = &rv;
 				if (SUCCESS == call_user_function(NULL, &disp->object, name,
@@ -289,6 +286,9 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 				trace("something blew up\n");
 				ret = DISP_E_EXCEPTION;
 			} zend_end_try();
+		} else if (wFlags & DISPATCH_PROPERTYGET) {
+			retval = zend_read_property(Z_OBJCE(disp->object), Z_OBJ(disp->object), Z_STRVAL_P(name), Z_STRLEN_P(name), 1, &rv);
+			ret = S_OK;
 		} else {
 			trace("Don't know how to handle this invocation %08x\n", wFlags);
 		}
@@ -307,7 +307,9 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 				VariantInit(pvarRes);
 				php_com_variant_from_zval(pvarRes, retval, COMG(code_page));
 			}
-			// zval_ptr_dtor(retval); // TODO needed for function calls?
+			if (retval == &rv) {
+				zval_ptr_dtor(retval);
+			}
 		} else if (pvarRes) {
 			VariantInit(pvarRes);
 		}
