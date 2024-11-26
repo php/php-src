@@ -1310,6 +1310,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 #endif
 
 	ZVAL_COPY(&ch->private_data, &source->private_data);
+	ZVAL_COPY(&ch->postfields, &source->postfields);
 
 	efree(ch->to_free);
 	ch->to_free = source->to_free;
@@ -1595,7 +1596,7 @@ PHP_FUNCTION(curl_copy_handle)
 
 	_php_setup_easy_copy_handlers(dupch, ch);
 
-	postfields = &ch->postfields;
+	postfields = &dupch->postfields;
 	if (Z_TYPE_P(postfields) != IS_UNDEF) {
 		if (build_mime_structure_from_hash(dupch, postfields) == FAILURE) {
 			zval_ptr_dtor(return_value);
