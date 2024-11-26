@@ -2714,7 +2714,34 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					}
 					/* THROW and EXIT may be used in the middle of BB */
 					/* don't generate code for the rest of BB */
-					i = end;
+
+					/* Skip current opline for call_level computation
+					 * Don't include last opline because end of loop already checks call level of last opline */
+					i++;
+					for (; i < end; i++) {
+						opline = op_array->opcodes + i;
+						switch (opline->opcode) {
+							case ZEND_INIT_FCALL:
+							case ZEND_INIT_FCALL_BY_NAME:
+							case ZEND_INIT_NS_FCALL_BY_NAME:
+							case ZEND_INIT_METHOD_CALL:
+							case ZEND_INIT_DYNAMIC_CALL:
+							case ZEND_INIT_STATIC_METHOD_CALL:
+							case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+							case ZEND_INIT_USER_CALL:
+							case ZEND_NEW:
+								call_level++;
+								break;
+							case ZEND_DO_FCALL:
+							case ZEND_DO_ICALL:
+							case ZEND_DO_UCALL:
+							case ZEND_DO_FCALL_BY_NAME:
+							case ZEND_CALLABLE_CONVERT:
+								call_level--;
+								break;
+						}
+					}
+					opline = op_array->opcodes + i;
 					break;
 				/* stackless execution */
 				case ZEND_INCLUDE_OR_EVAL:
