@@ -3,7 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.0alpha1
 
 - COM:
-  . Fix property access of PHP objects wrapped in variant. (cmb)
+  . Fixed property access of PHP objects wrapped in variant. (cmb)
+  . Fixed method calls for PHP objects wrapped in variant. (cmb)
 
 - Core:
   . Fixed bug GH-16665 (\array and \callable should not be usable in
