@@ -47,6 +47,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16695 (phar:// tar parser and zero-length file header blocks).
     (nielsdos, Hans Krentel)
 
+- PHPDBG:
+  . Fixed bug GH-15208 (Segfault with breakpoint map and phpdbg_clear()).
+    (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-16808 (Segmentation fault in RecursiveIteratorIterator
     ->current() with a xml element input). (nielsdos)
