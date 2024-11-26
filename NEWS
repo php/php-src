@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     skipLazyInitialization() may change initialized proxy). (Arnaud)
   . Fix is_zend_ptr() huge block comparison. (nielsdos)
 
+- Curl:
+  . Fix various memory leaks in curl mime handling. (nielsdos)
+
 - DOM:
   . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
     (nielsdos)
