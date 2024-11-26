@@ -968,7 +968,7 @@ namespace {
     function pg_socket_poll($socket, int $read, int $write, int $timeout = -1): int {}
 
 #ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
-    function pg_set_chunked_rows_size(Pgsql\Connection $connection, int $size): bool {}
+    function pg_set_chunked_rows_size(PgSql\Connection $connection, int $size): bool {}
 #endif
 }
 
