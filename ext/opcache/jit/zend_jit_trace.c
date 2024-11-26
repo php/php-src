@@ -1164,28 +1164,13 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 		if (opline) {
 			while (opline > op_array->opcodes) {
 				opline--;
-				switch (opline->opcode) {
-					case ZEND_INIT_FCALL:
-					case ZEND_INIT_FCALL_BY_NAME:
-					case ZEND_INIT_NS_FCALL_BY_NAME:
-					case ZEND_INIT_METHOD_CALL:
-					case ZEND_INIT_DYNAMIC_CALL:
-					case ZEND_INIT_STATIC_METHOD_CALL:
-					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
-					case ZEND_INIT_USER_CALL:
-					case ZEND_NEW:
-						if (call_level == 0) {
-							return opline;
-						}
-						call_level--;
-						break;
-					case ZEND_DO_FCALL:
-					case ZEND_DO_ICALL:
-					case ZEND_DO_UCALL:
-					case ZEND_DO_FCALL_BY_NAME:
-					case ZEND_CALLABLE_CONVERT:
-						call_level++;
-						break;
+				if (zend_jit_inc_call_level(opline->opcode)) {
+					if (call_level == 0) {
+						return opline;
+					}
+					call_level--;
+				} else if (zend_jit_dec_call_level(opline->opcode)) {
+					call_level++;
 				}
 			}
 		}
@@ -4394,17 +4379,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 			frame_flags = 0;
 
-			switch (opline->opcode) {
-				case ZEND_INIT_FCALL:
-				case ZEND_INIT_FCALL_BY_NAME:
-				case ZEND_INIT_NS_FCALL_BY_NAME:
-				case ZEND_INIT_METHOD_CALL:
-				case ZEND_INIT_DYNAMIC_CALL:
-				case ZEND_INIT_STATIC_METHOD_CALL:
-				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
-				case ZEND_INIT_USER_CALL:
-				case ZEND_NEW:
-					frame->call_level++;
+			if (zend_jit_inc_call_level(opline->opcode)) {
+				frame->call_level++;
 			}
 
 			if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
@@ -6426,13 +6402,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 done:
 			polymorphic_side_trace = 0;
-			switch (opline->opcode) {
-				case ZEND_DO_FCALL:
-				case ZEND_DO_ICALL:
-				case ZEND_DO_UCALL:
-				case ZEND_DO_FCALL_BY_NAME:
-				case ZEND_CALLABLE_CONVERT:
-					frame->call_level--;
+			if (zend_jit_dec_call_level(opline->opcode)) {
+				frame->call_level--;
 			}
 
 			if (ra) {
