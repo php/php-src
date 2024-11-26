@@ -178,6 +178,8 @@ PHPAPI void *php_reallocarray(void *optr, size_t nmemb, size_t size);
 END_EXTERN_C()
 #undef reallocarray
 #define reallocarray php_reallocarray
+#define HAVE_REALLOCARRAY 1
+#define USE_REALLOCARRAY_PHP_IMPL 1
 #endif
 
 BEGIN_EXTERN_C()

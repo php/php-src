@@ -1,5 +1,5 @@
-/*	OpenBSD: glob.h,v 1.7 2002/02/17 19:42:21 millert Exp 	*/
-/*	NetBSD: glob.h,v 1.5 1994/10/26 00:55:56 cgd Exp 	*/
+/*	$OpenBSD: glob.h,v 1.14 2019/02/04 16:45:40 millert Exp $	*/
+/*	$NetBSD: glob.h,v 1.5 1994/10/26 00:55:56 cgd Exp $	*/
 
 /*
  * Copyright (c) 1989, 1993
@@ -16,11 +16,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
+ * 3. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -49,11 +45,12 @@
 #include "Zend/zend_stream.h"
 
 typedef struct {
-	int gl_pathc;		/* Count of total paths so far. */
-	int gl_matchc;		/* Count of paths matching pattern. */
-	int gl_offs;		/* Reserved at beginning of gl_pathv. */
+	size_t gl_pathc;	/* Count of total paths so far. */
+	size_t gl_matchc;	/* Count of paths matching pattern. */
+	size_t gl_offs;		/* Reserved at beginning of gl_pathv. */
 	int gl_flags;		/* Copy of flags parameter to glob. */
 	char **gl_pathv;	/* List of paths matching pattern. */
+	zend_stat_t **gl_statv;	/* Stat entries corresponding to gl_pathv */
 				/* Copy of errfunc parameter to glob. */
 	int (*gl_errfunc)(const char *, int);
 
@@ -63,19 +60,24 @@ typedef struct {
 	 * and lstat(2).
 	 */
 	void (*gl_closedir)(void *);
-	struct dirent *(*gl_readdir)(void *);
+	struct dirent *(*gl_readdir)(void *);	
 	void *(*gl_opendir)(const char *);
 	int (*gl_lstat)(const char *, zend_stat_t *);
 	int (*gl_stat)(const char *, zend_stat_t *);
 } glob_t;
 
-/* Flags */
 #define	GLOB_APPEND	0x0001	/* Append to output from previous call. */
 #define	GLOB_DOOFFS	0x0002	/* Use gl_offs. */
 #define	GLOB_ERR	0x0004	/* Return on error. */
 #define	GLOB_MARK	0x0008	/* Append / to matching directories. */
 #define	GLOB_NOCHECK	0x0010	/* Return pattern itself if nothing matches. */
 #define	GLOB_NOSORT	0x0020	/* Don't sort. */
+#define	GLOB_NOESCAPE	0x1000	/* Disable backslash escaping. */
+
+#define	GLOB_NOSPACE	(-1)	/* Malloc call failed. */
+#define	GLOB_ABORTED	(-2)	/* Unignored error. */
+#define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
+#define	GLOB_NOSYS	(-4)	/* Function not supported. */
 
 #ifndef _POSIX_SOURCE
 #define	GLOB_ALTDIRFUNC	0x0040	/* Use alternately specified directory funcs. */
@@ -84,19 +86,15 @@ typedef struct {
 #define	GLOB_NOMAGIC	0x0200	/* GLOB_NOCHECK without magic chars (csh). */
 #define	GLOB_QUOTE	0x0400	/* Quote special chars with \. */
 #define	GLOB_TILDE	0x0800	/* Expand tilde names from the passwd file. */
-#define	GLOB_NOESCAPE	0x1000	/* Disable backslash escaping. */
 #define GLOB_LIMIT	0x2000	/* Limit pattern match output to ARG_MAX */
+#define	GLOB_KEEPSTAT	0x4000	/* Retain stat data for paths in gl_statv. */
+#define GLOB_ABEND	GLOB_ABORTED /* backward compatibility */
 #endif
 
-/* Error values returned by glob(3) */
-#define	GLOB_NOSPACE	(-1)	/* Malloc call failed. */
-#define	GLOB_ABORTED	(-2)	/* Unignored error. */
-#define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
-#define	GLOB_NOSYS	(-4)	/* Function not supported. */
-#define GLOB_ABEND	GLOB_ABORTED
-
 BEGIN_EXTERN_C()
-PHPAPI int	glob(const char *, int, int (*)(const char *, int), glob_t *);
+PHPAPI int	glob(const char *__restrict, int, int (*)(const char *, int),
+	    glob_t *__restrict);
 PHPAPI void	globfree(glob_t *);
 END_EXTERN_C()
+
 #endif /* !_GLOB_H_ */
