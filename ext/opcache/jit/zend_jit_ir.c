@@ -17381,8 +17381,15 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
-	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) != 0 && (opline->op2_type & (IS_VAR|IS_TMP_VAR)) != 0) {
+	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) != 0
+	 && (opline->op2_type & (IS_VAR|IS_TMP_VAR)) != 0
+	 && (op2_info & MAY_BE_RC1)
+	 && (op2_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 		jit_set_Z_TYPE_INFO(jit, op1_addr, IS_UNDEF);
+		if (JIT_G(current_frame)) {
+			SET_STACK_TYPE(JIT_G(current_frame)->stack,
+				EX_VAR_TO_NUM(opline->op1.var), IS_UNKNOWN, 1);
+		}
 	}
 	jit_FREE_OP(jit, opline->op2_type, opline->op2, op2_info, NULL);
 	zend_jit_check_exception(jit);
@@ -17455,18 +17462,34 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
+	bool op1_undef = false;
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
-	 && ((opline->op2_type & (IS_VAR|IS_TMP_VAR))
-	  || (op_data_type & (IS_VAR|IS_TMP_VAR)))) {
+	 && (((opline->op2_type & (IS_VAR|IS_TMP_VAR))
+	   && (op2_info & MAY_BE_RC1)
+	   && (op2_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)))
+	  || ((op_data_type & (IS_VAR|IS_TMP_VAR))
+	   && (op1_data_info & MAY_BE_RC1)
+	   && (op1_data_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))))) {
+	    op1_undef = true;
 		jit_set_Z_TYPE_INFO(jit, op1_addr, IS_UNDEF);
+		if (JIT_G(current_frame)) {
+			SET_STACK_TYPE(JIT_G(current_frame)->stack,
+				EX_VAR_TO_NUM(opline->op1.var), IS_UNKNOWN, 1);
+		}
 	}
 	jit_FREE_OP(jit, opline->op2_type, opline->op2, op2_info, NULL);
-	/* If OP1 is a TMP|VAR, we don't need to set OP2 to UNDEF on free because
+	/* If OP1 is set to UNDEF, we don't need to set OP2 to UNDEF on free because
 	 * zend_fetch_debug_backtrace aborts when it encounters the first UNDEF TMP|VAR. */
-	if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR))
+	if (!op1_undef
 	 && (opline->op2_type & (IS_VAR|IS_TMP_VAR)) != 0
-	 && (op_data_type & (IS_VAR|IS_TMP_VAR)) != 0) {
+	 && (op_data_type & (IS_VAR|IS_TMP_VAR)) != 0
+	 && (op1_data_info & MAY_BE_RC1)
+	 && (op1_data_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 		jit_set_Z_TYPE_INFO(jit, op2_addr, IS_UNDEF);
+		if (JIT_G(current_frame)) {
+			SET_STACK_TYPE(JIT_G(current_frame)->stack,
+				EX_VAR_TO_NUM(opline->op2.var), IS_UNKNOWN, 1);
+		}
 	}
 	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, NULL);
 	zend_jit_check_exception(jit);
