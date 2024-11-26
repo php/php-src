@@ -836,6 +836,38 @@ ZEND_EXT_API void zend_jit_status(zval *ret)
 	add_assoc_zval(ret, "jit", &stats);
 }
 
+static bool zend_jit_inc_call_level(uint8_t opcode)
+{
+	switch (opcode) {
+		case ZEND_INIT_FCALL:
+		case ZEND_INIT_FCALL_BY_NAME:
+		case ZEND_INIT_NS_FCALL_BY_NAME:
+		case ZEND_INIT_METHOD_CALL:
+		case ZEND_INIT_DYNAMIC_CALL:
+		case ZEND_INIT_STATIC_METHOD_CALL:
+		case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+		case ZEND_INIT_USER_CALL:
+		case ZEND_NEW:
+			return true;
+		default:
+			return false;
+	}
+}
+
+static bool zend_jit_dec_call_level(uint8_t opcode)
+{
+	switch (opcode) {
+		case ZEND_DO_FCALL:
+		case ZEND_DO_ICALL:
+		case ZEND_DO_UCALL:
+		case ZEND_DO_FCALL_BY_NAME:
+		case ZEND_CALLABLE_CONVERT:
+			return true;
+		default:
+			return false;
+	}
+}
+
 static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 {
 	smart_str buf = {0};
@@ -1572,17 +1604,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 		for (i = ssa->cfg.blocks[b].start; i <= end; i++) {
 			zend_ssa_op *ssa_op = ssa->ops ? &ssa->ops[i] : NULL;
 			opline = op_array->opcodes + i;
-			switch (opline->opcode) {
-				case ZEND_INIT_FCALL:
-				case ZEND_INIT_FCALL_BY_NAME:
-				case ZEND_INIT_NS_FCALL_BY_NAME:
-				case ZEND_INIT_METHOD_CALL:
-				case ZEND_INIT_DYNAMIC_CALL:
-				case ZEND_INIT_STATIC_METHOD_CALL:
-				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
-				case ZEND_INIT_USER_CALL:
-				case ZEND_NEW:
-					call_level++;
+			if (zend_jit_inc_call_level(opline->opcode)) {
+				call_level++;
 			}
 
 			if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
@@ -2720,25 +2743,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					i++;
 					for (; i < end; i++) {
 						opline = op_array->opcodes + i;
-						switch (opline->opcode) {
-							case ZEND_INIT_FCALL:
-							case ZEND_INIT_FCALL_BY_NAME:
-							case ZEND_INIT_NS_FCALL_BY_NAME:
-							case ZEND_INIT_METHOD_CALL:
-							case ZEND_INIT_DYNAMIC_CALL:
-							case ZEND_INIT_STATIC_METHOD_CALL:
-							case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
-							case ZEND_INIT_USER_CALL:
-							case ZEND_NEW:
-								call_level++;
-								break;
-							case ZEND_DO_FCALL:
-							case ZEND_DO_ICALL:
-							case ZEND_DO_UCALL:
-							case ZEND_DO_FCALL_BY_NAME:
-							case ZEND_CALLABLE_CONVERT:
-								call_level--;
-								break;
+						if (zend_jit_inc_call_level(opline->opcode)) {
+							call_level++;
+						} else if (zend_jit_dec_call_level(opline->opcode)) {
+							call_level--;
 						}
 					}
 					opline = op_array->opcodes + i;
@@ -2853,13 +2861,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					}
 			}
 done:
-			switch (opline->opcode) {
-				case ZEND_DO_FCALL:
-				case ZEND_DO_ICALL:
-				case ZEND_DO_UCALL:
-				case ZEND_DO_FCALL_BY_NAME:
-				case ZEND_CALLABLE_CONVERT:
-					call_level--;
+			if (zend_jit_dec_call_level(opline->opcode)) {
+				call_level--;
 			}
 		}
 		zend_jit_bb_end(&ctx, b);
