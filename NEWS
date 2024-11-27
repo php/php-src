@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed GH-16776 (imagecreatefromstring overflow). (David Carlier)
 
+- GMP:
+  . Revert gmp_pow() overly restrictive overflow checks.
+    (David Carlier)
+
 - Hash:
   . Fixed GH-16711: Segfault in mhash(). (Girgias)
 
