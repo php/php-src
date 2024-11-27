@@ -7,7 +7,7 @@ if (PHP_CURL != "no") {
 		SETUP_OPENSSL("curl", PHP_CURL) >= 2 &&
 		CHECK_LIB("winmm.lib", "curl", PHP_CURL) &&
 		CHECK_LIB("wldap32.lib", "curl", PHP_CURL) &&
-		SETUP_ZLIB_LIB("curl", PHP_CURL) &&
+		SETUP_ZLIB_LIB("curl") &&
 		CHECK_LIB("normaliz.lib", "curl", PHP_CURL)
 	) {
 		PHP_EVAL_INCLINE(LIBCURL_CFLAGS, "curl");

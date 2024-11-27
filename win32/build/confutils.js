@@ -3684,7 +3684,14 @@ function ADD_MAKEFILE_FRAGMENT(src_file)
 
 function SETUP_ZLIB_LIB(target, path_to_check)
 {
-	return (PHP_ZLIB != "no" && !PHP_ZLIB_SHARED) || CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check);
+	var pcm;
+	if ((PHP_ZLIB != "no" && !PHP_ZLIB_SHARED) || (pcm = PKG_CHECK_MODULES("ZLIB", "zlib"))) {
+		if (pcm) {
+			PHP_EVAL_LIBLINE(ZLIB_CFLAGS, target);
+		}
+		return true;
+	}
+	return false;
 }
 
 function SETUP_OPENSSL(target)

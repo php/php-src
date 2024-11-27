@@ -8,11 +8,11 @@ if (PHP_GD != "no") {
 	if (
 		PKG_CHECK_MODULES("GD", "libjpeg freetype libpng libiconv") &&
 		CHECK_HEADER_ADD_INCLUDE("gd.h", "CFLAGS_GD", PHP_GD + ";ext\\gd\\libgd") &&
-		SETUP_ZLIB_LIB("gd", PHP_GD) &&
-		CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
-		) {
-			PHP_EVAL_INCLINE(GD_CFLAGS, "gd");
-			PHP_EVAL_LIBLINE(GD_LIBS, "gd");
+		SETUP_ZLIB_LIB("gd") && PKG_CHECK_MODULES("ZLIB", "zlib")
+	) {
+		PHP_EVAL_INCLINE(GD_CFLAGS, "gd");
+		PHP_EVAL_LIBLINE(GD_LIBS, "gd");
+		PHP_EVAL_INCLINE(ZLIB_CFLAGS);
 
 		if (PKG_CHECK_MODULES("LIBXPM", "libxpm")) {
 			PHP_EVAL_INCLINE(LIBXPM_CFLAGS, "gd");
