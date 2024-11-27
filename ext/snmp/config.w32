@@ -3,9 +3,9 @@
 ARG_WITH("snmp", "SNMP support", "no");
 
 if (PHP_SNMP != "no") {
-	if (PKG_CHECK_MODULES("SNMP", "netsnmp")) {
-		PHP_EVAL_INCLINE(SNMP_CFLAGS, "snmp");
-		PHP_EVAL_LIBLINE(SNMP_LIBS, "snmp")
+	if (PKG_CHECK_MODULES("NET_SNMP", "net-snmp")) {
+		PHP_EVAL_INCLINE(NET_SNMP_CFLAGS, "snmp");
+		PHP_EVAL_LIBLINE(NET_SNMP_LIBS, "snmp")
 		EXTENSION('snmp', 'snmp.c');
 		ADD_EXTENSION_DEP('snmp', 'spl');
 		AC_DEFINE('HAVE_SNMP', 1, "Define to 1 if the PHP extension 'snmp' is available.");

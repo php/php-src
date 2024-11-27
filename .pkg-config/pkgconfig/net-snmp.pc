@@ -6,6 +6,6 @@ Name: net-snmp
 Description: winlib net-snmp package
 URL: https://github.com/winlibs/net-snmp
 Version: 5.9.4
-Requires: libcrypto libssl
+Requires: openssl
 Libs: -L${libdir} -lnetsnmp
 Cflags: -I${includedir}
