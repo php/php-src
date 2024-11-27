@@ -244,7 +244,7 @@ PHP_GSHUTDOWN_FUNCTION(curl)
 
 zend_class_entry *curl_ce;
 zend_class_entry *curl_share_ce;
-zend_class_entry *curl_persistent_share_ce;
+zend_class_entry *curl_share_persistent_ce;
 static zend_object_handlers curl_object_handlers;
 
 static zend_object *curl_create_object(zend_class_entry *class_type);
@@ -429,8 +429,8 @@ PHP_MINIT_FUNCTION(curl)
 	curl_share_ce = register_class_CurlShareHandle();
 	curl_share_register_handlers();
 
-	curl_persistent_share_ce = register_class_CurlPersistentShareHandle();
-	curl_persistent_share_register_handlers();
+	curl_share_persistent_ce = register_class_CurlSharePersistentHandle();
+	curl_share_persistent_register_handlers();
 
 	curlfile_register_class();
 
@@ -2302,7 +2302,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 					break;
 				}
 
-				if (Z_OBJCE_P(zvalue) != curl_share_ce && Z_OBJCE_P(zvalue) != curl_persistent_share_ce) {
+				if (Z_OBJCE_P(zvalue) != curl_share_ce && Z_OBJCE_P(zvalue) != curl_share_persistent_ce) {
 					break;
 				}
 

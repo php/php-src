@@ -141,7 +141,7 @@ PHP_FUNCTION(curl_share_strerror)
  *
  * Throws an exception if the share options are invalid.
  */
-PHP_FUNCTION(curl_persistent_share_init)
+PHP_FUNCTION(curl_share_init_persistent)
 {
 	zval *share_opts = NULL, *entry = NULL;
 	zend_ulong persistent_id = 0;
@@ -154,7 +154,7 @@ PHP_FUNCTION(curl_persistent_share_init)
 		Z_PARAM_ARRAY_EX(share_opts, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	object_init_ex(return_value, curl_persistent_share_ce);
+	object_init_ex(return_value, curl_share_persistent_ce);
 	sh = Z_CURL_SHARE_P(return_value);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
@@ -177,7 +177,7 @@ PHP_FUNCTION(curl_persistent_share_init)
 	} ZEND_HASH_FOREACH_END();
 
 	zend_array_sort(Z_ARRVAL_P(share_opts), php_array_data_compare_unstable_i, 1);
-	zend_update_property(curl_persistent_share_ce, Z_OBJ_P(return_value), "options", sizeof("options") - 1, share_opts);
+	zend_update_property(curl_share_persistent_ce, Z_OBJ_P(return_value), "options", sizeof("options") - 1, share_opts);
 
 	if (persistent_id) {
 		zval *persisted = zend_hash_index_find(&CURL_G(persistent_curlsh), persistent_id);
@@ -280,22 +280,22 @@ void curl_share_register_handlers(void) {
 	curl_share_handlers.compare = zend_objects_not_comparable;
 }
 
-/* CurlPersistentShareHandle class */
+/* CurlSharePersistentHandle class */
 
-static zend_function *curl_persistent_share_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct CurlPersistentShareHandle, use curl_persistent_share_init() instead");
+static zend_object_handlers curl_share_persistent_handlers;
+
+static zend_function *curl_share_persistent_get_constructor(zend_object *object) {
+	zend_throw_error(NULL, "Cannot directly construct CurlSharePersistentHandle, use curl_share_init_persistent() instead");
 	return NULL;
 }
 
-static zend_object_handlers curl_persistent_share_handlers;
+void curl_share_persistent_register_handlers(void) {
+	curl_share_persistent_ce->create_object = curl_share_create_object;
+	curl_share_persistent_ce->default_object_handlers = &curl_share_persistent_handlers;
 
-void curl_persistent_share_register_handlers(void) {
-	curl_persistent_share_ce->create_object = curl_share_create_object;
-	curl_persistent_share_ce->default_object_handlers = &curl_persistent_share_handlers;
-
-	memcpy(&curl_persistent_share_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	curl_persistent_share_handlers.offset = XtOffsetOf(php_curlsh, std);
-	curl_persistent_share_handlers.get_constructor = curl_persistent_share_get_constructor;
-	curl_persistent_share_handlers.clone_obj = NULL;
-	curl_persistent_share_handlers.compare = zend_objects_not_comparable;
+	memcpy(&curl_share_persistent_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	curl_share_persistent_handlers.offset = XtOffsetOf(php_curlsh, std);
+	curl_share_persistent_handlers.get_constructor = curl_share_persistent_get_constructor;
+	curl_share_persistent_handlers.clone_obj = NULL;
+	curl_share_persistent_handlers.compare = zend_objects_not_comparable;
 }

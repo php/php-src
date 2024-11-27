@@ -9,7 +9,7 @@ include 'skipif-nocaddy.inc';
 --FILE--
 <?php
 
-function get_localhost_curl_handle(CurlPersistentShareHandle $sh): CurlHandle {
+function get_localhost_curl_handle(CurlSharePersistentHandle $sh): CurlHandle {
     $ch = curl_init("https://localhost");
 
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -19,12 +19,12 @@ function get_localhost_curl_handle(CurlPersistentShareHandle $sh): CurlHandle {
     return $ch;
 }
 
-$sh1 = curl_persistent_share_init([CURL_LOCK_DATA_DNS, CURL_LOCK_DATA_CONNECT]);
+$sh1 = curl_share_init_persistent([CURL_LOCK_DATA_DNS, CURL_LOCK_DATA_CONNECT]);
 $ch1 = get_localhost_curl_handle($sh1);
 
 // Note that we're using different share options and thus should get a different persistent share
 // handle.
-$sh2 = curl_persistent_share_init([CURL_LOCK_DATA_CONNECT]);
+$sh2 = curl_share_init_persistent([CURL_LOCK_DATA_CONNECT]);
 $ch2 = get_localhost_curl_handle($sh2);
 
 var_dump($sh1->options != $sh2->options);

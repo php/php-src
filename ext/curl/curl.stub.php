@@ -3672,7 +3672,7 @@ final class CurlShareHandle
  * @strict-properties
  * @not-serializable
  */
-final class CurlPersistentShareHandle
+final class CurlSharePersistentHandle
 {
     public readonly array $options;
 }
@@ -3760,10 +3760,10 @@ function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $va
 function curl_share_strerror(int $error_code): ?string {}
 
 /** @refcount 1 */
-function curl_strerror(int $error_code): ?string {}
+function curl_share_init_persistent(array $share_options): CurlSharePersistentHandle {}
 
 /** @refcount 1 */
-function curl_persistent_share_init(array $share_options): CurlPersistentShareHandle {}
+function curl_strerror(int $error_code): ?string {}
 
 /**
  * @return array<string, int|string|array>|false

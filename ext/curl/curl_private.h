@@ -164,8 +164,8 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 
 void curl_multi_register_handlers(void);
 void curl_share_register_handlers(void);
+void curl_share_persistent_register_handlers(void);
 void curl_share_free_persistent_curlsh(zval *data);
-void curl_persistent_share_register_handlers(void);
 void curlfile_register_class(void);
 zend_result curl_cast_object(zend_object *obj, zval *result, int type);
 
