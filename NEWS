@@ -14,12 +14,20 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-16630 (UAF in lexer with encoding translation and heredocs).
     (nielsdos)
+  . Fix is_zend_ptr() huge block comparison. (nielsdos)
+
+- Curl:
+  . Fix various memory leaks in curl mime handling. (nielsdos)
 
 - FPM:
   . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
 
 - GD:
   . Fixed GH-16776 (imagecreatefromstring overflow). (David Carlier)
+
+- GMP:
+  . Revert gmp_pow() overly restrictive overflow checks.
+    (David Carlier)
 
 - Hash:
   . Fixed GH-16711: Segfault in mhash(). (Girgias)
@@ -29,6 +37,7 @@ PHP                                                                        NEWS
     (nielsdos, Dmitry)
   . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
     (dktapps)
+  . Fixed bug GH-16902 (Set of opcache tests fail zts+aarch64). (nielsdos)
 
 - OpenSSL:
   . Prevent unexpected array entry conversion when reading key. (nielsdos)
@@ -42,9 +51,16 @@ PHP                                                                        NEWS
   . Fixed bug GH-16695 (phar:// tar parser and zero-length file header blocks).
     (nielsdos, Hans Krentel)
 
+- PHPDBG:
+  . Fixed bug GH-15208 (Segfault with breakpoint map and phpdbg_clear()).
+    (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-16808 (Segmentation fault in RecursiveIteratorIterator
     ->current() with a xml element input). (nielsdos)
+
+- Windows:
+  . Fixed bug GH-16849 (Error dialog causes process to hang). (cmb)
 
 21 Nov 2024, PHP 8.2.26
 
@@ -117,8 +133,12 @@ PHP                                                                        NEWS
     (nielsdos)
 
 - GMP:
+  . Fixed floating point exception bug with gmp_pow when using
+    large exposant values. (David Carlier).
   . Fixed bug GH-16411 (gmp_export() can cause overflow). (cmb)
   . Fixed bug GH-16501 (gmp_random_bits() can cause overflow).
+    (David Carlier)
+  . Fixed gmp_pow() overflow bug with large base/exponents.
     (David Carlier)
   . Fixed segfaults and other issues related to operator overloading with
     GMP objects. (Girgias)
