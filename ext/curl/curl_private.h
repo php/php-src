@@ -136,13 +136,11 @@ typedef struct {
 } php_curlm;
 
 typedef struct _php_curlsh {
-	CURLSH *share;
-
+	CURLSH                   *share;
 	struct {
 		int no;
 	} err;
-
-    zend_object std;
+	zend_object std;
 } php_curlsh;
 
 php_curl *init_curl_handle_into_zval(zval *curl);
