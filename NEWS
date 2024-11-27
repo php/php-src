@@ -76,6 +76,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-16905 (Internal iterator functions can't handle UNDEF
     properties). (nielsdos)
+  . Fixed bug GH-16957 (Assertion failure in array_shift with
+    self-referencing array). (nielsdos)
 
 - Streams:
   . Fixed network connect poll interuption handling. (Jakub Zelenka)
