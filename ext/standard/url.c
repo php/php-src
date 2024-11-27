@@ -552,13 +552,28 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 /* {{{ URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
-	zend_string *in_str;
+    zend_string *in_str = NULL;
+    zend_long    in_long;
+    zend_string *tmpstr = NULL;
+    zend_string *encoded_str;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(in_str)
-	ZEND_PARSE_PARAMETERS_END();
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR_OR_LONG(in_str, in_long)
+    ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
+    if (in_str == NULL) {
+        /* Input is an integer */
+        in_str = tmpstr = zend_long_to_str(in_long);
+    }
+
+    encoded_str = php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str));
+
+    /* Release the temporary string if we allocated one */
+    if (tmpstr != NULL) {
+        zend_string_release(tmpstr);
+    }
+
+    RETURN_STR(encoded_str);
 }
 /* }}} */
 
@@ -614,13 +629,29 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 /* {{{ URL-encodes string */
 PHP_FUNCTION(rawurlencode)
 {
-	zend_string *in_str;
+    zend_string *in_str = NULL;
+    zend_long    in_long;
+    zend_string *tmpstr = NULL;
+    zend_string *encoded_str;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(in_str)
-	ZEND_PARSE_PARAMETERS_END();
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR_OR_LONG(in_str, in_long)
+    ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
+    if (in_str == NULL) {
+        /* Input is an integer */
+        in_str = tmpstr = zend_long_to_str(in_long);
+    }
+
+    encoded_str = php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str));
+
+
+    /* Release the temporary string if we allocated one */
+    if (tmpstr != NULL) {
+        zend_string_release(tmpstr);
+    }
+
+    RETURN_STR(encoded_str);
 }
 /* }}} */
 

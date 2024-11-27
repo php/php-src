@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e277d3a5699db6aeedb08642720be841dc37d683 */
+ * Stub hash: f7c38f9d4e4ac96c42e7b1ec2046d79c565c64b4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2077,11 +2077,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_parse_url, 0, 1, MAY_BE_LONG|MAY
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-#define arginfo_urlencode arginfo_base64_encode
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_urlencode, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, string, MAY_BE_STRING|MAY_BE_LONG, NULL)
+ZEND_END_ARG_INFO()
 
 #define arginfo_urldecode arginfo_base64_encode
 
-#define arginfo_rawurlencode arginfo_base64_encode
+#define arginfo_rawurlencode arginfo_urlencode
 
 #define arginfo_rawurldecode arginfo_base64_encode
 

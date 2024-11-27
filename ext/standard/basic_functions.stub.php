@@ -3715,7 +3715,7 @@ function parse_url(string $url, int $component = -1): int|string|array|null|fals
  * @compile-time-eval
  * @refcount 1
  */
-function urlencode(string $string): string {}
+function urlencode(string|int $string): string {}
 
 /**
  * @compile-time-eval
@@ -3727,7 +3727,7 @@ function urldecode(string $string): string {}
  * @compile-time-eval
  * @refcount 1
  */
-function rawurlencode(string $string): string {}
+function rawurlencode(string|int $string): string {}
 
 /**
  * @compile-time-eval

@@ -2,7 +2,7 @@
 String functions
 --FILE--
 <?php
-
+declare(strict_types=1);
 echo "Testing strtok: ";
 
 $str = "testing 1/2\\3";
@@ -202,6 +202,11 @@ if (strlen($ui1) == strlen($ui2) && strlen($ui1) == $len && $ui1 != $ui2) {
     echo("failed!\n");
 }
 
+echo "testing (raw)urlencode(int)\n";
+var_dump(urlencode(1));
+var_dump(rawurlencode(1));
+
+
 ?>
 --EXPECT--
 Testing strtok: passed
@@ -221,3 +226,6 @@ Testing addslashes: passed
 Testing stripslashes: passed
 Testing uniqid(true): passed
 Testing uniqid(false): passed
+testing (raw)urlencode(int)
+string(1) "1"
+string(1) "1"
