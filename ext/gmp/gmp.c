@@ -96,7 +96,7 @@ PHP_GMP_API zend_class_entry *php_gmp_class_entry(void) {
 	((__GNU_MP_VERSION >= 6) || (__GNU_MP_VERSION >= 5 && __GNU_MP_VERSION_MINOR >= 1))
 
 #define IS_GMP(zval) \
-	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), gmp_ce))
+	(Z_TYPE_P(zval) == IS_OBJECT && Z_OBJCE_P(zval) == gmp_ce)
 
 #define GET_GMP_OBJECT_FROM_OBJ(obj) \
 	php_gmp_object_from_zend_object(obj)
@@ -116,7 +116,7 @@ static bool gmp_zend_parse_arg_into_mpz_ex(
 	bool is_operator
 ) {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
-		if (EXPECTED(instanceof_function(Z_OBJCE_P(arg), gmp_ce))) {
+		if (EXPECTED(Z_OBJCE_P(arg) == gmp_ce)) {
 			*destination_mpz_ptr = GET_GMP_FROM_ZVAL(arg);
 			return true;
 		}
