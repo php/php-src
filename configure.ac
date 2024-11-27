@@ -689,7 +689,7 @@ AS_VAR_IF([php_cv_func_copy_file_range], [yes],
   [AC_DEFINE([HAVE_COPY_FILE_RANGE], [1],
     [Define to 1 if you have the 'copy_file_range' function.])])
 
-AC_REPLACE_FUNCS([strlcat strlcpy explicit_bzero getopt])
+AC_REPLACE_FUNCS([strlcat strlcpy reallocarray explicit_bzero getopt])
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 
@@ -1638,6 +1638,7 @@ PHP_ADD_SOURCES([main], m4_normalize([
     php_ticks.c
     php_variables.c
     reentrancy.c
+    reallocarray.c
     rfc1867.c
     safe_bcmp.c
     SAPI.c
