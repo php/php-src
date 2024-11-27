@@ -59,13 +59,6 @@
 
 #define FC(member) (CG(file_context).member)
 
-#define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
-#define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
-#define literal_dtor(zv) do { \
-		zval_ptr_dtor_nogc(zv); \
-		ZVAL_NULL(zv); \
-	} while (0)
-
 typedef struct _zend_loop_var {
 	uint8_t opcode;
 	uint8_t var_type;
@@ -5343,7 +5336,47 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		}
 	}
 
-	uint32_t init_opnum = get_next_op_number();
+	/* Check if we already know which method we're calling */
+	if (method_node.op_type == IS_CONST) {
+		zend_class_entry *ce = NULL;
+		if (class_node.op_type == IS_CONST) {
+			zend_string *lcname = zend_string_tolower(Z_STR(class_node.u.constant));
+			ce = zend_hash_find_ptr(CG(class_table), lcname);
+			if (ce) {
+				if (zend_compile_ignore_class(ce, CG(active_op_array)->filename)) {
+					ce = NULL;
+				}
+			} else if (CG(active_class_entry)
+					&& zend_string_equals_ci(CG(active_class_entry)->name, lcname)) {
+				ce = CG(active_class_entry);
+			}
+			zend_string_release(lcname);
+		} else if (class_node.op_type == IS_UNUSED
+				&& (class_node.u.op.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
+				&& zend_is_scope_known()) {
+			ce = CG(active_class_entry);
+		}
+		if (ce) {
+			zend_string *lcname = zend_string_tolower(Z_STR(method_node.u.constant));
+			fbc = zend_get_compatible_func_or_null(ce, lcname);
+			zend_string_release(lcname);
+
+			if (fbc
+			 && !(CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS)
+			 && (fbc->type == ZEND_INTERNAL_FUNCTION)
+			 && zend_ast_is_list(args_ast)
+			 && !zend_args_contain_unpack_or_named(zend_ast_get_list(args_ast))) {
+				if (zend_compile_frameless_icall(result, zend_ast_get_list(args_ast), fbc, type) != (uint32_t)-1) {
+					zval_ptr_dtor(&method_node.u.constant);
+					if (class_node.op_type == IS_CONST) {
+						zval_ptr_dtor(&class_node.u.constant);
+					}
+					return;
+				}
+			}
+		}
+	}
+
 	opline = get_next_op();
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 
@@ -5359,47 +5392,6 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 			opline->result.num = zend_alloc_cache_slot();
 		}
 		SET_NODE(opline->op2, &method_node);
-	}
-
-	/* Check if we already know which method we're calling */
-	if (opline->op2_type == IS_CONST) {
-		zend_class_entry *ce = NULL;
-		if (opline->op1_type == IS_CONST) {
-			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op1) + 1);
-			ce = zend_hash_find_ptr(CG(class_table), lcname);
-			if (ce) {
-				if (zend_compile_ignore_class(ce, CG(active_op_array)->filename)) {
-					ce = NULL;
-				}
-			} else if (CG(active_class_entry)
-					&& zend_string_equals_ci(CG(active_class_entry)->name, lcname)) {
-				ce = CG(active_class_entry);
-			}
-		} else if (opline->op1_type == IS_UNUSED
-				&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
-				&& zend_is_scope_known()) {
-			ce = CG(active_class_entry);
-		}
-		if (ce) {
-			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op2) + 1);
-			fbc = zend_get_compatible_func_or_null(ce, lcname);
-		}
-	}
-
-	if (!(CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS)
-	 && fbc
-	 && (fbc->type == ZEND_INTERNAL_FUNCTION)
-	 && zend_ast_is_list(args_ast)
-	 && !zend_args_contain_unpack_or_named(zend_ast_get_list(args_ast))) {
-		if (zend_compile_frameless_icall(result, zend_ast_get_list(args_ast), fbc, type) != (uint32_t)-1) {
-			/* Update opline in case it got invalidated. */
-			zend_op_array *op_array = CG(active_op_array);
-			opline = &op_array->opcodes[init_opnum];
-			literal_dtor(&ZEND_OP1_LITERAL(opline));
-			literal_dtor(&ZEND_OP2_LITERAL(opline));
-			MAKE_NOP(opline);
-			return;
-		}
 	}
 
 	zend_compile_call_common(result, args_ast, fbc, zend_ast_get_lineno(method_ast));
