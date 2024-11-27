@@ -404,7 +404,7 @@ valueof_op_failure:
 
 static zend_result gmp_do_operation_ex(uint8_t opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	mpz_ptr gmp_op1, gmp_result;
+	mpz_ptr gmp_result;
 	switch (opcode) {
 	case ZEND_ADD:
 		return binop_operator_helper(mpz_add, result, op1, op2);
@@ -429,11 +429,9 @@ static zend_result gmp_do_operation_ex(uint8_t opcode, zval *result, zval *op1, 
 	case ZEND_BW_XOR:
 		return binop_operator_helper(mpz_xor, result, op1, op2);
 	case ZEND_BW_NOT: {
-		if (!gmp_zend_parse_arg_into_mpz_ex(op1, &gmp_op1, 1, false)) {
-			return FAILURE;
-		}
+		ZEND_ASSERT(Z_TYPE_P(op1) == IS_OBJECT && Z_OBJCE_P(op1) == gmp_ce);
 		gmp_create(result, &gmp_result);
-		mpz_com(gmp_result, gmp_op1);
+		mpz_com(gmp_result, GET_GMP_FROM_ZVAL(op1));
 		return SUCCESS;
 	}
 
