@@ -67,6 +67,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16808 (Segmentation fault in RecursiveIteratorIterator
     ->current() with a xml element input). (nielsdos)
 
+- SNMP:
+  . Fixed bug GH-16959 (snmget modifies the object_id array).
+    (David Carlier)
+
 - Standard:
   . Fixed bug GH-16905 (Internal iterator functions can't handle UNDEF
     properties). (nielsdos)
