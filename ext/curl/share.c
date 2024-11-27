@@ -160,20 +160,39 @@ PHP_FUNCTION(curl_share_init_persistent)
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
 		ZVAL_DEREF(entry);
 
-		zend_ulong option = zval_get_long_ex(entry, true);
+		bool failed       = false;
+		zend_ulong option = zval_try_get_long(entry, &failed);
 
-		if (option == CURL_LOCK_DATA_COOKIE) {
-			zend_throw_exception_ex(
-				NULL,
-				0,
-				"CURL_LOCK_DATA_COOKIE is not allowed with persistent curl share handles"
-			);
-
+		if (failed) {
+			zend_argument_type_error(1, "must contain only longs, %s given", zend_zval_value_name(entry));
 			goto error;
 		}
 
-		// Ensure that each additional option results in a unique persistent ID.
-		persistent_id += 1 << option;
+		switch (option) {
+		// Disallowed options
+		case CURL_LOCK_DATA_COOKIE:
+			zend_argument_value_error(1, "CURL_LOCK_DATA_COOKIE is not allowed");
+			goto error;
+
+		// Allowed options
+		case CURL_LOCK_DATA_DNS:
+			persistent_id |= 1 << 0;
+			break;
+		case CURL_LOCK_DATA_SSL_SESSION:
+			persistent_id |= 1 << 1;
+			break;
+		case CURL_LOCK_DATA_CONNECT:
+			persistent_id |= 1 << 2;
+			break;
+		case CURL_LOCK_DATA_PSL:
+			persistent_id |= 1 << 3;
+			break;
+
+		// Unknown options
+		default:
+			zend_argument_value_error(1, "must contain only CURL_LOCK_DATA_* constants");
+			goto error;
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	zend_array_sort(Z_ARRVAL_P(share_opts), php_array_data_compare_unstable_i, 1);
