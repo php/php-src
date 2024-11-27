@@ -149,6 +149,29 @@ class Response extends BaseResponse
     }
 
     /**
+     * Expect status field with value that matches the supplied pattern.
+     *
+     * @param string $fieldName
+     * @param string $pattern
+     *
+     * @return Response
+     */
+    public function expectJsonBodyPatternForStatusField(string $fieldName, string $pattern): Response
+    {
+        $rawData = $this->getBody('application/json');
+        $data = json_decode($rawData, true);
+        if (preg_match('|' . $pattern . '|', $data[$fieldName]) > 0) {
+            return $this;
+        }
+
+        $this->error(
+            "Field $fieldName did not match pattern $pattern in status data '$rawData'"
+        );
+
+        return $this;
+    }
+
+    /**
      * Expect that one of the processes in json status process list has a field with value that
      * matches the supplied pattern.
      *
@@ -167,7 +190,7 @@ class Response extends BaseResponse
             );
         }
         foreach ($data['processes'] as $process) {
-            if (preg_match('|' . $pattern . '|', $process[$fieldName]) !== false) {
+            if (preg_match('|' . $pattern . '|', $process[$fieldName]) > 0) {
                 return $this;
             }
         }
