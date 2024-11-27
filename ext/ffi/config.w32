@@ -1,8 +1,9 @@
 ARG_WITH('ffi', 'ffi support', 'no');
 
 if (PHP_FFI != 'no') {
-	if (CHECK_HEADER_ADD_INCLUDE("ffi.h", "CFLAGS_FFI", PHP_FFI+ ";" + PHP_PHP_BUILD + "\\include") &&
-		CHECK_LIB("libffi.lib", "ffi", PHP_FFI)) {
+	if (PKG_CHECK_MODULES("LIBFFI", "libffi")) {
+		PHP_EVAL_INCLINE(LIBFFI_CFLAGS, "ffi");
+		PHP_EVAL_LIBLINE(LIBFFI_LIBS, "ffi");
 		AC_DEFINE('HAVE_FFI', 1, "Define to 1 if the PHP extension 'ffi' is available.");
 
 		if (!X64) {
@@ -13,12 +14,11 @@ if (PHP_FFI != 'no') {
 			AC_DEFINE('HAVE_FFI_SYSV', 1, 'Define to 1 if libffi supports the sysv calling convention.');
 		}
 		// Available in https://github.com/winlibs/libffi.
-		if (GREP_HEADER("ffitarget.h", "FFI_VECTORCALL_PARTIAL", PHP_PHP_BUILD + "\\include")) {
-			AC_DEFINE('HAVE_FFI_VECTORCALL_PARTIAL', 1, 'Define to 1 if libffi partially supports the vectorcall calling convention.');
-		}
+		// FIXME: only define if actually supported
+		AC_DEFINE('HAVE_FFI_VECTORCALL_PARTIAL', 1, 'Define to 1 if libffi partially supports the vectorcall calling convention.');
 
 		EXTENSION('ffi', 'ffi.c ffi_parser.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	} else {
-		WARNING('ffi not enabled, headers or libraries not found');
+		WARNING('ffi not enabled; libffi package not found');
 	}
 }
