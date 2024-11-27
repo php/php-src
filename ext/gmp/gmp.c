@@ -1140,14 +1140,7 @@ ZEND_FUNCTION(gmp_pow)
 		RETURN_THROWS();
 	}
 
-    double powmax = log((double)ZEND_LONG_MAX);
-
 	INIT_GMP_RETVAL(gmpnum_result);
-	zend_ulong gmpnum = mpz_get_ui(gmpnum_base);
-	if ((log(gmpnum) * exp) > powmax) {
-		zend_value_error("base and exponent overflow");
-		RETURN_THROWS();
-	}
 	mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
 }
 /* }}} */
