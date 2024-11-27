@@ -916,9 +916,7 @@ ZEND_FUNCTION(gmp_div_qr)
 	gmp_create(&result1, &gmpnum_result1);
 	gmp_create(&result2, &gmpnum_result2);
 
-	array_init(return_value);
-	add_next_index_zval(return_value, &result1);
-	add_next_index_zval(return_value, &result2);
+	RETVAL_ARR(zend_new_pair(&result1, &result2));
 
 	switch (round) {
 		case GMP_ROUND_ZERO:
@@ -1217,9 +1215,7 @@ ZEND_FUNCTION(gmp_sqrtrem)
 	gmp_create(&result1, &gmpnum_result1);
 	gmp_create(&result2, &gmpnum_result2);
 
-	array_init(return_value);
-	add_next_index_zval(return_value, &result1);
-	add_next_index_zval(return_value, &result2);
+	RETVAL_ARR(zend_new_pair(&result1, &result2));
 
 	mpz_sqrtrem(gmpnum_result1, gmpnum_result2, gmpnum_a);
 }
@@ -1276,9 +1272,7 @@ ZEND_FUNCTION(gmp_rootrem)
 	gmp_create(&result1, &gmpnum_result1);
 	gmp_create(&result2, &gmpnum_result2);
 
-	array_init(return_value);
-	add_next_index_zval(return_value, &result1);
-	add_next_index_zval(return_value, &result2);
+	RETVAL_ARR(zend_new_pair(&result1, &result2));
 
 #if GMP_51_OR_NEWER
 	/* mpz_rootrem() is supported since GMP 4.2, but buggy wrt odd roots
