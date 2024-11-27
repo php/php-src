@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libssh2
+Description: winlibs libssh2 package
+Url: https://github.com/winlibs/libssh2
+Version: 1.11.1
+Libs: -L${libdir} -llibssh2
+Cflags: -I${includedir}

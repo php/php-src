@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: nghttp2
+Description: winlibs nghttp2 package
+Url: https://github.com/winlibs/nghttp2
+Version: 1.63.0
+Libs: -L${libdir} -lnghttp2
+Cflags: -I${includedir}
