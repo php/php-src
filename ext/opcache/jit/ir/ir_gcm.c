@@ -890,9 +890,11 @@ int ir_schedule(ir_ctx *ctx)
 
 	/* Topological sort according dependencies inside each basic block */
 	for (b = 1, bb = ctx->cfg_blocks + 1; b <= ctx->cfg_blocks_count; b++, bb++) {
+		ir_ref start;
+
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 		/* Schedule BB start */
-		i = bb->start;
+		start = i = bb->start;
 		_xlat[i] = bb->start = insns_count;
 		insn = &ctx->ir_base[i];
 		if (insn->op == IR_CASE_VAL) {
@@ -904,12 +906,15 @@ int ir_schedule(ir_ctx *ctx)
 		i = _next[i];
 		insn = &ctx->ir_base[i];
 		if (bb->flags & (IR_BB_HAS_PHI|IR_BB_HAS_PI|IR_BB_HAS_PARAM|IR_BB_HAS_VAR)) {
+			int count = 0;
+
 			/* Schedule PARAM, VAR, PI */
 			while (insn->op == IR_PARAM || insn->op == IR_VAR || insn->op == IR_PI) {
 				_xlat[i] = insns_count;
 				insns_count += 1;
 				i = _next[i];
 				insn = &ctx->ir_base[i];
+				count++;
 			}
 			/* Schedule PHIs */
 			while (insn->op == IR_PHI) {
@@ -925,6 +930,52 @@ int ir_schedule(ir_ctx *ctx)
 					}
 				}
 				i = _next[i];
+				insn = &ctx->ir_base[i];
+				count++;
+			}
+			/* Schedule remaining PHIs */
+			if (UNEXPECTED(count < ctx->use_lists[start].count - 1)) {
+				ir_use_list *use_list = &ctx->use_lists[start];
+				ir_ref *p, count = use_list->count;
+				ir_ref phis = _prev[i];
+
+				for (p = &ctx->use_edges[use_list->refs]; count > 0; p++, count--) {
+					ir_ref use = *p;
+					if (!_xlat[use]) {
+						ir_insn *use_insn = &ctx->ir_base[use];
+						if (use_insn->op == IR_PARAM
+						 || use_insn->op == IR_VAR
+						 || use_insn->op == IR_PI
+						 || use_insn->op == IR_PHI) {
+							if (_prev[use] != phis) {
+								/* remove "use" */
+								_prev[_next[use]] = _prev[use];
+								_next[_prev[use]] = _next[use];
+								/* insert "use" after "phis" */
+								_prev[use] = phis;
+								_next[use] = _next[phis];
+								_prev[_next[phis]] = use;
+								_next[phis] = use;
+							}
+							phis = use;
+							_xlat[use] = insns_count;
+							if (use_insn->op == IR_PHI) {
+								ir_ref *q;
+								/* Reuse "n" from MERGE and skip first input */
+								insns_count += ir_insn_inputs_to_len(n + 1);
+								for (j = n, q = use_insn->ops + 2; j > 0; q++, j--) {
+									ir_ref input = *q;
+									if (input < IR_TRUE) {
+										consts_count += ir_count_constant(_xlat, input);
+									}
+								}
+							} else {
+								insns_count += 1;
+							}
+						}
+					}
+				}
+				i = _next[phis];
 				insn = &ctx->ir_base[i];
 			}
 		}
