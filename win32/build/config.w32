@@ -356,7 +356,7 @@ if (PHP_SECURITY_FLAGS == "yes") {
 }
 
 ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
-ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
+ARG_ENABLE("sanitizer", "Enable ASan (and UBSan) extensions", "no");
 if (VS_TOOLSET) {
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 1929) {
