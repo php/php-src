@@ -1813,7 +1813,7 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	zend_file_cache_unserialize_early_bindings(script, buf);
 }
 
-zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
+zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle, bool force_file_cache_only)
 {
 	zend_string *full_path = file_handle->opened_path;
 	int fd;
@@ -1928,6 +1928,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 
 	if (!file_cache_only &&
+		!force_file_cache_only &&
 	    !ZCSG(restart_in_progress) &&
 	    !ZCSG(restart_pending) &&
 		!ZSMMG(memory_exhausted) &&

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c416c231c5d1270b7e5961f84cc3ca3e29db4959 */
+ * Stub hash: efbc2d9c4b73ec6b63ada6ec2591fc035a24931c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_opcache_reset, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -24,7 +24,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_opcache_get_configuration, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-#define arginfo_opcache_is_script_cached arginfo_opcache_compile_file
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_opcache_is_script_cached, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, file_cache, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(opcache_reset);
 ZEND_FUNCTION(opcache_get_status);
