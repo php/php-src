@@ -69,6 +69,10 @@ PHP                                                                        NEWS
 - SOAP:
   . Fix make check being invoked in ext/soap. (Ma27)
 
+- Standard:
+  . Fixed bug GH-16905 (Internal iterator functions can't handle UNDEF
+    properties). (nielsdos)
+
 - Windows:
   . Fixed bug GH-16849 (Error dialog causes process to hang). (cmb)
 
