@@ -1155,9 +1155,7 @@ class MethodName implements FunctionOrMethodName {
 }
 
 class ReturnInfo {
-    // REFCOUNT_SCALAR (formerly REFCOUNT_0) is automatically applied for
-    // scalars, and not allowed for non-scalars
-    const REFCOUNT_SCALAR = "0";
+    const REFCOUNT_0 = "0";
     const REFCOUNT_1 = "1";
     const REFCOUNT_N = "N";
 
@@ -1201,12 +1199,14 @@ class ReturnInfo {
         $isScalarType = $type !== null && $type->isScalar();
 
         if ($refcount === null) {
-            $this->refcount = $isScalarType ? self::REFCOUNT_SCALAR : self::REFCOUNT_N;
+            $this->refcount = $isScalarType ? self::REFCOUNT_0 : self::REFCOUNT_N;
             return;
         }
 
         if ($isScalarType) {
-            throw new Exception("@refcount is not permitted on functions returning scalar values");
+            throw new Exception(
+                "@refcount on functions returning scalar values is redundant and not permitted"
+            );
         }
 
         if (!in_array($refcount, ReturnInfo::REFCOUNTS_NONSCALAR, true)) {
