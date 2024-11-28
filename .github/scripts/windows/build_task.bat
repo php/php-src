@@ -35,7 +35,7 @@ set CFLAGS=/W1 /WX /w14013
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
-	--disable-debug-pack ^
+	--enable-debug-pack ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
