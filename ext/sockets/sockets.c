@@ -354,7 +354,11 @@ char *sockets_strerror(int error) /* {{{ */
 
 #ifndef PHP_WIN32
 	if (error < -10000) {
-		error = -error - 10000;
+		if (error == INT_MIN) {
+			error = 2147473648;
+		} else {
+			error = -error - 10000;
+		}
 
 #ifdef HAVE_HSTRERROR
 		buf = hstrerror(error);
