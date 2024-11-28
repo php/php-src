@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
     (nielsdos)
 
+- FPM:
+  . Fixed bug GH-16932 (wrong FPM status output). (Jakub Zelenka, James Lucas)
+
 - GMP:
   . Fixed bug GH-16890 (array_sum() with GMP can loose precision (LLP64)).
     (cmb)
