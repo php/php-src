@@ -7,7 +7,6 @@ opcache.jit=disable
 opcache.jit_buffer_size=0
 opcache.file_cache={TMP}
 opcache.file_cache_only=1
-opcache.log_verbosity_level=4
 --EXTENSIONS--
 opcache
 --FILE--
