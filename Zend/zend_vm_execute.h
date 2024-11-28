@@ -6958,7 +6958,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 	} else {
 		do {
 			if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_CONST & (IS_CV|IS_VAR)) {
+				if (IS_CONST & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -6968,7 +6968,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_CONST & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -9514,7 +9516,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 	} else {
 		do {
 			if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_CONST & (IS_CV|IS_VAR)) {
+				if (IS_CONST & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -9524,7 +9526,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_CONST & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -11937,7 +11941,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 	} else {
 		do {
 			if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_CONST & (IS_CV|IS_VAR)) {
+				if (IS_CONST & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -11947,7 +11951,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_CONST & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -16326,7 +16332,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	} else {
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) {
+				if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -16336,7 +16342,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if (((IS_TMP_VAR|IS_VAR) & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -17807,7 +17815,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 	} else {
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) {
+				if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -17817,7 +17825,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if (((IS_TMP_VAR|IS_VAR) & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -19203,7 +19213,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	} else {
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) {
+				if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -19213,7 +19223,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if (((IS_TMP_VAR|IS_VAR) & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -34393,7 +34405,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 	} else {
 		do {
 			if (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_UNUSED & (IS_CV|IS_VAR)) {
+				if (IS_UNUSED & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -34403,7 +34415,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_UNUSED & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -36505,7 +36519,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 	} else {
 		do {
 			if (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_UNUSED & (IS_CV|IS_VAR)) {
+				if (IS_UNUSED & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -36515,7 +36529,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_UNUSED & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -39073,7 +39089,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	} else {
 		do {
 			if (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_UNUSED & (IS_CV|IS_VAR)) {
+				if (IS_UNUSED & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -39083,7 +39099,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_UNUSED & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -44124,7 +44142,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 	} else {
 		do {
 			if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_CV & (IS_CV|IS_VAR)) {
+				if (IS_CV & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -44134,7 +44152,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_CV & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -47962,7 +47982,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 	} else {
 		do {
 			if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_CV & (IS_CV|IS_VAR)) {
+				if (IS_CV & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -47972,7 +47992,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_CV & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -53506,7 +53528,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 	} else {
 		do {
 			if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (IS_CV & (IS_CV|IS_VAR)) {
+				if (IS_CV & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -53516,7 +53538,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((IS_CV & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {

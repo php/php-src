@@ -8,7 +8,7 @@ struct Box {
         public $value,
     ) {}
 
-    public function preDec() {
+    public mutating function preDec() {
         --$this->value;
     }
 }
@@ -28,7 +28,7 @@ $postInc = $original;
 var_dump($postInc->value++);
 
 $preDecMethod = $original;
-var_dump($preDecMethod->preDec());
+var_dump($preDecMethod->preDec!());
 
 var_dump($preDec);
 var_dump($preInc);

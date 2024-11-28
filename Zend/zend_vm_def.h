@@ -3539,7 +3539,7 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 	} else {
 		do {
 			if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-				if (OP1_TYPE & (IS_CV|IS_VAR)) {
+				if (OP1_TYPE & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
 					SEPARATE_DATA_OBJ(object);
 				}
 				obj = Z_OBJ_P(object);
@@ -3549,7 +3549,9 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-						SEPARATE_DATA_OBJ(object);
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
 						if ((OP1_TYPE & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
