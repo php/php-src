@@ -153,7 +153,7 @@ zend_module_entry pcntl_module_entry = {
 	"pcntl",
 	ext_functions,
 	PHP_MINIT(pcntl),
-	PHP_MSHUTDOWN(pcntl),
+	NULL,
 	PHP_RINIT(pcntl),
 	PHP_RSHUTDOWN(pcntl),
 	PHP_MINFO(pcntl),
@@ -217,11 +217,6 @@ PHP_MINIT_FUNCTION(pcntl)
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
 
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(pcntl)
-{
 	return SUCCESS;
 }
 
