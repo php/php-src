@@ -44,7 +44,7 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
     runs-on: windows-2022
-    timeout-minutes: 50
+    timeout-minutes: 90
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
