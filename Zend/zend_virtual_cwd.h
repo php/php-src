@@ -103,7 +103,7 @@ typedef unsigned short mode_t;
 #define IS_SLASH(c)	((c) == '/')
 // IS_SLASH_P() may read the previous char on Windows, which may be OOB; use IS_SLASH_P_EX() instead
 #define IS_SLASH_P(c)	(*(c) == '/')
-#define IS_SLASH_P_EX(c, first_byte)	(*(c) == '/')
+#define IS_SLASH_P_EX(c, first_byte) IS_SLASH_P(c)
 
 #endif
 
