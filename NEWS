@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16344 (setRawValueWithoutLazyInitialization() and
     skipLazyInitialization() may change initialized proxy). (Arnaud)
   . Fix is_zend_ptr() huge block comparison. (nielsdos)
+  . Fixed potential OOB read in zend_dirname() on Windows. (cmb)
 
 - Curl:
   . Fix various memory leaks in curl mime handling. (nielsdos)

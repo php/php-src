@@ -2201,7 +2201,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	}
 
 	/* Strip trailing slashes */
-	while (end >= path && IS_SLASH_P(end)) {
+	while (end >= path && IS_SLASH_P_EX(end, end == path)) {
 		end--;
 	}
 	if (end < path) {
@@ -2212,7 +2212,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	}
 
 	/* Strip filename */
-	while (end >= path && !IS_SLASH_P(end)) {
+	while (end >= path && !IS_SLASH_P_EX(end, end == path)) {
 		end--;
 	}
 	if (end < path) {
@@ -2223,7 +2223,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	}
 
 	/* Strip slashes which came before the file name */
-	while (end >= path && IS_SLASH_P(end)) {
+	while (end >= path && IS_SLASH_P_EX(end, end == path)) {
 		end--;
 	}
 	if (end < path) {
