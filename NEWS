@@ -73,6 +73,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16905 (Internal iterator functions can't handle UNDEF
     properties). (nielsdos)
 
+- Streams:
+  . Fixed network connect poll interuption handling. (Jakub Zelenka)
+
 - Windows:
   . Fixed bug GH-16849 (Error dialog causes process to hang). (cmb)
 
