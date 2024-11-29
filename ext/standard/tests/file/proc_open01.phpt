@@ -11,7 +11,7 @@ if ($php === false) {
 $proc = proc_open(
     "$php -n",
     array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
-    $pipes, getcwd(), array(), array()
+    $pipes, getcwd(), array('PATH' => getenv('PATH')), array()
 );
 if ($proc === false) {
     print "something went wrong.\n";

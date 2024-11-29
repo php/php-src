@@ -30,7 +30,7 @@ $process = proc_open(
     ],
     $pipes,
     getcwd(),
-    [],
+    ['PATH' => getenv('PATH')],
     [
         'suppress_errors' => true,
         'bypass_shell' => false
