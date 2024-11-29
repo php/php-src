@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-16630 (UAF in lexer with encoding translation and heredocs).
     (nielsdos)
   . Fix is_zend_ptr() huge block comparison. (nielsdos)
+  . Fixed potential OOB read in zend_dirname() on Windows. (cmb)
 
 - Curl:
   . Fixed bug GH-16802 (open_basedir bypass using curl extension). (nielsdos)
