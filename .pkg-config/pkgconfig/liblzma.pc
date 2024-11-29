@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: liblzma
+Description: winlibs liblzma package
+Url: https://github.com/winlibs/liblzma
+Version: 5.6.3
+Libs: -L${libdir} -lliblzma_a
+Cflags: -I${includedir}

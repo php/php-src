@@ -1,0 +1,11 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libzip
+Description: winlibs libzip package
+Url: https://github.com/winlibs/libzip
+Version: 1.11.2
+Requires: libbzip2 zlib liblzma
+Libs: -L${libdir} -llibzip_a
+Cflags: -I${includedir}

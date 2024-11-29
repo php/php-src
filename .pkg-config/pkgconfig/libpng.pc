@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/libpng16
+
+Name: libpng
+Description: winlibs libpng package
+Url: https://github.com/winlibs/libpng
+Version: 1.6.43
+Libs: -L${libdir} -llibpng_a
+Cflags: -I${includedir}

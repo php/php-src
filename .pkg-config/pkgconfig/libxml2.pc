@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/libxml2
+
+Name: libxml2
+Description: winlibs libxml2 package
+Url: https://github.com/winlibs/libxml2
+Version: 2.11.9
+Libs: -L${libdir} -llibxml2_a_dll
+Cflags: -I${includedir}

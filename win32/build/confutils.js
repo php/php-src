@@ -1054,6 +1054,62 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	return p;
 }
 
+function PKG_CHECK_MODULES(prefix, list_of_modules)
+{
+	var out;
+	STDOUT.Write("Checking for " + list_of_modules + "... ");
+	if (!(out = execute("pkg-config --cflags " + list_of_modules))) {
+		STDOUT.WriteLine("not found");
+		return false;
+	}
+	eval(prefix + "_CFLAGS = out");
+	if (!(out = execute("pkg-config --libs " + list_of_modules))) {
+		STDOUT.WriteLine("not found");
+		return false;
+	}
+	eval(prefix + "_LIBS = out");
+	STDOUT.WriteLine("found");
+	return true;
+}
+
+function PHP_EVAL_LIBLINE(libline, libs_variable, not_extension)
+{
+	if (typeof libs_variable == "undefined") {
+		ldflags_variable = "LDFLAGS";
+		arflags_variable = "ARFLAGS";
+		libs_variable = "LIBS";
+	} else {
+		ldflags_variable = "LDFLAGS_" + libs_variable.toUpperCase();
+		arflags_variable = "ARFLAGS_" + libs_variable.toUpperCase();
+		libs_variable = "LIBS_" + libs_variable.toUpperCase();
+	}
+	var args = libline.split(/\s/);
+	for (var i = 0; i < args.length; i++) {
+		var arg = args[i];
+		if (arg.match(/^-l(.*)/)) {
+			ADD_FLAG(libs_variable, RegExp.$1 + ".lib");
+		} else if (arg.match(/^-L(.*)/)) {
+			var path = condense_path(RegExp.$1);
+			ADD_FLAG(ldflags_variable, '/libpath:"' + path + '" ');
+			ADD_FLAG(arflags_variable, '/libpath:"' + path + '" ');
+		}
+	}
+}
+
+function PHP_EVAL_INCLINE(headerline, cflags_variable)
+{
+	cflags_variable = typeof cflags_variable === "undefined" ? "CFLAGS" : "CFLAGS_" + cflags_variable.toUpperCase();
+	var args = headerline.split(/\s/);
+	for (var i = 0; i < args.length; i++) {
+		var arg = args[i];
+		if (arg.match(/^-I(.*)/)) {
+			ADD_FLAG(cflags_variable, "/I " + condense_path(RegExp.$1));
+		} else {
+			ADD_FLAG(cflags_variable, arg);
+		}
+	}
+}
+
 /* XXX check whether some manifest was originally supplied, otherwise keep using the default. */
 function generate_version_info_manifest(makefiletarget)
 {
@@ -3628,32 +3684,33 @@ function ADD_MAKEFILE_FRAGMENT(src_file)
 
 function SETUP_ZLIB_LIB(target, path_to_check)
 {
-	return (PHP_ZLIB != "no" && !PHP_ZLIB_SHARED) || CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check);
+	var pcm;
+	if ((PHP_ZLIB != "no" && !PHP_ZLIB_SHARED) || (pcm = PKG_CHECK_MODULES("ZLIB", "zlib"))) {
+		if (pcm) {
+			PHP_EVAL_LIBLINE(ZLIB_CFLAGS, target);
+		}
+		return true;
+	}
+	return false;
 }
 
-function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part, add_to_flag_only)
+function SETUP_OPENSSL(target)
 {
-	var ret = 0;
-	var cflags_var = "CFLAGS_" + target.toUpperCase();
-
-	if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
-			CHECK_LIB("libssl.lib", target, path_to_check) &&
-			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
-			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
-		/* Openssl 1.1.x or later */
+	if (PKG_CHECK_MODULES("OPENSSL", "openssl >= 1.1.1")) {
+		PHP_EVAL_INCLINE(OPENSSL_CFLAGS, target);
+		PHP_EVAL_LIBLINE(OPENSSL_LIBS, target);
 		return 2;
 	}
-
-	return ret;
+	return 0;
 }
 
-function SETUP_SQLITE3(target, path_to_check, shared) {
-	var cflags_var = "CFLAGS_" + target.toUpperCase();
-	var libs = (shared ? "libsqlite3.lib;libsqlite3_a.lib" : "libsqlite3_a.lib;libsqlite3.lib");
-
-	return CHECK_LIB(libs, target, path_to_check) &&
-		CHECK_HEADER_ADD_INCLUDE("sqlite3.h", cflags_var) &&
-		CHECK_HEADER_ADD_INCLUDE("sqlite3ext.h", cflags_var);
+function SETUP_SQLITE3(target) {
+	if (PKG_CHECK_MODULES("SQLITE3", "sqlite3 >= 3.7.7")) {
+		PHP_EVAL_INCLINE(SQLITE3_CFLAGS, target);
+		PHP_EVAL_LIBLINE(SQLITE3_LIBS, target);
+		return true;
+	}
+	return false;
 }
 
 function check_binary_tools_sdk()

@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: gettext
+Description: winlibs gettext package
+Url: https://github.com/winlibs/gettext
+Version: 0.18.3
+Libs: -L${libdir} -llibintl_a
+Cflags: -I${includedir}

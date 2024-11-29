@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libargon
+Description: winlibs libargon package
+Url: https://github.com/winlibs/argon2
+Version: 20190702
+Libs: -L${libdir} -largon2_a
+Cflags: -I${includedir}

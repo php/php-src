@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libenchant
+Description: winlibs libenchant package
+Url: https://github.com/winlibs/enchant
+Version: 2.2.8-1
+Libs: -L${libdir} -llibenchant2
+Cflags: -I${includedir}

@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: sqlite3
+Description: winlibs sqlite3 package
+Url: https://github.com/winlibs/sqlite3
+Version: 3.46.0
+Libs: -L${libdir} -llibsqlite3
+Cflags: -I${includedir}

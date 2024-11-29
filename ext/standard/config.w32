@@ -3,14 +3,12 @@
 ARG_WITH("password-argon2", "Argon2 support", "no");
 
 if (PHP_PASSWORD_ARGON2 != "no") {
-	if (CHECK_LIB("argon2_a.lib;argon2.lib", null, PHP_PASSWORD_ARGON2)
-	&& CHECK_HEADER_ADD_INCLUDE("argon2.h", "CFLAGS")) {
-		if (!CHECK_FUNC_IN_HEADER("argon2.h", "argon2id_hash_raw", PHP_PHP_BUILD + "\\include", "CFLAGS")) {
-			ERROR("Please verify that Argon2 header and libraries >= 20161029 are installed");
-		}
+	if (PKG_CHECK_MODULES("LIBARGON", "libargon >= 20161029")) {
+		PHP_EVAL_INCLINE(LIBARGON_CFLAGS);
+		PHP_EVAL_LIBLINE(LIBARGON_LIBS);
 		AC_DEFINE('HAVE_ARGON2LIB', 1, "Define to 1 if the system has the 'libargon2' library.");
 	} else {
-		WARNING("Argon2 not enabled; libraries and headers not found");
+		WARNING("Argon2 not enabled; libargon package not found");
 	}
 }
 

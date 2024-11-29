@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libiconv
+Description: winlibs libiconv package
+Url: https://github.com/winlibs/libiconv
+Version: 1.17.1
+Libs: -L${libdir} -llibiconv_a
+Cflags: -I${includedir}

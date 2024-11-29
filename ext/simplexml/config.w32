@@ -6,8 +6,9 @@ if (PHP_SIMPLEXML == "yes") {
 	if(PHP_LIBXML == "yes" &&
 		ADD_EXTENSION_DEP('simplexml', 'libxml') &&
 		ADD_EXTENSION_DEP('simplexml', 'spl') &&
-		CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_SIMPLEXML", PHP_PHP_BUILD + "\\include\\libxml2")
+		PKG_CHECK_MODULES("LIBXML2", "libxml2 >= 2.9.4")
 	) {
+		PHP_EVAL_INCLINE(LIBXML2_CFLAGS, "simplexml");
 		EXTENSION("simplexml", "simplexml.c");
 		AC_DEFINE("HAVE_SIMPLEXML", 1, "Define to 1 if the PHP extension 'simplexml' is available.");
 		if (!PHP_SIMPLEXML_SHARED) {

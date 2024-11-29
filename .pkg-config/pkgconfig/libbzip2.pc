@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libbzip2
+Description: winlibs libbzip2 package
+Url: https://github.com/winlibs/libbzip2
+Version: 1.0.8
+Libs: -L${libdir} -llibbz2_a
+Cflags: -I${includedir}

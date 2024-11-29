@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/webp
+
+Name: libwebp
+Description: winlibs libwebp package
+Url: https://github.com/winlibs/libwebp
+Version: 1.3.2
+Libs: -L${libdir} -llibwebp_a
+Cflags: -I${includedir}

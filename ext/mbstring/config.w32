@@ -42,8 +42,9 @@ if (PHP_MBSTRING != "no") {
 		AC_DEFINE('HAVE_MBSTRING', 1, "Define to 1 if the PHP extension 'mbstring' is available.");
 
 		if (PHP_MBREGEX != "no") {
-			if (CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_MBSTRING", PHP_MBREGEX) &&
-				CHECK_LIB("onig_a.lib;libonig_a.lib", "mbstring", PHP_MBSTRING)) {
+			if (PKG_CHECK_MODULES("ONIGURUMA", "oniguruma")) {
+				PHP_EVAL_INCLINE(ONIGURUMA_CFLAGS, "mbstring");
+				PHP_EVAL_LIBLINE(ONIGURUMA_LIBS, "mbstring");
 				AC_DEFINE('HAVE_MBREGEX', 1, 'Define to 1 if mbstring has multibyte regex support enabled.');
 
 				/* XXX libonig is only usable as a static library ATM, code change required to link with a DLL. */

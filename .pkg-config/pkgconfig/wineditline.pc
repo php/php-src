@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/editline
+
+Name: wineditline
+Description: winlibs wineditline package
+Url: https://github.com/winlibs/wineditline
+Version: 2.206
+Libs: -L${libdir} -ledit_a
+Cflags: -I${includedir}

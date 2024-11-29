@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libsodium
+Description: winlibs libsodium package
+Url: https://github.com/winlibs/libsodium
+Version: 1.0.20
+Libs: -L${libdir} -llibsodium
+Cflags: -I${includedir}

@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: liblmdb
+Description: winlibs liblmdb package
+Url: https://github.com/winlibs/lmdb
+Version: 0.9.33
+Libs: -L${libdir} -lliblmdb_a -lntdll
+Cflags: -I${includedir}

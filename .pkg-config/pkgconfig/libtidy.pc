@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libtidy
+Description: winlibs libtidy package
+Url: https://github.com/winlibs/libtidy
+Version: 5.6.0-1
+Libs: -L${libdir} -ltidy_a
+Cflags: -I${includedir} /DTIDY_STATIC=1

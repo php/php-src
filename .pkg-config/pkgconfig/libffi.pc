@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libffi
+Description: winlibs libffi package
+Url: https://github.com/winlibs/libffi
+Version: 3.3pl1
+Libs: -L${libdir} -llibffi
+Cflags: -I${includedir}

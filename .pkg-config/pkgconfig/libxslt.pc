@@ -1,0 +1,10 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libxslt
+Description: winlibs libxslt package
+Url: https://github.com/winlibs/libxslt
+Version: 1.1.39
+Libs: -L${libdir} -llibxslt_a
+Cflags: -I${includedir} /DLIBXSLT_STATIC

@@ -3,18 +3,12 @@
 ARG_WITH("tidy", "TIDY support", "no");
 
 if (PHP_TIDY != "no") {
-	var tidy_static = false;
-	if ((CHECK_LIB("libtidy_a.lib;tidy_a.lib", "tidy", PHP_TIDY) && (tidy_static = true) ||
-		CHECK_LIB("libtidy.lib;tidy.lib", "tidy", PHP_TIDY)) &&
-			(
-				CHECK_HEADER_ADD_INCLUDE("tidy.h", "CFLAGS_TIDY") ||
-				CHECK_HEADER_ADD_INCLUDE("tidy/tidy.h", "CFLAGS_TIDY", null, null, true) ||
-				CHECK_HEADER_ADD_INCLUDE("libtidy/tidy.h", "CFLAGS_TIDY", null, null, true)
-			)) {
+	if (PKG_CHECK_MODULES("LIBTIDY", "libtidy")) {
+		PHP_EVAL_INCLINE(LIBTIDY_CFLAGS, "tidy");
+		PHP_EVAL_LIBLINE(LIBTIDY_LIBS, "tidy");
 
-		if (CHECK_HEADER_ADD_INCLUDE("tidybuffio.h", "CFLAGS_TIDY")) {
-			AC_DEFINE('HAVE_TIDYBUFFIO_H', 1, 'Define to 1 if you have the <tidybuffio.h> header file.');
-		}
+		// FIXME: define only if has tidybuffio.h
+		AC_DEFINE('HAVE_TIDYBUFFIO_H', 1, 'Define to 1 if you have the <tidybuffio.h> header file.');
 
 		EXTENSION("tidy", "tidy.c");
 		AC_DEFINE('HAVE_TIDY', 1, "Define to 1 if the PHP extension 'tidy' is available.");
@@ -25,11 +19,7 @@ if (PHP_TIDY != "no") {
 		if (!PHP_TIDY_SHARED) {
 			ADD_DEF_FILE("ext\\tidy\\php_tidy.def");
 		}
-		if (tidy_static) {
-			ADD_FLAG("CFLAGS_TIDY", "/DTIDY_STATIC=1");
-		}
-
 	} else {
-		WARNING("tidy not enabled; libraries and headers not found");
+		WARNING("tidy not enabled; libtidy package not found");
 	}
 }

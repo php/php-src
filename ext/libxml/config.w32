@@ -3,26 +3,22 @@
 ARG_WITH("libxml", "LibXML support", "yes");
 
 if (PHP_LIBXML == "yes") {
-	if (CHECK_LIB("libxml2_a_dll.lib;libxml2_a.lib", "libxml") &&
-			((PHP_ICONV != "no" && !PHP_ICONV_SHARED) || CHECK_LIB("libiconv_a.lib;iconv_a.lib;libiconv.lib;iconv.lib", "libxml")) &&
-			CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_LIBXML", PHP_PHP_BUILD + "\\include\\libxml2") &&
-			CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_LIBXML", PHP_PHP_BUILD + "\\include\\libxml2")) {
-
-		if (GREP_HEADER("libxml/xmlversion.h", "#define\\s+LIBXML_VERSION\\s+(\\d+)", PHP_PHP_BUILD + "\\include\\libxml2") &&
-				+RegExp.$1 >= 20904) {
-
-			EXTENSION("libxml", "libxml.c mime_sniff.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-			AC_DEFINE("HAVE_LIBXML", 1, "Define to 1 if the PHP extension 'libxml' is available.");
-			ADD_FLAG("CFLAGS_LIBXML", "/D LIBXML_STATIC /D LIBXML_STATIC_FOR_DLL /D HAVE_WIN32_THREADS ");
-			if (!PHP_LIBXML_SHARED) {
-				ADD_DEF_FILE("ext\\libxml\\php_libxml2.def");
-			}
-			PHP_INSTALL_HEADERS("ext/libxml", "php_libxml.h");
-		} else {
-			WARNING("libxml support can't be enabled, libxml version >= 2.9.4 required");
+	LIBXML2_ICONV_LIBS = "";
+	if (PKG_CHECK_MODULES("LIBXML2", "libxml2 >= 2.9.4") &&
+		((PHP_ICONV != "no" && !PHP_ICONV_SHARED) || PKG_CHECK_MODULES("ICONV", "libiconv"))
+	) {
+		PHP_EVAL_INCLINE(LIBXML2_CFLAGS, "libxml");
+		PHP_EVAL_LIBLINE(LIBXML2_LIBS, "libxml");
+		PHP_EVAL_LIBLINE(LIBXML2_ICONV_LIBS, "libxml");
+		EXTENSION("libxml", "libxml.c mime_sniff.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		AC_DEFINE("HAVE_LIBXML", 1, "Define to 1 if the PHP extension 'libxml' is available.");
+		ADD_FLAG("CFLAGS_LIBXML", "/D LIBXML_STATIC /D LIBXML_STATIC_FOR_DLL /D HAVE_WIN32_THREADS ");
+		if (!PHP_LIBXML_SHARED) {
+			ADD_DEF_FILE("ext\\libxml\\php_libxml2.def");
 		}
+		PHP_INSTALL_HEADERS("ext/libxml", "php_libxml.h");
 	} else {
-		WARNING("libxml support can't be enabled, iconv or libxml are missing")
+		WARNING("libxml not enabled, iconv or libxml2 >= 2.9.4 package not found")
 		PHP_LIBXML = "no"
 	}
 }

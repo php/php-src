@@ -4,9 +4,9 @@ ARG_ENABLE("xmlreader", "XMLReader support", "yes");
 
 if (PHP_XMLREADER == "yes" &&
 	PHP_LIBXML == "yes" &&
-	CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_XMLREADER", PHP_PHP_BUILD + "\\include\\libxml2") &&
-	CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_XMLREADER", PHP_PHP_BUILD + "\\include\\libxml2")
-	) {
+	PKG_CHECK_MODULES("LIBXML2", "libxml2 >= 2.9.4")
+) {
+	PHP_EVAL_INCLINE(LIBXML2_CFLAGS, "xmlreader");
 	EXTENSION("xmlreader", "php_xmlreader.c");
 	AC_DEFINE("HAVE_XMLREADER", 1, "Define to 1 if the PHP extension 'xmlreader' is available.");
 	if (!PHP_XMLREADER_SHARED) {

@@ -1,0 +1,9 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/interbase
+
+Name: fbclient
+Description: winlibs fbclient package
+Version: 4.0.4
+Libs: -L${libdir} -lfbclient_ms
+Cflags: -I${includedir}

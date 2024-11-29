@@ -4,32 +4,18 @@ ARG_WITH("xsl", "xsl support", "no");
 
 if (PHP_XSL != "no") {
 	if (PHP_DOM == "yes" && PHP_LIBXML == "yes"
-	&& ADD_EXTENSION_DEP('xsl', 'libxml')
-	&& ADD_EXTENSION_DEP('xsl', 'dom')
-	&& CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_XSL", PHP_PHP_BUILD + "\\include\\libxml2")
+		&& ADD_EXTENSION_DEP('xsl', 'libxml')
+		&& ADD_EXTENSION_DEP('xsl', 'dom')
+		&& PKG_CHECK_MODULES("LIBXML2", "libxml2 >= 2.9.4")
 	) {
-		var ext_xsl_lib_found = false;
-		var ext_exslt_lib_found = false;
-
-		if (CHECK_LIB("libxslt_a.lib", "xsl", PHP_XSL)) {
-			ext_xsl_lib_found = true;
-			ADD_FLAG("CFLAGS_XSL", "/D LIBXSLT_STATIC ");
-			if (CHECK_LIB("libexslt_a.lib", "xsl", PHP_XSL)) {
-				ADD_FLAG("CFLAGS_XSL", "/D LIBEXSLT_STATIC ");
-				ext_exslt_lib_found = true;
-			}
-		} else if (CHECK_LIB("libxslt.lib", "xsl", PHP_XSL)) {
-			ext_xsl_lib_found = true;
-			if (CHECK_LIB("libexslt.lib", "xsl", PHP_XSL)) {
-				ext_exslt_lib_found = true;
-			}
-		}
-
-		if (ext_xsl_lib_found && CHECK_HEADER_ADD_INCLUDE("libxslt\\xslt.h", "CFLAGS_XSL")) {
-			if (ext_exslt_lib_found) {
-				if (CHECK_HEADER_ADD_INCLUDE("libexslt\\exslt.h", "CFLAGS_XSL")) {
-					AC_DEFINE("HAVE_XSL_EXSLT", 1, "Define to 1 if the system has the EXSLT extension library for XSLT.");
-				}
+		if (PKG_CHECK_MODULES("LIBXSLT", "libxslt")) {
+			PHP_EVAL_INCLINE(LIBXML2_CFLAGS, "xsl");
+			PHP_EVAL_INCLINE(LIBXSLT_CFLAGS, "xsl");
+			PHP_EVAL_LIBLINE(LIBXSLT_LIBS, "xsl");
+			if (PKG_CHECK_MODULES("LIBEXSLT", "libexslt")) {
+				PHP_EVAL_INCLINE(LIBEXSLT_CFLAGS, "xsl");
+				PHP_EVAL_LIBLINE(LIBEXSLT_LIBS, "xsl");
+				AC_DEFINE("HAVE_XSL_EXSLT", 1, "Define to 1 if the system has the EXSLT extension library for XSLT.");
 			}
 			EXTENSION("xsl", "php_xsl.c xsltprocessor.c", PHP_XSL_SHARED);
 			AC_DEFINE("HAVE_XSL", 1, "Define to 1 if the PHP extension 'xsl' is available.");
@@ -40,9 +26,8 @@ if (PHP_XSL != "no") {
 					ADD_FLAG("LDFLAGS_XSL", "/nodefaultlib:msvcrt");
 				}
 			}
-
 		} else {
-			WARNING("xsl not enabled; libraries and headers not found");
+			WARNING("xsl not enabled; libxslt package not found");
 		}
 	} else {
 		WARNING("xsl not enabled; DOM extension required");

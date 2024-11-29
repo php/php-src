@@ -1,0 +1,11 @@
+prefix=C:/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libcurl
+Description: winlibs libcurl package
+Url: https://github.com/winlibs/cURL
+Version: 8.10.1
+Requires: libssh2 nghttp2
+Libs: -L${libdir} -llibcurl_a
+Cflags: -I${includedir}
