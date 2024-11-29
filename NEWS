@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros)
     (Saki Takamachi)
 
+- COM:
+  . Fixed bug GH-16991 (Getting typeinfo of non DISPATCH variant segfaults).
+    (cmb)
+
 - Core:
   . Fixed bug GH-16344 (setRawValueWithoutLazyInitialization() and
     skipLazyInitialization() may change initialized proxy). (Arnaud)
