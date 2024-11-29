@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.2
 
+- BcMath:
+  . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros)
+    (Saki Takamachi)
+
 - Core:
   . Fixed bug GH-16344 (setRawValueWithoutLazyInitialization() and
     skipLazyInitialization() may change initialized proxy). (Arnaud)
