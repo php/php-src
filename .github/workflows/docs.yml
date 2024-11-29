@@ -19,9 +19,9 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: pip install sphinx-design sphinxawesome-theme rstfmt
+        run: pip install -r docs/requirements.txt
       - name: Check formatting
-        run: rstfmt --check -w 100 docs/source
+        run: make -C docs check-formatting
       - name: Publish
         if: github.event_name == 'push'
         uses: sphinx-notes/pages@v3
