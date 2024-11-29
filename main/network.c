@@ -297,6 +297,35 @@ typedef int php_non_blocking_flags_t;
 	 fcntl(sock, F_SETFL, save)
 #endif
 
+#ifdef HAVE_GETTIMEOFDAY
+/* Subtract times */
+static inline void sub_times(struct timeval a, struct timeval b, struct timeval *result)
+{
+	result->tv_usec = a.tv_usec - b.tv_usec;
+	if (result->tv_usec < 0L) {
+		a.tv_sec--;
+		result->tv_usec += 1000000L;
+	}
+	result->tv_sec = a.tv_sec - b.tv_sec;
+	if (result->tv_sec < 0L) {
+		result->tv_sec++;
+		result->tv_usec -= 1000000L;
+	}
+}
+
+static inline void php_network_set_limit_time(struct timeval *limit_time,
+		struct timeval *timeout)
+{
+	gettimeofday(limit_time, NULL);
+	limit_time->tv_sec += timeout->tv_sec;
+	limit_time->tv_usec += timeout->tv_usec;
+	if (limit_time->tv_usec >= 1000000) {
+		limit_time->tv_usec -= 1000000;
+		limit_time->tv_sec++;
+	}
+}
+#endif
+
 /* Connect to a socket using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
@@ -349,25 +378,53 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	 * expected when a connection is actively refused. This way,
 	 * php_pollfd_for will return a mask with POLLOUT if the connection
 	 * is successful and with POLLPRI otherwise. */
-	if ((n = php_pollfd_for(sockfd, POLLOUT|POLLPRI, timeout)) == 0) {
+	int events = POLLOUT|POLLPRI;
 #else
-	if ((n = php_pollfd_for(sockfd, PHP_POLLREADABLE|POLLOUT, timeout)) == 0) {
+	int events = PHP_POLLREADABLE|POLLOUT;
 #endif
-		error = PHP_TIMEOUT_ERROR_VALUE;
+	struct timeval working_timeout;
+#ifdef HAVE_GETTIMEOFDAY
+	struct timeval limit_time, time_now;
+#endif
+	if (timeout) {
+		memcpy(&working_timeout, timeout, sizeof(working_timeout));
+#ifdef HAVE_GETTIMEOFDAY
+		php_network_set_limit_time(&limit_time, &working_timeout);
+#endif
 	}
 
-	if (n > 0) {
-		len = sizeof(error);
-		/*
-		   BSD-derived systems set errno correctly
-		   Solaris returns -1 from getsockopt in case of error
-		   */
-		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
+	while (true) {
+		n = php_pollfd_for(sockfd, events, timeout ? &working_timeout : NULL);
+		if (n < 0) {
+			if (errno == EINTR) {
+#ifdef HAVE_GETTIMEOFDAY
+				if (timeout) {
+					gettimeofday(&time_now, NULL);
+
+					if (!timercmp(&time_now, &limit_time, <)) {
+						/* time limit expired; no need for another poll */
+						error = PHP_TIMEOUT_ERROR_VALUE;
+						break;
+					} else {
+						/* work out remaining time */
+						sub_times(limit_time, time_now, &working_timeout);
+					}
+				}
+#endif
+				continue;
+			}
 			ret = -1;
+		} else if (n == 0) {
+			error = PHP_TIMEOUT_ERROR_VALUE;
+		} else {
+			len = sizeof(error);
+			/* BSD-derived systems set errno correctly.
+			 * Solaris returns -1 from getsockopt in case of error. */
+			if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
+				ret = -1;
+			}
 		}
-	} else {
-		/* whoops: sockfd has disappeared */
-		ret = -1;
+		break;
 	}
 
 ok:
@@ -387,22 +444,6 @@ ok:
 		}
 	}
 	return ret;
-}
-/* }}} */
-
-/* {{{ sub_times */
-static inline void sub_times(struct timeval a, struct timeval b, struct timeval *result)
-{
-	result->tv_usec = a.tv_usec - b.tv_usec;
-	if (result->tv_usec < 0L) {
-		a.tv_sec--;
-		result->tv_usec += 1000000L;
-	}
-	result->tv_sec = a.tv_sec - b.tv_sec;
-	if (result->tv_sec < 0L) {
-		result->tv_sec++;
-		result->tv_usec -= 1000000L;
-	}
 }
 /* }}} */
 
@@ -765,7 +806,6 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 }
 /* }}} */
 
-
 /* Connect to a remote host using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
@@ -797,13 +837,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	if (timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
 #ifdef HAVE_GETTIMEOFDAY
-		gettimeofday(&limit_time, NULL);
-		limit_time.tv_sec += working_timeout.tv_sec;
-		limit_time.tv_usec += working_timeout.tv_usec;
-		if (limit_time.tv_usec >= 1000000) {
-			limit_time.tv_usec -= 1000000;
-			limit_time.tv_sec++;
-		}
+		php_network_set_limit_time(&limit_time, &working_timeout);
 #endif
 	}
 
