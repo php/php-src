@@ -1916,7 +1916,7 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
-	persistent_script = zend_file_cache_script_load(file_handle, false);
+	persistent_script = zend_file_cache_script_load(file_handle);
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 	if (persistent_script) {
@@ -2133,7 +2133,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 
 	/* Check the second level cache */
 	if (!persistent_script && ZCG(accel_directives).file_cache) {
-		persistent_script = zend_file_cache_script_load(file_handle, false);
+		persistent_script = zend_file_cache_script_load(file_handle);
 	}
 
 	/* If script was not found or invalidated by validate_timestamps */

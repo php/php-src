@@ -1813,7 +1813,95 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	zend_file_cache_unserialize_early_bindings(script, buf);
 }
 
-zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle, bool force_file_cache_only)
+// Function to validate the file cache and return a boolean result
+bool zend_file_cache_script_validate(zend_file_handle *file_handle)
+{
+    int fd;
+    char *filename;
+    zend_file_cache_metainfo info;
+    unsigned int actual_checksum;
+    void *mem;
+
+    if (!file_handle || !file_handle->opened_path) {
+        return false;
+    }
+
+    filename = zend_file_cache_get_bin_file_path(file_handle->opened_path);
+    fd = zend_file_cache_open(filename, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        goto failure; // Open failed
+    }
+
+    if (zend_file_cache_flock(fd, LOCK_SH) != 0) {
+        goto failure_close; // Flock failed
+    }
+
+
+    if (read(fd, &info, sizeof(info)) != sizeof(info)) {
+        zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (info)\n", filename);
+        goto failure_unlock_close;
+    }
+
+    // Verify header
+    if (memcmp(info.magic, "OPCACHE", 8) != 0 || memcmp(info.system_id, zend_system_id, 32) != 0) {
+        zend_accel_error(ACCEL_LOG_WARNING, "opcache invalid header in file '%s'\n", filename);
+        goto failure_unlock_close;
+    }
+
+    // Verify timestamp if required
+    if (ZCG(accel_directives).validate_timestamps &&
+        zend_get_file_handle_timestamp(file_handle, NULL) != info.timestamp) {
+        goto failure_unlock_close;
+    }
+
+    checkpoint = zend_arena_checkpoint(CG(arena));
+#if defined(__AVX__) || defined(__SSE2__)
+	/* Align to 64-byte boundary */
+	mem = zend_arena_alloc(&CG(arena), info.mem_size + info.str_size + 64);
+	mem = (void*)(((uintptr_t)mem + 63L) & ~63L);
+#else
+	mem = zend_arena_alloc(&CG(arena), info.mem_size + info.str_size);
+#endif
+
+	if (read(fd, mem, info.mem_size + info.str_size) != (ssize_t)(info.mem_size + info.str_size)) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (mem)\n", filename);
+		zend_arena_release(&CG(arena), checkpoint);
+		goto failure_unlock_close;
+	}
+	if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
+	}
+	close(fd);
+
+	/* verify checksum */
+	if (ZCG(accel_directives).file_cache_consistency_checks &&
+	    (actual_checksum = zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size)) != info.checksum) {
+		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s' excepted checksum: 0x%08x actual checksum: 0x%08x\n", filename, info.checksum, actual_checksum);
+		zend_arena_release(&CG(arena), checkpoint);
+		goto failure;
+	}
+
+	zend_arena_release(&CG(arena), checkpoint);
+    zend_file_cache_flock(fd, LOCK_UN);
+    close(fd);
+    efree(filename);
+    return true; // Validation successful
+
+failure_unlock_close:
+    zend_file_cache_flock(fd, LOCK_UN);
+failure_close:
+    close(fd);
+failure:
+    if (!ZCG(accel_directives).file_cache_read_only) {
+        zend_file_cache_unlink(filename);
+    }
+    efree(filename);
+
+    return false; // Validation failed
+}
+
+
+zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
 {
 	zend_string *full_path = file_handle->opened_path;
 	int fd;
@@ -1928,7 +2016,6 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 
 	if (!file_cache_only &&
-		!force_file_cache_only &&
 	    !ZCSG(restart_in_progress) &&
 	    !ZCSG(restart_pending) &&
 		!ZSMMG(memory_exhausted) &&
