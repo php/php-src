@@ -2,6 +2,11 @@
 Test parse_ini_file() function : variation - various absolute and relative paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip Only run on Windows");
+?>
 --FILE--
 <?php
 echo "*** Testing parse_ini_file() : variation ***\n";
