@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed jdtogregorian overflow. (David Carlier)
   . Fixed cal_to_jd julian_days argument overflow. (David Carlier)
 
+- COM:
+  . Fixed bug GH-16991 (Getting typeinfo of non DISPATCH variant segfaults).
+    (cmb)
+
 - Core:
   . Fail early in *nix configuration build script. (hakre)
   . Fixed bug GH-16727 (Opcache bad signal 139 crash in ZTS bookworm
