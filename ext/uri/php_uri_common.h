@@ -26,6 +26,7 @@ extern zend_class_entry *uri_exception_ce;
 extern zend_class_entry *uninitialized_uri_exception_ce;
 extern zend_class_entry *uri_operation_exception_ce;
 extern zend_class_entry *invalid_uri_exception_ce;
+extern zend_class_entry *whatwg_error_type_ce;
 extern zend_class_entry *whatwg_error_ce;
 
 typedef struct uri_handler_t {
@@ -63,8 +64,8 @@ static inline uri_internal_t *uri_internal_from_obj(zend_object *object) {
 #define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
 #define Z_URI_INTERNAL_P(zv) uri_internal_from_obj(Z_OBJ_P((zv)))
 
-#define URI_PARSER_RFC3986 "rfc3986"
-#define URI_PARSER_WHATWG "whatwg"
+#define URI_PARSER_RFC3986 "Uri\\Rfc3986Uri"
+#define URI_PARSER_WHATWG "Uri\\WhatWgUri"
 
 typedef zend_result (*uri_read_t)(const uri_internal_t *internal_uri, zval *retval);
 

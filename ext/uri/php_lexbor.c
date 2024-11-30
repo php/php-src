@@ -89,8 +89,12 @@ static void fill_errors(zval *errors)
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser->log->list)) != NULL) {
 		zval error;
 		object_init_ex(&error, whatwg_error_ce);
-		zend_update_property_string(whatwg_error_ce, Z_OBJ(error), "position", sizeof("position") - 1, (const char *) lxb_error->data);
-		zend_update_property_long(whatwg_error_ce, Z_OBJ(error), "errorCode", sizeof("errorCode") - 1, lxb_error->id);
+		zend_update_property_string(whatwg_error_ce, Z_OBJ(error), "context", sizeof("context") - 1, (const char *) lxb_error->data);
+
+		zval error_type;
+		zend_string *error_str = zend_string_init((const char *) lxb_error->data,strlen((const char *) lxb_error->data), false);
+		zend_enum_new(&error_type, whatwg_error_type_ce, error_str, NULL); // todo case name
+		zend_update_property(whatwg_error_ce, Z_OBJ(error), "type", sizeof("type") - 1, &error_type);
 
 		add_next_index_zval(errors, &error);
 	}

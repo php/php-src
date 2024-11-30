@@ -605,7 +605,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zval *option_val;
 	zend_string *parser_name;
 	int parser_name_set;
-	FETCH_STR_OPTION(parser_name, "parser");
+	FETCH_STR_OPTION(parser_name, "uri_parser_class");
 
 	uri_handler_t *uri_handler = php_uri_get_handler(parser_name_set ? parser_name : NULL);
 	if (uri_handler == NULL) {

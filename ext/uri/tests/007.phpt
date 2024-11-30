@@ -28,14 +28,14 @@ URI parsing failed
 array(%d) {
   [0]=>
   object(Uri\WhatWgError)#%d (%d) {
-    ["position"]=>
+    ["context"]=>
     string(26) "password/path?q=r#fragment"
-    ["errorCode"]=>
-    int(26)
+    ["type"]=>
+    enum(Uri\WhatWg\WhatWgErrorType::password/path?q=r#fragment)
   }
   [1]=>
   object(Uri\WhatWgError)#%d (%d) {
-    ["position"]=>
+    ["context"]=>
     string(36) "@username:password/path?q=r#fragment"
     ["errorCode"]=>
     int(23)

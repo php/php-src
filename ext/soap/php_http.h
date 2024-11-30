@@ -24,7 +24,7 @@ int make_http_soap_request(zval              *this_ptr,
 						   zend_string       *location,
                            char              *soapaction,
                            int               soap_version,
-						   const zend_string *uri_parser_name,
+						   const zend_string *uri_parser_class,
                            zval              *response);
 
 int proxy_authentication(zval* this_ptr, smart_str* soap_headers);

@@ -604,7 +604,7 @@ namespace {
         public function __getLastResponseHeaders(): ?string {}
 
         /** @tentative-return-type */
-        public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false, ?string $uriParserName = null): ?string {}
+        public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false, ?string $uriParserClass = null): ?string {}
 
         /** @tentative-return-type */
         public function __setCookie(string $name, ?string $value = null): void {}

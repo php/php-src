@@ -7,10 +7,6 @@ Cloning Rfc3986Uris doesn't copy the path properly yet
 --FILE--
 <?php
 
-$uri = new Uri\WhatWgUri("https://EXAMPLE.COM/foo/../bar");
-var_dump($uri->normalize());
-exit;
-
 $uri1 = Uri\Rfc3986Uri::parse("HTTPS://////EXAMPLE.com");
 $uri2 = $uri1->normalize();
 $uri3 = Uri\Rfc3986Uri::parse("https://example.com")->normalize();
@@ -18,8 +14,8 @@ $uri4 = Uri\Rfc3986Uri::parse("https://example.com/foo/..")->normalize();
 
 var_dump($uri1);
 var_dump($uri2);
-var_dump($uri3->__toString());
-var_dump($uri4->__toString());
+var_dump($uri3->toString());
+var_dump($uri4->toString());
 
 $uri5 = Uri\WhatWgUri::parse("HTTPS://////EXAMPLE.com");
 $uri6 = $uri5->normalize();
@@ -28,8 +24,8 @@ $uri8 = Uri\WhatWgUri::parse("https://example.com/foo/..")->normalize();
 
 var_dump($uri5);
 var_dump($uri6);
-var_dump($uri7->__toString());
-var_dump($uri8->__toString());
+var_dump($uri7->toString());
+var_dump($uri8->toString());
 
 ?>
 --EXPECT--

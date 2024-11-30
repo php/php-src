@@ -6,7 +6,7 @@ uri
 --FILE--
 <?php
 
-function handleException(Uri\UriInterface $uri, Closure $callback)
+function handleException(Uri\Uri $uri, Closure $callback)
 {
     try {
         $callback($uri);
@@ -15,30 +15,30 @@ function handleException(Uri\UriInterface $uri, Closure $callback)
     }
 }
 
-function callMembers(Uri\UriInterface $uri)
+function callMembers(Uri\Uri $uri)
 {
-    handleException($uri, function (Uri\UriInterface $uri) {var_dump($uri);});
-    handleException($uri, function (Uri\UriInterface $uri) {var_dump(isset($uri->scheme));});
-    handleException($uri, function (Uri\UriInterface $uri) {var_dump(empty($uri->scheme));});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->scheme;});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->getScheme();});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->user;});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->getUser();});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->password;});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->getPassword();});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->host;});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->getHost();});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->port;});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->getPort();});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->path;});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->getPath();});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->query;});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->getQuery();});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->fragment;});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->getFragment();});
-    handleException($uri, function (Uri\UriInterface $uri) {json_encode($uri);});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->__serialize();});
-    handleException($uri, function (Uri\UriInterface $uri) {$uri->__toString();});
+    handleException($uri, function (Uri\Uri $uri) {var_dump($uri);});
+    handleException($uri, function (Uri\Uri $uri) {var_dump(isset($uri->scheme));});
+    handleException($uri, function (Uri\Uri $uri) {var_dump(empty($uri->scheme));});
+    handleException($uri, function (Uri\Uri $uri) {$uri->scheme;});
+    handleException($uri, function (Uri\Uri $uri) {$uri->getScheme();});
+    handleException($uri, function (Uri\Uri $uri) {$uri->user;});
+    handleException($uri, function (Uri\Uri $uri) {$uri->getUser();});
+    handleException($uri, function (Uri\Uri $uri) {$uri->password;});
+    handleException($uri, function (Uri\Uri $uri) {$uri->getPassword();});
+    handleException($uri, function (Uri\Uri $uri) {$uri->host;});
+    handleException($uri, function (Uri\Uri $uri) {$uri->getHost();});
+    handleException($uri, function (Uri\Uri $uri) {$uri->port;});
+    handleException($uri, function (Uri\Uri $uri) {$uri->getPort();});
+    handleException($uri, function (Uri\Uri $uri) {$uri->path;});
+    handleException($uri, function (Uri\Uri $uri) {$uri->getPath();});
+    handleException($uri, function (Uri\Uri $uri) {$uri->query;});
+    handleException($uri, function (Uri\Uri $uri) {$uri->getQuery();});
+    handleException($uri, function (Uri\Uri $uri) {$uri->fragment;});
+    handleException($uri, function (Uri\Uri $uri) {$uri->getFragment();});
+    handleException($uri, function (Uri\Uri $uri) {json_encode($uri);});
+    handleException($uri, function (Uri\Uri $uri) {$uri->__serialize();});
+    handleException($uri, function (Uri\Uri $uri) {$uri->toString();});
 }
 
 $reflectionClass = new ReflectionClass(Uri\Rfc3986Uri::class);

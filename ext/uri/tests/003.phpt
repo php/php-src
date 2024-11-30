@@ -53,7 +53,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
 array(1) {
   [0]=>
   object(Uri\WhatWgError)#%d (%d) {
-    ["position"]=>
+    ["context"]=>
     string(7) "/page:1"
     ["errorCode"]=>
     int(21)

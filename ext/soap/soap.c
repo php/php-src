@@ -2769,7 +2769,7 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 /* {{{ SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
-	zend_string *buf, *location, *uri_parser_name = NULL;
+	zend_string *buf, *location, *uri_parser_class = NULL;
 	char       *action;
 	size_t     action_size;
 	zend_long  version;
@@ -2780,17 +2780,17 @@ PHP_METHOD(SoapClient, __doRequest)
 	    &buf,
 	    &location,
 	    &action, &action_size,
-	    &version, &one_way, &uri_parser_name) == FAILURE) {
+	    &version, &one_way, &uri_parser_class) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (SOAP_GLOBAL(features) & SOAP_WAIT_ONE_WAY_CALLS) {
 		one_way = 0;
 	}
 	if (one_way) {
-		if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_name, NULL)) {
+		if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_class, NULL)) {
 			RETURN_EMPTY_STRING();
 		}
-	} else if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_name,
+	} else if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_class,
 	    return_value)) {
 		return;
 	}

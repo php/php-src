@@ -5,7 +5,7 @@ uri
 --FILE--
 <?php
 
-function callGetters(Uri\UriInterface $uri)
+function callGetters(Uri\Uri $uri)
 {
     var_dump($uri->getScheme());
     var_dump($uri->getUser());

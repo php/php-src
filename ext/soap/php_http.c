@@ -341,7 +341,7 @@ int make_http_soap_request(zval              *this_ptr,
                            zend_string       *location,
                            char              *soapaction,
                            int               soap_version,
-                           const zend_string *uri_parser_name,
+                           const zend_string *uri_parser_class,
                            zval              *return_value)
 {
 	zend_string *request;
@@ -436,7 +436,7 @@ int make_http_soap_request(zval              *this_ptr,
 	}
 
 	if (location != NULL && ZSTR_VAL(location)[0] != '\000') {
-		uri_handler_t *uri_handler = php_uri_get_handler(uri_parser_name);
+		uri_handler_t *uri_handler = php_uri_get_handler(uri_parser_class);
 		if (uri_handler == NULL) {
 			zend_argument_value_error(6, "must be a valid URI parser name");
 			return FALSE;
@@ -1160,7 +1160,7 @@ try_again:
 		char *loc;
 
 		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
-			uri_handler_t *uri_handler = php_uri_get_handler(uri_parser_name);
+			uri_handler_t *uri_handler = php_uri_get_handler(uri_parser_class);
 			if (uri_handler == NULL) {
 				zend_argument_value_error(6, "must be a valid URI parser name");
 				return FALSE;

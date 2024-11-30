@@ -15,7 +15,7 @@ readonly class MyWhatWgUri extends Uri\WhatWgUri
     public int $foo;
 }
 
-function handleException(Uri\UriInterface $uri, Closure $callback)
+function handleException(Uri\Uri $uri, Closure $callback)
 {
     try {
         $callback($uri);
@@ -24,17 +24,17 @@ function handleException(Uri\UriInterface $uri, Closure $callback)
     }
 }
 
-function unsetMembers(Uri\UriInterface $uri)
+function unsetMembers(Uri\Uri $uri)
 {
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->scheme);});
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->user);});
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->password);});
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->host);});
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->port);});
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->path);});
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->query);});
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->fragment);});
-    handleException($uri, function (Uri\UriInterface $uri) {unset($uri->foo);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->scheme);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->user);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->password);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->host);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->port);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->path);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->query);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->fragment);});
+    handleException($uri, function (Uri\Uri $uri) {unset($uri->foo);});
 }
 
 unsetMembers(new MyRfc3986Uri("https://example.com"));

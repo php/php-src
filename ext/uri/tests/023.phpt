@@ -9,15 +9,15 @@ $uri1 = Uri\Rfc3986Uri::parse("https://example.com");
 $uri2 = $uri1->withScheme("http");
 $uri3 = $uri2->withScheme(null);
 
-var_dump($uri1->__toString());
-var_dump($uri2->__toString());
-var_dump($uri3->__toString());
+var_dump($uri1->toString());
+var_dump($uri2->toString());
+var_dump($uri3->toString());
 
 $uri1 = Uri\WhatWgUri::parse("https://example.com");
 $uri2 = $uri1->withScheme("http");
 
-var_dump($uri1->__toString());
-var_dump($uri2->__toString());
+var_dump($uri1->toString());
+var_dump($uri2->toString());
 
 try {
     $uri2->withScheme(null);
