@@ -2501,7 +2501,7 @@ PHP_FUNCTION(curl_getinfo)
 				CAAS("content_type", s_code);
 			} else {
 				zval retnull;
-				ZVAL_FALSE(&retnull);
+				ZVAL_NULL(&retnull);
 				CAAZ("content_type", &retnull);
 			}
 		}
@@ -2660,6 +2660,17 @@ PHP_FUNCTION(curl_getinfo)
 					RETURN_FALSE;
 				}
 				break;
+			case CURLINFO_CONTENT_TYPE: {
+				char *s_code = NULL;
+
+				if (curl_easy_getinfo(ch->cp, option, &s_code) == CURLE_OK && s_code) {
+					RETURN_STRING(s_code);
+				} else {
+					RETURN_NULL();
+				}
+				break;
+			}
+
 			default: {
 				int type = CURLINFO_TYPEMASK & option;
 				switch (type) {
