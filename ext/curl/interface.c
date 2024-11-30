@@ -2501,7 +2501,7 @@ PHP_FUNCTION(curl_getinfo)
 				CAAS("content_type", s_code);
 			} else {
 				zval retnull;
-				ZVAL_NULL(&retnull);
+				ZVAL_FALSE(&retnull);
 				CAAZ("content_type", &retnull);
 			}
 		}
