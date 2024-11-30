@@ -1246,6 +1246,8 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	if (PHP_SANITIZER == "yes") {
 		if (CLANG_TOOLSET) {
 			add_asan_opts("CFLAGS_" + SAPI, "LIBS_" + SAPI, (is_lib ? "ARFLAGS_" : "LDFLAGS_") + SAPI);
+		} else if (VS_TOOLSET) {
+			ADD_FLAG("CFLAGS", "/fsanitize=address");
 		}
 	}
 
@@ -3442,8 +3444,12 @@ function toolset_setup_build_mode()
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
 		ADD_FLAG("CFLAGS", "/LD /MD");
-		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
-			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
+		if (PHP_SANITIZER == "yes") {
+			if (VS_TOOLSET) {
+				ADD_FLAG("CFLAGS", "/Ox /U NDebug /U NDEBUG /D ZEND_DEBUG=1");
+			} else if (CLANG_TOOLSET) {
+				ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
+			}
 		} else {
 			// Equivalent to Release_TSInline build -> best optimization
 			ADD_FLAG("CFLAGS", "/Ox /D NDebug /D NDEBUG /GF /D ZEND_DEBUG=0");
