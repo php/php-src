@@ -2610,7 +2610,7 @@ class ConstInfo extends VariableLike
     {
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
-        return "$className.constants." . strtolower(str_replace(["__", "_"], ["", "-"], $this->name->getDeclarationName()));
+        return "$className.constants." . strtolower(str_replace("_", "-", trim($this->name->getDeclarationName(), "_")));
     }
 
     protected function getFieldSynopsisName(): string
@@ -3052,7 +3052,7 @@ class PropertyInfo extends VariableLike
     {
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
-        return "$className.props." . strtolower(str_replace(["__", "_"], ["", "-"], $this->name->getDeclarationName()));
+        return "$className.props." . strtolower(str_replace("_", "-", trim($this->name->getDeclarationName(), "_")));
     }
 
     protected function getFieldSynopsisName(): string
@@ -6424,8 +6424,14 @@ if ($generateMethodSynopses) {
     }
 
     foreach ($methodSynopses as $filename => $content) {
-        if (!file_exists("$manualTarget/$filename")) {
-            if (file_put_contents("$manualTarget/$filename", $content)) {
+        $path = "$manualTarget/$filename";
+
+        if (!file_exists($path)) {
+            if (!file_exists(dirname($path))) {
+                mkdir(dirname($path));
+            }
+
+            if (file_put_contents($path, $content)) {
                 echo "Saved $filename\n";
             }
         }
