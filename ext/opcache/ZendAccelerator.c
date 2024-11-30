@@ -1815,6 +1815,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OBSERVER;
+		CG(compiler_options) |= ZEND_COMPILE_WITH_ARRAY_TEMPLATES;
 #ifdef ZEND_WIN32
 		/* On Windows, don't compile with internal classes. Shm may be attached from different
 		 * processes with internal classes living in different addresses. */
@@ -4429,6 +4430,7 @@ static zend_result accel_preload(const char *config, bool in_child)
 	CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 	CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+	CG(compiler_options) |= ZEND_COMPILE_WITH_ARRAY_TEMPLATES;
 	CG(skip_shebang) = true;
 
 	zend_try {

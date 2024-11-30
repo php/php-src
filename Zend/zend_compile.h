@@ -1285,6 +1285,11 @@ END_EXTERN_C()
 /* ignore observer notifications, e.g. to manually notify afterwards in a post-processing step after compilation */
 #define ZEND_COMPILE_IGNORE_OBSERVER			(1<<18)
 
+/* Allow compiling with ZEND_ARRAY_DUP and ZEND_ARRAY_SET_PLACEHOLDER opcodes.
+ * These are generally faster with opcache, because the array constant is
+ * immutable, which allows for fast cloning through memcpy. */
+#define ZEND_COMPILE_WITH_ARRAY_TEMPLATES		(1<<19)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 

@@ -9792,7 +9792,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast, bool allow_templ
 	zend_ast *last_elem_ast = NULL;
 	uint32_t i;
 	bool is_constant = 1;
-	bool use_template = true;
+	bool use_template = CG(compiler_options) & ZEND_COMPILE_WITH_ARRAY_TEMPLATES;
 
 	if (ast->attr == ZEND_ARRAY_SYNTAX_LIST) {
 		zend_error(E_COMPILE_ERROR, "Cannot use list() as standalone expression");
