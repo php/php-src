@@ -1159,8 +1159,7 @@ class ReturnInfo {
     const REFCOUNT_1 = "1";
     const REFCOUNT_N = "N";
 
-    const REFCOUNTS = [
-        self::REFCOUNT_0,
+    const REFCOUNTS_NONSCALAR = [
         self::REFCOUNT_1,
         self::REFCOUNT_N,
     ];
@@ -1204,16 +1203,14 @@ class ReturnInfo {
             return;
         }
 
-        if (!in_array($refcount, ReturnInfo::REFCOUNTS, true)) {
-            throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
+        if ($isScalarType) {
+            throw new Exception(
+                "@refcount on functions returning scalar values is redundant and not permitted"
+            );
         }
 
-        if ($isScalarType && $refcount !== self::REFCOUNT_0) {
-            throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
-        }
-
-        if (!$isScalarType && $refcount === self::REFCOUNT_0) {
-            throw new Exception('A non-scalar return type of "' . $type->__toString() . '" cannot have a refcount of "' . self::REFCOUNT_0 . '"');
+        if (!in_array($refcount, ReturnInfo::REFCOUNTS_NONSCALAR, true)) {
+            throw new Exception("@refcount must have one of the following values: \"1\", \"N\", $refcount given");
         }
 
         $this->refcount = $refcount;
