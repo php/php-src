@@ -11,35 +11,35 @@ $uri1 = Uri\Rfc3986Uri::parse("https://example.com/foo/bar");
 $uri2 = $uri1->withPath("/foo");
 $uri3 = $uri2->withPath(null);
 
-var_dump($uri1->__toString());
-var_dump($uri2->__toString());
-var_dump($uri3->__toString());
+var_dump($uri1->toString());
+var_dump($uri2->toString());
+var_dump($uri3->toString());
 
 $uri1 = Uri\Rfc3986Uri::parse("https://example.com");
 $uri2 = $uri1->withPath("/foo");
 
-var_dump($uri1->__toString());
-var_dump($uri2->__toString());
+var_dump($uri1->toString());
+var_dump($uri2->toString());
 
 $uri1 = Uri\Rfc3986Uri::parse("/path?query=abc#foo");
 $uri2 = $uri1->withPath("/");
 
-var_dump($uri1->__toString());
-var_dump($uri2->__toString());
+var_dump($uri1->toString());
+var_dump($uri2->toString());
 
 $uri1 = Uri\WhatWgUri::parse("https://example.com/foo/bar");
 $uri2 = $uri1->withPath("/foo");
 $uri3 = $uri2->withPath(null);
 
-var_dump($uri1->__toString());
-var_dump($uri2->__toString());
-var_dump($uri3->__toString());
+var_dump($uri1->toString());
+var_dump($uri2->toString());
+var_dump($uri3->toString());
 
 $uri1 = Uri\WhatWgUri::parse("https://example.com");
 $uri2 = $uri1->withPath("/foo");
 
-var_dump($uri1->__toString());
-var_dump($uri2->__toString());
+var_dump($uri1->toString());
+var_dump($uri2->toString());
 
 ?>
 --EXPECT--

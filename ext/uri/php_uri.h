@@ -40,7 +40,7 @@ PHPAPI void php_uri_free(uri_internal_t *internal_uri);
 
 PHPAPI void php_uri_instantiate_uri(
 	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_string *base_url_str,
-	bool is_constructor, bool return_errors
+	bool is_constructor, zval *errors_zv
 );
 PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers);
 
