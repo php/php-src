@@ -166,6 +166,9 @@ PHP 8.5 UPGRADE NOTES
   PHP_RELEASE_VERSION are now always numbers.  Previously, they have been
   strings for buildconf builds.
 
+* --enable-sanitzer is now supported for MSVC builds.  This enables ASan and
+  debug assertions, and is supported as of MSVC 16.9 and Windows 10.
+
 * COM:
   . The extension is now build shared by default; previously it defaulted to a
     static extension, although the official Windows binaries built a shared
