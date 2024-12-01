@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16879 (JIT dead code skipping does not update call_level).
     (nielsdos)
 
+- SAPI:
+  . Fixed bug GH-16998 (UBSAN warning in rfc1867). (nielsdos)
+
 - PHPDBG:
   . Fixed bug GH-15208 (Segfault with breakpoint map and phpdbg_clear()).
     (nielsdos)
