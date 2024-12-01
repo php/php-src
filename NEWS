@@ -67,6 +67,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15208 (Segfault with breakpoint map and phpdbg_clear()).
     (nielsdos)
 
+- SAPI:
+  . Fixed bug GH-16998 (UBSAN warning in rfc1867). (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-16808 (Segmentation fault in RecursiveIteratorIterator
     ->current() with a xml element input). (nielsdos)
