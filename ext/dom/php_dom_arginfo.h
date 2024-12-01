@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 860bf40a97ec6570e9f5b0616407ba55d7c8d6f8 */
+ * Stub hash: 0fcee2fa666dc88faf084578dde157409a6f5594 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -3524,13 +3524,13 @@ static zend_class_entry *register_class_Dom_XMLDocument(zend_class_entry *class_
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Dom_TokenList(zend_class_entry *class_entry_Dom_IteratorAggregate, zend_class_entry *class_entry_Dom_Countable)
+static zend_class_entry *register_class_Dom_TokenList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Dom", "TokenList", class_Dom_TokenList_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
-	zend_class_implements(class_entry, 2, class_entry_Dom_IteratorAggregate, class_entry_Dom_Countable);
+	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
