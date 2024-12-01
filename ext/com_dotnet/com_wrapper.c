@@ -256,31 +256,26 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 
 		/* TODO: if PHP raises an exception here, we should catch it
 		 * and expose it as a COM exception */
-
+		zend_fcall_info_cache fcc;
 		if (wFlags & DISPATCH_PROPERTYPUT) {
 			zend_update_property(Z_OBJCE(disp->object), Z_OBJ(disp->object), Z_STRVAL_P(name), Z_STRLEN_P(name), &params[0]);
 			ret = S_OK;
-		} else if (wFlags & DISPATCH_METHOD && zend_is_callable_ex(name, Z_OBJ(disp->object), 0, NULL, NULL, NULL)) {
+		} else if (wFlags & DISPATCH_METHOD && zend_is_callable_ex(name, Z_OBJ(disp->object), 0, NULL, &fcc, NULL)) {
 			zend_try {
 				retval = &rv;
-				if (SUCCESS == call_user_function(NULL, &disp->object, name,
-							retval, pdp->cArgs, params)) {
-					ret = S_OK;
-					trace("function called ok\n");
+				zend_call_known_fcc(&fcc, retval, pdp->cArgs, params, NULL);
+				ret = S_OK;
+				trace("function called ok\n");
 
-					/* Copy any modified values to callers copy of variant*/
-					for (i = 0; i < pdp->cArgs; i++) {
-						php_com_dotnet_object *obj = CDNO_FETCH(&params[i]);
-						VARIANT *srcvar = &obj->v;
-						VARIANT *dstvar = &pdp->rgvarg[ pdp->cArgs - 1 - i];
-						if ((V_VT(dstvar) & VT_BYREF) && obj->modified ) {
-							trace("percolate modified value for arg %u VT=%08x\n", i, V_VT(dstvar));
-							php_com_copy_variant(dstvar, srcvar);
-						}
+				/* Copy any modified values to callers copy of variant*/
+				for (i = 0; i < pdp->cArgs; i++) {
+					php_com_dotnet_object *obj = CDNO_FETCH(&params[i]);
+					VARIANT *srcvar = &obj->v;
+					VARIANT *dstvar = &pdp->rgvarg[ pdp->cArgs - 1 - i];
+					if ((V_VT(dstvar) & VT_BYREF) && obj->modified ) {
+						trace("percolate modified value for arg %u VT=%08x\n", i, V_VT(dstvar));
+						php_com_copy_variant(dstvar, srcvar);
 					}
-				} else {
-					trace("failed to call func\n");
-					ret = DISP_E_EXCEPTION;
 				}
 			} zend_catch {
 				trace("something blew up\n");
