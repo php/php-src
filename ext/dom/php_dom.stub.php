@@ -2096,7 +2096,7 @@ namespace Dom
      * @not-serializable
      * @strict-properties
      */
-    final class TokenList implements IteratorAggregate, Countable
+    final class TokenList implements \IteratorAggregate, \Countable
     {
         /** @implementation-alias Dom\Node::__construct */
         private function __construct() {}
