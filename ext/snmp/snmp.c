@@ -629,6 +629,31 @@ retry:
 }
 /* }}} */
 
+static void php_snmp_zend_string_release_from_char_pointer(char *ptr) {
+	if (ptr) {
+		zend_string *pptr = (zend_string *)(ptr - XtOffsetOf(zend_string, val));
+		zend_string_release(pptr);
+	}
+}
+
+static void php_free_objid_query(struct objid_query *objid_query, HashTable* oid_ht, const HashTable *value_ht, int st) {
+	if (oid_ht) {
+		uint32_t count = zend_hash_num_elements(oid_ht);
+
+		for (uint32_t i = 0; i < count; i ++) {
+			snmpobjarg *arg = &objid_query->vars[i];
+			if (!arg->oid) {
+				break;
+			}
+			if (value_ht) {
+				php_snmp_zend_string_release_from_char_pointer(arg->value);
+			}
+			php_snmp_zend_string_release_from_char_pointer(arg->oid);
+		}
+	}
+	efree(objid_query->vars);
+}
+
 /* {{{ php_snmp_parse_oid
 *
 * OID parser (and type, value for SNMP_SET command)
@@ -677,10 +702,15 @@ static bool php_snmp_parse_oid(
 			return false;
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
+		memset(objid_query->vars, 0, sizeof(snmpobjarg) * zend_hash_num_elements(oid_ht));
 		objid_query->array_output = (st & SNMP_CMD_SET) == 0;
 		ZEND_HASH_FOREACH_VAL(oid_ht, tmp_oid) {
-			convert_to_string(tmp_oid);
-			objid_query->vars[objid_query->count].oid = Z_STRVAL_P(tmp_oid);
+			zend_string *tmp = zval_try_get_string(tmp_oid);
+			if (!tmp) {
+				php_free_objid_query(objid_query, oid_ht, value_ht, st);
+				return false;
+			}
+			objid_query->vars[objid_query->count].oid = ZSTR_VAL(tmp);
 			if (st & SNMP_CMD_SET) {
 				if (type_str) {
 					pptr = ZSTR_VAL(type_str);
@@ -704,18 +734,24 @@ static bool php_snmp_parse_oid(
 						}
 					}
 					if (idx_type < type_ht->nNumUsed) {
-						convert_to_string(tmp_type);
-						if (Z_STRLEN_P(tmp_type) != 1) {
-							zend_value_error("Type must be a single character");
-							efree(objid_query->vars);
+						zend_string *type = zval_try_get_string(tmp_type);
+						if (!type) {
+							php_free_objid_query(objid_query, oid_ht, value_ht, st);
 							return false;
 						}
-						pptr = Z_STRVAL_P(tmp_type);
-						objid_query->vars[objid_query->count].type = *pptr;
+						size_t len = ZSTR_LEN(type);
+						char ptype = *ZSTR_VAL(type);
+						zend_string_release(type);
+						if (len != 1) {
+							zend_value_error("Type must be a single character");
+							php_free_objid_query(objid_query, oid_ht, value_ht, st);
+							return false;
+						}
+						objid_query->vars[objid_query->count].type = ptype;
 						idx_type++;
 					} else {
-						php_error_docref(NULL, E_WARNING, "'%s': no type set", Z_STRVAL_P(tmp_oid));
-						efree(objid_query->vars);
+						php_error_docref(NULL, E_WARNING, "'%s': no type set", ZSTR_VAL(tmp));
+						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
 				}
@@ -741,12 +777,16 @@ static bool php_snmp_parse_oid(
 						}
 					}
 					if (idx_value < value_ht->nNumUsed) {
-						convert_to_string(tmp_value);
-						objid_query->vars[objid_query->count].value = Z_STRVAL_P(tmp_value);
+						zend_string *tmp = zval_try_get_string(tmp_value);
+						if (!tmp) {
+							php_free_objid_query(objid_query, oid_ht, value_ht, st);
+							return false;
+						}
+						objid_query->vars[objid_query->count].value = ZSTR_VAL(tmp);
 						idx_value++;
 					} else {
-						php_error_docref(NULL, E_WARNING, "'%s': no value set", Z_STRVAL_P(tmp_oid));
-						efree(objid_query->vars);
+						php_error_docref(NULL, E_WARNING, "'%s': no value set", ZSTR_VAL(tmp));
+						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
 				}
@@ -759,14 +799,14 @@ static bool php_snmp_parse_oid(
 	if (st & SNMP_CMD_WALK) {
 		if (objid_query->count > 1) {
 			php_snmp_error(object, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Multi OID walks are not supported!");
-			efree(objid_query->vars);
+			php_free_objid_query(objid_query, oid_ht, value_ht, st);
 			return false;
 		}
 		objid_query->vars[0].name_length = MAX_NAME_LEN;
 		if (strlen(objid_query->vars[0].oid)) { /* on a walk, an empty string means top of tree - no error */
 			if (!snmp_parse_oid(objid_query->vars[0].oid, objid_query->vars[0].name, &(objid_query->vars[0].name_length))) {
 				php_snmp_error(object, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Invalid object identifier: %s", objid_query->vars[0].oid);
-				efree(objid_query->vars);
+				php_free_objid_query(objid_query, oid_ht, value_ht, st);
 				return false;
 			}
 		} else {
@@ -778,7 +818,7 @@ static bool php_snmp_parse_oid(
 			objid_query->vars[objid_query->offset].name_length = MAX_OID_LEN;
 			if (!snmp_parse_oid(objid_query->vars[objid_query->offset].oid, objid_query->vars[objid_query->offset].name, &(objid_query->vars[objid_query->offset].name_length))) {
 				php_snmp_error(object, PHP_SNMP_ERRNO_OID_PARSING_ERROR, "Invalid object identifier: %s", objid_query->vars[objid_query->offset].oid);
-				efree(objid_query->vars);
+				php_free_objid_query(objid_query, oid_ht, value_ht, st);
 				return false;
 			}
 		}
@@ -1250,12 +1290,12 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 
 	if (session_less_mode) {
 		if (!netsnmp_session_init(&session, version, a1, a2, timeout, retries)) {
-			efree(objid_query.vars);
+			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			netsnmp_session_free(&session);
 			RETURN_FALSE;
 		}
 		if (version == SNMP_VERSION_3 && !netsnmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL)) {
-			efree(objid_query.vars);
+			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			netsnmp_session_free(&session);
 			/* Warning message sent already, just bail out */
 			RETURN_FALSE;
@@ -1266,7 +1306,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		session = snmp_object->session;
 		if (!session) {
 			zend_throw_error(NULL, "Invalid or uninitialized SNMP object");
-			efree(objid_query.vars);
+			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			RETURN_THROWS();
 		}
 
@@ -1292,7 +1332,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 
 	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, session, &objid_query);
 
-	efree(objid_query.vars);
+	php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 
 	if (session_less_mode) {
 		netsnmp_session_free(&session);
