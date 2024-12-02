@@ -1882,8 +1882,6 @@ bool zend_file_cache_script_validate(zend_file_handle *file_handle)
 	}
 
 	zend_arena_release(&CG(arena), checkpoint);
-    zend_file_cache_flock(fd, LOCK_UN);
-    close(fd);
     efree(filename);
     return true; // Validation successful
 
@@ -1899,7 +1897,6 @@ failure:
 
     return false; // Validation failed
 }
-
 
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
 {
