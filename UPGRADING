@@ -44,6 +44,10 @@ PHP 8.5 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . Added support for Closures in constant expressions.
+    RFC: https://wiki.php.net/rfc/closures_in_const_expr
+
 - DOM:
   . Added Dom\Element::$outerHTML.
 
