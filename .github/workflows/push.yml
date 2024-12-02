@@ -192,6 +192,7 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+            --asan
   MACOS_DEBUG_NTS:
     if: false
     strategy:
