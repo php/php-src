@@ -3331,7 +3331,7 @@ static zend_result accel_post_startup(void)
 	}
 
 	if ( ZCG(accel_directives).file_cache ) {
-		zend_accel_error(ACCEL_LOG_INFO, "opcache.file_cache running with PHP build ID: %s", zend_system_id);
+		zend_accel_error(ACCEL_LOG_INFO, "opcache.file_cache running with PHP build ID: %.32s", zend_system_id);
 
 		zend_stat_t buf = {0};
 
