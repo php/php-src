@@ -81,6 +81,7 @@ PHP                                                                        NEWS
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
     nielsdos)
+  . Fixed bug GH-16843 (Windows phpize builds ignore source subfolders). (cmb)
 
 - XMLWriter:
   . Improved performance and reduce memory consumption. (nielsdos)
