@@ -1160,10 +1160,7 @@ mysqli.allow_persistent = On
 ; https://php.net/mysqli.max-links
 mysqli.max_links = -1
 
-; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
-; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
-; at MYSQL_PORT.
+; Default port number for mysqli_connect().
 ; https://php.net/mysqli.default-port
 mysqli.default_port = 3306
 
@@ -1172,15 +1169,15 @@ mysqli.default_port = 3306
 ; https://php.net/mysqli.default-socket
 mysqli.default_socket =
 
-; Default host for mysqli_connect() (doesn't apply in safe mode).
+; Default host for mysqli_connect().
 ; https://php.net/mysqli.default-host
 mysqli.default_host =
 
-; Default user for mysqli_connect() (doesn't apply in safe mode).
+; Default user for mysqli_connect().
 ; https://php.net/mysqli.default-user
 mysqli.default_user =
 
-; Default password for mysqli_connect() (doesn't apply in safe mode).
+; Default password for mysqli_connect().
 ; Note that this is generally a *bad* idea to store passwords in this file.
 ; *Any* user with PHP access can run 'echo get_cfg_var("mysqli.default_pw")
 ; and reveal this password!  And of course, any users with read access to this
