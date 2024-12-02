@@ -367,10 +367,6 @@ static int filename_is_in_cache(zend_string *filename)
 
 static int filename_is_in_file_cache(zend_string *filename)
 {
-	if (!ZCG(accel_directives).file_cache) {
-		return 0;
-	}
-
 	zend_string *realpath;
 
 	realpath = zend_resolve_path(filename);
@@ -1012,12 +1008,9 @@ ZEND_FUNCTION(opcache_compile_file)
 ZEND_FUNCTION(opcache_is_script_cached)
 {
 	zend_string *script_name;
-	bool file_cache = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(script_name)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(file_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!validate_api_restriction()) {
@@ -1028,9 +1021,25 @@ ZEND_FUNCTION(opcache_is_script_cached)
 		RETURN_FALSE;
 	}
 
-	if (file_cache) {
-		RETURN_BOOL(filename_is_in_file_cache(script_name));
-	} else {
-		RETURN_BOOL(filename_is_in_cache(script_name));
+	RETURN_BOOL(filename_is_in_cache(script_name));
+}
+
+/* {{{ Return true if the script is cached in OPCache file cache, false if it is not cached or if OPCache is not running. */
+ZEND_FUNCTION(opcache_is_script_cached_in_file_cache)
+{
+	zend_string *script_name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(script_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!validate_api_restriction()) {
+		RETURN_FALSE;
 	}
+
+	if (!ZCG(accelerator_enabled) || !ZCG(accel_directives).file_cache) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(filename_is_in_file_cache(script_name));
 }

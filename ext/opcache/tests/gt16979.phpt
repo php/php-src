@@ -14,11 +14,11 @@ opcache
 opcache_compile_file(__FILE__);
 
 var_dump(
-    opcache_is_script_cached(__FILE__, false)
+    opcache_is_script_cached(__FILE__)
 );
 
 var_dump(
-    opcache_is_script_cached(__FILE__, true)
+    opcache_is_script_cached_in_file_cache(__FILE__)
 );
 
 ?>
