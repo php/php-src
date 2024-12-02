@@ -7204,9 +7204,9 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 
 				while (n) {
 					n--;
-					ir_IF_TRUE(end_inputs->refs[n]);
+					jit_IF_TRUE_FALSE_ex(jit, end_inputs->refs[n], label);
 					ir_END_list(true_inputs);
-					ir_IF_FALSE(end_inputs->refs[n]);
+					jit_IF_TRUE_FALSE_ex(jit, end_inputs->refs[n], label2);
 					ir_END_list(false_inputs);
 				}
 				ir_MERGE_list(true_inputs);
