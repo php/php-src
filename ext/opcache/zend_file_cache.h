@@ -19,8 +19,16 @@
 #ifndef ZEND_FILE_CACHE_H
 #define ZEND_FILE_CACHE_H
 
+typedef struct _zend_file_cache_handle {
+	zend_string *full_path;
+	zend_file_cache_metainfo info;
+	void *mem, *checkpoint;
+} zend_file_cache_handle;
+
 int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm);
-bool zend_file_cache_script_validate(zend_file_handle *file_handle);
+zend_always_inline zend_result zend_file_cache_open(zend_file_handle *file_handle, zend_file_cache_handle *cache_handle);
+zend_always_inline void zend_file_cache_close(zend_file_cache_handle *cache_handle);
+zend_result zend_file_cache_validate(zend_file_handle *file_handle);
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle);
 void zend_file_cache_invalidate(zend_string *full_path);
 
