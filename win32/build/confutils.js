@@ -2270,6 +2270,10 @@ function generate_config_h()
 
 	outfile = FSO.CreateTextFile("main/config.w32.h", true);
 
+	outfile.WriteLine("#ifndef CONFIG_W32_H");
+	outfile.WriteLine("#define CONFIG_W32_H");
+	outfile.WriteBlankLines(1);
+
 	indata = indata.replace(new RegExp("@PREFIX@", "g"), prefix);
 	outfile.Write(indata);
 
@@ -2317,6 +2321,8 @@ function generate_config_h()
 	outfile.WriteLine("#if __has_include(\"main/config.pickle.h\")");
 	outfile.WriteLine("#include \"main/config.pickle.h\"");
 	outfile.WriteLine("#endif");
+	outfile.WriteBlankLines(1);
+	outfile.WriteLine("#endif /* CONFIG_W32_H */");
 
 	outfile.Close();
 }
