@@ -1614,8 +1614,15 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		if (obj_dir == null) {
 			if (MODE_PHPIZE) {
 				/* In the phpize mode, the subdirs are always relative to BUID_DIR.
-					No need to differentiate by extension, only one gets built. */
-				var build_dir = (dirname ? dirname : "").replace(new RegExp("^..\\\\"), "");
+					No need to differentiate by extension, only one gets built.
+					We still need to cater to subfolders, though. */
+				if (dir.charAt(configure_module_dirname.length) === "\\" &&
+					dir.substr(0, configure_module_dirname.length) === configure_module_dirname) {
+					var reldir = dir.substr(configure_module_dirname.length + 1);
+					var build_dir = (dirname ? (reldir + "\\" + dirname) : reldir).replace(new RegExp("^..\\\\"), "");
+				} else {
+					var build_dir = (dirname ? dirname : "").replace(new RegExp("^..\\\\"), "");
+				}
 			} else {
 				var build_dir = (dirname ? (dir + "\\" + dirname) : dir).replace(new RegExp("^..\\\\"), "");
 			}
