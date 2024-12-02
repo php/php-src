@@ -1820,7 +1820,7 @@ bool zend_file_cache_script_validate(zend_file_handle *file_handle)
     char *filename;
     zend_file_cache_metainfo info;
     unsigned int actual_checksum;
-    void *mem;
+    void *mem, *checkpoint;
 
     if (!file_handle || !file_handle->opened_path) {
         return false;

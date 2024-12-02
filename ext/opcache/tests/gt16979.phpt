@@ -5,7 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.jit=disable
 opcache.jit_buffer_size=0
-opcache.file_cache={TMP}
+opcache.file_cache="{TMP}"
 --EXTENSIONS--
 opcache
 --FILE--
