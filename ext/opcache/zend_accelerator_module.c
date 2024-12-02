@@ -380,7 +380,7 @@ static int filename_is_in_file_cache(zend_string *filename)
 	zend_stream_init_filename_ex(&handle, filename);
 	handle.opened_path = realpath;
 
-	zend_result result = zend_file_cache_script_validate(&handle);
+	zend_result result = zend_file_cache_validate(&handle);
 
 	zend_destroy_file_handle(&handle);
 
