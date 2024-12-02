@@ -7,7 +7,7 @@ dba
 --SKIPIF--
 <?php
 require_once __DIR__ . '/setup/setup_dba_tests.inc';
-check_skip('inifile');
+check_skip('flatfile');
 ?>
 --FILE--
 <?php
