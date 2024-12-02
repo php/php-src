@@ -1293,9 +1293,9 @@ PHP_FUNCTION(dba_list)
 
 	zval *zv;
 	ZEND_HASH_MAP_FOREACH_VAL(&DBA_G(connections), zv) {
-		dba_info *info = Z_DBA_INFO_P(zv);
-		if (info) {
-			add_next_index_str(return_value, zend_string_copy(info->path));
+		dba_connection *connection = Z_DBA_CONNECTION_P(zv);
+		if (connection->info) {
+			add_index_str(return_value, connection->std.handle, zend_string_copy(connection->info->path));
 		}
 	} ZEND_HASH_FOREACH_END();
 }

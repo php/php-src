@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fix various memory leaks in curl mime handling. (nielsdos)
 
+- DBA:
+  . Fixed bug GH-16990 (dba_list() is now zero-indexed instead of using
+    resource ids) (kocsismate)
+
 - DOM:
   . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
     (nielsdos)
