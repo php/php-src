@@ -1334,7 +1334,7 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 	/* Negative "var" has special meaning for IR */
 	if (val > 0) {
 		if (jit->ctx.binding) {
-			ir_ref old = ir_binding_find(jit, val);
+			ir_ref old = ir_binding_find(&jit->ctx, val);
 			if (old && old != -EX_NUM_TO_VAR(jit->ssa->vars[var].var)) {
 				val = ir_emit2(&jit->ctx, IR_OPT(IR_COPY, jit->ctx.ir_base[val].type), val, 1);
 			}
