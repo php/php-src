@@ -1746,6 +1746,32 @@ ZEND_API inheritance_status zend_verify_property_hook_variance(const zend_proper
 	return zend_perform_covariant_type_check(ce, prop_info->type, ce, value_arg_info->type);
 }
 
+#ifdef ZEND_WIN32
+/* Hooked properties set get_iterator, which causes issues on Windows. Windows
+ * attaches multiple processes to the same shm, with each process potentially
+ * having different addresses to the corresponding get_iterator function due to
+ * ASLR. This prevents us from caching the class.
+ *
+ * To at least cache the unlinked class, avoid early-binding on Windows, and set
+ * get_iterator during inheritance. The linked class may not use inheritance
+ * cache. */
+static void zend_link_hooked_object_iter(zend_class_entry *ce) {
+	if (!ce->get_iterator && ce->num_hooked_props) {
+		ce->get_iterator = zend_hooked_object_get_iterator;
+		ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
+		if (CG(current_linking_class) == ce) {
+			HashTable *ht = (HashTable*)ce->inheritance_cache;
+			if (ht) {
+				zend_hash_destroy(ht);
+				FREE_HASHTABLE(ht);
+				ce->inheritance_cache = NULL;
+			}
+			CG(current_linking_class) = NULL;
+		}
+	}
+}
+#endif
+
 ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *parent_ce, bool checked) /* {{{ */
 {
 	zend_property_info *property_info;
@@ -3550,6 +3576,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_enum_register_funcs(ce);
 		}
 
+#ifdef ZEND_WIN32
+		zend_link_hooked_object_iter(ce);
+#endif
+
 		if (parent) {
 			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 				add_dependency_obligation(ce, parent);
@@ -3837,6 +3867,10 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			if (is_cacheable) {
 				zend_begin_record_errors();
 			}
+
+#ifdef ZEND_WIN32
+			zend_link_hooked_object_iter(ce);
+#endif
 
 			zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
 			if (parent_ce && parent_ce->num_interfaces) {
