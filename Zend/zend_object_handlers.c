@@ -2158,6 +2158,13 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2)
 {
+	zval *other = Z_TYPE_P(o1) == IS_OBJECT ? o2 : o1;
+
+	/* Fall back to zend_std_compare_objects() for bool. */
+	if (Z_TYPE_P(other) == IS_TRUE || Z_TYPE_P(other) == IS_FALSE) {
+		return zend_std_compare_objects(o1, o2);
+	}
+
 	return ZEND_UNCOMPARABLE;
 }
 
