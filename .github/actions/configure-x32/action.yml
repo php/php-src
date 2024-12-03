@@ -27,6 +27,7 @@ runs:
             --with-pgsql \
             --with-pdo-pgsql \
             --with-pdo-sqlite \
+            --with-pdo-firebird \
             --without-pear \
             --enable-gd \
             --with-jpeg \
