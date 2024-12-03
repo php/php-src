@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.27
+05 Dec 2024, PHP 8.2.27RC1
 
 - Calendar:
   . Fixed jdtogregorian overflow. (David Carlier)
