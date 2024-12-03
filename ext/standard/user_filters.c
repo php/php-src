@@ -516,13 +516,17 @@ PHP_FUNCTION(stream_filter_register)
 	fdat = ecalloc(1, sizeof(struct php_user_filter_data));
 	fdat->classname = zend_string_copy(classname);
 
-	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
-		RETVAL_TRUE;
+	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL) {
+		if (php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
+			RETURN_TRUE;
+		}
+
+		zend_hash_del(BG(user_filter_map), filtername);
 	} else {
 		zend_string_release_ex(classname, 0);
 		efree(fdat);
-		RETVAL_FALSE;
 	}
+
+	RETURN_FALSE;
 }
 /* }}} */
