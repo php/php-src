@@ -28,6 +28,12 @@ PHP 8.5 UPGRADE NOTES
 - Core:
   . It is no longer possible to use "array" and "callable" as class alias names
     in class_alias().
+  . Loosely comparing uncomparable objects (e.g. enums, \CurlHandle and other
+    internal classes) to booleans was previously inconsistent. If compared to a
+    boolean literal $object == true, it would behave the same way as (bool)
+    $object. If compared to a statically unknown value $object == $true, it
+    would always return false. This behavior was consolidated to always follow
+    the behavior of (bool) $object.
 
 - Intl:
   . The extension now requires at least ICU 57.1.

@@ -2333,13 +2333,29 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT
-				 && Z_TYPE_P(op2) == IS_OBJECT
-				 && Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
-					return 0;
-				} else if (Z_TYPE_P(op1) == IS_OBJECT) {
-					return Z_OBJ_HANDLER_P(op1, compare)(op1, op2);
-				} else if (Z_TYPE_P(op2) == IS_OBJECT) {
-					return Z_OBJ_HANDLER_P(op2, compare)(op1, op2);
+				 || Z_TYPE_P(op2) == IS_OBJECT) {
+					zval *object, *other;
+					if (Z_TYPE_P(op1) == IS_OBJECT) {
+						object = op1;
+						other = op2;
+					} else {
+						object = op2;
+						other = op1;
+					}
+					if (EXPECTED(Z_TYPE_P(other) == IS_OBJECT)) {
+						if (Z_OBJ_P(object) == Z_OBJ_P(other)) {
+							return 0;
+						}
+					} else if (Z_TYPE_P(other) == IS_TRUE || Z_TYPE_P(other) == IS_FALSE) {
+						zval casted;
+						if (Z_OBJ_HANDLER_P(object, cast_object)(Z_OBJ_P(object), &casted, _IS_BOOL) == FAILURE) {
+							return object == op1 ? 1 : -1;
+						}
+						int ret = object == op1 ? zend_compare(&casted, other) : zend_compare(other, &casted);
+						ZEND_ASSERT(!Z_REFCOUNTED_P(&casted));
+						return ret;
+					}
+					return Z_OBJ_HANDLER_P(object, compare)(op1, op2);
 				}
 
 				if (!converted) {
