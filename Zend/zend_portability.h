@@ -863,4 +863,11 @@ static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
 }
 #endif
 
+#ifdef ZEND_WIN32
+/* Whether it's allowed to reattach to a shm segment from different processes on
+ * this platform. This prevents pointing to internal structures from shm due to
+ * ASLR. Currently only possible on Windows. */
+# define ZEND_OPCACHE_SHM_REATTACHMENT 1
+#endif
+
 #endif /* ZEND_PORTABILITY_H */
