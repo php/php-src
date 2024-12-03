@@ -6902,7 +6902,7 @@ done:
 
 							ssa->var_info[j].type &= ~MAY_BE_GUARD;
 							op_type = concrete_type(ssa->var_info[j].type);
-							if (!zend_jit_type_guard(&ctx, opline, EX_NUM_TO_VAR(i), op_type)) {
+							if (!zend_jit_type_guard(&ctx, NULL, EX_NUM_TO_VAR(i), op_type)) {
 								goto jit_failure;
 							}
 							SET_STACK_TYPE(stack, i, op_type, 1);
