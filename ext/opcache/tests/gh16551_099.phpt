@@ -49,15 +49,15 @@ var_dump(
 --CLEAN--
 <?php
 if (substr(PHP_OS, 0, 3) !== 'WIN') {
-    $pattern = __DIR__ . '/*/' . __DIR__ . '/*16551_999.inc.bin';
+    $pattern = __DIR__ . '/*/' . __DIR__ . '/*16551*.bin';
 } else {
-    $pattern = __DIR__ . '/*/*/' . str_replace(':', '', __DIR__) . '/*16551_999.inc.bin';
+    $pattern = __DIR__ . '/*/*/' . str_replace(':', '', __DIR__) . '/*16551*.bin';
 }
 foreach (glob($pattern) as $p) {
     unlink($p);
     $p = dirname($p);
     while(strlen($p) > strlen(__DIR__)) {
-        rmdir($p);
+        @rmdir($p);
         $p = dirname($p);
     }
 }

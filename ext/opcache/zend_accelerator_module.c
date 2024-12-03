@@ -1037,7 +1037,12 @@ ZEND_FUNCTION(opcache_is_script_cached_in_file_cache)
 		RETURN_FALSE;
 	}
 
-	if (!ZCG(accelerator_enabled) || !ZCG(accel_directives).file_cache) {
+	// account for accelerator_enabled = false when file_cache_only = true
+	if (!(ZCG(accelerator_enabled) || ZCG(accel_directives).file_cache_only)) {
+		RETURN_FALSE;
+	}
+	
+	if (!ZCG(accel_directives).file_cache) {
 		RETURN_FALSE;
 	}
 
