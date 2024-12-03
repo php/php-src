@@ -1013,13 +1013,6 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 
 #define IR_RESERVED_FLAG_1     (1U<<31)
 
-/*** IR Binding ***/
-IR_ALWAYS_INLINE ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
-{
-	ir_ref var = ir_hashtab_find(ctx->binding, ref);
-	return (var != (ir_ref)IR_INVALID_VAL) ? var : 0;
-}
-
 /*** IR Use Lists ***/
 struct _ir_use_list {
 	ir_ref        refs; /* index in ir_ctx->use_edges[] array */
