@@ -1139,6 +1139,12 @@ ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def)
 	return def;
 }
 
+ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
+{
+	ir_ref var = ir_hashtab_find(ctx->binding, ref);
+	return (var != (ir_ref)IR_INVALID_VAL) ? var : 0;
+}
+
 /* Batch construction of def->use edges */
 #if 0
 void ir_build_def_use_lists(ir_ctx *ctx)
