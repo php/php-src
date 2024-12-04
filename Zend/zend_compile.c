@@ -9860,7 +9860,8 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast, bool allow_templ
 		zval tmp;
 		zval *value;
 		if (value_ast->kind != ZEND_AST_ZVAL) {
-			ZVAL_NULL(&tmp);
+			/* Replaced at runtime by ZEND_ARRAY_SET_PLACEHOLDER. */
+			ZVAL_ERROR(&tmp);
 			value = &tmp;
 		} else {
 			value = zend_ast_get_zval(value_ast);

@@ -147,6 +147,9 @@ static void zend_persist_zval_calc(zval *z)
 				}
 			}
 			break;
+		case _IS_ERROR:
+			/* Allowed for array templates. */
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;

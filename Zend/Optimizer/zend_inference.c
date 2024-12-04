@@ -2105,7 +2105,9 @@ ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 	} else if (HT_IS_PACKED(ht)) {
 		tmp |= MAY_BE_ARRAY_PACKED;
 		ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
-			tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+			if (Z_TYPE_P(val) != _IS_ERROR) {
+				tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, str, val) {
@@ -2114,7 +2116,9 @@ ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 			} else {
 				tmp |= MAY_BE_ARRAY_NUMERIC_HASH;
 			}
-			tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+			if (Z_TYPE_P(val) != _IS_ERROR) {
+				tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 	return tmp;
@@ -3443,12 +3447,36 @@ static zend_always_inline zend_result _zend_update_type_info(
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			}
 			break;
-		case ZEND_ARRAY_DUP:
-		case ZEND_ARRAY_SET_PLACEHOLDER:
-			/* FIXME: This can of course be more specific. However, one challenge
-			 * will be removing filled NULL slots from type inference. */
-			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
+		case ZEND_ARRAY_DUP: {
+			ZEND_ASSERT(opline->op1_type == IS_CONST);
+			zval *template = CRT_CONSTANT_EX(op_array, opline, opline->op1);
+			uint32_t tmp = zend_array_type_info(template);
+			tmp &= ~MAY_BE_RCN;
+			tmp |= MAY_BE_RC1;
+			if (!(tmp & MAY_BE_ARRAY_OF_ANY)) {
+				tmp |= MAY_BE_ARRAY_OF_ANY;
+			}
+			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			break;
+		}
+		case ZEND_ARRAY_SET_PLACEHOLDER: {
+			// FIXME: op1 RC inference
+			uint32_t tmp = RES_USE_INFO();
+			if ((tmp & MAY_BE_ARRAY_OF_ANY) == MAY_BE_ARRAY_OF_ANY) {
+				ZEND_ASSERT(ssa_op->result_use != -1);
+				zend_op *dup_op = op_array->opcodes + ssa_vars[ssa_op->result_use].definition;
+				if (dup_op->opcode == ZEND_ARRAY_DUP) {
+					zval *template = CRT_CONSTANT_EX(op_array, dup_op, dup_op->op1);
+					tmp = zend_array_type_info(template);
+					tmp &= ~MAY_BE_RCN;
+					tmp |= MAY_BE_RC1;
+				}
+			}
+			uint32_t dim_type = ((tmp & MAY_BE_ARRAY_KEY_LONG) ? MAY_BE_LONG : 0) | ((tmp & MAY_BE_ARRAY_KEY_STRING) ? MAY_BE_STRING : 0);
+			tmp |= assign_dim_array_result_type(tmp, dim_type, t1, IS_CONST);
+			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
+			break;
+		}
 		case ZEND_ADD_ARRAY_UNPACK:
 			tmp = ssa_var_info[ssa_op->result_use].type;
 			ZEND_ASSERT(tmp & MAY_BE_ARRAY);
