@@ -1,5 +1,16 @@
 --TEST--
 GH-13177 (PHP 8.3.2: final private constructor not allowed when used in trait)
+--SKIPIF--
+<?php
+$tracing = extension_loaded("Zend OPcache")
+    && ($conf = opcache_get_configuration()["directives"])
+    && array_key_exists("opcache.jit", $conf)
+    &&  $conf["opcache.jit"] === "tracing";
+if (PHP_OS_FAMILY === "Windows" && PHP_INT_SIZE == 8 && $tracing) {
+    $url = "https://github.com/php/php-src/issues/15709";
+    die("xfail Test fails on Windows x64 (VS17) and tracing JIT; see $url");
+}
+?>
 --FILE--
 <?php
 
