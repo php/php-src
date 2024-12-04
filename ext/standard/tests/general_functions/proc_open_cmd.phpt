@@ -18,7 +18,6 @@ if (($num = stream_select($read, $write, $except, 1000)) === false) {
         fpassthru($stream);
     }
 }
-@unlink("cmd.exe"); // TODO remove when fix has been applied
 ?>
 --EXPECTF--
 resource(%d) of type (process)
