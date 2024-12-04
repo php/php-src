@@ -54,7 +54,7 @@ DEBUGGER_CMD=
 DEBUGGER_ARGS=
 !endif
 
-all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
+all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS) test_helpers
 
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
 
@@ -185,6 +185,7 @@ clean-pgo: clean-all
 	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_PECL)
 	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_TEST_PACK)
 
+test_helpers: $(PHP_SRC_DIR)\ext\standard\tests\helpers\bad_cmd.exe
 
 !if $(PHP_TEST_INI_PATH) == ""
 test: set-tmp-env
