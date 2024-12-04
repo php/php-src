@@ -39,7 +39,7 @@ function test($boundaryLen) {
     ]);
 
     $spec = [
-        0 => ['pipe', 'r'],
+        0 => [PHP_OS_FAMILY === "Windows" ? 'socket' : 'pipe', 'r'],
         1 => STDOUT,
         2 => STDOUT,
     ];
