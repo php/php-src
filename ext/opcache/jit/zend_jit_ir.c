@@ -8653,24 +8653,47 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 	return 1;
 }
 
+static int zend_jit_func_guard(zend_jit_ctx *jit, ir_ref func_ref, const zend_function *func, const void *exit_addr)
+{
+	if (func->type == ZEND_USER_FUNCTION &&
+	    (!(func->common.fn_flags & ZEND_ACC_IMMUTABLE) ||
+	     (func->common.fn_flags & ZEND_ACC_CLOSURE) ||
+	     !func->common.function_name)) {
+		const zend_op *opcodes = func->op_array.opcodes;
+
+		// JIT: if (call->func.op_array.opcodes != opcodes) goto exit_addr;
+		ir_GUARD(
+			ir_EQ(
+				ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes))),
+				ir_CONST_ADDR(opcodes)),
+			ir_CONST_ADDR(exit_addr));
+#ifdef ZEND_WIN32
+	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+		// ASLR may cause different addresses in different workers. Check for the internal function handler.
+		// JIT: if (call->func.internal_function.handler != handler) goto exit_addr;
+		ir_GUARD(
+			ir_EQ(
+				ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_internal_function, handler))),
+				ir_CONST_FC_FUNC(func->internal_function.handler)),
+			ir_CONST_ADDR(exit_addr));
+#endif
+	} else {
+		// JIT: if (call->func != func) goto exit_addr;
+		ir_GUARD(ir_EQ(func_ref, ir_CONST_ADDR(func)), ir_CONST_ADDR(exit_addr));
+	}
+
+	return 1;
+}
+
 static int zend_jit_init_fcall_guard(zend_jit_ctx *jit, uint32_t level, const zend_function *func, const zend_op *to_opline)
 {
 	int32_t exit_point;
 	const void *exit_addr;
 	ir_ref call;
 
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-#ifdef ZEND_WIN32
-		// TODO: ASLR may cause different addresses in different workers ???
-		return 0;
-#endif
-	} else if (func->type == ZEND_USER_FUNCTION) {
-		if (!zend_accel_in_shm(func->op_array.opcodes)) {
-			/* op_array and op_array->opcodes are not persistent. We can't link. */
-			return 0;
-		}
-	} else {
-		ZEND_UNREACHABLE();
+	if (func->type == ZEND_USER_FUNCTION
+	 && !zend_accel_in_shm(func->op_array.opcodes)) {
+		/* op_array and op_array->opcodes are not persistent. We can't link. */
 		return 0;
 	}
 
@@ -8688,24 +8711,7 @@ static int zend_jit_init_fcall_guard(zend_jit_ctx *jit, uint32_t level, const ze
 		level--;
 	}
 
-	if (func->type == ZEND_USER_FUNCTION &&
-	    (!(func->common.fn_flags & ZEND_ACC_IMMUTABLE) ||
-	     (func->common.fn_flags & ZEND_ACC_CLOSURE) ||
-	     !func->common.function_name)) {
-		const zend_op *opcodes = func->op_array.opcodes;
-
-		// JIT: if (call->func.op_array.opcodes != opcodes) goto exit_addr;
-		ir_GUARD(
-			ir_EQ(
-				ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CALL(call, func)), offsetof(zend_op_array, opcodes))),
-				ir_CONST_ADDR(opcodes)),
-			ir_CONST_ADDR(exit_addr));
-	} else {
-		// JIT: if (call->func != func) goto exit_addr;
-		ir_GUARD(ir_EQ(ir_LOAD_A(jit_CALL(call, func)), ir_CONST_ADDR(func)), ir_CONST_ADDR(exit_addr));
-	}
-
-	return 1;
+	return zend_jit_func_guard(jit, ir_LOAD_A(jit_CALL(call, func)), func, exit_addr);
 }
 
 static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, int call_level, zend_jit_trace_rec *trace, int checked_stack)
@@ -8812,17 +8818,8 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 				}
 				if (!func || opline->opcode == ZEND_INIT_FCALL) {
 					ir_GUARD(ref, ir_CONST_ADDR(exit_addr));
-				} else if (func->type == ZEND_USER_FUNCTION
-					 && !(func->common.fn_flags & ZEND_ACC_IMMUTABLE)) {
-					const zend_op *opcodes = func->op_array.opcodes;
-
-					ir_GUARD(
-						ir_EQ(
-							ir_LOAD_A(ir_ADD_OFFSET(ref, offsetof(zend_op_array, opcodes))),
-							ir_CONST_ADDR(opcodes)),
-						ir_CONST_ADDR(exit_addr));
-				} else {
-					ir_GUARD(ir_EQ(ref, ir_CONST_ADDR(func)), ir_CONST_ADDR(exit_addr));
+				} else if (!zend_jit_func_guard(jit, ref, func, exit_addr)) {
+					return 0;
 				}
 			} else {
 jit_SET_EX_OPLINE(jit, opline);
@@ -9028,11 +9025,7 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 	if ((!func || zend_jit_may_be_modified(func, op_array))
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL
-	 && trace->func
-#ifdef _WIN32
-	 && trace->func->type != ZEND_INTERNAL_FUNCTION
-#endif
-	) {
+	 && trace->func) {
 		int32_t exit_point;
 		const void *exit_addr;
 
@@ -9047,19 +9040,8 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 
 		func = (zend_function*)trace->func;
 
-		if (func->type == ZEND_USER_FUNCTION &&
-		    (!(func->common.fn_flags & ZEND_ACC_IMMUTABLE) ||
-		     (func->common.fn_flags & ZEND_ACC_CLOSURE) ||
-		     !func->common.function_name)) {
-			const zend_op *opcodes = func->op_array.opcodes;
-
-			ir_GUARD(
-				ir_EQ(
-					ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes))),
-					ir_CONST_ADDR(opcodes)),
-				ir_CONST_ADDR(exit_addr));
-		} else {
-			ir_GUARD(ir_EQ(func_ref, ir_CONST_ADDR(func)), ir_CONST_ADDR(exit_addr));
+		if (!zend_jit_func_guard(jit, func_ref, func, exit_addr)) {
+			return 0;
 		}
 	}
 
@@ -9213,11 +9195,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 	if ((!func || zend_jit_may_be_modified(func, op_array))
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL
-	 && trace->func
-#ifdef _WIN32
-	 && trace->func->type != ZEND_INTERNAL_FUNCTION
-#endif
-	) {
+	 && trace->func) {
 		int32_t exit_point;
 		const void *exit_addr;
 
@@ -9232,19 +9210,8 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 
 		func = (zend_function*)trace->func;
 
-		if (func->type == ZEND_USER_FUNCTION &&
-		    (!(func->common.fn_flags & ZEND_ACC_IMMUTABLE) ||
-		     (func->common.fn_flags & ZEND_ACC_CLOSURE) ||
-		     !func->common.function_name)) {
-			const zend_op *opcodes = func->op_array.opcodes;
-
-			ir_GUARD(
-				ir_EQ(
-					ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes))),
-					ir_CONST_ADDR(opcodes)),
-				ir_CONST_ADDR(exit_addr));
-		} else {
-			ir_GUARD(ir_EQ(func_ref, ir_CONST_ADDR(func)), ir_CONST_ADDR(exit_addr));
+		if (!zend_jit_func_guard(jit, func_ref, func, exit_addr)) {
+			return 0;
 		}
 	}
 
