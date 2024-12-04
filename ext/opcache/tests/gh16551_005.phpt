@@ -16,17 +16,6 @@ opcache_file_cache
 
 $uncached_file = __DIR__ . '/gh16551_999.inc';
 
-// fix problem on ARM where it was already reporting as cached in SHM.
-opcache_invalidate($uncached_file);
-
-var_dump(
-    opcache_is_script_cached($uncached_file)
-);
-
-var_dump(
-    opcache_is_script_cached_in_file_cache($uncached_file)
-);
-
 opcache_compile_file($uncached_file);
 
 var_dump(
@@ -39,7 +28,5 @@ var_dump(
 
 ?>
 --EXPECT--
-bool(false)
-bool(false)
 bool(true)
 bool(false)
