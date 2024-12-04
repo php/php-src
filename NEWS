@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.3
 
+- Streams:
+  . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
+    to incorrect error handling). (nielsdos)
 
 05 Dec 2024, PHP 8.4.2
 
