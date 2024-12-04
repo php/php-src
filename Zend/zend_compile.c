@@ -9836,11 +9836,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast, bool allow_templ
 		last_elem_ast = elem_ast;
 	}
 
-	if (!is_constant
-	 && (!allow_template
-	  || !use_template
-	  /* Array templates are slower for n=1 arrays. */
-	  || list->children <= 1)) {
+	if (!is_constant && (!allow_template || !use_template)) {
 		ZVAL_UNDEF(result);
 		return 0;
 	}
