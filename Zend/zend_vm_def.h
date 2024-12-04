@@ -6442,7 +6442,7 @@ ZEND_VM_HANDLER(210, ZEND_ARRAY_DUP, CONST, UNUSED)
 	zend_array *copy;
 	USE_OPLINE
 
-	copy = zend_array_dup(Z_ARRVAL_P(GET_OP1_ZVAL_PTR(BP_VAR_R)));
+	copy = zend_array_dup_immutable(Z_ARRVAL_P(GET_OP1_ZVAL_PTR(BP_VAR_R)));
 	ZVAL_ARR(EX_VAR(opline->result.var), copy);
 
 	ZEND_VM_NEXT_OPCODE();

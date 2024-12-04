@@ -11142,7 +11142,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_DUP_SPEC_CONST_UNUSED_HA
 	zend_array *copy;
 	USE_OPLINE
 
-	copy = zend_array_dup(Z_ARRVAL_P(RT_CONSTANT(opline, opline->op1)));
+	copy = zend_array_dup_immutable(Z_ARRVAL_P(RT_CONSTANT(opline, opline->op1)));
 	ZVAL_ARR(EX_VAR(opline->result.var), copy);
 
 	ZEND_VM_NEXT_OPCODE();

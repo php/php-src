@@ -2435,6 +2435,36 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 	return idx;
 }
 
+ZEND_API HashTable* ZEND_FASTCALL zend_array_dup_immutable(const HashTable *source)
+{
+	IS_CONSISTENT(source);
+	ZEND_ASSERT(GC_FLAGS(source) & IS_ARRAY_IMMUTABLE);
+
+	HashTable *target;
+	ALLOC_HASHTABLE(target);
+	GC_SET_REFCOUNT(target, 1);
+	GC_TYPE_INFO(target) = GC_ARRAY;
+	HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
+
+	target->nTableMask = source->nTableMask;
+	target->nNumUsed = source->nNumUsed;
+	target->nNumOfElements = source->nNumOfElements;
+	target->nTableSize = source->nTableSize;
+	target->nInternalPointer = source->nInternalPointer;
+	target->nNextFreeElement = source->nNextFreeElement;
+	target->pDestructor = ZVAL_PTR_DTOR;
+
+	if (HT_IS_PACKED(source)) {
+		HT_SET_DATA_ADDR(target, emalloc(HT_PACKED_SIZE(target)));
+		memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_PACKED_USED_SIZE(source));
+	} else {
+		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
+		memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
+	}
+
+	return target;
+}
+
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 {
 	uint32_t idx;

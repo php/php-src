@@ -345,6 +345,7 @@ ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t size);
 ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(const zval *val1, const zval *val2);
 ZEND_API uint32_t zend_array_count(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source);
+ZEND_API HashTable* ZEND_FASTCALL zend_array_dup_immutable(const HashTable *source);
 ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht);
 ZEND_API HashTable* zend_array_to_list(const HashTable *source);
 ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht);
