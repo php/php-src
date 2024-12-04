@@ -18,7 +18,6 @@ function test($boundaryLen) {
         getenv('TEST_PHP_CGI_EXECUTABLE'),
         '-C',
         '-n',
-        __DIR__ . '/GHSA-9pqp-7h25-4f32.inc',
     ];
 
     $boundary = str_repeat('A', $boundaryLen);
