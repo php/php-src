@@ -10,6 +10,9 @@ PHP                                                                        NEWS
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
 
+- Fileinfo:
+  . Fixed bug GH-17039 (PHP 8.4: Incorrect MIME content type). (nielsdos)
+
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
