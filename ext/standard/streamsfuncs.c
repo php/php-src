@@ -1781,7 +1781,7 @@ PHP_FUNCTION(sapi_windows_console_size)
 	php_stream *stream;
 	zend_long fileno;
 	int width, height;
-	zval ztmp;
+	zval zwidth, zheight;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 	Z_PARAM_RESOURCE(zsrc)
@@ -1810,11 +1810,9 @@ PHP_FUNCTION(sapi_windows_console_size)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
-	ZVAL_LONG(&ztmp, width);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &ztmp);
-	ZVAL_LONG(&ztmp, height);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &ztmp);
+	ZVAL_LONG(&zwidth, width);
+	ZVAL_LONG(&zheight, height);
+	RETURN_ARR(zend_new_pair(&zwidth, &zheight));
 }
 #endif
 
