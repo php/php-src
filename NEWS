@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
 
+- Date:
+  . Fix undefined behaviour problems regarding integer overflow in extreme edge
+    cases. (nielsdos, cmb, ilutov)
+
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
   . Added Dom\Element::insertAdjacentHTML(). (nielsdos)
