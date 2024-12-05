@@ -3460,7 +3460,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			break;
 		}
 		case ZEND_ARRAY_SET_PLACEHOLDER: {
-			// FIXME: op1 RC inference
+			// FIXME: op2 RC inference
 			uint32_t tmp = RES_USE_INFO();
 			if ((tmp & MAY_BE_ARRAY_OF_ANY) == MAY_BE_ARRAY_OF_ANY) {
 				ZEND_ASSERT(ssa_op->result_use != -1);
@@ -3473,7 +3473,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 				}
 			}
 			uint32_t dim_type = ((tmp & MAY_BE_ARRAY_KEY_LONG) ? MAY_BE_LONG : 0) | ((tmp & MAY_BE_ARRAY_KEY_STRING) ? MAY_BE_STRING : 0);
-			tmp |= assign_dim_array_result_type(tmp, dim_type, t1, IS_CONST);
+			tmp |= assign_dim_array_result_type(tmp, dim_type, t2, IS_CONST);
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			break;
 		}

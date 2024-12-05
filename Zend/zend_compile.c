@@ -10813,8 +10813,8 @@ handle_index:
 				continue;
 			}
 
-			opline = zend_emit_op(NULL, ZEND_ARRAY_SET_PLACEHOLDER, &value_node, NULL);
-			opline->op2.num = (uintptr_t) element - (HT_IS_PACKED(template) ? (uintptr_t) template->arPacked : (uintptr_t) template->arData);
+			opline = zend_emit_op(NULL, ZEND_ARRAY_SET_PLACEHOLDER, NULL, &value_node);
+			opline->extended_value = (uintptr_t) element - (HT_IS_PACKED(template) ? (uintptr_t) template->arPacked : (uintptr_t) template->arData);
 			SET_NODE(opline->result, result);
 		} else if (opnum_init == -1) {
 			opnum_init = get_next_op_number();

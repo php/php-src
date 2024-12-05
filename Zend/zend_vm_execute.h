@@ -11077,45 +11077,6 @@ num_index:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *expr_ptr, new_expr, *element;
-	zend_array *array;
-
-	SAVE_OPLINE();
-
-	expr_ptr = RT_CONSTANT(opline, opline->op1);
-
-	if (IS_CONST == IS_TMP_VAR) {
-		/* pass */
-	} else if (IS_CONST == IS_CONST) {
-		Z_TRY_ADDREF_P(expr_ptr);
-	} else if (IS_CONST == IS_CV) {
-		ZVAL_DEREF(expr_ptr);
-		Z_TRY_ADDREF_P(expr_ptr);
-	} else /* if (IS_CONST == IS_VAR) */ {
-		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
-			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
-
-			expr_ptr = Z_REFVAL_P(expr_ptr);
-			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
-				expr_ptr = &new_expr;
-				efree_size(ref, sizeof(zend_reference));
-			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
-		}
-	}
-
-	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
-	element = (zval*)((uintptr_t)array->arData + opline->op2.num);
-	ZVAL_COPY_VALUE(element, expr_ptr);
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
@@ -21767,45 +21728,6 @@ num_index:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_SET_PLACEHOLDER_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *expr_ptr, new_expr, *element;
-	zend_array *array;
-
-	SAVE_OPLINE();
-
-	expr_ptr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
-
-	if (IS_TMP_VAR == IS_TMP_VAR) {
-		/* pass */
-	} else if (IS_TMP_VAR == IS_CONST) {
-		Z_TRY_ADDREF_P(expr_ptr);
-	} else if (IS_TMP_VAR == IS_CV) {
-		ZVAL_DEREF(expr_ptr);
-		Z_TRY_ADDREF_P(expr_ptr);
-	} else /* if (IS_TMP_VAR == IS_VAR) */ {
-		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
-			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
-
-			expr_ptr = Z_REFVAL_P(expr_ptr);
-			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
-				expr_ptr = &new_expr;
-				efree_size(ref, sizeof(zend_reference));
-			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
-		}
-	}
-
-	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
-	element = (zval*)((uintptr_t)array->arData + opline->op2.num);
-	ZVAL_COPY_VALUE(element, expr_ptr);
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
@@ -30704,45 +30626,6 @@ num_index:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_SET_PLACEHOLDER_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *expr_ptr, new_expr, *element;
-	zend_array *array;
-
-	SAVE_OPLINE();
-
-	expr_ptr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_TMP_VAR) {
-		/* pass */
-	} else if (IS_VAR == IS_CONST) {
-		Z_TRY_ADDREF_P(expr_ptr);
-	} else if (IS_VAR == IS_CV) {
-		ZVAL_DEREF(expr_ptr);
-		Z_TRY_ADDREF_P(expr_ptr);
-	} else /* if (IS_VAR == IS_VAR) */ {
-		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
-			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
-
-			expr_ptr = Z_REFVAL_P(expr_ptr);
-			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
-				expr_ptr = &new_expr;
-				efree_size(ref, sizeof(zend_reference));
-			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
-		}
-	}
-
-	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
-	element = (zval*)((uintptr_t)array->arData + opline->op2.num);
-	ZVAL_COPY_VALUE(element, expr_ptr);
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
@@ -35466,6 +35349,45 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *expr_ptr, new_expr, *element;
+	zend_array *array;
+
+	SAVE_OPLINE();
+
+	expr_ptr = RT_CONSTANT(opline, opline->op2);
+
+	if (IS_CONST == IS_TMP_VAR) {
+		/* pass */
+	} else if (IS_CONST == IS_CONST) {
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else if (IS_CONST == IS_CV) {
+		ZVAL_DEREF(expr_ptr);
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else /* if (IS_CONST == IS_VAR) */ {
+		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
+			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
+
+			expr_ptr = Z_REFVAL_P(expr_ptr);
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
+				expr_ptr = &new_expr;
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
+				Z_ADDREF_P(expr_ptr);
+			}
+		}
+	}
+
+	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
+	element = (zval*)((uintptr_t)array->arData + opline->extended_value);
+	ZVAL_COPY_VALUE(element, expr_ptr);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
@@ -37696,6 +37618,84 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMPVAR_HANDL
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *expr_ptr, new_expr, *element;
+	zend_array *array;
+
+	SAVE_OPLINE();
+
+	expr_ptr = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+
+	if (IS_TMP_VAR == IS_TMP_VAR) {
+		/* pass */
+	} else if (IS_TMP_VAR == IS_CONST) {
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else if (IS_TMP_VAR == IS_CV) {
+		ZVAL_DEREF(expr_ptr);
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else /* if (IS_TMP_VAR == IS_VAR) */ {
+		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
+			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
+
+			expr_ptr = Z_REFVAL_P(expr_ptr);
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
+				expr_ptr = &new_expr;
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
+				Z_ADDREF_P(expr_ptr);
+			}
+		}
+	}
+
+	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
+	element = (zval*)((uintptr_t)array->arData + opline->extended_value);
+	ZVAL_COPY_VALUE(element, expr_ptr);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *expr_ptr, new_expr, *element;
+	zend_array *array;
+
+	SAVE_OPLINE();
+
+	expr_ptr = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
+
+	if (IS_VAR == IS_TMP_VAR) {
+		/* pass */
+	} else if (IS_VAR == IS_CONST) {
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else if (IS_VAR == IS_CV) {
+		ZVAL_DEREF(expr_ptr);
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else /* if (IS_VAR == IS_VAR) */ {
+		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
+			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
+
+			expr_ptr = Z_REFVAL_P(expr_ptr);
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
+				expr_ptr = &new_expr;
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
+				Z_ADDREF_P(expr_ptr);
+			}
+		}
+	}
+
+	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
+	element = (zval*)((uintptr_t)array->arData + opline->extended_value);
+	ZVAL_COPY_VALUE(element, expr_ptr);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -40105,6 +40105,45 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	EX(call) = call;
 
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *expr_ptr, new_expr, *element;
+	zend_array *array;
+
+	SAVE_OPLINE();
+
+	expr_ptr = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
+
+	if (IS_CV == IS_TMP_VAR) {
+		/* pass */
+	} else if (IS_CV == IS_CONST) {
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else if (IS_CV == IS_CV) {
+		ZVAL_DEREF(expr_ptr);
+		Z_TRY_ADDREF_P(expr_ptr);
+	} else /* if (IS_CV == IS_VAR) */ {
+		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
+			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
+
+			expr_ptr = Z_REFVAL_P(expr_ptr);
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
+				expr_ptr = &new_expr;
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
+				Z_ADDREF_P(expr_ptr);
+			}
+		}
+	}
+
+	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
+	element = (zval*)((uintptr_t)array->arData + opline->extended_value);
+	ZVAL_COPY_VALUE(element, expr_ptr);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -51044,45 +51083,6 @@ num_index:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *expr_ptr, new_expr, *element;
-	zend_array *array;
-
-	SAVE_OPLINE();
-
-	expr_ptr = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_TMP_VAR) {
-		/* pass */
-	} else if (IS_CV == IS_CONST) {
-		Z_TRY_ADDREF_P(expr_ptr);
-	} else if (IS_CV == IS_CV) {
-		ZVAL_DEREF(expr_ptr);
-		Z_TRY_ADDREF_P(expr_ptr);
-	} else /* if (IS_CV == IS_VAR) */ {
-		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
-			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
-
-			expr_ptr = Z_REFVAL_P(expr_ptr);
-			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
-				expr_ptr = &new_expr;
-				efree_size(ref, sizeof(zend_reference));
-			} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
-		}
-	}
-
-	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
-	element = (zval*)((uintptr_t)array->arData + opline->op2.num);
-	ZVAL_COPY_VALUE(element, expr_ptr);
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
@@ -57813,11 +57813,11 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_JMP_FRAMELESS_SPEC_CONST_LABEL,
 			(void*)&&ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_LABEL,
 			(void*)&&ZEND_ARRAY_DUP_SPEC_CONST_UNUSED_LABEL,
-			(void*)&&ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CONST_UNUSED_LABEL,
-			(void*)&&ZEND_ARRAY_SET_PLACEHOLDER_SPEC_TMP_UNUSED_LABEL,
-			(void*)&&ZEND_ARRAY_SET_PLACEHOLDER_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CONST_LABEL,
+			(void*)&&ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_TMP_LABEL,
+			(void*)&&ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_VAR_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CV_LABEL,
 			(void*)&&ZEND_INIT_FCALL_OFFSET_SPEC_CONST_LABEL,
 			(void*)&&ZEND_RECV_NOTYPE_SPEC_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -60134,11 +60134,6 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED)
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CONST_UNUSED):
-				VM_TRACE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CONST_UNUSED)
-				ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				VM_TRACE_OP_END(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CONST_UNUSED)
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_CONST_UNUSED)
 				ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -61563,11 +61558,6 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED)
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_TMP_UNUSED):
-				VM_TRACE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_TMP_UNUSED)
-				ZEND_ARRAY_SET_PLACEHOLDER_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				VM_TRACE_OP_END(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_TMP_UNUSED)
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_TMP_UNUSED):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_TMP_UNUSED)
 				ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62327,11 +62317,6 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED)
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_VAR_UNUSED):
-				VM_TRACE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_VAR_UNUSED)
-				ZEND_ARRAY_SET_PLACEHOLDER_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				VM_TRACE_OP_END(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_VAR_UNUSED)
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_VAR_UNUSED)
 				ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62662,6 +62647,11 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUSED_CONST)
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CONST):
+				VM_TRACE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CONST)
+				ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CONST)
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_UNUSED_CONST):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_UNUSED_CONST)
 				ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62801,6 +62791,16 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_YIELD_SPEC_UNUSED_TMPVAR)
 				ZEND_YIELD_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_YIELD_SPEC_UNUSED_TMPVAR)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_TMP):
+				VM_TRACE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_TMP)
+				ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_TMP)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_VAR):
+				VM_TRACE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_VAR)
+				ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_VAR)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_CLASS_SPEC_UNUSED_UNUSED):
 				VM_TRACE(ZEND_FETCH_CLASS_SPEC_UNUSED_UNUSED)
@@ -62996,6 +62996,11 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV)
 				ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_INIT_STATIC_METHOD_CALL_SPEC_UNUSED_CV)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CV):
+				VM_TRACE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CV)
+				ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CV)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_UNUSED_CV):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_UNUSED_CV)
@@ -64020,11 +64025,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED)
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED)
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CV_UNUSED):
-				VM_TRACE(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CV_UNUSED)
-				ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				VM_TRACE_OP_END(ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CV_UNUSED)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_CV_UNUSED):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_CV_UNUSED)
@@ -67031,11 +67031,11 @@ void zend_vm_init(void)
 		ZEND_JMP_FRAMELESS_SPEC_CONST_HANDLER,
 		ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_HANDLER,
 		ZEND_ARRAY_DUP_SPEC_CONST_UNUSED_HANDLER,
-		ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CONST_UNUSED_HANDLER,
-		ZEND_ARRAY_SET_PLACEHOLDER_SPEC_TMP_UNUSED_HANDLER,
-		ZEND_ARRAY_SET_PLACEHOLDER_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CONST_HANDLER,
+		ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_TMP_HANDLER,
+		ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_VAR_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_ARRAY_SET_PLACEHOLDER_SPEC_CV_UNUSED_HANDLER,
+		ZEND_ARRAY_SET_PLACEHOLDER_SPEC_UNUSED_CV_HANDLER,
 		ZEND_INIT_FCALL_OFFSET_SPEC_CONST_HANDLER,
 		ZEND_RECV_NOTYPE_SPEC_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -68159,7 +68159,7 @@ void zend_vm_init(void)
 		2575,
 		2576,
 		2577,
-		2578 | SPEC_RULE_OP1,
+		2578 | SPEC_RULE_OP2,
 		3492,
 		3492,
 		3492,

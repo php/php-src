@@ -317,7 +317,7 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 				}
 				ZEND_FALLTHROUGH;
 			case ZEND_ARRAY_SET_PLACEHOLDER:
-				if (OP1_INFO() & MAY_BE_OBJECT) {
+				if (OP2_INFO() & MAY_BE_OBJECT) {
 					/* object aliasing */
 					return 1;
 				}
@@ -495,10 +495,13 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 							    (op-1)->op1_use >= 0) {
 								enclosing_root = ees[(op-1)->op1_use];
 							} else if ((opline->opcode == ZEND_INIT_ARRAY ||
-							     opline->opcode == ZEND_ADD_ARRAY_ELEMENT ||
-								 opline->opcode == ZEND_ARRAY_SET_PLACEHOLDER) &&
+							     opline->opcode == ZEND_ADD_ARRAY_ELEMENT) &&
 							    op->op1_use == i &&
 							    op->result_def >= 0) {
+								enclosing_root = ees[op->result_def];
+							} else if (opline->opcode == ZEND_ARRAY_SET_PLACEHOLDER
+							 && op->op2_use == i
+							 && op->result_def >= 0) {
 								enclosing_root = ees[op->result_def];
 							} else {
 								continue;

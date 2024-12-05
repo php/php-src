@@ -1190,7 +1190,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			zval *result = &ctx->values[ssa_op->result_use];
 
 			SKIP_IF_TOP(result);
-			SKIP_IF_TOP(op1);
+			SKIP_IF_TOP(op2);
 
 #if 1
 			/* FIXME: See below. */
@@ -1204,12 +1204,12 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 			/* FIXME: Avoid dup-ing the array in every step. */
 			zend_array *array = zend_array_dup(Z_ARRVAL_P(result));
-			zval *element = (zval*)((uintptr_t)array->arData + opline->op2.num);
+			zval *element = (zval*)((uintptr_t)array->arData + opline->extended_value);
 
 			zval tmp;
 			ZVAL_ARR(&tmp, array);
 
-			if (IS_BOT(op1)) {
+			if (IS_BOT(op2)) {
 #if 1
 				/* FIXME: Handle partial arrays. Deleting hashes is problematic
 				 * because it changes the offsets for the placeholders. */
@@ -1232,8 +1232,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				MAKE_PARTIAL_ARRAY(&tmp);
 #endif
 			} else {
-				ZVAL_COPY(element, op1);
-				if (IS_PARTIAL_ARRAY(op1)) {
+				ZVAL_COPY(element, op2);
+				if (IS_PARTIAL_ARRAY(op2)) {
 					MAKE_PARTIAL_ARRAY(&tmp);
 				}
 			}

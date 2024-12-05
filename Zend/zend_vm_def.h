@@ -6243,7 +6243,7 @@ ZEND_VM_C_LABEL(num_index):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(211, ZEND_ARRAY_SET_PLACEHOLDER, CONST|TMP|VAR|CV, UNUSED|NUM)
+ZEND_VM_HANDLER(211, ZEND_ARRAY_SET_PLACEHOLDER, UNUSED, CONST|TMP|VAR|CV, NUM)
 {
 	USE_OPLINE
 	zval *expr_ptr, new_expr, *element;
@@ -6251,16 +6251,16 @@ ZEND_VM_HANDLER(211, ZEND_ARRAY_SET_PLACEHOLDER, CONST|TMP|VAR|CV, UNUSED|NUM)
 
 	SAVE_OPLINE();
 
-	expr_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	expr_ptr = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE == IS_TMP_VAR) {
+	if (OP2_TYPE == IS_TMP_VAR) {
 		/* pass */
-	} else if (OP1_TYPE == IS_CONST) {
+	} else if (OP2_TYPE == IS_CONST) {
 		Z_TRY_ADDREF_P(expr_ptr);
-	} else if (OP1_TYPE == IS_CV) {
+	} else if (OP2_TYPE == IS_CV) {
 		ZVAL_DEREF(expr_ptr);
 		Z_TRY_ADDREF_P(expr_ptr);
-	} else /* if (OP1_TYPE == IS_VAR) */ {
+	} else /* if (OP2_TYPE == IS_VAR) */ {
 		if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 			zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
@@ -6276,7 +6276,7 @@ ZEND_VM_HANDLER(211, ZEND_ARRAY_SET_PLACEHOLDER, CONST|TMP|VAR|CV, UNUSED|NUM)
 	}
 
 	array = Z_ARRVAL_P(EX_VAR(opline->result.var));
-	element = (zval*)((uintptr_t)array->arData + opline->op2.num);
+	element = (zval*)((uintptr_t)array->arData + opline->extended_value);
 	ZVAL_COPY_VALUE(element, expr_ptr);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
