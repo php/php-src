@@ -389,7 +389,6 @@ AC_CHECK_HEADERS(m4_normalize([
   pty.h
   pwd.h
   resolv.h
-  strings.h
   syslog.h
   sysexits.h
   sys/ioctl.h
@@ -587,7 +586,6 @@ AC_CHECK_FUNCS(m4_normalize([
   statfs
   statvfs
   std_syslog
-  strcasecmp
   strptime
   strtok_r
   symlink

@@ -28,7 +28,7 @@
  *
  */
 
-#include "libmbfl/config.h"
+#include <libmbfl/config.h>
 
 #ifdef HAVE_STRINGS_H
 	/* For strncasecmp */
