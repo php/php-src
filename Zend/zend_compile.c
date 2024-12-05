@@ -10688,7 +10688,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_op *opline;
 	uint32_t i, opnum_init = -1;
-	bool packed = 1, use_template = false;
+	bool packed = 1;
 
 	znode template_node;
 	template_node.op_type = IS_CONST;
@@ -10702,9 +10702,6 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_array *template = NULL;
 	if (Z_TYPE(template_node.u.constant) == IS_ARRAY) {
-		opnum_init = get_next_op_number();
-		zend_emit_op_tmp(result, ZEND_ARRAY_DUP, &template_node, NULL);
-		use_template = true;
 		template = Z_ARRVAL(template_node.u.constant);
 	}
 
@@ -10720,7 +10717,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		}
 
 		if (terminate_array_template(elem_ast)) {
-			use_template = false;
+			template = NULL;
 		}
 
 		value_ast = elem_ast->child[0];
@@ -10739,7 +10736,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		key_ast = elem_ast->child[1];
 		by_ref = elem_ast->attr;
 
-		if (key_ast && !use_template) {
+		if (key_ast && !template) {
 			zend_compile_expr(&key_node, key_ast);
 			zend_handle_numeric_op(&key_node);
 			key_node_ptr = &key_node;
@@ -10752,7 +10749,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_expr(&value_node, value_ast);
 		}
 
-		if (use_template) {
+		if (template) {
 			zval *element;
 			if (key_ast) {
 				zval *key = zend_ast_get_zval(key_ast);
@@ -10805,7 +10802,7 @@ handle_index:
 				// }
 			}
 
-			if (use_template && value_ast->kind == ZEND_AST_ZVAL) {
+			if (value_ast->kind == ZEND_AST_ZVAL) {
 				zval_ptr_dtor(&value_node.u.constant);
 				if (key_node_ptr) {
 					zval_ptr_dtor(&key_node_ptr->u.constant);
@@ -10813,7 +10810,12 @@ handle_index:
 				continue;
 			}
 
-			opline = zend_emit_op(NULL, ZEND_ARRAY_SET_PLACEHOLDER, NULL, &value_node);
+			if (opnum_init == -1) {
+				opnum_init = get_next_op_number();
+				opline = zend_emit_op_tmp(result, ZEND_ARRAY_DUP, &template_node, &value_node);
+			} else {
+				opline = zend_emit_op(NULL, ZEND_ARRAY_SET_PLACEHOLDER, NULL, &value_node);
+			}
 			opline->extended_value = (uintptr_t) element - (HT_IS_PACKED(template) ? (uintptr_t) template->arPacked : (uintptr_t) template->arData);
 			SET_NODE(opline->result, result);
 		} else if (opnum_init == -1) {
@@ -10834,10 +10836,12 @@ handle_index:
 	}
 
 	/* Add a flag to INIT_ARRAY if we know this array cannot be packed */
-	if (!packed && !template) {
+	if (!packed) {
 		ZEND_ASSERT(opnum_init != (uint32_t)-1);
 		opline = &CG(active_op_array)->opcodes[opnum_init];
-		opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
+		if (opline->opcode == ZEND_INIT_ARRAY) {
+			opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
+		}
 	}
 }
 /* }}} */

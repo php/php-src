@@ -911,6 +911,8 @@ optimize_const_unary_op:
 						src->opcode != ZEND_COPY_TMP &&
 						src->opcode != ZEND_ADD_ARRAY_ELEMENT &&
 						src->opcode != ZEND_ADD_ARRAY_UNPACK &&
+						/* ARRAY_DUP is ok. If it is used within a QM_ASSIGN, it
+						 * has no ARRAY_SET_PLACEHOLDER calls. */
 						src->opcode != ZEND_ARRAY_SET_PLACEHOLDER &&
 						(src->opcode != ZEND_DECLARE_LAMBDA_FUNCTION ||
 						 src == opline -1)) {
@@ -1570,6 +1572,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 							break;
 						case ZEND_ADD_ARRAY_ELEMENT:
 						case ZEND_ADD_ARRAY_UNPACK:
+						/* FIXME: Can we eliminate these? There's no reason for them to be added if unused. */
 						case ZEND_ARRAY_SET_PLACEHOLDER:
 						case ZEND_ROPE_ADD:
 							zend_bitset_incl(usage, VAR_NUM(opline->result.var));

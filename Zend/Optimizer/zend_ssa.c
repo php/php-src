@@ -730,8 +730,11 @@ add_op1_def:
 			ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
 			ZEND_FALLTHROUGH;
 		case ZEND_ARRAY_DUP:
-			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
-				goto add_op1_def;
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
+				ssa_ops[k].op2_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op2.var)
 			}
 			break;
 		case ZEND_YIELD:

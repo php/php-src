@@ -1182,12 +1182,14 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			return;
 		}
-		case ZEND_ARRAY_DUP: {
-			SET_RESULT(result, op1);
-			return;
-		}
+		case ZEND_ARRAY_DUP:
 		case ZEND_ARRAY_SET_PLACEHOLDER: {
-			zval *result = &ctx->values[ssa_op->result_use];
+			zval *result;
+			if (opline->opcode == ZEND_ARRAY_DUP) {
+				result = op1;
+			} else {
+				result = &ctx->values[ssa_op->result_use];
+			}
 
 			SKIP_IF_TOP(result);
 			SKIP_IF_TOP(op2);
