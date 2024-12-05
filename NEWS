@@ -12,8 +12,9 @@ PHP                                                                        NEWS
 05 Dec 2024, PHP 8.4.2
 
 - BcMath:
-  . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros)
+  . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros).
     (Saki Takamachi)
+  . Fixed bug GH-17049 (Correctly compare 0 and -0). (Saki Takamachi)
 
 - COM:
   . Fixed bug GH-16991 (Getting typeinfo of non DISPATCH variant segfaults).
