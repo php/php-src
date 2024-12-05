@@ -32,7 +32,6 @@ explained at the end of this document in
 
     - https://travis-ci.com/github/php/php-src
     - https://dev.azure.com/phpazuredevops/PHP/
-    - https://cirrus-ci.com/github/php/php-src
 
     It is recommended to do so a couple of days before the packaging day, to
     have enough time to investigate failures, communicate with the authors and

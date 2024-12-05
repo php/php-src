@@ -9,7 +9,6 @@ on:
       - '**/README.*'
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
-      - .cirrus.yml
       - .travis.yml
       - travis/*
       - .circleci/*
@@ -27,7 +26,6 @@ on:
       - '**/README.*'
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
-      - .cirrus.yml
       - .travis.yml
       - travis/*
       - .circleci/*

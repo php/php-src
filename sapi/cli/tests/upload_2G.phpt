@@ -36,8 +36,6 @@ if (getenv('TRAVIS')) {
     die("skip Fails intermittently on travis");
 }
 
-if (getenv('CIRRUS_CI')) die('skip Fails on Cirrus');
-
 if (getenv('SKIP_PERF_SENSITIVE')) {
     die("skip Test may be very slow if PHP is instrumented");
 }
