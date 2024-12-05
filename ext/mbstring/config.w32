@@ -12,12 +12,15 @@ if (PHP_MBSTRING != "no") {
 		STDOUT.WriteLine("Using bundled libmbfl...");
 
 		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring -Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
-			/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
+			/D MBFL_DLL_EXPORT=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
 
 		ADD_FLAG("CFLAGS_BD_EXT_MBSTRING", "/utf-8")
 
-		FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.w32",
-			"ext\\mbstring\\libmbfl\\config.h", true);
+		var mbfl_config = FSO.CreateTextFile("ext/mbstring/libmbfl/config.h", true);
+		mbfl_config.WriteLine("#define HAVE_STRCASECMP 1");
+		mbfl_config.WriteLine("#define HAVE_STRICMP 1");
+		mbfl_config.WriteLine("#include <config.w32.h>");
+		mbfl_config.Close();
 
 		ADD_SOURCES("ext/mbstring/libmbfl/filters", "html_entities.c \
 			mbfilter_7bit.c mbfilter_base64.c \
