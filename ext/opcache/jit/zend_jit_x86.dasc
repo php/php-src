@@ -9274,19 +9274,11 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, uint32_t level, const zen
 	int32_t exit_point;
 	const void *exit_addr;
 
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-#ifdef ZEND_WIN32
-		// TODO: ASLR may cause different addresses in different workers ???
-		return 0;
-#endif
-	} else if (func->type == ZEND_USER_FUNCTION) {
+	if (func->type == ZEND_USER_FUNCTION) {
 		if (!zend_accel_in_shm(func->op_array.opcodes)) {
 			/* op_array and op_array->opcodes are not persistent. We can't link. */
 			return 0;
 		}
-	} else {
-		ZEND_UNREACHABLE();
-		return 0;
 	}
 
 	exit_point = zend_jit_trace_get_exit_point(to_opline, ZEND_JIT_EXIT_POLYMORPHISM);
@@ -9320,6 +9312,22 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, uint32_t level, const zen
 		|		cmp aword [r1 + offsetof(zend_op_array, opcodes)], opcodes
 		|	.endif
 		|	jne &exit_addr
+#ifdef _WIN32
+	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+		const zif_handler handler = func->internal_function.handler;
+
+		|   .if X64
+		||		if (!IS_SIGNED_32BIT(handler)) {
+		|			mov64 r2, ((ptrdiff_t)handler)
+		|			cmp aword [r1 + offsetof(zend_internal_function, handler)], r2
+		||		} else {
+		|			cmp aword [r1 + offsetof(zend_internal_function, handler)], handler
+		||		}
+		|	.else
+		|		cmp aword [r1 + offsetof(zend_internal_function, handler)], handler
+		|	.endif
+		|	jne &exit_addr
+#endif
 	} else {
 		|   .if X64
 		||		if (!IS_SIGNED_32BIT(func)) {
@@ -9466,6 +9474,22 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 					|		cmp aword [r0 + offsetof(zend_op_array, opcodes)], opcodes
 					|	.endif
 					|	jz >3
+#ifdef _WIN32
+				} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+					const zif_handler handler = func->internal_function.handler;
+
+					|   .if X64
+					||		if (!IS_SIGNED_32BIT(handler)) {
+					|			mov64 r1, ((ptrdiff_t)handler)
+					|			cmp aword [r0 + offsetof(zend_internal_function, handler)], r1
+					||		} else {
+					|			cmp aword [r0 + offsetof(zend_internal_function, handler)], handler
+					||		}
+					|	.else
+					|		cmp aword [r0 + offsetof(zend_internal_function, handler)], handler
+					|	.endif
+					|	jz >3
+#endif
 				} else {
 					|   .if X64
 					||		if (!IS_SIGNED_32BIT(func)) {
@@ -9652,11 +9676,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	if ((!func || zend_jit_may_be_modified(func, op_array))
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL
-	 && trace->func
-#ifdef _WIN32
-	 && trace->func->type != ZEND_INTERNAL_FUNCTION
-#endif
-	) {
+	 && trace->func) {
 		int32_t exit_point;
 		const void *exit_addr;
 
@@ -9685,6 +9705,22 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 			|		cmp aword [r0 + offsetof(zend_op_array, opcodes)], opcodes
 			|	.endif
 			|	jne &exit_addr
+#ifdef _WIN32
+		} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+			const zif_handler handler = func->internal_function.handler;
+
+			|   .if X64
+			||		if (!IS_SIGNED_32BIT(handler)) {
+			|			mov64 r1, ((ptrdiff_t)handler)
+			|			cmp aword [r0 + offsetof(zend_internal_function, handler)], r1
+			||		} else {
+			|			cmp aword [r0 + offsetof(zend_internal_function, handler)], handler
+			||		}
+			|	.else
+			|		cmp aword [r0 + offsetof(zend_internal_function, handler)], handler
+			|	.endif
+			|	jne &exit_addr
+#endif
 		} else {
 			|   .if X64
 			||		if (!IS_SIGNED_32BIT(func)) {
