@@ -9280,7 +9280,7 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, uint32_t level, const zen
 		|	jne &exit_addr
 #ifdef _WIN32
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
-		const zif_handler *handler = func->internal_function.handler;
+		const zif_handler handler = func->internal_function.handler;
 
 		|   .if X64
 		||		if (!IS_SIGNED_32BIT(handler)) {
@@ -9442,7 +9442,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 					|	jz >3
 #ifdef _WIN32
 				} else if (func->type == ZEND_INTERNAL_FUNCTION) {
-					const zif_handler *handler = func->internal_function.handler;
+					const zif_handler handler = func->internal_function.handler;
 
 					|   .if X64
 					||		if (!IS_SIGNED_32BIT(handler)) {
@@ -9673,7 +9673,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 			|	jne &exit_addr
 #ifdef _WIN32
 		} else if (func->type == ZEND_INTERNAL_FUNCTION) {
-			const zif_handler *handler = func->internal_function.handler;
+			const zif_handler handler = func->internal_function.handler;
 
 			|   .if X64
 			||		if (!IS_SIGNED_32BIT(handler)) {
