@@ -60,4 +60,7 @@ PHP_WINUTIL_API BOOL php_win32_console_is_own(void);
 /* Check whether the current SAPI is run on console. */
 PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void);
 
+/* Gets the width and height of a console. */
+PHP_WINUTIL_API BOOL php_win32_console_size(zend_long fileno, int *width, int *height);
+
 #endif
