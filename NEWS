@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - BcMath:
   . Fixed bug GH-17049 (Correctly compare 0 and -0). (Saki Takamachi)
+  . Fixed bug GH-17061 (Now Number::round() does not remove trailing zeros).
+    (Saki Takamachi)
 
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
