@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17061 (Now Number::round() does not remove trailing zeros).
     (Saki Takamachi)
 
+- DBA:
+  . Skip test if inifile is disabled. (orlitzky)
+
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
