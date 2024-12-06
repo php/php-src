@@ -194,7 +194,7 @@ PHPAPI int
 glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
     glob_t *pglob)
 {
-	const u_char *patnext;
+	const uint8_t *patnext;
 	int c;
 	Char *bufnext, *bufend, patbuf[PATH_MAX];
 	struct glob_lim limit = { 0, 0, 0 };
@@ -206,7 +206,7 @@ glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
 	flags |= GLOB_NOESCAPE;
 #endif
 
-	patnext = (u_char *) pattern;
+	patnext = (uint8_t *) pattern;
 	if (!(flags & GLOB_APPEND)) {
 		pglob->gl_pathc = 0;
 		pglob->gl_pathv = NULL;
@@ -772,7 +772,7 @@ glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 	else
 		readdirfunc = (struct dirent *(*)(void *))readdir;
 	while ((dp = (*readdirfunc)(dirp))) {
-		u_char *sc;
+		uint8_t *sc;
 		Char *dc;
 
 		if ((pglob->gl_flags & GLOB_LIMIT) &&
@@ -788,7 +788,7 @@ glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 		if (dp->d_name[0] == DOT && *pattern != DOT)
 			continue;
 		dc = pathend;
-		sc = (u_char *) dp->d_name;
+		sc = (uint8_t *) dp->d_name;
 		while (dc < pathend_last && (*dc++ = *sc++) != EOS)
 			;
 		if (dc >= pathend_last) {
