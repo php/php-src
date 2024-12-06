@@ -93,7 +93,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 		return FAILURE;													\
 	}
 
-#define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\013\014"
+#define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\v\f"
 
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
 
@@ -703,14 +703,14 @@ static bool is_session_name_valid(const zend_string *name, int diagnostic_type)
 {
 	if (ZSTR_LEN(name) == 0) {
 		if (diagnostic_type) {
-			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot be empty", ZSTR_VAL(name));
+			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" must not be empty", ZSTR_VAL(name));
 		}
 		return false;
 	}
 	/* NUL bytes are not allowed */
 	if (zend_str_has_nul_byte(name)) {
 		if (diagnostic_type) {
-			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot contain NUL bytes", ZSTR_VAL(name));
+			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" must not contain any null bytes", ZSTR_VAL(name));
 		}
 		return false;
 	}
@@ -719,15 +719,15 @@ static bool is_session_name_valid(const zend_string *name, int diagnostic_type)
 	 (TL;DR: name is stored in HashTable so numeric string is converted to int key, but lookup looks for string key). */
 	if (is_numeric_str_function(name, NULL, NULL)) {
 		if (diagnostic_type) {
-			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot be numeric", ZSTR_VAL(name));
+			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" must not be numeric", ZSTR_VAL(name));
 		}
 		return false;
 	}
 	/* Prevent broken Set-Cookie header, because the session_name might be user supplied */
-	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
+	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\v\f") != NULL) {   /* man isspace for \v and \f */
 		if (diagnostic_type) {
-			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot contain any of the following "
-				"'=,; \\t\\r\\n\\013\\014'", ZSTR_VAL(name));
+			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" must not contain any of the following "
+				"'=,; \\t\\r\\n\\v\\f'", ZSTR_VAL(name));
 		}
 		return false;
 	}
