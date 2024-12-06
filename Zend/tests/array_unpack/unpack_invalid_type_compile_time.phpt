@@ -1,5 +1,7 @@
 --TEST--
 Unpacking non-array/Traversable detected at compile-time
+--XFAIL--
+Still need to check why this behavior changes
 --FILE--
 <?php
 

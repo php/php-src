@@ -29,5 +29,5 @@ esc:
      ; (after optimizer)
      ; %sdce_007.php:2-6
 0000 CV0($x) = RECV 1
-0001 CV1($a) = INIT_ARRAY 1 (packed) CV0($x) NEXT
+0001 CV1($a) = ARRAY_DUP 0 array(...) CV0($x)
 0002 RETURN CV1($a)

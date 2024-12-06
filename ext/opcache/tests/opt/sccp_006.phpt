@@ -24,16 +24,11 @@ $_main:
 0000 RETURN int(1)
 
 foo:
-     ; (lines=8, args=1, vars=2, tmps=1)
+     ; (lines=5, args=1, vars=2, tmps=1)
      ; (after optimizer)
      ; %ssccp_006.php:2-5
 0000 CV0($x) = RECV 1
-0001 T2 = INIT_ARRAY 3 int(1) string("a")
-0002 T2 = ADD_ARRAY_ELEMENT int(2) string("a")
-0003 T2 = ADD_ARRAY_ELEMENT CV0($x) string("a")
-0004 CV1($a) = QM_ASSIGN T2
-0005 T2 = FETCH_DIM_R CV1($a) string("a")
-0006 ECHO T2
-0007 RETURN null
-LIVE RANGES:
-     2: 0002 - 0004 (tmp/var)
+0001 CV1($a) = ARRAY_DUP 0 array(...) CV0($x)
+0002 T2 = FETCH_DIM_R CV1($a) string("a")
+0003 ECHO T2
+0004 RETURN null

@@ -360,9 +360,8 @@ static bool opline_supports_assign_contraction(
 	}
 
 	if (opline->opcode == ZEND_ARRAY_DUP) {
-		/* FIXME: Is this ok? Array initialization might be incomplete if value
-		 * evaluation fails, but this is no different from ZEND_INIT_ARRAY. */
-		return false;
+		/* ARRAY_DUP initializes the result array before reading key/value. */
+		return opline->op2_type != IS_CV || opline->op2.var != cv_var;
 	}
 
 	if (opline->opcode == ZEND_CAST
