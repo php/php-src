@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.3
 
+- BcMath:
+  . Fixed bug GH-17049 (Correctly compare 0 and -0). (Saki Takamachi)
+
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
@@ -14,7 +17,6 @@ PHP                                                                        NEWS
 - BcMath:
   . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros).
     (Saki Takamachi)
-  . Fixed bug GH-17049 (Correctly compare 0 and -0). (Saki Takamachi)
 
 - COM:
   . Fixed bug GH-16991 (Getting typeinfo of non DISPATCH variant segfaults).
