@@ -2,9 +2,8 @@
  zend_constant
 ###############
 
-PHP constants (referring to non-class constants) are stored in a dedicated
-structure ``zend_constant``, which holds both the value of the constant and
-details for using it.
+PHP constants (referring to non-class constants) are stored in a dedicated structure
+``zend_constant``, which holds both the value of the constant and details for using it.
 
 ************
  definition
@@ -18,21 +17,18 @@ details for using it.
        zend_string *filename;
    } zend_constant;
 
-The ``value`` field stores both the value itself and some metadata. The ``name``
-and ``filename`` store the name of the constant and the name of the file in
-which it was defined.
+The ``value`` field stores both the value itself and some metadata. The ``name`` and ``filename``
+store the name of the constant and the name of the file in which it was defined.
 
-******
+*******
  value
-******
+*******
 
-The value of the constant is stored in the :doc:`./zval` ``value``. However,
-since the ``zval`` structure has extra space, for constants this is used to
-store both the number of the module that the constant was defined in, and a
-combination of the flags that affect the usage of the constant.
+The value of the constant is stored in the :doc:`./zval` ``value``. However, since the ``zval``
+structure has extra space, for constants this is used to store both the number of the module that
+the constant was defined in, and a combination of the flags that affect the usage of the constant.
 
-This extra information is placed in the ``uint32_t`` field
-``value.u2.constant_flags``. 
+This extra information is placed in the ``uint32_t`` field ``value.u2.constant_flags``.
 
 The bottom 16 bits are used to hold flags about the constant
 
@@ -44,28 +40,25 @@ The bottom 16 bits are used to hold flags about the constant
    #define CONST_OWNED          (1<<3) /* constant should be destroyed together
                                             with class */
 
-These bottom 16 bits can be accessed with the ``ZEND_CONSTANT_FLAGS()`` macro,
-which is given a ``zend_constant`` pointer as a parameter.
+These bottom 16 bits can be accessed with the ``ZEND_CONSTANT_FLAGS()`` macro, which is given a
+``zend_constant`` pointer as a parameter.
 
-On the other hand, the top 16 bits are used to store the number of the PHP
-module that registered the constant. For constants defined by the user, the
-module number stored will be ``PHP_USER_CONSTANT``. This module number can be
-accessed with the ``ZEND_CONSTANT_MODULE_NUMBER()`` macro, which is likewise
-given a ``zend_constant`` pointer as a parameter.
+On the other hand, the top 16 bits are used to store the number of the PHP module that registered
+the constant. For constants defined by the user, the module number stored will be
+``PHP_USER_CONSTANT``. This module number can be accessed with the ``ZEND_CONSTANT_MODULE_NUMBER()``
+macro, which is likewise given a ``zend_constant`` pointer as a parameter.
 
 ******
  name
 ******
 
-The ``name`` holds a :doc:`zend_string` with the name of the constant, to allow
-searching for constants that have already been defined. This string is released
-when the constant itself is freed.
+The ``name`` holds a :doc:`zend_string` with the name of the constant, to allow searching for
+constants that have already been defined. This string is released when the constant itself is freed.
 
-******
+**********
  filename
-******
+**********
 
-Finally, the ``filename`` holds another ``zend_string`` with the name of the
-file in which the constant was defined, or ``NULL`` if not defined userland
-code. This field provides the foundation for the PHP method
-``ReflectionConstant::getFileName()``.
+Finally, the ``filename`` holds another ``zend_string`` with the name of the file in which the
+constant was defined, or ``NULL`` if not defined userland code. This field provides the foundation
+for the PHP method ``ReflectionConstant::getFileName()``.
