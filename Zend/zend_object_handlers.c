@@ -1748,7 +1748,7 @@ static zend_always_inline zend_function *zend_get_user_call_function(zend_class_
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope) /* {{{ */
+ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope) /* {{{ */
 {
 	zend_throw_error(NULL, "Call to %s method %s::%s() from %s%s",
 		zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name),
@@ -1758,7 +1758,7 @@ static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc,
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
+ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
 {
 	zend_throw_error(NULL, "Cannot call abstract method %s::%s()",
 		ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));

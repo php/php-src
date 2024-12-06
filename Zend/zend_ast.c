@@ -54,6 +54,18 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node) {
 	return (zend_ast *) ast;
 }
 
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(void) {
+	zend_ast_fcc *ast;
+
+	ast = zend_ast_alloc(sizeof(zend_ast_fcc));
+	ast->kind = ZEND_AST_CALLABLE_CONVERT;
+	ast->attr = 0;
+	ast->lineno = ZEND_MAP_PTR_NEW_OFFSET();
+	ZEND_MAP_PTR_INIT(ast->fptr, NULL);
+
+	return (zend_ast *) ast;
+}
+
 static zend_always_inline zend_ast * zend_ast_create_zval_int(zval *zv, uint32_t attr, uint32_t lineno) {
 	zend_ast_zval *ast;
 
@@ -1002,6 +1014,111 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			}
 			return SUCCESS;
 		}
+		case ZEND_AST_CALL:
+		case ZEND_AST_STATIC_CALL:
+		{
+			zend_function *fptr;
+			switch (ast->kind) {
+				case ZEND_AST_CALL: {
+					ZEND_ASSERT(ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT);
+					zend_ast_fcc *fcc_ast = (zend_ast_fcc*)ast->child[1];
+					fptr = ZEND_MAP_PTR_GET(fcc_ast->fptr);
+
+					if (!fptr) {
+						zend_string *function_name = zend_ast_get_str(ast->child[0]);
+						zend_string *function_name_lc = zend_string_tolower(function_name);
+						fptr = zend_fetch_function(function_name_lc);
+						if (!fptr && ast->child[0]->attr != ZEND_NAME_FQ) {
+							const char *backslash = zend_memrchr(ZSTR_VAL(function_name_lc), '\\', ZSTR_LEN(function_name_lc));
+							if (backslash) {
+								fptr = zend_fetch_function_str(backslash + 1, ZSTR_LEN(function_name_lc) - (backslash - ZSTR_VAL(function_name_lc) + 1));
+							}
+						}
+						zend_string_release(function_name_lc);
+						if (!fptr) {
+							zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function_name));
+							return FAILURE;
+						}
+
+						ZEND_MAP_PTR_SET(fcc_ast->fptr, fptr);
+					}
+
+					break;
+				}
+				case ZEND_AST_STATIC_CALL: {
+					ZEND_ASSERT(ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT);
+					zend_ast_fcc *fcc_ast = (zend_ast_fcc*)ast->child[2];
+
+					fptr = ZEND_MAP_PTR_GET(fcc_ast->fptr);
+
+					if (!fptr) {
+						zend_class_entry *ce = zend_ast_fetch_class(ast->child[0], scope);
+						if (!ce) {
+							return FAILURE;
+						}
+						zend_string *method_name = zend_ast_get_str(ast->child[1]);
+						if (ce->get_static_method) {
+							fptr = ce->get_static_method(ce, method_name);
+						} else {
+							fptr = zend_hash_find_ptr_lc(&ce->function_table, method_name);
+							if (fptr) {
+								if (!(fptr->common.fn_flags & ZEND_ACC_PUBLIC)) {
+									if (UNEXPECTED(fptr->common.scope != scope)) {
+										if (
+											UNEXPECTED(fptr->op_array.fn_flags & ZEND_ACC_PRIVATE)
+											|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fptr), scope))
+										) {
+											if (ce->__callstatic) {
+												zend_throw_error(NULL, "Creating a callable for the magic __callStatic() method is not supported in constant expressions");
+											} else {
+												zend_bad_method_call(fptr, method_name, scope);
+											}
+
+											return FAILURE;
+										}
+									}
+								}
+							} else {
+								if (ce->__callstatic) {
+									zend_throw_error(NULL, "Creating a callable for the magic __callStatic() method is not supported in constant expressions");
+								} else {
+									zend_undefined_method(ce, method_name);
+								}
+
+								return FAILURE;
+							}
+						}
+
+						if (!(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
+							zend_non_static_method_call(fptr);
+							
+							return FAILURE;
+						}
+						if ((fptr->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+							zend_abstract_method_call(fptr);
+							
+							return FAILURE;
+						} else if (fptr->common.scope->ce_flags & ZEND_ACC_TRAIT) {
+							zend_error(E_DEPRECATED,
+								"Calling static trait method %s::%s is deprecated, "
+								"it should only be called on a class using the trait",
+								ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name));
+							if (EG(exception)) {
+								return FAILURE;
+							}
+						}
+
+						ZEND_MAP_PTR_SET(fcc_ast->fptr, fptr);
+					}
+
+					break;
+				}
+			}
+
+			zend_create_fake_closure(result, fptr, scope, scope, NULL);
+
+			return SUCCESS;
+		}
 		case ZEND_AST_OP_ARRAY:
 		{
 			zend_function *func = (zend_function *)zend_ast_get_op_array(ast)->op_array;
@@ -1092,6 +1209,8 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 		size = sizeof(zend_ast_zval);
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		size = sizeof(zend_ast_op_array);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		size = sizeof(zend_ast_fcc);
 	} else if (zend_ast_is_list(ast)) {
 		uint32_t i;
 		zend_ast_list *list = zend_ast_get_list(ast);
@@ -1159,6 +1278,14 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->lineno = old->lineno;
 		new->op_array = old->op_array;
 		buf = (void*)((char*)buf + sizeof(zend_ast_op_array));
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *old = (zend_ast_fcc*)ast;
+		zend_ast_fcc *new = (zend_ast_fcc*)buf;
+		new->kind = old->kind;
+		new->attr = old->attr;
+		new->lineno = old->lineno;
+		ZEND_MAP_PTR_INIT(new->fptr, ZEND_MAP_PTR(old->fptr));
+		buf = (void*)((char*)buf + sizeof(zend_ast_fcc));
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
