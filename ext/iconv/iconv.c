@@ -2535,7 +2535,8 @@ static php_stream_filter_status_t php_iconv_stream_filter_do_filter(
 		if (php_iconv_stream_filter_append_bucket(self, stream, filter,
 				buckets_out, bucket->buf, bucket->buflen, &consumed,
 				php_stream_is_persistent(stream)) != SUCCESS) {
-			goto out_failure;
+			php_stream_bucket_delref(bucket);
+			return PSFS_ERR_FATAL;
 		}
 
 		php_stream_bucket_delref(bucket);
@@ -2545,7 +2546,7 @@ static php_stream_filter_status_t php_iconv_stream_filter_do_filter(
 		if (php_iconv_stream_filter_append_bucket(self, stream, filter,
 				buckets_out, NULL, 0, &consumed,
 				php_stream_is_persistent(stream)) != SUCCESS) {
-			goto out_failure;
+			return PSFS_ERR_FATAL;
 		}
 	}
 
@@ -2554,12 +2555,6 @@ static php_stream_filter_status_t php_iconv_stream_filter_do_filter(
 	}
 
 	return PSFS_PASS_ON;
-
-out_failure:
-	if (bucket != NULL) {
-		php_stream_bucket_delref(bucket);
-	}
-	return PSFS_ERR_FATAL;
 }
 /* }}} */
 

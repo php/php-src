@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.3
 
+- Iconv:
+  . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
+
 - Streams:
   . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
     to incorrect error handling). (nielsdos)
