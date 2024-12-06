@@ -954,10 +954,9 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 				if (flags & FILTER_FLAG_NO_RES_RANGE || flags & FILTER_FLAG_GLOBAL_RANGE) {
 					if (
 						(ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && (ip[7] == 0 || ip[7] == 1)) ||
-						(ip[0] == 0x5f) ||
 						(ip[0] >= 0xfe80 && ip[0] <= 0xfebf) ||
-						(ip[0] == 0x2001 && (ip[1] == 0x0db8 || (ip[1] >= 0x0010 && ip[1] <= 0x001f))) ||
-						(ip[0] == 0x3ff3)
+						(ip[0] == 0x2001 && (ip[1] == 0x0db8 || (ip[1] >= 0x0010 && ip[1] <= 0x001f)))
+
 					) {
 						RETURN_VALIDATION_FAILED
 					}
