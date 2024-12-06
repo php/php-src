@@ -3388,7 +3388,7 @@ function toolset_setup_intrinsic_cflags()
 	}
 }
 
-function toolset_setup_common_ldlags()
+function toolset_setup_common_ldflags()
 {
 	var envLDFLAGS = WshShell.Environment("PROCESS").Item("LDFLAGS");
 

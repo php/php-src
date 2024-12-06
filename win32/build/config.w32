@@ -93,7 +93,7 @@ if (VS_TOOLSET) {
 }
 
 // General link flags
-toolset_setup_common_ldlags();
+toolset_setup_common_ldflags();
 
 // General libs
 toolset_setup_common_libs();
