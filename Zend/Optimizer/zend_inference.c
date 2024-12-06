@@ -3449,7 +3449,12 @@ static zend_always_inline zend_result _zend_update_type_info(
 			break;
 		case ZEND_ARRAY_DUP:
 		case ZEND_ARRAY_SET_PLACEHOLDER: {
-			// FIXME: op2 RC inference
+			if (ssa_op->op2_def) {
+				tmp = t2;
+				tmp &= ~MAY_BE_RC1;
+				tmp |= MAY_BE_RCN;
+				UPDATE_SSA_TYPE(tmp, ssa_op->op2_def);
+			}
 			if (opline->opcode == ZEND_ARRAY_DUP) {
 				ZEND_ASSERT(opline->op1_type == IS_CONST);
 				zval *template = CRT_CONSTANT_EX(op_array, opline, opline->op1);
