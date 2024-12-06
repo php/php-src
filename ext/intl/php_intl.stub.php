@@ -390,7 +390,7 @@ function datefmt_get_error_message(IntlDateFormatter $formatter): string {}
 
 /* formatter */
 
-function numfmt_create(string $locale, int $style, ?string $pattern = null): ?NumberFormatter {}
+function numfmt_create(string $locale, string|int $style, ?string $pattern = null): ?NumberFormatter {}
 
 function numfmt_format(NumberFormatter $formatter, int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 

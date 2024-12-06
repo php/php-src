@@ -34,7 +34,7 @@ Caught (8192): IntlRuleBasedBreakIterator::__construct(): Passing null to parame
 Caught (8192): IntlRuleBasedBreakIterator::__construct(): Passing null to parameter #2 ($compiled) of type bool is deprecated
 Caught (8192): Collator::__construct(): Passing null to parameter #1 ($locale) of type string is deprecated
 Caught (8192): NumberFormatter::__construct(): Passing null to parameter #1 ($locale) of type string is deprecated
-Caught (8192): NumberFormatter::__construct(): Passing null to parameter #2 ($style) of type int is deprecated
+Caught (8192): NumberFormatter::__construct(): Passing null to parameter #2 ($style) of type string|int is deprecated
 Caught (8192): MessageFormatter::__construct(): Passing null to parameter #1 ($locale) of type string is deprecated
 Caught (8192): MessageFormatter::__construct(): Passing null to parameter #2 ($pattern) of type string is deprecated
 Caught (8192): ResourceBundle::__construct(): Passing null to parameter #3 ($fallback) of type bool is deprecated
