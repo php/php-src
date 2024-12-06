@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3c6be99bb36965139464925a618cb0bf03affa62 */
+ * Stub hash: d9c80f2ec4740892abd6562a70184bc8704e340a */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -95,7 +95,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFunction_isAnonymous arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
-#define arginfo_class_ReflectionFunction_isDisabled arginfo_class_ReflectionFunctionAbstract_inNamespace
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunction_isDisabled, 0, 0, IS_FALSE, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunction_invoke, 0, 0, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
