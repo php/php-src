@@ -1189,20 +1189,10 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				result = op1;
 			} else {
 				result = &ctx->values[ssa_op->result_use];
+				SKIP_IF_TOP(result);
 			}
 
-			SKIP_IF_TOP(result);
 			SKIP_IF_TOP(op2);
-
-#if 1
-			/* FIXME: See below. */
-			if (IS_BOT(result)) {
-				SET_RESULT_BOT(result);
-				return;
-			}
-#else
-			ZEND_ASSERT(!IS_BOT(result));
-#endif
 
 			/* FIXME: Avoid dup-ing the array in every step. */
 			zend_array *array = zend_array_dup(Z_ARRVAL_P(result));
@@ -1212,34 +1202,15 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			ZVAL_ARR(&tmp, array);
 
 			if (IS_BOT(op2)) {
-#if 1
-				/* FIXME: Handle partial arrays. Deleting hashes is problematic
-				 * because it changes the offsets for the placeholders. */
-				SET_RESULT_BOT(result);
-				zval_ptr_dtor_nogc(&tmp);
-				return;
-#else
 				/* Remove unknown index and mark array as partial. */
-				if (HT_IS_PACKED(array)) {
-					zval_ptr_dtor(element);
-					ZVAL_UNDEF(element);
-				} else {
-					Bucket *bucket = (Bucket *)((uintptr_t)element - XtOffsetOf(Bucket, val));
-					if (bucket->key) {
-						zend_hash_del(array, bucket->key);
-					} else {
-						zend_hash_index_del(array, bucket->h);
-					}
-				}
+				MAKE_BOT(element);
 				MAKE_PARTIAL_ARRAY(&tmp);
-#endif
 			} else {
 				ZVAL_COPY(element, op2);
-				if (IS_PARTIAL_ARRAY(op2)) {
+				if (IS_PARTIAL_ARRAY(result) || IS_PARTIAL_ARRAY(op2)) {
 					MAKE_PARTIAL_ARRAY(&tmp);
 				}
 			}
-
 
 			SET_RESULT(result, &tmp);
 			zval_ptr_dtor_nogc(&tmp);
