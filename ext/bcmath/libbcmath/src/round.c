@@ -33,10 +33,50 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	* - If the fractional part ends with zeros, the zeros are omitted and the number of digits in num is reduced.
 	*   Meaning we might end up in the previous case.
 	*/
+
+	/* e.g. value is 0.1 and precision is -3, ret is 0 or 1000  */
 	if (precision < 0 && num->n_len < (size_t) (-(precision + Z_L(1))) + 1) {
-		*result = bc_copy_num(BCG(_zero_));
+		switch (mode) {
+			case PHP_ROUND_HALF_UP:
+			case PHP_ROUND_HALF_DOWN:
+			case PHP_ROUND_HALF_EVEN:
+			case PHP_ROUND_HALF_ODD:
+			case PHP_ROUND_TOWARD_ZERO:
+				*result = bc_copy_num(BCG(_zero_));
+				return;
+
+			case PHP_ROUND_CEILING:
+				if (num->n_sign == MINUS) {
+					*result = bc_copy_num(BCG(_zero_));
+					return;
+				}
+				break;
+
+			case PHP_ROUND_FLOOR:
+				if (num->n_sign == PLUS) {
+					*result = bc_copy_num(BCG(_zero_));
+					return;
+				}
+				break;
+
+			case PHP_ROUND_AWAY_FROM_ZERO:
+				break;
+
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+
+		if (bc_is_zero(num)) {
+			*result = bc_copy_num(BCG(_zero_));
+			return;
+		}
+
+		/* If precision is -3, it becomes 1000. */
+		*result = bc_new_num(-precision + 1, 0);
+		(*result)->n_value[0] = 1;
+		(*result)->n_sign = num->n_sign;
 		return;
 	}
+
 	/* Just like bcadd('1', '1', 4) becomes '2.0000', it pads with zeros at the end if necessary. */
 	if (precision >= 0 && num->n_scale <= precision) {
 		if (num->n_scale == precision) {
@@ -61,7 +101,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	 * If the result of rounding is carried over, it will be added later, so first set it to 0 here.
 	 */
 	if (rounded_len == 0) {
-		*result = bc_copy_num(BCG(_zero_));
+		*result = bc_new_num(1, 0);
 	} else {
 		*result = bc_new_num(num->n_len, precision > 0 ? precision : 0);
 		memcpy((*result)->n_value, num->n_value, rounded_len);
