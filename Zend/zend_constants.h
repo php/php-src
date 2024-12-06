@@ -22,7 +22,6 @@
 
 #include "zend_globals.h"
 
-#define CONST_CS				0					/* No longer used -- always case sensitive */
 #define CONST_PERSISTENT		(1<<0)				/* Persistent */
 #define CONST_NO_FILE_CACHE		(1<<1)				/* Can't be saved in file cache */
 #define CONST_DEPRECATED		(1<<2)				/* Deprecated */
