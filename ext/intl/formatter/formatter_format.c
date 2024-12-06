@@ -18,6 +18,7 @@
 
 #include "php_intl.h"
 
+#include <unicode/unumberformatter.h>
 #include <unicode/ustring.h>
 
 #include "formatter_class.h"
@@ -28,6 +29,7 @@
 PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
+	UFormattedNumber *result = NULL;
 	zend_long type = FORMAT_TYPE_DEFAULT;
 	UChar format_buf[32];
 	UChar* formatted = format_buf;
@@ -42,7 +44,12 @@ PHP_FUNCTION( numfmt_format )
 	}
 
 	/* Fetch the object. */
-	FORMATTER_METHOD_FETCH_OBJECT;
+	FORMATTER_METHOD_FETCH_OBJECT2;
+
+	if (FORMATTER_OBJECT2(nfo)) {
+		result = unumf_openResult(&INTL_DATA_ERROR_CODE(nfo));
+		INTL_METHOD_CHECK_STATUS(nfo, "Error opening formatter result");
+	}
 
 	if(type == FORMAT_TYPE_DEFAULT) {
 		switch(Z_TYPE_P(number)) {
@@ -60,48 +67,77 @@ PHP_FUNCTION( numfmt_format )
 	switch(type) {
 		case FORMAT_TYPE_INT32:
 			convert_to_long(number);
-			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
-				formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+			if (FORMATTER_OBJECT(nfo)) {
+				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
+					formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+			} else {
+				unumf_formatInt(FORMATTER_OBJECT2(nfo), (int32_t)Z_LVAL_P(number), result, &INTL_DATA_ERROR_CODE(nfo));
+				formatted_len = unumf_resultToString(result, formatted, formatted_len, &INTL_DATA_ERROR_CODE(nfo));
+			}
+			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo));
 				formatted = eumalloc(formatted_len);
-				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
-					formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+				if (FORMATTER_OBJECT(nfo)) {
+					formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
+						formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+				} else {
+					formatted_len = unumf_resultToString(result, formatted, formatted_len, &INTL_DATA_ERROR_CODE(nfo));
+				}
 				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
 					efree(formatted);
 				}
 			}
-			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 			break;
 
 		case FORMAT_TYPE_INT64:
 		{
 			int64_t value = (Z_TYPE_P(number) == IS_DOUBLE)?(int64_t)Z_DVAL_P(number):Z_LVAL_P(number);
-			formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+			if (FORMATTER_OBJECT(nfo)) {
+				formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+			} else {
+				unumf_formatInt(FORMATTER_OBJECT2(nfo), value, result, &INTL_DATA_ERROR_CODE(nfo));
+				INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
+				formatted_len = unumf_resultToString(result, formatted, formatted_len, &INTL_DATA_ERROR_CODE(nfo));
+			}
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo));
 				formatted = eumalloc(formatted_len);
-				formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+				if (FORMATTER_OBJECT(nfo)) {
+					formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+				} else {
+					formatted_len = unumf_resultToString(result, formatted, formatted_len, &INTL_DATA_ERROR_CODE(nfo));
+				}
 				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
 					efree(formatted);
 				}
 			}
-			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
+			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting to string failed" );
 		}
 			break;
 
 		case FORMAT_TYPE_DOUBLE:
 			convert_to_double(number);
-			formatted_len = unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+			if (FORMATTER_OBJECT(nfo)) {
+				formatted_len = unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+			} else {
+				unumf_formatDouble(FORMATTER_OBJECT2(nfo), Z_DVAL_P(number), result, &INTL_DATA_ERROR_CODE(nfo));
+				INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
+				formatted_len = unumf_resultToString(result, formatted, formatted_len, &INTL_DATA_ERROR_CODE(nfo));
+			}
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo));
 				formatted = eumalloc(formatted_len);
-				unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+				if (FORMATTER_OBJECT(nfo)) {
+					unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+				} else {
+					formatted_len = unumf_resultToString(result, formatted, formatted_len, &INTL_DATA_ERROR_CODE(nfo));
+				}
 				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
 					efree(formatted);
 				}
 			}
-			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
+			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting to string failed" );
 			break;
 		case FORMAT_TYPE_CURRENCY:
 			if (getThis()) {
@@ -119,6 +155,8 @@ PHP_FUNCTION( numfmt_format )
 	}
 
 	INTL_METHOD_RETVAL_UTF8( nfo, formatted, formatted_len, ( formatted != format_buf ) );
+
+	unumf_closeResult(result);
 }
 /* }}} */
 

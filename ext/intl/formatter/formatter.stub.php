@@ -183,13 +183,13 @@ class NumberFormatter
     #[\Deprecated(since: '8.3')]
     public const int TYPE_CURRENCY = UNKNOWN;
 
-    public function __construct(string $locale, int $style, ?string $pattern = null) {}
+    public function __construct(string $locale, string|int $style, ?string $pattern = null) {}
 
     /**
      * @tentative-return-type
      * @alias numfmt_create
      */
-    public static function create(string $locale, int $style, ?string $pattern = null): ?NumberFormatter {}
+    public static function create(string $locale, string|int $style, ?string $pattern = null): ?NumberFormatter {}
 
     /**
      * @tentative-return-type

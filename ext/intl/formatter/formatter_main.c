@@ -16,6 +16,8 @@
 #include <config.h>
 #endif
 
+#include <unicode/ucurr.h>
+#include <unicode/unumberformatter.h>
 #include <unicode/ustring.h>
 #include <unicode/uloc.h>
 
@@ -30,13 +32,14 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 	char*       pattern = NULL;
 	size_t      locale_len = 0, pattern_len = 0;
 	zend_long   style;
+	zend_string *sstyle;
 	UChar*      spattern     = NULL;
 	int32_t     spattern_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(locale, locale_len)
-		Z_PARAM_LONG(style)
+		Z_PARAM_STR_OR_LONG(sstyle, style)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(pattern, pattern_len)
 	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
@@ -70,13 +73,24 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 	}
 
 	/* Create an ICU number formatter. */
-	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+	if (!sstyle) {
+		FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
 
-	if(spattern) {
-		efree(spattern);
+		if(spattern) {
+			efree(spattern);
+		}
+
+		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
+	} else {
+		UChar *bstyle = 0;
+		int32_t blen = 0;
+		intl_convert_utf8_to_utf16(&bstyle, &blen, ZSTR_VAL(sstyle), ZSTR_LEN(sstyle), &INTL_DATA_ERROR_CODE(nfo));
+		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: error converting style to UTF-16");
+		FORMATTER_OBJECT2(nfo) = unumf_openForSkeletonAndLocale(bstyle, blen, locale, &INTL_DATA_ERROR_CODE(nfo));
+		efree(bstyle);
+		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: new number formatter failed");
 	}
 
-	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
 	return SUCCESS;
 }
 /* }}} */
