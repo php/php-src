@@ -45,9 +45,9 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool us
 
 	/* First, compare signs. */
 	if (use_sign && n1->n_sign != n2->n_sign) {
-		if (n1->n_len == 1 && n2->n_len == 1 &&
+		if ((n1->n_scale > scale || n2->n_scale > scale) &&
+			n1->n_len == 1 && n2->n_len == 1 &&
 			n1->n_value[0] == 0 && n2->n_value[0] == 0 &&
-			(n1->n_scale > scale || n2->n_scale > scale) &&
 			bc_is_zero_for_scale(n1, scale) && bc_is_zero_for_scale(n2, scale)
 		) {
 			/* e.g. 0.00 <=> -0.00 */
