@@ -2063,8 +2063,9 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 			object_lhs = false;
 		}
 		ZEND_ASSERT(Z_TYPE_P(value) != IS_OBJECT);
-		uint8_t target_type = (Z_TYPE_P(value) == IS_FALSE || Z_TYPE_P(value) == IS_TRUE)
-								 ? _IS_BOOL : Z_TYPE_P(value);
+		uint8_t target_type = Z_TYPE_P(value);
+		/* Should be handled in zend_compare(). */
+		ZEND_ASSERT(target_type != IS_FALSE && target_type != IS_TRUE);
 		if (Z_OBJ_HT_P(object)->cast_object(Z_OBJ_P(object), &casted, target_type) == FAILURE) {
 			// TODO: Less crazy.
 			if (target_type == IS_LONG || target_type == IS_DOUBLE) {
@@ -2158,13 +2159,6 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2)
 {
-	zval *other = Z_TYPE_P(o1) == IS_OBJECT ? o2 : o1;
-
-	/* Fall back to zend_std_compare_objects() for bool. */
-	if (Z_TYPE_P(other) == IS_TRUE || Z_TYPE_P(other) == IS_FALSE) {
-		return zend_std_compare_objects(o1, o2);
-	}
-
 	return ZEND_UNCOMPARABLE;
 }
 
