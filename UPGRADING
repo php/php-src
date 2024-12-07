@@ -167,7 +167,7 @@ PHP 8.5 UPGRADE NOTES
   strings for buildconf builds.
 
 * --enable-sanitzer is now supported for MSVC builds.  This enables ASan and
-  debug assertions, and is supported as of MSVC 16.9 and Windows 10.
+  debug assertions, and is supported as of MSVC 16.10 and Windows 10.
 
 * COM:
   . The extension is now build shared by default; previously it defaulted to a
