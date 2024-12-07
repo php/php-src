@@ -849,7 +849,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives,   "opcache.jit_max_recursive_returns", JIT_G(max_recursive_returns));
 	add_assoc_long(&directives,   "opcache.jit_max_root_traces", JIT_G(max_root_traces));
 	add_assoc_long(&directives,   "opcache.jit_max_side_traces", JIT_G(max_side_traces));
-	add_assoc_long(&directives,   "opcache.jit_prof_threshold", JIT_G(prof_threshold));
+	add_assoc_double(&directives,   "opcache.jit_prof_threshold", JIT_G(prof_threshold));
 	add_assoc_long(&directives,   "opcache.jit_max_trace_length", JIT_G(max_trace_length));
 #endif
 
