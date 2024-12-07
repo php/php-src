@@ -81,7 +81,7 @@ static int quality2Quantizer(int quality) {
 
 	float scaleFactor = (float) AVIF_QUANTIZER_WORST_QUALITY / (float) MAX_QUALITY;
 
-	return round(scaleFactor * (MAX_QUALITY - clampedQuality));
+	return (int) round(scaleFactor * (MAX_QUALITY - clampedQuality));
 }
 
 /*
@@ -103,7 +103,7 @@ static avifBool setEncoderTilesAndThreads(avifEncoder *encoder, avifRGBImage *rg
 
 	// The number of tiles in any dimension will always be a power of 2. We can only specify log(2)tiles.
 
-	tilesLog2 = floor(log2(tiles));
+	tilesLog2 = (int) floor(log2(tiles));
 
 	// If the image's width is greater than the height, use more tile columns
 	// than tile rows to make the tile size close to a square.

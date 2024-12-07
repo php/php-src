@@ -473,7 +473,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 	/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
 	 * (max - min) > ZEND_LONG_MAX.
 	 */
-	zend_ulong offset = (double) ( (double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0));
+	zend_ulong offset = (zend_ulong) (((double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0)));
 
 	return (zend_long) (offset + min);
 }

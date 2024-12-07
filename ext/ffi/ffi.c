@@ -7496,10 +7496,10 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 		case ZEND_FFI_TYPE_FLOAT:
 			if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
-				val->d = val->u64;
+				val->d = (zend_ffi_double) val->u64;
 			} else if (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
-				val->d = val->i64;
+				val->d = (zend_ffi_double) val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
@@ -7512,10 +7512,10 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 		case ZEND_FFI_TYPE_DOUBLE:
 			if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
-				val->d = val->u64;
+				val->d = (zend_ffi_double) val->u64;
 			} else if (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
-				val->d = val->i64;
+				val->d = (zend_ffi_double) val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
@@ -7551,7 +7551,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT32;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT32;
 				val->u64 = val->ch;
@@ -7566,7 +7566,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_INT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_INT32;
-				val->i64 = val->d;
+				val->i64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_INT32;
 				val->i64 = val->ch;
@@ -7579,7 +7579,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT64;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT64;
 				val->u64 = val->ch;
@@ -7596,7 +7596,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->ch = val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_CHAR;
-				val->ch = val->d;
+				val->ch = (char) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 			} else {
 				val->kind = ZEND_FFI_VAL_ERROR;
@@ -7607,7 +7607,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT32;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT32;
 				val->u64 = val->ch;

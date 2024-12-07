@@ -1028,7 +1028,7 @@ static zval *to_zval_double(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			whiteSpace_collapse(data->children->content);
 			switch (is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, 0)) {
 				case IS_LONG:
-					ZVAL_DOUBLE(ret, lval);
+					ZVAL_DOUBLE(ret, (double) lval);
 					break;
 				case IS_DOUBLE:
 					ZVAL_DOUBLE(ret, dval);

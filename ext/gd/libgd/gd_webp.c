@@ -156,7 +156,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	if (quality >= gdWebpLossless) {
 		out_size = WebPEncodeLosslessRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, &out);
 	} else {
-		out_size = WebPEncodeRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, quality, &out);
+		out_size = WebPEncodeRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, (float) quality, &out);
 	}
 
 	if (out_size == 0) {
