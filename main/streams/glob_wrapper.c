@@ -225,7 +225,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 			*opened_path = zend_string_init(path, strlen(path), 0);
 		}
 	}
-
+	const char *pattern = path;
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
@@ -244,14 +244,13 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 		cwd_skip = strlen(cwd)+1;
 
 		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, path);
+		pattern = work_pattern;
 	}
-#else
-	char *work_pattern = path;
 #endif
 
 	pglob = ecalloc(1, sizeof(*pglob));
 
-	if (0 != (ret = glob(work_pattern, pglob->flags & GLOB_FLAGMASK, NULL, &pglob->glob))) {
+	if (0 != (ret = glob(pattern, pglob->flags & GLOB_FLAGMASK, NULL, &pglob->glob))) {
 #ifdef GLOB_NOMATCH
 		if (GLOB_NOMATCH != ret)
 #endif
