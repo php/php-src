@@ -963,10 +963,18 @@ jobs:
           - x64: true
             zts: true
             opcache: true
+            asan: false
           - x64: false
             zts: false
             opcache: false
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+            asan: false
+          - x64: true
+            zts: true
+            opcache: true
+            asan: true
+            branch: 'master'
+            timeout: 120
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}"
     runs-on: windows-${{ inputs.windows_version }}
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
@@ -979,6 +987,7 @@ jobs:
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
       PARALLEL: -j2
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
+      ASAN: "${{ matrix.asan && '1' || '0' }}"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
