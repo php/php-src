@@ -1103,15 +1103,6 @@ static void init_request_info(void)
 			script_path_translated = __unixify(script_path_translated, 0, NULL, 1, 0);
 #endif
 
-			// If DocumentRoot contains cyrillic characters and PHP is invoked with SetHandler (not applicable to ProxyPassMatch),
-			// then the cyrillic characters are urlencoded by apache, and we need to decode them, for example with
-			// DocumentRoot /home/hans/web/cyrillicрф.ratma.net/public_html
-			// env_script_filename contains /home/hans/web/cyrillic%D1%80%D1%84.ratma.net/public_html/index.php.
-			// and we must decode it to /home/hans/web/cyrillicрф.ratma.net/public_html/index.php.
-			if (apache_was_here && strchr(script_path_translated, '%'))
-			{
-				php_raw_url_decode(script_path_translated, strlen(script_path_translated));
-			}
 			
 			/*
 			 * if the file doesn't exist, try to extract PATH_INFO out
@@ -1128,8 +1119,21 @@ static void init_request_info(void)
 				char *ptr;
 
 				if (pt) {
+					// If DocumentRoot contains cyrillic characters and PHP is invoked with SetHandler (not applicable to ProxyPassMatch),
+					// then the cyrillic characters are urlencoded by apache, and we need to decode them, for example with
+					// DocumentRoot /home/hans/web/cyrillicрф.ratma.net/public_html
+					// env_script_filename contains /home/hans/web/cyrillic%D1%80%D1%84.ratma.net/public_html/index.php.
+					// and we must decode it to /home/hans/web/cyrillicрф.ratma.net/public_html/index.php.
+					bool firstrun_apache_cyrillic_encoding = apache_was_here && memchr(pt, '%', len);
+					if(firstrun_apache_cyrillic_encoding) {
+						len = php_raw_url_decode(pt, len);
+					}					
 					while ((ptr = strrchr(pt, '/')) || (ptr = strrchr(pt, '\\'))) {
-						*ptr = 0;
+						if(firstrun_apache_cyrillic_encoding) {
+							firstrun_apache_cyrillic_encoding = false;
+						} else {
+							*ptr = 0;
+						}
 						if (stat(pt, &st) == 0 && S_ISREG(st.st_mode)) {
 							/*
 							 * okay, we found the base script!
