@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17061 (Now Number::round() does not remove trailing zeros).
     (Saki Takamachi)
 
+- Core:
+  . Fixed bug OSS-Fuzz #382922236 (Duplicate dynamic properties in hooked object
+    iterator properties table). (ilutov)
+
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
 

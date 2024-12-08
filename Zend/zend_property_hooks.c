@@ -44,7 +44,9 @@ static uint32_t zho_num_backed_props(zend_object *zobj)
 static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access, bool force_ptr, bool include_dynamic_props)
 {
 	zend_class_entry *ce = zobj->ce;
-	zend_array *properties = zend_new_array(ce->default_properties_count);
+	zend_array *properties = zend_new_array(include_dynamic_props && zobj->properties
+		? zend_hash_num_elements(zobj->properties)
+		: ce->default_properties_count);
 	zend_hash_real_init_mixed(properties);
 
 	/* Build list of parents */
@@ -105,7 +107,8 @@ skip_property:
 		zend_string *prop_name;
 		zval *prop_value;
 		ZEND_HASH_FOREACH_STR_KEY_VAL_FROM(zobj->properties, prop_name, prop_value, zho_num_backed_props(zobj)) {
-			Z_TRY_ADDREF_P(_zend_hash_append(properties, prop_name, prop_value));
+			zval *tmp = _zend_hash_append(properties, prop_name, prop_value);
+			Z_TRY_ADDREF_P(tmp);
 		} ZEND_HASH_FOREACH_END();
 	}
 
