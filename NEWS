@@ -20,6 +20,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
     to incorrect error handling). (nielsdos)
 
+- Windows:
+  . Hardened proc_open() against cmd.exe hijacking. (cmb)
+
 05 Dec 2024, PHP 8.4.2
 
 - BcMath:
