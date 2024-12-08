@@ -1038,7 +1038,7 @@ static void init_request_info(void)
 				size_t plen = strlen(p);
 				memmove(env_script_filename, p, plen + 1);
 				apache_was_here = 1;
-				// If DocumentRoot contains cyrillic characters and PHP is invoked with SetHandler (not applicable to ProxySetMatch),
+				// If DocumentRoot contains cyrillic characters and PHP is invoked with SetHandler (not applicable to ProxyPassMatch),
 				// then the cyrillic characters are urlencoded by apache, and we need to decode them, for example with
 				// DocumentRoot /home/hans/web/cyrillicрф.ratma.net/public_html
 				// env_script_filename contains /home/hans/web/cyrillic%D1%80%D1%84.ratma.net/public_html/index.php.
