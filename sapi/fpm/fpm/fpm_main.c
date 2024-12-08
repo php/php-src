@@ -1044,7 +1044,7 @@ static void init_request_info(void)
 				// env_script_filename contains /home/hans/web/cyrillic%D1%80%D1%84.ratma.net/public_html/index.php.
 				// and we must decode it to /home/hans/web/cyrillicрф.ratma.net/public_html/index.php.
 				if(memchr(env_script_filename, '%', plen) != NULL){
-					plen = php_url_decode(env_script_filename, plen);
+					plen = php_raw_url_decode(env_script_filename, plen);
 				}
 			}
 			/* ignore query string if sent by Apache (RewriteRule) */
