@@ -261,15 +261,17 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	}
 
 #ifdef ZTS
-	/* strip prepended CWD */
-	for (i = 0; i < pglob->glob.gl_pathc; i++) {
-		char *p = pglob->glob.gl_pathv[i];
-		char *q = p + cwd_skip;
-		char *e = p + strlen(pglob->glob.gl_pathv[i]) - 1;
-		while (q <= e) {
-			*p++ = *q++;
+	if (cwd_skip > 0) {
+		/* strip prepended CWD */
+		for (i = 0; i < pglob->glob.gl_pathc; i++) {
+			char *p = pglob->glob.gl_pathv[i];
+			char *q = p + cwd_skip;
+			char *e = p + strlen(pglob->glob.gl_pathv[i]) - 1;
+			while (q <= e) {
+				*p++ = *q++;
+			}
+			*p = '\0';
 		}
-		*p = '\0';
 	}
 #endif
 
