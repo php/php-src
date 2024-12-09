@@ -1124,16 +1124,14 @@ static void init_request_info(void)
 					// DocumentRoot /home/hans/web/cyrillicрф.ratma.net/public_html
 					// env_script_filename contains /home/hans/web/cyrillic%D1%80%D1%84.ratma.net/public_html/index.php.
 					// and we must decode it to /home/hans/web/cyrillicрф.ratma.net/public_html/index.php.
-					bool firstrun_apache_cyrillic_encoding = apache_was_here && memchr(pt, '%', len);
-					if(firstrun_apache_cyrillic_encoding) {
+					if(apache_was_here && memchr(pt, '%', len)) {
 						len = php_raw_url_decode(pt, len);
-					}					
+						ptr = &pt[len]; // php_raw_url_decode() writes a trailing null byte, &pt[len] is that null byte.
+						goto apache_cyrillic_jump;
+					}
 					while ((ptr = strrchr(pt, '/')) || (ptr = strrchr(pt, '\\'))) {
-						if(firstrun_apache_cyrillic_encoding) {
-							firstrun_apache_cyrillic_encoding = false;
-						} else {
-							*ptr = 0;
-						}
+						*ptr = 0;
+						apache_cyrillic_jump:
 						if (stat(pt, &st) == 0 && S_ISREG(st.st_mode)) {
 							/*
 							 * okay, we found the base script!
