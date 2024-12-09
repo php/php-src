@@ -8576,7 +8576,7 @@ static void zend_compile_property_hooks(
 	ce->num_hooked_props++;
 
 	/* See zend_link_hooked_object_iter(). */
-#ifndef ZEND_WIN32
+#ifndef ZEND_OPCACHE_SHM_REATTACHMENT
 	if (!ce->get_iterator) {
 		/* Will be removed again, in case of Iterator or IteratorAggregate. */
 		ce->get_iterator = zend_hooked_object_get_iterator;
@@ -9107,7 +9107,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	/* We currently don't early-bind classes that implement interfaces or use traits */
 	if (!ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
-#ifdef ZEND_WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 	 /* See zend_link_hooked_object_iter(). */
 	 && !ce->num_hooked_props
 #endif
