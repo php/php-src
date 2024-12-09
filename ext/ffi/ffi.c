@@ -4378,6 +4378,21 @@ ZEND_METHOD(FFI, addr) /* {{{ */
 }
 /* }}} */
 
+static zend_ffi_type *zend_ffi_type_from_cdata_or_ctype(zval *zv)
+{
+	ZVAL_DEREF(zv);
+	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == zend_ffi_cdata_ce) {
+		zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+		return ZEND_FFI_TYPE(cdata->type);
+	} else if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == zend_ffi_ctype_ce) {
+		zend_ffi_ctype *ctype = (zend_ffi_ctype*)Z_OBJ_P(zv);
+		return ZEND_FFI_TYPE(ctype->type);
+	} else {
+		zend_wrong_parameter_class_error(1, "FFI\\CData or FFI\\CType", zv);
+		return NULL;
+	}
+}
+
 ZEND_METHOD(FFI, sizeof) /* {{{ */
 {
 	zval *zv;
@@ -4388,15 +4403,8 @@ ZEND_METHOD(FFI, sizeof) /* {{{ */
 		Z_PARAM_ZVAL(zv);
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_DEREF(zv);
-	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == zend_ffi_cdata_ce) {
-		zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
-		type = ZEND_FFI_TYPE(cdata->type);
-	} else if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == zend_ffi_ctype_ce) {
-		zend_ffi_ctype *ctype = (zend_ffi_ctype*)Z_OBJ_P(zv);
-		type = ZEND_FFI_TYPE(ctype->type);
-	} else {
-		zend_wrong_parameter_class_error(1, "FFI\\CData or FFI\\CType", zv);
+	type = zend_ffi_type_from_cdata_or_ctype(zv);
+	if (UNEXPECTED(!type)) {
 		RETURN_THROWS();
 	}
 
@@ -4414,15 +4422,8 @@ ZEND_METHOD(FFI, alignof) /* {{{ */
 		Z_PARAM_ZVAL(zv);
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_DEREF(zv);
-	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == zend_ffi_cdata_ce) {
-		zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
-		type = ZEND_FFI_TYPE(cdata->type);
-	} else if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == zend_ffi_ctype_ce) {
-		zend_ffi_ctype *ctype = (zend_ffi_ctype*)Z_OBJ_P(zv);
-		type = ZEND_FFI_TYPE(ctype->type);
-	} else {
-		zend_wrong_parameter_class_error(1, "FFI\\CData or FFI\\CType", zv);
+	type = zend_ffi_type_from_cdata_or_ctype(zv);
+	if (UNEXPECTED(!type)) {
 		RETURN_THROWS();
 	}
 
