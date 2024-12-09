@@ -4431,6 +4431,37 @@ ZEND_METHOD(FFI, alignof) /* {{{ */
 }
 /* }}} */
 
+ZEND_METHOD(FFI, offsetof)
+{
+	zval *zv;
+	zend_ffi_type *type;
+	zend_string *field_name;
+
+	ZEND_FFI_VALIDATE_API_RESTRICTION();
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(zv)
+		Z_PARAM_STR(field_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	type = zend_ffi_type_from_cdata_or_ctype(zv);
+	if (UNEXPECTED(!type)) {
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
+		zend_argument_value_error(1, "must be a struct/union");
+		RETURN_THROWS();
+	}
+
+	const zend_ffi_field *field = zend_hash_find_ptr(&type->record.fields, field_name);
+	if (UNEXPECTED(!field)) {
+		zend_argument_value_error(2, "does not exist");
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(field->offset);
+}
+
 ZEND_METHOD(FFI, memcpy) /* {{{ */
 {
 	zval *zv1, *zv2;

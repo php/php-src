@@ -42,6 +42,9 @@ namespace {
         /** @prefer-ref $ptr */
         public static function alignof(FFI\CData|FFI\CType $ptr): int {}
 
+        /** @prefer-ref $ptr */
+        public static function offsetof(FFI\CData|FFI\CType $ptr, string $field): int {}
+
         /**
          * @param FFI\CData|string $from
          * @prefer-ref $to
