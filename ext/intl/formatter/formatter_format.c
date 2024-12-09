@@ -210,6 +210,7 @@ PHP_FUNCTION( numfmt_format_currency )
 		/* The new NumberFormatter takes the currency format (aka skeleton)
 		 * from NumberFormatter::__construct 2nd argument.
 		 */
+		zend_error(E_DEPRECATED, "Calling NumberFormat::formatCurrency when the object has been instantiated with the currency/* token is deprecated.");
 		result = unumf_openResult(&INTL_DATA_ERROR_CODE(nfo));
 		INTL_METHOD_CHECK_STATUS(nfo, "Error opening formatter result");
 		unumf_formatDouble(FORMATTER_OBJECT2(nfo), number, result, &INTL_DATA_ERROR_CODE(nfo));

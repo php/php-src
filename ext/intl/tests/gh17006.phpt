@@ -24,9 +24,11 @@ try {
 $fmt = new \NumberFormatter('en_US', "group-auto currency/USD");
 var_dump($fmt->formatCurrency($number));
 ?>
---EXPECT--
+--EXPECTF--
 string(11) "one million"
 string(9) "1 million"
 string(13) "$1,000,000.00"
 NumberFormatter::formatCurrency(): Argument #3 currency cannot be null when instantiating NumberFormatterwith a style constant
+
+Deprecated: Calling NumberFormat::formatCurrency when the object has been instantiated with the currency/* token is deprecated. in %s on line %d
 string(13) "$1,000,000.00"
