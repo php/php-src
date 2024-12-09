@@ -397,7 +397,7 @@ function numfmt_format(NumberFormatter $formatter, int|float $num, int $type = N
 /** @param int $offset */
 function numfmt_parse(NumberFormatter $formatter, string $string, int $type = NumberFormatter::TYPE_DOUBLE, &$offset = null): int|float|false {}
 
-function numfmt_format_currency(NumberFormatter $formatter, float $amount, string $currency): string|false {}
+function numfmt_format_currency(NumberFormatter $formatter, float $amount, ?string $currency = null): string|false {}
 
 /**
  * @param string $currency

@@ -171,33 +171,59 @@ PHP_FUNCTION( numfmt_format_currency )
 	size_t     currency_len  = 0;
 	UChar*     scurrency     = NULL;
 	int32_t    scurrency_len = 0;
+	UFormattedNumber *result = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ods",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Od|s!",
 		&object, NumberFormatter_ce_ptr,  &number, &currency, &currency_len ) == FAILURE )
 	{
 		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
-	FORMATTER_METHOD_FETCH_OBJECT;
+	FORMATTER_METHOD_FETCH_OBJECT2;
 
-	/* Convert currency to UTF-16. */
-	intl_convert_utf8_to_utf16(&scurrency, &scurrency_len, currency, currency_len, &INTL_DATA_ERROR_CODE(nfo));
-	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-16 failed" );
+	if (FORMATTER_OBJECT(nfo)) {
+		if (!currency) {
+			zend_argument_value_error(3, "currency cannot be null when instantiating NumberFormatter"
+					             "with a style constant");
+			RETURN_THROWS();
+		}
+		/* Convert currency to UTF-16. */
+		intl_convert_utf8_to_utf16(&scurrency, &scurrency_len, currency, currency_len, &INTL_DATA_ERROR_CODE(nfo));
+		INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-16 failed" );
 
-	/* Format the number using a fixed-length buffer. */
-	formatted_len = unum_formatDoubleCurrency(FORMATTER_OBJECT(nfo), number, scurrency, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+		/* Format the number using a fixed-length buffer. */
+		formatted_len = unum_formatDoubleCurrency(FORMATTER_OBJECT(nfo), number, scurrency, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 
-	/* If the buffer turned out to be too small
-	 * then allocate another buffer dynamically
-	 * and use it to format the number.
-	 */
-	if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-		intl_error_reset(INTL_DATA_ERROR_P(nfo));
-		formatted = eumalloc(formatted_len);
-		unum_formatDoubleCurrency(FORMATTER_OBJECT(nfo), number, scurrency, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+		/* If the buffer turned out to be too small
+	 	 * then allocate another buffer dynamically
+	 	 * and use it to format the number.
+	 	 */
+		if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
+			intl_error_reset(INTL_DATA_ERROR_P(nfo));
+			formatted = eumalloc(formatted_len);
+			unum_formatDoubleCurrency(FORMATTER_OBJECT(nfo), number, scurrency, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+		}
+	} else {
+		/* The new NumberFormatter takes the currency format (aka skeleton)
+		 * from NumberFormatter::__construct 2nd argument.
+		 */
+		result = unumf_openResult(&INTL_DATA_ERROR_CODE(nfo));
+		INTL_METHOD_CHECK_STATUS(nfo, "Error opening formatter result");
+		unumf_formatDouble(FORMATTER_OBJECT2(nfo), number, result, &INTL_DATA_ERROR_CODE(nfo));
+		INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
+		formatted_len = unumf_resultToString(result, formatted, formatted_len, &INTL_DATA_ERROR_CODE(nfo));
+		/* If the buffer turned out to be too small
+	 	 * then allocate another buffer dynamically
+	 	 * and use it to format the number.
+	 	 */
+		if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
+			intl_error_reset(INTL_DATA_ERROR_P(nfo));
+			formatted = eumalloc(formatted_len);
+			formatted_len = unumf_resultToString(result, formatted, formatted_len, &INTL_DATA_ERROR_CODE(nfo));
+		}
 	}
 
 	if( U_FAILURE( INTL_DATA_ERROR_CODE((nfo)) ) ) {
@@ -214,6 +240,8 @@ PHP_FUNCTION( numfmt_format_currency )
 	if(scurrency) {
 		efree(scurrency);
 	}
+
+	unumf_closeResult(result);
 }
 
 /* }}} */
