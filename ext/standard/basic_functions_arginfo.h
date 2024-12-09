@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e277d3a5699db6aeedb08642720be841dc37d683 */
+ * Stub hash: 00ae851416ff17c3b066c31c073de5e0b510d91f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -614,6 +614,20 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crypt, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#if defined(HAVE_XCRYPT_4_4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crypt_gensalt, 0, 0, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prefix, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crypt_preferred_method, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crypt_checksalt, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 #if defined(HAVE_STRPTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strptime, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -2457,6 +2471,11 @@ ZEND_FUNCTION(sys_getloadavg);
 ZEND_FUNCTION(get_browser);
 ZEND_FUNCTION(crc32);
 ZEND_FUNCTION(crypt);
+#if defined(HAVE_XCRYPT_4_4)
+ZEND_FUNCTION(crypt_gensalt);
+ZEND_FUNCTION(crypt_preferred_method);
+ZEND_FUNCTION(crypt_checksalt);
+#endif
 #if defined(HAVE_STRPTIME)
 ZEND_FUNCTION(strptime);
 #endif
@@ -3053,6 +3072,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_browser, arginfo_get_browser)
 	ZEND_RAW_FENTRY("crc32", zif_crc32, arginfo_crc32, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(crypt, arginfo_crypt)
+#if defined(HAVE_XCRYPT_4_4)
+	ZEND_FE(crypt_gensalt, arginfo_crypt_gensalt)
+	ZEND_FE(crypt_preferred_method, arginfo_crypt_preferred_method)
+	ZEND_FE(crypt_checksalt, arginfo_crypt_checksalt)
+#endif
 #if defined(HAVE_STRPTIME)
 	ZEND_RAW_FENTRY("strptime", zif_strptime, arginfo_strptime, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
@@ -3989,6 +4013,48 @@ static void register_basic_functions_symbols(int module_number)
 #endif
 #if defined(HAVE_NL_LANGINFO) && defined(CODESET)
 	REGISTER_LONG_CONSTANT("CODESET", CODESET, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_STD_DES", "", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_EXT_DES", "_", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_MD5", "$1$", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_BLOWFISH", "$2y$", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_SHA256", "$5$", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_SHA512", "$6$", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_SCRYPT", "$7$", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_GOST_YESCRYPT", "$gy$", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_STRING_CONSTANT("CRYPT_PREFIX_YESCRYPT", "$y$", CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_LONG_CONSTANT("CRYPT_SALT_OK", CRYPT_SALT_OK, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_LONG_CONSTANT("CRYPT_SALT_INVALID", CRYPT_SALT_INVALID, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_LONG_CONSTANT("CRYPT_SALT_METHOD_DISABLED", CRYPT_SALT_METHOD_DISABLED, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_LONG_CONSTANT("CRYPT_SALT_METHOD_LEGACY", CRYPT_SALT_METHOD_LEGACY, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XCRYPT_4_4)
+	REGISTER_LONG_CONSTANT("CRYPT_SALT_TOO_CHEAP", CRYPT_SALT_TOO_CHEAP, CONST_PERSISTENT);
 #endif
 
 

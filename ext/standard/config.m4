@@ -93,8 +93,14 @@ AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
 ], [
 AC_SEARCH_LIBS([crypt], [crypt],
   [AC_DEFINE([HAVE_CRYPT], [1],
-    [Define to 1 if you have the 'crypt' function.])],
-  [AC_MSG_FAILURE([Cannot use external libcrypt as crypt() is missing.])])
+    [Define to 1 if you have the 'crypt' function.])]
+
+AC_SEARCH_LIBS([crypt_gensalt_rn], [crypt],
+  AC_SEARCH_LIBS([crypt_preferred_method], [crypt],
+    AC_SEARCH_LIBS([crypt_checksalt], [crypt],
+    [AC_DEFINE([HAVE_XCRYPT_4_4], [1],
+      [Define to 1 if you have the 'crypt_gensalt_rn', 'crypt_preferred_method' and 'crypt_checksalt' functions.])]
+))))
 
 AC_SEARCH_LIBS([crypt_r], [crypt],
   [AC_DEFINE([HAVE_CRYPT_R], [1],

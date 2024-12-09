@@ -115,6 +115,12 @@ PHPAPI php_basic_globals basic_globals;
 #include "php_fopen_wrappers.h"
 #include "streamsfuncs.h"
 #include "zend_frameless_function.h"
+#ifdef HAVE_CRYPT_H
+# if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
+#  define _GNU_SOURCE
+# endif
+# include <crypt.h>
+#endif
 #include "basic_functions_arginfo.h"
 
 #if __has_feature(memory_sanitizer)
