@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
 
+- FFI:
+  . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
+
 - Fileinfo:
   . Fixed bug GH-17039 (PHP 8.4: Incorrect MIME content type). (nielsdos)
 
