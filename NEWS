@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Fixed bug GH-17040 (SimpleXML's unset can break DOM objects). (nielsdos)
 
+- Sockets:
+  . Fixed bug GH-16276 (socket_strerror overflow handling with INT_MIN).
+    (David Carlier / cmb)
+
 - Streams:
   . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
     to incorrect error handling). (nielsdos)
