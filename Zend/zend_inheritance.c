@@ -1755,12 +1755,12 @@ static void zend_link_hooked_object_iter(zend_class_entry *ce) {
 		ce->get_iterator = zend_hooked_object_get_iterator;
 		ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
 		if (CG(current_linking_class) == ce) {
+# if ZEND_DEBUG
+			/* This check is executed before inheriting any elements that can
+			 * track dependencies. */
 			HashTable *ht = (HashTable*)ce->inheritance_cache;
-			if (ht) {
-				zend_hash_destroy(ht);
-				FREE_HASHTABLE(ht);
-				ce->inheritance_cache = NULL;
-			}
+			ZEND_ASSERT(!ht);
+# endif
 			CG(current_linking_class) = NULL;
 		}
 	}
