@@ -39,6 +39,7 @@
                                (1<<(16+6)) | (1<<(16+7)) | (1<<(16+8)) | (1<<(16+9)) | (1<<(16+10)) | \
                                (1<<(16+11)) | (1<<(16+12)) | (1<<(16+13)) | (1<<(16+14)) | (1<<(16+15)))
 */
+#  define IR_SHADOW_ARGS     32
 # else
 #  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<12) | (1<<13) | (1<<14) | (1<<15)) /* all preserved registers */
 # endif
@@ -2709,7 +2710,11 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 //				jit->ctx.fixed_save_regset &= 0xffff; // TODO: don't save FP registers ???
 //#endif
 			}
+#ifdef _WIN64
+			jit->ctx.fixed_call_stack_size = 16 + IR_SHADOW_ARGS;
+#else
 			jit->ctx.fixed_call_stack_size = 16;
+#endif
 		} else {
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 			jit->ctx.fixed_stack_red_zone = ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE;
@@ -8978,7 +8983,11 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 			// JIT: alloca(sizeof(void*));
 			this_ref2 = ir_ALLOCA(ir_CONST_ADDR(0x10));
 		} else {
+#ifdef _WIN64
+			this_ref2 = ir_HARD_COPY_A(jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS));
+#else
 			this_ref2 = ir_HARD_COPY_A(ir_RLOAD_A(IR_REG_SP));
+#endif
 		}
 		ir_STORE(this_ref2, this_ref);
 
@@ -8994,10 +9003,17 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 					this_ref2);
 		}
 
-		this_ref2 = ir_LOAD_A(ir_RLOAD_A(IR_REG_SP));
+
 		if (!jit->ctx.fixed_call_stack_size) {
+			this_ref2 = ir_LOAD_A(ir_RLOAD_A(IR_REG_SP));
 			// JIT: revert alloca
 			ir_AFREE(ir_CONST_ADDR(0x10));
+		} else {
+#ifdef _WIN64
+			this_ref2 = ir_LOAD_A(jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS));
+#else
+			this_ref2 = ir_LOAD_A(ir_RLOAD_A(IR_REG_SP));
+#endif
 		}
 
 		ir_GUARD(ref2, jit_STUB_ADDR(jit, jit_stub_exception_handler));
@@ -10257,7 +10273,11 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				// JIT: alloca(sizeof(void*));
 				ptr = ir_ALLOCA(ir_CONST_ADDR(sizeof(zval)));
 			} else {
+#ifdef _WIN64
+				ptr = ir_HARD_COPY_A(jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS));
+#else
 				ptr = ir_HARD_COPY_A(ir_RLOAD_A(IR_REG_SP));
+#endif
 			}
 			res_addr = ZEND_ADDR_REF_ZVAL(ptr);
 		}
@@ -10385,7 +10405,16 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			func_info |= MAY_BE_NULL;
 
 			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-				ir_ref sp = ir_RLOAD_A(IR_REG_SP);
+				ir_ref sp;
+				if (!jit->ctx.fixed_call_stack_size) {
+					sp = ir_RLOAD_A(IR_REG_SP);
+				} else {
+#ifdef _WIN32
+					sp = jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS);
+#else
+					sp = ir_RLOAD_A(IR_REG_SP);
+#endif
+				}
 				res_addr = ZEND_ADDR_REF_ZVAL(sp);
 				jit_ZVAL_PTR_DTOR(jit, res_addr, func_info, 1, opline);
 			}
