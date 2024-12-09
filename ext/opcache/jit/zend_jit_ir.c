@@ -10409,7 +10409,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				if (!jit->ctx.fixed_call_stack_size) {
 					sp = ir_RLOAD_A(IR_REG_SP);
 				} else {
-#ifdef _WIN32
+#ifdef _WIN64
 					sp = jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS);
 #else
 					sp = ir_RLOAD_A(IR_REG_SP);
