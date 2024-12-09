@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
+- Opcache:
+  . opcache_get_configuration() properly reports jit_prof_threshold. (cmb)
+
 - SimpleXML:
   . Fixed bug GH-17040 (SimpleXML's unset can break DOM objects). (nielsdos)
 
