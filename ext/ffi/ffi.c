@@ -4975,7 +4975,12 @@ static char *zend_ffi_skip_ws_and_comments(char *p, bool allow_standalone_newlin
 			while (*p && (*p != '*' || p[1] != '/')) {
 				p++;
 			}
-			p += 2;
+			if (*p == '*') {
+				p++;
+				if (*p == '/') {
+					p++;
+				}
+			}
 		} else {
 			break;
 		}
