@@ -4017,19 +4017,7 @@ PHP_FUNCTION(imageaffine)
 		if ((zval_affine_elem = zend_hash_index_find(Z_ARRVAL_P(z_affine), i)) != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
 				case IS_LONG:
-					affine[i] = (double) Z_LVAL_P(zval_affine_elem);
-					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
-						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
-						RETURN_THROWS();
-					}
-					break;
 				case IS_DOUBLE:
-					affine[i] = Z_DVAL_P(zval_affine_elem);
-					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
-						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
-						RETURN_THROWS();
-					}
-					break;
 				case IS_STRING:
 					affine[i] = zval_get_double(zval_affine_elem);
 					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
@@ -4195,11 +4183,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m1), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
-					m1[i]  = (double) Z_LVAL_P(tmp);
-					break;
 				case IS_DOUBLE:
-					m1[i] = Z_DVAL_P(tmp);
-					break;
 				case IS_STRING:
 					m1[i] = zval_get_double(tmp);
 					break;
@@ -4212,11 +4196,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m2), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
-					m2[i]  = (double) Z_LVAL_P(tmp);
-					break;
 				case IS_DOUBLE:
-					m2[i] = Z_DVAL_P(tmp);
-					break;
 				case IS_STRING:
 					m2[i] = zval_get_double(tmp);
 					break;

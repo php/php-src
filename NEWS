@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Added PHP_BUILD_DATE constant. (cmb)
   . Added support for Closures in constant expressions. (timwolla,
     Volker Dusch)
+  . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
+    if available. (timwolla)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -74,9 +76,14 @@ PHP                                                                        NEWS
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).
 
+- Streams:
+  . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
+    (cmb)
+
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
     nielsdos)
+  . Fixed bug GH-16843 (Windows phpize builds ignore source subfolders). (cmb)
 
 - XMLWriter:
   . Improved performance and reduce memory consumption. (nielsdos)

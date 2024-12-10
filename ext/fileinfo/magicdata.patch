@@ -1,6 +1,73 @@
+diff -ur Magdir.orig/javascript Magdir/javascript
+--- Magdir.orig/javascript	2024-12-04 21:21:54.168928738 +0100
++++ Magdir/javascript	2024-12-04 21:21:56.652262003 +0100
+@@ -17,37 +17,38 @@
+ !:mime application/javascript
+ 
+ # JavaScript
+-# The strength is increased to beat the C++ & HTML rules
++# The strength is increased to beat the C++ but lose to HTML rules,
++# because javascript is embedded in hmtl files typically
+ 0	search	"use\x20strict"	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 0	search	'use\x20strict'	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 0	regex	module(\\.|\\[["'])exports.*=	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 0	regex	\^(const|var|let).*=.*require\\(	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 0	regex	\^export\x20(function|class|default|const|var|let|async)\x20	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 0	regex	\\((async\x20)?function[(\x20]	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 0	regex	\^(import|export).*\x20from\x20	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 0	regex	\^(import|export)\x20["']\\./	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 0	regex	\^require\\(["']	JavaScript source
+@@ -55,13 +56,13 @@
+ !:mime	application/javascript
+ !:ext 	js
+ 0	regex	typeof.*[!=]==	JavaScript source
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext 	js
+ 
+ # React Native minified JavaScript
+ 0	search/128	__BUNDLE_START_TIME__=	React Native minified JavaScript
+-!:strength +30
++!:strength +20
+ !:mime	application/javascript
+ !:ext	bundle/jsbundle
+ 
 diff -ur Magdir.orig/rpm Magdir/rpm
---- Magdir.orig/rpm	2021-02-23 01:49:24.000000000 +0100
-+++ Magdir/rpm	2021-04-05 19:40:55.080911893 +0200
+--- Magdir.orig/rpm	2024-12-04 21:21:54.175595405 +0100
++++ Magdir/rpm	2024-12-04 21:21:56.652262003 +0100
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -10,17 +77,17 @@ diff -ur Magdir.orig/rpm Magdir/rpm
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
 diff -ur Magdir.orig/securitycerts Magdir/securitycerts
---- Magdir.orig/securitycerts	2021-02-23 01:49:24.000000000 +0100
-+++ Magdir/securitycerts	2021-04-05 19:40:55.080911893 +0200
+--- Magdir.orig/securitycerts	2024-12-04 21:21:54.175595405 +0100
++++ Magdir/securitycerts	2024-12-04 21:21:56.652262003 +0100
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
-diff --git a/magic/Magdir/sgml b/magic/Magdir/sgml
---- Magdir.orig/sgml
-+++ Magdir/sgml
+diff -ur Magdir.orig/sgml Magdir/sgml
+--- Magdir.orig/sgml	2024-12-04 21:21:54.175595405 +0100
++++ Magdir/sgml	2024-12-04 21:21:56.652262003 +0100
 @@ -1,16 +1,17 @@
  
  #------------------------------------------------------------------------------
@@ -41,3 +108,106 @@ diff --git a/magic/Magdir/sgml b/magic/Magdir/sgml
 +0	string/bt	\<svg			SVG Scalable Vector Graphics image
  !:mime	image/svg+xml
  !:ext   svg
+ 
+@@ -53,11 +54,14 @@
+ # avoid misdetection as JavaScript
+ 0	string/cWt	\<!doctype\ html	HTML document text
+ !:mime	text/html
++!:strength + 30
+ 0	string/ct	\<html>	HTML document text
+ !:mime	text/html
++!:strength + 30
+ 0	string/ct	\<!--
+ >&0	search/4096/cWt	\<!doctype\ html	HTML document text
+ !:mime	text/html
++!:strength + 30
+ >&0	search/4096/ct	\<html>	HTML document text
+ !:mime	text/html
+ 
+@@ -65,69 +69,61 @@
+ # https://www.w3.org/TR/SVG/single-page.html
+ 0	search/4096/cWbt	\<!doctype\ svg	SVG XML document
+ !:mime  image/svg+xml
+-!:strength + 15
++!:strength + 30
+ 
+ 0	search/4096/cwt	\<head\>		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cWt	\<head\ 		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cwt	\<title\>		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cWt	\<title\ 		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cwt	\<html\>		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cWt	\<html\ 		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cwt	\<script\> 		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cWt	\<script\ 		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cwt	\<style\> 		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cWt	\<style\  		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cwt	\<table\>		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 0	search/4096/cWt	\<table\ 		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 
+ 0	search/4096/cwt	\<a\ href=		HTML document text
+ !:mime	text/html
+-!:strength + 15
++!:strength + 30
+ 
+ # Extensible markup language (XML), a subset of SGML
+ # from Marc Prud'hommeaux (marc@apocalypse.org)
+ 0	search/1/cwt	\<?xml			XML document text
+ !:mime	text/xml
+-!:strength + 15
+-0	string/t		\<?xml\ version\ "	XML
+-!:mime	text/xml
+-!:strength + 15
++!:strength + 30
+ 0	string/t		\<?xml\ version="	XML
+ !:mime	text/xml
+-!:strength + 15
+->15	string/t	>\0			%.3s document text
+->>23	search/1	\<xsl:stylesheet	(XSL stylesheet)
+->>24	search/1	\<xsl:stylesheet	(XSL stylesheet)
+-0	string/t	\<?xml\ version='	XML
+-!:mime	text/xml
+-!:strength + 15
++!:strength + 30
+ >15	string/t	>\0			%.3s document text
+ >>23	search/1	\<xsl:stylesheet	(XSL stylesheet)
+ >>24	search/1	\<xsl:stylesheet	(XSL stylesheet)
++
+ 0	search/1/wt	\<?XML			broken XML document text
+ !:mime	text/xml
+ !:strength - 10

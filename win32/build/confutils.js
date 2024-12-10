@@ -1246,6 +1246,8 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	if (PHP_SANITIZER == "yes") {
 		if (CLANG_TOOLSET) {
 			add_asan_opts("CFLAGS_" + SAPI, "LIBS_" + SAPI, (is_lib ? "ARFLAGS_" : "LDFLAGS_") + SAPI);
+		} else if (VS_TOOLSET) {
+			ADD_FLAG("CFLAGS", "/fsanitize=address");
 		}
 	}
 
@@ -1614,8 +1616,15 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		if (obj_dir == null) {
 			if (MODE_PHPIZE) {
 				/* In the phpize mode, the subdirs are always relative to BUID_DIR.
-					No need to differentiate by extension, only one gets built. */
-				var build_dir = (dirname ? dirname : "").replace(new RegExp("^..\\\\"), "");
+					No need to differentiate by extension, only one gets built.
+					We still need to cater to subfolders, though. */
+				if (dir.charAt(configure_module_dirname.length) === "\\" &&
+					dir.substr(0, configure_module_dirname.length) === configure_module_dirname) {
+					var reldir = dir.substr(configure_module_dirname.length + 1);
+					var build_dir = (dirname ? (reldir + "\\" + dirname) : reldir).replace(new RegExp("^..\\\\"), "");
+				} else {
+					var build_dir = (dirname ? dirname : "").replace(new RegExp("^..\\\\"), "");
+				}
 			} else {
 				var build_dir = (dirname ? (dir + "\\" + dirname) : dir).replace(new RegExp("^..\\\\"), "");
 			}
@@ -2270,6 +2279,10 @@ function generate_config_h()
 
 	outfile = FSO.CreateTextFile("main/config.w32.h", true);
 
+	outfile.WriteLine("#ifndef CONFIG_W32_H");
+	outfile.WriteLine("#define CONFIG_W32_H");
+	outfile.WriteBlankLines(1);
+
 	indata = indata.replace(new RegExp("@PREFIX@", "g"), prefix);
 	outfile.Write(indata);
 
@@ -2317,6 +2330,8 @@ function generate_config_h()
 	outfile.WriteLine("#if __has_include(\"main/config.pickle.h\")");
 	outfile.WriteLine("#include \"main/config.pickle.h\"");
 	outfile.WriteLine("#endif");
+	outfile.WriteBlankLines(1);
+	outfile.WriteLine("#endif /* CONFIG_W32_H */");
 
 	outfile.Close();
 }
@@ -3442,8 +3457,12 @@ function toolset_setup_build_mode()
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
 		ADD_FLAG("CFLAGS", "/LD /MD");
-		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
-			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
+		if (PHP_SANITIZER == "yes") {
+			if (VS_TOOLSET) {
+				ADD_FLAG("CFLAGS", "/Ox /U NDebug /U NDEBUG /D ZEND_DEBUG=1");
+			} else if (CLANG_TOOLSET) {
+				ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
+			}
 		} else {
 			// Equivalent to Release_TSInline build -> best optimization
 			ADD_FLAG("CFLAGS", "/Ox /D NDebug /D NDEBUG /GF /D ZEND_DEBUG=0");

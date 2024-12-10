@@ -21,7 +21,7 @@
  * - If you supply only sockets, this simply passes through to winsock select().
  * - If you supply file handles, there is no way to distinguish between
  *   ready for read/write or OOB, so any set in which the handle is found will
- *   be marked as ready.
+ *   be marked as ready. Pipes will be checked if they are ready for read, though.
  * - If you supply a mixture of handles and sockets, the system will interleave
  *   calls between select() and WaitForMultipleObjects(). The time slicing may
  *   cause this function call to take up to 100 ms longer than you specified.
@@ -135,15 +135,23 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 				for (i = 0; i < n_handles; i++) {
 					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[i], 0)) {
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], rfds)) {
-							FD_SET((uint32_t)handle_slot_to_fd[i], &aread);
+							DWORD avail_read = 0;
+							if (GetFileType(handles[i]) != FILE_TYPE_PIPE
+								|| !PeekNamedPipe(handles[i], NULL, 0, NULL, &avail_read, NULL)
+								|| avail_read > 0
+							) {
+								FD_SET((uint32_t)handle_slot_to_fd[i], &aread);
+								retcode++;
+							}
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], wfds)) {
 							FD_SET((uint32_t)handle_slot_to_fd[i], &awrite);
+							retcode++;
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], efds)) {
 							FD_SET((uint32_t)handle_slot_to_fd[i], &aexcept);
+							retcode++;
 						}
-						retcode++;
 					}
 				}
 			}

@@ -151,6 +151,11 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_stackseg_np
 ]))
 
+AC_CHECK_DECL([clock_gettime_nsec_np],
+  [AC_DEFINE([HAVE_CLOCK_GETTIME_NSEC_NP], [1],
+    [Define to 1 if you have the declaration of 'clock_gettime_nsec_np'.])],,
+  [#include <time.h>])
+
 dnl
 dnl Check for sigsetjmp. If sigsetjmp is defined as a macro, use AC_CHECK_DECL
 dnl as a fallback since AC_CHECK_FUNC cannot detect macros.
