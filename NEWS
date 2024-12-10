@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Added PHP_BUILD_DATE constant. (cmb)
   . Added support for Closures in constant expressions. (timwolla,
     Volker Dusch)
+  . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
+    if available. (timwolla)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
