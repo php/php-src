@@ -29,8 +29,8 @@ bool(false)
 string(11) "fe80:5:6::1"
 bool(false)
 string(12) "2001:0db8::1"
-bool(false)
+string(12) "2001:0db8::1"
 string(12) "2001:0010::1"
-bool(false)
+string(12) "2001:0010::1"
 string(12) "240b:0010::1"
 string(12) "240b:0010::1"
