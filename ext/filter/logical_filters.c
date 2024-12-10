@@ -969,15 +969,15 @@ static bool ipv6_get_status_flags(int ip[8], bool *global, bool *reserved, bool 
 	return true;
 }
 
+/* Validates an ipv4 or ipv6 IP, based on the flag (4, 6, or both) add a flag
+ * to throw out reserved ranges; multicast ranges... etc. If both allow_ipv4
+ * and allow_ipv6 flags flag are used, then the first dot or colon determine
+ * the format */
 void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	/* validates an ipv4 or ipv6 IP, based on the flag (4, 6, or both) add a
-	 * flag to throw out reserved ranges; multicast ranges... etc. If both
-	 * allow_ipv4 and allow_ipv6 flags flag are used, then the first dot or
-	 * colon determine the format */
-
-	int            ip[8];
-	int            mode;
+	int  ip[8];
+	int  mode;
+	bool flag_global, flag_reserved, flag_private; /* flags for ranges as determined by RFC 6890 */
 
 	if (memchr(Z_STRVAL_P(value), ':', Z_STRLEN_P(value))) {
 		mode = FORMAT_IPV6;
@@ -995,63 +995,35 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	switch (mode) {
-		case FORMAT_IPV4:
-			{
-				if (!_php_filter_validate_ipv4(Z_STRVAL_P(value), Z_STRLEN_P(value), ip)) {
-					RETURN_VALIDATION_FAILED
-				}
+	if (mode == FORMAT_IPV4) {
+		if (!_php_filter_validate_ipv4(Z_STRVAL_P(value), Z_STRLEN_P(value), ip)) {
+			RETURN_VALIDATION_FAILED
+		}
 
-				/* Check flags */
-				bool flag_global, flag_reserved, flag_private;
-				bool known_block = ipv4_get_status_flags(ip, &flag_global, &flag_reserved, &flag_private);
+		if (!ipv4_get_status_flags(ip, &flag_global, &flag_reserved, &flag_private)) {
+			return; /* no special block */
+		}
+	}
+	else if (mode == FORMAT_IPV6) {
+		if (_php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value), ip) < 1) {
+			RETURN_VALIDATION_FAILED
+		}
 
-				if (!known_block) {
-					break;
-				}
+		if (!ipv6_get_status_flags(ip, &flag_global, &flag_reserved, &flag_private)) {
+			return; /* no special block */
+		}
+	}
 
-				if ((flags & FILTER_FLAG_GLOBAL_RANGE) && flag_global != true) {
-					RETURN_VALIDATION_FAILED
-				}
+	if ((flags & FILTER_FLAG_GLOBAL_RANGE) && flag_global != true) {
+		RETURN_VALIDATION_FAILED
+	}
 
-				if ((flags & FILTER_FLAG_NO_PRIV_RANGE) && flag_private == true) {
-					RETURN_VALIDATION_FAILED
-				}
+	if ((flags & FILTER_FLAG_NO_PRIV_RANGE) && flag_private == true) {
+		RETURN_VALIDATION_FAILED
+	}
 
-				if ((flags & FILTER_FLAG_NO_RES_RANGE) && flag_reserved == true) {
-					RETURN_VALIDATION_FAILED
-				}
-			}
-			break;
-
-		case FORMAT_IPV6:
-			{
-				int res = 0;
-				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value), ip);
-				if (res < 1) {
-					RETURN_VALIDATION_FAILED
-				}
-				/* Check flags */
-				bool flag_global, flag_reserved, flag_private;
-				bool known_block = ipv6_get_status_flags(ip, &flag_global, &flag_reserved, &flag_private);
-
-				if (!known_block) {
-					break;
-				}
-
-				if ((flags & FILTER_FLAG_GLOBAL_RANGE) && flag_global != true) {
-					RETURN_VALIDATION_FAILED
-				}
-
-				if ((flags & FILTER_FLAG_NO_PRIV_RANGE) && flag_private == true) {
-					RETURN_VALIDATION_FAILED
-				}
-
-				if ((flags & FILTER_FLAG_NO_RES_RANGE) && flag_reserved == true) {
-					RETURN_VALIDATION_FAILED
-				}
-			}
-			break;
+	if ((flags & FILTER_FLAG_NO_RES_RANGE) && flag_reserved == true) {
+		RETURN_VALIDATION_FAILED
 	}
 }
 /* }}} */
