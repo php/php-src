@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.16
 
+- Core:
+  . Fixed bug GH-17106 (ZEND_MATCH_ERROR misoptimization). (ilutov)
+
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
 
