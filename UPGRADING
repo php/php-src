@@ -180,6 +180,11 @@ PHP 8.5 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- Core:
+  The high resolution timer (`hrtime()`) on macOS now uses the recommended
+  `clock_gettime_nsec_np(CLOCK_UPTIME_RAW)` API instead of
+  `mach_absolute_time()`.
+
 ========================================
 14. Performance Improvements
 ========================================
