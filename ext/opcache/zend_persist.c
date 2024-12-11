@@ -194,6 +194,7 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		ZVAL_PTR(&z, copy->op_array);
 		zend_persist_op_array(&z);
 		copy->op_array = Z_PTR(z);
+		copy->ast = zend_persist_ast(copy->ast);
 		node = (zend_ast *) copy;
 	} else if (zend_ast_is_decl(ast)) {
 		zend_ast_decl *copy = zend_shared_memdup(ast, sizeof(zend_ast_decl));

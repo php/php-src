@@ -366,6 +366,11 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		/* The op_array itself will be serialized as part of the dynamic_func_defs. */
 		SERIALIZE_PTR(zend_ast_get_op_array(ast)->op_array);
+
+		SERIALIZE_PTR(zend_ast_get_op_array(ast)->ast);
+		tmp = zend_ast_get_op_array(ast)->ast;
+		UNSERIALIZE_PTR(tmp);
+		zend_file_cache_serialize_ast(tmp, script, info, buf);
 	} else if (zend_ast_is_decl(ast)) {
 		zend_ast_decl *decl = (zend_ast_decl*)ast;
 		for (i = 0; i < 5; i++) {
@@ -1258,6 +1263,9 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		/* The op_array itself will be unserialized as part of the dynamic_func_defs. */
 		UNSERIALIZE_PTR(zend_ast_get_op_array(ast)->op_array);
+
+		UNSERIALIZE_PTR(zend_ast_get_op_array(ast)->ast);
+		zend_file_cache_unserialize_ast(zend_ast_get_op_array(ast)->ast, script, buf);
 	} else if (zend_ast_is_decl(ast)) {
 		zend_ast_decl *decl = (zend_ast_decl*)ast;
 		for (i = 0; i < 5; i++) {

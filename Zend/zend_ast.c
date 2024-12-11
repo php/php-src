@@ -100,14 +100,14 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, ze
 	return (zend_ast *) ast;
 }
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_array) {
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_array, zend_ast *original_ast, zend_ast_attr attr) {
 	zend_ast_op_array *ast;
 
 	ast = zend_ast_alloc(sizeof(zend_ast_op_array));
 	ast->kind = ZEND_AST_OP_ARRAY;
-	ast->attr = 0;
-	ast->lineno = CG(zend_lineno);
+	ast->attr = attr;
 	ast->op_array = op_array;
+	ast->ast = original_ast;
 
 	return (zend_ast *) ast;
 }
@@ -1091,7 +1091,7 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		size = sizeof(zend_ast_zval);
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
-		size = sizeof(zend_ast_op_array);
+		size = sizeof(zend_ast_op_array) + zend_ast_tree_size(zend_ast_get_op_array(ast)->ast);
 	} else if (zend_ast_is_list(ast)) {
 		uint32_t i;
 		zend_ast_list *list = zend_ast_get_list(ast);
@@ -1161,9 +1161,10 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		zend_ast_op_array *new = (zend_ast_op_array*)buf;
 		new->kind = old->kind;
 		new->attr = old->attr;
-		new->lineno = old->lineno;
 		new->op_array = old->op_array;
 		buf = (void*)((char*)buf + sizeof(zend_ast_op_array));
+		new->ast = (zend_ast*)buf;
+		buf = zend_ast_tree_copy(old->ast, buf);
 	} else if (zend_ast_is_decl(ast)) {
 		zend_ast_decl *old = (zend_ast_decl*)ast;
 		zend_ast_decl *new = (zend_ast_decl*)buf;
@@ -1256,7 +1257,7 @@ tail_call:
 	} else if (EXPECTED(ast->kind == ZEND_AST_CONSTANT)) {
 		zend_string_release_ex(zend_ast_get_constant_name(ast), 0);
 	} else if (EXPECTED(ast->kind == ZEND_AST_OP_ARRAY)) {
-		/* Nothing to do. */
+		zend_ast_destroy(zend_ast_get_op_array(ast)->ast);
 	} else if (zend_ast_is_decl(ast)) {
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
@@ -1913,6 +1914,10 @@ tail_call:
 		case ZEND_AST_CONSTANT: {
 			zend_string *name = zend_ast_get_constant_name(ast);
 			smart_str_appendl(str, ZSTR_VAL(name), ZSTR_LEN(name));
+			break;
+		}
+		case ZEND_AST_OP_ARRAY: {
+			zend_ast_export_ex(str, zend_ast_get_op_array(ast)->ast, priority, indent);
 			break;
 		}
 		case ZEND_AST_CONSTANT_CLASS:
