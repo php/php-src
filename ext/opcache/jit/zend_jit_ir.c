@@ -3213,6 +3213,63 @@ static zend_never_inline void zend_jit_set_sp_adj_vm(void)
 }
 #endif
 
+#ifdef _WIN64
+/*
+ * We use a single unwind entry for the whole JIT buffer.
+ * This works, because all the JIT-ed PHP functions have the same "fixed stack frame".
+ */
+static PRUNTIME_FUNCTION zend_jit_uw_func = NULL;
+
+#ifdef ZEND_JIT_RT_UNWINDER
+static PRUNTIME_FUNCTION zend_jit_unwind_callback(DWORD64 pc, PVOID context)
+{
+	return zend_jit_uw_func;
+}
+#endif
+
+static void zend_jit_setup_unwinder(void)
+{
+	/* Hardcoded SEH unwinf data for JIT-ed PHP functions with "fixed stack frame" */
+	static const unsigned char uw_data[] = {
+		0x01, // UBYTE: 3 Version , UBYTE: 5 Flags
+		0x10, // UBYTE Size of prolog
+		0x09, // UBYTE Count of unwind codes
+		0x00, // UBYTE: 4 Frame Register, UBYTE: 4 Frame Register offset (scaled)
+		// USHORT * n Unwind codes array
+		0x10, 0x82, // c: subq $0x48, %rsp
+		0x0c, 0xf0, // a: pushq %r15
+		0x0a, 0xe0, // 8: pushq %r14
+		0x08, 0xd0, // 6: pushq %r13
+		0x06, 0xc0, // 4: pushq %r12
+		0x04, 0x70, // 3: pushq %rdi
+		0x03, 0x60, // 2: pushq %rsi
+		0x02, 0x50, // 1: pushq %rbp
+		0x01, 0x30, // 0: pushq %rbx
+	};
+
+	zend_jit_uw_func = (PRUNTIME_FUNCTION)*dasm_ptr;
+	*dasm_ptr = (char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(sizeof(RUNTIME_FUNCTION) + sizeof(uw_data), 16);
+
+	zend_jit_uw_func->BeginAddress = 0;
+	zend_jit_uw_func->EndAddress = (uintptr_t)dasm_end - (uintptr_t)dasm_buf;
+	zend_jit_uw_func->UnwindData = (uintptr_t)zend_jit_uw_func + sizeof(RUNTIME_FUNCTION) - (uintptr_t)dasm_buf;
+	memcpy((char*)zend_jit_uw_func + sizeof(RUNTIME_FUNCTION), uw_data, sizeof(uw_data));
+
+#ifdef ZEND_JIT_RT_UNWINDER
+	RtlInstallFunctionTableCallback(
+		(uintptr_t)dasm_buf | 3,
+		(uintptr_t) dasm_buf,
+		(uintptr_t)dasm_end - (uintptr_t)dasm_buf,
+		zend_jit_unwind_callback,
+		NULL,
+		NULL);
+#else
+	RtlAddFunctionTable(zend_jit_uw_func, 1, (uintptr_t)dasm_buf);
+#endif
+}
+#endif
+
+
 static void zend_jit_setup(void)
 {
 #if defined(IR_TARGET_X86)
@@ -3420,6 +3477,10 @@ static void zend_jit_setup(void)
 	zend_jit_calc_trace_prologue_size();
 	zend_jit_setup_stubs();
 	JIT_G(debug) = debug;
+
+#ifdef _WIN64
+	zend_jit_setup_unwinder();
+#endif
 }
 
 static void zend_jit_shutdown_ir(void)
