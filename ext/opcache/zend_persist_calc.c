@@ -89,6 +89,9 @@ static void zend_persist_ast_calc(zend_ast *ast)
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		ADD_SIZE(sizeof(zend_ast_zval));
 		zend_persist_op_array_calc(&((zend_ast_zval*)(ast))->val);
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		ADD_SIZE(zend_ast_size(children));
