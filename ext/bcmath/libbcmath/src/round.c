@@ -71,7 +71,11 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 		}
 
 		/* If precision is -3, it becomes 1000. */
-		*result = bc_new_num(-precision + 1, 0);
+		if (UNEXPECTED(precision == ZEND_LONG_MIN)) {
+			*result = bc_new_num((size_t) ZEND_LONG_MAX + 2, 0);
+		} else {
+			*result = bc_new_num(-precision + 1, 0);
+		}
 		(*result)->n_value[0] = 1;
 		(*result)->n_sign = num->n_sign;
 		return;
