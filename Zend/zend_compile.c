@@ -11220,13 +11220,10 @@ static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 	}
 
 	znode node;
-	zend_op_array *op = zend_compile_func_decl(&node, *ast_ptr, FUNC_DECL_LEVEL_CONSTEXPR);
+	zend_op_array *op = zend_compile_func_decl(&node, (zend_ast*)closure_ast, FUNC_DECL_LEVEL_CONSTEXPR);
 
 	zend_ast_destroy(*ast_ptr);
-	zval z;
-	ZVAL_PTR(&z, op);
-	*ast_ptr = zend_ast_create_zval(&z);
-	(*ast_ptr)->kind = ZEND_AST_OP_ARRAY;
+	*ast_ptr = zend_ast_create_op_array(op);
 }
 
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)

@@ -87,8 +87,10 @@ static void zend_persist_ast_calc(zend_ast *ast)
 			}
 		}
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
-		ADD_SIZE(sizeof(zend_ast_zval));
-		zend_persist_op_array_calc(&((zend_ast_zval*)(ast))->val);
+		ADD_SIZE(sizeof(zend_ast_op_array));
+		zval z;
+		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
+		zend_persist_op_array_calc(&z);
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		ADD_SIZE(zend_ast_size(children));

@@ -190,6 +190,8 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
 
         if kind == enum_value('ZEND_AST_ZVAL') or kind == enum_value('ZEND_AST_CONSTANT'):
             return self.val.cast(gdb.lookup_type('zend_ast_zval'))
+        if kind == enum_value('ZEND_AST_OP_ARRAY'):
+            return self.val.cast(gdb.lookup_type('zend_ast_op_array'))
         if kind == enum_value('ZEND_AST_ZNODE'):
             return self.val.cast(gdb.lookup_type('zend_ast_znode'))
         if self.is_decl():
