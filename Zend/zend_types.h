@@ -23,6 +23,7 @@
 #define ZEND_TYPES_H
 
 #include "zend_portability.h"
+#include "zend_types_defs.h"
 #include "zend_long.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -86,16 +87,8 @@ typedef ZEND_RESULT_CODE zend_result;
 #endif
 
 typedef struct _zend_object_handlers zend_object_handlers;
-typedef struct _zend_class_entry     zend_class_entry;
-typedef union  _zend_function        zend_function;
-typedef struct _zend_execute_data    zend_execute_data;
-
-typedef struct _zval_struct     zval;
 
 typedef struct _zend_refcounted zend_refcounted;
-typedef struct _zend_string     zend_string;
-typedef struct _zend_array      zend_array;
-typedef struct _zend_object     zend_object;
 typedef struct _zend_resource   zend_resource;
 typedef struct _zend_reference  zend_reference;
 typedef struct _zend_ast_ref    zend_ast_ref;

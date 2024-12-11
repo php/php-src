@@ -6,7 +6,7 @@
  *
  * See https://sourceware.org/gdb/current/onlinedocs/gdb.html/dotdebug_005fgdb_005fscripts-section.html#dotdebug_005fgdb_005fscripts-section
  */
-asm(
+__asm__(
     ".pushsection \".debug_gdb_scripts\", \"MS\",%progbits,1\n"
     ".byte 4 /* Python Text */\n"
     ".ascii \"gdb.inlined-script\\n\"\n"

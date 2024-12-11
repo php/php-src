@@ -832,13 +832,13 @@ typedef struct _ir_hashtab_bucket {
 	uint32_t    next;
 } ir_hashtab_bucket;
 
-typedef struct _ir_hashtab {
+struct _ir_hashtab {
 	void       *data;
 	uint32_t    mask;
 	uint32_t    size;
 	uint32_t    count;
 	uint32_t    pos;
-} ir_hashtab;
+};
 
 void ir_hashtab_init(ir_hashtab *tab, uint32_t size);
 void ir_hashtab_free(ir_hashtab *tab);

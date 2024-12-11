@@ -12,26 +12,27 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Ilija Tovilo <ilutov@php.net>                               |
-   +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_PROPERTY_HOOKS_H
-#define ZEND_PROPERTY_HOOKS_H
+#ifndef ZEND_TYPES_DEFS_H
+#define ZEND_TYPES_DEFS_H
 
-#include "zend_portability.h"
-#include "zend_types_defs.h"
+typedef struct _zend_class_entry     zend_class_entry;
+typedef union  _zend_function        zend_function;
+typedef struct _zend_execute_data    zend_execute_data;
 
-BEGIN_EXTERN_C()
+typedef struct _zval_struct     zval;
 
-typedef enum {
-	ZEND_PROPERTY_HOOK_GET = 0,
-	ZEND_PROPERTY_HOOK_SET = 1,
-} zend_property_hook_kind;
+typedef struct _zend_string     zend_string;
+typedef struct _zend_array      zend_array;
+typedef struct _zend_object     zend_object;
 
-ZEND_API zend_object_iterator *zend_hooked_object_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
-ZEND_API zend_array *zend_hooked_object_build_properties(zend_object *zobj);
+typedef struct _zend_object_iterator zend_object_iterator;
 
-END_EXTERN_C()
+typedef struct _zend_op zend_op;
 
-#endif /* ZEND_PROPERTY_HOOKS_H */
+typedef struct _zend_property_info zend_property_info;
+
+typedef struct _zend_file_handle zend_file_handle;
+
+#endif /* ZEND_TYPES_DEFS_H */

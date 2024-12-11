@@ -10877,7 +10877,7 @@ next_block:;
 
 		do {
 			/* _cldemote(p); */
-			asm volatile(".byte 0x0f, 0x1c, 0x06" :: "S" (p));
+			__asm__ volatile(".byte 0x0f, 0x1c, 0x06" :: "S" (p));
 			p += 64;
 		} while (p < start + size);
 	}

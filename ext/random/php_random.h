@@ -98,10 +98,10 @@ typedef struct _php_random_algo_with_state {
 	void *state;
 } php_random_algo_with_state;
 
-typedef struct _php_random_fallback_seed_state {
+struct _php_random_fallback_seed_state {
 	bool initialized;
 	unsigned char seed[20];
-} php_random_fallback_seed_state;
+};
 
 extern PHPAPI const php_random_algo php_random_algo_mt19937;
 extern PHPAPI const php_random_algo php_random_algo_pcgoneseq128xslrr64;

@@ -21,9 +21,6 @@
 
 #include "zend_portability.h"
 
-typedef struct _zend_op zend_op;
-typedef struct _zend_execute_data zend_execute_data;
-
 BEGIN_EXTERN_C()
 
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* opcode);

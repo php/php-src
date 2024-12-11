@@ -115,9 +115,6 @@ typedef enum dom_iterator_type {
 	DOM_HTMLCOLLECTION,
 } dom_iterator_type;
 
-struct php_dom_libxml_ns_mapper;
-typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
-
 static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
 	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
 }
