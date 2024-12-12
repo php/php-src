@@ -2950,7 +2950,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 			(ta->tm_gmtoff < 0) ? '-' : '+',
 			labs(ta->tm_gmtoff / 3600), labs( (ta->tm_gmtoff % 3600) / 60 ));
 #else
-# if defined(__CYGWIN__) || (defined(PHP_WIN32) && defined(_MSC_VER) && _MSC_VER >= 1900)
+# if defined(__CYGWIN__) || (defined(PHP_WIN32) && defined(_MSC_VER))
 		snprintf(tzbuf, sizeof(tzbuf), "%c%02d:%02d", ((ta->tm_isdst ? _timezone - 3600:_timezone)>0)?'-':'+', abs((ta->tm_isdst ? _timezone - 3600 : _timezone) / 3600), abs(((ta->tm_isdst ? _timezone - 3600 : _timezone) % 3600) / 60));
 # else
 		snprintf(tzbuf, sizeof(tzbuf), "%c%02d:%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs(((ta->tm_isdst ? timezone - 3600 : timezone) % 3600) / 60));
