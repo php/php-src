@@ -3628,9 +3628,11 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 	}
 
 	zend_jit_unprotect();
-	zend_jit_setup();
+	zend_jit_setup(reattached);
 	zend_jit_protect();
-	zend_jit_init_handlers();
+	if (!reattached) {
+		zend_jit_init_handlers();
+	}
 
 	zend_jit_trace_startup(reattached);
 

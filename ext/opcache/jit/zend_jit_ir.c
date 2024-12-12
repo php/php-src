@@ -39,6 +39,7 @@
                                (1<<(16+6)) | (1<<(16+7)) | (1<<(16+8)) | (1<<(16+9)) | (1<<(16+10)) | \
                                (1<<(16+11)) | (1<<(16+12)) | (1<<(16+13)) | (1<<(16+14)) | (1<<(16+15)))
 */
+#  define IR_SHADOW_ARGS     32
 # else
 #  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<12) | (1<<13) | (1<<14) | (1<<15)) /* all preserved registers */
 # endif
@@ -2709,7 +2710,11 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 //				jit->ctx.fixed_save_regset &= 0xffff; // TODO: don't save FP registers ???
 //#endif
 			}
+#ifdef _WIN64
+			jit->ctx.fixed_call_stack_size = 16 + IR_SHADOW_ARGS;
+#else
 			jit->ctx.fixed_call_stack_size = 16;
+#endif
 		} else {
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 			jit->ctx.fixed_stack_red_zone = ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE;
@@ -3208,7 +3213,93 @@ static zend_never_inline void zend_jit_set_sp_adj_vm(void)
 }
 #endif
 
-static void zend_jit_setup(void)
+#ifdef _WIN64
+/*
+ * We use a single unwind entry for the whole JIT buffer.
+ * This works, because all the JIT-ed PHP functions have the same "fixed stack frame".
+ */
+static PRUNTIME_FUNCTION zend_jit_uw_func = NULL;
+
+#ifdef ZEND_JIT_RT_UNWINDER
+static PRUNTIME_FUNCTION zend_jit_unwind_callback(DWORD64 pc, PVOID context)
+{
+	return zend_jit_uw_func;
+}
+#endif
+
+static void zend_jit_setup_unwinder(void)
+{
+	/* Hardcoded SEH unwind data for JIT-ed PHP functions with "fixed stack frame" */
+	static const unsigned char uw_data[] = {
+		0x01, // UBYTE: 3 Version , UBYTE: 5 Flags
+		0x10, // UBYTE Size of prolog
+		0x09, // UBYTE Count of unwind codes
+		0x00, // UBYTE: 4 Frame Register, UBYTE: 4 Frame Register offset (scaled)
+		// USHORT * n Unwind codes array
+		0x10, 0x82, // c: subq $0x48, %rsp
+		0x0c, 0xf0, // a: pushq %r15
+		0x0a, 0xe0, // 8: pushq %r14
+		0x08, 0xd0, // 6: pushq %r13
+		0x06, 0xc0, // 4: pushq %r12
+		0x04, 0x70, // 3: pushq %rdi
+		0x03, 0x60, // 2: pushq %rsi
+		0x02, 0x50, // 1: pushq %rbp
+		0x01, 0x30, // 0: pushq %rbx
+		0x00, 0x00,
+	};
+	static const unsigned char uw_data_exitcall[] = {
+		0x01, // UBYTE: 3 Version , UBYTE: 5 Flags
+		0x10, // UBYTE Size of prolog
+		0x0a, // UBYTE Count of unwind codes
+		0x00, // UBYTE: 4 Frame Register, UBYTE: 4 Frame Register offset (scaled)
+		// USHORT * n Unwind codes array
+		0x10, 0x01, 0x2f, 0x00, // c: subq 376, %rsp ; 0x48 + 32+16*8+16*8+8+8
+		0x0c, 0xf0, // a: pushq %r15
+		0x0a, 0xe0, // 8: pushq %r14
+		0x08, 0xd0, // 6: pushq %r13
+		0x06, 0xc0, // 4: pushq %r12
+		0x04, 0x70, // 3: pushq %rdi
+		0x03, 0x60, // 2: pushq %rsi
+		0x02, 0x50, // 1: pushq %rbp
+		0x01, 0x30, // 0: pushq %rbx
+	};
+
+	zend_jit_uw_func = (PRUNTIME_FUNCTION)*dasm_ptr;
+	*dasm_ptr = (char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(sizeof(RUNTIME_FUNCTION) * 4 +
+		sizeof(uw_data) + sizeof(uw_data_exitcall) + sizeof(uw_data), 16);
+
+	zend_jit_uw_func[0].BeginAddress = 0;
+	zend_jit_uw_func[1].BeginAddress = (uintptr_t)zend_jit_stub_handlers[jit_stub_trace_exit] - (uintptr_t)dasm_buf;
+	zend_jit_uw_func[2].BeginAddress = (uintptr_t)zend_jit_stub_handlers[jit_stub_undefined_offset] - (uintptr_t)dasm_buf;
+
+	zend_jit_uw_func[0].EndAddress = zend_jit_uw_func[1].BeginAddress;
+	zend_jit_uw_func[1].EndAddress = zend_jit_uw_func[2].BeginAddress;
+	zend_jit_uw_func[2].EndAddress = (uintptr_t)dasm_end - (uintptr_t)dasm_buf;
+
+	zend_jit_uw_func[0].UnwindData = (uintptr_t)zend_jit_uw_func  - (uintptr_t)dasm_buf + sizeof(RUNTIME_FUNCTION) * 4;
+	zend_jit_uw_func[1].UnwindData = zend_jit_uw_func[0].UnwindData + sizeof(uw_data);
+	zend_jit_uw_func[2].UnwindData = zend_jit_uw_func[1].UnwindData + sizeof(uw_data_exitcall);
+
+	memcpy((char*)dasm_buf + zend_jit_uw_func[0].UnwindData, uw_data, sizeof(uw_data));
+	memcpy((char*)dasm_buf + zend_jit_uw_func[1].UnwindData, uw_data_exitcall, sizeof(uw_data_exitcall));
+	memcpy((char*)dasm_buf + zend_jit_uw_func[2].UnwindData, uw_data, sizeof(uw_data));
+
+#ifdef ZEND_JIT_RT_UNWINDER
+	RtlInstallFunctionTableCallback(
+		(uintptr_t)dasm_buf | 3,
+		(uintptr_t) dasm_buf,
+		(uintptr_t)dasm_end - (uintptr_t)dasm_buf,
+		zend_jit_unwind_callback,
+		NULL,
+		NULL);
+#else
+	RtlAddFunctionTable(zend_jit_uw_func, 3, (uintptr_t)dasm_buf);
+#endif
+}
+#endif
+
+
+static void zend_jit_setup(bool reattached)
 {
 #if defined(IR_TARGET_X86)
 	if (!zend_cpu_supports_sse2()) {
@@ -3413,8 +3504,14 @@ static void zend_jit_setup(void)
 	}
 
 	zend_jit_calc_trace_prologue_size();
-	zend_jit_setup_stubs();
+	if (!reattached) {
+		zend_jit_setup_stubs();
+	}
 	JIT_G(debug) = debug;
+
+#ifdef _WIN64
+	zend_jit_setup_unwinder();
+#endif
 }
 
 static void zend_jit_shutdown_ir(void)
@@ -8978,7 +9075,11 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 			// JIT: alloca(sizeof(void*));
 			this_ref2 = ir_ALLOCA(ir_CONST_ADDR(0x10));
 		} else {
+#ifdef _WIN64
+			this_ref2 = ir_HARD_COPY_A(jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS));
+#else
 			this_ref2 = ir_HARD_COPY_A(ir_RLOAD_A(IR_REG_SP));
+#endif
 		}
 		ir_STORE(this_ref2, this_ref);
 
@@ -8994,10 +9095,17 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 					this_ref2);
 		}
 
-		this_ref2 = ir_LOAD_A(ir_RLOAD_A(IR_REG_SP));
+
 		if (!jit->ctx.fixed_call_stack_size) {
+			this_ref2 = ir_LOAD_A(ir_RLOAD_A(IR_REG_SP));
 			// JIT: revert alloca
 			ir_AFREE(ir_CONST_ADDR(0x10));
+		} else {
+#ifdef _WIN64
+			this_ref2 = ir_LOAD_A(jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS));
+#else
+			this_ref2 = ir_LOAD_A(ir_RLOAD_A(IR_REG_SP));
+#endif
 		}
 
 		ir_GUARD(ref2, jit_STUB_ADDR(jit, jit_stub_exception_handler));
@@ -10257,7 +10365,11 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				// JIT: alloca(sizeof(void*));
 				ptr = ir_ALLOCA(ir_CONST_ADDR(sizeof(zval)));
 			} else {
+#ifdef _WIN64
+				ptr = ir_HARD_COPY_A(jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS));
+#else
 				ptr = ir_HARD_COPY_A(ir_RLOAD_A(IR_REG_SP));
+#endif
 			}
 			res_addr = ZEND_ADDR_REF_ZVAL(ptr);
 		}
@@ -10385,7 +10497,16 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			func_info |= MAY_BE_NULL;
 
 			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-				ir_ref sp = ir_RLOAD_A(IR_REG_SP);
+				ir_ref sp;
+				if (!jit->ctx.fixed_call_stack_size) {
+					sp = ir_RLOAD_A(IR_REG_SP);
+				} else {
+#ifdef _WIN64
+					sp = jit_ADD_OFFSET(jit, ir_RLOAD_A(IR_REG_SP), IR_SHADOW_ARGS);
+#else
+					sp = ir_RLOAD_A(IR_REG_SP);
+#endif
+				}
 				res_addr = ZEND_ADDR_REF_ZVAL(sp);
 				jit_ZVAL_PTR_DTOR(jit, res_addr, func_info, 1, opline);
 			}
