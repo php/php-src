@@ -3,6 +3,7 @@
 #ifndef FPM_H
 #define FPM_H 1
 
+#include <zend.h>
 #include <unistd.h>
 
 #ifdef HAVE_SYSEXITS_H

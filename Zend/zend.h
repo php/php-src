@@ -24,6 +24,32 @@
 
 #define ZEND_ENGINE_3
 
+#if !defined(__CYGWIN__) && defined(_WIN32)
+# define TSRM_WIN32
+# include <Zend/zend_config.w32.h>
+# define _CRTDBG_MAP_ALLOC
+# include <malloc.h>
+# include <stdlib.h>
+# include <crtdbg.h>
+# include <string.h>
+# ifndef ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+#  define WIN32_LEAN_AND_MEAN
+# endif
+# include <winsock2.h>
+# include <windows.h>
+# include <float.h>
+#else
+# include <main/php_config.h>
+# include <stdlib.h>
+# ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+# endif
+# ifdef HAVE_SYS_SELECT_H
+#  include <sys/select.h>
+# endif
+# include <string.h>
+#endif
+
 #include "zend_types.h"
 #include "zend_map_ptr.h"
 #include "zend_errors.h"

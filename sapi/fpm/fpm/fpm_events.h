@@ -3,6 +3,8 @@
 #ifndef FPM_EVENTS_H
 #define FPM_EVENTS_H 1
 
+#include <zend.h>
+
 #define FPM_EV_TIMEOUT  (1 << 0)
 #define FPM_EV_READ     (1 << 1)
 #define FPM_EV_PERSIST  (1 << 2)
