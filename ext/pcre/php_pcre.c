@@ -506,10 +506,21 @@ static int pcre_clean_cache(zval *data, void *arg)
 /* }}} */
 
 static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats) {
+	bool destroy = EG(flags) & EG_FLAGS_IN_SHUTDOWN;
+
 	uint32_t i;
 	for (i = 0; i < num_subpats; i++) {
 		if (subpat_names[i]) {
-			zend_string_release_ex(subpat_names[i], true);
+			if (destroy) {
+				/* Because the subpattern names are persistent, and the fact that the
+				 * symbol table destruction is skipped when using fast_shutdown,
+				 * this means the refcounts will not be updated for the destruction of
+				 * the arrays that hold the subpattern name keys. */
+				ZEND_ASSERT(!ZSTR_IS_INTERNED(subpat_names[i]));
+				pefree(subpat_names[i], true);
+			} else {
+				zend_string_release_ex(subpat_names[i], true);
+			}
 		}
 	}
 	pefree(subpat_names, true);
@@ -548,22 +559,6 @@ static zend_string **make_subpats_table(uint32_t name_cnt, pcre_cache_entry *pce
 	return subpat_names;
 }
 /* }}} */
-
-/* Because the subpattern names are persistent, and the fact that the
- * symbol table destruction is skipped when using fast_shutdown,
- * this means the refcounts will not be updated for the destruction of
- * the arrays that hold the subpattern name keys.
- * To solve this, detect this situation and duplicate the strings. */
-static zend_always_inline bool has_symbol_table_hazard(void)
-{
-	zend_execute_data *ex = EG(current_execute_data);
-	if (UNEXPECTED(!ex || !ex->prev_execute_data)) {
-		return false;
-	}
-	/* Note: we may also narrow this to only check if the symbol table equals
-	 * &EG(symbol_table), but this is a cheaper check. */
-	return ZEND_CALL_INFO(ex->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE;
-}
 
 /* {{{ static calculate_unit_length */
 /* Calculates the byte length of the next character. Assumes valid UTF-8 for PCRE2_UTF. */
@@ -989,24 +984,12 @@ static inline void add_named(
 		HashTable *const subpats, zend_string *name, zval *val, bool unmatched) {
 	ZEND_ASSERT(GC_FLAGS(name) & IS_STR_PERSISTENT);
 
-	bool symbol_table_hazard = has_symbol_table_hazard();
-
 	/* If the DUPNAMES option is used, multiple subpatterns might have the same name.
 	 * In this case we want to preserve the one that actually has a value. */
 	if (!unmatched) {
-		if (EXPECTED(!symbol_table_hazard)) {
-			zend_hash_update(subpats, name, val);
-		} else {
-			zend_hash_str_update(subpats, ZSTR_VAL(name), ZSTR_LEN(name), val);
-		}
+		zend_hash_update(subpats, name, val);
 	} else {
-		zval *zv;
-		if (EXPECTED(!symbol_table_hazard)) {
-			zv = zend_hash_add(subpats, name, val);
-		} else {
-			zv = zend_hash_str_add(subpats, ZSTR_VAL(name), ZSTR_LEN(name), val);
-		}
-		if (!zv) {
+		if (!zend_hash_add(subpats, name, val)) {
 			return;
 		}
 	}
@@ -1091,16 +1074,10 @@ static void populate_subpat_array(
 				zend_hash_next_index_insert_new(subpats_ht, &val);
 			}
 			if (unmatched_as_null) {
-				bool symbol_table_hazard = has_symbol_table_hazard();
-
 				for (i = count; i < num_subpats; i++) {
 					ZVAL_NULL(&val);
 					if (subpat_names[i]) {
-						if (EXPECTED(!symbol_table_hazard)) {
-							zend_hash_add(subpats_ht, subpat_names[i], &val);
-						} else {
-							zend_hash_str_add(subpats_ht, ZSTR_VAL(subpat_names[i]), ZSTR_LEN(subpat_names[i]), &val);
-						}
+						zend_hash_add(subpats_ht, subpat_names[i], &val);
 					}
 					zend_hash_next_index_insert_new(subpats_ht, &val);
 				}
@@ -1465,17 +1442,11 @@ error:
 	/* Add the match sets to the output array and clean up */
 	if (match_sets) {
 		if (subpat_names) {
-			bool symbol_table_hazard = has_symbol_table_hazard();
-
 			for (i = 0; i < num_subpats; i++) {
 				zval wrapper;
 				ZVAL_ARR(&wrapper, match_sets[i]);
 				if (subpat_names[i]) {
-					if (EXPECTED(!symbol_table_hazard)) {
-						zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &wrapper);
-					} else {
-						zend_hash_str_update(Z_ARRVAL_P(subpats), ZSTR_VAL(subpat_names[i]), ZSTR_LEN(subpat_names[i]), &wrapper);
-					}
+					zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &wrapper);
 					GC_ADDREF(match_sets[i]);
 				}
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &wrapper);
