@@ -1811,6 +1811,7 @@ PHP_FUNCTION(socket_set_option)
 	HashTable		 		*opt_ht;
 	zval 					*l_onoff, *l_linger;
 	zval		 			*sec, *usec;
+	bool                                    failed;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ollz", &arg1, socket_ce, &level, &optname, &arg4) == FAILURE) {
 		RETURN_THROWS();
@@ -1883,11 +1884,19 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			convert_to_long(l_onoff);
-			convert_to_long(l_linger);
+			zend_long zl_onoff = zval_try_get_long(l_onoff, &failed);
+			if (failed) {
+				zend_argument_type_error(4, "\"%s\" must be an int, %s given", l_onoff_key, zend_zval_value_name(l_onoff));
+				RETURN_THROWS();
+			}
+			zend_long zl_linger = zval_try_get_long(l_linger, &failed);
+			if (failed) {
+				zend_argument_type_error(4, "\"%s\" must be an int, %s given", l_linger_key, zend_zval_value_name(l_linger));
+				RETURN_THROWS();
+			}
 
-			lv.l_onoff = (unsigned short)Z_LVAL_P(l_onoff);
-			lv.l_linger = (unsigned short)Z_LVAL_P(l_linger);
+			lv.l_onoff = (unsigned short)zl_onoff;
+			lv.l_linger = (unsigned short)zl_linger;
 
 			optlen = sizeof(lv);
 			opt_ptr = &lv;
@@ -1898,6 +1907,7 @@ PHP_FUNCTION(socket_set_option)
 		case SO_SNDTIMEO: {
 			const char sec_key[] = "sec";
 			const char usec_key[] = "usec";
+			bool failed;
 
 			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
@@ -1911,15 +1921,23 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			convert_to_long(sec);
-			convert_to_long(usec);
+			zend_long zsec = zval_try_get_long(sec, &failed);
+			if (failed) {
+				zend_argument_type_error(4, "\"%s\" must be an int, %s given", sec_key, zend_zval_value_name(sec));
+				RETURN_THROWS();
+			}
+			zend_long zusec = zval_try_get_long(usec, &failed);
+			if (failed) {
+				zend_argument_type_error(4, "\"%s\" must be an int, %s given", usec_key, zend_zval_value_name(usec));
+				RETURN_THROWS();
+			}
 #ifndef PHP_WIN32
-			tv.tv_sec = Z_LVAL_P(sec);
-			tv.tv_usec = Z_LVAL_P(usec);
+			tv.tv_sec = zsec;
+			tv.tv_usec = zusec;
 			optlen = sizeof(tv);
 			opt_ptr = &tv;
 #else
-			timeout = Z_LVAL_P(sec) * 1000 + Z_LVAL_P(usec) / 1000;
+			timeout = zsec * 1000 + zusec / 1000;
 			optlen = sizeof(int);
 			opt_ptr = &timeout;
 #endif
@@ -1971,15 +1989,19 @@ PHP_FUNCTION(socket_set_option)
 
 #ifdef SO_ATTACH_REUSEPORT_CBPF
 		case SO_ATTACH_REUSEPORT_CBPF: {
-			convert_to_long(arg4);
+			zend_long fval = zval_try_get_long(arg4, &failed);
+			if (failed) {
+				zend_argument_type_error(4, "must be an int, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
 
-			if (!Z_LVAL_P(arg4)) {
+			if (!fval) {
 				ov = 1;
 				optlen = sizeof(ov);
 				opt_ptr = &ov;
 				optname = SO_DETACH_BPF;
 			} else {
-				uint32_t k = (uint32_t)Z_LVAL_P(arg4);
+				uint32_t k = (uint32_t)fval;
 				static struct sock_filter cbpf[8] = {0};
 				static struct sock_fprog bpfprog;
 
@@ -2006,8 +2028,11 @@ PHP_FUNCTION(socket_set_option)
 
 		default:
 default_case:
-			convert_to_long(arg4);
-			ov = Z_LVAL_P(arg4);
+			ov = zval_try_get_long(arg4, &failed);
+			if (failed) {
+				zend_argument_type_error(4, "must be an int, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
 
 			optlen = sizeof(ov);
 			opt_ptr = &ov;
