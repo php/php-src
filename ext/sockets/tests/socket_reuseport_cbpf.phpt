@@ -18,6 +18,11 @@ if (!$socket) {
 }
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_REUSEADDR, true));
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_REUSEPORT, true));
+try {
+	socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, array());
+} catch (\TypeError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, SKF_AD_CPU));
 var_dump(socket_bind($socket, '0.0.0.0'));
 socket_listen($socket);
@@ -26,5 +31,6 @@ socket_close($socket);
 --EXPECT--
 bool(true)
 bool(true)
+socket_set_option(): Argument #4 ($value) must be an int, array given
 bool(true)
 bool(true)
