@@ -3070,18 +3070,6 @@ SLOW TEST SUMMARY
         $failed_test_summary .= "=====================================================================\n";
     }
 
-    if (count($PHP_FAILED_TESTS['XFAILED'])) {
-        $failed_test_summary .= '
-=====================================================================
-EXPECTED FAILED TEST SUMMARY
----------------------------------------------------------------------
-';
-        foreach ($PHP_FAILED_TESTS['XFAILED'] as $failed_test_data) {
-            $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
-        }
-        $failed_test_summary .= "=====================================================================\n";
-    }
-
     if (count($PHP_FAILED_TESTS['BORKED'])) {
         $failed_test_summary .= '
 =====================================================================
@@ -3126,19 +3114,6 @@ LEAKED TEST SUMMARY
 ---------------------------------------------------------------------
 ';
         foreach ($PHP_FAILED_TESTS['LEAKED'] as $failed_test_data) {
-            $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
-        }
-
-        $failed_test_summary .= "=====================================================================\n";
-    }
-
-    if (count($PHP_FAILED_TESTS['XLEAKED'])) {
-        $failed_test_summary .= '
-=====================================================================
-EXPECTED LEAK TEST SUMMARY
----------------------------------------------------------------------
-';
-        foreach ($PHP_FAILED_TESTS['XLEAKED'] as $failed_test_data) {
             $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
         }
 
