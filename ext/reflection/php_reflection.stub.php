@@ -436,6 +436,8 @@ class ReflectionClass implements Reflector
     public function getShortName(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function mayBeCyclic(): bool {}
 }
 
 class ReflectionObject extends ReflectionClass

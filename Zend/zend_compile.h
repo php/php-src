@@ -341,10 +341,11 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Class Flags 2 (ce_flags2) (unused: 0-31)               |     |     |     */
+/* Class Flags 2 (ce_flags2) (unused: 1-31)               |     |     |     */
 /* =========================                              |     |     |     */
 /*                                                        |     |     |     */
-/* #define ZEND_ACC2_EXAMPLE             (1 << 0)      X  |     |     |     */
+/* Object may be the root of a cycle                      |     |     |     */
+#define ZEND_ACC2_MAY_BE_CYCLIC          (1 << 0)  /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */

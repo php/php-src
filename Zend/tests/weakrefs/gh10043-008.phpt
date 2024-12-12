@@ -5,6 +5,9 @@ Self-referencing map entry GC - 008
 
 class Canary extends stdClass
 {
+    /* Force object to be added to GC, even though it is acyclic. */
+    public $dummy;
+
     public function __construct(public string $name)
     {
     }

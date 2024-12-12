@@ -11,6 +11,9 @@ class GlobalData
 
 class Value
 {
+    /* Force object to be added to GC, even though it is acyclic. */
+    public $dummy;
+
     public function __destruct()
     {
         new Bar();
@@ -19,6 +22,9 @@ class Value
 
 class Bar
 {
+    /* Force object to be added to GC, even though it is acyclic. */
+    public $dummy;
+
     public function __construct()
     {
         GlobalData::$bar = $this;

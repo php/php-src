@@ -4400,6 +4400,16 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionClass, mayBeCyclic)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	RETURN_BOOL(ce->ce_flags2 & ZEND_ACC2_MAY_BE_CYCLIC);
+}
+
 /* {{{ Returns the class' constructor if there is one, NULL otherwise */
 ZEND_METHOD(ReflectionClass, getConstructor)
 {
