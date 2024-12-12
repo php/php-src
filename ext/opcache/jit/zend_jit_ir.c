@@ -3299,7 +3299,7 @@ static void zend_jit_setup_unwinder(void)
 #endif
 
 
-static void zend_jit_setup(void)
+static void zend_jit_setup(bool reattached)
 {
 #if defined(IR_TARGET_X86)
 	if (!zend_cpu_supports_sse2()) {
@@ -3504,7 +3504,9 @@ static void zend_jit_setup(void)
 	}
 
 	zend_jit_calc_trace_prologue_size();
-	zend_jit_setup_stubs();
+	if (!reattached) {
+		zend_jit_setup_stubs();
+	}
 	JIT_G(debug) = debug;
 
 #ifdef _WIN64
