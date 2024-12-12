@@ -1757,14 +1757,7 @@ static ZEND_COLD void zend_ast_export_hook_list(smart_str *str, zend_ast_list *h
 		if (hook->flags & ZEND_ACC_FINAL) {
 			smart_str_appends(str, "final ");
 		}
-		switch (i) {
-			case ZEND_PROPERTY_HOOK_GET:
-				smart_str_appends(str, "get");
-				break;
-			case ZEND_PROPERTY_HOOK_SET:
-				smart_str_appends(str, "set");
-				break;
-		}
+		smart_str_append(str, hook->name);
 		zend_ast *body = hook->child[2];
 		if (body == NULL) {
 			smart_str_appendc(str, ';');
