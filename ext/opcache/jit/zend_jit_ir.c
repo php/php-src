@@ -3229,7 +3229,7 @@ static PRUNTIME_FUNCTION zend_jit_unwind_callback(DWORD64 pc, PVOID context)
 
 static void zend_jit_setup_unwinder(void)
 {
-	/* Hardcoded SEH unwinf data for JIT-ed PHP functions with "fixed stack frame" */
+	/* Hardcoded SEH unwind data for JIT-ed PHP functions with "fixed stack frame" */
 	static const unsigned char uw_data[] = {
 		0x01, // UBYTE: 3 Version , UBYTE: 5 Flags
 		0x10, // UBYTE Size of prolog
