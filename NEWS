@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17106 (ZEND_MATCH_ERROR misoptimization). (ilutov)
   . Fixed bug GH-17162 (zend_array_try_init() with dtor can cause engine UAF).
     (nielsdos)
+  . Fixed bug GH-17101 (AST->string does not reproduce constructor property
+    promotion correctly). (nielsdos)
 
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
