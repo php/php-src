@@ -274,6 +274,7 @@ function main(): void
         'error_reporting=' . E_ALL,
         'display_errors=1',
         'display_startup_errors=1',
+        'display_error_function_args=0',
         'log_errors=0',
         'html_errors=0',
         'track_errors=0',
