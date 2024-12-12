@@ -598,7 +598,7 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 /* }}} */
 
 /* {{{ Gets the function arguments printed as a string from a backtrace frame. */
-ZEND_API zend_string *zend_trace_function_args_to_string(HashTable *frame) {
+ZEND_API zend_string *zend_trace_function_args_to_string(const HashTable *frame) {
 	zval *tmp;
 	smart_str str = {0};
 	/* init because ASan will complain */
