@@ -2,6 +2,16 @@
 
 #include <php_config.h>
 
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+
 /* Solaris does not have it */
 #ifndef INADDR_NONE
 # define INADDR_NONE (-1)
