@@ -48,6 +48,9 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug GH-16276 (socket_strerror overflow handling with INT_MIN).
     (David Carlier / cmb)
+  . Fixed overflow on SO_LINGER values setting, strengthening values check
+    on SO_SNDTIMEO/SO_RCVTIMEO for socket_set_option().
+    (David Carlier)
 
 - Streams:
   . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
