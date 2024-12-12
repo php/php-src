@@ -3233,7 +3233,7 @@ static void zend_jit_setup_unwinder(void)
 	static const unsigned char uw_data[] = {
 		0x01, // UBYTE: 3 Version , UBYTE: 5 Flags
 		0x10, // UBYTE Size of prolog
-		0x0a, // UBYTE Count of unwind codes
+		0x09, // UBYTE Count of unwind codes
 		0x00, // UBYTE: 4 Frame Register, UBYTE: 4 Frame Register offset (scaled)
 		// USHORT * n Unwind codes array
 		0x10, 0x82, // c: subq $0x48, %rsp
