@@ -2567,7 +2567,14 @@ simple_list:
 			}
 			smart_str_appendc(str, '$');
 			zend_ast_export_name(str, ast->child[1], 0, indent);
-			APPEND_DEFAULT_VALUE(2);
+			if (ast->child[2]) {
+				smart_str_appends(str, " = ");
+				zend_ast_export_ex(str, ast->child[2], 0, indent);
+			}
+			if (ast->child[5]) {
+				zend_ast_export_hook_list(str, zend_ast_get_list(ast->child[5]), indent);
+			}
+			break;
 		case ZEND_AST_ENUM_CASE:
 			if (ast->child[3]) {
 				zend_ast_export_attributes(str, ast->child[3], indent, 1);
