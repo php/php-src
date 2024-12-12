@@ -613,6 +613,15 @@ ignore_repeated_source = Off
 ; Production Value: On
 ;fatal_error_backtraces = On
 
+; This directive controls whether PHP will print the actual arguments of a
+; function upon an error. If disabled (or there was an error fetching the
+; arguments), the function providing the error may optionally provide some
+; additional information after the problem function's name.
+; Default Value: Off
+; Development Value: On
+; Production Value: On
+display_error_function_args = On
+
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
