@@ -22,22 +22,6 @@
 
 #include <../main/config.w32.h>
 
-#define _CRTDBG_MAP_ALLOC
-
-#include <malloc.h>
-#include <stdlib.h>
-#include <crtdbg.h>
-
-#include <string.h>
-
-#ifndef ZEND_INCLUDE_FULL_WINDOWS_HEADERS
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#include <windows.h>
-
-#include <float.h>
-
 #if _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
