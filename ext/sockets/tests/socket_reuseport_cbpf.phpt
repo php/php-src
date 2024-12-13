@@ -31,6 +31,6 @@ socket_close($socket);
 --EXPECT--
 bool(true)
 bool(true)
-socket_set_option(): Argument #4 ($value) must be an int, array given
+socket_set_option(): Argument #4 ($value) must be of type int, array given
 bool(true)
 bool(true)

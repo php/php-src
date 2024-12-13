@@ -1811,7 +1811,7 @@ PHP_FUNCTION(socket_set_option)
 	HashTable		 		*opt_ht;
 	zval 					*l_onoff, *l_linger;
 	zval		 			*sec, *usec;
-	bool                                    failed;
+	bool failed;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ollz", &arg1, socket_ce, &level, &optname, &arg4) == FAILURE) {
 		RETURN_THROWS();
@@ -1872,6 +1872,11 @@ PHP_FUNCTION(socket_set_option)
 			const char l_onoff_key[] = "l_onoff";
 			const char l_linger_key[] = "l_linger";
 
+			if (Z_TYPE_P(arg4) != IS_ARRAY) {
+				zend_argument_type_error(4, "must be of type array, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
+	
 			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
@@ -1886,12 +1891,22 @@ PHP_FUNCTION(socket_set_option)
 
 			zend_long zl_onoff = zval_try_get_long(l_onoff, &failed);
 			if (failed) {
-				zend_argument_type_error(4, "\"%s\" must be an int, %s given", l_onoff_key, zend_zval_value_name(l_onoff));
+				zend_argument_type_error(4, "\"%s\" must be of type int, %s given", l_onoff_key, zend_zval_value_name(l_onoff));
 				RETURN_THROWS();
 			}
 			zend_long zl_linger = zval_try_get_long(l_linger, &failed);
 			if (failed) {
-				zend_argument_type_error(4, "\"%s\" must be an int, %s given", l_linger_key, zend_zval_value_name(l_linger));
+				zend_argument_type_error(4, "\"%s\" must be of type int, %s given", l_linger_key, zend_zval_value_name(l_linger));
+				RETURN_THROWS();
+			}
+
+			if (zl_onoff < 0 || zl_onoff > USHRT_MAX) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", l_onoff_key, USHRT_MAX);
+				RETURN_THROWS();
+			}
+
+			if (zl_linger < 0 || zl_linger > USHRT_MAX) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %d", l_linger, USHRT_MAX);
 				RETURN_THROWS();
 			}
 
@@ -1907,7 +1922,11 @@ PHP_FUNCTION(socket_set_option)
 		case SO_SNDTIMEO: {
 			const char sec_key[] = "sec";
 			const char usec_key[] = "usec";
-			bool failed;
+
+			if (Z_TYPE_P(arg4) != IS_ARRAY) {
+				zend_argument_type_error(4, "must be of type array, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
 
 			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
@@ -1923,12 +1942,12 @@ PHP_FUNCTION(socket_set_option)
 
 			zend_long zsec = zval_try_get_long(sec, &failed);
 			if (failed) {
-				zend_argument_type_error(4, "\"%s\" must be an int, %s given", sec_key, zend_zval_value_name(sec));
+				zend_argument_type_error(4, "\"%s\" must be of type int, %s given", sec_key, zend_zval_value_name(sec));
 				RETURN_THROWS();
 			}
 			zend_long zusec = zval_try_get_long(usec, &failed);
 			if (failed) {
-				zend_argument_type_error(4, "\"%s\" must be an int, %s given", usec_key, zend_zval_value_name(usec));
+				zend_argument_type_error(4, "\"%s\" must be of type int, %s given", usec_key, zend_zval_value_name(usec));
 				RETURN_THROWS();
 			}
 #ifndef PHP_WIN32
@@ -1991,7 +2010,7 @@ PHP_FUNCTION(socket_set_option)
 		case SO_ATTACH_REUSEPORT_CBPF: {
 			zend_long fval = zval_try_get_long(arg4, &failed);
 			if (failed) {
-				zend_argument_type_error(4, "must be an int, %s given", zend_zval_value_name(arg4));
+				zend_argument_type_error(4, "must be of type int, %s given", zend_zval_value_name(arg4));
 				RETURN_THROWS();
 			}
 
