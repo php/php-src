@@ -961,7 +961,15 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			if (UNEXPECTED(!jit_extension)
 			 || UNEXPECTED(!(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))) {
-				stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
+#ifdef HAVE_GCC_GLOBAL_REGS
+				if (execute_data->prev_execute_data != prev_execute_data) {
+#else
+				if (rc < 0) {
+#endif
+					stop = ZEND_JIT_TRACE_STOP_RETURN;
+				} else {
+					stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
+				}
 				break;
 			}
 			offset = jit_extension->offset;

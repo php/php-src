@@ -1092,13 +1092,31 @@ void ir_set_op(ir_ctx *ctx, ir_ref ref, int32_t n, ir_ref val)
 	ir_insn_set_op(insn, n, val);
 }
 
+ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n)
+{
+	ir_insn *insn = &ctx->ir_base[ref];
+
+#ifdef IR_DEBUG
+	if (n > 3) {
+		int32_t count;
+
+		IR_ASSERT(IR_OP_HAS_VAR_INPUTS(ir_op_flags[insn->op]));
+		count = insn->inputs_count;
+		IR_ASSERT(n <= count);
+	}
+#endif
+	return ir_insn_op(insn, n);
+}
+
 ir_ref ir_param(ir_ctx *ctx, ir_type type, ir_ref region, const char *name, int pos)
 {
+	IR_ASSERT(ctx->ir_base[region].op == IR_START);
 	return ir_emit(ctx, IR_OPT(IR_PARAM, type), region, ir_str(ctx, name), pos);
 }
 
 ir_ref ir_var(ir_ctx *ctx, ir_type type, ir_ref region, const char *name)
 {
+	IR_ASSERT(IR_IS_BB_START(ctx->ir_base[region].op));
 	return ir_emit(ctx, IR_OPT(IR_VAR, type), region, ir_str(ctx, name), IR_UNUSED);
 }
 
@@ -1119,6 +1137,12 @@ ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def)
 		ir_hashtab_add(ctx->binding, def, var);
 	}
 	return def;
+}
+
+ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
+{
+	ir_ref var = ir_hashtab_find(ctx->binding, ref);
+	return (var != (ir_ref)IR_INVALID_VAL) ? var : 0;
 }
 
 /* Batch construction of def->use edges */
@@ -1158,7 +1182,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 		use_list->count = 0;
 	}
 
-	edges = ir_mem_malloc(edges_count * sizeof(ir_ref));
+	edges = ir_mem_malloc(IR_ALIGNED_SIZE(edges_count * sizeof(ir_ref), 4096));
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base + i; i < ctx->insns_count;) {
 		n = insn->inputs_count;
 		for (j = n, p = insn->ops + 1; j > 0; j--, p++) {
@@ -1227,7 +1251,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 	}
 
 	ctx->use_edges_count = edges_count;
-	edges = ir_mem_malloc(edges_count * sizeof(ir_ref));
+	edges = ir_mem_malloc(IR_ALIGNED_SIZE(edges_count * sizeof(ir_ref), 4096));
 	for (use_list = lists + ctx->insns_count - 1; use_list != lists; use_list--) {
 		n = use_list->refs;
 		if (n) {
@@ -1338,8 +1362,13 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 		use_list->count++;
 		return 0;
 	} else {
-		/* Reallocate the whole edges buffer (this is inefficient) */
-		ctx->use_edges = ir_mem_realloc(ctx->use_edges, (ctx->use_edges_count + use_list->count + 1) * sizeof(ir_ref));
+		size_t old_size = IR_ALIGNED_SIZE(ctx->use_edges_count * sizeof(ir_ref), 4096);
+		size_t new_size = IR_ALIGNED_SIZE((ctx->use_edges_count + use_list->count + 1) * sizeof(ir_ref), 4096);
+
+		if (old_size < new_size) {
+			/* Reallocate the whole edges buffer (this is inefficient) */
+			ctx->use_edges = ir_mem_realloc(ctx->use_edges, new_size);
+		}
 		memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
 		use_list->refs = ctx->use_edges_count;
 		ctx->use_edges[use_list->refs + use_list->count] = ref;
@@ -1947,7 +1976,7 @@ ir_ref _ir_VAR(ir_ctx *ctx, ir_type type, const char* name)
 	ir_ref ref = ctx->control;
 
 	while (1) {
-		IR_ASSERT(ctx->control);
+		IR_ASSERT(ref);
 		if (IR_IS_BB_START(ctx->ir_base[ref].op)) {
 			break;
 		}
@@ -2820,6 +2849,10 @@ void _ir_VSTORE(ir_ctx *ctx, ir_ref var, ir_ref val)
 			}
 		} else if (insn->op == IR_VLOAD) {
 			if (insn->op2 == var) {
+				if (ref == val) {
+					/* dead STORE */
+					return;
+				}
 				break;
 			}
 		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
@@ -2910,6 +2943,10 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 			}
 		} else if (insn->op == IR_LOAD) {
 			if (insn->op2 == addr) {
+				if (ref == val) {
+					/* dead STORE */
+					return;
+				}
 				break;
 			}
 			type2 = insn->type;

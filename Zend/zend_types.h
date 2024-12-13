@@ -1273,14 +1273,16 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_DELREF(z)					Z_DELREF_P(&(z))
 
 #define Z_TRY_ADDREF_P(pz) do {		\
-	if (Z_REFCOUNTED_P((pz))) {		\
-		Z_ADDREF_P((pz));			\
+	zval *_pz = (pz);				\
+	if (Z_REFCOUNTED_P(_pz)) {		\
+		Z_ADDREF_P(_pz);			\
 	}								\
 } while (0)
 
 #define Z_TRY_DELREF_P(pz) do {		\
-	if (Z_REFCOUNTED_P((pz))) {		\
-		Z_DELREF_P((pz));			\
+	zval *_pz = (pz);				\
+	if (Z_REFCOUNTED_P(_pz)) {		\
+		Z_DELREF_P(_pz);			\
 	}								\
 } while (0)
 

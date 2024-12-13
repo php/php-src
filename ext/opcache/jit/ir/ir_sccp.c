@@ -255,7 +255,7 @@ static bool ir_is_dead_load_ex(ir_ctx *ctx, ir_ref ref, uint32_t flags, ir_insn 
 {
 	if ((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)) {
 		return ctx->use_lists[ref].count == 1;
-	} else if (insn->op == IR_ALLOCA) {
+	} else if (insn->op == IR_ALLOCA || insn->op == IR_BLOCK_BEGIN) {
 		return ctx->use_lists[ref].count == 1;
 	}
 	return 0;
@@ -644,8 +644,13 @@ static void ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_insn *_values
 									next_insn = use_insn;
 								} else if (use_insn->op != IR_NOP) {
 									IR_ASSERT(use_insn->op1 == ref);
-									use_insn->op1 = prev;
-									ir_use_list_add(ctx, prev, use);
+									IR_ASSERT(use_insn->op == IR_VAR);
+									ir_ref region = prev;
+									while (!IR_IS_BB_START(ctx->ir_base[region].op)) {
+										region = ctx->ir_base[region].op1;
+									}
+									use_insn->op1 = region;
+									ir_use_list_add(ctx, region, use);
 									p = &ctx->use_edges[use_list->refs + k];
 								}
 							}
@@ -1240,6 +1245,22 @@ static void ir_merge_blocks(ir_ctx *ctx, ir_ref end, ir_ref begin, ir_bitqueue *
 	}
 }
 
+static void ir_remove_unused_vars(ir_ctx *ctx, ir_ref start, ir_ref end)
+{
+	ir_use_list *use_list = &ctx->use_lists[start];
+	ir_ref *p, use, n = use_list->count;
+
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+		use = *p;
+		if (use != end) {
+			ir_insn *use_insn = &ctx->ir_base[use];
+			IR_ASSERT(use_insn->op == IR_VAR);
+			IR_ASSERT(ctx->use_lists[use].count == 0);
+			MAKE_NOP(use_insn);
+		}
+	}
+}
+
 static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue *worklist)
 {
 	if (insn->inputs_count == 2) {
@@ -1289,8 +1310,12 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn, 
 		ir_ref next_ref = ctx->use_edges[ctx->use_lists[ref].refs];
 		ir_insn *next = &ctx->ir_base[next_ref];
 
-		IR_ASSERT(ctx->use_lists[start1_ref].count == 1);
-		IR_ASSERT(ctx->use_lists[start2_ref].count == 1);
+		if (ctx->use_lists[start1_ref].count != 1) {
+			ir_remove_unused_vars(ctx, start1_ref, end1_ref);
+		}
+		if (ctx->use_lists[start2_ref].count != 1) {
+			ir_remove_unused_vars(ctx, start2_ref, end2_ref);
+		}
 
 		next->op1 = root->op1;
 		ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
@@ -1331,7 +1356,9 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn, 
 			if (start->op != IR_CASE_VAL && start->op != IR_CASE_DEFAULT) {
 				return 0;
 			}
-			IR_ASSERT(ctx->use_lists[start_ref].count == 1);
+			if (ctx->use_lists[start_ref].count != 1) {
+				ir_remove_unused_vars(ctx, start_ref, end_ref);
+			}
 			if (!root_ref) {
 				root_ref = start->op1;
 				if (ctx->use_lists[root_ref].count != count) {
@@ -1454,8 +1481,12 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					}
 					next = &ctx->ir_base[next_ref];
 
-					IR_ASSERT(ctx->use_lists[start1_ref].count == 1);
-					IR_ASSERT(ctx->use_lists[start2_ref].count == 1);
+					if (ctx->use_lists[start1_ref].count != 1) {
+						ir_remove_unused_vars(ctx, start1_ref, end1_ref);
+					}
+					if (ctx->use_lists[start2_ref].count != 1) {
+						ir_remove_unused_vars(ctx, start2_ref, end2_ref);
+					}
 
 					insn->op = (
 						(is_less ? cond->op1 : cond->op2)
@@ -1540,8 +1571,12 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					}
 					next = &ctx->ir_base[next_ref];
 
-					IR_ASSERT(ctx->use_lists[start1_ref].count == 1);
-					IR_ASSERT(ctx->use_lists[start2_ref].count == 1);
+					if (ctx->use_lists[start1_ref].count != 1) {
+						ir_remove_unused_vars(ctx, start1_ref, end1_ref);
+					}
+					if (ctx->use_lists[start2_ref].count != 1) {
+						ir_remove_unused_vars(ctx, start2_ref, end2_ref);
+					}
 
 					insn->op = IR_ABS;
 					insn->inputs_count = 1;
@@ -1605,8 +1640,12 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					}
 					next = &ctx->ir_base[next_ref];
 
-					IR_ASSERT(ctx->use_lists[start1_ref].count == 1);
-					IR_ASSERT(ctx->use_lists[start2_ref].count == 1);
+					if (ctx->use_lists[start1_ref].count != 1) {
+						ir_remove_unused_vars(ctx, start1_ref, end1_ref);
+					}
+					if (ctx->use_lists[start2_ref].count != 1) {
+						ir_remove_unused_vars(ctx, start2_ref, end2_ref);
+					}
 
 					insn->op = IR_COND;
 					insn->inputs_count = 3;
@@ -2126,9 +2165,13 @@ static void ir_optimize_merge(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_
 
 			ir_ref next_ref = ctx->use_edges[use_list->refs + 1];
 			ir_insn *next = &ctx->ir_base[next_ref];
-			IR_ASSERT(next->op != IR_PHI);
 
-			if (phi->op == IR_PHI) {
+			if (next->op == IR_PHI) {
+				SWAP_REFS(phi_ref, next_ref);
+				SWAP_INSNS(phi, next);
+			}
+
+			if (phi->op == IR_PHI && next->op != IR_PHI) {
 				if (next->op == IR_IF && next->op1 == merge_ref && ctx->use_lists[phi_ref].count == 1) {
 					if (next->op2 == phi_ref) {
 						if (ir_try_split_if(ctx, next_ref, next, worklist)) {
@@ -2213,7 +2256,7 @@ int ir_sccp(ir_ctx *ctx)
 				if (!may_benefit) {
 					IR_MAKE_BOTTOM(i);
 					if (insn->op == IR_FP2FP || insn->op == IR_FP2INT || insn->op == IR_TRUNC
-					 || insn->op == IR_ZEXT || insn->op == IR_SEXT) {
+					 || insn->op == IR_ZEXT || insn->op == IR_SEXT || insn->op == IR_EQ || insn->op == IR_NE) {
 						ir_bitqueue_add(&worklist2, i);
 					}
 				} else if (!ir_sccp_fold(ctx, _values, i, insn->opt, insn->op1, insn->op2, insn->op3)) {
@@ -2222,7 +2265,7 @@ int ir_sccp(ir_ctx *ctx)
 				} else if (_values[i].optx == IR_BOTTOM) {
 					insn = &ctx->ir_base[i];
 					if (insn->op == IR_FP2FP || insn->op == IR_FP2INT || insn->op == IR_TRUNC
-					 || insn->op == IR_ZEXT || insn->op == IR_SEXT) {
+					 || insn->op == IR_ZEXT || insn->op == IR_SEXT || insn->op == IR_EQ || insn->op == IR_NE) {
 						ir_bitqueue_add(&worklist2, i);
 					}
 				}

@@ -925,13 +925,13 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 			if (flags & FILTER_FLAG_GLOBAL_RANGE) {
 				if (
-						(ip[0] == 100 && ip[1] >= 64 && ip[1] <= 127 ) ||
-						(ip[0] == 192 && ip[1] == 0 && ip[2] == 0 ) ||
-						(ip[0] == 192 && ip[1] == 0 && ip[2] == 2 ) ||
-						(ip[0] == 198 && ip[1] >= 18 && ip[1] <= 19 ) ||
-						(ip[0] == 198 && ip[1] == 51 && ip[2] == 100 ) ||
-						(ip[0] == 203 && ip[1] == 0 && ip[2] == 113 )
-		   ) {
+					(ip[0] == 100 && ip[1] >= 64 && ip[1] <= 127 ) ||
+					(ip[0] == 192 && ip[1] == 0 && ip[2] == 0 ) ||
+					(ip[0] == 192 && ip[1] == 0 && ip[2] == 2 ) ||
+					(ip[0] == 198 && ip[1] >= 18 && ip[1] <= 19 ) ||
+					(ip[0] == 198 && ip[1] == 51 && ip[2] == 100 ) ||
+					(ip[0] == 203 && ip[1] == 0 && ip[2] == 113 )
+				) {
 					RETURN_VALIDATION_FAILED
 				}
 			}
@@ -952,23 +952,24 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 					}
 				}
 				if (flags & FILTER_FLAG_NO_RES_RANGE || flags & FILTER_FLAG_GLOBAL_RANGE) {
-					if ((ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0
-							&& ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && (ip[7] == 0 || ip[7] == 1))
-						|| (ip[0] == 0x5f)
-						|| (ip[0] >= 0xfe80 && ip[0] <= 0xfebf)
-						|| (ip[0] == 0x2001 && (ip[1] == 0x0db8 || (ip[1] >= 0x0010 && ip[1] <= 0x001f)))
-						|| (ip[0] == 0x3ff3)
-								) {
-									RETURN_VALIDATION_FAILED
-								}
+					if (
+						(ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && (ip[7] == 0 || ip[7] == 1)) ||
+						(ip[0] == 0x5f) ||
+						(ip[0] >= 0xfe80 && ip[0] <= 0xfebf) ||
+						(ip[0] == 0x2001 && (ip[1] == 0x0db8 || (ip[1] >= 0x0010 && ip[1] <= 0x001f))) ||
+						(ip[0] == 0x3ff3)
+					) {
+						RETURN_VALIDATION_FAILED
+					}
 				}
 				if (flags & FILTER_FLAG_GLOBAL_RANGE) {
-					if ((ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0xffff) ||
-							(ip[0] == 0x0100 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) ||
-							(ip[0] == 0x2001 && ip[1] <= 0x01ff) ||
-							(ip[0] == 0x2001 && ip[1] == 0x0002 && ip[2] == 0) ||
-							(ip[0] >= 0xfc00 && ip[0] <= 0xfdff)
-					   ) {
+					if (
+						(ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0xffff) ||
+						(ip[0] == 0x0100 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) ||
+						(ip[0] == 0x2001 && ip[1] <= 0x01ff) ||
+						(ip[0] == 0x2001 && ip[1] == 0x0002 && ip[2] == 0) ||
+						(ip[0] >= 0xfc00 && ip[0] <= 0xfdff)
+					) {
 						RETURN_VALIDATION_FAILED
 					}
 				}

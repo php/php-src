@@ -46,6 +46,7 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 #include "zend_file_cache.h"
+#include "zend_system_id.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/basic_functions.h"
 
@@ -3282,6 +3283,7 @@ static zend_result accel_post_startup(void)
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
 			} else {
 				zend_jit_startup(ZSMMG(reserved), jit_size, reattached);
+				zend_jit_startup_ok = true;
 			}
 		}
 #endif
@@ -3300,6 +3302,54 @@ static zend_result accel_post_startup(void)
 #endif
 		accel_shared_globals = calloc(1, sizeof(zend_accel_shared_globals));
 	}
+
+	/* opcache.file_cache_read_only should only be enabled when all script files are read-only */
+	int file_cache_access_mode = 0;
+
+	if (ZCG(accel_directives).file_cache_read_only) {
+		zend_accel_error(ACCEL_LOG_INFO, "opcache.file_cache is in read-only mode");
+
+		if (!ZCG(accel_directives).file_cache) {
+			accel_startup_ok = false;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache_read_only is set without a proper setting of opcache.file_cache");
+			return SUCCESS;
+		}
+
+		/* opcache.file_cache is read only, so ensure the directory is readable */
+#ifndef ZEND_WIN32
+		file_cache_access_mode = R_OK | X_OK;
+#else
+		file_cache_access_mode = 04; // Read access
+#endif
+	} else {
+		/* opcache.file_cache isn't read only, so ensure the directory is writable */
+#ifndef ZEND_WIN32
+		file_cache_access_mode = R_OK | W_OK | X_OK;
+#else
+		file_cache_access_mode = 06; // Read and write access
+#endif
+	}
+
+	if ( ZCG(accel_directives).file_cache ) {
+		zend_accel_error(ACCEL_LOG_INFO, "opcache.file_cache running with PHP build ID: %.32s", zend_system_id);
+
+		zend_stat_t buf = {0};
+
+		if (!IS_ABSOLUTE_PATH(ZCG(accel_directives).file_cache, strlen(ZCG(accel_directives).file_cache)) ||
+			zend_stat(ZCG(accel_directives).file_cache, &buf) != 0 ||
+			!S_ISDIR(buf.st_mode) ||
+#ifndef ZEND_WIN32
+			access(ZCG(accel_directives).file_cache, file_cache_access_mode) != 0
+#else
+			_access(ZCG(accel_directives).file_cache, file_cache_access_mode) != 0
+#endif
+			) {
+			accel_startup_ok = false;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "opcache.file_cache must be a full path of an accessible directory");
+			return SUCCESS;
+		}
+	}
+
 #if ENABLE_FILE_CACHE_FALLBACK
 file_cache_fallback:
 #endif

@@ -1159,8 +1159,7 @@ class ReturnInfo {
     const REFCOUNT_1 = "1";
     const REFCOUNT_N = "N";
 
-    const REFCOUNTS = [
-        self::REFCOUNT_0,
+    const REFCOUNTS_NONSCALAR = [
         self::REFCOUNT_1,
         self::REFCOUNT_N,
     ];
@@ -1204,16 +1203,14 @@ class ReturnInfo {
             return;
         }
 
-        if (!in_array($refcount, ReturnInfo::REFCOUNTS, true)) {
-            throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
+        if ($isScalarType) {
+            throw new Exception(
+                "@refcount on functions returning scalar values is redundant and not permitted"
+            );
         }
 
-        if ($isScalarType && $refcount !== self::REFCOUNT_0) {
-            throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
-        }
-
-        if (!$isScalarType && $refcount === self::REFCOUNT_0) {
-            throw new Exception('A non-scalar return type of "' . $type->__toString() . '" cannot have a refcount of "' . self::REFCOUNT_0 . '"');
+        if (!in_array($refcount, ReturnInfo::REFCOUNTS_NONSCALAR, true)) {
+            throw new Exception("@refcount must have one of the following values: \"1\", \"N\", $refcount given");
         }
 
         $this->refcount = $refcount;
@@ -2086,6 +2083,13 @@ OUPUT_EXAMPLE
 
         $methodSynopsis->appendChild(new DOMText("\n   "));
 
+        foreach ($this->attributes as $attribute) {
+            $modifier = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+            $modifier->setAttribute("role", "attribute");
+            $methodSynopsis->appendChild($modifier);
+            $methodSynopsis->appendChild(new DOMText("\n   "));
+        }
+
         foreach ($this->getModifierNames() as $modifierString) {
             $modifierElement = $doc->createElement('modifier', $modifierString);
             $methodSynopsis->appendChild($modifierElement);
@@ -2606,7 +2610,7 @@ class ConstInfo extends VariableLike
     {
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
-        return "$className.constants." . strtolower(str_replace(["__", "_"], ["", "-"], $this->name->getDeclarationName()));
+        return "$className.constants." . strtolower(str_replace("_", "-", trim($this->name->getDeclarationName(), "_")));
     }
 
     protected function getFieldSynopsisName(): string
@@ -3048,7 +3052,7 @@ class PropertyInfo extends VariableLike
     {
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
-        return "$className.props." . strtolower(str_replace(["__", "_"], ["", "-"], $this->name->getDeclarationName()));
+        return "$className.props." . strtolower(str_replace("_", "-", trim($this->name->getDeclarationName(), "_")));
     }
 
     protected function getFieldSynopsisName(): string
@@ -3870,6 +3874,13 @@ class ClassInfo {
             $ooElement->appendChild($doc->createElement('modifier', $modifierOverride));
             $ooElement->appendChild(new DOMText("\n$indentation "));
         } elseif ($withModifiers) {
+            foreach ($classInfo->attributes as $attribute) {
+                $modifier = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                $modifier->setAttribute("role", "attribute");
+                $ooElement->appendChild($modifier);
+                $ooElement->appendChild(new DOMText("\n$indentation "));
+            }
+
             if ($classInfo->flags & Modifiers::FINAL) {
                 $ooElement->appendChild($doc->createElement('modifier', 'final'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
@@ -6413,8 +6424,14 @@ if ($generateMethodSynopses) {
     }
 
     foreach ($methodSynopses as $filename => $content) {
-        if (!file_exists("$manualTarget/$filename")) {
-            if (file_put_contents("$manualTarget/$filename", $content)) {
+        $path = "$manualTarget/$filename";
+
+        if (!file_exists($path)) {
+            if (!file_exists(dirname($path))) {
+                mkdir(dirname($path));
+            }
+
+            if (file_put_contents($path, $content)) {
                 echo "Saved $filename\n";
             }
         }

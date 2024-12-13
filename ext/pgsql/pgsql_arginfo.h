@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 824e5aa07fd6753b5bc7821a39ccb76768f2470b */
+ * Stub hash: 13be2a3c9a4ef4a72c0a67019b7400418752b603 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -490,7 +490,7 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_chunked_rows_size, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, connection, Pgsql\\Connection, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif

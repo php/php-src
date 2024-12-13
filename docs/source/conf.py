@@ -16,7 +16,6 @@ project = 'php-src docs'
 author = 'The PHP Group'
 extensions = [
     'sphinx_design',
-    'sphinxawesome_theme.highlighting',
 ]
 templates_path = ['_templates']
 html_theme = 'sphinxawesome_theme'

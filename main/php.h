@@ -265,6 +265,8 @@ END_EXTERN_C()
 extern char **environ;
 #endif	/* ifndef PHP_WIN32 */
 
+extern const char php_build_date[];
+
 #ifdef PHP_PWRITE_64
 ssize_t pwrite(int, void *, size_t, off64_t);
 #endif

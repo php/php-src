@@ -3731,6 +3731,10 @@ static void ir_emit_vload(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	int32_t offset;
 	ir_mem mem;
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead load */
+		return;
+	}
 	IR_ASSERT(var_insn->op == IR_VAR);
 	fp = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
 	offset = IR_SPILL_POS_TO_OFFSET(var_insn->op3);
@@ -4128,6 +4132,10 @@ static void ir_emit_block_begin(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	dasm_State **Dst = &data->dasm_state;
 	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead load */
+		return;
+	}
 	|	mov Rx(def_reg), sp
 
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
@@ -5244,6 +5252,14 @@ static void ir_emit_tls(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |		ldr Rx(reg), [Rx(reg), #insn->op2]
 ||	} else {
 |		ldr Rx(reg), [Rx(reg), #0]
+|		ldr Rx(reg), [Rx(reg), #insn->op2]
+|		ldr Rx(reg), [Rx(reg), #insn->op3]
+||	}
+||# elif defined(__MUSL__)
+||	if (insn->op3 == IR_NULL) {
+|		ldr Rx(reg), [Rx(reg), #insn->op2]
+||	} else {
+|		ldr Rx(reg), [Rx(reg), #-8]
 |		ldr Rx(reg), [Rx(reg), #insn->op2]
 |		ldr Rx(reg), [Rx(reg), #insn->op3]
 ||	}

@@ -640,6 +640,7 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_SWITCH_LONG:
 				case ZEND_SWITCH_STRING:
 				case ZEND_MATCH:
+				case ZEND_MATCH_ERROR:
 				case ZEND_JMP_NULL: {
 					zend_op *end = op_array->opcodes + op_array->last;
 					while (opline < end) {
@@ -652,6 +653,7 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 								&& opline->opcode != ZEND_SWITCH_LONG
 								&& opline->opcode != ZEND_SWITCH_STRING
 								&& opline->opcode != ZEND_MATCH
+								&& opline->opcode != ZEND_MATCH_ERROR
 								&& opline->opcode != ZEND_JMP_NULL
 								&& (opline->opcode != ZEND_FREE
 									|| opline->extended_value != ZEND_FREE_ON_RETURN);

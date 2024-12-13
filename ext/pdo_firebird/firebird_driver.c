@@ -790,7 +790,7 @@ free_statement:
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
 static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
-	int qcount = 0;
+	size_t qcount = 0;
 	char const *co, *l, *r;
 	char *c;
 	size_t quotedlen;
@@ -803,6 +803,10 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
 	/* count the number of ' characters */
 	for (co = ZSTR_VAL(unquoted); (co = strchr(co,'\'')); qcount++, co++);
+
+	if (UNEXPECTED(ZSTR_LEN(unquoted) + 2 > ZSTR_MAX_LEN - qcount)) {
+		return NULL;
+	}
 
 	quotedlen = ZSTR_LEN(unquoted) + qcount + 2;
 	quoted_str = zend_string_alloc(quotedlen, 0);
@@ -1405,7 +1409,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		char errmsg[512];
 		const ISC_STATUS *s = H->isc_status;
 		fb_interpret(errmsg, sizeof(errmsg),&s);
-		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%ld] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%" PRIiPTR "] %s",
 				"HY000", H->isc_status[1], errmsg);
 	}
 

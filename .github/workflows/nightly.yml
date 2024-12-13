@@ -227,6 +227,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ubuntu:${{ inputs.ubuntu_version }}
+    env:
+      PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
       mysql:
         image: mysql:8.3
@@ -235,6 +237,15 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -728,12 +739,14 @@ jobs:
         with:
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Build mysql-8.4
+        if: ${{ !inputs.libmysqlclient_with_mysqli }}
         uses: ./.github/actions/build-libmysqlclient
         with:
           configurationParameters: ${{ !inputs.libmysqlclient_with_mysqli && '--enable-werror' || '' }}
           libmysql: mysql-8.4.0-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Test mysql-8.4
+        if: ${{ !inputs.libmysqlclient_with_mysqli }}
         uses: ./.github/actions/test-libmysqlclient
         with:
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
@@ -864,10 +877,18 @@ jobs:
           - x64: true
             zts: true
             opcache: true
+            asan: false
           - x64: false
             zts: false
             opcache: false
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+            asan: false
+          - x64: true
+            zts: true
+            opcache: true
+            asan: true
+            branch: 'master'
+            timeout: 120
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}"
     runs-on: windows-${{ inputs.windows_version }}
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
@@ -880,6 +901,7 @@ jobs:
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
       PARALLEL: -j2
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
+      ASAN: "${{ matrix.asan && '1' || '0' }}"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
@@ -893,3 +915,13 @@ jobs:
         run: .github/scripts/windows/build.bat
       - name: Test
         run: .github/scripts/windows/test.bat
+  FREEBSD:
+    name: FREEBSD
+    runs-on: ubuntu-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: FreeBSD
+        uses: ./.github/actions/freebsd

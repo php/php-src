@@ -1149,8 +1149,10 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 			} else {
 				flags = IR_DEF_REUSES_OP1_REG | IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG;
 			}
-			if (IR_IS_CONST_REF(insn->op2) && insn->op1 != insn->op2) {
-				n = ir_add_const_tmp_reg(ctx, insn->op2, 2, n, constraints);
+			if (IR_IS_CONST_REF(insn->op2)) {
+				if (insn->op1 != insn->op2) {
+					n = ir_add_const_tmp_reg(ctx, insn->op2, 2, n, constraints);
+				}
 			} else if (ir_rule(ctx, insn->op2) == IR_STATIC_ALLOCA) {
 				constraints->tmp_regs[n] = IR_TMP_REG(2, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
 				n++;
@@ -1223,9 +1225,11 @@ op2_const:
 			} else if (ir_rule(ctx, insn->op1) & IR_FUSED) {
 				flags = IR_USE_MUST_BE_IN_REG | IR_OP2_MUST_BE_IN_REG;
 			}
-			if (IR_IS_CONST_REF(insn->op2) && insn->op1 != insn->op2) {
-				flags = IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
-				n = ir_add_const_tmp_reg(ctx, insn->op2, 2, n, constraints);
+			if (IR_IS_CONST_REF(insn->op2)) {
+				if (insn->op1 != insn->op2) {
+					flags = IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
+					n = ir_add_const_tmp_reg(ctx, insn->op2, 2, n, constraints);
+				}
 			} else if (ir_rule(ctx, insn->op2) == IR_STATIC_ALLOCA) {
 				constraints->tmp_regs[n] = IR_TMP_REG(2, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
 				n++;
@@ -3360,10 +3364,23 @@ static ir_mem ir_fuse_addr(ir_ctx *ctx, ir_ref root, ir_ref ref)
 			offset_insn = insn;
 			break;
 		case IR_LEA_IB_O:
-			base_reg_ref = insn->op1 * sizeof(ir_ref) + 1;
-			index_reg_ref = insn->op1 * sizeof(ir_ref) + 2;
+			op1_insn = &ctx->ir_base[insn->op1];
 			offset_insn = insn;
 			scale = 1;
+			if (ir_rule(ctx, op1_insn->op2) == IR_STATIC_ALLOCA) {
+				offset = IR_SPILL_POS_TO_OFFSET(ctx->ir_base[op1_insn->op2].op3);
+				base_reg = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
+				base_reg_ref = IR_UNUSED;
+				index_reg_ref = insn->op1 * sizeof(ir_ref) + 1;
+			} else if (ir_rule(ctx, op1_insn->op1) == IR_STATIC_ALLOCA) {
+				offset = IR_SPILL_POS_TO_OFFSET(ctx->ir_base[op1_insn->op1].op3);
+				base_reg = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
+				base_reg_ref = IR_UNUSED;
+				index_reg_ref = insn->op1 * sizeof(ir_ref) + 2;
+			} else {
+				base_reg_ref = insn->op1 * sizeof(ir_ref) + 1;
+				index_reg_ref = insn->op1 * sizeof(ir_ref) + 2;
+			}
 			break;
 		case IR_LEA_OB_SI:
 			index_reg_ref = insn->op2 * sizeof(ir_ref) + 1;
@@ -7463,6 +7480,10 @@ static void ir_emit_vload(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_reg fp;
 	ir_mem mem;
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead load */
+		return;
+	}
 	IR_ASSERT(var_insn->op == IR_VAR);
 	fp = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
 	mem = IR_MEM_BO(fp, IR_SPILL_POS_TO_OFFSET(var_insn->op3));
@@ -7909,6 +7930,10 @@ static void ir_emit_block_begin(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	dasm_State **Dst = &data->dasm_state;
 	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead load */
+		return;
+	}
 	|	mov Ra(def_reg), Ra(IR_REG_RSP)
 
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {

@@ -1,0 +1,105 @@
+name: FreeBSD
+runs:
+  using: composite
+  steps:
+    - name: FreeBSD
+      uses: vmactions/freebsd-vm@v1
+      with:
+        release: '13.3'
+        usesh: true
+        copyback: false
+        # Temporarily disable sqlite, as FreeBSD ships it with disabled double quotes. We'll need to fix our tests.
+        # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269889
+        prepare: |
+          cd $GITHUB_WORKSPACE
+
+          kldload accf_http
+          pkg install -y \
+            autoconf \
+            bison \
+            gmake \
+            re2c \
+            icu \
+            libiconv \
+            png \
+            freetype2 \
+            enchant2 \
+            bzip2 \
+            t1lib \
+            gmp \
+            tidyp \
+            libsodium \
+            libzip \
+            libxml2 \
+            libxslt \
+            openssl \
+            oniguruma \
+            pkgconf \
+            webp \
+            libavif \
+            `#sqlite3` \
+            curl
+
+          ./buildconf -f
+          ./configure \
+            --prefix=/usr/local \
+            --enable-debug \
+            --enable-option-checking=fatal \
+            --enable-fpm \
+            `#--with-pdo-sqlite` \
+            --without-sqlite3 \
+            --without-pdo-sqlite \
+            --without-pear \
+            --with-bz2 \
+            --with-avif \
+            --with-jpeg \
+            --with-webp \
+            --with-freetype \
+            --enable-gd \
+            --enable-exif \
+            --with-zip \
+            --with-zlib \
+            --enable-soap \
+            --enable-xmlreader \
+            --with-xsl \
+            --with-libxml \
+            --enable-shmop \
+            --enable-pcntl \
+            --enable-mbstring \
+            --with-curl \
+            --enable-sockets \
+            --with-openssl \
+            --with-iconv=/usr/local \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --with-ffi \
+            --enable-zend-test \
+            --enable-dl-test=shared \
+            --enable-intl \
+            --with-mhash \
+            --with-sodium \
+            --enable-werror \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d
+          gmake -j2
+          mkdir /etc/php.d
+          gmake install > /dev/null
+          echo opcache.enable_cli=1 > /etc/php.d/opcache.ini
+          echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+          echo opcache.preload_user=root >> /etc/php.d/opcache.ini
+        run: |
+          cd $GITHUB_WORKSPACE
+
+          export SKIP_IO_CAPTURE_TESTS=1
+          export CI_NO_IPV6=1
+          export STACK_LIMIT_DEFAULTS_CHECK=1
+          sapi/cli/php run-tests.php \
+            -P -q -j2 \
+            -g FAIL,BORK,LEAK,XLEAK \
+            --no-progress \
+            --offline \
+            --show-diff \
+            --show-slow 1000 \
+            --set-timeout 120 \
+            -d zend_extension=opcache.so

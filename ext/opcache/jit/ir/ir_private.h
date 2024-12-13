@@ -1013,13 +1013,6 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 
 #define IR_RESERVED_FLAG_1     (1U<<31)
 
-/*** IR Binding ***/
-IR_ALWAYS_INLINE ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
-{
-	ir_ref var = ir_hashtab_find(ctx->binding, ref);
-	return (var != (ir_ref)IR_INVALID_VAL) ? var : 0;
-}
-
 /*** IR Use Lists ***/
 struct _ir_use_list {
 	ir_ref        refs; /* index in ir_ctx->use_edges[] array */
@@ -1031,6 +1024,25 @@ void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref use);
 void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
 void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
 bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
+
+IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
+{
+	ir_use_list *use_list = &ctx->use_lists[ref];
+	ir_ref n = use_list->count;
+	ir_ref *p;
+
+	IR_ASSERT(ir_op_flags[ctx->ir_base[ref].op] & IR_OP_FLAG_CONTROL);
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+		ir_ref next = *p;
+		ir_insn *insn = &ctx->ir_base[next];
+
+		if ((ir_op_flags[insn->op] & IR_OP_FLAG_CONTROL) && insn->op1 == ref) {
+			return next;
+		}
+	}
+	IR_ASSERT(0);
+	return IR_UNUSED;
+}
 
 /*** Modification helpers ***/
 #define MAKE_NOP(_insn) do { \

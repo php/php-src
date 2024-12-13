@@ -3,14 +3,24 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.0alpha1
 
 - COM:
-  . Fix property access of PHP objects wrapped in variant. (cmb)
+  . Fixed property access of PHP objects wrapped in variant. (cmb)
+  . Fixed method calls for PHP objects wrapped in variant. (cmb)
 
 - Core:
   . Fixed bug GH-16665 (\array and \callable should not be usable in
     class_alias). (nielsdos)
+  . Added PHP_BUILD_DATE constant. (cmb)
+  . Added support for Closures in constant expressions. (timwolla,
+    Volker Dusch)
+  . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
+    if available. (timwolla)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
+
+- Date:
+  . Fix undefined behaviour problems regarding integer overflow in extreme edge
+    cases. (nielsdos, cmb, ilutov)
 
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
@@ -18,6 +28,14 @@ PHP                                                                        NEWS
 
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
+
+- MySQLnd:
+  . Added mysqlnd.collect_memory_statistics to ini quick reference.
+    (hauk92)
+
+- OPcache:
+  . Fixed ZTS OPcache build on Cygwin. (cmb)
+  . Added opcache.file_cache_read_only. (Samuel Melrose)
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
@@ -51,14 +69,21 @@ PHP                                                                        NEWS
 - Sockets:
   . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
     (David Carlier)
+  . Added TCP_FUNCTION_BLK to change the TCP stack algorithm on FreeBSD.
+    (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).
 
+- Streams:
+  . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
+    (cmb)
+
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
     nielsdos)
+  . Fixed bug GH-16843 (Windows phpize builds ignore source subfolders). (cmb)
 
 - XMLWriter:
   . Improved performance and reduce memory consumption. (nielsdos)

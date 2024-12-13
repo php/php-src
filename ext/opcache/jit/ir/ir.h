@@ -720,6 +720,8 @@ IR_ALWAYS_INLINE void ir_set_op3(ir_ctx *ctx, ir_ref ref, ir_ref val)
 	ctx->ir_base[ref].op3 = val;
 }
 
+ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n);
+
 IR_ALWAYS_INLINE ir_ref ir_insn_op(const ir_insn *insn, int32_t n)
 {
 	const ir_ref *p = insn->ops + n;
@@ -741,7 +743,10 @@ ir_ref ir_fold3(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_param(ir_ctx *ctx, ir_type type, ir_ref region, const char *name, int pos);
 ir_ref ir_var(ir_ctx *ctx, ir_type type, ir_ref region, const char *name);
+
+/* IR Binding */
 ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def);
+ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref);
 
 /* Def -> Use lists */
 void ir_build_def_use_lists(ir_ctx *ctx);

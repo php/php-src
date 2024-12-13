@@ -97,6 +97,8 @@ PHPAPI size_t core_globals_offset;
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
+const char php_build_date[] = __DATE__ " " __TIME__;
+
 PHPAPI const char *php_version(void)
 {
 	return PHP_VERSION;
@@ -110,8 +112,8 @@ PHPAPI unsigned int php_version_id(void)
 PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
 	char *version_info;
-	spprintf(&version_info, 0, "PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
-		PHP_VERSION, sapi_module->name, __DATE__, __TIME__,
+	spprintf(&version_info, 0, "PHP %s (%s) (built: %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
+		PHP_VERSION, sapi_module->name, php_build_date,
 #ifdef ZTS
 		"ZTS"
 #else
@@ -2118,8 +2120,9 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		_set_invalid_parameter_handler(old_invalid_parameter_handler);
 	}
 
-	/* Disable the message box for assertions.*/
+	/* Disable the message box for assertions and errors.*/
 	_CrtSetReportMode(_CRT_ASSERT, 0);
+	_CrtSetReportMode(_CRT_ERROR, 0);
 #endif
 
 #ifdef ZTS

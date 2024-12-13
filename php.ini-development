@@ -119,6 +119,11 @@
 ;   Development Value: 60 (60 seconds)
 ;   Production Value: 60 (60 seconds)
 
+; mysqlnd.collect_memory_statistics
+;   Default Value: Off
+;   Development Value: On
+;   Production Value: Off
+
 ; output_buffering
 ;   Default Value: Off
 ;   Development Value: 4096
@@ -1153,10 +1158,7 @@ mysqli.allow_persistent = On
 ; https://php.net/mysqli.max-links
 mysqli.max_links = -1
 
-; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
-; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
-; at MYSQL_PORT.
+; Default port number for mysqli_connect().
 ; https://php.net/mysqli.default-port
 mysqli.default_port = 3306
 
@@ -1165,15 +1167,15 @@ mysqli.default_port = 3306
 ; https://php.net/mysqli.default-socket
 mysqli.default_socket =
 
-; Default host for mysqli_connect() (doesn't apply in safe mode).
+; Default host for mysqli_connect().
 ; https://php.net/mysqli.default-host
 mysqli.default_host =
 
-; Default user for mysqli_connect() (doesn't apply in safe mode).
+; Default user for mysqli_connect().
 ; https://php.net/mysqli.default-user
 mysqli.default_user =
 
-; Default password for mysqli_connect() (doesn't apply in safe mode).
+; Default password for mysqli_connect().
 ; Note that this is generally a *bad* idea to store passwords in this file.
 ; *Any* user with PHP access can run 'echo get_cfg_var("mysqli.default_pw")
 ; and reveal this password!  And of course, any users with read access to this
@@ -1193,6 +1195,9 @@ mysqlnd.collect_statistics = On
 
 ; Enable / Disable collection of memory usage statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
+; Default Value: Off
+; Development Value: On
+; Production Value: Off
 mysqlnd.collect_memory_statistics = On
 
 ; Records communication from all extensions using mysqlnd to the specified log
@@ -1765,6 +1770,15 @@ ldap.max_links = -1
 ; It should improve performance when SHM memory is full, at server restart or
 ; SHM reset. The default "" disables file based caching.
 ;opcache.file_cache=
+
+; Enables or disables read-only mode for the second level cache directory.
+; It should improve performance for read-only containers,
+; when the cache is pre-warmed and packaged alongside the application.
+; Best used with `opcache.validate_timestamps=0`, `opcache.enable_file_override=1`
+; and `opcache.file_cache_consistency_checks=0`.
+; Note: A cache generated with a different build of PHP, a different file path,
+; or different settings (including which extensions are loaded), may be ignored.
+;opcache.file_cache_read_only=0
 
 ; Enables or disables opcode caching in shared memory.
 ;opcache.file_cache_only=0

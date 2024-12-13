@@ -271,7 +271,9 @@ static char* php_get_windows_name()
 						major = "Windows 10";
 					}
 				} else {
-					if (osvi.dwBuildNumber >= 20348) {
+					if (osvi.dwBuildNumber >= 26100) {
+						major = "Windows Server 2025";
+					} else if (osvi.dwBuildNumber >= 20348) {
 						major = "Windows Server 2022";
 					} else if (osvi.dwBuildNumber >= 19042) {
 						major = "Windows Server, version 20H2";
@@ -801,7 +803,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 		php_info_print_box_end();
 		php_info_print_table_start();
 		php_info_print_table_row(2, "System", ZSTR_VAL(php_uname));
-		php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__);
+		php_info_print_table_row(2, "Build Date", php_build_date);
 #ifdef PHP_BUILD_SYSTEM
 		php_info_print_table_row(2, "Build System", PHP_BUILD_SYSTEM);
 #endif

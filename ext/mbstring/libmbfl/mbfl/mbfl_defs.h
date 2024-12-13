@@ -31,18 +31,6 @@
 #ifndef MBFL_DEFS_H
 #define MBFL_DEFS_H
 
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL (0L)
-#else
-#define NULL (void *)(0L)
-#endif
-#endif
-
-#ifndef SIZE_MAX
-#define SIZE_MAX	((size_t)~0)
-#endif
-
 #ifdef _WIN32
 #ifdef MBFL_DLL_EXPORT
 #define MBFLAPI __declspec(dllexport)

@@ -59,7 +59,7 @@ IR_ALWAYS_INLINE void _ir_add_predecessors(const ir_insn *insn, ir_worklist *wor
 
 int ir_build_cfg(ir_ctx *ctx)
 {
-	ir_ref n, *p, ref, start, end, next;
+	ir_ref n, *p, ref, start, end;
 	uint32_t b;
 	ir_insn *insn;
 	ir_worklist worklist;
@@ -145,18 +145,8 @@ int ir_build_cfg(ir_ctx *ctx)
 			start = ref;
 			/* Skip control nodes untill BB end */
 			while (1) {
-				use_list = &ctx->use_lists[ref];
-				n = use_list->count;
-				next = IR_UNUSED;
-				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
-					next = *p;
-					insn = &ctx->ir_base[next];
-					if ((ir_op_flags[insn->op] & IR_OP_FLAG_CONTROL) && insn->op1 == ref) {
-						break;
-					}
-				}
-				IR_ASSERT(next != IR_UNUSED);
-				ref = next;
+				ref = ir_next_control(ctx, ref);
+				insn = &ctx->ir_base[ref];
 				if (IR_IS_BB_END(insn->op)) {
 					break;
 				}

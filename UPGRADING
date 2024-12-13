@@ -28,6 +28,12 @@ PHP 8.5 UPGRADE NOTES
 - Core:
   . It is no longer possible to use "array" and "callable" as class alias names
     in class_alias().
+  . Loosely comparing uncomparable objects (e.g. enums, \CurlHandle and other
+    internal classes) to booleans was previously inconsistent. If compared to a
+    boolean literal $object == true, it would behave the same way as (bool)
+    $object. If compared to a statically unknown value $object == $true, it
+    would always return false. This behavior was consolidated to always follow
+    the behavior of (bool) $object.
 
 - Intl:
   . The extension now requires at least ICU 57.1.
@@ -43,6 +49,10 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 2. New Features
 ========================================
+
+- Core:
+  . Added support for Closures in constant expressions.
+    RFC: https://wiki.php.net/rfc/closures_in_const_expr
 
 - DOM:
   . Added Dom\Element::$outerHTML.
@@ -129,15 +139,30 @@ PHP 8.5 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Core:
+  . PHP_BUILD_DATE.
+
 - POSIX:
   . POSIX_SC_OPEN_MAX.
 
 - Sockets:
   . IPPROTO_ICMP/IPPROTO_ICMPV6.
+  . TCP_FUNCTION_BLK (FreeBSD only).
 
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- Opcache:
+  . Added opcache.file_cache_read_only to support a read-only
+    opcache.file_cache directory, for use with read-only file systems
+    (e.g. read-only Docker containers).
+    Best used with opcache.validate_timestamps=0,
+    opcache.enable_file_override=1,
+    and opcache.file_cache_consistency_checks=0.
+    Note: A cache generated with a different build of PHP, a different file
+    path, or different settings (including which extensions are loaded), may be
+    ignored.
 
 ========================================
 12. Windows Support
@@ -147,6 +172,18 @@ PHP 8.5 UPGRADE NOTES
   PHP_RELEASE_VERSION are now always numbers.  Previously, they have been
   strings for buildconf builds.
 
+* phpize builds now reflect the source tree in the build dir (like that already
+  worked for in-tree builds); some extension builds (especially when using
+  Makefile.frag.w32) may need adjustments.
+
+* --enable-sanitzer is now supported for MSVC builds.  This enables ASan and
+  debug assertions, and is supported as of MSVC 16.10 and Windows 10.
+
+* COM:
+  . The extension is now build shared by default; previously it defaulted to a
+    static extension, although the official Windows binaries built a shared
+    extension.
+
 * FFI:
   . It is no longer necessary to specify the library when using FFI::cdef()
     and FFI::load(). However, this convenience feature should not be used in
@@ -155,6 +192,11 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+- Core:
+  The high resolution timer (`hrtime()`) on macOS now uses the recommended
+  `clock_gettime_nsec_np(CLOCK_UPTIME_RAW)` API instead of
+  `mach_absolute_time()`.
 
 ========================================
 14. Performance Improvements
