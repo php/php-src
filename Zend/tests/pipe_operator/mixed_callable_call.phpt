@@ -27,6 +27,10 @@ class _Test
     }
 }
 
+function _double(int $x): int {
+    return $x * 2;
+}
+
 $test = new _Test();
 
 $add3 = fn($x) => _add($x, 3);
@@ -36,9 +40,10 @@ $res1 = 2
     |> 'strlen'
     |> $add3
     |> fn($x) => _area($x, 2)
+    |> _double(...)
 ;
 
 var_dump($res1);
 ?>
 --EXPECT--
-int(20)
+int(40)
