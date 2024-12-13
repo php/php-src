@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
 
+- DOM:
+  . Fixed bug GH-17145 (DOM memory leak). (nielsdos)
+
 - FFI:
   . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
 
