@@ -1257,6 +1257,7 @@ PHP_FUNCTION(zip_read)
 
 		zr_rsrc->zf = zip_fopen_index(rsrc_int->za, rsrc_int->index_current, 0);
 		if (zr_rsrc->zf) {
+			Z_ADDREF_P(zip_dp);
 			rsrc_int->index_current++;
 			RETURN_RES(zend_register_resource(zr_rsrc, le_zip_entry));
 		} else {
