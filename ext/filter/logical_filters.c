@@ -871,7 +871,7 @@ fixup_ip:
 
 /* From the tables in RFC 6890 - Special-Purpose IP Address Registriesi
  * Including errata: https://www.rfc-editor.org/errata_search.php?rfc=6890&rec_status=1 */
-static bool ipv4_get_status_flags(int ip[8], bool *global, bool *reserved, bool *private)
+static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
 {
 	*global = false;
 	*reserved = false;
@@ -928,7 +928,7 @@ static bool ipv4_get_status_flags(int ip[8], bool *global, bool *reserved, bool 
 }
 
 /* From the tables in RFC 6890 - Special-Purpose IP Address Registries */
-static bool ipv6_get_status_flags(int ip[8], bool *global, bool *reserved, bool *private)
+static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
 {
 	*global = false;
 	*reserved = false;
