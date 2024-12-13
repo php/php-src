@@ -93,6 +93,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
     (cmb)
 
+- Tests:
+  . Allow to shuffle tests even in non-parallell mode. (dhuang00)
+
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
     nielsdos)

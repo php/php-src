@@ -1231,7 +1231,7 @@ function system_with_timeout(
 
 function run_all_tests(array $test_files, array $env, ?string $redir_tested = null): void
 {
-    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
+    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache, $shuffle;
     global $preload;
     // Parallel testing
     global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
@@ -1251,6 +1251,11 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
             }
             return true;
         });
+    }
+
+    // To discover parallelization issues and order dependent tests it is useful to randomize the test order.
+    if ($shuffle) {
+        shuffle($test_files);
     }
 
     /* Ignore -jN if there is only one file to analyze. */
@@ -1358,11 +1363,8 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
     // Some tests assume that they are executed in a certain order. We will be popping from
     // $test_files, so reverse its order here. This makes sure that order is preserved at least
     // for tests with a common conflict key.
-    $test_files = array_reverse($test_files);
-
-    // To discover parallelization issues it is useful to randomize the test order.
-    if ($shuffle) {
-        shuffle($test_files);
+    if (!$shuffle) {
+        $test_files = array_reverse($test_files);
     }
 
     // Don't start more workers than test files.
