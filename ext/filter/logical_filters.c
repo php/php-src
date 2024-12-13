@@ -899,7 +899,7 @@ static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved,
 		*private = true;
 	} else if (ip[0] == 192 && ip[1] == 0 && ip[2] == 0) {
 		/* RFC 6890 - IETF Protocol Assignments */
-	} else if (ip[0] == 192 && ip[1] >= 0 && ip[1] <= 31) {
+	} else if (ip[0] == 192 && ip[1] == 0 && ip[2] == 0 && ip[3] >= 0 && ip[3] <= 7) {
 		/* RFC 6333 - DS-Lite */
 	} else if (ip[0] == 192 && ip[1] == 0 && ip[2] == 2) {
 		/* RFC 5737 - Documentation */
