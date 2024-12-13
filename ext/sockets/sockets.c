@@ -1811,7 +1811,6 @@ PHP_FUNCTION(socket_set_option)
 	HashTable		 		*opt_ht;
 	zval 					*l_onoff, *l_linger;
 	zval		 			*sec, *usec;
-	bool failed;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ollz", &arg1, socket_ce, &level, &optname, &arg4) == FAILURE) {
 		RETURN_THROWS();
@@ -1888,16 +1887,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			zend_long vall_lonoff = zval_try_get_long(l_onoff, &failed);
-			if (failed) {
-				zend_argument_type_error(4, "\"%s\" must be of type int, %s given", l_onoff_key, zend_zval_value_name(l_onoff));
-				RETURN_THROWS();
-			}
-			zend_long vall_linger = zval_try_get_long(l_linger, &failed);
-			if (failed) {
-				zend_argument_type_error(4, "\"%s\" must be of type int, %s given", l_linger_key, zend_zval_value_name(l_linger));
-				RETURN_THROWS();
-			}
+			zend_long vall_lonoff = zval_get_long(l_onoff);
+			zend_long vall_linger = zval_get_long(l_linger);
 
 			if (vall_lonoff < 0 || vall_lonoff > USHRT_MAX) {
 				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", l_onoff_key, USHRT_MAX);
@@ -1938,35 +1929,16 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			zend_long valsec = zval_try_get_long(sec, &failed);
-			if (failed) {
-				zend_argument_type_error(4, "\"%s\" must be of type int, %s given", sec_key, zend_zval_value_name(sec));
-				RETURN_THROWS();
-			}
-			zend_long valusec = zval_try_get_long(usec, &failed);
-			if (failed) {
-				zend_argument_type_error(4, "\"%s\" must be of type int, %s given", usec_key, zend_zval_value_name(usec));
-				RETURN_THROWS();
-			}
+			zend_long valsec = zval_get_long(sec);
+			zend_long valusec = zval_get_long(usec);
 #ifndef PHP_WIN32
 			tv.tv_sec = valsec;
 			tv.tv_usec = valusec;
 			optlen = sizeof(tv);
 			opt_ptr = &tv;
 #else
-			if (valsec < 0 || valsec > INT_MAX / 1000) {
-				zend_argument_value_error(4, "\"%s\" must be between 0 and %d", sec_key, INT_MAX / 1000);
-				RETURN_THROWS();
-			}
-
-			timeout = valsec * 1000;
+			timeout = valsec * 1000 + valusec / 1000;
 	
-			if (valusec < 0 || timeout > INT_MAX - (valusec / 1000)) {
-				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", usec_key, (DWORD)(INT_MAX - (valusec / 1000)));
-				RETURN_THROWS();
-			}
-
-			timeout += valusec / 1000;
 			optlen = sizeof(int);
 			opt_ptr = &timeout;
 #endif
@@ -2018,11 +1990,7 @@ PHP_FUNCTION(socket_set_option)
 
 #ifdef SO_ATTACH_REUSEPORT_CBPF
 		case SO_ATTACH_REUSEPORT_CBPF: {
-			zend_long fval = zval_try_get_long(arg4, &failed);
-			if (failed) {
-				zend_argument_type_error(4, "must be of type int, %s given", zend_zval_value_name(arg4));
-				RETURN_THROWS();
-			}
+			zend_long fval = zval_get_long(arg4);
 
 			if (!fval) {
 				ov = 1;
@@ -2057,11 +2025,7 @@ PHP_FUNCTION(socket_set_option)
 
 		default:
 default_case:
-			ov = zval_try_get_long(arg4, &failed);
-			if (failed) {
-				zend_argument_type_error(4, "must be an int, %s given", zend_zval_value_name(arg4));
-				RETURN_THROWS();
-			}
+			ov = zval_get_long(arg4);
 
 			optlen = sizeof(ov);
 			opt_ptr = &ov;

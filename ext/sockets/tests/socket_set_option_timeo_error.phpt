@@ -54,9 +54,7 @@ try {
 ?>
 --EXPECTF--
 socket_set_option(): Argument #4 ($value) must be of type array, stdClass given
-socket_set_option(): Argument #4 ($value) "usec" must be of type int, string given
-socket_set_option(): Argument #4 ($value) "sec" must be of type int, stdClass given
+
+Warning: Object of class stdClass could not be converted to int in %s on line %d
 socket_set_option(): Argument #4 ($value) must be of type array, string given
-socket_set_option(): Argument #4 ($value) "l_onoff" must be of type int, string given
-socket_set_option(): Argument #4 ($value) "l_linger" must be of type int, array given
 socket_set_option(): Argument #4 ($value) "l_onoff" must be between 0 and %d

@@ -28,9 +28,10 @@ var_dump(socket_bind($socket, '0.0.0.0'));
 socket_listen($socket);
 socket_close($socket);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
-socket_set_option(): Argument #4 ($value) must be of type int, array given
+
+Warning: socket_set_option(): Unable to set socket option [2]: No such file or directory in %s on line %d
 bool(true)
 bool(true)
