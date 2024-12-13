@@ -869,7 +869,8 @@ fixup_ip:
 }
 /* }}} */
 
-/* From the tables in RFC 6890 - Special-Purpose IP Address Registries */
+/* From the tables in RFC 6890 - Special-Purpose IP Address Registriesi
+ * Including errata: https://www.rfc-editor.org/errata_search.php?rfc=6890&rec_status=1 */
 static bool ipv4_get_status_flags(int ip[8], bool *global, bool *reserved, bool *private)
 {
 	*global = false;
@@ -877,6 +878,9 @@ static bool ipv4_get_status_flags(int ip[8], bool *global, bool *reserved, bool 
 	*private = false;
 
 	if (ip[0] == 0) {
+		/* RFC 0791 - This network */
+		*reserved = true;
+	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) {
 		/* RFC 1122 - This host on this network */
 		*reserved = true;
 	} else if (ip[0] == 10) {
