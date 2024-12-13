@@ -1504,6 +1504,7 @@ int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, si
 			}
 		}
 
+		ZEND_ASSERT(!mydata->is_persistent);
 		mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
 		mydata->alias_len = alias ? alias_len : fname_len;
 	}
