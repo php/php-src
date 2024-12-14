@@ -1119,19 +1119,19 @@ static void init_request_info(void)
 				char *ptr;
 
 				if (pt) {
-					// If DocumentRoot contains cyrillic characters and PHP is invoked with SetHandler (not applicable to ProxyPassMatch),
-					// then the cyrillic characters are urlencoded by apache, and we need to decode them, for example with
-					// DocumentRoot /home/hans/web/cyrillicрф.ratma.net/public_html
-					// env_script_filename contains /home/hans/web/cyrillic%D1%80%D1%84.ratma.net/public_html/index.php.
-					// and we must decode it to /home/hans/web/cyrillicрф.ratma.net/public_html/index.php.
+					// If DocumentRoot contains special characters like '%' or  cyrillic 'рф' and PHP is invoked with SetHandler (not applicable to ProxyPassMatch),
+					// then the special characters are urlencoded by apache, and we need to decode them, for example with
+					// DocumentRoot /home/hans/web/cyrillicрф.ratma.net/public_html/test%lol
+					// env_script_filename contains /home/hans/web/cyrillic%D1%80%D1%84.ratma.net/public_html/test%25lol/index.php.
+					// and we must decode it to /home/hans/web/cyrillicрф.ratma.net/public_html/test%lol/index.php.
 					if(apache_was_here && memchr(pt, '%', len)) {
 						len = php_raw_url_decode(pt, len);
 						ptr = &pt[len]; // php_raw_url_decode() writes a trailing null byte, &pt[len] is that null byte.
-						goto apache_cyrillic_jump;
+						goto apache_special_jump;
 					}
 					while ((ptr = strrchr(pt, '/')) || (ptr = strrchr(pt, '\\'))) {
 						*ptr = 0;
-						apache_cyrillic_jump:
+						apache_special_jump:
 						if (stat(pt, &st) == 0 && S_ISREG(st.st_mode)) {
 							/*
 							 * okay, we found the base script!
