@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - Opcache:
   . opcache_get_configuration() properly reports jit_prof_threshold. (cmb)
 
+- PgSql:
+  . Fixed bug GH-17158 (pg_fetch_result Shows Incorrect ArgumentCountError
+    Message when Called With 1 Argument). (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-17040 (SimpleXML's unset can break DOM objects). (nielsdos)
 
