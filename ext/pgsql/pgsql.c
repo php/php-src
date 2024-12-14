@@ -1894,7 +1894,7 @@ PHP_FUNCTION(pg_fetch_result)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
 		ZEND_PARSE_PARAMETERS_END();
-	} else {
+	} else if (ZEND_NUM_ARGS() == 3) {
 		ZEND_PARSE_PARAMETERS_START(3, 3)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
 			if (zend_string_equals_literal(EG(current_execute_data)->func->common.function_name, "pg_result")) {
@@ -1904,6 +1904,9 @@ PHP_FUNCTION(pg_fetch_result)
 			}
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
 		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		zend_wrong_parameters_count_error(2, 3);
+		RETURN_THROWS();
 	}
 
 	pg_result = Z_PGSQL_RESULT_P(result);
