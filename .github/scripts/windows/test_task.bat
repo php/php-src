@@ -131,6 +131,10 @@ for %%i in (ldap) do (
 	del %PHP_BUILD_DIR%\php_%%i.dll
 )
 
+rem reduce excessive stack reserve for testing
+editbin /stack:8388608 %PHP_BUILD_DIR%\php.exe
+editbin /stack:8388608 %PHP_BUILD_DIR%\php-cgi.exe
+
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
 if "%ASAN%" equ "1" set ASAN_OPTS=--asan
