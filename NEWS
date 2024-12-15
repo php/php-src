@@ -42,6 +42,8 @@ PHP                                                                        NEWS
 
 - SimpleXML:
   . Fixed bug GH-17040 (SimpleXML's unset can break DOM objects). (nielsdos)
+  . Fixed bug GH-17153 (SimpleXML crash when using autovivification on
+    document). (nielsdos)
 
 - Sockets:
   . Fixed bug GH-16276 (socket_strerror overflow handling with INT_MIN).
