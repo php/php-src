@@ -678,7 +678,9 @@ PHP_FUNCTION(pcntl_exec)
 		envs_hash = Z_ARRVAL_P(envs);
 		envc = zend_hash_num_elements(envs_hash);
 
-		pair = envp = safe_emalloc((envc + 1), sizeof(char *), 0);
+		size_t envp_len = (envc + 1);
+		pair = envp = safe_emalloc(envp_len, sizeof(char *), 0);
+		memset(envp, 0, sizeof(char *) * envp_len);
 		ZEND_HASH_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
 			if (envi >= envc) break;
 			if (!key) {
@@ -689,9 +691,7 @@ PHP_FUNCTION(pcntl_exec)
 
 			if (!try_convert_to_string(element)) {
 				zend_string_release(key);
-				efree(argv);
-				efree(envp);
-				RETURN_THROWS();
+				goto cleanup_env_vars;
 			}
 
 			/* Length of element + equal sign + length of key + null */
@@ -714,6 +714,7 @@ PHP_FUNCTION(pcntl_exec)
 			php_error_docref(NULL, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
 
+cleanup_env_vars:
 		/* Cleanup */
 		for (pair = envp; *pair != NULL; pair++) efree(*pair);
 		efree(envp);
