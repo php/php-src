@@ -1135,7 +1135,7 @@ PHP_FUNCTION(pg_query)
 
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if (ZEND_NUM_ARGS() == 2) {
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 			Z_PARAM_STRING(query, query_len)
@@ -1143,6 +1143,9 @@ PHP_FUNCTION(pg_query)
 
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
+	} else {
+		zend_wrong_parameters_count_error(1, 2);
+		RETURN_THROWS();
 	}
 
 	pgsql = link->conn;
@@ -1233,7 +1236,7 @@ PHP_FUNCTION(pg_query_params)
 
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if (ZEND_NUM_ARGS() == 3) {
 		ZEND_PARSE_PARAMETERS_START(3, 3)
 			Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 			Z_PARAM_STRING(query, query_len)
@@ -1242,6 +1245,9 @@ PHP_FUNCTION(pg_query_params)
 
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
+	} else {
+		zend_wrong_parameters_count_error(2, 3);
+		RETURN_THROWS();
 	}
 
 	pgsql = link->conn;
@@ -1343,7 +1349,7 @@ PHP_FUNCTION(pg_prepare)
 
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if (ZEND_NUM_ARGS() == 3) {
 		ZEND_PARSE_PARAMETERS_START(3, 3)
 			Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 			Z_PARAM_STRING(stmtname, stmtname_len)
@@ -1352,6 +1358,9 @@ PHP_FUNCTION(pg_prepare)
 
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
+	} else {
+		zend_wrong_parameters_count_error(2, 3);
+		RETURN_THROWS();
 	}
 
 	pgsql = link->conn;
@@ -1429,7 +1438,7 @@ PHP_FUNCTION(pg_execute)
 
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if (ZEND_NUM_ARGS() == 3) {
 		ZEND_PARSE_PARAMETERS_START(3, 3)
 			Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 			Z_PARAM_STRING(stmtname, stmtname_len)
@@ -1438,6 +1447,9 @@ PHP_FUNCTION(pg_execute)
 
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
+	} else {
+		zend_wrong_parameters_count_error(2, 3);
+		RETURN_THROWS();
 	}
 
 	pgsql = link->conn;
@@ -2229,7 +2241,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bo
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
 		ZEND_PARSE_PARAMETERS_END();
-	} else {
+	} else if (ZEND_NUM_ARGS() == 3) {
 		ZEND_PARSE_PARAMETERS_START(3, 3)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
 			if (nullable_row) {
@@ -2239,6 +2251,9 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bo
 			}
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
 		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		zend_wrong_parameters_count_error(2, 3);
+		RETURN_THROWS();
 	}
 
 	pg_result = Z_PGSQL_RESULT_P(result);
@@ -3069,7 +3084,7 @@ PHP_FUNCTION(pg_set_error_verbosity)
 
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if (ZEND_NUM_ARGS() == 2) {
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 			Z_PARAM_LONG(verbosity)
@@ -3077,6 +3092,9 @@ PHP_FUNCTION(pg_set_error_verbosity)
 
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
+	} else {
+		zend_wrong_parameters_count_error(1, 2);
+		RETURN_THROWS();
 	}
 
 	pgsql = link->conn;
@@ -3147,7 +3165,7 @@ PHP_FUNCTION(pg_set_client_encoding)
 
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if (ZEND_NUM_ARGS() == 2) {
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 			Z_PARAM_STRING(encoding, encoding_len)
@@ -3155,6 +3173,9 @@ PHP_FUNCTION(pg_set_client_encoding)
 
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
+	} else {
+		zend_wrong_parameters_count_error(1, 2);
+		RETURN_THROWS();
 	}
 
 	pgsql = link->conn;
@@ -3241,7 +3262,7 @@ PHP_FUNCTION(pg_put_line)
 
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
+	} else if (ZEND_NUM_ARGS() == 2) {
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 			Z_PARAM_STRING(query, query_len)
@@ -3249,6 +3270,9 @@ PHP_FUNCTION(pg_put_line)
 
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
+	} else {
+		zend_wrong_parameters_count_error(1, 2);
+		RETURN_THROWS();
 	}
 
 	pgsql = link->conn;

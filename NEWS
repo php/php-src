@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 - PgSql:
   . Fixed bug GH-17158 (pg_fetch_result Shows Incorrect ArgumentCountError
     Message when Called With 1 Argument). (nielsdos)
+  . Fixed further ArgumentCountError for calls with flexible
+    number of arguments. (David Carlier)
 
 - Phar:
   . Fixed bug GH-17137 (Segmentation fault ext/phar/phar.c). (nielsdos)
