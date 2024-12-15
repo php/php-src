@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fixed unstable get_iterator pointer for hooked classes in shm on Windows.
     (ilutov)
   . Fixed bug GH-17106 (ZEND_MATCH_ERROR misoptimization). (ilutov)
+  . Fixed bug GH-17162 (zend_array_try_init() with dtor can cause engine UAF).
+    (nielsdos)
 
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
