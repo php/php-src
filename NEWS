@@ -40,6 +40,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17158 (pg_fetch_result Shows Incorrect ArgumentCountError
     Message when Called With 1 Argument). (nielsdos)
 
+- Phar:
+  . Fixed bug GH-17137 (Segmentation fault ext/phar/phar.c). (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-17040 (SimpleXML's unset can break DOM objects). (nielsdos)
   . Fixed bug GH-17153 (SimpleXML crash when using autovivification on
