@@ -4,7 +4,7 @@ Fix pg_query()/pg_query_params()/pg_prepare()/pg_execute()/pg_set_error_verbosit
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
