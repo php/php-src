@@ -16,7 +16,7 @@ $options_5 = array("l_onoff" => PHP_INT_MAX, "l_linger" => "1");
 
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, new stdClass);
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
 
@@ -32,7 +32,12 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 try {
-	socket_set_option( $socket, SOL_SOCKET, SO_LINGER, "not good");
+	socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, "not good");
+} catch (\TypeError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+try {
+	socket_set_option( $socket, SOL_SOCKET, SO_LINGER, "not good neither");
 } catch (\TypeError $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
@@ -53,8 +58,9 @@ try {
 }
 ?>
 --EXPECTF--
-socket_set_option(): Argument #4 ($value) must be of type array, stdClass given
+socket_set_option(): Argument #4 ($value) must have key "sec"
 
 Warning: Object of class stdClass could not be converted to int in %s on line %d
-socket_set_option(): Argument #4 ($value) must be of type array, string given
+socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is SO_RCVTIMEO, string given
+socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is SO_LINGER, string given
 socket_set_option(): Argument #4 ($value) "l_onoff" must be between 0 and %d

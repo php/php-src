@@ -1872,11 +1872,15 @@ PHP_FUNCTION(socket_set_option)
 			const char l_linger_key[] = "l_linger";
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
-				zend_argument_type_error(4, "must be of type array, %s given", zend_zval_value_name(arg4));
-				RETURN_THROWS();
+				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
+					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is SO_LINGER, %s given", zend_zval_value_name(arg4));
+					RETURN_THROWS();
+				} else {
+					opt_ht = Z_OBJPROP_P(arg4);
+				}
+			} else {
+				opt_ht = Z_ARRVAL_P(arg4);
 			}
-	
-			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", l_onoff_key);
@@ -1887,21 +1891,21 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			zend_long vall_lonoff = zval_get_long(l_onoff);
-			zend_long vall_linger = zval_get_long(l_linger);
+			zend_long val_lonoff = zval_get_long(l_onoff);
+			zend_long val_linger = zval_get_long(l_linger);
 
-			if (vall_lonoff < 0 || vall_lonoff > USHRT_MAX) {
+			if (val_lonoff < 0 || val_lonoff > USHRT_MAX) {
 				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", l_onoff_key, USHRT_MAX);
 				RETURN_THROWS();
 			}
 
-			if (vall_linger < 0 || vall_linger > USHRT_MAX) {
+			if (val_linger < 0 || val_linger > USHRT_MAX) {
 				zend_argument_value_error(4, "\"%s\" must be between 0 and %d", l_linger, USHRT_MAX);
 				RETURN_THROWS();
 			}
 
-			lv.l_onoff = (unsigned short)vall_lonoff;
-			lv.l_linger = (unsigned short)vall_linger;
+			lv.l_onoff = (unsigned short)val_lonoff;
+			lv.l_linger = (unsigned short)val_linger;
 
 			optlen = sizeof(lv);
 			opt_ptr = &lv;
@@ -1914,11 +1918,17 @@ PHP_FUNCTION(socket_set_option)
 			const char usec_key[] = "usec";
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
-				zend_argument_type_error(4, "must be of type array, %s given", zend_zval_value_name(arg4));
-				RETURN_THROWS();
+				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
+					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is %s, %s given",
+							optname == SO_RCVTIMEO ? "SO_RCVTIMEO" : "SO_SNDTIMEO",
+							zend_zval_value_name(arg4));
+					RETURN_THROWS();
+				} else {
+					opt_ht = Z_OBJPROP_P(arg4);
+				}
+			} else {
+				opt_ht = Z_ARRVAL_P(arg4);
 			}
-
-			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", sec_key);
@@ -1990,15 +2000,15 @@ PHP_FUNCTION(socket_set_option)
 
 #ifdef SO_ATTACH_REUSEPORT_CBPF
 		case SO_ATTACH_REUSEPORT_CBPF: {
-			zend_long fval = zval_get_long(arg4);
+			zend_long cbpf_val = zval_get_long(arg4);
 
-			if (!fval) {
+			if (!cbpf_val) {
 				ov = 1;
 				optlen = sizeof(ov);
 				opt_ptr = &ov;
 				optname = SO_DETACH_BPF;
 			} else {
-				uint32_t k = (uint32_t)fval;
+				uint32_t k = (uint32_t)cbpf_val;
 				static struct sock_filter cbpf[8] = {0};
 				static struct sock_fprog bpfprog;
 
