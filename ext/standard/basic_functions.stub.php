@@ -3569,6 +3569,9 @@ function stream_isatty($stream): bool {}
 #ifdef PHP_WIN32
 /** @param resource $stream */
 function sapi_windows_vt100_support($stream, ?bool $enable = null): bool {}
+
+/** @param resource $stream */
+function sapi_windows_console_size($stream): array|bool {}
 #endif
 
 /** @param resource $stream */

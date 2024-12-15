@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e277d3a5699db6aeedb08642720be841dc37d683 */
+ * Stub hash: af7ac72dbd92ef13bf975e9f66319e11554d9b95 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1987,6 +1987,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_vt100_support, 0, 1
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sapi_windows_console_size, 0, 1, MAY_BE_ARRAY|MAY_BE_BOOL)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
 #endif
 
 #define arginfo_stream_set_chunk_size arginfo_stream_set_write_buffer
@@ -2816,6 +2820,7 @@ ZEND_FUNCTION(stream_is_local);
 ZEND_FUNCTION(stream_isatty);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_vt100_support);
+ZEND_FUNCTION(sapi_windows_console_size);
 #endif
 ZEND_FUNCTION(stream_set_chunk_size);
 #if (defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32))
@@ -3423,6 +3428,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_isatty, arginfo_stream_isatty)
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_vt100_support, arginfo_sapi_windows_vt100_support)
+	ZEND_FE(sapi_windows_console_size, arginfo_sapi_windows_console_size)
 #endif
 	ZEND_FE(stream_set_chunk_size, arginfo_stream_set_chunk_size)
 #if (defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32))

@@ -114,3 +114,14 @@ PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void)
 	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
 }/*}}}*/
 
+PHP_WINUTIL_API BOOL php_win32_console_size(zend_long fileno, int *width, int *height)
+{
+	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	if (!GetConsoleScreenBufferInfo(handle, &csbi)) {
+		return 0;
+	}
+	*width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	*height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	return 1;
+}

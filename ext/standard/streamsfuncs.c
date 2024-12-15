@@ -1774,6 +1774,46 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 		}
 	}
 }
+
+PHP_FUNCTION(sapi_windows_console_size)
+{
+	zval *zsrc;
+	php_stream *stream;
+	zend_long fileno;
+	int width, height;
+	zval zwidth, zheight;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+	Z_PARAM_RESOURCE(zsrc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_stream_from_zval(stream, zsrc);
+
+	/* get the fd.
+	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
+	 * It is only used here so that the buffered data warning is not displayed.
+	 */
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&fileno, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&fileno, 0);
+	} else {
+		php_error_docref(NULL, E_WARNING, "not able to analyze the specified stream");
+		RETURN_FALSE;
+	}
+
+	if (!php_win32_console_fileno_is_console(fileno)) {
+		RETURN_FALSE;
+	}
+
+	if (!php_win32_console_size(fileno, &width, &height)) {
+		RETURN_FALSE;
+	}
+
+	ZVAL_LONG(&zwidth, width);
+	ZVAL_LONG(&zheight, height);
+	RETURN_ARR(zend_new_pair(&zwidth, &zheight));
+}
 #endif
 
 #ifdef HAVE_SHUTDOWN
