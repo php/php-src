@@ -10,7 +10,7 @@ include("inc/skipif.inc");
 <?php
 
 
-include "config.inc";
+include "inc/config.inc";
 
 $db = pg_connect($conn_str);
 try {
