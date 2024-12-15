@@ -3433,7 +3433,24 @@ PHP_FUNCTION(imageconvolution)
 			}
 		}
 	}
-	res = gdImageConvolution(im_src, matrix, (float)div, (float)offset);
+
+	if (UNEXPECTED(!zend_finite(div))) {
+		zend_argument_value_error(3, "must be finite");
+		RETURN_THROWS();
+	}
+
+	float div_float = (float) div;
+	if (UNEXPECTED(div_float == 0.0f)) {
+		zend_argument_value_error(3, "must not be 0");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!zend_finite(offset))) {
+		zend_argument_value_error(4, "must be finite");
+		RETURN_THROWS();
+	}
+
+	res = gdImageConvolution(im_src, matrix, div_float, (float) offset);
 
 	if (res) {
 		RETURN_TRUE;
