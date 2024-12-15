@@ -1,5 +1,7 @@
 --TEST--
 Harden against cmd.exe hijacking
+--CONFLICTS--
+all
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY !== "Windows") die("skip only for Windows");
@@ -18,6 +20,7 @@ if (($num = stream_select($read, $write, $except, 1000)) === false) {
         fpassthru($stream);
     }
 }
+@unlink("cmd.exe");
 ?>
 --EXPECTF--
 resource(%d) of type (process)
