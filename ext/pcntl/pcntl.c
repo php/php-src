@@ -651,14 +651,18 @@ PHP_FUNCTION(pcntl_exec)
 				efree(argv);
 				RETURN_THROWS();
 			}
-			// TODO Check element does not have nul bytes?
+			if (zend_str_has_nul_byte(Z_STR_P(element))) {
+				zend_argument_value_error(2, "individual argument must not contain null bytes");
+				efree(argv);
+				RETURN_THROWS();
+			}
 
 			*current_arg = Z_STRVAL_P(element);
 			current_arg++;
 		} ZEND_HASH_FOREACH_END();
 		*current_arg = NULL;
 	} else {
-		argv = safe_emalloc(2, sizeof(char *), 0);
+		argv = emalloc(2 * sizeof(char *));
 		argv[0] = path;
 		argv[1] = NULL;
 	}
@@ -679,25 +683,31 @@ PHP_FUNCTION(pcntl_exec)
 				goto cleanup_env_vars;
 			}
 
+			if (zend_str_has_nul_byte(element_str)) {
+				zend_argument_value_error(3, "value for environment variable must not contain null bytes");
+				zend_string_release_ex(element_str, false);
+				goto cleanup_env_vars;
+			}
+
+			/* putenv() allows integer environment variables */
 			if (!key) {
-				// TODO Does it even make sense to have an environment variable which is an integer?
 				key = zend_long_to_str((zend_long) key_num);
 			} else {
+				if (zend_str_has_nul_byte(key)) {
+					zend_argument_value_error(3, "name for environment variable must not contain null bytes");
+					zend_string_release_ex(element_str, false);
+					goto cleanup_env_vars;
+				}
 				zend_string_addref(key);
 			}
 
-			// TODO Check key and element do not have nul bytes?
-
 			/* Length of element + equal sign + length of key + null */
-			const uint8_t equal_len = strlen("=");
-			size_t pair_length = ZSTR_LEN(element_str) + equal_len + ZSTR_LEN(key) + 1;
-			ZEND_ASSERT(pair_length < SIZE_MAX);
-			*pair = emalloc(pair_length);
+			*pair = safe_emalloc(ZSTR_LEN(element_str) + 1, sizeof(char), ZSTR_LEN(key) + 1);
 			/* Copy key=element + final null byte into buffer */
 			memcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key));
-			memcpy(*pair + ZSTR_LEN(key), "=", equal_len);
+			(*pair)[ZSTR_LEN(key)] = '=';
 			/* Copy null byte */
-			memcpy(*pair + ZSTR_LEN(key) + equal_len, ZSTR_VAL(element_str), ZSTR_LEN(element_str) + 1);
+			memcpy(*pair + ZSTR_LEN(key) + 1, ZSTR_VAL(element_str), ZSTR_LEN(element_str) + 1);
 
 			/* Cleanup */
 			zend_string_release_ex(key, false);
