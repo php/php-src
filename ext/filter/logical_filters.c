@@ -919,7 +919,8 @@ static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved,
 		/* RFC 1122 - Reserved */
 		*reserved = true;
 	} else if (ip[0] == 255 && ip[1] == 255 && ip[2] == 255 && ip[3] == 255) {
-		/* RFC 0919 - Limited Broadcast */
+		/* RFC 0919 - Limited Broadcast, Updated by RFC 8190, 2.2. */
+		*reserved = true;
 	} else {
 		return false;
 	}
