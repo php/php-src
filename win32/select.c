@@ -16,12 +16,15 @@
 
 #include "php.h"
 #include "php_network.h"
+#include "win32/time.h"
 
 /* Win32 select() will only work with sockets, so we roll our own implementation here.
  * - If you supply only sockets, this simply passes through to winsock select().
  * - If you supply file handles, there is no way to distinguish between
  *   ready for read/write or OOB, so any set in which the handle is found will
- *   be marked as ready. Pipes will be checked if they are ready for read, though.
+ *   be marked as ready.
+ * - If you supply only pipe handles in rfds, and no handles in wfds or efds,
+ *   the pipes will only be marked as ready if there is data available.
  * - If you supply a mixture of handles and sockets, the system will interleave
  *   calls between select() and WaitForMultipleObjects(). The time slicing may
  *   cause this function call to take up to 100 ms longer than you specified.
@@ -34,6 +37,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
 	int handle_slot_to_fd[MAXIMUM_WAIT_OBJECTS];
 	int n_handles = 0, i;
+	int num_read_pipes = 0;
 	fd_set sock_read, sock_write, sock_except;
 	fd_set aread, awrite, aexcept;
 	int sock_max_fd = -1;
@@ -78,6 +82,9 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 					sock_max_fd = i;
 				}
 			} else {
+				if (SAFE_FD_ISSET(i, rfds) && GetFileType(handles[n_handles]) == FILE_TYPE_PIPE) {
+					num_read_pipes++;
+				}
 				handle_slot_to_fd[n_handles] = i;
 				n_handles++;
 			}
@@ -136,7 +143,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[i], 0)) {
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], rfds)) {
 							DWORD avail_read = 0;
-							if (GetFileType(handles[i]) != FILE_TYPE_PIPE
+							if (num_read_pipes < n_handles
 								|| !PeekNamedPipe(handles[i], NULL, 0, NULL, &avail_read, NULL)
 								|| avail_read > 0
 							) {
@@ -155,6 +162,9 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 					}
 				}
 			}
+		}
+		if (retcode == 0 && num_read_pipes == n_handles && sock_max_fd < 0) {
+			usleep(100);
 		}
 	} while (retcode == 0 && (ms_total == INFINITE || GetTickCount64() < limit));
 
