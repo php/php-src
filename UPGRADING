@@ -189,6 +189,13 @@ PHP 8.5 UPGRADE NOTES
     and FFI::load(). However, this convenience feature should not be used in
     production.
 
+* Streams:
+  . If only pipe streams are contained in the $read array, and the $write and
+    $except arrays are empty, stream_select() now behaves similar to POSIX
+    systems, i.e. the function only returns if at least one pipe is ready to be
+    read, or after the timeout expires.  Previously, stream_select() returned
+    immediately, reporting all streams as ready to read.
+
 ========================================
 13. Other Changes
 ========================================
