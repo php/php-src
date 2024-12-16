@@ -12,7 +12,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 require 'testdb.inc';
 
 $dbh = getDbConnection();
-$query = 'SELECT 1';
+$query = 'SELECT 1 FROM RDB$DATABASE';
 $stmt = $dbh->query($query);
 
 try {
