@@ -27,13 +27,12 @@ PHP_FUNCTION(cli_set_process_title)
 {
 	char *title = NULL;
 	size_t title_len;
-	int rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &title, &title_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	rc = set_ps_title(title);
+	ps_title_status rc = set_ps_title(title, title_len);
 	if (rc == PS_TITLE_SUCCESS) {
 		RETURN_TRUE;
 	}
@@ -48,13 +47,12 @@ PHP_FUNCTION(cli_get_process_title)
 {
 	size_t length = 0;
 	const char* title = NULL;
-	int rc;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	rc = get_ps_title(&length, &title);
+	ps_title_status rc = get_ps_title(&length, &title);
 	if (rc != PS_TITLE_SUCCESS) {
 			php_error_docref(NULL, E_WARNING, "cli_get_process_title had an error: %s", ps_title_errno(rc));
 			RETURN_NULL();
