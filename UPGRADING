@@ -69,6 +69,10 @@ PHP 8.5 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . Trying to set a process title that is too long with cli_set_process_title()
+    will now fail instead of silently truncating the given title.
+
 ========================================
 4. Deprecated Functionality
 ========================================
