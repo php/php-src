@@ -1881,8 +1881,6 @@ PHP_FUNCTION(socket_set_option)
 	zend_long					level, optname;
 	void 					*opt_ptr;
 	HashTable		 		*opt_ht;
-	zval 					*l_onoff, *l_linger;
-	zval		 			*sec, *usec;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
@@ -1969,6 +1967,7 @@ PHP_FUNCTION(socket_set_option)
 		case SO_LINGER: {
 			const char l_onoff_key[] = "l_onoff";
 			const char l_linger_key[] = "l_linger";
+			zval *l_onoff, *l_linger;
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
 				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
@@ -2015,6 +2014,7 @@ PHP_FUNCTION(socket_set_option)
 		case SO_SNDTIMEO: {
 			const char sec_key[] = "sec";
 			const char usec_key[] = "usec";
+			zval *sec, *usec;
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
 				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
