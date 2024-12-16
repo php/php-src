@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
 
+- Embed:
+  . Fixed bug GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
+
 - Mbstring:
   . Fixed bug GH-17989 (mb_output_handler crash with unset
     http_output_conv_mimetypes). (nielsdos)
