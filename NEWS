@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17049 (Correctly compare 0 and -0). (Saki Takamachi)
   . Fixed bug GH-17061 (Now Number::round() does not remove trailing zeros).
     (Saki Takamachi)
+  . Fixed bug GH-17064 (Correctly round rounding mode with zero edge case).
+    (Saki Takamachi)
 
 - Core:
   . Fixed bug OSS-Fuzz #382922236 (Duplicate dynamic properties in hooked object
