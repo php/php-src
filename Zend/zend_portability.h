@@ -791,13 +791,9 @@ extern "C++" {
 # define ZEND_STATIC_ASSERT(c, m)
 #endif
 
-#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) /* C11 */
+#if ((defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) /* C11 */ \
+  || (defined(__cplusplus) && __cplusplus >= 201103L) /* C++11 */) && !defined(ZEND_WIN32)
 typedef max_align_t zend_max_align_t;
-#elif (defined(__cplusplus) && __cplusplus >= 201103L) /* C++11 */
-extern "C++" {
-# include <cstddef>
-}
-typedef std::max_align_t zend_max_align_t;
 #else
 typedef union {
 	char c;
