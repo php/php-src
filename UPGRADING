@@ -97,6 +97,9 @@ PHP 8.5 UPGRADE NOTES
     gzfile, gzopen and readgzfile functions had been changed
     from int to boolean.
 
+- PCNTL:
+  . pcntl_exec() now has a formal return type of false.
+
 - PDO_PGSQL:
   . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
   . Pdo\Pgsql::setAttribute and Pdo\Pgsql::prepare supports
