@@ -200,6 +200,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-17224 (UAF in importNode). (nielsdos)
 
 - Embed:
+  . Fixed GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
   . Make build command for program using embed portable. (dunglas)
 
 - FFI:
