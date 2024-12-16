@@ -6,18 +6,30 @@ PHP                                                                        NEWS
   . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros)
     (Saki Takamachi)
 
+- Calendar:
+  . Fixed jdtogregorian overflow. (David Carlier)
+  . Fixed cal_to_jd julian_days argument overflow. (David Carlier)
+
 - COM:
   . Fixed bug GH-16991 (Getting typeinfo of non DISPATCH variant segfaults).
     (cmb)
 
 - Core:
+  . Fail early in *nix configuration build script. (hakre)
   . Fixed bug GH-16344 (setRawValueWithoutLazyInitialization() and
     skipLazyInitialization() may change initialized proxy). (Arnaud)
+  . Fixed bug GH-16727 (Opcache bad signal 139 crash in ZTS bookworm
+    (frankenphp)). (nielsdos)
+  . Fixed bug GH-16799 (Assertion failure at Zend/zend_vm_execute.h:7469).
+    (nielsdos)
+  . Fixed bug GH-16630 (UAF in lexer with encoding translation and heredocs).
+    (nielsdos)
   . Fix is_zend_ptr() huge block comparison. (nielsdos)
   . Fixed potential OOB read in zend_dirname() on Windows. (cmb)
   . Fixed bug GH-15964 (printf() can strip sign of -INF). (divinity76, cmb)
 
 - Curl:
+  . Fixed bug GH-16802 (open_basedir bypass using curl extension). (nielsdos)
   . Fix various memory leaks in curl mime handling. (nielsdos)
 
 - DBA:
@@ -25,15 +37,24 @@ PHP                                                                        NEWS
     resource ids) (kocsismate)
 
 - DOM:
+  . Fixed bug GH-16777 (Calling the constructor again on a DOM object after it
+    is in a document causes UAF). (nielsdos)
   . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
     (nielsdos)
 
 - FPM:
+  . Fixed GH-16432 (PHP-FPM 8.2 SIGSEGV in fpm_get_status). (Jakub Zelenka)
   . Fixed bug GH-16932 (wrong FPM status output). (Jakub Zelenka, James Lucas)
+
+- GD:
+  . Fixed GH-16776 (imagecreatefromstring overflow). (David Carlier)
 
 - GMP:
   . Fixed bug GH-16890 (array_sum() with GMP can loose precision (LLP64)).
     (cmb)
+
+- Hash:
+  . Fixed GH-16711: Segfault in mhash(). (Girgias)
 
 - Opcache:
   . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
@@ -42,12 +63,31 @@ PHP                                                                        NEWS
   . Fixed bug GH-16879 (JIT dead code skipping does not update call_level).
     (nielsdos)
 
-- SAPI:
-  . Fixed bug GH-16998 (UBSAN warning in rfc1867). (nielsdos)
+- OpenSSL:
+  . Prevent unexpected array entry conversion when reading key. (nielsdos)
+  . Fix various memory leaks related to openssl exports. (nielsdos)
+  . Fix memory leak in php_openssl_pkey_from_zval(). (nielsdos)
+
+- PDO:
+  . Fixed memory leak of `setFetchMode()`. (SakiTakamachi)
+
+- Phar:
+  . Fixed bug GH-16695 (phar:// tar parser and zero-length file header blocks).
+    (nielsdos, Hans Krentel)
 
 - PHPDBG:
   . Fixed bug GH-15208 (Segfault with breakpoint map and phpdbg_clear()).
     (nielsdos)
+
+- SAPI:
+  . Fixed bug GH-16998 (UBSAN warning in rfc1867). (nielsdos)
+
+- SimpleXML:
+  . Fixed bug GH-16808 (Segmentation fault in RecursiveIteratorIterator
+    ->current() with a xml element input). (nielsdos)
+
+- SOAP:
+  . Fix make check being invoked in ext/soap. (Ma27)
 
 - Standard:
   . Fixed bug GH-16905 (Internal iterator functions can't handle UNDEF
