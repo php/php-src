@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13437 (FPM: ERROR: scoreboard: failed to lock (already
     locked)). (Jakub Zelenka)
 
+- GD:
+  . Fixed bug GH-16255 (Unexpected nan value in ext/gd/libgd/gd_filter.c).
+    (nielsdos, cmb)
+
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
