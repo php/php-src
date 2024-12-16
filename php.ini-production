@@ -361,6 +361,12 @@ disable_classes =
 ; https://php.net/realpath-cache-ttl
 ;realpath_cache_ttl = 120
 
+; Allows user to disable the "stat cache". By default php remembers the
+; results of the last call to stat() and lstat() and functions that call
+; it underneath.  Setting this to Off disables that behaviour.
+; http://php.net/enable-stat-cache
+;enable_stat_cache = On
+
 ; Enables or disables the circular reference collector.
 ; https://php.net/zend.enable-gc
 zend.enable_gc = On
