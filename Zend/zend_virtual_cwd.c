@@ -146,6 +146,7 @@ static void cwd_globals_ctor(virtual_cwd_globals *cwd_g) /* {{{ */
 	cwd_g->realpath_cache_size = 0;
 	cwd_g->realpath_cache_size_limit = REALPATH_CACHE_SIZE;
 	cwd_g->realpath_cache_ttl = REALPATH_CACHE_TTL;
+	cwd_g->enable_stat_cache = true;
 	memset(cwd_g->realpath_cache, 0, sizeof(cwd_g->realpath_cache));
 }
 /* }}} */
