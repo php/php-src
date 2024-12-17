@@ -620,44 +620,44 @@ PHP_FUNCTION(pcntl_wstopsig)
 /* {{{ Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
-	zval *args = NULL, *envs = NULL;
+	zval *args = NULL;
+	HashTable *env_vars_ht = NULL;
 	zval *element;
-	HashTable *args_hash, *envs_hash;
-	int argc = 0, argi = 0;
-	int envc = 0, envi = 0;
 	char **argv = NULL, **envp = NULL;
-	char **current_arg, **pair;
-	size_t pair_length;
-	zend_string *key;
 	char *path;
 	size_t path_len;
-	zend_ulong key_num;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(path, path_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(args)
-		Z_PARAM_ARRAY(envs)
+		Z_PARAM_ARRAY_HT(env_vars_ht)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (args != NULL) {
+		// TODO Check array is a list?
 		/* Build argument list */
 		SEPARATE_ARRAY(args);
-		args_hash = Z_ARRVAL_P(args);
-		argc = zend_hash_num_elements(args_hash);
+		const HashTable *args_ht = Z_ARRVAL_P(args);
+		uint32_t argc = zend_hash_num_elements(args_ht);
 
+		/* We want a NULL terminated array of char* with the first entry being the path,
+		 * followed by the arguments */
 		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
-		*argv = path;
-		current_arg = argv+1;
-		ZEND_HASH_FOREACH_VAL(args_hash, element) {
-			if (argi >= argc) break;
+		argv[0] = path;
+		char **current_arg = argv+1;
+		ZEND_HASH_FOREACH_VAL(args_ht, element) {
 			if (!try_convert_to_string(element)) {
+				efree(argv);
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(element))) {
+				zend_argument_value_error(2, "individual argument must not contain null bytes");
 				efree(argv);
 				RETURN_THROWS();
 			}
 
 			*current_arg = Z_STRVAL_P(element);
-			argi++;
 			current_arg++;
 		} ZEND_HASH_FOREACH_END();
 		*current_arg = NULL;
@@ -667,39 +667,51 @@ PHP_FUNCTION(pcntl_exec)
 		argv[1] = NULL;
 	}
 
-	if ( ZEND_NUM_ARGS() == 3 ) {
+	if (env_vars_ht != NULL) {
 		/* Build environment pair list */
-		SEPARATE_ARRAY(envs);
-		envs_hash = Z_ARRVAL_P(envs);
-		envc = zend_hash_num_elements(envs_hash);
+		char **pair;
+		zend_ulong key_num;
+		zend_string *key;
 
-		size_t envp_len = (envc + 1);
+		/* We want a NULL terminated array of char* */
+		size_t envp_len = zend_hash_num_elements(env_vars_ht) + 1;
 		pair = envp = safe_emalloc(envp_len, sizeof(char *), 0);
 		memset(envp, 0, sizeof(char *) * envp_len);
-		ZEND_HASH_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
-			if (envi >= envc) break;
-			if (!key) {
-				key = zend_long_to_str(key_num);
-			} else {
-				zend_string_addref(key);
-			}
-
-			if (!try_convert_to_string(element)) {
-				zend_string_release(key);
+		ZEND_HASH_FOREACH_KEY_VAL(env_vars_ht, key_num, key, element) {
+			zend_string *element_str = zval_try_get_string(element);
+			if (element_str == NULL) {
 				goto cleanup_env_vars;
 			}
 
+			if (zend_str_has_nul_byte(element_str)) {
+				zend_argument_value_error(3, "value for environment variable must not contain null bytes");
+				zend_string_release_ex(element_str, false);
+				goto cleanup_env_vars;
+			}
+
+			/* putenv() allows integer environment variables */
+			if (!key) {
+				key = zend_long_to_str((zend_long) key_num);
+			} else {
+				if (zend_str_has_nul_byte(key)) {
+					zend_argument_value_error(3, "name for environment variable must not contain null bytes");
+					zend_string_release_ex(element_str, false);
+					goto cleanup_env_vars;
+				}
+				zend_string_addref(key);
+			}
+
 			/* Length of element + equal sign + length of key + null */
-			ZEND_ASSERT(Z_STRLEN_P(element) < SIZE_MAX && ZSTR_LEN(key) < SIZE_MAX);
-			*pair = safe_emalloc(Z_STRLEN_P(element) + 1, sizeof(char), ZSTR_LEN(key) + 1);
-			pair_length = Z_STRLEN_P(element) + ZSTR_LEN(key) + 2;
-			strlcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
-			strlcat(*pair, "=", pair_length);
-			strlcat(*pair, Z_STRVAL_P(element), pair_length);
+			*pair = safe_emalloc(ZSTR_LEN(element_str) + 1, sizeof(char), ZSTR_LEN(key) + 1);
+			/* Copy key=element + final null byte into buffer */
+			memcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key));
+			(*pair)[ZSTR_LEN(key)] = '=';
+			/* Copy null byte */
+			memcpy(*pair + ZSTR_LEN(key) + 1, ZSTR_VAL(element_str), ZSTR_LEN(element_str) + 1);
 
 			/* Cleanup */
-			zend_string_release_ex(key, 0);
-			envi++;
+			zend_string_release_ex(key, false);
+			zend_string_release_ex(element_str, false);
 			pair++;
 		} ZEND_HASH_FOREACH_END();
 		*(pair) = NULL;
