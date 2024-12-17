@@ -1942,6 +1942,10 @@ PHP_FUNCTION(socket_set_option)
 				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is TCP_FUNCTION_BLK, %s given", zend_zval_value_name(arg4));
 				RETURN_THROWS();
 			}
+			if (zend_str_has_nul_byte(Z_STR_P(arg4))) {
+				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is TCP_FUNCTION_BLK");
+				RETURN_THROWS();
+			}
 			struct tcp_function_set tfs = {0};
 			strlcpy(tfs.function_set_name, Z_STRVAL_P(arg4), TCP_FUNCTION_NAME_LEN_MAX);
 
@@ -2067,6 +2071,10 @@ PHP_FUNCTION(socket_set_option)
 		case SO_ACCEPTFILTER: {
 			if (Z_TYPE_P(arg4) != IS_STRING) {
 				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is SO_ACCEPTFILTER, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(arg4))) {
+				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is SO_ACCEPTFILTER");
 				RETURN_THROWS();
 			}
 			struct accept_filter_arg af = {0};
