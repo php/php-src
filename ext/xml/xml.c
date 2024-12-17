@@ -72,7 +72,7 @@ typedef struct {
 	/* We return a pointer to these zvals in get_gc(), so it's
 	 * important that a) they are adjacent b) object is the first
 	 * and c) the number of zvals is kept up to date. */
-#define XML_PARSER_NUM_ZVALS 12
+#define XML_PARSER_NUM_ZVALS 14
 	zval object;
 	zval startElementHandler;
 	zval endElementHandler;
@@ -85,6 +85,8 @@ typedef struct {
 	zval unknownEncodingHandler;
 	zval startNamespaceDeclHandler;
 	zval endNamespaceDeclHandler;
+	zval data;
+	zval info;
 
 	zend_function *startElementPtr;
 	zend_function *endElementPtr;
@@ -98,12 +100,10 @@ typedef struct {
 	zend_function *startNamespaceDeclPtr;
 	zend_function *endNamespaceDeclPtr;
 
-	zval data;
-	zval info;
 	int level;
 	int toffset;
 	int curtag;
-	zval *ctag;
+	zend_long ctag_index;
 	char **ltags;
 	int lastwasopen;
 	int skipwhite;
@@ -326,6 +326,8 @@ static void xml_parser_free_obj(zend_object *object)
 {
 	xml_parser *parser = xml_parser_from_obj(object);
 
+	zval_ptr_dtor(&parser->info);
+	zval_ptr_dtor(&parser->data);
 	if (parser->parser) {
 		XML_ParserFree(parser->parser);
 	}
@@ -551,15 +553,18 @@ static void _xml_add_to_info(xml_parser *parser, const char *name)
 {
 	zval *element;
 
-	if (Z_ISUNDEF(parser->info)) {
+	if (Z_ISUNDEF(parser->info) || UNEXPECTED(Z_TYPE_P(Z_REFVAL(parser->info)) != IS_ARRAY)) {
 		return;
 	}
 
+	SEPARATE_ARRAY(Z_REFVAL(parser->info));
+	zend_array *arr = Z_ARRVAL_P(Z_REFVAL(parser->info));
+
 	size_t name_len = strlen(name);
-	if ((element = zend_hash_str_find(Z_ARRVAL(parser->info), name, name_len)) == NULL) {
+	if ((element = zend_hash_str_find(arr, name, name_len)) == NULL) {
 		zval values;
 		array_init(&values);
-		element = zend_hash_str_update(Z_ARRVAL(parser->info), name, name_len, &values);
+		element = zend_hash_str_update(arr, name, name_len, &values);
 	}
 
 	add_next_index_long(element, parser->curtag);
@@ -582,6 +587,33 @@ static zend_string *_xml_decode_tag(xml_parser *parser, const XML_Char *tag)
 	return str;
 }
 /* }}} */
+
+static zval *xml_get_separated_data(xml_parser *parser)
+{
+	if (EXPECTED(Z_TYPE_P(Z_REFVAL(parser->data)) == IS_ARRAY)) {
+		SEPARATE_ARRAY(Z_REFVAL(parser->data));
+		return Z_REFVAL(parser->data);
+	}
+	return NULL;
+}
+
+static zval *xml_get_ctag(xml_parser *parser)
+{
+	zval *data = xml_get_separated_data(parser);
+	if (EXPECTED(data)) {
+		zval *zv = zend_hash_index_find(Z_ARRVAL_P(data), parser->ctag_index);
+		if (UNEXPECTED(!zv)) {
+			return NULL;
+		}
+		ZVAL_DEREF(zv);
+		if (UNEXPECTED(Z_TYPE_P(zv) != IS_ARRAY)) {
+			return NULL;
+		}
+		SEPARATE_ARRAY(zv);
+		return zv;
+	}
+	return NULL;
+}
 
 /* {{{ _xml_startElementHandler() */
 void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Char **attributes)
@@ -662,7 +694,19 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				zval_ptr_dtor(&atr);
 			}
 
-			parser->ctag = zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
+			zval *data = xml_get_separated_data(parser);
+			if (EXPECTED(data)) {
+				/* Note: due to array resizes or user interference,
+				 * we have to store an index instead of a zval into the array's memory. */
+				zend_array *arr = Z_ARRVAL_P(data);
+				if (EXPECTED(zend_hash_next_index_insert(arr, &tag))) {
+					parser->ctag_index = arr->nNextFreeElement - 1;
+				} else {
+					zval_ptr_dtor(&tag);
+				}
+			} else {
+				zval_ptr_dtor(&tag);
+			}
 		} else if (parser->level == (XML_MAXLEVEL + 1)) {
 						php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
 		}
@@ -695,19 +739,26 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 
 	if (!Z_ISUNDEF(parser->data) && !EG(exception)) {
 		zval tag;
+		zval *data = xml_get_separated_data(parser);
 
 		if (parser->lastwasopen) {
-			add_assoc_string(parser->ctag, "type", "complete");
+			if (EXPECTED(data)) {
+				zval *zv = zend_hash_index_find_deref(Z_ARRVAL_P(data), parser->ctag_index);
+				if (EXPECTED(zv && Z_TYPE_P(zv) == IS_ARRAY)) {
+					SEPARATE_ARRAY(zv);
+					add_assoc_string(zv, "type", "complete");
+				}
+			}
 		} else {
-			array_init(&tag);
-
 			_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
 
-			add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
-			add_assoc_string(&tag, "type", "close");
-			add_assoc_long(&tag, "level", parser->level);
-
-			zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
+			if (EXPECTED(data)) {
+				array_init(&tag);
+				add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
+				add_assoc_string(&tag, "type", "close");
+				add_assoc_long(&tag, "level", parser->level);
+				zend_hash_next_index_insert(Z_ARRVAL_P(data), &tag);
+			}
 		}
 
 		parser->lastwasopen = 0;
@@ -765,9 +816,15 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		}
 	}
 	if (parser->lastwasopen) {
+		zval *ctag = xml_get_ctag(parser);
+		if (UNEXPECTED(!ctag)) {
+			zend_string_release_ex(decoded_value, false);
+			return;
+		}
+
 		zval *myval;
 		/* check if the current tag already has a value - if yes append to that! */
-		if ((myval = zend_hash_find(Z_ARRVAL_P(parser->ctag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
+		if ((myval = zend_hash_find(Z_ARRVAL_P(ctag), ZSTR_KNOWN(ZEND_STR_VALUE))) && Z_TYPE_P(myval) == IS_STRING) {
 			size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 			Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
 			strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
@@ -775,7 +832,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			zend_string_release_ex(decoded_value, 0);
 		} else {
 			if (doprint || (! parser->skipwhite)) {
-				add_assoc_str(parser->ctag, "value", decoded_value);
+				add_assoc_str(ctag, "value", decoded_value);
 			} else {
 				zend_string_release_ex(decoded_value, 0);
 			}
@@ -783,9 +840,17 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 	} else {
 		zval tag;
 		zval *curtag, *mytype, *myval;
-		ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
-			if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
-				if (zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
+
+		zval *data = xml_get_separated_data(parser);
+		if (UNEXPECTED(!data)) {
+			zend_string_release_ex(decoded_value, false);
+			return;
+		}
+
+		ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL_P(data), curtag) {
+			if (EXPECTED(Z_TYPE_P(curtag) == IS_ARRAY) && (mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
+				if (EXPECTED(Z_TYPE_P(mytype) == IS_STRING) && zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
+					SEPARATE_ARRAY(curtag);
 					if ((myval = zend_hash_find(Z_ARRVAL_P(curtag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
 						size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
@@ -805,7 +870,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			add_assoc_str(&tag, "value", decoded_value);
 			add_assoc_string(&tag, "type", "cdata");
 			add_assoc_long(&tag, "level", parser->level);
-			zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
+			zend_hash_next_index_insert(Z_ARRVAL_P(data), &tag);
 		} else if (parser->level == (XML_MAXLEVEL + 1)) {
 								php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
 		} else {
@@ -1266,21 +1331,21 @@ PHP_FUNCTION(xml_parse_into_struct)
 	}
 
 	if (info) {
-		info = zend_try_array_init(info);
-		if (!info) {
+		if (!zend_try_array_init(info)) {
 			RETURN_THROWS();
 		}
 	}
 
-	xdata = zend_try_array_init(xdata);
-	if (!xdata) {
+	if (!zend_try_array_init(xdata)) {
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY_VALUE(&parser->data, xdata);
+	zval_ptr_dtor(&parser->data);
+	ZVAL_COPY(&parser->data, xdata);
 
 	if (info) {
-		ZVAL_COPY_VALUE(&parser->info, info);
+		zval_ptr_dtor(&parser->info);
+		ZVAL_COPY(&parser->info, info);
 	}
 
 	parser->level = 0;
