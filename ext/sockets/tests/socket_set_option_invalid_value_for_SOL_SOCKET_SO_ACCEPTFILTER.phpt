@@ -33,7 +33,7 @@ try {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
-    $ret = socket_set_option($socket, SOL_SOCKET, SO_ACCEPTFILTER, str_repeat("a", 2048);
+    $ret = socket_set_option($socket, SOL_SOCKET, SO_ACCEPTFILTER, str_repeat("a", 2048));
     var_dump($ret);
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
