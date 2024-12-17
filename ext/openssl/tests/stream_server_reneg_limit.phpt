@@ -7,9 +7,6 @@ openssl
 if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl help', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
-if(substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not suitable for Windows');
-}
 ?>
 --FILE--
 <?php
@@ -83,8 +80,9 @@ $clientCode = <<<'CODE'
     // Server settings only allow one per second (should result in disconnection)
     fwrite($stdin, "R\nR\nR\nR\n");
 
-    $lines = [];
-    while(!feof($stderr)) {
+    $r = [$stderr];
+    $w = $e = null;
+    while (stream_select($r, $w, $e, 1) > 0) {
         fgets($stderr);
     }
 
