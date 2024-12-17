@@ -45,7 +45,7 @@ PHP 8.5 UPGRADE NOTES
 - PCNTL:
   . pcntl_exec() now throws ValueErrors when entries of the $args parameter
     contain null bytes.
-  . pcntl_exec() now throws ValueErrors when entries or keys of of the
+  . pcntl_exec() now throws ValueErrors when entries or keys of the
     $env_vars parameter contain null bytes.
 
 - SPL:
