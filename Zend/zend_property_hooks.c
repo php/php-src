@@ -28,6 +28,7 @@ typedef struct {
 	bool declared_props_done;
 	zval declared_props;
 	bool dynamic_props_done;
+	uint32_t dynamic_prop_offset;
 	uint32_t dynamic_prop_it;
 	zval current_key;
 	zval current_data;
@@ -36,9 +37,19 @@ typedef struct {
 static zend_result zho_it_valid(zend_object_iterator *iter);
 static void zho_it_move_forward(zend_object_iterator *iter);
 
-static uint32_t zho_num_backed_props(zend_object *zobj)
+static uint32_t zho_find_dynamic_prop_offset(zend_array *properties)
 {
-	return zobj->ce->default_properties_count;
+	uint32_t offset = 0;
+	zval *value;
+
+	ZEND_HASH_MAP_FOREACH_VAL(properties, value) {
+		if (Z_TYPE_P(value) != IS_INDIRECT) {
+			break;
+		}
+		offset++;
+	} ZEND_HASH_FOREACH_END();
+
+	return offset;
 }
 
 static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access, bool force_ptr, bool include_dynamic_props)
@@ -106,7 +117,10 @@ skip_property:
 	if (include_dynamic_props && zobj->properties) {
 		zend_string *prop_name;
 		zval *prop_value;
-		ZEND_HASH_FOREACH_STR_KEY_VAL_FROM(zobj->properties, prop_name, prop_value, zho_num_backed_props(zobj)) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(zobj->properties, prop_name, prop_value) {
+			if (Z_TYPE_P(prop_value) == IS_INDIRECT) {
+				continue;
+			}
 			zval *tmp = _zend_hash_append(properties, prop_name, prop_value);
 			Z_TRY_ADDREF_P(tmp);
 		} ZEND_HASH_FOREACH_END();
@@ -132,7 +146,8 @@ static void zho_dynamic_it_init(zend_hooked_object_iterator *hooked_iter)
 	zend_object *zobj = Z_OBJ_P(&hooked_iter->it.data);
 	zend_array *properties = zobj->handlers->get_properties(zobj);
 	hooked_iter->dynamic_props_done = false;
-	hooked_iter->dynamic_prop_it = zend_hash_iterator_add(properties, zho_num_backed_props(zobj));
+	hooked_iter->dynamic_prop_offset = zho_find_dynamic_prop_offset(properties);
+	hooked_iter->dynamic_prop_it = zend_hash_iterator_add(properties, hooked_iter->dynamic_prop_offset);
 }
 
 static void zho_it_get_current_key(zend_object_iterator *iter, zval *key);
@@ -324,7 +339,7 @@ static void zho_it_rewind(zend_object_iterator *iter)
 	zend_hash_internal_pointer_reset(properties);
 	hooked_iter->declared_props_done = !zend_hash_num_elements(properties);
 	hooked_iter->dynamic_props_done = false;
-	EG(ht_iterators)[hooked_iter->dynamic_prop_it].pos = zho_num_backed_props(Z_OBJ(iter->data));
+	EG(ht_iterators)[hooked_iter->dynamic_prop_it].pos = hooked_iter->dynamic_prop_offset;
 }
 
 static HashTable *zho_it_get_gc(zend_object_iterator *iter, zval **table, int *n)
