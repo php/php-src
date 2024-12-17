@@ -101,6 +101,9 @@ PHP                                                                        NEWS
 - Windows:
   . Hardened proc_open() against cmd.exe hijacking. (cmb)
 
+- XML:
+  . Fixed bug GH-1718 (unreachable program point in zend_hash). (nielsdos)
+
 19 Dec 2024, PHP 8.3.15
 
 - Calendar:
