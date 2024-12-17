@@ -583,7 +583,8 @@ PHP_METHOD(Dom_TokenList, replace)
 		/* It already exists, remove token instead. */
 		zend_hash_del_bucket(token_set, bucket);
 	} else {
-		Z_STR(bucket->val) = new_token;
+		/* Need to use ZVAL_STR instead of Z_STR to reset the type flags. */
+		ZVAL_STR(&bucket->val, new_token);
 	}
 
 	/* 5. Run the update steps. */
