@@ -48,6 +48,10 @@ PHP 8.5 UPGRADE NOTES
   . pcntl_exec() now throws ValueErrors when entries or keys of the
     $env_vars parameter contain null bytes.
 
+- PDO_FIREBIRD:
+  . A ValueError is now thrown when trying to set a cursor name that is too
+    long on a PDOStatement resulting from the Firebird driver.
+
 - SPL:
   . ArrayObject no longer accepts enums, as modifying the $name or $value
     properties can break engine assumptions.
