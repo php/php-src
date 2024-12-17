@@ -98,7 +98,7 @@ int	mysqlnd_local_infile_error(void * ptr, char *error_buf, unsigned int error_b
 	}
 
 	ZEND_ASSERT(error_buf_len >= sizeof("Unknown error"));
-	memcpy(error_buf, "Unknown error", sizeof("Unknown error"));
+	strcpy(error_buf, "Unknown error");
 	DBG_INF_FMT("no info, %d", CR_UNKNOWN_ERROR);
 	DBG_RETURN(CR_UNKNOWN_ERROR);
 }
