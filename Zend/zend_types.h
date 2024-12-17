@@ -808,7 +808,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_ARRAY_EX					(IS_ARRAY          | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
 #define IS_OBJECT_EX				(IS_OBJECT         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
 #define IS_RESOURCE_EX				(IS_RESOURCE       | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
-#define IS_REFERENCE_EX				(IS_REFERENCE      | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
+#define IS_REFERENCE_EX				(IS_REFERENCE      | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
 
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
@@ -942,6 +942,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define Z_OPT_REFCOUNTED(zval)		Z_TYPE_INFO_REFCOUNTED(Z_TYPE_INFO(zval))
 #define Z_OPT_REFCOUNTED_P(zval_p)	Z_OPT_REFCOUNTED(*(zval_p))
+
+#define Z_OPT_COLLECTABLE(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT)) != 0)
+#define Z_OPT_COLLECTABLE_P(zval_p)	Z_OPT_COLLECTABLE(*(zval_p))
 
 /* deprecated: (COPYABLE is the same as IS_ARRAY) */
 #define Z_OPT_COPYABLE(zval)		(Z_OPT_TYPE(zval) == IS_ARRAY)

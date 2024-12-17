@@ -34,6 +34,8 @@ PHP 8.5 UPGRADE NOTES
     $object. If compared to a statically unknown value $object == $true, it
     would always return false. This behavior was consolidated to always follow
     the behavior of (bool) $object.
+  . The return value of gc_collect_cycles() no longer includes strings and
+    resources that were indirectly collected through cycles.
 
 - Intl:
   . The extension now requires at least ICU 57.1.
