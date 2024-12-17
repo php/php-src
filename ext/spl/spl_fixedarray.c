@@ -239,10 +239,14 @@ static HashTable* spl_fixedarray_object_get_properties_for(zend_object *obj, zen
 	zval *const elements = intern->array.elements;
 	HashTable *ht = zend_new_array(size);
 
-	for (zend_long i = 0; i < size; i++) {
-		Z_TRY_ADDREF_P(&elements[i]);
-		zend_hash_next_index_insert(ht, &elements[i]);
+	/* The array elements are not *real properties*. */
+	if (purpose != ZEND_PROP_PURPOSE_GET_OBJECT_VARS) {
+		for (zend_long i = 0; i < size; i++) {
+			Z_TRY_ADDREF_P(&elements[i]);
+			zend_hash_next_index_insert(ht, &elements[i]);
+		}
 	}
+
 	if (source_properties && zend_hash_num_elements(source_properties) > 0) {
 		zend_long nkey;
 		zend_string *skey;
