@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.2
+19 Dec 2024, PHP 8.4.2
 
 - BcMath:
   . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros)
