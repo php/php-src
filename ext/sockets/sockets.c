@@ -1946,8 +1946,13 @@ PHP_FUNCTION(socket_set_option)
 				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is TCP_FUNCTION_BLK");
 				RETURN_THROWS();
 			}
+			if (Z_STRLEN_P(arg4) > TCP_FUNCTION_NAME_LEN_MAX) {
+				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is TCP_FUNCTION_BLK", TCP_FUNCTION_NAME_LEN_MAX);
+				RETURN_THROWS();
+			}
 			struct tcp_function_set tfs = {0};
-			strlcpy(tfs.function_set_name, Z_STRVAL_P(arg4), TCP_FUNCTION_NAME_LEN_MAX);
+			/* Copy the trailing nul byte */
+			memcpy(tfs.function_set_name, Z_STRVAL_P(arg4), Z_STRLEN_P(arg4)+1);
 
 			optlen = sizeof(tfs);
 			opt_ptr = &tfs;
@@ -2077,8 +2082,13 @@ PHP_FUNCTION(socket_set_option)
 				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is SO_ACCEPTFILTER");
 				RETURN_THROWS();
 			}
+			if (Z_STRLEN_P(arg4) > sizeof(af.af_name)) {
+				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is SO_ACCEPTFILTER", sizeof(af.af_name));
+				RETURN_THROWS();
+			}
 			struct accept_filter_arg af = {0};
-			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
+			/* Copy the trailing nul byte */
+			memcpy(af.af_name, Z_STRVAL_P(arg4), Z_STRLEN_P(arg4)+1);
 			opt_ptr = &af;
 			optlen = sizeof(af);
 			break;
