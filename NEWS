@@ -75,6 +75,10 @@ PHP                                                                        NEWS
     on SO_SNDTIMEO/SO_RCVTIMEO for socket_set_option().
     (David Carlier)
 
+- SPL:
+  . Fixed bug GH-17198 (SplFixedArray assertion failure with get_object_vars).
+    (nielsdos)
+
 - Streams:
   . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
     to incorrect error handling). (nielsdos)
