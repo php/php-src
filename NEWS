@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-17101 (AST->string does not reproduce constructor property
     promotion correctly). (nielsdos)
+  . Fixed bug GH-17200 (Incorrect dynamic prop offset in hooked prop iterator).
+    (ilutov)
 
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
