@@ -887,15 +887,25 @@ static int pdo_firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zva
 		default:
 			return 0;
 		case PDO_ATTR_CURSOR_NAME:
-			if (!try_convert_to_string(val)) {
+			zend_string *str_val = zval_try_get_string(val);
+			if (str_val == NULL) {
+				return 0;
+			}
+			// TODO Check cursor name does not have null bytes?
+			if (ZSTR_LEN(str_val) >= sizeof(S->name)) {
+				zend_value_error("Cursor name must not be longer than %zu bytes", sizeof(S->name) - 1);
+				zend_string_release(str_val);
 				return 0;
 			}
 
-			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
+			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, ZSTR_VAL(str_val), 0)) {
 				php_firebird_error_stmt(stmt);
+				zend_string_release(str_val);
 				return 0;
 			}
-			strlcpy(S->name, Z_STRVAL_P(val), sizeof(S->name));
+			/* Include trailing nul byte */
+			memcpy(S->name, ZSTR_VAL(str_val), ZSTR_LEN(str_val) + 1);
+			zend_string_release(str_val);
 			break;
 	}
 	return 1;
