@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug GH-17145 (DOM memory leak). (nielsdos)
+  . Fixed bug GH-17201 (Dom\TokenList issues with interned string replace).
+    (nielsdos)
 
 - FFI:
   . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
