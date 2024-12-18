@@ -84,6 +84,8 @@ PHP                                                                        NEWS
     to incorrect error handling). (nielsdos)
   . Fixed bug GH-16810 (overflow on fopen HTTP wrapper timeout value).
     (David Carlier)
+  . Fixed bug GH-17067 (glob:// wrapper doesn't cater to CWD for ZTS builds).
+    (cmb)
 
 - Windows:
   . Hardened proc_open() against cmd.exe hijacking. (cmb)
