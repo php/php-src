@@ -1552,8 +1552,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) && !0) {
+			zend_nodiscard_function(fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
 			if (!0) {
@@ -1654,8 +1659,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) && !1) {
+			zend_nodiscard_function(fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
 			if (!1) {
@@ -1756,8 +1766,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) && !RETURN_VALUE_USED(opline)) {
+			zend_nodiscard_function(fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
 			if (!RETURN_VALUE_USED(opline)) {
@@ -1860,8 +1875,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) && !0) {
+			zend_nodiscard_function(fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
@@ -1978,8 +1998,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) && !1) {
+			zend_nodiscard_function(fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
@@ -2096,8 +2121,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) && !RETURN_VALUE_USED(opline)) {
+			zend_nodiscard_function(fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
