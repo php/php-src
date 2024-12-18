@@ -1,5 +1,5 @@
 --TEST--
-bug 8315, NULL values halt the validation
+Bug #8315 (NULL values halt the validation)
 --EXTENSIONS--
 filter
 --FILE--

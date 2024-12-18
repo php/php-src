@@ -1,5 +1,5 @@
 --TEST--
-FR #51368 (php_filter_float does not allow custom thousand separators)
+Bug #51368 (php_filter_float does not allow custom thousand separators)
 --EXTENSIONS--
 filter
 --FILE--

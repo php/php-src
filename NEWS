@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
 
+- Filter:
+  . Fixed bug GH-16944 (Fix filtering special IPv4 and IPv6 ranges, by using
+    information from RFC 6890). (Derick)
+
 - FPM:
   . Fixed bug GH-13437 (FPM: ERROR: scoreboard: failed to lock (already
     locked)). (Jakub Zelenka)
