@@ -524,29 +524,38 @@ class DateTimeImmutable implements DateTimeInterface
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::modify() does not modify the object itself")]
     public function modify(string $modifier): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::add() does not modify the object itself")]
     public function add(DateInterval $interval): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::sub() does not modify the object itself")]
     public function sub(DateInterval $interval): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTimezone() does not modify the object itself")]
     public function setTimezone(DateTimeZone $timezone): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTime() does not modify the object itself")]
     public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setDate() does not modify the object itself")]
     public function setDate(int $year, int $month, int $day): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setISODate() does not modify the object itself")]
     public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTimestamp() does not modify the object itself")]
     public function setTimestamp(int $timestamp): DateTimeImmutable {}
 
+    #[\NoDiscard(message: "as DateTimeImmutable::setMicrosecond() does not modify the object itself")]
     public function setMicrosecond(int $microsecond): static {}
 
     /** @tentative-return-type */

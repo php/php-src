@@ -8377,6 +8377,35 @@ static zend_op_array *zend_compile_func_decl_ex(
 		}
 	}
 
+	zend_attribute *nodiscard_attribute = zend_get_attribute_str(
+		op_array->attributes,
+		"nodiscard",
+		sizeof("nodiscard")-1
+	);
+
+	if (nodiscard_attribute) {
+		if (is_hook) {
+			zend_error_noreturn(E_COMPILE_ERROR, "#[\\NoDiscard] is not supported for property hooks");
+		}
+
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
+			if (ZEND_TYPE_CONTAINS_CODE(return_info->type, IS_VOID)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A void %s does not return a value, but #[\\NoDiscard] requires a return value",
+					CG(active_class_entry) != NULL ? "method" : "function");
+			}
+
+			if (ZEND_TYPE_CONTAINS_CODE(return_info->type, IS_NEVER)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A never returning %s does not return a value, but #[\\NoDiscard] requires a return value",
+					CG(active_class_entry) != NULL ? "method" : "function");
+			}
+		}
+
+		op_array->fn_flags |= ZEND_ACC_NODISCARD;
+	}
+
 	zend_compile_stmt(stmt_ast);
 
 	if (is_method) {
