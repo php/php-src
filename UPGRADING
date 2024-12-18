@@ -115,6 +115,14 @@ PHP 8.5 UPGRADE NOTES
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
 
+- POSIX:
+  . posix_ttyname sets last_error to EBADF when encountering
+    an invalid file descriptor.
+  . posix_isatty raises an E_WARNING message when encountering
+    an invalid file descriptor.
+  . posix_fpathconf checks invalid file descriptors and sets
+    last_error to EBADF and raises an E_WARNING message.
+
 ========================================
 6. New Functions
 ========================================

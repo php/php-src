@@ -54,6 +54,9 @@ PHP                                                                        NEWS
 - POSIX:
   . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
     a process can handle. (David Carlier)
+  . posix_ttyname() sets last_error to EBADF on invalid file descriptors,
+    posix_isatty() raises E_WARNING on invalid file descriptors,
+    posix_fpathconf checks invalid file descriptors. (David Carlier)
 
 - Random:
   . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
