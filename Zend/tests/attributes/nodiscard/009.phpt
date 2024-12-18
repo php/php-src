@@ -1,0 +1,14 @@
+--TEST--
+#[\NoDiscard]: Combining with #[\Deprecated] (Internal).
+--EXTENSIONS--
+zend_test
+--FILE--
+<?php
+
+zend_test_deprecated_nodiscard();
+
+?>
+--EXPECTF--
+Deprecated: Function zend_test_deprecated_nodiscard() is deprecated, custom message in %s on line %d
+
+Warning: (B)The return value of function zend_test_deprecated_nodiscard() is expected to be consumed, custom message 2 in %s on line %d
