@@ -1,5 +1,5 @@
 --TEST--
-Bug #49510	boolean validation fails with FILTER_NULL_ON_FAILURE
+Bug #49510 (boolean validation fails with FILTER_NULL_ON_FAILURE)
 --EXTENSIONS--
 filter
 --FILE--

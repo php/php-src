@@ -1,5 +1,5 @@
 --TEST--
-bug 51192, FILTER_VALIDATE_URL will invalidate a hostname that includes '-'
+Bug #51192 (FILTER_VALIDATE_URL will invalidate a hostname that includes '-')
 --EXTENSIONS--
 filter
 --FILE--
