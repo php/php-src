@@ -1646,6 +1646,8 @@ PHP_FUNCTION(socket_get_option)
 	struct timeval	tv;
 #ifdef PHP_WIN32
 	DWORD				timeout = 0;
+#else
+	struct timeval timeout;
 #endif
 	socklen_t		optlen;
 	php_socket		*php_sock;
@@ -1749,14 +1751,6 @@ PHP_FUNCTION(socket_get_option)
 
 			case SO_RCVTIMEO:
 			case SO_SNDTIMEO:
-#ifndef PHP_WIN32
-				optlen = sizeof(tv);
-
-				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&tv, &optlen) != 0) {
-					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
-					RETURN_FALSE;
-				}
-#else
 				optlen = sizeof(timeout);
 
 				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&timeout, &optlen) != 0) {
@@ -1764,8 +1758,12 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
+#ifndef PHP_WIN32
+				tv.tv_sec = timeout.tv_sec;
+				tv.tv_usec = timeout.tv_usec;
+#else
 				tv.tv_sec = timeout ? (long)(timeout / 1000) : 0;
-				tv.tv_usec = timeout ? (long)((timeout * 1000) % 1000000) : 0;
+				tv.tv_usec = timeout ? (long)((timeout % 1000) * 1000) : 0;
 #endif
 
 				array_init(return_value);
@@ -2046,7 +2044,24 @@ PHP_FUNCTION(socket_set_option)
 			optlen = sizeof(tv);
 			opt_ptr = &tv;
 #else
-			timeout = Z_LVAL_P(sec) * 1000 + Z_LVAL_P(usec) / 1000;
+			if (valsec < 0 || valsec > ULONG_MAX / 1000) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", sec_key, (ULONG_MAX / 1000));
+				RETURN_THROWS();
+			}
+
+			timeout = valsec * 1000;
+
+
+			/*
+			 * We deliberately throw if (valusec / 1000) > ULONG_MAX, treating it as a programmer error.
+			 * On Windows, ULONG_MAX = 2^32, unlike ZEND_LONG_MAX = 2^63.
+			 */
+			if (valusec < 0 || timeout > ULONG_MAX - (valusec / 1000)) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", usec_key, (DWORD)(ULONG_MAX - (valusec / 1000)));
+				RETURN_THROWS();
+			}
+
+			timeout += valusec / 1000;
 			optlen = sizeof(timeout);
 			opt_ptr = &timeout;
 #endif
