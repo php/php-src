@@ -51,6 +51,8 @@ PHP                                                                        NEWS
   . opcache_get_configuration() properly reports jit_prof_threshold. (cmb)
   . Fixed bug GH-17140 (Assertion failure in JIT trace exit with
     ZEND_FETCH_DIM_FUNC_ARG). (nielsdos, Dmitry)
+  . Fixed bug GH-17151 (Incorrect RC inference of op1 of FETCH_OBJ and
+    INIT_METHOD_CALL). (Dmitry, ilutov)
 
 - PCNTL:
   . Fix memory leak in cleanup code of pcntl_exec() when a non stringable

@@ -14426,6 +14426,7 @@ result_fetched:
 		ir_MERGE_list(slow_inputs);
 		jit_SET_EX_OPLINE(jit, opline);
 
+		op1_info |= MAY_BE_RC1 | MAY_BE_RCN; /* object may be captured/released in magic handler */
 		if (opline->opcode == ZEND_FETCH_OBJ_W) {
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_fetch_obj_w_slow), obj_ref);
 			ir_END_list(end_inputs);
