@@ -218,6 +218,11 @@ namespace {
     #[\Deprecated(message: "custom message")]
     function zend_test_deprecated_attr(): void {}
 
+
+    #[\Deprecated(message: "custom message")]
+    #[\NoDiscard(message: "custom message 2")]
+    function zend_test_deprecated_nodiscard(): int {}
+
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}
 
