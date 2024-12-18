@@ -470,6 +470,7 @@ PHP_FUNCTION(posix_ttyname)
 		/* fd must fit in an int and be positive */
 		if (fd < 0 || fd > INT_MAX) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
+			POSIX_G(last_error) = EBADF;
 			RETURN_FALSE;
 		}
 	}
@@ -532,6 +533,7 @@ PHP_FUNCTION(posix_isatty)
 
 	/* A valid file descriptor must fit in an int and be positive */
 	if (fd < 0 || fd > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
 		POSIX_G(last_error) = EBADF;
 		RETURN_FALSE;
 	}
@@ -1324,6 +1326,12 @@ PHP_FUNCTION(posix_fpathconf)
 				zend_zval_value_name(z_fd));
 			RETURN_THROWS();
 		}
+	}
+	/* fd must fit in an int and be positive */
+	if (fd < 0 || fd > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
+		POSIX_G(last_error) = EBADF;
+		RETURN_FALSE;
 	}
 
 	ret = fpathconf(fd, name);
