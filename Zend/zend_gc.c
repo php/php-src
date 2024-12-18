@@ -1282,7 +1282,7 @@ tail_call:
 					GC_REF_SET_COLOR(ht, GC_WHITE);
 					GC_STACK_PUSH((zend_refcounted *) ht);
 					for (; n != 0; n--) {
-						if (Z_OPT_COLLECTABLE_P(zv)) {
+						if (Z_COLLECTABLE_P(zv)) {
 							ref = Z_COUNTED_P(zv);
 							if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 								GC_REF_SET_COLOR(ref, GC_WHITE);
@@ -1704,7 +1704,7 @@ tail_call:
 				for (; n != 0; n--) {
 					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 					zval *entry = (zval*) Z_PTR_P(zv);
-					if (Z_COLLECTABLE_P(entry)) {
+					if (Z_OPT_COLLECTABLE_P(entry)) {
 						ref = Z_COUNTED_P(entry);
 						GC_STACK_PUSH(ref);
 					}
