@@ -1810,6 +1810,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 	ce->parent = parent_ce;
 	ce->default_object_handlers = parent_ce->default_object_handlers;
 	ce->ce_flags |= ZEND_ACC_RESOLVED_PARENT;
+	ce->ce_flags |= (parent_ce->ce_flags & ZEND_ACC_MAY_BE_CYCLIC);
 
 	/* Inherit properties */
 	if (parent_ce->default_properties_count) {
@@ -2832,6 +2833,9 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 		if (!traits[i]) {
 			continue;
 		}
+
+		ce->ce_flags |= (traits[i]->ce_flags & ZEND_ACC_MAY_BE_CYCLIC);
+
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->properties_info, prop_name, property_info) {
 			uint32_t flags = property_info->flags;
 

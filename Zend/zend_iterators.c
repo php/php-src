@@ -58,6 +58,7 @@ ZEND_API void zend_register_iterator_wrapper(void)
 {
 	INIT_CLASS_ENTRY(zend_iterator_class_entry, "__iterator_wrapper", NULL);
 	zend_iterator_class_entry.default_object_handlers = &iterator_object_handlers;
+	zend_iterator_class_entry.ce_flags |= ZEND_ACC_MAY_BE_CYCLIC;
 }
 
 static void iter_wrapper_free(zend_object *object)

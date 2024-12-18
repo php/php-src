@@ -31,6 +31,9 @@ static zend_always_inline void _zend_object_std_init(zend_object *object, zend_c
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = GC_OBJECT;
+	if (!(ce->ce_flags & ZEND_ACC_MAY_BE_CYCLIC)) {
+		GC_TYPE_INFO(object) |= (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT);
+	}
 	object->ce = ce;
 	object->extra_flags = 0;
 	object->handlers = ce->default_object_handlers;

@@ -30,7 +30,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     Property [ public string $name ]
   }
 
-  - Methods [64] {
+  - Methods [65] {
     Method [ <internal:Reflection> private method __clone ] {
 
       - Parameters [0] {
@@ -513,6 +513,13 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
         Parameter #1 [ <optional> int $flags = 0 ]
       }
       - Return [ array ]
+    }
+
+    Method [ <internal:Reflection> public method mayBeCyclic ] {
+
+      - Parameters [0] {
+      }
+      - Return [ bool ]
     }
   }
 }

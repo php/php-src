@@ -786,7 +786,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define GC_ARRAY					IS_ARRAY
 #define GC_OBJECT					IS_OBJECT
 #define GC_RESOURCE					(IS_RESOURCE     | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
-#define GC_REFERENCE				(IS_REFERENCE    | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_REFERENCE				IS_REFERENCE
 #define GC_CONSTANT_AST				(IS_CONSTANT_AST | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */

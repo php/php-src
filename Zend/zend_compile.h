@@ -267,7 +267,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30,31)                            |     |     |     */
+/* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -332,6 +332,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Object may be the root of a cycle                      |     |     |     */
+#define ZEND_ACC_MAY_BE_CYCLIC           (1 << 30) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 29-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
