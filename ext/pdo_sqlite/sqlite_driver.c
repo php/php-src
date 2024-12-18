@@ -104,14 +104,14 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 		if (H->db) {
 			/* delete the function from the handle */
 			sqlite3_create_function(H->db,
-				func->funcname,
+				ZSTR_VAL(func->funcname),
 				func->argc,
 				SQLITE_UTF8,
 				func,
 				NULL, NULL, NULL);
 		}
 
-		efree((char*)func->funcname);
+		zend_string_release(func->funcname);
 		if (ZEND_FCC_INITIALIZED(func->func)) {
 			zend_fcc_dtor(&func->func);
 		}
@@ -132,13 +132,13 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 		if (H->db) {
 			/* delete the collation from the handle */
 			sqlite3_create_collation(H->db,
-				collation->name,
+				ZSTR_VAL(collation->name),
 				SQLITE_UTF8,
 				collation,
 				NULL);
 		}
 
-		efree((char*)collation->name);
+		zend_string_release(collation->name);
 		if (ZEND_FCC_INITIALIZED(collation->callback)) {
 			zend_fcc_dtor(&collation->callback);
 		}
@@ -496,8 +496,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	struct pdo_sqlite_func *func;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
-	char *func_name;
-	size_t func_name_len;
+	zend_string *func_name;
 	zend_long argc = -1;
 	zend_long flags = 0;
 	pdo_dbh_t *dbh;
@@ -505,7 +504,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
-		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_STR(func_name)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
@@ -519,9 +518,9 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8, func, php_sqlite3_func_callback, NULL, NULL);
+	ret = sqlite3_create_function(H->db, ZSTR_VAL(func_name), argc, flags | SQLITE_UTF8, func, php_sqlite3_func_callback, NULL, NULL);
 	if (ret == SQLITE_OK) {
-		func->funcname = estrdup(func_name);
+		func->funcname = zend_string_copy(func_name);
 
 		zend_fcc_dup(&func->func, &fcc);
 
@@ -555,15 +554,14 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	zend_fcall_info fini_fci = empty_fcall_info;
 	zend_fcall_info_cache step_fcc = empty_fcall_info_cache;
 	zend_fcall_info_cache fini_fcc = empty_fcall_info_cache;
-	char *func_name;
-	size_t func_name_len;
+	zend_string *func_name;
 	zend_long argc = -1;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_STR(func_name)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(step_fci, step_fcc)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fini_fci, fini_fcc)
 		Z_PARAM_OPTIONAL
@@ -577,10 +575,10 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8, func, NULL,
+	ret = sqlite3_create_function(H->db, ZSTR_VAL(func_name), argc, SQLITE_UTF8, func, NULL,
 		php_sqlite3_func_step_callback, php_sqlite3_func_final_callback);
 	if (ret == SQLITE_OK) {
-		func->funcname = estrdup(func_name);
+		func->funcname = zend_string_copy(func_name);
 
 		zend_fcc_dup(&func->step, &step_fcc);
 		zend_fcc_dup(&func->fini, &fini_fcc);
@@ -631,14 +629,13 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 	struct pdo_sqlite_collation *collation;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
-	char *collation_name;
-	size_t collation_name_len;
+	zend_string *collation_name;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(collation_name, collation_name_len)
+		Z_PARAM_STR(collation_name)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -649,9 +646,9 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 
 	collation = (struct pdo_sqlite_collation*)ecalloc(1, sizeof(*collation));
 
-	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, callback);
+	ret = sqlite3_create_collation(H->db, ZSTR_VAL(collation_name), SQLITE_UTF8, collation, callback);
 	if (ret == SQLITE_OK) {
-		collation->name = estrdup(collation_name);
+		collation->name = zend_string_copy(collation_name);
 
 		zend_fcc_dup(&collation->callback, &fcc);
 
