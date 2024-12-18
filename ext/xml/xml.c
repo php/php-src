@@ -667,9 +667,11 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				array_init(&tag);
 				array_init(&atr);
 
-				_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
+				char *skipped_tag_name = SKIP_TAGSTART(ZSTR_VAL(tag_name));
 
-				add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
+				_xml_add_to_info(parser, skipped_tag_name);
+
+				add_assoc_string(&tag, "tag", skipped_tag_name);
 				add_assoc_string(&tag, "type", "open");
 				add_assoc_long(&tag, "level", parser->level);
 
@@ -736,9 +738,11 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 			} else {
 				array_init(&tag);
 
-				_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
+				char *skipped_tag_name = SKIP_TAGSTART(ZSTR_VAL(tag_name));
 
-				add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
+				_xml_add_to_info(parser, skipped_tag_name);
+
+				add_assoc_string(&tag, "tag", skipped_tag_name);
 				add_assoc_string(&tag, "type", "close");
 				add_assoc_long(&tag, "level", parser->level);
 
