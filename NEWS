@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     promotion correctly). (nielsdos)
   . Fixed bug GH-17211 (observer segfault on function loaded with dl()).
     (Arnaud)
+  . Fixed bug GH-17216 (Trampoline crash on error). (nielsdos)
 
 - Date:
   . Fixed bug GH-14709 DatePeriod::__construct() overflow on recurrences.
