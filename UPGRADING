@@ -100,10 +100,9 @@ PHP 8.5 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
-- Zlib:
-  . The "use_include_path" argument for the
-    gzfile, gzopen and readgzfile functions had been changed
-    from int to boolean.
+- Intl:
+  . IntlDateFormatter::setTimeZone()()/datefmt_set_timezone
+    throws an IntlException on uninitialised classes/clone failures.
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
@@ -124,6 +123,11 @@ PHP 8.5 UPGRADE NOTES
     an invalid file descriptor.
   . posix_fpathconf checks invalid file descriptors and sets
     last_error to EBADF and raises an E_WARNING message.
+
+- Zlib:
+  . The "use_include_path" argument for the
+    gzfile, gzopen and readgzfile functions had been changed
+    from int to boolean.
 
 ========================================
 6. New Functions

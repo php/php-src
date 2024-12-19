@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
+  . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
+    with uninitialised classes or clone failure. (David Carlier)
 
 - MySQLnd:
   . Added mysqlnd.collect_memory_statistics to ini quick reference.
