@@ -13,7 +13,7 @@ gettext
     //   * https://github.com/php/php-src/issues/17163
     //
     $result = bind_textdomain_codeset('messages', "UTF-8");
-    var_dump($result === false or $result === "UTF-8");
+    var_dump($result === false || $result === "UTF-8");
 
     echo "Done\n";
 ?>

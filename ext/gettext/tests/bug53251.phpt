@@ -29,7 +29,7 @@ $expected = [true, true, false, "UTF-8", "UTF-8"];
 //
 $expected_musl = [false, true, false, false, false];
 
-var_dump($results === $expected or $results === $expected_musl);
+var_dump($results === $expected || $results === $expected_musl);
 ?>
 --EXPECT--
 bool(true)
