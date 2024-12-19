@@ -792,7 +792,9 @@ php_mysqlnd_change_auth_response_write(void * _packet)
 	MYSQLND_VIO * vio = packet->header.vio;
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
-	zend_uchar * buffer = pfc->cmd_buffer.length >= packet->auth_data_len? pfc->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
+	// zend_uchar * buffer = pfc->cmd_buffer.length >= packet->auth_data_len? pfc->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
+	size_t total_packet_size = packet->auth_data_len + MYSQLND_HEADER_SIZE;
+	zend_uchar * const buffer = pfc->cmd_buffer.length >= total_packet_size? pfc->cmd_buffer.buffer : mnd_emalloc(total_packet_size);
 	zend_uchar * p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
 
 	DBG_ENTER("php_mysqlnd_change_auth_response_write");
