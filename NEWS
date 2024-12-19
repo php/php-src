@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16255 (Unexpected nan value in ext/gd/libgd/gd_filter.c).
     (nielsdos, cmb)
 
+- Gettext:
+  . Fixed bug GH-17202 (Segmentation fault ext/gettext/gettext.c
+    bindtextdomain()). (Michael Orlitzky)
+
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
