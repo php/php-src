@@ -167,7 +167,7 @@ PHP_FUNCTION(bindtextdomain)
 	char *domain;
 	size_t domain_len;
 	zend_string *dir = NULL;
-	char *retval, dir_name[MAXPATHLEN];
+	char *retval, dir_name[MAXPATHLEN], *btd_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS!", &domain, &domain_len, &dir) == FAILURE) {
 		RETURN_THROWS();
@@ -181,7 +181,16 @@ PHP_FUNCTION(bindtextdomain)
 	}
 
 	if (dir == NULL) {
-		RETURN_STRING(bindtextdomain(domain, NULL));
+		btd_result = bindtextdomain(domain, NULL);
+		if (btd_result == NULL) {
+			/* POSIX-compliant implementations can return
+			 * NULL if an error occured. On musl you will
+			 * also get NULL if the domain is not yet
+			 * bound, because musl has no default directory
+			 * to return in that case. */
+			 RETURN_FALSE;
+		}
+		RETURN_STRING(btd_result);
 	}
 
 	if (ZSTR_LEN(dir) != 0 && !zend_string_equals_literal(dir, "0")) {
