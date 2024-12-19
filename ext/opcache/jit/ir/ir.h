@@ -528,11 +528,12 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_OPT_INLINE          (1<<16)
 #define IR_OPT_FOLDING         (1<<17)
 #define IR_OPT_CFG             (1<<18) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_CODEGEN         (1<<19)
-#define IR_GEN_NATIVE          (1<<20)
-#define IR_GEN_CODE            (1<<21) /* C or LLVM */
+#define IR_OPT_MEM2SSA         (1<<19)
+#define IR_OPT_CODEGEN         (1<<20)
+#define IR_GEN_NATIVE          (1<<21)
+#define IR_GEN_CODE            (1<<22) /* C or LLVM */
 
-#define IR_GEN_CACHE_DEMOTE    (1<<22) /* Demote the generated code from closest CPU caches */
+#define IR_GEN_CACHE_DEMOTE    (1<<23) /* Demote the generated code from closest CPU caches */
 
 /* debug related */
 #ifdef IR_DEBUG
@@ -751,13 +752,15 @@ ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref);
 /* Def -> Use lists */
 void ir_build_def_use_lists(ir_ctx *ctx);
 
+/* SSA Construction */
+int ir_mem2ssa(ir_ctx *ctx);
+
 /* CFG - Control Flow Graph (implementation in ir_cfg.c) */
 int ir_build_cfg(ir_ctx *ctx);
-int ir_remove_unreachable_blocks(ir_ctx *ctx);
 int ir_build_dominators_tree(ir_ctx *ctx);
 int ir_find_loops(ir_ctx *ctx);
 int ir_schedule_blocks(ir_ctx *ctx);
-void ir_build_prev_refs(ir_ctx *ctx);
+void ir_reset_cfg(ir_ctx *ctx);
 
 /* SCCP - Sparse Conditional Constant Propagation (implementation in ir_sccp.c) */
 int ir_sccp(ir_ctx *ctx);
@@ -929,7 +932,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 		}
 
 		return ir_emit_code(ctx, size);
-	} else if (opt_level == 1 || opt_level == 2) {
+	} else if (opt_level > 0) {
 		if (!(ctx->flags & IR_OPT_FOLDING)) {
 			// IR_ASSERT(0 && "IR_OPT_FOLDING must be set in ir_init() for -O1 and -O2");
 			return NULL;
@@ -938,14 +941,29 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 
 		ir_build_def_use_lists(ctx);
 
-		if (opt_level == 2
-		 && !ir_sccp(ctx)) {
-			return NULL;
+		if (ctx->flags & IR_OPT_MEM2SSA) {
+			if (!ir_build_cfg(ctx)
+			 || !ir_build_dominators_tree(ctx)
+			 || !ir_mem2ssa(ctx)) {
+				return NULL;
+			}
 		}
 
-		if (!ir_build_cfg(ctx)
-		 || !ir_build_dominators_tree(ctx)
-		 || !ir_find_loops(ctx)
+		if (opt_level > 1) {
+			ir_reset_cfg(ctx);
+			if (!ir_sccp(ctx)) {
+				return NULL;
+			}
+		}
+
+		if (!ctx->cfg_blocks) {
+			if (!ir_build_cfg(ctx)
+			 || !ir_build_dominators_tree(ctx)) {
+				return NULL;
+			}
+		}
+
+		if (!ir_find_loops(ctx)
 		 || !ir_gcm(ctx)
 		 || !ir_schedule(ctx)
 		 || !ir_match(ctx)

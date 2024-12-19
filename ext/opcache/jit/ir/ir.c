@@ -330,6 +330,7 @@ static ir_ref ir_next_const(ir_ctx *ctx)
 
 static void ir_grow_top(ir_ctx *ctx)
 {
+	ir_ref old_insns_limit = ctx->insns_limit;
 	ir_insn *buf = ctx->ir_base - ctx->consts_limit;
 
 	if (ctx->insns_limit < 1024 * 4) {
@@ -341,6 +342,12 @@ static void ir_grow_top(ir_ctx *ctx)
 	}
 	buf = ir_mem_realloc(buf, (ctx->consts_limit + ctx->insns_limit) * sizeof(ir_insn));
 	ctx->ir_base = buf + ctx->consts_limit;
+
+	if (ctx->use_lists) {
+		ctx->use_lists = ir_mem_realloc(ctx->use_lists, ctx->insns_limit * sizeof(ir_use_list));
+		memset(ctx->use_lists + old_insns_limit, 0,
+			(ctx->insns_limit - old_insns_limit) * sizeof(ir_use_list));
+	}
 }
 
 static ir_ref ir_next_insn(ir_ctx *ctx)
@@ -1152,7 +1159,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 	ir_ref n, i, j, *p, def;
 	ir_insn *insn;
 	uint32_t edges_count;
-	ir_use_list *lists = ir_mem_calloc(ctx->insns_count, sizeof(ir_use_list));
+	ir_use_list *lists = ir_mem_calloc(ctx->insns_limit, sizeof(ir_use_list));
 	ir_ref *edges;
 	ir_use_list *use_list;
 
@@ -1207,7 +1214,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 	ir_ref n, i, j, *p, def;
 	ir_insn *insn;
 	size_t linked_lists_size, linked_lists_top = 0, edges_count = 0;
-	ir_use_list *lists = ir_mem_calloc(ctx->insns_count, sizeof(ir_use_list));
+	ir_use_list *lists = ir_mem_calloc(ctx->insns_limit, sizeof(ir_use_list));
 	ir_ref *edges;
 	ir_use_list *use_list;
 	ir_ref *linked_lists;

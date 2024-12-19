@@ -8,6 +8,8 @@
 #include "ir.h"
 #include "ir_private.h"
 
+static int ir_remove_unreachable_blocks(ir_ctx *ctx);
+
 IR_ALWAYS_INLINE void _ir_add_successors(const ir_ctx *ctx, ir_ref ref, ir_worklist *worklist)
 {
 	ir_use_list *use_list = &ctx->use_lists[ref];
@@ -53,6 +55,24 @@ IR_ALWAYS_INLINE void _ir_add_predecessors(const ir_insn *insn, ir_worklist *wor
 	} else if (insn->op != IR_START) {
 		if (EXPECTED(insn->op1)) {
 			ir_worklist_push(worklist, insn->op1);
+		}
+	}
+}
+
+void ir_reset_cfg(ir_ctx *ctx)
+{
+	ctx->cfg_blocks_count = 0;
+	ctx->cfg_edges_count = 0;
+	if (ctx->cfg_blocks) {
+		ir_mem_free(ctx->cfg_blocks);
+		ctx->cfg_blocks = NULL;
+		if (ctx->cfg_edges) {
+			ir_mem_free(ctx->cfg_edges);
+			ctx->cfg_edges = NULL;
+		}
+		if (ctx->cfg_map) {
+			ir_mem_free(ctx->cfg_map);
+			ctx->cfg_map = NULL;
 		}
 	}
 }
@@ -330,11 +350,15 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 		}
 	}
 	i--;
+	for (j = i + 1; j <= n; j++) {
+		ir_insn_set_op(insn, j, IR_UNUSED);
+	}
 	if (i == 1) {
 		insn->op = IR_BEGIN;
 		insn->inputs_count = 1;
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
+			n++;
 			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
@@ -347,12 +371,14 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 						if (ir_bitset_in(life_inputs, j - 1)) {
 							use_insn->op1 = ir_insn_op(use_insn, j);
 						} else if (input > 0) {
-							ir_use_list_remove_all(ctx, input, use);
+							ir_use_list_remove_one(ctx, input, use);
 						}
 					}
 					use_insn->op = IR_COPY;
-					use_insn->op2 = IR_UNUSED;
-					use_insn->op3 = IR_UNUSED;
+					use_insn->inputs_count = 1;
+					for (j = 2; j <= n; j++) {
+						ir_insn_set_op(use_insn, j, IR_UNUSED);
+					}
 					ir_use_list_remove_all(ctx, merge, use);
 				}
 			}
@@ -360,9 +386,9 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 	} else {
 		insn->inputs_count = i;
 
-		n++;
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
+			n++;
 			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
@@ -378,8 +404,12 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 							}
 							i++;
 						} else if (input > 0) {
-							ir_use_list_remove_all(ctx, input, use);
+							ir_use_list_remove_one(ctx, input, use);
 						}
+					}
+					use_insn->inputs_count = i - 1;
+					for (j = i; j <= n; j++) {
+						ir_insn_set_op(use_insn, j, IR_UNUSED);
 					}
 				}
 			}
@@ -390,7 +420,7 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 }
 
 /* CFG constructed after SCCP pass doesn't have unreachable BBs, otherwise they should be removed */
-int ir_remove_unreachable_blocks(ir_ctx *ctx)
+static int ir_remove_unreachable_blocks(ir_ctx *ctx)
 {
 	uint32_t b, *p, i;
 	uint32_t unreachable_count = 0;

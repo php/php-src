@@ -356,9 +356,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 			}
 		} else {
 			j = i = ctx->cfg_map[use];
-			IR_ASSERT(i > 0);
-			while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
-				j = ctx->cfg_blocks[j].idom;
+			if (i) {
+				IR_ASSERT(i > 0);
+				while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
+					j = ctx->cfg_blocks[j].idom;
+				}
 			}
 			clone = ir_hashtab_find(&hash, j);
 			if (clone == IR_INVALID_VAL) {
@@ -941,8 +943,9 @@ int ir_schedule(ir_ctx *ctx)
 
 				for (p = &ctx->use_edges[use_list->refs]; count > 0; p++, count--) {
 					ir_ref use = *p;
-					if (!_xlat[use]) {
-						ir_insn *use_insn = &ctx->ir_base[use];
+					ir_insn *use_insn = &ctx->ir_base[use];
+					if (!_xlat[use] && (_blocks[use] || use_insn->op == IR_PARAM)) {
+						IR_ASSERT(_blocks[use] == b || use_insn->op == IR_PARAM);
 						if (use_insn->op == IR_PARAM
 						 || use_insn->op == IR_VAR
 						 || use_insn->op == IR_PI

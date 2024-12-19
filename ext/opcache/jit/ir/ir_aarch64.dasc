@@ -1095,6 +1095,8 @@ binop_fp:
 				}
 			}
 			return IR_SKIPPED | IR_NOP;
+		case IR_NOP:
+			return IR_SKIPPED | IR_NOP;
 		default:
 			break;
 	}
@@ -5603,7 +5605,8 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 						} else if (def_flags & IR_USE_MUST_BE_IN_REG) {
 							if (insn->op == IR_VLOAD
 							 && ctx->live_intervals[ctx->vregs[i]]
-							 && ctx->live_intervals[ctx->vregs[i]]->stack_spill_pos != -1) {
+							 && ctx->live_intervals[ctx->vregs[i]]->stack_spill_pos != -1
+							 && ir_is_same_mem_var(ctx, i, ctx->ir_base[insn->op2].op3)) {
 								/* pass */
 							} else if (insn->op != IR_PARAM) {
 								reg = ir_get_free_reg(insn->type, available);
@@ -5704,7 +5707,7 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 								if (reg != IR_REG_NONE && IR_REGSET_IN(available, reg)) {
 									IR_REGSET_EXCL(available, reg);
 									ctx->regs[i][j] = reg | IR_REG_SPILL_LOAD;
-								} else if (j > 1 && input == insn->op1 && ctx->regs[i][1] != IR_REG_NONE) {
+								} else if (IR_IS_FOLDABLE_OP(insn->op) && j > 1 && input == insn->op1 && ctx->regs[i][1] != IR_REG_NONE) {
 									ctx->regs[i][j] = ctx->regs[i][1];
 								} else if (use_flags & IR_USE_MUST_BE_IN_REG) {
 									reg = ir_get_free_reg(ctx->ir_base[input].type, available);

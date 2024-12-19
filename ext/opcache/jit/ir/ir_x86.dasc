@@ -1456,10 +1456,28 @@ op2_const:
 		case IR_SEXT:
 		case IR_ZEXT:
 		case IR_TRUNC:
-		case IR_BITCAST:
 		case IR_PROTO:
 		case IR_FP2FP:
 			flags = IR_DEF_REUSES_OP1_REG | IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
+			break;
+		case IR_BITCAST:
+			insn = &ctx->ir_base[ref];
+			if (IR_IS_TYPE_INT(insn->type) && IR_IS_TYPE_INT(ctx->ir_base[insn->op1].type)) {
+				flags = IR_DEF_REUSES_OP1_REG | IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
+			} else {
+				flags = IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
+			}
+			break;
+		case IR_FP2INT:
+			flags = IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
+			break;
+		case IR_INT2FP:
+			flags = IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
+			insn = &ctx->ir_base[ref];
+			if (IR_IS_CONST_REF(insn->op1)) {
+				constraints->tmp_regs[0] = IR_TMP_REG(1, ctx->ir_base[insn->op1].type, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n = 1;
+			}
 			break;
 		case IR_ABS_INT:
 			flags = IR_DEF_CONFLICTS_WITH_INPUT_REGS | IR_USE_MUST_BE_IN_REG | IR_OP1_MUST_BE_IN_REG;
@@ -2877,6 +2895,8 @@ store_int:
 					}
 				}
 			}
+			return IR_SKIPPED | IR_NOP;
+		case IR_NOP:
 			return IR_SKIPPED | IR_NOP;
 		default:
 			break;
@@ -6202,20 +6222,33 @@ static void ir_emit_cond(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 	IR_ASSERT(def_reg != IR_REG_NONE);
 
-	if (op2_reg != IR_REG_NONE && IR_REG_SPILLED(op2_reg)) {
+	if (op2 != op3) {
+		if (op2_reg != IR_REG_NONE && IR_REG_SPILLED(op2_reg)) {
+			op2_reg = IR_REG_NUM(op2_reg);
+			ir_emit_load(ctx, type, op2_reg, op2);
+			if (op1 == op2) {
+				op1_reg = op2_reg;
+			}
+		}
+		if (op3_reg != IR_REG_NONE && IR_REG_SPILLED(op3_reg)) {
+			op3_reg = IR_REG_NUM(op3_reg);
+			ir_emit_load(ctx, type, op3_reg, op3);
+			if (op1 == op2) {
+				op1_reg = op3_reg;
+			}
+		}
+	} else if (op2_reg != IR_REG_NONE && IR_REG_SPILLED(op2_reg)) {
 		op2_reg = IR_REG_NUM(op2_reg);
 		ir_emit_load(ctx, type, op2_reg, op2);
+		op3_reg = op2_reg;
 		if (op1 == op2) {
 			op1_reg = op2_reg;
 		}
-		if (op3 == op2) {
-			op3_reg = op2_reg;
-		}
-	}
-	if (op3_reg != IR_REG_NONE && op3 != op2 && IR_REG_SPILLED(op3_reg)) {
+	} else if (op3_reg != IR_REG_NONE && IR_REG_SPILLED(op3_reg)) {
 		op3_reg = IR_REG_NUM(op3_reg);
 		ir_emit_load(ctx, type, op3_reg, op3);
-		if (op1 == op2) {
+		op2_reg = op3_reg;
+		if (op1 == op3) {
 			op1_reg = op3_reg;
 		}
 	}
@@ -6710,7 +6743,19 @@ static void ir_emit_sext(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.endif
 		}
 	} else if (IR_IS_CONST_REF(insn->op1)) {
-		IR_ASSERT(0);
+		int64_t val;
+
+		if (ir_type_size[src_type] == 1) {
+			val = ctx->ir_base[insn->op1].val.i8;
+		} else if (ir_type_size[src_type] == 2) {
+			val = ctx->ir_base[insn->op1].val.i16;
+		} else if (ir_type_size[src_type] == 4) {
+			val = ctx->ir_base[insn->op1].val.i32;
+		} else {
+			IR_ASSERT(ir_type_size[src_type] == 8);
+			val = ctx->ir_base[insn->op1].val.i64;
+		}
+		ir_emit_mov_imm_int(ctx, dst_type, def_reg, val);
 	} else {
 		ir_mem mem;
 
@@ -6809,7 +6854,19 @@ static void ir_emit_zext(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.endif
 		}
 	} else if (IR_IS_CONST_REF(insn->op1)) {
-		IR_ASSERT(0);
+		uint64_t val;
+
+		if (ir_type_size[src_type] == 1)  {
+			val = ctx->ir_base[insn->op1].val.u8;
+		} else if (ir_type_size[src_type] == 2) {
+			val = ctx->ir_base[insn->op1].val.u16;
+		} else if (ir_type_size[src_type] == 4) {
+			val = ctx->ir_base[insn->op1].val.u32;
+		} else {
+			IR_ASSERT(ir_type_size[src_type] == 8);
+			val = ctx->ir_base[insn->op1].val.u64;
+		}
+		ir_emit_mov_imm_int(ctx, dst_type, def_reg, val);
 	} else {
 		ir_mem mem;
 
@@ -7117,6 +7174,8 @@ static void ir_emit_int2fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			}
 |.endif
 		}
+	} else if (IR_IS_CONST_REF(insn->op1)) {
+		IR_ASSERT(0);
 	} else {
 		ir_mem mem;
 		bool src64 = ir_type_size[src_type] == 8;
@@ -9559,7 +9618,7 @@ static void ir_emit_sse_sqrt(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 	if (IR_REG_SPILLED(op3_reg)) {
 		op3_reg = IR_REG_NUM(op3_reg);
-		ir_emit_load(ctx, IR_ADDR, op3_reg, insn->op3);
+		ir_emit_load(ctx, insn->type, op3_reg, insn->op3);
 	}
 
 	|	ASM_FP_REG_REG_OP sqrts, insn->type, def_reg, op3_reg
@@ -9581,7 +9640,7 @@ static void ir_emit_sse_round(ir_ctx *ctx, ir_ref def, ir_insn *insn, int round_
 
 	if (IR_REG_SPILLED(op3_reg)) {
 		op3_reg = IR_REG_NUM(op3_reg);
-		ir_emit_load(ctx, IR_ADDR, op3_reg, insn->op3);
+		ir_emit_load(ctx, insn->type, op3_reg, insn->op3);
 	}
 
 	if (ctx->mflags & IR_X86_AVX) {
@@ -10019,7 +10078,8 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 						} else if (def_flags & IR_USE_MUST_BE_IN_REG) {
 							if (insn->op == IR_VLOAD
 							 && ctx->live_intervals[ctx->vregs[i]]
-							 && ctx->live_intervals[ctx->vregs[i]]->stack_spill_pos != -1) {
+							 && ctx->live_intervals[ctx->vregs[i]]->stack_spill_pos != -1
+							 && ir_is_same_mem_var(ctx, i, ctx->ir_base[insn->op2].op3)) {
 								/* pass */
 							} else if (insn->op != IR_PARAM) {
 								reg = ir_get_free_reg(insn->type, available);
@@ -10120,7 +10180,7 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 								if (reg != IR_REG_NONE && IR_REGSET_IN(available, reg)) {
 									IR_REGSET_EXCL(available, reg);
 									ctx->regs[i][j] = reg | IR_REG_SPILL_LOAD;
-								} else if (j > 1 && input == insn->op1 && ctx->regs[i][1] != IR_REG_NONE) {
+								} else if (IR_IS_FOLDABLE_OP(insn->op) && j > 1 && input == insn->op1 && ctx->regs[i][1] != IR_REG_NONE) {
 									ctx->regs[i][j] = ctx->regs[i][1];
 								} else if (use_flags & IR_USE_MUST_BE_IN_REG) {
 									reg = ir_get_free_reg(ctx->ir_base[input].type, available);
@@ -11018,7 +11078,8 @@ void ir_fix_thunk(void *thunk_entry, void *addr)
 		addr_ptr = (void**)(code + 6 + *offset_ptr);
 		*addr_ptr = addr;
 	} else {
-		int32_t *addr_ptr;
+		typedef IR_SET_ALIGNED(1, int32_t unaligned_int32_t);
+		unaligned_int32_t *addr_ptr;
 
 		code[0] = 0xe9;
 		addr_ptr = (int32_t*)(code + 1);
