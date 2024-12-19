@@ -1120,6 +1120,7 @@ struct _ir_block {
 	uint32_t     loop_depth;
 };
 
+void ir_build_prev_refs(ir_ctx *ctx);
 uint32_t ir_skip_empty_target_blocks(const ir_ctx *ctx, uint32_t b);
 uint32_t ir_next_block(const ir_ctx *ctx, uint32_t b);
 void ir_get_true_false_blocks(const ir_ctx *ctx, uint32_t b, uint32_t *true_block, uint32_t *false_block);
