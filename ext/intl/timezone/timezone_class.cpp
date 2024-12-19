@@ -147,24 +147,15 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			instanceof_function(Z_OBJCE_P(zv_timezone), TimeZone_ce_ptr)) {
 		TimeZone_object *to = Z_INTL_TIMEZONE_P(zv_timezone);
 
-		/* TODO Throw proper Error exceptions for uninitialized classes and failure to clone */
 		if (to->utimezone == NULL) {
-			spprintf(&message, 0, "%s: passed IntlTimeZone is not "
+			zend_throw_error(NULL, "%s: passed IntlTimeZone is not "
 				"properly constructed", func);
-			if (message) {
-				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-				efree(message);
-			}
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
 		if (UNEXPECTED(timeZone == NULL)) {
-			spprintf(&message, 0, "%s: could not clone TimeZone", func);
-			if (message) {
-				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
-				efree(message);
-			}
+			zend_throw_error(NULL, "%s: could not clone TimeZone", func);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
@@ -185,32 +176,20 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		}
 		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRLEN_P(zv_timezone),
 				&status) == FAILURE) {
-			spprintf(&message, 0, "%s: Time zone identifier given is not a "
+			zend_throw_error(NULL, "%s: Time zone identifier given is not a "
 				"valid UTF-8 string", func);
-			if (message) {
-				intl_errors_set(outside_error, status, message, 1);
-				efree(message);
-			}
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
 		if (UNEXPECTED(timeZone == NULL)) {
-			spprintf(&message, 0, "%s: Could not create time zone", func);
-			if (message) {
-				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
-				efree(message);
-			}
+			zend_throw_error(NULL, "%s: Could not create time zone", func);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		if (*timeZone == TimeZone::getUnknown()) {
-			spprintf(&message, 0, "%s: No such time zone: '%s'",
+			zend_throw_error(NULL, "%s: No such time zone: '%s'",
 				func, Z_STRVAL_P(zv_timezone));
-			if (message) {
-				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-				efree(message);
-			}
 			zval_ptr_dtor_str(&local_zv_tz);
 			delete timeZone;
 			return NULL;

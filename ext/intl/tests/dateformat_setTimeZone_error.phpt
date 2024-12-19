@@ -10,15 +10,19 @@ ini_set("date.timezone", 'Atlantic/Azores');
 
 $df = new IntlDateFormatter(NULL, 0, 0);
 
-var_dump($df->setTimeZone(array()));
-var_dump($df->setTimeZone('non existing timezone'));
+try {
+	$df->setTimeZone(array());
+} catch (Throwable $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
 
+try {
+	$df->setTimeZone('non existing timezone');
+} catch (Throwable $e) {
+	echo $e->getMessage();
+}
 ?>
 --EXPECTF--
 Warning: Array to string conversion in %s on line %d
-
-Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: No such time zone: 'Array' in %s on line %d
-bool(false)
-
-Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: No such time zone: 'non existing timezone' in %s on line %d
-bool(false)
+datefmt_set_timezone: No such time zone: 'Array'
+datefmt_set_timezone: No such time zone: 'non existing timezone'
