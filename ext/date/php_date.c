@@ -5122,9 +5122,11 @@ static bool date_period_init_iso8601_string(php_period_obj *dpobj, zend_class_en
 
 static bool date_period_init_finish(php_period_obj *dpobj, zend_long options, zend_long recurrences)
 {
-	if (dpobj->end == NULL && recurrences < 1) {
+	const zend_long max_recurrences = (INT_MAX - 8);
+
+	if (dpobj->end == NULL && (recurrences < 1 || recurrences > max_recurrences)) {
 		zend_string *func = get_active_function_or_method_name();
-		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
+		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): Recurrence count must be greater or equal to 1 and lower than " ZEND_LONG_FMT, ZSTR_VAL(func), max_recurrences + 1);
 		zend_string_release(func);
 		return false;
 	}
@@ -5133,8 +5135,17 @@ static bool date_period_init_finish(php_period_obj *dpobj, zend_long options, ze
 	dpobj->include_start_date = !(options & PHP_DATE_PERIOD_EXCLUDE_START_DATE);
 	dpobj->include_end_date = options & PHP_DATE_PERIOD_INCLUDE_END_DATE;
 
-	/* recurrrences */
-	dpobj->recurrences = recurrences + dpobj->include_start_date + dpobj->include_end_date;
+	/* recurrences */
+	recurrences += dpobj->include_start_date + dpobj->include_end_date;
+
+	if (UNEXPECTED(recurrences > max_recurrences)) {
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_exception_ex(date_ce_date_malformed_string_exception, 0, "%s(): Recurrence count must be greater or equal to 1 and lower than " ZEND_LONG_FMT " (including options)", ZSTR_VAL(func), max_recurrences + 1);
+		zend_string_release(func);
+		return false;
+	}
+
+	dpobj->recurrences = (int)recurrences;
 
 	dpobj->initialized = 1;
 
