@@ -689,6 +689,7 @@ class ZendOpcodes:
         filename = os.path.join(dirname, 'zend_vm_opcodes.h')
 
         opcodes = {}
+        found_nop = False
 
         with open(filename, 'r') as file:
             content = file.read()
@@ -696,8 +697,13 @@ class ZendOpcodes:
             pattern = re.compile(r'#define (ZEND_[^\s]+)\s+([0-9]+)')
             matches = pattern.findall(content)
             for name, number in matches:
+                if not found_nop:
+                    if name == 'ZEND_NOP':
+                        found_nop = True
+                    else:
+                        continue
                 if name == 'ZEND_VM_LAST_OPCODE':
-                    continue
+                    break
                 opcodes[name] = int(number)
 
         self._opcodes = opcodes
