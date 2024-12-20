@@ -379,7 +379,8 @@ class ZendFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
 
     def children(self):
         for field in self.val.type.fields():
-            if field.name == 'common':
+            if field.name == 'common' or field.name == 'type' or field.name == 'quick_arg_flags':
+                # Redundant with op_array / internal_function
                 continue
             elif field.name == 'op_array':
                 if int(self.val['type']) == ZendFnTypes.ZEND_USER_FUNCTION or int(self.val['type']) == ZendFnTypes.ZEND_EVAL_CODE:
