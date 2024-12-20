@@ -64,7 +64,6 @@ class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
 
     def __init__(self, val):
         self.val = val
-        load_type_bits()
 
     def to_string(self):
         return self.format_type(self.val)
@@ -81,7 +80,7 @@ class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
         meta = []
         for bit in range(0, type_mask_size):
             if type_mask & (1 << bit):
-                type_name = type_bit_to_name.get(bit)
+                type_name = ZendTypeBits.zendTypeName(bit)
                 match type_name:
                     case None:
                         parts.append('(1<<%d)' % bit)
@@ -207,36 +206,35 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
 
     def __init__(self, val):
         self.val = val
-        load_type_bits()
 
     def to_string(self):
         return self.value_to_string()
 
     def value_to_string(self):
         t = int(self.val['u1']['v']['type'])
-        if t == type_name_to_bit['undef']:
+        if t == ZendTypeBits.bit('undef'):
             return 'undef'
-        elif t == type_name_to_bit['null']:
+        elif t == ZendTypeBits.bit('null'):
             return 'null'
-        elif t == type_name_to_bit['false']:
+        elif t == ZendTypeBits.bit('false'):
             return 'false'
-        elif t == type_name_to_bit['true']:
+        elif t == ZendTypeBits.bit('true'):
             return 'true'
-        elif t == type_name_to_bit['long']:
+        elif t == ZendTypeBits.bit('long'):
             return str(self.val['value']['lval'])
-        elif t == type_name_to_bit['double']:
+        elif t == ZendTypeBits.bit('double'):
             return str(self.val['value']['dval'])
-        elif t == type_name_to_bit['string']:
+        elif t == ZendTypeBits.bit('string'):
             return format_zstr(self.val['value']['str'])
-        elif t == type_name_to_bit['array']:
+        elif t == ZendTypeBits.bit('array'):
             return 'array'
-        elif t == type_name_to_bit['object']:
+        elif t == ZendTypeBits.bit('object'):
             return 'object(%s)' % format_zstr(self.val['value']['obj']['ce']['name'])
-        elif t == type_name_to_bit['resource']:
+        elif t == ZendTypeBits.bit('resource'):
             return 'resource'
-        elif t == type_name_to_bit['reference']:
+        elif t == ZendTypeBits.bit('reference'):
             return 'reference'
-        elif t == type_name_to_bit['constant_ast']:
+        elif t == ZendTypeBits.bit('constant_ast'):
             return 'constant_ast'
         else:
             return 'zval of type %d' % int(self.val['u1']['v']['type'])
@@ -246,29 +244,29 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
             if field.name == 'value':
                 value = self.val['value']
                 t = int(self.val['u1']['v']['type'])
-                if t == type_name_to_bit['undef']:
+                if t == ZendTypeBits.bit('undef'):
                     value = value['lval']
-                elif t == type_name_to_bit['null']:
+                elif t == ZendTypeBits.bit('null'):
                     value = value['lval']
-                elif t == type_name_to_bit['false']:
+                elif t == ZendTypeBits.bit('false'):
                     value = value['lval']
-                elif t == type_name_to_bit['true']:
+                elif t == ZendTypeBits.bit('true'):
                     value = value['lval']
-                elif t == type_name_to_bit['long']:
+                elif t == ZendTypeBits.bit('long'):
                     value = value['lval']
-                elif t == type_name_to_bit['double']:
+                elif t == ZendTypeBits.bit('double'):
                     value = value['dval']
-                elif t == type_name_to_bit['string']:
+                elif t == ZendTypeBits.bit('string'):
                     value = value['str'].dereference()
-                elif t == type_name_to_bit['array']:
+                elif t == ZendTypeBits.bit('array'):
                     value = value['arr'].dereference()
-                elif t == type_name_to_bit['object']:
+                elif t == ZendTypeBits.bit('object'):
                     value = value['obj'].dereference()
-                elif t == type_name_to_bit['resource']:
+                elif t == ZendTypeBits.bit('resource'):
                     value = value['res'].dereference()
-                elif t == type_name_to_bit['reference']:
+                elif t == ZendTypeBits.bit('reference'):
                     value = value['ref'].dereference()
-                elif t == type_name_to_bit['constant_ast']:
+                elif t == ZendTypeBits.bit('constant_ast'):
                     value = value['ast'].dereference()
                 else:
                     value = value['ptr']
@@ -501,41 +499,56 @@ class PrintOpcodeCommand(gdb.Command):
 
 PrintOpcodeCommand()
 
-type_bit_to_name = None
-type_name_to_bit = None
+class ZendTypeBits:
+    _bits = None
 
-def load_type_bits():
-    global type_bit_to_name
-    global type_name_to_bit
+    @classmethod
+    def zendTypeName(self, bit):
+        self._load()
+        for name in self._bits:
+            if bit == self._bits[name]:
+                return name
 
-    if type_bit_to_name != None:
-        return
+    @classmethod
+    def zvalTypeName(self, bit):
+        # Same as zendTypeName, but return the last matching one
+        # e.g. 13 is IS_PTR, not IS_ITERABLE
+        self._load()
+        ret = None
+        for name in self._bits:
+            if bit == self._bits[name]:
+                ret = name
+        return ret
 
-    dirname = detect_source_dir()
-    filename = os.path.join(dirname, 'zend_types.h')
+    @classmethod
+    def bit(self, name):
+        self._load()
+        return self._bits.get(name)
 
-    bits = {}
+    @classmethod
+    def _load(self):
+        if self._bits != None:
+            return
 
-    with open(filename, 'r') as file:
-        content = file.read()
+        dirname = detect_source_dir()
+        filename = os.path.join(dirname, 'zend_types.h')
 
-        pattern = re.compile(r'#define _ZEND_TYPE_([^\s]+)_BIT\s+\(1u << (\d+)\)')
-        matches = pattern.findall(content)
-        for name, bit in matches:
-            bits[int(bit)] = name.lower()
+        bits = {}
 
-        pattern = re.compile(r'#define IS_([^\s]+)\s+(\d+)')
-        matches = pattern.findall(content)
-        for name, bit in matches:
-            if not int(bit) in bits:
-                bits[int(bit)] = name.lower()
+        with open(filename, 'r') as file:
+            content = file.read()
 
-    types = {}
-    for bit in bits:
-        types[bits[bit]] = bit
+            pattern = re.compile(r'#define _ZEND_TYPE_([^\s]+)_BIT\s+\(1u << (\d+)\)')
+            matches = pattern.findall(content)
+            for name, bit in matches:
+                bits[name.lower()] = int(bit)
 
-    type_bit_to_name = bits
-    type_name_to_bit = types
+            pattern = re.compile(r'#define IS_([^\s]+)\s+(\d+)')
+            matches = pattern.findall(content)
+            for name, bit in matches:
+                bits[name.lower()] = int(bit)
+
+        self._bits = bits
 
 class ZendFnTypes:
     ZEND_INTERNAL_FUNCTION = 1
