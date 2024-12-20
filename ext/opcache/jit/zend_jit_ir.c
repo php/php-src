@@ -13572,6 +13572,13 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 
 	op1_addr = zend_jit_prepare_array_update(jit, opline, &op1_info, op1_addr, &if_type, &ht_ref, &may_throw);
 
+	if (Z_MODE(op3_addr) == IS_REG
+	 && Z_LOAD(op3_addr)
+	 && jit->ra[Z_SSA_VAR(op3_addr)].ref == IR_NULL) {
+		/* Force load */
+		zend_jit_use_reg(jit, op3_addr);
+	}
+
 	if (op1_info & MAY_BE_ARRAY) {
 		uint32_t var_def_info = zend_array_element_type(op1_def_info, opline->op1_type, 1, 0);
 
@@ -15209,6 +15216,13 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 		&& prop_type != IS_UNDEF
 		&& prop_type != IS_REFERENCE
 		&& (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_OBJECT);
+
+	if (Z_MODE(val_addr) == IS_REG
+	 && Z_LOAD(val_addr)
+	 && jit->ra[Z_SSA_VAR(val_addr)].ref == IR_NULL) {
+		/* Force load */
+		zend_jit_use_reg(jit, val_addr);
+	}
 
 	if (!prop_info) {
 		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
