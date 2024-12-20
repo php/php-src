@@ -74,6 +74,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added TCP_FUNCTION_BLK to change the TCP stack algorithm on FreeBSD.
     (David Carlier)
+  . socket_set_option() catches possible overflow with SO_RCVTIMEO/SO_SNDTIMEO
+    with timeout setting on windows. (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
