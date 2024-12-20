@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-17101 (AST->string does not reproduce constructor property
     promotion correctly). (nielsdos)
+  . Fixed bug GH-17211 (observer segfault on function loaded with dl()).
+    (Arnaud)
 
 - Date:
   . Fixed bug GH-14709 DatePeriod::__construct() overflow on recurrences.
