@@ -7,9 +7,15 @@ zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_functions=1
+zend_test.observer.show_output=1
 --FILE--
 <?php
-$loaded = dl('dl_test.so');
+
+if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+    $loaded = dl('php_dl_test.dll');
+} else {
+    $loaded = dl('dl_test.so');
+}
 
 var_dump(dl_test_test2("World!"));
 
