@@ -29,6 +29,8 @@ Then you can interact with that variable:
 
 import gdb
 import re
+import traceback
+import os
 
 pp_set = gdb.printing.RegexpCollectionPrettyPrinter("php")
 
@@ -296,6 +298,9 @@ class ZendClassEntryPrettyPrinter(gdb.printing.PrettyPrinter):
             if field.name is not None:
                 if field.name in self.STRING_FIELDS:
                     yield (field.name, zendStringPointerPrinter(self.val[field.name]))
+                elif field.name == 'ce_flags':
+                    flags = self.val[field.name]
+                    yield (field.name, '%d = %s' % (flags, ZendAccFlags.format_ce_flags(flags)))
                 else:
                     yield (field.name, self.val[field.name])
             else:
@@ -320,10 +325,181 @@ class ZendClassConstantPrettyPrinter(gdb.printing.PrettyPrinter):
                 yield ('doc_comment', zendStringPointerPrinter(self.val['doc_comment']))
             elif field.name == 'ce':
                 yield ('ce', zendStringPointerPrinter(self.val['ce']['name']))
+            elif field.name == 'value':
+                flags = self.val[field.name]['u2']['constant_flags']
+                yield ('value.u2.constant_flags', '%d = %s' % (flags, ZendAccFlags.format_const_flags(flags)))
+                yield (field.name, self.val[field.name])
             else:
                 yield (field.name, self.val[field.name])
 
 pp_set.add_printer('zend_class_constant', '^_zend_class_constant$', ZendClassConstantPrettyPrinter)
+
+class ZendPropertyInfoPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_property_info"
+
+    def __init__(self, val):
+        self.val = val
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name == 'name':
+                yield (field.name, zendStringPointerPrinter(self.val[field.name]))
+            elif field.name == 'flags':
+                flags = self.val[field.name]
+                yield ('flags', '%d = %s' % (flags, ZendAccFlags.format_prop_flags(flags)))
+            else:
+                yield (field.name, self.val[field.name])
+
+pp_set.add_printer('zend_property_info', '^_zend_property_info$', ZendPropertyInfoPrettyPrinter)
+
+class ZendFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_function"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        match int(self.val['type']):
+            case ZendFnTypes.ZEND_INTERNAL_FUNCTION:
+                typestr = 'internal'
+            case ZendFnTypes.ZEND_USER_FUNCTION:
+                typestr = 'user'
+            case ZendFnTypes.ZEND_EVAL_CODE:
+                typestr = 'eval'
+            case _:
+                typestr = '???'
+
+        if self.val['common']['function_name']:
+            namestr = format_zstr(self.val['common']['function_name'])
+        else:
+            namestr = '{main}'
+
+        if self.val['common']['scope']:
+            str = '%s method %s::%s' % (typestr, format_zstr(self.val['common']['scope']['name']), namestr)
+        else:
+            str = '%s function %s' % (typestr, namestr)
+
+        if int(self.val['type']) == ZendFnTypes.ZEND_USER_FUNCTION or int(self.val['type']) == ZendFnTypes.ZEND_EVAL_CODE:
+            str = '%s %s:%d' % (str, format_zstr(self.val['op_array']['filename']), int(self.val['op_array']['line_start']))
+
+        return str
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name == 'common':
+                continue
+            elif field.name == 'op_array':
+                if int(self.val['type']) == ZendFnTypes.ZEND_USER_FUNCTION or int(self.val['type']) == ZendFnTypes.ZEND_EVAL_CODE:
+                    yield (field.name, self.val[field.name])
+            elif field.name == 'internal_function':
+                if int(self.val['type']) == ZendFnTypes.ZEND_INTERNAL_FUNCTION:
+                    yield (field.name, self.val[field.name])
+            else:
+                yield (field.name, self.val[field.name])
+
+pp_set.add_printer('zend_function', '^_zend_function$', ZendFunctionPrettyPrinter)
+
+class ZendOpArrayPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_op_array"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        if self.val['function_name']:
+            namestr = format_zstr(self.val['function_name'])
+        else:
+            namestr = '{main}'
+
+        if self.val['scope']:
+            str = 'method %s::%s' % (format_zstr(self.val['scope']['name']), namestr)
+        else:
+            str = 'function %s' % (namestr)
+
+        str = '%s %s:%d' % (str, format_zstr(self.val['filename']), int(self.val['line_start']))
+
+        return str
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name == 'fn_flags':
+                value = self.val[field.name]
+                yield (field.name, '%d = %s' % (value, ZendAccFlags.format_fn_flags(value)))
+            else:
+                yield (field.name, self.val[field.name])
+
+pp_set.add_printer('zend_op_array', '^_zend_op_array$', ZendOpArrayPrettyPrinter)
+
+class ZendOpPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_op"
+
+    def __init__(self, val):
+        self.val = val
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name == 'opcode':
+                opcode = int(self.val[field.name])
+                yield (field.name, '%d = %s' % (opcode, ZendOpcodes.name(opcode)))
+            else:
+                yield (field.name, self.val[field.name])
+
+pp_set.add_printer('zend_op', '^_zend_op$', ZendOpPrettyPrinter)
+
+class ZendInternalFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_internal_function"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        if self.val['function_name']:
+            namestr = format_zstr(self.val['function_name'])
+        else:
+            namestr = '???'
+
+        if self.val['scope']:
+            str = 'method %s::%s' % (format_zstr(self.val['scope']['name']), namestr)
+        else:
+            str = 'function %s' % (namestr)
+
+        return str
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name == 'fn_flags':
+                yield ('fn_flags', ('%d = %s' % (self.val[field.name], ZendAccFlags.format_fn_flags(self.val[field.name]))))
+            else:
+                yield (field.name, self.val[field.name])
+
+pp_set.add_printer('zend_internal_function', '^_zend_internal_function$', ZendInternalFunctionPrettyPrinter)
+
+class PrintAccFlagsCommand(gdb.Command):
+    "Pretty print ACC flags"
+
+    def __init__ (self, type):
+        self.type = type
+        name = 'print_%s_flags' % type
+        super(PrintAccFlagsCommand, self).__init__(name, gdb.COMMAND_USER)
+
+    def invoke (self, arg, from_tty):
+        print(ZendAccFlags.format_flags(arg, self.type))
+
+PrintAccFlagsCommand('fn')
+PrintAccFlagsCommand('ce')
+PrintAccFlagsCommand('prop')
+PrintAccFlagsCommand('const')
+
+class PrintOpcodeCommand(gdb.Command):
+    "Pretty print opcode"
+
+    def __init__ (self):
+        super(PrintOpcodeCommand, self).__init__("print_opcode", gdb.COMMAND_USER)
+
+    def invoke (self, arg, from_tty):
+        print(ZendOpcodes.name(arg))
+
+PrintOpcodeCommand()
 
 type_bit_to_name = None
 type_name_to_bit = None
@@ -335,10 +511,8 @@ def load_type_bits():
     if type_bit_to_name != None:
         return
 
-    (symbol,_) = gdb.lookup_symbol("zend_gc_refcount")
-    if symbol == None:
-        raise Exception("Could not find zend_types.h: symbol zend_gc_refcount not found")
-    filename = symbol.symtab.fullname()
+    dirname = detect_source_dir()
+    filename = os.path.join(dirname, 'zend_types.h')
 
     bits = {}
 
@@ -362,6 +536,154 @@ def load_type_bits():
 
     type_bit_to_name = bits
     type_name_to_bit = types
+
+class ZendFnTypes:
+    ZEND_INTERNAL_FUNCTION = 1
+    ZEND_USER_FUNCTION = 2
+    ZEND_EVAL_CODE = 4
+
+class ZendAccFlag:
+    ce = False
+    fn = False
+    prop = False
+    const = False
+    bit = 0
+    def __init__(self, ce, fn, prop, const, bit):
+        self.ce = ce
+        self.fn = fn
+        self.prop = prop
+        self.const = const
+        self.bit = bit
+
+    def applies_to(self, type):
+        return getattr(self, type)
+
+class ZendAccFlags:
+    _flags = None
+
+    @classmethod
+    def fn_flag_name(self, bit):
+        self.flag_name(bit, 'fn')
+
+    @classmethod
+    def ce_flag_name(self, bit):
+        self.flag_name(bit, 'ce')
+
+    @classmethod
+    def prop_flag_name(self, bit):
+        self.flag_name(bit, 'prop')
+
+    @classmethod
+    def const_flag_name(self, bit):
+        self.flag_name(bit, 'const')
+
+    @classmethod
+    def flag_name(self, bit, type):
+        self._load()
+        for name in self._flags:
+            flag = self._flags[name]
+            if flag.applies_to(type) and bit == flag.bit:
+                return name
+
+    @classmethod
+    def flag_bit(self, name):
+        self._load()
+        return self._flags[name]
+
+    @classmethod
+    def format_flags(self, flags, type):
+        flags = int(flags)
+        names = []
+        for i in range(0, 31):
+            if (flags & (1 << i)) != 0:
+                name = self.flag_name(i, type)
+                if name == None:
+                    names.append('(1 << %d)' % (i))
+                else:
+                    names.append(name)
+        return ' | '.join(names)
+
+    @classmethod
+    def format_fn_flags(self, flags):
+        return self.format_flags(flags, 'fn')
+
+    @classmethod
+    def format_ce_flags(self, flags):
+        return self.format_flags(flags, 'ce')
+
+    @classmethod
+    def format_prop_flags(self, flags):
+        return self.format_flags(flags, 'prop')
+
+    @classmethod
+    def format_const_flags(self, flags):
+        return self.format_flags(flags, 'const')
+
+    @classmethod
+    def _load(self):
+        if self._flags != None:
+            return
+
+        dirname = detect_source_dir()
+        filename = os.path.join(dirname, 'zend_compile.h')
+
+        flags = {}
+
+        with open(filename, 'r') as file:
+            content = file.read()
+
+            pattern = re.compile(r'#define (ZEND_ACC_[^\s]+)\s+\(1U?\s+<<\s+(\d+)\)\s+/\*\s+(X?)\s+\|\s+(X?)\s+\|\s+(X?)\s+\|\s+(X?)\s+\*/')
+            matches = pattern.findall(content)
+            for name, bit, cls, func, prop, const in matches:
+                flags[name] = ZendAccFlag(cls == 'X', func == 'X', prop == 'X', const == 'X', int(bit))
+
+        self._flags = flags
+
+class ZendOpcodes:
+    _opcodes = None
+
+    @classmethod
+    def name(self, number):
+        self._load()
+        number = int(number)
+        for name in self._opcodes:
+            if number == self._opcodes[name]:
+                return name
+
+    @classmethod
+    def number(self, name):
+        self._load()
+        return self._opcodes[name]
+
+    @classmethod
+    def _load(self):
+        if self._opcodes != None:
+            return
+
+        dirname = detect_source_dir()
+        filename = os.path.join(dirname, 'zend_vm_opcodes.h')
+
+        opcodes = {}
+
+        with open(filename, 'r') as file:
+            content = file.read()
+
+            pattern = re.compile(r'#define (ZEND_[^\s]+)\s+([0-9]+)')
+            matches = pattern.findall(content)
+            for name, number in matches:
+                if name == 'ZEND_VM_LAST_OPCODE':
+                    continue
+                opcodes[name] = int(number)
+
+        self._opcodes = opcodes
+
+def detect_source_dir():
+    (symbol,_) = gdb.lookup_symbol("zend_visibility_to_set_visibility")
+    if symbol == None:
+        raise Exception("Could not find zend_compile.h: symbol zend_visibility_to_set_visibility not found")
+    filename = symbol.symtab.fullname()
+    dirname = os.path.dirname(filename)
+    return dirname
 
 def lookup_symbol(name):
     (symbol, _) = gdb.lookup_symbol(name)
