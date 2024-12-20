@@ -39,30 +39,14 @@ class ZendStringPrettyPrinter(gdb.printing.PrettyPrinter):
         self.val = val
 
     def to_string(self):
-        return self.format_string()
+        return format_zstr(self.val)
 
     def children(self):
         for field in self.val.type.fields():
             if field.name == 'val':
-                yield ('val', self.format_string())
+                yield ('val', self.to_string())
             else:
                 yield (field.name, self.val[field.name])
-
-    def format_string(self):
-        len = int(self.val['len'])
-        truncated = False
-        if len > 50:
-            len = 50
-            truncated = True
-
-        ptr_type = gdb.lookup_type('char').pointer()
-        ary_type = gdb.lookup_type('char').array(len)
-        str = self.val['val'].cast(ptr_type).dereference().cast(ary_type)
-        str = str.format_string()
-        if truncated:
-            str += ' (%d bytes total)' % int(self.val['len'])
-
-        return str
 
 
 pp_set.add_printer('zend_string', '^_zend_string$', ZendStringPrettyPrinter)
@@ -71,7 +55,7 @@ def zendStringPointerPrinter(ptr):
     "Given a pointer to a zend_string, show the contents (if non-NULL)"
     if int(ptr) == 0:
         return '0x0'
-    return ZendStringPrettyPrinter(ptr.dereference()).to_string()
+    return format_zstr(ptr)
 
 class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
     "Print a zend_type"
@@ -115,7 +99,7 @@ class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
                         separator = '&'
                     case 'name':
                         str = t['ptr'].cast(gdb.lookup_type('zend_string').pointer())
-                        parts.append(ZendStringPrettyPrinter(str).to_string())
+                        parts.append(format_zstr(str))
                     case _:
                         parts.append(type_name)
 
@@ -166,7 +150,7 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
                         c = c.dereference()
                     yield ('child[%d]' % i, c)
             elif field.name == 'name':
-                yield (field.name, ZendStringPrettyPrinter(val[field.name].dereference()).to_string())
+                yield (field.name, format_zstr(val[field.name]))
             elif field.name == 'val':
                 yield (field.name, ZvalPrettyPrinter(val[field.name]).to_string())
             else:
@@ -241,11 +225,11 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
         elif t == type_name_to_bit['double']:
             return str(self.val['value']['dval'])
         elif t == type_name_to_bit['string']:
-            return ZendStringPrettyPrinter(self.val['value']['str'].dereference()).to_string()
+            return format_zstr(self.val['value']['str'])
         elif t == type_name_to_bit['array']:
             return 'array'
         elif t == type_name_to_bit['object']:
-            return 'object(%s)' % ZendStringPrettyPrinter(self.val['value']['obj']['ce']['name'].dereference()).to_string()
+            return 'object(%s)' % format_zstr(self.val['value']['obj']['ce']['name'])
         elif t == type_name_to_bit['resource']:
             return 'resource'
         elif t == type_name_to_bit['reference']:
@@ -392,5 +376,21 @@ def enum_value(name):
 def array_size(ary_type):
     # array types have a single field whose type represents its range
     return ary_type.fields()[0].type.range()[1]+1
+
+def format_zstr(zstr):
+    len = int(zstr['len'])
+    truncated = False
+    if len > 200:
+        len = 200
+        truncated = True
+
+    ptr_type = gdb.lookup_type('char').pointer()
+    ary_type = gdb.lookup_type('char').array(len)
+    str = zstr['val'].cast(ptr_type).dereference().cast(ary_type)
+    str = str.format_string()
+    if truncated:
+        str += ' (%d bytes total)' % int(zstr['len'])
+
+    return str
 
 gdb.printing.register_pretty_printer(gdb, pp_set, replace=True)
