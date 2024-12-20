@@ -11,7 +11,7 @@ zend_test.observer.show_output=1
 --FILE--
 <?php
 
-if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+if (PHP_OS_FAMILY === 'Windows') {
     $loaded = dl('php_dl_test.dll');
 } else {
     $loaded = dl('dl_test.so');
