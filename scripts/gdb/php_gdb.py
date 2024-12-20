@@ -236,6 +236,16 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
             return 'reference'
         elif t == ZendTypeBits.bit('constant_ast'):
             return 'constant_ast'
+        elif t == ZendTypeBits.bit('indirect'):
+            value = self.val['value']['zv']
+            valuestr = ZvalPrettyPrinter(value).to_string()
+            return 'indirect: ((zval*) 0x%x) %s' % (int(value), valuestr)
+        elif t == ZendTypeBits.bit('ptr'):
+            value = int(self.val['value']['ptr'])
+            return 'ptr: ((void*) 0x%x)' % (value)
+        elif t == ZendTypeBits.bit('alias_ptr'):
+            value = int(self.val['value']['ptr'])
+            return 'alias_ptr: ((void*) 0x%x)' % (value)
         else:
             return 'zval of type %d' % int(self.val['u1']['v']['type'])
 
@@ -268,6 +278,8 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
                     value = value['ref'].dereference()
                 elif t == ZendTypeBits.bit('constant_ast'):
                     value = value['ast'].dereference()
+                elif t == ZendTypeBits.bit('indirect'):
+                    value = value['zv'].dereference()
                 else:
                     value = value['ptr']
                 yield (field.name, value)
