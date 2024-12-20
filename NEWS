@@ -21,6 +21,7 @@ PHP                                                                        NEWS
     promotion correctly). (nielsdos)
   . Fixed bug GH-17200 (Incorrect dynamic prop offset in hooked prop iterator).
     (ilutov)
+  . Fixed bug GH-17216 (Trampoline crash on error). (nielsdos)
 
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
