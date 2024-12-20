@@ -259,7 +259,7 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
                 elif t == type_name_to_bit['string']:
                     value = value['str'].dereference()
                 elif t == type_name_to_bit['array']:
-                    value = value['ht'].dereference()
+                    value = value['arr'].dereference()
                 elif t == type_name_to_bit['object']:
                     value = value['obj'].dereference()
                 elif t == type_name_to_bit['resource']:
