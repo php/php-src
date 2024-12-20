@@ -48,16 +48,10 @@ class ZendStringPrettyPrinter(gdb.printing.PrettyPrinter):
             if field.name == 'val':
                 yield ('val', self.to_string())
             else:
-                yield (field.name, self.val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
 
 pp_set.add_printer('zend_string', '^_zend_string$', ZendStringPrettyPrinter)
-
-def zendStringPointerPrinter(ptr):
-    "Given a pointer to a zend_string, show the contents (if non-NULL)"
-    if int(ptr) == 0:
-        return '0x0'
-    return format_zstr(ptr)
 
 class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
     "Print a zend_type"
@@ -70,7 +64,7 @@ class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
 
     def children(self):
         for field in self.val.type.fields():
-            yield (field.name, self.val[field.name])
+            yield (field.name, format_nested(self.val[field.name]))
 
     def format_type(self, t):
         type_mask = int(t['type_mask'])
@@ -155,7 +149,7 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
             elif field.name == 'val':
                 yield (field.name, ZvalPrettyPrinter(val[field.name]).to_string())
             else:
-                yield (field.name, val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
     def is_special(self):
         special_shift = 6 # ZEND_AST_SPECIAL_SHIFT
@@ -286,7 +280,7 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
             elif field.name == 'u2':
                 yield ('u2', self.val[field.name]['extra'])
             else:
-                yield (field.name, self.val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
 
 pp_set.add_printer('zval', '^_zval_struct$', ZvalPrettyPrinter)
@@ -294,25 +288,20 @@ pp_set.add_printer('zval', '^_zval_struct$', ZvalPrettyPrinter)
 class ZendClassEntryPrettyPrinter(gdb.printing.PrettyPrinter):
     "Print a zend_class_entry"
 
-    # String pointers, show the string contents if possible
-    STRING_FIELDS = [ 'name', 'doc_comment' ]
-
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
-        return zendStringPointerPrinter(self.val['name'])
+        return format_zstr(self.val['name'])
 
     def children(self):
         for field in self.val.type.fields():
             if field.name is not None:
-                if field.name in self.STRING_FIELDS:
-                    yield (field.name, zendStringPointerPrinter(self.val[field.name]))
-                elif field.name == 'ce_flags':
+                if field.name == 'ce_flags':
                     flags = self.val[field.name]
                     yield (field.name, '%d = %s' % (flags, ZendAccFlags.format_ce_flags(flags)))
                 else:
-                    yield (field.name, self.val[field.name])
+                    yield (field.name, format_nested(self.val[field.name]))
             else:
                 # Don't break on the union fields. Unfortunately, pretty
                 # printers done in python cannot match the default formatting of
@@ -331,16 +320,12 @@ class ZendClassConstantPrettyPrinter(gdb.printing.PrettyPrinter):
 
     def children(self):
         for field in self.val.type.fields():
-            if field.name == 'doc_comment':
-                yield ('doc_comment', zendStringPointerPrinter(self.val['doc_comment']))
-            elif field.name == 'ce':
-                yield ('ce', zendStringPointerPrinter(self.val['ce']['name']))
-            elif field.name == 'value':
+            if field.name == 'value':
                 flags = self.val[field.name]['u2']['constant_flags']
                 yield ('value.u2.constant_flags', '%d = %s' % (flags, ZendAccFlags.format_const_flags(flags)))
                 yield (field.name, self.val[field.name])
             else:
-                yield (field.name, self.val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
 pp_set.add_printer('zend_class_constant', '^_zend_class_constant$', ZendClassConstantPrettyPrinter)
 
@@ -352,13 +337,11 @@ class ZendPropertyInfoPrettyPrinter(gdb.printing.PrettyPrinter):
 
     def children(self):
         for field in self.val.type.fields():
-            if field.name == 'name':
-                yield (field.name, zendStringPointerPrinter(self.val[field.name]))
-            elif field.name == 'flags':
+            if field.name == 'flags':
                 flags = self.val[field.name]
                 yield ('flags', '%d = %s' % (flags, ZendAccFlags.format_prop_flags(flags)))
             else:
-                yield (field.name, self.val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
 pp_set.add_printer('zend_property_info', '^_zend_property_info$', ZendPropertyInfoPrettyPrinter)
 
@@ -405,7 +388,7 @@ class ZendFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
                 if int(self.val['type']) == ZendFnTypes.ZEND_INTERNAL_FUNCTION:
                     yield (field.name, self.val[field.name])
             else:
-                yield (field.name, self.val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
 pp_set.add_printer('zend_function', '^_zend_function$', ZendFunctionPrettyPrinter)
 
@@ -436,7 +419,7 @@ class ZendOpArrayPrettyPrinter(gdb.printing.PrettyPrinter):
                 value = self.val[field.name]
                 yield (field.name, '%d = %s' % (value, ZendAccFlags.format_fn_flags(value)))
             else:
-                yield (field.name, self.val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
 pp_set.add_printer('zend_op_array', '^_zend_op_array$', ZendOpArrayPrettyPrinter)
 
@@ -452,7 +435,7 @@ class ZendOpPrettyPrinter(gdb.printing.PrettyPrinter):
                 opcode = int(self.val[field.name])
                 yield (field.name, '%d = %s' % (opcode, ZendOpcodes.name(opcode)))
             else:
-                yield (field.name, self.val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
 pp_set.add_printer('zend_op', '^_zend_op$', ZendOpPrettyPrinter)
 
@@ -480,7 +463,7 @@ class ZendInternalFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
             if field.name == 'fn_flags':
                 yield ('fn_flags', ('%d = %s' % (self.val[field.name], ZendAccFlags.format_fn_flags(self.val[field.name]))))
             else:
-                yield (field.name, self.val[field.name])
+                yield (field.name, format_nested(self.val[field.name]))
 
 pp_set.add_printer('zend_internal_function', '^_zend_internal_function$', ZendInternalFunctionPrettyPrinter)
 
@@ -745,5 +728,31 @@ def format_zstr(zstr):
         str += ' (%d bytes total)' % int(zstr['len'])
 
     return str
+
+def format_nested(value):
+    orig_value = value
+    type = value.type
+
+    # Null pointers
+    if type.code == gdb.TYPE_CODE_PTR and int(value) == 0:
+        return orig_value
+
+    addr = orig_value.address
+
+    while type.code == gdb.TYPE_CODE_PTR:
+        addr = int(value)
+        type = type.target()
+        value = value.dereference()
+
+    type = gdb.types.get_basic_type(type)
+
+    if type.tag and re.match(r'^_zend_string$', type.tag):
+        return format_zstr(value)
+    elif type.tag and re.match(r'^_zend_class_entry$', type.tag):
+        return '((zend_class_entry*)0x%x) %s' % (addr, format_zstr(value['name']))
+    elif type.tag and re.match(r'^_zend_array$', type.tag):
+        return '((zend_array*)0x%x) array(%d)' % (addr, value['nNumOfElements'])
+
+    return orig_value
 
 gdb.printing.register_pretty_printer(gdb, pp_set, replace=True)
