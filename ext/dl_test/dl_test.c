@@ -76,9 +76,27 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
+PHP_METHOD(DlTest, test)
+{
+	char *var = "World";
+	size_t var_len = sizeof("World") - 1;
+	zend_string *retval;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(var, var_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	retval = strpprintf(0, "Hello %s", var);
+
+	RETURN_STR(retval);
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(dl_test)
 {
+	register_class_DlTest();
+
 	/* Test backwards compatibility */
 	if (getenv("PHP_DL_TEST_USE_OLD_REGISTER_INI_ENTRIES")) {
 		zend_register_ini_entries(ini_entries, module_number);
