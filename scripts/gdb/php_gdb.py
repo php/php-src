@@ -18,7 +18,7 @@ Use |set print pretty| to enable multi-line printing and indentation:
 
 Use |set print max-depth| to control the maximum print depth for nested
 structures:
-  (gdb) set print pretty on
+  (gdb) set print max-depth 5
 
 To interactively type Python for development of the printers, use
   (gdb) python foo = gdb.parse_and_eval('bar')
