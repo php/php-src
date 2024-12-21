@@ -88,6 +88,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-17198 (SplFixedArray assertion failure with get_object_vars).
     (nielsdos)
+  . Fixed bug GH-17225 (NULL deref in spl_directory.c). (nielsdos)
 
 - Streams:
   . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
