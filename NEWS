@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
 
+- DOM:
+  . Fixed bug GH-17224 (UAF in importNode). (nielsdos)
+
 - FFI:
   . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
 

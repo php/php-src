@@ -809,14 +809,14 @@ PHP_METHOD(DOMDocument, importNode)
 			xmlNsPtr nsptr = NULL;
 			xmlNodePtr root = xmlDocGetRootElement(docp);
 
-			nsptr = xmlSearchNsByHref (nodep->doc, root, nodep->ns->href);
+			nsptr = xmlSearchNsByHref (docp, root, nodep->ns->href);
 			if (nsptr == NULL || nsptr->prefix == NULL) {
 				int errorcode;
 				nsptr = dom_get_ns(root, (char *) nodep->ns->href, &errorcode, (char *) nodep->ns->prefix);
 
 				/* If there is no root, the namespace cannot be attached to it, so we have to attach it to the old list. */
 				if (nsptr != NULL && root == NULL) {
-					php_libxml_set_old_ns(nodep->doc, nsptr);
+					php_libxml_set_old_ns(docp, nsptr);
 				}
 			}
 			retnodep->ns = nsptr;
