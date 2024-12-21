@@ -886,7 +886,7 @@ static int pdo_firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zva
 	switch (attr) {
 		default:
 			return 0;
-		case PDO_ATTR_CURSOR_NAME:
+		case PDO_ATTR_CURSOR_NAME: {
 			zend_string *str_val = zval_try_get_string(val);
 			if (str_val == NULL) {
 				return 0;
@@ -907,6 +907,7 @@ static int pdo_firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zva
 			memcpy(S->name, ZSTR_VAL(str_val), ZSTR_LEN(str_val) + 1);
 			zend_string_release(str_val);
 			break;
+		}
 	}
 	return 1;
 }
