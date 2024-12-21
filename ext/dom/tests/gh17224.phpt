@@ -18,15 +18,15 @@ var_dump($att);
 ?>
 --EXPECTF--
 object(DOMAttr)#%d (%d) {
-  ["specified"]=>
-  bool(true)
-  ["schemaTypeInfo"]=>
-  NULL
   ["name"]=>
   string(4) "attr"
+  ["specified"]=>
+  bool(true)
   ["value"]=>
   string(10) "namespaced"
   ["ownerElement"]=>
+  NULL
+  ["schemaTypeInfo"]=>
   NULL
   ["nodeName"]=>
   string(7) "ai:attr"
