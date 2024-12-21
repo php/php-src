@@ -5098,7 +5098,8 @@ static bool zend_compile_parent_property_hook_call(znode *result, zend_ast *ast,
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for parent property hook call");
 	}
 
-	zend_string *property_name = zend_ast_get_str(class_ast->child[1]);
+	zval *property_hook_name_zv = zend_ast_get_zval(class_ast->child[1]);
+	zend_string *property_name = zval_get_string(property_hook_name_zv);
 	zend_string *hook_name = zend_ast_get_str(method_ast);
 	zend_property_hook_kind hook_kind = zend_get_property_hook_kind_from_name(hook_name);
 	ZEND_ASSERT(hook_kind != (uint32_t)-1);
@@ -5122,7 +5123,6 @@ static bool zend_compile_parent_property_hook_call(znode *result, zend_ast *ast,
 	zend_op *opline = get_next_op();
 	opline->opcode = ZEND_INIT_PARENT_PROPERTY_HOOK_CALL;
 	opline->op1_type = IS_CONST;
-	zend_string_copy(property_name);
 	opline->op1.constant = zend_add_literal_string(&property_name);
 	opline->op2.num = hook_kind;
 
