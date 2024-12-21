@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.4
 
+- Core:
+  . Fixed bug GH-17234 (Numeric parent hook call fails with assertion).
+    (nielsdos)
+
 - FTP:
   . Fixed bug GH-16800 (ftp functions can abort with EINTR). (nielsdos)
 
