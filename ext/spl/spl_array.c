@@ -74,6 +74,11 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 		return &Z_ARRVAL(intern->array);
 	} else {
 		zend_object *obj = Z_OBJ(intern->array);
+		/* Since we're directly playing with the properties table, we shall initialize the lazy object directly.
+		 * If we don't, it's possible to continue working with the wrong object in case we're using a proxy. */
+		if (UNEXPECTED(zend_lazy_object_must_init(obj))) {
+			obj = zend_lazy_object_init(obj);
+		}
 		/* rebuild properties */
 		zend_std_get_properties_ex(obj);
 		if (GC_REFCOUNT(obj->properties) > 1) {
