@@ -72,6 +72,9 @@ PHP                                                                        NEWS
     on SO_SNDTIMEO/SO_RCVTIMEO for socket_set_option().
     (David Carlier)
 
+- SPL:
+  . Fixed bug GH-17225 (NULL deref in spl_directory.c). (nielsdos)
+
 - Streams:
   . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
     to incorrect error handling). (nielsdos)
