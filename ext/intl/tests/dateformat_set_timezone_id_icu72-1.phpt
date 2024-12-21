@@ -37,7 +37,11 @@ function ut_main()
 
         $res_str .= "-----------";
         $res_str .= "\nTrying to set timezone_id= $timezone_id_entry";
-        if (ut_datefmt_set_timezone_id( $fmt , $timezone_id_entry ) !== $result) die("ut_datefmt_set_timezone_id failed");
+	try {
+        	if (ut_datefmt_set_timezone_id( $fmt , $timezone_id_entry ) !== $result) die("ut_datefmt_set_timezone_id failed");
+	} catch (IntlException $e) {
+		echo $e->getMessage() . PHP_EOL;
+	}
         $timezone_id = ut_datefmt_get_timezone_id( $fmt );
         $res_str .= "\nAfter call to set_timezone_id :  timezone_id= $timezone_id";
         $formatted = ut_datefmt_format( $fmt, 0);
@@ -58,9 +62,8 @@ include_once( 'ut_common.inc' );
 ut_run();
 ?>
 --EXPECTF--
-Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: No such time zone: 'CN' in %sut_common.inc on line %d
-
-Warning: datefmt_set_timezone(): datefmt_set_timezone: No such time zone: 'CN' in %sut_common.inc on line %d
+datefmt_set_timezone: No such time zone: 'CN'
+datefmt_set_timezone: No such time zone: 'CN'
 
 After creation of the dateformatter :  timezone_id= US/Pacific
 -----------

@@ -22,6 +22,7 @@
 #include <unicode/timezone.h>
 #include <unicode/calendar.h>
 #include "../intl_convertcpp.h"
+#include "../intl_common.h"
 
 #include "../common/common_date.h"
 
@@ -148,14 +149,14 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		TimeZone_object *to = Z_INTL_TIMEZONE_P(zv_timezone);
 
 		if (to->utimezone == NULL) {
-			zend_throw_error(NULL, "%s: passed IntlTimeZone is not "
+			zend_throw_error(IntlException_ce_ptr, "%s: passed IntlTimeZone is not "
 				"properly constructed", func);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
 		if (UNEXPECTED(timeZone == NULL)) {
-			zend_throw_error(NULL, "%s: could not clone TimeZone", func);
+			zend_throw_error(IntlException_ce_ptr, "%s: could not clone TimeZone", func);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
@@ -176,19 +177,19 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		}
 		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRLEN_P(zv_timezone),
 				&status) == FAILURE) {
-			zend_throw_error(NULL, "%s: Time zone identifier given is not a "
+			zend_throw_error(IntlException_ce_ptr, "%s: Time zone identifier given is not a "
 				"valid UTF-8 string", func);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
 		if (UNEXPECTED(timeZone == NULL)) {
-			zend_throw_error(NULL, "%s: Could not create time zone", func);
+			zend_throw_error(IntlException_ce_ptr, "%s: Could not create time zone", func);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		if (*timeZone == TimeZone::getUnknown()) {
-			zend_throw_error(NULL, "%s: No such time zone: '%s'",
+			zend_throw_error(IntlException_ce_ptr, "%s: No such time zone: '%s'",
 				func, Z_STRVAL_P(zv_timezone));
 			zval_ptr_dtor_str(&local_zv_tz);
 			delete timeZone;
