@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17330 (SNMP::setSecurity segfault on closed session).
     (David Carlier)
 
+- SPL:
+  . Fixed bug GH-15833 (Segmentation fault (access null pointer) in
+    ext/spl/spl_array.c). (nielsdos)
+
 02 Jan 2025, PHP 8.4.3
 
 - BcMath:
