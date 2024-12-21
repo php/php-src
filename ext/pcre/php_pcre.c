@@ -49,10 +49,14 @@ char *php_pcre_version;
 
 struct _pcre_cache_entry {
 	pcre2_code *re;
-	/* Pointer is not NULL when there are named captures.
-	 * Length is equal to capture_count + 1 to account for capture group 0. */
+	/* Pointer is not NULL (during request) when there are named captures.
+	 * Length is equal to capture_count + 1 to account for capture group 0.
+	 * This table cache is only valid during request.
+	 * Trying to store this over multiple requests causes issues when the keys are exposed in user arrays
+	 * (see GH-17122 and GH-17132). */
 	zend_string **subpats_table;
 	uint32_t preg_options;
+	uint32_t name_count;
 	uint32_t capture_count;
 	uint32_t compile_options;
 	uint32_t refcount;
@@ -478,6 +482,14 @@ static PHP_RINIT_FUNCTION(pcre)
 
 static PHP_RSHUTDOWN_FUNCTION(pcre)
 {
+	pcre_cache_entry *pce;
+	ZEND_HASH_MAP_FOREACH_PTR(&PCRE_G(pcre_cache), pce) {
+		if (pce->subpats_table) {
+			free_subpats_table(pce->subpats_table, pce->capture_count + 1);
+			pce->subpats_table = NULL;
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	pcre2_general_context_free(PCRE_G(gctx_zmm));
 	PCRE_G(gctx_zmm) = NULL;
 
@@ -506,24 +518,13 @@ static int pcre_clean_cache(zval *data, void *arg)
 /* }}} */
 
 static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats) {
-	bool destroy = EG(flags) & EG_FLAGS_IN_SHUTDOWN;
-
 	uint32_t i;
 	for (i = 0; i < num_subpats; i++) {
 		if (subpat_names[i]) {
-			if (destroy) {
-				/* Because the subpattern names are persistent, and the fact that the
-				 * symbol table destruction is skipped when using fast_shutdown,
-				 * this means the refcounts will not be updated for the destruction of
-				 * the arrays that hold the subpattern name keys. */
-				ZEND_ASSERT(!ZSTR_IS_INTERNED(subpat_names[i]));
-				pefree(subpat_names[i], true);
-			} else {
-				zend_string_release_ex(subpat_names[i], true);
-			}
+			zend_string_release_ex(subpat_names[i], false);
 		}
 	}
-	pefree(subpat_names, true);
+	efree(subpat_names);
 }
 
 /* {{{ static make_subpats_table */
@@ -542,23 +543,24 @@ static zend_string **make_subpats_table(uint32_t name_cnt, pcre_cache_entry *pce
 		return NULL;
 	}
 
-	subpat_names = pecalloc(num_subpats, sizeof(zend_string *), true);
+	subpat_names = ecalloc(num_subpats, sizeof(zend_string *));
 	while (ni++ < name_cnt) {
 		unsigned short name_idx = 0x100 * (unsigned char)name_table[0] + (unsigned char)name_table[1];
 		const char *name = name_table + 2;
-		/* Note: this makes a persistent string when the cache is not request-based because the string
-		 * has to outlive the request. In that case, they will only be used within this thread
-		 * and never be shared.
-		 * Although we will be storing them in user-exposed arrays, they cannot cause problems
-		 * because they only live in this thread and the last reference is deleted on shutdown
-		 * instead of by user code. */
-		subpat_names[name_idx] = zend_string_init(name, strlen(name), true);
-		GC_MAKE_PERSISTENT_LOCAL(subpat_names[name_idx]);
+		subpat_names[name_idx] = zend_string_init(name, strlen(name), false);
 		name_table += name_size;
 	}
 	return subpat_names;
 }
 /* }}} */
+
+static zend_string **ensure_subpats_table(uint32_t name_cnt, pcre_cache_entry *pce)
+{
+	if (!pce->subpats_table) {
+		pce->subpats_table = make_subpats_table(name_cnt, pce);
+	}
+	return pce->subpats_table;
+}
 
 /* {{{ static calculate_unit_length */
 /* Calculates the byte length of the next character. Assumes valid UTF-8 for PCRE2_UTF. */
@@ -831,6 +833,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
 	new_entry.refcount = 0;
+	new_entry.subpats_table = NULL;
 
 	rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count);
 	if (rc < 0) {
@@ -842,8 +845,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 		return NULL;
 	}
 
-	uint32_t name_count;
-	rc = pcre2_pattern_info(re, PCRE2_INFO_NAMECOUNT, &name_count);
+	rc = pcre2_pattern_info(re, PCRE2_INFO_NAMECOUNT, &new_entry.name_count);
 	if (rc < 0) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
@@ -851,21 +853,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 		php_error_docref(NULL, E_WARNING, "Internal pcre_pattern_info() error %d", rc);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
-	}
-
-	/* Compute and cache the subpattern table to avoid computing it again over and over. */
-	if (name_count > 0) {
-		new_entry.subpats_table = make_subpats_table(name_count, &new_entry);
-		if (!new_entry.subpats_table) {
-			if (key != regex) {
-				zend_string_release_ex(key, false);
-			}
-			/* Warning already emitted by make_subpats_table() */
-			pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
-			return NULL;
-		}
-	} else {
-		new_entry.subpats_table = NULL;
 	}
 
 	/*
@@ -982,7 +969,7 @@ static zend_always_inline void populate_match_value(
 
 static inline void add_named(
 		HashTable *const subpats, zend_string *name, zval *val, bool unmatched) {
-	ZEND_ASSERT(GC_FLAGS(name) & IS_STR_PERSISTENT);
+	ZEND_ASSERT(!(GC_FLAGS(name) & IS_STR_PERSISTENT));
 
 	/* If the DUPNAMES option is used, multiple subpatterns might have the same name.
 	 * In this case we want to preserve the one that actually has a value. */
@@ -1245,8 +1232,11 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	 * allocate the table only if there are any named subpatterns.
 	 */
 	subpat_names = NULL;
-	if (subpats) {
-		subpat_names = pce->subpats_table;
+	if (subpats && pce->name_count > 0) {
+		subpat_names = ensure_subpats_table(pce->name_count, pce);
+		if (UNEXPECTED(!subpat_names)) {
+			RETURN_FALSE;
+		}
 	}
 
 	matched = 0;
@@ -1882,7 +1872,14 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
-	subpat_names = pce->subpats_table;
+	if (pce->name_count > 0) {
+		subpat_names = ensure_subpats_table(pce->name_count, pce);
+		if (UNEXPECTED(!subpat_names)) {
+			return NULL;
+		}
+	} else {
+		subpat_names = NULL;
+	}
 
 	alloc_len = 0;
 	result = NULL;
