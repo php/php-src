@@ -229,7 +229,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			}
 		}
 		if (opened_path) {
-			*opened_path = strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+			*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%s/%S", idata->phar->fname, idata->internal_file->filename);
 		}
 		return fpf;
 	} else {
@@ -267,8 +267,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 
 				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
 				entry->is_temp_dir = 1;
-				entry->filename = estrndup("", 0);
-				entry->filename_len = 0;
+				entry->filename = ZSTR_EMPTY_ALLOC();
 				entry->phar = phar;
 				entry->offset = entry->offset_abs = 0;
 				entry->compressed_filesize = entry->uncompressed_filesize = phar->halt_offset;
@@ -306,13 +305,11 @@ idata_error:
 	}
 	php_url_free(resource);
 #ifdef MBO_0
-		fprintf(stderr, "Pharname:   %s\n", idata->phar->filename);
+		fprintf(stderr, "Pharname:   %s\n", idata->phar->fname);
 		fprintf(stderr, "Filename:   %s\n", internal_file);
-		fprintf(stderr, "Entry:      %s\n", idata->internal_file->filename);
+		fprintf(stderr, "Entry:      %s\n", ZSTR_VAL(idata->internal_file->filename));
 		fprintf(stderr, "Size:       %u\n", idata->internal_file->uncompressed_filesize);
 		fprintf(stderr, "Compressed: %u\n", idata->internal_file->flags);
-		fprintf(stderr, "Offset:     %u\n", idata->internal_file->offset_within_phar);
-		fprintf(stderr, "Cached:     %s\n", idata->internal_file->filedata ? "yes" : "no");
 #endif
 
 	/* check length, crc32 */
@@ -325,10 +322,10 @@ idata_error:
 	}
 
 	if (!PHAR_G(cwd_init) && (options & STREAM_OPEN_FOR_INCLUDE)) {
-		char *entry = idata->internal_file->filename, *cwd;
+		char *entry = ZSTR_VAL(idata->internal_file->filename), *cwd;
 
 		PHAR_G(cwd_init) = 1;
-		if ((idata->phar->is_tar || idata->phar->is_zip) && idata->internal_file->filename_len == sizeof(".phar/stub.php")-1 && !strncmp(idata->internal_file->filename, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+		if ((idata->phar->is_tar || idata->phar->is_zip) && ZSTR_LEN(idata->internal_file->filename) == sizeof(".phar/stub.php")-1 && !strncmp(entry, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 			/* we're executing the stub, which doesn't count as a file */
 			PHAR_G(cwd_init) = 0;
 		} else if ((cwd = strrchr(entry, '/'))) {
@@ -341,7 +338,7 @@ idata_error:
 		}
 	}
 	if (opened_path) {
-		*opened_path = strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+		*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%s/%S", idata->phar->fname, idata->internal_file->filename);
 	}
 	efree(internal_file);
 phar_stub:
@@ -448,7 +445,7 @@ static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t cou
 
 	php_stream_seek(data->fp, data->position, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
-		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, data->internal_file->filename, data->phar->fname);
+		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, ZSTR_VAL(data->internal_file->filename), data->phar->fname);
 		return -1;
 	}
 	data->position = php_stream_tell(data->fp);
@@ -853,18 +850,17 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		 * if it already exists, we overwrite the destination like what copy('phar://...', 'phar://...') does. */
 		entry = zend_hash_str_update_mem(&(phar->manifest), ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info));
 
-		entry->filename = estrndup(ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1);
+		entry->filename = zend_string_init(ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1, false);
 		if (FAILURE == phar_copy_entry_fp(source, entry, &error)) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);
 			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 			efree(error);
-			zend_hash_str_del(&(phar->manifest), entry->filename, strlen(entry->filename));
+			zend_hash_del(&phar->manifest, entry->filename);
 			return 0;
 		}
 		is_modified = 1;
 		entry->is_modified = 1;
-		entry->filename_len = strlen(entry->filename);
 		is_dir = entry->is_dir;
 	} else {
 		is_dir = zend_hash_str_exists(&(phar->virtual_dirs), ZSTR_VAL(resource_from->path)+1, ZSTR_LEN(resource_from->path)-1);
@@ -901,10 +897,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 				is_modified = 1;
 				entry->is_modified = 1;
-				efree(entry->filename);
-				// TODO: avoid reallocation (make entry->filename zend_string*)
-				entry->filename = estrndup(ZSTR_VAL(new_str_key), ZSTR_LEN(new_str_key));
-				entry->filename_len = ZSTR_LEN(new_str_key);
+				zend_string_release(entry->filename);
+				entry->filename = zend_string_copy(new_str_key);
 
 				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);

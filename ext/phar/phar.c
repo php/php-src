@@ -367,7 +367,7 @@ void destroy_phar_manifest_entry_int(phar_entry_info *entry) /* {{{ */
 
 	phar_metadata_tracker_free(&entry->metadata_tracker, entry->is_persistent);
 
-	pefree(entry->filename, entry->is_persistent);
+	zend_string_release_ex(entry->filename, entry->is_persistent);
 
 	if (entry->link) {
 		pefree(entry->link, entry->is_persistent);
@@ -424,7 +424,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
 		if (idata->fp && idata->fp != idata->phar->fp && idata->fp != idata->phar->ufp && idata->fp != idata->internal_file->fp) {
 			php_stream_close(idata->fp);
 		}
-		zend_hash_str_del(&idata->phar->manifest, idata->internal_file->filename, idata->internal_file->filename_len);
+		zend_hash_del(&idata->phar->manifest, idata->internal_file->filename);
 		idata->phar->refcount--;
 		efree(idata);
 	} else {
@@ -1134,9 +1134,10 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)")
 		}
 
-		PHAR_GET_32(buffer, entry.filename_len);
+		uint32_t filename_len;
+		PHAR_GET_32(buffer, filename_len);
 
-		if (entry.filename_len == 0) {
+		if (filename_len == 0) {
 			MAPPHAR_FAIL("zero-length filename encountered in phar \"%s\"");
 		}
 
@@ -1144,19 +1145,19 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 			entry.manifest_pos = manifest_index;
 		}
 
-		if (entry.filename_len > (size_t)(endbuffer - buffer - 24)) {
+		if (filename_len > (size_t)(endbuffer - buffer - 24)) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 
-		if ((manifest_ver & PHAR_API_VER_MASK) >= PHAR_API_MIN_DIR && buffer[entry.filename_len - 1] == '/') {
+		if ((manifest_ver & PHAR_API_VER_MASK) >= PHAR_API_MIN_DIR && buffer[filename_len - 1] == '/') {
 			entry.is_dir = 1;
 		} else {
 			entry.is_dir = 0;
 		}
 
-		phar_add_virtual_dirs(mydata, buffer, entry.filename_len);
-		entry.filename = pestrndup(buffer, entry.filename_len, entry.is_persistent);
-		buffer += entry.filename_len;
+		phar_add_virtual_dirs(mydata, buffer, filename_len);
+		const char *filename_raw = buffer;
+		buffer += filename_len;
 		PHAR_GET_32(buffer, entry.uncompressed_filesize);
 		PHAR_GET_32(buffer, entry.timestamp);
 
@@ -1176,13 +1177,15 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		PHAR_GET_32(buffer, entry.flags);
 
 		if (entry.is_dir) {
-			entry.filename_len--;
+			filename_len--;
 			entry.flags |= PHAR_ENT_PERM_DEF_DIR;
 		}
 
+		entry.filename = zend_string_init(filename_raw, filename_len, entry.is_persistent);
+
 		PHAR_GET_32(buffer, len);
 		if (len > (size_t)(endbuffer - buffer)) {
-			pefree(entry.filename, entry.is_persistent);
+			zend_string_free(entry.filename);
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 		/* Don't implicitly call unserialize() on potentially untrusted input unless getMetadata() is called directly. */
@@ -1199,21 +1202,21 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 			case PHAR_ENT_COMPRESSED_GZ:
 				if (!PHAR_G(has_zlib)) {
 					phar_metadata_tracker_free(&entry.metadata_tracker, entry.is_persistent);
-					pefree(entry.filename, entry.is_persistent);
+					zend_string_free(entry.filename);
 					MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
 				}
 				break;
 			case PHAR_ENT_COMPRESSED_BZ2:
 				if (!PHAR_G(has_bz2)) {
 					phar_metadata_tracker_free(&entry.metadata_tracker, entry.is_persistent);
-					pefree(entry.filename, entry.is_persistent);
+					zend_string_free(entry.filename);
 					MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
 				}
 				break;
 			default:
 				if (entry.uncompressed_filesize != entry.compressed_filesize) {
 					phar_metadata_tracker_free(&entry.metadata_tracker, entry.is_persistent);
-					pefree(entry.filename, entry.is_persistent);
+					zend_string_free(entry.filename);
 					MAPPHAR_FAIL("internal corruption of phar \"%s\" (compressed and uncompressed size does not match for uncompressed entry)");
 				}
 				break;
@@ -1223,10 +1226,11 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		/* if signature matched, no need to check CRC32 for each file */
 		entry.is_crc_checked = (manifest_flags & PHAR_HDR_SIGNATURE ? 1 : 0);
 		phar_set_inode(&entry);
+		// TODO: avoid copy
 		if (mydata->is_persistent) {
-			str = zend_string_init_interned(entry.filename, entry.filename_len, 1);
+			str = zend_string_init_interned(ZSTR_VAL(entry.filename), ZSTR_LEN(entry.filename), 1);
 		} else {
-			str = zend_string_init(entry.filename, entry.filename_len, 0);
+			str = zend_string_init(ZSTR_VAL(entry.filename), ZSTR_LEN(entry.filename), 0);
 		}
 		zend_hash_add_mem(&mydata->manifest, str, (void*)&entry, sizeof(phar_entry_info));
 		zend_string_release(str);
@@ -2390,14 +2394,14 @@ zend_result phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char *
 		phar_zip_data_desc desc;
 
 		if (SUCCESS != phar_open_archive_fp(idata->phar)) {
-			spprintf(error, 0, "phar error: unable to open zip-based phar archive \"%s\" to verify local file header for file \"%s\"", idata->phar->fname, entry->filename);
+			spprintf(error, 0, "phar error: unable to open zip-based phar archive \"%s\" to verify local file header for file \"%s\"", idata->phar->fname, ZSTR_VAL(entry->filename));
 			return FAILURE;
 		}
 		php_stream_seek(phar_get_entrypfp(idata->internal_file), entry->header_offset, SEEK_SET);
 
 		if (sizeof(local) != php_stream_read(phar_get_entrypfp(idata->internal_file), (char *) &local, sizeof(local))) {
 
-			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local file header for file \"%s\")", idata->phar->fname, entry->filename);
+			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local file header for file \"%s\")", idata->phar->fname, ZSTR_VAL(entry->filename));
 			return FAILURE;
 		}
 
@@ -2410,7 +2414,7 @@ zend_result phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char *
 					entry->compressed_filesize, SEEK_SET);
 			if (sizeof(desc) != php_stream_read(phar_get_entrypfp(idata->internal_file),
 							    (char *) &desc, sizeof(desc))) {
-				spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local data descriptor for file \"%s\")", idata->phar->fname, entry->filename);
+				spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local data descriptor for file \"%s\")", idata->phar->fname, ZSTR_VAL(entry->filename));
 				return FAILURE;
 			}
 			if (desc.signature[0] == 'P' && desc.signature[1] == 'K') {
@@ -2421,8 +2425,8 @@ zend_result phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char *
 			}
 		}
 		/* verify local header */
-		if (entry->filename_len != PHAR_ZIP_16(local.filename_len) || entry->crc32 != PHAR_ZIP_32(local.crc32) || entry->uncompressed_filesize != PHAR_ZIP_32(local.uncompsize) || entry->compressed_filesize != PHAR_ZIP_32(local.compsize)) {
-			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (local header of file \"%s\" does not match central directory)", idata->phar->fname, entry->filename);
+		if (ZSTR_LEN(entry->filename) != PHAR_ZIP_16(local.filename_len) || entry->crc32 != PHAR_ZIP_32(local.crc32) || entry->uncompressed_filesize != PHAR_ZIP_32(local.uncompsize) || entry->compressed_filesize != PHAR_ZIP_32(local.compsize)) {
+			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (local header of file \"%s\" does not match central directory)", idata->phar->fname, ZSTR_VAL(entry->filename));
 			return FAILURE;
 		}
 
@@ -2450,7 +2454,7 @@ zend_result phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char *
 		entry->is_crc_checked = 1;
 		return SUCCESS;
 	} else {
-		spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", idata->phar->fname, entry->filename);
+		spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", idata->phar->fname, ZSTR_VAL(entry->filename));
 		return FAILURE;
 	}
 }
@@ -2712,7 +2716,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 		}
 		/* after excluding deleted files, calculate manifest size in bytes and number of entries */
 		++new_manifest_count;
-		phar_add_virtual_dirs(phar, entry->filename, entry->filename_len);
+		phar_add_virtual_dirs(phar, ZSTR_VAL(entry->filename), ZSTR_LEN(entry->filename));
 
 		if (entry->is_dir) {
 			/* we use this to calculate API version, 1.1.1 is used for phars with directories */
@@ -2729,7 +2733,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 		}
 
 		/* 32 bits for filename length, length of filename, manifest + metadata, and add 1 for trailing / if a directory */
-		offset += 4 + entry->filename_len + sizeof(entry_buffer) + (entry->metadata_tracker.str ? ZSTR_LEN(entry->metadata_tracker.str) : 0) + (entry->is_dir ? 1 : 0);
+		offset += 4 + ZSTR_LEN(entry->filename) + sizeof(entry_buffer) + (entry->metadata_tracker.str ? ZSTR_LEN(entry->metadata_tracker.str) : 0) + (entry->is_dir ? 1 : 0);
 
 		/* compress and rehash as necessary */
 		if ((oldfile && !entry->is_modified) || entry->is_dir) {
@@ -2757,7 +2761,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			}
 			php_stream_close(newfile);
 			if (error) {
-				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
+				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 			}
 			return;
 		}
@@ -2778,11 +2782,11 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			php_stream_close(newfile);
 			if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
 				if (error) {
-					spprintf(error, 0, "unable to gzip compress file \"%s\" to new phar \"%s\"", entry->filename, phar->fname);
+					spprintf(error, 0, "unable to gzip compress file \"%s\" to new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 				}
 			} else {
 				if (error) {
-					spprintf(error, 0, "unable to bzip2 compress file \"%s\" to new phar \"%s\"", entry->filename, phar->fname);
+					spprintf(error, 0, "unable to bzip2 compress file \"%s\" to new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 				}
 			}
 			return;
@@ -2815,7 +2819,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			}
 			php_stream_close(newfile);
 			if (error) {
-				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
+				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 			}
 			goto cleanup;
 		}
@@ -2826,7 +2830,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			}
 			php_stream_close(newfile);
 			if (error) {
-				spprintf(error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
+				spprintf(error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 			}
 			goto cleanup;
 		}
@@ -2929,13 +2933,13 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 
 		if (entry->is_dir) {
 			/* add 1 for trailing slash */
-			phar_set_32(entry_buffer, entry->filename_len + 1);
+			phar_set_32(entry_buffer, ZSTR_LEN(entry->filename) + 1);
 		} else {
-			phar_set_32(entry_buffer, entry->filename_len);
+			phar_set_32(entry_buffer, ZSTR_LEN(entry->filename));
 		}
 
 		if (4 != php_stream_write(newfile, entry_buffer, 4)
-		|| entry->filename_len != php_stream_write(newfile, entry->filename, entry->filename_len)
+		|| ZSTR_LEN(entry->filename) != php_stream_write(newfile, ZSTR_VAL(entry->filename), ZSTR_LEN(entry->filename))
 		|| (entry->is_dir && 1 != php_stream_write(newfile, "/", 1))) {
 			if (must_close_old_file) {
 				php_stream_close(oldfile);
@@ -2943,9 +2947,9 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			php_stream_close(newfile);
 			if (error) {
 				if (entry->is_dir) {
-					spprintf(error, 0, "unable to write filename of directory \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
+					spprintf(error, 0, "unable to write filename of directory \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 				} else {
-					spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
+					spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 				}
 			}
 			goto cleanup;
@@ -2979,7 +2983,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			php_stream_close(newfile);
 
 			if (error) {
-				spprintf(error, 0, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
+				spprintf(error, 0, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 			}
 
 			goto cleanup;
@@ -3020,7 +3024,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 				}
 				php_stream_close(newfile);
 				if (error) {
-					spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
+					spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 				}
 				goto cleanup;
 			}
@@ -3032,7 +3036,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			}
 			php_stream_close(newfile);
 			if (error) {
-				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
+				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 			}
 			goto cleanup;
 		}
@@ -3048,7 +3052,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			php_stream_close(newfile);
 
 			if (error) {
-				spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\"", entry->filename, phar->fname);
+				spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
 			}
 
 			goto cleanup;

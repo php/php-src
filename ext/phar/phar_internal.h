@@ -204,8 +204,7 @@ typedef struct _phar_entry_info {
 	/* when changing compression, save old flags in case fp is NULL */
 	uint32_t                 old_flags;
 	phar_metadata_tracker metadata_tracker;
-	uint32_t                 filename_len;
-	char                     *filename;
+	zend_string              *filename;
 	enum phar_fp_type        fp_type;
 	/* offset within original phar file of the file contents */
 	zend_long                     offset_abs;
@@ -386,14 +385,14 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 	size_t tmp_len;
 	size_t len1, len2;
 
-	tmp_len = MIN(MAXPATHLEN, entry->filename_len + entry->phar->fname_len);
+	tmp_len = MIN(MAXPATHLEN, ZSTR_LEN(entry->filename) + entry->phar->fname_len);
 
 	len1 = MIN(entry->phar->fname_len, tmp_len);
 	if (entry->phar->fname) {
 		memcpy(tmp, entry->phar->fname, len1);
 	}
 
-	len2 = MIN(tmp_len - len1, entry->filename_len);
+	len2 = MIN(tmp_len - len1, ZSTR_LEN(entry->filename));
 	memcpy(tmp + len1, entry->filename, len2);
 
 	entry->inode = (unsigned short) zend_hash_func(tmp, tmp_len);
