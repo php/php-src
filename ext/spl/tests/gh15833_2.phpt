@@ -22,5 +22,6 @@ $recursiveArrayIterator->next();
 var_dump($recursiveArrayIterator->current());
 ?>
 --EXPECT--
-int(1)
+foo
+NULL
 NULL
