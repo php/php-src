@@ -78,6 +78,11 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 		 * If we don't, it's possible to continue working with the wrong object in case we're using a proxy. */
 		if (UNEXPECTED(zend_lazy_object_must_init(obj))) {
 			obj = zend_lazy_object_init(obj);
+			if (UNEXPECTED(!obj)) {
+				zval_ptr_dtor(&intern->array);
+				ZVAL_ARR(&intern->array, zend_new_array(0));
+				return &Z_ARRVAL(intern->array);
+			}
 		}
 		/* rebuild properties */
 		zend_std_get_properties_ex(obj);
