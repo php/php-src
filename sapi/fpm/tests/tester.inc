@@ -401,11 +401,15 @@ class Tester
         bool $debug = null,
         string $clientTransport = 'stream'
     ) {
-        $this->configTemplate  = $configTemplate;
-        $this->code            = $code;
-        $this->options         = $options;
-        $this->fileName        = $fileName ?: self::getCallerFileName();
-        $this->debug           = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
+        $this->configTemplate = $configTemplate;
+        $this->code           = $code;
+        $this->options        = $options;
+        $this->fileName       = $fileName ?: self::getCallerFileName();
+        if (($debugFilter = getenv('TEST_FPM_DEBUG_FILTER')) !== false) {
+            $this->debug = str_contains(basename($this->fileName), $debugFilter);
+        } else {
+            $this->debug = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
+        }
         $this->logReader       = new LogReader($this->debug);
         $this->logTool         = new LogTool($this->logReader, $this->debug);
         $this->clientTransport = $clientTransport;
@@ -930,6 +934,7 @@ class Tester
                         $requestData['headers'] ?? [],
                         $requestData['uri'] ?? null
                     );
+                    $this->trace('Request params', $params);
 
                     if (isset($requestData['delay'])) {
                         usleep($requestData['delay']);
