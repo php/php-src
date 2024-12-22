@@ -50,8 +50,43 @@ class ZendStringPrettyPrinter(gdb.printing.PrettyPrinter):
             else:
                 yield (field.name, format_nested(self.val[field.name]))
 
-
 pp_set.add_printer('zend_string', '^_zend_string$', ZendStringPrettyPrinter)
+
+class ZendObjectPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_object"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return 'object(%s)' % format_zstr(self.val['ce']['name'])
+
+    def children(self):
+        for field in self.val.type.fields():
+            yield (field.name, format_nested(self.val[field.name]))
+
+pp_set.add_printer('zend_object', '^_zend_object$', ZendObjectPrettyPrinter)
+
+class ZendArrayPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_array"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return 'array(%d)' % self.val['nNumOfElements']
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name is None:
+                name = '<anonymous>'
+                val = self.val[field]
+            else:
+                name = field.name
+                val = self.val[field.name]
+            yield (name, format_nested(val))
+
+pp_set.add_printer('zend_array', '^_zend_array$', ZendArrayPrettyPrinter)
 
 class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
     "Print a zend_type"
