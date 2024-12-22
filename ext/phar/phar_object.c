@@ -4169,9 +4169,7 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 	if (virtual_file_ex(&new_state, entry->filename, NULL, CWD_EXPAND) != 0 ||
 			new_state.cwd_length <= 1) {
 		if (EINVAL == errno && entry->filename_len > 50) {
-			char *tmp = estrndup(entry->filename, 50);
-			spprintf(error, 4096, "Cannot extract \"%s...\" to \"%s...\", extracted filename is too long for filesystem", tmp, dest);
-			efree(tmp);
+			spprintf(error, 4096, "Cannot extract \"%.50s...\" to \"%s...\", extracted filename is too long for filesystem", entry->filename, dest);
 		} else {
 			spprintf(error, 4096, "Cannot extract \"%s\", internal error", entry->filename);
 		}
@@ -4196,13 +4194,10 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 	len = spprintf(&fullpath, 0, "%s/%s", dest, filename);
 
 	if (len >= MAXPATHLEN) {
-		char *tmp;
 		/* truncate for error message */
 		fullpath[50] = '\0';
 		if (entry->filename_len > 50) {
-			tmp = estrndup(entry->filename, 50);
-			spprintf(error, 4096, "Cannot extract \"%s...\" to \"%s...\", extracted filename is too long for filesystem", tmp, fullpath);
-			efree(tmp);
+			spprintf(error, 4096, "Cannot extract \"%.50s...\" to \"%s...\", extracted filename is too long for filesystem", entry->filename, fullpath);
 		} else {
 			spprintf(error, 4096, "Cannot extract \"%s\" to \"%s...\", extracted filename is too long for filesystem", entry->filename, fullpath);
 		}
