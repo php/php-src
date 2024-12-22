@@ -2606,15 +2606,18 @@ PHP_METHOD(SplFileObject, fwrite)
 	char *str;
 	size_t str_len;
 	zend_long length = 0;
+	bool length_is_null = true;
 	ssize_t written;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &length) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (!length_is_null) {
 		if (length >= 0) {
 			str_len = MIN((size_t)length, str_len);
 		} else {
