@@ -57,6 +57,8 @@ PHP 8.5 UPGRADE NOTES
 - SPL:
   . ArrayObject no longer accepts enums, as modifying the $name or $value
     properties can break engine assumptions.
+  . SplFileObject::fwrite's parameter $length is now nullable. The default
+    value changed from 0 to null.
 
 ========================================
 2. New Features
@@ -99,7 +101,7 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 
 - Zlib:
-  . The "use_include_path" argument for the 
+  . The "use_include_path" argument for the
     gzfile, gzopen and readgzfile functions had been changed
     from int to boolean.
 
