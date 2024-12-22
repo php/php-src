@@ -10,14 +10,14 @@ $desc = [
 ];
 $read_pipes = [];
 for ($i = 0; $i < 10; $i++) {
-    $procs[] = proc_open([$php, "-r", "usleep(100000 * (10 - $i)); echo 'hello$i';"], $desc, $pipes);
+    $procs[] = proc_open([$php, "-r", "usleep(10000 * (10 - $i)); echo 'hello$i';"], $desc, $pipes);
     $read_pipes[] = $pipes[1];
 }
 $out = [];
 $rset = $read_pipes;
 $wset = null;
 $eset = null;
-while (!empty($read_pipes) && ($selected = stream_select($rset, $wset, $eset, 2)) > 0) {
+while (!empty($read_pipes) && ($selected = stream_select($rset, $wset, $eset, 1)) > 0) {
     foreach ($rset as $pipe) {
         if ($selected === 10) {
             echo "stream_select() reported all pipes as ready\n";
