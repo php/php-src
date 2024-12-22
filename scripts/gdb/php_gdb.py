@@ -503,6 +503,28 @@ class ZendInternalFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
 
 pp_set.add_printer('zend_internal_function', '^_zend_internal_function$', ZendInternalFunctionPrettyPrinter)
 
+class ZendRefcountedHPrettyPrinter(gdb.printing.PrettyPrinter):
+    "Print a zend_refcounted_h"
+
+    def __init__(self, val):
+        self.val = val
+
+    def children(self):
+        for field in self.val.type.fields():
+            if field.name == 'u':
+                val = self.val[field.name]
+                if val == None:
+                    val = self.val
+                for subfield in val.type.fields():
+                    if subfield.name == 'type_info':
+                        yield (('%s.%s' % (field.name, subfield.name)), ZendRefTypeInfo.format(int(val[subfield.name])))
+                    else:
+                        yield (('%s.%s' % (field.name, subfield.name)), format_nested(val[subfield.name]))
+            else:
+                yield (('%s' % field.name), format_nested(self.val[field.name]))
+
+pp_set.add_printer('zend_refcounted_h', '^_zend_refcounted_h$', ZendRefcountedHPrettyPrinter)
+
 class PrintAccFlagsCommand(gdb.Command):
     "Pretty print ACC flags"
 
@@ -512,6 +534,7 @@ class PrintAccFlagsCommand(gdb.Command):
         super(PrintAccFlagsCommand, self).__init__(name, gdb.COMMAND_USER)
 
     def invoke (self, arg, from_tty):
+        arg = int(gdb.parse_and_eval(arg))
         print(ZendAccFlags.format_flags(arg, self.type))
 
 PrintAccFlagsCommand('fn')
@@ -526,9 +549,22 @@ class PrintOpcodeCommand(gdb.Command):
         super(PrintOpcodeCommand, self).__init__("print_opcode", gdb.COMMAND_USER)
 
     def invoke (self, arg, from_tty):
+        arg = int(gdb.parse_and_eval(arg))
         print(ZendOpcodes.name(arg))
 
 PrintOpcodeCommand()
+
+class PrintRefTypeInfoCommand(gdb.Command):
+    "Pretty print zend_refcounted.gc.u.type_info"
+
+    def __init__ (self):
+        super(PrintRefTypeInfoCommand, self).__init__("print_ref_type_info", gdb.COMMAND_USER)
+
+    def invoke (self, arg, from_tty):
+        arg = int(gdb.parse_and_eval(arg))
+        print(ZendRefTypeInfo.format(arg))
+
+PrintRefTypeInfoCommand()
 
 class ZendTypeBits:
     _bits = None
@@ -726,6 +762,154 @@ class ZendOpcodes:
                 opcodes[name] = int(number)
 
         self._opcodes = opcodes
+
+class ZendRefTypeInfo:
+    _bits = None
+
+    @classmethod
+    def flag_name(self, bit):
+        return self._flag_name_in(bit, self._bits)
+
+    @classmethod
+    def _flag_name_in(self, bit, bits):
+        for name in bits:
+            if bit == bits[name]:
+                return name
+
+    @classmethod
+    def bit(self, name):
+        return self._bits.get(name)
+
+    @classmethod
+    def format(self, flags):
+        self._load()
+        names = []
+
+        type = flags & self._type_mask
+        type_name = ZendTypeBits.zvalTypeName(type)
+        if type_name is not None:
+            names.append('IS_%s' % type_name.upper())
+
+        bits = self._bits
+        type_bits = None
+        match type_name:
+            case 'string':
+                type_bits = self._str_bits
+            case 'array':
+                type_bits = self._array_bits
+            case 'object':
+                type_bits = self._obj_bits
+
+        type_flags = flags & self._flags_mask
+        for i in range(0, 31):
+            if (1<<i) > type_flags:
+                break
+            if (type_flags & (1<<i)) != 0:
+                name = self.flag_name(i)
+                if type_bits is not None:
+                    name2 = self._flag_name_in(i, type_bits)
+                    if name2 is not None:
+                        if name is not None:
+                            names.append('%s(%s)' % (name2, name))
+                        else:
+                            names.append(name2)
+                        continue
+                if name is not None:
+                    names.append(name)
+                else:
+                    names.append('(1 << %d)' % (i))
+
+        if (flags & (1<<self.bit('GC_NOT_COLLECTABLE'))) == 0:
+            gc_color = (flags >> self._info_shift) & self._gc_color
+            match gc_color:
+                case self._gc_black:
+                    names.append('GC_BLACK')
+                case self._gc_white:
+                    names.append('GC_WHITE')
+                case self._gc_grey:
+                    names.append('GC_GREY')
+                case self._gc_purple:
+                    names.append('GC_PURPLE')
+
+            gc_address = (flags >> self._info_shift) & self._gc_address
+            if gc_address != 0:
+                names.append('GC_ADDRESS(%d)' % gc_address)
+        else:
+            info = flags & self._info_mask
+            if info != 0:
+                names.append('GC_INFO(%d)' % info)
+
+        return ' | '.join(names)
+
+    @classmethod
+    def _load(self):
+        if self._bits != None:
+            return
+
+        dirname = detect_source_dir()
+        filename = os.path.join(dirname, 'zend_types.h')
+
+        bits = {}
+        str_bits = {}
+        array_bits = {}
+        obj_bits = {}
+
+        with open(filename, 'r') as file:
+            content = file.read()
+
+            # GC_NOT_COLLECTABLE          (1<<4)
+            pattern = re.compile(r'#define (GC_[^\s]+)\s+\(\s*1\s*<<\s*([0-9]+)\s*\)')
+            matches = pattern.findall(content)
+            for name, bit in matches:
+                bits[name] = int(bit)
+
+            # GC_TYPE_MASK                0x0000000f
+            # GC_INFO_SHIFT               10
+            pattern = re.compile(r'#define (GC_[^\s]+)\s+((0x)?[0-9a-f]+)')
+            matches = pattern.findall(content)
+            for name, bit, _ in matches:
+                match name:
+                    case 'GC_TYPE_MASK':
+                        self._type_mask = int(bit, 0)
+                    case 'GC_FLAGS_MASK':
+                        self._flags_mask = int(bit, 0)
+                    case 'GC_INFO_MASK':
+                        self._info_mask = int(bit, 0)
+                    case 'GC_INFO_SHIFT':
+                        self._info_shift = int(bit, 0)
+                    case 'GC_FLAGS_SHIFT':
+                        self._flags_shift = int(bit, 0)
+
+            # IS_STR_INTERNED             GC_IMMUTABLE
+            # IS_STR_PERMANENT            (1<<8)
+            pattern = re.compile(r'#define (IS_(STR|ARRAY|OBJ)_[^\s]+)\s+(\(\s*1\s*<<\s*([0-9]+)\s*\)|GC_[a-zA-Z_]+)')
+            matches = pattern.findall(content)
+            for name, type, val, bit in matches:
+                if bit == '':
+                    bit = bits.get(val)
+                    if bit == None:
+                        continue
+                match type:
+                    case 'STR':
+                        target = str_bits
+                    case 'ARRAY':
+                        target = array_bits
+                    case 'OBJ':
+                        target = obj_bits
+                target[name] = int(bit)
+
+        # Hard coded because these are not exposed in header files
+        self._gc_address = 0x0fffff
+        self._gc_color   = 0x300000
+        self._gc_black   = 0x000000
+        self._gc_white   = 0x100000
+        self._gc_grey    = 0x200000
+        self._gc_purple  = 0x300000
+
+        self._bits = bits
+        self._str_bits = str_bits
+        self._array_bits = array_bits
+        self._obj_bits = obj_bits
 
 def detect_source_dir():
     (symbol,_) = gdb.lookup_symbol("zend_visibility_to_set_visibility")
