@@ -807,6 +807,7 @@ again:
 			if (ZSTR_LEN(str) == 1) {
 				*(char*)ptr = ZSTR_VAL(str)[0];
 			} else {
+				zend_tmp_string_release(tmp_str);
 				zend_ffi_assign_incompatible(value, type);
 				return FAILURE;
 			}
