@@ -517,7 +517,8 @@ class ZendRefcountedHPrettyPrinter(gdb.printing.PrettyPrinter):
                     val = self.val
                 for subfield in val.type.fields():
                     if subfield.name == 'type_info':
-                        yield (('%s.%s' % (field.name, subfield.name)), ZendRefTypeInfo.format(int(val[subfield.name])))
+                        flags = int(val[subfield.name])
+                        yield (('%s.%s' % (field.name, subfield.name)), '%d = %s' % (flags, ZendRefTypeInfo.format(flags)))
                     else:
                         yield (('%s.%s' % (field.name, subfield.name)), format_nested(val[subfield.name]))
             else:
