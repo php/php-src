@@ -11,7 +11,10 @@ if test "$PHP_EMBED" != "no"; then
   case "$PHP_EMBED" in
     yes|shared)
       LIBPHP_CFLAGS="-shared"
-      PHP_EMBED_TYPE=shared
+      AS_CASE(["$host_alias"], [*darwin*], [
+        SAPI_SHARED="libs/libphp.dylib"
+        PHP_EMBED_TYPE=shared-dylib
+      ], [PHP_EMBED_TYPE=shared])
       INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(prefix)/lib; \$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)\$(prefix)/lib"
       ;;
     static)

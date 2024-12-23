@@ -29,6 +29,9 @@
 # Libtool library files generated during build process
 *.la
 
+# Mac shared library files generated during build process
+*.dylib
+
 # Directories created by Libtool for storing generated library files
 .libs/
 
