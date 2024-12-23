@@ -12,13 +12,13 @@ $df = new IntlDateFormatter(NULL, 0, 0);
 
 try {
 	$df->setTimeZone(array());
-} catch (Throwable $e) {
+} catch (IntlException $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
 
 try {
 	$df->setTimeZone('non existing timezone');
-} catch (Throwable $e) {
+} catch (IntlException $e) {
 	echo $e->getMessage();
 }
 ?>
