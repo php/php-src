@@ -22,6 +22,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-17224 (UAF in importNode). (nielsdos)
 
+- Embed:
+  . Make build command for program using embed portable. (dunglas)
+
 - FFI:
   . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
   . Fix memory leak on ZEND_FFI_TYPE_CHAR conversion failure. (nielsdos)
