@@ -11,8 +11,10 @@ if test "$PHP_EMBED" != "no"; then
   case "$PHP_EMBED" in
     yes|shared)
       LIBPHP_CFLAGS="-shared"
-      PHP_EMBED_TYPE=shared
-      AS_CASE(["$host_alias"], [*darwin*], [SAPI_SHARED="libs/libphp.dylib"], [])
+      AS_CASE(["$host_alias"], [*darwin*], [
+        SAPI_SHARED="libs/libphp.dylib"
+        PHP_EMBED_TYPE=shared-dylib
+      ], [PHP_EMBED_TYPE=shared])
       INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(prefix)/lib; \$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)\$(prefix)/lib"
       ;;
     static)
@@ -27,9 +29,6 @@ if test "$PHP_EMBED" != "no"; then
   if test "$PHP_EMBED_TYPE" != "no"; then
     PHP_SUBST(LIBPHP_CFLAGS)
     PHP_SELECT_SAPI(embed, $PHP_EMBED_TYPE, php_embed.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-    if test "$SAPI_SHARED" = "libs/libphp.dylib"; then
-      OVERALL_TARGET=libphp.dylib
-    fi
     PHP_INSTALL_HEADERS([sapi/embed/php_embed.h])
   fi
   AC_MSG_RESULT([$PHP_EMBED_TYPE])

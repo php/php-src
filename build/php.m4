@@ -765,6 +765,23 @@ AC_DEFUN([PHP_BUILD_SHARED],[
 ])
 
 dnl
+dnl PHP_BUILD_SHARED_DYLIB
+dnl
+AC_DEFUN([PHP_BUILD_SHARED_DYLIB],[
+  PHP_BUILD_PROGRAM
+  OVERALL_TARGET=libphp.dylib
+  php_sapi_module=shared
+
+  php_c_pre=$shared_c_pre
+  php_c_meta=$shared_c_meta
+  php_c_post=$shared_c_post
+  php_cxx_pre=$shared_cxx_pre
+  php_cxx_meta=$shared_cxx_meta
+  php_cxx_post=$shared_cxx_post
+  php_lo=$shared_lo
+])
+
+dnl
 dnl PHP_BUILD_STATIC
 dnl
 AC_DEFUN([PHP_BUILD_STATIC],[
@@ -876,6 +893,7 @@ AC_DEFUN([PHP_SELECT_SAPI],[
     case "$2" in
     static[)] PHP_BUILD_STATIC;;
     shared[)] PHP_BUILD_SHARED;;
+    shared-dylib[)] PHP_BUILD_SHARED_DYLIB;;
     bundle[)] PHP_BUILD_BUNDLE;;
     esac
     install_sapi="install-sapi"
