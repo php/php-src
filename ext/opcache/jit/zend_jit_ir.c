@@ -10110,20 +10110,17 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					}
 				}
 			} else {
-				if (!trace || (trace->op == ZEND_JIT_TRACE_END
-				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
-					ir_ref ip;
+				ir_ref ip;
 
-					if (zend_accel_in_shm(func->op_array.opcodes)) {
-						ip = ir_CONST_ADDR(func->op_array.opcodes);
-					} else {
-						if (!func_ref) {
-							func_ref = ir_LOAD_A(jit_CALL(rx, func));
-						}
-						ip = ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes)));
+				if (zend_accel_in_shm(func->op_array.opcodes)) {
+					ip = ir_CONST_ADDR(func->op_array.opcodes);
+				} else {
+					if (!func_ref) {
+						func_ref = ir_LOAD_A(jit_CALL(rx, func));
 					}
-					jit_LOAD_IP(jit, ip);
+					ip = ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes)));
 				}
+				jit_LOAD_IP(jit, ip);
 				if (GCC_GLOBAL_REGS) {
 					ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper));
 				} else {
