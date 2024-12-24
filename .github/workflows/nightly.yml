@@ -46,7 +46,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ branch }}
+          ref: ${{ inputs.branch }}
       - name: emerge
         uses: ./.github/actions/emerge
       - name: System info
