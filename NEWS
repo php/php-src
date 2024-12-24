@@ -74,6 +74,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17151 (Incorrect RC inference of op1 of FETCH_OBJ and
     INIT_METHOD_CALL). (Dmitry, ilutov)
   . Fixed bug GH-17246 (GC during SCCP causes segfault). (Dmitry)
+  . Fixed bug GH-17257 (UBSAN warning in ext/opcache/jit/zend_jit_vm_helpers.c).
+    (nielsdos, Dmitry)
 
 - PCNTL:
   . Fix memory leak in cleanup code of pcntl_exec() when a non stringable
