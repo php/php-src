@@ -1449,6 +1449,41 @@ PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
 
 PHP_ZEND_TEST_API int gh11934b_ffi_var_test_cdata;
 
+enum bug_gh16013_enum {
+	BUG_GH16013_A = 1,
+	BUG_GH16013_B = 2,
+};
+
+struct bug_gh16013_int_struct {
+	int field;
+};
+
+PHP_ZEND_TEST_API char bug_gh16013_return_char(void) {
+	return 'A';
+}
+
+PHP_ZEND_TEST_API bool bug_gh16013_return_bool(void) {
+	return true;
+}
+
+PHP_ZEND_TEST_API short bug_gh16013_return_short(void) {
+	return 12345;
+}
+
+PHP_ZEND_TEST_API int bug_gh16013_return_int(void) {
+	return 123456789;
+}
+
+PHP_ZEND_TEST_API enum bug_gh16013_enum bug_gh16013_return_enum(void) {
+	return BUG_GH16013_B;
+}
+
+PHP_ZEND_TEST_API struct bug_gh16013_int_struct bug_gh16013_return_struct(void) {
+	struct bug_gh16013_int_struct ret;
+	ret.field = 123456789;
+	return ret;
+}
+
 #ifdef HAVE_COPY_FILE_RANGE
 /**
  * This function allows us to simulate early return of copy_file_range by setting the limit_copy_file_range ini setting.
