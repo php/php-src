@@ -120,7 +120,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(EXECUTE_DATA_D)
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_copy_extra_args_helper_ex(EXECUTE_DATA_D, bool skip_recv)
+static void ZEND_FASTCALL zend_jit_copy_extra_args_helper_ex(bool skip_recv EXECUTE_DATA_DC)
 {
 	zend_op_array *op_array = &EX(func)->op_array;
 
@@ -168,12 +168,12 @@ static void ZEND_FASTCALL zend_jit_copy_extra_args_helper_ex(EXECUTE_DATA_D, boo
 
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D)
 {
-	zend_jit_copy_extra_args_helper_ex(EXECUTE_DATA_C, true);
+	zend_jit_copy_extra_args_helper_ex(true EXECUTE_DATA_CC);
 }
 
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(EXECUTE_DATA_D)
 {
-	zend_jit_copy_extra_args_helper_ex(EXECUTE_DATA_C, false);
+	zend_jit_copy_extra_args_helper_ex(false EXECUTE_DATA_CC);
 }
 
 bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
