@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug GH-16255 (Unexpected nan value in ext/gd/libgd/gd_filter.c).
     (nielsdos, cmb)
+  . Ported fix for libgd bug 276 (Sometimes pixels are missing when storing
+    images as BMPs). (cmb)
 
 - Gettext:
   . Fixed bug GH-17202 (Segmentation fault ext/gettext/gettext.c
