@@ -25,8 +25,8 @@
 #include "gdhelpers.h"
 #include "bmp.h"
 
-static int compress_row(unsigned char *uncompressed_row, int length);
-static int build_rle_packet(unsigned char *row, int packet_type, int length, unsigned char *data);
+static int compress_row(unsigned char *uncompressed_row, int length, int ppbyte, int nibble);
+static int build_rle_packet(unsigned char *row, int packet_type, int length, unsigned char *data, int ppbyte, int nibble);
 
 static int bmp_read_header(gdIOCtxPtr infile, bmp_hdr_t *hdr);
 static int bmp_read_info(gdIOCtxPtr infile, bmp_info_t *info);
@@ -90,6 +90,7 @@ void gdImageBmp(gdImagePtr im, FILE *outFile, int compression)
 */
 void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 {
+	int bpp, ppbyte, compression_method;
 	int bitmap_size = 0, info_size, total_size, padding;
 	int i, row, xpos, pixel;
 	int error = 0;
@@ -116,7 +117,17 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 		}
 	}
 
-	bitmap_size = ((im->sx * (im->trueColor ? 24 : 8)) / 8) * im->sy;
+	if (im->trueColor) {
+		bpp = 24;
+	} else if (im->colorsTotal <= 2 && !compression) {
+		bpp = 1;
+	} else if (im->colorsTotal <= 16) {
+		bpp = 4;
+	} else {
+		bpp = 8;
+	}
+	ppbyte = 8 / bpp; /* for palette images */
+	bitmap_size = ((im->sx * bpp + 7) / 8) * im->sy;
 
 	/* 40 byte Windows v3 header */
 	info_size = BMP_WINDOWS_V3;
@@ -132,6 +143,8 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 	/* bitmap header + info header + data */
 	total_size = 14 + info_size + bitmap_size;
 
+	compression_method = (compression ? (bpp >= 8 ? BMP_BI_RLE8 : BMP_BI_RLE4) : BMP_BI_RGB);
+
 	/* write bmp header info */
 	gdPutBuf("BM", 2, out);
 	gdBMPPutInt(out, total_size);
@@ -144,8 +157,8 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 	gdBMPPutInt(out, im->sx); /* width */
 	gdBMPPutInt(out, im->sy); /* height */
 	gdBMPPutWord(out, 1); /* colour planes */
-	gdBMPPutWord(out, (im->trueColor ? 24 : 8)); /* bit count */
-	gdBMPPutInt(out, (compression ? BMP_BI_RLE8 : BMP_BI_RGB)); /* compression */
+	gdBMPPutWord(out, bpp); /* bit count */
+	gdBMPPutInt(out, compression_method); /* compression */
 	gdBMPPutInt(out, bitmap_size); /* image size */
 	gdBMPPutInt(out, 0); /* H resolution */
 	gdBMPPutInt(out, 0); /* V ressolution */
@@ -153,7 +166,11 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 	gdBMPPutInt(out, 0); /* important colours */
 
 	/* The line must be divisible by 4, else it's padded with NULLs */
-	padding = ((int)(im->trueColor ? 3 : 1) * im->sx) % 4;
+	if (bpp < 8) {
+		padding = (im->sx + ppbyte - 1) / ppbyte % 4;
+	} else {
+		padding = ((int)(im->trueColor ? 3 : 1) * im->sx) % 4;
+	}
 	if (padding) {
 		padding = 4 - padding;
 	}
@@ -177,13 +194,37 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 		}
 
 		for (row = (im->sy - 1); row >= 0; row--) {
+			int byte = 0;
 			if (compression) {
 				memset (uncompressed_row, 0, gdImageSX(im));
 			}
 
 			for (xpos = 0; xpos < im->sx; xpos++) {
-				if (compression) {
+				if (compression && bpp < 8) {
+					byte = (byte << bpp) + gdImageGetPixel(im, xpos, row);
+					if (xpos % 2 == 1) {
+						*uncompressed_row++ = (unsigned char) byte;
+						byte = 0;
+					} else if (xpos + 1 == im->sx) {
+						/* imcomplete byte at end of row */
+						byte <<= bpp;
+						*uncompressed_row++ = (unsigned char) byte;
+						byte = 0;
+					}
+				} else if (compression) {
 					*uncompressed_row++ = (unsigned char)gdImageGetPixel(im, xpos, row);
+				} else if (bpp < 8) {
+					int next_chunk_in_byte = (xpos + 1) % ppbyte;
+					byte = (byte << bpp) + gdImageGetPixel(im, xpos, row);
+					if (next_chunk_in_byte == 0) {
+						Putchar(byte, out);
+						byte = 0;
+					} else if (xpos + 1 == im->sx) {
+						/* imcomplete byte at end of row */
+						byte <<= bpp * (ppbyte - next_chunk_in_byte);
+						Putchar(byte, out);
+						byte = 0;
+					}
 				} else {
 					Putchar(gdImageGetPixel(im, xpos, row), out);
 				}
@@ -196,8 +237,10 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 				}
 			} else {
 				int compressed_size = 0;
+				int length = (gdImageSX(im) + ppbyte - 1) / ppbyte;
+				int nibble = gdImageSX(im) % ppbyte;
 				uncompressed_row = uncompressed_row_start;
-				if ((compressed_size = compress_row(uncompressed_row, gdImageSX(im))) < 0) {
+				if ((compressed_size = compress_row(uncompressed_row, length, ppbyte, nibble)) < 0) {
 					error = 1;
 					break;
 				}
@@ -289,7 +332,7 @@ cleanup:
 	return;
 }
 
-static int compress_row(unsigned char *row, int length)
+static int compress_row(unsigned char *row, int length, int ppbyte, int nibble)
 {
 	int rle_type = 0;
 	int compressed_length = 0;
@@ -321,9 +364,9 @@ static int compress_row(unsigned char *row, int length)
 		}
 
 		if (rle_type == BMP_RLE_TYPE_RLE) {
-			if (compressed_run >= 128 || memcmp(uncompressed_rowp, uncompressed_rowp - 1, 1) != 0) {
+			if (compressed_run >= 127 || memcmp(uncompressed_rowp, uncompressed_rowp - 1, 1) != 0) {
 				/* more than what we can store in a single run or run is over due to non match, force write */
-				rle_compression = build_rle_packet(row, rle_type, compressed_run, uncompressed_row);
+				rle_compression = build_rle_packet(row, rle_type, compressed_run, uncompressed_row, ppbyte, 0);
 				row += rle_compression;
 				compressed_length += rle_compression;
 				compressed_run = 0;
@@ -333,9 +376,9 @@ static int compress_row(unsigned char *row, int length)
 				uncompressed_rowp++;
 			}
 		} else {
-			if (compressed_run >= 128 || memcmp(uncompressed_rowp, uncompressed_rowp - 1, 1) == 0) {
+			if (compressed_run >= 127 || memcmp(uncompressed_rowp, uncompressed_rowp - 1, 1) == 0) {
 				/* more than what we can store in a single run or run is over due to match, force write */
-				rle_compression = build_rle_packet(row, rle_type, compressed_run, uncompressed_row);
+				rle_compression = build_rle_packet(row, rle_type, compressed_run, uncompressed_row, ppbyte, 0);
 				row += rle_compression;
 				compressed_length += rle_compression;
 				compressed_run = 0;
@@ -349,8 +392,9 @@ static int compress_row(unsigned char *row, int length)
 		}
 	}
 
+	/* the following condition is always true */
 	if (compressed_run) {
-		compressed_length += build_rle_packet(row, rle_type, compressed_run, uncompressed_row);
+		compressed_length += build_rle_packet(row, rle_type, compressed_run, uncompressed_row, ppbyte, nibble);
 	}
 
 	gdFree(uncompressed_start);
@@ -358,10 +402,10 @@ static int compress_row(unsigned char *row, int length)
 	return compressed_length;
 }
 
-static int build_rle_packet(unsigned char *row, int packet_type, int length, unsigned char *data)
+static int build_rle_packet(unsigned char *row, int packet_type, int length, unsigned char *data, int ppbyte, int nibble)
 {
 	int compressed_size = 0;
-	if (length < 1 || length > 128) {
+	if (length < 1 || length > 127) {
 		return 0;
 	}
 
@@ -370,7 +414,7 @@ static int build_rle_packet(unsigned char *row, int packet_type, int length, uns
 		int i = 0;
 		for (i = 0; i < length; i++) {
 			compressed_size += 2;
-			memset(row, 1, 1);
+			memset(row, ppbyte * 1 - (i + 1 == length ? nibble : 0), 1);
 			row++;
 
 			memcpy(row, data++, 1);
@@ -378,7 +422,7 @@ static int build_rle_packet(unsigned char *row, int packet_type, int length, uns
 		}
 	} else if (packet_type == BMP_RLE_TYPE_RLE) {
 		compressed_size = 2;
-		memset(row, length, 1);
+		memset(row, ppbyte * length - nibble, 1);
 		row++;
 
 		memcpy(row, data, 1);
@@ -388,7 +432,7 @@ static int build_rle_packet(unsigned char *row, int packet_type, int length, uns
 		memset(row, BMP_RLE_COMMAND, 1);
 		row++;
 
-		memset(row, length, 1);
+		memset(row, ppbyte * length - nibble, 1);
 		row++;
 
 		memcpy(row, data, length);
