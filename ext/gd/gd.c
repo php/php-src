@@ -801,6 +801,68 @@ PHP_FUNCTION(imagecolormatch)
 }
 /* }}} */
 
+PHP_FUNCTION(imagetruecolortopalettesetmethod)
+{
+	zval *IM;
+	zend_long method;
+	zend_long speed = 0;
+	gdImagePtr im;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJECT_OF_CLASS(IM, gd_image_ce)
+		Z_PARAM_LONG(method)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(speed)
+	ZEND_PARSE_PARAMETERS_END();
+
+	im = php_gd_libgdimageptr_from_zval_p(IM);
+
+	if (method <= GD_QUANT_DEFAULT || method >= GD_QUANT_LIQ) {
+		zend_argument_value_error(2, "must be one of the GD_QUANT_* constants");
+		RETURN_THROWS();
+	}
+
+	if (speed < 0 || speed > 10) {
+		zend_argument_value_error(3, "must be between 0 and 10");
+		RETURN_THROWS();
+	}
+
+	if (gdImageTrueColorToPaletteSetMethod(im, method, speed)) {
+		RETURN_TRUE;
+	} else {
+		php_error_docref(NULL, E_WARNING, "Couldn't set quantization method");
+		RETURN_FALSE;
+	}
+}
+
+PHP_FUNCTION(imagetruecolortopalettesetquality)
+{
+	zval *IM;
+	zend_long min_quality;
+	zend_long max_quality;
+	gdImagePtr im;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_OBJECT_OF_CLASS(IM, gd_image_ce)
+		Z_PARAM_LONG(min_quality)
+		Z_PARAM_LONG(max_quality)
+	ZEND_PARSE_PARAMETERS_END();
+
+	im = php_gd_libgdimageptr_from_zval_p(IM);
+
+	if (min_quality < 1 || min_quality > 100) {
+		zend_argument_value_error(2, "must be between 1 and 100");
+		RETURN_THROWS();
+	}
+
+	if (max_quality < 1 || max_quality > 100) {
+		zend_argument_value_error(3, "must be between 1 and 100");
+		RETURN_THROWS();
+	}
+
+	gdImageTrueColorToPaletteSetQuality (im, min_quality, max_quality);
+}
+
 /* {{{ Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
 PHP_FUNCTION(imagesetthickness)
 {

@@ -107,6 +107,33 @@ int gdLayerOverlay(int dst, int src);
 int gdLayerMultiply(int dest, int src);
 
 /**
+ * Group: Color Quantization
+ *
+ * Enum: gdPaletteQuantizationMethod
+ *
+ * Constants:
+ *   GD_QUANT_DEFAULT  - GD_QUANT_LIQ if libimagequant is available,
+ *                       GD_QUANT_JQUANT otherwise.
+ *   GD_QUANT_JQUANT   - libjpeg's old median cut. Fast, but only uses 16-bit
+ *                       color.
+ *   GD_QUANT_NEUQUANT - NeuQuant - approximation using Kohonen neural network.
+ *   GD_QUANT_LIQ      - A combination of algorithms used in libimagequant
+ *                       aiming for the highest quality at cost of speed.
+ *
+ * Note that GD_QUANT_JQUANT does not retain the alpha channel, and
+ * GD_QUANT_NEUQUANT does not support dithering.
+ *
+ * See also:
+ *   - <gdImageTrueColorToPaletteSetMethod>
+ */
+enum gdPaletteQuantizationMethod {
+	GD_QUANT_DEFAULT = 0,
+	GD_QUANT_JQUANT = 1,
+	GD_QUANT_NEUQUANT = 2,
+	GD_QUANT_LIQ = 3
+};
+
+/**
  * Group: Transform
  *
  * Constants: gdInterpolationMethod
@@ -241,6 +268,18 @@ typedef struct gdImageStruct {
 	int cy2;
 	unsigned int res_x;
 	unsigned int res_y;
+
+	/* Selects quantization method, see gdImageTrueColorToPaletteSetMethod() and gdPaletteQuantizationMethod enum. */
+	int paletteQuantizationMethod;
+	/* speed/quality trade-off. 1 = best quality, 10 = best speed. 0 = method-specific default.
+	   Applicable to GD_QUANT_LIQ and GD_QUANT_NEUQUANT. */
+	int paletteQuantizationSpeed;
+	/* Image will remain true-color if conversion to palette cannot achieve given quality.
+	   Value from 1 to 100, 1 = ugly, 100 = perfect. Applicable to GD_QUANT_LIQ.*/
+	int paletteQuantizationMinQuality;
+	/* Image will use minimum number of palette colors needed to achieve given quality. Must be higher than paletteQuantizationMinQuality
+	   Value from 1 to 100, 1 = ugly, 100 = perfect. Applicable to GD_QUANT_LIQ.*/
+	int paletteQuantizationMaxQuality;
 	gdInterpolationMethod interpolation_id;
 	interpolation_method interpolation;
 } gdImage;
@@ -575,6 +614,24 @@ int gdImagePaletteToTrueColor(gdImagePtr src);
 	and im2 is the palette version */
 int gdImageColorMatch(gdImagePtr im1, gdImagePtr im2);
 
+/* Selects quantization method used for subsequent gdImageTrueColorToPalette calls.
+   See gdPaletteQuantizationMethod enum (e.g. GD_QUANT_NEUQUANT, GD_QUANT_LIQ).
+   Speed is from 1 (highest quality) to 10 (fastest).
+   Speed 0 selects method-specific default (recommended).
+
+   Returns FALSE if the given method is invalid or not available.
+*/
+int gdImageTrueColorToPaletteSetMethod (gdImagePtr im, int method, int speed);
+
+/*
+  Chooses quality range that subsequent call to gdImageTrueColorToPalette will aim for.
+  Min and max quality is in range 1-100 (1 = ugly, 100 = perfect). Max must be higher than min.
+  If palette cannot represent image with at least min_quality, then image will remain true-color.
+  If palette can represent image with quality better than max_quality, then lower number of colors will be used.
+  This function has effect only when GD_QUANT_LIQ method has been selected and the source image is true-color.
+*/
+void gdImageTrueColorToPaletteSetQuality (gdImagePtr im, int min_quality, int max_quality);
+
 /* Specifies a color index (if a palette image) or an
 	RGB color (if a truecolor image) which should be
 	considered 100% transparent. FOR TRUECOLOR IMAGES,
@@ -738,6 +795,8 @@ void gdImageInterlace(gdImagePtr im, int interlaceArg);
 void gdImageAlphaBlending(gdImagePtr im, int alphaBlendingArg);
 void gdImageAntialias(gdImagePtr im, int antialias);
 void gdImageSaveAlpha(gdImagePtr im, int saveAlphaArg);
+
+gdImagePtr gdImageNeuQuant(gdImagePtr im, const int max_color, int sample_factor);
 
 enum gdPixelateMode {
 	GD_PIXELATE_UPPERLEFT,

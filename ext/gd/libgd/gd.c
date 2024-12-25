@@ -1020,6 +1020,11 @@ gdImagePtr gdImageClone (gdImagePtr src) {
 	dst->res_x = src->res_x;
 	dst->res_y = src->res_y;
 
+	dst->paletteQuantizationMethod     = src->paletteQuantizationMethod;
+	dst->paletteQuantizationSpeed      = src->paletteQuantizationSpeed;
+	dst->paletteQuantizationMinQuality = src->paletteQuantizationMinQuality;
+	dst->paletteQuantizationMaxQuality = src->paletteQuantizationMaxQuality;
+
 	dst->interpolation_id = src->interpolation_id;
 	dst->interpolation    = src->interpolation;
 

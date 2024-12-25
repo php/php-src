@@ -58,7 +58,7 @@ if (PHP_GD != "no") {
 			gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_png.c gd_ss.c \
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
 			gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c gd_avif.c \
-			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
+			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c gd_nnquant.c", "gd");
 		AC_DEFINE('HAVE_GD_BUNDLED', 1, "Define to 1 if gd extension uses GD library bundled in PHP.");
 		AC_DEFINE('HAVE_GD_PNG', 1, "Define to 1 if gd extension has PNG support.");
 		AC_DEFINE('HAVE_GD_BMP', 1, "Define to 1 if gd extension has BMP support.");

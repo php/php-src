@@ -1426,6 +1426,73 @@ zeroHistogram (hist3d histogram)
     }
 }
 
+/**
+ * Function: gdImageTrueColorToPaletteSetMethod
+ *
+ * Selects the quantization method
+ *
+ * That quantization method is used for all subsequent
+ * <gdImageTrueColorToPalette> and <gdImageCreatePaletteFromTrueColor> calls.
+ *
+ * Parameters:
+ *   im     - The image.
+ *   method - The quantization method, see <gdPaletteQuantizationMethod>.
+ *   speed  - The quantization speed between 1 (highest quality) and
+ *            10 (fastest). 0 selects a method-specific default (recommended).
+ *
+ * Returns:
+ *   Zero if the given method is invalid or not available; non-zero otherwise.
+ *
+ * See also:
+ *   - <gdImageTrueColorToPaletteSetQuality>
+ */
+int gdImageTrueColorToPaletteSetMethod (gdImagePtr im, int method, int speed)
+{
+#ifndef HAVE_LIBIMAGEQUANT
+	if (method == GD_QUANT_LIQ) {
+		return FALSE;
+	}
+#endif
+
+	if (method >= GD_QUANT_DEFAULT && method <= GD_QUANT_LIQ) {
+		im->paletteQuantizationMethod = method;
+
+		if (speed < 0 || speed > 10) {
+			speed = 0;
+		}
+		im->paletteQuantizationSpeed = speed;
+	}
+	return TRUE;
+}
+
+/**
+ * Function: gdImageTrueColorToPaletteSetQuality
+ *
+ * Chooses a quality range for quantization
+ *
+ * That quality range is used in all subsequent calls to
+ * <gdImageTrueColorToPalette> and <gdImageCreatePaletteFromTrueColor>
+ * if the quantization method is <GD_QUANT_LIQ>.
+ *
+ * Parameters:
+ *   im          - The image.
+ *   min_quality - The minimum quality in range 1-100 (1 = ugly, 100 = perfect).
+ *                 If the palette cannot represent the image with at least
+ *                 min_quality, then no conversion is done.
+ *   max_quality - The maximum quality in range 1-100 (1 = ugly, 100 = perfect),
+ *                 which must be higher than the min_quality. If the palette can
+ *                 represent the image with a quality better than max_quality,
+ *                 then fewer colors than requested will be used.
+ */
+void gdImageTrueColorToPaletteSetQuality (gdImagePtr im, int min_quality, int max_quality)
+{
+	if (min_quality >= 0 && min_quality <= 100 &&
+	        max_quality >= 0 && max_quality <= 100 && min_quality <= max_quality) {
+		im->paletteQuantizationMinQuality = min_quality;
+		im->paletteQuantizationMaxQuality = max_quality;
+	}
+}
+
 static int gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colorsWanted, gdImagePtr *cimP);
 
 gdImagePtr gdImageCreatePaletteFromTrueColor (gdImagePtr im, int dither, int colorsWanted)
@@ -1442,6 +1509,28 @@ int gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
 	return gdImageTrueColorToPaletteBody(im, dither, colorsWanted, 0);
 }
 
+#ifdef HAVE_LIBIMAGEQUANT
+/**
+  LIQ library needs pixels in RGBA order with alpha 0-255 (opaque 255).
+  This callback is run whenever source rows need to be converted from GD's format.
+*/
+static void convert_gdpixel_to_rgba(liq_color output_row[], int y, int width, void *userinfo)
+{
+	gdImagePtr oim = userinfo;
+	int x;
+	for(x = 0; x < width; x++) {
+		output_row[x].r = gdTrueColorGetRed(input_buf[y][x]) * 255/gdRedMax;
+		output_row[x].g = gdTrueColorGetGreen(input_buf[y][x]) * 255/gdGreenMax;
+		output_row[x].b = gdTrueColorGetBlue(input_buf[y][x]) * 255/gdBlueMax;
+		int alpha = gdTrueColorGetAlpha(input_buf[y][x]);
+		if (gdAlphaOpaque < gdAlphaTransparent) {
+			alpha = gdAlphaTransparent - alpha;
+		}
+		output_row[x].a = alpha * 255/gdAlphaMax;
+	}
+}
+#endif
+
 static void free_truecolor_image_data(gdImagePtr oim)
 {
   int i;
@@ -1454,6 +1543,19 @@ static void free_truecolor_image_data(gdImagePtr oim)
   gdFree (oim->tpixels);
   oim->tpixels = 0;
 }
+
+#ifdef HAVE_LIBIMAGEQUANT
+/* liq requires 16 byte aligned heap memory */
+static void *malloc16(size_t size)
+{
+#ifndef _WIN32
+	void *p;
+	return posix_memalign(&p, 16, size) == 0 ? p : NULL;
+#else
+	return _aligned_malloc(16, size);
+#endif
+}
+#endif
 
 /*
  * Module initialization routine for 2-pass color quantization.
@@ -1513,6 +1615,83 @@ static int gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colors
   	}
       }
   }
+
+	if (oim->paletteQuantizationMethod == GD_QUANT_NEUQUANT) {
+		if (cimP) { /* NeuQuant always creates a copy, so the new blank image can't be used */
+			gdImageDestroy(nim);
+		}
+		nim = gdImageNeuQuant(oim, colorsWanted, oim->paletteQuantizationSpeed ? oim->paletteQuantizationSpeed : 2);
+		if (cimP) {
+			*cimP = nim;
+		}
+		if (!nim) {
+			return FALSE;
+		} else {
+			free_truecolor_image_data(oim);
+			gdImageCopy(oim, nim, 0, 0, 0, 0, oim->sx, oim->sy);
+			gdImageDestroy(nim);
+		}
+		return TRUE;
+	}
+
+
+#ifdef HAVE_LIBIMAGEQUANT
+	if (oim->paletteQuantizationMethod == GD_QUANT_DEFAULT ||
+	        oim->paletteQuantizationMethod == GD_QUANT_LIQ) {
+		liq_attr *attr = liq_attr_create_with_allocator(malloc16, free);
+		liq_image *image;
+		liq_result *remap;
+		int remapped_ok = 0;
+
+		liq_set_max_colors(attr, colorsWanted);
+
+		/* by default make it fast to match speed of previous implementation */
+		liq_set_speed(attr, oim->paletteQuantizationSpeed ? oim->paletteQuantizationSpeed : 9);
+		if (oim->paletteQuantizationMaxQuality) {
+			liq_set_quality(attr, oim->paletteQuantizationMinQuality, oim->paletteQuantizationMaxQuality);
+		}
+		image = liq_image_create_custom(attr, convert_gdpixel_to_rgba, oim, oim->sx, oim->sy, 0);
+		remap = liq_quantize_image(attr, image);
+		if (!remap) { /* minimum quality not met, leave image unmodified */
+			liq_image_destroy(image);
+			liq_attr_destroy(attr);
+			goto outOfMemory;
+		}
+
+		liq_set_dithering_level(remap, dither ? 1 : 0);
+		if (LIQ_OK == liq_write_remapped_image_rows(remap, image, output_buf)) {
+			remapped_ok = 1;
+			const liq_palette *pal = liq_get_palette(remap);
+			nim->transparent = -1;
+			unsigned int icolor;
+			for(icolor=0; icolor < pal->count; icolor++) {
+				nim->open[icolor] = 0;
+				nim->red[icolor] = pal->entries[icolor].r * gdRedMax/255;
+				nim->green[icolor] = pal->entries[icolor].g * gdGreenMax/255;
+				nim->blue[icolor] = pal->entries[icolor].b * gdBlueMax/255;
+				int alpha = pal->entries[icolor].a * gdAlphaMax/255;
+				if (gdAlphaOpaque < gdAlphaTransparent) {
+					alpha = gdAlphaTransparent - alpha;
+				}
+				nim->alpha[icolor] = alpha;
+				if (nim->transparent == -1 && alpha == gdAlphaTransparent) {
+					nim->transparent = icolor;
+				}
+			}
+			nim->colorsTotal = pal->count;
+		}
+		liq_result_destroy(remap);
+		liq_image_destroy(image);
+		liq_attr_destroy(attr);
+
+		if (remapped_ok) {
+			if (!cimP) {
+				free_truecolor_image_data(oim);
+			}
+			return TRUE;
+		}
+	}
+#endif
 
   cquantize = (my_cquantize_ptr) gdCalloc (1, sizeof (my_cquantizer));
   if (!cquantize)
