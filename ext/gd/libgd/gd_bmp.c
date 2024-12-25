@@ -136,11 +136,11 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 	}
 
 	/* bitmap header + info header + data */
-	total_size = 14 + info_size + bitmap_size + padding * im->sy;
+	total_size = 14 + info_size + bitmap_size;
 
 	/* write bmp header info */
 	gdPutBuf("BM", 2, out);
-	gdBMPPutInt(out, total_size);
+	gdBMPPutInt(out, total_size + padding * im->sy);
 	gdBMPPutWord(out, 0);
 	gdBMPPutWord(out, 0);
 	gdBMPPutInt(out, 14 + info_size);
