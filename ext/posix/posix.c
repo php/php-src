@@ -434,9 +434,9 @@ static int php_posix_stream_get_fd(zval *zfp, zend_long *ret) /* {{{ */
 	 */
 	php_socket_t fd = -1;
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&fd, 0);
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void**)&fd, 0);
 	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&fd, 0);
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void**)&fd, 0);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
