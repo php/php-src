@@ -40,6 +40,7 @@ PHPAPI zend_class_entry  *spl_ce_ArrayObject;
 
 typedef struct _spl_array_object {
 	zval              array;
+	HashTable         *sentinel_array;
 	uint32_t          ht_iter;
 	int               ar_flags;
 	unsigned char	  nApplyCount;
@@ -79,11 +80,14 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 		if (UNEXPECTED(zend_lazy_object_must_init(obj))) {
 			obj = zend_lazy_object_init(obj);
 			if (UNEXPECTED(!obj)) {
-				zval_ptr_dtor(&intern->array);
-				ZVAL_ARR(&intern->array, zend_new_array(0));
-				return &Z_ARRVAL(intern->array);
+				if (!intern->sentinel_array) {
+					intern->sentinel_array = zend_new_array(0);
+				}
+				return &intern->sentinel_array;
 			}
 		}
+		/* should no longer be lazy */
+		ZEND_ASSERT(!zend_lazy_object_must_init(obj));
 		/* rebuild properties */
 		zend_std_get_properties_ex(obj);
 		if (GC_REFCOUNT(obj->properties) > 1) {
@@ -137,6 +141,10 @@ static void spl_array_object_free_storage(zend_object *object)
 
 	if (intern->ht_iter != (uint32_t) -1) {
 		zend_hash_iterator_del(intern->ht_iter);
+	}
+
+	if (UNEXPECTED(intern->sentinel_array)) {
+		zend_array_release(intern->sentinel_array);
 	}
 
 	zend_object_std_dtor(&intern->std);
@@ -499,6 +507,9 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	uint32_t refcount = 0;
 	if (!offset || Z_TYPE_P(offset) == IS_NULL) {
 		ht = spl_array_get_hash_table(intern);
+		if (UNEXPECTED(ht == intern->sentinel_array)) {
+			return;
+		}
 		refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 		zend_hash_next_index_insert(ht, value);
 
@@ -515,6 +526,10 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	ht = spl_array_get_hash_table(intern);
+	if (UNEXPECTED(ht == intern->sentinel_array)) {
+		spl_hash_key_release(&key);
+		return;
+	}
 	refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 	if (key.key) {
 		zend_hash_update_ind(ht, key.key, value);

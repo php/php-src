@@ -9,7 +9,8 @@ class C {
 }
 $reflector = new ReflectionClass(C::class);
 $obj = $reflector->newLazyProxy(function ($obj) {
-    throw new Error('foo');
+    static $counter = 0;
+    throw new Error('nope ' . ($counter++));
 });
 $recursiveArrayIterator = new RecursiveArrayIterator($obj);
 try {
@@ -17,11 +18,24 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump($recursiveArrayIterator->current());
-$recursiveArrayIterator->next();
-var_dump($recursiveArrayIterator->current());
+try {
+    var_dump($recursiveArrayIterator->current());
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $recursiveArrayIterator->next();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($recursiveArrayIterator->current());
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
-foo
-NULL
-NULL
+nope 0
+nope 1
+nope 2
+nope 3
