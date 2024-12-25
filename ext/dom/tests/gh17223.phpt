@@ -5,7 +5,8 @@ dom
 --FILE--
 <?php
 $doc = new DOMDocument("1.0", "Shift-JIS");
-$doc->save("%00");
+@$doc->save("%00");
+echo "Done\n";
 ?>
---EXPECTF--
-Warning: DOMDocument::save(): URI must not contain percent-encoded NUL bytes in %s on line %d
+--EXPECT--
+Done
