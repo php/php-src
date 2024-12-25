@@ -986,6 +986,27 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	ret_type = ZEND_FFI_TYPE(callback_data->type->func.ret_type);
 	if (ret_type->kind != ZEND_FFI_TYPE_VOID) {
 		zend_ffi_zval_to_cdata(ret, ret_type, &retval);
+
+#ifdef WORDS_BIGENDIAN
+		if (ret_type->size < sizeof(ffi_arg)
+		 && ret_type->kind >= ZEND_FFI_TYPE_UINT8
+		 && ret_type->kind < ZEND_FFI_TYPE_POINTER) {
+			/* We need to widen the value (zero extend) */
+			switch (ret_type->size) {
+				case 1:
+					*(ffi_arg*)ret = *(uint8_t*)ret;
+					break;
+				case 2:
+					*(ffi_arg*)ret = *(uint16_t*)ret;
+					break;
+				case 4:
+					*(ffi_arg*)ret = *(uint32_t*)ret;
+					break;
+				default:
+					break;
+			}
+		}
+#endif
 	}
 
 	zval_ptr_dtor(&retval);
@@ -2856,7 +2877,31 @@ static ZEND_FUNCTION(ffi_trampoline) /* {{{ */
 	}
 
 	if (ZEND_FFI_TYPE(type->func.ret_type)->kind != ZEND_FFI_TYPE_VOID) {
-		zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1, 0);
+		zend_ffi_type *func_ret_type = ZEND_FFI_TYPE(type->func.ret_type);
+
+#ifdef WORDS_BIGENDIAN
+		if (func_ret_type->size < sizeof(ffi_arg)
+		 && func_ret_type->kind >= ZEND_FFI_TYPE_UINT8
+		 && func_ret_type->kind < ZEND_FFI_TYPE_POINTER) {
+
+			/* We need to narrow the value (truncate) */
+			switch (func_ret_type->size) {
+				case 1:
+					*(uint8_t*)ret = *(ffi_arg*)ret;
+					break;
+				case 2:
+					*(uint16_t*)ret = *(ffi_arg*)ret;
+					break;
+				case 4:
+					*(uint32_t*)ret = *(ffi_arg*)ret;
+					break;
+				default:
+					break;
+			}
+		}
+#endif
+
+		zend_ffi_cdata_to_zval(NULL, ret, func_ret_type, BP_VAR_R, return_value, 0, 1, 0);
 	} else {
 		ZVAL_NULL(return_value);
 	}

@@ -38,6 +38,7 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
   . Fix memory leak on ZEND_FFI_TYPE_CHAR conversion failure. (nielsdos)
+  . Fixed bug GH-16013 and bug #80857 (Big endian issues). (Dmitry, nielsdos)
 
 - Fileinfo:
   . Fixed bug GH-17039 (PHP 8.4: Incorrect MIME content type). (nielsdos)
