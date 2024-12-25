@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-static zend_op_array dummy_op_array;
 static zend_jit_trace_info *zend_jit_traces = NULL;
 static const void **zend_jit_exit_groups = NULL;
 
@@ -74,9 +73,6 @@ static void zend_jit_trace_startup(bool reattached)
 			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not obtain JIT exit groups buffer!");
 		}
 	}
-
-	memset(&dummy_op_array, 0, sizeof(dummy_op_array));
-	dummy_op_array.fn_flags = ZEND_ACC_DONE_PASS_TWO;
 
 	JIT_G(exit_counters) = calloc(JIT_G(max_exit_counters), 1);
 	if (JIT_G(exit_counters) == NULL) {
