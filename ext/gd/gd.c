@@ -817,8 +817,8 @@ PHP_FUNCTION(imagetruecolortopalettesetmethod)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	if (method <= GD_QUANT_DEFAULT || method >= GD_QUANT_LIQ) {
-		zend_argument_value_error(2, "must be one of the GD_QUANT_* constants");
+	if (method < GD_QUANT_DEFAULT || method > GD_QUANT_LIQ) {
+		zend_argument_value_error(2, "must be one of the IMG_QUANT_* constants");
 		RETURN_THROWS();
 	}
 

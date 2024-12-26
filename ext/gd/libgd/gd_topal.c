@@ -39,6 +39,10 @@
 #include "gd.h"
 #include "gdhelpers.h"
 
+#ifdef HAVE_LIBIMAGEQUANT
+#include <libimagequant.h>
+#endif
+
 /* (Re)define some defines known by libjpeg */
 #define QUANT_2PASS_SUPPORTED
 
@@ -1552,7 +1556,7 @@ static void *malloc16(size_t size)
 	void *p;
 	return posix_memalign(&p, 16, size) == 0 ? p : NULL;
 #else
-	return _aligned_malloc(16, size);
+	return _aligned_malloc(size, 16);
 #endif
 }
 #endif
