@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     Volker Dusch)
   . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
     if available. (timwolla)
+  . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
+    non-printable characters in string literals). (nielsdos, WangYihang)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)

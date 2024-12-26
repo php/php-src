@@ -23,7 +23,7 @@
 #include "zend_func_info.h"
 #include "zend_call_graph.h"
 #include "zend_dump.h"
-#include "ext/standard/php_string.h"
+#include "zend_smart_str.h"
 
 void zend_dump_ht(HashTable *ht)
 {
@@ -66,13 +66,27 @@ void zend_dump_const(const zval *zv)
 		case IS_DOUBLE:
 			fprintf(stderr, " float(%g)", Z_DVAL_P(zv));
 			break;
-		case IS_STRING:;
-			zend_string *escaped_string = php_addcslashes(Z_STR_P(zv), "\"\\", 2);
+		case IS_STRING: {
+			smart_str escaped_string = {0};
+			smart_str_append_escaped(&escaped_string, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
+			smart_str_0(&escaped_string);
 
-			fprintf(stderr, " string(\"%s\")", ZSTR_VAL(escaped_string));
+			fprintf(stderr, " string(\"");
 
-			zend_string_release(escaped_string);
+			/* Also escape '"' */
+			for (size_t i = 0; i < ZSTR_LEN(escaped_string.s); i++) {
+				if (ZSTR_VAL(escaped_string.s)[i] == '"') {
+					fprintf(stderr, "\\\"");
+				} else {
+					putc(ZSTR_VAL(escaped_string.s)[i], stderr);
+				}
+			}
+
+			fprintf(stderr, "\")");
+
+			smart_str_free_ex(&escaped_string, false);
 			break;
+		}
 		case IS_ARRAY:
 			fprintf(stderr, " array(...)");
 			break;
