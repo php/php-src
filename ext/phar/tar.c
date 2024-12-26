@@ -177,7 +177,7 @@ static zend_result phar_tar_process_metadata(phar_entry_info *entry, php_stream 
 
 	phar_parse_metadata_lazy(metadata, &entry->metadata_tracker, entry->uncompressed_filesize, entry->is_persistent);
 
-	if (ZSTR_LEN(entry->filename) == sizeof(".phar/.metadata.bin")-1 && !memcmp(ZSTR_VAL(entry->filename), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1)) {
+	if (zend_string_equals_literal(entry->filename, ".phar/.metadata.bin")) {
 		if (phar_metadata_tracker_has_data(&entry->phar->metadata_tracker, entry->phar->is_persistent)) {
 			efree(metadata);
 			return FAILURE;
@@ -515,7 +515,7 @@ bail:
 			++entry.manifest_pos;
 		}
 
-		if (ZSTR_LEN(entry.filename) >= sizeof(".phar/.metadata")-1 && !memcmp(ZSTR_VAL(entry.filename), ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
+		if (zend_string_starts_with_literal(entry.filename, ".phar/.metadata")) {
 			if (FAILURE == phar_tar_process_metadata(newentry, fp)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has invalid metadata in magic file \"%s\"", fname, ZSTR_VAL(entry.filename));
@@ -526,7 +526,7 @@ bail:
 			}
 		}
 
-		if (!actual_alias && ZSTR_LEN(entry.filename) == sizeof(".phar/alias.txt")-1 && !strncmp(ZSTR_VAL(entry.filename), ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+		if (!actual_alias && zend_string_equals_literal(entry.filename, ".phar/alias.txt")) {
 			/* found explicit alias */
 			if (size > 511) {
 				if (error) {
@@ -907,8 +907,8 @@ static int phar_tar_setupmetadata(zval *zv, void *argument) /* {{{ */
 	char **error = i->error;
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv), *metadata, newentry = {0};
 
-	if (ZSTR_LEN(entry->filename) >= sizeof(".phar/.metadata") && !memcmp(ZSTR_VAL(entry->filename), ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
-		if (ZSTR_LEN(entry->filename) == sizeof(".phar/.metadata.bin")-1 && !memcmp(ZSTR_VAL(entry->filename), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1)) {
+	if (zend_string_starts_with_literal(entry->filename, ".phar/.metadata")) {
+		if (zend_string_equals_literal(entry->filename, ".phar/.metadata.bin")) {
 			return phar_tar_setmetadata(&entry->phar->metadata_tracker, entry, error);
 		}
 		/* search for the file this metadata entry references */
