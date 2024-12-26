@@ -3053,6 +3053,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_undefined_long_key_ex);
 	REGISTER_HELPER(zend_jit_undefined_string_key);
 	REGISTER_HELPER(zend_jit_copy_extra_args_helper);
+	REGISTER_HELPER(zend_jit_copy_extra_args_helper_no_skip_recv);
 	REGISTER_HELPER(zend_jit_vm_stack_free_args_helper);
 	REGISTER_HELPER(zend_free_extra_named_params);
 	REGISTER_HELPER(zend_jit_free_call_frame);
@@ -10292,6 +10293,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					}
 				}
 			} else {
+				ir_ref helper;
 				if (!trace || (trace->op == ZEND_JIT_TRACE_END
 				 && trace->stop >= ZEND_JIT_TRACE_STOP_INTERPRETER)) {
 					ir_ref ip;
@@ -10305,11 +10307,14 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 						ip = ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes)));
 					}
 					jit_LOAD_IP(jit, ip);
+					helper = ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper);
+				} else {
+					helper = ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper_no_skip_recv);
 				}
 				if (GCC_GLOBAL_REGS) {
-					ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper));
+					ir_CALL(IR_VOID, helper);
 				} else {
-					ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper), jit_FP(jit));
+					ir_CALL_1(IR_VOID, helper, jit_FP(jit));
 				}
 			}
 		} else {
