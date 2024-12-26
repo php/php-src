@@ -598,7 +598,7 @@ static const char *zend_ini_consume_quantity_prefix(const char *const digits, co
 	if (digits_consumed[0] == '0' && !isdigit(digits_consumed[1])) {
 		/* Value is just 0 */
 		if ((digits_consumed+1) == str_end) {
-			return digits;
+			return digits_consumed;
 		}
 
 		switch (digits_consumed[1]) {
