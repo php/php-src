@@ -587,7 +587,7 @@ typedef enum {
 	ZEND_INI_PARSE_QUANTITY_UNSIGNED,
 } zend_ini_parse_quantity_signed_result_t;
 
-static const char *zend_ini_consume_quantity_prefix(const char *const digits, const char *const str_end) {
+static const char *zend_ini_consume_quantity_prefix(const char *const digits, const char *const str_end, int base) {
 	const char *digits_consumed = digits;
 	/* Ignore leading whitespace. */
 	while (digits_consumed < str_end && zend_is_whitespace(*digits_consumed)) {++digits_consumed;}
@@ -606,9 +606,14 @@ static const char *zend_ini_consume_quantity_prefix(const char *const digits, co
 			case 'X':
 			case 'o':
 			case 'O':
+				digits_consumed += 2;
+				break;
 			case 'b':
 			case 'B':
-				digits_consumed += 2;
+				if (base != 16) {
+					/* 0b or 0B is valid in base 16, but not in the other supported bases. */
+					digits_consumed += 2;
+				}
 				break;
 		}
 	}
@@ -696,7 +701,7 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 				return 0;
         }
         digits += 2;
-		if (UNEXPECTED(digits == str_end || digits != zend_ini_consume_quantity_prefix(digits, str_end))) {
+		if (UNEXPECTED(digits == str_end || digits != zend_ini_consume_quantity_prefix(digits, str_end, base))) {
 			/* Escape the string to avoid null bytes and to make non-printable chars
 			 * visible */
 			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
