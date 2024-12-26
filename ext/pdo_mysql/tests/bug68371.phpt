@@ -1,5 +1,5 @@
 --TEST--
-PDO MySQL Bug #38671 (PDO#getAttribute() cannot be called with platform-specific attribute names)
+PDO MySQL Bug #68371 (PDO#getAttribute() cannot be called with platform-specific attribute names)
 --EXTENSIONS--
 pdo_mysql
 --SKIPIF--
@@ -16,7 +16,6 @@ $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 $attrs = [
     // Extensive test: default value and set+get values
     PDO::ATTR_EMULATE_PREPARES	    => array(null, true, false),
-    PDO::MYSQL_ATTR_DIRECT_QUERY	=> array(null, false, true),
     PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => array(null, false, true),
 
     // Just test the default
@@ -68,9 +67,6 @@ foreach ($attrs as $a => $vals) {
 ?>
 --EXPECTF--
 bool(true)
-OK
-OK
-bool(false)
 OK
 OK
 bool(true)

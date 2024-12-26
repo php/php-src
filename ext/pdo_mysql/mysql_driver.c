@@ -454,7 +454,6 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
 			PDO_DBG_RETURN(true);
 
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
 			if (!pdo_get_bool_param(&bval, val)) {
 				PDO_DBG_RETURN(false);
@@ -555,7 +554,6 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 
 		case PDO_ATTR_EMULATE_PREPARES:
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 			ZVAL_BOOL(return_value, H->emulate_prepare);
 			break;
 
@@ -761,8 +759,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		zend_string *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 
-		H->emulate_prepare = pdo_attr_lval(driver_options,
-			PDO_MYSQL_ATTR_DIRECT_QUERY, H->emulate_prepare);
 		H->emulate_prepare = pdo_attr_lval(driver_options,
 			PDO_ATTR_EMULATE_PREPARES, H->emulate_prepare);
 
