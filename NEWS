@@ -61,6 +61,9 @@ PHP                                                                        NEWS
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
+- LibXML:
+  . Fixed bug GH-17223 (Memory leak in libxml encoding handling). (nielsdos)
+
 - MBString:
   . Fixed bug GH-17112 (Macro redefinitions). (nielsdos, cmb)
 
