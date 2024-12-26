@@ -24,6 +24,7 @@ $b = imagecolorallocate($image,0,255,255);
 $half =  imagefilledarc ( $image, 75, 75, 70, 70, 0, 180, $a, IMG_ARC_PIE );
 $half2 =  imagefilledarc ( $image, 75, 55, 80, 70, 0, -180, $b, IMG_ARC_PIE );
 
+imagetruecolortopalettesetmethod($image, IMG_QUANT_JQUANT);
 var_dump(imagetruecolortopalette($image, true, 2));
 
 include_once __DIR__ . '/func.inc';
