@@ -309,7 +309,7 @@ static int contest(nn_quant *nnq, int al, int b, int g, int r)
 	double bestd,bestbiasd;
 	register int *p,*f, *n;
 
-	bestd = ~(((int) 1)<<31);
+	bestd = INT_MAX;
 	bestbiasd = bestd;
 	bestpos = 0;
 	bestbiaspos = bestpos;
