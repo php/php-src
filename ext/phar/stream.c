@@ -325,7 +325,7 @@ idata_error:
 		char *entry = ZSTR_VAL(idata->internal_file->filename), *cwd;
 
 		PHAR_G(cwd_init) = 1;
-		if ((idata->phar->is_tar || idata->phar->is_zip) && ZSTR_LEN(idata->internal_file->filename) == sizeof(".phar/stub.php")-1 && !strncmp(entry, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+		if ((idata->phar->is_tar || idata->phar->is_zip) && zend_string_equals_literal(idata->internal_file->filename, ".phar/stub.php")) {
 			/* we're executing the stub, which doesn't count as a file */
 			PHAR_G(cwd_init) = 0;
 		} else if ((cwd = strrchr(entry, '/'))) {

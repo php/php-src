@@ -484,7 +484,7 @@ foundit:
 											+ PHAR_GET_16(zipentry.extra_len);
 		}
 
-		if (ZSTR_LEN(entry.filename) == sizeof(".phar/signature.bin")-1 && !strncmp(ZSTR_VAL(entry.filename), ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+		if (zend_string_equals_literal(entry.filename, ".phar/signature.bin")) {
 			size_t read;
 			php_stream *sigfile;
 			char *sig;
@@ -627,7 +627,7 @@ foundit:
 			ZVAL_UNDEF(&entry.metadata_tracker.val);
 		}
 
-		if (!actual_alias && ZSTR_LEN(entry.filename) == sizeof(".phar/alias.txt")-1 && !strncmp(ZSTR_VAL(entry.filename), ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+		if (!actual_alias && zend_string_equals_literal(entry.filename, ".phar/alias.txt")) {
 			php_stream_filter *filter;
 
 			/* archive alias found */
