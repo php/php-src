@@ -601,16 +601,11 @@ static zval *xml_get_ctag(xml_parser *parser)
 {
 	zval *data = xml_get_separated_data(parser);
 	if (EXPECTED(data)) {
-		zval *zv = zend_hash_index_find(Z_ARRVAL_P(data), parser->ctag_index);
-		if (UNEXPECTED(!zv)) {
-			return NULL;
+		zval *zv = zend_hash_index_find_deref(Z_ARRVAL_P(data), parser->ctag_index);
+		if (EXPECTED(zv && Z_TYPE_P(zv) == IS_ARRAY)) {
+			SEPARATE_ARRAY(zv);
+			return zv;
 		}
-		ZVAL_DEREF(zv);
-		if (UNEXPECTED(Z_TYPE_P(zv) != IS_ARRAY)) {
-			return NULL;
-		}
-		SEPARATE_ARRAY(zv);
-		return zv;
 	}
 	return NULL;
 }
@@ -739,19 +734,16 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 
 	if (!Z_ISUNDEF(parser->data) && !EG(exception)) {
 		zval tag;
-		zval *data = xml_get_separated_data(parser);
 
 		if (parser->lastwasopen) {
-			if (EXPECTED(data)) {
-				zval *zv = zend_hash_index_find_deref(Z_ARRVAL_P(data), parser->ctag_index);
-				if (EXPECTED(zv && Z_TYPE_P(zv) == IS_ARRAY)) {
-					SEPARATE_ARRAY(zv);
-					add_assoc_string(zv, "type", "complete");
-				}
+			zval *zv = xml_get_ctag(parser);
+			if (EXPECTED(zv)) {
+				add_assoc_string(zv, "type", "complete");
 			}
 		} else {
 			_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
 
+			zval *data = xml_get_separated_data(parser);
 			if (EXPECTED(data)) {
 				array_init(&tag);
 				add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
