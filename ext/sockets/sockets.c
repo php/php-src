@@ -217,7 +217,7 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
-static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
+static bool php_open_listen_sock(php_socket *sock, unsigned short port, int backlog) /* {{{ */
 {
 	struct sockaddr_in  la = {0};
 	struct hostent	    *hp;
@@ -232,7 +232,7 @@ static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{
 
 	memcpy((char *) &la.sin_addr, hp->h_addr, hp->h_length);
 	la.sin_family = hp->h_addrtype;
-	la.sin_port = htons((unsigned short) port);
+	la.sin_port = htons(port);
 
 	sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);
 	sock->blocking = 1;
@@ -680,10 +680,15 @@ PHP_FUNCTION(socket_create_listen)
 		Z_PARAM_LONG(backlog)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
-	if (!php_open_listen_sock(php_sock, port, backlog)) {
+	if (!php_open_listen_sock(php_sock, (unsigned short)port, backlog)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}

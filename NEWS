@@ -82,6 +82,8 @@ PHP                                                                        NEWS
     with timeout setting on windows. (David Carlier)
   . Added TCP_FUNCTION_ALIAS, TCP_REUSPORT_LB_NUMA, TCP_REUSPORT_LB_NUMA_NODOM,
     TCP_REUSPORT_LB_CURDOM, TCP_BBR_ALGORITHM constants.
+  . socket_create_listen() throws an exception on invalid port value.
+    (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt

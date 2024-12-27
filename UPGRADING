@@ -124,6 +124,10 @@ PHP 8.5 UPGRADE NOTES
   . posix_fpathconf checks invalid file descriptors and sets
     last_error to EBADF and raises an E_WARNING message.
 
+- Sockets:
+  . socket_create_listen throws a ValueError if the port is
+    lower than 0 or greater than 65535.
+
 - Zlib:
   . The "use_include_path" argument for the
     gzfile, gzopen and readgzfile functions had been changed
