@@ -234,6 +234,22 @@ static void ldap_result_entry_free_obj(zend_object *obj)
 	} \
 }
 
+static bool php_ldap_is_numerically_indexed_array(const zend_array *arr)
+{
+	if (zend_hash_num_elements(arr) == 0 || HT_IS_PACKED(arr)) {
+		return true;
+	}
+
+	zend_string *str_key;
+	ZEND_HASH_MAP_FOREACH_STR_KEY(arr, str_key) {
+		if (str_key) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
+}
+
 /* An LDAP value must be a string, however it defines a format for integer and
  * booleans, thus we parse zvals to the corresponding string if possible
  * See RFC 4517: https://datatracker.ietf.org/doc/html/rfc4517 */
@@ -1481,8 +1497,8 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			/* We don't allocate ldap_attrs for an empty array */
 			goto process;
 		}
-		if (!zend_array_is_list(attributes)) {
-			zend_argument_value_error(4, "must be a list");
+		if (!php_ldap_is_numerically_indexed_array(attributes)) {
+			zend_argument_value_error(4, "must be an array with numeric indices");
 			RETURN_THROWS();
 		}
 		/* Allocate +1 as we need an extra entry to NULL terminate the list */
@@ -1490,7 +1506,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 		zend_ulong attribute_index = 0;
 		zval *attribute_zv = NULL;
-		ZEND_HASH_FOREACH_NUM_KEY_VAL(attributes, attribute_index, attribute_zv) {
+		ZEND_HASH_FOREACH_VAL(attributes, attribute_zv) {
 			ZVAL_DEREF(attribute_zv);
 			if (Z_TYPE_P(attribute_zv) != IS_STRING) {
 				zend_argument_type_error(4, "must be a list of strings, %s given", zend_zval_value_name(attribute_zv));
@@ -1503,7 +1519,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				ret = 0;
 				goto cleanup;
 			}
-			ldap_attrs[attribute_index] = ZSTR_VAL(attribute);
+			ldap_attrs[attribute_index++] = ZSTR_VAL(attribute);
 		} ZEND_HASH_FOREACH_END();
 		ldap_attrs[num_attribs] = NULL;
 	}
@@ -2302,8 +2318,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				RETVAL_FALSE;
 				goto cleanup;
 			}
-			if (!zend_array_is_list(Z_ARRVAL_P(attribute_values))) {
-				zend_argument_value_error(3, "must be a list of attribute values");
+			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(attribute_values))) {
+				zend_argument_value_error(3, "must be an array of attribute values with numeric indices");
 				RETVAL_FALSE;
 				goto cleanup;
 			}
@@ -2314,7 +2330,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 
 			zend_ulong attribute_value_index = 0;
 			zval *attribute_value = NULL;
-			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(attribute_values), attribute_value_index, attribute_value) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(attribute_values), attribute_value) {
 				zend_string *value = php_ldap_try_get_ldap_value_from_zval(attribute_value);
 				if (UNEXPECTED(value == NULL)) {
 					RETVAL_FALSE;
@@ -2324,6 +2340,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				/* The string will be free by php_ldap_zend_string_release_from_char_pointer() during cleanup */
 				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_val = ZSTR_VAL(value);
 				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_len = ZSTR_LEN(value);
+				attribute_value_index++;
 			} ZEND_HASH_FOREACH_END();
 			ldap_mods[attribute_index]->mod_bvalues[num_values] = NULL;
 		}
@@ -2594,8 +2611,8 @@ PHP_FUNCTION(ldap_modify_batch)
 		zend_argument_must_not_be_empty_error(3);
 		RETURN_THROWS();
 	}
-	if (!zend_array_is_list(modifications)) {
-		zend_argument_value_error(3, "must be a list");
+	if (!php_ldap_is_numerically_indexed_array(modifications)) {
+		zend_argument_value_error(3, "must be an array with numeric indices");
 		RETURN_THROWS();
 	}
 
@@ -2689,8 +2706,8 @@ PHP_FUNCTION(ldap_modify_batch)
 			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must not be empty");
 			RETURN_THROWS();
 		}
-		if (!zend_array_is_list(modification_values)) {
-			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be a list");
+		if (!php_ldap_is_numerically_indexed_array(modification_values)) {
+			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be an array with numeric indices");
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2752,7 +2769,7 @@ PHP_FUNCTION(ldap_modify_batch)
 			/* for each value */
 			zend_ulong value_index = 0;
 			zval *modification_value_zv = NULL;
-			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(modification_values), value_index, modification_value_zv) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(modification_values), modification_value_zv) {
 				zend_string *modval = zval_get_string(modification_value_zv);
 				if (EG(exception)) {
 					RETVAL_FALSE;
@@ -2768,6 +2785,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				ldap_mods[modification_index]->mod_bvalues[value_index]->bv_len = ZSTR_LEN(modval);
 				ldap_mods[modification_index]->mod_bvalues[value_index]->bv_val = estrndup(ZSTR_VAL(modval), ZSTR_LEN(modval));
 				zend_string_release(modval);
+				value_index++;
 			} ZEND_HASH_FOREACH_END();
 
 			/* NULL-terminate values */
