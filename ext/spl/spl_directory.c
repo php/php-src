@@ -1596,13 +1596,12 @@ PHP_METHOD(GlobIterator, count)
 		RETURN_THROWS();
 	}
 
-	if (spl_intern_is_glob(intern)) {
-		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
-	} else {
-		/* This can happen by abusing destructors. */
-		/* TODO: relax this from E_ERROR to an exception */
-		php_error_docref(NULL, E_ERROR, "GlobIterator lost glob state");
-	}
+	/* The spl_filesystem_object_get_method_check() function is called prior to calling this function.
+	 * Therefore, the directory entry cannot be NULL. However, if it is not NULL, then it must be a glob iterator
+	 * by construction. */
+	ZEND_ASSERT(spl_intern_is_glob(intern));
+
+	RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 }
 /* }}} */
 #endif /* HAVE_GLOB */
