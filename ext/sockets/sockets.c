@@ -680,6 +680,11 @@ PHP_FUNCTION(socket_create_listen)
 		Z_PARAM_LONG(backlog)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
