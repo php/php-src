@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     (Saki Takamachi)
   . Fixed bug GH-17064 (Correctly round rounding mode with zero edge case).
     (Saki Takamachi)
+  . Fixed bug GH-17275 (Fixed the calculation logic of dividend scale).
+    (Saki Takamachi)
 
 - Core:
   . Fixed bug OSS-Fuzz #382922236 (Duplicate dynamic properties in hooked object
