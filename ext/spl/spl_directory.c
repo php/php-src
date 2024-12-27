@@ -1600,8 +1600,7 @@ PHP_METHOD(GlobIterator, count)
 		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 	} else {
 		/* This can happen by abusing destructors. */
-		/* TODO: relax this from E_ERROR to an exception */
-		php_error_docref(NULL, E_ERROR, "GlobIterator lost glob state");
+		zend_throw_error(NULL, "GlobIterator lost glob state");
 	}
 }
 /* }}} */
