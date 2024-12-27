@@ -120,6 +120,9 @@ PHP                                                                        NEWS
 - Windows:
   . Hardened proc_open() against cmd.exe hijacking. (cmb)
 
+- XML:
+  . Fixed bug GH-1718 (unreachable program point in zend_hash). (nielsdos)
+
 05 Dec 2024, PHP 8.4.2
 
 - BcMath:
