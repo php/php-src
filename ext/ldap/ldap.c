@@ -1498,7 +1498,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			goto process;
 		}
 		if (!php_ldap_is_numerically_indexed_array(attributes)) {
-			zend_argument_value_error(4, "must be an array with numeric indices");
+			zend_argument_value_error(4, "must be an array with numeric keys");
 			RETURN_THROWS();
 		}
 		/* Allocate +1 as we need an extra entry to NULL terminate the list */
@@ -2319,7 +2319,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				goto cleanup;
 			}
 			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(attribute_values))) {
-				zend_argument_value_error(3, "must be an array of attribute values with numeric indices");
+				zend_argument_value_error(3, "must be an array of attribute values with numeric keys");
 				RETVAL_FALSE;
 				goto cleanup;
 			}
@@ -2612,7 +2612,7 @@ PHP_FUNCTION(ldap_modify_batch)
 		RETURN_THROWS();
 	}
 	if (!php_ldap_is_numerically_indexed_array(modifications)) {
-		zend_argument_value_error(3, "must be an array with numeric indices");
+		zend_argument_value_error(3, "must be an array with numeric keys");
 		RETURN_THROWS();
 	}
 
@@ -2707,7 +2707,7 @@ PHP_FUNCTION(ldap_modify_batch)
 			RETURN_THROWS();
 		}
 		if (!php_ldap_is_numerically_indexed_array(modification_values)) {
-			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be an array with numeric indices");
+			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be an array with numeric keys");
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();

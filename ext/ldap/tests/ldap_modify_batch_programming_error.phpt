@@ -244,7 +244,7 @@ try {
 --EXPECT--
 ValueError: ldap_modify_batch(): Argument #2 ($dn) must not contain any null bytes
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must not be empty
-ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must be an array with numeric indices
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) must be an array with numeric keys
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) a modification entry must only contain the keys "attrib", "modtype", and "values"
 TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) must only contain arrays
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) a modification entry must not contain the "values" option when option "modtype" is LDAP_MODIFY_BATCH_REMOVE_ALL
@@ -257,6 +257,6 @@ ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) a modificatio
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) a modification entry must contain the "values" option when the "modtype" option is not LDAP_MODIFY_BATCH_REMOVE_ALL
 TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must be of type array, string given
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must not be empty
-ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must be an array with numeric indices
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must be an array with numeric keys
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) a modification entry must contain the "attrib" option
 ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) a modification entry must contain the "modtype" option

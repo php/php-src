@@ -80,7 +80,7 @@ try {
 TypeError: ldap_list(): Argument #1 ($ldap) must be of type LDAP\Connection|array, int given
 TypeError: ldap_list(): Argument #2 ($base) must be of type string when argument #1 ($ldap) is an LDAP\Connection instance
 TypeError: ldap_list(): Argument #3 ($filter) must be of type string when argument #1 ($ldap) is an LDAP\Connection instance
-ValueError: ldap_list(): Argument #4 ($attributes) must be an array with numeric indices
+ValueError: ldap_list(): Argument #4 ($attributes) must be an array with numeric keys
 TypeError: ldap_list(): Argument #4 ($attributes) must be a list of strings, int given
 ValueError: ldap_list(): Argument #4 ($attributes) must not contain strings with any null bytes
 ValueError: ldap_list(): Argument #4 ($attributes) must not contain strings with any null bytes
