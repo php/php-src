@@ -608,7 +608,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					time_buffer,
 					(unsigned long) (now_epoch - proc->start_epoch),
 					proc->requests,
-					duration.tv_sec * 1000000UL + duration.tv_usec,
+					(unsigned long) (duration.tv_sec * 1000000UL + duration.tv_usec),
 					proc->request_method[0] != '\0' ? proc->request_method : "-",
 					proc->request_uri[0] != '\0' ? proc->request_uri : "-",
 					query_string ? "?" : "",
