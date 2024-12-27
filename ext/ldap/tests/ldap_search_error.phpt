@@ -20,7 +20,7 @@ $result = ldap_search($link, $dn, $filter);
 var_dump($result);
 
 try {
-    $result = ldap_search($link, $dn, $filter, array(1 => 'top'));
+    $result = ldap_search($link, $dn, $filter, array('foo' => 'top'));
     var_dump($result);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
@@ -60,7 +60,7 @@ try {
 --EXPECTF--
 Warning: ldap_search(): Search: No such object in %s on line %d
 bool(false)
-ldap_search(): Argument #4 ($attributes) must be a list
+ldap_search(): Argument #4 ($attributes) must be an array with numeric keys
 ldap_search(): Argument #1 ($ldap) must not be empty
 ldap_search(): Argument #2 ($base) must be the same size as argument #1
 ldap_search(): Argument #3 ($filter) must be the same size as argument #1
