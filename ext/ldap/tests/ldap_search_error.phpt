@@ -19,7 +19,7 @@ $filter = "(dc=*)";
 $result = ldap_search($link, $dn, $filter);
 var_dump($result);
 
-$result = ldap_search($link, $dn, $filter, array(1 => 'top'));
+$result = ldap_search($link, $dn, $filter, array('foo' => 'top'));
 var_dump($result);
 
 try {
@@ -57,7 +57,7 @@ try {
 Warning: ldap_search(): Search: No such object in %s on line %d
 bool(false)
 
-Warning: ldap_search(): Array initialization wrong in %s on line %d
+Warning: ldap_search(): Argument #4 ($attributes) must be an array with numeric keys in %s on line %d
 bool(false)
 ldap_search(): Argument #1 ($ldap) cannot be empty
 ldap_search(): Argument #2 ($base) must have the same number of elements as the links array
