@@ -38,6 +38,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-13437 (FPM: ERROR: scoreboard: failed to lock (already
     locked)). (Jakub Zelenka)
   . Fixed bug GH-17112 (Macro redefinitions). (cmb, nielsdos)
+  . Fixed bug GH-17208 (bug64539-status-json-encoding.phpt fail on 32-bits).
+    (nielsdos)
 
 - GD:
   . Fixed bug GH-16255 (Unexpected nan value in ext/gd/libgd/gd_filter.c).
