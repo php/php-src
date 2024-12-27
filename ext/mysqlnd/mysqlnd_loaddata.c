@@ -68,7 +68,8 @@ int mysqlnd_local_infile_read(void * ptr, zend_uchar * buf, unsigned int buf_len
 
 	DBG_ENTER("mysqlnd_local_infile_read");
 
-	ssize_t count = php_stream_read(info->fd, (char *) buf, buf_len);
+	// TODO Change this, and the return type of the function to ssize_t
+	int count = (int) php_stream_read(info->fd, (char *) buf, buf_len);
 
 	if (count < 0) {
 		strcpy(info->error_msg, "Error reading file");
