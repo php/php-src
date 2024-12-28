@@ -285,6 +285,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list
+%type <ast> interface_name_list interface_name
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -355,10 +356,10 @@ legacy_namespace_name:
 ;
 
 name:
-		T_STRING									{ $$ = $1; $$->attr = ZEND_NAME_NOT_FQ; }
-	|	T_NAME_QUALIFIED							{ $$ = $1; $$->attr = ZEND_NAME_NOT_FQ; }
-	|	T_NAME_FULLY_QUALIFIED						{ $$ = $1; $$->attr = ZEND_NAME_FQ; }
-	|	T_NAME_RELATIVE								{ $$ = $1; $$->attr = ZEND_NAME_RELATIVE; }
+		T_STRING									{ $$ = $1; $$->attr |= ZEND_NAME_NOT_FQ; }
+	|	T_NAME_QUALIFIED							{ $$ = $1; $$->attr |= ZEND_NAME_NOT_FQ; }
+	|	T_NAME_FULLY_QUALIFIED						{ $$ = $1; $$->attr |= ZEND_NAME_FQ; }
+	|	T_NAME_RELATIVE								{ $$ = $1; $$->attr |= ZEND_NAME_RELATIVE; }
 ;
 
 attribute_decl:
@@ -666,12 +667,12 @@ extends_from:
 
 interface_extends_list:
 		%empty			        { $$ = NULL; }
-	|	T_EXTENDS class_name_list	{ $$ = $2; }
+	|	T_EXTENDS interface_name_list	{ $$ = $2; }
 ;
 
 implements_list:
 		%empty		        		{ $$ = NULL; }
-	|	T_IMPLEMENTS class_name_list	{ $$ = $2; }
+	|	T_IMPLEMENTS interface_name_list	{ $$ = $2; }
 ;
 
 foreach_variable:
@@ -972,6 +973,11 @@ class_statement:
 class_name_list:
 		class_name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
 	|	class_name_list ',' class_name { $$ = zend_ast_list_add($1, $3); }
+;
+
+interface_name_list:
+		interface_name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
+	|	interface_name_list ',' interface_name { $$ = zend_ast_list_add($1, $3); }
 ;
 
 trait_adaptations:
@@ -1409,6 +1415,11 @@ class_name:
 			{ zval zv; ZVAL_INTERNED_STR(&zv, ZSTR_KNOWN(ZEND_STR_STATIC));
 			  $$ = zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ); }
 	|	name { $$ = $1; }
+;
+
+interface_name:
+		class_name		{ $$ = $1; }
+	|	'?' name 		{ $$ = $2; $$->attr |= ZEND_CLASS_NAME_OPTIONAL; }
 ;
 
 class_name_reference:

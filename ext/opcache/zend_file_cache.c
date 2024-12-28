@@ -795,7 +795,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 	if (ce->num_interfaces) {
 		uint32_t i;
-		zend_class_name *interface_names;
+		zend_interface_name *interface_names;
 
 		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 
@@ -806,6 +806,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		for (i = 0; i < ce->num_interfaces; i++) {
 			SERIALIZE_STR(interface_names[i].name);
 			SERIALIZE_STR(interface_names[i].lc_name);
+			// SERIALIZE_BOOL(interface_names[i].is_optional) ?
 		}
 	}
 

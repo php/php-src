@@ -8061,12 +8061,13 @@ static void add_stringable_interface(zend_class_entry *ce) {
 
 	ce->num_interfaces++;
 	ce->interface_names =
-		erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
+		erealloc(ce->interface_names, sizeof(zend_interface_name) * ce->num_interfaces);
 	// TODO: Add known interned strings instead?
 	ce->interface_names[ce->num_interfaces - 1].name =
 		ZSTR_INIT_LITERAL("Stringable", 0);
 	ce->interface_names[ce->num_interfaces - 1].lc_name =
 		ZSTR_INIT_LITERAL("stringable", 0);
+	ce->interface_names[ce->num_interfaces - 1].is_optional = false;
 }
 
 static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, bool has_body) /* {{{ */
@@ -8977,16 +8978,17 @@ static void zend_compile_implements(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
-	zend_class_name *interface_names;
+	zend_interface_name *interface_names;
 	uint32_t i;
 
-	interface_names = emalloc(sizeof(zend_class_name) * list->children);
+	interface_names = emalloc(sizeof(zend_interface_name) * list->children);
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *class_ast = list->child[i];
 		interface_names[i].name =
 			zend_resolve_const_class_name_reference(class_ast, "interface name");
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
+		interface_names[i].is_optional = ZEND_CLASS_NAME_OPTIONAL & class_ast->attr;
 	}
 
 	ce->num_interfaces = list->children;

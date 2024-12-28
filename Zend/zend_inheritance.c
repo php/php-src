@@ -3527,23 +3527,32 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 	}
 
+	size_t num_implementable_interfaces = 0;
 	if (ce->num_interfaces) {
 		for (i = 0; i < ce->num_interfaces; i++) {
 			zend_class_entry *iface = zend_fetch_class_by_name(
 				ce->interface_names[i].name, ce->interface_names[i].lc_name,
 				ZEND_FETCH_CLASS_INTERFACE |
-				ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED | ZEND_FETCH_CLASS_EXCEPTION);
+				ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED | ZEND_FETCH_CLASS_EXCEPTION |
+				(ce->interface_names[i].is_optional ? ZEND_FETCH_CLASS_SILENT : 0));
+
+			// Optional interfaces are skipped if they don't exist.
+			if (!iface && ce->interface_names[i].is_optional) {
+				continue;
+			}
+
 			if (!iface) {
 				check_unrecoverable_load_failure(ce);
 				free_alloca(traits_and_interfaces, use_heap);
 				return NULL;
 			}
-			traits_and_interfaces[ce->num_traits + i] = iface;
+			traits_and_interfaces[ce->num_traits + num_implementable_interfaces++] = iface;
 			if (iface) {
 				UPDATE_IS_CACHEABLE(iface);
 			}
 		}
 	}
+	ce->num_interfaces = num_implementable_interfaces;
 
 #ifndef ZEND_WIN32
 	if (ce->ce_flags & ZEND_ACC_ENUM) {

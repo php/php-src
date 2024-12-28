@@ -87,6 +87,12 @@ typedef struct _zend_class_name {
 	zend_string *lc_name;
 } zend_class_name;
 
+typedef struct _zend_interface_name {
+	zend_string *name;
+	zend_string *lc_name;
+	bool is_optional;
+} zend_interface_name;
+
 typedef struct _zend_trait_method_reference {
 	zend_string *method_name;
 	zend_string *class_name;
@@ -210,7 +216,7 @@ struct _zend_class_entry {
 	/* class_entry or string(s) depending on ZEND_ACC_LINKED */
 	union {
 		zend_class_entry **interfaces;
-		zend_class_name *interface_names;
+		zend_interface_name *interface_names;
 	};
 
 	zend_class_name *trait_names;
