@@ -2086,7 +2086,7 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 			struct accept_filter_arg af = {0};
-			if (Z_STRLEN_P(arg4) > sizeof(af.af_name)) {
+			if (Z_STRLEN_P(arg4) >= sizeof(af.af_name)) {
 				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is SO_ACCEPTFILTER", sizeof(af.af_name));
 				RETURN_THROWS();
 			}
