@@ -1,13 +1,10 @@
 --TEST--
-socket_set_option($socket, IPPROTO_TCP, TCP_FUNCTION_BLK, INVALID_TYPE_FOR_OPTION)
+socket_set_option($socket, SOL_TCP, TCP_FUNCTION_BLK, INVALID_TYPE_FOR_OPTION)
 --EXTENSIONS--
 sockets
 --SKIPIF--
 <?php
 
-if (!defined('IPPROTO_TCP')) {
-    die('skip IPPROTO_TCP not available.');
-}
 if (!defined('TCP_FUNCTION_BLK')) {
     die('skip TCP_FUNCTION_BLK not available.');
 }
@@ -21,19 +18,19 @@ if (!$socket) {
 }
 
 try {
-    $ret = socket_set_option($socket, IPPROTO_TCP, TCP_FUNCTION_BLK, new stdClass());
+    $ret = socket_set_option($socket, SOL_TCP, TCP_FUNCTION_BLK, new stdClass());
     var_dump($ret);
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
-    $ret = socket_set_option($socket, IPPROTO_TCP, TCP_FUNCTION_BLK, "string\0with\0null\0bytes");
+    $ret = socket_set_option($socket, SOL_TCP, TCP_FUNCTION_BLK, "string\0with\0null\0bytes");
     var_dump($ret);
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
-    $ret = socket_set_option($socket, IPPROTO_TCP, TCP_FUNCTION_BLK, str_repeat("a", 2048));
+    $ret = socket_set_option($socket, SOL_TCP, TCP_FUNCTION_BLK, str_repeat("a", 2048));
     var_dump($ret);
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;

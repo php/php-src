@@ -1,13 +1,10 @@
 --TEST--
-socket_set_option($socket, IPPROTO_TCP, TCP_CONGESTION, INVALID_TYPE_FOR_OPTION)
+socket_set_option($socket, SOL_TCP, TCP_CONGESTION, INVALID_TYPE_FOR_OPTION)
 --EXTENSIONS--
 sockets
 --SKIPIF--
 <?php
 
-if (!defined('IPPROTO_TCP')) {
-    die('skip IPPROTO_TCP not available.');
-}
 if (!defined('TCP_CONGESTION')) {
     die('skip TCP_CONGESTION not available.');
 }
@@ -21,7 +18,7 @@ if (!$socket) {
 }
 
 try {
-    $ret = socket_set_option($socket, IPPROTO_TCP, TCP_CONGESTION, new stdClass());
+    $ret = socket_set_option($socket, SOL_TCP, TCP_CONGESTION, new stdClass());
     var_dump($ret);
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
