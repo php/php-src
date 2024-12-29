@@ -3552,7 +3552,6 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			}
 		}
 	}
-	ce->num_interfaces = num_implementable_interfaces;
 
 #ifndef ZEND_WIN32
 	if (ce->ce_flags & ZEND_ACC_ENUM) {
@@ -3597,6 +3596,8 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zv = zend_hash_find_known_hash(CG(class_table), key);
 			Z_CE_P(zv) = ce;
 		}
+
+		ce->num_interfaces = num_implementable_interfaces;
 
 		if (CG(unlinked_uses)) {
 			zend_hash_index_del(CG(unlinked_uses), (zend_long)(uintptr_t) ce);
