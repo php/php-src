@@ -1921,8 +1921,8 @@ PHP_FUNCTION(ini_get)
 /* {{{ Get all configuration options */
 PHP_FUNCTION(ini_get_all)
 {
-	char *extname = NULL;
-	size_t extname_len = 0, module_number = 0;
+	zend_string *extname = NULL;
+	size_t module_number = 0;
 	zend_module_entry *module;
 	bool details = 1;
 	zend_string *key;
@@ -1931,15 +1931,15 @@ PHP_FUNCTION(ini_get_all)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(extname, extname_len)
+		Z_PARAM_STR_OR_NULL(extname)
 		Z_PARAM_BOOL(details)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_ini_sort_entries();
 
 	if (extname) {
-		if ((module = zend_hash_str_find_ptr(&module_registry, extname, extname_len)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Extension \"%s\" cannot be found", extname);
+		if ((module = zend_hash_find_ptr(&module_registry, extname)) == NULL) {
+			php_error_docref(NULL, E_WARNING, "Extension \"%s\" cannot be found", ZSTR_VAL(extname));
 			RETURN_FALSE;
 		}
 		module_number = module->module_number;
