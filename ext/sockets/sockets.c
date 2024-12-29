@@ -1569,7 +1569,7 @@ PHP_FUNCTION(socket_sendto)
 #endif
 	int					retval;
 	size_t              buf_len, addr_len;
-	zend_long			len, flags, port;
+	zend_long			len, flags, port = 0;
 	bool           port_is_null = 1;
 	char				*buf, *addr;
 
@@ -1585,6 +1585,12 @@ PHP_FUNCTION(socket_sendto)
 
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
+
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(6, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
