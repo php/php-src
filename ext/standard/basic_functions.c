@@ -2350,8 +2350,7 @@ PHP_FUNCTION(is_uploaded_file)
 /* {{{ Move a file if and only if it was created by an upload */
 PHP_FUNCTION(move_uploaded_file)
 {
-	char *path, *new_path;
-	size_t path_len, new_path_len;
+	zend_string *path, *new_path;
 	bool successful = 0;
 
 #ifndef PHP_WIN32
@@ -2359,43 +2358,43 @@ PHP_FUNCTION(move_uploaded_file)
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(path, path_len)
-		Z_PARAM_PATH(new_path, new_path_len)
+		Z_PARAM_PATH_STR(path)
+		Z_PARAM_PATH_STR(new_path)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!SG(rfc1867_uploaded_files)) {
 		RETURN_FALSE;
 	}
 
-	if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
+	if (!zend_hash_exists(SG(rfc1867_uploaded_files), path)) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(new_path)) {
+	if (php_check_open_basedir(ZSTR_VAL(new_path))) {
 		RETURN_FALSE;
 	}
 
-	if (VCWD_RENAME(path, new_path) == 0) {
+	if (VCWD_RENAME(ZSTR_VAL(path), ZSTR_VAL(new_path)) == 0) {
 		successful = 1;
 #ifndef PHP_WIN32
 		oldmask = umask(077);
 		umask(oldmask);
 
-		ret = VCWD_CHMOD(new_path, 0666 & ~oldmask);
+		ret = VCWD_CHMOD(ZSTR_VAL(new_path), 0666 & ~oldmask);
 
 		if (ret == -1) {
 			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		}
 #endif
-	} else if (php_copy_file_ex(path, new_path, STREAM_DISABLE_OPEN_BASEDIR) == SUCCESS) {
-		VCWD_UNLINK(path);
+	} else if (php_copy_file_ex(ZSTR_VAL(path), ZSTR_VAL(new_path), STREAM_DISABLE_OPEN_BASEDIR) == SUCCESS) {
+		VCWD_UNLINK(ZSTR_VAL(path));
 		successful = 1;
 	}
 
 	if (successful) {
-		zend_hash_str_del(SG(rfc1867_uploaded_files), path, path_len);
+		zend_hash_del(SG(rfc1867_uploaded_files), path);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Unable to move \"%s\" to \"%s\"", path, new_path);
+		php_error_docref(NULL, E_WARNING, "Unable to move \"%s\" to \"%s\"", ZSTR_VAL(path), ZSTR_VAL(new_path));
 	}
 
 	RETURN_BOOL(successful);
