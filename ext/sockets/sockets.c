@@ -1949,7 +1949,7 @@ PHP_FUNCTION(socket_set_option)
 			/* [...] the unique name of the TCP stack, and should be no longer than
 			 * TCP_FUNCTION_NAME_LEN_MAX-1 characters in length.
 			 * https://github.com/freebsd/freebsd-src/blob/da2c88dfcf4f425e6e0a58d6df3a7c8e88d8df92/share/man/man9/tcp_functions.9#L193C1-L194C50 */
-			if (Z_STRLEN_P(arg4) > TCP_FUNCTION_NAME_LEN_MAX) {
+			if (Z_STRLEN_P(arg4) >= TCP_FUNCTION_NAME_LEN_MAX) {
 				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is TCP_FUNCTION_BLK", TCP_FUNCTION_NAME_LEN_MAX);
 				RETURN_THROWS();
 			}
