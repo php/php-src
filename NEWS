@@ -65,6 +65,10 @@ PHP                                                                        NEWS
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
+- LDAP:
+  . Fixed bug GH-17280 (ldap_search() fails when $attributes array has holes).
+    (nielsdos)
+
 - LibXML:
   . Fixed bug GH-17223 (Memory leak in libxml encoding handling). (nielsdos)
 

@@ -234,6 +234,22 @@ static void ldap_result_entry_free_obj(zend_object *obj)
 	} \
 }
 
+static bool php_ldap_is_numerically_indexed_array(zend_array *arr)
+{
+	if (zend_hash_num_elements(arr) == 0 || HT_IS_PACKED(arr)) {
+		return true;
+	}
+
+	zend_string *str_key;
+	ZEND_HASH_MAP_FOREACH_STR_KEY(arr, str_key) {
+		if (str_key) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return false;
+}
+
 /* {{{ Parse controls from and to arrays */
 static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array, int request)
 {
@@ -1473,20 +1489,22 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			num_attribs = zend_hash_num_elements(Z_ARRVAL_P(attrs));
 			ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
 
-			for (i = 0; i<num_attribs; i++) {
-				if ((attr = zend_hash_index_find(Z_ARRVAL_P(attrs), i)) == NULL) {
-					php_error_docref(NULL, E_WARNING, "Array initialization wrong");
-					ret = 0;
-					goto cleanup;
-				}
+			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(attrs))) {
+				php_error_docref(NULL, E_WARNING, "Argument #4 ($attributes) must be an array with numeric keys");
+				ret = 0;
+				goto cleanup;
+			}
 
+			i = 0;
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(attrs), attr) {
 				convert_to_string(attr);
 				if (EG(exception)) {
 					ret = 0;
 					goto cleanup;
 				}
-				ldap_attrs[i] = Z_STRVAL_P(attr);
-			}
+				ldap_attrs[i++] = Z_STRVAL_P(attr);
+			} ZEND_HASH_FOREACH_END();
+
 			ldap_attrs[num_attribs] = NULL;
 			ZEND_FALLTHROUGH;
 		default:
@@ -2259,14 +2277,16 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			ldap_mods[i]->mod_bvalues[0]->bv_val = Z_STRVAL_P(value);
 			ldap_mods[i]->mod_bvalues[0]->bv_len = Z_STRLEN_P(value);
 		} else {
-			for (j = 0; j < num_values; j++) {
-				if ((ivalue = zend_hash_index_find(Z_ARRVAL_P(value), j)) == NULL) {
-					zend_argument_value_error(3, "must contain arrays with consecutive integer indices starting from 0");
-					num_berval[i] = j;
-					num_attribs = i + 1;
-					RETVAL_FALSE;
-					goto cleanup;
-				}
+			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(value))) {
+				zend_argument_value_error(3, "must be an array with numeric keys");
+				RETVAL_FALSE;
+				num_berval[i] = 0;
+				num_attribs = i + 1;
+				goto cleanup;
+			}
+
+			j = 0;
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), ivalue) {
 				convert_to_string(ivalue);
 				if (EG(exception)) {
 					num_berval[i] = j;
@@ -2277,7 +2297,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				ldap_mods[i]->mod_bvalues[j] = (struct berval *) emalloc (sizeof(struct berval));
 				ldap_mods[i]->mod_bvalues[j]->bv_val = Z_STRVAL_P(ivalue);
 				ldap_mods[i]->mod_bvalues[j]->bv_len = Z_STRLEN_P(ivalue);
-			}
+				j++;
+			} ZEND_HASH_FOREACH_END();
 		}
 		ldap_mods[i]->mod_bvalues[num_values] = NULL;
 		zend_hash_move_forward(Z_ARRVAL_P(entry));
@@ -2545,7 +2566,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	zval *fetched;
 	char *dn;
 	size_t dn_len;
-	int i, j, k;
+	int i, j;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
 	LDAPControl **lserverctrls = NULL;
@@ -2605,12 +2626,14 @@ PHP_FUNCTION(ldap_modify_batch)
 
 		num_mods = zend_hash_num_elements(Z_ARRVAL_P(mods));
 
-		for (i = 0; i < num_mods; i++) {
-			/* is the numbering consecutive? */
-			if ((fetched = zend_hash_index_find(Z_ARRVAL_P(mods), i)) == NULL) {
-				zend_argument_value_error(3, "must have consecutive integer indices starting from 0");
-				RETURN_THROWS();
-			}
+		if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(mods))) {
+			zend_argument_value_error(3, "must be an array with numeric keys");
+			RETURN_THROWS();
+		}
+
+		i = 0;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(mods), fetched) {
+			ZVAL_DEREF(fetched);
 			mod = fetched;
 
 			/* is it an array? */
@@ -2708,18 +2731,9 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_THROWS();
 					}
 
-					/* are its keys integers? */
-					if (zend_hash_get_current_key_type(Z_ARRVAL_P(modinfo)) != HASH_KEY_IS_LONG) {
-						zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_VALUES "\" must be integer-indexed", get_active_function_name());
+					if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(modinfo))) {
+						zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_VALUES "\" must be an array with numeric keys", get_active_function_name());
 						RETURN_THROWS();
-					}
-
-					/* are the keys consecutive? */
-					for (k = 0; k < num_modvals; k++) {
-						if ((fetched = zend_hash_index_find(Z_ARRVAL_P(modinfo), k)) == NULL) {
-							zend_value_error("%s(): Option \"" LDAP_MODIFY_BATCH_VALUES "\" must have consecutive integer indices starting from 0", get_active_function_name());
-							RETURN_THROWS();
-						}
 					}
 				}
 
@@ -2734,7 +2748,9 @@ PHP_FUNCTION(ldap_modify_batch)
 				zend_value_error("%s(): Required option \"" LDAP_MODIFY_BATCH_MODTYPE "\" is missing", get_active_function_name());
 				RETURN_THROWS();
 			}
-		}
+
+			i++;
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* validation was successful */
 
@@ -2788,9 +2804,9 @@ PHP_FUNCTION(ldap_modify_batch)
 			ldap_mods[i]->mod_bvalues = safe_emalloc((num_modvals+1), sizeof(struct berval *), 0);
 
 			/* for each value */
-			for (j = 0; j < num_modvals; j++) {
+			j = 0;
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(vals), fetched) {
 				/* fetch it */
-				fetched = zend_hash_index_find(Z_ARRVAL_P(vals), j);
 				modval = zval_get_string(fetched);
 				if (EG(exception)) {
 					RETVAL_FALSE;
@@ -2806,7 +2822,8 @@ PHP_FUNCTION(ldap_modify_batch)
 				ldap_mods[i]->mod_bvalues[j]->bv_len = ZSTR_LEN(modval);
 				ldap_mods[i]->mod_bvalues[j]->bv_val = estrndup(ZSTR_VAL(modval), ZSTR_LEN(modval));
 				zend_string_release(modval);
-			}
+				j++;
+			} ZEND_HASH_FOREACH_END();
 
 			/* NULL-terminate values */
 			ldap_mods[i]->mod_bvalues[num_modvals] = NULL;
