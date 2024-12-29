@@ -1888,8 +1888,6 @@ PHP_FUNCTION(socket_set_option)
 	zend_long					level, optname;
 	void 					*opt_ptr;
 	HashTable		 		*opt_ht;
-	zval 					*l_onoff, *l_linger;
-	zval		 			*sec, *usec;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
@@ -1930,13 +1928,12 @@ PHP_FUNCTION(socket_set_option)
 		switch (optname) {
 #ifdef TCP_CONGESTION
 		case TCP_CONGESTION: {
-			if (Z_TYPE_P(arg4) == IS_STRING) {
-				opt_ptr = Z_STRVAL_P(arg4);
-				optlen = Z_STRLEN_P(arg4);
-			} else {
-				opt_ptr = "";
-				optlen = 0;
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is TCP_CONGESTION, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
+			opt_ptr = Z_STRVAL_P(arg4);
+			optlen = Z_STRLEN_P(arg4);
 			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
 				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 				RETURN_FALSE;
@@ -1949,11 +1946,23 @@ PHP_FUNCTION(socket_set_option)
 #ifdef TCP_FUNCTION_BLK
 		case TCP_FUNCTION_BLK: {
 			if (Z_TYPE_P(arg4) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Invalid tcp stack name argument type");
-				RETURN_FALSE;
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is TCP_FUNCTION_BLK, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(arg4))) {
+				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is TCP_FUNCTION_BLK");
+				RETURN_THROWS();
+			}
+			/* [...] the unique name of the TCP stack, and should be no longer than
+			 * TCP_FUNCTION_NAME_LEN_MAX-1 characters in length.
+			 * https://github.com/freebsd/freebsd-src/blob/da2c88dfcf4f425e6e0a58d6df3a7c8e88d8df92/share/man/man9/tcp_functions.9#L193C1-L194C50 */
+			if (Z_STRLEN_P(arg4) >= TCP_FUNCTION_NAME_LEN_MAX) {
+				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is TCP_FUNCTION_BLK", TCP_FUNCTION_NAME_LEN_MAX);
+				RETURN_THROWS();
 			}
 			struct tcp_function_set tfs = {0};
-			strlcpy(tfs.function_set_name, Z_STRVAL_P(arg4), TCP_FUNCTION_NAME_LEN_MAX);
+			/* Copy the trailing nul byte */
+			memcpy(tfs.function_set_name, Z_STRVAL_P(arg4), Z_STRLEN_P(arg4)+1);
 
 			optlen = sizeof(tfs);
 			opt_ptr = &tfs;
@@ -1976,6 +1985,7 @@ PHP_FUNCTION(socket_set_option)
 		case SO_LINGER: {
 			const char l_onoff_key[] = "l_onoff";
 			const char l_linger_key[] = "l_linger";
+			zval *l_onoff, *l_linger;
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
 				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
@@ -2022,6 +2032,7 @@ PHP_FUNCTION(socket_set_option)
 		case SO_SNDTIMEO: {
 			const char sec_key[] = "sec";
 			const char usec_key[] = "usec";
+			zval *sec, *usec;
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
 				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
@@ -2078,13 +2089,12 @@ PHP_FUNCTION(socket_set_option)
 		}
 #ifdef SO_BINDTODEVICE
 		case SO_BINDTODEVICE: {
-			if (Z_TYPE_P(arg4) == IS_STRING) {
-				opt_ptr = Z_STRVAL_P(arg4);
-				optlen = Z_STRLEN_P(arg4);
-			} else {
-				opt_ptr = "";
-				optlen = 0;
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is SO_BINDTODEVICE, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
+			opt_ptr = Z_STRVAL_P(arg4);
+			optlen = Z_STRLEN_P(arg4);
 			break;
 		}
 #endif
@@ -2092,11 +2102,20 @@ PHP_FUNCTION(socket_set_option)
 #ifdef SO_ACCEPTFILTER
 		case SO_ACCEPTFILTER: {
 			if (Z_TYPE_P(arg4) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
-				RETURN_FALSE;
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is SO_ACCEPTFILTER, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(arg4))) {
+				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is SO_ACCEPTFILTER");
+				RETURN_THROWS();
 			}
 			struct accept_filter_arg af = {0};
-			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
+			if (Z_STRLEN_P(arg4) >= sizeof(af.af_name)) {
+				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is SO_ACCEPTFILTER", sizeof(af.af_name));
+				RETURN_THROWS();
+			}
+			/* Copy the trailing nul byte */
+			memcpy(af.af_name, Z_STRVAL_P(arg4), Z_STRLEN_P(arg4)+1);
 			opt_ptr = &af;
 			optlen = sizeof(af);
 			break;
@@ -2111,8 +2130,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_FALSE;
 			}
 			if (Z_TYPE_P(arg4) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
-				RETURN_FALSE;
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is FIL_ATTACH or FIL_DETACH, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
 			opt_ptr = Z_STRVAL_P(arg4);
 			optlen = Z_STRLEN_P(arg4);
