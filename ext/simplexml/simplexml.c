@@ -954,18 +954,16 @@ static void get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval *
 
 static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *value) /* {{{ */
 {
-	zend_string *key;
-	zval  *data_ptr;
-
-	key = zend_string_init(name, namelen, 0);
-	if ((data_ptr = zend_hash_find(rv, key)) != NULL) {
+	zend_string *key = zend_string_init(name, namelen, 0);
+	zval *data_ptr = zend_hash_lookup(rv, key);
+	if (!Z_ISNULL_P(data_ptr)) {
 		if (Z_TYPE_P(data_ptr) == IS_ARRAY) {
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(data_ptr), value);
 		} else {
 			ZVAL_ARR(data_ptr, zend_new_pair(data_ptr, value));
 		}
 	} else {
-		zend_hash_add_new(rv, key, value);
+		ZVAL_COPY_VALUE(data_ptr, value);
 	}
 	zend_string_release_ex(key, 0);
 }
