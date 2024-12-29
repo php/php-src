@@ -1192,7 +1192,7 @@ PHP_FUNCTION(socket_connect)
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port   = htons((unsigned short int)port);
 
-			if (! php_set_inet6_addr(&sin6, addr, php_sock)) {
+			if (php_set_inet6_addr(&sin6, addr, php_sock) == FAILURE) {
 				RETURN_FALSE;
 			}
 
@@ -1211,7 +1211,7 @@ PHP_FUNCTION(socket_connect)
 			sin.sin_family = AF_INET;
 			sin.sin_port   = htons((unsigned short int)port);
 
-			if (! php_set_inet_addr(&sin, addr, php_sock)) {
+			if (php_set_inet_addr(&sin, addr, php_sock) == FAILURE) {
 				RETURN_FALSE;
 			}
 
@@ -1318,7 +1318,7 @@ PHP_FUNCTION(socket_bind)
 				sa->sin_family = AF_INET;
 				sa->sin_port = htons((unsigned short) port);
 
-				if (! php_set_inet_addr(sa, addr, php_sock)) {
+				if (php_set_inet_addr(sa, addr, php_sock) == FAILURE) {
 					RETURN_FALSE;
 				}
 
@@ -1333,7 +1333,7 @@ PHP_FUNCTION(socket_bind)
 				sa->sin6_family = AF_INET6;
 				sa->sin6_port = htons((unsigned short) port);
 
-				if (! php_set_inet6_addr(sa, addr, php_sock)) {
+				if (php_set_inet6_addr(sa, addr, php_sock) == FAILURE) {
 					RETURN_FALSE;
 				}
 
@@ -1610,7 +1610,7 @@ PHP_FUNCTION(socket_sendto)
 			sin.sin_family = AF_INET;
 			sin.sin_port = htons((unsigned short) port);
 
-			if (! php_set_inet_addr(&sin, addr, php_sock)) {
+			if (php_set_inet_addr(&sin, addr, php_sock) == FAILURE) {
 				RETURN_FALSE;
 			}
 
@@ -1627,7 +1627,7 @@ PHP_FUNCTION(socket_sendto)
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port = htons((unsigned short) port);
 
-			if (! php_set_inet6_addr(&sin6, addr, php_sock)) {
+			if (php_set_inet6_addr(&sin6, addr, php_sock) == FAILURE) {
 				RETURN_FALSE;
 			}
 

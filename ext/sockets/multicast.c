@@ -128,7 +128,7 @@ static zend_result php_get_address_from_array(const HashTable *ht, const char *k
 		return FAILURE;
 	}
 	str = zval_get_tmp_string(val, &tmp_str);
-	if (!php_set_inet46_addr(ss, ss_len, ZSTR_VAL(str), sock)) {
+	if (php_set_inet46_addr(ss, ss_len, ZSTR_VAL(str), sock) == FAILURE) {
 		zend_tmp_string_release(tmp_str);
 		return FAILURE;
 	}

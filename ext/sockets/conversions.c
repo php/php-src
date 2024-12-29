@@ -550,13 +550,11 @@ static void to_zval_read_uid_t(const char *data, zval *zv, res_context *ctx)
 /* CONVERSIONS for sockaddr */
 static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_context *ctx)
 {
-	int					res;
 	struct sockaddr_in	saddr = {0};
 	zend_string			*addr_str, *tmp_addr_str;
 
 	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
-	res = php_set_inet_addr(&saddr, ZSTR_VAL(addr_str), ctx->sock);
-	if (res) {
+	if (php_set_inet_addr(&saddr, ZSTR_VAL(addr_str), ctx->sock) == SUCCESS) {
 		memcpy(inaddr, &saddr.sin_addr, sizeof saddr.sin_addr);
 	} else {
 		/* error already emitted, but let's emit another more relevant */
@@ -600,13 +598,11 @@ static void to_zval_read_sockaddr_in(const char *data, zval *zv, res_context *ct
 #ifdef HAVE_IPV6
 static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_context *ctx)
 {
-	int					res;
 	struct sockaddr_in6	saddr6 = {0};
 	zend_string			*addr_str, *tmp_addr_str;
 
 	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
-	res = php_set_inet6_addr(&saddr6, ZSTR_VAL(addr_str), ctx->sock);
-	if (res) {
+	if (php_set_inet6_addr(&saddr6, ZSTR_VAL(addr_str), ctx->sock) == SUCCESS) {
 		memcpy(addr6, &saddr6.sin6_addr, sizeof saddr6.sin6_addr);
 	} else {
 		/* error already emitted, but let's emit another more relevant */
