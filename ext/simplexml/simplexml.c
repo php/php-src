@@ -935,7 +935,6 @@ static void get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval *
 		php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL);
 
 		ZVAL_OBJ(value, &subnode->zo);
-		/*zval_add_ref(value);*/
 	}
 }
 /* }}} */
