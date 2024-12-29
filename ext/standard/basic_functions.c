@@ -2088,17 +2088,15 @@ PHP_FUNCTION(set_include_path)
 /* {{{ Get the current include_path configuration option */
 PHP_FUNCTION(get_include_path)
 {
-	char *str;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	str = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
+	zend_string *str = zend_ini_str("include_path", sizeof("include_path") - 1, 0);
 
 	if (str == NULL) {
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(str);
+	RETURN_STR_COPY(str);
 }
 /* }}} */
 
