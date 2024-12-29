@@ -1054,7 +1054,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			for (i = 0; i < ce->num_interfaces; i++) {
 				zend_accel_store_interned_string(ce->interface_names[i].name);
 				zend_accel_store_interned_string(ce->interface_names[i].lc_name);
-				// TODO: should we store .is_optional here? How?
 			}
 			ce->interface_names = zend_shared_memdup_free(ce->interface_names, sizeof(zend_interface_name) * ce->num_interfaces);
 		}

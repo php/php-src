@@ -806,7 +806,6 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		for (i = 0; i < ce->num_interfaces; i++) {
 			SERIALIZE_STR(interface_names[i].name);
 			SERIALIZE_STR(interface_names[i].lc_name);
-			// SERIALIZE_BOOL(interface_names[i].is_optional) ?
 		}
 	}
 
@@ -2029,7 +2028,7 @@ void zend_file_cache_invalidate(zend_string *full_path)
 	if (ZCG(accel_directives).file_cache_read_only) {
 		return;
 	}
-	
+
 	char *filename;
 
 	filename = zend_file_cache_get_bin_file_path(full_path);
