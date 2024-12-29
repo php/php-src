@@ -13,7 +13,7 @@ extern zend_result php_string_to_if_index(const char *val, unsigned *out);
 
 #ifdef HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
-zend_result php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
 {
 	struct in6_addr tmp;
 #ifdef HAVE_GETADDRINFO
@@ -41,12 +41,12 @@ zend_result php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_sock
 #else
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
 #endif
-			return FAILURE;
+			return false;
 		}
 		if (addrinfo->ai_family != PF_INET6 || addrinfo->ai_addrlen != sizeof(struct sockaddr_in6)) {
 			php_error_docref(NULL, E_WARNING, "Host lookup failed: Non AF_INET6 domain returned on AF_INET6 socket");
 			freeaddrinfo(addrinfo);
-			return FAILURE;
+			return false;
 		}
 
 		memcpy(&(sin6->sin6_addr.s6_addr), ((struct sockaddr_in6*)(addrinfo->ai_addr))->sin6_addr.s6_addr, sizeof(struct in6_addr));
@@ -55,7 +55,7 @@ zend_result php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_sock
 #else
 		/* No IPv6 specific hostname resolution is available on this system? */
 		php_error_docref(NULL, E_WARNING, "Host lookup failed: getaddrinfo() not available on this system");
-		return FAILURE;
+		return false;
 #endif
 
 	}
@@ -68,14 +68,14 @@ zend_result php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_sock
 
 		if (*scope == '\0') {
 			zend_value_error("scope cannot be empty");
-			return FAILURE;
+			return false;
 		}
 
 
 		if (IS_LONG == is_numeric_string(scope, strlen(scope), &lval, &dval, 0)) {
 			if (lval <= 0 || (zend_ulong)lval > UINT_MAX) {
 				zend_value_error("scope must be between 1 and %u", UINT_MAX);
-				return FAILURE;
+				return false;
 			}
 			scope_id = lval;
 		} else {
@@ -85,13 +85,13 @@ zend_result php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_sock
 		sin6->sin6_scope_id = scope_id;
 	}
 
-	return SUCCESS;
+	return true;
 }
 /* }}} */
 #endif
 
 /* Sets addr by hostname, or by ip in string form (AF_INET)  */
-zend_result php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock) /* {{{ */
 {
 	struct in_addr tmp;
 	struct hostent *host_entry;
@@ -106,40 +106,40 @@ zend_result php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket 
 #else
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
 #endif
-			return FAILURE;
+			return false;
 		}
 		if (host_entry->h_addrtype != AF_INET) {
 			php_error_docref(NULL, E_WARNING, "Host lookup failed: Non AF_INET domain returned on AF_INET socket");
-			return FAILURE;
+			return false;
 		}
 		memcpy(&(sin->sin_addr.s_addr), host_entry->h_addr_list[0], host_entry->h_length);
 	}
 
-	return SUCCESS;
+	return true;
 }
 /* }}} */
 
 /* Sets addr by hostname or by ip in string form (AF_INET or AF_INET6,
  * depending on the socket) */
-zend_result php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *string, php_socket *php_sock) /* {{{ */
 {
 	if (php_sock->type == AF_INET) {
 		struct sockaddr_in t = {0};
-		if (php_set_inet_addr(&t, string, php_sock) == SUCCESS) {
+		if (php_set_inet_addr(&t, string, php_sock)) {
 			memcpy(ss, &t, sizeof t);
 			ss->ss_family = AF_INET;
 			*ss_len = sizeof(t);
-			return SUCCESS;
+			return true;
 		}
 	}
 #ifdef HAVE_IPV6
 	else if (php_sock->type == AF_INET6) {
 		struct sockaddr_in6 t = {0};
-		if (php_set_inet6_addr(&t, string, php_sock) == SUCCESS) {
+		if (php_set_inet6_addr(&t, string, php_sock)) {
 			memcpy(ss, &t, sizeof t);
 			ss->ss_family = AF_INET6;
 			*ss_len = sizeof(t);
-			return SUCCESS;
+			return true;
 		}
 	}
 #endif
@@ -147,5 +147,5 @@ zend_result php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, cha
 		php_error_docref(NULL, E_WARNING,
 			"IP address used in the context of an unexpected type of socket");
 	}
-	return FAILURE;
+	return false;
 }

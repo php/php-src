@@ -59,7 +59,7 @@ static const char *_php_source_op_to_string(enum source_op sop);
 static int _php_source_op_to_ipv4_op(enum source_op sop);
 #endif
 
-zend_result php_string_to_if_index(const char *val, unsigned *out)
+bool php_string_to_if_index(const char *val, unsigned *out)
 {
 #ifdef HAVE_IF_NAMETOINDEX
 	unsigned int ind;
@@ -68,30 +68,30 @@ zend_result php_string_to_if_index(const char *val, unsigned *out)
 	if (ind == 0) {
 		php_error_docref(NULL, E_WARNING,
 			"No interface with name \"%s\" could be found", val);
-		return FAILURE;
+		return false;
 	} else {
 		*out = ind;
-		return SUCCESS;
+		return true;
 	}
 #else
 	php_error_docref(NULL, E_WARNING,
 			"This platform does not support looking up an interface by "
 			"name, an integer interface index must be supplied instead");
-	return FAILURE;
+	return false;
 #endif
 }
 
-static zend_result php_get_if_index_from_zval(zval *val, unsigned *out)
+static bool php_get_if_index_from_zval(zval *val, unsigned *out)
 {
-	int ret;
+	bool ret = false;
 
 	if (Z_TYPE_P(val) == IS_LONG) {
 		if (Z_LVAL_P(val) < 0 || (zend_ulong)Z_LVAL_P(val) > UINT_MAX) {
 			zend_value_error("Index must be between 0 and %u", UINT_MAX);
-			return FAILURE;
+			return ret;
 		}
 		*out = Z_LVAL_P(val);
-		ret = SUCCESS;
+		ret = true;
 	} else {
 		zend_string *tmp_str;
 		zend_string *str = zval_get_tmp_string(val, &tmp_str);
@@ -104,20 +104,20 @@ static zend_result php_get_if_index_from_zval(zval *val, unsigned *out)
 
 
 
-static zend_result php_get_if_index_from_array(const HashTable *ht, const char *key,
+static bool php_get_if_index_from_array(const HashTable *ht, const char *key,
 	php_socket *sock, unsigned int *if_index)
 {
 	zval *val;
 
 	if ((val = zend_hash_str_find(ht, key, strlen(key))) == NULL) {
 		*if_index = 0; /* default: 0 */
-		return SUCCESS;
+		return true;
 	}
 
 	return php_get_if_index_from_zval(val, if_index);
 }
 
-static zend_result php_get_address_from_array(const HashTable *ht, const char *key,
+static bool php_get_address_from_array(const HashTable *ht, const char *key,
 	php_socket *sock, php_sockaddr_storage *ss, socklen_t *ss_len)
 {
 	zval *val;
@@ -125,18 +125,18 @@ static zend_result php_get_address_from_array(const HashTable *ht, const char *k
 
 	if ((val = zend_hash_str_find(ht, key, strlen(key))) == NULL) {
 		zend_value_error("No key \"%s\" passed in optval", key);
-		return FAILURE;
+		return false;
 	}
 	str = zval_get_tmp_string(val, &tmp_str);
-	if (php_set_inet46_addr(ss, ss_len, ZSTR_VAL(str), sock) == FAILURE) {
+	if (!php_set_inet46_addr(ss, ss_len, ZSTR_VAL(str), sock)) {
 		zend_tmp_string_release(tmp_str);
-		return FAILURE;
+		return false;
 	}
 	zend_tmp_string_release(tmp_str);
-	return SUCCESS;
+	return true;
 }
 
-static zend_result php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *arg4)
+static bool php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *arg4)
 {
 	HashTable		 		*opt_ht;
 	unsigned int			if_index;
@@ -162,13 +162,13 @@ mcast_req_fun: ;
 			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
-			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
-				&glen) == FAILURE) {
-					return FAILURE;
+			if (!php_get_address_from_array(opt_ht, "group", php_sock, &group,
+				&glen)) {
+					return false;
 			}
-			if (php_get_if_index_from_array(opt_ht, "interface", php_sock,
-				&if_index) == FAILURE) {
-					return FAILURE;
+			if (!php_get_if_index_from_array(opt_ht, "interface", php_sock,
+				&if_index)) {
+					return false;
 			}
 
 			retval = mcast_req_fun(php_sock, level, (struct sockaddr*)&group,
@@ -198,17 +198,17 @@ mcast_req_fun: ;
 			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
-			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
-					&glen) == FAILURE) {
-				return FAILURE;
+			if (!php_get_address_from_array(opt_ht, "group", php_sock, &group,
+					&glen)) {
+				return false;
 			}
-			if (php_get_address_from_array(opt_ht, "source", php_sock, &source,
-					&slen) == FAILURE) {
-				return FAILURE;
+			if (!php_get_address_from_array(opt_ht, "source", php_sock, &source,
+					&slen)) {
+				return false;
 			}
-			if (php_get_if_index_from_array(opt_ht, "interface", php_sock,
-					&if_index) == FAILURE) {
-				return FAILURE;
+			if (!php_get_if_index_from_array(opt_ht, "interface", php_sock,
+					&if_index)) {
+				return false;
 			}
 
 			retval = mcast_sreq_fun(php_sock, level, (struct sockaddr*)&group,
@@ -220,16 +220,16 @@ mcast_req_fun: ;
 		php_error_docref(NULL, E_WARNING,
 			"Unexpected option in php_do_mcast_opt (level %d, option %d). "
 			"This is a bug.", level, optname);
-		return FAILURE;
+		return false;
 	}
 
 	if (retval != 0) {
 		if (retval != -2) { /* error, but message already emitted */
 			PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 		}
-		return FAILURE;
+		return false;
 	}
-	return SUCCESS;
+	return true;
 }
 
 int php_do_setsockopt_ip_mcast(php_socket *php_sock,
@@ -253,18 +253,18 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 	case PHP_MCAST_JOIN_SOURCE_GROUP:
 	case PHP_MCAST_LEAVE_SOURCE_GROUP:
 #endif
-		if (php_do_mcast_opt(php_sock, level, optname, arg4) == FAILURE) {
+		if (!php_do_mcast_opt(php_sock, level, optname, arg4)) {
 			return FAILURE;
 		} else {
 			return SUCCESS;
 		}
 
 	case IP_MULTICAST_IF:
-		if (php_get_if_index_from_zval(arg4, &if_index) == FAILURE) {
+		if (!php_get_if_index_from_zval(arg4, &if_index)) {
 			return FAILURE;
 		}
 
-		if (php_if_index_to_addr4(if_index, php_sock, &if_addr) == FAILURE) {
+		if (!php_if_index_to_addr4(if_index, php_sock, &if_addr)) {
 			return FAILURE;
 		}
 		opt_ptr = &if_addr;
@@ -321,14 +321,14 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 	case PHP_MCAST_JOIN_SOURCE_GROUP:
 	case PHP_MCAST_LEAVE_SOURCE_GROUP:
 #endif
-		if (php_do_mcast_opt(php_sock, level, optname, arg4) == FAILURE) {
+		if (!php_do_mcast_opt(php_sock, level, optname, arg4)) {
 			return FAILURE;
 		} else {
 			return SUCCESS;
 		}
 
 	case IPV6_MULTICAST_IF:
-		if (php_get_if_index_from_zval(arg4, &if_index) == FAILURE) {
+		if (!php_get_if_index_from_zval(arg4, &if_index)) {
 			return FAILURE;
 		}
 
@@ -463,8 +463,7 @@ static int _php_mcast_join_leave(
 		assert(group_len == sizeof(struct sockaddr_in));
 
 		if (if_index != 0) {
-			if (php_if_index_to_addr4(if_index, sock, &addr) ==
-					FAILURE)
+			if (!php_if_index_to_addr4(if_index, sock, &addr))
 				return -2; /* failure, but notice already emitted */
 			mreq.imr_interface = addr;
 		} else {
@@ -532,8 +531,7 @@ static int _php_mcast_source_op(
 		assert(source_len == sizeof(struct sockaddr_in));
 
 		if (if_index != 0) {
-			if (php_if_index_to_addr4(if_index, sock, &addr) ==
-					FAILURE)
+			if (!php_if_index_to_addr4(if_index, sock, &addr))
 				return -2; /* failure, but notice already emitted */
 			mreqs.imr_interface = addr;
 		} else {
@@ -616,7 +614,7 @@ static int _php_source_op_to_ipv4_op(enum source_op sop)
 #endif /* HAS_MCAST_EXT */
 
 #ifdef PHP_WIN32
-zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
+bool php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
 {
 	MIB_IPADDRTABLE *addr_table;
 	ULONG size;
@@ -627,7 +625,7 @@ zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struc
 
 	if (if_index == 0) {
 		out_addr->s_addr = INADDR_ANY;
-		return SUCCESS;
+		return true;
 	}
 
 	size = 4 * (sizeof *addr_table);
@@ -642,23 +640,23 @@ retry:
 		efree(addr_table);
 		php_error_docref(NULL, E_WARNING,
 			"GetIpAddrTable failed with error %lu", retval);
-		return FAILURE;
+		return false;
 	}
 	for (i = 0; i < addr_table->dwNumEntries; i++) {
 		MIB_IPADDRROW r = addr_table->table[i];
 		if (r.dwIndex == if_index) {
 			out_addr->s_addr = r.dwAddr;
 			efree(addr_table);
-			return SUCCESS;
+			return true;
 		}
 	}
 	efree(addr_table);
 	php_error_docref(NULL, E_WARNING,
 		"No interface with index %u was found", if_index);
-	return FAILURE;
+	return false;
 }
 
-zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
+bool php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
 {
 	MIB_IPADDRTABLE *addr_table;
 	ULONG size;
@@ -669,7 +667,7 @@ zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, uns
 
 	if (addr->s_addr == INADDR_ANY) {
 		*if_index = 0;
-		return SUCCESS;
+		return true;
 	}
 
 	size = 4 * (sizeof *addr_table);
@@ -684,14 +682,14 @@ retry:
 		efree(addr_table);
 		php_error_docref(NULL, E_WARNING,
 			"GetIpAddrTable failed with error %lu", retval);
-		return FAILURE;
+		return false;
 	}
 	for (i = 0; i < addr_table->dwNumEntries; i++) {
 		MIB_IPADDRROW r = addr_table->table[i];
 		if (r.dwAddr == addr->s_addr) {
 			*if_index = r.dwIndex;
 			efree(addr_table);
-			return SUCCESS;
+			return true;
 		}
 	}
 	efree(addr_table);
@@ -702,18 +700,18 @@ retry:
 		php_error_docref(NULL, E_WARNING,
 			"The interface with IP address %s was not found", addr_str);
 	}
-	return FAILURE;
+	return false;
 }
 
 #else
 
-zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
+bool php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
 {
 	struct ifreq if_req;
 
 	if (if_index == 0) {
 		out_addr->s_addr = INADDR_ANY;
-		return SUCCESS;
+		return true;
 	}
 
 #if !defined(ifr_ifindex) && (defined(ifr_index) || defined(__HAIKU__))
@@ -730,21 +728,21 @@ zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struc
 #endif
 		php_error_docref(NULL, E_WARNING,
 			"Failed obtaining address for interface %u: error %d", if_index, errno);
-		return FAILURE;
+		return false;
 	}
 
 	if (ioctl(php_sock->bsd_socket, SIOCGIFADDR, &if_req) == -1) {
 		php_error_docref(NULL, E_WARNING,
 			"Failed obtaining address for interface %u: error %d", if_index, errno);
-		return FAILURE;
+		return false;
 	}
 
 	memcpy(out_addr, &((struct sockaddr_in *) &if_req.ifr_addr)->sin_addr,
 		sizeof *out_addr);
-	return SUCCESS;
+	return true;
 }
 
-zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
+bool php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
 {
 	struct ifconf	if_conf = {0};
 	char			*buf = NULL,
@@ -755,7 +753,7 @@ zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, uns
 
 	if (addr->s_addr == INADDR_ANY) {
 		*if_index = 0;
-		return SUCCESS;
+		return true;
 	}
 
 	for(;;) {
@@ -819,7 +817,7 @@ zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, uns
 				*if_index = index_tmp;
 #endif
 				efree(buf);
-				return SUCCESS;
+				return true;
 			}
 		}
 	}
@@ -834,6 +832,6 @@ zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, uns
 err:
 	if (buf != NULL)
 		efree(buf);
-	return FAILURE;
+	return false;
 }
 #endif
