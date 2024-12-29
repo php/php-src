@@ -2329,18 +2329,17 @@ PHP_FUNCTION(unregister_tick_function)
 /* {{{ Check if file was created by rfc1867 upload */
 PHP_FUNCTION(is_uploaded_file)
 {
-	char *path;
-	size_t path_len;
+	zend_string *path;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH(path, path_len)
+		Z_PARAM_PATH_STR(path)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!SG(rfc1867_uploaded_files)) {
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
+	if (zend_hash_exists(SG(rfc1867_uploaded_files), path)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
