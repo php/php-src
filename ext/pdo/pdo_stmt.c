@@ -625,7 +625,6 @@ static bool do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 
 	if (ce->constructor) {
 		ZVAL_UNDEF(&fci->function_name);
-		fci->retval = &stmt->fetch.cls.retval;
 		fci->param_count = 0;
 		fci->params = NULL;
 
@@ -839,18 +838,18 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 					}
 				}
 				if (ce->constructor && (flags & PDO_FETCH_PROPS_LATE)) {
+					zval retval_constructor_call;
+					stmt->fetch.cls.fci.retval = &retval_constructor_call;
 					stmt->fetch.cls.fci.object = Z_OBJ_P(return_value);
 					stmt->fetch.cls.fcc.object = Z_OBJ_P(return_value);
-					if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc) == FAILURE) {
-						/* TODO Error? */
-						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor");
-						return 0;
-					} else {
-						if (!Z_ISUNDEF(stmt->fetch.cls.retval)) {
-							zval_ptr_dtor(&stmt->fetch.cls.retval);
-							ZVAL_UNDEF(&stmt->fetch.cls.retval);
-						}
+					zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc);
+					if (Z_TYPE(retval_constructor_call) == IS_UNDEF) {
+						/* Exception has happened */
+						zval_ptr_dtor(return_value);
+						return false;
 					}
+					zval_ptr_dtor(&retval_constructor_call);
+					ZVAL_UNDEF(stmt->fetch.cls.fci.retval);
 				}
 			}
 			break;
@@ -985,17 +984,18 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	switch (how) {
 		case PDO_FETCH_CLASS:
 			if (ce->constructor && !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
+				zval retval_constructor_call;
+				stmt->fetch.cls.fci.retval = &retval_constructor_call;
 				stmt->fetch.cls.fci.object = Z_OBJ_P(return_value);
 				stmt->fetch.cls.fcc.object = Z_OBJ_P(return_value);
-				if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc) == FAILURE) {
-					/* TODO Error? */
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor");
-					return 0;
-				} else {
-					if (!Z_ISUNDEF(stmt->fetch.cls.retval)) {
-						zval_ptr_dtor(&stmt->fetch.cls.retval);
-					}
+				zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc);
+				if (Z_TYPE(retval_constructor_call) == IS_UNDEF) {
+					/* Exception has happened */
+					zval_ptr_dtor(return_value);
+					return false;
 				}
+				zval_ptr_dtor(&retval_constructor_call);
+				ZVAL_UNDEF(stmt->fetch.cls.fci.retval);
 			}
 			if (flags & PDO_FETCH_CLASSTYPE) {
 				do_fetch_opt_finish(stmt, 0);

@@ -615,7 +615,6 @@ struct _pdo_stmt_t {
 			zval ctor_args;            /* freed */
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
-			zval retval;
 			zend_class_entry *ce;
 		} cls;
 		struct {
