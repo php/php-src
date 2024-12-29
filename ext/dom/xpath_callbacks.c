@@ -192,7 +192,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 	if (callable_ht) {
 		zend_string *key;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(callable_ht, key, entry) {
-			zend_fcall_info_cache* fcc = emalloc(sizeof(zend_fcall_info));
+			zend_fcall_info_cache* fcc = emalloc(sizeof(*fcc));
 			char *error;
 			if (!zend_is_callable_ex(entry, NULL, 0, NULL, fcc, &error)) {
 				zend_argument_type_error(1, "must be an array with valid callbacks as values, %s", error);
@@ -235,7 +235,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 			zend_argument_value_error(1, "must be a valid callback name");
 			return FAILURE;
 		}
-		zend_fcall_info_cache* fcc = emalloc(sizeof(zend_fcall_info));
+		zend_fcall_info_cache* fcc = emalloc(sizeof(*fcc));
 		char *error;
 		zval tmp;
 		ZVAL_STR(&tmp, name);
@@ -263,7 +263,7 @@ static php_dom_xpath_callback_ns *php_dom_xpath_callbacks_ensure_ns(php_dom_xpat
 {
 	if (ns == NULL) {
 		if (!registry->php_ns) {
-			registry->php_ns = emalloc(sizeof(php_dom_xpath_callback_ns));
+			registry->php_ns = emalloc(sizeof(*registry->php_ns));
 			php_dom_xpath_callback_ns_ctor(registry->php_ns);
 		}
 		return registry->php_ns;
@@ -274,7 +274,7 @@ static php_dom_xpath_callback_ns *php_dom_xpath_callbacks_ensure_ns(php_dom_xpat
 		}
 		php_dom_xpath_callback_ns *namespace = zend_hash_find_ptr(registry->namespaces, ns);
 		if (namespace == NULL) {
-			namespace = emalloc(sizeof(php_dom_xpath_callback_ns));
+			namespace = emalloc(sizeof(*namespace));
 			php_dom_xpath_callback_ns_ctor(namespace);
 			zend_hash_add_new_ptr(registry->namespaces, ns, namespace);
 		}
@@ -295,7 +295,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_update_single_method_handler(
 	}
 
 	php_dom_xpath_callback_ns *namespace = php_dom_xpath_callbacks_ensure_ns(registry, ns);
-	zend_fcall_info_cache* allocated_fcc = emalloc(sizeof(zend_fcall_info));
+	zend_fcall_info_cache* allocated_fcc = emalloc(sizeof(*allocated_fcc));
 	zend_fcc_dup(allocated_fcc, fcc);
 
 	zval registered_value;
