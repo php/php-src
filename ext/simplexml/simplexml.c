@@ -268,7 +268,7 @@ long_dim:
 		}
 	}
 
-	ZVAL_UNDEF(rv);
+	ZVAL_NULL(rv);
 
 	if (node) {
 		if (attribs) {
@@ -336,10 +336,6 @@ long_dim:
 
 	if (member == &tmp_zv) {
 		zval_ptr_dtor_str(&tmp_zv);
-	}
-
-	if (Z_ISUNDEF_P(rv)) {
-		ZVAL_NULL(rv);
 	}
 
 	return rv;
