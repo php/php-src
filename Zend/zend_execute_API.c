@@ -824,7 +824,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		return SUCCESS; /* we would result in an unstable executor otherwise */
 	}
 
-	ZEND_ASSERT(fci->size == sizeof(zend_fcall_info));
+	ZEND_ASSERT(ZEND_FCI_INITIALIZED(*fci));
 
 	if (!fci_cache || !fci_cache->function_handler) {
 		char *error = NULL;
