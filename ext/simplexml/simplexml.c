@@ -1928,8 +1928,9 @@ static zend_result sxe_count_elements(zend_object *object, zend_long *count) /* 
 		zval rv;
 		zend_call_method_with_0_params(object, intern->zo.ce, &intern->fptr_count, "count", &rv);
 		if (!Z_ISUNDEF(rv)) {
-			ZEND_ASSERT(Z_TYPE(rv) == IS_LONG);
-			*count = Z_LVAL(rv);
+			/* TODO: change this to Z_LVAL_P() once the tentative type on count() is gone. */
+			*count = zval_get_long(&rv);
+			zval_ptr_dtor(&rv);
 			return SUCCESS;
 		}
 		return FAILURE;
