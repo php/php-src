@@ -84,6 +84,8 @@ PHP                                                                        NEWS
     TCP_REUSPORT_LB_CURDOM, TCP_BBR_ALGORITHM constants.
   . socket_create_listen() throws an exception on invalid port value.
     (David Carlier)
+  . socket_bind() throws an exception on invalid port value.
+    (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt

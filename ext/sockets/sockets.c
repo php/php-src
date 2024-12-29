@@ -1288,6 +1288,11 @@ PHP_FUNCTION(socket_bind)
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
 
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 	switch(php_sock->type) {
 		case AF_UNIX:
 			{
