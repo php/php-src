@@ -86,6 +86,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . socket_bind() throws an exception on invalid port value.
     (David Carlier)
+  . socket_sendto() throws an exception on invalid port value.
+    (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
