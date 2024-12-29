@@ -1989,16 +1989,6 @@ PHP_FUNCTION(ini_get_all)
 }
 /* }}} */
 
-static int php_ini_check_path(char *option_name, size_t option_len, char *new_option_name, size_t new_option_len) /* {{{ */
-{
-	if (option_len + 1 != new_option_len) {
-		return 0;
-	}
-
-	return !strncmp(option_name, new_option_name, option_len);
-}
-/* }}} */
-
 /* {{{ Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
 {
@@ -2027,15 +2017,16 @@ PHP_FUNCTION(ini_set)
 	zend_string *new_value_tmp_str;
 	zend_string *new_value_str = zval_get_tmp_string(new_value, &new_value_tmp_str);
 
-#define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, var_len, ini, sizeof(ini))
 	/* open basedir check */
 	if (PG(open_basedir)) {
-		if (_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "error_log") ||
-			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "java.class.path") ||
-			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "java.home") ||
-			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "mail.log") ||
-			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "java.library.path") ||
-			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "vpopmail.directory")) {
+		if (
+			zend_string_equals_literal(varname, "error_log")
+			|| zend_string_equals_literal(varname, "java.class.path")
+			|| zend_string_equals_literal(varname, "java.home")
+			|| zend_string_equals_literal(varname, "mail.log")
+			|| zend_string_equals_literal(varname, "java.library.path")
+			|| zend_string_equals_literal(varname, "vpopmail.directory")
+		) {
 			if (php_check_open_basedir(ZSTR_VAL(new_value_str))) {
 				zval_ptr_dtor_str(return_value);
 				zend_tmp_string_release(new_value_tmp_str);
@@ -2043,7 +2034,6 @@ PHP_FUNCTION(ini_set)
 			}
 		}
 	}
-#undef _CHECK_PATH
 
 	if (zend_alter_ini_entry_ex(varname, new_value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
 		zval_ptr_dtor_str(return_value);
