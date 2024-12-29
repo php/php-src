@@ -97,7 +97,6 @@ static zend_object *xmlwriter_object_new(zend_class_entry *class_type)
 
 /* {{{ function prototypes */
 static PHP_MINIT_FUNCTION(xmlwriter);
-static PHP_MSHUTDOWN_FUNCTION(xmlwriter);
 static PHP_MINFO_FUNCTION(xmlwriter);
 /* }}} */
 
@@ -201,7 +200,7 @@ zend_module_entry xmlwriter_module_entry = {
 	"xmlwriter",
 	ext_functions,
 	PHP_MINIT(xmlwriter),
-	PHP_MSHUTDOWN(xmlwriter),
+	NULL,
 	NULL,
 	NULL,
 	PHP_MINFO(xmlwriter),
@@ -1071,13 +1070,6 @@ static PHP_MINIT_FUNCTION(xmlwriter)
 	xmlwriter_class_entry_ce->create_object = xmlwriter_object_new;
 	xmlwriter_class_entry_ce->default_object_handlers = &xmlwriter_object_handlers;
 
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION */
-static PHP_MSHUTDOWN_FUNCTION(xmlwriter)
-{
 	return SUCCESS;
 }
 /* }}} */
