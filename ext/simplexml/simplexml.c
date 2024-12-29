@@ -1640,10 +1640,11 @@ PHP_METHOD(SimpleXMLElement, addChild)
 {
 	php_sxe_object *sxe;
 	char           *qname, *value = NULL, *nsuri = NULL;
-	size_t             qname_len, value_len = 0, nsuri_len = 0;
+	size_t          qname_len, value_len = 0, nsuri_len = 0;
 	xmlNodePtr      node, newnode;
 	xmlNsPtr        nsptr = NULL;
 	xmlChar        *localname, *prefix = NULL;
+	bool            free_localname = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s!",
 		&qname, &qname_len, &value, &value_len, &nsuri, &nsuri_len) == FAILURE) {
@@ -1674,7 +1675,9 @@ PHP_METHOD(SimpleXMLElement, addChild)
 
 	localname = xmlSplitQName2((xmlChar *)qname, &prefix);
 	if (localname == NULL) {
-		localname = xmlStrdup((xmlChar *)qname);
+		localname = (xmlChar *)qname;
+	} else {
+		free_localname = true;
 	}
 
 	newnode = xmlNewChild(node, NULL, localname, (xmlChar *)value);
@@ -1694,7 +1697,9 @@ PHP_METHOD(SimpleXMLElement, addChild)
 
 	node_as_zval_str(sxe, newnode, return_value, SXE_ITER_NONE, localname, prefix, 0);
 
-	xmlFree(localname);
+	if (free_localname) {
+		xmlFree(localname);
+	}
 	if (prefix != NULL) {
 		xmlFree(prefix);
 	}
