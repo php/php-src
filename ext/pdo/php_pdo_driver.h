@@ -619,12 +619,9 @@ struct _pdo_stmt_t {
 			zend_class_entry *ce;
 		} cls;
 		struct {
-			zval fetch_args;           /* freed */
+			zval dummy; /* This exists due to alignment reasons with fetch.into and fetch.cls.ctor_args */
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
-			zval object;
-			zval function;
-			zval *values;              /* freed */
 		} func;
 		zval into;
 	} fetch;

@@ -643,11 +643,11 @@ static bool do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-static bool make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args) /* {{{ */
+static bool pdo_stmt_init_fci_fcc_for_function_fetch_mode(pdo_stmt_t *stmt, zval *callable)
 {
 	char *is_callable_error = NULL;
 
-	if (zend_fcall_info_init(callable, 0, fci, fcc, NULL, &is_callable_error) == FAILURE) {
+	if (zend_fcall_info_init(callable, 0, &stmt->fetch.func.fci, &stmt->fetch.func.fcc, NULL, &is_callable_error) == FAILURE) {
 		if (is_callable_error) {
 			zend_type_error("%s", is_callable_error);
 			efree(is_callable_error);
@@ -656,33 +656,16 @@ static bool make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info *
 		}
 		return false;
 	}
-	if (is_callable_error) {
-		/* Possible error message */
-		efree(is_callable_error);
-	}
+	ZEND_ASSERT(is_callable_error == NULL);
 
-	fci->param_count = num_args; /* probably less */
-	fci->params = safe_emalloc(sizeof(zval), num_args, 0);
+	uint32_t num_args = stmt->column_count;
+	stmt->fetch.func.fci.param_count = num_args; /* probably less */
+	stmt->fetch.func.fci.params = safe_emalloc(sizeof(zval), num_args, 0);
 
 	return true;
 }
-/* }}} */
 
-static bool do_fetch_func_prepare(pdo_stmt_t *stmt) /* {{{ */
-{
-	zend_fcall_info *fci = &stmt->fetch.cls.fci;
-	zend_fcall_info_cache *fcc = &stmt->fetch.cls.fcc;
-
-	if (!make_callable_ex(stmt, &stmt->fetch.func.function, fci, fcc, stmt->column_count)) {
-		return false;
-	} else {
-		stmt->fetch.func.values = safe_emalloc(sizeof(zval), stmt->column_count, 0);
-		return true;
-	}
-}
-/* }}} */
-
-static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
+static void do_fetch_opt_finish(pdo_stmt_t *stmt, bool free_ctor_agrs) /* {{{ */
 {
 	/* fci.size is used to check if it is valid */
 	if (stmt->fetch.cls.fci.size && stmt->fetch.cls.fci.params) {
@@ -700,10 +683,6 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 		zval_ptr_dtor(&stmt->fetch.cls.ctor_args);
 		ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 		stmt->fetch.cls.fci.param_count = 0;
-	}
-	if (stmt->fetch.func.values) {
-		efree(stmt->fetch.func.values);
-		stmt->fetch.func.values = NULL;
 	}
 }
 /* }}} */
@@ -894,16 +873,10 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 		case PDO_FETCH_FUNC:
 			/* TODO: Make this an assertion and ensure this is true higher up? */
-			if (Z_ISUNDEF(stmt->fetch.func.function)) {
+			if (!ZEND_FCI_INITIALIZED(stmt->fetch.func.fci)) {
 				/* TODO ArgumentCountError? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch function specified");
-				return 0;
-			}
-			if (!stmt->fetch.func.fci.size) {
-				if (!do_fetch_func_prepare(stmt))
-				{
-					return 0;
-				}
+				return false;
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
@@ -999,8 +972,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				break;
 
 			case PDO_FETCH_FUNC:
-				ZVAL_COPY_VALUE(&stmt->fetch.func.values[idx], &val);
-				ZVAL_COPY_VALUE(&stmt->fetch.cls.fci.params[idx], &stmt->fetch.func.values[idx]);
+				ZVAL_COPY_VALUE(&stmt->fetch.func.fci.params[idx], &val);
 				break;
 
 			default:
@@ -1045,8 +1017,9 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 					ZVAL_COPY_VALUE(return_value, &retval);
 				}
 			}
-			while (idx--) {
-				zval_ptr_dtor(&stmt->fetch.func.values[idx]);
+			/* Free FCI parameters that were allocated in the previous loop */
+			for (uint32_t param_num = 0; param_num < stmt->fetch.func.fci.param_count; param_num++) {
+				zval_ptr_dtor(&stmt->fetch.func.fci.params[param_num]);
 			}
 			break;
 
@@ -1295,9 +1268,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 				zend_argument_type_error(2, "must be a callable, null given");
 				RETURN_THROWS();
 			}
-			/* TODO Check it is a callable? */
-			ZVAL_COPY_VALUE(&stmt->fetch.func.function, arg2);
-			if (do_fetch_func_prepare(stmt) == false) {
+			if (pdo_stmt_init_fci_fcc_for_function_fetch_mode(stmt, arg2) == false) {
 				RETURN_THROWS();
 			}
 			break;
