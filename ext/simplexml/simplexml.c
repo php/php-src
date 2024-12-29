@@ -956,17 +956,13 @@ static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *val
 {
 	zend_string *key;
 	zval  *data_ptr;
-	zval  newptr;
 
 	key = zend_string_init(name, namelen, 0);
 	if ((data_ptr = zend_hash_find(rv, key)) != NULL) {
 		if (Z_TYPE_P(data_ptr) == IS_ARRAY) {
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(data_ptr), value);
 		} else {
-			array_init(&newptr);
-			zend_hash_next_index_insert_new(Z_ARRVAL(newptr), data_ptr);
-			zend_hash_next_index_insert_new(Z_ARRVAL(newptr), value);
-			ZVAL_ARR(data_ptr, Z_ARR(newptr));
+			ZVAL_ARR(data_ptr, zend_new_pair(data_ptr, value));
 		}
 	} else {
 		zend_hash_add_new(rv, key, value);
