@@ -1995,7 +1995,7 @@ PHP_METHOD(SimpleXMLElement, key)
 		RETURN_THROWS();
 	}
 
-	curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
+	curnode = intern->node->node;
 	RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name));
 }
 /* }}} */
@@ -2486,7 +2486,7 @@ static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key) 
 
 	xmlNodePtr curnode = NULL;
 	if (intern != NULL && intern->node != NULL) {
-		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
+		curnode = intern->node->node;
 	}
 
 	if (curnode) {
