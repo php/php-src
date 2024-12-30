@@ -127,6 +127,8 @@ PHP 8.5 UPGRADE NOTES
 - Sockets:
   . socket_create_listen, socket_bind and socket_sendto throw a
     ValueError if the port is lower than 0 or greater than 65535.
+  . socket_addrinfo_lookup throw a TypeError if any of the hints
+    values cannot be cast to a int.
 
 - Zlib:
   . The "use_include_path" argument for the

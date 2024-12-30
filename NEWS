@@ -88,6 +88,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . socket_sendto() throws an exception on invalid port value.
     (David Carlier)
+  . socket_addrinfo_lookup throws an exception on invalid hints value types.
+    (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
