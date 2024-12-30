@@ -2026,7 +2026,6 @@ function ini_parse_quantity(string $shorthand): int {}
 /** @refcount 1 */
 function set_include_path(string $include_path): string|false {}
 
-/** @refcount 1 */
 function get_include_path(): string|false {}
 
 /** @refcount 1 */
