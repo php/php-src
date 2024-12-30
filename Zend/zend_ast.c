@@ -2720,6 +2720,11 @@ simple_list:
 				zend_ast_export_name(str, ast->child[1], 0, indent);
 			}
 			break;
+		case ZEND_AST_PIPE:
+			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			smart_str_appends(str, " |> ");
+			zend_ast_export_ex(str, ast->child[1], 0, indent);
+			break;
 		case ZEND_AST_NAMED_ARG:
 			smart_str_append(str, zend_ast_get_str(ast->child[0]));
 			smart_str_appends(str, ": ");

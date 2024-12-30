@@ -10,9 +10,16 @@ function _test(int $a): int {
 try {
     assert((5 |> '_test') == 99);
 } catch (AssertionError $e) {
-    print $e->getMessage();
+    print $e->getMessage() . PHP_EOL;
+}
+
+try {
+    assert((5 |> _test(...)) == 99);
+} catch (AssertionError $e) {
+    print $e->getMessage() . PHP_EOL;
 }
 
 ?>
 --EXPECTF--
-assert(5 |> \_test == 99)
+assert(5 |> '_test' == 99)
+assert(5 |> _test(...) == 99)
