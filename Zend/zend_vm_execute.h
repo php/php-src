@@ -2177,7 +2177,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(
 		if ((call_info & Z_TYPE_MASK) == IS_OBJECT
 		 && (!(call_info & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS))
 			 /* Bug #72523 */
-			|| (call_info & ZEND_CALL_TOP))) {
+			|| (call_info & (ZEND_CALL_DYNAMIC|ZEND_CALL_TOP)) == ZEND_CALL_TOP)) {
 			ZEND_ADD_CALL_FLAG_EX(call_info, ZEND_CALL_RELEASE_THIS);
 			Z_ADDREF(gen_execute_data->This);
 		}
