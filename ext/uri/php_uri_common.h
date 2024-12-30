@@ -20,7 +20,7 @@
 extern zend_class_entry *uri_interface_ce;
 extern zend_class_entry *rfc3986_uri_ce;
 extern zend_object_handlers rfc3986_uri_object_handlers;
-extern zend_class_entry *whatwg_uri_ce;
+extern zend_class_entry *whatwg_url_ce;
 extern zend_object_handlers whatwg_uri_object_handlers;
 extern zend_class_entry *uri_exception_ce;
 extern zend_class_entry *uninitialized_uri_exception_ce;
