@@ -2586,14 +2586,35 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 	if (zhints && !HT_IS_PACKED(Z_ARRVAL_P(zhints))) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
+				bool failed = false;
 				if (zend_string_equals_literal(key, "ai_flags")) {
-					hints.ai_flags = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_flags\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					hints.ai_flags = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_socktype")) {
-					hints.ai_socktype = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_socktype\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					hints.ai_socktype = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_protocol")) {
-					hints.ai_protocol = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_protocol\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					hints.ai_protocol = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_family")) {
-					hints.ai_family = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_family\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					hints.ai_family = (int)val;
 				} else {
 					zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
 						"\"ai_protocol\", or \"ai_family\"");
