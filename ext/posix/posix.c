@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include "ext/standard/info.h"
 #include "php_posix.h"
+#include "main/php_network.h"
 
 #ifdef HAVE_POSIX
 
@@ -415,7 +416,7 @@ PHP_FUNCTION(posix_ctermid)
 /* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
+static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *ret) /* {{{ */
 {
 	php_stream *stream;
 
@@ -425,19 +426,21 @@ static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 		return FAILURE;
 	}
 
-	/* get the fd.
+	/* get the fd. php_socket_t is used for FDs, and is shorter than zend_long.
 	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
 	 * It is only used here so that the buffered data warning is not displayed.
 	 */
+	php_socket_t fd = -1;
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)fd, 0);
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void**)&fd, 0);
 	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)fd, 0);
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void**)&fd, 0);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
 		return FAILURE;
 	}
+	*ret = fd;
 	return SUCCESS;
 }
 /* }}} */
