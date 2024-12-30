@@ -5,12 +5,12 @@ uri
 --FILE--
 <?php
 
-var_dump(Uri\Rfc3986Uri::parse("chrome-extension://example.com"));
-var_dump(Uri\WhatWgUri::parse("chrome-extension://example.com"));
+var_dump(Uri\Rfc3986\Uri::parse("chrome-extension://example.com"));
+var_dump(Uri\WhatWg\Url::parse("chrome-extension://example.com"));
 
 ?>
 --EXPECTF--
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(16) "chrome-extension"
   ["user"]=>
@@ -28,7 +28,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(16) "chrome-extension"
   ["user"]=>

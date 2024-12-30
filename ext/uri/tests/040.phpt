@@ -5,15 +5,17 @@ uri
 --FILE--
 <?php
 
-$uri = Uri\Rfc3986Uri::parse("https:example.com");
+$uri = Uri\Rfc3986\Uri::parse("https:example.com");
 var_dump($uri);
+var_dump($uri->toString());
 
-$uri = Uri\WhatWgUri::parse("https:example.com");
+$uri = Uri\WhatWg\Url::parse("https:example.com");
 var_dump($uri);
+var_dump($uri->toString());
 
 ?>
 --EXPECTF--
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>
@@ -31,7 +33,8 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#%d (%d) {
+string(17) "https:example.com"
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>
@@ -49,3 +52,4 @@ object(Uri\WhatWgUri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
+string(20) "https://example.com/"

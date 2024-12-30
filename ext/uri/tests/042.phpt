@@ -5,15 +5,14 @@ uri
 --FILE--
 <?php
 
-$uri = Uri\Rfc3986Uri::parse("urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66");
+$uri = Uri\Rfc3986\Uri::parse("urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66");
 var_dump($uri);
 
-$uri = Uri\WhatWgUri::parse("urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66");
-var_dump($uri);
+$uri = Uri\WhatWg\Url::parse("urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66");
 
 ?>
 --EXPECTF--
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(3) "urn"
   ["user"]=>
@@ -31,7 +30,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(3) "urn"
   ["user"]=>

@@ -5,7 +5,7 @@ uri
 --FILE--
 <?php
 
-$uri1 = Uri\Rfc3986Uri::parse("https://example.com:8080");
+$uri1 = Uri\Rfc3986\Uri::parse("https://example.com:8080");
 $uri2 = $uri1->withPort(22);
 $uri3 = $uri2->withPort(null);
 
@@ -13,13 +13,13 @@ var_dump($uri1->toString());
 var_dump($uri2->toString());
 var_dump($uri3->toString());
 
-$uri1 = Uri\Rfc3986Uri::parse("ftp://foo.com:443?query=abc#foo");
+$uri1 = Uri\Rfc3986\Uri::parse("ftp://foo.com:443?query=abc#foo");
 $uri2 = $uri1->withPort(8080);
 
 var_dump($uri1->toString());
 var_dump($uri2->toString());
 
-$uri1 = Uri\WhatWgUri::parse("https://example.com:8080");
+$uri1 = Uri\WhatWg\Url::parse("https://example.com:8080");
 $uri2 = $uri1->withPort(22);
 $uri3 = $uri2->withPort(null);
 
@@ -27,7 +27,7 @@ var_dump($uri1->toString());
 var_dump($uri2->toString());
 var_dump($uri3->toString());
 
-$uri1 = Uri\WhatWgUri::parse("ftp://foo.com:443?query=abc#foo");
+$uri1 = Uri\WhatWg\Url::parse("ftp://foo.com:443?query=abc#foo");
 $uri2 = $uri1->withPort(8080);
 
 var_dump($uri1->toString());

@@ -5,14 +5,14 @@ uri
 --FILE--
 <?php
 
-var_dump(Uri\Rfc3986Uri::parse("http://example.com/path/to/file2", "https://test.com"));
-var_dump(Uri\Rfc3986Uri::parse("/path/to/file2", "https://test.com"));
-var_dump(Uri\WhatWgUri::parse("http://example.com/path/to/file1", "https://test.com"));
-var_dump(Uri\WhatWgUri::parse("/path/to/file1", "https://test.com"));
+var_dump(Uri\Rfc3986\Uri::parse("http://example.com/path/to/file2", "https://test.com"));
+var_dump(Uri\Rfc3986\Uri::parse("/path/to/file2", "https://test.com"));
+var_dump(Uri\WhatWg\Url::parse("http://example.com/path/to/file1", "https://test.com"));
+var_dump(Uri\WhatWg\Url::parse("/path/to/file1", "https://test.com"));
 
 ?>
 --EXPECTF--
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(4) "http"
   ["user"]=>
@@ -30,7 +30,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>
@@ -48,7 +48,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(4) "http"
   ["user"]=>
@@ -66,7 +66,7 @@ object(Uri\WhatWgUri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>

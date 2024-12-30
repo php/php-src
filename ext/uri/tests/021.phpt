@@ -5,7 +5,7 @@ uri
 --FILE--
 <?php
 
-readonly class MyRfc3986Uri extends Uri\Rfc3986Uri
+readonly class MyRfc3986Uri extends Uri\Rfc3986\Uri
 {
     public int $foo;
 
@@ -20,7 +20,7 @@ readonly class MyRfc3986Uri extends Uri\Rfc3986Uri
     }
 }
 
-readonly class MyWhatWgUri extends Uri\WhatWgUri
+readonly class MyWhatWgUri extends Uri\WhatWg\Url
 {
     public int $foo;
 

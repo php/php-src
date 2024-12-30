@@ -16,12 +16,12 @@ function printUri(Uri\Uri $uri) {
     var_dump($uri->getFragment());
 }
 
-$uri = Uri\Rfc3986Uri::parse("http://%61pple:p%61ss@ex%61mple.com/foob%61r?%61bc=%61bc#%61bc");
+$uri = Uri\Rfc3986\Uri::parse("http://%61pple:p%61ss@ex%61mple.com/foob%61r?%61bc=%61bc#%61bc");
 printUri($uri);
 $uri = $uri->normalize();
 printUri($uri);
 
-$uri = Uri\WhatWgUri::parse("http://%61pple:p%61ss@ex%61mple.com/foob%61r?%61bc=%61bc#%61bc");
+$uri = Uri\WhatWg\Url::parse("http://%61pple:p%61ss@ex%61mple.com/foob%61r?%61bc=%61bc#%61bc");
 printUri($uri);
 $uri = $uri->normalize();
 printUri($uri);

@@ -41,62 +41,62 @@ function callMembers(Uri\Uri $uri)
     handleException($uri, function (Uri\Uri $uri) {$uri->toString();});
 }
 
-$reflectionClass = new ReflectionClass(Uri\Rfc3986Uri::class);
+$reflectionClass = new ReflectionClass(Uri\Rfc3986\Uri::class);
 $uri = $reflectionClass->newInstanceWithoutConstructor();
 callMembers($uri);
 
 echo "\n";
 
-$reflectionClass = new ReflectionClass(Uri\WhatWgUri::class);
+$reflectionClass = new ReflectionClass(Uri\WhatWg\Url::class);
 $uri = $reflectionClass->newInstanceWithoutConstructor();
 callMembers($uri);
 
 ?>
 --EXPECTF--
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
 }
 bool(false)
 bool(true)
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
-Uri\Rfc3986Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
+Uri\Rfc3986\Uri object is not correctly initialized
 
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
 }
 bool(false)
 bool(true)
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
-Uri\WhatWgUri object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized
+Uri\WhatWg\Url object is not correctly initialized

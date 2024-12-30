@@ -5,15 +5,15 @@ uri
 --FILE--
 <?php
 
-$uri = new Uri\Rfc3986Uri("https://username:password@example.com:8080/path?q=r#fragment");
+$uri = new Uri\Rfc3986\Uri("https://username:password@example.com:8080/path?q=r#fragment");
 var_dump($uri);
 
-$uri = new Uri\WhatWgUri("https://username:password@example.com:8080/path?q=r#fragment");
+$uri = new Uri\WhatWg\Url("https://username:password@example.com:8080/path?q=r#fragment");
 var_dump($uri);
 
 ?>
 --EXPECTF--
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>
@@ -31,7 +31,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["fragment"]=>
   string(8) "fragment"
 }
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>

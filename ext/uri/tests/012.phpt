@@ -5,15 +5,15 @@ uri
 --FILE--
 <?php
 
-var_dump(Uri\Rfc3986Uri::parse("mailto:Joe@Example.COM"));
-var_dump(Uri\WhatWgUri::parse("mailto:Joe@Example.COM"));
+var_dump(Uri\Rfc3986\Uri::parse("mailto:Joe@Example.COM"));
+var_dump(Uri\WhatWg\Url::parse("mailto:Joe@Example.COM"));
 
-var_dump(Uri\Rfc3986Uri::parse("file:///E:/Documents%20and%20Settings"));
-var_dump(Uri\WhatWgUri::parse("file:///E:\\Documents and Settings"));
+var_dump(Uri\Rfc3986\Uri::parse("file:///E:/Documents%20and%20Settings"));
+var_dump(Uri\WhatWg\Url::parse("file:///E:\\Documents and Settings"));
 
 ?>
 --EXPECTF--
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(6) "mailto"
   ["user"]=>
@@ -31,7 +31,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(6) "mailto"
   ["user"]=>
@@ -49,7 +49,7 @@ object(Uri\WhatWgUri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(4) "file"
   ["user"]=>
@@ -67,7 +67,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(4) "file"
   ["user"]=>

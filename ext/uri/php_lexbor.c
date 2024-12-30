@@ -376,7 +376,7 @@ static void *lexbor_parse_uri(const zend_string *url_str, const zend_string *bas
 
 static zend_class_entry *lexbor_get_uri_ce(void)
 {
-	return whatwg_uri_ce;
+	return whatwg_url_ce;
 }
 
 static void *lexbor_clone_uri(void *uri)
