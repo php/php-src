@@ -5,19 +5,19 @@ uri
 --FILE--
 <?php
 
-$uri1 = Uri\Rfc3986Uri::parse("https://example.com");
+$uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
 $uri2 = clone $uri1;
 var_dump($uri1);
 var_dump($uri2);
 
-$uri3 = Uri\WhatWgUri::parse("https://example.com");
+$uri3 = Uri\WhatWg\Url::parse("https://example.com");
 $uri4 = clone $uri3;
 var_dump($uri3);
 var_dump($uri4);
 
 ?>
 --EXPECTF--
-object(Uri\Rfc3986Uri)#1 (%d) {
+object(Uri\Rfc3986\Uri)#1 (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>
@@ -35,7 +35,7 @@ object(Uri\Rfc3986Uri)#1 (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\Rfc3986Uri)#2 (%d) {
+object(Uri\Rfc3986\Uri)#2 (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>
@@ -53,7 +53,7 @@ object(Uri\Rfc3986Uri)#2 (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#3 (%d) {
+object(Uri\WhatWg\Url)#3 (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>
@@ -71,7 +71,7 @@ object(Uri\WhatWgUri)#3 (%d) {
   ["fragment"]=>
   NULL
 }
-object(Uri\WhatWgUri)#4 (%d) {
+object(Uri\WhatWg\Url)#4 (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>

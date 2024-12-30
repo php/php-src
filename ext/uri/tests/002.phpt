@@ -7,13 +7,13 @@ uri
 
 $t1 = hrtime(true);
 for ($i = 0; $i < 1000; $i++) {
-    Uri\Rfc3986Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+    Uri\Rfc3986\Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 }
 $t2 = hrtime(true);
 
 $t3 = hrtime(true);
 for ($i = 0; $i < 1000; $i++) {
-    Uri\WhatWgUri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+    Uri\WhatWg\Url::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 }
 $t4 = hrtime(true);
 
@@ -25,12 +25,12 @@ $t6 = hrtime(true);
 
 echo "RFC 3986 parser:\n";
 var_dump(($t2 - $t1) / 1_000_000_000);
-var_dump(Uri\Rfc3986Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
+var_dump(Uri\Rfc3986\Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
 echo "------------------------\n";
 
 echo "WHATWG parser:\n";
 var_dump(($t4 - $t3) / 1_000_000_000);
-var_dump(Uri\WhatWgUri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
+var_dump(Uri\WhatWg\Url::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
 echo "------------------------\n";
 
 echo "parse_url:\n";
@@ -42,7 +42,7 @@ echo "------------------------\n";
 --EXPECTF--
 RFC 3986 parser:
 float(0.004389959)
-object(Uri\Rfc3986Uri)#%d (%d) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>
@@ -63,7 +63,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
 ------------------------
 WHATWG parser:
 float(0.007400166)
-object(Uri\WhatWgUri)#%d (%d) {
+object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["user"]=>

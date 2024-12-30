@@ -7,7 +7,7 @@ Cloning Rfc3986Uris doesn't copy the path properly yet
 --FILE--
 <?php
 
-$uri1 = Uri\Rfc3986Uri::parse("https://example.com");
+$uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
 $uri2 = $uri1->withHost("test.com");
 $uri3 = $uri2->withHost(null);
 
@@ -15,19 +15,19 @@ var_dump($uri1->toString());
 var_dump($uri2->toString());
 var_dump($uri3->toString());
 
-$uri1 = Uri\Rfc3986Uri::parse("ftp://foo.com?query=abc#foo");
+$uri1 = Uri\Rfc3986\Uri::parse("ftp://foo.com?query=abc#foo");
 $uri2 = $uri1->withHost("test.com");
 
 var_dump($uri1->toString());
 var_dump($uri2->toString());
 
-$uri1 = Uri\Rfc3986Uri::parse("/path?query=abc#foo");
+$uri1 = Uri\Rfc3986\Uri::parse("/path?query=abc#foo");
 $uri2 = $uri1->withHost("test.com");
 
 var_dump($uri1->toString());
 var_dump($uri2->toString());
 
-$uri1 = Uri\WhatWgUri::parse("https://example.com");
+$uri1 = Uri\WhatWg\Url::parse("https://example.com");
 $uri2 = $uri1->withHost("test.com");
 
 var_dump($uri1->toString());
@@ -39,7 +39,7 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-$uri1 = Uri\WhatWgUri::parse("ftp://foo.com?query=abc#foo");
+$uri1 = Uri\WhatWg\Url::parse("ftp://foo.com?query=abc#foo");
 $uri2 = $uri1->withHost("test.com");
 
 var_dump($uri1->toString());

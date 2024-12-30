@@ -5,7 +5,7 @@ uri
 --FILE--
 <?php
 
-$uri1 = Uri\Rfc3986Uri::parse("https://example.com");
+$uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
 $uri2 = $uri1->withScheme("http");
 $uri3 = $uri2->withScheme(null);
 
@@ -13,7 +13,7 @@ var_dump($uri1->toString());
 var_dump($uri2->toString());
 var_dump($uri3->toString());
 
-$uri1 = Uri\WhatWgUri::parse("https://example.com");
+$uri1 = Uri\WhatWg\Url::parse("https://example.com");
 $uri2 = $uri1->withScheme("http");
 
 var_dump($uri1->toString());
