@@ -1295,7 +1295,7 @@ expr:
 	|	expr T_IS_NOT_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
 	|	expr T_PIPE expr
-			{ $$ = zend_ast_create(ZEND_AST_CALL, $3, zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1) ); $$->attr = ZEND_CALL_SYNTAX_PIPE; }
+			{ $$ = zend_ast_create(ZEND_AST_PIPE, $1, $3); }
 	|	expr '<' expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, $3); }
 	|	expr T_IS_SMALLER_OR_EQUAL expr

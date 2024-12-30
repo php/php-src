@@ -6613,6 +6613,30 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 	efree(jmp_end_opnums);
 }
 
+static void zend_compile_pipe(znode *result, zend_ast *ast)
+{
+	zend_ast *operand_ast = ast->child[0];
+	zend_ast *callable_ast = ast->child[1];
+
+	znode operand_result;
+	zend_compile_expr(&operand_result, operand_ast);
+
+	/* Turn $foo |> bar(...) into bar($foo). */
+	if (callable_ast->kind == ZEND_AST_CALL
+	 && callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		callable_ast = callable_ast->child[0];
+	 }
+
+	znode callable_result;
+	zend_compile_expr(&callable_result, callable_ast);
+
+	zend_ast *fcall_ast = zend_ast_create(ZEND_AST_CALL,
+		zend_ast_create_znode(&callable_result),
+		zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&operand_result)));
+
+	zend_compile_expr(result, fcall_ast);
+}
+
 static void zend_compile_try(zend_ast *ast) /* {{{ */
 {
 	zend_ast *try_ast = ast->child[0];
@@ -11769,6 +11793,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
 			return;
+		case ZEND_AST_PIPE:
+			zend_compile_pipe(result, ast);
+		return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
 	}
