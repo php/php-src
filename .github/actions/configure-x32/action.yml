@@ -12,7 +12,7 @@ runs:
 
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/lib/i386-linux-gnu/pkgconfig"
         ./buildconf --force
-        export CFLAGS="-m32 -msse2"
+        export CFLAGS="-m32 -msse2 -DGD_TEST_HELPERS"
         export CXXFLAGS="-m32 -msse2"
         export LDFLAGS=-L/usr/lib/i386-linux-gnu
         ./configure ${{ inputs.configurationParameters }} \

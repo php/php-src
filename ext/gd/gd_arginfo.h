@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f8a22bff1d123313f37da400500e573baace837 */
+ * Stub hash: d80b05c9e734f5690e5cf302dc190cef7d9ce702 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -567,6 +567,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageresolution, 0, 1, MAY_BE_AR
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, resolution_y, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
+#if defined(GD_TEST_HELPERS)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagechangedpixels, 0, 2, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, im1, GdImage, 0)
+	ZEND_ARG_OBJ_INFO(0, im2, GdImage, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_calc_image_dissimilarity, 0, 2, IS_DOUBLE, 0)
+	ZEND_ARG_OBJ_INFO(0, im1, GdImage, 0)
+	ZEND_ARG_OBJ_INFO(0, im2, GdImage, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(gd_info);
 ZEND_FUNCTION(imageloadfont);
 ZEND_FUNCTION(imagesetstyle);
@@ -701,6 +713,10 @@ ZEND_FUNCTION(imageaffinematrixconcat);
 ZEND_FUNCTION(imagegetinterpolation);
 ZEND_FUNCTION(imagesetinterpolation);
 ZEND_FUNCTION(imageresolution);
+#if defined(GD_TEST_HELPERS)
+ZEND_FUNCTION(imagechangedpixels);
+ZEND_FUNCTION(calc_image_dissimilarity);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gd_info, arginfo_gd_info)
@@ -839,6 +855,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagegetinterpolation, arginfo_imagegetinterpolation)
 	ZEND_FE(imagesetinterpolation, arginfo_imagesetinterpolation)
 	ZEND_FE(imageresolution, arginfo_imageresolution)
+#if defined(GD_TEST_HELPERS)
+	ZEND_FE(imagechangedpixels, arginfo_imagechangedpixels)
+	ZEND_FE(calc_image_dissimilarity, arginfo_calc_image_dissimilarity)
+#endif
 	ZEND_FE_END
 };
 

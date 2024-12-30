@@ -4326,6 +4326,73 @@ PHP_FUNCTION(imageresolution)
 }
 /* }}} */
 
+#ifdef GD_TEST_HELPERS
+static PHP_FUNCTION(imagechangedpixels)
+{
+	zval *IM1, *IM2;
+	gdImagePtr im1, im2;
+	int i, j, result = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(IM1, gd_image_ce)
+		Z_PARAM_OBJECT_OF_CLASS(IM2, gd_image_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	im1 = php_gd_libgdimageptr_from_zval_p(IM1);
+	im2 = php_gd_libgdimageptr_from_zval_p(IM2);
+
+	ZEND_ASSERT(gdImageTrueColor(im1) && gdImageTrueColor(im2));
+	ZEND_ASSERT(gdImageSX(im1) == gdImageSX(im2) && gdImageSY(im1) == gdImageSY(im2));
+
+	for (j = gdImageSY(im1) - 1; j >= 0; --j) {
+		for (i = gdImageSX(im1) - 1; i >= 0; --i) {
+			if (gdImageTrueColorPixel(im1, i, j) != gdImageTrueColorPixel(im2, i, j)) {
+				result++;
+			}
+		}
+	}
+
+	RETURN_LONG(result);
+}
+
+static double calc_pixel_distance(gdImagePtr im1, gdImagePtr im2, int x, int y)
+{
+	int c1 = gdImageGetPixel(im1, x, y);
+	int c2 = gdImageGetPixel(im2, x, y);
+# define SQR(a) ((a) * (a))
+	return sqrt(
+		SQR(gdImageRed(im1, c1) - gdImageRed(im2, c2)) +
+		SQR(gdImageGreen(im1, c1) - gdImageGreen(im2, c2)) +
+		SQR(gdImageBlue(im1, c1) - gdImageBlue(im2, c2)));
+# undef SQR
+}
+
+static PHP_FUNCTION(calc_image_dissimilarity)
+{
+	zval *IM1, *IM2;
+	gdImagePtr im1, im2;
+	int i, j;
+	double result = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(IM1, gd_image_ce)
+		Z_PARAM_OBJECT_OF_CLASS(IM2, gd_image_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	im1 = php_gd_libgdimageptr_from_zval_p(IM1);
+	im2 = php_gd_libgdimageptr_from_zval_p(IM2);
+
+	ZEND_ASSERT(gdImageSX(im1) == gdImageSX(im2) && gdImageSY(im1) == gdImageSY(im2));
+
+	for (j = gdImageSY(im2) - 1; j >= 0; --j) {
+		for (i = gdImageSX(im1) - 1; i >= 0; --i) {
+			result += calc_pixel_distance(im1, im2, i, j);
+		}
+	}
+
+	RETURN_DOUBLE(result);
+}
+#endif
 
 /*********************************************************
  *

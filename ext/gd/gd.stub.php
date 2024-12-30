@@ -794,3 +794,9 @@ function imagesetinterpolation(GdImage $image, int $method = IMG_BILINEAR_FIXED)
  * @refcount 1
  */
 function imageresolution(GdImage $image, ?int $resolution_x = null, ?int $resolution_y = null): array|bool {}
+
+#ifdef GD_TEST_HELPERS
+function imagechangedpixels(GdImage $im1, GdImage $im2): int {}
+
+function calc_image_dissimilarity(GdImage $im1, GdImage $im2): float {}
+#endif

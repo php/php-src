@@ -59,6 +59,23 @@ function get_libxpm_version()
     return $version;
 }
 
+if (!function_exists("imagechangedpixels")) {
+    function imagechangedpixels(GdImage $im1, GdImage $im2): int
+    {
+        $pixels_changed = 0;
+        for ($y = imagesy($im1) - 1; $y >= 0; --$y) {
+            for ($x = imagesx($im1) - 1; $x >= 0; --$x) {
+                $c1 = imagecolorat($im1, $x, $y);
+                $c2 = imagecolorat($im2, $x, $y);
+                if ($c1 != $c2) {
+                    $pixels_changed++;
+                }
+            }
+        }
+        return $pixels_changed;
+    }
+}
+
 /**
  * Tests that an in-memory image equals a PNG file.
  *
@@ -106,16 +123,7 @@ function test_image_equals_image(GdImage $expected, GdImage $actual, bool $save_
         }
         return;
     }
-    $pixels_changed = 0;
-    for ($y = 0; $y < $exp_y; $y++) {
-        for ($x = 0; $x < $exp_x; $x ++) {
-            $exp_c = imagecolorat($expected, $x, $y);
-            $act_c = imagecolorat($actual, $x, $y);
-            if ($exp_c != $act_c) {
-                $pixels_changed++;
-            }
-        }
-    }
+    $pixels_changed = imagechangedpixels($expected, $actual);
     if (!$pixels_changed) {
         echo "The images are equal.\n";
     } else {
