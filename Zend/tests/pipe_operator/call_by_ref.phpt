@@ -8,7 +8,6 @@ function _modify(int &$a): string {
     return "foo";
 }
 
-//try {
 $a = 5;
 $res1 = $a |> '_modify';
 
