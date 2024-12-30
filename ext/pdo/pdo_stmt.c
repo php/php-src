@@ -1090,7 +1090,7 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 
 	mode = mode & ~PDO_FETCH_FLAGS;
 
-	if (mode < 0 || mode > PDO_FETCH__MAX) {
+	if (mode < 0 || mode >= PDO_FETCH__MAX) {
 		zend_argument_value_error(mode_arg_num, "must be a bitmask of PDO::FETCH_* constants");
 		return 0;
 	}
@@ -1121,10 +1121,6 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 			}
 			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
 				zend_argument_value_error(mode_arg_num, "must use PDO::FETCH_CLASSTYPE with PDO::FETCH_CLASS");
-				return 0;
-			}
-			if (mode >= PDO_FETCH__MAX) {
-				zend_argument_value_error(mode_arg_num, "must be a bitmask of PDO::FETCH_* constants");
 				return 0;
 			}
 			ZEND_FALLTHROUGH;
