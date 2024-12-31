@@ -25,7 +25,8 @@ function calc_pixel_distance(int $color1, int $color2): float
  */
 function calc_image_dissimilarity(GdImage $image1, GdImage $image2): float
 {
-    // assumes image1 and image2 have same width and height
+    assert(imageistruecolor($image1) && imageistruecolor($image2));
+    assert(imagesx($image1) === imagesx($image2) && imagesy($image1) === imagesy($image2));
     $dissimilarity = 0;
     for ($j = 0, $m = imagesy($image1); $j < $m; $j++) {
         for ($i = 0, $n = imagesx($image1); $i < $n; $i++) {

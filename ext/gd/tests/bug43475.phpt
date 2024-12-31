@@ -60,6 +60,7 @@ imageline($im, 700, 100, 700, 600, IMG_COLOR_STYLED);
 imageline($im, 700, 600, 200, 100, IMG_COLOR_STYLED);
 
 $ex = imagecreatefrompng(__DIR__ . '/bug43475.png');
+imagepalettetotruecolor($im);
 var_dump(calc_image_dissimilarity($ex, $im) < 1e-5);
 ?>
 --EXPECT--

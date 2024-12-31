@@ -95,6 +95,7 @@ function test_image_equals_file(string $filename, GdImage $actual): void
  */
 function test_image_equals_image(GdImage $expected, GdImage $actual, bool $save_actual = false): void
 {
+    assert(imageistruecolor($expected) && imageistruecolor($actual));
     $exp_x = imagesx($expected);
     $exp_y = imagesy($expected);
     $act_x = imagesx($actual);
