@@ -30,12 +30,12 @@ imagewebp($im1, $filename);
 $im2 = imagecreatefromwebp($filename);
 imagewebp($im2, $filename);
 echo 'Is lossy conversion close enough? ';
-var_dump(calc_image_dissimilarity($im1, $im2) < 10e5);
+var_dump(mse($im1, $im2) < 500);
 
 imagewebp($im1, $filename, IMG_WEBP_LOSSLESS);
 $im_lossless = imagecreatefromwebp($filename);
 echo 'Does lossless conversion work? ';
-var_dump(calc_image_dissimilarity($im1, $im_lossless) == 0);
+var_dump(mse($im1, $im_lossless) == 0);
 
 try {
 	imagewebp($im1, $filename, -10);
