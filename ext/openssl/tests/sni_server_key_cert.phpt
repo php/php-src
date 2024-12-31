@@ -27,8 +27,8 @@ $serverCode = <<<'CODE'
         ]
     ]]);
 
-    $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
     for ($i=0; $i < 3; $i++) {
         @stream_socket_accept($server, 3);
@@ -42,23 +42,21 @@ $clientCode = <<<'CODE'
         'capture_peer_cert' => true
     ];
 
-    phpt_wait();
-
     $ctxArr['peer_name'] = 'cs.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
-    $client = stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    $client = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
     var_dump(openssl_x509_parse($cert)['subject']['CN']);
 
     $ctxArr['peer_name'] = 'uk.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
-    $client = @stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    $client = @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
     var_dump(openssl_x509_parse($cert)['subject']['CN']);
 
     $ctxArr['peer_name'] = 'us.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
-    $client = @stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    $client = @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
     var_dump(openssl_x509_parse($cert)['subject']['CN']);
 CODE;

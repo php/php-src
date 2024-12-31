@@ -14,8 +14,8 @@ $serverCode = <<<'CODE'
     $context = stream_context_create(['ssl' => ['local_cert' => '%s']]);
 
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
-    $fp = stream_socket_server("ssl://127.0.0.1:10011", $errornum, $errorstr, $flags, $context);
-    phpt_notify();
+    $fp = stream_socket_server("ssl://127.0.0.1:0", $errornum, $errorstr, $flags, $context);
+    phpt_notify_server_start($fp);
     $conn = stream_socket_accept($fp);
     $total = 100000;
     $result = fread($conn, $total);
@@ -40,8 +40,7 @@ $peerName = 'bug72333';
 $clientCode = <<<'CODE'
     $context = stream_context_create(['ssl' => ['verify_peer' => false, 'peer_name' => '%s']]);
 
-    phpt_wait();
-    $fp = stream_socket_client("ssl://127.0.0.1:10011", $errornum, $errorstr, 3000, STREAM_CLIENT_CONNECT, $context);
+    $fp = stream_socket_client("ssl://{{ ADDR }}", $errornum, $errorstr, 3000, STREAM_CLIENT_CONNECT, $context);
     stream_set_blocking($fp, false);
 
     function blocking_fwrite($fp, $buf) {
