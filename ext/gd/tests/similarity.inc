@@ -6,25 +6,14 @@
  */
 
 /**
- * Gets the individual components of an RGB value.
- */
-function get_rgb(int $color, &$red, &$green, &$blue): void
-{
-    // assumes $color is an RGB value
-    $red = ($color >> 16) & 0xFF;
-    $green = ($color >> 8) & 0xFF;
-    $blue = $color & 0xFF;
-}
-
-/**
  * Calculates the euclidean distance of two RGB values.
  */
 function calc_pixel_distance(int $color1, int $color2): float
 {
-    get_rgb($color1, $red1, $green1, $blue1);
-    get_rgb($color2, $red2, $green2, $blue2);
     return sqrt(
-        pow($red1 - $red2, 2) + pow($green1 - $green2, 2) + pow($blue1 - $blue2, 2)
+        ((($color1 >> 16) & 0xFF) - (($color2 >> 16) & 0xFF)) ** 2 +
+        ((($color1 >>  8) & 0xFF) - (($color2 >>  8) & 0xFF)) ** 2 +
+        ((($color1 >>  0) & 0xFF) - (($color2 >>  0) & 0xFF)) ** 2
     );
 }
 
