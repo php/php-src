@@ -128,11 +128,8 @@ function test_image_equals_image(GdImage $expected, GdImage $actual, bool $save_
 
 /**
  * Returns the truecolor version of an image.
- *
- * @param resource $image
- * @return resource
  */
-function test_to_truecolor($image)
+function test_to_truecolor(GdImage $image): GdImage
 {
     if (imageistruecolor($image)) {
         return $image;
@@ -150,11 +147,8 @@ function test_to_truecolor($image)
  *
  * The image is saved right beside the temporary .php test file with the
  * extension .out.png.
- *
- * @param resource $image
- * @return void
  */
-function save_actual_image($image)
+function save_actual_image(GdImage $image): void
 {
     $pathinfo = pathinfo($_SERVER['SCRIPT_FILENAME']);
     $filename = "{$pathinfo['dirname']}/{$pathinfo['filename']}.out.png";

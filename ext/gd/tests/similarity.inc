@@ -7,15 +7,8 @@
 
 /**
  * Gets the individual components of an RGB value.
- *
- * @param int $color
- * @param int $red
- * @param int $green
- * @param int $blue
- *
- * @return void
  */
-function get_rgb($color, &$red, &$green, &$blue)
+function get_rgb(int $color, &$red, &$green, &$blue): void
 {
     // assumes $color is an RGB value
     $red = ($color >> 16) & 0xFF;
@@ -25,13 +18,8 @@ function get_rgb($color, &$red, &$green, &$blue)
 
 /**
  * Calculates the euclidean distance of two RGB values.
- *
- * @param int $color1
- * @param int $color2
- *
- * @return int
  */
-function calc_pixel_distance($color1, $color2)
+function calc_pixel_distance(int $color1, int $color2): float
 {
     get_rgb($color1, $red1, $green1, $blue1);
     get_rgb($color2, $red2, $green2, $blue2);
@@ -43,13 +31,10 @@ function calc_pixel_distance($color1, $color2)
 /**
  * Calculates dissimilarity of two images.
  *
- * @param resource $image1
- * @param resource $image2
- *
- * @return int The dissimilarity. 0 means the images are identical. The higher
- *             the value, the more dissimilar are the images.
+ * The dissimilarity. 0 means the images are identical. The higher
+ * the value, the more dissimilar are the images.
  */
-function calc_image_dissimilarity($image1, $image2)
+function calc_image_dissimilarity(GdImage $image1, GdImage $image2): float
 {
     // assumes image1 and image2 have same width and height
     $dissimilarity = 0;
