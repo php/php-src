@@ -14,7 +14,7 @@ gd
 --FILE--
 <?php
 
-    require_once __DIR__ . '/similarity.inc';
+    require_once __DIR__ . '/func.inc';
 
     $infile = __DIR__  . '/girl.avif';
     $outfile = __DIR__  . '/test.avif';

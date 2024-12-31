@@ -12,7 +12,7 @@ if (!function_exists('imagewebp') || !function_exists('imagecreatefromwebp'))
 ?>
 --FILE--
 <?php
-require_once __DIR__ . '/similarity.inc';
+require_once __DIR__ . '/func.inc';
 
 $filename = __DIR__ . '/webp_basic.webp';
 

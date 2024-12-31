@@ -13,7 +13,7 @@ gd
 ?>
 --FILE--
 <?php
-require_once __DIR__ . '/similarity.inc';
+require_once __DIR__ . '/func.inc';
 
 function setStyleAndThickness($im, $color, $thickness)
 {
