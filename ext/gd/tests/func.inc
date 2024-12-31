@@ -78,9 +78,7 @@ function test_image_equals_file(string $filename, GdImage $actual): void
         save_actual_image($actual);
         return;
     }
-    $actual = test_to_truecolor($actual);
     $expected = imagecreatefrompng($filename);
-    $expected = test_to_truecolor($expected);
     test_image_equals_image($expected, $actual, true);
 }
 
@@ -124,22 +122,6 @@ function test_image_equals_image(GdImage $expected, GdImage $actual, bool $save_
         if ($save_actual) {
             save_actual_image($actual);
         }
-    }
-}
-
-/**
- * Returns the truecolor version of an image.
- */
-function test_to_truecolor(GdImage $image): GdImage
-{
-    if (imageistruecolor($image)) {
-        return $image;
-    } else {
-        $width = imagesx($image);
-        $height = imagesy($image);
-        $result = imagecreatetruecolor($width, $height);
-        imagecopy($result, $image, 0,0, 0,0, $width, $height);
-        return $result;
     }
 }
 
