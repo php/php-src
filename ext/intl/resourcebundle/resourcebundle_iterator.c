@@ -108,8 +108,7 @@ static void resourcebundle_iterator_key( zend_object_iterator *iter, zval *key )
 		if (EXPECTED(iterator->currentkey)) {
 			ZVAL_STRING(key, iterator->currentkey);
 		} else {
-			ZVAL_NULL(key);
-			ZVAL_NULL(&iterator->current);
+			ZVAL_UNDEF(key);
 		}
 	} else {
 		ZVAL_LONG(key, iterator->i);

@@ -21,10 +21,18 @@ VALUE: object(ResourceBundle)#4 (0) {
 KEY: string(16) "DateTimePatterns"
 VALUE: object(ResourceBundle)#3 (0) {
 }
-KEY: NULL
-VALUE: NULL
-KEY: NULL
-VALUE: NULL
+KEY:
+Warning: Undefined variable $key in /home/dcarlier/Contribs/php-src/ext/intl/tests/gh17317.php on line 3
+NULL
+VALUE:
+Warning: Undefined variable $value in /home/dcarlier/Contribs/php-src/ext/intl/tests/gh17317.php on line 4
+NULL
+KEY:
+Warning: Undefined variable $key in /home/dcarlier/Contribs/php-src/ext/intl/tests/gh17317.php on line 3
+NULL
+VALUE:
+Warning: Undefined variable $value in /home/dcarlier/Contribs/php-src/ext/intl/tests/gh17317.php on line 4
+NULL
 KEY: string(11) "appendItems"
 VALUE: object(ResourceBundle)#3 (0) {
 }
