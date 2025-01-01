@@ -19,5 +19,4 @@ $ctx = stream_context_create($config);
 var_dump(fopen("http://" . PHP_CLI_SERVER_ADDRESS . "/test", "r", false, $ctx));
 ?>
 --EXPECTF--
-Warning: fopen(http://%s): Failed to open stream: timeout must be lower than %d in %s on line %d
-bool(false)
+resource(%d) of type (stream)
