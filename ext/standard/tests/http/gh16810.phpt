@@ -3,7 +3,10 @@ Bug #79265 variation: "host:" not at start of header
 --INI--
 allow_url_fopen=1
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
+<?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (getenv("SKIP_ONLINE_TESTS")) die("skip test requiring internet connection");
+?>
 --FILE--
 <?php
 $uri = "http://www.example.com";
