@@ -15,9 +15,10 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$dummy_query = get_dummy_sql_request();
-$stmt = $db->prepare($dummy_query);
-$stmt->execute();
+$db->exec('CREATE TABLE pdo_fetch_function_incorrect_callable(id int NOT NULL PRIMARY KEY, pl_name VARCHAR(10))');
+$db->exec("INSERT INTO pdo_fetch_function_incorrect_callable VALUES (1, 'php')");
+$db->exec("INSERT INTO pdo_fetch_function_incorrect_callable VALUES (2, 'sql')");
+$stmt = $db->query('SELECT * FROM pdo_fetch_function_incorrect_callable');
 
 class Bar {
     static private function privateStatic($x, $y) {
@@ -77,6 +78,12 @@ try {
     echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "pdo_fetch_function_incorrect_callable");
 ?>
 --EXPECT--
 TypeError: function "nothing" not found or invalid function name
