@@ -146,57 +146,57 @@ PHP_FUNCTION(curl_share_init_persistent)
 	zval *share_opts = NULL, *entry = NULL;
 	zend_ulong persistent_id = 0;
 
-	php_curlsh *sh;
+	php_curlsh *sh = NULL;
 
-	CURLSHcode error;
+	CURLSHcode error = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY_EX(share_opts, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	object_init_ex(return_value, curl_share_persistent_ce);
-	sh = Z_CURL_SHARE_P(return_value);
-
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
 		ZVAL_DEREF(entry);
 
-		bool failed       = false;
+		bool       failed = false;
 		zend_ulong option = zval_try_get_long(entry, &failed);
 
 		if (failed) {
-			zend_argument_type_error(1, "must contain only longs, %s given", zend_zval_value_name(entry));
+			zend_argument_type_error(1, "must contain only integer values, %s given", zend_zval_value_name(entry));
 			goto error;
 		}
 
 		switch (option) {
-		// Disallowed options
-		case CURL_LOCK_DATA_COOKIE:
-			zend_argument_value_error(1, "CURL_LOCK_DATA_COOKIE is not allowed");
-			goto error;
+			// Disallowed options
+			case CURL_LOCK_DATA_COOKIE:
+				zend_argument_value_error(1, "CURL_LOCK_DATA_COOKIE is not allowed");
+				goto error;
 
-		// Allowed options
-		case CURL_LOCK_DATA_DNS:
-			persistent_id |= 1 << 0;
-			break;
-		case CURL_LOCK_DATA_SSL_SESSION:
-			persistent_id |= 1 << 1;
-			break;
-		case CURL_LOCK_DATA_CONNECT:
-			persistent_id |= 1 << 2;
-			break;
-		case CURL_LOCK_DATA_PSL:
-			persistent_id |= 1 << 3;
-			break;
+			// Allowed options
+			case CURL_LOCK_DATA_DNS:
+				persistent_id |= 1 << 0;
+				break;
+			case CURL_LOCK_DATA_SSL_SESSION:
+				persistent_id |= 1 << 1;
+				break;
+			case CURL_LOCK_DATA_CONNECT:
+				persistent_id |= 1 << 2;
+				break;
+			case CURL_LOCK_DATA_PSL:
+				persistent_id |= 1 << 3;
+				break;
 
-		// Unknown options
-		default:
-			zend_argument_value_error(1, "must contain only CURL_LOCK_DATA_* constants");
-			goto error;
+			// Unknown options
+			default:
+				zend_argument_value_error(1, "must contain only CURL_LOCK_DATA_* constants");
+				goto error;
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	zend_array_sort(Z_ARRVAL_P(share_opts), php_array_data_compare_unstable_i, 1);
 	zend_update_property(curl_share_persistent_ce, Z_OBJ_P(return_value), "options", sizeof("options") - 1, share_opts);
+
+	object_init_ex(return_value, curl_share_persistent_ce);
+	sh = Z_CURL_SHARE_P(return_value);
 
 	if (persistent_id) {
 		zval *persisted = zend_hash_index_find(&CURL_G(persistent_curlsh), persistent_id);
@@ -238,7 +238,7 @@ PHP_FUNCTION(curl_share_init_persistent)
 	return;
 
  error:
-	if (sh->share) {
+	if (sh && sh->share) {
 		curl_share_cleanup(sh->share);
 	}
 
