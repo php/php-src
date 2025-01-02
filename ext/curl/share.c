@@ -154,6 +154,11 @@ PHP_FUNCTION(curl_share_init_persistent)
 		Z_PARAM_ARRAY(share_opts)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (zend_hash_num_elements(Z_ARRVAL_P(share_opts)) == 0) {
+		zend_argument_value_error(1, "must not be empty");
+		goto error;
+	}
+
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
 		ZVAL_DEREF(entry);
 
@@ -168,7 +173,7 @@ PHP_FUNCTION(curl_share_init_persistent)
 		switch (option) {
 			// Disallowed options
 			case CURL_LOCK_DATA_COOKIE:
-				zend_argument_value_error(1, "must not contain CURL_LOCK_DATA_COOKIE because it is unsafe");
+				zend_argument_value_error(1, "must not contain CURL_LOCK_DATA_COOKIE because sharing cookies across PHP requests is unsafe");
 				goto error;
 
 			// Allowed options
@@ -196,44 +201,36 @@ PHP_FUNCTION(curl_share_init_persistent)
 	zval share_opts_prop;
 	array_init(&share_opts_prop);
 
-	if (persistent_id & 1 << 0) {
+	if (persistent_id & (1 << 0)) {
 		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_DNS);
 	}
 
-	if (persistent_id & 1 << 1) {
+	if (persistent_id & (1 << 1)) {
 		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_SSL_SESSION);
 	}
 
-	if (persistent_id & 1 << 2) {
+	if (persistent_id & (1 << 2)) {
 		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_CONNECT);
 	}
 
-	if (persistent_id & 1 << 3) {
+	if (persistent_id & (1 << 3)) {
 		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_PSL);
 	}
 
 	object_init_ex(return_value, curl_share_persistent_ce);
 
-	zend_update_property(
-	    curl_share_persistent_ce,
-		Z_OBJ_P(return_value),
-		"options",
-		sizeof("options") - 1,
-		&share_opts_prop
-	);
-
+	zend_update_property(curl_share_persistent_ce, Z_OBJ_P(return_value), ZEND_STRL("options"), &share_opts_prop);
 	zval_ptr_dtor(&share_opts_prop);
 
 	sh = Z_CURL_SHARE_P(return_value);
 
-	if (persistent_id) {
-		zval *persisted = zend_hash_index_find(&CURL_G(persistent_curlsh), persistent_id);
+	zval *persisted = zend_hash_index_find(&CURL_G(persistent_curlsh), persistent_id);
 
-		if (persisted) {
-			sh->share = Z_PTR_P(persisted);
+	// If we were able to find an existing persistent share handle, we can use it and return early.
+	if (persisted) {
+		sh->share = Z_PTR_P(persisted);
 
-			return;
-		}
+		return;
 	}
 
 	// We could not find an existing share handle, so we'll have to create one.
@@ -246,27 +243,18 @@ PHP_FUNCTION(curl_share_init_persistent)
 		error = curl_share_setopt(sh->share, CURLSHOPT_SHARE, zval_get_long(entry));
 
 		if (error != CURLSHE_OK) {
-			zend_throw_exception_ex(
-				NULL,
-				0,
-				"Could not construct persistent cURL share handle: %s",
-				curl_share_strerror(error)
-			);
+			zend_throw_exception_ex(NULL, 0, "Could not construct persistent cURL share handle: %s", curl_share_strerror(error));
 
 			goto error;
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	zend_hash_index_add_new_ptr(
-		&CURL_G(persistent_curlsh),
-		persistent_id,
-		sh->share
-	);
+	zend_hash_index_add_new_ptr(&CURL_G(persistent_curlsh),	persistent_id, sh->share);
 
 	return;
 
  error:
-	if (sh && sh->share) {
+	if (sh) {
 		curl_share_cleanup(sh->share);
 	}
 
@@ -281,10 +269,6 @@ PHP_FUNCTION(curl_share_init_persistent)
 void curl_share_free_persistent_curlsh(zval *data)
 {
 	CURLSH *handle = Z_PTR_P(data);
-
-	if (!handle) {
-		return;
-	}
 
 	curl_share_cleanup(handle);
 }
