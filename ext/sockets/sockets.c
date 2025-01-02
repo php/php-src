@@ -2583,6 +2583,12 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 	memset(&hints, 0, sizeof(hints));
 
+#if defined(PHP_WIN32)
+#  if !defined(AF_MAX)
+#    define AF_MAX (AF_BTH + 1)
+#  endif
+#endif
+
 	if (zhints && !HT_IS_PACKED(Z_ARRVAL_P(zhints))) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
@@ -2593,11 +2599,19 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 						zend_argument_type_error(3, "\"ai_flags\" key must be of type int, %s given", zend_zval_type_name(hint));
 						RETURN_THROWS();
 					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_flags\" key must be between 0 and %d", INT_MAX);
+						RETURN_THROWS();
+					}
 					hints.ai_flags = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_socktype")) {
 					zend_long val = zval_try_get_long(hint, &failed);
 					if (failed) {
 						zend_argument_type_error(3, "\"ai_socktype\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_socktype\" key must be between 0 and %d", INT_MAX);
 						RETURN_THROWS();
 					}
 					hints.ai_socktype = (int)val;
@@ -2607,11 +2621,19 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 						zend_argument_type_error(3, "\"ai_protocol\" key must be of type int, %s given", zend_zval_type_name(hint));
 						RETURN_THROWS();
 					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_protocol\" key must be between 0 and %d", INT_MAX);
+						RETURN_THROWS();
+					}
 					hints.ai_protocol = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_family")) {
 					zend_long val = zval_try_get_long(hint, &failed);
 					if (failed) {
 						zend_argument_type_error(3, "\"ai_family\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					if (val < 0 || val >= AF_MAX) {
+						zend_argument_value_error(3, "\"ai_family\" key must be between 0 and %d", AF_MAX - 1);
 						RETURN_THROWS();
 					}
 					hints.ai_family = (int)val;
