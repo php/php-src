@@ -168,7 +168,7 @@ PHP_FUNCTION(curl_share_init_persistent)
 		switch (option) {
 			// Disallowed options
 			case CURL_LOCK_DATA_COOKIE:
-				zend_argument_value_error(1, "CURL_LOCK_DATA_COOKIE is not allowed");
+				zend_argument_value_error(1, "must not contain CURL_LOCK_DATA_COOKIE because it is unsafe");
 				goto error;
 
 			// Allowed options
