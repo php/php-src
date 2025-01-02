@@ -58,8 +58,8 @@ gd
 
     // Note we could also forgive a certain number of pixel differences.
     // With the current test image, we just didn't need to.
-    echo 'What is the mean squared error of the two images? ';
-    print_r(mse($img, $img_from_avif));
+    echo 'What is the mean squared error of the two images? ',
+        mse($img, $img_from_avif);
 
     unlink($outfile);
 
