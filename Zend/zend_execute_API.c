@@ -884,7 +884,11 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 						ZEND_CALL_NUM_ARGS(call) = i;
 cleanup_args:
 						zend_vm_stack_free_args(call);
+						if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+							zend_free_extra_named_params(call->extra_named_params);
+						}
 						zend_vm_stack_free_call_frame(call);
+						zend_release_fcall_info_cache(fci_cache);
 						return SUCCESS;
 					}
 				}

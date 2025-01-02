@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 30ed66d5e97f6615a461d39f40f85a18ba618711 */
+ * Stub hash: efd913e4fcacb2949dc5392857032ab9c59c818d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -41,18 +41,18 @@ ZEND_END_ARG_INFO()
 
 #if defined(PHP_ODBC_HAVE_FETCH_HASH)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, statement)
+	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_fetch_array, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, statement)
+	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_fetch_into, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, statement)
+	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 	ZEND_ARG_INFO(1, array)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()

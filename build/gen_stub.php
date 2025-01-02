@@ -183,8 +183,8 @@ class Context {
 }
 
 class ArrayType extends SimpleType {
-    public Type $keyType;
-    public Type $valueType;
+    public /* readonly */ Type $keyType;
+    public /* readonly */ Type $valueType;
 
     public static function createGenericArray(): self
     {
@@ -222,8 +222,8 @@ class ArrayType extends SimpleType {
 }
 
 class SimpleType {
-    public string $name;
-    public bool $isBuiltin;
+    public /* readonly */ string $name;
+    public /* readonly */ bool $isBuiltin;
 
     public static function fromNode(Node $node): SimpleType {
         if ($node instanceof Node\Name) {
@@ -306,17 +306,17 @@ class SimpleType {
             case "NULL":
                 return SimpleType::null();
             case "boolean":
-                return SimpleType::bool();
+                return new SimpleType("bool", true);
             case "integer":
-                return SimpleType::int();
+                return new SimpleType("int", true);
             case "double":
-                return SimpleType::float();
+                return new SimpleType("float", true);
             case "string":
-                return SimpleType::string();
+                return new SimpleType("string", true);
             case "array":
-                return SimpleType::array();
+                return new SimpleType("array", true);
             case "object":
-                return SimpleType::object();
+                return new SimpleType("object", true);
             default:
                 throw new Exception("Type \"" . gettype($value) . "\" cannot be inferred based on value");
         }
@@ -325,41 +325,6 @@ class SimpleType {
     public static function null(): SimpleType
     {
         return new SimpleType("null", true);
-    }
-
-    public static function bool(): SimpleType
-    {
-        return new SimpleType("bool", true);
-    }
-
-    public static function int(): SimpleType
-    {
-        return new SimpleType("int", true);
-    }
-
-    public static function float(): SimpleType
-    {
-        return new SimpleType("float", true);
-    }
-
-    public static function string(): SimpleType
-    {
-        return new SimpleType("string", true);
-    }
-
-    public static function array(): SimpleType
-    {
-        return new SimpleType("array", true);
-    }
-
-    public static function object(): SimpleType
-    {
-        return new SimpleType("object", true);
-    }
-
-    public static function void(): SimpleType
-    {
-        return new SimpleType("void", true);
     }
 
     protected function __construct(string $name, bool $isBuiltin) {
@@ -559,8 +524,8 @@ class SimpleType {
 
 class Type {
     /** @var SimpleType[] */
-    public array $types;
-    public bool $isIntersection;
+    public /* readonly */ array $types;
+    public /* readonly */ bool $isIntersection;
 
     public static function fromNode(Node $node): Type {
         if ($node instanceof Node\UnionType || $node instanceof Node\IntersectionType) {
@@ -661,28 +626,19 @@ class Type {
         return false;
     }
 
-    public function getWithoutNull(): Type {
-        return new Type(
-            array_values(
-                array_filter(
-                    $this->types,
-                    function(SimpleType $type) {
-                        return !$type->isNull();
-                    }
-                )
-            ),
-            false
-        );
-    }
-
     public function tryToSimpleType(): ?SimpleType {
-        $withoutNull = $this->getWithoutNull();
+        $nonNullTypes = array_filter(
+            $this->types,
+            function(SimpleType $type) {
+                return !$type->isNull();
+            }
+        );
         /* type has only null */
-        if (count($withoutNull->types) === 0) {
+        if (count($nonNullTypes) === 0) {
             return $this->types[0];
         }
-        if (count($withoutNull->types) === 1) {
-            return $withoutNull->types[0];
+        if (count($nonNullTypes) === 1) {
+            return reset($nonNullTypes);
         }
         return null;
     }
@@ -770,10 +726,6 @@ class Type {
     }
 
     public function __toString() {
-        if ($this->types === null) {
-            return 'mixed';
-        }
-
         $char = $this->isIntersection ? '&' : '|';
         return implode($char, array_map(
             function ($type) { return $type->name; },
@@ -784,9 +736,9 @@ class Type {
 
 class ArginfoType {
     /** @var SimpleType[] $classTypes */
-    public array $classTypes;
+    public /* readonly */ array $classTypes;
     /** @var SimpleType[] $builtinTypes */
-    private array $builtinTypes;
+    private /* readonly */ array $builtinTypes;
 
     /**
      * @param SimpleType[] $classTypes
@@ -818,15 +770,15 @@ class ArginfoType {
 }
 
 class ArgInfo {
-    const SEND_BY_VAL = 0;
-    const SEND_BY_REF = 1;
-    const SEND_PREFER_REF = 2;
+    const SEND_BY_VAL = "0";
+    const SEND_BY_REF = "1";
+    const SEND_PREFER_REF = "ZEND_SEND_PREFER_REF";
 
-    public string $name;
-    public int $sendBy;
-    public bool $isVariadic;
+    public /* readonly */ string $name;
+    public /* readonly */ string $sendBy;
+    public /* readonly */ bool $isVariadic;
     public ?Type $type;
-    public ?Type $phpDocType;
+    public /* readonly */ ?Type $phpDocType;
     public ?string $defaultValue;
     /** @var AttributeInfo[] */
     public array $attributes;
@@ -836,7 +788,7 @@ class ArgInfo {
      */
     public function __construct(
         string $name,
-        int $sendBy,
+        string $sendBy,
         bool $isVariadic,
         ?Type $type,
         ?Type $phpDocType,
@@ -846,7 +798,8 @@ class ArgInfo {
         $this->name = $name;
         $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
-        $this->setTypes($type, $phpDocType);
+        $this->type = $type;
+        $this->phpDocType = $phpDocType;
         $this->defaultValue = $defaultValue;
         $this->attributes = $attributes;
     }
@@ -857,18 +810,6 @@ class ArgInfo {
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type)
             && $this->defaultValue === $other->defaultValue;
-    }
-
-    public function getSendByString(): string {
-        switch ($this->sendBy) {
-        case self::SEND_BY_VAL:
-            return "0";
-        case self::SEND_BY_REF:
-            return "1";
-        case self::SEND_PREFER_REF:
-            return "ZEND_SEND_PREFER_REF";
-        }
-        throw new Exception("Invalid sendBy value");
     }
 
     public function getMethodSynopsisType(): Type {
@@ -911,12 +852,6 @@ class ArgInfo {
 
         return $this->defaultValue;
     }
-
-    private function setTypes(?Type $type, ?Type $phpDocType): void
-    {
-        $this->type = $type;
-        $this->phpDocType = $phpDocType;
-    }
 }
 
 interface VariableLikeName {
@@ -944,7 +879,7 @@ abstract class AbstractConstName implements ConstOrClassConstName
 }
 
 class ConstName extends AbstractConstName {
-    public string $const;
+    public /* readonly */ string $const;
 
     public function __construct(?Name $namespace, string $const)
     {
@@ -980,8 +915,8 @@ class ConstName extends AbstractConstName {
 }
 
 class ClassConstName extends AbstractConstName {
-    public Name $class;
-    public string $const;
+    public /* readonly */ Name $class;
+    public /* readonly */ string $const;
 
     public function __construct(Name $class, string $const)
     {
@@ -1006,8 +941,8 @@ class ClassConstName extends AbstractConstName {
 }
 
 class PropertyName implements VariableLikeName {
-    public Name $class;
-    public string $property;
+    public /* readonly */ Name $class;
+    public /* readonly */ string $property;
 
     public function __construct(Name $class, string $property)
     {
@@ -1022,7 +957,7 @@ class PropertyName implements VariableLikeName {
 
     public function getDeclarationName(): string
     {
-         return $this->property;
+        return $this->property;
     }
 }
 
@@ -1038,7 +973,7 @@ interface FunctionOrMethodName {
 }
 
 class FunctionName implements FunctionOrMethodName {
-    private Name $name;
+    private /* readonly */ Name $name;
 
     public function __construct(Name $name) {
         $this->name = $name;
@@ -1106,8 +1041,8 @@ class FunctionName implements FunctionOrMethodName {
 }
 
 class MethodName implements FunctionOrMethodName {
-    public Name $className;
-    public string $methodName;
+    public /* readonly */ Name $className;
+    public /* readonly */ string $methodName;
 
     public function __construct(Name $className, string $methodName) {
         $this->className = $className;
@@ -1159,21 +1094,23 @@ class ReturnInfo {
     const REFCOUNT_1 = "1";
     const REFCOUNT_N = "N";
 
-    const REFCOUNTS = [
-        self::REFCOUNT_0,
+    const REFCOUNTS_NONSCALAR = [
         self::REFCOUNT_1,
         self::REFCOUNT_N,
     ];
 
-    public bool $byRef;
+    public /* readonly */ bool $byRef;
+    // NOT readonly - gets removed when discarding info for older PHP versions
     public ?Type $type;
-    public ?Type $phpDocType;
-    public bool $tentativeReturnType;
-    public string $refcount;
+    public /* readonly */ ?Type $phpDocType;
+    public /* readonly */ bool $tentativeReturnType;
+    public /* readonly */ string $refcount;
 
     public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType, ?string $refcount) {
         $this->byRef = $byRef;
-        $this->setTypes($type, $phpDocType, $tentativeReturnType);
+        $this->type = $type;
+        $this->phpDocType = $phpDocType;
+        $this->tentativeReturnType = $tentativeReturnType;
         $this->setRefcount($refcount);
     }
 
@@ -1187,13 +1124,6 @@ class ReturnInfo {
         return $this->type ?? $this->phpDocType;
     }
 
-    private function setTypes(?Type $type, ?Type $phpDocType, bool $tentativeReturnType): void
-    {
-        $this->type = $type;
-        $this->phpDocType = $phpDocType;
-        $this->tentativeReturnType = $tentativeReturnType;
-    }
-
     private function setRefcount(?string $refcount): void
     {
         $type = $this->phpDocType ?? $this->type;
@@ -1204,16 +1134,14 @@ class ReturnInfo {
             return;
         }
 
-        if (!in_array($refcount, ReturnInfo::REFCOUNTS, true)) {
-            throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
+        if ($isScalarType) {
+            throw new Exception(
+                "@refcount on functions returning scalar values is redundant and not permitted"
+            );
         }
 
-        if ($isScalarType && $refcount !== self::REFCOUNT_0) {
-            throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
-        }
-
-        if (!$isScalarType && $refcount === self::REFCOUNT_0) {
-            throw new Exception('A non-scalar return type of "' . $type->__toString() . '" cannot have a refcount of "' . self::REFCOUNT_0 . '"');
+        if (!in_array($refcount, ReturnInfo::REFCOUNTS_NONSCALAR, true)) {
+            throw new Exception("@refcount must have one of the following values: \"1\", \"N\", $refcount given");
         }
 
         $this->refcount = $refcount;
@@ -1221,19 +1149,19 @@ class ReturnInfo {
 }
 
 class FuncInfo {
-    public FunctionOrMethodName $name;
-    public int $classFlags;
+    public /* readonly */ FunctionOrMethodName $name;
+    public /* readonly */ int $classFlags;
     public int $flags;
-    public ?string $aliasType;
+    public /* readonly */ ?string $aliasType;
     public ?FunctionOrMethodName $alias;
-    public bool $isDeprecated;
+    public /* readonly */ bool $isDeprecated;
     public bool $supportsCompileTimeEval;
-    public bool $verify;
+    public /* readonly */ bool $verify;
     /** @var ArgInfo[] */
-    public array $args;
-    public ReturnInfo $return;
-    public int $numRequiredArgs;
-    public ?string $cond;
+    public /* readonly */ array $args;
+    public /* readonly */ ReturnInfo $return;
+    public /* readonly */ int $numRequiredArgs;
+    public /* readonly */ ?string $cond;
     public bool $isUndocumentable;
     public ?int $minimumPhpVersionIdCompatibility;
     /** @var AttributeInfo[] */
@@ -1333,7 +1261,7 @@ class FuncInfo {
         return $result;
     }
 
-    public function hasParamWithUnknownDefaultValue(): bool
+    private function hasParamWithUnknownDefaultValue(): bool
     {
         foreach ($this->args as $arg) {
             if ($arg->defaultValue && !$arg->hasProperDefaultValue()) {
@@ -1413,7 +1341,7 @@ class FuncInfo {
         return $code;
     }
 
-    public function getFramelessFunctionInfosName(): string {
+    private function getFramelessFunctionInfosName(): string {
         return $this->name->getFramelessFunctionInfosName();
     }
 
@@ -2086,6 +2014,13 @@ OUPUT_EXAMPLE
 
         $methodSynopsis->appendChild(new DOMText("\n   "));
 
+        foreach ($this->attributes as $attribute) {
+            $modifier = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+            $modifier->setAttribute("role", "attribute");
+            $methodSynopsis->appendChild($modifier);
+            $methodSynopsis->appendChild(new DOMText("\n   "));
+        }
+
         foreach ($this->getModifierNames() as $modifierString) {
             $modifierElement = $doc->createElement('modifier', $modifierString);
             $methodSynopsis->appendChild($modifierElement);
@@ -2161,16 +2096,12 @@ OUPUT_EXAMPLE
         foreach ($this->framelessFunctionInfos as $key => $framelessFunctionInfo) {
             $this->framelessFunctionInfos[$key] = clone $framelessFunctionInfo;
         }
-        if ($this->exposedDocComment) {
-            $this->exposedDocComment = clone $this->exposedDocComment;
-        }
     }
 }
 
 class EvaluatedValue
 {
-    /** @var mixed */
-    public $value;
+    public /* readonly */ mixed $value;
     public SimpleType $type;
     public Expr $expr;
     public bool $isUnknownConstValue;
@@ -2353,12 +2284,12 @@ abstract class VariableLike
 {
     public int $flags;
     public ?Type $type;
-    public ?Type $phpDocType;
-    public ?string $link;
+    public /* readonly */ ?Type $phpDocType;
+    public /* readonly */ ?string $link;
     public ?int $phpVersionIdMinimumCompatibility;
     /** @var AttributeInfo[] */
     public array $attributes;
-    public ?ExposedDocComment $exposedDocComment;
+    public /* readonly */ ?ExposedDocComment $exposedDocComment;
 
     /**
      * @var AttributeInfo[] $attributes
@@ -2381,8 +2312,6 @@ abstract class VariableLike
         $this->exposedDocComment = $exposedDocComment;
     }
 
-    abstract protected function getVariableTypeCode(): string;
-
     abstract protected function getVariableTypeName(): string;
 
     abstract protected function getFieldSynopsisDefaultLinkend(): string;
@@ -2393,16 +2322,6 @@ abstract class VariableLike
     abstract protected function getFieldSynopsisValueString(array $allConstInfos): ?string;
 
     abstract public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void;
-
-    protected function addTypeToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
-    {
-        $type = $this->phpDocType ?? $this->type;
-
-        if ($type) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
-            $fieldsynopsisElement->appendChild($type->getTypeForDoc($doc));
-        }
-    }
 
     /**
      * @return array<int, string[]>
@@ -2482,7 +2401,11 @@ abstract class VariableLike
 
         $this->addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
 
-        $this->addTypeToFieldSynopsis($doc, $fieldsynopsisElement);
+        $type = $this->phpDocType ?? $this->type;
+        if ($type) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($type->getTypeForDoc($doc));
+        }
 
         $varnameElement = $doc->createElement("varname", $this->getFieldSynopsisName());
         if ($this->link) {
@@ -2541,11 +2464,11 @@ abstract class VariableLike
 
 class ConstInfo extends VariableLike
 {
-    public ConstOrClassConstName $name;
-    public Expr $value;
+    public /* readonly */ ConstOrClassConstName $name;
+    public /* readonly */ Expr $value;
     public bool $isDeprecated;
     public ?string $valueString;
-    public ?string $cond;
+    public /* readonly */ ?string $cond;
     public ?string $cValue;
     public bool $isUndocumentable;
     public bool $isFileCacheAllowed;
@@ -2597,16 +2520,11 @@ class ConstInfo extends VariableLike
         return "constant";
     }
 
-    protected function getVariableTypeCode(): string
-    {
-        return "const";
-    }
-
     protected function getFieldSynopsisDefaultLinkend(): string
     {
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
-        return "$className.constants." . strtolower(str_replace(["__", "_"], ["", "-"], $this->name->getDeclarationName()));
+        return "$className.constants." . strtolower(str_replace("_", "-", trim($this->name->getDeclarationName(), "_")));
     }
 
     protected function getFieldSynopsisName(): string
@@ -2650,7 +2568,7 @@ class ConstInfo extends VariableLike
         return $termElement;
     }
 
-     public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel): DOMElement {
+    public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel): DOMElement {
         $indentation = str_repeat(" ", $indentationLevel);
 
         $entryElement = $doc->createElement("entry");
@@ -2906,12 +2824,12 @@ class ConstInfo extends VariableLike
 
 class PropertyInfo extends VariableLike
 {
-    public int $classFlags;
-    public PropertyName $name;
-    public ?Expr $defaultValue;
-    public ?string $defaultValueString;
-    public bool $isDocReadonly;
-    public bool $isVirtual;
+    public /* readonly */ int $classFlags;
+    public /* readonly */ PropertyName $name;
+    public /* readonly */ ?Expr $defaultValue;
+    public /* readonly */ ?string $defaultValueString;
+    public /* readonly */ bool $isDocReadonly;
+    public /* readonly */ bool $isVirtual;
 
     // Map possible variable names to the known string constant, see
     // ZEND_KNOWN_STRINGS
@@ -3034,11 +2952,6 @@ class PropertyInfo extends VariableLike
         parent::__construct($flags, $type, $phpDocType, $link, $phpVersionIdMinimumCompatibility, $attributes, $exposedDocComment);
     }
 
-    protected function getVariableTypeCode(): string
-    {
-        return "property";
-    }
-
     protected function getVariableTypeName(): string
     {
         return "property";
@@ -3048,7 +2961,7 @@ class PropertyInfo extends VariableLike
     {
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
-        return "$className.props." . strtolower(str_replace(["__", "_"], ["", "-"], $this->name->getDeclarationName()));
+        return "$className.props." . strtolower(str_replace("_", "-", trim($this->name->getDeclarationName(), "_")));
     }
 
     protected function getFieldSynopsisName(): string
@@ -3226,15 +3139,12 @@ class PropertyInfo extends VariableLike
         foreach ($this->attributes as $key => $attribute) {
             $this->attributes[$key] = clone $attribute;
         }
-        if ($this->exposedDocComment) {
-            $this->exposedDocComment = clone $this->exposedDocComment;
-        }
     }
 }
 
 class EnumCaseInfo {
-    public string $name;
-    public ?Expr $value;
+    public /* readonly */ string $name;
+    public /* readonly */ ?Expr $value;
 
     public function __construct(string $name, ?Expr $value) {
         $this->name = $name;
@@ -3259,9 +3169,9 @@ class EnumCaseInfo {
 }
 
 class AttributeInfo {
-    public string $class;
+    public /* readonly */ string $class;
     /** @var \PhpParser\Node\Arg[] */
-    public array $args;
+    public /* readonly */ array $args;
 
     /** @param \PhpParser\Node\Arg[] $args */
     public function __construct(string $class, array $args) {
@@ -3312,30 +3222,30 @@ class AttributeInfo {
 }
 
 class ClassInfo {
-    public Name $name;
+    public /* readonly */ Name $name;
     public int $flags;
     public string $type;
-    public ?string $alias;
-    public ?SimpleType $enumBackingType;
-    public bool $isDeprecated;
+    public /* readonly */ ?string $alias;
+    public /* readonly */ ?SimpleType $enumBackingType;
+    public /* readonly */ bool $isDeprecated;
     public bool $isStrictProperties;
     /** @var AttributeInfo[] */
     public array $attributes;
     public ?ExposedDocComment $exposedDocComment;
     public bool $isNotSerializable;
     /** @var Name[] */
-    public array $extends;
+    public /* readonly */ array $extends;
     /** @var Name[] */
-    public array $implements;
+    public /* readonly */ array $implements;
     /** @var ConstInfo[] */
-    public array $constInfos;
+    public /* readonly */ array $constInfos;
     /** @var PropertyInfo[] */
-    public array $propertyInfos;
+    public /* readonly */ array $propertyInfos;
     /** @var FuncInfo[] */
     public array $funcInfos;
     /** @var EnumCaseInfo[] */
-    public array $enumCaseInfos;
-    public ?string $cond;
+    public /* readonly */ array $enumCaseInfos;
+    public /* readonly */ ?string $cond;
     public ?int $phpVersionIdMinimumCompatibility;
     public bool $isUndocumentable;
 
@@ -3870,6 +3780,13 @@ class ClassInfo {
             $ooElement->appendChild($doc->createElement('modifier', $modifierOverride));
             $ooElement->appendChild(new DOMText("\n$indentation "));
         } elseif ($withModifiers) {
+            foreach ($classInfo->attributes as $attribute) {
+                $modifier = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                $modifier->setAttribute("role", "attribute");
+                $ooElement->appendChild($modifier);
+                $ooElement->appendChild(new DOMText("\n$indentation "));
+            }
+
             if ($classInfo->flags & Modifiers::FINAL) {
                 $ooElement->appendChild($doc->createElement('modifier', 'final'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
@@ -3895,7 +3812,7 @@ class ClassInfo {
         return strtolower(str_replace("_", "-", implode('-', $name->getParts())));
     }
 
-    public static function getClassSynopsisReference(Name $name): string {
+    private static function getClassSynopsisReference(Name $name): string {
         return "class." . self::getClassSynopsisFilename($name);
     }
 
@@ -4084,10 +4001,6 @@ class ClassInfo {
         foreach ($this->attributes as $key => $attribute) {
             $this->attributes[$key] = clone $attribute;
         }
-
-        if ($this->exposedDocComment) {
-            $this->exposedDocComment = clone $this->exposedDocComment;
-        }
     }
 
     /**
@@ -4206,8 +4119,8 @@ class FileInfo {
 }
 
 class DocCommentTag {
-    public string $name;
-    public ?string $value;
+    public /* readonly */ string $name;
+    public /* readonly */ ?string $value;
 
     public function __construct(string $name, ?string $value) {
         $this->name = $name;
@@ -4263,8 +4176,10 @@ class DocCommentTag {
     }
 }
 
+// Instances of ExposedDocComment are immutable and do not need to be cloned
+// when held by an object that is cloned
 class ExposedDocComment {
-    private string $docComment;
+    private /* readonly */ string $docComment;
 
     public function __construct(string $docComment) {
         $this->docComment = $docComment;
@@ -5099,14 +5014,14 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
                 if ($simpleArgType->isBuiltin) {
                     $code .= sprintf(
                         "\tZEND_%s_TYPE_INFO%s(%s, %s, %s, %d%s)\n",
-                        $argKind, $argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                        $argKind, $argDefaultKind, $argInfo->sendBy, $argInfo->name,
                         $simpleArgType->toTypeCode(), $argType->isNullable(),
                         $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
                 } else {
                     $code .= sprintf(
                         "\tZEND_%s_OBJ_INFO%s(%s, %s, %s, %d%s)\n",
-                        $argKind,$argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                        $argKind,$argDefaultKind, $argInfo->sendBy, $argInfo->name,
                         $simpleArgType->toEscapedName(), $argType->isNullable(),
                         $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
@@ -5116,14 +5031,14 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
                 if ($arginfoType->hasClassType()) {
                     $code .= sprintf(
                         "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s%s)\n",
-                        $argKind, $argInfo->getSendByString(), $argInfo->name,
+                        $argKind, $argInfo->sendBy, $argInfo->name,
                         $arginfoType->toClassTypeString(), $arginfoType->toTypeMask(),
                         !$argInfo->isVariadic ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
                 } else {
                     $code .= sprintf(
                         "\tZEND_%s_TYPE_MASK(%s, %s, %s, %s)\n",
-                        $argKind, $argInfo->getSendByString(), $argInfo->name,
+                        $argKind, $argInfo->sendBy, $argInfo->name,
                         $arginfoType->toTypeMask(),
                         $argInfo->getDefaultValueAsArginfoString()
                     );
@@ -5132,7 +5047,7 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
         } else {
             $code .= sprintf(
                 "\tZEND_%s_INFO%s(%s, %s%s)\n",
-                $argKind, $argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                $argKind, $argDefaultKind, $argInfo->sendBy, $argInfo->name,
                 $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
             );
         }
@@ -5161,7 +5076,7 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
 function generateCodeWithConditions(
     iterable $infos, string $separator, Closure $codeGenerator, ?string $parentCond = null): string {
     $code = "";
-    
+
     // For combining the conditional blocks of the infos with the same condition
     $openCondition = null;
     foreach ($infos as $info) {
@@ -6413,8 +6328,14 @@ if ($generateMethodSynopses) {
     }
 
     foreach ($methodSynopses as $filename => $content) {
-        if (!file_exists("$manualTarget/$filename")) {
-            if (file_put_contents("$manualTarget/$filename", $content)) {
+        $path = "$manualTarget/$filename";
+
+        if (!file_exists($path)) {
+            if (!file_exists(dirname($path))) {
+                mkdir(dirname($path));
+            }
+
+            if (file_put_contents($path, $content)) {
                 echo "Saved $filename\n";
             }
         }

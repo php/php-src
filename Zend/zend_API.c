@@ -2941,7 +2941,14 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
 	internal_function->module = EG(current_module);
-	internal_function->T = 0;
+	if (EG(active) && ZEND_OBSERVER_ENABLED) {
+		/* Add an observer temporary to store previous observed frames. This is
+		 * normally handled by zend_observer_post_startup(), except for
+		 * functions registered at runtime (EG(active)). */
+		internal_function->T = 1;
+	} else {
+		internal_function->T = 0;
+	}
 	memset(internal_function->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
 	while (ptr->fname) {

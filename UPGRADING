@@ -28,6 +28,14 @@ PHP 8.5 UPGRADE NOTES
 - Core:
   . It is no longer possible to use "array" and "callable" as class alias names
     in class_alias().
+  . Loosely comparing uncomparable objects (e.g. enums, \CurlHandle and other
+    internal classes) to booleans was previously inconsistent. If compared to a
+    boolean literal $object == true, it would behave the same way as (bool)
+    $object. If compared to a statically unknown value $object == $true, it
+    would always return false. This behavior was consolidated to always follow
+    the behavior of (bool) $object.
+  . The return value of gc_collect_cycles() no longer includes strings and
+    resources that were indirectly collected through cycles.
 
 - Intl:
   . The extension now requires at least ICU 57.1.
@@ -36,13 +44,29 @@ PHP 8.5 UPGRADE NOTES
   . ldap_get_option() and ldap_set_option() now throw a ValueError when
     passing an invalid option.
 
+- PCNTL:
+  . pcntl_exec() now throws ValueErrors when entries of the $args parameter
+    contain null bytes.
+  . pcntl_exec() now throws ValueErrors when entries or keys of the
+    $env_vars parameter contain null bytes.
+
+- PDO_FIREBIRD:
+  . A ValueError is now thrown when trying to set a cursor name that is too
+    long on a PDOStatement resulting from the Firebird driver.
+
 - SPL:
   . ArrayObject no longer accepts enums, as modifying the $name or $value
     properties can break engine assumptions.
+  . SplFileObject::fwrite's parameter $length is now nullable. The default
+    value changed from 0 to null.
 
 ========================================
 2. New Features
 ========================================
+
+- Core:
+  . Added support for Closures in constant expressions.
+    RFC: https://wiki.php.net/rfc/closures_in_const_expr
 
 - DOM:
   . Added Dom\Element::$outerHTML.
@@ -59,6 +83,10 @@ PHP 8.5 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . Trying to set a process title that is too long with cli_set_process_title()
+    will now fail instead of silently truncating the given title.
+
 ========================================
 4. Deprecated Functionality
 ========================================
@@ -72,10 +100,12 @@ PHP 8.5 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
-- Zlib:
-  . The "use_include_path" argument for the 
-    gzfile, gzopen and readgzfile functions had been changed
-    from int to boolean.
+- Intl:
+  . IntlDateFormatter::setTimeZone()()/datefmt_set_timezone
+    throws an IntlException on uninitialised classes/clone failures.
+
+- PCNTL:
+  . pcntl_exec() now has a formal return type of false.
 
 - PDO_PGSQL:
   . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
@@ -85,6 +115,25 @@ PHP 8.5 UPGRADE NOTES
 
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
+
+- POSIX:
+  . posix_ttyname sets last_error to EBADF when encountering
+    an invalid file descriptor.
+  . posix_isatty raises an E_WARNING message when encountering
+    an invalid file descriptor.
+  . posix_fpathconf checks invalid file descriptors and sets
+    last_error to EBADF and raises an E_WARNING message.
+
+- Sockets:
+  . socket_create_listen, socket_bind and socket_sendto throw a
+    ValueError if the port is lower than 0 or greater than 65535.
+  . socket_addrinfo_lookup throw a TypeError if any of the hints
+    values cannot be cast to a int.
+
+- Zlib:
+  . The "use_include_path" argument for the
+    gzfile, gzopen and readgzfile functions had been changed
+    from int to boolean.
 
 ========================================
 6. New Functions
@@ -137,10 +186,27 @@ PHP 8.5 UPGRADE NOTES
 
 - Sockets:
   . IPPROTO_ICMP/IPPROTO_ICMPV6.
+  . TCP_FUNCTION_BLK (FreeBSD only).
+  . TCP_FUNCTION_ALIAS (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA_NODOM (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
+  . TCP_BBR_ALGORITHM (FreeBSD only).
 
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- Opcache:
+  . Added opcache.file_cache_read_only to support a read-only
+    opcache.file_cache directory, for use with read-only file systems
+    (e.g. read-only Docker containers).
+    Best used with opcache.validate_timestamps=0,
+    opcache.enable_file_override=1,
+    and opcache.file_cache_consistency_checks=0.
+    Note: A cache generated with a different build of PHP, a different file
+    path, or different settings (including which extensions are loaded), may be
+    ignored.
 
 ========================================
 12. Windows Support
@@ -149,6 +215,13 @@ PHP 8.5 UPGRADE NOTES
 * The configuration variables PHP_VERSION, PHP_MINOR_VERSION, and
   PHP_RELEASE_VERSION are now always numbers.  Previously, they have been
   strings for buildconf builds.
+
+* phpize builds now reflect the source tree in the build dir (like that already
+  worked for in-tree builds); some extension builds (especially when using
+  Makefile.frag.w32) may need adjustments.
+
+* --enable-sanitzer is now supported for MSVC builds.  This enables ASan and
+  debug assertions, and is supported as of MSVC 16.10 and Windows 10.
 
 * COM:
   . The extension is now build shared by default; previously it defaulted to a
@@ -160,13 +233,28 @@ PHP 8.5 UPGRADE NOTES
     and FFI::load(). However, this convenience feature should not be used in
     production.
 
+* Streams:
+  . If only pipe streams are contained in the $read array, and the $write and
+    $except arrays are empty, stream_select() now behaves similar to POSIX
+    systems, i.e. the function only returns if at least one pipe is ready to be
+    read, or after the timeout expires.  Previously, stream_select() returned
+    immediately, reporting all streams as ready to read.
+
 ========================================
 13. Other Changes
 ========================================
 
+- Core:
+  The high resolution timer (`hrtime()`) on macOS now uses the recommended
+  `clock_gettime_nsec_np(CLOCK_UPTIME_RAW)` API instead of
+  `mach_absolute_time()`.
+
 ========================================
 14. Performance Improvements
 ========================================
+
+- XMLReader:
+  . Improved property access performance.
 
 - XMLWriter:
   . Improved performance and reduce memory consumption.

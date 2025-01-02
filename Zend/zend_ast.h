@@ -35,6 +35,7 @@ enum _zend_ast_kind {
 	/* special nodes */
 	ZEND_AST_ZVAL = 1 << ZEND_AST_SPECIAL_SHIFT,
 	ZEND_AST_CONSTANT,
+	ZEND_AST_OP_ARRAY,
 	ZEND_AST_ZNODE,
 
 	/* declaration nodes */
@@ -362,7 +363,7 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
 		return Z_LINENO_P(zv);
-	} else if (ast->kind == ZEND_AST_CONSTANT) {
+	} else if (ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_OP_ARRAY) {
 		zval *zv = &((zend_ast_zval *) ast)->val;
 		return Z_LINENO_P(zv);
 	} else {

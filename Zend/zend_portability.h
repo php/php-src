@@ -307,9 +307,7 @@ char *alloca();
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
-#elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
-# define ZEND_FASTCALL __fastcall
-#elif defined(_MSC_VER) && _MSC_VER >= 1800
+#elif defined(_MSC_VER)
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
@@ -863,6 +861,13 @@ static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
           | ((u & 0x000000000000ff00ULL) << 40)
           | ((u & 0x00000000000000ffULL) << 56));
 }
+#endif
+
+#ifdef ZEND_WIN32
+/* Whether it's allowed to reattach to a shm segment from different processes on
+ * this platform. This prevents pointing to internal structures from shm due to
+ * ASLR. Currently only possible on Windows. */
+# define ZEND_OPCACHE_SHM_REATTACHMENT 1
 #endif
 
 #endif /* ZEND_PORTABILITY_H */

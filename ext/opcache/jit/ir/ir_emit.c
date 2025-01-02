@@ -566,6 +566,9 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 		if (IR_IS_TYPE_INT(type)) {
 #ifdef IR_HAVE_SWAP_INT
 			if (pred[from] == to) {
+				if (ir_type_size[types[to]] > ir_type_size[type]) {
+					type = types[to];
+				}
 				ir_emit_swap(ctx, type, to, from);
 				IR_REGSET_EXCL(todo, from);
 				loc[to] = from;
@@ -579,7 +582,7 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 			loc[to] = tmp_reg;
 		} else {
 #ifdef IR_HAVE_SWAP_FP
-			if (pred[from] == to) {
+			if (pred[from] == to && types[to] == type) {
 				ir_emit_swap_fp(ctx, type, to, from);
 				IR_REGSET_EXCL(todo, from);
 				loc[to] = from;

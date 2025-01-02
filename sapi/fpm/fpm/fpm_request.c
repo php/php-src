@@ -201,7 +201,7 @@ void fpm_request_end(void)
 	fpm_scoreboard_proc_release(proc);
 
 	/* memory_peak */
-	fpm_scoreboard_update_commit(0, 0, 0, 0, 0, 0, 0, proc->memory, FPM_SCOREBOARD_ACTION_SET, NULL);
+	fpm_scoreboard_update_commit(-1, -1, -1, -1, -1, -1, -1, proc->memory, FPM_SCOREBOARD_ACTION_SET, NULL);
 }
 
 void fpm_request_finished(void)

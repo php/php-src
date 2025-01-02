@@ -214,8 +214,8 @@ PHP_FUNCTION(curl_multi_select)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	if (!(timeout >= 0.0 && timeout <= ((double)INT_MAX / 1000.0))) {
-		zend_argument_value_error(2, "must be between 0 and %d", (int)ceilf((double)INT_MAX / 1000));
+	if (!(timeout >= 0.0 && timeout <= (INT_MAX / 1000.0))) {
+		zend_argument_value_error(2, "must be between 0 and %f", INT_MAX / 1000.0);
 		RETURN_THROWS();
 	}
 

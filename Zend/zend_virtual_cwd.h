@@ -75,8 +75,11 @@ typedef unsigned short mode_t;
 #define DEFAULT_SLASH '\\'
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
+// IS_SLASH_P() may read the previous char on Windows, which may be OOB; use IS_SLASH_P_EX() instead
 #define IS_SLASH_P(c)	(*(c) == '/' || \
         (*(c) == '\\' && !IsDBCSLeadByte(*(c-1))))
+#define IS_SLASH_P_EX(c, first_byte)	(*(c) == '/' || \
+        (*(c) == '\\' && ((first_byte) || !IsDBCSLeadByte(*(c-1)))))
 
 /* COPY_WHEN_ABSOLUTE is 2 under Win32 because by chance both regular absolute paths
    in the file system and UNC paths need copying of two characters */
@@ -110,7 +113,9 @@ typedef unsigned short mode_t;
 #endif
 
 #define IS_SLASH(c)	((c) == '/')
+// IS_SLASH_P() may read the previous char on Windows, which may be OOB; use IS_SLASH_P_EX() instead
 #define IS_SLASH_P(c)	(*(c) == '/')
+#define IS_SLASH_P_EX(c, first_byte) IS_SLASH_P(c)
 
 #endif
 

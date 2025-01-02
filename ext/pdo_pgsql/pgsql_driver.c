@@ -295,7 +295,7 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 			execute_only = 1;
 		}
 	} else {
-		emulate = H->disable_native_prepares || H->emulate_prepares;
+		emulate = H->emulate_prepares;
 		execute_only = H->disable_prepares;
 	}
 

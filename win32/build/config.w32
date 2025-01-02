@@ -93,7 +93,7 @@ if (VS_TOOLSET) {
 }
 
 // General link flags
-toolset_setup_common_ldlags();
+toolset_setup_common_ldflags();
 
 // General libs
 toolset_setup_common_libs();
@@ -356,8 +356,20 @@ if (PHP_SECURITY_FLAGS == "yes") {
 }
 
 ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
-ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
-if (CLANG_TOOLSET) {
+ARG_ENABLE("sanitizer", "Enable ASan (and UBSan) extensions", "no");
+if (PHP_SANITIZER == "yes" && PHP_DEBUG == "yes") {
+	ERROR("Use of both --enable-sanitizer and --enable-debug not allowed.");
+}
+if (PHP_SANITIZER == "yes" && PHP_DEBUG_PACK == "no") {
+	ERROR("--enable-sanitizer requires --enable-debug-pack");
+}
+if (VS_TOOLSET) {
+	if (PHP_SANITIZER == "yes") {
+		if (COMPILER_NUMERIC_VERSION < 1929) {
+			ERROR("MSVC at least 16.10 required for sanitation plugins");
+		}
+	}
+} else if (CLANG_TOOLSET) {
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
 		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
 		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +

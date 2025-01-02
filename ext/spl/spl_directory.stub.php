@@ -283,7 +283,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fscanf(string $format, mixed &...$vars): array|int|null {}
 
     /** @tentative-return-type */
-    public function fwrite(string $data, int $length = 0): int|false {}
+    public function fwrite(string $data, ?int $length = null): int|false {}
 
     /** @tentative-return-type */
     public function fstat(): array {}

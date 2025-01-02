@@ -147,6 +147,7 @@ jobs:
       MYSQL_TEST_HOST: mysql
       PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
       PDO_MYSQL_TEST_HOST: mysql
+      PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
       mysql:
         image: mysql:8.3
@@ -155,6 +156,15 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
         uses: actions/checkout@v4

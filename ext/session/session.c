@@ -2175,19 +2175,17 @@ PHP_FUNCTION(session_set_save_handler)
 
 		if (register_shutdown) {
 			/* create shutdown function */
-			php_shutdown_function_entry shutdown_function_entry;
-			zval callable;
-			zend_result result;
-
-			ZVAL_STRING(&callable, "session_register_shutdown");
-			result = zend_fcall_info_init(&callable, 0, &shutdown_function_entry.fci,
-				&shutdown_function_entry.fci_cache, NULL, NULL);
-
-			ZEND_ASSERT(result == SUCCESS);
+			php_shutdown_function_entry shutdown_function_entry = {
+				.fci_cache = empty_fcall_info_cache,
+				.params = NULL,
+				.param_count = 0,
+			};
+			zend_function *fn_entry = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("session_register_shutdown"));
+			ZEND_ASSERT(fn_entry != NULL);
+			shutdown_function_entry.fci_cache.function_handler = fn_entry;
 
 			/* add shutdown function, removing the old one if it exists */
-			if (!register_user_shutdown_function("session_shutdown", strlen("session_shutdown"), &shutdown_function_entry)) {
-				zval_ptr_dtor(&callable);
+			if (!register_user_shutdown_function(ZEND_STRL("session_shutdown"), &shutdown_function_entry)) {
 				php_error_docref(NULL, E_WARNING, "Unable to register session shutdown function");
 				RETURN_FALSE;
 			}
@@ -2826,9 +2824,11 @@ PHP_FUNCTION(session_status)
 /* {{{ Registers session_write_close() as a shutdown function */
 PHP_FUNCTION(session_register_shutdown)
 {
-	php_shutdown_function_entry shutdown_function_entry;
-	zval callable;
-	zend_result result;
+	php_shutdown_function_entry shutdown_function_entry = {
+		.fci_cache = empty_fcall_info_cache,
+		.params = NULL,
+		.param_count = 0,
+	};
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2838,15 +2838,11 @@ PHP_FUNCTION(session_register_shutdown)
 	 * function after calling session_set_save_handler(), which expects
 	 * the session still to be available.
 	 */
-	ZVAL_STRING(&callable, "session_write_close");
-	result = zend_fcall_info_init(&callable, 0, &shutdown_function_entry.fci,
-		&shutdown_function_entry.fci_cache, NULL, NULL);
-
-	ZEND_ASSERT(result == SUCCESS);
+	zend_function *fn_entry = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("session_write_close"));
+	ZEND_ASSERT(fn_entry != NULL);
+	shutdown_function_entry.fci_cache.function_handler = fn_entry;
 
 	if (!append_user_shutdown_function(&shutdown_function_entry)) {
-		zval_ptr_dtor(&callable);
-
 		/* Unable to register shutdown function, presumably because of lack
 		 * of memory, so flush the session now. It would be done in rshutdown
 		 * anyway but the handler will have had it's dtor called by then.

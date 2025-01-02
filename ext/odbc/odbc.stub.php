@@ -351,18 +351,15 @@ namespace {
     function odbc_do(Odbc\Connection $odbc, string $query): Odbc\Result|false {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
-    /** @param resource $statement */
-    function odbc_fetch_object($statement, ?int $row = null): stdClass|false {}
+    function odbc_fetch_object(Odbc\Result $statement, ?int $row = null): stdClass|false {}
 
-    /** @param resource $statement */
-    function odbc_fetch_array($statement, ?int $row = null): array|false {}
+    function odbc_fetch_array(Odbc\Result $statement, ?int $row = null): array|false {}
 #endif
 
     /**
-     * @param resource $statement
      * @param array $array
      */
-    function odbc_fetch_into($statement, &$array, ?int $row = null): int|false {}
+    function odbc_fetch_into(Odbc\Result $statement, &$array, ?int $row = null): int|false {}
 
     function odbc_fetch_row(Odbc\Result $statement, ?int $row = null): bool {}
 

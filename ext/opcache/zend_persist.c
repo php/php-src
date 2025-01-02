@@ -188,6 +188,10 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 			}
 		}
 		node = (zend_ast *) copy;
+	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
+		zend_ast_zval *copy = zend_shared_memdup(ast, sizeof(zend_ast_zval));
+		zend_persist_op_array(&copy->val);
+		node = (zend_ast *) copy;
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		node = zend_shared_memdup(ast, zend_ast_size(children));

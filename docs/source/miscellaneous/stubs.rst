@@ -226,7 +226,7 @@ Additional meta information can be attached to functions, with the following PHP
 -  ``@deprecated``: Triggers the usual deprecation notice when the function/method is called.
 
 -  ``@alias``: If a function/method is an alias of another function/method, then the aliased
-   function/method name has to be provided as value. E.g. the function ``sizeof()` has the ``@alias
+   function/method name has to be provided as value. E.g. the function ``sizeof()`` has the ``@alias
    count`` annotation.
 
 -  ``@implementation-alias``: This is very similar to ``@alias`` with some semantic differences.
@@ -255,7 +255,7 @@ Additional meta information can be attached to functions, with the following PHP
 In order to generate code which is necessary for registering constants, classes, properties, enums,
 and traits, use the ``@generate-class-entries`` file-level PHPDoc block.
 
-``@generate-class-entries`` implies ``@generate-function-entries```, so the latter is then
+``@generate-class-entries`` implies ``@generate-function-entries``, so the latter is then
 superfluous.
 
 Given the following stub:
@@ -573,8 +573,8 @@ Then notice the ``#if (PHP_VERSION_ID >= ...)`` conditions in the generated argi
        return class_entry;
    }
 
-The preprocessor conditions are necessary because ``enum``s, ``readonly`` properties, and the
-``not-serializable`` flag, are PHP 8.1 features and don't exist in PHP 8.0.
+The preprocessor conditions are necessary because enumerations (``enum``), ``readonly`` properties,
+and the ``not-serializable`` flag, are PHP 8.1 features and don't exist in PHP 8.0.
 
 The registration of ``Number`` is therefore completely omitted, while the ``readonly`` flag is not
 added for``Elephpant::$name`` for PHP versions before 8.1.

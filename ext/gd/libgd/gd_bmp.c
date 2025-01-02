@@ -350,9 +350,7 @@ static int compress_row(unsigned char *row, int length)
 	}
 
 	if (compressed_run) {
-		if (rle_type == BMP_RLE_TYPE_RLE) {
-			compressed_length += build_rle_packet(row, rle_type, compressed_run, uncompressed_row);
-		}
+		compressed_length += build_rle_packet(row, rle_type, compressed_run, uncompressed_row);
 	}
 
 	gdFree(uncompressed_start);

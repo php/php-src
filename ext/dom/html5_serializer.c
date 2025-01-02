@@ -27,7 +27,7 @@
 #include <lexbor/encoding/encoding.h>
 
 /* This file implements the HTML 5 serialization algorithm.
- * https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2023-12-14)
+ * https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2024-12-11)
  */
 
 #define TRY(x) do { if (UNEXPECTED((x) != SUCCESS)) { return FAILURE; } } while (0)
@@ -371,7 +371,9 @@ zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode 
 		children = node->children;
 	}
 
-	/* Step 4 */
+	/* Step 4 concerns shadow roots, but we don't have these, so skip. */
+
+	/* Step 5 */
 	return dom_html5_serialize_node(ctx, children, node);
 }
 

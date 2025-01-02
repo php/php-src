@@ -17,6 +17,7 @@ function test(string $name, object $obj) {
     $reflector->initializeLazyObject($obj);
     $reflector->getProperty('a')->setRawValueWithoutLazyInitialization($obj, 'test');
 
+    var_dump($obj->a);
     var_dump($obj);
 }
 
@@ -33,9 +34,22 @@ $obj = $reflector->newLazyProxy(function () {
 
 test('Proxy', $obj);
 
+$real = new C('foo');
+$obj = $reflector->newLazyProxy(function () use ($real) {
+    return $real;
+});
+$reflector->initializeLazyObject($obj);
+$reflector->resetAsLazyProxy($real, function () {
+    return new C('bar');
+});
+$reflector->initializeLazyObject($real);
+
+test('Nested Proxy', $obj);
+
 ?>
 --EXPECTF--
 # Ghost
+string(4) "test"
 object(C)#%d (2) {
   ["a"]=>
   string(4) "test"
@@ -43,12 +57,27 @@ object(C)#%d (2) {
   NULL
 }
 # Proxy
+string(4) "test"
 lazy proxy object(C)#%d (1) {
   ["instance"]=>
   object(C)#%d (2) {
     ["a"]=>
-    NULL
+    string(4) "test"
     ["b"]=>
     NULL
+  }
+}
+# Nested Proxy
+string(4) "test"
+lazy proxy object(C)#%d (1) {
+  ["instance"]=>
+  lazy proxy object(C)#%d (1) {
+    ["instance"]=>
+    object(C)#%d (2) {
+      ["a"]=>
+      string(4) "test"
+      ["b"]=>
+      NULL
+    }
   }
 }

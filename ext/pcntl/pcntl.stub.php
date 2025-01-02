@@ -1055,7 +1055,7 @@ function pcntl_wifcontinued(int $status): bool {}
 
     function pcntl_wstopsig(int $status): int|false {}
 
-    function pcntl_exec(string $path, array $args = [], array $env_vars = []): bool {}
+    function pcntl_exec(string $path, array $args = [], array $env_vars = []): false {}
 
     function pcntl_alarm(int $seconds): int {}
 

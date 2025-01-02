@@ -331,7 +331,7 @@ ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_ob
 			if (obj->typeinfo) {
 				ITypeInfo_AddRef(obj->typeinfo);
 				return obj->typeinfo;
-			} else {
+			} else if (V_VT(&obj->v) == VT_DISPATCH) {
 				IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &typeinfo);
 				if (typeinfo) {
 					return typeinfo;

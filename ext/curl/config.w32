@@ -8,8 +8,7 @@ if (PHP_CURL != "no") {
 		SETUP_OPENSSL("curl", PHP_CURL) >= 2 &&
 		CHECK_LIB("winmm.lib", "curl", PHP_CURL) &&
 		CHECK_LIB("wldap32.lib", "curl", PHP_CURL) &&
-		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "curl", PHP_CURL))) ||
-			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "curl", PHP_CURL)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED))) &&
+		SETUP_ZLIB_LIB("curl", PHP_CURL) &&
 		(CHECK_LIB("normaliz.lib", "curl", PHP_CURL) &&
 		 CHECK_LIB("libssh2.lib", "curl", PHP_CURL) &&
 		 CHECK_LIB("nghttp2.lib", "curl", PHP_CURL))

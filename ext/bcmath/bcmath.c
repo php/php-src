@@ -1801,8 +1801,6 @@ PHP_METHOD(BcMath_Number, round)
 	bc_num ret = NULL;
 	bc_round(intern->num, precision, rounding_mode, &ret);
 
-	bc_rm_trailing_zeros(ret);
-
 	bcmath_number_obj_t *new_intern = bcmath_number_new_obj(ret, ret->n_scale);
 	RETURN_OBJ(&new_intern->std);
 }

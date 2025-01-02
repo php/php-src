@@ -225,10 +225,32 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 			*opened_path = zend_string_init(path, strlen(path), 0);
 		}
 	}
+	const char *pattern = path;
+#ifdef ZTS
+	char cwd[MAXPATHLEN];
+	char work_pattern[MAXPATHLEN];
+	char *result;
+	size_t cwd_skip = 0;
+	if (!IS_ABSOLUTE_PATH(path, strlen(path))) {
+		result = VCWD_GETCWD(cwd, MAXPATHLEN);
+		if (!result) {
+			cwd[0] = '\0';
+		}
+# ifdef PHP_WIN32
+		if (IS_SLASH(*path)) {
+			cwd[2] = '\0';
+		}
+# endif
+		cwd_skip = strlen(cwd)+1;
+
+		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, path);
+		pattern = work_pattern;
+	}
+#endif
 
 	pglob = ecalloc(1, sizeof(*pglob));
 
-	if (0 != (ret = glob(path, pglob->flags & GLOB_FLAGMASK, NULL, &pglob->glob))) {
+	if (0 != (ret = glob(pattern, pglob->flags & GLOB_FLAGMASK, NULL, &pglob->glob))) {
 #ifdef GLOB_NOMATCH
 		if (GLOB_NOMATCH != ret)
 #endif
@@ -237,6 +259,21 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 			return NULL;
 		}
 	}
+
+#ifdef ZTS
+	if (cwd_skip > 0) {
+		/* strip prepended CWD */
+		for (i = 0; i < pglob->glob.gl_pathc; i++) {
+			char *p = pglob->glob.gl_pathv[i];
+			char *q = p + cwd_skip;
+			char *e = p + strlen(pglob->glob.gl_pathv[i]) - 1;
+			while (q <= e) {
+				*p++ = *q++;
+			}
+			*p = '\0';
+		}
+	}
+#endif
 
 	/* if open_basedir in use, check and filter restricted paths */
 	if ((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) {

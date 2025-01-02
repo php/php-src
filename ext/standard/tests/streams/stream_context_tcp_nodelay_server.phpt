@@ -2,6 +2,13 @@
 stream context tcp_nodelay server
 --EXTENSIONS--
 sockets
+--SKIPIF--
+<?php
+if (!function_exists("proc_open")) die("skip no proc_open");
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip sockets ext currently does not work in worker on Windows');
+}
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -12,36 +19,25 @@ $serverCode = <<<'CODE'
     ]);
 
     $server = stream_socket_server(
-        "tcp://127.0.0.1:9099", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $ctxt);
+        "tcp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $ctxt);
+    phpt_notify_server_start($server);
 
-    $client = stream_socket_accept($server);
+    $conn = stream_socket_accept($server);
 
-    var_dump(socket_get_option(
-                socket_import_stream($server),
-                    SOL_TCP, TCP_NODELAY) > 0);
+    $si = socket_get_option(socket_import_stream($server), SOL_TCP, TCP_NODELAY) > 0 ? "nodelay": "delay";
+    $ci = socket_get_option(socket_import_stream($conn), SOL_TCP, TCP_NODELAY) > 0 ? "nodelay": "delay";
 
-    var_dump(socket_get_option(
-                socket_import_stream($client),
-                    SOL_TCP, TCP_NODELAY) > 0);
-
-    fclose($client);
-    fclose($server);
+    phpt_notify(message:"server-$si:conn-$ci");
 CODE;
 
 $clientCode = <<<'CODE'
-    $test = stream_socket_client(
-        "tcp://127.0.0.1:9099", $errno, $errstr, 10);
+    $test = stream_socket_client("tcp://{{ ADDR }}", $errno, $errstr, 10);
 
-    sleep(1);
-
-    fclose($test);
+    echo phpt_wait();
 CODE;
 
-include sprintf(
-    "%s/../../../openssl/tests/ServerClientTestCase.inc",
-    __DIR__);
-ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
+include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
-bool(false)
-bool(true)
+server-delay:conn-nodelay

@@ -17,6 +17,7 @@
 // This generates a configure script for win32 build
 
 var STDOUT = WScript.StdOut;
+var STDERR = WScript.StdErr;
 
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var C = FSO.CreateTextFile("configure.js", true);
@@ -201,6 +202,13 @@ function buildconf_process_args()
 if (buildconf_process_args() == 0) {
 	WScript.Quit(3);
 }
+
+if (FSO.FileExists("config.w32")) {
+	STDERR.WriteLine("Cannot find config.w32");
+	STDERR.WriteLine("Must be run from the root of the extension source");
+	WScript.Quit(10);
+}
+
 STDOUT.WriteLine("Rebuilding configure.js");
 STDOUT.WriteLine(PHP_DIR);
 

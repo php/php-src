@@ -10,8 +10,11 @@ class X extends IntlTimeZone {
 function __construct() {}
 }
 
-var_dump(intlcal_create_instance(new X, NULL));
+try {
+	intlcal_create_instance(new X, NULL);
+} catch (IntlException $e) {
+	echo $e->getMessage();
+}
 ?>
---EXPECTF--
-Warning: intlcal_create_instance(): intlcal_create_instance: passed IntlTimeZone is not properly constructed in %s on line %d
-NULL
+--EXPECT--
+intlcal_create_instance: passed IntlTimeZone is not properly constructed

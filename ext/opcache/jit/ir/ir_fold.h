@@ -1513,6 +1513,34 @@ IR_FOLD(NOT(UGT))
 	IR_FOLD_NEXT;
 }
 
+IR_FOLD(EQ(SUB, C_U8))
+IR_FOLD(EQ(SUB, C_U16))
+IR_FOLD(EQ(SUB, C_U32))
+IR_FOLD(EQ(SUB, C_U64))
+IR_FOLD(EQ(SUB, C_I8))
+IR_FOLD(EQ(SUB, C_I16))
+IR_FOLD(EQ(SUB, C_I32))
+IR_FOLD(EQ(SUB, C_I64))
+IR_FOLD(EQ(SUB, C_ADDR))
+IR_FOLD(NE(SUB, C_U8))
+IR_FOLD(NE(SUB, C_U16))
+IR_FOLD(NE(SUB, C_U32))
+IR_FOLD(NE(SUB, C_U64))
+IR_FOLD(NE(SUB, C_I8))
+IR_FOLD(NE(SUB, C_I16))
+IR_FOLD(NE(SUB, C_I32))
+IR_FOLD(NE(SUB, C_I64))
+IR_FOLD(NE(SUB, C_ADDR))
+{
+	/* (a - b) == 0 => a == b */
+	if (ctx->use_lists && ctx->use_lists[op1].count == 1 && op2_insn->val.u64 == 0) {
+		op1 = op1_insn->op1;
+		op2 = op1_insn->op2;
+		IR_FOLD_RESTART;
+	}
+	IR_FOLD_NEXT;
+}
+
 IR_FOLD(ADD(_, C_U8))
 IR_FOLD(ADD(_, C_U16))
 IR_FOLD(ADD(_, C_U32))

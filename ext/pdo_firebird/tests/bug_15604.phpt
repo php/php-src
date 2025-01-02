@@ -15,7 +15,7 @@ $dbh = getDbConnection();
 
 $dbh->exec('
 recreate table t_bug_15604 (
-  id bigint not null,
+  id int not null,
   a int not null,
   b int,
   constraint pk_bug_15604 primary key(id)

@@ -227,6 +227,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ubuntu:${{ inputs.ubuntu_version }}
+    env:
+      PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
       mysql:
         image: mysql:8.3
@@ -235,6 +237,15 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -952,10 +963,18 @@ jobs:
           - x64: true
             zts: true
             opcache: true
+            asan: false
           - x64: false
             zts: false
             opcache: false
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+            asan: false
+          - x64: true
+            zts: true
+            opcache: true
+            asan: true
+            branch: 'master'
+            timeout: 120
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}"
     runs-on: windows-${{ inputs.windows_version }}
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
@@ -968,6 +987,7 @@ jobs:
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
       PARALLEL: -j2
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
+      ASAN: "${{ matrix.asan && '1' || '0' }}"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf

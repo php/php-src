@@ -319,8 +319,8 @@ static char *next_line(multipart_buffer *self)
 		}
 		/* return entire buffer as a partial line */
 		line[self->bufsize] = 0;
-		self->buf_begin = ptr;
 		self->bytes_in_buffer = 0;
+		/* Let fill_buffer() handle the reset of self->buf_begin */
 	}
 
 	return line;

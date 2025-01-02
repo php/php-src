@@ -203,10 +203,16 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 }
 /* }}} */
 
+static inline bool spl_intern_is_glob(const spl_filesystem_object *intern)
+{
+	/* NULL check on `dirp` is necessary as destructors may interfere. */
+	return intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops);
+}
+
 PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *intern) /* {{{ */
 {
 #ifdef HAVE_GLOB
-	if (intern->type == SPL_FS_DIR && php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
+	if (intern->type == SPL_FS_DIR && spl_intern_is_glob(intern)) {
 		size_t len = 0;
 		char *tmp = php_glob_stream_get_path(intern->u.dir.dirp, &len);
 		if (len == 0) {
@@ -636,7 +642,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	}
 	if (intern->type == SPL_FS_DIR) {
 #ifdef HAVE_GLOB
-		if (intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
+		if (spl_intern_is_glob(intern)) {
 			ZVAL_STR_COPY(&tmp, intern->path);
 		} else {
 			ZVAL_FALSE(&tmp);
@@ -1590,13 +1596,12 @@ PHP_METHOD(GlobIterator, count)
 		RETURN_THROWS();
 	}
 
-	if (intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
-		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
-	} else {
-		/* should not happen */
-		// TODO ZEND_ASSERT ?
-		php_error_docref(NULL, E_ERROR, "GlobIterator lost glob state");
-	}
+	/* The spl_filesystem_object_get_method_check() function is called prior to calling this function.
+	 * Therefore, the directory entry cannot be NULL. However, if it is not NULL, then it must be a glob iterator
+	 * by construction. */
+	ZEND_ASSERT(spl_intern_is_glob(intern));
+
+	RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 }
 /* }}} */
 #endif /* HAVE_GLOB */
@@ -2600,15 +2605,18 @@ PHP_METHOD(SplFileObject, fwrite)
 	char *str;
 	size_t str_len;
 	zend_long length = 0;
+	bool length_is_null = true;
 	ssize_t written;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &length) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (!length_is_null) {
 		if (length >= 0) {
 			str_len = MIN((size_t)length, str_len);
 		} else {

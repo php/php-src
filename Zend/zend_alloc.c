@@ -2617,8 +2617,8 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 
 	zend_mm_huge_list *block = AG(mm_heap)->huge_list;
 	while (block) {
-		if (ptr >= (void*)block
-				&& ptr < (void*)((char*)block + block->size)) {
+		if (ptr >= block->ptr
+				&& ptr < (void*)((char*)block->ptr + block->size)) {
 			return 1;
 		}
 		block = block->next;

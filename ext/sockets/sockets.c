@@ -217,7 +217,7 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
-static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
+static bool php_open_listen_sock(php_socket *sock, unsigned short port, int backlog) /* {{{ */
 {
 	struct sockaddr_in  la = {0};
 	struct hostent	    *hp;
@@ -232,7 +232,7 @@ static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{
 
 	memcpy((char *) &la.sin_addr, hp->h_addr, hp->h_length);
 	la.sin_family = hp->h_addrtype;
-	la.sin_port = htons((unsigned short) port);
+	la.sin_port = htons(port);
 
 	sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);
 	sock->blocking = 1;
@@ -370,7 +370,11 @@ char *sockets_strerror(int error) /* {{{ */
 
 #ifndef PHP_WIN32
 	if (error < -10000) {
-		error = -error - 10000;
+		if (error == INT_MIN) {
+			error = 2147473648;
+		} else {
+			error = -error - 10000;
+		}
 
 #ifdef HAVE_HSTRERROR
 		buf = hstrerror(error);
@@ -676,10 +680,15 @@ PHP_FUNCTION(socket_create_listen)
 		Z_PARAM_LONG(backlog)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
-	if (!php_open_listen_sock(php_sock, port, backlog)) {
+	if (!php_open_listen_sock(php_sock, (unsigned short)port, backlog)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -1279,6 +1288,11 @@ PHP_FUNCTION(socket_bind)
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
 
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 	switch(php_sock->type) {
 		case AF_UNIX:
 			{
@@ -1555,7 +1569,7 @@ PHP_FUNCTION(socket_sendto)
 #endif
 	int					retval;
 	size_t              buf_len, addr_len;
-	zend_long			len, flags, port;
+	zend_long			len, flags, port = 0;
 	bool           port_is_null = 1;
 	char				*buf, *addr;
 
@@ -1571,6 +1585,12 @@ PHP_FUNCTION(socket_sendto)
 
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
+
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(6, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
@@ -1641,7 +1661,9 @@ PHP_FUNCTION(socket_get_option)
 	struct linger	linger_val;
 	struct timeval	tv;
 #ifdef PHP_WIN32
-	int				timeout = 0;
+	DWORD				timeout = 0;
+#else
+	struct timeval timeout;
 #endif
 	socklen_t		optlen;
 	php_socket		*php_sock;
@@ -1703,6 +1725,29 @@ PHP_FUNCTION(socket_get_option)
 			}
 		}
 #endif
+
+#ifdef TCP_FUNCTION_BLK
+		case TCP_FUNCTION_BLK:
+#ifdef TCP_FUNCTION_ALIAS
+		case TCP_FUNCTION_ALIAS:
+#endif
+		{
+
+			struct tcp_function_set tsf = {0};
+			optlen = sizeof(tsf);
+
+			if (getsockopt(php_sock->bsd_socket, level, optname, &tsf, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			}
+
+			array_init(return_value);
+
+			add_assoc_string(return_value, "function_set_name", tsf.function_set_name);
+			add_assoc_long(return_value, "pcbcnt", tsf.pcbcnt);
+			return;
+		}
+#endif
 		}
 	}
 
@@ -1726,23 +1771,19 @@ PHP_FUNCTION(socket_get_option)
 
 			case SO_RCVTIMEO:
 			case SO_SNDTIMEO:
-#ifndef PHP_WIN32
-				optlen = sizeof(tv);
-
-				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&tv, &optlen) != 0) {
-					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
-					RETURN_FALSE;
-				}
-#else
-				optlen = sizeof(int);
+				optlen = sizeof(timeout);
 
 				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&timeout, &optlen) != 0) {
 					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
 					RETURN_FALSE;
 				}
 
-				tv.tv_sec = timeout ? timeout / 1000 : 0;
-				tv.tv_usec = timeout ? (timeout * 1000) % 1000000 : 0;
+#ifndef PHP_WIN32
+				tv.tv_sec = timeout.tv_sec;
+				tv.tv_usec = timeout.tv_usec;
+#else
+				tv.tv_sec = timeout ? (long)(timeout / 1000) : 0;
+				tv.tv_usec = timeout ? (long)((timeout % 1000) * 1000) : 0;
 #endif
 
 				array_init(return_value);
@@ -1851,15 +1892,13 @@ PHP_FUNCTION(socket_set_option)
 	php_socket				*php_sock;
 	int						ov, optlen, retval;
 #ifdef PHP_WIN32
-	int						timeout;
+	DWORD						timeout;
 #else
 	struct					timeval tv;
 #endif
 	zend_long					level, optname;
 	void 					*opt_ptr;
 	HashTable		 		*opt_ht;
-	zval 					*l_onoff, *l_linger;
-	zval		 			*sec, *usec;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
@@ -1900,13 +1939,12 @@ PHP_FUNCTION(socket_set_option)
 		switch (optname) {
 #ifdef TCP_CONGESTION
 		case TCP_CONGESTION: {
-			if (Z_TYPE_P(arg4) == IS_STRING) {
-				opt_ptr = Z_STRVAL_P(arg4);
-				optlen = Z_STRLEN_P(arg4);
-			} else {
-				opt_ptr = "";
-				optlen = 0;
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is TCP_CONGESTION, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
+			opt_ptr = Z_STRVAL_P(arg4);
+			optlen = Z_STRLEN_P(arg4);
 			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
 				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 				RETURN_FALSE;
@@ -1915,6 +1953,39 @@ PHP_FUNCTION(socket_set_option)
 			RETURN_TRUE;
 		}
 #endif
+
+#ifdef TCP_FUNCTION_BLK
+		case TCP_FUNCTION_BLK: {
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is TCP_FUNCTION_BLK, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(arg4))) {
+				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is TCP_FUNCTION_BLK");
+				RETURN_THROWS();
+			}
+			/* [...] the unique name of the TCP stack, and should be no longer than
+			 * TCP_FUNCTION_NAME_LEN_MAX-1 characters in length.
+			 * https://github.com/freebsd/freebsd-src/blob/da2c88dfcf4f425e6e0a58d6df3a7c8e88d8df92/share/man/man9/tcp_functions.9#L193C1-L194C50 */
+			if (Z_STRLEN_P(arg4) >= TCP_FUNCTION_NAME_LEN_MAX) {
+				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is TCP_FUNCTION_BLK", TCP_FUNCTION_NAME_LEN_MAX);
+				RETURN_THROWS();
+			}
+			struct tcp_function_set tfs = {0};
+			/* Copy the trailing nul byte */
+			memcpy(tfs.function_set_name, Z_STRVAL_P(arg4), Z_STRLEN_P(arg4)+1);
+
+			optlen = sizeof(tfs);
+			opt_ptr = &tfs;
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+
 		}
 	}
 
@@ -1925,9 +1996,18 @@ PHP_FUNCTION(socket_set_option)
 		case SO_LINGER: {
 			const char l_onoff_key[] = "l_onoff";
 			const char l_linger_key[] = "l_linger";
+			zval *l_onoff, *l_linger;
 
-			convert_to_array(arg4);
-			opt_ht = Z_ARRVAL_P(arg4);
+			if (Z_TYPE_P(arg4) != IS_ARRAY) {
+				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
+					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is SO_LINGER, %s given", zend_zval_value_name(arg4));
+					RETURN_THROWS();
+				} else {
+					opt_ht = Z_OBJPROP_P(arg4);
+				}
+			} else {
+				opt_ht = Z_ARRVAL_P(arg4);
+			}
 
 			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", l_onoff_key);
@@ -1938,11 +2018,21 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			convert_to_long(l_onoff);
-			convert_to_long(l_linger);
+			zend_long val_lonoff = zval_get_long(l_onoff);
+			zend_long val_linger = zval_get_long(l_linger);
 
-			lv.l_onoff = (unsigned short)Z_LVAL_P(l_onoff);
-			lv.l_linger = (unsigned short)Z_LVAL_P(l_linger);
+			if (val_lonoff < 0 || val_lonoff > USHRT_MAX) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", l_onoff_key, USHRT_MAX);
+				RETURN_THROWS();
+			}
+
+			if (val_linger < 0 || val_linger > USHRT_MAX) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %d", l_linger, USHRT_MAX);
+				RETURN_THROWS();
+			}
+
+			lv.l_onoff = (unsigned short)val_lonoff;
+			lv.l_linger = (unsigned short)val_linger;
 
 			optlen = sizeof(lv);
 			opt_ptr = &lv;
@@ -1953,9 +2043,20 @@ PHP_FUNCTION(socket_set_option)
 		case SO_SNDTIMEO: {
 			const char sec_key[] = "sec";
 			const char usec_key[] = "usec";
+			zval *sec, *usec;
 
-			convert_to_array(arg4);
-			opt_ht = Z_ARRVAL_P(arg4);
+			if (Z_TYPE_P(arg4) != IS_ARRAY) {
+				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
+					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is %s, %s given",
+							optname == SO_RCVTIMEO ? "SO_RCVTIMEO" : "SO_SNDTIMEO",
+							zend_zval_value_name(arg4));
+					RETURN_THROWS();
+				} else {
+					opt_ht = Z_OBJPROP_P(arg4);
+				}
+			} else {
+				opt_ht = Z_ARRVAL_P(arg4);
+			}
 
 			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", sec_key);
@@ -1966,29 +2067,45 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			convert_to_long(sec);
-			convert_to_long(usec);
+			zend_long valsec = zval_get_long(sec);
+			zend_long valusec = zval_get_long(usec);
 #ifndef PHP_WIN32
-			tv.tv_sec = Z_LVAL_P(sec);
-			tv.tv_usec = Z_LVAL_P(usec);
+			tv.tv_sec = valsec;
+			tv.tv_usec = valusec;
 			optlen = sizeof(tv);
 			opt_ptr = &tv;
 #else
-			timeout = Z_LVAL_P(sec) * 1000 + Z_LVAL_P(usec) / 1000;
-			optlen = sizeof(int);
+			if (valsec < 0 || valsec > ULONG_MAX / 1000) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", sec_key, (ULONG_MAX / 1000));
+				RETURN_THROWS();
+			}
+
+			timeout = valsec * 1000;
+
+
+			/*
+			 * We deliberately throw if (valusec / 1000) > ULONG_MAX, treating it as a programmer error.
+			 * On Windows, ULONG_MAX = 2^32, unlike ZEND_LONG_MAX = 2^63.
+			 */
+			if (valusec < 0 || timeout > ULONG_MAX - (valusec / 1000)) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", usec_key, (DWORD)(ULONG_MAX - (valusec / 1000)));
+				RETURN_THROWS();
+			}
+
+			timeout += valusec / 1000;
+			optlen = sizeof(timeout);
 			opt_ptr = &timeout;
 #endif
 			break;
 		}
 #ifdef SO_BINDTODEVICE
 		case SO_BINDTODEVICE: {
-			if (Z_TYPE_P(arg4) == IS_STRING) {
-				opt_ptr = Z_STRVAL_P(arg4);
-				optlen = Z_STRLEN_P(arg4);
-			} else {
-				opt_ptr = "";
-				optlen = 0;
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is SO_BINDTODEVICE, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
+			opt_ptr = Z_STRVAL_P(arg4);
+			optlen = Z_STRLEN_P(arg4);
 			break;
 		}
 #endif
@@ -1996,11 +2113,20 @@ PHP_FUNCTION(socket_set_option)
 #ifdef SO_ACCEPTFILTER
 		case SO_ACCEPTFILTER: {
 			if (Z_TYPE_P(arg4) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
-				RETURN_FALSE;
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is SO_ACCEPTFILTER, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(arg4))) {
+				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is SO_ACCEPTFILTER");
+				RETURN_THROWS();
 			}
 			struct accept_filter_arg af = {0};
-			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
+			if (Z_STRLEN_P(arg4) >= sizeof(af.af_name)) {
+				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is SO_ACCEPTFILTER", sizeof(af.af_name));
+				RETURN_THROWS();
+			}
+			/* Copy the trailing nul byte */
+			memcpy(af.af_name, Z_STRVAL_P(arg4), Z_STRLEN_P(arg4)+1);
 			opt_ptr = &af;
 			optlen = sizeof(af);
 			break;
@@ -2015,8 +2141,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_FALSE;
 			}
 			if (Z_TYPE_P(arg4) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
-				RETURN_FALSE;
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is FIL_ATTACH or FIL_DETACH, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
 			opt_ptr = Z_STRVAL_P(arg4);
 			optlen = Z_STRLEN_P(arg4);
@@ -2026,15 +2152,15 @@ PHP_FUNCTION(socket_set_option)
 
 #ifdef SO_ATTACH_REUSEPORT_CBPF
 		case SO_ATTACH_REUSEPORT_CBPF: {
-			convert_to_long(arg4);
+			zend_long cbpf_val = zval_get_long(arg4);
 
-			if (!Z_LVAL_P(arg4)) {
+			if (!cbpf_val) {
 				ov = 1;
 				optlen = sizeof(ov);
 				opt_ptr = &ov;
 				optname = SO_DETACH_BPF;
 			} else {
-				uint32_t k = (uint32_t)Z_LVAL_P(arg4);
+				uint32_t k = (uint32_t)cbpf_val;
 				static struct sock_filter cbpf[8] = {0};
 				static struct sock_fprog bpfprog;
 
@@ -2061,8 +2187,7 @@ PHP_FUNCTION(socket_set_option)
 
 		default:
 default_case:
-			convert_to_long(arg4);
-			ov = Z_LVAL_P(arg4);
+			ov = zval_get_long(arg4);
 
 			optlen = sizeof(ov);
 			opt_ptr = &ov;
@@ -2461,14 +2586,35 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 	if (zhints && !HT_IS_PACKED(Z_ARRVAL_P(zhints))) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
+				bool failed = false;
 				if (zend_string_equals_literal(key, "ai_flags")) {
-					hints.ai_flags = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_flags\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					hints.ai_flags = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_socktype")) {
-					hints.ai_socktype = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_socktype\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					hints.ai_socktype = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_protocol")) {
-					hints.ai_protocol = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_protocol\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					hints.ai_protocol = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_family")) {
-					hints.ai_family = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_family\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					hints.ai_family = (int)val;
 				} else {
 					zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
 						"\"ai_protocol\", or \"ai_family\"");

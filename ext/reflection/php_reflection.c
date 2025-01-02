@@ -6005,6 +6005,11 @@ ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 		RETURN_THROWS();
 	}
 
+	while (zend_object_is_lazy_proxy(object)
+			&& zend_lazy_object_initialized(object)) {
+		object = zend_lazy_object_get_instance(object);
+	}
+
 	zval *var_ptr = OBJ_PROP(object, ref->prop->offset);
 	bool prop_was_lazy = Z_PROP_FLAG_P(var_ptr) & IS_PROP_LAZY;
 
@@ -6048,7 +6053,10 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 		RETURN_THROWS();
 	}
 
-	bool prop_was_lazy = (Z_PROP_FLAG_P(OBJ_PROP(object, ref->prop->offset)) & IS_PROP_LAZY);
+	while (zend_object_is_lazy_proxy(object)
+			&& zend_lazy_object_initialized(object)) {
+		object = zend_lazy_object_get_instance(object);
+	}
 
 	zval *src = &object->ce->default_properties_table[OBJ_PROP_TO_NUM(ref->prop->offset)];
 	zval *dst = OBJ_PROP(object, ref->prop->offset);
@@ -6063,7 +6071,7 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 	ZVAL_COPY_PROP(dst, src);
 
 	/* Object becomes non-lazy if this was the last lazy prop */
-	if (prop_was_lazy && zend_object_is_lazy(object)
+	if (zend_object_is_lazy(object)
 			&& !zend_lazy_object_initialized(object)) {
 		if (zend_lazy_object_decr_lazy_props(object)) {
 			zend_lazy_object_realize(object);

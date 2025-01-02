@@ -44,7 +44,8 @@ fpassthru($pipes[1]);
 proc_close($proc);
 
 putenv('ENV_1=ENV_1');
-$env = ['ENV_2' => 'ENV_2'];
+/* PATH is needed to find ASan DLLs (and maybe others) on Windows */
+$env = ['ENV_2' => 'ENV_2', 'PATH' => getenv('PATH')];
 $cmd = [$php, '-n', '-r', 'var_dump(getenv("ENV_1"), getenv("ENV_2"));'];
 
 echo "\nEnvironment inheritance:\n";

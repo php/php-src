@@ -1458,7 +1458,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 				postval = Z_STR_P(prop);
 
 				if (php_check_open_basedir(ZSTR_VAL(postval))) {
-					return FAILURE;
+					goto out_string;
 				}
 
 				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "mime", sizeof("mime")-1, 0, &rv);
@@ -1483,15 +1483,18 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 					seekfunc = NULL;
 				}
 
+				part = curl_mime_addpart(mime);
+				if (part == NULL) {
+					if (stream) {
+						php_stream_close(stream);
+					}
+					goto out_string;
+				}
+
 				cb_arg = emalloc(sizeof *cb_arg);
 				cb_arg->filename = zend_string_copy(postval);
 				cb_arg->stream = stream;
 
-				part = curl_mime_addpart(mime);
-				if (part == NULL) {
-					zend_string_release_ex(string_key, 0);
-					return FAILURE;
-				}
 				if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
 					|| (form_error = curl_mime_data_cb(part, filesize, read_cb, seekfunc, free_cb, cb_arg)) != CURLE_OK
 					|| (form_error = curl_mime_filename(part, filename ? filename : ZSTR_VAL(postval))) != CURLE_OK
@@ -1512,8 +1515,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "postname", sizeof("postname")-1, 0, &rv);
 			if (EG(exception)) {
-				zend_string_release_ex(string_key, 0);
-				return FAILURE;
+				goto out_string;
 			}
 			ZVAL_DEREF(prop);
 			ZEND_ASSERT(Z_TYPE_P(prop) == IS_STRING);
@@ -1522,8 +1524,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "mime", sizeof("mime")-1, 0, &rv);
 			if (EG(exception)) {
-				zend_string_release_ex(string_key, 0);
-				return FAILURE;
+				goto out_string;
 			}
 			ZVAL_DEREF(prop);
 			ZEND_ASSERT(Z_TYPE_P(prop) == IS_STRING);
@@ -1532,8 +1533,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "data", sizeof("data")-1, 0, &rv);
 			if (EG(exception)) {
-				zend_string_release_ex(string_key, 0);
-				return FAILURE;
+				goto out_string;
 			}
 			ZVAL_DEREF(prop);
 			ZEND_ASSERT(Z_TYPE_P(prop) == IS_STRING);
@@ -1545,8 +1545,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 			part = curl_mime_addpart(mime);
 			if (part == NULL) {
-				zend_string_release_ex(string_key, 0);
-				return FAILURE;
+				goto out_string;
 			}
 			if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
 				|| (form_error = curl_mime_data(part, ZSTR_VAL(postval), ZSTR_LEN(postval))) != CURLE_OK
@@ -1577,7 +1576,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 	SAVE_CURL_ERROR(ch, error);
 	if (error != CURLE_OK) {
-		return FAILURE;
+		goto out_mime;
 	}
 
 	if ((*ch->clone) == 1) {
@@ -1588,6 +1587,12 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 	SAVE_CURL_ERROR(ch, error);
 	return error == CURLE_OK ? SUCCESS : FAILURE;
+
+out_string:
+	zend_string_release_ex(string_key, false);
+out_mime:
+	curl_mime_free(mime);
+	return FAILURE;
 }
 /* }}} */
 

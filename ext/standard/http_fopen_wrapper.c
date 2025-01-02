@@ -245,6 +245,18 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	if (context && (tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "timeout")) != NULL) {
 		double d = zval_get_double(tmpzval);
 #ifndef PHP_WIN32
+		const double timeoutmax = (double) PHP_TIMEOUT_ULL_MAX / 1000000.0;
+#else
+		const double timeoutmax = (double) LONG_MAX / 1000000.0;
+#endif
+
+		if (d > timeoutmax) {
+			php_stream_wrapper_log_error(wrapper, options, "timeout must be lower than " ZEND_ULONG_FMT, (zend_ulong)timeoutmax);
+			zend_string_release(transport_string);
+			php_url_free(resource);
+			return NULL;
+		}
+#ifndef PHP_WIN32
 		timeout.tv_sec = (time_t) d;
 		timeout.tv_usec = (size_t) ((d - timeout.tv_sec) * 1000000);
 #else

@@ -362,6 +362,10 @@ bool ir_check(const ir_ctx *ctx)
 									break;
 								}
 							}
+							if (count == 0 && (insn->op == IR_END || insn->op == IR_LOOP_END)) {
+								/* Dead block */
+								break;
+							}
 							fprintf(stderr, "ir_base[%d].op (%s) must have 1 successor (%d)\n",
 								i, ir_op_name[insn->op], count);
 							ok = 0;

@@ -23,6 +23,7 @@
 #include "zend_language_parser.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions.h"
+#include "zend_closures.h"
 #include "zend_constants.h"
 #include "zend_enum.h"
 
@@ -989,6 +990,13 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			}
 			return SUCCESS;
 		}
+		case ZEND_AST_OP_ARRAY:
+		{
+			zend_function *func = Z_PTR_P(&((zend_ast_zval*)(ast))->val);
+
+			zend_create_closure(result, func, scope, scope, NULL);
+			return SUCCESS;
+		}
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 		{
@@ -1068,7 +1076,7 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 {
 	size_t size;
 
-	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_OP_ARRAY) {
 		size = sizeof(zend_ast_zval);
 	} else if (zend_ast_is_list(ast)) {
 		uint32_t i;
@@ -1126,6 +1134,13 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 				new->child[i] = NULL;
 			}
 		}
+	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
+		zend_ast_zval *new = (zend_ast_zval*)buf;
+		new->kind = ZEND_AST_OP_ARRAY;
+		new->attr = ast->attr;
+		ZVAL_COPY(&new->val, &((zend_ast_zval *) ast)->val);
+		Z_LINENO(new->val) = zend_ast_get_lineno(ast);
+		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		zend_ast *new = (zend_ast*)buf;
@@ -1189,6 +1204,8 @@ tail_call:
 		}
 	} else if (EXPECTED(ast->kind == ZEND_AST_CONSTANT)) {
 		zend_string_release_ex(zend_ast_get_constant_name(ast), 0);
+	} else if (EXPECTED(ast->kind == ZEND_AST_OP_ARRAY)) {
+		ZEND_ASSERT(!Z_REFCOUNTED(((zend_ast_zval*)(ast))->val));
 	} else if (EXPECTED(ast->kind >= ZEND_AST_FUNC_DECL)) {
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
@@ -1742,6 +1759,44 @@ static ZEND_COLD void zend_ast_export_type(smart_str *str, zend_ast *ast, int in
 		smart_str_appendc(str, '?');
 	}
 	zend_ast_export_ns_name(str, ast, 0, indent);
+}
+
+static ZEND_COLD void zend_ast_export_hook_list(smart_str *str, zend_ast_list *hook_list, int indent)
+{
+	smart_str_appends(str, " {");
+	smart_str_appendc(str, '\n');
+	indent++;
+	zend_ast_export_indent(str, indent);
+
+	for (uint32_t i = 0; i < hook_list->children; i++) {
+		zend_ast_decl *hook = (zend_ast_decl *)hook_list->child[i];
+		zend_ast_export_visibility(str, hook->flags, ZEND_MODIFIER_TARGET_PROPERTY);
+		if (hook->flags & ZEND_ACC_FINAL) {
+			smart_str_appends(str, "final ");
+		}
+		smart_str_append(str, hook->name);
+		zend_ast *body = hook->child[2];
+		if (body == NULL) {
+			smart_str_appendc(str, ';');
+		} else if (body->kind == ZEND_AST_PROPERTY_HOOK_SHORT_BODY) {
+			smart_str_appends(str, " => ");
+			zend_ast_export_ex(str, body->child[0], 0, indent);
+			smart_str_appendc(str, ';');
+		} else {
+			smart_str_appends(str, " {\n");
+			zend_ast_export_stmt(str, body, indent + 1);
+			zend_ast_export_indent(str, indent);
+			smart_str_appendc(str, '}');
+		}
+		if (i < (hook_list->children - 1)) {
+			smart_str_appendc(str, '\n');
+			zend_ast_export_indent(str, indent);
+		}
+	}
+	smart_str_appendc(str, '\n');
+	indent--;
+	zend_ast_export_indent(str, indent);
+	smart_str_appendc(str, '}');
 }
 
 #define BINARY_OP(_op, _p, _pl, _pr) do { \
@@ -2389,49 +2444,7 @@ simple_list:
 			}
 
 			if (ast->child[3]) {
-				zend_ast_list *hook_list = zend_ast_get_list(ast->child[3]);
-
-				smart_str_appends(str, " {");
-				smart_str_appendc(str, '\n');
-				indent++;
-				zend_ast_export_indent(str, indent);
-
-				for (uint32_t i = 0; i < hook_list->children; i++) {
-					zend_ast_decl *hook = (zend_ast_decl *)hook_list->child[i];
-					zend_ast_export_visibility(str, hook->flags, ZEND_MODIFIER_TARGET_PROPERTY);
-					if (hook->flags & ZEND_ACC_FINAL) {
-						smart_str_appends(str, "final ");
-					}
-					switch (i) {
-						case ZEND_PROPERTY_HOOK_GET:
-							smart_str_appends(str, "get");
-							break;
-						case ZEND_PROPERTY_HOOK_SET:
-							smart_str_appends(str, "set");
-							break;
-					}
-					zend_ast *body = hook->child[2];
-					if (body == NULL) {
-						smart_str_appendc(str, ';');
-					} else if (body->kind == ZEND_AST_PROPERTY_HOOK_SHORT_BODY) {
-						smart_str_appends(str, " => ");
-						zend_ast_export_ex(str, body->child[0], 0, indent);
-						smart_str_appendc(str, ';');
-					} else {
-						smart_str_appends(str, " {\n");
-						zend_ast_export_stmt(str, body, indent + 1);
-						zend_ast_export_indent(str, indent);
-						smart_str_appendc(str, '}');
-					}
-					if (i < (hook_list->children - 1)) {
-						smart_str_appendc(str, '\n');
-						zend_ast_export_indent(str, indent);
-					}
-				}
-				smart_str_appendc(str, '\n');
-				indent--;
-				zend_ast_export_indent(str, indent);
-				smart_str_appendc(str, '}');
+				zend_ast_export_hook_list(str, zend_ast_get_list(ast->child[3]), indent);
 			}
 			break;
 		case ZEND_AST_CONST_ELEM:
@@ -2558,6 +2571,7 @@ simple_list:
 			if (ast->child[3]) {
 				zend_ast_export_attributes(str, ast->child[3], indent, 0);
 			}
+			zend_ast_export_visibility(str, ast->attr, ZEND_MODIFIER_TARGET_CPP);
 			if (ast->child[0]) {
 				zend_ast_export_type(str, ast->child[0], indent);
 				smart_str_appendc(str, ' ');
@@ -2570,7 +2584,14 @@ simple_list:
 			}
 			smart_str_appendc(str, '$');
 			zend_ast_export_name(str, ast->child[1], 0, indent);
-			APPEND_DEFAULT_VALUE(2);
+			if (ast->child[2]) {
+				smart_str_appends(str, " = ");
+				zend_ast_export_ex(str, ast->child[2], 0, indent);
+			}
+			if (ast->child[5]) {
+				zend_ast_export_hook_list(str, zend_ast_get_list(ast->child[5]), indent);
+			}
+			break;
 		case ZEND_AST_ENUM_CASE:
 			if (ast->child[3]) {
 				zend_ast_export_attributes(str, ast->child[3], indent, 1);

@@ -33,7 +33,8 @@
 
 #define ZEND_HRTIME_PLATFORM_POSIX   0
 #define ZEND_HRTIME_PLATFORM_WINDOWS 0
-#define ZEND_HRTIME_PLATFORM_APPLE   0
+#define ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE 0
+#define ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC 0
 #define ZEND_HRTIME_PLATFORM_HPUX    0
 #define ZEND_HRTIME_PLATFORM_AIX     0
 
@@ -43,9 +44,12 @@
 #elif defined(_WIN32) || defined(_WIN64)
 # undef  ZEND_HRTIME_PLATFORM_WINDOWS
 # define ZEND_HRTIME_PLATFORM_WINDOWS 1
+#elif HAVE_CLOCK_GETTIME_NSEC_NP
+# undef  ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC
+# define ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC 1
 #elif defined(__APPLE__)
-# undef  ZEND_HRTIME_PLATFORM_APPLE
-# define ZEND_HRTIME_PLATFORM_APPLE 1
+# undef  ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
+# define ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE 1
 #elif (defined(__hpux) || defined(hpux)) || ((defined(__sun__) || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
 # undef  ZEND_HRTIME_PLATFORM_HPUX
 # define ZEND_HRTIME_PLATFORM_HPUX 1
@@ -54,7 +58,7 @@
 # define ZEND_HRTIME_PLATFORM_AIX 1
 #endif
 
-#define ZEND_HRTIME_AVAILABLE (ZEND_HRTIME_PLATFORM_POSIX || ZEND_HRTIME_PLATFORM_WINDOWS || ZEND_HRTIME_PLATFORM_APPLE || ZEND_HRTIME_PLATFORM_HPUX || ZEND_HRTIME_PLATFORM_AIX)
+#define ZEND_HRTIME_AVAILABLE (ZEND_HRTIME_PLATFORM_POSIX || ZEND_HRTIME_PLATFORM_WINDOWS || ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE || ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC || ZEND_HRTIME_PLATFORM_HPUX || ZEND_HRTIME_PLATFORM_AIX)
 
 BEGIN_EXTERN_C()
 
@@ -82,7 +86,9 @@ static zend_always_inline zend_hrtime_t zend_hrtime(void)
 	LARGE_INTEGER lt = {0};
 	QueryPerformanceCounter(&lt);
 	return (zend_hrtime_t)((zend_hrtime_t)lt.QuadPart * zend_hrtime_timer_scale);
-#elif ZEND_HRTIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC
+	return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
+#elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 	return (zend_hrtime_t)mach_absolute_time() * zend_hrtime_timerlib_info.numer / zend_hrtime_timerlib_info.denom;
 #elif ZEND_HRTIME_PLATFORM_POSIX
 	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };

@@ -3348,7 +3348,7 @@ try_next_encoding:;
 	}
 
 	for (size_t i = 0; i < length; i++) {
-		array[i].demerits *= array[i].multiplier;
+		array[i].demerits = (uint64_t) (array[i].demerits * array[i].multiplier);
 	}
 
 	return length;

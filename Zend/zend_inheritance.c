@@ -1746,6 +1746,27 @@ ZEND_API inheritance_status zend_verify_property_hook_variance(const zend_proper
 	return zend_perform_covariant_type_check(ce, prop_info->type, ce, value_arg_info->type);
 }
 
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+/* Hooked properties set get_iterator, which causes issues on for shm
+ * reattachment. Avoid early-binding on Windows and set get_iterator during
+ * inheritance. The linked class may not use inheritance cache. */
+static void zend_link_hooked_object_iter(zend_class_entry *ce) {
+	if (!ce->get_iterator && ce->num_hooked_props) {
+		ce->get_iterator = zend_hooked_object_get_iterator;
+		ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
+		if (CG(current_linking_class) == ce) {
+# if ZEND_DEBUG
+			/* This check is executed before inheriting any elements that can
+			 * track dependencies. */
+			HashTable *ht = (HashTable*)ce->inheritance_cache;
+			ZEND_ASSERT(!ht);
+# endif
+			CG(current_linking_class) = NULL;
+		}
+	}
+}
+#endif
+
 ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *parent_ce, bool checked) /* {{{ */
 {
 	zend_property_info *property_info;
@@ -3422,7 +3443,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	return ce;
 }
 
-#ifndef ZEND_WIN32
+#ifndef ZEND_OPCACHE_SHM_REATTACHMENT
 # define UPDATE_IS_CACHEABLE(ce) do { \
 			if ((ce)->type == ZEND_USER_CLASS) { \
 				is_cacheable &= (ce)->ce_flags; \
@@ -3566,6 +3587,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			 * opcache. */
 			zend_enum_register_funcs(ce);
 		}
+
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+		zend_link_hooked_object_iter(ce);
+#endif
 
 		if (parent) {
 			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
@@ -3854,6 +3879,10 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			if (is_cacheable) {
 				zend_begin_record_errors();
 			}
+
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+			zend_link_hooked_object_iter(ce);
+#endif
 
 			zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
 			if (parent_ce && parent_ce->num_interfaces) {
