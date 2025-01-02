@@ -151,7 +151,7 @@ PHP_FUNCTION(curl_share_init_persistent)
 	CURLSHcode error = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_EX(share_opts, 0, 1)
+		Z_PARAM_ARRAY(share_opts)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
@@ -192,10 +192,38 @@ PHP_FUNCTION(curl_share_init_persistent)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	zend_array_sort(Z_ARRVAL_P(share_opts), php_array_data_compare_unstable_i, 1);
-	zend_update_property(curl_share_persistent_ce, Z_OBJ_P(return_value), "options", sizeof("options") - 1, share_opts);
+	// Construct a property field for the CurlSharePersistentHandle object with the enabled share options.
+	zval share_opts_prop;
+	array_init(&share_opts_prop);
+
+	if (persistent_id & 1 << 0) {
+		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_DNS);
+	}
+
+	if (persistent_id & 1 << 1) {
+		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_SSL_SESSION);
+	}
+
+	if (persistent_id & 1 << 2) {
+		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_CONNECT);
+	}
+
+	if (persistent_id & 1 << 3) {
+		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_PSL);
+	}
 
 	object_init_ex(return_value, curl_share_persistent_ce);
+
+	zend_update_property(
+	    curl_share_persistent_ce,
+		Z_OBJ_P(return_value),
+		"options",
+		sizeof("options") - 1,
+		&share_opts_prop
+	);
+
+	zval_ptr_dtor(&share_opts_prop);
+
 	sh = Z_CURL_SHARE_P(return_value);
 
 	if (persistent_id) {

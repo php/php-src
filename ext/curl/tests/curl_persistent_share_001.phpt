@@ -19,10 +19,10 @@ function get_localhost_curl_handle(CurlSharePersistentHandle $sh): CurlHandle {
     return $ch;
 }
 
-$sh1 = curl_share_init_persistent([CURL_LOCK_DATA_CONNECT, CURL_LOCK_DATA_DNS]);
+$sh1 = curl_share_init_persistent([CURL_LOCK_DATA_CONNECT, CURL_LOCK_DATA_DNS, CURL_LOCK_DATA_DNS]);
 $ch1 = get_localhost_curl_handle($sh1);
 
-// Expect the two options we set above, but sorted.
+// Expect the two options we set above, but sorted and de-duplicated.
 var_dump($sh1->options);
 
 $sh2 = curl_share_init_persistent([CURL_LOCK_DATA_DNS, CURL_LOCK_DATA_CONNECT]);
