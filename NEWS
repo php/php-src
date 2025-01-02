@@ -36,6 +36,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
  
+- Opcache:
+  . Fixed bug GH-15981 (Segfault with frameless jumps and minimal JIT).
+    (nielsdos)
+
 - PHPDBG:
   . Fix crashes in function registration + test. (nielsdos, Girgias)
 
