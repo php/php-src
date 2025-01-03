@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug GH-16800 (ftp functions can abort with EINTR). (nielsdos)
 
+- Intl:
+  . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
+
 02 Jan 2025, PHP 8.3.16RC1
 
 - Core:

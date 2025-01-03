@@ -51,6 +51,7 @@ inline BreakIterator *_breakiter_prolog(zend_object_iterator *iter)
 static void _breakiterator_destroy_it(zend_object_iterator *iter)
 {
 	zval_ptr_dtor(&iter->data);
+	/* Don't free iter here because it is allocated as an object on its own, not embedded. */
 }
 
 static void _breakiterator_move_forward(zend_object_iterator *iter)
@@ -79,8 +80,18 @@ static void _breakiterator_rewind(zend_object_iterator *iter)
 	ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 }
 
+static void zoi_with_current_dtor_self(zend_object_iterator *iter)
+{
+	// Note: wrapping_obj is unused, call to zoi_with_current_dtor() not necessary
+	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
+	ZEND_ASSERT(Z_ISUNDEF(zoi_iter->wrapping_obj));
+
+	// Unlike the other iterators, this iterator is a new, standalone instance
+	zoi_iter->destroy_it(iter);
+}
+
 static const zend_object_iterator_funcs breakiterator_iterator_funcs = {
-	zoi_with_current_dtor,
+	zoi_with_current_dtor_self,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,
 	NULL,
@@ -133,6 +144,7 @@ typedef struct zoi_break_iter_parts {
 static void _breakiterator_parts_destroy_it(zend_object_iterator *iter)
 {
 	zval_ptr_dtor(&iter->data);
+	efree(iter);
 }
 
 static void _breakiterator_parts_get_current_key(zend_object_iterator *iter, zval *key)
@@ -231,7 +243,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	ii->iterator->index = 0;
 
 	((zoi_with_current*)ii->iterator)->destroy_it = _breakiterator_parts_destroy_it;
-	ZVAL_OBJ(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 
 	((zoi_break_iter_parts*)ii->iterator)->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);
