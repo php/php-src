@@ -145,7 +145,7 @@ void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void php_dom_normalize_legacy(xmlNodePtr nodep);
 void php_dom_normalize_modern(xmlNodePtr nodep);
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, zend_string *local_lower, zend_long *cur, zend_long index);
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, const xmlChar *ns, const xmlChar *local, const zend_string *local_lower, zend_long *cur, zend_long index);
 void php_dom_create_implementation(zval *retval, bool modern);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);

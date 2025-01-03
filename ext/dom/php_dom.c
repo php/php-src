@@ -1869,7 +1869,7 @@ static bool dom_match_qualified_name_for_tag_name_equality(const xmlChar *local,
 	return dom_match_qualified_name_according_to_spec(local_to_use, nodep);
 }
 
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, zend_string *local_lower, zend_long *cur, zend_long index) /* {{{ */
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, const xmlChar *ns, const xmlChar *local, const zend_string *local_lower, zend_long *cur, zend_long index) /* {{{ */
 {
 	/* Can happen with detached document */
 	if (UNEXPECTED(nodep == NULL)) {
