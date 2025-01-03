@@ -98,6 +98,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17153 (SimpleXML crash when using autovivification on
     document). (nielsdos)
 
+- SNMP:
+  . Fixed bug GH-17330 (SNMP::setSecurity segfault on closed session).
+    (David Carlier)
+
 - Sockets:
   . Fixed bug GH-16276 (socket_strerror overflow handling with INT_MIN).
     (David Carlier / cmb)
