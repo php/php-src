@@ -21,7 +21,6 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/php_array.h"
 #include "Zend/zend_exceptions.h"
 
 #include "curl_private.h"
@@ -143,30 +142,30 @@ PHP_FUNCTION(curl_share_strerror)
  */
 PHP_FUNCTION(curl_share_init_persistent)
 {
-	zval *share_opts = NULL, *entry = NULL;
+	HashTable *share_opts = NULL;
+	zval *share_opts_entry = NULL;
+
 	zend_ulong persistent_id = 0;
 
 	php_curlsh *sh = NULL;
 
-	CURLSHcode error = 0;
-
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(share_opts)
+		Z_PARAM_ARRAY_HT(share_opts)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_hash_num_elements(Z_ARRVAL_P(share_opts)) == 0) {
-		zend_argument_value_error(1, "must not be empty");
+	if (zend_hash_num_elements(share_opts) == 0) {
+		zend_argument_must_not_be_empty_error(1);
 		goto error;
 	}
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
-		ZVAL_DEREF(entry);
+	ZEND_HASH_FOREACH_VAL(share_opts, share_opts_entry) {
+		ZVAL_DEREF(share_opts_entry);
 
-		bool       failed = false;
-		zend_ulong option = zval_try_get_long(entry, &failed);
+		bool failed = false;
+		zend_ulong option = zval_try_get_long(share_opts_entry, &failed);
 
 		if (failed) {
-			zend_argument_type_error(1, "must contain only integer values, %s given", zend_zval_value_name(entry));
+			zend_argument_type_error(1, "must contain only int values, %s given", zend_zval_value_name(share_opts_entry));
 			goto error;
 		}
 
@@ -237,13 +236,13 @@ PHP_FUNCTION(curl_share_init_persistent)
 	sh->share = curl_share_init();
 
 	// Apply $share_options to the handle.
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(share_opts), entry) {
-		ZVAL_DEREF(entry);
+	ZEND_HASH_FOREACH_VAL(share_opts, share_opts_entry) {
+		ZVAL_DEREF(share_opts_entry);
 
-		error = curl_share_setopt(sh->share, CURLSHOPT_SHARE, zval_get_long(entry));
+		CURLSHcode curlsh_error = curl_share_setopt(sh->share, CURLSHOPT_SHARE, zval_get_long(share_opts_entry));
 
-		if (error != CURLSHE_OK) {
-			zend_throw_exception_ex(NULL, 0, "Could not construct persistent cURL share handle: %s", curl_share_strerror(error));
+		if (curlsh_error != CURLSHE_OK) {
+			zend_throw_exception_ex(NULL, 0, "Could not construct persistent cURL share handle: %s", curl_share_strerror(curlsh_error));
 
 			goto error;
 		}

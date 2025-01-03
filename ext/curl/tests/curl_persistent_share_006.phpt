@@ -5,12 +5,13 @@ curl
 --FILE--
 <?php
 
-$sh = curl_share_init_persistent([]);
+try {
+    $sh = curl_share_init_persistent([]);
+} catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: curl_share_init_persistent(): Argument #1 ($share_options) must not be empty in %scurl_persistent_share_006.php:3
-Stack trace:
-#0 %scurl_persistent_share_006.php(3): curl_share_init_persistent(Array)
-#1 {main}
-  thrown in %scurl_persistent_share_006.php on line 3
+curl_share_init_persistent(): Argument #1 ($share_options) must not be empty
