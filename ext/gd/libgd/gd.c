@@ -680,18 +680,20 @@ void gdImagePaletteCopy (gdImagePtr to, gdImagePtr from)
  *  the second call!)  The code is simplified from that in the article,
  *  as we know that gd images always start at (0,0)
  */
+/* 2.0.26, TBB: we now have to respect a clipping rectangle, it won't
+	necessarily start at 0. */
 
-static int clip_1d(int *x0, int *y0, int *x1, int *y1, int maxdim) {
+static int clip_1d(int *x0, int *y0, int *x1, int *y1, int mindim, int maxdim) {
 	double m;      /* gradient of line */
 
-	if (*x0 < 0) {  /* start of line is left of window */
-		if(*x1 < 0) { /* as is the end, so the line never cuts the window */
+	if (*x0 < mindim) {  /* start of line is left of window */
+		if(*x1 < mindim) { /* as is the end, so the line never cuts the window */
 			return 0;
 		}
 		m = (*y1 - *y0)/(double)(*x1 - *x0); /* calculate the slope of the line */
 		/* adjust x0 to be on the left boundary (ie to be zero), and y0 to match */
-		*y0 -= (int)(m * *x0);
-		*x0 = 0;
+		*y0 -= (int)(m * (*x0 - mindim));
+		*x0 = mindim;
 		/* now, perhaps, adjust the far end of the line as well */
 		if (*x1 > maxdim) {
 			*y1 += (int)(m * (maxdim - *x1));
@@ -707,9 +709,9 @@ static int clip_1d(int *x0, int *y0, int *x1, int *y1, int maxdim) {
 		*y0 += (int)(m * (maxdim - *x0)); /* adjust so point is on the right boundary */
 		*x0 = maxdim;
 		/* now, perhaps, adjust the end of the line */
-		if (*x1 < 0) {
-			*y1 -= (int)(m * *x1);
-			*x1 = 0;
+		if (*x1 < mindim) {
+			*y1 -= (int)(m * (*x1 - mindim));
+			*x1 = mindim;
 		}
 		return 1;
 	}
@@ -720,10 +722,10 @@ static int clip_1d(int *x0, int *y0, int *x1, int *y1, int maxdim) {
 		*x1 = maxdim;
 		return 1;
 	}
-	if (*x1 < 0) { /* other end is outside to the left */
+	if (*x1 < mindim) { /* other end is outside to the left */
 		m = (*y1 - *y0)/(double)(*x1 - *x0);  /* calculate the slope of the line */
-		*y1 -= (int)(m * *x1);
-		*x1 = 0;
+		*y1 -= (int)(m * (*x1 - mindim));
+		*x1 = mindim;
 		return 1;
 	}
 	/* only get here if both points are inside the window */
@@ -1107,11 +1109,16 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		gdImageAALine(im, x1, y1, x2, y2, im->AA_color);
 		return;
 	}
+	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no
+	   points need to be drawn. 2.0.26, TBB: clip to edges of clipping
+	   rectangle. We were getting away with this because gdImageSetPixel
+	   is used for actual drawing, but this is still more efficient and opens
+	   the way to skip per-pixel bounds checking in the future. */
 
-	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
-	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
+	if (clip_1d (&x1, &y1, &x2, &y2, im->cx1, im->cx2) == 0)
 		return;
-	}
+	if (clip_1d (&y1, &x1, &y2, &x2, im->cy1, im->cy2) == 0)
+		return;
 
 	dx = abs (x2 - x1);
 	dy = abs (y2 - y1);
@@ -1299,10 +1306,11 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 		return;
 	}
 
-	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
-	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
+	/* TBB: use the clipping rectangle */
+	if (clip_1d (&x1, &y1, &x2, &y2, im->cx1, im->cx2) == 0)
 		return;
-	}
+	if (clip_1d (&y1, &x1, &y2, &x2, im->cy1, im->cy2) == 0)
+		return;
 
 	dx = x2 - x1;
 	dy = y2 - y1;
