@@ -219,7 +219,7 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, zval *return_value);
 xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index);
 void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
-int php_dom_get_namednodemap_length(dom_object *obj);
+zend_long php_dom_get_namednodemap_length(dom_object *obj);
 xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep);
 
 #define DOM_GET_INTERN(__id, __intern) { \
