@@ -795,17 +795,6 @@ void gdImageSetPixel (gdImagePtr im, int x, int y, int color)
 	}
 }
 
-int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y)
-{
-	int p = gdImageGetPixel(im, x, y);
-
-	if (!im->trueColor)  {
-		return gdTrueColorAlpha(im->red[p], im->green[p], im->blue[p], (im->transparent == p) ? gdAlphaTransparent : im->alpha[p]);
-	} else {
-		return p;
-	}
-}
-
 static void gdImageBrushApply (gdImagePtr im, int x, int y)
 {
 	int lx, ly;
@@ -919,35 +908,6 @@ static void gdImageTileApply (gdImagePtr im, int x, int y)
 }
 
 
-static int gdImageTileGet (gdImagePtr im, int x, int y)
-{
-	int srcx, srcy;
-	int tileColor,p;
-	if (!im->tile) {
-		return -1;
-	}
-	srcx = x % gdImageSX(im->tile);
-	srcy = y % gdImageSY(im->tile);
-	p = gdImageGetPixel(im->tile, srcx, srcy);
-
-	if (im->trueColor) {
-		if (im->tile->trueColor) {
-			tileColor = p;
-		} else {
-			tileColor = gdTrueColorAlpha( gdImageRed(im->tile,p), gdImageGreen(im->tile,p), gdImageBlue (im->tile,p), gdImageAlpha (im->tile,p));
-		}
-	} else {
-		if (im->tile->trueColor) {
-			tileColor = gdImageColorResolveAlpha(im, gdTrueColorGetRed (p), gdTrueColorGetGreen (p), gdTrueColorGetBlue (p), gdTrueColorGetAlpha (p));
-		} else {
-			tileColor = p;
-			tileColor = gdImageColorResolveAlpha(im, gdImageRed (im->tile,p), gdImageGreen (im->tile,p), gdImageBlue (im->tile,p), gdImageAlpha (im->tile,p));
-		}
-	}
-	return tileColor;
-}
-
-
 int gdImageGetPixel (gdImagePtr im, int x, int y)
 {
 	if (gdImageBoundsSafe(im, x, y)) {
@@ -961,96 +921,23 @@ int gdImageGetPixel (gdImagePtr im, int x, int y)
 	}
 }
 
+int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y)
+{
+	int p = gdImageGetPixel(im, x, y);
+
+	if (!im->trueColor)  {
+		return gdTrueColorAlpha(im->red[p], im->green[p], im->blue[p], (im->transparent == p) ? gdAlphaTransparent : im->alpha[p]);
+	} else {
+		return p;
+	}
+}
+
 void gdImageAABlend (gdImagePtr im)
 {
 	(void)im;
 }
 
 static void _gdImageFilledHRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-
-gdImagePtr gdImageClone (gdImagePtr src) {
-	gdImagePtr dst;
-	register int i, x;
-
-	if (src->trueColor) {
-		dst = gdImageCreateTrueColor(src->sx , src->sy);
-	} else {
-		dst = gdImageCreate(src->sx , src->sy);
-	}
-
-	if (dst == NULL) {
-		return NULL;
-	}
-
-	if (src->trueColor == 0) {
-		dst->colorsTotal = src->colorsTotal;
-		for (i = 0; i < gdMaxColors; i++) {
-			dst->red[i]   = src->red[i];
-			dst->green[i] = src->green[i];
-			dst->blue[i]  = src->blue[i];
-			dst->alpha[i] = src->alpha[i];
-			dst->open[i]  = src->open[i];
-		}
-		for (i = 0; i < src->sy; i++) {
-			for (x = 0; x < src->sx; x++) {
-				dst->pixels[i][x] = src->pixels[i][x];
-			}
-		}
-	} else {
-		for (i = 0; i < src->sy; i++) {
-			for (x = 0; x < src->sx; x++) {
-				dst->tpixels[i][x] = src->tpixels[i][x];
-			}
-		}
-	}
-
-	dst->interlace   = src->interlace;
-
-	dst->alphaBlendingFlag = src->alphaBlendingFlag;
-	dst->saveAlphaFlag     = src->saveAlphaFlag;
-	dst->AA                = src->AA;
-	dst->AA_color          = src->AA_color;
-	dst->AA_dont_blend     = src->AA_dont_blend;
-
-	dst->cx1 = src->cx1;
-	dst->cy1 = src->cy1;
-	dst->cx2 = src->cx2;
-	dst->cy2 = src->cy2;
-
-	dst->res_x = src->res_x;
-	dst->res_y = src->res_y;
-
-	dst->interpolation_id = src->interpolation_id;
-	dst->interpolation    = src->interpolation;
-
-	if (src->brush) {
-		dst->brush = gdImageClone(src->brush);
-	}
-
-	if (src->tile) {
-		dst->tile = gdImageClone(src->tile);
-	}
-
-	if (src->style) {
-		gdImageSetStyle(dst, src->style, src->styleLength);
-		dst->stylePos = src->stylePos;
-	}
-
-	for (i = 0; i < gdMaxColors; i++) {
-		dst->brushColorMap[i] = src->brushColorMap[i];
-		dst->tileColorMap[i] = src->tileColorMap[i];
-	}
-
-	if (src->polyAllocated > 0 && overflow2(sizeof(int), src->polyAllocated) == 0) {
-		dst->polyInts = gdMalloc (sizeof (int) * src->polyAllocated);
-		dst->polyAllocated = src->polyAllocated;
-		for (i = 0; i < src->polyAllocated; i++) {
-			dst->polyInts[i] = src->polyInts[i];
-		}
-	}
-
-	return dst;
-}
 
 static void gdImageHLine(gdImagePtr im, int y, int x1, int x2, int col)
 {
@@ -1259,115 +1146,6 @@ TBB: but watch out for /0! */
 	}
 }
 
-
-/*
- * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
- * */
-#define BLEND_COLOR(a, nc, c, cc) \
-nc = (cc) + (((((c) - (cc)) * (a)) + ((((c) - (cc)) * (a)) >> 8) + 0x80) >> 8);
-
-inline static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color, int t)
-{
-	int dr,dg,db,p,r,g,b;
-	dr = gdTrueColorGetRed(color);
-	dg = gdTrueColorGetGreen(color);
-	db = gdTrueColorGetBlue(color);
-
-	p = gdImageGetPixel(im,x,y);
-	r = gdTrueColorGetRed(p);
-	g = gdTrueColorGetGreen(p);
-	b = gdTrueColorGetBlue(p);
-
-	BLEND_COLOR(t, dr, r, dr);
-	BLEND_COLOR(t, dg, g, dg);
-	BLEND_COLOR(t, db, b, db);
-	im->tpixels[y][x]=gdTrueColorAlpha(dr, dg, db,  gdAlphaOpaque);
-}
-
-/*
- * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
- **/
-void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
-{
-	/* keep them as 32bits */
-	long x, y, inc, frac;
-	long dx, dy,tmp;
-
-	if (!im->trueColor) {
-		/* TBB: don't crash when the image is of the wrong type */
-		gdImageLine(im, x1, y1, x2, y2, col);
-		return;
-	}
-
-	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
-	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
-		return;
-	}
-
-	dx = x2 - x1;
-	dy = y2 - y1;
-
-	if (dx == 0 && dy == 0) {
-		return;
-	}
-	if (abs((int)dx) > abs((int)dy)) {
-		if (dx < 0) {
-			tmp = x1;
-			x1 = x2;
-			x2 = tmp;
-			tmp = y1;
-			y1 = y2;
-			y2 = tmp;
-			dx = x2 - x1;
-			dy = y2 - y1;
-		}
-		y = y1;
-		inc = (dy * 65536) / dx;
-		frac = 0;
-		for (x = x1; x <= x2; x++) {
-			gdImageSetAAPixelColor(im, x, y, col, (frac >> 8) & 0xFF);
-			if (y + 1 < im->sy) {
-				gdImageSetAAPixelColor(im, x, y + 1, col, (~frac >> 8) & 0xFF);
-			}
-			frac += inc;
-			if (frac >= 65536) {
-				frac -= 65536;
-				y++;
-			} else if (frac < 0) {
-				frac += 65536;
-				y--;
-			}
-		}
-	} else {
-		if (dy < 0) {
-			tmp = x1;
-			x1 = x2;
-			x2 = tmp;
-			tmp = y1;
-			y1 = y2;
-			y2 = tmp;
-			dx = x2 - x1;
-			dy = y2 - y1;
-		}
-		x = x1;
-		inc = (dx * 65536) / dy;
-		frac = 0;
-		for (y = y1; y <= y2; y++) {
-			gdImageSetAAPixelColor(im, x, y, col, (frac >> 8) & 0xFF);
-			if (x + 1 < im->sx) {
-				gdImageSetAAPixelColor(im, x + 1, y, col, (~frac >> 8) & 0xFF);
-			}
-			frac += inc;
-			if (frac >= 65536) {
-				frac -= 65536;
-				x++;
-			} else if (frac < 0) {
-				frac += 65536;
-				x--;
-			}
-		}
-	}
-}
 
 static void dashedSet (gdImagePtr im, int x, int y, int color, int *onP, int *dashStepP, int wid, int vert);
 
@@ -1951,6 +1729,35 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
  * code I added a 2nd private function.
  */
 
+static int gdImageTileGet (gdImagePtr im, int x, int y)
+{
+	int srcx, srcy;
+	int tileColor,p;
+	if (!im->tile) {
+		return -1;
+	}
+	srcx = x % gdImageSX(im->tile);
+	srcy = y % gdImageSY(im->tile);
+	p = gdImageGetPixel(im->tile, srcx, srcy);
+
+	if (im->trueColor) {
+		if (im->tile->trueColor) {
+			tileColor = p;
+		} else {
+			tileColor = gdTrueColorAlpha( gdImageRed(im->tile,p), gdImageGreen(im->tile,p), gdImageBlue (im->tile,p), gdImageAlpha (im->tile,p));
+		}
+	} else {
+		if (im->tile->trueColor) {
+			tileColor = gdImageColorResolveAlpha(im, gdTrueColorGetRed (p), gdTrueColorGetGreen (p), gdTrueColorGetBlue (p), gdTrueColorGetAlpha (p));
+		} else {
+			tileColor = p;
+			tileColor = gdImageColorResolveAlpha(im, gdImageRed (im->tile,p), gdImageGreen (im->tile,p), gdImageBlue (im->tile,p), gdImageAlpha (im->tile,p));
+		}
+	}
+	return tileColor;
+}
+
+
 /* horizontal segment of scan line y */
 struct seg {int y, xl, xr, dy;};
 
@@ -2305,6 +2112,90 @@ static void _gdImageFilledVRectangle (gdImagePtr im, int x1, int y1, int x2, int
 void gdImageFilledRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 {
 	_gdImageFilledVRectangle(im, x1, y1, x2, y2, color);
+}
+
+gdImagePtr gdImageClone (gdImagePtr src) {
+	gdImagePtr dst;
+	register int i, x;
+
+	if (src->trueColor) {
+		dst = gdImageCreateTrueColor(src->sx , src->sy);
+	} else {
+		dst = gdImageCreate(src->sx , src->sy);
+	}
+
+	if (dst == NULL) {
+		return NULL;
+	}
+
+	if (src->trueColor == 0) {
+		dst->colorsTotal = src->colorsTotal;
+		for (i = 0; i < gdMaxColors; i++) {
+			dst->red[i]   = src->red[i];
+			dst->green[i] = src->green[i];
+			dst->blue[i]  = src->blue[i];
+			dst->alpha[i] = src->alpha[i];
+			dst->open[i]  = src->open[i];
+		}
+		for (i = 0; i < src->sy; i++) {
+			for (x = 0; x < src->sx; x++) {
+				dst->pixels[i][x] = src->pixels[i][x];
+			}
+		}
+	} else {
+		for (i = 0; i < src->sy; i++) {
+			for (x = 0; x < src->sx; x++) {
+				dst->tpixels[i][x] = src->tpixels[i][x];
+			}
+		}
+	}
+
+	dst->interlace   = src->interlace;
+
+	dst->alphaBlendingFlag = src->alphaBlendingFlag;
+	dst->saveAlphaFlag     = src->saveAlphaFlag;
+	dst->AA                = src->AA;
+	dst->AA_color          = src->AA_color;
+	dst->AA_dont_blend     = src->AA_dont_blend;
+
+	dst->cx1 = src->cx1;
+	dst->cy1 = src->cy1;
+	dst->cx2 = src->cx2;
+	dst->cy2 = src->cy2;
+
+	dst->res_x = src->res_x;
+	dst->res_y = src->res_y;
+
+	dst->interpolation_id = src->interpolation_id;
+	dst->interpolation    = src->interpolation;
+
+	if (src->brush) {
+		dst->brush = gdImageClone(src->brush);
+	}
+
+	if (src->tile) {
+		dst->tile = gdImageClone(src->tile);
+	}
+
+	if (src->style) {
+		gdImageSetStyle(dst, src->style, src->styleLength);
+		dst->stylePos = src->stylePos;
+	}
+
+	for (i = 0; i < gdMaxColors; i++) {
+		dst->brushColorMap[i] = src->brushColorMap[i];
+		dst->tileColorMap[i] = src->tileColorMap[i];
+	}
+
+	if (src->polyAllocated > 0 && overflow2(sizeof(int), src->polyAllocated) == 0) {
+		dst->polyInts = gdMalloc (sizeof (int) * src->polyAllocated);
+		dst->polyAllocated = src->polyAllocated;
+		for (i = 0; i < src->polyAllocated; i++) {
+			dst->polyInts[i] = src->polyInts[i];
+		}
+	}
+
+	return dst;
 }
 
 void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h)
@@ -3032,16 +2923,6 @@ int gdAlphaBlend (int dst, int src) {
 
 }
 
-void gdImageAlphaBlending (gdImagePtr im, int alphaBlendingArg)
-{
-	im->alphaBlendingFlag = alphaBlendingArg;
-}
-
-void gdImageSaveAlpha (gdImagePtr im, int saveAlphaArg)
-{
-	im->saveAlphaFlag = saveAlphaArg;
-}
-
 int gdLayerOverlay (int dst, int src)
 {
 	int a1, a2;
@@ -3097,6 +2978,16 @@ int gdLayerMultiply (int dst, int src)
 		);
 }
 
+void gdImageAlphaBlending (gdImagePtr im, int alphaBlendingArg)
+{
+	im->alphaBlendingFlag = alphaBlendingArg;
+}
+
+void gdImageSaveAlpha (gdImagePtr im, int saveAlphaArg)
+{
+	im->saveAlphaFlag = saveAlphaArg;
+}
+
 void gdImageSetClip (gdImagePtr im, int x1, int y1, int x2, int y2)
 {
 	if (x1 < 0) {
@@ -3141,6 +3032,115 @@ void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigne
 {
 	if (res_x > 0) im->res_x = res_x;
 	if (res_y > 0) im->res_y = res_y;
+}
+
+/*
+ * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
+ * */
+#define BLEND_COLOR(a, nc, c, cc) \
+nc = (cc) + (((((c) - (cc)) * (a)) + ((((c) - (cc)) * (a)) >> 8) + 0x80) >> 8);
+
+inline static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color, int t)
+{
+	int dr,dg,db,p,r,g,b;
+	dr = gdTrueColorGetRed(color);
+	dg = gdTrueColorGetGreen(color);
+	db = gdTrueColorGetBlue(color);
+
+	p = gdImageGetPixel(im,x,y);
+	r = gdTrueColorGetRed(p);
+	g = gdTrueColorGetGreen(p);
+	b = gdTrueColorGetBlue(p);
+
+	BLEND_COLOR(t, dr, r, dr);
+	BLEND_COLOR(t, dg, g, dg);
+	BLEND_COLOR(t, db, b, db);
+	im->tpixels[y][x]=gdTrueColorAlpha(dr, dg, db,  gdAlphaOpaque);
+}
+
+/*
+ * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
+ **/
+void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
+{
+	/* keep them as 32bits */
+	long x, y, inc, frac;
+	long dx, dy,tmp;
+
+	if (!im->trueColor) {
+		/* TBB: don't crash when the image is of the wrong type */
+		gdImageLine(im, x1, y1, x2, y2, col);
+		return;
+	}
+
+	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
+	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
+		return;
+	}
+
+	dx = x2 - x1;
+	dy = y2 - y1;
+
+	if (dx == 0 && dy == 0) {
+		return;
+	}
+	if (abs((int)dx) > abs((int)dy)) {
+		if (dx < 0) {
+			tmp = x1;
+			x1 = x2;
+			x2 = tmp;
+			tmp = y1;
+			y1 = y2;
+			y2 = tmp;
+			dx = x2 - x1;
+			dy = y2 - y1;
+		}
+		y = y1;
+		inc = (dy * 65536) / dx;
+		frac = 0;
+		for (x = x1; x <= x2; x++) {
+			gdImageSetAAPixelColor(im, x, y, col, (frac >> 8) & 0xFF);
+			if (y + 1 < im->sy) {
+				gdImageSetAAPixelColor(im, x, y + 1, col, (~frac >> 8) & 0xFF);
+			}
+			frac += inc;
+			if (frac >= 65536) {
+				frac -= 65536;
+				y++;
+			} else if (frac < 0) {
+				frac += 65536;
+				y--;
+			}
+		}
+	} else {
+		if (dy < 0) {
+			tmp = x1;
+			x1 = x2;
+			x2 = tmp;
+			tmp = y1;
+			y1 = y2;
+			y2 = tmp;
+			dx = x2 - x1;
+			dy = y2 - y1;
+		}
+		x = x1;
+		inc = (dx * 65536) / dy;
+		frac = 0;
+		for (y = y1; y <= y2; y++) {
+			gdImageSetAAPixelColor(im, x, y, col, (frac >> 8) & 0xFF);
+			if (x + 1 < im->sx) {
+				gdImageSetAAPixelColor(im, x + 1, y, col, (~frac >> 8) & 0xFF);
+			}
+			frac += inc;
+			if (frac >= 65536) {
+				frac -= 65536;
+				x++;
+			} else if (frac < 0) {
+				frac += 65536;
+				x--;
+			}
+		}
+	}
 }
 
 /* convert a palette image to true color */

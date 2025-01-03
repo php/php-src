@@ -292,30 +292,6 @@ typedef void(*gdErrorMethod)(int, const char *, va_list);
 void gdSetErrorMethod(gdErrorMethod);
 void gdClearErrorMethod(void);
 
-/**
- * Group: Types
- *
- * typedef: gdRect
- *  Defines a rectilinear region.
- *
- *  x - left position
- *  y - right position
- *  width - Rectangle width
- *  height - Rectangle height
- *
- * typedef: gdRectPtr
- *  Pointer to a <gdRect>
- *
- * See also:
- *  <gdSetInterpolationMethod>
- **/
-typedef struct
-{
-	int x, y;
-	int width, height;
-}
-gdRect, *gdRectPtr;
-
 /* For backwards compatibility only. Use gdImageSetStyle()
 	for MUCH more flexible line drawing. Also see
 	gdImageSetBrush(). */
@@ -352,6 +328,9 @@ gdImagePtr gdImageCreateTrueColor(int sx, int sy);
 	JPEG is always truecolor. */
 gdImagePtr gdImageCreateFromPng(FILE *fd);
 gdImagePtr gdImageCreateFromPngCtx(gdIOCtxPtr in);
+
+gdImagePtr gdImageCreateFromGif(FILE *fd);
+gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWBMP(FILE *inFile);
 gdImagePtr gdImageCreateFromWBMPCtx(gdIOCtx *infile);
 gdImagePtr gdImageCreateFromJpeg(FILE *infile);
@@ -361,8 +340,8 @@ gdImagePtr gdImageCreateFromJpegCtxEx(gdIOCtx *infile, int ignore_warning);
 gdImagePtr gdImageCreateFromJpegPtr (int size, void *data);
 gdImagePtr gdImageCreateFromJpegPtrEx (int size, void *data, int ignore_warning);
 gdImagePtr gdImageCreateFromWebp(FILE *fd);
-gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
+gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 
 gdImagePtr gdImageCreateFromAvif(FILE *infile);
 gdImagePtr gdImageCreateFromAvifPtr(int size, void *data);
@@ -391,6 +370,7 @@ typedef struct {
 } gdSource, *gdSourcePtr;
 
 gdImagePtr gdImageCreateFromPngSource(gdSourcePtr in);
+gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
 
 gdImagePtr gdImageCreateFromGd(FILE *in);
 gdImagePtr gdImageCreateFromGdCtx(gdIOCtxPtr in);
@@ -417,8 +397,8 @@ void gdImageDestroy(gdImagePtr im);
 
 void gdImageSetPixel(gdImagePtr im, int x, int y, int color);
 
-int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y);
 int gdImageGetPixel(gdImagePtr im, int x, int y);
+int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y);
 
 void gdImageAABlend(gdImagePtr im);
 
@@ -436,6 +416,8 @@ void gdImageFilledRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int c
 void gdImageSetClip(gdImagePtr im, int x1, int y1, int x2, int y2);
 void gdImageGetClip(gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P);
 void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y);
+/* 2.0.12: this now checks the clipping rectangle */
+#define gdImageBoundsSafe(im, x, y) (!((((y) < (im)->cy1) || ((y) > (im)->cy2)) || (((x) < (im)->cx1) || ((x) > (im)->cx2))))
 void gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
 void gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
 void gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
@@ -503,6 +485,30 @@ gdImageStringFTEx(gdImage * im, int *brect, int fg, char * fontlist,
 typedef struct {
 	int x, y;
 } gdPoint, *gdPointPtr;
+
+/**
+ * Group: Types
+ *
+ * typedef: gdRect
+ *  Defines a rectilinear region.
+ *
+ *  x - left position
+ *  y - right position
+ *  width - Rectangle width
+ *  height - Rectangle height
+ *
+ * typedef: gdRectPtr
+ *  Pointer to a <gdRect>
+ *
+ * See also:
+ *  <gdSetInterpolationMethod>
+ **/
+typedef struct
+{
+	int x, y;
+	int width, height;
+}
+gdRect, *gdRectPtr;
 
 void gdImagePolygon(gdImagePtr im, gdPointPtr p, int n, int c);
 void gdImageOpenPolygon(gdImagePtr im, gdPointPtr p, int n, int c);
@@ -587,9 +593,9 @@ int gdImageColorMatch(gdImagePtr im1, gdImagePtr im2);
 void gdImageColorTransparent(gdImagePtr im, int color);
 
 void gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
+void gdImageGif(gdImagePtr im, FILE *out);
 void gdImagePng(gdImagePtr im, FILE *out);
 void gdImagePngCtx(gdImagePtr im, gdIOCtx *out);
-void gdImageGif(gdImagePtr im, FILE *out);
 void gdImageGifCtx(gdImagePtr im, gdIOCtx *out);
 
 void * gdImageBmpPtr(gdImagePtr im, int *size, int compression);
@@ -619,6 +625,9 @@ void *gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
 void gdImageJpeg(gdImagePtr im, FILE *out, int quality);
 void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 
+/* Best to free this memory with gdFree(), not free() */
+void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
+
 /**
  * Group: WebP
  *
@@ -633,13 +642,6 @@ void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 #define gdWebpLossless 101
 
 void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
-
-/* Best to free this memory with gdFree(), not free() */
-void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
-
-gdImagePtr gdImageCreateFromGif(FILE *fd);
-gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
-gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
 
 void gdImageAvif(gdImagePtr im, FILE *outfile);
 void gdImageAvifEx(gdImagePtr im, FILE *outfile, int quality, int speed);
@@ -672,8 +674,6 @@ void *gdImagePngPtrEx(gdImagePtr im, int *size, int level, int basefilter);
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size);
 
-void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int c);
-
 /* Style is a bitwise OR ( | operator ) of these.
 	gdArc and gdChord are mutually exclusive;
 	gdChord just connects the starting and ending
@@ -693,6 +693,7 @@ void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int c);
 
 void gdImageFilledArc(gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color, int style);
 void gdImageArc(gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color);
+void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int c);
 void gdImageFilledEllipse(gdImagePtr im, int cx, int cy, int w, int h, int color);
 void gdImageFillToBorder(gdImagePtr im, int x, int y, int border, int color);
 void gdImageFill(gdImagePtr im, int x, int y, int color);
@@ -749,9 +750,33 @@ typedef struct {
 	unsigned int seed;
 } gdScatter, *gdScatterPtr;
 
+/* filters section */
 int gdImageScatter(gdImagePtr im, int sub, int plus);
 int gdImageScatterColor(gdImagePtr im, int sub, int plus, int colors[], unsigned int num_colors);
 int gdImageScatterEx(gdImagePtr im, gdScatterPtr s);
+int gdImageSmooth(gdImagePtr im, float weight);
+int gdImageMeanRemoval(gdImagePtr im);
+int gdImageEmboss(gdImagePtr im);
+int gdImageGaussianBlur(gdImagePtr im);
+int gdImageEdgeDetectQuick(gdImagePtr src);
+int gdImageSelectiveBlur( gdImagePtr src);
+/* Image convolution by a 3x3 custom matrix */
+int gdImageConvolution(gdImagePtr src, float ft[3][3], float filter_div, float offset);
+/* Simply adds or subtracts respectively red, green or blue to a pixel */
+int gdImageColor(gdImagePtr src, const int red, const int green, const int blue, const int alpha);
+/* Set the contrast level <contrast> for the image <src> */
+int gdImageContrast(gdImagePtr src, double contrast);
+/* Set the brightness level <brightness> for the image src */
+int gdImageBrightness(gdImagePtr src, int brightness);
+/* Convert the image src to a grayscale image */
+int gdImageGrayScale(gdImagePtr src);
+/*
+ * Negate the imag src, white becomes black,
+ * The red, green, and blue intensities of an image are negated.
+ * White becomes black, yellow becomes blue, etc.
+ */
+int gdImageNegate(gdImagePtr src);
+
 
 /* Macros to access information about images. */
 
@@ -801,41 +826,6 @@ void* gdDPExtractData(struct gdIOCtx* ctx, int *size);
 #define GD2_FMT_RAW             1
 #define GD2_FMT_COMPRESSED      2
 
-
-/* filters section
- *
- * Negate the imag src, white becomes black,
- * The red, green, and blue intensities of an image are negated.
- * White becomes black, yellow becomes blue, etc.
- */
-int gdImageNegate(gdImagePtr src);
-
-/* Convert the image src to a grayscale image */
-int gdImageGrayScale(gdImagePtr src);
-
-/* Set the brightness level <brightness> for the image src */
-int gdImageBrightness(gdImagePtr src, int brightness);
-
-/* Set the contrast level <contrast> for the image <src> */
-int gdImageContrast(gdImagePtr src, double contrast);
-
-/* Simply adds or subtracts respectively red, green or blue to a pixel */
-int gdImageColor(gdImagePtr src, const int red, const int green, const int blue, const int alpha);
-
-/* Image convolution by a 3x3 custom matrix */
-int gdImageConvolution(gdImagePtr src, float ft[3][3], float filter_div, float offset);
-
-int gdImageEdgeDetectQuick(gdImagePtr src);
-
-int gdImageGaussianBlur(gdImagePtr im);
-
-int gdImageSelectiveBlur( gdImagePtr src);
-
-int gdImageEmboss(gdImagePtr im);
-
-int gdImageMeanRemoval(gdImagePtr im);
-
-int gdImageSmooth(gdImagePtr im, float weight);
 
 /* Image comparison definitions */
 int gdImageCompare(gdImagePtr im1, gdImagePtr im2);
@@ -929,8 +919,5 @@ int gdTransformAffineBoundingBox(gdRectPtr src, const double affine[6], gdRectPt
 #ifdef __cplusplus
 }
 #endif
-
-/* 2.0.12: this now checks the clipping rectangle */
-#define gdImageBoundsSafe(im, x, y) (!((((y) < (im)->cy1) || ((y) > (im)->cy2)) || (((x) < (im)->cx1) || ((x) > (im)->cx2))))
 
 #endif /* GD_H */
