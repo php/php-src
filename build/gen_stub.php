@@ -2742,8 +2742,6 @@ class ConstInfo extends VariableLike
             $code .= "#endif\n";
         }
 
-        $code .= "\tzend_string_release(const_{$constName}_name);\n";
-
         return $code;
     }
 
@@ -3057,7 +3055,7 @@ class PropertyInfo extends VariableLike
         $result = [
             "\tzend_string *$nameCode = zend_string_init(\"$propName\", sizeof(\"$propName\") - 1, 1);\n",
             $nameCode,
-            "\tzend_string_release($nameCode);\n"
+            "\tzend_string_release_ex($nameCode, 1);\n"
         ];
         // If not set, use the current latest version
         $allVersions = ALL_PHP_VERSION_IDS;
@@ -3202,7 +3200,6 @@ class AttributeInfo {
         } else {
             $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init_interned(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
             $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
-            $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
         }
         foreach ($this->args as $i => $arg) {
             $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);

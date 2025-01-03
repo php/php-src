@@ -87,59 +87,50 @@ static zend_class_entry *register_class_Attribute(void)
 	ZVAL_LONG(&const_TARGET_CLASS_value, ZEND_ATTRIBUTE_TARGET_CLASS);
 	zend_string *const_TARGET_CLASS_name = zend_string_init_interned("TARGET_CLASS", sizeof("TARGET_CLASS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_CLASS_name, &const_TARGET_CLASS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TARGET_CLASS_name);
 
 	zval const_TARGET_FUNCTION_value;
 	ZVAL_LONG(&const_TARGET_FUNCTION_value, ZEND_ATTRIBUTE_TARGET_FUNCTION);
 	zend_string *const_TARGET_FUNCTION_name = zend_string_init_interned("TARGET_FUNCTION", sizeof("TARGET_FUNCTION") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_FUNCTION_name, &const_TARGET_FUNCTION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TARGET_FUNCTION_name);
 
 	zval const_TARGET_METHOD_value;
 	ZVAL_LONG(&const_TARGET_METHOD_value, ZEND_ATTRIBUTE_TARGET_METHOD);
 	zend_string *const_TARGET_METHOD_name = zend_string_init_interned("TARGET_METHOD", sizeof("TARGET_METHOD") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_METHOD_name, &const_TARGET_METHOD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TARGET_METHOD_name);
 
 	zval const_TARGET_PROPERTY_value;
 	ZVAL_LONG(&const_TARGET_PROPERTY_value, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 	zend_string *const_TARGET_PROPERTY_name = zend_string_init_interned("TARGET_PROPERTY", sizeof("TARGET_PROPERTY") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_PROPERTY_name, &const_TARGET_PROPERTY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TARGET_PROPERTY_name);
 
 	zval const_TARGET_CLASS_CONSTANT_value;
 	ZVAL_LONG(&const_TARGET_CLASS_CONSTANT_value, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 	zend_string *const_TARGET_CLASS_CONSTANT_name = zend_string_init_interned("TARGET_CLASS_CONSTANT", sizeof("TARGET_CLASS_CONSTANT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_CLASS_CONSTANT_name, &const_TARGET_CLASS_CONSTANT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TARGET_CLASS_CONSTANT_name);
 
 	zval const_TARGET_PARAMETER_value;
 	ZVAL_LONG(&const_TARGET_PARAMETER_value, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 	zend_string *const_TARGET_PARAMETER_name = zend_string_init_interned("TARGET_PARAMETER", sizeof("TARGET_PARAMETER") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_PARAMETER_name, &const_TARGET_PARAMETER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TARGET_PARAMETER_name);
 
 	zval const_TARGET_ALL_value;
 	ZVAL_LONG(&const_TARGET_ALL_value, ZEND_ATTRIBUTE_TARGET_ALL);
 	zend_string *const_TARGET_ALL_name = zend_string_init_interned("TARGET_ALL", sizeof("TARGET_ALL") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_ALL_name, &const_TARGET_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TARGET_ALL_name);
 
 	zval const_IS_REPEATABLE_value;
 	ZVAL_LONG(&const_IS_REPEATABLE_value, ZEND_ATTRIBUTE_IS_REPEATABLE);
 	zend_string *const_IS_REPEATABLE_name = zend_string_init_interned("IS_REPEATABLE", sizeof("IS_REPEATABLE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_IS_REPEATABLE_name, &const_IS_REPEATABLE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_IS_REPEATABLE_name);
 
 	zval property_flags_default_value;
 	ZVAL_UNDEF(&property_flags_default_value);
 	zend_string *property_flags_name = zend_string_init("flags", sizeof("flags") - 1, 1);
 	zend_declare_typed_property(class_entry, property_flags_name, &property_flags_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_flags_name);
+	zend_string_release_ex(property_flags_name, 1);
 
 	zend_string *attribute_name_Attribute_class_Attribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_Attribute_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Attribute_0, 1);
-	zend_string_release(attribute_name_Attribute_class_Attribute_0);
 	zval attribute_Attribute_class_Attribute_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_Attribute_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_Attribute_0->args[0].value, &attribute_Attribute_class_Attribute_0_arg0);
@@ -156,7 +147,6 @@ static zend_class_entry *register_class_ReturnTypeWillChange(void)
 
 	zend_string *attribute_name_Attribute_class_ReturnTypeWillChange_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ReturnTypeWillChange_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ReturnTypeWillChange_0, 1);
-	zend_string_release(attribute_name_Attribute_class_ReturnTypeWillChange_0);
 	zval attribute_Attribute_class_ReturnTypeWillChange_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_ReturnTypeWillChange_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_ReturnTypeWillChange_0->args[0].value, &attribute_Attribute_class_ReturnTypeWillChange_0_arg0);
@@ -173,7 +163,6 @@ static zend_class_entry *register_class_AllowDynamicProperties(void)
 
 	zend_string *attribute_name_Attribute_class_AllowDynamicProperties_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_AllowDynamicProperties_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_AllowDynamicProperties_0, 1);
-	zend_string_release(attribute_name_Attribute_class_AllowDynamicProperties_0);
 	zval attribute_Attribute_class_AllowDynamicProperties_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_AllowDynamicProperties_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_AllowDynamicProperties_0->args[0].value, &attribute_Attribute_class_AllowDynamicProperties_0_arg0);
@@ -190,7 +179,6 @@ static zend_class_entry *register_class_SensitiveParameter(void)
 
 	zend_string *attribute_name_Attribute_class_SensitiveParameter_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_SensitiveParameter_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_SensitiveParameter_0, 1);
-	zend_string_release(attribute_name_Attribute_class_SensitiveParameter_0);
 	zval attribute_Attribute_class_SensitiveParameter_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_SensitiveParameter_0_arg0, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_SensitiveParameter_0->args[0].value, &attribute_Attribute_class_SensitiveParameter_0_arg0);
@@ -221,7 +209,6 @@ static zend_class_entry *register_class_Override(void)
 
 	zend_string *attribute_name_Attribute_class_Override_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_Override_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Override_0, 1);
-	zend_string_release(attribute_name_Attribute_class_Override_0);
 	zval attribute_Attribute_class_Override_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_Override_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_Override_0->args[0].value, &attribute_Attribute_class_Override_0_arg0);
@@ -246,7 +233,6 @@ static zend_class_entry *register_class_Deprecated(void)
 
 	zend_string *attribute_name_Attribute_class_Deprecated_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_Deprecated_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Deprecated_0, 1);
-	zend_string_release(attribute_name_Attribute_class_Deprecated_0);
 	zval attribute_Attribute_class_Deprecated_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_Deprecated_0->args[0].value, &attribute_Attribute_class_Deprecated_0_arg0);
