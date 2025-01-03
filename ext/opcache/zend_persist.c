@@ -197,13 +197,8 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		zend_accel_store_interned_string(copy->original_ast);
 		node = (zend_ast *) copy;
 	} else if (zend_ast_is_decl(ast)) {
-		zend_ast_decl *copy = zend_shared_memdup(ast, sizeof(zend_ast_decl));
-		for (i = 0; i < 5; i++) {
-			if (copy->child[i]) {
-				copy->child[i] = zend_persist_ast(copy->child[i]);
-			}
-		}
-		node = (zend_ast *) copy;
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		node = zend_shared_memdup(ast, zend_ast_size(children));

@@ -1104,13 +1104,8 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 			}
 		}
 	} else if (zend_ast_is_decl(ast)) {
-		zend_ast_decl *decl = (zend_ast_decl*)ast;
-		size = sizeof(zend_ast_decl);
-		for (size_t i = 0; i < 5; i++) {
-			if (decl->child[i]) {
-				size += zend_ast_tree_size(decl->child[i]);
-			}
-		}
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 
@@ -1167,33 +1162,8 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->original_ast = zend_string_copy(old->original_ast);
 		buf = (void*)((char*)buf + sizeof(zend_ast_op_array));
 	} else if (zend_ast_is_decl(ast)) {
-		zend_ast_decl *old = (zend_ast_decl*)ast;
-		zend_ast_decl *new = (zend_ast_decl*)buf;
-		new->kind = old->kind;
-		new->attr = old->attr;
-		new->start_lineno = old->start_lineno;
-		new->end_lineno = old->end_lineno;
-		new->flags = old->flags;
-		if (old->doc_comment) {
-			new->doc_comment = zend_string_copy(old->doc_comment);
-		} else {
-			new->doc_comment = NULL;
-		}
-		if (old->name) {
-			new->name = zend_string_copy(old->name);
-		} else {
-			new->name = NULL;
-		}
-
-		buf = (void*)((char*)buf + sizeof(zend_ast_decl));
-		for (size_t i = 0; i < 5; i++) {
-			if (old->child[i]) {
-				new->child[i] = (zend_ast*)buf;
-				buf = zend_ast_tree_copy(old->child[i], buf);
-			} else {
-				new->child[i] = NULL;
-			}
-		}
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		zend_ast *new = (zend_ast*)buf;
@@ -1259,7 +1229,7 @@ tail_call:
 		zend_string_release_ex(zend_ast_get_constant_name(ast), 0);
 	} else if (EXPECTED(ast->kind == ZEND_AST_OP_ARRAY)) {
 		zend_string_release_ex(zend_ast_get_op_array(ast)->original_ast, 0);
-	} else if (zend_ast_is_decl(ast)) {
+	} else if (EXPECTED(zend_ast_is_decl(ast))) {
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
 		if (decl->name) {

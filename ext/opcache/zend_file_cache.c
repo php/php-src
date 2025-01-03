@@ -369,15 +369,8 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 
 		SERIALIZE_STR(zend_ast_get_op_array(ast)->original_ast);
 	} else if (zend_ast_is_decl(ast)) {
-		zend_ast_decl *decl = (zend_ast_decl*)ast;
-		for (i = 0; i < 5; i++) {
-			if (decl->child[i] && !IS_SERIALIZED(decl->child[i])) {
-				SERIALIZE_PTR(decl->child[i]);
-				tmp = decl->child[i];
-				UNSERIALIZE_PTR(tmp);
-				zend_file_cache_serialize_ast(tmp, script, info, buf);
-			}
-		}
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
@@ -1263,13 +1256,8 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 
 		UNSERIALIZE_STR(zend_ast_get_op_array(ast)->original_ast);
 	} else if (zend_ast_is_decl(ast)) {
-		zend_ast_decl *decl = (zend_ast_decl*)ast;
-		for (i = 0; i < 5; i++) {
-			if (decl->child[i] && !IS_UNSERIALIZED(decl->child[i])) {
-				UNSERIALIZE_PTR(decl->child[i]);
-				zend_file_cache_unserialize_ast(decl->child[i], script, buf);
-			}
-		}
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {

@@ -93,13 +93,8 @@ static void zend_persist_ast_calc(zend_ast *ast)
 		zend_persist_op_array_calc(&z);
 		ADD_INTERNED_STRING(zend_ast_get_op_array(ast)->original_ast);
 	} else if (zend_ast_is_decl(ast)) {
-		zend_ast_decl *decl = (zend_ast_decl*)ast;
-		ADD_SIZE(sizeof(zend_ast_decl));
-		for (size_t i = 0; i < 5; i++) {
-			if (decl->child[i]) {
-				zend_persist_ast_calc(decl->child[i]);
-			}
-		}
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		ADD_SIZE(zend_ast_size(children));
