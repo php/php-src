@@ -214,7 +214,6 @@ typedef struct _zend_ast_op_array {
 	zend_ast_attr attr;
 	uint32_t lineno;
 	zend_op_array *op_array;
-	zend_string *original_ast;
 } zend_ast_op_array;
 
 /* Separate structure for function and class declaration, as they need extra information. */
@@ -241,7 +240,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval)
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class_name, zend_ast *name);
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_array, zend_string *original_ast);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_array);
 
 #if ZEND_AST_SPEC
 # define ZEND_AST_SPEC_CALL(name, ...) \

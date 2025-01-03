@@ -366,8 +366,6 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		/* The op_array itself will be serialized as part of the dynamic_func_defs. */
 		SERIALIZE_PTR(zend_ast_get_op_array(ast)->op_array);
-
-		SERIALIZE_STR(zend_ast_get_op_array(ast)->original_ast);
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -1253,8 +1251,6 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		/* The op_array itself will be unserialized as part of the dynamic_func_defs. */
 		UNSERIALIZE_PTR(zend_ast_get_op_array(ast)->op_array);
-
-		UNSERIALIZE_STR(zend_ast_get_op_array(ast)->original_ast);
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();

@@ -194,7 +194,6 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		ZVAL_PTR(&z, copy->op_array);
 		zend_persist_op_array(&z);
 		copy->op_array = Z_PTR(z);
-		zend_accel_store_interned_string(copy->original_ast);
 		node = (zend_ast *) copy;
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */

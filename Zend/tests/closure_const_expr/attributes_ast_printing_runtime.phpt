@@ -17,8 +17,6 @@ foreach ($r->getAttributes() as $attribute) {
 --EXPECT--
 Attribute [ Attr ] {
   - Arguments [1] {
-    Argument #0 [ static function ($foo) {
-    echo $foo;
-} ]
+    Argument #0 [ Closure({closure:foo():3}) ]
   }
 }
