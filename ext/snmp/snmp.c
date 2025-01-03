@@ -1660,6 +1660,10 @@ PHP_METHOD(SNMP, setSecurity)
 	zend_string *a1 = NULL, *a2 = NULL, *a3 = NULL, *a4 = NULL, *a5 = NULL, *a6 = NULL, *a7 = NULL;
 
 	snmp_object = Z_SNMP_P(object);
+	if (!snmp_object->session) {
+		zend_throw_error(NULL, "Invalid or uninitialized SNMP object");
+		RETURN_THROWS();
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|SSSSSS", &a1, &a2, &a3, &a4,&a5, &a6, &a7) == FAILURE) {
 		RETURN_THROWS();
