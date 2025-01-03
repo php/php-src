@@ -29,7 +29,7 @@ $ch2 = get_localhost_curl_handle($sh2);
 
 var_dump($sh1->options != $sh2->options);
 
-// Expect the connect time on the subsequent request to be non-zero, since it's reusing the connection.
+// Expect the connect time on the subsequent request to be non-zero, since it's *not* reusing the connection.
 var_dump(curl_exec($ch1));
 var_dump(curl_exec($ch2));
 var_dump("second connect_time: " . (curl_getinfo($ch2)["connect_time"]));
