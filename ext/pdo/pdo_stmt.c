@@ -708,14 +708,38 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 }
 /* }}} */
 
+static bool pdo_do_key_pair_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset, HashTable *container)
+{
+	if (!do_fetch_common(stmt, ori, offset)) {
+		return false;
+	}
+	if (stmt->column_count != 2) {
+		/* TODO: Error? */
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns.");
+		return false;
+	}
+
+	zval key, val;
+	fetch_value(stmt, &key, 0, NULL);
+	fetch_value(stmt, &val, 1, NULL);
+
+	if (Z_TYPE(key) == IS_LONG) {
+		zend_hash_index_update(container, Z_LVAL(key), &val);
+	} else {
+		convert_to_string(&key);
+		zend_symtable_update(container, Z_STR(key), &val);
+	}
+	zval_ptr_dtor(&key);
+	return true;
+}
+
 /* perform a fetch.
  * Stores values into return_value according to HOW. */
-static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all) /* {{{ */
+static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *group_key) /* {{{ */
 {
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
-	zval grp_val, *pgrp, retval, old_ctor_args = {{0}, {0}, {0}};
-	int colno;
+	zval retval, old_ctor_args = {{0}, {0}, {0}};
 	int i = 0;
 
 	if (how == PDO_FETCH_USE_DEFAULT) {
@@ -725,23 +749,54 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	how = how & ~PDO_FETCH_FLAGS;
 
 	if (!do_fetch_common(stmt, ori, offset)) {
-		return 0;
+		return false;
 	}
 
 	if (how == PDO_FETCH_BOUND) {
 		RETVAL_TRUE;
-		return 1;
-	}
-
-	if ((flags & PDO_FETCH_GROUP) && stmt->fetch.column == -1) {
-		colno = 1;
-	} else {
-		colno = stmt->fetch.column;
+		return true;
 	}
 
 	if (how == PDO_FETCH_LAZY) {
 		get_lazy_object(stmt, return_value);
-		return 1;
+		return true;
+	}
+
+	/* When fetching a column we only do one value fetch, so handle it separately */
+	if (how == PDO_FETCH_COLUMN) {
+		int colno = stmt->fetch.column;
+
+		if ((flags & PDO_FETCH_GROUP) && stmt->fetch.column == -1) {
+			colno = 1;
+		}
+
+		if (colno < 0 ) {
+			zend_value_error("Column index must be greater than or equal to 0");
+			return false;
+		}
+
+		if (colno >= stmt->column_count) {
+			zend_value_error("Invalid column index");
+			return false;
+		}
+
+		if (flags == PDO_FETCH_GROUP && stmt->fetch.column == -1) {
+			fetch_value(stmt, return_value, 1, NULL);
+		} else if (flags == PDO_FETCH_GROUP && colno) {
+			fetch_value(stmt, return_value, 0, NULL);
+		} else {
+			fetch_value(stmt, return_value, colno, NULL);
+		}
+
+		if (group_key) {
+			if (flags == PDO_FETCH_GROUP && stmt->fetch.column > 0) {
+				fetch_value(stmt, group_key, colno, NULL);
+			} else {
+				fetch_value(stmt, group_key, 0, NULL);
+			}
+			convert_to_string(group_key);
+		}
+		return true;
 	}
 
 	RETVAL_FALSE;
@@ -752,44 +807,10 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 		case PDO_FETCH_BOTH:
 		case PDO_FETCH_NUM:
 		case PDO_FETCH_NAMED:
-			if (!return_all) {
+			if (!group_key) {
 				array_init_size(return_value, stmt->column_count);
 			} else {
 				array_init(return_value);
-			}
-			break;
-
-		case PDO_FETCH_KEY_PAIR:
-			if (stmt->column_count != 2) {
-				/* TODO: Error? */
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns.");
-				return 0;
-			}
-			if (!return_all) {
-				array_init(return_value);
-			}
-			break;
-
-		case PDO_FETCH_COLUMN:
-			if (colno < 0 ) {
-				zend_value_error("Column index must be greater than or equal to 0");
-				return false;
-			}
-
-			if (colno >= stmt->column_count) {
-				zend_value_error("Invalid column index");
-				return false;
-			}
-
-			if (flags == PDO_FETCH_GROUP && stmt->fetch.column == -1) {
-				fetch_value(stmt, return_value, 1, NULL);
-			} else if (flags == PDO_FETCH_GROUP && colno) {
-				fetch_value(stmt, return_value, 0, NULL);
-			} else {
-				fetch_value(stmt, return_value, colno, NULL);
-			}
-			if (!return_all) {
-				return 1;
 			}
 			break;
 
@@ -889,18 +910,10 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	if (return_all && how != PDO_FETCH_KEY_PAIR) {
-		if (flags == PDO_FETCH_GROUP && how == PDO_FETCH_COLUMN && stmt->fetch.column > 0) {
-			fetch_value(stmt, &grp_val, colno, NULL);
-		} else {
-			fetch_value(stmt, &grp_val, i, NULL);
-		}
-		convert_to_string(&grp_val);
-		if (how == PDO_FETCH_COLUMN) {
-			i = stmt->column_count; /* no more data to fetch */
-		} else {
-			i++;
-		}
+	if (group_key) {
+		fetch_value(stmt, group_key, i, NULL);
+		convert_to_string(group_key);
+		i++;
 	}
 
 	for (idx = 0; i < stmt->column_count; i++, idx++) {
@@ -910,22 +923,6 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 		switch (how) {
 			case PDO_FETCH_ASSOC:
 				zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
-				break;
-
-			case PDO_FETCH_KEY_PAIR:
-				{
-					zval tmp;
-					fetch_value(stmt, &tmp, ++i, NULL);
-
-					if (Z_TYPE(val) == IS_LONG) {
-						zend_hash_index_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_LVAL(val), &tmp);
-					} else {
-						convert_to_string(&val);
-						zend_symtable_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_STR(val), &tmp);
-					}
-					zval_ptr_dtor(&val);
-					return 1;
-				}
 				break;
 
 			case PDO_FETCH_USE_DEFAULT:
@@ -1048,10 +1045,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call user-supplied function");
 				return 0;
 			} else {
-				if (return_all) {
-					zval_ptr_dtor(return_value); /* we don't need that */
-					ZVAL_COPY_VALUE(return_value, &retval);
-				} else if (!Z_ISUNDEF(retval)) {
+				if (!Z_ISUNDEF(retval)) {
 					ZVAL_COPY_VALUE(return_value, &retval);
 				}
 			}
@@ -1064,26 +1058,19 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			break;
 	}
 
-	if (return_all) {
-		if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
-			zend_symtable_update(Z_ARRVAL_P(return_all), Z_STR(grp_val), return_value);
-		} else {
-			zval grp;
-			if ((pgrp = zend_symtable_find(Z_ARRVAL_P(return_all), Z_STR(grp_val))) == NULL) {
-				array_init(&grp);
-				zend_symtable_update(Z_ARRVAL_P(return_all), Z_STR(grp_val), &grp);
-			} else {
-				ZVAL_COPY_VALUE(&grp, pgrp);
-			}
-			zend_hash_next_index_insert(Z_ARRVAL(grp), return_value);
-		}
-		zval_ptr_dtor_str(&grp_val);
-	}
-
 	return 1;
 }
 /* }}} */
 
+
+// TODO Error on the following cases:
+// Using any fetch flag with PDO_FETCH_KEY_PAIR
+// Combining PDO_FETCH_UNIQUE and PDO_FETCH_GROUP
+// Using PDO_FETCH_UNIQUE or PDO_FETCH_GROUP outside of fetchAll()
+// Combining PDO_FETCH_PROPS_LATE with a fetch mode different than PDO_FETCH_CLASS
+// Improve error detection when combining PDO_FETCH_USE_DEFAULT with
+// Reject PDO_FETCH_INTO mode with fetch_all as no support
+// Reject $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, value); bypass
 static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_arg_num, bool fetch_all) /* {{{ */
 {
 	int flags = mode & PDO_FETCH_FLAGS;
@@ -1155,6 +1142,17 @@ PHP_METHOD(PDOStatement, fetch)
 		RETURN_THROWS();
 	}
 
+	int fetch_mode = how & ~PDO_FETCH_FLAGS;
+	if (fetch_mode == PDO_FETCH_KEY_PAIR) {
+		array_init_size(return_value, 1);
+		bool success = pdo_do_key_pair_fetch(stmt, ori, off, Z_ARRVAL_P(return_value));
+		if (!success) {
+			zval_dtor(return_value);
+			PDO_HANDLE_STMT_ERR();
+			RETURN_FALSE;
+		}
+		return;
+	}
 	if (!do_fetch(stmt, return_value, how, ori, off, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
@@ -1234,12 +1232,10 @@ PHP_METHOD(PDOStatement, fetchColumn)
 PHP_METHOD(PDOStatement, fetchAll)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
-	zval data, *return_all = NULL;
 	zval *arg2 = NULL;
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
-	bool error = false;
-	int flags, old_arg_count;
+	uint32_t old_arg_count;
 
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
@@ -1253,6 +1249,9 @@ PHP_METHOD(PDOStatement, fetchAll)
 		RETURN_THROWS();
 	}
 
+	int fetch_mode = how & ~PDO_FETCH_FLAGS;
+	int flags = how & PDO_FETCH_FLAGS;
+
 	old_ce = stmt->fetch.cls.ce;
 	ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
 	old_arg_count = stmt->fetch.cls.fci.param_count;
@@ -1261,7 +1260,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	/* TODO Would be good to reuse part of pdo_stmt_setup_fetch_mode() in some way */
 
-	switch (how & ~PDO_FETCH_FLAGS) {
+	switch (fetch_mode) {
 		case PDO_FETCH_CLASS:
 			/* Figure out correct class */
 			if (arg2) {
@@ -1328,7 +1327,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 				}
 				stmt->fetch.column = Z_LVAL_P(arg2);
 			} else {
-				stmt->fetch.column = how & PDO_FETCH_GROUP ? -1 : 0;
+				stmt->fetch.column = flags & PDO_FETCH_GROUP ? -1 : 0;
 			}
 			break;
 
@@ -1343,34 +1342,47 @@ PHP_METHOD(PDOStatement, fetchAll)
 			}
 	}
 
-	flags = how & PDO_FETCH_FLAGS;
 
-	if ((how & ~PDO_FETCH_FLAGS) == PDO_FETCH_USE_DEFAULT) {
+	if (fetch_mode == PDO_FETCH_USE_DEFAULT) {
 		flags |= stmt->default_fetch_type & PDO_FETCH_FLAGS;
-		how |= stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
+		fetch_mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
+		how = fetch_mode | flags;
 	}
 
 	PDO_STMT_CLEAR_ERR();
-	if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
-		(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
-	) {
-		array_init(return_value);
-		return_all = return_value;
-	}
-	if (!do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all)) {
-		error = true;
+
+	zval data, group_key;
+
+	array_init(return_value);
+
+	if (fetch_mode == PDO_FETCH_KEY_PAIR) {
+		while (pdo_do_key_pair_fetch(stmt, PDO_FETCH_ORI_NEXT, /* offset */ 0, Z_ARRVAL_P(return_value)));
+		PDO_HANDLE_STMT_ERR();
+		return;
 	}
 
-	if (!error) {
-		if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
-			(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
-		) {
-			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all));
-		} else {
-			array_init(return_value);
-			do {
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &data);
-			} while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL));
+	// Need to handle the "broken" PDO_FETCH_GROUP|PDO_FETCH_UNIQUE fetch case
+	//if (flags == PDO_FETCH_GROUP || flags == PDO_FETCH_UNIQUE) {
+	if (flags & PDO_FETCH_GROUP || flags & PDO_FETCH_UNIQUE) {
+		while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, &group_key)) {
+			ZEND_ASSERT(Z_TYPE(group_key) == IS_STRING);
+			if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
+				zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR(group_key), &data);
+			} else {
+				zval *group_ptr = zend_symtable_find(Z_ARRVAL_P(return_value), Z_STR(group_key));
+				zval group;
+				if (group_ptr == NULL) {
+					group_ptr = &group;
+					array_init(group_ptr);
+					zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR(group_key), group_ptr);
+				}
+				zend_hash_next_index_insert(Z_ARRVAL_P(group_ptr), &data);
+			}
+			zval_ptr_dtor_str(&group_key);
+		}
+	} else {
+		while (do_fetch(stmt, &data, how, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &data);
 		}
 	}
 
@@ -1381,13 +1393,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
 	stmt->fetch.cls.fci.param_count = old_arg_count;
 
-	/* on no results, return an empty array */
-	if (error) {
-		PDO_HANDLE_STMT_ERR();
-		if (Z_TYPE_P(return_value) != IS_ARRAY) {
-			array_init(return_value);
-		}
-	}
+	PDO_HANDLE_STMT_ERR();
 }
 /* }}} */
 

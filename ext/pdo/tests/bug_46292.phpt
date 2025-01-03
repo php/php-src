@@ -72,33 +72,37 @@ object(myclass2)#%d (2) {
 myclass::__construct()
 myclass::__construct()
 myclass::__construct()
-array(4) {
-  [0]=>
-  object(myclass)#%d (2) {
-    ["val"]=>
-    string(1) "0"
-    ["group_name"]=>
-    string(5) "alpha"
+array(2) {
+  ["alpha"]=>
+  array(2) {
+    [0]=>
+    object(myclass)#%d (1) {
+      ["val"]=>
+      string(1) "0"
+      ["group_name"]=>
+      uninitialized(string)
+    }
+    [1]=>
+    object(myclass)#%d (1) {
+      ["val"]=>
+      string(1) "1"
+      ["group_name"]=>
+      uninitialized(string)
+    }
   }
-  [1]=>
-  object(stdClass)#%d (2) {
-    ["group_name"]=>
-    string(4) "beta"
-    ["val"]=>
-    string(1) "0"
-  }
-  [2]=>
-  object(myclass)#%d (2) {
-    ["val"]=>
-    string(1) "1"
-    ["group_name"]=>
-    string(5) "alpha"
-  }
-  [3]=>
-  object(myclass2)#%d (2) {
-    ["val"]=>
-    string(1) "2"
-    ["group_name"]=>
-    string(4) "beta"
+  ["beta"]=>
+  array(2) {
+    [0]=>
+    object(stdClass)#%d (1) {
+      ["val"]=>
+      string(1) "0"
+    }
+    [1]=>
+    object(myclass2)#%d (1) {
+      ["val"]=>
+      string(1) "2"
+      ["group_name"]=>
+      uninitialized(string)
+    }
   }
 }
