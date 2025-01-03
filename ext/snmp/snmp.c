@@ -944,6 +944,11 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 /* {{{ Set the security level in the snmpv3 session */
 static bool netsnmp_session_set_sec_level(struct snmp_session *s, zend_string *level)
 {
+	if (!s) {
+		zend_value_error("SNMP session is not initialized or has been closed");
+		return false;
+	}
+
 	if (zend_string_equals_literal_ci(level, "noAuthNoPriv") || zend_string_equals_literal_ci(level, "nanp")) {
 		s->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
 	} else if (zend_string_equals_literal_ci(level, "authNoPriv") || zend_string_equals_literal_ci(level, "anp")) {
