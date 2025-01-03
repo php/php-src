@@ -83,14 +83,15 @@ typedef struct dom_nnodemap_object {
 	int nodetype;
 	int cached_length;
 	xmlHashTable *ht;
-	xmlChar *local, *local_lower;
+	xmlChar *local;
+	zend_string *local_lower;
 	xmlChar *ns;
 	php_libxml_cache_tag cache_tag;
 	dom_object *cached_obj;
 	zend_long cached_obj_index;
 	xmlDictPtr dict;
-	bool free_local : 1;
-	bool free_ns : 1;
+	bool release_local : 1;
+	bool release_ns : 1;
 } dom_nnodemap_object;
 
 typedef struct {
@@ -144,14 +145,14 @@ void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void php_dom_normalize_legacy(xmlNodePtr nodep);
 void php_dom_normalize_modern(xmlNodePtr nodep);
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, zend_long *cur, zend_long index);
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, zend_string *local_lower, zend_long *cur, zend_long index);
 void php_dom_create_implementation(zval *retval, bool modern);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
 bool dom_node_is_read_only(const xmlNode *node);
 bool dom_node_children_valid(const xmlNode *node);
 void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type, bool modern);
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len);
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(dom_nnodemap_object *objmap, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);

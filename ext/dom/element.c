@@ -811,15 +811,14 @@ Since:
 */
 static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 {
-	size_t name_len;
 	dom_object *intern, *namednode;
-	char *name;
+	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (name_len > INT_MAX) {
+	if (ZSTR_LEN(name) > INT_MAX) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
@@ -832,7 +831,7 @@ static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, b
 		php_dom_create_iterator(return_value, DOM_NODELIST, false);
 	}
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, NULL, 0);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, NULL);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagName)
@@ -1239,20 +1238,23 @@ Since: DOM Level 2
 */
 static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 {
-	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
-	char *uri, *name;
+	zend_string *uri, *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!p", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P!P", &uri, &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (uri_len > INT_MAX) {
+	if (!uri) {
+		uri = ZSTR_EMPTY_ALLOC();
+	}
+
+	if (ZSTR_LEN(uri) > INT_MAX) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
 
-	if (name_len > INT_MAX) {
+	if (ZSTR_LEN(name) > INT_MAX) {
 		zend_argument_value_error(2, "is too long");
 		RETURN_THROWS();
 	}
@@ -1265,7 +1267,7 @@ static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS
 		php_dom_create_iterator(return_value, DOM_NODELIST, false);
 	}
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, uri ? uri : "", uri_len);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, uri);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagNameNS)
