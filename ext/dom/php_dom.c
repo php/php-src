@@ -1452,7 +1452,7 @@ void dom_objects_free_storage(zend_object *object)
 }
 /* }}} */
 
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len) /* {{{ */
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns) /* {{{ */
 {
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
@@ -1473,24 +1473,23 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 	const xmlChar* tmp;
 
 	if (local) {
-		int len = (int) local_len;
+		int len = (int) ZSTR_LEN(local);
 		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)local, len)) != NULL) {
 			mapptr->local = BAD_CAST tmp;
 		} else {
-			mapptr->local = xmlCharStrndup(local, len);
-			mapptr->free_local = true;
+			mapptr->local = BAD_CAST ZSTR_VAL(zend_string_copy(local));
+			mapptr->release_local = true;
 		}
-		mapptr->local_lower = BAD_CAST estrdup(local);
-		zend_str_tolower((char *) mapptr->local_lower, len);
+		mapptr->local_lower = zend_string_tolower(local);
 	}
 
 	if (ns) {
-		int len = (int) ns_len;
+		int len = (int) ZSTR_LEN(ns);
 		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ns, len)) != NULL) {
 			mapptr->ns = BAD_CAST tmp;
 		} else {
-			mapptr->ns = xmlCharStrndup(ns, len);
-			mapptr->free_ns = true;
+			mapptr->ns = BAD_CAST ZSTR_VAL(zend_string_copy(ns));
+			mapptr->release_ns = true;
 		}
 	}
 }
@@ -1561,6 +1560,11 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 
 #endif
 
+/* The char pointer MUST refer to the char* of a zend_string struct */
+static void dom_zend_string_release_from_char_pointer(xmlChar *ptr) {
+	zend_string_release((zend_string*) (ptr - XtOffsetOf(zend_string, val)));
+}
+
 void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 {
 	dom_object *intern = php_dom_obj_from_obj(object);
@@ -1570,14 +1574,14 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 		if (objmap->cached_obj && GC_DELREF(&objmap->cached_obj->std) == 0) {
 			zend_objects_store_del(&objmap->cached_obj->std);
 		}
-		if (objmap->free_local) {
-			xmlFree(objmap->local);
+		if (objmap->release_local) {
+			dom_zend_string_release_from_char_pointer(objmap->local);
 		}
-		if (objmap->free_ns) {
-			xmlFree(objmap->ns);
+		if (objmap->release_ns) {
+			dom_zend_string_release_from_char_pointer(objmap->ns);
 		}
 		if (objmap->local_lower) {
-			efree(objmap->local_lower);
+			zend_string_release(objmap->local_lower);
 		}
 		if (!Z_ISUNDEF(objmap->baseobj_zv)) {
 			zval_ptr_dtor(&objmap->baseobj_zv);
@@ -1607,9 +1611,9 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type)
 	objmap->ht = NULL;
 	objmap->local = NULL;
 	objmap->local_lower = NULL;
-	objmap->free_local = false;
+	objmap->release_local = false;
 	objmap->ns = NULL;
-	objmap->free_ns = false;
+	objmap->release_ns = false;
 	objmap->cache_tag.modification_nr = 0;
 	objmap->cached_length = -1;
 	objmap->cached_obj = NULL;
@@ -1865,7 +1869,7 @@ static bool dom_match_qualified_name_for_tag_name_equality(const xmlChar *local,
 	return dom_match_qualified_name_according_to_spec(local_to_use, nodep);
 }
 
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, zend_long *cur, zend_long index) /* {{{ */
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, zend_string *local_lower, zend_long *cur, zend_long index) /* {{{ */
 {
 	/* Can happen with detached document */
 	if (UNEXPECTED(nodep == NULL)) {
@@ -1884,7 +1888,7 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 
 	while (*cur <= index) {
 		if (nodep->type == XML_ELEMENT_NODE) {
-			if (local_match_any || dom_match_qualified_name_for_tag_name_equality(local, local_lower, nodep, match_qname)) {
+			if (local_match_any || dom_match_qualified_name_for_tag_name_equality(local, BAD_CAST ZSTR_VAL(local_lower), nodep, match_qname)) {
 				if (ns_match_any || (ns[0] == '\0' && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, ns))) {
 					if (*cur == index) {
 						ret = nodep;
