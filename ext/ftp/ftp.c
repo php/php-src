@@ -1407,6 +1407,22 @@ ftp_getresp(ftpbuf_t *ftp)
 }
 /* }}} */
 
+static ssize_t my_send_wrapper_with_restart(php_socket_t fd, const void *buf, size_t size, int flags) {
+	ssize_t n;
+	do {
+		n = send(fd, buf, size, flags);
+	} while (n == -1 && php_socket_errno() == EINTR);
+	return n;
+}
+
+static ssize_t my_recv_wrapper_with_restart(php_socket_t fd, void *buf, size_t size, int flags) {
+	ssize_t n;
+	do {
+		n = recv(fd, buf, size, flags);
+	} while (n == -1 && php_socket_errno() == EINTR);
+	return n;
+}
+
 int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 #ifdef HAVE_FTP_SSL
 	int err;
@@ -1422,7 +1438,7 @@ int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 		handle = ftp->data->ssl_handle;
 		fd = ftp->data->fd;
 	} else {
-		return send(s, buf, size, 0);
+		return my_send_wrapper_with_restart(s, buf, size, 0);
 	}
 
 	do {
@@ -1461,8 +1477,33 @@ int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 	} while (retry);
 	return sent;
 #else
-	return send(s, buf, size, 0);
+	return my_send_wrapper_with_restart(s, buf, size, 0);
 #endif
+}
+
+static int my_poll(php_socket_t fd, int events, int timeout) {
+	int n;
+	zend_hrtime_t timeout_hr = (zend_hrtime_t) timeout * 1000000;
+
+	while (true) {
+		zend_hrtime_t start_ns = zend_hrtime();
+		n = php_pollfd_for_ms(fd, events, (int) (timeout_hr / 1000000));
+
+		if (n == -1 && php_socket_errno() == EINTR) {
+			zend_hrtime_t delta_ns = zend_hrtime() - start_ns;
+			if (delta_ns > timeout_hr) {
+#ifndef PHP_WIN32
+				errno = ETIMEDOUT;
+#endif
+				break;
+			}
+			timeout_hr -= delta_ns;
+		} else {
+			break;
+		}
+	}
+
+	return n;
 }
 
 /* {{{ my_send */
@@ -1474,7 +1515,7 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 
 	size = len;
 	while (size) {
-		n = php_pollfd_for_ms(s, POLLOUT, ftp->timeout_sec * 1000);
+		n = my_poll(s, POLLOUT, ftp->timeout_sec * 1000);
 
 		if (n < 1) {
 			char buf[256];
@@ -1513,7 +1554,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 	SSL *handle = NULL;
 	php_socket_t fd;
 #endif
-	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
+	n = my_poll(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
@@ -1573,7 +1614,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		} while (retry);
 	} else {
 #endif
-		nr_bytes = recv(s, buf, len, 0);
+		nr_bytes = my_recv_wrapper_with_restart(s, buf, len, 0);
 #ifdef HAVE_FTP_SSL
 	}
 #endif
@@ -1587,7 +1628,7 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 {
 	int		n;
 
-	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
+	n = my_poll(s, PHP_POLLREADABLE, 1000);
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
@@ -1610,7 +1651,7 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 {
 	int		n;
 
-	n = php_pollfd_for_ms(s, POLLOUT, 1000);
+	n = my_poll(s, POLLOUT, 1000);
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
@@ -1634,7 +1675,7 @@ my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrl
 {
 	int		n;
 
-	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
+	n = my_poll(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
