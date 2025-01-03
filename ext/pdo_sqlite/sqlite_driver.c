@@ -851,6 +851,72 @@ cleanup:
 }
 /* }}} */
 
+typedef struct {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+} pdo_sqlite_authorizer_data;
+
+static int php_sqlite_authorizer_callback(void *authdata, int action_code,
+	const char *arg1, const char *arg2, const char *arg3, const char *arg4)
+{
+	pdo_sqlite_authorizer_data *auth_data = (pdo_sqlite_authorizer_data *)authdata;
+	zval params[4];
+	zval retval;
+	int result = SQLITE_DENY;
+
+	ZVAL_LONG(&params[0], action_code);
+	ZVAL_STRING(&params[1], arg1 ? arg1 : "");
+	ZVAL_STRING(&params[2], arg2 ? arg2 : "");
+	ZVAL_STRING(&params[3], arg3 ? arg3 : "");
+
+	auth_data->fci.param_count = 4;
+	auth_data->fci.params = params;
+	auth_data->fci.retval = &retval;
+
+	if (zend_call_function(&auth_data->fci, &auth_data->fcc) == SUCCESS) {
+		if (Z_TYPE(retval) == IS_TRUE) {
+			result = SQLITE_OK;
+		}
+		zval_ptr_dtor(&retval);
+	}
+
+	zval_ptr_dtor(&params[1]);
+	zval_ptr_dtor(&params[2]);
+	zval_ptr_dtor(&params[3]);
+
+	return result;
+}
+
+static PHP_METHOD(PDO_SQLite_Ext, setAuthorizer)
+{
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	pdo_sqlite_authorizer_data *authdata = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!fci.size) {
+		// Callback is NULL, remove authorizer
+		sqlite3_set_authorizer(H->db, NULL, NULL);
+		RETURN_TRUE;
+	}
+
+	authdata = ecalloc(1, sizeof(pdo_sqlite_authorizer_data));
+	authdata->fci = fci;
+	authdata->fcc = fcc;
+
+	if (sqlite3_set_authorizer(H->db, php_sqlite_authorizer_callback, authdata) == SQLITE_OK) {
+		RETURN_TRUE;
+	}
+
+	efree(authdata);
+	RETURN_FALSE;
+}
+
 const pdo_driver_t pdo_sqlite_driver = {
 	PDO_DRIVER_HEADER(sqlite),
 	pdo_sqlite_handle_factory

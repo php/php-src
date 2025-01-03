@@ -63,4 +63,7 @@ class Sqlite extends \PDO
         ?string $dbname = "main",
         int $flags = \Pdo\Sqlite::OPEN_READONLY
     ) {}
+
+    /** @return bool */
+    public function setAuthorizer(?callable $callback): bool {}
 }
