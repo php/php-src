@@ -718,11 +718,6 @@ void gdImageCopyResized(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int 
 	substituted automatically. */
 void gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH);
 
-gdImagePtr gdImageRotate90(gdImagePtr src, int ignoretransparent);
-gdImagePtr gdImageRotate180(gdImagePtr src, int ignoretransparent);
-gdImagePtr gdImageRotate270(gdImagePtr src, int ignoretransparent);
-gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
-
 gdImagePtr gdImageClone(gdImagePtr src);
 
 void gdImageSetBrush(gdImagePtr im, gdImagePtr brush);
@@ -882,17 +877,8 @@ gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color, const f
 int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id);
 gdInterpolationMethod gdImageGetInterpolationMethod(gdImagePtr im);
 
-gdImagePtr gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, const unsigned int new_height);
-gdImagePtr gdImageScaleBicubic(gdImagePtr src_img, const unsigned int new_width, const unsigned int new_height);
-gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, const unsigned int height);
-gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width, const unsigned int height);
-gdImagePtr gdImageScaleTwoPass(const gdImagePtr pOrigImage, const unsigned int uOrigWidth, const unsigned int uOrigHeight, const unsigned int uNewWidth, const unsigned int uNewHeight);
 gdImagePtr gdImageScale(const gdImagePtr src, const unsigned int new_width, const unsigned int new_height);
 
-gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, const int bgColor);
-gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int bgColor);
-gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const int bgColor);
-gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor);
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
 
 typedef enum {
