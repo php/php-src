@@ -91,7 +91,7 @@ static void zend_persist_ast_calc(zend_ast *ast)
 		zval z;
 		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
 		zend_persist_op_array_calc(&z);
-		zend_persist_ast_calc(zend_ast_get_op_array(ast)->ast);
+		ADD_INTERNED_STRING(zend_ast_get_op_array(ast)->original_ast);
 	} else if (zend_ast_is_decl(ast)) {
 		zend_ast_decl *decl = (zend_ast_decl*)ast;
 		ADD_SIZE(sizeof(zend_ast_decl));

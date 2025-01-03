@@ -11222,7 +11222,10 @@ static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 	znode node;
 	zend_op_array *op = zend_compile_func_decl(&node, (zend_ast*)closure_ast, FUNC_DECL_LEVEL_CONSTEXPR);
 
-	*ast_ptr = zend_ast_create_op_array(op, (zend_ast*)closure_ast, 0);
+	zend_string *original_ast = zend_ast_export("", *ast_ptr, "");
+	zend_ast_destroy(*ast_ptr);
+	*ast_ptr = zend_ast_create_op_array(op, original_ast);
+
 }
 
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)
