@@ -58,10 +58,10 @@ PHP_FUNCTION(hrtime)
 	if (UNEXPECTED(get_as_num)) {
 		PHP_RETURN_HRTIME(t);
 	} else {
-		array_init_size(return_value, 2);
-		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-		add_next_index_long(return_value, (zend_long)(t / (zend_hrtime_t)ZEND_NANO_IN_SEC));
-		add_next_index_long(return_value, (zend_long)(t % (zend_hrtime_t)ZEND_NANO_IN_SEC));
+		zval first, second;
+		ZVAL_LONG(&first, (zend_long)(t / (zend_hrtime_t)ZEND_NANO_IN_SEC));
+		ZVAL_LONG(&second, (zend_long)(t % (zend_hrtime_t)ZEND_NANO_IN_SEC));
+		RETURN_ARR(zend_new_pair(&first, &second));
 	}
 #else
 	RETURN_FALSE;
