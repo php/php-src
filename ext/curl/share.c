@@ -237,7 +237,7 @@ PHP_FUNCTION(curl_share_init_persistent)
 
 	// Apply the options property to the handle. We avoid using $share_opts as zval_get_long may not necessarily return
 	// the same value as it did in the initial ZEND_HASH_FOREACH_VAL above.
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&share_opts_prop), share_opts_entry) {
+	ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(&share_opts_prop), share_opts_entry) {
 		CURLSHcode curlsh_error = curl_share_setopt(sh->share, CURLSHOPT_SHARE, Z_LVAL_P(share_opts_entry));
 
 		if (curlsh_error != CURLSHE_OK) {
