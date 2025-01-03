@@ -14,6 +14,7 @@ if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.3', '<=')) {
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug67325.jpg';
 
 $im = imagecreatefromjpeg($filename);
+imagetruecolortopalettesetmethod($im, IMG_QUANT_JQUANT);
 imagetruecolortopalette($im, 0, 256);
 
 $white = 0;

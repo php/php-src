@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f8a22bff1d123313f37da400500e573baace837 */
+ * Stub hash: 6df1e68080ceef570af08c72636be6428c0668eb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -33,6 +33,18 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolormatch, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image1, GdImage, 0)
 	ZEND_ARG_OBJ_INFO(0, image2, GdImage, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagetruecolortopalettesetmethod, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_TYPE_INFO(0, method, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, speed, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagetruecolortopalettesetquality, 0, 3, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_TYPE_INFO(0, min_quality, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, max_quality, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetthickness, 0, 2, _IS_BOOL, 0)
@@ -575,6 +587,8 @@ ZEND_FUNCTION(imageistruecolor);
 ZEND_FUNCTION(imagetruecolortopalette);
 ZEND_FUNCTION(imagepalettetotruecolor);
 ZEND_FUNCTION(imagecolormatch);
+ZEND_FUNCTION(imagetruecolortopalettesetmethod);
+ZEND_FUNCTION(imagetruecolortopalettesetquality);
 ZEND_FUNCTION(imagesetthickness);
 ZEND_FUNCTION(imagefilledellipse);
 ZEND_FUNCTION(imagefilledarc);
@@ -711,6 +725,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagetruecolortopalette, arginfo_imagetruecolortopalette)
 	ZEND_FE(imagepalettetotruecolor, arginfo_imagepalettetotruecolor)
 	ZEND_FE(imagecolormatch, arginfo_imagecolormatch)
+	ZEND_FE(imagetruecolortopalettesetmethod, arginfo_imagetruecolortopalettesetmethod)
+	ZEND_FE(imagetruecolortopalettesetquality, arginfo_imagetruecolortopalettesetquality)
 	ZEND_FE(imagesetthickness, arginfo_imagesetthickness)
 	ZEND_FE(imagefilledellipse, arginfo_imagefilledellipse)
 	ZEND_FE(imagefilledarc, arginfo_imagefilledarc)
@@ -879,6 +895,10 @@ static void register_gd_symbols(int module_number)
 #if defined(gdEffectMultiply)
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_MULTIPLY", gdEffectMultiply, CONST_PERSISTENT);
 #endif
+	REGISTER_LONG_CONSTANT("IMG_QUANT_DEFAULT", GD_QUANT_DEFAULT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_QUANT_JQUANT", GD_QUANT_JQUANT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_QUANT_NEUQUANT", GD_QUANT_NEUQUANT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_QUANT_LIQ", GD_QUANT_LIQ, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_DEFAULT", GD_CROP_DEFAULT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_TRANSPARENT", GD_CROP_TRANSPARENT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_BLACK", GD_CROP_BLACK, CONST_PERSISTENT);

@@ -177,6 +177,30 @@ const IMG_EFFECT_MULTIPLY = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue GD_QUANT_DEFAULT
+ */
+const IMG_QUANT_DEFAULT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue GD_QUANT_JQUANT
+ */
+const IMG_QUANT_JQUANT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue GD_QUANT_NEUQUANT
+ */
+const IMG_QUANT_NEUQUANT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue GD_QUANT_LIQ
+ */
+const IMG_QUANT_LIQ = UNKNOWN;
+
+/**
+ * @var int
  * @cvalue GD_CROP_DEFAULT
  */
 const IMG_CROP_DEFAULT = UNKNOWN;
@@ -497,6 +521,10 @@ function imagetruecolortopalette(GdImage $image, bool $dither, int $num_colors):
 function imagepalettetotruecolor(GdImage $image): bool {}
 
 function imagecolormatch(GdImage $image1, GdImage $image2): bool {}
+
+function imagetruecolortopalettesetmethod(GdImage $image, int $method, int $speed = 0): bool {}
+
+function imagetruecolortopalettesetquality(GdImage $image, int $min_quality, int $max_quality): void {}
 
 function imagesetthickness(GdImage $image, int $thickness): bool {}
 
