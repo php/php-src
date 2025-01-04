@@ -2723,8 +2723,6 @@ void gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	}
 }
 
-int gdCompareInt (const void *a, const void *b);
-
 /* THANKS to Kirsten Schulz for the polygon fixes! */
 
 /* The intersection finding technique of this code could be improved
@@ -2736,6 +2734,8 @@ int gdCompareInt (const void *a, const void *b);
 void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
 	int i;
+	int j;
+	int index;
 	int y;
 	int miny, maxy, pmaxy;
 	int x1, y1;
@@ -2840,8 +2840,21 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 				im->polyInts[ints++] = x2;
 			}
 		}
-		qsort(im->polyInts, ints, sizeof(int), gdCompareInt);
-
+		/*
+		  2.0.26: polygons pretty much always have less than 100 points,
+		  and most of the time they have considerably less. For such trivial
+		  cases, insertion sort is a good choice. Also a good choice for
+		  future implementations that may wish to indirect through a table.
+		*/
+		for (i = 1; (i < ints); i++) {
+			index = im->polyInts[i];
+			j = i;
+			while ((j > 0) && (im->polyInts[j - 1] > index)) {
+				im->polyInts[j] = im->polyInts[j - 1];
+				j--;
+			}
+			im->polyInts[j] = index;
+		}
 		for (i = 0; i < ints - 1; i += 2) {
 			gdImageLine(im, im->polyInts[i], y, im->polyInts[i + 1], y, fill_color);
 		}
@@ -2851,11 +2864,6 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	if (c == gdAntiAliased) {
 		gdImagePolygon(im, p, n, c);
 	}
-}
-
-int gdCompareInt (const void *a, const void *b)
-{
-	return (*(const int *) a) - (*(const int *) b);
 }
 
 void gdImageSetStyle (gdImagePtr im, int *style, int noOfPixels)
