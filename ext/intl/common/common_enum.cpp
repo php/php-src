@@ -36,6 +36,7 @@ void zoi_with_current_dtor(zend_object_iterator *iter)
 {
 	zoi_with_current *zoiwc = (zoi_with_current*)iter;
 	zval_ptr_dtor(&zoiwc->wrapping_obj);
+	ZVAL_UNDEF(&zoiwc->wrapping_obj);
 }
 
 U_CFUNC zend_result zoi_with_current_valid(zend_object_iterator *iter)
@@ -80,6 +81,14 @@ static void string_enum_current_move_forward(zend_object_iterator *iter)
 	} //else we've reached the end of the enum, nothing more is required
 }
 
+HashTable *zoi_with_current_get_gc(zend_object_iterator *iter, zval **table, int *n)
+{
+	zoi_with_current *zoiwc = reinterpret_cast<zoi_with_current*>(iter);
+	*table = &zoiwc->wrapping_obj;
+	*n = 1;
+	return nullptr;
+}
+
 static void string_enum_rewind(zend_object_iterator *iter)
 {
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
@@ -106,7 +115,6 @@ static void string_enum_rewind(zend_object_iterator *iter)
 static void string_enum_destroy_it(zend_object_iterator *iter)
 {
 	delete (StringEnumeration*)Z_PTR(iter->data);
-	efree(iter);
 }
 
 static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
@@ -117,7 +125,7 @@ static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 	string_enum_current_move_forward,
 	string_enum_rewind,
 	zoi_with_current_invalidate_current,
-	NULL, /* get_gc */
+	zoi_with_current_get_gc,
 };
 
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object)
@@ -135,16 +143,41 @@ U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *ob
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 }
 
+static void IntlIterator_objects_dtor(zend_object *object)
+{
+	IntlIterator_object	*ii = php_intl_iterator_fetch_object(object);
+	if (ii->iterator) {
+		((zoi_with_current*)ii->iterator)->destroy_it(ii->iterator);
+		OBJ_RELEASE(&ii->iterator->std);
+		ii->iterator = NULL;
+	}
+}
+
 static void IntlIterator_objects_free(zend_object *object)
 {
 	IntlIterator_object	*ii = php_intl_iterator_fetch_object(object);
 
-	if (ii->iterator) {
-		((zoi_with_current*)ii->iterator)->destroy_it(ii->iterator);
-	}
 	intl_error_reset(INTLITERATOR_ERROR_P(ii));
 
 	zend_object_std_dtor(&ii->zo);
+}
+
+static HashTable *IntlIterator_object_get_gc(zend_object *obj, zval **table, int *n)
+{
+	IntlIterator_object *ii = php_intl_iterator_fetch_object(obj);
+	if (ii->iterator) {
+		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+		zend_get_gc_buffer_add_obj(gc_buffer, &ii->iterator->std);
+		zend_get_gc_buffer_use(gc_buffer, table, n);
+	} else {
+		*table = nullptr;
+		*n = 0;
+	}
+	if (obj->properties == nullptr && obj->ce->default_properties_count == 0) {
+		return nullptr;
+	} else {
+		return zend_std_get_properties(obj);
+	}
 }
 
 static zend_object_iterator *IntlIterator_get_iterator(
@@ -263,7 +296,9 @@ U_CFUNC void intl_register_common_symbols(int module_number)
 		sizeof IntlIterator_handlers);
 	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;
+	IntlIterator_handlers.dtor_obj = IntlIterator_objects_dtor;
 	IntlIterator_handlers.free_obj = IntlIterator_objects_free;
+	IntlIterator_handlers.get_gc = IntlIterator_object_get_gc;
 
 	register_common_symbols(module_number);
 }
