@@ -2081,7 +2081,7 @@ done:
 
 static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 {
-	int i, l, x1, x2, dy;
+	int l, x1, x2, dy;
 	int oc;   /* old pixel value */
 	int wx2,wy2;
 	/* stack of filled segments */
