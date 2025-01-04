@@ -1182,6 +1182,9 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		}
 
 		entry.filename = zend_string_init(filename_raw, filename_len, entry.is_persistent);
+		if (entry.is_persistent) {
+			GC_MAKE_PERSISTENT_LOCAL(entry.filename);
+		}
 
 		PHAR_GET_32(buffer, len);
 		if (len > (size_t)(endbuffer - buffer)) {
