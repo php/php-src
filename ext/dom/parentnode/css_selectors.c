@@ -245,7 +245,7 @@ void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zv
 		zend_array_destroy(list);
 		RETURN_THROWS();
 	} else {
-		php_dom_create_iterator(return_value, DOM_NODELIST, true);
+		object_init_ex(return_value, dom_modern_nodelist_class_entry);
 		dom_object *ret_obj = Z_DOMOBJ_P(return_value);
 		dom_nnodemap_object *mapptr = (dom_nnodemap_object *) ret_obj->ptr;
 		ZVAL_ARR(&mapptr->baseobj_zv, list);

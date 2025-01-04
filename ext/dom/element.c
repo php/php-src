@@ -809,7 +809,7 @@ PHP_METHOD(Dom_Element, removeAttributeNode)
 Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagname
 Since:
 */
-static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, bool modern)
+static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *iter_ce)
 {
 	dom_object *intern, *namednode;
 	zend_string *name;
@@ -825,23 +825,19 @@ static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, b
 
 	DOM_GET_THIS_INTERN(intern);
 
-	if (modern) {
-		php_dom_create_iterator(return_value, DOM_HTMLCOLLECTION, true);
-	} else {
-		php_dom_create_iterator(return_value, DOM_NODELIST, false);
-	}
+	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
 	dom_namednode_iter(intern, 0, namednode, NULL, name, NULL);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagName)
 {
-	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_nodelist_class_entry);
 }
 
 PHP_METHOD(Dom_Element, getElementsByTagName)
 {
-	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_html_collection_class_entry);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
@@ -1236,7 +1232,7 @@ PHP_METHOD(Dom_Element, setAttributeNodeNS)
 Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
 Since: DOM Level 2
 */
-static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS, bool modern)
+static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *iter_ce)
 {
 	dom_object *intern, *namednode;
 	zend_string *uri, *name;
@@ -1261,23 +1257,19 @@ static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS
 
 	DOM_GET_THIS_INTERN(intern);
 
-	if (modern) {
-		php_dom_create_iterator(return_value, DOM_HTMLCOLLECTION, true);
-	} else {
-		php_dom_create_iterator(return_value, DOM_NODELIST, false);
-	}
+	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
 	dom_namednode_iter(intern, 0, namednode, NULL, name, uri);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagNameNS)
 {
-	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_nodelist_class_entry);
 }
 
 PHP_METHOD(Dom_Element, getElementsByTagNameNS)
 {
-	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_html_collection_class_entry);
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 

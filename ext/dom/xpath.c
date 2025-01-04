@@ -24,6 +24,7 @@
 #include "php_dom.h"
 #include "namespace_compat.h"
 #include "private_data.h"
+#include "internal_helpers.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -371,7 +372,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
-			php_dom_create_iterator(return_value, DOM_NODELIST, modern);
+			object_init_ex(return_value, dom_get_nodelist_ce(modern));
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;

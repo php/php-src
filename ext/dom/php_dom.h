@@ -109,13 +109,6 @@ typedef struct {
 	dom_object dom;
 } dom_object_namespace_node;
 
-typedef enum dom_iterator_type {
-	DOM_NODELIST,
-	DOM_NAMEDNODEMAP,
-	DOM_DTD_NAMEDNODEMAP,
-	DOM_HTMLCOLLECTION,
-} dom_iterator_type;
-
 struct php_dom_libxml_ns_mapper;
 typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
 
@@ -151,7 +144,6 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
 bool dom_node_is_read_only(const xmlNode *node);
 bool dom_node_children_valid(const xmlNode *node);
-void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type, bool modern);
 void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(dom_nnodemap_object *objmap, int index);

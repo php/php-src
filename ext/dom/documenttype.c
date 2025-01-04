@@ -23,6 +23,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "dom_properties.h"
+#include "internal_helpers.h"
 
 /* {{{ name	string
 readonly=yes
@@ -47,7 +48,7 @@ zend_result dom_documenttype_entities_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
-	php_dom_create_iterator(retval, DOM_DTD_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
+	object_init_ex(retval, dom_get_dtd_namednodemap_ce(php_dom_follow_spec_intern(obj)));
 
 	xmlHashTable *entityht = (xmlHashTable *) dtdptr->entities;
 
@@ -68,7 +69,7 @@ zend_result dom_documenttype_notations_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
-	php_dom_create_iterator(retval, DOM_DTD_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
+	object_init_ex(retval, dom_get_dtd_namednodemap_ce(php_dom_follow_spec_intern(obj)));
 
 	xmlHashTable *notationht = (xmlHashTable *) dtdptr->notations;
 
