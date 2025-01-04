@@ -1006,6 +1006,10 @@ void zend_assert_valid_class_name(const zend_string *const_name, const char *typ
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope);
 ZEND_API zend_string *zend_type_to_string(zend_type type);
 
+void zend_compile_attributes(
+	HashTable **attributes, zend_ast *ast, uint32_t offset, uint32_t target, uint32_t promoted
+);
+
 /* BEGIN: OPCODES */
 
 #include "zend_vm_opcodes.h"

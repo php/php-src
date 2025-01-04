@@ -83,6 +83,10 @@ PHP 8.5 UPGRADE NOTES
   . Fatal Errors (such as an exceeded maximum execution time) now include a
     backtrace.
     RFC: https://wiki.php.net/rfc/error_backtraces_v2
+  . Added support for attributes on compile-time non-class constants.
+  . Added constant Attribute::TARGET_CONSTANT.
+  . The #[\Deprecated] attribute can now be used on constants.
+    RFC: https://wiki.php.net/rfc/attributes-on-constants
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
@@ -217,6 +221,8 @@ PHP 8.5 UPGRADE NOTES
   . ReflectionConstant::getFileName() was introduced.
   . ReflectionConstant::getExtension() and
     ReflectionConstant::getExtensionName() were introduced.
+  . ReflectionConstant::getAttributes() was introduced.
+    RFC: https://wiki.php.net/rfc/attributes-on-constants
 
 ========================================
 7. New Classes and Interfaces
