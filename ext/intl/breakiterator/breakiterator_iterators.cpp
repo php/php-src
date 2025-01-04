@@ -144,7 +144,6 @@ typedef struct zoi_break_iter_parts {
 static void _breakiterator_parts_destroy_it(zend_object_iterator *iter)
 {
 	zval_ptr_dtor(&iter->data);
-	efree(iter);
 }
 
 static void _breakiterator_parts_get_current_key(zend_object_iterator *iter, zval *key)
@@ -223,7 +222,7 @@ static const zend_object_iterator_funcs breakiterator_parts_it_funcs = {
 	_breakiterator_parts_move_forward,
 	_breakiterator_parts_rewind,
 	zoi_with_current_invalidate_current,
-	NULL, /* get_gc */
+	zoi_with_current_get_gc,
 };
 
 void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
