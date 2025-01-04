@@ -291,7 +291,6 @@ Since:
 */
 PHP_METHOD(DOMElement, getAttribute)
 {
-	zval *id;
 	xmlNode *nodep;
 	char *name;
 	xmlChar *value = NULL;
@@ -300,12 +299,11 @@ PHP_METHOD(DOMElement, getAttribute)
 	size_t name_len;
 	bool should_free = false;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(name, name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attr) {
@@ -348,9 +346,7 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	dom_object *intern;
 	zval tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -402,17 +398,16 @@ Since:
 */
 PHP_METHOD(DOMElement, setAttribute)
 {
-	zval *id;
 	xmlNode *nodep;
 	int name_valid;
 	size_t name_len, value_len;
 	dom_object *intern;
 	char *name, *value;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &value, &value_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STRING(value, value_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (name_len == 0) {
 		zend_argument_must_not_be_empty_error(1);
@@ -425,7 +420,7 @@ PHP_METHOD(DOMElement, setAttribute)
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	if (php_dom_follow_spec_intern(intern)) {
 		xmlChar *name_processed = BAD_CAST name;
@@ -646,18 +641,16 @@ Since:
 */
 PHP_METHOD(DOMElement, getAttributeNode)
 {
-	zval *id;
 	xmlNodePtr nodep, attrp;
 	size_t name_len;
 	dom_object *intern;
 	char *name;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(name, name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp == NULL) {
@@ -774,9 +767,9 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 	xmlAttr *attrp;
 	dom_object *intern, *attrobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node, node_ce)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
