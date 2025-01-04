@@ -1229,14 +1229,15 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		/* if signature matched, no need to check CRC32 for each file */
 		entry.is_crc_checked = (manifest_flags & PHAR_HDR_SIGNATURE ? 1 : 0);
 		phar_set_inode(&entry);
-		// TODO: avoid copy
 		if (mydata->is_persistent) {
 			str = zend_string_init_interned(ZSTR_VAL(entry.filename), ZSTR_LEN(entry.filename), 1);
 		} else {
-			str = zend_string_init(ZSTR_VAL(entry.filename), ZSTR_LEN(entry.filename), 0);
+			str = entry.filename;
 		}
 		zend_hash_add_mem(&mydata->manifest, str, (void*)&entry, sizeof(phar_entry_info));
-		zend_string_release(str);
+		if (mydata->is_persistent) {
+			zend_string_release(str);
+		}
 	}
 
 	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0xF);
