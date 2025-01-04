@@ -109,6 +109,10 @@ PHP 8.5 UPGRADE NOTES
   . Added the (void) to indicate that not using a value is intentional. The
     (void) cast does nothing by itself.
     RFC: https://wiki.php.net/rfc/marking_return_value_as_important
+  . Added support for attributes on compile-time non-class constants.
+  . Added constant Attribute::TARGET_CONSTANT.
+  . The #[\Deprecated] attribute can now be used on constants.
+    RFC: https://wiki.php.net/rfc/attributes-on-constants
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
@@ -270,6 +274,8 @@ PHP 8.5 UPGRADE NOTES
   . ReflectionConstant::getFileName() was introduced.
   . ReflectionConstant::getExtension() and
     ReflectionConstant::getExtensionName() were introduced.
+  . ReflectionConstant::getAttributes() was introduced.
+    RFC: https://wiki.php.net/rfc/attributes-on-constants
 
 ========================================
 7. New Classes and Interfaces
