@@ -930,7 +930,9 @@ static int gdImageTileGet (gdImagePtr im, int x, int y)
 	srcy = y % gdImageSY(im->tile);
 	p = gdImageGetPixel(im->tile, srcx, srcy);
 
-	if (im->trueColor) {
+	if (p == im->tile->transparent) {
+		tileColor = im->transparent;
+	} else if (im->trueColor) {
 		if (im->tile->trueColor) {
 			tileColor = p;
 		} else {
