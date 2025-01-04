@@ -101,7 +101,7 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 
 - Intl:
-  . IntlDateFormatter::setTimeZone()()/datefmt_set_timezone
+  . IntlDateFormatter::setTimeZone()/datefmt_set_timezone()
     throws an IntlException on uninitialised classes/clone failures.
 
 - PCNTL:
