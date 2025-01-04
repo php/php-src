@@ -374,6 +374,9 @@ bail:
 				return FAILURE;
 			}
 			entry.filename = zend_string_alloc(entry.uncompressed_filesize, myphar->is_persistent);
+			if (myphar->is_persistent) {
+				GC_MAKE_PERSISTENT_LOCAL(entry.filename);
+			}
 			ZSTR_VAL(entry.filename)[entry.uncompressed_filesize] = '\0';
 
 			read = php_stream_read(fp, ZSTR_VAL(entry.filename), entry.uncompressed_filesize);
@@ -440,6 +443,9 @@ bail:
 			}
 
 			entry.filename = zend_string_init(name, filename_len, myphar->is_persistent);
+			if (myphar->is_persistent) {
+				GC_MAKE_PERSISTENT_LOCAL(entry.filename);
+			}
 		} else if (!last_was_longlink) {
 			/* calculate strlen, which can be no longer than 100 */
 			uint32_t filename_len;
@@ -455,6 +461,9 @@ bail:
 			}
 
 			entry.filename = zend_string_init(hdr->name, filename_len, myphar->is_persistent);
+			if (myphar->is_persistent) {
+				GC_MAKE_PERSISTENT_LOCAL(entry.filename);
+			}
 		}
 		last_was_longlink = 0;
 
