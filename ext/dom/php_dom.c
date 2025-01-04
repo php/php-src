@@ -1623,27 +1623,6 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type)
 	return &intern->std;
 }
 
-void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type, bool modern) /* {{{ */
-{
-	zend_class_entry *ce;
-
-	if (iterator_type == DOM_NAMEDNODEMAP) {
-		ce = dom_get_namednodemap_ce(modern);
-	} else if (iterator_type == DOM_HTMLCOLLECTION) {
-		/* This only exists in modern DOM. */
-		ZEND_ASSERT(modern);
-		ce = dom_html_collection_class_entry;
-	} else if (iterator_type == DOM_DTD_NAMEDNODEMAP) {
-		ce = dom_get_dtd_namednodemap_ce(modern);
-	} else {
-		ZEND_ASSERT(iterator_type == DOM_NODELIST);
-		ce = dom_get_nodelist_ce(modern);
-	}
-
-	object_init_ex(return_value, ce);
-}
-/* }}} */
-
 static zend_always_inline zend_class_entry *dom_get_element_ce(const xmlNode *node, bool modern)
 {
 	if (modern) {
