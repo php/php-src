@@ -1544,40 +1544,26 @@ static int preg_get_backref(char **str, int *backref)
 }
 /* }}} */
 
-/* {{{ preg_do_repl_func */
-static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
+/* Return NULL if an exception has occurred */
+static zend_string *preg_do_repl_func(zend_fcall_info_cache *fcc, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
 {
-	zend_string *result_str;
+	zend_string *result_str = NULL;
 	zval		 retval;			/* Function return value */
 	zval	     arg;				/* Argument to pass to function */
 
 	array_init_size(&arg, count + (mark ? 1 : 0));
 	populate_subpat_array(&arg, subject, offsets, subpat_names, num_subpats, count, mark, flags);
 
-	fci->retval = &retval;
-	fci->param_count = 1;
-	fci->params = &arg;
-
-	if (zend_call_function(fci, fcc) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
-			result_str = Z_STR(retval);
-		} else {
-			result_str = zval_get_string_func(&retval);
-			zval_ptr_dtor(&retval);
-		}
-	} else {
-		if (!EG(exception)) {
-			php_error_docref(NULL, E_WARNING, "Unable to call custom replacement function");
-		}
-
-		result_str = zend_string_init(&subject[offsets[0]], offsets[1] - offsets[0], 0);
-	}
-
+	zend_call_known_fcc(fcc, &retval, 1, &arg, NULL);
 	zval_ptr_dtor(&arg);
+	/* No Exception has occurred */
+	if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
+		result_str = zval_try_get_string(&retval);
+	}
+	zval_ptr_dtor(&retval);
 
 	return result_str;
 }
-/* }}} */
 
 /* {{{ php_pcre_replace */
 PHPAPI zend_string *php_pcre_replace(zend_string *regex,
@@ -1940,10 +1926,12 @@ matched:
 
 			/* Use custom function to get replacement string and its length. */
 			eval_result = preg_do_repl_func(
-				fci, fcc, subject, offsets, subpat_names, num_subpats, count,
+				fcc, subject, offsets, subpat_names, num_subpats, count,
 				pcre2_get_mark(match_data), flags);
 
-			ZEND_ASSERT(eval_result);
+			if (UNEXPECTED(eval_result == NULL)) {
+				goto error;
+			}
 			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result) + ZSTR_MAX_OVERHEAD, new_len) -ZSTR_MAX_OVERHEAD;
 			if (new_len >= alloc_len) {
 				alloc_len = zend_safe_address_guarded(2, new_len, ZSTR_MAX_OVERHEAD) - ZSTR_MAX_OVERHEAD;
