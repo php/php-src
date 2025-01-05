@@ -2381,18 +2381,18 @@ PHP_FUNCTION(preg_replace_callback)
 	zend_long limit = -1, flags = 0;
 	size_t replace_count;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ARRAY_HT_OR_STR(regex_ht, regex_str)
-		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL(zcount)
 		Z_PARAM_LONG(flags)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_END_EX(goto free_trampoline);
 
 	replace_count = php_preg_replace_func_impl(return_value, regex_str, regex_ht,
 		&fcc,
@@ -2400,19 +2400,19 @@ PHP_FUNCTION(preg_replace_callback)
 	if (zcount) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
+	free_trampoline:
+	zend_release_fcall_info_cache(&fcc);
 }
 /* }}} */
 
 /* {{{ Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback_array)
 {
-	zval zv, *replace, *zcount = NULL;
+	zval *replace, *zcount = NULL;
 	HashTable *pattern, *subject_ht;
 	zend_string *subject_str, *str_idx_regex;
 	zend_long limit = -1, flags = 0;
 	size_t replace_count = 0;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
 
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(2, 5)
@@ -2424,10 +2424,6 @@ PHP_FUNCTION(preg_replace_callback_array)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	fci.size = sizeof(fci);
-	fci.object = NULL;
-	fci.named_params = NULL;
-
 	if (subject_ht) {
 		GC_TRY_ADDREF(subject_ht);
 	} else {
@@ -2435,29 +2431,32 @@ PHP_FUNCTION(preg_replace_callback_array)
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(pattern, str_idx_regex, replace) {
-		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
-			zend_argument_type_error(1, "must contain only valid callbacks");
-			goto error;
-		}
 		if (!str_idx_regex) {
 			zend_argument_type_error(1, "must contain only string patterns as keys");
 			goto error;
 		}
 
-		ZVAL_COPY_VALUE(&fci.function_name, replace);
+		zend_fcall_info_cache fcc = empty_fcall_info_cache;
+		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
+			zend_argument_type_error(1, "must contain only valid callbacks");
+			goto error;
+		}
 
-		replace_count += php_preg_replace_func_impl(&zv, str_idx_regex, /* regex_ht */ NULL, &fcc,
+		zval retval;
+		replace_count += php_preg_replace_func_impl(&retval, str_idx_regex, /* regex_ht */ NULL, &fcc,
 			subject_str, subject_ht, limit, flags);
-		switch (Z_TYPE(zv)) {
+		zend_release_fcall_info_cache(&fcc);
+
+		switch (Z_TYPE(retval)) {
 			case IS_ARRAY:
 				ZEND_ASSERT(subject_ht);
 				zend_array_release(subject_ht);
-				subject_ht = Z_ARR(zv);
+				subject_ht = Z_ARR(retval);
 				break;
 			case IS_STRING:
 				ZEND_ASSERT(subject_str);
 				zend_string_release(subject_str);
-				subject_str = Z_STR(zv);
+				subject_str = Z_STR(retval);
 				break;
 			case IS_NULL:
 				RETVAL_NULL();
