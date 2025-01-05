@@ -842,7 +842,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 	struct sockaddr **res;
 
 	if (ZSTR_LEN(hostname) >= MAX_NAME_LEN) {
-		php_error_docref(NULL, E_WARNING, "hostname length must be lower than %d", MAX_NAME_LEN);
+		zend_value_error("hostname length must be lower than %d", MAX_NAME_LEN);
 		return false;
 	}
 
@@ -872,7 +872,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 				char *pport = pptr + 2;
 				tmp_port = atoi(pport);
 				if (tmp_port < 0 || tmp_port > USHRT_MAX) {
-					php_error_docref(NULL, E_WARNING, "Remote port must be between 0 and %u", USHRT_MAX);
+					zend_value_error("remote port must be between 0 and %u", USHRT_MAX);
 					return false;
 				}
 				remote_port = (unsigned short)tmp_port;
@@ -887,7 +887,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 			char *pport = pptr + 1;
 			tmp_port = atoi(pport);
 			if (tmp_port < 0 || tmp_port > USHRT_MAX) {
-				php_error_docref(NULL, E_WARNING, "Remote port must be between 0 and %u", USHRT_MAX);
+				zend_value_error("remote port must be between 0 and %u", USHRT_MAX);
 				return false;
 			}
 			remote_port = (unsigned short)tmp_port;
