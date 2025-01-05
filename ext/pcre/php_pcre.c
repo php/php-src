@@ -1032,13 +1032,12 @@ static inline void add_offset_pair(
 /* }}} */
 
 static void populate_subpat_array(
-		zval *subpats, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
+		HashTable *subpats_ht, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
 		uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags) {
 	zend_long offset_capture = flags & PREG_OFFSET_CAPTURE;
 	zend_long unmatched_as_null = flags & PREG_UNMATCHED_AS_NULL;
 	zval val;
 	int i;
-	HashTable *subpats_ht = Z_ARRVAL_P(subpats);
 	if (subpat_names) {
 		if (offset_capture) {
 			for (i = 0; i < count; i++) {
@@ -1088,15 +1087,17 @@ static void populate_subpat_array(
 				zend_hash_next_index_insert_new(subpats_ht, &val);
 			}
 			if (unmatched_as_null) {
+				ZVAL_NULL(&val);
 				for (i = count; i < num_subpats; i++) {
-					add_next_index_null(subpats);
+					zend_hash_next_index_insert_new(subpats_ht, &val);
 				}
 			}
 		}
 	}
 	/* Add MARK, if available */
 	if (mark) {
-		add_assoc_string_ex(subpats, "MARK", sizeof("MARK") - 1, (char *)mark);
+		ZVAL_STRING(&val, (char *)mark);
+		zend_hash_str_add_new(subpats_ht, ZEND_STRL("MARK"), &val);
 	}
 }
 
@@ -1350,7 +1351,7 @@ matched:
 						mark = pcre2_get_mark(match_data);
 						array_init_size(&result_set, count + (mark ? 1 : 0));
 						populate_subpat_array(
-							&result_set, subject, offsets, subpat_names,
+							Z_ARRVAL(result_set), subject, offsets, subpat_names,
 							num_subpats, count, mark, flags);
 						/* And add it to the output array */
 						zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &result_set);
@@ -1359,7 +1360,7 @@ matched:
 					/* For each subpattern, insert it into the subpatterns array. */
 					mark = pcre2_get_mark(match_data);
 					populate_subpat_array(
-						subpats, subject, offsets, subpat_names, num_subpats, count, mark, flags);
+						Z_ARRVAL_P(subpats), subject, offsets, subpat_names, num_subpats, count, mark, flags);
 					break;
 				}
 			}
@@ -1552,7 +1553,7 @@ static zend_string *preg_do_repl_func(zend_fcall_info_cache *fcc, const char *su
 	zval	     arg;				/* Argument to pass to function */
 
 	array_init_size(&arg, count + (mark ? 1 : 0));
-	populate_subpat_array(&arg, subject, offsets, subpat_names, num_subpats, count, mark, flags);
+	populate_subpat_array(Z_ARRVAL(arg), subject, offsets, subpat_names, num_subpats, count, mark, flags);
 
 	zend_call_known_fcc(fcc, &retval, 1, &arg, NULL);
 	zval_ptr_dtor(&arg);
