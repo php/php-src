@@ -2026,10 +2026,9 @@ error:
 	return result;
 }
 
-/* {{{ php_pcre_replace_func */
 static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 							  zend_string *subject_str,
-							  zend_fcall_info *fci, zend_fcall_info_cache *fcc,
+							  zend_fcall_info_cache *fcc,
 							  size_t limit, size_t *replace_count, zend_long flags)
 {
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
@@ -2045,7 +2044,6 @@ static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 
 	return result;
 }
-/* }}} */
 
 /* {{{ php_pcre_replace_array */
 static zend_string *php_pcre_replace_array(HashTable *regex,
@@ -2152,8 +2150,7 @@ static zend_string *php_replace_in_subject_func(zend_string *regex_str, HashTabl
 	zend_string *result;
 
 	if (regex_str) {
-		result = php_pcre_replace_func(
-			regex_str, subject, fci, fcc, limit, replace_count, flags);
+		result = php_pcre_replace_func(regex_str, subject, fcc, limit, replace_count, flags);
 		return result;
 	} else {
 		/* If regex is an array */
@@ -2172,7 +2169,7 @@ static zend_string *php_replace_in_subject_func(zend_string *regex_str, HashTabl
 			/* Do the actual replacement and put the result back into subject
 			   for further replacements. */
 			result = php_pcre_replace_func(
-				regex_entry_str, subject, fci, fcc, limit, replace_count, flags);
+				regex_entry_str, subject, fcc, limit, replace_count, flags);
 			zend_tmp_string_release(tmp_regex_entry_str);
 			zend_string_release(subject);
 			subject = result;
