@@ -142,9 +142,14 @@ PHP_FUNCTION(curl_share_strerror)
  */
 PHP_FUNCTION(curl_share_init_persistent)
 {
+	// Options specified by the user.
 	HashTable *share_opts = NULL;
-	zval *share_opts_entry = NULL;
 
+	// De-duplicated and sorted options.
+	zval share_opts_prop;
+	ZVAL_UNDEF(&share_opts_prop);
+
+	// An ID representing the unique set of options specified by the user.
 	zend_ulong persistent_id = 0;
 
 	php_curlsh *sh = NULL;
@@ -158,14 +163,14 @@ PHP_FUNCTION(curl_share_init_persistent)
 		goto error;
 	}
 
-	ZEND_HASH_FOREACH_VAL(share_opts, share_opts_entry) {
-		ZVAL_DEREF(share_opts_entry);
+	ZEND_HASH_FOREACH_VAL(share_opts, zval *entry) {
+		ZVAL_DEREF(entry);
 
 		bool failed = false;
-		zend_ulong option = zval_try_get_long(share_opts_entry, &failed);
+		zend_ulong option = zval_try_get_long(entry, &failed);
 
 		if (failed) {
-			zend_argument_type_error(1, "must contain only int values, %s given", zend_zval_value_name(share_opts_entry));
+			zend_argument_type_error(1, "must contain only int values, %s given", zend_zval_value_name(entry));
 			goto error;
 		}
 
@@ -196,8 +201,10 @@ PHP_FUNCTION(curl_share_init_persistent)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	// Construct a property field for the CurlSharePersistentHandle object with the enabled share options.
-	zval share_opts_prop;
+	// We're now decently confident that we'll be returning a CurlSharePersistentHandle object, so we construct it here.
+	object_init_ex(return_value, curl_share_persistent_ce);
+
+	// Next we initialize a property field for the CurlSharePersistentHandle object with the enabled share options.
 	array_init(&share_opts_prop);
 
 	if (persistent_id & (1 << 0)) {
@@ -216,20 +223,17 @@ PHP_FUNCTION(curl_share_init_persistent)
 		add_next_index_long(&share_opts_prop, CURL_LOCK_DATA_PSL);
 	}
 
-	object_init_ex(return_value, curl_share_persistent_ce);
-
 	zend_update_property(curl_share_persistent_ce, Z_OBJ_P(return_value), ZEND_STRL("options"), &share_opts_prop);
-	zval_ptr_dtor(&share_opts_prop);
 
 	sh = Z_CURL_SHARE_P(return_value);
 
+	// If we are able to find an existing persistent share handle, we can use it and return early.
 	zval *persisted = zend_hash_index_find(&CURL_G(persistent_curlsh), persistent_id);
 
-	// If we were able to find an existing persistent share handle, we can use it and return early.
 	if (persisted) {
 		sh->share = Z_PTR_P(persisted);
 
-		return;
+		goto cleanup;
 	}
 
 	// We could not find an existing share handle, so we'll have to create one.
@@ -237,8 +241,8 @@ PHP_FUNCTION(curl_share_init_persistent)
 
 	// Apply the options property to the handle. We avoid using $share_opts as zval_get_long may not necessarily return
 	// the same value as it did in the initial ZEND_HASH_FOREACH_VAL above.
-	ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(&share_opts_prop), share_opts_entry) {
-		CURLSHcode curlsh_error = curl_share_setopt(sh->share, CURLSHOPT_SHARE, Z_LVAL_P(share_opts_entry));
+	ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(&share_opts_prop), zval *entry) {
+		CURLSHcode curlsh_error = curl_share_setopt(sh->share, CURLSHOPT_SHARE, Z_LVAL_P(entry));
 
 		if (curlsh_error != CURLSHE_OK) {
 			zend_throw_exception_ex(NULL, 0, "Could not construct persistent cURL share handle: %s", curl_share_strerror(curlsh_error));
@@ -249,12 +253,17 @@ PHP_FUNCTION(curl_share_init_persistent)
 
 	zend_hash_index_add_new_ptr(&CURL_G(persistent_curlsh),	persistent_id, sh->share);
 
+ cleanup:
+	zval_ptr_dtor(&share_opts_prop);
+
 	return;
 
  error:
 	if (sh) {
 		curl_share_cleanup(sh->share);
 	}
+
+	zval_ptr_dtor(&share_opts_prop);
 
 	RETURN_THROWS();
 }
