@@ -3059,9 +3059,9 @@ PHP_FUNCTION(iterator_count)
 /* }}} */
 
 typedef struct {
-	zend_long              count;
-	zend_fcall_info        fci;
-	zend_fcall_info_cache  fcc;
+	zend_long count;
+	HashTable *params_ht;
+	zend_fcall_info_cache fcc;
 } spl_iterator_apply_info;
 
 static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -3071,7 +3071,7 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 	int result;
 
 	apply_info->count++;
-	zend_call_function_with_return_value(&apply_info->fci, &apply_info->fcc, &retval);
+	zend_call_known_fcc(&apply_info->fcc, &retval, 0, NULL, apply_info->params_ht);
 	result = zend_is_true(&retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
 	zval_ptr_dtor(&retval);
 	return result;
@@ -3082,18 +3082,25 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 PHP_FUNCTION(iterator_apply)
 {
 	zval *traversable;
-	spl_iterator_apply_info  apply_info;
+	zend_fcall_info dummy_fci;
+	spl_iterator_apply_info apply_info = {
+		.count = 0,
+		.params_ht = NULL,
+		.fcc = {},
+	};
 
 	/* The HashTable is used to determine positional arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of|h!", &traversable, zend_ce_traversable,
-			&apply_info.fci, &apply_info.fcc, &apply_info.fci.named_params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OF|h!", &traversable, zend_ce_traversable,
+			&dummy_fci, &apply_info.fcc, &apply_info.params_ht) == FAILURE) {
+		zend_release_fcall_info_cache(&apply_info.fcc);
 		RETURN_THROWS();
 	}
 
-	apply_info.count = 0;
 	if (spl_iterator_apply(traversable, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
-		return;
+		zend_release_fcall_info_cache(&apply_info.fcc);
+		RETURN_THROWS();
 	}
+	zend_release_fcall_info_cache(&apply_info.fcc);
 	RETURN_LONG(apply_info.count);
 }
 /* }}} */
