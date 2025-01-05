@@ -2184,11 +2184,10 @@ static zend_string *php_replace_in_subject_func(zend_string *regex_str, const Ha
 	}
 }
 
-/* {{{ preg_replace_func_impl */
-static size_t preg_replace_func_impl(zval *return_value,
-	zend_string *regex_str, HashTable *regex_ht,
-	zend_fcall_info *fci, zend_fcall_info_cache *fcc,
-	zend_string *subject_str, HashTable *subject_ht, zend_long limit_val, zend_long flags)
+static size_t php_preg_replace_func_impl(zval *return_value,
+	zend_string *regex_str, const HashTable *regex_ht,
+	zend_fcall_info_cache *fcc,
+	zend_string *subject_str, const HashTable *subject_ht, zend_long limit_val, zend_long flags)
 {
 	zend_string	*result;
 	size_t replace_count = 0;
@@ -2216,7 +2215,10 @@ static size_t preg_replace_func_impl(zval *return_value,
 		   and add the result to the return_value array. */
 		ZEND_HASH_FOREACH_KEY_VAL(subject_ht, num_key, string_key, subject_entry) {
 			zend_string *tmp_subject_entry_str;
-			zend_string *subject_entry_str = zval_get_tmp_string(subject_entry, &tmp_subject_entry_str);
+			zend_string *subject_entry_str = zval_try_get_tmp_string(subject_entry, &tmp_subject_entry_str);
+			if (UNEXPECTED(subject_entry_str == NULL)) {
+				break;
+			}
 
 			result = php_replace_in_subject_func(
 				regex_str, regex_ht, fcc, subject_entry_str, limit_val, &replace_count, flags);
@@ -2235,7 +2237,6 @@ static size_t preg_replace_func_impl(zval *return_value,
 
 	return replace_count;
 }
-/* }}} */
 
 static void _preg_replace_common(
 	zval *return_value,
@@ -2393,8 +2394,8 @@ PHP_FUNCTION(preg_replace_callback)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	replace_count = preg_replace_func_impl(return_value, regex_str, regex_ht,
-		&fci, &fcc,
+	replace_count = php_preg_replace_func_impl(return_value, regex_str, regex_ht,
+		&fcc,
 		subject_str, subject_ht, limit, flags);
 	if (zcount) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
@@ -2445,7 +2446,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 
-		replace_count += preg_replace_func_impl(&zv, str_idx_regex, /* regex_ht */ NULL, &fci, &fcc,
+		replace_count += php_preg_replace_func_impl(&zv, str_idx_regex, /* regex_ht */ NULL, &fcc,
 			subject_str, subject_ht, limit, flags);
 		switch (Z_TYPE(zv)) {
 			case IS_ARRAY:
