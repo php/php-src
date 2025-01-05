@@ -145,7 +145,8 @@ typedef enum {
 	GD_SINC,
 	GD_TRIANGLE,
 	GD_WEIGHTED4,
-	GD_METHOD_COUNT = 21
+	GD_LINEAR,
+	GD_METHOD_COUNT = 22
 } gdInterpolationMethod;
 
 /* define struct with name and func ptr and add it to gdImageStruct gdInterpolationMethod interpolation; */
