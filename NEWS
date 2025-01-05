@@ -22,6 +22,8 @@ PHP                                                                        NEWS
     images). (cmb)
   . Ported fix for libgd 223 (gdImageRotateGeneric() does not properly
     interpolate). (cmb)
+  . Added support for reading GIFs without colormap to bundled libgd. (Andrew
+    Burley, cmb)
 
 - Intl:
   . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
