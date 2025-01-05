@@ -131,6 +131,9 @@ PHP 8.5 UPGRADE NOTES
   . socket_addrinfo_lookup throw a TypeError if any of the hints
     values cannot be cast to a int and can throw a ValueError if
     any of these values overflow.
+  . socket_set_option with MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
+    options will throw an exception if the value isn't a valid object
+    or array.
 
 - Zlib:
   . The "use_include_path" argument for the

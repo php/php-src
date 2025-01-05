@@ -159,8 +159,16 @@ mcast_req_fun: ;
 			php_sockaddr_storage	group = {0};
 			socklen_t				glen;
 
-			convert_to_array(arg4);
-			opt_ht = Z_ARRVAL_P(arg4);
+			if (Z_TYPE_P(arg4) != IS_ARRAY) {
+				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
+					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is MCAST_LEAVE_GROUP, %s given", zend_zval_value_name(arg4));
+					return FAILURE;
+				} else {
+					opt_ht = Z_OBJPROP_P(arg4);
+				}
+			} else {
+				opt_ht = Z_ARRVAL_P(arg4);
+			}
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 				&glen) == FAILURE) {
@@ -194,9 +202,16 @@ mcast_req_fun: ;
 									source = {0};
 			socklen_t				glen,
 									slen;
-
-			convert_to_array(arg4);
-			opt_ht = Z_ARRVAL_P(arg4);
+			if (Z_TYPE_P(arg4) != IS_ARRAY) {
+				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
+					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is MCAST_LEAVE_SOURCE_GROUP, %s given", zend_zval_value_name(arg4));
+					return FAILURE;
+				} else {
+					opt_ht = Z_OBJPROP_P(arg4);
+				}
+			} else {
+				opt_ht = Z_ARRVAL_P(arg4);
+			}
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 					&glen) == FAILURE) {
