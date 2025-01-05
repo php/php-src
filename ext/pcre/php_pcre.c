@@ -1835,14 +1835,12 @@ error:
 }
 /* }}} */
 
-/* {{{ php_pcre_replace_func_impl() */
-static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_string *subject_str, const char *subject, size_t subject_len, zend_fcall_info *fci, zend_fcall_info_cache *fcc, size_t limit, size_t *replace_count, zend_long flags)
+static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_string *subject_str, zend_fcall_info_cache *fcc, size_t limit, size_t *replace_count, zend_long flags)
 {
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
 	zend_string		**subpat_names;		/* Array for named subpatterns */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
-	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
 	size_t			 last_end_offset;	/* Where the last search ended */
@@ -1850,7 +1848,6 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 					*piece;				/* The current piece of subject */
 	size_t			result_len; 		/* Length of result */
 	zend_string		*result;			/* Result of replacement */
-	zend_string     *eval_result;		/* Result of custom function */
 	pcre2_match_data *match_data;
 	bool old_mdata_used;
 
@@ -1889,15 +1886,15 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if ((pce->preg_options & PREG_JIT) && options) {
-		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
+		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	} else
 #endif
-	count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
+	count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 			options, match_data, mctx);
 
 	while (1) {
-		piece = subject + last_end_offset;
+		piece = ZSTR_VAL(subject_str) + last_end_offset;
 
 		if (count >= 0 && limit) {
 			/* Check for too many substrings condition. */
@@ -1921,13 +1918,14 @@ matched:
 			}
 
 			/* Set the match location in subject */
-			match = subject + offsets[0];
+			match = ZSTR_VAL(subject_str) + offsets[0];
 
-			new_len = result_len + offsets[0] - last_end_offset; /* part before the match */
+			/* Length of needed storage */
+			size_t new_len = result_len + offsets[0] - last_end_offset; /* part before the match */
 
 			/* Use custom function to get replacement string and its length. */
-			eval_result = preg_do_repl_func(
-				fcc, subject, offsets, subpat_names, num_subpats, count,
+			zend_string *eval_result = preg_do_repl_func(
+				fcc, ZSTR_VAL(subject_str), offsets, subpat_names, num_subpats, count,
 				pcre2_get_mark(match_data), flags);
 
 			if (UNEXPECTED(eval_result == NULL)) {
@@ -1964,10 +1962,10 @@ matched:
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
 			if (start_offset == offsets[0]) {
-				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
+				count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK | PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED, match_data, mctx);
 
-				piece = subject + start_offset;
+				piece = ZSTR_VAL(subject_str) + start_offset;
 				if (count >= 0 && limit) {
 					goto matched;
 				} else if (count == PCRE2_ERROR_NOMATCH || limit == 0) {
@@ -1975,7 +1973,7 @@ matched:
 					   this is not necessarily the end. We need to advance
 					   the start offset, and continue. Fudge the offset values
 					   to achieve this, unless we're already at the end of the string. */
-					if (start_offset < subject_len) {
+					if (start_offset < ZSTR_LEN(subject_str)) {
 						size_t unit_len = calculate_unit_length(pce, piece);
 						start_offset += unit_len;
 					} else {
@@ -1988,20 +1986,17 @@ matched:
 
 		} else if (count == PCRE2_ERROR_NOMATCH || limit == 0) {
 not_matched:
-			if (!result && subject_str) {
+			if (result == NULL) {
 				result = zend_string_copy(subject_str);
 				break;
 			}
 			/* now we know exactly how long it is */
-			alloc_len = result_len + subject_len - last_end_offset;
-			if (NULL != result) {
-				result = zend_string_realloc(result, alloc_len, 0);
-			} else {
-				result = zend_string_alloc(alloc_len, 0);
-			}
+			size_t segment_len = ZSTR_LEN(subject_str) - last_end_offset;
+			alloc_len = result_len + segment_len;
+			result = zend_string_realloc(result, alloc_len, 0);
 			/* stick that last bit of string on our output */
-			memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - last_end_offset);
-			result_len += subject_len - last_end_offset;
+			memcpy(ZSTR_VAL(result) + result_len, piece, segment_len);
+			result_len += segment_len;
 			ZSTR_VAL(result)[result_len] = '\0';
 			ZSTR_LEN(result) = result_len;
 			break;
@@ -2016,11 +2011,11 @@ error:
 		}
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if ((pce->preg_options & PREG_JIT)) {
-			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
+			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
+		count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	}
 	if (match_data != mdata) {
@@ -2030,7 +2025,6 @@ error:
 
 	return result;
 }
-/* }}} */
 
 /* {{{ php_pcre_replace_func */
 static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
@@ -2046,9 +2040,7 @@ static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 		return NULL;
 	}
 	pce->refcount++;
-	result = php_pcre_replace_func_impl(
-		pce, subject_str, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), fci, fcc,
-		limit, replace_count, flags);
+	result = php_pcre_replace_func_impl(pce, subject_str, fcc, limit, replace_count, flags);
 	pce->refcount--;
 
 	return result;
