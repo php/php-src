@@ -92,6 +92,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . socket_addrinfo_lookup throws an exception if any of the hints value
     overflows. (David Carlier)
+  . socket_addrinfo_lookup throws an exception if one or more hints entries
+    has an index as numeric. (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt

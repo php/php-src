@@ -126,7 +126,8 @@ PHP 8.5 UPGRADE NOTES
 
 - Sockets:
   . socket_create_listen, socket_bind and socket_sendto throw a
-    ValueError if the port is lower than 0 or greater than 65535.
+    ValueError if the port is lower than 0 or greater than 65535,
+    also if any of the hints array entry is indexes numerically.
   . socket_addrinfo_lookup throw a TypeError if any of the hints
     values cannot be cast to a int and can throw a ValueError if
     any of these values overflow.
