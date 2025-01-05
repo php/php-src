@@ -3059,7 +3059,6 @@ PHP_FUNCTION(iterator_count)
 /* }}} */
 
 typedef struct {
-	zval                   *obj;
 	zend_long              count;
 	zend_fcall_info        fci;
 	zend_fcall_info_cache  fcc;
@@ -3082,16 +3081,17 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 /* {{{ Calls a function for every element in an iterator */
 PHP_FUNCTION(iterator_apply)
 {
+	zval *traversable;
 	spl_iterator_apply_info  apply_info;
 
 	/* The HashTable is used to determine positional arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of|h!", &apply_info.obj, zend_ce_traversable,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of|h!", &traversable, zend_ce_traversable,
 			&apply_info.fci, &apply_info.fcc, &apply_info.fci.named_params) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	apply_info.count = 0;
-	if (spl_iterator_apply(apply_info.obj, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
+	if (spl_iterator_apply(traversable, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
 		return;
 	}
 	RETURN_LONG(apply_info.count);
