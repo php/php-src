@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
 
+- SNMP:
+  . Fixed bug GH-17330 (SNMP::setSecurity segfault on closed session).
+    (David Carlier)
+
 02 Jan 2025, PHP 8.3.16RC1
 
 - Core:
@@ -97,10 +101,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-17040 (SimpleXML's unset can break DOM objects). (nielsdos)
   . Fixed bug GH-17153 (SimpleXML crash when using autovivification on
     document). (nielsdos)
-
-- SNMP:
-  . Fixed bug GH-17330 (SNMP::setSecurity segfault on closed session).
-    (David Carlier)
 
 - Sockets:
   . Fixed bug GH-16276 (socket_strerror overflow handling with INT_MIN).
