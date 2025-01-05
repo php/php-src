@@ -2142,9 +2142,8 @@ static zend_always_inline zend_string *php_replace_in_subject(
 }
 /* }}} */
 
-/* {{{ php_replace_in_subject_func */
-static zend_string *php_replace_in_subject_func(zend_string *regex_str, HashTable *regex_ht,
-	zend_fcall_info *fci, zend_fcall_info_cache *fcc,
+static zend_string *php_replace_in_subject_func(zend_string *regex_str, const HashTable *regex_ht,
+	zend_fcall_info_cache *fcc,
 	zend_string *subject, size_t limit, size_t *replace_count, zend_long flags)
 {
 	zend_string *result;
@@ -2164,7 +2163,10 @@ static zend_string *php_replace_in_subject_func(zend_string *regex_str, HashTabl
 		ZEND_HASH_FOREACH_VAL(regex_ht, regex_entry) {
 			/* Make sure we're dealing with strings. */
 			zend_string *tmp_regex_entry_str;
-			zend_string *regex_entry_str = zval_get_tmp_string(regex_entry, &tmp_regex_entry_str);
+			zend_string *regex_entry_str = zval_try_get_tmp_string(regex_entry, &tmp_regex_entry_str);
+			if (UNEXPECTED(regex_entry_str == NULL)) {
+				break;
+			}
 
 			/* Do the actual replacement and put the result back into subject
 			   for further replacements. */
@@ -2181,7 +2183,6 @@ static zend_string *php_replace_in_subject_func(zend_string *regex_str, HashTabl
 		return subject;
 	}
 }
-/* }}} */
 
 /* {{{ preg_replace_func_impl */
 static size_t preg_replace_func_impl(zval *return_value,
@@ -2194,7 +2195,7 @@ static size_t preg_replace_func_impl(zval *return_value,
 
 	if (subject_str) {
 		result = php_replace_in_subject_func(
-			regex_str, regex_ht, fci, fcc, subject_str, limit_val, &replace_count, flags);
+			regex_str, regex_ht, fcc, subject_str, limit_val, &replace_count, flags);
 		if (result != NULL) {
 			RETVAL_STR(result);
 		} else {
@@ -2218,7 +2219,7 @@ static size_t preg_replace_func_impl(zval *return_value,
 			zend_string *subject_entry_str = zval_get_tmp_string(subject_entry, &tmp_subject_entry_str);
 
 			result = php_replace_in_subject_func(
-				regex_str, regex_ht, fci, fcc, subject_entry_str, limit_val, &replace_count, flags);
+				regex_str, regex_ht, fcc, subject_entry_str, limit_val, &replace_count, flags);
 			if (result != NULL) {
 				/* Add to return array */
 				ZVAL_STR(&zv, result);
