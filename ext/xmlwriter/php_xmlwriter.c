@@ -66,16 +66,6 @@ static void xmlwriter_object_dtor(zend_object *object)
 }
 /* }}} */
 
-/* {{{ xmlwriter_object_free_storage */
-static void xmlwriter_object_free_storage(zend_object *object)
-{
-	ze_xmlwriter_object *intern = php_xmlwriter_fetch_object(object);
-
-	zend_object_std_dtor(&intern->std);
-}
-/* }}} */
-
-
 /* {{{ xmlwriter_object_new */
 static zend_object *xmlwriter_object_new(zend_class_entry *class_type)
 {
@@ -1064,7 +1054,6 @@ static PHP_MINIT_FUNCTION(xmlwriter)
 	memcpy(&xmlwriter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlwriter_object_handlers.offset = XtOffsetOf(ze_xmlwriter_object, std);
 	xmlwriter_object_handlers.dtor_obj = xmlwriter_object_dtor;
-	xmlwriter_object_handlers.free_obj = xmlwriter_object_free_storage;
 	xmlwriter_object_handlers.clone_obj = NULL;
 	xmlwriter_class_entry_ce = register_class_XMLWriter();
 	xmlwriter_class_entry_ce->create_object = xmlwriter_object_new;
