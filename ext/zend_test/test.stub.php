@@ -55,6 +55,7 @@ namespace {
         public stdClass|Iterator|null $classUnionProp = null;
         public Traversable&Countable $classIntersectionProp;
         public readonly int $readonlyProp;
+        public final int $finalProp;
 
         public static function is_object(): int {}
 
