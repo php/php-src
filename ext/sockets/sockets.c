@@ -1741,7 +1741,7 @@ PHP_FUNCTION(socket_get_option)
 				RETURN_FALSE;
 			}
 
-			array_init(return_value);
+			array_init_size(return_value, 2);
 
 			add_assoc_string(return_value, "function_set_name", tsf.function_set_name);
 			add_assoc_long(return_value, "pcbcnt", tsf.pcbcnt);
@@ -1764,7 +1764,7 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
-				array_init(return_value);
+				array_init_size(return_value, 2);
 				add_assoc_long(return_value, "l_onoff", linger_val.l_onoff);
 				add_assoc_long(return_value, "l_linger", linger_val.l_linger);
 				return;
@@ -1786,7 +1786,7 @@ PHP_FUNCTION(socket_get_option)
 				tv.tv_usec = timeout ? (long)((timeout % 1000) * 1000) : 0;
 #endif
 
-				array_init(return_value);
+				array_init_size(return_value, 2);
 
 				add_assoc_long(return_value, "sec", tv.tv_sec);
 				add_assoc_long(return_value, "usec", tv.tv_usec);
@@ -1808,7 +1808,7 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
-				array_init(return_value);
+				array_init_size(return_value, 9);
 
 				add_assoc_long(return_value, "rmem_alloc", minfo[SK_MEMINFO_RMEM_ALLOC]);
 				add_assoc_long(return_value, "rcvbuf", minfo[SK_MEMINFO_RCVBUF]);
@@ -1833,7 +1833,7 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
-				array_init(return_value);
+				array_init_size(return_value, 1);
 
 				add_assoc_string(return_value, "af_name", af.af_name);
 				return;
@@ -1857,9 +1857,11 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
-				array_init(return_value);
+				size_t arrlen = optlen / sizeof(struct fil_info);
 
-				for (i = 0; i < optlen / sizeof(struct fil_info); i++) {
+				array_init_size(return_value, arrlen);
+
+				for (i = 0; i < arrlen; i++) {
 					add_index_string(return_value, i, fi[i].fi_name);
 				}
 
@@ -2583,7 +2585,19 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (zhints && !HT_IS_PACKED(Z_ARRVAL_P(zhints))) {
+#if defined(PHP_WIN32)
+#  if !defined(AF_MAX)
+#    define AF_MAX (AF_BTH + 1)
+#  endif
+#endif
+
+	if (zhints) {
+		if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(zhints)))) {
+			zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
+					"\"ai_protocol\", or \"ai_family\"");
+			RETURN_THROWS();
+		}
+
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
 				bool failed = false;
@@ -2593,11 +2607,19 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 						zend_argument_type_error(3, "\"ai_flags\" key must be of type int, %s given", zend_zval_type_name(hint));
 						RETURN_THROWS();
 					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_flags\" key must be between 0 and %d", INT_MAX);
+						RETURN_THROWS();
+					}
 					hints.ai_flags = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_socktype")) {
 					zend_long val = zval_try_get_long(hint, &failed);
 					if (failed) {
 						zend_argument_type_error(3, "\"ai_socktype\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_socktype\" key must be between 0 and %d", INT_MAX);
 						RETURN_THROWS();
 					}
 					hints.ai_socktype = (int)val;
@@ -2607,6 +2629,10 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 						zend_argument_type_error(3, "\"ai_protocol\" key must be of type int, %s given", zend_zval_type_name(hint));
 						RETURN_THROWS();
 					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_protocol\" key must be between 0 and %d", INT_MAX);
+						RETURN_THROWS();
+					}
 					hints.ai_protocol = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_family")) {
 					zend_long val = zval_try_get_long(hint, &failed);
@@ -2614,12 +2640,20 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 						zend_argument_type_error(3, "\"ai_family\" key must be of type int, %s given", zend_zval_type_name(hint));
 						RETURN_THROWS();
 					}
+					if (val < 0 || val >= AF_MAX) {
+						zend_argument_value_error(3, "\"ai_family\" key must be between 0 and %d", AF_MAX - 1);
+						RETURN_THROWS();
+					}
 					hints.ai_family = (int)val;
 				} else {
 					zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
-						"\"ai_protocol\", or \"ai_family\"");
+							"\"ai_protocol\", or \"ai_family\"");
 					RETURN_THROWS();
-				}
+					}
+			} else {
+				zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
+						"\"ai_protocol\", or \"ai_family\"");
+				RETURN_THROWS();
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

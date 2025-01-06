@@ -3103,6 +3103,10 @@ class PropertyInfo extends VariableLike
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_STATIC", PHP_70_VERSION_ID);
         }
 
+        if ($this->flags & Modifiers::FINAL) {
+            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_FINAL", PHP_84_VERSION_ID);
+        }
+
         if ($this->flags & Modifiers::READONLY) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_81_VERSION_ID);
         } elseif ($this->classFlags & Modifiers::READONLY) {
@@ -3123,6 +3127,11 @@ class PropertyInfo extends VariableLike
         if ($this->flags & Modifiers::STATIC) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "static"));
+        }
+
+        if ($this->flags & Modifiers::FINAL) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "final"));
         }
 
         if ($this->flags & Modifiers::READONLY || $this->isDocReadonly) {

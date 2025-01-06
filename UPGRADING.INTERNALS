@@ -22,6 +22,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- ext/gd
+  . The gdImageScale*() and gdImageRotate*() helpers are now internal in the
+    bundled libgd, like they have been in external libgd as of gd-2.1.1.
+
 - ext/libxml
   . The refcount APIs now return an `unsigned int` instead of an `int`.
 

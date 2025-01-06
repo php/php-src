@@ -90,6 +90,13 @@ PHP                                                                        NEWS
     (David Carlier)
   . socket_addrinfo_lookup throws an exception on invalid hints value types.
     (David Carlier)
+  . socket_addrinfo_lookup throws an exception if any of the hints value
+    overflows. (David Carlier)
+  . socket_addrinfo_lookup throws an exception if one or more hints entries
+    has an index as numeric. (David Carlier)
+  . socket_set_option with the options MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
+    will throw an exception if its value is not a valid array/object.
+    (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt

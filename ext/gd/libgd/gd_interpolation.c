@@ -67,14 +67,31 @@ TODO:
 # include <emmintrin.h>
 #endif
 
-#ifndef MIN
-#define MIN(a,b) ((a)<(b)?(a):(b))
-#endif
-#define MIN3(a,b,c) ((a)<(b)?(MIN(a,c)):(MIN(b,c)))
-#ifndef MAX
-#define MAX(a,b) ((a)<(b)?(b):(a))
-#endif
-#define MAX3(a,b,c) ((a)<(b)?(MAX(b,c)):(MAX(a,c)))
+static gdImagePtr gdImageScaleBilinear(gdImagePtr im,
+                                       const unsigned int new_width,
+                                       const unsigned int new_height);
+static gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src,
+                                           const unsigned int width,
+                                           const unsigned int height);
+static gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im,
+                                               const unsigned int width, const unsigned int height);
+static gdImagePtr gdImageScaleTwoPass(const gdImagePtr pOrigImage,
+                                      const unsigned int uOrigWidth,
+                                      const unsigned int uOrigHeight,
+                                      const unsigned int uNewWidth,
+                                      const unsigned int uNewHeight);
+static gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src,
+                                                const float degrees,
+                                                const int bgColor);
+static gdImagePtr gdImageRotateBilinear(gdImagePtr src,
+                                        const float degrees,
+                                        const int bgColor);
+static gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src,
+                                            const float degrees,
+                                            const int bgColor);
+static gdImagePtr gdImageRotateGeneric(gdImagePtr src,
+                                       const float degrees,
+                                       const int bgColor);
 
 /* only used here, let do a generic fixed point integers later if required by other
    part of GD */
@@ -738,8 +755,8 @@ static int getPixelInterpolateWeight(gdImagePtr im, const double x, const double
  */
 int getPixelInterpolated(gdImagePtr im, const double x, const double y, const int bgColor)
 {
-	const int xi=(int)((x) < 0 ? x - 1: x);
-	const int yi=(int)((y) < 0 ? y - 1: y);
+	const int xi=(int)(x);
+	const int yi=(int)(y);
 	int yii;
 	int i;
 	double kernel, kernel_cache_y;
@@ -1045,15 +1062,12 @@ static inline int _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_wi
 	return 1;
 }
 
-gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const unsigned int new_width, const unsigned int new_height)
+static gdImagePtr
+gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const unsigned int new_width, const unsigned int new_height)
 {
 	gdImagePtr tmp_im;
 	gdImagePtr dst;
 	int scale_pass_res;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	/* Convert to truecolor if it isn't; this code requires it. */
 	if (!src->trueColor) {
@@ -1094,7 +1108,8 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 	Integer only implementation, good to have for common usages like pre scale very large
 	images before using another interpolation methods for the last step.
 */
-gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width, const unsigned int height)
+static gdImagePtr
+gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width, const unsigned int height)
 {
 	const unsigned long new_width = MAX(1, width);
 	const unsigned long new_height = MAX(1, height);
@@ -1107,10 +1122,6 @@ gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width,
 	unsigned long  dst_offset_x;
 	unsigned long  dst_offset_y = 0;
 	unsigned int i;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	dst_img = gdImageCreateTrueColor(new_width, new_height);
 
@@ -1164,10 +1175,6 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
 	long i;
 	gdImagePtr new_img;
 	const int transparent = im->transparent;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	new_img = gdImageCreateTrueColor(new_width, new_height);
 	if (new_img == NULL) {
@@ -1266,10 +1273,6 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 	long i;
 	gdImagePtr new_img;
 
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
-
 	new_img = gdImageCreateTrueColor(new_width, new_height);
 	if (!new_img){
 		return NULL;
@@ -1340,7 +1343,8 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 	return new_img;
 }
 
-gdImagePtr gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, const unsigned int new_height)
+static gdImagePtr
+gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, const unsigned int new_height)
 {
 	if (im->trueColor) {
 		return gdImageScaleBilinearTC(im, new_width, new_height);
@@ -1349,7 +1353,8 @@ gdImagePtr gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, con
 	}
 }
 
-gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, const unsigned int height)
+static gdImagePtr
+gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, const unsigned int height)
 {
 	const long new_width = MAX(1, width);
 	const long new_height = MAX(1, height);
@@ -1367,10 +1372,6 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 	unsigned int dst_offset_x;
 	unsigned int dst_offset_y = 0;
 	long i;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	/* impact perf a bit, but not that much. Implementation for palette
 	   images can be done at a later point.
@@ -1628,7 +1629,8 @@ static int gdRotatedImageSize(gdImagePtr src, const float angle, gdRectPtr bbox)
     return GD_TRUE;
 }
 
-gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, const int bgColor)
+static gdImagePtr
+gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
 	const int src_w  = gdImageSX(src);
@@ -1649,10 +1651,6 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
     gdRotatedImageSize(src, degrees, &bbox);
     new_width = bbox.width;
     new_height = bbox.height;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (!dst) {
@@ -1685,7 +1683,8 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 	return dst;
 }
 
-gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor)
+static gdImagePtr
+gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
 	const int src_w  = gdImageSX(src);
@@ -1702,13 +1701,6 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 	gdImagePtr dst;
 	int new_width, new_height;
 	gdRect bbox;
-
-	const gdFixed f_slop_y = f_sin;
-	const gdFixed f_slop_x = f_cos;
-	const gdFixed f_slop = f_slop_x > 0 && f_slop_y > 0 ?
-							(f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y))
-						: 0;
-
 
 	if (bgColor < 0) {
 		return NULL;
@@ -1735,15 +1727,10 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 			long m = gd_fxtoi(f_m);
 			long n = gd_fxtoi(f_n);
 
-			if ((n <= 0) || (m <= 0) || (m >= src_h) || (n >= src_w)) {
+			if (m < -1 || n < -1 || m >= src_h || n >= src_w ) {
 				dst->tpixels[dst_offset_y][dst_offset_x++] = bgColor;
-			} else if ((n <= 1) || (m <= 1) || (m >= src_h - 1) || (n >= src_w - 1)) {
-				register int c = getPixelInterpolated(src, n, m, bgColor);
-				c = c | (( gdTrueColorGetAlpha(c) + ((int)(127* gd_fxtof(f_slop)))) << 24);
-
-				dst->tpixels[dst_offset_y][dst_offset_x++] = _color_blend(bgColor, c);
 			} else {
-				dst->tpixels[dst_offset_y][dst_offset_x++] = getPixelInterpolated(src, n, m, bgColor);
+				dst->tpixels[dst_offset_y][dst_offset_x++] = getPixelInterpolated(src, gd_fxtod(f_n), gd_fxtod(f_m), bgColor);
 			}
 		}
 		dst_offset_y++;
@@ -1751,7 +1738,8 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 	return dst;
 }
 
-gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int bgColor)
+static gdImagePtr
+gdImageRotateBilinear(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = (float)((- degrees / 180.0f) * M_PI);
 	const unsigned int src_w = gdImageSX(src);
@@ -1866,7 +1854,8 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 	return dst;
 }
 
-gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const int bgColor)
+static gdImagePtr
+gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const int bgColor)
 {
 	const float _angle = (float)((- degrees / 180.0f) * M_PI);
 	const int src_w = gdImageSX(src);

@@ -1028,7 +1028,12 @@ static ssize_t php_plain_files_dirstream_read(php_stream *stream, char *buf, siz
 
 	result = readdir(dir);
 	if (result) {
-		PHP_STRLCPY(ent->d_name, result->d_name, sizeof(ent->d_name), strlen(result->d_name));
+		size_t len = strlen(result->d_name);
+		if (UNEXPECTED(len >= sizeof(ent->d_name))) {
+			return -1;
+		}
+		/* Include null byte */
+		memcpy(ent->d_name, result->d_name, len+1);
 #ifdef _DIRENT_HAVE_D_TYPE
 		ent->d_type = result->d_type;
 #else
