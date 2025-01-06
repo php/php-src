@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     transparency). (cmb)
   . Fixed bug GH-17373 (imagefttext() ignores clipping rect for palette
     images). (cmb)
+  . Ported fix for libgd 223 (gdImageRotateGeneric() does not properly
+    interpolate). (cmb)
 
 - Intl:
   . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
