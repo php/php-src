@@ -748,8 +748,8 @@ static int getPixelInterpolateWeight(gdImagePtr im, const double x, const double
  */
 int getPixelInterpolated(gdImagePtr im, const double x, const double y, const int bgColor)
 {
-	const int xi=(int)((x) < 0 ? x - 1: x);
-	const int yi=(int)((y) < 0 ? y - 1: y);
+	const int xi=(int)(x);
+	const int yi=(int)(y);
 	int yii;
 	int i;
 	double kernel, kernel_cache_y;
@@ -1713,13 +1713,6 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 	int new_width, new_height;
 	gdRect bbox;
 
-	const gdFixed f_slop_y = f_sin;
-	const gdFixed f_slop_x = f_cos;
-	const gdFixed f_slop = f_slop_x > 0 && f_slop_y > 0 ?
-							(f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y))
-						: 0;
-
-
 	if (bgColor < 0) {
 		return NULL;
 	}
@@ -1745,15 +1738,10 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 			long m = gd_fxtoi(f_m);
 			long n = gd_fxtoi(f_n);
 
-			if ((n <= 0) || (m <= 0) || (m >= src_h) || (n >= src_w)) {
+			if (m < -1 || n < -1 || m >= src_h || n >= src_w ) {
 				dst->tpixels[dst_offset_y][dst_offset_x++] = bgColor;
-			} else if ((n <= 1) || (m <= 1) || (m >= src_h - 1) || (n >= src_w - 1)) {
-				register int c = getPixelInterpolated(src, n, m, bgColor);
-				c = c | (( gdTrueColorGetAlpha(c) + ((int)(127* gd_fxtof(f_slop)))) << 24);
-
-				dst->tpixels[dst_offset_y][dst_offset_x++] = _color_blend(bgColor, c);
 			} else {
-				dst->tpixels[dst_offset_y][dst_offset_x++] = getPixelInterpolated(src, n, m, bgColor);
+				dst->tpixels[dst_offset_y][dst_offset_x++] = getPixelInterpolated(src, gd_fxtod(f_n), gd_fxtod(f_m), bgColor);
 			}
 		}
 		dst_offset_y++;
