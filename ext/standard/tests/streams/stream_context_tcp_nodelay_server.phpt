@@ -5,9 +5,6 @@ sockets
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip sockets ext currently does not work in worker on Windows');
-}
 ?>
 --FILE--
 <?php
@@ -32,12 +29,12 @@ CODE;
 
 $clientCode = <<<'CODE'
     $test = stream_socket_client("tcp://{{ ADDR }}", $errno, $errstr, 10);
-
     echo phpt_wait();
 CODE;
 
 include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
---EXPECT--
+--EXPECTF--
 server-delay:conn-nodelay
+
