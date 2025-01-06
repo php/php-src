@@ -2160,10 +2160,10 @@ int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id)
 		case GD_DEFAULT:
 			id = GD_LINEAR;
 			im->interpolation = filter_linear;
+			break;
 
 		default:
 			return 0;
-			break;
 	}
 	im->interpolation_id = id;
 	return 1;
