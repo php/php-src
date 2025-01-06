@@ -81,7 +81,6 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(clear,     "clear breakpoints",                        'C', NULL, 0, 0),
 	PHPDBG_COMMAND_D(help,      "show help menu",                           'h', phpdbg_help_commands, "|s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(set,       "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(register,  "register a function",                      'R', NULL, "s", 0),
 	PHPDBG_COMMAND_D(source,    "execute a phpdbginit",                     '<', NULL, "s", 0),
 	PHPDBG_COMMAND_D(export,    "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(sh,   	    "shell a command",                           0 , NULL, "i", 0),
@@ -90,114 +89,6 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(next,      "step over next line",                      'n', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_END_COMMAND
 }; /* }}} */
-
-static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
-{
-	phpdbg_param_t *name = NULL;
-
-	if (stack->type == STACK_PARAM) {
-		char *lc_name;
-
-		name = stack->next;
-
-		if (!name || name->type != STR_PARAM) {
-			return FAILURE;
-		}
-
-		lc_name = zend_str_tolower_dup(name->str, name->len);
-
-		if (zend_hash_str_exists(&PHPDBG_G(registered), lc_name, name->len)) {
-			zval fretval;
-			zend_fcall_info fci;
-
-			memset(&fci, 0, sizeof(zend_fcall_info));
-
-			ZVAL_STRINGL(&fci.function_name, lc_name, name->len);
-			fci.size = sizeof(zend_fcall_info);
-			fci.object = NULL;
-			fci.retval = &fretval;
-			fci.param_count = 0;
-			fci.params = NULL;
-			fci.named_params = NULL;
-
-			zval params;
-			if (name->next) {
-				phpdbg_param_t *next = name->next;
-
-				array_init(&params);
-
-				while (next) {
-					char *buffered = NULL;
-
-					switch (next->type) {
-						case OP_PARAM:
-						case COND_PARAM:
-						case STR_PARAM:
-							add_next_index_stringl(&params, next->str, next->len);
-						break;
-
-						case NUMERIC_PARAM:
-							add_next_index_long(&params, next->num);
-						break;
-
-						case METHOD_PARAM:
-							spprintf(&buffered, 0, "%s::%s", next->method.class, next->method.name);
-							add_next_index_string(&params, buffered);
-						break;
-
-						case NUMERIC_METHOD_PARAM:
-							spprintf(&buffered, 0, "%s::%s#"ZEND_LONG_FMT, next->method.class, next->method.name, next->num);
-							add_next_index_string(&params, buffered);
-						break;
-
-						case NUMERIC_FUNCTION_PARAM:
-							spprintf(&buffered, 0, "%s#"ZEND_LONG_FMT, next->str, next->num);
-							add_next_index_string(&params, buffered);
-						break;
-
-						case FILE_PARAM:
-							spprintf(&buffered, 0, "%s:"ZEND_ULONG_FMT, next->file.name, next->file.line);
-							add_next_index_string(&params, buffered);
-						break;
-
-						case NUMERIC_FILE_PARAM:
-							spprintf(&buffered, 0, "%s:#"ZEND_ULONG_FMT, next->file.name, next->file.line);
-							add_next_index_string(&params, buffered);
-						break;
-
-						default: {
-							/* not yet */
-						}
-					}
-
-					next = next->next;
-				}
-				/* Add positional arguments */
-				fci.named_params = Z_ARRVAL(params);
-			}
-
-			phpdbg_activate_err_buf(0);
-			phpdbg_free_err_buf();
-
-			phpdbg_debug("created %d params from arguments", fci.param_count);
-
-			if (zend_call_function(&fci, NULL) == SUCCESS) {
-				zend_print_zval_r(&fretval, 0);
-				phpdbg_out("\n");
-				zval_ptr_dtor(&fretval);
-			}
-
-			zval_ptr_dtor_str(&fci.function_name);
-			efree(lc_name);
-
-			return SUCCESS;
-		}
-
-		efree(lc_name);
-	}
-
-	return FAILURE;
-} /* }}} */
 
 struct phpdbg_init_state {
 	int line;
@@ -262,12 +153,10 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 				switch (phpdbg_stack_execute(&stack, 1 /* allow_async_unsafe == 1 */)) {
 					case FAILURE:
 						phpdbg_activate_err_buf(0);
-						if (phpdbg_call_register(&stack) == FAILURE) {
-							if (state->init_file) {
-								phpdbg_output_err_buf("Unrecognized command in %s:%d: %s, %s!", state->init_file, state->line, input, PHPDBG_G(err_buf).msg);
-							} else {
-								phpdbg_output_err_buf("Unrecognized command on line %d: %s, %s!", state->line, input, PHPDBG_G(err_buf).msg);
-							}
+						if (state->init_file) {
+							phpdbg_output_err_buf("Unrecognized command in %s:%d: %s, %s!", state->init_file, state->line, input, PHPDBG_G(err_buf).msg);
+						} else {
+							phpdbg_output_err_buf("Unrecognized command on line %d: %s, %s!", state->line, input, PHPDBG_G(err_buf).msg);
 						}
 					break;
 				}
@@ -1411,29 +1300,6 @@ PHPDBG_COMMAND(export) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_COMMAND(register) /* {{{ */
-{
-	zend_function *function;
-	char *lcname = zend_str_tolower_dup(param->str, param->len);
-	size_t lcname_len = param->len;
-
-	if (!zend_hash_str_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
-		if ((function = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len))) {
-			zend_hash_str_update_ptr(&PHPDBG_G(registered), lcname, lcname_len, function);
-			function_add_ref(function);
-
-			phpdbg_notice("Registered %s", lcname);
-		} else {
-			phpdbg_error("The requested function (%s) could not be found", param->str);
-		}
-	} else {
-		phpdbg_error("The requested name (%s) is already in use", lcname);
-	}
-
-	efree(lcname);
-	return SUCCESS;
-} /* }}} */
-
 PHPDBG_COMMAND(quit) /* {{{ */
 {
 	PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
@@ -1553,7 +1419,7 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 			switch (ret) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
-						if (!allow_async_unsafe || phpdbg_call_register(&stack) == FAILURE) {
+						if (!allow_async_unsafe) {
 							if (PHPDBG_G(err_buf).active) {
 							    phpdbg_output_err_buf("%s", PHPDBG_G(err_buf).msg);
 							}

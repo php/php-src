@@ -4,7 +4,6 @@ Test exceptions in eval during exception
 r
 ev next_error()
 c
-
 q
 --EXPECTF--
 [Successful compilation of %s]
@@ -26,7 +25,6 @@ Stack trace:
 #0 %s(20): {closure:%s:%d}()
 #1 {main}
 [Script ended normally]
-prompt> [The stack contains nothing !]
 prompt> 
 --FILE--
 <?php
