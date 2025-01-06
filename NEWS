@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     with 0x0b). (nielsdos)
   . Fixed bug GH-16886 (ini_parse_quantity() fails to emit warning for 0x+0).
     (nielsdos)
+  . Fixed bug GH-17214 (Relax final+private warning for trait methods with
+    inherited final). (ilutov)
 
 - Enchant:
   . Fix crashes in enchant when passing null bytes. (nielsdos)

@@ -2048,9 +2048,11 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 
 static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, zend_function *fn_copy, zend_string *name)
 {
-	/* If the function was originally already private+final, then it will have already been warned about.
-	 * If the function became private+final only after applying modifiers, we need to emit the same warning. */
-	if ((original_fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) != (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+	/* If the function was originally already private+final, then it will have
+	 * already been warned about. Only emit this error when the used trait method
+	 * explicitly became final, avoiding errors for `as private` where it was
+	 * already final. */
+	if (!(original_fn_flags & ZEND_ACC_FINAL)
 		&& (fn_copy->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
 		&& !zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
