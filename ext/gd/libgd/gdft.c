@@ -720,7 +720,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 		y = pen_y + row;
 
 		/* clip if out of bounds */
-		if (y >= im->sy || y < 0) {
+		if (y > im->cy2 || y < im->cy1) {
 			continue;
 		}
 
@@ -743,7 +743,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 				x = pen_x + col;
 
 				/* clip if out of bounds */
-				if (x >= im->sx || x < 0) {
+				if (x > im->cx2 || x < im->cx1) {
 					continue;
 				}
 				/* get pixel location in gd buffer */

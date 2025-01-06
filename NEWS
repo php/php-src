@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug GH-17349 (Tiled truecolor filling looses single color
     transparency). (cmb)
+  . Fixed bug GH-17373 (imagefttext() ignores clipping rect for palette
+    images). (cmb)
 
 - Intl:
   . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
