@@ -17,20 +17,6 @@ extern "C" {
 #define GD_EXTRA_VERSION ""
 #define GD_VERSION_STRING "2.0.35"
 
-#ifdef NETWARE
-/* default fontpath for netware systems */
-#define DEFAULT_FONTPATH "sys:/java/nwgfx/lib/x11/fonts/ttf;."
-#define PATHSEPARATOR ";"
-#elif defined(_WIN32)
-/* default fontpath for windows systems */
-#define DEFAULT_FONTPATH "c:\\winnt\\fonts;c:\\windows\\fonts;."
-#define PATHSEPARATOR ";"
-#else
-/* default fontpath for unix systems */
-#define DEFAULT_FONTPATH "/usr/X11R6/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/truetype:/usr/X11R6/lib/X11/fonts/TTF:/usr/share/fonts/TrueType:/usr/share/fonts/truetype:/usr/openwin/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/Type1:."
-#define PATHSEPARATOR ":"
-#endif
-
 /* gd.h: declarations file for the graphic-draw module.
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided

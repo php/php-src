@@ -90,16 +90,26 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
  * some last resort values that might match some Un*x system
  * if building this version of gd separate from graphviz.
  */
+
 #ifndef DEFAULT_FONTPATH
-#if defined(__APPLE__) || (defined(__MWERKS__) && defined(macintosh))
-#define DEFAULT_FONTPATH "/usr/share/fonts/truetype:/System/Library/Fonts:/Library/Fonts"
-#else
-#define DEFAULT_FONTPATH "/usr/share/fonts/truetype"
+#  if defined(_WIN32)
+#    define DEFAULT_FONTPATH "C:\\WINDOWS\\FONTS;C:\\WINNT\\FONTS"
+#  elif defined(__APPLE__) || (defined(__MWERKS__) && defined(macintosh))
+#    define DEFAULT_FONTPATH "/usr/share/fonts/truetype:/System/Library/Fonts:/Library/Fonts"
+#  else
+   /* default fontpath for unix systems  - whatever happened to standards ! */
+#    define DEFAULT_FONTPATH "/usr/X11R6/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/truetype:/usr/X11R6/lib/X11/fonts/TTF:/usr/share/fonts/TrueType:/usr/share/fonts/truetype:/usr/openwin/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/Type1:/usr/lib/X11/fonts/Type1:/usr/openwin/lib/X11/fonts/Type1"
+#  endif
 #endif
-#endif
+
 #ifndef PATHSEPARATOR
-#define PATHSEPARATOR ":"
+#  if defined(_WIN32)
+#    define PATHSEPARATOR ";"
+#  else
+#    define PATHSEPARATOR ":"
+#  endif
 #endif
+
 
 #ifndef TRUE
 #define FALSE 0
