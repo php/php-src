@@ -70,6 +70,11 @@ PHP                                                                        NEWS
   . Added ReflectionConstant::getExtension() and ::getExtensionName().
     (DanielEScherzer)
 
+- Session:
+  . session_start() throws a ValueError on option argument if not a hashmap
+    or a TypeError if read_and_close value is not compatible with int.
+    (David Carlier)
+
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)

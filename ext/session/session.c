@@ -2634,9 +2634,8 @@ PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
 	zval *value;
-	zend_ulong num_idx;
 	zend_string *str_idx;
-	zend_long read_and_close = 0;
+	bool read_and_close = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
 		RETURN_THROWS();
@@ -2659,32 +2658,44 @@ PHP_FUNCTION(session_start)
 
 	/* set options */
 	if (options) {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_idx, str_idx, value) {
-			if (str_idx) {
-				switch(Z_TYPE_P(value)) {
-					case IS_STRING:
-					case IS_TRUE:
-					case IS_FALSE:
-					case IS_LONG:
-						if (zend_string_equals_literal(str_idx, "read_and_close")) {
-							read_and_close = zval_get_long(value);
-						} else {
-							zend_string *tmp_val;
-							zend_string *val = zval_get_tmp_string(value, &tmp_val);
-							if (php_session_start_set_ini(str_idx, val) == FAILURE) {
-								php_error_docref(NULL, E_WARNING, "Setting option \"%s\" failed", ZSTR_VAL(str_idx));
-							}
-							zend_tmp_string_release(tmp_val);
-						}
-						break;
-					default:
-						zend_type_error("%s(): Option \"%s\" must be of type string|int|bool, %s given",
-							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_value_name(value)
-						);
-						RETURN_THROWS();
-				}
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), str_idx, value) {
+			if (UNEXPECTED(!str_idx)) {
+				zend_argument_value_error(1, "must be of type array with keys as string");
+				RETURN_THROWS();
 			}
-			(void) num_idx;
+			switch(Z_TYPE_P(value)) {
+				case IS_STRING:
+				case IS_TRUE:
+				case IS_FALSE:
+				case IS_LONG:
+					if (zend_string_equals_literal(str_idx, "read_and_close")) {
+						zend_long tmp;
+						if (Z_TYPE_P(value) != IS_STRING) {
+							tmp = zval_get_long(value);
+						} else {
+							if (is_numeric_string(Z_STRVAL_P(value), Z_STRLEN_P(value), &tmp, NULL, false) != IS_LONG) {
+								zend_type_error("%s(): Option \"%s\" value must be of type compatible with int, \"%s\" given",
+										get_active_function_name(), ZSTR_VAL(str_idx), Z_STRVAL_P(value)
+									       );
+								RETURN_THROWS();
+							}
+						}
+						read_and_close = (tmp > 0);
+					} else {
+						zend_string *tmp_val;
+						zend_string *val = zval_get_tmp_string(value, &tmp_val);
+						if (php_session_start_set_ini(str_idx, val) == FAILURE) {
+							php_error_docref(NULL, E_WARNING, "Setting option \"%s\" failed", ZSTR_VAL(str_idx));
+						}
+						zend_tmp_string_release(tmp_val);
+					}
+					break;
+				default:
+					zend_type_error("%s(): Option \"%s\" must be of type string|int|bool, %s given",
+							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_value_name(value)
+						       );
+					RETURN_THROWS();
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
