@@ -3374,18 +3374,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 	}
 
-#ifdef VIRTUAL_DIR
-	{
-		char tmp_font_path[MAXPATHLEN];
-
-		if (!VCWD_REALPATH(fontname, tmp_font_path)) {
-			fontname = NULL;
-		}
-	}
-#endif /* VIRTUAL_DIR */
-
-	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
-
 	// libgd note: Those should return const char * ideally, but backward compatibility ..
 	if (EXT) {
 		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);

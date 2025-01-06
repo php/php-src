@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
     cmb)
+  . Fixed bug #64823 (ZTS GD fails to to find system TrueType font). (cmb)
 
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
