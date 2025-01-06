@@ -634,6 +634,9 @@ static double filter_welsh(const double x)
 }
 #endif
 
+
+/* keep it for future usage for affine copy over an existing image, targetting fix for 2.2.2 */
+#if 0 
 /* Copied from upstream's libgd */
 static inline int _color_blend (const int dst, const int src)
 {
@@ -666,6 +669,7 @@ static inline int _color_blend (const int dst, const int src)
 		}
 	}
 }
+#endif
 
 static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, const int bgColor)
 {
