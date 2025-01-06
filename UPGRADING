@@ -68,6 +68,11 @@ PHP 8.5 UPGRADE NOTES
   . Added support for Closures in constant expressions.
     RFC: https://wiki.php.net/rfc/closures_in_const_expr
 
+- Curl:
+  . Added support for share handles that are persisted across multiple PHP
+    requests, safely allowing for more effective connection reuse.
+    RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
+
 - DOM:
   . Added Dom\Element::$outerHTML.
 
@@ -148,6 +153,9 @@ PHP 8.5 UPGRADE NOTES
   . curl_multi_get_handles() allows retrieving all CurlHandles current
     attached to a CurlMultiHandle. This includes both handles added using
     curl_multi_add_handle() and handles accepted by CURLMOPT_PUSHFUNCTION.
+  . curl_share_init_persistent() allows creating a share handle that is
+    persisted across multiple PHP requests.
+    RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
 
 - DOM:
   . Added Dom\Element::insertAdjacentHTML().
@@ -165,6 +173,11 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- Curl:
+  . CurlSharePersistentHandle representing a share handle that is persisted
+    across multiple PHP requests.
+    RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
 
 ========================================
 8. Removed Extensions and SAPIs

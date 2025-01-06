@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
+  . Added curl_share_init_persistent(). (enorris)
 
 - Date:
   . Fix undefined behaviour problems regarding integer overflow in extreme edge
