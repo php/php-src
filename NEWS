@@ -32,6 +32,10 @@ PHP                                                                        NEWS
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
 
+-GD:
+  . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
+    cmb)
+
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
