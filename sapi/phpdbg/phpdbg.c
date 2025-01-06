@@ -89,11 +89,6 @@ static void php_phpdbg_destroy_bp_condition(zval *data) /* {{{ */
 	efree(brake);
 } /* }}} */
 
-static void php_phpdbg_destroy_registered(zval *data) /* {{{ */
-{
-	zend_function_dtor(data);
-} /* }}} */
-
 static void php_phpdbg_destroy_file_source(zval *data) /* {{{ */
 {
 	phpdbg_file_source *source = (phpdbg_file_source *) Z_PTR_P(data);
@@ -163,7 +158,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], 8, NULL, NULL, 0);
 
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
-	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
+	zend_hash_init(&PHPDBG_G(registered), 8, NULL, NULL, true);
 
 	zend_hash_init(&PHPDBG_G(file_sources), 0, NULL, php_phpdbg_destroy_file_source, 0);
 	phpdbg_setup_watchpoints();

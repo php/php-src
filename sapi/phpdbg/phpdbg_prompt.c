@@ -1424,7 +1424,6 @@ PHPDBG_COMMAND(register) /* {{{ */
 	if (!zend_hash_str_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
 		if ((function = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len))) {
 			zend_hash_str_update_ptr(&PHPDBG_G(registered), lcname, lcname_len, function);
-			function_add_ref(function);
 
 			phpdbg_notice("Registered %s", lcname);
 		} else {
