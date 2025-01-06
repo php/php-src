@@ -2,8 +2,6 @@
 Test property mutation - path
 --EXTENSIONS--
 uri
---XFAIL--
-Cloning Rfc3986Uris doesn't copy the path properly yet
 --FILE--
 <?php
 
@@ -27,19 +25,19 @@ $uri2 = $uri1->withPath("/");
 var_dump($uri1->toString());
 var_dump($uri2->toString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com/foo/bar");
-$uri2 = $uri1->withPath("/foo");
-$uri3 = $uri2->withPath(null);
+$url1 = Uri\WhatWg\Url::parse("https://example.com/foo/bar");
+$url2 = $url1->withPath("/foo");
+$url3 = $url2->withPath(null);
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
-var_dump($uri3->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
+var_dump($url3->toMachineFriendlyString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com");
-$uri2 = $uri1->withPath("/foo");
+$url1 = Uri\WhatWg\Url::parse("https://example.com");
+$uri2 = $url1->withPath("/foo");
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
 
 ?>
 --EXPECT--
@@ -48,6 +46,8 @@ string(23) "https://example.com/foo"
 string(19) "https://example.com"
 string(19) "https://example.com"
 string(23) "https://example.com/foo"
+string(19) "/path?query=abc#foo"
+string(15) "/?query=abc#foo"
 string(27) "https://example.com/foo/bar"
 string(23) "https://example.com/foo"
 string(20) "https://example.com/"

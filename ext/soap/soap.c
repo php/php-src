@@ -228,9 +228,9 @@ static void soap_url_object_free(zend_object *obj)
 {
 	soap_url_object *url_obj = soap_url_object_fetch(obj);
 
-	if (url_obj->url) {
-		php_url_free(url_obj->url);
-		url_obj->url = NULL;
+	if (url_obj->uri) {
+		php_uri_struct_free(url_obj->uri);
+		url_obj->uri = NULL;
 	}
 
 	zend_object_std_dtor(&url_obj->std);

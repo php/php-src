@@ -196,7 +196,7 @@ static void URI_FUNC(OnExitPartHelperTwo)(URI_TYPE(ParserState) * state);
 
 static void URI_FUNC(ResetParserStateExceptUri)(URI_TYPE(ParserState) * state);
 
-static UriBool URI_FUNC(PushPathSegment)(URI_TYPE(ParserState) * state,
+UriBool URI_FUNC(PushPathSegment)(URI_TYPE(ParserState) * state,
 		const URI_CHAR * first, const URI_CHAR * afterLast,
 		UriMemoryManager * memory);
 
@@ -2119,7 +2119,7 @@ static URI_INLINE void URI_FUNC(ResetParserStateExceptUri)(URI_TYPE(ParserState)
 
 
 
-static URI_INLINE UriBool URI_FUNC(PushPathSegment)(
+UriBool URI_FUNC(PushPathSegment)(
 		URI_TYPE(ParserState) * state, const URI_CHAR * first,
 		const URI_CHAR * afterLast, UriMemoryManager * memory) {
 	URI_TYPE(PathSegment) * segment = memory->calloc(memory, 1, sizeof(URI_TYPE(PathSegment)));

@@ -27,6 +27,7 @@
 #include "zend_smart_str.h"
 #include "php_ini.h"
 #include "SAPI.h"
+#include "ext/uri/php_uri.h"
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 
@@ -254,7 +255,7 @@ static zend_always_inline zval *php_soap_deref(zval *zv) {
 #define Z_CLIENT_LAST_RESPONSE_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 35))
 
 typedef struct soap_url_object {
-	php_url *url;
+	php_uri *uri;
 	zend_object std;
 } soap_url_object;
 

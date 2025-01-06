@@ -21,21 +21,21 @@ var_dump($uri1->toString());
 var_dump($uri2->toString());
 var_dump($uri3->toString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com?foo=bar");
-$uri2 = $uri1->withQuery("?foo=baz");
-$uri3 = $uri2->withQuery(null);
+$url1 = Uri\WhatWg\Url::parse("https://example.com?foo=bar");
+$url2 = $url1->withQuery("?foo=baz");
+$url3 = $url2->withQuery(null);
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
-var_dump($uri3->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
+var_dump($url3->toMachineFriendlyString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com");
-$uri2 = $uri1->withQuery("?foo=bar&foo=baz");
-$uri3 = $uri1->withQuery("foo=bar&foo=baz");
+$url1 = Uri\WhatWg\Url::parse("https://example.com");
+$url2 = $url1->withQuery("?foo=bar&foo=baz");
+$url3 = $url1->withQuery("foo=bar&foo=baz");
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
-var_dump($uri3->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
+var_dump($url3->toMachineFriendlyString());
 
 ?>
 --EXPECT--

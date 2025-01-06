@@ -2627,7 +2627,7 @@ static char *php_openssl_get_url_name(const char *resourcename,
 	}
 
 	zval host_zv;
-	zend_result result = php_uri_get_host(internal_uri, &host_zv);
+	zend_result result = php_uri_get_host(internal_uri, URI_COMPONENT_READ_RAW, &host_zv);
 	if (result == SUCCESS && Z_TYPE(host_zv) == IS_STRING) {
 		const char * host = Z_STRVAL(host_zv);
 		char * url_name = NULL;

@@ -17,7 +17,6 @@
 #ifndef PHP_URI_COMMON_H
 #define PHP_URI_COMMON_H
 
-extern zend_class_entry *uri_interface_ce;
 extern zend_class_entry *rfc3986_uri_ce;
 extern zend_object_handlers rfc3986_uri_object_handlers;
 extern zend_class_entry *whatwg_url_ce;
@@ -29,15 +28,26 @@ extern zend_class_entry *invalid_uri_exception_ce;
 extern zend_class_entry *whatwg_error_type_ce;
 extern zend_class_entry *whatwg_error_ce;
 
+typedef enum {
+	URI_RECOMPOSITION_MACHINE_FRIENDLY,
+	URI_RECOMPOSITION_HUMAN_FRIENDLY,
+	URI_RECOMPOSITION_NORMALIZED_HUMAN_FRIENDLY,
+	URI_RECOMPOSITION_NORMALIZED_MACHINE_FRIENDLY,
+} uri_recomposition_mode_t;
+
+typedef enum {
+	URI_COMPONENT_READ_RAW,
+	URI_COMPONENT_READ_NORMALIZED_HUMAN_FRIENDLY,
+	URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY,
+} uri_component_read_mode_t;
+
 typedef struct uri_handler_t {
 	const char *name;
 
 	zend_result (*init_parser)(void);
 	void *(*parse_uri)(const zend_string *uri_str, const zend_string *base_url_str, zval *errors);
-	zend_class_entry *(*get_uri_ce)(void);
 	void *(*clone_uri)(void *uri);
-	zend_result (*normalize_uri)(void *uri);
-	zend_string *(*uri_to_string)(void *uri, bool exclude_fragment);
+	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
 	void (*free_uri)(void *uri);
 	zend_result (*destroy_parser)(void);
 	HashTable *property_handlers;
@@ -64,10 +74,11 @@ static inline uri_internal_t *uri_internal_from_obj(zend_object *object) {
 #define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
 #define Z_URI_INTERNAL_P(zv) uri_internal_from_obj(Z_OBJ_P((zv)))
 
-#define URI_PARSER_RFC3986 "Uri\\Rfc3986Uri"
-#define URI_PARSER_WHATWG "Uri\\WhatWgUri"
+#define URI_PARSER_RFC3986 "Uri\\Rfc3986\\Uri"
+#define URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
+#define URI_SERIALIZED_PROPERTY_NAME "__uri"
 
-typedef zend_result (*uri_read_t)(const uri_internal_t *internal_uri, zval *retval);
+typedef zend_result (*uri_read_t)(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
 
 typedef zend_result (*uri_write_t)(uri_internal_t *internal_uri, zval *value, zval *errors);
 
@@ -107,21 +118,13 @@ void throw_invalid_uri_exception(zval *errors);
     } \
 } while (0)
 
-#define URI_CHECK_INITIALIZATION_RETURN_VOID(internal_uri, object) do { \
-	ZEND_ASSERT(internal_uri != NULL); \
-	if (UNEXPECTED(internal_uri->uri == NULL)) { \
-		zend_throw_error(uninitialized_uri_exception_ce, "%s object is not correctly initialized", ZSTR_VAL(object->ce->name)); \
-		return; \
-    } \
-} while (0)
-
-#define URI_GETTER(property_name) do { \
+#define URI_GETTER(property_name, component_read_mode) do { \
 	ZEND_PARSE_PARAMETERS_NONE(); \
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS); \
 	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, Z_OBJ_P(ZEND_THIS)); \
 	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
 	ZEND_ASSERT(property_handler != NULL); \
-	if (UNEXPECTED(property_handler->read_func(internal_uri, return_value) == FAILURE)) { \
+	if (UNEXPECTED(property_handler->read_func(internal_uri, component_read_mode, return_value) == FAILURE)) { \
 		zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
 		RETURN_THROWS(); \
 	} \
@@ -160,6 +163,16 @@ void throw_invalid_uri_exception(zval *errors);
 	zval_ptr_dtor(property_zv);
 
 #define URI_WITHER_STR(property_name) do { \
+	zend_string *value; \
+	ZEND_PARSE_PARAMETERS_START(1, 1) \
+		Z_PARAM_PATH_STR(value) \
+	ZEND_PARSE_PARAMETERS_END(); \
+	zval zv; \
+	ZVAL_STR_COPY(&zv, value); \
+	URI_WITHER_COMMON(property_name, &zv, return_value) \
+} while (0)
+
+#define URI_WITHER_STR_OR_NULL(property_name) do { \
 	zend_string *value; \
 	ZEND_PARSE_PARAMETERS_START(1, 1) \
 		Z_PARAM_PATH_STR_OR_NULL(value) \

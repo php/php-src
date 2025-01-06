@@ -13,14 +13,14 @@ var_dump($uri1->toString());
 var_dump($uri2->toString());
 var_dump($uri3->toString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com");
-$uri2 = $uri1->withScheme("http");
+$url1 = Uri\WhatWg\Url::parse("https://example.com");
+$url2 = $url1->withScheme("http");
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
 
 try {
-    $uri2->withScheme(null);
+    $url2->withScheme("");
 } catch (Uri\InvalidUriException $e) {
     echo $e->getMessage() . "\n";
 }

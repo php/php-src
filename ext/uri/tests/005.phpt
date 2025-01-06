@@ -7,9 +7,12 @@ uri
 
 var_dump(Uri\Rfc3986\Uri::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor"));
 
-$uri = Uri\WhatWg\Url::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor");
-var_dump($uri);
-var_dump($uri->toString());
+$url = Uri\WhatWg\Url::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor");
+var_dump($url);
+var_dump($url->getHost());
+var_dump($url->getHumanFriendlyHost());
+var_dump($url->toHumanFriendlyString());
+var_dump($url->toMachineFriendlyString());
 
 ?>
 --EXPECTF--
@@ -32,4 +35,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   string(6) "anchor"
 }
+string(18) "xn--hostname-b1aaa"
+string(14) "héééostname"
+string(71) "http://username:password@héééostname:9090/path?arg=va%C3%A9ue#anchor"
 string(75) "http://username:password@xn--hostname-b1aaa:9090/path?arg=va%C3%A9ue#anchor"

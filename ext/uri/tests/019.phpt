@@ -8,20 +8,54 @@ uri
 $uri = Uri\Rfc3986\Uri::parse("🐘");
 var_dump($uri);
 
-$uri = Uri\WhatWg\Url::parse("🐘", null);
+$errors = [];
+$url = Uri\WhatWg\Url::parse("🐘", null, $errors);
+var_dump($url);
+var_dump($errors);
+
+$uri = Uri\Rfc3986\Uri::parse("https://🐘.com/🐘?🐘=🐘");
 var_dump($uri);
-var_dump($uri[0]->errorCode === \Uri\WhatWgError::ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
+
+$url = Uri\WhatWg\Url::parse("https://🐘.com/🐘?🐘=🐘", null);
+var_dump($url);
+var_dump($url->getHost());
+var_dump($url->getHumanFriendlyHost());
+var_dump($url->toMachineFriendlyString());
+var_dump($url->toHumanFriendlyString());
 
 ?>
 --EXPECTF--
 NULL
+NULL
 array(1) {
   [0]=>
-  object(Uri\WhatWgError)#%d (%d) {
+  object(Uri\WhatWg\WhatWgError)#%d (%d) {
     ["context"]=>
     string(4) "🐘"
-    ["errorCode"]=>
-    int(21)
+    ["type"]=>
+    enum(Uri\WhatWg\WhatWgErrorType::MissingSchemeNonRelativeUrl)
   }
 }
-bool(true)
+NULL
+object(Uri\WhatWg\Url)#%d (%d) {
+  ["scheme"]=>
+  string(5) "https"
+  ["user"]=>
+  NULL
+  ["password"]=>
+  NULL
+  ["host"]=>
+  string(12) "xn--go8h.com"
+  ["port"]=>
+  NULL
+  ["path"]=>
+  string(12) "%F0%9F%90%98"
+  ["query"]=>
+  string(25) "%F0%9F%90%98=%F0%9F%90%98"
+  ["fragment"]=>
+  NULL
+}
+string(12) "xn--go8h.com"
+string(8) "🐘.com"
+string(59) "https://xn--go8h.com/%F0%9F%90%98?%F0%9F%90%98=%F0%9F%90%98"
+string(55) "https://🐘.com/%F0%9F%90%98?%F0%9F%90%98=%F0%9F%90%98"

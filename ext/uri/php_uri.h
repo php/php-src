@@ -26,17 +26,30 @@ extern zend_module_entry uri_module_entry;
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+typedef struct {
+	zend_string *scheme;
+	zend_string *user;
+	zend_string *password;
+	zend_string *host;
+	unsigned short port;
+	zend_string *path;
+	zend_string *query;
+	zend_string *fragment;
+} php_uri;
+
 PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name);
 PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str, zval *errors);
-PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, zval *zv);
-PHPAPI zend_result php_uri_get_user(const uri_internal_t *internal_uri, zval *zv);
-PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, zval *zv);
-PHPAPI zend_result php_uri_get_host(const uri_internal_t *internal_uri, zval *zv);
-PHPAPI zend_result php_uri_get_port(const uri_internal_t *internal_uri, zval *zv);
-PHPAPI zend_result php_uri_get_path(const uri_internal_t *internal_uri, zval *zv);
-PHPAPI zend_result php_uri_get_query(const uri_internal_t *internal_uri, zval *zv);
-PHPAPI zend_result php_uri_get_fragment(const uri_internal_t *internal_uri, zval *zv);
+PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+PHPAPI zend_result php_uri_get_user(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+PHPAPI zend_result php_uri_get_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+PHPAPI zend_result php_uri_get_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+PHPAPI zend_result php_uri_get_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+PHPAPI zend_result php_uri_get_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+PHPAPI zend_result php_uri_get_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
 PHPAPI void php_uri_free(uri_internal_t *internal_uri);
+PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_string *uri_str, zval *errors);
+PHPAPI void php_uri_struct_free(php_uri *uri);
 
 PHPAPI void php_uri_instantiate_uri(
 	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_string *base_url_str,

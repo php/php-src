@@ -24,9 +24,9 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-$uri = new Uri\WhatWg\Url("https://example.com");
+$url = new Uri\WhatWg\Url("https://example.com");
 try {
-    $uri->withHost("exam\0ple.com");
+    $url->withHost("exam\0ple.com");
 } catch (Error $e) {
     echo $e->getMessage() . "\n";
 }

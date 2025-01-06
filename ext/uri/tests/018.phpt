@@ -10,10 +10,10 @@ $uri2 = clone $uri1;
 var_dump($uri1);
 var_dump($uri2);
 
-$uri3 = Uri\WhatWg\Url::parse("https://example.com");
-$uri4 = clone $uri3;
-var_dump($uri3);
-var_dump($uri4);
+$url3 = Uri\WhatWg\Url::parse("https://example.com");
+$url4 = clone $url3;
+var_dump($url3);
+var_dump($url4);
 
 ?>
 --EXPECTF--

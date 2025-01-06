@@ -8,8 +8,8 @@ uri
 $uri = new Uri\Rfc3986\Uri("https://username:password@example.com:8080/path?q=r#fragment");
 var_dump($uri);
 
-$uri = new Uri\WhatWg\Url("https://username:password@example.com:8080/path?q=r#fragment");
-var_dump($uri);
+$url = new Uri\WhatWg\Url("https://username:password@example.com:8080/path?q=r#fragment");
+var_dump($url);
 
 ?>
 --EXPECTF--

@@ -405,6 +405,10 @@ lxb_url_serialize(const lxb_url_t *url, lexbor_serialize_cb_f cb, void *ctx,
                   bool exclude_fragment);
 
 LXB_API lxb_status_t
+lxb_url_serialize_unicode(lxb_unicode_idna_t *idna, const lxb_url_t *url, lexbor_serialize_cb_f cb, void *ctx,
+						  bool exclude_fragment);
+
+LXB_API lxb_status_t
 lxb_url_serialize_scheme(const lxb_url_t *url,
                          lexbor_serialize_cb_f cb, void *ctx);
 
@@ -461,6 +465,23 @@ lxb_url_serialize_fragment(const lxb_url_t *url,
  */
 LXB_API lxb_url_t *
 lxb_url_clone(lexbor_mraw_t *mraw, lxb_url_t *url);
+
+/*
+ * Below are auxiliary functions.
+ */
+
+typedef enum {
+	LXB_URL_HOST_OPT_UNDEF       = 0 << 0,
+	LXB_URL_HOST_OPT_NOT_SPECIAL = 1 << 0,
+	LXB_URL_HOST_OPT_DECODE      = 1 << 1,
+	LXB_URL_HOST_OPT_IDNA        = 1 << 2
+}
+lxb_url_host_opt_t;
+
+LXB_API lxb_status_t
+lxb_url_percent_decode(const lxb_char_t *data, const lxb_char_t *end,
+					   lexbor_str_t *str, lexbor_mraw_t *mraw,
+					   lxb_url_host_opt_t *opt);
 
 /*
  * Inline functions.

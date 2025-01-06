@@ -19,19 +19,19 @@ $uri2 = $uri1->withPort(8080);
 var_dump($uri1->toString());
 var_dump($uri2->toString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com:8080");
-$uri2 = $uri1->withPort(22);
-$uri3 = $uri2->withPort(null);
+$url1 = Uri\WhatWg\Url::parse("https://example.com:8080");
+$url2 = $url1->withPort(22);
+$url3 = $url2->withPort(null);
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
-var_dump($uri3->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
+var_dump($url3->toMachineFriendlyString());
 
-$uri1 = Uri\WhatWg\Url::parse("ftp://foo.com:443?query=abc#foo");
-$uri2 = $uri1->withPort(8080);
+$url1 = Uri\WhatWg\Url::parse("ftp://foo.com:443?query=abc#foo");
+$url2 = $url1->withPort(8080);
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
 
 ?>
 --EXPECT--

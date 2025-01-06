@@ -6,7 +6,7 @@ uri
 --FILE--
 <?php
 
-function handleException(Uri\Uri $uri, Closure $callback)
+function handleException($uri, Closure $callback)
 {
     try {
         $callback($uri);
@@ -15,30 +15,35 @@ function handleException(Uri\Uri $uri, Closure $callback)
     }
 }
 
-function callMembers(Uri\Uri $uri)
+function callMembers($uri)
 {
-    handleException($uri, function (Uri\Uri $uri) {var_dump($uri);});
-    handleException($uri, function (Uri\Uri $uri) {var_dump(isset($uri->scheme));});
-    handleException($uri, function (Uri\Uri $uri) {var_dump(empty($uri->scheme));});
-    handleException($uri, function (Uri\Uri $uri) {$uri->scheme;});
-    handleException($uri, function (Uri\Uri $uri) {$uri->getScheme();});
-    handleException($uri, function (Uri\Uri $uri) {$uri->user;});
-    handleException($uri, function (Uri\Uri $uri) {$uri->getUser();});
-    handleException($uri, function (Uri\Uri $uri) {$uri->password;});
-    handleException($uri, function (Uri\Uri $uri) {$uri->getPassword();});
-    handleException($uri, function (Uri\Uri $uri) {$uri->host;});
-    handleException($uri, function (Uri\Uri $uri) {$uri->getHost();});
-    handleException($uri, function (Uri\Uri $uri) {$uri->port;});
-    handleException($uri, function (Uri\Uri $uri) {$uri->getPort();});
-    handleException($uri, function (Uri\Uri $uri) {$uri->path;});
-    handleException($uri, function (Uri\Uri $uri) {$uri->getPath();});
-    handleException($uri, function (Uri\Uri $uri) {$uri->query;});
-    handleException($uri, function (Uri\Uri $uri) {$uri->getQuery();});
-    handleException($uri, function (Uri\Uri $uri) {$uri->fragment;});
-    handleException($uri, function (Uri\Uri $uri) {$uri->getFragment();});
-    handleException($uri, function (Uri\Uri $uri) {json_encode($uri);});
-    handleException($uri, function (Uri\Uri $uri) {$uri->__serialize();});
-    handleException($uri, function (Uri\Uri $uri) {$uri->toString();});
+    handleException($uri, function ($uri) {var_dump($uri);});
+    handleException($uri, function ($uri) {var_export($uri); echo "\n";});
+    handleException($uri, function ($uri) {$uri->getScheme();});
+    handleException($uri, function ($uri) {$uri->getRawScheme();});
+    handleException($uri, function ($uri) {$uri->getUser();});
+    handleException($uri, function ($uri) {$uri->getRawUser();});
+    handleException($uri, function ($uri) {$uri->getPassword();});
+    handleException($uri, function ($uri) {$uri->getRawPassword();});
+    handleException($uri, function ($uri) {$uri->getHost();});
+    handleException($uri, function ($uri) {$uri->getPort();});
+    handleException($uri, function ($uri) {$uri->getPath();});
+    handleException($uri, function ($uri) {$uri->getRawPath();});
+    handleException($uri, function ($uri) {$uri->getQuery();});
+    handleException($uri, function ($uri) {$uri->getRawQuery();});
+    handleException($uri, function ($uri) {$uri->getFragment();});
+    handleException($uri, function ($uri) {$uri->getRawFragment();});
+    handleException($uri, function ($uri) {json_encode($uri);});
+    handleException($uri, function ($uri) {$uri->__serialize();});
+
+    if ($uri instanceof Uri\Rfc3986\Uri) {
+        handleException($uri, function ($uri) {$uri->getRawHost();});
+        handleException($uri, function ($uri) {$uri->toString();});
+    } else {
+        handleException($uri, function ($uri) {$uri->getHumanFriendlyHost();});
+        handleException($uri, function ($uri) {$uri->toHumanFriendlyString();});
+        handleException($uri, function ($uri) {$uri->toMachineFriendlyString();});
+    }
 }
 
 $reflectionClass = new ReflectionClass(Uri\Rfc3986\Uri::class);
@@ -55,10 +60,8 @@ callMembers($uri);
 --EXPECTF--
 object(Uri\Rfc3986\Uri)#%d (%d) {
 }
-bool(false)
-bool(true)
-Uri\Rfc3986\Uri object is not correctly initialized
-Uri\Rfc3986\Uri object is not correctly initialized
+\Uri\Rfc3986\Uri::__set_state(array(
+))
 Uri\Rfc3986\Uri object is not correctly initialized
 Uri\Rfc3986\Uri object is not correctly initialized
 Uri\Rfc3986\Uri object is not correctly initialized
@@ -79,9 +82,8 @@ Uri\Rfc3986\Uri object is not correctly initialized
 
 object(Uri\WhatWg\Url)#%d (%d) {
 }
-bool(false)
-bool(true)
-Uri\WhatWg\Url object is not correctly initialized
+\Uri\WhatWg\Url::__set_state(array(
+))
 Uri\WhatWg\Url object is not correctly initialized
 Uri\WhatWg\Url object is not correctly initialized
 Uri\WhatWg\Url object is not correctly initialized

@@ -85,7 +85,7 @@ extern "C" {
 # include "UriBase.h"
 #endif
 
-
+extern const URI_CHAR * const URI_FUNC(SafeToPointTo);
 
 /**
  * Specifies a range of characters within a string.
@@ -200,7 +200,11 @@ typedef struct URI_TYPE(QueryListStruct) {
 	struct URI_TYPE(QueryListStruct) * next; /**< Pointer to the next key/value pair in the list, can be NULL if last already */
 } URI_TYPE(QueryList); /**< @copydoc UriQueryListStructA */
 
+URI_PUBLIC UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri);
 
+URI_PUBLIC UriBool URI_FUNC(PushPathSegment)(URI_TYPE(ParserState) * state,
+		const URI_CHAR * first, const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
 
 /**
  * Parses a RFC 3986 %URI.

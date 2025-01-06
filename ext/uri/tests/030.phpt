@@ -19,19 +19,19 @@ $uri2 = $uri1->withFragment("#fragment");
 var_dump($uri1->toString());
 var_dump($uri2->toString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com#fragment1");
-$uri2 = $uri1->withFragment("#fragment2");
-$uri3 = $uri2->withFragment(null);
+$url1 = Uri\WhatWg\Url::parse("https://example.com#fragment1");
+$url2 = $url1->withFragment("#fragment2");
+$url3 = $url2->withFragment(null);
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
-var_dump($uri3->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
+var_dump($url3->toMachineFriendlyString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com?abc=def");
-$uri2 = $uri1->withFragment("#fragment");
+$url1 = Uri\WhatWg\Url::parse("https://example.com?abc=def");
+$url2 = $url1->withFragment("#fragment");
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
 
 ?>
 --EXPECT--

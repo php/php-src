@@ -9,9 +9,9 @@ $uri = Uri\Rfc3986\Uri::parse("https:example.com");
 var_dump($uri);
 var_dump($uri->toString());
 
-$uri = Uri\WhatWg\Url::parse("https:example.com");
-var_dump($uri);
-var_dump($uri->toString());
+$url = Uri\WhatWg\Url::parse("https:example.com");
+var_dump($url);
+var_dump($url->toMachineFriendlyString());
 
 ?>
 --EXPECTF--

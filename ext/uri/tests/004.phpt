@@ -87,22 +87,6 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-array(%d) {
-  [0]=>
-  object(Uri\WhatWgError)#%d (%d) {
-    ["context"]=>
-    string(20) "192.168/contact.html"
-    ["errorCode"]=>
-    int(21)
-  }
-}
 NULL
-array(%d) {
-  [0]=>
-  object(Uri\WhatWgError)#%d (%d) {
-    ["context"]=>
-    string(52) " drag race all stars 7 winners cast on this season's"
-    ["errorCode"]=>
-    int(2)
-  }
-}
+NULL
+NULL

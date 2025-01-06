@@ -34,7 +34,7 @@ var_dump(Uri\WhatWg\Url::parse("https://username:password@www.google.com:8080/pa
 echo "------------------------\n";
 
 echo "parse_url:\n";
-var_dump(($t4 - $t3) / 1_000_000_000);
+var_dump(($t6 - $t5) / 1_000_000_000);
 var_dump(parse_url("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"));
 echo "------------------------\n";
 
