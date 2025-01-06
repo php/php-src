@@ -50,12 +50,4 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-array(1) {
-  [0]=>
-  object(Uri\WhatWgError)#%d (%d) {
-    ["context"]=>
-    string(7) "/page:1"
-    ["errorCode"]=>
-    int(21)
-  }
-}
+NULL

@@ -2,8 +2,6 @@
 Test relative URI parsing
 --EXTENSIONS--
 uri
---XFAIL--
-Fails due to the errors array
 --FILE--
 <?php
 
@@ -11,8 +9,8 @@ $uri = Uri\Rfc3986\Uri::parse("?query#fragment");
 var_dump($uri);
 
 $errors = [];
-$uri = Uri\WhatWg\Url::parse("?query#fragment", null, $errors);
-var_dump($uri);
+$url = Uri\WhatWg\Url::parse("?query#fragment", null, $errors);
+var_dump($url);
 var_dump($errors);
 
 ?>
@@ -36,3 +34,12 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(8) "fragment"
 }
 NULL
+array(%d) {
+  [0]=>
+  object(Uri\WhatWg\WhatWgError)#%d (%d) {
+    ["context"]=>
+    string(15) "?query#fragment"
+    ["type"]=>
+    enum(Uri\WhatWg\WhatWgErrorType::MissingSchemeNonRelativeUrl)
+  }
+}

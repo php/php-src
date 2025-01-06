@@ -27,13 +27,13 @@ try {
 }
 var_dump($uri1);
 
-$uri3 = new MyWhatWgUri("https://example.com");
+$url3 = new MyWhatWgUri("https://example.com");
 try {
-    $uri4 = clone $uri3;
+    $url4 = clone $url3;
 } catch (Uri\UninitializedUriException $e) {
     echo $e->getMessage() . "\n";
 }
-var_dump($uri3);
+var_dump($url3);
 
 ?>
 --EXPECTF--

@@ -2,8 +2,6 @@
 Test URI equality checks
 --EXTENSIONS--
 uri
---XFAIL--
-Cloning Rfc3986Uris doesn't copy the path properly yet
 --FILE--
 <?php
 
@@ -11,141 +9,33 @@ readonly class MyRfc3986Uri extends Uri\Rfc3986\Uri
 {
 }
 
-readonly class MyWhatWgUri extends Uri\WhatWg\Url
+readonly class MyWhatWgUrl extends Uri\WhatWg\Url
 {
 }
 
-readonly class FakeUri implements Uri\Uri
-{
-    public function getScheme(): ?string
-    {
-        return "https";
-    }
+var_dump(new Uri\Rfc3986\Uri("https://example.com")->equals(new Uri\Rfc3986\Uri("https://example.com"))); // true: identical URIs
+var_dump(new Uri\Rfc3986\Uri("https://example.com#foo")->equals(new Uri\Rfc3986\Uri("https://example.com#bar"), true)); // true: fragment differs, but excludeFragment = true
+var_dump(new Uri\Rfc3986\Uri("https://example.com#foo")->equals(new Uri\Rfc3986\Uri("https://example.com#bar"), false)); // false: fragment differs and excludeFragment = false
+var_dump(new Uri\Rfc3986\Uri("https://example.com/foo/..")->equals(new Uri\Rfc3986\Uri("https://example.com"))); // false: first URI becomes https://example.com/ after normalization
+var_dump(new Uri\Rfc3986\Uri("https://example.com/foo/..")->equals(new Uri\Rfc3986\Uri("https://example.com/"))); // true: both URIs are https://example.com/ after normalization
+var_dump(new Uri\Rfc3986\Uri("http://example%2ecom/foo%2fb%61r")->equals(new Uri\Rfc3986\Uri("http://example%2ecom/foo/bar"))); // false: "/" in the path should not be decoded
+var_dump(new Uri\Rfc3986\Uri("http://example%2ecom/foo/b%61r")->equals(new Uri\Rfc3986\Uri("http://example%2ecom/foo/bar"))); // true: percent-decoding during normalization gives same URIs
 
-    public function withScheme(?string $scheme): static
-    {
-        return $this;
-    }
+var_dump(new MyRfc3986Uri("https://example.com/foo/..")->equals(new Uri\Rfc3986\Uri("https://example.com/"))); // true: both URIs are https://example.com/ after normalization
+var_dump(new Uri\Rfc3986\Uri("https://example.com/foo/..")->equals(new MyRfc3986Uri("https://example.com/"))); // true: both URIs are https://example.com/ after normalization
+var_dump(new MyRfc3986Uri("https://example.com/foo/..")->equals(new MyRfc3986Uri("https://example.com/"))); // true: both URIs are https://example.com/ after normalization
 
-    public function getUser(): ?string
-    {
-        return null;
-    }
+var_dump(new Uri\WhatWg\Url("https://example.com")->equals(new Uri\WhatWg\Url("https://example.com"))); // true: identical URIs
+var_dump(new Uri\WhatWg\Url("https://example.com#foo")->equals(new Uri\WhatWg\Url("https://example.com#bar"), true)); // true: fragment differs, but excludeFragment = true
+var_dump(new Uri\WhatWg\Url("https://example.com#foo")->equals(new Uri\WhatWg\Url("https://example.com#bar"), false)); // false: fragment differs and excludeFragment = false
+var_dump(new Uri\WhatWg\Url("https://example.com/foo/..")->equals(new Uri\WhatWg\Url("https://example.com"))); // true: both URIs are https://example.com/ after normalization
+var_dump(new Uri\WhatWg\Url("https://example.com/foo/..")->equals(new Uri\WhatWg\Url("https://example.com/"))); // true: both URIs are https://example.com/ after normalization
+var_dump(new Uri\WhatWg\Url("http://example%2ecom/foo%2fb%61r")->equals(new Uri\WhatWg\Url("http://example%2ecom/foo/bar"))); // false: WHATWG doesn't percent-decode the path during normalization
+var_dump(new Uri\WhatWg\Url("http://example%2ecom/foo/b%61r")->equals(new Uri\WhatWg\Url("http://example.com/foo/b%61r"))); // true: WHATWG percent-decodes the host during normalization
 
-    public function withUser(?string $user): static
-    {
-        return $this;
-    }
-
-    public function getPassword(): ?string
-    {
-        return null;
-    }
-
-    public function withPassword(?string $password): static
-    {
-        return $this;
-    }
-
-    public function getHost(): ?string
-    {
-        return "example.com";
-    }
-
-    public function withHost(?string $host): static {
-        return $this;
-    }
-
-    public function getPort(): ?int
-    {
-        return null;
-    }
-
-    public function withPort(?int $port): static
-    {
-        return $this;
-    }
-
-    public function getPath(): ?string
-    {
-        return null;
-    }
-
-    public function withPath(?string $path): static
-    {
-        return $this;
-    }
-
-    public function getQuery(): ?string
-    {
-        return null;
-    }
-
-    public function withQuery(?string $query): static
-    {
-        return $this;
-    }
-
-    public function getFragment(): ?string
-    {
-        return null;
-    }
-
-    public function withFragment(?string $fragment): static
-    {
-        return $this;
-    }
-
-    public function equals(Uri\Uri $uri, bool $excludeFragment = true): bool
-    {
-        return false;
-    }
-
-    public function normalize(): static
-    {
-        return $this;
-    }
-
-    public function toNormalizedString(): string
-    {
-        return "https://example.com";
-    }
-
-    public function toString(): string
-    {
-        return "https://example.com";
-    }
-
-    public function resolve(string $uri): static
-    {
-        return $this;
-    }
-}
-
-var_dump(new Uri\Rfc3986\Uri("https://example.com")->equals(new Uri\Rfc3986\Uri("https://example.com")));
-var_dump(new Uri\Rfc3986\Uri("https://example.com#foo")->equals(new Uri\Rfc3986\Uri("https://example.com#bar"), true));
-var_dump(new Uri\Rfc3986\Uri("https://example.com#foo")->equals(new Uri\Rfc3986\Uri("https://example.com#bar"), false));
-var_dump(new Uri\Rfc3986\Uri("https://example.com/")->equals(new Uri\WhatWg\Url("https://example.com/")));
-var_dump(new Uri\Rfc3986\Uri("https://example.com/foo/..")->equals(new Uri\Rfc3986\Uri("https://example.com")));
-var_dump(new Uri\Rfc3986\Uri("http://example%2ecom/foo%2fb%61r")->equals(new Uri\Rfc3986\Uri("http://example%2ecom/foo/bar")));
-
-var_dump(new MyRfc3986Uri("https://example.com/foo/..")->equals(new Uri\Rfc3986\Uri("https://example.com")));
-var_dump(new Uri\Rfc3986\Uri("https://example.com/foo/..")->equals(new MyRfc3986Uri("https://example.com")));
-var_dump(new MyRfc3986Uri("https://example.com/")->equals(new MyWhatWgUri("https://example.com")));
-var_dump(new FakeUri("https://example.com")->equals(new Uri\Rfc3986\Uri("https://example.com")));
-var_dump(new Uri\Rfc3986\Uri("https://example.com")->equals(new FakeUri("https://example.com")));
-
-var_dump(new Uri\WhatWg\Url("https://example.com")->equals(new Uri\WhatWg\Url("https://example.com")));
-var_dump(new Uri\WhatWg\Url("https://example.com#foo")->equals(new Uri\WhatWg\Url("https://example.com#bar"), true));
-var_dump(new Uri\WhatWg\Url("https://example.com#foo")->equals(new Uri\WhatWg\Url("https://example.com#bar"), false));
-var_dump(new Uri\WhatWg\Url("https://example.com/")->equals(new Uri\Rfc3986\Uri("https://example.com/")));
-var_dump(new Uri\WhatWg\Url("https://example.com/foo/..")->equals(new Uri\WhatWg\Url("https://example.com")));
-var_dump(new Uri\WhatWg\Url("http://example%2ecom/foo/bar")->equals(new Uri\WhatWg\Url("http://example.com/foo/bar")));
-var_dump(new Uri\WhatWg\Url("http://example.com/foo%2fb%61r")->equals(new Uri\WhatWg\Url("http://example%2ecom/foo/bar")));
-
-var_dump(new MyWhatWgUri("https://example.com/foo/..")->equals(new Uri\WhatWg\Url("https://example.com")));
-var_dump(new Uri\WhatWg\Url("https://example.com/foo/..")->equals(new MyWhatWgUri("https://example.com")));
-var_dump(new MyWhatWgUri("https://example.com/")->equals(new MyRfc3986Uri("https://example.com")));
+var_dump(new MyWhatWgUrl("https://example.com/foo/..")->equals(new Uri\WhatWg\Url("https://example.com"))); // true: both URIs are https://example.com/ after normalization
+var_dump(new Uri\WhatWg\Url("https://example.com/foo/..")->equals(new MyWhatWgUrl("https://example.com"))); // true: both URIs are https://example.com/ after normalization
+var_dump(new MyWhatWgUrl("https://example.com/")->equals(new MyWhatWgUrl("https://example.com"))); // true: both URIs are https://example.com/ after normalization
 
 ?>
 --EXPECT--
@@ -153,17 +43,19 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-bool(false)
-bool(true)
-bool(true)
 bool(true)
 bool(false)
 bool(true)
 bool(true)
 bool(true)
-bool(false)
-bool(false)
 bool(true)
 bool(true)
 bool(true)
 bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
