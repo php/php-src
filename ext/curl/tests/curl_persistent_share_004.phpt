@@ -8,9 +8,9 @@ curl
 try {
     $sh = curl_share_init_persistent([CURL_LOCK_DATA_COOKIE]);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+    echo $e->getMessage() . PHP_EOL;
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 curl_share_init_persistent(): Argument #1 ($share_options) must not contain CURL_LOCK_DATA_COOKIE because sharing cookies across PHP requests is unsafe

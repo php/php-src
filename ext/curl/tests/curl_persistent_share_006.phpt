@@ -8,10 +8,9 @@ curl
 try {
     $sh = curl_share_init_persistent([]);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+    echo $e->getMessage() . PHP_EOL;
 }
 
-
 ?>
---EXPECTF--
+--EXPECT--
 curl_share_init_persistent(): Argument #1 ($share_options) must not be empty
