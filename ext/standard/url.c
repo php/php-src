@@ -321,7 +321,7 @@ parse_host:
 	return ret;
 }
 
-static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, zval *retval)
+static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -334,7 +334,7 @@ static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, zva
 	return SUCCESS;
 }
 
-static zend_result parse_url_read_user(const uri_internal_t *internal_uri, zval *retval)
+static zend_result parse_url_read_user(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -347,7 +347,7 @@ static zend_result parse_url_read_user(const uri_internal_t *internal_uri, zval 
 	return SUCCESS;
 }
 
-static zend_result parse_url_read_password(const uri_internal_t *internal_uri, zval *retval)
+static zend_result parse_url_read_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -360,7 +360,7 @@ static zend_result parse_url_read_password(const uri_internal_t *internal_uri, z
 	return SUCCESS;
 }
 
-static zend_result parse_url_read_host(const uri_internal_t *internal_uri, zval *retval)
+static zend_result parse_url_read_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -373,7 +373,7 @@ static zend_result parse_url_read_host(const uri_internal_t *internal_uri, zval 
 	return SUCCESS;
 }
 
-static zend_result parse_url_read_port(const uri_internal_t *internal_uri, zval *retval)
+static zend_result parse_url_read_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -386,7 +386,7 @@ static zend_result parse_url_read_port(const uri_internal_t *internal_uri, zval 
 	return SUCCESS;
 }
 
-static zend_result parse_url_read_path(const uri_internal_t *internal_uri, zval *retval)
+static zend_result parse_url_read_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -399,7 +399,7 @@ static zend_result parse_url_read_path(const uri_internal_t *internal_uri, zval 
 	return SUCCESS;
 }
 
-static zend_result parse_url_read_query(const uri_internal_t *internal_uri, zval *retval)
+static zend_result parse_url_read_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -412,7 +412,7 @@ static zend_result parse_url_read_query(const uri_internal_t *internal_uri, zval
 	return SUCCESS;
 }
 
-static zend_result parse_url_read_fragment(const uri_internal_t *internal_uri, zval *retval)
+static zend_result parse_url_read_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -441,13 +441,6 @@ static zend_result parse_url_init_parser(void)
 	return SUCCESS;
 }
 
-static zend_class_entry *parse_url_get_uri_ce(void)
-{
-	ZEND_UNREACHABLE();
-
-	return NULL;
-}
-
 static void *parse_url_clone_uri(void *uri)
 {
 	ZEND_UNREACHABLE();
@@ -462,12 +455,7 @@ static void *parse_url_parse_uri(const zend_string *uri_str, const zend_string *
 	return php_url_parse_ex2(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), &has_port);
 }
 
-static zend_result parse_url_normalize_uri(void *uri)
-{
-	ZEND_UNREACHABLE();
-}
-
-static zend_string *parse_url_uri_to_string(void *uri, bool exclude_fragment)
+static zend_string *parse_url_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
 {
 	ZEND_UNREACHABLE();
 }
@@ -483,9 +471,7 @@ const uri_handler_t parse_url_uri_handler = {
 	"parse_url",
 	parse_url_init_parser,
 	parse_url_parse_uri,
-	parse_url_get_uri_ce,
 	parse_url_clone_uri,
-	parse_url_normalize_uri,
 	parse_url_uri_to_string,
 	parse_url_free_uri,
 	parse_url_destroy_parser,

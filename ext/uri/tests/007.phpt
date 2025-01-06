@@ -19,6 +19,11 @@ try {
     var_dump($e->errors);
 }
 
+$softErrors = [];
+$url = new Uri\WhatWg\Url(" https://example.org ", null, $softErrors);
+var_dump($url->toMachineFriendlyString());
+var_dump($softErrors);
+
 ?>
 --EXPECTF--
 URI parsing failed
@@ -27,17 +32,34 @@ array(%d) {
 URI parsing failed
 array(%d) {
   [0]=>
-  object(Uri\WhatWgError)#%d (%d) {
+  object(Uri\WhatWg\WhatWgError)#%d (%d) {
     ["context"]=>
     string(26) "password/path?q=r#fragment"
     ["type"]=>
-    enum(Uri\WhatWg\WhatWgErrorType::password/path?q=r#fragment)
+    enum(Uri\WhatWg\WhatWgErrorType::PortInvalid)
   }
   [1]=>
-  object(Uri\WhatWgError)#%d (%d) {
+  object(Uri\WhatWg\WhatWgError)#%d (%d) {
     ["context"]=>
     string(36) "@username:password/path?q=r#fragment"
-    ["errorCode"]=>
-    int(23)
+    ["type"]=>
+    enum(Uri\WhatWg\WhatWgErrorType::InvalidCredentials)
+  }
+}
+string(20) "https://example.org/"
+array(2) {
+  [0]=>
+  object(Uri\WhatWg\WhatWgError)#%d (%d) {
+    ["context"]=>
+    string(1) " "
+    ["type"]=>
+    enum(Uri\WhatWg\WhatWgErrorType::InvalidUrlUnit)
+  }
+  [1]=>
+  object(Uri\WhatWg\WhatWgError)#%d (%d) {
+    ["context"]=>
+    string(21) " https://example.org "
+    ["type"]=>
+    enum(Uri\WhatWg\WhatWgErrorType::InvalidUrlUnit)
   }
 }
