@@ -667,9 +667,6 @@ static int readline_shell_run(void) /* {{{ */
 
 				zend_alter_ini_entry_chars_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 				zend_string_release_ex(cmd, 0);
-				add_history(line);
-
-				zend_string_release_ex(prompt, 0);
 			}
 		}
 
