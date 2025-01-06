@@ -29,40 +29,31 @@ namespace Uri\Rfc3986 {
     /** @strict-properties */
     readonly class Uri
     {
-        /** @virtual */
-        private ?string $scheme;
-        /** @virtual */
-        private ?string $user;
-        /** @virtual */
-        private ?string $password;
-        /** @virtual */
-        private ?string $host;
-        /** @virtual */
-        private ?int $port;
-        /** @virtual */
-        private ?string $path;
-        /** @virtual */
-        private ?string $query;
-        /** @virtual */
-        private ?string $fragment;
-
         public static function parse(string $uri, ?string $baseUrl = null): ?static {}
 
         public function __construct(string $uri, ?string $baseUrl = null) {}
 
         public function getScheme(): ?string {}
 
+        public function getRawScheme(): ?string {}
+
         public function withScheme(?string $encodedScheme): static {}
 
         public function getUser(): ?string {}
+
+        public function getRawUser(): ?string {}
 
         public function withUser(?string $encodedUser): static {}
 
         public function getPassword(): ?string {}
 
+        public function getRawPassword(): ?string {}
+
         public function withPassword(?string $encodedPassword): static {}
 
         public function getHost(): ?string {}
+
+        public function getRawHost(): ?string {}
 
         public function withHost(?string $encodedHost): static {}
 
@@ -72,19 +63,23 @@ namespace Uri\Rfc3986 {
 
         public function getPath(): ?string {}
 
+        public function getRawPath(): ?string {}
+
         public function withPath(?string $encodedPath): static {}
 
         public function getQuery(): ?string {}
+
+        public function getRawQuery(): ?string {}
 
         public function withQuery(?string $encodedQuery): static {}
 
         public function getFragment(): ?string {}
 
+        public function getRawFragment(): ?string {}
+
         public function withFragment(?string $encodedFragment): static {}
 
         public function equals(\Uri\Rfc3986\Uri $uri, bool $excludeFragment = true): bool {}
-
-        public function normalize(): static {}
 
         public function toNormalizedString(): string {}
 
@@ -101,36 +96,37 @@ namespace Uri\Rfc3986 {
 }
 
 namespace Uri\WhatWg {
-    enum WhatWgErrorType: int {
-        case DomainToAscii = 0;
-        case DomainToUnicode = 1;
-        case DomainInvalidCodePoint = 2;
-        case HostInvalidCodePoint = 3;
-        case Ipv4EmptyPart = 4;
-        case Ipv4TooManyParts = 5;
-        case Ipv4NonNumericPart = 6;
-        case Ipv4NonDecimalPart = 7;
-        case Ipv4OutOfRangePart = 8;
-        case Ipv6Unclosed = 9;
-        case Ipv6InvalidCompression = 10;
-        case Ipv6TooManyPieces = 11;
-        case Ipv6MultipleCompression = 12;
-        case Ipv6InvalidCodePoint = 13;
-        case Ipv6TooFewPieces = 14;
-        case Ipv4InIpv6TooManyPieces = 15;
-        case Ipv4InIpv6InvalidCodePoint = 16;
-        case Ipv4InIpv6OutOfRangePart = 17;
-        case Ipv4InIpv6TooFewParts = 18;
-        case InvalidUrlUnit = 19;
-        case SpecialSchemeMissingFollowingSolidus = 20;
-        case MissingSchemeNonRelativeUrl = 21;
-        case InvalidReverseSoldius = 22;
-        case InvalidCredentials = 23;
-        case HostMissing = 24;
-        case PortOfOfRange = 25;
-        case PortInvalid = 26;
-        case FileInvalidWindowsDriveLetter = 27;
-        case FileInvalidWindowsDriveLetterHost = 28;
+    enum WhatWgErrorType
+    {
+        case DomainToAscii;
+        case DomainToUnicode;
+        case DomainInvalidCodePoint;
+        case HostInvalidCodePoint;
+        case Ipv4EmptyPart;
+        case Ipv4TooManyParts;
+        case Ipv4NonNumericPart;
+        case Ipv4NonDecimalPart;
+        case Ipv4OutOfRangePart;
+        case Ipv6Unclosed;
+        case Ipv6InvalidCompression;
+        case Ipv6TooManyPieces;
+        case Ipv6MultipleCompression;
+        case Ipv6InvalidCodePoint;
+        case Ipv6TooFewPieces;
+        case Ipv4InIpv6TooManyPieces;
+        case Ipv4InIpv6InvalidCodePoint;
+        case Ipv4InIpv6OutOfRangePart;
+        case Ipv4InIpv6TooFewParts;
+        case InvalidUrlUnit;
+        case SpecialSchemeMissingFollowingSolidus;
+        case MissingSchemeNonRelativeUrl;
+        case InvalidReverseSoldius;
+        case InvalidCredentials;
+        case HostMissing;
+        case PortOfOfRange;
+        case PortInvalid;
+        case FileInvalidWindowsDriveLetter;
+        case FileInvalidWindowsDriveLetterHost;
     }
 
     /** @strict-properties */
@@ -145,37 +141,23 @@ namespace Uri\WhatWg {
     /** @strict-properties */
     readonly class Url
     {
-        /** @virtual */
-        private ?string $scheme;
-        /** @virtual */
-        private ?string $user;
-        /** @virtual */
-        private ?string $password;
-        /** @virtual */
-        private ?string $host;
-        /** @virtual */
-        private ?int $port;
-        /** @virtual */
-        private ?string $path;
-        /** @virtual */
-        private ?string $query;
-        /** @virtual */
-        private ?string $fragment;
-
         /** @param array $errors */
         public static function parse(string $uri, ?string $baseUrl = null, &$errors = null): ?static {}
 
         /** @param array $softErrors */
         public function __construct(string $uri, ?string $baseUrl = null, &$softErrors = null) {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getScheme */
-        public function getScheme(): ?string {}
+        public function getScheme(): string {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::withScheme */
-        public function withScheme(?string $encodedScheme): static {}
+        public function getRawScheme(): string {}
+
+        public function withScheme(string $encodedScheme): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getUser */
         public function getUser(): ?string {}
+
+        /** @implementation-alias Uri\Rfc3986\Uri::getRawUser */
+        public function getRawUser(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withUser */
         public function withUser(?string $encodedUser): static {}
@@ -183,14 +165,17 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getPassword */
         public function getPassword(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getRawPassword */
+        public function getRawPassword(): ?string {}
+
         /** @implementation-alias Uri\Rfc3986\Uri::withPassword */
         public function withPassword(?string $encodedPassword): static {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getHost */
-        public function getHost(): ?string {}
+        public function getHost(): string {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::withHost */
-        public function withHost(?string $encodedHost): static {}
+        public function getHumanFriendlyHost(): string {}
+
+        public function withHost(string $encodedHost): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPort */
         public function getPort(): ?int {}
@@ -201,11 +186,17 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getPath */
         public function getPath(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getRawPath */
+        public function getRawPath(): ?string {}
+
         /** @implementation-alias Uri\Rfc3986\Uri::withPath */
         public function withPath(?string $encodedPath): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getQuery */
         public function getQuery(): ?string {}
+
+        /** @implementation-alias Uri\Rfc3986\Uri::getRawQuery */
+        public function getRawQuery(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withQuery */
         public function withQuery(?string $encodedQuery): static {}
@@ -213,14 +204,17 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getFragment */
         public function getFragment(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getRawFragment */
+        public function getRawFragment(): ?string {}
+
         /** @implementation-alias Uri\Rfc3986\Uri::withFragment */
         public function withFragment(?string $encodedFragment): static {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::equals */
         public function equals(\Uri\WhatWg\Url $uri, bool $excludeFragment = true): bool {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::toString */
-        public function toString(): string {}
+        public function toMachineFriendlyString(): string {}
+
+        public function toHumanFriendlyString(): string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::resolve */
         public function resolve(string $uri): static {}

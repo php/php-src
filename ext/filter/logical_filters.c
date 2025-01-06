@@ -620,14 +620,14 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	zval scheme;
-	result = php_uri_get_scheme(internal_uri, &scheme);
+	result = php_uri_get_scheme(internal_uri, URI_COMPONENT_READ_RAW, &scheme);
 	if (result == FAILURE) {
 		php_uri_free(internal_uri);
 		RETURN_VALIDATION_FAILED
 	}
 
 	zval host;
-	result = php_uri_get_host(internal_uri, &host);
+	result = php_uri_get_host(internal_uri, URI_COMPONENT_READ_RAW, &host);
 	if (result == FAILURE) {
 		zval_ptr_dtor(&scheme);
 		php_uri_free(internal_uri);
@@ -669,7 +669,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	zval path;
-	result = php_uri_get_path(internal_uri, &path);
+	result = php_uri_get_path(internal_uri, URI_COMPONENT_READ_RAW, &path);
 	if (result == FAILURE) {
 		php_uri_free(internal_uri);
 		zval_ptr_dtor(&scheme);
@@ -678,7 +678,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	zval query;
-	result = php_uri_get_query(internal_uri, &query);
+	result = php_uri_get_query(internal_uri, URI_COMPONENT_READ_RAW, &query);
 	if (result == FAILURE) {
 		php_uri_free(internal_uri);
 		zval_ptr_dtor(&scheme);
@@ -707,14 +707,14 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zval_ptr_dtor(&query);
 
 	zval user;
-	result = php_uri_get_user(internal_uri, &user);
+	result = php_uri_get_user(internal_uri, URI_COMPONENT_READ_RAW, &user);
 	if (result == FAILURE) {
 		php_uri_free(internal_uri);
 		RETURN_VALIDATION_FAILED
 	}
 
 	zval password;
-	result = php_uri_get_password(internal_uri, &password);
+	result = php_uri_get_password(internal_uri, URI_COMPONENT_READ_RAW, &password);
 	if (result == FAILURE) {
 		php_uri_free(internal_uri);
 		zval_ptr_dtor(&user);

@@ -13,13 +13,13 @@ var_dump($uri1->toString());
 var_dump($uri2->toString());
 var_dump($uri3->toString());
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com");
-$uri2 = $uri1->withUser("user");
-$uri3 = $uri2->withUser(null);
+$url1 = Uri\WhatWg\Url::parse("https://example.com");
+$url2 = $url1->withUser("user");
+$url3 = $url2->withUser(null);
 
-var_dump($uri1->toString());
-var_dump($uri2->toString());
-var_dump($uri3->toString());
+var_dump($url1->toMachineFriendlyString());
+var_dump($url2->toMachineFriendlyString());
+var_dump($url3->toMachineFriendlyString());
 
 ?>
 --EXPECT--
