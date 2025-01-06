@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     with 0x0b). (nielsdos)
   . Fixed bug GH-16886 (ini_parse_quantity() fails to emit warning for 0x+0).
     (nielsdos)
+  . Fixed bug GH-17222 (__PROPERTY__ magic constant does not work in all
+    constant expression contexts). (ilutov)
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
