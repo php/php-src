@@ -95,6 +95,8 @@ function enchant_dict_add_to_personal(EnchantDictionary $dictionary, string $wor
 
 function enchant_dict_add_to_session(EnchantDictionary $dictionary, string $word): void {}
 
+function enchant_dict_remove_from_session(EnchantDictionary $dictionary, string $word): void {}
+
 function enchant_dict_is_added(EnchantDictionary $dictionary, string $word): bool {}
 
 /**
