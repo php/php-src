@@ -14291,6 +14291,29 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			}
 		}
 	} else {
+		/* Child classes may add hooks to property. */
+		if (ce_is_instanceof && !(prop_info->flags & ZEND_ACC_FINAL)) {
+			int prop_info_offset =
+				(((prop_info->offset - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
+			ir_ref prop_info_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)));
+			prop_info_ref = ir_LOAD_A(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_class_entry, properties_info_table)));
+			prop_info_ref = ir_LOAD_A(ir_ADD_OFFSET(prop_info_ref, prop_info_offset));
+			ir_ref is_same_prop_info = ir_EQ(prop_info_ref, ir_CONST_ADDR(prop_info));
+			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
+				ir_GUARD(is_same_prop_info, ir_CONST_ADDR(exit_addr));
+			} else {
+				ir_ref if_same_prop_info = ir_IF(is_same_prop_info);
+				ir_IF_FALSE_cold(if_same_prop_info);
+				ir_END_list(slow_inputs);
+				ir_IF_TRUE(if_same_prop_info);
+			}
+		}
+
 		prop_ref = ir_ADD_OFFSET(obj_ref, prop_info->offset);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
@@ -14435,7 +14458,7 @@ result_fetched:
 		SET_STACK_REG(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 	}
 
-	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || !prop_info) {
+	if (slow_inputs) {
 		ir_MERGE_list(slow_inputs);
 		jit_SET_EX_OPLINE(jit, opline);
 

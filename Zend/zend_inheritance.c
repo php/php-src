@@ -1653,11 +1653,6 @@ void zend_build_properties_info_table(zend_class_entry *ce)
 			table, parent_table,
 			sizeof(zend_property_info *) * ce->parent->default_properties_count
 		);
-
-		/* Child did not add any new properties, we are done */
-		if (ce->default_properties_count == ce->parent->default_properties_count) {
-			return;
-		}
 	}
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
