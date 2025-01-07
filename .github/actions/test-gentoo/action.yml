@@ -9,7 +9,15 @@ runs:
     - shell: bash
       run: |
         set -x
-        # XXX: Set up database tests?
+        # XXX: Set up other database tests?
+        # XXX: These tests are not running containerized
+        export MYSQL_TEST_USER=ci
+        export MYSQL_TEST_PASSWD=ci
+        if [[ -z "$PDO_MYSQL_TEST_DSN" ]]; then
+          export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+        fi
+        export PDO_MYSQL_TEST_USER=ci
+        export PDO_MYSQL_TEST_PASS=ci
         # Slow tests criteron is doubled because this runner isn't as fast as others
         export SKIP_IO_CAPTURE_TESTS=1
         export STACK_LIMIT_DEFAULTS_CHECK=1
