@@ -2026,6 +2026,14 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 		goto done;
 	}
 
+	if(overflow2(im->sy, im->sx)) {
+		return;
+	}
+
+	if(overflow2(sizeof(struct seg), ((im->sy * im->sx) / 4))) {
+		return;
+	}
+
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
 
@@ -2073,13 +2081,13 @@ done:
 
 static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 {
-	int i, l, x1, x2, dy;
+	int l, x1, x2, dy;
 	int oc;   /* old pixel value */
 	int wx2,wy2;
 	/* stack of filled segments */
 	struct seg *stack;
 	struct seg *sp;
-	char **pts;
+	char *pts;
 
 	if (!im->tile) {
 		return;
@@ -2089,10 +2097,15 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 
 	nc =  gdImageTileGet(im,x,y);
 
-	pts = (char **) ecalloc(im->sy + 1, sizeof(char *));
-	for (i = 0; i < im->sy + 1; i++) {
-		pts[i] = (char *) ecalloc(im->sx + 1, sizeof(char));
+	if(overflow2(im->sy, im->sx)) {
+		return;
 	}
+
+	if(overflow2(sizeof(struct seg), ((im->sy * im->sx) / 4))) {
+		return;
+	}
+
+	pts = (char *) ecalloc(im->sy * im->sx, sizeof(char));
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
@@ -2105,9 +2118,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
  	FILL_PUSH(y+1, x, x, -1);
 	while (sp>stack) {
 		FILL_POP(y, x1, x2, dy);
-		for (x=x1; x>=0 && (!pts[y][x] && gdImageGetPixel(im,x,y)==oc); x--) {
+		for (x=x1; x>=0 && (!pts[y + x*wy2] && gdImageGetPixel(im,x,y)==oc); x--) {
 			nc = gdImageTileGet(im,x,y);
-			pts[y][x] = 1;
+			pts[y + x*wy2] = 1;
 			gdImageSetPixel(im,x, y, nc);
 		}
 		if (x>=x1) {
@@ -2121,9 +2134,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 		}
 		x = x1+1;
 		do {
-			for(; x<wx2 && (!pts[y][x] && gdImageGetPixel(im,x, y)==oc); x++) {
+			for(; x<wx2 && (!pts[y + x*wy2] && gdImageGetPixel(im,x, y)==oc); x++) {
 				nc = gdImageTileGet(im,x,y);
-				pts[y][x] = 1;
+				pts[y + x * wy2] = 1;
 				gdImageSetPixel(im, x, y, nc);
 			}
 			FILL_PUSH(y, l, x-1, dy);
@@ -2132,13 +2145,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
 skip:
-			for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
+			for(x++; x<=x2 && (pts[y + x*wy2] || gdImageGetPixel(im,x, y)!=oc); x++);
 			l = x;
 		} while (x<=x2);
-	}
-
-	for(i = 0; i < im->sy + 1; i++) {
-		efree(pts[i]);
 	}
 
 	efree(pts);
