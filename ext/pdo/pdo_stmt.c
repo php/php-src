@@ -936,8 +936,8 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			case PDO_FETCH_NAMED:
 				/* already have an item with this name? */
 				{
-					zval *curr_val;
-					if ((curr_val = zend_hash_find(Z_ARRVAL_P(return_value), stmt->columns[i].name))) {
+					zval *curr_val = zend_hash_find(Z_ARRVAL_P(return_value), column_name);
+					if (curr_val != NULL) {
 						zval arr;
 						if (Z_TYPE_P(curr_val) != IS_ARRAY) {
 							/* a little bit of black magic here:
