@@ -335,9 +335,7 @@ static void TimeZone_objects_free(zend_object *object)
 /* {{{ TimeZone_object_create */
 static zend_object *TimeZone_object_create(zend_class_entry *ce)
 {
-	TimeZone_object*	intern;
-
-	intern = (TimeZone_object*)ecalloc(1, sizeof(TimeZone_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	TimeZone_object* intern = (TimeZone_object*)zend_object_alloc(sizeof(TimeZone_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);

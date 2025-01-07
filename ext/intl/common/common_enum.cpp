@@ -204,9 +204,7 @@ static zend_object_iterator *IntlIterator_get_iterator(
 
 static zend_object *IntlIterator_object_create(zend_class_entry *ce)
 {
-	IntlIterator_object	*intern;
-
-	intern = (IntlIterator_object*)ecalloc(1, sizeof(IntlIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	IntlIterator_object	*intern = (IntlIterator_object*)zend_object_alloc(sizeof(IntlIterator_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);
