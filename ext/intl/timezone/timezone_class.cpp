@@ -133,7 +133,6 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 													 const char *func)
 {
 	zval		local_zv_tz;
-	char		*message = NULL;
 	TimeZone	*timeZone;
 
 	if (zv_timezone == NULL || Z_TYPE_P(zv_timezone) == IS_NULL) {
