@@ -307,6 +307,9 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
 		}
 
+		zval_ptr_dtor(&EG(error_backtrace));
+		ZVAL_UNDEF(&EG(error_backtrace));
+
 		/* Release static properties and static variables prior to the final GC run,
 		 * as they may hold GC roots. */
 		ZEND_HASH_MAP_REVERSE_FOREACH_VAL(EG(function_table), zv) {

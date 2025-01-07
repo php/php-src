@@ -119,6 +119,13 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnUpdateFatalErrorBacktraces)
+{
+	EG(fatal_error_backtraces) = zend_ini_parse_bool(new_value);
+
+	return SUCCESS;
+}
+
 static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 {
 	bool val;
@@ -260,6 +267,7 @@ static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+	ZEND_INI_ENTRY("fatal_error_backtraces",			"1",		ZEND_INI_ALL,		OnUpdateFatalErrorBacktraces)
 	STD_ZEND_INI_ENTRY("zend.assertions",				"1",    ZEND_INI_ALL,       OnUpdateAssertions,           assertions,   zend_executor_globals,  executor_globals)
 	ZEND_INI_ENTRY3_EX("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled, NULL, NULL, NULL, zend_gc_enabled_displayer_cb)
 	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
@@ -811,6 +819,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->in_autoload = NULL;
 	executor_globals->current_execute_data = NULL;
 	executor_globals->current_module = NULL;
+	ZVAL_UNDEF(&executor_globals->error_backtrace);
 	executor_globals->exit_status = 0;
 #if XPFPA_HAVE_CW
 	executor_globals->saved_fpu_cw = 0;
@@ -1048,6 +1057,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_size) = 0;
 	CG(map_ptr_last) = 0;
 #endif /* ZTS */
+
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
 	zend_interned_strings_init();
@@ -1463,6 +1473,9 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		EG(errors)[EG(num_errors)-1] = info;
 	}
 
+	// Always clear the last backtrace.
+	zval_ptr_dtor(&EG(error_backtrace));
+
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		zend_execute_data *ex;
@@ -1484,6 +1497,8 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 				ex->opline = opline;
 			}
 		}
+	} else if (EG(fatal_error_backtraces) && (type & E_FATAL_ERRORS)) {
+		zend_fetch_debug_backtrace(&EG(error_backtrace), 0, EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
 	}
 
 	zend_observer_error_notify(type, error_filename, error_lineno, message);

@@ -272,6 +272,7 @@ function main(): void
         'disable_functions=',
         'output_buffering=Off',
         'error_reporting=' . E_ALL,
+        'fatal_error_backtraces=Off',
         'display_errors=1',
         'display_startup_errors=1',
         'log_errors=0',
