@@ -714,7 +714,6 @@ static bool pdo_do_key_pair_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation o
 		return false;
 	}
 	if (stmt->column_count != 2) {
-		/* TODO: Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns.");
 		return false;
 	}
