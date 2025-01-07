@@ -23,7 +23,7 @@ $regexesToTest = [
     ],
     [
         '@\b\w{1,2}\b@' => $callback,
-        '~\A.~' => $trampolineThrow,
+        '~\A.~' => $callbackThrow,
     ],
     [
         '@\b\w{1,2}\b@' => $callback,
@@ -58,7 +58,6 @@ foreach ($regexesToTest as $regex) {
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $trampolineThrow in %s on line %d
 Trampoline for trampoline
 Trampoline for trampoline
 Trampoline for trampoline
@@ -91,10 +90,12 @@ Trampoline for trampoline
 Trampoline for trampoline
 
 Warning: Array to string conversion in %s on line %d
-TypeError: preg_replace_callback_array(): Argument #1 ($pattern) must contain only valid callbacks
+Trampoline for trampolineThrow
+Exception: boo
 Trampoline for trampoline
 Trampoline for trampoline
-TypeError: preg_replace_callback_array(): Argument #1 ($pattern) must contain only valid callbacks
+Trampoline for trampolineThrow
+Exception: boo
 Error: Object of class stdClass could not be converted to string
 TypeError: preg_replace_callback_array(): Argument #2 ($subject) must be of type array|string, stdClass given
 Trampoline for trampoline
