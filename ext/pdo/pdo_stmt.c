@@ -918,15 +918,16 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	for (idx = 0; i < stmt->column_count; i++, idx++) {
 		zval val;
 		fetch_value(stmt, &val, i, NULL);
+		zend_string *column_name = stmt->columns[i].name;
 
 		switch (how) {
 			case PDO_FETCH_ASSOC:
-				zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+				zend_symtable_update(Z_ARRVAL_P(return_value), column_name, &val);
 				break;
 
 			case PDO_FETCH_USE_DEFAULT:
 			case PDO_FETCH_BOTH:
-				zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+				zend_symtable_update(Z_ARRVAL_P(return_value), column_name, &val);
 				if (zend_hash_index_add(Z_ARRVAL_P(return_value), i, &val) != NULL) {
 					Z_TRY_ADDREF(val);
 				}
@@ -961,7 +962,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 						}
 						zend_hash_next_index_insert_new(Z_ARRVAL(arr), &val);
 					} else {
-						zend_hash_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+						zend_hash_update(Z_ARRVAL_P(return_value), column_name, &val);
 					}
 				}
 				break;
@@ -972,17 +973,13 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 			case PDO_FETCH_OBJ:
 			case PDO_FETCH_INTO:
-				zend_update_property_ex(NULL, Z_OBJ_P(return_value),
-					stmt->columns[i].name,
-					&val);
+				zend_update_property_ex(NULL, Z_OBJ_P(return_value), column_name, &val);
 				zval_ptr_dtor(&val);
 				break;
 
 			case PDO_FETCH_CLASS:
 				if ((flags & PDO_FETCH_SERIALIZE) == 0 || idx) {
-					zend_update_property_ex(ce, Z_OBJ_P(return_value),
-						stmt->columns[i].name,
-						&val);
+					zend_update_property_ex(ce, Z_OBJ_P(return_value), column_name, &val);
 					zval_ptr_dtor(&val);
 				} else {
 					if (!ce->unserialize) {
