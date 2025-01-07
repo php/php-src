@@ -649,16 +649,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		len = strlen(line);
 
-		if (pos + len + 2 > size) {
-			size = pos + len + 2;
-			code = erealloc(code, size);
-		}
-		memcpy(&code[pos], line, len);
-		pos += len;
-		code[pos] = '\n';
-		code[++pos] = '\0';
-
-		if (line[0] == '#' && line[1] != '[' && cli_is_valid_code(code, pos, &prompt)) {
+		if (line[0] == '#' && line[1] != '[' && pos == 0) {
 			char *param = strstr(&line[1], "=");
 			if (param) {
 				zend_string *cmd;
@@ -667,8 +658,22 @@ static int readline_shell_run(void) /* {{{ */
 
 				zend_alter_ini_entry_chars_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 				zend_string_release_ex(cmd, 0);
+				add_history(line);
+
+				zend_string_release_ex(prompt, 0);
+				prompt = cli_get_prompt("php", '>');
+				continue;
 			}
 		}
+
+		if (pos + len + 2 > size) {
+			size = pos + len + 2;
+			code = erealloc(code, size);
+		}
+		memcpy(&code[pos], line, len);
+		pos += len;
+		code[pos] = '\n';
+		code[++pos] = '\0';
 
 		if (*line) {
 			add_history(line);
