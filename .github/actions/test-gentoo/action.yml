@@ -18,6 +18,10 @@ runs:
         fi
         export PDO_MYSQL_TEST_USER=ci
         export PDO_MYSQL_TEST_PASS=ci
+        export PGSQL_TEST_CONNSTR="host=localhost dbname=test port=5432 user=ci password=ci"
+        if [[ -z "$PDO_PGSQL_TEST_DSN" ]]; then
+          export PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=ci password=ci"
+        fi
         # Slow tests criteron is doubled because this runner isn't as fast as others
         export SKIP_IO_CAPTURE_TESTS=1
         export STACK_LIMIT_DEFAULTS_CHECK=1
