@@ -707,6 +707,22 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 }
 /* }}} */
 
+PHP_FUNCTION(enchant_dict_remove_from_session)
+{
+	zval *dict;
+	const char *word;
+	size_t wordlen;
+	const enchant_dict *pdict;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	PHP_ENCHANT_GET_DICT;
+
+	enchant_dict_remove_from_session(pdict->pdict, word, wordlen);
+}
+
 /* {{{ whether or not 'word' exists in this spelling-session */
 PHP_FUNCTION(enchant_dict_is_added)
 {
