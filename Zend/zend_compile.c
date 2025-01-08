@@ -11293,7 +11293,8 @@ static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 			break;
 		case ZEND_AST_CLOSURE:
 			zend_compile_const_expr_closure(ast_ptr);
-			break;
+			/* Return, because we do not want to traverse the children. */
+			return;
 	}
 
 	zend_ast_apply(ast, zend_compile_const_expr, context);
