@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Added support for reading GIFs without colormap to bundled libgd. (Andrew
     Burley, cmb)
 
+- Gettext:
+  . Fixed bug GH-17400 (bindtextdomain SEGV on invalid domain).
+    (David Carlier)
+
 - Intl:
   . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
  
