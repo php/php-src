@@ -5,19 +5,16 @@ Fatal error backtrace w/ sensitive parameters
 
 ini_set('fatal_error_backtraces', true);
 
-function oom(#[\SensitiveParameter] $unused) {
-    $argv[1] = "stdClass";
-
-    include __DIR__ . '/new_oom.inc';
+function trigger_fatal(#[\SensitiveParameter] $unused) {
+    eval("class Foo {}; class Foo {}");
 }
 
-oom("foo");
+trigger_fatal("bar");
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes) in %snew_oom.inc on line %d
+Fatal error: Cannot redeclare class Foo (%s) in %s : eval()'d code on line %d
 Stack trace:
-#0 %snew_oom.inc(%d): ReflectionClass->newInstanceWithoutConstructor()
-#1 %sfatal_error_backtraces_002.php(%d): include(%s)
-#2 %sfatal_error_backtraces_002.php(%d): oom(Object(SensitiveParameterValue))
-#3 {main}
+#0 %sfatal_error_backtraces_002.php(%d): eval()
+#1 %sfatal_error_backtraces_002.php(%d): trigger_fatal(Object(SensitiveParameterValue))
+#2 {main}

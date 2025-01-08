@@ -45,7 +45,7 @@ array(4) {
   int(11)
 }
 
-Fatal error: Cannot redeclare class Foo (previously declared in /Users/enorris/workspace/php-src/ext/standard/tests/general_functions/error_get_last.php(18) : eval()'d code:1) in /Users/enorris/workspace/php-src/ext/standard/tests/general_functions/error_get_last.php(18) : eval()'d code on line 1
+Fatal error: Cannot redeclare class Foo (%s) in %s on line %d
 Stack trace:
 #0 %serror_get_last.php(%d): eval()
 #1 %serror_get_last.php(%d): trigger_fatal_error_with_stacktrace()
