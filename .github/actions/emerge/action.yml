@@ -3,13 +3,12 @@ runs:
   using: composite
   steps:
     - shell: sh
-      # Omitting libiconv from glibc system
-      # XXX: mysql-client needed? IMAP i don't think so anymore either
-      # XXX: Set USE flags appropriately to i.e. avoid installing servers
-      # (though if they're masked it doesn't matter)
-      # XXX: For now this is nopped out since it doesn't run in a container yet
+      # This does nothing, as currently the Gentoo/ppc64 CI system is
+      # not running jobs containerized.
+      #
+      # - libiconv is not used, glibc iconv is instead
       run: |
-        emerge --noreplace \
+        for package in \
             sys-apps/util-linux \
             app-shells/bash \
             app-admin/sudo \
@@ -47,5 +46,10 @@ runs:
             net-analyzer/net-snmp \
             net-nds/openldap \
             dev-db/unixODBC \
-            dev-db/postgresql \
-            || true
+            dev-db/postgresql; do
+          echo $package
+          if ! portageq has_version / $package; then
+            echo "need to install $package"
+            exit 1
+          fi
+        done
