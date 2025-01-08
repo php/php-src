@@ -1080,7 +1080,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "value", dom_attr_value_read, dom_attr_value_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "ownerElement", dom_attr_owner_element_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "specified", dom_attr_specified_read, NULL);
-	zend_hash_merge(&dom_modern_attr_prop_handlers, &dom_node_prop_handlers, NULL, false);
+	zend_hash_merge(&dom_modern_attr_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_attr_prop_handlers, "nodeValue", dom_node_node_value_read, dom_node_node_value_write);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_attr_prop_handlers, "textContent", dom_node_text_content_read, dom_node_text_content_write);
 	zend_hash_add_new_ptr(&classes, dom_modern_attr_class_entry->name, &dom_modern_attr_prop_handlers);
@@ -1194,7 +1194,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_documenttype_prop_handlers, "publicId", dom_documenttype_public_id_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_documenttype_prop_handlers, "systemId", dom_documenttype_system_id_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_documenttype_prop_handlers, "internalSubset", dom_documenttype_internal_subset_read, NULL);
-	zend_hash_merge(&dom_modern_documenttype_prop_handlers, &dom_node_prop_handlers, NULL, false);
+	zend_hash_merge(&dom_modern_documenttype_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
 	zend_hash_add_new_ptr(&classes, dom_modern_documenttype_class_entry->name, &dom_modern_documenttype_prop_handlers);
 
 	dom_notation_class_entry = register_class_DOMNotation(dom_node_class_entry);
