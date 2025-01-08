@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
 
+- Enchant:
+  . Fix crashes in enchant when passing null bytes. (nielsdos)
+
 - FTP:
   . Fixed bug GH-16800 (ftp functions can abort with EINTR). (nielsdos)
 
