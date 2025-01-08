@@ -1,33 +1,27 @@
 --TEST--
-MySQL PDO: PDOStatement->fetchObject() with $constructorArgs
+PDO Common: PDOStatement->fetchObject() with $constructorArgs
 --EXTENSIONS--
-pdo_mysql
+pdo
 --SKIPIF--
 <?php
-require_once __DIR__ . '/inc/mysql_pdo_test.inc';
-MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
-
-try {
-    $query = "SELECT '', NULL, \"\" FROM DUAL";
-    $stmt = $db->prepare($query);
-    $ok = $stmt->execute();
-} catch (PDOException $e) {
-    die("skip: Test cannot be run with SQL mode ANSI");
-}
-if (!$ok)
-    die("skip: Test cannot be run with SQL mode ANSI");
+$dir = getenv('REDIR_TEST_DIR');
+if (false == $dir) die('skip no driver');
+require_once $dir . 'pdo_test.inc';
+PDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once __DIR__ . '/inc/mysql_pdo_test.inc';
-/** @var PDO $db */
-$db = MySQLPDOTest::factory();
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
 
-$table = 'pdo_mysql_stmt_fetchobject_ctor_args';
-MySQLPDOTest::createTestTable($table, $db);
+$table = 'pdo_stmt_fetchobject_ctor_args';
+$db->exec("CREATE TABLE {$table} (id INT, label CHAR(1), PRIMARY KEY(id))");
+$db->exec("INSERT INTO {$table} (id, label) VALUES (1, 'a')");
+$db->exec("INSERT INTO {$table} (id, label) VALUES (2, 'b')");
+$db->exec("INSERT INTO {$table} (id, label) VALUES (3, 'c')");
 
-$query = "SELECT id FROM {$table} ORDER BY id ASC LIMIT 1";
+$query = "SELECT id FROM {$table} ORDER BY id ASC";
 $stmt = $db->prepare($query);
 
 class Foo {
@@ -79,9 +73,9 @@ try {
 ?>
 --CLEAN--
 <?php
-require_once __DIR__ . '/inc/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_fetchobject_ctor_args');
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "pdo_stmt_fetchobject_ctor_args");
 ?>
 --EXPECTF--
 Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected
