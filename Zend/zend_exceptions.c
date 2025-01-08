@@ -904,6 +904,10 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = ex->ce;
 	EG(exception) = NULL;
+
+	zval_ptr_dtor(&EG(error_backtrace));
+	ZVAL_UNDEF(&EG(error_backtrace));
+
 	if (ce_exception == zend_ce_parse_error || ce_exception == zend_ce_compile_error) {
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, ZEND_STR_MESSAGE));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, ZEND_STR_FILE));
