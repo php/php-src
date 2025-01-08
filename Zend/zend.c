@@ -119,13 +119,6 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 }
 /* }}} */
 
-static ZEND_INI_MH(OnUpdateFatalErrorBacktraces)
-{
-	EG(fatal_error_backtraces) = zend_ini_parse_bool(new_value);
-
-	return SUCCESS;
-}
-
 static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 {
 	bool val;
@@ -267,7 +260,7 @@ static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
-	ZEND_INI_ENTRY("fatal_error_backtraces",			"1",		ZEND_INI_ALL,		OnUpdateFatalErrorBacktraces)
+	STD_ZEND_INI_BOOLEAN("fatal_error_backtraces",			"1",	ZEND_INI_ALL,       OnUpdateBool, fatal_error_backtraces,      zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.assertions",				"1",    ZEND_INI_ALL,       OnUpdateAssertions,           assertions,   zend_executor_globals,  executor_globals)
 	ZEND_INI_ENTRY3_EX("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled, NULL, NULL, NULL, zend_gc_enabled_displayer_cb)
 	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
@@ -1475,6 +1468,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 
 	// Always clear the last backtrace.
 	zval_ptr_dtor(&EG(error_backtrace));
+	ZVAL_UNDEF(&EG(error_backtrace));
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
