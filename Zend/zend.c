@@ -812,7 +812,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->in_autoload = NULL;
 	executor_globals->current_execute_data = NULL;
 	executor_globals->current_module = NULL;
-	ZVAL_UNDEF(&executor_globals->error_backtrace);
 	executor_globals->exit_status = 0;
 #if XPFPA_HAVE_CW
 	executor_globals->saved_fpu_cw = 0;
