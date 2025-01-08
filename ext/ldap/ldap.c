@@ -73,7 +73,7 @@ void ldap_memvfree(void **v)
 typedef struct {
 	LDAP *link;
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-	zval rebindproc;
+	zend_fcall_info_cache rebind_proc_fcc;
 #endif
 	zend_object std;
 } ldap_linkdata;
@@ -131,7 +131,9 @@ static void ldap_link_free(ldap_linkdata *ld)
 	ld->link = NULL;
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-	zval_ptr_dtor(&ld->rebindproc);
+	if (ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
+		zend_fcc_dtor(&ld->rebind_proc_fcc);
+	}
 #endif
 
 	LDAPG(num_links)--;
@@ -3711,7 +3713,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 	}
 
 	/* link exists and callback set? */
-	if (Z_ISUNDEF(ld->rebindproc)) {
+	if (!ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
 		php_error_docref(NULL, E_WARNING, "No callback set");
 		return LDAP_OTHER;
 	}
@@ -3719,11 +3721,12 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 	/* callback */
 	ZVAL_COPY_VALUE(&cb_args[0], cb_link);
 	ZVAL_STRING(&cb_args[1], url);
-	if (call_user_function(EG(function_table), NULL, &ld->rebindproc, &cb_retval, 2, cb_args) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
+	zend_call_known_fcc(&ld->rebind_proc_fcc, &cb_retval, 2, cb_args, NULL);
+	if (EXPECTED(!Z_ISUNDEF(cb_retval))) {
+		// TODO Use zval_try_get_long()
 		retval = zval_get_long(&cb_retval);
 		zval_ptr_dtor(&cb_retval);
 	} else {
-		php_error_docref(NULL, E_WARNING, "rebind_proc PHP callback failed");
 		retval = LDAP_OTHER;
 	}
 	zval_ptr_dtor(&cb_args[1]);
@@ -3735,35 +3738,35 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 PHP_FUNCTION(ldap_set_rebind_proc)
 {
 	zval *link;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info dummy_fci;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	ldap_linkdata *ld;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of!", &link, ldap_link_ce, &fci, &fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OF!", &link, ldap_link_ce, &dummy_fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ld = Z_LDAP_LINK_P(link);
-	VERIFY_LDAP_LINK_CONNECTED(ld);
-
-	if (!ZEND_FCI_INITIALIZED(fci)) {
-		/* unregister rebind procedure */
-		if (!Z_ISUNDEF(ld->rebindproc)) {
-			zval_ptr_dtor(&ld->rebindproc);
-			ZVAL_UNDEF(&ld->rebindproc);
-			ldap_set_rebind_proc(ld->link, NULL, NULL);
-		}
-		RETURN_TRUE;
+	/* Inline VERIFY_LDAP_LINK_CONNECTED(ld); as we need to free trampoline */
+	if (!ld->link) {
+		zend_release_fcall_info_cache(&fcc);
+		zend_throw_error(NULL, "LDAP connection has already been closed");
+		RETURN_THROWS();
 	}
 
-	/* register rebind procedure */
-	if (Z_ISUNDEF(ld->rebindproc)) {
+	/* Free old FCC */
+	if (!ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
+		zend_fcc_dtor(&ld->rebind_proc_fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		/* register rebind procedure */
 		ldap_set_rebind_proc(ld->link, _ldap_rebind_proc, (void *) link);
+		zend_fcc_dup(&ld->rebind_proc_fcc, &fcc);
 	} else {
-		zval_ptr_dtor(&ld->rebindproc);
-	}
+		/* unregister rebind procedure */
+		ldap_set_rebind_proc(ld->link, NULL, NULL);
+    }
 
-	ZVAL_COPY(&ld->rebindproc, &fci.function_name);
 	RETURN_TRUE;
 }
 /* }}} */
