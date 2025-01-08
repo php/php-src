@@ -12,6 +12,8 @@ require_once('skipifbindfailure.inc');
 ?>
 --FILE--
 <?php
+/*** NOTE: THE CALLBACK IS NOT CALLED AS WE DON'T TEST THE REBINDING HAPPENS AS WE NEED MULTIPLE LDAP SERVERS ***/
+
 require "connect.inc";
 
 function rebind_proc ($ldap, $referral) {

@@ -9,6 +9,8 @@ require_once('skipifbindfailure.inc');
 ?>
 --FILE--
 <?php
+/*** NOTE: THE TRAMPOLINE IS NOT CALLED AS WE DON'T TEST THE REBINDING HAPPENS AS WE NEED MULTIPLE LDAP SERVERS ***/
+
 require "connect.inc";
 
 class TrampolineTest {
