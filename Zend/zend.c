@@ -1050,7 +1050,6 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_size) = 0;
 	CG(map_ptr_last) = 0;
 #endif /* ZTS */
-
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
 	zend_interned_strings_init();

@@ -1,9 +1,9 @@
 --TEST--
 Fatal error backtrace
+--INI--
+fatal_error_backtraces=On
 --FILE--
 <?php
-
-ini_set('fatal_error_backtraces', true);
 
 eval("class Foo {}; class Foo {}");
 ?>

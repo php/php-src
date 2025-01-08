@@ -183,7 +183,7 @@ struct _zend_executor_globals {
 
 	int error_reporting;
 
-	int  fatal_error_backtraces;
+	bool fatal_error_backtraces;
 	zval error_backtrace;
 
 	int exit_status;

@@ -1,16 +1,15 @@
 --TEST--
 Fatal error backtrace w/ sensitive parameters
+--INI--
+fatal_error_backtraces=On
 --FILE--
 <?php
-
-ini_set('fatal_error_backtraces', true);
 
 function trigger_fatal(#[\SensitiveParameter] $unused) {
     eval("class Foo {}; class Foo {}");
 }
 
 trigger_fatal("bar");
-
 ?>
 --EXPECTF--
 Fatal error: Cannot redeclare class Foo (%s) in %s : eval()'d code on line %d
