@@ -1,5 +1,5 @@
 --TEST--
-#[\NoDiscard]: Casting to (bool) suppresses.
+#[\NoDiscard]: Casting to (void) suppresses.
 --FILE--
 <?php
 
@@ -43,22 +43,22 @@ $closure2 = #[\NoDiscard] function(): int {
 	return 0;
 };
 
-(bool)test();
-(bool)test2();
-(bool)test3(1, 2, named: 3);
-(bool)call_user_func("test");
+(void)test();
+(void)test2();
+(void)test3(1, 2, named: 3);
+(void)call_user_func("test");
 $fcc = test(...);
-(bool)$fcc();
+(void)$fcc();
 
 $cls = new Clazz();
-(bool)$cls->test();
-(bool)$cls->test2();
-(bool)call_user_func([$cls, "test"]);
-(bool)Clazz::test3();
+(void)$cls->test();
+(void)$cls->test2();
+(void)call_user_func([$cls, "test"]);
+(void)Clazz::test3();
 
-(bool)$closure();
+(void)$closure();
 
-(bool)$closure2();
+(void)$closure2();
 
 ?>
 DONE
