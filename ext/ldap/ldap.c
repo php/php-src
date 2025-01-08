@@ -3757,14 +3757,11 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 	/* Free old FCC */
 	if (!ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
 		zend_fcc_dtor(&ld->rebind_proc_fcc);
-		memcpy(&ld->rebind_proc_fcc, &empty_fcall_info_cache, sizeof(zend_fcall_info_cache));
 	}
 	if (ZEND_FCC_INITIALIZED(fcc)) {
 		/* register rebind procedure */
 		ldap_set_rebind_proc(ld->link, _ldap_rebind_proc, (void *) link);
 		zend_fcc_dup(&ld->rebind_proc_fcc, &fcc);
-		/* Clear potential trampoline */
-		zend_release_fcall_info_cache(&fcc);
 	} else {
 		/* unregister rebind procedure */
 		ldap_set_rebind_proc(ld->link, NULL, NULL);
