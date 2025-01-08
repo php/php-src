@@ -207,6 +207,15 @@ typedef struct _zend_ast_zval {
 	zval val;
 } zend_ast_zval;
 
+typedef struct _zend_op_array zend_op_array;
+
+typedef struct _zend_ast_op_array {
+	zend_ast_kind kind;
+	zend_ast_attr attr;
+	uint32_t lineno;
+	zend_op_array *op_array;
+} zend_ast_op_array;
+
 /* Separate structure for function and class declaration, as they need extra information. */
 typedef struct _zend_ast_decl {
 	zend_ast_kind kind;
@@ -230,6 +239,8 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval)
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class_name, zend_ast *name);
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_array);
 
 #if ZEND_AST_SPEC
 # define ZEND_AST_SPEC_CALL(name, ...) \
@@ -353,6 +364,11 @@ static zend_always_inline zend_string *zend_ast_get_str(zend_ast *ast) {
 	return Z_STR_P(zv);
 }
 
+static zend_always_inline zend_ast_op_array *zend_ast_get_op_array(zend_ast *ast) {
+	ZEND_ASSERT(ast->kind == ZEND_AST_OP_ARRAY);
+	return (zend_ast_op_array *) ast;
+}
+
 static zend_always_inline zend_string *zend_ast_get_constant_name(zend_ast *ast) {
 	ZEND_ASSERT(ast->kind == ZEND_AST_CONSTANT);
 	ZEND_ASSERT(Z_TYPE(((zend_ast_zval *) ast)->val) == IS_STRING);
@@ -369,7 +385,7 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
 		return Z_LINENO_P(zv);
-	} else if (ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_OP_ARRAY) {
+	} else if (ast->kind == ZEND_AST_CONSTANT) {
 		zval *zv = &((zend_ast_zval *) ast)->val;
 		return Z_LINENO_P(zv);
 	} else {

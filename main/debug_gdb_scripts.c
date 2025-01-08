@@ -860,6 +860,8 @@ asm(
     ".ascii \"\\n\"\n"
     ".ascii \"        if kind == enum_value('ZEND_AST_ZVAL') or kind == enum_value('ZEND_AST_CONSTANT'):\\n\"\n"
     ".ascii \"            return self.val.cast(gdb.lookup_type('zend_ast_zval'))\\n\"\n"
+    ".ascii \"        if kind == enum_value('ZEND_AST_OP_ARRAY'):\\n\"\n"
+    ".ascii \"            return self.val.cast(gdb.lookup_type('zend_ast_op_array'))\\n\"\n"
     ".ascii \"        if kind == enum_value('ZEND_AST_ZNODE'):\\n\"\n"
     ".ascii \"            return self.val.cast(gdb.lookup_type('zend_ast_znode'))\\n\"\n"
     ".ascii \"        if self.is_decl():\\n\"\n"
