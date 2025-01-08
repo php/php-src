@@ -25,6 +25,7 @@ $two_params_dict = [
     "enchant_dict_suggest",
     "enchant_dict_add",
     "enchant_dict_add_to_session",
+    "enchant_dict_remove_from_session",
     "enchant_dict_is_added",
 ];
 
@@ -65,6 +66,7 @@ enchant_dict_check(): Argument #2 ($word) must not contain any null bytes
 enchant_dict_suggest(): Argument #2 ($word) must not contain any null bytes
 enchant_dict_add(): Argument #2 ($word) must not contain any null bytes
 enchant_dict_add_to_session(): Argument #2 ($word) must not contain any null bytes
+enchant_dict_remove_from_session(): Argument #2 ($word) must not contain any null bytes
 enchant_dict_is_added(): Argument #2 ($word) must not contain any null bytes
 enchant_broker_set_ordering(): Argument #2 ($tag) must not contain any null bytes
 enchant_dict_store_replacement(): Argument #2 ($misspelled) must not contain any null bytes

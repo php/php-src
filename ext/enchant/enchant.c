@@ -714,7 +714,7 @@ PHP_FUNCTION(enchant_dict_remove_from_session)
 	size_t wordlen;
 	const enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
