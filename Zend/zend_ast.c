@@ -1088,6 +1088,9 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 				size += zend_ast_tree_size(list->child[i]);
 			}
 		}
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 
@@ -1141,6 +1144,9 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		ZVAL_COPY(&new->val, &((zend_ast_zval *) ast)->val);
 		Z_LINENO(new->val) = zend_ast_get_lineno(ast);
 		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		zend_ast *new = (zend_ast*)buf;
@@ -1206,7 +1212,7 @@ tail_call:
 		zend_string_release_ex(zend_ast_get_constant_name(ast), 0);
 	} else if (EXPECTED(ast->kind == ZEND_AST_OP_ARRAY)) {
 		ZEND_ASSERT(!Z_REFCOUNTED(((zend_ast_zval*)(ast))->val));
-	} else if (EXPECTED(ast->kind >= ZEND_AST_FUNC_DECL)) {
+	} else if (EXPECTED(zend_ast_is_decl(ast))) {
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
 		if (decl->name) {
@@ -1237,6 +1243,9 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *contex
 		for (i = 0; i < list->children; ++i) {
 			fn(&list->child[i], context);
 		}
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; ++i) {
