@@ -133,7 +133,6 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 													 const char *func)
 {
 	zval		local_zv_tz;
-	char		*message = NULL;
 	TimeZone	*timeZone;
 
 	if (zv_timezone == NULL || Z_TYPE_P(zv_timezone) == IS_NULL) {
@@ -335,9 +334,7 @@ static void TimeZone_objects_free(zend_object *object)
 /* {{{ TimeZone_object_create */
 static zend_object *TimeZone_object_create(zend_class_entry *ce)
 {
-	TimeZone_object*	intern;
-
-	intern = (TimeZone_object*)ecalloc(1, sizeof(TimeZone_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	TimeZone_object* intern = (TimeZone_object*)zend_object_alloc(sizeof(TimeZone_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);

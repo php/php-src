@@ -342,6 +342,10 @@ static zend_always_inline bool zend_ast_is_special(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_SPECIAL_SHIFT) & 1;
 }
 
+static zend_always_inline bool zend_ast_is_decl(zend_ast *ast) {
+	return zend_ast_is_special(ast) && ast->kind >= ZEND_AST_FUNC_DECL;
+}
+
 static zend_always_inline bool zend_ast_is_list(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_IS_LIST_SHIFT) & 1;
 }
@@ -373,6 +377,8 @@ static zend_always_inline zend_string *zend_ast_get_constant_name(zend_ast *ast)
 
 static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 	ZEND_ASSERT(!zend_ast_is_list(ast));
+	ZEND_ASSERT(!zend_ast_is_special(ast));
+
 	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
 }
 static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {

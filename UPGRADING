@@ -129,6 +129,12 @@ PHP 8.5 UPGRADE NOTES
   . posix_fpathconf checks invalid file descriptors and sets
     last_error to EBADF and raises an E_WARNING message.
 
+- Session:
+  . session_start is stricter in regard of the option argument.
+    it throws a ValueError if the whole is not a hashmap or
+    a TypeError if read_on_close value is not a valid type
+    compatible with int.
+
 - Sockets:
   . socket_create_listen, socket_bind and socket_sendto throw a
     ValueError if the port is lower than 0 or greater than 65535,
