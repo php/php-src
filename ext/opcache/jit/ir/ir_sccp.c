@@ -1238,7 +1238,7 @@ static void ir_merge_blocks(ir_ctx *ctx, ir_ref end, ir_ref begin, ir_bitqueue *
 
 	/* connect their predecessor and successor */
 	ctx->ir_base[next].op1 = prev;
-	ir_use_list_replace_all(ctx, prev, end, next);
+	ir_use_list_replace_one(ctx, prev, end, next);
 
 	if (ctx->ir_base[prev].op == IR_BEGIN || ctx->ir_base[prev].op == IR_MERGE) {
 		ir_bitqueue_add(worklist2, prev);
