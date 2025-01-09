@@ -965,7 +965,10 @@ def format_nested(value):
     while type.code == gdb.TYPE_CODE_PTR:
         addr = int(value)
         type = type.target()
-        value = value.dereference()
+        try:
+            value = value.dereference()
+        except:
+            pass
 
     type = gdb.types.get_basic_type(type)
 
