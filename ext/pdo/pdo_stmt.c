@@ -857,7 +857,8 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch function specified");
 				return false;
 			}
-			/* We can probably infer items than stmt->column_count for some cases */
+			/* There will be at most stmt->column_count parameters.
+			 * However, if we fetch a group key we will have over allocated. */
 			fetch_function_params = safe_emalloc(sizeof(zval), stmt->column_count, 0);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
