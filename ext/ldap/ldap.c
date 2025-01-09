@@ -1448,7 +1448,8 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	zend_string *base_dn_str = NULL;
 	HashTable *filter_ht = NULL;
 	zend_string *filter_str = NULL;
-	zend_long attrsonly, sizelimit, timelimit, deref;
+	zend_long sizelimit = 0, timelimit = 0, deref = LDAP_DEREF_NEVER;
+	bool attrsonly = false;
 	HashTable *server_controls_ht = NULL;
 	char **ldap_attrs = NULL;
 	ldap_linkdata *ld = NULL;
@@ -1465,12 +1466,27 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		Z_PARAM_ARRAY_HT_OR_STR(filter_ht, filter_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_EX(attrs, 0, 1)
-		Z_PARAM_LONG(attrsonly)
+		Z_PARAM_BOOL(attrsonly)
 		Z_PARAM_LONG(sizelimit)
 		Z_PARAM_LONG(timelimit)
 		Z_PARAM_LONG(deref)
 		Z_PARAM_ARRAY_HT_EX(server_controls_ht, 1, 1)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (sizelimit < -1 || sizelimit > INT_MAX) {
+		zend_argument_value_error(6, "must be between -1 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	if (timelimit < -1 || timelimit > INT_MAX) {
+		zend_argument_value_error(7, "must be between -1 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	if (deref < LDAP_DEREF_NEVER || deref > LDAP_DEREF_ALWAYS) {
+		zend_argument_value_error(8, "must be one of the LDAP_DEREF_* constants");
+		RETURN_THROWS();
+	}
 
 	/* Reverse -> fall through */
 	switch (argcount) {
@@ -1485,7 +1501,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			ldap_sizelimit = sizelimit;
 			ZEND_FALLTHROUGH;
 		case 5:
-			ldap_attrsonly = attrsonly;
+			ldap_attrsonly = attrsonly ? 1 : 0;
 			ZEND_FALLTHROUGH;
 		default:
 			break;
