@@ -47,5 +47,5 @@ $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_fetch_all_class_ctor_error");
 ?>
 --EXPECT--
-Error: User-supplied statement does not accept constructor arguments
-Error: User-supplied statement does not accept constructor arguments
+ValueError: PDOStatement::fetchAll(): Argument #3 must be empty when class provided in argument #2 ($class) does not have a constructor
+ValueError: PDOStatement::setFetchMode(): Argument #3 must be empty when class provided in argument #2 ($class) does not have a constructor

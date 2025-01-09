@@ -37,7 +37,12 @@ $db->exec("INSERT INTO pdo_fetch_class_change_ctor_two VALUES(4, 'D', 'delta')")
 $stmt = $db->prepare('SELECT val1, val2 FROM pdo_fetch_class_change_ctor_two');
 
 $stmt->execute();
-var_dump($stmt->fetchObject('Test', [$stmt]));
+
+try {
+    var_dump($stmt->fetchObject('Test', [$stmt]));
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+}
 
 ?>
 --CLEAN--
@@ -51,9 +56,4 @@ object(PDOStatement)#%s (1) {
   ["queryString"]=>
   string(54) "SELECT val1, val2 FROM pdo_fetch_class_change_ctor_two"
 }
-object(Test)#%s (2) {
-  ["val1"]=>
-  string(1) "A"
-  ["val2"]=>
-  string(5) "alpha"
-}
+Error: Cannot change default fetch mode while fetching

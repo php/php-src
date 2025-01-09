@@ -37,7 +37,12 @@ $stmt = $db->prepare('SELECT val1, val2 FROM pdo_fetch_class_change_ctor_three')
 $stmt->setFetchMode(PDO::FETCH_CLASS, 'Test', [$stmt]);
 
 $stmt->execute();
-var_dump($stmt->fetchAll());
+
+try {
+    var_dump($stmt->fetchAll());
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+}
 
 ?>
 --CLEAN--
@@ -51,36 +56,4 @@ object(PDOStatement)#%d (1) {
   ["queryString"]=>
   string(56) "SELECT val1, val2 FROM pdo_fetch_class_change_ctor_three"
 }
-string(5) "alpha"
-string(5) "alpha"
-string(5) "alpha"
-array(4) {
-  [0]=>
-  object(Test)#%d (2) {
-    ["val1"]=>
-    string(1) "A"
-    ["val2"]=>
-    string(5) "alpha"
-  }
-  [1]=>
-  object(Test)#%d (2) {
-    ["val1"]=>
-    string(1) "B"
-    ["val2"]=>
-    string(4) "beta"
-  }
-  [2]=>
-  object(Test)#%d (2) {
-    ["val1"]=>
-    string(1) "C"
-    ["val2"]=>
-    string(5) "gamma"
-  }
-  [3]=>
-  object(Test)#%d (2) {
-    ["val1"]=>
-    string(1) "D"
-    ["val2"]=>
-    string(5) "delta"
-  }
-}
+Error: Cannot change default fetch mode while fetching
