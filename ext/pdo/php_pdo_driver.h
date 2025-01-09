@@ -568,7 +568,9 @@ struct _pdo_stmt_t {
 	 * emulate prepare and bind on its behalf */
 	unsigned supports_placeholders:2;
 
-	unsigned _reserved:29;
+	/* If true we are in a do_fetch() call, and modification to the statement must be prevented */
+	unsigned in_fetch:1;
+	unsigned _reserved:28;
 
 	/* the number of columns in the result set; not valid until after
 	 * the statement has been executed at least once.  In some cases, might
@@ -611,13 +613,10 @@ struct _pdo_stmt_t {
 	union {
 		int column;
 		struct {
-			zval ctor_args;            /* freed */
-			zend_fcall_info_cache fcc;
-			zend_fcall_info fci;
+			HashTable *ctor_args;
 			zend_class_entry *ce;
 		} cls;
 		struct {
-			zval dummy; /* This exists due to alignment reasons with fetch.into and fetch.cls.ctor_args */
 			zend_fcall_info_cache fcc;
 		} func;
 		zend_object *into;

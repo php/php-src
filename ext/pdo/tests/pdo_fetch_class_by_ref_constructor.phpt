@@ -47,9 +47,14 @@ $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_fetch_class_by_ref_ctor");
 ?>
 --EXPECTF--
+Warning: TestByRefCtor::__construct(): Argument #1 ($str) must be passed by reference, value given in %s on line %d
 TestByRefCtor::__construct(aaaaaaaaaa, 1)
-TestByRefCtor::__construct(aaaaaaaaaaA, 2)
-TestByRefCtor::__construct(aaaaaaaaaaAB, 3)
+
+Warning: TestByRefCtor::__construct(): Argument #1 ($str) must be passed by reference, value given in %s on line %d
+TestByRefCtor::__construct(aaaaaaaaaa, 2)
+
+Warning: TestByRefCtor::__construct(): Argument #1 ($str) must be passed by reference, value given in %s on line %d
+TestByRefCtor::__construct(aaaaaaaaaa, 3)
 array(3) {
   [0]=>
   object(TestByRefCtor)#%d (3) {
@@ -67,7 +72,7 @@ array(3) {
     ["val"]=>
     string(1) "B"
     ["str":"TestByRefCtor":private]=>
-    string(12) "aaaaaaaaaaAB"
+    string(11) "aaaaaaaaaaB"
   }
   [2]=>
   object(TestByRefCtor)#%d (3) {
@@ -76,6 +81,6 @@ array(3) {
     ["val"]=>
     string(1) "C"
     ["str":"TestByRefCtor":private]=>
-    string(13) "aaaaaaaaaaABC"
+    string(11) "aaaaaaaaaaC"
   }
 }
