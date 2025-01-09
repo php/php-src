@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-17234 (Numeric parent hook call fails with assertion).
     (nielsdos)
+  . Fixed bug GH-16892 (ini_parse_quantity() fails to parse inputs starting
+    with 0x0b). (nielsdos)
+  . Fixed bug GH-16886 (ini_parse_quantity() fails to emit warning for 0x+0).
+    (nielsdos)
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
@@ -34,6 +38,9 @@ PHP                                                                        NEWS
  
 - PHPDBG:
   . Fix crashes in function registration + test. (nielsdos, Girgias)
+
+- SimpleXML:
+  . Fixed bug GH-17409 (Assertion failure Zend/zend_hash.c:1730). (nielsdos)
 
 - SNMP:
   . Fixed bug GH-17330 (SNMP::setSecurity segfault on closed session).
