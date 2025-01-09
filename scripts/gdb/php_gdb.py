@@ -336,7 +336,7 @@ class ZendClassEntryPrettyPrinter(gdb.printing.PrettyPrinter):
             if field.name is not None:
                 if field.name == 'ce_flags':
                     flags = self.val[field.name]
-                    yield (field.name, '%d = %s' % (flags, ZendAccFlags.format_ce_flags(flags)))
+                    yield (field.name, '%d (%s)' % (flags, ZendAccFlags.format_ce_flags(flags)))
                 else:
                     yield (field.name, format_nested(self.val[field.name]))
             else:
@@ -359,7 +359,7 @@ class ZendClassConstantPrettyPrinter(gdb.printing.PrettyPrinter):
         for field in self.val.type.fields():
             if field.name == 'value':
                 flags = self.val[field.name]['u2']['constant_flags']
-                yield ('value.u2.constant_flags', '%d = %s' % (flags, ZendAccFlags.format_const_flags(flags)))
+                yield ('value.u2.constant_flags', '%d (%s)' % (flags, ZendAccFlags.format_const_flags(flags)))
                 yield (field.name, self.val[field.name])
             else:
                 yield (field.name, format_nested(self.val[field.name]))
@@ -376,7 +376,7 @@ class ZendPropertyInfoPrettyPrinter(gdb.printing.PrettyPrinter):
         for field in self.val.type.fields():
             if field.name == 'flags':
                 flags = self.val[field.name]
-                yield ('flags', '%d = %s' % (flags, ZendAccFlags.format_prop_flags(flags)))
+                yield ('flags', '%d (%s)' % (flags, ZendAccFlags.format_prop_flags(flags)))
             else:
                 yield (field.name, format_nested(self.val[field.name]))
 
@@ -455,7 +455,7 @@ class ZendOpArrayPrettyPrinter(gdb.printing.PrettyPrinter):
         for field in self.val.type.fields():
             if field.name == 'fn_flags':
                 value = self.val[field.name]
-                yield (field.name, '%d = %s' % (value, ZendAccFlags.format_fn_flags(value)))
+                yield (field.name, '%d (%s)' % (value, ZendAccFlags.format_fn_flags(value)))
             else:
                 yield (field.name, format_nested(self.val[field.name]))
 
@@ -471,7 +471,7 @@ class ZendOpPrettyPrinter(gdb.printing.PrettyPrinter):
         for field in self.val.type.fields():
             if field.name == 'opcode':
                 opcode = int(self.val[field.name])
-                yield (field.name, '%d = %s' % (opcode, ZendOpcodes.name(opcode)))
+                yield (field.name, '%d (%s)' % (opcode, ZendOpcodes.name(opcode)))
             else:
                 yield (field.name, format_nested(self.val[field.name]))
 
@@ -499,7 +499,7 @@ class ZendInternalFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
     def children(self):
         for field in self.val.type.fields():
             if field.name == 'fn_flags':
-                yield ('fn_flags', ('%d = %s' % (self.val[field.name], ZendAccFlags.format_fn_flags(self.val[field.name]))))
+                yield ('fn_flags', ('%d (%s)' % (self.val[field.name], ZendAccFlags.format_fn_flags(self.val[field.name]))))
             else:
                 yield (field.name, format_nested(self.val[field.name]))
 
@@ -520,7 +520,7 @@ class ZendRefcountedHPrettyPrinter(gdb.printing.PrettyPrinter):
                 for subfield in val.type.fields():
                     if subfield.name == 'type_info':
                         flags = int(val[subfield.name])
-                        yield (('%s.%s' % (field.name, subfield.name)), '%d = %s' % (flags, ZendRefTypeInfo.format(flags)))
+                        yield (('%s.%s' % (field.name, subfield.name)), '%d (%s)' % (flags, ZendRefTypeInfo.format(flags)))
                     else:
                         yield (('%s.%s' % (field.name, subfield.name)), format_nested(val[subfield.name]))
             else:
