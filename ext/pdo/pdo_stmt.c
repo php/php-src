@@ -695,7 +695,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
 	zval old_ctor_args = {{0}, {0}, {0}};
-	int i = 0;
+	int column_index_to_fetch = 0;
 	zval *fetch_function_params = NULL;
 	uint32_t fetch_function_param_num = 0;
 
@@ -785,7 +785,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				old_arg_count = stmt->fetch.cls.fci.param_count;
 				do_fetch_opt_finish(stmt, 0);
 
-				fetch_value(stmt, &val, i++, NULL);
+				fetch_value(stmt, &val, column_index_to_fetch++, NULL);
 				if (Z_TYPE(val) != IS_NULL) {
 					if (!try_convert_to_string(&val)) {
 						return 0;
@@ -865,15 +865,15 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	}
 
 	if (group_key) {
-		fetch_value(stmt, group_key, i, NULL);
+		fetch_value(stmt, group_key, column_index_to_fetch, NULL);
 		convert_to_string(group_key);
-		i++;
+		column_index_to_fetch++;
 	}
 
-	for (idx = 0; i < stmt->column_count; i++, idx++) {
+	for (idx = 0; column_index_to_fetch < stmt->column_count; column_index_to_fetch++, idx++) {
 		zval val;
-		fetch_value(stmt, &val, i, NULL);
-		zend_string *column_name = stmt->columns[i].name;
+		fetch_value(stmt, &val, column_index_to_fetch, NULL);
+		zend_string *column_name = stmt->columns[column_index_to_fetch].name;
 
 		switch (how) {
 			case PDO_FETCH_ASSOC:
@@ -883,7 +883,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			case PDO_FETCH_USE_DEFAULT:
 			case PDO_FETCH_BOTH:
 				zend_symtable_update(Z_ARRVAL_P(return_value), column_name, &val);
-				if (zend_hash_index_add(Z_ARRVAL_P(return_value), i, &val) != NULL) {
+				if (zend_hash_index_add(Z_ARRVAL_P(return_value), column_index_to_fetch, &val) != NULL) {
 					Z_TRY_ADDREF(val);
 				}
 				break;
