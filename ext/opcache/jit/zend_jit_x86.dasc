@@ -9072,6 +9072,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 {
 	uint32_t used_stack;
 	bool stack_check = 1;
+	const size_t func_type_offset = is_closure ? offsetof(zend_closure, func.type) : offsetof(zend_function, type);
 
 	if (func) {
 		used_stack = zend_vm_calc_used_stack(opline->extended_value, func);
@@ -9082,13 +9083,9 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value + ZEND_OBSERVER_ENABLED) * sizeof(zval);
 
 		|	// if (EXPECTED(ZEND_USER_CODE(func->type))) {
-		if (!is_closure) {
-			|	test byte [r0 + offsetof(zend_function, type)], 1
-			|	mov FCARG1a, used_stack
-			|	jnz >1
-		} else {
-			|	mov FCARG1a, used_stack
-		}
+		|	test byte [r0 + func_type_offset], 1
+		|	mov FCARG1a, used_stack
+		|	jnz >1
 		|	// used_stack += (func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args)) * sizeof(zval);
 		|	mov edx, opline->extended_value
 		if (!is_closure) {
