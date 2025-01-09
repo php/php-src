@@ -28,6 +28,11 @@ $stmt = $pdo->prepare ("SELECT * FROM test38253");
 $stmt->execute();
 var_dump($stmt->fetchAll());
 
+$pdo->setAttribute (PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_INTO);
+$stmt = $pdo->prepare ("SELECT * FROM test38253");
+$stmt->execute();
+var_dump($stmt->fetchAll());
+
 ?>
 --CLEAN--
 <?php
@@ -43,6 +48,12 @@ array(0) {
 }
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: No fetch function specified in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error%s on line %d
+array(0) {
+}
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: No fetch-into object specified. in %s on line %d
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error%s on line %d
 array(0) {
