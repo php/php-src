@@ -642,28 +642,6 @@ static bool do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-static bool pdo_stmt_init_fci_fcc_for_function_fetch_mode(pdo_stmt_t *stmt, zval *callable)
-{
-	char *is_callable_error = NULL;
-
-	if (zend_fcall_info_init(callable, 0, &stmt->fetch.func.fci, &stmt->fetch.func.fcc, NULL, &is_callable_error) == FAILURE) {
-		if (is_callable_error) {
-			zend_type_error("%s", is_callable_error);
-			efree(is_callable_error);
-		} else {
-			zend_type_error("User-supplied function must be a valid callback");
-		}
-		return false;
-	}
-	ZEND_ASSERT(is_callable_error == NULL);
-
-	uint32_t num_args = stmt->column_count;
-	stmt->fetch.func.fci.param_count = num_args; /* probably less */
-	stmt->fetch.func.fci.params = safe_emalloc(sizeof(zval), num_args, 0);
-
-	return true;
-}
-
 static void do_fetch_opt_finish(pdo_stmt_t *stmt, bool free_ctor_agrs) /* {{{ */
 {
 	/* fci.size is used to check if it is valid */
@@ -716,8 +694,10 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 {
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
-	zval retval, old_ctor_args = {{0}, {0}, {0}};
+	zval old_ctor_args = {{0}, {0}, {0}};
 	int i = 0;
+	zval *fetch_function_params = NULL;
+	uint32_t fetch_function_param_num = 0;
 
 	if (how == PDO_FETCH_USE_DEFAULT) {
 		how = stmt->default_fetch_type;
@@ -872,11 +852,14 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 		case PDO_FETCH_FUNC:
 			/* TODO: Make this an assertion and ensure this is true higher up? */
-			if (!ZEND_FCI_INITIALIZED(stmt->fetch.func.fci)) {
+			if (!ZEND_FCC_INITIALIZED(stmt->fetch.func.fcc)) {
 				/* TODO ArgumentCountError? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch function specified");
 				return false;
 			}
+			/* There will be at most stmt->column_count parameters.
+			 * However, if we fetch a group key we will have over allocated. */
+			fetch_function_params = safe_emalloc(sizeof(zval), stmt->column_count, 0);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
@@ -971,7 +954,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				break;
 
 			case PDO_FETCH_FUNC:
-				ZVAL_COPY_VALUE(&stmt->fetch.func.fci.params[idx], &val);
+				ZVAL_COPY_VALUE(&fetch_function_params[fetch_function_param_num++], &val);
 				break;
 
 			default:
@@ -1006,21 +989,12 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			break;
 
 		case PDO_FETCH_FUNC:
-			stmt->fetch.func.fci.param_count = idx;
-			stmt->fetch.func.fci.retval = &retval;
-			if (zend_call_function(&stmt->fetch.func.fci, &stmt->fetch.func.fcc) == FAILURE) {
-				/* TODO Error? */
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call user-supplied function");
-				return 0;
-			} else {
-				if (!Z_ISUNDEF(retval)) {
-					ZVAL_COPY_VALUE(return_value, &retval);
-				}
-			}
+			zend_call_known_fcc(&stmt->fetch.func.fcc, return_value, fetch_function_param_num, fetch_function_params, NULL);
 			/* Free FCI parameters that were allocated in the previous loop */
-			for (uint32_t param_num = 0; param_num < stmt->fetch.func.fci.param_count; param_num++) {
-				zval_ptr_dtor(&stmt->fetch.func.fci.params[param_num]);
+			for (uint32_t param_num = 0; param_num < fetch_function_param_num; param_num++) {
+				zval_ptr_dtor(&fetch_function_params[param_num]);
 			}
+			efree(fetch_function_params);
 			break;
 
 		default:
@@ -1197,6 +1171,26 @@ PHP_METHOD(PDOStatement, fetchColumn)
 }
 /* }}} */
 
+static bool pdo_get_fcc_from_zval(zend_fcall_info_cache *fcc, zval *callable) {
+	if (callable == NULL) {
+		/* TODO use "must be of type callable" format? */
+		zend_argument_type_error(2, "must be a callable, null given");
+		return false;
+	}
+
+	char *is_callable_error = NULL;
+	if (!zend_is_callable_ex(callable, NULL, 0, NULL, fcc, &is_callable_error)) {
+		if (is_callable_error) {
+			zend_type_error("%s", is_callable_error);
+			efree(is_callable_error);
+		} else {
+			zend_type_error("User-supplied function must be a valid callback");
+		}
+		return false;
+	}
+	return true;
+}
+
 /* {{{ Returns an array of all of the results. */
 PHP_METHOD(PDOStatement, fetchAll)
 {
@@ -1263,12 +1257,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 				zend_string_release(func);
 				RETURN_THROWS();
 			}
-			if (arg2 == NULL) {
-				/* TODO use "must be of type callable" format? */
-				zend_argument_type_error(2, "must be a callable, null given");
-				RETURN_THROWS();
-			}
-			if (pdo_stmt_init_fci_fcc_for_function_fetch_mode(stmt, arg2) == false) {
+			if (!pdo_get_fcc_from_zval(&stmt->fetch.func.fcc, arg2)) {
 				RETURN_THROWS();
 			}
 			break;

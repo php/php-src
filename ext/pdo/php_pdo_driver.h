@@ -613,13 +613,12 @@ struct _pdo_stmt_t {
 		int column;
 		struct {
 			zval ctor_args;            /* freed */
-			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
+			zend_fcall_info fci;
 			zend_class_entry *ce;
 		} cls;
 		struct {
 			zval dummy; /* This exists due to alignment reasons with fetch.into and fetch.cls.ctor_args */
-			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
 		} func;
 		zval into;
