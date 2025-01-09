@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fix crashes in function registration + test. (nielsdos, Girgias)
 
+- SimpleXML:
+  . Fixed bug GH-17409 (Assertion failure Zend/zend_hash.c:1730). (nielsdos)
+
 - SNMP:
   . Fixed bug GH-17330 (SNMP::setSecurity segfault on closed session).
     (David Carlier)
