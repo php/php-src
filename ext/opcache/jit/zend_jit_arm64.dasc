@@ -8471,6 +8471,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 {
 	uint32_t used_stack;
 	bool stack_check = 1;
+	const size_t func_type_offset = is_closure ? offsetof(zend_closure, func.type) : offsetof(zend_function, type);
 
 	// REG0   -> zend_function
 	// FCARG1 -> used_stack
@@ -8484,15 +8485,11 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value + ZEND_OBSERVER_ENABLED) * sizeof(zval);
 
 		|	// if (EXPECTED(ZEND_USER_CODE(func->type))) {
-		if (!is_closure) {
-			|	LOAD_32BIT_VAL FCARG1w, used_stack
-			|	// Check whether REG0 is an internal function.
-			|	ldrb TMP1w, [REG0, #offsetof(zend_function, type)]
-			|	TST_32_WITH_CONST TMP1w, 1, TMP2w
-			|	bne >1
-		} else {
-			|	LOAD_32BIT_VAL FCARG1w, used_stack
-		}
+		|	LOAD_32BIT_VAL FCARG1w, used_stack
+		|	// Check whether REG0 is an internal function.
+		|	ldrb TMP1w, [REG0, #func_type_offset]
+		|	TST_32_WITH_CONST TMP1w, 1, TMP2w
+		|	bne >1
 		|	// used_stack += (func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args)) * sizeof(zval);
 		|	LOAD_32BIT_VAL REG2w, opline->extended_value
 		if (!is_closure) {
