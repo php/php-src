@@ -41,12 +41,12 @@ class ZendStringPrettyPrinter(gdb.printing.PrettyPrinter):
         self.val = val
 
     def to_string(self):
-        return format_zstr(self.val)
+        return '((zend_string*) 0x%x) %s' % (self.val.address, format_zstr(self.val))
 
     def children(self):
         for field in self.val.type.fields():
             if field.name == 'val':
-                yield ('val', self.to_string())
+                yield ('val', format_zstr(self.val))
             else:
                 yield (field.name, format_nested(self.val[field.name]))
 
@@ -95,7 +95,7 @@ class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
         self.val = val
 
     def to_string(self):
-        return self.format_type(self.val)
+        return '((zend_type*) 0x%x) %s' % (self.val.address, self.format_type(self.val))
 
     def children(self):
         for field in self.val.type.fields():
@@ -237,7 +237,7 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
         self.val = val
 
     def to_string(self):
-        return self.value_to_string()
+        return '((zval*) 0x%x) %s' % (self.val.address, self.value_to_string())
 
     def value_to_string(self):
         t = int(self.val['u1']['v']['type'])
@@ -327,7 +327,7 @@ class ZendClassEntryPrettyPrinter(gdb.printing.PrettyPrinter):
         self.val = val
 
     def to_string(self):
-        return format_zstr(self.val['name'])
+        return '((zend_class_entry*) 0x%x) %s' % (self.val.address, format_zstr(self.val['name']))
 
     def children(self):
         for field in self.val.type.fields():
@@ -410,7 +410,7 @@ class ZendFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
         if int(self.val['type']) == ZendFnTypes.ZEND_USER_FUNCTION or int(self.val['type']) == ZendFnTypes.ZEND_EVAL_CODE:
             str = '%s %s:%d' % (str, format_zstr(self.val['op_array']['filename']), int(self.val['op_array']['line_start']))
 
-        return str
+        return '((zend_function*) 0x%x) %s' % (self.val.address, str)
 
     def children(self):
         for field in self.val.type.fields():
@@ -447,7 +447,7 @@ class ZendOpArrayPrettyPrinter(gdb.printing.PrettyPrinter):
 
         str = '%s %s:%d' % (str, format_zstr(self.val['filename']), int(self.val['line_start']))
 
-        return str
+        return '((zend_op_array*) 0x%x) %s' % (self.val.address, str)
 
     def children(self):
         for field in self.val.type.fields():
@@ -492,7 +492,7 @@ class ZendInternalFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
         else:
             str = 'function %s' % (namestr)
 
-        return str
+        return '((zend_internal_function*) 0x%x) %s' % (self.val.address, str)
 
     def children(self):
         for field in self.val.type.fields():
