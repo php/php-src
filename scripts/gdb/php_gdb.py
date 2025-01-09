@@ -282,36 +282,38 @@ class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
         for field in self.val.type.fields():
             if field.name == 'value':
                 value = self.val['value']
+                sub_field = 'ptr'
                 t = int(self.val['u1']['v']['type'])
                 if t == ZendTypeBits.bit('undef'):
-                    value = value['lval']
+                    sub_field = 'lval'
                 elif t == ZendTypeBits.bit('null'):
-                    value = value['lval']
+                    sub_field = 'lval'
                 elif t == ZendTypeBits.bit('false'):
-                    value = value['lval']
+                    sub_field = 'lval'
                 elif t == ZendTypeBits.bit('true'):
-                    value = value['lval']
+                    sub_field = 'lval'
                 elif t == ZendTypeBits.bit('long'):
-                    value = value['lval']
+                    sub_field = 'lval'
                 elif t == ZendTypeBits.bit('double'):
-                    value = value['dval']
+                    sub_field = 'dval'
                 elif t == ZendTypeBits.bit('string'):
-                    value = value['str'].dereference()
+                    sub_field = 'str'
                 elif t == ZendTypeBits.bit('array'):
-                    value = value['arr'].dereference()
+                    sub_field = 'arr'
                 elif t == ZendTypeBits.bit('object'):
-                    value = value['obj'].dereference()
+                    sub_field = 'obj'
                 elif t == ZendTypeBits.bit('resource'):
-                    value = value['res'].dereference()
+                    sub_field = 'res'
                 elif t == ZendTypeBits.bit('reference'):
-                    value = value['ref'].dereference()
+                    sub_field = 'ref'
                 elif t == ZendTypeBits.bit('constant_ast'):
-                    value = value['ast'].dereference()
+                    sub_field = 'ast'
                 elif t == ZendTypeBits.bit('indirect'):
-                    value = value['zv'].dereference()
-                else:
-                    value = value['ptr']
-                yield (field.name, value)
+                    sub_field = 'zv'
+                value = value[sub_field]
+                if sub_field != 'ptr' and value.type.code == gdb.TYPE_CODE_PTR:
+                    value = value.dereference()
+                yield ('%s.%s' % (field.name, sub_field), value)
             elif field.name == 'u2':
                 yield ('u2', self.val[field.name]['extra'])
             else:
