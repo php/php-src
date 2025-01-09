@@ -1808,10 +1808,6 @@ IR_FOLD(MUL(_, C_ADDR))
 		IR_FOLD_COPY(op2);
 	} else if (op2_insn->val.u64 == 1) {
 		IR_FOLD_COPY(op1);
-	} else if (op2_insn->val.u64 == 2 && IR_OPT_TYPE(opt) != IR_ADDR) {
-		opt = IR_ADD | (opt & IR_OPT_TYPE_MASK);
-		op2 = op1;
-		IR_FOLD_RESTART;
 	}
 	IR_FOLD_NEXT;
 }
@@ -1827,11 +1823,6 @@ IR_FOLD(MUL(_, C_I64))
 	} else if (op2_insn->val.i64 == 1) {
 		/* a * 1 => a */
 		IR_FOLD_COPY(op1);
-	} else if (op2_insn->val.i64 == 2) {
-		/* a * 2 => a + a */
-		opt = IR_ADD | (opt & IR_OPT_TYPE_MASK);
-		op2 = op1;
-		IR_FOLD_RESTART;
 	} else if (op2_insn->val.i64 == -1) {
 		/* a * -1 => -a */
 		opt = IR_NEG | (opt & IR_OPT_TYPE_MASK);
@@ -2907,7 +2898,6 @@ IR_FOLD(ADD(SHR, SHL))
 
 
 /* Swap operands (move lower ref to op2) for better CSE */
-IR_FOLD(ADD(_, _))
 IR_FOLD(MUL(_, _))
 IR_FOLD_NAMED(swap_ops)
 {
@@ -2927,6 +2917,19 @@ IR_FOLD(MUL_OV(_, _))
 	}
 	/* skip CSE ??? */
 	IR_FOLD_EMIT;
+}
+
+IR_FOLD(ADD(_, _))
+{
+	if (IR_IS_TYPE_INT(IR_OPT_TYPE(opt)) && op1 == op2) {
+		/* a + a => a * 2 */
+		IR_ASSERT(!IR_IS_CONST_REF(op1));
+		val.u64 = 2;
+		opt = IR_MUL | (opt & IR_OPT_TYPE_MASK);
+		op2 = ir_const(ctx, val, IR_OPT_TYPE(opt));
+		IR_FOLD_RESTART;
+	}
+	IR_FOLD_DO_NAMED(swap_ops);
 }
 
 IR_FOLD(SUB(_, _))

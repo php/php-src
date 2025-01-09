@@ -701,7 +701,7 @@ typedef struct _ir_list {
 	uint32_t len;
 } ir_list;
 
-bool ir_list_contains(const ir_list *l, ir_ref val);
+uint32_t ir_list_find(const ir_list *l, ir_ref val);
 void ir_list_insert(ir_list *l, uint32_t i, ir_ref val);
 void ir_list_remove(ir_list *l, uint32_t i);
 
@@ -764,6 +764,19 @@ IR_ALWAYS_INLINE void ir_list_set(ir_list *l, uint32_t i, ir_ref val)
 {
 	IR_ASSERT(i < l->len);
 	ir_array_set_unchecked(&l->a, i, val);
+}
+
+/* Doesn't preserve order */
+IR_ALWAYS_INLINE void ir_list_del(ir_list *l, uint32_t i)
+{
+	IR_ASSERT(i < l->len);
+	l->len--;
+	ir_array_set_unchecked(&l->a, i, ir_array_at(&l->a, l->len));
+}
+
+IR_ALWAYS_INLINE bool ir_list_contains(const ir_list *l, ir_ref val)
+{
+	return ir_list_find(l, val) != (uint32_t)-1;
 }
 
 /* Worklist (unique list) */
@@ -1019,11 +1032,12 @@ struct _ir_use_list {
 	ir_ref        count;
 };
 
-void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref use);
-void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref use);
-void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
-void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
-bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
+void ir_use_list_remove_all(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_remove_one(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_replace_all(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
+void ir_use_list_replace_one(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
+bool ir_use_list_add(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_sort(ir_ctx *ctx, ir_ref def);
 
 IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
 {
@@ -1067,6 +1081,9 @@ IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
 		_insn1 = _insn2; \
 		_insn2 = _tmp; \
 	} while (0)
+
+void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref);
+void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val);
 
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \
