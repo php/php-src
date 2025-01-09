@@ -225,6 +225,7 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 
 	while (ini_entry->name) {
 		p = pemalloc(sizeof(zend_ini_entry), 1);
+		p->def = ini_entry;
 		p->name = zend_string_init_interned(ini_entry->name, ini_entry->name_length, 1);
 		p->on_modify = ini_entry->on_modify;
 		p->mh_arg1 = ini_entry->mh_arg1;
