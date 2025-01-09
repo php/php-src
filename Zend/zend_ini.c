@@ -701,6 +701,7 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 				return 0;
         }
         digits += 2;
+		/* STRTOULL may silently ignore a prefix of whitespace, sign, and base prefix, which would be invalid at this position */
 		if (UNEXPECTED(digits == str_end || digits != zend_ini_consume_quantity_prefix(digits, str_end, base))) {
 			/* Escape the string to avoid null bytes and to make non-printable chars
 			 * visible */
