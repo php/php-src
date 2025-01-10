@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17330 (SNMP::setSecurity segfault on closed session).
     (David Carlier)
 
+- Zip:
+  . Fixed bug GH-17139 (Fix zip_entry_name() crash on invalid entry).
+    (nielsdos)
+
 02 Jan 2025, PHP 8.3.16RC1
 
 - Core:
