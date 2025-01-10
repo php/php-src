@@ -14024,6 +14024,52 @@ static int zend_jit_class_guard(zend_jit_ctx *jit, const zend_op *opline, ir_ref
 	return 1;
 }
 
+/* Child classes that add new hooks to existing properties will violate the
+ * assumption that properties may be accessed directly. This guard makes sure no
+ * new hooked properties have been created in the object, compared to the trace
+ * class. For function JIT, we just pick the slow path. */
+static bool zend_jit_new_hooks_guard(
+	zend_jit_ctx *jit,
+	const zend_op *opline,
+	zend_ssa *ssa,
+	const zend_ssa_op *ssa_op,
+	ir_ref obj_ref,
+	uint32_t op1_info,
+	zend_class_entry *ce,
+	bool ce_is_instanceof,
+	zend_property_info *prop_info,
+	ir_ref *slow_inputs
+) {
+	if ((JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || !(op1_info & MAY_BE_NEW_HOOKS_GUARD))
+	 && ce_is_instanceof
+	 && !(prop_info->flags & ZEND_ACC_FINAL)) {
+		ir_ref num_hooked_props = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)));
+		num_hooked_props = ir_LOAD_U32(ir_ADD_OFFSET(num_hooked_props, offsetof(zend_class_entry, num_hooked_props)));
+		ir_ref has_same_num_hooked_props = ir_EQ(num_hooked_props, ir_CONST_U32(ce->num_hooked_props));
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			/* We use EXIT_TO_VM to avoid creating new side-traces that would
+			 * just immediately fail. To make side-traces work properly, the
+			 * side-trace needs to create a class guard for the given subclass. */
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			if (!exit_addr) {
+				return false;
+			}
+			ir_GUARD(has_same_num_hooked_props, ir_CONST_ADDR(exit_addr));
+			if (ssa->var_info && ssa_op->op1_use >= 0) {
+				ssa->var_info[ssa_op->op1_use].type |= MAY_BE_NEW_HOOKS_GUARD;
+			}
+		} else {
+			ir_ref if_same_num_hooked_props = ir_IF(has_same_num_hooked_props);
+			ir_IF_FALSE_cold(if_same_num_hooked_props);
+			ir_END_list(*slow_inputs);
+			ir_IF_TRUE(if_same_num_hooked_props);
+		}
+	}
+
+	return true;
+}
+
 static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
                               const zend_op        *opline,
                               const zend_op_array  *op_array,
@@ -14291,27 +14337,8 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			}
 		}
 	} else {
-		/* Child classes may add hooks to property. */
-		if (ce_is_instanceof && !(prop_info->flags & ZEND_ACC_FINAL)) {
-			int prop_info_offset =
-				(((prop_info->offset - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
-			ir_ref prop_info_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)));
-			prop_info_ref = ir_LOAD_A(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_class_entry, properties_info_table)));
-			prop_info_ref = ir_LOAD_A(ir_ADD_OFFSET(prop_info_ref, prop_info_offset));
-			ir_ref is_same_prop_info = ir_EQ(prop_info_ref, ir_CONST_ADDR(prop_info));
-			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-				if (!exit_addr) {
-					return 0;
-				}
-				ir_GUARD(is_same_prop_info, ir_CONST_ADDR(exit_addr));
-			} else {
-				ir_ref if_same_prop_info = ir_IF(is_same_prop_info);
-				ir_IF_FALSE_cold(if_same_prop_info);
-				ir_END_list(slow_inputs);
-				ir_IF_TRUE(if_same_prop_info);
-			}
+		if (!zend_jit_new_hooks_guard(jit, opline, ssa, ssa_op, obj_ref, op1_info, ce, ce_is_instanceof, prop_info, &slow_inputs)) {
+			return 0;
 		}
 
 		prop_ref = ir_ADD_OFFSET(obj_ref, prop_info->offset);
@@ -14771,6 +14798,10 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			ir_IF_FALSE(if_has_prop_info);
 		}
 	} else {
+		if (!zend_jit_new_hooks_guard(jit, opline, ssa, ssa_op, obj_ref, op1_info, ce, ce_is_instanceof, prop_info, &slow_inputs)) {
+			return 0;
+		}
+
 		prop_ref = ir_ADD_OFFSET(obj_ref, prop_info->offset);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 		/* With the exception of __clone(), readonly assignment always happens on IS_UNDEF, doding
@@ -15095,6 +15126,10 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 		}
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 	} else {
+		if (!zend_jit_new_hooks_guard(jit, opline, ssa, ssa_op, obj_ref, op1_info, ce, ce_is_instanceof, prop_info, &slow_inputs)) {
+			return 0;
+		}
+
 		prop_ref = ir_ADD_OFFSET(obj_ref, prop_info->offset);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 
@@ -15518,6 +15553,10 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 		}
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 	} else {
+		if (!zend_jit_new_hooks_guard(jit, opline, ssa, ssa_op, obj_ref, op1_info, ce, ce_is_instanceof, prop_info, &slow_inputs)) {
+			return 0;
+		}
+
 		prop_ref = ir_ADD_OFFSET(obj_ref, prop_info->offset);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 

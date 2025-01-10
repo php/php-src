@@ -31,6 +31,7 @@
 #define MAY_BE_PACKED_GUARD         (1<<27) /* needs packed array guard */
 #define MAY_BE_CLASS_GUARD          (1<<27) /* needs class guard */
 #define MAY_BE_GUARD                (1<<28) /* needs type guard */
+#define MAY_BE_NEW_HOOKS_GUARD      (1<<29) /* object has new guards compared to comp-time class */
 
 #define MAY_HAVE_DTOR \
 	(MAY_BE_OBJECT|MAY_BE_RESOURCE \
