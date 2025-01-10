@@ -96,10 +96,6 @@ PHP                                                                        NEWS
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)
 
-- Sodium:
-  . Fix overall theorical overflows on zend_string buffer allocations.
-    (David Carlier/nielsdos)
-
 - Sockets:
   . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
     (David Carlier)
@@ -124,6 +120,12 @@ PHP                                                                        NEWS
   . socket_set_option with the options MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
     will throw an exception if its value is not a valid array/object.
     (David Carlier)
+  . socket_getsockname/socket_create/socket_bind handled AF_PACKET family socket.
+    (David Carlier)
+
+- Sodium:
+  . Fix overall theorical overflows on zend_string buffer allocations.
+    (David Carlier/nielsdos)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt

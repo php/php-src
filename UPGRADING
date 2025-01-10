@@ -164,6 +164,9 @@ PHP 8.5 UPGRADE NOTES
   . socket_set_option with MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
     options will throw an exception if the value isn't a valid object
     or array.
+  . socket_create/socket_bind can create AF_PACKET family sockets.
+  . socket_getsockname gets the interface index and its string
+    representation with AF_PACKET socket.
 
 - Zlib:
   . The "use_include_path" argument for the
@@ -241,6 +244,7 @@ PHP 8.5 UPGRADE NOTES
   . TCP_REUSPORT_LB_NUMA_NODOM (FreeBSD only).
   . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
   . TCP_BBR_ALGORITHM (FreeBSD only).
+  . AF_PACKET (Linux only).
 
 ========================================
 11. Changes to INI File Handling
