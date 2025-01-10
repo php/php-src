@@ -91,7 +91,9 @@ ValueError: Invalid or uninitialized Zip object
 bool(true)
 bool(true)
 Trampoline for trampolineThrow
+
+Warning: ZipArchive::close(): Operation cancelled in %s on line %d
 Exception: boo
-bool(false)
-string(8) "No error"
+bool(true)
+string(19) "Operation cancelled"
 Done
