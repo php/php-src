@@ -67,7 +67,7 @@ jobs:
             CXX=clang++-17
             --enable-debug
             --enable-zts
-          skipSlow: true # FIXME: This should likely include slow extensions
+          skipSlow: false # FIXME: This should likely include slow extensions
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       # Skip an install action for now
