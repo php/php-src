@@ -24,8 +24,11 @@ var_dump($zip->registerCancelCallback(function () {
     return [];
 }));
 var_dump($zip->addFromString(PHP_BINARY, 'entry #1'));
-
-var_dump($zip->close());
+try {
+    var_dump($zip->close());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 var_dump($zip->status == ZipArchive::ER_CANCELLED);
 var_dump($zip->getStatusString());
 @unlink($file);
@@ -38,10 +41,12 @@ $file = $dirname . '__tmp_oo_cancel_incorrect_return.zip';
 
 @unlink($file);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
+
+Warning: ZipArchive::close(): Operation cancelled in %s on line %d
+TypeError: Return value of callback provided to ZipArchive::registerCancelCallback() must be of type int, array returned
 bool(true)
-bool(false)
-string(8) "No error"
+string(19) "Operation cancelled"
 Done
