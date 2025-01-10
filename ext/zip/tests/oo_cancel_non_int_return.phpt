@@ -1,5 +1,5 @@
 --TEST--
-ZipArchive::registerCancelCallback() with a normal callback
+ZipArchive::registerCancelCallback() with a callback returning an incorrect type
 --EXTENSIONS--
 zip
 --SKIPIF--
@@ -12,16 +12,16 @@ date.timezone=UTC
 --FILE--
 <?php
 $dirname = dirname(__FILE__) . '/';
-$file = $dirname . '__tmp_oo_cancel.zip';
+$file = $dirname . '__tmp_oo_cancel_incorrect_return.zip';
 
 $zip = new ZipArchive;
 if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
     exit('failed');
 }
 
+/* Register a bogus callback */
 var_dump($zip->registerCancelCallback(function () {
-    // Always cancel
-    return -1;
+    return [];
 }));
 var_dump($zip->addFromString(PHP_BINARY, 'entry #1'));
 
@@ -34,16 +34,14 @@ Done
 --CLEAN--
 <?php
 $dirname = dirname(__FILE__) . '/';
-$file = $dirname . '__tmp_oo_cancel.zip';
+$file = $dirname . '__tmp_oo_cancel_incorrect_return.zip';
 
 @unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
-
-Warning: ZipArchive::close(): Operation cancelled in %s
+bool(true)
 bool(false)
-bool(true)
-string(19) "Operation cancelled"
+string(8) "No error"
 Done
