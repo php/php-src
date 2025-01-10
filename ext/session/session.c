@@ -947,7 +947,11 @@ static PHP_INI_MH(OnUpdateRefererCheck)
 	if (ZSTR_LEN(new_value) != 0) {
 		php_error_docref("session.configuration", E_DEPRECATED, "Usage of session.referer_check INI setting is deprecated");
 	}
-	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+
+	zend_string **p = (zend_string **) ZEND_INI_GET_ADDR();
+	*p = new_value ? new_value : NULL;
+	return SUCCESS;
+
 }
 
 /* {{{ PHP_INI */
@@ -1720,7 +1724,9 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 			}
 			/* Check whether the current request was referred to by
 			 * an external site which invalidates the previously found id. */
-			if (PS(id) && PS(extern_referer_chk) && ZSTR_LEN(PS(extern_referer_chk)) != 0 &&
+			if (PS(id) &&
+				PS(extern_referer_chk) &&
+				ZSTR_LEN(PS(extern_referer_chk)) != 0 &&
 				!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
 				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
 				Z_TYPE_P(data) == IS_STRING &&
