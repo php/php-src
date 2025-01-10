@@ -80,7 +80,7 @@ typedef struct _ze_zip_object {
 	zend_fcall_info_cache progress_callback;
 #endif
 #ifdef HAVE_CANCEL_CALLBACK
-	zval cancel_callback;
+	zend_fcall_info_cache cancel_callback;
 #endif
 	zend_object zo;
 } ze_zip_object;
