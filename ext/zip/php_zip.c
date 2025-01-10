@@ -3069,10 +3069,12 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 	ze_zip_object *obj = ptr;
 
 	zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
-	if (!Z_ISUNDEF(cb_retval)) {
-		retval = zval_get_long(&cb_retval);
-		zval_ptr_dtor(&cb_retval);
+	if (Z_ISUNDEF(cb_retval)) {
+		/* Cancel if an exception has been thrown */
+		return -1;
 	}
+	retval = zval_get_long(&cb_retval);
+	zval_ptr_dtor(&cb_retval);
 
 	return retval;
 }
