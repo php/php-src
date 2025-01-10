@@ -3065,7 +3065,6 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 {
 	zval cb_retval;
-	int retval = 0;
 	ze_zip_object *obj = ptr;
 
 	zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
@@ -3073,10 +3072,17 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 		/* Cancel if an exception has been thrown */
 		return -1;
 	}
-	retval = zval_get_long(&cb_retval);
+	bool failed = false;
+	zend_long retval = zval_try_get_long(&cb_retval, &failed);
+	if (failed) {
+		zend_type_error("Return value of callback provided to ZipArchive::registerCancelCallback()"
+			" must be of type int, %s returned", zend_zval_value_name(&cb_retval));
+		zval_ptr_dtor(&cb_retval);
+		return -1;
+	}
 	zval_ptr_dtor(&cb_retval);
 
-	return retval;
+	return (int) retval;
 }
 
 /* {{{ register a progression callback: int callback(double state); */
