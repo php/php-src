@@ -42,6 +42,8 @@ runs:
             dev-db/lmdb \
             app-crypt/argon2 \
             app-text/enchant \
+            app-dict/myspell-en \
+            app-dict/myspell-de \
             dev-db/freetds \
             net-analyzer/net-snmp \
             net-nds/openldap \
