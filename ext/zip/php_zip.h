@@ -77,7 +77,7 @@ typedef struct _ze_zip_object {
 	int err_zip;
 	int err_sys;
 #ifdef HAVE_PROGRESS_CALLBACK
-	zval progress_callback;
+	zend_fcall_info_cache progress_callback;
 #endif
 #ifdef HAVE_CANCEL_CALLBACK
 	zval cancel_callback;
