@@ -1030,13 +1030,12 @@ static void php_zip_progress_callback_free(void *ptr)
 #endif
 
 #ifdef HAVE_CANCEL_CALLBACK
-static void _php_zip_cancel_callback_free(void *ptr)
+static void php_zip_cancel_callback_free(void *ptr)
 {
 	ze_zip_object *obj = ptr;
 
-	if (!Z_ISUNDEF(obj->cancel_callback)) {
-		zval_ptr_dtor(&obj->cancel_callback);
-		ZVAL_UNDEF(&obj->cancel_callback);
+	if (ZEND_FCC_INITIALIZED(obj->cancel_callback)) {
+		zend_fcc_dtor(&obj->cancel_callback);
 	}
 }
 #endif
@@ -1070,7 +1069,7 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 
 #ifdef HAVE_CANCEL_CALLBACK
 	/* if not properly called by libzip */
-	_php_zip_cancel_callback_free(intern);
+	php_zip_cancel_callback_free(intern);
 #endif
 
 	intern->za = NULL;
@@ -3063,13 +3062,14 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 #endif
 
 #ifdef HAVE_CANCEL_CALLBACK
-static int _php_zip_cancel_callback(zip_t *arch, void *ptr)
+static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 {
 	zval cb_retval;
 	int retval = 0;
 	ze_zip_object *obj = ptr;
 
-	if (call_user_function(EG(function_table), NULL, &obj->cancel_callback, &cb_retval, 0, NULL) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
+	zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
+	if (!Z_ISUNDEF(cb_retval)) {
 		retval = zval_get_long(&cb_retval);
 		zval_ptr_dtor(&cb_retval);
 	}
@@ -3081,24 +3081,28 @@ static int _php_zip_cancel_callback(zip_t *arch, void *ptr)
 PHP_METHOD(ZipArchive, registerCancelCallback)
 {
 	struct zip *intern;
-	zval *self = ZEND_THIS;
-	zend_fcall_info fci;
+	zend_fcall_info dummy_fci;
 	zend_fcall_info_cache fcc;
 	ze_zip_object *obj;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "F", &dummy_fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	ZIP_FROM_OBJECT(intern, self);
-
-	obj = Z_ZIP_P(self);
+	/* Inline ZIP_FROM_OBJECT(intern, self); */
+	obj = Z_ZIP_P(ZEND_THIS);
+	intern = obj->za;
+	if (!intern) { \
+		zend_value_error("Invalid or uninitialized Zip object");
+		zend_release_fcall_info_cache(&fcc);
+		RETURN_THROWS();
+	}
 
 	/* free if called twice */
-	_php_zip_cancel_callback_free(obj);
+	php_zip_cancel_callback_free(obj);
 
 	/* register */
-	ZVAL_COPY(&obj->cancel_callback, &fci.function_name);
-	if (zip_register_cancel_callback_with_state(intern, _php_zip_cancel_callback, _php_zip_cancel_callback_free, obj)) {
+	zend_fcc_dup(&obj->cancel_callback, &fcc);
+	if (zip_register_cancel_callback_with_state(intern, php_zip_cancel_callback, php_zip_cancel_callback_free, obj)) {
 		RETURN_FALSE;
 	}
 
