@@ -16,6 +16,7 @@ runs:
         ./configure \
           --enable-option-checking=fatal \
           --prefix=/usr \
+          --with-libdir=lib64 \
           --enable-phpdbg \
           --enable-fpm \
           --with-pdo-mysql=mysqlnd \
