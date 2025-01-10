@@ -45,8 +45,10 @@ runs:
             dev-db/freetds \
             net-analyzer/net-snmp \
             net-nds/openldap \
+            dev-libs/cyrus-sasl \
             dev-db/unixODBC \
-            dev-db/postgresql; do
+            dev-db/postgresql \
+            ; do
           echo $package
           if ! portageq has_version / $package; then
             echo "need to install $package"
