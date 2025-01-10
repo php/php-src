@@ -26,6 +26,13 @@ const AF_INET6 = UNKNOWN;
  */
 const AF_DIVERT = UNKNOWN;
 #endif
+#ifdef AF_PACKET
+/**
+ * @var int
+ * @cvalue AF_PACKET
+ */
+const AF_PACKET = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SOCK_STREAM
@@ -1978,6 +1985,28 @@ const UDPLITE_SEND_CSCOV = UNKNOWN;
  */
 const UDPLITE_RECV_CSCOV = UNKNOWN;
 #endif
+#if defined(ETH_P_ALL)
+/**
+ * @var int
+ * @cvalue ETH_P_IP
+ */
+const ETH_P_IP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_IPV6
+ */
+const ETH_P_IPV6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_LOOP
+ */
+const ETH_P_LOOP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_ALL
+ */
+const ETH_P_ALL = UNKNOWN;
+#endif
 
 /**
  * @strict-properties
@@ -2017,13 +2046,13 @@ function socket_read(Socket $socket, int $length, int $mode = PHP_BINARY_READ): 
  * @param string $address
  * @param int $port
  */
-function socket_getsockname(Socket $socket, &$address, &$port = null): bool {}
+function socket_getsockname(Socket $socket, &$address, ?int &$objint = null): bool {}
 
 /**
  * @param string $address
  * @param int $port
  */
-function socket_getpeername(Socket $socket, &$address, &$port = null): bool {}
+function socket_getpeername(Socket $socket, &$address, ?int &$objint = null): bool {}
 
 function socket_create(int $domain, int $type, int $protocol): Socket|false {}
 

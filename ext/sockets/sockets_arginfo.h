@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2c5f4685d5dab42426d4fe0553dd17cb9935a572 */
+ * Stub hash: 1b54a83cd0f640fb0df2565155070455b8814f4b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -48,7 +48,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_getsockname, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
 	ZEND_ARG_INFO(1, address)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, port, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(1, objint, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_socket_getpeername arginfo_socket_getsockname
@@ -319,6 +319,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(AF_DIVERT)
 	REGISTER_LONG_CONSTANT("AF_DIVERT", AF_DIVERT, CONST_PERSISTENT);
+#endif
+#if defined(AF_PACKET)
+	REGISTER_LONG_CONSTANT("AF_PACKET", AF_PACKET, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SOCK_STREAM", SOCK_STREAM, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_DGRAM", SOCK_DGRAM, CONST_PERSISTENT);
@@ -1086,6 +1089,18 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(UDPLITE_RECV_CSCOV)
 	REGISTER_LONG_CONSTANT("UDPLITE_RECV_CSCOV", UDPLITE_RECV_CSCOV, CONST_PERSISTENT);
+#endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_P_IP", ETH_P_IP, CONST_PERSISTENT);
+#endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_P_IPV6", ETH_P_IPV6, CONST_PERSISTENT);
+#endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_P_LOOP", ETH_P_LOOP, CONST_PERSISTENT);
+#endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_P_ALL", ETH_P_ALL, CONST_PERSISTENT);
 #endif
 }
 
