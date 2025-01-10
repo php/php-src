@@ -38,6 +38,7 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
       LDAP_LIBDIR=$1
     fi
   fi
+  PHP_LDAP_PKGCONFIG=false
 ])
 
 PHP_ARG_WITH([ldap],
@@ -59,52 +60,53 @@ if test "$PHP_LDAP" != "no"; then
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   AS_VAR_IF([PHP_LDAP], [yes], [
-    for i in /usr/local /usr; do
-      PHP_LDAP_CHECKS([$i])
-    done
+    PKG_CHECK_MODULES([LDAP], [lber ldap])
+    PHP_LDAP_PKGCONFIG=true
   ], [PHP_LDAP_CHECKS([$PHP_LDAP])])
 
-  AS_VAR_IF([LDAP_DIR],, [AC_MSG_ERROR([Cannot find ldap.h])])
-
-  dnl -pc removal is a hack for clang
-  MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')
-
-  AH_TEMPLATE([HAVE_ORALDAP],
-    [Define to 1 if the ldap extension uses the Oracle Instant Client.])
-
-  if test -f $LDAP_LIBDIR/liblber.a || test -f $LDAP_LIBDIR/liblber.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.a || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.$SHLIB_SUFFIX_NAME; then
-    PHP_ADD_LIBRARY_WITH_PATH([lber], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
-    PHP_ADD_LIBRARY_WITH_PATH([ldap], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
-
-  elif test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/libldap.3.dylib; then
-    PHP_ADD_LIBRARY_WITH_PATH([ldap], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
-
-  elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.12.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.12.1; then
-    PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
-    AC_DEFINE([HAVE_ORALDAP], [1])
-
-  elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-    PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
-    AC_DEFINE([HAVE_ORALDAP], [1])
-
-  elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME; then
-     PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
-     AC_DEFINE([HAVE_ORALDAP], [1])
-
+  if test "$PHP_LDAP_PKGCONFIG" = true; then
+    PHP_EVAL_INCLINE([$LDAP_CFLAGS])
+    PHP_EVAL_LIBLINE([$LDAP_LIBS], [LDAP_SHARED_LIBADD])
   else
-    AC_MSG_ERROR([Cannot find ldap libraries in $LDAP_LIBDIR.])
+    AS_VAR_IF([LDAP_DIR],, [AC_MSG_ERROR([Cannot find ldap.h])])
+
+    dnl -pc removal is a hack for clang
+    MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')
+
+    AH_TEMPLATE([HAVE_ORALDAP],
+      [Define to 1 if the ldap extension uses the Oracle Instant Client.])
+
+    if test -f $LDAP_LIBDIR/liblber.a || test -f $LDAP_LIBDIR/liblber.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.a || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.$SHLIB_SUFFIX_NAME; then
+      PHP_ADD_LIBRARY_WITH_PATH([lber], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
+      PHP_ADD_LIBRARY_WITH_PATH([ldap], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
+
+    elif test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/libldap.3.dylib; then
+      PHP_ADD_LIBRARY_WITH_PATH([ldap], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
+
+    elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.12.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.12.1; then
+      PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
+      AC_DEFINE([HAVE_ORALDAP], [1])
+
+    elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
+      PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
+      AC_DEFINE([HAVE_ORALDAP], [1])
+
+    elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME; then
+       PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
+       AC_DEFINE([HAVE_ORALDAP], [1])
+
+    else
+      AC_MSG_ERROR([Cannot find ldap libraries in $LDAP_LIBDIR.])
+    fi
+
+    PHP_ADD_INCLUDE([$LDAP_INCDIR])
+
+    dnl Save original values
+    _SAVE_CPPFLAGS=$CPPFLAGS
+    _SAVE_LIBS=$LIBS
+    CPPFLAGS="$CPPFLAGS -I$LDAP_INCDIR"
+    LIBS="$LIBS $LDAP_SHARED_LIBADD"
   fi
-
-  PHP_ADD_INCLUDE([$LDAP_INCDIR])
-  PHP_SUBST([LDAP_SHARED_LIBADD])
-  AC_DEFINE([HAVE_LDAP], [1],
-    [Define to 1 if the PHP extension 'ldap' is available.])
-
-  dnl Save original values
-  _SAVE_CPPFLAGS=$CPPFLAGS
-  _SAVE_LIBS=$LIBS
-  CPPFLAGS="$CPPFLAGS -I$LDAP_INCDIR"
-  LIBS="$LIBS $LDAP_SHARED_LIBADD"
 
   dnl Check for 3 arg ldap_set_rebind_proc
   AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc],
@@ -132,6 +134,12 @@ if test "$PHP_LDAP" != "no"; then
     ldap_whoami_s
   ]))
 
+  if test "$PHP_LDAP_PKGCONFIG" = false; then
+    dnl Restore original values
+    CPPFLAGS=$_SAVE_CPPFLAGS
+    LIBS=$_SAVE_LIBS
+  fi
+
   dnl SASL check
   AS_VAR_IF([PHP_LDAP_SASL], [no],, [
     PKG_CHECK_MODULES([SASL], [libsasl2])
@@ -146,7 +154,7 @@ if test "$PHP_LDAP" != "no"; then
     [AC_CHECK_FUNC([ldap_simple_bind_s],,
       [AC_MSG_ERROR([LDAP library build check failed.])])])
 
-  dnl Restore original values
-  CPPFLAGS=$_SAVE_CPPFLAGS
-  LIBS=$_SAVE_LIBS
+  PHP_SUBST([LDAP_SHARED_LIBADD])
+  AC_DEFINE([HAVE_LDAP], [1],
+    [Define to 1 if the PHP extension 'ldap' is available.])
 fi
