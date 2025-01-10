@@ -81,4 +81,3 @@ $wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl.wsdl';
 @unlink($wsdlFile);
 ?>
 --EXPECT--
-Error: Invalid callback readfile, function "readfile" not found or invalid function name

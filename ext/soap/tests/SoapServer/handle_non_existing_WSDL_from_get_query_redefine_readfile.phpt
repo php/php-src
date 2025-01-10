@@ -85,4 +85,3 @@ $wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl.wsdl';
 @unlink($wsdlFile);
 ?>
 --EXPECT--
-Exception: BOO
