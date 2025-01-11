@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
     non-printable characters in string literals). (nielsdos, WangYihang)
   . Add support for backtraces for fatal errors. (enorris)
+  . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)

@@ -207,6 +207,17 @@ static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, z
 	return variable_ptr;
 }
 
+static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable_ptr, zval *value) {
+	if (Z_REFCOUNTED_P(variable_ptr)) {
+		ZEND_ASSERT(Z_TYPE_P(variable_ptr) != IS_REFERENCE);
+		zend_refcounted *ref = Z_COUNTED_P(variable_ptr);
+		ZVAL_COPY_VALUE(variable_ptr, value);
+		GC_DTOR_NO_REF(ref);
+	} else {
+		ZVAL_COPY_VALUE(variable_ptr, value);
+	}
+}
+
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant(zval *pp);
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *pp, zend_class_entry *scope);
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *pp, zend_class_entry *scope, zend_ast_evaluate_ctx *ctx);
