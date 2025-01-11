@@ -39,6 +39,8 @@ runs:
             dev-db/sqlite \
             app-text/htmltidy \
             sys-libs/gdbm \
+            dev-db/qdbm \
+            dev-db/tokyocabinet \
             dev-db/lmdb \
             app-crypt/argon2 \
             app-text/enchant \
