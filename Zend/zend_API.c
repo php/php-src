@@ -4666,8 +4666,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_ex(zend_reference *ref, zval *val
 		zval_ptr_dtor(val);
 		return FAILURE;
 	} else {
-		zval_ptr_dtor(&ref->val);
-		ZVAL_COPY_VALUE(&ref->val, val);
+		ZEND_SAFE_ASSIGN_VALUE(&ref->val, val);
 		return SUCCESS;
 	}
 }

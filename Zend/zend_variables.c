@@ -85,6 +85,20 @@ ZEND_API void zval_ptr_dtor(zval *zval_ptr) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void zval_ptr_safe_dtor(zval *zval_ptr)
+{
+	if (Z_REFCOUNTED_P(zval_ptr)) {
+		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
+
+		if (GC_DELREF(ref) == 0) {
+			ZVAL_NULL(zval_ptr);
+			rc_dtor_func(ref);
+		} else {
+			gc_check_possible_root(ref);
+		}
+	}
+}
+
 ZEND_API void zval_internal_ptr_dtor(zval *zval_ptr) /* {{{ */
 {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
