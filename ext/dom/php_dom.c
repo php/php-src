@@ -1474,7 +1474,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 
 	if (local) {
 		int len = (int) ZSTR_LEN(local);
-		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)local, len)) != NULL) {
+		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ZSTR_VAL(local), len)) != NULL) {
 			mapptr->local = BAD_CAST tmp;
 		} else {
 			mapptr->local = BAD_CAST ZSTR_VAL(zend_string_copy(local));
@@ -1485,7 +1485,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 
 	if (ns) {
 		int len = (int) ZSTR_LEN(ns);
-		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ns, len)) != NULL) {
+		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ZSTR_VAL(ns), len)) != NULL) {
 			mapptr->ns = BAD_CAST tmp;
 		} else {
 			mapptr->ns = BAD_CAST ZSTR_VAL(zend_string_copy(ns));
