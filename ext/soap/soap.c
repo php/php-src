@@ -1313,6 +1313,8 @@ PHP_METHOD(SoapServer, handle)
 			if (stream) {
 				php_stream_passthru(stream);
 				php_stream_close(stream);
+			} else {
+				soap_server_fault("Server", "Couldn't find WSDL", NULL, NULL, NULL);
 			}
 
 			SOAP_SERVER_END_CODE();
