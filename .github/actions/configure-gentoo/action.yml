@@ -68,8 +68,9 @@ runs:
           --with-cdb \
           --enable-flatfile \
           --enable-inifile \
+          --with-tcadb \
           --with-lmdb \
-          --with-gdbm \
+          --with-qdbm \
           ${{ inputs.skipSlow == 'false' && '--with-snmp' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-unixODBC' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-odbc=unixODBC,/usr' || '' }} \
