@@ -610,7 +610,7 @@ PHP_FUNCTION(sapi_windows_cp_set)
 		cp = php_win32_cp_set_by_id((DWORD)id);
 	}
 	if (!cp) {
-		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage %d", id);
+		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage " ZEND_LONG_FMT, id);
 		RETURN_FALSE;
 	}
 
