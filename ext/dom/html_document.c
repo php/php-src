@@ -994,34 +994,17 @@ fail_oom:
 	RETURN_THROWS();
 }
 
-PHP_METHOD(Dom_HTMLDocument, createFromFile)
+static void dom_html_document_create_from_stream(
+	zval *return_value,
+	php_stream *stream,
+	zend_long options,
+	const char *override_encoding,
+	size_t override_encoding_len,
+	zend_string *opened_path,
+	const char *filename
+)
 {
-	const char *filename, *override_encoding = NULL;
 	php_dom_private_data *private_data = NULL;
-	size_t filename_len, override_encoding_len;
-	zend_long options = 0;
-	php_stream *stream = NULL;
-	if (zend_parse_parameters(
-		ZEND_NUM_ARGS(),
-		"p|lp!",
-		&filename,
-		&filename_len,
-		&options,
-		&override_encoding,
-		&override_encoding_len
-	) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	/* See php_libxml_streams_IO_open_wrapper(), apparently this caused issues in the past. */
-	if (strstr(filename, "%00")) {
-		zend_argument_value_error(1, "must not contain percent-encoded NUL bytes");
-		RETURN_THROWS();
-	}
-
-	if (!check_options_validity(2, options)) {
-		RETURN_THROWS();
-	}
 
 	dom_lexbor_libxml2_bridge_application_data application_data;
 	application_data.input_name = filename;
@@ -1056,15 +1039,6 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 		}
 		should_determine_encoding_implicitly = false;
 		dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
-	}
-
-	zend_string *opened_path = NULL;
-	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, &opened_path, php_libxml_get_stream_context());
-	if (!stream) {
-		if (!EG(exception)) {
-			zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", filename);
-		}
-		RETURN_THROWS();
 	}
 
 	/* MIME sniff */
@@ -1192,12 +1166,6 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 		lxml_doc->URL = xmlStrdup((const xmlChar *) filename);
 	}
 
-	if (opened_path != NULL) {
-		zend_string_release_ex(opened_path, false);
-	}
-	php_stream_close(stream);
-	stream = NULL;
-
 	dom_object *intern = php_dom_instantiate_object_helper(
 		return_value,
 		dom_html_document_class_entry,
@@ -1216,10 +1184,52 @@ fail_general:
 		php_dom_private_data_destroy(private_data);
 	}
 	lxb_html_document_destroy(document);
-	php_stream_close(stream);
+}
+
+PHP_METHOD(Dom_HTMLDocument, createFromFile)
+{
+	const char *filename, *override_encoding = NULL;
+	size_t filename_len, override_encoding_len;
+	zend_long options = 0;
+	if (zend_parse_parameters(
+		ZEND_NUM_ARGS(),
+		"p|lp!",
+		&filename,
+		&filename_len,
+		&options,
+		&override_encoding,
+		&override_encoding_len
+	) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	/* See php_libxml_streams_IO_open_wrapper(), apparently this caused issues in the past. */
+	if (strstr(filename, "%00")) {
+		zend_argument_value_error(1, "must not contain percent-encoded NUL bytes");
+		RETURN_THROWS();
+	}
+
+	if (!check_options_validity(2, options)) {
+		RETURN_THROWS();
+	}
+
+	zend_string *opened_path = NULL;
+	php_stream *stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, &opened_path, php_libxml_get_stream_context());
+	if (!stream) {
+		if (!EG(exception)) {
+			zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", filename);
+		}
+		RETURN_THROWS();
+	}
+
+	dom_html_document_create_from_stream(
+		return_value, stream, options, override_encoding, override_encoding_len, opened_path, filename
+	);
+
 	if (opened_path != NULL) {
 		zend_string_release_ex(opened_path, false);
 	}
+	php_stream_close(stream);
 }
 
 static zend_result dom_write_output_smart_str(void *ctx, const char *buf, size_t size)
