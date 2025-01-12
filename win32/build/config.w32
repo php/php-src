@@ -370,6 +370,7 @@ if (VS_TOOLSET) {
 		}
 	}
 } else if (CLANG_TOOLSET) {
+	AC_DEFINE("PHP_HAVE_BUILTIN_EXPECT", 1, "Define to 1 if the compiler supports '__builtin_expect'.");
 	AC_DEFINE("PHP_HAVE_BUILTIN_SADDL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_saddl_overflow'.");
 	AC_DEFINE("PHP_HAVE_BUILTIN_SADDLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_saddll_overflow'.");
 	AC_DEFINE("PHP_HAVE_BUILTIN_SSUBL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_ssubl_overflow'.");
