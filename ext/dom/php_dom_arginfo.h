@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0fcee2fa666dc88faf084578dde157409a6f5594 */
+ * Stub hash: 8018206ec17368080a8f58e03f3e4be53cde2e34 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1005,6 +1005,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_HTMLDocument_createFrom
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, overrideEncoding, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_HTMLDocument_createFromStream, 0, 1, Dom\\HTMLDocument, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, documentURI, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, overrideEncoding, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_HTMLDocument_createFromString, 0, 1, Dom\\HTMLDocument, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
@@ -1302,6 +1309,7 @@ ZEND_METHOD(Dom_Document, registerNodeClass);
 ZEND_METHOD(Dom_Document, importLegacyNode);
 ZEND_METHOD(Dom_HTMLDocument, createEmpty);
 ZEND_METHOD(Dom_HTMLDocument, createFromFile);
+ZEND_METHOD(Dom_HTMLDocument, createFromStream);
 ZEND_METHOD(Dom_HTMLDocument, createFromString);
 ZEND_METHOD(Dom_XMLDocument, saveXml);
 ZEND_METHOD(Dom_HTMLDocument, saveHtml);
@@ -1752,6 +1760,7 @@ static const zend_function_entry class_Dom_Document_methods[] = {
 static const zend_function_entry class_Dom_HTMLDocument_methods[] = {
 	ZEND_ME(Dom_HTMLDocument, createEmpty, arginfo_class_Dom_HTMLDocument_createEmpty, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Dom_HTMLDocument, createFromFile, arginfo_class_Dom_HTMLDocument_createFromFile, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Dom_HTMLDocument, createFromStream, arginfo_class_Dom_HTMLDocument_createFromStream, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Dom_HTMLDocument, createFromString, arginfo_class_Dom_HTMLDocument_createFromString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_RAW_FENTRY("saveXml", zim_Dom_XMLDocument_saveXml, arginfo_class_Dom_HTMLDocument_saveXml, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("saveXmlFile", zim_DOMDocument_save, arginfo_class_Dom_HTMLDocument_saveXmlFile, ZEND_ACC_PUBLIC, NULL, NULL)

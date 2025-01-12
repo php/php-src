@@ -1004,10 +1004,12 @@ static void dom_html_document_create_from_stream(
 	const char *filename
 )
 {
+	ZEND_ASSERT(stream != NULL);
+
 	php_dom_private_data *private_data = NULL;
 
 	dom_lexbor_libxml2_bridge_application_data application_data;
-	application_data.input_name = filename;
+	application_data.input_name = filename ? filename : "Entity";
 	application_data.current_total_offset = 0;
 	application_data.html_no_implied = options & HTML_PARSE_NOIMPLIED;
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
@@ -1230,6 +1232,34 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 		zend_string_release_ex(opened_path, false);
 	}
 	php_stream_close(stream);
+}
+
+PHP_METHOD(Dom_HTMLDocument, createFromStream)
+{
+	php_stream *stream;
+	zval *stream_zv;
+	const char *document_uri = NULL;
+	const char *override_encoding = NULL;
+	size_t override_encoding_len, document_uri_len;
+	zend_long options = 0;
+	if (zend_parse_parameters(
+		ZEND_NUM_ARGS(),
+		"r|p!lp!",
+		&stream_zv,
+		&document_uri,
+		&document_uri_len,
+		&options,
+		&override_encoding,
+		&override_encoding_len
+	) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	php_stream_from_res(stream, Z_RES_P(stream_zv));
+
+	dom_html_document_create_from_stream(
+		return_value, stream, options, override_encoding, override_encoding_len, NULL, document_uri
+	);
 }
 
 static zend_result dom_write_output_smart_str(void *ctx, const char *buf, size_t size)
