@@ -59,6 +59,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15833 (Segmentation fault (access null pointer) in
     ext/spl/spl_array.c). (nielsdos)
 
+- Windows:
+  . Fixed clang compiler detection. (cmb)
+
 - Zip:
   . Fixed bug GH-17139 (Fix zip_entry_name() crash on invalid entry).
     (nielsdos)
