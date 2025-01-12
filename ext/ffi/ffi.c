@@ -3052,7 +3052,7 @@ static void *dlsym_loaded(char *symbol)
 	return addr;
 }
 # undef DL_FETCH_SYMBOL
-# define DL_FETCH_SYMBOL(h, s) (h == NULL ? dlsym_loaded(s) : GetProcAddress(h, s))
+# define DL_FETCH_SYMBOL(h, s) (h == NULL ? dlsym_loaded(s) : (void*) GetProcAddress(h, s))
 #endif
 
 ZEND_METHOD(FFI, cdef) /* {{{ */
