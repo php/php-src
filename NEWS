@@ -55,6 +55,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15833 (Segmentation fault (access null pointer) in
     ext/spl/spl_array.c). (nielsdos)
 
+- Zip:
+  . Fixed bug GH-17139 (Fix zip_entry_name() crash on invalid entry).
+    (nielsdos)
+
 02 Jan 2025, PHP 8.4.3
 
 - BcMath:
