@@ -26,6 +26,12 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . The gdImageScale*() and gdImageRotate*() helpers are now internal in the
     bundled libgd, like they have been in external libgd as of gd-2.1.1.
 
+- ext/json
+  . php_json_encode_serializable_object() now assumes `EG(active)`,
+    if not a bailout is caused. Therefore a minor BC break exists if the
+    `PHP_JSON_PARTIAL_OUTPUT_ON_ERROR` option is in use.
+    However, this situation is highly unlikely.
+
 - ext/libxml
   . The refcount APIs now return an `unsigned int` instead of an `int`.
 
