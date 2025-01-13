@@ -702,7 +702,7 @@ again:
 			/* Avoid modifications (and potential freeing) of the array through a reference when a
 			 * jsonSerialize() method is invoked. */
 			zval zv;
-			int res;
+			zend_result res;
 			ZVAL_COPY(&zv, val);
 			res = php_json_encode_array(buf, &zv, options, encoder);
 			zval_ptr_dtor_nogc(&zv);
