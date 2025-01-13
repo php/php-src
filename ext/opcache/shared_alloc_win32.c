@@ -47,7 +47,7 @@ static void *mapping_base;
 static void zend_win_error_message(int type, char *msg, int err)
 {
 	HANDLE h;
-	char *ev_msgs[2];
+	const char *ev_msgs[2];
 	char *buf = php_win32_error_to_msg(err);
 
 	h = RegisterEventSource(NULL, TEXT(ACCEL_EVENT_SOURCE));
