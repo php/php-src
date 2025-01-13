@@ -8657,6 +8657,13 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 		flags |= zend_property_is_virtual(ce, name, hooks_ast, flags) ? ZEND_ACC_VIRTUAL : 0;
 
+		/* FIXME: This is a dirty fix to maintain ABI compatibility. We don't
+		 * have an actual property info yet, but we really only need the name
+		 * anyway. We should convert this to a zend_string. */
+		ZEND_ASSERT(!CG(context).active_property_info);
+		zend_property_info dummy_prop_info = { .name = name };
+		CG(context).active_property_info = &dummy_prop_info;
+
 		if (!hooks_ast) {
 			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 				zend_error_noreturn(E_COMPILE_ERROR,
@@ -8749,6 +8756,8 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		if (attr_ast) {
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
 		}
+
+		CG(context).active_property_info = NULL;
 	}
 }
 /* }}} */
