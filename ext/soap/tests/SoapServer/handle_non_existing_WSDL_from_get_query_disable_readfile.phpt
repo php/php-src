@@ -8,7 +8,7 @@ WSDL
 disable_functions=readfile
 --FILE--
 <?php
-$wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl.wsdl';
+$wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl_from_get_query_disable_readfile.wsdl';
 
 $wsdl = <<<'WSDL'
 <?xml version="1.0" ?>
@@ -68,16 +68,12 @@ $options = [];
 $server = new SoapServer($wsdlFile, $options);
 
 unlink($wsdlFile);
+$server->handle();
 
-try {
-    $server->handle();
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
 ?>
 --CLEAN--
 <?php
-$wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl.wsdl';
+$wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl_from_get_query_disable_readfile.wsdl';
 @unlink($wsdlFile);
 ?>
 --EXPECT--

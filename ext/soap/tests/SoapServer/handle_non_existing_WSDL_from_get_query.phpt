@@ -6,7 +6,7 @@ soap
 WSDL
 --FILE--
 <?php
-$wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl.wsdl';
+$wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl_from_get_query.wsdl';
 
 $wsdl = <<<'WSDL'
 <?xml version="1.0" ?>
@@ -72,7 +72,7 @@ $server->handle();
 ?>
 --CLEAN--
 <?php
-$wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl.wsdl';
+$wsdlFile = __DIR__ . '/test_handle_non_existent_wsdl_from_get_query.wsdl';
 @unlink($wsdlFile);
 ?>
 --EXPECT--
