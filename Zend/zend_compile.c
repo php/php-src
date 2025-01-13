@@ -342,7 +342,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_arra
 	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
 	CG(context).in_jmp_frameless_branch = false;
-	CG(context).active_property_info = NULL;
+	CG(context).active_property_info_name = NULL;
 	CG(context).active_property_hook_kind = (zend_property_hook_kind)-1;
 }
 /* }}} */
@@ -5100,13 +5100,13 @@ static bool zend_compile_parent_property_hook_call(znode *result, zend_ast *ast,
 	zend_property_hook_kind hook_kind = zend_get_property_hook_kind_from_name(hook_name);
 	ZEND_ASSERT(hook_kind != (uint32_t)-1);
 
-	const zend_property_info *prop_info = CG(context).active_property_info;
-	if (!prop_info) {
+	const zend_string *prop_info_name = CG(context).active_property_info_name;
+	if (!prop_info_name) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Must not use parent::$%s::%s() outside a property hook",
 			ZSTR_VAL(property_name), ZSTR_VAL(hook_name));
 	}
 
-	const char *unmangled_prop_name = zend_get_unmangled_property_name(prop_info->name);
+	const char *unmangled_prop_name = zend_get_unmangled_property_name(prop_info_name);
 	if (!zend_string_equals_cstr(property_name, unmangled_prop_name, strlen(unmangled_prop_name))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Must not use parent::$%s::%s() in a different property ($%s)",
 			ZSTR_VAL(property_name), ZSTR_VAL(hook_name), unmangled_prop_name);
@@ -8242,7 +8242,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 
 static zend_op_array *zend_compile_func_decl_ex(
 	znode *result, zend_ast *ast, enum func_decl_level level,
-	const zend_property_info *property_info,
+	zend_string *property_info_name,
 	zend_property_hook_kind hook_kind
 ) {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
@@ -8340,7 +8340,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 	}
 
 	zend_oparray_context_begin(&orig_oparray_context, op_array);
-	CG(context).active_property_info = property_info;
+	CG(context).active_property_info_name = property_info_name;
 	CG(context).active_property_hook_kind = hook_kind;
 
 	{
@@ -8557,7 +8557,7 @@ static void zend_compile_property_hooks(
 		hook->name = zend_strpprintf(0, "$%s::%s", ZSTR_VAL(prop_name), ZSTR_VAL(name));
 
 		zend_function *func = (zend_function *) zend_compile_func_decl_ex(
-			NULL, (zend_ast *) hook, FUNC_DECL_LEVEL_NESTED, prop_info, hook_kind);
+			NULL, (zend_ast *) hook, FUNC_DECL_LEVEL_NESTED, prop_info->name, hook_kind);
 
 		func->common.prop_info = prop_info;
 
@@ -8657,12 +8657,8 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 		flags |= zend_property_is_virtual(ce, name, hooks_ast, flags) ? ZEND_ACC_VIRTUAL : 0;
 
-		/* FIXME: This is a dirty fix to maintain ABI compatibility. We don't
-		 * have an actual property info yet, but we really only need the name
-		 * anyway. We should convert this to a zend_string. */
-		ZEND_ASSERT(!CG(context).active_property_info);
-		zend_property_info dummy_prop_info = { .name = name };
-		CG(context).active_property_info = &dummy_prop_info;
+		ZEND_ASSERT(!CG(context).active_property_info_name);
+		CG(context).active_property_info_name = name;
 
 		if (!hooks_ast) {
 			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
@@ -8757,7 +8753,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
 		}
 
-		CG(context).active_property_info = NULL;
+		CG(context).active_property_info_name = NULL;
 	}
 }
 /* }}} */
@@ -9613,9 +9609,9 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case T_PROPERTY_C: {
-			const zend_property_info *prop_info = CG(context).active_property_info;
-			if (prop_info) {
-				ZVAL_STR(zv, zend_copy_unmangled_prop_name(prop_info->name));
+			zend_string *prop_info_name = CG(context).active_property_info_name;
+			if (prop_info_name) {
+				ZVAL_STR(zv, zend_copy_unmangled_prop_name(prop_info_name));
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}
