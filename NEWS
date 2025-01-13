@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-17222 (__PROPERTY__ magic constant does not work in all
     constant expression contexts). (ilutov)
+  . Fixed bug GH-17214 (Relax final+private warning for trait methods with
+    inherited final). (ilutov)
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
