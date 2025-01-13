@@ -1322,8 +1322,8 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		}
 	}
 
-	if (!Z_ISUNDEF(EG(error_backtrace))) {
-		backtrace = zend_trace_to_string(Z_ARRVAL(EG(error_backtrace)), /* include_main */ true);
+	if (!Z_ISUNDEF(EG(fatal_error_backtrace))) {
+		backtrace = zend_trace_to_string(Z_ARRVAL(EG(fatal_error_backtrace)), /* include_main */ true);
 	}
 
 	/* store the error if it has changed */
