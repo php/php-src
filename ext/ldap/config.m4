@@ -64,10 +64,10 @@ if test "$PHP_LDAP" != "no"; then
     PHP_LDAP_PKGCONFIG=true
   ], [PHP_LDAP_CHECKS([$PHP_LDAP])])
 
-  if test "$PHP_LDAP_PKGCONFIG" = true; then
+  AS_IF([test "$PHP_LDAP_PKGCONFIG" = true], [
     PHP_EVAL_INCLINE([$LDAP_CFLAGS])
     PHP_EVAL_LIBLINE([$LDAP_LIBS], [LDAP_SHARED_LIBADD])
-  else
+  ], [
     AS_VAR_IF([LDAP_DIR],, [AC_MSG_ERROR([Cannot find ldap.h])])
 
     dnl -pc removal is a hack for clang
@@ -106,7 +106,7 @@ if test "$PHP_LDAP" != "no"; then
     _SAVE_LIBS=$LIBS
     CPPFLAGS="$CPPFLAGS -I$LDAP_INCDIR"
     LIBS="$LIBS $LDAP_SHARED_LIBADD"
-  fi
+  ])
 
   dnl Check for 3 arg ldap_set_rebind_proc
   AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc],
@@ -134,11 +134,11 @@ if test "$PHP_LDAP" != "no"; then
     ldap_whoami_s
   ]))
 
-  if test "$PHP_LDAP_PKGCONFIG" = false; then
+  AS_IF([test "$PHP_LDAP_PKGCONFIG" = false], [
     dnl Restore original values
     CPPFLAGS=$_SAVE_CPPFLAGS
     LIBS=$_SAVE_LIBS
-  fi
+  ])
 
   dnl SASL check
   AS_VAR_IF([PHP_LDAP_SASL], [no],, [
