@@ -385,7 +385,7 @@ static void ir_sccp_remove_insn2(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist)
 
 static void ir_sccp_replace_insn(ir_ctx *ctx, ir_insn *_values, ir_ref ref, ir_ref new_ref, ir_bitqueue *worklist)
 {
-	ir_ref j, n, *p, use, k, l;
+	ir_ref j, n, *p, use, i;
 	ir_insn *insn;
 	ir_use_list *use_list;
 
@@ -409,40 +409,48 @@ static void ir_sccp_replace_insn(ir_ctx *ctx, ir_insn *_values, ir_ref ref, ir_r
 
 	use_list = &ctx->use_lists[ref];
 	n = use_list->count;
-	for (j = 0, p = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
-		use = *p;
-		if (IR_IS_FEASIBLE(use)) {
-			insn = &ctx->ir_base[use];
-			l = insn->inputs_count;
-			for (k = 1; k <= l; k++) {
-				if (ir_insn_op(insn, k) == ref) {
-					ir_insn_set_op(insn, k, new_ref);
-				}
+	p = &ctx->use_edges[use_list->refs];
+	if (new_ref <= 0) {
+		/* constant or IR_UNUSED */
+		for (; n; p++, n--) {
+			use = *p;
+			/* we may skip nodes that are going to be removed by SCCP (TOP, CONST and COPY) */
+			if (_values[use].op > IR_COPY) {
+				insn = &ctx->ir_base[use];
+				i = ir_insn_find_op(insn, ref);
+				if (!i) continue;
+				IR_ASSERT(i > 0);
+				ir_insn_set_op(insn, i, new_ref);
+				/* schedule folding */
+				ir_bitqueue_add(worklist, use);
 			}
-#if IR_COMBO_COPY_PROPAGATION
-			if (new_ref > 0 && IR_IS_BOTTOM(use)) {
+		}
+	} else {
+		for (j = 0; j < n; j++, p++) {
+			use = *p;
+			/* we may skip nodes that are going to be removed by SCCP (TOP, CONST and COPY) */
+			if (_values[use].optx == IR_BOTTOM) {
+				insn = &ctx->ir_base[use];
+				i = ir_insn_find_op(insn, ref);
+				IR_ASSERT(i > 0);
+				ir_insn_set_op(insn, i, new_ref);
 				if (ir_use_list_add(ctx, new_ref, use)) {
 					/* restore after reallocation */
 					use_list = &ctx->use_lists[ref];
 					n = use_list->count;
 					p = &ctx->use_edges[use_list->refs + j];
 				}
-			}
-#endif
-			/* we may skip nodes that are going to be removed by SCCP (TOP, CONST and COPY) */
-			if (worklist && _values[use].op > IR_COPY) {
 				/* schedule folding */
 				ir_bitqueue_add(worklist, use);
 			}
 		}
 	}
-
 	CLEAR_USES(ref);
 }
 
 static void ir_sccp_replace_insn2(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bitqueue *worklist)
 {
-	ir_ref j, n, *p, use, k, l;
+	ir_ref i, j, n, *p, use;
 	ir_insn *insn;
 	ir_use_list *use_list;
 
@@ -468,29 +476,37 @@ static void ir_sccp_replace_insn2(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bi
 
 	use_list = &ctx->use_lists[ref];
 	n = use_list->count;
-	for (j = 0, p = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
-		use = *p;
-		insn = &ctx->ir_base[use];
-		l = insn->inputs_count;
-		for (k = 1; k <= l; k++) {
-			if (ir_insn_op(insn, k) == ref) {
-				ir_insn_set_op(insn, k, new_ref);
-			}
+	p = &ctx->use_edges[use_list->refs];
+	if (new_ref <= 0) {
+		/* constant or IR_UNUSED */
+		for (; n; p++, n--) {
+			use = *p;
+			IR_ASSERT(use != ref);
+			insn = &ctx->ir_base[use];
+			i = ir_insn_find_op(insn, ref);
+			IR_ASSERT(i > 0);
+			ir_insn_set_op(insn, i, new_ref);
+			/* schedule folding */
+			ir_bitqueue_add(worklist, use);
 		}
-#if IR_COMBO_COPY_PROPAGATION
-		if (new_ref > 0) {
+	} else {
+		for (j = 0; j < n; j++, p++) {
+			use = *p;
+			IR_ASSERT(use != ref);
+			insn = &ctx->ir_base[use];
+			i = ir_insn_find_op(insn, ref);
+			IR_ASSERT(i > 0);
+			ir_insn_set_op(insn, i, new_ref);
 			if (ir_use_list_add(ctx, new_ref, use)) {
 				/* restore after reallocation */
 				use_list = &ctx->use_lists[ref];
 				n = use_list->count;
 				p = &ctx->use_edges[use_list->refs + j];
 			}
+			/* schedule folding */
+			ir_bitqueue_add(worklist, use);
 		}
-#endif
-		/* schedule folding */
-		ir_bitqueue_add(worklist, use);
 	}
-
 	CLEAR_USES(ref);
 }
 
@@ -2483,7 +2499,9 @@ int ir_sccp(ir_ctx *ctx)
 		} else if (value->op == IR_TOP) {
 			/* remove unreachable instruction */
 			insn = &ctx->ir_base[i];
-			if (ir_op_flags[insn->op] & (IR_OP_FLAG_DATA|IR_OP_FLAG_MEM)) {
+			if (insn->op == IR_NOP) {
+				/* already removed */
+			} else if (ir_op_flags[insn->op] & (IR_OP_FLAG_DATA|IR_OP_FLAG_MEM)) {
 				if (insn->op != IR_PARAM && (insn->op != IR_VAR || _values[insn->op1].op == IR_TOP)) {
 					ir_sccp_remove_insn(ctx, _values, i, &worklist2);
 				}
