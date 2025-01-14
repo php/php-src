@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.16
+16 Jan 2025, PHP 8.3.16
 
 - Core:
   . Fixed bug GH-17106 (ZEND_MATCH_ERROR misoptimization). (ilutov)
