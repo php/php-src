@@ -21,7 +21,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test is not for Windows platfo
 <?php
     require_once 'connect.inc';
 
-    if (true !== ($tmp = mysqli_debug(sprintf('d:t:O,%s/mysqli_debug_phpt.trace', sys_get_temp_dir()))))
+    $trace_file = tempnam(sys_get_temp_dir(), "mysqli_debug_phpt");
+
+    if (true !== ($tmp = mysqli_debug(sprintf('d:t:O,%s', $trace_file))))
         printf("[001] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
     // table.inc will create a database connection and run some SQL queries, therefore
@@ -29,7 +31,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test is not for Windows platfo
     require_once 'table.inc';
 
     clearstatcache();
-    $trace_file = sprintf('%s/mysqli_debug_phpt.trace', sys_get_temp_dir());
     if (!file_exists($trace_file))
         printf("[002] Trace file '%s' has not been created\n", $trace_file);
     if (filesize($trace_file) < 50)
