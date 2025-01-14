@@ -59,7 +59,7 @@ int php_win32_check_trailing_space(const char * path, const size_t path_len)
 	if (path_len > MAXPATHLEN - 1) {
 		return 1;
 	}
-	if (path) {
+	if (path && path_len > 0) {
 		if (path[0] == ' ' || path[path_len - 1] == ' ') {
 			return 0;
 		} else {
