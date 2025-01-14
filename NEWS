@@ -47,6 +47,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-17428 (Assertion failure ext/opcache/jit/zend_jit_ir.c:8940).
     (nielsdos)
 
+- PCNTL:
+  . Fixed pcntl_setcpuaffinity exception type from ValueError to TypeError for
+    the cpu mask argument with entries type different than int/string.
+    (David Carlier)
+
 - PHPDBG:
   . Fix crashes in function registration + test. (nielsdos, Girgias)
 

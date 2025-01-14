@@ -1720,9 +1720,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 				cpu = (zend_long)tmp;
 			} else {
-				zend_string *wcpu = zval_get_string_func(ncpu);
-				zend_argument_value_error(2, "cpu id invalid type (%s)", ZSTR_VAL(wcpu));
-				zend_string_release(wcpu);
+				zend_argument_type_error(2, "value must be of type int|string, %s given", zend_zval_value_name(ncpu));
 				PCNTL_CPU_DESTROY(mask);
 				RETURN_THROWS();
 			}
