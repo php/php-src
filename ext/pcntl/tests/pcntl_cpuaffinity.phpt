@@ -48,7 +48,7 @@ try {
 
 try {
 	pcntl_setcpuaffinity(null, [1, array(1)]);
-} catch (\ValueError $e) {
+} catch (\TypeError $e) {
 	echo $e->getMessage();
 }
 ?>
