@@ -3739,7 +3739,7 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 	var lib_dir = get_clang_lib_dir();
 
 	if (!!cflags_name) {
-		ADD_FLAG(cflags_name, "-fsanitize=address,undefined");
+		ADD_FLAG(cflags_name, "-fsanitize=address,undefined -fno-sanitize=function");
 	}
 	if (!!libs_name) {
 		if (TARGET_ARCH == 'x64') {
