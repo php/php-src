@@ -861,14 +861,14 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 #elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(FAILED(LongSub(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult)))) {
-		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, lresult);
 	}
 #elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(FAILED(LongLongSub(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult)))) {
-		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, llresult);
 	}
