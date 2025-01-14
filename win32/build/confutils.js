@@ -3137,7 +3137,7 @@ function toolset_get_compiler_name(short)
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
-		return full.split(/\n/)[0].replace(/\s/g, ' ');
+		return trim(full.split(/\n/)[0].replace(/\s/g, ' '));
 	}
 
 	WARNING("Unsupported toolset");
@@ -3698,31 +3698,31 @@ function check_binary_tools_sdk()
 function get_clang_lib_dir()
 {
 	var ret = null;
-	var ver = null;
+	var ver = null, major = null;
 
-	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
+	if (COMPILER_NAME_LONG.match(/clang version ((\d+)\.[\d\.]+)/)) {
 		ver = RegExp.$1;
+		major = RegExp.$2;
 	} else {
-		ERROR("Failed to determine clang lib path");
+		ERROR("Failed to determine clang version");
 	}
 
-	if (TARGET_ARCH != 'x86') {
-		ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+	var cmd = "cmd /c where clang.exe";
+	var path = trim(execute(cmd).split(/\n/)[0]).replace(/bin\\clang\.exe$/, "");
+	if (!FSO.FolderExists(path)) {
+		ERROR("Failed to determine clang installation folder");
+	}
+
+	ret = path + "lib\\clang\\" + major + "\\lib\\";
+	if (!FSO.FolderExists(ret)) {
+		ret = path + "lib\\clang\\" + ver + "\\lib\\";
 		if (!FSO.FolderExists(ret)) {
 			ret = null;
-		}
-	} else {
-		ret = PROGRAM_FILESx86 + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
-		if (!FSO.FolderExists(ret)) {
-			ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
-			if (!FSO.FolderExists(ret)) {
-				ret = null;
-			}
 		}
 	}
 
 	if (null == ret) {
-		ERROR("Invalid clang lib path encountered");
+		ERROR("Failed to determine clang lib folder");
 	}
 
 	return ret;
@@ -3731,13 +3731,7 @@ function get_clang_lib_dir()
 function add_asan_opts(cflags_name, libs_name, ldflags_name)
 {
 
-	var ver = null;
-
-	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
-		ver = RegExp.$1;
-	} else {
-		ERROR("Failed to determine clang lib path");
-	}
+	var lib_dir = get_clang_lib_dir();
 
 	if (!!cflags_name) {
 		ADD_FLAG(cflags_name, "-fsanitize=address,undefined");
@@ -3754,7 +3748,7 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 	}
 
 	if (!!ldflags_name) {
-		ADD_FLAG(ldflags_name, "/libpath:\"" + get_clang_lib_dir() + "\\windows\"");
+		ADD_FLAG(ldflags_name, "/libpath:\"" + lib_dir + "\\windows\"");
 	}
 }
 
