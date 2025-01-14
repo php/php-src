@@ -3137,7 +3137,7 @@ function toolset_get_compiler_name(short)
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
-		ERROR(full.split(/\n/)[0].replace(/\s/g, ' '));
+		return full.split(/\n/)[0].replace(/\s/g, ' ');
 	}
 
 	WARNING("Unsupported toolset");
