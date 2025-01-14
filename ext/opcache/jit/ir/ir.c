@@ -1386,6 +1386,11 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 		if (old_size < new_size) {
 			/* Reallocate the whole edges buffer (this is inefficient) */
 			ctx->use_edges = ir_mem_realloc(ctx->use_edges, new_size);
+		} else if (n == ctx->use_edges_count) {
+			ctx->use_edges[n] = ref;
+			use_list->count++;
+			ctx->use_edges_count++;
+			return 0;
 		}
 		memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
 		use_list->refs = ctx->use_edges_count;
@@ -1416,20 +1421,39 @@ void ir_use_list_sort(ir_ctx *ctx, ir_ref ref)
 
 void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref)
 {
-	int i, j, n, use;
+	int i, j, n, *p, use;
 	ir_insn *insn;
+	ir_use_list *use_list;
 
 	IR_ASSERT(ref != new_ref);
-	n = ctx->use_lists[ref].count;
-	for (i = 0; i < n; i++) {
-		use = ctx->use_edges[ctx->use_lists[ref].refs + i];
-		IR_ASSERT(use != ref);
-		insn = &ctx->ir_base[use];
-		j = ir_insn_find_op(insn, ref);
-		IR_ASSERT(j > 0);
-		ir_insn_set_op(insn, j, new_ref);
-		if (!IR_IS_CONST_REF(new_ref)) {
-			ir_use_list_add(ctx, new_ref, use);
+	use_list = &ctx->use_lists[ref];
+	n = use_list->count;
+	p = ctx->use_edges + use_list->refs;
+
+	if (new_ref < 0) {
+		/* constant or IR_UNUSED */
+		for (; n; p++, n--) {
+			use = *p;
+			IR_ASSERT(use != ref);
+			insn = &ctx->ir_base[use];
+			j = ir_insn_find_op(insn, ref);
+			IR_ASSERT(j > 0);
+			ir_insn_set_op(insn, j, new_ref);
+		}
+	} else {
+		for (i = 0; i < n; p++, i++) {
+			use = *p;
+			IR_ASSERT(use != ref);
+			insn = &ctx->ir_base[use];
+			j = ir_insn_find_op(insn, ref);
+			IR_ASSERT(j > 0);
+			ir_insn_set_op(insn, j, new_ref);
+			if (ir_use_list_add(ctx, new_ref, use)) {
+				/* restore after reallocation */
+				use_list = &ctx->use_lists[ref];
+				n = use_list->count;
+				p = &ctx->use_edges[use_list->refs + i];
+			}
 		}
 	}
 }
