@@ -2760,8 +2760,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					/* THROW and EXIT may be used in the middle of BB */
 					/* don't generate code for the rest of BB */
 
-					/* Skip current opline for call_level computation
-					 * Don't include last opline because end of loop already checks call level of last opline */
+					/* Skip current opline for call_level computation because it does not influence call_level.
+					 * Don't include last opline because end of loop already checks call level of last opline. */
 					i++;
 					for (; i < end; i++) {
 						opline = op_array->opcodes + i;
@@ -2771,7 +2771,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							call_level--;
 						}
 					}
-					opline = op_array->opcodes + i;
+					opline = op_array->opcodes + end;
 					break;
 				/* stackless execution */
 				case ZEND_INCLUDE_OR_EVAL:
