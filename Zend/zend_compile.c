@@ -6427,6 +6427,32 @@ static bool can_match_use_jumptable(zend_ast_list *arms) {
 	return 1;
 }
 
+static void zend_compile_pipe(znode *result, zend_ast *ast)
+{
+	zend_ast *operand_ast = ast->child[0];
+	zend_ast *callable_ast = ast->child[1];
+
+	znode operand_result;
+	zend_compile_expr(&operand_result, operand_ast);
+	znode wrapped_operand_result;
+	zend_emit_op_tmp(&wrapped_operand_result, ZEND_QM_ASSIGN, &operand_result, NULL);
+
+	/* Turn $foo |> bar(...) into bar($foo). */
+	if (callable_ast->kind == ZEND_AST_CALL
+	    && callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		callable_ast = callable_ast->child[0];
+	}
+
+	znode callable_result;
+	zend_compile_expr(&callable_result, callable_ast);
+
+	zend_ast *fcall_ast = zend_ast_create(ZEND_AST_CALL,
+	                                      zend_ast_create_znode(&callable_result),
+	                                      zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&wrapped_operand_result)));
+
+	zend_compile_expr(result, fcall_ast);
+}
+
 static void zend_compile_match(znode *result, zend_ast *ast)
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -6611,30 +6637,6 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		efree(jmpnz_opnums);
 	}
 	efree(jmp_end_opnums);
-}
-
-static void zend_compile_pipe(znode *result, zend_ast *ast)
-{
-	zend_ast *operand_ast = ast->child[0];
-	zend_ast *callable_ast = ast->child[1];
-
-	znode operand_result;
-	zend_compile_expr(&operand_result, operand_ast);
-
-	/* Turn $foo |> bar(...) into bar($foo). */
-	if (callable_ast->kind == ZEND_AST_CALL
-	 && callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
-		callable_ast = callable_ast->child[0];
-	 }
-
-	znode callable_result;
-	zend_compile_expr(&callable_result, callable_ast);
-
-	zend_ast *fcall_ast = zend_ast_create(ZEND_AST_CALL,
-		zend_ast_create_znode(&callable_result),
-		zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&operand_result)));
-
-	zend_compile_expr(result, fcall_ast);
 }
 
 static void zend_compile_try(zend_ast *ast) /* {{{ */
