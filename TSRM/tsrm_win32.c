@@ -374,14 +374,16 @@ static process_pair *process_get(FILE *stream)
 	process_pair *ptr;
 	process_pair *newptr;
 
-	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
-		if (ptr->stream == stream) {
-			break;
+	if (TWG(process) != NULL) {
+		for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
+			if (ptr->stream == stream) {
+				break;
+			}
 		}
-	}
 
-	if (ptr < (TWG(process) + TWG(process_size))) {
-		return ptr;
+		if (ptr < (TWG(process) + TWG(process_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (process_pair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(process_pair));

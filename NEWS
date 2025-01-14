@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-17214 (Relax final+private warning for trait methods with
     inherited final). (ilutov)
+  . Fixed NULL arithmetic during system program execution on Windows. (cmb,
+    nielsdos)
 
 - Enchant:
   . Fix crashes in enchant when passing null bytes. (nielsdos)
