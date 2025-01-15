@@ -3318,6 +3318,11 @@ function toolset_setup_common_cflags()
 		var vc_ver = probe_binary(PATH_PROG('cl', null));
 		ADD_FLAG("CFLAGS"," -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions");
 	}
+
+	if (!CLANG_TOOLSET) {
+		/* clang uses __builtin_*() instead */
+		ADD_FLAG("CFLAGS", "/DENABLE_INTSAFE_SIGNED_FUNCTIONS");
+	}
 }
 
 function toolset_setup_intrinsic_cflags()
