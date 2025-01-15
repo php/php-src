@@ -5,6 +5,10 @@ ARG_ENABLE('embed', 'Embedded SAPI library', 'no');
 var PHP_EMBED_PGO = false;
 
 if (PHP_EMBED != "no") {
-	SAPI('embed', 'php_embed.c', 'php' + PHP_VERSION + 'embed.lib', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	SAPI('embed', 'php_embed.c', 'php' + PHP_VERSION + 'embed.' + (PHP_EMBED_SHARED ? 'dll' : 'lib'), '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	if (PHP_EMBED_SHARED) {
+		ADD_FLAG("CFLAGS_EMBED", "/DPHP_EMBED_EXPORTS");
+		AC_DEFINE("PHP_EMBED_SHARED", 1, "Define to 1 if you have a shared embed SAPI.");
+	}
 	PHP_INSTALL_HEADERS("sapi/embed", "php_embed.h");
 }

@@ -509,7 +509,7 @@ can be built that way. \
 			if (force) {
 				STDOUT.WriteLine("snapshot: forcing " + arg.optname + " on");
 				argval = "yes";
-				shared = true;
+				shared = arg.optname != "embed";
 			}
 		}
 

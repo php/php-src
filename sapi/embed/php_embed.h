@@ -38,7 +38,13 @@
 #ifndef PHP_WIN32
     #define EMBED_SAPI_API SAPI_API
 #else
-    #define EMBED_SAPI_API
+# if defined(PHP_EMBED_EXPORTS)
+#  define EMBED_SAPI_API __declspec(dllexport)
+# elif defined(PHP_EMBED_SHARED)
+#  define EMBED_SAPI_API __declspec(dllimport)
+# else
+#  define EMBED_SAPI_API
+# endif
 #endif
 
 #ifdef ZTS
