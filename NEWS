@@ -15,6 +15,7 @@ PHP                                                                        NEWS
     inherited final). (ilutov)
   . Fixed NULL arithmetic during system program execution on Windows. (cmb,
     nielsdos)
+  . Fixed potential OOB when checking for trailing spaces on Windows. (cmb)
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
