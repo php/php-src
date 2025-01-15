@@ -48,7 +48,7 @@ try {
 
 try {
 	pcntl_setcpuaffinity(null, [1, array(1)]);
-} catch (\ValueError $e) {
+} catch (\TypeError $e) {
 	echo $e->getMessage();
 }
 ?>
@@ -64,6 +64,4 @@ pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cpu id invalid value (def)
 pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cpu id must be between 0 and %d (%d)
 pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cpu id must be between 0 and %d (-1024)
 pcntl_getcpuaffinity(): Argument #1 ($process_id) invalid process (-1024)
-
-Warning: Array to string conversion in %s on line %d
-pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cpu id invalid type (Array)
+pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) value must be of type int|string, array given
