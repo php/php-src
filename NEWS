@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     constant expression contexts). (ilutov)
   . Fixed bug GH-17214 (Relax final+private warning for trait methods with
     inherited final). (ilutov)
+  . Fixed NULL arithmetic during system program execution on Windows. (cmb,
+    nielsdos)
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
