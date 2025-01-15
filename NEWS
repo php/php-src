@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     inherited final). (ilutov)
   . Fixed NULL arithmetic during system program execution on Windows. (cmb,
     nielsdos)
+  . Fixed potential OOB when checking for trailing spaces on Windows. (cmb)
 
 - Enchant:
   . Fix crashes in enchant when passing null bytes. (nielsdos)
