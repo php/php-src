@@ -5,7 +5,7 @@ soap
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === "Windows") {
-    die("skip see https://github.com/php/php-src/issues/17468 for reason why test is skipped on Windows");
+    die("skip see https://github.com/php/php-src/issues/17468");
 }
 ?>
 --GET--
