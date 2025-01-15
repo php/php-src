@@ -41,6 +41,11 @@ static void pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 		einfo = &S->einfo;
 	}
 
+	/* If we don't have a driver error do not populate the info array */
+	if (strlen(einfo->last_err_msg) == 0) {
+		return;
+	}
+
 	message = strpprintf(0, "%s (%s[%ld] at %s:%d)",
 				einfo->last_err_msg,
 				einfo->what, (long) einfo->last_error,
