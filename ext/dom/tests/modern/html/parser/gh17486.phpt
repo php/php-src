@@ -18,7 +18,7 @@ $html = <<<HTML
 		<svg>
 			<path d="{$repeated}" />
 		</svg>
-		<div>&#xa;</div>
+		<div>&#x0;</div>
 	</body>
 </html>
 HTML;
@@ -34,6 +34,6 @@ file_put_contents(__DIR__ . '/gh17486.tmp', $html);
 @unlink(__DIR__ . '/gh17486.tmp');
 ?>
 --EXPECTF--
-Warning: Dom\HTMLDocument::createFromString(): tokenizer error control-character-reference in Entity, line: 7, column: 9 in %s on line %d
+Warning: Dom\HTMLDocument::createFromString(): tokenizer error null-character-reference in Entity, line: 7, column: 9 in %s on line %d
 
-Warning: Dom\HTMLDocument::createFromFile(): tokenizer error control-character-reference in %sgh17486.tmp, line: 7, column: 9 in %s on line %d
+Warning: Dom\HTMLDocument::createFromFile(): tokenizer error null-character-reference in %s line: 7, column: 9 in %s on line %d
