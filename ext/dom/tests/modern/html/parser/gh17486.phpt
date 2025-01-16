@@ -2,6 +2,8 @@
 GH-17486 (Incorrect error line numbers reported in Dom\HTMLDocument::createFromString)
 --EXTENSIONS--
 dom
+--INI--
+error_reporting=E_ALL
 --CREDITS--
 xPaw
 --FILE--
