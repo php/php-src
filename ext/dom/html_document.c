@@ -880,6 +880,13 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 		if (!result) {
 			goto fail_oom;
 		}
+
+		/* In the string case we have a single buffer that acts as a sliding window.
+		 * The `current_input_characters` field starts pointing at the start of the buffer, but needs to slide along the
+		 * sliding window as well. */
+		if (application_data.current_input_characters) {
+			application_data.current_input_characters += chunk_size;
+		}
 	}
 
 	if (!dom_parse_decode_encode_finish(&ctx, document, parser, &decoding_encoding_ctx, &tokenizer_error_offset, &tree_error_offset)) {

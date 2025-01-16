@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
+  . Fixed bug GH-17486 (Incorrect error line numbers reported in
+    Dom\HTMLDocument::createFromString). (nielsdos)
 
 - Enchant:
   . Fix crashes in enchant when passing null bytes. (nielsdos)
