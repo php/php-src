@@ -14,6 +14,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-Haha
-Warning: unserialize(): Function foo() hasn't defined the class it was called for in %s on line %d
+--EXPECT--
+Unserialization function foo is not defined
