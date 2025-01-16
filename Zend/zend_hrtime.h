@@ -66,7 +66,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API extern double zend_hrtime_timer_scale;
 
-#elif ZEND_HRTIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 
 # include <mach/mach_time.h>
 # include <string.h>
