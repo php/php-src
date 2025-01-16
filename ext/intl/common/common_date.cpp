@@ -94,12 +94,11 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 }
 /* }}} */
 
-U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
+U_CFUNC zend_result intl_datetime_decompose(zend_object *obj, double *millis, TimeZone **tz,
 		intl_error *err, const char *func)
 {
-	zval	retval;
-	zval	zfuncname;
 	char	*message;
+	php_date_obj *datetime = php_date_obj_from_obj(obj);
 
 	if (err && U_FAILURE(err->code)) {
 		return FAILURE;
@@ -109,35 +108,35 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		*millis = ZEND_NAN;
 	}
 	if (tz) {
-		*tz = NULL;
+		*tz = nullptr;
 	}
 
 	if (millis) {
-		php_date_obj *datetime;
+		auto *getTimestampMethod = static_cast<zend_function *>(zend_hash_str_find_ptr(&obj->ce->function_table, ZEND_STRL("gettimestamp")));
+		zval retval;
 
-		ZVAL_STRING(&zfuncname, "getTimestamp");
-		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL)
-				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
-			spprintf(&message, 0, "%s: error calling ::getTimeStamp() on the "
-					"object", func);
-			intl_errors_set(err, U_INTERNAL_PROGRAM_ERROR,
-				message, 1);
+		ZEND_ASSERT(getTimestampMethod && "DateTimeInterface is sealed and thus must have this method");
+		zend_call_known_function(getTimestampMethod, obj, obj->ce, &retval, 0, nullptr, nullptr);
+
+		/* An exception has occurred */
+		if (Z_TYPE(retval) == IS_UNDEF) {
+			return FAILURE;
+		}
+		// TODO: Remove this when DateTimeInterface::getTimestamp() no longer has a tentative return type
+		if (Z_TYPE(retval) != IS_LONG) {
+			spprintf(&message, 0, "%s: %s::getTimestamp() did not return an int", func, ZSTR_VAL(obj->ce->name));
+			intl_errors_set(err, U_INTERNAL_PROGRAM_ERROR, message, 1);
 			efree(message);
-			zval_ptr_dtor(&zfuncname);
 			return FAILURE;
 		}
 
-		datetime = Z_PHPDATE_P(z);
 		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval) + (datetime->time->us / 1000);
-		zval_ptr_dtor(&zfuncname);
 	}
 
 	if (tz) {
-		php_date_obj *datetime;
-		datetime = Z_PHPDATE_P(z);
 		if (!datetime->time) {
 			spprintf(&message, 0, "%s: the %s object is not properly "
-					"initialized", func, ZSTR_VAL(Z_OBJCE_P(z)->name));
+					"initialized", func, ZSTR_VAL(obj->ce->name));
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
 				message, 1);
 			efree(message);
@@ -198,7 +197,7 @@ try_again:
 		break;
 	case IS_OBJECT:
 		if (instanceof_function(Z_OBJCE_P(z), php_date_get_interface_ce())) {
-			intl_datetime_decompose(z, &rv, NULL, err, func);
+			intl_datetime_decompose(Z_OBJ_P(z), &rv, nullptr, err, func);
 		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr)) {
 			Calendar_object *co = Z_INTL_CALENDAR_P(z);
 			if (co->ucal == NULL) {
