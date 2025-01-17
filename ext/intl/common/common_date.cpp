@@ -112,7 +112,7 @@ U_CFUNC zend_result intl_datetime_decompose(zend_object *obj, double *millis, Ti
 	}
 
 	if (millis) {
-		auto *getTimestampMethod = static_cast<zend_function *>(zend_hash_str_find_ptr(&obj->ce->function_table, ZEND_STRL("gettimestamp")));
+		auto getTimestampMethod = static_cast<zend_function *>(zend_hash_str_find_ptr(&obj->ce->function_table, ZEND_STRL("gettimestamp")));
 		zval retval;
 
 		ZEND_ASSERT(getTimestampMethod && "DateTimeInterface is sealed and thus must have this method");
