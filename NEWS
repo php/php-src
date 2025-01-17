@@ -13,6 +13,10 @@ PHP                                                                        NEWS
     nielsdos)
   . Fixed potential OOB when checking for trailing spaces on Windows. (cmb)
 
+- DOM:
+  . Fixed bug GH-17500 (Segfault with requesting nodeName on nameless doctype).
+    (nielsdos)
+
 - Enchant:
   . Fix crashes in enchant when passing null bytes. (nielsdos)
 
