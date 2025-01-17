@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17481 (UTF-8 corruption in \Dom\HTMLDocument). (nielsdos)
   . Fixed bug GH-17500 (Segfault with requesting nodeName on nameless doctype).
     (nielsdos)
+  . Fixed bug GH-17485 (upstream fix, Self-closing tag on void elements
+    shouldn't be a parse error/warning in \Dom\HTMLDocument). (lexborisov)
 
 - Enchant:
   . Fix crashes in enchant when passing null bytes. (nielsdos)
