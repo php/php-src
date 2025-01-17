@@ -905,8 +905,8 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 	ce_exception = ex->ce;
 	EG(exception) = NULL;
 
-	zval_ptr_dtor(&EG(fatal_error_backtrace));
-	ZVAL_UNDEF(&EG(fatal_error_backtrace));
+	zval_ptr_dtor(&EG(last_fatal_error_backtrace));
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	if (ce_exception == zend_ce_parse_error || ce_exception == zend_ce_compile_error) {
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, ZEND_STR_MESSAGE));

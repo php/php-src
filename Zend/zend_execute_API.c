@@ -140,7 +140,7 @@ void init_executor(void) /* {{{ */
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
 #endif
 
-	ZVAL_UNDEF(&EG(fatal_error_backtrace));
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	EG(symtable_cache_ptr) = EG(symtable_cache);
 	EG(symtable_cache_limit) = EG(symtable_cache) + SYMTABLE_CACHE_SIZE;
@@ -309,8 +309,8 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
 		}
 
-		zval_ptr_dtor(&EG(fatal_error_backtrace));
-		ZVAL_UNDEF(&EG(fatal_error_backtrace));
+		zval_ptr_dtor(&EG(last_fatal_error_backtrace));
+		ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 		/* Release static properties and static variables prior to the final GC run,
 		 * as they may hold GC roots. */
