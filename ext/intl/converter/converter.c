@@ -384,20 +384,23 @@ static bool php_converter_set_encoding(php_converter_object *objval,
 		if (objval) {
 			THROW_UFAILURE(objval, "ucnv_open", error);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Error setting encoding: %d - %s", (int)error, u_errorName(error));
+			char *msg;
+			spprintf(&msg, 0, "Error setting encoding: %d - %s", (int)error, u_errorName(error));
+			intl_error_set(NULL, error, msg, 1);
+			efree(msg);
 		}
-		return 0;
+		return false;
 	}
 
 	if (objval && !php_converter_set_callbacks(objval, cnv)) {
-		return 0;
+		return false;
 	}
 
 	if (*pcnv) {
 		ucnv_close(*pcnv);
 	}
 	*pcnv = cnv;
-	return 1;
+	return true;
 }
 /* }}} */
 
