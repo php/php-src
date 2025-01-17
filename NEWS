@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17486 (Incorrect error line numbers reported in
     Dom\HTMLDocument::createFromString). (nielsdos)
   . Fixed bug GH-17481 (UTF-8 corruption in \Dom\HTMLDocument). (nielsdos)
+  . Fixed bug GH-17500 (Segfault with requesting nodeName on nameless doctype).
+    (nielsdos)
 
 - Enchant:
   . Fix crashes in enchant when passing null bytes. (nielsdos)
