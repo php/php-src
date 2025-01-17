@@ -32,7 +32,7 @@ PHP                                                                        NEWS
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
 
--GD:
+- GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
     cmb)
 
