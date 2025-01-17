@@ -4469,7 +4469,6 @@ PHP_FUNCTION(mb_send_mail)
 	bool suppress_content_transfer_encoding = false;
 
 	char *p;
-	enum mbfl_no_encoding;
 	const mbfl_encoding *tran_cs,	/* transfer text charset */
 						*head_enc,	/* header transfer encoding */
 						*body_enc;	/* body transfer encoding */
