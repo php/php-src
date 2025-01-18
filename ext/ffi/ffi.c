@@ -904,6 +904,7 @@ static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *n
 			return zend_string_copy(name);
 	}
 #endif
+	return zend_string_copy(name);
 }
 /* }}} */
 
