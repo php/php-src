@@ -204,7 +204,8 @@ static zend_result phar_tar_process_metadata(phar_entry_info *entry, php_stream 
 
 zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
 {
-	char buf[512], *actual_alias = NULL, *p;
+	char buf[512], *p;
+	zend_string *actual_alias = NULL;
 	phar_entry_info entry = {0};
 	size_t pos = 0, read, totalsize;
 	tar_header *hdr;
@@ -567,9 +568,11 @@ bail:
 					return FAILURE;
 				}
 
-				actual_alias = pestrndup(buf, size, myphar->is_persistent);
+				actual_alias = zend_string_init(buf, size, myphar->is_persistent);
+				if (myphar->is_persistent) {
+					GC_MAKE_PERSISTENT_LOCAL(actual_alias);
+				}
 				myphar->alias = actual_alias;
-				myphar->alias_len = size;
 				php_stream_seek(fp, pos, SEEK_SET);
 			} else {
 				if (error) {
@@ -667,7 +670,7 @@ next:
 
 		myphar->is_temporary_alias = 0;
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len))) {
+		if (NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias))) {
 			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
@@ -677,7 +680,7 @@ next:
 			}
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len, myphar);
+		zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar);
 	} else {
 		phar_archive_data *fd_ptr;
 
@@ -691,12 +694,14 @@ next:
 					return FAILURE;
 				}
 			}
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, myphar);
-			myphar->alias = pestrndup(alias, alias_len, myphar->is_persistent);
-			myphar->alias_len = alias_len;
+
+			myphar->alias = zend_string_init(alias, alias_len, myphar->is_persistent);
+			zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), myphar->alias, myphar);
 		} else {
-			myphar->alias = pestrndup(myphar->fname, fname_len, myphar->is_persistent);
-			myphar->alias_len = fname_len;
+			myphar->alias = zend_string_init(myphar->fname, fname_len, myphar->is_persistent);
+		}
+		if (myphar->is_persistent) {
+			GC_MAKE_PERSISTENT_LOCAL(myphar->alias);
 		}
 
 		myphar->is_temporary_alias = 1;
@@ -999,13 +1004,13 @@ void phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_def
 	}
 
 	/* set alias */
-	if (!phar->is_temporary_alias && phar->alias_len) {
+	if (!phar->is_temporary_alias && phar->alias) {
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return;
 		}
-		if (phar->alias_len != php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
+		if (ZSTR_LEN(phar->alias) != php_stream_write(entry.fp, ZSTR_VAL(phar->alias), ZSTR_LEN(phar->alias))) {
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
@@ -1013,7 +1018,7 @@ void phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_def
 			return;
 		}
 
-		entry.uncompressed_filesize = phar->alias_len;
+		entry.uncompressed_filesize = ZSTR_LEN(phar->alias);
 
 		entry.filename = ZSTR_INIT_LITERAL(".phar/alias.txt", false);
 		zend_hash_update_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info));

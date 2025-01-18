@@ -150,8 +150,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	/* phar_get_archive cache */
 	char*       last_phar_name;
 	uint32_t    last_phar_name_len;
-	char*       last_alias;
-	uint32_t    last_alias_len;
+	zend_string*last_alias;
 	phar_archive_data* last_phar;
 	HashTable mime_types;
 ZEND_END_MODULE_GLOBALS(phar)
@@ -248,8 +247,7 @@ struct _phar_archive_data {
 	/* for phar_detect_fname_ext, this stores the location of the file extension within fname */
 	char                     *ext;
 	uint32_t                 ext_len;
-	char                     *alias;
-	uint32_t                      alias_len;
+	zend_string              *alias;
 	char                     version[12];
 	size_t                   halt_offset;
 	HashTable                manifest;
@@ -405,12 +403,12 @@ void phar_object_init(void);
 void phar_destroy_phar_data(phar_archive_data *phar);
 
 zend_result phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
-zend_result phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
-zend_result phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_open_from_filename(char *fname, size_t fname_len, zend_string *alias, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_open_or_create_filename(char *fname, size_t fname_len, zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 zend_result phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-zend_result phar_open_executed_filename(char *alias, size_t alias_len, char **error);
+zend_result phar_open_executed_filename(zend_string *alias, char **error);
 zend_result phar_free_alias(phar_archive_data *phar);
-zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error);
+zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, zend_string *alias, char **error);
 zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error);
 zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);
 

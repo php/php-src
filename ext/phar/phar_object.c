@@ -550,8 +550,9 @@ PHP_METHOD(Phar, webPhar)
 	zval *mimeoverride = NULL;
 	zend_fcall_info rewrite_fci = {0};
 	zend_fcall_info_cache rewrite_fcc;
-	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
-	size_t alias_len = 0, f404_len = 0, free_pathinfo = 0;
+	zend_string *alias = NULL;
+	char *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
+	size_t f404_len = 0, free_pathinfo = 0;
 	size_t ru_len = 0;
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
 	const char *basename;
@@ -562,13 +563,13 @@ PHP_METHOD(Phar, webPhar)
 	phar_entry_info *info = NULL;
 	size_t sapi_mod_name_len = strlen(sapi_module.name);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!s!af!", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!s!s!af!", &alias, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	if (phar_open_executed_filename(alias, alias_len, &error) != SUCCESS) {
+	if (phar_open_executed_filename(alias, &error) != SUCCESS) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);
@@ -761,7 +762,7 @@ cleanup_fail:
 			entry_len = sizeof("/index.php")-1;
 		}
 
-		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
+		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, NULL) ||
 			(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0)) == NULL) {
 			phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len);
 
@@ -807,7 +808,7 @@ cleanup_fail:
 		}
 	}
 
-	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
+	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, NULL) ||
 		(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0)) == NULL) {
 		phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len);
 		zend_bailout();
@@ -961,17 +962,17 @@ PHP_METHOD(Phar, createDefaultStub)
 /* {{{ Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
-	char *alias = NULL, *error;
-	size_t alias_len = 0;
+	char *error;
+	zend_string *alias = NULL;
 	zend_long dataoffset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!l", &alias, &alias_len, &dataoffset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!l", &alias, &dataoffset) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	RETVAL_BOOL(phar_open_executed_filename(alias, alias_len, &error) == SUCCESS);
+	RETVAL_BOOL(phar_open_executed_filename(alias, &error) == SUCCESS);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -982,16 +983,17 @@ PHP_METHOD(Phar, mapPhar)
 /* {{{ Loads any phar archive with an alias */
 PHP_METHOD(Phar, loadPhar)
 {
-	char *fname, *alias = NULL, *error;
-	size_t fname_len, alias_len = 0;
+	char *fname, *error;
+	zend_string *alias = NULL;
+	size_t fname_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|s!", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|S!", &fname, &fname_len, &alias) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	RETVAL_BOOL(phar_open_from_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, &error) == SUCCESS);
+	RETVAL_BOOL(phar_open_from_filename(fname, fname_len, alias, REPORT_ERRORS, NULL, &error) == SUCCESS);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -1114,8 +1116,9 @@ static const spl_other_handler phar_spl_foreign_handler = {
  */
 PHP_METHOD(Phar, __construct)
 {
-	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
-	size_t fname_len, alias_len = 0;
+	char *fname, *error, *arch = NULL, *entry = NULL, *save_fname;
+	zend_string *alias = NULL;
+	size_t fname_len;
 	size_t arch_len, entry_len;
 	bool is_data;
 	zend_long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
@@ -1129,11 +1132,11 @@ PHP_METHOD(Phar, __construct)
 	is_data = instanceof_function(Z_OBJCE_P(zobj), phar_ce_data);
 
 	if (is_data) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls!l", &fname, &fname_len, &flags, &alias, &alias_len, &format) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lS!l", &fname, &fname_len, &flags, &alias, &format) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls!", &fname, &fname_len, &flags, &alias, &alias_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lS!", &fname, &fname_len, &flags, &alias) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
@@ -1161,7 +1164,7 @@ PHP_METHOD(Phar, __construct)
 #endif
 	}
 
-	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
+	if (phar_open_or_create_filename(fname, fname_len, alias, is_data, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
 
 		if (fname == arch && fname != save_fname) {
 			efree(arch);
@@ -1306,7 +1309,7 @@ PHP_METHOD(Phar, unlinkArchive)
 		RETURN_THROWS();
 	}
 
-	if (FAILURE == phar_open_from_filename(fname, fname_len, NULL, 0, REPORT_ERRORS, &phar, &error)) {
+	if (FAILURE == phar_open_from_filename(fname, fname_len, NULL, REPORT_ERRORS, &phar, &error)) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown phar archive \"%s\": %s", fname, error);
 			efree(error);
@@ -1347,7 +1350,8 @@ PHP_METHOD(Phar, unlinkArchive)
 
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
+	PHAR_G(last_alias) = NULL;
 
 	phar_archive_delref(phar);
 	unlink(fname);
@@ -2166,10 +2170,8 @@ its_ok:
 		if (phar->alias && phar != pphar) {
 			if (phar->is_temporary_alias) {
 				phar->alias = NULL;
-				phar->alias_len = 0;
 			} else {
-				phar->alias = pestrndup(newpath, strlen(newpath), phar->is_persistent);
-				phar->alias_len = strlen(newpath);
+				phar->alias = zend_string_init(newpath, strlen(newpath), phar->is_persistent);
 				phar->is_temporary_alias = 1;
 				zend_hash_str_update_ptr(&(PHAR_G(phar_alias_map)), newpath, phar->fname_len, phar);
 			}
@@ -2186,7 +2188,6 @@ its_ok:
 		/* See comment in other branch. */
 		if (phar != pphar) {
 			phar->alias = NULL;
-			phar->alias_len = 0;
 		}
 	}
 
@@ -2246,7 +2247,8 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
+	PHAR_G(last_alias) = NULL;
 
 	phar = (phar_archive_data *) ecalloc(1, sizeof(phar_archive_data));
 	/* set whole-archive compression and type from parameter */
@@ -2675,8 +2677,12 @@ PHP_METHOD(Phar, getAlias)
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (phar_obj->archive->alias && phar_obj->archive->alias != phar_obj->archive->fname) {
-		RETURN_STRINGL(phar_obj->archive->alias, phar_obj->archive->alias_len);
+	// TODO: what was the point of the fname != alias check? Adding a check for the byte contents make some cache_list tests fail...
+	if (phar_obj->archive->alias/* && !zend_string_equals_cstr(phar_obj->archive->alias, phar_obj->archive->fname, phar_obj->archive->fname_len)*/) {
+		if (GC_FLAGS(phar_obj->archive->alias) & GC_PERSISTENT) {
+			RETURN_STR(zend_string_dup(phar_obj->archive->alias, false));
+		}
+		RETURN_STR_COPY(phar_obj->archive->alias);
 	}
 }
 /* }}} */
@@ -2700,9 +2706,9 @@ PHP_METHOD(Phar, getPath)
 PHP_METHOD(Phar, setAlias)
 {
 	zend_string *new_alias = NULL;
-	char *error, *oldalias;
+	char *error;
+	zend_string *oldalias;
 	phar_archive_data *fd_ptr;
-	size_t oldalias_len;
 	int old_temp, readd = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &new_alias) == FAILURE) {
@@ -2719,7 +2725,8 @@ PHP_METHOD(Phar, setAlias)
 
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
+	PHAR_G(last_alias) = NULL;
 
 	if (phar_obj->archive->is_data) {
 		if (phar_obj->archive->is_tar) {
@@ -2732,7 +2739,7 @@ PHP_METHOD(Phar, setAlias)
 		RETURN_THROWS();
 	}
 
-	if (zend_string_equals_cstr(new_alias, phar_obj->archive->alias, phar_obj->archive->alias_len)) {
+	if (zend_string_equals(new_alias, phar_obj->archive->alias)) {
 		RETURN_TRUE;
 	}
 	if (NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), new_alias))) {
@@ -2755,18 +2762,21 @@ valid_alias:
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	if (phar_obj->archive->alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias, phar_obj->archive->alias_len))) {
-		zend_hash_str_del(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias, phar_obj->archive->alias_len);
+	if (phar_obj->archive->alias && NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias))) {
+		zend_hash_del(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias);
 		readd = 1;
 	}
 
 	oldalias = phar_obj->archive->alias;
-	oldalias_len = phar_obj->archive->alias_len;
 	old_temp = phar_obj->archive->is_temporary_alias;
 
-	phar_obj->archive->alias_len = ZSTR_LEN(new_alias);
-	if (phar_obj->archive->alias_len) {
-		phar_obj->archive->alias = pestrndup(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias), phar_obj->archive->is_persistent);
+	if (ZSTR_LEN(new_alias)) {
+		if (phar_obj->archive->is_persistent) {
+			phar_obj->archive->alias = zend_string_init(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias), phar_obj->archive->is_persistent);
+			GC_MAKE_PERSISTENT_LOCAL(phar_obj->archive->alias);
+		} else {
+			phar_obj->archive->alias = zend_string_copy(new_alias);
+		}
 	} else {
 		phar_obj->archive->alias = NULL;
 	}
@@ -2776,11 +2786,10 @@ valid_alias:
 
 	if (error) {
 		phar_obj->archive->alias = oldalias;
-		phar_obj->archive->alias_len = oldalias_len;
 		phar_obj->archive->is_temporary_alias = old_temp;
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		if (readd) {
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), oldalias, oldalias_len, phar_obj->archive);
+			zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), oldalias, phar_obj->archive);
 		}
 		efree(error);
 		RETURN_THROWS();
@@ -2789,7 +2798,7 @@ valid_alias:
 	zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), new_alias, phar_obj->archive);
 
 	if (oldalias) {
-		efree(oldalias);
+		zend_string_release(oldalias);
 	}
 
 	RETURN_TRUE;
@@ -4478,7 +4487,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		RETURN_THROWS();
 	}
 
-	if (phar_open_from_filename(arch, arch_len, NULL, 0, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
+	if (phar_open_from_filename(arch, arch_len, NULL, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
 		efree(arch);
 		efree(entry);
 		if (error) {

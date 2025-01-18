@@ -310,7 +310,7 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 	if (*ZSTR_VAL(filename) == '.') {
 		size_t try_len;
 
-		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
+		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, NULL)) {
 			efree(arch);
 			return NULL;
 		}
@@ -491,7 +491,7 @@ zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname
 		*error = NULL;
 	}
 
-	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error)) {
+	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, error)) {
 		return FAILURE;
 	}
 
@@ -646,7 +646,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 
 	is_dir = (path_len && path[path_len - 1] == '/') ? 1 : 0;
 
-	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error)) {
+	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, error)) {
 		return NULL;
 	}
 
@@ -980,7 +980,8 @@ zend_result phar_free_alias(phar_archive_data *phar) /* {{{ */
 
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
+	PHAR_G(last_alias) = NULL;
 
 	return SUCCESS;
 }
@@ -990,7 +991,7 @@ zend_result phar_free_alias(phar_archive_data *phar) /* {{{ */
  * Looks up a phar archive in the filename map, connecting it to the alias
  * (if any) or returns null
  */
-zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error) /* {{{ */
+zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, zend_string *alias, char **error) /* {{{ */
 {
 	phar_archive_data *fd, *fd_ptr;
 	char *my_realpath, *save;
@@ -1006,40 +1007,39 @@ zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fn
 
 	if (PHAR_G(last_phar) && fname_len == PHAR_G(last_phar_name_len) && !memcmp(fname, PHAR_G(last_phar_name), fname_len)) {
 		*archive = PHAR_G(last_phar);
-		if (alias && alias_len) {
+		if (alias) {
 
-			if (!PHAR_G(last_phar)->is_temporary_alias && (alias_len != PHAR_G(last_phar)->alias_len || memcmp(PHAR_G(last_phar)->alias, alias, alias_len))) {
+			if (!PHAR_G(last_phar)->is_temporary_alias && !zend_string_equals(PHAR_G(last_phar)->alias, alias)) {
 				if (error) {
-					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, PHAR_G(last_phar)->fname, fname);
+					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", ZSTR_VAL(alias), PHAR_G(last_phar)->fname, fname);
 				}
 				*archive = NULL;
 				return FAILURE;
 			}
 
-			if (PHAR_G(last_phar)->alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias, PHAR_G(last_phar)->alias_len))) {
-				zend_hash_str_del(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias, PHAR_G(last_phar)->alias_len);
+			if (PHAR_G(last_phar)->alias && NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias))) {
+				zend_hash_del(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias);
 			}
 
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, *archive);
+			zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), alias, *archive);
 			PHAR_G(last_alias) = alias;
-			PHAR_G(last_alias_len) = alias_len;
 		}
 
 		return SUCCESS;
 	}
 
-	if (alias && alias_len && PHAR_G(last_phar) && alias_len == PHAR_G(last_alias_len) && !memcmp(alias, PHAR_G(last_alias), alias_len)) {
+	if (alias && PHAR_G(last_phar) && zend_string_equals(alias, PHAR_G(last_alias))) {
 		fd = PHAR_G(last_phar);
 		fd_ptr = fd;
 		goto alias_success;
 	}
 
-	if (alias && alias_len) {
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
+	if (alias) {
+		if (NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), alias))) {
 alias_success:
 			if (fname && (fname_len != fd_ptr->fname_len || strncmp(fname, fd_ptr->fname, fname_len))) {
 				if (error) {
-					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, fd_ptr->fname, fname);
+					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", ZSTR_VAL(alias), fd_ptr->fname, fname);
 				}
 				if (SUCCESS == phar_free_alias(fd_ptr)) {
 					if (error) {
@@ -1056,12 +1056,11 @@ alias_success:
 			PHAR_G(last_phar_name) = fd->fname;
 			PHAR_G(last_phar_name_len) = fd->fname_len;
 			PHAR_G(last_alias) = alias;
-			PHAR_G(last_alias_len) = alias_len;
 
 			return SUCCESS;
 		}
 
-		if (PHAR_G(manifest_cached) && NULL != (fd_ptr = zend_hash_str_find_ptr(&cached_alias, alias, alias_len))) {
+		if (PHAR_G(manifest_cached) && NULL != (fd_ptr = zend_hash_find_ptr(&cached_alias, alias))) {
 			goto alias_success;
 		}
 	}
@@ -1075,26 +1074,25 @@ alias_success:
 			*archive = fd_ptr;
 			fd = fd_ptr;
 
-			if (alias && alias_len) {
-				if (!fd->is_temporary_alias && (alias_len != fd->alias_len || memcmp(fd->alias, alias, alias_len))) {
+			if (alias) {
+				if (!fd->is_temporary_alias && !zend_string_equals(alias, fd->alias)) {
 					if (error) {
-						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, fd_ptr->fname, fname);
+						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", ZSTR_VAL(alias), fd_ptr->fname, fname);
 					}
 					return FAILURE;
 				}
 
-				if (fd->alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), fd->alias, fd->alias_len))) {
-					zend_hash_str_del(&(PHAR_G(phar_alias_map)), fd->alias, fd->alias_len);
+				if (fd->alias && NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), fd->alias))) {
+					zend_hash_del(&(PHAR_G(phar_alias_map)), fd->alias);
 				}
 
-				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, fd);
+				zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), alias, fd);
 			}
 
 			PHAR_G(last_phar) = fd;
 			PHAR_G(last_phar_name) = fd->fname;
 			PHAR_G(last_phar_name_len) = fd->fname_len;
 			PHAR_G(last_alias) = fd->alias;
-			PHAR_G(last_alias_len) = fd->alias_len;
 
 			return SUCCESS;
 		}
@@ -1105,10 +1103,10 @@ alias_success:
 
 			/* this could be problematic - alias should never be different from manifest alias
 			   for cached phars */
-			if (!fd->is_temporary_alias && alias && alias_len) {
-				if (alias_len != fd->alias_len || memcmp(fd->alias, alias, alias_len)) {
+			if (!fd->is_temporary_alias && alias) {
+				if (!zend_string_equals(alias, fd->alias)) {
 					if (error) {
-						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, fd_ptr->fname, fname);
+						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", ZSTR_VAL(alias), fd_ptr->fname, fname);
 					}
 					return FAILURE;
 				}
@@ -1118,7 +1116,6 @@ alias_success:
 			PHAR_G(last_phar_name) = fd->fname;
 			PHAR_G(last_phar_name_len) = fd->fname_len;
 			PHAR_G(last_alias) = fd->alias;
-			PHAR_G(last_alias_len) = fd->alias_len;
 
 			return SUCCESS;
 		}
@@ -1130,7 +1127,6 @@ alias_success:
 			PHAR_G(last_phar_name) = fd->fname;
 			PHAR_G(last_phar_name_len) = fd->fname_len;
 			PHAR_G(last_alias) = fd->alias;
-			PHAR_G(last_alias_len) = fd->alias_len;
 
 			return SUCCESS;
 		}
@@ -1142,7 +1138,6 @@ alias_success:
 			PHAR_G(last_phar_name) = fd->fname;
 			PHAR_G(last_phar_name_len) = fd->fname_len;
 			PHAR_G(last_alias) = fd->alias;
-			PHAR_G(last_alias_len) = fd->alias_len;
 
 			return SUCCESS;
 		}
@@ -1165,8 +1160,8 @@ realpath_success:
 			*archive = fd_ptr;
 			fd = fd_ptr;
 
-			if (alias && alias_len) {
-				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, fd);
+			if (alias) {
+				zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), alias, fd);
 			}
 
 			efree(my_realpath);
@@ -1175,7 +1170,6 @@ realpath_success:
 			PHAR_G(last_phar_name) = fd->fname;
 			PHAR_G(last_phar_name_len) = fd->fname_len;
 			PHAR_G(last_alias) = fd->alias;
-			PHAR_G(last_alias_len) = fd->alias_len;
 
 			return SUCCESS;
 		}
@@ -2077,7 +2071,7 @@ static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
 	phar->ext = phar->fname + (phar->ext - fname);
 
 	if (phar->alias) {
-		phar->alias = estrndup(phar->alias, phar->alias_len);
+		phar->alias = zend_string_copy(phar->alias);
 	}
 
 	if (phar->signature) {
@@ -2121,9 +2115,10 @@ zend_result phar_copy_on_write(phar_archive_data **pphar) /* {{{ */
 	newpphar = Z_PTR_P(pzv);
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
+	PHAR_G(last_alias) = NULL;
 
-	if (newpphar->alias_len && NULL == zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), newpphar->alias, newpphar->alias_len, newpphar)) {
+	if (newpphar->alias && NULL == zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), newpphar->alias, newpphar)) {
 		zend_hash_str_del(&(PHAR_G(phar_fname_map)), (*pphar)->fname, (*pphar)->fname_len);
 		return FAILURE;
 	}
