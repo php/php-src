@@ -900,9 +900,10 @@ static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *n
 		case FFI_VECTORCALL_PARTIAL:
 			return strpprintf(0, "%s@@%zu", ZSTR_VAL(name), zend_ffi_arg_size(type));
 # endif
+		default:
+			return zend_string_copy(name);
 	}
 #endif
-	return zend_string_copy(name);
 }
 /* }}} */
 

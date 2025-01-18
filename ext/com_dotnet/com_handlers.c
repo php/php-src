@@ -353,7 +353,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 							ITypeComp_Release(bindptr.lptcomp);
 							break;
 
-						case DESCKIND_NONE:
+						default:
 							break;
 					}
 					if (TI) {
