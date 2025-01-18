@@ -668,7 +668,7 @@ next:
 		myphar->is_temporary_alias = 0;
 
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, myphar->alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 				}
@@ -683,7 +683,7 @@ next:
 
 		if (alias_len) {
 			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-				if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+				if (SUCCESS != phar_free_alias(fd_ptr)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 					}

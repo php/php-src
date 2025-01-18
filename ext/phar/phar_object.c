@@ -2737,7 +2737,7 @@ PHP_METHOD(Phar, setAlias)
 	}
 	if (NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), new_alias))) {
 		spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", ZSTR_VAL(new_alias), fd_ptr->fname);
-		if (SUCCESS == phar_free_alias(fd_ptr, ZSTR_VAL(new_alias), ZSTR_LEN(new_alias))) {
+		if (SUCCESS == phar_free_alias(fd_ptr)) {
 			efree(error);
 			goto valid_alias;
 		}

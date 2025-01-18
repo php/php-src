@@ -967,7 +967,7 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 }
 /* }}} */
 
-zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len) /* {{{ */
+zend_result phar_free_alias(phar_archive_data *phar) /* {{{ */
 {
 	if (phar->refcount || phar->is_persistent) {
 		return FAILURE;
@@ -1041,7 +1041,7 @@ alias_success:
 				if (error) {
 					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, fd_ptr->fname, fname);
 				}
-				if (SUCCESS == phar_free_alias(fd_ptr, alias, alias_len)) {
+				if (SUCCESS == phar_free_alias(fd_ptr)) {
 					if (error) {
 						efree(*error);
 						*error = NULL;

@@ -1277,7 +1277,7 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		}
 
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				signature = NULL;
 				fp = NULL;
 				MAPPHAR_FAIL("Cannot open archive \"%s\", alias is already in use by existing archive");
@@ -1499,7 +1499,7 @@ zend_result phar_create_or_parse_filename(char *fname, size_t fname_len, char *a
 		phar_archive_data *fd_ptr;
 
 		if (alias && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: phar \"%s\" cannot set alias \"%s\", already in use by another phar archive", mydata->fname, alias);
 				}

@@ -409,7 +409,7 @@ zend_result phar_open_from_filename(char *fname, size_t fname_len, char *alias, 
 zend_result phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 zend_result phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 zend_result phar_open_executed_filename(char *alias, size_t alias_len, char **error);
-zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len);
+zend_result phar_free_alias(phar_archive_data *phar);
 zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error);
 zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error);
 zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);

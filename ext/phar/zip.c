@@ -772,7 +772,7 @@ foundit:
 		mydata->is_temporary_alias = 0;
 
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, mydata->alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with implicit alias, alias is already in use", fname);
 				}
@@ -794,7 +794,7 @@ foundit:
 
 		if (alias_len) {
 			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-				if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+				if (SUCCESS != phar_free_alias(fd_ptr)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with explicit alias, alias is already in use", fname);
 					}
