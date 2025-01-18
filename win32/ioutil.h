@@ -220,11 +220,11 @@ zend_always_inline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in
 		}
 
 		if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(mb, mb_len) || PHP_WIN32_IOUTIL_IS_JUNCTION_PATHW(mb, mb_len) || PHP_WIN32_IOUTIL_IS_UNC_PATHW(mb, mb_len)) {
-			memmove(ret, mb, mb_len * sizeof(wchar_t));
+			memcpy(ret, mb, mb_len * sizeof(wchar_t));
 			ret[mb_len] = L'\0';
 		} else {
 			wchar_t *src = mb, *dst = ret + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
-			memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+			memcpy(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
 #ifndef ZTS
 			if (dir_len > 0) {
 				size_t len = GetCurrentDirectoryW(dir_len, dst);
