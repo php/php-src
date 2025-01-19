@@ -39,6 +39,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-17307 (Internal closure causes JIT failure). (nielsdos)
 
+- Phar:
+  . Fixed bug GH-17518 (offset overflow phar extractTo()). (nielsdos)
+
 - PHPDBG:
   . Fix crashes in function registration + test. (nielsdos, Girgias)
 
