@@ -118,6 +118,7 @@ static bool check_has_header(const char *headers, const char *header) {
 typedef struct _php_stream_http_response_header_info {
 	php_stream_filter *transfer_encoding;
 	size_t file_size;
+	bool error;
 	bool follow_location;
 	char location[HTTP_HEADER_BLOCK_SIZE];
 } php_stream_http_response_header_info;
@@ -127,6 +128,7 @@ static void php_stream_http_response_header_info_init(
 {
 	header_info->transfer_encoding = NULL;
 	header_info->file_size = 0;
+	header_info->error = false;
 	header_info->follow_location = 1;
 	header_info->location[0] = '\0';
 }
@@ -164,10 +166,11 @@ static bool php_stream_http_response_header_trim(char *http_header_line,
 /* Process folding headers of the current line and if there are none, parse last full response
  * header line. It returns NULL if the last header is finished, otherwise it returns updated
  * last header line.  */
-static zend_string *php_stream_http_response_headers_parse(php_stream *stream,
-		php_stream_context *context, int options, zend_string *last_header_line_str,
-		char *header_line, size_t *header_line_length, int response_code,
-		zval *response_header, php_stream_http_response_header_info *header_info)
+static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *wrapper,
+		php_stream *stream, php_stream_context *context, int options,
+		zend_string *last_header_line_str, char *header_line, size_t *header_line_length,
+		int response_code, zval *response_header,
+		php_stream_http_response_header_info *header_info)
 {
 	char *last_header_line = ZSTR_VAL(last_header_line_str);
 	size_t last_header_line_length = ZSTR_LEN(last_header_line_str);
@@ -209,6 +212,19 @@ static zend_string *php_stream_http_response_headers_parse(php_stream *stream,
 	/* Find header separator position. */
 	char *last_header_value = memchr(last_header_line, ':', last_header_line_length);
 	if (last_header_value) {
+		/* Verify there is no space in header name */
+		char *last_header_name = last_header_line + 1;
+		while (last_header_name < last_header_value) {
+			if (*last_header_name == ' ' || *last_header_name == '\t') {
+				header_info->error = true;
+				php_stream_wrapper_log_error(wrapper, options,
+					"HTTP invalid response format (space in header name)!");
+				zend_string_efree(last_header_line_str);
+				return NULL;
+			}
+			++last_header_name;
+		}
+
 		last_header_value++; /* Skip ':'. */
 
 		/* Strip leading whitespace. */
@@ -217,9 +233,12 @@ static zend_string *php_stream_http_response_headers_parse(php_stream *stream,
 			last_header_value++;
 		}
 	} else {
-		/* There is no colon. Set the value to the end of the header line, which is effectively
-		 * an empty string. */
-		last_header_value = last_header_line_end;
+		/* There is no colon which means invalid response so error. */
+		header_info->error = true;
+		php_stream_wrapper_log_error(wrapper, options,
+				"HTTP invalid response format (no colon in header line)!");
+		zend_string_efree(last_header_line_str);
+		return NULL;
 	}
 
 	bool store_header = true;
@@ -926,10 +945,16 @@ finish:
 			
 			if (last_header_line_str != NULL) {
 				/* Parse last header line. */
-				last_header_line_str = php_stream_http_response_headers_parse(stream, context,
-						options, last_header_line_str, http_header_line, &http_header_line_length,
-						response_code, response_header, &header_info);
-				if (last_header_line_str != NULL) {
+				last_header_line_str = php_stream_http_response_headers_parse(wrapper, stream,
+						context, options, last_header_line_str, http_header_line,
+						&http_header_line_length, response_code, response_header, &header_info);
+				if (EXPECTED(last_header_line_str == NULL)) {
+					if (UNEXPECTED(header_info.error)) {
+						php_stream_close(stream);
+						stream = NULL;
+						goto out;
+					}
+				} else {
 					/* Folding header present so continue. */
 					continue;
 				}
@@ -959,8 +984,8 @@ finish:
 
 	/* If the stream was closed early, we still want to process the last line to keep BC. */
 	if (last_header_line_str != NULL) {
-		php_stream_http_response_headers_parse(stream, context, options, last_header_line_str,
-				NULL, NULL, response_code, response_header, &header_info);
+		php_stream_http_response_headers_parse(wrapper, stream, context, options,
+				last_header_line_str, NULL, NULL, response_code, response_header, &header_info);
 	}
 
 	if (!reqok || (header_info.location[0] != '\0' && header_info.follow_location)) {
