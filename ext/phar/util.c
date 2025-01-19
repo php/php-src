@@ -1082,7 +1082,7 @@ alias_success:
 					return FAILURE;
 				}
 
-				if (fd->alias && NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), fd->alias))) {
+				if (fd->alias) {
 					zend_hash_del(&(PHAR_G(phar_alias_map)), fd->alias);
 				}
 
