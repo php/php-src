@@ -749,7 +749,7 @@ foundit:
 			}
 		}
 
-		mydata->alias = entry.is_persistent ? zend_string_init(ZSTR_VAL(actual_alias), ZSTR_LEN(actual_alias), false) : actual_alias;
+		mydata->alias = entry.is_persistent ? zend_string_init(ZSTR_VAL(actual_alias), ZSTR_LEN(actual_alias), true) : actual_alias;
 
 		if (entry.is_persistent) {
 			GC_MAKE_PERSISTENT_LOCAL(mydata->alias);
