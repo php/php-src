@@ -2863,10 +2863,10 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 	 *  ?: phar metadata
 	 */
 	size_t written_alias_len;
-	if (phar->is_temporary_alias) {
+	if (phar->is_temporary_alias || !phar->alias) {
 		written_alias_len = 0;
 	} else {
-		written_alias_len = ZSTR_LEN(phar->alias); // TODO: null alias?
+		written_alias_len = ZSTR_LEN(phar->alias);
 	}
 
 	manifest_len = offset + written_alias_len + sizeof(manifest) + (main_metadata_str.s ? ZSTR_LEN(main_metadata_str.s) : 0);

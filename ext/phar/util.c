@@ -1017,7 +1017,7 @@ zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fn
 				return FAILURE;
 			}
 
-			if (PHAR_G(last_phar)->alias && NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias))) {
+			if (PHAR_G(last_phar)->alias) {
 				zend_hash_del(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias);
 			}
 

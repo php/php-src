@@ -2762,8 +2762,7 @@ valid_alias:
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	if (phar_obj->archive->alias && NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias))) {
-		zend_hash_del(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias);
+	if (phar_obj->archive->alias && zend_hash_del(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias) == SUCCESS) {
 		readd = 1;
 	}
 
