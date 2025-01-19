@@ -1,8 +1,18 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 36eac2dee86bcc386c24e2cc14caa7bd3d709e82 */
+ * Stub hash: a238d5299e5c2d1cbf10c1270d294809af05d5eb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 1, "SimpleXMLElement::class")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace_or_prefix, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, is_prefix, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_stream, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, document_uri, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 1, "SimpleXMLElement::class")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace_or_prefix, IS_STRING, 0, "\"\"")
@@ -101,6 +111,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SimpleXMLElement_
 ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(simplexml_load_file);
+ZEND_FUNCTION(simplexml_load_stream);
 ZEND_FUNCTION(simplexml_load_string);
 ZEND_FUNCTION(simplexml_import_dom);
 ZEND_METHOD(SimpleXMLElement, xpath);
@@ -126,6 +137,7 @@ ZEND_METHOD(SimpleXMLElement, getChildren);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(simplexml_load_file, arginfo_simplexml_load_file)
+	ZEND_FE(simplexml_load_stream, arginfo_simplexml_load_stream)
 	ZEND_FE(simplexml_load_string, arginfo_simplexml_load_string)
 	ZEND_FE(simplexml_import_dom, arginfo_simplexml_import_dom)
 	ZEND_FE_END
