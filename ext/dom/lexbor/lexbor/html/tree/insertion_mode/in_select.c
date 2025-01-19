@@ -126,6 +126,37 @@ lxb_html_tree_insertion_mode_in_select_optgroup(lxb_html_tree_t *tree,
 }
 
 lxb_inline bool
+lxb_html_tree_insertion_mode_in_select_hr(lxb_html_tree_t *tree,
+                                          lxb_html_token_t *token)
+{
+    lxb_html_element_t *element;
+    lxb_dom_node_t *node = lxb_html_tree_current_node(tree);
+
+    if (lxb_html_tree_node_is(node, LXB_TAG_OPTION)) {
+        lxb_html_tree_open_elements_pop(tree);
+    }
+
+    node = lxb_html_tree_current_node(tree);
+
+    if (lxb_html_tree_node_is(node, LXB_TAG_OPTGROUP)) {
+        lxb_html_tree_open_elements_pop(tree);
+    }
+
+    element = lxb_html_tree_insert_html_element(tree, token);
+    if (element == NULL) {
+        tree->status = LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+
+        return lxb_html_tree_process_abort(tree);
+    }
+
+    lxb_html_tree_open_elements_pop(tree);
+
+    lxb_html_tree_acknowledge_token_self_closing(tree, token);
+
+    return true;
+}
+
+lxb_inline bool
 lxb_html_tree_insertion_mode_in_select_optgroup_closed(lxb_html_tree_t *tree,
                                                        lxb_html_token_t *token)
 {
@@ -318,6 +349,9 @@ lxb_html_tree_insertion_mode_in_select(lxb_html_tree_t *tree,
 
         case LXB_TAG_OPTGROUP:
             return lxb_html_tree_insertion_mode_in_select_optgroup(tree, token);
+
+        case LXB_TAG_HR:
+            return lxb_html_tree_insertion_mode_in_select_hr(tree, token);
 
         case LXB_TAG_SELECT:
             return lxb_html_tree_insertion_mode_in_select_select(tree, token);
