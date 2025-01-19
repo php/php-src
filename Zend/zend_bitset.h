@@ -56,9 +56,9 @@ ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_ulong_ntz(zend_ulong num
 	unsigned long index;
 
 #if defined(_WIN64)
-	if (!BitScanForward64(&index, num)) {
+	if (UNEXPECTED(!BitScanForward64(&index, num))) {
 #else
-	if (!BitScanForward(&index, num)) {
+	if (UNEXPECTED(!BitScanForward(&index, num))) {
 #endif
 		/* undefined behavior */
 		return SIZEOF_ZEND_LONG * 8;
@@ -94,9 +94,9 @@ ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_ulong_nlz(zend_ulong num
 	unsigned long index;
 
 #if defined(_WIN64)
-	if (!BitScanReverse64(&index, num)) {
+	if (UNEXPECTED(!BitScanReverse64(&index, num))) {
 #else
-	if (!BitScanReverse(&index, num)) {
+	if (UNEXPECTED(!BitScanReverse(&index, num))) {
 #endif
 		/* undefined behavior */
 		return SIZEOF_ZEND_LONG * 8;
