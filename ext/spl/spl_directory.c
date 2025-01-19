@@ -1368,6 +1368,9 @@ PHP_METHOD(SplFileInfo, getPathInfo)
 
 	if (ce == NULL) {
 		ce = intern->info_class;
+	} else if (!instanceof_function(ce, spl_ce_SplFileInfo)) {
+		zend_argument_type_error(1, "must be a class name derived from %s or null, %s given", ZSTR_VAL(spl_ce_SplFileInfo->name), ZSTR_VAL(ce->name));
+		RETURN_THROWS();
 	}
 
 	path = spl_filesystem_object_get_pathname(intern);
