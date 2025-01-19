@@ -621,7 +621,7 @@ struct _pdo_stmt_t {
 			zval dummy; /* This exists due to alignment reasons with fetch.into and fetch.cls.ctor_args */
 			zend_fcall_info_cache fcc;
 		} func;
-		zval into;
+		zend_object *into;
 	} fetch;
 
 	/* used by the query parser for driver specific

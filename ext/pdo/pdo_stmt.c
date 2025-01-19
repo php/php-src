@@ -836,14 +836,14 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 		case PDO_FETCH_INTO:
 			/* TODO: Make this an assertion and ensure this is true higher up? */
-			if (Z_ISUNDEF(stmt->fetch.into)) {
+			if (stmt->fetch.into == NULL) {
 				/* TODO ArgumentCountError? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch-into object specified.");
 				return 0;
 				break;
 			}
 
-			ZVAL_COPY(return_value, &stmt->fetch.into);
+			ZVAL_OBJ_COPY(return_value, stmt->fetch.into);
 
 			if (Z_OBJ_P(return_value)->ce == ZEND_STANDARD_CLASS_DEF_PTR) {
 				how = PDO_FETCH_OBJ;
@@ -1655,9 +1655,9 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 
 	switch (stmt->default_fetch_type) {
 		case PDO_FETCH_INTO:
-			if (!Z_ISUNDEF(stmt->fetch.into)) {
-				zval_ptr_dtor(&stmt->fetch.into);
-				ZVAL_UNDEF(&stmt->fetch.into);
+			if (stmt->fetch.into) {
+				OBJ_RELEASE(stmt->fetch.into);
+				stmt->fetch.into = NULL;
 			}
 			break;
 		default:
@@ -1786,7 +1786,8 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				return false;
 			}
 
-			ZVAL_COPY(&stmt->fetch.into, &args[0]);
+			GC_ADDREF(Z_OBJ(args[0]));
+			stmt->fetch.into = Z_OBJ(args[0]);
 			break;
 		default:
 			zend_argument_value_error(mode_arg_num, "must be one of the PDO::FETCH_* constants");
@@ -2030,7 +2031,11 @@ static HashTable *dbstmt_get_gc(zend_object *object, zval **gc_data, int *gc_cou
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->database_object_handle);
-	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->fetch.into);
+	if ((stmt->default_fetch_type & PDO_FETCH_INTO) == PDO_FETCH_INTO) {
+		zend_get_gc_buffer_add_obj(gc_buffer, stmt->fetch.into);
+	} else if ((stmt->default_fetch_type & PDO_FETCH_CLASS) == PDO_FETCH_CLASS) {
+		zend_get_gc_buffer_add_zval(gc_buffer, &stmt->fetch.cls.ctor_args);
+	}
 	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_count);
 
 	/**
@@ -2077,9 +2082,9 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 
 	pdo_stmt_reset_columns(stmt);
 
-	if (!Z_ISUNDEF(stmt->fetch.into) && stmt->default_fetch_type == PDO_FETCH_INTO) {
-		zval_ptr_dtor(&stmt->fetch.into);
-		ZVAL_UNDEF(&stmt->fetch.into);
+	if (stmt->fetch.into && stmt->default_fetch_type == PDO_FETCH_INTO) {
+		OBJ_RELEASE(stmt->fetch.into);
+		stmt->fetch.into = NULL;
 	}
 
 	do_fetch_opt_finish(stmt, 1);
@@ -2168,7 +2173,6 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 
 	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
 			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
-
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
 		ZVAL_UNDEF(&I->fetch_ahead);
