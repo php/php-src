@@ -62,6 +62,9 @@ PHP                                                                        NEWS
     the cpu mask argument with entries type different than int/string.
     (David Carlier)
 
+- Phar:
+  . Fixed bug GH-17518 (offset overflow phar extractTo()). (nielsdos)
+
 - PHPDBG:
   . Fix crashes in function registration + test. (nielsdos, Girgias)
 
