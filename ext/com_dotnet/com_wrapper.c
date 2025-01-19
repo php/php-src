@@ -424,7 +424,7 @@ static void generate_dispids(php_dispatchex *disp)
 	zend_string *name = NULL;
 	zval *tmp, tmp2;
 	int keytype;
-	zend_ulong pid;
+	zend_long pid;
 
 	if (disp->dispid_to_name == NULL) {
 		ALLOC_HASHTABLE(disp->dispid_to_name);

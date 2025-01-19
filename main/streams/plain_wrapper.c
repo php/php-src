@@ -622,7 +622,7 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 				}
 
 				*(FILE**)ret = data->file;
-				data->fd = (int) SOCK_ERR;
+				data->fd = SOCK_ERR;
 			}
 			return SUCCESS;
 
