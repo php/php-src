@@ -39,7 +39,6 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_fetch_all_class_error_unknown");
 ?>
---EXPECTF--
+--EXPECT--
 TypeError: PDOStatement::setFetchMode(): Argument #2 must be a valid class
-
-Fatal error: Class "Unknown" not found in %s on line %d
+TypeError: PDOStatement::fetchAll(): Argument #2 must be a valid class

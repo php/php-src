@@ -1231,7 +1231,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 					zend_argument_type_error(2, "must be of type string, %s given", zend_zval_value_name(arg2));
 					RETURN_THROWS();
 				}
-				stmt->fetch.cls.ce = zend_fetch_class(Z_STR_P(arg2), ZEND_FETCH_CLASS_AUTO);
+				stmt->fetch.cls.ce = zend_lookup_class(Z_STR_P(arg2));
 				if (!stmt->fetch.cls.ce) {
 					zend_argument_type_error(2, "must be a valid class");
 					RETURN_THROWS();
