@@ -2890,7 +2890,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 
 	/* write the manifest header */
 	if (sizeof(manifest) != php_stream_write(newfile, manifest, sizeof(manifest))
-	|| written_alias_len != php_stream_write(newfile, ZSTR_VAL(phar->alias), written_alias_len)) {
+	|| (written_alias_len > 0 && written_alias_len != php_stream_write(newfile, ZSTR_VAL(phar->alias), written_alias_len))) {
 
 		if (must_close_old_file) {
 			php_stream_close(oldfile);
