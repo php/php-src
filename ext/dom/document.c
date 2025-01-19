@@ -1345,7 +1345,17 @@ const char *dom_get_valid_file_path(const char *source, char *resolved_path, int
 }
 /* }}} */
 
-xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding) /* {{{ */
+static int dom_stream_read(void *context, char *buffer, int len)
+{
+	zend_resource *resource = context;
+	if (EXPECTED(resource->ptr)) {
+		php_stream *stream = resource->ptr;
+		return php_stream_read(stream, buffer, len);
+	}
+	return -1;
+}
+
+xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, dom_source_union source, size_t options, xmlCharEncodingHandlerPtr encoding, const char *override_document_uri) /* {{{ */
 {
 	xmlDocPtr ret;
 	xmlParserCtxtPtr ctxt = NULL;
@@ -1371,16 +1381,18 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 	xmlInitParser();
 
 	if (mode == DOM_LOAD_FILE) {
-		if (CHECK_NULL_PATH(source, source_len)) {
+		if (CHECK_NULL_PATH(source.str, source.str_len)) {
 			zend_argument_value_error(1, "must not contain any null bytes");
 			return NULL;
 		}
-		const char *file_dest = dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
+		const char *file_dest = dom_get_valid_file_path(source.str, resolved_path, MAXPATHLEN);
 		if (file_dest) {
 			ctxt = xmlCreateFileParserCtxt(file_dest);
 		}
+	} else if (mode == DOM_LOAD_STRING) {
+		ctxt = xmlCreateMemoryParserCtxt(source.str, source.str_len);
 	} else {
-		ctxt = xmlCreateMemoryParserCtxt(source, source_len);
+		ctxt = xmlCreateIOParserCtxt(NULL, NULL, dom_stream_read, NULL, source.stream->res, XML_CHAR_ENCODING_NONE);
 	}
 
 	if (ctxt == NULL) {
@@ -1393,7 +1405,7 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 	}
 
 	/* If loading from memory, we need to set the base directory for the document */
-	if (mode != DOM_LOAD_FILE) {
+	if (mode == DOM_LOAD_STRING) {
 #ifdef HAVE_GETCWD
 		directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
 #elif defined(HAVE_GETWD)
@@ -1410,6 +1422,11 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 			}
 			ctxt->directory = (char *) xmlCanonicPath((const xmlChar *) resolved_path);
 		}
+	} else if (override_document_uri) {
+		if(ctxt->directory != NULL) {
+			xmlFree(ctxt->directory);
+		}
+		ctxt->directory = (char *) xmlCanonicPath((const xmlChar *) override_document_uri);
 	}
 
 	ctxt->vctxt.error = php_libxml_ctx_error;
@@ -1507,21 +1524,20 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 	RETURN_TRUE;
 }
 
-static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void dom_legacy_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	char *source;
-	size_t source_len;
+	dom_source_union source;
 	zend_long options = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source.str, &source.str_len, &options) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!source_len) {
+	if (!source.str_len) {
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
-	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+	if (ZEND_SIZE_T_INT_OVFL(source.str_len)) {
 		php_error_docref(NULL, E_WARNING, "Input string is too long");
 		RETURN_FALSE;
 	}
@@ -1530,7 +1546,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_FALSE;
 	}
 
-	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options, NULL);
+	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, options, NULL, NULL);
 	if (newdoc == DOM_DOCUMENT_MALFORMED) {
 		newdoc = NULL;
 	}
@@ -1542,7 +1558,7 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, load)
 {
-	dom_parse_document(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
+	dom_legacy_parse_document(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_load */
 
@@ -1551,7 +1567,7 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, loadXML)
 {
-	dom_parse_document(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
+	dom_legacy_parse_document(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
 /* }}} end dom_document_loadxml */
 

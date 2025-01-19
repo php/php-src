@@ -2068,6 +2068,9 @@ namespace Dom
 
         public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
 
+        /** @param resource $stream */
+        public static function createFromStream($stream, ?string $documentURI = null, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
+
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
 
         /**
