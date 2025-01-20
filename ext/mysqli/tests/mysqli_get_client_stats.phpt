@@ -23,8 +23,7 @@ mysqli
     try {
         $sql = sprintf("CREATE SERVER myself FOREIGN DATA WRAPPER mysql OPTIONS (user '%s', password '%s', database '%s')",
             get_default_user(), get_default_password(), get_default_database());
-        $stmt = mysqli_query($link, $sql);
-        $stmt->close();
+        mysqli_query($link, $sql);
         mysqli_query($link, "DROP SERVER myself");
     } catch(\mysqli_sql_exception) {
         die("skip don't have create server privilege");
