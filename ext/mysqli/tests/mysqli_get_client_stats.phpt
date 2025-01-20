@@ -10,9 +10,6 @@ mysqli
     // this test, so check if we can do that. We don't check if we can merely
     // create a table; if that doesn't work with the provided database, many
     // more tests would fail.
-
-    // It seems DML can be privilege checked on prepare, but DML can't be, so
-    // we need to execute and clean up.
     try {
         $sql = "CREATE DATABASE mysqli_get_client_stats";
         mysqli_query($link, $sql);
