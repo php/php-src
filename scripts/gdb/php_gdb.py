@@ -534,7 +534,7 @@ class PrintAccFlagsCommand(gdb.Command):
     def __init__ (self, type):
         self.type = type
         name = 'print_%s_flags' % type
-        super(PrintAccFlagsCommand, self).__init__(name, gdb.COMMAND_USER)
+        super(PrintAccFlagsCommand, self).__init__(name, gdb.COMMAND_USER, gdb.COMPLETE_EXPRESSION)
 
     def invoke (self, arg, from_tty):
         arg = int(gdb.parse_and_eval(arg))
@@ -549,7 +549,7 @@ class PrintOpcodeCommand(gdb.Command):
     "Pretty print opcode"
 
     def __init__ (self):
-        super(PrintOpcodeCommand, self).__init__("print_opcode", gdb.COMMAND_USER)
+        super(PrintOpcodeCommand, self).__init__("print_opcode", gdb.COMMAND_USER, gdb.COMPLETE_EXPRESSION)
 
     def invoke (self, arg, from_tty):
         arg = int(gdb.parse_and_eval(arg))
@@ -561,13 +561,35 @@ class PrintRefTypeInfoCommand(gdb.Command):
     "Pretty print zend_refcounted.gc.u.type_info"
 
     def __init__ (self):
-        super(PrintRefTypeInfoCommand, self).__init__("print_ref_type_info", gdb.COMMAND_USER)
+        super(PrintRefTypeInfoCommand, self).__init__("print_ref_type_info", gdb.COMMAND_USER, gdb.COMPLETE_EXPRESSION)
 
     def invoke (self, arg, from_tty):
         arg = int(gdb.parse_and_eval(arg))
         print(ZendRefTypeInfo.format(arg))
 
 PrintRefTypeInfoCommand()
+
+class DumpOpArrayCommand(gdb.Command):
+    "Dump an op_array"
+
+    def __init__ (self):
+        super(DumpOpArrayCommand, self).__init__("dump_op_array", gdb.COMMAND_USER, gdb.COMPLETE_EXPRESSION)
+
+    def invoke (self, arg, from_tty):
+        op_array = gdb.parse_and_eval(arg)
+        if op_array.type.code != gdb.TYPE_CODE_PTR:
+            print("Must pass a zend_op_array* (got a %s)" % op_array.type)
+            return
+        if str(gdb.types.get_basic_type(op_array.type.target())) != 'struct _zend_op_array':
+            print("Must pass a zend_op_array* (got a %s)" % op_array.type)
+            return
+        if int(op_array) == 0:
+            print("NULL")
+            return
+        gdb.execute("call zend_dump_op_array((zend_op_array*)0x%x, 0, 0, 0)" % (int(op_array)))
+        return
+
+DumpOpArrayCommand()
 
 class ZendTypeBits:
     _bits = None
