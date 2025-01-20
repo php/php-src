@@ -609,8 +609,7 @@ static int glob0(const Char *pattern, php_glob_t *pglob, struct glob_lim *limitp
 			size_t n = pglob->gl_pathc - oldpathc;
 			size_t o = pglob->gl_offs + oldpathc;
 
-			if ((path_stat = ecalloc(n, sizeof(*path_stat))) == NULL)
-				return PHP_GLOB_NOSPACE;
+			path_stat = ecalloc(n, sizeof(*path_stat));
 			for (i = 0; i < n; i++) {
 				path_stat[i].gps_path = pglob->gl_pathv[o + i];
 				path_stat[i].gps_stat = pglob->gl_statv[o + i];
@@ -837,7 +836,6 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 		newn >= SSIZE_MAX ||
 		SIZE_MAX / sizeof(*pathv) <= newn ||
 		SIZE_MAX / sizeof(*statv) <= newn) {
- nospace:
 		for (i = pglob->gl_offs; i < newn - 2; i++) {
 			if (pglob->gl_pathv && pglob->gl_pathv[i])
 				efree(pglob->gl_pathv[i]);
@@ -852,9 +850,7 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 		return(PHP_GLOB_NOSPACE);
 	}
 
-	pathv = safe_erealloc_rel(pglob->gl_pathv, newn, sizeof(*pathv), 0);
-	if (pathv == NULL)
-		goto nospace;
+	pathv = safe_erealloc(pglob->gl_pathv, newn, sizeof(*pathv), 0);
 	if (pglob->gl_pathv == NULL && pglob->gl_offs > 0) {
 		/* first time around -- clear initial gl_offs items */
 		pathv += pglob->gl_offs;
@@ -864,9 +860,7 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 	pglob->gl_pathv = pathv;
 
 	if ((pglob->gl_flags & PHP_GLOB_KEEPSTAT) != 0) {
-		statv = safe_erealloc_rel(pglob->gl_statv, newn, sizeof(*statv), 0);
-		if (statv == NULL)
-			goto nospace;
+		statv = safe_erealloc(pglob->gl_statv, newn, sizeof(*statv), 0);
 		if (pglob->gl_statv == NULL && pglob->gl_offs > 0) {
 			/* first time around -- clear initial gl_offs items */
 			statv += pglob->gl_offs;
@@ -883,9 +877,8 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 				errno = 0;
 				return(PHP_GLOB_NOSPACE);
 			}
-			if ((statv[pglob->gl_offs + pglob->gl_pathc] =
-				emalloc(sizeof(**statv))) == NULL)
-				goto copy_error;
+			statv[pglob->gl_offs + pglob->gl_pathc] =
+				emalloc(sizeof(**statv));
 			memcpy(statv[pglob->gl_offs + pglob->gl_pathc], sb,
 				sizeof(*sb));
 		}
@@ -896,13 +889,12 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 		;
 	len = (size_t)(p - path);
 	limitp->glim_malloc += len;
-	if ((copy = emalloc(len)) != NULL) {
-		if (g_Ctoc(path, copy, len)) {
-			efree(copy);
-			return(PHP_GLOB_NOSPACE);
-		}
-		pathv[pglob->gl_offs + pglob->gl_pathc++] = copy;
+	copy = emalloc(len);
+	if (g_Ctoc(path, copy, len)) {
+		efree(copy);
+		return(PHP_GLOB_NOSPACE);
 	}
+	pathv[pglob->gl_offs + pglob->gl_pathc++] = copy;
 	pathv[pglob->gl_offs + pglob->gl_pathc] = NULL;
 
 	if ((pglob->gl_flags & PHP_GLOB_LIMIT) &&
@@ -911,7 +903,6 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 		errno = 0;
 		return(PHP_GLOB_NOSPACE);
 	}
- copy_error:
 	return(copy == NULL ? PHP_GLOB_NOSPACE : 0);
 }
 
