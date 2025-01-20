@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed NULL arithmetic during system program execution on Windows. (cmb,
     nielsdos)
   . Fixed potential OOB when checking for trailing spaces on Windows. (cmb)
+  . Fixed bug GH-17408 (Assertion failure Zend/zend_exceptions.c).
+    (nielsdos, ilutov)
 
 - DOM:
   . Fixed bug GH-17500 (Segfault with requesting nodeName on nameless doctype).
