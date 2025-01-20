@@ -15,9 +15,8 @@ mysqli
     // we need to execute and clean up.
     try {
         $sql = "CREATE DATABASE mysqli_get_client_stats";
-        $stmt = mysqli_query($link, $sql);
-        $stmt->close();
-         mysqli_query($link, "DROP DATABASE mysqli_get_client_stats");
+        mysqli_query($link, $sql);
+        mysqli_query($link, "DROP DATABASE mysqli_get_client_stats");
     } catch (\mysqli_sql_exception) {
         die("skip don't have create database privilege");
     }
