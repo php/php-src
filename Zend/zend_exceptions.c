@@ -193,7 +193,6 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 		zend_exception_set_previous(exception, EG(exception));
 		EG(exception) = exception;
 		if (previous) {
-			ZEND_ASSERT(is_handle_exception_set() && "HANDLE_EXCEPTION not set?");
 			return;
 		}
 	}
