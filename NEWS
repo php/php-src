@@ -65,6 +65,10 @@ PHP                                                                        NEWS
     the cpu mask argument with entries type different than int/string.
     (David Carlier)
 
+- PgSql:
+  . Fixed build failure when the constant PGRES_TUPLES_CHUNK is not present
+    in the system. (chschneider)
+
 - Phar:
   . Fixed bug GH-17518 (offset overflow phar extractTo()). (nielsdos)
 
