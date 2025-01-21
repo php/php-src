@@ -6629,7 +6629,7 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 
 		zend_result result = zend_call_function(&fci, &fci_cache);
 		if (EXPECTED(result == SUCCESS)) {
-			int retval_true;
+			bool retval_true;
 
 			retval_true = zend_is_true(&retval);
 			zval_ptr_dtor(&retval);
