@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed potential OOB when checking for trailing spaces on Windows. (cmb)
   . Fixed bug GH-17408 (Assertion failure Zend/zend_exceptions.c).
     (nielsdos, ilutov)
+  . Fix may_have_extra_named_args flag for ZEND_AST_UNPACK. (nielsdos)
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
