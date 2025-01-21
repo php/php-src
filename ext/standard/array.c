@@ -6628,30 +6628,28 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 		ZVAL_COPY_VALUE(&args[0], operand);
 
 		zend_result result = zend_call_function(&fci, &fci_cache);
-		if (EXPECTED(result == SUCCESS)) {
-			bool retval_true;
+		ZEND_ASSERT(result == SUCCESS);
 
-			retval_true = zend_is_true(&retval);
-			zval_ptr_dtor(&retval);
-
-			/* This negates the condition, if negate_condition is true. Otherwise it does nothing with `retval_true`. */
-			retval_true ^= negate_condition;
-
-			if (retval_true) {
-				if (result_value != NULL) {
-					ZVAL_COPY_DEREF(result_value, &args[0]);
-				}
-
-				if (result_key != NULL) {
-					ZVAL_COPY(result_key, &args[1]);
-				}
-
-				return SUCCESS;
-			}
+		if (UNEXPECTED(EG(exception))) {
+			return FAILURE;
 		}
 
-		if (UNEXPECTED(result != SUCCESS)) {
-			return FAILURE;
+		bool retval_true = zend_is_true(&retval);
+		zval_ptr_dtor(&retval);
+
+		/* This negates the condition, if negate_condition is true. Otherwise it does nothing with `retval_true`. */
+		retval_true ^= negate_condition;
+
+		if (retval_true) {
+			if (result_value != NULL) {
+				ZVAL_COPY_DEREF(result_value, &args[0]);
+			}
+
+			if (result_key != NULL) {
+				ZVAL_COPY(result_key, &args[1]);
+			}
+
+			break;
 		}
 	} ZEND_HASH_FOREACH_END();
 
