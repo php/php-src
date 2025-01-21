@@ -6549,32 +6549,25 @@ PHP_FUNCTION(array_filter)
 				if (!string_key) {
 					ZVAL_LONG(key, num_key);
 				} else {
-					ZVAL_STR_COPY(key, string_key);
+					ZVAL_STR(key, string_key);
 				}
 			}
 			if (use_type != ARRAY_FILTER_USE_KEY) {
-				ZVAL_COPY(&args[0], operand);
+				ZVAL_COPY_VALUE(&args[0], operand);
 			}
 			fci.params = args;
 
-			if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
-				bool retval_true;
+			zend_result result = zend_call_function(&fci, &fci_cache);
+			ZEND_ASSERT(result == SUCCESS);
 
-				zval_ptr_dtor(&args[0]);
-				if (use_type == ARRAY_FILTER_USE_BOTH) {
-					zval_ptr_dtor(&args[1]);
-				}
-				retval_true = zend_is_true(&retval);
-				zval_ptr_dtor(&retval);
-				if (!retval_true) {
-					continue;
-				}
-			} else {
-				zval_ptr_dtor(&args[0]);
-				if (use_type == ARRAY_FILTER_USE_BOTH) {
-					zval_ptr_dtor(&args[1]);
-				}
-				return;
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+
+			bool retval_true = zend_is_true(&retval);
+			zval_ptr_dtor(&retval);
+			if (!retval_true) {
+				continue;
 			}
 		} else if (!zend_is_true(operand)) {
 			continue;
