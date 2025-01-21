@@ -2360,7 +2360,7 @@ static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 			return false;
 		}
 		ZEND_ASSERT(retval == &tmp_val);
-		bool res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+		bool res = i_zend_is_true(retval);
 		zval_ptr_dtor_nogc(retval);
 		return res;
 	} else {
