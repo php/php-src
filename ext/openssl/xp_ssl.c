@@ -700,7 +700,7 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 				err_code = e;
 			}
 
-			php_error_docref(NULL, E_WARNING, "Error encoding X509 certificate: %d: %s", err_code, ERR_error_string(err_code, err_buf));
+			php_error_docref(NULL, E_WARNING, "Error encoding X509 certificate: %lu: %s", err_code, ERR_error_string(err_code, err_buf));
 			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 		}
 
