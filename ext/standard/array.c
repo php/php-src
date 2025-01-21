@@ -6622,10 +6622,10 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 		if (!str_key) {
 			ZVAL_LONG(&args[1], num_key);
 		} else {
-			ZVAL_STR_COPY(&args[1], str_key);
+			ZVAL_STR(&args[1], str_key);
 		}
 
-		ZVAL_COPY(&args[0], operand);
+		ZVAL_COPY_VALUE(&args[0], operand);
 
 		zend_result result = zend_call_function(&fci, &fci_cache);
 		if (EXPECTED(result == SUCCESS)) {
@@ -6646,15 +6646,9 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 					ZVAL_COPY(result_key, &args[1]);
 				}
 
-				zval_ptr_dtor(&args[0]);
-				zval_ptr_dtor(&args[1]);
-
 				return SUCCESS;
 			}
 		}
-
-		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
 
 		if (UNEXPECTED(result != SUCCESS)) {
 			return FAILURE;
