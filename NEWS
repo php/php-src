@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 
 - Session:
   . Fix type confusion with session SID constant. (nielsdos)
+  . Fixed bug GH-17541 (ext/session NULL pointer dereferencement during
+    ID reset). (Girgias)
 
 - SimpleXML:
   . Fixed bug GH-17409 (Assertion failure Zend/zend_hash.c:1730). (nielsdos)
