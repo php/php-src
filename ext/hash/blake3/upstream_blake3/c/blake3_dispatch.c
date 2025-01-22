@@ -4,9 +4,12 @@
 
 #include "blake3_impl.h"
 
-#if defined(IS_X86)
 #if defined(_MSC_VER)
 #include <Windows.h>
+#endif
+
+#if defined(IS_X86)
+#if defined(_MSC_VER)
 #include <intrin.h>
 #elif defined(__GNUC__)
 #include <immintrin.h>
@@ -219,6 +222,29 @@ void blake3_compress_xof(const uint32_t cv[8],
 #endif
 #endif
   blake3_compress_xof_portable(cv, block, block_len, counter, flags, out);
+}
+
+
+void blake3_xof_many(const uint32_t cv[8],
+                     const uint8_t block[BLAKE3_BLOCK_LEN],
+                     uint8_t block_len, uint64_t counter, uint8_t flags,
+                     uint8_t out[64], size_t outblocks) {
+  if (outblocks == 0) {
+    // The current assembly implementation always outputs at least 1 block.
+    return;
+  }
+#if defined(IS_X86)
+  const enum cpu_feature features = get_cpu_features();
+#if !defined(_WIN32) && !defined(BLAKE3_NO_AVX512)
+  if (features & AVX512VL) {
+    blake3_xof_many_avx512(cv, block, block_len, counter, flags, out, outblocks);
+    return;
+  }
+#endif
+#endif
+  for(size_t i = 0; i < outblocks; ++i) {
+    blake3_compress_xof(cv, block, block_len, counter + i, flags, out + 64*i);
+  }
 }
 
 void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,

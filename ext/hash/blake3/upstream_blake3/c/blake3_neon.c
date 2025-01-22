@@ -9,13 +9,13 @@
 #endif
 
 INLINE uint32x4_t loadu_128(const uint8_t src[16]) {
-    // https://github.com/BLAKE3-team/BLAKE3/pull/384
-    return vreinterpretq_u32_u8(vld1q_u8(src));
+  // vld1q_u32 has alignment requirements. Don't use it.
+  return vreinterpretq_u32_u8(vld1q_u8(src));
 }
 
 INLINE void storeu_128(uint32x4_t src, uint8_t dest[16]) {
-    // https://github.com/BLAKE3-team/BLAKE3/pull/384
-    vst1q_u8(dest, vreinterpretq_u8_u32(src));
+  // vst1q_u32 has alignment requirements. Don't use it.
+  vst1q_u8(dest, vreinterpretq_u8_u32(src));
 }
 
 INLINE uint32x4_t add_128(uint32x4_t a, uint32x4_t b) {
@@ -34,7 +34,7 @@ INLINE uint32x4_t set4(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
 }
 
 INLINE uint32x4_t rot16_128(uint32x4_t x) {
-  // The straightfoward implementation would be two shifts and an or, but that's
+  // The straightforward implementation would be two shifts and an or, but that's
   // slower on microarchitectures we've tested. See
   // https://github.com/BLAKE3-team/BLAKE3/pull/319.
   // return vorrq_u32(vshrq_n_u32(x, 16), vshlq_n_u32(x, 32 - 16));

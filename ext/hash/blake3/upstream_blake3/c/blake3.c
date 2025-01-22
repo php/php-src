@@ -88,24 +88,30 @@ INLINE void output_chaining_value(const output_t *self, uint8_t cv[32]) {
 
 INLINE void output_root_bytes(const output_t *self, uint64_t seek, uint8_t *out,
                               size_t out_len) {
+  if (out_len == 0) {
+      return;
+  }
   uint64_t output_block_counter = seek / 64;
   size_t offset_within_block = seek % 64;
   uint8_t wide_buf[64];
-  while (out_len > 0) {
-    blake3_compress_xof(self->input_cv, self->block, self->block_len,
-                        output_block_counter, self->flags | ROOT, wide_buf);
-    size_t available_bytes = 64 - offset_within_block;
-    size_t memcpy_len;
-    if (out_len > available_bytes) {
-      memcpy_len = available_bytes;
-    } else {
-      memcpy_len = out_len;
-    }
-    memcpy(out, wide_buf + offset_within_block, memcpy_len);
-    out += memcpy_len;
-    out_len -= memcpy_len;
+  if(offset_within_block) {
+    blake3_compress_xof(self->input_cv, self->block, self->block_len, output_block_counter, self->flags | ROOT, wide_buf);
+    const size_t available_bytes = 64 - offset_within_block;
+    const size_t bytes = out_len > available_bytes ? available_bytes : out_len;
+    memcpy(out, wide_buf + offset_within_block, bytes);
+    out += bytes;
+    out_len -= bytes;
     output_block_counter += 1;
-    offset_within_block = 0;
+  }
+  if(out_len / 64) {
+    blake3_xof_many(self->input_cv, self->block, self->block_len, output_block_counter, self->flags | ROOT, out, out_len / 64);
+  }
+  output_block_counter += out_len / 64;
+  out += out_len & -64;
+  out_len -= out_len & -64;
+  if(out_len) {
+    blake3_compress_xof(self->input_cv, self->block, self->block_len, output_block_counter, self->flags | ROOT, wide_buf);
+    memcpy(out, wide_buf, out_len);
   }
 }
 
@@ -134,9 +140,7 @@ INLINE void chunk_state_update(blake3_chunk_state *self, const uint8_t *input,
     input_len -= BLAKE3_BLOCK_LEN;
   }
 
-  size_t take = chunk_state_fill_buf(self, input, input_len);
-  input += take;
-  input_len -= take;
+  chunk_state_fill_buf(self, input, input_len);
 }
 
 INLINE output_t chunk_state_output(const blake3_chunk_state *self) {
@@ -341,12 +345,13 @@ INLINE void compress_subtree_to_parent_node(
   size_t num_cvs = blake3_compress_subtree_wide(input, input_len, key,
                                                 chunk_counter, flags, cv_array);
   assert(num_cvs <= MAX_SIMD_DEGREE_OR_2);
-  // https://github.com/BLAKE3-team/BLAKE3/pull/380
-  // This condition is always true, and we just
-  // asserted it above. But GCC can't tell that it's always true, and if NDEBUG
-  // is set on platforms where MAX_SIMD_DEGREE_OR_2 == 2, GCC emits spurious
-  // warnings here. GCC 8.5 is particularly sensitive, so if you're changing
-  // this code, test it against that version.
+  // The following loop never executes when MAX_SIMD_DEGREE_OR_2 is 2, because
+  // as we just asserted, num_cvs will always be <=2 in that case. But GCC
+  // (particularly GCC 8.5) can't tell that it never executes, and if NDEBUG is
+  // set then it emits incorrect warnings here. We tried a few different
+  // hacks to silence these, but in the end our hacks just produced different
+  // warnings (see https://github.com/BLAKE3-team/BLAKE3/pull/380). Out of
+  // desperation, we ifdef out this entire loop when we know it's not needed.
 #if MAX_SIMD_DEGREE_OR_2 > 2
   // If MAX_SIMD_DEGREE_OR_2 is greater than 2 and there's enough input,
   // compress_subtree_wide() returns more than 2 chaining values. Condense
@@ -429,7 +434,7 @@ INLINE void hasher_merge_cv_stack(blake3_hasher *self, uint64_t total_len) {
 //    of the whole tree, and it would need to be ROOT finalized. We can't
 //    compress it until we know.
 // 2) This 64 KiB input might complete a larger tree, whose root node is
-//    similarly going to be the the root of the whole tree. For example, maybe
+//    similarly going to be the root of the whole tree. For example, maybe
 //    we have 196 KiB (that is, 128 + 64) hashed so far. We can't compress the
 //    node at the root of the 256 KiB subtree until we know how to finalize it.
 //
