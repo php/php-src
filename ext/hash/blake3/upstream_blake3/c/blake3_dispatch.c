@@ -235,6 +235,8 @@ void blake3_xof_many(const uint32_t cv[8],
   }
 #if defined(IS_X86)
   const enum cpu_feature features = get_cpu_features();
+// https://github.com/BLAKE3-team/BLAKE3/pull/443
+  MAYBE_UNUSED(features);
 #if !defined(_WIN32) && !defined(BLAKE3_NO_AVX512)
   if (features & AVX512VL) {
     blake3_xof_many_avx512(cv, block, block_len, counter, flags, out, outblocks);
