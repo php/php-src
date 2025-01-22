@@ -868,7 +868,6 @@ optimize_const_unary_op:
 				break;
 
 			case ZEND_RETURN:
-			case ZEND_EXIT:
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
 					if (src && src->opcode == ZEND_QM_ASSIGN) {
@@ -1221,8 +1220,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 				target = op_array->opcodes + target_block->start;
 				if ((target->opcode == ZEND_RETURN ||
 				            target->opcode == ZEND_RETURN_BY_REF ||
-				            target->opcode == ZEND_GENERATOR_RETURN ||
-				            target->opcode == ZEND_EXIT) &&
+				            target->opcode == ZEND_GENERATOR_RETURN) &&
 				           !(op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
 					/* JMP L, L: RETURN to immediate RETURN */
 					*last_op = *target;

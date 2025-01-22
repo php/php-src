@@ -1,17 +1,17 @@
 --TEST--
-DOM\HTMLDocument::documentURI
+Dom\HTMLDocument::documentURI
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/test foo.html", LIBXML_NOERROR);
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/test foo.html", LIBXML_NOERROR);
 var_dump($dom->documentURI);
 
 $memory = fopen("php://memory", "w+");
 fwrite($memory, "foobar");
 rewind($memory);
-$dom = DOM\HTMLDocument::createFromFile("php://memory");
+$dom = Dom\HTMLDocument::createFromFile("php://memory");
 var_dump($dom->documentURI);
 fclose($memory);
 
@@ -37,11 +37,11 @@ class DummyWrapper {
 
 stream_wrapper_register("dummy", DummyWrapper::class);
 
-$dom = DOM\HTMLDocument::createFromFile("dummy://foo/ bar");
+$dom = Dom\HTMLDocument::createFromFile("dummy://foo/ bar");
 var_dump($dom->documentURI);
 
 ?>
 --EXPECTF--
-string(%d) "file:/%stest%20foo.html"
+string(%d) "file://%stest%sfoo.html"
 string(12) "php://memory"
 string(16) "dummy://foo/ bar"

@@ -19,6 +19,10 @@
 #ifndef PHPDBG_OUT_H
 #define PHPDBG_OUT_H
 
+#ifndef PHPDBG_DEBUG
+# define PHPDBG_DEBUG 0
+#endif
+
 /**
  * Error/notice/formatting helpers
  */
@@ -58,6 +62,8 @@ PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...);
 PHPDBG_API void phpdbg_free_err_buf(void);
 PHPDBG_API void phpdbg_activate_err_buf(bool active);
 PHPDBG_API int phpdbg_output_err_buf(const char *strfmt, ...);
+
+int phpdbg_process_print(int fd, int type, const char *msg, int msglen);
 
 
 /* {{{ For separation */

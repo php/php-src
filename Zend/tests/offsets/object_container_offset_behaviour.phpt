@@ -20,6 +20,8 @@ empty():
 Cannot use object of type stdClass as array
 null coalesce:
 Cannot use object of type stdClass as array
+Reference to dimension:
+Cannot use object of type stdClass as array
 unset():
 Cannot use object of type stdClass as array
 Nested read:
@@ -43,6 +45,28 @@ ob_start();
 foreach ($offsets as $dimension) {
     $container = new stdClass();
     $error = '(new stdClass())[' . zend_test_var_export($dimension) . '] has different outputs' . "\n";
+
+    include $var_dim_filename;
+    $varOutput = ob_get_contents();
+    ob_clean();
+    $varOutput = str_replace(
+        [$var_dim_filename],
+        ['%s'],
+        $varOutput
+    );
+
+    if ($varOutput !== EXPECTED_OUTPUT) {
+        file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_object_container_{$failuresNb}.txt", $varOutput);
+        ++$failuresNb;
+        $failures[] = $error;
+    }
+    ++$testCasesTotal;
+}
+/* Using offsets as references */
+foreach ($offsets as $offset) {
+    $dimension = &$offset;
+    $container = new stdClass();
+    $error = '(new stdClass())[&' . zend_test_var_export($offset) . '] has different outputs' . "\n";
 
     include $var_dim_filename;
     $varOutput = ob_get_contents();

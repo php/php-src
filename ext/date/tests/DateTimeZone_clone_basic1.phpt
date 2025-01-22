@@ -22,7 +22,7 @@ if ($clone != $orig) {
 }else if ($clone === $orig) {
     echo "TEST FAILED : objects identical\n";
 } else {
-    echo "TEST PASSED : Objects equal but not indetical\n";
+    echo "TEST PASSED : Objects equal but not identical\n";
 }
 
 ?>
@@ -40,4 +40,4 @@ object(DateTimeZone)#%d (2) {
   ["timezone"]=>
   string(3) "GMT"
 }
-TEST PASSED : Objects equal but not indetical
+TEST PASSED : Objects equal but not identical

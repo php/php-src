@@ -26,7 +26,7 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-parser`: Fuzzing language parser and compiler
 * `php-fuzz-unserialize`: Fuzzing unserialize() function
 * `php-fuzz-unserializehash`: Fuzzing unserialize() for HashContext objects
-* `php-fuzz-json`: Fuzzing JSON parser (requires --enable-json)
+* `php-fuzz-json`: Fuzzing JSON parser
 * `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
 * `php-fuzz-mbstring`: Fuzzing `mb_convert_encoding()` (requires `--enable-mbstring`)
 * `php-fuzz-mbregex`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)

@@ -43,7 +43,7 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 }
 /* }}} */
 
-zend_module_entry zend_builtin_module = { /* {{{ */
+static zend_module_entry zend_builtin_module = { /* {{{ */
 	STANDARD_MODULE_HEADER,
 	"Core",
 	ext_functions,
@@ -68,6 +68,33 @@ zend_result zend_startup_builtin_functions(void) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
+
+ZEND_FUNCTION(exit)
+{
+	zend_string *str = NULL;
+	zend_long status = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG(str, status)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		size_t len = ZSTR_LEN(str);
+		if (len != 0) {
+			/* An exception might be emitted by an output handler */
+			zend_write(ZSTR_VAL(str), len);
+			if (EG(exception)) {
+				RETURN_THROWS();
+			}
+		}
+	} else {
+		EG(exit_status) = status;
+	}
+
+	ZEND_ASSERT(!EG(exception));
+	zend_throw_unwind_exit();
+}
 
 /* {{{ Get the version of the Zend Engine */
 ZEND_FUNCTION(zend_version)
@@ -697,7 +724,8 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
 			 !zend_check_protected(prop_info->ce, scope)) ||
 			((prop_info->flags & ZEND_ACC_PRIVATE) &&
-			  prop_info->ce != scope)) {
+			  prop_info->ce != scope) ||
+			(prop_info->flags & ZEND_ACC_VIRTUAL)) {
 			continue;
 		}
 		prop = NULL;
@@ -768,28 +796,32 @@ ZEND_FUNCTION(get_object_vars)
 		Z_PARAM_OBJ(zobj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	properties = zobj->handlers->get_properties(zobj);
+	zval obj_zv;
+	ZVAL_OBJ(&obj_zv, zobj);
+	properties = zend_get_properties_for(&obj_zv, ZEND_PROP_PURPOSE_GET_OBJECT_VARS);
 	if (properties == NULL) {
 		RETURN_EMPTY_ARRAY();
 	}
 
 	if (!zobj->ce->default_properties_count && properties == zobj->properties && !GC_IS_RECURSIVE(properties)) {
 		/* fast copy */
-		if (EXPECTED(zobj->handlers == &std_object_handlers)) {
-			RETURN_ARR(zend_proptable_to_symtable(properties, 0));
-		}
-		RETURN_ARR(zend_proptable_to_symtable(properties, 1));
+		bool always_duplicate = zobj->handlers != &std_object_handlers;
+		RETVAL_ARR(zend_proptable_to_symtable(properties, always_duplicate));
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
 		ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, value) {
 			bool is_dynamic = 1;
+			zval tmp;
+			ZVAL_UNDEF(&tmp);
 			if (Z_TYPE_P(value) == IS_INDIRECT) {
 				value = Z_INDIRECT_P(value);
 				if (UNEXPECTED(Z_ISUNDEF_P(value))) {
 					continue;
 				}
 
+				is_dynamic = 0;
+			} else if (Z_TYPE_P(value) == IS_PTR) {
 				is_dynamic = 0;
 			}
 
@@ -799,6 +831,24 @@ ZEND_FUNCTION(get_object_vars)
 
 			if (Z_ISREF_P(value) && Z_REFCOUNT_P(value) == 1) {
 				value = Z_REFVAL_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_PTR) {
+				/* value is IS_PTR for properties with hooks. */
+				zend_property_info *prop_info = Z_PTR_P(value);
+				if ((prop_info->flags & ZEND_ACC_VIRTUAL) && !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
+					continue;
+				}
+				const char *unmangled_name_cstr = zend_get_unmangled_property_name(prop_info->name);
+				zend_string *unmangled_name = zend_string_init(unmangled_name_cstr, strlen(unmangled_name_cstr), false);
+				zend_read_property_ex(prop_info->ce, zobj, unmangled_name, /* silent */ true, &tmp);
+				zend_string_release_ex(unmangled_name, false);
+				if (EG(exception)) {
+					zend_release_properties(properties);
+					zval_ptr_dtor(return_value);
+					ZVAL_UNDEF(return_value);
+					RETURN_THROWS();
+				}
+				value = &tmp;
 			}
 			Z_TRY_ADDREF_P(value);
 
@@ -818,8 +868,10 @@ ZEND_FUNCTION(get_object_vars)
 			} else {
 				zend_symtable_add_new(Z_ARRVAL_P(return_value), key, value);
 			}
+			zval_ptr_dtor(&tmp);
 		} ZEND_HASH_FOREACH_END();
 	}
+	zend_release_properties(properties);
 }
 /* }}} */
 
@@ -833,7 +885,7 @@ ZEND_FUNCTION(get_mangled_object_vars)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	properties = obj->handlers->get_properties(obj);
+	properties = zend_get_properties_no_lazy_init(obj);
 	if (!properties) {
 		ZVAL_EMPTY_ARRAY(return_value);
 		return;
@@ -965,8 +1017,8 @@ static void _property_exists(zval *return_value, zval *object, zend_string *prop
 		RETURN_TRUE;
 	}
 
-	if (Z_TYPE_P(object) ==  IS_OBJECT &&
-		Z_OBJ_HANDLER_P(object, has_property)(Z_OBJ_P(object), property, 2, NULL)) {
+	if (Z_TYPE_P(object) == IS_OBJECT &&
+		Z_OBJ_HANDLER_P(object, has_property)(Z_OBJ_P(object), property, ZEND_PROPERTY_EXISTS, NULL)) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -1152,7 +1204,7 @@ ZEND_FUNCTION(class_alias)
 		if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, false) == SUCCESS) {
 			RETURN_TRUE;
 		} else {
-			zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(alias_name));
+			zend_class_redeclaration_error_ex(E_WARNING, alias_name, ce);
 			RETURN_FALSE;
 		}
 	} else {
@@ -1190,6 +1242,11 @@ ZEND_FUNCTION(trigger_error)
 
 	switch (error_type) {
 		case E_USER_ERROR:
+			zend_error(E_DEPRECATED, "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4,"
+				" throw an exception or call exit with a string message instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 		case E_USER_WARNING:
 		case E_USER_NOTICE:
 		case E_USER_DEPRECATED:
@@ -1650,7 +1707,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						if (is_sensitive) {
 							zval redacted_arg;
 							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-							zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+							zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
 							ZEND_HASH_FILL_SET(&redacted_arg);
 						} else {
 							Z_TRY_ADDREF_P(&original_arg);
@@ -1682,7 +1739,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						if (is_sensitive) {
 							zval redacted_arg;
 							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-							zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+							zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
 							ZEND_HASH_FILL_SET(&redacted_arg);
 						} else {
 							Z_TRY_ADDREF_P(&original_arg);
@@ -1722,7 +1779,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 				if (is_sensitive) {
 					zval redacted_arg;
 					object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-					zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+					zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
 					ZEND_HASH_FILL_SET(&redacted_arg);
 				} else {
 					Z_TRY_ADDREF_P(&original_arg);
@@ -1776,7 +1833,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
 {
-	zend_execute_data *call;
+	zend_execute_data *call, *last_call = NULL;
 	zend_object *object;
 	bool fake_frame = 0;
 	int lineno, frameno = 0;
@@ -1821,10 +1878,21 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	if (skip_last) {
 		/* skip debug_backtrace() */
+		last_call = call;
 		call = call->prev_execute_data;
 	}
 
 	while (call && (limit == 0 || frameno < limit)) {
+		if (UNEXPECTED(!call->func)) {
+			/* This is the fake frame inserted for nested generators. Normally,
+			 * this frame is preceded by the actual generator frame and then
+			 * replaced by zend_generator_check_placeholder_frame() below.
+			 * However, the frame is popped before cleaning the stack frame,
+			 * which is observable by destructors. */
+			call = zend_generator_check_placeholder_frame(call);
+			ZEND_ASSERT(call->func);
+		}
+
 		zend_execute_data *prev = call->prev_execute_data;
 
 		if (!prev) {
@@ -1857,9 +1925,15 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				zval *arg = zend_get_zval_ptr(op_data, op_data->op1_type, &op_data->op1, call);
 				if (Z_TYPE_P(arg) == IS_UNDEF) goto not_frameless_call;
 			}
+			zend_function *func = ZEND_FLF_FUNC(opline);
+			/* Assume frameless functions are not recursive with themselves.
+			 * This condition may be true when observers are enabled:
+			 * Observers will put a call frame on top of the frameless opcode. */
+			if (last_call && last_call->func == func) {
+				goto not_frameless_call;
+			}
 			stack_frame = zend_new_array(8);
 			zend_hash_real_init_mixed(stack_frame);
-			zend_function *func = ZEND_FLF_FUNC(opline);
 			zend_string *name = func->common.function_name;
 			ZVAL_STRINGL(&tmp, ZSTR_VAL(name), ZSTR_LEN(name));
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
@@ -2068,6 +2142,7 @@ skip_frame:
 		} else {
 			fake_frame = 0;
 			include_filename = filename;
+			last_call = call;
 			call = prev;
 		}
 	}

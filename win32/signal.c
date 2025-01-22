@@ -97,7 +97,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 		RETURN_THROWS();
 	}
 
-#if ZTS
+#ifdef ZTS
 	if (!tsrm_is_main_thread()) {
 		zend_throw_error(NULL, "CTRL events can only be received on the main thread");
 		RETURN_THROWS();

@@ -11,4 +11,4 @@ enum B implements A {}
 
 ?>
 --EXPECTF--
-Fatal error: Enum B must implement 1 abstract private method (A::a) in %s on line %d
+Fatal error: Enum B must implement 1 abstract method (A::a) in %s on line %d

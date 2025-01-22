@@ -31,8 +31,8 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src);
 PHPAPI int php_multisort_compare(const void *a, const void *b);
 PHPAPI zend_long php_count_recursive(HashTable *ht);
 
-PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_status *status, zval *array);
-PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *status, zval *input, zend_long num_req, zval *retval, bool silent);
+PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *array);
+PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, zend_long num_req, zval *retval, bool silent);
 
 #define PHP_EXTR_OVERWRITE			0
 #define PHP_EXTR_SKIP				1

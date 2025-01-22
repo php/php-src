@@ -43,23 +43,23 @@ Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown o
 
 Deprecated: Constant ASSERT_ACTIVE is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 
 Deprecated: Constant ASSERT_WARNING is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 
 Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 assertion failed 21,"assert($a != 0)"
 
 Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 class assertion failed 24,"assert($a != 0)"
 
 Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 class assertion failed 28,"assert($a != 0)"

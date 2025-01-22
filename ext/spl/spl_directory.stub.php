@@ -97,10 +97,7 @@ class SplFileInfo implements Stringable
     /** @tentative-return-type */
     public function __debugInfo(): array {}
 
-    /**
-     * @deprecated
-     * @tentative-return-type
-     */
+    #[\Deprecated(since: '8.2')]
     final public function _bad_state_ex(): void {}
 }
 
@@ -286,7 +283,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fscanf(string $format, mixed &...$vars): array|int|null {}
 
     /** @tentative-return-type */
-    public function fwrite(string $data, int $length = 0): int|false {}
+    public function fwrite(string $data, ?int $length = null): int|false {}
 
     /** @tentative-return-type */
     public function fstat(): array {}

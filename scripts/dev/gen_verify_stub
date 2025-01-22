@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Handle GNU vs. BSD checksum utilities
+sha256sum="$(which sha256sum)"
+sha256sum="${sha256sum:-$(which shasum) -a 256}"
+
 if [ "x$1" == "x" ]
 then
 	echo "Usage: $0 <version> [email]"
@@ -41,7 +45,7 @@ done
 for TARBALL in "$PHPROOT/php-$RELEASE_VER.tar.bz2" "$PHPROOT/php-$RELEASE_VER.tar.gz" "$PHPROOT/php-$RELEASE_VER.tar.xz"
 do
 	basename $TARBALL
-	echo "SHA256 hash: `sha256sum $TARBALL | cut -d' ' -f1`";
+	echo "SHA256 hash: `$sha256sum $TARBALL | cut -d' ' -f1`";
 	echo PGP signature:
 	cat $TARBALL.asc
 	echo -e "\n"

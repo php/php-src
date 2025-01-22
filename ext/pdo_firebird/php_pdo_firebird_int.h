@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifndef PHP_PDO_FIREBIRD_INT_H
 #define PHP_PDO_FIREBIRD_INT_H
 
@@ -31,8 +33,6 @@
 #define PDO_FB_DEF_TIME_FMT "%H:%M:%S"
 #define PDO_FB_DEF_TIMESTAMP_FMT PDO_FB_DEF_DATE_FMT " " PDO_FB_DEF_TIME_FMT
 
-#define SHORT_MAX (1 << (8*sizeof(short)-1))
-
 #if SIZEOF_ZEND_LONG == 8 && !defined(PHP_WIN32)
 # define LL_LIT(lit) lit ## L
 #else
@@ -42,12 +42,6 @@
 
 /* Firebird API has a couple of missing const decls in its API */
 #define const_cast(s) ((char*)(s))
-
-#ifdef PHP_WIN32
-typedef void (__stdcall *info_func_t)(char*);
-#else
-typedef void (*info_func_t)(char*);
-#endif
 
 #ifndef min
 #define min(a,b) ((a)<(b)?(a):(b))

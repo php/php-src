@@ -1,67 +1,27 @@
-PHP_ARG_ENABLE([fpm],,
+PHP_ARG_ENABLE([fpm],
+  [for FPM build],
   [AS_HELP_STRING([--enable-fpm],
     [Enable building of the fpm SAPI executable])],
   [no],
   [no])
 
 dnl Configure checks.
-AC_DEFUN([AC_FPM_STDLIBS],
-[
-  AC_CHECK_FUNCS(clearenv setproctitle setproctitle_fast)
-
-  AC_SEARCH_LIBS(inet_addr, nsl)
+AC_DEFUN([PHP_FPM_CLOCK], [
+AC_CHECK_FUNCS([clock_gettime],, [
+  LIBS_save=$LIBS
+  AC_SEARCH_LIBS([clock_gettime], [rt], [
+    ac_cv_func_clock_gettime=yes
+    AC_DEFINE([HAVE_CLOCK_GETTIME], [1])
+    AS_VAR_IF([ac_cv_search_clock_gettime], ["none required"],,
+      [AS_VAR_APPEND([FPM_EXTRA_LIBS], [" $ac_cv_search_clock_gettime"])])
+  ])
+  LIBS=$LIBS_save
 ])
 
-AC_DEFUN([AC_FPM_SETPFLAGS],
-[
-  AC_MSG_CHECKING([for setpflags])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <priv.h>]], [[setpflags(0, 0);]])], [
-    AC_DEFINE([HAVE_SETPFLAGS], 1, [do we have setpflags?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-])
-
-AC_DEFUN([AC_FPM_CLOCK],
-[
-  have_clock_gettime=no
-
-  AC_MSG_CHECKING([for clock_gettime])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);]])], [
-    have_clock_gettime=yes
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-
-  if test "$have_clock_gettime" = "no"; then
-    AC_MSG_CHECKING([for clock_gettime in -lrt])
-
-    SAVED_LIBS="$LIBS"
-    LIBS="$LIBS -lrt"
-
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);]])], [
-      have_clock_gettime=yes
-      AC_MSG_RESULT([yes])
-    ], [
-      LIBS="$SAVED_LIBS"
-      AC_MSG_RESULT([no])
-    ])
-  fi
-
-  if test "$have_clock_gettime" = "yes"; then
-    AC_DEFINE([HAVE_CLOCK_GETTIME], 1, [do we have clock_gettime?])
-  fi
-
-  have_clock_get_time=no
-
-  if test "$have_clock_gettime" = "no"; then
-    AC_MSG_CHECKING([for clock_get_time])
-
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <mach/mach.h>
+AS_VAR_IF([ac_cv_func_clock_gettime], [no],
+  [AC_CACHE_CHECK([for clock_get_time], [php_cv_func_clock_get_time],
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([
+      #include <mach/mach.h>
       #include <mach/clock.h>
       #include <mach/mach_error.h>
 
@@ -81,39 +41,23 @@ AC_DEFUN([AC_FPM_CLOCK],
 
         return 0;
       }
-    ]])], [
-      have_clock_get_time=yes
-      AC_MSG_RESULT([yes])
-    ], [
-      AC_MSG_RESULT([no])
-    ], [AC_MSG_RESULT([no (cross-compiling)])])
-  fi
+    ])],
+    [php_cv_func_clock_get_time=yes],
+    [php_cv_func_clock_get_time=no],
+    [php_cv_func_clock_get_time=no])])
+  AS_VAR_IF([php_cv_func_clock_get_time], [yes],
+    [AC_DEFINE([HAVE_CLOCK_GET_TIME], [1],
+      [Define to 1 if you have the 'clock_get_time' function.])])
+])])
 
-  if test "$have_clock_get_time" = "yes"; then
-    AC_DEFINE([HAVE_CLOCK_GET_TIME], 1, [do we have clock_get_time?])
-  fi
-])
-
-AC_DEFUN([AC_FPM_TRACE],
-[
-  have_ptrace=no
-  have_broken_ptrace=no
-
-  AC_MSG_CHECKING([for ptrace])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+AC_DEFUN([PHP_FPM_TRACE],
+[AC_CACHE_CHECK([for ptrace], [php_cv_func_ptrace],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
     #include <sys/types.h>
-    #include <sys/ptrace.h> ]], [[ptrace(0, 0, (void *) 0, 0);]])], [
-    have_ptrace=yes
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-
-  if test "$have_ptrace" = "yes"; then
-    AC_MSG_CHECKING([whether ptrace works])
-
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    #include <sys/ptrace.h>
+  ],
+  [ptrace(0, 0, (void *) 0, 0);])],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
       #include <unistd.h>
       #include <signal.h>
       #include <sys/wait.h>
@@ -135,7 +79,8 @@ AC_DEFUN([AC_FPM_TRACE],
 
       int main(void)
       {
-        long v1 = (unsigned int) -1; /* copy will fail if sizeof(long) == 8 and we've got "int ptrace()" */
+        /* copy will fail if sizeof(long) == 8 and we've got "int ptrace()" */
+        long v1 = (unsigned int) -1;
         long v2;
         pid_t child;
         int status;
@@ -180,56 +125,41 @@ AC_DEFUN([AC_FPM_TRACE],
           return 0;
         }
       }
-    ]])], [
-      AC_MSG_RESULT([yes])
-    ], [
-      have_ptrace=no
-      have_broken_ptrace=yes
-      AC_MSG_RESULT([no])
-    ], [
-      AC_MSG_RESULT([skipped (cross-compiling)])
-    ])
-  fi
+    ])],
+    [php_cv_func_ptrace=yes],
+    [php_cv_func_ptrace=no],
+    [php_cv_func_ptrace=yes])],
+  [php_cv_func_ptrace=no])])
 
-  if test "$have_ptrace" = "yes"; then
-    AC_DEFINE([HAVE_PTRACE], 1, [do we have ptrace?])
-  fi
-
-  have_mach_vm_read=no
-
-  if test "$have_broken_ptrace" = "yes"; then
-    AC_MSG_CHECKING([for mach_vm_read])
-
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <mach/mach.h>
+AS_VAR_IF([php_cv_func_ptrace], [yes],
+  [AC_DEFINE([HAVE_PTRACE], [1],
+    [Define to 1 if you have the 'ptrace' function.])],
+  [AC_CACHE_CHECK([for mach_vm_read], [php_cv_func_mach_vm_read],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <mach/mach.h>
       #include <mach/mach_vm.h>
-    ]], [[
-      mach_vm_read((vm_map_t)0, (mach_vm_address_t)0, (mach_vm_size_t)0, (vm_offset_t *)0, (mach_msg_type_number_t*)0);
-    ]])], [
-      have_mach_vm_read=yes
-      AC_MSG_RESULT([yes])
     ], [
-      AC_MSG_RESULT([no])
-    ])
-  fi
+      mach_vm_read(
+        (vm_map_t)0,
+        (mach_vm_address_t)0,
+        (mach_vm_size_t)0,
+        (vm_offset_t *)0,
+        (mach_msg_type_number_t*)0);
+    ])],
+    [php_cv_func_mach_vm_read=yes],
+    [php_cv_func_mach_vm_read=no])])
+])
 
-  if test "$have_mach_vm_read" = "yes"; then
-    AC_DEFINE([HAVE_MACH_VM_READ], 1, [do we have mach_vm_read?])
-  fi
+AS_VAR_IF([php_cv_func_mach_vm_read], [yes],
+  [AC_DEFINE([HAVE_MACH_VM_READ], [1],
+    [Define to 1 if you have the 'mach_vm_read' function.])])
 
-  proc_mem_file=""
+AC_CACHE_CHECK([for proc mem file], [php_cv_file_proc_mem],
+[AS_IF([test -r /proc/$$/mem], [proc_mem_file=mem],
+  [test -r /proc/$$/as], [proc_mem_file=as],
+  [proc_mem_file=])
 
-  if test -r /proc/$$/mem ; then
-    proc_mem_file="mem"
-  else
-    if test -r /proc/$$/as ; then
-      proc_mem_file="as"
-    fi
-  fi
-
-  if test -n "$proc_mem_file" ; then
-    AC_MSG_CHECKING([for proc mem file])
-
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AS_VAR_IF([proc_mem_file],,,
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
       #ifndef _GNU_SOURCE
       #define _GNU_SOURCE
       #endif
@@ -257,268 +187,175 @@ AC_DEFUN([AC_FPM_TRACE],
         close(fd);
         return v1 != v2;
       }
-    ]])], [
-      AC_MSG_RESULT([$proc_mem_file])
-    ], [
-      proc_mem_file=""
-      AC_MSG_RESULT([no])
-    ], [
-      AC_MSG_RESULT([skipped (cross-compiling)])
-    ])
-  fi
-
-  if test -n "$proc_mem_file"; then
-    AC_DEFINE_UNQUOTED([PROC_MEM_FILE], "$proc_mem_file", [/proc/pid/mem interface])
-  fi
-
-  fpm_trace_type=""
-
-  if test "$have_ptrace" = "yes"; then
-    fpm_trace_type=ptrace
-
-  elif test -n "$proc_mem_file"; then
-    fpm_trace_type=pread
-
-  elif test "$have_mach_vm_read" = "yes" ; then
-    fpm_trace_type=mach
-
-  else
-    AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])
-  fi
-
+    ]])],
+    [php_cv_file_proc_mem=$proc_mem_file],
+    [php_cv_file_proc_mem=],
+    [php_cv_file_proc_mem=$proc_mem_file])
+  ])
 ])
 
-AC_DEFUN([AC_FPM_BUILTIN_ATOMIC],
-[
-  AC_MSG_CHECKING([if gcc supports __sync_bool_compare_and_swap])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+AS_VAR_IF([php_cv_file_proc_mem],,,
+  [AC_DEFINE_UNQUOTED([PROC_MEM_FILE], ["$php_cv_file_proc_mem"],
+    [Define to the /proc/pid/mem interface filename value.])])
+
+AS_IF([test "x$php_cv_func_ptrace" = xyes], [fpm_trace_type=ptrace],
+  [test -n "$php_cv_file_proc_mem"], [fpm_trace_type=pread],
+  [test "x$php_cv_func_mach_vm_read" = xyes], [fpm_trace_type=mach],
+  [fpm_trace_type=])
+
+AS_VAR_IF([fpm_trace_type],,
+  [AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])])
+])
+
+AC_DEFUN([PHP_FPM_BUILTIN_ATOMIC],
+[AC_CACHE_CHECK([if compiler supports __sync_bool_compare_and_swap],
+  [php_cv_have___sync_bool_compare_and_swap],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([], [
     int variable = 1;
     return (__sync_bool_compare_and_swap(&variable, 1, 2)
            && __sync_add_and_fetch(&variable, 1)) ? 1 : 0;
-  ]])], [
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_BUILTIN_ATOMIC, 1, [Define to 1 if gcc supports __sync_bool_compare_and_swap() a.o.])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
+  ])],
+  [php_cv_have___sync_bool_compare_and_swap=yes],
+  [php_cv_have___sync_bool_compare_and_swap=no])])
+AS_VAR_IF([php_cv_have___sync_bool_compare_and_swap], [yes],
+  [AC_DEFINE([HAVE_BUILTIN_ATOMIC], [1],
+    [Define to 1 if compiler supports __sync_bool_compare_and_swap() a.o.])])
 ])
 
-AC_DEFUN([AC_FPM_LQ],
-[
-  have_lq=no
+AC_DEFUN([PHP_FPM_LQ],
+[AC_CACHE_CHECK([for TCP_INFO], [php_cv_have_TCP_INFO],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <netinet/tcp.h>], [
+    struct tcp_info ti;
+    int x = TCP_INFO;
+    (void)ti;
+    (void)x;
+  ])],
+  [php_cv_have_TCP_INFO=yes],
+  [php_cv_have_TCP_INFO=no])])
+AS_VAR_IF([php_cv_have_TCP_INFO], [yes],
+  [AC_DEFINE([HAVE_LQ_TCP_INFO], [1], [Define to 1 if you have 'TCP_INFO'.])])
 
-  AC_MSG_CHECKING([for TCP_INFO])
+AC_CACHE_CHECK([for TCP_CONNECTION_INFO], [php_cv_have_TCP_CONNECTION_INFO],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <netinet/tcp.h>], [
+    struct tcp_connection_info ti;
+    int x = TCP_CONNECTION_INFO;
+    (void)ti;
+    (void)x;
+  ])],
+  [php_cv_have_TCP_CONNECTION_INFO=yes],
+  [php_cv_have_TCP_CONNECTION_INFO=no])])
+AS_VAR_IF([php_cv_have_TCP_CONNECTION_INFO], [yes],
+  [AC_DEFINE([HAVE_LQ_TCP_CONNECTION_INFO], [1],
+    [Define to 1 if you have 'TCP_CONNECTION_INFO'.])])
 
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[struct tcp_info ti; int x = TCP_INFO;]])], [
-    have_lq=tcp_info
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-
-  if test "$have_lq" = "tcp_info"; then
-    AC_DEFINE([HAVE_LQ_TCP_INFO], 1, [do we have TCP_INFO?])
-  fi
-
-  AC_MSG_CHECKING([for TCP_CONNECTION_INFO])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[struct tcp_connection_info ti; int x = TCP_CONNECTION_INFO;]])], [
-    have_lq=tcp_connection_info
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-
-  if test "$have_lq" = "tcp_connection_info"; then
-    AC_DEFINE([HAVE_LQ_TCP_CONNECTION_INFO], 1, [do we have TCP_CONNECTION_INFO?])
-  fi
-
-  if test "$have_lq" = "no" ; then
-    AC_MSG_CHECKING([for SO_LISTENQLEN])
-
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/socket.h>]], [[int x = SO_LISTENQLIMIT; int y = SO_LISTENQLEN;]])], [
-      have_lq=so_listenq
-      AC_MSG_RESULT([yes])
-    ], [
-      AC_MSG_RESULT([no])
-    ])
-
-    if test "$have_lq" = "so_listenq"; then
-      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQ?])
-    fi
-  fi
+AC_CACHE_CHECK([for SO_LISTENQLEN], [php_cv_have_SO_LISTENQLEN],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/socket.h>], [
+    int x = SO_LISTENQLIMIT;
+    int y = SO_LISTENQLEN;
+    (void)x;
+    (void)y;
+  ])],
+  [php_cv_have_SO_LISTENQLEN=yes],
+  [php_cv_have_SO_LISTENQLEN=no])])
+AS_VAR_IF([php_cv_have_SO_LISTENQLEN], [yes],
+  [AC_DEFINE([HAVE_LQ_SO_LISTENQ], [1],
+    [Define to 1 if you have 'SO_LISTENQ*'.])])
 ])
 
-AC_DEFUN([AC_FPM_SYSCONF],
-[
-	AC_MSG_CHECKING([for sysconf])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <unistd.h>]], [[sysconf(_SC_CLK_TCK);]])],[
-		AC_DEFINE([HAVE_SYSCONF], 1, [do we have sysconf?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
+AC_DEFUN([PHP_FPM_KQUEUE],
+[AC_CACHE_CHECK([for kqueue],
+  [php_cv_have_kqueue],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([dnl
+    #include <sys/types.h>
+    #include <sys/event.h>
+    #include <sys/time.h>
+  ], [dnl
+    int kfd;
+    struct kevent k;
+    kfd = kqueue();
+    /* 0 -> STDIN_FILENO */
+    EV_SET(&k, 0, EVFILT_READ , EV_ADD | EV_CLEAR, 0, 0, NULL);
+    (void)kfd;
+  ])],
+  [php_cv_have_kqueue=yes],
+  [php_cv_have_kqueue=no])])
+AS_VAR_IF([php_cv_have_kqueue], [yes],
+  [AC_DEFINE([HAVE_KQUEUE], [1],
+    [Define to 1 if system has a working 'kqueue' function.])])
 ])
 
-AC_DEFUN([AC_FPM_TIMES],
-[
-	AC_MSG_CHECKING([for times])
+AC_DEFUN([PHP_FPM_EPOLL],
+[AC_CACHE_CHECK([for epoll],
+  [php_cv_have_epoll],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [dnl
+    int epollfd;
+    struct epoll_event e;
 
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/times.h>]], [[struct tms t; times(&t);]])],[
-		AC_DEFINE([HAVE_TIMES], 1, [do we have times?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
+    epollfd = epoll_create(1);
+    if (epollfd < 0) {
+      return 1;
+    }
+
+    e.events = EPOLLIN | EPOLLET;
+    e.data.fd = 0;
+
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &e) == -1) {
+      return 1;
+    }
+
+    e.events = 0;
+    if (epoll_wait(epollfd, &e, 1, 1) < 0) {
+      return 1;
+    }
+  ])],
+  [php_cv_have_epoll=yes],
+  [php_cv_have_epoll=no])])
+AS_VAR_IF([php_cv_have_epoll], [yes],
+  [AC_DEFINE([HAVE_EPOLL], [1], [Define to 1 if system has a working epoll.])])
 ])
 
-AC_DEFUN([AC_FPM_KQUEUE],
-[
-	AC_MSG_CHECKING([for kqueue])
+AC_DEFUN([PHP_FPM_SELECT],
+[AC_CACHE_CHECK([for select],
+  [php_cv_have_select],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([dnl
+    /* According to POSIX.1-2001 */
+    #include <sys/select.h>
 
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <sys/types.h>
-		#include <sys/event.h>
-		#include <sys/time.h>
-	]], [[
-		int kfd;
-		struct kevent k;
-		kfd = kqueue();
-		/* 0 -> STDIN_FILENO */
-		EV_SET(&k, 0, EVFILT_READ , EV_ADD | EV_CLEAR, 0, 0, NULL);
-	]])], [
-		AC_DEFINE([HAVE_KQUEUE], 1, [do we have kqueue?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
+    /* According to earlier standards */
+    #include <sys/time.h>
+    #include <sys/types.h>
+    #include <unistd.h>
+  ], [dnl
+    fd_set fds;
+    struct timeval t;
+    t.tv_sec = 0;
+    t.tv_usec = 42;
+    FD_ZERO(&fds);
+    /* 0 -> STDIN_FILENO */
+    FD_SET(0, &fds);
+    select(FD_SETSIZE, &fds, NULL, NULL, &t);
+  ])],
+  [php_cv_have_select=yes],
+  [php_cv_have_select=no])])
+AS_VAR_IF([php_cv_have_select], [yes],
+  [AC_DEFINE([HAVE_SELECT], [1],
+    [Define to 1 if system has a working 'select' function.])])
 ])
 
-AC_DEFUN([AC_FPM_PORT],
-[
-	AC_MSG_CHECKING([for port framework])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <port.h>
-	]], [[
-		int port;
-
-		port = port_create();
-		if (port < 0) {
-			return 1;
-		}
-	]])], [
-		AC_DEFINE([HAVE_PORT], 1, [do we have port framework?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
-AC_DEFUN([AC_FPM_DEVPOLL],
-[
-	AC_MSG_CHECKING([for /dev/poll])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <stdio.h>
-		#include <sys/devpoll.h>
-	]], [[
-		int n, dp;
-		struct dvpoll dvp;
-		dp = 0;
-		dvp.dp_fds = NULL;
-		dvp.dp_nfds = 0;
-		dvp.dp_timeout = 0;
-		n = ioctl(dp, DP_POLL, &dvp)
-	]])], [
-		AC_DEFINE([HAVE_DEVPOLL], 1, [do we have /dev/poll?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
-AC_DEFUN([AC_FPM_EPOLL],
-[
-	AC_MSG_CHECKING([for epoll])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <sys/epoll.h>
-	]], [[
-		int epollfd;
-		struct epoll_event e;
-
-		epollfd = epoll_create(1);
-		if (epollfd < 0) {
-			return 1;
-		}
-
-		e.events = EPOLLIN | EPOLLET;
-		e.data.fd = 0;
-
-		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &e) == -1) {
-			return 1;
-		}
-
-		e.events = 0;
-		if (epoll_wait(epollfd, &e, 1, 1) < 0) {
-			return 1;
-		}
-	]])], [
-		AC_DEFINE([HAVE_EPOLL], 1, [do we have epoll?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
-AC_DEFUN([AC_FPM_SELECT],
-[
-	AC_MSG_CHECKING([for select])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		/* According to POSIX.1-2001 */
-		#include <sys/select.h>
-
-		/* According to earlier standards */
-		#include <sys/time.h>
-		#include <sys/types.h>
-		#include <unistd.h>
-	]], [[
-		fd_set fds;
-		struct timeval t;
-		t.tv_sec = 0;
-		t.tv_usec = 42;
-		FD_ZERO(&fds);
-		/* 0 -> STDIN_FILENO */
-		FD_SET(0, &fds);
-		select(FD_SETSIZE, &fds, NULL, NULL, &t);
-	]])], [
-		AC_DEFINE([HAVE_SELECT], 1, [do we have select?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
-AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
-  AC_MSG_RESULT($PHP_FPM)
+  PHP_FPM_CLOCK
+  PHP_FPM_TRACE
+  PHP_FPM_BUILTIN_ATOMIC
+  PHP_FPM_LQ
+  PHP_FPM_KQUEUE
+  PHP_FPM_EPOLL
+  PHP_FPM_SELECT
 
-  AC_FPM_STDLIBS
-  AC_FPM_SETPFLAGS
-  AC_FPM_CLOCK
-  AC_FPM_TRACE
-  AC_FPM_BUILTIN_ATOMIC
-  AC_FPM_LQ
-  AC_FPM_SYSCONF
-  AC_FPM_TIMES
-  AC_FPM_KQUEUE
-  AC_FPM_PORT
-  AC_FPM_DEVPOLL
-  AC_FPM_EPOLL
-  AC_FPM_SELECT
+  AC_CHECK_FUNCS([clearenv setproctitle setproctitle_fast])
+
+  AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
+  AC_CHECK_HEADER([sys/times.h], [AC_CHECK_FUNCS([times])])
+  AC_CHECK_HEADER([port.h], [AC_CHECK_FUNCS([port_create])])
 
   PHP_ARG_WITH([fpm-user],,
     [AS_HELP_STRING([[--with-fpm-user[=USER]]],
@@ -533,53 +370,64 @@ if test "$PHP_FPM" != "no"; then
     [nobody],
     [no])
 
-  PHP_ARG_WITH([fpm-systemd],,
+  PHP_ARG_WITH([fpm-systemd],
+    [whether to enable systemd integration in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-systemd],
       [Activate systemd integration])],
     [no],
     [no])
 
-  PHP_ARG_WITH([fpm-acl],,
+  PHP_ARG_WITH([fpm-acl],
+    [whether to use Access Control Lists (ACL) in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-acl],
       [Use POSIX Access Control Lists])],
     [no],
     [no])
 
-  PHP_ARG_WITH([fpm-apparmor],,
+  PHP_ARG_WITH([fpm-apparmor],
+    [whether to enable AppArmor confinement in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-apparmor],
       [Support AppArmor confinement through libapparmor])],
     [no],
     [no])
 
-  PHP_ARG_WITH([fpm-selinux],,
+  PHP_ARG_WITH([fpm-selinux],
+    [whether to enable SELinux support in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-selinux],
       [Support SELinux policy library])],
     [no],
     [no])
 
-  if test "$PHP_FPM_SYSTEMD" != "no" ; then
+  AS_VAR_IF([PHP_FPM_SYSTEMD], [no], [php_fpm_systemd=simple], [
     PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 209])
 
-    AC_CHECK_HEADERS(systemd/sd-daemon.h, [HAVE_SD_DAEMON_H="yes"], [HAVE_SD_DAEMON_H="no"])
-    if test $HAVE_SD_DAEMON_H = "no"; then
-      AC_MSG_ERROR([Your system does not support systemd.])
-    else
-      AC_DEFINE(HAVE_SYSTEMD, 1, [FPM use systemd integration])
-      PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
-      PHP_EVAL_LIBLINE($SYSTEMD_LIBS)
-      PHP_EVAL_INCLINE($SYSTEMD_CFLAGS)
-      php_fpm_systemd=notify
-    fi
-  else
-    php_fpm_systemd=simple
-  fi
+    AC_DEFINE([HAVE_SYSTEMD], [1],
+      [Define to 1 if FPM has systemd integration.])
+    PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
+    PHP_EVAL_LIBLINE([$SYSTEMD_LIBS], [FPM_EXTRA_LIBS], [yes])
+    PHP_EVAL_INCLINE([$SYSTEMD_CFLAGS])
 
-  if test "$PHP_FPM_ACL" != "no" ; then
+    php_fpm_systemd=notify
+
+    dnl Sanity check.
+    CFLAGS_save=$CFLAGS
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([systemd/sd-daemon.h],,
+      [AC_MSG_FAILURE([Required <systemd/sd-daemon.h> header file not found.])])
+    CFLAGS=$CFLAGS_save
+  ])
+
+  AC_SUBST([php_fpm_systemd])
+
+  AS_VAR_IF([PHP_FPM_ACL], [no],, [
     AC_CHECK_HEADERS([sys/acl.h])
 
-    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
-      int main(void)
-      {
+    dnl *BSD has acl_* built into libc, macOS doesn't have user/group support.
+    LIBS_save=$LIBS
+    AC_SEARCH_LIBS([acl_free], [acl],
+    [AC_CACHE_CHECK([for ACL user/group permissions support],
+      [php_cv_lib_acl_user_group],
+      [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/acl.h>], [
         acl_t acl;
         acl_entry_t user, group;
         acl = acl_init(1);
@@ -588,98 +436,95 @@ if test "$PHP_FPM" != "no"; then
         acl_create_entry(&acl, &group);
         acl_set_tag_type(user, ACL_GROUP);
         acl_free(acl);
-        return 0;
-      }
-    ]])], [
-      AC_CHECK_LIB(acl, acl_free,
-        [PHP_ADD_LIBRARY(acl)
-          have_fpm_acl=yes
-        ],[
-          AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
-            int main(void)
-            {
-              acl_t acl;
-              acl_entry_t user, group;
-              acl = acl_init(1);
-              acl_create_entry(&acl, &user);
-              acl_set_tag_type(user, ACL_USER);
-              acl_create_entry(&acl, &group);
-              acl_set_tag_type(user, ACL_GROUP);
-              acl_free(acl);
-              return 0;
-            }
-          ]])],[have_fpm_acl=yes],[have_fpm_acl=no],[have_fpm_acl=no])
-        ])
-    ], [
-      have_fpm_acl=no
+      ])],
+      [php_cv_lib_acl_user_group=yes],
+      [php_cv_lib_acl_user_group=no])])
+      AS_VAR_IF([php_cv_lib_acl_user_group], [yes], [
+        AC_DEFINE([HAVE_FPM_ACL], [1],
+          [Define to 1 if PHP-FPM has ACL support.])
+        AS_VAR_IF([ac_cv_search_acl_free], ["none required"],,
+          [AS_VAR_APPEND([FPM_EXTRA_LIBS], [" $ac_cv_search_acl_free"])])
+      ])
     ])
+    LIBS=$LIBS_save
+  ])
 
-    AC_MSG_CHECKING([for acl user/group permissions support])
-    if test "$have_fpm_acl" = "yes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_FPM_ACL], 1, [do we have acl support?])
-    else
-      AC_MSG_RESULT([no])
-    fi
-  fi
+  AS_VAR_IF([PHP_FPM_APPARMOR], [no],, [
+    PKG_CHECK_MODULES([APPARMOR], [libapparmor],
+      [PHP_EVAL_INCLINE([$APPARMOR_CFLAGS])],
+      [AC_CHECK_LIB([apparmor], [aa_change_profile],
+        [APPARMOR_LIBS=-lapparmor],
+        [AC_MSG_FAILURE([Required libapparmor library not found.])])])
+    PHP_EVAL_LIBLINE([$APPARMOR_LIBS], [FPM_EXTRA_LIBS], [yes])
 
-  if test "x$PHP_FPM_APPARMOR" != "xno" ; then
-    AC_CHECK_HEADERS([sys/apparmor.h])
-    AC_CHECK_LIB(apparmor, aa_change_profile, [
-      PHP_ADD_LIBRARY(apparmor)
-      AC_DEFINE(HAVE_APPARMOR, 1, [ AppArmor confinement available ])
-    ],[
-      AC_MSG_ERROR(libapparmor required but not found)
-    ])
-  fi
+    dnl Sanity check.
+    CFLAGS_save=$CFLAGS
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([sys/apparmor.h],
+      [AC_DEFINE([HAVE_APPARMOR], [1],
+        [Define to 1 if AppArmor confinement is available for PHP-FPM.])],
+      [AC_MSG_FAILURE([Required <sys/apparmor.h> header file not found.])])
+    CFLAGS=$CFLAGS_save
+  ])
 
-  if test "x$PHP_FPM_SELINUX" != "xno" ; then
-    AC_CHECK_HEADERS([selinux/selinux.h])
-    AC_CHECK_LIB(selinux, security_setenforce, [
-      PHP_ADD_LIBRARY(selinux)
-      AC_DEFINE(HAVE_SELINUX, 1, [ SElinux available ])
-    ],[])
-  fi
+  AS_VAR_IF([PHP_FPM_SELINUX], [no],, [
+    PKG_CHECK_MODULES([SELINUX], [libselinux],
+      [PHP_EVAL_INCLINE([$SELINUX_CFLAGS])],
+      [AC_CHECK_LIB([selinux], [security_setenforce],
+        [SELINUX_LIBS=-lselinux],
+        [AC_MSG_FAILURE([Required SELinux library not found.])])])
+    PHP_EVAL_LIBLINE([$SELINUX_LIBS], [FPM_EXTRA_LIBS], [yes])
 
-  PHP_SUBST_OLD(php_fpm_systemd)
-  AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
+    dnl Sanity check.
+    CFLAGS_save=$CFLAGS
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([selinux/selinux.h],
+      [AC_DEFINE([HAVE_SELINUX], [1],
+        [Define to 1 if SELinux is available in PHP-FPM.])],
+      [AC_MSG_FAILURE([Required <selinux/selinux.h> header file not found.])])
+    CFLAGS=$CFLAGS_save
+  ])
 
-  if test -z "$PHP_FPM_USER" -o "$PHP_FPM_USER" = "yes" -o "$PHP_FPM_USER" = "no"; then
-    php_fpm_user="nobody"
+  if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
+    php_fpm_user=nobody
   else
-    php_fpm_user="$PHP_FPM_USER"
+    php_fpm_user=$PHP_FPM_USER
   fi
 
-  if test -z "$PHP_FPM_GROUP" -o "$PHP_FPM_GROUP" = "yes" -o "$PHP_FPM_GROUP" = "no"; then
-    php_fpm_group="nobody"
+  if test -z "$PHP_FPM_GROUP" || test "$PHP_FPM_GROUP" = "yes" || test "$PHP_FPM_GROUP" = "no"; then
+    php_fpm_group=nobody
   else
-    php_fpm_group="$PHP_FPM_GROUP"
+    php_fpm_group=$PHP_FPM_GROUP
   fi
 
-  PHP_SUBST_OLD(php_fpm_user)
-  PHP_SUBST_OLD(php_fpm_group)
-  php_fpm_sysconfdir=`eval echo $sysconfdir`
-  PHP_SUBST_OLD(php_fpm_sysconfdir)
-  php_fpm_localstatedir=`eval echo $localstatedir`
-  PHP_SUBST_OLD(php_fpm_localstatedir)
-  php_fpm_prefix=`eval echo $prefix`
-  PHP_SUBST_OLD(php_fpm_prefix)
+  AC_SUBST([php_fpm_user])
+  AC_SUBST([php_fpm_group])
+  php_fpm_sysconfdir=$(eval echo $sysconfdir)
+  AC_SUBST([php_fpm_sysconfdir])
+  php_fpm_localstatedir=$(eval echo $localstatedir)
+  AC_SUBST([php_fpm_localstatedir])
+  php_fpm_prefix=$(eval echo $prefix)
+  AC_SUBST([php_fpm_prefix])
 
-  AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
-  AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
-
-  PHP_ADD_BUILD_DIR(sapi/fpm/fpm)
-  PHP_ADD_BUILD_DIR(sapi/fpm/fpm/events)
-  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/www.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
+  PHP_ADD_BUILD_DIR([
+    sapi/fpm/fpm
+    sapi/fpm/fpm/events
+  ])
+  AC_CONFIG_FILES([
+    sapi/fpm/init.d.php-fpm
+    sapi/fpm/php-fpm.8
+    sapi/fpm/php-fpm.conf
+    sapi/fpm/php-fpm.service
+    sapi/fpm/status.html
+    sapi/fpm/www.conf
+  ])
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
 
-  if test "$fpm_trace_type" && test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"; then
-    PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"
-  fi
-
-  PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  AS_VAR_IF([fpm_trace_type],,,
+    [AS_IF([test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"],
+      [PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"])])
 
   PHP_FPM_FILES="fpm/fpm.c \
     fpm/fpm_children.c \
@@ -688,7 +533,7 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_conf.c \
     fpm/fpm_env.c \
     fpm/fpm_events.c \
-		fpm/fpm_log.c \
+    fpm/fpm_log.c \
     fpm/fpm_main.c \
     fpm/fpm_php.c \
     fpm/fpm_php_trace.c \
@@ -703,31 +548,29 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_unix.c \
     fpm/fpm_worker_pool.c \
     fpm/zlog.c \
-		fpm/events/select.c \
-		fpm/events/poll.c \
-		fpm/events/epoll.c \
-		fpm/events/kqueue.c \
-		fpm/events/devpoll.c \
-		fpm/events/port.c \
+    fpm/events/select.c \
+    fpm/events/poll.c \
+    fpm/events/epoll.c \
+    fpm/events/kqueue.c \
+    fpm/events/port.c \
   "
 
-  PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
+  PHP_SELECT_SAPI([fpm],
+    [program],
+    [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
+    [-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-  case $host_alias in
-      *aix*)
-        BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
-        ;;
-      *darwin*)
-        BUILD_FPM="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
-      ;;
-      *)
-        BUILD_FPM="\$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
-      ;;
-  esac
+  AS_CASE([$host_alias],
+    [*aix*], [
+      BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+    ],
+    [*darwin*], [
+      BUILD_FPM="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+    ], [
+      BUILD_FPM="\$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+    ])
 
-  PHP_SUBST(SAPI_FPM_PATH)
-  PHP_SUBST(BUILD_FPM)
-
-else
-  AC_MSG_RESULT(no)
+  PHP_SUBST([SAPI_FPM_PATH])
+  PHP_SUBST([BUILD_FPM])
+  PHP_SUBST([FPM_EXTRA_LIBS])
 fi

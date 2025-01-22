@@ -40,12 +40,12 @@
 #include "php_network.h"
 #include "zend_smart_str.h"
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
 
 #include <sys/types.h>
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -54,7 +54,7 @@
 #else
 #include <netinet/in.h>
 #include <netdb.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #endif
@@ -368,32 +368,44 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	memset(file_handle, 0, sizeof(zend_file_handle));
 
 	path_info = SG(request_info).request_uri;
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir) && path_info && '/' == path_info[0] && '~' == path_info[1]) {
 		char *s = strchr(path_info + 2, '/');
 
 		if (s) {			/* if there is no path name after the file, do not bother */
 			char user[32];			/* to try open the directory */
-			struct passwd *pw;
-#if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
-			struct passwd pwstruc;
-			long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-			char *pwbuf;
 
-			if (pwbuflen < 1) {
-				return FAILURE;
-			}
-
-			pwbuf = emalloc(pwbuflen);
-#endif
 			length = s - (path_info + 2);
 			if (length > sizeof(user) - 1) {
 				length = sizeof(user) - 1;
 			}
 			memcpy(user, path_info + 2, length);
 			user[length] = '\0';
+
+			struct passwd *pw;
 #if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
-			if (getpwnam_r(user, &pwstruc, pwbuf, pwbuflen, &pw)) {
+			struct passwd pwstruc;
+			long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+			char *pwbuf;
+			int err;
+
+			if (pwbuflen < 1) {
+				pwbuflen = 1024;
+			}
+# if ZEND_DEBUG
+			/* Test retry logic */
+			pwbuflen = 1;
+# endif
+			pwbuf = emalloc(pwbuflen);
+
+try_again:
+			err = getpwnam_r(user, &pwstruc, pwbuf, pwbuflen, &pw);
+			if (err) {
+				if (err == ERANGE) {
+					pwbuflen *= 2;
+					pwbuf = erealloc(pwbuf, pwbuflen);
+					goto try_again;
+				}
 				efree(pwbuf);
 				return FAILURE;
 			}

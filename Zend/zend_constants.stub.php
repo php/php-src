@@ -71,6 +71,8 @@ const E_USER_NOTICE = UNKNOWN;
 /**
  * @var int
  * @cvalue E_STRICT
+ * @deprecated
+ * @todo Remove in PHP 9.0
  */
 const E_STRICT = UNKNOWN;
 

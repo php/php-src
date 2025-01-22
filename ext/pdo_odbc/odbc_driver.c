@@ -15,14 +15,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 /* this file actually lives in main/ */
 #include "php_odbc_utils.h"
 #include "php_pdo_odbc.h"
@@ -39,6 +39,11 @@ static void pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 	if (stmt) {
 		S = (pdo_odbc_stmt*)stmt->driver_data;
 		einfo = &S->einfo;
+	}
+
+	/* If we don't have a driver error do not populate the info array */
+	if (strlen(einfo->last_err_msg) == 0) {
+		return;
 	}
 
 	message = strpprintf(0, "%s (%s[%ld] at %s:%d)",
@@ -461,7 +466,8 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL, /* get_driver_methods */
 	NULL, /* request_shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */
-	NULL /* get_gc */
+	NULL, /* get_gc */
+	NULL /* scanner */
 };
 
 static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */

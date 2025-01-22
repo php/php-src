@@ -651,12 +651,10 @@ lxb_dom_element_qualified_name(lxb_dom_element_t *element, size_t *len)
     const lxb_tag_data_t *data;
 
     if (element->qualified_name != 0) {
-        data = lxb_tag_data_by_id(element->node.owner_document->tags,
-                                  element->qualified_name);
+        data = lxb_tag_data_by_id(element->qualified_name);
     }
     else {
-        data = lxb_tag_data_by_id(element->node.owner_document->tags,
-                                  element->node.local_name);
+        data = lxb_tag_data_by_id(element->node.local_name);
     }
 
     if (len != NULL) {
@@ -723,8 +721,7 @@ lxb_dom_element_local_name(lxb_dom_element_t *element, size_t *len)
 {
     const lxb_tag_data_t *data;
 
-    data = lxb_tag_data_by_id(element->node.owner_document->tags,
-                              element->node.local_name);
+    data = lxb_tag_data_by_id(element->node.local_name);
     if (data == NULL) {
         if (len != NULL) {
             *len = 0;

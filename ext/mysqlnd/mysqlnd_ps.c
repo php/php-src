@@ -764,7 +764,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
 
-	if (!stmt || !stmt->conn || !result || !result->conn || !result->unbuf) {
+	if (!stmt->conn || !result->conn) {
 		DBG_ERR("no statement");
 		DBG_RETURN(FAIL);
 	}
@@ -1552,18 +1552,6 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			stmt->flags = ival;
 			break;
 		}
-		case STMT_ATTR_PREFETCH_ROWS: {
-			unsigned long ival = *(unsigned long *) value;
-			if (ival == 0) {
-				ival = MYSQLND_DEFAULT_PREFETCH_ROWS;
-			} else if (ival > 1) {
-				SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
-				DBG_INF("FAIL");
-				DBG_RETURN(FAIL);
-			}
-			stmt->prefetch_rows = ival;
-			break;
-		}
 		default:
 			SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 			DBG_RETURN(FAIL);
@@ -1594,10 +1582,6 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 			break;
 		case STMT_ATTR_CURSOR_TYPE:
 			*(unsigned long *) value = stmt->flags;
-			DBG_INF_FMT("value=%lu", *(unsigned long *) value);
-			break;
-		case STMT_ATTR_PREFETCH_ROWS:
-			*(unsigned long *) value = stmt->prefetch_rows;
 			DBG_INF_FMT("value=%lu", *(unsigned long *) value);
 			break;
 		default:

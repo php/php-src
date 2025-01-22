@@ -5,7 +5,7 @@ pdo_sqlite
 --FILE--
 <?php
 
-class MyPdoSqlite extends PdoSqlite {}
+class MyPdoSqlite extends Pdo\Sqlite {}
 
 $db = MyPdoSqlite::connect('sqlite::memory:');
 if (!$db instanceof MyPdoSqlite) {

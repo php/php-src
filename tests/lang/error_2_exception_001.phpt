@@ -30,11 +30,11 @@ try {
 }
 
 try {
-    trigger_error("I will become an exception", E_USER_ERROR);
+    trigger_error("I will become an exception", E_USER_WARNING);
 } catch (MyException $exception) {
     echo "There was an exception: " . $exception->getErrno() . ", '" . $exception->getErrmsg() . "'\n";
 }
 
 ?>
 --EXPECT--
-There was an exception: 256, 'I will become an exception'
+There was an exception: 512, 'I will become an exception'

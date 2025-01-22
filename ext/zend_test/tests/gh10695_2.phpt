@@ -13,6 +13,6 @@ $resource = zend_test_create_throwing_resource();
 --EXPECTF--
 Fatal error: Uncaught Exception: Caught in %s:%d
 Stack trace:
-#0 [internal function]: {closure}(Object(Exception))
+#0 [internal function]: {closure:%s:%d}(Object(Exception))
 #1 {main}
   thrown in %s on line %d

@@ -49,8 +49,8 @@ try {
 ?>
 --EXPECT--
 Cannot assign array to property DOMNode::$nodeValue of type ?string
-Cannot write read-only property DOMDocument::$nodeType
-Cannot write read-only property DOMDocument::$xmlEncoding
-Cannot write read-only property DOMEntity::$actualEncoding
-Cannot write read-only property DOMEntity::$encoding
-Cannot write read-only property DOMEntity::$version
+Cannot modify readonly property DOMDocument::$nodeType
+Cannot modify readonly property DOMDocument::$xmlEncoding
+Cannot modify readonly property DOMEntity::$actualEncoding
+Cannot modify readonly property DOMEntity::$encoding
+Cannot modify readonly property DOMEntity::$version

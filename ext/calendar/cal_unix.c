@@ -60,12 +60,12 @@ PHP_FUNCTION(jdtounix)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &uday) == FAILURE) {
 		RETURN_THROWS();
 	}
-	uday -= 2440588 /* J.D. of 1.1.1970 */;
-
-	if (uday < 0 || uday > ZEND_LONG_MAX / SECS_PER_DAY) { /* before beginning of unix epoch or greater than representable */
+	if (uday < 2440588 || (uday - 2440588) > (ZEND_LONG_MAX / SECS_PER_DAY)) { /* before beginning of unix epoch or greater than representable */
 		zend_value_error("jday must be between 2440588 and " ZEND_LONG_FMT, ZEND_LONG_MAX / SECS_PER_DAY + 2440588);
 		RETURN_THROWS();
 	}
+
+	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
 	RETURN_LONG(uday * SECS_PER_DAY);
 }

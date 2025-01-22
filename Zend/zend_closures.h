@@ -20,6 +20,8 @@
 #ifndef ZEND_CLOSURES_H
 #define ZEND_CLOSURES_H
 
+#include "zend_types.h"
+
 BEGIN_EXTERN_C()
 
 /* This macro depends on zend_closure structure layout */

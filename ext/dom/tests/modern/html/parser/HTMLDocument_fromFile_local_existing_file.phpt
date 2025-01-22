@@ -1,16 +1,16 @@
 --TEST--
-DOM\HTMLDocument::createFromFile() - local existing file
+Dom\HTMLDocument::createFromFile() - local existing file
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/../../../test.html");
-echo $dom->saveHTML(), "\n";
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/../../../test.html");
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECTF--
-Warning: DOM\HTMLDocument::createFromFile(): tree error unexpected-token-in-initial-mode in %s on line %d
+Warning: Dom\HTMLDocument::createFromFile(): tree error unexpected-token-in-initial-mode in %s on line %d
 <html><head>
 <title>Hello world</title>
 </head>

@@ -60,17 +60,17 @@ Number "-9" (scale 0)
 
 Number "0" (scale 0)
 0 ** 15                             = 0
-0 ** -15                            = 0
+0 ** -15                            = Negative power of zero
 0 ** 1                              = 0
-0 ** -9                             = 0
+0 ** -9                             = Negative power of zero
 0 ** 0                              = 1
 0 ** -0                             = 1
 
 Number "-0" (scale 0)
 -0 ** 15                             = 0
--0 ** -15                            = 0
+-0 ** -15                            = Negative power of zero
 -0 ** 1                              = 0
--0 ** -9                             = 0
+-0 ** -9                             = Negative power of zero
 -0 ** 0                              = 1
 -0 ** -0                             = 1
 
@@ -188,17 +188,17 @@ Number "-9" (scale 10)
 
 Number "0" (scale 10)
 0 ** 15                             = 0.0000000000
-0 ** -15                            = 0.0000000000
+0 ** -15                            = Negative power of zero
 0 ** 1                              = 0.0000000000
-0 ** -9                             = 0.0000000000
+0 ** -9                             = Negative power of zero
 0 ** 0                              = 1.0000000000
 0 ** -0                             = 1.0000000000
 
 Number "-0" (scale 10)
 -0 ** 15                             = 0.0000000000
--0 ** -15                            = 0.0000000000
+-0 ** -15                            = Negative power of zero
 -0 ** 1                              = 0.0000000000
--0 ** -9                             = 0.0000000000
+-0 ** -9                             = Negative power of zero
 -0 ** 0                              = 1.0000000000
 -0 ** -0                             = 1.0000000000
 

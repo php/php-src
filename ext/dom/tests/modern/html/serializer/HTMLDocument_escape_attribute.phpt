@@ -1,14 +1,14 @@
 --TEST--
-DOM\HTMLDocument serialization escape attribute
+Dom\HTMLDocument serialization escape attribute
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString("<p></p>", LIBXML_NOERROR);
+$dom = Dom\HTMLDocument::createFromString("<p></p>", LIBXML_NOERROR);
 $p = $dom->documentElement->firstChild->nextSibling->firstChild;
 $p->setAttribute("foo", "<bar>\"'&");
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

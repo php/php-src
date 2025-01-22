@@ -4,6 +4,7 @@ Observer: Function observing in fibers with unfinished fiber
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.fiber_init=1
 zend_test.observer.fiber_switch=1
@@ -31,8 +32,8 @@ $fiber->start();
 <!-- alloc: %s -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-    <!-- init {closure}() -->
-    <{closure}>
+    <!-- init {closure:%s:%d}() -->
+    <{closure:%s:%d}>
       <!-- init var_dump() -->
       <var_dump>
 int(1)
@@ -48,7 +49,7 @@ int(1)
     <!-- Exception: GracefulExit -->
   </Fiber::suspend>
   <!-- Exception: GracefulExit -->
-</{closure}>
+</{closure:%s:%d}>
 <!-- switching from fiber %s to %s -->
 <destroyed '%s'>
 <!-- destroy: %s -->

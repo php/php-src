@@ -4,6 +4,7 @@ Bug #77024 SplFileObject::__toString() may return array
 <?php
 
 $file = new SplTempFileObject;
+$file->setCsvControl(escape: "");
 $file->fputcsv(['foo', 'bar', 'baz']);
 $file->rewind();
 $file->setFlags(SplFileObject::READ_CSV);

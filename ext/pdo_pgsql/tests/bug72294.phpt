@@ -1,7 +1,6 @@
 --TEST--
 Bug #72294 Segmentation fault/invalid pointer in connection with pgsql_stmt_dtor
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
@@ -27,7 +26,7 @@ abstract class PHPUnit_Framework_TestCase
     private $name = null;
     private $result;
 
-    public function run(PHPUnit_Framework_TestResult $result = null)
+    public function run(?PHPUnit_Framework_TestResult $result = null)
     {
         $result->run($this);
     }

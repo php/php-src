@@ -1,7 +1,6 @@
 --TEST--
 Bug #73959 (lastInsertId fails to throw an exception)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

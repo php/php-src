@@ -477,6 +477,8 @@ name_state:
         data++;
     }
 
+    *name_end = data;
+
 spaces_state:
 
     data = lxb_html_encoding_skip_spaces(data, end);

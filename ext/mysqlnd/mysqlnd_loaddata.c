@@ -65,11 +65,11 @@ static
 int mysqlnd_local_infile_read(void * ptr, zend_uchar * buf, unsigned int buf_len)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
-	int count;
 
 	DBG_ENTER("mysqlnd_local_infile_read");
 
-	count = (int) php_stream_read(info->fd, (char *) buf, buf_len);
+	// TODO Change this, and the return type of the function to ssize_t
+	int count = (int) php_stream_read(info->fd, (char *) buf, buf_len);
 
 	if (count < 0) {
 		strcpy(info->error_msg, "Error reading file");
@@ -90,12 +90,16 @@ int	mysqlnd_local_infile_error(void * ptr, char *error_buf, unsigned int error_b
 	DBG_ENTER("mysqlnd_local_infile_error");
 
 	if (info) {
-		strlcpy(error_buf, info->error_msg, error_buf_len);
+		size_t error_msg_len_with_null_byte = strlen(info->error_msg) + 1;
+		ZEND_ASSERT(error_buf_len >= error_msg_len_with_null_byte);
+
+		memcpy(error_buf, info->error_msg, error_msg_len_with_null_byte);
 		DBG_INF_FMT("have info, %d", info->error_no);
 		DBG_RETURN(info->error_no);
 	}
 
-	strlcpy(error_buf, "Unknown error", error_buf_len);
+	ZEND_ASSERT(error_buf_len >= sizeof("Unknown error"));
+	strcpy(error_buf, "Unknown error");
 	DBG_INF_FMT("no info, %d", CR_UNKNOWN_ERROR);
 	DBG_RETURN(CR_UNKNOWN_ERROR);
 }

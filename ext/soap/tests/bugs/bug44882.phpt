@@ -8,7 +8,7 @@ soap.wsdl_cache_enabled=0
 <?php
 class TestSoapClient extends SoapClient
 {
-    public function __doRequest($req, $loc, $act, $ver, $one_way = 0): ?string
+    public function __doRequest($req, $loc, $act, $ver, $one_way = 0): string
     {
         return <<<XML
 <?xml version="1.0" encoding="UTF-8"?>

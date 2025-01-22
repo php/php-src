@@ -14,7 +14,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -24,19 +24,16 @@
 /* {{{ */
 static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
 {
-	const char*      locale;
+	char*            locale;
 	size_t           locale_len = 0;
 	zval*            object;
 	Collator_object* co;
 
 	intl_error_reset( NULL );
 	object = return_value;
-	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s",
-		&locale, &locale_len ) == FAILURE )
-	{
-		return FAILURE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(locale, locale_len)
+	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
 
 	if (error_handling != NULL) {
 		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
@@ -47,7 +44,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *erro
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	if(locale_len == 0) {
-		locale = intl_locale_get_default();
+		locale = (char *)intl_locale_get_default();
 	}
 
 	/* Open ICU collator. */

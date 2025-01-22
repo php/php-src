@@ -11,43 +11,42 @@ mysqli.allow_local_infile=1
 --FILE--
 <?php
     require 'table.inc';
-    if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'a')"))
+    if (false === mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'a')"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     // NOTE: empty string, no multiple insert syntax
     if (!is_null($tmp = mysqli_info($link)) || ('' != $tmp))
         printf("[004] Expecting null, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (101, 'a'), (102, 'b')"))
+    if (false === mysqli_query($link, "INSERT INTO test(id, label) VALUES (101, 'a'), (102, 'b')"))
         printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
         printf("[006] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (!$res = mysqli_query($link, 'INSERT INTO test(id, label) SELECT id + 200, label FROM test'))
+    if (false === mysqli_query($link, 'INSERT INTO test(id, label) SELECT id + 200, label FROM test'))
         printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
         printf("[008] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (!$res = mysqli_query($link, 'ALTER TABLE test MODIFY label CHAR(2)'))
+    if (false === mysqli_query($link, 'ALTER TABLE test MODIFY label CHAR(2)'))
         printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
         printf("[010] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (!$res = mysqli_query($link, "UPDATE test SET label = 'b' WHERE id >= 100"))
+    if (false === mysqli_query($link, "UPDATE test SET label = 'b' WHERE id >= 100"))
         printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
         printf("[012] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (!$res = mysqli_query($link, "SELECT 1"))
+    if (false === mysqli_query($link, "SELECT 1"))
         printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!is_null($tmp = mysqli_info($link)) || ('' != $tmp))
         printf("[014] Expecting null, got %s/%s\n", gettype($tmp), $tmp);
-    mysqli_free_result($res);
 
     // NOTE: no LOAD DATA INFILE test
     if ($dir = sys_get_temp_dir()) {

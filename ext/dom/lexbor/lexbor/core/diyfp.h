@@ -71,7 +71,7 @@ lexbor_cached_power_bin(int exp, int *dec_exp);
 /*
  * Inline functions
  */
-#if (LEXBOR_HAVE_BUILTIN_CLZLL)
+#ifdef LEXBOR_HAVE_BUILTIN_CLZLL
 #define nxt_leading_zeros64(x)  (((x) == 0) ? 64 : __builtin_clzll(x))
 
 #else
@@ -199,7 +199,7 @@ lexbor_diyfp_sub(lexbor_diyfp_t lhs, lexbor_diyfp_t rhs)
 lxb_inline lexbor_diyfp_t
 lexbor_diyfp_mul(lexbor_diyfp_t lhs, lexbor_diyfp_t rhs)
 {
-#if (LEXBOR_HAVE_UNSIGNED_INT128)
+#ifdef LEXBOR_HAVE_UNSIGNED_INT128
 
     uint64_t l, h;
     lxb_uint128_t u128;

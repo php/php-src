@@ -22,6 +22,7 @@
 #include <unicode/timezone.h>
 #include <unicode/calendar.h>
 #include "../intl_convertcpp.h"
+#include "../intl_common.h"
 
 #include "../common/common_date.h"
 
@@ -132,7 +133,6 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 													 const char *func)
 {
 	zval		local_zv_tz;
-	char		*message = NULL;
 	TimeZone	*timeZone;
 
 	if (zv_timezone == NULL || Z_TYPE_P(zv_timezone) == IS_NULL) {
@@ -146,23 +146,16 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 	if (Z_TYPE_P(zv_timezone) == IS_OBJECT &&
 			instanceof_function(Z_OBJCE_P(zv_timezone), TimeZone_ce_ptr)) {
 		TimeZone_object *to = Z_INTL_TIMEZONE_P(zv_timezone);
+
 		if (to->utimezone == NULL) {
-			spprintf(&message, 0, "%s: passed IntlTimeZone is not "
+			zend_throw_error(IntlException_ce_ptr, "%s: passed IntlTimeZone is not "
 				"properly constructed", func);
-			if (message) {
-				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-				efree(message);
-			}
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
 		if (UNEXPECTED(timeZone == NULL)) {
-			spprintf(&message, 0, "%s: could not clone TimeZone", func);
-			if (message) {
-				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
-				efree(message);
-			}
+			zend_throw_error(IntlException_ce_ptr, "%s: could not clone TimeZone", func);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
@@ -183,32 +176,20 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		}
 		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRLEN_P(zv_timezone),
 				&status) == FAILURE) {
-			spprintf(&message, 0, "%s: Time zone identifier given is not a "
+			zend_throw_error(IntlException_ce_ptr, "%s: Time zone identifier given is not a "
 				"valid UTF-8 string", func);
-			if (message) {
-				intl_errors_set(outside_error, status, message, 1);
-				efree(message);
-			}
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
 		if (UNEXPECTED(timeZone == NULL)) {
-			spprintf(&message, 0, "%s: Could not create time zone", func);
-			if (message) {
-				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
-				efree(message);
-			}
+			zend_throw_error(IntlException_ce_ptr, "%s: Could not create time zone", func);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		if (*timeZone == TimeZone::getUnknown()) {
-			spprintf(&message, 0, "%s: No such time zone: '%s'",
+			zend_throw_error(IntlException_ce_ptr, "%s: No such time zone: '%s'",
 				func, Z_STRVAL_P(zv_timezone));
-			if (message) {
-				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-				efree(message);
-			}
 			zval_ptr_dtor_str(&local_zv_tz);
 			delete timeZone;
 			return NULL;
@@ -224,38 +205,22 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 /* {{{ clone handler for TimeZone */
 static zend_object *TimeZone_clone_obj(zend_object *object)
 {
-	TimeZone_object		*to_orig,
-						*to_new;
-	zend_object			*ret_val;
-	intl_error_reset(NULL);
-
-	to_orig = php_intl_timezone_fetch_object(object);
-	intl_error_reset(TIMEZONE_ERROR_P(to_orig));
-
-	ret_val = TimeZone_ce_ptr->create_object(object->ce);
-	to_new  = php_intl_timezone_fetch_object(ret_val);
+	TimeZone_object *to_orig = php_intl_timezone_fetch_object(object);
+	zend_object     *ret_val = TimeZone_ce_ptr->create_object(object->ce);
+	TimeZone_object  *to_new = php_intl_timezone_fetch_object(ret_val);
 
 	zend_objects_clone_members(&to_new->zo, &to_orig->zo);
 
 	if (to_orig->utimezone != NULL) {
-		TimeZone	*newTimeZone;
-
-		newTimeZone = to_orig->utimezone->clone();
-		to_new->should_delete = 1;
+		TimeZone *newTimeZone = to_orig->utimezone->clone();
+		to_new->should_delete = true;
 		if (!newTimeZone) {
-			zend_string *err_msg;
-			intl_errors_set_code(TIMEZONE_ERROR_P(to_orig),
-				U_MEMORY_ALLOCATION_ERROR);
-			intl_errors_set_custom_msg(TIMEZONE_ERROR_P(to_orig),
-				"Could not clone IntlTimeZone", 0);
-			err_msg = intl_error_get_message(TIMEZONE_ERROR_P(to_orig));
-			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
-			zend_string_free(err_msg);
+			zend_throw_error(NULL, "Failed to clone IntlTimeZone");
 		} else {
 			to_new->utimezone = newTimeZone;
 		}
 	} else {
-		zend_throw_exception(NULL, "Cannot clone unconstructed IntlTimeZone", 0);
+		zend_throw_error(NULL, "Cannot clone uninitialized IntlTimeZone");
 	}
 
 	return ret_val;
@@ -369,9 +334,7 @@ static void TimeZone_objects_free(zend_object *object)
 /* {{{ TimeZone_object_create */
 static zend_object *TimeZone_object_create(zend_class_entry *ce)
 {
-	TimeZone_object*	intern;
-
-	intern = (TimeZone_object*)ecalloc(1, sizeof(TimeZone_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	TimeZone_object* intern = (TimeZone_object*)zend_object_alloc(sizeof(TimeZone_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);

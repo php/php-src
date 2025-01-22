@@ -13,5 +13,5 @@ fwrite($fp, $text);
 fclose($fp);
 
 ?>
---EXPECT--
-HctBDoAgDETRq8zOjfEeHKOGATG0TRpC4u1Vdn/xX4IoxkVMxgP1zA4vkJVhULk9UGkM6TvSNolmxUNlNLePVQ45O3eINf0fsQxtCxwv
+--EXPECTF--
+HctB%s

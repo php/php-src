@@ -18,14 +18,12 @@
 
 #include <ctype.h>
 #include <sys/stat.h>
+#include <locale.h>
 
 #include "php.h"
 #include "SAPI.h"
 #include "php_variables.h"
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/pageinfo.h"
-#include "ext/pcre/php_pcre.h"
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -511,12 +509,15 @@ SAPI_API void sapi_deactivate_module(void)
 	}
 	if (SG(request_info).auth_user) {
 		efree(SG(request_info).auth_user);
+		SG(request_info).auth_user = NULL;
 	}
 	if (SG(request_info).auth_password) {
 		efree(SG(request_info).auth_password);
+		SG(request_info).auth_password = NULL;
 	}
 	if (SG(request_info).auth_digest) {
 		efree(SG(request_info).auth_digest);
+		SG(request_info).auth_digest = NULL;
 	}
 	if (SG(request_info).content_type_dup) {
 		efree(SG(request_info).content_type_dup);

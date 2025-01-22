@@ -6,6 +6,9 @@ function skipFunction($function): bool {
      || $function === 'readline'
      || $function === 'readline_read_history'
      || $function === 'readline_write_history'
+        /* terminates script */
+     || $function === 'exit'
+     || $function === 'die'
         /* intentionally violate invariants */
      || $function === 'zend_create_unterminated_string'
      || $function === 'zend_test_array_return'

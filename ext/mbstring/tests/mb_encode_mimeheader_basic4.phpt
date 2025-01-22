@@ -2,6 +2,8 @@
 Test mb_encode_mimeheader() function : test cases found by fuzzer
 --EXTENSIONS--
 mbstring
+--INI--
+error_reporting=E_ALL^E_DEPRECATED
 --FILE--
 <?php
 
@@ -115,7 +117,25 @@ var_dump(mb_encode_mimeheader("\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
 // In the general case, matching the old implementation's decision to transfer-encode or not
 // perfectly would require allocating potentially unbounded scratch memory (up to the size of
 // the input string), but we aim to only use a constant amount of temporarily allocated memory
-var_dump(mb_encode_mimeheader("2\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20!3", "GB18030", "Q", ""));
+var_dump(mb_encode_mimeheader("2\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20!3", "GB18030", "Q", ""));
+
+// Regression test for infinite loop which was unintentionally caused when refactoring
+var_dump(mb_encode_mimeheader(",9868949,9868978,9869015,9689100,9869121,9869615,9870690,9867116,98558119861183. ", "utf-8", "B"));
+var_dump(mb_encode_mimeheader('xx ' . str_repeat("A", 81) . " ", "utf-8", "B"));
+
+// Regression test for problem where MIME encoding loop would not leave enough space in wchar
+// buffer for the next iteration, causing an assertion failure
+mb_internal_encoding('MacJapanese');
+var_dump(mb_encode_mimeheader("ne\xf6\xff\xff\xffs\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff1\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff1", 'CP50220', 'B', "A", 44));
+
+// Regression test for failing assertion caused by the fact that QPrint deliberately generates no
+// wchars for CR (0x0D) bytes
+try {
+	mb_internal_encoding('Quoted-Printable');
+	var_dump(mb_encode_mimeheader("=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=00=00=00=00=00=00=00=01=00=00=00=00=00=00=00850r=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=00=00=00=0050r=08=0DCP850r850r0r", "Quoted-Printable", "B", "", 184));
+} catch (\ValueError $e) {
+	echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done";
 ?>
@@ -156,5 +176,11 @@ string(75) "  111111111111111111111111111111111111111111111111111111111111111111
 string(33) "=?HZ-GB-2312?Q?=7E=7Bs=5B=7E=7D?="
 string(77) "2                                                                          !3"
 string(282) "=?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20!=33=20?="
-string(296) "2 =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20!=33?="
+string(344) "2 =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20?= =?GB18030?Q?=20=20=20=20=20=20=20=20=20!=33?="
+string(135) "=?UTF-8?B?LDk4Njg5NDksOTg2ODk3OCw5ODY5MDE1LDk2ODkxMDAsOTg2OTEyMSw5ODY5?=
+ =?UTF-8?B?NjE1LDk4NzA2OTAsOTg2NzExNiw5ODU1ODExOTg2MTE4My4g?="
+string(142) "xx =?UTF-8?B?QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB?=
+ =?UTF-8?B?QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIA==?="
+string(690) "=?ISO-2022-JP?B?bmU/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/cxskQiFEGyhCPw==?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/MRskQiFEGyhCPxskQiFEGyhCPw==?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/MQ==?="
+mb_encode_mimeheader(): Argument #2 ($charset) "Quoted-Printable" cannot be used for MIME header encoding
 Done

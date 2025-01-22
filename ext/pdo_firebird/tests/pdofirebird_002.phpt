@@ -13,8 +13,8 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 require_once __DIR__ . "/testdb.inc";
 
 $db = connectToDb();
-if (!$db instanceof PdoFirebird) {
-    echo "Wrong class type. Should be PdoFirebird but is " . get_class($db) . "\n";
+if (!$db instanceof Pdo\Firebird) {
+    echo "Wrong class type. Should be Pdo\Firebird but is " . get_class($db) . "\n";
 }
 
 $db->query('CREATE TABLE pdofirebird_002 (idx INT NOT NULL PRIMARY KEY, name VARCHAR(20))');

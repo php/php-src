@@ -20,4 +20,4 @@ try {
 
 ?>
 --EXPECT--
-DOM\Document::schemaValidateSource(): Argument #1 ($source) must not be empty
+DOMDocument::schemaValidateSource(): Argument #1 ($source) must not be empty

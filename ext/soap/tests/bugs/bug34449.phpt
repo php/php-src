@@ -5,7 +5,7 @@ soap
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): never {
     echo "$request\n";
     exit;
   }

@@ -18,11 +18,17 @@ var_dump(call_user_func(array('foo', 'teste')));
 
 ?>
 --EXPECTF--
-Deprecated: Optional parameter $a declared before required parameter $b is implicitly treated as a required parameter in %s on line %d
+Deprecated: {closure:%s:%d}(): Optional parameter $a declared before required parameter $b is implicitly treated as a required parameter in %s on line %d
 string(1) "x"
 array(1) {
   [0]=>
-  object(Closure)#%d (1) {
+  object(Closure)#%d (4) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
     ["parameter"]=>
     array(2) {
       ["$a"]=>

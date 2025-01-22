@@ -6,6 +6,7 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0x20000
 opcache.preload=
+zend_test.observer.enabled=0
 --EXTENSIONS--
 opcache
 --FILE--
@@ -49,10 +50,8 @@ Loop::test:
      ; (lines=3, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_009.php:4-10
-0000 ECHO string("Start
-")
-0001 ECHO string("Done
-")
+0000 ECHO string("Start\n")
+0001 ECHO string("Done\n")
 0002 RETURN null
 
 Loop::test2:

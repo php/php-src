@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument::createFromFile() - parser warning libxml_get_last_error()
+Dom\HTMLDocument::createFromFile() - parser warning libxml_get_last_error()
 --EXTENSIONS--
 dom
 --FILE--
@@ -8,7 +8,7 @@ dom
 libxml_use_internal_errors(true);
 
 $html = '<>x</> <!doctype html>';
-$dom = DOM\HTMLDocument::createFromFile(__DIR__."/parser_warning_01.html");
+$dom = Dom\HTMLDocument::createFromFile(__DIR__."/parser_warning_01.html");
 
 var_dump(libxml_get_last_error());
 

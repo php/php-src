@@ -22,7 +22,7 @@ blah blah blah blah blah blah blah
 blah blah blah blah blah blah blah
 EOD;
 
-$name = tempnam("./ext/standard/tests/file/", "php");
+$name = tempnam(__DIR__, "php");
 $fp = fopen($name, "w");
 fwrite($fp, $data);
 fclose($fp);

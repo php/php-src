@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0d12e04d92a3f0cc70179814aab0491d1d3fd2f7 */
+ * Stub hash: 5b4ce3f5f7dee60bde803b3c2eb3994777f56914 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
@@ -48,7 +48,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_registerPHPF
 	ZEND_ARG_TYPE_INFO(0, callable, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_setProfiling, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_setProfiling, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
@@ -58,7 +58,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_getSecurityPrefs, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-
 
 ZEND_METHOD(XSLTProcessor, importStylesheet);
 ZEND_METHOD(XSLTProcessor, transformToDoc);
@@ -73,7 +72,6 @@ ZEND_METHOD(XSLTProcessor, registerPHPFunctionNS);
 ZEND_METHOD(XSLTProcessor, setProfiling);
 ZEND_METHOD(XSLTProcessor, setSecurityPrefs);
 ZEND_METHOD(XSLTProcessor, getSecurityPrefs);
-
 
 static const zend_function_entry class_XSLTProcessor_methods[] = {
 	ZEND_ME(XSLTProcessor, importStylesheet, arginfo_class_XSLTProcessor_importStylesheet, ZEND_ACC_PUBLIC)
@@ -119,7 +117,7 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "XSLTProcessor", class_XSLTProcessor_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_doXInclude_default_value;
 	ZVAL_FALSE(&property_doXInclude_default_value);
@@ -132,6 +130,18 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 	zend_string *property_cloneDocument_name = zend_string_init("cloneDocument", sizeof("cloneDocument") - 1, 1);
 	zend_declare_typed_property(class_entry, property_cloneDocument_name, &property_cloneDocument_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_cloneDocument_name);
+
+	zval property_maxTemplateDepth_default_value;
+	ZVAL_UNDEF(&property_maxTemplateDepth_default_value);
+	zend_string *property_maxTemplateDepth_name = zend_string_init("maxTemplateDepth", sizeof("maxTemplateDepth") - 1, 1);
+	zend_declare_typed_property(class_entry, property_maxTemplateDepth_name, &property_maxTemplateDepth_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_maxTemplateDepth_name);
+
+	zval property_maxTemplateVars_default_value;
+	ZVAL_UNDEF(&property_maxTemplateVars_default_value);
+	zend_string *property_maxTemplateVars_name = zend_string_init("maxTemplateVars", sizeof("maxTemplateVars") - 1, 1);
+	zend_declare_typed_property(class_entry, property_maxTemplateVars_name, &property_maxTemplateVars_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_maxTemplateVars_name);
 
 	return class_entry;
 }

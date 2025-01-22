@@ -64,7 +64,7 @@ require_once 'skipifconnectfailure.inc';
     assert(strlen($blob) <= $max_allowed_packet);
 
     try {
-        $tmp = mysqli_stmt_send_long_data($stmt, -1, $blob);
+        mysqli_stmt_send_long_data($stmt, -1, $blob);
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }

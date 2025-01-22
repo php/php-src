@@ -29,7 +29,7 @@ function hash_hmac_file(string $algo, string $filename, #[\SensitiveParameter] s
  */
 function hash_init(string $algo, int $flags = 0, #[\SensitiveParameter] string $key = "", array $options = []): HashContext {}
 
-function hash_update(HashContext $context, string $data): bool {}
+function hash_update(HashContext $context, string $data): true {}
 
 /** @param resource $stream */
 function hash_update_stream(HashContext $context, $stream, int $length = -1): int {}
@@ -70,28 +70,28 @@ function hash_equals(#[\SensitiveParameter] string $known_string, #[\SensitivePa
 function hash_hkdf(string $algo, #[\SensitiveParameter] string $key, int $length = 0, string $info = "", string $salt = ""): string {}
 
 #ifdef PHP_MHASH_BC
-/** @deprecated */
+#[\Deprecated(since: '8.1')]
 function mhash_get_block_size(int $algo): int|false {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1')]
 function mhash_get_hash_name(int $algo): string|false {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1')]
 function mhash_keygen_s2k(int $algo, string $password, string $salt, int $length): string|false {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.1')]
 function mhash_count(): int {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1')]
 function mhash(int $algo, string $data, ?string $key = null): string|false {}
 #endif
 
@@ -102,4 +102,6 @@ final class HashContext
     public function __serialize(): array {}
 
     public function __unserialize(array $data): void {}
+
+    public function __debugInfo(): array {}
 }

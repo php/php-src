@@ -1,7 +1,6 @@
 --TEST--
 Bug GH-9411 (PgSQL large object resource is incorrectly closed)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

@@ -1,4 +1,8 @@
 name: apt
+inputs:
+  asan:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
@@ -37,18 +41,18 @@ runs:
           libxpm-dev \
           libzip-dev \
           libsqlite3-dev \
+          libsqlite3-mod-spatialite \
           libwebp-dev \
+          ${{ inputs.asan == 'false' && 'libavif-dev' || '' }} \
           libonig-dev \
-          libkrb5-dev \
-          libgssapi-krb5-2 \
           libcurl4-openssl-dev \
           libxml2-dev \
           libxslt1-dev \
           libpq-dev \
-          libreadline-dev \
+          libedit-dev \
           libldap2-dev \
           libsodium-dev \
-          libargon2-0-dev \
+          libargon2-dev \
           libmm-dev \
           libsnmp-dev \
           postgresql \
@@ -59,7 +63,6 @@ runs:
           unixodbc-dev \
           llvm \
           clang \
-          libc-client-dev \
           dovecot-core \
           dovecot-pop3d \
           dovecot-imapd \

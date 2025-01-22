@@ -17,14 +17,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 #ifndef PDO_USE_MYSQLND
@@ -309,24 +309,30 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	bool use_national_character_set = 0;
-	char *quoted;
+	bool use_binary = 0;
 	size_t quotedlen;
-	zend_string *quoted_str;
 
-	if (H->assume_national_character_set_strings) {
-		use_national_character_set = 1;
-	}
-	if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
-		use_national_character_set = 1;
-	}
-	if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
-		use_national_character_set = 0;
+	if ((paramtype & PDO_PARAM_LOB) == PDO_PARAM_LOB) {
+		use_binary = 1;
+	} else {
+		if (H->assume_national_character_set_strings) {
+			use_national_character_set = 1;
+		}
+		if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
+			use_national_character_set = 1;
+		}
+		if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
+			use_national_character_set = 0;
+		}
 	}
 
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("unquoted=%.*s", (int)ZSTR_LEN(unquoted), ZSTR_VAL(unquoted));
-	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3 + (use_national_character_set ? 1 : 0));
+
+	zend_string *quoted_str = zend_string_safe_alloc(2, ZSTR_LEN(unquoted),
+		3 + (use_national_character_set ? 1 : 0) + (use_binary ? 7 : 0), false);
+	char *quoted = ZSTR_VAL(quoted_str);
 
 	if (use_national_character_set) {
 		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 2, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
@@ -334,6 +340,11 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 		quoted[1] = '\'';
 
 		++quotedlen; /* N prefix */
+	} else if (use_binary) {
+		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 8, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
+		memcpy(quoted, "_binary'", 8);
+
+		quotedlen += 7; /* _binary prefix */
 	} else {
 		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
 		quoted[0] = '\'';
@@ -343,8 +354,8 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	quoted[++quotedlen] = '\0';
 	PDO_DBG_INF_FMT("quoted=%.*s", (int)quotedlen, quoted);
 
-	quoted_str = zend_string_init(quoted, quotedlen, 0);
-	efree(quoted);
+	quoted_str = zend_string_truncate(quoted_str, quotedlen, false);
+
 	PDO_DBG_RETURN(quoted_str);
 }
 /* }}} */
@@ -443,7 +454,6 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
 			PDO_DBG_RETURN(true);
 
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
 			if (!pdo_get_bool_param(&bval, val)) {
 				PDO_DBG_RETURN(false);
@@ -544,7 +554,6 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 
 		case PDO_ATTR_EMULATE_PREPARES:
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 			ZVAL_BOOL(return_value, H->emulate_prepare);
 			break;
 
@@ -650,7 +659,8 @@ static const struct pdo_dbh_methods mysql_methods = {
 	NULL,
 	pdo_mysql_request_shutdown,
 	pdo_mysql_in_transaction,
-	NULL /* get_gc */
+	NULL, /* get_gc */
+    pdo_mysql_scanner
 };
 /* }}} */
 
@@ -749,8 +759,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		zend_string *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 
-		H->emulate_prepare = pdo_attr_lval(driver_options,
-			PDO_MYSQL_ATTR_DIRECT_QUERY, H->emulate_prepare);
 		H->emulate_prepare = pdo_attr_lval(driver_options,
 			PDO_ATTR_EMULATE_PREPARES, H->emulate_prepare);
 

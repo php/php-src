@@ -547,22 +547,26 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 	timelib_sll tmp_nr = 0;
 	int len = 0;
 
-	str = timelib_calloc(1, max_length + 2); // for sign and \0
-	str_ptr = str;
+	/* Skip over non-numeric chars */
 
 	while (((**ptr < '0') || (**ptr > '9')) && (**ptr != '+') && (**ptr != '-')) {
 		if (**ptr == '\0') {
 			add_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Found unexpected data");
-			timelib_free(str);
 			return 0;
 		}
 		++*ptr;
 	}
+	
+	/* Allocate string to feed to strtoll(): sign + length + '\0' */
+	str = timelib_calloc(1, max_length + 2);
+	str[0] = '+'; /* First position is the sign */
+	str_ptr = str + 1;
 
-	if ((**ptr == '+') || (**ptr == '-')) {
-		*str_ptr = **ptr;
+	while ((**ptr == '+') || (**ptr == '-')) {
+		if (**ptr == '-') {
+			str[0] = str[0] == '+' ? '-' : '+';
+		}
 		++*ptr;
-		++str_ptr;
 	}
 
 	while (((**ptr < '0') || (**ptr > '9'))) {
@@ -713,7 +717,7 @@ static const timelib_relunit* timelib_lookup_relunit(const char **ptr)
 
 static void add_with_overflow(Scanner *s, timelib_sll *e, timelib_sll amount, int multiplier)
 {
-#if defined(__has_builtin) && __has_builtin(__builtin_saddll_overflow)
+#if TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW
 	if (__builtin_saddll_overflow(*e, amount * multiplier, e)) {
 		add_error(s, TIMELIB_ERR_NUMBER_OUT_OF_RANGE, "Number out of range");
 	}

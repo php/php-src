@@ -1,12 +1,12 @@
 --TEST--
-DOM\HTMLDocument serialization escape nbsp
+Dom\HTMLDocument serialization escape nbsp
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString("<p>these must transform: \xc2\xa0\xc2\xa0 but these not: \xa0|\xc2...</p><br>", LIBXML_NOERROR);
-echo $dom->saveHTML();
+$dom = Dom\HTMLDocument::createFromString("<p>these must transform: \xc2\xa0\xc2\xa0 but these not: \xa0|\xc2...</p><br>", LIBXML_NOERROR);
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

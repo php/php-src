@@ -1,5 +1,5 @@
 --TEST--
-Empty enum with from/tryFrom doens't segfault
+Empty enum with from/tryFrom doesn't segfault
 --FILE--
 <?php
 

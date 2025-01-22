@@ -18,7 +18,7 @@ var_dump(posix_errno() != 0);
 var_dump(posix_pathconf(sys_get_temp_dir(), POSIX_PC_PATH_MAX));
 ?>
 --EXPECTF--
-posix_pathconf(): Argument #1 ($path) cannot be empty
+posix_pathconf(): Argument #1 ($path) must not be empty
 bool(false)
 bool(true)
 int(%d)

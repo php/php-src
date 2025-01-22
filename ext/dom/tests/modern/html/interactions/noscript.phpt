@@ -7,29 +7,31 @@ dom
 
 echo "--- Parsing ---\n";
 
-$dom = DOM\HTMLDocument::createFromString("<!doctype html><html><body><noscript><p>hi</p></noscript></body></html>", DOM\HTML_NO_DEFAULT_NS);
+$dom = Dom\HTMLDocument::createFromString("<!doctype html><html><body><noscript><p>hi</p></noscript></body></html>", Dom\HTML_NO_DEFAULT_NS);
 var_dump($dom->documentElement->textContent);
-echo $dom->saveHTML(), "\n";
-echo $dom->saveXML();
+var_dump($dom->documentElement->namespaceURI);
+echo $dom->saveHtml(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Modifying the text content: tag ---\n";
 
-$xpath = new DOMXPath($dom);
+$xpath = new Dom\XPath($dom);
 $noscript = $xpath->query("//noscript")[0];
 $noscript->textContent = "<p>bye</p>";
-echo $dom->saveHTML(), "\n";
-echo $dom->saveXML();
+echo $dom->saveHtml(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Modifying the text content: trick ---\n";
 
 $noscript->textContent = "<!-- </noscript> -->";
-echo $dom->saveHTML(), "\n";
-echo $dom->saveXML();
+echo $dom->saveHtml(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--
 --- Parsing ---
 string(2) "hi"
+NULL
 <!DOCTYPE html><html><head></head><body><noscript><p>hi</p></noscript></body></html>
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE html>

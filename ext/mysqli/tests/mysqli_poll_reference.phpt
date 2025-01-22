@@ -42,7 +42,7 @@ if (mysqli_get_server_version($link) < 50012)
         // WARNING: All arrays point to the same object - this will give bogus results!
         // The behaviour is in line with stream_select(). Be warned, be careful.
         $links = $errors = $reject = array($mysqli1, $mysqli2);
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             continue;
         }
 
@@ -73,7 +73,7 @@ if (mysqli_get_server_version($link) < 50012)
         // WARNING: All arrays point to the same object - this will give bogus results!
         $links = $errors = array($mysqli1, $mysqli2);
         $reject = array($mysqli1, $mysqli2);
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             continue;
         }
         foreach ($links as $link) {
@@ -103,7 +103,7 @@ if (mysqli_get_server_version($link) < 50012)
         // WARNING: All arrays point to the same object - this will give bogus results!
         $links = array($mysqli1, $mysqli2);
         $errors = $reject = array($mysqli1, $mysqli2);
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             continue;
         }
         foreach ($links as $link) {
@@ -133,7 +133,7 @@ if (mysqli_get_server_version($link) < 50012)
             break;
         }
         $links = $errors = $reject = array($mysqli1, $mysqli2);
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             continue;
         }
         // WARNING: Due to the reference issue none of these should ever fire!
@@ -176,7 +176,7 @@ if (mysqli_get_server_version($link) < 50012)
         }
         $links = $errors = $reject = $all;
         ob_start();
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             $tmp = ob_get_contents();
             ob_end_clean();
             if ($tmp != '') {
@@ -193,7 +193,7 @@ if (mysqli_get_server_version($link) < 50012)
         }
     } while ($processed < 2);
 
-    $ready = mysqli_poll($links, $errors, $reject, 0, 50000);
+    mysqli_poll($links, $errors, $reject, 0, 50000);
     mysqli_close($mysqli1);
     mysqli_close($mysqli2);
 

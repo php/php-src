@@ -36,6 +36,8 @@ foreach ($fields as $field) {
     } else {
       $fo = new SplFileObject($file, $file_modes[$mode_counter]);
     }
+    $fo->setCsvControl(escape: '\\');
+
     $csv_field = $field;
 
     // write to a file in csv format

@@ -2,7 +2,7 @@
 Bug #54367 (Use of closure causes problem in ArrayAccess)
 --FILE--
 <?php
-class MyObjet implements ArrayAccess
+class MyObject implements ArrayAccess
 {
     public function offsetSet($offset, $value): void { }
     public function offsetExists($offset): bool {  }
@@ -16,7 +16,7 @@ class MyObjet implements ArrayAccess
     }
 }
 
-$a = new MyObjet();
+$a = new MyObject();
 echo $a['p']('foo');
 ?>
 --EXPECT--

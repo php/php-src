@@ -183,8 +183,9 @@ typedef struct st_mysqlnd_charset
 	unsigned int	char_minlen;
 	unsigned int	char_maxlen;
 	const char		*comment;
-	unsigned int 	(*mb_charlen)(const unsigned int c);
-	unsigned int 	(*mb_valid)(const char * const start, const char * const end);
+	short			mb_charlen;
+	short			mb_valid;
+	unsigned int    lowest_mb_byte;
 } MYSQLND_CHARSET;
 
 
@@ -1266,7 +1267,6 @@ struct st_mysqlnd_stmt_data
 	MYSQLND_ERROR_INFO			error_info_impl;
 
 	bool					update_max_length;
-	zend_ulong					prefetch_rows;
 
 	bool					cursor_exists;
 	mysqlnd_stmt_use_or_store_func default_rset_handler;

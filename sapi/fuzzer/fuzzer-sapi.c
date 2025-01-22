@@ -30,7 +30,7 @@
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
 
-const char HARDCODED_INI[] =
+static const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"implicit_flush=1\n"
 	"output_buffering=0\n"

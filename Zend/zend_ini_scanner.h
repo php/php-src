@@ -20,6 +20,10 @@
 #ifndef _ZEND_INI_SCANNER_H
 #define _ZEND_INI_SCANNER_H
 
+#include "zend_types.h"
+
+typedef struct _zend_file_handle zend_file_handle;
+
 /* Scanner modes */
 #define ZEND_INI_SCANNER_NORMAL 0 /* Normal mode. [DEFAULT] */
 #define ZEND_INI_SCANNER_RAW    1 /* Raw mode. Option values are not parsed */

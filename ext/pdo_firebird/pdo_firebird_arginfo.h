@@ -1,20 +1,22 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 037c073de9e3e3593c62cb7da8ee7202c38c2723 */
+ * Stub hash: d36b2055abc48ae91c3442dda68fa2a28eb6d25b */
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Firebird_getApiVersion, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
+ZEND_METHOD(Pdo_Firebird, getApiVersion);
 
-
-static const zend_function_entry class_PdoFirebird_methods[] = {
+static const zend_function_entry class_Pdo_Firebird_methods[] = {
+	ZEND_ME(Pdo_Firebird, getApiVersion, arginfo_class_Pdo_Firebird_getApiVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_PdoFirebird(zend_class_entry *class_entry_PDO)
+static zend_class_entry *register_class_Pdo_Firebird(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PdoFirebird", class_PdoFirebird_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Firebird", class_Pdo_Firebird_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_DATE_FORMAT_value;
 	ZVAL_LONG(&const_ATTR_DATE_FORMAT_value, PDO_FB_ATTR_DATE_FORMAT);

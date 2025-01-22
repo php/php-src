@@ -1,5 +1,5 @@
 --TEST--
-filter_var() and doubles with thousend separators
+filter_var() and doubles with thousand separators
 --EXTENSIONS--
 filter
 --FILE--

@@ -14,7 +14,7 @@
 
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <php.h>
@@ -27,8 +27,6 @@
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
 #include <unicode/usearch.h>
-
-#include "ext/standard/php_string.h"
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
@@ -168,7 +166,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			if(char_pos < offset_pos) {
 				/* last one is beyond our start offset */
 				char_pos = USEARCH_DONE;
-			}			
+			}
 		} else {
 			/* searching backwards is broken, so we search forwards, albeit it's less efficient */
 			int32_t prev_pos = USEARCH_DONE;

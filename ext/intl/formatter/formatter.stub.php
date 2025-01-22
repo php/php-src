@@ -27,10 +27,8 @@ class NumberFormatter
     public const int PATTERN_RULEBASED = UNKNOWN;
     /** @cvalue UNUM_IGNORE */
     public const int IGNORE = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 53
     /** @cvalue UNUM_CURRENCY_ACCOUNTING */
     public const int CURRENCY_ACCOUNTING = UNKNOWN;
-#endif
     /** @cvalue UNUM_DEFAULT */
     public const int DEFAULT_STYLE = UNKNOWN;
 
@@ -180,9 +178,9 @@ class NumberFormatter
     /** @cvalue FORMAT_TYPE_DOUBLE */
     public const int TYPE_DOUBLE = UNKNOWN;
     /**
-     * @deprecated
      * @cvalue FORMAT_TYPE_CURRENCY
      */
+    #[\Deprecated(since: '8.3')]
     public const int TYPE_CURRENCY = UNKNOWN;
 
     public function __construct(string $locale, int $style, ?string $pattern = null) {}

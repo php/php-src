@@ -1,5 +1,5 @@
 --TEST--
-Cannot declare class, because the name is already in use
+Cannot redeclare class
 --FILE--
 <?php
 
@@ -11,4 +11,4 @@ test();
 
 ?>
 --EXPECTF--
-Fatal error: Cannot declare class A, because the name is already in use in %s on line %d
+Fatal error: Cannot redeclare class A (previously declared in %s:%d) in %s on line %d

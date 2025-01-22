@@ -43,25 +43,25 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
   }
 
   - Constants [19] {
-    Constant [ int PREG_PATTERN_ORDER ] { 1 }
-    Constant [ int PREG_SET_ORDER ] { 2 }
-    Constant [ int PREG_OFFSET_CAPTURE ] { 256 }
-    Constant [ int PREG_UNMATCHED_AS_NULL ] { 512 }
-    Constant [ int PREG_SPLIT_NO_EMPTY ] { 1 }
-    Constant [ int PREG_SPLIT_DELIM_CAPTURE ] { 2 }
-    Constant [ int PREG_SPLIT_OFFSET_CAPTURE ] { 4 }
-    Constant [ int PREG_GREP_INVERT ] { 1 }
-    Constant [ int PREG_NO_ERROR ] { 0 }
-    Constant [ int PREG_INTERNAL_ERROR ] { 1 }
-    Constant [ int PREG_BACKTRACK_LIMIT_ERROR ] { 2 }
-    Constant [ int PREG_RECURSION_LIMIT_ERROR ] { 3 }
-    Constant [ int PREG_BAD_UTF8_ERROR ] { 4 }
-    Constant [ int PREG_BAD_UTF8_OFFSET_ERROR ] { 5 }
-    Constant [ int PREG_JIT_STACKLIMIT_ERROR ] { 6 }
-    Constant [ string PCRE_VERSION ] { %s }
-    Constant [ int PCRE_VERSION_MAJOR ] { %d }
-    Constant [ int PCRE_VERSION_MINOR ] { %d }
-    Constant [ bool PCRE_JIT_SUPPORT ] { %d }
+    Constant [ <persistent> int PREG_PATTERN_ORDER ] { 1 }
+    Constant [ <persistent> int PREG_SET_ORDER ] { 2 }
+    Constant [ <persistent> int PREG_OFFSET_CAPTURE ] { 256 }
+    Constant [ <persistent> int PREG_UNMATCHED_AS_NULL ] { 512 }
+    Constant [ <persistent> int PREG_SPLIT_NO_EMPTY ] { 1 }
+    Constant [ <persistent> int PREG_SPLIT_DELIM_CAPTURE ] { 2 }
+    Constant [ <persistent> int PREG_SPLIT_OFFSET_CAPTURE ] { 4 }
+    Constant [ <persistent> int PREG_GREP_INVERT ] { 1 }
+    Constant [ <persistent> int PREG_NO_ERROR ] { 0 }
+    Constant [ <persistent> int PREG_INTERNAL_ERROR ] { 1 }
+    Constant [ <persistent> int PREG_BACKTRACK_LIMIT_ERROR ] { 2 }
+    Constant [ <persistent> int PREG_RECURSION_LIMIT_ERROR ] { 3 }
+    Constant [ <persistent> int PREG_BAD_UTF8_ERROR ] { 4 }
+    Constant [ <persistent> int PREG_BAD_UTF8_OFFSET_ERROR ] { 5 }
+    Constant [ <persistent> int PREG_JIT_STACKLIMIT_ERROR ] { 6 }
+    Constant [ <persistent> string PCRE_VERSION ] { %s }
+    Constant [ <persistent> int PCRE_VERSION_MAJOR ] { %d }
+    Constant [ <persistent> int PCRE_VERSION_MINOR ] { %d }
+    Constant [ <persistent> bool PCRE_JIT_SUPPORT ] { %d }
   }
 
   - Functions {

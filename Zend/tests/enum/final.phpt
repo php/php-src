@@ -5,8 +5,9 @@ Enum is final
 
 enum Foo {}
 
-class Bar extends Foo {}
+$final = new ReflectionClass(Foo::class)->isFinal();
+var_dump($final);
 
 ?>
---EXPECTF--
-Fatal error: Class Bar cannot extend final class Foo in %s on line %d
+--EXPECT--
+bool(true)

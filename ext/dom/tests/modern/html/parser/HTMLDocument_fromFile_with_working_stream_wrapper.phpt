@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument::createFromFile() with working stream wrapper
+Dom\HTMLDocument::createFromFile() with working stream wrapper
 --EXTENSIONS--
 dom
 --FILE--
@@ -34,15 +34,15 @@ stream_wrapper_register("euw", EchoUriWrapper::class, 0);
 
 echo "--- Stream wrapper case ---\n";
 
-$dom = DOM\HTMLDocument::createFromFile("euw://<p>hello</p>");
-echo $dom->saveHTML(), "\n";
+$dom = Dom\HTMLDocument::createFromFile("euw://<p>hello</p>");
+echo $dom->saveHtml(), "\n";
 
 echo "--- Stream wrapper in two chunks case ---\n";
 
 libxml_use_internal_errors(true);
 // To properly test this, keep the 4096 in sync with document.c's input stream buffer size.
-$dom = DOM\HTMLDocument::createFromFile("euw://<!doctype html><html>" . str_repeat("\n", 4096-22) . "<></html>");
-echo $dom->saveHTML(), "\n";
+$dom = Dom\HTMLDocument::createFromFile("euw://<!doctype html><html>" . str_repeat("\n", 4096-22) . "<></html>");
+echo $dom->saveHtml(), "\n";
 
 foreach (libxml_get_errors() as $error) {
     var_dump($error->line, $error->column);
@@ -52,7 +52,7 @@ foreach (libxml_get_errors() as $error) {
 --EXPECTF--
 --- Stream wrapper case ---
 
-Warning: DOM\HTMLDocument::createFromFile(): tree error unexpected-token-in-initial-mode in euw://<p>hello</p>, line: 1, column: 2 in %s on line %d
+Warning: Dom\HTMLDocument::createFromFile(): tree error unexpected-token-in-initial-mode in euw://<p>hello</p>, line: 1, column: 2 in %s on line %d
 <html><head></head><body><p>hello</p></body></html>
 --- Stream wrapper in two chunks case ---
 <!DOCTYPE html><html><head></head><body>&lt;&gt;</body></html>

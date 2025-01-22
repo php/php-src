@@ -309,7 +309,6 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[050] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    $types = 'i';
     $id = 1;
     $params = array(
         0 => $stmt,

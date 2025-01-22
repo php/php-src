@@ -115,7 +115,7 @@ typedef void (*zend_frameless_function_3)(zval *return_value, zval *op1, zval *o
 extern size_t zend_flf_count;
 extern size_t zend_flf_capacity;
 ZEND_API extern void **zend_flf_handlers;
-extern zend_function **zend_flf_functions;
+ZEND_API extern zend_function **zend_flf_functions;
 
 typedef struct {
 	void *handler;

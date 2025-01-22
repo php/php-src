@@ -31,6 +31,7 @@
 #include "zend_inheritance.h"
 #include "zend_ini.h"
 #include "zend_enum.h"
+#include "zend_object_handlers.h"
 #include "zend_observer.h"
 
 #include <stdarg.h>
@@ -41,6 +42,7 @@ ZEND_API HashTable module_registry;
 static zend_module_entry **module_request_startup_handlers;
 static zend_module_entry **module_request_shutdown_handlers;
 static zend_module_entry **module_post_deactivate_handlers;
+static zend_module_entry **modules_dl_loaded;
 
 static zend_class_entry  **class_cleanup_handlers;
 
@@ -436,6 +438,31 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	va_end(va);
 }
 /* }}} */
+
+ZEND_API ZEND_COLD void zend_argument_must_not_be_empty_error(uint32_t arg_num)
+{
+	zend_argument_value_error(arg_num, "must not be empty");
+}
+
+ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, zend_class_entry *old_ce)
+{
+	if (old_ce->type == ZEND_INTERNAL_CLASS) {
+		zend_error(type, "Cannot redeclare %s %s",
+			zend_get_object_type(old_ce),
+			ZSTR_VAL(new_name));
+	} else {
+		zend_error(type, "Cannot redeclare %s %s (previously declared in %s:%d)",
+			zend_get_object_type(old_ce),
+			ZSTR_VAL(new_name),
+			ZSTR_VAL(old_ce->info.user.filename),
+			old_ce->info.user.line_start);
+	}
+}
+
+ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, zend_class_entry *old_ce)
+{
+	zend_class_redeclaration_error_ex(type, old_ce->name, old_ce);
+}
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null) /* {{{ */
 {
@@ -1675,7 +1702,7 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
 				zval *slot = OBJ_PROP(object, property_info->offset);
 
-				if (UNEXPECTED(ZEND_TYPE_IS_SET(property_info->type))) {
+				if (ZEND_TYPE_IS_SET(property_info->type)) {
 					zval tmp;
 
 					ZVAL_COPY_VALUE(&tmp, prop);
@@ -1743,10 +1770,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 						ZSTR_VAL(object->ce->name), property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
 				}
 
-				if (!object->properties) {
-					rebuild_object_properties(object);
-				}
-				prop = zend_hash_update(object->properties, key, prop);
+				prop = zend_hash_update(zend_std_get_properties_ex(object), key, prop);
 				zval_add_ref(prop);
 			}
 		} else {
@@ -1758,10 +1782,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 					ZSTR_VAL(object->ce->name), h);
 			}
 
-			if (!object->properties) {
-				rebuild_object_properties(object);
-			}
-			prop = zend_hash_index_update(object->properties, h, prop);
+			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1774,7 +1795,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
  * calling zend_merge_properties(). */
 static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties) /* {{{ */
 {
-	if (UNEXPECTED(class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_ENUM))) {
+	if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
 		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
 		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
@@ -1782,6 +1803,7 @@ static zend_always_inline zend_result _object_and_properties_init(zval *arg, zen
 		} else if (class_type->ce_flags & ZEND_ACC_ENUM) {
 			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(class_type->name));
 		} else {
+			ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
 			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
 		}
 		ZVAL_NULL(arg);
@@ -1822,6 +1844,73 @@ ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *cla
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* {{{ */
 {
 	return _object_and_properties_init(arg, class_type, NULL);
+}
+/* }}} */
+
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
+{
+	zend_result status = _object_and_properties_init(arg, class_type, NULL);
+	if (UNEXPECTED(status == FAILURE)) {
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	}
+	zend_object *obj = Z_OBJ_P(arg);
+	zend_function *constructor = obj->handlers->get_constructor(obj);
+	if (constructor == NULL) {
+		/* The constructor can be NULL for 2 different reasons:
+		 * - It is not defined
+		 * - We are not allowed to call the constructor (e.g. private, or internal opaque class)
+		 *   and an exception has been thrown
+		 * in the former case, we are (mostly) done and the object is initialized,
+		 * in the latter we need to destroy the object as initialization failed
+		 */
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(arg);
+			ZVAL_UNDEF(arg);
+			return FAILURE;
+		}
+
+		/* Surprisingly, this is the only case where internal classes will allow to pass extra arguments
+		 * However, if there are named arguments (and it is not empty),
+		 * an Error must be thrown to be consistent with new ClassName() */
+		if (UNEXPECTED(named_params != NULL && zend_hash_num_elements(named_params) != 0)) {
+			/* Throw standard Error */
+			zend_string *arg_name = NULL;
+			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
+			ZEND_ASSERT(arg_name != NULL);
+			zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
+			/* Do not call destructor, free object, and set arg to IS_UNDEF */
+			zend_object_store_ctor_failed(obj);
+			zval_ptr_dtor(arg);
+			ZVAL_UNDEF(arg);
+			return FAILURE;
+		} else {
+			return SUCCESS;
+		}
+	}
+	/* A constructor should not return a value, however if an exception is thrown
+	 * zend_call_known_function() will set the retval to IS_UNDEF */
+	zval retval;
+	zend_call_known_function(
+		constructor,
+		obj,
+		class_type,
+		&retval,
+		param_count,
+		params,
+		named_params
+	);
+	if (Z_TYPE(retval) == IS_UNDEF) {
+		/* Do not call destructor, free object, and set arg to IS_UNDEF */
+		zend_object_store_ctor_failed(obj);
+		zval_ptr_dtor(arg);
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	} else {
+		/* Unlikely, but user constructors may return any value they want */
+		zval_ptr_dtor(&retval);
+		return SUCCESS;
+	}
 }
 /* }}} */
 
@@ -2398,6 +2487,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	int startup_count = 0;
 	int shutdown_count = 0;
 	int post_deactivate_count = 0;
+	int dl_loaded_count = 0;
 	zend_class_entry *ce;
 	int class_count = 0;
 
@@ -2412,6 +2502,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		if (module->post_deactivate_func) {
 			post_deactivate_count++;
 		}
+		if (module->handle) {
+			dl_loaded_count++;
+		}
 	} ZEND_HASH_FOREACH_END();
 	module_request_startup_handlers = (zend_module_entry**)realloc(
 		module_request_startup_handlers,
@@ -2424,6 +2517,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	module_request_shutdown_handlers[shutdown_count] = NULL;
 	module_post_deactivate_handlers = module_request_shutdown_handlers + shutdown_count + 1;
 	module_post_deactivate_handlers[post_deactivate_count] = NULL;
+	/* Cannot reuse module_request_startup_handlers because it is freed in zend_destroy_modules, which happens before zend_unload_modules. */
+	modules_dl_loaded = realloc(modules_dl_loaded, sizeof(zend_module_entry*) * (dl_loaded_count + 1));
+	modules_dl_loaded[dl_loaded_count] = NULL;
 	startup_count = 0;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
@@ -2435,6 +2531,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		}
 		if (module->post_deactivate_func) {
 			module_post_deactivate_handlers[--post_deactivate_count] = module;
+		}
+		if (module->handle) {
+			modules_dl_loaded[--dl_loaded_count] = module;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2657,8 +2756,8 @@ static void zend_check_magic_method_no_return_type(
 
 ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type) /* {{{ */
 {
-	if (ZSTR_VAL(fptr->common.function_name)[0] != '_'
-	 || ZSTR_VAL(fptr->common.function_name)[1] != '_') {
+	if (ZSTR_VAL(lcname)[0] != '_'
+	 || ZSTR_VAL(lcname)[1] != '_') {
 		return;
 	}
 
@@ -2842,21 +2941,34 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
 	internal_function->module = EG(current_module);
-	internal_function->T = 0;
+	if (EG(active) && ZEND_OBSERVER_ENABLED) {
+		/* Add an observer temporary to store previous observed frames. This is
+		 * normally handled by zend_observer_post_startup(), except for
+		 * functions registered at runtime (EG(active)). */
+		internal_function->T = 1;
+	} else {
+		internal_function->T = 0;
+	}
 	memset(internal_function->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
 	while (ptr->fname) {
 		fname_len = strlen(ptr->fname);
 		internal_function->handler = ptr->handler;
+		internal_function->doc_comment = ptr->doc_comment ? zend_string_init_interned(ptr->doc_comment, strlen(ptr->doc_comment), 1) : NULL;
 		internal_function->function_name = zend_string_init_interned(ptr->fname, fname_len, 1);
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
+		internal_function->prop_info = NULL;
 		internal_function->attributes = NULL;
 		internal_function->frameless_function_infos = ptr->frameless_function_infos;
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
 			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 		} else {
-			ZEND_MAP_PTR_NEW(internal_function->run_time_cache);
+#ifdef ZTS
+			ZEND_MAP_PTR_NEW_STATIC(internal_function->run_time_cache);
+#else
+			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, NULL);
+#endif
 		}
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
@@ -3238,17 +3350,22 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		clean_module_functions(module);
 	}
 
-#if HAVE_LIBDL
-	if (module->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
-		DL_UNLOAD(module->handle);
-	}
-#endif
-
 #if ZEND_RC_DEBUG
 	zend_rc_debug = orig_rc_debug;
 #endif
 }
 /* }}} */
+
+void module_registry_unload(const zend_module_entry *module)
+{
+#ifdef HAVE_LIBDL
+	if (!getenv("ZEND_DONT_UNLOAD_MODULES")) {
+		DL_UNLOAD(module->handle);
+	}
+#else
+	ZEND_IGNORE_VALUE(module);
+#endif
+}
 
 ZEND_API void zend_activate_modules(void) /* {{{ */
 {
@@ -3294,6 +3411,18 @@ ZEND_API void zend_deactivate_modules(void) /* {{{ */
 }
 /* }}} */
 
+void zend_unload_modules(void) /* {{{ */
+{
+	zend_module_entry **modules = modules_dl_loaded;
+	while (*modules) {
+		module_registry_unload(*modules);
+		modules++;
+	}
+	free(modules_dl_loaded);
+	modules_dl_loaded = NULL;
+}
+/* }}} */
+
 ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
@@ -3312,6 +3441,9 @@ ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 				break;
 			}
 			module_destructor(module);
+			if (module->handle) {
+				module_registry_unload(module);
+			}
 			zend_string_release_ex(key, 0);
 		} ZEND_HASH_MAP_FOREACH_END_DEL();
 	} else {
@@ -3372,9 +3504,16 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
  */
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce) /* {{{ */
 {
-	zend_class_entry *register_class;
+	return zend_register_internal_class_with_flags(class_entry, parent_ce, 0);
+}
+/* }}} */
 
-	register_class = zend_register_internal_class(class_entry);
+ZEND_API zend_class_entry *zend_register_internal_class_with_flags(
+	zend_class_entry *class_entry,
+	zend_class_entry *parent_ce,
+	uint32_t ce_flags
+) {
+	zend_class_entry *register_class = do_register_internal_class(class_entry, ce_flags);
 
 	if (parent_ce) {
 		zend_do_inheritance(register_class, parent_ce);
@@ -3383,7 +3522,6 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 
 	return register_class;
 }
-/* }}} */
 
 ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...) /* {{{ */
 {
@@ -3439,7 +3577,7 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		zend_str_tolower_copy(ZSTR_VAL(lcname), name, name_len);
 	}
 
-	zend_assert_valid_class_name(lcname);
+	zend_assert_valid_class_name(lcname, "a class alias");
 
 	lcname = zend_new_interned_string(lcname);
 
@@ -3489,6 +3627,13 @@ ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t
 
 static void zend_disable_function(const char *function_name, size_t function_name_length)
 {
+	if (UNEXPECTED(
+		(function_name_length == strlen("exit") && !memcmp(function_name, "exit", strlen("exit")))
+		|| (function_name_length == strlen("die") && !memcmp(function_name, "die", strlen("die")))
+	)) {
+		zend_error(E_WARNING, "Cannot disable function %s()", function_name);
+		return;
+	}
 	zend_hash_str_del(CG(function_table), function_name, function_name_length);
 }
 
@@ -4389,6 +4534,43 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
 		access_type |= ZEND_ACC_PUBLIC;
 	}
+	/* Add the protected(set) bit for public readonly properties with no set visibility. */
+	if ((access_type & (ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK)) == (ZEND_ACC_PUBLIC|ZEND_ACC_READONLY)) {
+		access_type |= ZEND_ACC_PROTECTED_SET;
+	} else if (UNEXPECTED(access_type & ZEND_ACC_PPP_SET_MASK)) {
+		if (!ZEND_TYPE_IS_SET(type)) {
+			zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
+				"Property with asymmetric visibility %s::$%s must have type",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+		uint32_t get_visibility = zend_visibility_to_set_visibility(access_type & ZEND_ACC_PPP_MASK);
+		uint32_t set_visibility = access_type & ZEND_ACC_PPP_SET_MASK;
+		if (get_visibility > set_visibility) {
+			zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
+				"Visibility of property %s::$%s must not be weaker than set visibility",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+		/* Remove equivalent set visibility. */
+		if (((access_type & (ZEND_ACC_PUBLIC|ZEND_ACC_PUBLIC_SET)) == (ZEND_ACC_PUBLIC|ZEND_ACC_PUBLIC_SET))
+		 || ((access_type & (ZEND_ACC_PROTECTED|ZEND_ACC_PROTECTED_SET)) == (ZEND_ACC_PROTECTED|ZEND_ACC_PROTECTED_SET))
+		 || ((access_type & (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET)) == (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET))) {
+			access_type &= ~ZEND_ACC_PPP_SET_MASK;
+		}
+		/* private(set) properties are implicitly final. */
+		if (access_type & ZEND_ACC_PRIVATE_SET) {
+			access_type |= ZEND_ACC_FINAL;
+		}
+	}
+
+	/* Virtual properties have no backing storage, the offset should never be used. However, the
+	 * virtual flag cannot be definitively determined at compile time. Allow using default values
+	 * anyway, and assert after inheritance that the property is not actually virtual. */
+	if (access_type & ZEND_ACC_VIRTUAL) {
+		if (Z_TYPE_P(property) == IS_UNDEF) {
+			property_info->offset = (uint32_t)-1;
+			goto skip_property_storage;
+		}
+	}
 	if (access_type & ZEND_ACC_STATIC) {
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
 			ZEND_ASSERT(property_info_ptr->flags & ZEND_ACC_STATIC);
@@ -4438,6 +4620,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		ZVAL_COPY_VALUE(property_default_ptr, property);
 		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 	}
+skip_property_storage:
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		/* Must be interned to avoid ZTS data races */
 		if (is_persistent_class(ce)) {
@@ -4462,6 +4645,8 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	property_info->flags = access_type;
 	property_info->doc_comment = doc_comment;
 	property_info->attributes = NULL;
+	property_info->prototype = property_info;
+	property_info->hooks = NULL;
 	property_info->ce = ce;
 	property_info->type = type;
 

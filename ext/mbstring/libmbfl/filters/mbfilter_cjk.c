@@ -1923,9 +1923,9 @@ retry:
 
 	/* check for major japanese chars: U+4E00 - U+9FFF */
 	if (s1 <= 0) {
-		for (k = 0; k < uni2jis_tbl_len; k++) {
-			if (c >= uni2jis_tbl_range[k][0] && c <= uni2jis_tbl_range[k][1]) {
-				s1 = uni2jis_tbl[k][c-uni2jis_tbl_range[k][0]];
+		for (size_t offset = 0; offset < uni2jis_tbl_len; offset++) {
+			if (c >= uni2jis_tbl_range[offset][0] && c <= uni2jis_tbl_range[offset][1]) {
+				s1 = uni2jis_tbl[offset][c-uni2jis_tbl_range[offset][0]];
 				break;
 			}
 		}
@@ -10687,7 +10687,6 @@ const mbfl_encoding mbfl_encoding_uhc = {
 
 static int mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 {
-	int k;
 	int c1, c2, c3, w = -1;
 
 	switch (filter->status) {
@@ -10728,13 +10727,14 @@ static int mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 
 		c2 = (c1 << 8) | c;
 
-		if (w <= 0 &&
-			((c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
-			 (c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
-			 (c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844)))) {
-			for (k = 0; k < mbfl_gb18030_pua_tbl_max; k++) {
-				if (c2 >= mbfl_gb18030_pua_tbl[k][2] && c2 <= mbfl_gb18030_pua_tbl[k][2] + mbfl_gb18030_pua_tbl[k][1] - mbfl_gb18030_pua_tbl[k][0]) {
-					w = c2 - mbfl_gb18030_pua_tbl[k][2] + mbfl_gb18030_pua_tbl[k][0];
+		if (w <= 0 && (
+			(c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
+			(c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
+			(c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844))
+		)) {
+			for (size_t offset = 0; offset < mbfl_gb18030_pua_tbl_max; offset++) {
+				if (c2 >= mbfl_gb18030_pua_tbl[offset][2] && c2 <= mbfl_gb18030_pua_tbl[offset][2] + mbfl_gb18030_pua_tbl[offset][1] - mbfl_gb18030_pua_tbl[offset][0]) {
+					w = c2 - mbfl_gb18030_pua_tbl[offset][2] + mbfl_gb18030_pua_tbl[offset][0];
 					CK((*filter->output_function)(w, filter->data));
 					break;
 				}
@@ -10783,7 +10783,7 @@ static int mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 			} else { /* Unicode BMP */
 				w = (((c1 - 0x81)*10 + (c2 - 0x30))*126 + (c3 - 0x81))*10 + (c - 0x30);
 				if (w >= 0 && w <= 39419) {
-					k = mbfl_bisec_srch(w, mbfl_gb2uni_tbl, mbfl_gb_uni_max);
+					int k = mbfl_bisec_srch(w, mbfl_gb2uni_tbl, mbfl_gb_uni_max);
 					w += mbfl_gb_uni_ofst[k];
 				} else {
 					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
@@ -11219,7 +11219,6 @@ static void mb_wchar_to_gb18030(uint32_t *in, size_t len, mb_convert_buf *buf, b
 
 static int mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter)
 {
-	int k;
 	int c1, c2, w = -1;
 
 	switch (filter->status) {
@@ -11253,10 +11252,12 @@ static int mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter)
 
 		c2 = (c1 << 8) | c;
 
-		if (w <= 0 &&
-			((c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
-			 (c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
-			 (c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844)))) {
+		if (w <= 0 && (
+			(c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
+			(c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
+			(c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844))
+		)) {
+			size_t k;
 			for (k = 0; k < mbfl_cp936_pua_tbl_max; k++) {
 				if (c2 >= mbfl_cp936_pua_tbl[k][2] &&
 					c2 <= mbfl_cp936_pua_tbl[k][2] +
@@ -12026,7 +12027,7 @@ static inline int is_in_cp950_pua(int c1, int c)
 
 static int mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 {
-	int k, c1, w;
+	int c1, w;
 
 	switch (filter->status) {
 	case 0:
@@ -12063,6 +12064,7 @@ static int mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 				if (is_in_cp950_pua(c1, c)) {
 					int c2 = (c1 << 8) | c;
 
+					size_t k;
 					for (k = 0; k < sizeof(cp950_pua_tbl) / (sizeof(unsigned short)*4); k++) {
 						if (c2 >= cp950_pua_tbl[k][2] && c2 <= cp950_pua_tbl[k][3]) {
 							break;
@@ -12147,7 +12149,7 @@ static int mbfl_filt_conv_big5_wchar_flush(mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 {
-	int k, s = 0;
+	int s = 0;
 
 	if (c >= ucs_a1_big5_table_min && c < ucs_a1_big5_table_max) {
 		s = ucs_a1_big5_table[c - ucs_a1_big5_table_min];
@@ -12165,6 +12167,7 @@ static int mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 
 	if (filter->to->no_encoding == mbfl_no_encoding_cp950) {
 		if (c >= 0xe000 && c <= 0xf848) { /* PUA for CP950 */
+			size_t k;
 			for (k = 0; k < sizeof(cp950_pua_tbl) / (sizeof(unsigned short)*4); k++) {
 				if (c <= cp950_pua_tbl[k][1]) {
 					break;
@@ -12373,7 +12376,7 @@ static size_t mb_cp950_to_wchar(unsigned char **in, size_t *in_len, uint32_t *bu
 				if (is_in_cp950_pua(c, c2)) {
 					unsigned int s = (c << 8) | c2;
 
-					int k;
+					size_t k;
 					for (k = 0; k < sizeof(cp950_pua_tbl) / (sizeof(unsigned short)*4); k++) {
 						if (s >= cp950_pua_tbl[k][2] && s <= cp950_pua_tbl[k][3]) {
 							break;
@@ -12466,7 +12469,7 @@ static void mb_wchar_to_cp950(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 		}
 
 		if (w >= 0xE000 && w <= 0xF848) {
-			int k;
+			size_t k;
 			for (k = 0; k < sizeof(cp950_pua_tbl) / (sizeof(unsigned short)*4); k++) {
 				if (w <= cp950_pua_tbl[k][1]) {
 					break;

@@ -2,11 +2,13 @@
 
 /** @generate-class-entries */
 
+namespace Pdo;
+
 /**
  * @strict-properties
  * @not-serializable
  */
-class PdoSqlite extends PDO
+class Sqlite extends \PDO
 {
 #ifdef SQLITE_DETERMINISTIC
     /** @cvalue SQLITE_DETERMINISTIC */
@@ -49,9 +51,6 @@ class PdoSqlite extends PDO
         int $flags = 0
     ): bool {}
 
-// PDO_SQLITE_OMIT_LOAD_EXTENSION might be defined by ext/pdo_sqlite/config.m4
-// if Sqlite3 did not have the sqlite3_load_extension function present
-// which can depend on how SQLite was compiled: https://www.sqlite.org/compile.html
 #ifndef PDO_SQLITE_OMIT_LOAD_EXTENSION
     public function loadExtension(string $name): void {}
 #endif
@@ -62,6 +61,6 @@ class PdoSqlite extends PDO
         string $column,
         int $rowid,
         ?string $dbname = "main",
-        int $flags = PdoSqlite::OPEN_READONLY
+        int $flags = \Pdo\Sqlite::OPEN_READONLY
     ) {}
 }

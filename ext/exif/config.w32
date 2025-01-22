@@ -2,12 +2,8 @@
 
 ARG_ENABLE('exif', 'Exchangeable image information (EXIF) Support', 'no');
 
-if(PHP_EXIF != 'no')
-{
-	if(ADD_EXTENSION_DEP('exif', 'mbstring'))
-	{
-		AC_DEFINE('HAVE_EXIF', 1, 'Have EXIF Support');
-
-		EXTENSION('exif', 'exif.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
-	}
+if(PHP_EXIF != 'no') {
+	AC_DEFINE('HAVE_EXIF', 1, "Define to 1 if the PHP extension 'exif' is available.");
+	EXTENSION('exif', 'exif.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	ADD_EXTENSION_DEP('exif', 'mbstring', true);
 }

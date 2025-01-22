@@ -25,8 +25,8 @@ Class [ <user> readonly class Foo ] {
   }
 
   - Properties [2] {
-    Property [ public readonly int $bar ]
-    Property [ public readonly int $baz ]
+    Property [ public protected(set) readonly int $bar ]
+    Property [ public protected(set) readonly int $baz ]
   }
 
   - Methods [0] {

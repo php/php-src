@@ -42,7 +42,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(1) "0"
-Division by zero
+gmp_divexact(): Argument #2 ($num2) Division by zero
 string(2) "10"
 string(3) "512"
 string(19) "5000000000000000000"

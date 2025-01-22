@@ -30,9 +30,7 @@ U_CFUNC PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 

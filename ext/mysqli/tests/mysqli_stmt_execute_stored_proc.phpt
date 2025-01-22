@@ -63,43 +63,39 @@ if (mysqli_get_server_version($link) <= 50000) {
     }
 
 
-    if (function_exists('mysqli_stmt_get_result')) {
+    if (!mysqli_query($link, 'DROP PROCEDURE IF EXISTS p'))
+        printf("[019] [%d] %s.\n", mysqli_errno($link), mysqli_error($link));
 
-        if (!mysqli_query($link, 'DROP PROCEDURE IF EXISTS p'))
-            printf("[019] [%d] %s.\n", mysqli_errno($link), mysqli_error($link));
+    if (mysqli_real_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(25)) BEGIN SELECT VERSION() INTO ver_param; END;')) {
+        // no result set, one output parameter
+        if (!$stmt = mysqli_prepare($link, 'CALL p(@version)'))
+            printf("[020] Cannot prepare CALL, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-        if (mysqli_real_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(25)) BEGIN SELECT VERSION() INTO ver_param; END;')) {
-            // no result set, one output parameter
-            if (!$stmt = mysqli_prepare($link, 'CALL p(@version)'))
-                printf("[020] Cannot prepare CALL, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+        if (!mysqli_stmt_execute($stmt))
+            printf("[021] Cannot execute CALL, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-            if (!mysqli_stmt_execute($stmt))
-                printf("[021] Cannot execute CALL, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        if (!mysqli_stmt_close($stmt))
+            printf("[022] Cannot close statement, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-            if (!mysqli_stmt_close($stmt))
-                printf("[022] Cannot close statement, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        if (!$stmt = mysqli_prepare($link, 'SELECT @version AS _version'))
+            printf("[023] Cannot prepare SELECT, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-            if (!$stmt = mysqli_prepare($link, 'SELECT @version AS _version'))
-                printf("[023] Cannot prepare SELECT, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+        if (!mysqli_stmt_execute($stmt))
+            printf("[024] Cannot execute SELECT, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-            if (!mysqli_stmt_execute($stmt))
-                printf("[024] Cannot execute SELECT, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        if (!$res = mysqli_stmt_get_result($stmt))
+            printf("[025] Cannot get result set, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-            if (!$res = mysqli_stmt_get_result($stmt))
-                printf("[025] Cannot get result set, [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        if ((!($row = mysqli_fetch_assoc($res))) || ($row['_version'] == ""))
+            printf("[026] Results seem wrong, got %s, [%d] %s\n",
+                $row['_version'],
+                mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-            if ((!($row = mysqli_fetch_assoc($res))) || ($row['_version'] == ""))
-                printf("[026] Results seem wrong, got %s, [%d] %s\n",
-                    $row['_version'],
-                    mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        mysqli_free_result($res);
+        mysqli_stmt_close($stmt);
 
-            mysqli_free_result($res);
-            mysqli_stmt_close($stmt);
-
-        } else {
-            printf("[027] Cannot create SP, [%d] %s.\n", mysqli_errno($link), mysqli_error($link));
-        }
-
+    } else {
+        printf("[027] Cannot create SP, [%d] %s.\n", mysqli_errno($link), mysqli_error($link));
     }
 
     if (!mysqli_query($link, 'DROP PROCEDURE IF EXISTS p'))

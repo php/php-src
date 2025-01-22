@@ -21,6 +21,7 @@
 #define ZEND_INHERITANCE_H
 
 #include "zend.h"
+#include "zend_compile.h"
 
 BEGIN_EXTERN_C()
 
@@ -41,6 +42,18 @@ void zend_inheritance_check_override(zend_class_entry *ce);
 
 ZEND_API extern zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
 ZEND_API extern zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);
+
+typedef enum {
+	INHERITANCE_UNRESOLVED = -1,
+	INHERITANCE_ERROR = 0,
+	INHERITANCE_WARNING = 1,
+	INHERITANCE_SUCCESS = 2,
+} zend_inheritance_status;
+
+ZEND_API zend_inheritance_status zend_verify_property_hook_variance(const zend_property_info *prop_info, const zend_function *func);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_hooked_property_variance_error(const zend_property_info *prop_info);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_hooked_property_variance_error_ex(zend_string *value_param_name, zend_string *class_name, zend_string *prop_name);
+ZEND_API void zend_verify_hooked_property(zend_class_entry *ce, zend_property_info *prop_info, zend_string *prop_name);
 
 END_EXTERN_C()
 

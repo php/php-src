@@ -1,16 +1,16 @@
 --TEST--
-DOM\XMLDocument::createFromFile 01
+Dom\XMLDocument::createFromFile 01
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-DOM\XMLDocument::createFromString("");
+Dom\XMLDocument::createFromString("");
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: DOM\XMLDocument::createFromString(): Argument #1 ($source) must not be empty in %s:%d
+Fatal error: Uncaught ValueError: Dom\XMLDocument::createFromString(): Argument #1 ($source) must not be empty in %s:%d
 Stack trace:
-#0 %s(%d): DOM\XMLDocument::createFromString('')
+#0 %s(%d): Dom\XMLDocument::createFromString('')
 #1 {main}
   thrown in %s on line %d

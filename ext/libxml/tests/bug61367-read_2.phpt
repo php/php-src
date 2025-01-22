@@ -58,6 +58,6 @@ bool(true)
 int(4)
 bool(true)
 
-Warning: DOMDocument::loadXML(): %Sfailed to load external entity "file:///%s/test_bug_61367-read/bad" in %s on line %d
+%s: DOMDocument::loadXML(): %Sfailed to load %s
 
 Warning: Attempt to read property "nodeValue" on null in %s on line %d

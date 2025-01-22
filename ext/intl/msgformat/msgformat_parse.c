@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <unicode/ustring.h>
@@ -79,19 +79,18 @@ PHP_FUNCTION( msgfmt_parse_message )
 	int         spattern_len = 0;
 	char       *pattern = NULL;
 	size_t      pattern_len = 0;
-	const char *slocale = NULL;
+	char       *slocale = NULL;
 	size_t      slocale_len = 0;
 	char       *source = NULL;
 	size_t      src_len = 0;
 	MessageFormatter_object mf;
 	MessageFormatter_object *mfo = &mf;
 
-	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sss",
-		  &slocale, &slocale_len, &pattern, &pattern_len, &source, &src_len ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STRING(slocale, slocale_len)
+		Z_PARAM_STRING(pattern, pattern_len)
+		Z_PARAM_STRING(source, src_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	INTL_CHECK_LOCALE_LEN(slocale_len);
 	memset(mfo, 0, sizeof(*mfo));
@@ -111,7 +110,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	}
 
 	if(slocale_len == 0) {
-		slocale = intl_locale_get_default();
+		slocale = (char *)intl_locale_get_default();
 	}
 
 #ifdef MSG_FORMAT_QUOTE_APOS

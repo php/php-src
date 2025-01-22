@@ -34,13 +34,16 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+void bc_square_ex(bc_num n1, bc_num *result, size_t scale_min) {
+	bc_num square_ex = bc_square(n1, scale_min);
+	bc_free_num(result);
+	*(result) = square_ex;
+}
 
-/* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.
-   Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
+/* Raise "base" to the "exponent" power.  The result is placed in RESULT.
+   Maximum exponent is LONG_MAX.  If a "exponent" is not an integer,
    only the integer part is used.  */
-
-void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
-{
+bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 	bc_num temp, power;
 	size_t rscale;
 	size_t pwrscale;
@@ -51,7 +54,7 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	if (exponent == 0) {
 		bc_free_num (result);
 		*result = bc_copy_num(BCG(_one_));
-		return;
+		return true;
 	}
 
 	/* Other initializations. */
@@ -61,15 +64,15 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 		rscale = scale;
 	} else {
 		is_neg = false;
-		rscale = MIN (num1->n_scale * exponent, MAX(scale, num1->n_scale));
+		rscale = MIN (base->n_scale * exponent, MAX(scale, base->n_scale));
 	}
 
 	/* Set initial value of temp. */
-	power = bc_copy_num(num1);
-	pwrscale = num1->n_scale;
+	power = bc_copy_num(base);
+	pwrscale = base->n_scale;
 	while ((exponent & 1) == 0) {
 		pwrscale = 2 * pwrscale;
-		bc_multiply(power, power, &power, pwrscale);
+		bc_square_ex(power, &power, pwrscale);
 		exponent = exponent >> 1;
 	}
 	temp = bc_copy_num(power);
@@ -79,31 +82,33 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	/* Do the calculation. */
 	while (exponent > 0) {
 		pwrscale = 2 * pwrscale;
-		bc_multiply(power, power, &power, pwrscale);
+		bc_square_ex(power, &power, pwrscale);
 		if ((exponent & 1) == 1) {
 			calcscale = pwrscale + calcscale;
-			bc_multiply(temp, power, &temp, calcscale);
+			bc_multiply_ex(temp, power, &temp, calcscale);
 		}
 		exponent = exponent >> 1;
 	}
 
 	/* Assign the value. */
 	if (is_neg) {
-		bc_divide(BCG(_one_), temp, result, rscale);
+		if (bc_divide(BCG(_one_), temp, result, rscale) == false) {
+			bc_free_num (&temp);
+			bc_free_num (&power);
+			return false;
+		}
 		bc_free_num (&temp);
 	} else {
 		bc_free_num (result);
 		*result = temp;
-		if ((*result)->n_scale > rscale) {
-			(*result)->n_scale = rscale;
-		}
+		(*result)->n_scale = MIN(scale, (*result)->n_scale);
 	}
 	bc_free_num (&power);
+	return true;
 }
 
 /* This is used internally by BCMath */
-void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale)
-{
+void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale) {
 	/* Exponent must not have fractional part */
 	assert(expo->n_scale == 0);
 

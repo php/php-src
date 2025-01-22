@@ -26,4 +26,4 @@ $b->main();
 
 ?>
 --EXPECTF--
-Fatal error: Class Bar contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Bar::doOtherStuff) in %s on line %d
+Fatal error: Class Bar contains 1 abstract method and must therefore be declared abstract or implement the remaining method (Bar::doOtherStuff) in %s on line %d

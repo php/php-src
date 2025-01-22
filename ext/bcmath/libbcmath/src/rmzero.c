@@ -44,3 +44,16 @@ void _bc_rm_leading_zeros(bc_num num)
 		num->n_len--;
 	}
 }
+
+void bc_rm_trailing_zeros(bc_num num)
+{
+	if (num->n_scale == 0) {
+		return;
+	}
+
+	char *end = num->n_value + num->n_len + num->n_scale - 1;
+	while (*end == 0 && num->n_scale > 0) {
+		num->n_scale--;
+		end--;
+	}
+}

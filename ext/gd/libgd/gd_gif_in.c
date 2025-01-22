@@ -244,8 +244,10 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 					BitSet(buf[8], INTERLACE), &ZeroDataBlock);
 		} else {
 			if (!haveGlobalColormap) {
-				gdImageDestroy(im);
-				return 0;
+				// Still a valid gif, apply simple default palette as per spec
+				ColorMap[CM_RED][1] = 0xff;
+				ColorMap[CM_GREEN][1] = 0xff;
+				ColorMap[CM_BLUE][1] = 0xff;
 			}
 			ReadImage(im, fd, width, height,
 						ColorMap,
@@ -360,7 +362,7 @@ GetDataBlock(gdIOCtx *fd, unsigned char *buf, int *ZeroDataBlockP)
 		if (rv > 0) {
 			tmp = safe_emalloc(3 * rv, sizeof(char), 1);
 			for (i=0;i<rv;i++) {
-				sprintf(&tmp[3*sizeof(char)*i], " %02x", buf[i]);
+				snprintf(tmp + 3 * i, 4, " %02x", buf[i]);
 			}
 		} else {
 			tmp = estrdup("");

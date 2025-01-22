@@ -3,10 +3,9 @@ FFI 100: PHP symbols
 --EXTENSIONS--
 ffi
 --SKIPIF--
-<?php require_once('utils.inc'); ?>
 <?php
 try {
-    ffi_cdef("extern void *zend_printf;", ffi_get_php_dll_name());
+    FFI::cdef("extern void *zend_printf;");
 } catch (Throwable $e) {
     die('skip PHP symbols not available');
 }
@@ -17,7 +16,7 @@ ffi.enable=1
 <?php
 require_once('utils.inc');
 $fastcall = ffi_get_fastcall_specifier();
-$zend = ffi_cdef("
+$zend = FFI::cdef("
     const char *get_zend_version(void);
     //char *get_zend_version(void);
     extern size_t (*zend_printf)(const char *format, ...);
@@ -26,7 +25,7 @@ $zend = ffi_cdef("
 
     void $fastcall zend_str_tolower(char *str, size_t length);
 
-", ffi_get_php_dll_name());
+");
 var_dump(trim(explode("\n",$zend->get_zend_version())[0]));
 //var_dump(trim(FFI::string($zend->get_zend_version())));
 var_dump($zend->zend_printf);

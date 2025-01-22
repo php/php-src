@@ -37,7 +37,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_apache_get_modules arginfo_apache_request_headers
 
-
 ZEND_FUNCTION(apache_lookup_uri);
 ZEND_FUNCTION(virtual);
 ZEND_FUNCTION(apache_request_headers);
@@ -48,12 +47,11 @@ ZEND_FUNCTION(apache_getenv);
 ZEND_FUNCTION(apache_get_version);
 ZEND_FUNCTION(apache_get_modules);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(apache_lookup_uri, arginfo_apache_lookup_uri)
 	ZEND_FE(virtual, arginfo_virtual)
 	ZEND_FE(apache_request_headers, arginfo_apache_request_headers)
-	ZEND_FALIAS(getallheaders, apache_request_headers, arginfo_getallheaders)
+	ZEND_RAW_FENTRY("getallheaders", zif_apache_request_headers, arginfo_getallheaders, 0, NULL, NULL)
 	ZEND_FE(apache_response_headers, arginfo_apache_response_headers)
 	ZEND_FE(apache_note, arginfo_apache_note)
 	ZEND_FE(apache_setenv, arginfo_apache_setenv)

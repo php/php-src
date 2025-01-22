@@ -148,16 +148,25 @@ void SdnToGregorian(
 	int dayOfYear;
 
 	if (sdn <= 0 ||
-			sdn > (LONG_MAX - 4 * GREGOR_SDN_OFFSET) / 4) {
+			sdn > (ZEND_LONG_MAX - 4 * GREGOR_SDN_OFFSET) / 4) {
 		goto fail;
 	}
 	temp = (sdn + GREGOR_SDN_OFFSET) * 4 - 1;
+
+	if (temp < 0 || (temp / DAYS_PER_400_YEARS) > INT_MAX) {
+		goto fail;
+	}
 
 	/* Calculate the century (year/100). */
 	century = temp / DAYS_PER_400_YEARS;
 
 	/* Calculate the year and day of year (1 <= dayOfYear <= 366). */
 	temp = ((temp % DAYS_PER_400_YEARS) / 4) * 4 + 3;
+
+	if (century > ((INT_MAX / 100) - (temp / DAYS_PER_4_YEARS))) {
+		goto fail;
+	}
+
 	year = (century * 100) + (temp / DAYS_PER_4_YEARS);
 	dayOfYear = (temp % DAYS_PER_4_YEARS) / 4 + 1;
 

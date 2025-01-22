@@ -47,7 +47,7 @@ hash_init(): Argument #1 ($algo) must be a valid hashing algorithm
 hash_init(): Argument #1 ($algo) must be a cryptographic hashing algorithm if HMAC is requested
 
 -- Testing hash_init() function with HASH_HMAC and no key --
-hash_init(): Argument #3 ($key) cannot be empty when HMAC is requested
+hash_init(): Argument #3 ($key) must not be empty when HMAC is requested
 
 Deprecated: hash_init(): Passing null to parameter #3 ($key) of type string is deprecated in %s on line %d
-hash_init(): Argument #3 ($key) cannot be empty when HMAC is requested
+hash_init(): Argument #3 ($key) must not be empty when HMAC is requested

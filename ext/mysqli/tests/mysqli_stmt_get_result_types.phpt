@@ -5,9 +5,6 @@ mysqli
 --SKIPIF--
 <?php
     require_once 'skipifconnectfailure.inc';
-
-    if (!function_exists('mysqli_stmt_get_result'))
-        die("skip mysqli_stmt_get_result() not available");
 ?>
 --FILE--
 <?php
@@ -40,14 +37,12 @@ mysqli
         $id = null;
         if (!mysqli_stmt_bind_param($stmt, "i" . $bind_type, $id, $bind_value)) {
             printf("[%04d] [%d] %s\n", $offset + 3, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
 
         for ($id = 1; $id < 4; $id++) {
             if (!mysqli_stmt_execute($stmt)) {
                 printf("[%04d] [%d] %s\n", $offset + 3 + $id, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-                mysqli_stmt_close($stmt);
                 return false;
             }
         }
@@ -57,38 +52,27 @@ mysqli
 
         if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test")) {
             printf("[%04d] [%d] %s\n", $offset + 7, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
 
         if (!mysqli_stmt_execute($stmt)) {
             printf("[%04d] [%d] %s\n", $offset + 8, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
-
-        $result = mysqli_stmt_result_metadata($stmt);
 
         if (!$res = mysqli_stmt_get_result($stmt)) {
             printf("[%04d] [%d] %s\n", $offset + 9, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
         $num = 0;
-        $fields = mysqli_fetch_fields($result);
 
         while ($row = mysqli_fetch_assoc($res)) {
-            $bind_res = &$row['label'];
-            if (!gettype($bind_res) == 'unicode') {
-                if ($bind_res !== $bind_value && (!$type_hint || ($type_hint !== gettype($bind_res)))) {
-                    printf("[%04d] [%d] Expecting %s/'%s' [type hint = %s], got %s/'%s'\n",
-                        $offset + 10, $num,
-                        gettype($bind_value), $bind_value, $type_hint,
-                        gettype($bind_res), $bind_res);
-                        mysqli_free_result($res);
-                        mysqli_stmt_close($stmt);
-                        return false;
-                }
+            if ($row['label'] !== $bind_value && (!$type_hint || ($type_hint !== gettype($row['label'])))) {
+                printf("[%04d] [%d] Expecting %s/'%s' [type hint = %s], got %s/'%s'\n",
+                    $offset + 10, $num,
+                    gettype($bind_value), $bind_value, $type_hint,
+                    gettype($row['label']), $row['label']);
+                    return false;
             }
             $num++;
         }
@@ -96,13 +80,9 @@ mysqli
         if ($num != 3) {
             printf("[%04d] [%d] %s, expecting 3 results, got only %d results\n",
                 $offset + 11, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt), $num);
-            mysqli_free_result($res);
-            mysqli_stmt_close($stmt);
             return false;
         }
 
-        mysqli_free_result($res);
-        mysqli_stmt_close($stmt);
         return true;
     }
 
@@ -157,28 +137,22 @@ mysqli
     func_mysqli_stmt_get_result($link, $engine, "i", "BIGINT", -1 * PHP_INT_MAX + 1, 1820);
     func_mysqli_stmt_get_result($link, $engine, "i", "BIGINT UNSIGNED", PHP_INT_MAX, 1840);
     func_mysqli_stmt_get_result($link, $engine, "s", "BIGINT UNSIGNED", "18446744073709551615", 1860);
-    func_mysqli_stmt_get_result($link, $engine, "s", "BIGINT", "-9223372036854775808", 1880);
+    func_mysqli_stmt_get_result($link, $engine, "s", "BIGINT", "-9223372036854775808", 1880, "integer");
 
-    func_mysqli_stmt_get_result($link, $engine, "d", "FLOAT", -9223372036854775808 - 1.1, 600);
+    func_mysqli_stmt_get_result($link, $engine, "d", "FLOAT", -9237.21, 600);
     func_mysqli_stmt_get_result($link, $engine, "d", "FLOAT", NULL, 620);
-    func_mysqli_stmt_get_result($link, $engine, "d", "FLOAT UNSIGNED", 18446744073709551615 + 1.1, 640);
+    func_mysqli_stmt_get_result($link, $engine, "d", "FLOAT UNSIGNED", 18467.5, 640);
     func_mysqli_stmt_get_result($link, $engine, "d", "FLOAT UNSIGNED ", NULL, 660);
 
-    // Yes, we need the temporary variable. The PHP casting will foul us otherwise.
-    $tmp = strval('-99999999.99');
-    func_mysqli_stmt_get_result($link, $engine, "d", "DOUBLE(10,2)", $tmp, 680, "string");
+    func_mysqli_stmt_get_result($link, $engine, "d", "DOUBLE(10,2)", -99999999.99, 680);
     func_mysqli_stmt_get_result($link, $engine, "d", "DOUBLE(10,2)", NULL, 700);
-    $tmp = strval('99999999.99');
-    func_mysqli_stmt_get_result($link, $engine, "d", "DOUBLE(10,2) UNSIGNED", $tmp , 720, "string");
+    func_mysqli_stmt_get_result($link, $engine, "d", "DOUBLE(10,2) UNSIGNED", 99999999.99 , 720);
     func_mysqli_stmt_get_result($link, $engine, "d", "DOUBLE(10,2) UNSIGNED", NULL, 740);
-    $tmp = strval('-99999999.99');
-    func_mysqli_stmt_get_result($link, $engine, "d", "DECIMAL(10,2)", $tmp, 760, "string");
+    func_mysqli_stmt_get_result($link, $engine, "d", "DECIMAL(10,2)", '-99999999.99', 760, "string");
     func_mysqli_stmt_get_result($link, $engine, "d", "DECIMAL(10,2)", NULL, 780);
-    $tmp = strval('99999999.99');
-    func_mysqli_stmt_get_result($link, $engine, "d", "DECIMAL(10,2)", $tmp, 800, "string");
+    func_mysqli_stmt_get_result($link, $engine, "d", "DECIMAL(10,2)", '99999999.99', 800, "string");
     func_mysqli_stmt_get_result($link, $engine, "d", "DECIMAL(10,2)", NULL, 820);
 
-    // don't care about date() strict TZ warnings...
     func_mysqli_stmt_get_result($link, $engine, "s", "DATE", @date('Y-m-d'), 840);
     func_mysqli_stmt_get_result($link, $engine, "s", "DATE NOT NULL", @date('Y-m-d'), 860);
     func_mysqli_stmt_get_result($link, $engine, "s", "DATE", NULL, 880);
@@ -194,8 +168,8 @@ mysqli
     func_mysqli_stmt_get_result($link, $engine, "s", "TIME", NULL, 1020);
 
     $tmp = intval(@date('Y'));
-    func_mysqli_stmt_get_result($link, $engine, "s", "YEAR", $tmp, 1040, "integer");
-    func_mysqli_stmt_get_result($link, $engine, "s", "YEAR NOT NULL", $tmp, 1060, "integer");
+    func_mysqli_stmt_get_result($link, $engine, "s", "YEAR", $tmp, 1040, "string"); // YEAR is a string with implicit display width of 4
+    func_mysqli_stmt_get_result($link, $engine, "s", "YEAR NOT NULL", $tmp, 1060, "string");
     func_mysqli_stmt_get_result($link, $engine, "s", "YEAR", NULL, 1080);
 
     $string255 = func_mysqli_stmt_bind_make_string(255);

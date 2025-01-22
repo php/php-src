@@ -96,37 +96,22 @@ static int BreakIterator_compare_objects(zval *object1,
 /* {{{ clone handler for BreakIterator */
 static zend_object *BreakIterator_clone_obj(zend_object *object)
 {
-	BreakIterator_object	*bio_orig,
-							*bio_new;
-	zend_object				*ret_val;
-
-	bio_orig = php_intl_breakiterator_fetch_object(object);
-	intl_errors_reset(INTL_DATA_ERROR_P(bio_orig));
-
-	ret_val = BreakIterator_ce_ptr->create_object(object->ce);
-	bio_new  = php_intl_breakiterator_fetch_object(ret_val);
+	BreakIterator_object *bio_orig = php_intl_breakiterator_fetch_object(object);
+	zend_object *ret_val           = BreakIterator_ce_ptr->create_object(object->ce);
+	BreakIterator_object *bio_new  = php_intl_breakiterator_fetch_object(ret_val);
 
 	zend_objects_clone_members(&bio_new->zo, &bio_orig->zo);
 
 	if (bio_orig->biter != NULL) {
-		BreakIterator *new_biter;
-
-		new_biter = bio_orig->biter->clone();
+		BreakIterator *new_biter = bio_orig->biter->clone();
 		if (!new_biter) {
-			zend_string *err_msg;
-			intl_errors_set_code(BREAKITER_ERROR_P(bio_orig),
-				U_MEMORY_ALLOCATION_ERROR);
-			intl_errors_set_custom_msg(BREAKITER_ERROR_P(bio_orig),
-				"Could not clone BreakIterator", 0);
-			err_msg = intl_error_get_message(BREAKITER_ERROR_P(bio_orig));
-			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
-			zend_string_free(err_msg);
+			zend_throw_error(NULL, "Failed to clone BreakIterator");
 		} else {
 			bio_new->biter = new_biter;
 			ZVAL_COPY(&bio_new->text, &bio_orig->text);
 		}
 	} else {
-		zend_throw_exception(NULL, "Cannot clone unconstructed BreakIterator", 0);
+		zend_throw_error(NULL, "Cannot clone uninitialized BreakIterator");
 	}
 
 	return ret_val;

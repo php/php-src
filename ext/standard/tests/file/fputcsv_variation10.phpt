@@ -42,7 +42,7 @@ foreach ($fields as $field) {
     $csv_field = $field;
 
     // write to a file in csv format
-    var_dump( fputcsv($file_handle, $csv_field) );
+    var_dump( fputcsv($file_handle, $csv_field, escape: "\\") );
 
     // check the file pointer position and eof
     var_dump( ftell($file_handle) );

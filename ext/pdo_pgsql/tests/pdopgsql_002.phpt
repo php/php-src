@@ -1,7 +1,6 @@
 --TEST--
-PdoPgsql connect through PDO::connect
+Pdo\Pgsql connect through PDO::connect
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
@@ -15,8 +14,8 @@ PDOTest::skip();
 require_once __DIR__ . "/config.inc";
 
 $db =  Pdo::connect($config['ENV']['PDOTEST_DSN']);
-if (!$db instanceof PdoPgsql) {
-    echo "Wrong class type. Should be PdoPgsql but is " . get_class($db) . "\n";
+if (!$db instanceof Pdo\Pgsql) {
+    echo "Wrong class type. Should be Pdo\Pgsql but is " . get_class($db) . "\n";
 }
 
 $db->exec('CREATE TABLE pdopgsql_002(id INT NOT NULL PRIMARY KEY, name VARCHAR(10))');

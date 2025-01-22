@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 94697d59958fb55a431bfa4786158b5db3c1ae0e */
+ * Stub hash: 96d78126bc5af37c5d94fa160e509623e947de48 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_finfo_open, 0, 0, finfo, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FILEINFO_NONE")
@@ -10,7 +10,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_finfo_close, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, finfo, finfo, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_finfo_set_flags, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_finfo_set_flags, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, finfo, finfo, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -50,10 +50,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_finfo_buffer, 0,
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_finfo_set_flags, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_finfo_set_flags, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-
 
 ZEND_FUNCTION(finfo_open);
 ZEND_FUNCTION(finfo_close);
@@ -61,7 +60,6 @@ ZEND_FUNCTION(finfo_set_flags);
 ZEND_FUNCTION(finfo_file);
 ZEND_FUNCTION(finfo_buffer);
 ZEND_FUNCTION(mime_content_type);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(finfo_open, arginfo_finfo_open)
@@ -73,12 +71,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_finfo_methods[] = {
-	ZEND_ME_MAPPING(__construct, finfo_open, arginfo_class_finfo___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(file, finfo_file, arginfo_class_finfo_file, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(buffer, finfo_buffer, arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set_flags, finfo_set_flags, arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zif_finfo_open, arginfo_class_finfo___construct, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("file", zif_finfo_file, arginfo_class_finfo_file, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("buffer", zif_finfo_buffer, arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("set_flags", zif_finfo_set_flags, arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -106,8 +103,7 @@ static zend_class_entry *register_class_finfo(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "finfo", class_finfo_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

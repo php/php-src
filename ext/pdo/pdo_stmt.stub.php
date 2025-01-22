@@ -61,8 +61,8 @@ class PDOStatement implements IteratorAggregate
     /** @tentative-return-type */
     public function setAttribute(int $attribute, mixed $value): bool {}
 
-    /** @return bool */
-    public function setFetchMode(int $mode, mixed ...$args) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function setFetchMode(int $mode, mixed ...$args): true {}
 
     public function getIterator(): Iterator {}
 }

@@ -10,5 +10,5 @@ echo is_resource($zip) ? "OK" : "Failure";
 
 ?>
 --EXPECTF--
-Deprecated: Function zip_open() is deprecated in %s on line %d
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
 OK

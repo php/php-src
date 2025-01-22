@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECT--
-posix_eaccess(): Argument #1 ($filename) cannot be empty
+posix_eaccess(): Argument #1 ($filename) must not be empty

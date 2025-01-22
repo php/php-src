@@ -23,6 +23,8 @@ final class Generator implements Iterator
     public function throw(Throwable $exception): mixed {}
 
     public function getReturn(): mixed {}
+
+    public function __debugInfo(): array {}
 }
 
 class ClosedGeneratorException extends Exception

@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -26,7 +26,6 @@
 
 /* PHP Includes */
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "main/php_network.h"
 
 /* for fileno() */
@@ -97,7 +96,7 @@ static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 
 static ssize_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count)
 {
-	ssize_t wrote = 0;
+	size_t wrote = 0;
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 
 	do {
@@ -350,7 +349,7 @@ PHP_FUNCTION(bzopen)
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 
@@ -440,40 +439,40 @@ PHP_FUNCTION(bzerror)
 /* {{{ Compresses a string into BZip2 encoded data */
 PHP_FUNCTION(bzcompress)
 {
-	char             *source;          /* Source data to compress */
-	zend_long              zblock_size = 0; /* Optional block size to use */
-	zend_long              zwork_factor = 0;/* Optional work factor to use */
-	zend_string      *dest = NULL;     /* Destination to place the compressed data into */
-	int               error,           /* Error Container */
-					  block_size  = 4, /* Block size for compression algorithm */
-					  work_factor = 0, /* Work factor for compression algorithm */
-					  argc = ZEND_NUM_ARGS(); /* Argument count */
-	size_t               source_len;      /* Length of the source data */
-	unsigned int      dest_len;        /* Length of the destination buffer */
+	char        *source;           /* Source data to compress */
+	zend_long    zblock_size = 4;  /* Block size for compression algorithm */
+	zend_long    zwork_factor = 0; /* Work factor for compression algorithm */
+	zend_string *dest = NULL;      /* Destination to place the compressed data into */
+	size_t       source_len;       /* Length of the source data */
+	unsigned int dest_len;         /* Length of the destination buffer */
 
-	if (zend_parse_parameters(argc, "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	if (zblock_size < 1 || zblock_size > 9) {
+		zend_argument_value_error(2, "must be between 1 and 9");
+		RETURN_THROWS();
+	}
+	int block_size = (int) zblock_size;
+
+	if (zwork_factor < 0 || zwork_factor > 250) {
+		zend_argument_value_error(3, "must be between 0 and 250");
+		RETURN_THROWS();
+	}
+	int work_factor = (int) zwork_factor;
 
 	/* Assign them to easy to use variables, dest_len is initially the length of the data
 	   + .01 x length of data + 600 which is the largest size the results of the compression
 	   could possibly be, at least that's what the libbz2 docs say (thanks to jeremy@nirvani.net
 	   for pointing this out).  */
+	// TODO Check source string length fits in unsigned int
 	dest_len = (unsigned int) (source_len + (0.01 * source_len) + 600);
 
 	/* Allocate the destination buffer */
 	dest = zend_string_alloc(dest_len, 0);
 
-	/* Handle the optional arguments */
-	if (argc > 1) {
-		block_size = zblock_size;
-	}
-
-	if (argc > 2) {
-		work_factor = zwork_factor;
-	}
-
-	error = BZ2_bzBuffToBuffCompress(ZSTR_VAL(dest), &dest_len, source, source_len, block_size, 0, work_factor);
+	int error = BZ2_bzBuffToBuffCompress(ZSTR_VAL(dest), &dest_len, source, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
 		zend_string_efree(dest);
 		RETURN_LONG(error);
@@ -513,6 +512,7 @@ PHP_FUNCTION(bzdecompress)
 		RETURN_FALSE;
 	}
 
+	// TODO Check source string length fits in unsigned int
 	bzs.next_in = source;
 	bzs.avail_in = source_len;
 

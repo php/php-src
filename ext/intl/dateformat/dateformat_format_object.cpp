@@ -64,9 +64,9 @@ static bool valid_format(zval *z) {
 
 U_CFUNC PHP_FUNCTION(datefmt_format_object)
 {
-	zval				*object,
-						*format = NULL;
-	const char			*locale_str	= NULL;
+	zend_object			*object;
+	zval				*format = NULL;
+	char			       *locale_str	= NULL;
 	size_t				locale_len;
 	bool				pattern		= false;
 	UDate				date;
@@ -77,13 +77,15 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	DateFormat::EStyle	dateStyle = DateFormat::kDefault,
 						timeStyle = DateFormat::kDefault;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|zs!",
-			&object, &format, &locale_str, &locale_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_OBJ(object)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(format)
+		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!locale_str) {
-		locale_str = intl_locale_get_default();
+		locale_str = (char *)intl_locale_get_default();
 	}
 
 	if (format == NULL || Z_TYPE_P(format) == IS_NULL) {
@@ -147,9 +149,9 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		timeStyle = (DateFormat::EStyle)(timeStyle & ~DateFormat::kRelative);
 	}
 
-	zend_class_entry *instance_ce = Z_OBJCE_P(object);
+	zend_class_entry *instance_ce = object->ce;
 	if (instanceof_function(instance_ce, Calendar_ce_ptr)) {
-		Calendar *obj_cal = calendar_fetch_native_calendar(Z_OBJ_P(object));
+		Calendar *obj_cal = calendar_fetch_native_calendar(object);
 		if (obj_cal == NULL) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad IntlCalendar instance: "

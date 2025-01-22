@@ -24,8 +24,14 @@ var_dump($closure1);
 print_r($closure1);
 
 ?>
---EXPECT--
-object(Closure)#1 (1) {
+--EXPECTF--
+object(Closure)#%d (4) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["static"]=>
   array(1) {
     ["var"]=>
@@ -34,6 +40,9 @@ object(Closure)#1 (1) {
 }
 Closure Object
 (
+    [name] => {closure:%s:%d}
+    [file] => %s
+    [line] => %d
     [static] => Array
         (
             [var] => 
@@ -41,7 +50,13 @@ Closure Object
 
 )
 Undefined constant "CONST_REF"
-object(Closure)#1 (1) {
+object(Closure)#%d (4) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["static"]=>
   array(1) {
     ["var"]=>
@@ -50,13 +65,22 @@ object(Closure)#1 (1) {
 }
 Closure Object
 (
+    [name] => {closure:%s:%d}
+    [file] => %s
+    [line] => %d
     [static] => Array
         (
             [var] => 
         )
 
 )
-object(Closure)#1 (1) {
+object(Closure)#%d (4) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["static"]=>
   array(1) {
     ["var"]=>
@@ -65,6 +89,9 @@ object(Closure)#1 (1) {
 }
 Closure Object
 (
+    [name] => {closure:%s:%d}
+    [file] => %s
+    [line] => %d
     [static] => Array
         (
             [var] => foo

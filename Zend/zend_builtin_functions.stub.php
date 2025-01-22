@@ -7,6 +7,11 @@ class stdClass
 {
 }
 
+function exit(string|int $status = 0): never {}
+
+/** @alias exit */
+function die(string|int $status = 0): never {}
+
 /** @refcount 1 */
 function zend_version(): string {}
 

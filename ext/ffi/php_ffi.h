@@ -208,6 +208,7 @@ typedef struct _zend_ffi_val {
 
 zend_result zend_ffi_parse_decl(const char *str, size_t len);
 zend_result zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl);
+void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl);
 
 /* parser callbacks */
 void ZEND_NORETURN zend_ffi_parser_error(const char *msg, ...);

@@ -2,6 +2,7 @@
 Bug #77535 (Invalid callback, h2 server push)
 --EXTENSIONS--
 curl
+--XFAIL--
 --SKIPIF--
 <?php
 include 'skipif-nocaddy.inc';

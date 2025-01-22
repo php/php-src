@@ -6,7 +6,7 @@ pdo_sqlite
 <?php
 
 // This test was copied from the pdo_sqlite test for sqliteCreateCollation
-$db = new PdoSqlite('sqlite::memory:');
+$db = new Pdo\Sqlite('sqlite::memory:');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->query('CREATE TABLE test_pdo_sqlite_createcollation (id INT AUTO INCREMENT, name TEXT)');

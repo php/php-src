@@ -12,7 +12,7 @@ PDOTest::skip();
 
 require 'ext/pdo/tests/pdo_test.inc';
 $config = PDOTest::get_config(__DIR__ . "/common.phpt");
-$db = new PdoOdbc($config['ENV']['PDOTEST_DSN'], $config['ENV']['PDOTEST_USER'], $config['ENV']['PDOTEST_PASS']);
+$db = new Pdo\Odbc($config['ENV']['PDOTEST_DSN'], $config['ENV']['PDOTEST_USER'], $config['ENV']['PDOTEST_PASS']);
 
 $db->query("CREATE TABLE pdoodbc_001 (id INT, name TEXT)");
 $db->query("INSERT INTO pdoodbc_001 VALUES (NULL, 'PHP'), (NULL, 'PHP6')");

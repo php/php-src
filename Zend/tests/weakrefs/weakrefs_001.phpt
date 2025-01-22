@@ -26,9 +26,15 @@ object(stdClass)#1 (0) refcount(2){
 }
 object(stdClass)#1 (0) refcount(2){
 }
-object(WeakReference)#2 (0) {
+object(WeakReference)#2 (1) {
+  ["object"]=>
+  object(stdClass)#1 (0) {
+  }
 }
-object(WeakReference)#2 (0) {
+object(WeakReference)#2 (1) {
+  ["object"]=>
+  object(stdClass)#1 (0) {
+  }
 }
 object(stdClass)#1 (0) refcount(2){
 }
@@ -36,4 +42,3 @@ object(stdClass)#1 (0) refcount(2){
 }
 NULL
 NULL
-

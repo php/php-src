@@ -46,7 +46,7 @@ require_once 'skipifconnectfailure.inc';
         'mysqli.allow_local_infile', 'mysqli.local_infile_directory',
         'mysqli.allow_persistent', 'mysqli.max_persistent'
     );
-    foreach ($expected as $k => $entry)
+    foreach ($expected as $entry)
         if (!stristr($phpinfo, $entry))
             printf("[010] Could not find entry for '%s'\n", $entry);
 

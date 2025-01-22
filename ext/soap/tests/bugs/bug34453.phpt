@@ -1,5 +1,5 @@
 --TEST--
-Bug #29839 (incorrect convert (xml:lang to lang))
+Bug #34453 (parsing http://www.w3.org/2001/xml.xsd exception)
 --EXTENSIONS--
 soap
 --INI--
@@ -20,7 +20,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('EchoString');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

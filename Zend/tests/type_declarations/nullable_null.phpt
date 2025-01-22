@@ -7,5 +7,6 @@ function test(Foo $a = null) {
 }
 test(null);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: test(): Implicitly marking parameter $a as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 ok

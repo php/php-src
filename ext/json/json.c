@@ -16,13 +16,11 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/html.h"
 #include "zend_smart_str.h"
 #include "php_json.h"
 #include "php_json_encoder.h"
@@ -337,7 +335,7 @@ PHP_FUNCTION(json_validate)
 	}
 
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
-	
+
 	if (depth <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();

@@ -94,8 +94,7 @@ while (($enc_error_new = openssl_error_string()) !== false) {
 var_dump($error_queue_size);
 echo "\n";
 
-$is_111 = OPENSSL_VERSION_NUMBER >= 0x10101000;
-$err_pem_no_start_line = $is_111 ? '0909006C': '0906D06C';
+$err_pem_no_start_line = '0909006C';
 
 // PKEY
 echo "PKEY errors\n";
@@ -118,12 +117,12 @@ expect_openssl_errors('openssl_pkey_get_public', [$err_pem_no_start_line]);
 @openssl_private_encrypt("data", $crypted, $private_key_file, 1000);
 expect_openssl_errors('openssl_private_encrypt', ['0408F090']);
 // private decrypt with failed padding check
-@openssl_private_decrypt("data", $crypted, $private_key_file);
-expect_openssl_errors('openssl_private_decrypt', ['04065072']);
+@openssl_private_decrypt("data", $crypted, $private_key_file, OPENSSL_PKCS1_OAEP_PADDING);
+expect_openssl_errors('openssl_private_decrypt', ['04099079']);
 // public encrypt and decrypt with failed padding check and padding
 @openssl_public_encrypt("data", $crypted, $public_key_file, 1000);
-@openssl_public_decrypt("data", $crypted, $public_key_file);
-expect_openssl_errors('openssl_private_(en|de)crypt padding', ['0408F090', '04067072']);
+@openssl_public_decrypt("data", $crypted, $public_key_file, OPENSSL_PKCS1_OAEP_PADDING);
+expect_openssl_errors('openssl_private_(en|de)crypt padding', ['0408F090', '06089093']);
 
 // X509
 echo "X509 errors\n";

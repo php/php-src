@@ -9,4 +9,4 @@ class mixed
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'mixed' as class name as it is reserved in %s on line %d
+Fatal error: Cannot use "mixed" as a class name as it is reserved in %s on line %d

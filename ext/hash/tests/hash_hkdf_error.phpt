@@ -61,6 +61,6 @@ trycatch_dump(
 [ValueError] hash_hkdf(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hkdf() function with invalid parameters --
-[ValueError] hash_hkdf(): Argument #2 ($key) cannot be empty
+[ValueError] hash_hkdf(): Argument #2 ($key) must not be empty
 [ValueError] hash_hkdf(): Argument #3 ($length) must be greater than or equal to 0
 [ValueError] hash_hkdf(): Argument #3 ($length) must be less than or equal to 5100

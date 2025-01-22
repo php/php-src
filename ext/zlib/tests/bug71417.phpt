@@ -75,7 +75,7 @@ read: bool(false)
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 
-read: string(32) "The quick brown fox jumps over t"
+read: string(3%d) "The quick brown fox jumps over%s"
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 

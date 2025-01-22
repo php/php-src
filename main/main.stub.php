@@ -34,6 +34,13 @@ const PHP_EXTRA_VERSION = UNKNOWN;
  * @cvalue PHP_VERSION_ID
  */
 const PHP_VERSION_ID = UNKNOWN;
+
+/**
+ * @var string
+ * @cvalue php_build_date
+ */
+const PHP_BUILD_DATE = UNKNOWN;
+
 /**
  * @var bool
  * @cvalue PHP_ZTS
@@ -84,6 +91,11 @@ const PHP_PREFIX = UNKNOWN;
  * @cvalue PHP_BINDIR
  */
 const PHP_BINDIR = UNKNOWN;
+/**
+ * @var string
+ * @cvalue PHP_SBINDIR
+ */
+const PHP_SBINDIR = UNKNOWN;
 #ifndef PHP_WIN32
 /**
  * @var string
@@ -354,3 +366,15 @@ const UPLOAD_ERR_EXTENSION = UNKNOWN;
  */
 const ZEND_VERIFY_TYPE_INFERENCE = UNKNOWN;
 #endif
+/**
+ * @var string
+ * @cvalue sapi_module.name
+ * @no-file-cache
+ */
+const PHP_SAPI = UNKNOWN;
+/**
+ * @var string
+ * @cvalue PG(php_binary) ? PG(php_binary) : ""
+ * @no-file-cache
+ */
+const PHP_BINARY = UNKNOWN;

@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL isInTransaction
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

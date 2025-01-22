@@ -4,11 +4,16 @@ Observer: Function observing in fibers with bailout in fiber
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.fiber_init=1
 zend_test.observer.fiber_switch=1
 zend_test.observer.fiber_destroy=1
 memory_limit=100M
+--SKIPIF--
+<?php
+if (getenv("USE_ZEND_ALLOC") === "0") die("skip requires ZendMM because it uses the memory limit");
+?>
 --FILE--
 <?php
 
@@ -40,8 +45,8 @@ $fiber->resume();
 <!-- alloc: %s -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-    <!-- init {closure}() -->
-    <{closure}>
+    <!-- init {closure:%s:%d}() -->
+    <{closure:%s:%d}>
       <!-- init var_dump() -->
       <var_dump>
 int(1)
@@ -57,8 +62,8 @@ int(1)
 <!-- alloc: %s -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-        <!-- init {closure}() -->
-        <{closure}>
+        <!-- init {closure:%s:%d}() -->
+        <{closure:%s:%d}>
           <var_dump>
 int(2)
           </var_dump>
@@ -76,7 +81,7 @@ int(2)
 
 Fatal error: Allowed memory size of 104857600 bytes exhausted %s on line %d
           </str_repeat>
-        </{closure}>
+        </{closure:%s:%d}>
 <!-- switching from fiber %s to %s -->
 <returned '%s'>
 <!-- destroy: %s -->

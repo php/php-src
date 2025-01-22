@@ -4,9 +4,6 @@ int openssl_x509_checkpurpose ( mixed $x509cert , int $purpose [, array $cainfo 
 marcosptf - <marcosptf@yahoo.com.br>
 --EXTENSIONS--
 openssl
---SKIPIF--
-<?php if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
-?>
 --FILE--
 <?php
 include 'CertificateGenerator.inc';

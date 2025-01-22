@@ -59,7 +59,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_iconv_get_encoding, 0, 0, MAY_BE
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_STRING, 0, "\"all\"")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(iconv_strlen);
 ZEND_FUNCTION(iconv_substr);
 ZEND_FUNCTION(iconv_strpos);
@@ -70,7 +69,6 @@ ZEND_FUNCTION(iconv_mime_decode_headers);
 ZEND_FUNCTION(iconv);
 ZEND_FUNCTION(iconv_set_encoding);
 ZEND_FUNCTION(iconv_get_encoding);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(iconv_strlen, arginfo_iconv_strlen)

@@ -24,6 +24,7 @@ typedef struct _pdo_dbh_t 		 pdo_dbh_t;
 typedef struct _pdo_dbh_object_t pdo_dbh_object_t;
 typedef struct _pdo_stmt_t		 pdo_stmt_t;
 typedef struct _pdo_row_t		 pdo_row_t;
+typedef	struct _pdo_scanner_t	 pdo_scanner_t;
 struct pdo_bound_param_data;
 
 #ifndef TRUE
@@ -33,7 +34,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20170320
+#define PDO_DRIVER_API	20240423
 
 /* Doctrine hardcodes these constants, avoid changing their values. */
 enum pdo_param_type {
@@ -79,11 +80,11 @@ enum pdo_fetch_type {
 	PDO_FETCH__MAX /* must be last */
 };
 
-#define PDO_FETCH_FLAGS     0xFFFF0000  /* fetchAll() modes or'd to PDO_FETCH_XYZ */
-#define PDO_FETCH_GROUP     0x00010000  /* fetch into groups */
-#define PDO_FETCH_UNIQUE    0x00030000  /* fetch into groups assuming first col is unique */
-#define PDO_FETCH_CLASSTYPE 0x00040000  /* fetch class gets its class name from 1st column */
-#define PDO_FETCH_SERIALIZE 0x00080000  /* fetch class instances by calling serialize */
+#define PDO_FETCH_FLAGS      0xFFFF0000  /* fetchAll() modes or'd to PDO_FETCH_XYZ */
+#define PDO_FETCH_GROUP      0x00010000  /* fetch into groups */
+#define PDO_FETCH_UNIQUE     0x00030000  /* fetch into groups assuming first col is unique */
+#define PDO_FETCH_CLASSTYPE  0x00040000  /* fetch class gets its class name from 1st column */
+#define PDO_FETCH_SERIALIZE  0x00080000  /* fetch class instances by calling serialize */
 #define PDO_FETCH_PROPS_LATE 0x00100000  /* fetch props after calling ctor */
 
 /* fetch orientation for scrollable cursors */
@@ -275,6 +276,9 @@ typedef void (*pdo_dbh_request_shutdown)(pdo_dbh_t *dbh);
  * with any zvals in the driver_data that would be freed if the handle is destroyed. */
 typedef void (*pdo_dbh_get_gc_func)(pdo_dbh_t *dbh, zend_get_gc_buffer *buffer);
 
+/* driver specific re2s sql parser, overrides the default one if present */
+typedef int (*pdo_dbh_sql_scanner)(pdo_scanner_t *s);
+
 /* for adding methods to the dbh or stmt objects
 pointer to a list of driver specific functions. The convention is
 to prefix the function names using the PDO driver name; this will
@@ -307,6 +311,7 @@ struct pdo_dbh_methods {
 	/* if defined to NULL, PDO will use its internal transaction tracking state */
 	pdo_dbh_txn_func		in_transaction;
 	pdo_dbh_get_gc_func		get_gc;
+	pdo_dbh_sql_scanner		scanner;
 };
 
 /* }}} */
@@ -608,18 +613,13 @@ struct _pdo_stmt_t {
 		int column;
 		struct {
 			zval ctor_args;            /* freed */
-			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
-			zval retval;
+			zend_fcall_info fci;
 			zend_class_entry *ce;
 		} cls;
 		struct {
-			zval fetch_args;           /* freed */
-			zend_fcall_info fci;
+			zval dummy; /* This exists due to alignment reasons with fetch.into and fetch.cls.ctor_args */
 			zend_fcall_info_cache fcc;
-			zval object;
-			zval function;
-			zval *values;              /* freed */
 		} func;
 		zval into;
 	} fetch;
@@ -645,6 +645,10 @@ static inline pdo_stmt_t *php_pdo_stmt_fetch_object(zend_object *obj) {
 struct _pdo_row_t {
 	zend_object std;
 	pdo_stmt_t *stmt;
+};
+
+struct _pdo_scanner_t {
+	const char *ptr, *cur, *tok, *end;
 };
 
 /* Call this in MINIT to register the PDO driver.
@@ -684,6 +688,8 @@ PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);
 
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
 PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count);
+
+PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zend_object *current_object, zend_class_entry *called_scope, zval *new_zval_object);
 
 /* Normalization for fetching long param for driver attributes */
 PDO_API bool pdo_get_long_param(zend_long *lval, zval *value);

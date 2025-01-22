@@ -91,6 +91,7 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 		execute_data = (zend_execute_data *) stack->top;
 
 		memset(execute_data, 0, sizeof(zend_execute_data));
+		execute_data->func = (zend_function *) &zend_pass_function;
 
 		EG(current_execute_data) = execute_data;
 		EG(jit_trace_num) = 0;
@@ -228,7 +229,7 @@ static zend_always_inline void delegate_transfer_result(
 
 static ZEND_METHOD(_ZendTestFiber, __construct)
 {
-	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_FUNC(fiber->fci, fiber->fci_cache)
@@ -240,7 +241,7 @@ static ZEND_METHOD(_ZendTestFiber, __construct)
 
 static ZEND_METHOD(_ZendTestFiber, start)
 {
-	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(ZEND_THIS);
 	zval *params;
 	uint32_t param_count;
 	zend_array *named_params;
@@ -304,7 +305,7 @@ static ZEND_METHOD(_ZendTestFiber, resume)
 		Z_PARAM_ZVAL(value);
 	ZEND_PARSE_PARAMETERS_END();
 
-	fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_test_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(NULL, "Cannot resume a fiber that is not suspended");
@@ -325,7 +326,7 @@ static ZEND_METHOD(_ZendTestFiber, pipeTo)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(ZEND_THIS);
 	zend_test_fiber *target = (zend_test_fiber *) zend_test_fiber_class->create_object(zend_test_fiber_class);
 
 	target->fci = fci;
@@ -352,4 +353,5 @@ void zend_test_fiber_init(void)
 	zend_test_fiber_handlers = std_object_handlers;
 	zend_test_fiber_handlers.dtor_obj = zend_test_fiber_object_destroy;
 	zend_test_fiber_handlers.free_obj = zend_test_fiber_object_free;
+	zend_test_fiber_handlers.clone_obj = NULL;
 }

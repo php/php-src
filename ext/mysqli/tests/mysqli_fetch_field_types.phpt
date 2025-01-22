@@ -30,7 +30,7 @@ require_once 'skipifconnectfailure.inc';
             $sql = sprintf("INSERT INTO test(id) VALUES (%s)", $php_value);
 
         if (!mysqli_query($link, $sql)) {
-            printf("[003] '%s' - '%s' - '%s', [%d] %s\n", $sql_type, $create, $sql,
+            printf("[003] '%s' - '%s', [%d] %s\n", $sql_type, $sql,
                 mysqli_errno($link), mysqli_error($link));
             return false;
         }
@@ -67,7 +67,7 @@ require_once 'skipifconnectfailure.inc';
     $datatypes = array(
         MYSQLI_TYPE_TINY => array('TINYINT', 5),
         MYSQLI_TYPE_SHORT => array('SMALLINT', 10),
-        MYSQLI_TYPE_LONG => 'MYSQLI_TYPE_LONG - TODO add testing',
+        MYSQLI_TYPE_LONG => array('INT', 15),
         MYSQLI_TYPE_FLOAT => array('FLOAT', '1.3'),
         MYSQLI_TYPE_DOUBLE => array('DOUBLE', '1.4'),
         MYSQLI_TYPE_TIMESTAMP => array('TIMESTAMP', '2007-08-20 18:34:00'),
@@ -77,31 +77,23 @@ require_once 'skipifconnectfailure.inc';
         MYSQLI_TYPE_TIME => array('TIME', '18:41:38'),
         MYSQLI_TYPE_DATETIME => array('DATETIME', '2007-08-20 18:42:01'),
         MYSQLI_TYPE_YEAR => array('YEAR', '2007'),
-        MYSQLI_TYPE_ENUM => array('ENUM("everything", "is", "just", "wonderful")', 'is'),
-        // MYSQLI_TYPE_SET	=> array('SET("I", "smash", "the")', 'I,smash,the'), - string
-        // MYSQLI_TYPE_TINY_BLOB => array("TINYBLOB", "I got a tiny blog"), - blob
-        // MYSQLI_TYPE_MEDIUM_BLOB => array("MEDIUMBLOB", "No blob for masses"), - blob
-        // MYSQLI_TYPE_LONG_BLOB => array("LONGBLOB", "Small is beautiful?"), - blob
-        MYSQLI_TYPE_BLOB => array("LONGBLOB", 'MySQL does not report proper type. Use Length to distinct BLOB types'),
-        MYSQLI_TYPE_BLOB => array("MEDIUMBLOB", 'MySQL does not report proper type. Use Length to distinct BLOB types'),
-        MYSQLI_TYPE_BLOB => array("TINYBLOB", 'MySQL does not report proper type. Use Length to distinct BLOB types'),
+        // MYSQLI_TYPE_ENUM => array('ENUM("everything", "is", "just", "wonderful")', 'is'), // We cannot test ENUM because every ENUM value is just a plain string => MYSQLI_TYPE_STRING
+        // MYSQLI_TYPE_SET	=> array('SET("I", "smash", "the")', 'I,smash,the'),  // We cannot test SET because every SET value is just a plain string => MYSQLI_TYPE_STRING
+        // MYSQLI_TYPE_BLOB => array("LONGBLOB", 'MySQL does not report proper type. Use Length to distinct BLOB types'),
+        // MYSQLI_TYPE_BLOB => array("MEDIUMBLOB", 'MySQL does not report proper type. Use Length to distinct BLOB types'),
+        // MYSQLI_TYPE_BLOB => array("TINYBLOB", 'MySQL does not report proper type. Use Length to distinct BLOB types'),
         MYSQLI_TYPE_BLOB => array("BLOB", 'silly'),
         MYSQLI_TYPE_VAR_STRING => array("VARCHAR(32768)", 'varchar'),
-        MYSQLI_TYPE_STRING => 'MYSQLI_TYPE_STRING - TODO add testing',
         MYSQLI_TYPE_STRING => array('CHAR(1)', 'a'),
-        MYSQLI_TYPE_STRING => array("SET('I', 'smash', 'the')", 'smash'),
-        MYSQLI_TYPE_NULL => 'MYSQLI_TYPE_NULL - TODO add testing',
-        MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE - TODO add testing',
-        MYSQLI_TYPE_INTERVAL => 'MYSQLI_TYPE_INTERVAL - TODO add testing',
-        MYSQLI_TYPE_GEOMETRY => 'MYSQLI_TYPE_GEOMETRY - TODO add testing',
+        // MYSQLI_TYPE_NULL => array('CHAR(1) NULL', null), // We cannot test NULL because MySQL doesn't have standalone NULL type, only nullable types
+        // MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE - TODO add testing', // This is an internal type, not a real MySQL type
+        // MYSQLI_TYPE_GEOMETRY => array('GEOMETRY', 'TODO add testing'),
+        MYSQLI_TYPE_NEWDECIMAL => array('DECIMAL', '1.1'),
+        MYSQLI_TYPE_BIT => array('BIT', 0),
     );
 
-    $datatypes[MYSQLI_TYPE_NEWDECIMAL] = array('DECIMAL', '1.1');
-    $datatypes[MYSQLI_TYPE_BIT] = array('BIT', 0);
-
     foreach ($datatypes as $php_type => $datatype) {
-        if (is_array($datatype))
-            mysqli_field_datatypes($link, $datatype[0], $datatype[1], $php_type, $datatypes);
+        mysqli_field_datatypes($link, $datatype[0], $datatype[1], $php_type, $datatypes);
     }
 
     mysqli_close($link);

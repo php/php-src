@@ -15,14 +15,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
@@ -32,7 +32,7 @@ enum pdo_odbc_conv_result {
 	PDO_ODBC_CONV_FAIL
 };
 
-static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SWORD sqltype)
+static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SQLSMALLINT sqltype)
 {
 	if (!S->assume_utf8) return 0;
 	switch (sqltype) {
@@ -287,7 +287,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	RETCODE rc;
-	SWORD sqltype = 0, ctype = 0, scale = 0, nullable = 0;
+	SQLSMALLINT sqltype = 0, ctype = 0, scale = 0, nullable = 0;
 	SQLULEN precision = 0;
 	pdo_odbc_param *P;
 	zval *parameter;
@@ -563,7 +563,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
 	RETCODE rc;
-	SWORD	colnamelen;
+	SQLSMALLINT colnamelen;
 	SQLULEN	colsize;
 	SQLLEN displaysize = 0;
 
@@ -689,11 +689,12 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 				/* read block. 256 bytes => 255 bytes are actually read, the last 1 is NULL */
 				rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, buf2, 256, &C->fetched_len);
 
-				/* adjust `used` in case we have length info from the driver */
+				/* adjust `used` in case we have proper length info from the driver */
 				if (orig_fetched_len >= 0 && C->fetched_len >= 0) {
 					SQLLEN fixed_used = orig_fetched_len - C->fetched_len;
-					ZEND_ASSERT(fixed_used <= used + 1);
-					used = fixed_used;
+					if (fixed_used <= used + 1) {
+						used = fixed_used;
+					}
 				}
 
 				/* resize output buffer and reassemble block */

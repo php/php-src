@@ -6,4 +6,4 @@ const FOO_COMPILE_ERROR = "BAR"{0};
 var_dump(FOO_COMPILE_ERROR);
 ?>
 --EXPECTF--
-Fatal error: Array and string offset access syntax with curly braces is no longer supported in %s on line 2
+Parse error: syntax error, unexpected token "{", expecting "," or ";" in %s on line %d

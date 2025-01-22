@@ -6,6 +6,7 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0x20000
 opcache.preload=
+zend_test.observer.enabled=0
 --EXTENSIONS--
 opcache
 --FILE--
@@ -35,8 +36,7 @@ $_main:
 0004 INIT_FCALL 1 %d string("var_export")
 0005 SEND_VAR CV0($x) 1
 0006 DO_ICALL
-0007 ECHO string("
-")
+0007 ECHO string("\n")
 0008 JMP 0003
 0009 FE_FREE V1
 0010 RETURN int(1)

@@ -1,5 +1,5 @@
 --TEST--
-AST pretty-peinter
+AST pretty-printer
 --INI--
 zend.assertions=1
 --FILE--

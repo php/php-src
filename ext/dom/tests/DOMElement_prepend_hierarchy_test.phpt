@@ -22,6 +22,13 @@ $b_world = $b_hello->nextSibling;
 $b_hello->prepend($b_world->firstChild);
 var_dump($dom->saveHTML());
 
+echo "-- Prepend hello with world's child and text --\n";
+$dom = clone $dom_original;
+$b_hello = $dom->firstChild->firstChild;
+$b_world = $b_hello->nextSibling;
+$b_hello->prepend($b_world->firstChild, "foo");
+var_dump($dom->saveHTML());
+
 echo "-- Prepend world's child with hello --\n";
 $dom = clone $dom_original;
 $b_hello = $dom->firstChild->firstChild;
@@ -29,11 +36,28 @@ $b_world = $b_hello->nextSibling;
 $b_world->firstChild->prepend($b_hello);
 var_dump($dom->saveHTML());
 
+echo "-- Prepend world's child with hello and text --\n";
+$dom = clone $dom_original;
+$b_hello = $dom->firstChild->firstChild;
+$b_world = $b_hello->nextSibling;
+$b_world->firstChild->prepend($b_hello, "foo");
+var_dump($dom->saveHTML());
+
 echo "-- Prepend hello with itself --\n";
 $dom = clone $dom_original;
 $b_hello = $dom->firstChild->firstChild;
 try {
     $b_hello->prepend($b_hello);
+} catch (\DOMException $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump($dom->saveHTML());
+
+echo "-- Prepend hello with itself and text --\n";
+$dom = clone $dom_original;
+$b_hello = $dom->firstChild->firstChild;
+try {
+    $b_hello->prepend($b_hello, "foo");
 } catch (\DOMException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -70,12 +94,22 @@ string(39) "<p><b><b><i>world</i></b>hello</b></p>
 -- Prepend hello with world's child --
 string(39) "<p><b><i>world</i>hello</b><b></b></p>
 "
+-- Prepend hello with world's child and text --
+string(42) "<p><b><i>world</i>foohello</b><b></b></p>
+"
 -- Prepend world's child with hello --
 string(39) "<p><b><i><b>hello</b>world</i></b></p>
+"
+-- Prepend world's child with hello and text --
+string(42) "<p><b><i><b>hello</b>fooworld</i></b></p>
 "
 -- Prepend hello with itself --
 Hierarchy Request Error
 string(39) "<p><b>hello</b><b><i>world</i></b></p>
+"
+-- Prepend hello with itself and text --
+Hierarchy Request Error
+string(27) "<p><b><i>world</i></b></p>
 "
 -- Prepend world's i tag with the parent --
 Hierarchy Request Error

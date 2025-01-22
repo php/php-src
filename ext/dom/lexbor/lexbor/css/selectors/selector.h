@@ -110,7 +110,7 @@ typedef uint32_t lxb_css_selector_specificity_t;
     ((sp) & ~((((uint32_t) 1 << 9) - 1) << (n)))
 
 #define LXB_CSS_SELECTOR_SPECIFICITY_MASK                                     \
-    ((((uint32_t) 1 << 31) - 1) << (9))
+    ((((uint32_t) 1 << (32 - 9)) - 1) << (9))
 
 #define lxb_css_selector_sp_i(sp)  ((sp) >> 28)
 

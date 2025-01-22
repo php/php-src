@@ -44,8 +44,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 {
 	EG(flags) |= EG_FLAGS_OBJECT_STORE_NO_REUSE;
 	if (objects->top > 1) {
-		zend_fiber_switch_block();
-
 		uint32_t i;
 		for (i = 1; i < objects->top; i++) {
 			zend_object *obj = objects->object_buckets[i];
@@ -62,8 +60,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 				}
 			}
 		}
-
-		zend_fiber_switch_unblock();
 	}
 }
 
@@ -179,11 +175,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 
 		if (object->handlers->dtor_obj != zend_objects_destroy_object
 				|| object->ce->destructor) {
-			zend_fiber_switch_block();
 			GC_SET_REFCOUNT(object, 1);
 			object->handlers->dtor_obj(object);
 			GC_DELREF(object);
-			zend_fiber_switch_unblock();
 		}
 	}
 

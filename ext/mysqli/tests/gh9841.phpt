@@ -33,7 +33,7 @@ $mysqli->real_query("SELECT (
     UNION ALL
     SELECT 2
 ) FROM dual");
-$result = new mysqli_result($mysqli);
+new mysqli_result($mysqli);
 
 // now make sure the errors are thrown when not using silent mode
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -65,7 +65,7 @@ $mysqli->real_query("SELECT (
     SELECT 2
 ) FROM dual");
 try {
-    $result = new mysqli_result($mysqli);
+    new mysqli_result($mysqli);
 } catch (mysqli_sql_exception $e) {
     echo $e->getMessage()."\n";
 }

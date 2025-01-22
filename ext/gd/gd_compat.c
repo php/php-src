@@ -1,7 +1,7 @@
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #else
-#include "php_config.h"
+#include <php_config.h>
 #endif
 
 #include "gd_compat.h"

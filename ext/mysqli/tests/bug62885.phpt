@@ -17,7 +17,6 @@ try {
 }
 
 $test2 = array();
-$test2 = array();
 try {
     $test1 = mysqli_poll($test2, $test3, $tablica, 0);
 } catch (\ValueError $e) {

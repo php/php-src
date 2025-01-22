@@ -34,15 +34,11 @@ static char php_hex2int(int c) /* {{{ */
 {
 	if (isdigit(c)) {
 		return c - '0';
-	}
-	else if (c >= 'A' && c <= 'F') {
+	} else if (c >= 'A' && c <= 'F') {
 		return c - 'A' + 10;
-	}
-	else if (c >= 'a' && c <= 'f') {
+	} else {
+		ZEND_ASSERT(c >= 'a' && c <= 'f');
 		return c - 'a' + 10;
-	}
-	else {
-		return -1;
 	}
 }
 /* }}} */
@@ -145,7 +141,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 {
 	zend_ulong lp = 0;
 	unsigned char c, *d;
-	char *hex = "0123456789ABCDEF";
+	const char *hex = "0123456789ABCDEF";
 	zend_string *ret;
 
 	ret = zend_string_safe_alloc(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);

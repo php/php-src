@@ -30,7 +30,7 @@
 #include "win32/winutil.h"
 #endif
 
-#if HAVE_SCANDIR && HAVE_ALPHASORT && HAVE_DIRENT_H
+#if defined(HAVE_SCANDIR) && defined(HAVE_ALPHASORT) && defined(HAVE_DIRENT_H)
 #include <dirent.h>
 #endif
 
@@ -378,7 +378,7 @@ static void php_load_zend_extension_cb(void *arg)
 
 #ifdef PHP_WIN32
 		if (!php_win32_image_compatible(handle, &err1)) {
-				php_error(E_CORE_WARNING, err1);
+				php_error(E_CORE_WARNING, "%s", err1);
 				efree(err1);
 				efree(libpath);
 				DL_UNLOAD(handle);
@@ -395,7 +395,7 @@ static void php_load_zend_extension_cb(void *arg) { }
 #endif
 /* }}} */
 
-static void append_ini_path(char *php_ini_search_path, int search_path_size, const char *path)
+static void append_ini_path(char *php_ini_search_path, size_t search_path_size, const char *path)
 {
 	static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 
@@ -432,7 +432,7 @@ int php_init_config(void)
 		php_ini_search_path = sapi_module.php_ini_path_override;
 		free_ini_search_path = 0;
 	} else if (!sapi_module.php_ini_ignore) {
-		int search_path_size;
+		size_t search_path_size;
 		char *default_location;
 		char *env_location;
 #ifdef PHP_WIN32
@@ -478,7 +478,7 @@ int php_init_config(void)
 		 * Prepare search path
 		 */
 
-		search_path_size = MAXPATHLEN * 4 + (int)strlen(env_location) + 3 + 1;
+		search_path_size = MAXPATHLEN * 4 + strlen(env_location) + 3 + 1;
 		php_ini_search_path = (char *) emalloc(search_path_size);
 		free_ini_search_path = 1;
 		php_ini_search_path[0] = 0;

@@ -107,7 +107,7 @@
 ; error_reporting
 ;   Default Value: E_ALL
 ;   Development Value: E_ALL
-;   Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
+;   Production Value: E_ALL & ~E_DEPRECATED
 
 ; log_errors
 ;   Default Value: Off
@@ -118,6 +118,11 @@
 ;   Default Value: -1 (Unlimited)
 ;   Development Value: 60 (60 seconds)
 ;   Production Value: 60 (60 seconds)
+
+; mysqlnd.collect_memory_statistics
+;   Default Value: Off
+;   Development Value: On
+;   Production Value: Off
 
 ; output_buffering
 ;   Default Value: Off
@@ -138,16 +143,6 @@
 ;   Default Value: 100
 ;   Development Value: 1000
 ;   Production Value: 1000
-
-; session.sid_bits_per_character
-;   Default Value: 4
-;   Development Value: 5
-;   Production Value: 5
-
-; session.sid_length
-;   Default Value: 32
-;   Development Value: 26
-;   Production Value: 26
 
 ; short_open_tag
 ;   Default Value: On
@@ -452,7 +447,7 @@ memory_limit = 128M
 ; operators. The error level constants are below here for convenience as well as
 ; some common settings and their meanings.
 ; By default, PHP is set to take action on all errors, notices and warnings EXCEPT
-; those related to E_NOTICE and E_STRICT, which together cover best practices and
+; those related to E_NOTICE, which together cover best practices and
 ; recommended coding standards in PHP. For performance reasons, this is the
 ; recommend error reporting setting. Your production server shouldn't be wasting
 ; resources complaining about best practices and coding standards. That's what
@@ -472,9 +467,6 @@ memory_limit = 128M
 ;                     intentional (e.g., using an uninitialized variable and
 ;                     relying on the fact it is automatically initialized to an
 ;                     empty string)
-; E_STRICT          - run-time notices, enable to have PHP suggest changes
-;                     to your code which will ensure the best interoperability
-;                     and forward compatibility of your code
 ; E_CORE_ERROR      - fatal errors that occur during PHP's initial startup
 ; E_CORE_WARNING    - warnings (non-fatal errors) that occur during PHP's
 ;                     initial startup
@@ -490,11 +482,10 @@ memory_limit = 128M
 ; Common Values:
 ;   E_ALL (Show all errors, warnings and notices including coding standards.)
 ;   E_ALL & ~E_NOTICE  (Show all errors, except for notices)
-;   E_ALL & ~E_NOTICE & ~E_STRICT  (Show all errors, except for notices and coding standards warnings.)
 ;   E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR  (Show only errors)
 ; Default Value: E_ALL
 ; Development Value: E_ALL
-; Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
+; Production Value: E_ALL & ~E_DEPRECATED
 ; https://php.net/error-reporting
 error_reporting = E_ALL
 
@@ -928,13 +919,8 @@ default_socket_timeout = 60
 ;   Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=bz2
-
-; The ldap extension must be before curl if OpenSSL 1.0.2 and OpenLDAP is used
-; otherwise it results in segfault when unloading after using SASL.
-; See https://github.com/php/php-src/issues/8620 for more info.
-;extension=ldap
-
 ;extension=curl
+;extension=exif
 ;extension=ffi
 ;extension=ftp
 ;extension=fileinfo
@@ -942,8 +928,8 @@ default_socket_timeout = 60
 ;extension=gettext
 ;extension=gmp
 ;extension=intl
+;extension=ldap
 ;extension=mbstring
-;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
 ;extension=odbc
 ;extension=openssl
@@ -1172,10 +1158,7 @@ mysqli.allow_persistent = On
 ; https://php.net/mysqli.max-links
 mysqli.max_links = -1
 
-; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
-; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
-; at MYSQL_PORT.
+; Default port number for mysqli_connect().
 ; https://php.net/mysqli.default-port
 mysqli.default_port = 3306
 
@@ -1184,15 +1167,15 @@ mysqli.default_port = 3306
 ; https://php.net/mysqli.default-socket
 mysqli.default_socket =
 
-; Default host for mysqli_connect() (doesn't apply in safe mode).
+; Default host for mysqli_connect().
 ; https://php.net/mysqli.default-host
 mysqli.default_host =
 
-; Default user for mysqli_connect() (doesn't apply in safe mode).
+; Default user for mysqli_connect().
 ; https://php.net/mysqli.default-user
 mysqli.default_user =
 
-; Default password for mysqli_connect() (doesn't apply in safe mode).
+; Default password for mysqli_connect().
 ; Note that this is generally a *bad* idea to store passwords in this file.
 ; *Any* user with PHP access can run 'echo get_cfg_var("mysqli.default_pw")
 ; and reveal this password!  And of course, any users with read access to this
@@ -1212,6 +1195,9 @@ mysqlnd.collect_statistics = On
 
 ; Enable / Disable collection of memory usage statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
+; Default Value: Off
+; Development Value: On
+; Production Value: Off
 mysqlnd.collect_memory_statistics = On
 
 ; Records communication from all extensions using mysqlnd to the specified log
@@ -1427,15 +1413,6 @@ session.cache_expire = 180
 ; https://php.net/session.use-trans-sid
 session.use_trans_sid = 0
 
-; Set session ID character length. This value could be between 22 to 256.
-; Shorter length than default is supported only for compatibility reason.
-; Users should use 32 or more chars.
-; https://php.net/session.sid-length
-; Default Value: 32
-; Development Value: 26
-; Production Value: 26
-session.sid_length = 26
-
 ; The URL rewriter will look for URLs in a defined set of HTML tags.
 ; <form> is special; if you include them here, the rewriter will
 ; add a hidden <input> field with the info which is otherwise appended
@@ -1460,18 +1437,6 @@ session.trans_sid_tags = "a=href,area=href,frame=src,form="
 ; Development Value: ""
 ; Production Value: ""
 ;session.trans_sid_hosts=""
-
-; Define how many bits are stored in each character when converting
-; the binary hash data to something readable.
-; Possible values:
-;   4  (4 bits: 0-9, a-f)
-;   5  (5 bits: 0-9, a-v)
-;   6  (6 bits: 0-9, a-z, A-Z, "-", ",")
-; Default Value: 4
-; Development Value: 5
-; Production Value: 5
-; https://php.net/session.hash-bits-per-character
-session.sid_bits_per_character = 5
 
 ; Enable upload progress tracking in $_SESSION
 ; Default Value: On
@@ -1641,7 +1606,7 @@ zend.assertions = 1
 ; With mbstring support this will automatically be converted into the encoding
 ; given by corresponding encode setting. When empty mbstring.internal_encoding
 ; is used. For the decode settings you can distinguish between motorola and
-; intel byte order. A decode setting cannot be empty.
+; intel byte order. A decode setting must not be empty.
 ; https://php.net/exif.encode-unicode
 ;exif.encode_unicode = ISO-8859-15
 
@@ -1805,6 +1770,15 @@ ldap.max_links = -1
 ; It should improve performance when SHM memory is full, at server restart or
 ; SHM reset. The default "" disables file based caching.
 ;opcache.file_cache=
+
+; Enables or disables read-only mode for the second level cache directory.
+; It should improve performance for read-only containers,
+; when the cache is pre-warmed and packaged alongside the application.
+; Best used with `opcache.validate_timestamps=0`, `opcache.enable_file_override=1`
+; and `opcache.file_cache_consistency_checks=0`.
+; Note: A cache generated with a different build of PHP, a different file path,
+; or different settings (including which extensions are loaded), may be ignored.
+;opcache.file_cache_read_only=0
 
 ; Enables or disables opcode caching in shared memory.
 ;opcache.file_cache_only=0

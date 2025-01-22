@@ -1,7 +1,7 @@
 --TEST--
 PDO_mysql connect through PDO::connect
 --EXTENSIONS--
-PDO_odbc
+pdo_odbc
 --SKIPIF--
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
@@ -12,9 +12,9 @@ PDOTest::skip();
 
 require 'ext/pdo/tests/pdo_test.inc';
 $config = PDOTest::get_config(__DIR__ . "/common.phpt");
-$db = PdoOdbc::connect($config['ENV']['PDOTEST_DSN'], $config['ENV']['PDOTEST_USER'], $config['ENV']['PDOTEST_PASS']);
-if (!$db instanceof PdoOdbc) {
-    echo "Wrong class type. Should be PdoOdbc but is " . get_class($db) . "\n";
+$db = Pdo\Odbc::connect($config['ENV']['PDOTEST_DSN'], $config['ENV']['PDOTEST_USER'], $config['ENV']['PDOTEST_PASS']);
+if (!$db instanceof Pdo\Odbc) {
+    echo "Wrong class type. Should be Pdo\Odbc but is " . get_class($db) . "\n";
 }
 
 $db->exec('CREATE TABLE pdoodbc_002(id INT NOT NULL PRIMARY KEY, name VARCHAR(10))');

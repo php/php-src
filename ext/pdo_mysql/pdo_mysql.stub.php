@@ -2,11 +2,13 @@
 
 /** @generate-class-entries */
 
+namespace Pdo;
+
 /**
  * @strict-properties
  * @not-serializable
  */
-class PdoMysql extends PDO
+class Mysql extends \PDO
 {
     /** @cvalue PDO_MYSQL_ATTR_USE_BUFFERED_QUERY */
     public const int ATTR_USE_BUFFERED_QUERY = UNKNOWN;
@@ -31,7 +33,7 @@ class PdoMysql extends PDO
     /** @cvalue PDO_MYSQL_ATTR_COMPRESS */
     public const int ATTR_COMPRESS = UNKNOWN;
 
-    /** @cvalue PDO_MYSQL_ATTR_DIRECT_QUERY */
+    /** @cvalue PDO_ATTR_EMULATE_PREPARES */
     public const int ATTR_DIRECT_QUERY = UNKNOWN;
 
     /** @cvalue PDO_MYSQL_ATTR_FOUND_ROWS */

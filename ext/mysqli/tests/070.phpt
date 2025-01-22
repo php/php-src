@@ -15,6 +15,8 @@ require_once 'skipifconnectfailure.inc';
     $mysql->close();
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
+
+Deprecated: Method mysqli::ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this method is now redundant in %s
 bool(true)
 done!

@@ -36,34 +36,34 @@ $obj = $ra->newInstance();
 var_dump($args, $obj);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
   NULL
   [1]=>
-  object(stdClass)#3 (0) {
+  object(stdClass)#%d (0) {
   }
 }
-object(MyAttribute)#4 (2) {
+object(MyAttribute)#%d (2) {
   ["x"]=>
   NULL
   ["y"]=>
-  object(stdClass)#5 (0) {
+  object(stdClass)#%d (0) {
   }
 }
 bool(true)
 bool(true)
 array(2) {
   ["y"]=>
-  object(stdClass)#2 (0) {
+  object(stdClass)#%d (0) {
   }
   ["x"]=>
   NULL
 }
-object(MyAttribute)#10 (2) {
+object(MyAttribute)#%d (2) {
   ["x"]=>
   NULL
   ["y"]=>
-  object(stdClass)#11 (0) {
+  object(stdClass)#%d (0) {
   }
 }

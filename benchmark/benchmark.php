@@ -2,6 +2,12 @@
 
 require_once __DIR__ . '/shared.php';
 
+foreach (array("mbstring", "sockets", "mysqli", "openssl", "gmp") as $ext) {
+    if (!extension_loaded($ext)) {
+        throw new LogicException("Extension $ext is required.");
+    }
+}
+
 $storeResult = ($argv[1] ?? 'false') === 'true';
 $phpCgi = $argv[2] ?? dirname(PHP_BINARY) . '/php-cgi';
 if (!file_exists($phpCgi)) {

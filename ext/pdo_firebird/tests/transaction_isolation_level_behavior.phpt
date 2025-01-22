@@ -51,7 +51,7 @@ $dbh = new PDO(
     PDO_FIREBIRD_TEST_DSN,
     PDO_FIREBIRD_TEST_USER,
     PDO_FIREBIRD_TEST_PASS,
-    [PDO::FB_TRANSACTION_ISOLATION_LEVEL => PDO::FB_READ_COMMITTED]
+    [Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL => Pdo\Firebird::READ_COMMITTED]
 );
 echo "begin transaction\n";
 $dbh->beginTransaction();
@@ -74,7 +74,7 @@ $dbh = new PDO(
     PDO_FIREBIRD_TEST_DSN,
     PDO_FIREBIRD_TEST_USER,
     PDO_FIREBIRD_TEST_PASS,
-    [PDO::FB_TRANSACTION_ISOLATION_LEVEL => PDO::FB_REPEATABLE_READ]
+    [Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL => Pdo\Firebird::REPEATABLE_READ]
 );
 echo "begin transaction\n";
 $dbh->beginTransaction();
@@ -104,7 +104,7 @@ $dbh = new PDO(
     PDO_FIREBIRD_TEST_DSN,
     PDO_FIREBIRD_TEST_USER,
     PDO_FIREBIRD_TEST_PASS,
-    [PDO::FB_TRANSACTION_ISOLATION_LEVEL => PDO::FB_SERIALIZABLE]
+    [Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL => Pdo\Firebird::SERIALIZABLE]
 );
 echo "begin transaction\n";
 $dbh->beginTransaction();

@@ -12,8 +12,8 @@ spl_autoload_register(function ($name) {
 var_dump(class_exists('NotExistingClass'));
 
 ?>
---EXPECT--
-{closure}(NotExistingClass)
+--EXPECTF--
+{closure:%s:%d}(NotExistingClass)
 bool(false)
-{closure}(NotExistingClass), done
+{closure:%s:%d}(NotExistingClass), done
 bool(false)

@@ -74,7 +74,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_UConverter_trans
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(UConverter, __construct);
 ZEND_METHOD(UConverter, convert);
 ZEND_METHOD(UConverter, fromUCallback);
@@ -94,7 +93,6 @@ ZEND_METHOD(UConverter, setSourceEncoding);
 ZEND_METHOD(UConverter, setSubstChars);
 ZEND_METHOD(UConverter, toUCallback);
 ZEND_METHOD(UConverter, transcode);
-
 
 static const zend_function_entry class_UConverter_methods[] = {
 	ZEND_ME(UConverter, __construct, arginfo_class_UConverter___construct, ZEND_ACC_PUBLIC)
@@ -124,8 +122,7 @@ static zend_class_entry *register_class_UConverter(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "UConverter", class_UConverter_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_REASON_UNASSIGNED_value;
 	ZVAL_LONG(&const_REASON_UNASSIGNED_value, UCNV_UNASSIGNED);

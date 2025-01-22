@@ -15,10 +15,9 @@ runs:
         set -x
         LIBMYSQL=${{ inputs.libmysql }}
         MYSQL_BASE=${LIBMYSQL%%-linux-*}
-        MYSQL_VERSION=${MYSQL_BASE#*-}
         MYSQL_DIR=$HOME/$MYSQL_BASE
         mkdir -p $MYSQL_DIR
-        URL=https://cdn.mysql.com/Downloads/MySQL-${MYSQL_VERSION%.*}/$LIBMYSQL
+        URL=https://downloads.mysql.com/archives/get/p/23/file/$LIBMYSQL
         wget -nv $URL
         tar -xf $LIBMYSQL --strip-components=1 -C $MYSQL_DIR
         PDO_MYSQL=${MYSQL_DIR}

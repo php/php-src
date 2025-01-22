@@ -30,10 +30,10 @@
 #include "win32/winutil.h"
 #include <process.h>
 #endif
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -49,6 +49,8 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/date/php_date.h"
+#include "ext/random/php_random_csprng.h"
+#include "ext/random/php_random_zend_utils.h"
 #include "php_variables.h"
 #include "ext/standard/credits.h"
 #ifdef PHP_WIN32
@@ -81,7 +83,6 @@
 #include "SAPI.h"
 #include "rfc1867.h"
 
-#include "ext/standard/html_tables.h"
 #include "main_arginfo.h"
 /* }}} */
 
@@ -96,6 +97,8 @@ PHPAPI size_t core_globals_offset;
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
+const char php_build_date[] = __DATE__ " " __TIME__;
+
 PHPAPI const char *php_version(void)
 {
 	return PHP_VERSION;
@@ -104,6 +107,47 @@ PHPAPI const char *php_version(void)
 PHPAPI unsigned int php_version_id(void)
 {
 	return PHP_VERSION_ID;
+}
+
+PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
+{
+	char *version_info;
+	spprintf(&version_info, 0, "PHP %s (%s) (built: %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
+		PHP_VERSION, sapi_module->name, php_build_date,
+#ifdef ZTS
+		"ZTS"
+#else
+		"NTS"
+#endif
+#ifdef PHP_BUILD_COMPILER
+		" " PHP_BUILD_COMPILER
+#endif
+#ifdef PHP_BUILD_ARCH
+		" " PHP_BUILD_ARCH
+#endif
+#if ZEND_DEBUG
+		" DEBUG"
+#endif
+#ifdef HAVE_GCOV
+		" GCOV"
+#endif
+		,
+#ifdef PHP_BUILD_PROVIDER
+		"Built by " PHP_BUILD_PROVIDER "\n"
+#else
+					""
+#endif
+		,
+		get_zend_version()
+	);
+	return version_info;
+}
+
+PHPAPI void php_print_version(sapi_module_struct *sapi_module)
+{
+	char *version_info = php_get_version(sapi_module);
+	php_printf("%s", version_info);
+	efree(version_info);
 }
 
 /* {{{ PHP_INI_MH */
@@ -652,6 +696,11 @@ static PHP_INI_MH(OnUpdateMailLog)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMailForceExtra)
 {
+	/* Check that INI setting does not have any nul bytes */
+	if (new_value && ZSTR_LEN(new_value) != strlen(ZSTR_VAL(new_value))) {
+		/* TODO Emit warning? */
+		return FAILURE;
+	}
 	/* Don't allow changing it in htaccess */
 	if (stage == PHP_INI_STAGE_HTACCESS) {
 			return FAILURE;
@@ -1322,10 +1371,6 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 				error_type_str = "Notice";
 				syslog_type_int = LOG_NOTICE;
 				break;
-			case E_STRICT:
-				error_type_str = "Strict Standards";
-				syslog_type_int = LOG_INFO;
-				break;
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 				error_type_str = "Deprecated";
@@ -1413,6 +1458,14 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					zend_objects_store_mark_destructed(&EG(objects_store));
+					if (CG(in_compilation) && (type == E_COMPILE_ERROR || type == E_PARSE)) {
+						/* We bailout during compilation which may for example leave stale entries in CG(loop_var_stack).
+						 * If code is compiled during shutdown, we need to make sure the compiler is reset to a clean state,
+						 * otherwise this will lead to incorrect compilation during shutdown.
+						 * We don't do a full re-initialization via init_compiler() because that will also reset streams and resources. */
+						shutdown_compiler();
+						zend_init_compiler_data_structures();
+					}
 					zend_bailout();
 					return;
 				}
@@ -1460,12 +1513,25 @@ PHPAPI char *php_get_current_user(void)
 		struct passwd *retpwptr = NULL;
 		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 		char *pwbuf;
+		int err;
 
 		if (pwbuflen < 1) {
-			return "";
+			pwbuflen = 1024;
 		}
+# if ZEND_DEBUG
+		/* Test retry logic */
+		pwbuflen = 1;
+# endif
 		pwbuf = emalloc(pwbuflen);
-		if (getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr) != 0) {
+
+try_again:
+		err = getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr);
+		if (err != 0) {
+			if (err == ERANGE) {
+				pwbuflen *= 2;
+				pwbuf = erealloc(pwbuf, pwbuflen);
+				goto try_again;
+			}
 			efree(pwbuf);
 			return "";
 		}
@@ -2045,7 +2111,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zend_module_entry *module;
 
 #ifdef PHP_WIN32
-	WORD wVersionRequested = MAKEWORD(2, 0);
+	WORD wVersionRequested = MAKEWORD(2, 2);
 	WSADATA wsaData;
 
 	old_invalid_parameter_handler =
@@ -2054,8 +2120,9 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		_set_invalid_parameter_handler(old_invalid_parameter_handler);
 	}
 
-	/* Disable the message box for assertions.*/
+	/* Disable the message box for assertions and errors.*/
 	_CrtSetReportMode(_CRT_ASSERT, 0);
+	_CrtSetReportMode(_CRT_ERROR, 0);
 #endif
 
 #ifdef ZTS
@@ -2093,6 +2160,11 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 #endif
 	gc_globals_ctor();
 
+	zend_observer_startup();
+#if ZEND_DEBUG
+	zend_observer_error_register(report_zend_debug_error_notify_cb);
+#endif
+
 	zuf.error_function = php_error_cb;
 	zuf.printf_function = php_printf;
 	zuf.write_function = php_output_write;
@@ -2106,14 +2178,11 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zuf.printf_to_smart_str_function = php_printf_to_smart_str;
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
+	zuf.random_bytes_function = php_random_bytes_ex;
+	zuf.random_bytes_insecure_function = php_random_bytes_insecure_for_zend;
 	zend_startup(&zuf);
 	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
-
-	zend_observer_startup();
-#if ZEND_DEBUG
-	zend_observer_error_register(report_zend_debug_error_notify_cb);
-#endif
 
 #if HAVE_TZSET
 	tzset();
@@ -2122,7 +2191,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 #ifdef PHP_WIN32
 	char *img_err;
 	if (!php_win32_crt_compatible(&img_err)) {
-		php_error(E_CORE_WARNING, img_err);
+		php_error(E_CORE_WARNING, "%s", img_err);
 		efree(img_err);
 		return FAILURE;
 	}
@@ -2132,21 +2201,19 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		fprintf(stderr, "\nwinsock.dll unusable. %d\n", WSAGetLastError());
 		return FAILURE;
 	}
+
+	if (UNEXPECTED(HIBYTE(wsaData.wVersion) != 2)) {
+		fprintf(stderr, "\nversion not found in winsock.dll. %d\n", WSAGetLastError());
+		WSACleanup();
+		return FAILURE;
+	}
 	php_win32_signal_ctrl_handler_init();
 #endif
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
 
-    register_main_symbols(module_number);
-
-    REGISTER_MAIN_STRINGL_CONSTANT("PHP_SAPI", sapi_module.name, strlen(sapi_module.name), CONST_PERSISTENT | CONST_NO_FILE_CACHE);
-
 	php_binary_init();
-	if (PG(php_binary)) {
-		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_NO_FILE_CACHE);
-	} else {
-		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_NO_FILE_CACHE);
-	}
+	register_main_symbols(module_number);
 
 	/* this will read in php.ini, set up the configuration parameters,
 	   load zend extensions and register php function extensions
@@ -2247,6 +2314,9 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 
 	/* freeze the list of observer fcall_init handlers */
 	zend_observer_post_startup();
+
+	/* freeze the list of persistent internal functions */
+	zend_init_internal_run_time_cache();
 
 	/* Extensions that add engine hooks after this point do so at their own peril */
 	zend_finalize_system_id();
@@ -2613,7 +2683,9 @@ PHPAPI int php_handle_auth_data(const char *auth)
 			if (pass) {
 				*pass++ = '\0';
 				SG(request_info).auth_user = estrndup(ZSTR_VAL(user), ZSTR_LEN(user));
-				SG(request_info).auth_password = estrdup(pass);
+				if (strlen(pass) > 0) {
+					SG(request_info).auth_password = estrdup(pass);
+				}
 				ret = 0;
 			}
 			zend_string_free(user);

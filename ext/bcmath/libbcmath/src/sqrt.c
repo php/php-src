@@ -38,30 +38,32 @@
 
 bool bc_sqrt(bc_num *num, size_t scale)
 {
+	const bc_num local_num = *num;
 	/* Initial checks. */
-	int cmp_res = bc_compare(*num, BCG(_zero_));
-	if (cmp_res < 0) {
-		return false; /* error */
-	} else {
-		if (cmp_res == 0) {
-			bc_free_num (num);
-			*num = bc_copy_num(BCG(_zero_));
-			return true;
-		}
+	if (bc_is_neg(local_num)) {
+		/* Cannot take the square root of a negative number */
+		return false;
 	}
-	cmp_res = bc_compare(*num, BCG(_one_));
-	if (cmp_res == 0) {
+	/* Square root of 0 is 0 */
+	if (bc_is_zero(local_num)) {
+		bc_free_num (num);
+		*num = bc_copy_num(BCG(_zero_));
+		return true;
+	}
+
+	bcmath_compare_result num_cmp_one = bc_compare(local_num, BCG(_one_), local_num->n_scale);
+	/* Square root of 1 is 1 */
+	if (num_cmp_one == BCMATH_EQUAL) {
 		bc_free_num (num);
 		*num = bc_copy_num(BCG(_one_));
 		return true;
 	}
 
 	/* Initialize the variables. */
-	size_t rscale;
 	size_t cscale;
 	bc_num guess, guess1, point5, diff;
+	size_t rscale = MAX(scale, local_num->n_scale);
 
-	rscale = MAX (scale, (*num)->n_scale);
 	bc_init_num(&guess1);
 	bc_init_num(&diff);
 	point5 = bc_new_num (1, 1);
@@ -69,17 +71,17 @@ bool bc_sqrt(bc_num *num, size_t scale)
 
 
 	/* Calculate the initial guess. */
-	if (cmp_res < 0) {
+	if (num_cmp_one == BCMATH_RIGHT_GREATER) {
 		/* The number is between 0 and 1.  Guess should start at 1. */
 		guess = bc_copy_num(BCG(_one_));
-		cscale = (*num)->n_scale;
+		cscale = local_num->n_scale;
 	} else {
 		/* The number is greater than 1.  Guess should start at 10^(exp/2). */
 		bc_init_num(&guess);
 		bc_int2num(&guess, 10);
 
-		bc_int2num(&guess1, (*num)->n_len);
-		bc_multiply(guess1, point5, &guess1, 0);
+		bc_int2num(&guess1, local_num->n_len);
+		bc_multiply_ex(guess1, point5, &guess1, 0);
 		guess1->n_scale = 0;
 		bc_raise_bc_exponent(guess, guess1, &guess, 0);
 		bc_free_num (&guess1);
@@ -92,9 +94,9 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		bc_free_num (&guess1);
 		guess1 = bc_copy_num(guess);
 		bc_divide(*num, guess, &guess, cscale);
-		bc_add(guess, guess1, &guess, 0);
-		bc_multiply(guess, point5, &guess, cscale);
-		bc_sub(guess, guess1, &diff, cscale + 1);
+		bc_add_ex(guess, guess1, &guess, 0);
+		bc_multiply_ex(guess, point5, &guess, cscale);
+		bc_sub_ex(guess, guess1, &diff, cscale + 1);
 		if (bc_is_near_zero(diff, cscale)) {
 			if (cscale < rscale + 1) {
 				cscale = MIN (cscale * 3, rscale + 1);
