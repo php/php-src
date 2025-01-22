@@ -1189,7 +1189,7 @@ function is_pgo_desired(mod)
 	return eval("!!" + varname);
 }
 
-function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
+function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir, duplicate_sources)
 {
 	var SAPI = sapiname.toUpperCase();
 	var ldflags;
@@ -1213,7 +1213,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		ADD_FLAG('CFLAGS_' + SAPI, cflags);
 	}
 
-	ADD_SOURCES(configure_module_dirname, file_list, sapiname, obj_dir);
+	ADD_SOURCES(configure_module_dirname, file_list, sapiname, obj_dir, duplicate_sources);
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# SAPI " + sapiname);
 	MFO.WriteBlankLines(1);
@@ -1550,7 +1550,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	extensions_enabled[extensions_enabled.length] = [extname, shared ? 'shared' : 'static', false];
 }
 
-function ADD_SOURCES(dir, file_list, target, obj_dir)
+function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 {
 	var i;
 	var tv;
@@ -1654,8 +1654,10 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		srcs_by_dir[build_dir].push(i);
 	}
 
-	/* Create makefile build targets and dependencies. */
-	MFO.WriteLine(objs_line + ": " + srcs_line);
+	if (!duplicate_sources) {
+		/* Create makefile build targets and dependencies. */
+		MFO.WriteLine(objs_line + ": " + srcs_line);
+	}
 
 	/* Create target subdirs if any and produce the compiler calls, /mp is respected if enabled. */
 	for (var k in srcs_by_dir) {
@@ -1737,38 +1739,40 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			}
 		}
 
-		if (PHP_MP_DISABLED) {
-			for (var j in srcs_by_dir[k]) {
-				src = file_list[srcs_by_dir[k][j]];
+		if (!duplicate_sources) {
+			if (PHP_MP_DISABLED) {
+				for (var j in srcs_by_dir[k]) {
+					src = file_list[srcs_by_dir[k][j]];
 
-				var _tmp = src.split("\\");
-				var filename = _tmp.pop();
-				obj = filename.replace(re, ".obj");
+					var _tmp = src.split("\\");
+					var filename = _tmp.pop();
+					obj = filename.replace(re, ".obj");
 
-				MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+
+					if ("clang" == PHP_ANALYZER) {
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
+					} else if ("cppcheck" == PHP_ANALYZER) {
+						MFO.WriteLine("\t\"" + CMD_MOD1 + "$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src);
+					}else if (PHP_ANALYZER == "pvs") {
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+							+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
+					}
+				}
+			} else {
+				/* TODO create a response file at least for the source files to work around the cmd line length limit. */
+				var src_line = "";
+				for (var j in srcs_by_dir[k]) {
+					src_line += dir + "\\" + file_list[srcs_by_dir[k][j]] + " ";
+				}
+
+				MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
 
 				if ("clang" == PHP_ANALYZER) {
-					MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
+					MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
 				} else if ("cppcheck" == PHP_ANALYZER) {
-					MFO.WriteLine("\t\"" + CMD_MOD1 + "$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src);
-				}else if (PHP_ANALYZER == "pvs") {
-					MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
-						+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
+					MFO.WriteLine("\t\"$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + src_line);
 				}
-			}
-		} else {
-			/* TODO create a response file at least for the source files to work around the cmd line length limit. */
-			var src_line = "";
-			for (var j in srcs_by_dir[k]) {
-				src_line += dir + "\\" + file_list[srcs_by_dir[k][j]] + " ";
-			}
-
-			MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
-
-			if ("clang" == PHP_ANALYZER) {
-				MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
-			} else if ("cppcheck" == PHP_ANALYZER) {
-				MFO.WriteLine("\t\"$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + src_line);
 			}
 		}
 	}
