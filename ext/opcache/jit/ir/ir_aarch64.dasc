@@ -925,7 +925,7 @@ binop_fp:
 			if (ctx->flags & IR_FUNCTION) {
 				ctx->flags |= IR_USE_FRAME_POINTER;
 			}
-			ctx->flags2 |= IR_HAS_CALLS | IR_16B_FRAME_ALIGNMENT;
+			ctx->flags2 |= IR_HAS_CALLS;
 			return IR_CALL;
 		case IR_VAR:
 			return IR_SKIPPED | IR_VAR;
@@ -941,7 +941,7 @@ binop_fp:
 					}
 				}
 				ctx->flags |= IR_USE_FRAME_POINTER;
-				ctx->flags2 |= IR_HAS_ALLOCA | IR_16B_FRAME_ALIGNMENT;
+				ctx->flags2 |= IR_HAS_ALLOCA;
 			}
 			return IR_ALLOCA;
 		case IR_LOAD:
@@ -5788,12 +5788,12 @@ void ir_fix_stack_frame(ir_ctx *ctx)
 	ctx->stack_frame_alignment = 0;
 	ctx->call_stack_size = 0;
 
-	if ((ctx->flags2 & IR_16B_FRAME_ALIGNMENT) && !(ctx->flags & IR_FUNCTION)) {
+	if (!(ctx->flags & IR_FUNCTION)) {
 		while (IR_ALIGNED_SIZE(ctx->stack_frame_size, 16) != ctx->stack_frame_size) {
 			ctx->stack_frame_size += sizeof(void*);
 			ctx->stack_frame_alignment += sizeof(void*);
 		}
-	} else if (ctx->flags2 & IR_16B_FRAME_ALIGNMENT) {
+	} else {
 		/* Stack must be 16 byte aligned */
 		if (!(ctx->flags & IR_FUNCTION)) {
 			while (IR_ALIGNED_SIZE(ctx->stack_frame_size, 16) != ctx->stack_frame_size) {
