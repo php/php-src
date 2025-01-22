@@ -92,7 +92,7 @@ int ir_build_cfg(ir_ctx *ctx)
 	uint32_t len = ir_bitset_len(ctx->insns_count);
 	ir_bitset bb_starts = ir_mem_calloc(len * 2, IR_BITSET_BITS / 8);
 	ir_bitset bb_leaks = bb_starts + len;
-	_blocks = ir_mem_calloc(ctx->insns_count, sizeof(uint32_t));
+	_blocks = ir_mem_calloc(ctx->insns_limit, sizeof(uint32_t));
 	ir_worklist_init(&worklist, ctx->insns_count);
 
 	/* First try to perform backward DFS search starting from "stop" nodes */

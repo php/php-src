@@ -348,6 +348,12 @@ static void ir_grow_top(ir_ctx *ctx)
 		memset(ctx->use_lists + old_insns_limit, 0,
 			(ctx->insns_limit - old_insns_limit) * sizeof(ir_use_list));
 	}
+
+	if (ctx->cfg_map) {
+		ctx->cfg_map = ir_mem_realloc(ctx->cfg_map, ctx->insns_limit * sizeof(uint32_t));
+		memset(ctx->cfg_map + old_insns_limit, 0,
+			(ctx->insns_limit - old_insns_limit) * sizeof(uint32_t));
+	}
 }
 
 static ir_ref ir_next_insn(ir_ctx *ctx)
