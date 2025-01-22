@@ -1479,7 +1479,7 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 		smart_str_appends(&var, ZSTR_VAL(PS(id)));
 		smart_str_0(&var);
 		if (sid) {
-			zval_ptr_dtor_str(sid);
+			zval_ptr_dtor(sid);
 			ZVAL_STR(sid, smart_str_extract(&var));
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s), 0);
@@ -1487,7 +1487,7 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 		}
 	} else {
 		if (sid) {
-			zval_ptr_dtor_str(sid);
+			zval_ptr_dtor(sid);
 			ZVAL_EMPTY_STRING(sid);
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", "", 0, 0);
