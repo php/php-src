@@ -75,6 +75,9 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fix crashes in function registration + test. (nielsdos, Girgias)
 
+- Session:
+  . Fix type confusion with session SID constant. (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-17409 (Assertion failure Zend/zend_hash.c:1730). (nielsdos)
 
