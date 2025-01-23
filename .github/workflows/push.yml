@@ -198,8 +198,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 13
-            arch: X64
           - os: 14
             arch: ARM64
     name: MACOS_${{ matrix.arch }}_DEBUG_NTS
