@@ -686,6 +686,7 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 	/* Numeric session.name won't work at all */
 	if (
 		ZSTR_LEN(new_value) == 0
+		|| zend_str_has_nul_byte(new_value)
 		|| is_numeric_str_function(new_value, NULL, NULL)
 		|| strpbrk(ZSTR_VAL(new_value), SESSION_FORBIDDEN_CHARS) != NULL
 	) {
@@ -699,7 +700,7 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" must not be numeric, empty, or contain any of the following characters \"" SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "\"", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "session.name \"%s\" must not be numeric, empty, contain null bytes or any of the following characters \"" SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "\"", ZSTR_VAL(new_value));
 		}
 		return FAILURE;
 	}

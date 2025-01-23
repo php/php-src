@@ -39,19 +39,21 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_name() : variation ***
 
-Warning: session_name(): session.name "	" must not be numeric, empty, or contain any of the following characters "=,;.[ \t\r\n\013\014" in %s on line %d
+Warning: session_name(): session.name "" must not be numeric, empty, contain null bytes or any of the following characters "=,;.[ \t\r\n\013\014" in %s on line %d
 string(9) "PHPSESSID"
 bool(true)
 string(9) "PHPSESSID"
 bool(true)
-string(9) "PHPSESSID"
-bool(true)
-string(9) "PHPSESSID"
-bool(true)
-string(9) "PHPSESSID"
 string(9) "PHPSESSID"
 
-Warning: session_name(): session.name "" must not be numeric, empty, or contain any of the following characters "=,;.[ \t\r\n\013\014" in %s on line 1%d
+Warning: session_name(): session.name "	" must not be numeric, empty, contain null bytes or any of the following characters "=,;.[ \t\r\n\013\014" in %s on line %d
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+
+Warning: session_name(): session.name "" must not be numeric, empty, contain null bytes or any of the following characters "=,;.[ \t\r\n\013\014" in %s on line %d
 string(9) "PHPSESSID"
 bool(true)
 string(9) "PHPSESSID"

@@ -6,25 +6,19 @@ session
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-if (defined("pass3")) {
-} else {
 function errorHandler($errorNumber, $errorMessage, $fileName, $lineNumber) {
-define("pass3", 1);
-include(__FILE__);
+    // Destroy session while emitting warning from the bogus session name in session_start
+    session_destroy();
 }
+
 set_error_handler('errorHandler');
-}
+
 ob_start();
 var_dump(session_name("\t"));
 var_dump(session_start());
-var_dump(session_destroy());
 
 ?>
 --EXPECTF--
-Warning: session_name(): session.name "	" must not be numeric, empty, or contain any of the following characters "=,;.[ \t\r\n\013\014" in %s on line %d
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 string(9) "PHPSESSID"
-bool(true)
-bool(true)
-string(9) "PHPSESSID"
-bool(true)
 bool(true)
