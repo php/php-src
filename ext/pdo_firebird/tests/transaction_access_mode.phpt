@@ -132,7 +132,7 @@ $dbh = getDbConnection();
 @$dbh->exec('DROP TABLE transaction_access_mode');
 unset($dbh);
 ?>
---EXPECT--
+--EXPECTF--
 ========== Set attr in construct ==========
 OK: writable
 OK: readonly
@@ -154,7 +154,7 @@ array(1) {
 readonly
 bool(true)
 OK: readonly
-SQLSTATE[42000]: Syntax error or access violation: -817 attempted update during read-only transaction
+SQLSTATE[%r(42000|25006)%r]: %r(Read only sql transaction|Syntax error or access violation)%r: -817 attempted update during read-only transaction
 array(1) {
   [0]=>
   array(2) {
