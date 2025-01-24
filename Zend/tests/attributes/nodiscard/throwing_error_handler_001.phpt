@@ -31,5 +31,5 @@ try {
 
 ?>
 --EXPECT--
-Caught: (F)The return value of function test() is expected to be consumed
-Caught: (F)The return value of function test2() is expected to be consumed
+Caught: (B)The return value of function test() is expected to be consumed
+Caught: (B)The return value of function test2() is expected to be consumed

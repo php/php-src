@@ -12,4 +12,4 @@ test();
 
 ?>
 --EXPECTF--
-Warning: (F)The return value of function test() is expected to be consumed, 1234 in %s on line %d
+Warning: (B)The return value of function test() is expected to be consumed, 1234 in %s on line %d
