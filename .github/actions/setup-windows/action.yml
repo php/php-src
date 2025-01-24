@@ -5,7 +5,20 @@ runs:
     - name: Setup MySQL
       shell: pwsh
       run: |
-        choco install mysql -y --no-progress --params="/port:3306"
+        try {
+          # Try installing MySQL from default choco
+          choco install mysql -y --no-progress --params="/port:3306"
+        } catch {
+          Write-Host "Default MySQL installation failed (dev.mysql.com rate-limiting?). Trying backup location..."
+          $backupUrl = "https://github.com/divinity76/php-src/releases/download/mysql-8.0.31-winx64.zip/mysql-8.0.31-winx64.zip"
+          $destination = "C:\tools\mysql-8.0.31-winx64.zip"
+          Invoke-WebRequest -Uri $backupUrl -OutFile $destination
+          # Extract and install MySQL manually
+          Expand-Archive -Path $destination -DestinationPath "C:\tools\mysql"
+          Write-Host "MySQL extracted to C:\tools\mysql"
+          # Add MySQL to PATH
+          $env:Path += ";C:\tools\mysql\bin"
+        }
         mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Setup MSSQL
       shell: pwsh
