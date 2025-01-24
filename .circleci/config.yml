@@ -5,7 +5,7 @@ jobs:
     resource_class: arm.medium
     docker:
       - image: cimg/base:current-22.04
-      - image: mysql:8
+      - image: mysql:8.3
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_ROOT_PASSWORD: ''
