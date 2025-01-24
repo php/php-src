@@ -19,9 +19,8 @@
 #include "blake3/upstream_blake3/c/blake3.h"
 #include <string.h> // memcpy
 
-PHP_HASH_API void PHP_BLAKE3Init(PHP_BLAKE3_CTX *context, HashTable *args)
+PHP_HASH_API void PHP_BLAKE3Init(PHP_BLAKE3_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
-	(void)args; // ¯\_(ツ)_/¯
 	blake3_hasher_init(context);
 }
 
