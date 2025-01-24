@@ -87,8 +87,15 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int result = 1;
 
-	/* release the statement */
-	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
+	/* TODO: for master, move this check to a separate function shared between pdo drivers.
+	 *       pdo_pgsql and pdo_mysql do this exact same thing */
+	bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
+		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
+		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
+
+	/* release the statement.
+	 * Note: if the server object is already gone then the statement was closed already as well. */
+	if (server_obj_usable && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
 		RECORD_ERROR(stmt);
 		result = 0;
 	}
