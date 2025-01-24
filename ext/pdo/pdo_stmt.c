@@ -2028,12 +2028,13 @@ out:
 static HashTable *dbstmt_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 {
 	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
+	enum pdo_fetch_type default_fetch_mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->database_object_handle);
-	if ((stmt->default_fetch_type & PDO_FETCH_INTO) == PDO_FETCH_INTO) {
+	if (default_fetch_mode == PDO_FETCH_INTO) {
 		zend_get_gc_buffer_add_obj(gc_buffer, stmt->fetch.into);
-	} else if ((stmt->default_fetch_type & PDO_FETCH_CLASS) == PDO_FETCH_CLASS) {
+	} else if (default_fetch_mode == PDO_FETCH_CLASS) {
 		zend_get_gc_buffer_add_zval(gc_buffer, &stmt->fetch.cls.ctor_args);
 	}
 	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_count);
