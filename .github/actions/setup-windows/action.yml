@@ -5,6 +5,8 @@ runs:
     - name: Setup MySQL
       shell: pwsh
       run: |
+        # Force errors to be terminating so catch block is triggered
+        $ErrorActionPreference = 'Stop'
         try {
           # Try installing MySQL from default choco
           choco install mysql -y --no-progress --params="/port:3306"
