@@ -13,7 +13,7 @@ foreach ($algos as $algo) {
     $orig_final = hash_final($orig);
     $copy_final = hash_final($copy);
     var_dump($orig_final);
-    if($orig_final !== $copy_final) {
+    if ($orig_final !== $copy_final) {
         // unreachable
         throw new \LogicException("hash_final() results differ");
     }
