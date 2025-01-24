@@ -44,6 +44,7 @@ function not_serializable(string $algo)
     return in_array($algo, [
         "xxh3", 
         "xxh128",
+        "blake3", // todo: blake3 can be seralized but it's not implemented yet
         ], true);
 }
 
