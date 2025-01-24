@@ -24,9 +24,26 @@
 
 // typedef struct blake3_hasher PHP_BLAKE3_CTX;
 #define PHP_BLAKE3_CTX blake3_hasher
-// help: is V correct?
-//#define PHP_BLAKE3_SPEC "b8b8qb64bbbbb1760"
-#define PHP_BLAKE3_SPEC "L8L8Qa64CCCCL8Ca1760"
+// When testing, the compiler insert 5 alignment-padding bytes after buf_len, and 7 trailing alignment bytes at the end of the struct.
+// Unsure if it is portable to rely on this exact padding behavior..
+// If the CIs pass, I'll assume it is portable.
+#define PHP_BLAKE3_SPEC /* uint32_t key[8]; */"l8" \
+/* uint32_t cv[8]; */ "l8" \
+/* uint64_t chunk_counter; */ "q" \
+/* uint8_t buf[BLAKE3_BLOCK_LEN];  */ "b64" \
+/* uint8_t buf_len; */ "b" \
+/* skip 5 bytes of alignment padding in chunk */ "B5" \
+/* uint8_t blocks_compressed */ "b" \
+/* uint8_t flags; */ "b" \
+/* uint8_t cv_stack_len; */ "b" \
+/* uint8_t cv_stack[(BLAKE3_MAX_DEPTH + 1) * BLAKE3_OUT_LEN]; */ "b1760" \
+/* skip 7 trailing alignment bytes */     "B7" \
+"."
+
+
+
+
+
 
 PHP_HASH_API void PHP_BLAKE3Init(PHP_BLAKE3_CTX *context, HashTable *args);
 PHP_HASH_API void PHP_BLAKE3Update(PHP_BLAKE3_CTX *context, const unsigned char *input, size_t len);
