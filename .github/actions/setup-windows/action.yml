@@ -5,13 +5,12 @@ runs:
     - name: Setup MySQL
       shell: pwsh
       run: |
-        # Force errors to be terminating so catch block is triggered
-        $ErrorActionPreference = 'Stop'
         try {
           # Try installing MySQL from default choco
-          echo before $?
           choco install mysql -y --no-progress --params="/port:3306"
-          echo after $?
+          if (-not $?) {
+            throw "Chocolatey MySQL installation failed. Falling back to manual installation."
+          }
         } catch {
           Write-Host "Default MySQL installation failed (likely 403 from dev.mysql.com). Fallback to backup ZIP..."
           $backupUrl = "https://github.com/divinity76/php-src/releases/download/mysql-8.0.31-winx64.zip/mysql-8.0.31-winx64.zip"
