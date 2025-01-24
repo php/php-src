@@ -26,6 +26,12 @@ on:
       windows_version:
         required: true
         type: string
+      skip_symfony:
+        required: true
+        type: boolean
+      skip_wordpress:
+        required: true
+        type: boolean
 permissions:
   contents: read
 jobs:
@@ -554,7 +560,7 @@ jobs:
             exit 1
           fi
       - name: Test Symfony
-        if: always()
+        if: always() && !inputs.skip_symfony
         run: |
           git clone https://github.com/symfony/symfony.git --depth=1
           cd symfony
@@ -586,7 +592,7 @@ jobs:
             exit 1
           fi
       - name: 'Symfony Preloading'
-        if: always()
+        if: always() && !inputs.skip_symfony
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
           cd symfony_demo
@@ -594,7 +600,7 @@ jobs:
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
           php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
       - name: Test Wordpress
-        if: always()
+        if: always() && !inputs.skip_wordpress
         run: |
           git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
           cd wordpress
