@@ -11,15 +11,23 @@ runs:
           # Try installing MySQL from default choco
           choco install mysql -y --no-progress --params="/port:3306"
         } catch {
-          Write-Host "Default MySQL installation failed (dev.mysql.com rate-limiting?). Trying backup location..."
+          Write-Host "Default MySQL installation failed (likely 403 from dev.mysql.com). Fallback to backup ZIP..."
           $backupUrl = "https://github.com/divinity76/php-src/releases/download/mysql-8.0.31-winx64.zip/mysql-8.0.31-winx64.zip"
           $destination = "C:\tools\mysql-8.0.31-winx64.zip"
           Invoke-WebRequest -Uri $backupUrl -OutFile $destination
-          # Extract and install MySQL manually
+          # 3) Expand the ZIP into C:\tools\mysql
           Expand-Archive -Path $destination -DestinationPath "C:\tools\mysql"
-          Write-Host "MySQL extracted to C:\tools\mysql"
-          # Add MySQL to PATH
-          $env:Path += ";C:\tools\mysql\bin"
+          # 4) Point to the MySQL bin directory in the environment PATH (for the current session)
+          $mysqlDir = "C:\tools\mysql\mysql-8.0.31-winx64"
+          $env:Path += ";$mysqlDir\bin"
+          # 5) Initialize the MySQL data directory (insecure init => empty root password)
+          & "$mysqlDir\bin\mysqld.exe" --initialize-insecure --datadir="$mysqlDir\data"
+          # 6) Install MySQL as a Windows service named "MySQL80"
+          & "$mysqlDir\bin\mysqld.exe" --install MySQL80 --datadir="$mysqlDir\data"
+          # 7) Start the MySQL service
+          Start-Service MySQL80
+          # (Optional) Wait a few seconds to ensure MySQL is fully up:
+          Start-Sleep -Seconds 2
         }
         mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Setup MSSQL
