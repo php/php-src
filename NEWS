@@ -42,6 +42,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-17307 (Internal closure causes JIT failure). (nielsdos)
 
+- PDO:
+  . Fixed a memory leak when the GC is used to free a PDOStatment. (Girgias)
+  . Fixed a crash in the PDO Firebird Statement destructor. (nielsdos)
+
 - Phar:
   . Fixed bug GH-17518 (offset overflow phar extractTo()). (nielsdos)
 
