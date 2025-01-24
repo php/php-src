@@ -5,8 +5,8 @@ runs:
     - name: Setup MySQL
       shell: cmd
       run: |
-        path
-        dir "C:\Program Files"
+        net start
+        mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Setup MSSQL
       shell: pwsh
       run: |
