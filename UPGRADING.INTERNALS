@@ -35,6 +35,11 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 - ext/libxml
   . The refcount APIs now return an `unsigned int` instead of an `int`.
 
+- ext/pdo
+  . Added `php_pdo_stmt_valid_db_obj_handle()` to check if the database object
+    is still valid. This is useful when a GC cycle is collected and the
+    database object can be destroyed prior to destroying the statement.
+
 ========================
 4. OpCode changes
 ========================

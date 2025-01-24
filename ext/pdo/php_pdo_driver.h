@@ -696,4 +696,11 @@ PDO_API bool pdo_get_long_param(zend_long *lval, zval *value);
 PDO_API bool pdo_get_bool_param(bool *bval, zval *value);
 
 PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
+
+/* When a GC cycle is collected, it's possible that the database object is destroyed prior to destroying
+ * the statement. In that case, accessing the database object will cause a UAF.
+ * This function checks if the database object is still valid.
+ * If it is invalid, the internal driver statement data should have been cleared by the native driver API already. */
+PDO_API bool php_pdo_stmt_valid_db_obj_handle(const pdo_stmt_t *stmt);
+
 #endif /* PHP_PDO_DRIVER_H */
