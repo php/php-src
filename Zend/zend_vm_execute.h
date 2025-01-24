@@ -1148,12 +1148,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
 		EG(vm_stack_top) = (zval*)execute_data;
-
-		if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
-			zend_function *fbc = EX(func);
-			zend_nodiscard_function(fbc);
-		}
-
 		execute_data = EX(prev_execute_data);
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1189,11 +1183,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 		}
 
 		old_execute_data = execute_data;
-		if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
-			zend_function *fbc = EX(func);
-			zend_nodiscard_function(fbc);
-		}
-
 		execute_data = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
 
@@ -1213,8 +1202,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
 		old_execute_data = execute_data;
-		ZEND_ASSERT(EX(return_value));
-
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
 
@@ -1235,12 +1222,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 	} else {
 		if (EXPECTED((call_info & ZEND_CALL_CODE) == 0)) {
 			EG(current_execute_data) = EX(prev_execute_data);
-
-			if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
-				zend_function *fbc = EX(func);
-				zend_nodiscard_function(fbc);
-			}
-
 			i_free_compiled_variables(execute_data);
 #ifdef ZEND_PREFER_RELOAD
 			call_info = EX_CALL_INFO();
@@ -1346,9 +1327,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	}
 
 	if (!0) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-			zend_nodiscard_function(fbc);
-		}
 		i_zval_ptr_dtor(ret);
 	}
 
@@ -1413,9 +1391,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	}
 
 	if (!1) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-			zend_nodiscard_function(fbc);
-		}
 		i_zval_ptr_dtor(ret);
 	}
 
@@ -1481,9 +1456,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_OBS
 	}
 
 	if (!RETURN_VALUE_USED(opline)) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-			zend_nodiscard_function(fbc);
-		}
 		i_zval_ptr_dtor(ret);
 	}
 
@@ -1580,8 +1552,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)) != 0)) {
+		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !0) {
+			zend_nodiscard_function("(B)", fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
 			if (!0) {
@@ -1659,9 +1636,6 @@ fcall_by_name_end:
 		}
 
 		if (!0) {
-			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function(fbc);
-			}
 			i_zval_ptr_dtor(ret);
 		}
 	}
@@ -1685,8 +1659,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)) != 0)) {
+		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !1) {
+			zend_nodiscard_function("(B)", fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
 			if (!1) {
@@ -1764,9 +1743,6 @@ fcall_by_name_end:
 		}
 
 		if (!1) {
-			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function(fbc);
-			}
 			i_zval_ptr_dtor(ret);
 		}
 	}
@@ -1790,8 +1766,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)) != 0)) {
+		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !RETURN_VALUE_USED(opline)) {
+			zend_nodiscard_function("(B)", fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
 			if (!RETURN_VALUE_USED(opline)) {
@@ -1871,9 +1852,6 @@ fcall_by_name_end:
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
-			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function(fbc);
-			}
 			i_zval_ptr_dtor(ret);
 		}
 	}
@@ -1897,8 +1875,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)) != 0)) {
+		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !0) {
+			zend_nodiscard_function("(A)", fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
@@ -1987,9 +1970,6 @@ fcall_end:
 		}
 
 		if (!0) {
-			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function(fbc);
-			}
 			i_zval_ptr_dtor(ret);
 		}
 	}
@@ -2018,8 +1998,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)) != 0)) {
+		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !1) {
+			zend_nodiscard_function("(A)", fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
@@ -2108,9 +2093,6 @@ fcall_end:
 		}
 
 		if (!1) {
-			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function(fbc);
-			}
 			i_zval_ptr_dtor(ret);
 		}
 	}
@@ -2139,8 +2121,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_deprecated_function(fbc);
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)) != 0)) {
+		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+			zend_deprecated_function(fbc);
+		}
+		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !RETURN_VALUE_USED(opline)) {
+			zend_nodiscard_function("(A)", fbc);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
@@ -2230,9 +2217,6 @@ fcall_end:
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
-			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function(fbc);
-			}
 			i_zval_ptr_dtor(ret);
 		}
 	}
@@ -58731,12 +58715,6 @@ zend_leave_helper_SPEC_LABEL:
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
 		EG(vm_stack_top) = (zval*)execute_data;
-
-		if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
-			zend_function *fbc = EX(func);
-			zend_nodiscard_function(fbc);
-		}
-
 		execute_data = EX(prev_execute_data);
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -58772,11 +58750,6 @@ zend_leave_helper_SPEC_LABEL:
 		}
 
 		old_execute_data = execute_data;
-		if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
-			zend_function *fbc = EX(func);
-			zend_nodiscard_function(fbc);
-		}
-
 		execute_data = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
 
@@ -58796,8 +58769,6 @@ zend_leave_helper_SPEC_LABEL:
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
 		old_execute_data = execute_data;
-		ZEND_ASSERT(EX(return_value));
-
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
 
@@ -58818,12 +58789,6 @@ zend_leave_helper_SPEC_LABEL:
 	} else {
 		if (EXPECTED((call_info & ZEND_CALL_CODE) == 0)) {
 			EG(current_execute_data) = EX(prev_execute_data);
-
-			if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
-				zend_function *fbc = EX(func);
-				zend_nodiscard_function(fbc);
-			}
-
 			i_free_compiled_variables(execute_data);
 #ifdef ZEND_PREFER_RELOAD
 			call_info = EX_CALL_INFO();
