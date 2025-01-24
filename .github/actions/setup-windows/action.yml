@@ -5,8 +5,11 @@ runs:
     - name: Setup MySQL
       shell: cmd
       run: |
+        mysqld --initialize-insecure
+        mysqld --install
         net start MySQL
-        mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
+        mysql -u root -e "SELECT VERSION()"
+        mysql --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Setup MSSQL
       shell: pwsh
       run: |
