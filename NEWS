@@ -65,6 +65,10 @@ PHP                                                                        NEWS
     the cpu mask argument with entries type different than int/string.
     (David Carlier)
 
+- PDO:
+  . Fixed a memory leak when the GC is used to free a PDOStatment. (Girgias)
+  . Fixed a crash in the PDO Firebird Statement destructor. (nielsdos)
+
 - PgSql:
   . Fixed build failure when the constant PGRES_TUPLES_CHUNK is not present
     in the system. (chschneider)

@@ -2074,8 +2074,11 @@ out:
 static HashTable *dbstmt_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 {
 	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
-	*gc_data = &stmt->fetch.into;
-	*gc_count = 1;
+
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->database_object_handle);
+	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->fetch.into);
+	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_count);
 
 	/**
 	 * If there are no dynamic properties and the default property is 1 (that is, there is only one property
