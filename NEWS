@@ -65,6 +65,9 @@ PHP                                                                        NEWS
     the cpu mask argument with entries type different than int/string.
     (David Carlier)
 
+- PCRE:
+  . Fixed bug GH-17122 (memory leak in regex). (nielsdos)
+
 - PDO:
   . Fixed a memory leak when the GC is used to free a PDOStatment. (Girgias)
   . Fixed a crash in the PDO Firebird Statement destructor. (nielsdos)
