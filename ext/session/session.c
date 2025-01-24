@@ -94,6 +94,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 	}
 
 #define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\013\014"
+#define SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "=,;.[ \\t\\r\\n\\013\\014"
 
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
 
@@ -682,7 +683,12 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 	SESSION_CHECK_OUTPUT_STATE;
 
 	/* Numeric session.name won't work at all */
-	if ((!ZSTR_LEN(new_value) || is_numeric_string(ZSTR_VAL(new_value), ZSTR_LEN(new_value), NULL, NULL, 0))) {
+	if (
+		ZSTR_LEN(new_value) == 0
+		|| zend_str_has_nul_byte(new_value)
+		|| is_numeric_str_function(new_value, NULL, NULL)
+		|| strpbrk(ZSTR_VAL(new_value), SESSION_FORBIDDEN_CHARS) != NULL
+	) {
 		int err_type;
 
 		if (stage == ZEND_INI_STAGE_RUNTIME || stage == ZEND_INI_STAGE_ACTIVATE || stage == ZEND_INI_STAGE_STARTUP) {
@@ -693,7 +699,7 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" cannot be numeric or empty", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "session.name \"%s\" must not be numeric, empty, contain null bytes or any of the following characters \"" SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "\"", ZSTR_VAL(new_value));
 		}
 		return FAILURE;
 	}
@@ -1421,11 +1427,7 @@ static zend_result php_session_send_cookie(void) /* {{{ */
 		return FAILURE;
 	}
 
-	/* Prevent broken Set-Cookie header, because the session_name might be user supplied */
-	if (strpbrk(PS(session_name), SESSION_FORBIDDEN_CHARS) != NULL) {   /* man isspace for \013 and \014 */
-		php_error_docref(NULL, E_WARNING, "session.name cannot contain any of the following '=,;.[ \\t\\r\\n\\013\\014'");
-		return FAILURE;
-	}
+	ZEND_ASSERT(strpbrk(PS(session_name), SESSION_FORBIDDEN_CHARS) == NULL);
 
 	/* URL encode id because it might be user supplied */
 	e_id = php_url_encode(ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)));
@@ -1545,7 +1547,10 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 	}
 
 	if (PS(use_cookies) && PS(send_cookie)) {
-		php_session_send_cookie();
+		zend_result cookies_sent = php_session_send_cookie();
+		if (UNEXPECTED(cookies_sent == FAILURE)) {
+			return FAILURE;
+		}
 		PS(send_cookie) = 0;
 	}
 
