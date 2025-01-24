@@ -32,12 +32,12 @@
 /* uint64_t chunk_counter; */ "q" \
 /* uint8_t buf[BLAKE3_BLOCK_LEN];  */ "b64" \
 /* uint8_t buf_len; */ "b" \
-/* skip 5 bytes of alignment padding in chunk */ "B5" \
+/* skip uint8_t padding_1[5] */ "B5" \
 /* uint8_t blocks_compressed */ "b" \
 /* uint8_t flags; */ "b" \
 /* uint8_t cv_stack_len; */ "b" \
 /* uint8_t cv_stack[(BLAKE3_MAX_DEPTH + 1) * BLAKE3_OUT_LEN]; */ "b1760" \
-/* skip 7 trailing alignment bytes */     "B7" \
+/* skip 7 uint8_t padding_2[7]*/     "B7" \
 "."
 
 
