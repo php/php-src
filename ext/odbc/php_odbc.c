@@ -938,7 +938,11 @@ PHP_FUNCTION(odbc_prepare)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			*/
+# if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			SQLSetStmtAttr(result->stmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER) ODBCG(default_cursortype), 0);
+# else
 			SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, ODBCG(default_cursortype));
+# endif
 		}
 	} else {
 		result->fetch_abs = 0;
@@ -1326,7 +1330,11 @@ PHP_FUNCTION(odbc_exec)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			 */
+# if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			SQLSetStmtAttr(result->stmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER) ODBCG(default_cursortype), 0);
+# else
 			SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, ODBCG(default_cursortype));
+# endif
 		}
 	} else {
 		result->fetch_abs = 0;
@@ -2170,7 +2178,11 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	}
 #else
 	if (cur_opt != SQL_CUR_DEFAULT) {
+# if defined(ODBCVER) && (ODBCVER >= 0x0300)
+		rc = SQLSetConnectAttr(link->connection->hdbc, SQL_ATTR_ODBC_CURSORS, (SQLPOINTER) (intptr_t) cur_opt, 0);
+# else
 		rc = SQLSetConnectOption(link->connection->hdbc, SQL_ODBC_CURSORS, cur_opt);
+# endif
 		if (rc != SQL_SUCCESS) {  /* && rc != SQL_SUCCESS_WITH_INFO ? */
 			odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SQLSetConnectOption");
 			return false;
@@ -2672,7 +2684,11 @@ PHP_FUNCTION(odbc_autocommit)
 	CHECK_ODBC_CONNECTION(conn);
 
 	if (!pv_onoff_is_null) {
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+		rc = SQLSetConnectAttr(conn->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) (intptr_t) (pv_onoff ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), 0);
+#else
 		rc = SQLSetConnectOption(conn->hdbc, SQL_AUTOCOMMIT, pv_onoff ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF);
+#endif
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			odbc_sql_error(conn, SQL_NULL_HSTMT, "Set autocommit");
 			RETURN_FALSE;
@@ -2681,7 +2697,11 @@ PHP_FUNCTION(odbc_autocommit)
 	} else {
 		SQLINTEGER status;
 
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+		rc = SQLGetConnectAttr(conn->hdbc, SQL_ATTR_AUTOCOMMIT, &status, SQL_IS_INTEGER, NULL);
+#else
 		rc = SQLGetConnectOption(conn->hdbc, SQL_AUTOCOMMIT, (PTR)&status);
+#endif
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			odbc_sql_error(conn, SQL_NULL_HSTMT, "Get commit status");
 			RETURN_FALSE;
@@ -2783,7 +2803,11 @@ PHP_FUNCTION(odbc_setoption)
 				php_error_docref(NULL, E_WARNING, "Unable to set option for persistent connection");
 				RETURN_FALSE;
 			}
+# if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			rc = SQLSetConnectAttr(link->connection->hdbc, pv_opt, (SQLPOINTER) pv_val, 0);
+# else
 			rc = SQLSetConnectOption(link->connection->hdbc, (unsigned short) pv_opt, pv_val);
+# endif
 			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 				odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SetConnectOption");
 				RETURN_FALSE;
@@ -2797,7 +2821,11 @@ PHP_FUNCTION(odbc_setoption)
 			result = Z_ODBC_RESULT_P(pv_handle);
 			CHECK_ODBC_RESULT(result);
 
+# if defined(ODBCVER) && (ODBCVER >= 0x0300)
+			rc = SQLSetStmtAttr(result->stmt, pv_opt, (SQLPOINTER) pv_val, 0);
+# else
 			rc = SQLSetStmtOption(result->stmt, (unsigned short) pv_opt, pv_val);
+# endif
 
 			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 				odbc_sql_error(result->conn_ptr, result->stmt, "SetStmtOption");
