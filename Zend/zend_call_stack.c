@@ -380,7 +380,6 @@ static bool zend_call_stack_get_freebsd(zend_call_stack *stack)
 static bool zend_call_stack_get_win32(zend_call_stack *stack)
 {
 	ULONG_PTR low_limit, high_limit;
-	ULONG size;
 	MEMORY_BASIC_INFORMATION guard_region = {0}, uncommitted_region = {0};
 	size_t result_size, page_size;
 
