@@ -832,7 +832,7 @@ static bool php_snmp_parse_oid(
 /* {{{ snmp_session_init
 	allocates memory for session and session->peername, caller should free it manually using session_free() and efree()
 */
-static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, int timeout, int retries)
+static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries)
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
@@ -841,8 +841,20 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 	struct sockaddr **psal;
 	struct sockaddr **res;
 
+	*session_p = 0;
+
 	if (ZSTR_LEN(hostname) >= MAX_NAME_LEN) {
 		zend_value_error("hostname length must be lower than %d", MAX_NAME_LEN);
+		return false;
+	}
+
+	if (timeout < -1 || timeout > LONG_MAX) {
+		zend_value_error("timeout must be between -1 and %ld", LONG_MAX);
+		return false;
+	}
+
+	if (retries < -1 || retries > INT_MAX) {
+		zend_value_error("retries must be between -1 and %d", INT_MAX);
 		return false;
 	}
 
@@ -856,7 +868,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 
 	snmp_sess_init(session);
 
-	session->version = version;
+	session->version = (long)version;
 
 	session->peername = emalloc(MAX_NAME_LEN);
 	/* we copy original hostname for further processing */
@@ -954,8 +966,8 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 		session->community_len = ZSTR_LEN(community);
 	}
 
-	session->retries = retries;
-	session->timeout = timeout;
+	session->retries = (int)retries;
+	session->timeout = (long)timeout;
 	return true;
 }
 /* }}} */
