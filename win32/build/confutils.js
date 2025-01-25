@@ -3305,6 +3305,7 @@ function toolset_setup_common_cflags()
 
 		ADD_FLAG("CFLAGS", "/Zc:wchar_t");
 	} else if (CLANG_TOOLSET) {
+		ADD_FLAG("CFLAGS", "-Wno-deprecated-declarations");
 		if (TARGET_ARCH == 'x86') {
 			ADD_FLAG('CFLAGS', '-m32');
 		} else {
