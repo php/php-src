@@ -1670,7 +1670,6 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		var mangle_dir = k.replace(new RegExp("[\\\\/.-]", "g"), "_");
 		var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
 
-		DEFINE(bd_flags_name, "/Fp" + sub_build + d + " /FR" + sub_build + d + " ");
 		if (VS_TOOLSET) {
 			ADD_FLAG(bd_flags_name, "/Fd" + sub_build + d);
 		}
@@ -2474,15 +2473,12 @@ function handle_analyzer_makefile_flags(fd, key, val)
 
 		if ("clang" == PHP_ANALYZER) {
 			val = val.replace(/\/FD /, "")
-				.replace(/\/Fp.+? /, "")
 				.replace(/\/Fo.+? /, "")
 				.replace(/\/Fd.+? /, "")
 				//.replace(/\/Fd.+?/, " ")
-				.replace(/\/FR.+? /, "")
 				.replace("/guard:cf ", "")
 				.replace(/\/MP \d+ /, "")
 				.replace(/\/MP /, "")
-				.replace("/LD ", "")
 				.replace("/Qspectre ", "");
 		} else if ("cppcheck" == PHP_ANALYZER) {
 			new_val = "";
@@ -3449,7 +3445,7 @@ function toolset_setup_common_libs()
 function toolset_setup_build_mode()
 {
 	if (PHP_DEBUG == "yes") {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /U NDebug /U NDEBUG /D ZEND_DEBUG=1 " +
+		ADD_FLAG("CFLAGS", "/MDd /Od /U NDebug /U NDEBUG /D ZEND_DEBUG=1 " +
 			(TARGET_ARCH == 'x86'?"/ZI":"/Zi"));
 		ADD_FLAG("LDFLAGS", "/debug");
 		// Avoid problems when linking to release libraries that use the release
@@ -3461,7 +3457,7 @@ function toolset_setup_build_mode()
 			ADD_FLAG("CFLAGS", "/Zi");
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
-		ADD_FLAG("CFLAGS", "/LD /MD");
+		ADD_FLAG("CFLAGS", "/MD");
 		if (PHP_SANITIZER == "yes") {
 			if (VS_TOOLSET) {
 				ADD_FLAG("CFLAGS", "/Ox /U NDebug /U NDEBUG /D ZEND_DEBUG=1");
