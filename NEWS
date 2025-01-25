@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-17408 (Assertion failure Zend/zend_exceptions.c).
     (nielsdos, ilutov)
   . Fix may_have_extra_named_args flag for ZEND_AST_UNPACK. (nielsdos)
+  . Fix NULL arithmetic in System V shared memory emulation for Windows. (cmb)
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
