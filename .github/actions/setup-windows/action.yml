@@ -3,10 +3,12 @@ runs:
   using: composite
   steps:
     - name: Setup MySQL
-      shell: pwsh
+      shell: cmd
       run: |
-        choco install mysql -y --no-progress --params="/port:3306"
-        mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
+        mysqld --initialize-insecure
+        mysqld --install
+        net start MySQL
+        mysql --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Setup MSSQL
       shell: pwsh
       run: |
