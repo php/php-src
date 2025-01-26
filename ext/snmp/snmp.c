@@ -832,7 +832,7 @@ static bool php_snmp_parse_oid(
 /* {{{ netsnmp_session_init
 	allocates memory for session and session->peername, caller should free it manually using session_free() and efree()
 */
-static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries)
+static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, int timeout_argument_offset)
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
@@ -843,19 +843,39 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 
 	*session_p = 0;
 
+	ZEND_ASSERT(hostname != NULL);
+	ZEND_ASSERT(community != NULL);
+
+	if (zend_str_has_nul_byte(hostname)) {
+		zend_argument_value_error(2, "must not contain any null bytes");
+		return false;
+	}
+
 	if (ZSTR_LEN(hostname) >= MAX_NAME_LEN) {
-		zend_value_error("hostname length must be lower than %d", MAX_NAME_LEN);
+		zend_argument_value_error(2, "length must be lower than %d", MAX_NAME_LEN);
 		return false;
 	}
 
-	if (timeout < -1 || timeout > LONG_MAX) {
-		zend_value_error("timeout must be between -1 and %ld", LONG_MAX);
+	if (zend_str_has_nul_byte(community)) {
+		zend_argument_value_error(3, "must not contain any null bytes");
 		return false;
 	}
 
-	if (retries < -1 || retries > INT_MAX) {
-		zend_value_error("retries must be between -1 and %d", INT_MAX);
+	if (ZSTR_LEN(community) == 0) {
+		zend_argument_value_error(3, "cannot be empty");
 		return false;
+	}
+
+	if (timeout_argument_offset != -1) {
+		if (timeout < -1 || timeout > LONG_MAX) {
+			zend_argument_value_error(timeout_argument_offset, "must be between -1 and %ld", LONG_MAX);
+			return false;
+		}
+
+		if (retries < -1 || retries > INT_MAX) {
+			zend_argument_value_error(timeout_argument_offset, "must be between -1 and %d", INT_MAX);
+			return false;
+		}
 	}
 
 	// TODO: Do not strip and re-add the port in peername?
@@ -1207,6 +1227,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	struct objid_query objid_query;
 	php_snmp_session *session;
 	int session_less_mode = (getThis() == NULL);
+	int timeout_argument_offset = -1;
 	php_snmp_object *snmp_object;
 	php_snmp_object glob_snmp_object;
 
@@ -1233,6 +1254,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
+
+				timeout_argument_offset = 10;
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
@@ -1251,6 +1274,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
+
+				timeout_argument_offset = 9;
 			}
 		} else {
 			if (st & SNMP_CMD_SET) {
@@ -1264,6 +1289,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
+
+				timeout_argument_offset = 6;
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
@@ -1277,6 +1304,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
+
+				timeout_argument_offset = 4;
 			}
 		}
 	} else {
@@ -1320,7 +1349,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	}
 
 	if (session_less_mode) {
-		if (!netsnmp_session_init(&session, version, a1, a2, timeout, retries)) {
+		if (!netsnmp_session_init(&session, version, a1, a2, timeout, retries, timeout_argument_offset)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			netsnmp_session_free(&session);
 			RETURN_FALSE;
@@ -1624,7 +1653,7 @@ PHP_METHOD(SNMP, __construct)
 		netsnmp_session_free(&(snmp_object->session));
 	}
 
-	if (!netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries)) {
+	if (!netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 4)) {
 		return;
 	}
 	snmp_object->max_oids = 0;
