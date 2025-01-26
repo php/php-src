@@ -1842,7 +1842,7 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt)
 		RETURN_THROWS();
 	}
 	msg_len = ciphertext_len;
-	if (msg_len == SIZE_MAX) {
+	if (msg_len >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -1957,7 +1957,7 @@ PHP_FUNCTION(sodium_crypto_aead_aegis128l_decrypt)
 		RETURN_FALSE;
 	}
 	msg_len = ciphertext_len;
-	if (msg_len == SIZE_MAX) {
+	if (msg_len >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
