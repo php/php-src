@@ -53,7 +53,7 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_close($link);
 
-    if ($link = mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
+    if ($link = @mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
         printf("[009] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
             $host, $user . 'unknown_really', $db, $port, $socket);
 
@@ -141,7 +141,6 @@ require_once 'skipifconnectfailure.inc';
     print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_connect(): (%s/%d): Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r in %s on line %d
 array(1) {
   ["testing"]=>
   string(21) "mysqli.default_socket"
