@@ -47,6 +47,7 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed a memory leak when the GC is used to free a PDOStatment. (Girgias)
   . Fixed a crash in the PDO Firebird Statement destructor. (nielsdos)
+  . Fixed UAFs when changing default fetch class ctor args. (Girgias, nielsdos)
 
 - Phar:
   . Fixed bug GH-17518 (offset overflow phar extractTo()). (nielsdos)
