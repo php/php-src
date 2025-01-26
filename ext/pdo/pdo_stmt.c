@@ -1365,10 +1365,13 @@ PHP_METHOD(PDOStatement, fetchAll)
 	}
 
 	PDO_STMT_CLEAR_ERR();
-	/* Increase refcount for ctor_args as those might be removed during individual fetches */
-	bool increase_refcount_ctor = Z_TYPE(stmt->fetch.cls.ctor_args) == IS_ARRAY;
-	if (increase_refcount_ctor) {
-		GC_TRY_ADDREF(Z_ARRVAL(stmt->fetch.cls.ctor_args));
+
+	/* We increase the refcount and store it to determine if usercode has been messing around with the ctor args */
+	HashTable *current_ctor = Z_TYPE(stmt->fetch.cls.ctor_args) == IS_ARRAY ? Z_ARRVAL(stmt->fetch.cls.ctor_args) : NULL;
+	uint32_t ctor_refcount = 0;
+	if (current_ctor) {
+		GC_TRY_ADDREF(current_ctor);
+		ctor_refcount = GC_REFCOUNT(current_ctor);
 	}
 	if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
 		(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
@@ -1394,8 +1397,13 @@ PHP_METHOD(PDOStatement, fetchAll)
 	}
 
 	do_fetch_opt_finish(stmt, 0);
-	if (increase_refcount_ctor) {
-		zval_ptr_dtor(&stmt->fetch.cls.ctor_args);
+	if (current_ctor) {
+		/* The ctor args have been changed under our nose, destroy them */
+		if (GC_REFCOUNT(current_ctor) != ctor_refcount) {
+			zval_ptr_dtor(&stmt->fetch.cls.ctor_args);
+		} else {
+			GC_TRY_DELREF(current_ctor);
+		}
 	}
 
 	/* Restore defaults which were changed by PDO_FETCH_CLASS mode */
