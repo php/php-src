@@ -149,6 +149,8 @@ PHP                                                                        NEWS
 - Zlib:
   . gzfile, gzopen and readgzfile, their "use_include_path" argument
     is now a boolean. (David Carlier)
+  . Fixed bug GH-16883 (gzopen() does not use the default stream context when
+    opening HTTP URLs). (nielsdos)
 
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

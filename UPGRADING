@@ -166,6 +166,8 @@ PHP 8.5 UPGRADE NOTES
   . The "use_include_path" argument for the
     gzfile, gzopen and readgzfile functions had been changed
     from int to boolean.
+  . gzfile, gzopen and readgzfile functions now respect the default
+    stream context.
 
 ========================================
 6. New Functions
