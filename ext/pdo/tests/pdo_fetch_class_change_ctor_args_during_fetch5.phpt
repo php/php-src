@@ -45,6 +45,6 @@ var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE, 'B', [$stmt]));
 --EXPECTF--
 PDOStatement::fetchAll(): The PDO::FETCH_SERIALIZE mode is deprecated
 PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: cannot unserialize class
-PDOStatement::fetchAll(): SQLSTATE[HY000]: General error%s
+PDOStatement::fetchAll(): SQLSTATE[HY000]: General error%S
 array(0) {
 }
