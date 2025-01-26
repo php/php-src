@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-17485 (upstream fix, Self-closing tag on void elements
     shouldn't be a parse error/warning in \Dom\HTMLDocument). (lexborisov)
+  . Fixed bug GH-17572 (getElementsByTagName returns collections with
+    tagName-based indexing). (nielsdos)
 
 - Enchant:
   . Fix crashes in enchant when passing null bytes. (nielsdos)
