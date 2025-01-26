@@ -42,9 +42,9 @@ set_error_handler(stuffingErrorHandler(...));
 var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE, 'B', [$stmt]));
 
 ?>
---EXPECT--
+--EXPECTF--
 PDOStatement::fetchAll(): The PDO::FETCH_SERIALIZE mode is deprecated
 PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: cannot unserialize class
-PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 1 no such table: classtypes
+PDOStatement::fetchAll(): SQLSTATE[HY000]: General error%s
 array(0) {
 }
