@@ -10,9 +10,12 @@ runs:
         net start MySQL
         mysql --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Setup MSSQL
-      shell: pwsh
+      shell: cmd
       run: |
-        choco install sql-server-express -y --no-progress --install-arguments="/SECURITYMODE=SQL /SAPWD=Password12!"
+        curl -Ls -o SQL2022-SSEI-Expr.exe https://download.microsoft.com/download/5/1/4/5145fe04-4d30-4b85-b0d1-39533663a2f1/SQL2022-SSEI-Expr.exe
+        SQL2022-SSEI-Expr.exe /Action=Download /MediaPath="%TEMP%" /MediaType=Core /ENU /Quiet
+        %TEMP%\SQLEXPR_x64_ENU.exe /X:%TEMP%\Media /QS
+        %TEMP%\Media\setup.exe /Q /IACCEPTSQLSERVERLICENSETERMS /ACTION="install" /FEATURES=SQLEngine /INSTANCENAME=SQLEXPRESS /SQLSVCACCOUNT="NT AUTHORITY\SYSTEM" /SQLSYSADMINACCOUNTS="BUILTIN\ADMINISTRATORS" /SAPWD="Password12!" /SECURITYMODE=SQL /ERRORREPORTING=0
     - name: Setup PostgreSQL
       shell: pwsh
       run: |
