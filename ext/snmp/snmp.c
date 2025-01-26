@@ -153,7 +153,7 @@ static PHP_GINIT_FUNCTION(snmp)
 	} \
 }
 
-static void snmp_session_free(php_snmp_session **session) /* {{{ */
+static void netsnmp_session_free(php_snmp_session **session) /* {{{ */
 {
 	if (*session) {
 		PHP_SNMP_SESSION_FREE(peername);
@@ -174,7 +174,7 @@ static void php_snmp_object_free_storage(zend_object *object) /* {{{ */
 		return;
 	}
 
-	snmp_session_free(&(intern->session));
+	netsnmp_session_free(&(intern->session));
 
 	zend_object_std_dtor(&intern->zo);
 }
@@ -829,10 +829,10 @@ static bool php_snmp_parse_oid(
 }
 /* }}} */
 
-/* {{{ snmp_session_init
+/* {{{ netsnmp_session_init
 	allocates memory for session and session->peername, caller should free it manually using session_free() and efree()
 */
-static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries)
+static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries)
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
@@ -1320,14 +1320,14 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	}
 
 	if (session_less_mode) {
-		if (!snmp_session_init(&session, version, a1, a2, timeout, retries)) {
+		if (!netsnmp_session_init(&session, version, a1, a2, timeout, retries)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
-			snmp_session_free(&session);
+			netsnmp_session_free(&session);
 			RETURN_FALSE;
 		}
 		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
-			snmp_session_free(&session);
+			netsnmp_session_free(&session);
 			/* Warning message sent already, just bail out */
 			RETURN_FALSE;
 		}
@@ -1366,7 +1366,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 
 	if (session_less_mode) {
-		snmp_session_free(&session);
+		netsnmp_session_free(&session);
 	} else {
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, glob_snmp_object.enum_print);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, glob_snmp_object.quick_print);
@@ -1621,10 +1621,10 @@ PHP_METHOD(SNMP, __construct)
 
 	/* handle re-open of snmp session */
 	if (snmp_object->session) {
-		snmp_session_free(&(snmp_object->session));
+		netsnmp_session_free(&(snmp_object->session));
 	}
 
-	if (!snmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries)) {
+	if (!netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries)) {
 		return;
 	}
 	snmp_object->max_oids = 0;
@@ -1649,7 +1649,7 @@ PHP_METHOD(SNMP, close)
 		RETURN_THROWS();
 	}
 
-	snmp_session_free(&(snmp_object->session));
+	netsnmp_session_free(&(snmp_object->session));
 
 	RETURN_TRUE;
 }
