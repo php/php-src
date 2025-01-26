@@ -4162,12 +4162,15 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 
 			if ((info & MAY_BE_PACKED_GUARD) != 0
+			 && (info & MAY_BE_GUARD) == 0
 			 && (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
 			  || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 			  || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET)
 			 && (ssa->vars[i].use_chain != -1
 			  || (ssa->vars[i].phi_use_chain
 			   && !(ssa->var_info[ssa->vars[i].phi_use_chain->ssa_var].type & MAY_BE_PACKED_GUARD)))) {
+				ZEND_ASSERT(STACK_TYPE(stack, i) == IS_ARRAY);
+
 				if (!zend_jit_packed_guard(&dasm_state, opline, EX_NUM_TO_VAR(i), info)) {
 					goto jit_failure;
 				}
