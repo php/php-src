@@ -2777,7 +2777,7 @@ PHP_FUNCTION(pg_lo_write)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_id, pgsql_lob_ce)
-		Z_PARAM_STR(str)
+		Z_PARAM_PATH_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(z_len, z_len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2794,10 +2794,6 @@ PHP_FUNCTION(pg_lo_write)
 		len = z_len;
 	}
 	else {
-		if (zend_str_has_nul_byte(str)) {
-			zend_argument_value_error(2, "must not contain any null bytes");
-			RETURN_THROWS();
-		}
 		len = ZSTR_LEN(str);
 	}
 
