@@ -34,6 +34,6 @@ pg_close($db);
 
 ?>
 --EXPECT--
-pg_close_stmt(): Argument #1 ($stmt) must not be empty
+pg_close_stmt(): Argument #2 ($statement_name) must not be empty
 bool(true)
 bool(true)
