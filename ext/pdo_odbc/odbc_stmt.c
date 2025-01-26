@@ -136,7 +136,11 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 
-	if (S->stmt != SQL_NULL_HANDLE) {
+	// TODO: Factor this out; pg/mysql/firebird do the same thing
+	bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
+		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
+		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
+	if (S->stmt != SQL_NULL_HANDLE && server_obj_usable) {
 		if (stmt->executed) {
 			SQLCloseCursor(S->stmt);
 		}
