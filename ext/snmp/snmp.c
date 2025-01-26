@@ -862,7 +862,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 	}
 
 	if (ZSTR_LEN(community) == 0) {
-		zend_argument_value_error(3, "cannot be empty");
+		zend_argument_must_not_be_empty_error(3);
 		return false;
 	}
 
@@ -904,7 +904,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 				char *pport = pptr + 2;
 				tmp_port = atoi(pport);
 				if (tmp_port < 0 || tmp_port > USHRT_MAX) {
-					zend_value_error("remote port must be between 0 and %u", USHRT_MAX);
+					zend_argument_value_error(2, "remote port must be between 0 and %u", USHRT_MAX);
 					return false;
 				}
 				remote_port = (unsigned short)tmp_port;
@@ -919,7 +919,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 			char *pport = pptr + 1;
 			tmp_port = atoi(pport);
 			if (tmp_port < 0 || tmp_port > USHRT_MAX) {
-				zend_value_error("remote port must be between 0 and %u", USHRT_MAX);
+				zend_argument_value_error(2, "remote port must be between 0 and %u", USHRT_MAX);
 				return false;
 			}
 			remote_port = (unsigned short)tmp_port;
