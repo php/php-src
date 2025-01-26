@@ -1252,6 +1252,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 	zval *arg2 = NULL;
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
+	HashTable *current_ctor = NULL;
 	bool error = false;
 	int flags, old_arg_count;
 
@@ -1269,6 +1270,10 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	old_ce = stmt->fetch.cls.ce;
 	ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
+	if (Z_TYPE(old_ctor_args) == IS_ARRAY) {
+		/* Protect against destruction by marking this as immutable: we consider this non-owned temporarily */
+		Z_TYPE_INFO(stmt->fetch.cls.ctor_args) = IS_ARRAY;
+	}
 	old_arg_count = stmt->fetch.cls.fci.param_count;
 
 	do_fetch_opt_finish(stmt, 0);
@@ -1293,7 +1298,13 @@ PHP_METHOD(PDOStatement, fetchAll)
 			}
 
 			if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args)) > 0) {
-				ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, ctor_args); /* we're not going to free these */
+				/* We increase the refcount and store it in case usercode has been messing around with the ctor args.
+				 * We need to store current_ctor separately as usercode may change the ctor_args which will cause a leak. */
+				current_ctor = Z_ARRVAL_P(ctor_args);
+				ZVAL_COPY(&stmt->fetch.cls.ctor_args, ctor_args);
+				/* Protect against destruction by marking this as immutable: we consider this non-owned
+				 * as destruction is handled via current_ctor. */
+				Z_TYPE_INFO(stmt->fetch.cls.ctor_args) = IS_ARRAY;
 			} else {
 				ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 			}
@@ -1366,11 +1377,6 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	PDO_STMT_CLEAR_ERR();
 
-	/* We increase the refcount and store it to determine if usercode has been messing around with the ctor args */
-	HashTable *current_ctor = Z_TYPE(stmt->fetch.cls.ctor_args) == IS_ARRAY ? Z_ARRVAL(stmt->fetch.cls.ctor_args) : NULL;
-	if (current_ctor) {
-		GC_TRY_ADDREF(current_ctor);
-	}
 	if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
 		(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
 	) {
@@ -1396,11 +1402,15 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	do_fetch_opt_finish(stmt, 0);
 	if (current_ctor) {
-		zend_hash_release(current_ctor);
+		// TODO: can current_ctor contain cycles? If yes, then this should be added as possible root (or be handled via a zval*)
+		zend_array_release(current_ctor);
 	}
 
 	/* Restore defaults which were changed by PDO_FETCH_CLASS mode */
 	stmt->fetch.cls.ce = old_ce;
+	/* ctor_args may have been changed to an owned object in the meantime, so destroy it.
+	 * If it was not, then the type flags update will have protected us against destruction. */
+	zval_ptr_dtor(&stmt->fetch.cls.ctor_args);
 	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
 	stmt->fetch.cls.fci.param_count = old_arg_count;
 
