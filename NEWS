@@ -83,6 +83,11 @@ PHP                                                                        NEWS
     or a TypeError if read_and_close value is not compatible with int.
     (David Carlier)
 
+- SNMP:
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3 and
+    SNMP::__construct() throw an exception on invalid hostname, community
+    timeout and retries arguments. (David Carlier)
+
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)

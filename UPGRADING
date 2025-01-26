@@ -140,6 +140,13 @@ PHP 8.5 UPGRADE NOTES
     a TypeError if read_on_close value is not a valid type
     compatible with int.
 
+- SNMP:
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3
+    and SNMP::__construct() throw a ValueError when the hostname
+    is too large, contains any null byte or if the port is given
+    when negative or greater than 65535, timeout and retries values
+    are lower than -1 or too large.
+
 - Sockets:
   . socket_create_listen, socket_bind and socket_sendto throw a
     ValueError if the port is lower than 0 or greater than 65535,
