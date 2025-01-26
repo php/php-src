@@ -117,7 +117,7 @@ jobs:
           skipSlow: ${{ matrix.asan }}
       - name: MySQL
         run: |
-          sudo mysql -h127.0.0.1 -P3306 -proot -e "SELECT user, host, plugin from mysql.user WHERE plugin='mysql_native_password';"
+          sudo mysql -h127.0.0.1 -P3306 -proot -e "SELECT user, host, plugin from mysql.user;"
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
