@@ -81,6 +81,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Added ReflectionConstant::getExtension() and ::getExtensionName().
     (DanielEScherzer)
+  . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
+    zval for uninitialized typed properties). (nielsdos)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap

@@ -4128,7 +4128,7 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 	prop = zend_std_get_static_property(ce, name, BP_VAR_IS);
 	EG(fake_scope) = old_scope;
 
-	if (prop) {
+	if (prop && !Z_ISUNDEF_P(prop)) {
 		RETURN_COPY_DEREF(prop);
 	}
 
@@ -4136,8 +4136,13 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 		RETURN_COPY(def_value);
 	}
 
-	zend_throw_exception_ex(reflection_exception_ptr, 0,
-		"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	if (prop) {
+		zend_throw_error(NULL,
+			"Typed property %s::$%s must not be accessed before initialization", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	} else {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	}
 }
 /* }}} */
 
