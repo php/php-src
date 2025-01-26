@@ -125,6 +125,10 @@ PHP 8.5 UPGRADE NOTES
 
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
+  . pg_connect checks if the connection_string argument contains
+    any null byte.
+  . pg_close_stmt checks if the statement_name argument contains
+    any null byte.
 
 - POSIX:
   . posix_ttyname sets last_error to EBADF when encountering

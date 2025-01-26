@@ -63,6 +63,9 @@ PHP                                                                        NEWS
   . Added pg_close_stmt to close a prepared statement while allowing
     its name to be reused. (David Carlier)
   . Added Iterable support for pgsql_copy_from. (David Carlier)
+  . pg_connect checks if connection_string contains any null byte,
+    pg_close_stmt check if the statement contains any null byte.
+    (David Carlier)
 
 - POSIX:
   . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
