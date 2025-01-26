@@ -26,9 +26,9 @@
 #include "SAPI.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 #include "php_zlib.h"
 #include "zlib_arginfo.h"
-#include "ext/standard/file.h"
 
 /*
  * zlib include files can define the following preprocessor defines which rename
