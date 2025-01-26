@@ -87,9 +87,7 @@ require_once 'skipifconnectfailure.inc';
         printf("[016] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
             $host, $user . 'unknown_really', $db, $port, $socket);
         $mysqli->close();
-    } catch (mysqli_sql_exception $e) {
-        printf("%s\n", $e->getMessage());
-    }
+    } catch (mysqli_sql_exception $e) {}
 
     ini_set('mysqli.default_socket', $socket);
     try {

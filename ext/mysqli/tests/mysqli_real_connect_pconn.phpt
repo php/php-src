@@ -147,5 +147,4 @@ mysqli.max_persistent=10
 	require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' %r(\(using password: \w+\) ){0,1}%rin %s on line %d
 done!

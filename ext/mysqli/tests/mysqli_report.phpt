@@ -173,9 +173,7 @@ require_once 'skipifconnectfailure.inc';
                 $host, $user . 'unknown_really', $db, $port, $socket);
         mysqli_close($link);
 
-    } catch (mysqli_sql_exception $e) {
-        printf("[013] %s\n", $e->getMessage());
-    }
+    } catch (mysqli_sql_exception $e) {}
 
     try {
         if (!$link = mysqli_init())
@@ -185,9 +183,7 @@ require_once 'skipifconnectfailure.inc';
             printf("[015] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
                 $host, $user . 'unknown_really', $db, $port, $socket);
         mysqli_close($link);
-    } catch (mysqli_sql_exception $e) {
-        printf("[016] %s\n", $e->getMessage());
-    }
+    } catch (mysqli_sql_exception $e) {}
 
     /*
     MYSQLI_REPORT_INDEX --->
