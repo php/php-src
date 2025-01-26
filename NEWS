@@ -74,6 +74,7 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed a memory leak when the GC is used to free a PDOStatment. (Girgias)
   . Fixed a crash in the PDO Firebird Statement destructor. (nielsdos)
+  . Fixed UAFs when changing default fetch class ctor args. (Girgias, nielsdos)
 
 - PgSql:
   . Fixed build failure when the constant PGRES_TUPLES_CHUNK is not present
