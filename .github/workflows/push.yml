@@ -85,9 +85,6 @@ jobs:
         uses: actions/checkout@v4
       - name: apt
         uses: ./.github/actions/apt-x64
-      - name: MySQL
-        run: |
-          sudo mysql -e "SELECT user, host, plugin from mysql.user WHERE plugin='mysql_native_password';"
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -118,6 +115,9 @@ jobs:
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
             ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++' || '' }}
           skipSlow: ${{ matrix.asan }}
+      - name: MySQL
+        run: |
+          sudo mysql -h127.0.0.1 -P3306 -e "SELECT user, host, plugin from mysql.user WHERE plugin='mysql_native_password';"
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
