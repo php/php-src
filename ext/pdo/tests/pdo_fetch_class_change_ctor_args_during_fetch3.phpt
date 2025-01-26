@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO::FETCH_CLASS with a constructor that changes the ctor args (Variation setFetchMode)
+PDO Common: PDO::FETCH_CLASS with a constructor that changes the ctor args within PDO::fetchAll() (no args variation)
 --EXTENSIONS--
 pdo
 --SKIPIF--
@@ -27,7 +27,7 @@ class Test {
     }
 }
 
-// TODO Rename test table to pdo_fetch_class_change_ctor_one in PHP-8.4
+// TODO Rename test table to pdo_fetch_class_change_ctor_three in PHP-8.4
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val1 VARCHAR(10), val2 VARCHAR(10))');
 $db->exec("INSERT INTO test VALUES(1, 'A', 'alpha')");
 $db->exec("INSERT INTO test VALUES(2, 'B', 'beta')");
