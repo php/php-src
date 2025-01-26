@@ -6329,7 +6329,7 @@ PHP_FUNCTION(pg_close_stmt)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(stmt) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
