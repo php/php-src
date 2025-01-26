@@ -830,7 +830,7 @@ static bool php_snmp_parse_oid(
 /* }}} */
 
 /* {{{ snmp_session_init
-	allocates memory for session and session->peername, caller should free it manually using session_free() and efree()
+	allocates memory for session and session->peername, caller should free it manually using snmp_session_free() and efree()
 */
 static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, int timeout_argument_offset)
 {
