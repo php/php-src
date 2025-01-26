@@ -140,7 +140,7 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:
-    if: false
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
     timeout-minutes: 50
