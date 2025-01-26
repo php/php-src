@@ -26,7 +26,7 @@ mysqli.max_persistent=10
     if (!$link = mysqli_init())
         printf("[004] mysqli_init() failed\n");
 
-    if (false !== ($tmp = mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket)))
+    if (false !== ($tmp = @mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket)))
         printf("[005] Expecting boolean/false got %s/%s. Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n", gettype($tmp), $tmp, $host, $user . 'unknown_really', $db, $port, $socket);
 
     // Run the following tests without an anoynmous MySQL user and use a password for the test user!

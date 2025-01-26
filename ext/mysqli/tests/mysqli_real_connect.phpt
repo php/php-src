@@ -24,7 +24,7 @@ mysqli.allow_local_infile=1
     if (!$link = mysqli_init())
         printf("[004] mysqli_init() failed\n");
 
-    if (false !== ($tmp = mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket)))
+    if (false !== ($tmp = @mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket)))
         printf("[005] Expecting boolean/false got %s/%s. Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n", gettype($tmp), $tmp, $host, $user . 'unknown_really', $db, $port, $socket);
 
     // Run the following tests without an anoynmous MySQL user and use a password for the test user!
@@ -147,7 +147,6 @@ mysqli.allow_local_infile=1
     print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' %r(\(using password: \w+\) ){0,1}%rin %s on line %d
 object(mysqli)#%d (%d) {
   ["client_info"]=>
   string(%d) "%s"

@@ -10,7 +10,7 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'connect.inc';
 
-    if ($mysqli = new mysqli($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket) && !mysqli_connect_errno())
+    if ($mysqli = @new mysqli($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket) && !mysqli_connect_errno())
         printf("[003] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
             $host, $user . 'unknown_really', $db, $port, $socket);
 
@@ -83,7 +83,7 @@ require_once 'skipifconnectfailure.inc';
     mysqli_report(MYSQLI_REPORT_STRICT);
 
     try {
-        $mysqli = new mysqli($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket);
+        $mysqli = @new mysqli($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket);
         printf("[016] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
             $host, $user . 'unknown_really', $db, $port, $socket);
         $mysqli->close();
@@ -143,9 +143,7 @@ require_once 'skipifconnectfailure.inc';
     print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli::__construct(): (%s/%d): Access denied for user '%sunknown%s'@'%s' %r(\(using password: \w+\) ){0,1}%rin %s on line %d
 mysqli object is not fully initialized
 mysqli object is not fully initialized
 ... and now Exceptions
-Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
 done!

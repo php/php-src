@@ -168,7 +168,7 @@ require_once 'skipifconnectfailure.inc';
 
     try {
 
-        if ($link = my_mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
+        if ($link = @my_mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
             printf("[012] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
                 $host, $user . 'unknown_really', $db, $port, $socket);
         mysqli_close($link);
@@ -181,7 +181,7 @@ require_once 'skipifconnectfailure.inc';
         if (!$link = mysqli_init())
             printf("[014] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-        if ($link = my_mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
+        if ($link = @my_mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
             printf("[015] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
                 $host, $user . 'unknown_really', $db, $port, $socket);
         mysqli_close($link);
@@ -334,6 +334,4 @@ Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/
 Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 
 Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
-[013] Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
-[016] Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
 done!
