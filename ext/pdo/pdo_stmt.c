@@ -1365,6 +1365,11 @@ PHP_METHOD(PDOStatement, fetchAll)
 	}
 
 	PDO_STMT_CLEAR_ERR();
+	/* Increase refcount for ctor_args as those might be removed during individual fetches */
+	bool increase_refcount_ctor = Z_TYPE(stmt->fetch.cls.ctor_args) == IS_ARRAY;
+	if (increase_refcount_ctor) {
+		GC_TRY_ADDREF(Z_ARRVAL(stmt->fetch.cls.ctor_args));
+	}
 	if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
 		(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
 	) {
@@ -1389,6 +1394,9 @@ PHP_METHOD(PDOStatement, fetchAll)
 	}
 
 	do_fetch_opt_finish(stmt, 0);
+	if (increase_refcount_ctor) {
+		zval_ptr_dtor(&stmt->fetch.cls.ctor_args);
+	}
 
 	/* Restore defaults which were changed by PDO_FETCH_CLASS mode */
 	stmt->fetch.cls.ce = old_ce;
