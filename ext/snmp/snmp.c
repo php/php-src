@@ -153,7 +153,7 @@ static PHP_GINIT_FUNCTION(snmp)
 	} \
 }
 
-static void netsnmp_session_free(php_snmp_session **session) /* {{{ */
+static void snmp_session_free(php_snmp_session **session) /* {{{ */
 {
 	if (*session) {
 		PHP_SNMP_SESSION_FREE(peername);
@@ -174,7 +174,7 @@ static void php_snmp_object_free_storage(zend_object *object) /* {{{ */
 		return;
 	}
 
-	netsnmp_session_free(&(intern->session));
+	snmp_session_free(&(intern->session));
 
 	zend_object_std_dtor(&intern->zo);
 }
@@ -829,10 +829,10 @@ static bool php_snmp_parse_oid(
 }
 /* }}} */
 
-/* {{{ netsnmp_session_init
-	allocates memory for session and session->peername, caller should free it manually using session_free() and efree()
+/* {{{ snmp_session_init
+	allocates memory for session and session->peername, caller should free it manually using snmp_session_free() and efree()
 */
-static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, int timeout_argument_offset)
+static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, int timeout_argument_offset)
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
@@ -862,7 +862,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	}
 
 	if (ZSTR_LEN(community) == 0) {
-		zend_argument_value_error(3, "cannot be empty");
+		zend_argument_must_not_be_empty_error(3);
 		return false;
 	}
 
@@ -873,7 +873,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		}
 
 		if (retries < -1 || retries > INT_MAX) {
-			zend_argument_value_error(timeout_argument_offset, "must be between -1 and %d", INT_MAX);
+			zend_argument_value_error(timeout_argument_offset + 1, "must be between -1 and %d", INT_MAX);
 			return false;
 		}
 	}
@@ -904,7 +904,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 				char *pport = pptr + 2;
 				tmp_port = atoi(pport);
 				if (tmp_port < 0 || tmp_port > USHRT_MAX) {
-					zend_value_error("remote port must be between 0 and %u", USHRT_MAX);
+					zend_argument_value_error(2, "remote port must be between 0 and %u", USHRT_MAX);
 					return false;
 				}
 				remote_port = (unsigned short)tmp_port;
@@ -919,7 +919,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 			char *pport = pptr + 1;
 			tmp_port = atoi(pport);
 			if (tmp_port < 0 || tmp_port > USHRT_MAX) {
-				zend_value_error("remote port must be between 0 and %u", USHRT_MAX);
+				zend_argument_value_error(2, "remote port must be between 0 and %u", USHRT_MAX);
 				return false;
 			}
 			remote_port = (unsigned short)tmp_port;
@@ -1349,14 +1349,14 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	}
 
 	if (session_less_mode) {
-		if (!netsnmp_session_init(&session, version, a1, a2, timeout, retries, timeout_argument_offset)) {
+		if (!snmp_session_init(&session, version, a1, a2, timeout, retries, timeout_argument_offset)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
-			netsnmp_session_free(&session);
+			snmp_session_free(&session);
 			RETURN_FALSE;
 		}
 		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
-			netsnmp_session_free(&session);
+			snmp_session_free(&session);
 			/* Warning message sent already, just bail out */
 			RETURN_FALSE;
 		}
@@ -1395,7 +1395,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 
 	if (session_less_mode) {
-		netsnmp_session_free(&session);
+		snmp_session_free(&session);
 	} else {
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, glob_snmp_object.enum_print);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, glob_snmp_object.quick_print);
@@ -1650,10 +1650,10 @@ PHP_METHOD(SNMP, __construct)
 
 	/* handle re-open of snmp session */
 	if (snmp_object->session) {
-		netsnmp_session_free(&(snmp_object->session));
+		snmp_session_free(&(snmp_object->session));
 	}
 
-	if (!netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 4)) {
+	if (!snmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 4)) {
 		return;
 	}
 	snmp_object->max_oids = 0;
@@ -1678,7 +1678,7 @@ PHP_METHOD(SNMP, close)
 		RETURN_THROWS();
 	}
 
-	netsnmp_session_free(&(snmp_object->session));
+	snmp_session_free(&(snmp_object->session));
 
 	RETURN_TRUE;
 }
