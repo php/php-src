@@ -141,6 +141,8 @@ static void preload_restart(void);
 # define LOCKVAL(v)   (ZCSG(v))
 #endif
 
+#define ZCG_KEY_LEN (MAXPATHLEN * 8)
+
 /**
  * Clear AVX/SSE2-aligned memory.
  */
@@ -1190,7 +1192,8 @@ zend_string *accel_make_persistent_key(zend_string *str)
 	char *key;
 	int key_length;
 
-	ZSTR_LEN(&ZCG(key)) = 0;
+	ZEND_ASSERT(GC_REFCOUNT(ZCG(key)) == 1);
+	ZSTR_LEN(ZCG(key)) = 0;
 
 	/* CWD and include_path don't matter for absolute file names and streams */
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
@@ -1300,7 +1303,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 		}
 
 		/* Calculate key length */
-		if (UNEXPECTED((size_t)(cwd_len + path_length + include_path_len + 2) >= sizeof(ZCG(_key)))) {
+		if (UNEXPECTED((size_t)(cwd_len + path_length + include_path_len + 2) >= ZCG_KEY_LEN)) {
 			return NULL;
 		}
 
@@ -1309,7 +1312,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 		 * since in itself, it may include colons (which we use to separate
 		 * different components of the key)
 		 */
-		key = ZSTR_VAL(&ZCG(key));
+		key = ZSTR_VAL(ZCG(key));
 		memcpy(key, path, path_length);
 		key[path_length] = ':';
 		key_length = path_length + 1;
@@ -1333,7 +1336,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 			parent_script_len = ZSTR_LEN(parent_script);
 			while ((--parent_script_len > 0) && !IS_SLASH(ZSTR_VAL(parent_script)[parent_script_len]));
 
-			if (UNEXPECTED((size_t)(key_length + parent_script_len + 1) >= sizeof(ZCG(_key)))) {
+			if (UNEXPECTED((size_t)(key_length + parent_script_len + 1) >= ZCG_KEY_LEN)) {
 				return NULL;
 			}
 			key[key_length] = ':';
@@ -1342,11 +1345,9 @@ zend_string *accel_make_persistent_key(zend_string *str)
 			key_length += parent_script_len;
 		}
 		key[key_length] = '\0';
-		GC_SET_REFCOUNT(&ZCG(key), 1);
-		GC_TYPE_INFO(&ZCG(key)) = GC_STRING;
-		ZSTR_H(&ZCG(key)) = 0;
-		ZSTR_LEN(&ZCG(key)) = key_length;
-		return &ZCG(key);
+		ZSTR_H(ZCG(key)) = 0;
+		ZSTR_LEN(ZCG(key)) = key_length;
+		return ZCG(key);
 	}
 
 	/* not use_cwd */
@@ -2014,8 +2015,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	      ZCG(cache_opline) == EG(current_execute_data)->opline))) {
 
 		persistent_script = ZCG(cache_persistent_script);
-		if (ZSTR_LEN(&ZCG(key))) {
-			key = &ZCG(key);
+		if (ZSTR_LEN(ZCG(key))) {
+			key = ZCG(key);
 		}
 
 	} else {
@@ -2555,7 +2556,7 @@ static zend_string* persistent_zend_resolve_path(zend_string *filename)
 							SHM_PROTECT();
 							HANDLE_UNBLOCK_INTERRUPTIONS();
 						} else {
-							ZSTR_LEN(&ZCG(key)) = 0;
+							ZSTR_LEN(ZCG(key)) = 0;
 						}
 						ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 						ZCG(cache_persistent_script) = persistent_script;
@@ -2927,7 +2928,15 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
+	accel_globals->key = zend_string_alloc(ZCG_KEY_LEN, true);
 }
+
+#ifdef ZTS
+static void accel_globals_dtor(zend_accel_globals *accel_globals)
+{
+	zend_string_free(accel_globals->key);
+}
+#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 # ifndef _WIN32
@@ -3100,7 +3109,7 @@ static void accel_move_code_to_huge_pages(void)
 static int accel_startup(zend_extension *extension)
 {
 #ifdef ZTS
-	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, NULL);
+	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
 #else
 	accel_globals_ctor(&accel_globals);
 #endif

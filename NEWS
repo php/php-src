@@ -17,7 +17,6 @@ PHP                                                                        NEWS
   . Fix may_have_extra_named_args flag for ZEND_AST_UNPACK. (nielsdos)
   . Fix NULL arithmetic in System V shared memory emulation for Windows. (cmb)
 
-
 - DOM:
   . Fixed bug GH-17500 (Segfault with requesting nodeName on nameless doctype).
     (nielsdos)
@@ -43,6 +42,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug GH-17307 (Internal closure causes JIT failure). (nielsdos)
+  . Fixed bug GH-17564 (Potential UB when reading from / writing to struct
+    padding). (ilutov)
 
 - PDO:
   . Fixed a memory leak when the GC is used to free a PDOStatment. (Girgias)
