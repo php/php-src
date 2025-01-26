@@ -1199,6 +1199,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
 	uint32_t old_arg_count;
+	HashTable *current_ctor = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
@@ -1217,6 +1218,10 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	old_ce = stmt->fetch.cls.ce;
 	ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
+	if (Z_TYPE(old_ctor_args) == IS_ARRAY) {
+		/* Protect against destruction by marking this as immutable: we consider this non-owned temporarily */
+		Z_TYPE_INFO(stmt->fetch.cls.ctor_args) = IS_ARRAY;
+	}
 	old_arg_count = stmt->fetch.cls.fci.param_count;
 
 	do_fetch_opt_finish(stmt, 0);
@@ -1241,7 +1246,13 @@ PHP_METHOD(PDOStatement, fetchAll)
 			}
 
 			if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args)) > 0) {
-				ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, ctor_args); /* we're not going to free these */
+				/* We increase the refcount and store it in case usercode has been messing around with the ctor args.
+				 * We need to store current_ctor separately as usercode may change the ctor_args which will cause a leak. */
+				current_ctor = Z_ARRVAL_P(ctor_args);
+				ZVAL_COPY(&stmt->fetch.cls.ctor_args, ctor_args);
+				/* Protect against destruction by marking this as immutable: we consider this non-owned
+				 * as destruction is handled via current_ctor. */
+				Z_TYPE_INFO(stmt->fetch.cls.ctor_args) = IS_ARRAY;
 			} else {
 				ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 			}
@@ -1343,9 +1354,15 @@ PHP_METHOD(PDOStatement, fetchAll)
 	}
 
 	do_fetch_opt_finish(stmt, 0);
+	if (current_ctor) {
+		zend_array_release(current_ctor);
+	}
 
 	/* Restore defaults which were changed by PDO_FETCH_CLASS mode */
 	stmt->fetch.cls.ce = old_ce;
+	/* ctor_args may have been changed to an owned object in the meantime, so destroy it.
+	 * If it was not, then the type flags update will have protected us against destruction. */
+	zval_ptr_dtor(&stmt->fetch.cls.ctor_args);
 	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
 	stmt->fetch.cls.fci.param_count = old_arg_count;
 
