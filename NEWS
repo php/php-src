@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-17654 (Multiple classes using same trait causes function
     JIT crash). (nielsdos)
+  . Fixed bug GH-17577 (JIT packed type guard crash). (nielsdos, Dmitry)
 
 - PHPDBG:
   . Partially fixed bug GH-17387 (Trivial crash in phpdbg lexer). (nielsdos)
