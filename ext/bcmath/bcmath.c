@@ -183,23 +183,28 @@ PHP_FUNCTION(bcadd)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	bc_add (first, second, &result, scale);
 
+	bc_free_num(&first);
+	bc_free_num(&second);
 	RETVAL_STR(bc_num2str_ex(result, scale));
 
-	cleanup: {
+	bc_free_num(&result);
+	return;
+
+	fail: {
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
-	};
+	}
 }
 /* }}} */
 
@@ -234,23 +239,28 @@ PHP_FUNCTION(bcsub)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	bc_sub (first, second, &result, scale);
 
+	bc_free_num(&first);
+	bc_free_num(&second);
 	RETVAL_STR(bc_num2str_ex(result, scale));
 
-	cleanup: {
+	bc_free_num(&result);
+	return;
+
+	fail: {
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
-	};
+	}
 }
 /* }}} */
 
@@ -285,19 +295,24 @@ PHP_FUNCTION(bcmul)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	bc_multiply (first, second, &result, scale);
 
+	bc_free_num(&first);
+	bc_free_num(&second);
 	RETVAL_STR(bc_num2str_ex(result, scale));
 
-	cleanup: {
+	bc_free_num(&result);
+	return;
+
+	fail: {
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
@@ -336,22 +351,27 @@ PHP_FUNCTION(bcdiv)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (!bc_divide(first, second, &result, scale)) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
-		goto cleanup;
+		goto fail;
 	}
 
+	bc_free_num(&first);
+	bc_free_num(&second);
 	RETVAL_STR(bc_num2str_ex(result, scale));
 
-	cleanup: {
+	bc_free_num(&result);
+	return;
+
+	fail: {
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
@@ -390,22 +410,27 @@ PHP_FUNCTION(bcmod)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (!bc_modulo(first, second, &result, scale)) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-		goto cleanup;
+		goto fail;
 	}
 
+	bc_free_num(&first);
+	bc_free_num(&second);
 	RETVAL_STR(bc_num2str_ex(result, scale));
 
-	cleanup: {
+	bc_free_num(&result);
+	return;
+
+	fail: {
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
@@ -446,43 +471,47 @@ PHP_FUNCTION(bcpowmod)
 
 	if (php_str2num(&bc_base, ZSTR_VAL(base_str)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (php_str2num(&bc_expo, ZSTR_VAL(exponent_str)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (php_str2num(&bc_modulus, ZSTR_VAL(modulus_str)) == FAILURE) {
 		zend_argument_value_error(3, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	raise_mod_status status = bc_raisemod(bc_base, bc_expo, bc_modulus, &result, scale);
 	switch (status) {
 		case BASE_HAS_FRACTIONAL:
 			zend_argument_value_error(1, "cannot have a fractional part");
-			goto cleanup;
+			goto fail;
 		case EXPO_HAS_FRACTIONAL:
 			zend_argument_value_error(2, "cannot have a fractional part");
-			goto cleanup;
+			goto fail;
 		case EXPO_IS_NEGATIVE:
 			zend_argument_value_error(2, "must be greater than or equal to 0");
-			goto cleanup;
+			goto fail;
 		case MOD_HAS_FRACTIONAL:
 			zend_argument_value_error(3, "cannot have a fractional part");
-			goto cleanup;
+			goto fail;
 		case MOD_IS_ZERO:
 			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-			goto cleanup;
+			goto fail;
 		case OK:
+			bc_free_num(&bc_base);
+			bc_free_num(&bc_expo);
+			bc_free_num(&bc_modulus);
 			RETVAL_STR(bc_num2str_ex(result, scale));
-			break;
+			bc_free_num(&result);
+			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	cleanup: {
+	fail: {
 		bc_free_num(&bc_base);
 		bc_free_num(&bc_expo);
 		bc_free_num(&bc_modulus);
@@ -522,30 +551,35 @@ PHP_FUNCTION(bcpow)
 
 	if (php_str2num(&first, ZSTR_VAL(base_str)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	if (php_str2num(&bc_exponent, ZSTR_VAL(exponent_str)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
-		goto cleanup;
+		goto fail;
 	}
 
 	/* Check the exponent for scale digits and convert to a long. */
 	if (bc_exponent->n_scale != 0) {
 		zend_argument_value_error(2, "cannot have a fractional part");
-		goto cleanup;
+		goto fail;
 	}
 	long exponent = bc_num2long(bc_exponent);
 	if (exponent == 0 && (bc_exponent->n_len > 1 || bc_exponent->n_value[0] != 0)) {
 		zend_argument_value_error(2, "is too large");
-		goto cleanup;
+		goto fail;
 	}
 
 	bc_raise(first, exponent, &result, scale);
 
+	bc_free_num(&first);
+	bc_free_num(&bc_exponent);
 	RETVAL_STR(bc_num2str_ex(result, scale));
 
-	cleanup: {
+	bc_free_num(&result);
+	return;
+
+	fail: {
 		bc_free_num(&first);
 		bc_free_num(&bc_exponent);
 		bc_free_num(&result);
