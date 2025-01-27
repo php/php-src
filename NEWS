@@ -64,6 +64,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17307 (Internal closure causes JIT failure). (nielsdos)
   . Fixed bug GH-17428 (Assertion failure ext/opcache/jit/zend_jit_ir.c:8940).
     (nielsdos)
+  . Fixed bug GH-17564 (Potential UB when reading from / writing to struct
+    padding). (ilutov)
 
 - PCNTL:
   . Fixed pcntl_setcpuaffinity exception type from ValueError to TypeError for
