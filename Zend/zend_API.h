@@ -1097,22 +1097,6 @@ ZEND_API zend_result zend_try_assign_typed_ref_res(zend_reference *ref, zend_res
 ZEND_API zend_result zend_try_assign_typed_ref_zval(zend_reference *ref, zval *zv);
 ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, bool strict);
 
-#define ZEND_SAFE_ASSIGN_VALUE(zv, value) do { \
-	zval *_zv = zv; \
-	zval *_value = value; \
-	if (Z_REFCOUNTED_P(_zv)) { \
-		zend_refcounted *rc = Z_COUNTED_P(_zv); \
-		ZVAL_COPY_VALUE(_zv, _value); \
-		if (!GC_DELREF(rc)) { \
-			rc_dtor_func(rc); \
-		} else { \
-			gc_check_possible_root(rc); \
-		} \
-	} else { \
-		ZVAL_COPY_VALUE(_zv, _value); \
-	} \
-} while (0)
-
 #define _ZEND_TRY_ASSIGN_NULL(zv, is_ref) do { \
 	zval *_zv = zv; \
 	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \

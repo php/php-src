@@ -15,7 +15,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 ========================
 
 - Zend
-  . Added ZEND_SAFE_ASSIGN_VALUE() macro to safely assign a value to a zval.
+  . Added zend_safe_assign_to_variable_noref() function to safely assign
+    a value to a non-reference zval.
   . Added zval_ptr_safe_dtor() to safely destroy a zval when a destructor
     could interfere.
 
