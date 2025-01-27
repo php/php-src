@@ -290,7 +290,7 @@ zval* collator_convert_string_to_double( zval* str, zval *rv )
 	zval* num = collator_convert_string_to_number( str, rv );
 	if( Z_TYPE_P(num) == IS_LONG )
 	{
-		ZVAL_DOUBLE( num, Z_LVAL_P( num ) );
+		ZVAL_DOUBLE( num, (double) Z_LVAL_P( num ) );
 	}
 
 	return num;

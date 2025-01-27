@@ -1143,7 +1143,7 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 TBB: but watch out for /0! */
 			double ac = cos (atan2 (dy, dx));
 			if (ac != 0) {
-				wid = thick / ac;
+				wid = (int) (thick / ac);
 			} else {
 				wid = 1;
 			}
@@ -1207,7 +1207,7 @@ TBB: but watch out for /0! */
 		   TBB: but watch out for /0! */
 		double as = sin (atan2 (dy, dx));
 		if (as != 0) {
-			wid = thick / as;
+			wid = (int) (thick / as);
 		} else {
 			wid = 1;
 		}
@@ -1398,7 +1398,7 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 		TBB: but watch out for /0! */
 		double as = sin(atan2(dy, dx));
 		if (as != 0) {
-			wid = thick / as;
+			wid = (int) (thick / as);
 		} else {
 			wid = 1;
 		}
@@ -1447,7 +1447,7 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 		TBB: but watch out for /0! */
 		double as = sin (atan2 (dy, dx));
 		if (as != 0) {
-			wid = thick / as;
+			wid = (int) (thick / as);
 		} else {
 			wid = 1;
 		}
@@ -2846,7 +2846,7 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 			 * same footprint.
 			 */
 			if (y >= y1 && y < y2) {
-				im->polyInts[ints++] = (float) ((y - y1) * (x2 - x1)) / (float) (y2 - y1) + 0.5 + x1;
+				im->polyInts[ints++] = (int) ((float) ((y - y1) * (x2 - x1)) / (float) (y2 - y1) + 0.5 + x1);
 			} else if (y == pmaxy && y == y2) {
 				im->polyInts[ints++] = x2;
 			}

@@ -51,8 +51,8 @@ static double gamma_max(double x, double y)
 
 static void splitint64(uint64_t v, double *vhi, double *vlo)
 {
-	*vhi = v >> 2;
-	*vlo = v & UINT64_C(0x3);
+	*vhi = (double) (v >> 2);
+	*vlo = (double) (v & UINT64_C(0x3));
 }
 
 static uint64_t ceilint(double a, double b, double g)

@@ -32,7 +32,7 @@ if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 if "%ASAN%" equ "1" set ADD_CONF=%ADD_CONF% --enable-sanitizer --enable-debug-pack
 
-set CFLAGS=/W1 /WX /w14013
+set CFLAGS=/W2 /WX /w14013 /wd4146 /wd4305
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
