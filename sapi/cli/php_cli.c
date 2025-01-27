@@ -1105,7 +1105,7 @@ do_repeat:
 				zend_printf("Scan for additional .ini files in: %s\n", php_ini_scanned_path  ? php_ini_scanned_path : "(none)");
 				zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
 				zend_printf("\n");
-				zend_printf("Non-standard INI settings:\n");
+				zend_printf("Non-default INI settings:\n");
 				zend_ini_entry *ini_entry;
 				HashTable *sorted = zend_array_dup(EG(ini_directives));
 				zend_array_sort(sorted, zend_ini_entry_cmp, 1);
