@@ -35,8 +35,6 @@ typedef struct _php_com_dotnet_object {
 
 	ITypeInfo *typeinfo;
 
-	zend_class_entry *ce;
-
    	/* associated event sink */
 	IDispatch *sink_dispatch;
 	GUID sink_id;
