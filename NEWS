@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     (nielsdos, ilutov)
   . Fix may_have_extra_named_args flag for ZEND_AST_UNPACK. (nielsdos)
   . Fix NULL arithmetic in System V shared memory emulation for Windows. (cmb)
+  . Fixed bug GH-17597 (#[\Deprecated] does not work for __call() and
+    __callStatic()). (timwolla)
 
 - DOM:
   . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
