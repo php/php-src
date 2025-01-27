@@ -132,6 +132,7 @@ PHP                                                                        NEWS
     (David Carlier)
   . socket_getsockname/socket_create/socket_bind handled AF_PACKET family socket.
     (David Carlier)
+  . Added IP_BINDANY for a socket to bind to any address. (David Carlier)
 
 - Sodium:
   . Fix overall theorical overflows on zend_string buffer allocations.

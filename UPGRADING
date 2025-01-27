@@ -267,6 +267,7 @@ PHP 8.5 UPGRADE NOTES
   . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
   . TCP_BBR_ALGORITHM (FreeBSD only).
   . AF_PACKET (Linux only).
+  . IP_BINDANY (FreeBSD/NetBSD/OpenBSD only).
 
 ========================================
 11. Changes to INI File Handling
