@@ -22,7 +22,7 @@ pcntl_signal(SIGCHLD, function($sig, $info) use (&$processes) {
 
 for ($i = 0; $i <= 5; $i++) {
     // Sleeping ensures we get to add the process to the list before the signal is invoked.
-    $process = proc_open('sleep 1', [], $pipes);
+    $process = proc_open(['sleep', '1'], [], $pipes);
     $pid = proc_get_status($process)['pid'];
     $processes[$pid] = $process;
 }

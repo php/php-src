@@ -61,7 +61,22 @@ if ($serverCert === false
 $port = 14430;
 
 // set up local server
-$cmd = "openssl s_server -key $serverKeyPath -cert $serverCertPath -accept $port -www -CAfile $clientCertPath -verify_return_error -Verify 1";
+$cmd = [
+    'openssl',
+    's_server',
+    '-key',
+    $serverKeyPath,
+    '-cert',
+    $serverCertPath,
+    '-accept',
+    $port,
+    '-www',
+    '-CAfile',
+    $clientCertPath,
+    '-verify_return_error',
+    '-Verify',
+    1
+];
 $process = proc_open($cmd, [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]], $pipes);
 
 if ($process === false) {

@@ -14,7 +14,7 @@ $ds = array(
         );
 
 $cat = proc_open(
-        "/bin/cat",
+        ['/bin/cat'],
         $ds,
         $pipes
         );

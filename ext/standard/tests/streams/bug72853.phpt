@@ -14,7 +14,7 @@ $descs = array(
     1 => array('pipe', 'w'), // stdout
 );
 
-$p = proc_open("ls", $descs, $pipes, '.', NULL, NULL);
+$p = proc_open(['ls'], $descs, $pipes, '.', NULL, NULL);
 
 stream_set_blocking($pipes[1], false);
 var_dump(stream_get_meta_data($pipes[1]));

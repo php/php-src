@@ -21,7 +21,7 @@ fgets($stream);
 
 // cast $stream and read fd until eof. Print each line that was read, prefixed with "proc open stdin:"
 $process = proc_open(
-    'sed "s/^/proc open stdin:/"',
+    ['sed', 's/^/proc open stdin:/'],
     [
         0 => $stream,
         1 => ['pipe', 'w'],
