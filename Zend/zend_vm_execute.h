@@ -1557,7 +1557,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 			zend_deprecated_function(fbc);
 		}
 		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !0) {
-			zend_nodiscard_function("(B)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
@@ -1664,7 +1664,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 			zend_deprecated_function(fbc);
 		}
 		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !1) {
-			zend_nodiscard_function("(B)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
@@ -1771,7 +1771,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 			zend_deprecated_function(fbc);
 		}
 		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !RETURN_VALUE_USED(opline)) {
-			zend_nodiscard_function("(B)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
@@ -1880,7 +1880,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 			zend_deprecated_function(fbc);
 		}
 		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !0) {
-			zend_nodiscard_function("(A)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
@@ -2003,7 +2003,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 			zend_deprecated_function(fbc);
 		}
 		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !1) {
-			zend_nodiscard_function("(A)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
@@ -2126,7 +2126,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 			zend_deprecated_function(fbc);
 		}
 		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !RETURN_VALUE_USED(opline)) {
-			zend_nodiscard_function("(A)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {

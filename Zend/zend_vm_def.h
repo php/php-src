@@ -4161,7 +4161,7 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL,OBSERVER))
 			zend_deprecated_function(fbc);
 		}
 		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !RETURN_VALUE_USED(opline)) {
-			zend_nodiscard_function("(B)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
@@ -4270,7 +4270,7 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 			zend_deprecated_function(fbc);
 		}
 		if (EG(exception) == NULL && (fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0 && !RETURN_VALUE_USED(opline)) {
-			zend_nodiscard_function("(A)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
