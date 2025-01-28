@@ -212,11 +212,7 @@ static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable
 		ZEND_ASSERT(Z_TYPE_P(variable_ptr) != IS_REFERENCE);
 		zend_refcounted *ref = Z_COUNTED_P(variable_ptr);
 		ZVAL_COPY_VALUE(variable_ptr, value);
-		if (!GC_DELREF(ref)) {
-			rc_dtor_func(ref);
-		} else {
-			gc_check_possible_root(ref);
-		}
+		GC_DTOR_NO_REF(ref);
 	} else {
 		ZVAL_COPY_VALUE(variable_ptr, value);
 	}
