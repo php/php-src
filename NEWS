@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.17
+30 Jan 2025, PHP 8.3.17RC1
 
 - Core:
   . Fixed bug GH-16892 (ini_parse_quantity() fails to parse inputs starting
