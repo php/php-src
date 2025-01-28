@@ -1559,7 +1559,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 			zend_deprecated_function(fbc);
 		}
 		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
-			zend_nodiscard_function("(B)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
@@ -1668,7 +1668,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 			zend_deprecated_function(fbc);
 		}
 		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
-			zend_nodiscard_function("(B)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
@@ -1777,7 +1777,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 			zend_deprecated_function(fbc);
 		}
 		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
-			zend_nodiscard_function("(B)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			UNDEF_RESULT();
@@ -1888,7 +1888,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 			zend_deprecated_function(fbc);
 		}
 		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
-			zend_nodiscard_function("(A)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
@@ -2013,7 +2013,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 			zend_deprecated_function(fbc);
 		}
 		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
-			zend_nodiscard_function("(A)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
@@ -2138,7 +2138,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 			zend_deprecated_function(fbc);
 		}
 		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
-			zend_nodiscard_function("(A)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {

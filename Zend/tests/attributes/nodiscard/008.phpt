@@ -15,4 +15,4 @@ test();
 --EXPECTF--
 Deprecated: Function test() is deprecated in %s on line %d
 
-Warning: (B)The return value of function test() is expected to be consumed in %s on line %d
+Warning: The return value of function test() is expected to be consumed in %s on line %d
