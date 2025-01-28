@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.4
+?? ??? ????, PHP 8.4.5
+
+
+30 Jan 2025, PHP 8.4.4
 
 - Core:
   . Fixed bug GH-17234 (Numeric parent hook call fails with assertion).
