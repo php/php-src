@@ -333,15 +333,14 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
 
 #define zend_release_properties(ht) do { \
-	if ((ht) && !(GC_FLAGS(ht) & GC_IMMUTABLE) && !GC_DELREF(ht)) { \
-		zend_array_destroy(ht); \
+	if (ht) { \
+		zend_array_release(ht); \
 	} \
 } while (0)
 
 #define zend_free_trampoline(func) do { \
-		HashTable *attributes = (func)->common.attributes; \
-		if (attributes && !(GC_FLAGS(attributes) & GC_IMMUTABLE) && !GC_DELREF(attributes)) { \
-			zend_array_destroy(attributes); \
+		if ((func)->common.attributes) { \
+			zend_array_release((func)->common.attributes); \
 		} \
 		if ((func) == &EG(trampoline)) { \
 			EG(trampoline).common.attributes = NULL; \
