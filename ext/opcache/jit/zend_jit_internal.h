@@ -233,6 +233,8 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(EXECUTE_DATA_D);
 bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
+bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D);
+bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D);
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D);
 void ZEND_FASTCALL zend_jit_undefined_long_key_ex(zend_long key EXECUTE_DATA_DC);
 void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D);
