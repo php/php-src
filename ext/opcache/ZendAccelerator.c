@@ -1728,7 +1728,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	zend_persistent_script *new_persistent_script;
 	uint32_t orig_functions_count, orig_class_count;
 	zend_op_array *orig_active_op_array;
-	zval orig_user_error_handler;
 	zend_op_array *op_array;
 	bool do_bailout = false;
 	accel_time_t timestamp = 0;
@@ -1796,10 +1795,8 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	orig_active_op_array = CG(active_op_array);
 	orig_functions_count = EG(function_table)->nNumUsed;
 	orig_class_count = EG(class_table)->nNumUsed;
-	ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 
 	/* Override them with ours */
-	ZVAL_UNDEF(&EG(user_error_handler));
 	if (ZCG(accel_directives).record_warnings) {
 		zend_begin_record_errors();
 	}
@@ -1825,7 +1822,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 	/* Restore originals */
 	CG(active_op_array) = orig_active_op_array;
-	EG(user_error_handler) = orig_user_error_handler;
 	EG(record_errors) = 0;
 
 	if (!op_array) {
