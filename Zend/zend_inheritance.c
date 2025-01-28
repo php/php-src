@@ -499,8 +499,6 @@ static inheritance_status zend_is_class_subtype_of_type(
 		} else if (fe_ce == zend_ce_closure) {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
-		} else {
-			return INHERITANCE_ERROR;
 		}
 	}
 
