@@ -2929,6 +2929,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 	accel_globals->key = zend_string_alloc(ZCG_KEY_LEN, true);
+	GC_MAKE_PERSISTENT_LOCAL(accel_globals->key);
 }
 
 #ifdef ZTS
