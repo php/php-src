@@ -96,7 +96,9 @@ static PHP_GINIT_FUNCTION(bcmath)
 /* {{{ PHP_GSHUTDOWN_FUNCTION */
 static PHP_GSHUTDOWN_FUNCTION(bcmath)
 {
-	bc_force_free_numbers();
+	bc_force_free_number(&bcmath_globals->_zero_);
+	bc_force_free_number(&bcmath_globals->_one_);
+	bc_force_free_number(&bcmath_globals->_two_);
 }
 /* }}} */
 

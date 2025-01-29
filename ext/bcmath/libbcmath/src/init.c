@@ -82,18 +82,11 @@ void bc_init_numbers(void)
 	BCG(_two_)->n_value[0] = 2;
 }
 
-static void _bc_force_free_number(bc_num *num)
+void bc_force_free_number(bc_num *num)
 {
 	pefree((*num)->n_ptr, 1);
 	pefree(*num, 1);
 	*num = NULL;
-}
-
-void bc_force_free_numbers(void)
-{
-	_bc_force_free_number(&BCG(_zero_));
-	_bc_force_free_number(&BCG(_one_));
-	_bc_force_free_number(&BCG(_two_));
 }
 
 
