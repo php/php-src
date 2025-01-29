@@ -2046,13 +2046,13 @@ function socket_read(Socket $socket, int $length, int $mode = PHP_BINARY_READ): 
  * @param string $address
  * @param int $port
  */
-function socket_getsockname(Socket $socket, &$address, ?int &$objint = null): bool {}
+function socket_getsockname(Socket $socket, &$address, &$port = null): bool {}
 
 /**
  * @param string $address
  * @param int $port
  */
-function socket_getpeername(Socket $socket, &$address, ?int &$objint = null): bool {}
+function socket_getpeername(Socket $socket, &$address, &$port = null): bool {}
 
 function socket_create(int $domain, int $type, int $protocol): Socket|false {}
 
