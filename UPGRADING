@@ -68,6 +68,9 @@ PHP 8.5 UPGRADE NOTES
   . Closure is now a proper subtype of callable
   . Added support for Closures in constant expressions.
     RFC: https://wiki.php.net/rfc/closures_in_const_expr
+  . Fatal Errors (such as an exceeded maximum execution time) now include a
+    backtrace.
+    RFC: https://wiki.php.net/rfc/error_backtraces_v2
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
@@ -242,6 +245,11 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- Core:
+  . Added fatal_error_backtraces to control whether fatal errors should include
+    a backtrace.
+    RFC: https://wiki.php.net/rfc/error_backtraces_v2
 
 - Opcache:
   . Added opcache.file_cache_read_only to support a read-only
