@@ -209,7 +209,7 @@ PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count)
 static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
 {
 	if (Z_ISUNDEF(stmt->lazy_object_ref)) {
-		pdo_row_t *row = ecalloc(1, sizeof(pdo_row_t));
+		pdo_row_t *row = zend_object_alloc(sizeof(pdo_row_t), pdo_row_ce);
 		row->stmt = stmt;
 		zend_object_std_init(&row->std, pdo_row_ce);
 		ZVAL_OBJ(&stmt->lazy_object_ref, &row->std);
@@ -2462,7 +2462,7 @@ void pdo_row_free_storage(zend_object *std)
 
 zend_object *pdo_row_new(zend_class_entry *ce)
 {
-	pdo_row_t *row = ecalloc(1, sizeof(pdo_row_t));
+	pdo_row_t *row = zend_object_alloc(sizeof(pdo_row_t), ce);
 	zend_object_std_init(&row->std, ce);
 
 	return &row->std;
