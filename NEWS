@@ -16,6 +16,7 @@ PHP                                                                        NEWS
     if available. (timwolla)
   . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
     non-printable characters in string literals). (nielsdos, WangYihang)
+  . Add support for backtraces for fatal errors. (enorris)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
