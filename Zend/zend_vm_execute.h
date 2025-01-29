@@ -2237,7 +2237,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(
 		memcpy(gen_execute_data, execute_data, used_stack);
 
 		/* Save execution context in generator object. */
-		generator = (zend_generator *) Z_OBJ_P(EX(return_value));
+		generator = zend_generator_from_obj(Z_OBJ_P(EX(return_value)));
 		generator->func = gen_execute_data->func;
 		generator->execute_data = gen_execute_data;
 		generator->frozen_call_stack = NULL;
@@ -5807,7 +5807,7 @@ yield_from_try_again:
 	} else if (IS_CONST != IS_CONST && Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val)->get_iterator) {
 		zend_class_entry *ce = Z_OBJCE_P(val);
 		if (ce == zend_ce_generator) {
-			zend_generator *new_gen = (zend_generator *) Z_OBJ_P(val);
+			zend_generator *new_gen = zend_generator_from_obj(Z_OBJ_P(val));
 
 			Z_ADDREF_P(val);
 
@@ -15411,7 +15411,7 @@ yield_from_try_again:
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST && Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val)->get_iterator) {
 		zend_class_entry *ce = Z_OBJCE_P(val);
 		if (ce == zend_ce_generator) {
-			zend_generator *new_gen = (zend_generator *) Z_OBJ_P(val);
+			zend_generator *new_gen = zend_generator_from_obj(Z_OBJ_P(val));
 
 			Z_ADDREF_P(val);
 			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -41508,7 +41508,7 @@ yield_from_try_again:
 	} else if (IS_CV != IS_CONST && Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val)->get_iterator) {
 		zend_class_entry *ce = Z_OBJCE_P(val);
 		if (ce == zend_ce_generator) {
-			zend_generator *new_gen = (zend_generator *) Z_OBJ_P(val);
+			zend_generator *new_gen = zend_generator_from_obj(Z_OBJ_P(val));
 
 			Z_ADDREF_P(val);
 
