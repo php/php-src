@@ -605,7 +605,6 @@ struct _pdo_stmt_t {
 	/* for lazy fetches, we always return the same lazy object handle.
 	 * Let's keep it here. */
 	zval lazy_object_ref;
-	zend_ulong refcount;
 
 	/* defaults for fetches */
 	enum pdo_fetch_type default_fetch_type;
