@@ -99,7 +99,6 @@ void bc_init_numbers(void)
 
 void bc_force_free_number(bc_num *num)
 {
-	pefree((*num)->n_ptr, 1);
 	pefree(*num, 1);
 	*num = NULL;
 }
