@@ -27,7 +27,7 @@ warning();
 
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare function warning() (previously declared in %s(8) : eval()'d code:1) in %swarning.inc on line 2
+Fatal error: Cannot redeclare %Swarning() (previously declared in %s(8) : eval()'d code:1) in %swarning.inc on line 2
 array(2) {
   [0]=>
   string(7) "004.php"
