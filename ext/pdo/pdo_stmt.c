@@ -2021,7 +2021,7 @@ static zend_function *dbstmt_method_get(zend_object **object_pp, zend_string *me
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
-			if (!pdo_hash_methods(Z_PDO_OBJECT_P(&stmt->database_object_handle),
+			if (!pdo_hash_methods(php_pdo_dbh_fetch_object(stmt->database_object_handle),
 				PDO_DBH_DRIVER_METHOD_KIND_STMT)
 				|| !stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
 				goto out;
@@ -2048,7 +2048,7 @@ static HashTable *dbstmt_get_gc(zend_object *object, zval **gc_data, int *gc_cou
 	enum pdo_fetch_type default_fetch_mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->database_object_handle);
+	zend_get_gc_buffer_add_obj(gc_buffer, stmt->database_object_handle);
 	if (default_fetch_mode == PDO_FETCH_INTO) {
 		zend_get_gc_buffer_add_obj(gc_buffer, stmt->fetch.into);
 	} else if (default_fetch_mode == PDO_FETCH_CLASS) {
@@ -2107,8 +2107,9 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 
 	do_fetch_opt_finish(stmt, 1);
 
-	if (!Z_ISUNDEF(stmt->database_object_handle)) {
-		zval_ptr_dtor(&stmt->database_object_handle);
+	if (stmt->database_object_handle != NULL) {
+		OBJ_RELEASE(stmt->database_object_handle);
+		stmt->database_object_handle = NULL;
 	}
 	zend_object_std_dtor(&stmt->std);
 }

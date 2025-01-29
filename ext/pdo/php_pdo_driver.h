@@ -578,7 +578,7 @@ struct _pdo_stmt_t {
 	struct pdo_column_data *columns;
 
 	/* we want to keep the dbh alive while we live, so we own a reference */
-	zval database_object_handle;
+	zend_object *database_object_handle;
 	pdo_dbh_t *dbh;
 
 	/* keep track of bound input parameters.  Some drivers support
