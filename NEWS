@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.5
 
+- BCMath:
+  . Fixed bug GH-17398 (bcmul memory leak). (SakiTakamachi)
+
 - DOM:
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
     Dom\HTML_NO_DEFAULT_NS). (nielsdos)
@@ -63,7 +66,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
- 
+
 - Opcache:
   . Fixed bug GH-15981 (Segfault with frameless jumps and minimal JIT).
     (nielsdos)
