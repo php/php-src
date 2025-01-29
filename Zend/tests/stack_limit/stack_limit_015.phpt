@@ -1,0 +1,69 @@
+--TEST--
+Stack limit 015 - Internal stack limit check in zend_compile_var()
+--SKIPIF--
+<?php
+if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
+?>
+--EXTENSIONS--
+zend_test
+--INI--
+zend.max_allowed_stack_size=128K
+--FILE--
+<?php
+
+$test
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+    ->p->p->p->p->p->p->p->p->p->p
+;
+
+?>
+--EXPECTF--
+Fatal error: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached during compilation. Try splitting expression in %s on line %d
