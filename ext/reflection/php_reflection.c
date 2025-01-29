@@ -4137,8 +4137,8 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 	}
 
 	if (prop) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Property %s::$%s is not initialized and no default was provided", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		zend_throw_error(NULL,
+			"Typed property %s::$%s must not be accessed before initialization", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	} else {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));

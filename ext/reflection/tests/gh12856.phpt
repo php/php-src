@@ -13,7 +13,7 @@ $rc = new ReflectionClass(Bug::class);
 var_dump($rc->getStaticPropertyValue('untyped'));
 try {
     var_dump($rc->getStaticPropertyValue('typed1'));
-} catch (ReflectionException $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 var_dump($rc->getStaticPropertyValue('typed1', 1));
@@ -22,6 +22,6 @@ var_dump($rc->getStaticPropertyValue('typed2'));
 ?>
 --EXPECT--
 NULL
-Property Bug::$typed1 is not initialized and no default was provided
+Typed property Bug::$typed1 must not be accessed before initialization
 int(1)
 int(3)
