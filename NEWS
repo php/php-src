@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.18
 
+- Core:
+   Fixed bug GH-17618 (UnhandledMatchError does not take
+   zend.exception_ignore_args=1 into account). (timwolla)
 
 13 Feb 2025, PHP 8.3.17
 
