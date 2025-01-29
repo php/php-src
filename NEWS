@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - BCMath:
   . Fixed bug GH-17398 (bcmul memory leak). (SakiTakamachi)
 
+- Core:
+  . Fixed bug GH-17623 (Broken stack overflow detection for variable
+    compilation). (ilutov)
+
 13 Feb 2025, PHP 8.3.17
 
 - Core:
