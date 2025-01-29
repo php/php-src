@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - BCMath:
   . Fixed bug GH-17398 (bcmul memory leak). (SakiTakamachi)
 
+- Core:
+  . Fixed bug GH-17623 (Broken stack overflow detection for variable
+    compilation). (ilutov)
+
 - DOM:
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
     Dom\HTML_NO_DEFAULT_NS). (nielsdos)
