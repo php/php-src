@@ -2267,7 +2267,7 @@ static zval *row_read_column_number(pdo_stmt_t *stmt, zend_long column, zval *rv
 
 static zval *row_prop_read(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
-	pdo_row_t *row = (pdo_row_t *)object;
+	pdo_row_t *row = php_pdo_row_fetch_object(object);
 	pdo_stmt_t *stmt = row->stmt;
 	zend_long lval;
 	zval *retval;
@@ -2304,7 +2304,7 @@ static zval *row_dim_read(zend_object *object, zval *offset, int type, zval *rv)
 		return NULL;
 	}
 	if (Z_TYPE_P(offset) == IS_LONG) {
-		pdo_row_t *row = (pdo_row_t *)object;
+		pdo_row_t *row = php_pdo_row_fetch_object(object);
 		pdo_stmt_t *stmt = row->stmt;
 		ZEND_ASSERT(stmt);
 
@@ -2342,7 +2342,7 @@ static void row_dim_write(zend_object *object, zval *member, zval *value)
 // todo: make row_prop_exists return bool as well
 static int row_prop_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
-	pdo_row_t *row = (pdo_row_t *)object;
+	pdo_row_t *row = php_pdo_row_fetch_object(object);
 	pdo_stmt_t *stmt = row->stmt;
 	zend_long lval;
 	zval tmp_val;
@@ -2370,7 +2370,7 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 {
 	if (Z_TYPE_P(offset) == IS_LONG) {
-		pdo_row_t *row = (pdo_row_t *)object;
+		pdo_row_t *row = php_pdo_row_fetch_object(object);
 		pdo_stmt_t *stmt = row->stmt;
 		ZEND_ASSERT(stmt);
 		zend_long column = Z_LVAL_P(offset);
@@ -2411,7 +2411,7 @@ static void row_dim_delete(zend_object *object, zval *offset)
 
 static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose purpose)
 {
-	pdo_row_t *row = (pdo_row_t *)object;
+	pdo_row_t *row = php_pdo_row_fetch_object(object);
 	pdo_stmt_t *stmt = row->stmt;
 	HashTable *props;
 	int i;
@@ -2453,7 +2453,7 @@ static zval *pdo_row_get_property_ptr_ptr(zend_object *object, zend_string *name
 
 void pdo_row_free_storage(zend_object *std)
 {
-	pdo_row_t *row = (pdo_row_t *)std;
+	pdo_row_t *row = php_pdo_row_fetch_object(std);
 	if (row->stmt) {
 		ZVAL_UNDEF(&row->stmt->lazy_object_ref);
 		OBJ_RELEASE(&row->stmt->std);
@@ -2490,6 +2490,7 @@ void pdo_stmt_init(void)
 	pdo_row_ce->default_object_handlers = &pdo_row_object_handlers;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	pdo_row_object_handlers.offset = XtOffsetOf(pdo_row_t, std);
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
 	pdo_row_object_handlers.clone_obj = NULL;
 	pdo_row_object_handlers.get_property_ptr_ptr = pdo_row_get_property_ptr_ptr;
