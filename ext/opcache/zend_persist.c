@@ -189,9 +189,15 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		}
 		node = (zend_ast *) copy;
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
-		zend_ast_zval *copy = zend_shared_memdup(ast, sizeof(zend_ast_zval));
-		zend_persist_op_array(&copy->val);
+		zend_ast_op_array *copy = zend_shared_memdup(ast, sizeof(zend_ast_op_array));
+		zval z;
+		ZVAL_PTR(&z, copy->op_array);
+		zend_persist_op_array(&z);
+		copy->op_array = Z_PTR(z);
 		node = (zend_ast *) copy;
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		node = zend_shared_memdup(ast, zend_ast_size(children));

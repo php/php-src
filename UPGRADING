@@ -65,6 +65,7 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Closure is now a proper subtype of callable
   . Added support for Closures in constant expressions.
     RFC: https://wiki.php.net/rfc/closures_in_const_expr
 
@@ -109,6 +110,10 @@ PHP 8.5 UPGRADE NOTES
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone()
     throws an IntlException on uninitialised classes/clone failures.
 
+  . grapheme_extract() properly assigns $next value when skipping over
+    invalid starting bytes. Previously there were cases where it would
+    point to the start of the grapheme boundary instead of the end.
+
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
 
@@ -120,6 +125,10 @@ PHP 8.5 UPGRADE NOTES
 
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
+  . pg_connect checks if the connection_string argument contains
+    any null byte.
+  . pg_close_stmt checks if the statement_name argument contains
+    any null byte.
 
 - POSIX:
   . posix_ttyname sets last_error to EBADF when encountering
@@ -128,6 +137,19 @@ PHP 8.5 UPGRADE NOTES
     an invalid file descriptor.
   . posix_fpathconf checks invalid file descriptors and sets
     last_error to EBADF and raises an E_WARNING message.
+
+- Session:
+  . session_start is stricter in regard of the option argument.
+    it throws a ValueError if the whole is not a hashmap or
+    a TypeError if read_on_close value is not a valid type
+    compatible with int.
+
+- SNMP:
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3
+    and SNMP::__construct() throw a ValueError when the hostname
+    is too large, contains any null byte or if the port is given
+    when negative or greater than 65535, timeout and retries values
+    are lower than -1 or too large.
 
 - Sockets:
   . socket_create_listen, socket_bind and socket_sendto throw a
@@ -144,6 +166,8 @@ PHP 8.5 UPGRADE NOTES
   . The "use_include_path" argument for the
     gzfile, gzopen and readgzfile functions had been changed
     from int to boolean.
+  . gzfile, gzopen and readgzfile functions now respect the default
+    stream context.
 
 ========================================
 6. New Functions
@@ -159,6 +183,10 @@ PHP 8.5 UPGRADE NOTES
 
 - DOM:
   . Added Dom\Element::insertAdjacentHTML().
+
+- Enchant:
+  . Added enchant_dict_remove_from_session() to remove a word added to the
+    spellcheck session via enchant_dict_add_to_session().
 
 - PGSQL:
   . pg_close_stmt offers an alternative way to close a prepared

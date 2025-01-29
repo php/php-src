@@ -65,28 +65,28 @@ char *php_mailer = "PHP 7 WIN32";
 /* Error messages */
 static char *ErrorMessages[] =
 {
-	{"Success"}, /* 0 */
-	{"Bad arguments from form"}, /* 1 */
-	{"Unable to open temporary mailfile for read"},
-	{"Failed to Start Sockets"},
-	{"Failed to Resolve Host"},
-	{"Failed to obtain socket handle"}, /* 5 */
-	{"Failed to connect to mailserver, verify your \"SMTP\" setting in php.ini"},
-	{"Failed to Send"},
-	{"Failed to Receive"},
-	{"Server Error"},
-	{"Failed to resolve the host IP name"}, /* 10 */
-	{"Out of memory"},
-	{"Unknown error"},
-	{"Bad Message Contents"},
-	{"Bad Message Subject"},
-	{"Bad Message destination"}, /* 15 */
-	{"Bad Message Return Path"},
-	{"Bad Mail Host"},
-	{"Bad Message File"},
-	{"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing"},
-	{"Mailserver rejected our \"sendmail_from\" setting"}, /* 20 */
-	{"Error while trimming mail header with PCRE, please file a bug report at https://github.com/php/php-src/issues"} /* 21 */
+	"Success", /* 0 */
+	"Bad arguments from form", /* 1 */
+	"Unable to open temporary mailfile for read",
+	"Failed to Start Sockets",
+	"Failed to Resolve Host",
+	"Failed to obtain socket handle", /* 5 */
+	"Failed to connect to mailserver, verify your \"SMTP\" setting in php.ini",
+	"Failed to Send",
+	"Failed to Receive",
+	"Server Error",
+	"Failed to resolve the host IP name", /* 10 */
+	"Out of memory",
+	"Unknown error",
+	"Bad Message Contents",
+	"Bad Message Subject",
+	"Bad Message destination", /* 15 */
+	"Bad Message Return Path",
+	"Bad Mail Host",
+	"Bad Message File",
+	"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing",
+	"Mailserver rejected our \"sendmail_from\" setting", /* 20 */
+	"Error while trimming mail header with PCRE, please file a bug report at https://github.com/php/php-src/issues" /* 21 */
 };
 
 /* This pattern converts all single occurrences of \n (Unix)

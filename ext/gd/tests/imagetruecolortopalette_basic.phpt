@@ -25,7 +25,7 @@ $half =  imagefilledarc ( $image, 75, 75, 70, 70, 0, 180, $a, IMG_ARC_PIE );
 $half2 =  imagefilledarc ( $image, 75, 55, 80, 70, 0, -180, $b, IMG_ARC_PIE );
 
 var_dump(imagetruecolortopalette($image, true, 2));
-
+imagepalettetotruecolor($image);
 include_once __DIR__ . '/func.inc';
 test_image_equals_file(__DIR__ . '/imagetruecolortopalette_basic.png', $image);
 ?>

@@ -8507,18 +8507,16 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 	} else {
 		ir_ref num_args_ref;
 		ir_ref if_internal_func = IR_UNUSED;
+		const size_t func_type_offset = is_closure ? offsetof(zend_closure, func.type) : offsetof(zend_function, type);
 
 		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value + ZEND_OBSERVER_ENABLED) * sizeof(zval);
 		used_stack_ref = ir_CONST_ADDR(used_stack);
+		used_stack_ref = ir_HARD_COPY_A(used_stack_ref); /* load constant once */
 
-		if (!is_closure) {
-			used_stack_ref = ir_HARD_COPY_A(used_stack_ref); /* load constant once */
-
-			// JIT: if (EXPECTED(ZEND_USER_CODE(func->type))) {
-			ir_ref tmp = ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_function, type)));
-			if_internal_func = ir_IF(ir_AND_U8(tmp, ir_CONST_U8(1)));
-			ir_IF_FALSE(if_internal_func);
-		}
+		// JIT: if (EXPECTED(ZEND_USER_CODE(func->type))) {
+		ir_ref tmp = ir_LOAD_U8(ir_ADD_OFFSET(func_ref, func_type_offset));
+		if_internal_func = ir_IF(ir_AND_U8(tmp, ir_CONST_U8(1)));
+		ir_IF_FALSE(if_internal_func);
 
 		// JIT: used_stack += (func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args)) * sizeof(zval);
 		num_args_ref = ir_CONST_U32(opline->extended_value);
@@ -8545,12 +8543,8 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		}
 		ref = ir_SUB_A(used_stack_ref, ref);
 
-		if (is_closure) {
-			used_stack_ref = ref;
-		} else {
-			ir_MERGE_WITH_EMPTY_TRUE(if_internal_func);
-			used_stack_ref = ir_PHI_2(IR_ADDR, ref, used_stack_ref);
-		}
+		ir_MERGE_WITH_EMPTY_TRUE(if_internal_func);
+		used_stack_ref = ir_PHI_2(IR_ADDR, ref, used_stack_ref);
 	}
 
 	zend_jit_start_reuse_ip(jit);

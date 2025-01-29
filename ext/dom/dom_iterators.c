@@ -49,6 +49,13 @@ static void itemHashScanner (void *payload, void *data, xmlChar *name)
 }
 /* }}} */
 
+static dom_nnodemap_object *php_dom_iterator_get_nnmap(const php_dom_iterator *iterator)
+{
+	const zval *object = &iterator->intern.data;
+	dom_object *nnmap = Z_DOMOBJ_P(object);
+	return nnmap->ptr;
+}
+
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID) /* {{{ */
 {
 	xmlEntityPtr ret = xmlMalloc(sizeof(xmlEntity));
@@ -120,18 +127,22 @@ zval *php_dom_iterator_current_data(zend_object_iterator *iter) /* {{{ */
 static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) /* {{{ */
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
-	zval *object = &iterator->intern.data;
-	zend_class_entry *ce = Z_OBJCE_P(object);
+	dom_nnodemap_object *objmap = php_dom_iterator_get_nnmap(iterator);
 
-	/* Nodelists have the index as a key while named node maps have the name as a key. */
-	if (instanceof_function(ce, dom_nodelist_class_entry) || instanceof_function(ce, dom_modern_nodelist_class_entry)) {
+	/* Only dtd named node maps, i.e. the ones based on a libxml hash table or attribute collections,
+	 * are keyed by the name because in that case the name is unique. */
+	if (!objmap->ht && objmap->nodetype != XML_ATTRIBUTE_NODE) {
 		ZVAL_LONG(key, iter->index);
 	} else {
 		dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 
 		if (intern != NULL && intern->ptr != NULL) {
-			xmlNodePtr curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
-			ZVAL_STRINGL(key, (char *) curnode->name, xmlStrlen(curnode->name));
+			xmlNodePtr curnode = ((php_libxml_node_ptr *)intern->ptr)->node;
+			if (objmap->nodetype == XML_ATTRIBUTE_NODE && php_dom_follow_spec_intern(intern)) {
+				ZVAL_NEW_STR(key, dom_node_get_node_name_attribute_or_element(curnode, false));
+			} else {
+				ZVAL_STRINGL(key, (const char *) curnode->name, xmlStrlen(curnode->name));
+			}
 		} else {
 			ZVAL_NULL(key);
 		}
@@ -169,9 +180,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 	}
 
 	dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
-	zval *object = &iterator->intern.data;
-	dom_object *nnmap = Z_DOMOBJ_P(object);
-	dom_nnodemap_object *objmap = nnmap->ptr;
+	dom_nnodemap_object *objmap = php_dom_iterator_get_nnmap(iterator);
 
 	if (intern != NULL && intern->ptr != NULL) {
 		if (objmap->nodetype != XML_ENTITY_NODE &&

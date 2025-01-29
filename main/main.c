@@ -2198,7 +2198,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 #ifdef PHP_WIN32
 	char *img_err;
 	if (!php_win32_crt_compatible(&img_err)) {
-		php_error(E_CORE_WARNING, img_err);
+		php_error(E_CORE_WARNING, "%s", img_err);
 		efree(img_err);
 		return FAILURE;
 	}

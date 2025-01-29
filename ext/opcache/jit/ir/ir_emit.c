@@ -272,10 +272,10 @@ static bool ir_is_same_mem_var(const ir_ctx *ctx, ir_ref r1, int32_t offset)
 
 void *ir_resolve_sym_name(const char *name)
 {
-	void *handle = NULL;
 	void *addr;
 
 #ifndef _WIN32
+	void *handle = NULL;
 # ifdef RTLD_DEFAULT
 	handle = RTLD_DEFAULT;
 # endif

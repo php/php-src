@@ -23,6 +23,7 @@
 #include "zend_execute.h"
 #include "zend_inheritance.h"
 #include "zend_interfaces.h"
+#include "zend_closures.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 #include "zend_exceptions.h"
@@ -485,6 +486,17 @@ static inheritance_status zend_is_class_subtype_of_type(
 		if (!fe_ce) {
 			have_unresolved = 1;
 		} else {
+			track_class_dependency(fe_ce, fe_class_name);
+			return INHERITANCE_SUCCESS;
+		}
+	}
+
+	/* If the parent has 'callable' as a return type, then Closure satisfies the co-variant check */
+	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_CALLABLE) {
+		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
+		if (!fe_ce) {
+			have_unresolved = 1;
+		} else if (fe_ce == zend_ce_closure) {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
 		}
@@ -2384,9 +2396,11 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 
 static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, zend_function *fn_copy, zend_string *name)
 {
-	/* If the function was originally already private+final, then it will have already been warned about.
-	 * If the function became private+final only after applying modifiers, we need to emit the same warning. */
-	if ((original_fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) != (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+	/* If the function was originally already private+final, then it will have
+	 * already been warned about. Only emit this error when the used trait method
+	 * explicitly became final, avoiding errors for `as private` where it was
+	 * already final. */
+	if (!(original_fn_flags & ZEND_ACC_FINAL)
 		&& (fn_copy->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
 		&& !zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");

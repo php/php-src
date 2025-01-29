@@ -158,8 +158,9 @@ static int pdo_firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int result = 1;
 
-	/* release the statement */
-	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
+	/* release the statement.
+	 * Note: if the server object is already gone then the statement was closed already as well. */
+	if (php_pdo_stmt_valid_db_obj_handle(stmt) && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
 		php_firebird_error_stmt(stmt);
 		result = 0;
 	}

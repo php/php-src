@@ -56,7 +56,7 @@ PHP_WINUTIL_API void php_win32_error_msg_free(char *msg)
 
 int php_win32_check_trailing_space(const char * path, const size_t path_len)
 {/*{{{*/
-	if (path_len > MAXPATHLEN - 1) {
+	if (path_len == 0 || path_len > MAXPATHLEN - 1) {
 		return 1;
 	}
 	if (path) {
@@ -468,7 +468,7 @@ static zend_always_inline BOOL is_compatible(HMODULE handle, BOOL is_smaller, ch
 		if (GetModuleFileName(handle, buf, sizeof(buf)) != 0) {
 			spprintf(err, 0, format, buf, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
 		} else {
-			spprintf(err, 0, "Can't retrieve the module name (error %u)", GetLastError());
+			spprintf(err, 0, "Can't retrieve the module name (error %lu)", GetLastError());
 		}
 		return FALSE;
 	}
@@ -493,7 +493,7 @@ PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err)
 # endif
 	HMODULE handle = GetModuleHandle(crt_name);
 	if (handle == NULL) {
-		spprintf(err, 0, "Can't get handle of module %s (error %u)", crt_name, GetLastError());
+		spprintf(err, 0, "Can't get handle of module %s (error %lu)", crt_name, GetLastError());
 		return FALSE;
 	}
 	return is_compatible(handle, FALSE, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", err);

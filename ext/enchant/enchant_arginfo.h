@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bcd5195c8a1eea47d881747a57f1b1342ef0bbd1 */
+ * Stub hash: f4705d8708830247ffb55a7bf73bc6e874e12629 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_enchant_broker_init, 0, 0, EnchantBroker, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -79,6 +79,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_enchant_dict_add_to_session arginfo_enchant_dict_add
 
+#define arginfo_enchant_dict_remove_from_session arginfo_enchant_dict_add
+
 #define arginfo_enchant_dict_is_added arginfo_enchant_dict_check
 
 #define arginfo_enchant_dict_is_in_session arginfo_enchant_dict_check
@@ -114,6 +116,7 @@ ZEND_FUNCTION(enchant_dict_check);
 ZEND_FUNCTION(enchant_dict_suggest);
 ZEND_FUNCTION(enchant_dict_add);
 ZEND_FUNCTION(enchant_dict_add_to_session);
+ZEND_FUNCTION(enchant_dict_remove_from_session);
 ZEND_FUNCTION(enchant_dict_is_added);
 ZEND_FUNCTION(enchant_dict_store_replacement);
 ZEND_FUNCTION(enchant_dict_get_error);
@@ -138,6 +141,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(enchant_dict_add, arginfo_enchant_dict_add)
 	ZEND_RAW_FENTRY("enchant_dict_add_to_personal", zif_enchant_dict_add, arginfo_enchant_dict_add_to_personal, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(enchant_dict_add_to_session, arginfo_enchant_dict_add_to_session)
+	ZEND_FE(enchant_dict_remove_from_session, arginfo_enchant_dict_remove_from_session)
 	ZEND_FE(enchant_dict_is_added, arginfo_enchant_dict_is_added)
 	ZEND_RAW_FENTRY("enchant_dict_is_in_session", zif_enchant_dict_is_added, arginfo_enchant_dict_is_in_session, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(enchant_dict_store_replacement, arginfo_enchant_dict_store_replacement)

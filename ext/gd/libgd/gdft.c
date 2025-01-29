@@ -408,9 +408,6 @@ static void *fontFetch (char **error, void *key)
 		path = gdEstrdup (fontsearchpath);
 
 		/* if name is an absolute filename then test directly */
-#ifdef NETWARE
-		if (*name == '/' || (name[0] != 0 && strstr(name, ":/"))) {
-#else
 		/* Actual length doesn't matter, just the minimum does up to length 2. */
 		unsigned int min_length = 0;
 		if (name[0] != '\0') {
@@ -422,7 +419,6 @@ static void *fontFetch (char **error, void *key)
 		}
 		ZEND_IGNORE_VALUE(min_length); /* On Posix systems this may be unused */
 		if (IS_ABSOLUTE_PATH(name, min_length)) {
-#endif
 			snprintf(fullname, sizeof(fullname) - 1, "%s", name);
 			if (access(fullname, R_OK) == 0) {
 				font_found++;

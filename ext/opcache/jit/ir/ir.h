@@ -29,7 +29,9 @@ extern "C" {
 # endif
 /* Only supported is little endian for any arch on Windows,
    so just fake the same for all. */
-# define __ORDER_LITTLE_ENDIAN__ 1
+# ifndef __ORDER_LITTLE_ENDIAN__
+#  define __ORDER_LITTLE_ENDIAN__ 1
+# endif
 # define __BYTE_ORDER__ __ORDER_LITTLE_ENDIAN__
 # ifndef __has_builtin
 #  define __has_builtin(arg) (0)
@@ -705,6 +707,7 @@ ir_ref ir_emit3(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_emit_N(ir_ctx *ctx, uint32_t opt, int32_t count);
 void   ir_set_op(ir_ctx *ctx, ir_ref ref, int32_t n, ir_ref val);
+ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n);
 
 IR_ALWAYS_INLINE void ir_set_op1(ir_ctx *ctx, ir_ref ref, ir_ref val)
 {
@@ -721,8 +724,6 @@ IR_ALWAYS_INLINE void ir_set_op3(ir_ctx *ctx, ir_ref ref, ir_ref val)
 	ctx->ir_base[ref].op3 = val;
 }
 
-ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n);
-
 IR_ALWAYS_INLINE ir_ref ir_insn_op(const ir_insn *insn, int32_t n)
 {
 	const ir_ref *p = insn->ops + n;
@@ -733,6 +734,18 @@ IR_ALWAYS_INLINE void ir_insn_set_op(ir_insn *insn, int32_t n, ir_ref val)
 {
 	ir_ref *p = insn->ops + n;
 	*p = val;
+}
+
+IR_ALWAYS_INLINE uint32_t ir_insn_find_op(const ir_insn *insn, ir_ref val)
+{
+	int i, n = insn->inputs_count;
+
+	for (i = 1; i <= n; i++) {
+		if (ir_insn_op(insn, i) == val) {
+			return i;
+		}
+	}
+	return 0;
 }
 
 ir_ref ir_fold(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
@@ -947,10 +960,12 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 			 || !ir_mem2ssa(ctx)) {
 				return NULL;
 			}
+			if (opt_level > 1) {
+				ir_reset_cfg(ctx);
+			}
 		}
 
 		if (opt_level > 1) {
-			ir_reset_cfg(ctx);
 			if (!ir_sccp(ctx)) {
 				return NULL;
 			}

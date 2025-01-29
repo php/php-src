@@ -306,7 +306,7 @@ PHP_FUNCTION(com_get_active_object)
 		if (FAILED(res)) {
 			php_com_throw_exception(res, NULL);
 		} else {
-			res = IUnknown_QueryInterface(unk, &IID_IDispatch, &obj);
+			res = IUnknown_QueryInterface(unk, &IID_IDispatch, (void **) &obj);
 
 			if (FAILED(res)) {
 				php_com_throw_exception(res, NULL);

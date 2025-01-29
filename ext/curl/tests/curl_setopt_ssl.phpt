@@ -7,7 +7,7 @@ curl
 if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl version', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
-if (PHP_OS_FAMILY === 'Windows') die('skip not for Windows');
+
 if (PHP_OS_FAMILY === 'Darwin') die('skip Fails intermittently on macOS');
 if (PHP_OS === 'FreeBSD') die('skip proc_open seems to be stuck on FreeBSD');
 $curl_version = curl_version();
@@ -62,7 +62,7 @@ $port = 14430;
 
 // set up local server
 $cmd = "openssl s_server -key $serverKeyPath -cert $serverCertPath -accept $port -www -CAfile $clientCertPath -verify_return_error -Verify 1";
-$process = proc_open($cmd, [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]], $pipes);
+$process = proc_open($cmd, [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]], $pipes, null, null, ["bypass_shell" => true]);
 
 if ($process === false) {
     die('failed to start server');

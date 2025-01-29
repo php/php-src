@@ -2106,7 +2106,11 @@ lxb_html_tokenizer_state_char_ref_numeric_end(lxb_html_tokenizer_t *tkz,
             break;
     }
 
-    if (tkz->entity_number <= 0x1F
+    if ((tkz->entity_number <= 0x1F
+         && tkz->entity_number != 0x09  /* TAB */
+         && tkz->entity_number != 0x0A  /* LINE FEED (LF) */
+         && tkz->entity_number != 0x0C  /* FORM FEED (FF) */
+         && tkz->entity_number != 0x20) /* SPACE */
         || (tkz->entity_number >= 0x7F && tkz->entity_number <= 0x9F))
     {
         lxb_html_tokenizer_error_add(tkz->parse_errors, tkz->markup,

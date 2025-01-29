@@ -29,6 +29,14 @@ PHP                                                                        NEWS
   . Added Dom\Element::$outerHTML. (nielsdos)
   . Added Dom\Element::insertAdjacentHTML(). (nielsdos)
 
+- Enchant:
+  . Added enchant_dict_remove_from_session(). (nielsdos)
+
+- GD:
+  . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
+    cmb)
+  . Fixed bug #64823 (ZTS GD fails to to find system TrueType font). (cmb)
+
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
@@ -55,6 +63,9 @@ PHP                                                                        NEWS
   . Added pg_close_stmt to close a prepared statement while allowing
     its name to be reused. (David Carlier)
   . Added Iterable support for pgsql_copy_from. (David Carlier)
+  . pg_connect checks if connection_string contains any null byte,
+    pg_close_stmt check if the statement contains any null byte.
+    (David Carlier)
 
 - POSIX:
   . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
@@ -70,9 +81,23 @@ PHP                                                                        NEWS
   . Added ReflectionConstant::getExtension() and ::getExtensionName().
     (DanielEScherzer)
 
+- Session:
+  . session_start() throws a ValueError on option argument if not a hashmap
+    or a TypeError if read_and_close value is not compatible with int.
+    (David Carlier)
+
+- SNMP:
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3 and
+    SNMP::__construct() throw an exception on invalid hostname, community
+    timeout and retries arguments. (David Carlier)
+
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)
+
+- Sodium:
+  . Fix overall theorical overflows on zend_string buffer allocations.
+    (David Carlier/nielsdos)
 
 - Sockets:
   . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
@@ -124,6 +149,8 @@ PHP                                                                        NEWS
 - Zlib:
   . gzfile, gzopen and readgzfile, their "use_include_path" argument
     is now a boolean. (David Carlier)
+  . Fixed bug GH-16883 (gzopen() does not use the default stream context when
+    opening HTTP URLs). (nielsdos)
 
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

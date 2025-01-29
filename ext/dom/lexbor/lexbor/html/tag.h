@@ -82,7 +82,6 @@ lxb_html_tag_is_void(lxb_tag_id_t tag_id)
         case LXB_TAG_INPUT:
         case LXB_TAG_LINK:
         case LXB_TAG_META:
-        case LXB_TAG_PARAM:
         case LXB_TAG_SOURCE:
         case LXB_TAG_TRACK:
         case LXB_TAG_WBR:

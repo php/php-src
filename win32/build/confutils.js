@@ -1670,7 +1670,6 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		var mangle_dir = k.replace(new RegExp("[\\\\/.-]", "g"), "_");
 		var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
 
-		DEFINE(bd_flags_name, "/Fp" + sub_build + d + " /FR" + sub_build + d + " ");
 		if (VS_TOOLSET) {
 			ADD_FLAG(bd_flags_name, "/Fd" + sub_build + d);
 		}
@@ -2474,15 +2473,12 @@ function handle_analyzer_makefile_flags(fd, key, val)
 
 		if ("clang" == PHP_ANALYZER) {
 			val = val.replace(/\/FD /, "")
-				.replace(/\/Fp.+? /, "")
 				.replace(/\/Fo.+? /, "")
 				.replace(/\/Fd.+? /, "")
 				//.replace(/\/Fd.+?/, " ")
-				.replace(/\/FR.+? /, "")
 				.replace("/guard:cf ", "")
 				.replace(/\/MP \d+ /, "")
 				.replace(/\/MP /, "")
-				.replace("/LD ", "")
 				.replace("/Qspectre ", "");
 		} else if ("cppcheck" == PHP_ANALYZER) {
 			new_val = "";
@@ -3137,7 +3133,7 @@ function toolset_get_compiler_name(short)
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
-		ERROR(full.split(/\n/)[0].replace(/\s/g, ' '));
+		return trim(full.split(/\n/)[0].replace(/\s/g, ' '));
 	}
 
 	WARNING("Unsupported toolset");
@@ -3318,6 +3314,11 @@ function toolset_setup_common_cflags()
 		var vc_ver = probe_binary(PATH_PROG('cl', null));
 		ADD_FLAG("CFLAGS"," -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions");
 	}
+
+	if (!CLANG_TOOLSET) {
+		/* clang uses __builtin_*() instead */
+		ADD_FLAG("CFLAGS", "/DENABLE_INTSAFE_SIGNED_FUNCTIONS");
+	}
 }
 
 function toolset_setup_intrinsic_cflags()
@@ -3444,7 +3445,7 @@ function toolset_setup_common_libs()
 function toolset_setup_build_mode()
 {
 	if (PHP_DEBUG == "yes") {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /U NDebug /U NDEBUG /D ZEND_DEBUG=1 " +
+		ADD_FLAG("CFLAGS", "/MDd /Od /U NDebug /U NDEBUG /D ZEND_DEBUG=1 " +
 			(TARGET_ARCH == 'x86'?"/ZI":"/Zi"));
 		ADD_FLAG("LDFLAGS", "/debug");
 		// Avoid problems when linking to release libraries that use the release
@@ -3456,7 +3457,7 @@ function toolset_setup_build_mode()
 			ADD_FLAG("CFLAGS", "/Zi");
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
-		ADD_FLAG("CFLAGS", "/LD /MD");
+		ADD_FLAG("CFLAGS", "/MD");
 		if (PHP_SANITIZER == "yes") {
 			if (VS_TOOLSET) {
 				ADD_FLAG("CFLAGS", "/Ox /U NDebug /U NDEBUG /D ZEND_DEBUG=1");
@@ -3698,31 +3699,31 @@ function check_binary_tools_sdk()
 function get_clang_lib_dir()
 {
 	var ret = null;
-	var ver = null;
+	var ver = null, major = null;
 
-	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
+	if (COMPILER_NAME_LONG.match(/clang version ((\d+)\.[\d\.]+)/)) {
 		ver = RegExp.$1;
+		major = RegExp.$2;
 	} else {
-		ERROR("Failed to determine clang lib path");
+		ERROR("Failed to determine clang version");
 	}
 
-	if (TARGET_ARCH != 'x86') {
-		ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
+	var cmd = "cmd /c where clang.exe";
+	var path = trim(execute(cmd).split(/\n/)[0]).replace(/bin\\clang\.exe$/, "");
+	if (!FSO.FolderExists(path)) {
+		ERROR("Failed to determine clang installation folder");
+	}
+
+	ret = path + "lib\\clang\\" + major + "\\lib\\";
+	if (!FSO.FolderExists(ret)) {
+		ret = path + "lib\\clang\\" + ver + "\\lib\\";
 		if (!FSO.FolderExists(ret)) {
 			ret = null;
-		}
-	} else {
-		ret = PROGRAM_FILESx86 + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
-		if (!FSO.FolderExists(ret)) {
-			ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
-			if (!FSO.FolderExists(ret)) {
-				ret = null;
-			}
 		}
 	}
 
 	if (null == ret) {
-		ERROR("Invalid clang lib path encountered");
+		ERROR("Failed to determine clang lib folder");
 	}
 
 	return ret;
@@ -3731,16 +3732,10 @@ function get_clang_lib_dir()
 function add_asan_opts(cflags_name, libs_name, ldflags_name)
 {
 
-	var ver = null;
-
-	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
-		ver = RegExp.$1;
-	} else {
-		ERROR("Failed to determine clang lib path");
-	}
+	var lib_dir = get_clang_lib_dir();
 
 	if (!!cflags_name) {
-		ADD_FLAG(cflags_name, "-fsanitize=address,undefined");
+		ADD_FLAG(cflags_name, "-fsanitize=address,undefined -fno-sanitize=function");
 	}
 	if (!!libs_name) {
 		if (TARGET_ARCH == 'x64') {
@@ -3754,7 +3749,7 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 	}
 
 	if (!!ldflags_name) {
-		ADD_FLAG(ldflags_name, "/libpath:\"" + get_clang_lib_dir() + "\\windows\"");
+		ADD_FLAG(ldflags_name, "/libpath:\"" + lib_dir + "\\windows\"");
 	}
 }
 
