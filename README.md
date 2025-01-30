@@ -45,6 +45,10 @@ On Ubuntu, you can install these using:
     sudo apt install -y pkg-config build-essential autoconf bison re2c \
                         libxml2-dev libsqlite3-dev
 
+On MacOS, you can install these using:
+
+    brew install build-essential autoconf bison re2c iconv
+
 On Fedora, you can install these using:
 
     sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
@@ -63,7 +67,7 @@ Configure your build. `--enable-debug` is recommended for development, see
 
 Build PHP. To speed up the build, specify the maximum number of jobs using `-j`:
 
-    make -j4
+    make -j$(nproc)
 
 The number of jobs should usually match the number of available cores, which
 can be determined using `nproc`.
