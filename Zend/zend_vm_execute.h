@@ -1552,7 +1552,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	const uint32_t no_discard = (!0) * ZEND_ACC_NODISCARD;
+	const uint32_t no_discard = 0 ? 0 : ZEND_ACC_NODISCARD;
 
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
 		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
@@ -1661,7 +1661,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	const uint32_t no_discard = (!1) * ZEND_ACC_NODISCARD;
+	const uint32_t no_discard = 1 ? 0 : ZEND_ACC_NODISCARD;
 
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
 		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
@@ -1770,7 +1770,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	const uint32_t no_discard = (!RETURN_VALUE_USED(opline)) * ZEND_ACC_NODISCARD;
+	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
 
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
 		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
@@ -1881,7 +1881,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	const uint32_t no_discard = (!0) * ZEND_ACC_NODISCARD;
+	const uint32_t no_discard = 0 ? 0 : ZEND_ACC_NODISCARD;
 
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
 		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
@@ -2006,7 +2006,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	const uint32_t no_discard = (!1) * ZEND_ACC_NODISCARD;
+	const uint32_t no_discard = 1 ? 0 : ZEND_ACC_NODISCARD;
 
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
 		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
@@ -2131,7 +2131,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	const uint32_t no_discard = (!RETURN_VALUE_USED(opline)) * ZEND_ACC_NODISCARD;
+	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
 
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
 		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
