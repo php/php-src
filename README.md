@@ -42,32 +42,43 @@ a default build, you will additionally need libxml2 and libsqlite3.
 
 On Ubuntu, you can install these using:
 
-    sudo apt install -y pkg-config build-essential autoconf bison re2c \
-                        libxml2-dev libsqlite3-dev
+```shell
+sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev libsqlite3-dev
+```
 
 On MacOS, you can install these using:
 
-    brew install build-essential autoconf bison re2c iconv
+```shell
+brew install build-essential autoconf bison re2c iconv
+```
 
 On Fedora, you can install these using:
 
-    sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
+```shell
+sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
+```
 
 Generate configure:
 
-    ./buildconf
+```shell
+./buildconf
+```
 
 Configure your build. `--enable-debug` is recommended for development, see
 `./configure --help` for a full list of options.
 
-    # For development
-    ./configure --enable-debug
-    # For production
-    ./configure
+```shell
+# For development
+./configure --enable-debug
+# For production
+./configure
+```
 
 Build PHP. To speed up the build, specify the maximum number of jobs using `-j`:
 
-    make -j$(nproc)
+```shell
+make -j$(nproc)
+```
 
 The number of jobs should usually match the number of available cores, which
 can be determined using `nproc`.
@@ -80,7 +91,9 @@ successful compilation of the sources to run this test suite.
 It is possible to run tests using multiple cores by setting `-jN` in
 `TEST_PHP_ARGS`:
 
-    make TEST_PHP_ARGS=-j4 test
+```shell
+make TEST_PHP_ARGS=-j4 test
+```
 
 Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum
 number of jobs should not exceed the number of cores available.
@@ -92,7 +105,9 @@ testing and quality assurance.
 
 After a successful build (and test), PHP may be installed with:
 
-    make install
+```shell
+make install
+```
 
 Depending on your permissions and prefix, `make install` may need super user
 permissions.
