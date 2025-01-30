@@ -546,7 +546,7 @@ static bool dom_decode_encode_fast_path(
 			parser,
 			buf_ptr - buf,
 			buf,
-			buf_ptr - buf,
+			buf_ref - *buf_ref_ref,
 			tokenizer_error_offset,
 			tree_error_offset
 		)) {
