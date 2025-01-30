@@ -189,6 +189,9 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 
 			zval_ptr_dtor_str(&fci.function_name);
 			efree(lc_name);
+			if (fci.named_params) {
+				zend_array_destroy(fci.named_params);
+			}
 
 			return SUCCESS;
 		}

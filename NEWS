@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
     Dom\HTML_NO_DEFAULT_NS). (nielsdos)
 
+- PHPDBG:
+  . Partially fixed bug GH-17387 (Trivial crash in phpdbg lexer). (nielsdos)
+  . Fix memory leak in phpdbg calling registered function. (nielsdos)
+
 30 Jan 2025, PHP 8.4.4
 
 - Core:
