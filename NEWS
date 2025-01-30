@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17718 (Calling static methods on an interface that has
     `__callStatic` is allowed). (timwolla)
 
+- FPM:
+  . Fixed bug GH-17643 (FPM with httpd ProxyPass encoded PATH_INFO env).
+    (Jakub Zelenka)
+
 - LDAP:
   . Fixed bug GH-17704 (ldap_search fails when $attributes contains a
     non-packed array with numerical keys). (nielsdos, 7u83)
