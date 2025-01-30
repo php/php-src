@@ -98,6 +98,12 @@ make TEST_PHP_ARGS=-j4 test
 Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum
 number of jobs should not exceed the number of cores available.
 
+Use `TESTS` variable to tests only specific directories:
+
+```shell
+make TESTS=Zend/tests/throw/ test
+```
+
 The [qa.php.net](https://qa.php.net) site provides more detailed info about
 testing and quality assurance.
 
