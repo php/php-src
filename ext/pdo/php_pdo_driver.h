@@ -609,7 +609,7 @@ struct _pdo_stmt_t {
 
 	/* for lazy fetches, we always return the same lazy object handle.
 	 * Let's keep it here. */
-	zval lazy_object_ref;
+	zend_object *lazy_object_ref;
 
 	pdo_dbh_t *dbh;
 	/* we want to keep the dbh alive while we live, so we own a reference */

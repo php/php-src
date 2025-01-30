@@ -206,17 +206,17 @@ PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count)
 	stmt->column_count = new_count;
 }
 
-static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
+static void pdo_get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
 {
-	if (Z_ISUNDEF(stmt->lazy_object_ref)) {
+	if (stmt->lazy_object_ref == NULL) {
 		pdo_row_t *row = zend_object_alloc(sizeof(pdo_row_t), pdo_row_ce);
 		row->stmt = stmt;
 		zend_object_std_init(&row->std, pdo_row_ce);
-		ZVAL_OBJ(&stmt->lazy_object_ref, &row->std);
+		stmt->lazy_object_ref = &row->std;
 		GC_ADDREF(&stmt->std);
 		GC_DELREF(&row->std);
 	}
-	ZVAL_COPY(return_value, &stmt->lazy_object_ref);
+	ZVAL_OBJ_COPY(return_value, stmt->lazy_object_ref);
 }
 /* }}} */
 
@@ -685,7 +685,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	}
 
 	if (how == PDO_FETCH_LAZY) {
-		get_lazy_object(stmt, return_value);
+		pdo_get_lazy_object(stmt, return_value);
 		return true;
 	}
 
@@ -2373,7 +2373,7 @@ static void pdo_row_free_storage(zend_object *std)
 {
 	pdo_row_t *row = php_pdo_row_fetch_object(std);
 	if (row->stmt) {
-		ZVAL_UNDEF(&row->stmt->lazy_object_ref);
+		row->stmt->lazy_object_ref = NULL;
 		OBJ_RELEASE(&row->stmt->std);
 	}
 }
