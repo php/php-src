@@ -93,6 +93,12 @@ class XSLTProcessor
 
     /**
      * @param DOMDocument|Dom\Document|SimpleXMLElement $document
+     * @param resource $stream
+     */
+    public function transformToStream(object $document, $stream, ?string $encoding = null): int {}
+
+    /**
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToUri(object $document, string $uri): int {}
