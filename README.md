@@ -115,7 +115,7 @@ After a successful build (and test), PHP may be installed with:
 make install
 ```
 
-Depending on your permissions and prefix, `make install` may need super user
+Depending on your permissions and prefix, `make install` may need superuser
 permissions.
 
 ## PHP extensions
