@@ -147,6 +147,22 @@ try {
     var_dump($e->getMessage());
 }
 
+try {
+    (function () {
+        return "string" + throw null ?? throw new Exception('return throw null ?? throw new Exception();');
+    })();
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    (function () {
+        return "string1" . 5 . "ok" / throw throw throw throw new Exception("cool");
+    })();
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
+
 ?>
 --EXPECT--
 string(13) "true && throw"
@@ -171,3 +187,5 @@ string(42) "Unsupported operand types: Exception + int"
 string(35) "throw $exception = new Exception();"
 string(37) "throw $exception ??= new Exception();"
 string(30) "throw null ?? new Exception();"
+string(43) "return throw null ?? throw new Exception();"
+string(43) "cool"
