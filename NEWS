@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-17623 (Broken stack overflow detection for variable
     compilation). (ilutov)
+  . Fixed bug GH-17618 (UnhandledMatchError does not take
+    zend.exception_ignore_args=1 into account). (timwolla)
 
 - DOM:
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
