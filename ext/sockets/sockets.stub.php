@@ -2156,3 +2156,17 @@ function socket_wsaprotocol_info_import(string $info_id): Socket|false {}
 
 function socket_wsaprotocol_info_release(string $info_id): bool {}
 #endif
+
+#ifdef AF_PACKET
+final class SocketEthernetInfo
+{
+    /** @readonly **/
+    public Socket $socket;
+    /** @readonly **/
+    public string $macsrc;
+    /** @readonly **/
+    public string $macdst;
+    /** @readonly **/
+    public array $payload;
+}
+#endif
