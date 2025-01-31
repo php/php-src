@@ -45,6 +45,7 @@ cmd /c configure.bat ^
 if %errorlevel% neq 0 exit /b 3
 
 nmake /NOLOGO
+nmake /NOLOGO comtest.dll
 if %errorlevel% neq 0 exit /b 3
 
 exit /b 0
