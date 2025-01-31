@@ -641,13 +641,9 @@ static inline pdo_stmt_t *php_pdo_stmt_fetch_object(zend_object *obj) {
 #define Z_PDO_STMT_P(zv) php_pdo_stmt_fetch_object(Z_OBJ_P((zv)))
 
 struct _pdo_row_t {
-	pdo_stmt_t *stmt;
 	zend_object std;
+	pdo_stmt_t *stmt;
 };
-
-static inline pdo_row_t *php_pdo_row_fetch_object(zend_object *obj) {
-	return (pdo_row_t *)((char*)(obj) - XtOffsetOf(pdo_row_t, std));
-}
 
 struct _pdo_scanner_t {
 	const char *ptr, *cur, *tok, *end;
