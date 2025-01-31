@@ -640,7 +640,7 @@ static bool pdo_call_fetch_object_constructor(zend_function *constructor, HashTa
 	zval retval_constructor_call;
 	zend_fcall_info fci = {
 		.size = sizeof(zend_fcall_info),
-		.function_name = {},
+		.function_name = { 0 },
 		.object = Z_OBJ_P(return_value),
 		.retval = &retval_constructor_call,
 		.param_count = 0,
