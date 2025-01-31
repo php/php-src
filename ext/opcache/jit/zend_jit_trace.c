@@ -1745,7 +1745,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						if (!(orig_op1_type & IS_TRACE_PACKED)) {
 							zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
 
-							if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
+							if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)
+							 && (info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
 								info->type |= MAY_BE_PACKED_GUARD;
 								info->type &= ~MAY_BE_ARRAY_PACKED;
 							}
@@ -1754,7 +1755,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 								&& val_type != IS_UNDEF) {
 							zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
 
-							if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
+							if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)
+							 && (info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
 								info->type |= MAY_BE_PACKED_GUARD;
 								info->type &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
 							}
@@ -1833,7 +1835,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 
 						zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
 
-						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
+						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)
+						 && (info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
 							info->type |= MAY_BE_PACKED_GUARD;
 							if (orig_op1_type & IS_TRACE_PACKED) {
 								info->type &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
@@ -1935,7 +1938,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 
 						zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
 
-						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
+						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)
+						 && (info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
 							info->type |= MAY_BE_PACKED_GUARD;
 							if (orig_op1_type & IS_TRACE_PACKED) {
 								info->type &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
@@ -1965,7 +1969,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 
 						zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
 
-						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
+						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)
+						 && (info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
 							info->type |= MAY_BE_PACKED_GUARD;
 							info->type &= ~MAY_BE_ARRAY_PACKED;
 						}
@@ -4162,10 +4167,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 
 			if ((info & MAY_BE_PACKED_GUARD) != 0
-			 && (info & MAY_BE_GUARD) == 0
 			 && (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
 			  || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
-			  || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET)
+			  || (trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET
+			   && (opline-1)->result_type == IS_VAR
+			   && EX_VAR_TO_NUM((opline-1)->result.var) == i))
 			 && (ssa->vars[i].use_chain != -1
 			  || (ssa->vars[i].phi_use_chain
 			   && !(ssa->var_info[ssa->vars[i].phi_use_chain->ssa_var].type & MAY_BE_PACKED_GUARD)))) {
