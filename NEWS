@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     non-printable characters in string literals). (nielsdos, WangYihang)
   . Add support for backtraces for fatal errors. (enorris)
   . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
+  . Improved error message of UnhandledMatchError for
+    zend.exception_string_param_max_len=0. (timwolla)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)

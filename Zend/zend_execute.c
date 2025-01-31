@@ -874,10 +874,12 @@ ZEND_COLD zend_never_inline void zend_magic_get_property_type_inconsistency_erro
 
 ZEND_COLD void zend_match_unhandled_error(const zval *value)
 {
+	zend_long max_len = EG(exception_string_param_max_len);
 	smart_str msg = {0};
 	if (
 		EG(exception_ignore_args)
-		|| smart_str_append_zval(&msg, value, EG(exception_string_param_max_len)) != SUCCESS
+		|| (Z_TYPE_P(value) == IS_STRING && max_len == 0)
+		|| smart_str_append_zval(&msg, value, max_len) != SUCCESS
 	) {
 		smart_str_appendl(&msg, "of type ", sizeof("of type ")-1);
 		smart_str_appends(&msg, zend_zval_type_name(value));
