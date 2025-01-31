@@ -5673,7 +5673,7 @@ static bool zend_has_finally(void) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_return(zend_ast *ast) /* {{{ */
+static void zend_compile_return(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	bool is_generator = (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0;
@@ -5716,8 +5716,7 @@ static void zend_compile_return(zend_ast *ast) /* {{{ */
 
 	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
 
-	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
-		&expr_node, NULL);
+	opline = zend_emit_op(result, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN, &expr_node, NULL);
 
 	if (by_ref && expr_ast) {
 		if (zend_is_call(expr_ast)) {
@@ -5759,7 +5758,7 @@ static void zend_compile_throw(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_break_continue(zend_ast *ast) /* {{{ */
+static void zend_compile_break_continue(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *depth_ast = ast->child[0];
 
@@ -5830,7 +5829,7 @@ static void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 		}
 	}
 
-	opline = zend_emit_op(NULL, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT, NULL, NULL);
+	opline = zend_emit_op(result, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT, NULL, NULL);
 	opline->op1.num = CG(context).current_brk_cont;
 	opline->op2.num = depth;
 }
@@ -11380,15 +11379,8 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_UNSET:
 			zend_compile_unset(ast);
 			break;
-		case ZEND_AST_RETURN:
-			zend_compile_return(ast);
-			break;
 		case ZEND_AST_ECHO:
 			zend_compile_echo(ast);
-			break;
-		case ZEND_AST_BREAK:
-		case ZEND_AST_CONTINUE:
-			zend_compile_break_continue(ast);
 			break;
 		case ZEND_AST_GOTO:
 			zend_compile_goto(ast);
@@ -11454,6 +11446,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_HALT_COMPILER:
 			zend_compile_halt_compiler(ast);
 			break;
+		case ZEND_AST_RETURN:
+		case ZEND_AST_CONTINUE:
+		case ZEND_AST_BREAK:
 		case ZEND_AST_THROW:
 			zend_compile_expr(NULL, ast);
 			break;
@@ -11601,8 +11596,15 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_ARROW_FUNC:
 			zend_compile_func_decl(result, ast, FUNC_DECL_LEVEL_NESTED);
 			return;
+		case ZEND_AST_CONTINUE:
+		case ZEND_AST_BREAK:
+			zend_compile_break_continue(result, ast);
+			return;
 		case ZEND_AST_THROW:
 			zend_compile_throw(result, ast);
+			return;
+		case ZEND_AST_RETURN:
+			zend_compile_return(result, ast);
 			return;
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
