@@ -872,7 +872,7 @@ ZEND_COLD void zend_match_unhandled_error(const zval *value)
 {
 	smart_str msg = {0};
 
-	if (Z_TYPE_P(value) <= IS_STRING) {
+	if (!EG(exception_ignore_args) && Z_TYPE_P(value) <= IS_STRING) {
 		smart_str_append_scalar(&msg, value, EG(exception_string_param_max_len));
 	} else {
 		smart_str_appendl(&msg, "of type ", sizeof("of type ")-1);
