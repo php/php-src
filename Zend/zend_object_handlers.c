@@ -1617,7 +1617,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
-		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_DEPRECATED));
+		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD));
 	if (fbc->common.attributes) {
 		func->attributes = fbc->common.attributes;
 		GC_TRY_ADDREF(func->attributes);

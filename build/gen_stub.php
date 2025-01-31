@@ -1516,9 +1516,13 @@ class FuncInfo {
         }
 
         foreach ($this->attributes as $attr) {
-            if ($attr->class === "Deprecated") {
-                $flags[] = "ZEND_ACC_DEPRECATED";
-                break;
+            switch ($attr->class) {
+                case "Deprecated":
+                    $flags[] = "ZEND_ACC_DEPRECATED";
+                    break;
+                case "NoDiscard":
+                    $flags[] = "ZEND_ACC_NODISCARD";
+                    break;
             }
         }
 
