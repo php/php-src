@@ -1599,13 +1599,12 @@ PHP_METHOD(GlobIterator, count)
 		RETURN_THROWS();
 	}
 
-	if (spl_intern_is_glob(intern)) {
-		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
-	} else {
-		/* This can happen by abusing destructors. */
-		/* TODO: relax this from E_ERROR to an exception */
-		php_error_docref(NULL, E_ERROR, "GlobIterator lost glob state");
-	}
+	/* The spl_filesystem_object_get_method_check() function is called prior to calling this function.
+	 * Therefore, the directory entry cannot be NULL. However, if it is not NULL, then it must be a glob iterator
+	 * by construction. */
+	ZEND_ASSERT(spl_intern_is_glob(intern));
+
+	RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 }
 /* }}} */
 #endif /* HAVE_GLOB */
@@ -2609,15 +2608,18 @@ PHP_METHOD(SplFileObject, fwrite)
 	char *str;
 	size_t str_len;
 	zend_long length = 0;
+	bool length_is_null = true;
 	ssize_t written;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &length) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (!length_is_null) {
 		if (length >= 0) {
 			str_len = MIN((size_t)length, str_len);
 		} else {

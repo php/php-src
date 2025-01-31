@@ -8,9 +8,6 @@ if (strpos(getenv('PDO_FIREBIRD_TEST_DSN'), 'dialect=1')===false) {
     die('skip: PDO_FIREBIRD_TEST_DSN must contain a string "dialect=1"');
 }
 ?>
---XLEAK--
-A bug in firebird causes a memory leak when calling `isc_attach_database()`.
-See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require("testdb.inc");

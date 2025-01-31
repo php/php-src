@@ -136,7 +136,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 
-	if (S->stmt != SQL_NULL_HANDLE) {
+	if (S->stmt != SQL_NULL_HANDLE && php_pdo_stmt_valid_db_obj_handle(stmt)) {
 		if (stmt->executed) {
 			SQLCloseCursor(S->stmt);
 		}

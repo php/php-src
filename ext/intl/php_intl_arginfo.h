@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7a1b6eb454be08742ba45131de8ec57ec70a88c7 */
+ * Stub hash: 168eabfdcbf29189f2327448f104ea98752d1c5a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -622,12 +622,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_normalizer_is_normalized, 0, 1, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()
 
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_normalizer_get_raw_decomposition, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_resourcebundle_create, 0, 2, ResourceBundle, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -732,16 +730,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_intltz_get_unknown arginfo_intltz_create_default
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_windows_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_intltz_get_windows_id arginfo_intltz_get_region
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_id_for_windows_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intltz_has_same_rules, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, timezone, IntlTimeZone, 0)
@@ -938,9 +932,7 @@ ZEND_FUNCTION(msgfmt_get_error_code);
 ZEND_FUNCTION(msgfmt_get_error_message);
 ZEND_FUNCTION(normalizer_normalize);
 ZEND_FUNCTION(normalizer_is_normalized);
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_FUNCTION(normalizer_get_raw_decomposition);
-#endif
 ZEND_FUNCTION(resourcebundle_create);
 ZEND_FUNCTION(resourcebundle_get);
 ZEND_FUNCTION(resourcebundle_count);
@@ -966,10 +958,8 @@ ZEND_FUNCTION(intltz_get_raw_offset);
 ZEND_FUNCTION(intltz_get_region);
 ZEND_FUNCTION(intltz_get_tz_data_version);
 ZEND_FUNCTION(intltz_get_unknown);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_windows_id);
 ZEND_FUNCTION(intltz_get_id_for_windows_id);
-#endif
 ZEND_FUNCTION(intltz_has_same_rules);
 ZEND_FUNCTION(intltz_to_date_time_zone);
 ZEND_FUNCTION(intltz_use_daylight_time);
@@ -1129,9 +1119,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(msgfmt_get_error_message, arginfo_msgfmt_get_error_message)
 	ZEND_FE(normalizer_normalize, arginfo_normalizer_normalize)
 	ZEND_FE(normalizer_is_normalized, arginfo_normalizer_is_normalized)
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 	ZEND_FE(normalizer_get_raw_decomposition, arginfo_normalizer_get_raw_decomposition)
-#endif
 	ZEND_FE(resourcebundle_create, arginfo_resourcebundle_create)
 	ZEND_FE(resourcebundle_get, arginfo_resourcebundle_get)
 	ZEND_FE(resourcebundle_count, arginfo_resourcebundle_count)
@@ -1157,10 +1145,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intltz_get_region, arginfo_intltz_get_region)
 	ZEND_FE(intltz_get_tz_data_version, arginfo_intltz_get_tz_data_version)
 	ZEND_FE(intltz_get_unknown, arginfo_intltz_get_unknown)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_FE(intltz_get_windows_id, arginfo_intltz_get_windows_id)
 	ZEND_FE(intltz_get_id_for_windows_id, arginfo_intltz_get_id_for_windows_id)
-#endif
 	ZEND_FE(intltz_has_same_rules, arginfo_intltz_has_same_rules)
 	ZEND_FE(intltz_to_date_time_zone, arginfo_intltz_to_date_time_zone)
 	ZEND_FE(intltz_use_daylight_time, arginfo_intltz_use_daylight_time)

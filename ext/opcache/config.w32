@@ -1,9 +1,8 @@
 ARG_ENABLE("opcache", "whether to enable Zend OPcache support", "yes");
+ARG_ENABLE("opcache-jit", "whether to enable JIT (not supported for ARM64)", "yes");
 
 
 if (PHP_OPCACHE != "no") {
-
-	ARG_ENABLE("opcache-jit", "whether to enable JIT (not supported for ARM64)", "yes");
 
 	ZEND_EXTENSION('opcache', "\
 		ZendAccelerator.c \

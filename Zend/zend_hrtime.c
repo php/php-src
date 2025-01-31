@@ -33,7 +33,7 @@
 
 ZEND_API double zend_hrtime_timer_scale = .0;
 
-#elif ZEND_HRTIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 
 # include <mach/mach_time.h>
 # include <string.h>
@@ -62,7 +62,7 @@ void zend_startup_hrtime(void)
 		zend_hrtime_timer_scale = (double)ZEND_NANO_IN_SEC / (zend_hrtime_t)tf.QuadPart;
 	}
 
-#elif ZEND_HRTIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 
 	mach_timebase_info(&zend_hrtime_timerlib_info);
 

@@ -89,8 +89,6 @@ rem set SSLEAY_CONF=
 
 rem prepare for OPcache
 if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=64M -d opcache.jit=tracing
-rem work-around for failing to dl(mysqli) with OPcache (https://github.com/php/php-src/issues/8508)
-if "%OPCACHE%" equ "1" set OPCACHE_OPTS=%OPCACHE_OPTS% -d extension=mysqli
 
 rem prepare for enchant
 mkdir %~d0\usr\local\lib\enchant-2
@@ -134,19 +132,20 @@ for %%i in (ldap) do (
 	del %PHP_BUILD_DIR%\php_%%i.dll
 )
 
+rem reduce excessive stack reserve for testing
+editbin /stack:8388608 %PHP_BUILD_DIR%\php.exe
+editbin /stack:8388608 %PHP_BUILD_DIR%\php-cgi.exe
+
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
+
+if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
 mkdir c:\tests_tmp
 
-nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK %ASAN_OPTS% --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
 
 set EXIT_CODE=%errorlevel%
 
 taskkill /f /im snmpd.exe
-
-if %EXIT_CODE% GEQ 1 (
-	git checkout ext\pgsql\tests\config.inc
-	git diff > bless_tests.patch
-)
 
 exit /b %EXIT_CODE%

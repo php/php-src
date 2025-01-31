@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 14b0bdd019480b850940b2c2b012b5f6d51746b8 */
+ * Stub hash: 13be2a3c9a4ef4a72c0a67019b7400418752b603 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -318,7 +318,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_copy_from, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, rows, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, rows, Traversable, MAY_BE_ARRAY, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\"\\t\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, null_as, IS_STRING, 0, "\"\\\\\\\\N\"")
 ZEND_END_ARG_INFO()
@@ -495,6 +495,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_chunked_rows_size, 0, 2, 
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PG_CLOSE_STMT)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_close_stmt, 0, 2, Pgsql\\Result, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, connection, Pgsql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
 ZEND_FUNCTION(pg_connect_poll);
@@ -597,6 +604,9 @@ ZEND_FUNCTION(pg_put_copy_end);
 ZEND_FUNCTION(pg_socket_poll);
 #if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
 ZEND_FUNCTION(pg_set_chunked_rows_size);
+#endif
+#if defined(HAVE_PG_CLOSE_STMT)
+ZEND_FUNCTION(pg_close_stmt);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -725,6 +735,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_socket_poll, arginfo_pg_socket_poll)
 #if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
 	ZEND_FE(pg_set_chunked_rows_size, arginfo_pg_set_chunked_rows_size)
+#endif
+#if defined(HAVE_PG_CLOSE_STMT)
+	ZEND_FE(pg_close_stmt, arginfo_pg_close_stmt)
 #endif
 	ZEND_FE_END
 };

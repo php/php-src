@@ -291,7 +291,6 @@ Since:
 */
 PHP_METHOD(DOMElement, getAttribute)
 {
-	zval *id;
 	xmlNode *nodep;
 	char *name;
 	xmlChar *value = NULL;
@@ -300,12 +299,11 @@ PHP_METHOD(DOMElement, getAttribute)
 	size_t name_len;
 	bool should_free = false;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(name, name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attr) {
@@ -348,9 +346,7 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	dom_object *intern;
 	zval tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -402,17 +398,16 @@ Since:
 */
 PHP_METHOD(DOMElement, setAttribute)
 {
-	zval *id;
 	xmlNode *nodep;
 	int name_valid;
 	size_t name_len, value_len;
 	dom_object *intern;
 	char *name, *value;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &value, &value_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STRING(value, value_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (name_len == 0) {
 		zend_argument_must_not_be_empty_error(1);
@@ -425,7 +420,7 @@ PHP_METHOD(DOMElement, setAttribute)
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	if (php_dom_follow_spec_intern(intern)) {
 		xmlChar *name_processed = BAD_CAST name;
@@ -646,18 +641,16 @@ Since:
 */
 PHP_METHOD(DOMElement, getAttributeNode)
 {
-	zval *id;
 	xmlNodePtr nodep, attrp;
 	size_t name_len;
 	dom_object *intern;
 	char *name;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(name, name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp == NULL) {
@@ -774,9 +767,9 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 	xmlAttr *attrp;
 	dom_object *intern, *attrobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node, node_ce)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
@@ -809,40 +802,35 @@ PHP_METHOD(Dom_Element, removeAttributeNode)
 Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagname
 Since:
 */
-static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, bool modern)
+static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *iter_ce)
 {
-	size_t name_len;
 	dom_object *intern, *namednode;
-	char *name;
+	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (name_len > INT_MAX) {
+	if (ZSTR_LEN(name) > INT_MAX) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
 
 	DOM_GET_THIS_INTERN(intern);
 
-	if (modern) {
-		php_dom_create_iterator(return_value, DOM_HTMLCOLLECTION, true);
-	} else {
-		php_dom_create_iterator(return_value, DOM_NODELIST, false);
-	}
+	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, NULL, 0);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, NULL);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagName)
 {
-	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_nodelist_class_entry);
 }
 
 PHP_METHOD(Dom_Element, getElementsByTagName)
 {
-	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_html_collection_class_entry);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
@@ -1237,45 +1225,44 @@ PHP_METHOD(Dom_Element, setAttributeNodeNS)
 Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
 Since: DOM Level 2
 */
-static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS, bool modern)
+static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *iter_ce)
 {
-	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
-	char *uri, *name;
+	zend_string *uri, *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!p", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P!P", &uri, &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (uri_len > INT_MAX) {
+	if (!uri) {
+		uri = ZSTR_EMPTY_ALLOC();
+	}
+
+	if (ZSTR_LEN(uri) > INT_MAX) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
 
-	if (name_len > INT_MAX) {
+	if (ZSTR_LEN(name) > INT_MAX) {
 		zend_argument_value_error(2, "is too long");
 		RETURN_THROWS();
 	}
 
 	DOM_GET_THIS_INTERN(intern);
 
-	if (modern) {
-		php_dom_create_iterator(return_value, DOM_HTMLCOLLECTION, true);
-	} else {
-		php_dom_create_iterator(return_value, DOM_NODELIST, false);
-	}
+	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, uri ? uri : "", uri_len);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, uri);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagNameNS)
 {
-	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_nodelist_class_entry);
 }
 
 PHP_METHOD(Dom_Element, getElementsByTagNameNS)
 {
-	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_html_collection_class_entry);
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 
@@ -1715,6 +1702,98 @@ PHP_METHOD(Dom_Element, insertAdjacentText)
 }
 /* }}} end DOMElement::insertAdjacentText */
 
+/* https://html.spec.whatwg.org/#dom-element-insertadjacenthtml */
+PHP_METHOD(Dom_Element, insertAdjacentHTML)
+{
+	zval *where_zv;
+	zend_string *string;
+
+	dom_object *this_intern;
+	zval *id;
+	xmlNodePtr thisp;
+
+	bool created_context = false;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_STR(string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
+
+	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
+
+	/* 1. We don't do injection sinks. */
+
+	/* 2. Let context be NULL */
+	xmlNodePtr context = NULL;
+
+	/* 3. Use the first matching item from this list: (...) */
+	switch (ZSTR_LEN(where) + ZSTR_VAL(where)[2]) {
+		case sizeof("BeforeBegin") - 1 + 'f':
+		case sizeof("AfterEnd") - 1 + 't':
+			/* 1. Set context to this's parent. */
+			context = thisp->parent;
+
+			/* 2. If context is null or a Document, throw a "NoModificationAllowedError" DOMException. */
+			if (context == NULL || context->type == XML_DOCUMENT_NODE || context->type == XML_HTML_DOCUMENT_NODE) {
+				php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, true);
+				RETURN_THROWS();
+			}
+			break;
+		case sizeof("AfterBegin") - 1 + 't':
+		case sizeof("BeforeEnd") - 1 + 'f':
+			/* Set context to this. */
+			context = thisp;
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+	/* 4. If context is not an Element or all of the following are true: (...) */
+	if (context->type != XML_ELEMENT_NODE
+		|| (php_dom_ns_is_html_and_document_is_html(context) && xmlStrEqual(context->name, BAD_CAST "html"))) {
+		/* set context to the result of creating an element given this's node document, body, and the HTML namespace. */
+		xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(php_dom_get_ns_mapper(this_intern));
+
+		context = xmlNewDocNode(thisp->doc, html_ns, BAD_CAST "body", NULL);
+		created_context = true;
+		if (UNEXPECTED(context == NULL)) {
+			php_dom_throw_error(INVALID_STATE_ERR, true);
+			goto err;
+		}
+	}
+
+	/* 5. Let fragment be the result of invoking the fragment parsing algorithm steps with context and compliantString. */
+	xmlNodePtr fragment = dom_parse_fragment(this_intern, context, string);
+	if (fragment == NULL) {
+		goto err;
+	}
+
+	php_libxml_invalidate_node_list_cache(this_intern->document);
+
+	/* 6. Use the first matching item from this list: (...) */
+	switch (ZSTR_LEN(where) + ZSTR_VAL(where)[2]) {
+		case sizeof("BeforeBegin") - 1 + 'f':
+			php_dom_pre_insert(this_intern->document, fragment, thisp->parent, thisp);
+			break;
+		case sizeof("AfterEnd") - 1 + 't':
+			php_dom_pre_insert(this_intern->document, fragment, thisp->parent, thisp->next);
+			break;
+		case sizeof("AfterBegin") - 1 + 't':
+			php_dom_pre_insert(this_intern->document, fragment, thisp, thisp->children);
+			break;
+		case sizeof("BeforeEnd") - 1 + 'f':
+			php_dom_node_append(this_intern->document, fragment, thisp);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+err:
+	if (created_context) {
+		xmlFreeNode(context);
+	}
+}
+
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-toggleattribute
 Since:
 */
@@ -1761,7 +1840,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 			if (follow_spec) {
 				xmlSetNsProp(thisp, NULL, BAD_CAST qname, NULL);
 			} else {
-				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browers behaviour.
+				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browsers' behaviour.
 				* It follows the same rules when you'd manually add an attribute using the other APIs. */
 				int len;
 				const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);

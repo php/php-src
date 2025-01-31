@@ -398,7 +398,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 		n -= 400;
 	}
 
-/* meot (hundreads) case */
+/* meot (hundreds) case */
 	if (n >= 100) {
 		*p = alef_bet[18 + n / 100];
 		p++;

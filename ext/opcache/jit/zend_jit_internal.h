@@ -249,8 +249,11 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSIVE_CALL,    "recursive call") \
 	_(RECURSIVE_RET,     "recursive return") \
 	_(RETURN,            "return") \
-	_(INTERPRETER,       "exit to VM interpreter") \
 	_(LINK,              "link to another trace") \
+	_(INTERPRETER,       "exit to VM interpreter") \
+	_(TRAMPOLINE,        "trampoline call") \
+	_(PROP_HOOK_CALL,    "property hook call") \
+	_(BAD_FUNC,          "bad function call") \
 	/* compilation and linking successful */ \
 	_(COMPILED,          "compiled") \
 	_(ALREADY_DONE,      "already prcessed") \
@@ -268,9 +271,6 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(BLACK_LIST,        "trace blacklisted") \
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
 	_(COMPILED_LOOP,     "compiled loop") \
-	_(TRAMPOLINE,        "trampoline call") \
-	_(PROP_HOOK_CALL,    "property hook call") \
-	_(BAD_FUNC,          "bad function call") \
 	_(COMPILER_ERROR,    "JIT compilation error") \
 	/* no recoverable error (blacklist immediately) */ \
 	_(NO_SHM,            "insufficient shared memory") \
@@ -380,6 +380,12 @@ typedef enum _zend_jit_trace_op {
 
 #define ZEND_JIT_TRACE_FAKE_INFO(level) \
 	(((level) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT) | ZEND_JIT_TRACE_FAKE_INIT_CALL)
+
+#define ZEND_JIT_TRACE_NUM_ARGS_INFO(count) \
+	((count) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
+
+#define ZEND_JIT_TRACE_NUM_ARGS(info) \
+	(((info) & ZEND_JIT_TRACE_FAKE_LEVEL_MASK) >> ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
 
 #define ZEND_JIT_TRACE_SET_FIRST_SSA_VAR(_info, var) do { \
 		_info |= (var << ZEND_JIT_TRACE_SSA_VAR_SHIFT); \
@@ -676,26 +682,6 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	}
 	*exit_if_true = 0;
 	return NULL;
-}
-
-static inline bool zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
-{
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-#ifdef _WIN32
-		/* ASLR */
-		return 1;
-#else
-		return 0;
-#endif
-	} else if (func->type == ZEND_USER_FUNCTION) {
-		if (func->common.fn_flags & ZEND_ACC_PRELOADED) {
-			return 0;
-		}
-		if (func->op_array.filename == called_from->filename && !func->op_array.scope) {
-			return 0;
-		}
-	}
-	return 1;
 }
 
 static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *opline)

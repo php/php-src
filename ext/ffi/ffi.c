@@ -900,6 +900,9 @@ static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *n
 		case FFI_VECTORCALL_PARTIAL:
 			return strpprintf(0, "%s@@%zu", ZSTR_VAL(name), zend_ffi_arg_size(type));
 # endif
+		default:
+			/* other calling conventions don't apply name mangling */
+			break;
 	}
 #endif
 	return zend_string_copy(name);
@@ -3019,6 +3022,41 @@ static zend_always_inline bool zend_ffi_validate_api_restriction(zend_execute_da
 			RETURN_THROWS(); \
 		} \
 	} while (0)
+
+#ifdef PHP_WIN32
+# include <Psapi.h>
+# ifndef DWORD_MAX
+#  define DWORD_MAX ULONG_MAX
+# endif
+# define NUM_MODULES 1024
+/* A rough approximation of dlysm(RTLD_DEFAULT) */
+static void *dlsym_loaded(char *symbol)
+{
+	HMODULE modules_static[NUM_MODULES], *modules = modules_static;
+	DWORD num = NUM_MODULES, i;
+	void * addr;
+	if (!EnumProcessModules(GetCurrentProcess(), modules, num * sizeof(HMODULE), &num)) {
+		return NULL;
+	}
+	if (num >= NUM_MODULES && num <= DWORD_MAX / sizeof(HMODULE)) {
+		modules = emalloc(num *sizeof(HMODULE));
+		if (!EnumProcessModules(GetCurrentProcess(), modules, num * sizeof(HMODULE), &num)) {
+			efree(modules);
+			return NULL;
+		}
+	}
+	for (i = 0; i < num; i++) {
+		addr = GetProcAddress(modules[i], symbol);
+		if (addr != NULL) break;
+	}
+	if (modules != modules_static) {
+		efree(modules);
+	}
+	return addr;
+}
+# undef DL_FETCH_SYMBOL
+# define DL_FETCH_SYMBOL(h, s) (h == NULL ? dlsym_loaded(s) : (void*) GetProcAddress(h, s))
+#endif
 
 ZEND_METHOD(FFI, cdef) /* {{{ */
 {
@@ -7502,10 +7540,10 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 		case ZEND_FFI_TYPE_FLOAT:
 			if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
-				val->d = val->u64;
+				val->d = (zend_ffi_double) val->u64;
 			} else if (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
-				val->d = val->i64;
+				val->d = (zend_ffi_double) val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
@@ -7518,10 +7556,10 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 		case ZEND_FFI_TYPE_DOUBLE:
 			if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
-				val->d = val->u64;
+				val->d = (zend_ffi_double) val->u64;
 			} else if (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
-				val->d = val->i64;
+				val->d = (zend_ffi_double) val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
@@ -7557,7 +7595,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT32;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT32;
 				val->u64 = val->ch;
@@ -7572,7 +7610,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_INT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_INT32;
-				val->i64 = val->d;
+				val->i64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_INT32;
 				val->i64 = val->ch;
@@ -7585,7 +7623,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT64;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT64;
 				val->u64 = val->ch;
@@ -7602,7 +7640,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->ch = val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_CHAR;
-				val->ch = val->d;
+				val->ch = (char) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 			} else {
 				val->kind = ZEND_FFI_VAL_ERROR;
@@ -7613,7 +7651,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT32;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT32;
 				val->u64 = val->ch;

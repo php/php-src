@@ -143,11 +143,9 @@ typedef struct _php_cgi_globals_struct {
 	bool rfc2616_headers;
 	bool nph;
 	bool fix_pathinfo;
-	bool force_redirect;
 	bool discard_path;
 	bool fcgi_logging;
 	bool fcgi_logging_request_started;
-	char *redirect_status_env;
 	HashTable user_config_cache;
 	char *error_header;
 	char *fpm_config;
@@ -1423,8 +1421,6 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_BOOLEAN("cgi.force_redirect",      "1",  PHP_INI_SYSTEM, OnUpdateBool,   force_redirect, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("cgi.redirect_status_env", NULL, PHP_INI_SYSTEM, OnUpdateString, redirect_status_env, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("cgi.discard_path",        "0",  PHP_INI_SYSTEM, OnUpdateBool,   discard_path, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("fastcgi.logging",         "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
@@ -1437,8 +1433,6 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
 	php_cgi_globals->rfc2616_headers = 0;
 	php_cgi_globals->nph = 0;
-	php_cgi_globals->force_redirect = 1;
-	php_cgi_globals->redirect_status_env = NULL;
 	php_cgi_globals->fix_pathinfo = 1;
 	php_cgi_globals->discard_path = 0;
 	php_cgi_globals->fcgi_logging = 1;
@@ -1549,7 +1543,7 @@ static zend_module_entry cgi_module_entry = {
 int main(int argc, char *argv[])
 {
 	int exit_status = FPM_EXIT_OK;
-	int cgi = 0, c, use_extended_info = 0;
+	int c, use_extended_info = 0;
 	zend_file_handle file_handle;
 
 	/* temporary locals */
@@ -1765,46 +1759,6 @@ int main(int argc, char *argv[])
 
 	if (use_extended_info) {
 		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
-	}
-
-	/* check force_cgi after startup, so we have proper output */
-	if (cgi && CGIG(force_redirect)) {
-		/* Apache will generate REDIRECT_STATUS,
-		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
-		 * redirect.so and installation instructions available from
-		 * http://www.koehntopp.de/php.
-		 *   -- kk@netuse.de
-		 */
-		if (!getenv("REDIRECT_STATUS") &&
-			!getenv ("HTTP_REDIRECT_STATUS") &&
-			/* this is to allow a different env var to be configured
-			 * in case some server does something different than above */
-			(!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
-		) {
-			zend_try {
-				SG(sapi_headers).http_response_code = 400;
-				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
-<p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
-means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
-set, e.g. via an Apache Action directive.</p>\n\
-<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"http://php.net/security.cgi-bin\">\
-manual page for CGI security</a>.</p>\n\
-<p>For more information about changing this behaviour or re-enabling this webserver,\n\
-consult the installation file that came with this distribution, or visit \n\
-<a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
-			} zend_catch {
-			} zend_end_try();
-#if defined(ZTS) && !PHP_DEBUG
-			/* XXX we're crashing here in msvc6 debug builds at
-			 * php_message_handler_for_zend:839 because
-			 * SG(request_info).path_translated is an invalid pointer.
-			 * It still happens even though I set it to null, so something
-			 * weird is going on.
-			 */
-			tsrm_shutdown();
-#endif
-			return FPM_EXIT_SOFTWARE;
-		}
 	}
 
 #if ZEND_RC_DEBUG

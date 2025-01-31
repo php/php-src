@@ -1,7 +1,6 @@
 --TEST--
 Bug #43925 (Incorrect argument counter in prepared statements with pgsql)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

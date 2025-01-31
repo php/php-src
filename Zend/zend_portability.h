@@ -47,6 +47,9 @@
 #include "../TSRM/TSRM.h"
 
 #include <stdio.h>
+#if ZEND_DEBUG && defined(NDEBUG)
+# error "NDEBUG must not be defined when ZEND_DEBUG is enabled"
+#endif
 #include <assert.h>
 #include <math.h>
 
@@ -304,9 +307,7 @@ char *alloca();
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
-#elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
-# define ZEND_FASTCALL __fastcall
-#elif defined(_MSC_VER) && _MSC_VER >= 1800
+#elif defined(_MSC_VER)
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
@@ -444,14 +445,6 @@ char *alloca();
 # define ZTS_V 0
 #endif
 
-#ifndef LONG_MAX
-# define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-# define LONG_MIN (- LONG_MAX - 1)
-#endif
-
 #define MAX_LENGTH_OF_DOUBLE 32
 
 #undef MIN
@@ -518,6 +511,13 @@ extern "C++" {
 #if __has_feature(memory_sanitizer) || __has_feature(thread_sanitizer) || \
 	__has_feature(dataflow_sanitizer)
 # undef HAVE_FUNC_ATTRIBUTE_IFUNC
+#endif
+
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+# define MSAN_UNPOISON(value) __msan_unpoison(&(value), sizeof(value))
+#else
+# define MSAN_UNPOISON(value)
 #endif
 
 /* Only use ifunc resolvers if we have __builtin_cpu_supports() and __builtin_cpu_init(),

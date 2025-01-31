@@ -1858,7 +1858,7 @@ function array_udiff_uassoc(array $array, ...$rest): array {}
  * @prefer-ref $array
  * @prefer-ref $rest
  */
-function array_multisort(&$array, &...$rest): bool {}
+function array_multisort(&$array, &...$rest): true {}
 
 /** @return int|string|array<int, int|string> */
 function array_rand(array $array, int $num = 1): int|string|array {}
@@ -2026,7 +2026,6 @@ function ini_parse_quantity(string $shorthand): int {}
 /** @refcount 1 */
 function set_include_path(string $include_path): string|false {}
 
-/** @refcount 1 */
 function get_include_path(): string|false {}
 
 /** @refcount 1 */

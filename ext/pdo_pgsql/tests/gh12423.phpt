@@ -1,7 +1,6 @@
 --TEST--
 GitHub #12424 (Fix GH-12423: [pdo_pgsql] Changed to prioritize DSN authentication information over arguments.)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

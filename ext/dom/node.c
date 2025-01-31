@@ -287,9 +287,9 @@ zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	php_dom_create_iterator(retval, DOM_NODELIST, php_dom_follow_spec_intern(obj));
+	object_init_ex(retval, dom_get_nodelist_ce(php_dom_follow_spec_intern(obj)));
 	dom_object *intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, 0, NULL, 0);
+	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
 
 	return SUCCESS;
 }
@@ -421,9 +421,9 @@ zend_result dom_node_attributes_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (nodep->type == XML_ELEMENT_NODE) {
-		php_dom_create_iterator(retval, DOM_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
+		object_init_ex(retval, dom_get_namednodemap_ce(php_dom_follow_spec_intern(obj)));
 		dom_object *intern = Z_DOMOBJ_P(retval);
-		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, 0, NULL, 0);
+		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -843,8 +843,8 @@ static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlN
 
 static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNodePtr child, bool stricterror, bool warn_empty_fragment)
 {
-	if (dom_node_is_read_only(parentp) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+	if (dom_node_is_read_only(parentp) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
 		return false;
 	}
@@ -1287,8 +1287,8 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 		RETURN_FALSE;
 	}
 
-	if (dom_node_is_read_only(nodep) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+	if (dom_node_is_read_only(nodep) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
 		RETURN_FALSE;
 	}
@@ -2421,7 +2421,7 @@ PHP_METHOD(DOMNode, getRootNode)
 }
 /* }}} */
 
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-comparedocumentposition (last check date 2023-07-24)
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-comparedocumentposition (last check date 2024-11-17)
 Since:
 */
 

@@ -72,7 +72,7 @@ zend_long php_dom_get_nodelist_length(dom_object *obj)
 	}
 
 	if (objmap->nodetype == DOM_NODESET) {
-		HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
+		HashTable *nodeht = Z_ARRVAL_P(&objmap->baseobj_zv);
 		return zend_hash_num_elements(nodeht);
 	}
 
@@ -145,7 +145,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 				itemnode = php_dom_libxml_hash_iter(objmap, index);
 			} else {
 				if (objmap->nodetype == DOM_NODESET) {
-					HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
+					HashTable *nodeht = Z_ARRVAL_P(&objmap->baseobj_zv);
 					zval *entry = zend_hash_index_find(nodeht, index);
 					if (entry) {
 						ZVAL_COPY(return_value, entry);

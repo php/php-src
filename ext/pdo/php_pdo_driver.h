@@ -80,11 +80,11 @@ enum pdo_fetch_type {
 	PDO_FETCH__MAX /* must be last */
 };
 
-#define PDO_FETCH_FLAGS     0xFFFF0000  /* fetchAll() modes or'd to PDO_FETCH_XYZ */
-#define PDO_FETCH_GROUP     0x00010000  /* fetch into groups */
-#define PDO_FETCH_UNIQUE    0x00030000  /* fetch into groups assuming first col is unique */
-#define PDO_FETCH_CLASSTYPE 0x00040000  /* fetch class gets its class name from 1st column */
-#define PDO_FETCH_SERIALIZE 0x00080000  /* fetch class instances by calling serialize */
+#define PDO_FETCH_FLAGS      0xFFFF0000  /* fetchAll() modes or'd to PDO_FETCH_XYZ */
+#define PDO_FETCH_GROUP      0x00010000  /* fetch into groups */
+#define PDO_FETCH_UNIQUE     0x00030000  /* fetch into groups assuming first col is unique */
+#define PDO_FETCH_CLASSTYPE  0x00040000  /* fetch class gets its class name from 1st column */
+#define PDO_FETCH_SERIALIZE  0x00080000  /* fetch class instances by calling serialize */
 #define PDO_FETCH_PROPS_LATE 0x00100000  /* fetch props after calling ctor */
 
 /* fetch orientation for scrollable cursors */
@@ -568,7 +568,9 @@ struct _pdo_stmt_t {
 	 * emulate prepare and bind on its behalf */
 	unsigned supports_placeholders:2;
 
-	unsigned _reserved:29;
+	/* If true we are in a do_fetch() call, and modification to the statement must be prevented */
+	unsigned in_fetch:1;
+	unsigned _reserved:28;
 
 	/* the number of columns in the result set; not valid until after
 	 * the statement has been executed at least once.  In some cases, might
@@ -578,7 +580,7 @@ struct _pdo_stmt_t {
 	struct pdo_column_data *columns;
 
 	/* we want to keep the dbh alive while we live, so we own a reference */
-	zval database_object_handle;
+	zend_object *database_object_handle;
 	pdo_dbh_t *dbh;
 
 	/* keep track of bound input parameters.  Some drivers support
@@ -605,28 +607,19 @@ struct _pdo_stmt_t {
 	/* for lazy fetches, we always return the same lazy object handle.
 	 * Let's keep it here. */
 	zval lazy_object_ref;
-	zend_ulong refcount;
 
 	/* defaults for fetches */
 	enum pdo_fetch_type default_fetch_type;
 	union {
 		int column;
 		struct {
-			zval ctor_args;            /* freed */
-			zend_fcall_info fci;
-			zend_fcall_info_cache fcc;
-			zval retval;
+			HashTable *ctor_args;
 			zend_class_entry *ce;
 		} cls;
 		struct {
-			zval fetch_args;           /* freed */
-			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
-			zval object;
-			zval function;
-			zval *values;              /* freed */
 		} func;
-		zval into;
+		zend_object *into;
 	} fetch;
 
 	/* used by the query parser for driver specific
@@ -648,9 +641,13 @@ static inline pdo_stmt_t *php_pdo_stmt_fetch_object(zend_object *obj) {
 #define Z_PDO_STMT_P(zv) php_pdo_stmt_fetch_object(Z_OBJ_P((zv)))
 
 struct _pdo_row_t {
-	zend_object std;
 	pdo_stmt_t *stmt;
+	zend_object std;
 };
+
+static inline pdo_row_t *php_pdo_row_fetch_object(zend_object *obj) {
+	return (pdo_row_t *)((char*)(obj) - XtOffsetOf(pdo_row_t, std));
+}
 
 struct _pdo_scanner_t {
 	const char *ptr, *cur, *tok, *end;
@@ -701,4 +698,11 @@ PDO_API bool pdo_get_long_param(zend_long *lval, zval *value);
 PDO_API bool pdo_get_bool_param(bool *bval, zval *value);
 
 PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
+
+/* When a GC cycle is collected, it's possible that the database object is destroyed prior to destroying
+ * the statement. In that case, accessing the database object will cause a UAF.
+ * This function checks if the database object is still valid.
+ * If it is invalid, the internal driver statement data should have been cleared by the native driver API already. */
+PDO_API bool php_pdo_stmt_valid_db_obj_handle(const pdo_stmt_t *stmt);
+
 #endif /* PHP_PDO_DRIVER_H */

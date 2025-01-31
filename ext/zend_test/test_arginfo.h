@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a7b5de3e4868f9a4aef78da6b98bbce882e129a9 */
+ * Stub hash: 3082e62e96d5f4383c98638513463c676a7c3a69 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -718,6 +718,16 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #endif
 	zend_string_release(property_readonlyProp_name);
+
+	zval property_finalProp_default_value;
+	ZVAL_UNDEF(&property_finalProp_default_value);
+	zend_string *property_finalProp_name = zend_string_init("finalProp", sizeof("finalProp") - 1, 1);
+#if (PHP_VERSION_ID >= 80400)
+	zend_declare_typed_property(class_entry, property_finalProp_name, &property_finalProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+#elif (PHP_VERSION_ID >= 80000)
+	zend_declare_typed_property(class_entry, property_finalProp_name, &property_finalProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+#endif
+	zend_string_release(property_finalProp_name);
 
 
 	zend_string *attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, 1);

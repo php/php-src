@@ -1,6 +1,6 @@
 // vim:ft=javascript
 
-ARG_ENABLE("com-dotnet", "COM and .Net support", "yes");
+ARG_ENABLE("com-dotnet", "COM and .Net support", "yes,shared");
 
 if (PHP_COM_DOTNET == "yes") {
 	CHECK_LIB('oleaut32.lib', 'com_dotnet');

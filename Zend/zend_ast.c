@@ -23,6 +23,7 @@
 #include "zend_language_parser.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions.h"
+#include "zend_closures.h"
 #include "zend_constants.h"
 #include "zend_enum.h"
 
@@ -96,6 +97,18 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, ze
 	ast->attr = attr;
 	ZVAL_STR(&ast->val, name);
 	Z_LINENO(ast->val) = CG(zend_lineno);
+	return (zend_ast *) ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_array) {
+	zend_ast_op_array *ast;
+
+	ast = zend_ast_alloc(sizeof(zend_ast_op_array));
+	ast->kind = ZEND_AST_OP_ARRAY;
+	ast->attr = 0;
+	ast->lineno = CG(zend_lineno);
+	ast->op_array = op_array;
+
 	return (zend_ast *) ast;
 }
 
@@ -989,6 +1002,13 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			}
 			return SUCCESS;
 		}
+		case ZEND_AST_OP_ARRAY:
+		{
+			zend_function *func = (zend_function *)zend_ast_get_op_array(ast)->op_array;
+
+			zend_create_closure(result, func, scope, scope, NULL);
+			return SUCCESS;
+		}
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 		{
@@ -1070,6 +1090,8 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 
 	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		size = sizeof(zend_ast_zval);
+	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
+		size = sizeof(zend_ast_op_array);
 	} else if (zend_ast_is_list(ast)) {
 		uint32_t i;
 		zend_ast_list *list = zend_ast_get_list(ast);
@@ -1080,6 +1102,9 @@ static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 				size += zend_ast_tree_size(list->child[i]);
 			}
 		}
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 
@@ -1126,6 +1151,17 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 				new->child[i] = NULL;
 			}
 		}
+	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
+		zend_ast_op_array *old = zend_ast_get_op_array(ast);
+		zend_ast_op_array *new = (zend_ast_op_array*)buf;
+		new->kind = old->kind;
+		new->attr = old->attr;
+		new->lineno = old->lineno;
+		new->op_array = old->op_array;
+		buf = (void*)((char*)buf + sizeof(zend_ast_op_array));
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		zend_ast *new = (zend_ast*)buf;
@@ -1189,7 +1225,9 @@ tail_call:
 		}
 	} else if (EXPECTED(ast->kind == ZEND_AST_CONSTANT)) {
 		zend_string_release_ex(zend_ast_get_constant_name(ast), 0);
-	} else if (EXPECTED(ast->kind >= ZEND_AST_FUNC_DECL)) {
+	} else if (EXPECTED(ast->kind == ZEND_AST_OP_ARRAY)) {
+		/* Nothing to do. */
+	} else if (EXPECTED(zend_ast_is_decl(ast))) {
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
 		if (decl->name) {
@@ -1220,6 +1258,9 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *contex
 		for (i = 0; i < list->children; ++i) {
 			fn(&list->child[i], context);
 		}
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; ++i) {
@@ -1844,6 +1885,11 @@ tail_call:
 			smart_str_appendl(str, ZSTR_VAL(name), ZSTR_LEN(name));
 			break;
 		}
+		case ZEND_AST_OP_ARRAY:
+			smart_str_appends(str, "Closure(");
+			smart_str_append(str, zend_ast_get_op_array(ast)->op_array->function_name);
+			smart_str_appends(str, ")");
+			break;
 		case ZEND_AST_CONSTANT_CLASS:
 			smart_str_appendl(str, "__CLASS__", sizeof("__CLASS__")-1);
 			break;
@@ -2109,13 +2155,6 @@ simple_list:
 			break;
 		case ZEND_AST_CLONE:
 			PREFIX_OP("clone ", 270, 271);
-		case ZEND_AST_EXIT:
-			if (ast->child[0]) {
-				FUNC_OP("exit");
-			} else {
-				APPEND_STR("exit");
-			}
-			break;
 		case ZEND_AST_PRINT:
 			PREFIX_OP("print ", 60, 61);
 		case ZEND_AST_INCLUDE_OR_EVAL:

@@ -579,6 +579,22 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	} else {
 		Z_LVAL_P(op1) = llresult;
 	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(FAILED(LongAdd(Z_LVAL_P(op1), 1, &lresult)))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(FAILED(LongLongAdd(Z_LVAL_P(op1), 1, &llresult)))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 		/* switch to double */
@@ -637,6 +653,22 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 #elif defined(PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(FAILED(LongSub(Z_LVAL_P(op1), 1, &lresult)))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(FAILED(LongLongSub(Z_LVAL_P(op1), 1, &llresult)))) {
 		/* switch to double */
 		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
 	} else {
@@ -720,6 +752,20 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 #elif defined(PHP_HAVE_BUILTIN_SADDLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, llresult);
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(FAILED(LongAdd(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult)))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(FAILED(LongLongAdd(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult)))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, llresult);
@@ -808,6 +854,20 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 #elif defined(PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, llresult);
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(FAILED(LongSub(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult)))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(FAILED(LongLongSub(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult)))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, llresult);

@@ -673,19 +673,40 @@ class DatePeriod implements IteratorAggregate
     /** @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE */
     public const int INCLUDE_END_DATE = UNKNOWN;
 
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $start;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $current;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $end;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateInterval $interval;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public int $recurrences;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public bool $include_start_date;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public bool $include_end_date;
 
     public static function createFromISO8601String(string $specification, int $options = 0): static {}

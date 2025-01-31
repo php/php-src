@@ -23,6 +23,7 @@
 #include "zend_execute.h"
 #include "zend_inheritance.h"
 #include "zend_interfaces.h"
+#include "zend_closures.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 #include "zend_exceptions.h"
@@ -485,6 +486,17 @@ static inheritance_status zend_is_class_subtype_of_type(
 		if (!fe_ce) {
 			have_unresolved = 1;
 		} else {
+			track_class_dependency(fe_ce, fe_class_name);
+			return INHERITANCE_SUCCESS;
+		}
+	}
+
+	/* If the parent has 'callable' as a return type, then Closure satisfies the co-variant check */
+	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_CALLABLE) {
+		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
+		if (!fe_ce) {
+			have_unresolved = 1;
+		} else if (fe_ce == zend_ce_closure) {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
 		}
@@ -1507,7 +1519,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				}
 			} else if (UNEXPECTED(ZEND_TYPE_IS_SET(child_info->type) && !ZEND_TYPE_IS_SET(parent_info->type))) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-						"Type of %s::$%s must not be defined (as in class %s)",
+						"Type of %s::$%s must be omitted to match the parent definition in class %s",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(key),
 						ZSTR_VAL(parent_info->ce->name));
@@ -1778,7 +1790,12 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		if (UNEXPECTED(!(parent_ce->ce_flags & ZEND_ACC_INTERFACE))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Interface %s cannot extend class %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
 		}
-	} else if (UNEXPECTED(parent_ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_FINAL))) {
+	} else if (UNEXPECTED(parent_ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_FINAL|ZEND_ACC_ENUM))) {
+		/* Class must not extend an enum (GH-16315); check enums first since
+		 * enums are implemented as final classes */
+		if (parent_ce->ce_flags & ZEND_ACC_ENUM) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend enum %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
+		}
 		/* Class must not extend a final class */
 		if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend final class %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
@@ -2297,7 +2314,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		 * of where it is coming from there is no conflict and we do not need to add it again */
 		if (existing_fn->op_array.opcodes == fn->op_array.opcodes &&
 			(existing_fn->common.fn_flags & ZEND_ACC_PPP_MASK) == (fn->common.fn_flags & ZEND_ACC_PPP_MASK) &&
-			(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+			(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
 			return;
 		}
 
@@ -2363,7 +2380,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 
 static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* {{{ */
 {
-	if ((fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+	if (fn->common.scope->ce_flags & ZEND_ACC_TRAIT) {
 
 		fn->common.scope = ce;
 
@@ -3004,7 +3021,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	const zend_function *func;
 	zend_abstract_info ai;
 	bool is_explicit_abstract = (ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) != 0;
-	bool can_be_abstract = (ce->ce_flags & ZEND_ACC_ENUM) == 0;
+	bool can_be_abstract = (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_ANON_CLASS)) == 0;
 	memset(&ai, 0, sizeof(ai));
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, func) {
@@ -3032,16 +3049,28 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	}
 
 	if (ai.cnt) {
-		zend_error_noreturn(E_ERROR, !is_explicit_abstract && can_be_abstract
-			? "%s %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")"
-			: "%s %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
-			zend_get_object_type_uc(ce),
-			ZSTR_VAL(ce->name), ai.cnt,
-			ai.cnt > 1 ? "s" : "",
-			DISPLAY_ABSTRACT_FN(0),
-			DISPLAY_ABSTRACT_FN(1),
-			DISPLAY_ABSTRACT_FN(2)
+		if (!is_explicit_abstract && can_be_abstract) {
+			zend_error_noreturn(E_ERROR,
+				"%s %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+				zend_get_object_type_uc(ce),
+				ZSTR_VAL(ce->name), ai.cnt,
+				ai.cnt > 1 ? "s" : "",
+				ai.cnt > 1 ? "s" : "",
+				DISPLAY_ABSTRACT_FN(0),
+				DISPLAY_ABSTRACT_FN(1),
+				DISPLAY_ABSTRACT_FN(2)
 			);
+		} else {
+			zend_error_noreturn(E_ERROR,
+				"%s %s must implement %d abstract method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+				zend_get_object_type_uc(ce),
+				ZSTR_VAL(ce->name), ai.cnt,
+				ai.cnt > 1 ? "s" : "",
+				DISPLAY_ABSTRACT_FN(0),
+				DISPLAY_ABSTRACT_FN(1),
+				DISPLAY_ABSTRACT_FN(2)
+			);
+		}
 	} else {
 		/* now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed */
 		ce->ce_flags &= ~ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;

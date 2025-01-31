@@ -33,6 +33,7 @@
 typedef struct _zend_constant {
 	zval value;
 	zend_string *name;
+	zend_string *filename;
 } zend_constant;
 
 #define ZEND_CONSTANT_FLAGS(c) \

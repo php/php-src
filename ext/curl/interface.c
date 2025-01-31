@@ -61,11 +61,13 @@
 
 #ifdef __GNUC__
 /* don't complain about deprecated CURLOPT_* we're exposing to PHP; we
-   need to keep using those to avoid breaking PHP API compatibiltiy */
+   need to keep using those to avoid breaking PHP API compatibility */
 # pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 #include "curl_arginfo.h"
+
+ZEND_DECLARE_MODULE_GLOBALS(curl)
 
 #ifdef PHP_CURL_NEED_OPENSSL_TSL /* {{{ */
 static MUTEX_T *php_curl_openssl_tsl = NULL;
@@ -215,7 +217,11 @@ zend_module_entry curl_module_entry = {
 	NULL,
 	PHP_MINFO(curl),
 	PHP_CURL_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(curl),
+	PHP_GINIT(curl),
+	PHP_GSHUTDOWN(curl),
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -223,10 +229,22 @@ zend_module_entry curl_module_entry = {
 ZEND_GET_MODULE (curl)
 #endif
 
+PHP_GINIT_FUNCTION(curl)
+{
+	zend_hash_init(&curl_globals->persistent_curlsh, 0, NULL, curl_share_free_persistent_curlsh, true);
+	GC_MAKE_PERSISTENT_LOCAL(&curl_globals->persistent_curlsh);
+}
+
+PHP_GSHUTDOWN_FUNCTION(curl)
+{
+	zend_hash_destroy(&curl_globals->persistent_curlsh);
+}
+
 /* CurlHandle class */
 
 zend_class_entry *curl_ce;
 zend_class_entry *curl_share_ce;
+zend_class_entry *curl_share_persistent_ce;
 static zend_object_handlers curl_object_handlers;
 
 static zend_object *curl_create_object(zend_class_entry *class_type);
@@ -410,6 +428,10 @@ PHP_MINIT_FUNCTION(curl)
 
 	curl_share_ce = register_class_CurlShareHandle();
 	curl_share_register_handlers();
+
+	curl_share_persistent_ce = register_class_CurlSharePersistentHandle();
+	curl_share_persistent_register_handlers();
+
 	curlfile_register_class();
 
 	return SUCCESS;
@@ -1143,8 +1165,7 @@ void init_curl_handle(php_curl *ch)
 	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
 	zend_llist_init(&ch->to_free->stream, sizeof(struct mime_data_cb_arg *), (llist_dtor_func_t)curl_free_cb_arg, 0);
 
-	ch->to_free->slist = emalloc(sizeof(HashTable));
-	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
+	zend_hash_init(&ch->to_free->slist, 4, NULL, curl_free_slist, 0);
 	ZVAL_UNDEF(&ch->postfields);
 }
 
@@ -1312,7 +1333,6 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 
 	ZVAL_COPY(&ch->private_data, &source->private_data);
 
-	efree(ch->to_free->slist);
 	efree(ch->to_free);
 	ch->to_free = source->to_free;
 	efree(ch->clone);
@@ -1541,7 +1561,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 		if (Z_TYPE_P(current) == IS_ARRAY) {
 			zval *current_element;
 
-			ZEND_HASH_FOREACH_VAL(HASH_OF(current), current_element) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(current), current_element) {
 				add_simple_field(mime, string_key, current_element);
 			} ZEND_HASH_FOREACH_END();
 
@@ -2173,9 +2193,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 
 			if (slist) {
 				if ((*ch->clone) == 1) {
-					zend_hash_index_update_ptr(ch->to_free->slist, option, slist);
+					zend_hash_index_update_ptr(&ch->to_free->slist, option, slist);
 				} else {
-					zend_hash_next_index_insert_ptr(ch->to_free->slist, slist);
+					zend_hash_next_index_insert_ptr(&ch->to_free->slist, slist);
 				}
 			}
 
@@ -2196,7 +2216,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 
 		case CURLOPT_POSTFIELDS:
 			if (Z_TYPE_P(zvalue) == IS_ARRAY) {
-				if (zend_hash_num_elements(HASH_OF(zvalue)) == 0) {
+				if (zend_hash_num_elements(Z_ARRVAL_P(zvalue)) == 0) {
 					/* no need to build the mime structure for empty hashtables;
 					   also works around https://github.com/curl/curl/issues/6455 */
 					curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDS, "");
@@ -2283,16 +2303,24 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 
 		case CURLOPT_SHARE:
 			{
-				if (Z_TYPE_P(zvalue) == IS_OBJECT && Z_OBJCE_P(zvalue) == curl_share_ce) {
-					php_curlsh *sh = Z_CURL_SHARE_P(zvalue);
-					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
-
-					if (ch->share) {
-						OBJ_RELEASE(&ch->share->std);
-					}
-					GC_ADDREF(&sh->std);
-					ch->share = sh;
+				if (Z_TYPE_P(zvalue) != IS_OBJECT) {
+					break;
 				}
+
+				if (Z_OBJCE_P(zvalue) != curl_share_ce && Z_OBJCE_P(zvalue) != curl_share_persistent_ce) {
+					break;
+				}
+
+				php_curlsh *sh = Z_CURL_SHARE_P(zvalue);
+
+				curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
+
+				if (ch->share) {
+					OBJ_RELEASE(&ch->share->std);
+				}
+
+				GC_ADDREF(&sh->std);
+				ch->share = sh;
 			}
 			break;
 
@@ -2816,8 +2844,7 @@ static void curl_free_obj(zend_object *object)
 		zend_llist_clean(&ch->to_free->post);
 		zend_llist_clean(&ch->to_free->stream);
 
-		zend_hash_destroy(ch->to_free->slist);
-		efree(ch->to_free->slist);
+		zend_hash_destroy(&ch->to_free->slist);
 		efree(ch->to_free);
 		efree(ch->clone);
 	}

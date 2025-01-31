@@ -1779,7 +1779,7 @@ dnl
 dnl Common setup macro for ICU.
 dnl
 AC_DEFUN([PHP_SETUP_ICU],[
-  PKG_CHECK_MODULES([ICU], [icu-uc >= 50.1 icu-io icu-i18n])
+  PKG_CHECK_MODULES([ICU], [icu-uc >= 57.1 icu-io icu-i18n])
 
   PHP_EVAL_INCLINE([$ICU_CFLAGS])
   PHP_EVAL_LIBLINE([$ICU_LIBS], [$1])

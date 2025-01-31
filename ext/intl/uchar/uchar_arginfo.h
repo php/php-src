@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f0c67026b921d853e745fcc5d980bdb86f475c80 */
+ * Stub hash: 58fb5f326ee08cca73977720d3b055b0118d78bb */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 2, _IS_BOOL, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -62,11 +62,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_forDigi
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_getBidiPairedBracket, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
-	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_class_IntlChar_getBidiPairedBracket arginfo_class_IntlChar_charMirror
 
 #define arginfo_class_IntlChar_getBlockCode arginfo_class_IntlChar_charDigitValue
 
@@ -196,9 +192,7 @@ ZEND_METHOD(IntlChar, enumCharNames);
 ZEND_METHOD(IntlChar, enumCharTypes);
 ZEND_METHOD(IntlChar, foldCase);
 ZEND_METHOD(IntlChar, forDigit);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_METHOD(IntlChar, getBidiPairedBracket);
-#endif
 ZEND_METHOD(IntlChar, getBlockCode);
 ZEND_METHOD(IntlChar, getCombiningClass);
 ZEND_METHOD(IntlChar, getFC_NFKC_Closure);
@@ -259,9 +253,7 @@ static const zend_function_entry class_IntlChar_methods[] = {
 	ZEND_ME(IntlChar, enumCharTypes, arginfo_class_IntlChar_enumCharTypes, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(IntlChar, foldCase, arginfo_class_IntlChar_foldCase, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(IntlChar, forDigit, arginfo_class_IntlChar_forDigit, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_ME(IntlChar, getBidiPairedBracket, arginfo_class_IntlChar_getBidiPairedBracket, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-#endif
 	ZEND_ME(IntlChar, getBlockCode, arginfo_class_IntlChar_getBlockCode, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(IntlChar, getCombiningClass, arginfo_class_IntlChar_getCombiningClass, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(IntlChar, getFC_NFKC_Closure, arginfo_class_IntlChar_getFC_NFKC_Closure, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -850,14 +842,12 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_string *const_PROPERTY_WORD_BREAK_name = zend_string_init_interned("PROPERTY_WORD_BREAK", sizeof("PROPERTY_WORD_BREAK") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_PROPERTY_WORD_BREAK_name, &const_PROPERTY_WORD_BREAK_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_PROPERTY_WORD_BREAK_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_PROPERTY_BIDI_PAIRED_BRACKET_TYPE_value;
 	ZVAL_LONG(&const_PROPERTY_BIDI_PAIRED_BRACKET_TYPE_value, UCHAR_BIDI_PAIRED_BRACKET_TYPE);
 	zend_string *const_PROPERTY_BIDI_PAIRED_BRACKET_TYPE_name = zend_string_init_interned("PROPERTY_BIDI_PAIRED_BRACKET_TYPE", sizeof("PROPERTY_BIDI_PAIRED_BRACKET_TYPE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_PROPERTY_BIDI_PAIRED_BRACKET_TYPE_name, &const_PROPERTY_BIDI_PAIRED_BRACKET_TYPE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_PROPERTY_BIDI_PAIRED_BRACKET_TYPE_name);
-#endif
 
 	zval const_PROPERTY_INT_LIMIT_value;
 	ZVAL_LONG(&const_PROPERTY_INT_LIMIT_value, UCHAR_INT_LIMIT);
@@ -984,14 +974,12 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_string *const_PROPERTY_UPPERCASE_MAPPING_name = zend_string_init_interned("PROPERTY_UPPERCASE_MAPPING", sizeof("PROPERTY_UPPERCASE_MAPPING") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_PROPERTY_UPPERCASE_MAPPING_name, &const_PROPERTY_UPPERCASE_MAPPING_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_PROPERTY_UPPERCASE_MAPPING_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_PROPERTY_BIDI_PAIRED_BRACKET_value;
 	ZVAL_LONG(&const_PROPERTY_BIDI_PAIRED_BRACKET_value, UCHAR_BIDI_PAIRED_BRACKET);
 	zend_string *const_PROPERTY_BIDI_PAIRED_BRACKET_name = zend_string_init_interned("PROPERTY_BIDI_PAIRED_BRACKET", sizeof("PROPERTY_BIDI_PAIRED_BRACKET") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_PROPERTY_BIDI_PAIRED_BRACKET_name, &const_PROPERTY_BIDI_PAIRED_BRACKET_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_PROPERTY_BIDI_PAIRED_BRACKET_name);
-#endif
 
 	zval const_PROPERTY_STRING_LIMIT_value;
 	ZVAL_LONG(&const_PROPERTY_STRING_LIMIT_value, UCHAR_STRING_LIMIT);
@@ -1328,38 +1316,30 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_string *const_CHAR_DIRECTION_BOUNDARY_NEUTRAL_name = zend_string_init_interned("CHAR_DIRECTION_BOUNDARY_NEUTRAL", sizeof("CHAR_DIRECTION_BOUNDARY_NEUTRAL") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_CHAR_DIRECTION_BOUNDARY_NEUTRAL_name, &const_CHAR_DIRECTION_BOUNDARY_NEUTRAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CHAR_DIRECTION_BOUNDARY_NEUTRAL_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_CHAR_DIRECTION_FIRST_STRONG_ISOLATE_value;
 	ZVAL_LONG(&const_CHAR_DIRECTION_FIRST_STRONG_ISOLATE_value, U_FIRST_STRONG_ISOLATE);
 	zend_string *const_CHAR_DIRECTION_FIRST_STRONG_ISOLATE_name = zend_string_init_interned("CHAR_DIRECTION_FIRST_STRONG_ISOLATE", sizeof("CHAR_DIRECTION_FIRST_STRONG_ISOLATE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_CHAR_DIRECTION_FIRST_STRONG_ISOLATE_name, &const_CHAR_DIRECTION_FIRST_STRONG_ISOLATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CHAR_DIRECTION_FIRST_STRONG_ISOLATE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE_value;
 	ZVAL_LONG(&const_CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE_value, U_LEFT_TO_RIGHT_ISOLATE);
 	zend_string *const_CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE_name = zend_string_init_interned("CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE", sizeof("CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE_name, &const_CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE_value;
 	ZVAL_LONG(&const_CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE_value, U_RIGHT_TO_LEFT_ISOLATE);
 	zend_string *const_CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE_name = zend_string_init_interned("CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE", sizeof("CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE_name, &const_CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE_value;
 	ZVAL_LONG(&const_CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE_value, U_POP_DIRECTIONAL_ISOLATE);
 	zend_string *const_CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE_name = zend_string_init_interned("CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE", sizeof("CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE_name, &const_CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE_name);
-#endif
 
 	zval const_CHAR_DIRECTION_CHAR_DIRECTION_COUNT_value;
 	ZVAL_LONG(&const_CHAR_DIRECTION_CHAR_DIRECTION_COUNT_value, U_CHAR_DIRECTION_COUNT);
@@ -2704,262 +2684,198 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_string *const_BLOCK_CODE_TAKRI_name = zend_string_init_interned("BLOCK_CODE_TAKRI", sizeof("BLOCK_CODE_TAKRI") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_TAKRI_name, &const_BLOCK_CODE_TAKRI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_TAKRI_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_BASSA_VAH_value;
 	ZVAL_LONG(&const_BLOCK_CODE_BASSA_VAH_value, UBLOCK_BASSA_VAH);
 	zend_string *const_BLOCK_CODE_BASSA_VAH_name = zend_string_init_interned("BLOCK_CODE_BASSA_VAH", sizeof("BLOCK_CODE_BASSA_VAH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_BASSA_VAH_name, &const_BLOCK_CODE_BASSA_VAH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_BASSA_VAH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_CAUCASIAN_ALBANIAN_value;
 	ZVAL_LONG(&const_BLOCK_CODE_CAUCASIAN_ALBANIAN_value, UBLOCK_CAUCASIAN_ALBANIAN);
 	zend_string *const_BLOCK_CODE_CAUCASIAN_ALBANIAN_name = zend_string_init_interned("BLOCK_CODE_CAUCASIAN_ALBANIAN", sizeof("BLOCK_CODE_CAUCASIAN_ALBANIAN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_CAUCASIAN_ALBANIAN_name, &const_BLOCK_CODE_CAUCASIAN_ALBANIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_CAUCASIAN_ALBANIAN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_COPTIC_EPACT_NUMBERS_value;
 	ZVAL_LONG(&const_BLOCK_CODE_COPTIC_EPACT_NUMBERS_value, UBLOCK_COPTIC_EPACT_NUMBERS);
 	zend_string *const_BLOCK_CODE_COPTIC_EPACT_NUMBERS_name = zend_string_init_interned("BLOCK_CODE_COPTIC_EPACT_NUMBERS", sizeof("BLOCK_CODE_COPTIC_EPACT_NUMBERS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_COPTIC_EPACT_NUMBERS_name, &const_BLOCK_CODE_COPTIC_EPACT_NUMBERS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_COPTIC_EPACT_NUMBERS_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED_value;
 	ZVAL_LONG(&const_BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED_value, UBLOCK_COMBINING_DIACRITICAL_MARKS_EXTENDED);
 	zend_string *const_BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED_name = zend_string_init_interned("BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED", sizeof("BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED_name, &const_BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_DUPLOYAN_value;
 	ZVAL_LONG(&const_BLOCK_CODE_DUPLOYAN_value, UBLOCK_DUPLOYAN);
 	zend_string *const_BLOCK_CODE_DUPLOYAN_name = zend_string_init_interned("BLOCK_CODE_DUPLOYAN", sizeof("BLOCK_CODE_DUPLOYAN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_DUPLOYAN_name, &const_BLOCK_CODE_DUPLOYAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_DUPLOYAN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_ELBASAN_value;
 	ZVAL_LONG(&const_BLOCK_CODE_ELBASAN_value, UBLOCK_ELBASAN);
 	zend_string *const_BLOCK_CODE_ELBASAN_name = zend_string_init_interned("BLOCK_CODE_ELBASAN", sizeof("BLOCK_CODE_ELBASAN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_ELBASAN_name, &const_BLOCK_CODE_ELBASAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_ELBASAN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED_value;
 	ZVAL_LONG(&const_BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED_value, UBLOCK_GEOMETRIC_SHAPES_EXTENDED);
 	zend_string *const_BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED_name = zend_string_init_interned("BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED", sizeof("BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED_name, &const_BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_GRANTHA_value;
 	ZVAL_LONG(&const_BLOCK_CODE_GRANTHA_value, UBLOCK_GRANTHA);
 	zend_string *const_BLOCK_CODE_GRANTHA_name = zend_string_init_interned("BLOCK_CODE_GRANTHA", sizeof("BLOCK_CODE_GRANTHA") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_GRANTHA_name, &const_BLOCK_CODE_GRANTHA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_GRANTHA_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_KHOJKI_value;
 	ZVAL_LONG(&const_BLOCK_CODE_KHOJKI_value, UBLOCK_KHOJKI);
 	zend_string *const_BLOCK_CODE_KHOJKI_name = zend_string_init_interned("BLOCK_CODE_KHOJKI", sizeof("BLOCK_CODE_KHOJKI") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_KHOJKI_name, &const_BLOCK_CODE_KHOJKI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_KHOJKI_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_KHUDAWADI_value;
 	ZVAL_LONG(&const_BLOCK_CODE_KHUDAWADI_value, UBLOCK_KHUDAWADI);
 	zend_string *const_BLOCK_CODE_KHUDAWADI_name = zend_string_init_interned("BLOCK_CODE_KHUDAWADI", sizeof("BLOCK_CODE_KHUDAWADI") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_KHUDAWADI_name, &const_BLOCK_CODE_KHUDAWADI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_KHUDAWADI_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_LATIN_EXTENDED_E_value;
 	ZVAL_LONG(&const_BLOCK_CODE_LATIN_EXTENDED_E_value, UBLOCK_LATIN_EXTENDED_E);
 	zend_string *const_BLOCK_CODE_LATIN_EXTENDED_E_name = zend_string_init_interned("BLOCK_CODE_LATIN_EXTENDED_E", sizeof("BLOCK_CODE_LATIN_EXTENDED_E") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_LATIN_EXTENDED_E_name, &const_BLOCK_CODE_LATIN_EXTENDED_E_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_LATIN_EXTENDED_E_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_LINEAR_A_value;
 	ZVAL_LONG(&const_BLOCK_CODE_LINEAR_A_value, UBLOCK_LINEAR_A);
 	zend_string *const_BLOCK_CODE_LINEAR_A_name = zend_string_init_interned("BLOCK_CODE_LINEAR_A", sizeof("BLOCK_CODE_LINEAR_A") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_LINEAR_A_name, &const_BLOCK_CODE_LINEAR_A_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_LINEAR_A_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_MAHAJANI_value;
 	ZVAL_LONG(&const_BLOCK_CODE_MAHAJANI_value, UBLOCK_MAHAJANI);
 	zend_string *const_BLOCK_CODE_MAHAJANI_name = zend_string_init_interned("BLOCK_CODE_MAHAJANI", sizeof("BLOCK_CODE_MAHAJANI") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_MAHAJANI_name, &const_BLOCK_CODE_MAHAJANI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_MAHAJANI_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_MANICHAEAN_value;
 	ZVAL_LONG(&const_BLOCK_CODE_MANICHAEAN_value, UBLOCK_MANICHAEAN);
 	zend_string *const_BLOCK_CODE_MANICHAEAN_name = zend_string_init_interned("BLOCK_CODE_MANICHAEAN", sizeof("BLOCK_CODE_MANICHAEAN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_MANICHAEAN_name, &const_BLOCK_CODE_MANICHAEAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_MANICHAEAN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_MENDE_KIKAKUI_value;
 	ZVAL_LONG(&const_BLOCK_CODE_MENDE_KIKAKUI_value, UBLOCK_MENDE_KIKAKUI);
 	zend_string *const_BLOCK_CODE_MENDE_KIKAKUI_name = zend_string_init_interned("BLOCK_CODE_MENDE_KIKAKUI", sizeof("BLOCK_CODE_MENDE_KIKAKUI") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_MENDE_KIKAKUI_name, &const_BLOCK_CODE_MENDE_KIKAKUI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_MENDE_KIKAKUI_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_MODI_value;
 	ZVAL_LONG(&const_BLOCK_CODE_MODI_value, UBLOCK_MODI);
 	zend_string *const_BLOCK_CODE_MODI_name = zend_string_init_interned("BLOCK_CODE_MODI", sizeof("BLOCK_CODE_MODI") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_MODI_name, &const_BLOCK_CODE_MODI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_MODI_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_MRO_value;
 	ZVAL_LONG(&const_BLOCK_CODE_MRO_value, UBLOCK_MRO);
 	zend_string *const_BLOCK_CODE_MRO_name = zend_string_init_interned("BLOCK_CODE_MRO", sizeof("BLOCK_CODE_MRO") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_MRO_name, &const_BLOCK_CODE_MRO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_MRO_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_MYANMAR_EXTENDED_B_value;
 	ZVAL_LONG(&const_BLOCK_CODE_MYANMAR_EXTENDED_B_value, UBLOCK_MYANMAR_EXTENDED_B);
 	zend_string *const_BLOCK_CODE_MYANMAR_EXTENDED_B_name = zend_string_init_interned("BLOCK_CODE_MYANMAR_EXTENDED_B", sizeof("BLOCK_CODE_MYANMAR_EXTENDED_B") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_MYANMAR_EXTENDED_B_name, &const_BLOCK_CODE_MYANMAR_EXTENDED_B_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_MYANMAR_EXTENDED_B_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_NABATAEAN_value;
 	ZVAL_LONG(&const_BLOCK_CODE_NABATAEAN_value, UBLOCK_NABATAEAN);
 	zend_string *const_BLOCK_CODE_NABATAEAN_name = zend_string_init_interned("BLOCK_CODE_NABATAEAN", sizeof("BLOCK_CODE_NABATAEAN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_NABATAEAN_name, &const_BLOCK_CODE_NABATAEAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_NABATAEAN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_OLD_NORTH_ARABIAN_value;
 	ZVAL_LONG(&const_BLOCK_CODE_OLD_NORTH_ARABIAN_value, UBLOCK_OLD_NORTH_ARABIAN);
 	zend_string *const_BLOCK_CODE_OLD_NORTH_ARABIAN_name = zend_string_init_interned("BLOCK_CODE_OLD_NORTH_ARABIAN", sizeof("BLOCK_CODE_OLD_NORTH_ARABIAN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_OLD_NORTH_ARABIAN_name, &const_BLOCK_CODE_OLD_NORTH_ARABIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_OLD_NORTH_ARABIAN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_OLD_PERMIC_value;
 	ZVAL_LONG(&const_BLOCK_CODE_OLD_PERMIC_value, UBLOCK_OLD_PERMIC);
 	zend_string *const_BLOCK_CODE_OLD_PERMIC_name = zend_string_init_interned("BLOCK_CODE_OLD_PERMIC", sizeof("BLOCK_CODE_OLD_PERMIC") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_OLD_PERMIC_name, &const_BLOCK_CODE_OLD_PERMIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_OLD_PERMIC_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_ORNAMENTAL_DINGBATS_value;
 	ZVAL_LONG(&const_BLOCK_CODE_ORNAMENTAL_DINGBATS_value, UBLOCK_ORNAMENTAL_DINGBATS);
 	zend_string *const_BLOCK_CODE_ORNAMENTAL_DINGBATS_name = zend_string_init_interned("BLOCK_CODE_ORNAMENTAL_DINGBATS", sizeof("BLOCK_CODE_ORNAMENTAL_DINGBATS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_ORNAMENTAL_DINGBATS_name, &const_BLOCK_CODE_ORNAMENTAL_DINGBATS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_ORNAMENTAL_DINGBATS_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_PAHAWH_HMONG_value;
 	ZVAL_LONG(&const_BLOCK_CODE_PAHAWH_HMONG_value, UBLOCK_PAHAWH_HMONG);
 	zend_string *const_BLOCK_CODE_PAHAWH_HMONG_name = zend_string_init_interned("BLOCK_CODE_PAHAWH_HMONG", sizeof("BLOCK_CODE_PAHAWH_HMONG") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_PAHAWH_HMONG_name, &const_BLOCK_CODE_PAHAWH_HMONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_PAHAWH_HMONG_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_PALMYRENE_value;
 	ZVAL_LONG(&const_BLOCK_CODE_PALMYRENE_value, UBLOCK_PALMYRENE);
 	zend_string *const_BLOCK_CODE_PALMYRENE_name = zend_string_init_interned("BLOCK_CODE_PALMYRENE", sizeof("BLOCK_CODE_PALMYRENE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_PALMYRENE_name, &const_BLOCK_CODE_PALMYRENE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_PALMYRENE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_PAU_CIN_HAU_value;
 	ZVAL_LONG(&const_BLOCK_CODE_PAU_CIN_HAU_value, UBLOCK_PAU_CIN_HAU);
 	zend_string *const_BLOCK_CODE_PAU_CIN_HAU_name = zend_string_init_interned("BLOCK_CODE_PAU_CIN_HAU", sizeof("BLOCK_CODE_PAU_CIN_HAU") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_PAU_CIN_HAU_name, &const_BLOCK_CODE_PAU_CIN_HAU_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_PAU_CIN_HAU_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_PSALTER_PAHLAVI_value;
 	ZVAL_LONG(&const_BLOCK_CODE_PSALTER_PAHLAVI_value, UBLOCK_PSALTER_PAHLAVI);
 	zend_string *const_BLOCK_CODE_PSALTER_PAHLAVI_name = zend_string_init_interned("BLOCK_CODE_PSALTER_PAHLAVI", sizeof("BLOCK_CODE_PSALTER_PAHLAVI") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_PSALTER_PAHLAVI_name, &const_BLOCK_CODE_PSALTER_PAHLAVI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_PSALTER_PAHLAVI_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS_value;
 	ZVAL_LONG(&const_BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS_value, UBLOCK_SHORTHAND_FORMAT_CONTROLS);
 	zend_string *const_BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS_name = zend_string_init_interned("BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS", sizeof("BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS_name, &const_BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_SIDDHAM_value;
 	ZVAL_LONG(&const_BLOCK_CODE_SIDDHAM_value, UBLOCK_SIDDHAM);
 	zend_string *const_BLOCK_CODE_SIDDHAM_name = zend_string_init_interned("BLOCK_CODE_SIDDHAM", sizeof("BLOCK_CODE_SIDDHAM") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_SIDDHAM_name, &const_BLOCK_CODE_SIDDHAM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_SIDDHAM_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS_value;
 	ZVAL_LONG(&const_BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS_value, UBLOCK_SINHALA_ARCHAIC_NUMBERS);
 	zend_string *const_BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS_name = zend_string_init_interned("BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS", sizeof("BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS_name, &const_BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_SUPPLEMENTAL_ARROWS_C_value;
 	ZVAL_LONG(&const_BLOCK_CODE_SUPPLEMENTAL_ARROWS_C_value, UBLOCK_SUPPLEMENTAL_ARROWS_C);
 	zend_string *const_BLOCK_CODE_SUPPLEMENTAL_ARROWS_C_name = zend_string_init_interned("BLOCK_CODE_SUPPLEMENTAL_ARROWS_C", sizeof("BLOCK_CODE_SUPPLEMENTAL_ARROWS_C") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_SUPPLEMENTAL_ARROWS_C_name, &const_BLOCK_CODE_SUPPLEMENTAL_ARROWS_C_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_SUPPLEMENTAL_ARROWS_C_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_TIRHUTA_value;
 	ZVAL_LONG(&const_BLOCK_CODE_TIRHUTA_value, UBLOCK_TIRHUTA);
 	zend_string *const_BLOCK_CODE_TIRHUTA_name = zend_string_init_interned("BLOCK_CODE_TIRHUTA", sizeof("BLOCK_CODE_TIRHUTA") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_TIRHUTA_name, &const_BLOCK_CODE_TIRHUTA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_TIRHUTA_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_BLOCK_CODE_WARANG_CITI_value;
 	ZVAL_LONG(&const_BLOCK_CODE_WARANG_CITI_value, UBLOCK_WARANG_CITI);
 	zend_string *const_BLOCK_CODE_WARANG_CITI_name = zend_string_init_interned("BLOCK_CODE_WARANG_CITI", sizeof("BLOCK_CODE_WARANG_CITI") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_WARANG_CITI_name, &const_BLOCK_CODE_WARANG_CITI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_WARANG_CITI_name);
-#endif
 
 	zval const_BLOCK_CODE_COUNT_value;
 	ZVAL_LONG(&const_BLOCK_CODE_COUNT_value, UBLOCK_COUNT);
@@ -2972,38 +2888,30 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_string *const_BLOCK_CODE_INVALID_CODE_name = zend_string_init_interned("BLOCK_CODE_INVALID_CODE", sizeof("BLOCK_CODE_INVALID_CODE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BLOCK_CODE_INVALID_CODE_name, &const_BLOCK_CODE_INVALID_CODE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BLOCK_CODE_INVALID_CODE_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_BPT_NONE_value;
 	ZVAL_LONG(&const_BPT_NONE_value, U_BPT_NONE);
 	zend_string *const_BPT_NONE_name = zend_string_init_interned("BPT_NONE", sizeof("BPT_NONE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BPT_NONE_name, &const_BPT_NONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BPT_NONE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_BPT_OPEN_value;
 	ZVAL_LONG(&const_BPT_OPEN_value, U_BPT_OPEN);
 	zend_string *const_BPT_OPEN_name = zend_string_init_interned("BPT_OPEN", sizeof("BPT_OPEN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BPT_OPEN_name, &const_BPT_OPEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BPT_OPEN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_BPT_CLOSE_value;
 	ZVAL_LONG(&const_BPT_CLOSE_value, U_BPT_CLOSE);
 	zend_string *const_BPT_CLOSE_name = zend_string_init_interned("BPT_CLOSE", sizeof("BPT_CLOSE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BPT_CLOSE_name, &const_BPT_CLOSE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BPT_CLOSE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_BPT_COUNT_value;
 	ZVAL_LONG(&const_BPT_COUNT_value, U_BPT_COUNT);
 	zend_string *const_BPT_COUNT_name = zend_string_init_interned("BPT_COUNT", sizeof("BPT_COUNT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_BPT_COUNT_name, &const_BPT_COUNT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_BPT_COUNT_name);
-#endif
 
 	zval const_EA_NEUTRAL_value;
 	ZVAL_LONG(&const_EA_NEUTRAL_value, U_EA_NEUTRAL);
@@ -3604,230 +3512,174 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_string *const_JG_ROHINGYA_YEH_name = zend_string_init_interned("JG_ROHINGYA_YEH", sizeof("JG_ROHINGYA_YEH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_ROHINGYA_YEH_name, &const_JG_ROHINGYA_YEH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_ROHINGYA_YEH_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_ALEPH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_ALEPH_value, U_JG_MANICHAEAN_ALEPH);
 	zend_string *const_JG_MANICHAEAN_ALEPH_name = zend_string_init_interned("JG_MANICHAEAN_ALEPH", sizeof("JG_MANICHAEAN_ALEPH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_ALEPH_name, &const_JG_MANICHAEAN_ALEPH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_ALEPH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_AYIN_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_AYIN_value, U_JG_MANICHAEAN_AYIN);
 	zend_string *const_JG_MANICHAEAN_AYIN_name = zend_string_init_interned("JG_MANICHAEAN_AYIN", sizeof("JG_MANICHAEAN_AYIN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_AYIN_name, &const_JG_MANICHAEAN_AYIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_AYIN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_BETH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_BETH_value, U_JG_MANICHAEAN_BETH);
 	zend_string *const_JG_MANICHAEAN_BETH_name = zend_string_init_interned("JG_MANICHAEAN_BETH", sizeof("JG_MANICHAEAN_BETH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_BETH_name, &const_JG_MANICHAEAN_BETH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_BETH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_DALETH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_DALETH_value, U_JG_MANICHAEAN_DALETH);
 	zend_string *const_JG_MANICHAEAN_DALETH_name = zend_string_init_interned("JG_MANICHAEAN_DALETH", sizeof("JG_MANICHAEAN_DALETH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_DALETH_name, &const_JG_MANICHAEAN_DALETH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_DALETH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_DHAMEDH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_DHAMEDH_value, U_JG_MANICHAEAN_DHAMEDH);
 	zend_string *const_JG_MANICHAEAN_DHAMEDH_name = zend_string_init_interned("JG_MANICHAEAN_DHAMEDH", sizeof("JG_MANICHAEAN_DHAMEDH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_DHAMEDH_name, &const_JG_MANICHAEAN_DHAMEDH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_DHAMEDH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_FIVE_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_FIVE_value, U_JG_MANICHAEAN_FIVE);
 	zend_string *const_JG_MANICHAEAN_FIVE_name = zend_string_init_interned("JG_MANICHAEAN_FIVE", sizeof("JG_MANICHAEAN_FIVE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_FIVE_name, &const_JG_MANICHAEAN_FIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_FIVE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_GIMEL_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_GIMEL_value, U_JG_MANICHAEAN_GIMEL);
 	zend_string *const_JG_MANICHAEAN_GIMEL_name = zend_string_init_interned("JG_MANICHAEAN_GIMEL", sizeof("JG_MANICHAEAN_GIMEL") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_GIMEL_name, &const_JG_MANICHAEAN_GIMEL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_GIMEL_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_HETH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_HETH_value, U_JG_MANICHAEAN_HETH);
 	zend_string *const_JG_MANICHAEAN_HETH_name = zend_string_init_interned("JG_MANICHAEAN_HETH", sizeof("JG_MANICHAEAN_HETH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_HETH_name, &const_JG_MANICHAEAN_HETH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_HETH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_HUNDRED_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_HUNDRED_value, U_JG_MANICHAEAN_HUNDRED);
 	zend_string *const_JG_MANICHAEAN_HUNDRED_name = zend_string_init_interned("JG_MANICHAEAN_HUNDRED", sizeof("JG_MANICHAEAN_HUNDRED") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_HUNDRED_name, &const_JG_MANICHAEAN_HUNDRED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_HUNDRED_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_KAPH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_KAPH_value, U_JG_MANICHAEAN_KAPH);
 	zend_string *const_JG_MANICHAEAN_KAPH_name = zend_string_init_interned("JG_MANICHAEAN_KAPH", sizeof("JG_MANICHAEAN_KAPH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_KAPH_name, &const_JG_MANICHAEAN_KAPH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_KAPH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_LAMEDH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_LAMEDH_value, U_JG_MANICHAEAN_LAMEDH);
 	zend_string *const_JG_MANICHAEAN_LAMEDH_name = zend_string_init_interned("JG_MANICHAEAN_LAMEDH", sizeof("JG_MANICHAEAN_LAMEDH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_LAMEDH_name, &const_JG_MANICHAEAN_LAMEDH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_LAMEDH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_MEM_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_MEM_value, U_JG_MANICHAEAN_MEM);
 	zend_string *const_JG_MANICHAEAN_MEM_name = zend_string_init_interned("JG_MANICHAEAN_MEM", sizeof("JG_MANICHAEAN_MEM") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_MEM_name, &const_JG_MANICHAEAN_MEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_MEM_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_NUN_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_NUN_value, U_JG_MANICHAEAN_NUN);
 	zend_string *const_JG_MANICHAEAN_NUN_name = zend_string_init_interned("JG_MANICHAEAN_NUN", sizeof("JG_MANICHAEAN_NUN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_NUN_name, &const_JG_MANICHAEAN_NUN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_NUN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_ONE_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_ONE_value, U_JG_MANICHAEAN_ONE);
 	zend_string *const_JG_MANICHAEAN_ONE_name = zend_string_init_interned("JG_MANICHAEAN_ONE", sizeof("JG_MANICHAEAN_ONE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_ONE_name, &const_JG_MANICHAEAN_ONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_ONE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_PE_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_PE_value, U_JG_MANICHAEAN_PE);
 	zend_string *const_JG_MANICHAEAN_PE_name = zend_string_init_interned("JG_MANICHAEAN_PE", sizeof("JG_MANICHAEAN_PE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_PE_name, &const_JG_MANICHAEAN_PE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_PE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_QOPH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_QOPH_value, U_JG_MANICHAEAN_QOPH);
 	zend_string *const_JG_MANICHAEAN_QOPH_name = zend_string_init_interned("JG_MANICHAEAN_QOPH", sizeof("JG_MANICHAEAN_QOPH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_QOPH_name, &const_JG_MANICHAEAN_QOPH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_QOPH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_RESH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_RESH_value, U_JG_MANICHAEAN_RESH);
 	zend_string *const_JG_MANICHAEAN_RESH_name = zend_string_init_interned("JG_MANICHAEAN_RESH", sizeof("JG_MANICHAEAN_RESH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_RESH_name, &const_JG_MANICHAEAN_RESH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_RESH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_SADHE_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_SADHE_value, U_JG_MANICHAEAN_SADHE);
 	zend_string *const_JG_MANICHAEAN_SADHE_name = zend_string_init_interned("JG_MANICHAEAN_SADHE", sizeof("JG_MANICHAEAN_SADHE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_SADHE_name, &const_JG_MANICHAEAN_SADHE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_SADHE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_SAMEKH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_SAMEKH_value, U_JG_MANICHAEAN_SAMEKH);
 	zend_string *const_JG_MANICHAEAN_SAMEKH_name = zend_string_init_interned("JG_MANICHAEAN_SAMEKH", sizeof("JG_MANICHAEAN_SAMEKH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_SAMEKH_name, &const_JG_MANICHAEAN_SAMEKH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_SAMEKH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_TAW_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_TAW_value, U_JG_MANICHAEAN_TAW);
 	zend_string *const_JG_MANICHAEAN_TAW_name = zend_string_init_interned("JG_MANICHAEAN_TAW", sizeof("JG_MANICHAEAN_TAW") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_TAW_name, &const_JG_MANICHAEAN_TAW_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_TAW_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_TEN_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_TEN_value, U_JG_MANICHAEAN_TEN);
 	zend_string *const_JG_MANICHAEAN_TEN_name = zend_string_init_interned("JG_MANICHAEAN_TEN", sizeof("JG_MANICHAEAN_TEN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_TEN_name, &const_JG_MANICHAEAN_TEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_TEN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_TETH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_TETH_value, U_JG_MANICHAEAN_TETH);
 	zend_string *const_JG_MANICHAEAN_TETH_name = zend_string_init_interned("JG_MANICHAEAN_TETH", sizeof("JG_MANICHAEAN_TETH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_TETH_name, &const_JG_MANICHAEAN_TETH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_TETH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_THAMEDH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_THAMEDH_value, U_JG_MANICHAEAN_THAMEDH);
 	zend_string *const_JG_MANICHAEAN_THAMEDH_name = zend_string_init_interned("JG_MANICHAEAN_THAMEDH", sizeof("JG_MANICHAEAN_THAMEDH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_THAMEDH_name, &const_JG_MANICHAEAN_THAMEDH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_THAMEDH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_TWENTY_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_TWENTY_value, U_JG_MANICHAEAN_TWENTY);
 	zend_string *const_JG_MANICHAEAN_TWENTY_name = zend_string_init_interned("JG_MANICHAEAN_TWENTY", sizeof("JG_MANICHAEAN_TWENTY") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_TWENTY_name, &const_JG_MANICHAEAN_TWENTY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_TWENTY_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_WAW_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_WAW_value, U_JG_MANICHAEAN_WAW);
 	zend_string *const_JG_MANICHAEAN_WAW_name = zend_string_init_interned("JG_MANICHAEAN_WAW", sizeof("JG_MANICHAEAN_WAW") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_WAW_name, &const_JG_MANICHAEAN_WAW_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_WAW_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_YODH_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_YODH_value, U_JG_MANICHAEAN_YODH);
 	zend_string *const_JG_MANICHAEAN_YODH_name = zend_string_init_interned("JG_MANICHAEAN_YODH", sizeof("JG_MANICHAEAN_YODH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_YODH_name, &const_JG_MANICHAEAN_YODH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_YODH_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_MANICHAEAN_ZAYIN_value;
 	ZVAL_LONG(&const_JG_MANICHAEAN_ZAYIN_value, U_JG_MANICHAEAN_ZAYIN);
 	zend_string *const_JG_MANICHAEAN_ZAYIN_name = zend_string_init_interned("JG_MANICHAEAN_ZAYIN", sizeof("JG_MANICHAEAN_ZAYIN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_MANICHAEAN_ZAYIN_name, &const_JG_MANICHAEAN_ZAYIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_MANICHAEAN_ZAYIN_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 54
 
 	zval const_JG_STRAIGHT_WAW_value;
 	ZVAL_LONG(&const_JG_STRAIGHT_WAW_value, U_JG_STRAIGHT_WAW);
 	zend_string *const_JG_STRAIGHT_WAW_name = zend_string_init_interned("JG_STRAIGHT_WAW", sizeof("JG_STRAIGHT_WAW") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_JG_STRAIGHT_WAW_name, &const_JG_STRAIGHT_WAW_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_JG_STRAIGHT_WAW_name);
-#endif
 
 	zval const_JG_COUNT_value;
 	ZVAL_LONG(&const_JG_COUNT_value, U_JG_COUNT);
@@ -4002,30 +3854,24 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_string *const_WB_REGIONAL_INDICATOR_name = zend_string_init_interned("WB_REGIONAL_INDICATOR", sizeof("WB_REGIONAL_INDICATOR") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_WB_REGIONAL_INDICATOR_name, &const_WB_REGIONAL_INDICATOR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_WB_REGIONAL_INDICATOR_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_WB_HEBREW_LETTER_value;
 	ZVAL_LONG(&const_WB_HEBREW_LETTER_value, U_WB_HEBREW_LETTER);
 	zend_string *const_WB_HEBREW_LETTER_name = zend_string_init_interned("WB_HEBREW_LETTER", sizeof("WB_HEBREW_LETTER") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_WB_HEBREW_LETTER_name, &const_WB_HEBREW_LETTER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_WB_HEBREW_LETTER_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_WB_SINGLE_QUOTE_value;
 	ZVAL_LONG(&const_WB_SINGLE_QUOTE_value, U_WB_SINGLE_QUOTE);
 	zend_string *const_WB_SINGLE_QUOTE_name = zend_string_init_interned("WB_SINGLE_QUOTE", sizeof("WB_SINGLE_QUOTE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_WB_SINGLE_QUOTE_name, &const_WB_SINGLE_QUOTE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_WB_SINGLE_QUOTE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 
 	zval const_WB_DOUBLE_QUOTE_value;
 	ZVAL_LONG(&const_WB_DOUBLE_QUOTE_value, U_WB_DOUBLE_QUOTE);
 	zend_string *const_WB_DOUBLE_QUOTE_name = zend_string_init_interned("WB_DOUBLE_QUOTE", sizeof("WB_DOUBLE_QUOTE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_WB_DOUBLE_QUOTE_name, &const_WB_DOUBLE_QUOTE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_WB_DOUBLE_QUOTE_name);
-#endif
 
 	zval const_WB_COUNT_value;
 	ZVAL_LONG(&const_WB_COUNT_value, U_WB_COUNT);

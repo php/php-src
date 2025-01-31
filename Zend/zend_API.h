@@ -1107,7 +1107,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_NULL(_zv); \
 } while (0)
 
@@ -1129,7 +1129,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_FALSE(_zv); \
 } while (0)
 
@@ -1151,7 +1151,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_TRUE(_zv); \
 } while (0)
 
@@ -1173,7 +1173,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_BOOL(_zv, bval); \
 } while (0)
 
@@ -1195,7 +1195,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_LONG(_zv, lval); \
 } while (0)
 
@@ -1217,7 +1217,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_DOUBLE(_zv, dval); \
 } while (0)
 
@@ -1239,7 +1239,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_EMPTY_STRING(_zv); \
 } while (0)
 
@@ -1261,7 +1261,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_STR(_zv, str); \
 } while (0)
 
@@ -1283,7 +1283,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_NEW_STR(_zv, str); \
 } while (0)
 
@@ -1305,7 +1305,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_STRING(_zv, string); \
 } while (0)
 
@@ -1327,7 +1327,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_STRINGL(_zv, string, len); \
 } while (0)
 
@@ -1349,7 +1349,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_ARR(_zv, arr); \
 } while (0)
 
@@ -1371,7 +1371,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_RES(_zv, res); \
 } while (0)
 
@@ -1393,7 +1393,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_COPY_VALUE(_zv, other_zv); \
 } while (0)
 
@@ -1415,7 +1415,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_COPY_VALUE(_zv, other_zv); \
 } while (0)
 
@@ -1447,7 +1447,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 		} \
 		_zv = &ref->val; \
 	} \
-	zval_ptr_dtor(_zv); \
+	zval_ptr_safe_dtor(_zv); \
 	ZVAL_COPY_VALUE(_zv, other_zv); \
 } while (0)
 
@@ -1485,10 +1485,7 @@ static zend_always_inline zval *zend_try_array_init_size(zval *zv, uint32_t size
 		}
 		zv = &ref->val;
 	}
-	zval garbage;
-	ZVAL_COPY_VALUE(&garbage, zv);
-	ZVAL_NULL(zv);
-	zval_ptr_dtor(&garbage);
+	zval_ptr_safe_dtor(zv);
 	ZVAL_ARR(zv, arr);
 	return zv;
 }

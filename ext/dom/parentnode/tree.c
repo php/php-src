@@ -699,8 +699,8 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 
 static zend_result dom_child_removal_preconditions(const xmlNode *child, const dom_object *context)
 {
-	if (dom_node_is_read_only(child) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+	if (dom_node_is_read_only(child) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(context->document));
 		return FAILURE;
 	}

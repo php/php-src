@@ -2859,8 +2859,11 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end, _step) do { \
 		double __calc_size = ((start - end) / (_step)) + 1; \
 		if (__calc_size >= (double)HT_MAX_SIZE) { \
+			double __exceed_by = __calc_size - (double)HT_MAX_SIZE; \
 			zend_value_error(\
-					"The supplied range exceeds the maximum array size: start=%0.1f end=%0.1f step=%0.1f", end, start, (_step)); \
+				"The supplied range exceeds the maximum array size by %.1f elements: " \
+				"start=%.1f, end=%.1f, step=%.1f. Max size: %.0f", \
+				__exceed_by, end, start, (_step), (double)HT_MAX_SIZE); \
 			RETURN_THROWS(); \
 		} \
 		size = (uint32_t)_php_math_round(__calc_size, 0, PHP_ROUND_HALF_UP); \
@@ -2871,8 +2874,12 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end, _step) do { \
 		zend_ulong __calc_size = ((zend_ulong) start - end) / (_step); \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
+			uint64_t __excess = __calc_size - (HT_MAX_SIZE - 1); \
 			zend_value_error(\
-					"The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT " step=" ZEND_LONG_FMT, end, start, (_step)); \
+				"The supplied range exceeds the maximum array size by %" PRIu64 " elements: " \
+				"start=" ZEND_LONG_FMT ", end=" ZEND_LONG_FMT ", step=" ZEND_LONG_FMT ". " \
+				"Calculated size: %" PRIu64 ". Maximum size: %" PRIu64 ".", \
+				__excess, end, start, (_step), (uint64_t)__calc_size, (uint64_t)HT_MAX_SIZE); \
 			RETURN_THROWS(); \
 		} \
 		size = (uint32_t)(__calc_size + 1); \
@@ -6549,32 +6556,25 @@ PHP_FUNCTION(array_filter)
 				if (!string_key) {
 					ZVAL_LONG(key, num_key);
 				} else {
-					ZVAL_STR_COPY(key, string_key);
+					ZVAL_STR(key, string_key);
 				}
 			}
 			if (use_type != ARRAY_FILTER_USE_KEY) {
-				ZVAL_COPY(&args[0], operand);
+				ZVAL_COPY_VALUE(&args[0], operand);
 			}
 			fci.params = args;
 
-			if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
-				bool retval_true;
+			zend_result result = zend_call_function(&fci, &fci_cache);
+			ZEND_ASSERT(result == SUCCESS);
 
-				zval_ptr_dtor(&args[0]);
-				if (use_type == ARRAY_FILTER_USE_BOTH) {
-					zval_ptr_dtor(&args[1]);
-				}
-				retval_true = zend_is_true(&retval);
-				zval_ptr_dtor(&retval);
-				if (!retval_true) {
-					continue;
-				}
-			} else {
-				zval_ptr_dtor(&args[0]);
-				if (use_type == ARRAY_FILTER_USE_BOTH) {
-					zval_ptr_dtor(&args[1]);
-				}
-				return;
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+
+			bool retval_true = zend_is_true(&retval);
+			zval_ptr_dtor(&retval);
+			if (!retval_true) {
+				continue;
 			}
 		} else if (!zend_is_true(operand)) {
 			continue;
@@ -6622,42 +6622,34 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 		if (!str_key) {
 			ZVAL_LONG(&args[1], num_key);
 		} else {
-			ZVAL_STR_COPY(&args[1], str_key);
+			ZVAL_STR(&args[1], str_key);
 		}
 
-		ZVAL_COPY(&args[0], operand);
+		ZVAL_COPY_VALUE(&args[0], operand);
 
 		zend_result result = zend_call_function(&fci, &fci_cache);
-		if (EXPECTED(result == SUCCESS)) {
-			int retval_true;
+		ZEND_ASSERT(result == SUCCESS);
 
-			retval_true = zend_is_true(&retval);
-			zval_ptr_dtor(&retval);
-
-			/* This negates the condition, if negate_condition is true. Otherwise it does nothing with `retval_true`. */
-			retval_true ^= negate_condition;
-
-			if (retval_true) {
-				if (result_value != NULL) {
-					ZVAL_COPY_DEREF(result_value, &args[0]);
-				}
-
-				if (result_key != NULL) {
-					ZVAL_COPY(result_key, &args[1]);
-				}
-
-				zval_ptr_dtor(&args[0]);
-				zval_ptr_dtor(&args[1]);
-
-				return SUCCESS;
-			}
+		if (UNEXPECTED(EG(exception))) {
+			return FAILURE;
 		}
 
-		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		bool retval_true = zend_is_true(&retval);
+		zval_ptr_dtor(&retval);
 
-		if (UNEXPECTED(result != SUCCESS)) {
-			return FAILURE;
+		/* This negates the condition, if negate_condition is true. Otherwise it does nothing with `retval_true`. */
+		retval_true ^= negate_condition;
+
+		if (retval_true) {
+			if (result_value != NULL) {
+				ZVAL_COPY_DEREF(result_value, &args[0]);
+			}
+
+			if (result_key != NULL) {
+				ZVAL_COPY(result_key, &args[1]);
+			}
+
+			break;
 		}
 	} ZEND_HASH_FOREACH_END();
 

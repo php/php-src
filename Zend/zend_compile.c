@@ -214,6 +214,10 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("iterable")},
 	{ZEND_STRL("object")},
 	{ZEND_STRL("mixed")},
+	/* These are not usable as class names because they're proper tokens,
+	 * but they are here for class aliases. */
+	{ZEND_STRL("array")},
+	{ZEND_STRL("callable")},
 	{NULL, 0}
 };
 
@@ -338,7 +342,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_arra
 	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
 	CG(context).in_jmp_frameless_branch = false;
-	CG(context).active_property_info = NULL;
+	CG(context).active_property_info_name = NULL;
 	CG(context).active_property_hook_kind = (zend_property_hook_kind)-1;
 }
 /* }}} */
@@ -843,7 +847,7 @@ static void zend_do_free(znode *op1) /* {{{ */
 /* }}} */
 
 
-static char *zend_modifier_token_to_string(uint32_t token)
+static const char *zend_modifier_token_to_string(uint32_t token)
 {
 	switch (token) {
 		case T_PUBLIC:
@@ -954,12 +958,20 @@ uint32_t zend_modifier_list_to_flags(zend_modifier_target target, zend_ast *modi
 	zend_ast_list *modifier_list = zend_ast_get_list(modifiers);
 
 	for (uint32_t i = 0; i < modifier_list->children; i++) {
-		uint32_t new_flag = zend_modifier_token_to_flag(target, (uint32_t) Z_LVAL_P(zend_ast_get_zval(modifier_list->child[i])));
+		uint32_t token = (uint32_t) Z_LVAL_P(zend_ast_get_zval(modifier_list->child[i]));
+		uint32_t new_flag = zend_modifier_token_to_flag(target, token);
 		if (!new_flag) {
 			return 0;
 		}
+		/* Don't error immediately for duplicate flags, we want to prioritize the errors from zend_add_member_modifier(). */
+		bool duplicate_flag = (flags & new_flag);
 		flags = zend_add_member_modifier(flags, new_flag, target);
 		if (!flags) {
+			return 0;
+		}
+		if (duplicate_flag) {
+			zend_throw_exception_ex(zend_ce_compile_error, 0,
+				"Multiple %s modifiers are not allowed", zend_modifier_token_to_string(token));
 			return 0;
 		}
 	}
@@ -1017,23 +1029,6 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifi
 	if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Multiple access type modifiers are not allowed", 0);
-		return 0;
-	}
-	if ((flags & ZEND_ACC_ABSTRACT) && (new_flag & ZEND_ACC_ABSTRACT)) {
-		zend_throw_exception(zend_ce_compile_error, "Multiple abstract modifiers are not allowed", 0);
-		return 0;
-	}
-	if ((flags & ZEND_ACC_STATIC) && (new_flag & ZEND_ACC_STATIC)) {
-		zend_throw_exception(zend_ce_compile_error, "Multiple static modifiers are not allowed", 0);
-		return 0;
-	}
-	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
-		zend_throw_exception(zend_ce_compile_error, "Multiple final modifiers are not allowed", 0);
-		return 0;
-	}
-	if ((flags & ZEND_ACC_READONLY) && (new_flag & ZEND_ACC_READONLY)) {
-		zend_throw_exception(zend_ce_compile_error,
-			"Multiple readonly modifiers are not allowed", 0);
 		return 0;
 	}
 	if (target == ZEND_MODIFIER_TARGET_METHOD && (new_flags & ZEND_ACC_ABSTRACT) && (new_flags & ZEND_ACC_FINAL)) {
@@ -3709,6 +3704,7 @@ static uint32_t zend_get_arg_num(zend_function *fn, zend_string *arg_name) {
 			}
 		}
 	} else {
+		ZEND_ASSERT(fn->common.num_args == 0 || fn->internal_function.arg_info);
 		for (uint32_t i = 0; i < fn->common.num_args; i++) {
 			zend_internal_arg_info *arg_info = &fn->internal_function.arg_info[i];
 			size_t len = strlen(arg_info->name);
@@ -5105,13 +5101,13 @@ static bool zend_compile_parent_property_hook_call(znode *result, zend_ast *ast,
 	zend_property_hook_kind hook_kind = zend_get_property_hook_kind_from_name(hook_name);
 	ZEND_ASSERT(hook_kind != (uint32_t)-1);
 
-	const zend_property_info *prop_info = CG(context).active_property_info;
-	if (!prop_info) {
+	const zend_string *prop_info_name = CG(context).active_property_info_name;
+	if (!prop_info_name) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Must not use parent::$%s::%s() outside a property hook",
 			ZSTR_VAL(property_name), ZSTR_VAL(hook_name));
 	}
 
-	const char *unmangled_prop_name = zend_get_unmangled_property_name(prop_info->name);
+	const char *unmangled_prop_name = zend_get_unmangled_property_name(prop_info_name);
 	if (!zend_string_equals_cstr(property_name, unmangled_prop_name, strlen(unmangled_prop_name))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Must not use parent::$%s::%s() in a different property ($%s)",
 			ZSTR_VAL(property_name), ZSTR_VAL(hook_name), unmangled_prop_name);
@@ -8068,6 +8064,22 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
 	}
 
+	if ((fn_flags & ZEND_ACC_ABSTRACT)
+	 && !(ce->ce_flags & (ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_TRAIT))) {
+		// Don't say that the class should be declared abstract if it is
+		// anonymous or an enum and can't be abstract
+		if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Anonymous class method %s() must not be abstract",
+				ZSTR_VAL(name));
+		} else if (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_INTERFACE)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "%s method %s::%s() must not be abstract",
+				zend_get_object_type_case(ce, true), ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s declares abstract method %s() and must therefore be declared abstract",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+	}
+
 	if (in_interface) {
 		if (!(fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method "
@@ -8076,10 +8088,6 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 		if (fn_flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Interface method "
 				"%s::%s() must not be final", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-		}
-		if (fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Interface method "
-				"%s::%s() must not be abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 		op_array->fn_flags |= ZEND_ACC_ABSTRACT;
 	}
@@ -8131,7 +8139,13 @@ static uint32_t zend_add_dynamic_func_def(zend_op_array *def) {
 	return def_offset;
 }
 
-static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, bool toplevel) /* {{{ */
+enum func_decl_level {
+	FUNC_DECL_LEVEL_TOPLEVEL,
+	FUNC_DECL_LEVEL_NESTED,
+	FUNC_DECL_LEVEL_CONSTEXPR,
+};
+
+static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, enum func_decl_level level) /* {{{ */
 {
 	zend_string *unqualified_name, *name, *lcname;
 	zend_op *opline;
@@ -8201,26 +8215,35 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 	}
 
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
-	if (!toplevel) {
-		uint32_t func_ref = zend_add_dynamic_func_def(op_array);
-		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
-			opline->op2.num = func_ref;
-		} else {
-			opline = get_next_op();
-			opline->opcode = ZEND_DECLARE_FUNCTION;
-			opline->op1_type = IS_CONST;
-			LITERAL_STR(opline->op1, zend_string_copy(lcname));
-			opline->op2.num = func_ref;
+	switch (level) {
+		case FUNC_DECL_LEVEL_CONSTEXPR:
+			zend_add_dynamic_func_def(op_array);
+			break;
+		case FUNC_DECL_LEVEL_NESTED: {
+			uint32_t func_ref = zend_add_dynamic_func_def(op_array);
+			if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+				opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
+				opline->op2.num = func_ref;
+			} else {
+				opline = get_next_op();
+				opline->opcode = ZEND_DECLARE_FUNCTION;
+				opline->op1_type = IS_CONST;
+				LITERAL_STR(opline->op1, zend_string_copy(lcname));
+				opline->op2.num = func_ref;
+			}
+			break;
 		}
+		case FUNC_DECL_LEVEL_TOPLEVEL:
+			/* Nothing to do. */
+			break;
 	}
 	return lcname;
 }
 /* }}} */
 
 static zend_op_array *zend_compile_func_decl_ex(
-	znode *result, zend_ast *ast, bool toplevel,
-	const zend_property_info *property_info,
+	znode *result, zend_ast *ast, enum func_decl_level level,
+	zend_string *property_info_name,
 	zend_property_hook_kind hook_kind
 ) {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
@@ -8265,7 +8288,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 		bool has_body = stmt_ast != NULL;
 		lcname = zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
-		lcname = zend_begin_func_decl(result, op_array, decl, toplevel);
+		lcname = zend_begin_func_decl(result, op_array, decl, level);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
 			find_implicit_binds(&info, params_ast, stmt_ast);
 			compile_implicit_lexical_binds(&info, result, op_array);
@@ -8313,12 +8336,12 @@ static zend_op_array *zend_compile_func_decl_ex(
 		CG(active_class_entry) = NULL;
 	}
 
-	if (toplevel) {
+	if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		op_array->fn_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
 	zend_oparray_context_begin(&orig_oparray_context, op_array);
-	CG(context).active_property_info = property_info;
+	CG(context).active_property_info_name = property_info_name;
 	CG(context).active_property_hook_kind = hook_kind;
 
 	{
@@ -8360,7 +8383,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 		CG(zend_lineno) = decl->start_lineno;
 		zend_check_magic_method_implementation(
 			CG(active_class_entry), (zend_function *) op_array, lcname, E_COMPILE_ERROR);
-	} else if (toplevel) {
+	} else if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		/* Only register the function after a successful compile */
 		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
 			CG(zend_lineno) = decl->start_lineno;
@@ -8380,7 +8403,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 	/* Pop the loop variable stack separator */
 	zend_stack_del_top(&CG(loop_var_stack));
 
-	if (toplevel) {
+	if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		zend_observer_function_declared_notify(op_array, lcname);
 	}
 
@@ -8394,9 +8417,9 @@ static zend_op_array *zend_compile_func_decl_ex(
 	return op_array;
 }
 
-static zend_op_array *zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel)
+static zend_op_array *zend_compile_func_decl(znode *result, zend_ast *ast, enum func_decl_level level)
 {
-	return zend_compile_func_decl_ex(result, ast, toplevel, /* property_info */ NULL, (zend_property_hook_kind)-1);
+	return zend_compile_func_decl_ex(result, ast, level, /* property_info */ NULL, (zend_property_hook_kind)-1);
 }
 
 zend_property_hook_kind zend_get_property_hook_kind_from_name(zend_string *name) {
@@ -8535,7 +8558,7 @@ static void zend_compile_property_hooks(
 		hook->name = zend_strpprintf(0, "$%s::%s", ZSTR_VAL(prop_name), ZSTR_VAL(name));
 
 		zend_function *func = (zend_function *) zend_compile_func_decl_ex(
-			NULL, (zend_ast *) hook, /* toplevel */ false, prop_info, hook_kind);
+			NULL, (zend_ast *) hook, FUNC_DECL_LEVEL_NESTED, prop_info->name, hook_kind);
 
 		func->common.prop_info = prop_info;
 
@@ -8635,12 +8658,8 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 		flags |= zend_property_is_virtual(ce, name, hooks_ast, flags) ? ZEND_ACC_VIRTUAL : 0;
 
-		/* FIXME: This is a dirty fix to maintain ABI compatibility. We don't
-		 * have an actual property info yet, but we really only need the name
-		 * anyway. We should convert this to a zend_string. */
-		ZEND_ASSERT(!CG(context).active_property_info);
-		zend_property_info dummy_prop_info = { .name = name };
-		CG(context).active_property_info = &dummy_prop_info;
+		ZEND_ASSERT(!CG(context).active_property_info_name);
+		CG(context).active_property_info_name = name;
 
 		if (!hooks_ast) {
 			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
@@ -8735,7 +8754,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
 		}
 
-		CG(context).active_property_info = NULL;
+		CG(context).active_property_info_name = NULL;
 	}
 }
 /* }}} */
@@ -9591,9 +9610,9 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case T_PROPERTY_C: {
-			const zend_property_info *prop_info = CG(context).active_property_info;
-			if (prop_info) {
-				ZVAL_STR(zv, zend_copy_unmangled_prop_name(prop_info->name));
+			zend_string *prop_info_name = CG(context).active_property_info_name;
+			if (prop_info_name) {
+				ZVAL_STR(zv, zend_copy_unmangled_prop_name(prop_info_name));
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}
@@ -11058,7 +11077,8 @@ static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_CONST_ENUM_INIT
 		|| kind == ZEND_AST_NEW || kind == ZEND_AST_ARG_LIST
 		|| kind == ZEND_AST_NAMED_ARG
-		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP;
+		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP
+		|| kind == ZEND_AST_CLOSURE;
 }
 /* }}} */
 
@@ -11192,6 +11212,26 @@ static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 	class_ast->attr = fetch_type << ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT;
 }
 
+static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
+{
+	zend_ast_decl *closure_ast = (zend_ast_decl *) *ast_ptr;
+	zend_ast *uses_ast = closure_ast->child[1];
+	if (!(closure_ast->flags & ZEND_ACC_STATIC)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Closures in constant expressions must be static");
+	}
+	if (uses_ast) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use(...) variables in constant expression");
+	}
+
+	znode node;
+	zend_op_array *op = zend_compile_func_decl(&node, (zend_ast*)closure_ast, FUNC_DECL_LEVEL_CONSTEXPR);
+
+	zend_ast_destroy(*ast_ptr);
+	*ast_ptr = zend_ast_create_op_array(op);
+}
+
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)
 {
 	zend_ast_list *list = zend_ast_get_list(*ast_ptr);
@@ -11254,6 +11294,10 @@ static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 		case ZEND_AST_ARG_LIST:
 			zend_compile_const_expr_args(ast_ptr);
 			break;
+		case ZEND_AST_CLOSURE:
+			zend_compile_const_expr_closure(ast_ptr);
+			/* Return, because we do not want to traverse the children. */
+			return;
 	}
 
 	zend_ast_apply(ast, zend_compile_const_expr, context);
@@ -11296,7 +11340,7 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 
 	if (ast->kind == ZEND_AST_FUNC_DECL) {
 		CG(zend_lineno) = ast->lineno;
-		zend_compile_func_decl(NULL, ast, 1);
+		zend_compile_func_decl(NULL, ast, FUNC_DECL_LEVEL_TOPLEVEL);
 		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
 	} else if (ast->kind == ZEND_AST_CLASS) {
 		CG(zend_lineno) = ast->lineno;
@@ -11378,7 +11422,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_METHOD:
-			zend_compile_func_decl(NULL, ast, 0);
+			zend_compile_func_decl(NULL, ast, FUNC_DECL_LEVEL_NESTED);
 			break;
 		case ZEND_AST_ENUM_CASE:
 			zend_compile_enum_case(ast);
@@ -11555,7 +11599,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_ARROW_FUNC:
-			zend_compile_func_decl(result, ast, 0);
+			zend_compile_func_decl(result, ast, FUNC_DECL_LEVEL_NESTED);
 			return;
 		case ZEND_AST_THROW:
 			zend_compile_throw(result, ast);
@@ -11633,6 +11677,8 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 
 static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bool by_ref) /* {{{ */
 {
+	zend_check_stack_limit();
+
 	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_op *opcode = zend_compile_var_inner(result, ast, type, by_ref);
 	zend_short_circuiting_commit(checkpoint, result, ast);
@@ -11641,6 +11687,8 @@ static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bo
 
 static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, bool by_ref) /* {{{ */
 {
+	zend_check_stack_limit();
+
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
 			return zend_compile_simple_var(result, ast, type, 1);

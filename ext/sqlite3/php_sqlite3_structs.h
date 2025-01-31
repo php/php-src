@@ -44,7 +44,7 @@ struct php_sqlite3_bound_param  {
 typedef struct _php_sqlite3_func {
 	struct _php_sqlite3_func *next;
 
-	const char *func_name;
+	zend_string *func_name;
 	int argc;
 
 	zend_fcall_info_cache func;
@@ -56,7 +56,7 @@ typedef struct _php_sqlite3_func {
 typedef struct _php_sqlite3_collation {
 	struct _php_sqlite3_collation *next;
 
-	const char *collation_name;
+	zend_string *collation_name;
 	zend_fcall_info_cache cmp_func;
 } php_sqlite3_collation;
 

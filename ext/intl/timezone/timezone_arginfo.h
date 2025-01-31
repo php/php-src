@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ff6d6bb0789c719625f4271bf9ce1c12eea5c95e */
+ * Stub hash: 6ffeea8491aa48c49879fa77bdb644d10d5c71bd */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -81,16 +81,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlTimeZone_getUnknown arginfo_class_IntlTimeZone_createDefault
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getWindowsID, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_IntlTimeZone_getWindowsID arginfo_class_IntlTimeZone_getRegion
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getIDForWindowsID, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlTimeZone_hasSameRules, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, other, IntlTimeZone, 0)
@@ -125,10 +121,8 @@ ZEND_FUNCTION(intltz_get_raw_offset);
 ZEND_FUNCTION(intltz_get_region);
 ZEND_FUNCTION(intltz_get_tz_data_version);
 ZEND_FUNCTION(intltz_get_unknown);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_windows_id);
 ZEND_FUNCTION(intltz_get_id_for_windows_id);
-#endif
 ZEND_FUNCTION(intltz_has_same_rules);
 ZEND_FUNCTION(intltz_to_date_time_zone);
 ZEND_FUNCTION(intltz_use_daylight_time);
@@ -157,10 +151,8 @@ static const zend_function_entry class_IntlTimeZone_methods[] = {
 	ZEND_RAW_FENTRY("getRegion", zif_intltz_get_region, arginfo_class_IntlTimeZone_getRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getTZDataVersion", zif_intltz_get_tz_data_version, arginfo_class_IntlTimeZone_getTZDataVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getUnknown", zif_intltz_get_unknown, arginfo_class_IntlTimeZone_getUnknown, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_RAW_FENTRY("getWindowsID", zif_intltz_get_windows_id, arginfo_class_IntlTimeZone_getWindowsID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getIDForWindowsID", zif_intltz_get_id_for_windows_id, arginfo_class_IntlTimeZone_getIDForWindowsID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
-#endif
 	ZEND_RAW_FENTRY("hasSameRules", zif_intltz_has_same_rules, arginfo_class_IntlTimeZone_hasSameRules, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("toDateTimeZone", zif_intltz_to_date_time_zone, arginfo_class_IntlTimeZone_toDateTimeZone, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("useDaylightTime", zif_intltz_use_daylight_time, arginfo_class_IntlTimeZone_useDaylightTime, ZEND_ACC_PUBLIC, NULL, NULL)

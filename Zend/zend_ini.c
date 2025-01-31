@@ -480,40 +480,17 @@ ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig) 
 
 ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, bool *exists) /* {{{ */
 {
-	zend_ini_entry *ini_entry;
+	zend_string *str = zend_ini_str_ex(name, name_length, orig, exists);
 
-	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
-	if (ini_entry) {
-		if (exists) {
-			*exists = 1;
-		}
-
-		if (orig && ini_entry->modified) {
-			return ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : NULL;
-		} else {
-			return ini_entry->value ? ZSTR_VAL(ini_entry->value) : NULL;
-		}
-	} else {
-		if (exists) {
-			*exists = 0;
-		}
-		return NULL;
-	}
+	return str ? ZSTR_VAL(str) : NULL;
 }
 /* }}} */
 
 ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig) /* {{{ */
 {
-	bool exists = 1;
-	char *return_value;
+	zend_string *str = zend_ini_str(name, name_length, orig);
 
-	return_value = zend_ini_string_ex(name, name_length, orig, &exists);
-	if (!exists) {
-		return NULL;
-	} else if (!return_value) {
-		return_value = "";
-	}
-	return return_value;
+	return str ? ZSTR_VAL(str) : NULL;
 }
 /* }}} */
 

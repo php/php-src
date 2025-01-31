@@ -7,6 +7,7 @@ include "skipif.inc";
 
 if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
   die("skip this test is for Windows platforms only");
+if (getenv('SKIP_ASAN')) die('skip child process cannot be stopped under ASan');
 ?>
 --FILE--
 <?php

@@ -74,14 +74,11 @@ typedef struct bc_struct {
 #define MAX(a, b)      ((a)>(b)?(a):(b))
 #define MIN(a, b)      ((a)>(b)?(b):(a))
 
-#ifndef LONG_MAX
-#define LONG_MAX 0x7fffffff
-#endif
-
-
 /* Function Prototypes */
 
 void bc_init_numbers(void);
+
+void bc_force_free_number(bc_num *num);
 
 bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent);
 

@@ -252,7 +252,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 	}
 
 	/* #49274, fatal error with object without a toString method
-	  Fails nicely instead of getting a recovarable fatal error. */
+	  Fails nicely instead of getting a recoverable fatal error. */
 	if (Z_TYPE_P(value) == IS_OBJECT) {
 		zend_class_entry *ce;
 

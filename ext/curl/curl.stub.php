@@ -3668,6 +3668,15 @@ final class CurlShareHandle
 {
 }
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class CurlSharePersistentHandle
+{
+    public readonly array $options;
+}
+
 function curl_close(CurlHandle $handle): void {}
 
 /** @refcount 1 */
@@ -3701,6 +3710,8 @@ function curl_upkeep(CurlHandle $handle): bool {}
 #endif
 
 function curl_multi_add_handle(CurlMultiHandle $multi_handle, CurlHandle $handle): int {}
+
+function curl_multi_get_handles(CurlMultiHandle $multi_handle): array {}
 
 function curl_multi_close(CurlMultiHandle $multi_handle): void {}
 
@@ -3747,6 +3758,9 @@ function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $va
 
 /** @refcount 1 */
 function curl_share_strerror(int $error_code): ?string {}
+
+/** @refcount 1 */
+function curl_share_init_persistent(array $share_options): CurlSharePersistentHandle {}
 
 /** @refcount 1 */
 function curl_strerror(int $error_code): ?string {}

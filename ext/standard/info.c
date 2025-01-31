@@ -609,7 +609,7 @@ static void php_get_windows_cpu(char *buf, size_t bufsize)
 	GetSystemInfo(&SysInfo);
 	switch (SysInfo.wProcessorArchitecture) {
 		case PROCESSOR_ARCHITECTURE_INTEL :
-			snprintf(buf, bufsize, "i%d", SysInfo.dwProcessorType);
+			snprintf(buf, bufsize, "i%lu", SysInfo.dwProcessorType);
 			break;
 		case PROCESSOR_ARCHITECTURE_MIPS :
 			snprintf(buf, bufsize, "MIPS R%d000", SysInfo.wProcessorLevel);
@@ -671,7 +671,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 	if (mode == 's') {
 		php_uname = "Windows NT";
 	} else if (mode == 'r') {
-		return strpprintf(0, "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
+		return strpprintf(0, "%lu.%lu", dwWindowsMajorVersion, dwWindowsMinorVersion);
 	} else if (mode == 'n') {
 		php_uname = ComputerName;
 	} else if (mode == 'v') {
@@ -680,7 +680,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 
 		ZEND_ASSERT(winver != NULL);
 
-		zend_string *build_with_version = strpprintf(0, "build %d (%s)", dwBuild, winver);
+		zend_string *build_with_version = strpprintf(0, "build %lu (%s)", dwBuild, winver);
 		efree(winver);
 		return build_with_version;
 	} else if (mode == 'm') {
@@ -702,7 +702,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 			}
 		}
 
-		zend_string *build_with_all_info = strpprintf(0, "%s %s %d.%d build %d (%s) %s",
+		zend_string *build_with_all_info = strpprintf(0, "%s %s %lu.%lu build %lu (%s) %s",
 			"Windows NT", ComputerName, dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild,
 			winver ? winver: "unknown", wincpu);
 		efree(winver);
@@ -803,7 +803,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 		php_info_print_box_end();
 		php_info_print_table_start();
 		php_info_print_table_row(2, "System", ZSTR_VAL(php_uname));
-		php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__);
+		php_info_print_table_row(2, "Build Date", php_build_date);
 #ifdef PHP_BUILD_SYSTEM
 		php_info_print_table_row(2, "Build System", PHP_BUILD_SYSTEM);
 #endif

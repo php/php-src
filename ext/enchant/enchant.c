@@ -89,7 +89,7 @@ zend_module_entry enchant_module_entry = {
 	"enchant",
 	ext_functions,
 	PHP_MINIT(enchant),
-	PHP_MSHUTDOWN(enchant),
+	NULL,
 	NULL,	/* Replace with NULL if there's nothing to do at request start */
 	NULL,	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(enchant),
@@ -209,13 +209,6 @@ PHP_MINIT_FUNCTION(enchant)
 
 	register_enchant_symbols(module_number);
 
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION */
-PHP_MSHUTDOWN_FUNCTION(enchant)
-{
 	return SUCCESS;
 }
 /* }}} */
@@ -353,13 +346,11 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 
 	switch (dict_type) {
 		case PHP_ENCHANT_MYSPELL:
-			PHP_ENCHANT_GET_BROKER;
 			enchant_broker_set_param(pbroker->pbroker, "enchant.myspell.dictionary.path", (const char *)value);
 			RETURN_TRUE;
 			break;
 
 		case PHP_ENCHANT_ISPELL:
-			PHP_ENCHANT_GET_BROKER;
 			enchant_broker_set_param(pbroker->pbroker, "enchant.ispell.dictionary.path", (const char *)value);
 			RETURN_TRUE;
 			break;
@@ -389,12 +380,10 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 
 	switch (dict_type) {
 		case PHP_ENCHANT_MYSPELL:
-			PHP_ENCHANT_GET_BROKER;
 			value = enchant_broker_get_param(pbroker->pbroker, "enchant.myspell.dictionary.path");
 			break;
 
 		case PHP_ENCHANT_ISPELL:
-			PHP_ENCHANT_GET_BROKER;
 			value = enchant_broker_get_param(pbroker->pbroker, "enchant.ispell.dictionary.path");
 			break;
 
@@ -717,6 +706,22 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 	enchant_dict_add_to_session(pdict->pdict, word, wordlen);
 }
 /* }}} */
+
+PHP_FUNCTION(enchant_dict_remove_from_session)
+{
+	zval *dict;
+	const char *word;
+	size_t wordlen;
+	const enchant_dict *pdict;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	PHP_ENCHANT_GET_DICT;
+
+	enchant_dict_remove_from_session(pdict->pdict, word, wordlen);
+}
 
 /* {{{ whether or not 'word' exists in this spelling-session */
 PHP_FUNCTION(enchant_dict_is_added)

@@ -1358,24 +1358,6 @@ PHP_FUNCTION(imagetypes)
 }
 /* }}} */
 
-/* {{{ _php_ctx_getmbi */
-
-static int _php_ctx_getmbi(gdIOCtx *ctx)
-{
-	int i, mbi = 0;
-
-	do {
-		i = (ctx->getC)(ctx);
-		if (i < 0 || mbi > (INT_MAX >> 7)) {
-			return -1;
-		}
-		mbi = (mbi << 7) | (i & 0x7f);
-	} while (i & 0x80);
-
-	return mbi;
-}
-/* }}} */
-
 /* {{{ _php_image_type
  * Based on ext/standard/image.c
  */
@@ -1413,15 +1395,8 @@ static int _php_image_type(zend_string *data)
 		}
 	}
 
-	gdIOCtx *io_ctx;
-	io_ctx = gdNewDynamicCtxEx(8, ZSTR_VAL(data), 0);
-	if (io_ctx) {
-		if (_php_ctx_getmbi(io_ctx) == 0 && _php_ctx_getmbi(io_ctx) >= 0) {
-			io_ctx->gd_free(io_ctx);
-			return PHP_GDIMG_TYPE_WBM;
-		} else {
-			io_ctx->gd_free(io_ctx);
-		}
+	if (ZSTR_VAL(data)[0] == 0) {
+		return PHP_GDIMG_TYPE_WBM;
 	}
 
 	return -1;
@@ -3399,18 +3374,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 	}
 
-#ifdef VIRTUAL_DIR
-	{
-		char tmp_font_path[MAXPATHLEN];
-
-		if (!VCWD_REALPATH(fontname, tmp_font_path)) {
-			fontname = NULL;
-		}
-	}
-#endif /* VIRTUAL_DIR */
-
-	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
-
 	// libgd note: Those should return const char * ideally, but backward compatibility ..
 	if (EXT) {
 		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
@@ -4059,19 +4022,7 @@ PHP_FUNCTION(imageaffine)
 		if ((zval_affine_elem = zend_hash_index_find(Z_ARRVAL_P(z_affine), i)) != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
 				case IS_LONG:
-					affine[i] = Z_LVAL_P(zval_affine_elem);
-					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
-						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
-						RETURN_THROWS();
-					}
-					break;
 				case IS_DOUBLE:
-					affine[i] = Z_DVAL_P(zval_affine_elem);
-					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
-						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
-						RETURN_THROWS();
-					}
-					break;
 				case IS_STRING:
 					affine[i] = zval_get_double(zval_affine_elem);
 					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
@@ -4237,11 +4188,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m1), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
-					m1[i]  = Z_LVAL_P(tmp);
-					break;
 				case IS_DOUBLE:
-					m1[i] = Z_DVAL_P(tmp);
-					break;
 				case IS_STRING:
 					m1[i] = zval_get_double(tmp);
 					break;
@@ -4254,11 +4201,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m2), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
-					m2[i]  = Z_LVAL_P(tmp);
-					break;
 				case IS_DOUBLE:
-					m2[i] = Z_DVAL_P(tmp);
-					break;
 				case IS_STRING:
 					m2[i] = zval_get_double(tmp);
 					break;
