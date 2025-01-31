@@ -638,15 +638,11 @@ static bool pdo_do_key_pair_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation o
 static bool pdo_call_fetch_object_constructor(zend_function *constructor, HashTable *ctor_args, zval *return_value)
 {
 	zval retval_constructor_call;
-	zend_fcall_info fci = {
-		.size = sizeof(zend_fcall_info),
-		.function_name = { 0 },
-		.object = Z_OBJ_P(return_value),
-		.retval = &retval_constructor_call,
-		.param_count = 0,
-		.params = NULL,
-		.named_params = ctor_args,
-	};
+	zend_fcall_info fci = { 0 };
+	fci.size = sizeof(zend_fcall_info);
+	fci.object = Z_OBJ_P(return_value);
+	fci.retval = &retval_constructor_call;
+	fci.named_params = ctor_args;
 	zend_fcall_info_cache fcc = {
 		.function_handler = constructor,
 		.object = Z_OBJ_P(return_value),
