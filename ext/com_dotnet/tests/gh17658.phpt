@@ -22,6 +22,15 @@ fseek($stream, 0);
 $ph->LoadFromStream($stream);
 fclose($stream);
 echo $doc->Content, "\n";
+
+// verify that PHP.Test.Document does not implement IPersistStreamInit
+try {
+    $ph->InitNew();
+} catch (com_exception $ex) {
+    // supposed to fail with E_NOINTERFACE
+    echo dechex($ex->getCode()), "\n";
+}
 ?>
 --EXPECT--
 GH-17658
+80004002
