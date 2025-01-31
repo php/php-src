@@ -592,6 +592,7 @@ static int php_handler(request_rec *r)
 	apr_bucket *bucket;
 	apr_status_t rv;
 	request_rec * volatile parent_req = NULL;
+	JMP_BUF *parent_bailout = NULL;
 #ifdef ZTS
 	/* initial resource fetch */
 	(void)ts_resource(0);
@@ -663,6 +664,10 @@ normal:
 		/* setup standard CGI variables */
 		ap_add_common_vars(r);
 		ap_add_cgi_vars(r);
+	}
+
+	if (parent_bailout == NULL && parent_req && EG(bailout)) {
+		parent_bailout = EG(bailout);
 	}
 
 zend_first_try {
@@ -747,6 +752,10 @@ zend_first_try {
 		apr_pool_cleanup_run(r->pool, (void *)&SG(server_context), php_server_context_cleanup);
 	} else {
 		ctx->r = parent_req;
+	}
+
+	if (parent_bailout) {
+		EG(bailout) = parent_bailout;
 	}
 
 	return OK;
