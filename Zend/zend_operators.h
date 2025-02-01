@@ -49,7 +49,7 @@
 #include "zend_multiply.h"
 #include "zend_object_handlers.h"
 
-#define LONG_SIGN_MASK ZEND_LONG_MIN
+#define LONG_SIGN_MASK (((zend_ulong)1) << (8*sizeof(zend_long)-1))
 
 BEGIN_EXTERN_C()
 ZEND_API zend_result ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2);
@@ -723,7 +723,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	 */
 
 	if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
+		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (((zend_ulong) Z_LVAL_P(op1) + (zend_ulong) Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
 	} else {
 		ZVAL_LONG(result, Z_LVAL_P(op1) + Z_LVAL_P(op2));
@@ -804,11 +804,17 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		ZVAL_LONG(result, llresult);
 	}
 #else
-	ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
+	/*
+	 * 'result' may alias with op1 or op2, so we need to
+	 * ensure that 'result' is not updated until after we
+	 * have read the values of op1 and op2.
+	 */
 
 	if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
+		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (((zend_ulong) Z_LVAL_P(op1) - (zend_ulong) Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 	}
 #endif
 }
