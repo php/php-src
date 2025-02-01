@@ -1965,9 +1965,13 @@ static HashTable *dbstmt_get_gc(zend_object *object, zval **gc_data, int *gc_cou
 	enum pdo_fetch_type default_fetch_mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-	zend_get_gc_buffer_add_obj(gc_buffer, stmt->database_object_handle);
+	if (stmt->database_object_handle) {
+		zend_get_gc_buffer_add_obj(gc_buffer, stmt->database_object_handle);
+	}
 	if (default_fetch_mode == PDO_FETCH_INTO) {
-		zend_get_gc_buffer_add_obj(gc_buffer, stmt->fetch.into);
+		if (stmt->fetch.into) {
+			zend_get_gc_buffer_add_obj(gc_buffer, stmt->fetch.into);
+		}
 	} else if (default_fetch_mode == PDO_FETCH_CLASS && stmt->fetch.cls.ctor_args != NULL) {
 		zend_get_gc_buffer_add_ht(gc_buffer, stmt->fetch.cls.ctor_args);
 	}
