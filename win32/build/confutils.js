@@ -3269,9 +3269,9 @@ function toolset_setup_common_cflags()
 		// disable annoying warnings.  In addition, time_t defaults
 		// to 64-bit.  Ask for 32-bit.
 		if (TARGET_ARCH == 'x86') {
-			ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
+			ADD_FLAG('CFLAGS', ' /wd4995 /wd4996 /D_USE_32BIT_TIME_T=1 ');
 		} else {
-			ADD_FLAG('CFLAGS', ' /wd4996 ');
+			ADD_FLAG('CFLAGS', ' /wd4995 /wd4996 ');
 		}
 
 		if (PHP_DEBUG == "yes") {
