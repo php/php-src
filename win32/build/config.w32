@@ -275,6 +275,14 @@ MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\make_$(FIBER_ASM_ABI).obj Zend\\asm\\make_$(FIBER_ASM_ABI).asm');
 
+NFO.WriteBlankLines(1);
+NFO.WriteLine('rule as_fiber');
+NFO.WriteLine('  command = cmd /c ${PHP_ASSEMBLER} ${FIBER_ASM_FLAGS} $out $in > NUL');
+NFO.WriteLine('  description = as $in');
+NFO.WriteBlankLines(1);
+NFO.WriteLine('build ${BUILD_DIR}\\Zend\\jump_' + FIBER_ASM_ABI + '.obj: as_fiber Zend\\asm\\jump_' + FIBER_ASM_ABI + '.asm');
+NFO.WriteLine('build ${BUILD_DIR}\\Zend\\make_' + FIBER_ASM_ABI + '.obj: as_fiber Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
+
 ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 if (VS_TOOLSET && VCVERS >= 1914) {
 	ADD_FLAG("CFLAGS_BD_ZEND", "/d2FuncCache1");

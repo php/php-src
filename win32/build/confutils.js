@@ -20,6 +20,11 @@ var STDERR = WScript.StdErr;
 var WshShell = WScript.CreateObject("WScript.Shell");
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
+var NFO = null;
+var ninja = {
+	rules: {},
+	globals: {}
+};
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 var PROGRAM_FILESx86 = WshShell.Environment("Process").Item("ProgramFiles(x86)");
@@ -47,6 +52,7 @@ var PHP_TEST_INI = "";
 var PHP_TEST_INI_EXT_EXCLUDE = "";
 
 var PHP_MAKEFILE_FRAGMENTS = PHP_SRC_DIR + "\\Makefile.fragments.w32";
+var PHP_NINJA_FRAGMENTS = PHP_SRC_DIR + "\\ninja.fragments.w32";
 
 /* Care also about NTDDI_VERSION and _WIN32_WINNT in config.w32.h.in
    and manifest. */
@@ -536,6 +542,7 @@ can be built that way. \
 	}
 
 	MFO = FSO.CreateTextFile("Makefile.objects", true);
+	NFO = FSO.CreateTextFile("Ninja.objects", true);
 
 	var profile = false;
 
@@ -1063,6 +1070,7 @@ function generate_version_info_manifest(makefiletarget)
 		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": " + PHP_DIR + "\\build\\default.manifest");
 		MFO.WriteLine("\t" + CMD_MOD2 + "copy " + PHP_DIR + "\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest >nul");
 	} else {
+		NFO.WriteLine("# " + manifest_name + " manifest stuff here");
 		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": win32\\build\\default.manifest");
 		MFO.WriteLine("\t" + CMD_MOD2 + "copy $(PHP_SRC_DIR)\\win32\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest >nul");
 	}
@@ -1164,6 +1172,15 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 			+ makefiletarget + '\\"" /d URL="\\"' + project_url +
 			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning +
 			'\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" win32\\build\\template.rc');
+		NFO.WriteLine("rule rc_" + basename);
+		NFO.WriteLine("  command = ${RC} /nologo  ${BASE_INCLUDES} /n /fo ${BUILD_DIR}\\" + resname + logo + debug +
+			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
+			+ makefiletarget + '\\"" /d URL="\\"' + project_url +
+			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning +
+			'\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" win32\\build\\template.rc');
+		NFO.WriteLine("  description = rc $in");
+		NFO.WriteBlankLines(1);
+		NFO.WriteLine("build ${BUILD_DIR}\\" + resname + ": rc_" + basename + " win32\\build\\template.rc");
 	}
 	MFO.WriteBlankLines(1);
 	return resname;
@@ -1208,6 +1225,9 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir, duplicate_so
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# objects for SAPI " + sapiname);
 	MFO.WriteBlankLines(1);
+	NFO.WriteBlankLines(1);
+	NFO.WriteLine("# objects for SAPI " + sapiname);
+	NFO.WriteBlankLines(1);
 
 	if (cflags) {
 		ADD_FLAG('CFLAGS_' + SAPI, cflags);
@@ -1217,6 +1237,9 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir, duplicate_so
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# SAPI " + sapiname);
 	MFO.WriteBlankLines(1);
+	NFO.WriteBlankLines(1);
+	NFO.WriteLine("# SAPI " + sapiname);
+	NFO.WriteBlankLines(1);
 
 	/* generate a .res file containing version information */
 	resname = generate_version_info_resource(makefiletarget, sapiname, configure_module_dirname, true);
@@ -1277,10 +1300,20 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir, duplicate_so
 	} else {
 		if (ld) {
 			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(ARFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
+			NFO.WriteLine("rule ar_" + sapiname);
+			NFO.WriteLine("  command = ${MAKE_LIB} /nologo /out:${BUILD_DIR}\\" + makefiletarget + " " + ldflags.replace(/\$\(([a-zA-Z0-9_]+)\)/g, "${$1}") + " ${" + SAPI + "_GLOBAL_OBJS_RESP} ${BUILD_DIR}\\${PHPLIB} ${ARFLAGS_" + SAPI + "} ${LIBS_" + SAPI + "} ${BUILD_DIR}\\" + resname);
+			NFO.WriteLine("  description = ar " + makefiletarget);
 		} else {
 			ld = CMD_MOD1 + '"$(LINK)"';
 			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
+			NFO.WriteLine("rule ld_" + sapiname);
+			NFO.WriteLine("  command = ${LD} /nologo  ${" + SAPI + "_GLOBAL_OBJS_RESP} ${BUILD_DIR}\\${PHPLIB} ${LIBS_" + SAPI + "} ${BUILD_DIR}\\" + resname + " /out:${BUILD_DIR}\\" + makefiletarget + " " + ldflags.replace(/\$\(([a-zA-Z0-9_]+)\)/g, "${$1}") + " ${LDFLAGS_" + SAPI + "}");
+			NFO.WriteLine("  description = ld " + makefiletarget);
 		}
+	}
+
+	if (!MODE_PHPIZE) {
+		ninja.globals[SAPI] = "build ${BUILD_DIR}\\" + makefiletarget + ": " + (is_lib ? "ar_" : "ld_") + sapiname + " ${DEPS_" + SAPI + "} ${" + SAPI + "_GLOBAL_OBJS} ${BUILD_DIR}\\${PHPLIB} ${BUILD_DIR}\\" + resname;
 	}
 
 	if (manifest) {
@@ -1444,6 +1477,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# objects for EXT " + extname);
 	MFO.WriteBlankLines(1);
+	NFO.WriteBlankLines(1);
+	NFO.WriteLine("# objects for EXT " + extname);
+	NFO.WriteBlankLines(1);
 
 	ADD_SOURCES(configure_module_dirname, file_list, extname, obj_dir);
 
@@ -1482,6 +1518,12 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		} else {
+			NFO.WriteLine("# " + dllname + " DLL stuff here");
+			NFO.WriteLine("rule ld_" + EXT.toLowerCase());
+			NFO.WriteLine("  command = ${LD} ${" + EXT + "_GLOBAL_OBJS_RESP} ${BUILD_DIR}\\${PHPLIB} ${LIBS_" + EXT + "} ${LIBS} ${BUILD_DIR}\\" + resname + " /out:${BUILD_DIR}\\" + dllname + ldflags + " ${DLL_LDFLAGS} ${LDFLAGS} ${LDFLAGS_" + EXT + "}");
+			NFO.WriteLine("  description = ld $out");
+			NFO.WriteBlankLines(1);
+			ninja.globals[EXT] = "build ${BUILD_DIR}\\" + dllname + " | ${BUILD_DIR}\\" + libname + ": ld_" + EXT.toLowerCase() + " ${DEPS_" + EXT + "} ${" + EXT + "_GLOBAL_OBJS} ${BUILD_DIR}\\${PHPLIB} ${BUILD_DIR}\\" + resname;
 			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		}
@@ -1592,6 +1634,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 	var sub_build = "$(BUILD_DIR)\\";
 
 	var srcs_by_dir = {};
+	var nfo_builds = [];
 
 	/* Parse the file list to create an aggregated structure based on the subdirs passed. */
 	for (i in file_list) {
@@ -1642,6 +1685,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 			srcs_line = dir + "\\" + src;
 			objs_line = obj;
 		}
+		if (!obj.match(/ext\\opcache\\jit\\ir\\ir(_emit)?\.obj$/)) {
+			nfo_builds.push("build " + obj.replace("$(BUILD_DIR)", "${BUILD_DIR}") + ": cc_" + build_dir.replace(/[\\\/.-]/g, "_").toLowerCase() + " " + dir + "\\" + src + " || Zend\\zend_language_parser.c");
+		}
 
 		resp += " " + obj.replace('$(BUILD_DIR)', bd);
 		tv += " " + obj;
@@ -1655,8 +1701,8 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 	}
 
 	if (!duplicate_sources) {
-		/* Create makefile build targets and dependencies. */
-		MFO.WriteLine(objs_line + ": " + srcs_line);
+	/* Create makefile build targets and dependencies. */
+	MFO.WriteLine(objs_line + ": " + srcs_line);
 	}
 
 	/* Create target subdirs if any and produce the compiler calls, /mp is respected if enabled. */
@@ -1739,6 +1785,17 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 		}
 
 		if (!duplicate_sources) {
+			NFO.WriteBlankLines(1);
+			var rulename = "cc_" + mangle_dir.toLowerCase();
+			if (typeof ninja.rules[rulename] === "undefined") {
+				ninja.rules[rulename] = true;
+				NFO.WriteLine("rule " + rulename);
+				NFO.WriteLine("  command = ${CC} ${" + flags + "} ${CFLAGS} ${" + bd_flags_name + "} /showIncludes /FS /c $in /Fo$out");
+				NFO.WriteLine("  deps = msvc");
+				NFO.WriteLine("  description = cc $in");
+				NFO.WriteBlankLines(1);
+			}
+			NFO.WriteLine(nfo_builds.join("\n"));
 			if (PHP_MP_DISABLED) {
 				for (var j in srcs_by_dir[k]) {
 					src = file_list[srcs_by_dir[k][j]];
@@ -2099,6 +2156,7 @@ function generate_files()
 	STDOUT.WriteLine("Generating files...");
 	generate_tmp_php_ini();
 	generate_makefile();
+	generate_ninjafile();
 	if (!MODE_PHPIZE) {
 		generate_internal_functions();
 		generate_config_h();
@@ -2639,6 +2697,206 @@ function generate_makefile()
 		TF.Close();
 		MF.WriteBlankLines(2);
 		FSO.DeleteFile(PHP_MAKEFILE_FRAGMENTS, true);
+	}
+
+	MF.Close();
+}
+
+/* Generate the build.ninja */
+function generate_ninjafile()
+{
+	STDOUT.WriteLine("Generating build.ninja");
+	var MF = FSO.CreateTextFile("build.ninja", true);
+
+	MF.WriteLine("# Generated by configure.js");
+	MF.WriteBlankLines(1);
+	MF.WriteLine("ninja_required_version = 1.7");
+	MF.WriteBlankLines(1);
+	/* spit out variable definitions */
+	var keys = (new VBArray(configure_subst.Keys())).toArray();
+	var i, j;
+	var deps = {};
+	MF.WriteLine("PHP_SRC_DIR =" + PHP_SRC_DIR);
+	for (i in keys) {
+		// The trailing space is needed to prevent the trailing backslash
+		// that is part of the build dir flags (CFLAGS_BD_XXX) from being
+		// seen as a line continuation character
+
+		/* \s+\/ eliminates extra whitespace caused when using \ for string continuation,
+			whereby \/ is the start of the next compiler switch */
+		var val = trim(configure_subst.Item(keys[i])).replace(/\s+\//gm, " /");
+
+		var matches = val.match(/\$\([a-zA-Z0-9_]+\)/g);
+		deps[keys[i]] = {};
+		if (matches) {
+			for (j= 0; j < matches.length; j++) {
+				deps[keys[i]][matches[j].substring(2, matches[j].length - 1)] = true;
+			}
+		}
+
+		/* If static analyze is enabled, add analyzer specific stuff to the Makefile. */
+		handle_analyzer_makefile_flags(MF, keys[i], val);
+	}
+	var isResolved = function (obj) {
+		for (var i in obj) {
+			if (obj[i]) {
+				return false;
+			}
+		}
+		return true;
+	};
+	do {
+		var resolved = [];
+		for (i in deps) {
+			if (isResolved(deps[i])) {
+				resolved.push(i);
+			}
+		}
+		for (i = 0; i < resolved.length; i++) {
+			var val = trim(configure_subst.Item(resolved[i])).replace(/\s+\//gm, " /");
+			val = val.replace(/\$\(([a-zA-Z0-9_]+)\)/g, "${$1}");
+			MF.WriteLine(resolved[i] + "=" + val);
+			MF.WriteBlankLines(1);
+			delete deps[resolved[i]];
+			for (j in deps) {
+				if (deps[j][resolved[i]]) {
+					deps[j][resolved[i]] = false;
+				}
+			}
+		}
+	} while(resolved.length);
+
+	// remaining variables which use undefined variables
+	for (i in deps) {
+		var val = trim(configure_subst.Item(i)).replace(/\s+\//gm, " /");
+		val = val.replace(/\$\(([a-zA-Z0-9_]+)\)/g, "${$1}");
+		MF.WriteLine(i + "=" + val);
+		MF.WriteBlankLines(1);
+	}
+
+MF.WriteLine("# CMB");
+	var val = "yes" == PHP_TEST_INI ? PHP_TEST_INI_PATH : "";
+	/* Be sure it's done after generate_tmp_php_ini(). */
+	MF.WriteLine("PHP_TEST_INI_PATH=\"" + val + "\"");
+
+	MF.WriteBlankLines(1);
+	if (MODE_PHPIZE) {
+		var TF = FSO.OpenTextFile(PHP_DIR + "/script/Makefile.phpize", 1);
+	} else {
+		var TF = FSO.OpenTextFile("win32/build/build.ninja", 1);
+	}
+
+	MF.Write(TF.ReadAll());
+
+	// MF.WriteLine("build-headers:");
+	// MF.WriteLine("	" + CMD_MOD2 + "if not exist $(BUILD_DIR_DEV)\\include mkdir $(BUILD_DIR_DEV)\\include >nul");
+	// MF.WriteLine("	" + CMD_MOD2 + "for %D in ($(INSTALL_HEADERS_DIR)) do " + CMD_MOD2 + "if not exist $(BUILD_DIR_DEV)\\include\\%D mkdir $(BUILD_DIR_DEV)\\include\\%D >nul");
+	// for (i in headers_install) {
+	// 	if (headers_install[i][2] != "") {
+	// 			MF.WriteLine("	" + CMD_MOD2 + "if not exist $(BUILD_DIR_DEV)\\include\\" + headers_install[i][2] + " mkdir $(BUILD_DIR_DEV)\\include\\" +
+	// 											headers_install[i][2] + ">nul");
+	// 			MF.WriteLine("	" + CMD_MOD2 + "copy " + headers_install[i][0] + " " + "$(BUILD_DIR_DEV)\\include\\" + headers_install[i][2] + " /y >nul");
+	// 	}
+	// }
+	// MF.WriteLine("	" + CMD_MOD2 + "for %D in ($(INSTALL_HEADERS_DIR)) do " + CMD_MOD2 + "copy %D*.h $(BUILD_DIR_DEV)\\include\\%D /y >nul");
+	// if (MODE_PHPIZE) {
+	// 	MF.WriteBlankLines(1);
+	// 	MF.WriteLine("build-bins:");
+	// 	for (var i in extensions_enabled) {
+	// 		var lib = "php_" + extensions_enabled[i][0] + ".lib";
+	// 		var dll = "php_" + extensions_enabled[i][0] + ".dll";
+	// 		MF.WriteLine("	" + CMD_MOD2 + "copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+	// 		MF.WriteLine("  " + CMD_MOD2 + "if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX) >nul");
+	// 		MF.WriteLine("  " + CMD_MOD2 + "if not exist $(PHP_PREFIX)\\ext mkdir $(PHP_PREFIX)\\ext >nul");
+	// 		MF.WriteLine("	" + CMD_MOD2 + "copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)\\ext");
+	// 	}
+	// } else {
+	// 	MF.WriteBlankLines(1);
+	// 	MF.WriteLine("build-ext-libs:");
+	// 	MF.WriteLine("	" + CMD_MOD2 + "if not exist $(BUILD_DIR_DEV)\\lib mkdir $(BUILD_DIR_DEV)\\lib >nul");
+	// 	for (var i in extensions_enabled) {
+	// 		var lib;
+
+	// 		lib = "php_" + extensions_enabled[i][0] + "*.lib";
+
+	// 		if ('shared' == extensions_enabled[i][1]) {
+	// 			MF.WriteLine("	" + CMD_MOD2 + "if exist $(BUILD_DIR)\\" + lib + " copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+	// 		}
+	// 	}
+	// }
+	// TF.Close();
+
+	// MF.WriteBlankLines(1);
+
+	// var extra_path = "$(PHP_BUILD)\\bin";
+	// if (PHP_EXTRA_LIBS.length) {
+	// 	path = PHP_EXTRA_LIBS.split(';');
+	// 	for (i = 0; i < path.length; i++) {
+	// 		f = FSO.GetAbsolutePathName(path[i] + "\\..\\bin");
+	// 		if (FSO.FolderExists(f)) {
+	// 			extra_path = extra_path + ";" + f;
+	// 		}
+	// 	}
+	// }
+	// if (PHP_SANITIZER == "yes") {
+	// 	if (CLANG_TOOLSET) {
+	// 		extra_path = extra_path + ";" + get_clang_lib_dir() + "\\windows";
+	// 	}
+	// }
+	// MF.WriteLine("set-tmp-env:");
+	// MF.WriteLine("	" + CMD_MOD2 + "set PATH=" + extra_path + ";$(PATH)");
+
+	// MF.WriteBlankLines(2);
+
+	// MF.WriteLine("dump-tmp-env: set-tmp-env");
+	// MF.WriteLine("	" + CMD_MOD2 + "set");
+
+	// MF.WriteBlankLines(2);
+
+	// MFO.Close();
+	TF = FSO.OpenTextFile("Ninja.objects", 1);
+	if (!TF.AtEndOfStream) {
+		MF.Write(TF.ReadAll());
+	}
+	TF.Close();
+	MF.WriteBlankLines(2);
+
+	if (FSO.FileExists(PHP_NINJA_FRAGMENTS)) {
+		TF = FSO.OpenTextFile(PHP_NINJA_FRAGMENTS, 1);
+		if (!TF.AtEndOfStream) {
+			MF.Write(TF.ReadAll());
+		}
+		TF.Close();
+		MF.WriteBlankLines(2);
+		FSO.DeleteFile(PHP_NINJA_FRAGMENTS, true);
+	}
+
+	MF.WriteLine("# write stuff depending on global object stuff here");
+	var regex = /\$\(([a-zA-Z0-9_]+)\)/g;
+	var line = "build ${BUILD_DIR}\\${PHPDLL}: ld_php ${PHPDEF}" +
+		configure_subst.Item("PHP_GLOBAL_OBJS").replace(regex, "${$1}");
+	var items = configure_subst.Item("STATIC_EXT_OBJS").match(/\$\([A-Z_]+\)/g);
+	for (var i = 0; i < items.length; i++) {
+		var key = items[i].substring(2, items[i].length - 1);
+		line += " " + configure_subst.Item(key).replace(regex, "${$1}");
+	}
+	line += " ${PHPDLL_RES}";
+	line += " " + configure_subst.Item("ASM_OBJS").replace(regex, "${$1}");
+	line += " ${MCFILE}";
+	MF.WriteLine(line);
+	MF.WriteBlankLines(1);
+	line = configure_subst.Item("PHP_DLL_DEF_SOURCES");
+	MF.WriteLine("rule cat");
+	MF.WriteLine("  command = cmd /c copy " + line.replace(/\s+/g, "+") + " ${BUILD_DIR}\\${PHPDLL}.def > NUL");
+	MF.WriteBlankLines(1);
+	MF.WriteLine("build ${BUILD_DIR}\\${PHPDLL}.def: cat " + line);
+	for (ext in ninja.globals) {
+		line = configure_subst.Item(ext + "_GLOBAL_OBJS").replace(/\$\(([a-zA-Z0-9_]+)\)/g, "${$1}");
+		line = ninja.globals[ext].replace(new RegExp(" \\${" + ext + "_GLOBAL_OBJS}"), line);
+		if (!configure_subst.Item("DEPS_" + ext)) {
+			line = line.replace(new RegExp(" \\${DEPS_" + ext + "}"), "");
+		}
+		MF.WriteLine(line);
 	}
 
 	MF.Close();
@@ -3450,7 +3708,7 @@ function toolset_setup_build_mode()
 {
 	if (PHP_DEBUG == "yes") {
 		ADD_FLAG("CFLAGS", "/MDd /Od /U NDebug /U NDEBUG /D ZEND_DEBUG=1 " +
-			(TARGET_ARCH == 'x86'?"/ZI":"/Zi"));
+			("/Z7"));
 		ADD_FLAG("LDFLAGS", "/debug");
 		// Avoid problems when linking to release libraries that use the release
 		// version of the libc
@@ -3639,6 +3897,24 @@ function ADD_MAKEFILE_FRAGMENT(src_file)
 
 		h_in = FSO.OpenTextFile(fn_in, 1);
 		h_out = FSO.OpenTextFile(PHP_MAKEFILE_FRAGMENTS, open_flags, create_out_fl);
+
+		if (!h_in.AtEndOfStream) {
+			h_out.Write(h_in.ReadAll());
+			h_out.WriteBlankLines(1);
+		}
+
+		h_in.Close();
+		h_out.Close();
+	}
+
+	fn_in = fn_in.replace(/Makefile\.frag\.w32$/, "ninja.frag.w32");
+	if (FSO.FileExists(fn_in)) {
+		var h_in, h_out;
+		var create_out_fl = !FSO.FileExists(PHP_NINJA_FRAGMENTS);
+		var open_flags = create_out_fl ? 2 : 8;
+
+		h_in = FSO.OpenTextFile(fn_in, 1);
+		h_out = FSO.OpenTextFile(PHP_NINJA_FRAGMENTS, open_flags, create_out_fl);
 
 		if (!h_in.AtEndOfStream) {
 			h_out.Write(h_in.ReadAll());

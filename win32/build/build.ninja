@@ -1,0 +1,77 @@
+#  +----------------------------------------------------------------------+
+#  | Copyright (c) The PHP Group                                          |
+#  +----------------------------------------------------------------------+
+#  | This source file is subject to version 3.01 of the PHP license,      |
+#  | that is bundled with this package in the file LICENSE, and is        |
+#  | available through the world-wide-web at the following url:           |
+#  | https://www.php.net/license/3_01.txt                                 |
+#  | If you did not receive a copy of the PHP license and are unable to   |
+#  | obtain it through the world-wide-web, please send a note to          |
+#  | license@php.net so we can mail you a copy immediately.               |
+#  +----------------------------------------------------------------------+
+#  | Author: Wez Furlong <wez@thebrainroom.com>                           |
+#  +----------------------------------------------------------------------+
+#
+# This is the ninja template for the win32 build
+
+CC="${PHP_CL}"
+LD="${LINK}"
+MC="${MC}"
+MT="${MT}"
+RE2C="${RE2C}"
+PGOMGR="${PGOMGR}"
+PHP_BUILD=${PHP_BUILD}
+
+# See https://ninja-build.org/manual.html#_deps
+# msvc_deps_prefix = Hinweis: Einlesen der Datei:
+
+MCFILE=${BUILD_DIR}\wsyslog.rc
+
+rule bison_php
+  command = ${BISON} ${BISON_FLAGS} --output=$out -v -d $in
+  description = bison $in
+
+build Zend\zend_ini_parser.c: bison_php Zend\zend_ini_parser.y
+build Zend\zend_language_parser.c: bison_php Zend\zend_language_parser.y
+build sapi\phpdbg\phpdbg_parser.c: bison_php sapi\phpdbg\phpdbg_parser.y
+
+rule re2c_php_ini
+  command = ${RE2C} ${RE2C_FLAGS} --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
+  description = re2c $in
+
+build Zend\zend_ini_scanner.c | Zend\zend_ini_scanner_defs.h: re2c_php_ini Zend\zend_ini_scanner.l
+
+rule re2c_php_language
+  command = ${RE2C} ${RE2C_FLAGS} --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+  description = re2c $in
+
+build Zend\zend_language_scanner.c Zend\zend_language_scanner_defs.h: re2c_php_language Zend\zend_language_scanner.l
+
+rule re2c_phpdbg
+  command = ${RE2C} ${RE2C_FLAGS} -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l
+  description = re2c $in
+
+build sapi\phpdbg\phpdbg_lexer.c: re2c_phpdbg sapi\phpdbg\phpdbg_lexer.l
+
+rule mc_php
+  command = ${MC} -h win32\ -r ${BUILD_DIR}\ -x ${BUILD_DIR}\ $in
+  description = mc $in
+
+build ${MCFILE}: mc_php win32\build\wsyslog.mc
+
+PHPDLL_RES=${BUILD_DIR}\${PHPDLL}.res
+
+# FIXME: why isn't that defined in Makefile?
+RC=rc.exe
+
+rule rc_php
+  command = ${RC} /nologo /fo $out /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" /d FILE_NAME="\"${PHPDLL}\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" /I${BUILD_DIR} /d MC_INCLUDE="\"${MCFILE}\"" $in
+  description = rc $in
+
+build ${PHPDLL_RES}: rc_php win32\build\template.rc || ${BUILD_DIR}\\wsyslog.rc
+
+rule ld_php
+  command = ${LD} ${PHP_GLOBAL_OBJS_RESP} ${STATIC_EXT_OBJS_RESP} ${STATIC_EXT_LIBS} ${LIBS} ${ASM_OBJS} ${PHPDLL_RES} /out:$out ${PHP8_PGD_OPTION} ${PHP_LDFLAGS} ${LDFLAGS} ${STATIC_EXT_LDFLAGS}
+  description = ld $out
+
+build ${BUILD_DIR}\${PHPLIB}: phony ${BUILD_DIR}\${PHPDLL}

@@ -1,0 +1,7 @@
+rule re2c_ext_pdo
+  command = ${RE2C} ${RE2C_FLAGS} -o ext/pdo/pdo_sql_parser.c ext/pdo/pdo_sql_parser.re
+
+build ext\pdo\pdo_sql_parser.c: re2c_ext_pdo ext\pdo\pdo_sql_parser.re
+
+#	cd $(PHP_SRC_DIR)
+#	$(RE2C) $(RE2C_FLAGS) -o ext/pdo/pdo_sql_parser.c ext/pdo/pdo_sql_parser.re

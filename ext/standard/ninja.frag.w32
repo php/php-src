@@ -1,0 +1,15 @@
+rule re2c_ext_standard_1
+  command = ${RE2C} ${RE2C_FLAGS} -b -o ext/standard/var_unserializer.c ext/standard/var_unserializer.re
+
+build ext\standard\var_unserializer.c: re2c_ext_standard_1 ext\standard\var_unserializer.re
+
+rule re2c_ext_standard_2
+  command = ${RE2C} ${RE2C_FLAGS} -b -o ext/standard/url_scanner_ex.c ext/standard/url_scanner_ex.re
+
+build ext\standard\url_scanner_ex.c: re2c_ext_standard_2 ext\standard\url_scanner_ex.re
+
+#$(BUILD_DIR)\ext\standard\basic_functions.obj: $(PHP_SRC_DIR)\Zend\zend_language_parser.h
+
+#$(PHP_SRC_DIR)\ext\standard\tests\helpers\bad_cmd.exe: $(PHP_SRC_DIR)\ext\standard\tests\helpers\bad_cmd.c
+#	cd $(PHP_SRC_DIR)\ext\standard\tests\helpers
+#	$(PHP_CL) /nologo bad_cmd.c

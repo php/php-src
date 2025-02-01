@@ -1,0 +1,9 @@
+rule re2c_ext_json
+  command = ${RE2C} ${RE2C_FLAGS} -t ext/json/php_json_scanner_defs.h -bci -o ext/json/json_scanner.c ext/json/json_scanner.re
+
+build ext\json\json_scanner.c ext\json\php_json_scanner_defs.h: re2c_ext_json ext\json\json_scanner.re ext\json\json_parser.tab.h
+
+rule bison_ext_json
+  command = ${BISON} ${BISON_FLAGS} --defines -l ext/json/json_parser.y -o ext/json/json_parser.tab.c
+
+build ext\json\json_parser.tab.c ext\json\json_parser.tab.h: bison_ext_json ext\json\json_parser.y

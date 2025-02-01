@@ -1,0 +1,4 @@
+rule re2c_ext_phar
+  command = ${RE2C} ${RE2C_FLAGS} -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re
+
+build ext\phar\phar_path_check.c: re2c_ext_phar ext\phar\phar_path_check.re
