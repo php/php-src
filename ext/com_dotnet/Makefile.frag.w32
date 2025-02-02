@@ -21,10 +21,10 @@ register_comtest:
 	@reg add HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747}\1.0\HELPDIR /d "$(BUILD_DIR)\ext\com_dotnet\tests\comtest" /f > NUL
 	@reg add HKCU\SOFTWARE\Classes\CLSID\{B13FE324-D595-44C7-97D7-82CE20EDF878} /d "PHP COM Test Document" /f > NUL
 	@reg add HKCU\SOFTWARE\Classes\CLSID\{B13FE324-D595-44C7-97D7-82CE20EDF878}\InprocServer32 /d "$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll" /f > NUL
-	@reg add HKCU\SOFTWARE\Classes\PHP.Test.Document /d "PHP COM Test Document" /f > NUL
-	@reg add HKCU\SOFTWARE\Classes\PHP.Test.Document\CLSID /d "{B13FE324-D595-44C7-97D7-82CE20EDF878}" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\PHPTest.Document /d "PHP COM Test Document" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\PHPTest.Document\CLSID /d "{B13FE324-D595-44C7-97D7-82CE20EDF878}" /f > NUL
 
 unregister_comtest:
-	-@reg delete HKCU\SOFTWARE\Classes\PHP.Test.Document /f > NUL
+	-@reg delete HKCU\SOFTWARE\Classes\PHPTest.Document /f > NUL
 	-@reg delete HKCU\SOFTWARE\Classes\CLSID\{B13FE324-D595-44C7-97D7-82CE20EDF878} /f > NUL
 	-@reg delete HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747} /f > NUL

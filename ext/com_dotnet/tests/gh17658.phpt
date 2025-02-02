@@ -5,14 +5,14 @@ com_dotnet
 --SKIPIF--
 <?php
 try {
-    new com("PHP.Test.Document");
+    new com("PHPTest.Document");
 } catch (com_exception $ex) {
-    die("skip PHP.Test.Document not available (" . dechex($ex->getCode()) . ")");
+    die("skip PHPTest.Document not available (" . dechex($ex->getCode()) . ")");
 }
 ?>
 --FILE--
 <?php
-$doc = new com("PHP.Test.Document");
+$doc = new com("PHPTest.Document");
 $doc->Content = "GH-17658";
 $ph = new COMPersistHelper($doc);
 $stream = fopen("php://memory", "w+");
