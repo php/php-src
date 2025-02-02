@@ -205,6 +205,8 @@ PHP 8.5 UPGRADE NOTES
 - Enchant:
   . Added enchant_dict_remove_from_session() to remove a word added to the
     spellcheck session via enchant_dict_add_to_session().
+  . Added enchant_dict_remove() to put a word on the exclusion list and
+    remove it from the session dictionary.
 
 - PGSQL:
   . pg_close_stmt offers an alternative way to close a prepared
