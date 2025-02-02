@@ -1,13 +1,13 @@
 $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c: ext\com_dotnet\tests\comtest\comtest.idl
-	md $(BUILD_DIR)\ext\com_dotnet\tests\comtest
+	-md $(BUILD_DIR)\ext\com_dotnet\tests\comtest
 	midl /nologo /h $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.h /iid $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c /tlb $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.tlb ext\com_dotnet\tests\comtest\comtest.idl
 
 $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj: ext\com_dotnet\tests\comtest\comtest.cpp $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c
-	$(PHP_CL) /nologo /c /Fo:$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj /I $(BUILD_DIR)\ext\com_dotnet\tests\comtest ext\com_dotnet\tests\comtest\comtest.cpp
-	$(PHP_CL) /nologo /c /Fo:$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c
+	$(PHP_CL) /nologo /c /Fo$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj /I $(BUILD_DIR)\ext\com_dotnet\tests\comtest ext\com_dotnet\tests\comtest\comtest.cpp
+	$(PHP_CL) /nologo /c /Fo$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c
 
 $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll: $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj ext\com_dotnet\tests\comtest\comtest.def
-	$(LINK) /nologo /dll /out:$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj /def:ext\com_dotnet\tests\comtest\comtest.def OleAut32.lib
+	"$(LINK)" /nologo /dll /out:$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj /def:ext\com_dotnet\tests\comtest\comtest.def OleAut32.lib
 
 comtest.dll: $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll
 
