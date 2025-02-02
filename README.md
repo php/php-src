@@ -101,7 +101,7 @@ number of jobs should not exceed the number of cores available.
 Use `TESTS` variable to tests only specific directories:
 
 ```shell
-make TESTS=Zend/tests/throw/ test
+make TESTS=tests/lang/ test
 ```
 
 The [qa.php.net](https://qa.php.net) site provides more detailed info about
