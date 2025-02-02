@@ -58,6 +58,7 @@
 # ifdef HAVE_NETINET_ETHER_H
 #  include <netinet/ether.h>
 #  include <netinet/ip.h>
+#  include <linux/ipv6.h>
 # endif
 # if defined(HAVE_LINUX_SOCK_DIAG_H)
 #  include <linux/sock_diag.h>
@@ -1628,8 +1629,6 @@ PHP_FUNCTION(socket_recvfrom)
 #endif
 #ifdef AF_PACKET
 		case AF_PACKET:
-			// TODO expose and use proper ethernet frame type instead i.e. src mac, dst mac and payload to userland
-			// ditto for socket_sendto
 			slen = sizeof(sll);
 			memset(&sll, 0, sizeof(sll));
 			sll.sll_family = AF_PACKET;
@@ -1688,6 +1687,24 @@ PHP_FUNCTION(socket_recvfrom)
 					}
 					break;
 				}
+				case ETH_P_IPV6: {
+					struct ipv6hdr *ip = (struct ipv6hdr *)payload;
+					char s[INET6_ADDRSTRLEN], d[INET6_ADDRSTRLEN];
+					inet_ntop(AF_INET6, &ip->saddr, s, sizeof(s));
+					inet_ntop(AF_INET6, &ip->daddr, d, sizeof(d));
+					add_assoc_string(&zpayload, "ipsrc", s);
+					add_assoc_string(&zpayload, "ipdst", d);
+					break;
+				}
+				case ETH_P_LOOP: {
+					struct iphdr *ip = (struct iphdr *)payload;
+					struct in_addr s, d;
+					s.s_addr = ip->saddr;
+					d.s_addr = ip->daddr;
+					add_assoc_string(&zpayload, "ipsrc", inet_ntoa(s));
+					add_assoc_string(&zpayload, "ipdst", inet_ntoa(d));
+					break;
+				}
 				default:
 					zend_value_error("unsupported ethernet protocol");
 					RETURN_THROWS();
@@ -1719,7 +1736,7 @@ PHP_FUNCTION(socket_sendto)
 	struct sockaddr_in6	sin6;
 #endif
 #ifdef AF_PACKET
-	//struct sockaddr_ll      sll;
+	struct sockaddr_ll      sll;
 #endif
 	int					retval;
 	size_t              buf_len;
@@ -1796,7 +1813,6 @@ PHP_FUNCTION(socket_sendto)
 			break;
 #endif
 #ifdef AF_PACKET
-			/*
 		case AF_PACKET:
 			if (port_is_null) {
 				zend_argument_value_error(6, "cannot be null when the socket type is AF_PACKET");
@@ -1806,10 +1822,11 @@ PHP_FUNCTION(socket_sendto)
 			memset(&sll, 0, sizeof(sll));			
 			sll.sll_family = AF_PACKET;
 			sll.sll_ifindex = port;
+			sll.sll_halen = ETH_ALEN;
 
+			// TODO allows to use more user friendly type to replace raw buffer usage
 			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
 			break;
-			*/
 #endif
 		default:
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");

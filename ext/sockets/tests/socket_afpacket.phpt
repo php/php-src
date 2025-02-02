@@ -15,7 +15,7 @@ if (!function_exists("posix_getuid") || posix_getuid() != 0) {
 ?>
 --FILE--
 <?php
-    $s_c     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_IP);
+    $s_c     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
     $s_bind  = socket_bind($s_c, 'lo');
     var_dump($s_bind);
 
