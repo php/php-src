@@ -74,8 +74,14 @@ Configure your build. `--enable-debug` is recommended for development, see
 ./configure
 ```
 
-Build PHP. To speed up the build, specify the maximum number of jobs using `-j`:
+Build PHP. To speed up the build, specify the maximum number of jobs using `-j` argument:
 
+On Windows:
+```shell
+make -j4
+```
+
+On Unix system:
 ```shell
 make -j$(nproc)
 ```
