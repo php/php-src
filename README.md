@@ -49,7 +49,7 @@ sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev l
 On MacOS, you can install these using:
 
 ```shell
-brew install autoconf bison re2c iconv
+brew install autoconf bison re2c iconv libxml2 sqlite
 ```
 
 On Fedora, you can install these using:
