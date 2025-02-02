@@ -611,9 +611,9 @@ struct _pdo_stmt_t {
 	 * Let's keep it here. */
 	zval lazy_object_ref;
 
+	pdo_dbh_t *dbh;
 	/* we want to keep the dbh alive while we live, so we own a reference */
 	zend_object *database_object_handle;
-	pdo_dbh_t *dbh;
 
 	/* not always meaningful */
 	zend_long row_count;
