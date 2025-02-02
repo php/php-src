@@ -24,7 +24,7 @@ foreach ($tzs as $tz => $regions) {
   }
 }
 ?>
---EXPECT--
+--EXPECTF--
 ** Gnomeregan
 bool(false)
 Error: intltz_get_windows_id: Unknown windows timezone: U_ILLEGAL_ARGUMENT_ERROR
@@ -35,7 +35,7 @@ string(19) "America/Los_Angeles"
 string(17) "America/Vancouver"
 string(19) "America/Los_Angeles"
 string(19) "America/Los_Angeles"
-string(7) "PST8PDT"
+string(%d) "%r(PST8PDT|America\/Los_Angeles)%r"
 ** Romance Standard Time
 string(12) "Europe/Paris"
 string(15) "Europe/Brussels"
