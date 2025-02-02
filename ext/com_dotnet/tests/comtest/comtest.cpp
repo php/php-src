@@ -171,21 +171,18 @@ HRESULT CDocument::Load(IStream *pStm)
 	ULONG read = 0;
 	ULONG cbSize;
 	char *string;
+
 	if (FAILED(pStm->Read(&cbSize, sizeof cbSize, &read))) {
 		return S_FALSE;
 	}
-	string = (char *) malloc(cbSize);
-	if (string == NULL) {
+	if (!SysReAllocStringLen(&m_content, NULL, cbSize)) {
 		return S_FALSE;
 	}
-	if (FAILED(pStm->Read(string, cbSize, &read))) {
+	if (FAILED(pStm->Read(m_content, cbSize, &read))) {
+		// we may have garbage in m_content, but don't mind
 		return S_FALSE;
 	}
-	SysFreeString(m_content);
-	m_content = SysAllocStringByteLen(string, cbSize);
-
 	m_dirty = FALSE;
-
 	return S_OK;
 }
 
