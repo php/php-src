@@ -32,6 +32,10 @@ if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 if "%ASAN%" equ "1" set ADD_CONF=%ADD_CONF% --enable-sanitizer --enable-debug-pack
 
+rem C4018: comparison: signed/unsigned mismatch
+rem C4146: unary minus operator applied to unsigned type
+rem C4244: type conversion, possible loss of data
+rem C4267: 'size_t' type conversion, possible loss of data
 set CFLAGS=/W3 /WX /wd4018 /wd4146 /wd4244 /wd4267
 
 cmd /c configure.bat ^
