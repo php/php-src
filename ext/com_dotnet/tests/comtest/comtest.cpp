@@ -77,13 +77,13 @@ ULONG CDocument::Release()
 HRESULT CDocument::QueryInterface(REFIID riid, void** ppv)
 {
 	if (riid == IID_IUnknown) {
-		*ppv = (IDocument*) this;
+		*ppv = static_cast<IDocument*>(this);
 	} else if (riid == IID_IDocument) {
-		*ppv = (IDocument *) this;
+		*ppv = static_cast<IDocument*>(this);
 	} else if (riid == IID_IDispatch) {
-		*ppv = (IDispatch*) this;
+		*ppv = static_cast<IDispatch*>(this);
 	} else if (riid == IID_IPersistStream) {
-		*ppv = (IPersistStream *) this;
+		*ppv = static_cast<IPersistStream*>(this);
 	} else {
 		*ppv = NULL;
 		return E_NOINTERFACE;
