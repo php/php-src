@@ -6,8 +6,8 @@ com_dotnet
 <?php
 try {
     new com("PHP.Test.Document");
-} catch (com_exception) {
-    die("skip PHP.Test.Document not registered");
+} catch (com_exception $ex) {
+    die("skip PHP.Test.Document not available (" . dechex($ex->getCode()) . ")");
 }
 ?>
 --FILE--
