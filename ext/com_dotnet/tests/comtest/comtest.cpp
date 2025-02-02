@@ -100,6 +100,7 @@ HRESULT CDocument::GetTypeInfoCount(UINT* pCountTypeInfo)
 
 HRESULT CDocument::GetTypeInfo(UINT iTypeInfo, LCID lcid, ITypeInfo** ppITypeInfo)
 {
+	(void) lcid;
 	*ppITypeInfo = NULL;
 	if (iTypeInfo != 0) {
 		return DISP_E_BADINDEX;
@@ -111,6 +112,7 @@ HRESULT CDocument::GetTypeInfo(UINT iTypeInfo, LCID lcid, ITypeInfo** ppITypeInf
 
 HRESULT CDocument::GetIDsOfNames(REFIID riid, LPOLESTR* rgszNames, UINT cNames, LCID lcid, DISPID* rgDispId)
 {
+	(void) lcid;
 	if (riid != IID_NULL) {
 		return DISP_E_UNKNOWNINTERFACE;
 	}
@@ -120,6 +122,7 @@ HRESULT CDocument::GetIDsOfNames(REFIID riid, LPOLESTR* rgszNames, UINT cNames, 
 HRESULT CDocument::Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS* pDispParams,
 	VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr)
 {
+	(void) lcid;
 	if (riid != IID_NULL) {
 		return DISP_E_UNKNOWNINTERFACE;
 	}
@@ -170,7 +173,6 @@ HRESULT CDocument::Load(IStream *pStm)
 {
 	ULONG read = 0;
 	ULONG cbSize;
-	char *string;
 
 	if (FAILED(pStm->Read(&cbSize, sizeof cbSize, &read))) {
 		return S_FALSE;
