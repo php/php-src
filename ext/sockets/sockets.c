@@ -1706,8 +1706,8 @@ PHP_FUNCTION(socket_recvfrom)
 				}
 				default:
 					zend_string_efree(recv_buf);
-                                        zval_ptr_dtor(&zpayload);
-                                        zval_ptr_dtor(&obj);
+					zval_ptr_dtor(&zpayload);
+					zval_ptr_dtor(&obj);
 					zend_value_error("unsupported ethernet protocol");
 					RETURN_THROWS();
 			}
