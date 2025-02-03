@@ -14,16 +14,44 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Zend
+  . Added zend_safe_assign_to_variable_noref() function to safely assign
+    a value to a non-reference zval.
+  . Added zval_ptr_safe_dtor() to safely destroy a zval when a destructor
+    could interfere.
+
 ========================
 2. Build system changes
 ========================
+
+- Windows build system changes
+  . SAPI() and ADD_SOURCES() now suport the optional `duplicate_sources`
+    parameter.  If truthy, no rules to build the object files are generated.
+    This allows to build additional variants of SAPIs (e.g. a DLL and EXE)
+    without duplicate build rules.  It is up to the SAPI maintainers to ensure
+    that appropriate build rules are created.
 
 ========================
 3. Module changes
 ========================
 
+- ext/gd
+  . The gdImageScale*() and gdImageRotate*() helpers are now internal in the
+    bundled libgd, like they have been in external libgd as of gd-2.1.1.
+
+- ext/json
+  . php_json_encode_serializable_object() now assumes `EG(active)`,
+    if not a bailout is caused. Therefore a minor BC break exists if the
+    `PHP_JSON_PARTIAL_OUTPUT_ON_ERROR` option is in use.
+    However, this situation is highly unlikely.
+
 - ext/libxml
   . The refcount APIs now return an `unsigned int` instead of an `int`.
+
+- ext/pdo
+  . Added `php_pdo_stmt_valid_db_obj_handle()` to check if the database object
+    is still valid. This is useful when a GC cycle is collected and the
+    database object can be destroyed prior to destroying the statement.
 
 ========================
 4. OpCode changes

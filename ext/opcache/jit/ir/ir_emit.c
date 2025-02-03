@@ -272,10 +272,10 @@ static bool ir_is_same_mem_var(const ir_ctx *ctx, ir_ref r1, int32_t offset)
 
 void *ir_resolve_sym_name(const char *name)
 {
-	void *handle = NULL;
 	void *addr;
 
 #ifndef _WIN32
+	void *handle = NULL;
 # ifdef RTLD_DEFAULT
 	handle = RTLD_DEFAULT;
 # endif
@@ -566,6 +566,9 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 		if (IR_IS_TYPE_INT(type)) {
 #ifdef IR_HAVE_SWAP_INT
 			if (pred[from] == to) {
+				if (ir_type_size[types[to]] > ir_type_size[type]) {
+					type = types[to];
+				}
 				ir_emit_swap(ctx, type, to, from);
 				IR_REGSET_EXCL(todo, from);
 				loc[to] = from;
@@ -579,7 +582,7 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 			loc[to] = tmp_reg;
 		} else {
 #ifdef IR_HAVE_SWAP_FP
-			if (pred[from] == to) {
+			if (pred[from] == to && types[to] == type) {
 				ir_emit_swap_fp(ctx, type, to, from);
 				IR_REGSET_EXCL(todo, from);
 				loc[to] = from;

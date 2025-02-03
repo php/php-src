@@ -18,6 +18,8 @@
 #define FPM_SCOREBOARD_LOCK_HANG 0
 #define FPM_SCOREBOARD_LOCK_NOHANG 1
 
+#define FPM_SCOREBOARD_SPINLOCK_MAX_RETRIES 50000
+
 struct fpm_scoreboard_proc_s {
 	union {
 		atomic_t lock;
@@ -52,6 +54,8 @@ struct fpm_scoreboard_s {
 		atomic_t lock;
 		char dummy[16];
 	};
+	atomic_t writer_active;
+	unsigned int reader_count;
 	char pool[32];
 	int pm;
 	time_t start_epoch;

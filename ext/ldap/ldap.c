@@ -73,7 +73,7 @@ void ldap_memvfree(void **v)
 typedef struct {
 	LDAP *link;
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-	zval rebindproc;
+	zend_fcall_info_cache rebind_proc_fcc;
 #endif
 	zend_object std;
 } ldap_linkdata;
@@ -131,7 +131,9 @@ static void ldap_link_free(ldap_linkdata *ld)
 	ld->link = NULL;
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-	zval_ptr_dtor(&ld->rebindproc);
+	if (ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
+		zend_fcc_dtor(&ld->rebind_proc_fcc);
+	}
 #endif
 
 	LDAPG(num_links)--;
@@ -232,6 +234,22 @@ static void ldap_result_entry_free_obj(zend_object *obj)
 		zend_throw_error(NULL, "LDAP result has already been closed"); \
 		RETURN_THROWS(); \
 	} \
+}
+
+static bool php_ldap_is_numerically_indexed_array(const zend_array *arr)
+{
+	if (zend_hash_num_elements(arr) == 0 || HT_IS_PACKED(arr)) {
+		return true;
+	}
+
+	zend_string *str_key;
+	ZEND_HASH_MAP_FOREACH_STR_KEY(arr, str_key) {
+		if (str_key) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
 }
 
 /* An LDAP value must be a string, however it defines a format for integer and
@@ -1481,8 +1499,8 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			/* We don't allocate ldap_attrs for an empty array */
 			goto process;
 		}
-		if (!zend_array_is_list(attributes)) {
-			zend_argument_value_error(4, "must be a list");
+		if (!php_ldap_is_numerically_indexed_array(attributes)) {
+			zend_argument_value_error(4, "must be an array with numeric keys");
 			RETURN_THROWS();
 		}
 		/* Allocate +1 as we need an extra entry to NULL terminate the list */
@@ -1490,7 +1508,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 		zend_ulong attribute_index = 0;
 		zval *attribute_zv = NULL;
-		ZEND_HASH_FOREACH_NUM_KEY_VAL(attributes, attribute_index, attribute_zv) {
+		ZEND_HASH_FOREACH_VAL(attributes, attribute_zv) {
 			ZVAL_DEREF(attribute_zv);
 			if (Z_TYPE_P(attribute_zv) != IS_STRING) {
 				zend_argument_type_error(4, "must be a list of strings, %s given", zend_zval_value_name(attribute_zv));
@@ -1503,7 +1521,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				ret = 0;
 				goto cleanup;
 			}
-			ldap_attrs[attribute_index] = ZSTR_VAL(attribute);
+			ldap_attrs[attribute_index++] = ZSTR_VAL(attribute);
 		} ZEND_HASH_FOREACH_END();
 		ldap_attrs[num_attribs] = NULL;
 	}
@@ -2302,8 +2320,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				RETVAL_FALSE;
 				goto cleanup;
 			}
-			if (!zend_array_is_list(Z_ARRVAL_P(attribute_values))) {
-				zend_argument_value_error(3, "must be a list of attribute values");
+			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(attribute_values))) {
+				zend_argument_value_error(3, "must be an array of attribute values with numeric keys");
 				RETVAL_FALSE;
 				goto cleanup;
 			}
@@ -2314,7 +2332,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 
 			zend_ulong attribute_value_index = 0;
 			zval *attribute_value = NULL;
-			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(attribute_values), attribute_value_index, attribute_value) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(attribute_values), attribute_value) {
 				zend_string *value = php_ldap_try_get_ldap_value_from_zval(attribute_value);
 				if (UNEXPECTED(value == NULL)) {
 					RETVAL_FALSE;
@@ -2324,6 +2342,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 				/* The string will be free by php_ldap_zend_string_release_from_char_pointer() during cleanup */
 				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_val = ZSTR_VAL(value);
 				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index]->bv_len = ZSTR_LEN(value);
+				attribute_value_index++;
 			} ZEND_HASH_FOREACH_END();
 			ldap_mods[attribute_index]->mod_bvalues[num_values] = NULL;
 		}
@@ -2594,8 +2613,8 @@ PHP_FUNCTION(ldap_modify_batch)
 		zend_argument_must_not_be_empty_error(3);
 		RETURN_THROWS();
 	}
-	if (!zend_array_is_list(modifications)) {
-		zend_argument_value_error(3, "must be a list");
+	if (!php_ldap_is_numerically_indexed_array(modifications)) {
+		zend_argument_value_error(3, "must be an array with numeric keys");
 		RETURN_THROWS();
 	}
 
@@ -2689,8 +2708,8 @@ PHP_FUNCTION(ldap_modify_batch)
 			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must not be empty");
 			RETURN_THROWS();
 		}
-		if (!zend_array_is_list(modification_values)) {
-			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be a list");
+		if (!php_ldap_is_numerically_indexed_array(modification_values)) {
+			zend_argument_value_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be an array with numeric keys");
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2752,7 +2771,7 @@ PHP_FUNCTION(ldap_modify_batch)
 			/* for each value */
 			zend_ulong value_index = 0;
 			zval *modification_value_zv = NULL;
-			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(modification_values), value_index, modification_value_zv) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(modification_values), modification_value_zv) {
 				zend_string *modval = zval_get_string(modification_value_zv);
 				if (EG(exception)) {
 					RETVAL_FALSE;
@@ -2768,6 +2787,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				ldap_mods[modification_index]->mod_bvalues[value_index]->bv_len = ZSTR_LEN(modval);
 				ldap_mods[modification_index]->mod_bvalues[value_index]->bv_val = estrndup(ZSTR_VAL(modval), ZSTR_LEN(modval));
 				zend_string_release(modval);
+				value_index++;
 			} ZEND_HASH_FOREACH_END();
 
 			/* NULL-terminate values */
@@ -3693,7 +3713,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 	}
 
 	/* link exists and callback set? */
-	if (Z_ISUNDEF(ld->rebindproc)) {
+	if (!ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
 		php_error_docref(NULL, E_WARNING, "No callback set");
 		return LDAP_OTHER;
 	}
@@ -3701,11 +3721,12 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 	/* callback */
 	ZVAL_COPY_VALUE(&cb_args[0], cb_link);
 	ZVAL_STRING(&cb_args[1], url);
-	if (call_user_function(EG(function_table), NULL, &ld->rebindproc, &cb_retval, 2, cb_args) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
+	zend_call_known_fcc(&ld->rebind_proc_fcc, &cb_retval, 2, cb_args, NULL);
+	if (EXPECTED(!Z_ISUNDEF(cb_retval))) {
+		// TODO Use zval_try_get_long()
 		retval = zval_get_long(&cb_retval);
 		zval_ptr_dtor(&cb_retval);
 	} else {
-		php_error_docref(NULL, E_WARNING, "rebind_proc PHP callback failed");
 		retval = LDAP_OTHER;
 	}
 	zval_ptr_dtor(&cb_args[1]);
@@ -3717,35 +3738,35 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 PHP_FUNCTION(ldap_set_rebind_proc)
 {
 	zval *link;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info dummy_fci;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	ldap_linkdata *ld;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of!", &link, ldap_link_ce, &fci, &fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OF!", &link, ldap_link_ce, &dummy_fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ld = Z_LDAP_LINK_P(link);
-	VERIFY_LDAP_LINK_CONNECTED(ld);
-
-	if (!ZEND_FCI_INITIALIZED(fci)) {
-		/* unregister rebind procedure */
-		if (!Z_ISUNDEF(ld->rebindproc)) {
-			zval_ptr_dtor(&ld->rebindproc);
-			ZVAL_UNDEF(&ld->rebindproc);
-			ldap_set_rebind_proc(ld->link, NULL, NULL);
-		}
-		RETURN_TRUE;
+	/* Inline VERIFY_LDAP_LINK_CONNECTED(ld); as we need to free trampoline */
+	if (!ld->link) {
+		zend_release_fcall_info_cache(&fcc);
+		zend_throw_error(NULL, "LDAP connection has already been closed");
+		RETURN_THROWS();
 	}
 
-	/* register rebind procedure */
-	if (Z_ISUNDEF(ld->rebindproc)) {
+	/* Free old FCC */
+	if (ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
+		zend_fcc_dtor(&ld->rebind_proc_fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		/* register rebind procedure */
 		ldap_set_rebind_proc(ld->link, _ldap_rebind_proc, (void *) link);
+		zend_fcc_dup(&ld->rebind_proc_fcc, &fcc);
 	} else {
-		zval_ptr_dtor(&ld->rebindproc);
-	}
+		/* unregister rebind procedure */
+		ldap_set_rebind_proc(ld->link, NULL, NULL);
+    }
 
-	ZVAL_COPY(&ld->rebindproc, &fci.function_name);
 	RETURN_TRUE;
 }
 /* }}} */

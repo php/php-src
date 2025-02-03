@@ -869,15 +869,120 @@ fixup_ip:
 }
 /* }}} */
 
+/* From the tables in RFC 6890 - Special-Purpose IP Address Registriesi
+ * Including errata: https://www.rfc-editor.org/errata_search.php?rfc=6890&rec_status=1 */
+static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
+{
+	*global = false;
+	*reserved = false;
+	*private = false;
+
+	if (ip[0] == 0) {
+		/* RFC 0791 - This network */
+		*reserved = true;
+	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) {
+		/* RFC 1122 - This host on this network */
+		*reserved = true;
+	} else if (ip[0] == 10) {
+		/* RFC 1918 - Private Use */
+		*private = true;
+	} else if (ip[0] == 100 && ip[1] >= 64 && ip[1] <= 127) {
+		/* RFC 6598 - Shared Address Space */
+	} else if (ip[0] == 127) {
+		/* RFC 1122 - Loopback */
+		*reserved = true;
+	} else if (ip[0] == 169 && ip[1] == 254) {
+		/* RFC 3927 - Link Local */
+		*reserved = true;
+	} else if (ip[0] == 172 && ip[1] >= 16 && ip[1] <= 31) {
+		/* RFC 1918 - Private Use */
+		*private = true;
+	} else if (ip[0] == 192 && ip[1] == 0 && ip[2] == 0) {
+		/* RFC 6890 - IETF Protocol Assignments */
+	} else if (ip[0] == 192 && ip[1] == 0 && ip[2] == 0 && ip[3] >= 0 && ip[3] <= 7) {
+		/* RFC 6333 - DS-Lite */
+	} else if (ip[0] == 192 && ip[1] == 0 && ip[2] == 2) {
+		/* RFC 5737 - Documentation */
+	} else if (ip[0] == 192 && ip[1] == 88 && ip[2] == 99) {
+		/* RFC 3068 - 6to4 Relay Anycast */
+		*global = true;
+	} else if (ip[0] == 192 && ip[1] == 168) {
+		/* RFC 1918 - Private Use */
+		*private = true;
+	} else if (ip[0] == 198 && ip[1] >= 18 && ip[1] <= 19) {
+		/* RFC 2544 - Benchmarking */
+	} else if (ip[0] == 198 && ip[1] == 51 && ip[2] == 100) {
+		/* RFC 5737 - Documentation */
+	} else if (ip[0] == 203 && ip[1] == 0 && ip[2] == 113) {
+		/* RFC 5737 - Documentation */
+	} else if (ip[0] >= 240 && ip[1] <= 255) {
+		/* RFC 1122 - Reserved */
+		*reserved = true;
+	} else if (ip[0] == 255 && ip[1] == 255 && ip[2] == 255 && ip[3] == 255) {
+		/* RFC 0919 - Limited Broadcast, Updated by RFC 8190, 2.2. */
+		*reserved = true;
+	} else {
+		return false;
+	}
+
+	return true;
+}
+
+/* From the tables in RFC 6890 - Special-Purpose IP Address Registries */
+static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
+{
+	*global = false;
+	*reserved = false;
+	*private = false;
+
+	if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && ip[7] == 0) {
+		/* RFC 4291 - Unspecified Address */
+		*reserved = true;
+	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && ip[7] == 1) {
+		/* RFC 4291 - Loopback Address */
+		*reserved = true;
+	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b) {
+		/* RFC 6052 - IPv4-IPv6 Translation */
+		*global = true;
+	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0xffff) {
+		/* RFC 4291 - IPv4-mapped Address */
+		*reserved = true;
+	} else if (ip[0] == 0x0100 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) {
+		/* RFC 6666 - Discard-Only Address Block */
+	} else if (ip[0] == 0x2001 && ip[1] == 0x0000) {
+		/* RFC 4380 - TEREDO */
+	} else if (ip[0] == 0x2001 && ip[1] <= 0x01ff) {
+		/* RFC 2928 - IETF Protocol Assignments */
+	} else if (ip[0] == 0x2001 && ip[1] == 0x0002 && ip[2] == 0) {
+		/* RFC 5180 - Benchmarking */
+	} else if (ip[0] == 0x2001 && ip[1] == 0x0db8) {
+		/* RFC 3849 - Documentation */
+	} else if (ip[0] == 0x2001 && ip[1] >= 0x0010 && ip[1] <= 0x001f) {
+		/* RFC 4843 - ORCHID */
+	} else if (ip[0] == 0x2002) {
+		/* RFC 3056 - 6to4 */
+	} else if (ip[0] >= 0xfc00 && ip[0] <= 0xfdff) {
+		/* RFC 4193 - Unique-Local */
+		*private = true;
+	} else if (ip[0] >= 0xfe80 && ip[0] <= 0xfebf) {
+		/* RFC 4291 - Linked-Scoped Unicast */
+		*reserved = true;
+	} else {
+		return false;
+	}
+
+	return true;
+}
+
+/* Validates an ipv4 or ipv6 IP, based on the flag (4, 6, or both) add a flag
+ * to throw out reserved ranges; multicast ranges... etc. If both allow_ipv4
+ * and allow_ipv6 flags flag are used, then the first dot or colon determine
+ * the format */
 void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	/* validates an ipv4 or ipv6 IP, based on the flag (4, 6, or both) add a
-	 * flag to throw out reserved ranges; multicast ranges... etc. If both
-	 * allow_ipv4 and allow_ipv6 flags flag are used, then the first dot or
-	 * colon determine the format */
-
-	int            ip[8];
-	int            mode;
+	int  ip[8];
+	int  mode;
+	bool flag_global, flag_reserved, flag_private; /* flags for ranges as determined by RFC 6890 */
 
 	if (memchr(Z_STRVAL_P(value), ':', Z_STRLEN_P(value))) {
 		mode = FORMAT_IPV6;
@@ -895,86 +1000,35 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	switch (mode) {
-		case FORMAT_IPV4:
-			if (!_php_filter_validate_ipv4(Z_STRVAL_P(value), Z_STRLEN_P(value), ip)) {
-				RETURN_VALIDATION_FAILED
-			}
+	if (mode == FORMAT_IPV4) {
+		if (!_php_filter_validate_ipv4(Z_STRVAL_P(value), Z_STRLEN_P(value), ip)) {
+			RETURN_VALIDATION_FAILED
+		}
 
-			/* Check flags */
-			if (flags & FILTER_FLAG_NO_PRIV_RANGE  || flags & FILTER_FLAG_GLOBAL_RANGE) {
-				if (
-					(ip[0] == 10) ||
-					(ip[0] == 172 && ip[1] >= 16 && ip[1] <= 31) ||
-					(ip[0] == 192 && ip[1] == 168)
-				) {
-					RETURN_VALIDATION_FAILED
-				}
-			}
+		if (!ipv4_get_status_flags(ip, &flag_global, &flag_reserved, &flag_private)) {
+			return; /* no special block */
+		}
+	}
+	else if (mode == FORMAT_IPV6) {
+		if (_php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value), ip) < 1) {
+			RETURN_VALIDATION_FAILED
+		}
 
-			if (flags & FILTER_FLAG_NO_RES_RANGE || flags & FILTER_FLAG_GLOBAL_RANGE) {
-				if (
-					(ip[0] == 0) ||
-					(ip[0] >= 240) ||
-					(ip[0] == 127) ||
-					(ip[0] == 169 && ip[1] == 254)
-				) {
-					RETURN_VALIDATION_FAILED
-				}
-			}
+		if (!ipv6_get_status_flags(ip, &flag_global, &flag_reserved, &flag_private)) {
+			return; /* no special block */
+		}
+	}
 
-			if (flags & FILTER_FLAG_GLOBAL_RANGE) {
-				if (
-					(ip[0] == 100 && ip[1] >= 64 && ip[1] <= 127 ) ||
-					(ip[0] == 192 && ip[1] == 0 && ip[2] == 0 ) ||
-					(ip[0] == 192 && ip[1] == 0 && ip[2] == 2 ) ||
-					(ip[0] == 198 && ip[1] >= 18 && ip[1] <= 19 ) ||
-					(ip[0] == 198 && ip[1] == 51 && ip[2] == 100 ) ||
-					(ip[0] == 203 && ip[1] == 0 && ip[2] == 113 )
-				) {
-					RETURN_VALIDATION_FAILED
-				}
-			}
+	if ((flags & FILTER_FLAG_GLOBAL_RANGE) && flag_global != true) {
+		RETURN_VALIDATION_FAILED
+	}
 
-			break;
+	if ((flags & FILTER_FLAG_NO_PRIV_RANGE) && flag_private == true) {
+		RETURN_VALIDATION_FAILED
+	}
 
-		case FORMAT_IPV6:
-			{
-				int res = 0;
-				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value), ip);
-				if (res < 1) {
-					RETURN_VALIDATION_FAILED
-				}
-				/* Check flags */
-				if (flags & FILTER_FLAG_NO_PRIV_RANGE || flags & FILTER_FLAG_GLOBAL_RANGE) {
-					if (ip[0] >= 0xfc00 && ip[0] <= 0xfdff) {
-						RETURN_VALIDATION_FAILED
-					}
-				}
-				if (flags & FILTER_FLAG_NO_RES_RANGE || flags & FILTER_FLAG_GLOBAL_RANGE) {
-					if (
-						(ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && (ip[7] == 0 || ip[7] == 1)) ||
-						(ip[0] == 0x5f) ||
-						(ip[0] >= 0xfe80 && ip[0] <= 0xfebf) ||
-						(ip[0] == 0x2001 && (ip[1] == 0x0db8 || (ip[1] >= 0x0010 && ip[1] <= 0x001f))) ||
-						(ip[0] == 0x3ff3)
-					) {
-						RETURN_VALIDATION_FAILED
-					}
-				}
-				if (flags & FILTER_FLAG_GLOBAL_RANGE) {
-					if (
-						(ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0xffff) ||
-						(ip[0] == 0x0100 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) ||
-						(ip[0] == 0x2001 && ip[1] <= 0x01ff) ||
-						(ip[0] == 0x2001 && ip[1] == 0x0002 && ip[2] == 0) ||
-						(ip[0] >= 0xfc00 && ip[0] <= 0xfdff)
-					) {
-						RETURN_VALIDATION_FAILED
-					}
-				}
-			}
-			break;
+	if ((flags & FILTER_FLAG_NO_RES_RANGE) && flag_reserved == true) {
+		RETURN_VALIDATION_FAILED
 	}
 }
 /* }}} */

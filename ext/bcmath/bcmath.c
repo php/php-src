@@ -109,9 +109,9 @@ static PHP_GINIT_FUNCTION(bcmath)
 /* {{{ PHP_GSHUTDOWN_FUNCTION */
 static PHP_GSHUTDOWN_FUNCTION(bcmath)
 {
-	_bc_free_num_ex(&bcmath_globals->_zero_, 1);
-	_bc_free_num_ex(&bcmath_globals->_one_, 1);
-	_bc_free_num_ex(&bcmath_globals->_two_, 1);
+	bc_force_free_number(&bcmath_globals->_zero_);
+	bc_force_free_number(&bcmath_globals->_one_);
+	bc_force_free_number(&bcmath_globals->_two_);
 	bcmath_globals->arena = NULL;
 	bcmath_globals->arena_offset = 0;
 }
@@ -1800,8 +1800,6 @@ PHP_METHOD(BcMath_Number, round)
 
 	bc_num ret = NULL;
 	bc_round(intern->num, precision, rounding_mode, &ret);
-
-	bc_rm_trailing_zeros(ret);
 
 	bcmath_number_obj_t *new_intern = bcmath_number_new_obj(ret, ret->n_scale);
 	RETURN_OBJ(&new_intern->std);

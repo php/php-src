@@ -615,9 +615,11 @@ class my_mysqli_fake_server_conn
 
 class my_mysqli_fake_server_process
 {
+    private int $port;
+
     public function __construct(private $process, private array $pipes) {}
 
-    public function terminate(bool $wait = false)
+    public function terminate(bool $wait = false): void
     {
         if ($wait) {
             $this->wait();
@@ -625,9 +627,18 @@ class my_mysqli_fake_server_process
         proc_terminate($this->process);
     }
 
-    public function wait()
+    public function wait(): void
     {
-        echo fgets($this->pipes[1]);
+        $line = fgets($this->pipes[1]);
+        if (preg_match('/\[\*\] Server started on \d+\.\d+\.\d+\.\d+:(\d+)/', $line, $matches)) {
+            $this->port = (int)$matches[1];
+        }
+        echo $line;
+    }
+
+    public function getPort(): int
+    {
+        return $this->port ?? throw new RuntimeException("Port not set");
     }
 }
 
@@ -807,15 +818,20 @@ function my_mysqli_test_query_response_row_read_two_fields(my_mysqli_fake_server
     }
 }
 
-function run_fake_server(string $test_function, $port = 33305): void
+function run_fake_server(string $test_function, int|string $port = 0): int
 {
-    $address = '127.0.0.1';
+    $host = '127.0.0.1';
 
-    $socket = @stream_socket_server("tcp://$address:$port", $errno, $errstr);
+    $socket = @stream_socket_server("tcp://$host:$port", $errno, $errstr);
     if (!$socket) {
         die("Failed to create socket: $errstr ($errno)\n");
     }
-    echo "[*] Server started\n";
+    if (intval($port) === 0) {
+        $address = stream_socket_get_name($socket, false);
+        list($host, $port) = explode(":", $address);
+    }
+
+    echo "[*] Server started on $host:$port\n";
 
     try {
         $conn = new my_mysqli_fake_server_conn($socket);
@@ -832,7 +848,7 @@ function run_fake_server(string $test_function, $port = 33305): void
 }
 
 
-function run_fake_server_in_background($test_function, $port = 33305): my_mysqli_fake_server_process
+function run_fake_server_in_background($test_function, $port = 0): my_mysqli_fake_server_process
 {
     $command = [PHP_BINARY, '-n', __FILE__, 'mysqli_fake_server', $test_function, $port];
 
@@ -852,5 +868,5 @@ function run_fake_server_in_background($test_function, $port = 33305): my_mysqli
 }
 
 if (isset($argv) && $argc > 2 && $argv[1] == 'mysqli_fake_server') {
-    run_fake_server($argv[2], $argv[3] ?? '33305');
+    run_fake_server($argv[2], $argv[3] ?? 0);
 }

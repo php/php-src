@@ -1617,7 +1617,13 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
-		| (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE);
+		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_DEPRECATED));
+	if (fbc->common.attributes) {
+		func->attributes = fbc->common.attributes;
+		GC_TRY_ADDREF(func->attributes);
+	} else {
+		func->attributes = NULL;
+	}
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
@@ -2063,8 +2069,9 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 			object_lhs = false;
 		}
 		ZEND_ASSERT(Z_TYPE_P(value) != IS_OBJECT);
-		uint8_t target_type = (Z_TYPE_P(value) == IS_FALSE || Z_TYPE_P(value) == IS_TRUE)
-								 ? _IS_BOOL : Z_TYPE_P(value);
+		uint8_t target_type = Z_TYPE_P(value);
+		/* Should be handled in zend_compare(). */
+		ZEND_ASSERT(target_type != IS_FALSE && target_type != IS_TRUE);
 		if (Z_OBJ_HT_P(object)->cast_object(Z_OBJ_P(object), &casted, target_type) == FAILURE) {
 			// TODO: Less crazy.
 			if (target_type == IS_LONG || target_type == IS_DOUBLE) {

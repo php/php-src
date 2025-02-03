@@ -94,6 +94,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 	}
 
 #define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\013\014"
+#define SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "=,;.[ \\t\\r\\n\\013\\014"
 
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
 
@@ -705,7 +706,12 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 	SESSION_CHECK_OUTPUT_STATE;
 
 	/* Numeric session.name won't work at all */
-	if ((!ZSTR_LEN(new_value) || is_numeric_string(ZSTR_VAL(new_value), ZSTR_LEN(new_value), NULL, NULL, 0))) {
+	if (
+		ZSTR_LEN(new_value) == 0
+		|| zend_str_has_nul_byte(new_value)
+		|| is_numeric_str_function(new_value, NULL, NULL)
+		|| strpbrk(ZSTR_VAL(new_value), SESSION_FORBIDDEN_CHARS) != NULL
+	) {
 		int err_type;
 
 		if (stage == ZEND_INI_STAGE_RUNTIME || stage == ZEND_INI_STAGE_ACTIVATE || stage == ZEND_INI_STAGE_STARTUP) {
@@ -716,7 +722,7 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" cannot be numeric or empty", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "session.name \"%s\" must not be numeric, empty, contain null bytes or any of the following characters \"" SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "\"", ZSTR_VAL(new_value));
 		}
 		return FAILURE;
 	}
@@ -1430,11 +1436,7 @@ static zend_result php_session_send_cookie(void) /* {{{ */
 		return FAILURE;
 	}
 
-	/* Prevent broken Set-Cookie header, because the session_name might be user supplied */
-	if (strpbrk(PS(session_name), SESSION_FORBIDDEN_CHARS) != NULL) {   /* man isspace for \013 and \014 */
-		php_error_docref(NULL, E_WARNING, "session.name cannot contain any of the following '=,;.[ \\t\\r\\n\\013\\014'");
-		return FAILURE;
-	}
+	ZEND_ASSERT(strpbrk(PS(session_name), SESSION_FORBIDDEN_CHARS) == NULL);
 
 	/* URL encode id because it might be user supplied */
 	e_id = php_url_encode(ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)));
@@ -1554,7 +1556,10 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 	}
 
 	if (PS(use_cookies) && PS(send_cookie)) {
-		php_session_send_cookie();
+		zend_result cookies_sent = php_session_send_cookie();
+		if (UNEXPECTED(cookies_sent == FAILURE)) {
+			return FAILURE;
+		}
 		PS(send_cookie) = 0;
 	}
 
@@ -1571,7 +1576,7 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 		smart_str_appends(&var, ZSTR_VAL(PS(id)));
 		smart_str_0(&var);
 		if (sid) {
-			zval_ptr_dtor_str(sid);
+			zval_ptr_dtor(sid);
 			ZVAL_STR(sid, smart_str_extract(&var));
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s),  CONST_DEPRECATED);
@@ -1579,7 +1584,7 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 		}
 	} else {
 		if (sid) {
-			zval_ptr_dtor_str(sid);
+			zval_ptr_dtor(sid);
 			ZVAL_EMPTY_STRING(sid);
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", "", 0, CONST_DEPRECATED);
@@ -2175,19 +2180,17 @@ PHP_FUNCTION(session_set_save_handler)
 
 		if (register_shutdown) {
 			/* create shutdown function */
-			php_shutdown_function_entry shutdown_function_entry;
-			zval callable;
-			zend_result result;
-
-			ZVAL_STRING(&callable, "session_register_shutdown");
-			result = zend_fcall_info_init(&callable, 0, &shutdown_function_entry.fci,
-				&shutdown_function_entry.fci_cache, NULL, NULL);
-
-			ZEND_ASSERT(result == SUCCESS);
+			php_shutdown_function_entry shutdown_function_entry = {
+				.fci_cache = empty_fcall_info_cache,
+				.params = NULL,
+				.param_count = 0,
+			};
+			zend_function *fn_entry = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("session_register_shutdown"));
+			ZEND_ASSERT(fn_entry != NULL);
+			shutdown_function_entry.fci_cache.function_handler = fn_entry;
 
 			/* add shutdown function, removing the old one if it exists */
-			if (!register_user_shutdown_function("session_shutdown", strlen("session_shutdown"), &shutdown_function_entry)) {
-				zval_ptr_dtor(&callable);
+			if (!register_user_shutdown_function(ZEND_STRL("session_shutdown"), &shutdown_function_entry)) {
 				php_error_docref(NULL, E_WARNING, "Unable to register session shutdown function");
 				RETURN_FALSE;
 			}
@@ -2636,9 +2639,8 @@ PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
 	zval *value;
-	zend_ulong num_idx;
 	zend_string *str_idx;
-	zend_long read_and_close = 0;
+	bool read_and_close = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
 		RETURN_THROWS();
@@ -2661,32 +2663,44 @@ PHP_FUNCTION(session_start)
 
 	/* set options */
 	if (options) {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_idx, str_idx, value) {
-			if (str_idx) {
-				switch(Z_TYPE_P(value)) {
-					case IS_STRING:
-					case IS_TRUE:
-					case IS_FALSE:
-					case IS_LONG:
-						if (zend_string_equals_literal(str_idx, "read_and_close")) {
-							read_and_close = zval_get_long(value);
-						} else {
-							zend_string *tmp_val;
-							zend_string *val = zval_get_tmp_string(value, &tmp_val);
-							if (php_session_start_set_ini(str_idx, val) == FAILURE) {
-								php_error_docref(NULL, E_WARNING, "Setting option \"%s\" failed", ZSTR_VAL(str_idx));
-							}
-							zend_tmp_string_release(tmp_val);
-						}
-						break;
-					default:
-						zend_type_error("%s(): Option \"%s\" must be of type string|int|bool, %s given",
-							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_value_name(value)
-						);
-						RETURN_THROWS();
-				}
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), str_idx, value) {
+			if (UNEXPECTED(!str_idx)) {
+				zend_argument_value_error(1, "must be of type array with keys as string");
+				RETURN_THROWS();
 			}
-			(void) num_idx;
+			switch(Z_TYPE_P(value)) {
+				case IS_STRING:
+				case IS_TRUE:
+				case IS_FALSE:
+				case IS_LONG:
+					if (zend_string_equals_literal(str_idx, "read_and_close")) {
+						zend_long tmp;
+						if (Z_TYPE_P(value) != IS_STRING) {
+							tmp = zval_get_long(value);
+						} else {
+							if (is_numeric_string(Z_STRVAL_P(value), Z_STRLEN_P(value), &tmp, NULL, false) != IS_LONG) {
+								zend_type_error("%s(): Option \"%s\" value must be of type compatible with int, \"%s\" given",
+										get_active_function_name(), ZSTR_VAL(str_idx), Z_STRVAL_P(value)
+									       );
+								RETURN_THROWS();
+							}
+						}
+						read_and_close = (tmp > 0);
+					} else {
+						zend_string *tmp_val;
+						zend_string *val = zval_get_tmp_string(value, &tmp_val);
+						if (php_session_start_set_ini(str_idx, val) == FAILURE) {
+							php_error_docref(NULL, E_WARNING, "Setting option \"%s\" failed", ZSTR_VAL(str_idx));
+						}
+						zend_tmp_string_release(tmp_val);
+					}
+					break;
+				default:
+					zend_type_error("%s(): Option \"%s\" must be of type string|int|bool, %s given",
+							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_value_name(value)
+						       );
+					RETURN_THROWS();
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -2826,9 +2840,11 @@ PHP_FUNCTION(session_status)
 /* {{{ Registers session_write_close() as a shutdown function */
 PHP_FUNCTION(session_register_shutdown)
 {
-	php_shutdown_function_entry shutdown_function_entry;
-	zval callable;
-	zend_result result;
+	php_shutdown_function_entry shutdown_function_entry = {
+		.fci_cache = empty_fcall_info_cache,
+		.params = NULL,
+		.param_count = 0,
+	};
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2838,15 +2854,11 @@ PHP_FUNCTION(session_register_shutdown)
 	 * function after calling session_set_save_handler(), which expects
 	 * the session still to be available.
 	 */
-	ZVAL_STRING(&callable, "session_write_close");
-	result = zend_fcall_info_init(&callable, 0, &shutdown_function_entry.fci,
-		&shutdown_function_entry.fci_cache, NULL, NULL);
-
-	ZEND_ASSERT(result == SUCCESS);
+	zend_function *fn_entry = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("session_write_close"));
+	ZEND_ASSERT(fn_entry != NULL);
+	shutdown_function_entry.fci_cache.function_handler = fn_entry;
 
 	if (!append_user_shutdown_function(&shutdown_function_entry)) {
-		zval_ptr_dtor(&callable);
-
 		/* Unable to register shutdown function, presumably because of lack
 		 * of memory, so flush the session now. It would be done in rshutdown
 		 * anyway but the handler will have had it's dtor called by then.

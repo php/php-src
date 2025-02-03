@@ -3374,18 +3374,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 	}
 
-#ifdef VIRTUAL_DIR
-	{
-		char tmp_font_path[MAXPATHLEN];
-
-		if (!VCWD_REALPATH(fontname, tmp_font_path)) {
-			fontname = NULL;
-		}
-	}
-#endif /* VIRTUAL_DIR */
-
-	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
-
 	// libgd note: Those should return const char * ideally, but backward compatibility ..
 	if (EXT) {
 		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
@@ -3739,7 +3727,24 @@ PHP_FUNCTION(imageconvolution)
 			}
 		}
 	}
-	res = gdImageConvolution(im_src, matrix, (float)div, (float)offset);
+
+	if (UNEXPECTED(!zend_finite(div))) {
+		zend_argument_value_error(3, "must be finite");
+		RETURN_THROWS();
+	}
+
+	float div_float = (float) div;
+	if (UNEXPECTED(div_float == 0.0f)) {
+		zend_argument_value_error(3, "must not be 0");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!zend_finite(offset))) {
+		zend_argument_value_error(4, "must be finite");
+		RETURN_THROWS();
+	}
+
+	res = gdImageConvolution(im_src, matrix, div_float, (float) offset);
 
 	if (res) {
 		RETURN_TRUE;
@@ -4017,19 +4022,7 @@ PHP_FUNCTION(imageaffine)
 		if ((zval_affine_elem = zend_hash_index_find(Z_ARRVAL_P(z_affine), i)) != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
 				case IS_LONG:
-					affine[i] = Z_LVAL_P(zval_affine_elem);
-					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
-						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
-						RETURN_THROWS();
-					}
-					break;
 				case IS_DOUBLE:
-					affine[i] = Z_DVAL_P(zval_affine_elem);
-					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
-						zend_argument_value_error(2, "element %i must be between %d and %d", i, INT_MIN, INT_MAX);
-						RETURN_THROWS();
-					}
-					break;
 				case IS_STRING:
 					affine[i] = zval_get_double(zval_affine_elem);
 					if (affine[i] < INT_MIN || affine[i] > INT_MAX) {
@@ -4195,11 +4188,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m1), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
-					m1[i]  = Z_LVAL_P(tmp);
-					break;
 				case IS_DOUBLE:
-					m1[i] = Z_DVAL_P(tmp);
-					break;
 				case IS_STRING:
 					m1[i] = zval_get_double(tmp);
 					break;
@@ -4212,11 +4201,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m2), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
-					m2[i]  = Z_LVAL_P(tmp);
-					break;
 				case IS_DOUBLE:
-					m2[i] = Z_DVAL_P(tmp);
-					break;
 				case IS_STRING:
 					m2[i] = zval_get_double(tmp);
 					break;

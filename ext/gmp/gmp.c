@@ -1524,6 +1524,10 @@ ZEND_FUNCTION(gmp_random_range)
 }
 /* }}} */
 
+static bool gmp_is_bit_index_valid(zend_long index) {
+	return index >= 0 && (index / GMP_NUMB_BITS < INT_MAX);
+}
+
 /* {{{ Sets or clear bit in a */
 ZEND_FUNCTION(gmp_setbit)
 {
@@ -1536,12 +1540,8 @@ ZEND_FUNCTION(gmp_setbit)
 		RETURN_THROWS();
 	}
 
-	if (index < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-	if (index / GMP_NUMB_BITS >= INT_MAX) {
-		zend_argument_value_error(2, "must be less than %d * %d", INT_MAX, GMP_NUMB_BITS);
+	if (!gmp_is_bit_index_valid(index)) {
+		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
 		RETURN_THROWS();
 	}
 
@@ -1566,8 +1566,8 @@ ZEND_FUNCTION(gmp_clrbit)
 		RETURN_THROWS();
 	}
 
-	if (index < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (!gmp_is_bit_index_valid(index)) {
+		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
 		RETURN_THROWS();
 	}
 
@@ -1587,8 +1587,8 @@ ZEND_FUNCTION(gmp_testbit)
 		Z_PARAM_LONG(index)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (index < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (!gmp_is_bit_index_valid(index)) {
+		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
 		RETURN_THROWS();
 	}
 
@@ -1634,8 +1634,8 @@ ZEND_FUNCTION(gmp_scan0)
 		Z_PARAM_LONG(start)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (start < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (!gmp_is_bit_index_valid(start)) {
+		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
 		RETURN_THROWS();
 	}
 
@@ -1654,8 +1654,8 @@ ZEND_FUNCTION(gmp_scan1)
 		Z_PARAM_LONG(start)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (start < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (!gmp_is_bit_index_valid(start)) {
+		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
 		RETURN_THROWS();
 	}
 

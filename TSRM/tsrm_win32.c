@@ -374,14 +374,16 @@ static process_pair *process_get(FILE *stream)
 	process_pair *ptr;
 	process_pair *newptr;
 
-	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
-		if (ptr->stream == stream) {
-			break;
+	if (TWG(process) != NULL) {
+		for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
+			if (ptr->stream == stream) {
+				break;
+			}
 		}
-	}
 
-	if (ptr < (TWG(process) + TWG(process_size))) {
-		return ptr;
+		if (ptr < (TWG(process) + TWG(process_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (process_pair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(process_pair));
@@ -400,19 +402,21 @@ static shm_pair *shm_get(key_t key, void *addr)
 	shm_pair *ptr;
 	shm_pair *newptr;
 
-	for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
-		if (!ptr->descriptor) {
-			continue;
+	if (TWG(shm) != NULL) {
+		for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (!ptr->descriptor) {
+				continue;
+			}
+			if (!addr && ptr->descriptor->shm_perm.key == key) {
+				break;
+			} else if (ptr->addr == addr) {
+				break;
+			}
 		}
-		if (!addr && ptr->descriptor->shm_perm.key == key) {
-			break;
-		} else if (ptr->addr == addr) {
-			break;
-		}
-	}
 
-	if (ptr < (TWG(shm) + TWG(shm_size))) {
-		return ptr;
+		if (ptr < (TWG(shm) + TWG(shm_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (shm_pair*)realloc((void*)TWG(shm), (TWG(shm_size)+1)*sizeof(shm_pair));

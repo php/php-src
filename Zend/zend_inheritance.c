@@ -23,6 +23,7 @@
 #include "zend_execute.h"
 #include "zend_inheritance.h"
 #include "zend_interfaces.h"
+#include "zend_closures.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 #include "zend_exceptions.h"
@@ -485,6 +486,17 @@ static inheritance_status zend_is_class_subtype_of_type(
 		if (!fe_ce) {
 			have_unresolved = 1;
 		} else {
+			track_class_dependency(fe_ce, fe_class_name);
+			return INHERITANCE_SUCCESS;
+		}
+	}
+
+	/* If the parent has 'callable' as a return type, then Closure satisfies the co-variant check */
+	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_CALLABLE) {
+		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
+		if (!fe_ce) {
+			have_unresolved = 1;
+		} else if (fe_ce == zend_ce_closure) {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
 		}
@@ -1746,6 +1758,27 @@ ZEND_API inheritance_status zend_verify_property_hook_variance(const zend_proper
 	return zend_perform_covariant_type_check(ce, prop_info->type, ce, value_arg_info->type);
 }
 
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+/* Hooked properties set get_iterator, which causes issues on for shm
+ * reattachment. Avoid early-binding on Windows and set get_iterator during
+ * inheritance. The linked class may not use inheritance cache. */
+static void zend_link_hooked_object_iter(zend_class_entry *ce) {
+	if (!ce->get_iterator && ce->num_hooked_props) {
+		ce->get_iterator = zend_hooked_object_get_iterator;
+		ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
+		if (CG(current_linking_class) == ce) {
+# if ZEND_DEBUG
+			/* This check is executed before inheriting any elements that can
+			 * track dependencies. */
+			HashTable *ht = (HashTable*)ce->inheritance_cache;
+			ZEND_ASSERT(!ht);
+# endif
+			CG(current_linking_class) = NULL;
+		}
+	}
+}
+#endif
+
 ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *parent_ce, bool checked) /* {{{ */
 {
 	zend_property_info *property_info;
@@ -2363,9 +2396,11 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 
 static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, zend_function *fn_copy, zend_string *name)
 {
-	/* If the function was originally already private+final, then it will have already been warned about.
-	 * If the function became private+final only after applying modifiers, we need to emit the same warning. */
-	if ((original_fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) != (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+	/* If the function was originally already private+final, then it will have
+	 * already been warned about. Only emit this error when the used trait method
+	 * explicitly became final, avoiding errors for `as private` where it was
+	 * already final. */
+	if (!(original_fn_flags & ZEND_ACC_FINAL)
 		&& (fn_copy->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
 		&& !zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
@@ -3422,7 +3457,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	return ce;
 }
 
-#ifndef ZEND_WIN32
+#ifndef ZEND_OPCACHE_SHM_REATTACHMENT
 # define UPDATE_IS_CACHEABLE(ce) do { \
 			if ((ce)->type == ZEND_USER_CLASS) { \
 				is_cacheable &= (ce)->ce_flags; \
@@ -3566,6 +3601,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			 * opcache. */
 			zend_enum_register_funcs(ce);
 		}
+
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+		zend_link_hooked_object_iter(ce);
+#endif
 
 		if (parent) {
 			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
@@ -3854,6 +3893,10 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			if (is_cacheable) {
 				zend_begin_record_errors();
 			}
+
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+			zend_link_hooked_object_iter(ce);
+#endif
 
 			zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
 			if (parent_ce && parent_ce->num_interfaces) {

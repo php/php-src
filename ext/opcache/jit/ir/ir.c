@@ -330,6 +330,7 @@ static ir_ref ir_next_const(ir_ctx *ctx)
 
 static void ir_grow_top(ir_ctx *ctx)
 {
+	ir_ref old_insns_limit = ctx->insns_limit;
 	ir_insn *buf = ctx->ir_base - ctx->consts_limit;
 
 	if (ctx->insns_limit < 1024 * 4) {
@@ -341,6 +342,18 @@ static void ir_grow_top(ir_ctx *ctx)
 	}
 	buf = ir_mem_realloc(buf, (ctx->consts_limit + ctx->insns_limit) * sizeof(ir_insn));
 	ctx->ir_base = buf + ctx->consts_limit;
+
+	if (ctx->use_lists) {
+		ctx->use_lists = ir_mem_realloc(ctx->use_lists, ctx->insns_limit * sizeof(ir_use_list));
+		memset(ctx->use_lists + old_insns_limit, 0,
+			(ctx->insns_limit - old_insns_limit) * sizeof(ir_use_list));
+	}
+
+	if (ctx->cfg_map) {
+		ctx->cfg_map = ir_mem_realloc(ctx->cfg_map, ctx->insns_limit * sizeof(uint32_t));
+		memset(ctx->cfg_map + old_insns_limit, 0,
+			(ctx->insns_limit - old_insns_limit) * sizeof(uint32_t));
+	}
 }
 
 static ir_ref ir_next_insn(ir_ctx *ctx)
@@ -1110,11 +1123,13 @@ ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n)
 
 ir_ref ir_param(ir_ctx *ctx, ir_type type, ir_ref region, const char *name, int pos)
 {
+	IR_ASSERT(ctx->ir_base[region].op == IR_START);
 	return ir_emit(ctx, IR_OPT(IR_PARAM, type), region, ir_str(ctx, name), pos);
 }
 
 ir_ref ir_var(ir_ctx *ctx, ir_type type, ir_ref region, const char *name)
 {
+	IR_ASSERT(IR_IS_BB_START(ctx->ir_base[region].op));
 	return ir_emit(ctx, IR_OPT(IR_VAR, type), region, ir_str(ctx, name), IR_UNUSED);
 }
 
@@ -1137,6 +1152,12 @@ ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def)
 	return def;
 }
 
+ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
+{
+	ir_ref var = ir_hashtab_find(ctx->binding, ref);
+	return (var != (ir_ref)IR_INVALID_VAL) ? var : 0;
+}
+
 /* Batch construction of def->use edges */
 #if 0
 void ir_build_def_use_lists(ir_ctx *ctx)
@@ -1144,7 +1165,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 	ir_ref n, i, j, *p, def;
 	ir_insn *insn;
 	uint32_t edges_count;
-	ir_use_list *lists = ir_mem_calloc(ctx->insns_count, sizeof(ir_use_list));
+	ir_use_list *lists = ir_mem_calloc(ctx->insns_limit, sizeof(ir_use_list));
 	ir_ref *edges;
 	ir_use_list *use_list;
 
@@ -1174,7 +1195,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 		use_list->count = 0;
 	}
 
-	edges = ir_mem_malloc(edges_count * sizeof(ir_ref));
+	edges = ir_mem_malloc(IR_ALIGNED_SIZE(edges_count * sizeof(ir_ref), 4096));
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base + i; i < ctx->insns_count;) {
 		n = insn->inputs_count;
 		for (j = n, p = insn->ops + 1; j > 0; j--, p++) {
@@ -1199,7 +1220,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 	ir_ref n, i, j, *p, def;
 	ir_insn *insn;
 	size_t linked_lists_size, linked_lists_top = 0, edges_count = 0;
-	ir_use_list *lists = ir_mem_calloc(ctx->insns_count, sizeof(ir_use_list));
+	ir_use_list *lists = ir_mem_calloc(ctx->insns_limit, sizeof(ir_use_list));
 	ir_ref *edges;
 	ir_use_list *use_list;
 	ir_ref *linked_lists;
@@ -1243,7 +1264,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 	}
 
 	ctx->use_edges_count = edges_count;
-	edges = ir_mem_malloc(edges_count * sizeof(ir_ref));
+	edges = ir_mem_malloc(IR_ALIGNED_SIZE(edges_count * sizeof(ir_ref), 4096));
 	for (use_list = lists + ctx->insns_count - 1; use_list != lists; use_list--) {
 		n = use_list->refs;
 		if (n) {
@@ -1268,9 +1289,11 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref ref)
 {
 	ir_ref j, n, *p, *q, use;
-	ir_use_list *use_list = &ctx->use_lists[from];
+	ir_use_list *use_list;
 	ir_ref skip = 0;
 
+	IR_ASSERT(from > 0);
+	use_list = &ctx->use_lists[from];
 	n = use_list->count;
 	for (j = 0, p = q = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
 		use = *p;
@@ -1295,8 +1318,10 @@ void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref ref)
 void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref ref)
 {
 	ir_ref j, n, *p;
-	ir_use_list *use_list = &ctx->use_lists[from];
+	ir_use_list *use_list;
 
+	IR_ASSERT(from > 0);
+	use_list = &ctx->use_lists[from];
 	n = use_list->count;
 	j = 0;
 	p = &ctx->use_edges[use_list->refs];
@@ -1319,9 +1344,11 @@ void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref ref)
 
 void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
 {
-	ir_use_list *use_list = &ctx->use_lists[ref];
+	ir_use_list *use_list;
 	ir_ref i, n, *p;
 
+	IR_ASSERT(ref > 0);
+	use_list = &ctx->use_lists[ref];
 	n = use_list->count;
 	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
 		if (*p == use) {
@@ -1333,9 +1360,11 @@ void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use
 
 void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
 {
-	ir_use_list *use_list = &ctx->use_lists[ref];
+	ir_use_list *use_list;
 	ir_ref i, n, *p;
 
+	IR_ASSERT(ref > 0);
+	use_list = &ctx->use_lists[ref];
 	n = use_list->count;
 	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
 		if (*p == use) {
@@ -1346,22 +1375,107 @@ void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use
 
 bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 {
-	ir_use_list *use_list = &ctx->use_lists[to];
-	ir_ref n = use_list->refs + use_list->count;
+	ir_use_list *use_list;
+	ir_ref n;
 
+	IR_ASSERT(to > 0);
+	use_list = &ctx->use_lists[to];
+	n = use_list->refs + use_list->count;
 	if (n < ctx->use_edges_count && ctx->use_edges[n] == IR_UNUSED) {
 		ctx->use_edges[n] = ref;
 		use_list->count++;
 		return 0;
 	} else {
-		/* Reallocate the whole edges buffer (this is inefficient) */
-		ctx->use_edges = ir_mem_realloc(ctx->use_edges, (ctx->use_edges_count + use_list->count + 1) * sizeof(ir_ref));
+		size_t old_size = IR_ALIGNED_SIZE(ctx->use_edges_count * sizeof(ir_ref), 4096);
+		size_t new_size = IR_ALIGNED_SIZE((ctx->use_edges_count + use_list->count + 1) * sizeof(ir_ref), 4096);
+
+		if (old_size < new_size) {
+			/* Reallocate the whole edges buffer (this is inefficient) */
+			ctx->use_edges = ir_mem_realloc(ctx->use_edges, new_size);
+		} else if (n == ctx->use_edges_count) {
+			ctx->use_edges[n] = ref;
+			use_list->count++;
+			ctx->use_edges_count++;
+			return 0;
+		}
 		memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
 		use_list->refs = ctx->use_edges_count;
 		ctx->use_edges[use_list->refs + use_list->count] = ref;
 		use_list->count++;
 		ctx->use_edges_count += use_list->count;
 		return 1;
+	}
+}
+
+static int ir_ref_cmp(const void *p1, const void *p2)
+{
+	return *(ir_ref*)p1 - *(ir_ref*)p2;
+}
+
+void ir_use_list_sort(ir_ctx *ctx, ir_ref ref)
+{
+	ir_use_list *use_list;
+	uint32_t n;
+
+	IR_ASSERT(ref > 0);
+	use_list = &ctx->use_lists[ref];
+	n = use_list->count;
+	if (n > 1) {
+		qsort(ctx->use_edges + use_list->refs, n, sizeof(ir_ref), ir_ref_cmp);
+	}
+}
+
+void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref)
+{
+	int i, j, n, *p, use;
+	ir_insn *insn;
+	ir_use_list *use_list;
+
+	IR_ASSERT(ref != new_ref);
+	use_list = &ctx->use_lists[ref];
+	n = use_list->count;
+	p = ctx->use_edges + use_list->refs;
+
+	if (new_ref < 0) {
+		/* constant or IR_UNUSED */
+		for (; n; p++, n--) {
+			use = *p;
+			IR_ASSERT(use != ref);
+			insn = &ctx->ir_base[use];
+			j = ir_insn_find_op(insn, ref);
+			IR_ASSERT(j > 0);
+			ir_insn_set_op(insn, j, new_ref);
+		}
+	} else {
+		for (i = 0; i < n; p++, i++) {
+			use = *p;
+			IR_ASSERT(use != ref);
+			insn = &ctx->ir_base[use];
+			j = ir_insn_find_op(insn, ref);
+			IR_ASSERT(j > 0);
+			ir_insn_set_op(insn, j, new_ref);
+			if (ir_use_list_add(ctx, new_ref, use)) {
+				/* restore after reallocation */
+				use_list = &ctx->use_lists[ref];
+				n = use_list->count;
+				p = &ctx->use_edges[use_list->refs + i];
+			}
+		}
+	}
+}
+
+void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val)
+{
+	ir_insn *insn = &ctx->ir_base[ref];
+	ir_ref old_val = ir_insn_op(insn, idx);
+
+	IR_ASSERT(old_val != new_val);
+	if (new_val > 0) {
+		ir_use_list_add(ctx, new_val, ref);
+	}
+	ir_insn_set_op(insn, idx, new_val);
+	if (old_val > 0) {
+		ir_use_list_remove_one(ctx, old_val, ref);
 	}
 }
 
@@ -1408,16 +1522,16 @@ void ir_list_remove(ir_list *l, uint32_t i)
 	l->len--;
 }
 
-bool ir_list_contains(const ir_list *l, ir_ref val)
+uint32_t ir_list_find(const ir_list *l, ir_ref val)
 {
 	uint32_t i;
 
 	for (i = 0; i < l->len; i++) {
 		if (ir_array_at(&l->a, i) == val) {
-			return 1;
+			return i;
 		}
 	}
-	return 0;
+	return (uint32_t)-1;
 }
 
 static uint32_t ir_hashtab_hash_size(uint32_t size)
@@ -1963,7 +2077,7 @@ ir_ref _ir_VAR(ir_ctx *ctx, ir_type type, const char* name)
 	ir_ref ref = ctx->control;
 
 	while (1) {
-		IR_ASSERT(ctx->control);
+		IR_ASSERT(ref);
 		if (IR_IS_BB_START(ctx->ir_base[ref].op)) {
 			break;
 		}
@@ -1990,18 +2104,22 @@ ir_ref _ir_PHI_N(ir_ctx *ctx, ir_type type, ir_ref n, ir_ref *inputs)
 		return inputs[0];
 	} else {
 	    ir_ref i;
-		ir_ref ref = inputs[0];
+		ir_ref ref;
 
-		IR_ASSERT(ctx->ir_base[ctx->control].op == IR_MERGE || ctx->ir_base[ctx->control].op == IR_LOOP_BEGIN);
-		if (ref != IR_UNUSED) {
-			for (i = 1; i < n; i++) {
-				if (inputs[i] != ref) {
-					break;
+		if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
+			IR_ASSERT(ctx->ir_base[ctx->control].op == IR_MERGE
+				|| ctx->ir_base[ctx->control].op == IR_LOOP_BEGIN);
+			ref = inputs[0];
+			if (ref != IR_UNUSED) {
+				for (i = 1; i < n; i++) {
+					if (inputs[i] != ref) {
+						break;
+					}
 				}
-			}
-			if (i == n) {
-				/* all the same */
-				return ref;
+				if (i == n) {
+					/* all the same */
+					return ref;
+				}
 			}
 		}
 
@@ -2046,7 +2164,8 @@ void _ir_ENTRY(ir_ctx *ctx, ir_ref src, ir_ref num)
 void _ir_BEGIN(ir_ctx *ctx, ir_ref src)
 {
 	IR_ASSERT(!ctx->control);
-	if (src
+	if (EXPECTED(ctx->flags & IR_OPT_FOLDING)
+	 && src
 	 && src + 1 == ctx->insns_count
 	 && ctx->ir_base[src].op == IR_END) {
 		/* merge with the last END */
@@ -2075,8 +2194,14 @@ ir_ref _ir_IF(ir_ctx *ctx, ir_ref condition)
 {
 	ir_ref if_ref;
 
-	condition = _ir_fold_condition(ctx, condition);
 	IR_ASSERT(ctx->control);
+	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
+		if_ref = ir_emit2(ctx, IR_IF, ctx->control, condition);
+		ctx->control = IR_UNUSED;
+		return if_ref;
+	}
+
+	condition = _ir_fold_condition(ctx, condition);
 	if (IR_IS_CONST_REF(condition)) {
 		condition = ir_ref_is_true(ctx, condition) ? IR_TRUE : IR_FALSE;
 	} else {
@@ -2629,7 +2754,7 @@ void _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 			return;
 		}
 		condition = IR_FALSE;
-	} else {
+	} else if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
 		ir_insn *prev = NULL;
 		ir_ref ref = ctx->control;
 		ir_insn *insn;
@@ -2675,7 +2800,7 @@ void _ir_GUARD_NOT(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 			return;
 		}
 		condition = IR_TRUE;
-	} else {
+	} else if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
 		ir_insn *prev = NULL;
 		ir_ref ref = ctx->control;
 		ir_insn *insn;
@@ -2759,6 +2884,10 @@ ir_ref _ir_VLOAD(ir_ctx *ctx, ir_type type, ir_ref var)
 	ir_ref ref = ctx->control;
 	ir_insn *insn;
 
+	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
+		IR_ASSERT(ctx->control);
+		return ctx->control = ir_emit2(ctx, IR_OPT(IR_VLOAD, type), ctx->control, var);
+	}
 	while (ref > var) {
 		insn = &ctx->ir_base[ref];
 		if (insn->op == IR_VLOAD) {
@@ -2804,6 +2933,12 @@ void _ir_VSTORE(ir_ctx *ctx, ir_ref var, ir_ref val)
 	ir_ref prev = IR_UNUSED;
 	ir_insn *insn;
 	bool guarded = 0;
+
+	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
+		IR_ASSERT(ctx->control);
+		ctx->control = ir_emit3(ctx, IR_VSTORE, ctx->control, var, val);
+		return;
+	}
 
 	if (!IR_IS_CONST_REF(val)) {
 		insn = &ctx->ir_base[val];
@@ -2873,9 +3008,12 @@ void _ir_RSTORE(ir_ctx *ctx, ir_ref reg, ir_ref val)
 
 ir_ref _ir_LOAD(ir_ctx *ctx, ir_type type, ir_ref addr)
 {
-	ir_ref ref = ir_find_aliasing_load(ctx, ctx->control, type, addr);
+	ir_ref ref = IR_UNUSED;
 
 	IR_ASSERT(ctx->control);
+	if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
+		ref = ir_find_aliasing_load(ctx, ctx->control, type, addr);
+	}
 	if (!ref) {
 		ctx->control = ref = ir_emit2(ctx, IR_OPT(IR_LOAD, type), ctx->control, addr);
 	}
@@ -2892,6 +3030,12 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 	ir_type type2;
 	bool guarded = 0;
 
+	IR_ASSERT(ctx->control);
+	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
+		ctx->control = ir_emit3(ctx, IR_STORE, ctx->control, addr, val);
+		return;
+	}
+
 	if (!IR_IS_CONST_REF(val)) {
 		insn = &ctx->ir_base[val];
 		if (insn->op == IR_BITCAST
@@ -2902,7 +3046,6 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 		}
 	}
 
-	IR_ASSERT(ctx->control);
 	while (ref > limit) {
 		insn = &ctx->ir_base[ref];
 		if (insn->op == IR_STORE) {

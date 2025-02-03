@@ -357,8 +357,8 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 		object_init_ex(return_value, stream_bucket_class_entry);
 		zend_update_property(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("bucket"), &zbucket);
-		/* add_property_zval increments the refcount which is unwanted here */
-		zval_ptr_dtor(&zbucket);
+		/* zend_update_property increments the refcount which is unwanted here */
+		Z_DELREF(zbucket);
 		zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
 		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
 		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("dataLength"), bucket->buflen);
@@ -461,8 +461,8 @@ PHP_FUNCTION(stream_bucket_new)
 	ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 	object_init_ex(return_value, stream_bucket_class_entry);
 	zend_update_property(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("bucket"), &zbucket);
-	/* add_property_zval increments the refcount which is unwanted here */
-	zval_ptr_dtor(&zbucket);
+	/* zend_update_property increments the refcount which is unwanted here */
+	Z_DELREF(zbucket);
 	zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
 	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
 	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("dataLength"), bucket->buflen);
@@ -521,13 +521,17 @@ PHP_FUNCTION(stream_filter_register)
 	fdat = ecalloc(1, sizeof(struct php_user_filter_data));
 	fdat->classname = zend_string_copy(classname);
 
-	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
-		RETVAL_TRUE;
+	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL) {
+		if (php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
+			RETURN_TRUE;
+		}
+
+		zend_hash_del(BG(user_filter_map), filtername);
 	} else {
 		zend_string_release_ex(classname, 0);
 		efree(fdat);
-		RETVAL_FALSE;
 	}
+
+	RETURN_FALSE;
 }
 /* }}} */

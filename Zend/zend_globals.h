@@ -182,6 +182,10 @@ struct _zend_executor_globals {
 	JMP_BUF *bailout;
 
 	int error_reporting;
+
+	bool fatal_error_backtrace_on;
+	zval last_fatal_error_backtrace;
+
 	int exit_status;
 
 	HashTable *function_table;	/* function symbol table */

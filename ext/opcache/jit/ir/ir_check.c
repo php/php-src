@@ -291,6 +291,12 @@ bool ir_check(const ir_ctx *ctx)
 					ok = 0;
 				}
 				break;
+			case IR_PARAM:
+				if (i > 2 && ctx->ir_base[i - 1].op != IR_PARAM) {
+					fprintf(stderr, "ir_base[%d].op PARAMs must be used only right after START\n", i);
+					ok = 0;
+				}
+				break;
 		}
 
 		if (ctx->use_lists) {
@@ -361,6 +367,10 @@ bool ir_check(const ir_ctx *ctx)
 								if (count == 1) {
 									break;
 								}
+							}
+							if (count == 0 && (insn->op == IR_END || insn->op == IR_LOOP_END)) {
+								/* Dead block */
+								break;
 							}
 							fprintf(stderr, "ir_base[%d].op (%s) must have 1 successor (%d)\n",
 								i, ir_op_name[insn->op], count);

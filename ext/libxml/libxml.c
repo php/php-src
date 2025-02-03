@@ -433,9 +433,9 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 
 			if (strncasecmp(resolved_path, "file:/", pre_len) == 0
 				&& '/' != resolved_path[pre_len]) {
-				xmlChar *tmp = xmlStrdup(resolved_path + pre_len);
+				xmlChar *tmp = xmlStrdup(BAD_CAST (resolved_path + pre_len));
 				xmlFree(resolved_path);
-				resolved_path = tmp;
+				resolved_path = (char *) tmp;
 			}
 		}
 #endif
@@ -562,11 +562,11 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	char *unescaped = NULL;
 
 	if (URI == NULL)
-		return(NULL);
+		goto err;
 
 	if (strstr(URI, "%00")) {
 		php_error_docref(NULL, E_WARNING, "URI must not contain percent-encoded NUL bytes");
-		return NULL;
+		goto err;
 	}
 
 	puri = xmlParseURI(URI);
@@ -587,7 +587,7 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	}
 
 	if (context == NULL) {
-		return(NULL);
+		goto err;
 	}
 
 	/* Allocate the Output buffer front-end. */
@@ -599,6 +599,11 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	}
 
 	return(ret);
+
+err:
+	/* Similarly to __xmlOutputBufferCreateFilename we should also close the encoder on failure. */
+	xmlCharEncCloseFunc(encoder);
+	return NULL;
 }
 
 static void php_libxml_free_error(void *ptr)

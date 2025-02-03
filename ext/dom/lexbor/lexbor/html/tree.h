@@ -333,7 +333,7 @@ lxb_html_tree_acknowledge_token_self_closing(lxb_html_tree_t *tree,
 
     bool is_void = lxb_html_tag_is_void(token->tag_id);
 
-    if (is_void) {
+    if (!is_void) {
         lxb_html_tree_parse_error(tree, token,
                                   LXB_HTML_RULES_ERROR_NOVOHTELSTTAWITRSO);
     }

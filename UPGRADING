@@ -28,6 +28,14 @@ PHP 8.5 UPGRADE NOTES
 - Core:
   . It is no longer possible to use "array" and "callable" as class alias names
     in class_alias().
+  . Loosely comparing uncomparable objects (e.g. enums, \CurlHandle and other
+    internal classes) to booleans was previously inconsistent. If compared to a
+    boolean literal $object == true, it would behave the same way as (bool)
+    $object. If compared to a statically unknown value $object == $true, it
+    would always return false. This behavior was consolidated to always follow
+    the behavior of (bool) $object.
+  . The return value of gc_collect_cycles() no longer includes strings and
+    resources that were indirectly collected through cycles.
 
 - Intl:
   . The extension now requires at least ICU 57.1.
@@ -36,13 +44,50 @@ PHP 8.5 UPGRADE NOTES
   . ldap_get_option() and ldap_set_option() now throw a ValueError when
     passing an invalid option.
 
+- PCNTL:
+  . pcntl_exec() now throws ValueErrors when entries of the $args parameter
+    contain null bytes.
+  . pcntl_exec() now throws ValueErrors when entries or keys of the
+    $env_vars parameter contain null bytes.
+
+- PDO:
+  . The constructor arguments set in conjunction with PDO::FETCH_CLASS now
+    follow the usual CUFA (call_user_func_array) semantics.
+    This means string keys will act like a named argument.
+    Moreover, automatic wrapping for by-value arguments passed to a by-ref
+    parameter has been removed, and the usual E_WARNING about this is now
+    emitted.
+    To pass a variable by-ref to a constructor argument use the general
+    array value reference assignment: $ctor_args = [&$valByRef]
+  . Attempting to modify a PDOStatement during a call to PDO::fetch(),
+    PDO::fetchObject(), PDO::fetchAll() will now throw an Error.
+
+- PDO_FIREBIRD:
+  . A ValueError is now thrown when trying to set a cursor name that is too
+    long on a PDOStatement resulting from the Firebird driver.
+
 - SPL:
   . ArrayObject no longer accepts enums, as modifying the $name or $value
     properties can break engine assumptions.
+  . SplFileObject::fwrite's parameter $length is now nullable. The default
+    value changed from 0 to null.
 
 ========================================
 2. New Features
 ========================================
+
+- Core:
+  . Closure is now a proper subtype of callable
+  . Added support for Closures in constant expressions.
+    RFC: https://wiki.php.net/rfc/closures_in_const_expr
+  . Fatal Errors (such as an exceeded maximum execution time) now include a
+    backtrace.
+    RFC: https://wiki.php.net/rfc/error_backtraces_v2
+
+- Curl:
+  . Added support for share handles that are persisted across multiple PHP
+    requests, safely allowing for more effective connection reuse.
+    RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
 
 - DOM:
   . Added Dom\Element::$outerHTML.
@@ -59,6 +104,10 @@ PHP 8.5 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . Trying to set a process title that is too long with cli_set_process_title()
+    will now fail instead of silently truncating the given title.
+
 ========================================
 4. Deprecated Functionality
 ========================================
@@ -72,10 +121,16 @@ PHP 8.5 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
-- Zlib:
-  . The "use_include_path" argument for the 
-    gzfile, gzopen and readgzfile functions had been changed
-    from int to boolean.
+- Intl:
+  . IntlDateFormatter::setTimeZone()/datefmt_set_timezone()
+    throws an IntlException on uninitialised classes/clone failures.
+
+  . grapheme_extract() properly assigns $next value when skipping over
+    invalid starting bytes. Previously there were cases where it would
+    point to the start of the grapheme boundary instead of the end.
+
+- PCNTL:
+  . pcntl_exec() now has a formal return type of false.
 
 - PDO_PGSQL:
   . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
@@ -85,6 +140,52 @@ PHP 8.5 UPGRADE NOTES
 
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
+  . pg_connect checks if the connection_string argument contains
+    any null byte.
+  . pg_close_stmt checks if the statement_name argument contains
+    any null byte.
+
+- POSIX:
+  . posix_ttyname sets last_error to EBADF when encountering
+    an invalid file descriptor.
+  . posix_isatty raises an E_WARNING message when encountering
+    an invalid file descriptor.
+  . posix_fpathconf checks invalid file descriptors and sets
+    last_error to EBADF and raises an E_WARNING message.
+
+- Session:
+  . session_start is stricter in regard of the option argument.
+    it throws a ValueError if the whole is not a hashmap or
+    a TypeError if read_on_close value is not a valid type
+    compatible with int.
+
+- SNMP:
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3
+    and SNMP::__construct() throw a ValueError when the hostname
+    is too large, contains any null byte or if the port is given
+    when negative or greater than 65535, timeout and retries values
+    are lower than -1 or too large.
+
+- Sockets:
+  . socket_create_listen, socket_bind and socket_sendto throw a
+    ValueError if the port is lower than 0 or greater than 65535,
+    also if any of the hints array entry is indexes numerically.
+  . socket_addrinfo_lookup throw a TypeError if any of the hints
+    values cannot be cast to a int and can throw a ValueError if
+    any of these values overflow.
+  . socket_set_option with MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
+    options will throw an exception if the value isn't a valid object
+    or array.
+  . socket_create/socket_bind can create AF_PACKET family sockets.
+  . socket_getsockname gets the interface index and its string
+    representation with AF_PACKET socket.
+
+- Zlib:
+  . The "use_include_path" argument for the
+    gzfile, gzopen and readgzfile functions had been changed
+    from int to boolean.
+  . gzfile, gzopen and readgzfile functions now respect the default
+    stream context.
 
 ========================================
 6. New Functions
@@ -94,9 +195,18 @@ PHP 8.5 UPGRADE NOTES
   . curl_multi_get_handles() allows retrieving all CurlHandles current
     attached to a CurlMultiHandle. This includes both handles added using
     curl_multi_add_handle() and handles accepted by CURLMOPT_PUSHFUNCTION.
+  . curl_share_init_persistent() allows creating a share handle that is
+    persisted across multiple PHP requests.
+    RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
 
 - DOM:
   . Added Dom\Element::insertAdjacentHTML().
+
+- Enchant:
+  . Added enchant_dict_remove_from_session() to remove a word added to the
+    spellcheck session via enchant_dict_add_to_session().
+  . Added enchant_dict_remove() to put a word on the exclusion list and
+    remove it from the session dictionary.
 
 - PGSQL:
   . pg_close_stmt offers an alternative way to close a prepared
@@ -111,6 +221,11 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- Curl:
+  . CurlSharePersistentHandle representing a share handle that is persisted
+    across multiple PHP requests.
+    RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -138,10 +253,21 @@ PHP 8.5 UPGRADE NOTES
 - Sockets:
   . IPPROTO_ICMP/IPPROTO_ICMPV6.
   . TCP_FUNCTION_BLK (FreeBSD only).
+  . TCP_FUNCTION_ALIAS (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA_NODOM (FreeBSD only).
+  . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
+  . TCP_BBR_ALGORITHM (FreeBSD only).
+  . AF_PACKET (Linux only).
 
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- Core:
+  . Added fatal_error_backtraces to control whether fatal errors should include
+    a backtrace.
+    RFC: https://wiki.php.net/rfc/error_backtraces_v2
 
 - Opcache:
   . Added opcache.file_cache_read_only to support a read-only
@@ -162,6 +288,16 @@ PHP 8.5 UPGRADE NOTES
   PHP_RELEASE_VERSION are now always numbers.  Previously, they have been
   strings for buildconf builds.
 
+* phpize builds now reflect the source tree in the build dir (like that already
+  worked for in-tree builds); some extension builds (especially when using
+  Makefile.frag.w32) may need adjustments.
+
+* --enable-sanitzer is now supported for MSVC builds.  This enables ASan and
+  debug assertions, and is supported as of MSVC 16.10 and Windows 10.
+
+* The --with-uncritical-warn-choke configuration option for clang builds is
+  no longer supported.  Select warnings to suppress via CFLAGS instead.
+
 * COM:
   . The extension is now build shared by default; previously it defaulted to a
     static extension, although the official Windows binaries built a shared
@@ -172,13 +308,28 @@ PHP 8.5 UPGRADE NOTES
     and FFI::load(). However, this convenience feature should not be used in
     production.
 
+* Streams:
+  . If only pipe streams are contained in the $read array, and the $write and
+    $except arrays are empty, stream_select() now behaves similar to POSIX
+    systems, i.e. the function only returns if at least one pipe is ready to be
+    read, or after the timeout expires.  Previously, stream_select() returned
+    immediately, reporting all streams as ready to read.
+
 ========================================
 13. Other Changes
 ========================================
 
+- Core:
+  The high resolution timer (`hrtime()`) on macOS now uses the recommended
+  `clock_gettime_nsec_np(CLOCK_UPTIME_RAW)` API instead of
+  `mach_absolute_time()`.
+
 ========================================
 14. Performance Improvements
 ========================================
+
+- XMLReader:
+  . Improved property access performance.
 
 - XMLWriter:
   . Improved performance and reduce memory consumption.

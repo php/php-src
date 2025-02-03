@@ -281,7 +281,8 @@ PW32IO int php_win32_ioutil_close(int fd)
 
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
-	size_t path_len, dir_len = 0;
+	size_t path_len;
+	DWORD dir_len = 0;
 	const wchar_t *my_path;
 
 	if (!path) {
@@ -316,7 +317,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 			return -1;
 		}
-		memmove(tmp, path, (path_len + 1) * sizeof(wchar_t));
+		memcpy(tmp, path, (path_len + 1) * sizeof(wchar_t));
 
 		if (PHP_WIN32_IOUTIL_NORM_FAIL == php_win32_ioutil_normalize_path_w(&tmp, path_len, &path_len)) {
 			free(tmp);
@@ -331,12 +332,12 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 				free(tmp);
 				return -1;
 			}
-			memmove(_tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+			memcpy(_tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
 			src = tmp;
 			dst = _tmp + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 #ifndef ZTS
 			if (dir_len > 0) {
-				size_t len = GetCurrentDirectoryW(dir_len, dst);
+				DWORD len = GetCurrentDirectoryW(dir_len, dst);
 				if (len == 0 || len + 1 != dir_len) {
 					free(tmp);
 					free(_tmp);

@@ -272,6 +272,7 @@ function main(): void
         'disable_functions=',
         'output_buffering=Off',
         'error_reporting=' . E_ALL,
+        'fatal_error_backtraces=Off',
         'display_errors=1',
         'display_startup_errors=1',
         'log_errors=0',
@@ -1231,7 +1232,7 @@ function system_with_timeout(
 
 function run_all_tests(array $test_files, array $env, ?string $redir_tested = null): void
 {
-    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
+    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache, $shuffle;
     global $preload;
     // Parallel testing
     global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
@@ -1251,6 +1252,11 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
             }
             return true;
         });
+    }
+
+    // To discover parallelization issues and order dependent tests it is useful to randomize the test order.
+    if ($shuffle) {
+        shuffle($test_files);
     }
 
     /* Ignore -jN if there is only one file to analyze. */
@@ -1358,11 +1364,8 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
     // Some tests assume that they are executed in a certain order. We will be popping from
     // $test_files, so reverse its order here. This makes sure that order is preserved at least
     // for tests with a common conflict key.
-    $test_files = array_reverse($test_files);
-
-    // To discover parallelization issues it is useful to randomize the test order.
-    if ($shuffle) {
-        shuffle($test_files);
+    if (!$shuffle) {
+        $test_files = array_reverse($test_files);
     }
 
     // Don't start more workers than test files.
@@ -3070,18 +3073,6 @@ SLOW TEST SUMMARY
         $failed_test_summary .= "=====================================================================\n";
     }
 
-    if (count($PHP_FAILED_TESTS['XFAILED'])) {
-        $failed_test_summary .= '
-=====================================================================
-EXPECTED FAILED TEST SUMMARY
----------------------------------------------------------------------
-';
-        foreach ($PHP_FAILED_TESTS['XFAILED'] as $failed_test_data) {
-            $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
-        }
-        $failed_test_summary .= "=====================================================================\n";
-    }
-
     if (count($PHP_FAILED_TESTS['BORKED'])) {
         $failed_test_summary .= '
 =====================================================================
@@ -3126,19 +3117,6 @@ LEAKED TEST SUMMARY
 ---------------------------------------------------------------------
 ';
         foreach ($PHP_FAILED_TESTS['LEAKED'] as $failed_test_data) {
-            $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
-        }
-
-        $failed_test_summary .= "=====================================================================\n";
-    }
-
-    if (count($PHP_FAILED_TESTS['XLEAKED'])) {
-        $failed_test_summary .= '
-=====================================================================
-EXPECTED LEAK TEST SUMMARY
----------------------------------------------------------------------
-';
-        foreach ($PHP_FAILED_TESTS['XLEAKED'] as $failed_test_data) {
             $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
         }
 

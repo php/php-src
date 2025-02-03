@@ -374,7 +374,11 @@ PHPDBG_INFO(memory) /* {{{ */
 static inline void phpdbg_print_class_name(zend_class_entry *ce) /* {{{ */
 {
 	const char *visibility = ce->type == ZEND_USER_CLASS ? "User" : "Internal";
-	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class" : "Class";
+	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface"
+		: (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class"
+		: (ce->ce_flags & ZEND_ACC_ENUM) ? "Enum"
+		: (ce->ce_flags & ZEND_ACC_TRAIT) ? "Trait"
+		: "Class";
 
 	phpdbg_writeln("%s %s %.*s (%d)", visibility, type, (int) ZSTR_LEN(ce->name), ZSTR_VAL(ce->name), zend_hash_num_elements(&ce->function_table));
 } /* }}} */

@@ -4,14 +4,19 @@ const WORKER_ARGV_VALUE = 'RUN_WORKER';
 
 const WORKER_DEFAULT_NAME = 'server';
 
-function phpt_notify($worker = WORKER_DEFAULT_NAME)
+function phpt_notify(string $worker = WORKER_DEFAULT_NAME, string $message = ""): void
 {
-    ServerClientTestCase::getInstance()->notify($worker);
+    ServerClientTestCase::getInstance()->notify($worker, $message);
 }
 
-function phpt_wait($worker = WORKER_DEFAULT_NAME, $timeout = null)
+function phpt_wait($worker = WORKER_DEFAULT_NAME, $timeout = null): ?string
 {
-    ServerClientTestCase::getInstance()->wait($worker, $timeout);
+    return ServerClientTestCase::getInstance()->wait($worker, $timeout);
+}
+
+function phpt_notify_server_start($server): void
+{
+    ServerClientTestCase::getInstance()->notify_server_start($server);
 }
 
 function phpt_has_sslv3() {
@@ -149,43 +154,73 @@ class ServerClientTestCase
         eval($code);
     }
 
-    public function run($masterCode, $workerCode)
+    /**
+     * Run client and all workers
+     *
+     * @param string       $clientCode The client PHP code
+     * @param string|array $workerCode
+     * @param bool         $ephemeral Select whether automatic port selection and automatic awaiting is used
+     * @return void
+     * @throws Exception
+     */
+    public function run(string $clientCode, string|array $workerCode, bool $ephemeral = true): void
     {
         if (!is_array($workerCode)) {
             $workerCode = [WORKER_DEFAULT_NAME => $workerCode];
         }
-        foreach ($workerCode as $worker => $code) {
+        reset($workerCode);
+        $code = current($workerCode);
+        $worker = key($workerCode);
+        while ($worker != null) {
             $this->spawnWorkerProcess($worker, $this->stripPhpTagsFromCode($code));
+            $code = next($workerCode);
+            if ($ephemeral) {
+                $addr = trim($this->wait($worker));
+                if (empty($addr)) {
+                    throw new \Exception("Failed server start");
+                }
+                if ($code === false) {
+                    $clientCode = preg_replace('/{{\s*ADDR\s*}}/', $addr, $clientCode);
+                } else {
+                    $code = preg_replace('/{{\s*ADDR\s*}}/', $addr, $code);
+                }
+            }
+            $worker = key($workerCode);
         }
-        eval($this->stripPhpTagsFromCode($masterCode));
+
+        eval($this->stripPhpTagsFromCode($clientCode));
         foreach ($workerCode as $worker => $code) {
             $this->cleanupWorkerProcess($worker);
         }
     }
 
-    public function wait($worker, $timeout = null)
+    public function wait($worker, $timeout = null): ?string
     {
         $handle = $this->isWorker ? STDIN : $this->workerStdOut[$worker];
         if ($timeout === null) {
-            fgets($handle);
-            return true;
+            return fgets($handle);
         }
 
         stream_set_blocking($handle, false);
         $read = [$handle];
         $result = stream_select($read, $write, $except, $timeout);
         if (!$result) {
-            return false;
+            return null;
         }
 
-        fgets($handle);
+        $result = fgets($handle);
         stream_set_blocking($handle, true);
-        return true;
+        return $result;
     }
 
-    public function notify($worker)
+    public function notify(string $worker, string $message = ""): void
     {
-        fwrite($this->isWorker ? STDOUT : $this->workerStdIn[$worker], "\n");
+        fwrite($this->isWorker ? STDOUT : $this->workerStdIn[$worker], "$message\n");
+    }
+
+    public function notify_server_start($server): void
+    {
+        echo stream_socket_get_name($server, false) . "\n";
     }
 }
 

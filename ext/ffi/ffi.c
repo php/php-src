@@ -808,6 +808,7 @@ again:
 			if (ZSTR_LEN(str) == 1) {
 				*(char*)ptr = ZSTR_VAL(str)[0];
 			} else {
+				zend_tmp_string_release(tmp_str);
 				zend_ffi_assign_incompatible(value, type);
 				return FAILURE;
 			}
@@ -899,6 +900,9 @@ static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *n
 		case FFI_VECTORCALL_PARTIAL:
 			return strpprintf(0, "%s@@%zu", ZSTR_VAL(name), zend_ffi_arg_size(type));
 # endif
+		default:
+			/* other calling conventions don't apply name mangling */
+			break;
 	}
 #endif
 	return zend_string_copy(name);
@@ -985,6 +989,27 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	ret_type = ZEND_FFI_TYPE(callback_data->type->func.ret_type);
 	if (ret_type->kind != ZEND_FFI_TYPE_VOID) {
 		zend_ffi_zval_to_cdata(ret, ret_type, &retval);
+
+#ifdef WORDS_BIGENDIAN
+		if (ret_type->size < sizeof(ffi_arg)
+		 && ret_type->kind >= ZEND_FFI_TYPE_UINT8
+		 && ret_type->kind < ZEND_FFI_TYPE_POINTER) {
+			/* We need to widen the value (zero extend) */
+			switch (ret_type->size) {
+				case 1:
+					*(ffi_arg*)ret = *(uint8_t*)ret;
+					break;
+				case 2:
+					*(ffi_arg*)ret = *(uint16_t*)ret;
+					break;
+				case 4:
+					*(ffi_arg*)ret = *(uint32_t*)ret;
+					break;
+				default:
+					break;
+			}
+		}
+#endif
 	}
 
 	zval_ptr_dtor(&retval);
@@ -2855,7 +2880,31 @@ static ZEND_FUNCTION(ffi_trampoline) /* {{{ */
 	}
 
 	if (ZEND_FFI_TYPE(type->func.ret_type)->kind != ZEND_FFI_TYPE_VOID) {
-		zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1, 0);
+		zend_ffi_type *func_ret_type = ZEND_FFI_TYPE(type->func.ret_type);
+
+#ifdef WORDS_BIGENDIAN
+		if (func_ret_type->size < sizeof(ffi_arg)
+		 && func_ret_type->kind >= ZEND_FFI_TYPE_UINT8
+		 && func_ret_type->kind < ZEND_FFI_TYPE_POINTER) {
+
+			/* We need to narrow the value (truncate) */
+			switch (func_ret_type->size) {
+				case 1:
+					*(uint8_t*)ret = *(ffi_arg*)ret;
+					break;
+				case 2:
+					*(uint16_t*)ret = *(ffi_arg*)ret;
+					break;
+				case 4:
+					*(uint32_t*)ret = *(ffi_arg*)ret;
+					break;
+				default:
+					break;
+			}
+		}
+#endif
+
+		zend_ffi_cdata_to_zval(NULL, ret, func_ret_type, BP_VAR_R, return_value, 0, 1, 0);
 	} else {
 		ZVAL_NULL(return_value);
 	}
@@ -3006,7 +3055,7 @@ static void *dlsym_loaded(char *symbol)
 	return addr;
 }
 # undef DL_FETCH_SYMBOL
-# define DL_FETCH_SYMBOL(h, s) (h == NULL ? dlsym_loaded(s) : GetProcAddress(h, s))
+# define DL_FETCH_SYMBOL(h, s) (h == NULL ? dlsym_loaded(s) : (void*) GetProcAddress(h, s))
 #endif
 
 ZEND_METHOD(FFI, cdef) /* {{{ */
@@ -4995,38 +5044,85 @@ ZEND_METHOD(FFI_CType, getFuncParameterType) /* {{{ */
 }
 /* }}} */
 
+static char *zend_ffi_skip_ws_and_comments(char *p, bool allow_standalone_newline)
+{
+	while (true) {
+		if (*p == ' ' || *p == '\t') {
+			p++;
+		} else if (allow_standalone_newline && (*p == '\r' || *p == '\n' || *p == '\f' || *p == '\v')) {
+			p++;
+		} else if (allow_standalone_newline && *p == '/' && p[1] == '/') {
+			p += 2;
+			while (*p && *p != '\r' && *p != '\n') {
+				p++;
+			}
+		} else if (*p == '/' && p[1] == '*') {
+			p += 2;
+			while (*p && (*p != '*' || p[1] != '/')) {
+				p++;
+			}
+			if (*p == '*') {
+				p++;
+				if (*p == '/') {
+					p++;
+				}
+			}
+		} else {
+			break;
+		}
+	}
+
+	return p;
+}
+
 static char *zend_ffi_parse_directives(const char *filename, char *code_pos, char **scope_name, char **lib, bool preload) /* {{{ */
 {
 	char *p;
 
+	code_pos = zend_ffi_skip_ws_and_comments(code_pos, true);
+
 	*scope_name = NULL;
 	*lib = NULL;
 	while (*code_pos == '#') {
-		if (strncmp(code_pos, "#define FFI_SCOPE", sizeof("#define FFI_SCOPE") - 1) == 0
-		 && (code_pos[sizeof("#define FFI_SCOPE") - 1] == ' '
-		  || code_pos[sizeof("#define FFI_SCOPE") - 1] == '\t')) {
-			p = code_pos + sizeof("#define FFI_SCOPE");
-			while (*p == ' ' || *p == '\t') {
-				p++;
+		if (strncmp(code_pos, ZEND_STRL("#define")) == 0) {
+			p = zend_ffi_skip_ws_and_comments(code_pos + sizeof("#define") - 1, false);
+
+			char **target = NULL;
+			const char *target_name = NULL;
+			if (strncmp(p, ZEND_STRL("FFI_SCOPE")) == 0) {
+				p = zend_ffi_skip_ws_and_comments(p + sizeof("FFI_SCOPE") - 1, false);
+				target = scope_name;
+				target_name = "FFI_SCOPE";
+			} else if (strncmp(p, ZEND_STRL("FFI_LIB")) == 0) {
+				p = zend_ffi_skip_ws_and_comments(p + sizeof("FFI_LIB") - 1, false);
+				target = lib;
+				target_name = "FFI_LIB";
+			} else {
+				while (*p && *p != '\n' && *p != '\r') {
+					p++;
+				}
+				code_pos = zend_ffi_skip_ws_and_comments(p, true);
+				continue;
 			}
+
 			if (*p != '"') {
 				if (preload) {
-					zend_error(E_WARNING, "FFI: failed pre-loading '%s', bad FFI_SCOPE define", filename);
+					zend_error(E_WARNING, "FFI: failed pre-loading '%s', bad %s define", filename, target_name);
 				} else {
-					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', bad FFI_SCOPE define", filename);
+					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', bad %s define", filename, target_name);
 				}
 				return NULL;
 			}
 			p++;
-			if (*scope_name) {
+			if (*target) {
 				if (preload) {
-					zend_error(E_WARNING, "FFI: failed pre-loading '%s', FFI_SCOPE defined twice", filename);
+					zend_error(E_WARNING, "FFI: failed pre-loading '%s', %s defined twice", filename, target_name);
 				} else {
-					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', FFI_SCOPE defined twice", filename);
+					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', %s defined twice", filename, target_name);
 				}
 				return NULL;
 			}
-			*scope_name = p;
+			*target = p;
 			while (1) {
 				if (*p == '\"') {
 					*p = 0;
@@ -5034,68 +5130,16 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 					break;
 				} else if (*p <= ' ') {
 					if (preload) {
-						zend_error(E_WARNING, "FFI: failed pre-loading '%s', bad FFI_SCOPE define", filename);
+						zend_error(E_WARNING, "FFI: failed pre-loading '%s', bad %s define", filename, target_name);
 					} else {
-						zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', bad FFI_SCOPE define", filename);
+						zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', bad %s define", filename, target_name);
 					}
 					return NULL;
 				}
 				p++;
 			}
-			while (*p == ' ' || *p == '\t') {
-				p++;
-			}
-			while (*p == '\r' || *p == '\n') {
-				p++;
-			}
-			code_pos = p;
-		} else if (strncmp(code_pos, "#define FFI_LIB", sizeof("#define FFI_LIB") - 1) == 0
-		 && (code_pos[sizeof("#define FFI_LIB") - 1] == ' '
-		  || code_pos[sizeof("#define FFI_LIB") - 1] == '\t')) {
-			p = code_pos + sizeof("#define FFI_LIB");
-			while (*p == ' ' || *p == '\t') {
-				p++;
-			}
-			if (*p != '"') {
-				if (preload) {
-					zend_error(E_WARNING, "FFI: failed pre-loading '%s', bad FFI_LIB define", filename);
-				} else {
-					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', bad FFI_LIB define", filename);
-				}
-				return NULL;
-			}
-			p++;
-			if (*lib) {
-				if (preload) {
-					zend_error(E_WARNING, "FFI: failed pre-loading '%s', FFI_LIB defined twice", filename);
-				} else {
-					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', FFI_LIB defined twice", filename);
-				}
-				return NULL;
-			}
-			*lib = p;
-			while (1) {
-				if (*p == '\"') {
-					*p = 0;
-					p++;
-					break;
-				} else if (*p <= ' ') {
-					if (preload) {
-						zend_error(E_WARNING, "FFI: failed pre-loading '%s', bad FFI_LIB define", filename);
-					} else {
-						zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', bad FFI_LIB define", filename);
-					}
-					return NULL;
-				}
-				p++;
-			}
-			while (*p == ' ' || *p == '\t') {
-				p++;
-			}
-			while (*p == '\r' || *p == '\n') {
-				p++;
-			}
-			code_pos = p;
+
+			code_pos = zend_ffi_skip_ws_and_comments(p, true);
 		} else {
 			break;
 		}
@@ -7496,10 +7540,10 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 		case ZEND_FFI_TYPE_FLOAT:
 			if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
-				val->d = val->u64;
+				val->d = (zend_ffi_double) val->u64;
 			} else if (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
-				val->d = val->i64;
+				val->d = (zend_ffi_double) val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
@@ -7512,10 +7556,10 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 		case ZEND_FFI_TYPE_DOUBLE:
 			if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
-				val->d = val->u64;
+				val->d = (zend_ffi_double) val->u64;
 			} else if (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
-				val->d = val->i64;
+				val->d = (zend_ffi_double) val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_DOUBLE;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
@@ -7551,7 +7595,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT32;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT32;
 				val->u64 = val->ch;
@@ -7566,7 +7610,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_INT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_INT32;
-				val->i64 = val->d;
+				val->i64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_INT32;
 				val->i64 = val->ch;
@@ -7579,7 +7623,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT64;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT64;
 				val->u64 = val->ch;
@@ -7596,7 +7640,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->ch = val->i64;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_CHAR;
-				val->ch = val->d;
+				val->ch = (char) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 			} else {
 				val->kind = ZEND_FFI_VAL_ERROR;
@@ -7607,7 +7651,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 				val->kind = ZEND_FFI_VAL_UINT32;
 			} else if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
 				val->kind = ZEND_FFI_VAL_UINT32;
-				val->u64 = val->d;
+				val->u64 = (uint64_t) val->d;
 			} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 				val->kind = ZEND_FFI_VAL_UINT32;
 				val->u64 = val->ch;

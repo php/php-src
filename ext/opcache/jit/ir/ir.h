@@ -29,7 +29,9 @@ extern "C" {
 # endif
 /* Only supported is little endian for any arch on Windows,
    so just fake the same for all. */
-# define __ORDER_LITTLE_ENDIAN__ 1
+# ifndef __ORDER_LITTLE_ENDIAN__
+#  define __ORDER_LITTLE_ENDIAN__ 1
+# endif
 # define __BYTE_ORDER__ __ORDER_LITTLE_ENDIAN__
 # ifndef __has_builtin
 #  define __has_builtin(arg) (0)
@@ -528,11 +530,12 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_OPT_INLINE          (1<<16)
 #define IR_OPT_FOLDING         (1<<17)
 #define IR_OPT_CFG             (1<<18) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_CODEGEN         (1<<19)
-#define IR_GEN_NATIVE          (1<<20)
-#define IR_GEN_CODE            (1<<21) /* C or LLVM */
+#define IR_OPT_MEM2SSA         (1<<19)
+#define IR_OPT_CODEGEN         (1<<20)
+#define IR_GEN_NATIVE          (1<<21)
+#define IR_GEN_CODE            (1<<22) /* C or LLVM */
 
-#define IR_GEN_CACHE_DEMOTE    (1<<22) /* Demote the generated code from closest CPU caches */
+#define IR_GEN_CACHE_DEMOTE    (1<<23) /* Demote the generated code from closest CPU caches */
 
 /* debug related */
 #ifdef IR_DEBUG
@@ -704,6 +707,7 @@ ir_ref ir_emit3(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_emit_N(ir_ctx *ctx, uint32_t opt, int32_t count);
 void   ir_set_op(ir_ctx *ctx, ir_ref ref, int32_t n, ir_ref val);
+ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n);
 
 IR_ALWAYS_INLINE void ir_set_op1(ir_ctx *ctx, ir_ref ref, ir_ref val)
 {
@@ -720,8 +724,6 @@ IR_ALWAYS_INLINE void ir_set_op3(ir_ctx *ctx, ir_ref ref, ir_ref val)
 	ctx->ir_base[ref].op3 = val;
 }
 
-ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n);
-
 IR_ALWAYS_INLINE ir_ref ir_insn_op(const ir_insn *insn, int32_t n)
 {
 	const ir_ref *p = insn->ops + n;
@@ -734,6 +736,18 @@ IR_ALWAYS_INLINE void ir_insn_set_op(ir_insn *insn, int32_t n, ir_ref val)
 	*p = val;
 }
 
+IR_ALWAYS_INLINE uint32_t ir_insn_find_op(const ir_insn *insn, ir_ref val)
+{
+	int i, n = insn->inputs_count;
+
+	for (i = 1; i <= n; i++) {
+		if (ir_insn_op(insn, i) == val) {
+			return i;
+		}
+	}
+	return 0;
+}
+
 ir_ref ir_fold(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_fold0(ir_ctx *ctx, uint32_t opt);
@@ -743,18 +757,23 @@ ir_ref ir_fold3(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_param(ir_ctx *ctx, ir_type type, ir_ref region, const char *name, int pos);
 ir_ref ir_var(ir_ctx *ctx, ir_type type, ir_ref region, const char *name);
+
+/* IR Binding */
 ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def);
+ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref);
 
 /* Def -> Use lists */
 void ir_build_def_use_lists(ir_ctx *ctx);
 
+/* SSA Construction */
+int ir_mem2ssa(ir_ctx *ctx);
+
 /* CFG - Control Flow Graph (implementation in ir_cfg.c) */
 int ir_build_cfg(ir_ctx *ctx);
-int ir_remove_unreachable_blocks(ir_ctx *ctx);
 int ir_build_dominators_tree(ir_ctx *ctx);
 int ir_find_loops(ir_ctx *ctx);
 int ir_schedule_blocks(ir_ctx *ctx);
-void ir_build_prev_refs(ir_ctx *ctx);
+void ir_reset_cfg(ir_ctx *ctx);
 
 /* SCCP - Sparse Conditional Constant Propagation (implementation in ir_sccp.c) */
 int ir_sccp(ir_ctx *ctx);
@@ -926,7 +945,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 		}
 
 		return ir_emit_code(ctx, size);
-	} else if (opt_level == 1 || opt_level == 2) {
+	} else if (opt_level > 0) {
 		if (!(ctx->flags & IR_OPT_FOLDING)) {
 			// IR_ASSERT(0 && "IR_OPT_FOLDING must be set in ir_init() for -O1 and -O2");
 			return NULL;
@@ -935,14 +954,31 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 
 		ir_build_def_use_lists(ctx);
 
-		if (opt_level == 2
-		 && !ir_sccp(ctx)) {
-			return NULL;
+		if (ctx->flags & IR_OPT_MEM2SSA) {
+			if (!ir_build_cfg(ctx)
+			 || !ir_build_dominators_tree(ctx)
+			 || !ir_mem2ssa(ctx)) {
+				return NULL;
+			}
+			if (opt_level > 1) {
+				ir_reset_cfg(ctx);
+			}
 		}
 
-		if (!ir_build_cfg(ctx)
-		 || !ir_build_dominators_tree(ctx)
-		 || !ir_find_loops(ctx)
+		if (opt_level > 1) {
+			if (!ir_sccp(ctx)) {
+				return NULL;
+			}
+		}
+
+		if (!ctx->cfg_blocks) {
+			if (!ir_build_cfg(ctx)
+			 || !ir_build_dominators_tree(ctx)) {
+				return NULL;
+			}
+		}
+
+		if (!ir_find_loops(ctx)
 		 || !ir_gcm(ctx)
 		 || !ir_schedule(ctx)
 		 || !ir_match(ctx)

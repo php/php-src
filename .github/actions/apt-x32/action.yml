@@ -38,6 +38,7 @@ runs:
           libxml2-dev:i386 \
           libxpm-dev:i386 \
           libxslt1-dev:i386 \
+          firebird-dev:i386 \
           locales \
           make \
           pkg-config:i386 \

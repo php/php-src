@@ -172,10 +172,11 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 
 /* Keep these functions aliased for case some additional handling
    is needed later. */
-__forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
+zend_always_inline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *mb, *ret;
-	size_t mb_len, dir_len = 0;
+	size_t mb_len;
+	DWORD dir_len = 0;
 
 	mb = php_win32_cp_conv_any_to_w(in, in_len, &mb_len);
 	if (!mb) {
@@ -220,15 +221,15 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 		}
 
 		if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(mb, mb_len) || PHP_WIN32_IOUTIL_IS_JUNCTION_PATHW(mb, mb_len) || PHP_WIN32_IOUTIL_IS_UNC_PATHW(mb, mb_len)) {
-			memmove(ret, mb, mb_len * sizeof(wchar_t));
+			memcpy(ret, mb, mb_len * sizeof(wchar_t));
 			ret[mb_len] = L'\0';
 		} else {
 			wchar_t *src = mb, *dst = ret + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
-			memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+			memcpy(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
 #ifndef ZTS
 			if (dir_len > 0) {
-				size_t len = GetCurrentDirectoryW(dir_len, dst);
-				if (len == 0 || len + 1 != dir_len) {
+				DWORD len = GetCurrentDirectoryW(dir_len, dst);
+				if (len == 0 || len != dir_len - 1) {
 					free(ret);
 					free(mb);
 					return NULL;
@@ -268,7 +269,7 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 #define php_win32_ioutil_cur_to_w php_win32_cp_cur_to_w
 #define php_win32_ioutil_w_to_any php_win32_cp_w_to_any
 #define php_win32_ioutil_conv_w_to_any php_win32_cp_conv_w_to_any
-/*__forceinline static char *php_win32_ioutil_w_to_any(wchar_t* w_source_ptr)
+/*zend_always_inline static char *php_win32_ioutil_w_to_any(wchar_t* w_source_ptr)
 {
 	return php_win32_cp_w_to_any(w_source_ptr);
 }*/
@@ -292,7 +293,7 @@ PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *re
 PW32IO int php_win32_ioutil_symlink_w(const wchar_t *target, const wchar_t *link);
 PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link);
 
-__forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
+zend_always_inline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
 	int ret, err;
@@ -317,7 +318,7 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
+zend_always_inline static int php_win32_ioutil_open(const char *path, int flags, ...)
 {/*{{{*/
 	mode_t mode = 0;
 	PHP_WIN32_IOUTIL_INIT_W(path)
@@ -352,7 +353,7 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_unlink(const char *path)
+zend_always_inline static int php_win32_ioutil_unlink(const char *path)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
 	int ret = -1;
@@ -376,7 +377,7 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_rmdir(const char *path)
+zend_always_inline static int php_win32_ioutil_rmdir(const char *path)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
 	int ret = 0;
@@ -403,7 +404,7 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 	return ret;
 }/*}}}*/
 
-__forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
+zend_always_inline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
 {/*{{{*/
 	FILE *ret;
 	wchar_t modew[16] = {0};
@@ -435,7 +436,7 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_rename(const char *oldnamea, const char *newnamea)
+zend_always_inline static int php_win32_ioutil_rename(const char *oldnamea, const char *newnamea)
 {/*{{{*/
 	wchar_t *oldnamew;
 	wchar_t *newnamew;
@@ -479,7 +480,7 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_chdir(const char *patha)
+zend_always_inline static int php_win32_ioutil_chdir(const char *patha)
 {/*{{{*/
 	int ret;
 	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
@@ -504,7 +505,7 @@ __forceinline static int php_win32_ioutil_chdir(const char *patha)
 	return ret;
 }/*}}}*/
 
-__forceinline static char *php_win32_ioutil_getcwd(char *buf, size_t len)
+zend_always_inline static char *php_win32_ioutil_getcwd(char *buf, size_t len)
 {/*{{{*/
 	wchar_t tmp_bufw[PHP_WIN32_IOUTIL_MAXPATHLEN];
 	char *tmp_bufa = NULL;
@@ -544,7 +545,7 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, size_t len)
 }/*}}}*/
 
 /* TODO improve with usage of native APIs, split for _a and _w. */
-__forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
+zend_always_inline static int php_win32_ioutil_chmod(const char *patha, int mode)
 {/*{{{*/
 	wchar_t *pathw = php_win32_ioutil_any_to_w(patha);
 	int err = 0;
@@ -571,7 +572,7 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
+zend_always_inline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 {/*{{{*/
 	int ret;
 	DWORD err = 0;
@@ -596,7 +597,7 @@ __forceinline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_symlink(const char *target, const char *link)
+zend_always_inline static int php_win32_ioutil_symlink(const char *target, const char *link)
 {/*{{{*/
 	wchar_t *targetw, *linkw;
 	int ret;
@@ -622,7 +623,7 @@ __forceinline static int php_win32_ioutil_symlink(const char *target, const char
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_link(const char *target, const char *link)
+zend_always_inline static int php_win32_ioutil_link(const char *target, const char *link)
 {/*{{{*/
 	wchar_t *targetw, *linkw;
 	int ret;
@@ -649,7 +650,7 @@ __forceinline static int php_win32_ioutil_link(const char *target, const char *l
 
 PW32IO char *realpath(const char *path, char *resolved);
 
-__forceinline static char *php_win32_ioutil_realpath_ex0(const char *path, char *resolved, PBY_HANDLE_FILE_INFORMATION info)
+zend_always_inline static char *php_win32_ioutil_realpath_ex0(const char *path, char *resolved, PBY_HANDLE_FILE_INFORMATION info)
 {/*{{{*/
 	wchar_t retw[PHP_WIN32_IOUTIL_MAXPATHLEN];
 	char *reta;
@@ -694,7 +695,7 @@ __forceinline static char *php_win32_ioutil_realpath_ex0(const char *path, char 
 	return resolved;
 }/*}}}*/
 
-__forceinline static char *php_win32_ioutil_realpath(const char *path, char *resolved)
+zend_always_inline static char *php_win32_ioutil_realpath(const char *path, char *resolved)
 {/*{{{*/
 	return php_win32_ioutil_realpath_ex0(path, resolved, NULL);
 }/*}}}*/
@@ -758,7 +759,7 @@ typedef struct {
 PW32IO int php_win32_ioutil_stat_ex_w(const wchar_t *path, size_t path_len, php_win32_ioutil_stat_t *buf, int lstat);
 PW32IO int php_win32_ioutil_fstat(int fd, php_win32_ioutil_stat_t *buf);
 
-__forceinline static int php_win32_ioutil_stat_ex(const char *path, php_win32_ioutil_stat_t *buf, int lstat)
+zend_always_inline static int php_win32_ioutil_stat_ex(const char *path, php_win32_ioutil_stat_t *buf, int lstat)
 {/*{{{*/
 	size_t pathw_len;
 	wchar_t *pathw = php_win32_ioutil_conv_any_to_w(path, PHP_WIN32_CP_IGNORE_LEN, &pathw_len);
@@ -780,7 +781,7 @@ __forceinline static int php_win32_ioutil_stat_ex(const char *path, php_win32_io
 
 PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, size_t buf_len);
 
-__forceinline static ssize_t php_win32_ioutil_readlink(const char *path, char *buf, size_t buf_len)
+zend_always_inline static ssize_t php_win32_ioutil_readlink(const char *path, char *buf, size_t buf_len)
 {/*{{{*/
 	size_t pathw_len, ret_buf_len;
 	wchar_t *pathw = php_win32_ioutil_conv_any_to_w(path, PHP_WIN32_CP_IGNORE_LEN, &pathw_len);

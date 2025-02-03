@@ -137,9 +137,10 @@ IR_ALWAYS_INLINE uint32_t ir_ntz(uint32_t num)
 /* Number of trailing zero bits (0x01 -> 0; 0x40 -> 6; 0x00 -> LEN) */
 IR_ALWAYS_INLINE uint32_t ir_ntzl(uint64_t num)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl))
-	return __builtin_ctzl(num);
-#elif defined(_WIN64)
+  // Note that the _WIN64 case should come before __has_builtin() below so that
+  // clang-cl on Windows will use the uint64_t version, not the "long" uint32_t
+  // version.
+#if defined(_WIN64)
 	unsigned long index;
 
 	if (!_BitScanForward64(&index, num)) {
@@ -148,6 +149,8 @@ IR_ALWAYS_INLINE uint32_t ir_ntzl(uint64_t num)
 	}
 
 	return (uint32_t) index;
+#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzl))
+	return __builtin_ctzl(num);
 #else
 	uint32_t n;
 
@@ -701,7 +704,7 @@ typedef struct _ir_list {
 	uint32_t len;
 } ir_list;
 
-bool ir_list_contains(const ir_list *l, ir_ref val);
+uint32_t ir_list_find(const ir_list *l, ir_ref val);
 void ir_list_insert(ir_list *l, uint32_t i, ir_ref val);
 void ir_list_remove(ir_list *l, uint32_t i);
 
@@ -764,6 +767,19 @@ IR_ALWAYS_INLINE void ir_list_set(ir_list *l, uint32_t i, ir_ref val)
 {
 	IR_ASSERT(i < l->len);
 	ir_array_set_unchecked(&l->a, i, val);
+}
+
+/* Doesn't preserve order */
+IR_ALWAYS_INLINE void ir_list_del(ir_list *l, uint32_t i)
+{
+	IR_ASSERT(i < l->len);
+	l->len--;
+	ir_array_set_unchecked(&l->a, i, ir_array_at(&l->a, l->len));
+}
+
+IR_ALWAYS_INLINE bool ir_list_contains(const ir_list *l, ir_ref val)
+{
+	return ir_list_find(l, val) != (uint32_t)-1;
 }
 
 /* Worklist (unique list) */
@@ -1013,24 +1029,18 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 
 #define IR_RESERVED_FLAG_1     (1U<<31)
 
-/*** IR Binding ***/
-IR_ALWAYS_INLINE ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
-{
-	ir_ref var = ir_hashtab_find(ctx->binding, ref);
-	return (var != (ir_ref)IR_INVALID_VAL) ? var : 0;
-}
-
 /*** IR Use Lists ***/
 struct _ir_use_list {
 	ir_ref        refs; /* index in ir_ctx->use_edges[] array */
 	ir_ref        count;
 };
 
-void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref use);
-void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref use);
-void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
-void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
-bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
+void ir_use_list_remove_all(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_remove_one(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_replace_all(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
+void ir_use_list_replace_one(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
+bool ir_use_list_add(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_sort(ir_ctx *ctx, ir_ref def);
 
 IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
 {
@@ -1074,6 +1084,9 @@ IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
 		_insn1 = _insn2; \
 		_insn2 = _tmp; \
 	} while (0)
+
+void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref);
+void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val);
 
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \
@@ -1127,6 +1140,7 @@ struct _ir_block {
 	uint32_t     loop_depth;
 };
 
+void ir_build_prev_refs(ir_ctx *ctx);
 uint32_t ir_skip_empty_target_blocks(const ir_ctx *ctx, uint32_t b);
 uint32_t ir_next_block(const ir_ctx *ctx, uint32_t b);
 void ir_get_true_false_blocks(const ir_ctx *ctx, uint32_t b, uint32_t *true_block, uint32_t *false_block);

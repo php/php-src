@@ -3,22 +3,53 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.0alpha1
 
 - COM:
-  . Fix property access of PHP objects wrapped in variant. (cmb)
+  . Fixed property access of PHP objects wrapped in variant. (cmb)
+  . Fixed method calls for PHP objects wrapped in variant. (cmb)
 
 - Core:
   . Fixed bug GH-16665 (\array and \callable should not be usable in
     class_alias). (nielsdos)
   . Added PHP_BUILD_DATE constant. (cmb)
+  . Added support for Closures in constant expressions. (timwolla,
+    Volker Dusch)
+  . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
+    if available. (timwolla)
+  . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
+    non-printable characters in string literals). (nielsdos, WangYihang)
+  . Add support for backtraces for fatal errors. (enorris)
+  . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
+  . Improved error message of UnhandledMatchError for
+    zend.exception_string_param_max_len=0. (timwolla)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
+  . Added curl_share_init_persistent(). (enorris)
+
+- Date:
+  . Fix undefined behaviour problems regarding integer overflow in extreme edge
+    cases. (nielsdos, cmb, ilutov)
 
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
   . Added Dom\Element::insertAdjacentHTML(). (nielsdos)
 
+- Enchant:
+  . Added enchant_dict_remove_from_session(). (nielsdos)
+  . Added enchant_dict_remove(). (nielsdos)
+
+- GD:
+  . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
+    cmb)
+  . Fixed bug #64823 (ZTS GD fails to to find system TrueType font). (cmb)
+
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
+  . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
+    with uninitialised classes or clone failure. (David Carlier)
+
+- MySQLnd:
+  . Added mysqlnd.collect_memory_statistics to ini quick reference.
+    (hauk92)
 
 - OPcache:
   . Fixed ZTS OPcache build on Cygwin. (cmb)
@@ -37,10 +68,16 @@ PHP                                                                        NEWS
   . Added pg_close_stmt to close a prepared statement while allowing
     its name to be reused. (David Carlier)
   . Added Iterable support for pgsql_copy_from. (David Carlier)
+  . pg_connect checks if connection_string contains any null byte,
+    pg_close_stmt check if the statement contains any null byte.
+    (David Carlier)
 
 - POSIX:
   . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
     a process can handle. (David Carlier)
+  . posix_ttyname() sets last_error to EBADF on invalid file descriptors,
+    posix_isatty() raises E_WARNING on invalid file descriptors,
+    posix_fpathconf checks invalid file descriptors. (David Carlier)
 
 - Random:
   . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
@@ -48,6 +85,18 @@ PHP                                                                        NEWS
 - Reflection:
   . Added ReflectionConstant::getExtension() and ::getExtensionName().
     (DanielEScherzer)
+  . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
+    zval for uninitialized typed properties). (nielsdos)
+
+- Session:
+  . session_start() throws a ValueError on option argument if not a hashmap
+    or a TypeError if read_and_close value is not compatible with int.
+    (David Carlier)
+
+- SNMP:
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3 and
+    SNMP::__construct() throw an exception on invalid hostname, community
+    timeout and retries arguments. (David Carlier)
 
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
@@ -58,14 +107,47 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added TCP_FUNCTION_BLK to change the TCP stack algorithm on FreeBSD.
     (David Carlier)
+  . socket_set_option() catches possible overflow with SO_RCVTIMEO/SO_SNDTIMEO
+    with timeout setting on windows. (David Carlier)
+  . Added TCP_FUNCTION_ALIAS, TCP_REUSPORT_LB_NUMA, TCP_REUSPORT_LB_NUMA_NODOM,
+    TCP_REUSPORT_LB_CURDOM, TCP_BBR_ALGORITHM constants.
+  . socket_create_listen() throws an exception on invalid port value.
+    (David Carlier)
+  . socket_bind() throws an exception on invalid port value.
+    (David Carlier)
+  . socket_sendto() throws an exception on invalid port value.
+    (David Carlier)
+  . socket_addrinfo_lookup throws an exception on invalid hints value types.
+    (David Carlier)
+  . socket_addrinfo_lookup throws an exception if any of the hints value
+    overflows. (David Carlier)
+  . socket_addrinfo_lookup throws an exception if one or more hints entries
+    has an index as numeric. (David Carlier)
+  . socket_set_option with the options MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
+    will throw an exception if its value is not a valid array/object.
+    (David Carlier)
+  . socket_getsockname/socket_create/socket_bind handled AF_PACKET family socket.
+    (David Carlier)
+
+- Sodium:
+  . Fix overall theorical overflows on zend_string buffer allocations.
+    (David Carlier/nielsdos)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).
 
+- Streams:
+  . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
+    (cmb)
+
+- Tests:
+  . Allow to shuffle tests even in non-parallell mode. (dhuang00)
+
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
     nielsdos)
+  . Fixed bug GH-16843 (Windows phpize builds ignore source subfolders). (cmb)
 
 - XMLWriter:
   . Improved performance and reduce memory consumption. (nielsdos)
@@ -76,6 +158,8 @@ PHP                                                                        NEWS
 - Zlib:
   . gzfile, gzopen and readgzfile, their "use_include_path" argument
     is now a boolean. (David Carlier)
+  . Fixed bug GH-16883 (gzopen() does not use the default stream context when
+    opening HTTP URLs). (nielsdos)
 
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

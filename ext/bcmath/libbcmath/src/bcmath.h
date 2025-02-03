@@ -78,6 +78,8 @@ typedef struct bc_struct {
 
 void bc_init_numbers(void);
 
+void bc_force_free_number(bc_num *num);
+
 bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent);
 
 bc_num _bc_new_num_nonzeroed_ex(size_t length, size_t scale, bool persistent);

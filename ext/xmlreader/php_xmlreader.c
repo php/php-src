@@ -123,10 +123,25 @@ static zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *na
 }
 /* }}} */
 
+static xmlreader_prop_handler *xmlreader_get_prop_handler(zend_string *name, void **cache_slot)
+{
+	/* We don't store the `ce` as that may match with how the std cache slot code works in the fallback,
+	 * instead use the prop handlers table as `ce`. */
+	if (cache_slot && cache_slot[0] == &xmlreader_prop_handlers) {
+		return cache_slot[1];
+	} else {
+		xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+		if (hnd != NULL && cache_slot) {
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, &xmlreader_prop_handlers, hnd);
+		}
+		return hnd;
+	}
+}
+
 static int xmlreader_has_property(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	xmlreader_object *obj = php_xmlreader_fetch_object(object);
-	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
 
 	if (hnd != NULL) {
 		if (type == ZEND_PROPERTY_EXISTS) {
@@ -162,7 +177,7 @@ static zval *xmlreader_read_property(zend_object *object, zend_string *name, int
 {
 	zval *retval = NULL;
 	xmlreader_object *obj = php_xmlreader_fetch_object(object);
-	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
 
 	if (hnd != NULL) {
 		if (xmlreader_property_reader(obj, hnd, rv) == FAILURE) {
@@ -181,7 +196,7 @@ static zval *xmlreader_read_property(zend_object *object, zend_string *name, int
 /* {{{ xmlreader_write_property */
 static zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
 
 	if (hnd != NULL) {
 		zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
@@ -195,7 +210,7 @@ static zval *xmlreader_write_property(zend_object *object, zend_string *name, zv
 
 void xmlreader_unset_property(zend_object *object, zend_string *name, void **cache_slot)
 {
-	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
 
 	if (hnd != NULL) {
 		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));

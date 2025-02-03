@@ -31,9 +31,9 @@
 #ifndef MBFL_ENCODING_H
 #define MBFL_ENCODING_H
 
+#include "zend.h"
 #include "mbfl_defs.h"
 #include "mbfl_consts.h"
-#include "zend.h"
 
 enum mbfl_no_encoding {
 	mbfl_no_encoding_invalid = -1,

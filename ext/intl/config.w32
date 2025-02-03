@@ -3,7 +3,10 @@
 ARG_ENABLE("intl", "Enable internationalization support", "no");
 
 if (PHP_INTL != "no") {
-	if (CHECK_LIB("icuuc.lib", "intl", PHP_INTL) &&
+	if (CHECK_LIB("icudt.lib", "intl", PHP_INTL) &&
+		CHECK_LIB("icuin.lib", "intl", PHP_INTL) &&
+		CHECK_LIB("icuio.lib", "intl", PHP_INTL) &&
+		CHECK_LIB("icuuc.lib", "intl", PHP_INTL) &&
 					CHECK_HEADER_ADD_INCLUDE("unicode/utf.h", "CFLAGS_INTL")) {
 		// always build as shared - zend_strtod.c/ICU type conflict
 		EXTENSION("intl", "php_intl.c intl_convert.c intl_convertcpp.cpp intl_error.c ", true,
@@ -116,16 +119,9 @@ if (PHP_INTL != "no") {
 				codepointiterator_methods.cpp ",
 				"intl");
 
-		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib");
-
 		/* Compat for ICU before 58.1.*/
-		if (CHECK_LIB("icule.lib", "intl", PHP_INTL)) {
-			ADD_FLAG("LIBS_INTL", "icule.lib");
-		}
-		if (CHECK_LIB("iculx.lib", "intl", PHP_INTL)) {
-			ADD_FLAG("LIBS_INTL", "iculx.lib");
-		}
-
+		CHECK_LIB("icule.lib", "intl", PHP_INTL);
+		CHECK_LIB("iculx.lib", "intl", PHP_INTL);
 		ADD_FLAG("CFLAGS_INTL", "/std:c++17 /EHsc /DUNISTR_FROM_CHAR_EXPLICIT=explicit /DUNISTR_FROM_STRING_EXPLICIT=explicit /DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1 /DU_HIDE_OBSOLETE_UTF_OLD_H=1");
 	} else {
 		WARNING("intl not enabled; libraries and/or headers not found");

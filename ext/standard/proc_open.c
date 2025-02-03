@@ -698,22 +698,77 @@ static void init_process_info(PROCESS_INFORMATION *pi)
 	memset(&pi, 0, sizeof(pi));
 }
 
+/* on success, returns length of *comspec, which then needs to be efree'd by caller */
+static size_t find_comspec_nt(wchar_t **comspec)
+{
+	zend_string *path = NULL;
+	wchar_t *pathw = NULL;
+	wchar_t *bufp = NULL;
+	DWORD buflen = MAX_PATH, len = 0;
+
+	path = php_getenv("PATH", 4);
+	if (path == NULL) {
+		goto out;
+	}
+	pathw = php_win32_cp_any_to_w(ZSTR_VAL(path));
+	if (pathw == NULL) {
+		goto out;
+	}
+	bufp = emalloc(buflen * sizeof(wchar_t));
+	do {
+		/* the first call to SearchPathW() fails if the buffer is too small,
+		 * what is unlikely but possible; to avoid an explicit second call to
+		 * SeachPathW() and the error handling, we're looping */
+		len = SearchPathW(pathw, L"cmd.exe", NULL, buflen, bufp, NULL);
+		if (len == 0) {
+			goto out;
+		}
+		if (len < buflen) {
+			break;
+		}
+		buflen = len;
+		bufp = erealloc(bufp, buflen * sizeof(wchar_t));
+	} while (1);
+	*comspec = bufp;
+
+out:
+	if (path != NULL) {
+		zend_string_release(path);
+	}
+	if (pathw != NULL) {
+		free(pathw);
+	}
+	if (bufp != NULL && bufp != *comspec) {
+		efree(bufp);
+	}
+	return len;
+}
+
 static zend_result convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 {
-	size_t len = sizeof(COMSPEC_NT) + sizeof(" /s /c ") + cmdw_len + 3;
+	wchar_t *comspec;
+	size_t len = find_comspec_nt(&comspec);
+	if (len == 0) {
+		php_error_docref(NULL, E_WARNING, "Command conversion failed");
+		return FAILURE;
+	}
+	len += sizeof(" /s /c ") + cmdw_len + 3;
 	wchar_t *cmdw_shell = (wchar_t *)malloc(len * sizeof(wchar_t));
 
 	if (cmdw_shell == NULL) {
+		efree(comspec);
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		return FAILURE;
 	}
 
-	if (_snwprintf(cmdw_shell, len, L"%hs /s /c \"%s\"", COMSPEC_NT, *cmdw) == -1) {
+	if (_snwprintf(cmdw_shell, len, L"%s /s /c \"%s\"", comspec, *cmdw) == -1) {
+		efree(comspec);
 		free(cmdw_shell);
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		return FAILURE;
 	}
 
+	efree(comspec);
 	free(*cmdw);
 	*cmdw = cmdw_shell;
 

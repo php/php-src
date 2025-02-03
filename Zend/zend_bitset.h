@@ -60,7 +60,6 @@ ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_ulong_ntz(zend_ulong num
 #else
 	if (!BitScanForward(&index, num)) {
 #endif
-		/* undefined behavior */
 		return SIZEOF_ZEND_LONG * 8;
 	}
 
@@ -98,7 +97,6 @@ ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_ulong_nlz(zend_ulong num
 #else
 	if (!BitScanReverse(&index, num)) {
 #endif
-		/* undefined behavior */
 		return SIZEOF_ZEND_LONG * 8;
 	}
 

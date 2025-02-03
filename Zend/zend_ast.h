@@ -35,6 +35,7 @@ enum _zend_ast_kind {
 	/* special nodes */
 	ZEND_AST_ZVAL = 1 << ZEND_AST_SPECIAL_SHIFT,
 	ZEND_AST_CONSTANT,
+	ZEND_AST_OP_ARRAY,
 	ZEND_AST_ZNODE,
 
 	/* declaration nodes */
@@ -87,7 +88,6 @@ enum _zend_ast_kind {
 	ZEND_AST_SILENCE,
 	ZEND_AST_SHELL_EXEC,
 	ZEND_AST_CLONE,
-	ZEND_AST_EXIT,
 	ZEND_AST_PRINT,
 	ZEND_AST_INCLUDE_OR_EVAL,
 	ZEND_AST_UNARY_OP,
@@ -206,6 +206,15 @@ typedef struct _zend_ast_zval {
 	zval val;
 } zend_ast_zval;
 
+typedef struct _zend_op_array zend_op_array;
+
+typedef struct _zend_ast_op_array {
+	zend_ast_kind kind;
+	zend_ast_attr attr;
+	uint32_t lineno;
+	zend_op_array *op_array;
+} zend_ast_op_array;
+
 /* Separate structure for function and class declaration, as they need extra information. */
 typedef struct _zend_ast_decl {
 	zend_ast_kind kind;
@@ -229,6 +238,8 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval)
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class_name, zend_ast *name);
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_array);
 
 #if ZEND_AST_SPEC
 # define ZEND_AST_SPEC_CALL(name, ...) \
@@ -330,6 +341,10 @@ static zend_always_inline bool zend_ast_is_special(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_SPECIAL_SHIFT) & 1;
 }
 
+static zend_always_inline bool zend_ast_is_decl(zend_ast *ast) {
+	return zend_ast_is_special(ast) && ast->kind >= ZEND_AST_FUNC_DECL;
+}
+
 static zend_always_inline bool zend_ast_is_list(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_IS_LIST_SHIFT) & 1;
 }
@@ -348,6 +363,11 @@ static zend_always_inline zend_string *zend_ast_get_str(zend_ast *ast) {
 	return Z_STR_P(zv);
 }
 
+static zend_always_inline zend_ast_op_array *zend_ast_get_op_array(zend_ast *ast) {
+	ZEND_ASSERT(ast->kind == ZEND_AST_OP_ARRAY);
+	return (zend_ast_op_array *) ast;
+}
+
 static zend_always_inline zend_string *zend_ast_get_constant_name(zend_ast *ast) {
 	ZEND_ASSERT(ast->kind == ZEND_AST_CONSTANT);
 	ZEND_ASSERT(Z_TYPE(((zend_ast_zval *) ast)->val) == IS_STRING);
@@ -356,6 +376,8 @@ static zend_always_inline zend_string *zend_ast_get_constant_name(zend_ast *ast)
 
 static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 	ZEND_ASSERT(!zend_ast_is_list(ast));
+	ZEND_ASSERT(!zend_ast_is_special(ast));
+
 	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
 }
 static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
