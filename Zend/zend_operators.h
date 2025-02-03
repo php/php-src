@@ -731,11 +731,13 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	 * have read the values of op1 and op2.
 	 */
 
+	zend_long sum = (zend_long) ((zend_ulong) Z_LVAL_P(op1) + (zend_ulong) Z_LVAL_P(op2));
+
 	if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
+		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (sum & LONG_SIGN_MASK))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
 	} else {
-		ZVAL_LONG(result, Z_LVAL_P(op1) + Z_LVAL_P(op2));
+		ZVAL_LONG(result, sum);
 	}
 #endif
 }
@@ -813,11 +815,19 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		ZVAL_LONG(result, llresult);
 	}
 #else
-	ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
+	/*
+	 * 'result' may alias with op1 or op2, so we need to
+	 * ensure that 'result' is not updated until after we
+	 * have read the values of op1 and op2.
+	 */
+
+	zend_long sub = (zend_long) ((zend_ulong) Z_LVAL_P(op1) - (zend_ulong) Z_LVAL_P(op2));
 
 	if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
+		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (sub & LONG_SIGN_MASK))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, sub);
 	}
 #endif
 }
