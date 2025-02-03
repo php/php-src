@@ -1655,9 +1655,6 @@ PHP_FUNCTION(socket_recvfrom)
 
 			zval obj;
 			object_init_ex(&obj, socket_ethinfo_ce);
-			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
-			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
-			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethprotocol"), protocol);
 			array_init(&zpayload);
 
 			switch (protocol) {
@@ -1708,10 +1705,16 @@ PHP_FUNCTION(socket_recvfrom)
 					break;
 				}
 				default:
+					zend_string_efree(recv_buf);
+                                        zval_ptr_dtor(&zpayload);
+                                        zval_ptr_dtor(&obj);
 					zend_value_error("unsupported ethernet protocol");
 					RETURN_THROWS();
 			}
 
+			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
+			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
+			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethprotocol"), protocol);
 			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
 
 			ZEND_TRY_ASSIGN_REF_COPY(arg2, &obj);
@@ -1743,6 +1746,7 @@ PHP_FUNCTION(socket_sendto)
 #endif
 #ifdef AF_PACKET
 	struct sockaddr_ll      sll;
+	unsigned char           halen;
 #endif
 	int					retval;
 	size_t              buf_len;
@@ -1825,17 +1829,20 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_THROWS();
 			}
 
+			halen = addr_len > ETH_ALEN ? ETH_ALEN : (unsigned char)addr_len;
+
 			memset(&sll, 0, sizeof(sll));			
+			memcpy(sll.sll_addr, addr, halen);
 			sll.sll_family = AF_PACKET;
 			sll.sll_ifindex = port;
-			sll.sll_halen = ETH_ALEN;
+			sll.sll_halen = halen;
 
 			// TODO allows to use more user friendly type to replace raw buffer usage
 			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sll, sizeof(sll));
 			break;
 #endif
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, AF_PACKET or AF_INET6");
 			RETURN_THROWS();
 	}
 
