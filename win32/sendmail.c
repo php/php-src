@@ -111,6 +111,15 @@ static char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
+static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
+                    const char *headers, char *headers_lc, char **error_message);
+static int MailConnect();
+static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
+static int Post(LPCSTR msg);
+static int Ack(char **server_response);
+static unsigned long GetAddr(LPSTR szHost);
+static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
+
 /* This function is meant to unify the headers passed to to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
  * As a second step we also eliminate all \r\n occurrences which are:
