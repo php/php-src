@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6f70f344542e0e2f2464fd024f7ca77415010c4e */
+ * Stub hash: 9725b1a979cb5aa48079585278fa89c5edb321d4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1105,6 +1105,9 @@ static void register_sockets_symbols(int module_number)
 #if defined(ETH_P_ALL)
 	REGISTER_LONG_CONSTANT("ETH_P_ALL", ETH_P_ALL, CONST_PERSISTENT);
 #endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_FRAME_LEN", ETH_FRAME_LEN, CONST_PERSISTENT);
+#endif
 }
 
 static zend_class_entry *register_class_Socket(void)
@@ -1141,6 +1144,12 @@ static zend_class_entry *register_class_SocketEthernetInfo(void)
 	zend_string *property_socket_class_Socket = zend_string_init("Socket", sizeof("Socket")-1, 1);
 	zend_declare_typed_property(class_entry, property_socket_name, &property_socket_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_socket_class_Socket, 0, 0));
 	zend_string_release(property_socket_name);
+
+	zval property_ethprotocol_default_value;
+	ZVAL_UNDEF(&property_ethprotocol_default_value);
+	zend_string *property_ethprotocol_name = zend_string_init("ethprotocol", sizeof("ethprotocol") - 1, 1);
+	zend_declare_typed_property(class_entry, property_ethprotocol_name, &property_ethprotocol_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_ethprotocol_name);
 
 	zval property_macsrc_default_value;
 	ZVAL_UNDEF(&property_macsrc_default_value);

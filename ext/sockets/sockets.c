@@ -1656,6 +1656,7 @@ PHP_FUNCTION(socket_recvfrom)
 			object_init_ex(arg2, socket_ethinfo_ce);
 			zend_update_property_string(Z_OBJCE_P(arg2), Z_OBJ_P(arg2), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
 			zend_update_property_string(Z_OBJCE_P(arg2), Z_OBJ_P(arg2), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
+			zend_update_property_long(Z_OBJCE_P(arg2), Z_OBJ_P(arg2), ZEND_STRL("ethprotocol"), protocol);
 			array_init(&zpayload);
 
 			switch (protocol) {
@@ -1825,7 +1826,7 @@ PHP_FUNCTION(socket_sendto)
 			sll.sll_halen = ETH_ALEN;
 
 			// TODO allows to use more user friendly type to replace raw buffer usage
-			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sll, sizeof(sll));
 			break;
 #endif
 		default:

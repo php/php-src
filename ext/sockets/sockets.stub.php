@@ -2013,6 +2013,11 @@ const ETH_P_LOOP = UNKNOWN;
  * @cvalue ETH_P_ALL
  */
 const ETH_P_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_FRAME_LEN
+ */
+const ETH_FRAME_LEN = UNKNOWN;
 #endif
 
 /**
@@ -2162,6 +2167,8 @@ final class SocketEthernetInfo
 {
     /** @readonly **/
     public Socket $socket;
+    /** @readonly **/
+    public int $ethprotocol;
     /** @readonly **/
     public string $macsrc;
     /** @readonly **/

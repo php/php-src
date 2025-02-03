@@ -26,6 +26,18 @@ if (!function_exists("posix_getuid") || posix_getuid() != 0) {
     var_dump($iindex);
 
     socket_getpeername($s_c, $istr2, $iindex2);
+
+    $s_s     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
+    $v_bind  = socket_bind($s_s, 'lo');
+
+    $buf = str_pad(str_repeat("0", ETH_FRAME_LEN) .
+	   str_repeat("\xFF", 6) .
+	   str_repeat("\x11", 6) .
+	   "\x08\x00TEST ethernet", 2048, "\x00");
+
+    var_dump(socket_sendto($s_s, $buf, strlen($buf), 0, "lo", 1));
+
+    socket_close($s_s);
     socket_close($s_c);
 ?>
 --EXPECTF--
@@ -35,3 +47,4 @@ string(2) "lo"
 int(%i)
 
 Warning: socket_getpeername(): unable to retrieve peer name [95]: %sot supported in %s on line %d
+int(2048)
