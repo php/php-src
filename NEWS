@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
     Dom\HTML_NO_DEFAULT_NS). (nielsdos)
 
+- Opcache:
+  . Fixed bug GH-17654 (Multiple classes using same trait causes function
+    JIT crash). (nielsdos)
+
 - PHPDBG:
   . Partially fixed bug GH-17387 (Trivial crash in phpdbg lexer). (nielsdos)
   . Fix memory leak in phpdbg calling registered function. (nielsdos)
