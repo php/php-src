@@ -604,8 +604,11 @@ PHP_METHOD(SQLite3, query)
 	return_code = sqlite3_step(result->stmt_obj->stmt);
 
 	switch (return_code) {
-		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
+		{
+			result->complete = 1;
+		}
+		case SQLITE_ROW: /* Valid Row */
 		{
 			php_sqlite3_free_list *free_item;
 			free_item = emalloc(sizeof(php_sqlite3_free_list));
@@ -616,6 +619,7 @@ PHP_METHOD(SQLite3, query)
 			break;
 		}
 		default:
+			result->complete = 1;
 			if (!EG(exception)) {
 				php_sqlite3_error(db_obj, sqlite3_errcode(db_obj->db), "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
 			}
@@ -706,6 +710,9 @@ PHP_METHOD(SQLite3, querySingle)
 	return_code = sqlite3_step(stmt);
 
 	switch (return_code) {
+		php_sqlite3_result *result_obj;
+		zval *object = ZEND_THIS;
+		result_obj = Z_SQLITE3_RESULT_P(object);
 		case SQLITE_ROW: /* Valid Row */
 		{
 			if (!entire_row) {
@@ -723,6 +730,8 @@ PHP_METHOD(SQLite3, querySingle)
 		}
 		case SQLITE_DONE: /* Valid but no results */
 		{
+			result_obj->complete = 1;
+
 			if (!entire_row) {
 				RETVAL_NULL();
 			} else {
@@ -731,6 +740,7 @@ PHP_METHOD(SQLite3, querySingle)
 			break;
 		}
 		default:
+		result_obj->complete = 1;
 		if (!EG(exception)) {
 			php_sqlite3_error(db_obj, sqlite3_errcode(db_obj->db), "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
 		}
@@ -1782,14 +1792,16 @@ PHP_METHOD(SQLite3Stmt, execute)
 
 	return_code = sqlite3_step(stmt_obj->stmt);
 
+	sqlite3_reset(stmt_obj->stmt);
+	object_init_ex(return_value, php_sqlite3_result_entry);
+	result = Z_SQLITE3_RESULT_P(return_value);
 	switch (return_code) {
-		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
+                {
+			result->complete = 1;
+                }
+		case SQLITE_ROW: /* Valid Row */
 		{
-			sqlite3_reset(stmt_obj->stmt);
-			object_init_ex(return_value, php_sqlite3_result_entry);
-			result = Z_SQLITE3_RESULT_P(return_value);
-
 			result->is_prepared_statement = 1;
 			result->db_obj = stmt_obj->db_obj;
 			result->stmt_obj = stmt_obj;
@@ -1800,9 +1812,11 @@ PHP_METHOD(SQLite3Stmt, execute)
 			break;
 		}
 		case SQLITE_ERROR:
+			result_obj->complete = 1;
 			sqlite3_reset(stmt_obj->stmt);
 			ZEND_FALLTHROUGH;
 		default:
+			result_obj->complete = 1;
 			if (!EG(exception)) {
 				php_sqlite3_error(stmt_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(stmt_obj->stmt)), "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
 			}
@@ -1869,6 +1883,10 @@ PHP_METHOD(SQLite3Result, numColumns)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
+
+	if (result_obj->complete) {
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG(sqlite3_column_count(result_obj->stmt_obj->stmt));
 }
@@ -1937,6 +1955,10 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
+        if (result_obj->complete==1) {
+		return;
+        }
+
 	ret = sqlite3_step(result_obj->stmt_obj->stmt);
 	switch (ret) {
 		case SQLITE_ROW:
@@ -1990,6 +2012,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 			break;
 
 		default:
+			result_obj->complete = 1;
 			php_sqlite3_error(result_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(result_obj->stmt_obj->stmt)), "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
 	}
 }

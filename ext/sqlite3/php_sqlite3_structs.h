@@ -107,6 +107,7 @@ struct _php_sqlite3_result_object  {
 	zend_string **column_names;
 
 	int is_prepared_statement;
+	int complete;
 	zend_object zo;
 };
 
