@@ -195,8 +195,6 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 
 	if (headers) {
-		char *pos = NULL;
-
 		/* Use PCRE to trim the header into the right format */
 		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
