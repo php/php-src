@@ -136,9 +136,15 @@ static zend_result (*orig_post_startup_cb)(void);
 static zend_result accel_post_startup(void);
 static zend_result accel_finish_startup(void);
 
+#ifndef ZEND_WIN32
+# define PRELOAD_SUPPORT
+#endif
+
+#ifdef PRELOAD_SUPPORT
 static void preload_shutdown(void);
 static void preload_activate(void);
 static void preload_restart(void);
+#endif
 
 #ifdef ZEND_WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
@@ -2713,9 +2719,11 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 				}
 
 				zend_shared_alloc_restore_state();
+#ifdef PRELOAD_SUPPORT
 				if (ZCSG(preload_script)) {
 					preload_restart();
 				}
+#endif
 
 #ifdef HAVE_JIT
 				zend_jit_restart();
@@ -2757,9 +2765,11 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 	zend_jit_activate();
 #endif
 
+#ifdef PRELOAD_SUPPORT
 	if (ZCSG(preload_script)) {
 		preload_activate();
 	}
+#endif
 
 	return SUCCESS;
 }
@@ -3455,9 +3465,11 @@ void accel_shutdown(void)
 		return;
 	}
 
+#ifdef PRELOAD_SUPPORT
 	if (ZCSG(preload_script)) {
 		preload_shutdown();
 	}
+#endif
 
 	_file_cache_only = file_cache_only;
 
@@ -3566,6 +3578,7 @@ void accelerator_shm_read_unlock(void)
 }
 
 /* Preloading */
+#ifdef PRELOAD_SUPPORT
 static HashTable *preload_scripts = NULL;
 static zend_op_array *(*preload_orig_compile_file)(zend_file_handle *file_handle, int type);
 
@@ -4410,7 +4423,6 @@ static void preload_load(void)
 	}
 }
 
-#ifndef ZEND_WIN32
 static zend_result accel_preload(const char *config, bool in_child)
 {
 	zend_file_handle file_handle;
