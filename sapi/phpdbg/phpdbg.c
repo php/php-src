@@ -851,6 +851,7 @@ typedef struct {
 	int fd;
 } php_stdio_stream_data;
 
+#ifndef _WIN32
 static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count) {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
@@ -877,6 +878,7 @@ static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t c
 
 	return PHPDBG_G(php_stdiop_write)(stream, buf, count);
 }
+#endif
 
 /* copied from sapi/cli/php_cli.c cli_register_file_handles */
 void phpdbg_register_file_handles(void) /* {{{ */

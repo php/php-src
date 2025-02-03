@@ -4410,6 +4410,7 @@ static void preload_load(void)
 	}
 }
 
+#ifndef ZEND_WIN32
 static zend_result accel_preload(const char *config, bool in_child)
 {
 	zend_file_handle file_handle;
@@ -4665,7 +4666,6 @@ static void preload_send_header(sapi_header_struct *sapi_header, void *server_co
 {
 }
 
-#ifndef ZEND_WIN32
 static zend_result accel_finish_startup_preload(bool in_child)
 {
 	zend_result ret = SUCCESS;
