@@ -1653,10 +1653,11 @@ PHP_FUNCTION(socket_recvfrom)
 			unsigned short protocol = ntohs(e->h_proto);
 			unsigned char *payload = ((unsigned char *)e + sizeof(struct ethhdr));
 
-			object_init_ex(arg2, socket_ethinfo_ce);
-			zend_update_property_string(Z_OBJCE_P(arg2), Z_OBJ_P(arg2), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
-			zend_update_property_string(Z_OBJCE_P(arg2), Z_OBJ_P(arg2), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
-			zend_update_property_long(Z_OBJCE_P(arg2), Z_OBJ_P(arg2), ZEND_STRL("ethprotocol"), protocol);
+			zval obj;
+			object_init_ex(&obj, socket_ethinfo_ce);
+			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
+			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
+			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethprotocol"), protocol);
 			array_init(&zpayload);
 
 			switch (protocol) {
@@ -1711,10 +1712,14 @@ PHP_FUNCTION(socket_recvfrom)
 					RETURN_THROWS();
 			}
 
-			zend_update_property(Z_OBJCE_P(arg2), Z_OBJ_P(arg2), ZEND_STRL("payload"), &zpayload);
+			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
 
+			ZEND_TRY_ASSIGN_REF_COPY(arg2, &obj);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
-			ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
+
+			if (arg6) {
+				ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
+			}
 			break;
 #endif
 		default:
