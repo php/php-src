@@ -248,7 +248,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
 
-%type <ast> top_statement namespace_name name statement function_declaration_statement
+%type <ast> top_statement namespace_name name statement function_declaration_statement function_body
 %type <ast> class_declaration_statement trait_declaration_statement legacy_namespace_name
 %type <ast> interface_declaration_statement interface_extends_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
@@ -578,9 +578,14 @@ function_name:
 
 function_declaration_statement:
 	function returns_ref function_name backup_doc_comment '(' parameter_list ')' return_type
-	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
-		      zend_ast_get_str($3), $6, NULL, $11, $8, NULL); CG(extra_fn_flags) = $9; }
+	backup_fn_flags function_body backup_fn_flags
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $11, $1, $4,
+		      zend_ast_get_str($3), $6, NULL, $10, $8, NULL); CG(extra_fn_flags) = $9; }
+;
+
+function_body:
+        '{' inner_statement_list '}'    { $$ = $2; }
+    |   '=' statement                   { $$ = $2; }
 ;
 
 is_reference:
@@ -1030,6 +1035,7 @@ absolute_trait_method_reference:
 method_body:
 		';' /* abstract method */		{ $$ = NULL; }
 	|	'{' inner_statement_list '}'	{ $$ = $2; }
+	|	'=' statement	{ $$ = $2; }
 ;
 
 property_modifiers:
