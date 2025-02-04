@@ -2459,11 +2459,11 @@ class ConstInfo extends VariableLike
     public /* readonly */ AbstractConstName $name;
     public /* readonly */ Expr $value;
     public bool $isDeprecated;
-    public ?string $valueString;
+    public /* readonly */ ?string $valueString;
     public /* readonly */ ?string $cond;
-    public ?string $cValue;
-    public bool $isUndocumentable;
-    public bool $isFileCacheAllowed;
+    public /* readonly */ ?string $cValue;
+    public /* readonly */ bool $isUndocumentable;
+    public /* readonly */ bool $isFileCacheAllowed;
 
     /**
      * @var AttributeInfo[] $attributes
@@ -3248,7 +3248,7 @@ class ClassInfo {
     public /* readonly */ array $enumCaseInfos;
     public /* readonly */ ?string $cond;
     public ?int $phpVersionIdMinimumCompatibility;
-    public bool $isUndocumentable;
+    public /* readonly */ bool $isUndocumentable;
 
     /**
      * @param AttributeInfo[] $attributes
