@@ -777,7 +777,7 @@ PHP_METHOD(PDO, inTransaction)
 }
 /* }}} */
 
-PDO_API bool pdo_get_long_param(zend_long *lval, zval *value)
+PDO_API bool pdo_get_long_param(zend_long *lval, const zval *value)
 {
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
@@ -795,7 +795,7 @@ PDO_API bool pdo_get_long_param(zend_long *lval, zval *value)
 			return false;
 	}
 }
-PDO_API bool pdo_get_bool_param(bool *bval, zval *value)
+PDO_API bool pdo_get_bool_param(bool *bval, const zval *value)
 {
 	switch (Z_TYPE_P(value)) {
 		case IS_TRUE:
