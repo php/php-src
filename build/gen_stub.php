@@ -4238,15 +4238,14 @@ function parseDocComment(DocComment $comment): array {
 }
 
 class FramelessFunctionInfo {
-    public int $arity;
-}
+    public /* readonly */ int $arity;
 
-function parseFramelessFunctionInfo(string $json): FramelessFunctionInfo {
-    // FIXME: Should have some validation
-    $json = json_decode($json, true);
-    $framelessFunctionInfo = new FramelessFunctionInfo();
-    $framelessFunctionInfo->arity = $json["arity"];
-    return $framelessFunctionInfo;
+    public function __construct(string $json) {
+        // FIXME: Should have some validation
+        $json = json_decode($json, true);
+
+        $this->arity = $json["arity"];
+    }
 }
 
 function parseFunctionLike(
@@ -4330,7 +4329,7 @@ function parseFunctionLike(
                         break;
 
                     case 'frameless-function':
-                        $framelessFunctionInfos[] = parseFramelessFunctionInfo($tag->getValue());
+                        $framelessFunctionInfos[] = new FramelessFunctionInfo($tag->getValue());
                         break;
                 }
             }
