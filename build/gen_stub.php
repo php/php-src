@@ -2082,9 +2082,6 @@ OUPUT_EXAMPLE
             $this->args[$key] = clone $argInfo;
         }
         $this->return = clone $this->return;
-        foreach ($this->attributes as $key => $attribute) {
-            $this->attributes[$key] = clone $attribute;
-        }
         foreach ($this->framelessFunctionInfos as $key => $framelessFunctionInfo) {
             $this->framelessFunctionInfos[$key] = clone $framelessFunctionInfo;
         }
@@ -3137,9 +3134,6 @@ class PropertyInfo extends VariableLike
         if ($this->type) {
             $this->type = clone $this->type;
         }
-        foreach ($this->attributes as $key => $attribute) {
-            $this->attributes[$key] = clone $attribute;
-        }
     }
 }
 
@@ -3169,6 +3163,8 @@ class EnumCaseInfo {
     }
 }
 
+// Instances of AttributeInfo are immutable and do not need to be cloned
+// when held by an object that is cloned
 class AttributeInfo {
     public /* readonly */ string $class;
     /** @var \PhpParser\Node\Arg[] */
@@ -3995,10 +3991,6 @@ class ClassInfo {
 
         foreach ($this->funcInfos as $key => $funcInfo) {
             $this->funcInfos[$key] = clone $funcInfo;
-        }
-
-        foreach ($this->attributes as $key => $attribute) {
-            $this->attributes[$key] = clone $attribute;
         }
     }
 
