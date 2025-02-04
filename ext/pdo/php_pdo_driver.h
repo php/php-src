@@ -560,26 +560,21 @@ struct _pdo_stmt_t {
 	const struct pdo_stmt_methods *methods;
 	void *driver_data;
 
+	/* the cursor specific error code. */
+	pdo_error_type error_code;
+
 	/* if true, we've already successfully executed this statement at least
 	 * once */
-	unsigned executed:1;
+	uint16_t executed:1;
+
+	/* If true we are in a do_fetch() call, and modification to the statement must be prevented */
+	uint16_t in_fetch:1;
+
 	/* if true, the statement supports placeholders and can implement
 	 * bindParam() for its prepared statements, if false, PDO should
 	 * emulate prepare and bind on its behalf */
-	unsigned supports_placeholders:2;
-
-	unsigned _reserved:29;
-
-	/* the number of columns in the result set; not valid until after
-	 * the statement has been executed at least once.  In some cases, might
-	 * not be valid until fetch (at the driver level) has been called at least once.
-	 * */
-	int column_count;
-	struct pdo_column_data *columns;
-
-	/* we want to keep the dbh alive while we live, so we own a reference */
-	zval database_object_handle;
-	pdo_dbh_t *dbh;
+	uint16_t supports_placeholders:2;
+	uint16_t reserved: 12;
 
 	/* keep track of bound input parameters.  Some drivers support
 	 * input/output parameters, but you can't rely on that working */
@@ -590,6 +585,36 @@ struct _pdo_stmt_t {
 	 * in the result set */
 	HashTable *bound_columns;
 
+	struct pdo_column_data *columns;
+	/* the number of columns in the result set; not valid until after
+	 * the statement has been executed at least once.  In some cases, might
+	 * not be valid until fetch (at the driver level) has been called at least once.
+	 * */
+	int32_t column_count;
+
+	/* defaults for fetches */
+	enum pdo_fetch_type default_fetch_type;
+
+	union {
+		int column;
+		struct {
+			HashTable *ctor_args;
+			zend_class_entry *ce;
+		} cls;
+		struct {
+			zend_fcall_info_cache fcc;
+		} func;
+		zend_object *into;
+	} fetch;
+
+	/* for lazy fetches, we always return the same lazy object handle.
+	 * Let's keep it here. */
+	zval lazy_object_ref;
+
+	pdo_dbh_t *dbh;
+	/* we want to keep the dbh alive while we live, so we own a reference */
+	zend_object *database_object_handle;
+
 	/* not always meaningful */
 	zend_long row_count;
 
@@ -598,30 +623,6 @@ struct _pdo_stmt_t {
 
 	/* the copy of the query with expanded binds ONLY for emulated-prepare drivers */
 	zend_string *active_query_string;
-
-	/* the cursor specific error code. */
-	pdo_error_type error_code;
-
-	/* for lazy fetches, we always return the same lazy object handle.
-	 * Let's keep it here. */
-	zval lazy_object_ref;
-
-	/* defaults for fetches */
-	enum pdo_fetch_type default_fetch_type;
-	union {
-		int column;
-		struct {
-			zval ctor_args;            /* freed */
-			zend_fcall_info_cache fcc;
-			zend_fcall_info fci;
-			zend_class_entry *ce;
-		} cls;
-		struct {
-			zval dummy; /* This exists due to alignment reasons with fetch.into and fetch.cls.ctor_args */
-			zend_fcall_info_cache fcc;
-		} func;
-		zend_object *into;
-	} fetch;
 
 	/* used by the query parser for driver specific
 	 * parameter naming (see pgsql driver for example) */
@@ -634,6 +635,8 @@ struct _pdo_stmt_t {
     */
 	zend_object std;
 };
+
+
 
 static inline pdo_stmt_t *php_pdo_stmt_fetch_object(zend_object *obj) {
 	return (pdo_stmt_t *)((char*)(obj) - XtOffsetOf(pdo_stmt_t, std));

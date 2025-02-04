@@ -67,9 +67,9 @@ void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_e
 
 PDO_API bool php_pdo_stmt_valid_db_obj_handle(const pdo_stmt_t *stmt)
 {
-	return !Z_ISUNDEF(stmt->database_object_handle)
-		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
+	return stmt->database_object_handle != NULL
+		&& IS_OBJ_VALID(EG(objects_store).object_buckets[stmt->database_object_handle->handle])
+		&& !(OBJ_FLAGS(stmt->database_object_handle) & IS_OBJ_FREE_CALLED);
 }
 
 void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlstate, const char *supp) /* {{{ */
@@ -657,7 +657,8 @@ PHP_METHOD(PDO, prepare)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	ZVAL_OBJ_COPY(&stmt->database_object_handle, &dbh_obj->std);
+	GC_ADDREF(&dbh_obj->std);
+	stmt->database_object_handle = &dbh_obj->std;
 	/* we haven't created a lazy object yet */
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
@@ -1222,7 +1223,8 @@ PHP_METHOD(PDO, query)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	ZVAL_OBJ_COPY(&stmt->database_object_handle, &dbh_obj->std);
+	GC_ADDREF(&dbh_obj->std);
+	stmt->database_object_handle = &dbh_obj->std;
 	/* we haven't created a lazy object yet */
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
@@ -1252,8 +1254,8 @@ PHP_METHOD(PDO, query)
 		/* something broke */
 		dbh->query_stmt = stmt;
 		ZVAL_OBJ(&dbh->query_stmt_zval, Z_OBJ_P(return_value));
-		Z_DELREF(stmt->database_object_handle);
-		ZVAL_UNDEF(&stmt->database_object_handle);
+		GC_DELREF(stmt->database_object_handle);
+		stmt->database_object_handle = NULL;
 		PDO_HANDLE_STMT_ERR();
 	} else {
 		PDO_HANDLE_DBH_ERR();

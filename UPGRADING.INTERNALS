@@ -14,9 +14,22 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Zend
+  . Added zend_safe_assign_to_variable_noref() function to safely assign
+    a value to a non-reference zval.
+  . Added zval_ptr_safe_dtor() to safely destroy a zval when a destructor
+    could interfere.
+
 ========================
 2. Build system changes
 ========================
+
+- Windows build system changes
+  . SAPI() and ADD_SOURCES() now suport the optional `duplicate_sources`
+    parameter.  If truthy, no rules to build the object files are generated.
+    This allows to build additional variants of SAPIs (e.g. a DLL and EXE)
+    without duplicate build rules.  It is up to the SAPI maintainers to ensure
+    that appropriate build rules are created.
 
 ========================
 3. Module changes

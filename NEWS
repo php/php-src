@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
     non-printable characters in string literals). (nielsdos, WangYihang)
   . Add support for backtraces for fatal errors. (enorris)
+  . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
+  . Improved error message of UnhandledMatchError for
+    zend.exception_string_param_max_len=0. (timwolla)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -32,6 +35,7 @@ PHP                                                                        NEWS
 
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
+  . Added enchant_dict_remove(). (nielsdos)
 
 - GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
@@ -81,6 +85,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Added ReflectionConstant::getExtension() and ::getExtensionName().
     (DanielEScherzer)
+  . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
+    zval for uninitialized typed properties). (nielsdos)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap

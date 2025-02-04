@@ -636,7 +636,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
 	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)];
-	HANDLE shm_handle = NULL, info_handle = NULL;
+	HANDLE shm_handle = NULL;
 	BOOL created = FALSE;
 
 	if (key != IPC_PRIVATE) {

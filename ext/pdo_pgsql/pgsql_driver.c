@@ -200,13 +200,13 @@ const php_stream_ops pdo_pgsql_lob_stream_ops = {
 	NULL
 };
 
-php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid)
+php_stream *pdo_pgsql_create_lob_stream(zend_object *dbh, int lfd, Oid oid)
 {
 	php_stream *stm;
 	struct pdo_pgsql_lob_self *self = ecalloc(1, sizeof(*self));
-	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)(Z_PDO_DBH_P(dbh))->driver_data;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)(php_pdo_dbh_fetch_inner(dbh))->driver_data;
 
-	ZVAL_COPY_VALUE(&self->dbh, dbh);
+	ZVAL_OBJ(&self->dbh, dbh);
 	self->lfd = lfd;
 	self->oid = oid;
 	self->conn = H->server;
@@ -214,7 +214,7 @@ php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid)
 	stm = php_stream_alloc(&pdo_pgsql_lob_stream_ops, self, 0, "r+b");
 
 	if (stm) {
-		Z_ADDREF_P(dbh);
+		GC_ADDREF(dbh);
 		zend_hash_index_add_ptr(H->lob_streams, php_stream_get_resource_id(stm), stm->res);
 		return stm;
 	}
@@ -1116,7 +1116,7 @@ void pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAMETERS)
 	lfd = lo_open(H->server, oid, mode);
 
 	if (lfd >= 0) {
-		php_stream *stream = pdo_pgsql_create_lob_stream(ZEND_THIS, lfd, oid);
+		php_stream *stream = pdo_pgsql_create_lob_stream(Z_OBJ_P(ZEND_THIS), lfd, oid);
 		if (stream) {
 			php_stream_to_zval(stream, return_value);
 			return;

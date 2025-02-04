@@ -50,6 +50,18 @@ PHP 8.5 UPGRADE NOTES
   . pcntl_exec() now throws ValueErrors when entries or keys of the
     $env_vars parameter contain null bytes.
 
+- PDO:
+  . The constructor arguments set in conjunction with PDO::FETCH_CLASS now
+    follow the usual CUFA (call_user_func_array) semantics.
+    This means string keys will act like a named argument.
+    Moreover, automatic wrapping for by-value arguments passed to a by-ref
+    parameter has been removed, and the usual E_WARNING about this is now
+    emitted.
+    To pass a variable by-ref to a constructor argument use the general
+    array value reference assignment: $ctor_args = [&$valByRef]
+  . Attempting to modify a PDOStatement during a call to PDO::fetch(),
+    PDO::fetchObject(), PDO::fetchAll() will now throw an Error.
+
 - PDO_FIREBIRD:
   . A ValueError is now thrown when trying to set a cursor name that is too
     long on a PDOStatement resulting from the Firebird driver.
@@ -193,6 +205,8 @@ PHP 8.5 UPGRADE NOTES
 - Enchant:
   . Added enchant_dict_remove_from_session() to remove a word added to the
     spellcheck session via enchant_dict_add_to_session().
+  . Added enchant_dict_remove() to put a word on the exclusion list and
+    remove it from the session dictionary.
 
 - PGSQL:
   . pg_close_stmt offers an alternative way to close a prepared
@@ -280,6 +294,9 @@ PHP 8.5 UPGRADE NOTES
 
 * --enable-sanitzer is now supported for MSVC builds.  This enables ASan and
   debug assertions, and is supported as of MSVC 16.10 and Windows 10.
+
+* The --with-uncritical-warn-choke configuration option for clang builds is
+  no longer supported.  Select warnings to suppress via CFLAGS instead.
 
 * COM:
   . The extension is now build shared by default; previously it defaulted to a

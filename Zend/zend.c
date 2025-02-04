@@ -1050,6 +1050,8 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_last) = 0;
 #endif /* ZTS */
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	EG(fatal_error_backtrace_on) = false;
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	zend_interned_strings_init();
 	zend_startup_builtin_functions();

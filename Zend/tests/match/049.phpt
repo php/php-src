@@ -1,7 +1,7 @@
 --TEST--
-Match expression error messages (exception_string_param_max_len=0)
+Match expression error messages (zend.exception_ignore_args=1)
 --INI--
-zend.exception_string_param_max_len=0
+zend.exception_ignore_args=1
 --FILE--
 <?php
 
@@ -29,13 +29,13 @@ test(str_repeat('e', 100));
 test(str_repeat("e\n", 100));
 ?>
 --EXPECT--
-Unhandled match case NULL
-Unhandled match case 1
-Unhandled match case 5.5
-Unhandled match case 5.0
+Unhandled match case of type null
+Unhandled match case of type int
+Unhandled match case of type float
+Unhandled match case of type float
 Unhandled match case of type string
-Unhandled match case true
-Unhandled match case false
+Unhandled match case of type bool
+Unhandled match case of type bool
 Unhandled match case of type array
 Unhandled match case of type Beep
 Unhandled match case of type string

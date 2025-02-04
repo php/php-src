@@ -203,7 +203,7 @@ if (buildconf_process_args() == 0) {
 	WScript.Quit(3);
 }
 
-if (FSO.FileExists("config.w32")) {
+if (!FSO.FileExists("config.w32")) {
 	STDERR.WriteLine("Cannot find config.w32");
 	STDERR.WriteLine("Must be run from the root of the extension source");
 	WScript.Quit(10);
