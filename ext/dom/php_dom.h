@@ -57,7 +57,7 @@ extern zend_module_entry dom_module_entry;
 #include "zend_exceptions.h"
 #include "dom_ce.h"
 
-#define DOM_API_VERSION PHP_VERSION
+#define DOM_API_VERSION ZEND_MODULE_API_NO
 /* Define a custom type for iterating using an unused nodetype */
 #define DOM_NODESET XML_XINCLUDE_START
 
