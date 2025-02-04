@@ -468,9 +468,12 @@ struct _pdo_dbh_t {
 	/* bitmap for pdo_param_event(s) to skip in dispatch_param_event */
 	unsigned skip_param_evt:7;
 
+	/* defaults for fetches */
+	unsigned default_fetch_type:9;
+
 	/* the sum of the number of bits here and the bit fields preceding should
 	 * equal 32 */
-	unsigned _reserved_flags:14;
+	unsigned _reserved_flags:5;
 
 	/* data source string used to open this handle */
 	const char *data_source;
@@ -503,9 +506,6 @@ struct _pdo_dbh_t {
 	 * when PDO::query() fails */
 	pdo_stmt_t *query_stmt;
 	zval query_stmt_zval;
-
-	/* defaults for fetches */
-	enum pdo_fetch_type default_fetch_type;
 };
 
 /* represents a connection to a database */
