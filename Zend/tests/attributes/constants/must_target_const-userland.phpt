@@ -11,7 +11,7 @@ const EXAMPLE = 'Foo';
 
 $ref = new ReflectionConstant('EXAMPLE');
 $attribs = $ref->getAttributes();
-var_dump( $attribs );
+var_dump($attribs);
 $attribs[0]->newInstance();
 
 ?>
