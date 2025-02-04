@@ -4599,14 +4599,12 @@ function parseClass(
     ?int $minimumPhpVersionIdCompatibility,
     bool $isUndocumentable
 ): ClassInfo {
-    $flags = $class instanceof Class_ ? $class->flags : 0;
     $comments = $class->getComments();
     $alias = null;
     $isDeprecated = false;
     $isStrictProperties = false;
     $isNotSerializable = false;
     $allowsDynamicProperties = false;
-    $attributes = [];
 
     if ($comments) {
         $tags = parseDocComments($comments);
@@ -4667,7 +4665,7 @@ function parseClass(
 
     return new ClassInfo(
         $name,
-        $flags,
+        $class instanceof Class_ ? $class->flags : 0,
         $classKind,
         $alias,
         $class instanceof Enum_ && $class->scalarType !== null
@@ -4911,8 +4909,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
 }
 
 function parseStubFile(string $code): FileInfo {
-    $lexer = new PhpParser\Lexer\Emulative();
-    $parser = new PhpParser\Parser\Php7($lexer);
+    $parser = new PhpParser\Parser\Php7(new PhpParser\Lexer\Emulative());
     $nodeTraverser = new PhpParser\NodeTraverser;
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
     $prettyPrinter = new class extends Standard {
@@ -5178,8 +5175,7 @@ function generateArgInfoCode(
         $framelessFunctionCode = generateCodeWithConditions(
             $fileInfo->getAllFuncInfos(), "\n",
             static function (FuncInfo $funcInfo) {
-                $code = $funcInfo->getFramelessDeclaration($funcInfo);
-                return $code;
+                return $funcInfo->getFramelessDeclaration($funcInfo);
             }
         );
 
