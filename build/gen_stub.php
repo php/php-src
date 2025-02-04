@@ -2085,9 +2085,6 @@ OUPUT_EXAMPLE
             $this->args[$key] = clone $argInfo;
         }
         $this->return = clone $this->return;
-        foreach ($this->framelessFunctionInfos as $key => $framelessFunctionInfo) {
-            $this->framelessFunctionInfos[$key] = clone $framelessFunctionInfo;
-        }
     }
 }
 
@@ -4227,6 +4224,8 @@ function parseDocComment(DocComment $comment): array {
     return $tags;
 }
 
+// Instances of FramelessFunctionInfo are immutable and do not need to be cloned
+// when held by an object that is cloned
 class FramelessFunctionInfo {
     public /* readonly */ int $arity;
 
