@@ -61,6 +61,9 @@ PHP 8.5 UPGRADE NOTES
     array value reference assignment: $ctor_args = [&$valByRef]
   . Attempting to modify a PDOStatement during a call to PDO::fetch(),
     PDO::fetchObject(), PDO::fetchAll() will now throw an Error.
+  . The value of the constants PDO::FETCH_GROUP, PDO::FETCH_UNIQUE,
+    PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, and PDO::FETCH_SERIALIZE
+    has changed.
 
 - PDO_FIREBIRD:
   . A ValueError is now thrown when trying to set a cursor name that is too
