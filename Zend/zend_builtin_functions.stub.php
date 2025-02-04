@@ -117,14 +117,14 @@ function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
 function restore_error_handler(): true {}
 
-function get_error_handler(): mixed {}
+function get_error_handler(): ?callable {}
 
 /** @return callable|null */
 function set_exception_handler(?callable $callback) {}
 
 function restore_exception_handler(): true {}
 
-function get_exception_handler(): mixed {}
+function get_exception_handler(): ?callable {}
 
 /**
  * @return array<int, string>
