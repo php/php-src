@@ -1468,17 +1468,25 @@ static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int pri
 	smart_str_appendc(str, '}');
 }
 
-static ZEND_COLD void zend_ast_export_list(smart_str *str, zend_ast_list *list, bool separator, int priority, int indent)
+// Use zend_ast_export_list() unless fewer than `list->children` children
+// should be exported
+static ZEND_COLD void zend_ast_export_list_ex(smart_str *str, zend_ast_list *list, bool separator, int priority, int indent, int children)
 {
+	ZEND_ASSERT(children <= list->children);
 	uint32_t i = 0;
 
-	while (i < list->children) {
+	while (i < children) {
 		if (i != 0 && separator) {
 			smart_str_appends(str, ", ");
 		}
 		zend_ast_export_ex(str, list->child[i], priority, indent);
 		i++;
 	}
+}
+
+static ZEND_COLD void zend_ast_export_list(smart_str *str, zend_ast_list *list, bool separator, int priority, int indent)
+{
+	zend_ast_export_list_ex(str, list, separator, priority, indent, list->children);
 }
 
 static ZEND_COLD void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_list *list, int indent)
@@ -2064,13 +2072,10 @@ simple_list:
 					1
 				);
 				// So that the list printing doesn't try to print the attributes,
-				// decrease the number of children; since we need to increase it
-				// afterwards, instead of jumping to simple_list we need to
-				// put the zend_ast_export_list() call here
-				ast_list->children--;
+				// use zend_ast_export_list_ex() to override the number of children
+				// to print
 				smart_str_appends(str, "const ");
-				zend_ast_export_list(str, ast_list, 1, 20, indent);
-				ast_list->children++;
+				zend_ast_export_list_ex(str, ast_list, 1, 20, indent, ast_list->children - 1);
 				break;
 			}
 			smart_str_appends(str, "const ");
