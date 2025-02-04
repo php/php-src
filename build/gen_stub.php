@@ -861,18 +861,14 @@ interface VariableLikeName {
     public function getDeclarationName(): string;
 }
 
-interface ConstOrClassConstName extends VariableLikeName {
-    public function equals(ConstOrClassConstName $const): bool;
-    public function isClassConst(): bool;
-    public function isUnknown(): bool;
-}
-
-abstract class AbstractConstName implements ConstOrClassConstName
+abstract class AbstractConstName implements VariableLikeName
 {
-    public function equals(ConstOrClassConstName $const): bool
+    public function equals(AbstractConstName $const): bool
     {
         return $this->__toString() === $const->__toString();
     }
+
+    abstract public function isClassConst(): bool;
 
     public function isUnknown(): bool
     {
@@ -2468,7 +2464,7 @@ abstract class VariableLike
 
 class ConstInfo extends VariableLike
 {
-    public /* readonly */ ConstOrClassConstName $name;
+    public /* readonly */ AbstractConstName $name;
     public /* readonly */ Expr $value;
     public bool $isDeprecated;
     public ?string $valueString;
@@ -2481,7 +2477,7 @@ class ConstInfo extends VariableLike
      * @var AttributeInfo[] $attributes
      */
     public function __construct(
-        ConstOrClassConstName $name,
+        AbstractConstName $name,
         int $flags,
         Expr $value,
         ?string $valueString,
@@ -4455,7 +4451,7 @@ function parseFunctionLike(
  */
 function parseConstLike(
     PrettyPrinterAbstract $prettyPrinter,
-    ConstOrClassConstName $name,
+    AbstractConstName $name,
     Node\Const_ $const,
     int $flags,
     ?Node $type,
