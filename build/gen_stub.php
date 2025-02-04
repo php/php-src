@@ -1426,9 +1426,7 @@ class FuncInfo {
 
             if (!$php84MinimumCompatibility) {
                 $code .= "#else\n";
-            }
 
-            if (!$php84MinimumCompatibility) {
                 $flags = array_slice($flagsByPhpVersions, 0, 4, true);
                 $template = "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n";
                 $flagsCode = generateVersionDependentFlagCode(
@@ -1437,9 +1435,7 @@ class FuncInfo {
                     $this->minimumPhpVersionIdCompatibility
                 );
                 $code .= implode("", $flagsCode);
-            }
 
-            if (!$php84MinimumCompatibility) {
                 $code .= "#endif\n";
             }
         }
