@@ -12,6 +12,10 @@ PHP                                                                        NEWS
     zend.exception_ignore_args=1 into account). (timwolla)
   . Fix fallback paths in fast_long_{add,sub}_function. (nielsdos)
 
+- MBString:
+  . Fixed bug GH-17503 (Undefined float conversion in mb_convert_variables).
+    (cmb)
+
 - Opcache:
   . Fixed bug GH-17654 (Multiple classes using same trait causes function
     JIT crash). (nielsdos)
