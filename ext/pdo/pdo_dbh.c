@@ -35,7 +35,7 @@
 #include "zend_observer.h"
 #include "zend_extensions.h"
 
-static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
+static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, uint32_t value_arg_num);
 
 void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error)
 {
@@ -512,7 +512,7 @@ options:
 				ZVAL_DEREF(attr_value);
 
 				/* TODO: Should the constructor fail when the attribute cannot be set? */
-				pdo_dbh_attribute_set(dbh, long_key, attr_value);
+				pdo_dbh_attribute_set(dbh, long_key, attr_value, 3);
 			} ZEND_HASH_FOREACH_END();
 		}
 
@@ -814,7 +814,7 @@ PDO_API bool pdo_get_bool_param(bool *bval, const zval *value)
 }
 
 /* Return false on failure, true otherwise */
-static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /* {{{ */
+static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, uint32_t value_arg_num) /* {{{ */
 {
 	zend_long lval;
 	bool bval;
@@ -831,7 +831,7 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 					dbh->error_mode = lval;
 					return true;
 				default:
-					zend_value_error("Error mode must be one of the PDO::ERRMODE_* constants");
+					zend_argument_value_error(value_arg_num, "Error mode must be one of the PDO::ERRMODE_* constants");
 					return false;
 			}
 			return false;
@@ -847,7 +847,7 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 					dbh->desired_case = lval;
 					return true;
 				default:
-					zend_value_error("Case folding mode must be one of the PDO::CASE_* constants");
+					zend_argument_value_error(value_arg_num, "Case folding mode must be one of the PDO::CASE_* constants");
 					return false;
 			}
 			return false;
@@ -865,7 +865,7 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 				zval *tmp;
 				if ((tmp = zend_hash_index_find(Z_ARRVAL_P(value), 0)) != NULL && Z_TYPE_P(tmp) == IS_LONG) {
 					if (Z_LVAL_P(tmp) == PDO_FETCH_INTO || Z_LVAL_P(tmp) == PDO_FETCH_CLASS) {
-						zend_value_error("PDO::FETCH_INTO and PDO::FETCH_CLASS cannot be set as the default fetch mode");
+						zend_argument_value_error(value_arg_num, "PDO::FETCH_INTO and PDO::FETCH_CLASS cannot be set as the default fetch mode");
 						return false;
 					}
 				}
@@ -876,7 +876,7 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 				}
 			}
 			if (lval == PDO_FETCH_USE_DEFAULT) {
-				zend_value_error("Fetch mode must be a bitmask of PDO::FETCH_* constants");
+				zend_argument_value_error(value_arg_num, "Fetch mode must be a bitmask of PDO::FETCH_* constants");
 				return false;
 			}
 			dbh->default_fetch_type = lval;
@@ -906,25 +906,25 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 				return false;
 			}
 			if (Z_TYPE_P(value) != IS_ARRAY) {
-				zend_type_error("PDO::ATTR_STATEMENT_CLASS value must be of type array, %s given",
+				zend_argument_type_error(value_arg_num, "PDO::ATTR_STATEMENT_CLASS value must be of type array, %s given",
 					zend_zval_value_name(value));
 				return false;
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
-				zend_value_error("PDO::ATTR_STATEMENT_CLASS value must be an array with the format "
+				zend_argument_value_error(value_arg_num, "PDO::ATTR_STATEMENT_CLASS value must be an array with the format "
 					"array(classname, constructor_args)");
 				return false;
 			}
 			if (Z_TYPE_P(item) != IS_STRING || (pce = zend_lookup_class(Z_STR_P(item))) == NULL) {
-				zend_type_error("PDO::ATTR_STATEMENT_CLASS class must be a valid class");
+				zend_argument_type_error(value_arg_num, "PDO::ATTR_STATEMENT_CLASS class must be a valid class");
 				return false;
 			}
 			if (!instanceof_function(pce, pdo_dbstmt_ce)) {
-				zend_type_error("PDO::ATTR_STATEMENT_CLASS class must be derived from PDOStatement");
+				zend_argument_type_error(value_arg_num, "PDO::ATTR_STATEMENT_CLASS class must be derived from PDOStatement");
 				return false;
 			}
 			if (pce->constructor && !(pce->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
-				zend_type_error("User-supplied statement class cannot have a public constructor");
+				zend_argument_type_error(value_arg_num, "User-supplied statement class cannot have a public constructor");
 				return false;
 			}
 			dbh->def_stmt_ce = pce;
@@ -934,7 +934,7 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 				if (Z_TYPE_P(item) != IS_ARRAY) {
-					zend_type_error("PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
+					zend_argument_type_error(value_arg_num, "PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
 						zend_zval_value_name(value));
 					return false;
 				}
@@ -980,7 +980,7 @@ PHP_METHOD(PDO, setAttribute)
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
-	RETURN_BOOL(pdo_dbh_attribute_set(dbh, attr, value));
+	RETURN_BOOL(pdo_dbh_attribute_set(dbh, attr, value, 2));
 }
 /* }}} */
 
