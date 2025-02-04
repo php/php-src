@@ -3087,7 +3087,7 @@ class PropertyInfo extends VariableLike
                 $include = array_merge($include, self::PHP_81_KNOWN);
                 break;
         }
-        if (array_key_exists($propName,$include)) {
+        if (array_key_exists($propName, $include)) {
             $knownStr = $include[$propName];
             return [
                 '',
@@ -3584,7 +3584,6 @@ class ClassInfo {
      * @param iterable<ConstInfo> $allConstInfo
      */
     public function getClassSynopsisDocument(array $classMap, array $allConstInfos): ?string {
-
         $doc = new DOMDocument();
         $doc->formatOutput = true;
         $classSynopsis = $this->getClassSynopsisElement($doc, $classMap, $allConstInfos);
@@ -3602,7 +3601,6 @@ class ClassInfo {
      * @param array<string, ConstInfo> $allConstInfos
      */
     public function getClassSynopsisElement(DOMDocument $doc, array $classMap, array $allConstInfos): ?DOMElement {
-
         $classSynopsis = $doc->createElement("classsynopsis");
         $classSynopsis->setAttribute("class", $this->type === "interface" ? "interface" : "class");
 
@@ -4888,7 +4886,15 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             }
 
             $fileInfo->classInfos[] = parseClass(
-                $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos, $cond, $fileInfo->getMinimumPhpVersionIdCompatibility(), $fileInfo->isUndocumentable
+                $className,
+                $stmt,
+                $constInfos,
+                $propertyInfos,
+                $methodInfos,
+                $enumCaseInfos,
+                $cond,
+                $fileInfo->getMinimumPhpVersionIdCompatibility(),
+                $fileInfo->isUndocumentable
             );
             continue;
         }
@@ -5034,7 +5040,7 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
                 } else {
                     $code .= sprintf(
                         "\tZEND_%s_OBJ_INFO%s(%s, %s, %s, %d%s)\n",
-                        $argKind,$argDefaultKind, $argInfo->sendBy, $argInfo->name,
+                        $argKind, $argDefaultKind, $argInfo->sendBy, $argInfo->name,
                         $simpleArgType->toEscapedName(), $argType->isNullable(),
                         $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
@@ -5376,7 +5382,6 @@ function generatePropertyAttributeInitialization(
 
 /** @param array<string, FuncInfo> $funcMap */
 function generateOptimizerInfo(array $funcMap): string {
-
     $code = "/* This is a generated file, edit the .stub.php files instead. */\n\n";
 
     $code .= "static const func_info_t func_infos[] = {\n";
