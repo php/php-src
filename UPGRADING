@@ -244,6 +244,12 @@ PHP 8.5 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Core:
+  . get_error_handler() allows retrieving the current user-defined error handler
+    function
+  . get_exception_handler() allows retrieving the current user-defined exception
+    handler function
+
 - Curl:
   . curl_multi_get_handles() allows retrieving all CurlHandles current
     attached to a CurlMultiHandle. This includes both handles added using
