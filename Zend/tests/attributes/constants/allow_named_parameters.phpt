@@ -8,8 +8,8 @@ const EXAMPLE = 'Foo';
 
 $ref = new ReflectionConstant('EXAMPLE');
 $attribs = $ref->getAttributes();
-var_dump( $attribs );
-var_dump( $attribs[0]->getArguments() );
+var_dump($attribs);
+var_dump($attribs[0]->getArguments());
 
 ?>
 --EXPECTF--
