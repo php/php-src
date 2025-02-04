@@ -693,7 +693,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	if (how == PDO_FETCH_COLUMN) {
 		int colno = stmt->fetch.column;
 
-		if ((flags & PDO_FETCH_GROUP) && stmt->fetch.column == -1) {
+		if ((flags & (PDO_FETCH_GROUP|PDO_FETCH_UNIQUE)) && stmt->fetch.column == -1) {
 			colno = 1;
 		}
 
@@ -946,59 +946,81 @@ in_fetch_error:
 
 
 // TODO Error on the following cases:
-// Using any fetch flag with PDO_FETCH_KEY_PAIR
 // Combining PDO_FETCH_UNIQUE and PDO_FETCH_GROUP
-// Using PDO_FETCH_UNIQUE or PDO_FETCH_GROUP outside of fetchAll()
-// Combining PDO_FETCH_PROPS_LATE with a fetch mode different than PDO_FETCH_CLASS
-// Improve error detection when combining PDO_FETCH_USE_DEFAULT with
-// Reject PDO_FETCH_INTO mode with fetch_all as no support
 // Reject $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, value); bypass
-static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_arg_num, bool fetch_all) /* {{{ */
+static bool pdo_verify_fetch_mode(uint32_t default_mode_and_flags, zend_long mode_and_flags, uint32_t mode_arg_num, bool fetch_all) /* {{{ */
 {
-	int flags = mode & PDO_FETCH_FLAGS;
-
-	mode = mode & ~PDO_FETCH_FLAGS;
-
-	if (mode < 0 || mode >= PDO_FETCH__MAX) {
+	/* Mode must be a positive */
+	if (mode_and_flags < 0 || mode_and_flags >= PDO_FIRST_INVALID_FLAG) {
 		zend_argument_value_error(mode_arg_num, "must be a bitmask of PDO::FETCH_* constants");
-		return 0;
+		return false;
 	}
+
+	uint32_t flags = (zend_ulong)mode_and_flags & PDO_FETCH_FLAGS;
+	enum pdo_fetch_type mode = (zend_ulong)mode_and_flags & ~PDO_FETCH_FLAGS;
 
 	if (mode == PDO_FETCH_USE_DEFAULT) {
-		flags = stmt->default_fetch_type & PDO_FETCH_FLAGS;
-		mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
+		flags = default_mode_and_flags & PDO_FETCH_FLAGS;
+		mode = default_mode_and_flags & ~PDO_FETCH_FLAGS;
 	}
 
-	switch(mode) {
+	/* Flags can only be used in limited circumstances */
+	if (flags != 0) {
+		bool has_class_flags = (flags & (PDO_FETCH_CLASSTYPE|PDO_FETCH_PROPS_LATE|PDO_FETCH_SERIALIZE)) != 0;
+		if (has_class_flags && mode != PDO_FETCH_CLASS) {
+			zend_argument_value_error(mode_arg_num, "cannot use PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, or PDO::FETCH_SERIALIZE fetch flags with a fetch mode different than PDO::FETCH_CLASS");
+			return false;
+		}
+		// TODO Prevent setting those flags together or not? This would affect PDO::setFetchMode()
+		//bool has_grouping_flags = flags & (PDO_FETCH_GROUP|PDO_FETCH_UNIQUE);
+		//if (has_grouping_flags && !fetch_all) {
+		//	zend_argument_value_error(mode_arg_num, "cannot use PDO::FETCH_GROUP, or PDO::FETCH_UNIQUE fetch flags outside of PDOStatemnt::fetchAll()");
+		//	return false;
+		//}
+		if (flags & PDO_FETCH_SERIALIZE) {
+			php_error_docref(NULL, E_DEPRECATED, "The PDO::FETCH_SERIALIZE mode is deprecated");
+			if (UNEXPECTED(EG(exception))) {
+				return false;
+			}
+		}
+	}
+
+	switch (mode) {
 		case PDO_FETCH_FUNC:
 			if (!fetch_all) {
-				zend_value_error("Can only use PDO::FETCH_FUNC in PDOStatement::fetchAll()");
-				return 0;
+				zend_argument_value_error(mode_arg_num, "PDO::FETCH_FUNC can only be used with PDOStatement::fetchAll()");
+				return false;
 			}
-			return 1;
+			return true;
 
 		case PDO_FETCH_LAZY:
 			if (fetch_all) {
-				zend_argument_value_error(mode_arg_num, "cannot be PDO::FETCH_LAZY in PDOStatement::fetchAll()");
-				return 0;
+				zend_argument_value_error(mode_arg_num, "PDO::FETCH_LAZY cannot be used with PDOStatement::fetchAll()");
+				return false;
 			}
-			ZEND_FALLTHROUGH;
-		default:
-			if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-				zend_argument_value_error(mode_arg_num, "must use PDO::FETCH_SERIALIZE with PDO::FETCH_CLASS");
-				return 0;
-			}
-			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
-				zend_argument_value_error(mode_arg_num, "must use PDO::FETCH_CLASSTYPE with PDO::FETCH_CLASS");
-				return 0;
-			}
-			ZEND_FALLTHROUGH;
+			return true;
 
-		case PDO_FETCH_CLASS:
-			if (flags & PDO_FETCH_SERIALIZE) {
-				php_error_docref(NULL, E_DEPRECATED, "The PDO::FETCH_SERIALIZE mode is deprecated");
+		case PDO_FETCH_INTO:
+			if (fetch_all) {
+				zend_argument_value_error(mode_arg_num, "PDO::FETCH_INTO cannot be used with PDOStatement::fetchAll()");
+				return false;
 			}
-			return 1;
+			return true;
+
+		case PDO_FETCH_ASSOC:
+		case PDO_FETCH_NUM:
+		case PDO_FETCH_BOTH:
+		case PDO_FETCH_OBJ:
+		case PDO_FETCH_BOUND:
+		case PDO_FETCH_COLUMN:
+		case PDO_FETCH_CLASS:
+		case PDO_FETCH_NAMED:
+		case PDO_FETCH_KEY_PAIR:
+			return true;
+
+		default:
+			zend_argument_value_error(mode_arg_num, "must be a bitmask of PDO::FETCH_* constants");
+			return false;
 	}
 }
 /* }}} */
@@ -1020,7 +1042,7 @@ PHP_METHOD(PDOStatement, fetch)
 	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
-	if (!pdo_stmt_verify_mode(stmt, how, 1, false)) {
+	if (!pdo_verify_fetch_mode(stmt->default_fetch_type, how, 1, false)) {
 		RETURN_THROWS();
 	}
 
@@ -1140,7 +1162,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
-	if (!pdo_stmt_verify_mode(stmt, how, 1, true)) {
+	if (!pdo_verify_fetch_mode(stmt->default_fetch_type, how, 1, true)) {
 		RETURN_THROWS();
 	}
 
@@ -1215,7 +1237,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 				}
 				stmt->fetch.column = Z_LVAL_P(arg2);
 			} else {
-				stmt->fetch.column = flags & PDO_FETCH_GROUP ? -1 : 0;
+				stmt->fetch.column = flags & (PDO_FETCH_GROUP|PDO_FETCH_UNIQUE) ? -1 : 0;
 			}
 			break;
 
@@ -1606,7 +1628,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 
 	flags = mode & PDO_FETCH_FLAGS;
 
-	if (!pdo_stmt_verify_mode(stmt, mode, mode_arg_num, false)) {
+	if (!pdo_verify_fetch_mode(stmt->default_fetch_type, mode, mode_arg_num, false)) {
 		return false;
 	}
 
