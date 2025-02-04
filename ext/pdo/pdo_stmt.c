@@ -764,13 +764,6 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				}
 				zval_ptr_dtor(&ce_name_from_column);
 			} else {
-				/* This can happen if the fetch flags are set via PDO::setAttribute()
-				 * $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_CLASS);
-				 * See ext/pdo/tests/bug_38253.phpt */
-				if (UNEXPECTED(ce == NULL)) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch class specified");
-					goto in_fetch_error;
-				}
 				ctor_arguments = stmt->fetch.cls.ctor_args;
 			}
 			ZEND_ASSERT(ce != NULL);
@@ -795,14 +788,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			break;
 
 		case PDO_FETCH_INTO:
-			/* This can happen if the fetch flags are set via PDO::setAttribute()
-			 * $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_INTO);
-			 * See ext/pdo/tests/bug_38253.phpt */
-			if (stmt->fetch.into == NULL) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch-into object specified.");
-				goto in_fetch_error;
-			}
-
+			ZEND_ASSERT(stmt->fetch.into != NULL);
 			ZVAL_OBJ_COPY(return_value, stmt->fetch.into);
 
 			/* We want the behaviour of fetching into an object to be called from the global scope rather
@@ -811,13 +797,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			break;
 
 		case PDO_FETCH_FUNC:
-			/* This can happen if the fetch flags are set via PDO::setAttribute()
-			 * $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_FUNC);
-			 * See ext/pdo/tests/bug_38253.phpt */
-			if (UNEXPECTED(!ZEND_FCC_INITIALIZED(stmt->fetch.func.fcc))) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch function specified");
-				goto in_fetch_error;
-			}
+			ZEND_ASSERT(ZEND_FCC_INITIALIZED(stmt->fetch.func.fcc));
 			/* There will be at most stmt->column_count parameters.
 			 * However, if we fetch a group key we will have over allocated. */
 			fetch_function_params = safe_emalloc(sizeof(zval), stmt->column_count, 0);
@@ -1598,12 +1578,8 @@ void pdo_stmt_free_default_fetch_mode(pdo_stmt_t *stmt)
 {
 	enum pdo_fetch_type default_fetch_mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 	if (default_fetch_mode == PDO_FETCH_INTO) {
-		/* This can happen if the fetch flags are set via PDO::setAttribute()
-		 * $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_INTO);
-		 * See ext/pdo/tests/bug_38253.phpt */
-		if (EXPECTED(stmt->fetch.into != NULL)) {
-			OBJ_RELEASE(stmt->fetch.into);
-		}
+		ZEND_ASSERT(stmt->fetch.into != NULL);
+		OBJ_RELEASE(stmt->fetch.into);
 	} else if (default_fetch_mode == PDO_FETCH_CLASS) {
 		if (stmt->fetch.cls.ctor_args != NULL) {
 			zend_array_release(stmt->fetch.cls.ctor_args);
