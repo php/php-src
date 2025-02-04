@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
     Dom\HTML_NO_DEFAULT_NS). (nielsdos)
 
+- MBString:
+  . Fixed bug GH-17503 (Undefined float conversion in mb_convert_variables).
+    (cmb)
+
 - Opcache:
   . Fixed bug GH-17654 (Multiple classes using same trait causes function
     JIT crash). (nielsdos)
