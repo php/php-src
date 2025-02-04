@@ -772,9 +772,9 @@ class ArginfoType {
 }
 
 class ArgInfo {
-    const SEND_BY_VAL = "0";
-    const SEND_BY_REF = "1";
-    const SEND_PREFER_REF = "ZEND_SEND_PREFER_REF";
+    public const SEND_BY_VAL = "0";
+    public const SEND_BY_REF = "1";
+    public const SEND_PREFER_REF = "ZEND_SEND_PREFER_REF";
 
     public /* readonly */ string $name;
     public /* readonly */ string $sendBy;
@@ -1088,11 +1088,11 @@ class MethodName implements FunctionOrMethodName {
 }
 
 class ReturnInfo {
-    const REFCOUNT_0 = "0";
-    const REFCOUNT_1 = "1";
-    const REFCOUNT_N = "N";
+    public const REFCOUNT_0 = "0";
+    public const REFCOUNT_1 = "1";
+    public const REFCOUNT_N = "N";
 
-    const REFCOUNTS_NONSCALAR = [
+    public const REFCOUNTS_NONSCALAR = [
         self::REFCOUNT_1,
         self::REFCOUNT_N,
     ];
