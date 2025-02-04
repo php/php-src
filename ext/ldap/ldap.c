@@ -1448,17 +1448,16 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	zend_string *base_dn_str = NULL;
 	HashTable *filter_ht = NULL;
 	zend_string *filter_str = NULL;
-	zend_long sizelimit = 0, timelimit = 0, deref = LDAP_DEREF_NEVER;
-	bool attrsonly = false;
+	zend_long sizelimit = -1, timelimit = -1, deref = LDAP_DEREF_NEVER;
+	zend_long attrsonly = 0;
 	HashTable *server_controls_ht = NULL;
 	char **ldap_attrs = NULL;
 	ldap_linkdata *ld = NULL;
 	ldap_resultdata *result;
 	LDAPMessage *ldap_res = NULL;
 	LDAPControl **lserverctrls = NULL;
-	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;
-	int ret = 1, ldap_errno, argcount = ZEND_NUM_ARGS();
+	int ret = 1, ldap_errno;
 
 	ZEND_PARSE_PARAMETERS_START(3, 9)
 		Z_PARAM_ZVAL(link)
@@ -1466,7 +1465,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		Z_PARAM_ARRAY_HT_OR_STR(filter_ht, filter_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_EX(attrs, 0, 1)
-		Z_PARAM_BOOL(attrsonly)
+		Z_PARAM_LONG(attrsonly)
 		Z_PARAM_LONG(sizelimit)
 		Z_PARAM_LONG(timelimit)
 		Z_PARAM_LONG(deref)
@@ -1486,25 +1485,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	if (deref < LDAP_DEREF_NEVER || deref > LDAP_DEREF_ALWAYS) {
 		zend_argument_value_error(8, "must be one of the LDAP_DEREF_* constants");
 		RETURN_THROWS();
-	}
-
-	/* Reverse -> fall through */
-	switch (argcount) {
-		case 9:
-		case 8:
-			ldap_deref = deref;
-			ZEND_FALLTHROUGH;
-		case 7:
-			ldap_timelimit = timelimit;
-			ZEND_FALLTHROUGH;
-		case 6:
-			ldap_sizelimit = sizelimit;
-			ZEND_FALLTHROUGH;
-		case 5:
-			ldap_attrsonly = attrsonly ? 1 : 0;
-			ZEND_FALLTHROUGH;
-		default:
-			break;
 	}
 
 	if (attrs) {
@@ -1669,10 +1649,10 @@ process:
 				}
 			}
 
-			php_set_opts(current_ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
+			php_set_opts(current_ld->link, (int)sizelimit, (int)timelimit, (int)deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 			/* Run the actual search */
-			ldap_search_ext(current_ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &rcs[ldap_link_index]);
+			ldap_search_ext(current_ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, (int)attrsonly, lserverctrls, NULL, NULL, (int)sizelimit, &rcs[ldap_link_index]);
 			lds[ldap_link_index] = current_ld;
 
 			// TODO Reset the options of the link?
@@ -1727,10 +1707,10 @@ cleanup_parallel:
 			}
 		}
 
-		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
+		php_set_opts(ld->link, (int)sizelimit, (int)timelimit, (int)deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 		/* Run the actual search */
-		ldap_errno = ldap_search_ext_s(ld->link, ZSTR_VAL(base_dn_str), scope, ZSTR_VAL(filter_str), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &ldap_res);
+		ldap_errno = ldap_search_ext_s(ld->link, ZSTR_VAL(base_dn_str), scope, ZSTR_VAL(filter_str), ldap_attrs, (int)attrsonly, lserverctrls, NULL, NULL, (int)sizelimit, &ldap_res);
 
 		if (ldap_errno != LDAP_SUCCESS
 			&& ldap_errno != LDAP_SIZELIMIT_EXCEEDED
@@ -1768,7 +1748,7 @@ cleanup_parallel:
 cleanup:
 	if (ld) {
 		/* Restoring previous options */
-		php_set_opts(ld->link, old_ldap_sizelimit, old_ldap_timelimit, old_ldap_deref, &ldap_sizelimit, &ldap_timelimit, &ldap_deref);
+		php_set_opts(ld->link, old_ldap_sizelimit, old_ldap_timelimit, old_ldap_deref, (int *)&sizelimit, (int *)&timelimit, (int *)&deref);
 	}
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
