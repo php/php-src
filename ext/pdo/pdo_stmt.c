@@ -948,8 +948,7 @@ in_fetch_error:
 
 // TODO Error on the following cases:
 // Combining PDO_FETCH_UNIQUE and PDO_FETCH_GROUP
-// Reject $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, value); bypass
-static bool pdo_verify_fetch_mode(uint32_t default_mode_and_flags, zend_long mode_and_flags, uint32_t mode_arg_num, bool fetch_all) /* {{{ */
+PDO_API bool pdo_verify_fetch_mode(uint32_t default_mode_and_flags, zend_long mode_and_flags, uint32_t mode_arg_num, bool fetch_all) /* {{{ */
 {
 	/* Mode must be a positive */
 	if (mode_and_flags < 0 || mode_and_flags >= PDO_FIRST_INVALID_FLAG) {

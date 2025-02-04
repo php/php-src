@@ -857,22 +857,22 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, u
 			return true;
 
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
-			if (Z_TYPE_P(value) == IS_ARRAY) {
-				zval *tmp;
-				if ((tmp = zend_hash_index_find(Z_ARRVAL_P(value), 0)) != NULL && Z_TYPE_P(tmp) == IS_LONG) {
-					if (Z_LVAL_P(tmp) == PDO_FETCH_INTO || Z_LVAL_P(tmp) == PDO_FETCH_CLASS) {
-						zend_argument_value_error(value_arg_num, "PDO::FETCH_INTO and PDO::FETCH_CLASS cannot be set as the default fetch mode");
-						return false;
-					}
-				}
-				lval = zval_get_long(value);
-			} else {
-				if (!pdo_get_long_param(&lval, value)) {
-					return false;
-				}
+			if (!pdo_get_long_param(&lval, value)) {
+				return false;
 			}
-			if (lval == PDO_FETCH_USE_DEFAULT) {
-				zend_argument_value_error(value_arg_num, "Fetch mode must be a bitmask of PDO::FETCH_* constants");
+			if (!pdo_verify_fetch_mode(PDO_FETCH_USE_DEFAULT, lval, value_arg_num, false)) {
+				return false;
+			}
+			if (UNEXPECTED(
+				lval == PDO_FETCH_USE_DEFAULT
+				|| lval == PDO_FETCH_INTO
+				|| lval == PDO_FETCH_FUNC
+			)) {
+				zend_argument_value_error(value_arg_num, "cannot set default fetch mode to PDO::FETCH_USE_DEFAULT, PDO::FETCH_INTO, PDO::FETCH_FUNC");
+				return false;
+			}
+			if (UNEXPECTED((lval & PDO_FETCH_CLASS) && (lval & PDO_FETCH_CLASSTYPE) == 0)) {
+				zend_argument_value_error(value_arg_num, "cannot set default fetch mode to PDO::FETCH_CLASS without PDO::FETCH_CLASSTYPE");
 				return false;
 			}
 			dbh->default_fetch_type = lval;

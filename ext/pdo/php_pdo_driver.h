@@ -704,6 +704,8 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 PDO_API bool pdo_get_long_param(zend_long *lval, const zval *value);
 PDO_API bool pdo_get_bool_param(bool *bval, const zval *value);
 
+PDO_API bool pdo_verify_fetch_mode(uint32_t default_mode_and_flags, zend_long mode_and_flags, uint32_t mode_arg_num, bool fetch_all);
+
 PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
 
 /* When a GC cycle is collected, it's possible that the database object is destroyed prior to destroying
