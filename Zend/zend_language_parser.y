@@ -280,7 +280,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> inline_function union_type_element union_type intersection_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
-%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
+%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list match_cond_subject
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
@@ -716,10 +716,14 @@ case_separator:
 	|	';'
 ;
 
+match_cond_subject:
+        %empty          { zval z; ZVAL_TRUE(&z); $$ = zend_ast_create_zval(&z); }
+    |   '(' expr ')'    { $$ = $2; }
+;
 
 match:
-		T_MATCH '(' expr ')' '{' match_arm_list '}'
-			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); };
+		T_MATCH match_cond_subject '{' match_arm_list '}'
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, $2, $4); };
 ;
 
 match_arm_list:
