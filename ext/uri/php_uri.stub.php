@@ -39,17 +39,19 @@ namespace Uri\Rfc3986 {
 
         public function withScheme(?string $encodedScheme): static {}
 
+        public function getUserInfo(): ?string {}
+
+        public function getRawUserInfo(): ?string {}
+
+        public function withUserInfo(?string $encodedUserInfo): static {}
+
         public function getUser(): ?string {}
 
         public function getRawUser(): ?string {}
 
-        public function withUser(?string $encodedUser): static {}
-
         public function getPassword(): ?string {}
 
         public function getRawPassword(): ?string {}
-
-        public function withPassword(?string $encodedPassword): static {}
 
         public function getHost(): ?string {}
 
@@ -134,8 +136,9 @@ namespace Uri\WhatWg {
     {
         public string $context;
         public \Uri\WhatWg\WhatWgErrorType $type;
+        public bool $failure;
 
-        public function __construct(string $context, \Uri\WhatWg\WhatWgErrorType $type) {}
+        public function __construct(string $context, \Uri\WhatWg\WhatWgErrorType $type, bool $failure) {}
     }
 
     /** @strict-properties */
@@ -159,7 +162,6 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getRawUser */
         public function getRawUser(): ?string {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::withUser */
         public function withUser(?string $encodedUser): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPassword */
@@ -168,12 +170,11 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getRawPassword */
         public function getRawPassword(): ?string {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::withPassword */
         public function withPassword(?string $encodedPassword): static {}
 
         public function getHost(): string {}
 
-        public function getHumanFriendlyHost(): string {}
+        public function getHostForDisplay(): string {}
 
         public function withHost(string $encodedHost): static {}
 
@@ -212,9 +213,9 @@ namespace Uri\WhatWg {
 
         public function equals(\Uri\WhatWg\Url $uri, bool $excludeFragment = true): bool {}
 
-        public function toMachineFriendlyString(): string {}
+        public function toString(): string {}
 
-        public function toHumanFriendlyString(): string {}
+        public function toDisplayString(): string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::resolve */
         public function resolve(string $uri): static {}

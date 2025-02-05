@@ -14,7 +14,7 @@ function printUri($uri) {
     if ($uri instanceof Uri\Rfc3986\Uri) {
         var_dump($uri->getRawHost());
     } else {
-        var_dump($uri->getHumanFriendlyHost());
+        var_dump($uri->getHostForDisplay());
     }
     var_dump($uri->getPath());
     var_dump($uri->getRawPath());

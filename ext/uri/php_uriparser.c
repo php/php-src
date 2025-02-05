@@ -164,6 +164,21 @@ static zend_result uriparser_read_scheme(const uri_internal_t *internal_uri, uri
 	return SUCCESS;
 }
 
+static zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
+	UriUriA *uriparser_uri;
+	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+
+	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
+		ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, uriparser_uri->userInfo.afterLast - uriparser_uri->userInfo.first);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
 static zend_result uriparser_read_user(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
@@ -303,31 +318,7 @@ static void uriparser_append_scheme(const uri_internal_t *internal_uri, smart_st
 	zval_ptr_dtor(&tmp);
 }
 
-static void uriparser_append_user(const uri_internal_t *internal_uri, smart_str *uri_str)
-{
-	zval tmp;
-
-	uriparser_read_user(internal_uri, URI_COMPONENT_READ_RAW, &tmp);
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		smart_str_append(uri_str, Z_STR(tmp));
-	}
-
-	zval_ptr_dtor(&tmp);
-}
-
-static void uriparser_append_password(const uri_internal_t *internal_uri, smart_str *uri_str)
-{
-	zval tmp;
-
-	uriparser_read_password(internal_uri, URI_COMPONENT_READ_RAW, &tmp);
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		smart_str_append(uri_str, Z_STR(tmp));
-	}
-
-	zval_ptr_dtor(&tmp);
-}
-
-static void uriparser_append_authority(const uri_internal_t *internal_uri, smart_str *uri_str)
+static void uriparser_append_userinfo(const uri_internal_t *internal_uri, smart_str *uri_str)
 {
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
 	UriUriA *uriparser_uri = (UriUriA *) uriparser_uris->uri;
@@ -420,7 +411,7 @@ static zend_result uriparser_write_scheme(uri_internal_t *internal_uri, zval *va
 		smart_str_appends(&uri_str, "://");
 	}
 
-	uriparser_append_authority(internal_uri, &uri_str);
+	uriparser_append_userinfo(internal_uri, &uri_str);
 	uriparser_append_host(internal_uri, &uri_str);
 	uriparser_append_port(internal_uri, &uri_str);
 	uriparser_append_path(internal_uri, &uri_str);
@@ -430,37 +421,13 @@ static zend_result uriparser_write_scheme(uri_internal_t *internal_uri, zval *va
 	URIPARSER_PARSE_STR(uri_str, internal_uri, errors);
 }
 
-static zend_result uriparser_write_user(uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result uriparser_write_userinfo(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	smart_str uri_str = {0};
 
 	uriparser_append_scheme(internal_uri, &uri_str);
 
 	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) {
-		smart_str_append(&uri_str, Z_STR_P(value));
-		// TODO add :
-		uriparser_append_password(internal_uri, &uri_str);
-		smart_str_appends(&uri_str, "@");
-	}
-
-	uriparser_append_host(internal_uri, &uri_str);
-	uriparser_append_port(internal_uri, &uri_str);
-	uriparser_append_path(internal_uri, &uri_str);
-	uriparser_append_query(internal_uri, &uri_str);
-	uriparser_append_fragment(internal_uri, &uri_str);
-
-	URIPARSER_PARSE_STR(uri_str, internal_uri, errors);
-}
-
-static zend_result uriparser_write_password(uri_internal_t *internal_uri, zval *value, zval *errors)
-{
-	smart_str uri_str = {0};
-
-	uriparser_append_scheme(internal_uri, &uri_str);
-	uriparser_append_user(internal_uri, &uri_str);
-
-	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) {
-		smart_str_appends(&uri_str, ":");
 		smart_str_append(&uri_str, Z_STR_P(value));
 		smart_str_appends(&uri_str, "@");
 	}
@@ -478,7 +445,7 @@ static zend_result uriparser_write_host(uri_internal_t *internal_uri, zval *valu
 {
 	smart_str uri_str = {0};
 	uriparser_append_scheme(internal_uri, &uri_str);
-	uriparser_append_authority(internal_uri, &uri_str);
+	uriparser_append_userinfo(internal_uri, &uri_str);
 
 	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) {
 		smart_str_append(&uri_str, Z_STR_P(value));
@@ -496,7 +463,7 @@ static zend_result uriparser_write_port(uri_internal_t *internal_uri, zval *valu
 {
 	smart_str uri_str = {0};
 	uriparser_append_scheme(internal_uri, &uri_str);
-	uriparser_append_authority(internal_uri, &uri_str);
+	uriparser_append_userinfo(internal_uri, &uri_str);
 	uriparser_append_host(internal_uri, &uri_str);
 
 	if (Z_TYPE_P(value) == IS_LONG) {
@@ -515,7 +482,7 @@ static zend_result uriparser_write_path(uri_internal_t *internal_uri, zval *valu
 {
 	smart_str uri_str = {0};
 	uriparser_append_scheme(internal_uri, &uri_str);
-	uriparser_append_authority(internal_uri, &uri_str);
+	uriparser_append_userinfo(internal_uri, &uri_str);
 	uriparser_append_host(internal_uri, &uri_str);
 	uriparser_append_port(internal_uri, &uri_str);
 
@@ -533,7 +500,7 @@ static zend_result uriparser_write_query(uri_internal_t *internal_uri, zval *val
 {
 	smart_str uri_str = {0};
 	uriparser_append_scheme(internal_uri, &uri_str);
-	uriparser_append_authority(internal_uri, &uri_str);
+	uriparser_append_userinfo(internal_uri, &uri_str);
 	uriparser_append_host(internal_uri, &uri_str);
 	uriparser_append_port(internal_uri, &uri_str);
 	uriparser_append_path(internal_uri, &uri_str);
@@ -554,7 +521,7 @@ static zend_result uriparser_write_fragment(uri_internal_t *internal_uri, zval *
 {
 	smart_str uri_str = {0};
 	uriparser_append_scheme(internal_uri, &uri_str);
-	uriparser_append_authority(internal_uri, &uri_str);
+	uriparser_append_userinfo(internal_uri, &uri_str);
 	uriparser_append_host(internal_uri, &uri_str);
 	uriparser_append_port(internal_uri, &uri_str);
 	uriparser_append_path(internal_uri, &uri_str);
@@ -611,8 +578,9 @@ static zend_result uriparser_init_parser(void)
 	zend_hash_init(&uriparser_property_handlers, 8, NULL, NULL, true);
 
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), uriparser_read_scheme, uriparser_write_scheme);
-	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), uriparser_read_user, uriparser_write_user);
-	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PASSWORD), uriparser_read_password, uriparser_write_password);
+	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USERINFO), uriparser_read_userinfo, uriparser_write_userinfo);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), uriparser_read_user);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PASSWORD), uriparser_read_password);
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_HOST), uriparser_read_host, uriparser_write_host);
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PORT), uriparser_read_port, uriparser_write_port);
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PATH), uriparser_read_path, uriparser_write_path);

@@ -35,6 +35,8 @@ object(Uri\WhatWg\Url)#%d (%d) {
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   NULL
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
