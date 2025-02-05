@@ -548,21 +548,9 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 	return ret;
 }
 
-void zend_constant_add_attributes(zend_constant *c, zval *attributes_ast) {
-	zend_ast *ast = Z_ASTVAL_P(attributes_ast);
-	// Make sure file context and ast arena are initialized
-	zend_arena *ast_arena = zend_arena_create(1024);
-	zend_arena *original_ast_arena = CG(ast_arena);
-	CG(ast_arena) = ast_arena;
-	zend_file_context original_file_context;
-	zend_file_context_begin(&original_file_context);
-
-	zend_compile_attributes(&c->attributes, ast, 0, ZEND_ATTRIBUTE_TARGET_CONST, 0);
-
-	// Restore old file context and ast arena
-	zend_file_context_end(&original_file_context);
-	CG(ast_arena) = original_ast_arena;
-	zend_arena_destroy(ast_arena);
+void zend_constant_add_attributes(zend_constant *c, HashTable *attributes) {
+	GC_TRY_ADDREF(attributes);
+	c->attributes = attributes;
 
 	zend_attribute *deprecated_attribute = zend_get_attribute_str(
 		c->attributes,

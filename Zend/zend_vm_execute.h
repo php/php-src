@@ -8031,10 +8031,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ATTRIBUTED_CONST_SPEC_
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	}
 
-	zval *attribs = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+	HashTable *attributes = Z_PTR_P(get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1));
 	zend_constant *registered = zend_get_constant_ptr(c.name);
 	ZEND_ASSERT(registered != NULL);
-	zend_constant_add_attributes(registered, attribs);
+	zend_constant_add_attributes(registered, attributes);
 
 
 	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);

@@ -395,6 +395,9 @@ typedef struct _zend_oparray_context {
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* Has IS_PTR operands that needs special cleaning        |     |     |     */
+#define ZEND_ACC_PTR_OPS                 (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
