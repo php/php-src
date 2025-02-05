@@ -807,7 +807,7 @@ PHP_FUNCTION(putenv)
 			valw = php_win32_cp_any_to_w(value);
 		}
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
-		if (!keyw || !valw && value) {
+		if (!keyw || (!valw && value)) {
 			tsrm_env_unlock();
 			free(pe.putenv_string);
 			zend_string_release(pe.key);
