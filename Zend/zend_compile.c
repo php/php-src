@@ -7463,7 +7463,7 @@ void zend_compile_attributes(
 						zend_const_expr_to_zval(
 							&attr->args[j].value, extra_ptr, /* allow_dynamic */ true);
 						zend_ast_destroy(*extra_ptr);
-						zend_ast_ref_destroy(ast_copy_ref);
+						efree(ast_copy_ref);
 					} else {
 						zend_const_expr_to_zval(
 							&attr->args[j].value, arg_ast_ptr, /* allow_dynamic */ true);
