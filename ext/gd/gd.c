@@ -3981,6 +3981,11 @@ PHP_FUNCTION(imagescale)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
+	if (tmp_h < 0 && tmp_w < 0) {
+		zend_value_error("Argument #2 ($width) and argument #3 ($height) cannot be both negative");
+		RETURN_THROWS();
+	}
+
 	if (tmp_h < 0 || tmp_w < 0) {
 		/* preserve ratio */
 		long src_x, src_y;

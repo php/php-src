@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
     Dom\HTML_NO_DEFAULT_NS). (nielsdos)
 
+- GD:
+  . Fixed bug GH-17703 (imagescale with both width and height negative values
+    triggers only an Exception on width). (David Carlier)
+
 - MBString:
   . Fixed bug GH-17503 (Undefined float conversion in mb_convert_variables).
     (cmb)

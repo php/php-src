@@ -627,6 +627,9 @@ PHP 8.4 UPGRADE NOTES
   . DOMDocument::registerNodeClass() now has a tentative return type of true.
     Previously, the return type was bool but only true could be returned in practice.
 
+- GD:
+  . imagescale now throws a ValueError when both width and height arguments are negative.
+
 - Hash:
   . Changed the return type of hash_update() to true. It was already the case that only
     true could be returned, but the stub was not updated yet.
