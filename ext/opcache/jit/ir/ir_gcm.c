@@ -1059,7 +1059,7 @@ restart:
 	if (ctx->flags & IR_DEBUG_SCHEDULE) {
 		fprintf(stderr, "After Schedule\n");
 		for (i = 1; i != 0; i = _next[i]) {
-			fprintf(stderr, "%d -> %d\n", i, _blocks[i]);
+			fprintf(stderr, "%d -> %d (%d)\n", i, _blocks[i], _xlat[i]);
 		}
 	}
 #endif
@@ -1328,11 +1328,13 @@ restart:
 	new_ctx.cfg_edges = ctx->cfg_edges;
 	ctx->cfg_blocks = NULL;
 	ctx->cfg_edges = NULL;
+	ir_code_buffer *saved_code_buffer = ctx->code_buffer;
 
 	ir_free(ctx);
 	IR_ASSERT(new_ctx.consts_count == new_ctx.consts_limit);
 	IR_ASSERT(new_ctx.insns_count == new_ctx.insns_limit);
 	memcpy(ctx, &new_ctx, sizeof(ir_ctx));
+	ctx->code_buffer = saved_code_buffer;
 	ctx->flags2 |= IR_LINEAR;
 
 	ir_mem_free(_next);
