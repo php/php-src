@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- CLI:
+  . Extended --ini to print INI settings changed from the builtin default.
+    (timwolla)
+
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
   . Fixed method calls for PHP objects wrapped in variant. (cmb)
