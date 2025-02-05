@@ -7373,7 +7373,7 @@ static bool zend_is_valid_default_value(zend_type type, zval *value)
 	return 0;
 }
 
-void zend_compile_attributes(
+static void zend_compile_attributes(
 	HashTable **attributes, zend_ast *ast, uint32_t offset, uint32_t target, uint32_t promoted
 ) /* {{{ */ {
 	zend_attribute *attr;
@@ -7415,10 +7415,8 @@ void zend_compile_attributes(
 				}
 			}
 
-			uint32_t flags = 0;
-			if (CG(active_op_array) && (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)) {
-				flags = ZEND_ATTRIBUTE_STRICT_TYPES;
-			}
+			uint32_t flags = (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)
+				? ZEND_ATTRIBUTE_STRICT_TYPES : 0;
 			attr = zend_add_attribute(
 				attributes, name, args ? args->children : 0, flags, offset, el->lineno);
 			zend_string_release(name);
