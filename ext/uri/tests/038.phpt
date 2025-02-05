@@ -19,12 +19,12 @@ $url1 = Uri\WhatWg\Url::parse("HTTPS://////EXAMPLE.com");
 $url2 = Uri\WhatWg\Url::parse("https://example.com");
 $url3 = Uri\WhatWg\Url::parse("https://example.com/foo/..");
 
-var_dump($url1->toHumanFriendlyString());
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toHumanFriendlyString());
-var_dump($url2->toMachineFriendlyString());
-var_dump($url3->toHumanFriendlyString());
-var_dump($url3->toMachineFriendlyString());
+var_dump($url1->toDisplayString());
+var_dump($url1->toString());
+var_dump($url2->toDisplayString());
+var_dump($url2->toString());
+var_dump($url3->toDisplayString());
+var_dump($url3->toString());
 
 ?>
 --EXPECT--

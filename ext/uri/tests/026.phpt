@@ -28,8 +28,8 @@ var_dump($uri2->toString());
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
 $url2 = $url1->withHost("test.com");
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
 
 try {
     $url2->withHost(null);
@@ -40,8 +40,8 @@ try {
 $url1 = Uri\WhatWg\Url::parse("ftp://foo.com?query=abc#foo");
 $url2 = $url1->withHost("test.com");
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
 
 ?>
 --EXPECT--

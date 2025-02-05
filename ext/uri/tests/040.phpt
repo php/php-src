@@ -11,13 +11,15 @@ var_dump($uri->toString());
 
 $url = Uri\WhatWg\Url::parse("https:example.com");
 var_dump($url);
-var_dump($url->toMachineFriendlyString());
+var_dump($url->toString());
 
 ?>
 --EXPECTF--
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

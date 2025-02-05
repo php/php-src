@@ -16,8 +16,8 @@ var_dump($uri3->toString());
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
 $url2 = $url1->withScheme("http");
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
 
 try {
     $url2->withScheme("");

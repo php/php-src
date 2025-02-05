@@ -22,6 +22,8 @@ var_dump(Uri\WhatWg\Url::parse("http://example.com?foobar='<script> + @"));
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(4) "http"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -77,6 +79,8 @@ object(Uri\WhatWg\Url)#%d (%d) {
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(4) "http"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

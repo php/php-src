@@ -11,12 +11,12 @@ var_dump(Uri\Rfc3986\Uri::parse("https://你好你好"));
 var_dump(Uri\Rfc3986\Uri::parse("https://０Ｘｃ０．０２５０．０１"));
 var_dump(Uri\Rfc3986\Uri::parse("HttPs://0300.0250.0000.0001/path?query=foo%20bar")->toString());
 
-var_dump(Uri\WhatWg\Url::parse("http://////www.EXAMPLE.com:80")->toMachineFriendlyString());
-var_dump(Uri\WhatWg\Url::parse("https://www.example.com:443/dir1/../dir2")->toMachineFriendlyString());
-var_dump(Uri\WhatWg\Url::parse("https://你好你好")->toMachineFriendlyString());
-var_dump(Uri\WhatWg\Url::parse("https://你好你好")->toHumanFriendlyString());
-var_dump(Uri\WhatWg\Url::parse("https://０Ｘｃ０．０２５０．０１")->toMachineFriendlyString());
-var_dump(Uri\WhatWg\Url::parse("HttPs://0300.0250.0000.0001/path?query=foo%20bar")->toMachineFriendlyString());
+var_dump(Uri\WhatWg\Url::parse("http://////www.EXAMPLE.com:80")->toString());
+var_dump(Uri\WhatWg\Url::parse("https://www.example.com:443/dir1/../dir2")->toString());
+var_dump(Uri\WhatWg\Url::parse("https://你好你好")->toString());
+var_dump(Uri\WhatWg\Url::parse("https://你好你好")->toDisplayString());
+var_dump(Uri\WhatWg\Url::parse("https://０Ｘｃ０．０２５０．０１")->toString());
+var_dump(Uri\WhatWg\Url::parse("HttPs://0300.0250.0000.0001/path?query=foo%20bar")->toString());
 
 ?>
 --EXPECT--

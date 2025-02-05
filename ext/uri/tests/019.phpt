@@ -19,9 +19,9 @@ var_dump($uri);
 $url = Uri\WhatWg\Url::parse("https://🐘.com/🐘?🐘=🐘", null);
 var_dump($url);
 var_dump($url->getHost());
-var_dump($url->getHumanFriendlyHost());
-var_dump($url->toMachineFriendlyString());
-var_dump($url->toHumanFriendlyString());
+var_dump($url->getHostForDisplay());
+var_dump($url->toString());
+var_dump($url->toDisplayString());
 
 ?>
 --EXPECTF--
@@ -34,6 +34,8 @@ array(1) {
     string(4) "🐘"
     ["type"]=>
     enum(Uri\WhatWg\WhatWgErrorType::MissingSchemeNonRelativeUrl)
+    ["failure"]=>
+    bool(true)
   }
 }
 NULL

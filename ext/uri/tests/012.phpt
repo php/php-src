@@ -16,6 +16,8 @@ var_dump(Uri\WhatWg\Url::parse("file:///E:\\Documents and Settings"));
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(6) "mailto"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -52,6 +54,8 @@ object(Uri\WhatWg\Url)#%d (%d) {
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(4) "file"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

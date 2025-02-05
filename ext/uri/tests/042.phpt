@@ -15,6 +15,8 @@ var_dump($url);
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(3) "urn"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

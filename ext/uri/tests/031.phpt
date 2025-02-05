@@ -25,6 +25,8 @@ string(145) "O:15:"Uri\Rfc3986\Uri":1:{s:5:"__uri";s:98:"https://username:passwo
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  string(17) "username:password"
   ["user"]=>
   string(8) "username"
   ["password"]=>

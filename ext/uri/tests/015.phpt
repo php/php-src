@@ -38,12 +38,11 @@ function callMembers($uri)
 
     if ($uri instanceof Uri\Rfc3986\Uri) {
         handleException($uri, function ($uri) {$uri->getRawHost();});
-        handleException($uri, function ($uri) {$uri->toString();});
     } else {
-        handleException($uri, function ($uri) {$uri->getHumanFriendlyHost();});
-        handleException($uri, function ($uri) {$uri->toHumanFriendlyString();});
-        handleException($uri, function ($uri) {$uri->toMachineFriendlyString();});
+        handleException($uri, function ($uri) {$uri->getHostForDisplay();});
+        handleException($uri, function ($uri) {$uri->toDisplayString();});
     }
+    handleException($uri, function ($uri) {$uri->toString();});
 }
 
 $reflectionClass = new ReflectionClass(Uri\Rfc3986\Uri::class);

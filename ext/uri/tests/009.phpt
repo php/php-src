@@ -13,6 +13,8 @@ var_dump(Uri\WhatWg\Url::parse("chrome-extension://example.com"));
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(16) "chrome-extension"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

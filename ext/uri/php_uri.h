@@ -48,7 +48,7 @@ PHPAPI zend_result php_uri_get_path(const uri_internal_t *internal_uri, uri_comp
 PHPAPI zend_result php_uri_get_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
 PHPAPI zend_result php_uri_get_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
 PHPAPI void php_uri_free(uri_internal_t *internal_uri);
-PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_string *uri_str, zval *errors);
+PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_string *uri_str, uri_component_read_mode_t read_mode, zval *errors);
 PHPAPI void php_uri_struct_free(php_uri *uri);
 
 PHPAPI void php_uri_instantiate_uri(

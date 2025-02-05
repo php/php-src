@@ -114,93 +114,123 @@ static void fill_errors(zval *errors)
 		zend_update_property_string(whatwg_error_ce, Z_OBJ(error), "context", sizeof("context") - 1, (const char *) lxb_error->data);
 
 		zend_string *error_str;
+		zval failure;
 		switch (lxb_error->id) {
 			case LXB_URL_ERROR_TYPE_DOMAIN_TO_ASCII:
 				error_str = zend_string_init("DomainToAscii", sizeof("DomainToAscii"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_DOMAIN_TO_UNICODE:
 				error_str = zend_string_init("DomainToUnicode", sizeof("DomainToUnicode"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_DOMAIN_INVALID_CODE_POINT:
 				error_str = zend_string_init("DomainInvalidCodePoint", sizeof("DomainInvalidCodePoint"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_HOST_INVALID_CODE_POINT:
 				error_str = zend_string_init("HostInvalidCodePoint", sizeof("HostInvalidCodePoint"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_EMPTY_PART:
 				error_str = zend_string_init("Ipv4EmptyPart", sizeof("Ipv4EmptyPart"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_TOO_MANY_PARTS:
 				error_str = zend_string_init("Ipv4TooManyParts", sizeof("Ipv4TooManyParts"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_NON_NUMERIC_PART:
 				error_str = zend_string_init("Ipv4NonNumericPart", sizeof("Ipv4NonNumericPart"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_NON_DECIMAL_PART:
 				error_str = zend_string_init("Ipv4NonDecimalPart", sizeof("Ipv4NonDecimalPart"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART:
 				error_str = zend_string_init("Ipv4OutOfRangePart", sizeof("Ipv4OutOfRangePart"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV6_UNCLOSED:
 				error_str = zend_string_init("Ipv6Unclosed", sizeof("Ipv6Unclosed"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV6_INVALID_COMPRESSION:
 				error_str = zend_string_init("Ipv6InvalidCompression", sizeof("Ipv6InvalidCompression"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV6_TOO_MANY_PIECES:
 				error_str = zend_string_init("Ipv6TooManyPieces", sizeof("Ipv6TooManyPieces"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV6_MULTIPLE_COMPRESSION:
 				error_str = zend_string_init("Ipv6MultipleCompression", sizeof("Ipv6MultipleCompression"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV6_INVALID_CODE_POINT:
 				error_str = zend_string_init("Ipv6InvalidCodePoint", sizeof("Ipv6InvalidCodePoint"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV6_TOO_FEW_PIECES:
 				error_str = zend_string_init("Ipv6TooFewPieces", sizeof("Ipv6TooFewPieces"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_MANY_PIECES:
 				error_str = zend_string_init("Ipv4InIpv6TooManyPieces", sizeof("Ipv4InIpv6TooManyPieces"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_INVALID_CODE_POINT:
 				error_str = zend_string_init("Ipv4InIpv6InvalidCodePoint", sizeof("Ipv4InIpv6InvalidCodePoint"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_OUT_OF_RANGE_PART:
 				error_str = zend_string_init("Ipv4InIpv6OutOfRangePart", sizeof("Ipv4InIpv6OutOfRangePart"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_FEW_PARTS:
 				error_str = zend_string_init("Ipv4InIpv6TooFewParts", sizeof("Ipv4InIpv6TooFewParts"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_INVALID_URL_UNIT:
 				error_str = zend_string_init("InvalidUrlUnit", sizeof("InvalidUrlUnit"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_SPECIAL_SCHEME_MISSING_FOLLOWING_SOLIDUS:
 				error_str = zend_string_init("SpecialSchemeMissingFollowingSolidus", sizeof("SpecialSchemeMissingFollowingSolidus"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL:
 				error_str = zend_string_init("MissingSchemeNonRelativeUrl", sizeof("MissingSchemeNonRelativeUrl"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_INVALID_REVERSE_SOLIDUS:
 				error_str = zend_string_init("InvalidReverseSoldius", sizeof("InvalidReverseSoldius"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS:
 				error_str = zend_string_init("InvalidCredentials", sizeof("InvalidCredentials"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_HOST_MISSING:
 				error_str = zend_string_init("HostMissing", sizeof("HostMissing"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_PORT_OUT_OF_RANGE:
 				error_str = zend_string_init("PortOfOfRange", sizeof("PortOfOfRange"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_PORT_INVALID:
 				error_str = zend_string_init("PortInvalid", sizeof("PortInvalid"), false);
+				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER:
 				error_str = zend_string_init("FileInvalidWindowsDriveLetter", sizeof("FileInvalidWindowsDriveLetter"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST:
 				error_str = zend_string_init("FileInvalidWindowsDriveLetterHost", sizeof("FileInvalidWindowsDriveLetterHost"), false);
+				ZVAL_FALSE(&failure);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -210,6 +240,9 @@ static void fill_errors(zval *errors)
 		zend_update_property(whatwg_error_ce, Z_OBJ(error), "type", sizeof("type") - 1, &error_type);
 		zend_string_release(error_str);
 		zval_ptr_dtor(&error_type);
+
+		zend_update_property(whatwg_error_ce, Z_OBJ(error), "failure", sizeof("failure") - 1, &failure);
+		zval_ptr_dtor(&failure);
 
 		add_next_index_zval(errors, &error);
 	}

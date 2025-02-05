@@ -20,6 +20,8 @@ var_dump($url4);
 object(Uri\Rfc3986\Uri)#1 (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -38,6 +40,8 @@ object(Uri\Rfc3986\Uri)#1 (%d) {
 object(Uri\Rfc3986\Uri)#2 (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

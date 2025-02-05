@@ -7,7 +7,7 @@ uri
 
 var_dump(Uri\Rfc3986\Uri::parse("http://example.com?foo=Hell%C3%B3+W%C3%B6rld")->toString());
 
-var_dump(Uri\WhatWg\Url::parse("http://example.com?foo=Hell%C3%B3+W%C3%B6rld")->toMachineFriendlyString());
+var_dump(Uri\WhatWg\Url::parse("http://example.com?foo=Hell%C3%B3+W%C3%B6rld")->toString());
 
 ?>
 --EXPECT--

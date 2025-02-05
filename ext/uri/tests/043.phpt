@@ -31,6 +31,8 @@ var_dump($url);
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -49,6 +51,8 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -67,6 +71,8 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -85,6 +91,8 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "HTTPS"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

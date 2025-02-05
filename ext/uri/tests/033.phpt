@@ -15,6 +15,7 @@ var_export($url);
 --EXPECT--
 \Uri\Rfc3986\Uri::__set_state(array(
    'scheme' => 'https',
+   'userinfo' => 'username:password',
    'user' => 'username',
    'password' => 'password',
    'host' => 'www.google.com',

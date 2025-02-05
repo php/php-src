@@ -18,6 +18,8 @@ var_dump($errors);
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   NULL
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -41,5 +43,7 @@ array(%d) {
     string(15) "?query#fragment"
     ["type"]=>
     enum(Uri\WhatWg\WhatWgErrorType::MissingSchemeNonRelativeUrl)
+    ["failure"]=>
+    bool(true)
   }
 }
