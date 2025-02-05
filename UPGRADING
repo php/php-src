@@ -250,6 +250,10 @@ PHP 8.5 UPGRADE NOTES
   . getimagesize() now supports SVG images when ext-libxml is also loaded.
     Similarly, image_type_to_extension() and image_type_to_extension()
     now also handle IMAGETYPE_SVG.
+  . The array returned by getimagesize() now has two additional entries:
+    "width_unit" and "height_unit" to indicate in which units the dimensions
+    are expressed. These units are px by default. They are not necessarily
+    the same (just to give one example: one may be cm and the other may be px).
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
