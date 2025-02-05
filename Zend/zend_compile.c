@@ -8822,6 +8822,10 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 
 			if (deprecated) {
 				ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
+				/* For deprecated constants, we need to flag the zval for recursion
+				 * detection. Make sure the zval is separated out of shm. */
+				ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
 		}
 	}
