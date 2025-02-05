@@ -12,6 +12,10 @@ PHP                                                                        NEWS
     zend.exception_ignore_args=1 into account). (timwolla)
   . Fix fallback paths in fast_long_{add,sub}_function. (nielsdos)
 
+- LDAP:
+  . Fixed bug GH-17704 (ldap_search fails when $attributes contains a
+    non-packed array with numerical keys). (nielsdos, 7u83)
+
 - MBString:
   . Fixed bug GH-17503 (Undefined float conversion in mb_convert_variables).
     (cmb)
