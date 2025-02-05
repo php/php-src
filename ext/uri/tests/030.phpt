@@ -23,15 +23,15 @@ $url1 = Uri\WhatWg\Url::parse("https://example.com#fragment1");
 $url2 = $url1->withFragment("#fragment2");
 $url3 = $url2->withFragment(null);
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
-var_dump($url3->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
+var_dump($url3->toString());
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com?abc=def");
 $url2 = $url1->withFragment("#fragment");
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
 
 ?>
 --EXPECT--

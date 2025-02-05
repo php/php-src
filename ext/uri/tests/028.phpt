@@ -29,15 +29,15 @@ $url1 = Uri\WhatWg\Url::parse("https://example.com/foo/bar");
 $url2 = $url1->withPath("/foo");
 $url3 = $url2->withPath(null);
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
-var_dump($url3->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
+var_dump($url3->toString());
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
 $uri2 = $url1->withPath("/foo");
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
 
 ?>
 --EXPECT--

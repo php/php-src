@@ -19,10 +19,10 @@ try {
     var_dump($e->errors);
 }
 
-$softErrors = [];
-$url = new Uri\WhatWg\Url(" https://example.org ", null, $softErrors);
-var_dump($url->toMachineFriendlyString());
-var_dump($softErrors);
+$failures = [];
+$url = new Uri\WhatWg\Url(" https://example.org ", null, $failures);
+var_dump($url->toString());
+var_dump($failures);
 
 ?>
 --EXPECTF--
@@ -37,6 +37,8 @@ array(%d) {
     string(26) "password/path?q=r#fragment"
     ["type"]=>
     enum(Uri\WhatWg\WhatWgErrorType::PortInvalid)
+    ["failure"]=>
+    bool(true)
   }
   [1]=>
   object(Uri\WhatWg\WhatWgError)#%d (%d) {
@@ -44,6 +46,8 @@ array(%d) {
     string(36) "@username:password/path?q=r#fragment"
     ["type"]=>
     enum(Uri\WhatWg\WhatWgErrorType::InvalidCredentials)
+    ["failure"]=>
+    bool(false)
   }
 }
 string(20) "https://example.org/"
@@ -54,6 +58,8 @@ array(2) {
     string(1) " "
     ["type"]=>
     enum(Uri\WhatWg\WhatWgErrorType::InvalidUrlUnit)
+    ["failure"]=>
+    bool(false)
   }
   [1]=>
   object(Uri\WhatWg\WhatWgError)#%d (%d) {
@@ -61,5 +67,7 @@ array(2) {
     string(21) " https://example.org "
     ["type"]=>
     enum(Uri\WhatWg\WhatWgErrorType::InvalidUrlUnit)
+    ["failure"]=>
+    bool(false)
   }
 }

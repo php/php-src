@@ -10,9 +10,9 @@ var_dump(Uri\Rfc3986\Uri::parse("http://username:password@héééostname:9090/ga
 $url = Uri\WhatWg\Url::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor");
 var_dump($url);
 var_dump($url->getHost());
-var_dump($url->getHumanFriendlyHost());
-var_dump($url->toHumanFriendlyString());
-var_dump($url->toMachineFriendlyString());
+var_dump($url->getHostForDisplay());
+var_dump($url->toDisplayString());
+var_dump($url->toString());
 
 ?>
 --EXPECTF--

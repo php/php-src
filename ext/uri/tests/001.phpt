@@ -45,6 +45,8 @@ float(0.0032325)
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

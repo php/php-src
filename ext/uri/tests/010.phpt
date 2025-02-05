@@ -15,6 +15,8 @@ var_dump(Uri\WhatWg\Url::parse("/path/to/file1", "https://test.com"));
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(4) "http"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -33,6 +35,8 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
