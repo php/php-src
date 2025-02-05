@@ -7426,20 +7426,8 @@ void zend_compile_attributes(
 							"Cannot use positional argument after named argument");
 					}
 
-					if (target == ZEND_ATTRIBUTE_TARGET_CONST) {
-						// Make sure that deprecated constants are not updated
-						// into protected memory from opcache
-						zend_ast_ref *ast_copy_ref = zend_ast_copy(args->child[j]);
-						zend_ast *copied_ast = GC_AST(ast_copy_ref);
-						zend_ast **extra_ptr = &copied_ast;
-						zend_const_expr_to_zval(
-							&attr->args[j].value, extra_ptr, /* allow_dynamic */ true);
-						zend_ast_destroy(*extra_ptr);
-						efree(ast_copy_ref);
-					} else {
-						zend_const_expr_to_zval(
-							&attr->args[j].value, arg_ast_ptr, /* allow_dynamic */ true);
-					}
+					zend_const_expr_to_zval(
+						&attr->args[j].value, arg_ast_ptr, /* allow_dynamic */ true);
 				}
 			}
 		}
@@ -9512,12 +9500,17 @@ static void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 			"Cannot apply attributes to multiple constants at once"
 		);
 	}
+
+	HashTable *attributes = NULL;
+	zend_compile_attributes(&attributes, list->child[1], 0, ZEND_ATTRIBUTE_TARGET_CONST, 0);
+
 	ZEND_ASSERT(last_op != NULL);
 	last_op->opcode = ZEND_DECLARE_ATTRIBUTED_CONST;
 	znode attribs_node;
 	attribs_node.op_type = IS_CONST;
-	ZVAL_AST(&attribs_node.u.constant, zend_ast_copy(list->child[1]));
+	ZVAL_PTR(&attribs_node.u.constant, attributes);
 	zend_emit_op_data(&attribs_node);
+	CG(active_op_array)->fn_flags |= ZEND_ACC_PTR_OPS;
 }
 /* }}}*/
 

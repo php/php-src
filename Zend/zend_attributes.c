@@ -251,20 +251,11 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, u
 
 	ZVAL_COPY_OR_DUP(ret, &attr->args[i].value);
 
-	if (Z_TYPE_P(ret) != IS_CONSTANT_AST) {
-		return SUCCESS;
-	}
-	zend_ast *arg_ast = Z_ASTVAL_P(ret);
-	if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
-		attr->args[i].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
-		zend_ast *value = arg_ast->child[1];
-		zend_ast_ref *ast_ref = zend_ast_copy(value);
-		zval_ptr_dtor(ret);
-		ZVAL_AST(ret, ast_ref);
-	}
-	if (SUCCESS != zval_update_constant_ex(ret, scope)) {
-		zval_ptr_dtor(ret);
-		return FAILURE;
+	if (Z_TYPE_P(ret) == IS_CONSTANT_AST) {
+		if (SUCCESS != zval_update_constant_ex(ret, scope)) {
+			zval_ptr_dtor(ret);
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
