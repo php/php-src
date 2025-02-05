@@ -178,7 +178,7 @@ PHPAPI void php_uri_free(uri_internal_t *internal_uri)
 	efree(internal_uri);
 }
 
-PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_string *uri_str, zval *errors)
+PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_string *uri_str, uri_component_read_mode_t read_mode, zval *errors)
 {
 	uri_internal_t *uri_internal = php_uri_parse(uri_handler, uri_str, errors);
 	if (uri_internal == NULL) {
@@ -190,7 +190,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 	ZVAL_UNDEF(&tmp);
 	zend_result result;
 
-	result = php_uri_get_scheme(uri_internal, URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY, &tmp);
+	result = php_uri_get_scheme(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -200,7 +200,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		zval_ptr_dtor(&tmp);
 	}
 
-	result = php_uri_get_user(uri_internal, URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY, &tmp);
+	result = php_uri_get_user(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -210,7 +210,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		zval_ptr_dtor(&tmp);
 	}
 
-	result = php_uri_get_password(uri_internal, URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY, &tmp);
+	result = php_uri_get_password(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -220,7 +220,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		zval_ptr_dtor(&tmp);
 	}
 
-	result = php_uri_get_host(uri_internal, URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY, &tmp);
+	result = php_uri_get_host(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -230,7 +230,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		zval_ptr_dtor(&tmp);
 	}
 
-	result = php_uri_get_port(uri_internal, URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY, &tmp);
+	result = php_uri_get_port(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -239,7 +239,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		uri->port = Z_LVAL(tmp);
 	}
 
-	result = php_uri_get_path(uri_internal, URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY, &tmp);
+	result = php_uri_get_path(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -249,7 +249,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		zval_ptr_dtor(&tmp);
 	}
 
-	result = php_uri_get_query(uri_internal, URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY, &tmp);
+	result = php_uri_get_query(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -259,7 +259,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		zval_ptr_dtor(&tmp);
 	}
 
-	result = php_uri_get_fragment(uri_internal, URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY, &tmp);
+	result = php_uri_get_fragment(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -305,14 +305,20 @@ PHP_METHOD(Uri_WhatWg_WhatWgError, __construct)
 {
 	zend_string *context;
 	zval *type;
+	bool failure;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(context)
 		Z_PARAM_OBJECT_OF_CLASS(type, whatwg_error_type_ce)
+		Z_PARAM_BOOL(failure)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_update_property_str(whatwg_error_ce, Z_OBJ_P(ZEND_THIS), "context", sizeof("context") - 1, context);
 	zend_update_property(whatwg_error_ce, Z_OBJ_P(ZEND_THIS), "type", sizeof("type") - 1, type);
+	zval failure_zv;
+	ZVAL_BOOL(&failure_zv, failure);
+	zend_update_property(whatwg_error_ce, Z_OBJ_P(ZEND_THIS), "failure", sizeof("failure") - 1, &failure_zv);
+	zval_ptr_dtor(&failure_zv);
 }
 
 static zend_result pass_errors_by_ref(zval *errors_zv, zval *errors)
@@ -457,6 +463,21 @@ PHP_METHOD(Uri_Rfc3986_Uri, withScheme)
 	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_SCHEME));
 }
 
+PHP_METHOD(Uri_Rfc3986_Uri, getUserInfo)
+{
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USERINFO), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawUserInfo)
+{
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USERINFO), URI_COMPONENT_READ_RAW);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
+{
+	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_USERINFO));
+}
+
 PHP_METHOD(Uri_Rfc3986_Uri, getUser)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USER), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
@@ -467,11 +488,6 @@ PHP_METHOD(Uri_Rfc3986_Uri, getRawUser)
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USER), URI_COMPONENT_READ_RAW);
 }
 
-PHP_METHOD(Uri_Rfc3986_Uri, withUser)
-{
-	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_USER));
-}
-
 PHP_METHOD(Uri_Rfc3986_Uri, getPassword)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PASSWORD), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
@@ -480,11 +496,6 @@ PHP_METHOD(Uri_Rfc3986_Uri, getPassword)
 PHP_METHOD(Uri_Rfc3986_Uri, getRawPassword)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PASSWORD), URI_COMPONENT_READ_RAW);
-}
-
-PHP_METHOD(Uri_Rfc3986_Uri, withPassword)
-{
-	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_PASSWORD));
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getHost)
@@ -749,12 +760,22 @@ PHP_METHOD(Uri_WhatWg_Url, withScheme)
 	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_SCHEME));
 }
 
+PHP_METHOD(Uri_WhatWg_Url, withUser)
+{
+	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_USER));
+}
+
+PHP_METHOD(Uri_WhatWg_Url, withPassword)
+{
+	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_PASSWORD));
+}
+
 PHP_METHOD(Uri_WhatWg_Url, getHost)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
 }
 
-PHP_METHOD(Uri_WhatWg_Url, getHumanFriendlyHost)
+PHP_METHOD(Uri_WhatWg_Url, getHostForDisplay)
 {
 	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST), URI_COMPONENT_READ_NORMALIZED_HUMAN_FRIENDLY);
 }
@@ -790,7 +811,7 @@ PHP_METHOD(Uri_WhatWg_Url, equals)
 	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, exclude_fragment);
 }
 
-PHP_METHOD(Uri_WhatWg_Url, toHumanFriendlyString)
+PHP_METHOD(Uri_WhatWg_Url, toDisplayString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -801,7 +822,7 @@ PHP_METHOD(Uri_WhatWg_Url, toHumanFriendlyString)
 	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_HUMAN_FRIENDLY, false));
 }
 
-PHP_METHOD(Uri_WhatWg_Url, toMachineFriendlyString)
+PHP_METHOD(Uri_WhatWg_Url, toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

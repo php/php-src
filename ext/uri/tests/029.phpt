@@ -25,17 +25,17 @@ $url1 = Uri\WhatWg\Url::parse("https://example.com?foo=bar");
 $url2 = $url1->withQuery("?foo=baz");
 $url3 = $url2->withQuery(null);
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
-var_dump($url3->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
+var_dump($url3->toString());
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
 $url2 = $url1->withQuery("?foo=bar&foo=baz");
 $url3 = $url1->withQuery("foo=bar&foo=baz");
 
-var_dump($url1->toMachineFriendlyString());
-var_dump($url2->toMachineFriendlyString());
-var_dump($url3->toMachineFriendlyString());
+var_dump($url1->toString());
+var_dump($url2->toString());
+var_dump($url3->toString());
 
 ?>
 --EXPECT--

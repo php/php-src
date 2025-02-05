@@ -72,6 +72,8 @@ Uri\WhatWg\Url::parse(): Argument #2 ($baseUrl) cannot be empty
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   NULL
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>

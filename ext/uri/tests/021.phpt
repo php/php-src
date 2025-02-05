@@ -54,6 +54,8 @@ object(MyRfc3986Uri)#1 (%d) {
   int(1)
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
@@ -74,6 +76,8 @@ object(MyRfc3986Uri)#2 (%d) {
   int(2)
   ["scheme"]=>
   string(5) "https"
+  ["userinfo"]=>
+  NULL
   ["user"]=>
   NULL
   ["password"]=>
