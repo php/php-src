@@ -36,6 +36,7 @@
 #include <winsock2.h>
 #include <windows.h>
 
+#include <intsafe.h>
 #include <float.h>
 
 #define strcasecmp(s1, s2) _stricmp(s1, s2)

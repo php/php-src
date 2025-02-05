@@ -3086,7 +3086,7 @@ PHP_FUNCTION(iterator_apply)
 	spl_iterator_apply_info apply_info = {
 		.count = 0,
 		.params_ht = NULL,
-		.fcc = {},
+		.fcc = { 0 },
 	};
 
 	/* The HashTable is used to determine positional arguments */

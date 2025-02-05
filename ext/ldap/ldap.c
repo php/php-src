@@ -3755,7 +3755,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 	}
 
 	/* Free old FCC */
-	if (!ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
+	if (ZEND_FCC_INITIALIZED(ld->rebind_proc_fcc)) {
 		zend_fcc_dtor(&ld->rebind_proc_fcc);
 	}
 	if (ZEND_FCC_INITIALIZED(fcc)) {

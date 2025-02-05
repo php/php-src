@@ -45,7 +45,7 @@ zend_result zend_load_extension(const char *path)
 #ifdef ZEND_WIN32
 	char *err;
 	if (!php_win32_image_compatible(handle, &err)) {
-		zend_error(E_CORE_WARNING, err);
+		zend_error(E_CORE_WARNING, "%s", err);
 		return FAILURE;
 	}
 #endif

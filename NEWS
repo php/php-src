@@ -16,6 +16,10 @@ PHP                                                                        NEWS
     if available. (timwolla)
   . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
     non-printable characters in string literals). (nielsdos, WangYihang)
+  . Add support for backtraces for fatal errors. (enorris)
+  . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
+  . Improved error message of UnhandledMatchError for
+    zend.exception_string_param_max_len=0. (timwolla)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -31,10 +35,12 @@ PHP                                                                        NEWS
 
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
+  . Added enchant_dict_remove(). (nielsdos)
 
--GD:
+- GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
     cmb)
+  . Fixed bug #64823 (ZTS GD fails to to find system TrueType font). (cmb)
 
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
@@ -62,6 +68,9 @@ PHP                                                                        NEWS
   . Added pg_close_stmt to close a prepared statement while allowing
     its name to be reused. (David Carlier)
   . Added Iterable support for pgsql_copy_from. (David Carlier)
+  . pg_connect checks if connection_string contains any null byte,
+    pg_close_stmt check if the statement contains any null byte.
+    (David Carlier)
 
 - POSIX:
   . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
@@ -76,11 +85,18 @@ PHP                                                                        NEWS
 - Reflection:
   . Added ReflectionConstant::getExtension() and ::getExtensionName().
     (DanielEScherzer)
+  . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
+    zval for uninitialized typed properties). (nielsdos)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap
     or a TypeError if read_and_close value is not compatible with int.
     (David Carlier)
+
+- SNMP:
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3 and
+    SNMP::__construct() throw an exception on invalid hostname, community
+    timeout and retries arguments. (David Carlier)
 
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
@@ -110,6 +126,12 @@ PHP                                                                        NEWS
   . socket_set_option with the options MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
     will throw an exception if its value is not a valid array/object.
     (David Carlier)
+  . socket_getsockname/socket_create/socket_bind handled AF_PACKET family socket.
+    (David Carlier)
+
+- Sodium:
+  . Fix overall theorical overflows on zend_string buffer allocations.
+    (David Carlier/nielsdos)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
@@ -136,6 +158,8 @@ PHP                                                                        NEWS
 - Zlib:
   . gzfile, gzopen and readgzfile, their "use_include_path" argument
     is now a boolean. (David Carlier)
+  . Fixed bug GH-16883 (gzopen() does not use the default stream context when
+    opening HTTP URLs). (nielsdos)
 
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

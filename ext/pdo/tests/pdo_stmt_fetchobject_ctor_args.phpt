@@ -40,15 +40,15 @@ class Bar {
 $stmt->execute();
 try {
     $obj = $stmt->fetchObject(Foo::class);
-} catch (ArgumentCountError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $stmt->execute();
 try {
     $obj = $stmt->fetchObject(Foo::class, []);
-} catch (ArgumentCountError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $stmt->execute();
@@ -66,8 +66,8 @@ var_dump($obj);
 try {
     $stmt->execute();
     $obj = $stmt->fetchObject(Bar::class, ["a" => 123]);
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -78,8 +78,8 @@ $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_stmt_fetchobject_ctor_args");
 ?>
 --EXPECTF--
-Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected
-Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected
+ArgumentCountError: Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected
+ArgumentCountError: Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected
 object(Foo)#%d (2) {
   ["a"]=>
   int(123)
@@ -94,4 +94,4 @@ object(Bar)#%d (1) {
   ["id"]=>
   int(1)
 }
-User-supplied statement does not accept constructor arguments
+ValueError: PDOStatement::fetchObject(): Argument #2 ($constructorArgs) must be empty when class provided in argument #1 ($class) does not have a constructor

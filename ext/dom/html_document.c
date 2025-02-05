@@ -553,9 +553,32 @@ static bool dom_decode_encode_fast_path(
 	size_t *tree_error_offset
 )
 {
-	decoding_encoding_ctx->decode.status = LXB_STATUS_OK;
-
 	const lxb_char_t *buf_ref = *buf_ref_ref;
+
+	/* If we returned for needing more bytes, we need to finish up the buffer for the old codepoint. */
+	if (decoding_encoding_ctx->decode.status == LXB_STATUS_CONTINUE) {
+		lxb_char_t buf[4];
+		lxb_char_t *buf_ptr = buf;
+		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
+		if (lxb_encoding_encode_utf_8_single(&decoding_encoding_ctx->encode, &buf_ptr, buf + sizeof(buf), codepoint) > sizeof(buf)) {
+			buf_ptr = zend_mempcpy(buf, LXB_ENCODING_REPLACEMENT_BYTES, LXB_ENCODING_REPLACEMENT_SIZE);
+		}
+		decoding_encoding_ctx->decode.status = LXB_STATUS_OK;
+
+		if (!dom_process_parse_chunk(
+			ctx,
+			document,
+			parser,
+			buf_ptr - buf,
+			buf,
+			buf_ref - *buf_ref_ref,
+			tokenizer_error_offset,
+			tree_error_offset
+		)) {
+			goto fail_oom;
+		}
+	}
+
 	const lxb_char_t *last_output = buf_ref;
 	while (buf_ref != buf_end) {
 		/* Fast path converts non-validated UTF-8 -> validated UTF-8 */
@@ -759,7 +782,7 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 										   "LIBXML_NOERROR, "
 										   "LIBXML_COMPACT, "
 										   "LIBXML_HTML_NOIMPLIED, "
-										   "Dom\\NO_DEFAULT_NS)");
+										   "Dom\\HTML_NO_DEFAULT_NS)");
 		return false;
 	}
 	return true;
@@ -903,6 +926,13 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 		);
 		if (!result) {
 			goto fail_oom;
+		}
+
+		/* In the string case we have a single buffer that acts as a sliding window.
+		 * The `current_input_characters` field starts pointing at the start of the buffer, but needs to slide along the
+		 * sliding window as well. */
+		if (application_data.current_input_characters) {
+			application_data.current_input_characters += chunk_size;
 		}
 	}
 

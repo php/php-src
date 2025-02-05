@@ -168,6 +168,10 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 			zend_call_known_function(user_fn, NULL, NULL, NULL, 0, NULL, params_ht);
 			phpdbg_out("\n");
 
+			if (params_ht) {
+				zend_array_destroy(params_ht);
+			}
+
 			return SUCCESS;
 		}
 	}

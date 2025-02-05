@@ -1368,6 +1368,9 @@ PHP_METHOD(SplFileInfo, getPathInfo)
 
 	if (ce == NULL) {
 		ce = intern->info_class;
+	} else if (!instanceof_function(ce, spl_ce_SplFileInfo)) {
+		zend_argument_type_error(1, "must be a class name derived from %s or null, %s given", ZSTR_VAL(spl_ce_SplFileInfo->name), ZSTR_VAL(ce->name));
+		RETURN_THROWS();
 	}
 
 	path = spl_filesystem_object_get_pathname(intern);
@@ -2685,6 +2688,12 @@ PHP_METHOD(SplFileObject, ftruncate)
 	}
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
+
+	if (size < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
 
 	if (!php_stream_truncate_supported(intern->u.file.stream)) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't truncate file %s", ZSTR_VAL(intern->file_name));

@@ -47,7 +47,7 @@ static void *mapping_base;
 static void zend_win_error_message(int type, char *msg, int err)
 {
 	HANDLE h;
-	char *ev_msgs[2];
+	const char *ev_msgs[2];
 	char *buf = php_win32_error_to_msg(err);
 
 	h = RegisterEventSource(NULL, TEXT(ACCEL_EVENT_SOURCE));
@@ -90,7 +90,7 @@ void zend_shared_alloc_create_lock(void)
 {
 	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME));
 	if (!memory_mutex) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex (error %u)", GetLastError());
+		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex (error %lu)", GetLastError());
 		return;
 	}
 	ReleaseMutex(memory_mutex);

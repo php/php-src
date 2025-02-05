@@ -260,7 +260,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw
 
 				for(i=0; i < 8; i++) {
 					if (out[i] != 0) {
-						if (tp > (uint8_t *)buf) {
+						if (tp > buf) {
 							in_v6_break = 0;
 							tp[0] = ':';
 							tp++;

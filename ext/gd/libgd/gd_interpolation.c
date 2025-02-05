@@ -62,11 +62,6 @@ TODO:
 #include "gdhelpers.h"
 #include "gd_intern.h"
 
-#ifdef _MSC_VER
-# pragma optimize("t", on)
-# include <emmintrin.h>
-#endif
-
 static gdImagePtr gdImageScaleBilinear(gdImagePtr im,
                                        const unsigned int new_width,
                                        const unsigned int new_height);

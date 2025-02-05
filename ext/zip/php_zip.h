@@ -60,6 +60,9 @@ typedef zip_rsrc * zip_rsrc_ptr;
 typedef struct _ze_zip_read_rsrc {
 	struct zip_file *zf;
 	struct zip_stat sb;
+	/* Used to check if the zip resource still exists,
+	 * without holding a reference. This works because the IDs are unique. */
+	zend_long zip_rsrc_handle;
 } zip_read_rsrc;
 
 /* Extends zend object */
@@ -74,10 +77,10 @@ typedef struct _ze_zip_object {
 	int err_zip;
 	int err_sys;
 #ifdef HAVE_PROGRESS_CALLBACK
-	zval progress_callback;
+	zend_fcall_info_cache progress_callback;
 #endif
 #ifdef HAVE_CANCEL_CALLBACK
-	zval cancel_callback;
+	zend_fcall_info_cache cancel_callback;
 #endif
 	zend_object zo;
 } ze_zip_object;

@@ -848,9 +848,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			is essential to mitigate buggy console info. */
 			interactive = php_win32_console_is_own() &&
 				!(script_file ||
-					argc > php_optind && context.mode != PHP_CLI_MODE_CLI_DIRECT &&
+					(argc > php_optind && context.mode != PHP_CLI_MODE_CLI_DIRECT &&
 					context.mode != PHP_CLI_MODE_PROCESS_STDIN &&
-					strcmp(argv[php_optind-1],"--")
+					strcmp(argv[php_optind-1],"--"))
 				);
 		}
 #endif

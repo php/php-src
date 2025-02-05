@@ -807,7 +807,7 @@ PHP_FUNCTION(putenv)
 			valw = php_win32_cp_any_to_w(value);
 		}
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
-		if (!keyw || !valw && value) {
+		if (!keyw || (!valw && value)) {
 			tsrm_env_unlock();
 			free(pe.putenv_string);
 			zend_string_release(pe.key);
@@ -1436,6 +1436,11 @@ PHP_FUNCTION(error_get_last)
 
 		ZVAL_LONG(&tmp, PG(last_error_lineno));
 		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+
+		if (!Z_ISUNDEF(EG(last_fatal_error_backtrace))) {
+			ZVAL_COPY(&tmp, &EG(last_fatal_error_backtrace));
+			zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TRACE), &tmp);
+		}
 	}
 }
 /* }}} */
@@ -1457,6 +1462,9 @@ PHP_FUNCTION(error_clear_last)
 			PG(last_error_file) = NULL;
 		}
 	}
+
+	zval_ptr_dtor(&EG(last_fatal_error_backtrace));
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 }
 /* }}} */
 

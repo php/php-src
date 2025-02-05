@@ -34,8 +34,6 @@ bool(false)
 
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: bad IntlCalendar instance: not initialized properly in %s on line %d
 bool(false)
-
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: error calling ::getTimeStamp() on the object in %s on line %d
 Object of type B (inheriting DateTime) has not been correctly initialized by calling parent::__construct() in its constructor
 
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the date/time format type is invalid in %s on line %d

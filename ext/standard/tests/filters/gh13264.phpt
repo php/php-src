@@ -45,5 +45,5 @@ array(4) {
   ["line"]=>
   int(%d)
 }
-string(7) "Hello 6"
+string(%d) "Hello%s"
 
