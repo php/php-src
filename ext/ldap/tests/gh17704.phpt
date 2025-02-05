@@ -14,9 +14,10 @@ $link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 $attributes = ["uid", "cn"];
 // force a non-packed array 
-$attributes['x']="x"; unset($attributes['x']);
+$attributes["x"] = "x";
+unset($attributes["x"]);
 
-var_dump(ldap_search($link, $base, attributes: $attributes));
+var_dump(ldap_search($link, $base, "(o=*)", $attributes));
 ?>
 --EXPECTF--
 object(LDAP\Result)#%d (0) {
