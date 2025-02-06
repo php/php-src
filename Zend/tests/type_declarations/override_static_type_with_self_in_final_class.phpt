@@ -70,7 +70,7 @@ var_dump($bar->method1());
 var_dump($bar->method2());
 var_dump($bar->method3());
 ?>
---EXPECT--
+--EXPECTF--
 object(Foo)#1 (0) {
 }
 object(Foo)#1 (0) {

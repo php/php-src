@@ -22,5 +22,5 @@ $foo = new Foo();
 
 var_dump($foo->method3());
 ?>
---EXPECT--
-Fatal error: Declaration of Foo::method3(): Foo must be compatible with C::method3(): static in src/Zend/tests/type_declarations/override_static_type_with_self_in_non_final_class_with_trait.php on line 12
+--EXPECTF--
+Fatal error: Declaration of Foo::method3(): Foo must be compatible with C::method3(): static in %s on line %d
