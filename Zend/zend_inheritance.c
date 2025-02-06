@@ -677,18 +677,19 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 	uint32_t fe_type_mask = ZEND_TYPE_PURE_MASK(fe_type);
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
 	uint32_t added_types = fe_type_mask & ~proto_type_mask;
+
+	if (proto_type_mask & MAY_BE_STATIC && fe_type_mask | MAY_BE_STATIC &&
+		fe_scope->ce_flags & ZEND_ACC_FINAL &&
+		instanceof_function(fe_scope, proto_scope)) {
+		/* Replacing type that accepts static with self in final classes is okay */
+		return INHERITANCE_SUCCESS;
+	}
+
 	if (added_types) {
 		if ((added_types & MAY_BE_STATIC)
 				&& zend_type_permits_self(proto_type, proto_scope, fe_scope)) {
 			/* Replacing type that accepts self with static is okay */
 			added_types &= ~MAY_BE_STATIC;
-		}
-
-		if (proto_type_mask & MAY_BE_STATIC && fe_type_mask | MAY_BE_STATIC &&
-			fe_scope->ce_flags & ZEND_ACC_FINAL &&
-			zend_is_intersection_subtype_of_type(fe_scope, fe_type, proto_scope, proto_type) == INHERITANCE_SUCCESS) {
-			/* Replacing type that accepts static with self in final classes is okay */
-			return INHERITANCE_SUCCESS
 		}
 
 		if (added_types == MAY_BE_NEVER) {
