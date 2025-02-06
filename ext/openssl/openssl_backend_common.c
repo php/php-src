@@ -419,7 +419,7 @@ void php_openssl_dispose_config(struct php_x509_request * req)
 	}
 }
 
-int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded)
+zend_result php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded)
 {
 	char buffer[MAXPATHLEN];
 
@@ -448,7 +448,7 @@ int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded)
 	return SUCCESS;
 }
 
-int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded)
+zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int seeded)
 {
 	char buffer[MAXPATHLEN];
 
@@ -1746,7 +1746,7 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 	}
 }
 
-int php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
+zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
 		bool *free_iv, EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode)
 {
 	char *iv_new;
@@ -1797,7 +1797,7 @@ int php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_require
 
 }
 
-int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
+zend_result php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
 		const char **ppassword, size_t *ppassword_len, bool *free_password,
 		const char **piv, size_t *piv_len, bool *free_iv,
@@ -1869,7 +1869,7 @@ int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	return SUCCESS;
 }
 
-int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
+zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
 		zend_string **poutbuf, int *poutlen, const char *data, size_t data_len,
 		const char *aad, size_t aad_len, int enc)
