@@ -684,6 +684,13 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 			added_types &= ~MAY_BE_STATIC;
 		}
 
+		if (proto_type_mask & MAY_BE_STATIC && fe_type_mask | MAY_BE_STATIC &&
+			fe_scope->ce_flags & ZEND_ACC_FINAL &&
+			zend_is_intersection_subtype_of_type(fe_scope, fe_type, proto_scope, proto_type) == INHERITANCE_SUCCESS) {
+			/* Replacing type that accepts static with self in final classes is okay */
+			return INHERITANCE_SUCCESS
+		}
+
 		if (added_types == MAY_BE_NEVER) {
 			/* never is the bottom type */
 			return INHERITANCE_SUCCESS;
