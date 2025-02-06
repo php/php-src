@@ -219,7 +219,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 #ifndef PHP_WIN32
 		const double timeoutmax = (double) PHP_TIMEOUT_ULL_MAX / 1000000.0;
 #else
-		const double timeoutmax = (double) LONG_MAX / 1000000.0;
+		const double timeoutmax = (double) LONG_MAX + 0.999999;
 #endif
 
 		if (d > timeoutmax) {

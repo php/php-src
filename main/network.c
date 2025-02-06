@@ -319,6 +319,14 @@ static inline void php_network_set_limit_time(struct timeval *limit_time,
 		struct timeval *timeout)
 {
 	gettimeofday(limit_time, NULL);
+# ifdef PHP_WIN32
+	/* cap timeout (we're not picky regarding usec) */
+	if (limit_time->tv_sec > (LONG_MAX - timeout->tv_sec) + 1) {
+		limit_time->tv_sec = LONG_MAX;
+		limit_time->tv_usec = 999999;
+		return;
+	}
+# endif
 	limit_time->tv_sec += timeout->tv_sec;
 	limit_time->tv_usec += timeout->tv_usec;
 	if (limit_time->tv_usec >= 1000000) {
