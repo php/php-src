@@ -237,8 +237,8 @@ static inline void php_openssl_rand_add_timeval(void)  /* {{{ */
 
 #endif
 
-int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded);
-int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded);
+zend_result php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded);
+zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int seeded);
 
 EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo);
 const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo);
@@ -359,16 +359,16 @@ static inline void php_openssl_set_aead_flags(struct php_openssl_cipher_mode *mo
 #endif
 
 void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EVP_CIPHER *cipher_type);
-int php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
+zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
 		bool *free_iv, EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode);
 
-int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
+zend_result php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
 		const char **ppassword, size_t *ppassword_len, bool *free_password,
 		const char **piv, size_t *piv_len, bool *free_iv,
 		const char *tag, int tag_len, zend_long options, int enc);
 
-int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
+zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
 		zend_string **poutbuf, int *poutlen, const char *data, size_t data_len,
 		const char *aad, size_t aad_len, int enc);
