@@ -15,6 +15,8 @@ PHP                                                                        NEWS
     by reference). (ilutov)
   . Fixed bug GH-17718 (Calling static methods on an interface that has
     `__callStatic` is allowed). (timwolla)
+  . Fixed bug GH-17713 (ReflectionProperty::getRawValue() and related methods
+    may call hooks of overridden properties). (Arnaud)
 
 - DOM:
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of

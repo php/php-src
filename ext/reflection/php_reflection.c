@@ -6096,6 +6096,19 @@ ZEND_METHOD(ReflectionProperty, setValue)
 }
 /* }}} */
 
+/* Return the property info being used when accessing 'ref->prop' from scope
+ * 'scope' on 'object'. The result may be different from 'ref->prop' when the
+ * property is overridden on 'object' and was not private in 'scope'.
+ * The effective prop may add hooks or change flags. */
+static zend_property_info *reflection_property_get_effective_prop(
+		property_reference *ref, zend_class_entry *scope, zend_object *object) {
+	zend_property_info *prop = ref->prop;
+	if (scope != object->ce && !(prop && (prop->flags & ZEND_ACC_PRIVATE))) {
+		prop = zend_hash_find_ptr(&object->ce->properties_info, ref->unmangled_name);
+	}
+	return prop;
+}
+
 ZEND_METHOD(ReflectionProperty, getRawValue)
 {
 	reflection_object *intern;
@@ -6108,17 +6121,20 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
-		_DO_THROW("May not use getRawValue on static properties");
-		RETURN_THROWS();
-	}
-
 	if (!instanceof_function(Z_OBJCE_P(object), intern->ce)) {
 		_DO_THROW("Given object is not an instance of the class this property was declared in");
 		RETURN_THROWS();
 	}
 
-	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+	zend_property_info *prop = reflection_property_get_effective_prop(ref,
+			intern->ce, Z_OBJ_P(object));
+
+	if (UNEXPECTED(prop && (prop->flags & ZEND_ACC_STATIC))) {
+		_DO_THROW("May not use getRawValue on static properties");
+		RETURN_THROWS();
+	}
+
+	if (!prop || !prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
 		zval rv;
 		zval *member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
 
@@ -6131,17 +6147,19 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 			RETURN_COPY_VALUE(member_p);
 		}
 	} else {
-		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_GET, ref->unmangled_name);
+		zend_function *func = zend_get_property_hook_trampoline(prop, ZEND_PROPERTY_HOOK_GET, ref->unmangled_name);
 		zend_call_known_instance_method_with_0_params(func, Z_OBJ_P(object), return_value);
 	}
 }
 
-static void reflection_property_set_raw_value(property_reference *ref, reflection_object *intern, zend_object *object, zval *value)
+static void reflection_property_set_raw_value(zend_property_info *prop,
+		zend_string *unmangled_name, reflection_object *intern,
+		zend_object *object, zval *value)
 {
-	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
-		zend_update_property_ex(intern->ce, object, ref->unmangled_name, value);
+	if (!prop || !prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+		zend_update_property_ex(intern->ce, object, unmangled_name, value);
 	} else {
-		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_SET, ref->unmangled_name);
+		zend_function *func = zend_get_property_hook_trampoline(prop, ZEND_PROPERTY_HOOK_SET, unmangled_name);
 		zend_call_known_instance_method_with_1_params(func, object, NULL, value);
 	}
 }
@@ -6155,42 +6173,46 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
-		_DO_THROW("May not use setRawValue on static properties");
-		RETURN_THROWS();
-	}
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	reflection_property_set_raw_value(ref, intern, Z_OBJ_P(object), value);
+	zend_property_info *prop = reflection_property_get_effective_prop(ref,
+			intern->ce, Z_OBJ_P(object));
+
+	if (UNEXPECTED(prop && (prop->flags & ZEND_ACC_STATIC))) {
+		_DO_THROW("May not use setRawValue on static properties");
+		RETURN_THROWS();
+	}
+
+	reflection_property_set_raw_value(prop, ref->unmangled_name, intern, Z_OBJ_P(object), value);
 }
 
-static zend_result reflection_property_check_lazy_compatible(reflection_object *intern,
-		property_reference *ref, zend_object *object, const char *method)
+static zend_result reflection_property_check_lazy_compatible(
+		zend_property_info *prop, zend_string *unmangled_name,
+		reflection_object *intern, zend_object *object, const char *method)
 {
-	if (!ref->prop) {
+	if (!prop) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Can not use %s on dynamic property %s::$%s",
 				method, ZSTR_VAL(intern->ce->name),
-				ZSTR_VAL(ref->unmangled_name));
+				ZSTR_VAL(unmangled_name));
 		return FAILURE;
 	}
 
-	if (ref->prop->flags & ZEND_ACC_STATIC) {
+	if (prop->flags & ZEND_ACC_STATIC) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Can not use %s on static property %s::$%s",
-				method, ZSTR_VAL(intern->ce->name),
-				ZSTR_VAL(ref->unmangled_name));
+				method, ZSTR_VAL(prop->ce->name),
+				ZSTR_VAL(unmangled_name));
 		return FAILURE;
 	}
 
-	if (ref->prop->flags & ZEND_ACC_VIRTUAL) {
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Can not use %s on virtual property %s::$%s",
-				method, ZSTR_VAL(intern->ce->name),
-				ZSTR_VAL(ref->unmangled_name));
+				method, ZSTR_VAL(prop->ce->name),
+				ZSTR_VAL(unmangled_name));
 		return FAILURE;
 	}
 
@@ -6198,12 +6220,12 @@ static zend_result reflection_property_check_lazy_compatible(reflection_object *
 		if (!zend_class_can_be_lazy(object->ce)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Can not use %s on internal class %s",
-					method, ZSTR_VAL(intern->ce->name));
+					method, ZSTR_VAL(object->ce->name));
 			return FAILURE;
 		}
 	}
 
-	ZEND_ASSERT(IS_VALID_PROPERTY_OFFSET(ref->prop->offset));
+	ZEND_ASSERT(IS_VALID_PROPERTY_OFFSET(prop->offset));
 
 	return SUCCESS;
 }
@@ -6223,23 +6245,27 @@ ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 		Z_PARAM_ZVAL(value)
 	} ZEND_PARSE_PARAMETERS_END();
 
-	if (reflection_property_check_lazy_compatible(intern, ref, object,
-				"setRawValueWithoutLazyInitialization") == FAILURE) {
-		RETURN_THROWS();
-	}
-
 	while (zend_object_is_lazy_proxy(object)
 			&& zend_lazy_object_initialized(object)) {
 		object = zend_lazy_object_get_instance(object);
 	}
 
-	zval *var_ptr = OBJ_PROP(object, ref->prop->offset);
+	zend_property_info *prop = reflection_property_get_effective_prop(ref,
+			intern->ce, object);
+
+	if (reflection_property_check_lazy_compatible(prop, ref->unmangled_name,
+				intern, object, "setRawValueWithoutLazyInitialization") == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zval *var_ptr = OBJ_PROP(object, prop->offset);
 	bool prop_was_lazy = Z_PROP_FLAG_P(var_ptr) & IS_PROP_LAZY;
 
 	/* Do not trigger initialization */
 	Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_LAZY;
 
-	reflection_property_set_raw_value(ref, intern, object, value);
+	reflection_property_set_raw_value(prop, ref->unmangled_name, intern, object,
+			value);
 
 	/* Mark property as lazy again if an exception prevented update */
 	if (EG(exception) && prop_was_lazy && Z_TYPE_P(var_ptr) == IS_UNDEF
@@ -6271,7 +6297,8 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
 	} ZEND_PARSE_PARAMETERS_END();
 
-	if (reflection_property_check_lazy_compatible(intern, ref, object,
+	if (reflection_property_check_lazy_compatible(ref->prop,
+				ref->unmangled_name, intern, object,
 				"skipLazyInitialization") == FAILURE) {
 		RETURN_THROWS();
 	}
