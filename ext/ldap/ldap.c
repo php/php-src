@@ -247,7 +247,7 @@ static bool php_ldap_is_numerically_indexed_array(zend_array *arr)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return false;
+	return true;
 }
 
 /* {{{ Parse controls from and to arrays */
