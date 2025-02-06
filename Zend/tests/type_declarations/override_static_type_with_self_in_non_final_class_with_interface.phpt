@@ -21,4 +21,4 @@ $foo = new Foo();
 var_dump($foo->method1());
 ?>
 --EXPECT--
-Fatal error: Declaration of Foo::method1(): Foo must be compatible with A::method1(): static in /app/Zend/tests/type_declarations/override_static_type_with_self_in_non_final_class_with_interface.php on line 10
+Fatal error: Declaration of Foo::method1(): Foo must be compatible with A::method1(): static in src/Zend/tests/type_declarations/override_static_type_with_self_in_non_final_class_with_interface.php on line 10
