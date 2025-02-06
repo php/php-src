@@ -14,7 +14,7 @@ class Base {
         }
         set {
             echo __METHOD__, "\n";
-            $field = $value;
+            $this->hookedProp = $value;
         }
     }
     public $virtualProp {
@@ -36,7 +36,7 @@ class Test extends Base {
         }
         set {
             echo __FUNCTION__, "\n";
-            $field = $value;
+            $this->publicProp = $value;
         }
     }
     private $privateProp = 'Test::$privateProp' {
@@ -46,7 +46,7 @@ class Test extends Base {
         }
         set {
             echo __FUNCTION__, "\n";
-            $field = $value;
+            $this->privateProp = $value;
         }
     }
     public $dynamicProp {
@@ -56,7 +56,7 @@ class Test extends Base {
         }
         set {
             echo __FUNCTION__, "\n";
-            $field = $value;
+            $this->dynamicProp = $value;
         }
     }
     public $hookedProp {
@@ -66,7 +66,7 @@ class Test extends Base {
         }
         set {
             echo __METHOD__, "\n";
-            $field = $value;
+            $this->hookedProp = $value;
         }
     }
     public $virtualProp {
@@ -76,7 +76,7 @@ class Test extends Base {
         }
         set {
             echo __METHOD__, "\n";
-            $field = $value;
+            $this->virtualProp = $value;
         }
     }
     public static $changedProp = 'Test::$changedProp';
