@@ -38,11 +38,37 @@ final class Foo extends B implements A
     }
 }
 
+final class Bar extends B implements A
+{
+    use C;
+
+    public function method1(): Bar
+    {
+        return $this;
+    }
+
+    public function method2(): Bar
+    {
+        return $this;
+    }
+
+    public function method3(): Bar
+    {
+        return $this;
+    }
+}
+
 $foo = new Foo();
 
 var_dump($foo->method1());
 var_dump($foo->method2());
 var_dump($foo->method3());
+
+$bar = new Bar();
+
+var_dump($bar->method1());
+var_dump($bar->method2());
+var_dump($bar->method3());
 ?>
 --EXPECT--
 object(Foo)#1 (0) {
@@ -50,4 +76,10 @@ object(Foo)#1 (0) {
 object(Foo)#1 (0) {
 }
 object(Foo)#1 (0) {
+}
+object(Bar)#2 (0) {
+}
+object(Bar)#2 (0) {
+}
+object(Bar)#2 (0) {
 }
