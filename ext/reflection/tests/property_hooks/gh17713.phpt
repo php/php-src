@@ -165,5 +165,5 @@ int(43)
 # Accessing Test->changedProp from scope Base
 May not use setRawValue on static properties
 May not use getRawValue on static properties
-Can not use setRawValueWithoutLazyInitialization on static property Base::$changedProp
+Can not use setRawValueWithoutLazyInitialization on static property Test::$changedProp
 May not use getRawValue on static properties

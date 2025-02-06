@@ -6203,7 +6203,7 @@ static zend_result reflection_property_check_lazy_compatible(
 	if (prop->flags & ZEND_ACC_STATIC) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Can not use %s on static property %s::$%s",
-				method, ZSTR_VAL(intern->ce->name),
+				method, ZSTR_VAL(prop->ce->name),
 				ZSTR_VAL(unmangled_name));
 		return FAILURE;
 	}
@@ -6211,7 +6211,7 @@ static zend_result reflection_property_check_lazy_compatible(
 	if (prop->flags & ZEND_ACC_VIRTUAL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Can not use %s on virtual property %s::$%s",
-				method, ZSTR_VAL(intern->ce->name),
+				method, ZSTR_VAL(prop->ce->name),
 				ZSTR_VAL(unmangled_name));
 		return FAILURE;
 	}
@@ -6220,7 +6220,7 @@ static zend_result reflection_property_check_lazy_compatible(
 		if (!zend_class_can_be_lazy(object->ce)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Can not use %s on internal class %s",
-					method, ZSTR_VAL(intern->ce->name));
+					method, ZSTR_VAL(object->ce->name));
 			return FAILURE;
 		}
 	}
