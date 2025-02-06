@@ -78,7 +78,9 @@ for ($i = 0; $i < 100; $i++) {
 	$mb_levenshtein_score = mb_levenshtein($bytes, $compare, encoding: "UTF-8");
 	$watchstate_mb_levenshtein_score = watchstate_mb_levenshtein($bytes, $compare);
 	if ($mb_levenshtein_score !== $watchstate_mb_levenshtein_score) {
-		throw new Exception("mb_levenshtein compare error: {$mb_levenshtein_score} !== {$keinos_mb_levenshtein_score} param: {$bytes} vs {$compare}");
+		$hexbytes = bin2hex(mb_convert_encoding($bytes, "UTF-16", "UTF-8"));
+		$hexcompare = bin2hex(mb_convert_encoding($compare, "UTF-16", "UTF-8"));
+		throw new Exception("mb_levenshtein compare error: {$mb_levenshtein_score} !== {$keinos_mb_levenshtein_score} param: {$hexbytes} vs {$hexcompare}");
 	}
 }
 echo "OK" . PHP_EOL;
