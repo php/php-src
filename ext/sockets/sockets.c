@@ -1545,8 +1545,11 @@ PHP_FUNCTION(socket_recvfrom)
 	}
 
 #ifdef AF_PACKET
-	if (php_sock->type == AF_PACKET && arg3 < 2048) {
-		RETURN_FALSE;
+	// ethernet header + payload
+	// possibly follow-up PR SOCK_DGRAM
+	if (php_sock->type == AF_PACKET && arg3 < 1514) {
+		zend_argument_value_error(3, "must be at least 1514 for AF_PACKET");
+		RETURN_THROWS();
 	}
 #endif
 
@@ -1781,6 +1784,15 @@ PHP_FUNCTION(socket_sendto)
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
+
+#ifdef AF_PACKET
+	// ether header + payload
+	// TODO dealing with SOCK_DGRAM
+	if (php_sock->type == AF_PACKET && len < 60) {
+		zend_argument_value_error(3, "must be at least 64 for AF_PACKET");
+		RETURN_THROWS();
+	}
+#endif
 
 	switch (php_sock->type) {
 		case AF_UNIX:
