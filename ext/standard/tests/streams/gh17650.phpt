@@ -23,7 +23,9 @@ fwrite($fp, $text);
 rewind($fp);
 stream_filter_append($fp, 'testfilter', STREAM_FILTER_READ, 'testuserfilter');
 
-while (fgets($fp));
+while ($x = fgets($fp)) {
+  var_dump($x);
+}
 
 fclose($fp);
 
