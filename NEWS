@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17618 (UnhandledMatchError does not take
     zend.exception_ignore_args=1 into account). (timwolla)
   . Fix fallback paths in fast_long_{add,sub}_function. (nielsdos)
+  . Fixed bug GH-17718 (Calling static methods on an interface that has
+    `__callStatic` is allowed). (timwolla)
 
 - LDAP:
   . Fixed bug GH-17704 (ldap_search fails when $attributes contains a
