@@ -11258,9 +11258,12 @@ static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 	switch ((*ast_ptr)->kind) {
 		case ZEND_AST_CALL: {
 			zend_ast *name_ast = (*ast_ptr)->child[0];
-			zval *name_ast_zv;
-			if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(name_ast_zv = zend_ast_get_zval(name_ast)) != IS_STRING) {
+			if (name_ast->kind != ZEND_AST_ZVAL) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use dynamic function name in constant expression");
+			}
+			zval *name_ast_zv = zend_ast_get_zval(name_ast);
+			if (Z_TYPE_P(name_ast_zv) != IS_STRING) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Illegal function name");
 			}
 			bool is_fully_qualified;
 			zend_string *name = zend_resolve_function_name(Z_STR_P(name_ast_zv), name_ast->attr, &is_fully_qualified);
@@ -11275,8 +11278,11 @@ static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 			zend_ast *class_ast = (*ast_ptr)->child[0];
 			zend_compile_const_expr_class_reference(class_ast);
 			zend_ast *method_ast = (*ast_ptr)->child[1];
-			if (method_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(method_ast)) != IS_STRING) {
+			if (method_ast->kind != ZEND_AST_ZVAL) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use dynamic method name in constant expression");
+			}
+			if (Z_TYPE_P(zend_ast_get_zval(method_ast)) != IS_STRING) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Illegal method name");
 			}
 			break;
 		}
