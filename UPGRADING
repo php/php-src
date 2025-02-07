@@ -457,6 +457,9 @@ PHP 8.5 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- JSON:
+  . Encoding JSON strings without special characters is now faster.
+
 - ReflectionProperty:
   . Improved performance of the following methods: getValue(), getRawValue(),
     isInitialized(), setValue(), setRawValue().
