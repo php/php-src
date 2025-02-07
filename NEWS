@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fix fallback paths in fast_long_{add,sub}_function. (nielsdos)
   . Fixed bug OSS-Fuzz #391975641 (Crash when accessing property backing value
     by reference). (ilutov)
+  . Fixed bug GH-17718 (Calling static methods on an interface that has
+    `__callStatic` is allowed). (timwolla)
 
 - DOM:
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
