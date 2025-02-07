@@ -1681,6 +1681,9 @@ PHP_FUNCTION(socket_recvfrom)
 							break;
 						}
 						default:
+					                zend_string_efree(recv_buf);
+					                zval_ptr_dtor(&zpayload);
+					                zval_ptr_dtor(&obj);
 							zend_value_error("unsupported ip header protocol");
 							RETURN_THROWS();
 					}
@@ -2967,8 +2970,6 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ai = Z_ADDRESS_INFO_P(arg1);
-
-	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
