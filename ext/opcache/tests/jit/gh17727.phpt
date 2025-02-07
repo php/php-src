@@ -15,6 +15,7 @@ arnaud-lb
 YuanchengJiang
 --FILE--
 <?php
+$str = str_repeat('a', 1024 * 1024 * 1.25);
 class DestructableObject
 {
     public function __destruct()
@@ -27,7 +28,4 @@ $_ = new DestructableObject();
 --EXPECTF--
 Fatal error: Allowed memory size of 2097152 bytes exhausted %s
 Stack trace:
-#0 %s(%d): DestructableObject->__destruct()
 %A
-#%d [internal function]: DestructableObject->__destruct()
-#%d {main}
