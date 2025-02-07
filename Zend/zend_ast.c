@@ -60,7 +60,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(void) {
 	ast = zend_ast_alloc(sizeof(zend_ast_fcc));
 	ast->kind = ZEND_AST_CALLABLE_CONVERT;
 	ast->attr = 0;
-	ast->lineno = ZEND_MAP_PTR_NEW_OFFSET();
+	ast->lineno = CG(zend_lineno);
 	ZEND_MAP_PTR_INIT(ast->fptr, NULL);
 
 	return (zend_ast *) ast;
