@@ -53,10 +53,14 @@
 	(all) = (all) && !CHARSET_PARTIAL_SUPPORT((charset)) && ((doctype) != ENT_HTML_DOC_XML1); \
 } while (0)
 
-#define MB_FAILURE(pos, advance) do { \
+#define MB_FAILURE_NO_STATUS(pos, advance) do { \
 	*cursor = pos + (advance); \
-	*status = FAILURE; \
 	return 0; \
+} while (0)
+
+#define MB_FAILURE(pos, advance) do { \
+	*status = FAILURE; \
+	MB_FAILURE_NO_STATUS(pos, advance); \
 } while (0)
 
 #define CHECK_LEN(pos, chars_need) ((str_len - (pos)) >= (chars_need))
@@ -85,6 +89,87 @@ static char *get_default_charset(void) {
 }
 /* }}} */
 
+/* Decodes the next UTF-8 multibyte codepoint (i.e. >= 2 bytes).
+ * Uses `c` as the leading byte. */
+PHPAPI unsigned int php_next_utf8_char_mb(
+		const unsigned char *str,
+		unsigned char c,
+		size_t str_len,
+		size_t *cursor)
+{
+	size_t pos = *cursor;
+	unsigned int this_char = 0;
+
+	/* We'll follow strategy 2. from section 3.6.1 of UTR #36:
+	 * "In a reported illegal byte sequence, do not include any
+	 *  non-initial byte that encodes a valid character or is a leading
+	 *  byte for a valid sequence." */
+
+	ZEND_ASSERT(c >= 0x80);
+
+	if (UNEXPECTED(c < 0xc2)) {
+		MB_FAILURE_NO_STATUS(pos, 1);
+	} else if (c < 0xe0) {
+		if (UNEXPECTED(!CHECK_LEN(pos, 2)))
+			MB_FAILURE_NO_STATUS(pos, 1);
+
+		if (UNEXPECTED(!utf8_trail(str[pos + 1]))) {
+			MB_FAILURE_NO_STATUS(pos, utf8_lead(str[pos + 1]) ? 1 : 2);
+		}
+		this_char = ((c & 0x1f) << 6) | (str[pos + 1] & 0x3f);
+		if (UNEXPECTED(this_char < 0x80)) { /* non-shortest form */
+			MB_FAILURE_NO_STATUS(pos, 2);
+		}
+		pos += 2;
+	} else if (c < 0xf0) {
+		size_t avail = str_len - pos;
+
+		if (UNEXPECTED(avail < 3 ||
+				!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2]))) {
+			if (avail < 2 || utf8_lead(str[pos + 1]))
+				MB_FAILURE_NO_STATUS(pos, 1);
+			else if (avail < 3 || utf8_lead(str[pos + 2]))
+				MB_FAILURE_NO_STATUS(pos, 2);
+			else
+				MB_FAILURE_NO_STATUS(pos, 3);
+		}
+
+		this_char = ((c & 0x0f) << 12) | ((str[pos + 1] & 0x3f) << 6) | (str[pos + 2] & 0x3f);
+		if (UNEXPECTED(this_char < 0x800)) { /* non-shortest form */
+			MB_FAILURE_NO_STATUS(pos, 3);
+		} else if (UNEXPECTED(this_char >= 0xd800 && this_char <= 0xdfff)) { /* surrogate */
+			MB_FAILURE_NO_STATUS(pos, 3);
+		}
+		pos += 3;
+	} else if (c < 0xf5) {
+		size_t avail = str_len - pos;
+
+		if (UNEXPECTED(avail < 4 ||
+				!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2]) ||
+				!utf8_trail(str[pos + 3]))) {
+			if (avail < 2 || utf8_lead(str[pos + 1]))
+				MB_FAILURE_NO_STATUS(pos, 1);
+			else if (avail < 3 || utf8_lead(str[pos + 2]))
+				MB_FAILURE_NO_STATUS(pos, 2);
+			else if (avail < 4 || utf8_lead(str[pos + 3]))
+				MB_FAILURE_NO_STATUS(pos, 3);
+			else
+				MB_FAILURE_NO_STATUS(pos, 4);
+		}
+
+		this_char = ((c & 0x07) << 18) | ((str[pos + 1] & 0x3f) << 12) | ((str[pos + 2] & 0x3f) << 6) | (str[pos + 3] & 0x3f);
+		if (UNEXPECTED(this_char < 0x10000 || this_char > 0x10FFFF)) { /* non-shortest form or outside range */
+			MB_FAILURE_NO_STATUS(pos, 4);
+		}
+		pos += 4;
+	} else {
+		MB_FAILURE_NO_STATUS(pos, 1);
+	}
+
+	*cursor = pos;
+	return this_char;
+}
+
 /* {{{ get_next_char */
 static inline unsigned int get_next_char(
 		enum entity_charset charset,
@@ -105,72 +190,17 @@ static inline unsigned int get_next_char(
 	switch (charset) {
 	case cs_utf_8:
 		{
-			/* We'll follow strategy 2. from section 3.6.1 of UTR #36:
-			 * "In a reported illegal byte sequence, do not include any
-			 *  non-initial byte that encodes a valid character or is a leading
-			 *  byte for a valid sequence." */
 			unsigned char c;
 			c = str[pos];
 			if (c < 0x80) {
 				this_char = c;
 				pos++;
-			} else if (c < 0xc2) {
-				MB_FAILURE(pos, 1);
-			} else if (c < 0xe0) {
-				if (!CHECK_LEN(pos, 2))
-					MB_FAILURE(pos, 1);
-
-				if (!utf8_trail(str[pos + 1])) {
-					MB_FAILURE(pos, utf8_lead(str[pos + 1]) ? 1 : 2);
-				}
-				this_char = ((c & 0x1f) << 6) | (str[pos + 1] & 0x3f);
-				if (this_char < 0x80) { /* non-shortest form */
-					MB_FAILURE(pos, 2);
-				}
-				pos += 2;
-			} else if (c < 0xf0) {
-				size_t avail = str_len - pos;
-
-				if (avail < 3 ||
-						!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2])) {
-					if (avail < 2 || utf8_lead(str[pos + 1]))
-						MB_FAILURE(pos, 1);
-					else if (avail < 3 || utf8_lead(str[pos + 2]))
-						MB_FAILURE(pos, 2);
-					else
-						MB_FAILURE(pos, 3);
-				}
-
-				this_char = ((c & 0x0f) << 12) | ((str[pos + 1] & 0x3f) << 6) | (str[pos + 2] & 0x3f);
-				if (this_char < 0x800) { /* non-shortest form */
-					MB_FAILURE(pos, 3);
-				} else if (this_char >= 0xd800 && this_char <= 0xdfff) { /* surrogate */
-					MB_FAILURE(pos, 3);
-				}
-				pos += 3;
-			} else if (c < 0xf5) {
-				size_t avail = str_len - pos;
-
-				if (avail < 4 ||
-						!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2]) ||
-						!utf8_trail(str[pos + 3])) {
-					if (avail < 2 || utf8_lead(str[pos + 1]))
-						MB_FAILURE(pos, 1);
-					else if (avail < 3 || utf8_lead(str[pos + 2]))
-						MB_FAILURE(pos, 2);
-					else if (avail < 4 || utf8_lead(str[pos + 3]))
-						MB_FAILURE(pos, 3);
-					else
-						MB_FAILURE(pos, 4);
-				}
-
-				this_char = ((c & 0x07) << 18) | ((str[pos + 1] & 0x3f) << 12) | ((str[pos + 2] & 0x3f) << 6) | (str[pos + 3] & 0x3f);
-				if (this_char < 0x10000 || this_char > 0x10FFFF) { /* non-shortest form or outside range */
-					MB_FAILURE(pos, 4);
-				}
-				pos += 4;
 			} else {
-				MB_FAILURE(pos, 1);
+				this_char = php_next_utf8_char_mb(str, c, str_len, cursor);
+				if (UNEXPECTED(this_char == 0)) {
+					*status = FAILURE;
+				}
+				return this_char;
 			}
 		}
 		break;
