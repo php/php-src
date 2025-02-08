@@ -968,13 +968,13 @@ static bool pdo_verify_fetch_mode(uint32_t default_mode_and_flags, zend_long mod
 	if (flags != 0) {
 		bool has_class_flags = (flags & (PDO_FETCH_CLASSTYPE|PDO_FETCH_PROPS_LATE|PDO_FETCH_SERIALIZE)) != 0;
 		if (has_class_flags && mode != PDO_FETCH_CLASS) {
-			zend_argument_value_error(mode_arg_num, "cannot use PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, or PDO::FETCH_SERIALIZE fetch flags with a fetch mode different than PDO::FETCH_CLASS");
+			zend_argument_value_error(mode_arg_num, "cannot use PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, or PDO::FETCH_SERIALIZE fetch flags with a fetch mode other than PDO::FETCH_CLASS");
 			return false;
 		}
 		// TODO Prevent setting those flags together or not? This would affect PDO::setFetchMode()
 		//bool has_grouping_flags = flags & (PDO_FETCH_GROUP|PDO_FETCH_UNIQUE);
 		//if (has_grouping_flags && !fetch_all) {
-		//	zend_argument_value_error(mode_arg_num, "cannot use PDO::FETCH_GROUP, or PDO::FETCH_UNIQUE fetch flags outside of PDOStatemnt::fetchAll()");
+		//	zend_argument_value_error(mode_arg_num, "cannot use PDO::FETCH_GROUP, or PDO::FETCH_UNIQUE fetch flags outside of PDOStatement::fetchAll()");
 		//	return false;
 		//}
 		if (flags & PDO_FETCH_SERIALIZE) {
