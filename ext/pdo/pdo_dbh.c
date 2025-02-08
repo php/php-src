@@ -40,7 +40,6 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, u
 void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error)
 {
 		zval error_info,pdo_exception;
-		char *pdo_exception_message;
 
 		object_init_ex(&pdo_exception, php_pdo_get_exception());
 		array_init(&error_info);
@@ -49,17 +48,17 @@ void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_e
 		add_next_index_long(&error_info, driver_errcode);
 		add_next_index_string(&error_info, driver_errmsg);
 
-		spprintf(&pdo_exception_message, 0,"SQLSTATE[%s] [%d] %s",*pdo_error, driver_errcode, driver_errmsg);
+		zend_string *pdo_exception_message = zend_strpprintf(0,"SQLSTATE[%s] [%d] %s",*pdo_error, driver_errcode, driver_errmsg);
 		zend_update_property(php_pdo_get_exception(), Z_OBJ(pdo_exception), "errorInfo", sizeof("errorInfo")-1, &error_info);
 		zend_update_property_long(php_pdo_get_exception(), Z_OBJ(pdo_exception), "code", sizeof("code")-1, driver_errcode);
-		zend_update_property_string(
+		zend_update_property_str(
 			php_pdo_get_exception(),
 			Z_OBJ(pdo_exception),
 			"message",
 			sizeof("message")-1,
 			pdo_exception_message
 		);
-		efree(pdo_exception_message);
+		zend_string_release_ex(pdo_exception_message, false);
 		zval_ptr_dtor(&error_info);
 		zend_throw_exception_object(&pdo_exception);
 }
@@ -74,7 +73,6 @@ PDO_API bool php_pdo_stmt_valid_db_obj_handle(const pdo_stmt_t *stmt)
 void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlstate, const char *supp) /* {{{ */
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
-	char *message = NULL;
 	const char *msg;
 
 	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
@@ -98,21 +96,22 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 		msg = "<<Unknown error>>";
 	}
 
+	zend_string *message = NULL;
 	if (supp) {
-		spprintf(&message, 0, "SQLSTATE[%s]: %s: %s", *pdo_err, msg, supp);
+		message = zend_strpprintf(0, "SQLSTATE[%s]: %s: %s", *pdo_err, msg, supp);
 	} else {
-		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
+		message = zend_strpprintf(0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}
 
 	if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
-		php_error_docref(NULL, E_WARNING, "%s", message);
+		php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(message));
 	} else {
 		zval ex, info;
 		zend_class_entry *pdo_ex = php_pdo_get_exception();
 
 		object_init_ex(&ex, pdo_ex);
 
-		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "message", sizeof("message")-1, message);
+		zend_update_property_str(zend_ce_exception, Z_OBJ(ex), "message", sizeof("message")-1, message);
 		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", sizeof("code")-1, *pdo_err);
 
 		array_init(&info);
@@ -125,9 +124,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 		zend_throw_exception_object(&ex);
 	}
 
-	if (message) {
-		efree(message);
-	}
+	zend_string_release_ex(message, false);
 }
 /* }}} */
 
@@ -386,8 +383,7 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 
 	/* is this supposed to be a persistent connection ? */
 	if (options) {
-		int plen = 0;
-		char *hashkey = NULL;
+		zend_string *hash_key = NULL;
 		zend_resource *le;
 		pdo_dbh_t *pdbh = NULL;
 		zval *v;
@@ -396,14 +392,14 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 			if (Z_TYPE_P(v) == IS_STRING &&
 				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
 				/* user specified key */
-				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s:%s", data_source,
+				hash_key = zend_strpprintf(0, "PDO:DBH:DSN=%s:%s:%s:%s", data_source,
 						username ? username : "",
 						password ? password : "",
 						Z_STRVAL_P(v));
 				is_persistent = 1;
 			} else {
 				is_persistent = zval_get_long(v) ? 1 : 0;
-				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s", data_source,
+				hash_key = zend_strpprintf(0, "PDO:DBH:DSN=%s:%s:%s", data_source,
 						username ? username : "",
 						password ? password : "");
 			}
@@ -411,7 +407,7 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 
 		if (is_persistent) {
 			/* let's see if we have one cached.... */
-			if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashkey, plen)) != NULL) {
+			if ((le = zend_hash_find_ptr(&EG(persistent_list), hash_key)) != NULL) {
 				if (le->type == php_pdo_list_entry()) {
 					pdbh = (pdo_dbh_t*)le->ptr;
 
@@ -433,9 +429,9 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 
 				pdbh->refcount = 1;
 				pdbh->is_persistent = 1;
-				pdbh->persistent_id = pemalloc(plen + 1, 1);
-				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
-				pdbh->persistent_id_len = plen;
+				pdbh->persistent_id = pemalloc(ZSTR_LEN(hash_key) + 1, true);
+				memcpy((char *)pdbh->persistent_id, ZSTR_VAL(hash_key), ZSTR_LEN(hash_key) + 1);
+				pdbh->persistent_id_len = ZSTR_LEN(hash_key);
 				pdbh->def_stmt_ce = dbh->def_stmt_ce;
 			}
 		}
@@ -456,8 +452,8 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 			dbh = pdbh;
 		}
 
-		if (hashkey) {
-			efree(hashkey);
+		if (hash_key) {
+			zend_string_release_ex(hash_key, false);
 		}
 	}
 
