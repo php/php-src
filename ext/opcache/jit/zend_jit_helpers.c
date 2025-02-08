@@ -2084,7 +2084,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_w_slow(zend_object *zobj)
 
 			if (opline->op2_type == IS_CONST) {
 				prop_info = CACHED_PTR_EX(cache_slot + 2);
-				if (!prop_info) {
+				if (!prop_info || !EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 					break;
 				}
 			}
