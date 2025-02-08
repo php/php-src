@@ -1248,7 +1248,7 @@ PHP_METHOD(PDO, query)
 		}
 		/* something broke */
 		dbh->query_stmt = stmt;
-		ZVAL_OBJ(&dbh->query_stmt_zval, Z_OBJ_P(return_value));
+		dbh->query_stmt_obj = Z_OBJ_P(return_value);
 		GC_DELREF(stmt->database_object_handle);
 		stmt->database_object_handle = NULL;
 		PDO_HANDLE_STMT_ERR();
@@ -1468,7 +1468,8 @@ static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 	int i;
 
 	if (dbh->query_stmt) {
-		zval_ptr_dtor(&dbh->query_stmt_zval);
+		OBJ_RELEASE(dbh->query_stmt_obj);
+		dbh->query_stmt_obj = NULL;
 		dbh->query_stmt = NULL;
 	}
 

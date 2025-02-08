@@ -499,7 +499,7 @@ struct _pdo_dbh_t {
 	 * This will allow us to report the correct error message
 	 * when PDO::query() fails */
 	pdo_stmt_t *query_stmt;
-	zval query_stmt_zval;
+	zend_object *query_stmt_obj;
 
 	/* defaults for fetches */
 	enum pdo_fetch_type default_fetch_type;
