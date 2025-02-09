@@ -790,6 +790,7 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 	zval *option_buffer;
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		ZVAL_DEREF(option_buffer);
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING: {
@@ -870,6 +871,7 @@ PHP_FUNCTION(inflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
@@ -1088,6 +1090,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("level"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		level = zval_get_long(option_buffer);
 	}
 	if (level < -1 || level > 9) {
@@ -1096,6 +1099,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("memory"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
@@ -1104,6 +1108,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
@@ -1112,6 +1117,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("strategy"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		strategy = zval_get_long(option_buffer);
 	}
 	switch (strategy) {
