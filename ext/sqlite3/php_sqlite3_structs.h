@@ -93,7 +93,6 @@ typedef struct _php_sqlite3_result_object php_sqlite3_result;
 struct _php_sqlite3_result_object  {
 	php_sqlite3_db_object *db_obj;
 	php_sqlite3_stmt *stmt_obj;
-	zval stmt_obj_zval;
 
 	/* Cache of column names to speed up repeated fetchArray(SQLITE3_ASSOC) calls.
 	 * Cache is cleared on reset() and finalize() calls. */
@@ -114,7 +113,6 @@ static inline php_sqlite3_result *php_sqlite3_result_from_obj(zend_object *obj) 
 struct _php_sqlite3_stmt_object  {
 	sqlite3_stmt *stmt;
 	php_sqlite3_db_object *db_obj;
-	zval db_obj_zval;
 
 	int initialised;
 
