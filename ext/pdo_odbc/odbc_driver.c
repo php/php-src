@@ -536,8 +536,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 		bool use_pwd_arg = dbh->password != NULL && !php_memnistr(dbh->data_source, "pwd=", strlen("pwd="), dbh->data_source + dbh->data_source_len);
 
 		if (use_uid_arg || use_pwd_arg) {
-			char *db = (char*) emalloc(dbh->data_source_len + 1);
-			memcpy(db, dbh->data_source, dbh->data_source_len+1);
+			char *db = (char*) estrndup(dbh->data_source, dbh->data_source_len);
 			char *db_end = db + dbh->data_source_len;
 			db_end--;
 			if ((unsigned char)*(db_end) == ';') {
