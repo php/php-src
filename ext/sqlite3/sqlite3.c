@@ -1782,7 +1782,7 @@ PHP_METHOD(SQLite3Stmt, execute)
 			object_init_ex(return_value, php_sqlite3_result_entry);
 			result = Z_SQLITE3_RESULT_P(return_value);
 
-			result->is_prepared_statement = 1;
+			result->is_prepared_statement = true;
 			result->db_obj = stmt_obj->db_obj;
 			result->stmt_obj = stmt_obj;
 			result->column_names = NULL;
@@ -2027,7 +2027,7 @@ PHP_METHOD(SQLite3Result, finalize)
 	sqlite3result_clear_column_names_cache(result_obj);
 
 	/* We need to finalize an internal statement */
-	if (result_obj->is_prepared_statement == 0) {
+	if (!result_obj->is_prepared_statement) {
 		zend_llist_del_element(&(result_obj->db_obj->free_list), &result_obj->stmt_obj,
 			(int (*)(void *, void *)) php_sqlite3_compare_stmt_free);
 	} else {
