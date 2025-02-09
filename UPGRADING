@@ -236,6 +236,9 @@ PHP 8.5 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Fileinfo:
+  . Upgraded to file 5.46.
+
 - Readline:
   . The return types of readline_add_history(), readline_clear_history(), and
     readline_callback_handler_install() have been changed to true, rather
