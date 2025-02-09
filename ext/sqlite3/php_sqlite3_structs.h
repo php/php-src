@@ -89,12 +89,6 @@ typedef struct _php_sqlite3_agg_context  {
 typedef struct _php_sqlite3_stmt_object php_sqlite3_stmt;
 typedef struct _php_sqlite3_result_object php_sqlite3_result;
 
-/* sqlite3 objects to be destroyed */
-typedef struct _php_sqlite3_free_list {
-	zval stmt_obj_zval;
-	php_sqlite3_stmt *stmt_obj;
-} php_sqlite3_free_list;
-
 /* Structure for SQLite Result object. */
 struct _php_sqlite3_result_object  {
 	php_sqlite3_db_object *db_obj;
