@@ -1965,7 +1965,12 @@ static zval* ZEND_FASTCALL zend_jit_fetch_obj_r_slow_ex(zend_object *zobj)
 	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS);
 
 	retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, result);
-	if (retval == result && UNEXPECTED(Z_ISREF_P(retval))) {
+	if (retval != result) {
+		/* On exception, we may free the result in the ZEND_HANDLE_EXCEPTION VM handler
+		 * so we need to initialize the result.
+		 * We don't need to copy because we use the return value directly as a register. */
+		ZVAL_UNDEF(result);
+	} else if (UNEXPECTED(Z_ISREF_P(retval))) {
 		zend_unwrap_reference(retval);
 	}
 	return retval;
@@ -2017,7 +2022,12 @@ static zval* ZEND_FASTCALL zend_jit_fetch_obj_is_slow_ex(zend_object *zobj)
 	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS);
 
 	retval = zobj->handlers->read_property(zobj, name, BP_VAR_IS, cache_slot, result);
-	if (retval == result && UNEXPECTED(Z_ISREF_P(retval))) {
+	if (retval != result) {
+		/* On exception, we may free the result in the ZEND_HANDLE_EXCEPTION VM handler
+		 * so we need to initialize the result.
+		 * We don't need to copy because we use the return value directly as a register. */
+		ZVAL_UNDEF(result);
+	} else if (UNEXPECTED(Z_ISREF_P(retval))) {
 		zend_unwrap_reference(retval);
 	}
 	return retval;
