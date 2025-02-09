@@ -8,7 +8,9 @@ uri
 function callGetters($uri)
 {
     var_dump($uri->getScheme());
-    var_dump($uri->getRawScheme());
+    if ($uri instanceof Uri\Rfc3986\Uri) {
+        var_dump($uri->getRawScheme());
+    }
     var_dump($uri->getUser());
     var_dump($uri->getRawUser());
     var_dump($uri->getPassword());
@@ -47,14 +49,13 @@ string(8) "password"
 string(14) "www.google.com"
 string(14) "www.google.com"
 int(8080)
-string(29) "pathname1/pathname2/pathname3"
-string(29) "pathname1/pathname2/pathname3"
+string(30) "/pathname1/pathname2/pathname3"
+string(30) "/pathname1/pathname2/pathname3"
 string(10) "query=true"
 string(10) "query=true"
 string(11) "hash-exists"
 string(11) "hash-exists"
 
-string(5) "https"
 string(5) "https"
 string(8) "username"
 string(8) "username"
@@ -63,8 +64,8 @@ string(8) "password"
 string(14) "www.google.com"
 string(14) "www.google.com"
 int(8080)
-string(29) "pathname1/pathname2/pathname3"
-string(29) "pathname1/pathname2/pathname3"
+string(30) "/pathname1/pathname2/pathname3"
+string(30) "/pathname1/pathname2/pathname3"
 string(10) "query=true"
 string(10) "query=true"
 string(11) "hash-exists"

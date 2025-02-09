@@ -107,7 +107,7 @@ object(MyWhatWgUri)#3 (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(1) "/"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -127,7 +127,7 @@ object(MyWhatWgUri)#4 (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(1) "/"
   ["query"]=>
   NULL
   ["fragment"]=>

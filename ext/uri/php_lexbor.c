@@ -70,8 +70,8 @@ const uri_handler_t lexbor_uri_handler = {
 		case URI_COMPONENT_READ_RAW: \
 			ZVAL_STRINGL(retval, (const char *) start, len); \
 			break; \
-		case URI_COMPONENT_READ_NORMALIZED_HUMAN_FRIENDLY: /* Intentional fallthrough */ \
-		case URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY: { \
+		case URI_COMPONENT_READ_NORMALIZED_FOR_DISPLAY: /* Intentional fallthrough */ \
+		case URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING: { \
 			lexbor_str_t *str = lexbor_str_create(); \
 			lxb_url_host_opt_t opt; \
 			lxb_status_t result = lxb_url_percent_decode(start, start + len, \
@@ -254,7 +254,9 @@ static lxb_status_t lexbor_serialize_callback(const lxb_char_t *data, size_t len
 {
 	smart_str *uri_str = (smart_str *) ctx;
 
-	smart_str_appendl(uri_str, (const char *) data, length);
+	if (data != NULL && length > 0) {
+		smart_str_appendl(uri_str, (const char *) data, length);
+	}
 
 	return LXB_STATUS_OK;
 }
@@ -264,7 +266,8 @@ static zend_result lexbor_read_scheme(const uri_internal_t *internal_uri, uri_co
 	lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
 	ZEND_ASSERT(lexbor_uri->scheme.type != LXB_URL_SCHEMEL_TYPE__UNDEF);
-	LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->scheme.name.data, lexbor_uri->scheme.name.length, read_mode, retval);
+
+	ZVAL_STRINGL(retval, (const char *) lexbor_uri->scheme.name.data, lexbor_uri->scheme.name.length);
 
 	return SUCCESS;
 }
@@ -354,7 +357,7 @@ static zend_result lexbor_read_host(const uri_internal_t *internal_uri, uri_comp
 	} else if (lexbor_uri->host.type != LXB_URL_HOST_TYPE_EMPTY && lexbor_uri->host.type != LXB_URL_HOST_TYPE__UNDEF) {
 
 		switch (read_mode) {
-			case URI_COMPONENT_READ_NORMALIZED_HUMAN_FRIENDLY: {
+			case URI_COMPONENT_READ_NORMALIZED_FOR_DISPLAY: {
 				smart_str host_str = {0};
 				if (lexbor_parser->idna == NULL) {
 					lexbor_parser->idna = lxb_unicode_idna_create();
@@ -369,7 +372,7 @@ static zend_result lexbor_read_host(const uri_internal_t *internal_uri, uri_comp
 				ZVAL_STR(retval, smart_str_extract(&host_str));
 				break;
 			}
-			case URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY: /* Intentional fallthrough */
+			case URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING: /* Intentional fallthrough */
 			case URI_COMPONENT_READ_RAW:
 				ZVAL_STRINGL(retval, (const char *) lexbor_uri->host.u.domain.data, lexbor_uri->host.u.domain.length);
 				break;
@@ -425,8 +428,8 @@ static zend_result lexbor_read_path(const uri_internal_t *internal_uri, uri_comp
 
 	if (lexbor_uri->path.opaque) {
 		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
-	} else if (lexbor_uri->path.str.length > 1) {
-		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->path.str.data + 1, lexbor_uri->path.str.length - 1, read_mode, retval);
+	} else if (lexbor_uri->path.str.length) {
+		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -561,8 +564,8 @@ static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t rec
 	smart_str uri_str = {0};
 
 	switch (recomposition_mode) {
-		case URI_RECOMPOSITION_HUMAN_FRIENDLY: /* Intentional fallthrough */
-		case URI_RECOMPOSITION_NORMALIZED_HUMAN_FRIENDLY:
+		case URI_RECOMPOSITION_FOR_DISPLAY: /* Intentional fallthrough */
+		case URI_RECOMPOSITION_NORMALIZED_FOR_DISPLAY:
 			if (lexbor_parser->idna == NULL) {
 				lexbor_parser->idna = lxb_unicode_idna_create();
 				lxb_status_t status = lxb_unicode_idna_init(lexbor_parser->idna);
@@ -573,8 +576,8 @@ static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t rec
 			lxb_url_serialize_unicode(lexbor_parser->idna, lexbor_uri, lexbor_serialize_callback, (void *) &uri_str, exclude_fragment);
 			lxb_unicode_idna_clean(lexbor_parser->idna);
 			break;
-		case URI_RECOMPOSITION_MACHINE_FRIENDLY: /* Intentional fallthrough */
-		case URI_RECOMPOSITION_NORMALIZED_MACHINE_FRIENDLY:
+		case URI_RECOMPOSITION_FOR_MACHINE_PROCESSING: /* Intentional fallthrough */
+		case URI_RECOMPOSITION_NORMALIZED_FOR_MACHINE_PROCESSING:
 			lxb_url_serialize(lexbor_uri, lexbor_serialize_callback, (void *) &uri_str, exclude_fragment);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
