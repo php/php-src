@@ -10,13 +10,13 @@ function _test(int $a): int {
 try {
     assert((5 |> '_test') == 99);
 } catch (AssertionError $e) {
-    print $e->getMessage() . PHP_EOL;
+    echo $e->getMessage(), PHP_EOL;
 }
 
 try {
     assert((5 |> _test(...)) == 99);
 } catch (AssertionError $e) {
-    print $e->getMessage() . PHP_EOL;
+    echo $e->getMessage(), PHP_EOL;
 }
 
 ?>

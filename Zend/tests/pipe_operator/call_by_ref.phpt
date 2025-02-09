@@ -18,7 +18,7 @@ try {
     $res1 = $a |> _modify(...);
     var_dump($res1);
 } catch (\Error $e) {
-  print $e->getMessage() . PHP_EOL;
+  echo $e->getMessage(), PHP_EOL;
 }
 
 // Complex variables.
@@ -27,7 +27,7 @@ try {
     $res2 = $a |> _append(...);
     var_dump($res2);
 } catch (\Error $e) {
-  print $e->getMessage() . PHP_EOL;
+  echo $e->getMessage(), PHP_EOL;
 }
 
 
