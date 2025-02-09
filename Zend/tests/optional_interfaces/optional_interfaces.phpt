@@ -31,8 +31,8 @@ $classes = [
 
 foreach ($classes as $class) {
     echo "$class\n";
-    echo '    class implements '.implode(', ', class_implements($class))."\n";
-    echo '    object implements '.implode(', ', class_implements(new $class))."\n";
+    echo '    class implements:'.implode(', ', class_implements($class))."\n";
+    echo '    object implements:'.implode(', ', class_implements(new $class))."\n";
 }
 
 $interfaces = [
@@ -42,36 +42,36 @@ $interfaces = [
 
 foreach ($interfaces as $interface) {
     echo "$interface\n";
-    echo '    interface extends '.implode(', ', class_implements($class))."\n";
+    echo '    interface extends:'.implode(', ', class_implements($class))."\n";
 }
 
 ?>
 --EXPECT--
 ImplementingOptionalInterface
-    class implements ExistingInterface
-    object implements ExistingInterface
+    class implements:ExistingInterface
+    object implements:ExistingInterface
 SkippingOptionalInterface
-    class implements
-    object implements
+    class implements:
+    object implements:
 MultipleOptionalsExistingFirst
-    class implements ExistingInterface
-    object implements ExistingInterface
+    class implements:ExistingInterface
+    object implements:ExistingInterface
 MultipleOptionalsExistingLast
-    class implements ExistingInterface
-    object implements ExistingInterface
+    class implements:ExistingInterface
+    object implements:ExistingInterface
 MixedOptionalFirst
-    class implements ExistingInterface
-    object implements ExistingInterface
+    class implements:ExistingInterface
+    object implements:ExistingInterface
 MixedOptionalLast
-    class implements ExistingInterface
-    object implements ExistingInterface
+    class implements:ExistingInterface
+    object implements:ExistingInterface
 ImplementsInheritedExisting
-    class implements ExtendingExistingOptional, ExistingInterface
-    object implements ExtendingExistingOptional, ExistingInterface
+    class implements:ExtendingExistingOptional, ExistingInterface
+    object implements:ExtendingExistingOptional, ExistingInterface
 ImplementsInheritedSkipped
-    class implements ExtendingNonexistantOptional
-    object implements ExtendingNonexistantOptional
+    class implements:ExtendingNonexistantOptional
+    object implements:ExtendingNonexistantOptional
 ExtendingExistingOptional
-    interface extends ExtendingNonexistantOptional
+    interface extends:ExtendingNonexistantOptional
 ExtendingNonexistantOptional
-    interface extends ExtendingNonexistantOptional
+    interface extends:ExtendingNonexistantOptional
