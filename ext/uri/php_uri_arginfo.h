@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5b7d7b8be03ccdd4479ec8636f21617ae4f6fff6 */
+ * Stub hash: f6a093fa76d7a18752cd6cca991f3fb895ec0073 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -118,8 +118,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_getScheme arginfo_class_Uri_Rfc3986_Uri_toNormalizedString
 
-#define arginfo_class_Uri_WhatWg_Url_getRawScheme arginfo_class_Uri_Rfc3986_Uri_toNormalizedString
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withScheme, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, encodedScheme, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -226,7 +224,6 @@ ZEND_METHOD(Uri_WhatWg_WhatWgError, __construct);
 ZEND_METHOD(Uri_WhatWg_Url, parse);
 ZEND_METHOD(Uri_WhatWg_Url, __construct);
 ZEND_METHOD(Uri_WhatWg_Url, getScheme);
-ZEND_METHOD(Uri_WhatWg_Url, getRawScheme);
 ZEND_METHOD(Uri_WhatWg_Url, withScheme);
 ZEND_METHOD(Uri_WhatWg_Url, withUser);
 ZEND_METHOD(Uri_WhatWg_Url, withPassword);
@@ -285,7 +282,6 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_ME(Uri_WhatWg_Url, parse, arginfo_class_Uri_WhatWg_Url_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_WhatWg_Url, __construct, arginfo_class_Uri_WhatWg_Url___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, getScheme, arginfo_class_Uri_WhatWg_Url_getScheme, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_WhatWg_Url, getRawScheme, arginfo_class_Uri_WhatWg_Url_getRawScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, withScheme, arginfo_class_Uri_WhatWg_Url_withScheme, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("getUser", zim_Uri_Rfc3986_Uri_getUser, arginfo_class_Uri_WhatWg_Url_getUser, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getRawUser", zim_Uri_Rfc3986_Uri_getRawUser, arginfo_class_Uri_WhatWg_Url_getRawUser, ZEND_ACC_PUBLIC, NULL, NULL)

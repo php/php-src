@@ -26,7 +26,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(13) "path/to/file2"
+  string(14) "/path/to/file2"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -46,7 +46,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(13) "path/to/file2"
+  string(14) "/path/to/file2"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -64,7 +64,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(13) "path/to/file1"
+  string(14) "/path/to/file1"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -82,7 +82,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(13) "path/to/file1"
+  string(14) "/path/to/file1"
   ["query"]=>
   NULL
   ["fragment"]=>

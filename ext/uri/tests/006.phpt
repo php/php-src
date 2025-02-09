@@ -27,7 +27,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   int(8080)
   ["path"]=>
-  string(4) "path"
+  string(5) "/path"
   ["query"]=>
   string(3) "q=r"
   ["fragment"]=>
@@ -45,7 +45,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   int(8080)
   ["path"]=>
-  string(4) "path"
+  string(5) "/path"
   ["query"]=>
   string(3) "q=r"
   ["fragment"]=>

@@ -152,8 +152,6 @@ namespace Uri\WhatWg {
 
         public function getScheme(): string {}
 
-        public function getRawScheme(): string {}
-
         public function withScheme(string $encodedScheme): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getUser */

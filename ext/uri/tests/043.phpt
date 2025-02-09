@@ -42,7 +42,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(12) "without-base"
+  string(13) "/without-base"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -62,7 +62,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(9) "with-base"
+  string(10) "/with-base"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -82,7 +82,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(17) "with-base-in-vain"
+  string(18) "/with-base-in-vain"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -102,7 +102,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(17) "with-base-in-vain"
+  string(18) "/with-base-in-vain"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -121,7 +121,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(13) "without-base/"
+  string(14) "/without-base/"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -139,7 +139,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(9) "with-base"
+  string(10) "/with-base"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -157,7 +157,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(17) "with-base-in-vain"
+  string(18) "/with-base-in-vain"
   ["query"]=>
   NULL
   ["fragment"]=>

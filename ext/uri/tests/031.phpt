@@ -36,7 +36,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   int(8080)
   ["path"]=>
-  string(29) "pathname1/pathname2/pathname3"
+  string(30) "/pathname1/pathname2/pathname3"
   ["query"]=>
   string(10) "query=true"
   ["fragment"]=>
@@ -55,7 +55,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   int(8080)
   ["path"]=>
-  string(29) "pathname1/pathname2/pathname3"
+  string(30) "/pathname1/pathname2/pathname3"
   ["query"]=>
   string(10) "query=true"
   ["fragment"]=>

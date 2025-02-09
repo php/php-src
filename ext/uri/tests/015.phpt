@@ -20,7 +20,9 @@ function callMembers($uri)
     handleException($uri, function ($uri) {var_dump($uri);});
     handleException($uri, function ($uri) {var_export($uri); echo "\n";});
     handleException($uri, function ($uri) {$uri->getScheme();});
-    handleException($uri, function ($uri) {$uri->getRawScheme();});
+    if ($uri instanceof Uri\Rfc3986\Uri) {
+        handleException($uri, function ($uri) {$uri->getRawScheme();});
+    }
     handleException($uri, function ($uri) {$uri->getUser();});
     handleException($uri, function ($uri) {$uri->getRawUser();});
     handleException($uri, function ($uri) {$uri->getPassword();});
@@ -83,7 +85,6 @@ object(Uri\WhatWg\Url)#%d (%d) {
 }
 \Uri\WhatWg\Url::__set_state(array(
 ))
-Uri\WhatWg\Url object is not correctly initialized
 Uri\WhatWg\Url object is not correctly initialized
 Uri\WhatWg\Url object is not correctly initialized
 Uri\WhatWg\Url object is not correctly initialized

@@ -20,7 +20,7 @@ var_export($url);
    'password' => 'password',
    'host' => 'www.google.com',
    'port' => 8080,
-   'path' => 'pathname1/pathname2/pathname3',
+   'path' => '/pathname1/pathname2/pathname3',
    'query' => 'query=true',
    'fragment' => 'hash-exists',
 ))\Uri\WhatWg\Url::__set_state(array(
@@ -29,7 +29,7 @@ var_export($url);
    'password' => 'password',
    'host' => 'www.google.com',
    'port' => 8080,
-   'path' => 'pathname1/pathname2/pathname3',
+   'path' => '/pathname1/pathname2/pathname3',
    'query' => 'query=true',
    'fragment' => 'hash-exists',
 ))

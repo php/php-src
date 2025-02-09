@@ -51,7 +51,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(12) "%F0%9F%90%98"
+  string(13) "/%F0%9F%90%98"
   ["query"]=>
   string(25) "%F0%9F%90%98=%F0%9F%90%98"
   ["fragment"]=>
