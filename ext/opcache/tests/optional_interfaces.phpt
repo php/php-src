@@ -5,6 +5,8 @@ opcache.enable_cli=1
 opcache.enable=1
 --EXTENSIONS--
 opcache
+--CONFLICTS--
+server
 --FILE--
 <?php
 
