@@ -52,7 +52,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(1) "/"
   ["query"]=>
   string(25) "foo=Hell%C3%B3+W%C3%B6rld"
   ["fragment"]=>
@@ -70,7 +70,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(1) "/"
   ["query"]=>
   string(27) "foo=Hell%C3%B3%20W%C3%B6rld"
   ["fragment"]=>
@@ -109,7 +109,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(1) "/"
   ["query"]=>
   string(30) "foobar=%27%3Cscript%3E+%2B+%40"
   ["fragment"]=>
@@ -127,7 +127,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(1) "/"
   ["query"]=>
   string(30) "foobar=%27%3Cscript%3E%20+%20@"
   ["fragment"]=>
