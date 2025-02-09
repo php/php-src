@@ -1400,7 +1400,7 @@ PHP_FUNCTION(socket_bind)
 				struct sockaddr_ll *sa = (struct sockaddr_ll *) sock_type;
 				socklen_t sa_len = sizeof(sa);
 
-				if (getsockname(php_sock->bsd_socket, sock_type, &sa_len) < 0) {
+				if (getsockname(php_sock->bsd_socket, (struct sockaddr *)sa, &sa_len) < 0) {
 					zend_value_error("invalid AF_PACKET socket");
 					RETURN_THROWS();
 				}
@@ -1547,8 +1547,8 @@ PHP_FUNCTION(socket_recvfrom)
 #ifdef AF_PACKET
 	// ethernet header + payload
 	// possibly follow-up PR SOCK_DGRAM
-	if (php_sock->type == AF_PACKET && arg3 < 1514) {
-		zend_argument_value_error(3, "must be at least 1514 for AF_PACKET");
+	if (php_sock->type == AF_PACKET && arg3 < 60) {
+		zend_argument_value_error(3, "must be at least 60 for AF_PACKET");
 		RETURN_THROWS();
 	}
 #endif
@@ -1718,10 +1718,12 @@ PHP_FUNCTION(socket_recvfrom)
 					RETURN_THROWS();
 			}
 
+			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("socket"), arg1);
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
 			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethprotocol"), protocol);
 			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
+			// TODO fix leaks
 
 			ZEND_TRY_ASSIGN_REF_COPY(arg2, &obj);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);

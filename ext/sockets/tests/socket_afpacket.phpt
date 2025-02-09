@@ -15,7 +15,7 @@ if (!function_exists("posix_getuid") || posix_getuid() != 0) {
 ?>
 --FILE--
 <?php
-    $s_c     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_IP);
+    $s_c     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
     $s_bind  = socket_bind($s_c, 'lo');
     var_dump($s_bind);
 
@@ -27,16 +27,17 @@ if (!function_exists("posix_getuid") || posix_getuid() != 0) {
 
     socket_getpeername($s_c, $istr2, $iindex2);
 
-    $s_s     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
+    $s_s     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_LOOP);
     $v_bind  = socket_bind($s_s, 'lo');
 
-    $buf = str_repeat("0", ETH_FRAME_LEN) .
-	   str_repeat("\xFF", 6) .
-	   str_repeat("\x11", 6) .
-	   "\x08\x00" .
-	   str_pad("TEST", 46, "\x00");
+    $buf = pack("H12H12n", "ffffffffffff", "000000000000", ETH_P_LOOP);
+    $buf .= str_repeat("A", 46);
 
     var_dump(socket_sendto($s_s, $buf, strlen($buf), 0, "lo", 1));
+    var_dump(socket_recvfrom($s_c, $rsp, strlen($buf), 0, $addr));
+
+    var_dump($addr);
+    var_dump($rsp);
 
     socket_close($s_c);
 ?>
@@ -47,4 +48,24 @@ string(2) "lo"
 int(%i)
 
 Warning: socket_getpeername(): unable to retrieve peer name [95]: %sot supported in %s on line %d
-int(1574)
+int(60)
+int(60)
+string(2) "lo"
+object(SocketEthernetInfo)#3 (4) {
+  ["socket"]=>
+  object(Socket)#1 (0) {
+  }
+  ["ethprotocol"]=>
+  int(%i)
+  ["macsrc"]=>
+  string(11) "0:0:0:0:0:0"
+  ["macdst"]=>
+  string(%d) "%s:%s:%s:%s:%s:%s"
+  ["payload"]=>
+  array(2) {
+    ["ipsrc"]=>
+    string(%d) "%d.%d.%d.%d"
+    ["ipdst"]=>
+    string(%d) "%d.%d.%d.%d"
+  }
+}
