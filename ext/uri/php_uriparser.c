@@ -136,7 +136,7 @@ static zend_result uriparser_normalize_uri(UriUriA *uriparser_uri)
 #define URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode) do { \
 	if (read_mode == URI_COMPONENT_READ_RAW) { \
         uriparser_uri = (UriUriA *) uriparser_uris->uri; \
-    } else if (read_mode == URI_COMPONENT_READ_NORMALIZED_HUMAN_FRIENDLY || read_mode == URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY) { \
+    } else if (read_mode == URI_COMPONENT_READ_NORMALIZED_FOR_DISPLAY || read_mode == URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING) { \
         if (uriparser_uris->normalized_uri == NULL) { \
 			uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri); \
 			if (uriparser_normalize_uri(uriparser_uris->normalized_uri) == FAILURE) { \
@@ -260,6 +260,10 @@ static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_c
 		const UriPathSegmentA *p;
 		smart_str str = {0};
 
+		if (uriparser_uri->absolutePath || uriIsHostSetA(uriparser_uri)) {
+			smart_str_appends(&str, "/");
+		}
+
 		smart_str_appendl(&str, uriparser_uri->pathHead->text.first, (int) ((uriparser_uri->pathHead->text).afterLast - (uriparser_uri->pathHead->text).first));
 
 		for (p = uriparser_uri->pathHead->next; p != NULL; p = p->next) {
@@ -355,14 +359,7 @@ static void uriparser_append_port(const uri_internal_t *internal_uri, smart_str 
 
 static void uriparser_append_path(const uri_internal_t *internal_uri, smart_str *uri_str)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri = uriparser_uris->uri;
-
 	zval tmp;
-
-	if (uriparser_uri->absolutePath || (uriparser_uri->pathHead != NULL && uriIsHostSetA(uriparser_uri))) {
-		smart_str_appends(uri_str, "/");
-	}
 
 	uriparser_read_path(internal_uri, URI_COMPONENT_READ_RAW, &tmp);
 	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
@@ -679,7 +676,7 @@ static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t 
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) uri;
 	UriUriA *uriparser_uri = uriparser_uris->uri;
 
-	if ((recomposition_mode == URI_RECOMPOSITION_NORMALIZED_HUMAN_FRIENDLY || recomposition_mode == URI_RECOMPOSITION_NORMALIZED_MACHINE_FRIENDLY) &&
+	if ((recomposition_mode == URI_RECOMPOSITION_NORMALIZED_FOR_DISPLAY || recomposition_mode == URI_RECOMPOSITION_NORMALIZED_FOR_MACHINE_PROCESSING) &&
 		uriparser_uris->normalized_uri == NULL
 	) {
 		uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri);

@@ -450,7 +450,7 @@ PHP_METHOD(Uri_WhatWg_Url, __construct)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getScheme)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_SCHEME), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_SCHEME), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawScheme)
@@ -465,7 +465,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withScheme)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getUserInfo)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USERINFO), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USERINFO), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawUserInfo)
@@ -480,7 +480,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getUser)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USER), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USER), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawUser)
@@ -490,7 +490,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, getRawUser)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getPassword)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PASSWORD), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PASSWORD), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawPassword)
@@ -500,7 +500,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, getRawPassword)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getHost)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawHost)
@@ -515,7 +515,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withHost)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getPort)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PORT), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PORT), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withPort)
@@ -525,7 +525,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withPort)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getPath)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PATH), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_PATH), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawPath)
@@ -540,7 +540,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withPath)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getQuery)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_QUERY), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_QUERY), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawQuery)
@@ -555,7 +555,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withQuery)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getFragment)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_FRAGMENT), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_FRAGMENT), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawFragment)
@@ -585,9 +585,9 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, b
 	}
 
 	zend_string *this_str = this_internal_uri->handler->uri_to_string(
-		this_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_MACHINE_FRIENDLY, exclude_fragment);
+			this_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_FOR_MACHINE_PROCESSING, exclude_fragment);
 	zend_string *that_str = that_internal_uri->handler->uri_to_string(
-		that_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_MACHINE_FRIENDLY, exclude_fragment);
+			that_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_FOR_MACHINE_PROCESSING, exclude_fragment);
 
 	RETVAL_BOOL(zend_string_equals(this_str, that_str));
 
@@ -617,7 +617,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
 
-	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_MACHINE_FRIENDLY, false));
+	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_FOR_MACHINE_PROCESSING, false));
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, toNormalizedString)
@@ -628,7 +628,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toNormalizedString)
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, object);
 
-	RETVAL_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_MACHINE_FRIENDLY, false));
+	RETVAL_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_FOR_MACHINE_PROCESSING, false));
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, resolve)
@@ -644,7 +644,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, resolve)
 	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
 
 	zend_string *base_uri_str = internal_uri->handler->uri_to_string(
-		internal_uri->uri, URI_RECOMPOSITION_MACHINE_FRIENDLY, false); // TODO optimize by not reparsing the base URI
+			internal_uri->uri, URI_RECOMPOSITION_FOR_MACHINE_PROCESSING, false); // TODO optimize by not reparsing the base URI
 
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, base_uri_str, true, NULL);
 }
@@ -665,7 +665,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 	}
 
 	zval uri_zv;
-	ZVAL_STR(&uri_zv, internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_MACHINE_FRIENDLY, false));
+	ZVAL_STR(&uri_zv, internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_FOR_MACHINE_PROCESSING, false));
 	zend_hash_str_add_new(result, URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1, &uri_zv);
 
 	ZVAL_ARR(return_value, result);
@@ -747,12 +747,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __debugInfo)
 
 PHP_METHOD(Uri_WhatWg_Url, getScheme)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_SCHEME), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
-}
-
-PHP_METHOD(Uri_WhatWg_Url, getRawScheme)
-{
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_SCHEME), URI_COMPONENT_READ_RAW);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_SCHEME), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, withScheme)
@@ -772,12 +767,12 @@ PHP_METHOD(Uri_WhatWg_Url, withPassword)
 
 PHP_METHOD(Uri_WhatWg_Url, getHost)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST), URI_COMPONENT_READ_NORMALIZED_MACHINE_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, getHostForDisplay)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST), URI_COMPONENT_READ_NORMALIZED_HUMAN_FRIENDLY);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_HOST), URI_COMPONENT_READ_NORMALIZED_FOR_DISPLAY);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, withHost)
@@ -819,7 +814,7 @@ PHP_METHOD(Uri_WhatWg_Url, toDisplayString)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
 
-	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_HUMAN_FRIENDLY, false));
+	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_FOR_DISPLAY, false));
 }
 
 PHP_METHOD(Uri_WhatWg_Url, toString)
@@ -830,7 +825,7 @@ PHP_METHOD(Uri_WhatWg_Url, toString)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
 
-	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_MACHINE_FRIENDLY, false));
+	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_FOR_MACHINE_PROCESSING, false));
 }
 
 PHP_METHOD(Uri_WhatWg_Url, __unserialize)

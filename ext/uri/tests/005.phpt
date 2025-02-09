@@ -29,7 +29,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   int(9090)
   ["path"]=>
-  string(4) "path"
+  string(5) "/path"
   ["query"]=>
   string(14) "arg=va%C3%A9ue"
   ["fragment"]=>

@@ -65,7 +65,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(29) "E:/Documents%20and%20Settings"
+  string(30) "/E:/Documents%20and%20Settings"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -83,7 +83,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(29) "E:/Documents%20and%20Settings"
+  string(30) "/E:/Documents%20and%20Settings"
   ["query"]=>
   NULL
   ["fragment"]=>

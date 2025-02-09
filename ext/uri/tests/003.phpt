@@ -26,7 +26,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   int(9090)
   ["path"]=>
-  string(4) "path"
+  string(5) "/path"
   ["query"]=>
   string(14) "arg=va%C3%A9ue"
   ["fragment"]=>
@@ -46,7 +46,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(6) "page:1"
+  string(7) "/page:1"
   ["query"]=>
   NULL
   ["fragment"]=>
