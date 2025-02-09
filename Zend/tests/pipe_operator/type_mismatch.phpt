@@ -12,9 +12,9 @@ try {
     var_dump($res1);
 }
 catch (Throwable $e) {
-    printf("Expected %s thrown, got %s", TypeError::class, get_class($e));
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
---EXPECT--
-Expected TypeError thrown, got TypeError
+--EXPECTF--
+TypeError: _test(): Argument #1 ($a) must be of type int, string given, called in %s on line %d

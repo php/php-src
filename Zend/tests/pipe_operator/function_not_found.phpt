@@ -7,9 +7,9 @@ try {
     $res1 = 5 |> '_test';
 }
 catch (Throwable $e) {
-    printf("Expected %s thrown, got %s", Error::class, get_class($e));
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Expected Error thrown, got Error
+Error: Call to undefined function _test()

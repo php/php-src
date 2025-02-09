@@ -12,10 +12,10 @@ try {
     $res1 = 5 |> '_test';
 }
 catch (Throwable $e) {
-    printf("Expected %s thrown, got %s", ArgumentCountError::class, get_class($e));
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 
 ?>
---EXPECT--
-Expected ArgumentCountError thrown, got ArgumentCountError
+--EXPECTF--
+ArgumentCountError: Too few arguments to function %s, 1 passed in %s on line %s and exactly 2 expected

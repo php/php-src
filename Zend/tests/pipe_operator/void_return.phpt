@@ -13,9 +13,9 @@ try {
     var_dump($result);
 }
 catch (Throwable $e) {
-    printf("Expected %s thrown, got %s", TypeError::class, get_class($e));
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Expected TypeError thrown, got TypeError
+TypeError: strlen(): Argument #1 ($string) must be of type string, null given
