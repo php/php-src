@@ -2163,10 +2163,6 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 	php_sqlite3_func *func;
 	php_sqlite3_collation *collation;
 
-	if (!intern) {
-		return;
-	}
-
 	/* Release function_name from authorizer */
 	if (ZEND_FCC_INITIALIZED(intern->authorizer_fcc)) {
 		zend_fcc_dtor(&intern->authorizer_fcc);
@@ -2262,10 +2258,6 @@ static void php_sqlite3_stmt_object_free_storage(zend_object *object) /* {{{ */
 {
 	php_sqlite3_stmt *intern = php_sqlite3_stmt_from_obj(object);
 
-	if (!intern) {
-		return;
-	}
-
 	if (intern->bound_params) {
 		zend_hash_destroy(intern->bound_params);
 		FREE_HASHTABLE(intern->bound_params);
@@ -2288,10 +2280,6 @@ static void php_sqlite3_stmt_object_free_storage(zend_object *object) /* {{{ */
 static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ */
 {
 	php_sqlite3_result *intern = php_sqlite3_result_from_obj(object);
-
-	if (!intern) {
-		return;
-	}
 
 	sqlite3result_clear_column_names_cache(intern);
 
