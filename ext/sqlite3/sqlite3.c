@@ -161,7 +161,7 @@ PHP_METHOD(SQLite3, open)
 	}
 #endif
 
-	db_obj->initialised = 1;
+	db_obj->initialised = true;
 	db_obj->authorizer_fcc = empty_fcall_info_cache;
 
 	sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, db_obj);
@@ -199,7 +199,7 @@ PHP_METHOD(SQLite3, close)
 				RETURN_FALSE;
 			}
 		}
-		db_obj->initialised = 0;
+		db_obj->initialised = false;
 	}
 
 	RETURN_TRUE;
@@ -534,7 +534,7 @@ PHP_METHOD(SQLite3, prepare)
 		RETURN_FALSE;
 	}
 
-	stmt_obj->initialised = 1;
+	stmt_obj->initialised = true;
 
 	zend_llist_add_element(&(db_obj->free_list), &stmt_obj);
 }
@@ -586,7 +586,7 @@ PHP_METHOD(SQLite3, query)
 		RETURN_FALSE;
 	}
 
-	stmt_obj->initialised = 1;
+	stmt_obj->initialised = true;
 
 	object_init_ex(return_value, php_sqlite3_result_entry);
 	result = Z_SQLITE3_RESULT_P(return_value);
@@ -610,7 +610,7 @@ PHP_METHOD(SQLite3, query)
 				php_sqlite3_error(db_obj, sqlite3_errcode(db_obj->db), "Unable to execute statement: %s", sqlite3_errmsg(db_obj->db));
 			}
 			sqlite3_finalize(stmt_obj->stmt);
-			stmt_obj->initialised = 0;
+			stmt_obj->initialised = false;
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 	}
@@ -1839,7 +1839,7 @@ PHP_METHOD(SQLite3Stmt, __construct)
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
-	stmt_obj->initialised = 1;
+	stmt_obj->initialised = true;
 
 	zend_llist_add_element(&(db_obj->free_list), &stmt_obj);
 }
@@ -2139,7 +2139,7 @@ static void php_sqlite3_free_list_dtor(void **item)
 
 	if (stmt_obj && stmt_obj->initialised) {
 		sqlite3_finalize(stmt_obj->stmt);
-		stmt_obj->initialised = 0;
+		stmt_obj->initialised = false;
 	}
 }
 /* }}} */
@@ -2197,7 +2197,7 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 
 	if (intern->initialised && intern->db) {
 		sqlite3_close(intern->db);
-		intern->initialised = 0;
+		intern->initialised = false;
 	}
 
 	zend_object_std_dtor(&intern->zo);
