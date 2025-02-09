@@ -95,6 +95,21 @@ static int php_gziop_flush(php_stream *stream)
 	return gzflush(self->gz_file, Z_SYNC_FLUSH);
 }
 
+static int php_gziop_set_option(php_stream *stream, int option, int value, void *ptrparam)
+{
+	struct php_gz_stream_data_t *self = stream->abstract;
+
+	switch (option) {
+		case PHP_STREAM_OPTION_LOCKING:
+		case PHP_STREAM_OPTION_META_DATA_API:
+			return self->stream->ops->set_option(self->stream, option, value, ptrparam);
+		default:
+			break;
+	}
+
+	return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+}
+
 const php_stream_ops php_stream_gzio_ops = {
 	php_gziop_write, php_gziop_read,
 	php_gziop_close, php_gziop_flush,
@@ -102,7 +117,7 @@ const php_stream_ops php_stream_gzio_ops = {
 	php_gziop_seek,
 	NULL, /* cast */
 	NULL, /* stat */
-	NULL  /* set_option */
+	php_gziop_set_option  /* set_option */
 };
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
