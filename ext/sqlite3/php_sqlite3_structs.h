@@ -94,7 +94,7 @@ struct _php_sqlite3_result_object  {
 	php_sqlite3_db_object *db_obj;
 	php_sqlite3_stmt *stmt_obj;
 
-	int is_prepared_statement;
+	bool is_prepared_statement;
 	/* Cache of column names to speed up repeated fetchArray(SQLITE3_ASSOC) calls.
 	 * Cache is cleared on reset() and finalize() calls. */
 	int column_count;
