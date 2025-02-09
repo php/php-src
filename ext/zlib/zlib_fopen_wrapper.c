@@ -30,6 +30,18 @@ struct php_gz_stream_data_t	{
 	php_stream *stream;
 };
 
+static void php_gziop_report_errors(php_stream *stream, size_t count, const char *verb)
+{
+	if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
+		struct php_gz_stream_data_t *self = stream->abstract;
+		int error = 0;
+		gzerror(self->gz_file, &error);
+		if (error == Z_ERRNO) {
+			php_error_docref(NULL, E_NOTICE, "%s of %zu bytes failed with errno=%d %s", verb, count, errno, strerror(errno));
+		}
+	}
+}
+
 static ssize_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
@@ -37,6 +49,11 @@ static ssize_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 
 	/* XXX this needs to be looped for the case count > UINT_MAX */
 	read = gzread(self->gz_file, buf, count);
+
+	/* Notify user of error, like the standard file wrapper normally does (e.g. errno=13 on mandatory lock failure). */
+	if (UNEXPECTED(read < 0)) {
+		php_gziop_report_errors(stream, count, "Read");
+	}
 
 	if (gzeof(self->gz_file)) {
 		stream->eof = 1;
@@ -50,7 +67,14 @@ static ssize_t php_gziop_write(php_stream *stream, const char *buf, size_t count
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 
 	/* XXX this needs to be looped for the case count > UINT_MAX */
-	return gzwrite(self->gz_file, (char *) buf, count);
+	int written = gzwrite(self->gz_file, (char *) buf, count);
+
+	/* Notify user of error, like the standard file wrapper normally does (e.g. errno=13 on mandatory lock failure). */
+	if (UNEXPECTED(written < 0)) {
+		php_gziop_report_errors(stream, count, "Write");
+	}
+
+	return written;
 }
 
 static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs)
