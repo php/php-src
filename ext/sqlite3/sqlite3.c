@@ -833,13 +833,14 @@ static int sqlite3_do_callback(zend_fcall_info_cache *fcc, uint32_t argc, sqlite
 					break;
 
 				default: {
-					zend_string *str = zval_try_get_string(&retval);
+					zend_string *tmp;
+					zend_string *str = zval_try_get_tmp_string(&retval, &tmp);
 					if (UNEXPECTED(!str)) {
 						ret = FAILURE;
 						break;
 					}
 					sqlite3_result_text(context, ZSTR_VAL(str), ZSTR_LEN(str), SQLITE_TRANSIENT);
-					zend_string_release(str);
+					zend_tmp_string_release(tmp);
 					break;
 				}
 			}
@@ -1564,7 +1565,8 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 				}
 
 				case SQLITE3_TEXT: {
-					zend_string *str = zval_try_get_string(parameter);
+					zend_string *tmp;
+					zend_string *str = zval_try_get_tmp_string(parameter, &tmp);
 					if (UNEXPECTED(!str)) {
 						return FAILURE;
 					}
@@ -1572,7 +1574,7 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 					if (return_code != SQLITE_OK) {
 						php_sqlite3_error(stmt_obj->db_obj, return_code, "Unable to bind parameter number " ZEND_LONG_FMT, param->param_number);
 					}
-					zend_string_release(str);
+					zend_tmp_string_release(tmp);
 					break;
 				}
 
@@ -1998,7 +2000,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 static void sqlite3result_clear_column_names_cache(php_sqlite3_result *result) {
 	if (result->column_names) {
 		for (int i = 0; i < result->column_count; i++) {
-			zend_string_release(result->column_names[i]);
+			zend_string_release_ex(result->column_names[i], false);
 		}
 		efree(result->column_names);
 	}
