@@ -62,7 +62,7 @@ typedef struct _php_sqlite3_collation {
 
 /* Structure for SQLite Database object. */
 typedef struct _php_sqlite3_db_object  {
-	int initialised;
+	bool initialised;
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
 	php_sqlite3_collation *collations;
@@ -114,7 +114,7 @@ struct _php_sqlite3_stmt_object  {
 	sqlite3_stmt *stmt;
 	php_sqlite3_db_object *db_obj;
 
-	int initialised;
+	bool initialised;
 
 	/* Keep track of the zvals for bound parameters */
 	HashTable *bound_params;
