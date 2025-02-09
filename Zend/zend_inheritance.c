@@ -2232,14 +2232,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 		}
 	}
 
-	if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
-		for (i = 0; i < ce->num_interfaces; i++) {
-			zend_string_release_ex(ce->interface_names[i].name, 0);
-			zend_string_release_ex(ce->interface_names[i].lc_name, 0);
-		}
-		efree(ce->interface_names);
-	}
-
 	ce->num_interfaces = num_interfaces;
 	ce->interfaces = interfaces;
 	ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
@@ -3597,6 +3589,14 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			Z_CE_P(zv) = ce;
 		}
 
+		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+			for (i = 0; i < ce->num_interfaces; i++) {
+				zend_string_release_ex(ce->interface_names[i].name, 0);
+				zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+			}
+			efree(ce->interface_names);
+		}
+
 		ce->num_interfaces = num_implementable_interfaces;
 
 		if (CG(unlinked_uses)) {
@@ -3642,6 +3642,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		} else if (parent && parent->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent);
 		}
+
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT))
 			&& (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 				) {
