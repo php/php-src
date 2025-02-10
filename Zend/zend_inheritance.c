@@ -571,14 +571,15 @@ static inheritance_status zend_is_class_subtype_of_type(
 		return INHERITANCE_UNRESOLVED;
 	}
 
+	// replacing static with self in final classes is okay
 	if (!is_intersection && fe_scope->ce_flags & ZEND_ACC_FINAL && instanceof_function(fe_scope, proto_scope)) {
 		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 
-		if (!fe_ce || !instanceof_function(fe_ce, fe_scope)) {
-			return INHERITANCE_ERROR;
+		if (fe_ce && instanceof_function(fe_ce, fe_scope)) {
+			return INHERITANCE_SUCCESS;
 		}
 
-		return INHERITANCE_SUCCESS;
+		return INHERITANCE_ERROR;
 	}
 
 	return is_intersection ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
