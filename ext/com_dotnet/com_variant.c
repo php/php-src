@@ -24,6 +24,20 @@
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 
+static bool php_com_is_numerically_indexed_array(const HashTable *arr)
+{
+	if (zend_hash_num_elements(arr) == 0 || HT_IS_PACKED(arr)) {
+		return true;
+	}
+	zend_string *str_key;
+	ZEND_HASH_MAP_FOREACH_STR_KEY(arr, str_key) {
+		if (str_key) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return true;
+}
+
 /* create an automation SafeArray from a PHP array (HashTable).
  * Only creates a single-dimensional array of variants.
  * The keys of the PHP hash MUST be numeric. */
@@ -34,7 +48,7 @@ static void safe_array_from_hashtable(VARIANT *v, HashTable *ht, int codepage)
 	VARIANT *va;
 
 	/* find the largest array index, and assert that all keys are integers */
-	if (!zend_array_is_list(ht)) {
+	if (!php_com_is_numerically_indexed_array(ht)) {
 		// TODO: Make this a ValueError
 		php_error_docref(NULL, E_WARNING, "COM: converting from PHP array to VARIANT array; only arrays with numeric keys are allowed");
 		V_VT(v) = VT_NULL;
@@ -42,17 +56,9 @@ static void safe_array_from_hashtable(VARIANT *v, HashTable *ht, int codepage)
 	}
 	// TODO: Check not empty?
 
-	uint32_t nb_values = zend_hash_num_elements(ht);
-	if (nb_values > UINT_MAX) {
-		// TODO: Make this a ValueError?
-		php_error_docref(NULL, E_WARNING, "COM: max number %u of elements in safe array exceeded", UINT_MAX);
-		V_VT(v) = VT_NULL;
-		return;
-	}
-
 	/* allocate the structure */
 	bound.lLbound = 0;
-	bound.cElements = nb_values;
+	bound.cElements = zend_hash_num_elements(ht);
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
 
 	/* get a lock on the array itself */
