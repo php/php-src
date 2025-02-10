@@ -221,6 +221,7 @@ static void print_extensions(void) /* {{{ */
 #define STDERR_FILENO 2
 #endif
 
+#ifdef PHP_WRITE_STDOUT
 static inline bool sapi_cli_select(php_socket_t fd)
 {
 	fd_set wfd;
@@ -238,6 +239,7 @@ static inline bool sapi_cli_select(php_socket_t fd)
 
 	return ret != -1;
 }
+#endif
 
 PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /* {{{ */
 {
