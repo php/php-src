@@ -10,7 +10,7 @@ if (PHP_OS_FAMILY !== "Windows") die("skip Only for Windows because it has manda
 <?php
 
 echo "without wrapper\n";
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/005.txt.gz";
 $h = gzopen($f,'r');
 $h2 = gzopen($f, 'r');
 stream_set_chunk_size($h2,1);
@@ -23,7 +23,7 @@ gzclose($h);
 gzclose($h2);
 
 echo "\nwith wrapper\n";
-$f = "compress.zlib://".__DIR__."/004.txt.gz";
+$f = "compress.zlib://".__DIR__."/005.txt.gz";
 $h = fopen($f,'r');
 $h2 = fopen($f, 'r');
 stream_set_chunk_size($h2, 1);
