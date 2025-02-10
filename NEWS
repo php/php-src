@@ -1,5 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 8.1.32
+
+- Windows:
+  . Fixed phpize for Windows 11 (24H2). (bwoebi)
+
 21 Nov 2024, PHP 8.1.31
 
 - CLI:
@@ -27,8 +32,6 @@ PHP                                                                        NEWS
     might allow for CRLF injection in URIs). (CVE-2024-11234) (Jakub Zelenka)
   . Fixed bug GHSA-r977-prxv-hc43 (Single byte overread with
     convert.quoted-printable-decode filter). (CVE-2024-11233) (nielsdos)
-
-
 
 26 Sep 2024, PHP 8.1.30
 
