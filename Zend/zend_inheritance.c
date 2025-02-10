@@ -570,6 +570,11 @@ static inheritance_status zend_is_class_subtype_of_type(
 	if (have_unresolved) {
 		return INHERITANCE_UNRESOLVED;
 	}
+
+	if (!is_intersection && fe_scope->ce_flags & ZEND_ACC_FINAL && instanceof_function(fe_scope, proto_scope)) {
+		return INHERITANCE_SUCCESS;
+	}
+
 	return is_intersection ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
@@ -677,13 +682,6 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 	uint32_t fe_type_mask = ZEND_TYPE_PURE_MASK(fe_type);
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
 	uint32_t added_types = fe_type_mask & ~proto_type_mask;
-
-	if (proto_type_mask & MAY_BE_STATIC && fe_type_mask | MAY_BE_STATIC &&
-		fe_scope->ce_flags & ZEND_ACC_FINAL &&
-		instanceof_function(fe_scope, proto_scope)) {
-		/* Replacing type that accepts static with self in final classes is okay */
-		return INHERITANCE_SUCCESS;
-	}
 
 	if (added_types) {
 		if ((added_types & MAY_BE_STATIC)

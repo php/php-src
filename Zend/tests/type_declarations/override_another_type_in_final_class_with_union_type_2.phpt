@@ -17,4 +17,4 @@ $b = new B();
 var_dump($b->methodScalar1());
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::methodScalar1(): array must be compatible with A::methodScalar1(): static|bool in %s on line %d
+Fatal error: Declaration of B::methodScalar1(): B|array must be compatible with A::methodScalar1(): static|bool in %s on line %d
