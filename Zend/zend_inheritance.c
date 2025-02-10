@@ -477,8 +477,10 @@ static inheritance_status zend_is_class_subtype_of_type(
 	zend_class_entry *fe_ce = NULL;
 	bool have_unresolved = 0;
 
+	uint32_t proto_type_full_mask = ZEND_TYPE_FULL_MASK(proto_type);
+
 	/* If the parent has 'object' as a return type, any class satisfies the co-variant check */
-	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_OBJECT) {
+	if (proto_type_full_mask & MAY_BE_OBJECT) {
 		/* Currently, any class name would be allowed here. We still perform a class lookup
 		 * for forward-compatibility reasons, as we may have named types in the future that
 		 * are not classes (such as typedefs). */
@@ -492,7 +494,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 	}
 
 	/* If the parent has 'callable' as a return type, then Closure satisfies the co-variant check */
-	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_CALLABLE) {
+	if (proto_type_full_mask & MAY_BE_CALLABLE) {
 		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 		if (!fe_ce) {
 			have_unresolved = 1;
@@ -573,7 +575,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 
 	// replacing static with self in final classes is okay
 	if (!is_intersection && fe_scope->ce_flags & ZEND_ACC_FINAL &&
-		ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_STATIC && instanceof_function(fe_scope, proto_scope)) {
+		proto_type_full_mask & MAY_BE_STATIC && instanceof_function(fe_scope, proto_scope)) {
 		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 
 		if (fe_ce && instanceof_function(fe_ce, fe_scope)) {
