@@ -11797,7 +11797,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_PIPE:
 			zend_compile_pipe(result, ast);
-		return;
+			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
 	}
