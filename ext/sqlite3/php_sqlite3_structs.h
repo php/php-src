@@ -63,12 +63,12 @@ typedef struct _php_sqlite3_collation {
 /* Structure for SQLite Database object. */
 typedef struct _php_sqlite3_db_object  {
 	bool initialised;
+	bool exception;
+
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
 	php_sqlite3_collation *collations;
 	zend_fcall_info_cache authorizer_fcc;
-
-	bool exception;
 
 	zend_llist free_list;
 	zend_object zo;
