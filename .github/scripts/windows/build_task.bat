@@ -47,4 +47,7 @@ if %errorlevel% neq 0 exit /b 3
 nmake /NOLOGO
 if %errorlevel% neq 0 exit /b 3
 
+nmake run ARGS="-r ""var_dump(getenv('PATH'));"""
+nmake run ARGS="-r ""var_dump(exec('where libcrypto-3-x64.dll'));"""
+
 exit /b 0
