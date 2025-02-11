@@ -1382,9 +1382,9 @@ static zend_string *add_type_string(zend_string *type, zend_string *new_type, bo
 
 static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scope) {
 	if (scope) {
-		if (zend_string_equals_literal_ci(name, "self")) {
+		if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_SELF))) {
 			name = scope->name;
-		} else if (zend_string_equals_literal_ci(name, "parent") && scope->parent) {
+		} else if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT)) && scope->parent) {
 			name = scope->parent->name;
 		}
 	}
@@ -1730,9 +1730,9 @@ static inline bool class_name_refers_to_active_ce(zend_string *class_name, uint3
 
 uint32_t zend_get_class_fetch_type(const zend_string *name) /* {{{ */
 {
-	if (zend_string_equals_literal_ci(name, "self")) {
+	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_SELF))) {
 		return ZEND_FETCH_CLASS_SELF;
-	} else if (zend_string_equals_literal_ci(name, "parent")) {
+	} else if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return ZEND_FETCH_CLASS_PARENT;
 	} else if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 		return ZEND_FETCH_CLASS_STATIC;
