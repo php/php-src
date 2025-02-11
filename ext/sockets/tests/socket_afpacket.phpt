@@ -51,7 +51,7 @@ Warning: socket_getpeername(): unable to retrieve peer name [95]: %sot supported
 int(60)
 int(60)
 string(2) "lo"
-object(SocketEthernetInfo)#3 (4) {
+object(SocketEthernetInfo)#3 (%d) {
   ["socket"]=>
   object(Socket)#1 (0) {
   }
@@ -62,10 +62,7 @@ object(SocketEthernetInfo)#3 (4) {
   ["macdst"]=>
   string(%d) "%s:%s:%s:%s:%s:%s"
   ["payload"]=>
-  array(2) {
-    ["ipsrc"]=>
-    string(%d) "%d.%d.%d.%d"
-    ["ipdst"]=>
-    string(%d) "%d.%d.%d.%d"
+  array(%d) {
+  %a
   }
 }

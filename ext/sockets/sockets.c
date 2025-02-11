@@ -1685,9 +1685,9 @@ PHP_FUNCTION(socket_recvfrom)
 							break;
 						}
 						default:
-					                zend_string_efree(recv_buf);
-					                zval_ptr_dtor(&zpayload);
-					                zval_ptr_dtor(&obj);
+							zend_string_efree(recv_buf);
+							zval_ptr_dtor(&zpayload);
+							zval_ptr_dtor(&obj);
 							zend_value_error("unsupported ip header protocol");
 							RETURN_THROWS();
 					}
@@ -1718,12 +1718,12 @@ PHP_FUNCTION(socket_recvfrom)
 			}
 
 			Z_DELREF(zpayload);
+			zend_string_efree(recv_buf);
 			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("socket"), arg1);
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
 			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethprotocol"), protocol);
 			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-			// TODO fix leaks
 
 			ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
