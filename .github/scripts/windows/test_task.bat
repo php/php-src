@@ -140,7 +140,7 @@ set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
 if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
-curl -sL https://download.sysinternals.com/files/ListDlls.zip
+curl -sLO https://download.sysinternals.com/files/ListDlls.zip
 7z x -oC:\ListDlls ListDlls.zip
 C:\ListDlls\Listdlls64.exe -v libcrypto-3-x64.dll
 
