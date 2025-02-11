@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- CLI:
+  . Extended --ini to print INI settings changed from the builtin default.
+    (timwolla)
+
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
   . Fixed method calls for PHP objects wrapped in variant. (cmb)
@@ -35,6 +39,7 @@ PHP                                                                        NEWS
 
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
+  . Added enchant_dict_remove(). (nielsdos)
 
 - GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,

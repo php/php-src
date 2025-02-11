@@ -758,7 +758,7 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 	}
 
 	{ /* Then verify it against a policy */
-		SSL_EXTRA_CERT_CHAIN_POLICY_PARA ssl_policy_params = {sizeof(SSL_EXTRA_CERT_CHAIN_POLICY_PARA)};
+		SSL_EXTRA_CERT_CHAIN_POLICY_PARA ssl_policy_params = {{sizeof(SSL_EXTRA_CERT_CHAIN_POLICY_PARA)}};
 		CERT_CHAIN_POLICY_PARA chain_policy_params = {sizeof(CERT_CHAIN_POLICY_PARA)};
 		CERT_CHAIN_POLICY_STATUS chain_policy_status = {sizeof(CERT_CHAIN_POLICY_STATUS)};
 		BOOL verify_result;

@@ -106,7 +106,10 @@ bool ir_check(const ir_ctx *ctx)
 			use = *p;
 			if (use != IR_UNUSED) {
 				if (IR_IS_CONST_REF(use)) {
-					if (use >= ctx->consts_count) {
+					if (IR_OPND_KIND(flags, j) != IR_OPND_DATA) {
+						fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) must not be constant\n", i, j, use);
+						ok = 0;
+					} else if (use >= ctx->consts_count) {
 						fprintf(stderr, "ir_base[%d].ops[%d] constant reference (%d) is out of range\n", i, j, use);
 						ok = 0;
 					}

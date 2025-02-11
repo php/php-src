@@ -3348,7 +3348,8 @@ try_next_encoding:;
 	}
 
 	for (size_t i = 0; i < length; i++) {
-		array[i].demerits = (uint64_t) (array[i].demerits * array[i].multiplier);
+		double demerits = array[i].demerits * (double) array[i].multiplier;
+		array[i].demerits = demerits < (double) UINT64_MAX ? (uint64_t) demerits : UINT64_MAX;
 	}
 
 	return length;

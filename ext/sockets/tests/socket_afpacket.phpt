@@ -34,4 +34,4 @@ bool(true)
 string(2) "lo"
 int(%i)
 
-Warning: socket_getpeername(): unable to retrieve peer name [95]: Operation not supported in %s on line %d
+Warning: socket_getpeername(): unable to retrieve peer name [95]: %sot supported in %s on line %d

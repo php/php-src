@@ -402,7 +402,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}
 		if (bucket->buflen != Z_STRLEN_P(pzdata)) {
-			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
+			bucket->buf = perealloc(bucket->buf, MAX(Z_STRLEN_P(pzdata), 1), bucket->is_persistent);
 			bucket->buflen = Z_STRLEN_P(pzdata);
 		}
 		memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
