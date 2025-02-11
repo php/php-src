@@ -16,5 +16,5 @@ runs:
     - name: Setup PostgreSQL
       shell: pwsh
       run: |
-        Set-Service -Name "postgresql-x64-14" -StartupType manual -Status Running
+        Set-Service -Name "postgresql-x64-17" -StartupType manual -Status Running
         pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'Password12!';" }
