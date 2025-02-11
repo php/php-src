@@ -107,6 +107,10 @@ PHP 8.5 UPGRADE NOTES
     and is not a QName because in those cases the namespace is taken
     from the namespace href or prefix respectively.
 
+- Zlib:
+  . flock() is now supported on zlib streams. Previously, this always
+    failed to perform any locking action.
+
 ========================================
 3. Changes in SAPI modules
 ========================================

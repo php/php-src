@@ -165,6 +165,7 @@ PHP                                                                        NEWS
     is now a boolean. (David Carlier)
   . Fixed bug GH-16883 (gzopen() does not use the default stream context when
     opening HTTP URLs). (nielsdos)
+  . Implemented GH-17668 (zlib streams should support locking). (nielsdos)
 
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
