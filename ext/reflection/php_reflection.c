@@ -5817,6 +5817,12 @@ ZEND_METHOD(ReflectionProperty, getValue)
 			RETURN_THROWS();
 		}
 
+		/* TODO: Should this always use intern->ce? */
+		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
+			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			RETURN_THROWS();
+		}
+
 		if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
 			uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
 
@@ -5825,12 +5831,6 @@ ZEND_METHOD(ReflectionProperty, getValue)
 				if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 					RETURN_COPY_DEREF(retval);
 				}
-			}
-		} else {
-			/* TODO: Should this always use intern->ce? */
-			if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
-				_DO_THROW("Given object is not an instance of the class this property was declared in");
-				RETURN_THROWS();
 			}
 		}
 
@@ -5926,6 +5926,11 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
+	if (!instanceof_function(Z_OBJCE_P(object), intern->ce)) {
+		_DO_THROW("Given object is not an instance of the class this property was declared in");
+		RETURN_THROWS();
+	}
+
 	if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
 		uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
 
@@ -5934,11 +5939,6 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 			if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 				RETURN_COPY_DEREF(retval);
 			}
-		}
-	} else {
-		if (!instanceof_function(Z_OBJCE_P(object), intern->ce)) {
-			_DO_THROW("Given object is not an instance of the class this property was declared in");
-			RETURN_THROWS();
 		}
 	}
 
@@ -6209,18 +6209,18 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 			RETURN_THROWS();
 		}
 
+		/* TODO: Should this always use intern->ce? */
+		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
+			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			RETURN_THROWS();
+		}
+
 		if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
 			uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 				zval *value = OBJ_PROP(Z_OBJ_P(object), prop_offset);
 				RETURN_BOOL(Z_TYPE_INFO_P(value) != IS_UNDEF);
-			}
-		} else {
-			/* TODO: Should this always use intern->ce? */
-			if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
-				_DO_THROW("Given object is not an instance of the class this property was declared in");
-				RETURN_THROWS();
 			}
 		}
 
