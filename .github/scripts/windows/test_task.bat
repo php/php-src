@@ -148,6 +148,8 @@ ldd %PHP_BUILD_DIR%\php_openssl.dll
 reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs" /v /f *
 dir %PHP_BUILD_DIR%\libcrypto-3-x64.dll
 
+copy /-y %DEPS_DIR%\bin\*.dll %PHP_BUILD_DIR%\*
+
 mkdir c:\tests_tmp
 
 nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK %ASAN_OPTS% --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
