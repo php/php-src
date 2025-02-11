@@ -140,6 +140,10 @@ set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
 if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
+curl -sL https://download.sysinternals.com/files/ListDlls.zip
+7z x -oC:\ListDlls ListDlls.zip
+C:\ListDlls\Listdlls64.exe -v libcrypto-3-x64.dll
+
 mkdir c:\tests_tmp
 
 nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK %ASAN_OPTS% --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
