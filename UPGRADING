@@ -114,7 +114,8 @@ PHP 8.5 UPGRADE NOTES
 - CLI:
   . Trying to set a process title that is too long with cli_set_process_title()
     will now fail instead of silently truncating the given title.
-  . --ini will now print INI settings changed from the builtin default.
+  . Added a new --ini=diff option to print INI settings changed from the builtin
+    default.
 
 ========================================
 4. Deprecated Functionality

@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.0alpha1
 
 - CLI:
-  . Extended --ini to print INI settings changed from the builtin default.
+  . Add --ini=diff to print INI settings changed from the builtin default.
     (timwolla)
 
 - COM:
