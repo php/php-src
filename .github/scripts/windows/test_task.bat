@@ -144,7 +144,8 @@ curl -sLO https://download.sysinternals.com/files/ListDlls.zip
 7z x -oC:\ListDlls ListDlls.zip
 C:\ListDlls\Listdlls64.exe -accepteula -v libcrypto-3-x64.dll
 nmake run ARGS="-r ""var_dump(shell_exec('C:\\ListDlls\\Listdlls64.exe -accepteula -v php.exe'));"""
-ldd %PHP_BUILD_DIR%\php.exe
+ldd %PHP_BUILD_DIR%\ext\php_openssl.dll
+reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs" /v /f *
 
 mkdir c:\tests_tmp
 
