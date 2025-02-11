@@ -1709,7 +1709,7 @@ static bool zend_try_ct_eval_const(zval *zv, zend_string *name, bool is_fully_qu
 }
 /* }}} */
 
-static inline bool zend_is_scope_known(void) /* {{{ */
+static inline bool zend_is_scope_known_ex(bool allow_traits) /* {{{ */
 {
 	if (!CG(active_op_array)) {
 		/* This can only happen when evaluating a default value string. */
@@ -1728,9 +1728,13 @@ static inline bool zend_is_scope_known(void) /* {{{ */
 	}
 
 	/* For traits self etc refers to the using class, not the trait itself */
-	return (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == 0;
+	return allow_traits || (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == 0;
 }
 /* }}} */
+
+static inline bool zend_is_scope_known(void) {
+	return zend_is_scope_known_ex(false);
+}
 
 static inline bool class_name_refers_to_active_ce(const zend_string *class_name, uint32_t fetch_type) /* {{{ */
 {
@@ -7419,6 +7423,10 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 						class_name = CG(active_class_entry)->parent_name;
 						ZEND_ASSERT(class_name && "must know class name when resolving parent type at compile time");
 					}
+				}
+				if (zend_is_scope_known_ex(true)) {
+					zend_op_array *op_array = CG(active_op_array);
+					op_array->fn_flags2 = ZEND_ACC_RESOLVE_RELATIVE_TYPE;
 				}
 				zend_string_addref(class_name);
 			}
