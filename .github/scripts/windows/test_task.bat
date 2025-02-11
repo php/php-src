@@ -140,14 +140,6 @@ set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
 if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
-curl -sLO https://download.sysinternals.com/files/ListDlls.zip
-7z x -oC:\ListDlls ListDlls.zip
-C:\ListDlls\Listdlls64.exe -accepteula -v libcrypto-3-x64.dll
-nmake run ARGS="-r ""var_dump(shell_exec('C:\\ListDlls\\Listdlls64.exe -accepteula -v php.exe'));"""
-ldd %PHP_BUILD_DIR%\php_openssl.dll
-reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs" /v /f *
-dir %PHP_BUILD_DIR%\libcrypto-3-x64.dll
-
 copy /-y %DEPS_DIR%\bin\*.dll %PHP_BUILD_DIR%\*
 
 mkdir c:\tests_tmp
