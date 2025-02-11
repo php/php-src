@@ -1,5 +1,5 @@
 --TEST--
-Overriding another one type in final class with union types
+Override static with class that is even not an implementation of interface and add a type that is not in the interface in final class
 --FILE--
 <?php
 
@@ -13,7 +13,7 @@ final class B implements A
     public function methodScalar1(): C|array { return []; }
 }
 
-class C
+final class C
 {
 }
 

@@ -1,5 +1,5 @@
 --TEST--
-Overriding another one type in final class with union types
+Overriding static with self and add a type that is not in the interface in final class
 --FILE--
 <?php
 

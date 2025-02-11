@@ -1,5 +1,5 @@
 --TEST--
-Overriding another one type in final class with union types
+Overriding return type with type that is not in the interface in final class with union types
 --FILE--
 <?php
 
