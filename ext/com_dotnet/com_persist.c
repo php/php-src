@@ -557,7 +557,7 @@ CPH_METHOD(LoadFromStream)
 		} else {
 			res = get_persist_stream(helper);
 			if (helper->ips) {
-				res = IPersistStreamInit_Load(helper->ipsi, stm);
+				res = IPersistStream_Load(helper->ips, stm);
 			}
 		}
 	}
