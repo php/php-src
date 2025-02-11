@@ -26,15 +26,15 @@ if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 	git clone --branch %SDK_BRANCH% %SDK_REMOTE% --depth 1 "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
 )
 
-for /f "tokens=*" %%a in ('type %PHP_BUILD_CACHE_SDK_DIR%\VERSION') do set GOT_SDK_VER=%%a
-echo Got SDK version %GOT_SDK_VER%
-if NOT "%GOT_SDK_VER%" == "%PHP_BUILD_SDK_BRANCH:~8%" (
-	echo Switching to the configured SDK version %SDK_BRANCH:~8%
-	echo Fetching remote SDK repository
-	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" fetch --prune origin 2>&1
-	echo Checkout SDK repository branch
-	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" checkout --force %SDK_BRANCH%
-)
+@REM for /f "tokens=*" %%a in ('type %PHP_BUILD_CACHE_SDK_DIR%\VERSION') do set GOT_SDK_VER=%%a
+@REM echo Got SDK version %GOT_SDK_VER%
+@REM if NOT "%GOT_SDK_VER%" == "%PHP_BUILD_SDK_BRANCH:~8%" (
+@REM 	echo Switching to the configured SDK version %SDK_BRANCH:~8%
+@REM 	echo Fetching remote SDK repository
+@REM 	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" fetch --prune origin 2>&1
+@REM 	echo Checkout SDK repository branch
+@REM 	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" checkout --force %SDK_BRANCH%
+@REM )
 
 if not exist "%SDK_RUNNER%" (
 	echo "%SDK_RUNNER%" doesn't exist
