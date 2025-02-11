@@ -14733,7 +14733,11 @@ result_fetched:
 	}
 
 	if (may_throw) {
-		zend_jit_check_exception(jit);
+		if (Z_MODE(res_addr) == IS_REG) {
+			zend_jit_check_exception_undef_result(jit, opline);
+		} else {
+			zend_jit_check_exception(jit);
+		}
 	}
 
 	return 1;
