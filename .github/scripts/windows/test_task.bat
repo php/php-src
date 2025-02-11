@@ -142,7 +142,7 @@ if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
 curl -sLO https://download.sysinternals.com/files/ListDlls.zip
 7z x -oC:\ListDlls ListDlls.zip
-C:\ListDlls\Listdlls64.exe -v libcrypto-3-x64.dll
+C:\ListDlls\Listdlls64.exe -accepteula -v libcrypto-3-x64.dll
 
 mkdir c:\tests_tmp
 
