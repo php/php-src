@@ -1654,7 +1654,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			struct ethhdr *e = (struct ethhdr *)ZSTR_VAL(recv_buf);
 			unsigned short protocol = ntohs(e->h_proto);
-			unsigned char *payload = ((unsigned char *)e + sizeof(struct ethhdr));
+			unsigned char *payload;
 
 			zval obj;
 			object_init_ex(&obj, socket_ethinfo_ce);
@@ -1662,6 +1662,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			switch (protocol) {
 				case ETH_P_IP: {
+					payload = ((unsigned char *)e + sizeof(struct ethhdr));
 					struct iphdr *ip = (struct iphdr *)payload;
 					unsigned char *ipdata = payload + (ip->ihl * 4);
 					struct in_addr s, d;
@@ -1693,6 +1694,7 @@ PHP_FUNCTION(socket_recvfrom)
 					break;
 				}
 				case ETH_P_IPV6: {
+					payload = ((unsigned char *)e + sizeof(struct ethhdr));
 					struct ipv6hdr *ip = (struct ipv6hdr *)payload;
 					char s[INET6_ADDRSTRLEN], d[INET6_ADDRSTRLEN];
 					inet_ntop(AF_INET6, &ip->saddr, s, sizeof(s));
@@ -1702,12 +1704,6 @@ PHP_FUNCTION(socket_recvfrom)
 					break;
 				}
 				case ETH_P_LOOP: {
-					struct iphdr *ip = (struct iphdr *)payload;
-					struct in_addr s, d;
-					s.s_addr = ip->saddr;
-					d.s_addr = ip->daddr;
-					add_assoc_string(&zpayload, "ipsrc", inet_ntoa(s));
-					add_assoc_string(&zpayload, "ipdst", inet_ntoa(d));
 					break;
 				}
 				default:
@@ -1718,6 +1714,7 @@ PHP_FUNCTION(socket_recvfrom)
 					RETURN_THROWS();
 			}
 
+			Z_DELREF(zpayload);
 			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("socket"), arg1);
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
@@ -1725,7 +1722,7 @@ PHP_FUNCTION(socket_recvfrom)
 			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
 			// TODO fix leaks
 
-			ZEND_TRY_ASSIGN_REF_COPY(arg2, &obj);
+			ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
 
 			if (arg6) {
