@@ -5,10 +5,10 @@ if /i "%GITHUB_ACTIONS%" neq "True" (
     exit /b 3
 )
 
-del /f /q C:\Windows\System32\libcrypto-3-x64.dll >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-del /f /q C:\Windows\System32\libssl-3-x64.dll >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
+@REM del /f /q C:\Windows\System32\libcrypto-3-x64.dll >NUL 2>NUL
+@REM if %errorlevel% neq 0 exit /b 3
+@REM del /f /q C:\Windows\System32\libssl-3-x64.dll >NUL 2>NUL
+@REM if %errorlevel% neq 0 exit /b 3
 
 call %~dp0find-target-branch.bat
 set STABILITY=staging
