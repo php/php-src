@@ -1704,6 +1704,9 @@ PHP_FUNCTION(socket_recvfrom)
 					break;
 				}
 				case ETH_P_LOOP: {
+					struct ethhdr *innere = (struct ethhdr *)((unsigned char *)e + ETH_HLEN);
+					add_assoc_string(&zpayload, "macsrc", ether_ntoa((struct ether_addr *)innere->h_source));
+					add_assoc_string(&zpayload, "macdst", ether_ntoa((struct ether_addr *)innere->h_dest));
 					break;
 				}
 				default:
