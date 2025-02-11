@@ -10,4 +10,4 @@ trait T {
 ?>
 DONE
 --EXPECTF--
-Fatal error: Type self cannot be part of an intersection type in %s on line %d
+Fatal error: Type SELF cannot be part of an intersection type in %s on line %d

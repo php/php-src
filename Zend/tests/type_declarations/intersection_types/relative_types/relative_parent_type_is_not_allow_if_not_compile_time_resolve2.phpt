@@ -10,4 +10,4 @@ trait T {
 ?>
 DONE
 --EXPECTF--
-Fatal error: Type parent cannot be part of an intersection type in %s on line %d
+Fatal error: Type PARENT cannot be part of an intersection type in %s on line %d

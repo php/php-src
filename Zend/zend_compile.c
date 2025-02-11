@@ -7273,8 +7273,8 @@ static zend_type zend_compile_typename_ex(
 			}
 			/* Check for "self" and "parent" too */
 			if (
-				zend_string_equals(ZEND_TYPE_NAME(single_type), ZSTR_KNOWN(ZEND_STR_SELF))
-				|| zend_string_equals(ZEND_TYPE_NAME(single_type), ZSTR_KNOWN(ZEND_STR_PARENT))
+				zend_string_equals_ci(ZEND_TYPE_NAME(single_type), ZSTR_KNOWN(ZEND_STR_SELF))
+				|| zend_string_equals_ci(ZEND_TYPE_NAME(single_type), ZSTR_KNOWN(ZEND_STR_PARENT))
 			) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(ZEND_TYPE_NAME(single_type)));
