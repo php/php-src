@@ -225,7 +225,7 @@ static const char *zend_asymmetric_visibility_string(uint32_t fn_flags) /* {{{ *
 	}
 }
 
-static zend_string *resolve_class_name(zend_class_entry *scope, zend_string *name) {
+static zend_string *resolve_class_name(const zend_class_entry *scope, zend_string *name) {
 	ZEND_ASSERT(scope);
 	if (zend_string_equals_literal_ci(name, "parent") && scope->parent) {
 		if (scope->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
