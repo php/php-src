@@ -2666,14 +2666,14 @@ ZEND_METHOD(ReflectionParameter, getClass)
 		zend_string *class_name;
 
 		class_name = ZEND_TYPE_NAME(param->arg_info->type);
-		if (zend_string_equals_literal_ci(class_name, "self")) {
+		if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_SELF))) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses \"self\" as type but function is not a class member");
 				RETURN_THROWS();
 			}
-		} else if (zend_string_equals_literal_ci(class_name, "parent")) {
+		} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
