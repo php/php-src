@@ -1172,7 +1172,7 @@ class FuncInfo {
 
     /**
      * @param ArgInfo[] $args
-     * @param AttributeInfo[] $attribute
+     * @param AttributeInfo[] $attributes
      * @param FramelessFunctionInfo[] $framelessFunctionInfos
      */
     public function __construct(
