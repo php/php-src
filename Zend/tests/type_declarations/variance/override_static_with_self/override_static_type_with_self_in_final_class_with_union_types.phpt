@@ -19,8 +19,6 @@ interface A
 final class B implements A
 {
     public function methodScalar(): self { return $this; }
-    public function methodScalar10(): self|int { return $this; }
-    public function methodScalar15(): self { return $this; }
     public function methodIterable1(): self|iterable { return $this; }
     public function methodIterable2(): array { return []; }
     public function methodObject1(): self { return $this; }
