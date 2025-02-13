@@ -1,5 +1,5 @@
 --TEST--
-Overriding static return types with self in non-final class with interface
+Overriding static return types with self in non-final class
 --FILE--
 <?php
 
