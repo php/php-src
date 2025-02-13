@@ -177,10 +177,8 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
                 for i in range(0, num_children):
                     c = children[i]
                     if int(c) != 0:
-                        c = ZendAstPrettyPrinter(c.dereference()).cast()
+                        c = c.dereference()
                     yield ('child[%d]' % i, c)
-            elif field.name == 'name':
-                yield (field.name, format_zstr(val[field.name]))
             elif field.name == 'val':
                 yield (field.name, ZvalPrettyPrinter(val[field.name]).to_string())
             else:
@@ -961,9 +959,6 @@ def array_size(ary_type):
     return ary_type.fields()[0].type.range()[1]+1
 
 def format_zstr(zstr):
-    if zstr.type.code == gdb.TYPE_CODE_PTR and int(zstr) == 0:
-        return zstr
-
     len = int(zstr['len'])
     truncated = False
     if len > 200:
