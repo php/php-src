@@ -49,7 +49,7 @@ Options:
 
     -w <file>   Write a list of all failed tests to <file>.
 
-    -a <file>   Same as -w but append rather then truncating <file>.
+    -a <file>   Same as -w but append rather than truncating <file>.
 
     -W <file>   Write a list of all tests and their result status to <file>.
 
@@ -90,7 +90,7 @@ Options:
     --temp-source <sdir>  --temp-target <tdir> [--temp-urlbase <url>]
                 Write temporary files to <tdir> by replacing <sdir> from the
                 filenames to generate with <tdir>. In general you want to make
-                <sdir> the path to your source files and <tdir> some patch in
+                <sdir> the path to your source files and <tdir> some path in
                 your web page hierarchy with <url> pointing to <tdir>.
 
     --keep-[all|php|skip|clean]
