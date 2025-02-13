@@ -961,6 +961,9 @@ def array_size(ary_type):
     return ary_type.fields()[0].type.range()[1]+1
 
 def format_zstr(zstr):
+    if zstr.type.code == gdb.TYPE_CODE_PTR and int(zstr) == 0:
+        return zstr
+
     len = int(zstr['len'])
     truncated = False
     if len > 200:
