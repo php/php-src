@@ -4863,7 +4863,7 @@ ZEND_VM_HOT_SEND_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, CONST|UNUSED|NUM, SPE
 			ZEND_VM_C_GOTO(send_val_by_ref);
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-ZEND_VM_C_LABEL(send_val_by_ref):
+ZEND_VM_C_LABEL(send_val_by_ref):;
 		ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper, _arg_num, arg_num, _arg, arg);
 	}
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -8212,9 +8212,9 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 		case ZEND_USER_OPCODE_LEAVE:
 			ZEND_VM_LEAVE();
 		case ZEND_USER_OPCODE_DISPATCH:
-			ZEND_VM_DISPATCH(opline->opcode, opline);
+			ZEND_VM_DISPATCH_OPCODE(opline->opcode, opline);
 		default:
-			ZEND_VM_DISPATCH((uint8_t)(ret & 0xff), opline);
+			ZEND_VM_DISPATCH_OPCODE((uint8_t)(ret & 0xff), opline);
 	}
 }
 

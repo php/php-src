@@ -21,6 +21,9 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
+#include <main/php_config.h>
+#include "Zend/zend_portability.h"
+
 #define ZEND_VM_SPEC		1
 #define ZEND_VM_LINES		0
 #define ZEND_VM_KIND_CALL	1
@@ -38,6 +41,13 @@
 # if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))
 #  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 48
 # endif
+#endif
+
+#if defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) && !defined(ZEND_VM_TAIL_CALL_DISPATCH)
+# define ZEND_VM_TAIL_CALL_DISPATCH 1
+# define ZEND_OPCODE_HANDLER_CCONV ZEND_PRESERVE_NONE
+#else
+# define ZEND_OPCODE_HANDLER_CCONV ZEND_FASTCALL
 #endif
 
 #define ZEND_VM_OP_SPEC          0x00000001
