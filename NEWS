@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     (alexandre-daubois)
   . Fixed bug GH-19544 (GC treats ZEND_WEAKREF_TAG_MAP references as WeakMap
     references). (Arnaud, timwolla)
+  . Introduced the TAILCALL VM, enabled by default when compiling with Clang>=19
+    on x86_64 or aarch64. (Arnaud)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL

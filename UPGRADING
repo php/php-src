@@ -883,6 +883,11 @@ PHP 8.5 UPGRADE NOTES
   . Creating exception objects is now much faster.
   . The parts of the code that used SSE2 have been adapted to use SIMD
     with ARM NEON as well.
+  . Introduced the TAILCALL VM, enabled by default when compiling with Clang>=19
+    on x86_64 or aarch64. The TAILCALL VM is as fast as the HYBRID VM used when
+    compiling with GCC. This makes PHP binaries built with Clang>=19 as fast as
+    binaries built with GCC. The performance of the CALL VM, used with other
+    compilers, has also improved considerably.
 
 - Intl:
   . Now avoids creating extra string copies when converting strings
