@@ -177,14 +177,14 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
                 for i in range(0, num_children):
                     c = children[i]
                     if int(c) != 0:
-                        c = c.dereference()
+                        c = ZendAstPrettyPrinter(c.dereference()).cast()
                     yield ('child[%d]' % i, c)
             elif field.name == 'name':
                 yield (field.name, format_zstr(val[field.name]))
             elif field.name == 'val':
                 yield (field.name, ZvalPrettyPrinter(val[field.name]).to_string())
             else:
-                yield (field.name, format_nested(self.val[field.name]))
+                yield (field.name, format_nested(val[field.name]))
 
     def is_special(self):
         special_shift = 6 # ZEND_AST_SPECIAL_SHIFT
