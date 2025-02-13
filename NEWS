@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-15901 (phpdbg: Assertion failure on i funcs). (cmb)
 
+- Reflection:
+  . Fixed bug GH-15902 (Core dumped in ext/reflection/php_reflection.c).
+    (DanielEScherzer)
+
 - SimpleXML:
   . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
     (nielsdos)
