@@ -321,6 +321,20 @@ char *alloca();
 # define ZEND_FASTCALL
 #endif
 
+#ifdef HAVE_PRESERVE_NONE
+# define ZEND_PRESERVE_NONE __attribute__((preserve_none))
+#endif
+
+#if __has_attribute(musttail)
+# define HAVE_MUSTTAIL
+# define ZEND_MUSTTAIL __attribute__((musttail))
+#endif
+
+#if __has_attribute(sysv_abi)
+# define HAVE_SYSV_ABI
+# define ZEND_SYSV_ABI __attribute__((sysv_abi))
+#endif
+
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __attribute__((noreturn))

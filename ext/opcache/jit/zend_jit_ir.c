@@ -27,11 +27,21 @@
 # define ZREG_IP              7 /* IR_REG_RDI */
 # define ZREG_FIRST_FPR       8
 # define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7)) /* all preserved registers */
+# if ZEND_VM_TAIL_CALL_DISPATCH
+#  error
+# endif
 #elif defined(IR_TARGET_X64)
 # define IR_REG_SP            4 /* IR_REG_RSP */
 # define IR_REG_FP            5 /* IR_REG_RBP */
-# define ZREG_FP             14 /* IR_REG_R14 */
-# define ZREG_IP             15 /* IR_REG_R15 */
+# if ZEND_VM_TAIL_CALL_DISPATCH
+/* Use the first two arg registers of the preserve_none calling convention for FP/IP
+ * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1029 */
+#  define ZREG_FP             12 /* IR_REG_R12 */
+#  define ZREG_IP             13 /* IR_REG_R13 */
+# else
+#  define ZREG_FP             14 /* IR_REG_R14 */
+#  define ZREG_IP             15 /* IR_REG_R15 */
+# endif
 # define ZREG_FIRST_FPR      16
 # if defined(_WIN64)
 #  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15))
@@ -46,9 +56,17 @@
 # endif
 #elif defined(IR_TARGET_AARCH64)
 # define IR_REG_SP           31 /* IR_REG_RSP */
+# define IR_REG_LR           30 /* IR_REG_X30 */
 # define IR_REG_FP           29 /* IR_REG_X29 */
-# define ZREG_FP             27 /* IR_REG_X27 */
-# define ZREG_IP             28 /* IR_REG_X28 */
+# if ZEND_VM_TAIL_CALL_DISPATCH
+/* Use the first two arg registers of the preserve_none calling convention for FP/IP
+ * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/AArch64/AArch64CallingConvention.td#L541 */
+#  define ZREG_FP             20 /* IR_REG_X20 */
+#  define ZREG_IP             21 /* IR_REG_X21 */
+# else
+#  define ZREG_FP             27 /* IR_REG_X27 */
+#  define ZREG_IP             28 /* IR_REG_X28 */
+# endif
 # define ZREG_FIRST_FPR      32
 # define IR_REGSET_PRESERVED ((1<<19) | (1<<20) | (1<<21) | (1<<22) | (1<<23) | \
                               (1<<24) | (1<<25) | (1<<26) | (1<<27) | (1<<28)) /* all preserved registers */
@@ -64,12 +82,26 @@
 #undef  _ir_CTX
 #define _ir_CTX                 (&jit->ctx)
 
+#if ZEND_VM_TAIL_CALL_DISPATCH
+# define IR_OPCODE_HANDLER_RET IR_ADDR
+#elif GCC_GLOBAL_REGS
+# define IR_OPCODE_HANDLER_RET IR_VOID
+#else
+# define IR_OPCODE_HANDLER_RET IR_ADDR
+#endif
+
+#define IR_OPCODE_HANDLER_FUNC IR_FASTCALL_FUNC
+
 #undef  ir_CONST_ADDR
 #define ir_CONST_ADDR(_addr)    jit_CONST_ADDR(jit, (uintptr_t)(_addr))
 #define ir_CONST_FUNC(_addr)    jit_CONST_FUNC(jit, (uintptr_t)(_addr), 0)
 #define ir_CONST_FC_FUNC(_addr) jit_CONST_FUNC(jit, (uintptr_t)(_addr), IR_FASTCALL_FUNC)
 #define ir_CAST_FC_FUNC(_addr)  ir_fold2(_ir_CTX, IR_OPT(IR_PROTO, IR_ADDR), (_addr), \
 	ir_proto_0(_ir_CTX, IR_FASTCALL_FUNC, IR_I32))
+# define ir_CONST_OPCODE_HANDLER_FUNC(_addr) \
+	jit_CONST_OPCODE_HANDLER_FUNC(jit, _addr)
+# define ir_CAST_OPCODE_HANDLER_FUNC(_addr)  ir_fold2(_ir_CTX, IR_OPT(IR_PROTO, IR_ADDR), (_addr), \
+	ir_proto_0(_ir_CTX, IR_OPCODE_HANDLER_FUNC, IR_I32))
 
 #define ir_CONST_FUNC_PROTO(_addr, _proto) \
 	jit_CONST_FUNC_PROTO(jit, (uintptr_t)(_addr), (_proto))
@@ -542,11 +574,18 @@ static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
 #if defined(IR_TARGET_X86)
 	/* TODO: dummy prototype (only flags matter) ??? */
 	ir_ref proto = flags ? ir_proto_0(&jit->ctx, flags, IR_I32) : 0;
+#elif ZEND_VM_TAIL_CALL_DISPATCH
+	ir_ref proto = flags ? ir_proto_0(&jit->ctx, flags, IR_ADDR) : 0;
 #else
 	ir_ref proto = 0;
 #endif
 
 	return jit_CONST_FUNC_PROTO(jit, addr, proto);
+}
+
+static ir_ref jit_CONST_OPCODE_HANDLER_FUNC(zend_jit_ctx *jit, zend_vm_opcode_handler_t handler)
+{
+	return jit_CONST_FUNC(jit, (uintptr_t)handler, IR_OPCODE_HANDLER_FUNC);
 }
 
 static ir_ref jit_ADD_OFFSET(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset)
@@ -1922,6 +1961,20 @@ static void zend_jit_vm_leave(zend_jit_ctx *jit, ir_ref to_opline)
 	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR(ZEND_VM_ENTER_BIT)));
 }
 
+static void zend_jit_tailcall_handler(zend_jit_ctx *jit, ir_ref handler)
+{
+#if defined(IR_TARGET_X86)
+	if (!IR_IS_CONST_REF(handler)) {
+		handler = ir_CAST_OPCODE_HANDLER_FUNC(handler);
+	}
+#endif
+	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+		ir_TAILCALL(IR_OPCODE_HANDLER_RET, handler);
+	} else {
+		ir_TAILCALL_2(IR_ADDR, handler, jit_FP(jit), jit_IP(jit));
+	}
+}
+
 /* stubs */
 
 static int zend_jit_exception_handler_stub(zend_jit_ctx *jit)
@@ -1934,10 +1987,10 @@ static int zend_jit_exception_handler_stub(zend_jit_ctx *jit)
 	} else {
 		zend_vm_opcode_handler_t handler = EG(exception_op)->handler;
 
-		if (GCC_GLOBAL_REGS) {
-			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
+		if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+			zend_jit_tailcall_handler(jit, ir_CONST_OPCODE_HANDLER_FUNC(handler));
 		} else {
-			ir_ref ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
+			ir_ref ref = ir_CALL_2(IR_ADDR, ir_CONST_OPCODE_HANDLER_FUNC(handler), jit_FP(jit), jit_IP(jit));
 			zend_jit_vm_enter(jit, ref);
 		}
 	}
@@ -2036,8 +2089,8 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 		jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 	}
 
-	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		zend_jit_vm_enter(jit, jit_IP(jit));
 	}
@@ -2046,6 +2099,11 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 
 static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 {
+	if (ZEND_VM_TAIL_CALL_DISPATCH) {
+		ir_TAILCALL(IR_OPCODE_HANDLER_RET, ir_CONST_OPCODE_HANDLER_FUNC(zend_jit_leave_func_helper_tailcall));
+		return 1;
+	}
+
 	ir_ref call_info = ir_LOAD_U32(jit_EX(This.u1.type_info));
 	ir_ref if_top = ir_IF(ir_AND_U32(call_info, ir_CONST_U32(ZEND_CALL_TOP)));
 
@@ -2234,7 +2292,7 @@ static int zend_jit_leave_throw_stub(zend_jit_ctx *jit)
 	// JIT: opline = EG(exception_op);
 	jit_STORE_IP(jit, jit_EG(exception_op));
 
-	if (GCC_GLOBAL_REGS) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
 		ir_STORE(jit_EX(opline), jit_IP(jit));
 
 		// JIT: HANDLE_EXCEPTION()
@@ -2252,7 +2310,7 @@ static int zend_jit_hybrid_runtime_jit_stub(zend_jit_ctx *jit)
 		return 0;
 	}
 
-	ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_runtime_jit));
+	ir_CALL(IR_VOID, ir_CONST_OPCODE_HANDLER_FUNC(zend_runtime_jit));
 	ir_IJMP(ir_LOAD_A(jit_IP(jit)));
 	return 1;
 }
@@ -2382,7 +2440,7 @@ static int _zend_jit_hybrid_trace_counter_stub(zend_jit_ctx *jit, uint32_t cost)
 	ir_IJMP(_zend_jit_orig_opline_handler(jit, offset));
 
 	ir_IF_TRUE(if_halt);
-	ir_IJMP(ir_CONST_FC_FUNC(zend_jit_halt_op->handler));
+	ir_IJMP(ir_CONST_OPCODE_HANDLER_FUNC(zend_jit_halt_op->handler));
 
 	return 1;
 }
@@ -2420,7 +2478,7 @@ static int zend_jit_hybrid_loop_trace_counter_stub(zend_jit_ctx *jit)
 static int zend_jit_trace_halt_stub(zend_jit_ctx *jit)
 {
 	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
-		ir_TAILCALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_halt_op->handler));
+		ir_TAILCALL(IR_VOID, ir_CONST_OPCODE_HANDLER_FUNC(zend_jit_halt_op->handler));
 	} else if (GCC_GLOBAL_REGS) {
 		jit_STORE_IP(jit, IR_NULL);
 		ir_RETURN(IR_VOID);
@@ -2432,8 +2490,8 @@ static int zend_jit_trace_halt_stub(zend_jit_ctx *jit)
 
 static int zend_jit_trace_escape_stub(zend_jit_ctx *jit)
 {
-	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		zend_jit_vm_enter(jit, jit_IP(jit));
 	}
@@ -2459,8 +2517,8 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 	ref = ir_LOAD_A(jit_EX(opline));
 	jit_STORE_IP(jit, ref);
 
-	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		zend_jit_vm_enter(jit, ref);
 	}
@@ -2479,11 +2537,11 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 	zend_jit_check_timeout(jit, NULL, NULL);
 
 	addr = zend_jit_orig_opline_handler(jit);
-	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(IR_VOID, addr);
+	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+		zend_jit_tailcall_handler(jit, addr);
 	} else {
 #if defined(IR_TARGET_X86)
-		addr = ir_CAST_FC_FUNC(addr);
+		addr = ir_CAST_OPCODE_HANDLER_FUNC(addr);
 #endif
 		ref = ir_CALL_2(IR_ADDR, addr, jit_FP(jit), jit_IP(jit));
 		zend_jit_vm_enter(jit, ref);
@@ -2497,7 +2555,7 @@ static int zend_jit_undefined_offset_stub(zend_jit_ctx *jit)
 	if (GCC_GLOBAL_REGS) {
 		ir_TAILCALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_long_key));
 	} else {
-		ir_TAILCALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_long_key), jit_FP(jit), jit_IP(jit));
+		ir_TAILCALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_long_key), jit_FP(jit));
 	}
 
 	return 1;
@@ -2508,7 +2566,7 @@ static int zend_jit_undefined_key_stub(zend_jit_ctx *jit)
 	if (GCC_GLOBAL_REGS) {
 		ir_TAILCALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_string_key));
 	} else {
-		ir_TAILCALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_string_key), jit_FP(jit), jit_IP(jit));
+		ir_TAILCALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_string_key), jit_FP(jit));
 	}
 
 	return 1;
@@ -2696,6 +2754,23 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			 */
 			if (GCC_GLOBAL_REGS) {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
+			} else if (ZEND_VM_TAIL_CALL_DISPATCH) {
+				/* The only preserved register on x86 is RBP:
+				 * https://github.com/llvm/llvm-project/blob/a414877a7a5f000d01370acb1162eb1dea87f48c/llvm/lib/Target/X86/X86RegisterInfo.cpp#L319
+				 * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1183
+				 * On AArch64 it's LR, FP:
+				 * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/AArch64/AArch64CallingConvention.td#L681
+				 *
+				 * Add them to the fixed_regset to prevent usage or these regs.
+				 * It's cheaper to not use them than to save them.
+				 */
+#if defined(IR_TARGET_X64)
+				jit->ctx.fixed_regset |= (1<<IR_REG_FP);
+#elif defined(IR_TARGET_AARCH64)
+				jit->ctx.fixed_regset |= (1<<IR_REG_FP) | (1<<IR_REG_LR);
+#else
+				ZEND_UNREACHABLE();
+#endif
 			} else {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED;
 //#ifdef _WIN64
@@ -3149,11 +3224,13 @@ static void zend_jit_calc_trace_prologue_size(void)
 	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
 
 	if (!GCC_GLOBAL_REGS) {
-		ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
-		ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
-		jit_STORE_FP(jit, execute_data_ref);
-		jit_STORE_IP(jit, opline_ref);
-		jit->ctx.flags |= IR_FASTCALL_FUNC;
+		if (!ZEND_VM_TAIL_CALL_DISPATCH) {
+			ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
+			ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
+			jit_STORE_FP(jit, execute_data_ref);
+			jit_STORE_IP(jit, opline_ref);
+		}
+		jit->ctx.flags |= IR_OPCODE_HANDLER_FUNC;
 	}
 
 	ir_UNREACHABLE();
@@ -3983,7 +4060,7 @@ static void zend_jit_recv_entry(zend_jit_ctx *jit, int b)
 
 	/* Insert a MERGE block with additional ENTRY input between predecessor and this one */
 	ir_ENTRY(ref, bb->start);
-	if (!GCC_GLOBAL_REGS) {
+	if (!GCC_GLOBAL_REGS && !ZEND_VM_TAIL_CALL_DISPATCH) {
 		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
@@ -4004,7 +4081,7 @@ static void zend_jit_osr_entry(zend_jit_ctx *jit, int b)
 
 	/* Insert a MERGE block with additional ENTRY input between predecessor and this one */
 	ir_ENTRY(ref, bb->start);
-	if (!GCC_GLOBAL_REGS) {
+	if (!GCC_GLOBAL_REGS && !ZEND_VM_TAIL_CALL_DISPATCH) {
 		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
@@ -4020,7 +4097,7 @@ static void zend_jit_osr_entry(zend_jit_ctx *jit, int b)
 static ir_ref zend_jit_continue_entry(zend_jit_ctx *jit, ir_ref src, unsigned int label)
 {
 	ir_ENTRY(src, label);
-	if (!GCC_GLOBAL_REGS) {
+	if (!GCC_GLOBAL_REGS && !ZEND_VM_TAIL_CALL_DISPATCH) {
 		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
@@ -4038,6 +4115,10 @@ static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_th
 	if (GCC_GLOBAL_REGS) {
 		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
+	} else if (ZEND_VM_TAIL_CALL_DISPATCH) {
+		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
+		ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
+		jit_STORE_IP(jit, ip);
 	} else {
 		zend_vm_opcode_handler_t handler = opline->handler;
 		ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
@@ -4090,8 +4171,8 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 		}
 	} else {
 		zend_vm_opcode_handler_t handler = opline->handler;
-		if (GCC_GLOBAL_REGS) {
-			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
+		if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+			zend_jit_tailcall_handler(jit, ir_CONST_OPCODE_HANDLER_FUNC(handler));
 		} else if ((jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY)
 		 && (opline->opcode == ZEND_CATCH
 		  || opline->opcode == ZEND_FAST_CALL
@@ -4099,10 +4180,10 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 		  || opline->opcode == ZEND_MATCH_ERROR
 		  || opline->opcode == ZEND_THROW
 		  || opline->opcode == ZEND_VERIFY_NEVER_TYPE)) {
-			ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
+			ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_OPCODE_HANDLER_FUNC(handler), jit_FP(jit), jit_IP(jit));
 			zend_jit_vm_enter(jit, ip);
 		} else {
-			ir_TAILCALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
+			ir_TAILCALL_2(IR_ADDR, ir_CONST_OPCODE_HANDLER_FUNC(handler), jit_FP(jit), jit_IP(jit));
 		}
 	}
 	if (jit->b >= 0) {
@@ -10205,6 +10286,8 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				}
 				if (GCC_GLOBAL_REGS) {
 					ir_CALL(IR_VOID, helper);
+				} else if (ZEND_VM_TAIL_CALL_DISPATCH) {
+					ir_CALL_2(IR_ADDR, helper, jit_FP(jit), jit_IP(jit));
 				} else {
 					ir_ref ref = ir_CALL_2(IR_ADDR, helper, jit_FP(jit), jit_IP(jit));
 					jit_STORE_IP(jit, ref);
@@ -10379,8 +10462,8 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					}
 				}
 				/* fallback to indirect JMP or RETURN */
-				if (GCC_GLOBAL_REGS) {
-					ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+				if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+					zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 				} else {
 					zend_jit_vm_enter(jit, jit_IP(jit));
 				}
@@ -11147,8 +11230,8 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		jit_STORE_IP(jit, ir_ADD_OFFSET(jit_IP(jit), sizeof(zend_op)));
 	}
 
-	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		zend_jit_vm_leave(jit, jit_IP(jit));
 	}
@@ -16595,11 +16678,13 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 	jit->bb_edges = zend_arena_calloc(&CG(arena), count, sizeof(ir_ref));
 
 	if (!GCC_GLOBAL_REGS) {
-		ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
-		ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
-		jit_STORE_FP(jit, execute_data_ref);
-		jit_STORE_IP(jit, opline_ref);
-		jit->ctx.flags |= IR_FASTCALL_FUNC;
+		if (!ZEND_VM_TAIL_CALL_DISPATCH) {
+			ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
+			ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
+			jit_STORE_FP(jit, execute_data_ref);
+			jit_STORE_IP(jit, opline_ref);
+		}
+		jit->ctx.flags |= IR_OPCODE_HANDLER_FUNC;
 	}
 
 	return 1;
@@ -16973,8 +17058,8 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 	zend_jit_op_array_trace_extension *jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 	size_t offset = jit_extension->offset;
-	const void *handler =
-		(zend_vm_opcode_handler_t)ZEND_OP_TRACE_INFO(opline, offset)->call_handler;
+	zend_vm_opcode_handler_func_t handler =
+		ZEND_OP_TRACE_INFO(opline, offset)->call_handler;
 	ir_ref ref;
 
 	zend_jit_set_ip(jit, opline);
@@ -16987,7 +17072,8 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		    opline->opcode == ZEND_DO_UCALL ||
 		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
 		    opline->opcode == ZEND_DO_FCALL ||
-		    opline->opcode == ZEND_GENERATOR_CREATE) {
+		    opline->opcode == ZEND_GENERATOR_CREATE ||
+		    opline->opcode == ZEND_INCLUDE_OR_EVAL) {
 
 			jit_STORE_IP(jit, ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
 		} else {
@@ -17004,14 +17090,16 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		trace++;
 	}
 
-	if (!GCC_GLOBAL_REGS
-	 && (trace->op != ZEND_JIT_TRACE_END || trace->stop != ZEND_JIT_TRACE_STOP_RETURN)) {
+	if ((!GCC_GLOBAL_REGS
+	 && (trace->op != ZEND_JIT_TRACE_END || trace->stop != ZEND_JIT_TRACE_STOP_RETURN))
+	 || ZEND_VM_TAIL_CALL_DISPATCH) {
 		if (opline->opcode == ZEND_RETURN ||
 		    opline->opcode == ZEND_RETURN_BY_REF ||
 		    opline->opcode == ZEND_DO_UCALL ||
 		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
 		    opline->opcode == ZEND_DO_FCALL ||
-		    opline->opcode == ZEND_GENERATOR_CREATE) {
+		    opline->opcode == ZEND_GENERATOR_CREATE ||
+		    opline->opcode == ZEND_INCLUDE_OR_EVAL) {
 
 			ir_ref addr = jit_EG(current_execute_data);
 
@@ -17170,11 +17258,13 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 
 	if (!GCC_GLOBAL_REGS) {
 		if (!parent) {
-			ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
-			ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
-			jit_STORE_FP(jit, execute_data_ref);
-			jit_STORE_IP(jit, opline_ref);
-			jit->ctx.flags |= IR_FASTCALL_FUNC;
+			if (!ZEND_VM_TAIL_CALL_DISPATCH) {
+				ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
+				ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
+				jit_STORE_FP(jit, execute_data_ref);
+				jit_STORE_IP(jit, opline_ref);
+			}
+			jit->ctx.flags |= IR_OPCODE_HANDLER_FUNC;
 		}
 	}
 
@@ -17276,11 +17366,11 @@ static int zend_jit_trace_end_loop(zend_jit_ctx *jit, int loop_ref, const void *
 
 static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const zend_op *opline)
 {
-	if (GCC_GLOBAL_REGS) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
 		if (!original_handler) {
-			ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+			zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 		} else {
-			ir_TAILCALL(IR_VOID, zend_jit_orig_opline_handler(jit));
+			zend_jit_tailcall_handler(jit, zend_jit_orig_opline_handler(jit));
 		}
 	} else {
 		if (original_handler) {

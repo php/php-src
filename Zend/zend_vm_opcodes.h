@@ -42,11 +42,27 @@
 # endif
 #endif
 
+#if defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && defined(HAVE_SYSV_ABI) && (defined(__x86_64__) || defined(__aarch64__)) && (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) && !defined(ZEND_VM_TAIL_CALL_DISPATCH)
+# define ZEND_VM_TAIL_CALL_DISPATCH 1
+# define ZEND_OPCODE_HANDLER_CCONV ZEND_PRESERVE_NONE
+# ifdef _WIN32
+/* Use SysV ABI so that zend_vm_trampoline is returned in registers */
+#  define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_SYSV_ABI
+# else
+#  define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
+# endif
+#else
+# undef ZEND_VM_TAIL_CALL_DISPATCH
+# define ZEND_VM_TAIL_CALL_DISPATCH 0
+# define ZEND_OPCODE_HANDLER_CCONV    ZEND_FASTCALL
+# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
+#endif
+
 #if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
 typedef const void* zend_vm_opcode_handler_t;
 typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(void);
 #elif ZEND_VM_KIND == ZEND_VM_KIND_CALL
-typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_CCONV *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
 typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
 #elif ZEND_VM_KIND == ZEND_VM_KIND_SWITCH
 typedef int zend_vm_opcode_handler_t;
