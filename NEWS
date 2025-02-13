@@ -41,6 +41,7 @@ PHP                                                                        NEWS
 
 - Streams:
   . Fixed bug GH-17650 (realloc with size 0 in user_filters.c). (nielsdos)
+  . Fix memory leak on overflow in _php_stream_scandir(). (nielsdos)
 
 - Windows:
   . Fixed phpize for Windows 11 (24H2). (bwoebi)
