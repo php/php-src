@@ -55,6 +55,7 @@ PHP                                                                        NEWS
 - Zlib:
   . Fixed bug GH-17745 (zlib extension incorrectly handles object arguments).
     (nielsdos)
+  . Fix memory leak when encoding check fails. (nielsdos)
 
 30 Jan 2025, PHP 8.4.4
 
