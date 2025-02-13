@@ -25,6 +25,7 @@ const PHP_81_VERSION_ID = 80100;
 const PHP_82_VERSION_ID = 80200;
 const PHP_83_VERSION_ID = 80300;
 const PHP_84_VERSION_ID = 80400;
+const PHP_85_VERSION_ID = 80500;
 const ALL_PHP_VERSION_IDS = [
     PHP_70_VERSION_ID,
     PHP_80_VERSION_ID,
@@ -32,6 +33,7 @@ const ALL_PHP_VERSION_IDS = [
     PHP_82_VERSION_ID,
     PHP_83_VERSION_ID,
     PHP_84_VERSION_ID,
+    PHP_85_VERSION_ID,
 ];
 
 /**
@@ -1541,6 +1543,7 @@ class FuncInfo {
             PHP_82_VERSION_ID => $php82AndAboveFlags,
             PHP_83_VERSION_ID => $php82AndAboveFlags,
             PHP_84_VERSION_ID => $php82AndAboveFlags,
+            PHP_85_VERSION_ID => $php82AndAboveFlags,
         ];
     }
 
@@ -2342,6 +2345,7 @@ abstract class VariableLike
             PHP_82_VERSION_ID => [$flags],
             PHP_83_VERSION_ID => [$flags],
             PHP_84_VERSION_ID => [$flags],
+            PHP_85_VERSION_ID => [$flags],
         ];
     }
 
@@ -2925,6 +2929,12 @@ class PropertyInfo extends VariableLike
         "set" => "ZEND_STR_SET",
     ];
 
+    // NEW in 8.5
+    private const PHP_85_KNOWN = [
+        "self" => "ZEND_STR_SELF",
+        "parent" => "ZEND_STR_PARENT",
+    ];
+
     /**
      * @var AttributeInfo[] $attributes
      */
@@ -3068,6 +3078,10 @@ class PropertyInfo extends VariableLike
         }
         $include = self::PHP_80_KNOWN;
         switch ($minPhp) {
+            case PHP_85_VERSION_ID:
+                $include = array_merge($include, self::PHP_85_KNOWN);
+                // Intentional fall through
+
             case PHP_84_VERSION_ID:
                 $include = array_merge($include, self::PHP_84_KNOWN);
                 // Intentional fall through
@@ -3546,6 +3560,7 @@ class ClassInfo {
 
         $php83Flags = $php82Flags;
         $php84Flags = $php83Flags;
+        $php85Flags = $php84Flags;
 
         return [
             PHP_70_VERSION_ID => $php70Flags,
@@ -3554,6 +3569,7 @@ class ClassInfo {
             PHP_82_VERSION_ID => $php82Flags,
             PHP_83_VERSION_ID => $php83Flags,
             PHP_84_VERSION_ID => $php84Flags,
+            PHP_85_VERSION_ID => $php85Flags,
         ];
     }
 
@@ -4930,7 +4946,7 @@ function parseStubFile(string $code): FileInfo {
                     throw new Exception(
                         "Legacy PHP version must be one of: \"" . PHP_70_VERSION_ID . "\" (PHP 7.0), \"" . PHP_80_VERSION_ID . "\" (PHP 8.0), " .
                         "\"" . PHP_81_VERSION_ID . "\" (PHP 8.1), \"" . PHP_82_VERSION_ID . "\" (PHP 8.2), \"" . PHP_83_VERSION_ID . "\" (PHP 8.3), " .
-                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . $tag->value . "\" provided"
+                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . $tag->value . "\" provided"
                     );
                 }
 
