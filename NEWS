@@ -51,6 +51,10 @@ PHP                                                                        NEWS
   . Partially fixed bug GH-17387 (Trivial crash in phpdbg lexer). (nielsdos)
   . Fix memory leak in phpdbg calling registered function. (nielsdos)
 
+- Reflection:
+  . Fixed bug GH-15902 (Core dumped in ext/reflection/php_reflection.c).
+    (DanielEScherzer)
+
 - Streams:
   . Fixed bug GH-17650 (realloc with size 0 in user_filters.c). (nielsdos)
   . Fix memory leak on overflow in _php_stream_scandir(). (nielsdos)
