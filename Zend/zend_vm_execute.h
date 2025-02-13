@@ -8033,6 +8033,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ATTRIBUTED_CONST_SPEC_
 
 	HashTable *attributes = Z_PTR_P(get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1));
 	zend_constant *registered = zend_get_constant_ptr(c.name);
+	ZEND_ASSERT(attributes != NULL);
 	ZEND_ASSERT(registered != NULL);
 	zend_constant_add_attributes(registered, attributes);
 

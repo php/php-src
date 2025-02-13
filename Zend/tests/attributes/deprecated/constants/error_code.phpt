@@ -8,9 +8,9 @@ set_error_handler(function (int $errno, string $errstr, ?string $errfile = null,
 });
 
 #[\Deprecated]
-const Example = 5;
+const EXAMPLE = 5;
 
-Example;
+EXAMPLE;
 
 ?>
 --EXPECT--

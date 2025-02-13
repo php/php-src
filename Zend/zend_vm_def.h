@@ -8285,6 +8285,7 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 
 	HashTable *attributes = Z_PTR_P(GET_OP_DATA_ZVAL_PTR(BP_VAR_R));
 	zend_constant *registered = zend_get_constant_ptr(c.name);
+	ZEND_ASSERT(attributes != NULL);
 	ZEND_ASSERT(registered != NULL);
 	zend_constant_add_attributes(registered, attributes);
 
