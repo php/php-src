@@ -67,6 +67,9 @@ static const int8_t _ir_fp_reg_params[IR_REG_FP_ARGS];
 #else
 static const int8_t *_ir_fp_reg_params;
 #endif
+#ifdef IR_HAVE_PRESERVE_NONE
+static const int8_t _ir_int_pn_reg_params[IR_REG_INT_PNARGS];
+#endif
 
 static const ir_proto_t *ir_call_proto(const ir_ctx *ctx, ir_insn *insn)
 {
@@ -98,12 +101,14 @@ bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 				if (func->proto) {
 					const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
 
+					IR_CHECK_CALLING_CONV(proto->flags);
 					return (proto->flags & IR_FASTCALL_FUNC) != 0;
 				}
 			}
 		} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
 			const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
 
+			IR_CHECK_CALLING_CONV(proto->flags);
 			return (proto->flags & IR_FASTCALL_FUNC) != 0;
 		}
 		return 0;
@@ -112,6 +117,35 @@ bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 }
 #else
 bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
+{
+	return 0;
+}
+#endif
+
+#ifdef IR_HAVE_PRESERVE_NONE
+bool ir_is_preserve_none(const ir_ctx *ctx, const ir_insn *insn)
+{
+	if (IR_IS_CONST_REF(insn->op2)) {
+		const ir_insn *func = &ctx->ir_base[insn->op2];
+
+		if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
+			if (func->proto) {
+				const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
+
+				IR_CHECK_CALLING_CONV(proto->flags);
+				return (proto->flags & IR_PRESERVE_NONE_FUNC) != 0;
+			}
+		}
+	} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
+		const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
+
+		IR_CHECK_CALLING_CONV(proto->flags);
+		return (proto->flags & IR_PRESERVE_NONE_FUNC) != 0;
+	}
+	return 0;
+}
+#else
+bool ir_is_preserve_none(const ir_ctx *ctx, const ir_insn *insn)
 {
 	return 0;
 }
@@ -152,12 +186,20 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 	const int8_t *int_reg_params = _ir_int_reg_params;
 	const int8_t *fp_reg_params = _ir_fp_reg_params;
 
+	IR_CHECK_CALLING_CONV(ctx->flags);
+
 #ifdef IR_HAVE_FASTCALL
 	if (sizeof(void*) == 4 && (ctx->flags & IR_FASTCALL_FUNC)) {
 		int_reg_params_count = IR_REG_INT_FCARGS;
 		fp_reg_params_count = IR_REG_FP_FCARGS;
 		int_reg_params = _ir_int_fc_reg_params;
 		fp_reg_params = _ir_fp_fc_reg_params;
+	}
+#endif
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
 	}
 #endif
 
@@ -210,12 +252,20 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 	const int8_t *int_reg_params = _ir_int_reg_params;
 	const int8_t *fp_reg_params = _ir_fp_reg_params;
 
+	IR_CHECK_CALLING_CONV(ctx->flags);
+
 #ifdef IR_HAVE_FASTCALL
 	if (sizeof(void*) == 4 && ir_is_fastcall(ctx, insn)) {
 		int_reg_params_count = IR_REG_INT_FCARGS;
 		fp_reg_params_count = IR_REG_FP_FCARGS;
 		int_reg_params = _ir_int_fc_reg_params;
 		fp_reg_params = _ir_fp_fc_reg_params;
+	}
+#endif
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
 	}
 #endif
 
@@ -415,9 +465,9 @@ static int ir_const_label(ir_ctx *ctx, ir_ref ref)
 }
 
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-# include "ir_emit_x86.h"
+# include <ir_emit_x86.h>
 #elif defined(IR_TARGET_AARCH64)
-# include "ir_emit_aarch64.h"
+# include <ir_emit_aarch64.h>
 #else
 # error "Unknown IR target"
 #endif

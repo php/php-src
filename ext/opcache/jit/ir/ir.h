@@ -508,34 +508,36 @@ void ir_strtab_free(ir_strtab *strtab);
 
 /* IR Context Flags */
 #define IR_FUNCTION            (1<<0) /* Generate a function. */
+/* Func flags must be in the low 8 bits (for ir_proto_t.flags) */
 #define IR_FASTCALL_FUNC       (1<<1) /* Generate a function with fastcall calling convention, x86 32-bit only. */
-#define IR_VARARG_FUNC         (1<<2)
-#define IR_BUILTIN_FUNC        (1<<3)
-#define IR_STATIC              (1<<4)
-#define IR_EXTERN              (1<<5)
-#define IR_CONST               (1<<6)
+#define IR_PRESERVE_NONE_FUNC  (1<<2) /* Generate a function with preserve_none calling convention */
+#define IR_VARARG_FUNC         (1<<3)
+#define IR_BUILTIN_FUNC        (1<<4)
+#define IR_STATIC              (1<<5)
+#define IR_EXTERN              (1<<6)
+#define IR_CONST               (1<<7)
 
-#define IR_INITIALIZED         (1<<7) /* sym data flag: constant or an initialized variable */
-#define IR_CONST_STRING        (1<<8) /* sym data flag: constant string */
+#define IR_INITIALIZED         (1<<8) /* sym data flag: constant or an initialized variable */
+#define IR_CONST_STRING        (1<<9) /* sym data flag: constant string */
 
-#define IR_SKIP_PROLOGUE       (1<<8) /* Don't generate function prologue. */
-#define IR_USE_FRAME_POINTER   (1<<9)
-#define IR_PREALLOCATED_STACK  (1<<10)
-#define IR_NO_STACK_COMBINE    (1<<11)
-#define IR_START_BR_TARGET     (1<<12)
-#define IR_ENTRY_BR_TARGET     (1<<13)
-#define IR_GEN_ENDBR           (1<<14)
-#define IR_MERGE_EMPTY_ENTRIES (1<<15)
+#define IR_SKIP_PROLOGUE       (1<<9) /* Don't generate function prologue. */
+#define IR_USE_FRAME_POINTER   (1<<10)
+#define IR_PREALLOCATED_STACK  (1<<11)
+#define IR_NO_STACK_COMBINE    (1<<12)
+#define IR_START_BR_TARGET     (1<<13)
+#define IR_ENTRY_BR_TARGET     (1<<14)
+#define IR_GEN_ENDBR           (1<<15)
+#define IR_MERGE_EMPTY_ENTRIES (1<<16)
 
-#define IR_OPT_INLINE          (1<<16)
-#define IR_OPT_FOLDING         (1<<17)
-#define IR_OPT_CFG             (1<<18) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_MEM2SSA         (1<<19)
-#define IR_OPT_CODEGEN         (1<<20)
-#define IR_GEN_NATIVE          (1<<21)
-#define IR_GEN_CODE            (1<<22) /* C or LLVM */
+#define IR_OPT_INLINE          (1<<17)
+#define IR_OPT_FOLDING         (1<<18)
+#define IR_OPT_CFG             (1<<19) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
+#define IR_OPT_MEM2SSA         (1<<20)
+#define IR_OPT_CODEGEN         (1<<21)
+#define IR_GEN_NATIVE          (1<<22)
+#define IR_GEN_CODE            (1<<23) /* C or LLVM */
 
-#define IR_GEN_CACHE_DEMOTE    (1<<23) /* Demote the generated code from closest CPU caches */
+#define IR_GEN_CACHE_DEMOTE    (1<<24) /* Demote the generated code from closest CPU caches */
 
 /* debug related */
 #ifdef IR_DEBUG
