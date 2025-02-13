@@ -879,10 +879,6 @@ PHP_FUNCTION(inflate_init)
 		RETURN_THROWS();
 	}
 
-	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
-		RETURN_THROWS();
-	}
-
 	switch (encoding) {
 		case PHP_ZLIB_ENCODING_RAW:
 		case PHP_ZLIB_ENCODING_GZIP:
@@ -891,6 +887,10 @@ PHP_FUNCTION(inflate_init)
 		default:
 			zend_value_error("Encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE");
 			RETURN_THROWS();
+	}
+
+	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
+		RETURN_THROWS();
 	}
 
 	object_init_ex(return_value, inflate_context_ce);
@@ -1132,10 +1132,6 @@ PHP_FUNCTION(deflate_init)
 			RETURN_THROWS();
 	}
 
-	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
-		RETURN_THROWS();
-	}
-
 	switch (encoding) {
 		case PHP_ZLIB_ENCODING_RAW:
 		case PHP_ZLIB_ENCODING_GZIP:
@@ -1144,6 +1140,10 @@ PHP_FUNCTION(deflate_init)
 		default:
 			zend_argument_value_error(1, "must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE");
 			RETURN_THROWS();
+	}
+
+	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
+		RETURN_THROWS();
 	}
 
 	object_init_ex(return_value, deflate_context_ce);
