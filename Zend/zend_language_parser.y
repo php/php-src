@@ -1419,7 +1419,7 @@ class_name:
 
 interface_name:
 		class_name		{ $$ = $1; }
-	|	'?' name 		{ $$ = $2; $$->attr |= ZEND_CLASS_NAME_OPTIONAL; }
+	|	'?' name 		{ $$ = $2; $$->attr |= ZEND_NAME_OPTIONAL; }
 ;
 
 class_name_reference:
