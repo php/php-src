@@ -1080,12 +1080,12 @@ static zend_string *zend_resolve_non_class_name(
 		return zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
 	}
 
-	if (type == ZEND_NAME_FQ) {
+	if (NAME_QUAL(type) == ZEND_NAME_FQ) {
 		*is_fully_qualified = 1;
 		return zend_string_copy(name);
 	}
 
-	if (type == ZEND_NAME_RELATIVE) {
+	if (NAME_QUAL(type) == ZEND_NAME_RELATIVE) {
 		*is_fully_qualified = 1;
 		return zend_prefix_with_ns(name);
 	}
@@ -1142,23 +1142,24 @@ static zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /*
 	char *compound;
 
 	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
-		if (type == ZEND_NAME_FQ) {
+		if (NAME_QUAL(type) == ZEND_NAME_FQ) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"'\\%s' is an invalid class name", ZSTR_VAL(name));
 		}
-		if (type == ZEND_NAME_RELATIVE) {
+		if (NAME_QUAL(type) == ZEND_NAME_RELATIVE) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"'namespace\\%s' is an invalid class name", ZSTR_VAL(name));
 		}
-		ZEND_ASSERT(type == ZEND_NAME_NOT_FQ);
+
+		ZEND_ASSERT(NAME_QUAL(type) == ZEND_NAME_NOT_FQ);
 		return zend_string_copy(name);
 	}
 
-	if (type == ZEND_NAME_RELATIVE) {
+	if (NAME_QUAL(type) == ZEND_NAME_RELATIVE) {
 		return zend_prefix_with_ns(name);
 	}
 
-	if (type == ZEND_NAME_FQ) {
+	if (NAME_QUAL(type) == ZEND_NAME_FQ) {
 		if (ZSTR_VAL(name)[0] == '\\') {
 			/* Remove \ prefix (only relevant if this is a string rather than a label) */
 			name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
@@ -1745,7 +1746,7 @@ uint32_t zend_get_class_fetch_type(const zend_string *name) /* {{{ */
 static uint32_t zend_get_class_fetch_type_ast(zend_ast *name_ast) /* {{{ */
 {
 	/* Fully qualified names are always default refs */
-	if (name_ast->attr == ZEND_NAME_FQ) {
+	if (NAME_QUAL(name_ast->attr) == ZEND_NAME_FQ) {
 		return ZEND_FETCH_CLASS_DEFAULT;
 	}
 
@@ -2874,7 +2875,7 @@ static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t f
 	}
 
 	/* Fully qualified names are always default refs */
-	if (name_ast->attr == ZEND_NAME_FQ) {
+	if (NAME_QUAL(name_ast->attr) == ZEND_NAME_FQ) {
 		result->op_type = IS_CONST;
 		ZVAL_STR(&result->u.constant, zend_resolve_class_name_ast(name_ast));
 		return;
@@ -6960,7 +6961,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		uint8_t type_code = zend_lookup_builtin_type_by_name(type_name);
 
 		if (type_code != 0) {
-			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
+			if (NAME_QUAL(ast->attr) != ZEND_NAME_NOT_FQ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(type_name)));
@@ -7004,7 +7005,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				zend_string_addref(class_name);
 			}
 
-			if (ast->attr == ZEND_NAME_NOT_FQ
+			if (NAME_QUAL(ast->attr) == ZEND_NAME_NOT_FQ
 					&& zend_is_confusable_type(type_name, &correct_name)
 					&& zend_is_not_imported(type_name)) {
 				const char *extra =
@@ -10790,7 +10791,7 @@ static void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 	zend_string *orig_name = zend_ast_get_str(name_ast);
 	zend_string *resolved_name = zend_resolve_const_name(orig_name, name_ast->attr, &is_fully_qualified);
 
-	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__") || (name_ast->attr != ZEND_NAME_RELATIVE && zend_string_equals_literal(orig_name, "__COMPILER_HALT_OFFSET__"))) {
+	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__") || (NAME_QUAL(name_ast->attr) != ZEND_NAME_RELATIVE && zend_string_equals_literal(orig_name, "__COMPILER_HALT_OFFSET__"))) {
 		zend_ast *last = CG(ast);
 
 		while (last && last->kind == ZEND_AST_STMT_LIST) {
