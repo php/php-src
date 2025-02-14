@@ -3071,7 +3071,7 @@ class PropertyInfo extends VariableLike
         ];
         // If not set, use the current latest version
         $allVersions = ALL_PHP_VERSION_IDS;
-        $minPhp = $phpVersionIdMinimumCompatibility ?? end($allVersions);
+        $minPhp = $this->phpVersionIdMinimumCompatibility ?? end($allVersions);
         if ($minPhp < PHP_80_VERSION_ID) {
             // No known strings in 7.0
             return $result;
