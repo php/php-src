@@ -643,8 +643,9 @@ static int format_default_value(smart_str *str, zval *value) {
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
 	} else if (Z_TYPE_P(value) == IS_OBJECT) {
-		/* This branch may only be reached for default properties; show enum names,
-			or the type of non-enums (GH-15902) */
+		/* This branch is reached if the constant AST was already evaluated and
+		 * resulted in an object; show enum names, or the type of non-enums
+		 * (GH-15902) */
 		zend_object *obj = Z_OBJ_P(value);
 		zend_class_entry *class = obj->ce;
 		if (class->ce_flags & ZEND_ACC_ENUM) {
