@@ -108,7 +108,7 @@ static inline void strip_header(char *header_bag, char *lc_header_bag,
 static bool check_has_header(const char *headers, const char *header) {
 	const char *s = headers;
 	while ((s = strstr(s, header))) {
-		if (s == headers || *(s-1) == '\n') {
+		if (s == headers || (*(s-1) == '\n' && *(s-2) == '\r')) {
 			return 1;
 		}
 		s++;
