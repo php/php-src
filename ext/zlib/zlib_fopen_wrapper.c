@@ -61,7 +61,7 @@ static ssize_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 		}
 
 		if (UNEXPECTED(read < 0)) {
-			php_gziop_report_errors(stream, count, "Read");
+			php_gziop_report_errors(stream, chunk_size, "Read");
 			return read;
 		}
 
@@ -87,7 +87,7 @@ static ssize_t php_gziop_write(php_stream *stream, const char *buf, size_t count
 		count -= chunk_size;
 
 		if (UNEXPECTED(written < 0)) {
-			php_gziop_report_errors(stream, count, "Write");
+			php_gziop_report_errors(stream, chunk_size, "Write");
 			return written;
 		}
 
