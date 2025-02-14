@@ -45,36 +45,57 @@ static void php_gziop_report_errors(php_stream *stream, size_t count, const char
 static ssize_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
-	int read;
+	ssize_t total_read = 0;
 
-	/* XXX this needs to be looped for the case count > UINT_MAX */
-	read = gzread(self->gz_file, buf, count);
+	/* Despite the count argument of gzread() being "unsigned int",
+	 * the return value is "int". Error returns are values < 0, otherwise the count is returned.
+	 * To properly distinguish error values from success value, we therefore need to cap at INT_MAX.
+	 */
+	do {
+		unsigned int chunk_size = MIN(count, INT_MAX);
+		int read = gzread(self->gz_file, buf, chunk_size);
+		count -= chunk_size;
 
-	/* Notify user of error, like the standard file wrapper normally does (e.g. errno=13 on mandatory lock failure). */
-	if (UNEXPECTED(read < 0)) {
-		php_gziop_report_errors(stream, count, "Read");
-	}
+		if (gzeof(self->gz_file)) {
+			stream->eof = 1;
+		}
 
-	if (gzeof(self->gz_file)) {
-		stream->eof = 1;
-	}
+		if (UNEXPECTED(read < 0)) {
+			php_gziop_report_errors(stream, count, "Read");
+			return read;
+		}
 
-	return read;
+		total_read += read;
+		buf += read;
+	} while (count > 0 && !stream->eof);
+
+	return total_read;
 }
 
 static ssize_t php_gziop_write(php_stream *stream, const char *buf, size_t count)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
+	ssize_t total_written = 0;
 
-	/* XXX this needs to be looped for the case count > UINT_MAX */
-	int written = gzwrite(self->gz_file, (char *) buf, count);
+	/* Despite the count argument of gzread() being "unsigned int",
+	 * the return value is "int". Error returns are values < 0, otherwise the count is returned.
+	 * To properly distinguish error values from success value, we therefore need to cap at INT_MAX.
+	 */
+	do {
+		unsigned int chunk_size = MIN(count, INT_MAX);
+		int written = gzwrite(self->gz_file, buf, chunk_size);
+		count -= chunk_size;
 
-	/* Notify user of error, like the standard file wrapper normally does (e.g. errno=13 on mandatory lock failure). */
-	if (UNEXPECTED(written < 0)) {
-		php_gziop_report_errors(stream, count, "Write");
-	}
+		if (UNEXPECTED(written < 0)) {
+			php_gziop_report_errors(stream, count, "Write");
+			return written;
+		}
 
-	return written;
+		total_written += written;
+		buf += written;
+	} while (count > 0);
+
+    return total_written;
 }
 
 static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs)
