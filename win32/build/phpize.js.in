@@ -91,6 +91,7 @@ function find_config_w32(dirname)
 
 		deps = get_module_dep(contents);
 
+		n = "";
 		item = new Module_Item(n, c, dir_line, deps, contents);
 		MODULES.Add(n, item);
 	}
