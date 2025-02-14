@@ -2473,10 +2473,8 @@ _yy_state_2:
 static int parse_struct_declaration(int sym, zend_ffi_dcl *struct_dcl) {
 	zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;
 	zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;
-
 	sym = parse_specifier_qualifier_list(sym, &common_field_dcl);
 	base_field_dcl = common_field_dcl;
-
 	if (sym == YY__SEMICOLON || sym == YY__RBRACE) {
 		zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);
 	} else if (sym == YY__STAR || sym == YY_ID || sym == YY__LPAREN || sym == YY__COLON) {
