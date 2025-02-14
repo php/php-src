@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fix fallback paths in fast_long_{add,sub}_function. (nielsdos)
   . Fixed bug GH-17718 (Calling static methods on an interface that has
     `__callStatic` is allowed). (timwolla)
+  . Fixed bug GH-17797 (zend_test_compile_string crash on invalid
+    script path). (David Carlier)
 
 - FPM:
   . Fixed bug GH-17643 (FPM with httpd ProxyPass encoded PATH_INFO env).
