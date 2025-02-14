@@ -1034,7 +1034,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_NAME_FQ       0
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2
-#define ZEND_NAME_QUALIFIED_MASK 0x0011
+#define ZEND_NAME_QUALIFIED_MASK 0x03
 #define NAME_QUAL(type) (type & ZEND_NAME_QUALIFIED_MASK)
 
 #define ZEND_NAME_OPTIONAL 4
