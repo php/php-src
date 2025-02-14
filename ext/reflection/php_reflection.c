@@ -4828,24 +4828,19 @@ ZEND_METHOD(ReflectionClass, isCloneable)
 	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_ENUM)) {
 		RETURN_FALSE;
 	}
+	if (ce->clone) {
+		RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
+	}
 	if (!Z_ISUNDEF(intern->obj)) {
-		if (ce->clone) {
-			RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
-		} else {
-			RETURN_BOOL(Z_OBJ_HANDLER(intern->obj, clone_obj) != NULL);
-		}
+		RETURN_BOOL(Z_OBJ_HANDLER(intern->obj, clone_obj) != NULL);
 	} else {
-		if (ce->clone) {
-			RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
-		} else {
-			if (UNEXPECTED(object_init_ex(&obj, ce) != SUCCESS)) {
-				return;
-			}
-			/* We're not calling the constructor, so don't call the destructor either. */
-			zend_object_store_ctor_failed(Z_OBJ(obj));
-			RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
-			zval_ptr_dtor(&obj);
+		if (UNEXPECTED(object_init_ex(&obj, ce) != SUCCESS)) {
+			return;
 		}
+		/* We're not calling the constructor, so don't call the destructor either. */
+		zend_object_store_ctor_failed(Z_OBJ(obj));
+		RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
+		zval_ptr_dtor(&obj);
 	}
 }
 /* }}} */
