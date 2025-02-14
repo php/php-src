@@ -8988,7 +8988,7 @@ static void zend_compile_implements(zend_ast *ast) /* {{{ */
 		interface_names[i].name =
 			zend_resolve_const_class_name_reference(class_ast, "interface name");
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
-		interface_names[i].is_optional = ZEND_CLASS_NAME_OPTIONAL & class_ast->attr;
+		interface_names[i].is_optional = class_ast->attr & ZEND_CLASS_NAME_OPTIONAL;
 	}
 
 	ce->num_interfaces = list->children;
