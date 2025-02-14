@@ -2188,7 +2188,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
-static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry **interfaces) /* {{{ */
+static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry **interfaces, size_t num_interface_names) /* {{{ */
 {
 	zend_class_entry *iface;
 	uint32_t num_parent_interfaces = ce->parent ? ce->parent->num_interfaces : 0;
@@ -2230,6 +2230,14 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 			interfaces[num_interfaces] = iface;
 			num_interfaces++;
 		}
+	}
+
+	if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+		for (i = 0; i < num_interface_names; i++) {
+			zend_string_release_ex(ce->interface_names[i].name, 0);
+			zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+		}
+		efree(ce->interface_names);
 	}
 
 	ce->num_interfaces = num_interfaces;
@@ -3589,14 +3597,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			Z_CE_P(zv) = ce;
 		}
 
-		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
-			for (i = 0; i < ce->num_interfaces; i++) {
-				zend_string_release_ex(ce->interface_names[i].name, 0);
-				zend_string_release_ex(ce->interface_names[i].lc_name, 0);
-			}
-			efree(ce->interface_names);
-		}
-
+		size_t num_interface_names = ce->num_interfaces;
 		ce->num_interfaces = num_implementable_interfaces;
 
 		if (CG(unlinked_uses)) {
@@ -3638,7 +3639,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			memcpy(interfaces + num_parent_interfaces, traits_and_interfaces + ce->num_traits,
 				   sizeof(zend_class_entry *) * ce->num_interfaces);
 
-			zend_do_implement_interfaces(ce, interfaces);
+			zend_do_implement_interfaces(ce, interfaces, num_interface_names);
 		} else if (parent && parent->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent);
 		}
