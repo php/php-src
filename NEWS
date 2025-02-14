@@ -42,6 +42,9 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-17650 (realloc with size 0 in user_filters.c). (nielsdos)
 
+- Windows:
+  . Fixed phpize for Windows 11 (24H2). (bwoebi)
+
 - Zlib:
   . Fixed bug GH-17745 (zlib extension incorrectly handles object arguments).
     (nielsdos)
