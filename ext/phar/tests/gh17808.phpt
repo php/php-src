@@ -2,7 +2,6 @@
 GH-17808 (PharFileInfo refcount bug)
 --EXTENSIONS--
 phar
-zlib
 --FILE--
 <?php
 $fname = __DIR__.'/tar/files/Structures_Graph-1.0.3.tgz';
