@@ -162,7 +162,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 {
 	phar_archive_data *phar;
 	phar_entry_data *idata;
-	const char *internal_file;
+	char *internal_file;
 	char *error;
 	HashTable *pharcontext;
 	php_url *resource = NULL;
@@ -189,7 +189,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	phar_request_initialize();
 
 	/* strip leading "/" */
-	internal_file = ZSTR_VAL(resource->path) + 1;
+	internal_file = estrndup(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1);
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, 1))) {
 			if (error) {
@@ -198,6 +198,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			} else {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, ZSTR_VAL(resource->host));
 			}
+			efree(internal_file);
 			php_url_free(resource);
 			return NULL;
 		}
@@ -206,6 +207,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 		}
 		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 		php_url_free(resource);
+		efree(internal_file);
 
 		if (context && Z_TYPE(context->options) != IS_UNDEF && (pzoption = zend_hash_str_find(HASH_OF(&context->options), "phar", sizeof("phar")-1)) != NULL) {
 			pharcontext = HASH_OF(pzoption);
@@ -235,6 +237,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			/* retrieve the stub */
 			if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, NULL)) {
 				php_stream_wrapper_log_error(wrapper, options, "file %s is not a valid phar archive", ZSTR_VAL(resource->host));
+				efree(internal_file);
 				php_url_free(resource);
 				return NULL;
 			}
@@ -242,6 +245,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				if ((FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), ".phar/stub.php", sizeof(".phar/stub.php")-1, "r", 0, &error, 0)) || !idata) {
 					goto idata_error;
 				}
+				efree(internal_file);
 				if (opened_path) {
 					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
 				}
@@ -252,6 +256,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				if (stream == NULL) {
 					if (UNEXPECTED(FAILURE == phar_open_archive_fp(phar))) {
 						php_stream_wrapper_log_error(wrapper, options, "phar error: could not reopen phar \"%s\"", ZSTR_VAL(resource->host));
+						efree(internal_file);
 						php_url_free(resource);
 						return NULL;
 					}
@@ -280,6 +285,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				if (opened_path) {
 					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
 				}
+				efree(internal_file);
 				goto phar_stub;
 			}
 		}
@@ -292,6 +298,7 @@ idata_error:
 			} else {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, ZSTR_VAL(resource->host));
 			}
+			efree(internal_file);
 			php_url_free(resource);
 			return NULL;
 		}
@@ -310,6 +317,7 @@ idata_error:
 		php_stream_wrapper_log_error(wrapper, options, "%s", error);
 		efree(error);
 		phar_entry_delref(idata);
+		efree(internal_file);
 		return NULL;
 	}
 
@@ -332,6 +340,7 @@ idata_error:
 	if (opened_path) {
 		*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%s/%S", idata->phar->fname, idata->internal_file->filename);
 	}
+	efree(internal_file);
 phar_stub:
 	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	return fpf;
@@ -653,8 +662,7 @@ free_resource:
 static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
 {
 	php_url *resource;
-	const char *internal_file;
-	char *error;
+	char *internal_file, *error;
 	int internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data *pphar;
@@ -687,7 +695,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	}
 
 	/* need to copy to strip leading "/", will get touched again */
-	internal_file = ZSTR_VAL(resource->path) + 1;
+	internal_file = estrndup(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1);
 	internal_file_len = ZSTR_LEN(resource->path) - 1;
 	if (FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, internal_file_len, "r", 0, &error, 1)) {
 		/* constraints of fp refcount were not met */
@@ -697,6 +705,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		} else {
 			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed, file does not exist", url);
 		}
+		efree(internal_file);
 		php_url_free(resource);
 		return 0;
 	}
@@ -706,11 +715,13 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	if (idata->internal_file->fp_refcount > 1) {
 		/* more than just our fp resource is open for this file */
 		php_stream_wrapper_log_error(wrapper, options, "phar error: \"%s\" in phar \"%s\", has open file pointers, cannot unlink", internal_file, ZSTR_VAL(resource->host));
+		efree(internal_file);
 		php_url_free(resource);
 		phar_entry_delref(idata);
 		return 0;
 	}
 	php_url_free(resource);
+	efree(internal_file);
 	phar_entry_remove(idata, &error);
 	if (error) {
 		php_stream_wrapper_log_error(wrapper, options, "%s", error);

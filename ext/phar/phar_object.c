@@ -1976,7 +1976,7 @@ static zend_result phar_copy_file_contents(phar_entry_info *entry, php_stream *f
 }
 /* }}} */
 
-static zend_object *phar_rename_archive(phar_archive_data **sphar, const char *ext) /* {{{ */
+static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext) /* {{{ */
 {
 	const char *oldname = NULL;
 	phar_archive_data *phar = *sphar;
@@ -3484,7 +3484,7 @@ PHP_METHOD(Phar, copy)
 	}
 
 	size_t tmp_len = ZSTR_LEN(new_file);
-	const char *tmp_new_file = ZSTR_VAL(new_file);
+	char *tmp_new_file = ZSTR_VAL(new_file);
 	if (phar_path_check(&tmp_new_file, &tmp_len, &pcr_error) > pcr_is_ok) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"file \"%s\" contains invalid characters %s, cannot be copied from \"%s\" in phar %s", ZSTR_VAL(new_file), pcr_error, ZSTR_VAL(old_file), phar_obj->archive->fname);
