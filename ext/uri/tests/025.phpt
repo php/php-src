@@ -8,13 +8,22 @@ uri
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
 $url2 = $url1->withPassword("pass");
 $url3 = $url2->withPassword(null);
+$url4 = $url3->withPassword("p%61ss");
+$url5 = $url4->withPassword("p:s/");
 
-var_dump($url1->toString());
-var_dump($url2->toString());
-var_dump($url3->toString());
+$url6 = Uri\WhatWg\Url::parse("file:///foo/bar/");
+$url6 = $url6->withUser("pass");
+
+var_dump($url2->getRawPassword());
+var_dump($url3->getRawPassword());
+var_dump($url4->getRawPassword());
+var_dump($url5->getRawPassword());
+var_dump($url6->getRawPassword());
 
 ?>
 --EXPECT--
-string(20) "https://example.com/"
-string(26) "https://:pass@example.com/"
-string(20) "https://example.com/"
+string(4) "pass"
+NULL
+string(6) "p%61ss"
+string(8) "p%3As%2F"
+NULL

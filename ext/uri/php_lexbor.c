@@ -392,7 +392,7 @@ static zend_result lexbor_write_host(uri_internal_t *internal_uri, zval *value, 
 
 	ZVAL_TO_LEXBOR_STR(value, str);
 
-	lxb_status_t status = lxb_url_api_host_set(lexbor_uri, lexbor_parser, str.data, str.length);
+	lxb_status_t status = lxb_url_api_hostname_set(lexbor_uri, lexbor_parser, str.data, str.length);
 
 	CHECK_WRITE_RESULT(status, lexbor_uri, str, errors);
 }
