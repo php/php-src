@@ -32,6 +32,18 @@ foreach ($dom->querySelectorAll('meta[charset]') as $entry) {
     var_dump($dom->saveHtml($entry));
 }
 
+echo "--- charseT and lowercase value ---\n";
+
+foreach ($dom->querySelectorAll('meta[charseT="windows-1252"]') as $entry) {
+    var_dump($dom->saveHtml($entry));
+}
+
+echo "--- charset and lowercase value ---\n";
+
+foreach ($dom->querySelectorAll('meta[charset="windows-1252"]') as $entry) {
+    var_dump($dom->saveHtml($entry));
+}
+
 ?>
 --EXPECT--
 <html><head>
@@ -45,3 +57,7 @@ string(29) "<meta charset="Windows-1252">"
 --- charset ---
 string(29) "<meta charset="Windows-1252">"
 string(25) "<meta charset="x"></meta>"
+--- charseT and lowercase value ---
+string(29) "<meta charset="Windows-1252">"
+--- charset and lowercase value ---
+string(29) "<meta charset="Windows-1252">"

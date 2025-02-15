@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
     Dom\HTML_NO_DEFAULT_NS). (nielsdos)
+  . Fixed bug GH-17802 (\Dom\HTMLDocument querySelector attribute name is case
+    sensitive in HTML). (nielsdos)
 
 - GD:
   . Fixed bug GH-17703 (imagescale with both width and height negative values
