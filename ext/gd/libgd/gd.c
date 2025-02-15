@@ -3190,8 +3190,8 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 		// Note: do not revert back to gdMalloc() below ; reason here,
 		// due to a bug with a certain memory_limit INI value treshold,
 		// imagepalettetotruecolor crashes with even unrelated ZendMM allocations.
-		// See GH-17772 for an use case.
-		src->tpixels = (int **) gdCalloc(sizeof(int *), sy);
+		// See GH-17772 for a use case.
+		src->tpixels = (int **) gdCalloc(sy, sizeof(int *));
 		if (src->tpixels == NULL) {
 			return 0;
 		}
