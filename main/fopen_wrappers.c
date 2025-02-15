@@ -603,7 +603,13 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		const char *exec_fname = ZSTR_VAL(exec_filename);
 		size_t exec_fname_length = ZSTR_LEN(exec_filename);
 
-		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
+		while (exec_fname_length > 0) {
+			--exec_fname_length;
+			if (IS_SLASH(exec_fname[exec_fname_length])) {
+				break;
+			}
+		}
+
 		if (exec_fname_length > 0 &&
 			filename_length < (MAXPATHLEN - 2) &&
 		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {
