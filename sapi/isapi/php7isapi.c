@@ -45,7 +45,7 @@
 #endif
 
 #ifdef PHP_WIN32
-#define PHP_ENABLE_SEH
+// #define PHP_ENABLE_SEH
 #endif
 
 /*
@@ -143,6 +143,9 @@ static char *isapi_secure_server_variable_names[] = {
 	NULL
 };
 
+#if defined(PHP_WIN32) && defined(ZTS)
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 
 static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS)
 {
@@ -202,7 +205,7 @@ static zend_module_entry php_isapi_module = {
 };
 
 
-static int sapi_isapi_ub_write(const char *str, uint str_length)
+static size_t sapi_isapi_ub_write(const char *str, size_t str_length)
 {
 	DWORD num_bytes = str_length;
 	LPEXTENSION_CONTROL_BLOCK ecb;
@@ -222,7 +225,7 @@ static int sapi_isapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 
 
 
-static void accumulate_header_length(sapi_header_struct *sapi_header, uint *total_length)
+static void accumulate_header_length(sapi_header_struct *sapi_header, unsigned int *total_length)
 {
 	*total_length += sapi_header->header_len+2;
 }
@@ -241,7 +244,7 @@ static void concat_header(sapi_header_struct *sapi_header, char **combined_heade
 
 static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers)
 {
-	uint total_length = 2;		/* account for the trailing \r\n */
+	unsigned int total_length = 2;		/* account for the trailing \r\n */
 	char *combined_headers, *combined_headers_ptr;
 	LPEXTENSION_CONTROL_BLOCK lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 	HSE_SEND_HEADER_EX_INFO header_info;
@@ -315,7 +318,7 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers)
 
 static int php_isapi_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, &php_isapi_module, 1)==FAILURE) {
+	if (php_module_startup(sapi_module, &php_isapi_module)==FAILURE) {
 		return FAILURE;
 	} else {
 		bTerminateThreadsOnError = (zend_bool) INI_INT("isapi.terminate_threads_on_error");
@@ -324,7 +327,7 @@ static int php_isapi_startup(sapi_module_struct *sapi_module)
 }
 
 
-static int sapi_isapi_read_post(char *buffer, uint count_bytes)
+static size_t sapi_isapi_read_post(char *buffer, size_t count_bytes)
 {
 	LPEXTENSION_CONTROL_BLOCK lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 	DWORD read_from_buf=0;
@@ -372,7 +375,7 @@ static char *sapi_isapi_read_cookies(void)
 			efree(tmp_variable_buf);
 		}
 	}
-	return STR_EMPTY_ALLOC();
+	return NULL;
 }
 
 
@@ -837,6 +840,13 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 #ifdef PHP_ENABLE_SEH
 	LPEXCEPTION_POINTERS e;
 #endif
+#ifdef ZTS
+	/* initial resource fetch */
+	(void)ts_resource(0);
+# ifdef PHP_WIN32
+	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
+#endif
 
 	zend_first_try {
 #ifdef PHP_ENABLE_SEH
@@ -844,13 +854,11 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 #endif
 			init_request_info(lpECB);
 			SG(server_context) = lpECB;
-
 			php_request_startup();
 
-			file_handle.filename = SG(request_info).path_translated;
-			file_handle.free_filename = 0;
-			file_handle.type = ZEND_HANDLE_FILENAME;
-			file_handle.opened_path = NULL;
+			// FIXME: we're leaking the file_handle.filename
+			zend_stream_init_filename(&file_handle, (char *) SG(request_info).path_translated);
+			file_handle.primary_script = 1;
 
 			/* open the script here so we can 404 if it fails */
 			if (file_handle.filename)
@@ -862,12 +870,14 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 			} else {
 				php_execute_script(&file_handle);
 			}
+			zend_destroy_file_handle(&file_handle);
 
 			if (SG(request_info).cookie_data) {
 				efree(SG(request_info).cookie_data);
 			}
-			if (SG(request_info).path_translated)
+			if (SG(request_info).path_translated) {
 				efree(SG(request_info).path_translated);
+			}
 #ifdef PHP_ENABLE_SEH
 		} __except(exceptionhandler(&e, GetExceptionInformation())) {
 			char buf[1024];
@@ -880,7 +890,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 				GetSystemInfo(&si);
 
 				/* Get page ESP is pointing to */
-				_asm mov lpPage, esp;
+				// _asm mov lpPage, esp;
 
 				/* Get stack allocation base */
 				VirtualQuery(lpPage, &mi, sizeof(mi));
@@ -937,11 +947,10 @@ __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, L
 {
 	switch (fdwReason) {
 		case DLL_PROCESS_ATTACH:
-#ifdef WITH_ZEUS
-			tsrm_startup(128, 1, TSRM_ERROR_LEVEL_CORE, "TSRM.log");
-#else
-			tsrm_startup(128, 1, TSRM_ERROR_LEVEL_CORE, "C:\\TSRM.log");
-#endif
+			php_tsrm_startup_ex(128);
+# ifdef PHP_WIN32
+			ZEND_TSRMLS_CACHE_UPDATE();
+# endif
 			sapi_startup(&isapi_sapi_module);
 			if (isapi_sapi_module.startup) {
 				isapi_sapi_module.startup(&sapi_module);
