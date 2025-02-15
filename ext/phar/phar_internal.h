@@ -420,8 +420,8 @@ char *phar_decompress_filter(phar_entry_info * entry, int return_unknown);
 char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
 
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
-void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len);
-zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len);
+void phar_add_virtual_dirs(phar_archive_data *phar, const char *filename, size_t filename_len);
+zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, const char *path, size_t path_len);
 zend_string *phar_find_in_include_path(zend_string *file, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
@@ -463,10 +463,10 @@ extern HashTable cached_alias;
 bool phar_archive_delref(phar_archive_data *phar);
 void phar_entry_delref(phar_entry_data *idata);
 
-phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, int security);
-phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, int security);
-phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
-zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
+phar_entry_info *phar_get_entry_info(phar_archive_data *phar, const char *path, size_t path_len, char **error, int security);
+phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, const char *path, size_t path_len, char dir, char **error, int security);
+phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, const char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
+zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, const char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
 void phar_flush_ex(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 void phar_flush(phar_archive_data *archive, char **error);
 zend_result phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const char **ext_str, size_t *ext_len, int executable, int for_create, int is_complete);
@@ -484,6 +484,6 @@ typedef enum {
 	pcr_err_empty_entry
 } phar_path_check_result;
 
-phar_path_check_result phar_path_check(char **p, size_t *len, const char **error);
+phar_path_check_result phar_path_check(const char **p, size_t *len, const char **error);
 
 END_EXTERN_C()
