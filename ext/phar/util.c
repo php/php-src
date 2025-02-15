@@ -189,7 +189,7 @@ int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_of
 /* }}} */
 
 /* mount an absolute path or uri to a path internal to the phar archive */
-zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len) /* {{{ */
+zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, const char *path, size_t path_len) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	php_stream_statbuf ssb;
@@ -472,7 +472,7 @@ static zend_result phar_separate_entry_fp(phar_entry_info *entry, char **error) 
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
+zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, const char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -632,7 +632,7 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
+phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, const char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
@@ -1234,7 +1234,7 @@ char * phar_decompress_filter(phar_entry_info * entry, int return_unknown) /* {{
 /**
  * retrieve information on a file contained within a phar, or null if it ain't there
  */
-phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, int security) /* {{{ */
+phar_entry_info *phar_get_entry_info(phar_archive_data *phar, const char *path, size_t path_len, char **error, int security) /* {{{ */
 {
 	return phar_get_entry_info_dir(phar, path, path_len, 0, error, security);
 }
@@ -1245,7 +1245,7 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t
  * valid pre-existing empty directory entries
  */
 // TODO: convert this to use zend_string too
-phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, int security) /* {{{ */
+phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, const char *path, size_t path_len, char dir, char **error, int security) /* {{{ */
 {
 	const char *pcr_error;
 	phar_entry_info *entry;
@@ -2006,7 +2006,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 /* }}} */
 
 // TODO: convert this to zend_string too
-void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len) /* {{{ */
+void phar_add_virtual_dirs(phar_archive_data *phar, const char *filename, size_t filename_len) /* {{{ */
 {
 	const char *s;
 	zend_string *str;
