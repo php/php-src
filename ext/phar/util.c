@@ -632,17 +632,13 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, const char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
+static phar_entry_data *phar_get_or_create_entry_data_ex(char *fname, size_t fname_len, const char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
 	phar_entry_data *ret;
 	const char *pcr_error;
 	char is_dir;
-
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(path, path_len);
-#endif
 
 	is_dir = (path_len && path[path_len - 1] == '/') ? 1 : 0;
 
@@ -730,6 +726,19 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, co
 	return ret;
 }
 /* }}} */
+
+phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, const char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security)
+{
+#ifdef PHP_WIN32
+	char *path_dup = estrndup(path, path_len);
+	phar_unixify_path_separators(path_dup, path_len);
+	phar_entry_data *ret = phar_get_or_create_entry_data_ex(fname, fname_len, path_dup, path_len, mode, allow_dir, error, security);
+	efree(path_dup);
+	return ret;
+#else
+	return phar_get_or_create_entry_data_ex(fname, fname_len, path, path_len, mode, allow_dir, error, security);
+#endif
+}
 
 static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
 {
@@ -1245,15 +1254,11 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, const char *path, 
  * valid pre-existing empty directory entries
  */
 // TODO: convert this to use zend_string too
-phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, const char *path, size_t path_len, char dir, char **error, int security) /* {{{ */
+static phar_entry_info *phar_get_entry_info_dir_ex(phar_archive_data *phar, const char *path, size_t path_len, char dir, char **error, int security) /* {{{ */
 {
 	const char *pcr_error;
 	phar_entry_info *entry;
 	int is_dir;
-
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(path, path_len);
-#endif
 
 	is_dir = (path_len && (path[path_len - 1] == '/')) ? 1 : 0;
 
@@ -1400,6 +1405,19 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, const char *pa
 	return NULL;
 }
 /* }}} */
+
+phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, const char *path, size_t path_len, char dir, char **error, int security)
+{
+#ifdef PHP_WIN32
+	char *path_dup = estrndup(path, path_len);
+	phar_unixify_path_separators(path_dup, path_len);
+	phar_entry_info *ret = phar_get_entry_info_dir_ex(phar, path_dup, path_len, dir, error, security);
+	efree(path_dup);
+	return ret;
+#else
+	return phar_get_entry_info_dir_ex(phar, path, path_len, dir, error, security);
+#endif
+}
 
 static const char hexChars[] = "0123456789ABCDEF";
 
