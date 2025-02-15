@@ -4483,6 +4483,9 @@ PHP_METHOD(PharFileInfo, __construct)
 	efree(entry);
 
 	entry_obj->entry = entry_info;
+	if (!entry_info->is_persistent && !entry_info->is_temp_dir) {
+		++entry_info->fp_refcount;
+	}
 
 	ZVAL_STRINGL(&arg1, fname, fname_len);
 
@@ -4512,15 +4515,23 @@ PHP_METHOD(PharFileInfo, __destruct)
 		RETURN_THROWS();
 	}
 
-	if (entry_obj->entry && entry_obj->entry->is_temp_dir) {
+	if (!entry_obj->entry) {
+		return;
+	}
+
+	if (entry_obj->entry->is_temp_dir) {
 		if (entry_obj->entry->filename) {
 			efree(entry_obj->entry->filename);
 			entry_obj->entry->filename = NULL;
 		}
 
 		efree(entry_obj->entry);
-		entry_obj->entry = NULL;
+	} else if (!entry_obj->entry->is_persistent) {
+		--entry_obj->entry->fp_refcount;
+		/* It is necessarily still in the manifest, which will ultimately free this. */
 	}
+
+	entry_obj->entry = NULL;
 }
 /* }}} */
 
