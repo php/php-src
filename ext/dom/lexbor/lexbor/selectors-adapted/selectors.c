@@ -65,7 +65,21 @@ static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_id(const xml
 
 static zend_always_inline const xmlAttr *lxb_selectors_adapted_attr(const xmlNode *node, const lxb_char_t *name)
 {
-	const xmlAttr *attr = xmlHasProp(node, (const xmlChar *) name);
+	const xmlAttr *attr = NULL;
+	ZEND_ASSERT(node->doc != NULL);
+	if (php_dom_ns_is_html_and_document_is_html(node)) {
+		/* No need to handle DTD entities as we're in HTML. */
+		size_t name_bound = strlen((const char *) name) + 1;
+		for (const xmlAttr *cur = node->properties; cur != NULL; cur = cur->next) {
+			if (lexbor_str_data_nlocmp_right(cur->name, name, name_bound)) {
+				attr = cur;
+				break;
+			}
+		}
+	} else {
+		attr = xmlHasProp(node, (const xmlChar *) name);
+	}
+
 	if (attr != NULL && attr->ns != NULL) {
 		return NULL;
 	}
