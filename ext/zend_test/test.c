@@ -249,10 +249,6 @@ static ZEND_FUNCTION(zend_test_compile_string)
 
 	zend_op_array *op_array = NULL;
 
-	if (zend_str_has_nul_byte(filename)) {
-		return;
-	}
-
 	op_array = compile_string(source_string, ZSTR_VAL(filename), position);
 
 	if (op_array) {

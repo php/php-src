@@ -49,7 +49,7 @@ try {
 	echo $e->getMessage(), PHP_EOL;
 }
 
-zend_test_compile_string($x, $y, $z);
+zend_test_compile_string(null, null, null);
 
 $source_string = <<<EOF
 <?php
@@ -66,12 +66,6 @@ string(3) "php"
 string(3) "php"
 string(3) "php"
 zend_test_compile_string(): Argument #2 ($filename) must not contain any null bytes
-
-Warning: Undefined variable $x in %s on line %d
-
-Warning: Undefined variable $y in %s on line %d
-
-Warning: Undefined variable $z in %s on line %d
 
 Deprecated: zend_test_compile_string(): Passing null to parameter #1 ($source_string) of type string is deprecated in %s on line %d
 
