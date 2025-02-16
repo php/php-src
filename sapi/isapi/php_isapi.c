@@ -39,7 +39,6 @@ exception trapping when running under a debugger
 
 #define MAX_STATUS_LENGTH sizeof("xxxx LONGEST POSSIBLE STATUS DESCRIPTION")
 #define ISAPI_SERVER_VAR_BUF_SIZE 1024
-#define ISAPI_POST_DATA_BUF 1024
 
 static zend_bool bFilterLoaded=0;
 static zend_bool bTerminateThreadsOnError=0;
