@@ -602,10 +602,10 @@ class_declaration_statement:
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, CG(zend_lineno), $5, zend_ast_get_str($2), $3, $4, $7, NULL, NULL); }
 	|	class_modifiers T_CLASS
 		T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, CG(zend_lineno), $10, zend_ast_get_str($3), $7, $8, $5, $9, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1 | ZEND_ACC_SHORT_SYNTAX, CG(zend_lineno), $10, zend_ast_get_str($3), $7, $8, $5, $9, NULL); }
 	|	T_CLASS
 		T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, CG(zend_lineno), $9, zend_ast_get_str($2), $6, $7, $4, $8, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_SHORT_SYNTAX, CG(zend_lineno), $9, zend_ast_get_str($2), $6, $7, $4, $8, NULL); }
 ;
 
 class_modifiers:
