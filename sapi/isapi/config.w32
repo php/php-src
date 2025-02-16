@@ -1,5 +1,3 @@
-// vim:ft=javascript
-
 ARG_ENABLE('isapi', 'Build ISAPI version of PHP', 'no');
 
 if (PHP_ISAPI == "yes") {
