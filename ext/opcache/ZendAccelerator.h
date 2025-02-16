@@ -50,6 +50,7 @@
 
 #include "zend_extensions.h"
 #include "zend_compile.h"
+#include "zend_API.h"
 
 #include "Optimizer/zend_optimizer.h"
 #include "zend_accelerator_hash.h"
@@ -216,6 +217,8 @@ typedef struct _zend_accel_globals {
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
 #endif
+	void                   *preloaded_internal_run_time_cache;
+	size_t                  preloaded_internal_run_time_cache_size;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	zend_persistent_script *current_persistent_script;
@@ -280,6 +283,8 @@ typedef struct _zend_accel_shared_globals {
 
 	/* Interned Strings Support (must be the last element) */
 	ZEND_SET_ALIGNED(ZEND_STRING_TABLE_POS_ALIGNMENT, zend_string_table interned_strings);
+
+	size_t map_ptr_static_last;
 } zend_accel_shared_globals;
 
 #ifdef ZEND_WIN32
@@ -310,7 +315,7 @@ extern const char *zps_api_failure_reason;
 BEGIN_EXTERN_C()
 
 void accel_shutdown(void);
-zend_result accel_activate(INIT_FUNC_ARGS);
+ZEND_RINIT_FUNCTION(zend_accelerator);
 zend_result accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
