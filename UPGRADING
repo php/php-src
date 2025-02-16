@@ -250,6 +250,9 @@ PHP 8.5 UPGRADE NOTES
 - Fileinfo:
   . Upgraded to file 5.46.
 
+- PCRE:
+  . Upgraded to pcre2lib 10.45.
+
 - Readline:
   . The return types of readline_add_history(), readline_clear_history(), and
     readline_callback_handler_install() have been changed to true, rather
