@@ -141,6 +141,8 @@ editbin /stack:8388608 %PHP_BUILD_DIR%\php-cgi.exe
 
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
+copy /-y %DEPS_DIR%\bin\*.dll %PHP_BUILD_DIR%\*
+
 if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
 mkdir c:\tests_tmp
