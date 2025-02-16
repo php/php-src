@@ -35,7 +35,7 @@
 
 
 #ifdef PHP_WIN32
-// #define PHP_ENABLE_SEH
+#define PHP_ENABLE_SEH
 #endif
 
 /*
@@ -723,29 +723,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 		} __except(exceptionhandler(&e, GetExceptionInformation())) {
 			char buf[1024];
 			if (_exception_code()==EXCEPTION_STACK_OVERFLOW) {
-				LPBYTE lpPage;
-				static SYSTEM_INFO si;
-				static MEMORY_BASIC_INFORMATION mi;
-				static DWORD dwOldProtect;
-
-				GetSystemInfo(&si);
-
-				/* Get page ESP is pointing to */
-				// _asm mov lpPage, esp;
-
-				/* Get stack allocation base */
-				VirtualQuery(lpPage, &mi, sizeof(mi));
-
-				/* Go to the page below the current page */
-				lpPage = (LPBYTE) (mi.BaseAddress) - si.dwPageSize;
-
-				/* Free pages below current page */
-				if (!VirtualFree(mi.AllocationBase, (LPBYTE)lpPage - (LPBYTE) mi.AllocationBase, MEM_DECOMMIT)) {
-					_endthread();
-				}
-
-				/* Restore the guard page */
-				if (!VirtualProtect(lpPage, si.dwPageSize, PAGE_GUARD | PAGE_READWRITE, &dwOldProtect)) {
+				if (!_resetstkoflw()) {
 					_endthread();
 				}
 
