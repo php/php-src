@@ -594,17 +594,13 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_modifiers T_CLASS
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, CG(zend_lineno), $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
-	|	T_CLASS
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, CG(zend_lineno), $5, zend_ast_get_str($2), $3, $4, $7, NULL, NULL); }
-	|	class_modifiers T_CLASS
-		T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
+		class_modifiers T_CLASS T_STRING { $<num>$ = CG(zend_lineno); } extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>4, $7, zend_ast_get_str($3), $5, $6, $9, NULL, NULL); }
+	|	T_CLASS T_STRING { $<num>$ = CG(zend_lineno); } extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>3, $6, zend_ast_get_str($2), $4, $5, $8, NULL, NULL); }
+	|	class_modifiers T_CLASS T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1 | ZEND_ACC_SHORT_SYNTAX, CG(zend_lineno), $10, zend_ast_get_str($3), $7, $8, $5, $9, NULL); }
-	|	T_CLASS
-		T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
+	|	T_CLASS T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_SHORT_SYNTAX, CG(zend_lineno), $9, zend_ast_get_str($2), $6, $7, $4, $8, NULL); }
 ;
 
