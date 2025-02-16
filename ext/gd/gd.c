@@ -167,9 +167,7 @@ PHP_GD_API gdImagePtr php_gd_libgdimageptr_from_zval_p(zval* zp)
 
 zend_object *php_gd_image_object_create(zend_class_entry *class_type)
 {
-	size_t block_len = sizeof(php_gd_image_object) + zend_object_properties_size(class_type);
-	php_gd_image_object *intern = emalloc(block_len);
-	memset(intern, 0, block_len);
+	php_gd_image_object *intern = zend_object_alloc(sizeof(php_gd_image_object), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
