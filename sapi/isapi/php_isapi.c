@@ -24,19 +24,9 @@
 #include "ext/standard/info.h"
 #include "php_variables.h"
 #include "php_ini.h"
+#include <process.h>
 
-#ifdef PHP_WIN32
-# include <process.h>
-#else
-# define __try
-# define __except(val)
-# define __declspec(foo)
-#endif
-
-
-#ifdef PHP_WIN32
 #define PHP_ENABLE_SEH
-#endif
 
 /*
 uncomment the following lines to turn off
@@ -111,7 +101,7 @@ static char *isapi_secure_server_variable_names[] = {
 	NULL
 };
 
-#if defined(PHP_WIN32) && defined(ZTS)
+#ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
@@ -655,14 +645,11 @@ BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO *pVer)
 
 static void my_endthread()
 {
-#ifdef PHP_WIN32
 	if (bTerminateThreadsOnError) {
 		_endthread();
 	}
-#endif
 }
 
-#ifdef PHP_WIN32
 /* ep is accessible only in the context of the __except expression,
  * so we have to call this function to obtain it.
  */
@@ -671,7 +658,6 @@ BOOL exceptionhandler(LPEXCEPTION_POINTERS *e, LPEXCEPTION_POINTERS ep)
 	*e=ep;
 	return TRUE;
 }
-#endif
 
 DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
@@ -684,9 +670,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 #ifdef ZTS
 	/* initial resource fetch */
 	(void)ts_resource(0);
-# ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
-# endif
 #endif
 
 	zend_first_try {
@@ -767,9 +751,7 @@ __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, L
 	switch (fdwReason) {
 		case DLL_PROCESS_ATTACH:
 			php_tsrm_startup_ex(128);
-# ifdef PHP_WIN32
 			ZEND_TSRMLS_CACHE_UPDATE();
-# endif
 			sapi_startup(&isapi_sapi_module);
 			if (isapi_sapi_module.startup) {
 				isapi_sapi_module.startup(&sapi_module);
