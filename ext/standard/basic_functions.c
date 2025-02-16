@@ -1336,7 +1336,7 @@ PHP_FUNCTION(get_cfg_var)
 error options:
 	0 = send to php_error_log (uses syslog or file depending on ini setting)
 	1 = send via email to 3rd parameter 4th option = additional headers
-	2 = send via tcp/ip to 3rd parameter (name or ip:port)
+	2 = no longer an option
 	3 = save to file in 3rd parameter
 	4 = send to SAPI logger directly
 */
