@@ -49,6 +49,7 @@ try {
 	echo $e->getMessage(), PHP_EOL;
 }
 
+zend_test_compile_string($x, $y, $z);
 
 $source_string = <<<EOF
 <?php
@@ -58,12 +59,24 @@ EOF;
 zend_test_compile_string($source_string, 'Source string', ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(3) "php"
 #!/path/to/php
 string(3) "php"
 string(3) "php"
 string(3) "php"
 zend_test_compile_string(): Argument #2 ($filename) must not contain any null bytes
+
+Warning: Undefined variable $x in %s on line %d
+
+Warning: Undefined variable $y in %s on line %d
+
+Warning: Undefined variable $z in %s on line %d
+
+Deprecated: zend_test_compile_string(): Passing null to parameter #1 ($source_string) of type string is deprecated in %s on line %d
+
+Deprecated: zend_test_compile_string(): Passing null to parameter #2 ($filename) of type string is deprecated in %s on line %d
+
+Deprecated: zend_test_compile_string(): Passing null to parameter #3 ($position) of type int is deprecated in %s on line %d
 
 Parse error: syntax error, unexpected token "<", expecting end of file in Source string on line 1

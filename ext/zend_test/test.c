@@ -243,11 +243,15 @@ static ZEND_FUNCTION(zend_test_compile_string)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(source_string)
-		Z_PARAM_PATH_STR_EX(filename, 1, 0)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_LONG(position)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_op_array *op_array = NULL;
+
+	if (zend_str_has_nul_byte(filename)) {
+		return;
+	}
 
 	op_array = compile_string(source_string, ZSTR_VAL(filename), position);
 
