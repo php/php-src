@@ -250,7 +250,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement trait_declaration_statement legacy_namespace_name
-%type <ast> interface_declaration_statement interface_extends_list
+%type <ast> interface_declaration_statement interface_extends_list traits_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
 %type <ast> unprefixed_use_declarations const_decl inner_statement
@@ -594,12 +594,18 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
+		class_modifiers T_CLASS
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL, NULL); }
-	|	T_CLASS { $<num>$ = CG(zend_lineno); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, CG(zend_lineno), $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
+	|	T_CLASS
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, CG(zend_lineno), $5, zend_ast_get_str($2), $3, $4, $7, NULL, NULL); }
+	|	class_modifiers T_CLASS
+		T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, CG(zend_lineno), $10, zend_ast_get_str($3), $7, $8, $5, $9, NULL); }
+	|	T_CLASS
+		T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, CG(zend_lineno), $9, zend_ast_get_str($2), $6, $7, $4, $8, NULL); }
 ;
 
 class_modifiers:
@@ -672,6 +678,11 @@ interface_extends_list:
 implements_list:
 		%empty		        		{ $$ = NULL; }
 	|	T_IMPLEMENTS class_name_list	{ $$ = $2; }
+;
+
+traits_list:
+		%empty		        		{ $$ = NULL; }
+	|	T_USE class_name_list		{ $$ = $2; }
 ;
 
 foreach_variable:
