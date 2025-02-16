@@ -338,16 +338,14 @@ lxb_selectors_find(lxb_selectors_t *selectors, const xmlNode *root,
 				   const lxb_css_selector_list_t *list,
 				   lxb_selectors_cb_f cb, void *ctx)
 {
-	lxb_selectors_entry_t *entry;
+	lxb_selectors_entry_t entry = {0};
 	lxb_selectors_nested_t nested;
 
-	entry = lexbor_dobject_calloc(selectors->objs);
-
-	entry->combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
-	entry->selector = list->last;
+	entry.combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
+	entry.selector = list->last;
 
 	nested.parent = NULL;
-	nested.entry = entry;
+	nested.entry = &entry;
 	nested.cb = cb;
 	nested.ctx = ctx;
 
@@ -363,20 +361,19 @@ lxb_selectors_match_node(lxb_selectors_t *selectors, const xmlNode *node,
 						 lxb_selectors_cb_f cb, void *ctx)
 {
 	lxb_status_t status;
-	lxb_selectors_entry_t *entry;
 	lxb_selectors_nested_t nested;
 
 	if (!CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
 		return LXB_STATUS_OK;
 	}
 
-	entry = lexbor_dobject_calloc(selectors->objs);
+	lxb_selectors_entry_t entry = {0};
 
-	entry->combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
-	entry->selector = list->last;
+	entry.combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
+	entry.selector = list->last;
 
 	nested.parent = NULL;
-	nested.entry = entry;
+	nested.entry = &entry;
 	nested.cb = cb;
 	nested.ctx = ctx;
 
