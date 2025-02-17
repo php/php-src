@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17703 (imagescale with both width and height negative values
     triggers only an Exception on width). (David Carlier)
 
+- FFI:
+  . Fix FFI Parsing of Pointer Declaration Lists. (davnotdev)
+
 - FPM:
   . Fixed bug GH-17643 (FPM with httpd ProxyPass encoded PATH_INFO env).
     (Jakub Zelenka)
