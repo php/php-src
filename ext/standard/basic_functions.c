@@ -544,7 +544,7 @@ PHP_FUNCTION(inet_ntop)
 	char *address;
 	size_t address_len;
 	int af = AF_INET;
-	socklen_t buffersize = INET_ADDRSTRLEN;
+	socklen_t buffersize = INET6_ADDRSTRLEN;
 	char buffer[INET6_ADDRSTRLEN];
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -554,10 +554,11 @@ PHP_FUNCTION(inet_ntop)
 #ifdef HAVE_IPV6
 	if (address_len == 16) {
 		af = AF_INET6;
-		buffersize = INET6_ADDRSTRLEN;
 	} else
 #endif
-	if (address_len != 4) {
+	if (address_len == 4) {
+		buffersize = INET_ADDRSTRLEN;
+	} else {
 		RETURN_FALSE;
 	}
 
