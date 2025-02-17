@@ -287,7 +287,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> optional_parameter_list inner_class_statement
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
-%type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
+%type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers inner_class_modifiers
 %type <num> class_modifiers class_modifier anonymous_class_modifiers anonymous_class_modifiers_optional use_type backup_fn_flags
 
 %type <ptr> backup_lex_pos
@@ -974,7 +974,7 @@ attributed_class_statement:
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
 	|	enum_case { $$ = $1; }
-	|	property_modifiers inner_class_statement { $$ = $2; $$->attr = $1; }
+	|	inner_class_modifiers inner_class_statement { $$ = $2; $$->attr = $1; }
 ;
 
 class_statement:
@@ -1052,6 +1052,14 @@ property_modifiers:
 			{ $$ = zend_modifier_list_to_flags(ZEND_MODIFIER_TARGET_PROPERTY, $1);
 			  if (!$$) { YYERROR; } }
 	|	T_VAR
+			{ $$ = ZEND_ACC_PUBLIC; }
+;
+
+inner_class_modifiers:
+		non_empty_member_modifiers
+			{ $$ = zend_modifier_list_to_flags(ZEND_MODIFIER_TARGET_INNER_CLASS, $1);
+			  if (!$$) { YYERROR; } }
+	|	%empty
 			{ $$ = ZEND_ACC_PUBLIC; }
 ;
 
@@ -1569,6 +1577,8 @@ new_variable:
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 	|	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM class_name
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 ;
 

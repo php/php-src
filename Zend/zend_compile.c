@@ -1050,6 +1050,37 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifi
 			return 0;
 		}
 	}
+	if (target == ZEND_MODIFIER_TARGET_INNER_CLASS) {
+		if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Multiple access type modifiers are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_STATIC) || (new_flag & ZEND_ACC_STATIC)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Static inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PUBLIC_SET) || (new_flag & ZEND_ACC_PUBLIC_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Public(set) inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PROTECTED_SET) || (new_flag & ZEND_ACC_PROTECTED_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Protected(set) inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PRIVATE_SET) || (new_flag & ZEND_ACC_PRIVATE_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Private(set) inner classes are not allowed", 0);
+			return 0;
+		}
+	}
 	return new_flags;
 }
 /* }}} */
@@ -9110,6 +9141,29 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			ZSTR_VAL(CG(active_class_entry)->name), ZSTR_LEN(CG(active_class_entry)->name),
 				"::", 2,
 				ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+
+			zval name_zv;
+			ZVAL_STR(&name_zv, name);
+
+			// configure the current ce->flags for a nested class. This should only include:
+			// - final
+			// - readonly
+			// - abstract
+			ce->ce_flags |= decl->attr & (ZEND_ACC_FINAL|ZEND_ACC_READONLY|ZEND_ACC_ABSTRACT);
+
+			// configure the property/const stand-ins for a nested class. This should only include:
+			// - public
+			// - private
+			// - protected
+			int propFlags = decl->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
+
+			// there are two things we need to inject into the nested parent:
+			// - a static property that contains the name of the nested class
+			// - a constant that contains the name of the nested class
+			// this "tricks" the engine into thinking that the nested class is a normal class
+			zend_type t = ZEND_TYPE_INIT_CODE(IS_STRING, 0, 0);
+			zend_declare_typed_property(CG(active_class_entry), unqualified_name, &name_zv, propFlags | ZEND_ACC_STATIC | ZEND_ACC_READONLY, decl->doc_comment, t);
+			zend_declare_class_constant_ex(CG(active_class_entry), unqualified_name, &name_zv, propFlags, decl->doc_comment);
 		} else {
 			name = zend_prefix_with_ns(unqualified_name);
 		}
