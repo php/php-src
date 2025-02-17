@@ -4369,7 +4369,7 @@ static void preload_load(size_t orig_map_ptr_static_last)
 		zend_map_ptr_static_last = ZCSG(map_ptr_static_last);
 
 		/* Grow map_ptr table as needed, but allocate once for static + regular map_ptrs */
-		size_t new_static_size = ((zend_map_ptr_static_last - 1) & 4095) + 1;
+		size_t new_static_size = ZEND_MM_ALIGNED_SIZE_EX(zend_map_ptr_static_last, 4096);
 		if (zend_map_ptr_static_size != new_static_size) {
 			void *new_base = pemalloc((new_static_size + CG(map_ptr_size)) * sizeof(void *), 1);
 			if (CG(map_ptr_real_base)) {
@@ -4394,7 +4394,8 @@ static void preload_load(size_t orig_map_ptr_static_last)
 		ZCG(preloaded_internal_run_time_cache) = cache;
 
 		for (size_t cur_static_map_ptr = orig_map_ptr_static_last; cur_static_map_ptr < zend_map_ptr_static_last; ++cur_static_map_ptr) {
-			void **ptr = (void **) CG(map_ptr_real_base) + zend_map_ptr_static_size - ((cur_static_map_ptr & ~4095) + 4096) + (cur_static_map_ptr & 4095);
+			// Note: chunked like: [8192..12287][4096..8191][0..4095]
+			void **ptr = (void **) CG(map_ptr_real_base) + zend_map_ptr_static_size - ZEND_MM_ALIGNED_SIZE_EX(cur_static_map_ptr + 1, 4096) + (cur_static_map_ptr & 4095);
 			*ptr = cache;
 			cache += runtime_cache_size;
 		}
