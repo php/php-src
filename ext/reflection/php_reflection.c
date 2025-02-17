@@ -600,9 +600,10 @@ static zend_op *get_recv_op(zend_op_array *op_array, uint32_t offset)
 	return NULL;
 }
 
-static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
+static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset, bool *is_variadic) {
 	zend_op *recv = get_recv_op(op_array, offset);
 	if (!recv || recv->opcode != ZEND_RECV_INIT) {
+		*is_variadic = recv && recv->opcode == ZEND_RECV_VARIADIC;
 		return NULL;
 	}
 
@@ -696,7 +697,8 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 				smart_str_appends(str, "<default>");
 			}
 		} else {
-			zval *default_value = get_default_from_recv((zend_op_array*)fptr, offset);
+			bool is_variadic;
+			zval *default_value = get_default_from_recv((zend_op_array*)fptr, offset, &is_variadic);
 			if (default_value) {
 				smart_str_appends(str, " = ");
 				if (format_default_value(str, default_value) == FAILURE) {
@@ -1499,8 +1501,13 @@ static int get_parameter_default(zval *result, parameter_reference *param) {
 		return zend_get_default_from_internal_arg_info(
 			result, (zend_internal_arg_info *) param->arg_info);
 	} else {
-		zval *default_value = get_default_from_recv((zend_op_array *) param->fptr, param->offset);
+		bool is_variadic;
+		zval *default_value = get_default_from_recv((zend_op_array *) param->fptr, param->offset, &is_variadic);
 		if (!default_value) {
+			if (is_variadic) {
+				ZVAL_EMPTY_ARRAY(result);
+				return SUCCESS;
+			}
 			return FAILURE;
 		}
 
@@ -2868,10 +2875,11 @@ ZEND_METHOD(ReflectionParameter, isDefaultValueAvailable)
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		RETURN_BOOL(!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)
-			&& ((zend_internal_arg_info*) (param->arg_info))->default_value);
+			&& (((zend_internal_arg_info*) (param->arg_info))->default_value || ZEND_ARG_IS_VARIADIC((param->arg_info))));
 	} else {
-		zval *default_value = get_default_from_recv((zend_op_array *)param->fptr, param->offset);
-		RETURN_BOOL(default_value != NULL);
+		bool is_variadic;
+		zval *default_value = get_default_from_recv((zend_op_array *)param->fptr, param->offset, &is_variadic);
+		RETURN_BOOL(default_value != NULL || is_variadic);
 	}
 }
 /* }}} */
