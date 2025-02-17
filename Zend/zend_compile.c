@@ -9093,10 +9093,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		zend_string *unqualified_name = decl->name;
 
-		if (CG(active_class_entry)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
-		}
-
 		const char *type = "a class name";
 		if (decl->flags & ZEND_ACC_ENUM) {
 			type = "an enum name";
@@ -9105,8 +9101,18 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		} else if (decl->flags & ZEND_ACC_TRAIT) {
 			type = "a trait name";
 		}
+
 		zend_assert_valid_class_name(unqualified_name, type);
-		name = zend_prefix_with_ns(unqualified_name);
+		if (CG(active_class_entry)) {
+			// we have a nested class that needs to be renamed
+			// so append the unqualified name to the nested parent name
+			name = zend_string_concat3(
+			ZSTR_VAL(CG(active_class_entry)->name), ZSTR_LEN(CG(active_class_entry)->name),
+				"::", 2,
+				ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+		} else {
+			name = zend_prefix_with_ns(unqualified_name);
+		}
 		name = zend_new_interned_string(name);
 		lcname = zend_string_tolower(name);
 
