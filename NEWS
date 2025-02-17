@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
   . Added curl_share_init_persistent(). (enorris)
+  . Added CURLINFO_USED_PROXY, CURLINFO_HTTPAUTH_USED, and CURLINFO_PROXYAUTH_USED
+    support to curl_getinfo. (Ayesh Karunaratne)
 
 - Date:
   . Fix undefined behaviour problems regarding integer overflow in extreme edge
