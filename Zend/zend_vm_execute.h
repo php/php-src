@@ -961,7 +961,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DAT
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
 		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
-
 	} else {
 		value = zend_assign_to_variable_ex(prop, value, IS_CONST, EX_USES_STRICT_TYPES(), &garbage);
 	}
