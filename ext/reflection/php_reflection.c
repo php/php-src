@@ -5828,7 +5828,7 @@ ZEND_METHOD(ReflectionProperty, getValue)
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 				zval *retval = OBJ_PROP(Z_OBJ_P(object), prop_offset);
-				if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
+				if (EXPECTED(!Z_ISUNDEF_P(retval))) {
 					RETURN_COPY_DEREF(retval);
 				}
 			}
@@ -5936,7 +5936,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 			zval *retval = OBJ_PROP(Z_OBJ_P(object), prop_offset);
-			if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
+			if (EXPECTED(!Z_ISUNDEF_P(retval))) {
 				RETURN_COPY_DEREF(retval);
 			}
 		}
@@ -6220,7 +6220,7 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 				zval *value = OBJ_PROP(Z_OBJ_P(object), prop_offset);
-				RETURN_BOOL(Z_TYPE_INFO_P(value) != IS_UNDEF);
+				RETURN_BOOL(!Z_ISUNDEF_P(value));
 			}
 		}
 
