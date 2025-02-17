@@ -1235,7 +1235,7 @@ PHP_FUNCTION(socket_connect)
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port   = htons((unsigned short int)port);
 
-			if (! php_set_inet6_addr(&sin6, addr, php_sock)) {
+			if (!php_set_inet6_addr(&sin6, addr, php_sock)) {
 				RETURN_FALSE;
 			}
 
@@ -1254,7 +1254,7 @@ PHP_FUNCTION(socket_connect)
 			sin.sin_family = AF_INET;
 			sin.sin_port   = htons((unsigned short int)port);
 
-			if (! php_set_inet_addr(&sin, addr, php_sock)) {
+			if (!php_set_inet_addr(&sin, addr, php_sock)) {
 				RETURN_FALSE;
 			}
 
@@ -1361,7 +1361,7 @@ PHP_FUNCTION(socket_bind)
 				sa->sin_family = AF_INET;
 				sa->sin_port = htons((unsigned short) objint);
 
-				if (! php_set_inet_addr(sa, addr, php_sock)) {
+				if (!php_set_inet_addr(sa, addr, php_sock)) {
 					RETURN_FALSE;
 				}
 
@@ -1376,7 +1376,7 @@ PHP_FUNCTION(socket_bind)
 				sa->sin6_family = AF_INET6;
 				sa->sin6_port = htons((unsigned short) objint);
 
-				if (! php_set_inet6_addr(sa, addr, php_sock)) {
+				if (!php_set_inet6_addr(sa, addr, php_sock)) {
 					RETURN_FALSE;
 				}
 
@@ -1714,7 +1714,7 @@ PHP_FUNCTION(socket_sendto)
 			sin.sin_family = AF_INET;
 			sin.sin_port = htons((unsigned short) port);
 
-			if (! php_set_inet_addr(&sin, addr, php_sock)) {
+			if (!php_set_inet_addr(&sin, addr, php_sock)) {
 				RETURN_FALSE;
 			}
 
@@ -1731,7 +1731,7 @@ PHP_FUNCTION(socket_sendto)
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port = htons((unsigned short) port);
 
-			if (! php_set_inet6_addr(&sin6, addr, php_sock)) {
+			if (!php_set_inet6_addr(&sin6, addr, php_sock)) {
 				RETURN_FALSE;
 			}
 
@@ -1803,7 +1803,7 @@ PHP_FUNCTION(socket_get_option)
 				PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
 				RETURN_FALSE;
 			}
-			if (php_add4_to_if_index(&if_addr, php_sock, &if_index) == SUCCESS) {
+			if (php_add4_to_if_index(&if_addr, php_sock, &if_index)) {
 				RETURN_LONG((zend_long) if_index);
 			} else {
 				RETURN_FALSE;
