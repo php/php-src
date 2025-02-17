@@ -132,6 +132,7 @@ PHPAPI zend_class_entry *reflection_property_hook_type_ptr;
 typedef struct _property_reference {
 	zend_property_info *prop;
 	zend_string *unmangled_name;
+	void *cache_slot[3];
 } property_reference;
 
 /* Struct for parameters */
@@ -1506,6 +1507,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->prop = prop;
 	reference->unmangled_name = zend_string_copy(name);
+	memset(reference->cache_slot, 0, sizeof(reference->cache_slot));
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
@@ -5638,6 +5640,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->prop = dynam_prop ? NULL : property_info;
 	reference->unmangled_name = zend_string_copy(name);
+	memset(reference->cache_slot, 0, sizeof(reference->cache_slot));
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
@@ -5789,9 +5792,10 @@ ZEND_METHOD(ReflectionProperty, getValue)
 	zval *object = NULL;
 	zval *member_p = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &object) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJECT_EX(object, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
@@ -5814,7 +5818,23 @@ ZEND_METHOD(ReflectionProperty, getValue)
 			RETURN_THROWS();
 		}
 
-		member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
+		if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
+			uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
+
+			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				zval *retval = OBJ_PROP(Z_OBJ_P(object), prop_offset);
+				if (EXPECTED(!Z_ISUNDEF_P(retval))) {
+					RETURN_COPY_DEREF(retval);
+				}
+			}
+		}
+
+		zend_class_entry *old_scope = EG(fake_scope);
+		EG(fake_scope) = intern->ce;
+		member_p = Z_OBJ_P(object)->handlers->read_property(Z_OBJ_P(object),
+				ref->unmangled_name, BP_VAR_R, ref->cache_slot, &rv);
+		EG(fake_scope) = old_scope;
+
 		if (member_p != &rv) {
 			RETURN_COPY_DEREF(member_p);
 		} else {
@@ -5868,7 +5888,10 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			Z_PARAM_ZVAL(value)
 		ZEND_PARSE_PARAMETERS_END();
 
-		zend_update_property_ex(intern->ce, object, ref->unmangled_name, value);
+		zend_class_entry *old_scope = EG(fake_scope);
+		EG(fake_scope) = intern->ce;
+		object->handlers->write_property(object, ref->unmangled_name, value, ref->cache_slot);
+		EG(fake_scope) = old_scope;
 	}
 }
 /* }}} */
@@ -5892,15 +5915,26 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 	property_reference *ref;
 	zval *object;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT(object)
+	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!instanceof_function(Z_OBJCE_P(object), intern->ce)) {
 		_DO_THROW("Given object is not an instance of the class this property was declared in");
 		RETURN_THROWS();
+	}
+
+	if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
+		uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
+
+		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+			zval *retval = OBJ_PROP(Z_OBJ_P(object), prop_offset);
+			if (EXPECTED(!Z_ISUNDEF_P(retval))) {
+				RETURN_COPY_DEREF(retval);
+			}
+		}
 	}
 
 	zend_property_info *prop = reflection_property_get_effective_prop(ref,
@@ -5913,7 +5947,12 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 
 	if (!prop || !prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
 		zval rv;
-		zval *member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
+		zend_class_entry *old_scope = EG(fake_scope);
+		EG(fake_scope) = intern->ce;
+		zval *member_p = Z_OBJ_P(object)->handlers->read_property(
+				Z_OBJ_P(object), ref->unmangled_name, BP_VAR_R,
+				ref->cache_slot, &rv);
+		EG(fake_scope) = old_scope;
 
 		if (member_p != &rv) {
 			RETURN_COPY_DEREF(member_p);
@@ -5930,11 +5969,14 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 }
 
 static void reflection_property_set_raw_value(zend_property_info *prop,
-		zend_string *unmangled_name, reflection_object *intern,
+		zend_string *unmangled_name, void *cache_slot[3], reflection_object *intern,
 		zend_object *object, zval *value)
 {
 	if (!prop || !prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
-		zend_update_property_ex(intern->ce, object, unmangled_name, value);
+		zend_class_entry *old_scope = EG(fake_scope);
+		EG(fake_scope) = intern->ce;
+		object->handlers->write_property(object, unmangled_name, value, cache_slot);
+		EG(fake_scope) = old_scope;
 	} else {
 		zend_function *func = zend_get_property_hook_trampoline(prop, ZEND_PROPERTY_HOOK_SET, unmangled_name);
 		zend_call_known_instance_method_with_1_params(func, object, NULL, value);
@@ -5950,9 +5992,10 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2) {
+		Z_PARAM_OBJECT(object)
+		Z_PARAM_ZVAL(value)
+	} ZEND_PARSE_PARAMETERS_END();
 
 	zend_property_info *prop = reflection_property_get_effective_prop(ref,
 			intern->ce, Z_OBJ_P(object));
@@ -5962,7 +6005,8 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 		RETURN_THROWS();
 	}
 
-	reflection_property_set_raw_value(prop, ref->unmangled_name, intern, Z_OBJ_P(object), value);
+	reflection_property_set_raw_value(prop, ref->unmangled_name,
+			ref->cache_slot, intern, Z_OBJ_P(object), value);
 }
 
 static zend_result reflection_property_check_lazy_compatible(
@@ -6041,8 +6085,8 @@ ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 	/* Do not trigger initialization */
 	Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_LAZY;
 
-	reflection_property_set_raw_value(prop, ref->unmangled_name, intern, object,
-			value);
+	reflection_property_set_raw_value(prop, ref->unmangled_name,
+			ref->cache_slot, intern, object, value);
 
 	/* Mark property as lazy again if an exception prevented update */
 	if (EG(exception) && prop_was_lazy && Z_TYPE_P(var_ptr) == IS_UNDEF
@@ -6138,9 +6182,10 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 	zval *object = NULL;
 	zval *member_p = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &object) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJECT_EX(object, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
@@ -6165,9 +6210,19 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 			RETURN_THROWS();
 		}
 
+		if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
+			uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
+
+			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				zval *value = OBJ_PROP(Z_OBJ_P(object), prop_offset);
+				RETURN_BOOL(!Z_ISUNDEF_P(value));
+			}
+		}
+
 		old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
-		retval = Z_OBJ_HT_P(object)->has_property(Z_OBJ_P(object), ref->unmangled_name, ZEND_PROPERTY_EXISTS, NULL);
+		retval = Z_OBJ_HT_P(object)->has_property(Z_OBJ_P(object),
+				ref->unmangled_name, ZEND_PROPERTY_EXISTS, ref->cache_slot);
 		EG(fake_scope) = old_scope;
 
 		RETVAL_BOOL(retval);
