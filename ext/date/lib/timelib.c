@@ -173,6 +173,11 @@ timelib_long timelib_date_to_int(timelib_time *d, int *error)
 
 	ts = d->sse;
 
+	// adjust negative sse with fractions
+	if (ts < 0 && d->us) {
+		ts = ts + 1;
+	}
+
 	if (ts < TIMELIB_LONG_MIN || ts > TIMELIB_LONG_MAX) {
 		if (error) {
 			*error = 1;
@@ -182,7 +187,7 @@ timelib_long timelib_date_to_int(timelib_time *d, int *error)
 	if (error) {
 		*error = 0;
 	}
-	return (timelib_long) d->sse;
+	return (timelib_long) ts;
 }
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
