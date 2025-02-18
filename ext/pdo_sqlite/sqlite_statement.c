@@ -305,7 +305,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	const char *str;
 	zval flags;
 
-	if (!S->stmt) {
+	if (!S->stmt || !stmt->executed) {
 		return FAILURE;
 	}
 	if(colno >= sqlite3_column_count(S->stmt)) {
