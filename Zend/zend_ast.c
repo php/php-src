@@ -1394,11 +1394,11 @@ static ZEND_COLD void zend_ast_export_ns_name(smart_str *str, zend_ast *ast, int
 		zval *zv = zend_ast_get_zval(ast);
 
 		if (Z_TYPE_P(zv) == IS_STRING) {
-		    if (NAME_QUAL(ast->attr) == ZEND_NAME_FQ) {
+			if (NAME_QUAL(ast->attr) == ZEND_NAME_FQ) {
 				smart_str_appendc(str, '\\');
-		    } else if (NAME_QUAL(ast->attr) == ZEND_NAME_RELATIVE) {
+			} else if (NAME_QUAL(ast->attr) == ZEND_NAME_RELATIVE) {
 				smart_str_appends(str, "namespace\\");
-		    }
+			}
 			smart_str_append(str, Z_STR_P(zv));
 			return;
 		}
