@@ -297,10 +297,11 @@ typedef enum _ir_type {
 	_(COND,	        d3,   def, def, def) /* op1 ? op2 : op3             */ \
 	\
 	/* data-flow and miscellaneous ops                                  */ \
+	_(VADDR,        d1,   var, ___, ___) /* load address of local var   */ \
+	_(FRAME_ADDR,   d0,   ___, ___, ___) /* function frame address      */ \
 	_(PHI,          pN,   reg, def, def) /* SSA Phi function            */ \
 	_(COPY,         d1X1, def, opt, ___) /* COPY (last foldable op)     */ \
 	_(PI,           p2,   reg, def, ___) /* e-SSA Pi constraint ???     */ \
-	_(FRAME_ADDR,   d0,   ___, ___, ___) /* function frame address      */ \
 	/* (USE, RENAME)                                                    */ \
 	\
 	/* data ops                                                         */ \
@@ -320,7 +321,6 @@ typedef enum _ir_type {
 	_(AFREE,        a2,   src, def, ___) /* revert alloca(def)          */ \
 	_(BLOCK_BEGIN,  a1,   src, ___, ___) /* stacksave                   */ \
 	_(BLOCK_END,    a2,   src, def, ___) /* stackrestore                */ \
-	_(VADDR,        d1,   var, ___, ___) /* load address of local var   */ \
 	_(VLOAD,        l2,   src, var, ___) /* load value of local var     */ \
 	_(VSTORE,       s3,   src, var, def) /* store value to local var    */ \
 	_(RLOAD,        l1X2, src, num, opt) /* load value from register    */ \

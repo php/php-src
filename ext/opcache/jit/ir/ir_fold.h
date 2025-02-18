@@ -3013,6 +3013,7 @@ IR_FOLD(UGT(_, _))
 	} else if (op1 < op2) {  /* move lower ref to op2 */
 		SWAP_REFS(op1, op2);
 		opt ^= 3; /* [U]LT <-> [U]GT, [U]LE <-> [U]GE */
+		IR_FOLD_RESTART;
 	}
 	IR_FOLD_NEXT;
 }
