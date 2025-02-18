@@ -1124,15 +1124,12 @@ PHP_FUNCTION(curl_version)
 		}
 	}
 	CAAZ("features", &feature_list);
-	CAAS("ssl_version", d->ssl_version);
-	CAAS("libz_version", d->libz_version);
+
 	/* Add an array of protocols */
 	{
 		char **p = (char **) d->protocols;
 		zval protocol_list;
-
 		array_init(&protocol_list);
-
 		while (*p != NULL) {
 			add_next_index_string(&protocol_list, *p);
 			p++;
@@ -1150,20 +1147,28 @@ PHP_FUNCTION(curl_version)
 			add_next_index_string (&ssl_backends, list[i]->name);
 		CAAZ("ssl_backends", &ssl_backends);
 	}
-    if (d->age >= 1) {
-		CAAS("ares", d->ares);
-		CAAL("ares_num", d->ares_num);
+	zval feature_version;
+	array_init(&feature_version);
+	if (d->ssl_version) {
+		add_assoc_string (&feature_version, "ssl", d->ssl_version);
 	}
-	if (d->age >= 2) {
-		CAAS("libidn", d->libidn);
+	if (d->libz_version) {
+		add_assoc_string (&feature_version, "libz", d->libz_version);
 	}
-	if (d->age >= 3) {
-		CAAL("iconv_ver_num", d->iconv_ver_num);
-		CAAS("libssh_version", d->libssh_version);
+	if (d->age >= CURLVERSION_SECOND && d->ares) {
+		add_assoc_string (&feature_version, "ares", d->ares);
 	}
-	if (d->age >= 4) {
-		CAAL("brotli_ver_num", d->brotli_ver_num);
-		CAAS("brotli_version", d->brotli_version);
+	if (d->age >= CURLVERSION_THIRD && d->libidn) {
+		add_assoc_string (&feature_version, "libidn", d->libidn);
+	}
+	if (d->age >= CURLVERSION_FOURTH && d->iconv_ver_num) {
+		CAAL("version_iconv", d->iconv_ver_num);
+    }
+    if (d->age >= CURLVERSION_FOURTH && d->libssh_version) {
+		add_assoc_string (&feature_version, "libssh", d->libssh_version);
+	}
+	if (d->age >= CURLVERSION_FIFTH && d->brotli_version) {
+		add_assoc_string (&feature_version, "brotli", d->brotli_version);
 	}
 }
 /* }}} */
