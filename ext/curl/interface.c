@@ -391,6 +391,27 @@ PHP_MINFO_FUNCTION(curl)
 	if (d->age >= CURLVERSION_FOURTH && d->libssh_version) {
 		php_info_print_table_row(2, "Libssh Version", d->libssh_version);
 	}
+	if (d->age >= CURLVERSION_FIFTH && d->brotli_version) {
+		php_info_print_table_row(2, "Brotli Version", d->brotli_version);
+	}
+	if (d->age >= CURLVERSION_SIXTH && d->nghttp2_version) {
+		php_info_print_table_row(2, "Nghttp2 Version", d->nghttp2_version);
+	}
+	if (d->age >= CURLVERSION_SIXTH && d->quic_version) {
+		php_info_print_table_row(2, "QUIC Version", d->quic_version);
+	}
+	if (d->age >= CURLVERSION_EIGHTH && d->zstd_version) {
+		php_info_print_table_row(2, "Zstd Version", d->zstd_version);
+	}
+	if (d->age >= CURLVERSION_NINTH && d->hyper_version) {
+		php_info_print_table_row(2, "Hyper Version", d->hyper_version);
+	}
+	if (d->age >= CURLVERSION_TENTH && d->gsasl_version) {
+		php_info_print_table_row(2, "GNU SASL Version", d->gsasl_version);
+	}
+	if (d->age >= CURLVERSION_TWELFTH && d->rtmp_version) {
+		php_info_print_table_row(2, "RTMP Version", d->rtmp_version);
+	}
 
 	php_info_print_table_end();
 
@@ -1170,6 +1191,25 @@ PHP_FUNCTION(curl_version)
 	if (d->age >= CURLVERSION_FIFTH && d->brotli_version) {
 		add_assoc_string (&feature_version, "brotli", d->brotli_version);
 	}
+	if (d->age >= CURLVERSION_SIXTH && d->nghttp2_version) {
+		add_assoc_string (&feature_version, "nghttp2", d->nghttp2_version);
+    }
+	if (d->age >= CURLVERSION_SIXTH && d->quic_version) {
+		add_assoc_string (&feature_version, "quic", d->quic_version);
+	}
+	if (d->age >= CURLVERSION_EIGHTH && d->zstd_version) {
+		add_assoc_string (&feature_version, "zstd", d->zstd_version);
+	}
+	if (d->age >= CURLVERSION_NINTH && d->hyper_version) {
+		add_assoc_string (&feature_version, "hyper", d->hyper_version);
+	}
+	if (d->age >= CURLVERSION_TENTH && d->gsasl_version) {
+		add_assoc_string (&feature_version, "gsasl", d->gsasl_version);
+	}
+	if (d->age >= CURLVERSION_TWELFTH && d->rtmp_version) {
+		add_assoc_string (&feature_version, "rtmp", d->rtmp_version);
+	}
+	CAAZ("feature_versions", &feature_version);
 }
 /* }}} */
 
