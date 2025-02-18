@@ -8244,9 +8244,6 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
 	switch (level) {
-		case FUNC_DECL_LEVEL_CONSTEXPR:
-			zend_add_dynamic_func_def(op_array);
-			break;
 		case FUNC_DECL_LEVEL_NESTED: {
 			uint32_t func_ref = zend_add_dynamic_func_def(op_array);
 			if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
@@ -8261,6 +8258,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			}
 			break;
 		}
+		case FUNC_DECL_LEVEL_CONSTEXPR:
 		case FUNC_DECL_LEVEL_TOPLEVEL:
 			/* Nothing to do. */
 			break;
