@@ -243,7 +243,7 @@ static ZEND_FUNCTION(zend_test_compile_string)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(source_string)
-		Z_PARAM_STR(filename)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_LONG(position)
 	ZEND_PARSE_PARAMETERS_END();
 

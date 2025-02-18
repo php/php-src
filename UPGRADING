@@ -95,6 +95,18 @@ PHP 8.5 UPGRADE NOTES
   . Added support for share handles that are persisted across multiple PHP
     requests, safely allowing for more effective connection reuse.
     RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
+  . Added support for CURLINFO_USED_PROXY (libcurl >= 8.7.0),
+    CURLINFO_HTTPAUTH_USED, and CURLINFO_PROXYAUTH_USED
+    (libcurl >= 8.12.0) to the curl_getinfo() function.
+    When curl_getinfo() returns an array, the same information
+    is available as "used_proxy", "httpauth_used", and "proxyauth_used"
+    keys.
+    CURLINFO_USED_PROXY gets zero set if no proxy was used in the
+    previous transfer or a non-zero value if a proxy was used.
+    CURLINFO_HTTPAUTH_USED and CURLINFO_PROXYAUTH_USED get bitmasks
+    indicating the http and proxy authentication methods that were
+    used in the previous request. See CURLAUTH_* constants for
+    possible values.
 
 - DOM:
   . Added Dom\Element::$outerHTML.
@@ -106,6 +118,10 @@ PHP 8.5 UPGRADE NOTES
     This only works if the $name argument does not use Clark notation
     and is not a QName because in those cases the namespace is taken
     from the namespace href or prefix respectively.
+
+- Zlib:
+  . flock() is now supported on zlib streams. Previously, this always
+    failed to perform any locking action.
 
 ========================================
 3. Changes in SAPI modules
@@ -243,6 +259,12 @@ PHP 8.5 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Fileinfo:
+  . Upgraded to file 5.46.
+
+- PCRE:
+  . Upgraded to pcre2lib from 10.44 to 10.45.
+
 - Readline:
   . The return types of readline_add_history(), readline_clear_history(), and
     readline_callback_handler_install() have been changed to true, rather
@@ -254,6 +276,11 @@ PHP 8.5 UPGRADE NOTES
 
 - Core:
   . PHP_BUILD_DATE.
+
+- Curl:
+  . CURLINFO_USED_PROXY.
+  . CURLINFO_HTTPAUTH_USED.
+  . CURLINFO_PROXYAUTH_USED.
 
 - POSIX:
   . POSIX_SC_OPEN_MAX.
@@ -267,6 +294,7 @@ PHP 8.5 UPGRADE NOTES
   . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
   . TCP_BBR_ALGORITHM (FreeBSD only).
   . AF_PACKET (Linux only).
+  . IP_BINDANY (FreeBSD/NetBSD/OpenBSD only).
 
 ========================================
 11. Changes to INI File Handling

@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.157 2023/05/21 15:59:58 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.158 2024/11/10 16:52:27 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -46,6 +46,7 @@ FILE_RCSID("@(#)$File: compress.c,v 1.157 2023/05/21 15:59:58 christos Exp $")
 #ifdef HAVE_SPAWN_H
 #include <spawn.h>
 #endif
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
@@ -189,6 +190,7 @@ file_private const struct {
 #define METH_BZIP	7
 #define METH_XZ		9
 #define METH_LZIP	8
+#define METH_LRZIP	10
 #define METH_ZSTD	12
 #define METH_LZMA	13
 #define METH_ZLIB	14
@@ -246,6 +248,7 @@ file_private int uncompresszstd(const unsigned char *, unsigned char **, size_t,
 file_private int uncompresslzlib(const unsigned char *, unsigned char **, size_t,
     size_t *, int);
 #endif
+
 
 static int makeerror(unsigned char **, size_t *, const char *, ...)
     __attribute__((__format__(__printf__, 3, 4)));
@@ -832,7 +835,6 @@ err:
 	return makeerror(newch, n, "lzlib error: %s", LZ_strerror(err));
 }
 #endif
-
 
 static int
 makeerror(unsigned char **buf, size_t *len, const char *fmt, ...)

@@ -2384,10 +2384,10 @@ simple_list:
 				/* The const expr representation stores the fetch type instead. */
 				switch (ast->attr) {
 					case ZEND_FETCH_CLASS_SELF:
-						smart_str_appends(str, "self");
+						smart_str_append(str, ZSTR_KNOWN(ZEND_STR_SELF));
 						break;
 					case ZEND_FETCH_CLASS_PARENT:
-						smart_str_appends(str, "parent");
+						smart_str_append(str, ZSTR_KNOWN(ZEND_STR_PARENT));
 						break;
 					EMPTY_SWITCH_DEFAULT_CASE()
 				}

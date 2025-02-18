@@ -225,15 +225,15 @@ static const char *zend_asymmetric_visibility_string(uint32_t fn_flags) /* {{{ *
 	}
 }
 
-static zend_string *resolve_class_name(zend_class_entry *scope, zend_string *name) {
+static zend_string *resolve_class_name(const zend_class_entry *scope, zend_string *name) {
 	ZEND_ASSERT(scope);
-	if (zend_string_equals_literal_ci(name, "parent") && scope->parent) {
+	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT)) && scope->parent) {
 		if (scope->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
 			return scope->parent->name;
 		} else {
 			return scope->parent_name;
 		}
-	} else if (zend_string_equals_literal_ci(name, "self")) {
+	} else if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_SELF))) {
 		return scope->name;
 	} else {
 		return name;
@@ -390,8 +390,8 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 	ZEND_ASSERT(class_name);
 	if (!CG(current_linking_class) || ce == CG(current_linking_class)) {
 		return;
-	} else if (zend_string_equals_literal_ci(class_name, "self")
-	        || zend_string_equals_literal_ci(class_name, "parent")) {
+	} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_SELF))
+	        || zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return;
 	}
 

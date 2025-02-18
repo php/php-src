@@ -312,13 +312,13 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 		if (!ce) {
 			ce = zend_fetch_class(class_name, flags);
 		}
-	} else if (zend_string_equals_literal_ci(class_name, "self")) {
+	} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_SELF))) {
 		if (UNEXPECTED(!scope)) {
 			zend_throw_error(NULL, "Cannot access \"self\" when no class scope is active");
 			goto failure;
 		}
 		ce = scope;
-	} else if (zend_string_equals_literal_ci(class_name, "parent")) {
+	} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		if (UNEXPECTED(!scope)) {
 			zend_throw_error(NULL, "Cannot access \"parent\" when no class scope is active");
 			goto failure;
