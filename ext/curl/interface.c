@@ -365,6 +365,14 @@ PHP_MINFO_FUNCTION(curl)
 	if (d->ssl_version) {
 		php_info_print_table_row(2, "SSL Version", d->ssl_version);
 	}
+	n = 0;
+	int i;
+	const curl_ssl_backend **list;
+	curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
+	for(i = 0; list[i]; i++) {
+		n += snprintf(str + n, sizeof(str) - n, "%s%s", list[i]->name, list[i+1] != NULL ? ", " : "");
+	}
+	php_info_print_table_row(2, "SSL backends", str);
 
 	if (d->libz_version) {
 		php_info_print_table_row(2, "ZLib Version", d->libz_version);
@@ -1138,7 +1146,18 @@ PHP_FUNCTION(curl_version)
 		}
 		CAAZ("protocols", &protocol_list);
 	}
-	if (d->age >= 1) {
+	/* Add an array of ssl backends */
+	{
+		zval ssl_backends;
+		array_init(&ssl_backends);
+		int i;
+		const curl_ssl_backend **list;
+		curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
+		for(i = 0; list[i]; i++) 
+			add_next_index_string (&ssl_backends, list[i]->name);
+		CAAZ("ssl_backends", &ssl_backends);
+	}
+    if (d->age >= 1) {
 		CAAS("ares", d->ares);
 		CAAL("ares_num", d->ares_num);
 	}
