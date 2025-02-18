@@ -61,6 +61,8 @@ PHP                                                                        NEWS
 
 - Windows:
   . Fixed phpize for Windows 11 (24H2). (bwoebi)
+  . Fixed GH-17855 (CURL_STATICLIB flag set even if linked with shared lib).
+    (cmb)
 
 - Zlib:
   . Fixed bug GH-17745 (zlib extension incorrectly handles object arguments).
