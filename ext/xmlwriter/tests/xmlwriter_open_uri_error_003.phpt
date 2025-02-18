@@ -4,7 +4,7 @@ xmlwriter_open_uri with non existing file
 xmlwriter
 --FILE--
 <?php
-var_dump(xmlwriter_open_uri('foo/bar.tmp'));
+var_dump(xmlwriter_open_uri(__DIR__ . '/foo/bar.tmp'));
 ?>
 --CREDITS--
 Koen Kuipers koenk82@gmail.com
