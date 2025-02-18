@@ -3643,11 +3643,13 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_do_implement_interfaces(ce, interfaces, num_interface_names);
 		} else {
 			if (ce->interface_names) {
-				for (i = 0; i < num_interface_names; i++) {
-					zend_string_release_ex(ce->interface_names[i].name, 0);
-					zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+				if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+					for (i = 0; i < num_interface_names; i++) {
+						zend_string_release_ex(ce->interface_names[i].name, 0);
+						zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+					}
+					efree(ce->interface_names);
 				}
-				efree(ce->interface_names);
 				ce->interface_names = NULL;
 			}
 			if (parent && parent->num_interfaces) {
