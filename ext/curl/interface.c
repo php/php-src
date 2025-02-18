@@ -290,6 +290,7 @@ PHP_MINFO_FUNCTION(curl)
 			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
 			{"CharConv", CURL_VERSION_CONV},
 			{"Debug", CURL_VERSION_DEBUG},
+				{"MemoryDebug", CURL_VERSION_CURLDEBUG},
 			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
 			{"IDN", CURL_VERSION_IDN},
 			{"IPv6", CURL_VERSION_IPV6},
@@ -326,6 +327,9 @@ PHP_MINFO_FUNCTION(curl)
 #if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
 			{"GSASL", CURL_VERSION_GSASL},
 #endif
+				#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+					{"ThreadSafe", CURL_VERSION_THREADSAFE},
+				#endif
 			{NULL, 0}
 		};
 
@@ -1047,6 +1051,7 @@ PHP_FUNCTION(curl_version)
 			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
 			{"CharConv", CURL_VERSION_CONV},
 			{"Debug", CURL_VERSION_DEBUG},
+				{"MemoryDebug", CURL_VERSION_CURLDEBUG},
 			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
 			{"IDN", CURL_VERSION_IDN},
 			{"IPv6", CURL_VERSION_IPV6},
@@ -1083,6 +1088,9 @@ PHP_FUNCTION(curl_version)
 #if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
 			{"GSASL", CURL_VERSION_GSASL},
 #endif
+				#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+					{"ThreadSafe", CURL_VERSION_THREADSAFE},
+				#endif
 		};
 
 		for(i = 0; i < sizeof(feats) / sizeof(feats[0]); i++) {
