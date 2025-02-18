@@ -271,7 +271,7 @@ PHP_MINFO_FUNCTION(curl)
 
 	d = curl_version_info(CURLVERSION_NOW);
 	php_info_print_table_start();
-	php_info_print_table_row(2, "cURL support",    "enabled");
+	php_info_print_table_row(2, "cURL support", "enabled");
 	php_info_print_table_row(2, "cURL version", d->version);
 	snprintf(str, sizeof(str), "%d", d->age);
 	php_info_print_table_row(2, "Age", str);
@@ -301,7 +301,7 @@ PHP_MINFO_FUNCTION(curl)
 				{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
 				{"CharConv", CURL_VERSION_CONV},
 				{"Debug", CURL_VERSION_DEBUG},
-					{"MemoryDebug", CURL_VERSION_CURLDEBUG},
+				{"MemoryDebug", CURL_VERSION_CURLDEBUG},
 				{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
 				{"IDN", CURL_VERSION_IDN},
 				{"IPv6", CURL_VERSION_IPV6},
@@ -338,9 +338,9 @@ PHP_MINFO_FUNCTION(curl)
 	#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
 				{"GSASL", CURL_VERSION_GSASL},
 	#endif
-					#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
-						{"ThreadSafe", CURL_VERSION_THREADSAFE},
-					#endif
+	#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+				{"ThreadSafe", CURL_VERSION_THREADSAFE},
+	#endif
 				{NULL, 0}
 			};
 
@@ -788,8 +788,8 @@ static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_
 	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
 	// zend_call_known_fcc() with an uninitialized FCC.
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
-    	return rval;
-    }
+		return rval;
+	}
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_prereqfunction() called\n");
@@ -983,42 +983,42 @@ static int curl_debug(CURL *handle, curl_infotype type, char *data, size_t size,
 {
 	php_curl *ch = (php_curl *)clientp;
 
-    #if PHP_CURL_DEBUG
-    	fprintf(stderr, "curl_debug() called\n");
-    	fprintf(stderr, "type = %d, data = %s\n", type, data);
-    #endif
+	#if PHP_CURL_DEBUG
+		fprintf(stderr, "curl_debug() called\n");
+		fprintf(stderr, "type = %d, data = %s\n", type, data);
+	#endif
 
 	// Implicitly store the headers for compatibility with CURLINFO_HEADER_OUT
 	// used as a Curl option. Previously, setting CURLINFO_HEADER_OUT set curl_debug
 	// as the CURLOPT_DEBUGFUNCTION and stored the debug data when type is set to
 	// CURLINFO_HEADER_OUT. For backward compatibility, we now store the headers
 	// but also call the user-callback function if available.
-    if (type == CURLINFO_HEADER_OUT) {
-    	if (ch->header.str) {
-    		zend_string_release_ex(ch->header.str, 0);
-    	}
-    	ch->header.str = zend_string_init(data, size, 0);
-    }
+	if (type == CURLINFO_HEADER_OUT) {
+		if (ch->header.str) {
+			zend_string_release_ex(ch->header.str, 0);
+		}
+		ch->header.str = zend_string_init(data, size, 0);
+	}
 
-    if (!ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
-       	return 0;
-    }
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
+	   	return 0;
+	}
 
-    zval args[3];
+	zval args[3];
 
-    GC_ADDREF(&ch->std);
-    ZVAL_OBJ(&args[0], &ch->std);
-    ZVAL_LONG(&args[1], type);
-    ZVAL_STRINGL(&args[2], data, size);
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[1], type);
+	ZVAL_STRINGL(&args[2], data, size);
 
-    ch->in_callback = true;
-    zend_call_known_fcc(&ch->handlers.debug, NULL, /* param_count */ 3, args, /* named_params */ NULL);
-    ch->in_callback = false;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.debug, NULL, /* param_count */ 3, args, /* named_params */ NULL);
+	ch->in_callback = false;
 
-    zval_ptr_dtor(&args[0]);
-    zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[2]);
 
-    return 0;
+	return 0;
 }
 /* }}} */
 
@@ -1074,7 +1074,7 @@ PHP_FUNCTION(curl_version)
 	zval feature_list;
 	array_init(&feature_list);
 	if (d->age >= CURLVERSION_ELEVENTH && d->feature_names) {
-	{
+		{
 			char **p = (char **) d->feature_names;
 			while (*p != NULL) {
 				add_next_index_string(&feature_list, *p);
@@ -1095,7 +1095,7 @@ PHP_FUNCTION(curl_version)
 				{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
 				{"CharConv", CURL_VERSION_CONV},
 				{"Debug", CURL_VERSION_DEBUG},
-					{"MemoryDebug", CURL_VERSION_CURLDEBUG},
+				{"MemoryDebug", CURL_VERSION_CURLDEBUG},
 				{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
 				{"IDN", CURL_VERSION_IDN},
 				{"IPv6", CURL_VERSION_IPV6},
@@ -1132,9 +1132,9 @@ PHP_FUNCTION(curl_version)
 	#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
 				{"GSASL", CURL_VERSION_GSASL},
 	#endif
-					#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
-						{"ThreadSafe", CURL_VERSION_THREADSAFE},
-					#endif
+	#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+				{"ThreadSafe", CURL_VERSION_THREADSAFE},
+	#endif
 			};
 
 			for(i = 0; i < sizeof(feats) / sizeof(feats[0]); i++) {
@@ -1184,8 +1184,8 @@ PHP_FUNCTION(curl_version)
 	}
 	if (d->age >= CURLVERSION_FOURTH && d->iconv_ver_num) {
 		CAAL("version_iconv", d->iconv_ver_num);
-    }
-    if (d->age >= CURLVERSION_FOURTH && d->libssh_version) {
+	}
+	if (d->age >= CURLVERSION_FOURTH && d->libssh_version) {
 		add_assoc_string (&feature_version, "libssh", d->libssh_version);
 	}
 	if (d->age >= CURLVERSION_FIFTH && d->brotli_version) {
@@ -1193,7 +1193,7 @@ PHP_FUNCTION(curl_version)
 	}
 	if (d->age >= CURLVERSION_SIXTH && d->nghttp2_version) {
 		add_assoc_string (&feature_version, "nghttp2", d->nghttp2_version);
-    }
+	}
 	if (d->age >= CURLVERSION_SIXTH && d->quic_version) {
 		add_assoc_string (&feature_version, "quic", d->quic_version);
 	}
@@ -2370,9 +2370,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 
 		case CURLINFO_HEADER_OUT:
 			if (ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
-                zend_value_error("CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set");
-                return FAILURE;
-            }
+				zend_value_error("CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set");
+				return FAILURE;
+			}
 
 			if (zend_is_true(zvalue)) {
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, curl_debug);
