@@ -2238,6 +2238,7 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 			zend_string_release_ex(ce->interface_names[i].lc_name, 0);
 		}
 		efree(ce->interface_names);
+		ce->interface_names = NULL;
 	}
 
 	ce->num_interfaces = num_interfaces;
@@ -3640,8 +3641,18 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				   sizeof(zend_class_entry *) * ce->num_interfaces);
 
 			zend_do_implement_interfaces(ce, interfaces, num_interface_names);
-		} else if (parent && parent->num_interfaces) {
-			zend_do_inherit_interfaces(ce, parent);
+		} else {
+			if (ce->interface_names) {
+				for (i = 0; i < num_interface_names; i++) {
+					zend_string_release_ex(ce->interface_names[i].name, 0);
+					zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+				}
+				efree(ce->interface_names);
+				ce->interface_names = NULL;
+			}
+			if (parent && parent->num_interfaces) {
+				zend_do_inherit_interfaces(ce, parent);
+			}
 		}
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT))
 			&& (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
