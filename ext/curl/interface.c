@@ -1062,63 +1062,64 @@ PHP_FUNCTION(curl_version)
 		}
 	} else {
 		{
-		struct feat {
-			const char *name;
-			int bitmask;
-		};
+			struct feat {
+				const char *name;
+				int bitmask;
+			};
 
-		unsigned int i;
+			unsigned int i;
 
-		/* Sync this list with PHP_MINFO_FUNCTION(curl) as well */
-		static const struct feat feats[] = {
-			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
-			{"CharConv", CURL_VERSION_CONV},
-			{"Debug", CURL_VERSION_DEBUG},
-				{"MemoryDebug", CURL_VERSION_CURLDEBUG},
-			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
-			{"IDN", CURL_VERSION_IDN},
-			{"IPv6", CURL_VERSION_IPV6},
-			{"krb4", CURL_VERSION_KERBEROS4},
-			{"Largefile", CURL_VERSION_LARGEFILE},
-			{"libz", CURL_VERSION_LIBZ},
-			{"NTLM", CURL_VERSION_NTLM},
-			{"NTLMWB", CURL_VERSION_NTLM_WB},
-			{"SPNEGO", CURL_VERSION_SPNEGO},
-			{"SSL",  CURL_VERSION_SSL},
-			{"SSPI",  CURL_VERSION_SSPI},
-			{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
-			{"HTTP2", CURL_VERSION_HTTP2},
-			{"GSSAPI", CURL_VERSION_GSSAPI},
-			{"KERBEROS5", CURL_VERSION_KERBEROS5},
-			{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
-			{"PSL", CURL_VERSION_PSL},
-			{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
-			{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
-			{"BROTLI", CURL_VERSION_BROTLI},
-#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
-			{"ALTSVC", CURL_VERSION_ALTSVC},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
-			{"HTTP3", CURL_VERSION_HTTP3},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
-			{"UNICODE", CURL_VERSION_UNICODE},
-			{"ZSTD", CURL_VERSION_ZSTD},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
-			{"HSTS", CURL_VERSION_HSTS},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
-			{"GSASL", CURL_VERSION_GSASL},
-#endif
-				#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
-					{"ThreadSafe", CURL_VERSION_THREADSAFE},
-				#endif
-		};
+			/* Sync this list with PHP_MINFO_FUNCTION(curl) as well */
+			static const struct feat feats[] = {
+				{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
+				{"CharConv", CURL_VERSION_CONV},
+				{"Debug", CURL_VERSION_DEBUG},
+					{"MemoryDebug", CURL_VERSION_CURLDEBUG},
+				{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
+				{"IDN", CURL_VERSION_IDN},
+				{"IPv6", CURL_VERSION_IPV6},
+				{"krb4", CURL_VERSION_KERBEROS4},
+				{"Largefile", CURL_VERSION_LARGEFILE},
+				{"libz", CURL_VERSION_LIBZ},
+				{"NTLM", CURL_VERSION_NTLM},
+				{"NTLMWB", CURL_VERSION_NTLM_WB},
+				{"SPNEGO", CURL_VERSION_SPNEGO},
+				{"SSL",  CURL_VERSION_SSL},
+				{"SSPI",  CURL_VERSION_SSPI},
+				{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
+				{"HTTP2", CURL_VERSION_HTTP2},
+				{"GSSAPI", CURL_VERSION_GSSAPI},
+				{"KERBEROS5", CURL_VERSION_KERBEROS5},
+				{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
+				{"PSL", CURL_VERSION_PSL},
+				{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
+				{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
+				{"BROTLI", CURL_VERSION_BROTLI},
+	#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+				{"ALTSVC", CURL_VERSION_ALTSVC},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+				{"HTTP3", CURL_VERSION_HTTP3},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
+				{"UNICODE", CURL_VERSION_UNICODE},
+				{"ZSTD", CURL_VERSION_ZSTD},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+				{"HSTS", CURL_VERSION_HSTS},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+				{"GSASL", CURL_VERSION_GSASL},
+	#endif
+					#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+						{"ThreadSafe", CURL_VERSION_THREADSAFE},
+					#endif
+			};
 
-		for(i = 0; i < sizeof(feats) / sizeof(feats[0]); i++) {
-			if (feats[i].name) {
-				add_assoc_bool(&feature_list, feats[i].name, d->features & feats[i].bitmask ? true : false);
+			for(i = 0; i < sizeof(feats) / sizeof(feats[0]); i++) {
+				if (feats[i].name) {
+					add_assoc_bool(&feature_list, feats[i].name, d->features & feats[i].bitmask ? true : false);
+				}
 			}
 		}
 	}
