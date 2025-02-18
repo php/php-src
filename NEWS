@@ -54,6 +54,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17747 (Exception on reading property in register-based
     FETCH_OBJ_R breaks JIT). (Dmitry, nielsdos)
 
+- PDO_SQLite:
+  . Fixed GH-17837 ()::getColumnMeta() on unexecuted statement segfaults).
+    (cmb)
+
 - Phar:
   . Fixed bug GH-17808: PharFileInfo refcount bug. (nielsdos)
 
