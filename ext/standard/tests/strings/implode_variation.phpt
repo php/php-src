@@ -225,5 +225,9 @@ array(2) {
 }
 
 *** Testing end() on resource type ***
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 string(%d) "Resource id #%d::Resource id #%d"
 Done

@@ -85,31 +85,143 @@ echo "Done";
 --EXPECTF--
 *** Testing array_intersect() : assoc array with diff values to $arr1 argument ***
 -- Iterator 1 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(0) {
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(0) {
 }
 -- Iterator 2 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(0) {
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(0) {
 }
 -- Iterator 3 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   [1]=>
   int(1)
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   [1]=>
   int(1)
 }
 -- Iterator 4 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(2) {
   ["one"]=>
   int(1)
@@ -117,51 +229,231 @@ array(2) {
   int(2)
 }
 -- Iterator 5 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   ["float"]=>
   float(2.3333)
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   ["float"]=>
   float(2.3333)
 }
 -- Iterator 6 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   ["f1"]=>
   float(1.2)
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   ["f1"]=>
   float(1.2)
 }
 -- Iterator 7 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   ["red"]=>
   string(6) "col	or"
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   ["red"]=>
   string(6) "col	or"
 }
 -- Iterator 8 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   [2]=>
   string(9) "\v\fworld"
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   [2]=>
   string(9) "\v\fworld"
 }
 -- Iterator 9 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   ["heredoc"]=>
   string(11) "Hello world"
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(1) {
   ["heredoc"]=>
   string(11) "Hello world"
 }
 -- Iterator 10 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(2) {
   [11]=>
   object(classA)#%d (0) {
@@ -169,6 +461,42 @@ array(2) {
   ["resource"]=>
   resource(%d) of type (stream)
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(2) {
   [11]=>
   object(classA)#%d (0) {
@@ -177,6 +505,44 @@ array(2) {
   resource(%d) of type (stream)
 }
 -- Iterator 11 --
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(5) {
   [2]=>
   object(classA)#%d (0) {
@@ -190,6 +556,62 @@ array(5) {
   ["heredoc"]=>
   string(11) "Hello world"
 }
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
+
+Warning: Resource to string conversion in %s on line %d
 array(5) {
   [2]=>
   object(classA)#%d (0) {

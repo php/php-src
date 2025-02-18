@@ -147,6 +147,8 @@ array(2) {
   string(11) "Hello world"
 }
 -- Iteration 10 --
+
+Warning: Resource to string conversion in %s on line %d
 array(3) {
   ["Class A object"]=>
   object(classA)#%d (0) {
@@ -157,6 +159,8 @@ array(3) {
   resource(%d) of type (stream)
 }
 -- Iteration 11 --
+
+Warning: Resource to string conversion in %s on line %d
 array(8) {
   ["hello"]=>
   string(5) "hello"

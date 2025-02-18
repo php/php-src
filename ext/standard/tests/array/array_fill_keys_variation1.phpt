@@ -52,6 +52,8 @@ array(4) {
 
 -- Testing array_fill_keys() function with mixed array --
 
+Warning: Resource to string conversion in %s on line %d
+
 Warning: Array to string conversion in %s on line %d
 array(7) {
   ["Resource id #%d"]=>

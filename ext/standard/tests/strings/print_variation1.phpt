@@ -138,6 +138,8 @@ int(1)
 sample object
 int(1)
 -- Iteration 19 --
+
+Warning: Resource to string conversion in %s on line %d
 Resource id #%d
 int(1)
 -- Iteration 20 --

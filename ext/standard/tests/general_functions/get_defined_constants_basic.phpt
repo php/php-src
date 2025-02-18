@@ -9,7 +9,10 @@ var_dump(gettype(get_defined_constants()));
 
 $arr1 = get_defined_constants(false);
 $arr2 = get_defined_constants();
-var_dump(array_diff($arr1, $arr2));
+
+// TODO We suppress the warning for resource to string conversion
+// This should be removed when array_diff is fixed
+var_dump(@array_diff($arr1, $arr2));
 
 $n1 = count(get_defined_constants());
 define("USER_CONSTANT", "test");

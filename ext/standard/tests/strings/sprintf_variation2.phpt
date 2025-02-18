@@ -229,6 +229,10 @@ string(0) ""
 string(0) ""
 
 -- Iteration 28 --
+
+Warning: Resource to string conversion in %s on line %d
 string(%d) "Resource id #%d"
+
+Warning: Resource to string conversion in %s on line %d
 string(%d) "Resource id #%d"
 Done
