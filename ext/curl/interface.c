@@ -1067,9 +1067,10 @@ PHP_FUNCTION(curl_version)
 	array_init(return_value);
 
 	CAAS("version", d->version);
+	CAAL("version_number", d->version_num);
 	CAAL("age", d->age);
 	CAAS("host", d->host);
-	
+	CAAL("features", d->features);
 	/* Add an array of features */
 	zval feature_list;
 	array_init(&feature_list);
@@ -1144,7 +1145,7 @@ PHP_FUNCTION(curl_version)
 			}
 		}
 	}
-	CAAZ("features", &feature_list);
+	CAAZ("feature_list", &feature_list);
 
 	/* Add an array of protocols */
 	{
