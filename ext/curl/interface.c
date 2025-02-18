@@ -379,25 +379,17 @@ PHP_MINFO_FUNCTION(curl)
 	if (d->libz_version) {
 		php_info_print_table_row(2, "Zlib Version", d->libz_version);
 	}
-
-#if defined(CURLVERSION_SECOND) && CURLVERSION_NOW >= CURLVERSION_SECOND
-	if (d->ares) {
+	if (d->age >= CURLVERSION_SECOND && d->ares) {
 		php_info_print_table_row(2, "c-ares Version", d->ares);
 	}
-#endif
-
-#if defined(CURLVERSION_THIRD) && CURLVERSION_NOW >= CURLVERSION_THIRD
-	if (d->libidn) {
-		php_info_print_table_row(2, "libIDN Version", d->libidn);
+	if (d->age >= CURLVERSION_THIRD && d->libidn) {
+		php_info_print_table_row(2, "Libidn Version", d->libidn);
 	}
-#endif
-
-	if (d->iconv_ver_num) {
-		php_info_print_table_row(2, "IconV Version", d->iconv_ver_num);
+	if (d->age >= CURLVERSION_FOURTH && d->iconv_ver_num) {
+		php_info_print_table_row(2, "Iconv Version", d->iconv_ver_num);
 	}
-
-	if (d->libssh_version) {
-		php_info_print_table_row(2, "libSSH Version", d->libssh_version);
+	if (d->age >= CURLVERSION_FOURTH && d->libssh_version) {
+		php_info_print_table_row(2, "Libssh Version", d->libssh_version);
 	}
 
 	php_info_print_table_end();
