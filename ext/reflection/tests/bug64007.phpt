@@ -16,7 +16,7 @@ var_dump($generator);
 --EXPECTF--
 string(%d) "Class Generator is an internal class marked as final that cannot be instantiated without invoking its constructor"
 
-Fatal error: Uncaught ReflectionException: Access to non-public constructor of class Generator in %sbug64007.php:%d
+Fatal error: Uncaught ReflectionException: Access to non-public constructor of class Generator, the "Generator" class is reserved for internal use and cannot be manually instantiated, in %sbug64007.php:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->newInstance()
 #1 {main}
