@@ -8,6 +8,9 @@
  */
 final class Generator implements Iterator
 {
+    #[\NonpublicConstructor("the \"Generator\" class is reserved for internal use and cannot be manually instantiated")]
+    private function __construct() {}
+
     public function rewind(): void {}
 
     public function valid(): bool {}

@@ -19,6 +19,7 @@
 */
 
 #include "zend.h"
+#include "zend_attributes.h"
 #include "zend_globals.h"
 #include "zend_lazy_objects.h"
 #include "zend_variables.h"
@@ -2024,14 +2025,29 @@ ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zen
 
 static ZEND_COLD zend_never_inline void zend_bad_constructor_call(zend_function *constructor, zend_class_entry *scope) /* {{{ */
 {
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (zend_attribute_get_nonpublic_suffix(constructor->common.attributes, &message_suffix) == FAILURE) {
+		return;
+	}
+
 	if (scope) {
-		zend_throw_error(NULL, "Call to %s %s::%s() from scope %s",
+		zend_throw_error(NULL, "Call to %s %s::%s() from scope %s%S",
 			zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name),
-			ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name)
+			ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name),
+			message_suffix
 		);
 	} else {
-		zend_throw_error(NULL, "Call to %s %s::%s() from global scope", zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+		zend_throw_error(
+			NULL,
+			"Call to %s %s::%s() from global scope%S",
+			zend_visibility_string(constructor->common.fn_flags),
+			ZSTR_VAL(constructor->common.scope->name),
+			ZSTR_VAL(constructor->common.function_name),
+			message_suffix
+		);
 	}
+	zend_string_release(message_suffix);
 }
 /* }}} */
 

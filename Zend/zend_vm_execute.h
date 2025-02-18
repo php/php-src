@@ -7369,7 +7369,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -9943,7 +9955,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -10701,7 +10725,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -12435,7 +12471,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -25471,7 +25519,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -28404,7 +28464,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -29914,7 +29986,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -32853,7 +32937,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -35124,7 +35220,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -37293,7 +37401,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -37704,7 +37824,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -39938,7 +40070,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%S",
+					ZSTR_VAL(ce->name),
+					message_suffix
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
