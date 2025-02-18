@@ -23,6 +23,17 @@ var_dump(pathinfo(__FILE__, PATHINFO_FILENAME|PATHINFO_BASENAME));
 var_dump(pathinfo(__FILE__, PATHINFO_DIRNAME|PATHINFO_EXTENSION));
 var_dump(pathinfo(__FILE__, PATHINFO_DIRNAME|PATHINFO_BASENAME));
 
+try {
+	pathinfo(__FILE__, PATHINFO_DIRNAME-1);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+try {
+	pathinfo(__FILE__, PATHINFO_ALL+1);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -102,4 +113,6 @@ string(%d) "%s%estrings"
 string(12) "pathinfo.php"
 string(%d) "%s%estrings"
 string(%d) "%s%estrings"
+pathinfo(): Argument #2 ($flags) must be one of the PATHINFO_* constants
+pathinfo(): Argument #2 ($flags) must be one of the PATHINFO_* constants
 Done
