@@ -105,11 +105,11 @@ object(mysqli)#%d (%d) {
     }
   }
   ["field_count"]=>
-  int(0)
+  int(1)
   ["host_info"]=>
   string(%d) "%s"
   ["info"]=>
-  %s
+  NULL
   ["insert_id"]=>
   int(0)
   ["server_info"]=>
@@ -117,13 +117,13 @@ object(mysqli)#%d (%d) {
   ["server_version"]=>
   int(%d)
   ["sqlstate"]=>
-  string(5) "HY000"
+  string(%d) "%s"
   ["protocol_version"]=>
-  int(10)
+  int(%d)
   ["thread_id"]=>
   int(%d)
   ["warning_count"]=>
-  int(0)
+  int(%d)
 }
 
 Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
