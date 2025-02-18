@@ -3790,9 +3790,9 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 			} else {
 				zend_throw_error(
 					NULL,
-					"Cannot call private %s::__construct()%S",
+					"Cannot call private %s::__construct()%s",
 					ZSTR_VAL(ce->name),
-					message_suffix
+					ZSTR_VAL(message_suffix)
 				);
 				zend_string_release(message_suffix);
 			}

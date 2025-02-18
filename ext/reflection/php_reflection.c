@@ -4952,9 +4952,9 @@ ZEND_METHOD(ReflectionClass, newInstance)
 			zend_throw_exception_ex(
 				reflection_exception_ptr,
 				0,
-				"Access to non-public constructor of class %s%S",
+				"Access to non-public constructor of class %s%s",
 				ZSTR_VAL(ce->name),
-				message_suffix
+				ZSTR_VAL(message_suffix)
 			);
 			zend_string_release(message_suffix);
 			zval_ptr_dtor(return_value);
@@ -5043,9 +5043,9 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 			zend_throw_exception_ex(
 				reflection_exception_ptr,
 				0,
-				"Access to non-public constructor of class %s%S",
+				"Access to non-public constructor of class %s%s",
 				ZSTR_VAL(ce->name),
-				message_suffix
+				ZSTR_VAL(message_suffix)
 			);
 			zend_string_release(message_suffix);
 			zval_ptr_dtor(return_value);

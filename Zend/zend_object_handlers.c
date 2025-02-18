@@ -2032,19 +2032,19 @@ static ZEND_COLD zend_never_inline void zend_bad_constructor_call(zend_function 
 	}
 
 	if (scope) {
-		zend_throw_error(NULL, "Call to %s %s::%s() from scope %s%S",
+		zend_throw_error(NULL, "Call to %s %s::%s() from scope %s%s",
 			zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name),
 			ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name),
-			message_suffix
+			ZSTR_VAL(message_suffix)
 		);
 	} else {
 		zend_throw_error(
 			NULL,
-			"Call to %s %s::%s() from global scope%S",
+			"Call to %s %s::%s() from global scope%s",
 			zend_visibility_string(constructor->common.fn_flags),
 			ZSTR_VAL(constructor->common.scope->name),
 			ZSTR_VAL(constructor->common.function_name),
-			message_suffix
+			ZSTR_VAL(message_suffix)
 		);
 	}
 	zend_string_release(message_suffix);
