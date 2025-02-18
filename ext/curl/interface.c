@@ -272,9 +272,10 @@ PHP_MINFO_FUNCTION(curl)
 	d = curl_version_info(CURLVERSION_NOW);
 	php_info_print_table_start();
 	php_info_print_table_row(2, "cURL support",    "enabled");
-	php_info_print_table_row(2, "cURL Information", d->version);
+	php_info_print_table_row(2, "cURL version", d->version);
 	snprintf(str, sizeof(str), "%d", d->age);
 	php_info_print_table_row(2, "Age", str);
+	php_info_print_table_row(2, "Host", d->host);
 
 	// Features
 	if (d->age >= CURLVERSION_ELEVENTH && d->feature_names) {
@@ -352,6 +353,7 @@ PHP_MINFO_FUNCTION(curl)
 		}
 	}
 
+	// Protocols
 	n = 0;
 	p = (char **) d->protocols;
 	while (*p != NULL) {
@@ -360,8 +362,7 @@ PHP_MINFO_FUNCTION(curl)
 	}
 	php_info_print_table_row(2, "Protocols", str);
 
-	php_info_print_table_row(2, "Host", d->host);
-
+	// SSL
 	if (d->ssl_version) {
 		php_info_print_table_row(2, "SSL Version", d->ssl_version);
 	}
@@ -374,13 +375,14 @@ PHP_MINFO_FUNCTION(curl)
 	}
 	php_info_print_table_row(2, "SSL backends", str);
 
+	// Feature versions
 	if (d->libz_version) {
-		php_info_print_table_row(2, "ZLib Version", d->libz_version);
+		php_info_print_table_row(2, "Zlib Version", d->libz_version);
 	}
 
 #if defined(CURLVERSION_SECOND) && CURLVERSION_NOW >= CURLVERSION_SECOND
 	if (d->ares) {
-		php_info_print_table_row(2, "ZLib Version", d->ares);
+		php_info_print_table_row(2, "c-ares Version", d->ares);
 	}
 #endif
 
@@ -1053,6 +1055,7 @@ PHP_FUNCTION(curl_version)
 
 	CAAL("version_number", d->version_num);
 	CAAL("age", d->age);
+	CAAS("host", d->host);
 	
 	/* Add an array of features */
 	zval feature_list;
@@ -1130,7 +1133,6 @@ PHP_FUNCTION(curl_version)
 	CAAZ("features", &feature_list);
 	CAAL("ssl_version_number", d->ssl_version_num);
 	CAAS("version", d->version);
-	CAAS("host", d->host);
 	CAAS("ssl_version", d->ssl_version);
 	CAAS("libz_version", d->libz_version);
 	/* Add an array of protocols */
