@@ -1053,7 +1053,7 @@ PHP_FUNCTION(curl_version)
 
 	array_init(return_value);
 
-	CAAL("version_number", d->version_num);
+	CAAS("version", d->version);
 	CAAL("age", d->age);
 	CAAS("host", d->host);
 	
@@ -1131,8 +1131,6 @@ PHP_FUNCTION(curl_version)
 		}
 	}
 	CAAZ("features", &feature_list);
-	CAAL("ssl_version_number", d->ssl_version_num);
-	CAAS("version", d->version);
 	CAAS("ssl_version", d->ssl_version);
 	CAAS("libz_version", d->libz_version);
 	/* Add an array of protocols */
