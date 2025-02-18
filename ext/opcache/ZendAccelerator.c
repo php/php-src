@@ -4389,7 +4389,7 @@ static void preload_load(size_t orig_map_ptr_static_last)
 	if (orig_map_ptr_static_last != zend_map_ptr_static_last) {
 		/* preloaded static entries currently are all runtime cache pointers, just assign them as such */
 		size_t runtime_cache_size = zend_internal_run_time_cache_reserved_size();
-		ZCG(preloaded_internal_run_time_cache_size) = (zend_map_ptr_static_last - orig_map_ptr_static_last) * sizeof(void *);
+		ZCG(preloaded_internal_run_time_cache_size) = (zend_map_ptr_static_last - orig_map_ptr_static_last) * runtime_cache_size;
 		char *cache = pemalloc(ZCG(preloaded_internal_run_time_cache_size), 1);
 		ZCG(preloaded_internal_run_time_cache) = cache;
 
