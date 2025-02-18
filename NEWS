@@ -40,6 +40,10 @@ PHP                                                                        NEWS
     JIT crash). (nielsdos)
   . Fixed bug GH-17577 (JIT packed type guard crash). (nielsdos, Dmitry)
 
+- PDO_SQLite:
+  . Fixed GH-17837 ()::getColumnMeta() on unexecuted statement segfaults).
+    (cmb)
+
 - Phar:
   . Fixed bug GH-17808: PharFileInfo refcount bug. (nielsdos)
 
