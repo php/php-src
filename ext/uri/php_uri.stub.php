@@ -37,13 +37,13 @@ namespace Uri\Rfc3986 {
 
         public function getRawScheme(): ?string {}
 
-        public function withScheme(?string $encodedScheme): static {}
+        public function withScheme(?string $scheme): static {}
 
         public function getUserInfo(): ?string {}
 
         public function getRawUserInfo(): ?string {}
 
-        public function withUserInfo(?string $encodedUserInfo): static {}
+        public function withUserInfo(?string $userInfo): static {}
 
         public function getUser(): ?string {}
 
@@ -57,48 +57,48 @@ namespace Uri\Rfc3986 {
 
         public function getRawHost(): ?string {}
 
-        public function withHost(?string $encodedHost): static {}
+        public function withHost(?string $host): static {}
 
         public function getPort(): ?int {}
 
         public function withPort(?int $port): static {}
 
-        public function getPath(): ?string {}
+        public function getPath(): string {}
 
-        public function getRawPath(): ?string {}
+        public function getRawPath(): string {}
 
-        public function withPath(?string $encodedPath): static {}
+        public function withPath(string $path): static {}
 
         public function getQuery(): ?string {}
 
         public function getRawQuery(): ?string {}
 
-        public function withQuery(?string $encodedQuery): static {}
+        public function withQuery(?string $query): static {}
 
         public function getFragment(): ?string {}
 
         public function getRawFragment(): ?string {}
 
-        public function withFragment(?string $encodedFragment): static {}
+        public function withFragment(?string $fragment): static {}
 
         public function equals(\Uri\Rfc3986\Uri $uri, bool $excludeFragment = true): bool {}
 
-        public function toNormalizedString(): string {}
-
         public function toString(): string {}
+
+        public function toRawString(): string {}
 
         public function resolve(string $uri): static {}
 
-        public function __serialize(): array;
+        public function __serialize(): array {}
 
-        public function __unserialize(array $data): void;
+        public function __unserialize(array $data): void {}
 
-        public function __debugInfo(): array;
+        public function __debugInfo(): array {}
     }
 }
 
 namespace Uri\WhatWg {
-    enum WhatWgErrorType
+    enum UrlValidationErrorType
     {
         case DomainToAscii;
         case DomainToUnicode;
@@ -132,13 +132,13 @@ namespace Uri\WhatWg {
     }
 
     /** @strict-properties */
-    readonly class WhatWgError
+    final readonly class UrlValidationError
     {
         public string $context;
-        public \Uri\WhatWg\WhatWgErrorType $type;
+        public \Uri\WhatWg\UrlValidationErrorType $type;
         public bool $failure;
 
-        public function __construct(string $context, \Uri\WhatWg\WhatWgErrorType $type, bool $failure) {}
+        public function __construct(string $context, \Uri\WhatWg\UrlValidationErrorType $type, bool $failure) {}
     }
 
     /** @strict-properties */
@@ -152,7 +152,7 @@ namespace Uri\WhatWg {
 
         public function getScheme(): string {}
 
-        public function withScheme(string $encodedScheme): static {}
+        public function withScheme(string $scheme): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getUser */
         public function getUser(): ?string {}
@@ -160,7 +160,7 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getRawUser */
         public function getRawUser(): ?string {}
 
-        public function withUser(?string $encodedUser): static {}
+        public function withUser(?string $user): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPassword */
         public function getPassword(): ?string {}
@@ -168,28 +168,28 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getRawPassword */
         public function getRawPassword(): ?string {}
 
-        public function withPassword(?string $encodedPassword): static {}
+        public function withPassword(?string $password): static {}
 
-        public function getHost(): string {}
+        public function getAsciiHost(): ?string {}
 
-        public function getHostForDisplay(): string {}
+        public function getUnicodeHost(): ?string {}
 
-        public function withHost(string $encodedHost): static {}
+        public function withHost(?string $host): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPort */
         public function getPort(): ?int {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withPort */
-        public function withPort(?int $encodedPort): static {}
+        public function withPort(?int $port): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPath */
-        public function getPath(): ?string {}
+        public function getPath(): string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getRawPath */
-        public function getRawPath(): ?string {}
+        public function getRawPath(): string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withPath */
-        public function withPath(?string $encodedPath): static {}
+        public function withPath(string $path): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getQuery */
         public function getQuery(): ?string {}
@@ -198,7 +198,7 @@ namespace Uri\WhatWg {
         public function getRawQuery(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withQuery */
-        public function withQuery(?string $encodedQuery): static {}
+        public function withQuery(?string $query): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getFragment */
         public function getFragment(): ?string {}
@@ -207,13 +207,13 @@ namespace Uri\WhatWg {
         public function getRawFragment(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withFragment */
-        public function withFragment(?string $encodedFragment): static {}
+        public function withFragment(?string $fragment): static {}
 
-        public function equals(\Uri\WhatWg\Url $uri, bool $excludeFragment = true): bool {}
+        public function equals(\Uri\WhatWg\Url $url, bool $excludeFragment = true): bool {}
 
-        public function toString(): string {}
+        public function toAsciiString(): string {}
 
-        public function toDisplayString(): string {}
+        public function toUnicodeString(): string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::resolve */
         public function resolve(string $uri): static {}
@@ -223,6 +223,7 @@ namespace Uri\WhatWg {
 
         public function __unserialize(array $data): void {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::__debugInfo */
         public function __debugInfo(): array {}
     }
 }

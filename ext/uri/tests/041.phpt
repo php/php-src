@@ -29,7 +29,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(0) ""
   ["query"]=>
   string(5) "query"
   ["fragment"]=>
@@ -38,11 +38,11 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 NULL
 array(%d) {
   [0]=>
-  object(Uri\WhatWg\WhatWgError)#%d (%d) {
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
     string(15) "?query#fragment"
     ["type"]=>
-    enum(Uri\WhatWg\WhatWgErrorType::MissingSchemeNonRelativeUrl)
+    enum(Uri\WhatWg\UrlValidationErrorType::MissingSchemeNonRelativeUrl)
     ["failure"]=>
     bool(true)
   }

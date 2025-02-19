@@ -136,7 +136,7 @@ static zend_result uriparser_normalize_uri(UriUriA *uriparser_uri)
 #define URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode) do { \
 	if (read_mode == URI_COMPONENT_READ_RAW) { \
         uriparser_uri = (UriUriA *) uriparser_uris->uri; \
-    } else if (read_mode == URI_COMPONENT_READ_NORMALIZED_FOR_DISPLAY || read_mode == URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING) { \
+    } else if (read_mode == URI_COMPONENT_READ_NORMALIZED_UNICODE || read_mode == URI_COMPONENT_READ_NORMALIZED_ASCII) { \
         if (uriparser_uris->normalized_uri == NULL) { \
 			uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri); \
 			if (uriparser_normalize_uri(uriparser_uris->normalized_uri) == FAILURE) { \
@@ -226,7 +226,7 @@ static zend_result uriparser_read_host(const uri_internal_t *internal_uri, uri_c
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
 	UriUriA *uriparser_uri;
 	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
-
+	// TODO return ipv6 inside []
 	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL && uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first > 0) {
 		ZVAL_STRINGL(retval, uriparser_uri->hostText.first, uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first);
 	} else {
@@ -273,7 +273,7 @@ static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_c
 
 		ZVAL_STR(retval, smart_str_extract(&str));
 	} else {
-		ZVAL_NULL(retval);
+		ZVAL_EMPTY_STRING(retval);
 	}
 
 	return SUCCESS;
@@ -676,7 +676,7 @@ static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t 
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) uri;
 	UriUriA *uriparser_uri = uriparser_uris->uri;
 
-	if ((recomposition_mode == URI_RECOMPOSITION_NORMALIZED_FOR_DISPLAY || recomposition_mode == URI_RECOMPOSITION_NORMALIZED_FOR_MACHINE_PROCESSING) &&
+	if ((recomposition_mode == URI_RECOMPOSITION_NORMALIZED_UNICODE || recomposition_mode == URI_RECOMPOSITION_NORMALIZED_ASCII) &&
 		uriparser_uris->normalized_uri == NULL
 	) {
 		uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri);
