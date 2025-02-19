@@ -1254,7 +1254,7 @@ PHP_FUNCTION(curl_version)
 		add_assoc_string (&features_version, "rtmp", d->rtmp_version);
 	}
 #endif
-	CAAZ("features_versions", &features_version);
+	CAAZ("features_version", &features_version);
 }
 /* }}} */
 
