@@ -31,7 +31,7 @@ object(Uri\Rfc3986\Uri)#1 (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(0) ""
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -51,7 +51,7 @@ object(Uri\Rfc3986\Uri)#2 (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(0) ""
   ["query"]=>
   NULL
   ["fragment"]=>

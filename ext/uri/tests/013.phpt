@@ -33,7 +33,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(0) ""
   ["query"]=>
   string(25) "foo=Hell%C3%B3+W%C3%B6rld"
   ["fragment"]=>
@@ -90,7 +90,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(0) ""
   ["query"]=>
   string(30) "foobar=%27%3Cscript%3E+%2B+%40"
   ["fragment"]=>

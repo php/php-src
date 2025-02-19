@@ -613,7 +613,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	/* Parse the URI - if it fails, we return NULL */
-	php_uri *uri = php_uri_parse_to_struct(uri_handler, Z_STR_P(value), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING, NULL);
+	php_uri *uri = php_uri_parse_to_struct(uri_handler, Z_STR_P(value), URI_COMPONENT_READ_NORMALIZED_ASCII, NULL);
 	if (uri == NULL) {
 		RETURN_VALIDATION_FAILED
 	}
