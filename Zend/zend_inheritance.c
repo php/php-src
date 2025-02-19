@@ -581,7 +581,6 @@ static inheritance_status zend_is_class_subtype_of_type(
 	if (have_unresolved) {
 		return INHERITANCE_UNRESOLVED;
 	}
-
 	return is_intersection ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
