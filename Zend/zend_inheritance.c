@@ -502,6 +502,18 @@ static inheritance_status zend_is_class_subtype_of_type(
 		}
 	}
 
+	/* Replacing static with self in final classes is okay */
+	if ((ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_STATIC) &&
+		(fe_scope->ce_flags & ZEND_ACC_FINAL) && unlinked_instanceof(fe_scope, proto_scope)) {
+		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
+		if (!fe_ce) {
+			have_unresolved = 1;
+		} else if (fe_ce == fe_scope) {
+			track_class_dependency(fe_ce, fe_class_name);
+			return INHERITANCE_SUCCESS;
+		}
+	}
+
 	zend_type *single_type;
 
 	/* Traverse the list of parent types and check if the current child (FE)
@@ -569,18 +581,6 @@ static inheritance_status zend_is_class_subtype_of_type(
 
 	if (have_unresolved) {
 		return INHERITANCE_UNRESOLVED;
-	}
-
-	/* Replacing static with self in final classes is okay */
-	if ((ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_STATIC) &&
-		(fe_scope->ce_flags & ZEND_ACC_FINAL) && unlinked_instanceof(fe_scope, proto_scope)) {
-		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
-
-		if (fe_ce == fe_scope) {
-			return INHERITANCE_SUCCESS;
-		}
-
-		return INHERITANCE_ERROR;
 	}
 
 	return is_intersection ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
