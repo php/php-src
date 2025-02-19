@@ -9,10 +9,10 @@ var_dump(Uri\Rfc3986\Uri::parse("http://username:password@héééostname:9090/ga
 
 $url = Uri\WhatWg\Url::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor");
 var_dump($url);
-var_dump($url->getHost());
-var_dump($url->getHostForDisplay());
-var_dump($url->toDisplayString());
-var_dump($url->toString());
+var_dump($url->getAsciiHost());
+var_dump($url->getUnicodeHost());
+var_dump($url->toAsciiString());
+var_dump($url->toUnicodeString());
 
 ?>
 --EXPECTF--
@@ -37,5 +37,5 @@ object(Uri\WhatWg\Url)#%d (%d) {
 }
 string(18) "xn--hostname-b1aaa"
 string(14) "héééostname"
-string(71) "http://username:password@héééostname:9090/path?arg=va%C3%A9ue#anchor"
 string(75) "http://username:password@xn--hostname-b1aaa:9090/path?arg=va%C3%A9ue#anchor"
+string(71) "http://username:password@héééostname:9090/path?arg=va%C3%A9ue#anchor"

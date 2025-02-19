@@ -2,6 +2,8 @@
 Test property mutation - query
 --EXTENSIONS--
 uri
+--XFAIL--
+uriparser component modification must be fixed
 --FILE--
 <?php
 

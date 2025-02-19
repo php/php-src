@@ -7,11 +7,11 @@ uri
 
 $uri = Uri\Rfc3986\Uri::parse("https:example.com");
 var_dump($uri);
-var_dump($uri->toString());
+var_dump($uri->toRawString());
 
 $url = Uri\WhatWg\Url::parse("https:example.com");
 var_dump($url);
-var_dump($url->toString());
+var_dump($url->toAsciiString());
 
 ?>
 --EXPECTF--

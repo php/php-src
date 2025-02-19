@@ -1,5 +1,5 @@
 --TEST--
-Test toNormalizedString()
+Test toString()
 --EXTENSIONS--
 uri
 --FILE--
@@ -8,23 +8,23 @@ uri
 $uri1 = Uri\Rfc3986\Uri::parse("HTTPS://////EXAMPLE.com");
 $uri2 = Uri\Rfc3986\Uri::parse("https://example.com");
 $uri3 = Uri\Rfc3986\Uri::parse("https://example.com/foo/..");
+var_dump($uri1->toRawString());
 var_dump($uri1->toString());
-var_dump($uri1->toNormalizedString());
+var_dump($uri2->toRawString());
 var_dump($uri2->toString());
-var_dump($uri2->toNormalizedString());
+var_dump($uri3->toRawString());
 var_dump($uri3->toString());
-var_dump($uri3->toNormalizedString());
 
 $url1 = Uri\WhatWg\Url::parse("HTTPS://////EXAMPLE.com");
 $url2 = Uri\WhatWg\Url::parse("https://example.com");
 $url3 = Uri\WhatWg\Url::parse("https://example.com/foo/..");
 
-var_dump($url1->toDisplayString());
-var_dump($url1->toString());
-var_dump($url2->toDisplayString());
-var_dump($url2->toString());
-var_dump($url3->toDisplayString());
-var_dump($url3->toString());
+var_dump($url1->toUnicodeString());
+var_dump($url1->toAsciiString());
+var_dump($url2->toUnicodeString());
+var_dump($url2->toAsciiString());
+var_dump($url3->toUnicodeString());
+var_dump($url3->toAsciiString());
 
 ?>
 --EXPECT--

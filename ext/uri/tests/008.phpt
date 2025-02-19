@@ -15,11 +15,12 @@ function callGetters($uri)
     var_dump($uri->getRawUser());
     var_dump($uri->getPassword());
     var_dump($uri->getRawPassword());
-    var_dump($uri->getHost());
     if ($uri instanceof Uri\Rfc3986\Uri) {
+        var_dump($uri->getHost());
         var_dump($uri->getRawHost());
     } else {
-        var_dump($uri->getHostForDisplay());
+        var_dump($uri->getAsciiHost());
+        var_dump($uri->getUnicodeHost());
     }
     var_dump($uri->getPort());
     var_dump($uri->getPath());

@@ -34,6 +34,6 @@ try {
 ?>
 --EXPECT--
 Uri\Rfc3986\Uri::__construct(): Argument #1 ($uri) must not contain any null bytes
-Uri\Rfc3986\Uri::withHost(): Argument #1 ($encodedHost) must not contain any null bytes
+Uri\Rfc3986\Uri::withHost(): Argument #1 ($host) must not contain any null bytes
 Uri\WhatWg\Url::__construct(): Argument #1 ($uri) must not contain any null bytes
-Uri\WhatWg\Url::withHost(): Argument #1 ($encodedHost) must not contain any null bytes
+Uri\WhatWg\Url::withHost(): Argument #1 ($host) must not contain any null bytes

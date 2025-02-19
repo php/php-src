@@ -16,7 +16,7 @@ var_dump($uri);
 
 $uri = Uri\Rfc3986\Uri::parse("HTTPS://TEST.com/with-base-in-vain", "https://example.com");
 var_dump($uri);
-var_dump($uri->toNormalizedString());
+var_dump($uri->toString());
 
 $url = Uri\WhatWg\Url::parse("https://example.com/without-base/");
 var_dump($url);

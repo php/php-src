@@ -41,10 +41,10 @@ $url2 = $url1->withHost("test.com");
 $url3 = $url2->withHost("t%65st.com"); // test.com
 $url4 = $url3->withHost("test.com:8080");
 
-var_dump($url1->getHost());
-var_dump($url2->getHost());
-var_dump($url3->getHost());
-var_dump($url4->getHost());
+var_dump($url1->getAsciiHost());
+var_dump($url2->getAsciiHost());
+var_dump($url3->getAsciiHost());
+var_dump($url4->getAsciiHost());
 var_dump($url4->getPort());
 
 try {
@@ -68,8 +68,8 @@ try {
 $url1 = Uri\WhatWg\Url::parse("ftp://foo.com?query=abc#foo");
 $url2 = $url1->withHost("test.com");
 
-var_dump($url1->getHost());
-var_dump($url2->getHost());
+var_dump($url1->getAsciiHost());
+var_dump($url2->getAsciiHost());
 
 ?>
 --EXPECT--

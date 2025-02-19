@@ -27,7 +27,6 @@ function callMembers($uri)
     handleException($uri, function ($uri) {$uri->getRawUser();});
     handleException($uri, function ($uri) {$uri->getPassword();});
     handleException($uri, function ($uri) {$uri->getRawPassword();});
-    handleException($uri, function ($uri) {$uri->getHost();});
     handleException($uri, function ($uri) {$uri->getPort();});
     handleException($uri, function ($uri) {$uri->getPath();});
     handleException($uri, function ($uri) {$uri->getRawPath();});
@@ -40,11 +39,15 @@ function callMembers($uri)
 
     if ($uri instanceof Uri\Rfc3986\Uri) {
         handleException($uri, function ($uri) {$uri->getRawHost();});
+        handleException($uri, function ($uri) {$uri->getHost();});
+        handleException($uri, function ($uri) {$uri->toRawString();});
+        handleException($uri, function ($uri) {$uri->toString();});
     } else {
-        handleException($uri, function ($uri) {$uri->getHostForDisplay();});
-        handleException($uri, function ($uri) {$uri->toDisplayString();});
+        handleException($uri, function ($uri) {$uri->getAsciiHost();});
+        handleException($uri, function ($uri) {$uri->getUnicodeHost();});
+        handleException($uri, function ($uri) {$uri->toAsciiString();});
+        handleException($uri, function ($uri) {$uri->toUnicodeString();});
     }
-    handleException($uri, function ($uri) {$uri->toString();});
 }
 
 $reflectionClass = new ReflectionClass(Uri\Rfc3986\Uri::class);
@@ -63,6 +66,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 }
 \Uri\Rfc3986\Uri::__set_state(array(
 ))
+Uri\Rfc3986\Uri object is not correctly initialized
 Uri\Rfc3986\Uri object is not correctly initialized
 Uri\Rfc3986\Uri object is not correctly initialized
 Uri\Rfc3986\Uri object is not correctly initialized

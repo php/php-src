@@ -7,13 +7,13 @@ uri
 
 $uri = new Uri\Rfc3986\Uri("https://example.com/foo/bar%2Fbaz");
 
-var_dump($uri->toString());
+var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
 $url = new Uri\Whatwg\Url("https://example.com/foo/bar%2Fbaz");
 
-var_dump($url->toString());
+var_dump($url->toAsciiString());
 var_dump($url->getPath());
 var_dump($url->getRawPath());
 

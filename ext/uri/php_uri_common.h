@@ -25,20 +25,20 @@ extern zend_class_entry *uri_exception_ce;
 extern zend_class_entry *uninitialized_uri_exception_ce;
 extern zend_class_entry *uri_operation_exception_ce;
 extern zend_class_entry *invalid_uri_exception_ce;
-extern zend_class_entry *whatwg_error_type_ce;
-extern zend_class_entry *whatwg_error_ce;
+extern zend_class_entry *whatwg_url_validation_error_type_ce;
+extern zend_class_entry *whatwg_url_validation_error_ce;
 
 typedef enum {
-	URI_RECOMPOSITION_FOR_MACHINE_PROCESSING,
-	URI_RECOMPOSITION_FOR_DISPLAY,
-	URI_RECOMPOSITION_NORMALIZED_FOR_MACHINE_PROCESSING,
-	URI_RECOMPOSITION_NORMALIZED_FOR_DISPLAY,
+	URI_RECOMPOSITION_RAW_ASCII,
+	URI_RECOMPOSITION_RAW_UNICODE,
+	URI_RECOMPOSITION_NORMALIZED_ASCII,
+	URI_RECOMPOSITION_NORMALIZED_UNICODE,
 } uri_recomposition_mode_t;
 
 typedef enum {
 	URI_COMPONENT_READ_RAW,
-	URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING,
-	URI_COMPONENT_READ_NORMALIZED_FOR_DISPLAY,
+	URI_COMPONENT_READ_NORMALIZED_ASCII,
+	URI_COMPONENT_READ_NORMALIZED_UNICODE,
 } uri_component_read_mode_t;
 
 typedef struct uri_handler_t {
@@ -125,7 +125,7 @@ void throw_invalid_uri_exception(zval *errors);
 	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
 	ZEND_ASSERT(property_handler != NULL); \
 	if (UNEXPECTED(property_handler->read_func(internal_uri, component_read_mode, return_value) == FAILURE)) { \
-		zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
+		zend_throw_error(uri_operation_exception_ce, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
 		RETURN_THROWS(); \
 	} \
 } while (0)

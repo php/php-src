@@ -39,7 +39,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(0) ""
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -61,7 +61,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(0) ""
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -83,7 +83,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(0) ""
   ["query"]=>
   NULL
   ["fragment"]=>
