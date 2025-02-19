@@ -278,7 +278,7 @@ PHP_MINFO_FUNCTION(curl)
 	php_info_print_table_row(2, "Host", d->host);
 
 	// Features
-	if (d->age >= CURLVERSION_ELEVENTH && d->feature_names) {
+#if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0	CURLVERSION_ELEVENTH */
 		n = 0;
 		p = (char **) d->feature_names;
 		while (*p != NULL) {
@@ -286,7 +286,7 @@ PHP_MINFO_FUNCTION(curl)
 				p++;
 		}
 		php_info_print_table_row(2, "Features", str);
-	} else {
+#else
 		/* To update on each new cURL release using src/main.c in cURL sources */
 		/* make sure to sync this list with curl_version as well */
 		if (d->features) {
@@ -351,7 +351,7 @@ PHP_MINFO_FUNCTION(curl)
 				}
 			}
 		}
-	}
+#endif
 
 	// Protocols
 	n = 0;
@@ -379,39 +379,61 @@ PHP_MINFO_FUNCTION(curl)
 	if (d->libz_version) {
 		php_info_print_table_row(2, "Zlib Version", d->libz_version);
 	}
-	if (d->age >= CURLVERSION_SECOND && d->ares) {
+#if LIBCURL_VERSION_NUM >= 0x070B01 /* Available since 7.11.1	CURLVERSION_SECOND */
+	if (d->ares) {
 		php_info_print_table_row(2, "c-ares Version", d->ares);
 	}
-	if (d->age >= CURLVERSION_THIRD && d->libidn) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070C00 /* Available since 7.12.0	CURLVERSION_THIRD */
+	if (d->libidn) {
 		php_info_print_table_row(2, "Libidn Version", d->libidn);
 	}
-	if (d->age >= CURLVERSION_FOURTH && d->iconv_ver_num) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
+	if (d->iconv_ver_num) {
 		php_info_print_table_row(2, "Iconv Version", d->iconv_ver_num);
 	}
-	if (d->age >= CURLVERSION_FOURTH && d->libssh_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
+	if (d->libssh_version) {
 		php_info_print_table_row(2, "Libssh Version", d->libssh_version);
 	}
-	if (d->age >= CURLVERSION_FIFTH && d->brotli_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0	CURLVERSION_FIFTH */
+	if (d->brotli_version) {
 		php_info_print_table_row(2, "Brotli Version", d->brotli_version);
 	}
-	if (d->age >= CURLVERSION_SIXTH && d->nghttp2_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0	CURLVERSION_SIXTH */
+	if (d->nghttp2_version) {
 		php_info_print_table_row(2, "Nghttp2 Version", d->nghttp2_version);
 	}
-	if (d->age >= CURLVERSION_SIXTH && d->quic_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0	CURLVERSION_SIXTH */
+	if (d->quic_version) {
 		php_info_print_table_row(2, "QUIC Version", d->quic_version);
 	}
-	if (d->age >= CURLVERSION_EIGHTH && d->zstd_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0	CURLVERSION_EIGHTH */
+	if (d->zstd_version) {
 		php_info_print_table_row(2, "Zstd Version", d->zstd_version);
 	}
-	if (d->age >= CURLVERSION_NINTH && d->hyper_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0	CURLVERSION_NINTH */
+	if ( d->hyper_version) {
 		php_info_print_table_row(2, "Hyper Version", d->hyper_version);
 	}
-	if (d->age >= CURLVERSION_TENTH && d->gsasl_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074d00 /* Available since 7.77.0	CURLVERSION_TENTH */
+	if (d->gsasl_version) {
 		php_info_print_table_row(2, "GNU SASL Version", d->gsasl_version);
 	}
-	if (d->age >= CURLVERSION_TWELFTH && d->rtmp_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080800 /* Available since 8.8.0	CURLVERSION_TWELFTH */
+	if (d->rtmp_version) {
 		php_info_print_table_row(2, "RTMP Version", d->rtmp_version);
 	}
+#endif
 
 	php_info_print_table_end();
 
@@ -1074,7 +1096,7 @@ PHP_FUNCTION(curl_version)
 	/* Add an array of features */
 	zval feature_list;
 	array_init(&feature_list);
-	if (d->age >= CURLVERSION_ELEVENTH && d->feature_names) {
+#if defined(CURLVERSION_ELEVENTH) && CURLVERSION_NOW >= CURLVERSION_ELEVENTH
 		{
 			char **p = (char **) d->feature_names;
 			while (*p != NULL) {
@@ -1082,7 +1104,7 @@ PHP_FUNCTION(curl_version)
 				p++;
 			}
 		}
-	} else {
+#else
 		{
 			struct feat {
 				const char *name;
@@ -1144,7 +1166,7 @@ PHP_FUNCTION(curl_version)
 				}
 			}
 		}
-	}
+#endif
 	CAAZ("feature_list", &feature_list);
 
 	/* Add an array of protocols */
@@ -1177,39 +1199,61 @@ PHP_FUNCTION(curl_version)
 	if (d->libz_version) {
 		add_assoc_string (&feature_version, "libz", d->libz_version);
 	}
-	if (d->age >= CURLVERSION_SECOND && d->ares) {
+#if LIBCURL_VERSION_NUM >= 0x070B01 /* Available since 7.11.1	CURLVERSION_SECOND */
+	if (d->ares) {
 		add_assoc_string (&feature_version, "ares", d->ares);
 	}
-	if (d->age >= CURLVERSION_THIRD && d->libidn) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070C00 /* Available since 7.12.0	CURLVERSION_THIRD */
+	if (d->libidn) {
 		add_assoc_string (&feature_version, "libidn", d->libidn);
 	}
-	if (d->age >= CURLVERSION_FOURTH && d->iconv_ver_num) {
-		CAAL("version_iconv", d->iconv_ver_num);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
+	if (d->iconv_ver_num) {
+		add_assoc_string (&feature_version, "iconv", d->iconv_ver_num);
 	}
-	if (d->age >= CURLVERSION_FOURTH && d->libssh_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
+	if (d->libssh_version) {
 		add_assoc_string (&feature_version, "libssh", d->libssh_version);
 	}
-	if (d->age >= CURLVERSION_FIFTH && d->brotli_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0	CURLVERSION_FIFTH */
+	if (d->brotli_version) {
 		add_assoc_string (&feature_version, "brotli", d->brotli_version);
 	}
-	if (d->age >= CURLVERSION_SIXTH && d->nghttp2_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0	CURLVERSION_SIXTH */
+	if (d->nghttp2_version) {
 		add_assoc_string (&feature_version, "nghttp2", d->nghttp2_version);
 	}
-	if (d->age >= CURLVERSION_SIXTH && d->quic_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0	CURLVERSION_SIXTH */
+	if (d->quic_version) {
 		add_assoc_string (&feature_version, "quic", d->quic_version);
 	}
-	if (d->age >= CURLVERSION_EIGHTH && d->zstd_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0	CURLVERSION_EIGHTH */
+	if (d->zstd_version) {
 		add_assoc_string (&feature_version, "zstd", d->zstd_version);
 	}
-	if (d->age >= CURLVERSION_NINTH && d->hyper_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0	CURLVERSION_NINTH */
+	if (d->hyper_version) {
 		add_assoc_string (&feature_version, "hyper", d->hyper_version);
 	}
-	if (d->age >= CURLVERSION_TENTH && d->gsasl_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074d00 /* Available since 7.77.0	CURLVERSION_TENTH */
+	if (d->gsasl_version) {
 		add_assoc_string (&feature_version, "gsasl", d->gsasl_version);
 	}
-	if (d->age >= CURLVERSION_TWELFTH && d->rtmp_version) {
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080800 /* Available since 8.8.0	CURLVERSION_TWELFTH */
+	if (d->rtmp_version) {
 		add_assoc_string (&feature_version, "rtmp", d->rtmp_version);
 	}
+#endif
 	CAAZ("feature_versions", &feature_version);
 }
 /* }}} */
