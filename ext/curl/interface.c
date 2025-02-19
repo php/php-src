@@ -1211,7 +1211,7 @@ PHP_FUNCTION(curl_version)
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
 	if (d->iconv_ver_num) {
-		add_assoc_string (&feature_version, "iconv", d->iconv_ver_num);
+		add_assoc_long (&feature_version, "iconv", d->iconv_ver_num);
 	}
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
