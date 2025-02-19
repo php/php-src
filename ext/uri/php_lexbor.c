@@ -70,8 +70,8 @@ const uri_handler_t lexbor_uri_handler = {
 		case URI_COMPONENT_READ_RAW: \
 			ZVAL_STRINGL(retval, (const char *) start, len); \
 			break; \
-		case URI_COMPONENT_READ_NORMALIZED_FOR_DISPLAY: /* Intentional fallthrough */ \
-		case URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING: { \
+		case URI_COMPONENT_READ_NORMALIZED_UNICODE: /* Intentional fallthrough */ \
+		case URI_COMPONENT_READ_NORMALIZED_ASCII: { \
 			lexbor_str_t *str = lexbor_str_create(); \
 			lxb_url_host_opt_t opt; \
 			lxb_status_t result = lxb_url_percent_decode(start, start + len, \
@@ -110,8 +110,8 @@ static void fill_errors(zval *errors)
 	lexbor_plog_entry_t *lxb_error;
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser->log->list)) != NULL) {
 		zval error;
-		object_init_ex(&error, whatwg_error_ce);
-		zend_update_property_string(whatwg_error_ce, Z_OBJ(error), "context", sizeof("context") - 1, (const char *) lxb_error->data);
+		object_init_ex(&error, whatwg_url_validation_error_ce);
+		zend_update_property_string(whatwg_url_validation_error_ce, Z_OBJ(error), "context", sizeof("context") - 1, (const char *) lxb_error->data);
 
 		zend_string *error_str;
 		zval failure;
@@ -236,12 +236,12 @@ static void fill_errors(zval *errors)
 		}
 
 		zval error_type;
-		zend_enum_new(&error_type, whatwg_error_type_ce, error_str, NULL);
-		zend_update_property(whatwg_error_ce, Z_OBJ(error), "type", sizeof("type") - 1, &error_type);
+		zend_enum_new(&error_type, whatwg_url_validation_error_type_ce, error_str, NULL);
+		zend_update_property(whatwg_url_validation_error_ce, Z_OBJ(error), "type", sizeof("type") - 1, &error_type);
 		zend_string_release(error_str);
 		zval_ptr_dtor(&error_type);
 
-		zend_update_property(whatwg_error_ce, Z_OBJ(error), "failure", sizeof("failure") - 1, &failure);
+		zend_update_property(whatwg_url_validation_error_ce, Z_OBJ(error), "failure", sizeof("failure") - 1, &failure);
 		zval_ptr_dtor(&failure);
 
 		add_next_index_zval(errors, &error);
@@ -339,17 +339,18 @@ static zend_result lexbor_read_host(const uri_internal_t *internal_uri, uri_comp
 	lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
 	if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_IPV4) {
-		char buffer[17] = {0};
+		struct in_addr myaddr;
+		myaddr.s_addr = htonl((zend_ulong) &lexbor_uri->host.u.ipv4);
+		char buffer[17];
 
-		if (!inet_ntop(AF_INET, (const void *) &lexbor_uri->host.u.ipv4, buffer, sizeof(buffer))) {
-			ZVAL_NULL(retval);
-		}
+		const char* result = inet_ntop(AF_INET, &myaddr, buffer, sizeof(buffer));
+		ZEND_ASSERT(result != NULL);
 
 		ZVAL_STRING(retval, buffer);
 	} else if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_IPV6) {
-		char buffer[46] = {0};
+		char buffer[46];
 
-		php_sprintf(buffer, "%hu:%hu:%hu:%hu:%hu:%hu:%hu:%hu", lexbor_uri->host.u.ipv6[0], lexbor_uri->host.u.ipv6[1],
+		php_sprintf(buffer, "[%hu:%hu:%hu:%hu:%hu:%hu:%hu:%hu]", lexbor_uri->host.u.ipv6[0], lexbor_uri->host.u.ipv6[1],
 			lexbor_uri->host.u.ipv6[2], lexbor_uri->host.u.ipv6[3], lexbor_uri->host.u.ipv6[4], lexbor_uri->host.u.ipv6[5],
 			lexbor_uri->host.u.ipv6[6], lexbor_uri->host.u.ipv6[7]);
 
@@ -357,7 +358,7 @@ static zend_result lexbor_read_host(const uri_internal_t *internal_uri, uri_comp
 	} else if (lexbor_uri->host.type != LXB_URL_HOST_TYPE_EMPTY && lexbor_uri->host.type != LXB_URL_HOST_TYPE__UNDEF) {
 
 		switch (read_mode) {
-			case URI_COMPONENT_READ_NORMALIZED_FOR_DISPLAY: {
+			case URI_COMPONENT_READ_NORMALIZED_UNICODE: {
 				smart_str host_str = {0};
 				if (lexbor_parser->idna == NULL) {
 					lexbor_parser->idna = lxb_unicode_idna_create();
@@ -372,7 +373,7 @@ static zend_result lexbor_read_host(const uri_internal_t *internal_uri, uri_comp
 				ZVAL_STR(retval, smart_str_extract(&host_str));
 				break;
 			}
-			case URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING: /* Intentional fallthrough */
+			case URI_COMPONENT_READ_NORMALIZED_ASCII: /* Intentional fallthrough */
 			case URI_COMPONENT_READ_RAW:
 				ZVAL_STRINGL(retval, (const char *) lexbor_uri->host.u.domain.data, lexbor_uri->host.u.domain.length);
 				break;
@@ -431,7 +432,7 @@ static zend_result lexbor_read_path(const uri_internal_t *internal_uri, uri_comp
 	} else if (lexbor_uri->path.str.length) {
 		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
 	} else {
-		ZVAL_NULL(retval);
+		ZVAL_EMPTY_STRING(retval);
 	}
 
 	return SUCCESS;
@@ -564,8 +565,8 @@ static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t rec
 	smart_str uri_str = {0};
 
 	switch (recomposition_mode) {
-		case URI_RECOMPOSITION_FOR_DISPLAY: /* Intentional fallthrough */
-		case URI_RECOMPOSITION_NORMALIZED_FOR_DISPLAY:
+		case URI_RECOMPOSITION_RAW_UNICODE: /* Intentional fallthrough */
+		case URI_RECOMPOSITION_NORMALIZED_UNICODE:
 			if (lexbor_parser->idna == NULL) {
 				lexbor_parser->idna = lxb_unicode_idna_create();
 				lxb_status_t status = lxb_unicode_idna_init(lexbor_parser->idna);
@@ -576,8 +577,8 @@ static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t rec
 			lxb_url_serialize_unicode(lexbor_parser->idna, lexbor_uri, lexbor_serialize_callback, (void *) &uri_str, exclude_fragment);
 			lxb_unicode_idna_clean(lexbor_parser->idna);
 			break;
-		case URI_RECOMPOSITION_FOR_MACHINE_PROCESSING: /* Intentional fallthrough */
-		case URI_RECOMPOSITION_NORMALIZED_FOR_MACHINE_PROCESSING:
+		case URI_RECOMPOSITION_RAW_ASCII: /* Intentional fallthrough */
+		case URI_RECOMPOSITION_NORMALIZED_ASCII:
 			lxb_url_serialize(lexbor_uri, lexbor_serialize_callback, (void *) &uri_str, exclude_fragment);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()

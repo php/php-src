@@ -7,47 +7,47 @@ uri
 
 $uri = new Uri\Rfc3986\Uri("mailto:johndoe@example.com");
 
-var_dump($uri->toString());
+var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
 $uri = new Uri\Rfc3986\Uri("foo/bar");
-var_dump($uri->toString());
+var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
 $uri = new Uri\Rfc3986\Uri("/foo/bar");
-var_dump($uri->toString());
+var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
 $uri = new Uri\Rfc3986\Uri("https://example.com");
 
-var_dump($uri->toString());
+var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
 $uri = new Uri\Rfc3986\Uri("https://example.com/");
 
-var_dump($uri->toString());
+var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
 $url = new Uri\Whatwg\Url("mailto:johndoe@example.com");
 
-var_dump($url->toString());
+var_dump($url->toAsciiString());
 var_dump($url->getPath());
 var_dump($url->getRawPath());
 
 $url = new Uri\Whatwg\Url("https://example.com");
 
-var_dump($url->toString());
+var_dump($url->toAsciiString());
 var_dump($url->getPath());
 var_dump($url->getRawPath());
 
 $url = new Uri\Whatwg\Url("https://example.com/");
 
-var_dump($url->toString());
+var_dump($url->toAsciiString());
 var_dump($url->getPath());
 var_dump($url->getRawPath());
 
@@ -63,8 +63,8 @@ string(8) "/foo/bar"
 string(8) "/foo/bar"
 string(8) "/foo/bar"
 string(19) "https://example.com"
-NULL
-NULL
+string(0) ""
+string(0) ""
 string(20) "https://example.com/"
 string(1) "/"
 string(1) "/"

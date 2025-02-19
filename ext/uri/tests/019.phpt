@@ -18,10 +18,10 @@ var_dump($uri);
 
 $url = Uri\WhatWg\Url::parse("https://🐘.com/🐘?🐘=🐘", null);
 var_dump($url);
-var_dump($url->getHost());
-var_dump($url->getHostForDisplay());
-var_dump($url->toString());
-var_dump($url->toDisplayString());
+var_dump($url->getAsciiHost());
+var_dump($url->getUnicodeHost());
+var_dump($url->toAsciiString());
+var_dump($url->toUnicodeString());
 
 ?>
 --EXPECTF--
@@ -29,11 +29,11 @@ NULL
 NULL
 array(1) {
   [0]=>
-  object(Uri\WhatWg\WhatWgError)#%d (%d) {
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
     string(4) "🐘"
     ["type"]=>
-    enum(Uri\WhatWg\WhatWgErrorType::MissingSchemeNonRelativeUrl)
+    enum(Uri\WhatWg\UrlValidationErrorType::MissingSchemeNonRelativeUrl)
     ["failure"]=>
     bool(true)
   }
