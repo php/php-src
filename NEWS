@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed accidentally inherited default value in overridden virtual properties.
     (ilutov)
+  . Fixed bug GH-17376 (Broken JIT polymorphism for property hooks added to
+    child class). (ilutov)
 
 27 Feb 2025, PHP 8.4.5
 
