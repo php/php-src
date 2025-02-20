@@ -29,6 +29,7 @@ Array
     [AsynchDNS] => bool
     [CharConv] => bool
     [Debug] => bool
+    [MemoryDebug] => bool
     [GSS-Negotiate] => bool
     [IDN] => bool
     [IPv6] => bool
@@ -49,5 +50,12 @@ Array
     [HTTPS_PROXY] => bool
     [MULTI_SSL] => bool
     [BROTLI] => bool
+    [ALTSVC] => bool
+    [HTTP3] => bool
+    [UNICODE] => bool
+    [ZSTD] => bool
+    [HSTS] => bool
+    [GSASL] => bool
+    [ThreadSafe] => bool
 %A)
 Complete
