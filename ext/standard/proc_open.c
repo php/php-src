@@ -776,6 +776,7 @@ static zend_result convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 }
 #endif
 
+#ifndef PHP_WIN32
 /* Convert command parameter array passed as first argument to `proc_open` into command string */
 static zend_string* get_command_from_array(HashTable *array, char ***argv, int num_elems)
 {
@@ -807,6 +808,7 @@ static zend_string* get_command_from_array(HashTable *array, char ***argv, int n
 	(*argv)[i] = NULL;
 	return command;
 }
+#endif
 
 static descriptorspec_item* alloc_descriptor_array(HashTable *descriptorspec)
 {
@@ -1177,6 +1179,7 @@ static void close_all_descriptors(descriptorspec_item *descriptors, int ndesc)
 	}
 }
 
+#ifndef PHP_WIN32
 static void efree_argv(char **argv)
 {
 	if (argv) {
@@ -1188,6 +1191,7 @@ static void efree_argv(char **argv)
 		efree(argv);
 	}
 }
+#endif
 
 /* {{{ Execute a command, with specified files used for input/output */
 PHP_FUNCTION(proc_open)

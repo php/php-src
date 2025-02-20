@@ -63,6 +63,7 @@ enum pdo_param_type {
 
 #define PDO_PARAM_TYPE(x)		((x) & ~PDO_PARAM_FLAGS)
 
+/* Fetch mode is a bitmask of the fetch type (first 4 bits) with the fetch flags (bit 5 to 9)*/
 enum pdo_fetch_type {
 	PDO_FETCH_USE_DEFAULT,
 	PDO_FETCH_LAZY,
@@ -77,15 +78,17 @@ enum pdo_fetch_type {
 	PDO_FETCH_FUNC,		/* fetch into function and return its result */
 	PDO_FETCH_NAMED,    /* like PDO_FETCH_ASSOC, but can handle duplicate names */
 	PDO_FETCH_KEY_PAIR,	/* fetch into an array where the 1st column is a key and all subsequent columns are values */
-	PDO_FETCH__MAX /* must be last */
 };
 
-#define PDO_FETCH_FLAGS      0xFFFF0000  /* fetchAll() modes or'd to PDO_FETCH_XYZ */
-#define PDO_FETCH_GROUP      0x00010000  /* fetch into groups */
-#define PDO_FETCH_UNIQUE     0x00030000  /* fetch into groups assuming first col is unique */
-#define PDO_FETCH_CLASSTYPE  0x00040000  /* fetch class gets its class name from 1st column */
-#define PDO_FETCH_SERIALIZE  0x00080000  /* fetch class instances by calling serialize */
-#define PDO_FETCH_PROPS_LATE 0x00100000  /* fetch props after calling ctor */
+#define PDO_FETCH_FLAGS 0xFFFFFFF0 /* fetch flags mask */
+#define PDO_FETCH_GROUP (1u << 5u) /* fetch into groups */
+#define PDO_FETCH_UNIQUE (1u << 6u) /* fetch into groups assuming first col is unique */
+/* PDO_FETCH_CLASS only flags */
+#define PDO_FETCH_CLASSTYPE (1u << 7u) /* fetch class gets its class name from 1st column */
+#define PDO_FETCH_PROPS_LATE (1u << 8u) /* fetch props after calling ctor */
+#define PDO_FETCH_SERIALIZE (1u << 9u) /* DEPRECATED: fetch class instances by calling serialize */
+#define PDO_FIRST_INVALID_FLAG (1u << 10u)
+
 
 /* fetch orientation for scrollable cursors */
 enum pdo_fetch_orientation {
@@ -499,7 +502,7 @@ struct _pdo_dbh_t {
 	 * This will allow us to report the correct error message
 	 * when PDO::query() fails */
 	pdo_stmt_t *query_stmt;
-	zval query_stmt_zval;
+	zend_object *query_stmt_obj;
 
 	/* defaults for fetches */
 	enum pdo_fetch_type default_fetch_type;
@@ -609,7 +612,7 @@ struct _pdo_stmt_t {
 
 	/* for lazy fetches, we always return the same lazy object handle.
 	 * Let's keep it here. */
-	zval lazy_object_ref;
+	zend_object *lazy_object_ref;
 
 	pdo_dbh_t *dbh;
 	/* we want to keep the dbh alive while we live, so we own a reference */
@@ -698,8 +701,8 @@ PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count);
 PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zend_object *current_object, zend_class_entry *called_scope, zval *new_zval_object);
 
 /* Normalization for fetching long param for driver attributes */
-PDO_API bool pdo_get_long_param(zend_long *lval, zval *value);
-PDO_API bool pdo_get_bool_param(bool *bval, zval *value);
+PDO_API bool pdo_get_long_param(zend_long *lval, const zval *value);
+PDO_API bool pdo_get_bool_param(bool *bval, const zval *value);
 
 PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
 

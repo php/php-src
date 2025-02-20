@@ -9327,6 +9327,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 			ir_IF_FALSE_cold(if_static);
 		}
 
+		jit_SET_EX_OPLINE(jit, opline);
 		ref = ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_push_this_method_call_frame),
 				scope_ref,
 				func_ref,
@@ -10053,9 +10054,9 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			func = call_info->callee_func;
 		}
 		if ((op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
-		 && JIT_G(current_frame)
-		 && JIT_G(current_frame)->call
-		 && !JIT_G(current_frame)->call->func) {
+		 && (!JIT_G(current_frame)
+		  || !JIT_G(current_frame)->call
+		  || !JIT_G(current_frame)->call->func)) {
 			call_info = NULL; func = NULL; /* megamorphic call from trait */
 		}
 	}
@@ -14733,7 +14734,11 @@ result_fetched:
 	}
 
 	if (may_throw) {
-		zend_jit_check_exception(jit);
+		if (Z_MODE(res_addr) == IS_REG) {
+			zend_jit_check_exception_undef_result(jit, opline);
+		} else {
+			zend_jit_check_exception(jit);
+		}
 	}
 
 	return 1;

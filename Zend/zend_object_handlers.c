@@ -1617,7 +1617,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
-		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_DEPRECATED));
+		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED));
 	if (fbc->common.attributes) {
 		func->attributes = fbc->common.attributes;
 		GC_TRY_ADDREF(func->attributes);
@@ -1898,19 +1898,27 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	if (EXPECTED(fbc)) {
 		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 			zend_abstract_method_call(fbc);
-			fbc = NULL;
+			goto fail;
 		} else if (UNEXPECTED(fbc->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
 			zend_error(E_DEPRECATED,
 				"Calling static trait method %s::%s is deprecated, "
 				"it should only be called on a class using the trait",
 				ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 			if (EG(exception)) {
-				return NULL;
+				goto fail;
 			}
 		}
 	}
 
 	return fbc;
+
+ fail:
+	if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_string_release_ex(fbc->common.function_name, 0);
+		zend_free_trampoline(fbc);
+	}
+
+	return NULL;
 }
 /* }}} */
 

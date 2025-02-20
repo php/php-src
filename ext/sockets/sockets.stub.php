@@ -1915,6 +1915,13 @@ const TCP_QUICKACK = UNKNOWN;
  */
 const TCP_REPAIR = UNKNOWN;
 #endif
+#if defined(IP_BINDANY)
+/**
+ * @var int
+ * @cvalue IP_BINDANY
+ */
+const IP_BINDANY = UNKNOWN;
+#endif
 #if defined(IP_DONTFRAG)
 /**
  * @var int

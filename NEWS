@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- CLI:
+  . Extended --ini to print INI settings changed from the builtin default.
+    (timwolla)
+
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
   . Fixed method calls for PHP objects wrapped in variant. (cmb)
@@ -24,6 +28,8 @@ PHP                                                                        NEWS
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
   . Added curl_share_init_persistent(). (enorris)
+  . Added CURLINFO_USED_PROXY, CURLINFO_HTTPAUTH_USED, and CURLINFO_PROXYAUTH_USED
+    support to curl_getinfo. (Ayesh Karunaratne)
 
 - Date:
   . Fix undefined behaviour problems regarding integer overflow in extreme edge
@@ -36,6 +42,9 @@ PHP                                                                        NEWS
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
   . Added enchant_dict_remove(). (nielsdos)
+
+- Fileinfo:
+  . Upgrade to file 5.46. (nielsdos)
 
 - GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
@@ -57,6 +66,9 @@ PHP                                                                        NEWS
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
+
+- PCRE:
+  . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
 
 - PDO_PGSQL:
   . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
@@ -128,6 +140,7 @@ PHP                                                                        NEWS
     (David Carlier)
   . socket_getsockname/socket_create/socket_bind handled AF_PACKET family socket.
     (David Carlier)
+  . Added IP_BINDANY for a socket to bind to any address. (David Carlier)
 
 - Sodium:
   . Fix overall theorical overflows on zend_string buffer allocations.
@@ -160,6 +173,7 @@ PHP                                                                        NEWS
     is now a boolean. (David Carlier)
   . Fixed bug GH-16883 (gzopen() does not use the default stream context when
     opening HTTP URLs). (nielsdos)
+  . Implemented GH-17668 (zlib streams should support locking). (nielsdos)
 
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

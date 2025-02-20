@@ -48,13 +48,13 @@ foreach ((new ReflectionClass(C::class))->getMethods() as $method) {
 --EXPECT--
 C::a()
     $method->getReturnType() returns ReflectionNamedType
-    $method->getReturnType()->__toString() returns self
+    $method->getReturnType()->__toString() returns C
 
 C::b()
     $method->getReturnType() returns ReflectionUnionType
-    $method->getReturnType()->__toString() returns stdClass|self
+    $method->getReturnType()->__toString() returns stdClass|C
     $method->getReturnType()->getTypes() returns an array with 2 element(s)
-    type(s) in union: ReflectionNamedType(stdClass), ReflectionNamedType(self)
+    type(s) in union: ReflectionNamedType(stdClass), ReflectionNamedType(C)
 
 C::c()
     $method->getReturnType() returns ReflectionNamedType

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 65271ce06d23b397180a8dbbcecdb0cde5c6942b */
+ * Stub hash: 4c5bea6d9f290c244c7bb27c77fe8007d43a40db */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ob_gzhandler, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
@@ -106,7 +106,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_deflate_init, 0, 1, DeflateContext, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
+	ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_deflate_add, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
@@ -117,7 +117,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_inflate_init, 0, 1, InflateContext, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
+	ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inflate_add, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)

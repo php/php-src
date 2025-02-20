@@ -167,9 +167,7 @@ PHP_GD_API gdImagePtr php_gd_libgdimageptr_from_zval_p(zval* zp)
 
 zend_object *php_gd_image_object_create(zend_class_entry *class_type)
 {
-	size_t block_len = sizeof(php_gd_image_object) + zend_object_properties_size(class_type);
-	php_gd_image_object *intern = emalloc(block_len);
-	memset(intern, 0, block_len);
+	php_gd_image_object *intern = zend_object_alloc(sizeof(php_gd_image_object), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -1409,7 +1407,8 @@ gdImagePtr _php_image_create_from_string(zend_string *data, const char *tn, gdIm
 	gdImagePtr im;
 	gdIOCtx *io_ctx;
 
-	io_ctx = gdNewDynamicCtxEx(ZSTR_LEN(data), ZSTR_VAL(data), 0);
+	ZEND_ASSERT(ZSTR_LEN(data) <= INT_MAX); /* checked in imagecreatefromstring() */
+	io_ctx = gdNewDynamicCtxEx((int) ZSTR_LEN(data), ZSTR_VAL(data), 0);
 
 	if (!io_ctx) {
 		return NULL;
@@ -1438,6 +1437,10 @@ PHP_FUNCTION(imagecreatefromstring)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(data)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(data) > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
+	}
 
 	imtype = _php_image_type(data);
 
@@ -1562,17 +1565,23 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		buff = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 
 		if (!buff) {
-			php_error_docref(NULL, E_WARNING,"Cannot read image data");
+			php_error_docref(NULL, E_WARNING, "Cannot read image data");
+			goto out_err;
+		}
+
+		if (ZSTR_LEN(buff) > INT_MAX) {
+			zend_string_release_ex(buff, 0);
+			php_error_docref(NULL, E_WARNING, "Cannot read images with more than %d bytes", INT_MAX);
 			goto out_err;
 		}
 
 		/* needs to be malloc (persistent) - GD will free() it later */
 		pstr = pestrndup(ZSTR_VAL(buff), ZSTR_LEN(buff), 1);
-		io_ctx = gdNewDynamicCtxEx(ZSTR_LEN(buff), pstr, 0);
+		io_ctx = gdNewDynamicCtxEx((int) ZSTR_LEN(buff), pstr, 0);
 		if (!io_ctx) {
 			pefree(pstr, 1);
 			zend_string_release_ex(buff, 0);
-			php_error_docref(NULL, E_WARNING,"Cannot allocate GD IO context");
+			php_error_docref(NULL, E_WARNING, "Cannot allocate GD IO context");
 			goto out_err;
 		}
 
@@ -1796,7 +1805,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 		fflush(fp);
 		fclose(fp);
 	} else {
-		int   b;
+		size_t b;
 		FILE *tmp;
 		char  buf[4096];
 		zend_string *path;
@@ -2983,7 +2992,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_long X, Y, COL;
 	zend_string *C;
 	gdImagePtr im;
-	int ch = 0, col, x, y, i, l = 0;
+	int ch = 0, col, x, y, i;
+	size_t l = 0;
 	unsigned char *str = NULL;
 	zend_object *font_obj = NULL;
 	zend_long font_int = 0;
@@ -3944,6 +3954,11 @@ PHP_FUNCTION(imagescale)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
+	if (tmp_h < 0 && tmp_w < 0) {
+		zend_value_error("Argument #2 ($width) and argument #3 ($height) cannot be both negative");
+		RETURN_THROWS();
+	}
+
 	if (tmp_h < 0 || tmp_w < 0) {
 		/* preserve ratio */
 		long src_x, src_y;
@@ -4337,7 +4352,9 @@ static void _php_image_output_putc(struct gdIOCtx *ctx, int c) /* {{{ */
 
 static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
 {
-	return php_write((void *)buf, l);
+	size_t written = php_write((void *)buf, l);
+	ZEND_ASSERT(written <= INT_MAX); /* since l <= INT_MAX */
+	return (int) written;
 } /* }}} */
 
 static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */

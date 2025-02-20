@@ -807,7 +807,7 @@ PHP_FUNCTION(putenv)
 			valw = php_win32_cp_any_to_w(value);
 		}
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
-		if (!keyw || !valw && value) {
+		if (!keyw || (!valw && value)) {
 			tsrm_env_unlock();
 			free(pe.putenv_string);
 			zend_string_release(pe.key);
@@ -1336,7 +1336,7 @@ PHP_FUNCTION(get_cfg_var)
 error options:
 	0 = send to php_error_log (uses syslog or file depending on ini setting)
 	1 = send via email to 3rd parameter 4th option = additional headers
-	2 = send via tcp/ip to 3rd parameter (name or ip:port)
+	2 = no longer an option
 	3 = save to file in 3rd parameter
 	4 = send to SAPI logger directly
 */
