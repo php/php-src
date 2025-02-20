@@ -1827,7 +1827,12 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 
 static zend_persistent_script file_cache_validate_success_script;
 
-zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle, bool validate_only)
+zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
+{
+	return zend_file_cache_script_load_ex(file_handle, false);
+}
+
+zend_persistent_script *zend_file_cache_script_load_ex(zend_file_handle *file_handle, bool validate_only)
 {
 	zend_string *full_path = file_handle->opened_path;
 	int fd;

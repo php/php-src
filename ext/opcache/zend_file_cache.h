@@ -20,7 +20,8 @@
 #define ZEND_FILE_CACHE_H
 
 int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm);
-zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle, bool validate_only);
+zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle);
+zend_persistent_script *zend_file_cache_script_load_ex(zend_file_handle *file_handle, bool validate_only);
 void zend_file_cache_invalidate(zend_string *full_path);
 
 #endif /* ZEND_FILE_CACHE_H */
