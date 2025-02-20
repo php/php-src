@@ -10,6 +10,7 @@ class A {
 class B extends A {
     public $prop {
         get {
+            yield parent::$prop::get();
             yield parent::$prop::get() + 1;
             yield parent::$prop::get() + 2;
             yield parent::$prop::get() + 3;
@@ -24,6 +25,7 @@ foreach ($b->prop as $value) {
 
 ?>
 --EXPECT--
-int(43)
-int(44)
-int(45)
+NULL
+int(1)
+int(2)
+int(3)
