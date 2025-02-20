@@ -8675,8 +8675,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		// JIT: Z_CE(call->This) = called_scope;
 		ir_STORE(jit_CALL(rx, This), IR_NULL);
 	} else {
-		ir_ref object_or_called_scope, call_info, call_info2, object;
-		ir_ref if_cond = IR_UNUSED;
+		ir_ref object_or_called_scope, call_info, call_info2, object, if_cond;
 		ir_ref if_cond_user = IR_UNUSED;
 
 		if (opline->op2_type == IS_CV) {
@@ -8726,7 +8725,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 			// JIT: if (closure->func.op_array.run_time_cache__ptr)
 			if_cond = ir_IF(ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.op_array.run_time_cache__ptr))));
 			ir_IF_FALSE(if_cond);
-	
+
 			// JIT: zend_jit_init_func_run_time_cache_helper(closure->func);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_init_func_run_time_cache_helper),
 				ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func)));
