@@ -57,6 +57,8 @@ PHP                                                                        NEWS
     FETCH_OBJ_R breaks JIT). (Dmitry, nielsdos)
   . Fixed bug GH-17715 (Null pointer deref in observer API when calling
     cases() method on preloaded enum). (Bob)
+  . Fixed bug GH-17868 (Cannot allocate memory with tracing JIT on 8.4.4).
+    (nielsdos)
 
 - PDO_SQLite:
   . Fixed GH-17837 ()::getColumnMeta() on unexecuted statement segfaults).
