@@ -9164,6 +9164,9 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			zend_type t = ZEND_TYPE_INIT_CODE(IS_STRING, 0, 0);
 			zend_declare_typed_property(CG(active_class_entry), unqualified_name, &name_zv, propFlags | ZEND_ACC_STATIC | ZEND_ACC_READONLY, decl->doc_comment, t);
 			zend_declare_class_constant_ex(CG(active_class_entry), unqualified_name, &name_zv, propFlags, decl->doc_comment);
+
+			// oh, and make sure we emit the right opcodes
+			toplevel = true;
 		} else {
 			name = zend_prefix_with_ns(unqualified_name);
 		}
@@ -10949,7 +10952,18 @@ static void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 		if (Z_TYPE_P(const_zv) == IS_STRING) {
 			zend_string *const_str = Z_STR_P(const_zv);
 			zend_string *resolved_name = zend_resolve_class_name_ast(class_ast);
-			if (zend_try_ct_eval_class_const(&result->u.constant, resolved_name, const_str)) {
+
+			// check to see if there is a class registered at resolved_name::const_str
+			zend_string *name = zend_string_concat3(
+			ZSTR_VAL(resolved_name), ZSTR_LEN(resolved_name),
+				"::", 2,
+				ZSTR_VAL(const_str), ZSTR_LEN(const_str));
+
+			zend_str_tolower(ZSTR_VAL(name), ZSTR_LEN(name));
+
+			zend_class_entry *ce = zend_lookup_class_ex(name, name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+			zend_string_release(name);
+			if (!ce && zend_try_ct_eval_class_const(&result->u.constant, resolved_name, const_str)) {
 				result->op_type = IS_CONST;
 				zend_string_release_ex(resolved_name, 0);
 				return;

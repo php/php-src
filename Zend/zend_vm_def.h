@@ -8810,6 +8810,20 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, CV|TMPVAR|UNUSED|CLASS_FETCH, ANY)
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
+
+				// check if this is an inner class before failing
+				if (Z_TYPE_P(op) == IS_STRING) {
+					zend_string *class_name = Z_STR_P(op);
+					zend_class_entry *ce = zend_lookup_class(class_name);
+					// free class_name
+					zend_string_release(class_name);
+					if (ce) {
+						ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
+						FREE_OP1();
+						ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+					}
+				}
+
 				zend_type_error("Cannot use \"::class\" on %s", zend_zval_value_name(op));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				FREE_OP1();
