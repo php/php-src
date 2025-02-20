@@ -3009,9 +3009,10 @@ remove_mem_insn:
 		} else if (insn->op == IR_LOAD) {
 			val = ir_find_aliasing_load(ctx, insn->op1, insn->type, insn->op2);
 			if (val) {
+				ir_insn *val_insn;
 				ir_ref prev, next;
 
-remove_load:
+remove_aliased_load:
 				prev = insn->op1;
 				next = ir_next_control(ctx, i);
 				ctx->ir_base[next].op1 = prev;
@@ -3019,7 +3020,30 @@ remove_load:
 				ir_use_list_replace_one(ctx, prev, i, next);
 				insn->op1 = IR_UNUSED;
 
-				ir_iter_replace_insn(ctx, i, val, worklist);
+				val_insn = &ctx->ir_base[val];
+				if (val_insn->type == insn->type) {
+					ir_iter_replace_insn(ctx, i, val, worklist);
+				} else {
+					IR_ASSERT(!IR_IS_CONST_REF(insn->op2));
+					ir_use_list_remove_one(ctx, insn->op2, i);
+					if (ir_is_dead(ctx, insn->op2)) {
+						/* schedule DCE */
+						ir_bitqueue_add(worklist, insn->op2);
+					}
+					if (!IR_IS_CONST_REF(val)) {
+						ir_use_list_add(ctx, val, i);
+					}
+					if (ir_type_size[val_insn->type] == ir_type_size[insn->type]) {
+						/* load forwarding with bitcast (L2L) */
+						insn->optx = IR_OPTX(IR_BITCAST, insn->type, 1);
+					} else {
+						/* partial load forwarding (L2L) */
+						insn->optx = IR_OPTX(IR_TRUNC, insn->type, 1);
+					}
+					insn->op1 = val;
+					insn->op2 = IR_UNUSED;
+					ir_bitqueue_add(worklist, i);
+				}
 			}
 		} else if (insn->op == IR_STORE) {
 			if (ir_find_aliasing_store(ctx, insn->op1, insn->op2, insn->op3)) {
@@ -3049,7 +3073,7 @@ remove_bitcast:
 		} else if (insn->op == IR_VLOAD) {
 			val = ir_find_aliasing_vload(ctx, insn->op1, insn->type, insn->op2);
 			if (val) {
-				goto remove_load;
+				goto remove_aliased_load;
 			}
 		} else if (insn->op == IR_VSTORE) {
 			if (ir_find_aliasing_vstore(ctx, insn->op1, insn->op2, insn->op3)) {
@@ -3080,13 +3104,14 @@ int ir_sccp(ir_ctx *ctx)
 	ir_bitqueue sccp_worklist, iter_worklist;
 	ir_insn *_values;
 
-	ctx->flags2 |= IR_OPT_IN_SCCP;
 	ir_bitqueue_init(&iter_worklist, ctx->insns_count);
 	ir_bitqueue_init(&sccp_worklist, ctx->insns_count);
 	_values = ir_mem_calloc(ctx->insns_count, sizeof(ir_insn));
 
+	ctx->flags2 |= IR_OPT_IN_SCCP;
 	ir_sccp_analyze(ctx, _values, &sccp_worklist, &iter_worklist);
 	ir_sccp_transform(ctx, _values, &sccp_worklist, &iter_worklist);
+	ctx->flags2 &= ~IR_OPT_IN_SCCP;
 
 	ir_mem_free(_values);
 	ir_bitqueue_free(&sccp_worklist);
@@ -3096,8 +3121,6 @@ int ir_sccp(ir_ctx *ctx)
 	ir_iter_opt(ctx, &iter_worklist);
 
 	ir_bitqueue_free(&iter_worklist);
-
-	ctx->flags2 &= ~IR_OPT_IN_SCCP;
 
 	return 1;
 }
