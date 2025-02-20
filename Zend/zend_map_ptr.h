@@ -70,6 +70,9 @@ typedef struct _zend_string zend_string;
 	} while (0)
 # define ZEND_MAP_PTR_BIASED_BASE(real_base) \
 	((void*)(((uintptr_t)(real_base)) + zend_map_ptr_static_size * sizeof(void *) - 1))
+// Note: chunked like: [8192..12287][4096..8191][0..4095]
+#define ZEND_MAP_PTR_STATIC_NUM_TO_PTR(num) \
+	((void **)CG(map_ptr_real_base) + zend_map_ptr_static_size - ZEND_MM_ALIGNED_SIZE_EX((num) + 1, 4096) + ((num) & 4095))
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif

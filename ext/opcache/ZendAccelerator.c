@@ -4394,9 +4394,7 @@ static void preload_load(size_t orig_map_ptr_static_last)
 		ZCG(preloaded_internal_run_time_cache) = cache;
 
 		for (size_t cur_static_map_ptr = orig_map_ptr_static_last; cur_static_map_ptr < zend_map_ptr_static_last; ++cur_static_map_ptr) {
-			// Note: chunked like: [8192..12287][4096..8191][0..4095]
-			void **ptr = (void **) CG(map_ptr_real_base) + zend_map_ptr_static_size - ZEND_MM_ALIGNED_SIZE_EX(cur_static_map_ptr + 1, 4096) + (cur_static_map_ptr & 4095);
-			*ptr = cache;
+            *ZEND_MAP_PTR_STATIC_NUM_TO_PTR(cur_static_map_ptr) = cache;
 			cache += runtime_cache_size;
 		}
 	}
