@@ -85,8 +85,10 @@ PHP 8.5 UPGRADE NOTES
 
 - Core:
   . Closure is now a proper subtype of callable
-  . Added support for Closures in constant expressions.
+  . Added support for Closures and first class callables in constant
+    expressions.
     RFC: https://wiki.php.net/rfc/closures_in_const_expr
+    RFC: https://wiki.php.net/rfc/fcc_in_const_expr
   . Fatal Errors (such as an exceeded maximum execution time) now include a
     backtrace.
     RFC: https://wiki.php.net/rfc/error_backtraces_v2
