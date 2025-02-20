@@ -961,6 +961,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DAT
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
 		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
+
 	} else {
 		value = zend_assign_to_variable_ex(prop, value, IS_CONST, EX_USES_STRICT_TYPES(), &garbage);
 	}
@@ -15595,6 +15596,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_TMPVAR_H
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
+
+				// check if this is an inner class before failing
+				if (Z_TYPE_P(op) == IS_STRING) {
+					zend_string *class_name = Z_STR_P(op);
+					zend_class_entry *ce = zend_lookup_class(class_name);
+					// free class_name
+					zend_string_release(class_name);
+					if (ce) {
+						ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
+						zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+						ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+					}
+				}
+
 				zend_type_error("Cannot use \"::class\" on %s", zend_zval_value_name(op));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -33474,6 +33489,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_UNUSED_H
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
+
+				// check if this is an inner class before failing
+				if (Z_TYPE_P(op) == IS_STRING) {
+					zend_string *class_name = Z_STR_P(op);
+					zend_class_entry *ce = zend_lookup_class(class_name);
+					// free class_name
+					zend_string_release(class_name);
+					if (ce) {
+						ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
+
+						ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+					}
+				}
+
 				zend_type_error("Cannot use \"::class\" on %s", zend_zval_value_name(op));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 
@@ -41690,6 +41719,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_CV_HANDL
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
+
+				// check if this is an inner class before failing
+				if (Z_TYPE_P(op) == IS_STRING) {
+					zend_string *class_name = Z_STR_P(op);
+					zend_class_entry *ce = zend_lookup_class(class_name);
+					// free class_name
+					zend_string_release(class_name);
+					if (ce) {
+						ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
+
+						ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+					}
+				}
+
 				zend_type_error("Cannot use \"::class\" on %s", zend_zval_value_name(op));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 
