@@ -1096,7 +1096,7 @@ PHP_FUNCTION(curl_version)
 	/* Add an array of features */
 	zval feature_list;
 	array_init(&feature_list);
-#if defined(CURLVERSION_ELEVENTH) && CURLVERSION_NOW >= CURLVERSION_ELEVENTH
+#if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0	CURLVERSION_ELEVENTH */
 		{
 			char **p = (char **) d->feature_names;
 			while (*p != NULL) {
