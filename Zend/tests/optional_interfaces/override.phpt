@@ -19,4 +19,4 @@ class TestClass implements ?ExistingInterface, ?NonExistantInterface
 
 ?>
 --EXPECTF--
-Fatal error: TestClass::other() has #[\Override] attribute, but no matching parent method exists in %soptional_interfaces/override.php on line %d
+Fatal error: TestClass::other() has #[\Override] attribute, but no matching parent method exists in %soverride.php on line %d
