@@ -9094,18 +9094,29 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 		// we need to replace child 2 (stmt_ast) with a new AST:
 		// 1. that includes the constructor ensuring that the constructor properties are declared as "public" if not
-		// currently declared. (TODO: transform to public if not set)
+		// currently declared.
 		// 2. that includes the declared traits
 		// from there, we just continue as normal
 
 		// Create a new AST node for the new statement list which will eventually replace stmt_ast
 		zend_ast *new_stmt_ast = zend_ast_create_list(0, ZEND_AST_STMT_LIST);
 
-		// Create a new AST node for the constructor
-		zend_ast *constructor_ast = zend_ast_create_decl(ZEND_AST_METHOD, ZEND_ACC_PUBLIC, decl->start_lineno, decl->doc_comment, zend_string_init("__construct", sizeof("__construct") - 1, 0), decl->child[2], NULL, zend_ast_create_list(0, ZEND_AST_STMT_LIST), NULL, NULL);
+		// Create a new AST node for the constructor, setting any parameters to public
+		if (decl->child[2]) {
+			zend_ast_list *params = zend_ast_get_list(decl->child[2]);
 
-		// Add the constructor to the new statement list
-		zend_ast_list_add(new_stmt_ast, constructor_ast);
+			for (uint32_t i = 0; i < params->children; i++) {
+				ZEND_ASSERT(params->child[i]->kind == ZEND_AST_PARAM);
+				if (params->child[i]->attr < ZEND_ACC_PUBLIC) {
+					params->child[i]->attr = ZEND_ACC_PUBLIC;
+				}
+			}
+
+			zend_ast *constructor_ast = zend_ast_create_decl(ZEND_AST_METHOD, ZEND_ACC_PUBLIC, decl->start_lineno, decl->doc_comment, zend_string_init("__construct", sizeof("__construct") - 1, 0), decl->child[2], NULL, zend_ast_create_list(0, ZEND_AST_STMT_LIST), NULL, NULL);
+
+			// Add the constructor to the new statement list
+			zend_ast_list_add(new_stmt_ast, constructor_ast);
+		}
 
 		// update both the new statement ast and the original children to be cleaned up.
 		stmt_ast = new_stmt_ast;
