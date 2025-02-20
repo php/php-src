@@ -11099,7 +11099,8 @@ static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_NEW || kind == ZEND_AST_ARG_LIST
 		|| kind == ZEND_AST_NAMED_ARG
 		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP
-		|| kind == ZEND_AST_CLOSURE;
+		|| kind == ZEND_AST_CLOSURE
+		|| kind == ZEND_AST_CALL || kind == ZEND_AST_STATIC_CALL || kind == ZEND_AST_CALLABLE_CONVERT;
 }
 /* }}} */
 
@@ -11208,9 +11209,8 @@ static void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_const_expr_new(zend_ast **ast_ptr)
+static void zend_compile_const_expr_class_reference(zend_ast *class_ast)
 {
-	zend_ast *class_ast = (*ast_ptr)->child[0];
 	if (class_ast->kind == ZEND_AST_CLASS) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot use anonymous class in constant expression");
@@ -11233,6 +11233,12 @@ static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 	class_ast->attr = fetch_type << ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT;
 }
 
+static void zend_compile_const_expr_new(zend_ast **ast_ptr)
+{
+	zend_ast *class_ast = (*ast_ptr)->child[0];
+	zend_compile_const_expr_class_reference(class_ast);
+}
+
 static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 {
 	zend_ast_decl *closure_ast = (zend_ast_decl *) *ast_ptr;
@@ -11251,6 +11257,58 @@ static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 
 	zend_ast_destroy(*ast_ptr);
 	*ast_ptr = zend_ast_create_op_array(op);
+}
+
+static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
+{
+	zend_ast **args_ast;
+	switch ((*ast_ptr)->kind) {
+		case ZEND_AST_CALL:
+			args_ast = &(*ast_ptr)->child[1];
+			break;
+		case ZEND_AST_STATIC_CALL:
+			args_ast = &(*ast_ptr)->child[2];
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	if ((*args_ast)->kind != ZEND_AST_CALLABLE_CONVERT) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
+	}
+	ZEND_MAP_PTR_NEW(((zend_ast_fcc *)*args_ast)->fptr);
+
+	switch ((*ast_ptr)->kind) {
+		case ZEND_AST_CALL: {
+			zend_ast *name_ast = (*ast_ptr)->child[0];
+			if (name_ast->kind != ZEND_AST_ZVAL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use dynamic function name in constant expression");
+			}
+			zval *name_ast_zv = zend_ast_get_zval(name_ast);
+			if (Z_TYPE_P(name_ast_zv) != IS_STRING) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Illegal function name");
+			}
+			bool is_fully_qualified;
+			zend_string *name = zend_resolve_function_name(Z_STR_P(name_ast_zv), name_ast->attr, &is_fully_qualified);
+			zval_ptr_dtor_nogc(name_ast_zv);
+			ZVAL_STR(name_ast_zv, name);
+			if (is_fully_qualified) {
+				name_ast->attr = ZEND_NAME_FQ;
+			}
+			break;
+		}
+		case ZEND_AST_STATIC_CALL: {
+			zend_ast *class_ast = (*ast_ptr)->child[0];
+			zend_compile_const_expr_class_reference(class_ast);
+			zend_ast *method_ast = (*ast_ptr)->child[1];
+			if (method_ast->kind != ZEND_AST_ZVAL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use dynamic method name in constant expression");
+			}
+			if (Z_TYPE_P(zend_ast_get_zval(method_ast)) != IS_STRING) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Illegal method name");
+			}
+			break;
+		}
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
 }
 
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)
@@ -11319,6 +11377,10 @@ static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 			zend_compile_const_expr_closure(ast_ptr);
 			/* Return, because we do not want to traverse the children. */
 			return;
+		case ZEND_AST_CALL:
+		case ZEND_AST_STATIC_CALL:
+			zend_compile_const_expr_fcc(ast_ptr);
+			break;
 	}
 
 	zend_ast_apply(ast, zend_compile_const_expr, context);

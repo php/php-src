@@ -195,6 +195,9 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		zend_persist_op_array(&z);
 		copy->op_array = Z_PTR(z);
 		node = (zend_ast *) copy;
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *copy = zend_shared_memdup(ast, sizeof(zend_ast_fcc));
+		node = (zend_ast *) copy;
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
