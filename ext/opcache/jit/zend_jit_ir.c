@@ -14376,8 +14376,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 					ref = ir_CONST_ADDR(prop_info);
 				} else {
-					int prop_info_offset =
-						(((Z_PROP_TABLE_OFFSET(prop_info) - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
+					int prop_info_offset = Z_PROP_TABLE_OFFSET(prop_info) * sizeof(void*);
 
 					ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)));
 					ref = ir_LOAD_A(ir_ADD_OFFSET(ref, offsetof(zend_class_entry, properties_info_table)));
@@ -14777,8 +14776,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 				ref = ir_CONST_ADDR(prop_info);
 			} else {
-				int prop_info_offset =
-					(((Z_PROP_TABLE_OFFSET(prop_info) - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
+				int prop_info_offset = Z_PROP_TABLE_OFFSET(prop_info) * sizeof(void*);
 
 				ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)));
 				ref = ir_LOAD_A(ir_ADD_OFFSET(ref, offsetof(zend_class_entry, properties_info_table)));
@@ -15133,8 +15131,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 			if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 				ref = ir_CONST_ADDR(prop_info);
 			} else {
-				int prop_info_offset =
-					(((Z_PROP_TABLE_OFFSET(prop_info) - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
+				int prop_info_offset = Z_PROP_TABLE_OFFSET(prop_info) * sizeof(void*);
 
 				ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)));
 				ref = ir_LOAD_A(ir_ADD_OFFSET(ref, offsetof(zend_class_entry, properties_info_table)));
@@ -15523,8 +15520,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 			if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 				ref = ir_CONST_ADDR(prop_info);
 			} else {
-				int prop_info_offset =
-					(((Z_PROP_TABLE_OFFSET(prop_info) - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
+				int prop_info_offset = Z_PROP_TABLE_OFFSET(prop_info) * sizeof(void*);
 
 				ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)));
 				ref = ir_LOAD_A(ir_ADD_OFFSET(ref, offsetof(zend_class_entry, properties_info_table)));
