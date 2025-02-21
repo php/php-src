@@ -25,14 +25,11 @@ $garbage = [];
 foreach ($xpath->query('//p') as $entry)
     $garbage[] = $entry;
 
-$doc->xinclude();
+@$doc->xinclude();
 
 var_dump($garbage);
 ?>
---EXPECTF--
-Warning: DOMDocument::xinclude(): I/O warning : failed to load "%sthisisnonexistent"%s
-
-Warning: DOMDocument::xinclude(): could not load /run/media/niels/MoreData/php-8.3/thisisnonexistent, and no fallback was found in %s on line %d
+--EXPECT--
 array(3) {
   [0]=>
   object(DOMElement)#3 (1) {
