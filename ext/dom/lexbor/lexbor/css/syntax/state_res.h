@@ -49,7 +49,7 @@ lxb_css_syntax_state_res_map[256] =
     lxb_css_syntax_state_hash, /* 0x23; '#'; Pound sign */
     lxb_css_syntax_state_delim, /* 0x24; '$'; Dollar sign */
     lxb_css_syntax_state_delim, /* 0x25; '%'; Percentage sign */
-    lxb_css_syntax_state_delim, /* 0x26; '&'; Commericial and */
+    lxb_css_syntax_state_delim, /* 0x26; '&'; Commercial and */
     lxb_css_syntax_state_string, /* 0x27; '''; Apostrophe */
     lxb_css_syntax_state_lparenthesis, /* 0x28; '('; Left bracket */
     lxb_css_syntax_state_rparenthesis, /* 0x29; ')'; Right bracket */
