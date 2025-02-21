@@ -100,6 +100,57 @@ static char *isapi_secure_server_variable_names[] = {
 	NULL
 };
 
+typedef struct http_status {
+	int code;
+	const char* msg;
+  } http_status;
+  
+  static const http_status http_status_codes[] = {
+	{100, "Continue"},
+	{101, "Switching Protocols"},
+	{200, "OK"},
+	{201, "Created"},
+	{202, "Accepted"},
+	{203, "Non-Authoritative Information"},
+	{204, "No Content"},
+	{205, "Reset Content"},
+	{206, "Partial Content"},
+	{300, "Multiple Choices"},
+	{301, "Moved Permanently"},
+	{302, "Moved Temporarily"},
+	{303, "See Other"},
+	{304, "Not Modified"},
+	{305, "Use Proxy"},
+	{400, "Bad Request"},
+	{401, "Unauthorized"},
+	{402, "Payment Required"},
+	{403, "Forbidden"},
+	{404, "Not Found"},
+	{405, "Method Not Allowed"},
+	{406, "Not Acceptable"},
+	{407, "Proxy Authentication Required"},
+	{408, "Request Time-out"},
+	{409, "Conflict"},
+	{410, "Gone"},
+	{411, "Length Required"},
+	{412, "Precondition Failed"},
+	{413, "Request Entity Too Large"},
+	{414, "Request-URI Too Large"},
+	{415, "Unsupported Media Type"},
+	{428, "Precondition Required"},
+	{429, "Too Many Requests"},
+	{431, "Request Header Fields Too Large"},
+	{451, "Unavailable For Legal Reasons"},
+	{500, "Internal Server Error"},
+	{501, "Not Implemented"},
+	{502, "Bad Gateway"},
+	{503, "Service Unavailable"},
+	{504, "Gateway Time-out"},
+	{505, "HTTP Version not supported"},
+	{511, "Network Authentication Required"},
+	{0, NULL}
+};
+
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
@@ -227,36 +278,31 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers)
 	*combined_headers_ptr++ = '\n';
 	*combined_headers_ptr = 0;
 
-	switch (SG(sapi_headers).http_response_code) {
-		case 200:
-			header_info.pszStatus = "200 OK";
-			break;
-		case 302:
-			header_info.pszStatus = "302 Moved Temporarily";
-			break;
-		case 401:
-			header_info.pszStatus = "401 Authorization Required";
-			break;
-		default: {
-			const char *sline = SG(sapi_headers).http_status_line;
-			int sline_len;
+	const char *sline = SG(sapi_headers).http_status_line;
+	int sline_len;
 
-			/* httpd requires that r->status_line is set to the first digit of
-			 * the status-code: */
-			if (sline && ((sline_len = strlen(sline)) > 12) && strncmp(sline, "HTTP/1.", 7) == 0 && sline[8] == ' ') {
-				if ((sline_len - 9) > MAX_STATUS_LENGTH) {
-					status_buf = estrndup(sline + 9, MAX_STATUS_LENGTH);
-				} else {
-					status_buf = estrndup(sline + 9, sline_len - 9);
-				}
-			} else {
-				status_buf = emalloc(MAX_STATUS_LENGTH + 1);
-				snprintf(status_buf, MAX_STATUS_LENGTH, "%d Undescribed", SG(sapi_headers).http_response_code);
-			}
-			header_info.pszStatus = status_buf;
-			break;
+	/* httpd requires that r->status_line is set to the first digit of
+		* the status-code: */
+	if (sline && ((sline_len = strlen(sline)) > 12) && strncmp(sline, "HTTP/1.", 7) == 0 && sline[8] == ' ') {
+		if ((sline_len - 9) > MAX_STATUS_LENGTH) {
+			status_buf = estrndup(sline + 9, MAX_STATUS_LENGTH);
+		} else {
+			status_buf = estrndup(sline + 9, sline_len - 9);
+		}
+	} else {
+		http_status *status = (http_status*) http_status_codes;
+
+		while (status->code != 0 && status->code != SG(sapi_headers).http_response_code) {
+			status++;
+		}
+		status_buf = emalloc(MAX_STATUS_LENGTH + 1);
+		if (status->code) {
+			snprintf(status_buf, MAX_STATUS_LENGTH, "%d %s", status->code, status->msg);
+		} else {
+			snprintf(status_buf, MAX_STATUS_LENGTH, "%d Undefined", SG(sapi_headers).http_response_code);
 		}
 	}
+	header_info.pszStatus = status_buf;
 	header_info.cchStatus = strlen(header_info.pszStatus);
 	header_info.pszHeader = combined_headers;
 	header_info.cchHeader = total_length;
