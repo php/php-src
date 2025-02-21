@@ -1623,7 +1623,7 @@ static void dom_xinclude_strip_references(xmlNodePtr basep)
  * We have to remove userland references to xinclude nodes because libxml2 will make clones of these
  * and remove the original nodes. If the originals are removed while there are still userland references
  * this will cause memory corruption. */
-static void dom_xinclude_strip_fallback_references(xmlDocPtr docp, const xmlNode *basep)
+static void dom_xinclude_strip_fallback_references(const xmlNode *basep)
 {
 	xmlNodePtr current = basep->children;
 
@@ -1661,7 +1661,7 @@ PHP_METHOD(DOMDocument, xinclude)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	dom_xinclude_strip_fallback_references(docp, (const xmlNode *) docp);
+	dom_xinclude_strip_fallback_references((const xmlNode *) docp);
 
 	flags |= XML_PARSE_NOXINCNODE;
 	PHP_LIBXML_SANITIZE_GLOBALS(xinclude);
