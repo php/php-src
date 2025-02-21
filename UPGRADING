@@ -358,9 +358,13 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 
 - Core:
-  The high resolution timer (`hrtime()`) on macOS now uses the recommended
-  `clock_gettime_nsec_np(CLOCK_UPTIME_RAW)` API instead of
-  `mach_absolute_time()`.
+  . The high resolution timer (`hrtime()`) on macOS now uses the recommended
+    `clock_gettime_nsec_np(CLOCK_UPTIME_RAW)` API instead of
+    `mach_absolute_time()`.
+
+- CLI/CGI:
+  . The `-z` or `--zend-extension` option has been removed as it was
+    non-functional. Use `-d zend_extension=<path>` instead.
 
 ========================================
 14. Performance Improvements
