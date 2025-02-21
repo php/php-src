@@ -1100,7 +1100,7 @@ PHP_FUNCTION(curl_version)
 		{
 			char **p = (char **) d->feature_names;
 			while (*p != NULL) {
-				add_next_index_string(&feature_list, *p);
+				add_assoc_bool(&feature_list, *p, true);
 				p++;
 			}
 		}
