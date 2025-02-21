@@ -14,8 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16665 (\array and \callable should not be usable in
     class_alias). (nielsdos)
   . Added PHP_BUILD_DATE constant. (cmb)
-  . Added support for Closures in constant expressions. (timwolla,
-    Volker Dusch)
+  . Added support for Closures and first class callables in constant
+    expressions. (timwolla, Volker Dusch)
   . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
     if available. (timwolla)
   . Implement GH-15680 (Enhance zend_dump_op_array to properly represent

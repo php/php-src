@@ -99,6 +99,8 @@ static void zend_persist_ast_calc(zend_ast *ast)
 		if (old_function_name) {
 			zend_string_release_ex(old_function_name, 0);
 		}
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		ADD_SIZE(sizeof(zend_ast_fcc));
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();

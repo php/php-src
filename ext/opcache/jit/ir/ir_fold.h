@@ -1469,6 +1469,27 @@ IR_FOLD(EQ(SEXT, C_ADDR))
 		op1 = op1_insn->op1;
 		op2 = IR_UNUSED;
 		IR_FOLD_RESTART;
+	} else {
+		ir_type type = ctx->ir_base[op1_insn->op1].type;
+
+		if (IR_IS_TYPE_SIGNED(type)) {
+			switch (ir_type_size[type]) {
+				case 1:  val.i64 = op2_insn->val.i8;  break;
+				case 2:  val.i64 = op2_insn->val.i16; break;
+				case 4:  val.i64 = op2_insn->val.i32; break;
+				default: val.u64 = op2_insn->val.u64; break;
+			 }
+	    } else {
+			switch (ir_type_size[type]) {
+				case 1:  val.u64 = op2_insn->val.u8;  break;
+				case 2:  val.u64 = op2_insn->val.u16; break;
+				case 4:  val.u64 = op2_insn->val.u32; break;
+				default: val.u64 = op2_insn->val.u64; break;
+			 }
+		}
+		op1 = op1_insn->op1;
+		op2 = ir_const(ctx, val, type);
+		IR_FOLD_RESTART;
 	}
 	IR_FOLD_NEXT;
 }
@@ -1490,6 +1511,27 @@ IR_FOLD(NE(SEXT, C_ADDR))
 {
 	if (op2_insn->val.u64 == 0 && ctx->ir_base[op1_insn->op1].type == IR_BOOL) {
 		IR_FOLD_COPY(op1_insn->op1);
+	} else {
+		ir_type type = ctx->ir_base[op1_insn->op1].type;
+
+		if (IR_IS_TYPE_SIGNED(type)) {
+			switch (ir_type_size[type]) {
+				case 1:  val.i64 = op2_insn->val.i8;  break;
+				case 2:  val.i64 = op2_insn->val.i16; break;
+				case 4:  val.i64 = op2_insn->val.i32; break;
+				default: val.u64 = op2_insn->val.u64; break;
+			 }
+	    } else {
+			switch (ir_type_size[type]) {
+				case 1:  val.u64 = op2_insn->val.u8;  break;
+				case 2:  val.u64 = op2_insn->val.u16; break;
+				case 4:  val.u64 = op2_insn->val.u32; break;
+				default: val.u64 = op2_insn->val.u64; break;
+			 }
+		}
+		op1 = op1_insn->op1;
+		op2 = ir_const(ctx, val, type);
+		IR_FOLD_RESTART;
 	}
 	IR_FOLD_NEXT;
 }
@@ -1582,6 +1624,24 @@ IR_FOLD(SUB_OV(_, C_ADDR))
 	if (op2_insn->val.u64 == 0) {
 		/* a +/- 0 => a */
 		IR_FOLD_COPY(op1);
+	}
+	IR_FOLD_NEXT;
+}
+
+/* This rule is useful for ADD(0, SYM) => SYM */
+IR_FOLD(ADD(C_U8, _))
+IR_FOLD(ADD(C_U16, _))
+IR_FOLD(ADD(C_U32, _))
+IR_FOLD(ADD(C_U64, _))
+IR_FOLD(ADD(C_I8, _))
+IR_FOLD(ADD(C_I16, _))
+IR_FOLD(ADD(C_I32, _))
+IR_FOLD(ADD(C_I64, _))
+IR_FOLD(ADD(C_ADDR, _))
+{
+	if (op1_insn->val.u64 == 0) {
+		/* 0 + a => a */
+		IR_FOLD_COPY(op2);
 	}
 	IR_FOLD_NEXT;
 }

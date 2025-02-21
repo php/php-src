@@ -22,6 +22,7 @@
 #define ZEND_AST_H
 
 #include "zend_types.h"
+#include "zend_map_ptr.h"
 
 #ifndef ZEND_AST_SPEC
 # define ZEND_AST_SPEC 1
@@ -227,6 +228,13 @@ typedef struct _zend_ast_decl {
 	zend_ast *child[5];
 } zend_ast_decl;
 
+typedef struct _zend_ast_fcc {
+	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
+	zend_ast_attr attr; /* Additional attribute, use depending on node type */
+	uint32_t lineno;    /* Line number */
+	ZEND_MAP_PTR_DEF(zend_function *, fptr);
+} zend_ast_fcc;
+
 typedef void (*zend_ast_process_t)(zend_ast *ast);
 extern ZEND_API zend_ast_process_t zend_ast_process;
 
@@ -317,6 +325,8 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
 );
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(void);
 
 typedef struct {
 	bool had_side_effects;

@@ -122,11 +122,6 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call_tmp(zval *objec
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method)
-{
-	zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
-}
-
 static void ZEND_FASTCALL zend_jit_unref_helper(zval *zv)
 {
 	zend_reference *ref;

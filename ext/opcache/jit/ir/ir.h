@@ -960,9 +960,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 			 || !ir_mem2ssa(ctx)) {
 				return NULL;
 			}
-			if (opt_level > 1) {
-				ir_reset_cfg(ctx);
-			}
+			ir_reset_cfg(ctx);
 		}
 
 		if (opt_level > 1) {
