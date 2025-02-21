@@ -10,51 +10,80 @@ server
 --FILE--
 <?php
 
-$interfaceFile = __DIR__.'/optional_interfaces_interface.inc';
+/**
+  * Create a script that will be hit via HTTP and report
+  * - whether OpcachedClass is cached
+  * - whether OpcachedInterface exists
+  * - what interfaces does the OpcachedClass actually implements
+  */
+file_put_contents(
+    __DIR__.'/optional_interfaces_script.php',
+    <<<'SCRIPT'
+    <?php
 
-file_put_contents(__DIR__.'/optional_interfaces_script.php', <<<'SCRIPT'
-<?php
+    $classFile = __DIR__.'/optional_interfaces_class.inc';
+    $interfaceFile = __DIR__.'/optional_interfaces_interface.inc';
 
-$classFile = __DIR__.'/optional_interfaces_class.inc';
-$interfaceFile = __DIR__.'/optional_interfaces_interface.inc';
+    if (opcache_is_script_cached($classFile))
+        echo "Class is cached\n";
+    else
+        echo "Class is not cached\n";
 
-if (opcache_is_script_cached($classFile))
-    echo "Class is cached\n";
-else
-    echo "Class is not cached\n";
+    @(include $interfaceFile);
 
-@(include $interfaceFile);
+    if (interface_exists('OpcachedInterface'))
+        echo "OpcachedInterface is defined\n";
+    else
+        echo "OpcachedInterface is not defined\n";
 
-if (interface_exists('OpcachedInterface'))
-    echo "OpcachedInterface is defined\n";
-else
-    echo "OpcachedInterface is not defined\n";
+    $hitsBefore = opcache_get_status()['opcache_statistics']['hits'];
 
-$hitsBefore = opcache_get_status()['opcache_statistics']['hits'];
+    include $classFile;
 
-include $classFile;
+    if (opcache_get_status()['opcache_statistics']['hits'] > $hitsBefore)
+        echo "Class loaded from OPCache\n";
+    else
+        echo "Class loaded from file\n";
 
-if (opcache_get_status()['opcache_statistics']['hits'] > $hitsBefore)
-    echo "Class loaded from OPCache\n";
-else
-    echo "Class loaded from file\n";
+    echo "OpcachedClass implements:".implode(', ', class_implements('OpcachedClass'))."\n\n";
+    SCRIPT
+);
 
-echo "OpcachedClass implements:".implode(', ', class_implements('OpcachedClass'))."\n\n";
-SCRIPT);
 
+/**
+  * Launch a server with opcache enabled
+  */
 include __DIR__.'/php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d zend_extension=opcache');
+$extensionDir = ini_get('extension_dir');
+$extensionDirOption = $extensionDir ? "-d extension_dir=$extensionDir" : '';
+php_cli_server_start("$extensionDirOption -d opcache.enable=1 -d opcache.enable_cli=1 -d zend_extension=opcache");
 
+$interfaceFile = __DIR__.'/optional_interfaces_interface.inc';
 $uri = 'http://' . PHP_CLI_SERVER_ADDRESS . '/optional_interfaces_script.php';
 
+/**
+  * First hit
+  * nothing should be cached yet
+  * the interface doesn't exist, so the class implements nothing
+  */
 echo file_get_contents($uri);
 
+
+/**
+  * Create interface and do the second hit
+  * OpcachedClass should be loaded from opcache
+  * The interface exists, so it should be implemented
+  */
 file_put_contents($interfaceFile, '<?php interface OpcachedInterface {}');
-
 echo file_get_contents($uri);
 
-unlink($interfaceFile);
 
+/**
+  * Delete interface and do another hit
+  * OpcachedClass should be loaded from opcache
+  * The interface is removed, so it should no longer be implemented
+  */
+unlink($interfaceFile);
 echo file_get_contents($uri);
 
 unlink(__DIR__.'/optional_interfaces_script.php');
