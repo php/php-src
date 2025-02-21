@@ -13,9 +13,21 @@ class Foo {
 $foo = new Foo;
 $closure = Closure::fromCallable($foo);
 $test = $closure->__invoke(...);
+
+$rc = new ReflectionMethod($test, '__invoke');
+var_dump($rc->getAttributes());
+
 $test();
 
 ?>
 --EXPECTF--
+array(1) {
+  [0]=>
+  object(ReflectionAttribute)#%d (1) {
+    ["name"]=>
+    string(10) "Deprecated"
+  }
+}
+
 Deprecated: Method Foo::__invoke() is deprecated, xyzzy in %s on line %d
 In __invoke
