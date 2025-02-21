@@ -682,6 +682,16 @@ static int format_default_value(smart_str *str, zval *value) {
 			format_default_value(str, zv);
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
+	} else if (Z_TYPE_P(value) == IS_OBJECT) {
+		/* This branch is reached if the constant AST was already evaluated and
+		 * resulted in an object; enums are already handled in smart_str_append_zval()
+		 * (GH-15902) */
+		zend_object *obj = Z_OBJ_P(value);
+		zend_class_entry *class = obj->ce;
+		ZEND_ASSERT(!(class->ce_flags & ZEND_ACC_ENUM));
+		smart_str_appends(str, "object(");
+		smart_str_append(str, class->name);
+		smart_str_appends(str, ")");
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
 		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
