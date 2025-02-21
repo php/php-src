@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fix memory leak of X509_STORE in php_openssl_setup_verify() on failure.
     (nielsdos)
+  . Fixed bug #74796 (Requests through http proxy set peer name).
+    (Jakub Zelenka)
 
 - Phar:
   . Add missing filter cleanups on phar failure. (nielsdos)
