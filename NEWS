@@ -23,6 +23,7 @@ PHP                                                                        NEWS
     Dom\HTML_NO_DEFAULT_NS). (nielsdos)
   . Fixed bug GH-17802 (\Dom\HTMLDocument querySelector attribute name is case
     sensitive in HTML). (nielsdos)
+  . Fixed bug GH-17847 (xinclude destroys live node). (nielsdos)
 
 - GD:
   . Fixed bug GH-17703 (imagescale with both width and height negative values
