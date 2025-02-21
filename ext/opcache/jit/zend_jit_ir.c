@@ -8722,15 +8722,9 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		}
 
 		if (!func || func->common.type == ZEND_USER_FUNCTION) {
-			// JIT: if (closure->func.op_array.run_time_cache__ptr)
-			if_cond = ir_IF(ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.op_array.run_time_cache__ptr))));
-			ir_IF_FALSE(if_cond);
-
 			// JIT: zend_jit_init_func_run_time_cache_helper(closure->func);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_init_func_run_time_cache_helper),
 				ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func)));
-
-			ir_MERGE_WITH_EMPTY_TRUE(if_cond);
 		}
 
 		if (!func) {
