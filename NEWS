@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     may call hooks of overridden properties). (Arnaud)
   . Fixed bug GH-17916 (Final abstract properties should error).
     (DanielEScherzer)
+  . Fixed bug GH-17866 (zend_mm_heap corrupted error after upgrading from
+    8.4.3 to 8.4.4). (nielsdos)
 
 - DOM:
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
