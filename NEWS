@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17797 (zend_test_compile_string crash on invalid
     script path). (David Carlier)
 
+- DOM:
+  . Fixed bug GH-17847 (xinclude destroys live node). (nielsdos)
+
 - FFI:
   . Fix FFI Parsing of Pointer Declaration Lists. (davnotdev)
 
