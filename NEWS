@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - CLI:
   . Extended --ini to print INI settings changed from the builtin default.
     (timwolla)
+  . Drop support for -z CLI/CGI flag. (nielsdos)
 
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
