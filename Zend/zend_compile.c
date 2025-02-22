@@ -9171,6 +9171,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 			zval name_zv;
 			ZVAL_STR(&name_zv, name);
+			GC_ADDREF(name);
 
 			// configure the current ce->flags for a nested class. This should only include:
 			// - final
@@ -9189,8 +9190,12 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			// - a constant that contains the name of the nested class
 			// this "tricks" the engine into thinking that the nested class is a normal class
 			zend_type t = ZEND_TYPE_INIT_CODE(IS_STRING, 0, 0);
-			zend_declare_typed_property(CG(active_class_entry), unqualified_name, &name_zv, propFlags | ZEND_ACC_STATIC | ZEND_ACC_READONLY, decl->doc_comment, t);
-			zend_declare_class_constant_ex(CG(active_class_entry), unqualified_name, &name_zv, propFlags, decl->doc_comment);
+			zval propz, constz;
+			ZVAL_COPY_OR_DUP(&propz, &name_zv);
+			ZVAL_COPY_OR_DUP(&constz, &name_zv);
+			zend_declare_typed_property(CG(active_class_entry), unqualified_name, &propz, propFlags | ZEND_ACC_STATIC | ZEND_ACC_READONLY, decl->doc_comment, t);
+			zend_declare_class_constant_ex(CG(active_class_entry), unqualified_name, &constz, propFlags, decl->doc_comment);
+			ZVAL_PTR_DTOR(&name_zv);
 
 			// if a class is private or protected, we need to require scope for type checks
 			ce->required_scope = propFlags & (ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE) ? CG(active_class_entry) : NULL;
