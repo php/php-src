@@ -62,6 +62,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Upgrade to file 5.46. (nielsdos)
 
+- FPM:
+  . Fixed GH-17645 (FPM with httpd ProxyPass does not decode script path).
+    (Jakub Zelenka)
+
 - GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
     cmb)

@@ -152,6 +152,10 @@ PHP 8.5 UPGRADE NOTES
   . Added a new --ini=diff option to print INI settings changed from the builtin
     default.
 
+- FPM:
+  . FPM with httpd ProxyPass decodes the full scirpt path script path. Added
+    fastcgi.script_path_encoded INI setting to prevent this new behevior.
+
 ========================================
 4. Deprecated Functionality
 ========================================
