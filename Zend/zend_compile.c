@@ -757,7 +757,7 @@ static void zend_do_free(znode *op1) /* {{{ */
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
 		while (opline->opcode == ZEND_END_SILENCE ||
-			   opline->opcode == ZEND_OP_DATA) {
+			opline->opcode == ZEND_OP_DATA) {
 			opline--;
 		}
 
@@ -821,7 +821,7 @@ static void zend_do_free(znode *op1) /* {{{ */
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
 				if ((opline->opcode == ZEND_FETCH_LIST_R ||
-					 opline->opcode == ZEND_FETCH_LIST_W) &&
+					opline->opcode == ZEND_FETCH_LIST_W) &&
 					opline->op1_type == IS_VAR &&
 					opline->op1.var == op1->u.op.var) {
 					zend_emit_op(NULL, ZEND_FREE, op1, NULL);
@@ -2597,7 +2597,7 @@ static void zend_short_circuiting_commit(uint32_t checkpoint, znode *result, zen
 		opline->extended_value |=
 			ast->kind == ZEND_AST_ISSET ? ZEND_SHORT_CIRCUITING_CHAIN_ISSET :
 			ast->kind == ZEND_AST_EMPTY ? ZEND_SHORT_CIRCUITING_CHAIN_EMPTY :
-										  ZEND_SHORT_CIRCUITING_CHAIN_EXPR;
+			                              ZEND_SHORT_CIRCUITING_CHAIN_EXPR;
 		zend_stack_del_top(&CG(short_circuiting_opnums));
 	}
 }
@@ -3980,9 +3980,9 @@ ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /*
 			}
 		}
 	} else if (zend_execute_ex == execute_ex &&
-			   !zend_execute_internal &&
-			   (init_op->opcode == ZEND_INIT_FCALL_BY_NAME ||
-				init_op->opcode == ZEND_INIT_NS_FCALL_BY_NAME)) {
+	           !zend_execute_internal &&
+	           (init_op->opcode == ZEND_INIT_FCALL_BY_NAME ||
+	            init_op->opcode == ZEND_INIT_NS_FCALL_BY_NAME)) {
 		return ZEND_DO_FCALL_BY_NAME;
 	}
 	return ZEND_DO_FCALL;
@@ -4203,8 +4203,8 @@ static zend_result zend_compile_func_chr(znode *result, zend_ast_list *args) /* 
 {
 
 	if (args->children == 1 &&
-		args->child[0]->kind == ZEND_AST_ZVAL &&
-		Z_TYPE_P(zend_ast_get_zval(args->child[0])) == IS_LONG) {
+	    args->child[0]->kind == ZEND_AST_ZVAL &&
+	    Z_TYPE_P(zend_ast_get_zval(args->child[0])) == IS_LONG) {
 
 		zend_long c = Z_LVAL_P(zend_ast_get_zval(args->child[0])) & 0xff;
 
@@ -4220,8 +4220,8 @@ static zend_result zend_compile_func_chr(znode *result, zend_ast_list *args) /* 
 static zend_result zend_compile_func_ord(znode *result, zend_ast_list *args) /* {{{ */
 {
 	if (args->children == 1 &&
-		args->child[0]->kind == ZEND_AST_ZVAL &&
-		Z_TYPE_P(zend_ast_get_zval(args->child[0])) == IS_STRING) {
+	    args->child[0]->kind == ZEND_AST_ZVAL &&
+	    Z_TYPE_P(zend_ast_get_zval(args->child[0])) == IS_STRING) {
 
 		result->op_type = IS_CONST;
 		ZVAL_LONG(&result->u.constant, (unsigned char)Z_STRVAL_P(zend_ast_get_zval(args->child[0]))[0]);
