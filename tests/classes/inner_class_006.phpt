@@ -8,8 +8,6 @@ class A {
         public class C {}
     }
 }
-
-var_dump(new A::B::C());
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected identifier "C", expecting variable or "$" in %s on line %d
+Fatal error: Cannot nest classes more than 1 level deep in %s on line %d
