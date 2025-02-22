@@ -6993,6 +6993,18 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		}
 
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
+	} else if (ast->kind == ZEND_AST_CLASS_CONST) {
+		zend_string *class_name = zend_resolve_class_name_ast(ast->child[0]);
+		zend_string *const_name = zend_ast_get_str(ast->child[1]);
+		zend_string *inner_class_name = zend_string_concat3(
+			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
+			"::", 2,
+			ZSTR_VAL(const_name), ZSTR_LEN(const_name));
+		zend_string_release(class_name);
+
+                // todo: protect inner classes from being shared outside their scope
+
+		return (zend_type) ZEND_TYPE_INIT_CLASS(inner_class_name, /* allow null */ false, 0);
 	} else {
 		zend_string *type_name = zend_ast_get_str(ast);
 		uint8_t type_code = zend_lookup_builtin_type_by_name(type_name);
@@ -9149,7 +9161,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			// we have a nested class that needs to be renamed
 			// so append the unqualified name to the nested parent name
 			name = zend_string_concat3(
-			ZSTR_VAL(CG(active_class_entry)->name), ZSTR_LEN(CG(active_class_entry)->name),
+				ZSTR_VAL(CG(active_class_entry)->name), ZSTR_LEN(CG(active_class_entry)->name),
 				"::", 2,
 				ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
 
