@@ -36,6 +36,13 @@ const ALL_PHP_VERSION_IDS = [
     PHP_85_VERSION_ID,
 ];
 
+// file_put_contents() but with a success message printed after saving
+function report_file_put_contents(string $filename, string $content) {
+    if (file_put_contents($filename, $content)) {
+        echo "Saved $filename\n";
+    }
+}
+
 /**
  * @return FileInfo[]
  */
@@ -121,8 +128,8 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $context->allConstInfos,
             $stubHash
         );
-        if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($arginfoFile, $arginfoCode)) {
-            echo "Saved $arginfoFile\n";
+        if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+            report_file_put_contents($arginfoFile, $arginfoCode);
         }
 
         if ($fileInfo->shouldGenerateLegacyArginfo()) {
@@ -146,8 +153,8 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
                 $context->allConstInfos,
                 $stubHash
             );
-            if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($legacyFile, $arginfoCode)) {
-                echo "Saved $legacyFile\n";
+            if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+                report_file_put_contents($legacyFile, $arginfoCode);
             }
         }
 
@@ -6289,9 +6296,7 @@ if ($replacePredefinedConstants || $verifyManual) {
 
     if ($replacePredefinedConstants) {
         foreach ($predefinedConstants as $filename => $content) {
-            if (file_put_contents($filename, $content)) {
-                echo "Saved $filename\n";
-            }
+            report_file_put_contents($filename, $content);
         }
     }
 }
@@ -6306,9 +6311,7 @@ if ($generateClassSynopses) {
         }
 
         foreach ($classSynopses as $filename => $content) {
-            if (file_put_contents("$classSynopsesDirectory/$filename", $content)) {
-                echo "Saved $filename\n";
-            }
+            report_file_put_contents("$classSynopsesDirectory/$filename", $content);
         }
     }
 }
@@ -6318,9 +6321,7 @@ if ($replaceClassSynopses || $verifyManual) {
 
     if ($replaceClassSynopses) {
         foreach ($classSynopses as $filename => $content) {
-            if (file_put_contents($filename, $content)) {
-                echo "Saved $filename\n";
-            }
+            report_file_put_contents($filename, $content);
         }
     }
 }
@@ -6339,9 +6340,7 @@ if ($generateMethodSynopses) {
                 mkdir(dirname($path));
             }
 
-            if (file_put_contents($path, $content)) {
-                echo "Saved $filename\n";
-            }
+            report_file_put_contents($path, $content);
         }
     }
 }
@@ -6351,9 +6350,7 @@ if ($replaceMethodSynopses || $verifyManual) {
 
     if ($replaceMethodSynopses) {
         foreach ($methodSynopses as $filename => $content) {
-            if (file_put_contents($filename, $content)) {
-                echo "Saved $filename\n";
-            }
+            report_file_put_contents($filename, $content);
         }
     }
 }
@@ -6362,9 +6359,7 @@ if ($generateOptimizerInfo) {
     $filename = dirname(__FILE__, 2) . "/Zend/Optimizer/zend_func_infos.h";
     $optimizerInfo = generateOptimizerInfo($funcMap);
 
-    if (file_put_contents($filename, $optimizerInfo)) {
-        echo "Saved $filename\n";
-    }
+    report_file_put_contents($filename, $optimizerInfo);
 }
 
 if ($verifyManual) {
