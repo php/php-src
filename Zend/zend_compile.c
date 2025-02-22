@@ -6994,15 +6994,15 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else if (ast->kind == ZEND_AST_CLASS_CONST) {
-		zend_string *class_name = zend_resolve_class_name_ast(ast->child[0]);
+		zval cnz;
+		zend_try_compile_const_expr_resolve_class_name(&cnz, ast->child[0]);
+		zend_string *class_name = Z_STR(cnz);
 		zend_string *const_name = zend_ast_get_str(ast->child[1]);
 		zend_string *inner_class_name = zend_string_concat3(
 			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
 			"::", 2,
 			ZSTR_VAL(const_name), ZSTR_LEN(const_name));
 		zend_string_release(class_name);
-
-                // todo: protect inner classes from being shared outside their scope
 
 		return (zend_type) ZEND_TYPE_INIT_CLASS(inner_class_name, /* allow null */ false, 0);
 	} else {
@@ -9188,10 +9188,15 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			zend_declare_typed_property(CG(active_class_entry), unqualified_name, &name_zv, propFlags | ZEND_ACC_STATIC | ZEND_ACC_READONLY, decl->doc_comment, t);
 			zend_declare_class_constant_ex(CG(active_class_entry), unqualified_name, &name_zv, propFlags, decl->doc_comment);
 
+			// if a class is private or protected, we need to require scope for type checks
+			ce->required_scope = propFlags & (ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE) ? CG(active_class_entry) : NULL;
+			ce->required_scope_absolute = propFlags & (ZEND_ACC_PRIVATE) ? true : false;
+
 			// oh, and make sure we emit the right opcodes
 			toplevel = true;
 		} else {
 			name = zend_prefix_with_ns(unqualified_name);
+			ce->required_scope = NULL;
 		}
 		name = zend_new_interned_string(name);
 		lcname = zend_string_tolower(name);
