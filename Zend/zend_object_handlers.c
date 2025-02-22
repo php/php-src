@@ -298,7 +298,11 @@ static zend_never_inline zend_property_info *zend_get_parent_private_property(ze
 
 static ZEND_COLD zend_never_inline void zend_bad_property_access(const zend_property_info *property_info, const zend_class_entry *ce, const zend_string *member) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	if (property_info->flags & ZEND_ACC_INNER_CLASS_REFERENCE) {
+		zend_throw_error(NULL, "Cannot access %s inner class %s::%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	} else {
+		zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	}
 }
 /* }}} */
 

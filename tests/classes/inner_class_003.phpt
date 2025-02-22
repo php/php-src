@@ -21,7 +21,7 @@ new Foo::Bar();
 --EXPECTF--
 Inner
 
-Fatal error: Uncaught Error: Cannot access private property Foo::$Bar in %s:%d
+Fatal error: Uncaught Error: Cannot access private inner class Foo::Bar in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

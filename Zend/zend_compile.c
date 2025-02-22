@@ -9178,7 +9178,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			// - public
 			// - private
 			// - protected
-			int propFlags = decl->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
+			int propFlags = (decl->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE)) | ZEND_ACC_INNER_CLASS_REFERENCE;
 
 			// there are two things we need to inject into the nested parent:
 			// - a static property that contains the name of the nested class
