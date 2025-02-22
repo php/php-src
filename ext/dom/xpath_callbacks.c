@@ -24,6 +24,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 
 #include "php_dom.h"
+#include "internal_helpers.h"
 #include <libxml/parserInternals.h>
 
 static void xpath_callbacks_entry_dtor(zval *zv)
@@ -425,7 +426,8 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 	}
 
 	if (Z_TYPE(callback_retval) != IS_UNDEF) {
-		if (Z_TYPE(callback_retval) == IS_OBJECT && instanceof_function(Z_OBJCE(callback_retval), dom_node_class_entry)) {
+		if (Z_TYPE(callback_retval) == IS_OBJECT
+		 && (instanceof_function(Z_OBJCE(callback_retval), dom_get_node_ce(php_dom_follow_spec_node((const xmlNode *) ctxt->context->doc))))) {
 			xmlNode *nodep;
 			dom_object *obj;
 			if (xpath_callbacks->node_list == NULL) {
@@ -439,7 +441,7 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 		} else if (Z_TYPE(callback_retval) == IS_FALSE || Z_TYPE(callback_retval) == IS_TRUE) {
 			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(callback_retval) == IS_TRUE));
 		} else if (Z_TYPE(callback_retval) == IS_OBJECT) {
-			zend_type_error("Only objects that are instances of DOMNode can be converted to an XPath expression");
+			zend_type_error("Only objects that are instances of DOM nodes can be converted to an XPath expression");
 			zval_ptr_dtor(&callback_retval);
 			return FAILURE;
 		} else {
