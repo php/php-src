@@ -4769,16 +4769,10 @@ function getFileDocComments(array $stmts): array {
         return [];
     }
 
-    $comments = $stmts[0]->getComments();
-
-    $result = [];
-    foreach ($comments as $comment) {
-        if ($comment instanceof DocComment) {
-            $result[] = $comment;
-        }
-    }
-
-    return $result;
+    return array_filter(
+        $stmts[0]->getComments(),
+        static fn ( $comment ) => $comment instanceof DocComment
+    );
 }
 
 function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstract $prettyPrinter) {
