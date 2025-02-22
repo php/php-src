@@ -206,13 +206,14 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 			ZVAL_PTR(&registered_value, fcc);
 
 			if (!key) {
-				zend_string *str = zval_try_get_string(entry);
+				zend_string *tmp_str;
+				zend_string *str = zval_try_get_tmp_string(entry, &tmp_str);
 				if (str && php_dom_xpath_is_callback_name_valid_and_throw(str, name_validation, true)) {
 					zend_hash_update(&ns->functions, str, &registered_value);
 					if (register_func) {
 						register_func(ctxt, namespace, str);
 					}
-					zend_string_release_ex(str, false);
+					zend_tmp_string_release(tmp_str);
 				} else {
 					zend_fcc_dtor(fcc);
 					efree(fcc);
@@ -445,9 +446,10 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 			zval_ptr_dtor(&callback_retval);
 			return FAILURE;
 		} else {
-			zend_string *str = zval_get_string(&callback_retval);
+			zend_string *tmp_str;
+			zend_string *str = zval_get_tmp_string(&callback_retval, &tmp_str);
 			valuePush(ctxt, xmlXPathNewString(BAD_CAST ZSTR_VAL(str)));
-			zend_string_release_ex(str, 0);
+			zend_tmp_string_release(tmp_str);
 		}
 		zval_ptr_dtor(&callback_retval);
 	}

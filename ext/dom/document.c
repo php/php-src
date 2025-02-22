@@ -194,13 +194,12 @@ zend_result dom_document_version_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	/* Cannot fail because the type is either null or a string. */
-	zend_string *str = zval_get_string(newval);
+	/* Type is ?string */
+	zend_string *str = Z_TYPE_P(newval) == IS_NULL ? ZSTR_EMPTY_ALLOC() : Z_STR_P(newval);
 
 	if (php_dom_follow_spec_intern(obj)) {
 		if (!zend_string_equals_literal(str, "1.0") && !zend_string_equals_literal(str, "1.1")) {
 			zend_value_error("Invalid XML version");
-			zend_string_release_ex(str, 0);
 			return FAILURE;
 		}
 	}
@@ -211,7 +210,6 @@ zend_result dom_document_version_write(dom_object *obj, zval *newval)
 
 	docp->version = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -394,8 +392,8 @@ zend_result dom_document_document_uri_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	/* Cannot fail because the type is either null or a string. */
-	zend_string *str = zval_get_string(newval);
+	/* Type is ?string */
+	zend_string *str = Z_TYPE_P(newval) == IS_NULL ? ZSTR_EMPTY_ALLOC() : Z_STR_P(newval);
 
 	if (docp->URL != NULL) {
 		xmlFree(BAD_CAST docp->URL);
@@ -403,7 +401,6 @@ zend_result dom_document_document_uri_write(dom_object *obj, zval *newval)
 
 	docp->URL = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 

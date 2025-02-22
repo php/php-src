@@ -185,8 +185,8 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	/* Cannot fail because the type is either null or a string. */
-	zend_string *str = zval_get_string(newval);
+	/* Type is ?string */
+	zend_string *str = Z_TYPE_P(newval) == IS_NULL ? ZSTR_EMPTY_ALLOC() : Z_STR_P(newval);
 
 	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
@@ -213,7 +213,6 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 
 	php_libxml_invalidate_node_list_cache(obj->document);
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
