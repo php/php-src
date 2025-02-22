@@ -3229,6 +3229,22 @@ class AttributeInfo {
         }
         return $code;
     }
+
+    /**
+     * @param array<int, array<int, AttributeGroup>> $attributeGroups
+     * @return AttributeInfo[]
+     */
+    public static function createFromGroups(array $attributeGroups): array {
+        $attributes = [];
+
+        foreach ($attributeGroups as $attrGroup) {
+            foreach ($attrGroup->attrs as $attr) {
+                $attributes[] = new AttributeInfo($attr->name->toString(), $attr->args);
+            }
+        }
+
+        return $attributes;
+    }
 }
 
 class ClassInfo {
@@ -4426,7 +4442,7 @@ function parseFunctionLike(
                 $type,
                 isset($docParamTypes[$varName]) ? Type::fromString($docParamTypes[$varName]) : null,
                 $param->default ? $prettyPrinter->prettyPrintExpr($param->default) : null,
-                createAttributes($param->attrGroups)
+                AttributeInfo::createFromGroups($param->attrGroups)
             );
             if (!$param->default && !$param->variadic) {
                 $numRequiredArgs = $i + 1;
@@ -4465,7 +4481,7 @@ function parseFunctionLike(
             $cond,
             $isUndocumentable,
             $minimumPhpVersionIdCompatibility,
-            createAttributes($func->attrGroups),
+            AttributeInfo::createFromGroups($func->attrGroups),
             $framelessFunctionInfos,
             ExposedDocComment::extractExposedComment($comments)
         );
@@ -4656,7 +4672,7 @@ function parseClass(
         }
     }
 
-    $attributes = createAttributes($class->attrGroups);
+    $attributes = AttributeInfo::createFromGroups($class->attrGroups);
     foreach ($attributes as $attribute) {
         switch ($attribute->class) {
             case 'AllowDynamicProperties':
@@ -4718,22 +4734,6 @@ function parseClass(
         $minimumPhpVersionIdCompatibility,
         $isUndocumentable
     );
-}
-
-/**
- * @param array<int, array<int, AttributeGroup>> $attributeGroups
- * @return Attribute[]
- */
-function createAttributes(array $attributeGroups): array {
-    $attributes = [];
-
-    foreach ($attributeGroups as $attrGroup) {
-        foreach ($attrGroup->attrs as $attr) {
-            $attributes[] = new AttributeInfo($attr->name->toString(), $attr->args);
-        }
-    }
-
-    return $attributes;
 }
 
 function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
@@ -4855,7 +4855,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                             $cond,
                             $fileInfo->isUndocumentable,
                             $fileInfo->getMinimumPhpVersionIdCompatibility(),
-                            createAttributes($classStmt->attrGroups)
+                            AttributeInfo::createFromGroups($classStmt->attrGroups)
                         );
                     }
                 } else if ($classStmt instanceof Stmt\Property) {
@@ -4872,7 +4872,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                             $classStmt->getComments(),
                             $prettyPrinter,
                             $fileInfo->getMinimumPhpVersionIdCompatibility(),
-                            createAttributes($classStmt->attrGroups)
+                            AttributeInfo::createFromGroups($classStmt->attrGroups)
                         );
                     }
                 } else if ($classStmt instanceof Stmt\ClassMethod) {
