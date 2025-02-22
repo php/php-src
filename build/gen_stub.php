@@ -4223,6 +4223,29 @@ class ExposedDocComment {
     public function getLength(): int {
         return strlen($this->docComment);
     }
+
+    /** @param array<int, DocComment> $comments */
+    public static function extractExposedComment(array $comments): ?ExposedDocComment {
+        $exposedDocComment = null;
+
+        foreach ($comments as $comment) {
+            $text = $comment->getText();
+            $matches = [];
+            $pattern = "#^(\s*\/\*\*)(\s*@genstubs-expose-comment-block)(\s*)$#m";
+
+            if (preg_match($pattern, $text, $matches) !== 1) {
+                continue;
+            }
+
+            if ($exposedDocComment !== null) {
+                throw new Exception("Only one PHPDoc comment block can be exposed");
+            }
+
+            $exposedDocComment = preg_replace($pattern, '$1$3', $text);
+        }
+
+        return $exposedDocComment ? new ExposedDocComment($exposedDocComment) : null;
+    }
 }
 
 /** @return DocCommentTag[] */
@@ -4450,7 +4473,7 @@ function parseFunctionLike(
             $minimumPhpVersionIdCompatibility,
             createAttributes($func->attrGroups),
             $framelessFunctionInfos,
-            createExposedDocComment($comments)
+            ExposedDocComment::extractExposedComment($comments)
         );
     } catch (Exception $e) {
         throw new Exception($name . "(): " .$e->getMessage());
@@ -4527,7 +4550,7 @@ function parseConstLike(
         $link,
         $phpVersionIdMinimumCompatibility,
         $attributes,
-        createExposedDocComment($comments),
+        ExposedDocComment::extractExposedComment($comments),
         $isFileCacheAllowed
     );
 }
@@ -4594,7 +4617,7 @@ function parseProperty(
         $link,
         $phpVersionIdMinimumCompatibility,
         $attributes,
-        createExposedDocComment($comments)
+        ExposedDocComment::extractExposedComment($comments)
     );
 }
 
@@ -4689,7 +4712,7 @@ function parseClass(
         $isDeprecated,
         $isStrictProperties,
         $attributes,
-        createExposedDocComment($comments),
+        ExposedDocComment::extractExposedComment($comments),
         $isNotSerializable,
         $extends,
         $implements,
@@ -4717,29 +4740,6 @@ function createAttributes(array $attributeGroups): array {
     }
 
     return $attributes;
-}
-
-/** @param array<int, DocComment> $comments */
-function createExposedDocComment(array $comments): ?ExposedDocComment {
-    $exposedDocComment = null;
-
-    foreach ($comments as $comment) {
-        $text = $comment->getText();
-        $matches = [];
-        $pattern = "#^(\s*\/\*\*)(\s*@genstubs-expose-comment-block)(\s*)$#m";
-
-        if (preg_match($pattern, $text, $matches) !== 1) {
-            continue;
-        }
-
-        if ($exposedDocComment !== null) {
-            throw new Exception("Only one PHPDoc comment block can be exposed");
-        }
-
-        $exposedDocComment = preg_replace($pattern, '$1$3', $text);
-    }
-
-    return $exposedDocComment ? new ExposedDocComment($exposedDocComment) : null;
 }
 
 function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
