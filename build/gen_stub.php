@@ -4253,22 +4253,15 @@ class ExposedDocComment {
 function parseDocComments(array $comments): array {
     $tags = [];
     foreach ($comments as $comment) {
-        if ($comment instanceof DocComment) {
-            $tags = array_merge($tags, parseDocComment($comment));
+        if (!($comment instanceof DocComment)) {
+            continue;
         }
-    }
-
-    return $tags;
-}
-
-/** @return DocCommentTag[] */
-function parseDocComment(DocComment $comment): array {
-    $commentText = substr($comment->getText(), 2, -2);
-    $tags = [];
-    foreach (explode("\n", $commentText) as $commentLine) {
-        $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))?$/';
-        if (preg_match($regex, trim($commentLine), $matches)) {
-            $tags[] = new DocCommentTag($matches[1], $matches[2] ?? null);
+        $commentText = substr($comment->getText(), 2, -2);
+        foreach (explode("\n", $commentText) as $commentLine) {
+            $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))?$/';
+            if (preg_match($regex, trim($commentLine), $matches)) {
+                $tags[] = new DocCommentTag($matches[1], $matches[2] ?? null);
+            }
         }
     }
 
