@@ -9160,6 +9160,10 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		if (CG(active_class_entry)) {
 			// we have a nested class that needs to be renamed
 			// so append the unqualified name to the nested parent name
+			// but prevent nesting more than 1 level deep
+			if (zend_memnstr(ZSTR_VAL(CG(active_class_entry)->name), "::", sizeof("::") - 1, ZSTR_VAL(CG(active_class_entry)->name) + ZSTR_LEN(CG(active_class_entry)->name))) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot nest classes more than 1 level deep");
+			}
 			name = zend_string_concat3(
 				ZSTR_VAL(CG(active_class_entry)->name), ZSTR_LEN(CG(active_class_entry)->name),
 				"::", 2,
