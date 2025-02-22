@@ -1563,9 +1563,12 @@ static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cach
 	fci->params = &arg;
 	zend_call_function(fci, fcc);
 	zval_ptr_dtor(&arg);
+	if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
+		return Z_STR(retval);
+	}
 	/* No Exception has occurred */
-	if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
-		result_str = zval_try_get_string(&retval);
+	else if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
+		result_str = zval_try_get_string_func(&retval);
 	}
 	zval_ptr_dtor(&retval);
 
