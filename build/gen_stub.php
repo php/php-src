@@ -531,6 +531,8 @@ class SimpleType {
     }
 }
 
+// Instances of Type are immutable and do not need to be cloned
+// when held by an object that is cloned
 class Type {
     /** @var SimpleType[] */
     public /* readonly */ array $types;
@@ -3144,13 +3146,6 @@ class PropertyInfo extends VariableLike
         if ($this->flags & Modifiers::READONLY || $this->isDocReadonly) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "readonly"));
-        }
-    }
-
-    public function __clone()
-    {
-        if ($this->type) {
-            $this->type = clone $this->type;
         }
     }
 }
