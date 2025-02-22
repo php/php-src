@@ -9825,6 +9825,13 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 		HANDLE_EXCEPTION();
 	}
 	if (prop_info->flags & ZEND_ACC_PRIVATE) {
+		// break here
+		if (prop_info->flags & ZEND_ACC_INNER_CLASS_REFERENCE) {
+			zend_throw_error(NULL, "Cannot access private inner class %s::%s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(property_name));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
 		zend_throw_error(NULL, "Cannot access private property %s::$%s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(property_name));
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();

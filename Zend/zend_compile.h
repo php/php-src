@@ -253,7 +253,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Property Flags (unused: 13...)                         |     |     |     */
+/* Property Flags (unused: 14...)                         |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Promoted property / parameter                          |     |     |     */
@@ -266,6 +266,9 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PUBLIC_SET              (1 << 10) /*     |     |  X  |     */
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
+/*                                                        |     |     |     */
+/* Property is a reference                                |     |  X  |     */
+#define ZEND_ACC_INNER_CLASS_REFERENCE   (1 << 13) /*     |     |  X  |     */
 /*                                                        |     |     |     */
 /* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
