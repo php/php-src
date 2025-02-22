@@ -1308,7 +1308,7 @@ class FuncInfo {
         return $name->getDeclaration();
     }
 
-    public function getFramelessDeclaration(FuncInfo $funcInfo): ?string {
+    public function getFramelessDeclaration(): ?string {
         if (empty($this->framelessFunctionInfos)) {
             return null;
         }
@@ -5169,7 +5169,7 @@ function generateArgInfoCode(
         $framelessFunctionCode = generateCodeWithConditions(
             $fileInfo->getAllFuncInfos(), "\n",
             static function (FuncInfo $funcInfo) {
-                return $funcInfo->getFramelessDeclaration($funcInfo);
+                return $funcInfo->getFramelessDeclaration();
             }
         );
 
