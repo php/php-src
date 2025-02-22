@@ -390,7 +390,8 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 	size_t n = 0;
 	zval *hash_entry;
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-		zend_string *encoding_str = zval_try_get_string(hash_entry);
+		zend_string *tmp_encoding_str;
+		zend_string *encoding_str = zval_try_get_tmp_string(hash_entry, &tmp_encoding_str);
 		if (UNEXPECTED(!encoding_str)) {
 			efree(ZEND_VOIDP(list));
 			return FAILURE;
@@ -415,12 +416,12 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 				n++;
 			} else {
 				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
-				zend_string_release(encoding_str);
+				zend_tmp_string_release(tmp_encoding_str);
 				efree(ZEND_VOIDP(list));
 				return FAILURE;
 			}
 		}
-		zend_string_release(encoding_str);
+		zend_tmp_string_release(tmp_encoding_str);
 	} ZEND_HASH_FOREACH_END();
 	*return_list = list;
 	*return_size = n;
