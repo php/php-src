@@ -284,7 +284,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
-%type <ast> optional_parameter_list inner_class_statement
+%type <ast> optional_parameter_list inner_class_statement inner_type_without_static
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers inner_class_modifiers
@@ -871,10 +871,15 @@ type_expr_without_static:
 ;
 
 type_without_static:
-		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
-	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
-	|	name		{ $$ = $1; }
+		T_ARRAY						{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
+	|	T_CALLABLE					{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
+	|	name						{ $$ = $1; }
+	|	inner_type_without_static	{ $$ = $1; }
 ;
+
+inner_type_without_static:
+		name T_PAAMAYIM_NEKUDOTAYIM identifier
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $3); }
 
 union_type_without_static_element:
                 type_without_static { $$ = $1; }
@@ -954,7 +959,6 @@ inner_class_statement:
 	|	T_CLASS T_STRING '(' parameter_list ')' extends_from implements_list traits_list backup_doc_comment ';'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_SHORT_SYNTAX, CG(zend_lineno), $9, zend_ast_get_str($2), $6, $7, $4, $8, NULL); }
 ;
-
 
 attributed_class_statement:
 		property_modifiers optional_type_without_static property_list ';'
