@@ -9157,6 +9157,12 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		}
 
 		zend_assert_valid_class_name(unqualified_name, type);
+
+		// check to make sure we are in a class body and not a function body
+		if (CG(active_class_entry) && CG(active_op_array)->function_name) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
+		}
+
 		if (CG(active_class_entry)) {
 			// we have a nested class that needs to be renamed
 			// so append the unqualified name to the nested parent name
