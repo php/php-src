@@ -1478,9 +1478,9 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ZSTR_VAL(ce->name), ZSTR_VAL(key), zend_visibility_string(parent_info->flags), ZSTR_VAL(parent_info->ce->name), (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 			}
 			if (!(child_info->flags & ZEND_ACC_STATIC) && !(parent_info->flags & ZEND_ACC_VIRTUAL)) {
-				/* If we added props to the child property, we use the childs slot for
-				 * storage to keep the parent slot set to null. This automatically picks
-				 * the slow path in the JIT. */
+				/* If we added hooks to the child property, we use the child's slot for
+				 * storage to keep the parent slot set to IS_UNDEF. This automatically
+				 * picks the slow path in the JIT. */
 				bool use_child_prop = !parent_info->hooks && child_info->hooks;
 
 				if (use_child_prop && child_info->offset == ZEND_VIRTUAL_PROPERTY_OFFSET) {
