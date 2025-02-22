@@ -185,8 +185,8 @@ class Context {
 }
 
 class ArrayType extends SimpleType {
-    public /* readonly */ Type $keyType;
-    public /* readonly */ Type $valueType;
+    private /* readonly */ Type $keyType;
+    private /* readonly */ Type $valueType;
 
     public static function createGenericArray(): self
     {
@@ -877,7 +877,7 @@ abstract class AbstractConstName implements VariableLikeName
 }
 
 class ConstName extends AbstractConstName {
-    public /* readonly */ string $const;
+    private /* readonly */ string $const;
 
     public function __construct(?Name $namespace, string $const)
     {
@@ -914,7 +914,7 @@ class ConstName extends AbstractConstName {
 
 class ClassConstName extends AbstractConstName {
     public /* readonly */ Name $class;
-    public /* readonly */ string $const;
+    private /* readonly */ string $const;
 
     public function __construct(Name $class, string $const)
     {
@@ -940,7 +940,7 @@ class ClassConstName extends AbstractConstName {
 
 class PropertyName implements VariableLikeName {
     public /* readonly */ Name $class;
-    public /* readonly */ string $property;
+    private /* readonly */ string $property;
 
     public function __construct(Name $class, string $property)
     {
@@ -1148,12 +1148,12 @@ class ReturnInfo {
 
 class FuncInfo {
     public /* readonly */ FunctionOrMethodName $name;
-    public /* readonly */ int $classFlags;
+    private /* readonly */ int $classFlags;
     public int $flags;
     public /* readonly */ ?string $aliasType;
     public ?FunctionOrMethodName $alias;
-    public /* readonly */ bool $isDeprecated;
-    public bool $supportsCompileTimeEval;
+    private /* readonly */ bool $isDeprecated;
+    private bool $supportsCompileTimeEval;
     public /* readonly */ bool $verify;
     /** @var ArgInfo[] */
     public /* readonly */ array $args;
@@ -1161,12 +1161,12 @@ class FuncInfo {
     public /* readonly */ int $numRequiredArgs;
     public /* readonly */ ?string $cond;
     public bool $isUndocumentable;
-    public ?int $minimumPhpVersionIdCompatibility;
+    private ?int $minimumPhpVersionIdCompatibility;
     /** @var AttributeInfo[] */
     public array $attributes;
     /** @var FramelessFunctionInfo[] */
-    public array $framelessFunctionInfos;
-    public ?ExposedDocComment $exposedDocComment;
+    private array $framelessFunctionInfos;
+    private ?ExposedDocComment $exposedDocComment;
 
     /**
      * @param ArgInfo[] $args
@@ -2274,11 +2274,11 @@ abstract class VariableLike
     public int $flags;
     public ?Type $type;
     public /* readonly */ ?Type $phpDocType;
-    public /* readonly */ ?string $link;
-    public ?int $phpVersionIdMinimumCompatibility;
+    private /* readonly */ ?string $link;
+    protected ?int $phpVersionIdMinimumCompatibility;
     /** @var AttributeInfo[] */
     public array $attributes;
-    public /* readonly */ ?ExposedDocComment $exposedDocComment;
+    protected /* readonly */ ?ExposedDocComment $exposedDocComment;
 
     /**
      * @var AttributeInfo[] $attributes
@@ -2456,12 +2456,12 @@ class ConstInfo extends VariableLike
 {
     public /* readonly */ AbstractConstName $name;
     public /* readonly */ Expr $value;
-    public bool $isDeprecated;
-    public /* readonly */ ?string $valueString;
+    private bool $isDeprecated;
+    private /* readonly */ ?string $valueString;
     public /* readonly */ ?string $cond;
     public /* readonly */ ?string $cValue;
     public /* readonly */ bool $isUndocumentable;
-    public /* readonly */ bool $isFileCacheAllowed;
+    private /* readonly */ bool $isFileCacheAllowed;
 
     /**
      * @var AttributeInfo[] $attributes
@@ -2814,12 +2814,12 @@ class ConstInfo extends VariableLike
 
 class PropertyInfo extends VariableLike
 {
-    public /* readonly */ int $classFlags;
+    private /* readonly */ int $classFlags;
     public /* readonly */ PropertyName $name;
-    public /* readonly */ ?Expr $defaultValue;
-    public /* readonly */ ?string $defaultValueString;
-    public /* readonly */ bool $isDocReadonly;
-    public /* readonly */ bool $isVirtual;
+    private /* readonly */ ?Expr $defaultValue;
+    private /* readonly */ ?string $defaultValueString;
+    private /* readonly */ bool $isDocReadonly;
+    private /* readonly */ bool $isVirtual;
 
     // Map possible variable names to the known string constant, see
     // ZEND_KNOWN_STRINGS
@@ -3149,8 +3149,8 @@ class PropertyInfo extends VariableLike
 }
 
 class EnumCaseInfo {
-    public /* readonly */ string $name;
-    public /* readonly */ ?Expr $value;
+    private /* readonly */ string $name;
+    private /* readonly */ ?Expr $value;
 
     public function __construct(string $name, ?Expr $value) {
         $this->name = $name;
@@ -3179,7 +3179,7 @@ class EnumCaseInfo {
 class AttributeInfo {
     public /* readonly */ string $class;
     /** @var \PhpParser\Node\Arg[] */
-    public /* readonly */ array $args;
+    private /* readonly */ array $args;
 
     /** @param \PhpParser\Node\Arg[] $args */
     public function __construct(string $class, array $args) {
@@ -3234,13 +3234,13 @@ class ClassInfo {
     public int $flags;
     public string $type;
     public /* readonly */ ?string $alias;
-    public /* readonly */ ?SimpleType $enumBackingType;
-    public /* readonly */ bool $isDeprecated;
-    public bool $isStrictProperties;
+    private /* readonly */ ?SimpleType $enumBackingType;
+    private /* readonly */ bool $isDeprecated;
+    private bool $isStrictProperties;
     /** @var AttributeInfo[] */
     public array $attributes;
-    public ?ExposedDocComment $exposedDocComment;
-    public bool $isNotSerializable;
+    private ?ExposedDocComment $exposedDocComment;
+    private bool $isNotSerializable;
     /** @var Name[] */
     public /* readonly */ array $extends;
     /** @var Name[] */
@@ -3248,11 +3248,11 @@ class ClassInfo {
     /** @var ConstInfo[] */
     public /* readonly */ array $constInfos;
     /** @var PropertyInfo[] */
-    public /* readonly */ array $propertyInfos;
+    private /* readonly */ array $propertyInfos;
     /** @var FuncInfo[] */
     public array $funcInfos;
     /** @var EnumCaseInfo[] */
-    public /* readonly */ array $enumCaseInfos;
+    private /* readonly */ array $enumCaseInfos;
     public /* readonly */ ?string $cond;
     public ?int $phpVersionIdMinimumCompatibility;
     public /* readonly */ bool $isUndocumentable;
