@@ -2088,6 +2088,16 @@ OUPUT_EXAMPLE
         return $methodSynopsis;
     }
 
+    /** @param FuncInfo[] $generatedFuncInfos */
+    public function findEquivalent(array $generatedFuncInfos): ?FuncInfo {
+        foreach ($generatedFuncInfos as $generatedFuncInfo) {
+            if ($generatedFuncInfo->equalsApartFromNameAndRefcount($this)) {
+                return $generatedFuncInfo;
+            }
+        }
+        return null;
+    }
+
     public function __clone()
     {
         foreach ($this->args as $key => $argInfo) {
@@ -5053,16 +5063,6 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
     return $code . "\n";
 }
 
-/** @param FuncInfo[] $generatedFuncInfos */
-function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): ?FuncInfo {
-    foreach ($generatedFuncInfos as $generatedFuncInfo) {
-        if ($generatedFuncInfo->equalsApartFromNameAndRefcount($funcInfo)) {
-            return $generatedFuncInfo;
-        }
-    }
-    return null;
-}
-
 /**
  * @template T
  * @param iterable<T> $infos
@@ -5136,7 +5136,7 @@ function generateArgInfoCode(
         $fileInfo->getAllFuncInfos(), "\n",
         static function (FuncInfo $funcInfo) use (&$generatedFuncInfos, $fileInfo) {
             /* If there already is an equivalent arginfo structure, only emit a #define */
-            if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
+            if ($generatedFuncInfo = $funcInfo->findEquivalent($generatedFuncInfos)) {
                 $code = sprintf(
                     "#define %s %s\n",
                     $funcInfo->getArgInfoName(), $generatedFuncInfo->getArgInfoName()
