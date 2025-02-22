@@ -4050,6 +4050,36 @@ class FileInfo {
     public bool $legacyArginfoGeneration = false;
     private ?int $minimumPhpVersionIdCompatibility = null;
 
+    /** @param array<int, DocCommentTag> $fileTags */
+    public function __construct(array $fileTags) {
+        foreach ($fileTags as $tag) {
+            if ($tag->name === 'generate-function-entries') {
+                $this->generateFunctionEntries = true;
+                $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
+            } else if ($tag->name === 'generate-legacy-arginfo') {
+                if ($tag->value && !in_array((int) $tag->value, ALL_PHP_VERSION_IDS, true)) {
+                    throw new Exception(
+                        "Legacy PHP version must be one of: \"" . PHP_70_VERSION_ID . "\" (PHP 7.0), \"" . PHP_80_VERSION_ID . "\" (PHP 8.0), " .
+                        "\"" . PHP_81_VERSION_ID . "\" (PHP 8.1), \"" . PHP_82_VERSION_ID . "\" (PHP 8.2), \"" . PHP_83_VERSION_ID . "\" (PHP 8.3), " .
+                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . $tag->value . "\" provided"
+                    );
+                }
+
+                $this->minimumPhpVersionIdCompatibility = ($tag->value ? (int) $tag->value : PHP_70_VERSION_ID);
+            } else if ($tag->name === 'generate-class-entries') {
+                $this->generateClassEntries = true;
+                $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
+            } else if ($tag->name === 'undocumentable') {
+                $this->isUndocumentable = true;
+            }
+        }
+
+        // Generating class entries require generating function/method entries
+        if ($this->generateClassEntries && !$this->generateFunctionEntries) {
+            $this->generateFunctionEntries = true;
+        }
+    }
+
     /**
      * @return iterable<FuncInfo>
      */
@@ -4099,10 +4129,6 @@ class FileInfo {
         foreach ($this->classInfos as $key => $classInfo) {
             $this->classInfos[$key] = clone $classInfo;
         }
-    }
-
-    public function setMinimumPhpVersionIdCompatibility(?int $minimumPhpVersionIdCompatibility) {
-        $this->minimumPhpVersionIdCompatibility = $minimumPhpVersionIdCompatibility;
     }
 
     public function getMinimumPhpVersionIdCompatibility(): ?int {
@@ -4918,37 +4944,8 @@ function parseStubFile(string $code): FileInfo {
     $stmts = $parser->parse($code);
     $nodeTraverser->traverse($stmts);
 
-    $fileInfo = new FileInfo;
-    $fileDocComments = getFileDocComments($stmts);
-    if ($fileDocComments !== []) {
-        $fileTags = parseDocComments($fileDocComments);
-        foreach ($fileTags as $tag) {
-            if ($tag->name === 'generate-function-entries') {
-                $fileInfo->generateFunctionEntries = true;
-                $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
-            } else if ($tag->name === 'generate-legacy-arginfo') {
-                if ($tag->value && !in_array((int) $tag->value, ALL_PHP_VERSION_IDS, true)) {
-                    throw new Exception(
-                        "Legacy PHP version must be one of: \"" . PHP_70_VERSION_ID . "\" (PHP 7.0), \"" . PHP_80_VERSION_ID . "\" (PHP 8.0), " .
-                        "\"" . PHP_81_VERSION_ID . "\" (PHP 8.1), \"" . PHP_82_VERSION_ID . "\" (PHP 8.2), \"" . PHP_83_VERSION_ID . "\" (PHP 8.3), " .
-                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . $tag->value . "\" provided"
-                    );
-                }
-
-                $fileInfo->setMinimumPhpVersionIdCompatibility($tag->value ? (int) $tag->value : PHP_70_VERSION_ID);
-            } else if ($tag->name === 'generate-class-entries') {
-                $fileInfo->generateClassEntries = true;
-                $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
-            } else if ($tag->name === 'undocumentable') {
-                $fileInfo->isUndocumentable = true;
-            }
-        }
-    }
-
-    // Generating class entries require generating function/method entries
-    if ($fileInfo->generateClassEntries && !$fileInfo->generateFunctionEntries) {
-        $fileInfo->generateFunctionEntries = true;
-    }
+    $fileTags = parseDocComments(getFileDocComments($stmts));
+    $fileInfo = new FileInfo($fileTags);
 
     handleStatements($fileInfo, $stmts, $prettyPrinter);
     return $fileInfo;
