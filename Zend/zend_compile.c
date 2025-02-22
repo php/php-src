@@ -757,7 +757,7 @@ static void zend_do_free(znode *op1) /* {{{ */
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
 		while (opline->opcode == ZEND_END_SILENCE ||
-			opline->opcode == ZEND_OP_DATA) {
+		       opline->opcode == ZEND_OP_DATA) {
 			opline--;
 		}
 
@@ -821,9 +821,9 @@ static void zend_do_free(znode *op1) /* {{{ */
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
 				if ((opline->opcode == ZEND_FETCH_LIST_R ||
-					opline->opcode == ZEND_FETCH_LIST_W) &&
-					opline->op1_type == IS_VAR &&
-					opline->op1.var == op1->u.op.var) {
+				     opline->opcode == ZEND_FETCH_LIST_W) &&
+				    opline->op1_type == IS_VAR &&
+				    opline->op1.var == op1->u.op.var) {
 					zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 					return;
 				}
@@ -2979,7 +2979,7 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 	}
 
 	if (name_node.op_type == IS_CONST &&
-		zend_is_auto_global(Z_STR(name_node.u.constant))) {
+	    zend_is_auto_global(Z_STR(name_node.u.constant))) {
 
 		opline->extended_value = ZEND_FETCH_GLOBAL;
 	} else {
@@ -3999,7 +3999,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 		opline->extended_value = 0;
 
 		if (opline->opcode == ZEND_NEW) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
+		    zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
 		}
 
 		if (opline->opcode == ZEND_INIT_FCALL) {
@@ -4331,7 +4331,7 @@ static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, ze
 		zend_string *name = zend_resolve_function_name(orig_name, args->child[1]->child[0]->attr, &is_fully_qualified);
 
 		if (zend_string_equals_literal_ci(name, "array_slice")
-		 && !zend_args_contain_unpack_or_named(list)
+	     && !zend_args_contain_unpack_or_named(list)
 		 && list->children == 3
 		 && list->child[1]->kind == ZEND_AST_ZVAL) {
 			zval *zv = zend_ast_get_zval(list->child[1]);
@@ -5220,7 +5220,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 
 		if (!is_callable_convert &&
-			zend_try_compile_special_func(result, lcname,
+		    zend_try_compile_special_func(result, lcname,
 				zend_ast_get_list(args_ast), fbc, type) == SUCCESS
 		) {
 			zend_string_release_ex(lcname, 0);
@@ -5666,7 +5666,7 @@ static bool zend_handle_loops_and_finally_ex(zend_long depth, znode *return_valu
 			opline->op1.var = loop_var->var_num;
 			opline->extended_value = ZEND_FREE_ON_RETURN;
 			depth--;
-		}
+	    }
 	}
 	return (depth == 0);
 }
@@ -5698,7 +5698,7 @@ static bool zend_has_finally_ex(zend_long depth) /* {{{ */
 			return 0;
 		} else {
 			depth--;
-		}
+	    }
 	}
 	return 0;
 }
@@ -5882,7 +5882,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 
 	label = CT_CONSTANT_EX(op_array, opline->op2.constant);
 	if (CG(context).labels == NULL ||
-		(dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL
+	    (dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL
 	) {
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
@@ -7020,7 +7020,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			if (type_code == IS_ITERABLE) {
 				/* Set iterable bit for BC compat during Reflection and string representation of type */
 				zend_type iterable = (zend_type) ZEND_TYPE_INIT_CLASS_MASK(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
-					(MAY_BE_ARRAY|_ZEND_TYPE_ITERABLE_BIT));
+                	(MAY_BE_ARRAY|_ZEND_TYPE_ITERABLE_BIT));
 				return iterable;
 			}
 
@@ -7438,9 +7438,9 @@ static void zend_compile_attributes(
 			zend_ast *el = group->child[i];
 
 			if (el->child[1] &&
-				el->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot create Closure as attribute argument");
+			    el->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+			    zend_error_noreturn(E_COMPILE_ERROR,
+			        "Cannot create Closure as attribute argument");
 			}
 
 			zend_string *name = zend_resolve_class_name_ast(el->child[0]);
@@ -9861,8 +9861,8 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	}
 
 	if (!(opcode == ZEND_ADD || opcode == ZEND_SUB || opcode == ZEND_MUL || opcode == ZEND_DIV
-			   || opcode == ZEND_POW || opcode == ZEND_MOD || opcode == ZEND_SL || opcode == ZEND_SR
-			   || opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)) {
+               || opcode == ZEND_POW || opcode == ZEND_MOD || opcode == ZEND_SL || opcode == ZEND_SR
+               || opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)) {
 		/* Only the numeric operations throw errors. */
 		return 0;
 	}
@@ -11128,11 +11128,11 @@ static void zend_compile_rope_finalize(znode *result, uint32_t rope_elements, ze
 		while (opline != init_opline) {
 			opline--;
 			if (opline->opcode == ZEND_ROPE_ADD &&
-				opline->result.var == (uint32_t)-1) {
+			    opline->result.var == (uint32_t)-1) {
 				opline->op1.var = var;
 				opline->result.var = var;
 			} else if (opline->opcode == ZEND_ROPE_INIT &&
-					   opline->result.var == (uint32_t)-1) {
+			           opline->result.var == (uint32_t)-1) {
 				opline->result.var = var;
 			}
 		}
@@ -11228,8 +11228,8 @@ static void zend_compile_magic_const(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	ZEND_ASSERT(ast->attr == T_CLASS_C &&
-				CG(active_class_entry) &&
-				(CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
+	            CG(active_class_entry) &&
+	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
 	opline->op1.num = ZEND_FETCH_CLASS_SELF;
