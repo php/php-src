@@ -2275,6 +2275,7 @@ static void zend_adjust_for_fetch_type(zend_op *opline, znode *result, uint32_t 
 
 	switch (type) {
 		case BP_VAR_R:
+		case BP_VAR_INNER_CLASS:
 			opline->result_type = IS_TMP_VAR;
 			result->op_type = IS_TMP_VAR;
 			return;
@@ -3260,6 +3261,8 @@ static zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t 
 
 	if (delayed) {
 		opline = zend_delayed_emit_op(result, ZEND_FETCH_STATIC_PROP_R, &prop_node, NULL);
+	} else if (ast->kind == ZEND_AST_INNER_CLASS) {
+		opline = zend_emit_op(result, ZEND_FETCH_INNER_CLASS, &prop_node, NULL);
 	} else {
 		opline = zend_emit_op(result, ZEND_FETCH_STATIC_PROP_R, &prop_node, NULL);
 	}
@@ -11744,6 +11747,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
 			zend_compile_var(result, ast, BP_VAR_R, 0);
 			return;
+		case ZEND_AST_INNER_CLASS:
+			zend_compile_var(result, ast, BP_VAR_INNER_CLASS, 0);
+			return;
 		case ZEND_AST_ASSIGN:
 			zend_compile_assign(result, ast);
 			return;
@@ -11890,6 +11896,7 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 		case ZEND_AST_NULLSAFE_PROP:
 			return zend_compile_prop(result, ast, type, by_ref);
 		case ZEND_AST_STATIC_PROP:
+		case ZEND_AST_INNER_CLASS:
 			return zend_compile_static_prop(result, ast, type, by_ref, 0);
 		case ZEND_AST_CALL:
 			zend_compile_call(result, ast, type);

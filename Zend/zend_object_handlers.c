@@ -1991,7 +1991,11 @@ undeclared_property:
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 	ZVAL_DEINDIRECT(ret);
 
-	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
+	if (UNEXPECTED((type == BP_VAR_INNER_CLASS) && !(property_info->flags & ZEND_ACC_INNER_CLASS_REFERENCE))) {
+		zend_throw_error(NULL, "Unexpected property or const: %s::%s, expecting inner class name", ZSTR_VAL(property_info->ce->name), ZSTR_VAL(property_name));
+	}
+
+	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_INNER_CLASS || type == BP_VAR_RW)
 				&& Z_TYPE_P(ret) == IS_UNDEF && ZEND_TYPE_IS_SET(property_info->type))) {
 		zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 			ZSTR_VAL(property_info->ce->name), ZSTR_VAL(property_name));

@@ -3650,7 +3650,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_property
 		result = CACHED_PTR(cache_slot + sizeof(void *));
 		property_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
 
-		if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW)
+		if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_INNER_CLASS || fetch_type == BP_VAR_RW)
 				&& UNEXPECTED(Z_TYPE_P(result) == IS_UNDEF)
 				&& ZEND_TYPE_IS_SET(property_info->type)) {
 			zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",

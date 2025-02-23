@@ -879,7 +879,7 @@ type_without_static:
 
 inner_type_without_static:
 		name T_PAAMAYIM_NEKUDOTAYIM identifier
-			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_INNER_CLASS, $1, $3); }
 
 union_type_without_static_element:
                 type_without_static { $$ = $1; }
@@ -1583,7 +1583,7 @@ new_variable:
 	|	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM class_name
-			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_INNER_CLASS, $1, $3); }
 ;
 
 member_name:
