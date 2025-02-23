@@ -1846,7 +1846,11 @@ void php_request_shutdown(void *dummy)
 {
 	bool report_memleaks;
 
-	EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
+	if (EG(flags) & EG_FLAGS_IN_EXECUTOR_SHUTDOWN) {
+		return;
+	}
+
+	EG(flags) |= EG_FLAGS_IN_SHUTDOWN | EG_FLAGS_IN_EXECUTOR_SHUTDOWN;
 
 	report_memleaks = PG(report_memleaks);
 
