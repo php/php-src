@@ -59,6 +59,7 @@ PHP                                                                        NEWS
 - PDO_SQLite:
   . Fixed GH-17837 ()::getColumnMeta() on unexecuted statement segfaults).
     (cmb)
+  . Fix cycle leak in sqlite3 setAuthorizer(). (nielsdos)
 
 - Phar:
   . Fixed bug GH-17808: PharFileInfo refcount bug. (nielsdos)
