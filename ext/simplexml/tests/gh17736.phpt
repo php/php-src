@@ -4,7 +4,7 @@ GH-17736 (Assertion failure zend_reference_destroy())
 simplexml
 --FILE--
 <?php
-$o1 = new SimpleXMlElement('<a/>');
+$o1 = new SimpleXMLElement('<a/>');
 class C {
     public int $a = 1;
 }
