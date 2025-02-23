@@ -218,7 +218,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	void **wanted_mapping_base = default_mapping_base_set;
 
 	zend_shared_alloc_lock_win32();
-	/* Mapping retries: When Apache2 restarts, the parent process startup routine
+	/* Mapping retries: When the server restarts, the parent process startup routine
 	   can be called before the child process is killed. In this case, the mapping will fail
 	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
 	do {
