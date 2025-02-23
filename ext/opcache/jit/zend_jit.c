@@ -2710,6 +2710,23 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						call_level--;
 					}
 					break;
+				case ZEND_FETCH_OBJ_R:
+					if (!zend_jit_handler(&ctx, opline,
+						zend_may_throw(opline, ssa_op, op_array, ssa))) {
+						goto jit_failure;
+					}
+
+					/* If a simple hook is called, exit to the VM. */
+					ir_ref if_hook_enter = ir_IF(jit_CMP_IP(jit, IR_EQ, opline + 1));
+					ir_IF_FALSE(if_hook_enter);
+					if (GCC_GLOBAL_REGS || zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+						ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+					} else {
+						ir_RETURN(ir_CONST_I32(1)); /* ZEND_VM_ENTER */
+					}
+					ir_IF_TRUE(if_hook_enter);
+
+					break;
 				default:
 					if (!zend_jit_handler(&ctx, opline,
 							zend_may_throw(opline, ssa_op, op_array, ssa))) {
