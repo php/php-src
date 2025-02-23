@@ -3232,6 +3232,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				return;
 			}
 		}
+	} else if (prop_op_type == IS_CONST) {
+		/* CE mismatch, make cache slot consistent */
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	}
 
 	/* Pointer on property callback is required */
@@ -3267,7 +3270,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 
 		if (prop_op_type == IS_CONST) {
 			prop_info = CACHED_PTR_EX(cache_slot + 2);
-			if (prop_info && EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
+			if (prop_info) {
 				if (UNEXPECTED(!zend_handle_fetch_obj_flags(result, ptr, NULL, prop_info, flags))) {
 					goto end;
 				}
