@@ -309,6 +309,11 @@ PHP 8.5 UPGRADE NOTES
   . Added enchant_dict_remove() to put a word on the exclusion list and
     remove it from the session dictionary.
 
+- Pdo\Sqlite:
+  . Added support for Pdo\Sqlite::setAuthorizer(), which is the equivalent of
+    SQLite3::setAuthorizer(). The only interface difference is that the
+    pdo version returns void.
+
 - PGSQL:
   . pg_close_stmt offers an alternative way to close a prepared
     statement from the DEALLOCATE sql command in that we can reuse
