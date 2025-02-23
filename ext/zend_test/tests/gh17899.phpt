@@ -12,6 +12,7 @@ $source = '<?php
 require("sumfile.php");
 ?>';
 try {zend_test_compile_string($source,$source,$c);} catch (Exception $e) { echo($e); }
+?>
 --EXPECTF--
 
 Warning: Undefined variable $c in %s on line %d
