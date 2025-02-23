@@ -2122,7 +2122,6 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 
 	/* Free local return and argument values */
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&argv[0]);
 	zval_ptr_dtor(&argv[1]);
 	zval_ptr_dtor(&argv[2]);
 	zval_ptr_dtor(&argv[3]);
