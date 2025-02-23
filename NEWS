@@ -42,6 +42,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17654 (Multiple classes using same trait causes function
     JIT crash). (nielsdos)
   . Fixed bug GH-17577 (JIT packed type guard crash). (nielsdos, Dmitry)
+  . Fixed bug GH-17899 (zend_test_compile_string with invalid path
+    when opcache is enabled). (David Carlier)
 
 - PDO_SQLite:
   . Fixed GH-17837 ()::getColumnMeta() on unexecuted statement segfaults).
