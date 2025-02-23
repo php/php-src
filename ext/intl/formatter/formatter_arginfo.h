@@ -1,15 +1,15 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: caaa6ff408bfd88ec9bb998ffd753f4de971ccff */
+ * Stub hash: 017bc18ab85626a370410218d771d3e5c54556dd */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, style, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, style, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_NumberFormatter_create, 0, 2, NumberFormatter, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, style, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, style, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -24,9 +24,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_NumberFormatter_
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, offset, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_NumberFormatter_formatCurrency, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_NumberFormatter_formatCurrency, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, amount, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, currency, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, currency, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_NumberFormatter_parseCurrency, 0, 2, MAY_BE_DOUBLE|MAY_BE_FALSE)

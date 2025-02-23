@@ -39,12 +39,20 @@ extern zend_class_entry *NumberFormatter_ce_ptr;
 
 #define FORMATTER_METHOD_INIT_VARS				INTL_METHOD_INIT_VARS(NumberFormatter, nfo)
 #define FORMATTER_OBJECT(nfo)					(nfo)->nf_data.unum
+#define FORMATTER_OBJECT2(nfo)					(nfo)->nf_data.unum2
 #define FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_NUMBERFORMATTER, nfo)
 #define FORMATTER_METHOD_FETCH_OBJECT \
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (FORMATTER_OBJECT(nfo) == NULL) \
 	{ \
 		zend_throw_error(NULL, "Found unconstructed NumberFormatter"); \
+		RETURN_THROWS(); \
+	}
+#define FORMATTER_METHOD_FETCH_OBJECT2 \
+	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK; \
+	if (FORMATTER_OBJECT(nfo) == NULL && FORMATTER_OBJECT2(nfo) == NULL) \
+	{ \
+		zend_throw_error(NULL, "Found unconstructed NumberFormatter nor new NumberFormatter"); \
 		RETURN_THROWS(); \
 	}
 

@@ -42,6 +42,9 @@ void formatter_data_free( formatter_data* nf_data )
 	if( nf_data->unum )
 		unum_close( nf_data->unum );
 
+	if ( nf_data->unum2 )
+		unumf_close( nf_data->unum2 );
+
 	nf_data->unum = NULL;
 	intl_error_reset( &nf_data->error );
 }

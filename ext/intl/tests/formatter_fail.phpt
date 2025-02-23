@@ -109,15 +109,15 @@ Error: NumberFormatter object is already constructed in %s on line %d
 
 Deprecated: NumberFormatter::__construct(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
 
-Deprecated: NumberFormatter::__construct(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
+Deprecated: NumberFormatter::__construct(): Passing null to parameter #2 ($style) of type string|int is deprecated in %s on line %d
 
 Deprecated: NumberFormatter::create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
 
-Deprecated: NumberFormatter::create(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
+Deprecated: NumberFormatter::create(): Passing null to parameter #2 ($style) of type string|int is deprecated in %s on line %d
 
 Deprecated: numfmt_create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
 
-Deprecated: numfmt_create(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
+Deprecated: numfmt_create(): Passing null to parameter #2 ($style) of type string|int is deprecated in %s on line %d
 
 ValueError: NumberFormatter::__construct(): Argument #1 ($locale) "%s" is invalid in %s on line %d
 'U_ZERO_ERROR'

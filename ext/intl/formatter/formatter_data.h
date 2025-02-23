@@ -18,6 +18,7 @@
 #include <php.h>
 
 #include <unicode/unum.h>
+#include <unicode/unumberformatter.h>
 
 #include "intl_error.h"
 
@@ -27,6 +28,9 @@ typedef struct {
 
 	// formatter handling
 	UNumberFormat*  unum;
+
+	// new formatter handling
+	UNumberFormatter* unum2;
 } formatter_data;
 
 formatter_data* formatter_data_create( void );
