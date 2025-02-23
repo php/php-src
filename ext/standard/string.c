@@ -1592,6 +1592,11 @@ PHP_FUNCTION(pathinfo)
 		RETURN_THROWS();
 	}
 
+	if (opt < PHP_PATHINFO_ALL && (opt & (opt - 1))) {
+		zend_argument_value_error(2, "must be only one of the PATHINFO_* constants");
+		RETURN_THROWS();
+	}
+
 	have_basename = (opt & PHP_PATHINFO_BASENAME);
 
 	array_init(&tmp);
