@@ -254,6 +254,7 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_hash hash;             /* hash table for cached scripts */
 
 	size_t map_ptr_last;
+    size_t map_ptr_static_last;
 
 	/* Directives & Maintenance */
 	time_t          start_time;
@@ -280,8 +281,6 @@ typedef struct _zend_accel_shared_globals {
 	/* Tracing JIT */
 	void *jit_traces;
 	const void **jit_exit_groups;
-
-	size_t map_ptr_static_last;
 
 	/* Interned Strings Support (must be the last element) */
 	ZEND_SET_ALIGNED(ZEND_STRING_TABLE_POS_ALIGNMENT, zend_string_table interned_strings);

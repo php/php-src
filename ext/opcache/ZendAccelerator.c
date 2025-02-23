@@ -4379,7 +4379,7 @@ static void preload_load(size_t orig_map_ptr_static_last)
 			CG(map_ptr_real_base) = new_base;
 			zend_map_ptr_static_size = new_static_size;
 		} else {
-			CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void *), 1);
+			CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), (zend_map_ptr_static_size + CG(map_ptr_size)) * sizeof(void *), 1);
 		}
 
 		memset((void **) CG(map_ptr_real_base) + zend_map_ptr_static_size + old_map_ptr_last, 0, (CG(map_ptr_last) - old_map_ptr_last) * sizeof(void *));
