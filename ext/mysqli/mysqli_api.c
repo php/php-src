@@ -969,10 +969,6 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, bool is_method)
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
 	if (is_method && (Z_MYSQLI_P(getThis()))->ptr) {
 		return;
 	}
@@ -1004,6 +1000,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, bool is_method)
 /* {{{ Initialize mysqli and return a resource for use with mysql_real_connect */
 PHP_FUNCTION(mysqli_init)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
 	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */

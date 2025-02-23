@@ -56,6 +56,10 @@ PHP                                                                        NEWS
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
     with uninitialised classes or clone failure. (David Carlier)
 
+- MySQLi:
+  . Fixed bugs GH-17900 and GH-8084 (calling mysqli::__construct twice).
+    (nielsdos)
+
 - MySQLnd:
   . Added mysqlnd.collect_memory_statistics to ini quick reference.
     (hauk92)
