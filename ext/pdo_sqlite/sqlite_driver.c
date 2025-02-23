@@ -571,7 +571,7 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(error);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
