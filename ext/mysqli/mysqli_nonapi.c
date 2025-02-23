@@ -72,7 +72,12 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	}
 #endif
 
-	if (getThis() && !ZEND_NUM_ARGS() && in_ctor) {
+	if (UNEXPECTED(in_ctor && (Z_MYSQLI_P(object))->ptr)) {
+		zend_throw_error(NULL, "Cannot call constructor twice");
+		return;
+	}
+
+	if (in_ctor && !ZEND_NUM_ARGS()) {
 		php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, in_ctor);
 		return;
 	}
@@ -85,7 +90,9 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 		}
 
 		if (object) {
+#if ZEND_DEBUG
 			ZEND_ASSERT(instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry));
+#endif
 			mysqli_resource = (Z_MYSQLI_P(object))->ptr;
 			if (mysqli_resource && mysqli_resource->ptr) {
 				mysql = (MY_MYSQL*) mysqli_resource->ptr;
