@@ -513,7 +513,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(error);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -571,7 +571,7 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(error);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -643,7 +643,7 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(cleanup_fcc);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -663,12 +663,12 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 
 	zend_release_fcall_info_cache(&fcc);
 
-	if (UNEXPECTED(EG(exception))) {
-		RETURN_THROWS();
-	}
-
 	efree(collation);
 	RETURN_FALSE;
+
+cleanup_fcc:
+	zend_release_fcall_info_cache(&fcc);
+	RETURN_THROWS();
 }
 
 /* {{{ bool SQLite::sqliteCreateCollation(string name, callable callback)
