@@ -872,15 +872,6 @@ try_again:
 }
 /* }}} */
 
-static inline void zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
-{
-	if (UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->execute_data) && EXPECTED(generator->node.parent == NULL)) {
-		zend_generator_resume(generator);
-		generator->flags |= ZEND_GENERATOR_AT_FIRST_YIELD;
-	}
-}
-/* }}} */
-
 static inline void zend_generator_rewind(zend_generator *generator) /* {{{ */
 {
 	zend_generator_ensure_initialized(generator);
