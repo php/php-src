@@ -53,6 +53,12 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     is still valid. This is useful when a GC cycle is collected and the
     database object can be destroyed prior to destroying the statement.
 
+- ext/standard:
+  . The functionality of getimagesize(), image_type_to_mime_type(),
+    and image_type_to_extension() is now extensible using the internal APIs
+    php_image_register_handler() and php_image_unregister_handler() in
+    php_image.h.
+
 ========================
 4. OpCode changes
 ========================
