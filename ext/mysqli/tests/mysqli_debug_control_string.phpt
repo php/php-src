@@ -53,7 +53,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
         unlink($trace_file);
     }
 
-    $trace_file = sprintf('%s%s%s', sys_get_temp_dir(), DIRECTORY_SEPARATOR, 'mysqli_debug_phpt.trace');
+    $trace_file = tempnam(sys_get_temp_dir(), "mysqli_debug_phpt");
     try_control_string($link, 't:,,:o,' . $trace_file, $trace_file, 10);
     try_control_string($link, ':' . chr(0) . 'A,' . $trace_file, $trace_file, 20);
     try_control_string($link, 't:o,' . $trace_file . ':abc', $trace_file, 30);
