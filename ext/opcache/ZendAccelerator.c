@@ -1345,7 +1345,12 @@ zend_string *accel_make_persistent_key(zend_string *str)
 		    EXPECTED((parent_script = zend_get_executed_filename_ex()) != NULL)) {
 
 			parent_script_len = ZSTR_LEN(parent_script);
-			while ((--parent_script_len > 0) && !IS_SLASH(ZSTR_VAL(parent_script)[parent_script_len]));
+			while (parent_script_len > 0) {
+				--parent_script_len;
+				if (IS_SLASH(ZSTR_VAL(parent_script)[parent_script_len])) {
+					break;
+				}
+			}
 
 			if (UNEXPECTED((size_t)(key_length + parent_script_len + 1) >= ZCG_KEY_LEN)) {
 				return NULL;
