@@ -42,6 +42,279 @@
 
 #include "jit/zend_jit_internal.h"
 
+#if HAVE_FFI
+# include "ext/ffi/php_ffi.h"
+
+# define FFI_TYPE_GUARD    (1<<0)
+# define FFI_SYMBOLS_GUARD (1<<1)
+
+typedef struct zend_jit_ffi_info {
+	union {
+		zend_ffi_type *type;
+		HashTable     *symbols;
+	};
+	uint32_t           info;
+} zend_jit_ffi_info;
+
+static zend_ffi_type *zend_jit_ffi_type_pointer_to(const zend_ffi_type *type, zend_ffi_type *holder)
+{
+	holder->kind = ZEND_FFI_TYPE_POINTER;
+	holder->attr = 0;
+	holder->size = sizeof(void*);
+	holder->align = _Alignof(void*);
+	holder->pointer.type = ZEND_FFI_TYPE(type);
+	return holder;
+}
+
+static bool zend_jit_ffi_supported_type(zend_ffi_type *type)
+{
+	if (sizeof(void*) == 4) {
+		if (ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_UINT64
+		 || ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_SINT64) {
+			return false;
+		}
+	}
+	return true;
+}
+
+static bool zend_jit_ffi_supported_func(zend_ffi_type *type)
+{
+	zend_ffi_type *t;
+
+	type = ZEND_FFI_TYPE(type);
+
+	if (type->func.abi != ZEND_FFI_ABI_CDECL
+	 && type->func.abi != ZEND_FFI_ABI_FASTCALL) {
+		return false;
+	}
+
+	t = ZEND_FFI_TYPE(type->func.ret_type);
+	if (t->kind == ZEND_FFI_TYPE_STRUCT
+	 || !zend_jit_ffi_supported_type(t)) {
+		return false;
+	}
+
+	if (type->func.args) {
+		ZEND_HASH_PACKED_FOREACH_PTR(type->func.args, t) {
+			t = ZEND_FFI_TYPE(t);
+			if (t->kind == ZEND_FFI_TYPE_STRUCT
+			 || !zend_jit_ffi_supported_type(t)) {
+				return false;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	return true;
+}
+
+static bool zend_jit_is_send_bool_const(const zend_jit_trace_rec *p)
+{
+	if (p->op == ZEND_JIT_TRACE_VM
+	 && (p->opline->opcode == ZEND_SEND_VAL
+	  || p->opline->opcode == ZEND_SEND_VAL_EX)
+	 && p->opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(p->opline, p->opline->op1);
+
+		if (Z_TYPE_P(zv) <= IS_STRING) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static zend_ffi_type* zend_jit_ffi_supported_new(const zend_op *opline, HashTable *ffi_symbols, const zend_jit_trace_rec *p)
+{
+	zend_ffi_type *type = NULL;
+
+	if ((opline->extended_value == 1
+	  || opline->extended_value == 2
+	  || opline->extended_value == 3)
+	 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL
+	 && (p+2)->op == ZEND_JIT_TRACE_VM) {
+		if (((p+2)->opline->opcode == ZEND_SEND_VAL
+		  || (p+2)->opline->opcode == ZEND_SEND_VAL_EX)
+		 && (p+2)->opline->op1_type == IS_CONST) {
+			zval *zv = RT_CONSTANT((p+2)->opline, (p+2)->opline->op1);
+
+			if (Z_TYPE_P(zv) == IS_STRING) {
+				zend_ffi_dcl *dcl = zend_ffi_api->cache_type_get(Z_STR_P(zv), ffi_symbols);
+
+				if (dcl) {
+					type = dcl->type;
+					p += 3;
+				}
+			}
+		} else if ((p+2)->opline->opcode == ZEND_SEND_VAR_EX
+				&& (p+3)->op == ZEND_JIT_TRACE_OP1_TYPE
+				&& (p+3)->ce == zend_ffi_api->ctype_ce
+				&& (p+4)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
+			type = (zend_ffi_type*)(p+4)->ptr;
+			p += 5;
+		}
+	}
+
+	if (type
+	 && !ZEND_FFI_TYPE_IS_OWNED(type)
+	 && (type->attr & ZEND_FFI_ATTR_PERSISTENT)
+	 && type->size != 0
+	 && (opline->extended_value == 1
+	  || (opline->extended_value == 2
+	   && zend_jit_is_send_bool_const(p))
+	  || (opline->extended_value == 3
+	   && zend_jit_is_send_bool_const(p)
+	   && zend_jit_is_send_bool_const(p + 1)))) {
+		return type;
+	}
+
+	return NULL;
+}
+
+static zend_ffi_type* zend_jit_ffi_supported_cast(const zend_op *opline, HashTable *ffi_symbols, const zend_jit_trace_rec *p)
+{
+	zend_ffi_type *type = NULL;
+
+	if (opline->extended_value == 2
+	 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL
+	 && (p+2)->op == ZEND_JIT_TRACE_VM) {
+		if (((p+2)->opline->opcode == ZEND_SEND_VAL
+		  || (p+2)->opline->opcode == ZEND_SEND_VAL_EX)
+		 && (p+2)->opline->op1_type == IS_CONST) {
+			zval *zv = RT_CONSTANT((p+2)->opline, (p+2)->opline->op1);
+
+			if (Z_TYPE_P(zv) == IS_STRING) {
+				zend_ffi_dcl *dcl = zend_ffi_api->cache_type_get(Z_STR_P(zv), ffi_symbols);
+
+				if (dcl) {
+					type = dcl->type;
+					p += 3;
+				}
+			}
+		} else if ((p+2)->opline->opcode == ZEND_SEND_VAR_EX
+				&& (p+3)->op == ZEND_JIT_TRACE_OP1_TYPE
+				&& (p+3)->ce == zend_ffi_api->ctype_ce
+				&& (p+4)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
+			type = (zend_ffi_type*)(p+4)->ptr;
+			p += 5;
+		}
+	}
+
+	if (type
+	 && !ZEND_FFI_TYPE_IS_OWNED(type)
+	 && (type->attr & ZEND_FFI_ATTR_PERSISTENT)
+	 && type->size != 0) {
+		return type;
+	}
+
+	return NULL;
+}
+
+static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type)
+{
+	dst_type = ZEND_FFI_TYPE(dst_type);
+	if (!zend_jit_ffi_supported_type(dst_type)) {
+		return false;
+	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
+			|| (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE) {
+		return dst_type->kind < ZEND_FFI_TYPE_POINTER && dst_type->kind != ZEND_FFI_TYPE_VOID;
+	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_FALSE
+	 || (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_TRUE
+	 || (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == (MAY_BE_FALSE|MAY_BE_TRUE)) {
+		return dst_type->kind == ZEND_FFI_TYPE_BOOL;
+	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING) {
+		return dst_type->kind == ZEND_FFI_TYPE_CHAR;
+	} else if ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_NULL) {
+		return dst_type->kind == ZEND_FFI_TYPE_POINTER;
+	} else if (src_type) {
+		if (!zend_jit_ffi_supported_type(src_type)) {
+			return false;
+		}
+		if (dst_type == src_type
+		 || zend_ffi_api->is_compatible_type(dst_type, src_type)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool zend_jit_ffi_compatible_op(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type, uint8_t op)
+{
+	dst_type = ZEND_FFI_TYPE(dst_type);
+	if (!zend_jit_ffi_supported_type(dst_type)) {
+		return false;
+	} else if (dst_type->kind == ZEND_FFI_TYPE_FLOAT || dst_type->kind == ZEND_FFI_TYPE_DOUBLE) {
+		return (op == ZEND_ADD || op == ZEND_SUB || op == ZEND_MUL)
+			&& ((src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE
+			 || (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG);
+	} else if (dst_type->kind == ZEND_FFI_TYPE_BOOL) {
+		return (op == ZEND_BW_AND || op == ZEND_BW_OR)
+			&& (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG;
+	} else if (dst_type->kind == ZEND_FFI_TYPE_UINT8
+			|| dst_type->kind == ZEND_FFI_TYPE_UINT16
+			|| dst_type->kind == ZEND_FFI_TYPE_UINT32
+			|| dst_type->kind == ZEND_FFI_TYPE_UINT64
+			|| dst_type->kind == ZEND_FFI_TYPE_SINT8
+			|| dst_type->kind == ZEND_FFI_TYPE_SINT16
+			|| dst_type->kind == ZEND_FFI_TYPE_SINT32
+			|| dst_type->kind == ZEND_FFI_TYPE_SINT64
+			|| dst_type->kind == ZEND_FFI_TYPE_CHAR) {
+		return (op == ZEND_ADD || op == ZEND_SUB || op == ZEND_MUL
+			 || op == ZEND_BW_AND || op == ZEND_BW_OR || op == ZEND_BW_XOR
+			 || op == ZEND_SL || op == ZEND_SR || op == ZEND_MOD)
+			&& (src_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG;
+	} else if (dst_type->kind == ZEND_FFI_TYPE_POINTER
+	 && ZEND_FFI_TYPE(dst_type->pointer.type)->size != 0
+	 && src_info == MAY_BE_LONG
+	 && (op == ZEND_ADD || op == ZEND_SUB)) {
+		return true;
+	}
+	return false;
+}
+
+static uint32_t zend_jit_ffi_type_info(zend_ffi_type *type)
+{
+	uint32_t type_kind = type->kind;
+	uint32_t info = MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
+
+	if (type_kind == ZEND_FFI_TYPE_ENUM) {
+		type_kind = type->enumeration.kind;
+	}
+	switch (type_kind) {
+		case ZEND_FFI_TYPE_VOID:
+			info = MAY_BE_NULL;
+			break;
+		case ZEND_FFI_TYPE_FLOAT:
+		case ZEND_FFI_TYPE_DOUBLE:
+			info = MAY_BE_DOUBLE;
+			break;
+		case ZEND_FFI_TYPE_UINT8:
+		case ZEND_FFI_TYPE_SINT8:
+		case ZEND_FFI_TYPE_UINT16:
+		case ZEND_FFI_TYPE_SINT16:
+		case ZEND_FFI_TYPE_UINT32:
+		case ZEND_FFI_TYPE_SINT32:
+		case ZEND_FFI_TYPE_UINT64:
+		case ZEND_FFI_TYPE_SINT64:
+			info = MAY_BE_LONG;
+			break;
+		case ZEND_FFI_TYPE_BOOL:
+			info = MAY_BE_FALSE|MAY_BE_TRUE;
+			break;
+		case ZEND_FFI_TYPE_CHAR:
+			info = MAY_BE_STRING;
+			break;
+		case ZEND_FFI_TYPE_POINTER:
+			if ((type->attr & ZEND_FFI_ATTR_CONST)
+			 && ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
+				info = MAY_BE_STRING;
+			}
+			break;
+		default:
+			break;
+	}
+	return info;
+}
+#endif
+
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 #include <pthread.h>
 #endif
@@ -803,6 +1076,10 @@ static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_ar
 #endif
 
 #include "jit/zend_jit_ir.c"
+
+#if HAVE_FFI
+# include "jit/zend_jit_ir_ffi.c"
+#endif
 
 #if defined(__clang__)
 # pragma clang diagnostic pop

@@ -184,6 +184,11 @@ void zend_jit_restart(void);
 #define ZREG_ZVAL_ADDREF    (4<<4)
 #define ZREG_THIS           (5<<4)
 
+#define ZREG_FFI_PTR_LOAD   (1<<3)
+#define ZREG_FFI_ZVAL_DTOR  (1<<4)
+#define ZREG_FFI_ZVAL_DEREF (1<<5)
+#define ZREG_FFI_CTYPE      (1<<6)
+
 #define ZREG_NONE           -1
 
 #endif /* HAVE_JIT_H */
