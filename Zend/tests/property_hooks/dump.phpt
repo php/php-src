@@ -34,7 +34,7 @@ class Test {
 }
 
 class Child extends Test {
-    public $addedHooks {
+    public $addedHooks = 'addedHooks' {
         get { return strtoupper(parent::$addedHooks::get()); }
     }
     private $changed = 'changed Child' {

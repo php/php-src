@@ -8,7 +8,7 @@ class P {
 }
 
 class C extends P {
-    public $prop {
+    public $prop = 42 {
         get => parent::$prop::get();
     }
 }

@@ -806,7 +806,11 @@ zend_property_info *zend_lazy_object_get_property_info_for_slot(zend_object *obj
 	zend_property_info **table = obj->ce->properties_info_table;
 	intptr_t prop_num = slot - obj->properties_table;
 	if (prop_num >= 0 && prop_num < obj->ce->default_properties_count) {
-		return table[prop_num];
+		if (table[prop_num]) {
+			return table[prop_num];
+		} else {
+			return zend_get_property_info_for_slot_slow(obj, slot);
+		}
 	}
 
 	if (!zend_lazy_object_initialized(obj)) {

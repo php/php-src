@@ -200,3 +200,15 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 	}
 }
 /* }}} */
+
+ZEND_API ZEND_COLD zend_property_info *zend_get_property_info_for_slot_slow(zend_object *obj, zval *slot)
+{
+	uintptr_t offset = (uintptr_t)slot - (uintptr_t)obj->properties_table;
+	zend_property_info *prop_info;
+	ZEND_HASH_MAP_FOREACH_PTR(&obj->ce->properties_info, prop_info) {
+		if (prop_info->offset == offset) {
+			return prop_info;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return NULL;
+}
