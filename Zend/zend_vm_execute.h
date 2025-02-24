@@ -869,11 +869,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_fetch_static_prop_helper_
 		prop = &EG(uninitialized_zval);
 	}
 
-        if (type == BP_VAR_INNER_CLASS) {
-
-          }
-
-	if (type == BP_VAR_R || type == BP_VAR_IS) {
+	if (type == BP_VAR_R || type == BP_VAR_INNER_CLASS || type == BP_VAR_IS) {
 		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), prop);
 	} else {
 		ZVAL_INDIRECT(EX_VAR(opline->result.var), prop);

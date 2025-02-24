@@ -1847,7 +1847,7 @@ ZEND_VM_INLINE_HELPER(zend_fetch_static_prop_helper, ANY, ANY, int type)
 		prop = &EG(uninitialized_zval);
 	}
 
-	if (type == BP_VAR_R || type == BP_VAR_IS) {
+	if (type == BP_VAR_R || type == BP_VAR_INNER_CLASS || type == BP_VAR_IS) {
 		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), prop);
 	} else {
 		ZVAL_INDIRECT(EX_VAR(opline->result.var), prop);

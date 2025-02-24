@@ -6996,7 +6996,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		}
 
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
-	} else if (ast->kind == ZEND_AST_CLASS_CONST) {
+	} else if (ast->kind == ZEND_AST_CLASS_CONST || ast->kind == ZEND_AST_INNER_CLASS) {
 		zval cnz;
 		zend_try_compile_const_expr_resolve_class_name(&cnz, ast->child[0]);
 		zend_string *class_name = Z_STR(cnz);
