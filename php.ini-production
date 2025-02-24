@@ -819,6 +819,11 @@ enable_dl = Off
 ; https://php.net/fastcgi.impersonate
 ;fastcgi.impersonate = 1
 
+; Prevent decoding of SCRIPT_FILENAME if Apache ProxyPass or ProxyPassMatch is
+; used. This should not be used unless the script file paths are saved already
+; encoded in the file system.
+;fastcgi.script_path_encoded = 1
+
 ; Disable logging through FastCGI connection. PHP's default behavior is to enable
 ; this feature.
 ;fastcgi.logging = 0

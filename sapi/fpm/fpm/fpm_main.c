@@ -144,6 +144,7 @@ typedef struct _php_cgi_globals_struct {
 	bool nph;
 	bool fix_pathinfo;
 	bool discard_path;
+	bool fcgi_script_path_encoded;
 	bool fcgi_logging;
 	bool fcgi_logging_request_started;
 	HashTable user_config_cache;
@@ -1066,6 +1067,10 @@ static void init_request_info(void)
 			}
 		}
 
+		if (apache_was_here && !CGIG(fcgi_script_path_encoded)) {
+			php_raw_url_decode(env_script_filename, strlen(env_script_filename));
+		}
+
 		if (CGIG(fix_pathinfo)) {
 			struct stat st;
 			char *real_path = NULL;
@@ -1174,7 +1179,7 @@ static void init_request_info(void)
 									 * it is probably also in SCRIPT_NAME and need to be removed
 									 */
 									size_t decoded_path_info_len = 0;
-									if (strchr(path_info, '%')) {
+									if (CGIG(fcgi_script_path_encoded) && strchr(path_info, '%')) {
 										decoded_path_info = estrdup(path_info);
 										decoded_path_info_len = php_raw_url_decode(decoded_path_info, strlen(path_info));
 									}
@@ -1421,13 +1426,14 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 /* }}} */
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_BOOLEAN("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_BOOLEAN("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_BOOLEAN("cgi.discard_path",        "0",  PHP_INI_SYSTEM, OnUpdateBool,   discard_path, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_BOOLEAN("fastcgi.logging",         "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("fastcgi.error_header",    NULL, PHP_INI_SYSTEM, OnUpdateString, error_header, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("fpm.config",    NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_config, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.rfc2616_headers",         "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.nph",                     "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.fix_pathinfo",            "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.discard_path",            "0",  PHP_INI_SYSTEM, OnUpdateBool,   discard_path, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("fastcgi.script_path_encoded", "0",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_script_path_encoded, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("fastcgi.logging",             "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("fastcgi.error_header",          NULL, PHP_INI_SYSTEM, OnUpdateString, error_header, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("fpm.config",                    NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_config, php_cgi_globals_struct, php_cgi_globals)
 PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor */
@@ -1437,6 +1443,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 	php_cgi_globals->nph = 0;
 	php_cgi_globals->fix_pathinfo = 1;
 	php_cgi_globals->discard_path = 0;
+	php_cgi_globals->fcgi_script_path_encoded = 0;
 	php_cgi_globals->fcgi_logging = 1;
 	php_cgi_globals->fcgi_logging_request_started = false;
 	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, user_config_cache_entry_dtor, 1);
