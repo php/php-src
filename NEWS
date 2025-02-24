@@ -76,6 +76,9 @@ PHP                                                                        NEWS
     Pdo\Pgsql::prepare(…, [ PDO::ATTR_PREFETCH => 0 ]) make fetch() lazy
     instead of storing the whole result set in memory (Guillaume Outters)
 
+- PDO_SQLITE:
+  . Implement GH-17321: Add setAuthorizer to Pdo\Sqlite. (nielsdos)
+
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing
     its name to be reused. (David Carlier)
