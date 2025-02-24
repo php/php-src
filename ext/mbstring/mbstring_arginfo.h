@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 03c07f68bea7d7b96e6dc11f180f45663b859ed3 */
+ * Stub hash: de316945d5da7430183851eb3ac7dce2fc15b339 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")
@@ -131,6 +131,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_mb_ltrim arginfo_mb_trim
 
 #define arginfo_mb_rtrim arginfo_mb_trim
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_levenshtein, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, insertion_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, replacement_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deletion_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_detect_encoding, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -327,6 +336,7 @@ ZEND_FUNCTION(mb_lcfirst);
 ZEND_FUNCTION(mb_trim);
 ZEND_FUNCTION(mb_ltrim);
 ZEND_FUNCTION(mb_rtrim);
+ZEND_FUNCTION(mb_levenshtein);
 ZEND_FUNCTION(mb_detect_encoding);
 ZEND_FUNCTION(mb_list_encodings);
 ZEND_FUNCTION(mb_encoding_aliases);
@@ -396,6 +406,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mb_trim, arginfo_mb_trim)
 	ZEND_FE(mb_ltrim, arginfo_mb_ltrim)
 	ZEND_FE(mb_rtrim, arginfo_mb_rtrim)
+	ZEND_FE(mb_levenshtein, arginfo_mb_levenshtein)
 	ZEND_FE(mb_detect_encoding, arginfo_mb_detect_encoding)
 	ZEND_FE(mb_list_encodings, arginfo_mb_list_encodings)
 	ZEND_FE(mb_encoding_aliases, arginfo_mb_encoding_aliases)
