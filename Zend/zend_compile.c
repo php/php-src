@@ -862,6 +862,8 @@ static const char *zend_modifier_token_to_string(uint32_t token)
 			return "final";
 		case T_READONLY:
 			return "readonly";
+		case T_DATA:
+			return "data";
 		case T_ABSTRACT:
 			return "abstract";
 		case T_PUBLIC_SET:
@@ -995,6 +997,10 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 		zend_throw_exception(zend_ce_compile_error, "Multiple readonly modifiers are not allowed", 0);
 		return 0;
 	}
+	if ((flags & ZEND_ACC_DATA_CLASS) && (new_flag & ZEND_ACC_DATA_CLASS)) {
+		zend_throw_exception(zend_ce_compile_error, "Multiple data modifiers are not allowed", 0);
+		return 0;
+	}
 	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Cannot use the final modifier on an abstract class", 0);
@@ -1018,6 +1024,10 @@ uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag)
 	}
 	if ((flags & ZEND_ACC_READONLY_CLASS) && (new_flag & ZEND_ACC_READONLY_CLASS)) {
 		zend_throw_exception(zend_ce_compile_error, "Multiple readonly modifiers are not allowed", 0);
+		return 0;
+	}
+	if ((flags & ZEND_ACC_DATA_CLASS) && (new_flag & ZEND_ACC_DATA_CLASS)) {
+		zend_throw_exception(zend_ce_compile_error, "Multiple data modifiers are not allowed", 0);
 		return 0;
 	}
 	return new_flags;
