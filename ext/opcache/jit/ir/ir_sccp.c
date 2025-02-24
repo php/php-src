@@ -656,6 +656,7 @@ static IR_NEVER_INLINE void ir_sccp_analyze(ir_ctx *ctx, ir_insn *_values, ir_bi
 					}
 				}
 				IR_MAKE_BOTTOM(i);
+				ir_bitqueue_add(iter_worklist, i);
 			} else if (insn->op == IR_SWITCH) {
 				if (IR_IS_TOP(insn->op2)) {
 					ir_sccp_add_input(ctx, _values, worklist, insn->op2);
@@ -1144,6 +1145,35 @@ static IR_NEVER_INLINE void ir_sccp_transform(ir_ctx *ctx, ir_insn *_values, ir_
 /* Iterative Optimizations */
 /***************************/
 
+/* Modification of some instruction may open new optimization oprtunities for other
+ * instructions that use this one.
+ *
+ * For example, let "a = ADD(x, y)" became "a = ADD(x, C1)". In case we also have
+ * "b = ADD(a, C2)" we may optimize it into "b = ADD(x, C1 + C2)" and then might
+ * also remove "a".
+ *
+ * This implementation supports only few optimization of combinations from ir_fold.h
+ *
+ * TODO: Think abput a more general solution ???
+ */
+static void ir_iter_add_related_uses(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist)
+{
+	ir_insn *insn = &ctx->ir_base[ref];
+
+	if (insn->op == IR_ADD || insn->op == IR_SUB) {
+		ir_use_list *use_list = &ctx->use_lists[ref];
+
+		if (use_list->count == 1) {
+			ir_ref use = ctx->use_edges[use_list->refs];
+			ir_insn *use_insn = &ctx->ir_base[ref];
+
+			if (use_insn->op == IR_ADD || use_insn->op == IR_SUB) {
+				ir_bitqueue_add(worklist, use);
+			}
+		}
+	}
+}
+
 static void ir_iter_remove_insn(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist)
 {
 	ir_ref j, n, *p;
@@ -1191,6 +1221,7 @@ void ir_iter_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bitqueue *workl
 			ir_insn_set_op(insn, i, new_ref);
 			/* schedule folding */
 			ir_bitqueue_add(worklist, use);
+			ir_iter_add_related_uses(ctx, use, worklist);
 		}
 	} else {
 		for (j = 0; j < n; j++, p++) {
@@ -1812,9 +1843,6 @@ static ir_ref ir_ext_ref(ir_ctx *ctx, ir_ref var_ref, ir_ref src_ref, ir_op op, 
 	}
 
 	ref = ir_emit1(ctx, optx, src_ref);
-	ctx->use_lists = ir_mem_realloc(ctx->use_lists, ctx->insns_count * sizeof(ir_use_list));
-	ctx->use_lists[ref].count = 0;
-	ctx->use_lists[ref].refs = IR_UNUSED;
 	ir_use_list_add(ctx, ref, var_ref);
 	if (!IR_IS_CONST_REF(src_ref)) {
 		ir_use_list_replace_one(ctx, src_ref, var_ref, ref);
@@ -1894,6 +1922,7 @@ static bool ir_try_promote_ext(ir_ctx *ctx, ir_ref ext_ref, ir_insn *insn, ir_bi
 				} else {
 					ctx->ir_base[use].op1 = ir_ext_ref(ctx, use, use_insn->op1, op, type, worklist);
 				}
+				ir_bitqueue_add(worklist, use);
 			}
 			if (use_insn->op2 != ref) {
 				if (IR_IS_CONST_REF(use_insn->op2)
@@ -1902,6 +1931,7 @@ static bool ir_try_promote_ext(ir_ctx *ctx, ir_ref ext_ref, ir_insn *insn, ir_bi
 				} else {
 					ctx->ir_base[use].op2 = ir_ext_ref(ctx, use, use_insn->op2, op, type, worklist);
 				}
+				ir_bitqueue_add(worklist, use);
 			}
 		}
 	}
@@ -2152,7 +2182,7 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 			ir_ref root_ref = start1->op1;
 			ir_insn *root = &ctx->ir_base[root_ref];
 
-			if (root->op == IR_IF && ctx->use_lists[root->op2].count == 1) {
+			if (root->op == IR_IF && !IR_IS_CONST_REF(root->op2) && ctx->use_lists[root->op2].count == 1) {
 				ir_ref cond_ref = root->op2;
 				ir_insn *cond = &ctx->ir_base[cond_ref];
 				ir_type type = insn->type;
@@ -2873,7 +2903,7 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 	return 0;
 }
 
-static void ir_optimize_merge(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_bitqueue *worklist)
+static void ir_iter_optimize_merge(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_bitqueue *worklist)
 {
 	ir_use_list *use_list = &ctx->use_lists[merge_ref];
 
@@ -2915,6 +2945,171 @@ static void ir_optimize_merge(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_
 				ir_optimize_phi(ctx, merge_ref, merge, phi_ref, phi, worklist);
 			}
 		}
+	}
+}
+
+static ir_ref ir_iter_optimize_condition(ir_ctx *ctx, ir_ref control, ir_ref condition, bool *swap)
+{
+	ir_insn *condition_insn = &ctx->ir_base[condition];
+
+	if (condition_insn->opt == IR_OPT(IR_NOT, IR_BOOL)) {
+		*swap = 1;
+		condition = condition_insn->op1;
+		condition_insn = &ctx->ir_base[condition];
+	}
+
+	if (condition_insn->op == IR_NE && IR_IS_CONST_REF(condition_insn->op2)) {
+		ir_insn *val_insn = &ctx->ir_base[condition_insn->op2];
+
+		if (IR_IS_TYPE_INT(val_insn->type) && val_insn->val.u64 == 0) {
+			condition = condition_insn->op1;
+			condition_insn = &ctx->ir_base[condition];
+		}
+	} else if (condition_insn->op == IR_EQ && IR_IS_CONST_REF(condition_insn->op2)) {
+		ir_insn *val_insn = &ctx->ir_base[condition_insn->op2];
+
+		if (condition_insn->op2 == IR_TRUE) {
+			condition = condition_insn->op1;
+			condition_insn = &ctx->ir_base[condition];
+		} else if (IR_IS_TYPE_INT(val_insn->type) && val_insn->val.u64 == 0) {
+			condition = condition_insn->op1;
+			condition_insn = &ctx->ir_base[condition];
+			*swap = !*swap;
+		}
+	}
+
+	while ((condition_insn->op == IR_BITCAST
+	  || condition_insn->op == IR_ZEXT
+	  || condition_insn->op == IR_SEXT)
+	 && ctx->use_lists[condition].count == 1) {
+		condition = condition_insn->op1;
+		condition_insn = &ctx->ir_base[condition];
+	}
+
+	if (!IR_IS_CONST_REF(condition) && ctx->use_lists[condition].count > 1) {
+		condition = ir_check_dominating_predicates(ctx, control, condition);
+	}
+
+	return condition;
+}
+
+static void ir_iter_optimize_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue *worklist)
+{
+	bool swap = 0;
+	ir_ref condition = ir_iter_optimize_condition(ctx, insn->op1, insn->op2, &swap);
+
+	if (swap) {
+		ir_use_list *use_list = &ctx->use_lists[ref];
+		ir_ref *p, use;
+
+		IR_ASSERT(use_list->count == 2);
+		p = ctx->use_edges + use_list->refs;
+		use = *p;
+		if (ctx->ir_base[use].op == IR_IF_TRUE) {
+			ctx->ir_base[use].op = IR_IF_FALSE;
+			use = *(p+1);
+			ctx->ir_base[use].op = IR_IF_TRUE;
+		} else {
+			ctx->ir_base[use].op = IR_IF_TRUE;
+			use = *(p+1);
+			ctx->ir_base[use].op = IR_IF_FALSE;
+		}
+	}
+
+	if (IR_IS_CONST_REF(condition)) {
+		/*
+		 *    |                        |
+		 *    IF(TRUE)             =>  END
+		 *    | \                      |
+		 *    |  +------+              |
+		 *    |         IF_TRUE        |        BEGIN(unreachable)
+		 *    IF_FALSE  |              BEGIN
+		 *    |                        |
+		 */
+		ir_ref if_true_ref, if_false_ref;
+		ir_insn *if_true, *if_false;
+
+		insn->optx = IR_OPTX(IR_END, IR_VOID, 1);
+		if (!IR_IS_CONST_REF(insn->op2)) {
+			ir_use_list_remove_one(ctx, insn->op2, ref);
+		}
+		insn->op2 = IR_UNUSED;
+
+		ir_get_true_false_refs(ctx, ref, &if_true_ref, &if_false_ref);
+		if_true = &ctx->ir_base[if_true_ref];
+		if_false = &ctx->ir_base[if_false_ref];
+		if_true->op = IR_BEGIN;
+		if_false->op = IR_BEGIN;
+		if (ir_ref_is_true(ctx, condition)) {
+			if_false->op1 = IR_UNUSED;
+			ir_use_list_remove_one(ctx, ref, if_false_ref);
+			ir_bitqueue_add(worklist, if_true_ref);
+		} else {
+			if_true->op1 = IR_UNUSED;
+			ir_use_list_remove_one(ctx, ref, if_true_ref);
+			ir_bitqueue_add(worklist, if_false_ref);
+		}
+		ctx->flags2 &= ~IR_CFG_REACHABLE;
+	} else if (insn->op2 != condition) {
+		ir_iter_update_op(ctx, ref, 2, condition, worklist);
+	}
+}
+
+static void ir_iter_optimize_guard(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue *worklist)
+{
+	bool swap;
+	ir_ref condition = ir_iter_optimize_condition(ctx, insn->op1, insn->op2, &swap);
+
+	if (swap) {
+		if (insn->op == IR_GUARD) {
+			insn->op = IR_GUARD_NOT;
+		} else {
+			insn->op = IR_GUARD;
+		}
+	}
+
+	if (IR_IS_CONST_REF(condition)) {
+		if (insn->op == IR_GUARD) {
+			if (ir_ref_is_true(ctx, condition)) {
+				ir_ref prev, next;
+
+remove_guard:
+				prev = insn->op1;
+				next = ir_next_control(ctx, ref);
+				ctx->ir_base[next].op1 = prev;
+				ir_use_list_remove_one(ctx, ref, next);
+				ir_use_list_replace_one(ctx, prev, ref, next);
+				insn->op1 = IR_UNUSED;
+
+				if (!IR_IS_CONST_REF(insn->op2)) {
+					ir_use_list_remove_one(ctx, insn->op2, ref);
+					if (ir_is_dead(ctx, insn->op2)) {
+						/* schedule DCE */
+						ir_bitqueue_add(worklist, insn->op2);
+					}
+				}
+
+				if (insn->op3) {
+					/* SNAPSHOT */
+					ir_iter_remove_insn(ctx, insn->op3, worklist);
+				}
+
+				MAKE_NOP(insn);
+				return;
+			} else {
+				condition = IR_FALSE;
+			}
+		} else {
+			if (ir_ref_is_true(ctx, condition)) {
+				condition = IR_TRUE;
+			} else {
+				goto remove_guard;
+			}
+		}
+	}
+
+	if (insn->op2 != condition) {
+		ir_iter_update_op(ctx, ref, 2, condition, worklist);
 	}
 }
 
@@ -2993,7 +3188,7 @@ folding:
 					ir_merge_blocks(ctx, insn->op1, i, worklist);
 				}
 			} else if (insn->op == IR_MERGE) {
-				ir_optimize_merge(ctx, i, insn, worklist);
+				ir_iter_optimize_merge(ctx, i, insn, worklist);
 			}
 		} else if (ir_is_dead_load(ctx, i)) {
 			ir_ref next;
@@ -3081,20 +3276,10 @@ remove_bitcast:
 			} else {
 				goto remove_bitcast;
 			}
-		} else if (insn->op == IR_IF || insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
-			ir_insn *condition_insn = &ctx->ir_base[insn->op2];
-
-			if (condition_insn->op == IR_BITCAST || condition_insn->op == IR_ZEXT || condition_insn->op == IR_SEXT) {
-				ir_iter_update_op(ctx, i, 2, condition_insn->op1, worklist);
-				condition_insn = &ctx->ir_base[condition_insn->op1];
-			}
-			if (condition_insn->op == IR_NE && IR_IS_CONST_REF(condition_insn->op2)) {
-				ir_insn *val_insn = &ctx->ir_base[condition_insn->op2];
-
-				if (IR_IS_TYPE_INT(val_insn->type) && val_insn->val.u64 == 0) {
-					ir_iter_update_op(ctx, i, 2, condition_insn->op1, worklist);
-				}
-			}
+		} else if (insn->op == IR_IF) {
+			ir_iter_optimize_if(ctx, i, insn, worklist);
+		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
+			ir_iter_optimize_guard(ctx, i, insn, worklist);
 		}
 	}
 }
