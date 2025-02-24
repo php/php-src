@@ -207,6 +207,8 @@ typedef struct _zend_oparray_context {
 	zend_string *active_property_info_name;
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
+	uint32_t arg_num; // Current 1-based argument index if compiling arguments, otherwise zero.
+	zend_string *arg_name;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
