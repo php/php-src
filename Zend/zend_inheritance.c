@@ -1684,7 +1684,8 @@ void zend_build_properties_info_table(zend_class_entry *ce)
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
 		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0
 		 && !(prop->flags & ZEND_ACC_VIRTUAL)) {
-			table[Z_PROP_TABLE_OFFSET(prop)] = prop;
+			uint32_t prop_table_offset = OBJ_PROP_TO_NUM(!(prop->prototype->flags & ZEND_ACC_VIRTUAL) ? prop->prototype->offset : prop->offset);
+			table[prop_table_offset] = prop;
 		}
 	} ZEND_HASH_FOREACH_END();
 }
