@@ -26,28 +26,25 @@ curl
 --EXPECTF--
 Array
 (
+    [alt-svc] => bool
     [AsynchDNS] => bool
-    [CharConv] => bool
-    [Debug] => bool
-    [GSS-Negotiate] => bool
+    [brotli] => bool
+    [GSS-API] => bool
+    [HSTS] => bool
+    [HTTP2] => bool
+    [HTTPS-proxy] => bool
     [IDN] => bool
     [IPv6] => bool
-    [krb4] => bool
+    [Kerberos] => bool
     [Largefile] => bool
     [libz] => bool
     [NTLM] => bool
-    [NTLMWB] => bool
+    [PSL] => bool
     [SPNEGO] => bool
     [SSL] => bool
-    [SSPI] => bool
+    [threadsafe] => bool
     [TLS-SRP] => bool
-    [HTTP2] => bool
-    [GSSAPI] => bool
-    [KERBEROS5] => bool
-    [UNIX_SOCKETS] => bool
-    [PSL] => bool
-    [HTTPS_PROXY] => bool
-    [MULTI_SSL] => bool
-    [BROTLI] => bool
+    [UnixSockets] => bool
+    [zstd] => bool
 %A)
 Complete
