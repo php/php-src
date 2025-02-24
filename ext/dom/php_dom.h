@@ -179,13 +179,22 @@ void dom_set_document_ref_pointers(xmlNodePtr node, php_libxml_ref_obj *document
 void dom_set_document_ref_pointers_attr(xmlAttrPtr attr, php_libxml_ref_obj *document);
 
 typedef enum {
-	DOM_LOAD_STRING = 0,
-	DOM_LOAD_FILE = 1,
+	DOM_LOAD_STRING,
+	DOM_LOAD_FILE,
+	DOM_LOAD_STREAM,
 } dom_load_mode;
+
+typedef union {
+	struct {
+		const char *str;
+		size_t str_len;
+	};
+	php_stream *stream;
+} dom_source_union;
 
 #define DOM_DOCUMENT_MALFORMED ((xmlDocPtr) -1)
 
-xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding);
+xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, dom_source_union source, size_t options, xmlCharEncodingHandlerPtr encoding, const char *override_document_uri);
 
 /* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
