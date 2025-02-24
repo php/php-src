@@ -423,7 +423,7 @@ if test "$PHP_FPM" != "no"; then
     AC_CHECK_HEADERS([sys/acl.h])
 
     dnl *BSD has acl_* built into libc, macOS doesn't have user/group support.
-    LIBS_save=$LIBS
+    PHP_PUSH([fpm_acl])
     AC_SEARCH_LIBS([acl_free], [acl],
     [AC_CACHE_CHECK([for ACL user/group permissions support],
       [php_cv_lib_acl_user_group],
@@ -446,7 +446,7 @@ if test "$PHP_FPM" != "no"; then
           [AS_VAR_APPEND([FPM_EXTRA_LIBS], [" $ac_cv_search_acl_free"])])
       ])
     ])
-    LIBS=$LIBS_save
+    PHP_POP([fpm_acl])
   ])
 
   AS_VAR_IF([PHP_FPM_APPARMOR], [no],, [
