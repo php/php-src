@@ -156,7 +156,11 @@ class ZendAstKindPrettyPrinter(gdb.printing.PrettyPrinter):
 pp_set.add_printer('zend_ast_kind', '^zend_ast_kind$', ZendAstKindPrettyPrinter)
 
 class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
-    "Print a zend_ast"
+    """
+        Print a zend_ast, or one of the specialized structures based on it:
+        zend_ast_decl, zend_ast_list, zend_ast_op_array, zend_ast_zval, or
+        zend_ast_znode
+    """
 
     def __init__(self, val):
         self.val = val
@@ -229,6 +233,11 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
 
 
 pp_set.add_printer('zend_ast', '^_zend_ast$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_decl', '^_zend_ast_decl$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_list', '^_zend_ast_list$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_op_array', '^_zend_ast_op_array$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_zval', '^_zend_ast_zval$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_znode', '^_zend_ast_znode$', ZendAstPrettyPrinter)
 
 class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
     "Print a zval"
