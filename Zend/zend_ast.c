@@ -120,6 +120,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_arr
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
 	ast->op_array = op_array;
+	function_add_ref((zend_function *)op_array);
 
 	return (zend_ast *) ast;
 }
@@ -1277,6 +1278,7 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->attr = old->attr;
 		new->lineno = old->lineno;
 		new->op_array = old->op_array;
+		function_add_ref((zend_function *)new->op_array);
 		buf = (void*)((char*)buf + sizeof(zend_ast_op_array));
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *old = (zend_ast_fcc*)ast;
@@ -1353,7 +1355,8 @@ tail_call:
 	} else if (EXPECTED(ast->kind == ZEND_AST_CONSTANT)) {
 		zend_string_release_ex(zend_ast_get_constant_name(ast), 0);
 	} else if (EXPECTED(ast->kind == ZEND_AST_OP_ARRAY)) {
-		/* Nothing to do. */
+		zend_ast_op_array *op_array = zend_ast_get_op_array(ast);
+		destroy_op_array(op_array->op_array);
 	} else if (EXPECTED(zend_ast_is_decl(ast))) {
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
