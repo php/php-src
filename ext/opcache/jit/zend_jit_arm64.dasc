@@ -8655,11 +8655,18 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		|	str TMP1w, EX:RX->This.u1.type_info
 		|	// Z_PTR(call->This) = object_or_called_scope;
 		|	str REG1, EX:RX->This.value.ptr
-		|	ldr TMP1, [REG0, #offsetof(zend_closure, func.op_array.run_time_cache__ptr)]
-		|	cbnz TMP1, >1
-		|	add FCARG1x, REG0, #offsetof(zend_closure, func)
-		|	EXT_CALL zend_jit_init_func_run_time_cache_helper, REG0
-		|1:
+		if (!func) {
+			|	ldrb TMP1w, [REG0, #offsetof(zend_closure, func.type)]
+			|	cmp TMP1w, #ZEND_USER_FUNCTION
+			|	beq >1
+		}
+		if (!func || func->common.type == ZEND_USER_FUNCTION) {
+			|	add FCARG1x, REG0, #offsetof(zend_closure, func)
+			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, REG0
+		}
+		if (!func) {
+			|1:
+		}
 	}
 	|	// ZEND_CALL_NUM_ARGS(call) = num_args;
 	|	LOAD_32BIT_VAL TMP1w, opline->extended_value
