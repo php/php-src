@@ -31,7 +31,7 @@
 #include "libmbfl/config.h"
 
 #ifdef HAVE_STRINGS_H
-	/* For strcasecmp */
+	/* For strncasecmp */
 	#include <strings.h>
 #endif
 
@@ -53,13 +53,6 @@
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
 #include "filters/mbfilter_singlebyte.h"
-
-#ifndef HAVE_STRCASECMP
-#ifdef HAVE_STRICMP
-#define strcasecmp stricmp
-#endif
-#endif
-
 
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_base64,
