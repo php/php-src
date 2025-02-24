@@ -748,7 +748,11 @@ static zend_op_array *zend_persist_class_method(zend_op_array *op_array, zend_cl
 				// Real dynamically created internal functions like enum methods must have their own run_time_cache pointer. They're always on the same scope as their defining class.
 				// However, copies - as caused by inheritance of internal methods - must retain the original run_time_cache pointer, shared with the source function.
 				if (!op_array->scope || (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))) {
-					ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+					if (op_array->fn_flags & ZEND_ACC_PRELOADED) {
+						ZEND_MAP_PTR_NEW_STATIC(op_array->run_time_cache);
+					} else {
+						ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+					}
 				}
 			}
 		}
@@ -1426,6 +1430,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 	if (for_shm) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
+		ZCSG(map_ptr_static_last) = zend_map_ptr_static_last;
 	}
 
 #ifdef HAVE_JIT

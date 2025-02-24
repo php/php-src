@@ -418,7 +418,10 @@ static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id n
 	zif->module = EG(current_module);
 	zif->scope = ce;
 	zif->T = ZEND_OBSERVER_ENABLED;
-    if (EG(active)) { // at run-time
+	if (EG(active)) { // at run-time
+		if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+			zif->fn_flags |= ZEND_ACC_PRELOADED;
+		}
 		ZEND_MAP_PTR_INIT(zif->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 	} else {
 #ifdef ZTS
