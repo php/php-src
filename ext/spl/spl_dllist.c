@@ -764,7 +764,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 	if (element != NULL) {
-		/* connect the neightbors */
+		/* connect the neighbors */
 		if (element->prev) {
 			element->prev->next = element->next;
 		}

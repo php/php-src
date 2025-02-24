@@ -66,7 +66,7 @@ static uint8_t pclmul_shuf_mask_table[16] = {
 /* Folding of 128-bit data chunks */
 #define CRC32_FOLDING_BLOCK_SIZE (16)
 
-/* PCLMUL version of non-relfected crc32 */
+/* PCLMUL version of non-reflected crc32 */
 ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_DECL(size_t crc32_pclmul_batch(uint32_t *crc, const unsigned char *p, size_t nr, const crc32_pclmul_consts *consts));
 size_t crc32_pclmul_batch(uint32_t *crc, const unsigned char *p, size_t nr, const crc32_pclmul_consts *consts)
 {
@@ -183,7 +183,7 @@ size_t crc32_pclmul_batch(uint32_t *crc, const unsigned char *p, size_t nr, cons
 	return (nr_in - nr); /* the nr processed */
 }
 
-/* PCLMUL version of relfected crc32 */
+/* PCLMUL version of reflected crc32 */
 ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_DECL(size_t crc32_pclmul_reflected_batch(uint32_t *crc, const unsigned char *p, size_t nr, const crc32_pclmul_consts *consts));
 size_t crc32_pclmul_reflected_batch(uint32_t *crc, const unsigned char *p, size_t nr, const crc32_pclmul_consts *consts)
 {

@@ -284,7 +284,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	} else {
 		char *s = ZCG(accel_directives).mmap_base;
 
-		/* skip leading 0x, %p assumes hexdecimal format anyway */
+		/* skip leading 0x, %p assumes hexadecimal format anyway */
 		if (*s == '0' && *(s + 1) == 'x') {
 			s += 2;
 		}
