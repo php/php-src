@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     `__callStatic` is allowed). (timwolla)
   . Fixed bug GH-17713 (ReflectionProperty::getRawValue() and related methods
     may call hooks of overridden properties). (Arnaud)
+  . Fixed bug GH-17916 (Final abstract properties should error).
+    (DanielEScherzer)
 
 - DOM:
   . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
