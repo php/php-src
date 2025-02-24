@@ -932,6 +932,12 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 	if (!prop) {
 		smart_str_append_printf(str, "<dynamic> public $%s", prop_name);
 	} else {
+		if (prop->flags & ZEND_ACC_ABSTRACT) {
+			smart_str_appends(str, "abstract ");
+		}
+		if (prop->flags & ZEND_ACC_FINAL) {
+			smart_str_appends(str, "final ");
+		}
 		/* These are mutually exclusive */
 		switch (prop->flags & ZEND_ACC_PPP_MASK) {
 			case ZEND_ACC_PUBLIC:
