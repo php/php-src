@@ -55,6 +55,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17577 (JIT packed type guard crash). (nielsdos, Dmitry)
   . Fixed bug GH-17747 (Exception on reading property in register-based
     FETCH_OBJ_R breaks JIT). (Dmitry, nielsdos)
+  . Fixed bug GH-17715 (Null pointer deref in observer API when calling
+    cases() method on preloaded enum). (Bob)
 
 - PDO_SQLite:
   . Fixed GH-17837 ()::getColumnMeta() on unexecuted statement segfaults).
@@ -78,7 +80,7 @@ PHP                                                                        NEWS
   . Fix memory leak on overflow in _php_stream_scandir(). (nielsdos)
 
 - Windows:
-  . Fixed phpize for Windows 11 (24H2). (bwoebi)
+  . Fixed phpize for Windows 11 (24H2). (Bob)
   . Fixed GH-17855 (CURL_STATICLIB flag set even if linked with shared lib).
     (cmb)
 
