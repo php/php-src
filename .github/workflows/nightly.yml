@@ -520,7 +520,7 @@ jobs:
       - name: Test Laravel
         if: ${{ !cancelled() }}
         run: |
-          git clone https://github.com/laravel/framework.git --branch=master --depth=1
+          git clone https://github.com/laravel/framework.git --depth=1
           cd framework
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
