@@ -56,8 +56,11 @@ Array
     [flags] => Array
         (
             [0] => not_null
+            [1] => no_default_value
+            [2] => num
         )
 
+    [native_flags] => 36865
     [table] => test_33689
     [name] => bar
     [len] => 11
