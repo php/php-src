@@ -80,6 +80,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-15902 (Core dumped in ext/reflection/php_reflection.c).
     (DanielEScherzer)
+  . Fixed missing final and abstract flags when dumping properties.
+    (DanielEScherzer)
 
 - Standard:
   . Fixed bug #72666 (stat cache clearing inconsistent between file:// paths
