@@ -7,6 +7,16 @@
  * @cvalue TOKEN_PARSE
  */
 const TOKEN_PARSE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TOKEN_ENABLE_SHORT_OPEN_TAG
+ */
+const TOKEN_ENABLE_SHORT_OPEN_TAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TOKEN_DISABLE_SHORT_OPEN_TAG
+ */
+const TOKEN_DISABLE_SHORT_OPEN_TAG = UNKNOWN;
 
 function token_get_all(string $code, int $flags = 0): array {}
 
