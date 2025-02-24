@@ -44,6 +44,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-17577 (JIT packed type guard crash). (nielsdos, Dmitry)
   . Fixed bug GH-17899 (zend_test_compile_string with invalid path
     when opcache is enabled). (David Carlier)
+  . Fixed bug GH-17868 (Cannot allocate memory with tracing JIT). (nielsdos)
 
 - PDO_SQLite:
   . Fixed GH-17837 ()::getColumnMeta() on unexecuted statement segfaults).

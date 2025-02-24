@@ -9255,11 +9255,17 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		|	or dword EX:RX->This.u1.type_info, edx
 		|	// Z_PTR(call->This) = object_or_called_scope;
 		|	mov aword EX:RX->This.value.ptr, r1
-		|	cmp aword [r0 + offsetof(zend_closure, func.op_array.run_time_cache__ptr)], 0
-		|	jnz >1
-		|	lea FCARG1a, aword [r0 + offsetof(zend_closure, func)]
-		|	EXT_CALL zend_jit_init_func_run_time_cache_helper, r0
-		|1:
+		if (!func) {
+			|	cmp byte [r0 + offsetof(zend_closure, func.type)], ZEND_USER_FUNCTION
+			|	jnz >1
+		}
+		if (!func || func->common.type == ZEND_USER_FUNCTION) {
+			|	lea FCARG1a, aword [r0 + offsetof(zend_closure, func)]
+			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, r0
+		}
+		if (!func) {
+			|1:
+		}
 	}
 	|	// ZEND_CALL_NUM_ARGS(call) = num_args;
 	|	mov dword EX:RX->This.u2.num_args, opline->extended_value
