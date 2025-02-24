@@ -81,6 +81,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15902 (Core dumped in ext/reflection/php_reflection.c).
     (DanielEScherzer)
 
+- Standard:
+  . Fixed bug #72666 (stat cache clearing inconsistent between file:// paths
+    and plain paths). (Jakub Zelenka)
+
 - Streams:
   . Fixed bug GH-17650 (realloc with size 0 in user_filters.c). (nielsdos)
   . Fix memory leak on overflow in _php_stream_scandir(). (nielsdos)
