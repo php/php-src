@@ -148,7 +148,6 @@ const opt_struct OPTIONS[] = {
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
-	{'z', 1, "zend-extension"},
 	{10,  1, "rf"},
 	{10,  1, "rfunction"},
 	{11,  1, "rc"},
@@ -496,7 +495,6 @@ static void php_cli_usage(char *argv0)
 				"  -s               Output HTML syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Output source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
 				"\n"
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
@@ -800,9 +798,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				context.mode = PHP_CLI_MODE_STRIP;
 				break;
 
-			case 'z': /* load extension file */
-				zend_load_extension(php_optarg);
-				break;
 			case 'H':
 				hide_argv = true;
 				break;
