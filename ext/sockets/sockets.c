@@ -1516,6 +1516,8 @@ PHP_FUNCTION(socket_recvfrom)
 #endif
 #ifdef AF_PACKET
 	struct sockaddr_ll     sll;
+	int protoid;
+	socklen_t protoidlen = sizeof(protoid);
 #endif
 	char				addrbuf[INET6_ADDRSTRLEN];
 	socklen_t			slen;
@@ -1632,6 +1634,13 @@ PHP_FUNCTION(socket_recvfrom)
 #endif
 #ifdef AF_PACKET
 		case AF_PACKET:
+			getsockopt(php_sock->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
+
+			// TODO: SOCK_DGRAM support
+			if (protoid != SOCK_RAW) {
+				zend_argument_value_error(1, "must be SOCK_RAW socket type");
+				RETURN_THROWS();
+			}
 			slen = sizeof(sll);
 			memset(&sll, 0, sizeof(sll));
 			sll.sll_family = AF_PACKET;
@@ -1755,6 +1764,8 @@ PHP_FUNCTION(socket_sendto)
 #ifdef AF_PACKET
 	struct sockaddr_ll      sll;
 	unsigned char           halen;
+	int protoid;
+	socklen_t protoidlen = sizeof(protoid);
 #endif
 	int					retval;
 	size_t              buf_len;
@@ -1841,12 +1852,19 @@ PHP_FUNCTION(socket_sendto)
 #endif
 #ifdef AF_PACKET
 		case AF_PACKET:
+			getsockopt(php_sock->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
+
+			// TODO: SOCK_DGRAM support
+			if (protoid != SOCK_RAW) {
+				zend_argument_value_error(1, "must be SOCK_RAW socket type");
+				RETURN_THROWS();
+			}
 			if (port_is_null) {
 				zend_argument_value_error(6, "cannot be null when the socket type is AF_PACKET");
 				RETURN_THROWS();
 			}
 
-			halen = addr_len > ETH_ALEN ? ETH_ALEN : (unsigned char)addr_len;
+			halen = ZSTR_LEN(addr) > ETH_ALEN ? ETH_ALEN : (unsigned char)ZSTR_LEN(addr);
 
 			memset(&sll, 0, sizeof(sll));			
 			memcpy(sll.sll_addr, addr, halen);
