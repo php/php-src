@@ -467,11 +467,6 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 		ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_VARIADIC | ZEND_ACC_HAS_RETURN_TYPE;
 
 	invoke->common = closure->func.common;
-
-	if (invoke->common.attributes) {
-		GC_TRY_ADDREF(invoke->common.attributes);
-	}
-
 	/* We return ZEND_INTERNAL_FUNCTION, but arg_info representation is the
 	 * same as for ZEND_USER_FUNCTION (uses zend_string* instead of char*).
 	 * This is not a problem, because ZEND_ACC_HAS_TYPE_HINTS is never set,
