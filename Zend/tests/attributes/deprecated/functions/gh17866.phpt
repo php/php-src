@@ -16,6 +16,7 @@ $test = $closure->__invoke(...);
 
 $rc = new ReflectionMethod($test, '__invoke');
 var_dump($rc->getAttributes());
+var_dump($rc->isDeprecated());
 
 $test();
 
@@ -28,6 +29,7 @@ array(1) {
     string(10) "Deprecated"
   }
 }
+bool(true)
 
 Deprecated: Method Foo::__invoke() is deprecated, xyzzy in %s on line %d
 In __invoke
