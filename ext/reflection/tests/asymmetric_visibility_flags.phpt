@@ -26,7 +26,7 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-Property [ public private(set) int $bar ]
+Property [ final public private(set) int $bar ]
 bool(false)
 bool(true)
 bool(false)
