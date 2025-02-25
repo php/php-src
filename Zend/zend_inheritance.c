@@ -1436,7 +1436,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		}
 		if (!(parent_info->flags & ZEND_ACC_PRIVATE)) {
 			if (!(parent_info->ce->ce_flags & ZEND_ACC_INTERFACE)) {
-				child_info->prototype = parent_info;
+				child_info->prototype = parent_info->prototype;
 			}
 
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {
