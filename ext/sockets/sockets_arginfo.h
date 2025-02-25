@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9725b1a979cb5aa48079585278fa89c5edb321d4 */
+ * Stub hash: e8e63f6600f51cc8575f5eabe9976a317656b4b4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1163,10 +1163,16 @@ static zend_class_entry *register_class_SocketEthernetInfo(void)
 	zend_declare_typed_property(class_entry, property_macdst_name, &property_macdst_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_macdst_name);
 
+	zval property_rawpayload_default_value;
+	ZVAL_UNDEF(&property_rawpayload_default_value);
+	zend_string *property_rawpayload_name = zend_string_init("rawpayload", sizeof("rawpayload") - 1, 1);
+	zend_declare_typed_property(class_entry, property_rawpayload_name, &property_rawpayload_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_rawpayload_name);
+
 	zval property_payload_default_value;
 	ZVAL_UNDEF(&property_payload_default_value);
 	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT));
 	zend_string_release(property_payload_name);
 
 	return class_entry;
