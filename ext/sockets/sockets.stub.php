@@ -2174,6 +2174,8 @@ final class SocketEthernetInfo
     /** @readonly **/
     public string $macdst;
     /** @readonly **/
-    public array $payload;
+    public string $rawpayload;
+    /** @readonly **/
+    public object $payload;
 }
 #endif
