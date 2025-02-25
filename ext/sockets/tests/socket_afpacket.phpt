@@ -61,8 +61,10 @@ object(SocketEthernetInfo)#3 (%d) {
   string(%d) "%s:%s:%s:%s:%s:%s"
   ["macdst"]=>
   string(%d) "%s:%s:%s:%s:%s:%s"
+  ["rawpayload"]=>
+  string(%d) "%s"
   ["payload"]=>
-  array(%d) {
+  object(stdClass)#4 (%d) {
   %a
   }
 }
