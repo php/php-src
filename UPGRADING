@@ -235,7 +235,9 @@ PHP 8.5 UPGRADE NOTES
     remove it from the session dictionary.
 
 - Pdo\Sqlite:
-  . Added support for setAuthorizer() like Sqlite3 has.
+  . Added support for Pdo\Sqlite::setAuthorizer(), which is the equivalent of
+    SQLite3::setAuthorizer(). The only interface difference is that the
+    pdo version returns void.
 
 - PGSQL:
   . pg_close_stmt offers an alternative way to close a prepared
