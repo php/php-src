@@ -77,6 +77,15 @@ typedef struct {
 
 extern PHP_SOCKETS_API zend_class_entry *socket_ce;
 
+#ifdef AF_PACKET
+extern PHP_SOCKETS_API zend_class_entry *packet_ce;
+extern PHP_SOCKETS_API zend_class_entry *ethinfopacket_ce;
+extern PHP_SOCKETS_API zend_class_entry *tcppacket_ce;
+extern PHP_SOCKETS_API zend_class_entry *udppacket_ce;
+extern PHP_SOCKETS_API zend_class_entry *ipv4packet_ce;
+extern PHP_SOCKETS_API zend_class_entry *ipv6packet_ce;
+#endif
+
 static inline php_socket *socket_from_obj(zend_object *obj) {
 	return (php_socket *)((char *)(obj) - XtOffsetOf(php_socket, std));
 }
