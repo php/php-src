@@ -65,6 +65,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15902 (Core dumped in ext/reflection/php_reflection.c).
     (DanielEScherzer)
 
+- Sockets:
+  . Fixed bug GH-17921 (socket_read/socket_recv overflow on buffer size).
+    (David Carlier)
+
 - Standard:
   . Fixed bug #72666 (stat cache clearing inconsistent between file:// paths
     and plain paths). (Jakub Zelenka)
