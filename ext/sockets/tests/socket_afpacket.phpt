@@ -58,7 +58,7 @@ object(SocketEthernetInfo)#3 (%d) {
   ["ethprotocol"]=>
   int(%i)
   ["macsrc"]=>
-  string(11) "0:0:0:0:0:0"
+  string(%d) "%s:%s:%s:%s:%s:%s"
   ["macdst"]=>
   string(%d) "%s:%s:%s:%s:%s:%s"
   ["payload"]=>
