@@ -2013,11 +2013,6 @@ const ETH_P_LOOP = UNKNOWN;
  * @cvalue ETH_P_ALL
  */
 const ETH_P_ALL = UNKNOWN;
-/**
- * @var int
- * @cvalue ETH_FRAME_LEN
- */
-const ETH_FRAME_LEN = UNKNOWN;
 #endif
 
 /**
@@ -2160,20 +2155,4 @@ function socket_wsaprotocol_info_export(Socket $socket, int $process_id): string
 function socket_wsaprotocol_info_import(string $info_id): Socket|false {}
 
 function socket_wsaprotocol_info_release(string $info_id): bool {}
-#endif
-
-#ifdef AF_PACKET
-final class SocketEthernetInfo
-{
-    /** @readonly **/
-    public Socket $socket;
-    /** @readonly **/
-    public int $ethprotocol;
-    /** @readonly **/
-    public string $macsrc;
-    /** @readonly **/
-    public string $macdst;
-    /** @readonly **/
-    public array $payload;
-}
 #endif
