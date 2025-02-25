@@ -2060,25 +2060,30 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
                         out($f,"#endif\n");
                     } else {
-                        out($f,"#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG)\n");
+                        out($f,"#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG) || defined(ZEND_VM_FP_LOCAL_REG) || defined(ZEND_VM_IP_LOCAL_REG)\n");
                         out($f,$m[1]."struct {\n");
                         out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
                         out($f,$m[1]."\tchar hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];\n");
                         out($f,"#endif\n");
-                        out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
+                        out($f,"#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_IP_LOCAL_REG)\n");
                         out($f,$m[1]."\tconst zend_op *orig_opline;\n");
                         out($f,"#endif\n");
-                        out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
+                        out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) || defined(ZEND_VM_FP_LOCAL_REG)\n");
                         out($f,$m[1]."\tzend_execute_data *orig_execute_data;\n");
                         out($f,"#endif\n");
                         out($f,$m[1]."} vm_stack_data;\n");
                         out($f,"#endif\n");
                         out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
                         out($f,$m[1]."vm_stack_data.orig_opline = opline;\n");
+                        out($f,"#elif defined(ZEND_VM_IP_LOCAL_REG)\n");
+                        out($f,$m[1]."ZEND_VM_SAVE_REGISTER(ZEND_VM_IP_LOCAL_REG, vm_stack_data.orig_opline);\n");
                         out($f,"#endif\n");
                         out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
                         out($f,$m[1]."vm_stack_data.orig_execute_data = execute_data;\n");
                         out($f,$m[1]."execute_data = ex;\n");
+                        out($f,"#elif defined(ZEND_VM_FP_LOCAL_REG)\n");
+                        out($f,$m[1]."ZEND_VM_SAVE_REGISTER(ZEND_VM_FP_LOCAL_REG, vm_stack_data.orig_opline);\n");
+                        out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
                         out($f,"#else\n");
                         out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
                         out($f,"#endif\n");
@@ -2182,7 +2187,10 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 $m[1]."} else {\n" .
                                 "# ifdef ZEND_VM_IP_GLOBAL_REG\n" .
                                 $m[1]."\topline = vm_stack_data.orig_opline;\n" .
-                                "# endif\n".
+                                "# elif defined(ZEND_VM_FP_LOCAL_REG) || defined(ZEND_VM_IP_LOCAL_REG)\n".
+                                $m[1]."\tZEND_VM_RESTORE_REGISTER(ZEND_VM_IP_LOCAL_REG, vm_stack_data.orig_opline);\n".
+                                $m[1]."\tZEND_VM_RESTORE_REGISTER(ZEND_VM_FP_LOCAL_REG, vm_stack_data.orig_execute_data);\n".
+                                " #endif\n".
                                 $m[1]."\treturn;\n".
                                 $m[1]."}\n".
                                 "#endif\n");
