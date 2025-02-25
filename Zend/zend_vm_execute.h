@@ -55134,25 +55134,30 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 {
 	DCL_OPLINE
 
-#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG)
+#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG) || defined(ZEND_VM_FP_LOCAL_REG) || defined(ZEND_VM_IP_LOCAL_REG)
 	struct {
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 		char hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];
 #endif
-#ifdef ZEND_VM_IP_GLOBAL_REG
+#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_IP_LOCAL_REG)
 		const zend_op *orig_opline;
 #endif
-#ifdef ZEND_VM_FP_GLOBAL_REG
+#if defined(ZEND_VM_FP_GLOBAL_REG) || defined(ZEND_VM_FP_LOCAL_REG)
 		zend_execute_data *orig_execute_data;
 #endif
 	} vm_stack_data;
 #endif
 #ifdef ZEND_VM_IP_GLOBAL_REG
 	vm_stack_data.orig_opline = opline;
+#elif defined(ZEND_VM_IP_LOCAL_REG)
+	ZEND_VM_SAVE_REGISTER(ZEND_VM_IP_LOCAL_REG, vm_stack_data.orig_opline);
 #endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
 	vm_stack_data.orig_execute_data = execute_data;
 	execute_data = ex;
+#elif defined(ZEND_VM_FP_LOCAL_REG)
+	ZEND_VM_SAVE_REGISTER(ZEND_VM_FP_LOCAL_REG, vm_stack_data.orig_opline);
+	zend_execute_data *execute_data = ex;
 #else
 	zend_execute_data *execute_data = ex;
 #endif
@@ -64296,7 +64301,10 @@ zend_leave_helper_SPEC_LABEL:
 			} else {
 # ifdef ZEND_VM_IP_GLOBAL_REG
 				opline = vm_stack_data.orig_opline;
-# endif
+# elif defined(ZEND_VM_FP_LOCAL_REG) || defined(ZEND_VM_IP_LOCAL_REG)
+				ZEND_VM_RESTORE_REGISTER(ZEND_VM_IP_LOCAL_REG, vm_stack_data.orig_opline);
+				ZEND_VM_RESTORE_REGISTER(ZEND_VM_FP_LOCAL_REG, vm_stack_data.orig_execute_data);
+ #endif
 				return;
 			}
 #endif
