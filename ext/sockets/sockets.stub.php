@@ -2183,6 +2183,6 @@ final class SocketEthernetInfo
     /** @readonly **/
     public string $rawpayload;
     /** @readonly **/
-    public object $payload;
+    public ?object $payload;
 }
 #endif
