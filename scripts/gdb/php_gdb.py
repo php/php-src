@@ -208,6 +208,8 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
             return self.val.cast(gdb.lookup_type('zend_ast_zval'))
         if kind == enum_value('ZEND_AST_OP_ARRAY'):
             return self.val.cast(gdb.lookup_type('zend_ast_op_array'))
+        if kind == enum_value('ZEND_AST_CALLABLE_CONVERT'):
+            return self.val.cast(gdb.lookup_type('zend_ast_fcc'))
         if kind == enum_value('ZEND_AST_ZNODE'):
             return self.val.cast(gdb.lookup_type('zend_ast_znode'))
         if self.is_decl():
@@ -236,6 +238,7 @@ pp_set.add_printer('zend_ast', '^_zend_ast$', ZendAstPrettyPrinter)
 pp_set.add_printer('zend_ast_decl', '^_zend_ast_decl$', ZendAstPrettyPrinter)
 pp_set.add_printer('zend_ast_list', '^_zend_ast_list$', ZendAstPrettyPrinter)
 pp_set.add_printer('zend_ast_op_array', '^_zend_ast_op_array$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_fcc', '^_zend_ast_fcc$', ZendAstPrettyPrinter)
 pp_set.add_printer('zend_ast_zval', '^_zend_ast_zval$', ZendAstPrettyPrinter)
 pp_set.add_printer('zend_ast_znode', '^_zend_ast_znode$', ZendAstPrettyPrinter)
 
