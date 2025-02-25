@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+namespace {
 /**
  * @var int
  * @cvalue AF_UNIX
@@ -2020,6 +2021,11 @@ const ETH_P_LOOP = UNKNOWN;
  * @cvalue ETH_P_ALL
  */
 const ETH_P_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_FRAME_LEN
+ */
+const ETH_FRAME_LEN = UNKNOWN;
 #endif
 
 #ifdef UDP_SEGMENT
@@ -2190,3 +2196,49 @@ function socket_wsaprotocol_info_import(string $info_id): Socket|false {}
 
 function socket_wsaprotocol_info_release(string $info_id): bool {}
 #endif
+}
+
+namespace Socket {
+#ifdef AF_PACKET
+    class Packet
+    {
+	public int $headerSize;
+	public ?string $rawPacket;
+    }
+
+    final class EthernetPacket extends Packet
+    {
+	public \Socket $socket;
+	public int $ethProtocol;
+	public string $srcMac;
+	public string $dstMac;
+	public ?Packet $payload;
+    }
+
+    final class TcpPacket extends Packet
+    {
+	public int $srcPort;
+	public int $dstPort;
+    }
+
+    final class UdpPacket extends Packet
+    {
+	public int $srcPort;
+	public int $dstPort;
+    }
+
+    final class Ipv4Packet extends Packet
+    {
+	public string $srcAddr;
+	public string $dstAddr;
+	public ?Packet $payload;
+    }
+
+    final class Ipv6Packet extends Packet
+    {
+	public string $srcAddr;
+	public string $dstAddr;
+	public ?Packet $payload;
+    }
+#endif
+}
