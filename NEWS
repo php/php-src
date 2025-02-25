@@ -33,10 +33,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-17847 (xinclude destroys live node). (nielsdos)
   . Fix using Dom\Node with Dom\XPath callbacks. (nielsdos)
 
-- GD:
-  . Fixed bug GH-17703 (imagescale with both width and height negative values
-    triggers only an Exception on width). (David Carlier)
-
 - FFI:
   . Fix FFI Parsing of Pointer Declaration Lists. (davnotdev)
 
@@ -45,6 +41,8 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
 
 - GD:
+  . Fixed bug GH-17703 (imagescale with both width and height negative values
+    triggers only an Exception on width). (David Carlier)
   . Fixed bug GH-17772 (imagepalettetotruecolor crash with memory_limit=2M).
     (David Carlier)
 
