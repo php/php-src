@@ -1,3 +1,5 @@
+#include "Zend/zend_vm_opcodes.h"
+
 {%DEFINES%}
 
 #if (ZEND_VM_KIND != ZEND_VM_KIND_CALL) && (ZEND_GCC_VERSION >= 4000) && !defined(__clang__)

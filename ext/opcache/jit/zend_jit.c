@@ -98,7 +98,7 @@ static const void *zend_jit_func_trace_counter_handler = NULL;
 static const void *zend_jit_ret_trace_counter_handler = NULL;
 static const void *zend_jit_loop_trace_counter_handler = NULL;
 
-static int ZEND_FASTCALL zend_runtime_jit(void);
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS);
 
 static int zend_jit_trace_op_len(const zend_op *opline);
 static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
@@ -2871,7 +2871,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (GCC_GLOBAL_REGS) {
 								ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 							} else {
-								ir_RETURN(ir_CONST_I32(1)); /* ZEND_VM_ENTER */
+								zend_jit_vm_enter(jit, jit_IP(jit));
 							}
 							ir_IF_TRUE(if_hook_enter);
 						}
@@ -3074,11 +3074,18 @@ jit_failure:
 }
 
 /* Run-time JIT handler */
-static int ZEND_FASTCALL zend_runtime_jit(void)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_execute_data *execute_data = EG(current_execute_data);
+#if GCC_GLOBAL_REGS
+	zend_execute_data *execute_data;
+	zend_op *opline;
+#else
+	const zend_op *orig_opline = opline;
+#endif
+
+	execute_data = EG(current_execute_data);
 	zend_op_array *op_array = &EX(func)->op_array;
-	zend_op *opline = op_array->opcodes;
+	opline = op_array->opcodes;
 	zend_jit_op_array_extension *jit_extension;
 	bool do_bailout = 0;
 
@@ -3097,7 +3104,7 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 				}
 			}
 			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
-			opline->handler = jit_extension->orig_handler;
+			((zend_op*)opline)->handler = jit_extension->orig_handler;
 
 			/* perform real JIT for this function */
 			zend_real_jit_func(op_array, NULL, NULL, ZEND_JIT_ON_FIRST_EXEC);
@@ -3116,7 +3123,11 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 	}
 
 	/* JIT-ed code is going to be called by VM */
-	return 0;
+#if GCC_GLOBAL_REGS
+	return; // ZEND_VM_CONTINUE
+#else
+	return orig_opline; // ZEND_VM_CONTINUE
+#endif
 }
 
 void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
@@ -3171,9 +3182,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 				op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
 			}
 
-#ifdef HAVE_GCC_GLOBAL_REGS
 			EX(opline) = opline;
-#endif
 
 			/* perform real JIT for this function */
 			zend_real_jit_func(op_array, NULL, opline, ZEND_JIT_ON_HOT_COUNTERS);
