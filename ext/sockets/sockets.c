@@ -884,7 +884,7 @@ PHP_FUNCTION(socket_read)
 	ENSURE_SOCKET_VALID(php_sock);
 
 	/* overflow check */
-	if ((length + 1) < 2) {
+	if (length <= 0 || length == ZEND_LONG_MAX) {
 		RETURN_FALSE;
 	}
 
@@ -1326,7 +1326,7 @@ PHP_FUNCTION(socket_recv)
 	ENSURE_SOCKET_VALID(php_sock);
 
 	/* overflow check */
-	if ((len + 1) < 2) {
+	if (len <= 0 || len == ZEND_LONG_MAX) {
 		RETURN_FALSE;
 	}
 
