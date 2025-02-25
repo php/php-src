@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8e63f6600f51cc8575f5eabe9976a317656b4b4 */
+ * Stub hash: 387fd04fa188f0f45db030954f1d0245bf76519f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1172,7 +1172,7 @@ static zend_class_entry *register_class_SocketEthernetInfo(void)
 	zval property_payload_default_value;
 	ZVAL_UNDEF(&property_payload_default_value);
 	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT));
+	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT|MAY_BE_NULL));
 	zend_string_release(property_payload_name);
 
 	return class_entry;
