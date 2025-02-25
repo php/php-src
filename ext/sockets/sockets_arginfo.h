@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9725b1a979cb5aa48079585278fa89c5edb321d4 */
+ * Stub hash: aac197335037777d31d83d4a4040bbfcd0c55813 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1105,9 +1105,6 @@ static void register_sockets_symbols(int module_number)
 #if defined(ETH_P_ALL)
 	REGISTER_LONG_CONSTANT("ETH_P_ALL", ETH_P_ALL, CONST_PERSISTENT);
 #endif
-#if defined(ETH_P_ALL)
-	REGISTER_LONG_CONSTANT("ETH_FRAME_LEN", ETH_FRAME_LEN, CONST_PERSISTENT);
-#endif
 }
 
 static zend_class_entry *register_class_Socket(void)
@@ -1129,46 +1126,3 @@ static zend_class_entry *register_class_AddressInfo(void)
 
 	return class_entry;
 }
-
-#if defined(AF_PACKET)
-static zend_class_entry *register_class_SocketEthernetInfo(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_CLASS_ENTRY(ce, "SocketEthernetInfo", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
-
-	zval property_socket_default_value;
-	ZVAL_UNDEF(&property_socket_default_value);
-	zend_string *property_socket_name = zend_string_init("socket", sizeof("socket") - 1, 1);
-	zend_string *property_socket_class_Socket = zend_string_init("Socket", sizeof("Socket")-1, 1);
-	zend_declare_typed_property(class_entry, property_socket_name, &property_socket_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_socket_class_Socket, 0, 0));
-	zend_string_release(property_socket_name);
-
-	zval property_ethprotocol_default_value;
-	ZVAL_UNDEF(&property_ethprotocol_default_value);
-	zend_string *property_ethprotocol_name = zend_string_init("ethprotocol", sizeof("ethprotocol") - 1, 1);
-	zend_declare_typed_property(class_entry, property_ethprotocol_name, &property_ethprotocol_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_ethprotocol_name);
-
-	zval property_macsrc_default_value;
-	ZVAL_UNDEF(&property_macsrc_default_value);
-	zend_string *property_macsrc_name = zend_string_init("macsrc", sizeof("macsrc") - 1, 1);
-	zend_declare_typed_property(class_entry, property_macsrc_name, &property_macsrc_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_macsrc_name);
-
-	zval property_macdst_default_value;
-	ZVAL_UNDEF(&property_macdst_default_value);
-	zend_string *property_macdst_name = zend_string_init("macdst", sizeof("macdst") - 1, 1);
-	zend_declare_typed_property(class_entry, property_macdst_name, &property_macdst_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_macdst_name);
-
-	zval property_payload_default_value;
-	ZVAL_UNDEF(&property_payload_default_value);
-	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-	zend_string_release(property_payload_name);
-
-	return class_entry;
-}
-#endif

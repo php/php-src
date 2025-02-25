@@ -41,7 +41,6 @@
 # include <netdb.h>
 # include <netinet/in.h>
 # include <netinet/tcp.h>
-# include <netinet/udp.h>
 # include <sys/un.h>
 # include <arpa/inet.h>
 # include <sys/time.h>
@@ -54,11 +53,6 @@
 # include "php_sockets.h"
 # ifdef HAVE_IF_NAMETOINDEX
 #  include <net/if.h>
-# endif
-# ifdef HAVE_NETINET_ETHER_H
-#  include <netinet/ether.h>
-#  include <netinet/ip.h>
-#  include <linux/ipv6.h>
 # endif
 # if defined(HAVE_LINUX_SOCK_DIAG_H)
 #  include <linux/sock_diag.h>
@@ -126,9 +120,6 @@ static PHP_RSHUTDOWN_FUNCTION(sockets);
 
 zend_class_entry *socket_ce;
 static zend_object_handlers socket_object_handlers;
-#ifdef AF_PACKET
-zend_class_entry *socket_ethinfo_ce;
-#endif
 
 static zend_object *socket_create_object(zend_class_entry *class_type) {
 	php_socket *intern = zend_object_alloc(sizeof(php_socket), class_type);
@@ -491,9 +482,6 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.get_gc = socket_get_gc;
 	socket_object_handlers.compare = zend_objects_not_comparable;
 
-#if defined(AF_PACKET)
-	socket_ethinfo_ce = register_class_SocketEthernetInfo();
-#endif
 	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
 	address_info_ce->default_object_handlers = &address_info_object_handlers;
@@ -1400,7 +1388,7 @@ PHP_FUNCTION(socket_bind)
 				struct sockaddr_ll *sa = (struct sockaddr_ll *) sock_type;
 				socklen_t sa_len = sizeof(sa);
 
-				if (getsockname(php_sock->bsd_socket, (struct sockaddr *)sa, &sa_len) < 0) {
+				if (getsockname(php_sock->bsd_socket, sock_type, &sa_len) < 0) {
 					zend_value_error("invalid AF_PACKET socket");
 					RETURN_THROWS();
 				}
@@ -1515,9 +1503,7 @@ PHP_FUNCTION(socket_recvfrom)
 	struct sockaddr_in6	sin6;
 #endif
 #ifdef AF_PACKET
-	struct sockaddr_ll     sll;
-	int protoid;
-	socklen_t protoidlen = sizeof(protoid);
+	//struct sockaddr_ll     sll;
 #endif
 	char				addrbuf[INET6_ADDRSTRLEN];
 	socklen_t			slen;
@@ -1545,15 +1531,6 @@ PHP_FUNCTION(socket_recvfrom)
 	if (arg3 <= 0 || arg3 > ZEND_LONG_MAX - 1) {
 		RETURN_FALSE;
 	}
-
-#ifdef AF_PACKET
-	// ethernet header + payload
-	// possibly follow-up PR SOCK_DGRAM
-	if (php_sock->type == AF_PACKET && arg3 < 60) {
-		zend_argument_value_error(3, "must be at least 60 for AF_PACKET");
-		RETURN_THROWS();
-	}
-#endif
 
 	recv_buf = zend_string_alloc(arg3 + 1, 0);
 
@@ -1633,19 +1610,14 @@ PHP_FUNCTION(socket_recvfrom)
 			break;
 #endif
 #ifdef AF_PACKET
+			/*
 		case AF_PACKET:
-			getsockopt(php_sock->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
-
-			// TODO: SOCK_DGRAM support
-			if (protoid != SOCK_RAW) {
-				zend_argument_value_error(1, "must be SOCK_RAW socket type");
-				RETURN_THROWS();
-			}
+			// TODO expose and use proper ethernet frame type instead i.e. src mac, dst mac and payload to userland
+			// ditto for socket_sendto
 			slen = sizeof(sll);
 			memset(&sll, 0, sizeof(sll));
 			sll.sll_family = AF_PACKET;
 			char ifrname[IFNAMSIZ];
-			zval zpayload;
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sll, (socklen_t *)&slen);
 
@@ -1654,6 +1626,8 @@ PHP_FUNCTION(socket_recvfrom)
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
+			ZSTR_LEN(recv_buf) = retval;
+			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
 			if (UNEXPECTED(!if_indextoname(sll.sll_ifindex, ifrname))) {
 				PHP_SOCKET_ERROR(php_sock, "unable to get the interface name", errno);
@@ -1661,86 +1635,11 @@ PHP_FUNCTION(socket_recvfrom)
 				RETURN_FALSE;
 			}
 
-			struct ethhdr *e = (struct ethhdr *)ZSTR_VAL(recv_buf);
-			unsigned short protocol = ntohs(e->h_proto);
-			unsigned char *payload;
-
-			zval obj;
-			object_init_ex(&obj, socket_ethinfo_ce);
-			array_init(&zpayload);
-
-			switch (protocol) {
-				case ETH_P_IP: {
-					payload = ((unsigned char *)e + sizeof(struct ethhdr));
-					struct iphdr *ip = (struct iphdr *)payload;
-					unsigned char *ipdata = payload + (ip->ihl * 4);
-					struct in_addr s, d;
-					s.s_addr = ip->saddr;
-					d.s_addr = ip->daddr;
-					add_assoc_string(&zpayload, "ipsrc", inet_ntoa(s));
-					add_assoc_string(&zpayload, "ipdst", inet_ntoa(d));
-
-					switch (ip->protocol) {
-						case IPPROTO_TCP: {
-							struct tcphdr *tcp = (struct tcphdr *)ipdata;
-							add_assoc_long(&zpayload, "portsrc", ntohs(tcp->th_sport));
-							add_assoc_long(&zpayload, "portdst", ntohs(tcp->th_dport));
-							break;
-						}
-						case IPPROTO_UDP: {
-							struct udphdr *udp = (struct udphdr *)ipdata;
-							add_assoc_long(&zpayload, "portsrc", ntohs(udp->uh_sport));
-							add_assoc_long(&zpayload, "portdst", ntohs(udp->uh_dport));
-							break;
-						}
-						default:
-							zend_string_efree(recv_buf);
-							zval_ptr_dtor(&zpayload);
-							zval_ptr_dtor(&obj);
-							zend_value_error("unsupported ip header protocol");
-							RETURN_THROWS();
-					}
-					break;
-				}
-				case ETH_P_IPV6: {
-					payload = ((unsigned char *)e + sizeof(struct ethhdr));
-					struct ipv6hdr *ip = (struct ipv6hdr *)payload;
-					char s[INET6_ADDRSTRLEN], d[INET6_ADDRSTRLEN];
-					inet_ntop(AF_INET6, &ip->saddr, s, sizeof(s));
-					inet_ntop(AF_INET6, &ip->daddr, d, sizeof(d));
-					add_assoc_string(&zpayload, "ipsrc", s);
-					add_assoc_string(&zpayload, "ipdst", d);
-					break;
-				}
-				case ETH_P_LOOP: {
-					struct ethhdr *innere = (struct ethhdr *)((unsigned char *)e + ETH_HLEN);
-					add_assoc_string(&zpayload, "macsrc", ether_ntoa((struct ether_addr *)innere->h_source));
-					add_assoc_string(&zpayload, "macdst", ether_ntoa((struct ether_addr *)innere->h_dest));
-					break;
-				}
-				default:
-					zend_string_efree(recv_buf);
-					zval_ptr_dtor(&zpayload);
-					zval_ptr_dtor(&obj);
-					zend_value_error("unsupported ethernet protocol");
-					RETURN_THROWS();
-			}
-
-			Z_DELREF(zpayload);
-			zend_string_efree(recv_buf);
-			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("socket"), arg1);
-			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
-			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
-			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethprotocol"), protocol);
-			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-
-			ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
+			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
-
-			if (arg6) {
-				ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
-			}
+			ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
 			break;
+			*/
 #endif
 		default:
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
@@ -1762,10 +1661,7 @@ PHP_FUNCTION(socket_sendto)
 	struct sockaddr_in6	sin6;
 #endif
 #ifdef AF_PACKET
-	struct sockaddr_ll      sll;
-	unsigned char           halen;
-	int protoid;
-	socklen_t protoidlen = sizeof(protoid);
+	//struct sockaddr_ll      sll;
 #endif
 	int					retval;
 	size_t              buf_len;
@@ -1797,15 +1693,6 @@ PHP_FUNCTION(socket_sendto)
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-
-#ifdef AF_PACKET
-	// ether header + payload
-	// TODO dealing with SOCK_DGRAM
-	if (php_sock->type == AF_PACKET && len < 60) {
-		zend_argument_value_error(3, "must be at least 64 for AF_PACKET");
-		RETURN_THROWS();
-	}
-#endif
 
 	switch (php_sock->type) {
 		case AF_UNIX:
@@ -1851,33 +1738,23 @@ PHP_FUNCTION(socket_sendto)
 			break;
 #endif
 #ifdef AF_PACKET
+			/*
 		case AF_PACKET:
-			getsockopt(php_sock->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
-
-			// TODO: SOCK_DGRAM support
-			if (protoid != SOCK_RAW) {
-				zend_argument_value_error(1, "must be SOCK_RAW socket type");
-				RETURN_THROWS();
-			}
 			if (port_is_null) {
 				zend_argument_value_error(6, "cannot be null when the socket type is AF_PACKET");
 				RETURN_THROWS();
 			}
 
-			halen = ZSTR_LEN(addr) > ETH_ALEN ? ETH_ALEN : (unsigned char)ZSTR_LEN(addr);
-
 			memset(&sll, 0, sizeof(sll));			
-			memcpy(sll.sll_addr, addr, halen);
 			sll.sll_family = AF_PACKET;
 			sll.sll_ifindex = port;
-			sll.sll_halen = halen;
 
-			// TODO allows to use more user friendly type to replace raw buffer usage
-			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sll, sizeof(sll));
+			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
 			break;
+		*/
 #endif
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, AF_PACKET or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
@@ -3002,6 +2879,8 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ai = Z_ADDRESS_INFO_P(arg1);
+
+	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
