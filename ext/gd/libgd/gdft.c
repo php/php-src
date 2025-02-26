@@ -28,7 +28,7 @@
 #endif
 #endif
 
-/* number of antialised colors for indexed bitmaps */
+/* number of antialiased colors for indexed bitmaps */
 /* overwrite Windows GDI define in case of windows build */
 #ifdef NUMCOLORS
 #undef NUMCOLORS
@@ -400,7 +400,7 @@ static void *fontFetch (char **error, void *key)
 	fontlist = gdEstrdup(a->fontlist);
 
 	/*
-	 * Must use gd_strtok_r because strtok() isn't thread safe
+	 * Must use gd_strtok_r becasuse strtok() isn't thread safe
 	 */
 	for (name = gd_strtok_r (fontlist, LISTSEPARATOR, &strtok_ptr); name; name = gd_strtok_r (0, LISTSEPARATOR, &strtok_ptr)) {
 		char *strtok_ptr_path;
@@ -760,7 +760,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 					 */
 					*pixel = (fg < 0) ? -fg : fg;
 				} else {
-					/* find antialised color */
+					/* find antialiased color */
 					tc_key.bgcolor = *pixel;
 					tc_elem = (tweencolor_t *) gdCacheGet(tc_cache, &tc_key);
 					*pixel = tc_elem->tweencolor;
