@@ -987,6 +987,17 @@ PHP_FUNCTION(ldap_connect)
 			snprintf( url, urllen, "ldap://%s:" ZEND_LONG_FMT, host, port );
 		}
 
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+		if (url && !strncmp(url, "ldaps:", 6)) {
+			int val = 0;
+
+			/* ensure all pending TLS options are applied in a new context */
+			if (ldap_set_option(NULL, LDAP_OPT_X_TLS_NEWCTX, &val) != LDAP_OPT_SUCCESS) {
+				php_error_docref(NULL, E_WARNING, "Could not create new security context");
+			}
+		}
+#endif
+
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
 		/* ldap_init() is deprecated, use ldap_initialize() instead.
 		 */
@@ -3688,6 +3699,9 @@ PHP_FUNCTION(ldap_start_tls)
 	zval *link;
 	ldap_linkdata *ld;
 	int rc, protocol = LDAP_VERSION3;
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+	int val = 0;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &link, ldap_link_ce) != SUCCESS) {
 		RETURN_THROWS();
@@ -3697,6 +3711,9 @@ PHP_FUNCTION(ldap_start_tls)
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
 	if (((rc = ldap_set_option(ld->link, LDAP_OPT_PROTOCOL_VERSION, &protocol)) != LDAP_SUCCESS) ||
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+		((rc = ldap_set_option(ld->link, LDAP_OPT_X_TLS_NEWCTX, &val)) != LDAP_OPT_SUCCESS) ||
+#endif
 		((rc = ldap_start_tls_s(ld->link, NULL, NULL)) != LDAP_SUCCESS)
 	) {
 		php_error_docref(NULL, E_WARNING,"Unable to start TLS: %s", ldap_err2string(rc));
