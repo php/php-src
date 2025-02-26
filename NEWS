@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed property hook backing value access in multi-level inheritance.
     (ilutov)
+  . Fixed accidentally inherited default value in overridden virtual properties.
+    (ilutov)
 
 27 Feb 2025, PHP 8.4.5
 
