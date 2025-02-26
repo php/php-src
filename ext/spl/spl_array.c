@@ -1774,7 +1774,7 @@ PHP_METHOD(ArrayObject, __serialize)
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		ZVAL_NULL(&tmp);
 	} else {
-		ZVAL_COPY(&tmp, &intern->array);
+		ZVAL_DUP(&tmp, &intern->array);
 	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
