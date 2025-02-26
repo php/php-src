@@ -1701,6 +1701,12 @@ PHP_FUNCTION(socket_recvfrom)
 							zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
 							zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpayload"), ZSTR_VAL(recv_buf));
 							zend_string_efree(recv_buf);
+							ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
+							ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
+
+							if (arg6) {
+								ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
+							}
 							zend_value_error("unsupported ip header protocol");
 							RETURN_THROWS();
 					}
@@ -1729,6 +1735,12 @@ PHP_FUNCTION(socket_recvfrom)
 					zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
 					zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpayload"), ZSTR_VAL(recv_buf));
 					zend_string_efree(recv_buf);
+					ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
+					ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
+
+					if (arg6) {
+						ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
+					}
 					zend_value_error("unsupported ethernet protocol");
 					RETURN_THROWS();
 			}
