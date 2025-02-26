@@ -62,7 +62,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence T_DOUBLE_ARROW
 %precedence T_YIELD_FROM
 %precedence '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
-%left T_PIPE
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
@@ -72,6 +71,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%left T_PIPE
 %left '.'
 %left T_SL T_SR
 %left '+' '-'

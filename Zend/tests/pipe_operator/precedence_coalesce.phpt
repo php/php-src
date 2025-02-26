@@ -1,17 +1,17 @@
 --TEST--
-Pipe binds lower than coalesce
+Pipe binds higher than coalesce
 --FILE--
 <?php
 
-function _test1(int $a): int {
-    return $a * 2;
+function get_username(int $a): string {
+    return (string)$a;
 }
 
-$bad_func = null;
+$user = 5
+     |> get_username(...)
+     ?? 'default';
 
-$res1 = 5 |> $bad_func ?? '_test1';
-
-var_dump($res1);
+var_dump($user);
 ?>
 --EXPECT--
-int(10)
+string(1) "5"
