@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fec87d81c21ac5d56e62a5e0b4bbe673ea76edd5 */
+ * Stub hash: a5c987833eead5145690ba237a715ba852e24f10 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -735,6 +735,9 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(LDAP_OPT_X_TLS_CRLFILE)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRLFILE", LDAP_OPT_X_TLS_CRLFILE, CONST_PERSISTENT);
+#endif
+#if defined(LDAP_OPT_X_TLS_NEWCTX)
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_NEWCTX", LDAP_OPT_X_TLS_NEWCTX, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_OPT_X_TLS_PROTOCOL_MIN)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_MIN", LDAP_OPT_X_TLS_PROTOCOL_MIN, CONST_PERSISTENT);

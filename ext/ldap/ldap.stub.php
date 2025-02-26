@@ -325,6 +325,14 @@ namespace {
     const LDAP_OPT_X_TLS_CRLFILE = UNKNOWN;
 #endif
 
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+    /**
+     * @var int
+     * @cvalue LDAP_OPT_X_TLS_NEWCTX
+     */
+    const LDAP_OPT_X_TLS_NEWCTX = UNKNOWN;
+#endif
+
 #ifdef LDAP_OPT_X_TLS_PROTOCOL_MIN
     /**
      * @var int
