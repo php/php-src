@@ -1685,6 +1685,23 @@ PHP_FUNCTION(socket_recvfrom)
 				case ETH_P_IP: {
 					payload = ((unsigned char *)e + ETH_HLEN);
 					struct iphdr *ip = (struct iphdr *)payload;
+					size_t tlayer = ip->ihl * 4;
+					size_t totalip = ntohs(ip->tot_len);
+
+					if (tlayer < sizeof(*ip) || totalip < tlayer) {
+						ZVAL_NULL(&zpayload);
+						zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
+						zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpacket"), ZSTR_VAL(recv_buf));
+						zend_string_efree(recv_buf);
+						ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
+						ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
+
+						if (arg6) {
+							ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
+						}
+						zend_value_error("invalid transport header length");
+						RETURN_THROWS();
+					}
 					unsigned char *ipdata = payload + (ip->ihl * 4);
 					struct in_addr s, d;
 					s.s_addr = ip->saddr;
