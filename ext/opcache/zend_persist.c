@@ -190,9 +190,6 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		node = (zend_ast *) copy;
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		zend_ast_op_array *copy = zend_shared_memdup(ast, sizeof(zend_ast_op_array));
-		/* We're holding a separate reference to the op_array in the AST. Release it
-		 * early because zend_persist_op_array() is destructive. */
-		destroy_op_array(copy->op_array);
 		zval z;
 		ZVAL_PTR(&z, copy->op_array);
 		zend_persist_op_array(&z);
