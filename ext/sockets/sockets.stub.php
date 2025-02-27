@@ -2170,19 +2170,51 @@ function socket_wsaprotocol_info_release(string $info_id): bool {}
 #endif
 
 #ifdef AF_PACKET
-final class SocketEthernetInfo
+readonly class Packet
 {
-    /** @readonly **/
-    public Socket $socket;
-    /** @readonly **/
-    public int $ethprotocol;
-    /** @readonly **/
-    public string $macsrc;
-    /** @readonly **/
-    public string $macdst;
-    /** @readonly **/
-    public string $rawpayload;
-    /** @readonly **/
-    public ?object $payload;
+	public int $headersize;
+	public ?string $rawpacket;
+}
+
+
+final readonly class EthernetPacket extends Packet
+{
+	public Socket $socket;
+	public int $ethprotocol;
+	public string $macsrc;
+	public string $macdst;
+	public Ipv4Packet|Ipv6Packet|EthernetPacket|null $payload;
+}
+
+final readonly class TcpPacket extends Packet
+{
+	public string $srcaddr;
+	public string $dstaddr;
+	public string $srcport;
+	public string $dstport;
+	public ?object $payload;
+}
+
+final readonly class UdpPacket extends Packet
+{
+	public string $srcaddr;
+	public string $dstaddr;
+	public string $srcport;
+	public string $dstport;
+	public ?object $payload;
+}
+
+final readonly class Ipv4Packet extends Packet
+{
+	public string $srcaddr;
+	public string $dstaddr;
+	public ?object $payload;
+}
+
+final readonly class Ipv6Packet extends Packet
+{
+	public string $srcaddr;
+	public string $dstaddr;
+	public ?object $payload;
 }
 #endif
