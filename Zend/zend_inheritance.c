@@ -1436,7 +1436,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		}
 		if (!(parent_info->flags & ZEND_ACC_PRIVATE)) {
 			if (!(parent_info->ce->ce_flags & ZEND_ACC_INTERFACE)) {
-				child_info->prototype = parent_info;
+				child_info->prototype = parent_info->prototype;
 			}
 
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {
@@ -1478,17 +1478,44 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ZSTR_VAL(ce->name), ZSTR_VAL(key), zend_visibility_string(parent_info->flags), ZSTR_VAL(parent_info->ce->name), (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 			}
 			if (!(child_info->flags & ZEND_ACC_STATIC) && !(parent_info->flags & ZEND_ACC_VIRTUAL)) {
-				if (child_info->offset != ZEND_VIRTUAL_PROPERTY_OFFSET) {
-					int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
-					int child_num = OBJ_PROP_TO_NUM(child_info->offset);
+				/* If we added hooks to the child property, we use the child's slot for
+				 * storage to keep the parent slot set to IS_UNDEF. This automatically
+				 * picks the slow path in the JIT. */
+				bool use_child_prop = !parent_info->hooks && child_info->hooks;
 
-					/* Don't keep default properties in GC (they may be freed by opcache) */
-					zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
-					ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
-					ZVAL_UNDEF(&ce->default_properties_table[child_num]);
+				if (use_child_prop && child_info->offset == ZEND_VIRTUAL_PROPERTY_OFFSET) {
+					child_info->offset = OBJ_PROP_TO_OFFSET(ce->default_properties_count);
+					ce->default_properties_count++;
+					ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
+					zval *property_default_ptr = &ce->default_properties_table[OBJ_PROP_TO_NUM(child_info->offset)];
+					ZVAL_UNDEF(property_default_ptr);
+					Z_PROP_FLAG_P(property_default_ptr) = IS_PROP_UNINIT;
 				}
 
-				child_info->offset = parent_info->offset;
+				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
+				if (child_info->offset != ZEND_VIRTUAL_PROPERTY_OFFSET) {
+					/* Don't keep default properties in GC (they may be freed by opcache) */
+					zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
+
+					if (use_child_prop) {
+						ZVAL_UNDEF(&ce->default_properties_table[parent_num]);
+					} else {
+						int child_num = OBJ_PROP_TO_NUM(child_info->offset);
+						ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
+						ZVAL_UNDEF(&ce->default_properties_table[child_num]);
+					}
+				} else {
+					/* Default value was removed in child, remove it from parent too. */
+					if (ZEND_TYPE_IS_SET(child_info->type)) {
+						ZVAL_UNDEF(&ce->default_properties_table[parent_num]);
+					} else {
+						ZVAL_NULL(&ce->default_properties_table[parent_num]);
+					}
+				}
+
+				if (!use_child_prop) {
+					child_info->offset = parent_info->offset;
+				}
 				child_info->flags &= ~ZEND_ACC_VIRTUAL;
 			}
 
@@ -1663,7 +1690,8 @@ void zend_build_properties_info_table(zend_class_entry *ce)
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
 		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0
 		 && !(prop->flags & ZEND_ACC_VIRTUAL)) {
-			table[OBJ_PROP_TO_NUM(prop->offset)] = prop;
+			uint32_t prop_table_offset = OBJ_PROP_TO_NUM(!(prop->prototype->flags & ZEND_ACC_VIRTUAL) ? prop->prototype->offset : prop->offset);
+			table[prop_table_offset] = prop;
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -1677,8 +1705,12 @@ ZEND_API void zend_verify_hooked_property(zend_class_entry *ce, zend_property_in
 	/* We specified a default value (otherwise offset would be -1), but the virtual flag wasn't
 	 * removed during inheritance. */
 	if ((prop_info->flags & ZEND_ACC_VIRTUAL) && prop_info->offset != ZEND_VIRTUAL_PROPERTY_OFFSET) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot specify default value for virtual hooked property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+		if (Z_TYPE(ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)]) == IS_UNDEF) {
+			prop_info->offset = ZEND_VIRTUAL_PROPERTY_OFFSET;
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot specify default value for virtual hooked property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+		}
 	}
 	/* If the property turns backed during inheritance and no type and default value are set, we want
 	 * the default value to be null. */

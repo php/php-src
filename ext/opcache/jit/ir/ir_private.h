@@ -1182,6 +1182,9 @@ ir_ref ir_find_aliasing_vload(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var)
 ir_ref ir_find_aliasing_store(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val);
 ir_ref ir_find_aliasing_vstore(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val);
 
+/*** Predicates (see ir.c) ***/
+ir_ref ir_check_dominating_predicates(ir_ctx *ctx, ir_ref ref, ir_ref condition);
+
 /*** IR Live Info ***/
 typedef ir_ref                   ir_live_pos;
 typedef struct _ir_use_pos       ir_use_pos;
