@@ -41,14 +41,13 @@ jobs:
   LINUX_PPC64:
     if: inputs.run_linux_ppc64
     name: LINUX_PPC64_ASAN_UBSAN_DEBUG_ZTS
+    # This runs on a self-hosted runner; see https://wiki.php.net/systems/ci
     runs-on: [self-hosted, gentoo, ppc64]
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      - name: emerge
-        uses: ./.github/actions/emerge
       - name: System info
         run: |
           echo "::group::Show host CPU info"
