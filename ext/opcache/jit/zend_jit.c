@@ -2335,11 +2335,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
 					case ZEND_FETCH_OBJ_W:
-						if (opline->op2_type != IS_CONST
-						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
-						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
-							break;
-						}
 						ce = NULL;
 						ce_is_instanceof = 0;
 						on_this = 0;
@@ -2368,6 +2363,11 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									}
 								}
 							}
+						}
+						if (opline->op2_type != IS_CONST
+						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
+						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
+							break;
 						}
 						if (!zend_jit_fetch_obj(&ctx, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, 0, ce, ce_is_instanceof, on_this, 0, 0, NULL,
@@ -2716,15 +2716,25 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto jit_failure;
 					}
 
-					/* If a simple hook is called, exit to the VM. */
-					ir_ref if_hook_enter = ir_IF(jit_CMP_IP(jit, IR_EQ, opline + 1));
-					ir_IF_FALSE(if_hook_enter);
-					if (GCC_GLOBAL_REGS) {
-						ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
-					} else {
-						ir_RETURN(ir_CONST_I32(1)); /* ZEND_VM_ENTER */
+					if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE) {
+						if (opline->op1_type == IS_UNUSED) {
+							ce = op_array->scope;
+						} else {
+							ce = NULL;
+						}
 					}
-					ir_IF_TRUE(if_hook_enter);
+
+					if (!ce || !(ce->ce_flags & ZEND_ACC_FINAL) || ce->num_hooked_props > 0) {
+						/* If a simple hook is called, exit to the VM. */
+						ir_ref if_hook_enter = ir_IF(jit_CMP_IP(jit, IR_EQ, opline + 1));
+						ir_IF_FALSE(if_hook_enter);
+						if (GCC_GLOBAL_REGS) {
+							ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+						} else {
+							ir_RETURN(ir_CONST_I32(1)); /* ZEND_VM_ENTER */
+						}
+						ir_IF_TRUE(if_hook_enter);
+					}
 
 					break;
 				default:
