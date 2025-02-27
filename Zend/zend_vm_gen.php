@@ -1944,9 +1944,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()\n");
                             out($f,"# define ZEND_VM_LEAVE()           return  2\n");
                             out($f,"#else\n");
-                            out($f,"# define ZEND_VM_ENTER_EX()        return (zend_op*)-1\n");
-                            out($f,"# define ZEND_VM_ENTER()           ZEND_VM_ENTER_EX()\n");
-                            out($f,"# define ZEND_VM_LEAVE()           return (zend_op*)-1\n");
+                            out($f,"# define ZEND_VM_ENTER_EX()        return (zend_op*)-(uintptr_t)opline\n");
+                            out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
+                            out($f,"# define ZEND_VM_LEAVE()           return (zend_op*)-(uintptr_t)opline\n");
                             out($f,"#endif\n");
                             out($f,"#define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
                             out($f,"#define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
@@ -2181,8 +2181,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 $m[1]."return;\n" .
                                 "#else\n" .
                                 $m[1]."if (EXPECTED(opline != NULL)) {\n" .
+                                $m[1]."\topline = (zend_op*)-(uintptr_t)opline;\n".
                                 $m[1]."\texecute_data = EG(current_execute_data);\n".
-                                $m[1]."\topline = EX(opline);\n".
                                 $m[1]."\tZEND_VM_LOOP_INTERRUPT_CHECK();\n".
                                 $m[1]."} else {\n" .
                                 "# ifdef ZEND_VM_IP_GLOBAL_REG\n" .

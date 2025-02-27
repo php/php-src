@@ -375,8 +375,8 @@ static const void *zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op
 #else
 # define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data, const zend_op *opline
 # define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data, opline
-# define ZEND_OPCODE_HANDLER_ARGS_DC ZEND_OPCODE_HANDLER_ARGS,
-# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC ZEND_OPCODE_HANDLER_ARGS_PASSTHRU,
+# define ZEND_OPCODE_HANDLER_ARGS_DC ZEND_OPCODE_HANDLER_ARGS, 
+# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC ZEND_OPCODE_HANDLER_ARGS_PASSTHRU, 
 #endif
 
 #if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
@@ -422,7 +422,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 # define USE_OPLINE
 # define LOAD_OPLINE() opline = EX(opline)
 # define LOAD_OPLINE_EX() opline = EX(opline)
-# define LOAD_NEXT_OPLINE() opline = ++EX(opline)
+# define LOAD_NEXT_OPLINE() opline = EX(opline) + 1
 # define SAVE_OPLINE() EX(opline) = opline
 # define SAVE_OPLINE_EX()
 #endif
@@ -437,9 +437,9 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 # define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()
 # define ZEND_VM_LEAVE()           return  2
 #else
-# define ZEND_VM_ENTER_EX()        return (zend_op*)-1
-# define ZEND_VM_ENTER()           ZEND_VM_ENTER_EX()
-# define ZEND_VM_LEAVE()           return (zend_op*)-1
+# define ZEND_VM_ENTER_EX()        return (zend_op*)-(uintptr_t)opline
+# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()
+# define ZEND_VM_LEAVE()           return (zend_op*)-(uintptr_t)opline
 #endif
 #define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 #define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -64295,8 +64295,8 @@ zend_leave_helper_SPEC_LABEL:
 			return;
 #else
 			if (EXPECTED(opline != NULL)) {
+				opline = (zend_op*)-(uintptr_t)opline;
 				execute_data = EG(current_execute_data);
-				opline = EX(opline);
 				ZEND_VM_LOOP_INTERRUPT_CHECK();
 			} else {
 # ifdef ZEND_VM_IP_GLOBAL_REG
