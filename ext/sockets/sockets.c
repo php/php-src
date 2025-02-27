@@ -127,7 +127,12 @@ static PHP_RSHUTDOWN_FUNCTION(sockets);
 zend_class_entry *socket_ce;
 static zend_object_handlers socket_object_handlers;
 #ifdef AF_PACKET
-zend_class_entry *socket_ethinfo_ce;
+zend_class_entry *packet_ce;
+zend_class_entry *ethpacket_ce;
+zend_class_entry *tcppacket_ce;
+zend_class_entry *udppacket_ce;
+zend_class_entry *ipv4packet_ce;
+zend_class_entry *ipv6packet_ce;
 #endif
 
 static zend_object *socket_create_object(zend_class_entry *class_type) {
@@ -492,7 +497,12 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.compare = zend_objects_not_comparable;
 
 #if defined(AF_PACKET)
-	socket_ethinfo_ce = register_class_SocketEthernetInfo();
+	packet_ce = register_class_Packet();
+	ethpacket_ce = register_class_EthernetPacket(packet_ce);
+	tcppacket_ce = register_class_TcpPacket(packet_ce);
+	udppacket_ce = register_class_UdpPacket(packet_ce);
+	ipv4packet_ce = register_class_Ipv4Packet(packet_ce);
+	ipv6packet_ce = register_class_Ipv6Packet(packet_ce);
 #endif
 	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
@@ -1666,40 +1676,50 @@ PHP_FUNCTION(socket_recvfrom)
 			unsigned char *payload;
 
 			zval obj;
-			object_init_ex(&obj, socket_ethinfo_ce);
+			object_init_ex(&obj, ethpacket_ce);
+			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("socket"), arg1);
+			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("headersize"), sizeof(*e));
+			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethprotocol"), protocol);
 
 			switch (protocol) {
 				case ETH_P_IP: {
-					payload = ((unsigned char *)e + sizeof(struct ethhdr));
+					payload = ((unsigned char *)e + ETH_HLEN);
 					struct iphdr *ip = (struct iphdr *)payload;
 					unsigned char *ipdata = payload + (ip->ihl * 4);
 					struct in_addr s, d;
 					s.s_addr = ip->saddr;
 					d.s_addr = ip->daddr;
+					zval szpayload;
+					object_init_ex(&zpayload, ipv4packet_ce);
+					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipsrc"), inet_ntoa(s));
+					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipdst"), inet_ntoa(d));
+					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headersize"), sizeof(*ip));
+					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("socket"), arg1);
 
 					switch (ip->protocol) {
 						case IPPROTO_TCP: {
 							struct tcphdr *tcp = (struct tcphdr *)ipdata;
-							object_init(&zpayload);
-							zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipsrc"), inet_ntoa(s));
-							zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipdst"), inet_ntoa(d));
-							zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("portsrc"), ntohs(tcp->th_sport));
-							zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("portdst"), ntohs(tcp->th_dport));
+							object_init_ex(&szpayload, tcppacket_ce);
+							zend_update_property_long(Z_OBJCE(szpayload), Z_OBJ(szpayload), ZEND_STRL("srcport"), ntohs(tcp->th_sport));
+							zend_update_property_long(Z_OBJCE(szpayload), Z_OBJ(szpayload), ZEND_STRL("dstport"), ntohs(tcp->th_dport));
+							zend_update_property_long(Z_OBJCE(szpayload), Z_OBJ(szpayload), ZEND_STRL("headersize"), sizeof(*tcp));
+							zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("payload"), &szpayload);
 							break;
 						}
 						case IPPROTO_UDP: {
 							struct udphdr *udp = (struct udphdr *)ipdata;
-							object_init(&zpayload);
-							zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipsrc"), inet_ntoa(s));
-							zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipdst"), inet_ntoa(d));
-							zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("portsrc"), ntohs(udp->uh_sport));
-							zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("portdst"), ntohs(udp->uh_dport));
+							object_init_ex(&szpayload, udppacket_ce);
+							zend_update_property_string(Z_OBJCE(szpayload), Z_OBJ(szpayload), ZEND_STRL("ipsrc"), inet_ntoa(s));
+							zend_update_property_string(Z_OBJCE(szpayload), Z_OBJ(szpayload), ZEND_STRL("ipdst"), inet_ntoa(d));
+							zend_update_property_long(Z_OBJCE(szpayload), Z_OBJ(szpayload), ZEND_STRL("srcport"), ntohs(udp->uh_sport));
+							zend_update_property_long(Z_OBJCE(szpayload), Z_OBJ(szpayload), ZEND_STRL("dstport"), ntohs(udp->uh_dport));
+							zend_update_property_long(Z_OBJCE(szpayload), Z_OBJ(szpayload), ZEND_STRL("headersize"), sizeof(*udp));
+							zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("payload"), &szpayload);
 							break;
 						}
 						default:
-							ZVAL_NULL(&zpayload);
 							zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-							zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpayload"), ZSTR_VAL(recv_buf));
+							zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpacket"), ZSTR_VAL(recv_buf));
 							zend_string_efree(recv_buf);
 							ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
 							ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
@@ -1713,27 +1733,35 @@ PHP_FUNCTION(socket_recvfrom)
 					break;
 				}
 				case ETH_P_IPV6: {
-					payload = ((unsigned char *)e + sizeof(struct ethhdr));
+					payload = ((unsigned char *)e + ETH_HLEN);
 					struct ipv6hdr *ip = (struct ipv6hdr *)payload;
 					char s[INET6_ADDRSTRLEN], d[INET6_ADDRSTRLEN];
 					inet_ntop(AF_INET6, &ip->saddr, s, sizeof(s));
 					inet_ntop(AF_INET6, &ip->daddr, d, sizeof(d));
-					object_init(&zpayload);
+					object_init_ex(&zpayload, ipv6packet_ce);
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipsrc"), s);
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipdst"), d);
+					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headersize"), sizeof(*ip));
 					break;
 				}
 				case ETH_P_LOOP: {
 					struct ethhdr *innere = (struct ethhdr *)((unsigned char *)e + ETH_HLEN);
-					object_init(&zpayload);
+					zval innerp;
+					ZVAL_NULL(&innerp);
+					object_init_ex(&zpayload, ethpacket_ce);
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)innere->h_source));
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)innere->h_dest));
+					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headersize"), sizeof(*innere));
+					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("socket"), arg1);
+					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawpacket"), &innerp);
+					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("payload"), &innerp);
+					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ethprotocol"), 0);
 					break;
 				}
 				default:
 					ZVAL_NULL(&zpayload);
 					zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-					zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpayload"), ZSTR_VAL(recv_buf));
+					zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpacket"), ZSTR_VAL(recv_buf));
 					zend_string_efree(recv_buf);
 					ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
 					ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
@@ -1745,12 +1773,10 @@ PHP_FUNCTION(socket_recvfrom)
 					RETURN_THROWS();
 			}
 
-			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("socket"), arg1);
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macsrc"), ether_ntoa((struct ether_addr *)e->h_source));
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("macdst"), ether_ntoa((struct ether_addr *)e->h_dest));
-			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethprotocol"), protocol);
 			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpayload"), ZSTR_VAL(recv_buf));
+			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawpacket"), ZSTR_VAL(recv_buf));
 			Z_DELREF(zpayload);
 			zend_string_efree(recv_buf);
 
