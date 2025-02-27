@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     child class). (ilutov)
   . Fixed bug GH-17913 (ReflectionFunction::isDeprecated() returns incorrect
     results for closures created from magic __call()). (timwolla)
+  . Fixed bug GH-17941 (Stack-use-after-return with lazy objects and hooks).
+    (nielsdos)
 
 - DOM:
   . Fixed bug GH-17991 (Assertion failure dom_attr_value_write). (nielsdos)
