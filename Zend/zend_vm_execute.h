@@ -437,9 +437,9 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 # define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()
 # define ZEND_VM_LEAVE()           return  2
 #else
-# define ZEND_VM_ENTER_EX()        return (zend_op*)-(uintptr_t)opline
+# define ZEND_VM_ENTER_EX()        return (zend_op*)((uintptr_t)opline | (1ULL<<63))
 # define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()
-# define ZEND_VM_LEAVE()           return (zend_op*)-(uintptr_t)opline
+# define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | (1ULL<<63))
 #endif
 #define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 #define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);

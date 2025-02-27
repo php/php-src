@@ -145,7 +145,6 @@ extern "C" {
 #define ir_MOD_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_MOD, (_op1), (_op2))
 
 #define ir_NEG(_type, _op1)               ir_UNARY_OP(IR_NEG, (_type), (_op1))
-#define ir_NEG_A(_op1)                    ir_UNARY_OP_A(IR_NEG, (_op1))
 #define ir_NEG_C(_op1)                    ir_UNARY_OP_C(IR_NEG, (_op1))
 #define ir_NEG_I8(_op1)                   ir_UNARY_OP_I8(IR_NEG, (_op1))
 #define ir_NEG_I16(_op1)                  ir_UNARY_OP_I16(IR_NEG, (_op1))

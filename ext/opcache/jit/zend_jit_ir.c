@@ -1984,6 +1984,16 @@ static int zend_jit_exception_handler_free_op2_stub(zend_jit_ctx *jit)
 	return 1;
 }
 
+static void zend_jit_vm_enter(zend_jit_ctx *jit, ir_ref to_opline)
+{
+	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR((uintptr_t)1ULL<<63)));
+}
+
+static void zend_jit_vm_leave(zend_jit_ctx *jit, ir_ref to_opline)
+{
+	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR((uintptr_t)1ULL<<63)));
+}
+
 static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 {
 	ir_ref if_timeout, if_exception;
@@ -2011,7 +2021,7 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 	if (GCC_GLOBAL_REGS) {
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
-		ir_RETURN(ir_NEG_A(jit_IP(jit))); // ZEND_VM_ENTER
+		zend_jit_vm_enter(jit, jit_IP(jit));
 	}
 	return 1;
 }
@@ -2212,7 +2222,7 @@ static int zend_jit_leave_throw_stub(zend_jit_ctx *jit)
 		// JIT: HANDLE_EXCEPTION()
 		ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler));
 	} else {
-		ir_RETURN(ir_NEG_A(jit_IP(jit))); // ZEND_VM_LEAVE
+		zend_jit_vm_leave(jit, jit_IP(jit));
 	}
 
 	return 1;
@@ -2407,8 +2417,7 @@ static int zend_jit_trace_escape_stub(zend_jit_ctx *jit)
 	if (GCC_GLOBAL_REGS) {
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
-		// TODO: tailcall?
-		ir_RETURN(ir_NEG_A(jit_IP(jit))); // ZEND_VM_ENTER
+		zend_jit_vm_enter(jit, jit_IP(jit));
 	}
 
 	return 1;
@@ -2427,15 +2436,15 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 
 	ir_IF_TRUE(if_zero);
 
+	ref = jit_EG(current_execute_data);
+	jit_STORE_FP(jit, ir_LOAD_A(ref));
+	ref = ir_LOAD_A(jit_EX(opline));
+	jit_STORE_IP(jit, ref);
+
 	if (GCC_GLOBAL_REGS) {
-		ref = jit_EG(current_execute_data);
-		jit_STORE_FP(jit, ir_LOAD_A(ref));
-		ref = ir_LOAD_A(jit_EX(opline));
-		jit_STORE_IP(jit, ref);
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
-		ref = ir_LOAD_A(jit_EX(opline));
-		ir_RETURN(ir_NEG_A(ref)); // ZEND_VM_ENTER
+		zend_jit_vm_enter(jit, ref);
 	}
 
 	ir_IF_FALSE(if_zero);
@@ -2459,12 +2468,7 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 		addr = ir_CAST_FC_FUNC(addr);
 #endif
 		ref = ir_CALL_2(IR_ADDR, addr, jit_FP(jit), jit_IP(jit));
-		// Force reload execute_ex in VM
-		ir_ref is_positive = ir_IF(ir_GE(ref, ir_CONST_I32(0)));
-		ir_IF_TRUE(is_positive);
-		ir_RETURN(ir_NEG_A(ref)); // ZEND_VM_ENTER
-		ir_IF_FALSE(is_positive);
-		ir_RETURN(ref);
+		zend_jit_vm_enter(jit, ref);
 	}
 
 	return 1;
@@ -4220,12 +4224,7 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 		  || opline->opcode == ZEND_THROW
 		  || opline->opcode == ZEND_VERIFY_NEVER_TYPE)) {
 			ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
-			// Force reload execute_ex in VM (TODO: check if we actually need this)
-			ir_ref is_positive = ir_IF(ir_GE(ip, ir_CONST_I32(0)));
-			ir_IF_TRUE(is_positive);
-			ir_RETURN(ir_NEG_A(ip)); // ZEND_VM_ENTER
-			ir_IF_FALSE(is_positive);
-			ir_RETURN(ip);
+			zend_jit_vm_enter(jit, ip);
 		} else {
 			ir_TAILCALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
 		}
@@ -10489,7 +10488,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				if (GCC_GLOBAL_REGS) {
 					ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 				} else {
-					ir_RETURN(ir_NEG_A(jit_IP(jit))); // ZEND_VM_ENTER
+					zend_jit_vm_enter(jit, jit_IP(jit));
 				}
 			} while (0);
 
@@ -11256,7 +11255,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 	if (GCC_GLOBAL_REGS) {
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
-		ir_RETURN(ir_NEG_A(jit_IP(jit))); // ZEND_VM_LEAVE
+		zend_jit_vm_leave(jit, jit_IP(jit));
 	}
 
 	jit->b = -1;
@@ -17381,7 +17380,7 @@ static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const
 				return 1;
 			}
 		}
-		ir_RETURN(ir_NEG_A(jit_IP(jit))); // ZEND_VM_RETURN
+		zend_jit_vm_enter(jit, jit_IP(jit));
 	}
 	return 1;
 }

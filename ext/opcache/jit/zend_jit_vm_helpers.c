@@ -75,14 +75,14 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPC
 			zval_ptr_dtor(EX_VAR(old_opline->result.var));
 		}
 #ifndef HAVE_GCC_GLOBAL_REGS
-		return (zend_op*)-(uintptr_t)EG(current_execute_data)->opline;
+		return (zend_op*)((uintptr_t)EG(current_execute_data)->opline | (1ULL<<63));
 #endif
 	} else {
 		EX(opline)++;
 #ifdef HAVE_GCC_GLOBAL_REGS
 		opline = EX(opline);
 #else
-		return (zend_op*)-(uintptr_t)EX(opline);
+		return (zend_op*)((uintptr_t)EX(opline) | (1ULL<<63));
 #endif
 	}
 }
@@ -420,7 +420,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 #ifdef HAVE_GCC_GLOBAL_REGS
 		return;
 #else
-		return opline ? (zend_op*)-(uintptr_t)opline : NULL; // ZEND_VM_ENTER() : ZEND_VM_RETURN()
+		return opline ? (zend_op*)((uintptr_t)opline | (1ULL<<63)) : NULL; // ZEND_VM_ENTER() : ZEND_VM_RETURN()
 #endif
 	} else {
 		zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)ZEND_OP_TRACE_INFO(opline, offset)->orig_handler;
@@ -1000,8 +1000,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				/* return after interrupt handler */
 				ZEND_ASSERT(0 && "TODO");
 			}
-			opline = (zend_op*)-(uintptr_t)opline;
-			ZEND_ASSERT((intptr_t)opline > 0);
+			opline = (zend_op*)((uintptr_t)opline & ~(1ULL<<63));
 			execute_data = EG(current_execute_data);
 #endif
 
