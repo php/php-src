@@ -120,7 +120,6 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_arr
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
 	ast->op_array = op_array;
-	function_add_ref((zend_function *)op_array);
 
 	return (zend_ast *) ast;
 }
@@ -1355,8 +1354,7 @@ tail_call:
 	} else if (EXPECTED(ast->kind == ZEND_AST_CONSTANT)) {
 		zend_string_release_ex(zend_ast_get_constant_name(ast), 0);
 	} else if (EXPECTED(ast->kind == ZEND_AST_OP_ARRAY)) {
-		zend_ast_op_array *op_array = zend_ast_get_op_array(ast);
-		destroy_op_array(op_array->op_array);
+		destroy_op_array(zend_ast_get_op_array(ast)->op_array);
 	} else if (EXPECTED(zend_ast_is_decl(ast))) {
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
