@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-17376 (Broken JIT polymorphism for property hooks added to
     child class). (ilutov)
+  . Fixed bug GH-17913 (ReflectionFunction::isDeprecated() returns incorrect
+    results for closures created from magic __call()). (timwolla)
 
 27 Feb 2025, PHP 8.4.5
 
