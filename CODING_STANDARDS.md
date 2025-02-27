@@ -174,7 +174,7 @@ rewritten to comply with these rules.
     connect()
     getData()
     buildSomeWidget()
-    performHttpRequest()
+    performhttpRequest()
     ```
 
     Bad method names:
@@ -183,7 +183,7 @@ rewritten to comply with these rules.
     get_Data()
     buildsomewidget()
     getI()
-    performHTTPRequest()
+    performhttpsRequest()
     ```
 
     Good class names:
@@ -191,7 +191,7 @@ rewritten to comply with these rules.
     ```php
     Curl
     CurlResponse
-    HttpStatusCode
+    httpStatusCode
     Url
     BtreeMap // B-tree Map
     UserId // User Identifier
@@ -207,10 +207,10 @@ rewritten to comply with these rules.
     ```php
     curl
     curl_response
-    HTTPStatusCode
+    httpstatusCode
     URL
     BTreeMap
-    UserID // User Identifier
+    UserID //User Identifier
     CHAR
     INTL
     SSL\Certificate
