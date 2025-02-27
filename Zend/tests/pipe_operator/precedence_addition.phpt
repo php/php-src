@@ -7,8 +7,6 @@ function _test1(int $a): int {
     return $a * 2;
 }
 
-$bad_func = null;
-
 // This should add 5+2 first, then pipe that to _test1.
 $res1 = 5 + 2 |>  '_test1';
 
