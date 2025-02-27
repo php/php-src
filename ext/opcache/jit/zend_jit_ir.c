@@ -2672,7 +2672,15 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 #else /* IR_TARGET_x86 */
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 11; /* 4 saved registers and 7 spill slots (4 bytes) */
 #endif
+			/* JIT-ed code is called only from execute_ex, which takes care
+			 * of saving ZREG_FP, ZREG_IP when GCC_GLOBAL_REGS is 1, so we don't
+			 * have to save them. When GCC_GLOBAL_REGS is 1, always save them.
+			 */
+#if GCC_GLOBAL_REGS
 			jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
+#else
+			jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED;
+#endif
 //#ifdef _WIN64
 //				jit->ctx.fixed_save_regset &= 0xffff; // TODO: don't save FP registers ???
 //#endif
@@ -17072,6 +17080,12 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 	} else {
 		ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
+		if (opline->opcode == ZEND_RETURN ||
+		    opline->opcode == ZEND_RETURN_BY_REF ||
+		    opline->opcode == ZEND_GENERATOR_CREATE) {
+			// TODO: what other ops need this?
+			ref = ir_AND_A(ref, ir_CONST_ADDR(~(1ULL<<63)));
+		}
 		jit_LOAD_IP(jit, ref);
 	}
 	if (may_throw

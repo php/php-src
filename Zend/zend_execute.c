@@ -71,41 +71,6 @@
 # endif
 #endif
 
-#ifdef __clang__
-# if defined(i386)
-#  define ZEND_VM_FP_LOCAL_REG "%esi"
-#  define ZEND_VM_IP_LOCAL_REG "%edi"
-# elif defined(__x86_64__)
-#  define ZEND_VM_FP_LOCAL_REG "%r14"
-#  define ZEND_VM_IP_LOCAL_REG "%r15"
-// TODO: not portable
-#  define ZEND_VM_SAVE_REGISTER(reg, r) __asm__ volatile (      \
-		"movq %" reg ", %0"                                     \
-		: "=r" (r)                                              \
-		:                                                       \
-		:                                                       \
-	)
-#  define ZEND_VM_RESTORE_REGISTER(reg, r) __asm__ volatile (   \
-		"movq %0, %" reg                                        \
-		:                                                       \
-		: "r" (r)                                               \
-		: reg                                                   \
-	)
-# elif defined(__powerpc64__)
-#  define ZEND_VM_FP_LOCAL_REG "r14"
-#  define ZEND_VM_IP_LOCAL_REG "r15"
-# elif defined(__IBMC__) && ZEND_GCC_VERSION >= 4002 && defined(__powerpc64__)
-#  define ZEND_VM_FP_LOCAL_REG "r14"
-#  define ZEND_VM_IP_LOCAL_REG "r15"
-# elif defined(__aarch64__)
-#  define ZEND_VM_FP_LOCAL_REG "x27"
-#  define ZEND_VM_IP_LOCAL_REG "x28"
-# elif defined(__riscv) && __riscv_xlen == 64
-#  define ZEND_VM_FP_LOCAL_REG "x18"
-#  define ZEND_VM_IP_LOCAL_REG "x19"
-# endif
-#endif
-
 #if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 # pragma GCC diagnostic ignored "-Wvolatile-register-var"
   register zend_execute_data* volatile execute_data __asm__(ZEND_VM_FP_GLOBAL_REG);
