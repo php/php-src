@@ -1890,6 +1890,18 @@ static void zend_jit_check_timeout(zend_jit_ctx *jit, const zend_op *opline, con
 	}
 }
 
+static void zend_jit_vm_enter(zend_jit_ctx *jit, ir_ref to_opline)
+{
+	// ZEND_VM_ENTER()
+	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR((uintptr_t)1ULL<<63)));
+}
+
+static void zend_jit_vm_leave(zend_jit_ctx *jit, ir_ref to_opline)
+{
+	// ZEND_VM_LEAVE()
+	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR((uintptr_t)1ULL<<63)));
+}
+
 /* stubs */
 
 static int zend_jit_exception_handler_stub(zend_jit_ctx *jit)
@@ -1902,15 +1914,13 @@ static int zend_jit_exception_handler_stub(zend_jit_ctx *jit)
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
-		// TODO: zend_get_opcode_handler_func
 		handler = EG(exception_op)->handler;
 
 		if (GCC_GLOBAL_REGS) {
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
 		} else {
-			// TODO: tail call?
 			ir_ref ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
-			ir_RETURN(ref);
+			zend_jit_vm_enter(jit, ref);
 		}
 	}
 	return 1;
@@ -1982,16 +1992,6 @@ static int zend_jit_exception_handler_free_op2_stub(zend_jit_ctx *jit)
 	ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler_undef));
 
 	return 1;
-}
-
-static void zend_jit_vm_enter(zend_jit_ctx *jit, ir_ref to_opline)
-{
-	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR((uintptr_t)1ULL<<63)));
-}
-
-static void zend_jit_vm_leave(zend_jit_ctx *jit, ir_ref to_opline)
-{
-	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR((uintptr_t)1ULL<<63)));
 }
 
 static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
@@ -17390,7 +17390,7 @@ static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const
 			  || opline->opcode == ZEND_GENERATOR_CREATE
 			  || opline->opcode == ZEND_YIELD
 			  || opline->opcode == ZEND_YIELD_FROM)) {
-				ir_RETURN(ref);
+				zend_jit_vm_enter(jit, ref);
 				return 1;
 			}
 		}
