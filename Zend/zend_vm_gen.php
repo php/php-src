@@ -2175,7 +2175,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 "# endif\n" .
                                 $m[1]."return;\n" .
                                 "#else\n" .
-                                $m[1]."if (EXPECTED(opline != NULL)) {\n" .
+                                $m[1]."if (EXPECTED(opline != NULL && (uintptr_t)opline != (1ULL<<63))) {\n" .
                                 $m[1]."\topline = (zend_op*)((uintptr_t)opline & ~(1ULL<<63));\n".
                                 $m[1]."\texecute_data = EG(current_execute_data);\n".
                                 $m[1]."\tZEND_VM_LOOP_INTERRUPT_CHECK();\n".
