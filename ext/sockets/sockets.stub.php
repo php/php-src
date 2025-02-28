@@ -2013,6 +2013,11 @@ const ETH_P_LOOP = UNKNOWN;
  * @cvalue ETH_P_ALL
  */
 const ETH_P_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_FRAME_LEN
+ */
+const ETH_FRAME_LEN = UNKNOWN;
 #endif
 
 /**
@@ -2155,4 +2160,54 @@ function socket_wsaprotocol_info_export(Socket $socket, int $process_id): string
 function socket_wsaprotocol_info_import(string $info_id): Socket|false {}
 
 function socket_wsaprotocol_info_release(string $info_id): bool {}
+#endif
+
+#ifdef AF_PACKET
+readonly class Packet
+{
+	public int $headersize;
+	public ?string $rawpacket;
+}
+
+
+final readonly class EthernetPacket extends Packet
+{
+	public Socket $socket;
+	public int $ethprotocol;
+	public string $macsrc;
+	public string $macdst;
+	public Ipv4Packet|Ipv6Packet|EthernetPacket|null $payload;
+}
+
+final readonly class TcpPacket extends Packet
+{
+	public string $srcaddr;
+	public string $dstaddr;
+	public string $srcport;
+	public string $dstport;
+	public ?object $payload;
+}
+
+final readonly class UdpPacket extends Packet
+{
+	public string $srcaddr;
+	public string $dstaddr;
+	public string $srcport;
+	public string $dstport;
+	public ?object $payload;
+}
+
+final readonly class Ipv4Packet extends Packet
+{
+	public string $srcaddr;
+	public string $dstaddr;
+	public ?object $payload;
+}
+
+final readonly class Ipv6Packet extends Packet
+{
+	public string $srcaddr;
+	public string $dstaddr;
+	public ?object $payload;
+}
 #endif
