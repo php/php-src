@@ -1887,13 +1887,13 @@ static void zend_jit_check_timeout(zend_jit_ctx *jit, const zend_op *opline, con
 static void zend_jit_vm_enter(zend_jit_ctx *jit, ir_ref to_opline)
 {
 	// ZEND_VM_ENTER()
-	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR((uintptr_t)1ULL<<63)));
+	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR(ZEND_VM_ENTER_BIT)));
 }
 
 static void zend_jit_vm_leave(zend_jit_ctx *jit, ir_ref to_opline)
 {
 	// ZEND_VM_LEAVE()
-	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR((uintptr_t)1ULL<<63)));
+	ir_RETURN(ir_OR_A(to_opline, ir_CONST_ADDR(ZEND_VM_ENTER_BIT)));
 }
 
 /* stubs */
@@ -17078,7 +17078,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		    opline->opcode == ZEND_RETURN_BY_REF ||
 		    opline->opcode == ZEND_GENERATOR_CREATE) {
 			// TODO: what other ops need this?
-			ref = ir_AND_A(ref, ir_CONST_ADDR(~(1ULL<<63)));
+			ref = ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT));
 		}
 		jit_LOAD_IP(jit, ref);
 	}

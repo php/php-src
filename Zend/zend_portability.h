@@ -864,4 +864,8 @@ static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
 # define ZEND_OPCACHE_SHM_REATTACHMENT 1
 #endif
 
+#ifndef UINTPTR_WIDTH
+# define UINTPTR_WIDTH (CHAR_BITS * sizeof(uintptr_t))
+#endif
+
 #endif /* ZEND_PORTABILITY_H */
