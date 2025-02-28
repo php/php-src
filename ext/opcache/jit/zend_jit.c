@@ -3102,7 +3102,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLE
 				}
 			}
 			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
-			opline->handler = jit_extension->orig_handler;
+			((zend_op*)opline)->handler = jit_extension->orig_handler;
 
 			/* perform real JIT for this function */
 			zend_real_jit_func(op_array, NULL, NULL, ZEND_JIT_ON_FIRST_EXEC);
