@@ -1050,6 +1050,37 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifi
 			return 0;
 		}
 	}
+	if (target == ZEND_MODIFIER_TARGET_INNER_CLASS) {
+		if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Multiple access type modifiers are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_STATIC) || (new_flag & ZEND_ACC_STATIC)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Static inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PUBLIC_SET) || (new_flag & ZEND_ACC_PUBLIC_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Public(set) inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PROTECTED_SET) || (new_flag & ZEND_ACC_PROTECTED_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Protected(set) inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PRIVATE_SET) || (new_flag & ZEND_ACC_PRIVATE_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Private(set) inner classes are not allowed", 0);
+			return 0;
+		}
+	}
 	return new_flags;
 }
 /* }}} */
@@ -2244,6 +2275,7 @@ static void zend_adjust_for_fetch_type(zend_op *opline, znode *result, uint32_t 
 
 	switch (type) {
 		case BP_VAR_R:
+		case BP_VAR_INNER_CLASS:
 			opline->result_type = IS_TMP_VAR;
 			result->op_type = IS_TMP_VAR;
 			return;
@@ -3229,6 +3261,8 @@ static zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t 
 
 	if (delayed) {
 		opline = zend_delayed_emit_op(result, ZEND_FETCH_STATIC_PROP_R, &prop_node, NULL);
+	} else if (ast->kind == ZEND_AST_INNER_CLASS) {
+		opline = zend_emit_op(result, ZEND_FETCH_INNER_CLASS, &prop_node, NULL);
 	} else {
 		opline = zend_emit_op(result, ZEND_FETCH_STATIC_PROP_R, &prop_node, NULL);
 	}
@@ -6962,6 +6996,18 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		}
 
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
+	} else if (ast->kind == ZEND_AST_INNER_CLASS) {
+		zval cnz;
+		zend_try_compile_const_expr_resolve_class_name(&cnz, ast->child[0]);
+		zend_string *class_name = Z_STR(cnz);
+		zend_string *const_name = zend_ast_get_str(ast->child[1]);
+		zend_string *inner_class_name = zend_string_concat3(
+			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
+			"::", 2,
+			ZSTR_VAL(const_name), ZSTR_LEN(const_name));
+		zend_string_release(class_name);
+
+		return (zend_type) ZEND_TYPE_INIT_CLASS(inner_class_name, /* allow null */ false, 0);
 	} else {
 		zend_string *type_name = zend_ast_get_str(ast);
 		uint8_t type_code = zend_lookup_builtin_type_by_name(type_name);
@@ -9054,12 +9100,55 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	zend_class_entry *original_ce = CG(active_class_entry);
 
+	// handle short syntax, which involves rewiting the AST before continuing
+	if (decl->flags & ZEND_ACC_SHORT_SYNTAX) {
+		// child 0 is extends
+		// child 1 is implements
+		// child 2 is parameter list
+		// child 3 is traits
+
+		// we need to replace child 2 (stmt_ast) with a new AST:
+		// 1. that includes the constructor ensuring that the constructor properties are declared as "public" if not
+		// currently declared.
+		// 2. that includes the declared traits
+		// from there, we just continue as normal
+
+		// Create a new AST node for the new statement list which will eventually replace stmt_ast
+		zend_ast *new_stmt_ast = zend_ast_create_list(0, ZEND_AST_STMT_LIST);
+
+		// Create a new AST node for the constructor, setting any parameters to public
+		if (decl->child[2]) {
+			zend_ast_list *params = zend_ast_get_list(decl->child[2]);
+
+			for (uint32_t i = 0; i < params->children; i++) {
+				ZEND_ASSERT(params->child[i]->kind == ZEND_AST_PARAM);
+				if (params->child[i]->attr < ZEND_ACC_PUBLIC) {
+					params->child[i]->attr = ZEND_ACC_PUBLIC;
+				}
+			}
+
+			zend_ast *constructor_ast = zend_ast_create_decl(ZEND_AST_METHOD, ZEND_ACC_PUBLIC, decl->start_lineno, decl->doc_comment, zend_string_init("__construct", sizeof("__construct") - 1, 0), decl->child[2], NULL, zend_ast_create_list(0, ZEND_AST_STMT_LIST), NULL, NULL);
+
+			// Add the constructor to the new statement list
+			zend_ast_list_add(new_stmt_ast, constructor_ast);
+		}
+
+		// update both the new statement ast and the original children to be cleaned up.
+		stmt_ast = new_stmt_ast;
+		decl->child[2] = new_stmt_ast;
+
+		// finally, we now need to add "use" statements for the traits
+		if (decl->child[3]) {
+			zend_ast *use_trait_ast = zend_ast_create(ZEND_AST_USE_TRAIT, decl->child[3], NULL);
+			zend_ast_list_add(new_stmt_ast, use_trait_ast);
+		}
+
+		// and finally, remove the list of traits from the original decl
+		decl->child[3] = NULL;
+	}
+
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		zend_string *unqualified_name = decl->name;
-
-		if (CG(active_class_entry)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
-		}
 
 		const char *type = "a class name";
 		if (decl->flags & ZEND_ACC_ENUM) {
@@ -9069,8 +9158,64 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		} else if (decl->flags & ZEND_ACC_TRAIT) {
 			type = "a trait name";
 		}
+
 		zend_assert_valid_class_name(unqualified_name, type);
-		name = zend_prefix_with_ns(unqualified_name);
+
+		// check to make sure we are in a class body and not a function body
+		if (CG(active_class_entry) && CG(active_op_array)->function_name) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
+		}
+
+		if (CG(active_class_entry)) {
+			// we have a nested class that needs to be renamed
+			// so append the unqualified name to the nested parent name
+			// but prevent nesting more than 1 level deep
+			if (zend_memnstr(ZSTR_VAL(CG(active_class_entry)->name), "::", sizeof("::") - 1, ZSTR_VAL(CG(active_class_entry)->name) + ZSTR_LEN(CG(active_class_entry)->name))) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot nest classes more than 1 level deep");
+			}
+			name = zend_string_concat3(
+				ZSTR_VAL(CG(active_class_entry)->name), ZSTR_LEN(CG(active_class_entry)->name),
+				"::", 2,
+				ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+
+			zval name_zv;
+			ZVAL_STR(&name_zv, name);
+			GC_ADDREF(name);
+
+			// configure the current ce->flags for a nested class. This should only include:
+			// - final
+			// - readonly
+			// - abstract
+			ce->ce_flags |= decl->attr & (ZEND_ACC_FINAL|ZEND_ACC_READONLY|ZEND_ACC_ABSTRACT);
+
+			// configure the property/const stand-ins for a nested class. This should only include:
+			// - public
+			// - private
+			// - protected
+			int propFlags = (decl->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE)) | ZEND_ACC_INNER_CLASS_REFERENCE;
+
+			// there are two things we need to inject into the nested parent:
+			// - a static property that contains the name of the nested class
+			// - a constant that contains the name of the nested class
+			// this "tricks" the engine into thinking that the nested class is a normal class
+			zend_type t = ZEND_TYPE_INIT_CODE(IS_STRING, 0, 0);
+			zval propz, constz;
+			ZVAL_COPY_OR_DUP(&propz, &name_zv);
+			ZVAL_COPY_OR_DUP(&constz, &name_zv);
+			zend_declare_typed_property(CG(active_class_entry), unqualified_name, &propz, propFlags | ZEND_ACC_STATIC | ZEND_ACC_READONLY, decl->doc_comment, t);
+			zend_declare_class_constant_ex(CG(active_class_entry), unqualified_name, &constz, propFlags, decl->doc_comment);
+			ZVAL_PTR_DTOR(&name_zv);
+
+			// if a class is private or protected, we need to require scope for type checks
+			ce->required_scope = propFlags & (ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE) ? CG(active_class_entry) : NULL;
+			ce->required_scope_absolute = propFlags & (ZEND_ACC_PRIVATE) ? true : false;
+
+			// oh, and make sure we emit the right opcodes
+			toplevel = true;
+		} else {
+			name = zend_prefix_with_ns(unqualified_name);
+			ce->required_scope = NULL;
+		}
 		name = zend_new_interned_string(name);
 		lcname = zend_string_tolower(name);
 
@@ -10853,7 +10998,18 @@ static void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 		if (Z_TYPE_P(const_zv) == IS_STRING) {
 			zend_string *const_str = Z_STR_P(const_zv);
 			zend_string *resolved_name = zend_resolve_class_name_ast(class_ast);
-			if (zend_try_ct_eval_class_const(&result->u.constant, resolved_name, const_str)) {
+
+			// check to see if there is a class registered at resolved_name::const_str
+			zend_string *name = zend_string_concat3(
+			ZSTR_VAL(resolved_name), ZSTR_LEN(resolved_name),
+				"::", 2,
+				ZSTR_VAL(const_str), ZSTR_LEN(const_str));
+
+			zend_str_tolower(ZSTR_VAL(name), ZSTR_LEN(name));
+
+			zend_class_entry *ce = zend_lookup_class_ex(name, name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+			zend_string_release(name);
+			if (!ce && zend_try_ct_eval_class_const(&result->u.constant, resolved_name, const_str)) {
 				result->op_type = IS_CONST;
 				zend_string_release_ex(resolved_name, 0);
 				return;
@@ -11591,6 +11747,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
 			zend_compile_var(result, ast, BP_VAR_R, 0);
 			return;
+		case ZEND_AST_INNER_CLASS:
+			zend_compile_var(result, ast, BP_VAR_INNER_CLASS, 0);
+			return;
 		case ZEND_AST_ASSIGN:
 			zend_compile_assign(result, ast);
 			return;
@@ -11737,6 +11896,7 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 		case ZEND_AST_NULLSAFE_PROP:
 			return zend_compile_prop(result, ast, type, by_ref);
 		case ZEND_AST_STATIC_PROP:
+		case ZEND_AST_INNER_CLASS:
 			return zend_compile_static_prop(result, ast, type, by_ref, 0);
 		case ZEND_AST_CALL:
 			zend_compile_call(result, ast, type);
