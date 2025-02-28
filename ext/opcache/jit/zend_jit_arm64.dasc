@@ -8658,7 +8658,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		if (!func) {
 			|	ldrb TMP1w, [REG0, #offsetof(zend_closure, func.type)]
 			|	cmp TMP1w, #ZEND_USER_FUNCTION
-			|	beq >1
+			|	bne >1
 		}
 		if (!func || func->common.type == ZEND_USER_FUNCTION) {
 			|	add FCARG1x, REG0, #offsetof(zend_closure, func)
