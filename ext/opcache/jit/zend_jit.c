@@ -3076,7 +3076,14 @@ jit_failure:
 /* Run-time JIT handler */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS)
 {
+#if GCC_GLOBAL_REGS
+	zend_execute_data *execute_data;
+	zend_op *opline;
+#endif
+
+	execute_data = EG(current_execute_data);
 	zend_op_array *op_array = &EX(func)->op_array;
+	opline = op_array->opcodes;
 	zend_jit_op_array_extension *jit_extension;
 	bool do_bailout = 0;
 
@@ -3095,7 +3102,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLE
 				}
 			}
 			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
-			((zend_op*)opline)->handler = jit_extension->orig_handler;
+			opline->handler = jit_extension->orig_handler;
 
 			/* perform real JIT for this function */
 			zend_real_jit_func(op_array, NULL, NULL, ZEND_JIT_ON_FIRST_EXEC);
@@ -3113,11 +3120,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLE
 		zend_bailout();
 	}
 
-#if GCC_GLOBAL_REGS
-	opline = op_array->opcodes;
-	return;
-#else
 	/* JIT-ed code is going to be called by VM */
+#if GCC_GLOBAL_REGS
+	return; // ZEND_VM_CONTINUE
+#else
 	return op_array->opcodes; // ZEND_VM_CONTINUE
 #endif
 }
