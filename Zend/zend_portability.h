@@ -59,6 +59,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef HAVE_DLFCN_H
 # include <dlfcn.h>
@@ -862,6 +863,10 @@ static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
  * this platform. This prevents pointing to internal structures from shm due to
  * ASLR. Currently only possible on Windows. */
 # define ZEND_OPCACHE_SHM_REATTACHMENT 1
+#endif
+
+#ifndef CHAR_BITS
+# define CHAR_BITS 8
 #endif
 
 #ifndef UINTPTR_WIDTH
