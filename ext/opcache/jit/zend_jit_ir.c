@@ -29,14 +29,8 @@
 #elif defined(IR_TARGET_X64)
 # define IR_REG_SP            4 /* IR_REG_RSP */
 # define IR_REG_FP            5 /* IR_REG_RBP */
-# if 1 || GCC_GLOBAL_REGS
-#  define ZREG_FP             14 /* IR_REG_R14 */
-#  define ZREG_IP             15 /* IR_REG_R15 */
-# else
-/* Use callee-saved registers */
-#  define ZREG_FP             14 /* IR_REG_R10 */
-#  define ZREG_IP             15 /* IR_REG_R11 */
-# endif
+# define ZREG_FP             14 /* IR_REG_R14 */
+# define ZREG_IP             15 /* IR_REG_R15 */
 # define ZREG_FIRST_FPR      16
 # if defined(_WIN64)
 #  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15))
