@@ -89,6 +89,10 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 /* }}} */
 
 static const char *php_var_dump_object_prefix(zend_object *obj) {
+	if (obj->ce->ce_flags & ZEND_ACC_DATA_CLASS) {
+		return "data ";
+	}
+
 	if (EXPECTED(!zend_object_is_lazy(obj))) {
 		return "";
 	}
