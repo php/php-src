@@ -301,6 +301,7 @@ PHP 8.5 UPGRADE NOTES
   . TCP_BBR_ALGORITHM (FreeBSD only).
   . AF_PACKET (Linux only).
   . IP_BINDANY (FreeBSD/NetBSD/OpenBSD only).
+  . SO_BUSY_POLL (Linux only).
 
 ========================================
 11. Changes to INI File Handling
