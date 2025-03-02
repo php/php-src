@@ -129,7 +129,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract
      * @tentative-return-type
      */
     #[\Deprecated(since: '8.0', message: "as ReflectionFunction can no longer be constructed for disabled functions")]
-    public function isDisabled(): bool {}
+    public function isDisabled(): false {}
 
     /** @tentative-return-type */
     public function invoke(mixed ...$args): mixed {}
