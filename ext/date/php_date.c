@@ -4618,6 +4618,7 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 		zend_string_equals_literal(name, "days") ||
 		zend_string_equals_literal(name, "invert") ) {
 		/* Fallback to read_property. */
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 		ret = NULL;
 	} else {
 		ret = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);

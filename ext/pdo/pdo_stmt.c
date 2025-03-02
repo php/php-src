@@ -2491,6 +2491,7 @@ static zval *pdo_row_get_property_ptr_ptr(zend_object *object, zend_string *name
 	ZEND_IGNORE_VALUE(type);
 	ZEND_IGNORE_VALUE(cache_slot);
 
+	cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	return NULL;
 }
 

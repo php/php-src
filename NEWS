@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17913 (ReflectionFunction::isDeprecated() returns incorrect
     results for closures created from magic __call()). (timwolla)
 
+- Treewide:
+  . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
+
 27 Feb 2025, PHP 8.4.5
 
 - BCMath:
