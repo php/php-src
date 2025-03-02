@@ -30,6 +30,11 @@ if test "$PHP_EMBED" != "no"; then
       [php_embed.c],
       [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
+    PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/embed/Makefile.frag],
+      [$abs_srcdir/sapi/embed],
+      [sapi/embed])
+    AC_CONFIG_FILES([sapi/embed/php-embed.pc])
+    install_embed=install-embed
   ])
 else
   AC_MSG_RESULT([no])
