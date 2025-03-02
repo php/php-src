@@ -340,6 +340,52 @@ const IMG_AFFINE_SHEAR_VERTICAL = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue GD_CMP_IMAGE
+ */
+const IMG_CMP_IMAGE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_CMP_NUM_COLORS
+ */
+const IMG_CMP_NUM_COLORS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_CMP_COLOR
+ */
+const IMG_CMP_COLOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_CMP_SIZE_X
+ */
+const IMG_CMP_SIZE_X = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_CMP_SIZE_Y
+ */
+const IMG_CMP_SIZE_Y = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_CMP_TRANSPARENT
+ */
+const IMG_CMP_TRANSPARENT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_CMP_BACKGROUND
+ */
+const IMG_CMP_BACKGROUND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_CMP_INTERLACE
+ */
+const IMG_CMP_INTERLACE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_CMP_TRUECOLOR
+ */
+const IMG_CMP_TRUECOLOR = UNKNOWN;
+
+/**
+ * @var int
  * @cvalue GD_BUNDLED
  */
 const GD_BUNDLED = UNKNOWN;
@@ -794,3 +840,5 @@ function imagesetinterpolation(GdImage $image, int $method = IMG_BILINEAR_FIXED)
  * @refcount 1
  */
 function imageresolution(GdImage $image, ?int $resolution_x = null, ?int $resolution_y = null): array|bool {}
+
+function imagecompare(GdImage $image1, GdImage $image2): int {}
