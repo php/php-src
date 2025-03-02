@@ -889,6 +889,8 @@ static zval *php_zip_get_property_ptr_ptr(zend_object *object, zend_string *name
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
 
+	cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+
 	obj = php_zip_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
