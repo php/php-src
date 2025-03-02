@@ -131,7 +131,7 @@ X-Powered-By: PHP/%s
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
-<!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
+<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>404 Not Found</title><style>AAA</style>
 </head><body><h1>Not Found</h1><p>The requested resource <code class="url">/</code> was not found on this server.</p></body></html>
 HTTP/1.1 404 Not Found
 Host: %s
@@ -141,7 +141,7 @@ X-Powered-By: PHP/%s
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
-<!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
+<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>404 Not Found</title><style>AAA</style>
 </head><body><h1>Not Found</h1><p>The requested resource <code class="url">/main/style.css</code> was not found on this server.</p></body></html>
 HTTP/1.1 404 Not Found
 Host: %s
@@ -161,7 +161,7 @@ Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 Allow: GET, HEAD, POST
 
-<!doctype html><html><head><title>405 Method Not Allowed</title><style>AAA</style>
+<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>405 Method Not Allowed</title><style>AAA</style>
 </head><body><h1>Method Not Allowed</h1><p>Requested method not allowed.</p></body></html>
 HTTP/1.1 405 Method Not Allowed
 Host: %s
@@ -172,7 +172,7 @@ Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 Allow: GET, HEAD, POST
 
-<!doctype html><html><head><title>405 Method Not Allowed</title><style>AAA</style>
+<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>405 Method Not Allowed</title><style>AAA</style>
 </head><body><h1>Method Not Allowed</h1><p>Requested method not allowed.</p></body></html>
 HTTP/1.1 405 Method Not Allowed
 Host: %s
@@ -183,5 +183,5 @@ Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 Allow: GET, HEAD, POST
 
-<!doctype html><html><head><title>405 Method Not Allowed</title><style>AAA</style>
+<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>405 Method Not Allowed</title><style>AAA</style>
 </head><body><h1>Method Not Allowed</h1><p>Requested method not allowed.</p></body></html>
