@@ -390,14 +390,14 @@ function datefmt_get_error_message(IntlDateFormatter $formatter): string {}
 
 /* formatter */
 
-function numfmt_create(string $locale, int $style, ?string $pattern = null): ?NumberFormatter {}
+function numfmt_create(string $locale, string|int $style, ?string $pattern = null): ?NumberFormatter {}
 
 function numfmt_format(NumberFormatter $formatter, int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 
 /** @param int $offset */
 function numfmt_parse(NumberFormatter $formatter, string $string, int $type = NumberFormatter::TYPE_DOUBLE, &$offset = null): int|float|false {}
 
-function numfmt_format_currency(NumberFormatter $formatter, float $amount, string $currency): string|false {}
+function numfmt_format_currency(NumberFormatter $formatter, float $amount, ?string $currency = null): string|false {}
 
 /**
  * @param string $currency

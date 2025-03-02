@@ -77,6 +77,9 @@ zend_object *NumberFormatter_object_clone(zend_object *object)
 	} else {
 		zend_throw_error(NULL, "Cannot clone uninitialized NumberFormatter");
 	}
+	if (FORMATTER_OBJECT2(nfo) != NULL) {
+		FORMATTER_OBJECT2(new_nfo) = FORMATTER_OBJECT2(nfo);
+	}
 	return new_obj;
 }
 /* }}} */
