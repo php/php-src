@@ -2183,17 +2183,37 @@ sxe_object_new(zend_class_entry *ce)
 }
 /* }}} */
 
+static void sxe_create_obj_from_doc(zval *return_value, xmlDocPtr docp, zend_class_entry *ce, zend_string *ns, bool isprefix)
+{
+	if (!docp) {
+		RETURN_FALSE;
+	}
+
+	zend_function *fptr_count;
+	if (!ce) {
+		ce = ce_SimpleXMLElement;
+		fptr_count = NULL;
+	} else {
+		fptr_count = php_sxe_find_fptr_count(ce);
+	}
+	php_sxe_object *sxe = php_sxe_object_new(ce, fptr_count);
+	sxe->iter.nsprefix = ZSTR_LEN(ns) ? zend_string_copy(ns) : NULL;
+	sxe->iter.isprefix = isprefix;
+	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp);
+	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL);
+
+	RETURN_OBJ(&sxe->zo);
+}
+
 /* {{{ Load a filename and return a simplexml_element object to allow for processing */
 PHP_FUNCTION(simplexml_load_file)
 {
-	php_sxe_object *sxe;
 	char           *filename;
 	size_t             filename_len;
 	xmlDocPtr       docp;
 	zend_string      *ns = zend_empty_string;
 	zend_long            options = 0;
 	zend_class_entry *ce= ce_SimpleXMLElement;
-	zend_function    *fptr_count;
 	bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|C!lSb", &filename, &filename_len, &ce, &options, &ns, &isprefix) == FAILURE) {
@@ -2209,37 +2229,70 @@ PHP_FUNCTION(simplexml_load_file)
 	docp = xmlReadFile(filename, NULL, (int)options);
 	PHP_LIBXML_RESTORE_GLOBALS(read_file);
 
-	if (!docp) {
-		RETURN_FALSE;
-	}
-
-	if (!ce) {
-		ce = ce_SimpleXMLElement;
-		fptr_count = NULL;
-	} else {
-		fptr_count = php_sxe_find_fptr_count(ce);
-	}
-	sxe = php_sxe_object_new(ce, fptr_count);
-	sxe->iter.nsprefix = ZSTR_LEN(ns) ? zend_string_copy(ns) : NULL;
-	sxe->iter.isprefix = isprefix;
-	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp);
-	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL);
-
-	RETURN_OBJ(&sxe->zo);
+	sxe_create_obj_from_doc(return_value, docp, ce, ns, isprefix);
 }
 /* }}} */
+
+static int sxe_stream_read(void *context, char *buffer, int len)
+{
+	zend_resource *resource = context;
+	if (EXPECTED(resource->ptr)) {
+		php_stream *stream = resource->ptr;
+		return php_stream_read(stream, buffer, len);
+	}
+	return -1;
+}
+
+PHP_FUNCTION(simplexml_load_stream)
+{
+	zval		     *stream_zv;
+	php_stream	     *stream;
+	xmlDocPtr         docp;
+	zend_string      *ns = zend_empty_string;
+	zend_long         options = 0;
+	zend_class_entry *ce = ce_SimpleXMLElement;
+	bool              isprefix = 0;
+	const char       *encoding = NULL;
+	const char       *document_uri = NULL;
+	size_t            encoding_len, document_uri_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|p!p!C!lSb",
+		&stream_zv, &encoding, &encoding_len, &document_uri, &document_uri_len, &ce, &options, &ns, &isprefix) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	php_stream_from_res(stream, Z_RES_P(stream_zv));
+
+	if (!php_libxml_is_valid_encoding(encoding)) {
+		zend_argument_value_error(2, "must be a valid character encoding");
+		RETURN_THROWS();
+	}
+
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		zend_argument_value_error(5, "is too large");
+		RETURN_THROWS();
+	}
+
+	if (encoding) {
+		options |= XML_PARSE_IGNORE_ENC;
+	}
+
+	PHP_LIBXML_SANITIZE_GLOBALS(read_file);
+	docp = xmlReadIO(sxe_stream_read, NULL, stream->res, document_uri, encoding, (int) options);
+	PHP_LIBXML_RESTORE_GLOBALS(read_file);
+
+	sxe_create_obj_from_doc(return_value, docp, ce, ns, isprefix);
+}
 
 /* {{{ Load a string and return a simplexml_element object to allow for processing */
 PHP_FUNCTION(simplexml_load_string)
 {
-	php_sxe_object *sxe;
 	char           *data;
 	size_t             data_len;
 	xmlDocPtr       docp;
 	zend_string      *ns = zend_empty_string;
 	zend_long            options = 0;
 	zend_class_entry *ce= ce_SimpleXMLElement;
-	zend_function    *fptr_count;
 	bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|C!lSb", &data, &data_len, &ce, &options, &ns, &isprefix) == FAILURE) {
@@ -2263,23 +2316,7 @@ PHP_FUNCTION(simplexml_load_string)
 	docp = xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
 	PHP_LIBXML_RESTORE_GLOBALS(read_memory);
 
-	if (!docp) {
-		RETURN_FALSE;
-	}
-
-	if (!ce) {
-		ce = ce_SimpleXMLElement;
-		fptr_count = NULL;
-	} else {
-		fptr_count = php_sxe_find_fptr_count(ce);
-	}
-	sxe = php_sxe_object_new(ce, fptr_count);
-	sxe->iter.nsprefix = ZSTR_LEN(ns) ? zend_string_copy(ns) : NULL;
-	sxe->iter.isprefix = isprefix;
-	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp);
-	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL);
-
-	RETURN_OBJ(&sxe->zo);
+	sxe_create_obj_from_doc(return_value, docp, ce, ns, isprefix);
 }
 /* }}} */
 
