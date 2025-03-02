@@ -21,6 +21,7 @@
 #include "php.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_generators.h"
 #include "ext/pcre/php_pcre.h"
 
 #include "spl_iterators.h"
@@ -2812,6 +2813,15 @@ PHP_METHOD(AppendIterator, append)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &it, zend_ce_iterator) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (instanceof_function(Z_OBJCE_P(it), zend_ce_generator)) {
+		zend_generator *gen = (zend_generator*)Z_OBJ_P(it);
+		zend_generator_ensure_initialized(gen);
+		if (gen->execute_data == NULL) {
+			/* Skip an empty generator */
+			return;
+		}
 	}
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
