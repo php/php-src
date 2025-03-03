@@ -9,11 +9,11 @@ namespace {
         /** @cvalue __BIGGEST_ALIGNMENT__ */
         public const int __BIGGEST_ALIGNMENT__ = UNKNOWN;
 
-        public static function cdef(string $code = "", ?string $lib = null): FFI {}
+        public static function cdef(string $code = "", ?string $lib = null): FFI\Scope {}
 
-        public static function load(string $filename): ?FFI {}
+        public static function load(string $filename): ?FFI\Scope {}
 
-        public static function scope(string $name): FFI {}
+        public static function scope(string $name): FFI\Scope {}
 
         public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false): FFI\CData {}
 
@@ -70,6 +70,19 @@ namespace {
 }
 
 namespace FFI {
+
+	/** @not-serializable */
+    final class Scope {
+        public function new(CType|string $type, bool $owned = true, bool $persistent = false): CData {}
+
+        /**
+         * @param CData|int|float|bool|null $ptr
+         * @prefer-ref $ptr
+         */
+        public function cast(CType|string $type, $ptr): CData {}
+
+        public function type(string $type): CType {}
+    }
 
 	/** @not-serializable */
     final class CData {
