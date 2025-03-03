@@ -439,7 +439,7 @@ PHP_FUNCTION(stream_bucket_append)
 /* {{{ Create a new bucket for use on the current stream */
 PHP_FUNCTION(stream_bucket_new)
 {
-	zval *zstream, zbucket;
+	zval zbucket;
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
@@ -447,11 +447,10 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream_bucket *bucket;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(zstream)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STRING(buffer, buffer_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_stream_from_zval(stream, zstream);
 	pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream));
 
 	memcpy(pbuffer, buffer, buffer_len);
