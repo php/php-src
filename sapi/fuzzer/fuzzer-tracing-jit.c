@@ -73,9 +73,9 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"opcache.jit_max_exit_counters=100000\n"
 		"opcache.protect_memory=1\n",
 		opcache_path);
-	free(opcache_path);
 
 	create_file();
 	fuzzer_init_php_for_execute(ini_buf);
+	free(opcache_path);
 	return 0;
 }

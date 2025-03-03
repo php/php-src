@@ -35,6 +35,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	orig_data[Size] = '\0';
 
 	if (fuzzer_request_startup() == FAILURE) {
+		free(orig_data);
 		return 0;
 	}
 
