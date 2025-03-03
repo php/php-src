@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.20
 
+- Core:
+  . Fixed bug GH-17961 (use-after-free during dl()'ed module class destruction).
+    (Arnaud)
+  . Fixed bug GH-15367 (dl() of module with aliased class crashes in shutdown).
+    (Arnaud)
+
 - DOM:
   . Fix weird unpack behaviour in DOM. (nielsdos)
 
