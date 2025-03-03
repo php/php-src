@@ -85,6 +85,44 @@ END_EXTERN_C()
 #define PHP_STREAM_NOTIFY_SEVERITY_ERR	2
 
 BEGIN_EXTERN_C()
+static zend_always_inline bool php_stream_zend_parse_arg_into_stream_context(
+	zval *arg,
+	php_stream_context **destination_context_ptr,
+	bool check_null,
+	php_stream_context *default_context
+) {
+	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
+		*destination_context_ptr = (php_stream_context*)zend_fetch_resource_ex(arg, "Stream-Context", php_le_stream_context());
+		if (UNEXPECTED(*destination_context_ptr == NULL)) {
+			return false;
+		}
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		if (default_context) {
+			*destination_context_ptr = default_context;
+		} else {
+			*destination_context_ptr = NULL;
+		}
+	} else {
+		return false;
+	}
+	return true;
+}
+
+#define PHP_Z_PARAM_STREAM_CONTEXT_EX(destination_context_ptr, check_null, null_as_default_context) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	php_stream_context *php_param_default_context = php_stream_context_get_default(null_as_default_context); \
+	if (UNEXPECTED(!php_stream_zend_parse_arg_into_stream_context(_arg, &destination_context_ptr, check_null, php_param_default_context))) { \
+		_error_code = ZPP_ERROR_FAILURE; \
+		if (!EG(exception)) { \
+			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+		} \
+		break; \
+	}
+#define PHP_Z_PARAM_STREAM_CONTEXT(dest) PHP_Z_PARAM_STREAM_CONTEXT_EX(dest, false, false)
+#define PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL(dest) PHP_Z_PARAM_STREAM_CONTEXT_EX(dest, true, false)
+#define PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(dest) PHP_Z_PARAM_STREAM_CONTEXT_EX(dest, true, true)
+
 PHPAPI void php_stream_notification_notify(php_stream_context *context, int notifycode, int severity,
 		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr);
 PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context);
