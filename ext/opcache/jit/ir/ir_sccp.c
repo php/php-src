@@ -667,7 +667,7 @@ static IR_NEVER_INLINE void ir_sccp_analyze(ir_ctx *ctx, ir_insn *_values, ir_bi
 
 					use_list = &ctx->use_lists[i];
 					n = use_list->count;
-					for (j = 0, p = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
+					for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 						use = *p;
 						IR_ASSERT(use > 0);
 						use_insn = &ctx->ir_base[use];
@@ -1048,7 +1048,7 @@ static void ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_insn *_values
 		n++;
 		use_list = &ctx->use_lists[ref];
 		if (use_list->count > 1) {
-			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+			for (k = use_list->count, p = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
 				if (use_insn->op == IR_PHI) {
@@ -1715,6 +1715,7 @@ static bool ir_may_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref)
 			case IR_OR:
 			case IR_AND:
 			case IR_XOR:
+			case IR_SHL:
 				return ctx->use_lists[ref].count == 1 &&
 					ir_may_promote_i2i(ctx, type, insn->op1) &&
 					ir_may_promote_i2i(ctx, type, insn->op2);
@@ -1773,6 +1774,7 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
 			case IR_OR:
 			case IR_AND:
 			case IR_XOR:
+			case IR_SHL:
 				if (insn->op1 == insn->op2) {
 					insn->op2 = insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref);
 				} else {
@@ -2951,6 +2953,14 @@ static void ir_iter_optimize_merge(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge
 static ir_ref ir_iter_optimize_condition(ir_ctx *ctx, ir_ref control, ir_ref condition, bool *swap)
 {
 	ir_insn *condition_insn = &ctx->ir_base[condition];
+
+	while ((condition_insn->op == IR_BITCAST
+	  || condition_insn->op == IR_ZEXT
+	  || condition_insn->op == IR_SEXT)
+	 && ctx->use_lists[condition].count == 1) {
+		condition = condition_insn->op1;
+		condition_insn = &ctx->ir_base[condition];
+	}
 
 	if (condition_insn->opt == IR_OPT(IR_NOT, IR_BOOL)) {
 		*swap = 1;
