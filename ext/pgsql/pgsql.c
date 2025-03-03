@@ -6265,21 +6265,18 @@ PHP_FUNCTION(pg_put_copy_end)
 
 PHP_FUNCTION(pg_socket_poll)
 {
-	zval *z_socket;
 	php_stream *stream;
 	php_socket_t socket;
 	zend_long read, write;
 	zend_long ts = -1;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_RESOURCE(z_socket)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_LONG(read)
 		Z_PARAM_LONG(write)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(ts)
 	ZEND_PARSE_PARAMETERS_END();
-
-	php_stream_from_zval(stream, z_socket);
 
 	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void **)&socket, 0)) {
 		zend_argument_type_error(1, "invalid resource socket");
