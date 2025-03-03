@@ -32,4 +32,9 @@ PHP_MINFO_FUNCTION(spl);
 
 PHPAPI zend_string *php_spl_object_hash(zend_object *obj);
 
+#ifndef ZEND_AUTOLOAD_CLASS
+#define ZEND_AUTOLOAD_CLASS 1
+#define ZEND_AUTOLOAD_FUNCTION 2
+#endif
+
 #endif /* PHP_SPL_H */
