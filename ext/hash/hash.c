@@ -746,7 +746,7 @@ PHP_FUNCTION(hash_update_stream)
 /* {{{ Pump data into the hashing algorithm from a file */
 PHP_FUNCTION(hash_update_file)
 {
-	zval *zhash, *zcontext = NULL;
+	zend_object *hash_obj;
 	php_hashcontext_object *hash;
 	php_stream_context *context = NULL;
 	php_stream *stream;
@@ -754,13 +754,15 @@ PHP_FUNCTION(hash_update_file)
 	char buf[1024];
 	ssize_t n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|r!", &zhash, php_hashcontext_ce, &filename, &zcontext) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJ_OF_CLASS(hash_obj, php_hashcontext_ce)
+		Z_PARAM_PATH_STR(filename)
+		Z_PARAM_OPTIONAL
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
+	ZEND_PARSE_PARAMETERS_END();
 
-	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
+	hash = php_hashcontext_from_object(hash_obj);
 	PHP_HASHCONTEXT_VERIFY(hash);
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), "rb", REPORT_ERRORS, NULL, context);
 	if (!stream) {
