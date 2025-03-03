@@ -1,9 +1,9 @@
 --TEST--
-It's not possible to directly instantiate the Generator class
+#[\NonpublicConstructor]: works as a replacement for get_constructor
 --FILE--
 <?php
 
-new Generator;
+new Generator();
 
 ?>
 --EXPECTF--
