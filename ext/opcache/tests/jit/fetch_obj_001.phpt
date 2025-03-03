@@ -96,7 +96,7 @@ object(stdClass)#%d (2) {
 }
 object(stdClass)#%d (2) {
   ["a"]=>
-  &resource(5) of type (stream)
+  &resource(%d) of type (stream)
   ["b"]=>
   array(0) {
   }
@@ -122,7 +122,7 @@ object(stdClass)#%d (2) {
 }
 object(stdClass)#%d (2) {
   ["a"]=>
-  &resource(6) of type (stream)
+  &resource(%d) of type (stream)
   ["b"]=>
   array(0) {
   }
