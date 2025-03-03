@@ -798,7 +798,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 	if (ce->num_interfaces) {
 		uint32_t i;
-		zend_class_name *interface_names;
+		zend_interface_name *interface_names;
 
 		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 
@@ -2034,7 +2034,7 @@ void zend_file_cache_invalidate(zend_string *full_path)
 	if (ZCG(accel_directives).file_cache_read_only) {
 		return;
 	}
-	
+
 	char *filename;
 
 	filename = zend_file_cache_get_bin_file_path(full_path);
