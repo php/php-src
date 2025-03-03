@@ -2530,6 +2530,7 @@ static void php_cli_server_startup_workers(void) {
 #if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
 				php_cli_server_worker_install_pdeathsig();
 #endif
+				php_child_init();
 				return;
 			} else {
 				php_cli_server_workers[php_cli_server_worker] = pid;
