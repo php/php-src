@@ -140,7 +140,7 @@ jobs:
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:20.04
+      image: ubuntu:22.04
     env:
       MYSQL_TEST_HOST: mysql
       PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
