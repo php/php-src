@@ -993,7 +993,9 @@ PHP_FUNCTION(ldap_connect)
 
 			/* ensure all pending TLS options are applied in a new context */
 			if (ldap_set_option(NULL, LDAP_OPT_X_TLS_NEWCTX, &val) != LDAP_OPT_SUCCESS) {
+				zval_ptr_dtor(return_value);
 				php_error_docref(NULL, E_WARNING, "Could not create new security context");
+				RETURN_FALSE;
 			}
 		}
 #endif
