@@ -24,7 +24,7 @@ PHP_FUNCTION(phar_opendir) /* {{{ */
 {
 	char *filename;
 	size_t filename_len;
-	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;
@@ -35,9 +35,11 @@ PHP_FUNCTION(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|r!", &filename, &filename_len, &zcontext) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
+	ZEND_PARSE_PARAMETERS_END_EX(goto skip_phar;);
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry;
@@ -51,7 +53,6 @@ PHP_FUNCTION(phar_opendir) /* {{{ */
 		}
 
 		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 2, 0)) {
-			php_stream_context *context = NULL;
 			php_stream *stream;
 			char *name;
 
@@ -69,9 +70,7 @@ PHP_FUNCTION(phar_opendir) /* {{{ */
 			}
 			efree(entry);
 			efree(arch);
-			if (zcontext) {
-				context = php_stream_context_from_zval(zcontext, 0);
-			}
+
 			stream = php_stream_opendir(name, REPORT_ERRORS, context);
 			efree(name);
 			if (!stream) {
@@ -163,7 +162,7 @@ PHP_FUNCTION(phar_file_get_contents) /* {{{ */
 	zend_long offset = -1;
 	zend_long maxlen;
 	bool maxlen_is_null = 1;
-	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;
@@ -175,9 +174,14 @@ PHP_FUNCTION(phar_file_get_contents) /* {{{ */
 	}
 
 	/* Parse arguments */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "P|br!ll!", &filename, &use_include_path, &zcontext, &offset, &maxlen, &maxlen_is_null) == FAILURE) {
-		goto skip_phar;
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 5)
+		Z_PARAM_PATH_STR(filename)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(use_include_path)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
+		Z_PARAM_LONG(offset)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
+	ZEND_PARSE_PARAMETERS_END_EX(goto skip_phar;);
 
 	if (maxlen_is_null) {
 		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
@@ -192,13 +196,7 @@ PHP_FUNCTION(phar_file_get_contents) /* {{{ */
 			goto skip_phar;
 		}
 
-		php_stream_context *context = NULL;
-		php_stream *stream;
-
-		if (zcontext) {
-			context = php_stream_context_from_zval(zcontext, 0);
-		}
-		stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), "rb", 0 | REPORT_ERRORS, NULL, context);
+		php_stream *stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), "rb", 0 | REPORT_ERRORS, NULL, context);
 
 		zend_string_release_ex(name, false);
 
@@ -236,7 +234,7 @@ PHP_FUNCTION(phar_readfile) /* {{{ */
 {
 	zend_string *filename;
 	bool use_include_path = 0;
-	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;
@@ -246,19 +244,21 @@ PHP_FUNCTION(phar_readfile) /* {{{ */
 		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "P|br!", &filename, &use_include_path, &zcontext) == FAILURE) {
-		goto skip_phar;
-	}
+
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 3)
+		Z_PARAM_PATH_STR(filename)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(use_include_path)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
+	ZEND_PARSE_PARAMETERS_END_EX(goto skip_phar;);
+
 	if (use_include_path || (!IS_ABSOLUTE_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename)) && !strstr(ZSTR_VAL(filename), "://"))) {
 		zend_string *name = phar_get_name_for_relative_paths(filename, use_include_path);
 		if (!name) {
 			goto skip_phar;
 		}
 
-		php_stream *stream;
-		php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
-
-		stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), "rb", 0 | REPORT_ERRORS, NULL, context);
+		php_stream *stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), "rb", 0 | REPORT_ERRORS, NULL, context);
 
 		zend_string_release_ex(name, false);
 		if (stream == NULL) {
