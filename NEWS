@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
   . Improved error message of UnhandledMatchError for
     zend.exception_string_param_max_len=0. (timwolla)
+  . Fixed bug GH-17959 (Relax missing trait fatal error to error exception).
+    (ilutov)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
