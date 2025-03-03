@@ -35,7 +35,7 @@ $values = [
     [],
     new StdClass,
     new StringCapable,
-    fopen("data:text/plain,foobar", "r")
+    STDERR,
 ];
 
 foreach ($functions as $type => $function) {
@@ -96,15 +96,15 @@ int(9223372036854775807)
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, array given, called in %s on line %d
 
-*** Trying object(stdClass)#5 (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, stdClass given, called in %s on line %d
 
-*** Trying object(StringCapable)#6 (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, StringCapable given, called in %s on line %d
 
-*** Trying resource(5) of type (stream)
+*** Trying resource(%d) of type (stream)
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, resource given, called in %s on line %d
 
 Testing 'float' type:
@@ -149,15 +149,15 @@ float(NAN)
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, array given, called in %s on line %d
 
-*** Trying object(stdClass)#5 (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, stdClass given, called in %s on line %d
 
-*** Trying object(StringCapable)#6 (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, StringCapable given, called in %s on line %d
 
-*** Trying resource(5) of type (stream)
+*** Trying resource(%d) of type (stream)
 *** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, resource given, called in %s on line %d
 
 Testing 'string' type:
@@ -202,15 +202,15 @@ string(0) ""
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($s) must be of type string, array given, called in %s on line %d
 
-*** Trying object(stdClass)#5 (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($s) must be of type string, stdClass given, called in %s on line %d
 
-*** Trying object(StringCapable)#6 (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($s) must be of type string, StringCapable given, called in %s on line %d
 
-*** Trying resource(5) of type (stream)
+*** Trying resource(%d) of type (stream)
 *** Caught {closure:%s:%d}(): Argument #1 ($s) must be of type string, resource given, called in %s on line %d
 
 Testing 'bool' type:
@@ -255,15 +255,15 @@ bool(false)
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, array given, called in %s on line %d
 
-*** Trying object(stdClass)#5 (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, stdClass given, called in %s on line %d
 
-*** Trying object(StringCapable)#6 (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, StringCapable given, called in %s on line %d
 
-*** Trying resource(5) of type (stream)
+*** Trying resource(%d) of type (stream)
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, resource given, called in %s on line %d
 
 Done
