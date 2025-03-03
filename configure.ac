@@ -868,6 +868,23 @@ AS_VAR_IF([PHP_RTLD_NOW], [yes],
     [Define to 1 if 'dlopen()' uses the 'RTLD_NOW' mode flag instead of
     'RTLD_LAZY'.])])
 
+if test "$PHP_SAPI" = "apache2handler"; then
+  PHP_RTLD_DEEPBIND_DEFAULT=yes
+else
+  PHP_RTLD_DEEPBIND_DEFAULT=no
+fi
+
+PHP_ARG_ENABLE([rtld-deepbind],
+  [whether to dlopen extensions with RTLD_DEEPBIND],
+  [AS_HELP_STRING([--enable-rtld-deepbind],
+    [Use dlopen with RTLD_DEEPBIND])],
+  [$PHP_RTLD_DEEPBIND_DEFAULT],
+  [$PHP_RTLD_DEEPBIND_DEFAULT])
+
+if test "$PHP_RTLD_DEEPBIND" = "yes"; then
+  AC_DEFINE(PHP_USE_RTLD_DEEPBIND, 1, [ Use dlopen with RTLD_DEEPBIND ])
+fi
+
 PHP_ARG_WITH([layout],
   [layout of installed files],
   [AS_HELP_STRING([--with-layout=TYPE],
