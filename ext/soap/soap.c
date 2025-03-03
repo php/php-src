@@ -1309,7 +1309,7 @@ PHP_METHOD(SoapServer, handle)
 */
 
 			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
-			php_stream_context *context = php_stream_context_from_zval(NULL, false);
+			php_stream_context *context = php_stream_context_get_default(false);
 			php_stream *stream = php_stream_open_wrapper_ex(service->sdl->source, "rb", REPORT_ERRORS, NULL, context);
 			if (stream) {
 				php_stream_passthru(stream);
