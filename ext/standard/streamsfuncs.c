@@ -96,7 +96,7 @@ PHP_FUNCTION(stream_socket_pair)
 PHP_FUNCTION(stream_socket_client)
 {
 	zend_string *host;
-	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
+	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout;
 	bool timeout_is_null = 1;
 	php_timeout_ull conv;
@@ -115,7 +115,7 @@ PHP_FUNCTION(stream_socket_client)
 		Z_PARAM_ZVAL(zerrstr)
 		Z_PARAM_DOUBLE_OR_NULL(timeout, timeout_is_null)
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL(context)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_FALSE;
@@ -127,7 +127,9 @@ PHP_FUNCTION(stream_socket_client)
 		RETURN_THROWS();
 	}
 
-	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (context == NULL) {
+		context = php_stream_context_get_default(flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	}
 
 	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
 		spprintf(&hashkey, 0, "stream_socket_client__%s", ZSTR_VAL(host));
@@ -200,7 +202,7 @@ PHP_FUNCTION(stream_socket_server)
 {
 	char *host;
 	size_t host_len;
-	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
+	zval *zerrno = NULL, *zerrstr = NULL;
 	php_stream *stream = NULL;
 	int err = 0;
 	zend_long flags = STREAM_XPORT_BIND | STREAM_XPORT_LISTEN;
@@ -215,10 +217,12 @@ PHP_FUNCTION(stream_socket_server)
 		Z_PARAM_ZVAL(zerrno)
 		Z_PARAM_ZVAL(zerrstr)
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL(context)
 	ZEND_PARSE_PARAMETERS_END();
 
-	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (context == NULL) {
+		context = php_stream_context_get_default(flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	}
 
 	if (zerrno) {
 		ZEND_TRY_ASSIGN_REF_LONG(zerrno, 0);

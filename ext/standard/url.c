@@ -671,17 +671,14 @@ PHP_FUNCTION(get_headers)
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL;
 	bool format = 0;
-	zval *zcontext = NULL;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(url, url_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(format)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;

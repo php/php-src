@@ -142,17 +142,14 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
 	char *dirname;
 	size_t dir_len;
-	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *dirp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(dirname, dir_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	dirp = php_stream_opendir(dirname, REPORT_ERRORS, context);
 
@@ -469,23 +466,18 @@ PHP_FUNCTION(scandir)
 	zend_long flags = PHP_SCANDIR_SORT_ASCENDING;
 	zend_string **namelist;
 	int n, i;
-	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(dirn, dirn_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (dirn_len < 1) {
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
-	}
-
-	if (zcontext) {
-		context = php_stream_context_from_zval(zcontext, 0);
 	}
 
 	if (flags == PHP_SCANDIR_SORT_ASCENDING) {

@@ -382,7 +382,6 @@ PHP_FUNCTION(file_get_contents)
 	zend_long offset = 0;
 	zend_long maxlen;
 	bool maxlen_is_null = 1;
-	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
 
@@ -391,7 +390,7 @@ PHP_FUNCTION(file_get_contents)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 	ZEND_PARSE_PARAMETERS_END();
@@ -402,8 +401,6 @@ PHP_FUNCTION(file_get_contents)
 		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb",
 				(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
@@ -443,7 +440,6 @@ PHP_FUNCTION(file_put_contents)
 	zval *data;
 	ssize_t numbytes = 0;
 	zend_long flags = 0;
-	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *srcstream = NULL;
 	char mode[3] = "wb";
@@ -453,14 +449,16 @@ PHP_FUNCTION(file_put_contents)
 		Z_PARAM_ZVAL(data)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL(context)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(data) == IS_RESOURCE) {
 		php_stream_from_zval(srcstream, data);
 	}
 
-	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (context == NULL) {
+		context = php_stream_context_get_default(flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	}
 
 	if (flags & PHP_FILE_APPEND) {
 		mode[0] = 'a';
@@ -589,7 +587,6 @@ PHP_FUNCTION(file)
 	bool include_new_line;
 	bool skip_blank_lines;
 	php_stream *stream;
-	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *target_buf;
 
@@ -598,7 +595,7 @@ PHP_FUNCTION(file)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL(context)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((flags & ~(PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) != 0) {
@@ -610,7 +607,9 @@ PHP_FUNCTION(file)
 	include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
 
-	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (context == NULL) {
+		context = php_stream_context_get_default(flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	}
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (!stream) {
@@ -723,7 +722,6 @@ PHP_FUNCTION(fopen)
 	char *filename, *mode;
 	size_t filename_len, mode_len;
 	bool use_include_path = 0;
-	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
 
@@ -732,10 +730,8 @@ PHP_FUNCTION(fopen)
 		Z_PARAM_STRING(mode, mode_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 
@@ -1078,20 +1074,17 @@ PHP_FUNCTION(mkdir)
 {
 	char *dir;
 	size_t dir_len;
-	zval *zcontext = NULL;
 	zend_long mode = 0777;
 	bool recursive = 0;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_PATH(dir, dir_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(mode)
 		Z_PARAM_BOOL(recursive)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	RETURN_BOOL(php_stream_mkdir(dir, (int)mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
 }
@@ -1102,16 +1095,13 @@ PHP_FUNCTION(rmdir)
 {
 	char *dir;
 	size_t dir_len;
-	zval *zcontext = NULL;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(dir, dir_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	RETURN_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
 }
@@ -1124,7 +1114,6 @@ PHP_FUNCTION(readfile)
 	size_t filename_len;
 	size_t size = 0;
 	bool use_include_path = 0;
-	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
 
@@ -1132,10 +1121,8 @@ PHP_FUNCTION(readfile)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream) {
@@ -1196,15 +1183,14 @@ PHP_FUNCTION(rename)
 {
 	char *old_name, *new_name;
 	size_t old_name_len, new_name_len;
-	zval *zcontext = NULL;
 	php_stream_wrapper *wrapper;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_PATH(old_name, old_name_len)
 		Z_PARAM_PATH(new_name, new_name_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
@@ -1224,8 +1210,6 @@ PHP_FUNCTION(rename)
 		RETURN_FALSE;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
-
 	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context));
 }
 /* }}} */
@@ -1236,16 +1220,13 @@ PHP_FUNCTION(unlink)
 	char *filename;
 	size_t filename_len;
 	php_stream_wrapper *wrapper;
-	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 
@@ -1408,21 +1389,18 @@ PHP_FUNCTION(copy)
 {
 	char *source, *target;
 	size_t source_len, target_len;
-	zval *zcontext = NULL;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_PATH(source, source_len)
 		Z_PARAM_PATH(target, target_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
+		PHP_Z_PARAM_STREAM_CONTEXT_OR_NULL_AS_DEFAULT_CONTEXT(context)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_stream_locate_url_wrapper(source, NULL, 0) == &php_plain_files_wrapper && php_check_open_basedir(source)) {
 		RETURN_FALSE;
 	}
-
-	context = php_stream_context_from_zval(zcontext, 0);
 
 	RETURN_BOOL(php_copy_file_ctx(source, target, 0, context) == SUCCESS);
 }
