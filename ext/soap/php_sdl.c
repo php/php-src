@@ -1173,7 +1173,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	} zend_catch {
 		/* Avoid persistent memory leak. */
 		zend_hash_destroy(&ctx.docs);
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	} zend_end_try();
 
 	zend_hash_destroy(&ctx.messages);
