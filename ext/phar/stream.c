@@ -116,7 +116,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 			php_url_free(resource);
 			return NULL;
 		}
-		if (phar_open_or_create_filename(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, 0, options, &phar, &error) == FAILURE)
+		if (phar_open_or_create_filename(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, options, &phar, &error) == FAILURE)
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
@@ -139,7 +139,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 			return NULL;
 		}
 	} else {
-		if (phar_open_from_filename(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, options, NULL, &error) == FAILURE)
+		if (phar_open_from_filename(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, options, NULL, &error) == FAILURE)
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
@@ -235,7 +235,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	} else {
 		if (!*internal_file && (options & STREAM_OPEN_FOR_INCLUDE)) {
 			/* retrieve the stub */
-			if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, NULL)) {
+			if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, NULL)) {
 				php_stream_wrapper_log_error(wrapper, options, "file %s is not a valid phar archive", ZSTR_VAL(resource->host));
 				efree(internal_file);
 				php_url_free(resource);
@@ -580,7 +580,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 
 	internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
 	/* find the phar in our trusty global hash indexed by alias (host of phar://blah.phar/file.whatever) */
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, &error)) {
 		php_url_free(resource);
 		if (error) {
 			efree(error);
@@ -746,7 +746,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
-	if (SUCCESS != phar_get_archive(&pfrom, ZSTR_VAL(resource_from->host), ZSTR_LEN(resource_from->host), NULL, 0, &error)) {
+	if (SUCCESS != phar_get_archive(&pfrom, ZSTR_VAL(resource_from->host), ZSTR_LEN(resource_from->host), NULL, &error)) {
 		pfrom = NULL;
 		if (error) {
 			efree(error);
@@ -763,7 +763,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_to);
 		return 0;
 	}
-	if (SUCCESS != phar_get_archive(&pto, ZSTR_VAL(resource_to->host), ZSTR_LEN(resource_to->host), NULL, 0, &error)) {
+	if (SUCCESS != phar_get_archive(&pto, ZSTR_VAL(resource_to->host), ZSTR_LEN(resource_to->host), NULL, &error)) {
 		if (error) {
 			efree(error);
 		}
@@ -812,7 +812,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		return 0;
 	}
 
-	if (SUCCESS != phar_get_archive(&phar, ZSTR_VAL(resource_from->host), ZSTR_LEN(resource_from->host), NULL, 0, &error)) {
+	if (SUCCESS != phar_get_archive(&phar, ZSTR_VAL(resource_from->host), ZSTR_LEN(resource_from->host), NULL, &error)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
 		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
