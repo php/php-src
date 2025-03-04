@@ -490,7 +490,6 @@ struct _pdo_dbh_t {
 	size_t persistent_id_len;
 
 	uint32_t refcount;
-	uint32_t __reserved_padding;
 
 	/* driver specific "class" methods for the dbh and stmt */
 	HashTable *cls_methods[PDO_DBH_DRIVER_METHOD_KIND__MAX];
