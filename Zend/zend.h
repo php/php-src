@@ -207,6 +207,10 @@ struct _zend_class_entry {
 	uint32_t num_hooked_props;
 	uint32_t num_hooked_prop_variance_checks;
 
+	// When set, prevent usage of this class outside of the given scope
+	zend_class_entry *required_scope;
+	char required_scope_absolute;
+
 	/* class_entry or string(s) depending on ZEND_ACC_LINKED */
 	union {
 		zend_class_entry **interfaces;

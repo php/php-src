@@ -285,6 +285,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.name = zend_string_init_interned(class_name, class_name_len, 1); \
 		class_container.default_object_handlers = &std_object_handlers;	\
 		class_container.info.internal.builtin_functions = functions;	\
+		class_container.required_scope = NULL; \
 	}
 
 #define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \

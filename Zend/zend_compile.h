@@ -253,7 +253,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Property Flags (unused: 13...)                         |     |     |     */
+/* Property Flags (unused: 14...)                         |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Promoted property / parameter                          |     |     |     */
@@ -267,7 +267,10 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30,31)                            |     |     |     */
+/* Property is a reference                                |     |  X  |     */
+#define ZEND_ACC_INNER_CLASS_REFERENCE   (1 << 13) /*     |     |  X  |     */
+/*                                                        |     |     |     */
+/* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -275,6 +278,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_TRAIT                   (1 <<  1) /*  X  |     |     |     */
 #define ZEND_ACC_ANON_CLASS              (1 <<  2) /*  X  |     |     |     */
 #define ZEND_ACC_ENUM                    (1 << 28) /*  X  |     |     |     */
+#define ZEND_ACC_SHORT_SYNTAX            (1 << 30) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class linked with parent, interfaces and traits        |     |     |     */
 #define ZEND_ACC_LINKED                  (1 <<  3) /*  X  |     |     |     */
@@ -894,6 +898,7 @@ typedef enum {
 	ZEND_MODIFIER_TARGET_CONSTANT,
 	ZEND_MODIFIER_TARGET_CPP,
 	ZEND_MODIFIER_TARGET_PROPERTY_HOOK,
+	ZEND_MODIFIER_TARGET_INNER_CLASS,
 } zend_modifier_target;
 
 /* Used during AST construction */
@@ -1051,6 +1056,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define BP_VAR_IS			3
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
+#define BP_VAR_INNER_CLASS	6
 
 #define ZEND_INTERNAL_FUNCTION		1
 #define ZEND_USER_FUNCTION			2
