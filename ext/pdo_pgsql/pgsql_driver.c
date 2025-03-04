@@ -367,11 +367,15 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	zend_string *quoted_str;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	size_t tmp_len;
+	int err;
 
 	switch (paramtype) {
 		case PDO_PARAM_LOB:
 			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
 			escaped = PQescapeByteaConn(H->server, (unsigned char *)ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), &tmp_len);
+			if (escaped == NULL) {
+				return NULL;
+			}
 			quotedlen = tmp_len + 1;
 			quoted = emalloc(quotedlen + 1);
 			memcpy(quoted+1, escaped, quotedlen-2);
@@ -383,7 +387,11 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 		default:
 			quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 			quoted[0] = '\'';
-			quotedlen = PQescapeStringConn(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), NULL);
+			quotedlen = PQescapeStringConn(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), &err);
+			if (err) {
+				efree(quoted);
+				return NULL;
+			}
 			quoted[quotedlen + 1] = '\'';
 			quoted[quotedlen + 2] = '\0';
 			quotedlen += 2;
