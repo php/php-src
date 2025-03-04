@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: aac197335037777d31d83d4a4040bbfcd0c55813 */
+ * Stub hash: 42d486d2666d23569e70860e2b1ef203161792b3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -475,6 +475,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(SO_EXCLBIND)
 	REGISTER_LONG_CONSTANT("SO_EXCLBIND", SO_EXCLBIND, CONST_PERSISTENT);
+#endif
+#if defined(SO_BUSY_POLL)
+	REGISTER_LONG_CONSTANT("SO_BUSY_POLL", SO_BUSY_POLL, CONST_PERSISTENT);
 #endif
 #if defined(SKF_AD_OFF)
 	REGISTER_LONG_CONSTANT("SKF_AD_OFF", SKF_AD_OFF, CONST_PERSISTENT);
