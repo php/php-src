@@ -435,42 +435,46 @@ struct _pdo_dbh_t {
 	void *driver_data;
 
 	/* credentials */
-	char *username, *password;
+	char *username;
+	char *password;
 
 	/* if true, then data stored and pointed at by this handle must all be
 	 * persistently allocated */
-	unsigned is_persistent:1;
+	bool is_persistent:1;
 
 	/* if true, driver should act as though a COMMIT were executed between
 	 * each executed statement; otherwise, COMMIT must be carried out manually
 	 * */
-	unsigned auto_commit:1;
+	bool auto_commit:1;
 
 	/* if true, the handle has been closed and will not function anymore */
-	unsigned is_closed:1;
+	bool is_closed:1;
 
 	/* if true, the driver requires that memory be allocated explicitly for
 	 * the columns that are returned */
-	unsigned alloc_own_columns:1;
+	bool alloc_own_columns:1;
 
 	/* if true, commit or rollBack is allowed to be called */
 	bool in_txn:1;
 
-	/* max length a single character can become after correct quoting */
-	unsigned max_escaped_char_length:3;
-
-	/* oracle compat; see enum pdo_null_handling */
-	unsigned oracle_nulls:2;
-
 	/* when set, convert int/floats to strings */
-	unsigned stringify:1;
+	bool stringify:1;
 
 	/* bitmap for pdo_param_event(s) to skip in dispatch_param_event */
-	unsigned skip_param_evt:7;
+	uint8_t skip_param_evt;
 
-	/* the sum of the number of bits here and the bit fields preceding should
-	 * equal 32 */
-	unsigned _reserved_flags:14;
+	/* The PDO Error mode; see enum pdo_error_mode */
+	uint8_t error_mode;
+
+	/* oracle compat; see enum pdo_null_handling */
+	uint8_t oracle_nulls;
+
+	/* Case conversion; see enum pdo_case_conversion */
+	uint8_t native_case;
+	uint8_t desired_case;
+
+	/* max length a single character can become after correct quoting */
+	uint8_t max_escaped_char_length;
 
 	/* data source string used to open this handle */
 	const char *data_source;
@@ -478,15 +482,14 @@ struct _pdo_dbh_t {
 
 	/* the global error code. */
 	pdo_error_type error_code;
-
-	enum pdo_error_mode error_mode;
-
-	enum pdo_case_conversion native_case, desired_case;
+	/* defaults for fetches */
+	uint16_t default_fetch_type;
 
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
 	size_t persistent_id_len;
-	unsigned int refcount;
+
+	uint32_t refcount;
 
 	/* driver specific "class" methods for the dbh and stmt */
 	HashTable *cls_methods[PDO_DBH_DRIVER_METHOD_KIND__MAX];
@@ -503,9 +506,6 @@ struct _pdo_dbh_t {
 	 * when PDO::query() fails */
 	pdo_stmt_t *query_stmt;
 	zend_object *query_stmt_obj;
-
-	/* defaults for fetches */
-	enum pdo_fetch_type default_fetch_type;
 };
 
 /* represents a connection to a database */
