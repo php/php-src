@@ -332,6 +332,36 @@ PHP_METHOD(Pdo_Sqlite, openBlob)
 	}
 }
 
+PHP_METHOD(Pdo_Sqlite, setAuthorizer)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(free_fcc);
+	pdo_sqlite_db_handle *db_handle = (pdo_sqlite_db_handle *) dbh->driver_data;
+
+	/* Clear previously set callback */
+	if (ZEND_FCC_INITIALIZED(db_handle->authorizer_fcc)) {
+		zend_fcc_dtor(&db_handle->authorizer_fcc);
+	}
+
+	/* Only enable userland authorizer if argument is not NULL */
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		zend_fcc_dup(&db_handle->authorizer_fcc, &fcc);
+	}
+
+	return;
+
+free_fcc:
+	zend_release_fcall_info_cache(&fcc);
+	RETURN_THROWS();
+}
+
 static int php_sqlite_collation_callback(void *context, int string1_len, const void *string1,
 	int string2_len, const void *string2)
 {
