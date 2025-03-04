@@ -2716,24 +2716,27 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto jit_failure;
 					}
 
-					if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE) {
-						if (opline->op1_type == IS_UNUSED) {
-							ce = op_array->scope;
-						} else {
-							ce = NULL;
+					/* Cache slot is only used for IS_CONST op2, so only that can result in hook fast path. */
+					if (opline->op2_type == IS_CONST) {
+						if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE) {
+							if (opline->op1_type == IS_UNUSED) {
+								ce = op_array->scope;
+							} else {
+								ce = NULL;
+							}
 						}
-					}
 
-					if (!ce || !(ce->ce_flags & ZEND_ACC_FINAL) || ce->num_hooked_props > 0) {
-						/* If a simple hook is called, exit to the VM. */
-						ir_ref if_hook_enter = ir_IF(jit_CMP_IP(jit, IR_EQ, opline + 1));
-						ir_IF_FALSE(if_hook_enter);
-						if (GCC_GLOBAL_REGS) {
-							ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
-						} else {
-							ir_RETURN(ir_CONST_I32(1)); /* ZEND_VM_ENTER */
+						if (!ce || !(ce->ce_flags & ZEND_ACC_FINAL) || ce->num_hooked_props > 0) {
+							/* If a simple hook is called, exit to the VM. */
+							ir_ref if_hook_enter = ir_IF(jit_CMP_IP(jit, IR_EQ, opline + 1));
+							ir_IF_FALSE(if_hook_enter);
+							if (GCC_GLOBAL_REGS) {
+								ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+							} else {
+								ir_RETURN(ir_CONST_I32(1)); /* ZEND_VM_ENTER */
+							}
+							ir_IF_TRUE(if_hook_enter);
 						}
-						ir_IF_TRUE(if_hook_enter);
 					}
 
 					break;
