@@ -158,7 +158,7 @@ const opt_struct OPTIONS[] = {
 	{13,  1, "rzendextension"},
 	{14,  1, "ri"},
 	{14,  1, "rextinfo"},
-	{15,  0, "ini"},
+	{15,  2, "ini"},
 	/* Internal testing option -- may be changed or removed without notice,
 	 * including in patch releases. */
 	{16,  1, "repeat"},
@@ -500,6 +500,7 @@ static void php_cli_usage(char *argv0)
 				"                   starts with - or script is read from stdin\n"
 				"\n"
 				"  --ini            Show configuration file names\n"
+				"  --ini=diff       Show INI entries that differ from the built-in default\n"
 				"\n"
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
@@ -822,7 +823,15 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				reflection_what = php_optarg;
 				break;
 			case 15:
-				context.mode = PHP_CLI_MODE_SHOW_INI_CONFIG;
+				if (php_optarg) {
+					if (strcmp(php_optarg, "diff") == 0) {
+						context.mode = PHP_CLI_MODE_SHOW_INI_DIFF;
+					} else {
+						param_error = "Unknown argument for --ini\n";
+					}
+				} else {
+					context.mode = PHP_CLI_MODE_SHOW_INI_CONFIG;
+				}
 				break;
 			case 16:
 				num_repeats = atoi(php_optarg);
@@ -1101,7 +1110,10 @@ do_repeat:
 				zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
 				zend_printf("Scan for additional .ini files in: %s\n", php_ini_scanned_path  ? php_ini_scanned_path : "(none)");
 				zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
-				zend_printf("\n");
+				break;
+			}
+		case PHP_CLI_MODE_SHOW_INI_DIFF:
+			{
 				zend_printf("Non-default INI settings:\n");
 				zend_ini_entry *ini_entry;
 				HashTable *sorted = zend_array_dup(EG(ini_directives));

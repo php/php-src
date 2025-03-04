@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.0alpha1
 
 - CLI:
-  . Extended --ini to print INI settings changed from the builtin default.
+  . Add --ini=diff to print INI settings changed from the builtin default.
     (timwolla)
   . Drop support for -z CLI/CGI flag. (nielsdos)
   . Fixed GH-17956 - development server 404 page does not adapt to mobiles.
