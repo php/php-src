@@ -832,7 +832,7 @@ finish:
 					if (decode) {
 						transfer_encoding = php_stream_filter_create("dechunk", NULL, php_stream_is_persistent(stream));
 						if (transfer_encoding) {
-							/* don't store transfer-encodeing header */
+							/* don't store transfer-encoding header */
 							continue;
 						}
 					}
