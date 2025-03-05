@@ -6,11 +6,11 @@ mysqli
 <?php
 require_once('skipifconnectfailure.inc');
 /*
- * XXX: this test is flaky with persistent connections on PPC CI runner
+ * TODO: this test is flaky with persistent connections on PPC CI runner
  * [001] Expected '8711' got '8712'.
  */
 if (gethostname() == "php-ci-ppc64be") {
-	die("SKIP test is flaky");
+    die("SKIP test is flaky");
 }
 ?>
 --FILE--
