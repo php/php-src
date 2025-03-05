@@ -1,5 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d376e984db0db6ccd9356f632f9d7e1382b2afb7 */
+ * Stub hash: f15f37a5f93befeddb75e34c89bc0d84879a511b */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Generator___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Generator_rewind, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -27,6 +30,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Generator___debugInfo, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_METHOD(Generator, __construct);
 ZEND_METHOD(Generator, rewind);
 ZEND_METHOD(Generator, valid);
 ZEND_METHOD(Generator, current);
@@ -38,6 +42,7 @@ ZEND_METHOD(Generator, getReturn);
 ZEND_METHOD(Generator, __debugInfo);
 
 static const zend_function_entry class_Generator_methods[] = {
+	ZEND_ME(Generator, __construct, arginfo_class_Generator___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(Generator, rewind, arginfo_class_Generator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, valid, arginfo_class_Generator_valid, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, current, arginfo_class_Generator_current, ZEND_ACC_PUBLIC)
@@ -57,6 +62,15 @@ static zend_class_entry *register_class_Generator(zend_class_entry *class_entry_
 	INIT_CLASS_ENTRY(ce, "Generator", class_Generator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
+
+
+	zend_string *attribute_name_NonpublicConstructor_func___construct_0 = zend_string_init_interned("NonpublicConstructor", sizeof("NonpublicConstructor") - 1, 1);
+	zend_attribute *attribute_NonpublicConstructor_func___construct_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), attribute_name_NonpublicConstructor_func___construct_0, 1);
+	zend_string_release(attribute_name_NonpublicConstructor_func___construct_0);
+	zval attribute_NonpublicConstructor_func___construct_0_arg0;
+	zend_string *attribute_NonpublicConstructor_func___construct_0_arg0_str = zend_string_init("the \"Generator\" class is reserved for internal use and cannot be manually instantiated", strlen("the \"Generator\" class is reserved for internal use and cannot be manually instantiated"), 1);
+	ZVAL_STR(&attribute_NonpublicConstructor_func___construct_0_arg0, attribute_NonpublicConstructor_func___construct_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_NonpublicConstructor_func___construct_0->args[0].value, &attribute_NonpublicConstructor_func___construct_0_arg0);
 
 	return class_entry;
 }

@@ -47,6 +47,7 @@ extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 extern ZEND_API zend_class_entry *zend_ce_override;
 extern ZEND_API zend_class_entry *zend_ce_deprecated;
+extern ZEND_API zend_class_entry *zend_ce_nonpublic_constructor;
 
 typedef struct {
 	zend_string *name;
@@ -91,6 +92,8 @@ ZEND_API zend_attribute *zend_add_attribute(
 		uint32_t flags, uint32_t offset, uint32_t lineno);
 
 uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope);
+
+ZEND_API ZEND_COLD zend_result ZEND_FASTCALL zend_attribute_get_nonpublic_suffix(HashTable *attributes, zend_string **message_suffix);
 
 END_EXTERN_C()
 
