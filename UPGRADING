@@ -36,6 +36,8 @@ PHP 8.5 UPGRADE NOTES
     the behavior of (bool) $object.
   . The return value of gc_collect_cycles() no longer includes strings and
     resources that were indirectly collected through cycles.
+  . It is now allowed to substitute static with self or the concrete class name
+    in final subclasses.
 
 - Intl:
   . The extension now requires at least ICU 57.1.

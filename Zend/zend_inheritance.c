@@ -502,6 +502,17 @@ static inheritance_status zend_is_class_subtype_of_type(
 		}
 	}
 
+	/* If the parent has 'static' as a return type, then final classes could replace it with self */
+	if ((ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_STATIC) && (fe_scope->ce_flags & ZEND_ACC_FINAL)) {
+		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
+		if (!fe_ce) {
+			have_unresolved = 1;
+		} else if (fe_ce == fe_scope) {
+			track_class_dependency(fe_ce, fe_class_name);
+			return INHERITANCE_SUCCESS;
+		}
+	}
+
 	zend_type *single_type;
 
 	/* Traverse the list of parent types and check if the current child (FE)
