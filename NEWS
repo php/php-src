@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17913 (ReflectionFunction::isDeprecated() returns incorrect
     results for closures created from magic __call()). (timwolla)
 
+- Standard:
+  . Fix memory leaks in array_any() / array_all(). (nielsdos)
+
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
