@@ -9127,10 +9127,12 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 				}
 			}
 
-			zend_ast *constructor_ast = zend_ast_create_decl(ZEND_AST_METHOD, ZEND_ACC_PUBLIC, decl->start_lineno, decl->doc_comment, zend_string_init("__construct", sizeof("__construct") - 1, 0), decl->child[2], NULL, zend_ast_create_list(0, ZEND_AST_STMT_LIST), NULL, NULL);
+			if (params->children > 0) {
+				zend_ast *constructor_ast = zend_ast_create_decl(ZEND_AST_METHOD, ZEND_ACC_PUBLIC, decl->start_lineno, decl->doc_comment, zend_string_init("__construct", sizeof("__construct") - 1, 0), decl->child[2], NULL, zend_ast_create_list(0, ZEND_AST_STMT_LIST), NULL, NULL);
 
-			// Add the constructor to the new statement list
-			zend_ast_list_add(new_stmt_ast, constructor_ast);
+				// Add the constructor to the new statement list
+				zend_ast_list_add(new_stmt_ast, constructor_ast);
+			}
 		}
 
 		// update both the new statement ast and the original children to be cleaned up.
