@@ -11,6 +11,10 @@ class NumberFormatter
     public const int PATTERN_DECIMAL = UNKNOWN;
     /** @cvalue UNUM_DECIMAL */
     public const int DECIMAL = UNKNOWN;
+    /** @cvalue UNUM_DECIMAL_COMPACT_SHORT */
+    public const int DECIMAL_COMPACT_SHORT = UNKNOWN;
+    /** @cvalue UNUM_DECIMAL_COMPACT_LONG */
+    public const int DECIMAL_COMPACT_LONG = UNKNOWN;
     /** @cvalue UNUM_CURRENCY */
     public const int CURRENCY = UNKNOWN;
     /** @cvalue UNUM_PERCENT */

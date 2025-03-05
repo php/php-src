@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: caaa6ff408bfd88ec9bb998ffd753f4de971ccff */
+ * Stub hash: 05ab9fb3ba33163b2100e2773d70f67e110ecefc */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -136,6 +136,18 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_string *const_DECIMAL_name = zend_string_init_interned("DECIMAL", sizeof("DECIMAL") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_DECIMAL_name, &const_DECIMAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_DECIMAL_name);
+
+	zval const_DECIMAL_COMPACT_SHORT_value;
+	ZVAL_LONG(&const_DECIMAL_COMPACT_SHORT_value, UNUM_DECIMAL_COMPACT_SHORT);
+	zend_string *const_DECIMAL_COMPACT_SHORT_name = zend_string_init_interned("DECIMAL_COMPACT_SHORT", sizeof("DECIMAL_COMPACT_SHORT") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_DECIMAL_COMPACT_SHORT_name, &const_DECIMAL_COMPACT_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_DECIMAL_COMPACT_SHORT_name);
+
+	zval const_DECIMAL_COMPACT_LONG_value;
+	ZVAL_LONG(&const_DECIMAL_COMPACT_LONG_value, UNUM_DECIMAL_COMPACT_LONG);
+	zend_string *const_DECIMAL_COMPACT_LONG_name = zend_string_init_interned("DECIMAL_COMPACT_LONG", sizeof("DECIMAL_COMPACT_LONG") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_DECIMAL_COMPACT_LONG_name, &const_DECIMAL_COMPACT_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_DECIMAL_COMPACT_LONG_name);
 
 	zval const_CURRENCY_value;
 	ZVAL_LONG(&const_CURRENCY_value, UNUM_CURRENCY);
