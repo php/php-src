@@ -1316,7 +1316,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	uint32_t target_label, target_label2;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info, op1_mem_info;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
-	zend_class_entry *ce;
+	zend_class_entry *ce = NULL;
 	bool ce_is_instanceof;
 	bool on_this;
 
@@ -2335,11 +2335,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
 					case ZEND_FETCH_OBJ_W:
-						if (opline->op2_type != IS_CONST
-						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
-						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
-							break;
-						}
 						ce = NULL;
 						ce_is_instanceof = 0;
 						on_this = 0;
@@ -2368,6 +2363,11 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									}
 								}
 							}
+						}
+						if (opline->op2_type != IS_CONST
+						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
+						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
+							break;
 						}
 						if (!zend_jit_fetch_obj(&ctx, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, 0, ce, ce_is_instanceof, on_this, 0, 0, NULL,
@@ -2709,6 +2709,36 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						/* We skip over the DO_FCALL, so decrement call_level ourselves. */
 						call_level--;
 					}
+					break;
+				case ZEND_FETCH_OBJ_R:
+					if (!zend_jit_handler(&ctx, opline,
+						zend_may_throw(opline, ssa_op, op_array, ssa))) {
+						goto jit_failure;
+					}
+
+					/* Cache slot is only used for IS_CONST op2, so only that can result in hook fast path. */
+					if (opline->op2_type == IS_CONST) {
+						if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE) {
+							if (opline->op1_type == IS_UNUSED) {
+								ce = op_array->scope;
+							} else {
+								ce = NULL;
+							}
+						}
+
+						if (!ce || !(ce->ce_flags & ZEND_ACC_FINAL) || ce->num_hooked_props > 0) {
+							/* If a simple hook is called, exit to the VM. */
+							ir_ref if_hook_enter = ir_IF(jit_CMP_IP(jit, IR_EQ, opline + 1));
+							ir_IF_FALSE(if_hook_enter);
+							if (GCC_GLOBAL_REGS) {
+								ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
+							} else {
+								ir_RETURN(ir_CONST_I32(1)); /* ZEND_VM_ENTER */
+							}
+							ir_IF_TRUE(if_hook_enter);
+						}
+					}
+
 					break;
 				default:
 					if (!zend_jit_handler(&ctx, opline,
