@@ -14,7 +14,14 @@
   +----------------------------------------------------------------------+
 */
 
+#ifndef PHP_PDO_OCI_INT_H
+#define PHP_PDO_OCI_INT_H
+
+#include "zend_portability.h"
+
+ZEND_CGG_DIAGNOSTIC_IGNORED_START("-Wstrict-prototypes")
 #include <oci.h>
+ZEND_CGG_DIAGNOSTIC_IGNORED_END
 
 typedef struct {
 	const char *file;
@@ -105,3 +112,5 @@ enum {
 	PDO_OCI_ATTR_MODULE,
 	PDO_OCI_ATTR_CALL_TIMEOUT
 };
+
+#endif	/* PHP_PDO_OCI_INT_H */
