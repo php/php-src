@@ -1196,6 +1196,25 @@ static zend_always_inline bool zend_check_type_slow(
 			}
 		} else {
 			ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
+
+			// verify that the class is being used in the correct scope
+			if (ce && ce->required_scope) {
+				zend_class_entry *scope = zend_get_executed_scope();
+				if (ce->required_scope_absolute && scope != ce->required_scope) {
+					if (scope == NULL) {
+						zend_error(E_ERROR, "Private inner class %s cannot be used in the global scope", ce->name->val);
+					}
+
+					zend_error(E_ERROR, "Private inner class %s cannot be used in the scope of %s", ce->name->val, scope->name->val);
+				} else if (!instanceof_function(scope, ce->required_scope)) {
+					if (scope == NULL) {
+						zend_error(E_ERROR, "Protected inner class %s cannot be used in the global scope", ce->name->val);
+					}
+
+					zend_error(E_ERROR, "Protected inner class %s cannot be used in the scope of %s", ce->name->val, scope->name->val);
+				}
+			}
+
 			/* If we have a CE we check if it satisfies the type constraint,
 			 * otherwise it will check if a standard type satisfies it. */
 			if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
@@ -3631,7 +3650,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_property
 		result = CACHED_PTR(cache_slot + sizeof(void *));
 		property_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
 
-		if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW)
+		if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_INNER_CLASS || fetch_type == BP_VAR_RW)
 				&& UNEXPECTED(Z_TYPE_P(result) == IS_UNDEF)
 				&& ZEND_TYPE_IS_SET(property_info->type)) {
 			zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",

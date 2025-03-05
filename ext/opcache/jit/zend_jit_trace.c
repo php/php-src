@@ -6095,6 +6095,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						ZEND_FALLTHROUGH;
 					case ZEND_FETCH_STATIC_PROP_R:
+					case ZEND_FETCH_INNER_CLASS:
 					case ZEND_FETCH_STATIC_PROP_IS:
 					case ZEND_FETCH_STATIC_PROP_W:
 					case ZEND_FETCH_STATIC_PROP_RW:

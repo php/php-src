@@ -16073,6 +16073,9 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 		case ZEND_FETCH_STATIC_PROP_UNSET:
 			fetch_type = BP_VAR_UNSET;
 			break;
+		case ZEND_FETCH_INNER_CLASS:
+			fetch_type = BP_VAR_INNER_CLASS;
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 

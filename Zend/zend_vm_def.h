@@ -1847,7 +1847,7 @@ ZEND_VM_INLINE_HELPER(zend_fetch_static_prop_helper, ANY, ANY, int type)
 		prop = &EG(uninitialized_zval);
 	}
 
-	if (type == BP_VAR_R || type == BP_VAR_IS) {
+	if (type == BP_VAR_R || type == BP_VAR_INNER_CLASS || type == BP_VAR_IS) {
 		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), prop);
 	} else {
 		ZVAL_INDIRECT(EX_VAR(opline->result.var), prop);
@@ -1893,6 +1893,12 @@ ZEND_VM_HANDLER(178, ZEND_FETCH_STATIC_PROP_UNSET, ANY, CLASS_FETCH, CACHE_SLOT)
 ZEND_VM_HANDLER(176, ZEND_FETCH_STATIC_PROP_IS, ANY, CLASS_FETCH, CACHE_SLOT)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_fetch_static_prop_helper, type, BP_VAR_IS);
+}
+
+/* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR) */
+ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, ANY, CLASS_FETCH, CACHE_SLOT)
+{
+  ZEND_VM_DISPATCH_TO_HELPER(zend_fetch_static_prop_helper, type, BP_VAR_INNER_CLASS);
 }
 
 ZEND_VM_COLD_CONSTCONST_HANDLER(81, ZEND_FETCH_DIM_R, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
@@ -8810,6 +8816,20 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, CV|TMPVAR|UNUSED|CLASS_FETCH, ANY)
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
+
+				// check if this is an inner class before failing
+				if (Z_TYPE_P(op) == IS_STRING) {
+					zend_string *class_name = Z_STR_P(op);
+					zend_class_entry *ce = zend_lookup_class(class_name);
+					// free class_name
+					zend_string_release(class_name);
+					if (ce) {
+						ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
+						FREE_OP1();
+						ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+					}
+				}
+
 				zend_type_error("Cannot use \"::class\" on %s", zend_zval_value_name(op));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				FREE_OP1();
@@ -9811,6 +9831,12 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 		HANDLE_EXCEPTION();
 	}
 	if (prop_info->flags & ZEND_ACC_PRIVATE) {
+		if (prop_info->flags & ZEND_ACC_INNER_CLASS_REFERENCE) {
+			zend_throw_error(NULL, "Cannot access private inner class %s::%s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(property_name));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
 		zend_throw_error(NULL, "Cannot access private property %s::$%s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(property_name));
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();

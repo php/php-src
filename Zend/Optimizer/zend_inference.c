@@ -3816,6 +3816,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			break;
 		case ZEND_FETCH_STATIC_PROP_R:
+		case ZEND_FETCH_INNER_CLASS:
 		case ZEND_FETCH_STATIC_PROP_IS:
 		case ZEND_FETCH_STATIC_PROP_RW:
 		case ZEND_FETCH_STATIC_PROP_W:
@@ -3823,7 +3824,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 			tmp = zend_fetch_prop_type(script,
 				zend_fetch_static_prop_info(script, op_array, ssa, opline), &ce);
-			if (opline->opcode != ZEND_FETCH_STATIC_PROP_R
+			if (opline->opcode != ZEND_FETCH_STATIC_PROP_R && opline->opcode != ZEND_FETCH_INNER_CLASS
 					&& opline->opcode != ZEND_FETCH_STATIC_PROP_IS) {
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 				if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE) {

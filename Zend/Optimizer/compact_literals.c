@@ -221,6 +221,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_ASSIGN_STATIC_PROP:
 				case ZEND_ASSIGN_STATIC_PROP_REF:
 				case ZEND_FETCH_STATIC_PROP_R:
+				case ZEND_FETCH_INNER_CLASS:
 				case ZEND_FETCH_STATIC_PROP_W:
 				case ZEND_FETCH_STATIC_PROP_RW:
 				case ZEND_FETCH_STATIC_PROP_IS:
@@ -690,6 +691,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_ASSIGN_STATIC_PROP:
 				case ZEND_ASSIGN_STATIC_PROP_REF:
 				case ZEND_FETCH_STATIC_PROP_R:
+				case ZEND_FETCH_INNER_CLASS:
 				case ZEND_FETCH_STATIC_PROP_W:
 				case ZEND_FETCH_STATIC_PROP_RW:
 				case ZEND_FETCH_STATIC_PROP_IS:
