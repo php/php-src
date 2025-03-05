@@ -738,6 +738,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 		 && opline->opcode != ZEND_PRE_DEC_STATIC_PROP
 		 && opline->opcode != ZEND_POST_DEC_STATIC_PROP
 		 && opline->opcode != ZEND_FETCH_STATIC_PROP_R
+		 && opline->opcode != ZEND_FETCH_INNER_CLASS
 		 && opline->opcode != ZEND_FETCH_STATIC_PROP_W
 		 && opline->opcode != ZEND_FETCH_STATIC_PROP_RW
 		 && opline->opcode != ZEND_FETCH_STATIC_PROP_IS
