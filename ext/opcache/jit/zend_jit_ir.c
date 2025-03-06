@@ -9250,7 +9250,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 	}
 
 	ce = zend_get_known_class(op_array, opline, opline->op1_type, opline->op1);
-	if (!func && ce) {
+	if (!func && ce && (opline->op1_type == IS_CONST || !(ce->ce_flags & ZEND_ACC_TRAIT))) {
 		zval *zv = RT_CONSTANT(opline, opline->op2);
 		zend_string *method_name;
 
@@ -16034,7 +16034,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	zend_class_entry *ce;
 
 	ce = zend_get_known_class(op_array, opline, opline->op2_type, opline->op2);
-	if (ce) {
+	if (ce && (opline->op2_type == IS_CONST || !(ce->ce_flags & ZEND_ACC_TRAIT))) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zend_string *prop_name;
 
