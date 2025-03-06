@@ -1,5 +1,5 @@
 #!/bin/sh
-set -ex
+set -e
 
 # Create TLS certificate
 sudo mkdir -p /etc/ldap/ssl
@@ -42,7 +42,9 @@ sudo sed -e 's|^\s*SLAPD_SERVICES\s*=.*$|SLAPD_SERVICES="ldap:/// ldaps:/// ldap
 # Configure LDAP database.
 DBDN=`sudo ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(&(olcRootDN=*)(olcSuffix=*))' dn | grep -i '^dn:' | sed -e 's/^dn:\s*//'`;
 
-sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/ppolicy.ldif
+if test -f "/etc/ldap/schema/ppolicy.ldif"; then
+  sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/ppolicy.ldif
+fi
 
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// << EOF
 dn: $DBDN
