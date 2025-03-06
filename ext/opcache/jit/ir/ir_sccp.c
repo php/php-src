@@ -3067,7 +3067,7 @@ static void ir_iter_optimize_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 
 static void ir_iter_optimize_guard(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue *worklist)
 {
-	bool swap;
+	bool swap = 0;
 	ir_ref condition = ir_iter_optimize_condition(ctx, insn->op1, insn->op2, &swap);
 
 	if (swap) {
