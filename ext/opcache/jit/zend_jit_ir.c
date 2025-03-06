@@ -9353,8 +9353,18 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 		if (opline->op1_type == IS_UNUSED
 		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
 		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (!op_array->scope || (op_array->fn_flags & ZEND_ACC_STATIC)) {
+			if (op_array->fn_flags & ZEND_ACC_STATIC) {
 				scope_ref = ir_LOAD_A(jit_EX(This.value.ref));
+			} else if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+				ir_ref if_object, values = IR_UNUSED;
+
+				if_object = ir_IF(ir_EQ(jit_Z_TYPE_ref(jit, jit_EX(This)), ir_CONST_U8(IS_OBJECT)));
+				ir_IF_TRUE(if_object);
+				ir_END_PHI_list(values,
+					ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce))));
+				ir_IF_FALSE(if_object);
+				ir_END_PHI_list(values, ir_LOAD_A(jit_EX(This.value.ref)));
+				ir_PHI_list(values);
 			} else {
 				scope_ref = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce)));
 			}
