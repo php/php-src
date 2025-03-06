@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17913 (ReflectionFunction::isDeprecated() returns incorrect
     results for closures created from magic __call()). (timwolla)
 
+- Opcache:
+  . Fixed bug GH-15834 (Segfault with hook "simple get" cache slot and minimal
+    JIT). (nielsdos)
+
 - Standard:
   . Fix memory leaks in array_any() / array_all(). (nielsdos)
 
