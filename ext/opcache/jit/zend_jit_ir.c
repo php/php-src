@@ -3558,6 +3558,8 @@ static void jit_IF_TRUE_FALSE_ex(zend_jit_ctx *jit, ir_ref if_ref, ir_ref true_b
 	}
 }
 
+static void zend_jit_case_start(zend_jit_ctx *jit, int switch_b, int case_b, ir_ref switch_ref);
+
 static void _zend_jit_add_predecessor_ref(zend_jit_ctx *jit, int b, int pred, ir_ref ref)
 {
 	int i, *p;
@@ -3579,6 +3581,9 @@ static void _zend_jit_add_predecessor_ref(zend_jit_ctx *jit, int b, int pred, ir
 					jit->ctx.ir_base[ref].op = IR_LOOP_END;
 				} else if (jit->ctx.ir_base[ref].op == IR_IF) {
 					jit_IF_TRUE_FALSE_ex(jit, ref, b);
+					ref = ir_LOOP_END();
+				} else if (jit->ctx.ir_base[ref].op == IR_SWITCH) {
+					zend_jit_case_start(jit, pred, b, ref);
 					ref = ir_LOOP_END();
 				} else if (jit->ctx.ir_base[ref].op == IR_UNREACHABLE) {
 					ir_BEGIN(ref);
