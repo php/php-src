@@ -695,11 +695,9 @@ PHP_RINIT_FUNCTION(imap)
 }
 /* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION */
-PHP_RSHUTDOWN_FUNCTION(imap)
+static void free_errorlist(void)
 {
 	ERRORLIST *ecur = NIL;
-	STRINGLIST *acur = NIL;
 
 	if (IMAPG(imap_errorstack) != NIL) {
 		/* output any remaining errors at their original error level */
@@ -715,6 +713,11 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		mail_free_errorlist(&IMAPG(imap_errorstack));
 		IMAPG(imap_errorstack) = NIL;
 	}
+}
+
+static void free_stringlist(void)
+{
+	STRINGLIST *acur = NIL;
 
 	if (IMAPG(imap_alertstack) != NIL) {
 		/* output any remaining alerts at E_NOTICE level */
@@ -730,6 +733,13 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		mail_free_stringlist(&IMAPG(imap_alertstack));
 		IMAPG(imap_alertstack) = NIL;
 	}
+}
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+PHP_RSHUTDOWN_FUNCTION(imap)
+{
+	free_errorlist();
+	free_stringlist();
 	return SUCCESS;
 }
 /* }}} */
