@@ -31,5 +31,5 @@ try {
 
 ?>
 --EXPECT--
-Caught: The return value of function test() is expected to be consumed
-Caught: The return value of function test2() is expected to be consumed
+Caught: The return value of function test() should either be used or intentionally ignored by casting it as (void)
+Caught: The return value of function test2() should either be used or intentionally ignored by casting it as (void)

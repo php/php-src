@@ -33,12 +33,12 @@ $cls('foo');
 
 ?>
 --EXPECTF--
-Warning: The return value of method Clazz::test() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::test() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 __call(test)
 
-Warning: The return value of method Clazz::test() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::test() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 __callStatic(test)
 
-Warning: The return value of method Clazz::__invoke() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::__invoke() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 __invoke(foo)
 
