@@ -1974,13 +1974,13 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(const zend_functio
 	int code = fbc->type == ZEND_INTERNAL_FUNCTION ? E_WARNING : E_USER_WARNING;
 
 	if (fbc->common.scope) {
-		zend_error_unchecked(code, "The return value of method %s::%s() is expected to be consumed%S",
+		zend_error_unchecked(code, "The return value of method %s::%s() should either be used or intentionally ignored by casting it as (void)%S",
 			ZSTR_VAL(fbc->common.scope->name),
 			ZSTR_VAL(fbc->common.function_name),
 			message_suffix
 		);
 	} else {
-		zend_error_unchecked(code, "The return value of function %s() is expected to be consumed%S",
+		zend_error_unchecked(code, "The return value of function %s() should either be used or intentionally ignored by casting it as (void)%S",
 			ZSTR_VAL(fbc->common.function_name),
 			message_suffix
 		);

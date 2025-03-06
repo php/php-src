@@ -63,24 +63,24 @@ $closure2();
 
 ?>
 --EXPECTF--
-Warning: The return value of function test() is expected to be consumed in %s on line %d
+Warning: The return value of function test() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 
-Warning: The return value of function test2() is expected to be consumed, this is important in %s on line %d
+Warning: The return value of function test2() should either be used or intentionally ignored by casting it as (void), this is important in %s on line %d
 
-Warning: The return value of function test3() is expected to be consumed in %s on line %d
+Warning: The return value of function test3() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 
-Warning: The return value of function test() is expected to be consumed in %s on line %d
+Warning: The return value of function test() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 
-Warning: The return value of function test() is expected to be consumed in %s on line %d
+Warning: The return value of function test() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 
-Warning: The return value of method Clazz::test() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::test() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 
-Warning: The return value of method Clazz::test2() is expected to be consumed, this is important in %s on line %d
+Warning: The return value of method Clazz::test2() should either be used or intentionally ignored by casting it as (void), this is important in %s on line %d
 
-Warning: The return value of method Clazz::test3() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::test3() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 
-Warning: The return value of method Clazz::test() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::test() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 
-Warning: The return value of function {closure:%s:%d}() is expected to be consumed in %s on line %d
+Warning: The return value of function {closure:%s:%d}() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 
-Warning: The return value of function {closure:%s:%d}() is expected to be consumed in %s on line %d
+Warning: The return value of function {closure:%s:%d}() should either be used or intentionally ignored by casting it as (void) in %s on line %d
