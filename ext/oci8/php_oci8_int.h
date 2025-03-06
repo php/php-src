@@ -53,9 +53,9 @@
 /* }}} */
 
 #include "ext/standard/php_string.h"
-ZEND_CGG_DIAGNOSTIC_IGNORED_START("-Wstrict-prototypes")
+ZEND_DIAGNOSTIC_IGNORED_START("-Wstrict-prototypes")
 #include <oci.h>
-ZEND_CGG_DIAGNOSTIC_IGNORED_END
+ZEND_DIAGNOSTIC_IGNORED_END
 
 extern int le_connection;
 extern int le_pconnection;

@@ -19,9 +19,9 @@
 
 #include "zend_portability.h"
 
-ZEND_CGG_DIAGNOSTIC_IGNORED_START("-Wstrict-prototypes")
+ZEND_DIAGNOSTIC_IGNORED_START("-Wstrict-prototypes")
 #include <oci.h>
-ZEND_CGG_DIAGNOSTIC_IGNORED_END
+ZEND_DIAGNOSTIC_IGNORED_END
 
 typedef struct {
 	const char *file;
