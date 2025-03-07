@@ -2164,8 +2164,8 @@ function socket_wsaprotocol_info_release(string $info_id): bool {}
 #endif
 }
 
-#ifdef AF_PACKET
 namespace Socket {
+#ifdef AF_PACKET
     readonly class Packet
     {
 	public int $headerSize;
@@ -2174,7 +2174,7 @@ namespace Socket {
 
     final readonly class EthernetPacket extends Packet
     {
-	public Socket $socket;
+	public \Socket $socket;
 	public int $ethProtocol;
 	public string $macSrc;
 	public string $macDst;
@@ -2209,5 +2209,5 @@ namespace Socket {
 	public string $srcAddr;
 	public string $dstAddr;
     }
-}
 #endif
+}
