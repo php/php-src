@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 20b6ede441003579a89fd0d820a7a45e69aa93bd */
+ * Stub hash: bf349dc59526be59bba91edf3bb16c9532d7220c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1133,6 +1133,7 @@ static zend_class_entry *register_class_AddressInfo(void)
 	return class_entry;
 }
 
+#if defined(AF_PACKET)
 static zend_class_entry *register_class_Socket_Packet(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -1154,7 +1155,9 @@ static zend_class_entry *register_class_Socket_Packet(void)
 
 	return class_entry;
 }
+#endif
 
+#if defined(AF_PACKET)
 static zend_class_entry *register_class_Socket_EthernetPacket(zend_class_entry *class_entry_Socket_Packet)
 {
 	zend_class_entry ce, *class_entry;
@@ -1165,8 +1168,8 @@ static zend_class_entry *register_class_Socket_EthernetPacket(zend_class_entry *
 	zval property_socket_default_value;
 	ZVAL_UNDEF(&property_socket_default_value);
 	zend_string *property_socket_name = zend_string_init("socket", sizeof("socket") - 1, 1);
-	zend_string *property_socket_class_Socket_Socket = zend_string_init("Socket\\Socket", sizeof("Socket\\Socket")-1, 1);
-	zend_declare_typed_property(class_entry, property_socket_name, &property_socket_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_socket_class_Socket_Socket, 0, 0));
+	zend_string *property_socket_class_Socket = zend_string_init("Socket", sizeof("Socket")-1, 1);
+	zend_declare_typed_property(class_entry, property_socket_name, &property_socket_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_socket_class_Socket, 0, 0));
 	zend_string_release(property_socket_name);
 
 	zval property_ethProtocol_default_value;
@@ -1195,7 +1198,9 @@ static zend_class_entry *register_class_Socket_EthernetPacket(zend_class_entry *
 
 	return class_entry;
 }
+#endif
 
+#if defined(AF_PACKET)
 static zend_class_entry *register_class_Socket_TcpPacket(zend_class_entry *class_entry_Socket_Packet)
 {
 	zend_class_entry ce, *class_entry;
@@ -1229,7 +1234,9 @@ static zend_class_entry *register_class_Socket_TcpPacket(zend_class_entry *class
 
 	return class_entry;
 }
+#endif
 
+#if defined(AF_PACKET)
 static zend_class_entry *register_class_Socket_UdpPacket(zend_class_entry *class_entry_Socket_Packet)
 {
 	zend_class_entry ce, *class_entry;
@@ -1263,7 +1270,9 @@ static zend_class_entry *register_class_Socket_UdpPacket(zend_class_entry *class
 
 	return class_entry;
 }
+#endif
 
+#if defined(AF_PACKET)
 static zend_class_entry *register_class_Socket_Ipv4Packet(zend_class_entry *class_entry_Socket_Packet)
 {
 	zend_class_entry ce, *class_entry;
@@ -1291,7 +1300,9 @@ static zend_class_entry *register_class_Socket_Ipv4Packet(zend_class_entry *clas
 
 	return class_entry;
 }
+#endif
 
+#if defined(AF_PACKET)
 static zend_class_entry *register_class_Socket_Ipv6Packet(zend_class_entry *class_entry_Socket_Packet)
 {
 	zend_class_entry ce, *class_entry;
@@ -1313,3 +1324,4 @@ static zend_class_entry *register_class_Socket_Ipv6Packet(zend_class_entry *clas
 
 	return class_entry;
 }
+#endif

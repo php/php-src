@@ -66,19 +66,19 @@ Warning: socket_getpeername(): unable to retrieve peer name [95]: %sot supported
 int(60)
 int(60)
 string(2) "lo"
-object(EthernetPacket)#3 (%d) {
-  ["headersize"]=>
+object(Socket\EthernetPacket)#3 (%d) {
+  ["headerSize"]=>
   int(%d)
-  ["rawpacket"]=>
+  ["rawPacket"]=>
   string(%d) "%A"
   ["socket"]=>
   object(Socket)#1 (0) {
   }
-  ["ethprotocol"]=>
+  ["ethProtocol"]=>
   int(%i)
-  ["macsrc"]=>
+  ["macSrc"]=>
   string(%d) "%s:%s:%s:%s:%s:%s"
-  ["macdst"]=>
+  ["macDst"]=>
   string(%d) "%s:%s:%s:%s:%s:%s"
   ["payload"]=>
   object(%s)#4 (%d) {
