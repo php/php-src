@@ -58,6 +58,8 @@ PHP                                                                        NEWS
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
     with uninitialised classes or clone failure. (David Carlier)
+  . Added DECIMAL_COMPACT_SHORT/DECIMAL_COMPACT_LONG for NumberFormatter class.
+    (BogdanUngureanu)
 
 - MySQLi:
   . Fixed bugs GH-17900 and GH-8084 (calling mysqli::__construct twice).
