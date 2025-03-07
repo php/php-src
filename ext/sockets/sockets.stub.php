@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+namespace {
 /**
  * @var int
  * @cvalue AF_UNIX
@@ -2168,50 +2169,52 @@ function socket_wsaprotocol_info_import(string $info_id): Socket|false {}
 
 function socket_wsaprotocol_info_release(string $info_id): bool {}
 #endif
+}
 
 #ifdef AF_PACKET
-readonly class Packet
-{
-	public int $headersize;
-	public ?string $rawpacket;
-}
+namespace Socket {
+    readonly class Packet
+    {
+	public int $headerSize;
+	public ?string $rawPacket;
+    }
 
-
-final readonly class EthernetPacket extends Packet
-{
+    final readonly class EthernetPacket extends Packet
+    {
 	public Socket $socket;
-	public int $ethprotocol;
-	public string $macsrc;
-	public string $macdst;
-	public Ipv4Packet|Ipv6Packet|EthernetPacket|null $payload;
-}
+	public int $ethProtocol;
+	public string $macSrc;
+	public string $macDst;
+	public ?object $payload;
+    }
 
-final readonly class TcpPacket extends Packet
-{
-	public string $srcaddr;
-	public string $dstaddr;
-	public string $srcport;
-	public int $dstport;
-}
+    final readonly class TcpPacket extends Packet
+    {
+	public string $srcAddr;
+	public string $dstAddr;
+	public string $srcPort;
+	public int $dstPort;
+    }
 
-final readonly class UdpPacket extends Packet
-{
-	public string $srcaddr;
-	public string $dstaddr;
-	public string $srcport;
-	public int $dstport;
-}
+    final readonly class UdpPacket extends Packet
+    {
+	public string $srcAddr;
+	public string $dstAddr;
+	public string $srcPort;
+	public int $dstPort;
+    }
 
-final readonly class Ipv4Packet extends Packet
-{
-	public string $srcaddr;
-	public string $dstaddr;
-	public TcpPacket|UdpPacket|null $payload;
-}
+    final readonly class Ipv4Packet extends Packet
+    {
+	public string $srcAddr;
+	public string $dstAddr;
+	public ?object $payload;
+    }
 
-final readonly class Ipv6Packet extends Packet
-{
-	public string $srcaddr;
-	public string $dstaddr;
+    final readonly class Ipv6Packet extends Packet
+    {
+	public string $srcAddr;
+	public string $dstAddr;
+    }
 }
 #endif
