@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 00804dcdcd211597f3d67e095c6ca57436977781 */
+ * Stub hash: 062e5ba1680fab41e0b08a1ed2035fa19abbc86e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1130,211 +1130,183 @@ static zend_class_entry *register_class_AddressInfo(void)
 	return class_entry;
 }
 
-#if defined(AF_PACKET)
-static zend_class_entry *register_class_Packet(void)
+static zend_class_entry *register_class_Socket_Packet(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Packet", NULL);
+	INIT_NS_CLASS_ENTRY(ce, "Socket", "Packet", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_READONLY_CLASS);
 
-	zval property_headersize_default_value;
-	ZVAL_UNDEF(&property_headersize_default_value);
-	zend_string *property_headersize_name = zend_string_init("headersize", sizeof("headersize") - 1, 1);
-	zend_declare_typed_property(class_entry, property_headersize_name, &property_headersize_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_headersize_name);
+	zval property_headerSize_default_value;
+	ZVAL_UNDEF(&property_headerSize_default_value);
+	zend_string *property_headerSize_name = zend_string_init("headerSize", sizeof("headerSize") - 1, 1);
+	zend_declare_typed_property(class_entry, property_headerSize_name, &property_headerSize_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_headerSize_name);
 
-	zval property_rawpacket_default_value;
-	ZVAL_UNDEF(&property_rawpacket_default_value);
-	zend_string *property_rawpacket_name = zend_string_init("rawpacket", sizeof("rawpacket") - 1, 1);
-	zend_declare_typed_property(class_entry, property_rawpacket_name, &property_rawpacket_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_rawpacket_name);
+	zval property_rawPacket_default_value;
+	ZVAL_UNDEF(&property_rawPacket_default_value);
+	zend_string *property_rawPacket_name = zend_string_init("rawPacket", sizeof("rawPacket") - 1, 1);
+	zend_declare_typed_property(class_entry, property_rawPacket_name, &property_rawPacket_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_rawPacket_name);
 
 	return class_entry;
 }
-#endif
 
-#if defined(AF_PACKET)
-static zend_class_entry *register_class_EthernetPacket(zend_class_entry *class_entry_Packet)
+static zend_class_entry *register_class_Socket_EthernetPacket(zend_class_entry *class_entry_Socket_Packet)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "EthernetPacket", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
+	INIT_NS_CLASS_ENTRY(ce, "Socket", "EthernetPacket", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Socket_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
 
 	zval property_socket_default_value;
 	ZVAL_UNDEF(&property_socket_default_value);
 	zend_string *property_socket_name = zend_string_init("socket", sizeof("socket") - 1, 1);
-	zend_string *property_socket_class_Socket = zend_string_init("Socket", sizeof("Socket")-1, 1);
-	zend_declare_typed_property(class_entry, property_socket_name, &property_socket_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_socket_class_Socket, 0, 0));
+	zend_string *property_socket_class_Socket_Socket = zend_string_init("Socket\\Socket", sizeof("Socket\\Socket")-1, 1);
+	zend_declare_typed_property(class_entry, property_socket_name, &property_socket_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_socket_class_Socket_Socket, 0, 0));
 	zend_string_release(property_socket_name);
 
-	zval property_ethprotocol_default_value;
-	ZVAL_UNDEF(&property_ethprotocol_default_value);
-	zend_string *property_ethprotocol_name = zend_string_init("ethprotocol", sizeof("ethprotocol") - 1, 1);
-	zend_declare_typed_property(class_entry, property_ethprotocol_name, &property_ethprotocol_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_ethprotocol_name);
+	zval property_ethProtocol_default_value;
+	ZVAL_UNDEF(&property_ethProtocol_default_value);
+	zend_string *property_ethProtocol_name = zend_string_init("ethProtocol", sizeof("ethProtocol") - 1, 1);
+	zend_declare_typed_property(class_entry, property_ethProtocol_name, &property_ethProtocol_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_ethProtocol_name);
 
-	zval property_macsrc_default_value;
-	ZVAL_UNDEF(&property_macsrc_default_value);
-	zend_string *property_macsrc_name = zend_string_init("macsrc", sizeof("macsrc") - 1, 1);
-	zend_declare_typed_property(class_entry, property_macsrc_name, &property_macsrc_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_macsrc_name);
+	zval property_macSrc_default_value;
+	ZVAL_UNDEF(&property_macSrc_default_value);
+	zend_string *property_macSrc_name = zend_string_init("macSrc", sizeof("macSrc") - 1, 1);
+	zend_declare_typed_property(class_entry, property_macSrc_name, &property_macSrc_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_macSrc_name);
 
-	zval property_macdst_default_value;
-	ZVAL_UNDEF(&property_macdst_default_value);
-	zend_string *property_macdst_name = zend_string_init("macdst", sizeof("macdst") - 1, 1);
-	zend_declare_typed_property(class_entry, property_macdst_name, &property_macdst_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_macdst_name);
-
-	zval property_payload_default_value;
-	ZVAL_UNDEF(&property_payload_default_value);
-	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_string *property_payload_class_Ipv4Packet = zend_string_init("Ipv4Packet", sizeof("Ipv4Packet") - 1, 1);
-	zend_string *property_payload_class_Ipv6Packet = zend_string_init("Ipv6Packet", sizeof("Ipv6Packet") - 1, 1);
-	zend_string *property_payload_class_EthernetPacket = zend_string_init("EthernetPacket", sizeof("EthernetPacket") - 1, 1);
-	zend_type_list *property_payload_type_list = malloc(ZEND_TYPE_LIST_SIZE(3));
-	property_payload_type_list->num_types = 3;
-	property_payload_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_payload_class_Ipv4Packet, 0, 0);
-	property_payload_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_payload_class_Ipv6Packet, 0, 0);
-	property_payload_type_list->types[2] = (zend_type) ZEND_TYPE_INIT_CLASS(property_payload_class_EthernetPacket, 0, 0);
-	zend_type property_payload_type = ZEND_TYPE_INIT_UNION(property_payload_type_list, MAY_BE_NULL);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, property_payload_type);
-	zend_string_release(property_payload_name);
-
-	return class_entry;
-}
-#endif
-
-#if defined(AF_PACKET)
-static zend_class_entry *register_class_TcpPacket(zend_class_entry *class_entry_Packet)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_CLASS_ENTRY(ce, "TcpPacket", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
-
-	zval property_srcaddr_default_value;
-	ZVAL_UNDEF(&property_srcaddr_default_value);
-	zend_string *property_srcaddr_name = zend_string_init("srcaddr", sizeof("srcaddr") - 1, 1);
-	zend_declare_typed_property(class_entry, property_srcaddr_name, &property_srcaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_srcaddr_name);
-
-	zval property_dstaddr_default_value;
-	ZVAL_UNDEF(&property_dstaddr_default_value);
-	zend_string *property_dstaddr_name = zend_string_init("dstaddr", sizeof("dstaddr") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dstaddr_name, &property_dstaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_dstaddr_name);
-
-	zval property_srcport_default_value;
-	ZVAL_UNDEF(&property_srcport_default_value);
-	zend_string *property_srcport_name = zend_string_init("srcport", sizeof("srcport") - 1, 1);
-	zend_declare_typed_property(class_entry, property_srcport_name, &property_srcport_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_srcport_name);
-
-	zval property_dstport_default_value;
-	ZVAL_UNDEF(&property_dstport_default_value);
-	zend_string *property_dstport_name = zend_string_init("dstport", sizeof("dstport") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dstport_name, &property_dstport_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_dstport_name);
-
-	return class_entry;
-}
-#endif
-
-#if defined(AF_PACKET)
-static zend_class_entry *register_class_UdpPacket(zend_class_entry *class_entry_Packet)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_CLASS_ENTRY(ce, "UdpPacket", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
-
-	zval property_srcaddr_default_value;
-	ZVAL_UNDEF(&property_srcaddr_default_value);
-	zend_string *property_srcaddr_name = zend_string_init("srcaddr", sizeof("srcaddr") - 1, 1);
-	zend_declare_typed_property(class_entry, property_srcaddr_name, &property_srcaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_srcaddr_name);
-
-	zval property_dstaddr_default_value;
-	ZVAL_UNDEF(&property_dstaddr_default_value);
-	zend_string *property_dstaddr_name = zend_string_init("dstaddr", sizeof("dstaddr") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dstaddr_name, &property_dstaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_dstaddr_name);
-
-	zval property_srcport_default_value;
-	ZVAL_UNDEF(&property_srcport_default_value);
-	zend_string *property_srcport_name = zend_string_init("srcport", sizeof("srcport") - 1, 1);
-	zend_declare_typed_property(class_entry, property_srcport_name, &property_srcport_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_srcport_name);
-
-	zval property_dstport_default_value;
-	ZVAL_UNDEF(&property_dstport_default_value);
-	zend_string *property_dstport_name = zend_string_init("dstport", sizeof("dstport") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dstport_name, &property_dstport_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_dstport_name);
-
-	return class_entry;
-}
-#endif
-
-#if defined(AF_PACKET)
-static zend_class_entry *register_class_Ipv4Packet(zend_class_entry *class_entry_Packet)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_CLASS_ENTRY(ce, "Ipv4Packet", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
-
-	zval property_srcaddr_default_value;
-	ZVAL_UNDEF(&property_srcaddr_default_value);
-	zend_string *property_srcaddr_name = zend_string_init("srcaddr", sizeof("srcaddr") - 1, 1);
-	zend_declare_typed_property(class_entry, property_srcaddr_name, &property_srcaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_srcaddr_name);
-
-	zval property_dstaddr_default_value;
-	ZVAL_UNDEF(&property_dstaddr_default_value);
-	zend_string *property_dstaddr_name = zend_string_init("dstaddr", sizeof("dstaddr") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dstaddr_name, &property_dstaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_dstaddr_name);
+	zval property_macDst_default_value;
+	ZVAL_UNDEF(&property_macDst_default_value);
+	zend_string *property_macDst_name = zend_string_init("macDst", sizeof("macDst") - 1, 1);
+	zend_declare_typed_property(class_entry, property_macDst_name, &property_macDst_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_macDst_name);
 
 	zval property_payload_default_value;
 	ZVAL_UNDEF(&property_payload_default_value);
 	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_string *property_payload_class_TcpPacket = zend_string_init("TcpPacket", sizeof("TcpPacket") - 1, 1);
-	zend_string *property_payload_class_UdpPacket = zend_string_init("UdpPacket", sizeof("UdpPacket") - 1, 1);
-	zend_type_list *property_payload_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
-	property_payload_type_list->num_types = 2;
-	property_payload_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_payload_class_TcpPacket, 0, 0);
-	property_payload_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_payload_class_UdpPacket, 0, 0);
-	zend_type property_payload_type = ZEND_TYPE_INIT_UNION(property_payload_type_list, MAY_BE_NULL);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, property_payload_type);
+	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT|MAY_BE_NULL));
 	zend_string_release(property_payload_name);
 
 	return class_entry;
 }
-#endif
 
-#if defined(AF_PACKET)
-static zend_class_entry *register_class_Ipv6Packet(zend_class_entry *class_entry_Packet)
+static zend_class_entry *register_class_Socket_TcpPacket(zend_class_entry *class_entry_Socket_Packet)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Ipv6Packet", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
+	INIT_NS_CLASS_ENTRY(ce, "Socket", "TcpPacket", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Socket_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
 
-	zval property_srcaddr_default_value;
-	ZVAL_UNDEF(&property_srcaddr_default_value);
-	zend_string *property_srcaddr_name = zend_string_init("srcaddr", sizeof("srcaddr") - 1, 1);
-	zend_declare_typed_property(class_entry, property_srcaddr_name, &property_srcaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_srcaddr_name);
+	zval property_srcAddr_default_value;
+	ZVAL_UNDEF(&property_srcAddr_default_value);
+	zend_string *property_srcAddr_name = zend_string_init("srcAddr", sizeof("srcAddr") - 1, 1);
+	zend_declare_typed_property(class_entry, property_srcAddr_name, &property_srcAddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_srcAddr_name);
 
-	zval property_dstaddr_default_value;
-	ZVAL_UNDEF(&property_dstaddr_default_value);
-	zend_string *property_dstaddr_name = zend_string_init("dstaddr", sizeof("dstaddr") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dstaddr_name, &property_dstaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_dstaddr_name);
+	zval property_dstAddr_default_value;
+	ZVAL_UNDEF(&property_dstAddr_default_value);
+	zend_string *property_dstAddr_name = zend_string_init("dstAddr", sizeof("dstAddr") - 1, 1);
+	zend_declare_typed_property(class_entry, property_dstAddr_name, &property_dstAddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_dstAddr_name);
+
+	zval property_srcPort_default_value;
+	ZVAL_UNDEF(&property_srcPort_default_value);
+	zend_string *property_srcPort_name = zend_string_init("srcPort", sizeof("srcPort") - 1, 1);
+	zend_declare_typed_property(class_entry, property_srcPort_name, &property_srcPort_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_srcPort_name);
+
+	zval property_dstPort_default_value;
+	ZVAL_UNDEF(&property_dstPort_default_value);
+	zend_string *property_dstPort_name = zend_string_init("dstPort", sizeof("dstPort") - 1, 1);
+	zend_declare_typed_property(class_entry, property_dstPort_name, &property_dstPort_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_dstPort_name);
 
 	return class_entry;
 }
-#endif
+
+static zend_class_entry *register_class_Socket_UdpPacket(zend_class_entry *class_entry_Socket_Packet)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Socket", "UdpPacket", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Socket_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
+
+	zval property_srcAddr_default_value;
+	ZVAL_UNDEF(&property_srcAddr_default_value);
+	zend_string *property_srcAddr_name = zend_string_init("srcAddr", sizeof("srcAddr") - 1, 1);
+	zend_declare_typed_property(class_entry, property_srcAddr_name, &property_srcAddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_srcAddr_name);
+
+	zval property_dstAddr_default_value;
+	ZVAL_UNDEF(&property_dstAddr_default_value);
+	zend_string *property_dstAddr_name = zend_string_init("dstAddr", sizeof("dstAddr") - 1, 1);
+	zend_declare_typed_property(class_entry, property_dstAddr_name, &property_dstAddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_dstAddr_name);
+
+	zval property_srcPort_default_value;
+	ZVAL_UNDEF(&property_srcPort_default_value);
+	zend_string *property_srcPort_name = zend_string_init("srcPort", sizeof("srcPort") - 1, 1);
+	zend_declare_typed_property(class_entry, property_srcPort_name, &property_srcPort_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_srcPort_name);
+
+	zval property_dstPort_default_value;
+	ZVAL_UNDEF(&property_dstPort_default_value);
+	zend_string *property_dstPort_name = zend_string_init("dstPort", sizeof("dstPort") - 1, 1);
+	zend_declare_typed_property(class_entry, property_dstPort_name, &property_dstPort_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_dstPort_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Socket_Ipv4Packet(zend_class_entry *class_entry_Socket_Packet)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Socket", "Ipv4Packet", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Socket_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
+
+	zval property_srcAddr_default_value;
+	ZVAL_UNDEF(&property_srcAddr_default_value);
+	zend_string *property_srcAddr_name = zend_string_init("srcAddr", sizeof("srcAddr") - 1, 1);
+	zend_declare_typed_property(class_entry, property_srcAddr_name, &property_srcAddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_srcAddr_name);
+
+	zval property_dstAddr_default_value;
+	ZVAL_UNDEF(&property_dstAddr_default_value);
+	zend_string *property_dstAddr_name = zend_string_init("dstAddr", sizeof("dstAddr") - 1, 1);
+	zend_declare_typed_property(class_entry, property_dstAddr_name, &property_dstAddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_dstAddr_name);
+
+	zval property_payload_default_value;
+	ZVAL_UNDEF(&property_payload_default_value);
+	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
+	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT|MAY_BE_NULL));
+	zend_string_release(property_payload_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Socket_Ipv6Packet(zend_class_entry *class_entry_Socket_Packet)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Socket", "Ipv6Packet", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Socket_Packet, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
+
+	zval property_srcAddr_default_value;
+	ZVAL_UNDEF(&property_srcAddr_default_value);
+	zend_string *property_srcAddr_name = zend_string_init("srcAddr", sizeof("srcAddr") - 1, 1);
+	zend_declare_typed_property(class_entry, property_srcAddr_name, &property_srcAddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_srcAddr_name);
+
+	zval property_dstAddr_default_value;
+	ZVAL_UNDEF(&property_dstAddr_default_value);
+	zend_string *property_dstAddr_name = zend_string_init("dstAddr", sizeof("dstAddr") - 1, 1);
+	zend_declare_typed_property(class_entry, property_dstAddr_name, &property_dstAddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_dstAddr_name);
+
+	return class_entry;
+}
