@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17913 (ReflectionFunction::isDeprecated() returns incorrect
     results for closures created from magic __call()). (timwolla)
 
+- DOM:
+  . Fixed bug GH-17991 (Assertion failure dom_attr_value_write). (nielsdos)
+
 - Opcache:
   . Fixed bug GH-15834 (Segfault with hook "simple get" cache slot and minimal
     JIT). (nielsdos)
