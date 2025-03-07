@@ -37,10 +37,6 @@
 #include <string.h>
 #include "zend_alloc.h"
 
-static const BC_VECTOR POW_10_LUT[9] = {
-	1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000
-};
-
 /*
  * This function should be used when the divisor is not split into multiple chunks, i.e. when the size of the array is one.
  * This is because the algorithm can be simplified.
@@ -174,8 +170,8 @@ static inline void bc_standard_div(
 		divisor_top_digits = BC_VECTOR_SIZE;
 	}
 
-	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
-	size_t low_part_shift = POW_10_LUT[divisor_top_digits - 1];
+	size_t high_part_shift = BC_POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
+	size_t low_part_shift = BC_POW_10_LUT[divisor_top_digits - 1];
 	BC_VECTOR divisor_high_part = divisor_vectors[divisor_top_index] * high_part_shift + divisor_vectors[divisor_top_index - 1] / low_part_shift;
 	for (size_t i = 0; i < quot_arr_size; i++) {
 		BC_VECTOR numerator_high_part = numerator_vectors[numerator_top_index - i] * high_part_shift + numerator_vectors[numerator_top_index - i - 1] / low_part_shift;
@@ -281,7 +277,7 @@ static void bc_do_div(
 	size_t numerator_read = 0;
 	if (numerator_bottom_read_len < BC_VECTOR_SIZE) {
 		numerator_read = MIN(numerator_bottom_read_len, numerator_readable_len);
-		base = POW_10_LUT[numerator_bottom_extension];
+		base = BC_POW_10_LUT[numerator_bottom_extension];
 		numerator_vectors[numerator_vector_count] = 0;
 		for (size_t i = 0; i < numerator_read; i++) {
 			numerator_vectors[numerator_vector_count] += *numerator * base;
