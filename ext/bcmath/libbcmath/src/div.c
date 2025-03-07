@@ -51,7 +51,7 @@ static inline void bc_fast_div(
 {
 	size_t numerator_top_index = numerator_arr_size - 1;
 	size_t quot_top_index = quot_arr_size - 1;
-	for (size_t i = 0; i < quot_arr_size - 1; i++) {
+	for (size_t i = 0; i < quot_top_index; i++) {
 		if (numerator_vectors[numerator_top_index - i] < divisor_vector) {
 			quot_vectors[quot_top_index - i] = 0;
 			/* numerator_vectors[numerator_top_index - i] < divisor_vector, so there will be no overflow. */
