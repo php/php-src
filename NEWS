@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.19
 
+- GD:
+  . Fixed bug GH-17984 (calls with arguments as array with references).
+    (David Carlier)
+
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
@@ -33,8 +37,6 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug GH-17772 (imagepalettetotruecolor crash with memory_limit=2M).
-    (David Carlier)
-  . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
 
 - LDAP:
