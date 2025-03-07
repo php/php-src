@@ -1759,6 +1759,7 @@ PHP_FUNCTION(socket_recvfrom)
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipsrc"), s);
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ipdst"), d);
 					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headersize"), sizeof(*ip));
+					// TODO completing
 					break;
 				}
 				case ETH_P_LOOP: {
