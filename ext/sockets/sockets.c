@@ -1771,7 +1771,7 @@ PHP_FUNCTION(socket_recvfrom)
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("macDst"), ether_ntoa((struct ether_addr *)innere->h_dest));
 					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headerSize"), sizeof(*innere));
 					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("socket"), arg1);
-					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawpacket"), &innerp);
+					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), &innerp);
 					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("payload"), &innerp);
 					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ethProtocol"), 0);
 					break;
