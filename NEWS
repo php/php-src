@@ -65,6 +65,8 @@ PHP                                                                        NEWS
     triggers only an Exception on width). (David Carlier)
   . Fixed bug GH-17772 (imagepalettetotruecolor crash with memory_limit=2M).
     (David Carlier)
+  . Fixed bug GH-17984 (calls with arguments as array with references).
+    (David Carlier)
 
 - LDAP:
   . Fixed bug GH-17704 (ldap_search fails when $attributes contains a

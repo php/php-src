@@ -3748,7 +3748,7 @@ PHP_FUNCTION(imageconvolution)
 	}
 
 	for (i=0; i<3; i++) {
-		if ((var = zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i))) != NULL && Z_TYPE_P(var) == IS_ARRAY) {
+		if ((var = zend_hash_index_find_deref(Z_ARRVAL_P(hash_matrix), (i))) != NULL && Z_TYPE_P(var) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(var)) != 3 ) {
 				zend_argument_value_error(2, "must be a 3x3 array, matrix[%d] only has %d elements", i, zend_hash_num_elements(Z_ARRVAL_P(var)));
 				RETURN_THROWS();
@@ -4061,7 +4061,7 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	for (i = 0; i < nelems; i++) {
-		if ((zval_affine_elem = zend_hash_index_find(Z_ARRVAL_P(z_affine), i)) != NULL) {
+		if ((zval_affine_elem = zend_hash_index_find_deref(Z_ARRVAL_P(z_affine), i)) != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
 				case IS_LONG:
 					affine[i] = Z_LVAL_P(zval_affine_elem);
@@ -4239,7 +4239,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	}
 
 	for (i = 0; i < 6; i++) {
-		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m1), i)) != NULL) {
+		if ((tmp = zend_hash_index_find_deref(Z_ARRVAL_P(z_m1), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
 					m1[i]  = Z_LVAL_P(tmp);
@@ -4256,7 +4256,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 			}
 		}
 
-		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m2), i)) != NULL) {
+		if ((tmp = zend_hash_index_find_deref(Z_ARRVAL_P(z_m2), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
 					m2[i]  = Z_LVAL_P(tmp);
