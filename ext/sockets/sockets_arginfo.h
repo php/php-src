@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1661275adaad2baed7ecda0e62efba6789c0784f */
+ * Stub hash: 00804dcdcd211597f3d67e095c6ca57436977781 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1235,14 +1235,8 @@ static zend_class_entry *register_class_TcpPacket(zend_class_entry *class_entry_
 	zval property_dstport_default_value;
 	ZVAL_UNDEF(&property_dstport_default_value);
 	zend_string *property_dstport_name = zend_string_init("dstport", sizeof("dstport") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dstport_name, &property_dstport_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, property_dstport_name, &property_dstport_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_dstport_name);
-
-	zval property_payload_default_value;
-	ZVAL_UNDEF(&property_payload_default_value);
-	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT|MAY_BE_NULL));
-	zend_string_release(property_payload_name);
 
 	return class_entry;
 }
@@ -1277,14 +1271,8 @@ static zend_class_entry *register_class_UdpPacket(zend_class_entry *class_entry_
 	zval property_dstport_default_value;
 	ZVAL_UNDEF(&property_dstport_default_value);
 	zend_string *property_dstport_name = zend_string_init("dstport", sizeof("dstport") - 1, 1);
-	zend_declare_typed_property(class_entry, property_dstport_name, &property_dstport_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, property_dstport_name, &property_dstport_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_dstport_name);
-
-	zval property_payload_default_value;
-	ZVAL_UNDEF(&property_payload_default_value);
-	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT|MAY_BE_NULL));
-	zend_string_release(property_payload_name);
 
 	return class_entry;
 }
@@ -1313,7 +1301,14 @@ static zend_class_entry *register_class_Ipv4Packet(zend_class_entry *class_entry
 	zval property_payload_default_value;
 	ZVAL_UNDEF(&property_payload_default_value);
 	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT|MAY_BE_NULL));
+	zend_string *property_payload_class_TcpPacket = zend_string_init("TcpPacket", sizeof("TcpPacket") - 1, 1);
+	zend_string *property_payload_class_UdpPacket = zend_string_init("UdpPacket", sizeof("UdpPacket") - 1, 1);
+	zend_type_list *property_payload_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	property_payload_type_list->num_types = 2;
+	property_payload_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_payload_class_TcpPacket, 0, 0);
+	property_payload_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_payload_class_UdpPacket, 0, 0);
+	zend_type property_payload_type = ZEND_TYPE_INIT_UNION(property_payload_type_list, MAY_BE_NULL);
+	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, property_payload_type);
 	zend_string_release(property_payload_name);
 
 	return class_entry;
@@ -1339,12 +1334,6 @@ static zend_class_entry *register_class_Ipv6Packet(zend_class_entry *class_entry
 	zend_string *property_dstaddr_name = zend_string_init("dstaddr", sizeof("dstaddr") - 1, 1);
 	zend_declare_typed_property(class_entry, property_dstaddr_name, &property_dstaddr_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_dstaddr_name);
-
-	zval property_payload_default_value;
-	ZVAL_UNDEF(&property_payload_default_value);
-	zend_string *property_payload_name = zend_string_init("payload", sizeof("payload") - 1, 1);
-	zend_declare_typed_property(class_entry, property_payload_name, &property_payload_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT|MAY_BE_NULL));
-	zend_string_release(property_payload_name);
 
 	return class_entry;
 }
