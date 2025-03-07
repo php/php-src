@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fix memory leaks in array_any() / array_all(). (nielsdos)
 
+- GD:
+  . Fixed bug GH-17984 (calls with arguments as array with references).
+    (David Carlier)
+
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
@@ -64,8 +68,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-17703 (imagescale with both width and height negative values
     triggers only an Exception on width). (David Carlier)
   . Fixed bug GH-17772 (imagepalettetotruecolor crash with memory_limit=2M).
-    (David Carlier)
-  . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
 
 - LDAP:
