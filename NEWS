@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     results for closures created from magic __call()). (timwolla)
   . Fixed bug GH-17941 (Stack-use-after-return with lazy objects and hooks).
     (nielsdos)
+  . Fixed bug GH-17988 (Incorrect handling of hooked props without get hook in
+    get_object_vars()). (ilutov)
 
 - DOM:
   . Fixed bug GH-17991 (Assertion failure dom_attr_value_write). (nielsdos)
