@@ -2191,8 +2191,7 @@ final readonly class TcpPacket extends Packet
 	public string $srcaddr;
 	public string $dstaddr;
 	public string $srcport;
-	public string $dstport;
-	public ?object $payload;
+	public int $dstport;
 }
 
 final readonly class UdpPacket extends Packet
@@ -2200,21 +2199,19 @@ final readonly class UdpPacket extends Packet
 	public string $srcaddr;
 	public string $dstaddr;
 	public string $srcport;
-	public string $dstport;
-	public ?object $payload;
+	public int $dstport;
 }
 
 final readonly class Ipv4Packet extends Packet
 {
 	public string $srcaddr;
 	public string $dstaddr;
-	public ?object $payload;
+	public TcpPacket|UdpPacket|null $payload;
 }
 
 final readonly class Ipv6Packet extends Packet
 {
 	public string $srcaddr;
 	public string $dstaddr;
-	public ?object $payload;
 }
 #endif
