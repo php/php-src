@@ -14953,13 +14953,6 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				// CACHE_PTR_EX(cache_slot + 2, NULL);
 			}
 
-			if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) == IS_REG) {
-				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
-				if (!zend_jit_load_reg(jit, real_addr, res_addr, res_info)) {
-					return 0;
-				}
-			}
-
 			ir_END_list(end_inputs);
 			ir_IF_FALSE(if_has_prop_info);
 		}
@@ -15025,12 +15018,6 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				arg3,
 				arg4);
 
-			if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) == IS_REG) {
-				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
-				if (!zend_jit_load_reg(jit, real_addr, res_addr, res_info)) {
-					return 0;
-				}
-			}
 			ir_END_list(end_inputs);
 		}
 	}
@@ -15043,7 +15030,14 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				return 0;
 			}
 		} else {
-			if (!zend_jit_assign_to_variable(jit, opline, prop_addr, prop_addr, -1, -1, (opline+1)->op1_type, val_addr, val_info, res_addr, 0, 0)) {
+			zend_jit_addr real_res_addr;
+
+			if (res_addr && Z_MODE(res_addr) == IS_REG) {
+				real_res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+			} else {
+				real_res_addr = res_addr;
+			}
+			if (!zend_jit_assign_to_variable(jit, opline, prop_addr, prop_addr, -1, -1, (opline+1)->op1_type, val_addr, val_info, real_res_addr, 0, 0)) {
 				return 0;
 			}
 		}
@@ -15093,12 +15087,6 @@ slow_path:
 			ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
 			arg5);
 
-		if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) == IS_REG) {
-			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
-			if (!zend_jit_load_reg(jit, real_addr, res_addr, res_info)) {
-				return 0;
-			}
-		}
 		ir_END_list(end_inputs);
 	}
 
@@ -15117,6 +15105,13 @@ slow_path:
 
 	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
+	}
+
+	if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) == IS_REG) {
+		zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+		if (!zend_jit_load_reg(jit, real_addr, res_addr, res_info)) {
+			return 0;
+		}
 	}
 
 	if (may_throw) {
