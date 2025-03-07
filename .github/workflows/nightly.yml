@@ -76,11 +76,6 @@ jobs:
         with:
           runTestsParameters: >-
             --asan -x
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   ALPINE:
     if: inputs.run_alpine
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
