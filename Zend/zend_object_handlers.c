@@ -1198,6 +1198,11 @@ lazy_init:;
 
 	variable_ptr = zend_std_write_property(zobj, name, &backup, cache_slot);
 	zval_ptr_dtor(&backup);
+
+	if (variable_ptr == &backup) {
+		variable_ptr = value;
+	}
+
 	return variable_ptr;
 }
 /* }}} */
