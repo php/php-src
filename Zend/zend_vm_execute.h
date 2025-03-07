@@ -24037,12 +24037,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -24114,14 +24116,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -24191,12 +24191,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -24268,14 +24270,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -24345,12 +24345,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -24422,14 +24424,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -24499,12 +24499,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -24576,14 +24578,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -27028,12 +27028,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -27105,14 +27107,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -27182,12 +27182,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -27259,14 +27261,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -27336,12 +27336,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -27413,14 +27415,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -27490,12 +27490,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -27567,14 +27569,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -31381,12 +31381,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -31458,14 +31460,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -31535,12 +31535,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -31612,14 +31614,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -31689,12 +31689,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -31766,14 +31768,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -31843,12 +31843,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -31920,14 +31922,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -34128,12 +34128,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -34205,14 +34207,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -34282,12 +34282,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -34359,14 +34361,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -34436,12 +34436,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -34513,14 +34515,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -34590,12 +34590,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -34667,14 +34669,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -36296,12 +36296,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -36373,14 +36375,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -36450,12 +36450,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -36527,14 +36529,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -36604,12 +36604,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -36681,14 +36683,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -36758,12 +36758,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -36835,14 +36837,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -38942,12 +38942,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -39019,14 +39021,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -39096,12 +39096,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -39173,14 +39175,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -39250,12 +39250,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -39327,14 +39329,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -39404,12 +39404,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -39481,14 +39483,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -43342,12 +43342,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -43419,14 +43421,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -43496,12 +43496,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -43573,14 +43575,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -43650,12 +43650,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -43727,14 +43729,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -43804,12 +43804,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -43881,14 +43883,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -47294,12 +47294,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -47371,14 +47373,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -47448,12 +47448,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -47525,14 +47527,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -47602,12 +47602,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -47679,14 +47681,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -47756,12 +47756,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -47833,14 +47835,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -52793,12 +52793,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -52870,14 +52872,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -52947,12 +52947,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -53024,14 +53026,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -53101,12 +53101,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -53178,14 +53180,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
@@ -53255,12 +53255,14 @@ assign_object:
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
+			zend_property_info *prop_info;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
-					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
-
 					if (prop_info != NULL) {
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
@@ -53332,14 +53334,12 @@ fast_assign_obj:
 			} else {
 				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
 				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					property_val = OBJ_PROP(zobj, prop_info->offset);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
-						goto free_and_exit_assign_obj;
-					} else {
-						goto fast_assign_obj;
+					prop_info = CACHED_PTR_EX(cache_slot + 2);
+					prop_offset = prop_info->offset;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
 					}
+					goto assign_obj_simple;
 				}
 				/* Fall through to write_property for hooks. */
 			}
