@@ -180,7 +180,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 			 */
 			if (str_scale > 0) {
 				const char *fractional_new_end = bc_skip_zero_reverse(fractional_end, fractional_ptr);
-				str_scale -= fractional_end - fractional_new_end; // fractional_end >= fractional_new_end
+				str_scale -= fractional_end - fractional_new_end; /* fractional_end >= fractional_new_end */
 			}
 		}
 	} else {
