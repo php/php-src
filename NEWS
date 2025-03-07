@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     get_object_vars()). (ilutov)
   . Fixed bug GH-17998 (Skipped lazy object initialization on primed
     SIMPLE_WRITE cache). (ilutov)
+  . Fixed bug GH-17998 (Assignment to backing value in set hook of lazy proxy
+    calls hook again). (ilutov)
 
 - DOM:
   . Fixed bug GH-17991 (Assertion failure dom_attr_value_write). (nielsdos)

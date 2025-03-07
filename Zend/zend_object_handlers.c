@@ -673,9 +673,23 @@ static bool zend_is_in_hook(const zend_property_info *prop_info)
 
 static bool zend_should_call_hook(const zend_property_info *prop_info, const zend_object *obj)
 {
-	return !zend_is_in_hook(prop_info)
-		/* execute_data and This are guaranteed to be set if zend_is_in_hook() returns true. */
-		|| Z_OBJ(EG(current_execute_data)->This) != obj;
+	if (!zend_is_in_hook(prop_info)) {
+		return true;
+	}
+
+	/* execute_data and This are guaranteed to be set if zend_is_in_hook() returns true. */
+	zend_object *parent_obj = Z_OBJ(EG(current_execute_data)->This);
+	if (parent_obj == obj) {
+		return false;
+	}
+
+	if (zend_object_is_lazy_proxy(parent_obj)
+	 && zend_lazy_object_initialized(parent_obj)
+	 && zend_lazy_object_get_instance(parent_obj) == obj) {
+		return false;
+	}
+
+	return true;
 }
 
 static ZEND_COLD void zend_throw_no_prop_backing_value_access(zend_string *class_name, zend_string *prop_name, bool is_read)
