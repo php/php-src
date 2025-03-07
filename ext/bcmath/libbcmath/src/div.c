@@ -251,58 +251,39 @@ static inline void bc_standard_div(
 }
 
 static void bc_do_div(
-	const char *numerator, size_t numerator_readable_len, size_t numerator_bottom_extension,
-	const char *divisor, size_t divisor_len, bc_num *quot, size_t quot_len
+	const char *numerator, size_t numerator_size, size_t numerator_readable_size,
+	const char *divisor, size_t divisor_size,
+	bc_num *quot, size_t quot_size
 ) {
-	size_t divisor_arr_size = (divisor_len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t numerator_arr_size = (numerator_readable_len + numerator_bottom_extension + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t numerator_arr_size = (numerator_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t divisor_arr_size = (divisor_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t quot_arr_size = numerator_arr_size - divisor_arr_size + 1;
-	size_t quot_real_arr_size = MIN(quot_arr_size, (quot_len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE);
+	size_t quot_real_arr_size = MIN(quot_arr_size, (quot_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE);
 
 	BC_VECTOR *numerator_vectors = safe_emalloc(numerator_arr_size + divisor_arr_size + quot_arr_size, sizeof(BC_VECTOR), 0);
 	BC_VECTOR *divisor_vectors = numerator_vectors + numerator_arr_size;
 	BC_VECTOR *quot_vectors = divisor_vectors + divisor_arr_size;
 
-	/* Fill with zeros and convert as many vector elements as needed */
-	size_t numerator_vector_count = 0;
-	while (numerator_bottom_extension >= BC_VECTOR_SIZE) {
-		numerator_vectors[numerator_vector_count] = 0;
-		numerator_bottom_extension -= BC_VECTOR_SIZE;
-		numerator_vector_count++;
-	}
-
-	size_t numerator_bottom_read_len = BC_VECTOR_SIZE - numerator_bottom_extension;
-
-	size_t base;
-	size_t numerator_read = 0;
-	if (numerator_bottom_read_len < BC_VECTOR_SIZE) {
-		numerator_read = MIN(numerator_bottom_read_len, numerator_readable_len);
-		base = BC_POW_10_LUT[numerator_bottom_extension];
-		numerator_vectors[numerator_vector_count] = 0;
-		for (size_t i = 0; i < numerator_read; i++) {
-			numerator_vectors[numerator_vector_count] += *numerator * base;
-			base *= BASE;
-			numerator--;
-		}
-		numerator_vector_count++;
-	}
+	size_t numerator_extension = numerator_size > numerator_readable_size ? numerator_size - numerator_readable_size : 0;
 
 	/* Bulk convert numerator and divisor to vectors */
-	if (numerator_readable_len > numerator_read) {
-		bc_convert_to_vector(numerator_vectors + numerator_vector_count, numerator, numerator_readable_len - numerator_read);
-	}
-	bc_convert_to_vector(divisor_vectors, divisor, divisor_len);
+	size_t numerator_use_size = numerator_size - numerator_extension;
+	const char *numerator_end = numerator + numerator_use_size - 1;
+	bc_convert_to_vector_with_zero_pad(numerator_vectors, numerator_end, numerator_use_size, numerator_extension);
+
+	const char *divisor_end = divisor + divisor_size - 1;
+	bc_convert_to_vector(divisor_vectors, divisor_end, divisor_size);
 
 	/* Do the division */
 	if (divisor_arr_size == 1) {
 		bc_fast_div(numerator_vectors, numerator_arr_size, divisor_vectors[0], quot_vectors, quot_arr_size);
 	} else {
-		bc_standard_div(numerator_vectors, numerator_arr_size, divisor_vectors, divisor_arr_size, divisor_len, quot_vectors, quot_arr_size);
+		bc_standard_div(numerator_vectors, numerator_arr_size, divisor_vectors, divisor_arr_size, divisor_size, quot_vectors, quot_arr_size);
 	}
 
 	/* Convert to bc_num */
 	char *qptr = (*quot)->n_value;
-	char *qend = qptr + quot_len - 1;
+	char *qend = qptr + (*quot)->n_len + (*quot)->n_scale - 1;
 
 	size_t i;
 	for (i = 0; i < quot_real_arr_size - 1; i++) {
@@ -332,166 +313,115 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 	}
 
 	bc_free_num(quot);
+	size_t quot_scale = scale;
 
 	/* If numerator is zero, the quotient is always zero. */
 	if (bc_is_zero(numerator)) {
-		*quot = bc_copy_num(BCG(_zero_));
-		return true;
+		goto quot_zero;
 	}
 
 	/* If divisor is 1 / -1, the quotient's n_value is equal to numerator's n_value. */
 	if (_bc_do_compare(divisor, BCG(_one_), divisor->n_scale, false) == BCMATH_EQUAL) {
-		size_t quot_scale = MIN(numerator->n_scale, scale);
+		quot_scale = MIN(numerator->n_scale, quot_scale);
 		*quot = bc_new_num_nonzeroed(numerator->n_len, quot_scale);
 		char *qptr = (*quot)->n_value;
 		memcpy(qptr, numerator->n_value, numerator->n_len + quot_scale);
 		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
-		_bc_rm_leading_zeros(*quot);
 		return true;
 	}
 
 	char *numeratorptr = numerator->n_value;
-	char *numeratorend = numeratorptr + numerator->n_len + numerator->n_scale - 1;
-	size_t numerator_len = numerator->n_len;
-	size_t numerator_scale = numerator->n_scale;
+	size_t numerator_size = numerator->n_len + quot_scale + divisor->n_scale;
 
 	char *divisorptr = divisor->n_value;
-	char *divisorend = divisorptr + divisor->n_len + divisor->n_scale - 1;
-	size_t divisor_len = divisor->n_len;
-	size_t divisor_scale = divisor->n_scale;
-	size_t divisor_int_right_zeros = 0;
+	size_t divisor_size = divisor->n_len + divisor->n_scale;
 
-	/* remove divisor trailing zeros */
-	while (*divisorend == 0 && divisor_scale > 0) {
-		divisorend--;
-		divisor_scale--;
-	}
-	while (*divisorend == 0) {
-		divisorend--;
-		divisor_int_right_zeros++;
-	}
-
-	if (*numeratorptr == 0 && numerator_len == 1) {
+	/* check and remove numerator leading zeros */
+	size_t numerator_leading_zeros = 0;
+	while (*numeratorptr == 0) {
 		numeratorptr++;
-		numerator_len = 0;
+		numerator_leading_zeros++;
+	}
+	if (numerator_size > numerator_leading_zeros) {
+		numerator_size -= numerator_leading_zeros;
+	} else {
+		goto quot_zero;
 	}
 
-	size_t numerator_top_extension = 0;
-	size_t numerator_bottom_extension = 0;
-	if (divisor_scale > 0) {
-		/*
-		 * e.g. divisor_scale = 4
-		 * divisor = .0002, to be 2 or divisor = 200.001, to be 200001
-		 * numerator = .03, to be 300 or numerator = .000003, to be .03
-		 * numerator may become longer than the original data length due to the addition of
-		 * trailing zeros in the integer part.
-		 */
-		numerator_len += divisor_scale;
-		numerator_bottom_extension = numerator_scale < divisor_scale ? divisor_scale - numerator_scale : 0;
-		numerator_scale = numerator_scale > divisor_scale ? numerator_scale - divisor_scale : 0;
-		divisor_len += divisor_scale;
-		divisor_scale = 0;
-	} else if (divisor_int_right_zeros > 0) {
-		/*
-		 * e.g. divisor_int_right_zeros = 4
-		 * divisor = 2000, to be 2
-		 * numerator = 30, to be .03 or numerator = 30000, to be 30
-		 * Also, numerator may become longer than the original data length due to the addition of
-		 * leading zeros in the fractional part.
-		 */
-		numerator_top_extension = numerator_len < divisor_int_right_zeros ? divisor_int_right_zeros - numerator_len : 0;
-		numerator_len = numerator_len > divisor_int_right_zeros ? numerator_len - divisor_int_right_zeros : 0;
-		numerator_scale += divisor_int_right_zeros;
-		divisor_len -= divisor_int_right_zeros;
-		divisor_scale = 0;
-	}
-
-	/* remove numerator leading zeros */
-	while (*numeratorptr == 0 && numerator_len > 0) {
-		numeratorptr++;
-		numerator_len--;
-	}
-	/* remove divisor leading zeros */
+	/* check and remove divisor leading zeros */
 	while (*divisorptr == 0) {
 		divisorptr++;
-		divisor_len--;
+		divisor_size--;
 	}
 
-	/* Considering the scale specification, the quotient is always 0 if this condition is met */
-	if (divisor_len > numerator_len + scale) {
-		*quot = bc_copy_num(BCG(_zero_));
-		return true;
+	if (divisor_size > numerator_size) {
+		goto quot_zero;
 	}
 
-	/* Length of numerator data that can be read */
-	size_t numerator_readable_len = numeratorend - numeratorptr + 1;
-
-	/* set scale to numerator */
-	if (numerator_scale > scale) {
-		size_t scale_diff = numerator_scale - scale;
-		if (numerator_bottom_extension > scale_diff) {
-			numerator_bottom_extension -= scale_diff;
-		} else {
-			numerator_bottom_extension = 0;
-			if (EXPECTED(numerator_readable_len > scale_diff)) {
-				numerator_readable_len -= scale_diff;
-				numeratorend -= scale_diff;
-			} else {
-				numerator_readable_len = 0;
-				numeratorend = numeratorptr;
-			}
+	/* check and remove divisor trailing zeros. The divisor is not 0, so leave only one digit */
+	size_t divisor_trailing_zeros = 0;
+	for (size_t i = divisor_size - 1; i > 0; i--) {
+		if (divisorptr[i] != 0) {
+			break;
 		}
-		numerator_top_extension = MIN(numerator_top_extension, scale);
-	} else {
-		numerator_bottom_extension += scale - numerator_scale;
+		divisor_trailing_zeros++;
 	}
-	numerator_scale = scale;
+	divisor_size -= divisor_trailing_zeros;
 
-	if (divisor_len > numerator_readable_len + numerator_bottom_extension) {
-		*quot = bc_copy_num(BCG(_zero_));
-		return true;
+	if (numerator_size > divisor_trailing_zeros) {
+		numerator_size -= divisor_trailing_zeros;
+	} else {
+		goto quot_zero;
 	}
+
+	size_t quot_size = numerator_size - divisor_size + 1; /* numerator_size >= divisor_size */
+	if (quot_size > quot_scale) {
+		*quot = bc_new_num_nonzeroed(quot_size - quot_scale, quot_scale);
+	} else {
+		*quot = bc_new_num_nonzeroed(1, quot_scale); /* 1 is for 0 */
+	}
+
+	/* Size that can be read from numeratorptr */
+	size_t numerator_readable_size = numerator->n_len + numerator->n_scale - numerator_leading_zeros;
 
 	/* If divisor is 1 here, return the result of adjusting the decimal point position of numerator. */
-	if (divisor_len == 1 && *divisorptr == 1) {
-		if (numerator_len == 0) {
-			numerator_len = 1;
-			numerator_top_extension++;
-		}
-		size_t quot_scale = numerator_scale > numerator_bottom_extension ? numerator_scale - numerator_bottom_extension : 0;
-		numerator_bottom_extension = numerator_scale < numerator_bottom_extension ? numerator_bottom_extension - numerator_scale : 0;
-
-		*quot = bc_new_num_nonzeroed(numerator_len, quot_scale);
+	if (divisor_size == 1 && *divisorptr == 1) {
 		char *qptr = (*quot)->n_value;
-		for (size_t i = 0; i < numerator_top_extension; i++) {
+		if (quot_size <= quot_scale) {
+			/* int is 0 */
+			*qptr++ = 0;
+			for (size_t i = quot_size; i < quot_scale; i++) {
+				*qptr++ = 0;
+			}
+		}
+		size_t numerator_use_size = quot_size > numerator_readable_size ? numerator_readable_size : quot_size;
+		memcpy(qptr, numeratorptr, numerator_use_size);
+		qptr += numerator_use_size;
+		for (size_t i = 0; i < quot_size - numerator_use_size; i++) {
 			*qptr++ = 0;
 		}
-		memcpy(qptr, numeratorptr, numerator_readable_len);
-		qptr += numerator_readable_len;
-		for (size_t i = 0; i < numerator_bottom_extension; i++) {
-			*qptr++ = 0;
-		}
+		bc_rm_trailing_zeros(*quot);
 		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 		return true;
-	}
-
-	size_t quot_full_len;
-	if (divisor_len > numerator_len) {
-		*quot = bc_new_num_nonzeroed(1, scale);
-		quot_full_len = 1 + scale;
-	} else {
-		*quot = bc_new_num_nonzeroed(numerator_len - divisor_len + 1, scale);
-		quot_full_len = numerator_len - divisor_len + 1 + scale;
 	}
 
 	/* do divide */
-	bc_do_div(numeratorend, numerator_readable_len, numerator_bottom_extension, divisorend, divisor_len, quot, quot_full_len);
+	bc_do_div(
+		numeratorptr, numerator_size, numerator_readable_size,
+		divisorptr, divisor_size,
+		quot, quot_size
+	);
+
 	_bc_rm_leading_zeros(*quot);
 	if (bc_is_zero(*quot)) {
-		(*quot)->n_sign = PLUS;
+		bc_free_num(quot);
+		goto quot_zero;
 	} else {
 		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 	}
+	return true;
 
+quot_zero:
+	*quot = bc_copy_num(BCG(_zero_));
 	return true;
 }

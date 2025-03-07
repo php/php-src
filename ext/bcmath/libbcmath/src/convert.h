@@ -57,4 +57,32 @@ static inline void bc_convert_to_vector(BC_VECTOR *n_vector, const char *nend, s
 	}
 }
 
+static inline void bc_convert_to_vector_with_zero_pad(BC_VECTOR *n_vector, const char *nend, size_t nlen, size_t zeros)
+{
+	while (zeros >= BC_VECTOR_SIZE) {
+		*n_vector = 0;
+		n_vector++;
+		zeros -= BC_VECTOR_SIZE;
+	}
+
+	if (zeros > 0) {
+		*n_vector = 0;
+		BC_VECTOR base = BC_POW_10_LUT[zeros];
+		size_t tmp_len = MIN(BC_VECTOR_SIZE - zeros, nlen);
+		for (size_t i = 0; i < tmp_len; i++) {
+			*n_vector += *nend * base;
+			base *= BASE;
+			nend--;
+		}
+		n_vector++;
+		nlen -= tmp_len;
+	}
+
+	if (nlen == 0) {
+		return;
+	}
+
+	bc_convert_to_vector(n_vector, nend, nlen);
+}
+
 #endif
