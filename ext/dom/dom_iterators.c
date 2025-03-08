@@ -278,14 +278,12 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
-	iterator = emalloc(sizeof(php_dom_iterator));
+	iterator = emalloc(sizeof(*iterator));
+	memset(iterator, 0, sizeof(*iterator));
 	zend_iterator_init(&iterator->intern);
-	iterator->cache_tag.modification_nr = 0;
 
 	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_dom_iterator_funcs;
-
-	ZVAL_UNDEF(&iterator->curobj);
 
 	intern = Z_DOMOBJ_P(object);
 	objmap = (dom_nnodemap_object *)intern->ptr;
