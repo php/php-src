@@ -1798,6 +1798,49 @@ ZEND_VM_C_LABEL(fetch_this):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR, CONST, CACHE_SLOT)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_string *inner_class_name, *full_class_name;
+	zend_class_entry *outer_ce = NULL, *inner_ce = NULL;
+
+	if (OP1_TYPE == IS_CONST) {
+		zval *outer_class_zv = RT_CONSTANT(opline, opline->op1);
+		outer_ce = zend_lookup_class(Z_STR_P(outer_class_zv));
+		if (!outer_ce) {
+			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL_P(outer_class_zv));
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		outer_ce = CACHED_PTR(opline->extended_value);
+		if (UNEXPECTED(outer_ce == NULL)) {
+			outer_ce = Z_CE_P(EX_VAR(opline->op1.var));
+		}
+	}
+
+	inner_class_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+
+	full_class_name = zend_string_concat3(
+		ZSTR_VAL(outer_ce->name), ZSTR_LEN(outer_ce->name),
+		":>", 2,
+		ZSTR_VAL(inner_class_name), ZSTR_LEN(inner_class_name)
+	);
+
+	inner_ce = zend_lookup_class(full_class_name);
+	if (!inner_ce) {
+		zend_error(E_ERROR, "Class '%s' not found", ZSTR_VAL(full_class_name));
+	}
+
+	CACHE_PTR(opline->extended_value, inner_ce);
+	Z_CE_P(EX_VAR(opline->result.var)) = inner_ce;
+
+	zend_string_release(full_class_name);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(80, ZEND_FETCH_R, CONST|TMPVAR|CV, UNUSED, VAR_FETCH)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_fetch_var_address_helper, type, BP_VAR_R);

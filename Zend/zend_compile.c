@@ -2877,9 +2877,42 @@ static inline void zend_set_class_name_op1(zend_op *opline, znode *class_node) /
 }
 /* }}} */
 
+static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t fetch_flags);
+
+static void zend_compile_inner_class_ref(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *outer_class = ast->child[0];
+	zend_ast *inner_class = ast->child[1];
+
+	znode outer_node, inner_node;
+
+	// handle nesting
+	if (outer_class->kind == ZEND_AST_INNER_CLASS) {
+		zend_compile_inner_class_ref(&outer_node, outer_class);
+	} else {
+		zend_compile_class_ref(&outer_node, outer_class, ZEND_FETCH_CLASS_EXCEPTION);
+	}
+
+	if (inner_class->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(inner_class)) == IS_STRING) {
+		ZVAL_STR(&inner_node.u.constant, zend_string_dup(Z_STR_P(zend_ast_get_zval(inner_class)), 0));
+		inner_node.op_type = IS_CONST;
+	} else {
+		zend_compile_expr(&inner_node, inner_class);
+	}
+
+	zend_op *opline = zend_emit_op(result, ZEND_FETCH_INNER_CLASS, &outer_node, &inner_node);
+	opline->extended_value = zend_alloc_cache_slot();
+}
+/* }}} */
+
 static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t fetch_flags) /* {{{ */
 {
 	uint32_t fetch_type;
+
+	if (name_ast->kind == ZEND_AST_INNER_CLASS) {
+		zend_compile_inner_class_ref(result, name_ast);
+		return;
+	}
 
 	if (name_ast->kind != ZEND_AST_ZVAL) {
 		znode name_node;
@@ -9127,6 +9160,9 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			// if a class is private or protected, we need to require the correct scope
 			ce->required_scope = propFlags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED) ? CG(active_class_entry) : NULL;
 			ce->required_scope_absolute = propFlags & ZEND_ACC_PRIVATE ? true : false;
+			if (ce->required_scope) {
+				ce->required_scope->refcount ++;
+			}
 
 			// ensure the class is treated as a top-level class and not an anon class
 			toplevel = true;
@@ -11760,6 +11796,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
 			return;
+                        case ZEND_AST_INNER_CLASS:
+                          zend_compile_inner_class_ref(result, ast);
+                          return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
 	}
