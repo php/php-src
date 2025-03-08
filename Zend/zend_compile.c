@@ -9090,10 +9090,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		zend_string *unqualified_name = decl->name;
 
-		if (CG(active_class_entry)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
-		}
-
 		const char *type = "a class name";
 		if (decl->flags & ZEND_ACC_ENUM) {
 			type = "an enum name";
@@ -9103,7 +9099,41 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			type = "a trait name";
 		}
 		zend_assert_valid_class_name(unqualified_name, type);
-		name = zend_prefix_with_ns(unqualified_name);
+
+		if (CG(active_class_entry) && CG(active_op_array)->function_name) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be declared inside functions");
+		}
+
+		if (CG(active_class_entry)) {
+			// rename the inner class so we may reference it by name
+			name = zend_string_concat3(
+				ZSTR_VAL(CG(active_class_entry)->name), ZSTR_LEN(CG(active_class_entry)->name),
+				":>", 2,
+				ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name)
+			);
+
+			// configure the current ce->flags for a nested class. This should only include:
+			// - final
+			// - readonly
+			// - abstract
+			ce->ce_flags |= decl->attr & (ZEND_ACC_FINAL|ZEND_ACC_READONLY|ZEND_ACC_ABSTRACT);
+
+			// configure the const stand-ins for a nested class. This should only include:
+			// - public
+			// - private
+			// - protected
+			int propFlags = decl->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
+
+			// if a class is private or protected, we need to require the correct scope
+			ce->required_scope = propFlags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED) ? CG(active_class_entry) : NULL;
+			ce->required_scope_absolute = propFlags & ZEND_ACC_PRIVATE ? true : false;
+
+			// ensure the class is treated as a top-level class and not an anon class
+			toplevel = true;
+		} else {
+			name = zend_prefix_with_ns(unqualified_name);
+			ce->required_scope = NULL;
+		}
 		name = zend_new_interned_string(name);
 		lcname = zend_string_tolower(name);
 
