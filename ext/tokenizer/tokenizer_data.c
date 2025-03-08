@@ -167,6 +167,7 @@ char *get_token_type_name(int token_type)
 		case T_DOLLAR_OPEN_CURLY_BRACES: return "T_DOLLAR_OPEN_CURLY_BRACES";
 		case T_CURLY_OPEN: return "T_CURLY_OPEN";
 		case T_PAAMAYIM_NEKUDOTAYIM: return "T_DOUBLE_COLON";
+		case T_INNER_REF: return "T_INNER_REF";
 		case T_NS_SEPARATOR: return "T_NS_SEPARATOR";
 		case T_ELLIPSIS: return "T_ELLIPSIS";
 		case T_COALESCE: return "T_COALESCE";

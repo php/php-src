@@ -231,6 +231,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_DOLLAR_OPEN_CURLY_BRACES "'${'"
 %token T_CURLY_OPEN      "'{$'"
 %token T_PAAMAYIM_NEKUDOTAYIM "'::'"
+%token T_INNER_REF       "':>'"
 %token T_NS_SEPARATOR    "'\\'"
 %token T_ELLIPSIS        "'...'"
 %token T_COALESCE        "'??'"
