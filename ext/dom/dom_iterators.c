@@ -158,7 +158,7 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 	zval *object = &iterator->intern.data;
 
 	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry)) {
-		ZVAL_LONG(key, iter->index);
+		ZVAL_LONG(key, iterator->index);
 	} else {
 		dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 
@@ -188,6 +188,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 	if (Z_ISUNDEF(iterator->curobj)) {
 		return;
 	}
+
+	iterator->index++;
 
 	intern = Z_DOMOBJ_P(&iterator->curobj);
 	object = &iterator->intern.data;
@@ -227,18 +229,18 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 							curnode = basenode->children;
 						}
 					} else {
-						previndex = iter->index - 1;
+						previndex = iterator->index - 1;
 						curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 					}
 					curnode = dom_get_elements_by_tag_name_ns_raw(
-						basenode, curnode, (char *) objmap->ns, (char *) objmap->local, &previndex, iter->index);
+						basenode, curnode, (char *) objmap->ns, (char *) objmap->local, &previndex, iterator->index);
 				}
 			}
 		} else {
 			if (objmap->nodetype == XML_ENTITY_NODE) {
-				curnode = php_dom_libxml_hash_iter(objmap->ht, iter->index);
+				curnode = php_dom_libxml_hash_iter(objmap->ht, iterator->index);
 			} else {
-				curnode = php_dom_libxml_notation_iter(objmap->ht, iter->index);
+				curnode = php_dom_libxml_notation_iter(objmap->ht, iterator->index);
 			}
 		}
 	}
