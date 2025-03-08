@@ -3848,7 +3848,7 @@ PHP_FUNCTION(imageantialias)
 }
 /* }}} */
 
-static bool _php_gd_zval_try_get_c_int(zval *tmp, const char *field, int *res) {
+static bool php_gd_zval_try_get_c_int(zval *tmp, const char *field, int *res) {
 	zend_long r;
 	bool failed = false;
 	r = zval_try_get_long(tmp, &failed);
@@ -3882,7 +3882,7 @@ PHP_FUNCTION(imagecrop)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
-		if (!_php_gd_zval_try_get_c_int(tmp, "x", &rect.x)) {
+		if (!php_gd_zval_try_get_c_int(tmp, "x", &rect.x)) {
 			RETURN_THROWS();
 		}
 	} else {
@@ -3891,7 +3891,7 @@ PHP_FUNCTION(imagecrop)
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
-		if (!_php_gd_zval_try_get_c_int(tmp, "y", &rect.y)) {
+		if (!php_gd_zval_try_get_c_int(tmp, "y", &rect.y)) {
 			RETURN_THROWS();
 		}
 	} else {
@@ -3900,7 +3900,7 @@ PHP_FUNCTION(imagecrop)
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
-		if (!_php_gd_zval_try_get_c_int(tmp, "width", &rect.width)) {
+		if (!php_gd_zval_try_get_c_int(tmp, "width", &rect.width)) {
 			RETURN_THROWS();
 		}
 	} else {
@@ -3909,7 +3909,7 @@ PHP_FUNCTION(imagecrop)
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
-		if (!_php_gd_zval_try_get_c_int(tmp, "height", &rect.height)) {
+		if (!php_gd_zval_try_get_c_int(tmp, "height", &rect.height)) {
 			RETURN_THROWS();
 		}
 	} else {
