@@ -7,9 +7,9 @@ gd
 $img = imagecreatetruecolor(10, 10);
 
 // POC #1
-var_dump(imagecrop($img, array("x" => "a", "y" => 0, "width" => 10, "height" => 10)));
+var_dump(imagecrop($img, array("x" => 0, "y" => 0, "width" => 10, "height" => 10)));
 
-$arr = array("x" => "a", "y" => "12b", "width" => 10, "height" => 10);
+$arr = array("x" => 2147483647, "y" => 2147483647, "width" => 10, "height" => 10);
 var_dump(imagecrop($img, $arr));
 print_r($arr);
 
@@ -32,8 +32,8 @@ object(GdImage)#2 (0) {
 }
 Array
 (
-    [x] => a
-    [y] => 12b
+    [x] => 2147483647
+    [y] => 2147483647
     [width] => 10
     [height] => 10
 )
