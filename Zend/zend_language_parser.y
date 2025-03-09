@@ -158,6 +158,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_PROTECTED_SET "'protected(set)'"
 %token <ident> T_PUBLIC_SET    "'public(set)'"
 %token <ident> T_READONLY      "'readonly'"
+%token <ident> T_DATA		   "'data'"
 %token <ident> T_VAR           "'var'"
 %token <ident> T_UNSET         "'unset'"
 %token <ident> T_ISSET         "'isset'"
@@ -314,7 +315,7 @@ reserved_non_modifiers:
 
 semi_reserved:
 	  reserved_non_modifiers
-	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC | T_READONLY
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC | T_READONLY | T_DATA
 ;
 
 ampersand:
@@ -624,6 +625,7 @@ class_modifier:
 		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
 	|	T_READONLY 		{ $$ = ZEND_ACC_READONLY_CLASS|ZEND_ACC_NO_DYNAMIC_PROPERTIES; }
+	|   T_DATA          { $$ = ZEND_ACC_DATA_CLASS; }
 ;
 
 trait_declaration_statement:
