@@ -10,4 +10,4 @@ class Outer {
 
 ?>
 --EXPECTF--
-Fatal error: Multiple access type modifiers are not allowed in %s on line %d
+Parse error: syntax error, unexpected identifier "int", expecting "class" in %s on line %d
