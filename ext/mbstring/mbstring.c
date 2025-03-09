@@ -1573,7 +1573,9 @@ PHP_FUNCTION(mb_output_handler)
 		char *mimetype = NULL;
 
 		/* Analyze mime type */
-		if (SG(sapi_headers).mimetype && _php_mb_match_regex(MBSTRG(http_output_conv_mimetypes), SG(sapi_headers).mimetype, strlen(SG(sapi_headers).mimetype))) {
+		if (SG(sapi_headers).mimetype
+		 && MBSTRG(http_output_conv_mimetypes)
+		 && _php_mb_match_regex(MBSTRG(http_output_conv_mimetypes), SG(sapi_headers).mimetype, strlen(SG(sapi_headers).mimetype))) {
 			char *s;
 			if ((s = strchr(SG(sapi_headers).mimetype, ';')) == NULL) {
 				mimetype = estrdup(SG(sapi_headers).mimetype);
