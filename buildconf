@@ -130,8 +130,16 @@ fi
 
 echo "buildconf: Rebuilding configure"
 $PHP_AUTOCONF $autoconf_flags
+autoconf_status=$?
 
 echo "buildconf: Rebuilding main/php_config.h.in"
 $PHP_AUTOHEADER $autoheader_flags
+autoheader_status=$?
+
+if test "$autoconf_status" -ne 0 || test "$autoheader_status" -ne 0; then
+  echo "buildconf: Some issues occurred during the files generation." >&2
+  echo "           Please, check Autoconf source files or report a bug." >&2
+  exit 1
+fi
 
 echo "buildconf: Run ./configure to proceed with customizing the PHP build."
