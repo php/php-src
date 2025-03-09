@@ -19,6 +19,7 @@
 #include "php.h"
 #include "php_json.h"
 #include "php_json_parser.h"
+#include "php_json_scanner.h"
 
 #define YYDEBUG 0
 
