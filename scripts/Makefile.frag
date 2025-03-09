@@ -46,3 +46,6 @@ install-programs:
 		echo "  page: $(program_prefix)$${page}$(program_suffix).1"; \
 		$(INSTALL_DATA) $(builddir)/man1/$${page}.1 $(INSTALL_ROOT)$(mandir)/man1/$(program_prefix)$${page}$(program_suffix).1; \
 	done
+	@echo "Installing PHP .pc file:          $(INSTALL_ROOT)$(orig_libdir)/pkgconfig/"
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(orig_libdir)/pkgconfig
+	@$(INSTALL_DATA) $(builddir)/php.pc $(INSTALL_ROOT)$(orig_libdir)/pkgconfig/$(program_prefix)php$(program_suffix).pc
