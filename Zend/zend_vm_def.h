@@ -1798,7 +1798,7 @@ ZEND_VM_C_LABEL(fetch_this):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR, CONST, CACHE_SLOT)
+ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_SLOT)
 {
 	USE_OPLINE
 	SAVE_OPLINE();
@@ -1811,6 +1811,42 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR, CONST, CACHE_SLOT)
 		outer_ce = zend_lookup_class(Z_STR_P(outer_class_zv));
 		if (!outer_ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL_P(outer_class_zv));
+			HANDLE_EXCEPTION();
+		}
+	} else if (OP1_TYPE == IS_UNUSED) {
+		uint32_t fetch_type;
+		zend_class_entry *called_scope, *scope;
+
+		fetch_type = opline->op1.num;
+		scope = EX(func)->op_array.scope;
+		if (UNEXPECTED(scope == NULL)) {
+			SAVE_OPLINE();
+			zend_throw_error(NULL, "Cannot use \"%s\" in the global scope",
+				fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
+				fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
+		}
+		if (fetch_type & ZEND_FETCH_CLASS_SELF) {
+			outer_ce = scope;
+		} else if (fetch_type & ZEND_FETCH_CLASS_PARENT) {
+			if (UNEXPECTED(scope->parent == NULL)) {
+				SAVE_OPLINE();
+				zend_throw_error(NULL,
+					"Cannot use \"parent\" when current class scope has no parent");
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+				HANDLE_EXCEPTION();
+			}
+			outer_ce = scope->parent;
+		} else if (fetch_type & ZEND_FETCH_CLASS_STATIC) {
+			if (Z_TYPE(EX(This)) == IS_OBJECT) {
+				called_scope = Z_OBJCE(EX(This));
+			} else {
+				called_scope = Z_CE(EX(This));
+			}
+			outer_ce = called_scope;
+		} else {
+			zend_throw_error(NULL, "Unknown scope resolution");
 			HANDLE_EXCEPTION();
 		}
 	} else {
