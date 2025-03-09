@@ -1820,10 +1820,48 @@ static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 }
 /* }}} */
 
+static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast);
+
+static zend_string *zend_resolve_nested_class_name(zend_ast *ast) /* {{{ */
+{
+	ZEND_ASSERT(ast->kind == ZEND_AST_INNER_CLASS);
+
+	zend_ast *outer_class = ast->child[0];
+	zend_ast *inner_class = ast->child[1];
+
+	zend_string *outer_name, *inner_name, *full_name;
+
+	if (outer_class->kind == ZEND_AST_INNER_CLASS) {
+		outer_name = zend_resolve_nested_class_name(outer_class);
+	} else {
+		zval outer_class_name;
+		zend_try_compile_const_expr_resolve_class_name(&outer_class_name, outer_class);
+		outer_name = Z_STR(outer_class_name);
+	}
+
+	inner_name = zend_ast_get_str(inner_class);
+
+	full_name = zend_string_concat3(
+		ZSTR_VAL(outer_name), ZSTR_LEN(outer_name),
+		":>", 2,
+		ZSTR_VAL(inner_name), ZSTR_LEN(inner_name)
+	);
+
+	zend_string_release(outer_name);
+
+	return full_name;
+}
+/* }}} */
+
 static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast) /* {{{ */
 {
 	uint32_t fetch_type;
 	zval *class_name;
+
+	if (class_ast->kind == ZEND_AST_INNER_CLASS) {
+		ZVAL_STR(zv, zend_resolve_nested_class_name(class_ast));
+		return 1;
+	}
 
 	if (class_ast->kind != ZEND_AST_ZVAL) {
 		return 0;
@@ -7018,36 +7056,6 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 }
 /* }}} */
 
-static zend_string *zend_resolve_nested_class_name(zend_ast *ast)
-{
-	ZEND_ASSERT(ast->kind == ZEND_AST_INNER_CLASS);
-
-	zend_ast *outer_class = ast->child[0];
-	zend_ast *inner_class = ast->child[1];
-
-	zend_string *outer_name, *inner_name, *full_name;
-
-	if (outer_class->kind == ZEND_AST_INNER_CLASS) {
-		full_name = zend_resolve_nested_class_name(outer_class);
-	} else {
-		zval outer_class_name;
-		zend_try_compile_const_expr_resolve_class_name(&outer_class_name, outer_class);
-		outer_name = Z_STR(outer_class_name);
-	}
-
-	inner_name = zend_ast_get_str(inner_class);
-
-	full_name = zend_string_concat3(
-		ZSTR_VAL(outer_name), ZSTR_LEN(outer_name),
-		":>", 2,
-		ZSTR_VAL(inner_name), ZSTR_LEN(inner_name)
-	);
-
-	zend_string_release(outer_name);
-
-	return full_name;
-}
-
 static zend_type zend_compile_single_typename(zend_ast *ast)
 {
 	ZEND_ASSERT(!(ast->attr & ZEND_TYPE_NULLABLE));
@@ -11829,9 +11837,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
 			return;
-                        case ZEND_AST_INNER_CLASS:
-                          zend_compile_inner_class_ref(result, ast);
-                          return;
+		case ZEND_AST_INNER_CLASS:
+			zend_compile_inner_class_ref(result, ast);
+			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
 	}
