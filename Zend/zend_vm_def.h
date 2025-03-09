@@ -1804,7 +1804,9 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_S
 	SAVE_OPLINE();
 
 	zend_string *inner_class_name, *full_class_name;
-	zend_class_entry *outer_ce = NULL, *inner_ce = NULL;
+	zend_class_entry *outer_ce = NULL, *inner_ce = NULL, *scope = NULL;
+
+	scope = EX(func)->op_array.scope;
 
 	if (OP1_TYPE == IS_CONST) {
 		zval *outer_class_zv = RT_CONSTANT(opline, opline->op1);
@@ -1815,10 +1817,9 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_S
 		}
 	} else if (OP1_TYPE == IS_UNUSED) {
 		uint32_t fetch_type;
-		zend_class_entry *called_scope, *scope;
+		zend_class_entry *called_scope;
 
-		fetch_type = opline->op1.num;
-		scope = EX(func)->op_array.scope;
+		fetch_type = opline->op1.num & ZEND_FETCH_CLASS_MASK;
 		if (UNEXPECTED(scope == NULL)) {
 			SAVE_OPLINE();
 			zend_throw_error(NULL, "Cannot use \"%s\" in the global scope",
@@ -1827,9 +1828,9 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_S
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
-		if (fetch_type & ZEND_FETCH_CLASS_SELF) {
+		if (fetch_type == ZEND_FETCH_CLASS_SELF) {
 			outer_ce = scope;
-		} else if (fetch_type & ZEND_FETCH_CLASS_PARENT) {
+		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT) {
 			if (UNEXPECTED(scope->parent == NULL)) {
 				SAVE_OPLINE();
 				zend_throw_error(NULL,
@@ -1838,7 +1839,7 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_S
 				HANDLE_EXCEPTION();
 			}
 			outer_ce = scope->parent;
-		} else if (fetch_type & ZEND_FETCH_CLASS_STATIC) {
+		} else if (fetch_type == ZEND_FETCH_CLASS_STATIC) {
 			if (Z_TYPE(EX(This)) == IS_OBJECT) {
 				called_scope = Z_OBJCE(EX(This));
 			} else {
@@ -1867,6 +1868,17 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_S
 	inner_ce = zend_lookup_class(full_class_name);
 	if (!inner_ce) {
 		zend_error(E_ERROR, "Class '%s' not found", ZSTR_VAL(full_class_name));
+		HANDLE_EXCEPTION();
+	}
+
+	if (inner_ce->required_scope) {
+		if (inner_ce->required_scope_absolute && inner_ce->required_scope != scope) {
+			zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
+			HANDLE_EXCEPTION();
+		} else if (scope == NULL || !instanceof_function(scope, inner_ce->required_scope)) {
+			zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	CACHE_PTR(opline->extended_value, inner_ce);
