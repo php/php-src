@@ -145,6 +145,8 @@ function mb_ltrim(string $string, ?string $characters = null, ?string $encoding 
 
 function mb_rtrim(string $string, ?string $characters = null, ?string $encoding = null): string {}
 
+function mb_levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1, ?string $encoding = null): int {}
+
 /** @refcount 1 */
 function mb_detect_encoding(string $string, array|string|null $encodings = null, bool $strict = false): string|false {}
 
