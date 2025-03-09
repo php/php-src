@@ -3,6 +3,18 @@
 /** @generate-class-entries */
 
 /**
+ * @var int
+ * @cvalue ZEND_AUTOLOAD_CLASS
+ */
+const SPL_AUTOLOAD_CLASS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ZEND_AUTOLOAD_FUNCTION
+ */
+const SPL_AUTOLOAD_FUNCTION = UNKNOWN;
+
+/**
  * @param object|string $object_or_class
  * @return array<string, string>|false
  * @refcount 1
@@ -23,17 +35,17 @@ function class_parents($object_or_class, bool $autoload = true): array|false {}
  */
 function class_uses($object_or_class, bool $autoload = true): array|false {}
 
-function spl_autoload(string $class, ?string $file_extensions = null): void {}
+function spl_autoload(string $class, string|null $file_extensions = null): void {}
 
-function spl_autoload_call(string $class): void {}
+function spl_autoload_call(string $class, int $type = SPL_AUTOLOAD_CLASS): void {}
 
 function spl_autoload_extensions(?string $file_extensions = null): string {}
 
-function spl_autoload_functions(): array {}
+function spl_autoload_functions(int $type = SPL_AUTOLOAD_CLASS): array {}
 
-function spl_autoload_register(?callable $callback = null, bool $throw = true, bool $prepend = false): bool {}
+function spl_autoload_register(?callable $callback = null, bool $throw = true, bool $prepend = false, int $type = SPL_AUTOLOAD_CLASS): bool {}
 
-function spl_autoload_unregister(callable $callback): bool {}
+function spl_autoload_unregister(callable $callback, int $type = SPL_AUTOLOAD_CLASS): bool {}
 
 /**
  * @return array<string, string>
