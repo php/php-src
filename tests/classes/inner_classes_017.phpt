@@ -19,7 +19,8 @@ var_dump($r);
 test($r);
 ?>
 --EXPECTF--
-object(Outer:>Inner)#1 (0) {
-}
-
-Fatal error: Protected inner class Outer:>Inner cannot be used as a type declaration in the global scope in %s on line %d
+Fatal error: Uncaught TypeError: Method getInner is public but returns a protected class: Outer:>Inner in %s:%d
+Stack trace:
+#0 %s(%d): Outer::getInner()
+#1 {main}
+  thrown in %s on line %d

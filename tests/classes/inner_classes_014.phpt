@@ -6,14 +6,18 @@ private inner class
 class Outer {
     private class Inner {}
 
-    public function getInner(): self:>Inner {
+    private function getInner(): self:>Inner {
         return new self:>Inner();
+    }
+
+    public function getInner2(): mixed {
+        return $this->getInner();
     }
 }
 
 class Foo extends Outer {
     public function getInner(): parent:>Inner {
-        var_dump(parent::getInner());
+        var_dump(parent::getInner2());
         return new parent:>Inner();
     }
 }

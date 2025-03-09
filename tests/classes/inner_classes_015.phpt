@@ -6,7 +6,7 @@ protected inner class
 class Outer {
     protected class Inner {}
 
-    public function getInner(): self:>Inner {
+    protected function getInner(): self:>Inner {
         return new self:>Inner();
     }
 }
@@ -25,7 +25,9 @@ var_dump(new Outer:>Inner());
 --EXPECTF--
 object(Outer:>Inner)#2 (0) {
 }
-object(Outer:>Inner)#2 (0) {
-}
 
-Fatal error: Class 'Outer:>Inner' is protected in %s on line %d
+Fatal error: Uncaught TypeError: Method getInner is public but returns a protected class: Outer:>Inner in %s:%d
+Stack trace:
+#0 %s(%d): Foo->getInner()
+#1 {main}
+  thrown in %s on line %d

@@ -3310,6 +3310,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 
 			case ZEND_FETCH_CLASS:
 			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_FETCH_INNER_CLASS:
 				break; /* return value is zend_class_entry pointer */
 
 			default:
@@ -6663,10 +6664,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_CONST_C
 			HANDLE_EXCEPTION();
 		}
 	} else {
-		outer_ce = CACHED_PTR(opline->extended_value);
-		if (UNEXPECTED(outer_ce == NULL)) {
-			outer_ce = Z_CE_P(EX_VAR(opline->op1.var));
-		}
+		outer_ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
 
 	inner_class_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -7404,10 +7402,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -9978,10 +9972,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -10736,10 +10726,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -10890,6 +10876,24 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYP
 		}
 
 		SAVE_OPLINE();
+
+		if (Z_OBJCE_P(retval_ptr)->required_scope) {
+			if (EX(func)->common.fn_flags & ZEND_ACC_PUBLIC) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute) {
+					zend_type_error("Method %s is public but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				} else {
+					zend_type_error("Method %s is public but returns a protected class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			} else if (EX(func)->common.fn_flags & ZEND_ACC_PROTECTED) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute && Z_OBJCE_P(retval_ptr)->required_scope != EX(func)->common.scope) {
+					zend_type_error("Method %s is protected but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, cache_slot, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
@@ -12470,10 +12474,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
@@ -16271,10 +16271,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_TMPVAR_
 			HANDLE_EXCEPTION();
 		}
 	} else {
-		outer_ce = CACHED_PTR(opline->extended_value);
-		if (UNEXPECTED(outer_ce == NULL)) {
-			outer_ce = Z_CE_P(EX_VAR(opline->op1.var));
-		}
+		outer_ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
 
 	inner_class_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -21718,6 +21715,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 		}
 
 		SAVE_OPLINE();
+
+		if (Z_OBJCE_P(retval_ptr)->required_scope) {
+			if (EX(func)->common.fn_flags & ZEND_ACC_PUBLIC) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute) {
+					zend_type_error("Method %s is public but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				} else {
+					zend_type_error("Method %s is public but returns a protected class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			} else if (EX(func)->common.fn_flags & ZEND_ACC_PROTECTED) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute && Z_OBJCE_P(retval_ptr)->required_scope != EX(func)->common.scope) {
+					zend_type_error("Method %s is protected but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, cache_slot, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
@@ -25597,10 +25612,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -28530,10 +28541,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -30040,10 +30047,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -30194,6 +30197,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 		}
 
 		SAVE_OPLINE();
+
+		if (Z_OBJCE_P(retval_ptr)->required_scope) {
+			if (EX(func)->common.fn_flags & ZEND_ACC_PUBLIC) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute) {
+					zend_type_error("Method %s is public but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				} else {
+					zend_type_error("Method %s is public but returns a protected class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			} else if (EX(func)->common.fn_flags & ZEND_ACC_PROTECTED) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute && Z_OBJCE_P(retval_ptr)->required_scope != EX(func)->common.scope) {
+					zend_type_error("Method %s is protected but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, cache_slot, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
@@ -32979,10 +33000,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
@@ -33979,10 +33996,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_UNUSED_
 			HANDLE_EXCEPTION();
 		}
 	} else {
-		outer_ce = CACHED_PTR(opline->extended_value);
-		if (UNEXPECTED(outer_ce == NULL)) {
-			outer_ce = Z_CE_P(EX_VAR(opline->op1.var));
-		}
+		outer_ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
 
 	inner_class_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -35341,10 +35355,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -37510,10 +37520,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -37921,10 +37927,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -38075,6 +38077,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 		}
 
 		SAVE_OPLINE();
+
+		if (Z_OBJCE_P(retval_ptr)->required_scope) {
+			if (EX(func)->common.fn_flags & ZEND_ACC_PUBLIC) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute) {
+					zend_type_error("Method %s is public but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				} else {
+					zend_type_error("Method %s is public but returns a protected class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			} else if (EX(func)->common.fn_flags & ZEND_ACC_PROTECTED) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute && Z_OBJCE_P(retval_ptr)->required_scope != EX(func)->common.scope) {
+					zend_type_error("Method %s is protected but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, cache_slot, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
@@ -40155,10 +40175,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
@@ -50876,6 +50892,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 		}
 
 		SAVE_OPLINE();
+
+		if (Z_OBJCE_P(retval_ptr)->required_scope) {
+			if (EX(func)->common.fn_flags & ZEND_ACC_PUBLIC) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute) {
+					zend_type_error("Method %s is public but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				} else {
+					zend_type_error("Method %s is public but returns a protected class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			} else if (EX(func)->common.fn_flags & ZEND_ACC_PROTECTED) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute && Z_OBJCE_P(retval_ptr)->required_scope != EX(func)->common.scope) {
+					zend_type_error("Method %s is protected but returns a private class: %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, cache_slot, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
