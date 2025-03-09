@@ -318,10 +318,14 @@ PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
 	}
 
 	/* create cached prompt */
-#ifndef HAVE_LIBEDIT
-	/* TODO: libedit doesn't seems to support coloured prompt */
+#if !defined(HAVE_LIBEDIT) || (defined(HAVE_LIBEDIT) && defined(RL_PROMPT_START_IGNORE) && defined(RL_PROMPT_END_IGNORE))
+# if defined(HAVE_LIBEDIT) && defined(RL_PROMPT_START_IGNORE) && defined(RL_PROMPT_END_IGNORE)
+#  define PHPDBG_PROMPT_FORMAT "\1\033[%sm\2%s\1\033[0m\2 "
+# else
+#  define PHPDBG_PROMPT_FORMAT "\033[%sm%s\033[0m "
+# endif
 	if ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED)) {
-		ZEND_IGNORE_VALUE(asprintf(&PHPDBG_G(prompt)[1], "\033[%sm%s\033[0m ",
+		ZEND_IGNORE_VALUE(asprintf(&PHPDBG_G(prompt)[1], PHPDBG_PROMPT_FORMAT,
 			PHPDBG_G(colors)[PHPDBG_COLOR_PROMPT]->code,
 			PHPDBG_G(prompt)[0]));
 	} else
