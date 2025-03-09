@@ -7018,6 +7018,36 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 }
 /* }}} */
 
+static zend_string *zend_resolve_nested_class_name(zend_ast *ast)
+{
+	ZEND_ASSERT(ast->kind == ZEND_AST_INNER_CLASS);
+
+	zend_ast *outer_class = ast->child[0];
+	zend_ast *inner_class = ast->child[1];
+
+	zend_string *outer_name, *inner_name, *full_name;
+
+	if (outer_class->kind == ZEND_AST_INNER_CLASS) {
+		full_name = zend_resolve_nested_class_name(outer_class);
+	} else {
+		zval outer_class_name;
+		zend_try_compile_const_expr_resolve_class_name(&outer_class_name, outer_class);
+		outer_name = Z_STR(outer_class_name);
+	}
+
+	inner_name = zend_ast_get_str(inner_class);
+
+	full_name = zend_string_concat3(
+		ZSTR_VAL(outer_name), ZSTR_LEN(outer_name),
+		":>", 2,
+		ZSTR_VAL(inner_name), ZSTR_LEN(inner_name)
+	);
+
+	zend_string_release(outer_name);
+
+	return full_name;
+}
+
 static zend_type zend_compile_single_typename(zend_ast *ast)
 {
 	ZEND_ASSERT(!(ast->attr & ZEND_TYPE_NULLABLE));
@@ -7382,6 +7412,9 @@ static zend_type zend_compile_typename_ex(
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
 		}
+	} else if (ast->kind == ZEND_AST_INNER_CLASS) {
+		zend_string *name = zend_resolve_nested_class_name(ast);
+		return (zend_type) ZEND_TYPE_INIT_CLASS(name, /* allow null */ false, 0);
 	} else {
 		type = zend_compile_single_typename(ast);
 	}

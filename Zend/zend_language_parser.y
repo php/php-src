@@ -285,7 +285,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
-%type <ast> optional_parameter_list inner_class_statement inner_class_name_reference
+%type <ast> optional_parameter_list inner_class_statement
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers inner_class_modifiers
@@ -1431,18 +1431,15 @@ class_name:
 			{ zval zv; ZVAL_INTERNED_STR(&zv, ZSTR_KNOWN(ZEND_STR_STATIC));
 			  $$ = zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ); }
 	|	name { $$ = $1; }
+	| class_name T_INNER_REF name
+			{ $$ = zend_ast_create(ZEND_AST_INNER_CLASS, $1, $3); }
 ;
 
 class_name_reference:
-		inner_class_name_reference	{ $$ = $1; }
+		class_name	{ $$ = $1; }
 	|	new_variable				{ $$ = $1; }
 	|	'(' expr ')'				{ $$ = $2; }
 ;
-
-inner_class_name_reference:
-		class_name		{ $$ = $1; }
-	|	inner_class_name_reference T_INNER_REF class_name
-			{ $$ = zend_ast_create(ZEND_AST_INNER_CLASS, $1, $3); }
 
 backticks_expr:
 		%empty
