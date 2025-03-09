@@ -653,7 +653,7 @@ const IMAGETYPE_AVIF = UNKNOWN;
 const IMAGETYPE_UNKNOWN = UNKNOWN;
 /**
  * @var int
- * @cvalue IMAGE_FILETYPE_COUNT
+ * @cvalue IMAGE_FILETYPE_FIXED_COUNT
  */
 const IMAGETYPE_COUNT = UNKNOWN;
 
@@ -3026,13 +3026,11 @@ function request_parse_body(?array $options = null): array {}
 /* image.c */
 
 /**
- * @compile-time-eval
  * @refcount 1
  */
 function image_type_to_mime_type(int $image_type): string {}
 
 /**
- * @compile-time-eval
  * @refcount 1
  */
 function image_type_to_extension(int $image_type, bool $include_dot = true): string|false {}
