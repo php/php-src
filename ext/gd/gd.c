@@ -3560,6 +3560,26 @@ PHP_FUNCTION(imagecrop)
 		RETURN_THROWS();
 	}
 
+	if ((rect.width > 0 && rect.x > INT_MAX - rect.width)) {
+		zend_argument_value_error(2, "overflow with \"x\" and \"width\" keys");
+		RETURN_THROWS();
+	}
+
+	if ((rect.width < 0 && rect.x < INT_MIN - rect.width)) {
+		zend_argument_value_error(2, "underflow with \"x\" and \"width\" keys");
+		RETURN_THROWS();
+	}
+
+	if ((rect.height > 0 && rect.y > INT_MAX - rect.height)) {
+		zend_argument_value_error(2, "overflow with \"y\" and \"height\" keys");
+		RETURN_THROWS();
+	}
+
+	if ((rect.height < 0 && rect.y < INT_MIN - rect.height)) {
+		zend_argument_value_error(2, "underflow with \"y\" and \"height\" keys");
+		RETURN_THROWS();
+	}
+
 	im_crop = gdImageCrop(im, &rect);
 
 	if (im_crop == NULL) {
