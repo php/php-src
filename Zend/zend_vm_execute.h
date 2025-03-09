@@ -7313,10 +7313,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -9887,10 +9883,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -10645,10 +10637,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -12379,10 +12367,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_CONST != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
@@ -25415,10 +25399,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -28348,10 +28328,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -29858,10 +29834,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -32797,10 +32769,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_VAR != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
@@ -35068,10 +35036,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_CONST == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -37237,10 +37201,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -37648,10 +37608,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_UNUSED == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -39882,10 +39838,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
-	} else if (IS_UNUSED != IS_CONST &&
-	           IS_CV == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
