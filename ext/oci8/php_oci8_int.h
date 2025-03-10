@@ -324,7 +324,7 @@ typedef struct {
 		ub4 serverStatus = OCI_SERVER_NORMAL;	  \
 		switch (errcode) {						  \
 			case  1013:							  \
-				zend_bailout();					  \
+				zend_bailout_without_gc_protect();			  \
 				break;							  \
 			case	22:							  \
 			case	28:							  \
