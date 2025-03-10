@@ -36,7 +36,6 @@ PHPAPI PHP_FUNCTION(fpassthru);
 
 PHP_MINIT_FUNCTION(user_streams);
 
-PHPAPI int php_le_stream_context(void);
 PHPAPI zend_result php_copy_file(const char *src, const char *dest);
 PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags);
 PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx);
