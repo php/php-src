@@ -1204,6 +1204,10 @@ verify:
 
 CWD_API zend_result virtual_chdir(const char *path) /* {{{ */
 {
+	if (CWDG(cwd).cwd == NULL) {
+		return FAILURE;
+	}
+
 	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok, CWD_REALPATH) ? FAILURE : SUCCESS;
 }
 /* }}} */
