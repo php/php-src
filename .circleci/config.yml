@@ -166,6 +166,7 @@ jobs:
               `#--enable-werror`
       - run:
           name: make
+          no_output_timeout: 30m
           command: make -j2 > /dev/null
       - run:
           name: make install
