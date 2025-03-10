@@ -665,7 +665,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		}
 
 		mysqlnd_set_persistent_string(&conn->username, username.s, username.l, conn->persistent);
-		mysqlnd_set_persistent_string(&conn->password, username.s, password.l, conn->persistent);
+		mysqlnd_set_persistent_string(&conn->password, password.s, password.l, conn->persistent);
 		conn->port				= port;
 		mysqlnd_set_persistent_string(&conn->connect_or_select_db, database.s, database.l, conn->persistent);
 
