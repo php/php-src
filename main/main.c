@@ -328,10 +328,20 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	if (value == -1 && PG(max_memory_limit) != -1) {
 		if (stage == ZEND_INI_STAGE_STARTUP) {
 			/* memory_limit exceeds max_memory_limit at INI parsing. */
-			zend_error_noreturn(E_ERROR, "memory_limit cannot be set to unlimited when max_memory_limit (%lld bytes) is not unlimited", PG(max_memory_limit));
+			zend_error(
+				E_ERROR,
+				"memory_limit cannot be set to unlimited when max_memory_limit (" ZEND_LONG_FMT " bytes) is not unlimited",
+				PG(max_memory_limit)
+			);
+			exit(1);
 		} else {
 			/* new memory_limit exceeds max_memory_limit at runtime. */
-			zend_error(E_WARNING, "Failed to set memory_limit to unlimited. memory_limit (currently: %lld bytes) cannot be set to unlimited if max_memory_limit (%lld bytes) is not unlimited", PG(memory_limit), PG(max_memory_limit));
+			zend_error(
+				E_WARNING,
+				"Failed to set memory_limit to unlimited. memory_limit (currently: " ZEND_LONG_FMT " bytes) cannot be set to unlimited if max_memory_limit (" ZEND_LONG_FMT " bytes) is not unlimited",
+				PG(memory_limit),
+				PG(max_memory_limit)
+			);
 		}
 
 		return FAILURE;
@@ -341,10 +351,22 @@ static PHP_INI_MH(OnChangeMemoryLimit)
     if (PG(max_memory_limit) != -1 && value > PG(max_memory_limit)) {
 		if (stage == ZEND_INI_STAGE_STARTUP) {
 			/* memory_limit exceeds max_memory_limit at INI parsing. */
-			zend_error_noreturn(E_ERROR, "memory_limit (%zd bytes) exceeds max_memory_limit (%lld bytes)", value, PG(max_memory_limit));
+			zend_error(
+				E_ERROR,
+				"memory_limit (%zd bytes) exceeds max_memory_limit (" ZEND_LONG_FMT " bytes)",
+				value,
+				PG(max_memory_limit)
+			);
+			exit(1);
 		} else {
 			/* new memory_limit exceeds max_memory_limit at runtime. */
-			zend_error(E_WARNING, "Failed to set memory_limit to %zd bytes. memory_limit (currently: %lld bytes) cannot exceed max_memory_limit (%lld bytes)", value, PG(memory_limit), PG(max_memory_limit));
+			zend_error(
+				E_WARNING,
+				"Failed to set memory_limit to %zd bytes. memory_limit (currently: " ZEND_LONG_FMT " bytes) cannot exceed max_memory_limit (" ZEND_LONG_FMT " bytes)",
+				value,
+				PG(memory_limit),
+				PG(max_memory_limit)
+			);
 		}
 
 		return FAILURE;
