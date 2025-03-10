@@ -5,6 +5,7 @@ snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
+if (getenv('SKIP_ASAN')) die('skip Causes timeout on asan');
 ?>
 --FILE--
 <?php
