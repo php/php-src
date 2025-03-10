@@ -35,6 +35,9 @@
 #include <stddef.h>
 #include "zend_portability.h"
 
+#ifndef _BCMATH_PRIV_H_
+#define _BCMATH_PRIV_H_
+
 /* This will be 0x01010101 for 32-bit and 0x0101010101010101 for 64-bit */
 #define SWAR_ONES (~((size_t) 0) / 0xFF)
 /* This repeats a byte `x` into an entire 32/64-bit word.
@@ -67,9 +70,15 @@
  */
 #define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 
+static const BC_VECTOR BC_POW_10_LUT[9] = {
+	1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000
+};
+
 
 /* routines */
 bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, size_t scale, bool use_sign);
 bc_num _bc_do_add (bc_num n1, bc_num n2);
 bc_num _bc_do_sub (bc_num n1, bc_num n2);
 void _bc_rm_leading_zeros (bc_num num);
+
+#endif
