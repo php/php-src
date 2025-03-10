@@ -8,6 +8,10 @@ Antonio Diaz Ruiz <dejalatele@gmail.com>
 assert.bail=true
 --EXTENSIONS--
 dom
+--SKIPIF--
+<?php
+if (LIBXML_VERSION >= 21400) die("skip libxml >= 2.14 no longer has this non-standard warning");
+?>
 --FILE--
 <?php
 $doc = new DOMDocument();
