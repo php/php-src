@@ -19,6 +19,12 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     a value to a non-reference zval.
   . Added zval_ptr_safe_dtor() to safely destroy a zval when a destructor
     could interfere.
+  . The zend_fcall_info_args_ex() API has been removed.
+    This is because it does not follow the usual CUFA semantics and it
+    automatically wraps by-value arguments into references for by-ref
+    parameters.
+    It is recommended to set the FCI named_params instead,
+    however zend_fcall_info_args() can also be used.
 
 ========================
 2. Build system changes
