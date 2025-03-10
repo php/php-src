@@ -41,10 +41,10 @@ function read_from_pipe($pipe) {
     return $result;
 }
 
-$data0 = read_from_pipe($pipes[0]);
-echo 'read from pipe 0: ';
-var_dump($data0);
-fclose($pipes[0]);
+$data1 = read_from_pipe($pipes[1]);
+echo 'read from pipe 1: ';
+var_dump($data1);
+fclose($pipes[1]);
 
 $data3 = read_from_pipe($pipes[3]);
 echo 'read from pipe 3: ';
@@ -54,7 +54,7 @@ fclose($pipes[3]);
 proc_close($process);
 ?>
 --EXPECT--
-read from pipe 0: string(5) "foo
+read from pipe 1: string(5) "foo
 "
 read from pipe 3: string(3) "42
 "
