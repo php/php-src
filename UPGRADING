@@ -629,6 +629,11 @@ PHP 8.5 UPGRADE NOTES
   . Added fatal_error_backtraces to control whether fatal errors should include
     a backtrace.
     RFC: https://wiki.php.net/rfc/error_backtraces_v2
+  . Added startup-only max_memory_limit INI setting to control the maximum
+    memory_limit that may be configured at startup or runtime. Exceeding this
+    value emits a warning, unless set to -1, and sets memory_limit to the
+    current max_memory_limit instead.
+    ML discussion: https://externals.io/message/127108
 
 - Opcache:
   . Added opcache.file_cache_read_only to support a read-only
