@@ -317,11 +317,39 @@ static PHP_INI_MH(OnSetSerializePrecision)
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	size_t value;
+
 	if (new_value) {
 		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
 	} else {
-		value = Z_L(1)<<30;		/* effectively, no limit */
+		value = Z_L(1) << 30; /* effectively, no limit */
 	}
+
+	/* If max_memory_limit is not set to unlimited, verify change */
+	if (PG(max_memory_limit) != 0 && PG(max_memory_limit) != -1) {
+		if (value == -1) {
+			zend_error(
+				E_WARNING,
+				"Failed to set memory_limit to unlimited. memory_limit (currently: " ZEND_LONG_FMT " bytes) cannot be set to unlimited if max_memory_limit (" ZEND_LONG_FMT " bytes) is not unlimited",
+				PG(memory_limit),
+				PG(max_memory_limit)
+			);
+
+			return FAILURE;
+		}
+
+		if (value > PG(max_memory_limit)) {
+			zend_error(
+				E_WARNING,
+				"Failed to set memory_limit to %zd bytes. memory_limit (currently: " ZEND_LONG_FMT " bytes) cannot exceed max_memory_limit (" ZEND_LONG_FMT " bytes)",
+				value,
+				PG(memory_limit),
+				PG(max_memory_limit)
+			);
+
+			return FAILURE;
+		}
+	}
+
 	if (zend_set_memory_limit(value) == FAILURE) {
 		/* When the memory limit is reset to the original level during deactivation, we may be
 		 * using more memory than the original limit while shutdown is still in progress.
@@ -332,7 +360,45 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 			return FAILURE;
 		}
 	}
+
 	PG(memory_limit) = value;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnChangeMaxMemoryLimit)
+{
+	size_t value;
+	if (new_value) {
+		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
+	} else {
+		value = Z_L(1) << 30; /* effectively, no limit */
+	}
+
+	/* If new value is not unlimited, verify change */
+	if (value != -1) {
+		if (PG(memory_limit) == -1) {
+			zend_error(
+				E_ERROR,
+				"memory_limit is set to unlimited, you cannot set max_memory_limit to %zd bytes",
+				value
+			);
+			return FAILURE;
+		}
+
+		if (PG(memory_limit) > value) {
+			zend_error(
+				E_ERROR,
+				"memory_limit (" ZEND_LONG_FMT " bytes) exceeds max_memory_limit (%zd bytes)",
+				PG(memory_limit),
+				value
+			);
+			return FAILURE;
+		}
+	}
+
+	PG(max_memory_limit) = value;
 	return SUCCESS;
 }
 /* }}} */
@@ -800,7 +866,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mail.mixed_lf_and_crlf",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_mixed_lf_and_crlf,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
-	PHP_INI_ENTRY("memory_limit",				"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
+
+	PHP_INI_ENTRY("memory_limit",			"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
+	PHP_INI_ENTRY("max_memory_limit",		"-1",		PHP_INI_SYSTEM,		OnChangeMaxMemoryLimit)
+
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
