@@ -326,14 +326,12 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
 	/* If max_memory_limit is not set to unlimited, memory_limit cannot be set to unlimited. */
 	if (value == -1 && PG(max_memory_limit) != -1) {
-		if (PG(memory_limit) == 0) {
+		if (stage == ZEND_INI_STAGE_STARTUP) {
 			/* memory_limit exceeds max_memory_limit at INI parsing. */
-			zend_error(E_ERROR, "memory_limit cannot be set to unlimited when max_memory_limit (%zd bytes) is not unlimited", PG(max_memory_limit));
-			zend_bailout();
-			exit(1);
+			zend_error_noreturn(E_ERROR, "memory_limit cannot be set to unlimited when max_memory_limit (%lld bytes) is not unlimited", PG(max_memory_limit));
 		} else {
 			/* new memory_limit exceeds max_memory_limit at runtime. */
-			zend_error(E_WARNING, "Failed to set memory_limit to unlimited. memory_limit (currently: %zd bytes) cannot be set to unlimited if max_memory_limit (%zd bytes) is not unlimited", PG(memory_limit), PG(max_memory_limit));
+			zend_error(E_WARNING, "Failed to set memory_limit to unlimited. memory_limit (currently: %lld bytes) cannot be set to unlimited if max_memory_limit (%lld bytes) is not unlimited", PG(memory_limit), PG(max_memory_limit));
 		}
 
 		return FAILURE;
@@ -341,14 +339,12 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
     /* Enforce max_memory_limit if not unlimited */
     if (PG(max_memory_limit) != -1 && value > PG(max_memory_limit)) {
-		if (PG(memory_limit) == 0) {
+		if (stage == ZEND_INI_STAGE_STARTUP) {
 			/* memory_limit exceeds max_memory_limit at INI parsing. */
-			zend_error(E_ERROR, "memory_limit (%zd bytes) exceeds max_memory_limit (%zd bytes)", value, PG(max_memory_limit));
-			zend_bailout();
-			exit(1);
+			zend_error_noreturn(E_ERROR, "memory_limit (%zd bytes) exceeds max_memory_limit (%lld bytes)", value, PG(max_memory_limit));
 		} else {
 			/* new memory_limit exceeds max_memory_limit at runtime. */
-			zend_error(E_WARNING, "Failed to set memory_limit to %zd bytes. memory_limit (currently: %zd bytes) cannot exceed max_memory_limit (%zd bytes)", value, PG(memory_limit), PG(max_memory_limit));
+			zend_error(E_WARNING, "Failed to set memory_limit to %zd bytes. memory_limit (currently: %lld bytes) cannot exceed max_memory_limit (%lld bytes)", value, PG(memory_limit), PG(max_memory_limit));
 		}
 
 		return FAILURE;
