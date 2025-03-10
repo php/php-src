@@ -1,15 +1,15 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7092f1d4ba651f077cff37050899f090f00abf22 */
+ * Stub hash: 2ff92bf440a77f97b89943b451a10d8154efbac4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UnitEnum_cases, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_BackedEnum_from, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, value, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_BackedEnum_tryFrom, 0, 1, IS_STATIC, 1)
-	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, value, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
 
 

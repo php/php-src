@@ -36,6 +36,30 @@ ZEND_API zend_class_entry *zend_ce_unit_enum;
 ZEND_API zend_class_entry *zend_ce_backed_enum;
 ZEND_API zend_object_handlers zend_enum_object_handlers;
 
+// We are going to need some argument info for ::from() and ::tryFrom() for
+// enums that are int-backed or string-backed, we cannot just reuse the
+// information from the BackedEnum interface's methods because those are typed
+// with `never` parameters and for backed enums the type needs to match the
+// backing type. These are not added to any actual class, just used for their
+// type information
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IntBackedEnum_from, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IntBackedEnum_tryFrom, 0, 1, IS_STATIC, 1)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StringBackedEnum_from, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StringBackedEnum_tryFrom, 0, 1, IS_STATIC, 1)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+
 zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv)
 {
 	zend_object *zobj = zend_objects_new(ce);
@@ -456,7 +480,12 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		from_function->doc_comment = NULL;
 		from_function->num_args = 1;
 		from_function->required_num_args = 1;
-		from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_from + 1);
+		if (ce->enum_backing_type == IS_LONG) {
+			from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_IntBackedEnum_from + 1);
+		} else {
+			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
+			from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_StringBackedEnum_from + 1);
+		}
 		zend_enum_register_func(ce, ZEND_STR_FROM, from_function);
 
 		zend_internal_function *try_from_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
@@ -466,7 +495,12 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		try_from_function->doc_comment = NULL;
 		try_from_function->num_args = 1;
 		try_from_function->required_num_args = 1;
-		try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_tryFrom + 1);
+		if (ce->enum_backing_type == IS_LONG) {
+			try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_IntBackedEnum_tryFrom + 1);
+		} else {
+			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
+			try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_StringBackedEnum_tryFrom + 1);
+		}
 		zend_enum_register_func(ce, ZEND_STR_TRYFROM_LOWERCASE, try_from_function);
 	}
 }
