@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.6
 
+- BCMath:
+  . Fixed pointer subtraction for scale. (SakiTakamachi)
+
 - Core:
   . Fixed property hook backing value access in multi-level inheritance.
     (ilutov)
