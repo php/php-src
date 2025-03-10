@@ -13,9 +13,6 @@ echo "*** Testing array_reverse() : usage variations ***\n";
 $unset_var = 10;
 unset ($unset_var);
 
-//get a resource variable
-$fp = fopen(__FILE__, "r");
-
 //get a class
 class classA{
   public function __toString(){
@@ -45,10 +42,10 @@ $arrays = array (
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-       array(@$unset_var => "hello", $fp => 'resource'),
+       array(@$unset_var => "hello", STDERR => 'resource'),
 
        // array with mixed values
-/*11*/ array('hello' => 1, "fruit" => 2.2, $fp => 'resource', 133 => "int", @$unset_var => "unset", $heredoc => "heredoc")
+/*11*/ array('hello' => 1, "fruit" => 2.2, STDERR => 'resource', 133 => "int", @$unset_var => "unset", $heredoc => "heredoc")
 );
 
 // loop through the various elements of $arrays to test array_reverse()
@@ -66,17 +63,14 @@ foreach($arrays as $array) {
   $iterator++;
 };
 
-// close the file resource used
-fclose($fp);
-
 echo "Done";
 ?>
 --EXPECTF--
 *** Testing array_reverse() : usage variations ***
 
-Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line %d
 
-Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line %d
 -- Iteration 1 --
 - default argument -
 array(0) {
@@ -259,7 +253,7 @@ array(2) {
 }
 - $preserve keys = true -
 array(2) {
-  [5]=>
+  [3]=>
   string(8) "resource"
   [""]=>
   string(5) "hello"
@@ -295,7 +289,7 @@ array(6) {
   string(5) "unset"
   [133]=>
   string(3) "int"
-  [5]=>
+  [3]=>
   string(8) "resource"
   ["fruit"]=>
   float(2.2)
