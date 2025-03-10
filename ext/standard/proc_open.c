@@ -845,32 +845,6 @@ static zend_result set_proc_descriptor_to_blackhole(descriptorspec_item *desc)
 	return SUCCESS;
 }
 
-static zend_result set_proc_descriptor_to_pty(descriptorspec_item *desc, int *master_fd, int *slave_fd)
-{
-#ifdef HAVE_OPENPTY
-	/* All FDs set to PTY in the child process will go to the slave end of the same PTY.
-	 * Likewise, all the corresponding entries in `$pipes` in the parent will all go to the master
-	 * end of the same PTY.
-	 * If this is the first descriptorspec set to 'pty', find an available PTY and get master and
-	 * slave FDs. */
-	if (*master_fd == -1) {
-		if (openpty(master_fd, slave_fd, NULL, NULL, NULL)) {
-			php_error_docref(NULL, E_WARNING, "Could not open PTY (pseudoterminal): %s", strerror(errno));
-			return FAILURE;
-		}
-	}
-
-	desc->type       = DESCRIPTOR_TYPE_PIPE;
-	desc->childend   = dup(*slave_fd);
-	desc->parentend  = dup(*master_fd);
-	desc->mode_flags = O_RDWR;
-	return SUCCESS;
-#else
-	php_error_docref(NULL, E_WARNING, "PTY (pseudoterminal) not supported on this system");
-	return FAILURE;
-#endif
-}
-
 /* Mark the descriptor close-on-exec, so it won't be inherited by children */
 static php_file_descriptor_t make_descriptor_cloexec(php_file_descriptor_t fd)
 {
@@ -881,6 +855,28 @@ static php_file_descriptor_t make_descriptor_cloexec(php_file_descriptor_t fd)
 	fcntl(fd, F_SETFD, FD_CLOEXEC);
 #endif
 	return fd;
+#endif
+}
+
+static zend_result set_proc_descriptor_to_pty(descriptorspec_item *desc)
+{
+#ifdef HAVE_OPENPTY
+	int master_fd = -1, slave_fd = -1;
+
+	/* Find an available PTY and get master and slave FDs. */
+	if (openpty(&master_fd, &slave_fd, NULL, NULL, NULL)) {
+		php_error_docref(NULL, E_WARNING, "Could not open PTY (pseudoterminal): %s", strerror(errno));
+		return FAILURE;
+	}
+
+	desc->type       = DESCRIPTOR_TYPE_PIPE;
+	desc->childend   = slave_fd;
+	desc->parentend  = make_descriptor_cloexec(master_fd);
+	desc->mode_flags = O_RDWR;
+	return SUCCESS;
+#else
+	php_error_docref(NULL, E_WARNING, "PTY (pseudoterminal) not supported on this system");
+	return FAILURE;
 #endif
 }
 
@@ -1031,7 +1027,7 @@ static zend_result redirect_proc_descriptor(descriptorspec_item *desc, int targe
 
 /* Process one item from `$descriptorspec` argument to `proc_open` */
 static zend_result set_proc_descriptor_from_array(zval *descitem, descriptorspec_item *descriptors,
-	int ndesc, int nindex, int *pty_master_fd, int *pty_slave_fd) {
+	int ndesc, int nindex) {
 	zend_string *ztype = get_string_parameter(descitem, 0, "handle qualifier");
 	if (!ztype) {
 		return FAILURE;
@@ -1078,7 +1074,7 @@ static zend_result set_proc_descriptor_from_array(zval *descitem, descriptorspec
 		retval = set_proc_descriptor_to_blackhole(&descriptors[ndesc]);
 	} else if (zend_string_equals_literal(ztype, "pty")) {
 		/* Set descriptor to slave end of PTY */
-		retval = set_proc_descriptor_to_pty(&descriptors[ndesc], pty_master_fd, pty_slave_fd);
+		retval = set_proc_descriptor_to_pty(&descriptors[ndesc]);
 	} else {
 		php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", ZSTR_VAL(ztype));
 		goto finish;
@@ -1229,7 +1225,6 @@ PHP_FUNCTION(proc_open)
 #else
 	char **argv = NULL;
 #endif
-	int pty_master_fd = -1, pty_slave_fd = -1;
 	php_process_id_t child;
 	php_process_handle *proc;
 
@@ -1302,8 +1297,7 @@ PHP_FUNCTION(proc_open)
 				goto exit_fail;
 			}
 		} else if (Z_TYPE_P(descitem) == IS_ARRAY) {
-			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, (int)nindex,
-				&pty_master_fd, &pty_slave_fd) == FAILURE) {
+			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, (int)nindex) == FAILURE) {
 				goto exit_fail;
 			}
 		} else {
@@ -1554,14 +1548,6 @@ exit_fail:
 	free(envpw);
 #else
 	efree_argv(argv);
-#endif
-#ifdef HAVE_OPENPTY
-	if (pty_master_fd != -1) {
-		close(pty_master_fd);
-	}
-	if (pty_slave_fd != -1) {
-		close(pty_slave_fd);
-	}
 #endif
 	if (descriptors) {
 		efree(descriptors);
