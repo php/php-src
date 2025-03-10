@@ -420,7 +420,7 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 	/* If divisor is 1 here, return the result of adjusting the decimal point position of numerator. */
 	if (divisor_size == 1 && *divisorptr == 1) {
 		bc_divide_by_pow_10(numeratorptr, numerator_readable_size, quot, quot_size, quot_scale);
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;;
+		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 		return true;
 	}
 
