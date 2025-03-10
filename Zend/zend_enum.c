@@ -527,10 +527,17 @@ static const zend_function_entry unit_enum_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry backed_enum_methods[] = {
+static const zend_function_entry int_backed_enum_methods[] = {
 	ZEND_NAMED_ME(cases, zend_enum_cases_func, arginfo_class_UnitEnum_cases, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	ZEND_NAMED_ME(from, zend_enum_from_func, arginfo_class_BackedEnum_from, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	ZEND_NAMED_ME(tryFrom, zend_enum_try_from_func, arginfo_class_BackedEnum_tryFrom, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	ZEND_NAMED_ME(from, zend_enum_from_func, arginfo_class_IntBackedEnum_from, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	ZEND_NAMED_ME(tryFrom, zend_enum_try_from_func, arginfo_class_IntBackedEnum_tryFrom, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry string_backed_enum_methods[] = {
+	ZEND_NAMED_ME(cases, zend_enum_cases_func, arginfo_class_UnitEnum_cases, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	ZEND_NAMED_ME(from, zend_enum_from_func, arginfo_class_StringBackedEnum_from, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	ZEND_NAMED_ME(tryFrom, zend_enum_try_from_func, arginfo_class_StringBackedEnum_tryFrom, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -557,8 +564,13 @@ ZEND_API zend_class_entry *zend_register_internal_enum(
 			ce, unit_enum_methods, &ce->function_table, EG(current_module)->type);
 		zend_class_implements(ce, 1, zend_ce_unit_enum);
 	} else {
-		zend_register_functions(
-			ce, backed_enum_methods, &ce->function_table, EG(current_module)->type);
+		if (type == IS_LONG) {
+			zend_register_functions(
+				ce, int_backed_enum_methods, &ce->function_table, EG(current_module)->type);
+		} else {
+			zend_register_functions(
+				ce, string_backed_enum_methods, &ce->function_table, EG(current_module)->type);
+		}
 		zend_class_implements(ce, 1, zend_ce_backed_enum);
 	}
 
