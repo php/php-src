@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 70c8eee05cd6efeedac013d60bd436eec91d43c1 */
+ * Stub hash: 0641a8eeff00e6c8083fe4a8639f970e3ba80db9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_test1, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -42,6 +42,11 @@ static const zend_function_entry class_DlTestSubClass_methods[] = {
 	ZEND_FE_END
 };
 
+
+static const zend_function_entry class_DlTestAliasedClass_methods[] = {
+	ZEND_FE_END
+};
+
 static zend_class_entry *register_class_DlTest(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -74,6 +79,17 @@ static zend_class_entry *register_class_DlTestSubClass(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "DlTestSubClass", class_DlTestSubClass_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DlTestSuperClass);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DlTestAliasedClass(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DlTestAliasedClass", class_DlTestAliasedClass_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_register_class_alias("DlTestClassAlias", class_entry);
 
 	return class_entry;
 }

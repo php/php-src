@@ -20,3 +20,7 @@ class DlTestSuperClass {
 
 class DlTestSubClass extends DlTestSuperClass {
 }
+
+/** @alias DlTestClassAlias */
+class DlTestAliasedClass {
+}

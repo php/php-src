@@ -107,6 +107,7 @@ PHP_MINIT_FUNCTION(dl_test)
 	register_class_DlTest();
 	ce = register_class_DlTestSuperClass();
 	register_class_DlTestSubClass(ce);
+	register_class_DlTestAliasedClass();
 
 	/* Test backwards compatibility */
 	if (getenv("PHP_DL_TEST_USE_OLD_REGISTER_INI_ENTRIES")) {
