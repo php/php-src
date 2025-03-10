@@ -25,6 +25,11 @@ require_once 'skipifconnectfailure.inc';
     if (true !== ($tmp = mysqli_stmt_execute($stmt)))
         printf("[006] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
+    try {
+        mysqli_stmt_data_seek($stmt, 1);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     $id = null;
     if (!mysqli_stmt_bind_result($stmt, $id))
@@ -82,6 +87,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --EXPECT--
 mysqli_stmt object is not fully initialized
+The result set buffer is empty
 int(3)
 int(1)
 int(1)
