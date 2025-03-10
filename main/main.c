@@ -318,11 +318,11 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	size_t value;
 
-    if (new_value) {
-        value = zend_ini_parse_uquantity_warn(new_value, entry->name);
-    } else {
-        value = Z_L(1) << 30; /* effectively, no limit */
-    }
+	if (new_value) {
+		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
+	} else {
+		value = Z_L(1) << 30; /* effectively, no limit */
+	}
 
 	/* If max_memory_limit is not set to unlimited, verify change */
 	if (PG(max_memory_limit) != 0 && PG(max_memory_limit) != -1) {
@@ -350,15 +350,19 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 		}
 	}
 
-    if (zend_set_memory_limit(value) == FAILURE) {
-        if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-            zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
-            return FAILURE;
-        }
-    }
+	if (zend_set_memory_limit(value) == FAILURE) {
+		/* When the memory limit is reset to the original level during deactivation, we may be
+		 * using more memory than the original limit while shutdown is still in progress.
+		 * Ignore a failure for now, and set the memory limit when the memory manager has been
+		 * shut down and the minimal amount of memory is used. */
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
+			return FAILURE;
+		}
+	}
 
-    PG(memory_limit) = value;
-    return SUCCESS;
+	PG(memory_limit) = value;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -366,11 +370,11 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 static PHP_INI_MH(OnChangeMaxMemoryLimit)
 {
 	size_t value;
-    if (new_value) {
-        value = zend_ini_parse_uquantity_warn(new_value, entry->name);
-    } else {
-        value = Z_L(1) << 30; /* effectively, no limit */
-    }
+	if (new_value) {
+		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
+	} else {
+		value = Z_L(1) << 30; /* effectively, no limit */
+	}
 
 	/* If new value is not unlimited, verify change */
 	if (value != -1) {
@@ -394,8 +398,8 @@ static PHP_INI_MH(OnChangeMaxMemoryLimit)
 		}
 	}
 
-    PG(max_memory_limit) = value;
-    return SUCCESS;
+	PG(max_memory_limit) = value;
+	return SUCCESS;
 }
 /* }}} */
 
