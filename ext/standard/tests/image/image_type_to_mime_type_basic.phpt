@@ -21,6 +21,7 @@ $image_types = array (
     IMAGETYPE_IFF,
     IMAGETYPE_WBMP,
     IMAGETYPE_JPEG2000,
+    IMAGETYPE_HEIF,
     IMAGETYPE_XBM,
     IMAGETYPE_WEBP
 );
@@ -49,6 +50,7 @@ string(24) "application/octet-stream"
 string(9) "image/iff"
 string(18) "image/vnd.wap.wbmp"
 string(24) "application/octet-stream"
+string(10) "image/heif"
 string(9) "image/xbm"
 string(10) "image/webp"
 
