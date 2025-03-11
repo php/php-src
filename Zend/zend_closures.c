@@ -366,11 +366,12 @@ static zend_result zend_create_closure_from_callable(zval *return_value, zval *c
 
 		memset(&call, 0, sizeof(zend_internal_function));
 		call.type = ZEND_INTERNAL_FUNCTION;
-		call.fn_flags = mptr->common.fn_flags & ZEND_ACC_STATIC;
+		call.fn_flags = mptr->common.fn_flags & (ZEND_ACC_STATIC | ZEND_ACC_DEPRECATED);
 		call.handler = zend_closure_call_magic;
 		call.function_name = mptr->common.function_name;
 		call.scope = mptr->common.scope;
 		call.doc_comment = NULL;
+		call.attributes = mptr->common.attributes;
 
 		zend_free_trampoline(mptr);
 		mptr = (zend_function *) &call;
@@ -469,7 +470,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	zend_closure *closure = (zend_closure *)object;
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
 	const uint32_t keep_flags =
-		ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_VARIADIC | ZEND_ACC_HAS_RETURN_TYPE;
+		ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_VARIADIC | ZEND_ACC_HAS_RETURN_TYPE | ZEND_ACC_DEPRECATED;
 
 	invoke->common = closure->func.common;
 	/* We return ZEND_INTERNAL_FUNCTION, but arg_info representation is the
@@ -876,7 +877,7 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 
 		memset(&trampoline, 0, sizeof(zend_internal_function));
 		trampoline.type = ZEND_INTERNAL_FUNCTION;
-		trampoline.fn_flags = mptr->common.fn_flags & (ZEND_ACC_STATIC | ZEND_ACC_VARIADIC | ZEND_ACC_RETURN_REFERENCE);
+		trampoline.fn_flags = mptr->common.fn_flags & (ZEND_ACC_STATIC | ZEND_ACC_VARIADIC | ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_DEPRECATED);
 		trampoline.handler = zend_closure_call_magic;
 		trampoline.function_name = mptr->common.function_name;
 		trampoline.scope = mptr->common.scope;
@@ -884,6 +885,7 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 		if (trampoline.fn_flags & ZEND_ACC_VARIADIC) {
 			trampoline.arg_info = trampoline_arg_info;
 		}
+		trampoline.attributes = mptr->common.attributes;
 
 		zend_free_trampoline(mptr);
 		mptr = (zend_function *) &trampoline;

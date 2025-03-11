@@ -48,7 +48,8 @@ $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestBase'));
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestDerived', array(0)));
+$rowCounter = 0;
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestDerived', [&$rowCounter]));
 
 ?>
 --CLEAN--

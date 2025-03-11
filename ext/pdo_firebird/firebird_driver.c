@@ -599,13 +599,13 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 
 	if (H->date_format) {
-		efree(H->date_format);
+		zend_string_release_ex(H->date_format, false);
 	}
 	if (H->time_format) {
-		efree(H->time_format);
+		zend_string_release_ex(H->time_format, false);
 	}
 	if (H->timestamp_format) {
-		efree(H->timestamp_format);
+		zend_string_release_ex(H->timestamp_format, false);
 	}
 
 	if (H->einfo.errmsg) {
@@ -1091,10 +1091,9 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->date_format) {
-					efree(H->date_format);
+					zend_string_release_ex(H->date_format, false);
 				}
-				spprintf(&H->date_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release_ex(str, 0);
+				H->date_format = str;
 			}
 			return true;
 
@@ -1105,10 +1104,9 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->time_format) {
-					efree(H->time_format);
+					zend_string_release_ex(H->time_format, false);
 				}
-				spprintf(&H->time_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release_ex(str, 0);
+				H->time_format = str;
 			}
 			return true;
 
@@ -1119,10 +1117,9 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->timestamp_format) {
-					efree(H->timestamp_format);
+					zend_string_release_ex(H->timestamp_format, false);
 				}
-				spprintf(&H->timestamp_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release_ex(str, 0);
+				H->timestamp_format = str;
 			}
 			return true;
 
@@ -1243,15 +1240,27 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			return 1;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
-			ZVAL_STRING(val, H->date_format ? H->date_format : PDO_FB_DEF_DATE_FMT);
+			if (H->date_format) {
+				ZVAL_STR_COPY(val, H->date_format);
+			} else {
+				ZVAL_STRING(val, PDO_FB_DEF_DATE_FMT);
+			}
 			return 1;
 
 		case PDO_FB_ATTR_TIME_FORMAT:
-			ZVAL_STRING(val, H->time_format ? H->time_format : PDO_FB_DEF_TIME_FMT);
+			if (H->time_format) {
+				ZVAL_STR_COPY(val, H->time_format);
+			} else {
+				ZVAL_STRING(val, PDO_FB_DEF_TIME_FMT);
+			}
 			return 1;
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
-			ZVAL_STRING(val, H->timestamp_format ? H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT);
+			if (H->timestamp_format) {
+				ZVAL_STR_COPY(val, H->timestamp_format);
+			} else {
+				ZVAL_STRING(val, PDO_FB_DEF_TIMESTAMP_FMT);
+			}
 			return 1;
 
 		case PDO_FB_TRANSACTION_ISOLATION_LEVEL:

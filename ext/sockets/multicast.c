@@ -94,7 +94,10 @@ static zend_result php_get_if_index_from_zval(zval *val, unsigned *out)
 		ret = SUCCESS;
 	} else {
 		zend_string *tmp_str;
-		zend_string *str = zval_get_tmp_string(val, &tmp_str);
+		zend_string *str = zval_try_get_tmp_string(val, &tmp_str);
+		if (UNEXPECTED(!str)) {
+			return FAILURE;
+		}
 		ret = php_string_to_if_index(ZSTR_VAL(str), out);
 		zend_tmp_string_release(tmp_str);
 	}
@@ -127,8 +130,11 @@ static zend_result php_get_address_from_array(const HashTable *ht, const char *k
 		zend_value_error("No key \"%s\" passed in optval", key);
 		return FAILURE;
 	}
-	str = zval_get_tmp_string(val, &tmp_str);
-	if (!php_set_inet46_addr(ss, ss_len, ZSTR_VAL(str), sock)) {
+	str = zval_try_get_tmp_string(val, &tmp_str);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+	if (!php_set_inet46_addr(ss, ss_len, str, sock)) {
 		zend_tmp_string_release(tmp_str);
 		return FAILURE;
 	}

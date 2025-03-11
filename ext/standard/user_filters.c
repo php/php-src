@@ -402,7 +402,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}
 		if (bucket->buflen != Z_STRLEN_P(pzdata)) {
-			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
+			bucket->buf = perealloc(bucket->buf, MAX(Z_STRLEN_P(pzdata), 1), bucket->is_persistent);
 			bucket->buflen = Z_STRLEN_P(pzdata);
 		}
 		memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
@@ -439,7 +439,7 @@ PHP_FUNCTION(stream_bucket_append)
 /* {{{ Create a new bucket for use on the current stream */
 PHP_FUNCTION(stream_bucket_new)
 {
-	zval *zstream, zbucket;
+	zval zbucket;
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
@@ -447,11 +447,10 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream_bucket *bucket;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(zstream)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STRING(buffer, buffer_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_stream_from_zval(stream, zstream);
 	pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream));
 
 	memcpy(pbuffer, buffer, buffer_len);

@@ -357,6 +357,7 @@ static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, in
 		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
 
+	cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	return NULL;
 }
 
@@ -366,13 +367,14 @@ static zend_always_inline const dom_prop_handler *dom_get_prop_handler(const dom
 
 	if (obj->prop_handler != NULL) {
 		if (cache_slot && *cache_slot == obj->prop_handler) {
-			hnd = *(cache_slot + 1);
+			hnd = cache_slot[1];
 		}
 		if (!hnd) {
 			hnd = zend_hash_find_ptr(obj->prop_handler, name);
 			if (cache_slot) {
-				*cache_slot = obj->prop_handler;
-				*(cache_slot + 1) = (void *) hnd;
+				cache_slot[0] = obj->prop_handler;
+				cache_slot[1] = (void *) hnd;
+				cache_slot[2] = NULL;
 			}
 		}
 	}

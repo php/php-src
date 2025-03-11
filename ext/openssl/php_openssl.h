@@ -92,6 +92,8 @@ ZEND_TSRMLS_CACHE_EXTERN();
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 void php_openssl_store_errors(void);
+void php_openssl_errors_set_mark(void);
+void php_openssl_errors_restore_mark(void);
 
 /* openssl file path extra */
 bool php_openssl_check_path_ex(
@@ -145,6 +147,8 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 
 /* OpenSSLCertificate class */
 
+#include <openssl/x509.h>
+
 typedef struct _php_openssl_certificate_object {
 	X509 *x509;
 	zend_object std;
@@ -157,6 +161,40 @@ static inline php_openssl_certificate_object *php_openssl_certificate_from_obj(z
 }
 
 #define Z_OPENSSL_CERTIFICATE_P(zv) php_openssl_certificate_from_obj(Z_OBJ_P(zv))
+
+bool php_openssl_is_certificate_ce(zval *val);
+
+/* OpenSSLCertificateSigningRequest class */
+
+typedef struct _php_openssl_x509_request_object {
+	X509_REQ *csr;
+	zend_object std;
+} php_openssl_request_object;
+
+static inline php_openssl_request_object *php_openssl_request_from_obj(zend_object *obj) {
+	return (php_openssl_request_object *)((char *)(obj) - XtOffsetOf(php_openssl_request_object, std));
+}
+
+#define Z_OPENSSL_REQUEST_P(zv) php_openssl_request_from_obj(Z_OBJ_P(zv))
+
+bool php_openssl_is_request_ce(zval *val);
+
+/* OpenSSLAsymmetricKey class */
+
+typedef struct _php_openssl_pkey_object {
+	EVP_PKEY *pkey;
+	bool is_private;
+	zend_object std;
+} php_openssl_pkey_object;
+
+static inline php_openssl_pkey_object *php_openssl_pkey_from_obj(zend_object *obj) {
+	return (php_openssl_pkey_object *)((char *)(obj) - XtOffsetOf(php_openssl_pkey_object, std));
+}
+
+#define Z_OPENSSL_PKEY_P(zv) php_openssl_pkey_from_obj(Z_OBJ_P(zv))
+
+bool php_openssl_is_pkey_ce(zval *val);
+void php_openssl_pkey_object_init(zval *zv, EVP_PKEY *pkey, bool is_private);
 
 #if defined(HAVE_OPENSSL_ARGON2)
 

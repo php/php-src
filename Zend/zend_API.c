@@ -3760,7 +3760,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 	zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name), name_len);
 
 	*strict_class = 0;
-	if (zend_string_equals_literal(lcname, "self")) {
+	if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_SELF))) {
 		if (!scope) {
 			if (error) *error = estrdup("cannot access \"self\" when no class scope is active");
 		} else {
@@ -3777,7 +3777,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			}
 			ret = 1;
 		}
-	} else if (zend_string_equals_literal(lcname, "parent")) {
+	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		if (!scope) {
 			if (error) *error = estrdup("cannot access \"parent\" when no class scope is active");
 		} else if (!scope->parent) {
@@ -4666,8 +4666,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_ex(zend_reference *ref, zval *val
 		zval_ptr_dtor(val);
 		return FAILURE;
 	} else {
-		zval_ptr_dtor(&ref->val);
-		ZVAL_COPY_VALUE(&ref->val, val);
+		zend_safe_assign_to_variable_noref(&ref->val, val);
 		return SUCCESS;
 	}
 }

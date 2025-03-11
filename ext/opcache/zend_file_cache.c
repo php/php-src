@@ -75,7 +75,7 @@
 # define LOCK_UN 2
 static int zend_file_cache_flock(int fd, int op)
 {
-	OVERLAPPED offset = {0,0,0,0,NULL};
+	OVERLAPPED offset = {0, 0, {{0}}, NULL};
 	if (op == LOCK_EX) {
 		if (LockFileEx((HANDLE)_get_osfhandle(fd),
 		               LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &offset) == TRUE) {
@@ -366,6 +366,9 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		/* The op_array itself will be serialized as part of the dynamic_func_defs. */
 		SERIALIZE_PTR(zend_ast_get_op_array(ast)->op_array);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
+		ZEND_MAP_PTR_INIT(fcc->fptr, NULL);
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -1251,6 +1254,9 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
 		/* The op_array itself will be unserialized as part of the dynamic_func_defs. */
 		UNSERIALIZE_PTR(zend_ast_get_op_array(ast)->op_array);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
+		ZEND_MAP_PTR_NEW(fcc->fptr);
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();

@@ -6591,7 +6591,13 @@ PHP_FUNCTION(array_filter)
 /* }}} */
 
 /* {{{ Internal function to find an array element for a user closure. */
-static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval *result_key, zval *result_value, bool negate_condition)
+enum php_array_find_result {
+	PHP_ARRAY_FIND_EXCEPTION = -1,
+	PHP_ARRAY_FIND_NONE = 0,
+	PHP_ARRAY_FIND_SOME = 1,
+};
+
+static enum php_array_find_result php_array_find(const HashTable *array, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval *result_key, zval *result_value, bool negate_condition)
 {
 	zend_ulong num_key;
 	zend_string *str_key;
@@ -6599,16 +6605,8 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 	zval args[2];
 	zval *operand;
 
-	if (result_value != NULL) {
-  		ZVAL_UNDEF(result_value);
-	}
-
-	if (result_key != NULL) {
-  		ZVAL_UNDEF(result_key);
-	}
-
 	if (zend_hash_num_elements(array) == 0) {
-		return SUCCESS;
+		return PHP_ARRAY_FIND_NONE;
 	}
 
 	ZEND_ASSERT(ZEND_FCI_INITIALIZED(fci));
@@ -6630,8 +6628,8 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 		zend_result result = zend_call_function(&fci, &fci_cache);
 		ZEND_ASSERT(result == SUCCESS);
 
-		if (UNEXPECTED(EG(exception))) {
-			return FAILURE;
+		if (UNEXPECTED(Z_ISUNDEF(retval))) {
+			return PHP_ARRAY_FIND_EXCEPTION;
 		}
 
 		bool retval_true = zend_is_true(&retval);
@@ -6649,95 +6647,75 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 				ZVAL_COPY(result_key, &args[1]);
 			}
 
-			break;
+			return PHP_ARRAY_FIND_SOME;
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return SUCCESS;
+	return PHP_ARRAY_FIND_NONE;
 }
 /* }}} */
 
 /* {{{ Search within an array and returns the first found element value. */
 PHP_FUNCTION(array_find)
 {
-	zval *array = NULL;
+	HashTable *array;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(array)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_array_find(Z_ARR_P(array), fci, fci_cache, NULL, return_value, false) != SUCCESS) {
-		RETURN_THROWS();
-	}
-
-	if (Z_TYPE_P(return_value) == IS_UNDEF) {
-   		RETURN_NULL();
-	}
+	php_array_find(array, fci, fci_cache, NULL, return_value, false);
 }
 /* }}} */
 
 /* {{{ Search within an array and returns the first found element key. */
 PHP_FUNCTION(array_find_key)
 {
-	zval *array = NULL;
+	HashTable *array;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(array)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_array_find(Z_ARR_P(array), fci, fci_cache, return_value, NULL, false) != SUCCESS) {
-		RETURN_THROWS();
-	}
-
-	if (Z_TYPE_P(return_value) == IS_UNDEF) {
-   		RETURN_NULL();
-	}
+	php_array_find(array, fci, fci_cache, return_value, NULL, false);
 }
 /* }}} */
 
 /* {{{ Checks if at least one array element satisfies a callback function. */
 PHP_FUNCTION(array_any)
 {
-	zval *array = NULL;
+	HashTable *array;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(array)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_array_find(Z_ARR_P(array), fci, fci_cache, return_value, NULL, false) != SUCCESS) {
-		RETURN_THROWS();
-	}
-
-	RETURN_BOOL(Z_TYPE_P(return_value) != IS_UNDEF);
+	RETURN_BOOL(php_array_find(array, fci, fci_cache, NULL, NULL, false) == PHP_ARRAY_FIND_SOME);
 }
 /* }}} */
 
 /* {{{ Checks if all array elements satisfy a callback function. */
 PHP_FUNCTION(array_all)
 {
-	zval *array = NULL;
+	HashTable *array;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(array)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_array_find(Z_ARR_P(array), fci, fci_cache, return_value, NULL, true) != SUCCESS) {
-		RETURN_THROWS();
-	}
-
-	RETURN_BOOL(Z_TYPE_P(return_value) == IS_UNDEF);
+	RETURN_BOOL(php_array_find(array, fci, fci_cache, NULL, NULL, true) == PHP_ARRAY_FIND_NONE);
 }
 /* }}} */
 

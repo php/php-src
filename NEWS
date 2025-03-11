@@ -2,6 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- CLI:
+  . Add --ini=diff to print INI settings changed from the builtin default.
+    (timwolla)
+  . Drop support for -z CLI/CGI flag. (nielsdos)
+  . Fixed GH-17956 - development server 404 page does not adapt to mobiles.
+    (pascalchevrel)
+
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
   . Fixed method calls for PHP objects wrapped in variant. (cmb)
@@ -10,16 +17,22 @@ PHP                                                                        NEWS
   . Fixed bug GH-16665 (\array and \callable should not be usable in
     class_alias). (nielsdos)
   . Added PHP_BUILD_DATE constant. (cmb)
-  . Added support for Closures in constant expressions. (timwolla,
-    Volker Dusch)
+  . Added support for Closures and first class callables in constant
+    expressions. (timwolla, Volker Dusch)
   . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
     if available. (timwolla)
   . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
     non-printable characters in string literals). (nielsdos, WangYihang)
+  . Add support for backtraces for fatal errors. (enorris)
+  . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
+  . Improved error message of UnhandledMatchError for
+    zend.exception_string_param_max_len=0. (timwolla)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
   . Added curl_share_init_persistent(). (enorris)
+  . Added CURLINFO_USED_PROXY, CURLINFO_HTTPAUTH_USED, and CURLINFO_PROXYAUTH_USED
+    support to curl_getinfo. (Ayesh Karunaratne)
 
 - Date:
   . Fix undefined behaviour problems regarding integer overflow in extreme edge
@@ -31,15 +44,26 @@ PHP                                                                        NEWS
 
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
+  . Added enchant_dict_remove(). (nielsdos)
+
+- Fileinfo:
+  . Upgrade to file 5.46. (nielsdos)
 
 - GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
     cmb)
+  . Fixed bug #64823 (ZTS GD fails to to find system TrueType font). (cmb)
 
 - Intl:
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
     with uninitialised classes or clone failure. (David Carlier)
+  . Added DECIMAL_COMPACT_SHORT/DECIMAL_COMPACT_LONG for NumberFormatter class.
+    (BogdanUngureanu)
+
+- MySQLi:
+  . Fixed bugs GH-17900 and GH-8084 (calling mysqli::__construct twice).
+    (nielsdos)
 
 - MySQLnd:
   . Added mysqlnd.collect_memory_statistics to ini quick reference.
@@ -52,6 +76,9 @@ PHP                                                                        NEWS
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
 
+- PCRE:
+  . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
+
 - PDO_PGSQL:
   . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
   . Implement GH-15387 Pdo\Pgsql::setAttribute(PDO::ATTR_PREFETCH, 0) or
@@ -62,6 +89,9 @@ PHP                                                                        NEWS
   . Added pg_close_stmt to close a prepared statement while allowing
     its name to be reused. (David Carlier)
   . Added Iterable support for pgsql_copy_from. (David Carlier)
+  . pg_connect checks if connection_string contains any null byte,
+    pg_close_stmt check if the statement contains any null byte.
+    (David Carlier)
 
 - POSIX:
   . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
@@ -76,11 +106,18 @@ PHP                                                                        NEWS
 - Reflection:
   . Added ReflectionConstant::getExtension() and ::getExtensionName().
     (DanielEScherzer)
+  . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
+    zval for uninitialized typed properties). (nielsdos)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap
     or a TypeError if read_and_close value is not compatible with int.
     (David Carlier)
+
+- SNMP:
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3 and
+    SNMP::__construct() throw an exception on invalid hostname, community
+    timeout and retries arguments. (David Carlier)
 
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
@@ -110,6 +147,13 @@ PHP                                                                        NEWS
   . socket_set_option with the options MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
     will throw an exception if its value is not a valid array/object.
     (David Carlier)
+  . socket_getsockname/socket_create/socket_bind handled AF_PACKET family socket.
+    (David Carlier)
+  . Added IP_BINDANY for a socket to bind to any address. (David Carlier)
+
+- Sodium:
+  . Fix overall theorical overflows on zend_string buffer allocations.
+    (David Carlier/nielsdos)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
@@ -136,6 +180,9 @@ PHP                                                                        NEWS
 - Zlib:
   . gzfile, gzopen and readgzfile, their "use_include_path" argument
     is now a boolean. (David Carlier)
+  . Fixed bug GH-16883 (gzopen() does not use the default stream context when
+    opening HTTP URLs). (nielsdos)
+  . Implemented GH-17668 (zlib streams should support locking). (nielsdos)
 
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

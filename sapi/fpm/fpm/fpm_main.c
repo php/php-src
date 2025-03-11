@@ -1151,6 +1151,7 @@ static void init_request_info(void)
 							}
 
 							if (tflag) {
+								char *decoded_path_info = NULL;
 								if (orig_path_info) {
 									char old;
 
@@ -1172,7 +1173,6 @@ static void init_request_info(void)
 									 * As we can extract PATH_INFO from PATH_TRANSLATED
 									 * it is probably also in SCRIPT_NAME and need to be removed
 									 */
-									char *decoded_path_info = NULL;
 									size_t decoded_path_info_len = 0;
 									if (strchr(path_info, '%')) {
 										decoded_path_info = estrdup(path_info);
@@ -1195,11 +1195,13 @@ static void init_request_info(void)
 										env_script_name[env_script_file_info_start] = 0;
 										SG(request_info).request_uri = FCGI_PUTENV(request, "SCRIPT_NAME", env_script_name);
 									}
-									if (decoded_path_info) {
-										efree(decoded_path_info);
-									}
 								}
-								env_path_info = FCGI_PUTENV(request, "PATH_INFO", path_info);
+								if (decoded_path_info) {
+									env_path_info = FCGI_PUTENV(request, "PATH_INFO", decoded_path_info);
+									efree(decoded_path_info);
+								} else {
+									env_path_info = FCGI_PUTENV(request, "PATH_INFO", path_info);
+								}
 							}
 							if (!orig_script_filename ||
 								strcmp(orig_script_filename, pt) != 0) {

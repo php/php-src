@@ -14,7 +14,7 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-$v2->loadHTML("oU");
+$v2->loadHTML("<p>oU</p>");
 echo $v2->saveXML();
 
 ?>

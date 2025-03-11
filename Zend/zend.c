@@ -260,6 +260,7 @@ static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+	STD_ZEND_INI_BOOLEAN("fatal_error_backtraces",			"1",	ZEND_INI_ALL,       OnUpdateBool, fatal_error_backtrace_on,      zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.assertions",				"1",    ZEND_INI_ALL,       OnUpdateAssertions,           assertions,   zend_executor_globals,  executor_globals)
 	ZEND_INI_ENTRY3_EX("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled, NULL, NULL, NULL, zend_gc_enabled_displayer_cb)
 	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
@@ -1049,6 +1050,8 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_last) = 0;
 #endif /* ZTS */
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	EG(fatal_error_backtrace_on) = false;
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	zend_interned_strings_init();
 	zend_startup_builtin_functions();
@@ -1463,6 +1466,10 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		EG(errors)[EG(num_errors)-1] = info;
 	}
 
+	// Always clear the last backtrace.
+	zval_ptr_dtor(&EG(last_fatal_error_backtrace));
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
+
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		zend_execute_data *ex;
@@ -1484,6 +1491,8 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 				ex->opline = opline;
 			}
 		}
+	} else if (EG(fatal_error_backtrace_on) && (type & E_FATAL_ERRORS)) {
+		zend_fetch_debug_backtrace(&EG(last_fatal_error_backtrace), 0, EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
 	}
 
 	zend_observer_error_notify(type, error_filename, error_lineno, message);
@@ -2079,8 +2088,8 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 		return;
 	}
 
-	if (zend_string_equals_literal_ci(type_name, "self")
-			|| zend_string_equals_literal_ci(type_name, "parent")) {
+	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_SELF))
+			|| zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return;
 	}
 

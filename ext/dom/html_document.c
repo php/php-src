@@ -571,7 +571,7 @@ static bool dom_decode_encode_fast_path(
 			parser,
 			buf_ptr - buf,
 			buf,
-			buf_ptr - buf,
+			buf_ref - *buf_ref_ref,
 			tokenizer_error_offset,
 			tree_error_offset
 		)) {
@@ -782,7 +782,7 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 										   "LIBXML_NOERROR, "
 										   "LIBXML_COMPACT, "
 										   "LIBXML_HTML_NOIMPLIED, "
-										   "Dom\\NO_DEFAULT_NS)");
+										   "Dom\\HTML_NO_DEFAULT_NS)");
 		return false;
 	}
 	return true;

@@ -286,6 +286,35 @@ END_EXTERN_C()
 #define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", php_file_le_stream(), php_file_le_pstream())
 
 BEGIN_EXTERN_C()
+
+static zend_always_inline bool php_stream_zend_parse_arg_into_stream(zval *arg, php_stream **destination_stream_ptr, bool check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
+		*destination_stream_ptr = (php_stream*)zend_fetch_resource2(Z_RES_P(arg), "stream", php_file_le_stream(), php_file_le_pstream());
+		if (UNEXPECTED(*destination_stream_ptr == NULL)) {
+			return false;
+		}
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*destination_stream_ptr = NULL;
+	} else {
+		return false;
+	}
+	return true;
+}
+
+#define PHP_Z_PARAM_STREAM_EX(destination_stream_ptr, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!php_stream_zend_parse_arg_into_stream(_arg, &destination_stream_ptr, check_null))) { \
+		_error_code = ZPP_ERROR_FAILURE; \
+		if (!EG(exception)) { \
+			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+		} \
+		break; \
+	}
+#define PHP_Z_PARAM_STREAM(dest) PHP_Z_PARAM_STREAM_EX(dest, false)
+#define PHP_Z_PARAM_STREAM_OR_NULL(dest) PHP_Z_PARAM_STREAM_EX(dest, true)
+
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
 #define php_stream_free_enclosed(stream_enclosed, close_options) _php_stream_free_enclosed((stream_enclosed), (close_options))
 PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options);

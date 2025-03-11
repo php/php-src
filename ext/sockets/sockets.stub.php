@@ -26,6 +26,13 @@ const AF_INET6 = UNKNOWN;
  */
 const AF_DIVERT = UNKNOWN;
 #endif
+#ifdef AF_PACKET
+/**
+ * @var int
+ * @cvalue AF_PACKET
+ */
+const AF_PACKET = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SOCK_STREAM
@@ -1908,6 +1915,13 @@ const TCP_QUICKACK = UNKNOWN;
  */
 const TCP_REPAIR = UNKNOWN;
 #endif
+#if defined(IP_BINDANY)
+/**
+ * @var int
+ * @cvalue IP_BINDANY
+ */
+const IP_BINDANY = UNKNOWN;
+#endif
 #if defined(IP_DONTFRAG)
 /**
  * @var int
@@ -1977,6 +1991,28 @@ const UDPLITE_SEND_CSCOV = UNKNOWN;
  * @cvalue UDPLITE_RECV_CSCOV
  */
 const UDPLITE_RECV_CSCOV = UNKNOWN;
+#endif
+#if defined(ETH_P_ALL)
+/**
+ * @var int
+ * @cvalue ETH_P_IP
+ */
+const ETH_P_IP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_IPV6
+ */
+const ETH_P_IPV6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_LOOP
+ */
+const ETH_P_LOOP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_ALL
+ */
+const ETH_P_ALL = UNKNOWN;
 #endif
 
 /**

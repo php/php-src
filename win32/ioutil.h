@@ -175,7 +175,8 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 zend_always_inline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *mb, *ret;
-	size_t mb_len, dir_len = 0;
+	size_t mb_len;
+	DWORD dir_len = 0;
 
 	mb = php_win32_cp_conv_any_to_w(in, in_len, &mb_len);
 	if (!mb) {
@@ -227,8 +228,8 @@ zend_always_inline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in
 			memcpy(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
 #ifndef ZTS
 			if (dir_len > 0) {
-				size_t len = GetCurrentDirectoryW(dir_len, dst);
-				if (len == 0 || len + 1 != dir_len) {
+				DWORD len = GetCurrentDirectoryW(dir_len, dst);
+				if (len == 0 || len != dir_len - 1) {
 					free(ret);
 					free(mb);
 					return NULL;

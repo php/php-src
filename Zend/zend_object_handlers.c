@@ -673,9 +673,23 @@ static bool zend_is_in_hook(const zend_property_info *prop_info)
 
 static bool zend_should_call_hook(const zend_property_info *prop_info, const zend_object *obj)
 {
-	return !zend_is_in_hook(prop_info)
-		/* execute_data and This are guaranteed to be set if zend_is_in_hook() returns true. */
-		|| Z_OBJ(EG(current_execute_data)->This) != obj;
+	if (!zend_is_in_hook(prop_info)) {
+		return true;
+	}
+
+	/* execute_data and This are guaranteed to be set if zend_is_in_hook() returns true. */
+	zend_object *parent_obj = Z_OBJ(EG(current_execute_data)->This);
+	if (parent_obj == obj) {
+		return false;
+	}
+
+	if (zend_object_is_lazy_proxy(parent_obj)
+	 && zend_lazy_object_initialized(parent_obj)
+	 && zend_lazy_object_get_instance(parent_obj) == obj) {
+		return false;
+	}
+
+	return true;
 }
 
 static ZEND_COLD void zend_throw_no_prop_backing_value_access(zend_string *class_name, zend_string *prop_name, bool is_read)
@@ -1198,6 +1212,11 @@ lazy_init:;
 
 	variable_ptr = zend_std_write_property(zobj, name, &backup, cache_slot);
 	zval_ptr_dtor(&backup);
+
+	if (variable_ptr == &backup) {
+		variable_ptr = value;
+	}
+
 	return variable_ptr;
 }
 /* }}} */
@@ -1617,7 +1636,9 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
-		| (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE);
+		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED));
+	/* Attributes outlive the trampoline because they are created by the compiler. */
+	func->attributes = fbc->common.attributes;
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
@@ -1742,7 +1763,7 @@ static zend_always_inline zend_function *zend_get_user_call_function(zend_class_
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope) /* {{{ */
+ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope) /* {{{ */
 {
 	zend_throw_error(NULL, "Call to %s method %s::%s() from %s%s",
 		zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name),
@@ -1752,7 +1773,7 @@ static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc,
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
+ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
 {
 	zend_throw_error(NULL, "Cannot call abstract method %s::%s()",
 		ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
@@ -1892,19 +1913,27 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	if (EXPECTED(fbc)) {
 		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 			zend_abstract_method_call(fbc);
-			fbc = NULL;
+			goto fail;
 		} else if (UNEXPECTED(fbc->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
 			zend_error(E_DEPRECATED,
 				"Calling static trait method %s::%s is deprecated, "
 				"it should only be called on a class using the trait",
 				ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 			if (EG(exception)) {
-				return NULL;
+				goto fail;
 			}
 		}
 	}
 
 	return fbc;
+
+ fail:
+	if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_string_release_ex(fbc->common.function_name, 0);
+		zend_free_trampoline(fbc);
+	}
+
+	return NULL;
 }
 /* }}} */
 

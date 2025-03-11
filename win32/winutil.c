@@ -459,7 +459,7 @@ static zend_always_inline BOOL is_compatible(HMODULE handle, BOOL is_smaller, ch
 		This check is to be extended as new VS versions come out. */
 	DWORD core_minor = (DWORD)(PHP_LINKER_MINOR/10);
 	DWORD comp_minor = (DWORD)(minor/10);
-	if (14 == major && (is_smaller ? core_minor < comp_minor : core_minor > comp_minor) || PHP_LINKER_MAJOR != major)
+	if ((14 == major && (is_smaller ? core_minor < comp_minor : core_minor > comp_minor)) || PHP_LINKER_MAJOR != major)
 #else
 	if (PHP_LINKER_MAJOR != major)
 #endif

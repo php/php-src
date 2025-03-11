@@ -87,6 +87,8 @@ function enchant_dict_suggest(EnchantDictionary $dictionary, string $word): arra
 
 function enchant_dict_add(EnchantDictionary $dictionary, string $word): void {}
 
+function enchant_dict_remove(EnchantDictionary $dictionary, string $word): void {}
+
 /**
 * @alias enchant_dict_add
 */

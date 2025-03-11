@@ -36,14 +36,5 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			  const char *headers, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath);
 PHPAPI void TSMClose(void);
-static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
-			 const char *headers, char *headers_lc, char **error_message);
 PHPAPI char *GetSMErrorText(int index);
-
-static int MailConnect();
-static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
-static int Post(LPCSTR msg);
-static int Ack(char **server_response);
-static unsigned long GetAddr(LPSTR szHost);
-static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 #endif							/* sendmail_h */

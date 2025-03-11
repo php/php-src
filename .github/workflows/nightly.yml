@@ -17,6 +17,9 @@ on:
       run_alpine:
         required: true
         type: boolean
+      run_linux_ppc64:
+        required: true
+        type: boolean
       run_macos_arm64:
         required: true
         type: boolean
@@ -26,9 +29,53 @@ on:
       windows_version:
         required: true
         type: string
+      skip_symfony:
+        required: true
+        type: boolean
+      skip_wordpress:
+        required: true
+        type: boolean
 permissions:
   contents: read
 jobs:
+  LINUX_PPC64:
+    if: inputs.run_linux_ppc64
+    name: LINUX_PPC64_ASAN_UBSAN_DEBUG_ZTS
+    # This runs on a self-hosted runner; see https://wiki.php.net/systems/ci
+    runs-on: [self-hosted, gentoo, ppc64]
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed packages"
+          cat /var/lib/portage/world
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-gentoo
+        with:
+          configurationParameters: >-
+            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
+            CC=clang-17
+            CXX=clang++-17
+            --enable-debug
+            --enable-zts
+          skipSlow: false # FIXME: This should likely include slow extensions
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      # Skip an install action for now
+      - name: Tests
+        uses: ./.github/actions/test-gentoo
+        # There is no PPC JIT, so rip this out
+        with:
+          runTestsParameters: >-
+            --asan -x
   ALPINE:
     if: inputs.run_alpine
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
@@ -421,7 +468,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - uses: codecov/codecov-action@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -494,7 +541,7 @@ jobs:
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
           php -v
       - name: Test AMPHP
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
@@ -512,9 +559,9 @@ jobs:
           done
           exit $X
       - name: Test Laravel
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
-          git clone https://github.com/laravel/framework.git --branch=master --depth=1
+          git clone https://github.com/laravel/framework.git --depth=1
           cd framework
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
@@ -525,7 +572,7 @@ jobs:
             exit 1
           fi
       - name: Test ReactPHP
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
           X=0
@@ -543,7 +590,7 @@ jobs:
           done
           exit $X
       - name: Test Revolt PHP
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           git clone https://github.com/revoltphp/event-loop.git --depth=1
           cd event-loop
@@ -554,7 +601,7 @@ jobs:
             exit 1
           fi
       - name: Test Symfony
-        if: always()
+        if: ${{ !cancelled() && !inputs.skip_symfony }}
         run: |
           git clone https://github.com/symfony/symfony.git --depth=1
           cd symfony
@@ -575,7 +622,7 @@ jobs:
           done
           exit $X
       - name: Test PHPUnit
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           git clone https://github.com/sebastianbergmann/phpunit.git --branch=main --depth=1
           cd phpunit
@@ -586,7 +633,7 @@ jobs:
             exit 1
           fi
       - name: 'Symfony Preloading'
-        if: always()
+        if: ${{ !cancelled() && !inputs.skip_symfony }}
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
           cd symfony_demo
@@ -594,7 +641,7 @@ jobs:
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
           php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
       - name: Test Wordpress
-        if: always()
+        if: ${{ !cancelled() && !inputs.skip_wordpress }}
         run: |
           git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
           cd wordpress

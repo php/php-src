@@ -207,6 +207,17 @@ static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, z
 	return variable_ptr;
 }
 
+static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable_ptr, zval *value) {
+	if (Z_REFCOUNTED_P(variable_ptr)) {
+		ZEND_ASSERT(Z_TYPE_P(variable_ptr) != IS_REFERENCE);
+		zend_refcounted *ref = Z_COUNTED_P(variable_ptr);
+		ZVAL_COPY_VALUE(variable_ptr, value);
+		GC_DTOR_NO_REF(ref);
+	} else {
+		ZVAL_COPY_VALUE(variable_ptr, value);
+	}
+}
+
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant(zval *pp);
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *pp, zend_class_entry *scope);
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *pp, zend_class_entry *scope, zend_ast_evaluate_ctx *ctx);
@@ -436,6 +447,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer);
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield);
 ZEND_API zval* ZEND_FASTCALL zend_fetch_static_property(zend_execute_data *ex, int fetch_type);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method);
 ZEND_API void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc);
 
 ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data);

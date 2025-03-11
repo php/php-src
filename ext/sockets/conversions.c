@@ -555,7 +555,7 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 	zend_string			*addr_str, *tmp_addr_str;
 
 	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
-	res = php_set_inet_addr(&saddr, ZSTR_VAL(addr_str), ctx->sock);
+	res = php_set_inet_addr(&saddr, addr_str, ctx->sock);
 	if (res) {
 		memcpy(inaddr, &saddr.sin_addr, sizeof saddr.sin_addr);
 	} else {
@@ -605,7 +605,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 	zend_string			*addr_str, *tmp_addr_str;
 
 	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
-	res = php_set_inet6_addr(&saddr6, ZSTR_VAL(addr_str), ctx->sock);
+	res = php_set_inet6_addr(&saddr6, addr_str, ctx->sock);
 	if (res) {
 		memcpy(addr6, &saddr6.sin6_addr, sizeof saddr6.sin6_addr);
 	} else {
