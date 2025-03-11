@@ -1670,8 +1670,7 @@ static zend_string *get_field_name(PGconn *pgsql, Oid oid)
 			continue;
 		}
 
-		char *end_ptr;
-		Oid tmp_oid = strtoul(tmp_oid_str, &end_ptr, 10);
+		Oid tmp_oid = strtoul(tmp_oid_str, NULL, 10);
 
 		zend_string *name = zend_string_init(tmp_name, strlen(tmp_name), 0);
 		zend_hash_index_update_ptr(&PGG(field_oids), tmp_oid, name);
