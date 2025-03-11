@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   . Fix weird unpack behaviour in DOM. (nielsdos)
 
 - Embed:
-  . Fixed GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
+  . Fixed bug GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
 
 - GD:
   . Fixed bug GH-17984 (calls with arguments as array with references).
