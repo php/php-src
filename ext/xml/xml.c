@@ -657,9 +657,11 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			array_init(&tag);
 			array_init(&atr);
 
-			_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
+			char *skipped_tag_name = SKIP_TAGSTART(ZSTR_VAL(tag_name));
 
-			add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
+			_xml_add_to_info(parser, skipped_tag_name);
+
+			add_assoc_string(&tag, "tag", skipped_tag_name);
 			add_assoc_string(&tag, "type", "open");
 			add_assoc_long(&tag, "level", parser->level);
 
@@ -741,12 +743,14 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 				add_assoc_string(zv, "type", "complete");
 			}
 		} else {
-			_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
+			char *skipped_tag_name = SKIP_TAGSTART(ZSTR_VAL(tag_name));
+
+			_xml_add_to_info(parser, skipped_tag_name);
 
 			zval *data = xml_get_separated_data(parser);
 			if (EXPECTED(data)) {
 				array_init(&tag);
-				add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
+				add_assoc_string(&tag, "tag", skipped_tag_name);
 				add_assoc_string(&tag, "type", "close");
 				add_assoc_long(&tag, "level", parser->level);
 				zend_hash_next_index_insert(Z_ARRVAL_P(data), &tag);

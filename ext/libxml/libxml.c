@@ -525,41 +525,52 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 		if (Z_TYPE(s->wrapperdata) == IS_ARRAY) {
 			zval *header;
 
-			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
+			/* Scan backwards: The header array might contain the headers for multiple responses, if
+			 * a redirect was followed.
+			 */
+			ZEND_HASH_REVERSE_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
 				const char buf[] = "Content-Type:";
-				if (Z_TYPE_P(header) == IS_STRING &&
-						!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
-					char needle[] = "charset=";
-					char *haystack = estrndup(Z_STRVAL_P(header), Z_STRLEN_P(header));
-					char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), strlen(needle));
-
-					if (encoding) {
-						char *end;
-
-						encoding += sizeof("charset=")-1;
-						if (*encoding == '"') {
-							encoding++;
-						}
-						end = strchr(encoding, ';');
-						if (end == NULL) {
-							end = encoding + strlen(encoding);
-						}
-						end--; /* end == encoding-1 isn't a buffer underrun */
-						while (*end == ' ' || *end == '\t') {
-							end--;
-						}
-						if (*end == '"') {
-							end--;
-						}
-						if (encoding >= end) continue;
-						*(end+1) = '\0';
-						enc = xmlParseCharEncoding(encoding);
-						if (enc <= XML_CHAR_ENCODING_NONE) {
-							enc = XML_CHAR_ENCODING_NONE;
-						}
+				if (Z_TYPE_P(header) == IS_STRING) {
+					/* If no colon is found in the header, we assume it's the HTTP status line and bail out. */
+					char *colon = memchr(Z_STRVAL_P(header), ':', Z_STRLEN_P(header));
+					char *space = memchr(Z_STRVAL_P(header), ' ', Z_STRLEN_P(header));
+					if (colon == NULL || space < colon) {
+						break;
 					}
-					efree(haystack);
-					break; /* found content-type */
+
+					if (!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
+						char needle[] = "charset=";
+						char *haystack = estrndup(Z_STRVAL_P(header), Z_STRLEN_P(header));
+						char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), sizeof("charset=")-1);
+
+						if (encoding) {
+							char *end;
+
+							encoding += sizeof("charset=")-1;
+							if (*encoding == '"') {
+								encoding++;
+							}
+							end = strchr(encoding, ';');
+							if (end == NULL) {
+								end = encoding + strlen(encoding);
+							}
+							end--; /* end == encoding-1 isn't a buffer underrun */
+							while (*end == ' ' || *end == '\t') {
+								end--;
+							}
+							if (*end == '"') {
+								end--;
+							}
+							if (encoding >= end) continue;
+							*(end+1) = '\0';
+							enc = xmlParseCharEncoding(encoding);
+							if (enc <= XML_CHAR_ENCODING_NONE) {
+								enc = XML_CHAR_ENCODING_NONE;
+							}
+						}
+						efree(haystack);
+						break; /* found content-type */
+					}
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
