@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17998 (Assignment to backing value in set hook of lazy proxy
     calls hook again). (ilutov)
 
+- DBA:
+  . Fixed assertion violation when opening the same file with dba_open
+    multiple times. (chschneider)
+
 - DOM:
   . Fixed bug GH-17991 (Assertion failure dom_attr_value_write). (nielsdos)
   . Fix weird unpack behaviour in DOM. (nielsdos)
