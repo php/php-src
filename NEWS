@@ -16,7 +16,7 @@ PHP                                                                        NEWS
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
-27 Feb 2025, PHP 8.3.18RC1
+27 Feb 2025, PHP 8.3.18
 
 - BCMath:
   . Fixed bug GH-17398 (bcmul memory leak). (SakiTakamachi)
@@ -177,7 +177,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-17139 (Fix zip_entry_name() crash on invalid entry).
     (nielsdos)
 
-02 Jan 2025, PHP 8.3.16RC1
+02 Jan 2025, PHP 8.3.16
 
 - Core:
   . Fixed bug GH-17106 (ZEND_MATCH_ERROR misoptimization). (ilutov)
@@ -376,7 +376,7 @@ PHP                                                                        NEWS
 - Windows:
   . Fixed bug GH-16849 (Error dialog causes process to hang). (cmb)
 
-07 Nov 2024, PHP 8.3.14RC1
+07 Nov 2024, PHP 8.3.14
 
 - CLI:
   . Fixed bug GH-16373 (Shebang is not skipped for router script in cli-server
@@ -1129,7 +1129,7 @@ PHP                                                                        NEWS
 - Treewide:
   . Fix gcc-14 Wcalloc-transposed-args warnings. (Cristian Rodríguez)
 
-28 Mar 2024, PHP 8.3.5RC1
+28 Mar 2024, PHP 8.3.5
 
 - Core:
   . Fixed GH-13569 (GC buffer unnecessarily grows up to GC_MAX_BUF_SIZE when
@@ -1398,7 +1398,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-12980 (tidynode.props.attribute is missing
     "Boolean Attributes" and empty attributes). (nielsdos)
 
-07 Dec 2023, PHP 8.3.1RC1
+07 Dec 2023, PHP 8.3.1
 
 - Core:
   . Fixed bug GH-12758 / GH-12768 (Invalid opline in OOM handlers within
