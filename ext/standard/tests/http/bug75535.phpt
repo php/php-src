@@ -26,11 +26,9 @@ http_server_kill($pid);
 --EXPECT--
 NULL
 string(0) ""
-array(2) {
+array(1) {
   [0]=>
   string(15) "HTTP/1.0 200 Ok"
-  [1]=>
-  string(14) "Content-Length"
 }
 array(2) {
   [0]=>
