@@ -57,6 +57,7 @@ ZEND_BEGIN_MODULE_GLOBALS(dba)
 	const char *default_handler;
 	const dba_handler *default_hptr;
 	HashTable connections;
+	unsigned int connection_counter;
 ZEND_END_MODULE_GLOBALS(dba)
 
 ZEND_DECLARE_MODULE_GLOBALS(dba)
@@ -569,7 +570,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	}
 
 	zend_string *resource_key = zend_strpprintf(0,
-		"dba_%d_%s_%s_%s", persistent, ZSTR_VAL(path), ZSTR_VAL(mode), handler_str ? ZSTR_VAL(handler_str) : ""
+		"dba_%d_%u_%s_%s_%s", persistent, persistent ? 0 : DBA_G(connection_counter)++, ZSTR_VAL(path), ZSTR_VAL(mode), handler_str ? ZSTR_VAL(handler_str) : ""
 	);
 
 	if (persistent) {
