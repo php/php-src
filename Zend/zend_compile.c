@@ -2943,7 +2943,8 @@ static void zend_compile_inner_class_ref(znode *result, zend_ast *ast, uint32_t 
 	}
 
 	zend_op *opline = zend_emit_op(result, ZEND_FETCH_INNER_CLASS, &outer_node, &inner_node);
-	opline->extended_value = zend_alloc_cache_slot();
+	// ensure we allocate two slots to prevent an issue with static method access
+	opline->extended_value = zend_alloc_cache_slots(2);
 }
 /* }}} */
 
