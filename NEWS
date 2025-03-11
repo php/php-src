@@ -6,6 +6,21 @@ PHP                                                                        NEWS
   . Fixed bug GH-17211 (observer segfault on function loaded with dl()).
     (Arnaud)
 
+- LibXML:
+  . Fixed GHSA-wg4p-4hqh-c3g9 (Reocurrence of #72714). (nielsdos)
+  . Fixed GHSA-p3x9-6h7p-cgfc (libxml streams use wrong `content-type` header
+    when requesting a redirected resource). (CVE-2025-1219) (timwolla)
+
+- Streams:
+  . Fixed GHSA-hgf54-96fm-v528 (Stream HTTP wrapper header check might omit
+    basic auth header). (CVE-2025-1736) (Jakub Zelenka)
+  . Fixed GHSA-52jp-hrpf-2jff (Stream HTTP wrapper truncate redirect location
+    to 1024 bytes). (CVE-2025-1861) (Jakub Zelenka)
+  . Fixed GHSA-pcmh-g36c-qc44 (Streams HTTP wrapper does not fail for headers
+    without colon). (CVE-2025-1734) (Jakub Zelenka)
+  . Fixed GHSA-v8xr-gpvj-cx9g (Header parser of `http` stream wrapper does not
+    handle folded headers). (CVE-2025-1217) (Jakub Zelenka)
+
 - Windows:
   . Fixed phpize for Windows 11 (24H2). (bwoebi)
 
