@@ -1908,6 +1908,7 @@ PHP_FUNCTION(session_get_cookie_params)
 	add_assoc_string(return_value, "samesite", PS(cookie_samesite));
 }
 
+/* Return the current session name. If new name is given, the session name is replaced with new name */
 PHP_FUNCTION(session_name)
 {
 	zend_string *name = NULL;
@@ -1936,6 +1937,7 @@ PHP_FUNCTION(session_name)
 	}
 }
 
+/* Return the current module name used for accessing session data. If newname is given, the module name is replaced with newname */
 PHP_FUNCTION(session_module_name)
 {
 	zend_string *name = NULL;
@@ -2211,6 +2213,7 @@ PHP_FUNCTION(session_set_save_handler)
 	RETURN_TRUE;
 }
 
+/* Return the current save path passed to module_name. If newname is given, the save path is replaced with newname */
 PHP_FUNCTION(session_save_path)
 {
 	zend_string *name = NULL;
@@ -2239,6 +2242,7 @@ PHP_FUNCTION(session_save_path)
 	}
 }
 
+/* Return the current session id. If newid is given, the session id is replaced with newid */
 PHP_FUNCTION(session_id)
 {
 	zend_string *name = NULL;
@@ -2278,6 +2282,7 @@ PHP_FUNCTION(session_id)
 	}
 }
 
+/* Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 PHP_FUNCTION(session_regenerate_id)
 {
 	bool del_ses = 0;
@@ -2391,6 +2396,7 @@ PHP_FUNCTION(session_regenerate_id)
 	RETURN_TRUE;
 }
 
+/* Generate new session ID. Intended for user save handlers. */
 PHP_FUNCTION(session_create_id)
 {
 	zend_string *prefix = NULL, *new_id;
@@ -2445,6 +2451,7 @@ PHP_FUNCTION(session_create_id)
 	RETVAL_STR(smart_str_extract(&id));
 }
 
+/* Return the current cache limiter. If new_cache_limited is given, the current cache_limiter is replaced with new_cache_limiter */
 PHP_FUNCTION(session_cache_limiter)
 {
 	zend_string *limiter = NULL;
@@ -2473,6 +2480,7 @@ PHP_FUNCTION(session_cache_limiter)
 	}
 }
 
+/* Return the current cache expire. If new_cache_expire is given, the current cache_expire is replaced with new_cache_expire */
 PHP_FUNCTION(session_cache_expire)
 {
 	zend_long expires;
@@ -2503,6 +2511,7 @@ PHP_FUNCTION(session_cache_expire)
 	}
 }
 
+/* Serializes the current setup and returns the serialized representation */
 PHP_FUNCTION(session_encode)
 {
 	zend_string *enc;
@@ -2519,6 +2528,7 @@ PHP_FUNCTION(session_encode)
 	RETURN_STR(enc);
 }
 
+/* Deserializes data and reinitializes the variables */
 PHP_FUNCTION(session_decode)
 {
 	zend_string *str = NULL;
@@ -2702,6 +2712,7 @@ PHP_FUNCTION(session_write_close)
 	RETURN_TRUE;
 }
 
+/* Abort session and end session. Session data will not be written */
 PHP_FUNCTION(session_abort)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2715,6 +2726,7 @@ PHP_FUNCTION(session_abort)
 	RETURN_TRUE;
 }
 
+/* Reset session data from saved session data */
 PHP_FUNCTION(session_reset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2737,6 +2749,7 @@ PHP_FUNCTION(session_status)
 	RETURN_LONG(PS(session_status));
 }
 
+/* Registers session_write_close() as a shutdown function */
 PHP_FUNCTION(session_register_shutdown)
 {
 	php_shutdown_function_entry shutdown_function_entry = {
