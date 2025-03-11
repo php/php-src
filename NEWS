@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
+- Embed:
+  . Fixed GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
+
 27 Feb 2025, PHP 8.3.18RC1
 
 - BCMath:
@@ -200,7 +203,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-17224 (UAF in importNode). (nielsdos)
 
 - Embed:
-  . Fixed GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
   . Make build command for program using embed portable. (dunglas)
 
 - FFI:
