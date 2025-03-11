@@ -45,10 +45,10 @@ if (stripos(PHP_OS, 'WIN') === 0) {
     $tolerance = 0.05;
 } elseif (stripos(PHP_OS, 'DARWIN') === 0) {
     // macOS: time_sleep_until() may wake up slightly early for unknown reasons. Allow a larger tolerance.
-    $tolerance = 0.004;
+    $tolerance = 0.005;
 } else {
     // Default tolerance
-    $tolerance = 0.002;
+    $tolerance = 0.004;
 }
 
 if (isWithinTolerance($currentTime, $sleepUntil, $tolerance)) {
