@@ -940,6 +940,14 @@ static void zend_calc_live_ranges(
 		opnum--;
 		opline--;
 
+		/* SEPARATE always redeclares its op1. For the purposes of live-ranges,
+		 * its declaration is irrelevant. Don't terminate the current live-range
+		 * to avoid breaking special handling of COPY_TMP. */
+		if (opline->opcode == ZEND_SEPARATE) {
+			ZEND_ASSERT(opline->op1.var == opline->result.var);
+			continue;
+		}
+
 		if ((opline->result_type & (IS_TMP_VAR|IS_VAR)) && !is_fake_def(opline)) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->result.var) - var_offset;
 			/* Defs without uses can occur for two reasons: Either because the result is
