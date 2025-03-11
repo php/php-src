@@ -85,4 +85,47 @@ static inline void bc_convert_to_vector_with_zero_pad(BC_VECTOR *n_vector, const
 	bc_convert_to_vector(n_vector, nend, nlen);
 }
 
+static inline void bc_convert_vector_to_char(char *nptr, char *nend, BC_VECTOR *vectors, size_t vsize)
+{
+	size_t i;
+	for (i = 0; i < vsize - 1; i++) {
+#if BC_VECTOR_SIZE == 4
+		bc_write_bcd_representation(vectors[i], nend - 3);
+		nend -= 4;
+#else
+		bc_write_bcd_representation(vectors[i] / 10000, nend - 7);
+		bc_write_bcd_representation(vectors[i] % 10000, nend - 3);
+		nend -= 8;
+#endif
+	}
+
+	while (nend >= nptr) {
+		*nend-- = vectors[i] % BASE;
+		vectors[i] /= BASE;
+	}
+}
+
+static inline void bc_convert_vector_to_char_with_skip(char *nptr, char *nend, BC_VECTOR *vectors, size_t vsize, size_t skip)
+{
+	size_t vskip = skip / BC_VECTOR_SIZE;
+	vsize -= vskip;
+	vectors += vskip;
+
+	size_t protruded_skip = skip % BC_VECTOR_SIZE;
+	if (protruded_skip > 0) {
+		BC_VECTOR tmp = *vectors;
+		tmp /= BC_POW_10_LUT[protruded_skip];
+		size_t write_size = MIN(nend - nptr + 1, BC_VECTOR_SIZE - protruded_skip);
+		for (size_t i = 0; i < write_size; i++) {
+			*nend-- = tmp % BASE;
+			tmp /= BASE;
+		}
+		vectors++;
+		vsize--;
+	}
+	if (vsize > 0) {
+		bc_convert_vector_to_char(nptr, nend, vectors, vsize);
+	}
+}
+
 #endif
