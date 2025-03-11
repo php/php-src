@@ -51,7 +51,7 @@ if (stripos(PHP_OS, 'WIN') === 0) {
     $tolerance = 0.002;
 }
 
-if ($currentTime >= $sleepUntil && isWithinTolerance($currentTime, $sleepUntil, $tolerance)) {
+if (isWithinTolerance($currentTime, $sleepUntil, $tolerance)) {
     echo "Success" . PHP_EOL;
 } else {
     echo "Sleep until (before truncation): {$targetTime}" . PHP_EOL;
