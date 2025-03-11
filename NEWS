@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fix weird unpack behaviour in DOM. (nielsdos)
 
+- Embed:
+  . Fixed GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
+
 - GD:
   . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
@@ -15,9 +18,6 @@ PHP                                                                        NEWS
 
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
-
-- Embed:
-  . Fixed GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
 
 27 Feb 2025, PHP 8.3.18RC1
 
