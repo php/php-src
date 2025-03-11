@@ -61,6 +61,7 @@ static inline void bc_fast_div(
 	}
 	/* last */
 	quot_vectors[0] = numerator_vectors[0] / divisor_vector;
+	numerator_vectors[0] -= divisor_vector * quot_vectors[0];
 }
 
 /*
@@ -248,12 +249,15 @@ static inline void bc_standard_div(
 		div_carry = numerator_vectors[numerator_top_index - i];
 		numerator_vectors[numerator_top_index - i] = 0;
 	}
+	numerator_vectors[numerator_top_index - quot_arr_size + 1] = div_carry;
 }
 
 static void bc_do_div(
 	const char *numerator, size_t numerator_size, size_t numerator_readable_size,
 	const char *divisor, size_t divisor_size,
-	bc_num *quot, size_t quot_size
+	bc_num *quot, size_t quot_size,
+	bc_num *rem, size_t rem_over_size, size_t rem_write_size,
+	bool use_quot, bool use_rem
 ) {
 	size_t numerator_arr_size = (numerator_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t divisor_arr_size = (divisor_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
@@ -282,70 +286,121 @@ static void bc_do_div(
 	}
 
 	/* Convert to bc_num */
-	char *qptr = (*quot)->n_value;
-	char *qend = qptr + (*quot)->n_len + (*quot)->n_scale - 1;
-
-	size_t i;
-	for (i = 0; i < quot_real_arr_size - 1; i++) {
-#if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(quot_vectors[i], qend - 3);
-		qend -= 4;
-#else
-		bc_write_bcd_representation(quot_vectors[i] / 10000, qend - 7);
-		bc_write_bcd_representation(quot_vectors[i] % 10000, qend - 3);
-		qend -= 8;
-#endif
+	if (use_quot) {
+		char *qptr = (*quot)->n_value;
+		char *qend = qptr + (*quot)->n_len + (*quot)->n_scale - 1;
+		bc_convert_vector_to_char(qptr, qend, quot_vectors, quot_real_arr_size);
 	}
 
-	while (qend >= qptr) {
-		*qend-- = quot_vectors[i] % BASE;
-		quot_vectors[i] /= BASE;
+	if (use_rem) {
+		size_t rem_arr_size = (rem_write_size + rem_over_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+		BC_VECTOR *rem_vectors = numerator_vectors;
+
+		char *rptr = (*rem)->n_value;
+		char *rend = rptr + rem_write_size - 1;
+		if (rem_over_size > 0) {
+			bc_convert_vector_to_char_with_skip(rptr, rend, rem_vectors, rem_arr_size, rem_over_size);
+		} else {
+			bc_convert_vector_to_char(rptr, rend, rem_vectors, rem_arr_size);
+		}
 	}
 
 	efree(numerator_vectors);
 }
 
-static inline void bc_divide_by_one(bc_num numerator, bc_num *quot, size_t quot_scale)
+static inline void bc_divide_copy_numerator(bc_num numerator, bc_num *num, size_t scale)
 {
-	quot_scale = MIN(numerator->n_scale, quot_scale);
-	*quot = bc_new_num_nonzeroed(numerator->n_len, quot_scale);
-	char *qptr = (*quot)->n_value;
-	memcpy(qptr, numerator->n_value, numerator->n_len + quot_scale);
+	scale = MIN(numerator->n_scale, scale);
+	*num = bc_new_num_nonzeroed(numerator->n_len, scale);
+	char *nptr = (*num)->n_value;
+	memcpy(nptr, numerator->n_value, numerator->n_len + scale);
+}
+
+static inline void bc_divide_by_one(
+	bc_num numerator, bc_num divisor, bc_num *quot, size_t quot_scale, bc_num *rem, size_t rem_scale,
+	bool use_quot, bool use_rem)
+{
+	if (use_quot) {
+		bc_divide_copy_numerator(numerator, quot, quot_scale);
+		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+	}
+	if (use_rem) {
+		*rem = bc_new_num_nonzeroed(1, MIN(numerator->n_scale, rem_scale)); /* 1 is for 0 */
+		(*rem)->n_value[0] = 0;
+		memcpy((*rem)->n_value + 1, numerator->n_value + numerator->n_len, (*rem)->n_scale);
+		if (bc_is_zero(*rem)) {
+			(*rem)->n_sign = PLUS;
+			(*rem)->n_scale = 0;
+		} else {
+			(*rem)->n_sign = numerator->n_sign;
+		}
+	}
 }
 
 static inline void bc_divide_by_pow_10(
-	const char *numeratorptr, size_t numerator_readable_size, bc_num *quot, size_t quot_size, size_t quot_scale)
+	const char *numeratorptr, size_t numerator_len, size_t numerator_readable_size, size_t numerator_leading_zeros,
+	bc_num *quot, size_t quot_size, size_t quot_scale, bc_num *rem,
+	bool use_quot, bool use_rem)
 {
-	char *qptr = (*quot)->n_value;
-	for (size_t i = quot_size; i <= quot_scale; i++) {
-		*qptr++ = 0;
-	}
-
-	size_t numerator_use_size = quot_size > numerator_readable_size ? numerator_readable_size : quot_size;
-	memcpy(qptr, numeratorptr, numerator_use_size);
-	qptr += numerator_use_size;
-
-	if (numerator_use_size < (*quot)->n_len) {
-		/* e.g. 12.3 / 0.01 <=> 1230  */
-		for (size_t i = numerator_use_size; i < (*quot)->n_len; i++) {
+	if (use_quot) {
+		char *qptr = (*quot)->n_value;
+		for (size_t i = quot_size; i <= quot_scale; i++) {
 			*qptr++ = 0;
 		}
-		(*quot)->n_scale = 0;
-	} else {
-		char *qend = (*quot)->n_value + (*quot)->n_len + (*quot)->n_scale;
-		(*quot)->n_scale -= qend - qptr;
+
+		size_t numerator_use_size = quot_size > numerator_readable_size ? numerator_readable_size : quot_size;
+		memcpy(qptr, numeratorptr, numerator_use_size);
+		qptr += numerator_use_size;
+
+		if (numerator_use_size < (*quot)->n_len) {
+			/* e.g. 12.3 / 0.01 <=> 1230  */
+			for (size_t i = numerator_use_size; i < (*quot)->n_len; i++) {
+				*qptr++ = 0;
+			}
+			(*quot)->n_scale = 0;
+		} else {
+			char *qend = (*quot)->n_value + (*quot)->n_len + (*quot)->n_scale;
+			(*quot)->n_scale -= qend - qptr;
+		}
+	}
+
+	if (use_rem) {
+		char *rptr = (*rem)->n_value;
+		size_t rem_leading_zeros = numerator_leading_zeros + quot_size - (numerator_len - (*rem)->n_len);
+		if ((*rem)->n_len + (*rem)->n_scale <= rem_leading_zeros) {
+			bc_free_num(rem);
+			*rem = bc_copy_num(BCG(_zero_));
+			return;
+		}
+		for (size_t i = 0; i < rem_leading_zeros; i++) {
+			*rptr++ = 0;
+		}
+		_bc_rm_leading_zeros(*rem);
+		if (bc_is_zero(*rem)) {
+			(*rem)->n_sign = PLUS;
+			(*rem)->n_scale = 0;
+		}
 	}
 }
 
-bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
+bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, size_t scale, bool use_quot, bool use_rem)
 {
 	/* divide by zero */
 	if (bc_is_zero(divisor)) {
 		return false;
 	}
 
-	bc_free_num(quot);
-	size_t quot_scale = scale;
+	size_t quot_scale = 0;
+	size_t rem_scale = 0;
+	if (use_quot) {
+		bc_free_num(quot);
+	}
+	if (use_rem) {
+		bc_free_num(rem);
+		rem_scale = scale;
+	} else {
+		quot_scale = scale;
+	}
 
 	/* If numerator is zero, the quotient is always zero. */
 	if (bc_is_zero(numerator)) {
@@ -354,8 +409,7 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 
 	/* If divisor is 1 / -1, the quotient's n_value is equal to numerator's n_value. */
 	if (_bc_do_compare(divisor, BCG(_one_), divisor->n_scale, false) == BCMATH_EQUAL) {
-		bc_divide_by_one(numerator, quot, quot_scale);
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+		bc_divide_by_one(numerator, divisor, quot, quot_scale, rem, rem_scale, use_quot, use_rem);
 		return true;
 	}
 
@@ -404,10 +458,50 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 	}
 
 	size_t quot_size = numerator_size - divisor_size + 1; /* numerator_size >= divisor_size */
-	if (quot_size > quot_scale) {
-		*quot = bc_new_num_nonzeroed(quot_size - quot_scale, quot_scale);
-	} else {
-		*quot = bc_new_num_nonzeroed(1, quot_scale); /* 1 is for 0 */
+	if (use_quot) {
+		if (quot_size > quot_scale) {
+			*quot = bc_new_num_nonzeroed(quot_size - quot_scale, quot_scale);
+		} else {
+			*quot = bc_new_num_nonzeroed(1, quot_scale); /* 1 is for 0 */
+		}
+		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+	}
+
+	/**
+	 * If the calculation uses more digits than the scale of rem, writing the vector directly to rem
+	 * will exceed the size, so calculate the excess size in advance.
+	 */
+	size_t rem_over_size = 0;
+
+	/**
+	 * Conversely, there are cases where the vector does not fill the rem size.
+	 * In this case, the size to be written is calculated in advance to determine the start position for writing to rem.
+	 */
+	size_t rem_write_size = 0;
+	if (use_rem) {
+		size_t divisor_frac_size = divisor->n_scale > divisor_trailing_zeros ? divisor->n_scale - divisor_trailing_zeros : 0;
+		rem_scale = MIN(MAX(numerator->n_scale, divisor_frac_size), rem_scale);
+		*rem = bc_new_num_nonzeroed(divisor->n_len, rem_scale);
+		(*rem)->n_sign = numerator->n_sign;
+
+		if (divisor_frac_size > rem_scale) {
+			rem_over_size = divisor_frac_size - rem_scale;
+			rem_write_size = (*rem)->n_len + rem_scale;
+		} else {
+			if (divisor_frac_size > 0) {
+				rem_write_size = (*rem)->n_len + divisor_frac_size;
+			} else {
+				/* e.g. 100 % 30 */
+				rem_write_size = (*rem)->n_len - (divisor_trailing_zeros - divisor->n_scale);
+			}
+		}
+
+		size_t rem_size = (*rem)->n_len + (*rem)->n_scale;
+		if (rem_size > rem_write_size) {
+			size_t copy_size = rem_size - rem_write_size;
+			size_t len_diff = numerator->n_len - (*rem)->n_len;
+			memcpy((*rem)->n_value + rem_write_size, numerator->n_value + rem_write_size + len_diff, copy_size);
+		}
 	}
 
 	/* Size that can be read from numeratorptr */
@@ -415,8 +509,11 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 
 	/* If divisor is 1 here, return the result of adjusting the decimal point position of numerator. */
 	if (divisor_size == 1 && *divisorptr == 1) {
-		bc_divide_by_pow_10(numeratorptr, numerator_readable_size, quot, quot_size, quot_scale);
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+		bc_divide_by_pow_10(
+			numeratorptr, numerator->n_len, numerator_readable_size, numerator_leading_zeros,
+			quot, quot_size, quot_scale, rem,
+			use_quot, use_rem
+		);
 		return true;
 	}
 
@@ -424,18 +521,34 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 	bc_do_div(
 		numeratorptr, numerator_size, numerator_readable_size,
 		divisorptr, divisor_size,
-		quot, quot_size
+		quot, quot_size,
+		rem, rem_over_size, rem_write_size,
+		use_quot, use_rem
 	);
 
-	_bc_rm_leading_zeros(*quot);
-	if (bc_is_zero(*quot)) {
-		(*quot)->n_sign = PLUS;
-	} else {
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+	if (use_quot) {
+		_bc_rm_leading_zeros(*quot);
+		if (bc_is_zero(*quot)) {
+			(*quot)->n_sign = PLUS;
+			(*quot)->n_scale = 0;
+		}
+	}
+	if (use_rem) {
+		_bc_rm_leading_zeros(*rem);
+		if (bc_is_zero(*rem)) {
+			(*rem)->n_sign = PLUS;
+			(*rem)->n_scale = 0;
+		}
 	}
 	return true;
 
 quot_zero:
-	*quot = bc_copy_num(BCG(_zero_));
+	if (use_quot) {
+		*quot = bc_copy_num(BCG(_zero_));
+	}
+	if (use_rem) {
+		bc_divide_copy_numerator(numerator, rem, rem_scale);
+		(*rem)->n_sign = numerator->n_sign;
+	}
 	return true;
 }
