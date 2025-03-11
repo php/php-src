@@ -317,7 +317,6 @@ static PHP_INI_MH(OnSetSerializePrecision)
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	size_t value;
-
 	if (new_value) {
 		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
 	} else {
@@ -360,13 +359,11 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 			return FAILURE;
 		}
 	}
-
 	PG(memory_limit) = value;
 	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMaxMemoryLimit)
 {
 	size_t value;
@@ -386,7 +383,6 @@ static PHP_INI_MH(OnChangeMaxMemoryLimit)
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetLogFilter)
