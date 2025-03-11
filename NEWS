@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.28
+?? ??? ????, PHP 8.2.29
+
+13 Mar 2025, PHP 8.2.28
 
 - Core:
   . Fixed bug GH-17211 (observer segfault on function loaded with dl()).
