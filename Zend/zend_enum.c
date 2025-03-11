@@ -36,12 +36,12 @@ ZEND_API zend_class_entry *zend_ce_unit_enum;
 ZEND_API zend_class_entry *zend_ce_backed_enum;
 ZEND_API zend_object_handlers zend_enum_object_handlers;
 
-// We are going to need some argument info for ::from() and ::tryFrom() for
-// enums that are int-backed or string-backed, we cannot just reuse the
-// information from the BackedEnum interface's methods because those are typed
-// with `never` parameters and for backed enums the type needs to match the
-// backing type. These are not added to any actual class, just used for their
-// type information
+/* We are going to need some argument info for ::from() and ::tryFrom() for
+ * enums that are int-backed or string-backed, we cannot just reuse the
+ * information from the BackedEnum interface's methods because those are typed
+ * with `never` parameters and for backed enums the type needs to match the
+ * backing type. These are not added to any actual class, just used for their
+ * type information. */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IntBackedEnum_from, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
