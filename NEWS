@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
 
+- Intl:
+  . Fix locale_compose and locale_lookup to work with their array argument
+    with values as references. (David Carlier)
+
 - Embed:
   . Fixed bug GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
 
