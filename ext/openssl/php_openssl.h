@@ -26,22 +26,14 @@ extern zend_module_entry openssl_module_entry;
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
 #include <openssl/opensslv.h>
-#ifdef LIBRESSL_VERSION_NUMBER
-/* LibreSSL version check */
-#if LIBRESSL_VERSION_NUMBER < 0x20700000L
-#define PHP_OPENSSL_API_VERSION 0x10001
-#else
-#define PHP_OPENSSL_API_VERSION 0x10100
-#endif
-#else
 /* OpenSSL version check */
 #if OPENSSL_VERSION_NUMBER < 0x30000000L
+/* This includes LibreSSL that defines version 0x20000000L */
 #define PHP_OPENSSL_API_VERSION 0x10100
 #elif OPENSSL_VERSION_NUMBER < 0x30200000L
 #define PHP_OPENSSL_API_VERSION 0x30000
 #else
 #define PHP_OPENSSL_API_VERSION 0x30200
-#endif
 #endif
 
 #define OPENSSL_RAW_DATA 1
