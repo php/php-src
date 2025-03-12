@@ -807,7 +807,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 {
 	zval *ele_value;
 
-	if ((ele_value = zend_hash_str_find(hash_arr , key_name, strlen(key_name))) != NULL ) {
+	if ((ele_value = zend_hash_str_find_deref(hash_arr , key_name, strlen(key_name))) != NULL ) {
 		if(Z_TYPE_P(ele_value)!= IS_STRING ){
 			/* element value is not a string */
 			return FAILURE;
@@ -850,7 +850,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 	int 	isFirstSubtag 	= 0;
 
 	/* Variant/ Extlang/Private etc. */
-	if ((ele_value = zend_hash_str_find( hash_arr , key_name , strlen(key_name))) != NULL) {
+	if ((ele_value = zend_hash_str_find_deref( hash_arr , key_name , strlen(key_name))) != NULL) {
 		if( Z_TYPE_P(ele_value) == IS_STRING ){
 			add_prefix( loc_name , key_name);
 
@@ -862,6 +862,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			zval *data;
 
 			ZEND_HASH_FOREACH_VAL(arr, data) {
+				ZVAL_DEREF(data);
 				if(Z_TYPE_P(data) != IS_STRING) {
 					return FAILURE;
 				}
@@ -893,7 +894,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 		isFirstSubtag = 0;
 		for( i=0 ; i< max_value; i++ ){
 			snprintf( cur_key_name , 30, "%s%d", key_name , i);
-			if ((ele_value = zend_hash_str_find( hash_arr , cur_key_name , strlen(cur_key_name))) != NULL) {
+			if ((ele_value = zend_hash_str_find_deref( hash_arr , cur_key_name , strlen(cur_key_name))) != NULL) {
 				if( Z_TYPE_P(ele_value)!= IS_STRING ){
 					/* variant is not a string */
 					return FAILURE;
@@ -1426,6 +1427,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	char **cur_arr = ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *));
 	ZEND_HASH_FOREACH_VAL(hash_arr, ele_value) {
+		ZVAL_DEREF(ele_value);
 	/* convert the array to lowercase , also replace hyphens with the underscore and store it in cur_arr */
 		if(Z_TYPE_P(ele_value)!= IS_STRING) {
 			/* element value is not a string */
