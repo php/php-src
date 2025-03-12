@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17989 (mb_output_handler crash with unset
     http_output_conv_mimetypes). (nielsdos)
 
+- SPL:
+  . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
+    ArrayObject). (nielsdos)
+
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
