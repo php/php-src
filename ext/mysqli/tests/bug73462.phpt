@@ -1,17 +1,10 @@
 --TEST--
 Bug #73462 (Persistent connections don't set $connect_errno)
 --EXTENSIONS--
-mysqli
+all
 --SKIPIF--
 <?php
 require_once('skipifconnectfailure.inc');
-/*
- * TODO: this test is flaky with persistent connections on PPC CI runner
- * [001] Expected '8711' got '8712'.
- */
-if (gethostname() == "php-ci-ppc64be") {
-    die("SKIP test is flaky");
-}
 ?>
 --FILE--
 <?php
