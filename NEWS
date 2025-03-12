@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.19
+?? ??? ????, PHP 8.3.20
 
 - DOM:
   . Fix weird unpack behaviour in DOM. (nielsdos)
@@ -19,7 +19,7 @@ PHP                                                                        NEWS
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
-27 Feb 2025, PHP 8.3.18
+13 Feb 2025, PHP 8.3.19
 
 - BCMath:
   . Fixed bug GH-17398 (bcmul memory leak). (SakiTakamachi)
