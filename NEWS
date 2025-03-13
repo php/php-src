@@ -14,7 +14,7 @@ PHP                                                                        NEWS
     when requesting a redirected resource). (CVE-2025-1219) (timwolla)
 
 - Streams:
-  . Fixed GHSA-hgf54-96fm-v528 (Stream HTTP wrapper header check might omit
+  . Fixed GHSA-hgf5-96fm-v528 (Stream HTTP wrapper header check might omit
     basic auth header). (CVE-2025-1736) (Jakub Zelenka)
   . Fixed GHSA-52jp-hrpf-2jff (Stream HTTP wrapper truncate redirect location
     to 1024 bytes). (CVE-2025-1861) (Jakub Zelenka)
