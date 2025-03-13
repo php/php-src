@@ -5,13 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-/*
- * TODO: this test is flaky with persistent connections on PPC CI runner
- * [001] Expected '8711' got '8712'.
- */
-if (gethostname() == "php-ci-ppc64be") {
-    die("SKIP test is flaky");
-}
 ?>
 --FILE--
 <?php
@@ -19,7 +12,7 @@ if (gethostname() == "php-ci-ppc64be") {
 
     /* Initial persistent connection */
     $mysql_1 = new mysqli('p:'.$host, $user, $passwd, $db, $port);
-    $result = $mysql_1->query("SHOW STATUS LIKE 'Connections'");
+    $result = $mysql_1->query("SELECT CONNECTION_ID()");
     $c1 = $result->fetch_row();
     $result->free();
     $mysql_1->close();
@@ -35,7 +28,7 @@ if (gethostname() == "php-ci-ppc64be") {
     /* Re-use persistent connection */
     $mysql_3 = new mysqli('p:'.$host, $user, $passwd, $db, $port);
     $error = mysqli_connect_errno();
-    $result = $mysql_3->query("SHOW STATUS LIKE 'Connections'");
+    $result = $mysql_3->query("SELECT CONNECTION_ID()");
     $c3 = $result->fetch_row();
     $result->free();
     $mysql_3->close();
