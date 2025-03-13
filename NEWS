@@ -162,7 +162,7 @@ PHP                                                                        NEWS
   . Fix memory leak when encoding check fails. (nielsdos)
   . Fix zlib support for large files. (nielsdos)
 
-30 Jan 2025, PHP 8.4.4
+13 Feb 2025, PHP 8.4.4
 
 - Core:
   . Fixed bug GH-17234 (Numeric parent hook call fails with assertion).
@@ -281,7 +281,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-17139 (Fix zip_entry_name() crash on invalid entry).
     (nielsdos)
 
-02 Jan 2025, PHP 8.4.3
+16 Jan 2025, PHP 8.4.3
 
 - BcMath:
   . Fixed bug GH-17049 (Correctly compare 0 and -0). (Saki Takamachi)
@@ -410,7 +410,7 @@ PHP                                                                        NEWS
 - XML:
   . Fixed bug GH-1718 (unreachable program point in zend_hash). (nielsdos)
 
-05 Dec 2024, PHP 8.4.2
+19 Dec 2024, PHP 8.4.2
 
 - BcMath:
   . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros).
