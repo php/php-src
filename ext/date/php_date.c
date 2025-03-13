@@ -5291,7 +5291,7 @@ PHP_METHOD(DatePeriod, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
-static int check_id_allowed(const char *id, zend_long what) /* {{{ */
+static bool check_id_allowed(const char *id, zend_long what) /* {{{ */
 {
 	if ((what & PHP_DATE_TIMEZONE_GROUP_AFRICA)     && strncasecmp(id, "Africa/",      7) == 0) return 1;
 	if ((what & PHP_DATE_TIMEZONE_GROUP_AMERICA)    && strncasecmp(id, "America/",     8) == 0) return 1;
