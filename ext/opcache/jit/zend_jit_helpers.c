@@ -1636,7 +1636,7 @@ static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op
 	zend_string *result_str;
 	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(Z_STR_P(op1), Z_STR_P(op2));
 
-	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+	if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
 		return;
 	}
@@ -1672,7 +1672,7 @@ static void ZEND_FASTCALL zend_jit_fast_concat_helper(zval *result, zval *op1, z
 	zend_string *result_str;
 	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(Z_STR_P(op1), Z_STR_P(op2));
 
-	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+	if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
 		return;
 	}
@@ -1696,7 +1696,7 @@ static void ZEND_FASTCALL zend_jit_fast_concat_tmp_helper(zval *result, zval *op
 	zend_string *result_str;
 	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(Z_STR_P(op1), Z_STR_P(op2));
 
-	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+	if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
 		return;
 	}
