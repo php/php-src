@@ -3079,6 +3079,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLE
 #if GCC_GLOBAL_REGS
 	zend_execute_data *execute_data;
 	zend_op *opline;
+#else
+	const zend_op *orig_opline = opline;
 #endif
 
 	execute_data = EG(current_execute_data);
@@ -3124,7 +3126,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLE
 #if GCC_GLOBAL_REGS
 	return; // ZEND_VM_CONTINUE
 #else
-	return op_array->opcodes; // ZEND_VM_CONTINUE
+	return orig_opline; // ZEND_VM_CONTINUE
 #endif
 }
 
