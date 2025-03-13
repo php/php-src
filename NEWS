@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17991 (Assertion failure dom_attr_value_write). (nielsdos)
   . Fix weird unpack behaviour in DOM. (nielsdos)
 
+- GD:
+  . Fixed bug GH-17984 (calls with arguments as array with references).
+    (David Carlier)
+
 - Mbstring:
   . Fixed bug GH-17989 (mb_output_handler crash with unset
     http_output_conv_mimetypes). (nielsdos)
@@ -39,10 +43,6 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix memory leaks in array_any() / array_all(). (nielsdos)
-
-- GD:
-  . Fixed bug GH-17984 (calls with arguments as array with references).
-    (David Carlier)
 
 - SPL:
   . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
