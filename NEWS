@@ -1590,7 +1590,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-7815 (php_uname doesn't recognise latest Windows versions).
     (David Warner)
 
-02 Dec 2021, PHP 8.1.1
+16 Dec 2021, PHP 8.1.1
 
 - IMAP:
   . Fixed bug #81649 (imap_(un)delete accept sequences, not single numbers).
