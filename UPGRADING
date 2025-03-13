@@ -38,6 +38,9 @@ PHP 8.5 UPGRADE NOTES
     resources that were indirectly collected through cycles.
   . It is now allowed to substitute static with self or the concrete class name
     in final subclasses.
+  . The tick handlers are now deactivated after all shutdown functions, destructors
+    have run and the output handlers have been cleaned up.
+    This is a consequence of fixing GH-18033.
 
 - Intl:
   . The extension now requires at least ICU 57.1.

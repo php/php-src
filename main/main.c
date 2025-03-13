@@ -1904,8 +1904,6 @@ void php_request_shutdown(void *dummy)
 	 */
 	EG(current_execute_data) = NULL;
 
-	php_deactivate_ticks();
-
 	/* 0. Call any open observer end handlers that are still open after a zend_bailout */
 	if (ZEND_OBSERVER_ENABLED) {
 		zend_observer_fcall_end_all();
@@ -1925,6 +1923,8 @@ void php_request_shutdown(void *dummy)
 	zend_try {
 		php_output_end_all();
 	} zend_end_try();
+
+	php_deactivate_ticks();
 
 	/* 4. Reset max_execution_time (no longer executing php code after response sent) */
 	zend_try {
