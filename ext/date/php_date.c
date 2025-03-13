@@ -5030,7 +5030,7 @@ static bool date_period_initialize(timelib_time **st, timelib_time **et, timelib
 	return retval;
 } /* }}} */
 
-static bool date_period_init_iso8601_string(php_period_obj *dpobj, zend_class_entry* base_ce, const char *isostr, size_t isostr_len, zend_long options, zend_long *recurrences)
+static bool date_period_init_iso8601_string(php_period_obj *dpobj, zend_class_entry* base_ce, const char *isostr, size_t isostr_len, zend_long *recurrences)
 {
 	if (!date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), recurrences, isostr, isostr_len)) {
 		return false;
@@ -5116,7 +5116,7 @@ PHP_METHOD(DatePeriod, createFromISO8601String)
 
 	dpobj->current = NULL;
 
-	if (!date_period_init_iso8601_string(dpobj, date_ce_immutable, isostr, isostr_len, options, &recurrences)) {
+	if (!date_period_init_iso8601_string(dpobj, date_ce_immutable, isostr, isostr_len, &recurrences)) {
 		RETURN_THROWS();
 	}
 
@@ -5155,7 +5155,7 @@ PHP_METHOD(DatePeriod, __construct)
 			RETURN_THROWS();
 		}
 
-		if (!date_period_init_iso8601_string(dpobj, date_ce_date, isostr, isostr_len, options, &recurrences)) {
+		if (!date_period_init_iso8601_string(dpobj, date_ce_date, isostr, isostr_len, &recurrences)) {
 			RETURN_THROWS();
 		}
 	} else {
