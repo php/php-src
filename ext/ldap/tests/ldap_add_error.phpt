@@ -104,7 +104,7 @@ Warning: ldap_add(): Add: Already exists in %s on line %d
 bool(false)
 string(14) "Already exists"
 int(68)
-ldap_add(): Argument #3 ($entry) must be an array with numeric keys
+ldap_add(): Argument #3 ($entry) attribute "objectClass" must be an array with numeric keys
 
 Warning: ldap_add(): Add: Undefined attribute type in %s on line %d
 bool(false)

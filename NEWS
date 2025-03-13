@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
 
+- LDAP:
+  . Fixed bug GH-18015 (Error messages for ldap_mod_replace are confusing).
+    (nielsdos)
+
 - Mbstring:
   . Fixed bug GH-17989 (mb_output_handler crash with unset
     http_output_conv_mimetypes). (nielsdos)

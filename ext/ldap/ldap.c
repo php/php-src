@@ -2278,7 +2278,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 			ldap_mods[i]->mod_bvalues[0]->bv_len = Z_STRLEN_P(value);
 		} else {
 			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(value))) {
-				zend_argument_value_error(3, "must be an array with numeric keys");
+				zend_argument_value_error(3, "attribute \"%s\" must be an array with numeric keys", ZSTR_VAL(attribute));
 				RETVAL_FALSE;
 				num_berval[i] = 0;
 				num_attribs = i + 1;
