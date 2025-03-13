@@ -33,6 +33,8 @@ PHP                                                                        NEWS
     zend.exception_string_param_max_len=0. (timwolla)
   . Fixed bug GH-17959 (Relax missing trait fatal error to error exception).
     (ilutov)
+  . Fixed bug GH-18033 (NULL-ptr dereference when using register_tick_function
+    in destructor). (nielsdos)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
