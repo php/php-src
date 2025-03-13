@@ -2401,7 +2401,7 @@ static int zend_jit_trace_halt_stub(zend_jit_ctx *jit)
 		jit_STORE_IP(jit, IR_NULL);
 		ir_RETURN(IR_VOID);
 	} else {
-		ir_RETURN(ir_CONST_ADDR(0)); // ZEND_VM_RETURN
+		ir_RETURN(ir_CONST_ADDR(ZEND_VM_RETURN_VAL)); // ZEND_VM_RETURN
 	}
 	return 1;
 }

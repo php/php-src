@@ -1905,7 +1905,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define ZEND_OPCODE_HANDLER_RET const zend_op *\n");
                             out($f,"# define ZEND_VM_TAIL_CALL(call) return call\n");
                             out($f,"# define ZEND_VM_CONTINUE()      return opline\n");
-                            out($f,"# define ZEND_VM_RETURN()        return NULL\n");
+                            out($f,"# ifdef ZEND_HIGH_HALF_KERNEL\n");
+                            out($f,"#  define ZEND_VM_RETURN()        return NULL\n");
+                            out($f,"# else\n");
+                            out($f,"#  define ZEND_VM_RETURN()        return ZEND_VM_ENTER_BIT\n");
+                            out($f,"# endif\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {
                                 out($f,"# define ZEND_VM_HOT\n");
                             }
@@ -1944,7 +1948,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()\n");
                             out($f,"# define ZEND_VM_LEAVE()           return  2\n");
                             out($f,"#else\n");
-                            out($f,"# define ZEND_VM_ENTER_BIT         (1ULL<<(UINTPTR_WIDTH-1))\n");
+                            out($f,"# ifdef ZEND_HIGH_HALF_KERNEL\n");
+                            out($f,"#  define ZEND_VM_ENTER_BIT        (1ULL<<(UINTPTR_WIDTH-1))\n");
+                            out($f,"# else\n");
+                            out($f,"#  define ZEND_VM_ENTER_BIT        1ULL\n");
+                            out($f,"# endif\n");
                             out($f,"# define ZEND_VM_ENTER_EX()        return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
                             out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
                             out($f,"# define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
@@ -2147,7 +2155,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f, $m[1]."if (UNEXPECTED(!OPLINE))".$m[3]."\n");
                             out($f,"#else\n");
                             out($f, $m[1]."opline = ((opcode_handler_t)opline->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-                            out($f, $m[1]."if (UNEXPECTED((intptr_t)OPLINE <= 0))".$m[3]."\n");
+                            out($f, "# ifdef ZEND_HIGH_HALF_KERNEL\n");
+                            out($f, $m[1]."if (UNEXPECTED((intptr_t)opline <= 0))".$m[3]."\n");
+                            out($f, "# else\n");
+                            out($f, $m[1]."if (UNEXPECTED(((uintptr_t)opline & ZEND_VM_ENTER_BIT)))".$m[3]."\n");
+                            out($f, "# endif\n");
                             out($f,"#endif\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {
                                 out($f,"#endif /* ZEND_VM_KIND != ZEND_VM_KIND_HYBRID */\n");
@@ -2176,8 +2188,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 "# endif\n" .
                                 $m[1]."return;\n" .
                                 "#else\n" .
-                                $m[1]."if (EXPECTED(opline != NULL && (uintptr_t)opline != ZEND_VM_ENTER_BIT)) {\n" .
-                                $m[1]."\topline = (zend_op*)((uintptr_t)opline & ~ZEND_VM_ENTER_BIT);\n".
+                                $m[1]."opline = (const zend_op*)((uintptr_t)opline & ~ZEND_VM_ENTER_BIT);\n".
+                                $m[1]."if (EXPECTED(opline != NULL)) {\n" .
                                 $m[1]."\texecute_data = EG(current_execute_data);\n".
                                 $m[1]."\tZEND_VM_LOOP_INTERRUPT_CHECK();\n".
                                 $m[1]."} else {\n" .
