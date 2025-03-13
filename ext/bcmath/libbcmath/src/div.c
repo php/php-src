@@ -430,7 +430,6 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 	_bc_rm_leading_zeros(*quot);
 	if (bc_is_zero(*quot)) {
 		(*quot)->n_sign = PLUS;
-		(*quot)->n_scale = 0;
 	} else {
 		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 	}
