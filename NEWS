@@ -107,7 +107,7 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-17650 (realloc with size 0 in user_filters.c). (nielsdos)
   . Fix memory leak on overflow in _php_stream_scandir(). (nielsdos)
-  . Fixed GHSA-hgf54-96fm-v528 (Stream HTTP wrapper header check might omit
+  . Fixed GHSA-hgf5-96fm-v528 (Stream HTTP wrapper header check might omit
     basic auth header). (CVE-2025-1736) (Jakub Zelenka)
   . Fixed GHSA-52jp-hrpf-2jff (Stream HTTP wrapper truncate redirect location
     to 1024 bytes). (CVE-2025-1861) (Jakub Zelenka)
