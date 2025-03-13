@@ -665,12 +665,14 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 		}
 	}
 
+	/* empty() check the value is not falsy, isset() only check it is not null */
+	bool result = check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
+
 	if (value == &rv) {
 		zval_ptr_dtor(&rv);
 	}
 
-	/* empty() check the value is not falsy, isset() only check it is not null */
-	return check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
+	return result;
 } /* }}} */
 
 static int spl_array_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */

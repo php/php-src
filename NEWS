@@ -44,6 +44,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
 
+- SPL:
+  . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
+    ArrayObject). (nielsdos)
+
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
