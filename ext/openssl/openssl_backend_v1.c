@@ -27,159 +27,16 @@
 #include <openssl/engine.h>
 #endif
 
-/* OpenSSL compatibility functions and macros */
-#if PHP_OPENSSL_API_VERSION < 0x10100
-
-#define EVP_PKEY_get0_RSA(_pkey) _pkey->pkey.rsa
-#define EVP_PKEY_get0_DH(_pkey) _pkey->pkey.dh
-#define EVP_PKEY_get0_DSA(_pkey) _pkey->pkey.dsa
-#define EVP_PKEY_get0_EC_KEY(_pkey) _pkey->pkey.ec
-
-static int RSA_set0_key(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d)
-{
-	r->n = n;
-	r->e = e;
-	r->d = d;
-
-	return 1;
-}
-
-static int RSA_set0_factors(RSA *r, BIGNUM *p, BIGNUM *q)
-{
-	r->p = p;
-	r->q = q;
-
-	return 1;
-}
-
-static int RSA_set0_crt_params(RSA *r, BIGNUM *dmp1, BIGNUM *dmq1, BIGNUM *iqmp)
-{
-	r->dmp1 = dmp1;
-	r->dmq1 = dmq1;
-	r->iqmp = iqmp;
-
-	return 1;
-}
-
-static void RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e, const BIGNUM **d)
-{
-	*n = r->n;
-	*e = r->e;
-	*d = r->d;
-}
-
-static void RSA_get0_factors(const RSA *r, const BIGNUM **p, const BIGNUM **q)
-{
-	*p = r->p;
-	*q = r->q;
-}
-
-static void RSA_get0_crt_params(const RSA *r, const BIGNUM **dmp1, const BIGNUM **dmq1, const BIGNUM **iqmp)
-{
-	*dmp1 = r->dmp1;
-	*dmq1 = r->dmq1;
-	*iqmp = r->iqmp;
-}
-
-static void DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
-{
-	*p = dh->p;
-	*q = dh->q;
-	*g = dh->g;
-}
-
-static int DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
-{
-	dh->p = p;
-	dh->q = q;
-	dh->g = g;
-
-	return 1;
-}
-
-static void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
-{
-	*pub_key = dh->pub_key;
-	*priv_key = dh->priv_key;
-}
-
-static int DH_set0_key(DH *dh, BIGNUM *pub_key, BIGNUM *priv_key)
-{
-	dh->pub_key = pub_key;
-	dh->priv_key = priv_key;
-
-	return 1;
-}
-
-static void DSA_get0_pqg(const DSA *d, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
-{
-	*p = d->p;
-	*q = d->q;
-	*g = d->g;
-}
-
-int DSA_set0_pqg(DSA *d, BIGNUM *p, BIGNUM *q, BIGNUM *g)
-{
-	d->p = p;
-	d->q = q;
-	d->g = g;
-
-	return 1;
-}
-
-static void DSA_get0_key(const DSA *d, const BIGNUM **pub_key, const BIGNUM **priv_key)
-{
-	*pub_key = d->pub_key;
-	*priv_key = d->priv_key;
-}
-
-int DSA_set0_key(DSA *d, BIGNUM *pub_key, BIGNUM *priv_key)
-{
-	d->pub_key = pub_key;
-	d->priv_key = priv_key;
-
-	return 1;
-}
-
-static const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *asn1)
-{
-	return M_ASN1_STRING_data(asn1);
-}
-
-static int EVP_PKEY_up_ref(EVP_PKEY *pkey)
-{
-	return CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
-}
-
-#if PHP_OPENSSL_API_VERSION < 0x10002
-
-static int X509_get_signature_nid(const X509 *x)
-{
-	return OBJ_obj2nid(x->sig_alg->algorithm);
-}
-
-#endif
-
-#define OpenSSL_version		SSLeay_version
-#define OPENSSL_VERSION		SSLEAY_VERSION
-#define X509_getm_notBefore	X509_get_notBefore
-#define X509_getm_notAfter	X509_get_notAfter
-#define EVP_CIPHER_CTX_reset	EVP_CIPHER_CTX_cleanup
-
-#endif
-
 void php_openssl_backend_shutdown(void)
 {
-	#ifdef LIBRESSL_VERSION_NUMBER
+#ifdef LIBRESSL_VERSION_NUMBER
 	EVP_cleanup();
 
 	/* prevent accessing locking callback from unloaded extension */
 	CRYPTO_set_locking_callback(NULL);
 
-#ifndef OPENSSL_NO_ENGINE
 	/* Free engine list initialized by OPENSSL_config */
 	ENGINE_cleanup();
-#endif
 
 	/* free allocated error strings */
 	ERR_free_strings();
