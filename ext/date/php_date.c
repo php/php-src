@@ -2978,15 +2978,13 @@ PHP_METHOD(DateTime, __unserialize)
 {
 	zval             *object = ZEND_THIS;
 	php_date_obj     *dateobj;
-	zval             *array;
 	HashTable        *myht;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dateobj = Z_PHPDATE_P(object);
-	myht = Z_ARRVAL_P(array);
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
@@ -3002,15 +3000,13 @@ PHP_METHOD(DateTimeImmutable, __unserialize)
 {
 	zval             *object = ZEND_THIS;
 	php_date_obj     *dateobj;
-	zval             *array;
 	HashTable        *myht;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dateobj = Z_PHPDATE_P(object);
-	myht = Z_ARRVAL_P(array);
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
@@ -4087,14 +4083,11 @@ static bool php_date_timezone_initialize_from_hash(zval **return_value, php_time
 PHP_METHOD(DateTimeZone, __set_state)
 {
 	php_timezone_obj *tzobj;
-	zval             *array;
 	HashTable        *myht;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
-
-	myht = Z_ARRVAL_P(array);
 
 	php_date_instantiate(date_ce_timezone, return_value);
 	tzobj = Z_PHPTIMEZONE_P(return_value);
@@ -4174,15 +4167,13 @@ PHP_METHOD(DateTimeZone, __unserialize)
 {
 	zval             *object = ZEND_THIS;
 	php_timezone_obj *tzobj;
-	zval             *array;
 	HashTable        *myht;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
 
 	tzobj = Z_PHPTIMEZONE_P(object);
-	myht = Z_ARRVAL_P(array);
 
 	if (!php_date_timezone_initialize_from_hash(&object, &tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
@@ -4738,14 +4729,11 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 PHP_METHOD(DateInterval, __set_state)
 {
 	php_interval_obj *intobj;
-	zval             *array;
 	HashTable        *myht;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
-
-	myht = Z_ARRVAL_P(array);
 
 	php_date_instantiate(date_ce_interval, return_value);
 	intobj = Z_PHPINTERVAL_P(return_value);
@@ -4812,15 +4800,13 @@ PHP_METHOD(DateInterval, __unserialize)
 {
 	zval             *object = ZEND_THIS;
 	php_interval_obj *intervalobj;
-	zval             *array;
 	HashTable        *myht;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
 
 	intervalobj = Z_PHPINTERVAL_P(object);
-	myht = Z_ARRVAL_P(array);
 
 	php_date_interval_initialize_from_hash(&object, &intervalobj, myht);
 	restore_custom_dateinterval_properties(object, myht);
@@ -5835,14 +5821,11 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 PHP_METHOD(DatePeriod, __set_state)
 {
 	php_period_obj   *period_obj;
-	zval             *array;
 	HashTable        *myht;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
-
-	myht = Z_ARRVAL_P(array);
 
 	object_init_ex(return_value, date_ce_period);
 	period_obj = Z_PHPPERIOD_P(return_value);
@@ -5912,15 +5895,13 @@ PHP_METHOD(DatePeriod, __unserialize)
 {
 	zval             *object = ZEND_THIS;
 	php_period_obj   *period_obj;
-	zval             *array;
 	HashTable        *myht;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
 
 	period_obj = Z_PHPPERIOD_P(object);
-	myht = Z_ARRVAL_P(array);
 
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
