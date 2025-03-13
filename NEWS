@@ -40,6 +40,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-15834 (Segfault with hook "simple get" cache slot and minimal
     JIT). (nielsdos)
   . Fixed bug GH-17966 (Symfony JIT 1205 assertion failure). (nielsdos)
+  . Fixed bug GH-18037 (SEGV Zend/zend_execute.c). (nielsdos)
 
 - Standard:
   . Fix memory leaks in array_any() / array_all(). (nielsdos)
