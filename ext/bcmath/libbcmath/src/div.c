@@ -317,12 +317,8 @@ static inline void bc_divide_by_pow_10(
 	const char *numeratorptr, size_t numerator_readable_size, bc_num *quot, size_t quot_size, size_t quot_scale)
 {
 	char *qptr = (*quot)->n_value;
-	if (quot_size <= quot_scale) {
-		/* int is 0 */
+	for (size_t i = quot_size; i <= quot_scale; i++) {
 		*qptr++ = 0;
-		for (size_t i = quot_size; i < quot_scale; i++) {
-			*qptr++ = 0;
-		}
 	}
 
 	size_t numerator_use_size = quot_size > numerator_readable_size ? numerator_readable_size : quot_size;
