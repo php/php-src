@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- BCMath:
+  . Simplify `bc_divide()` code. (SakiTakamachi)
+
 - CLI:
   . Add --ini=diff to print INI settings changed from the builtin default.
     (timwolla)
