@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-17711 and GH-18022 (Infinite recursion on deprecated attribute
     evaluation). (ilutov)
+  . Fixed bug GH-18038 (Lazy proxy calls magic methods twice). (Arnaud)
 
 - Standard:
   . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
