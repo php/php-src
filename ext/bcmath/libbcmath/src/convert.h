@@ -34,11 +34,11 @@ static inline BC_VECTOR bc_partial_convert_to_vector(const char *n, size_t len)
 	}
 
 	BC_VECTOR num = 0;
-	BC_VECTOR base = 1;
+	BC_VECTOR digit_base_value = 1;
 
 	for (size_t i = 0; i < len; i++) {
-		num += *n * base;
-		base *= BASE;
+		num += *n * digit_base_value;
+		digit_base_value *= BASE;
 		n--;
 	}
 
@@ -67,15 +67,15 @@ static inline void bc_convert_to_vector_with_zero_pad(BC_VECTOR *n_vector, const
 
 	if (zeros > 0) {
 		*n_vector = 0;
-		BC_VECTOR base = BC_POW_10_LUT[zeros];
-		size_t tmp_len = MIN(BC_VECTOR_SIZE - zeros, nlen);
-		for (size_t i = 0; i < tmp_len; i++) {
-			*n_vector += *nend * base;
-			base *= BASE;
+		BC_VECTOR digit_base_value = BC_POW_10_LUT[zeros];
+		size_t len_to_write = MIN(BC_VECTOR_SIZE - zeros, nlen);
+		for (size_t i = 0; i < len_to_write; i++) {
+			*n_vector += *nend * digit_base_value;
+			digit_base_value *= BASE;
 			nend--;
 		}
 		n_vector++;
-		nlen -= tmp_len;
+		nlen -= len_to_write;
 	}
 
 	if (nlen == 0) {
