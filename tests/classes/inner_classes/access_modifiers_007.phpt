@@ -4,10 +4,12 @@ abstract inner classes
 <?php
 
 class Outer {
-    abstract class Inner {}
+    public abstract class Inner {}
 }
 
-$extended = new class extends Outer:>Inner{};
+class Extended extends Outer:>Inner {}
+
+$extended = new Extended();
 
 var_dump($extended);
 $reflection = new ReflectionClass('Outer:>Inner');
@@ -15,4 +17,11 @@ var_dump($reflection->isAbstract());
 new Outer:>Inner();
 ?>
 --EXPECTF--
-last one fails
+object(Extended)#1 (0) {
+}
+bool(true)
+
+Fatal error: Uncaught Error: Cannot instantiate abstract class Outer:>Inner in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

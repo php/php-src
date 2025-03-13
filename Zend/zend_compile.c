@@ -893,12 +893,12 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 			}
 			break;
 		case T_READONLY:
-			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP || target == ZEND_MODIFIER_TARGET_INNER_CLASS) {
 				return ZEND_ACC_READONLY;
 			}
 			break;
 		case T_ABSTRACT:
-			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_PROPERTY) {
+			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_INNER_CLASS) {
 				return ZEND_ACC_ABSTRACT;
 			}
 			break;
@@ -906,6 +906,7 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 			if (target == ZEND_MODIFIER_TARGET_METHOD
 				|| target == ZEND_MODIFIER_TARGET_CONSTANT
 				|| target == ZEND_MODIFIER_TARGET_PROPERTY
+				|| target == ZEND_MODIFIER_TARGET_INNER_CLASS
 				|| target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
 				return ZEND_ACC_FINAL;
 			}
@@ -9195,13 +9196,21 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			// - final
 			// - readonly
 			// - abstract
-			ce->ce_flags |= decl->attr & (ZEND_ACC_FINAL|ZEND_ACC_READONLY|ZEND_ACC_ABSTRACT);
+			decl->flags |= decl->attr & ZEND_ACC_FINAL;
+			if (decl->attr & ZEND_ACC_ABSTRACT) {
+				decl->flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
+			}
+			if (decl->attr & ZEND_ACC_READONLY) {
+				decl->flags |= ZEND_ACC_READONLY_CLASS & ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+			}
 
-			// configure the const stand-ins for a nested class. This should only include:
+			// configure for a nested class. This should only include:
 			// - public
 			// - private
 			// - protected
 			int propFlags = decl->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
+			// remove the flags from attrs
+			decl->attr &= ~(ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE|ZEND_ACC_FINAL|ZEND_ACC_ABSTRACT|ZEND_ACC_READONLY);
 
 			// if a class is private or protected, we need to require the correct scope
 			ce->required_scope = propFlags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED) ? CG(active_class_entry) : NULL;

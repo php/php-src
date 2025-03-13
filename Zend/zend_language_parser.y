@@ -627,6 +627,14 @@ class_modifier:
 	|	T_READONLY 		{ $$ = ZEND_ACC_READONLY_CLASS|ZEND_ACC_NO_DYNAMIC_PROPERTIES; }
 ;
 
+inner_class_modifiers:
+		non_empty_member_modifiers
+			{ $$ = zend_modifier_list_to_flags(ZEND_MODIFIER_TARGET_INNER_CLASS, $1);
+			  if (!$$) { YYERROR; } }
+	|	%empty
+			{ $$ = ZEND_ACC_PUBLIC; }
+;
+
 trait_declaration_statement:
 		T_TRAIT { $<num>$ = CG(zend_lineno); }
 		T_STRING backup_doc_comment '{' class_statement_list '}'
@@ -952,14 +960,6 @@ class_statement_list:
 inner_class_statement:
 		T_CLASS T_STRING { $<num>$ = CG(zend_lineno); } extends_from implements_list backup_doc_comment '{' class_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>3, $6, zend_ast_get_str($2), $4, $5, $8, NULL, NULL); }
-;
-
-inner_class_modifiers:
-		non_empty_member_modifiers
-			{ $$ = zend_modifier_list_to_flags(ZEND_MODIFIER_TARGET_INNER_CLASS, $1);
-			  if (!$$) { YYERROR; } }
-	|	%empty
-			{ $$ = ZEND_ACC_PUBLIC; }
 ;
 
 attributed_class_statement:

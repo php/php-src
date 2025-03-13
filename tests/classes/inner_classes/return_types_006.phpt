@@ -10,7 +10,7 @@ class Outer {
         }
     }
 
-    public function test() { return new self:>PrivateInner()->test(); }
+    public function test(): mixed { return new self:>PrivateInner()->test(); }
 }
 
 $foo = new Outer()->test();
