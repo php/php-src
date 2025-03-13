@@ -9215,6 +9215,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			// if a class is private or protected, we need to require the correct scope
 			ce->required_scope = propFlags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED) ? CG(active_class_entry) : NULL;
 			ce->required_scope_absolute = propFlags & ZEND_ACC_PRIVATE ? true : false;
+			ce->lexical_scope = CG(active_class_entry);
 
 			// ensure the class is treated as a top-level class and not an anon class
 			toplevel = true;

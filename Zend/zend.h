@@ -165,6 +165,7 @@ struct _zend_class_entry {
 	HashTable constants_table;
 
 	zend_class_entry *required_scope;
+	zend_class_entry *lexical_scope;
 	char required_scope_absolute;
 
 	ZEND_MAP_PTR_DEF(zend_class_mutable_data*, mutable_data);
