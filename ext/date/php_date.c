@@ -676,7 +676,6 @@ static const char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib
 static zend_string *date_format(const char *format, size_t format_len, const timelib_time *t, bool localtime)
 {
 	smart_str            string = {0};
-	size_t               i;
 	int                  length = 0;
 	char                 buffer[97];
 	timelib_time_offset *offset = NULL;
@@ -713,7 +712,7 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 		}
 	}
 
-	for (i = 0; i < format_len; i++) {
+	for (size_t i = 0; i < format_len; i++) {
 		rfc_colon = 0;
 		switch (format[i]) {
 			/* day */
@@ -4913,7 +4912,6 @@ cleanup:
 static zend_string *date_interval_format(const char *format, size_t format_len, timelib_rel_time *t)
 {
 	smart_str            string = {0};
-	size_t               i;
 	int                  length, have_format_spec = 0;
 	char                 buffer[33];
 
@@ -4921,7 +4919,7 @@ static zend_string *date_interval_format(const char *format, size_t format_len, 
 		return ZSTR_EMPTY_ALLOC();
 	}
 
-	for (i = 0; i < format_len; i++) {
+	for (size_t i = 0; i < format_len; i++) {
 		if (have_format_spec) {
 			switch (format[i]) {
 				case 'Y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->y); break;
@@ -5312,7 +5310,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 {
 	const timelib_tzdb             *tzdb;
 	const timelib_tzdb_index_entry *table;
-	int                             i, item_count;
+	int                             item_count;
 	zend_long                       what = PHP_DATE_TIMEZONE_GROUP_ALL;
 	char                           *option = NULL;
 	size_t                          option_len = 0;
@@ -5335,7 +5333,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 
 	array_init(return_value);
 
-	for (i = 0; i < item_count; ++i) {
+	for (int i = 0; i < item_count; ++i) {
 		if (what == PHP_DATE_TIMEZONE_PER_COUNTRY) {
 			if (tzdb->data[table[i].pos + 5] == option[0] && tzdb->data[table[i].pos + 6] == option[1]) {
 				add_next_index_string(return_value, table[i].id);
