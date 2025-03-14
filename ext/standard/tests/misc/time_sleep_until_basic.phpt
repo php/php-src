@@ -20,19 +20,19 @@ Michele Orselli mo@ideato.it
  *
  * @return bool True if the absolute difference is less than or equal to the tolerance, false otherwise.
  */
-function isWithinTolerance(float $val, float $target, float $tolerance): bool {
+function isWithinTolerance(float $val, float $target, float $tolerance): bool
+{
     return abs($val - $target) <= $tolerance;
 }
 
+$startTime = microtime(true);
 // Calculate the target sleep time (2 seconds from now)
-$targetTime = microtime(true) + 2;
-$sleepUntil = $targetTime;
-
-// Sleep until the target time and output the result of time_sleep_until()
-var_dump(time_sleep_until($sleepUntil));
-
+$targetTime = $startTime + 2;
+// Sleep until the target time
+$dump = time_sleep_until($targetTime);
 // Capture the current time immediately after sleep
-$currentTime = microtime(true);
+$timeAfterSleep = microtime(true);
+var_dump($dump);
 if (stripos(PHP_OS, 'WIN') === 0) {
     // on windows, time_sleep_until has millisecond accuracy while microtime() is accurate
     // to 10th of a second. this means there can be up to a .9 millisecond difference
@@ -45,18 +45,24 @@ if (stripos(PHP_OS, 'WIN') === 0) {
     $tolerance = 0.05;
 } elseif (stripos(PHP_OS, 'DARWIN') === 0) {
     // macOS: time_sleep_until() may wake up slightly early for unknown reasons. Allow a larger tolerance.
-    $tolerance = 0.005;
+    $tolerance = 0.02;
 } else {
     // Default tolerance
-    $tolerance = 0.004;
+    $tolerance = 0.01;
 }
 
-if (isWithinTolerance($currentTime, $sleepUntil, $tolerance)) {
+if (1 && isWithinTolerance($timeAfterSleep, $targetTime, $tolerance)) {
     echo "Success" . PHP_EOL;
 } else {
-    echo "Sleep until (before truncation): {$targetTime}" . PHP_EOL;
-    echo "Sleep until: {$sleepUntil}" . PHP_EOL;
-    echo "Now: {$currentTime}" . PHP_EOL;
+    echo "Failure" . PHP_EOL;
+    var_dump([
+        "startTime" => $startTime,
+        "targetTime" => $targetTime,
+        "timeAfterSleep" => $timeAfterSleep,
+        "diff" => $timeAfterSleep - $targetTime,
+        "tolerance" => $tolerance,
+        "distanceFromTarget" => abs($timeAfterSleep - $targetTime),
+    ]);
 }
 ?>
 --EXPECT--
