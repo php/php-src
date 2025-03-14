@@ -255,7 +255,8 @@ static inline void bc_standard_div(
 static void bc_do_div(
 	const char *numerator, size_t numerator_size, size_t numerator_readable_size,
 	const char *divisor, size_t divisor_size,
-	bc_num *quot, size_t quot_size
+	bc_num *quot, size_t quot_size,
+	bool use_quot
 ) {
 	size_t numerator_arr_size = BC_ARR_SIZE_FROM_LEN(numerator_size);
 	size_t divisor_arr_size = BC_ARR_SIZE_FROM_LEN(divisor_size);
@@ -292,10 +293,11 @@ static void bc_do_div(
 	}
 
 	/* Convert to bc_num */
-	char *qptr = (*quot)->n_value;
-	char *qend = qptr + (*quot)->n_len + (*quot)->n_scale - 1;
-
-	bc_convert_vector_to_char(quot_vectors, qptr, qend, quot_real_arr_size);
+	if (use_quot) {
+		char *qptr = (*quot)->n_value;
+		char *qend = qptr + (*quot)->n_len + (*quot)->n_scale - 1;
+		bc_convert_vector_to_char(quot_vectors, qptr, qend, quot_real_arr_size);
+	}
 
 	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
 		efree(numerator_vectors);
@@ -309,33 +311,37 @@ static inline void bc_divide_copy_numerator(bc_num numerator, bc_num *num, size_
 	memcpy((*num)->n_value, numerator->n_value, numerator->n_len + scale);
 }
 
-static inline void bc_divide_by_one(bc_num numerator, bc_num divisor, bc_num *quot, size_t quot_scale)
+static inline void bc_divide_by_one(bc_num numerator, bc_num divisor, bc_num *quot, size_t quot_scale, bool use_quot)
 {
-	bc_divide_copy_numerator(numerator, quot, quot_scale);
-	(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+	if (use_quot) {
+		bc_divide_copy_numerator(numerator, quot, quot_scale);
+		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+	}
 }
 
 static inline void bc_divide_by_pow_10(
-	const char *numeratorptr, size_t numerator_readable_size, bc_num *quot, size_t quot_size, size_t quot_scale)
+	const char *numeratorptr, size_t numerator_readable_size, bc_num *quot, size_t quot_size, size_t quot_scale, bool use_quot)
 {
-	char *qptr = (*quot)->n_value;
-	for (size_t i = quot_size; i <= quot_scale; i++) {
-		*qptr++ = 0;
-	}
-
-	size_t numerator_use_size = quot_size > numerator_readable_size ? numerator_readable_size : quot_size;
-	memcpy(qptr, numeratorptr, numerator_use_size);
-	qptr += numerator_use_size;
-
-	if (numerator_use_size < (*quot)->n_len) {
-		/* e.g. 12.3 / 0.01 <=> 1230  */
-		for (size_t i = numerator_use_size; i < (*quot)->n_len; i++) {
+	if (use_quot) {
+		char *qptr = (*quot)->n_value;
+		for (size_t i = quot_size; i <= quot_scale; i++) {
 			*qptr++ = 0;
 		}
-		(*quot)->n_scale = 0;
-	} else {
-		char *qend = (*quot)->n_value + (*quot)->n_len + (*quot)->n_scale;
-		(*quot)->n_scale -= qend - qptr;
+
+		size_t numerator_use_size = quot_size > numerator_readable_size ? numerator_readable_size : quot_size;
+		memcpy(qptr, numeratorptr, numerator_use_size);
+		qptr += numerator_use_size;
+
+		if (numerator_use_size < (*quot)->n_len) {
+			/* e.g. 12.3 / 0.01 <=> 1230  */
+			for (size_t i = numerator_use_size; i < (*quot)->n_len; i++) {
+				*qptr++ = 0;
+			}
+			(*quot)->n_scale = 0;
+		} else {
+			char *qend = (*quot)->n_value + (*quot)->n_len + (*quot)->n_scale;
+			(*quot)->n_scale -= qend - qptr;
+		}
 	}
 }
 
@@ -358,7 +364,7 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 
 	/* If divisor is 1 / -1, the quotient's n_value is equal to numerator's n_value. */
 	if (_bc_do_compare(divisor, BCG(_one_), divisor->n_scale, false) == BCMATH_EQUAL) {
-		bc_divide_by_one(numerator, divisor, quot, quot_scale);
+		bc_divide_by_one(numerator, divisor, quot, quot_scale, use_quot);
 		return true;
 	}
 
