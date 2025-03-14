@@ -381,6 +381,7 @@ dynamic:
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 		zend_class_entry *scope = get_fake_or_executed_scope();
 
+check_lexical_scope:
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
 				zend_property_info *p = zend_get_parent_private_property(scope, ce, member);
@@ -401,11 +402,11 @@ dynamic:
 				if (property_info->ce != ce) {
 					goto dynamic;
 				} else {
-					if (scope && scope->lexical_scope && scope->lexical_scope == ce) {
-						// Allow access to private properties from within the same outer class
-						goto found;
-					}
 wrong:
+					if (scope && scope->lexical_scope) {
+						scope = scope->lexical_scope;
+						goto check_lexical_scope;
+					}
 					/* Information was available, but we were denied access.  Error out. */
 					if (!silent) {
 						zend_bad_property_access(property_info, ce, member);
@@ -1819,6 +1820,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 	/* Check access level */
 	if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 		scope = zend_get_executed_scope();
+		zend_class_entry *original_scope = scope;
 check_lexical_scope:
 
 		if (fbc->common.scope != scope) {
@@ -1841,7 +1843,7 @@ check_lexical_scope:
 						scope = scope->lexical_scope;
 						goto check_lexical_scope;
 					}
-					zend_bad_method_call(fbc, method_name, scope);
+					zend_bad_method_call(fbc, method_name, original_scope);
 					fbc = NULL;
 				}
 			}
@@ -1900,6 +1902,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		fbc = Z_FUNC_P(func);
 		if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_class_entry *scope = zend_get_executed_scope();
+                        zend_class_entry *original_scope = scope;
 check_lexical_scope:
 			if (UNEXPECTED(fbc->common.scope != scope)) {
 				if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
@@ -1911,7 +1914,7 @@ check_lexical_scope:
 							goto check_lexical_scope;
 						}
 
-						zend_bad_method_call(fbc, function_name, scope);
+						zend_bad_method_call(fbc, function_name, original_scope);
 					}
 					fbc = fallback_fbc;
 				}
@@ -1988,10 +1991,15 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 
 	if (!(property_info->flags & ZEND_ACC_PUBLIC)) {
 		zend_class_entry *scope = get_fake_or_executed_scope();
+check_lexical_scope:
 		if (property_info->ce != scope) {
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
 				if (type != BP_VAR_IS) {
+					if (scope && scope->lexical_scope) {
+						scope = scope->lexical_scope;
+						goto check_lexical_scope;
+					}
 					zend_bad_property_access(property_info, ce, property_name);
 				}
 				return NULL;
