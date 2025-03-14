@@ -1131,6 +1131,15 @@ void zend_update_required_scope(zend_class_entry *ce)
 			ce->required_scope = r;
 		}
 	}
+
+	if (ce->lexical_scope) {
+		zend_class_entry *lexical_scope = ce->lexical_scope;
+
+		zend_class_entry *l = zend_shared_alloc_get_xlat_entry(lexical_scope);
+		if (l) {
+			ce->lexical_scope = l;
+		}
+	}
 }
 
 void zend_update_parent_ce(zend_class_entry *ce)

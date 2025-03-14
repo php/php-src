@@ -2943,9 +2943,7 @@ static void zend_compile_inner_class_ref(znode *result, zend_ast *ast, uint32_t 
 		zend_compile_expr(&inner_node, inner_class);
 	}
 
-	zend_op *opline = zend_emit_op(result, ZEND_FETCH_INNER_CLASS, &outer_node, &inner_node);
-	// ensure we allocate two slots to prevent an issue with static method access
-	opline->extended_value = zend_alloc_cache_slots(2);
+	zend_emit_op(result, ZEND_FETCH_INNER_CLASS, &outer_node, &inner_node);
 }
 /* }}} */
 
@@ -9222,6 +9220,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		} else {
 			name = zend_prefix_with_ns(unqualified_name);
 			ce->required_scope = NULL;
+			ce->lexical_scope = NULL;
 		}
 		name = zend_new_interned_string(name);
 		lcname = zend_string_tolower(name);

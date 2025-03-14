@@ -1061,7 +1061,7 @@ static zend_always_inline bool zend_check_class_visibility(const zend_class_entr
 			return 0;
 		}
 
-		return 0;
+		return 1;
 	}
 
 	// a private class is visible if it is the same class as the lexical scope and the current visibility is private
@@ -1087,14 +1087,6 @@ static zend_always_inline bool i_zend_verify_property_type(const zend_property_i
 	if (i_zend_check_property_type(info, property, strict)) {
 		return 1;
 	}
-
-        // todo:
-        // 1: add a flag to the type so we can tell the type is an inner class
-        // 2: use said flag to flag the property info
-        // 3: same with parameters/args too
-        // 4: create a simple function to take a visibility flag and ce, it should return SUCCESS if the ce can be used
-        // 5: if we have an inner class in a prop/arg, we validate it can be returned (do not autoload) by looping over types
-        //    that are inner classes and looking up the ce. If it is not autoloaded, then it is not going to match the type anyway.
 
 	zend_verify_property_type_error(info, property);
 	return 0;

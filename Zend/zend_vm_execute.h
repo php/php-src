@@ -6682,12 +6682,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_CONST_C
 	}
 
 	if (inner_ce->required_scope) {
-		if (inner_ce->required_scope_absolute && inner_ce->required_scope != scope) {
-			zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
-			HANDLE_EXCEPTION();
-		} else if (scope == NULL || !instanceof_function(scope, inner_ce->required_scope)) {
-			zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
-			HANDLE_EXCEPTION();
+		if (inner_ce->required_scope_absolute) {
+			// for private classes, we check if the scope we are currently in has access
+			if (scope != NULL && (inner_ce->required_scope == scope || scope->lexical_scope == inner_ce->required_scope)) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
+		} else {
+			// for protected classes, we check if the scope is an instance of the required scope
+			if (scope != NULL && (instanceof_function(scope, inner_ce->required_scope) || instanceof_function(scope->lexical_scope, inner_ce->required_scope))) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -7402,6 +7412,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_CONST != IS_CONST &&
+	           IS_CONST == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -9972,6 +9986,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_CONST != IS_CONST &&
+	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -10726,6 +10744,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_CONST != IS_CONST &&
+	           IS_UNUSED == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -12474,6 +12496,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_CONST != IS_CONST &&
+	           IS_CV == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
@@ -16289,12 +16315,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_TMPVAR_
 	}
 
 	if (inner_ce->required_scope) {
-		if (inner_ce->required_scope_absolute && inner_ce->required_scope != scope) {
-			zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
-			HANDLE_EXCEPTION();
-		} else if (scope == NULL || !instanceof_function(scope, inner_ce->required_scope)) {
-			zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
-			HANDLE_EXCEPTION();
+		if (inner_ce->required_scope_absolute) {
+			// for private classes, we check if the scope we are currently in has access
+			if (scope != NULL && (inner_ce->required_scope == scope || scope->lexical_scope == inner_ce->required_scope)) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
+		} else {
+			// for protected classes, we check if the scope is an instance of the required scope
+			if (scope != NULL && (instanceof_function(scope, inner_ce->required_scope) || instanceof_function(scope->lexical_scope, inner_ce->required_scope))) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -25612,6 +25648,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_VAR != IS_CONST &&
+	           IS_CONST == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -28541,6 +28581,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_VAR != IS_CONST &&
+	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -30047,6 +30091,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_VAR != IS_CONST &&
+	           IS_UNUSED == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -33000,6 +33048,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_VAR != IS_CONST &&
+	           IS_CV == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
@@ -34014,12 +34066,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_UNUSED_
 	}
 
 	if (inner_ce->required_scope) {
-		if (inner_ce->required_scope_absolute && inner_ce->required_scope != scope) {
-			zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
-			HANDLE_EXCEPTION();
-		} else if (scope == NULL || !instanceof_function(scope, inner_ce->required_scope)) {
-			zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
-			HANDLE_EXCEPTION();
+		if (inner_ce->required_scope_absolute) {
+			// for private classes, we check if the scope we are currently in has access
+			if (scope != NULL && (inner_ce->required_scope == scope || scope->lexical_scope == inner_ce->required_scope)) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
+		} else {
+			// for protected classes, we check if the scope is an instance of the required scope
+			if (scope != NULL && (instanceof_function(scope, inner_ce->required_scope) || instanceof_function(scope->lexical_scope, inner_ce->required_scope))) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
@@ -35355,6 +35417,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_CONST == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_UNUSED != IS_CONST &&
+	           IS_CONST == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CONST != IS_UNUSED) {
 		function_name = RT_CONSTANT(opline, opline->op2);
 		if (IS_CONST != IS_CONST) {
@@ -37520,6 +37586,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    (IS_TMP_VAR|IS_VAR) == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_UNUSED != IS_CONST &&
+	           (IS_TMP_VAR|IS_VAR) == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		function_name = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -37927,6 +37997,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_UNUSED == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_UNUSED != IS_CONST &&
+	           IS_UNUSED == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_UNUSED != IS_UNUSED) {
 		function_name = NULL;
 		if (IS_UNUSED != IS_CONST) {
@@ -40175,6 +40249,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	    IS_CV == IS_CONST &&
 	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
+	} else if (IS_UNUSED != IS_CONST &&
+	           IS_CV == IS_CONST &&
+	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
+		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 	} else if (IS_CV != IS_UNUSED) {
 		function_name = EX_VAR(opline->op2.var);
 		if (IS_CV != IS_CONST) {
