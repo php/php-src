@@ -11106,7 +11106,8 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 				} else if (GCC_GLOBAL_REGS) {
 					ir_GUARD(jit_IP(jit), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 				} else {
-					ir_GUARD(ir_LT(ref, ir_CONST_I32(0)), jit_STUB_ADDR(jit, jit_stub_trace_halt));
+					ir_GUARD(ir_NE(ref, ir_CONST_ADDR(ZEND_VM_RETURN_VAL)), jit_STUB_ADDR(jit, jit_stub_trace_halt));
+					jit_LOAD_IP(jit, ref);
 				}
 			}
 

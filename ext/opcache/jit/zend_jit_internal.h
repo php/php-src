@@ -201,7 +201,7 @@ extern const zend_op *zend_jit_halt_op;
 		return; \
 	} while(0)
 # define ZEND_VM_ENTER_BIT 0
-#  define ZEND_VM_RETURN_VAL 0
+# define ZEND_VM_RETURN_VAL 0
 #else
 # define EXECUTE_DATA_D                       zend_execute_data* execute_data
 # define EXECUTE_DATA_C                       execute_data

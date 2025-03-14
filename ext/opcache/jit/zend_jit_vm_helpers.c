@@ -105,7 +105,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(ZEND_OPCODE
 #ifdef HAVE_GCC_GLOBAL_REGS
 	opline = zend_jit_halt_op;
 #else
-	return NULL; // ZEND_VM_RETURN
+	return (const zend_op*)ZEND_VM_RETURN_VAL; // ZEND_VM_RETURN
 #endif
 }
 
@@ -412,7 +412,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 			opline = NULL;
 			return;
 #else
-			return NULL; // ZEND_VM_RETURN()
+			return (const zend_op*)ZEND_VM_RETURN_VAL; // ZEND_VM_RETURN()
 #endif
 		}
 		execute_data = EG(current_execute_data);
@@ -420,7 +420,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 #ifdef HAVE_GCC_GLOBAL_REGS
 		return;
 #else
-		return opline ? (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT) : NULL; // ZEND_VM_ENTER() : ZEND_VM_RETURN()
+		return (const zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT); // ZEND_VM_ENTER() / ZEND_VM_RETURN()
 #endif
 	} else {
 		zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)ZEND_OP_TRACE_INFO(opline, offset)->orig_handler;
@@ -990,7 +990,12 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 		if (UNEXPECTED(execute_data != prev_execute_data)) {
 #else
 		opline = handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+# ifdef ZEND_HIGH_HALF_KERNEL
 		if ((intptr_t)opline <= 0) {
+# else
+		if ((uintptr_t)opline & ZEND_VM_ENTER_BIT) {
+# endif
+			opline = (const zend_op*)((uintptr_t)opline & ~ZEND_VM_ENTER_BIT);
 			if (opline == NULL) {
 				stop = ZEND_JIT_TRACE_STOP_RETURN;
 				opline = NULL;
@@ -1000,7 +1005,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				/* return after interrupt handler */
 				ZEND_ASSERT(0 && "TODO");
 			}
-			opline = (zend_op*)((uintptr_t)opline & ~ZEND_VM_ENTER_BIT);
 			execute_data = EG(current_execute_data);
 #endif
 
