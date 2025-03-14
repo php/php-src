@@ -352,9 +352,16 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 		return false;
 	}
 
-	size_t quot_scale = scale;
+	size_t quot_scale = 0;
+	size_t rem_scale = 0;
 	if (use_quot) {
 		bc_free_num(quot);
+	}
+	if (use_rem) {
+		bc_free_num(rem);
+		rem_scale = scale;
+	} else {
+		quot_scale = scale;
 	}
 
 	/* If numerator is zero, the quotient is always zero. */
@@ -416,6 +423,10 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 	}
 
+	if (use_rem) {
+		/* TODO: create bc_num for rem */
+	}
+
 	/* Size that can be read from numeratorptr */
 	size_t numerator_readable_size = numerator->n_len + numerator->n_scale - numerator_leading_zeros;
 
@@ -439,11 +450,22 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 			(*quot)->n_scale = 0;
 		}
 	}
+	if (use_rem) {
+		_bc_rm_leading_zeros(*rem);
+		if (bc_is_zero(*rem)) {
+			(*rem)->n_sign = PLUS;
+			(*rem)->n_scale = 0;
+		}
+	}
 	return true;
 
 quot_zero:
 	if (use_quot) {
 		*quot = bc_copy_num(BCG(_zero_));
+	}
+	if (use_rem) {
+		bc_divide_copy_numerator(numerator, rem, rem_scale);
+		(*rem)->n_sign = numerator->n_sign;
 	}
 	return true;
 }
