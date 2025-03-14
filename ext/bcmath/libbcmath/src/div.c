@@ -309,9 +309,10 @@ static inline void bc_divide_copy_numerator(bc_num numerator, bc_num *num, size_
 	memcpy((*num)->n_value, numerator->n_value, numerator->n_len + scale);
 }
 
-static inline void bc_divide_by_one(bc_num numerator, bc_num *quot, size_t quot_scale)
+static inline void bc_divide_by_one(bc_num numerator, bc_num divisor, bc_num *quot, size_t quot_scale)
 {
 	bc_divide_copy_numerator(numerator, quot, quot_scale);
+	(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 }
 
 static inline void bc_divide_by_pow_10(
@@ -355,8 +356,7 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 
 	/* If divisor is 1 / -1, the quotient's n_value is equal to numerator's n_value. */
 	if (_bc_do_compare(divisor, BCG(_one_), divisor->n_scale, false) == BCMATH_EQUAL) {
-		bc_divide_by_one(numerator, quot, quot_scale);
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+		bc_divide_by_one(numerator, divisor, quot, quot_scale);
 		return true;
 	}
 
@@ -404,6 +404,7 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 	} else {
 		*quot = bc_new_num_nonzeroed(1, quot_scale); /* 1 is for 0 */
 	}
+	(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 
 	/* Size that can be read from numeratorptr */
 	size_t numerator_readable_size = numerator->n_len + numerator->n_scale - numerator_leading_zeros;
@@ -411,7 +412,6 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 	/* If divisor is 1 here, return the result of adjusting the decimal point position of numerator. */
 	if (divisor_size == 1 && *divisorptr == 1) {
 		bc_divide_by_pow_10(numeratorptr, numerator_readable_size, quot, quot_size, quot_scale);
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 		return true;
 	}
 
@@ -425,9 +425,6 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 	_bc_rm_leading_zeros(*quot);
 	if (bc_is_zero(*quot)) {
 		(*quot)->n_sign = PLUS;
-		(*quot)->n_scale = 0;
-	} else {
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 	}
 	return true;
 
