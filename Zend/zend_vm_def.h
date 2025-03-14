@@ -4526,7 +4526,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 
 		SAVE_OPLINE();
 
-		if (Z_OBJCE_P(retval_ptr)->required_scope) {
+		if (Z_TYPE_P(retval_ptr) == IS_OBJECT && Z_OBJCE_P(retval_ptr)->required_scope) {
 			if (EX(func)->common.fn_flags & ZEND_ACC_PUBLIC) {
 				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute) {
 					zend_type_error("Public method %s cannot return private class %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
