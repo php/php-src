@@ -286,23 +286,7 @@ static void bc_do_div(
 	/* Convert to bc_num */
 	char *qptr = (*quot)->n_value;
 	char *qend = qptr + (*quot)->n_len + (*quot)->n_scale - 1;
-
-	size_t i;
-	for (i = 0; i < quot_real_arr_size - 1; i++) {
-#if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(quot_vectors[i], qend - 3);
-		qend -= 4;
-#else
-		bc_write_bcd_representation(quot_vectors[i] / 10000, qend - 7);
-		bc_write_bcd_representation(quot_vectors[i] % 10000, qend - 3);
-		qend -= 8;
-#endif
-	}
-
-	while (qend >= qptr) {
-		*qend-- = quot_vectors[i] % BASE;
-		quot_vectors[i] /= BASE;
-	}
+	bc_convert_vector_to_char(qptr, qend, quot_vectors, quot_real_arr_size);
 
 	efree(numerator_vectors);
 }
