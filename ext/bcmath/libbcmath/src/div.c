@@ -340,7 +340,10 @@ static inline void bc_divide_by_one(
 }
 
 static inline void bc_divide_by_pow_10(
-	const char *numeratorptr, size_t numerator_readable_size, bc_num *quot, size_t quot_size, size_t quot_scale, bool use_quot)
+	const char *numeratorptr, size_t numerator_readable_size, size_t numerator_leading_zeros,
+	bc_num *quot, size_t quot_size, size_t quot_scale, bool use_quot,
+	bc_num *rem, size_t rem_size, bool use_rem,
+	size_t numerator_rem_len_diff)
 {
 	if (use_quot) {
 		char *qptr = (*quot)->n_value;
@@ -361,6 +364,23 @@ static inline void bc_divide_by_pow_10(
 		} else {
 			char *qend = (*quot)->n_value + (*quot)->n_len + (*quot)->n_scale;
 			(*quot)->n_scale -= qend - qptr;
+		}
+	}
+	if (use_rem) {
+		size_t rem_leading_zeros = numerator_leading_zeros + quot_size - numerator_rem_len_diff;
+		if (rem_size <= rem_leading_zeros) {
+			bc_free_num(rem);
+			*rem = bc_copy_num(BCG(_zero_));
+			return;
+		}
+		/* The values after this have already been copied, so just need to set them to 0. */
+		for (size_t i = 0; i < rem_leading_zeros; i++) {
+			(*rem)->n_value[i] = 0;
+		}
+		_bc_rm_leading_zeros(*rem);
+		if (bc_is_zero(*rem)) {
+			(*rem)->n_sign = PLUS;
+			(*rem)->n_scale = 0;
 		}
 	}
 }
@@ -492,7 +512,11 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 
 	/* If divisor is 1 here, return the result of adjusting the decimal point position of numerator. */
 	if (divisor_size == 1 && *divisorptr == 1) {
-		bc_divide_by_pow_10(numeratorptr, numerator_readable_size, quot, quot_size, quot_scale);
+		bc_divide_by_pow_10(
+			numeratorptr, numerator_readable_size, numerator_leading_zeros,
+			quot, quot_size, quot_scale, use_quot,
+			rem, rem_size, use_rem, numerator_rem_len_diff
+		);
 		return true;
 	}
 
