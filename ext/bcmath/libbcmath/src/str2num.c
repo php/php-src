@@ -105,6 +105,96 @@ static inline const char *bc_skip_zero_reverse(const char *scanner, const char *
 	return scanner;
 }
 
+static bool bc_scientific_notation_str2num(
+	bc_num *num, const char *str, const char *end, const char *integer_ptr, const char *fractional_ptr, const char *exponent_ptr,
+	size_t digits, size_t *full_scale)
+{
+	const char *fractional_end = exponent_ptr;
+
+	/* In scientific notation, the mantissa always has one integer digit. */
+	if (UNEXPECTED(digits != 1)) {
+		goto fail;
+	}
+
+	/* Must be 1 <= mantissa < 10 */
+	if (UNEXPECTED(*integer_ptr == 0)) {
+		goto fail;
+	}
+
+	if (UNEXPECTED(*exponent_ptr != 'e' && *exponent_ptr != 'E')) {
+		goto fail;
+	}
+	exponent_ptr++;
+
+	sign exponent_sign = PLUS;
+	if (*exponent_ptr == '+') {
+		/* Skip Sign */
+		exponent_ptr++;
+	} else if (*exponent_ptr == '-') {
+		exponent_sign = MINUS;
+		exponent_ptr++;
+	}
+
+	/* Skip exponent leading zeros. This is rare, so don't do bulk processing. */
+	while (*exponent_ptr == '0') {
+		exponent_ptr++;
+	}
+
+	const char *exponent_end = bc_count_digits(exponent_ptr, end);
+	if (UNEXPECTED(*exponent_end != '\0')) {
+		/* invalid num */
+		goto fail;
+	}
+
+	size_t exponent = 0;
+	while (exponent_ptr < exponent_end) {
+		exponent = exponent * 10 + (*exponent_ptr - '0'); /* TODO: check overflow */
+		exponent_ptr++;
+	}
+
+	size_t str_scale = fractional_end - fractional_ptr;
+
+	if (exponent_sign == PLUS) {
+		digits += exponent;
+		str_scale = str_scale > exponent ? str_scale - exponent : 0;
+
+		*num = bc_new_num_nonzeroed(digits, str_scale);
+		(*num)->n_sign = *str == '-' ? MINUS : PLUS;
+		char *nptr = (*num)->n_value;
+		char *nend = nptr + digits + str_scale;
+
+		*nptr++ = *integer_ptr - '0';
+		nptr = bc_copy_and_toggle_bcd(nptr, fractional_ptr, fractional_end);
+		while (nptr < nend) {
+			*nptr++ = 0;
+		}
+	} else {
+		digits = 0;
+		str_scale += exponent;
+
+		*num = bc_new_num_nonzeroed(1, str_scale); // 1 is for 0
+		(*num)->n_sign = *str == '-' ? MINUS : PLUS;
+		char *nptr = (*num)->n_value;
+
+		for (size_t i = 0; i < exponent; i++) {
+			*nptr++ = 0;
+		}
+
+		*nptr++ = *integer_ptr - '0';
+		nptr = bc_copy_and_toggle_bcd(nptr, fractional_ptr, fractional_end);
+	}
+
+	if (full_scale) {
+		*full_scale = str_scale;
+	}
+
+	return true;
+
+fail:
+	*num = bc_copy_num(BCG(_zero_));
+	return false;
+}
+
 /* Assumes `num` points to NULL, i.e. does yet not hold a number. */
 bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, size_t *full_scale, bool auto_scale)
 {
@@ -151,9 +241,8 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 
 		/* validate */
 		fractional_end = bc_count_digits(fractional_ptr, end);
-		if (UNEXPECTED(*fractional_end != '\0')) {
-			/* invalid num */
-			goto fail;
+		if (*fractional_end != '\0') {
+			return bc_scientific_notation_str2num(num, str, end, integer_ptr, fractional_ptr, fractional_end, digits, full_scale);
 		}
 
 		if (full_scale) {
