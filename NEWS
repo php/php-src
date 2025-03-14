@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - BCMath:
   . Simplify `bc_divide()` code. (SakiTakamachi)
   . If the result is 0, n_scale is set to 0. (SakiTakamachi)
+  . If size of BC_VECTOR array is within 64 bytes, stack area is now used.
+    (SakiTakamachi)
 
 - CLI:
   . Add --ini=diff to print INI settings changed from the builtin default.
