@@ -26,7 +26,7 @@ var_dump(new Outer:>Inner());
 object(Outer:>Inner)#2 (0) {
 }
 
-Fatal error: Uncaught TypeError: Method getInner is public but returns a protected class: Outer:>Inner in %s:%d
+Fatal error: Uncaught TypeError: Public method getInner cannot return protected class Outer:>Inner in %s:%d
 Stack trace:
 #0 %s(%d): Foo->getInner()
 #1 {main}

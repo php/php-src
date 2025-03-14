@@ -13,4 +13,4 @@ var_dump($line);
 --EXPECTF--
 autoload(inner_classes)
 
-Fatal error: Class 'inner_classes:>Line' is private in %s on line %d
+Fatal error: Cannot access private inner class 'inner_classes:>Line' in %s

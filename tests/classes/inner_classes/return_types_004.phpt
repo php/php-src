@@ -19,7 +19,7 @@ var_dump($r);
 test($r);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Method getInner is public but returns a private class: Outer:>Inner in %s:%d
+Fatal error: Uncaught TypeError: Public method getInner cannot return private class Outer:>Inner in %s:%d
 Stack trace:
 #0 %s(%d): Outer::getInner()
 #1 {main}

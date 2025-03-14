@@ -29,4 +29,4 @@ var_dump($outer->getInner());
 object(Outer:>Inner)#2 (0) {
 }
 
-Fatal error: Class 'Outer:>Inner' is private in %s on line %d
+Fatal error: Cannot access private inner class 'Outer:>Inner' in %s on line %d
