@@ -44,9 +44,13 @@ if (stripos(PHP_OS, 'WIN') === 0) {
     // millisecond(.5 rounded up is 1 millisecond)
     $tolerance = 0.05;
 } elseif (stripos(PHP_OS, 'DARWIN') === 0) {
-    // macOS: time_sleep_until() may wake up slightly early for unknown reasons. Allow a larger tolerance.
-    $tolerance = 0.02;
-} else {
+    // macOS: time_sleep_until() may wake up slightly early for unknown reasons.
+    // MacOS Github CI late by 106ms has been observed.
+    $tolerance = 0.2;
+} elseif(PHP_OS === "FreeBSD"){
+    // FreeBSD Github CI late by 74ms has been observed...
+    $tolerance = 0.2;
+}else {
     // Default tolerance
     $tolerance = 0.01;
 }
