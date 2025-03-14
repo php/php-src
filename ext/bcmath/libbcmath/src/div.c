@@ -300,12 +300,16 @@ static void bc_do_div(
 	}
 }
 
+static inline void bc_divide_copy_numerator(bc_num numerator, bc_num *num, size_t scale)
+{
+	scale = MIN(numerator->n_scale, scale);
+	*num = bc_new_num_nonzeroed(numerator->n_len, scale);
+	memcpy((*num)->n_value, numerator->n_value, numerator->n_len + scale);
+}
+
 static inline void bc_divide_by_one(bc_num numerator, bc_num *quot, size_t quot_scale)
 {
-	quot_scale = MIN(numerator->n_scale, quot_scale);
-	*quot = bc_new_num_nonzeroed(numerator->n_len, quot_scale);
-	char *qptr = (*quot)->n_value;
-	memcpy(qptr, numerator->n_value, numerator->n_len + quot_scale);
+	bc_divide_copy_numerator(numerator, quot, quot_scale);
 }
 
 static inline void bc_divide_by_pow_10(
