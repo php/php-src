@@ -658,7 +658,7 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 
 		zend_call_known_fcc(&parser->startElementHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
 		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 		zval_ptr_dtor(&args[2]);
 	}
 
@@ -744,7 +744,7 @@ void xml_endElementHandler(void *userData, const XML_Char *name)
 
 		zend_call_known_fcc(&parser->endElementHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
 		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 	}
 
 	if (!Z_ISUNDEF(parser->data) && !EG(exception)) {
@@ -803,7 +803,7 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 		zend_call_known_fcc(&parser->characterDataHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
 		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 	}
 
 	if (Z_ISUNDEF(parser->data) || EG(exception)) {
@@ -912,8 +912,8 @@ void xml_processingInstructionHandler(void *userData, const XML_Char *target, co
 
 	zend_call_known_fcc(&parser->processingInstructionHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
 }
 /* }}} */
 
@@ -933,7 +933,7 @@ void xml_defaultHandler(void *userData, const XML_Char *s, int len)
 
 	zend_call_known_fcc(&parser->defaultHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor_str(&args[1]);
 }
 /* }}} */
 
@@ -959,11 +959,11 @@ void xml_unparsedEntityDeclHandler(void *userData,
 
 	zend_call_known_fcc(&parser->unparsedEntityDeclHandler, /* retval */ NULL, /* param_count */ 6, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
-	zval_ptr_dtor(&args[5]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
+	zval_ptr_dtor_str(&args[5]);
 }
 /* }}} */
 
@@ -987,10 +987,10 @@ void xml_notationDeclHandler(void *userData, const XML_Char *notationName,
 
 	zend_call_known_fcc(&parser->notationDeclHandler, /* retval */ NULL, /* param_count */ 5, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
 }
 /* }}} */
 
@@ -1016,10 +1016,10 @@ int xml_externalEntityRefHandler(XML_Parser userData, const XML_Char *openEntity
 
 	zend_call_known_fcc(&parser->externalEntityRefHandler, /* retval */ &retval, /* param_count */ 5, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
 
 	/* TODO Better handling from callable return value */
 	if (!Z_ISUNDEF(retval)) {
@@ -1049,8 +1049,8 @@ void xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const 
 
 	zend_call_known_fcc(&parser->startNamespaceDeclHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
 }
 /* }}} */
 
@@ -1070,7 +1070,7 @@ void xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 
 	zend_call_known_fcc(&parser->endNamespaceDeclHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor_str(&args[1]);
 }
 /* }}} */
 
