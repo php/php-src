@@ -149,15 +149,21 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 
-	/*
-	 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
-	 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
-	 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
-	 */
-	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
+	BC_VECTOR stack_vectors[BC_STACK_VECTOR_SIZE];
+	size_t allocation_arr_size = n1_arr_size + n2_arr_size + prod_arr_size;
 
-	BC_VECTOR *n1_vector = buf;
-	BC_VECTOR *n2_vector = buf + n1_arr_size;
+	BC_VECTOR *n1_vector;
+	if (allocation_arr_size <= BC_STACK_VECTOR_SIZE) {
+		n1_vector = stack_vectors;
+	} else {
+		/*
+		 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
+		 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
+		 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
+		 */
+		n1_vector = safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
+	}
+	BC_VECTOR *n2_vector = n1_vector + n1_arr_size;
 	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
 
 	for (i = 0; i < prod_arr_size; i++) {
@@ -188,7 +194,9 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 
 	bc_mul_finish_from_vector(prod_vector, prod_arr_size, prodlen, prod);
 
-	efree(buf);
+	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
+		efree(n1_vector);
+	}
 }
 
 /** This is bc_standard_mul implementation for square */

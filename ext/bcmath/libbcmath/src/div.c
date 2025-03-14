@@ -260,7 +260,15 @@ static void bc_do_div(
 	size_t quot_arr_size = numerator_arr_size - divisor_arr_size + 1;
 	size_t quot_real_arr_size = MIN(quot_arr_size, (quot_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE);
 
-	BC_VECTOR *numerator_vectors = safe_emalloc(numerator_arr_size + divisor_arr_size + quot_arr_size, sizeof(BC_VECTOR), 0);
+	BC_VECTOR stack_vectors[BC_STACK_VECTOR_SIZE];
+	size_t allocation_arr_size = numerator_arr_size + divisor_arr_size + quot_arr_size;
+
+	BC_VECTOR *numerator_vectors;
+	if (allocation_arr_size <= BC_STACK_VECTOR_SIZE) {
+		numerator_vectors = stack_vectors;
+	} else {
+		numerator_vectors = safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
+	}
 	BC_VECTOR *divisor_vectors = numerator_vectors + numerator_arr_size;
 	BC_VECTOR *quot_vectors = divisor_vectors + divisor_arr_size;
 
@@ -302,7 +310,9 @@ static void bc_do_div(
 		quot_vectors[i] /= BASE;
 	}
 
-	efree(numerator_vectors);
+	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
+		efree(numerator_vectors);
+	}
 }
 
 static inline void bc_divide_by_one(bc_num numerator, bc_num *quot, size_t quot_scale)
