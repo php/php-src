@@ -1856,6 +1856,11 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_S
 
 	inner_class_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 
+	if (UNEXPECTED(ZSTR_LEN(outer_ce->name) + ZSTR_LEN(inner_class_name) + 2 > ZSTR_MAX_LEN)) {
+		zend_error(E_ERROR, "Class name is too long");
+		HANDLE_EXCEPTION();
+	}
+
 	full_class_name = zend_string_concat3(
 		ZSTR_VAL(outer_ce->name), ZSTR_LEN(outer_ce->name),
 		":>", 2,
