@@ -309,7 +309,6 @@ static inline xml_parser *xml_parser_from_obj(zend_object *obj) {
 
 static zend_object *xml_parser_create_object(zend_class_entry *class_type) {
 	xml_parser *intern = zend_object_alloc(sizeof(xml_parser), class_type);
-	memset(intern, 0, sizeof(xml_parser) - sizeof(zend_object));
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
