@@ -413,10 +413,12 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 	numerator_size -= numerator_leading_zeros;
 
 	/* check and remove divisor leading zeros */
+	size_t divisor_leading_zeros = 0;
 	while (*divisorptr == 0) {
 		divisorptr++;
-		divisor_size--;
+		divisor_leading_zeros++;
 	}
+	divisor_size -= divisor_leading_zeros;
 
 	if (divisor_size > numerator_size) {
 		goto quot_zero;
@@ -443,8 +445,46 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 	}
 
+	/**
+	 * If the calculation uses more digits than the scale of rem, writing the vector directly to rem
+	 * will exceed the size, so calculate the excess size in advance.
+	 */
+	size_t rem_over_size = 0;
+
+	/**
+	 * Conversely, there are cases where the vector does not fill the rem size.
+	 * In this case, the size to be written is calculated in advance to determine the start position for writing to rem.
+	 */
+	size_t rem_write_size = 0;
+
+	size_t rem_size = 0;
+	size_t numerator_rem_len_diff = 0;
 	if (use_rem) {
-		/* TODO: create bc_num for rem */
+		size_t divisor_int_size = divisor->n_len > divisor_leading_zeros ? divisor->n_len - divisor_leading_zeros : 0;
+		size_t divisor_frac_size = divisor->n_scale > divisor_trailing_zeros ? divisor->n_scale - divisor_trailing_zeros : 0;
+		rem_scale = MIN(MAX(numerator->n_scale, divisor_frac_size), rem_scale);
+
+		*rem = bc_new_num_nonzeroed(divisor_int_size > 0 ? divisor_int_size : 1, rem_scale); // 1 is for 0
+		(*rem)->n_sign = numerator->n_sign;
+
+		if (divisor_frac_size > rem_scale) {
+			rem_over_size = divisor_frac_size - rem_scale;
+			rem_write_size = (*rem)->n_len + rem_scale;
+		} else {
+			if (divisor_frac_size > 0) {
+				rem_write_size = (*rem)->n_len + divisor_frac_size;
+			} else {
+				/* e.g. 123 % 30 */
+				rem_write_size = (*rem)->n_len - (divisor_trailing_zeros - divisor->n_scale);
+			}
+		}
+
+		rem_size = (*rem)->n_len + (*rem)->n_scale;
+		if (rem_size > rem_write_size) {
+			size_t copy_size = rem_size - rem_write_size;
+			numerator_rem_len_diff = numerator->n_len - (*rem)->n_len;
+			memcpy((*rem)->n_value + rem_write_size, numerator->n_value + rem_write_size + numerator_rem_len_diff, copy_size);
+		}
 	}
 
 	/* Size that can be read from numeratorptr */
