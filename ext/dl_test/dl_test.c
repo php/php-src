@@ -92,10 +92,22 @@ PHP_METHOD(DlTest, test)
 	RETURN_STR(retval);
 }
 
+PHP_METHOD(DlTestSuperClass, test)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_NULL();
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(dl_test)
 {
+	zend_class_entry *ce;
+
 	register_class_DlTest();
+	ce = register_class_DlTestSuperClass();
+	register_class_DlTestSubClass(ce);
+	register_class_DlTestAliasedClass();
 
 	/* Test backwards compatibility */
 	if (getenv("PHP_DL_TEST_USE_OLD_REGISTER_INI_ENTRIES")) {

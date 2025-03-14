@@ -22,6 +22,10 @@ PHP                                                                        NEWS
     SIMPLE_WRITE cache). (ilutov)
   . Fixed bug GH-17998 (Assignment to backing value in set hook of lazy proxy
     calls hook again). (ilutov)
+  . Fixed bug GH-17961 (use-after-free during dl()'ed module class destruction).
+    (Arnaud)
+  . Fixed bug GH-15367 (dl() of module with aliased class crashes in shutdown).
+    (Arnaud)
 
 - DBA:
   . Fixed assertion violation when opening the same file with dba_open
