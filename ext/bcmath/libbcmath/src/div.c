@@ -370,12 +370,11 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 	while (*numeratorptr == 0) {
 		numeratorptr++;
 		numerator_leading_zeros++;
+		if (numerator_leading_zeros == numerator_size) {
+			goto quot_zero;
+		}
 	}
-	if (numerator_size > numerator_leading_zeros) {
-		numerator_size -= numerator_leading_zeros;
-	} else {
-		goto quot_zero;
-	}
+	numerator_size -= numerator_leading_zeros;
 
 	/* check and remove divisor leading zeros */
 	while (*divisorptr == 0) {
@@ -396,12 +395,7 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 		divisor_trailing_zeros++;
 	}
 	divisor_size -= divisor_trailing_zeros;
-
-	if (numerator_size > divisor_trailing_zeros) {
-		numerator_size -= divisor_trailing_zeros;
-	} else {
-		goto quot_zero;
-	}
+	numerator_size -= divisor_trailing_zeros;
 
 	size_t quot_size = numerator_size - divisor_size + 1; /* numerator_size >= divisor_size */
 	if (quot_size > quot_scale) {
