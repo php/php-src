@@ -160,7 +160,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 	*sumptr = carry;
 
 	/* Adjust sum and return. */
-	_bc_rm_leading_zeros(sum);
+	bc_rm_leading_zeros(sum);
 	return sum;
 }
 
@@ -291,6 +291,6 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2)
 	}
 
 	/* Clean up and return. */
-	_bc_rm_leading_zeros(diff);
+	bc_rm_leading_zeros(diff);
 	return diff;
 }

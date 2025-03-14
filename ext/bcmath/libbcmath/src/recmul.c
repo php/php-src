@@ -261,7 +261,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	prod->n_sign = (n1->n_sign == n2->n_sign ? PLUS : MINUS);
 	prod->n_len -= full_scale;
 	prod->n_scale = prod_scale;
-	_bc_rm_leading_zeros(prod);
+	bc_rm_leading_zeros(prod);
 	if (bc_is_zero(prod)) {
 		prod->n_sign = PLUS;
 		prod->n_scale = 0;
@@ -286,7 +286,7 @@ bc_num bc_square(bc_num n1, size_t scale)
 	prod->n_sign = PLUS;
 	prod->n_len -= full_scale;
 	prod->n_scale = prod_scale;
-	_bc_rm_leading_zeros(prod);
+	bc_rm_leading_zeros(prod);
 
 	return prod;
 }
