@@ -21,7 +21,6 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
-#include "Zend/zend_config.h"
 #include "Zend/zend_portability.h"
 
 #define ZEND_VM_SPEC		1

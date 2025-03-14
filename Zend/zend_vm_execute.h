@@ -306,7 +306,6 @@ static uint8_t zend_user_opcodes[256] = {0,
 	241,242,243,244,245,246,247,248,249,250,251,252,253,254,255
 };
 
-#include "Zend/zend_config.h"
 #include "Zend/zend_vm_opcodes.h"
 
 #define SPEC_START_MASK        0x0000ffff
@@ -403,7 +402,7 @@ static const void *zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op
 # ifdef ZEND_HIGH_HALF_KERNEL
 #  define ZEND_VM_RETURN()        return NULL
 # else
-#  define ZEND_VM_RETURN()        return ZEND_VM_ENTER_BIT
+#  define ZEND_VM_RETURN()        return (const zend_op*)ZEND_VM_ENTER_BIT
 # endif
 # define ZEND_VM_HOT
 # define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE

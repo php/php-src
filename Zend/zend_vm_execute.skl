@@ -1,4 +1,3 @@
-#include "Zend/zend_config.h"
 #include "Zend/zend_vm_opcodes.h"
 
 {%DEFINES%}

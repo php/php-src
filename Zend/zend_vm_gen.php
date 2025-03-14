@@ -2346,7 +2346,6 @@ function gen_vm_opcodes_header(
 ): string {
     $str = HEADER_TEXT;
     $str .= "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n";
-    $str .= "#include \"Zend/zend_config.h\"\n";
     $str .= "#include \"Zend/zend_portability.h\"\n";
     $str .= "\n";
     $str .= "#define ZEND_VM_SPEC\t\t" . ZEND_VM_SPEC . "\n";
