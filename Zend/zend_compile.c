@@ -9239,6 +9239,8 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		/* Find an anon class name that is not in use yet. */
 		name = NULL;
 		lcname = NULL;
+		ce->required_scope = NULL;
+		ce->lexical_scope = NULL;
 		do {
 			zend_tmp_string_release(name);
 			zend_tmp_string_release(lcname);
