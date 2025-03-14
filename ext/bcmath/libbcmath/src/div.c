@@ -61,6 +61,7 @@ static inline void bc_fast_div(
 	}
 	/* last */
 	quot_vectors[0] = numerator_vectors[0] / divisor_vector;
+	numerator_vectors[0] -= divisor_vector * quot_vectors[0];
 }
 
 /*
@@ -248,6 +249,7 @@ static inline void bc_standard_div(
 		div_carry = numerator_vectors[numerator_top_index - i];
 		numerator_vectors[numerator_top_index - i] = 0;
 	}
+	numerator_vectors[numerator_top_index - quot_arr_size + 1] = div_carry;
 }
 
 static void bc_do_div(
