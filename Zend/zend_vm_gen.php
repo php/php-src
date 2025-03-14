@@ -1908,7 +1908,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# ifdef ZEND_HIGH_HALF_KERNEL\n");
                             out($f,"#  define ZEND_VM_RETURN()        return NULL\n");
                             out($f,"# else\n");
-                            out($f,"#  define ZEND_VM_RETURN()        return ZEND_VM_ENTER_BIT\n");
+                            out($f,"#  define ZEND_VM_RETURN()        return (const zend_op*)ZEND_VM_ENTER_BIT\n");
                             out($f,"# endif\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {
                                 out($f,"# define ZEND_VM_HOT\n");
