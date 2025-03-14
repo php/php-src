@@ -4,7 +4,7 @@ outer class visibility
 <?php
 
 class Outer {
-        private class Inner {}
+        protected class Inner {}
         public Outer:>Inner $illegal;
 
         public function test(): void {

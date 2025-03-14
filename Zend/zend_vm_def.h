@@ -1869,12 +1869,22 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_S
 	}
 
 	if (inner_ce->required_scope) {
-		if (inner_ce->required_scope_absolute && inner_ce->required_scope != scope) {
-			zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
-			HANDLE_EXCEPTION();
-		} else if (scope == NULL || !instanceof_function(scope, inner_ce->required_scope)) {
-			zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
-			HANDLE_EXCEPTION();
+		if (inner_ce->required_scope_absolute) {
+			// for private classes, we check if the scope we are currently in has access
+			if (scope != NULL && (inner_ce->required_scope == scope || scope->lexical_scope == inner_ce->required_scope)) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Class '%s' is private", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
+		} else {
+			// for protected classes, we check if the scope is an instance of the required scope
+			if (scope != NULL && (instanceof_function(scope, inner_ce->required_scope) || instanceof_function(scope->lexical_scope, inner_ce->required_scope))) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Class '%s' is protected", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 

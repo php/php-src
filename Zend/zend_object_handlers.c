@@ -401,6 +401,10 @@ dynamic:
 				if (property_info->ce != ce) {
 					goto dynamic;
 				} else {
+					if (scope && scope->lexical_scope && scope->lexical_scope == ce) {
+						// Allow access to private properties from within the same outer class
+						goto found;
+					}
 wrong:
 					/* Information was available, but we were denied access.  Error out. */
 					if (!silent) {

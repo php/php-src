@@ -1045,11 +1045,56 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
+static zend_always_inline bool zend_check_class_visibility(const zend_class_entry *ce, const zend_property_info *info, uint32_t current_visibility) {
+	// a public class is always visible
+	if (!ce->required_scope) {
+		return 1;
+	}
+
+	// a protected class is visible if it is a subclass of the lexical scope and the current visibility is protected or private
+	if (!ce->required_scope_absolute) {
+		if (current_visibility & ZEND_ACC_PUBLIC) {
+			zend_type_error("Cannot assign private %s to higher visibile property %s::%s",
+				ZSTR_VAL(ce->name),
+				ZSTR_VAL(info->ce->name),
+				zend_get_unmangled_property_name(info->name));
+			return 0;
+		}
+
+		return 0;
+	}
+
+	// a private class is visible if it is the same class as the lexical scope and the current visibility is private
+	if (ce->required_scope_absolute && current_visibility & ZEND_ACC_PRIVATE) {
+		return 1;
+	}
+
+	zend_type_error("Cannot assign private %s to higher visibile property %s::%s",
+		ZSTR_VAL(ce->name),
+		ZSTR_VAL(info->ce->name),
+		zend_get_unmangled_property_name(info->name));
+
+	return 0;
+}
+
 static zend_always_inline bool i_zend_verify_property_type(const zend_property_info *info, zval *property, bool strict)
 {
+	if(Z_TYPE_P(property) == IS_OBJECT && !zend_check_class_visibility(Z_OBJCE_P(property), info, info->flags)) {
+		zend_verify_property_type_error(info, property);
+		return 0;
+	}
+
 	if (i_zend_check_property_type(info, property, strict)) {
 		return 1;
 	}
+
+        // todo:
+        // 1: add a flag to the type so we can tell the type is an inner class
+        // 2: use said flag to flag the property info
+        // 3: same with parameters/args too
+        // 4: create a simple function to take a visibility flag and ce, it should return SUCCESS if the ce can be used
+        // 5: if we have an inner class in a prop/arg, we validate it can be returned (do not autoload) by looping over types
+        //    that are inner classes and looking up the ce. If it is not autoloaded, then it is not going to match the type anyway.
 
 	zend_verify_property_type_error(info, property);
 	return 0;
