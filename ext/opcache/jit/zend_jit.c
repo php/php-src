@@ -2871,7 +2871,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (GCC_GLOBAL_REGS) {
 								ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 							} else {
-								ir_RETURN(ir_CONST_I32(1)); /* ZEND_VM_ENTER */
+								zend_jit_vm_enter(jit, jit_IP(jit));
 							}
 							ir_IF_TRUE(if_hook_enter);
 						}
