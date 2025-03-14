@@ -59,6 +59,7 @@ PHP                                                                        NEWS
     JIT). (nielsdos)
   . Fixed bug GH-17966 (Symfony JIT 1205 assertion failure). (nielsdos)
   . Fixed bug GH-18037 (SEGV Zend/zend_execute.c). (nielsdos)
+  . Fixed bug GH-18050 (IN_ARRAY optimization in DFA pass is broken). (ilutov)
 
 - Standard:
   . Fix memory leaks in array_any() / array_all(). (nielsdos)
