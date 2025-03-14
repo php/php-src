@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - BCMath:
   . Simplify `bc_divide()` code. (SakiTakamachi)
+  . If the result is 0, n_scale is set to 0. (SakiTakamachi)
 
 - CLI:
   . Add --ini=diff to print INI settings changed from the builtin default.

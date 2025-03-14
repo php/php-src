@@ -157,7 +157,7 @@ bool bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale)
 
 bc_num bc_floor_or_ceil(bc_num num, bool is_floor);
 
-void bc_round(bc_num num, zend_long places, zend_long mode, bc_num *result);
+size_t bc_round(bc_num num, zend_long places, zend_long mode, bc_num *result);
 
 typedef enum {
 	OK,
