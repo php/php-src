@@ -130,7 +130,14 @@ static inline void bc_rm_leading_zeros(bc_num num)
 	}
 }
 
-void bc_rm_trailing_zeros(bc_num num);
+static inline void bc_rm_trailing_zeros(bc_num num)
+{
+	char *end = num->n_value + num->n_len + num->n_scale - 1;
+	while (*end == 0 && num->n_scale > 0) {
+		num->n_scale--;
+		end--;
+	}
+}
 
 bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min);
 
