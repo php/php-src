@@ -1837,7 +1837,7 @@ check_lexical_scope:
 				if (zobj->ce->__call) {
 					fbc = zend_get_user_call_function(zobj->ce, method_name);
 				} else {
-					if (scope->lexical_scope) {
+					if (scope && scope->lexical_scope) {
 						scope = scope->lexical_scope;
 						goto check_lexical_scope;
 					}
@@ -1906,7 +1906,7 @@ check_lexical_scope:
 				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 					zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
 					if (!fallback_fbc) {
-						if (scope->lexical_scope) {
+						if (scope && scope->lexical_scope) {
 							scope = scope->lexical_scope;
 							goto check_lexical_scope;
 						}
