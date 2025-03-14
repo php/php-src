@@ -224,5 +224,6 @@ up:
 check_zero:
 	if (bc_is_zero(*result)) {
 		(*result)->n_sign = PLUS;
+		(*result)->n_scale = 0;
 	}
 }
