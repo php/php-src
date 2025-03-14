@@ -256,7 +256,8 @@ static void bc_do_div(
 	const char *numerator, size_t numerator_size, size_t numerator_readable_size,
 	const char *divisor, size_t divisor_size,
 	bc_num *quot, size_t quot_size,
-	bool use_quot
+	bc_num *rem, size_t rem_over_size, size_t rem_write_size,
+	bool use_quot, bool use_rem
 ) {
 	size_t numerator_arr_size = (numerator_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t divisor_arr_size = (divisor_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
@@ -289,6 +290,18 @@ static void bc_do_div(
 		char *qptr = (*quot)->n_value;
 		char *qend = qptr + (*quot)->n_len + (*quot)->n_scale - 1;
 		bc_convert_vector_to_char(qptr, qend, quot_vectors, quot_real_arr_size);
+	}
+	if (use_rem) {
+		size_t rem_arr_size = (rem_write_size + rem_over_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+		BC_VECTOR *rem_vectors = numerator_vectors;
+
+		char *rptr = (*rem)->n_value;
+		char *rend = rptr + rem_write_size - 1;
+		if (rem_over_size > 0) {
+			bc_convert_vector_to_char_with_skip(rptr, rend, rem_vectors, rem_arr_size, rem_over_size);
+		} else {
+			bc_convert_vector_to_char(rptr, rend, rem_vectors, rem_arr_size);
+		}
 	}
 
 	efree(numerator_vectors);
@@ -516,7 +529,9 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 	bc_do_div(
 		numeratorptr, numerator_size, numerator_readable_size,
 		divisorptr, divisor_size,
-		quot, quot_size
+		quot, quot_size,
+		rem, rem_over_size, rem_write_size,
+		use_quot, use_rem
 	);
 
 	if (use_quot) {
