@@ -807,8 +807,8 @@ PHP_FUNCTION(bcround)
 		goto cleanup;
 	}
 
-	bc_round(num, precision, mode, &result);
-	RETVAL_NEW_STR(bc_num2str_ex(result, result->n_scale));
+	size_t scale = bc_round(num, precision, mode, &result);
+	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&num);
@@ -1799,9 +1799,10 @@ PHP_METHOD(BcMath_Number, round)
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 
 	bc_num ret = NULL;
-	bc_round(intern->num, precision, rounding_mode, &ret);
+	size_t scale = bc_round(intern->num, precision, rounding_mode, &ret);
+	bc_rm_trailing_zeros(ret);
 
-	bcmath_number_obj_t *new_intern = bcmath_number_new_obj(ret, ret->n_scale);
+	bcmath_number_obj_t *new_intern = bcmath_number_new_obj(ret, scale);
 	RETURN_OBJ(&new_intern->std);
 }
 
