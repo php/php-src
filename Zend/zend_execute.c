@@ -1054,7 +1054,7 @@ static zend_always_inline bool zend_check_class_visibility(const zend_class_entr
 	// a protected class is visible if it is a subclass of the lexical scope and the current visibility is protected or private
 	if (!ce->required_scope_absolute) {
 		if (current_visibility & ZEND_ACC_PUBLIC) {
-			zend_type_error("Cannot assign private %s to higher visibile property %s::%s",
+			zend_type_error("Cannot assign protected %s to higher visibile property %s::%s",
 				ZSTR_VAL(ce->name),
 				ZSTR_VAL(info->ce->name),
 				zend_get_unmangled_property_name(info->name));
