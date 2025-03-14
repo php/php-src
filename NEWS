@@ -20,6 +20,7 @@ PHP                                                                        NEWS
     with values as references. (David Carlier)
   . Fix dateformat_format when the time is an array of references.
     (David Carlier)
+  . Fix UConverter::transcode with substitutes as references. (David Carlier)
 
 - Embed:
   . Fixed bug GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
