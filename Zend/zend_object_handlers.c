@@ -1819,6 +1819,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 	/* Check access level */
 	if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 		scope = zend_get_executed_scope();
+check_lexical_scope:
 
 		if (fbc->common.scope != scope) {
 			if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
@@ -1836,6 +1837,10 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 				if (zobj->ce->__call) {
 					fbc = zend_get_user_call_function(zobj->ce, method_name);
 				} else {
+					if (scope->lexical_scope) {
+						scope = scope->lexical_scope;
+						goto check_lexical_scope;
+					}
 					zend_bad_method_call(fbc, method_name, scope);
 					fbc = NULL;
 				}
@@ -1895,11 +1900,17 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		fbc = Z_FUNC_P(func);
 		if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_class_entry *scope = zend_get_executed_scope();
+check_lexical_scope:
 			if (UNEXPECTED(fbc->common.scope != scope)) {
 				if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 					zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
 					if (!fallback_fbc) {
+						if (scope->lexical_scope) {
+							scope = scope->lexical_scope;
+							goto check_lexical_scope;
+						}
+
 						zend_bad_method_call(fbc, function_name, scope);
 					}
 					fbc = fallback_fbc;
