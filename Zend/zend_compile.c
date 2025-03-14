@@ -9199,7 +9199,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 				decl->flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 			}
 			if (decl->attr & ZEND_ACC_READONLY) {
-				decl->flags |= ZEND_ACC_READONLY_CLASS & ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+				decl->flags |= ZEND_ACC_READONLY_CLASS | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 			}
 
 			// configure for a nested class. This should only include:

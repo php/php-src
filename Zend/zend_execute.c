@@ -1239,14 +1239,14 @@ static zend_always_inline bool zend_check_type_slow(
 				zend_class_entry *scope = zend_get_executed_scope();
 				if (ce->required_scope_absolute && scope != ce->required_scope) {
 					if (scope == NULL) {
-						zend_error(E_ERROR, "Private inner class %s cannot be used as a type declaration in the global scope", ce->name->val);
+						zend_error(E_ERROR, "Private inner class %s cannot be used as a type declaration in the global scope", ZSTR_VAL(ce->name));
 					}
 
-					zend_error(E_ERROR, "Private inner class %s cannot be used as a type declaration in the scope of %s", ce->name->val, scope->name->val);
+					zend_error(E_ERROR, "Private inner class %s cannot be used as a type declaration in the scope of %s", ZSTR_VAL(ce->name), ZSTR_VAL(scope->name));
 				} else if (scope == NULL) {
-					zend_error(E_ERROR, "Protected inner class %s cannot be used as a type declaration in the global scope", ce->name->val);
+					zend_error(E_ERROR, "Protected inner class %s cannot be used as a type declaration in the global scope", ZSTR_VAL(ce->name));
 				} else if (!instanceof_function(scope, ce->required_scope)) {
-					zend_error(E_ERROR, "Protected inner class %s cannot be used as a type declaration in the scope of %s", ce->name->val, scope->name->val);
+					zend_error(E_ERROR, "Protected inner class %s cannot be used as a type declaration in the scope of %s", ZSTR_VAL(ce->name), ZSTR_VAL(scope->name));
 				}
 			}
 
