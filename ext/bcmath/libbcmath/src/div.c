@@ -338,7 +338,7 @@ static inline void bc_divide_by_pow_10(
 	}
 }
 
-bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
+bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, size_t scale, bool use_quot, bool use_rem)
 {
 	/* divide by zero */
 	if (bc_is_zero(divisor)) {
