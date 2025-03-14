@@ -311,11 +311,31 @@ static inline void bc_divide_copy_numerator(bc_num numerator, bc_num *num, size_
 	memcpy((*num)->n_value, numerator->n_value, numerator->n_len + scale);
 }
 
-static inline void bc_divide_by_one(bc_num numerator, bc_num divisor, bc_num *quot, size_t quot_scale, bool use_quot)
+static inline void bc_divide_by_one(
+	bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem,
+	size_t quot_scale, size_t rem_scale, bool use_quot, bool use_rem)
 {
 	if (use_quot) {
 		bc_divide_copy_numerator(numerator, quot, quot_scale);
 		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+	}
+	if (use_rem) {
+		/* When dividing by 1, the integer part of rem is always 0. */
+		rem_scale = MIN(numerator->n_scale, rem_scale);
+		if (rem_scale == 0) {
+			*rem = bc_copy_num(BCG(_zero_));
+		} else {
+			*rem = bc_new_num_nonzeroed(1, rem_scale); /* 1 is for 0 */
+			(*rem)->n_value[0] = 0;
+			/* copy fractional part */
+			memcpy((*rem)->n_value + 1, numerator->n_value + numerator->n_len, rem_scale);
+			if (bc_is_zero(*rem)) {
+				(*rem)->n_sign = PLUS;
+				(*rem)->n_scale = 0;
+			} else {
+				(*rem)->n_sign = numerator->n_sign;
+			}
+		}
 	}
 }
 
@@ -371,7 +391,7 @@ bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, s
 
 	/* If divisor is 1 / -1, the quotient's n_value is equal to numerator's n_value. */
 	if (_bc_do_compare(divisor, BCG(_one_), divisor->n_scale, false) == BCMATH_EQUAL) {
-		bc_divide_by_one(numerator, divisor, quot, quot_scale, use_quot);
+		bc_divide_by_one(numerator, divisor, quot, rem, quot_scale, rem_scale, use_quot, use_rem);
 		return true;
 	}
 
