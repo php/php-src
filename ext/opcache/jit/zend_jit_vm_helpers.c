@@ -46,7 +46,7 @@ register const zend_op* volatile opline __asm__("x28");
 # pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif
 
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPCODE_HANDLER_ARGS_DC uint32_t call_info)
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info)
 {
 	zend_execute_data *old_execute_data;
 
@@ -87,7 +87,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPC
 	}
 }
 
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(ZEND_OPCODE_HANDLER_ARGS_DC uint32_t call_info)
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info)
 {
 	if (UNEXPECTED(call_info & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS))) {
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
@@ -397,7 +397,7 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key)
 	return _zend_quick_get_constant(key, 0, 1);
 }
 
-static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_counter_helper(ZEND_OPCODE_HANDLER_ARGS_DC uint32_t cost)
+static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_counter_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t cost)
 {
 	zend_jit_op_array_trace_extension *jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&EX(func)->op_array);

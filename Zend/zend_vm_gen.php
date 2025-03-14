@@ -818,7 +818,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
                         if (isset($matches[2])) {
                             // extra args
                             $args = substr(preg_replace("/,\s*[A-Za-z0-9_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
-                            return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC " . $args . "))";
+                            return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX " . $args . "))";
                         }
                         return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
                     }
@@ -852,7 +852,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
                         if (isset($matches[2])) {
                             // extra args
                             $args = substr(preg_replace("/,\s*[A-Za-z0-9_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
-                            return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC " . $args . "))";
+                            return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX " . $args . "))";
                         }
                         return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
                     }
@@ -1164,7 +1164,7 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
                 out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_fastcall $spec_name(ZEND_OPCODE_HANDLER_ARGS)\n");
             } else {
               // Helper with parameter
-                out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_fastcall $spec_name(ZEND_OPCODE_HANDLER_ARGS_DC $param)\n");
+                out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_fastcall $spec_name(ZEND_OPCODE_HANDLER_ARGS_EX $param)\n");
             }
             break;
         case ZEND_VM_KIND_SWITCH:
@@ -1870,13 +1870,13 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
                             out($f,"# define ZEND_OPCODE_HANDLER_ARGS void\n");
                             out($f,"# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU\n");
-                            out($f,"# define ZEND_OPCODE_HANDLER_ARGS_DC\n");
-                            out($f,"# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC\n");
+                            out($f,"# define ZEND_OPCODE_HANDLER_ARGS_EX\n");
+                            out($f,"# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX\n");
                             out($f,"#else\n");
                             out($f,"# define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data, const zend_op *opline\n");
                             out($f,"# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data, opline\n");
-                            out($f,"# define ZEND_OPCODE_HANDLER_ARGS_DC ZEND_OPCODE_HANDLER_ARGS, \n");
-                            out($f,"# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC ZEND_OPCODE_HANDLER_ARGS_PASSTHRU, \n");
+                            out($f,"# define ZEND_OPCODE_HANDLER_ARGS_EX ZEND_OPCODE_HANDLER_ARGS, \n");
+                            out($f,"# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX ZEND_OPCODE_HANDLER_ARGS_PASSTHRU, \n");
                             out($f,"#endif\n");
                             out($f,"\n");
                             out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
