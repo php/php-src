@@ -1888,7 +1888,6 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_S
 		}
 	}
 
-	CACHE_PTR(opline->extended_value, inner_ce);
 	Z_CE_P(EX_VAR(opline->result.var)) = inner_ce;
 
 	zend_string_release(full_class_name);

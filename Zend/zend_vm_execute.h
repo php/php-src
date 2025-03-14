@@ -6701,7 +6701,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_CONST_C
 		}
 	}
 
-	CACHE_PTR(opline->extended_value, inner_ce);
 	Z_CE_P(EX_VAR(opline->result.var)) = inner_ce;
 
 	zend_string_release(full_class_name);
@@ -16334,7 +16333,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_TMPVAR_
 		}
 	}
 
-	CACHE_PTR(opline->extended_value, inner_ce);
 	Z_CE_P(EX_VAR(opline->result.var)) = inner_ce;
 
 	zend_string_release(full_class_name);
@@ -34085,7 +34083,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_INNER_CLASS_SPEC_UNUSED_
 		}
 	}
 
-	CACHE_PTR(opline->extended_value, inner_ce);
 	Z_CE_P(EX_VAR(opline->result.var)) = inner_ce;
 
 	zend_string_release(full_class_name);
