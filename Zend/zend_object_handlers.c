@@ -2080,9 +2080,15 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 	if (constructor) {
 		if (UNEXPECTED(!(constructor->op_array.fn_flags & ZEND_ACC_PUBLIC))) {
 			zend_class_entry *scope = get_fake_or_executed_scope();
+check_lexical_scope:
 			if (UNEXPECTED(constructor->common.scope != scope)) {
 				if (UNEXPECTED(constructor->op_array.fn_flags & ZEND_ACC_PRIVATE)
 				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
+					if (scope && scope->lexical_scope) {
+						scope = scope->lexical_scope;
+						goto check_lexical_scope;
+					}
+
 					zend_bad_constructor_call(constructor, scope);
 					zend_object_store_ctor_failed(zobj);
 					constructor = NULL;
