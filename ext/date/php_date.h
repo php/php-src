@@ -89,9 +89,9 @@ static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
 struct _php_interval_obj {
 	timelib_rel_time *diff;
 	int               civil_or_wall;
+	bool              initialized;
 	bool              from_string;
 	zend_string      *date_string;
-	bool              initialized;
 	zend_object       std;
 };
 
@@ -140,7 +140,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime);
 
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gm);
 PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime);
-PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, php_date_obj *date_obj);
+PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, const php_date_obj *date_obj);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
