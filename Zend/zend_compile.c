@@ -7566,8 +7566,11 @@ static bool zend_property_is_virtual(zend_class_entry *ce, zend_string *property
 	return is_virtual;
 }
 
-static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fallback_return_type) /* {{{ */
+static void zend_compile_params(zend_ast_decl *decl, uint32_t fallback_return_type) /* {{{ */
 {
+	zend_ast *ast = decl->child[0];
+	zend_ast *return_type_ast = decl->child[3];
+
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_op_array *op_array = CG(active_op_array);
@@ -7704,7 +7707,30 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			}
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_NEVER) {
-				zend_error_noreturn(E_COMPILE_ERROR, "never cannot be used as a parameter type");
+				if (op_array->scope == NULL) {
+					zend_error_noreturn(
+						E_COMPILE_ERROR,
+						"never cannot be used as a parameter type for functions"
+					);
+				}
+				if (decl->child[2] != NULL) {
+					zend_error_noreturn(
+						E_COMPILE_ERROR,
+						"never cannot be used as a parameter type for methods with implementations"
+					);
+				}
+				if (*default_ast_ptr) {
+					zend_error_noreturn(
+						E_COMPILE_ERROR,
+						"never cannot be used as a parameter type for parameters with defaults"
+					);
+				}
+				if (decl->kind == ZEND_AST_PROPERTY_HOOK) {
+					zend_error_noreturn(
+						E_COMPILE_ERROR,
+						"never cannot be used as a parameter type for property hooks"
+					);
+				}
 			}
 
 			if (default_type != IS_UNDEF && default_type != IS_CONSTANT_AST && !force_nullable
@@ -8278,7 +8304,6 @@ static zend_op_array *zend_compile_func_decl_ex(
 	zend_ast *params_ast = decl->child[0];
 	zend_ast *uses_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
-	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
 	zend_string *lcname = NULL;
 	bool is_hook = decl->kind == ZEND_AST_PROPERTY_HOOK;
@@ -8380,7 +8405,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
 	}
 
-	zend_compile_params(params_ast, return_type_ast,
+	zend_compile_params(decl,
 		is_method && zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME) ? IS_STRING : 0);
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		zend_mark_function_as_generator();
