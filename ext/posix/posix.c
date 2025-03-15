@@ -422,7 +422,8 @@ static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *ret) /* {{{ */
 
 	php_stream_from_zval_no_verify(stream, zfp);
 
-	if (stream == NULL) {
+	if (UNEXPECTED(stream == NULL)) {
+		zend_argument_type_error(1, "must be an open stream resource");
 		return FAILURE;
 	}
 

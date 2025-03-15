@@ -771,11 +771,17 @@ is_string:
 		} else if (Z_TYPE(retval) == IS_RESOURCE) {
 			php_stream *stream;
 			php_stream_from_zval_no_verify(stream, &retval);
-			if (stream == NULL) {
+			if (UNEXPECTED(stream == NULL)) {
+				zval callable;
+				zend_get_callable_zval_from_fcc(&LIBXML(entity_loader_callback), &callable);
+
+				zend_string *callable_name = zend_get_callable_name(&callable);
 				php_libxml_ctx_error(context,
-						"The user entity loader callback '%s' has returned a "
+						"The user entity loader callback \"%s\" has returned a "
 						"resource, but it is not a stream",
-						ZSTR_VAL(LIBXML(entity_loader_callback).function_handler->common.function_name));
+						ZSTR_VAL(callable_name));
+				zend_string_release(callable_name);
+				zval_dtor(&callable);
 			} else {
 				/* TODO: allow storing the encoding in the stream context? */
 				xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;

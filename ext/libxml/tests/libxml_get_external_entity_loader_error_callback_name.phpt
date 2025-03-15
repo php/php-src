@@ -36,5 +36,8 @@ try {
 }
 
 ?>
---EXPECT--
-string(73) "DOMDocument::validate(): supplied resource is not a valid stream resource"
+--EXPECTF--
+Warning: DOMDocument::validate(): The user entity loader callback "Handler::handle" has returned a resource, but it is not a streamFailed to load external entity "-//FOO/BAR" in %s on line %d
+
+Warning: DOMDocument::validate(): Could not load the external subset "http://example.com/foobar" in %s on line %d
+bool(false)

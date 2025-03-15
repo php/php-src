@@ -27,4 +27,4 @@ try {
 ?>
 --EXPECT--
 bool(false)
-posix_ttyname(): supplied resource is not a valid stream resource
+posix_ttyname(): Argument #1 ($file_descriptor) must be an open stream resource
