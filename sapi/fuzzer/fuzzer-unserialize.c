@@ -30,13 +30,14 @@
 #include "ext/standard/php_var.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	unsigned char *orig_data = malloc(Size+1);
-	memcpy(orig_data, Data, Size);
-	orig_data[Size] = '\0';
 
 	if (fuzzer_request_startup() == FAILURE) {
 		return 0;
 	}
+
+	unsigned char *orig_data = malloc(Size+1);
+	memcpy(orig_data, Data, Size);
+	orig_data[Size] = '\0';
 
 	fuzzer_setup_dummy_frame();
 

@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 - Embed:
   . Fixed bug GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
 
+- Fuzzer:
+  . Fixed bug GH-18081 (Memory leaks in error paths of fuzzer SAPI).
+    (Lung-Alexandra)
+
 - Mbstring:
   . Fixed bug GH-17989 (mb_output_handler crash with unset
     http_output_conv_mimetypes). (nielsdos)
