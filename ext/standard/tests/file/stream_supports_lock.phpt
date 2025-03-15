@@ -44,5 +44,5 @@ bool(false)
 resource(%d) of type (stream)
 bool(false)
 resource(%d) of type (stream-context)
-stream_supports_lock(): supplied resource is not a valid stream resource
+stream_supports_lock(): Argument #1 ($stream) must be an open stream resource
 Done

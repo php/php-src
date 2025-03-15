@@ -19,5 +19,5 @@ echo "Done";
 *** Testing stream_get_meta_data() : error conditions ***
 
 -- Testing stream_get_meta_data() function with closed stream resource --
-stream_get_meta_data(): supplied resource is not a valid stream resource
+stream_get_meta_data(): Argument #1 ($stream) must be an open stream resource
 Done

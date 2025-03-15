@@ -18,4 +18,4 @@ try {
 --EXPECTF--
 int(%d)
 int(%d)
-fwrite(): supplied resource is not a valid stream resource
+fwrite(): Argument #1 ($stream) must be an open stream resource
