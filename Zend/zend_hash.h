@@ -261,7 +261,7 @@ ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_end_ex(const HashTable *
 static zend_always_inline zend_result zend_hash_has_more_elements_ex(const HashTable *ht, const HashPosition *pos) {
 	return (zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS);
 }
-static zend_always_inline zend_result zend_hash_has_more_elements(HashTable *ht) {
+static zend_always_inline zend_result zend_hash_has_more_elements(const HashTable *ht) {
 	return zend_hash_has_more_elements_ex(ht, &ht->nInternalPointer);
 }
 static zend_always_inline zend_result zend_hash_move_forward(HashTable *ht) {
@@ -554,7 +554,7 @@ static zend_always_inline zval *zend_symtable_find_ind(const HashTable *ht, zend
 }
 
 
-static zend_always_inline bool zend_symtable_exists(HashTable *ht, zend_string *key)
+static zend_always_inline bool zend_symtable_exists(const HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -566,7 +566,7 @@ static zend_always_inline bool zend_symtable_exists(HashTable *ht, zend_string *
 }
 
 
-static zend_always_inline bool zend_symtable_exists_ind(HashTable *ht, zend_string *key)
+static zend_always_inline bool zend_symtable_exists_ind(const HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -937,7 +937,7 @@ static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, ze
 	}
 }
 
-static zend_always_inline zval *zend_hash_index_find_deref(HashTable *ht, zend_ulong h)
+static zend_always_inline zval *zend_hash_index_find_deref(const HashTable *ht, zend_ulong h)
 {
 	zval *zv = zend_hash_index_find(ht, h);
 	if (zv) {
@@ -946,7 +946,7 @@ static zend_always_inline zval *zend_hash_index_find_deref(HashTable *ht, zend_u
 	return zv;
 }
 
-static zend_always_inline zval *zend_hash_find_deref(HashTable *ht, zend_string *str)
+static zend_always_inline zval *zend_hash_find_deref(const HashTable *ht, zend_string *str)
 {
 	zval *zv = zend_hash_find(ht, str);
 	if (zv) {
@@ -955,7 +955,7 @@ static zend_always_inline zval *zend_hash_find_deref(HashTable *ht, zend_string 
 	return zv;
 }
 
-static zend_always_inline zval *zend_hash_str_find_deref(HashTable *ht, const char *str, size_t len)
+static zend_always_inline zval *zend_hash_str_find_deref(const HashTable *ht, const char *str, size_t len)
 {
 	zval *zv = zend_hash_str_find(ht, str, len);
 	if (zv) {
@@ -964,7 +964,7 @@ static zend_always_inline zval *zend_hash_str_find_deref(HashTable *ht, const ch
 	return zv;
 }
 
-static zend_always_inline void *zend_symtable_str_find_ptr(HashTable *ht, const char *str, size_t len)
+static zend_always_inline void *zend_symtable_str_find_ptr(const HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
@@ -975,7 +975,7 @@ static zend_always_inline void *zend_symtable_str_find_ptr(HashTable *ht, const 
 	}
 }
 
-static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPosition *pos)
+static zend_always_inline void *zend_hash_get_current_data_ptr_ex(const HashTable *ht, const HashPosition *pos)
 {
 	zval *zv;
 
