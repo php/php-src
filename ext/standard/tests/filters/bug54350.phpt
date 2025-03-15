@@ -23,4 +23,4 @@ fwrite($fd, "foo");
 ?>
 --EXPECTF--
 Warning: fclose(): %d is not a valid stream resource in %s on line %d
-fclose(): supplied resource is not a valid stream resource
+fclose(): Argument #1 ($stream) must be an open stream resource
