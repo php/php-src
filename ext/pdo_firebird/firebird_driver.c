@@ -594,7 +594,8 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 	H->in_manually_txn = 0;
 
-	if (isc_detach_database(H->isc_status, &H->db)) {
+	/* isc_detach_database returns 0 on success, 1 on failure. */
+	if (H->db != NULL && isc_detach_database(H->isc_status, &H->db)) {
 		php_firebird_error(dbh);
 	}
 
