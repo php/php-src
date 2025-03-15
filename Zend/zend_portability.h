@@ -59,6 +59,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef HAVE_DLFCN_H
 # include <dlfcn.h>
@@ -862,6 +863,22 @@ static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
  * this platform. This prevents pointing to internal structures from shm due to
  * ASLR. Currently only possible on Windows. */
 # define ZEND_OPCACHE_SHM_REATTACHMENT 1
+#endif
+
+#ifndef CHAR_BITS
+# define CHAR_BITS 8
+#endif
+
+#ifndef UINTPTR_WIDTH
+# define UINTPTR_WIDTH (CHAR_BITS * sizeof(uintptr_t))
+#endif
+
+#if (defined(__linux__) && defined(__x86_64__)) \
+		|| (defined(ZEND_WIN32) && defined(_M_AMD64))
+/* The kernel reserves the higher part of the address space for itself.
+ * Therefore, we can assume that the higher bit of user space addresses is
+ * never set. */
+# define ZEND_HIGH_HALF_KERNEL
 #endif
 
 #endif /* ZEND_PORTABILITY_H */
