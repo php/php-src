@@ -2933,7 +2933,7 @@ static void zend_compile_inner_class_ref(znode *result, zend_ast *ast, uint32_t 
 	if (outer_class->kind == ZEND_AST_INNER_CLASS) {
 		zend_compile_inner_class_ref(&outer_node, outer_class, fetch_flags);
 	} else {
-		zend_compile_class_ref(&outer_node, outer_class, fetch_flags);
+		zend_compile_class_ref(&outer_node, outer_class, fetch_flags | ZEND_FETCH_CLASS_OUTER);
 	}
 
 	if (inner_class->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(inner_class)) == IS_STRING) {
@@ -2999,10 +2999,12 @@ static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t f
 	if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
 		result->op_type = IS_CONST;
 		ZVAL_STR(&result->u.constant, zend_resolve_class_name_ast(name_ast));
+	} else if (fetch_flags & ZEND_FETCH_CLASS_OUTER && fetch_type == ZEND_FETCH_CLASS_STATIC) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the static modifier on an inner class");
 	} else {
 		zend_ensure_valid_class_fetch_type(fetch_type);
 		result->op_type = IS_UNUSED;
-		result->u.op.num = fetch_type | fetch_flags;
+		result->u.op.num = fetch_type | (fetch_flags & ~ZEND_FETCH_CLASS_OUTER);
 	}
 }
 /* }}} */
