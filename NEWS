@@ -26,6 +26,7 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-15367 (dl() of module with aliased class crashes in shutdown).
     (Arnaud)
+  . Fixed OSS-Fuzz #403308724. (nielsdos)
 
 - DBA:
   . Fixed assertion violation when opening the same file with dba_open
