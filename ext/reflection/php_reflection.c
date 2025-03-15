@@ -4956,7 +4956,25 @@ ZEND_METHOD(ReflectionClass, newInstance)
 		HashTable *named_params;
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(
+				constructor->common.attributes,
+				&message_suffix) == FAILURE
+			) {
+				ZEND_ASSERT(EG(exception));
+				zval_ptr_dtor(return_value);
+				RETURN_THROWS();
+			}
+		
+			zend_throw_exception_ex(
+				reflection_exception_ptr,
+				0,
+				"Access to non-public constructor of class %s%s",
+				ZSTR_VAL(ce->name),
+				ZSTR_VAL(message_suffix)
+			);
+			zend_string_release(message_suffix);
 			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
@@ -5029,7 +5047,25 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 	/* Run the constructor if there is one */
 	if (constructor) {
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(
+				constructor->common.attributes,
+				&message_suffix) == FAILURE
+			) {
+				ZEND_ASSERT(EG(exception));
+				zval_ptr_dtor(return_value);
+				RETURN_THROWS();
+			}
+		
+			zend_throw_exception_ex(
+				reflection_exception_ptr,
+				0,
+				"Access to non-public constructor of class %s%s",
+				ZSTR_VAL(ce->name),
+				ZSTR_VAL(message_suffix)
+			);
+			zend_string_release(message_suffix);
 			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
