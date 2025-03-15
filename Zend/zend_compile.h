@@ -894,6 +894,7 @@ typedef enum {
 	ZEND_MODIFIER_TARGET_CONSTANT,
 	ZEND_MODIFIER_TARGET_CPP,
 	ZEND_MODIFIER_TARGET_PROPERTY_HOOK,
+	ZEND_MODIFIER_TARGET_INNER_CLASS,
 } zend_modifier_target;
 
 /* Used during AST construction */
@@ -1020,6 +1021,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_FETCH_CLASS_AUTO		4
 #define ZEND_FETCH_CLASS_INTERFACE	5
 #define ZEND_FETCH_CLASS_TRAIT		6
+#define ZEND_FETCH_CLASS_OUTER		7
 #define ZEND_FETCH_CLASS_MASK        0x0f
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100

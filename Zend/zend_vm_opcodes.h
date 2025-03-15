@@ -291,7 +291,8 @@ END_EXTERN_C()
 #define ZEND_FRAMELESS_ICALL_3              207
 #define ZEND_JMP_FRAMELESS                  208
 #define ZEND_INIT_PARENT_PROPERTY_HOOK_CALL 209
+#define ZEND_FETCH_INNER_CLASS              210
 
-#define ZEND_VM_LAST_OPCODE                 209
+#define ZEND_VM_LAST_OPCODE                 210
 
 #endif

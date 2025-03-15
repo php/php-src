@@ -893,12 +893,12 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 			}
 			break;
 		case T_READONLY:
-			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP || target == ZEND_MODIFIER_TARGET_INNER_CLASS) {
 				return ZEND_ACC_READONLY;
 			}
 			break;
 		case T_ABSTRACT:
-			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_PROPERTY) {
+			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_INNER_CLASS) {
 				return ZEND_ACC_ABSTRACT;
 			}
 			break;
@@ -906,6 +906,7 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 			if (target == ZEND_MODIFIER_TARGET_METHOD
 				|| target == ZEND_MODIFIER_TARGET_CONSTANT
 				|| target == ZEND_MODIFIER_TARGET_PROPERTY
+				|| target == ZEND_MODIFIER_TARGET_INNER_CLASS
 				|| target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
 				return ZEND_ACC_FINAL;
 			}
@@ -943,6 +944,8 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 		member = "parameter";
 	} else if (target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
 		member = "property hook";
+	} else if (target == ZEND_MODIFIER_TARGET_INNER_CLASS) {
+		member = "inner class";
 	} else {
 		ZEND_UNREACHABLE();
 	}
@@ -1047,6 +1050,37 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifi
 		if ((flags & ZEND_ACC_PPP_SET_MASK) && (new_flag & ZEND_ACC_PPP_SET_MASK)) {
 			zend_throw_exception(zend_ce_compile_error,
 				"Multiple access type modifiers are not allowed", 0);
+			return 0;
+		}
+	}
+	if (target == ZEND_MODIFIER_TARGET_INNER_CLASS) {
+		if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Multiple access type modifiers are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_STATIC) || (new_flag & ZEND_ACC_STATIC)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Static inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PUBLIC_SET) || (new_flag & ZEND_ACC_PUBLIC_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Public(set) inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PROTECTED_SET) || (new_flag & ZEND_ACC_PROTECTED_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Protected(set) inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PRIVATE_SET) || (new_flag & ZEND_ACC_PRIVATE_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Private(set) inner classes are not allowed", 0);
 			return 0;
 		}
 	}
@@ -1760,8 +1794,45 @@ static uint32_t zend_get_class_fetch_type_ast(zend_ast *name_ast) /* {{{ */
 }
 /* }}} */
 
+static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *class_ast);
+
+static zend_string *zend_resolve_nested_class_name(zend_ast *ast) /* {{{ */
+{
+	ZEND_ASSERT(ast->kind == ZEND_AST_INNER_CLASS);
+
+	zend_ast *outer_class = ast->child[0];
+	zend_ast *inner_class = ast->child[1];
+
+	zend_string *outer_name, *inner_name, *full_name;
+
+	if (outer_class->kind == ZEND_AST_INNER_CLASS) {
+		outer_name = zend_resolve_nested_class_name(outer_class);
+	} else {
+		zval outer_class_name;
+		zend_try_compile_const_expr_resolve_class_name(&outer_class_name, outer_class);
+		outer_name = Z_STR(outer_class_name);
+	}
+
+	inner_name = zend_ast_get_str(inner_class);
+
+	full_name = zend_string_concat3(
+		ZSTR_VAL(outer_name), ZSTR_LEN(outer_name),
+		":>", 2,
+		ZSTR_VAL(inner_name), ZSTR_LEN(inner_name)
+	);
+
+	zend_string_release(outer_name);
+
+	return full_name;
+}
+/* }}} */
+
 static zend_string *zend_resolve_const_class_name_reference(zend_ast *ast, const char *type)
 {
+	if (ast->kind == ZEND_AST_INNER_CLASS) {
+		return zend_resolve_nested_class_name(ast);
+	}
+
 	zend_string *class_name = zend_ast_get_str(ast);
 	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type_ast(ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
@@ -1791,6 +1862,11 @@ static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *c
 {
 	uint32_t fetch_type;
 	zval *class_name;
+
+	if (class_ast->kind == ZEND_AST_INNER_CLASS) {
+		ZVAL_STR(zv, zend_resolve_nested_class_name(class_ast));
+		return 1;
+	}
 
 	if (class_ast->kind != ZEND_AST_ZVAL) {
 		return 0;
@@ -2844,9 +2920,41 @@ static inline void zend_set_class_name_op1(zend_op *opline, znode *class_node) /
 }
 /* }}} */
 
+static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t fetch_flags);
+
+static void zend_compile_inner_class_ref(znode *result, zend_ast *ast, uint32_t fetch_flags) /* {{{ */
+{
+	zend_ast *outer_class = ast->child[0];
+	zend_ast *inner_class = ast->child[1];
+
+	znode outer_node, inner_node;
+
+	// handle nesting
+	if (outer_class->kind == ZEND_AST_INNER_CLASS) {
+		zend_compile_inner_class_ref(&outer_node, outer_class, fetch_flags);
+	} else {
+		zend_compile_class_ref(&outer_node, outer_class, fetch_flags | ZEND_FETCH_CLASS_OUTER);
+	}
+
+	if (inner_class->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(inner_class)) == IS_STRING) {
+		ZVAL_STR(&inner_node.u.constant, zend_string_dup(Z_STR_P(zend_ast_get_zval(inner_class)), 0));
+		inner_node.op_type = IS_CONST;
+	} else {
+		zend_compile_expr(&inner_node, inner_class);
+	}
+
+	zend_emit_op(result, ZEND_FETCH_INNER_CLASS, &outer_node, &inner_node);
+}
+/* }}} */
+
 static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t fetch_flags) /* {{{ */
 {
 	uint32_t fetch_type;
+
+	if (name_ast->kind == ZEND_AST_INNER_CLASS) {
+		zend_compile_inner_class_ref(result, name_ast, fetch_flags);
+		return;
+	}
 
 	if (name_ast->kind != ZEND_AST_ZVAL) {
 		znode name_node;
@@ -2891,10 +2999,12 @@ static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t f
 	if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
 		result->op_type = IS_CONST;
 		ZVAL_STR(&result->u.constant, zend_resolve_class_name_ast(name_ast));
+	} else if (fetch_flags & ZEND_FETCH_CLASS_OUTER && fetch_type == ZEND_FETCH_CLASS_STATIC) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the static modifier on an inner class");
 	} else {
 		zend_ensure_valid_class_fetch_type(fetch_type);
 		result->op_type = IS_UNUSED;
-		result->u.op.num = fetch_type | fetch_flags;
+		result->u.op.num = fetch_type | (fetch_flags & ~ZEND_FETCH_CLASS_OUTER);
 	}
 }
 /* }}} */
@@ -7316,6 +7426,9 @@ static zend_type zend_compile_typename_ex(
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
 		}
+	} else if (ast->kind == ZEND_AST_INNER_CLASS) {
+		zend_string *name = zend_resolve_nested_class_name(ast);
+		return (zend_type) ZEND_TYPE_INIT_CLASS(name, /* allow null */ false, 0);
 	} else {
 		type = zend_compile_single_typename(ast);
 	}
@@ -9057,10 +9170,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		zend_string *unqualified_name = decl->name;
 
-		if (CG(active_class_entry)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
-		}
-
 		const char *type = "a class name";
 		if (decl->flags & ZEND_ACC_ENUM) {
 			type = "an enum name";
@@ -9070,7 +9179,51 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			type = "a trait name";
 		}
 		zend_assert_valid_class_name(unqualified_name, type);
-		name = zend_prefix_with_ns(unqualified_name);
+
+		if (CG(active_class_entry) && CG(active_op_array)->function_name) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be declared inside functions");
+		}
+
+		if (CG(active_class_entry)) {
+			// rename the inner class so we may reference it by name
+			name = zend_string_concat3(
+				ZSTR_VAL(CG(active_class_entry)->name), ZSTR_LEN(CG(active_class_entry)->name),
+				":>", 2,
+				ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name)
+			);
+
+			// configure the current ce->flags for a nested class. This should only include:
+			// - final
+			// - readonly
+			// - abstract
+			decl->flags |= decl->attr & ZEND_ACC_FINAL;
+			if (decl->attr & ZEND_ACC_ABSTRACT) {
+				decl->flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
+			}
+			if (decl->attr & ZEND_ACC_READONLY) {
+				decl->flags |= ZEND_ACC_READONLY_CLASS | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+			}
+
+			// configure for a nested class. This should only include:
+			// - public
+			// - private
+			// - protected
+			int propFlags = decl->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
+			// remove the flags from attrs
+			decl->attr &= ~(ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE|ZEND_ACC_FINAL|ZEND_ACC_ABSTRACT|ZEND_ACC_READONLY);
+
+			// if a class is private or protected, we need to require the correct scope
+			ce->required_scope = propFlags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED) ? CG(active_class_entry) : NULL;
+			ce->required_scope_absolute = propFlags & ZEND_ACC_PRIVATE ? true : false;
+			ce->lexical_scope = CG(active_class_entry);
+
+			// ensure the class is treated as a top-level class and not an anon class
+			toplevel = true;
+		} else {
+			name = zend_prefix_with_ns(unqualified_name);
+			ce->required_scope = NULL;
+			ce->lexical_scope = NULL;
+		}
 		name = zend_new_interned_string(name);
 		lcname = zend_string_tolower(name);
 
@@ -9088,6 +9241,8 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		/* Find an anon class name that is not in use yet. */
 		name = NULL;
 		lcname = NULL;
+		ce->required_scope = NULL;
+		ce->lexical_scope = NULL;
 		do {
 			zend_tmp_string_release(name);
 			zend_tmp_string_release(lcname);
@@ -11696,6 +11851,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
+			return;
+		case ZEND_AST_INNER_CLASS:
+			zend_compile_inner_class_ref(result, ast, ZEND_FETCH_CLASS_EXCEPTION);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
