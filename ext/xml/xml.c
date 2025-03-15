@@ -320,8 +320,11 @@ static void xml_parser_free_ltags(xml_parser *parser)
 {
 	if (parser->ltags) {
 		int inx;
-		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++)
-			zend_string_release_ex(parser->ltags[inx], false);
+		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++) {
+			if (parser->ltags[inx]) {
+				zend_string_release_ex(parser->ltags[inx], false);
+			}
+		}
 		efree(parser->ltags);
 	}
 }
