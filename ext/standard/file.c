@@ -757,7 +757,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
-		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a valid stream resource", stream->res->handle);
+		php_error_docref(NULL, E_WARNING, "cannot close the provided stream, as it must not be manually closed");
 		RETURN_FALSE;
 	}
 
