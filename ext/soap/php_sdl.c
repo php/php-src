@@ -424,7 +424,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 		 * If we don't have an import namespace attribute (i.e. chameleon schema), inherit the one from the parent WSDL. */
 		targetNamespaceValue = import_namespace ? import_namespace : tmpsdl->target_ns;
 	}
-	zend_string *targetNamespaceStr = targetNamespaceValue ? zend_string_init(targetNamespaceValue, strlen(targetNamespaceValue), false) : zend_empty_string;
+	zend_string *targetNamespaceStr = targetNamespaceValue ? zend_string_init(targetNamespaceValue, strlen(targetNamespaceValue), false) : ZSTR_EMPTY_ALLOC();
 
 	trav = definitions->children;
 	while (trav != NULL) {
@@ -791,7 +791,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.services.inner,  0, NULL, dtor_inner_qname_ht, 0);
 
 	zend_try {
-	load_wsdl_ex(this_ptr, struri, &ctx, 0, NULL);
+	load_wsdl_ex(this_ptr, struri, &ctx, false, NULL);
 	schema_pass2(&ctx);
 
 	uint32_t service_ns_count = zend_hash_num_elements(&ctx.services.inner);
