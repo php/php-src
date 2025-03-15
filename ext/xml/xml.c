@@ -676,7 +676,7 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 			zend_string *stripped_tag = xml_stripped_tag(tag_name, parser->toffset);
 			xml_add_to_info(parser, stripped_tag);
 
-			add_assoc_str(&tag, "tag", stripped_tag);
+			add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
 			add_assoc_string(&tag, "type", "open");
 			add_assoc_long(&tag, "level", parser->level);
 
@@ -766,7 +766,7 @@ void xml_endElementHandler(void *userData, const XML_Char *name)
 			zval *data = xml_get_separated_data(parser);
 			if (EXPECTED(data)) {
 				array_init(&tag);
-				add_assoc_str(&tag, "tag", stripped_tag);
+				add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
 				add_assoc_string(&tag, "type", "close");
 				add_assoc_long(&tag, "level", parser->level);
 				zend_hash_next_index_insert(Z_ARRVAL_P(data), &tag);
@@ -886,7 +886,7 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			array_init(&tag);
 			zend_string *stripped_tag = xml_stripped_tag(parser->ltags[parser->level - 1], parser->toffset);
 			xml_add_to_info(parser, stripped_tag);
-			add_assoc_str(&tag, "tag", stripped_tag);
+			add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
 			add_assoc_str(&tag, "value", decoded_value);
 			add_assoc_string(&tag, "type", "cdata");
 			add_assoc_long(&tag, "level", parser->level);
