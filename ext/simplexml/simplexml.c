@@ -1215,6 +1215,21 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 }
 /* }}} */
 
+static const char *sxe_get_object_type_name(xmlXPathObjectType type)
+{
+	switch (type) {
+		case XPATH_BOOLEAN: return "bool";
+		case XPATH_NUMBER: return "number";
+		case XPATH_STRING: return "string";
+#ifdef LIBXML_XPTR_LOCS_ENABLED
+		case XPATH_POINT: return "point";
+		case XPATH_RANGE: return "range";
+		case XPATH_LOCATIONSET: return "location set";
+#endif
+		default: return "undefined";
+	}
+}
+
 /* {{{ Runs XPath query on the XML data */
 PHP_METHOD(SimpleXMLElement, xpath)
 {
@@ -1268,6 +1283,13 @@ PHP_METHOD(SimpleXMLElement, xpath)
 	}
 
 	if (!retval) {
+		RETURN_FALSE;
+	}
+
+	if (UNEXPECTED(retval->type != XPATH_NODESET)) {
+		php_error_docref(NULL, E_WARNING, "XPath expression must return a node set, %s returned",
+			sxe_get_object_type_name(retval->type));
+		xmlXPathFreeObject(retval);
 		RETURN_FALSE;
 	}
 
