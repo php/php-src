@@ -767,6 +767,8 @@ void xml_endElementHandler(void *userData, const XML_Char *name)
 				add_assoc_string(&tag, "type", "close");
 				add_assoc_long(&tag, "level", parser->level);
 				zend_hash_next_index_insert(Z_ARRVAL_P(data), &tag);
+			} else {
+				zend_string_release_ex(stripped_tag, false);
 			}
 		}
 
