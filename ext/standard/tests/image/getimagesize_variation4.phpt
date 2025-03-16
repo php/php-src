@@ -17,7 +17,7 @@ var_dump( $info );
 ?>
 --EXPECT--
 *** Testing getimagesize() : variation ***
-array(5) {
+array(7) {
   [0]=>
   int(550)
   [1]=>
@@ -28,6 +28,10 @@ array(5) {
   string(24) "width="550" height="400""
   ["mime"]=>
   string(29) "application/x-shockwave-flash"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
