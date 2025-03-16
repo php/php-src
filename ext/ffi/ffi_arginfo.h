@@ -1,16 +1,16 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d3626f5d39317876fc7d4f240b0758f17f3472c8 */
+ * Stub hash: 5e33ab4b9af905df8a2a13c14fba9c3dea95577e */
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI\\Scope, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lib, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_load, 0, 1, FFI, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_load, 0, 1, FFI\\Scope, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_scope, 0, 1, FFI, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_scope, 0, 1, FFI\\Scope, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -79,6 +79,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_isNull, 0, 1, _IS_BOOL
 	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, ptr, FFI\\CData, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_FFI_Scope_new arginfo_class_FFI_new
+
+#define arginfo_class_FFI_Scope_cast arginfo_class_FFI_cast
+
+#define arginfo_class_FFI_Scope_type arginfo_class_FFI_type
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_CType_getName, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -138,6 +144,9 @@ ZEND_METHOD(FFI, memcmp);
 ZEND_METHOD(FFI, memset);
 ZEND_METHOD(FFI, string);
 ZEND_METHOD(FFI, isNull);
+ZEND_METHOD(FFI_Scope, new);
+ZEND_METHOD(FFI_Scope, cast);
+ZEND_METHOD(FFI_Scope, type);
 ZEND_METHOD(FFI_CType, getName);
 ZEND_METHOD(FFI_CType, getKind);
 ZEND_METHOD(FFI_CType, getSize);
@@ -176,6 +185,13 @@ static const zend_function_entry class_FFI_methods[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_FFI_Scope_methods[] = {
+	ZEND_ME(FFI_Scope, new, arginfo_class_FFI_Scope_new, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_Scope, cast, arginfo_class_FFI_Scope_cast, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_Scope, type, arginfo_class_FFI_Scope_type, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
 static const zend_function_entry class_FFI_CType_methods[] = {
 	ZEND_ME(FFI_CType, getName, arginfo_class_FFI_CType_getName, ZEND_ACC_PUBLIC)
 	ZEND_ME(FFI_CType, getKind, arginfo_class_FFI_CType_getKind, ZEND_ACC_PUBLIC)
@@ -208,6 +224,16 @@ static zend_class_entry *register_class_FFI(void)
 	zend_string *const___BIGGEST_ALIGNMENT___name = zend_string_init_interned("__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const___BIGGEST_ALIGNMENT___name, &const___BIGGEST_ALIGNMENT___value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const___BIGGEST_ALIGNMENT___name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_FFI_Scope(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "FFI", "Scope", class_FFI_Scope_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

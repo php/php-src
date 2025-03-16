@@ -45,17 +45,9 @@ try {
 
 ?>
 --EXPECTF--
-Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
-Calling FFI::new() statically is deprecated
 object(FFI\CData:uint8_t[2])#1 (2) {
   [0]=>
   int(0)
   [1]=>
   int(0)
 }
-
-Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
-Calling FFI::type() statically is deprecated
-
-Deprecated: Calling FFI::cast() statically is deprecated in %s on line %d
-Calling FFI::cast() statically is deprecated
