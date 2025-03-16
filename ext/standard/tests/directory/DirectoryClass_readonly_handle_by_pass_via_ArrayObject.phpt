@@ -30,5 +30,5 @@ try {
 ?>
 --EXPECT--
 resource(3) of type (stream)
-TypeError: Directory::read(): Argument #1 must be a valid Directory resource
+Error: Internal directory stream has been altered
 Error: Typed property Directory::$handle must not be accessed before initialization
