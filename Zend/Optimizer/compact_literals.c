@@ -165,7 +165,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
-	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot;
+	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot;
 
 	if (op_array->last_literal) {
 		info = (literal_info*)zend_arena_calloc(&ctx->arena, op_array->last_literal, sizeof(literal_info));
@@ -175,6 +175,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		end = opline + op_array->last;
 		while (opline < end) {
 			switch (opline->opcode) {
+				case ZEND_JMP_FRAMELESS:
+					LITERAL_INFO(opline->op1.constant, 1);
+					break;
 				case ZEND_INIT_FCALL_BY_NAME:
 					LITERAL_INFO(opline->op2.constant, 2);
 					break;
@@ -480,13 +483,14 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_clean(&hash);
 		op_array->last_literal = j;
 
-		const_slot = zend_arena_alloc(&ctx->arena, j * 6 * sizeof(int));
-		memset(const_slot, -1, j * 6 * sizeof(int));
+		const_slot = zend_arena_alloc(&ctx->arena, j * 7 * sizeof(int));
+		memset(const_slot, -1, j * 7 * sizeof(int));
 		class_slot = const_slot + j;
 		func_slot = class_slot + j;
 		bind_var_slot = func_slot + j;
 		property_slot = bind_var_slot + j;
 		method_slot = property_slot + j;
+		jmp_slot = method_slot + j;
 
 		/* Update opcodes to use new literals table */
 		cache_size = zend_op_array_extension_handles * sizeof(void*);
@@ -774,8 +778,14 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
 				case ZEND_JMP_FRAMELESS:
-					opline->extended_value = cache_size;
-					cache_size += sizeof(void *);
+					// op1 func
+					if (jmp_slot[opline->op1.constant] >= 0) {
+						opline->extended_value = jmp_slot[opline->op1.constant];
+					} else {
+						opline->extended_value = cache_size;
+						cache_size += sizeof(void *);
+						jmp_slot[opline->op1.constant] = opline->extended_value;
+					}
 					break;
 				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAL_EX:
