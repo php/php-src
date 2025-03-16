@@ -72,6 +72,38 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	}
 }
 
+static inline void bc_standard_vector_mul(
+	BC_VECTOR *n1_vector, size_t n1_arr_size, BC_VECTOR *n2_vector, size_t n2_arr_size, BC_VECTOR *prod_vector, size_t prod_arr_size)
+{
+	for (size_t i = 0; i < prod_arr_size; i++) {
+		prod_vector[i] = 0;
+	}
+
+	/* Multiplication and addition */
+	size_t count = 0;
+	for (size_t i = 0; i < n1_arr_size; i++) {
+		/*
+		 * This calculation adds the result multiple times to the array entries.
+		 * When multiplying large numbers of digits, there is a possibility of
+		 * overflow, so digit adjustment is performed beforehand.
+		 */
+		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
+			bc_mul_carry_calc(prod_vector, prod_arr_size);
+			count = 0;
+		}
+		count++;
+		for (size_t j = 0; j < n2_arr_size; j++) {
+			prod_vector[i + j] += n1_vector[i] * n2_vector[j];
+		}
+	}
+
+	/*
+	 * Move a value exceeding 4/8 digits by carrying to the next digit.
+	 * However, the last digit does nothing.
+	 */
+	bc_mul_carry_calc(prod_vector, prod_arr_size);
+}
+
 /*
  * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
  * The array is generated starting with the smaller digits.
@@ -82,7 +114,6 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
  */
 static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
 {
-	size_t i;
 	const char *n1end = n1->n_value + n1len - 1;
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
@@ -108,37 +139,12 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	BC_VECTOR *n2_vector = n1_vector + n1_arr_size;
 	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
 
-	for (i = 0; i < prod_arr_size; i++) {
-		prod_vector[i] = 0;
-	}
-
 	/* Convert to BC_VECTOR[] */
 	bc_convert_to_vector(n1_vector, n1end, n1len);
 	bc_convert_to_vector(n2_vector, n2end, n2len);
 
-	/* Multiplication and addition */
-	size_t count = 0;
-	for (i = 0; i < n1_arr_size; i++) {
-		/*
-		 * This calculation adds the result multiple times to the array entries.
-		 * When multiplying large numbers of digits, there is a possibility of
-		 * overflow, so digit adjustment is performed beforehand.
-		 */
-		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
-			bc_mul_carry_calc(prod_vector, prod_arr_size);
-			count = 0;
-		}
-		count++;
-		for (size_t j = 0; j < n2_arr_size; j++) {
-			prod_vector[i + j] += n1_vector[i] * n2_vector[j];
-		}
-	}
-
-	/*
-	 * Move a value exceeding 4/8 digits by carrying to the next digit.
-	 * However, the last digit does nothing.
-	 */
-	bc_mul_carry_calc(prod_vector, prod_arr_size);
+	/* Do multiply */
+	bc_standard_vector_mul(n1_vector, n1_arr_size, n2_vector, n2_arr_size, prod_vector, prod_arr_size);
 
 	/* Convert to bc_num */
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
