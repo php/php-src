@@ -36,6 +36,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17991 (Assertion failure dom_attr_value_write). (nielsdos)
   . Fix weird unpack behaviour in DOM. (nielsdos)
 
+- Fuzzer:
+  . Fixed bug GH-18081 (Memory leaks in error paths of fuzzer SAPI).
+    (Lung-Alexandra)
+
 - GD:
   . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
