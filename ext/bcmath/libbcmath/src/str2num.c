@@ -142,6 +142,13 @@ static bool bc_scientific_notation_str2num(
 		exponent_ptr++;
 	}
 
+	if (fractional_end != NULL) {
+		/* Skip fraction trailing zeros. This is rare, so don't do bulk processing. */
+		while (fractional_end[-1] == '0') {
+			fractional_end--;
+		}
+	}
+
 	const char *integer_end = integer_ptr + digits;
 
 	size_t str_scale = fractional_end - fractional_ptr;
