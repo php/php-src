@@ -356,6 +356,7 @@ extern ZEND_API void (*zend_ticks_function)(int ticks);
  * internal frame is still on top.
  */
 extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
+extern ZEND_API void (*zend_exit)(zend_string *str, zend_long status);
 
 extern ZEND_API void (*zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
