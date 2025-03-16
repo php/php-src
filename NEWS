@@ -23,6 +23,7 @@ PHP                                                                        NEWS
   . Add HEIF/HEIC support to getimagesize. (Benstone Zhang)
   . Implement #71517 (Implement SVG support for getimagesize() and friends).
     (nielsdos)
+  . Optimized PHP html_entity_decode function. (Artem Ukrainskiy)
 
 - URI:
   . Empty host handling is fixed. (Máté Kocsis)
