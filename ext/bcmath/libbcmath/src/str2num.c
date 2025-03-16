@@ -111,16 +111,6 @@ static bool bc_scientific_notation_str2num(
 {
 	const char *fractional_end = exponent_ptr;
 
-	/* In scientific notation, the mantissa always has one integer digit. */
-	if (UNEXPECTED(digits != 1)) {
-		goto fail;
-	}
-
-	/* Must be 1 <= mantissa < 10 */
-	if (UNEXPECTED(*integer_ptr == 0)) {
-		goto fail;
-	}
-
 	if (UNEXPECTED(*exponent_ptr != 'e' && *exponent_ptr != 'E')) {
 		goto fail;
 	}
@@ -152,36 +142,44 @@ static bool bc_scientific_notation_str2num(
 		exponent_ptr++;
 	}
 
+	const char *integer_end = integer_ptr + digits;
+
 	size_t str_scale = fractional_end - fractional_ptr;
+	size_t str_full_len = digits + str_scale;
+	size_t leading_zero_paddings = 0;
 
 	if (exponent_sign == PLUS) {
 		digits += exponent;
+		if (digits == 0) {
+			leading_zero_paddings = 1;
+		}
 		str_scale = str_scale > exponent ? str_scale - exponent : 0;
-
-		*num = bc_new_num_nonzeroed(digits, str_scale);
-		(*num)->n_sign = *str == '-' ? MINUS : PLUS;
-		char *nptr = (*num)->n_value;
-		char *nend = nptr + digits + str_scale;
-
-		*nptr++ = *integer_ptr - '0';
-		nptr = bc_copy_and_toggle_bcd(nptr, fractional_ptr, fractional_end);
-		while (nptr < nend) {
-			*nptr++ = 0;
-		}
 	} else {
-		digits = 0;
 		str_scale += exponent;
+		if (digits > exponent) {
+			digits -= exponent;
+		} else {
+			leading_zero_paddings = exponent - digits + 1; /* 1 is for interger part */
+			digits = 0;
+		}
+	}
 
-		*num = bc_new_num_nonzeroed(1, str_scale); // 1 is for 0
-		(*num)->n_sign = *str == '-' ? MINUS : PLUS;
-		char *nptr = (*num)->n_value;
+	*num = bc_new_num_nonzeroed(digits > 0 ? digits : 1, str_scale); /* 1 is for 0 */
+	(*num)->n_sign = *str == '-' ? MINUS : PLUS;
+	char *nptr = (*num)->n_value;
 
-		for (size_t i = 0; i < exponent; i++) {
+	for (size_t i = 0; i < leading_zero_paddings; i++) {
+		*nptr++ = 0;
+	}
+
+	nptr = bc_copy_and_toggle_bcd(nptr, integer_ptr, integer_end);
+	nptr = bc_copy_and_toggle_bcd(nptr, fractional_ptr, fractional_end);
+
+	if (digits > str_full_len) {
+		/* Fill the rest integer part with zeros */
+		for (size_t i = 0; i < digits - str_full_len; i++) {
 			*nptr++ = 0;
 		}
-
-		*nptr++ = *integer_ptr - '0';
-		nptr = bc_copy_and_toggle_bcd(nptr, fractional_ptr, fractional_end);
 	}
 
 	if (full_scale) {
