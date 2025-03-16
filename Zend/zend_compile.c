@@ -344,6 +344,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_arra
 	CG(context).in_jmp_frameless_branch = false;
 	CG(context).active_property_info_name = NULL;
 	CG(context).active_property_hook_kind = (zend_property_hook_kind)-1;
+	CG(context).arg_num = 0;
 }
 /* }}} */
 
@@ -3731,6 +3732,8 @@ static uint32_t zend_compile_args(
 	uint32_t i;
 	bool uses_arg_unpack = 0;
 	uint32_t arg_count = 0; /* number of arguments not including unpacks */
+	uint32_t prev_arg_num = CG(context).arg_num;
+	zend_string *prev_arg_name = CG(context).arg_name;
 
 	/* Whether named arguments are used syntactically, to enforce language level limitations.
 	 * May not actually use named argument passing. */
@@ -3808,6 +3811,9 @@ static uint32_t zend_compile_args(
 
 			arg_count++;
 		}
+
+		CG(context).arg_num = arg_num;
+		CG(context).arg_name = arg_name;
 
 		/* Treat passing of $GLOBALS the same as passing a call.
 		 * This will error at runtime if the argument is by-ref. */
@@ -3923,9 +3929,34 @@ static uint32_t zend_compile_args(
 		zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
 	}
 
+	CG(context).arg_num = prev_arg_num;
+	CG(context).arg_name = prev_arg_name;
+
 	return arg_count;
 }
 /* }}} */
+
+static void zend_compile_default(znode *result, zend_ast *ast)
+{
+	uint32_t arg_num = CG(context).arg_num;
+
+	if (arg_num == 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use default in non-argument context.");
+	}
+
+	zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_DEFAULT_ARG, NULL, NULL);
+	opline->op1.num = arg_num;
+
+	// Argument number could not be determined; send argument name instead.
+	if (arg_num == (uint32_t) -1) {
+		zend_string *arg_name = CG(context).arg_name;
+		zend_string_addref(arg_name);
+
+		opline->op1_type = IS_CONST;
+		opline->op1.constant = zend_add_literal_string(&arg_name);
+		opline->op2.num = zend_alloc_cache_slot();
+	}
+}
 
 ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
@@ -6381,11 +6412,12 @@ static uint32_t count_match_conds(zend_ast_list *arms)
 
 	for (uint32_t i = 0; i < arms->children; i++) {
 		zend_ast *arm_ast = arms->child[i];
-		if (arm_ast->child[0] == NULL) {
+		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
+
+		if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
 			continue;
 		}
 
-		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 		num_conds += conds->children;
 	}
 
@@ -6395,12 +6427,13 @@ static uint32_t count_match_conds(zend_ast_list *arms)
 static bool can_match_use_jumptable(zend_ast_list *arms) {
 	for (uint32_t i = 0; i < arms->children; i++) {
 		zend_ast *arm_ast = arms->child[i];
-		if (!arm_ast->child[0]) {
+		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
+
+		if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
 			/* Skip default arm */
 			continue;
 		}
 
-		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 		for (uint32_t j = 0; j < conds->children; j++) {
 			zend_ast **cond_ast = &conds->child[j];
 
@@ -6441,14 +6474,22 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 
 	for (uint32_t i = 0; i < arms->children; ++i) {
 		zend_ast *arm_ast = arms->child[i];
+		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
-		if (!arm_ast->child[0]) {
-			if (has_default_arm) {
-				CG(zend_lineno) = arm_ast->lineno;
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Match expressions may only contain one default arm");
+		for (uint32_t j = 0; j < conds->children; ++j) {
+			if (conds->child[j]->kind == ZEND_AST_DEFAULT) {
+				if (conds->children > 1) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Match arms may not share conditions with the default arm");
+				}
+
+				if (has_default_arm) {
+					CG(zend_lineno) = arm_ast->lineno;
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Match expressions may only contain one default arm");
+				}
+				has_default_arm = 1;
 			}
-			has_default_arm = 1;
 		}
 	}
 
@@ -6470,14 +6511,14 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		uint32_t cond_count = 0;
 		for (uint32_t i = 0; i < arms->children; ++i) {
 			zend_ast *arm_ast = arms->child[i];
-
-			if (!arm_ast->child[0]) {
-				continue;
-			}
-
 			zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
+
 			for (uint32_t j = 0; j < conds->children; j++) {
 				zend_ast *cond_ast = conds->child[j];
+
+				if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
+					break;
+				}
 
 				znode cond_node;
 				zend_compile_expr(&cond_node, cond_ast);
@@ -6530,10 +6571,9 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 	for (uint32_t i = 0; i < arms->children; ++i) {
 		zend_ast *arm_ast = arms->child[i];
 		zend_ast *body_ast = arm_ast->child[1];
+		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
-		if (arm_ast->child[0] != NULL) {
-			zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
-
+		if (conds->child[0]->kind != ZEND_AST_DEFAULT) {
 			for (uint32_t j = 0; j < conds->children; j++) {
 				zend_ast *cond_ast = conds->child[j];
 
@@ -11696,6 +11736,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
+			return;
+		case ZEND_AST_DEFAULT:
+			zend_compile_default(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

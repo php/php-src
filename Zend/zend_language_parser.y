@@ -86,6 +86,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence T_ELSEIF
 %precedence T_ELSE
 
+%precedence T_DEFAULT
+%precedence T_SWITCH_DEFAULT
+
 %token <ast> T_LNUMBER   "integer"
 %token <ast> T_DNUMBER   "floating-point number"
 %token <ast> T_STRING    "identifier"
@@ -705,9 +708,9 @@ switch_case_list:
 
 case_list:
 		%empty { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
-	|	case_list T_CASE expr case_separator inner_statement_list
+	|	case_list T_CASE expr case_separator inner_statement_list %prec T_SWITCH_DEFAULT
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
-	|	case_list T_DEFAULT case_separator inner_statement_list
+	|	case_list T_DEFAULT case_separator inner_statement_list %prec T_SWITCH_DEFAULT
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $4)); }
 ;
 
@@ -719,7 +722,7 @@ case_separator:
 
 match:
 		T_MATCH '(' expr ')' '{' match_arm_list '}'
-			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); };
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); }
 ;
 
 match_arm_list:
@@ -735,8 +738,6 @@ non_empty_match_arm_list:
 match_arm:
 		match_arm_cond_list possible_comma T_DOUBLE_ARROW expr
 			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, $1, $4); }
-	|	T_DEFAULT possible_comma T_DOUBLE_ARROW expr
-			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, NULL, $4); }
 ;
 
 match_arm_cond_list:
@@ -1318,6 +1319,7 @@ expr:
 	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2); }
 	|	scalar { $$ = $1; }
 	|	'`' backticks_expr '`' { $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }
+	|	T_DEFAULT { $$ = zend_ast_create(ZEND_AST_DEFAULT); }
 	|	T_PRINT expr { $$ = zend_ast_create(ZEND_AST_PRINT, $2); }
 	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }

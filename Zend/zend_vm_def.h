@@ -9842,6 +9842,74 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM|CONST, UNUSED|NUM)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	// Initialize result.
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
+
+	zend_function *called_func = EX(call)->func;
+	reflection_parameter_reference param;
+
+	zend_string *arg_name;
+	if (OP1_TYPE == IS_CONST) {
+		// Argument offset could not be determined at compile-time (i.e. closure named param); look up offset by name.
+		arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+		param.offset = zend_get_arg_offset_by_name(called_func, arg_name, CACHE_ADDR(opline->op2.num));
+	} else {
+		param.offset = opline->op1.num - 1;
+	}
+
+	param.required = param.offset < called_func->common.required_num_args;
+	param.fptr = called_func;
+
+	if (UNEXPECTED(param.required || param.offset >= called_func->common.num_args)) {
+		if (OP1_TYPE == IS_CONST) {
+			zend_value_error(
+				"Cannot pass default to non-existent named parameter $%s of %s%s%s()",
+				ZSTR_VAL(arg_name),
+				called_func->common.scope ? ZSTR_VAL(called_func->common.scope->name) : "",
+				called_func->common.scope ? "::" : "",
+				ZSTR_VAL(called_func->common.function_name)
+			);
+		} else {
+			zend_value_error(
+				"Cannot pass default to %s parameter %u of %s%s%s()",
+				param.required ? "required" : "undeclared",
+				opline->op1.num,
+				called_func->common.scope ? ZSTR_VAL(called_func->common.scope->name) : "",
+				called_func->common.scope ? "::" : "",
+				ZSTR_VAL(called_func->common.function_name)
+			);
+		}
+
+		HANDLE_EXCEPTION();
+	}
+
+	// This is not safe until the above validation is complete, since arg_info can be NULL.
+	param.arg_info = &called_func->common.arg_info[param.offset];
+
+	zval default_value;
+	if (reflection_get_parameter_default(&default_value, &param) == FAILURE) {
+		if (!EG(exception)) {
+			zend_throw_exception(NULL, "Unable to fetch default value", 0);
+		}
+		HANDLE_EXCEPTION();
+	}
+
+	// Evaluate AST value, e.g. new class.
+	if (Z_TYPE(default_value) == IS_CONSTANT_AST
+		&& UNEXPECTED(zval_update_constant_ex(&default_value, called_func->common.scope) != SUCCESS)) {
+			HANDLE_EXCEPTION();
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &default_value);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
 {
 	USE_OPLINE

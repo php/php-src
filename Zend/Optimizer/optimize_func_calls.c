@@ -117,6 +117,13 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				} while (i < func->op_array.num_args);
 			}
 
+			for (zend_op *op = fcall + 1; op != opline; ++op) {
+				// Don't inline calls with explicit default arguments.
+				if (op->opcode == ZEND_FETCH_DEFAULT_ARG) {
+					return;
+				}
+			}
+
 			if (RETURN_VALUE_USED(opline)) {
 				zval zv;
 
