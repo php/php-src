@@ -186,24 +186,15 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	return prod;
 }
 
-bc_num bc_square(bc_num n1, size_t scale)
+void bc_square_vector(BC_VECTOR *n1_vector, size_t n1_arr_size, BC_VECTOR *prod_vector, size_t prod_arr_size)
 {
-	bc_num prod;
-
-	size_t len1 = n1->n_len + n1->n_scale;
-	size_t full_scale = n1->n_scale + n1->n_scale;
-	size_t prod_scale = MIN(full_scale, MAX(scale, n1->n_scale));
-
-	if (len1 <= BC_VECTOR_SIZE) {
-		bc_fast_square(n1, len1, &prod);
+	if (n1_arr_size == 1) {
+		prod_vector[0] = *n1_vector * *n1_vector;
+		if (prod_arr_size == 2) {
+			prod_vector[1] = prod_vector[0] / BC_VECTOR_BOUNDARY_NUM;
+			prod_vector[0] %= BC_VECTOR_BOUNDARY_NUM;
+		}
 	} else {
-		bc_standard_square(n1, len1, &prod);
+		bc_standard_vector_mul(n1_vector, n1_arr_size, n1_vector, n1_arr_size, prod_vector, prod_arr_size);
 	}
-
-	prod->n_sign = PLUS;
-	prod->n_len -= full_scale;
-	prod->n_scale = prod_scale;
-	_bc_rm_leading_zeros(prod);
-
-	return prod;
 }
