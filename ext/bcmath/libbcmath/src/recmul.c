@@ -72,23 +72,6 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	}
 }
 
-/* Common part of functions bc_standard_mul and bc_standard_square
- * that takes a vector and converts it to a bc_num 	*/
-static inline void bc_mul_finish_from_vector(BC_VECTOR *prod_vector, size_t prod_arr_size, size_t prodlen, bc_num *prod) {
-	/*
-	 * Move a value exceeding 4/8 digits by carrying to the next digit.
-	 * However, the last digit does nothing.
-	 */
-	bc_mul_carry_calc(prod_vector, prod_arr_size);
-
-	/* Convert to bc_num */
-	*prod = bc_new_num_nonzeroed(prodlen, 0);
-	char *pptr = (*prod)->n_value;
-	char *pend = pptr + prodlen - 1;
-
-	bc_convert_vector_to_char(prod_vector, pptr, pend, prod_arr_size);
-}
-
 /*
  * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
  * The array is generated starting with the smaller digits.
@@ -151,7 +134,17 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		}
 	}
 
-	bc_mul_finish_from_vector(prod_vector, prod_arr_size, prodlen, prod);
+	/*
+	 * Move a value exceeding 4/8 digits by carrying to the next digit.
+	 * However, the last digit does nothing.
+	 */
+	bc_mul_carry_calc(prod_vector, prod_arr_size);
+
+	/* Convert to bc_num */
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
+	char *pptr = (*prod)->n_value;
+	char *pend = pptr + prodlen - 1;
+	bc_convert_vector_to_char(prod_vector, pptr, pend, prod_arr_size);
 
 	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
 		efree(n1_vector);
