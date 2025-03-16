@@ -4357,10 +4357,9 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, uint32_t param_
 }
 /* }}} */
 
-ZEND_API zend_result zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args) /* {{{ */
+ZEND_API zend_result zend_fcall_info_args(zend_fcall_info *fci, zval *args) /* {{{ */
 {
 	zval *arg, *params;
-	uint32_t n = 1;
 
 	zend_fcall_info_args_clear(fci, !args);
 
@@ -4376,23 +4375,11 @@ ZEND_API zend_result zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function
 	fci->params = params = (zval *) erealloc(fci->params, fci->param_count * sizeof(zval));
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), arg) {
-		if (func && !Z_ISREF_P(arg) && ARG_SHOULD_BE_SENT_BY_REF(func, n)) {
-			ZVAL_NEW_REF(params, arg);
-			Z_TRY_ADDREF_P(arg);
-		} else {
-			ZVAL_COPY(params, arg);
-		}
+		ZVAL_COPY(params, arg);
 		params++;
-		n++;
 	} ZEND_HASH_FOREACH_END();
 
 	return SUCCESS;
-}
-/* }}} */
-
-ZEND_API zend_result zend_fcall_info_args(zend_fcall_info *fci, zval *args) /* {{{ */
-{
-	return zend_fcall_info_args_ex(fci, NULL, args);
 }
 /* }}} */
 

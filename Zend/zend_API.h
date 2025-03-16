@@ -721,7 +721,6 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, uint32_t param_
  * refcount. If args is NULL and arguments are set then those are cleared.
  */
 ZEND_API zend_result zend_fcall_info_args(zend_fcall_info *fci, zval *args);
-ZEND_API zend_result zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args);
 
 /** Set arguments in the zend_fcall_info struct taking care of refcount.
  * If argc is 0 the arguments which are set will be cleared, else pass
