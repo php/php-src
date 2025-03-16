@@ -64,19 +64,17 @@ static zend_class_entry *register_class_Transliterator(void)
 	ZVAL_LONG(&const_FORWARD_value, TRANSLITERATOR_FORWARD);
 	zend_string *const_FORWARD_name = zend_string_init_interned("FORWARD", sizeof("FORWARD") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_FORWARD_name, &const_FORWARD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_FORWARD_name);
 
 	zval const_REVERSE_value;
 	ZVAL_LONG(&const_REVERSE_value, TRANSLITERATOR_REVERSE);
 	zend_string *const_REVERSE_name = zend_string_init_interned("REVERSE", sizeof("REVERSE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_REVERSE_name, &const_REVERSE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_REVERSE_name);
 
 	zval property_id_default_value;
 	ZVAL_UNDEF(&property_id_default_value);
 	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
 	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_id_name);
+	zend_string_release_ex(property_id_name, 1);
 
 	return class_entry;
 }
