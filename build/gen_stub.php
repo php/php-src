@@ -848,10 +848,6 @@ class ArgInfo {
     }
 
     public function getDefaultValueAsMethodSynopsisString(): ?string {
-        if ($this->defaultValue === null) {
-            return null;
-        }
-
         switch ($this->defaultValue) {
             case 'UNKNOWN':
                 return null;
