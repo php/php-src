@@ -710,9 +710,7 @@ class Type {
             }
         } else {
             $type = $this->types[0];
-            $name = $type->name;
-
-            $typeElement = $doc->createElement('type', $name);
+            $typeElement = $doc->createElement('type', $type->name);
         }
 
         return $typeElement;
@@ -1937,9 +1935,8 @@ ENDCOMMENT
             $returnDescriptionPara->appendChild(new DOMText("Description."));
         } else if (count($returnType->types) === 1) {
             $type = $returnType->types[0];
-            $name = $type->name;
 
-            switch ($name) {
+            switch ($type->name) {
                 case 'void':
                     $descriptionNode = $doc->createEntityReference('return.void');
                     break;
