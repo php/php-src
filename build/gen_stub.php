@@ -1270,7 +1270,7 @@ class FuncInfo {
     /** @var ArgInfo[] */
     public /* readonly */ array $args;
     public /* readonly */ ReturnInfo $return;
-    public /* readonly */ int $numRequiredArgs;
+    private /* readonly */ int $numRequiredArgs;
     public /* readonly */ ?string $cond;
     public bool $isUndocumentable;
     private ?int $minimumPhpVersionIdCompatibility;
@@ -2199,6 +2199,21 @@ OUPUT_EXAMPLE
             }
         }
         return null;
+    }
+
+    public function toArgInfoCode(?int $minPHPCompatability): string {
+        $code = $this->return->beginArgInfo(
+            $this->getArgInfoName(),
+            $this->numRequiredArgs,
+            $minPHPCompatability === null || $minPHPCompatability >= PHP_81_VERSION_ID
+        );
+    
+        foreach ($this->args as $argInfo) {
+            $code .= $argInfo->toZendInfo();
+        }
+    
+        $code .= "ZEND_END_ARG_INFO()";
+        return $code . "\n";
     }
 
     public function __clone()
@@ -5047,21 +5062,6 @@ function parseStubFile(string $code): FileInfo {
     return $fileInfo;
 }
 
-function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
-    $code = $funcInfo->return->beginArgInfo(
-        $funcInfo->getArgInfoName(),
-        $funcInfo->numRequiredArgs,
-        $fileInfo->getMinimumPhpVersionIdCompatibility() === null || $fileInfo->getMinimumPhpVersionIdCompatibility() >= PHP_81_VERSION_ID
-    );
-
-    foreach ($funcInfo->args as $argInfo) {
-        $code .= $argInfo->toZendInfo();
-    }
-
-    $code .= "ZEND_END_ARG_INFO()";
-    return $code . "\n";
-}
-
 /**
  * @template T
  * @param iterable<T> $infos
@@ -5141,7 +5141,7 @@ function generateArgInfoCode(
                     $funcInfo->getArgInfoName(), $generatedFuncInfo->getArgInfoName()
                 );
             } else {
-                $code = funcInfoToCode($fileInfo, $funcInfo);
+                $code = $funcInfo->toArgInfoCode($fileInfo->getMinimumPhpVersionIdCompatibility());
             }
 
             $generatedFuncInfos[] = $funcInfo;
