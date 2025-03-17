@@ -464,7 +464,6 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 						/* Update opcode */
 						op->opcode = ZEND_IN_ARRAY;
 						op->extended_value = strict;
-						op->op2_type = IS_CONST;
 						op->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
 						if (has_opdata) {
 							MAKE_NOP(op + 1);
