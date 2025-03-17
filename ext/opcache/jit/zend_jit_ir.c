@@ -1030,11 +1030,6 @@ static int zend_jit_set_ip(zend_jit_ctx *jit, const zend_op *target)
 	return 1;
 }
 
-static int zend_jit_set_ip_ex(zend_jit_ctx *jit, const zend_op *target, bool set_ip_reg)
-{
-	return zend_jit_set_ip(jit, target);
-}
-
 static void jit_SET_EX_OPLINE(zend_jit_ctx *jit, const zend_op *target)
 {
 	if (jit->last_valid_opline == target) {

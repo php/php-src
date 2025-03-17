@@ -7438,7 +7438,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 				original_handler = 1;
 			}
 		}
-		zend_jit_set_ip_ex(&ctx, opline, original_handler);
+		zend_jit_set_ip(&ctx, opline);
 	}
 
 	zend_jit_trace_return(&ctx, original_handler, opline);
