@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed GH-18243 imagettftext() overflow/underflow on font size value.
     (David Carlier)
 
+- libxml:
+  . Fixed custom external entity loader returning an invalid resource leading
+    to a confusing TypeError message. (Girgias)
+
 - OpenSSL:
   . Fix memory leak in openssl_sign() when passing invalid algorithm.
     (nielsdos)
