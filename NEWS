@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Fixed property access of PHP objects wrapped in variant. (cmb)
   . Fixed method calls for PHP objects wrapped in variant. (cmb)
 
+- apache2handler:
+  . Added the apache_connection_stream() function for CGI WebSockets. (Richard Tyler Miles)
+
 - Core:
   . Fixed bug GH-16665 (\array and \callable should not be usable in
     class_alias). (nielsdos)
