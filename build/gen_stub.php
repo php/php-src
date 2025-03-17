@@ -1146,7 +1146,7 @@ class ReturnInfo {
         self::REFCOUNT_N,
     ];
 
-    public /* readonly */ bool $byRef;
+    private /* readonly */ bool $byRef;
     // NOT readonly - gets removed when discarding info for older PHP versions
     public ?Type $type;
     public /* readonly */ ?Type $phpDocType;
@@ -1192,6 +1192,69 @@ class ReturnInfo {
         }
 
         $this->refcount = $refcount;
+    }
+
+    public function beginArgInfo(string $funcInfoName, int $minArgs, bool $php81MinimumCompatibility): string {
+        $code = $this->beginArgInfoCompatible($funcInfoName, $minArgs);
+        if ($this->type !== null && $this->tentativeReturnType && !$php81MinimumCompatibility) {
+            $realCode = "#if (PHP_VERSION_ID >= " . PHP_81_VERSION_ID . ")\n";
+            $realCode .= $code;
+            $realCode .= sprintf(
+                "#else\nZEND_BEGIN_ARG_INFO_EX(%s, 0, %d, %d)\n#endif\n",
+                $funcInfoName, $this->byRef, $minArgs
+            );
+            return $realCode;
+        }
+        return $code;
+    }
+
+    /**
+     * Assumes PHP 8.1 compatibility, if that is not the case the caller is
+     * responsible for making the use of a tentative return type conditional
+     * based on the PHP version. Separate to allow using early returns
+     */
+    private function beginArgInfoCompatible(string $funcInfoName, int $minArgs): string {
+        if ($this->type !== null) {
+            if (null !== $simpleReturnType = $this->type->tryToSimpleType()) {
+                if ($simpleReturnType->isBuiltin) {
+                    return sprintf(
+                        "%s(%s, %d, %d, %s, %d)\n",
+                        $this->tentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX",
+                        $funcInfoName, $this->byRef,
+                        $minArgs,
+                        $simpleReturnType->toTypeCode(), $this->type->isNullable()
+                    );
+                }
+                return sprintf(
+                    "%s(%s, %d, %d, %s, %d)\n",
+                    $this->tentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX",
+                    $funcInfoName, $this->byRef,
+                    $minArgs,
+                    $simpleReturnType->toEscapedName(), $this->type->isNullable()
+                );
+            }
+            $arginfoType = $this->type->toArginfoType();
+            if ($arginfoType->hasClassType()) {
+                return sprintf(
+                    "%s(%s, %d, %d, %s, %s)\n",
+                    $this->tentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX",
+                    $funcInfoName, $this->byRef,
+                    $minArgs,
+                    $arginfoType->toClassTypeString(), $arginfoType->toTypeMask()
+                );
+            }
+            return sprintf(
+                "%s(%s, %d, %d, %s)\n",
+                $this->tentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX",
+                $funcInfoName, $this->byRef,
+                $minArgs,
+                $arginfoType->toTypeMask()
+            );
+        }
+        return sprintf(
+            "ZEND_BEGIN_ARG_INFO_EX(%s, 0, %d, %d)\n",
+            $funcInfoName, $this->byRef, $minArgs
+        );
     }
 }
 
@@ -5012,65 +5075,11 @@ function parseStubFile(string $code): FileInfo {
 }
 
 function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
-    $code = '';
-    $returnType = $funcInfo->return->type;
-    $isTentativeReturnType = $funcInfo->return->tentativeReturnType;
-    $php81MinimumCompatibility = $fileInfo->getMinimumPhpVersionIdCompatibility() === null || $fileInfo->getMinimumPhpVersionIdCompatibility() >= PHP_81_VERSION_ID;
-
-    if ($returnType !== null) {
-        if ($isTentativeReturnType && !$php81MinimumCompatibility) {
-            $code .= "#if (PHP_VERSION_ID >= " . PHP_81_VERSION_ID . ")\n";
-        }
-        if (null !== $simpleReturnType = $returnType->tryToSimpleType()) {
-            if ($simpleReturnType->isBuiltin) {
-                $code .= sprintf(
-                    "%s(%s, %d, %d, %s, %d)\n",
-                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX",
-                    $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
-                    $funcInfo->numRequiredArgs,
-                    $simpleReturnType->toTypeCode(), $returnType->isNullable()
-                );
-            } else {
-                $code .= sprintf(
-                    "%s(%s, %d, %d, %s, %d)\n",
-                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX",
-                    $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
-                    $funcInfo->numRequiredArgs,
-                    $simpleReturnType->toEscapedName(), $returnType->isNullable()
-                );
-            }
-        } else {
-            $arginfoType = $returnType->toArginfoType();
-            if ($arginfoType->hasClassType()) {
-                $code .= sprintf(
-                    "%s(%s, %d, %d, %s, %s)\n",
-                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX",
-                    $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
-                    $funcInfo->numRequiredArgs,
-                    $arginfoType->toClassTypeString(), $arginfoType->toTypeMask()
-                );
-            } else {
-                $code .= sprintf(
-                    "%s(%s, %d, %d, %s)\n",
-                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX",
-                    $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
-                    $funcInfo->numRequiredArgs,
-                    $arginfoType->toTypeMask()
-                );
-            }
-        }
-        if ($isTentativeReturnType && !$php81MinimumCompatibility) {
-            $code .= sprintf(
-                "#else\nZEND_BEGIN_ARG_INFO_EX(%s, 0, %d, %d)\n#endif\n",
-                $funcInfo->getArgInfoName(), $funcInfo->return->byRef, $funcInfo->numRequiredArgs
-            );
-        }
-    } else {
-        $code .= sprintf(
-            "ZEND_BEGIN_ARG_INFO_EX(%s, 0, %d, %d)\n",
-            $funcInfo->getArgInfoName(), $funcInfo->return->byRef, $funcInfo->numRequiredArgs
-        );
-    }
+    $code = $funcInfo->return->beginArgInfo(
+        $funcInfo->getArgInfoName(),
+        $funcInfo->numRequiredArgs,
+        $fileInfo->getMinimumPhpVersionIdCompatibility() === null || $fileInfo->getMinimumPhpVersionIdCompatibility() >= PHP_81_VERSION_ID
+    );
 
     foreach ($funcInfo->args as $argInfo) {
         $code .= $argInfo->toZendInfo();
