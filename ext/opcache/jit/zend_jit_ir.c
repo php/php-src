@@ -12185,7 +12185,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 								if (GCC_GLOBAL_REGS) {
 									ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_long_key_ex), h);
 								} else {
-									ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_long_key_ex), h, jit_FP(jit), jit_IP(jit));
+									ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_long_key_ex), h, jit_FP(jit));
 								}
 							} else {
 								ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_undefined_offset, IR_FASTCALL_FUNC));
