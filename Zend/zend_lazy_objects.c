@@ -329,7 +329,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		for (int i = 0; i < reflection_ce->default_properties_count; i++) {
 			zend_property_info *prop_info = obj->ce->properties_info_table[i];
 			if (EXPECTED(prop_info)) {
-				zval *p = &obj->properties_table[i];
+				zval *p = &obj->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 				if (Z_TYPE_P(p) != IS_UNDEF) {
 					if ((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(p) & IS_PROP_REINITABLE)
 							/* TODO: test final property */
