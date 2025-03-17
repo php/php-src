@@ -982,31 +982,26 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 #ifdef HAVE_GCC_GLOBAL_REGS
 		handler();
 		if (UNEXPECTED(opline == zend_jit_halt_op)) {
+#else
+		opline = handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+# ifdef ZEND_HIGH_HALF_KERNEL
+		if (UNEXPECTED((intptr_t)opline == 0)) {
+# else
+		if (UNEXPECTED(((uintptr_t)opline & ~ZEND_VM_ENTER_BIT) == 0)) {
+# endif
+#endif
 			stop = ZEND_JIT_TRACE_STOP_RETURN;
 			opline = NULL;
 			halt = ZEND_JIT_TRACE_HALT;
 			break;
 		}
-		if (UNEXPECTED(execute_data != prev_execute_data)) {
-#else
-		opline = handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-# ifdef ZEND_HIGH_HALF_KERNEL
-		if ((intptr_t)opline <= 0) {
-# else
+#ifndef HAVE_GCC_GLOBAL_REGS
 		if ((uintptr_t)opline & ZEND_VM_ENTER_BIT) {
-# endif
 			opline = (const zend_op*)((uintptr_t)opline & ~ZEND_VM_ENTER_BIT);
-			if (opline == NULL) {
-				stop = ZEND_JIT_TRACE_STOP_RETURN;
-				opline = NULL;
-				halt = ZEND_JIT_TRACE_HALT;
-				break;
-			} else if (execute_data == EG(current_execute_data)) {
-				/* return after interrupt handler */
-				ZEND_ASSERT(0 && "TODO");
-			}
 			execute_data = EG(current_execute_data);
+		}
 #endif
+		if (UNEXPECTED(execute_data != prev_execute_data)) {
 
 			op_array = &EX(func)->op_array;
 			jit_extension =
