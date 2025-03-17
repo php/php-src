@@ -157,25 +157,18 @@ PHP_FUNCTION(dir)
 /* }}} */
 
 
-static php_stream* php_dir_get_directory_stream_from_user_arg(zval *arg)
+static php_stream* php_dir_get_directory_stream_from_user_arg(php_stream *dir_stream)
 {
-	zend_resource *res;
-	if (arg == NULL) {
+	if (dir_stream == NULL) {
 		if (UNEXPECTED(DIRG(default_dir) == NULL)) {
 			zend_type_error("No resource supplied");
 			return NULL;
 		}
-		res = DIRG(default_dir);
-	} else {
-		ZEND_ASSERT(Z_TYPE_P(arg) == IS_RESOURCE);
-		res = Z_RES_P(arg);
+		zend_resource *res = DIRG(default_dir);
+		ZEND_ASSERT(res->type == php_file_le_stream());
+		dir_stream = (php_stream*) res->ptr;
 	}
 
-	if (UNEXPECTED(res->type != php_file_le_stream())) {
-		zend_argument_type_error(1, "must be a valid Directory resource");
-		return NULL;
-	}
-	php_stream *dir_stream = (php_stream*) res->ptr;
 	if (UNEXPECTED((dir_stream->flags & PHP_STREAM_FLAG_IS_DIR)) == 0) {
 		zend_argument_type_error(1, "must be a valid Directory resource");
 		return NULL;
@@ -209,14 +202,14 @@ static php_stream* php_dir_get_directory_stream_from_this(zval *this_z)
 /* {{{ Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
-	zval *id = NULL;
+	php_stream *dirp = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_OR_NULL(id)
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_stream *dirp = php_dir_get_directory_stream_from_user_arg(id);
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
 	if (UNEXPECTED(dirp == NULL)) {
 		RETURN_THROWS();
 	}
@@ -249,14 +242,14 @@ PHP_METHOD(Directory, close)
 /* {{{ Rewind dir_handle back to the start */
 PHP_FUNCTION(rewinddir)
 {
-	zval *id = NULL;
+	php_stream *dirp = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_OR_NULL(id)
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_stream *dirp = php_dir_get_directory_stream_from_user_arg(id);
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
 	if (UNEXPECTED(dirp == NULL)) {
 		RETURN_THROWS();
 	}
@@ -280,14 +273,14 @@ PHP_METHOD(Directory, rewind)
 /* {{{ Read directory entry from dir_handle */
 PHP_FUNCTION(readdir)
 {
-	zval *id = NULL;
+	php_stream *dirp = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE_OR_NULL(id)
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_stream *dirp = php_dir_get_directory_stream_from_user_arg(id);
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
 	if (UNEXPECTED(dirp == NULL)) {
 		RETURN_THROWS();
 	}
