@@ -839,7 +839,7 @@ class ArgInfo {
         return $this->defaultValue !== null && $this->defaultValue !== "UNKNOWN";
     }
 
-    public function getDefaultValueAsArginfoString(): string {
+    private function getDefaultValueAsArginfoString(): string {
         if ($this->hasProperDefaultValue()) {
             return '"' . addslashes($this->defaultValue) . '"';
         }
@@ -858,6 +858,50 @@ class ArgInfo {
         }
 
         return $this->defaultValue;
+    }
+
+    public function toZendInfo(): string {
+        $argKind = $this->isVariadic ? "ARG_VARIADIC" : "ARG";
+        $argDefaultKind = $this->hasProperDefaultValue() ? "_WITH_DEFAULT_VALUE" : "";
+        $argType = $this->type;
+        if ($argType !== null) {
+            if (null !== $simpleArgType = $argType->tryToSimpleType()) {
+                if ($simpleArgType->isBuiltin) {
+                    return sprintf(
+                        "\tZEND_%s_TYPE_INFO%s(%s, %s, %s, %d%s)\n",
+                        $argKind, $argDefaultKind, $this->sendBy, $this->name,
+                        $simpleArgType->toTypeCode(), $argType->isNullable(),
+                        $this->hasProperDefaultValue() ? ", " . $this->getDefaultValueAsArginfoString() : ""
+                    );
+                }
+                return sprintf(
+                    "\tZEND_%s_OBJ_INFO%s(%s, %s, %s, %d%s)\n",
+                    $argKind, $argDefaultKind, $this->sendBy, $this->name,
+                    $simpleArgType->toEscapedName(), $argType->isNullable(),
+                    $this->hasProperDefaultValue() ? ", " . $this->getDefaultValueAsArginfoString() : ""
+                );
+            }
+            $arginfoType = $argType->toArginfoType();
+            if ($arginfoType->hasClassType()) {
+                return sprintf(
+                    "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s%s)\n",
+                    $argKind, $this->sendBy, $this->name,
+                    $arginfoType->toClassTypeString(), $arginfoType->toTypeMask(),
+                    !$this->isVariadic ? ", " . $this->getDefaultValueAsArginfoString() : ""
+                );
+            }
+            return sprintf(
+                "\tZEND_%s_TYPE_MASK(%s, %s, %s, %s)\n",
+                $argKind, $this->sendBy, $this->name,
+                $arginfoType->toTypeMask(),
+                $this->getDefaultValueAsArginfoString()
+            );
+        }
+        return sprintf(
+            "\tZEND_%s_INFO%s(%s, %s%s)\n",
+            $argKind, $argDefaultKind, $this->sendBy, $this->name,
+            $this->hasProperDefaultValue() ? ", " . $this->getDefaultValueAsArginfoString() : ""
+        );
     }
 }
 
@@ -5029,51 +5073,7 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
     }
 
     foreach ($funcInfo->args as $argInfo) {
-        $argKind = $argInfo->isVariadic ? "ARG_VARIADIC" : "ARG";
-        $argDefaultKind = $argInfo->hasProperDefaultValue() ? "_WITH_DEFAULT_VALUE" : "";
-        $argType = $argInfo->type;
-        if ($argType !== null) {
-            if (null !== $simpleArgType = $argType->tryToSimpleType()) {
-                if ($simpleArgType->isBuiltin) {
-                    $code .= sprintf(
-                        "\tZEND_%s_TYPE_INFO%s(%s, %s, %s, %d%s)\n",
-                        $argKind, $argDefaultKind, $argInfo->sendBy, $argInfo->name,
-                        $simpleArgType->toTypeCode(), $argType->isNullable(),
-                        $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
-                    );
-                } else {
-                    $code .= sprintf(
-                        "\tZEND_%s_OBJ_INFO%s(%s, %s, %s, %d%s)\n",
-                        $argKind, $argDefaultKind, $argInfo->sendBy, $argInfo->name,
-                        $simpleArgType->toEscapedName(), $argType->isNullable(),
-                        $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
-                    );
-                }
-            } else {
-                $arginfoType = $argType->toArginfoType();
-                if ($arginfoType->hasClassType()) {
-                    $code .= sprintf(
-                        "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s%s)\n",
-                        $argKind, $argInfo->sendBy, $argInfo->name,
-                        $arginfoType->toClassTypeString(), $arginfoType->toTypeMask(),
-                        !$argInfo->isVariadic ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
-                    );
-                } else {
-                    $code .= sprintf(
-                        "\tZEND_%s_TYPE_MASK(%s, %s, %s, %s)\n",
-                        $argKind, $argInfo->sendBy, $argInfo->name,
-                        $arginfoType->toTypeMask(),
-                        $argInfo->getDefaultValueAsArginfoString()
-                    );
-                }
-            }
-        } else {
-            $code .= sprintf(
-                "\tZEND_%s_INFO%s(%s, %s%s)\n",
-                $argKind, $argDefaultKind, $argInfo->sendBy, $argInfo->name,
-                $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
-            );
-        }
+        $code .= $argInfo->toZendInfo();
     }
 
     $code .= "ZEND_END_ARG_INFO()";
