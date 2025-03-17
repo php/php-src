@@ -67,6 +67,13 @@ bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 		rscale = MIN (base->n_scale * exponent, MAX(scale, base->n_scale));
 	}
 
+	if (bc_is_zero(base)) {
+		bc_free_num(result);
+		*result = bc_copy_num(BCG(_zero_));
+		/* If the exponent is negative, it divides by 0, so it is false. */
+		return !is_neg;
+	}
+
 	/* Set initial value of temp. */
 	power = bc_copy_num(base);
 	pwrscale = base->n_scale;
