@@ -2701,9 +2701,8 @@ class ConstInfo extends VariableLike
 
         if ($this->exposedDocComment) {
             $commentCode = "const_{$constName}_comment";
-            $escapedComment = $this->exposedDocComment->escape();
-            $escapedCommentLength = $this->exposedDocComment->getLength();
-            $code .= "\tzend_string *$commentCode = zend_string_init_interned(\"$escapedComment\", $escapedCommentLength, 1);\n";
+            $escapedCommentInit = $this->exposedDocComment->getInitCode();
+            $code .= "\tzend_string *$commentCode = $escapedCommentInit\n";
         } else {
             $commentCode = "NULL";
         }
@@ -3029,9 +3028,8 @@ class PropertyInfo extends VariableLike
 
         if ($this->exposedDocComment) {
             $commentCode = "property_{$propertyName}_comment";
-            $escapedComment = $this->exposedDocComment->escape();
-            $escapedCommentLength = $this->exposedDocComment->getLength();
-            $code .= "\tzend_string *$commentCode = zend_string_init_interned(\"$escapedComment\", $escapedCommentLength, 1);\n";
+            $escapedCommentInit = $this->exposedDocComment->getInitCode();
+            $code .= "\tzend_string *$commentCode = $escapedCommentInit\n";
         } else {
             $commentCode = "NULL";
         }
@@ -3423,7 +3421,7 @@ class ClassInfo {
                 $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
             }
 
-            $code .= "\tclass_entry->doc_comment = zend_string_init_interned(\"" . $this->exposedDocComment->escape() . "\", " . $this->exposedDocComment->getLength() . ", 1);\n";
+            $code .= "\tclass_entry->doc_comment = " . $this->exposedDocComment->getInitCode() . "\n";
 
             if (!$php84MinimumCompatibility) {
                 $code .= "#endif\n";
@@ -4251,8 +4249,8 @@ class ExposedDocComment {
         return str_replace("\n", '\n', addslashes($this->docComment));
     }
 
-    public function getLength(): int {
-        return strlen($this->docComment);
+    public function getInitCode(): string {
+        return "zend_string_init_interned(\"" . $this->escape() . "\", " . strlen($this->docComment) . ", 1);";
     }
 
     /** @param array<int, DocComment> $comments */
