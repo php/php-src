@@ -1684,11 +1684,9 @@ class FuncInfo {
     }
 
     /**
-     * @param array<string, FuncInfo> $funcMap
-     * @param array<string, FuncInfo> $aliasMap
      * @throws Exception
      */
-    public function getMethodSynopsisDocument(array $funcMap, array $aliasMap): ?string {
+    public function getMethodSynopsisDocument(): ?string {
         $REFSEC1_SEPERATOR = "\n\n ";
 
         $doc = new DOMDocument("1.0", "utf-8");
@@ -1733,7 +1731,7 @@ class FuncInfo {
         /* Creation of <refsect1 role="description"> */
         $descriptionRefSec = $this->generateRefSect1($doc, 'description');
 
-        $methodSynopsis = $this->getMethodSynopsisElement($funcMap, $aliasMap, $doc);
+        $methodSynopsis = $this->getMethodSynopsisElement($doc);
         if (!$methodSynopsis) {
             return null;
         }
@@ -2117,11 +2115,9 @@ OUPUT_EXAMPLE
     }
 
     /**
-     * @param array<string, FuncInfo> $funcMap
-     * @param array<string, FuncInfo> $aliasMap
      * @throws Exception
      */
-    public function getMethodSynopsisElement(array $funcMap, array $aliasMap, DOMDocument $doc): ?DOMElement {
+    public function getMethodSynopsisElement(DOMDocument $doc): ?DOMElement {
         if ($this->hasParamWithUnknownDefaultValue()) {
             return null;
         }
@@ -2773,7 +2769,7 @@ class ConstInfo extends VariableLike
         if ($this->name->isClassConst()) {
             $code .= $this->getClassConstDeclaration($value, $allConstInfos);
         } else {
-            $code .= $this->getGlobalConstDeclaration($value, $allConstInfos);
+            $code .= $this->getGlobalConstDeclaration($value);
         }
         $code .= $this->getValueAssertion($value);
 
@@ -2784,8 +2780,7 @@ class ConstInfo extends VariableLike
         return $code;
     }
 
-    /** @param array<string, ConstInfo> $allConstInfos */
-    private function getGlobalConstDeclaration(EvaluatedValue $value, array $allConstInfos): string
+    private function getGlobalConstDeclaration(EvaluatedValue $value): string
     {
         $constName = str_replace('\\', '\\\\', $this->name->__toString());
         $constValue = $value->value;
@@ -5783,14 +5778,13 @@ function getReplacedSynopsisXml(string $xml): string
 
 /**
  * @param array<string, FuncInfo> $funcMap
- * @param array<string, FuncInfo> $aliasMap
  * @return array<string, string>
  */
-function generateMethodSynopses(array $funcMap, array $aliasMap): array {
+function generateMethodSynopses(array $funcMap): array {
     $result = [];
 
     foreach ($funcMap as $funcInfo) {
-        $methodSynopsis = $funcInfo->getMethodSynopsisDocument($funcMap, $aliasMap);
+        $methodSynopsis = $funcInfo->getMethodSynopsisDocument();
         if ($methodSynopsis !== null) {
             $result[$funcInfo->name->getMethodSynopsisFilename() . ".xml"] = $methodSynopsis;
         }
@@ -5801,7 +5795,6 @@ function generateMethodSynopses(array $funcMap, array $aliasMap): array {
 
 /**
  * @param array<string, FuncInfo> $funcMap
- * @param array<string, FuncInfo> $aliasMap
  * @param array<int, string> $methodSynopsisWarnings
  * @param array<string, FuncInfo> $undocumentedFuncMap
  * @return array<string, string>
@@ -5809,7 +5802,6 @@ function generateMethodSynopses(array $funcMap, array $aliasMap): array {
 function replaceMethodSynopses(
     string $targetDirectory,
     array $funcMap,
-    array $aliasMap,
     bool $isVerifyManual,
     array &$methodSynopsisWarnings,
     array &$undocumentedFuncMap
@@ -5908,7 +5900,7 @@ function replaceMethodSynopses(
             $funcInfo = $funcMap[$funcName];
             $documentedFuncMap[$funcInfo->name->__toString()] = $funcInfo->name->__toString();
 
-            $newMethodSynopsis = $funcInfo->getMethodSynopsisElement($funcMap, $aliasMap, $doc);
+            $newMethodSynopsis = $funcInfo->getMethodSynopsisElement($doc);
             if ($newMethodSynopsis === null) {
                 continue;
             }
@@ -6326,7 +6318,7 @@ if ($replaceClassSynopses || $verifyManual) {
 }
 
 if ($generateMethodSynopses) {
-    $methodSynopses = generateMethodSynopses($funcMap, $aliasMap);
+    $methodSynopses = generateMethodSynopses($funcMap);
     if (!file_exists($manualTarget)) {
         mkdir($manualTarget);
     }
@@ -6345,7 +6337,7 @@ if ($generateMethodSynopses) {
 }
 
 if ($replaceMethodSynopses || $verifyManual) {
-    $methodSynopses = replaceMethodSynopses($manualTarget, $funcMap, $aliasMap, $verifyManual, $methodSynopsisWarnings, $undocumentedFuncMap);
+    $methodSynopses = replaceMethodSynopses($manualTarget, $funcMap, $verifyManual, $methodSynopsisWarnings, $undocumentedFuncMap);
 
     if ($replaceMethodSynopses) {
         foreach ($methodSynopses as $filename => $content) {
