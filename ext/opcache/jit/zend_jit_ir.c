@@ -4101,6 +4101,7 @@ static void zend_jit_recv_entry(zend_jit_ctx *jit, int b)
 	/* Insert a MERGE block with additional ENTRY input between predecessor and this one */
 	ir_ENTRY(ref, bb->start);
 	if (!GCC_GLOBAL_REGS) {
+		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
 		jit_STORE_FP(jit, 2);
@@ -4121,7 +4122,7 @@ static void zend_jit_osr_entry(zend_jit_ctx *jit, int b)
 	/* Insert a MERGE block with additional ENTRY input between predecessor and this one */
 	ir_ENTRY(ref, bb->start);
 	if (!GCC_GLOBAL_REGS) {
-		/* 2 is hardcoded reference to IR_PARAM */
+		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
 		jit_STORE_FP(jit, 2);
@@ -4137,7 +4138,7 @@ static ir_ref zend_jit_continue_entry(zend_jit_ctx *jit, ir_ref src, unsigned in
 {
 	ir_ENTRY(src, label);
 	if (!GCC_GLOBAL_REGS) {
-		/* 2 is hardcoded reference to IR_PARAM */
+		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
 		jit_STORE_FP(jit, 2);
