@@ -17073,11 +17073,15 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
 		if (opline->opcode == ZEND_RETURN ||
 		    opline->opcode == ZEND_RETURN_BY_REF ||
+		    opline->opcode == ZEND_DO_UCALL ||
+		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
+		    opline->opcode == ZEND_DO_FCALL ||
 		    opline->opcode == ZEND_GENERATOR_CREATE) {
-			// TODO: what other ops need this?
-			ref = ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT));
+
+			jit_LOAD_IP(jit, ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
+		} else {
+			jit_LOAD_IP(jit, ref);
 		}
-		jit_LOAD_IP(jit, ref);
 	}
 	if (may_throw
 	 && opline->opcode != ZEND_RETURN
@@ -17117,10 +17121,8 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 					ir_GUARD(ir_NE(jit_IP(jit), ir_CONST_ADDR(zend_jit_halt_op)),
 						jit_STUB_ADDR(jit, jit_stub_trace_halt));
 				}
-			} else if (GCC_GLOBAL_REGS) {
-				ir_GUARD(jit_IP(jit), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 			} else {
-				// TODO: check
+				/* IP has been cleared of ZEND_VM_ENTER_BIT already */
 				ir_GUARD(jit_IP(jit), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 			}
 		} else if (opline->opcode == ZEND_GENERATOR_RETURN ||
