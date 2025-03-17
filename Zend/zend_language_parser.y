@@ -1819,6 +1819,14 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		return sizeof("\"\\\"")-1;
 	}
 
+	/* We used "amp" as a dummy label to avoid a duplicate token literal warning. */
+	if (strcmp(toktype, "\"amp\"") == 0) {
+		if (yyres) {
+			yystpcpy(yyres, "token \"&\"");
+		}
+		return sizeof("token \"&\"")-1;
+	}
+
 	/* Strip off the outer quote marks */
 	if (toktype_len >= 2 && *toktype == '"') {
 		toktype++;

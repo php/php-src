@@ -37,6 +37,7 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-18033 (NULL-ptr dereference when using register_tick_function
     in destructor). (nielsdos)
+  . Fixed bug GH-18026 (Improve "expecting token" error for ampersand). (ilutov)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
