@@ -1975,12 +1975,16 @@ ENDCOMMENT
 
         $prog = $doc->createElement('programlisting');
         $prog->setAttribute('role', 'php');
+        // So that GitHub syntax highlighting doesn't treat the closing tag
+        // in the DOMCdataSection as indication that it should stop syntax
+        // highlighting, break it up
+        $empty = '';
         $code = new DOMCdataSection(
             <<<CODE_EXAMPLE
 
 <?php
 echo "Code example";
-?>
+?$empty>
 
 CODE_EXAMPLE
         );
