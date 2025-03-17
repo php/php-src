@@ -412,7 +412,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 			if ((op->opcode == ZEND_FRAMELESS_ICALL_2
 			  || (op->opcode == ZEND_FRAMELESS_ICALL_3 && (op + 1)->op1_type == IS_CONST))
 			 && call_info->callee_func
-			 && zend_string_equals_literal(call_info->callee_func->common.function_name, "in_array")) {
+			 && zend_string_equals_literal_ci(call_info->callee_func->common.function_name, "in_array")) {
 
 				bool strict = 0;
 				bool has_opdata = op->opcode == ZEND_FRAMELESS_ICALL_3;
