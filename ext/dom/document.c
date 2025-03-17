@@ -1607,14 +1607,25 @@ static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(const xmlNode *n
 	}
 }
 
+static void dom_xinclude_strip_references_for_attributes(xmlNodePtr basep)
+{
+	for (xmlAttrPtr prop = basep->properties; prop; prop = prop->next) {
+		php_libxml_node_free_resource((xmlNodePtr) prop);
+	}
+}
+
 static void dom_xinclude_strip_references(xmlNodePtr basep)
 {
 	php_libxml_node_free_resource(basep);
+	dom_xinclude_strip_references_for_attributes(basep);
 
 	xmlNodePtr current = basep->children;
 
 	while (current) {
 		php_libxml_node_free_resource(current);
+		if (current->type == XML_ELEMENT_NODE) {
+			dom_xinclude_strip_references_for_attributes(current);
+		}
 		current = php_dom_next_in_tree_order(current, basep);
 	}
 }
