@@ -26,7 +26,6 @@ var_dump($obj);
 --EXPECTF--
 string(10) "C::__unset"
 init
-string(10) "C::__unset"
 lazy proxy object(C)#%d (1) {
   ["instance"]=>
   object(C)#%d (1) {

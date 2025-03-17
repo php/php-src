@@ -1574,10 +1574,10 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 
 		if (UNEXPECTED(guard)) {
 			guard = zend_get_property_guard(zobj, name);
-			if (!((*guard) & IN_ISSET)) {
-				(*guard) |= IN_ISSET;
+			if (!((*guard) & IN_UNSET)) {
+				(*guard) |= IN_UNSET;
 				zend_std_unset_property(zobj, name, cache_slot);
-				(*guard) &= ~IN_ISSET;
+				(*guard) &= ~IN_UNSET;
 				return;
 			}
 		}
