@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fix weird unpack behaviour in DOM. (nielsdos)
+  . Fix xinclude destruction of live attributes. (nielsdos)
 
 - GD:
   . Fixed bug GH-17984 (calls with arguments as array with references).
