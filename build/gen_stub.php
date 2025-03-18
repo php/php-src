@@ -1656,9 +1656,6 @@ class FuncInfo {
         return $refSec;
     }
 
-    /**
-     * @throws Exception
-     */
     public function getMethodSynopsisDocument(): ?string {
         $REFSEC1_SEPERATOR = "\n\n ";
 
@@ -2087,9 +2084,6 @@ OUPUT_EXAMPLE
         return $refSec;
     }
 
-    /**
-     * @throws Exception
-     */
     public function getMethodSynopsisElement(DOMDocument $doc): ?DOMElement {
         if ($this->hasParamWithUnknownDefaultValue()) {
             return null;
@@ -2411,7 +2405,7 @@ abstract class VariableLike
     protected /* readonly */ ?ExposedDocComment $exposedDocComment;
 
     /**
-     * @var AttributeInfo[] $attributes
+     * @param AttributeInfo[] $attributes
      */
     public function __construct(
         int $flags,
@@ -2594,7 +2588,7 @@ class ConstInfo extends VariableLike
     private /* readonly */ bool $isFileCacheAllowed;
 
     /**
-     * @var AttributeInfo[] $attributes
+     * @param AttributeInfo[] $attributes
      */
     public function __construct(
         AbstractConstName $name,
@@ -3048,7 +3042,7 @@ class PropertyInfo extends VariableLike
     ];
 
     /**
-     * @var AttributeInfo[] $attributes
+     * @param AttributeInfo[] $attributes
      */
     public function __construct(
         PropertyName $name,
@@ -3346,7 +3340,7 @@ class AttributeInfo {
     }
 
     /**
-     * @param array<int, array<int, AttributeGroup>> $attributeGroups
+     * @param AttributeGroup[] $attributeGroups
      * @return AttributeInfo[]
      */
     public static function createFromGroups(array $attributeGroups): array {
@@ -3706,7 +3700,6 @@ class ClassInfo {
     /**
      * @param array<string, ClassInfo> $classMap
      * @param array<string, ConstInfo> $allConstInfos
-     * @param iterable<ConstInfo> $allConstInfo
      */
     public function getClassSynopsisDocument(array $classMap, array $allConstInfos): ?string {
         $doc = new DOMDocument();
