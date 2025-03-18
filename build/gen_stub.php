@@ -4298,6 +4298,150 @@ class FileInfo {
     public function shouldGenerateLegacyArginfo(): bool {
         return $this->minimumPhpVersionIdCompatibility !== null && $this->minimumPhpVersionIdCompatibility < PHP_80_VERSION_ID;
     }
+
+    public function handleStatements(array $stmts, PrettyPrinterAbstract $prettyPrinter): void {
+        $conds = [];
+        foreach ($stmts as $stmt) {
+            $cond = handlePreprocessorConditions($conds, $stmt);
+    
+            if ($stmt instanceof Stmt\Nop) {
+                continue;
+            }
+    
+            if ($stmt instanceof Stmt\Namespace_) {
+                $this->handleStatements($stmt->stmts, $prettyPrinter);
+                continue;
+            }
+    
+            if ($stmt instanceof Stmt\Const_) {
+                foreach ($stmt->consts as $const) {
+                    $this->constInfos[] = parseConstLike(
+                        $prettyPrinter,
+                        new ConstName($const->namespacedName, $const->name->toString()),
+                        $const,
+                        0,
+                        null,
+                        $stmt->getComments(),
+                        $cond,
+                        $this->isUndocumentable,
+                        $this->getMinimumPhpVersionIdCompatibility(),
+                        []
+                    );
+                }
+                continue;
+            }
+    
+            if ($stmt instanceof Stmt\Function_) {
+                $this->funcInfos[] = parseFunctionLike(
+                    $prettyPrinter,
+                    new FunctionName($stmt->namespacedName),
+                    0,
+                    0,
+                    $stmt,
+                    $cond,
+                    $this->isUndocumentable,
+                    $this->getMinimumPhpVersionIdCompatibility()
+                );
+                continue;
+            }
+    
+            if ($stmt instanceof Stmt\ClassLike) {
+                $className = $stmt->namespacedName;
+                $constInfos = [];
+                $propertyInfos = [];
+                $methodInfos = [];
+                $enumCaseInfos = [];
+                foreach ($stmt->stmts as $classStmt) {
+                    $cond = handlePreprocessorConditions($conds, $classStmt);
+                    if ($classStmt instanceof Stmt\Nop) {
+                        continue;
+                    }
+    
+                    $classFlags = $stmt instanceof Class_ ? $stmt->flags : 0;
+                    $abstractFlag = $stmt instanceof Stmt\Interface_ ? Modifiers::ABSTRACT : 0;
+    
+                    if ($classStmt instanceof Stmt\ClassConst) {
+                        foreach ($classStmt->consts as $const) {
+                            $constInfos[] = parseConstLike(
+                                $prettyPrinter,
+                                new ClassConstName($className, $const->name->toString()),
+                                $const,
+                                $classStmt->flags,
+                                $classStmt->type,
+                                $classStmt->getComments(),
+                                $cond,
+                                $this->isUndocumentable,
+                                $this->getMinimumPhpVersionIdCompatibility(),
+                                AttributeInfo::createFromGroups($classStmt->attrGroups)
+                            );
+                        }
+                    } else if ($classStmt instanceof Stmt\Property) {
+                        if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
+                            throw new Exception("Visibility modifier is required");
+                        }
+                        foreach ($classStmt->props as $property) {
+                            $propertyInfos[] = parseProperty(
+                                $className,
+                                $classFlags,
+                                $classStmt->flags,
+                                $property,
+                                $classStmt->type,
+                                $classStmt->getComments(),
+                                $prettyPrinter,
+                                $this->getMinimumPhpVersionIdCompatibility(),
+                                AttributeInfo::createFromGroups($classStmt->attrGroups)
+                            );
+                        }
+                    } else if ($classStmt instanceof Stmt\ClassMethod) {
+                        if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
+                            throw new Exception("Visibility modifier is required");
+                        }
+                        $methodInfos[] = parseFunctionLike(
+                            $prettyPrinter,
+                            new MethodName($className, $classStmt->name->toString()),
+                            $classFlags,
+                            $classStmt->flags | $abstractFlag,
+                            $classStmt,
+                            $cond,
+                            $this->isUndocumentable,
+                            $this->getMinimumPhpVersionIdCompatibility()
+                        );
+                    } else if ($classStmt instanceof Stmt\EnumCase) {
+                        $enumCaseInfos[] = new EnumCaseInfo(
+                            $classStmt->name->toString(), $classStmt->expr);
+                    } else {
+                        throw new Exception("Not implemented {$classStmt->getType()}");
+                    }
+                }
+    
+                $this->classInfos[] = parseClass(
+                    $className,
+                    $stmt,
+                    $constInfos,
+                    $propertyInfos,
+                    $methodInfos,
+                    $enumCaseInfos,
+                    $cond,
+                    $this->getMinimumPhpVersionIdCompatibility(),
+                    $this->isUndocumentable
+                );
+                continue;
+            }
+    
+            if ($stmt instanceof Stmt\Expression) {
+                $expr = $stmt->expr;
+                if ($expr instanceof Expr\Include_) {
+                    $this->dependencies[] = (string)EvaluatedValue::createFromExpression($expr->expr, null, null, [])->value;
+                    continue;
+                }
+            }
+    
+            throw new Exception("Unexpected node {$stmt->getType()}");
+        }
+        if (!empty($conds)) {
+            throw new Exception("Unterminated preprocessor conditions");
+        }
+    }
 }
 
 class DocCommentTag {
@@ -4910,150 +5054,6 @@ function getFileDocComments(array $stmts): array {
     );
 }
 
-function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstract $prettyPrinter) {
-    $conds = [];
-    foreach ($stmts as $stmt) {
-        $cond = handlePreprocessorConditions($conds, $stmt);
-
-        if ($stmt instanceof Stmt\Nop) {
-            continue;
-        }
-
-        if ($stmt instanceof Stmt\Namespace_) {
-            handleStatements($fileInfo, $stmt->stmts, $prettyPrinter);
-            continue;
-        }
-
-        if ($stmt instanceof Stmt\Const_) {
-            foreach ($stmt->consts as $const) {
-                $fileInfo->constInfos[] = parseConstLike(
-                    $prettyPrinter,
-                    new ConstName($const->namespacedName, $const->name->toString()),
-                    $const,
-                    0,
-                    null,
-                    $stmt->getComments(),
-                    $cond,
-                    $fileInfo->isUndocumentable,
-                    $fileInfo->getMinimumPhpVersionIdCompatibility(),
-                    []
-                );
-            }
-            continue;
-        }
-
-        if ($stmt instanceof Stmt\Function_) {
-            $fileInfo->funcInfos[] = parseFunctionLike(
-                $prettyPrinter,
-                new FunctionName($stmt->namespacedName),
-                0,
-                0,
-                $stmt,
-                $cond,
-                $fileInfo->isUndocumentable,
-                $fileInfo->getMinimumPhpVersionIdCompatibility()
-            );
-            continue;
-        }
-
-        if ($stmt instanceof Stmt\ClassLike) {
-            $className = $stmt->namespacedName;
-            $constInfos = [];
-            $propertyInfos = [];
-            $methodInfos = [];
-            $enumCaseInfos = [];
-            foreach ($stmt->stmts as $classStmt) {
-                $cond = handlePreprocessorConditions($conds, $classStmt);
-                if ($classStmt instanceof Stmt\Nop) {
-                    continue;
-                }
-
-                $classFlags = $stmt instanceof Class_ ? $stmt->flags : 0;
-                $abstractFlag = $stmt instanceof Stmt\Interface_ ? Modifiers::ABSTRACT : 0;
-
-                if ($classStmt instanceof Stmt\ClassConst) {
-                    foreach ($classStmt->consts as $const) {
-                        $constInfos[] = parseConstLike(
-                            $prettyPrinter,
-                            new ClassConstName($className, $const->name->toString()),
-                            $const,
-                            $classStmt->flags,
-                            $classStmt->type,
-                            $classStmt->getComments(),
-                            $cond,
-                            $fileInfo->isUndocumentable,
-                            $fileInfo->getMinimumPhpVersionIdCompatibility(),
-                            AttributeInfo::createFromGroups($classStmt->attrGroups)
-                        );
-                    }
-                } else if ($classStmt instanceof Stmt\Property) {
-                    if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
-                        throw new Exception("Visibility modifier is required");
-                    }
-                    foreach ($classStmt->props as $property) {
-                        $propertyInfos[] = parseProperty(
-                            $className,
-                            $classFlags,
-                            $classStmt->flags,
-                            $property,
-                            $classStmt->type,
-                            $classStmt->getComments(),
-                            $prettyPrinter,
-                            $fileInfo->getMinimumPhpVersionIdCompatibility(),
-                            AttributeInfo::createFromGroups($classStmt->attrGroups)
-                        );
-                    }
-                } else if ($classStmt instanceof Stmt\ClassMethod) {
-                    if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
-                        throw new Exception("Visibility modifier is required");
-                    }
-                    $methodInfos[] = parseFunctionLike(
-                        $prettyPrinter,
-                        new MethodName($className, $classStmt->name->toString()),
-                        $classFlags,
-                        $classStmt->flags | $abstractFlag,
-                        $classStmt,
-                        $cond,
-                        $fileInfo->isUndocumentable,
-                        $fileInfo->getMinimumPhpVersionIdCompatibility()
-                    );
-                } else if ($classStmt instanceof Stmt\EnumCase) {
-                    $enumCaseInfos[] = new EnumCaseInfo(
-                        $classStmt->name->toString(), $classStmt->expr);
-                } else {
-                    throw new Exception("Not implemented {$classStmt->getType()}");
-                }
-            }
-
-            $fileInfo->classInfos[] = parseClass(
-                $className,
-                $stmt,
-                $constInfos,
-                $propertyInfos,
-                $methodInfos,
-                $enumCaseInfos,
-                $cond,
-                $fileInfo->getMinimumPhpVersionIdCompatibility(),
-                $fileInfo->isUndocumentable
-            );
-            continue;
-        }
-
-        if ($stmt instanceof Stmt\Expression) {
-            $expr = $stmt->expr;
-            if ($expr instanceof Expr\Include_) {
-                $fileInfo->dependencies[] = (string)EvaluatedValue::createFromExpression($expr->expr, null, null, [])->value;
-                continue;
-            }
-        }
-
-        throw new Exception("Unexpected node {$stmt->getType()}");
-    }
-    if (!empty($conds)) {
-        throw new Exception("Unterminated preprocessor conditions");
-    }
-}
-
 function parseStubFile(string $code): FileInfo {
     $parser = new PhpParser\Parser\Php7(new PhpParser\Lexer\Emulative());
     $nodeTraverser = new PhpParser\NodeTraverser;
@@ -5070,7 +5070,7 @@ function parseStubFile(string $code): FileInfo {
     $fileTags = parseDocComments(getFileDocComments($stmts));
     $fileInfo = new FileInfo($fileTags);
 
-    handleStatements($fileInfo, $stmts, $prettyPrinter);
+    $fileInfo->handleStatements($stmts, $prettyPrinter);
     return $fileInfo;
 }
 
