@@ -775,7 +775,7 @@ class ArgInfo {
     public /* readonly */ string $sendBy;
     public /* readonly */ bool $isVariadic;
     public ?Type $type;
-    public /* readonly */ ?Type $phpDocType;
+    private /* readonly */ ?Type $phpDocType;
     public ?string $defaultValue;
     /** @var AttributeInfo[] */
     public array $attributes;
@@ -2410,7 +2410,7 @@ class EvaluatedValue
 
 abstract class VariableLike
 {
-    public int $flags;
+    protected int $flags;
     public ?Type $type;
     public /* readonly */ ?Type $phpDocType;
     private /* readonly */ ?string $link;
@@ -3373,20 +3373,20 @@ class AttributeInfo {
 
 class ClassInfo {
     public /* readonly */ Name $name;
-    public int $flags;
+    private int $flags;
     public string $type;
     public /* readonly */ ?string $alias;
     private /* readonly */ ?SimpleType $enumBackingType;
     private /* readonly */ bool $isDeprecated;
     private bool $isStrictProperties;
     /** @var AttributeInfo[] */
-    public array $attributes;
+    private array $attributes;
     private ?ExposedDocComment $exposedDocComment;
     private bool $isNotSerializable;
     /** @var Name[] */
-    public /* readonly */ array $extends;
+    private /* readonly */ array $extends;
     /** @var Name[] */
-    public /* readonly */ array $implements;
+    private /* readonly */ array $implements;
     /** @var ConstInfo[] */
     public /* readonly */ array $constInfos;
     /** @var PropertyInfo[] */
@@ -4186,7 +4186,7 @@ class FileInfo {
     public bool $generateFunctionEntries = false;
     public string $declarationPrefix = "";
     public bool $generateClassEntries = false;
-    public bool $isUndocumentable = false;
+    private bool $isUndocumentable = false;
     private bool $legacyArginfoGeneration = false;
     private ?int $minimumPhpVersionIdCompatibility = null;
 
