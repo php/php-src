@@ -6,7 +6,7 @@ A pipe interrupted by an exception, to demonstrate correct order of execution.
 function foo()     { echo __FUNCTION__, PHP_EOL; return 1; }
 function bar()     { echo __FUNCTION__, PHP_EOL; return false; }
 function baz($in)  { echo __FUNCTION__, PHP_EOL; return $in; }
-function quux($in) { echo __FUNCTION__, PHP_EOL; throw new \Exception('Oops'); } // This is line 6.
+function quux($in) { echo __FUNCTION__, PHP_EOL; throw new \Exception('Oops'); }
 
 try {
     $result = foo()
