@@ -95,7 +95,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
         if (!$fileInfo = $context->parsedFiles[$stubFile] ?? null) {
             initPhpParser();
             $stubContent = $stubCode ?? file_get_contents($stubFile);
-            $fileInfo = parseStubFile($stubContent);
+            $fileInfo = FileInfo::parseStubFile($stubContent);
             $context->parsedFiles[$stubFile] = $fileInfo;
 
             foreach ($fileInfo->dependencies as $dependency) {
@@ -4268,7 +4268,27 @@ class FileInfo {
         return $legacyFileInfo;
     }
 
-    public function handleStatements(array $stmts, PrettyPrinterAbstract $prettyPrinter) {
+    public static function parseStubFile(string $code): FileInfo {
+        $parser = new PhpParser\Parser\Php7(new PhpParser\Lexer\Emulative());
+        $nodeTraverser = new PhpParser\NodeTraverser;
+        $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
+        $prettyPrinter = new class extends Standard {
+            protected function pName_FullyQualified(Name\FullyQualified $node): string {
+                return implode('\\', $node->getParts());
+            }
+        };
+    
+        $stmts = $parser->parse($code);
+        $nodeTraverser->traverse($stmts);
+    
+        $fileTags = DocCommentTag::parseDocComments(getFileDocComments($stmts));
+        $fileInfo = new FileInfo($fileTags);
+    
+        $fileInfo->handleStatements($stmts, $prettyPrinter);
+        return $fileInfo;
+    }
+
+    private function handleStatements(array $stmts, PrettyPrinterAbstract $prettyPrinter) {
         $conds = [];
         foreach ($stmts as $stmt) {
             $cond = self::handlePreprocessorConditions($conds, $stmt);
@@ -5002,26 +5022,6 @@ function getFileDocComments(array $stmts): array {
         $stmts[0]->getComments(),
         static fn ( $comment ): bool => $comment instanceof DocComment
     );
-}
-
-function parseStubFile(string $code): FileInfo {
-    $parser = new PhpParser\Parser\Php7(new PhpParser\Lexer\Emulative());
-    $nodeTraverser = new PhpParser\NodeTraverser;
-    $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
-    $prettyPrinter = new class extends Standard {
-        protected function pName_FullyQualified(Name\FullyQualified $node): string {
-            return implode('\\', $node->getParts());
-        }
-    };
-
-    $stmts = $parser->parse($code);
-    $nodeTraverser->traverse($stmts);
-
-    $fileTags = DocCommentTag::parseDocComments(getFileDocComments($stmts));
-    $fileInfo = new FileInfo($fileTags);
-
-    $fileInfo->handleStatements($stmts, $prettyPrinter);
-    return $fileInfo;
 }
 
 /**
