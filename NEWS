@@ -37,6 +37,7 @@ PHP                                                                        NEWS
   . Fix weird unpack behaviour in DOM. (nielsdos)
   . Fixed bug GH-18090 (DOM: Svg attributes and tag names are being lowercased).
     (nielsdos)
+  . Fix xinclude destruction of live attributes. (nielsdos)
 
 - Fuzzer:
   . Fixed bug GH-18081 (Memory leaks in error paths of fuzzer SAPI).
