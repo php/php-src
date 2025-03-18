@@ -107,27 +107,8 @@ static inline void bc_mul_finish_from_vector(BC_VECTOR *prod_vector, size_t prod
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
 	char *pptr = (*prod)->n_value;
 	char *pend = pptr + prodlen - 1;
-	size_t i = 0;
-	while (i < prod_arr_size - 1) {
-#if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(prod_vector[i], pend - 3);
-		pend -= 4;
-#else
-		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
-		pend -= 8;
-#endif
-		i++;
-	}
 
-	/*
-	 * The last digit may carry over.
-	 * Also need to fill it to the end with zeros, so loop until the end of the string.
-	 */
-	while (pend >= pptr) {
-		*pend-- = prod_vector[i] % BASE;
-		prod_vector[i] /= BASE;
-	}
+	bc_convert_vector_to_char(prod_vector, pptr, pend, prod_arr_size);
 }
 
 /*
