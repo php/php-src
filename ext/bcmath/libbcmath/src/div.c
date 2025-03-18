@@ -255,10 +255,10 @@ static void bc_do_div(
 	const char *divisor, size_t divisor_size,
 	bc_num *quot, size_t quot_size
 ) {
-	size_t numerator_arr_size = (numerator_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t divisor_arr_size = (divisor_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t numerator_arr_size = BC_ARR_SIZE_FROM_LEN(numerator_size);
+	size_t divisor_arr_size = BC_ARR_SIZE_FROM_LEN(divisor_size);
 	size_t quot_arr_size = numerator_arr_size - divisor_arr_size + 1;
-	size_t quot_real_arr_size = MIN(quot_arr_size, (quot_size + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE);
+	size_t quot_real_arr_size = MIN(quot_arr_size, BC_ARR_SIZE_FROM_LEN(quot_size));
 
 	BC_VECTOR stack_vectors[BC_STACK_VECTOR_SIZE];
 	size_t allocation_arr_size = numerator_arr_size + divisor_arr_size + quot_arr_size;

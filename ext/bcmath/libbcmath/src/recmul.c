@@ -126,9 +126,9 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n1_arr_size = BC_ARR_SIZE_FROM_LEN(n1len);
+	size_t n2_arr_size = BC_ARR_SIZE_FROM_LEN(n2len);
+	size_t prod_arr_size = BC_ARR_SIZE_FROM_LEN(prodlen);
 
 	BC_VECTOR stack_vectors[BC_STACK_VECTOR_SIZE];
 	size_t allocation_arr_size = n1_arr_size + n2_arr_size + prod_arr_size;
@@ -187,8 +187,8 @@ static void bc_standard_square(bc_num n1, size_t n1len, bc_num *prod)
 	const char *n1end = n1->n_value + n1len - 1;
 	size_t prodlen = n1len + n1len;
 
-	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n1_arr_size = BC_ARR_SIZE_FROM_LEN(n1len);
+	size_t prod_arr_size = BC_ARR_SIZE_FROM_LEN(prodlen);
 
 	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n1_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
 
