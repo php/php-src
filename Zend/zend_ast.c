@@ -2261,6 +2261,9 @@ simple_list:
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;
+		case ZEND_AST_CAST_VOID:
+			PREFIX_OP("(void)", 240, 241);
+			break;
 		case ZEND_AST_EMPTY:
 			FUNC_OP("empty");
 		case ZEND_AST_ISSET:
