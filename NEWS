@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug GH-18112 (NULL access with preloading and INI option). (nielsdos)
+  . Fixed bug GH-18107 (Opcache CFG jmp optimization with try-finally breaks
+    the exception table). (nielsdos)
 
 - PDO:
   . Fix memory leak when destroying PDORow. (nielsdos)
