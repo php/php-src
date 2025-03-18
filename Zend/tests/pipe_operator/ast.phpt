@@ -77,7 +77,6 @@ try {
 }
 
 try {
-    // Currently wrong
     assert(false && (foo() < bar()) |> baz());
 } catch (AssertionError $e) {
     echo $e->getMessage(), PHP_EOL;
@@ -90,15 +89,15 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Concat, which binds higher
-assert(false && (foo() . bar() |> baz() . quux()))
-assert(false && (foo() . bar() |> baz() . quux()))
+assert(false && foo() . bar() |> baz() . quux())
+assert(false && foo() . bar() |> baz() . quux())
 assert(false && foo() . (bar() |> baz()) . quux())
-assert(false && (foo() . bar() |> baz() . quux()))
+assert(false && foo() . bar() |> baz() . quux())
 assert(false && (foo() . bar() |> baz()) . quux())
 assert(false && foo() . (bar() |> baz() . quux()))
 <, which binds lower
 assert(false && foo() < bar() |> baz())
 assert(false && (foo() < bar()) |> baz())
-assert(false && foo() < (bar() |> baz()))
+assert(false && foo() < bar() |> baz())

@@ -2510,7 +2510,7 @@ simple_list:
 		case ZEND_AST_GREATER_EQUAL:           BINARY_OP(" >= ",  180, 181, 181);
 		case ZEND_AST_AND:                     BINARY_OP(" && ",  130, 130, 131);
 		case ZEND_AST_OR:                      BINARY_OP(" || ",  120, 120, 121);
-		case ZEND_AST_PIPE:                    BINARY_OP(" |> ",  130, 130, 131);
+		case ZEND_AST_PIPE:                    BINARY_OP(" |> ",  183, 183, 184);
 		case ZEND_AST_ARRAY_ELEM:
 			if (ast->child[1]) {
 				zend_ast_export_ex(str, ast->child[1], 80, indent);
