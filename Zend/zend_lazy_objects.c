@@ -731,15 +731,17 @@ zend_object *zend_lazy_object_clone(zend_object *old_obj)
 	zend_class_entry *ce = old_obj->ce;
 	zend_object *new_proxy = zend_objects_new(ce);
 
-	for (int i = 0; i < ce->default_properties_count; i++) {
-		zend_property_info *prop_info = ce->properties_info_table[i];
-		if (!prop_info) {
-			continue;
-		}
-
-		zval *p = &new_proxy->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+	/* Iterate in reverse to avoid overriding Z_PROP_FLAG_P() of child props with added hooks (GH-17870). */
+	for (int i = ce->default_properties_count - 1; i >= 0; i--) {
+		zval *p = &new_proxy->properties_table[i];
 		ZVAL_UNDEF(p);
-		Z_PROP_FLAG_P(p) = IS_PROP_UNINIT | IS_PROP_LAZY;
+		Z_PROP_FLAG_P(p) = 0;
+
+		zend_property_info *prop_info = ce->properties_info_table[i];
+		if (prop_info) {
+			zval *p = &new_proxy->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+			Z_PROP_FLAG_P(p) = IS_PROP_UNINIT | IS_PROP_LAZY;
+		}
 	}
 
 	OBJ_EXTRA_FLAGS(new_proxy) = OBJ_EXTRA_FLAGS(old_obj);
