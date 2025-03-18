@@ -4547,6 +4547,19 @@ class DocCommentTag {
 
         return $tags;
     }
+
+    /**
+     * @param DocCommentTag[] $tags
+     * @return array<string, ?string> Mapping tag names to the value (or null),
+     *   if a tag is present multiple times the last value is used
+     */
+    public static function makeTagMap(array $tags): array {
+        $map = [];
+        foreach ($tags as $tag) {
+            $map[$tag->name] = $tag->value;
+        }
+        return $map;
+    }
 }
 
 // Instances of ExposedDocComment are immutable and do not need to be cloned
@@ -4629,6 +4642,13 @@ function parseFunctionLike(
 
         if ($comments) {
             $tags = DocCommentTag::parseDocComments($comments);
+            $tagMap = DocCommentTag::makeTagMap($tags);
+
+            $isDeprecated = array_key_exists('deprecated', $tagMap);
+            $verify = !array_key_exists('no-verify', $tagMap);
+            $tentativeReturnType = array_key_exists('tentative-return-type', $tagMap);
+            $supportsCompileTimeEval = array_key_exists('compile-time-eval', $tagMap);
+            $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
 
             foreach ($tags as $tag) {
                 switch ($tag->name) {
@@ -4643,18 +4663,6 @@ function parseFunctionLike(
                         }
                         break;
 
-                    case 'deprecated':
-                        $isDeprecated = true;
-                        break;
-
-                    case 'no-verify':
-                        $verify = false;
-                        break;
-
-                    case 'tentative-return-type':
-                        $tentativeReturnType = true;
-                        break;
-
                     case 'return':
                         $docReturnType = $tag->getType();
                         break;
@@ -4667,20 +4675,12 @@ function parseFunctionLike(
                         $refcount = $tag->getValue();
                         break;
 
-                    case 'compile-time-eval':
-                        $supportsCompileTimeEval = true;
-                        break;
-
                     case 'prefer-ref':
                         $varName = $tag->getVariableName();
                         if (!isset($paramMeta[$varName])) {
                             $paramMeta[$varName] = [];
                         }
                         $paramMeta[$varName][$tag->name] = true;
-                        break;
-
-                    case 'undocumentable':
-                        $isUndocumentable = true;
                         break;
 
                     case 'frameless-function':
@@ -4812,26 +4812,19 @@ function parseConstLike(
     array $attributes
 ): ConstInfo {
     $phpDocType = null;
-    $deprecated = false;
-    $cValue = null;
-    $link = null;
-    $isFileCacheAllowed = true;
-    if ($comments) {
-        $tags = DocCommentTag::parseDocComments($comments);
-        foreach ($tags as $tag) {
-            if ($tag->name === 'var') {
-                $phpDocType = $tag->getType();
-            } elseif ($tag->name === 'deprecated') {
-                $deprecated = true;
-            } elseif ($tag->name === 'cvalue') {
-                $cValue = $tag->value;
-            } elseif ($tag->name === 'undocumentable') {
-                $isUndocumentable = true;
-            } elseif ($tag->name === 'link') {
-                $link = $tag->value;
-            } elseif ($tag->name === 'no-file-cache') {
-                $isFileCacheAllowed = false;
-            }
+
+    $tags = DocCommentTag::parseDocComments($comments);
+    $tagMap = DocCommentTag::makeTagMap($tags);
+
+    $deprecated = array_key_exists('deprecated', $tagMap);
+    $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
+    $isFileCacheAllowed = !array_key_exists('no-file-cache', $tagMap);
+    $cValue = $tagMap['cvalue'] ?? null;
+    $link = $tagMap['link'] ?? null;
+
+    foreach ($tags as $tag) {
+        if ($tag->name === 'var') {
+            $phpDocType = $tag->getType();
         }
     }
 
@@ -4886,22 +4879,17 @@ function parseProperty(
     array $attributes
 ): PropertyInfo {
     $phpDocType = null;
-    $isDocReadonly = false;
-    $isVirtual = false;
-    $link = null;
 
-    if ($comments) {
-        $tags = DocCommentTag::parseDocComments($comments);
-        foreach ($tags as $tag) {
-            if ($tag->name === 'var') {
-                $phpDocType = $tag->getType();
-            } elseif ($tag->name === 'readonly') {
-                $isDocReadonly = true;
-            } elseif ($tag->name === 'link') {
-                $link = $tag->value;
-            } elseif ($tag->name === 'virtual') {
-                $isVirtual = true;
-            }
+    $tags = DocCommentTag::parseDocComments($comments);
+    $tagMap = DocCommentTag::makeTagMap($tags);
+
+    $isDocReadonly = array_key_exists('readonly', $tagMap);
+    $link = $tagMap['link'] ?? null;
+    $isVirtual = array_key_exists('virtual', $tagMap);
+
+    foreach ($tags as $tag) {
+        if ($tag->name === 'var') {
+            $phpDocType = $tag->getType();
         }
     }
 
@@ -4956,25 +4944,18 @@ function parseClass(
 ): ClassInfo {
     $comments = $class->getComments();
     $alias = null;
-    $isDeprecated = false;
-    $isStrictProperties = false;
-    $isNotSerializable = false;
     $allowsDynamicProperties = false;
 
-    if ($comments) {
-        $tags = DocCommentTag::parseDocComments($comments);
-        foreach ($tags as $tag) {
-            if ($tag->name === 'alias') {
-                $alias = $tag->getValue();
-            } else if ($tag->name === 'deprecated') {
-                $isDeprecated = true;
-            } else if ($tag->name === 'strict-properties') {
-                $isStrictProperties = true;
-            } else if ($tag->name === 'not-serializable') {
-                $isNotSerializable = true;
-            } else if ($tag->name === 'undocumentable') {
-                $isUndocumentable = true;
-            }
+    $tags = DocCommentTag::parseDocComments($comments);
+    $tagMap = DocCommentTag::makeTagMap($tags);
+
+    $isDeprecated = array_key_exists('deprecated', $tagMap);
+    $isStrictProperties = array_key_exists('strict-properties', $tagMap);
+    $isNotSerializable = array_key_exists('not-serializable', $tagMap);
+    $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
+    foreach ($tags as $tag) {
+        if ($tag->name === 'alias') {
+            $alias = $tag->getValue();
         }
     }
 
