@@ -4528,6 +4528,25 @@ class DocCommentTag {
 
         return $matches["name"];
     }
+
+    /** @return DocCommentTag[] */
+    public static function parseDocComments(array $comments): array {
+        $tags = [];
+        foreach ($comments as $comment) {
+            if (!($comment instanceof DocComment)) {
+                continue;
+            }
+            $commentText = substr($comment->getText(), 2, -2);
+            foreach (explode("\n", $commentText) as $commentLine) {
+                $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))?$/';
+                if (preg_match($regex, trim($commentLine), $matches)) {
+                    $tags[] = new DocCommentTag($matches[1], $matches[2] ?? null);
+                }
+            }
+        }
+
+        return $tags;
+    }
 }
 
 // Instances of ExposedDocComment are immutable and do not need to be cloned
@@ -4571,25 +4590,6 @@ class ExposedDocComment {
     }
 }
 
-/** @return DocCommentTag[] */
-function parseDocComments(array $comments): array {
-    $tags = [];
-    foreach ($comments as $comment) {
-        if (!($comment instanceof DocComment)) {
-            continue;
-        }
-        $commentText = substr($comment->getText(), 2, -2);
-        foreach (explode("\n", $commentText) as $commentLine) {
-            $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))?$/';
-            if (preg_match($regex, trim($commentLine), $matches)) {
-                $tags[] = new DocCommentTag($matches[1], $matches[2] ?? null);
-            }
-        }
-    }
-
-    return $tags;
-}
-
 // Instances of FramelessFunctionInfo are immutable and do not need to be cloned
 // when held by an object that is cloned
 class FramelessFunctionInfo {
@@ -4628,7 +4628,7 @@ function parseFunctionLike(
         $framelessFunctionInfos = [];
 
         if ($comments) {
-            $tags = parseDocComments($comments);
+            $tags = DocCommentTag::parseDocComments($comments);
 
             foreach ($tags as $tag) {
                 switch ($tag->name) {
@@ -4817,7 +4817,7 @@ function parseConstLike(
     $link = null;
     $isFileCacheAllowed = true;
     if ($comments) {
-        $tags = parseDocComments($comments);
+        $tags = DocCommentTag::parseDocComments($comments);
         foreach ($tags as $tag) {
             if ($tag->name === 'var') {
                 $phpDocType = $tag->getType();
@@ -4891,7 +4891,7 @@ function parseProperty(
     $link = null;
 
     if ($comments) {
-        $tags = parseDocComments($comments);
+        $tags = DocCommentTag::parseDocComments($comments);
         foreach ($tags as $tag) {
             if ($tag->name === 'var') {
                 $phpDocType = $tag->getType();
@@ -4962,7 +4962,7 @@ function parseClass(
     $allowsDynamicProperties = false;
 
     if ($comments) {
-        $tags = parseDocComments($comments);
+        $tags = DocCommentTag::parseDocComments($comments);
         foreach ($tags as $tag) {
             if ($tag->name === 'alias') {
                 $alias = $tag->getValue();
@@ -5067,7 +5067,7 @@ function parseStubFile(string $code): FileInfo {
     $stmts = $parser->parse($code);
     $nodeTraverser->traverse($stmts);
 
-    $fileTags = parseDocComments(getFileDocComments($stmts));
+    $fileTags = DocCommentTag::parseDocComments(getFileDocComments($stmts));
     $fileInfo = new FileInfo($fileTags);
 
     $fileInfo->handleStatements($stmts, $prettyPrinter);
