@@ -26,6 +26,9 @@ foreach ($xpath->query('//p') as $entry) {
     $garbage[] = $entry;
     foreach ($entry->attributes as $attr) {
         $garbage[] = $attr;
+        foreach ($attr->childNodes as $child) {
+            $garbage[] = $child;
+        }
     }
 }
 
@@ -34,7 +37,7 @@ foreach ($xpath->query('//p') as $entry) {
 var_dump($garbage);
 ?>
 --EXPECT--
-array(5) {
+array(7) {
   [0]=>
   object(DOMElement)#3 (1) {
     ["schemaTypeInfo"]=>
@@ -58,10 +61,16 @@ array(5) {
     NULL
   }
   [4]=>
-  object(DOMAttr)#11 (2) {
+  object(DOMText)#13 (0) {
+  }
+  [5]=>
+  object(DOMAttr)#12 (2) {
     ["specified"]=>
     bool(true)
     ["schemaTypeInfo"]=>
     NULL
+  }
+  [6]=>
+  object(DOMText)#15 (0) {
   }
 }

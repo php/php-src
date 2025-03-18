@@ -1611,6 +1611,9 @@ static void dom_xinclude_strip_references_for_attributes(xmlNodePtr basep)
 {
 	for (xmlAttrPtr prop = basep->properties; prop; prop = prop->next) {
 		php_libxml_node_free_resource((xmlNodePtr) prop);
+		for (xmlNodePtr child = prop->children; child; child = child->next) {
+			php_libxml_node_free_resource(child);
+		}
 	}
 }
 
