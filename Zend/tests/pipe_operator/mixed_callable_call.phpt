@@ -31,6 +31,11 @@ function _double(int $x): int {
     return $x * 2;
 }
 
+function multiplier(int $x): \Closure
+{
+    return fn($y) => $x * $y;
+}
+
 $test = new _Test();
 
 $add3 = fn($x) => _add($x, 3);
@@ -41,9 +46,10 @@ $res1 = 2
     |> $add3
     |> fn($x) => _area($x, 2)
     |> _double(...)
+    |> multiplier(3)
 ;
 
 var_dump($res1);
 ?>
 --EXPECT--
-int(40)
+int(120)
