@@ -6432,14 +6432,20 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	zend_ast *operand_ast = ast->child[0];
 	zend_ast *callable_ast = ast->child[1];
 
+	/* Compile the left hand side down to a value first. */
 	znode operand_result;
 	zend_compile_expr(&operand_result, operand_ast);
+
+	/* Wrap the value in a ZEND_QM_ASSIGN opcode to ensure references
+	 * always fail. Otherwise, they'd only fail in complex cases like arrays.
+	 */
 	znode wrapped_operand_result;
 	zend_emit_op_tmp(&wrapped_operand_result, ZEND_QM_ASSIGN, &operand_result, NULL);
 
+	/* Turn the operand into a function parameter list. */
 	zend_ast *arg_list_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&wrapped_operand_result));
-	zend_ast *fcall_ast;
 
+	zend_ast *fcall_ast;
 	znode callable_result;
 
 	/* Turn $foo |> bar(...) into bar($foo). */
@@ -6451,13 +6457,13 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	} else if (callable_ast->kind == ZEND_AST_METHOD_CALL
 			&& callable_ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT) {
 		fcall_ast = zend_ast_create(ZEND_AST_METHOD_CALL,
-				callable_ast->child[0], callable_ast->child[1], arg_list_ast);
+			callable_ast->child[0], callable_ast->child[1], arg_list_ast);
 	/* Turn $foo |> $expr into ($expr)($foo) */
 	} else {
 		zend_compile_expr(&callable_result, callable_ast);
 		callable_ast = zend_ast_create_znode(&callable_result);
 		fcall_ast = zend_ast_create(ZEND_AST_CALL,
-				callable_ast, arg_list_ast);
+			callable_ast, arg_list_ast);
 	}
 
 	zend_compile_expr(result, fcall_ast);
