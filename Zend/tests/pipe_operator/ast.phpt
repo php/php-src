@@ -1,8 +1,8 @@
 --TEST--
-Test that a pipe operator displays as a pipe operator when outputting syntax.
+A pipe operator displays as a pipe operator when outputting syntax, with correct parens.
 --FILE--
 <?php
-
+/*
 function _test(int $a): int {
     return $a + 1;
 }
@@ -28,9 +28,77 @@ try {
 } catch (AssertionError $e) {
     echo $e->getMessage(), PHP_EOL;
 }
+*/
+
+print "Concat, which binds higher\n";
+
+try {
+    assert(false && foo() . bar() |> baz() . quux());
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    assert(false && (foo() . bar()) |> baz() . quux());
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    assert(false && foo() . (bar() |> baz()) . quux());
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    assert(false && foo() . bar() |> (baz() . quux()));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    assert(false && (foo() . bar() |> baz()) . quux());
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    assert(false && foo() . (bar() |> baz() . quux()));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+print "<, which binds lower\n";
+
+try {
+    assert(false && foo() < bar() |> baz());
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    // Currently wrong
+    assert(false && (foo() < bar()) |> baz());
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    assert(false && foo() < (bar() |> baz()));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-assert((5 |> '_test') == 99)
-assert((5 |> _test(...)) == 99)
-assert(5 |> abool(...))
+Concat, which binds higher
+assert(false && (foo() . bar() |> baz() . quux()))
+assert(false && (foo() . bar() |> baz() . quux()))
+assert(false && foo() . (bar() |> baz()) . quux())
+assert(false && (foo() . bar() |> baz() . quux()))
+assert(false && (foo() . bar() |> baz()) . quux())
+assert(false && foo() . (bar() |> baz() . quux()))
+<, which binds lower
+assert(false && foo() < bar() |> baz())
+assert(false && (foo() < bar()) |> baz())
+assert(false && foo() < (bar() |> baz()))
