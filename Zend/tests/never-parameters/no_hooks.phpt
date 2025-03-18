@@ -10,4 +10,4 @@ interface I
 
 ?>
 --EXPECTF--
-Fatal error: never cannot be used as a parameter type for property hooks in %s on line %d
+Fatal error: Type of parameter $value of hook I::$both::set must be compatible with property type in %s on line %d

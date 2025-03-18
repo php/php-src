@@ -9,4 +9,4 @@ interface Demo {
 
 ?>
 --EXPECTF--
-Fatal error: never cannot be used as a parameter type for parameters with defaults in %s on line %d
+Fatal error: Cannot use int as default value for parameter $v of type never in %s on line %d

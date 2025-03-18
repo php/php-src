@@ -564,13 +564,11 @@ ZEND_API zend_class_entry *zend_register_internal_enum(
 			ce, unit_enum_methods, &ce->function_table, EG(current_module)->type);
 		zend_class_implements(ce, 1, zend_ce_unit_enum);
 	} else {
-		if (type == IS_LONG) {
-			zend_register_functions(
-				ce, int_backed_enum_methods, &ce->function_table, EG(current_module)->type);
-		} else {
-			zend_register_functions(
-				ce, string_backed_enum_methods, &ce->function_table, EG(current_module)->type);
-		}
+		zend_function_entry *backed_enum_methods = type == IS_LONG
+			? int_backed_enum_methods
+			: string_backed_enum_methods;
+		zend_register_functions(
+			ce, backed_enum_methods, &ce->function_table, EG(current_module)->type);
 		zend_class_implements(ce, 1, zend_ce_backed_enum);
 	}
 

@@ -7716,21 +7716,18 @@ static void zend_compile_params(zend_ast_decl *decl, uint32_t fallback_return_ty
 				if (decl->child[2] != NULL) {
 					zend_error_noreturn(
 						E_COMPILE_ERROR,
-						"never cannot be used as a parameter type for methods with implementations"
+						"Function %s::%s() containing a body cannot use never as a parameter type",
+						ZSTR_VAL(op_array->scope->name),
+						ZSTR_VAL(op_array->function_name)
 					);
 				}
-				if (*default_ast_ptr) {
-					zend_error_noreturn(
-						E_COMPILE_ERROR,
-						"never cannot be used as a parameter type for parameters with defaults"
-					);
-				}
-				if (decl->kind == ZEND_AST_PROPERTY_HOOK) {
-					zend_error_noreturn(
-						E_COMPILE_ERROR,
-						"never cannot be used as a parameter type for property hooks"
-					);
-				}
+				/* The restriction on not using `never` parameters for
+				 * parameters with defaults is implemented by the validation of
+				 * default values (since no value is valid for a `never` type).
+				 * The restriction on not using `never` parameters for property
+				 * hooks is implemented by the validation that the type of
+				 * parameters accepted by the `set` hook is wider than that of
+				 * the property itself. */
 			}
 
 			if (default_type != IS_UNDEF && default_type != IS_CONSTANT_AST && !force_nullable

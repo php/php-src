@@ -13,9 +13,7 @@ echo $ref . "\n";
 
 $type = $ref->getType();
 
-if (!($type instanceof ReflectionNamedType)) {
-    throw new Exception("Should be named...");
-}
+assert($type instanceof ReflectionNamedType);
 echo "Name: " . $type->getName() . "\n";
 echo "isBuiltin: " . $type->isBuiltIn() . "\n";
 echo "allowsNull: " . (int)$type->allowsNull() . "\n";
