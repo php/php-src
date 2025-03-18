@@ -55,8 +55,7 @@ test:
 0012 DO_ICALL
 0013 T1 = IN_ARRAY 1 CV0($v) array(...)
 0014 JMPZ T1 0016
-0015 ECHO string("True
-")
+0015 ECHO string("True\n")
 0016 RETURN null
 bool(true)
 bool(true)
