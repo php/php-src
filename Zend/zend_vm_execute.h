@@ -1151,7 +1151,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 
 		if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
 			zend_function *fbc = EX(func);
-			zend_nodiscard_function("(F)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 
 		execute_data = EX(prev_execute_data);
@@ -1191,7 +1191,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 		old_execute_data = execute_data;
 		if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
 			zend_function *fbc = EX(func);
-			zend_nodiscard_function("(E)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 
 		execute_data = EX(prev_execute_data);
@@ -1238,7 +1238,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 
 			if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
 				zend_function *fbc = EX(func);
-				zend_nodiscard_function("(G)", fbc);
+				zend_nodiscard_function(fbc);
 			}
 
 			i_free_compiled_variables(execute_data);
@@ -1347,7 +1347,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 
 	if (!0) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-			zend_nodiscard_function("(C)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		i_zval_ptr_dtor(ret);
 	}
@@ -1414,7 +1414,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 
 	if (!1) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-			zend_nodiscard_function("(C)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		i_zval_ptr_dtor(ret);
 	}
@@ -1482,7 +1482,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_OBS
 
 	if (!RETURN_VALUE_USED(opline)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-			zend_nodiscard_function("(C)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 		i_zval_ptr_dtor(ret);
 	}
@@ -1660,7 +1660,7 @@ fcall_by_name_end:
 
 		if (!0) {
 			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function("(B)", fbc);
+				zend_nodiscard_function(fbc);
 			}
 			i_zval_ptr_dtor(ret);
 		}
@@ -1765,7 +1765,7 @@ fcall_by_name_end:
 
 		if (!1) {
 			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function("(B)", fbc);
+				zend_nodiscard_function(fbc);
 			}
 			i_zval_ptr_dtor(ret);
 		}
@@ -1872,7 +1872,7 @@ fcall_by_name_end:
 
 		if (!RETURN_VALUE_USED(opline)) {
 			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function("(B)", fbc);
+				zend_nodiscard_function(fbc);
 			}
 			i_zval_ptr_dtor(ret);
 		}
@@ -1988,7 +1988,7 @@ fcall_end:
 
 		if (!0) {
 			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function("(A)", fbc);
+				zend_nodiscard_function(fbc);
 			}
 			i_zval_ptr_dtor(ret);
 		}
@@ -2109,7 +2109,7 @@ fcall_end:
 
 		if (!1) {
 			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function("(A)", fbc);
+				zend_nodiscard_function(fbc);
 			}
 			i_zval_ptr_dtor(ret);
 		}
@@ -2231,7 +2231,7 @@ fcall_end:
 
 		if (!RETURN_VALUE_USED(opline)) {
 			if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_NODISCARD) != 0)) {
-				zend_nodiscard_function("(A)", fbc);
+				zend_nodiscard_function(fbc);
 			}
 			i_zval_ptr_dtor(ret);
 		}
@@ -58734,7 +58734,7 @@ zend_leave_helper_SPEC_LABEL:
 
 		if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
 			zend_function *fbc = EX(func);
-			zend_nodiscard_function("(F)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 
 		execute_data = EX(prev_execute_data);
@@ -58774,7 +58774,7 @@ zend_leave_helper_SPEC_LABEL:
 		old_execute_data = execute_data;
 		if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
 			zend_function *fbc = EX(func);
-			zend_nodiscard_function("(E)", fbc);
+			zend_nodiscard_function(fbc);
 		}
 
 		execute_data = EX(prev_execute_data);
@@ -58821,7 +58821,7 @@ zend_leave_helper_SPEC_LABEL:
 
 			if (UNEXPECTED((EX(func)->common.fn_flags & ZEND_ACC_NODISCARD) != 0) && !EX(return_value)) {
 				zend_function *fbc = EX(func);
-				zend_nodiscard_function("(G)", fbc);
+				zend_nodiscard_function(fbc);
 			}
 
 			i_free_compiled_variables(execute_data);

@@ -17,5 +17,5 @@ fclose($f);
 <!-- internal enter flock() -->
 <!-- internal enter NoDiscard::__construct() -->
 
-Warning: (A)The return value of function flock() is expected to be consumed, as locking the stream might have failed in %s on line %d
+Warning: The return value of function flock() is expected to be consumed, as locking the stream might have failed in %s on line %d
 <!-- internal enter fclose() -->

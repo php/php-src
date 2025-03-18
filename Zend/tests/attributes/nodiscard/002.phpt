@@ -35,10 +35,10 @@ $cls('foo');
 --EXPECTF--
 __call(test)
 
-Warning: (F)The return value of method Clazz::__call() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::__call() is expected to be consumed in %s on line %d
 __callStatic(test)
 
-Warning: (F)The return value of method Clazz::__callStatic() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::__callStatic() is expected to be consumed in %s on line %d
 __invoke(foo)
 
-Warning: (F)The return value of method Clazz::__invoke() is expected to be consumed in %s on line %d
+Warning: The return value of method Clazz::__invoke() is expected to be consumed in %s on line %d

@@ -1963,7 +1963,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_nodiscard_suffix_from_attribute(H
 	return result;
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(char *prefix, const zend_function *fbc)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(const zend_function *fbc)
 {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
@@ -1974,15 +1974,13 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(char *prefix, cons
 	int code = fbc->type == ZEND_INTERNAL_FUNCTION ? E_WARNING : E_USER_WARNING;
 
 	if (fbc->common.scope) {
-		zend_error_unchecked(code, "%sThe return value of method %s::%s() is expected to be consumed%S",
-			prefix,
+		zend_error_unchecked(code, "The return value of method %s::%s() is expected to be consumed%S",
 			ZSTR_VAL(fbc->common.scope->name),
 			ZSTR_VAL(fbc->common.function_name),
 			message_suffix
 		);
 	} else {
-		zend_error_unchecked(code, "%sThe return value of function %s() is expected to be consumed%S",
-			prefix,
+		zend_error_unchecked(code, "The return value of function %s() is expected to be consumed%S",
 			ZSTR_VAL(fbc->common.function_name),
 			message_suffix
 		);

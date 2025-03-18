@@ -17,4 +17,4 @@ test();
 
 ?>
 --EXPECTF--
-Warning: (G)The return value of function test() is expected to be consumed in %s on line %d
+Warning: The return value of function test() is expected to be consumed in %s on line %d
