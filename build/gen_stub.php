@@ -4302,7 +4302,7 @@ class FileInfo {
     public function handleStatements(array $stmts, PrettyPrinterAbstract $prettyPrinter): void {
         $conds = [];
         foreach ($stmts as $stmt) {
-            $cond = handlePreprocessorConditions($conds, $stmt);
+            $cond = self::handlePreprocessorConditions($conds, $stmt);
     
             if ($stmt instanceof Stmt\Nop) {
                 continue;
@@ -4352,7 +4352,7 @@ class FileInfo {
                 $methodInfos = [];
                 $enumCaseInfos = [];
                 foreach ($stmt->stmts as $classStmt) {
-                    $cond = handlePreprocessorConditions($conds, $classStmt);
+                    $cond = self::handlePreprocessorConditions($conds, $classStmt);
                     if ($classStmt instanceof Stmt\Nop) {
                         continue;
                     }
@@ -4441,6 +4441,34 @@ class FileInfo {
         if (!empty($conds)) {
             throw new Exception("Unterminated preprocessor conditions");
         }
+    }
+
+    private static function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
+        foreach ($stmt->getComments() as $comment) {
+            $text = trim($comment->getText());
+            if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
+                $conds[] = $matches[1];
+            } else if (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
+                $conds[] = "defined($matches[1])";
+            } else if (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
+                $conds[] = "!defined($matches[1])";
+            } else if (preg_match('/^#\s*else$/', $text)) {
+                if (empty($conds)) {
+                    throw new Exception("Encountered else without corresponding #if");
+                }
+                $cond = array_pop($conds);
+                $conds[] = "!($cond)";
+            } else if (preg_match('/^#\s*endif$/', $text)) {
+                if (empty($conds)) {
+                    throw new Exception("Encountered #endif without corresponding #if");
+                }
+                array_pop($conds);
+            } else if ($text[0] === '#') {
+                throw new Exception("Unrecognized preprocessor directive \"$text\"");
+            }
+        }
+    
+        return empty($conds) ? null : implode(' && ', $conds);
     }
 }
 
@@ -5012,34 +5040,6 @@ function parseClass(
         $minimumPhpVersionIdCompatibility,
         $isUndocumentable
     );
-}
-
-function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
-    foreach ($stmt->getComments() as $comment) {
-        $text = trim($comment->getText());
-        if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
-            $conds[] = $matches[1];
-        } else if (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
-            $conds[] = "defined($matches[1])";
-        } else if (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
-            $conds[] = "!defined($matches[1])";
-        } else if (preg_match('/^#\s*else$/', $text)) {
-            if (empty($conds)) {
-                throw new Exception("Encountered else without corresponding #if");
-            }
-            $cond = array_pop($conds);
-            $conds[] = "!($cond)";
-        } else if (preg_match('/^#\s*endif$/', $text)) {
-            if (empty($conds)) {
-                throw new Exception("Encountered #endif without corresponding #if");
-            }
-            array_pop($conds);
-        } else if ($text[0] === '#') {
-            throw new Exception("Unrecognized preprocessor directive \"$text\"");
-        }
-    }
-
-    return empty($conds) ? null : implode(' && ', $conds);
 }
 
 /** @return DocComment[] */
