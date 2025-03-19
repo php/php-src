@@ -67,6 +67,8 @@
 /* 64-bytes for 64-bit */
 #define BC_STACK_VECTOR_SIZE 8
 
+#define BC_ARR_SIZE_FROM_LEN(len) (((len) + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE)
+
 /*
  * Adding more than this many times may cause uint32_t/uint64_t to overflow.
  * Typically this is 1844 for 64bit and 42 for 32bit.
