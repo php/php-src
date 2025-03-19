@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17989 (mb_output_handler crash with unset
     http_output_conv_mimetypes). (nielsdos)
 
+- Opcache:
+  . Fixed bug GH-18112 (NULL access with preloading and INI option). (nielsdos)
+
 - SPL:
   . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
     ArrayObject). (nielsdos)
