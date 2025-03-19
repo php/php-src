@@ -3124,6 +3124,16 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_rope_end);
 	REGISTER_HELPER(zend_fcall_interrupt);
 
+#ifdef HAVE_FFI
+	REGISTER_HELPER(zend_jit_zval_string);
+	REGISTER_HELPER(zend_jit_zval_stringl);
+	REGISTER_HELPER(zend_jit_zval_ffi_ptr);
+	REGISTER_HELPER(zend_jit_zval_ffi_obj);
+	REGISTER_HELPER(zend_jit_zval_ffi_addr);
+	REGISTER_HELPER(zend_jit_zval_ffi_addr_var);
+	REGISTER_HELPER(zend_jit_ffi_create_ptr);
+#endif
+
 #ifndef ZTS
 	REGISTER_DATA(EG(current_execute_data));
 	REGISTER_DATA(EG(exception));
@@ -17552,9 +17562,32 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_ARRAY) {
 				op1_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY);
 			}
-			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
-					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
-					 ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING));
+			if (((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY)
+			 && (((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG)
+			  || ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING))) {
+				return 1;
+			}
+#ifdef HAVE_FFI
+			if (trace
+			 && (trace+1)->op == ZEND_JIT_TRACE_OP1_TYPE
+			 && (trace+2)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
+				zend_ffi_type *op1_ffi_type = (zend_ffi_type*)(trace+2)->ptr;
+				if (op1_ffi_type) {
+					zend_ffi_type holder;
+					if (ZEND_FFI_TYPE_IS_OWNED(op1_ffi_type)) {
+						op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &holder);
+					}
+					if ((op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
+					 && (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
+					 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind < ZEND_FFI_TYPE_POINTER
+					 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_VOID
+					 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(op1_ffi_type->array.type))) {
+						return 1;
+					}
+				}
+			}
+#endif
+			return 0;
 		case ZEND_ASSIGN_DIM_OP:
 			if (opline->result_type != IS_UNUSED) {
 				return 0;
@@ -17594,9 +17627,42 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 					return 0;
 				}
 			}
-			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
-					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
-					 ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING));
+			if (((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY)
+			 && (((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG)
+			  || ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING))) {
+				return 1;
+			}
+#ifdef HAVE_FFI
+			if ((opline->opcode == ZEND_ASSIGN_DIM || opline->opcode == ZEND_ASSIGN_DIM_OP)
+			 && trace
+			 && (trace+1)->op == ZEND_JIT_TRACE_OP1_TYPE
+			 && (trace+2)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
+				zend_ffi_type *op1_ffi_type = (zend_ffi_type*)(trace+2)->ptr;
+				zend_ffi_type *op3_ffi_type = NULL;
+				uint32_t op1_data_info = OP1_DATA_INFO();
+				zend_ffi_type holder, holder2;
+
+				if ((trace+3)->op == ZEND_JIT_TRACE_OP3_TYPE
+				 && (trace+4)->op == ZEND_JIT_TRACE_OP3_FFI_TYPE) {
+					op3_ffi_type = (zend_ffi_type*)(trace+4)->ptr;
+					if (ZEND_FFI_TYPE_IS_OWNED(op3_ffi_type)) {
+						op3_ffi_type = zend_jit_ffi_type_pointer_to(op3_ffi_type, &holder2);
+					}
+				}
+
+				if (op1_ffi_type) {
+					if (ZEND_FFI_TYPE_IS_OWNED(op1_ffi_type)) {
+						op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &holder);
+					}
+					if ((op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
+					 && (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG
+					 && zend_jit_ffi_compatible(op1_ffi_type->array.type, op1_data_info, op3_ffi_type)) {
+						return 1;
+					}
+				}
+			}
+#endif
+			return 0;
 		case ZEND_ASSIGN_OBJ_OP:
 			if (opline->result_type != IS_UNUSED) {
 				return 0;

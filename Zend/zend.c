@@ -98,6 +98,9 @@ ZEND_API void (*zend_accel_schedule_restart_hook)(int reason) = NULL;
 ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(void *bytes, size_t size, char *errstr, size_t errstr_size) = NULL;
 ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(zend_random_bytes_insecure_state *state, void *bytes, size_t size) = NULL;
 
+/* FFI/OPCache interopability API */
+ZEND_API struct _zend_ffi_api *zend_ffi_api = NULL;
+
 /* This callback must be signal handler safe! */
 void (*zend_on_timeout)(int seconds);
 

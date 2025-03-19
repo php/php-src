@@ -407,6 +407,9 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn,
 extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern ZEND_API zend_utility_values zend_uv;
 
+/* FFI/OPCache interopability API */
+extern ZEND_API struct _zend_ffi_api *zend_ffi_api;
+
 /* If DTrace is available and enabled */
 extern ZEND_API bool zend_dtrace_enabled;
 END_EXTERN_C()
