@@ -2406,7 +2406,7 @@ static zend_object *pdo_row_new(zend_class_entry *ce)
 {
 	pdo_row_t *row = zend_object_alloc(sizeof(pdo_row_t), ce);
 	zend_object_std_init(&row->std, ce);
-	object_properties_init(&row->std, pdo_row_ce);
+	object_properties_init(&row->std, ce);
 
 	return &row->std;
 }
