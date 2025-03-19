@@ -282,8 +282,8 @@ END_EXTERN_C()
 		return; \
 	} \
 } while (0)
-#define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), "stream", php_file_le_stream(), php_file_le_pstream())
-#define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), NULL, php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), NULL, php_file_le_stream(), php_file_le_pstream())
 
 BEGIN_EXTERN_C()
 
