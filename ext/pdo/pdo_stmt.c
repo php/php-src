@@ -212,6 +212,7 @@ static void pdo_get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
 		pdo_row_t *row = zend_object_alloc(sizeof(pdo_row_t), pdo_row_ce);
 		row->stmt = stmt;
 		zend_object_std_init(&row->std, pdo_row_ce);
+		object_properties_init(&row->std, pdo_row_ce);
 		stmt->lazy_object_ref = &row->std;
 		GC_ADDREF(&stmt->std);
 		GC_DELREF(&row->std);
@@ -2405,6 +2406,7 @@ static zend_object *pdo_row_new(zend_class_entry *ce)
 {
 	pdo_row_t *row = zend_object_alloc(sizeof(pdo_row_t), ce);
 	zend_object_std_init(&row->std, ce);
+	object_properties_init(&row->std, ce);
 
 	return &row->std;
 }
