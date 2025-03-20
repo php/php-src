@@ -63,6 +63,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-18050 (IN_ARRAY optimization in DFA pass is broken). (ilutov)
   . Fixed bug GH-18113 (stack-buffer-overflow ext/opcache/jit/ir/ir_sccp.c).
     (nielsdos)
+  . Fixed bug GH-18112 (NULL access with preloading and INI option). (nielsdos)
 
 - Standard:
   . Fix memory leaks in array_any() / array_all(). (nielsdos)
