@@ -20,5 +20,5 @@ echo "Done\n";
 --EXPECT--
 *** Testing fseek() : error conditions ***
 -- Testing fseek() with closed/unset file handle --
-fseek(): supplied resource is not a valid stream resource
+fseek(): Argument #1 ($stream) must be an open stream resource
 Done

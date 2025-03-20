@@ -15,6 +15,6 @@ try {
 echo "\nDone.\n";
 ?>
 --EXPECT--
-fread(): supplied resource is not a valid stream resource
+fread(): Argument #1 ($stream) must be an open stream resource
 
 Done.

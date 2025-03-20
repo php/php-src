@@ -20,5 +20,5 @@ echo "Done\n";
 --EXPECT--
 *** Testing ftell() : error conditions ***
 -- Testing ftell with closed/unset file handle --
-ftell(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
 Done
