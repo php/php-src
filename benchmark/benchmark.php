@@ -66,7 +66,7 @@ function runBench(bool $jit): array {
 
 function runSymfonyDemo(bool $jit): array {
     $dir = __DIR__ . '/repos/symfony-demo-2.2.3';
-    cloneRepo($dir, 'https://github.com/php/benchmarking-symfony-demo-2.2.3.git');
+    cloneRepo($dir, 'https://github.com/withinboredom/benchmarking-symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
     return runValgrindPhpCgiCommand('symfony-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
