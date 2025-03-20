@@ -6453,7 +6453,7 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	    && callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
 		fcall_ast = zend_ast_create(ZEND_AST_CALL,
 				callable_ast->child[0], arg_list_ast);
-	/* Turn $foo |> bar::>baz(...) into bar::baz($foo). */
+	/* Turn $foo |> bar::baz(...) into bar::baz($foo). */
 	} else if (callable_ast->kind == ZEND_AST_STATIC_CALL
 			&& callable_ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT) {
 		fcall_ast = zend_ast_create(ZEND_AST_STATIC_CALL,
