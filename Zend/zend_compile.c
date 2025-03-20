@@ -8353,6 +8353,16 @@ static zend_op_array *zend_compile_func_decl_ex(
 		if (deprecated_attribute) {
 			op_array->fn_flags |= ZEND_ACC_DEPRECATED;
 		}
+
+		zend_attribute *nodiscard_attribute = zend_get_attribute_str(
+			op_array->attributes,
+			"nodiscard",
+			sizeof("nodiscard")-1
+		);
+	
+		if (nodiscard_attribute) {
+			op_array->fn_flags |= ZEND_ACC_NODISCARD;
+		}	
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically

@@ -3205,7 +3205,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_NICE)
 	ZEND_FE(proc_nice, arginfo_proc_nice)
 #endif
-	ZEND_FE(flock, arginfo_flock)
+	ZEND_RAW_FENTRY("flock", zif_flock, arginfo_flock, ZEND_ACC_NODISCARD, NULL, NULL)
 	ZEND_FE(get_meta_tags, arginfo_get_meta_tags)
 	ZEND_FE(pclose, arginfo_pclose)
 	ZEND_FE(popen, arginfo_popen)
