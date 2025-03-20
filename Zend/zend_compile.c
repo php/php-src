@@ -8405,6 +8405,16 @@ static zend_op_array *zend_compile_func_decl_ex(
 		}
 	}
 
+	zend_attribute *nodiscard_attribute = zend_get_attribute_str(
+		op_array->attributes,
+		"nodiscard",
+		sizeof("nodiscard")-1
+	);
+
+	if (nodiscard_attribute) {
+		op_array->fn_flags |= ZEND_ACC_NODISCARD;
+	}
+
 	zend_compile_stmt(stmt_ast);
 
 	if (is_method) {
