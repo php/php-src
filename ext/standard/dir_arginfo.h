@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 069117bab1b9502faf516307aa7e80308f7b7f13 */
+ * Stub hash: 543d0d12062ed88dab7a3ac4354499682c5c7166 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Directory_close, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -9,14 +9,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Directory_read, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_FUNCTION(closedir);
-ZEND_FUNCTION(rewinddir);
-ZEND_FUNCTION(readdir);
+ZEND_METHOD(Directory, close);
+ZEND_METHOD(Directory, rewind);
+ZEND_METHOD(Directory, read);
 
 static const zend_function_entry class_Directory_methods[] = {
-	ZEND_RAW_FENTRY("close", zif_closedir, arginfo_class_Directory_close, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("rewind", zif_rewinddir, arginfo_class_Directory_rewind, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("read", zif_readdir, arginfo_class_Directory_read, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Directory, close, arginfo_class_Directory_close, ZEND_ACC_PUBLIC)
+	ZEND_ME(Directory, rewind, arginfo_class_Directory_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(Directory, read, arginfo_class_Directory_read, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
