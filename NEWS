@@ -12,6 +12,13 @@ PHP                                                                        NEWS
   . Fix weird unpack behaviour in DOM. (nielsdos)
   . Fix xinclude destruction of live attributes. (nielsdos)
 
+- Embed:
+  . Fixed bug GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
+
+- Fuzzer:
+  . Fixed bug GH-18081 (Memory leaks in error paths of fuzzer SAPI).
+    (Lung-Alexandra)
+
 - GD:
   . Fixed bug GH-17984 (calls with arguments as array with references).
     (David Carlier)
@@ -22,13 +29,6 @@ PHP                                                                        NEWS
   . Fix dateformat_format when the time is an array of references.
     (David Carlier)
   . Fix UConverter::transcode with substitutes as references. (David Carlier)
-
-- Embed:
-  . Fixed bug GH-8533 (Unable to link dynamic libphp on Mac). (Kévin Dunglas)
-
-- Fuzzer:
-  . Fixed bug GH-18081 (Memory leaks in error paths of fuzzer SAPI).
-    (Lung-Alexandra)
 
 - Mbstring:
   . Fixed bug GH-17989 (mb_output_handler crash with unset
