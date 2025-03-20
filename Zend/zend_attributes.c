@@ -31,6 +31,7 @@ ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 ZEND_API zend_class_entry *zend_ce_override;
 ZEND_API zend_class_entry *zend_ce_deprecated;
+ZEND_API zend_class_entry *zend_ce_nodiscard;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -186,6 +187,29 @@ ZEND_METHOD(Deprecated, __construct)
 		ZVAL_NULL(&value);
 	}
 	zend_update_property_ex(zend_ce_deprecated, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_SINCE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+}
+
+ZEND_METHOD(NoDiscard, __construct)
+{
+	zend_string *message = NULL;
+	zval value;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		ZVAL_STR(&value, message);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_nodiscard, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
 
 	/* The assignment might fail due to 'readonly'. */
 	if (UNEXPECTED(EG(exception))) {
@@ -520,6 +544,9 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_deprecated = register_class_Deprecated();
 	attr = zend_mark_internal_attribute(zend_ce_deprecated);
+
+	zend_ce_nodiscard = register_class_NoDiscard();
+	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
 }
 
 void zend_attributes_shutdown(void)
