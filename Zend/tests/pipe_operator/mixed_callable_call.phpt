@@ -27,6 +27,12 @@ class _Test
     }
 }
 
+class StaticTest {
+    public static function oneMore(int $x): int {
+        return $x + 1;
+    }
+}
+
 function _double(int $x): int {
     return $x * 2;
 }
@@ -47,9 +53,10 @@ $res1 = 2
     |> fn($x) => _area($x, 2)
     |> _double(...)
     |> multiplier(3)
+    |> StaticTest::oneMore(...)
 ;
 
 var_dump($res1);
 ?>
 --EXPECT--
-int(120)
+int(121)
