@@ -2400,6 +2400,7 @@ static void pdo_row_free_storage(zend_object *std)
 		row->stmt->lazy_object_ref = NULL;
 		OBJ_RELEASE(&row->stmt->std);
 	}
+	zend_object_std_dtor(std);
 }
 
 static zend_object *pdo_row_new(zend_class_entry *ce)
