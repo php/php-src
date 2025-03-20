@@ -65,6 +65,9 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-18112 (NULL access with preloading and INI option). (nielsdos)
 
+- PDO:
+  . Fix memory leak when destroying PDORow. (nielsdos)
+
 - Standard:
   . Fix memory leaks in array_any() / array_all(). (nielsdos)
 

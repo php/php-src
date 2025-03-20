@@ -2502,6 +2502,7 @@ void pdo_row_free_storage(zend_object *std)
 		ZVAL_UNDEF(&row->stmt->lazy_object_ref);
 		OBJ_RELEASE(&row->stmt->std);
 	}
+	zend_object_std_dtor(std);
 }
 
 zend_object *pdo_row_new(zend_class_entry *ce)
