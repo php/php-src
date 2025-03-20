@@ -37,6 +37,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-18112 (NULL access with preloading and INI option). (nielsdos)
 
+- PDO:
+  . Fix memory leak when destroying PDORow. (nielsdos)
+
 - SPL:
   . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
     ArrayObject). (nielsdos)
