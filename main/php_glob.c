@@ -55,6 +55,8 @@
  *	Number of matches in the current invocation of glob.
  */
 
+#if defined(HAVE_GLOB)
+
 #ifdef PHP_WIN32
 #if _MSC_VER < 1800
 # define _POSIX_
@@ -1120,3 +1122,5 @@ static void qprintf(const char *str, Char *s)
 	(void)printf("\n");
 }
 #endif
+
+#endif /* defined(HAVE_GLOB) */

@@ -30,13 +30,7 @@
 #include "php_zip.h"
 #include "php_zip_arginfo.h"
 
-#ifdef HAVE_GLOB
-#ifndef PHP_WIN32
-#include <glob.h>
-#else
-#include "win32/glob.h"
-#endif
-#endif
+#include "php_glob.h"
 
 /* {{{ Resource le */
 static int le_zip_dir;

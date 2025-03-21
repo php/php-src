@@ -314,7 +314,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 	ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/d2FuncCache1");
 }
 
-ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
+ADD_SOURCES("win32", "dllmain.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
 	getrusage.c ftok.c ioutil.c codepage.c nice.c \
 	fnmatch.c sockets.c console.c signal.c");
