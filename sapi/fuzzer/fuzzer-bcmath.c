@@ -73,20 +73,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
 	fuzzer_setup_dummy_frame();
 
-	zval result;
-	ZVAL_UNDEF(&result);
+	zval args[3];
+	ZVAL_STRINGL(&args[0], dividend_str, dividend_len);
+	ZVAL_STRINGL(&args[1], divisor_str, divisor_len);
+	ZVAL_LONG(&args[2], scale);
 
-	zval args[4];
-	ZVAL_COPY_VALUE(&args[0], &result);
-	ZVAL_STRINGL(&args[1], dividend_str, dividend_len);
-	ZVAL_STRINGL(&args[2], divisor_str, divisor_len);
-	ZVAL_LONG(&args[3], scale);
+	fuzzer_call_php_func_zval("bcdiv", 3, args);
 
-	fuzzer_call_php_func_zval("bcdiv", 4, args);
-
-	zval_ptr_dtor(&result);
+	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
 	efree(dividend_str);
 	efree(divisor_str);
 
