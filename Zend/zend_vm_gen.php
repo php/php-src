@@ -2416,6 +2416,12 @@ function gen_vm($def, $skel) {
     $max_opcode     = 0;
     $extra_num      = 256;
     foreach ($in as $line) {
+        // Handle Windows line endings, GH-17836; since a bunch of regular
+        // expressions below test for a newline at the end, just update the
+        // ending
+        if (substr($line, -2) === "\r\n") {
+            $line = substr_replace($line, "\n", -2);
+        }
         ++$lineno;
         if (strpos($line,"ZEND_VM_HANDLER(") === 0 ||
             strpos($line,"ZEND_VM_INLINE_HANDLER(") === 0 ||

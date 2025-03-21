@@ -84,6 +84,10 @@ PHP                                                                        NEWS
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
+- Windows:
+  . Fixed bug GH-17836 (zend_vm_gen.php shouldn't break on Windows line
+    endings). (DanielEScherzer)
+
 27 Feb 2025, PHP 8.4.5
 
 - BCMath:
