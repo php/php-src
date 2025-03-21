@@ -28,13 +28,21 @@
 
 #include "fuzzer-sapi.h"
 
-zend_long char_to_size_t(char *c) {
-	zend_long ret = 0;
-	if (*c >= '0' && *c <= '9') {
-		ret *= 10;
-		ret += *c - '0';
+bool char_to_zend_long(const char *c, size_t scale_len, zend_long *ret) {
+	*ret = 0;
+	zend_long old_ret = 0;
+	for (size_t i = 0; i < scale_len; i++) {
+		if (*c >= '0' && *c <= '9') {
+			*ret *= 10;
+			*ret += *c - '0';
+		}
+		if (*ret > old_ret) {
+			old_ret = *ret;
+		} else {
+			return false;
+		}
 	}
-	return ret;
+	return true;
 }
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
@@ -60,12 +68,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	Data = comma2 + 1;
 	Size -= divisor_len + 1;
 
-	char *scale_str = malloc(Size + 1);
-	memcpy(scale_str, Data, Size);
-	scale_str[Size] = '\0';
-
-	zend_long scale = char_to_size_t(scale_str);
-	free(scale_str);
+	zend_long scale = 0;
+	if (!char_to_zend_long((char *) Data, Size, &scale)) {
+		efree(dividend_str);
+		efree(divisor_str);
+		return 0;
+	}
 
 	if (fuzzer_request_startup() == FAILURE) {
 		return 0;
