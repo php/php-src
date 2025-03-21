@@ -30,13 +30,7 @@
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB)
 #endif
 
-#ifdef HAVE_GLOB
-#ifdef PHP_WIN32
-#include "win32/glob.h"
-#else
-#include <glob.h>
-#endif
-#endif
+#include "php_glob.h"
 
 #include "ext/pcre/php_pcre.h"
 

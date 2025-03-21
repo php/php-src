@@ -1631,6 +1631,7 @@ PHP_ADD_SOURCES([main], m4_normalize([
     php_content_types.c
     php_ini_builder.c
     php_ini.c
+    php_glob.c
     php_odbc_utils.c
     php_open_temporary_file.c
     php_scandir.c
