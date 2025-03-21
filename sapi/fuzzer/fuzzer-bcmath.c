@@ -39,25 +39,25 @@ zend_long char_to_size_t(char *c) {
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	/* num1,num2,scale */
-	const uint8_t *Comma1 = memchr(Data, ',', Size);
-	if (!Comma1) {
+	const uint8_t *comma1 = memchr(Data, ',', Size);
+	if (!comma1) {
 		return 0;
 	}
 
-	size_t dividend_len = Comma1 - Data;
+	size_t dividend_len = comma1 - Data;
 	char *dividend_str = estrndup((char *) Data, dividend_len);
-	Data = Comma1 + 1;
+	Data = comma1 + 1;
 	Size -= dividend_len + 1;
 
-	const uint8_t *Comma2 = memchr(Data, ',', Size);
-	if (!Comma2) {
+	const uint8_t *comma2 = memchr(Data, ',', Size);
+	if (!comma2) {
 		efree(dividend_str);
 		return 0;
 	}
 
-	size_t divisor_len = Comma2 - Data;
+	size_t divisor_len = comma2 - Data;
 	char *divisor_str = estrndup((char *) Data, divisor_len);
-	Data = Comma2 + 1;
+	Data = comma2 + 1;
 	Size -= divisor_len + 1;
 
 	char *scale_str = malloc(Size + 1);
