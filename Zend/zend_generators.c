@@ -24,6 +24,7 @@
 #include "zend_exceptions.h"
 #include "zend_generators.h"
 #include "zend_closures.h"
+#include "zend_attributes.h"
 #include "zend_generators_arginfo.h"
 #include "zend_observer.h"
 #include "zend_vm_opcodes.h"
@@ -471,14 +472,6 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 }
 /* }}} */
 
-static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *object) /* {{{ */
-{
-	zend_throw_error(NULL, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
-
-	return NULL;
-}
-/* }}} */
-
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr)
 {
 	if (!ptr->func && Z_TYPE(ptr->This) == IS_OBJECT) {
@@ -891,6 +884,13 @@ static inline void zend_generator_rewind(zend_generator *generator) /* {{{ */
 }
 /* }}} */
 
+ZEND_METHOD(Generator, __construct)
+{
+	// Reachable via reflection
+	zend_throw_error(NULL, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
+	RETURN_THROWS();
+}
+
 /* {{{ Rewind the generator */
 ZEND_METHOD(Generator, rewind)
 {
@@ -1221,7 +1221,6 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_generator_handlers.dtor_obj = zend_generator_dtor_storage;
 	zend_generator_handlers.get_gc = zend_generator_get_gc;
 	zend_generator_handlers.clone_obj = NULL;
-	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
 
 	zend_ce_ClosedGeneratorException = register_class_ClosedGeneratorException(zend_ce_exception);
 }
