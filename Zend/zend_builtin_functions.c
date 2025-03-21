@@ -1328,7 +1328,7 @@ ZEND_FUNCTION(get_error_handler)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-		RETURN_ZVAL(&EG(user_error_handler), 1, 0);
+		RETURN_COPY(&EG(user_error_handler));
 	}
 }
 
@@ -1383,7 +1383,7 @@ ZEND_FUNCTION(get_exception_handler)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-		RETURN_ZVAL(&EG(user_exception_handler), 1, 0);
+		RETURN_COPY(&EG(user_exception_handler));
 	}
 }
 
