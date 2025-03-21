@@ -20,6 +20,7 @@
 #include "filter_private.h"
 #include "ext/standard/url.h"
 #include "ext/pcre/php_pcre.h"
+#include "ext/uri/php_uri.h"
 
 #include "zend_multiply.h"
 
@@ -590,7 +591,6 @@ static bool php_filter_is_valid_ipv6_hostname(const char *s, size_t l)
 
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	php_url *url;
 	size_t old_len = Z_STRLEN_P(value);
 
 	php_filter_url(value, flags, option_array, charset);
@@ -599,57 +599,74 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	/* Use parse_url - if it returns false, we return NULL */
-	url = php_url_parse_ex(Z_STRVAL_P(value), Z_STRLEN_P(value));
+	/* Parse options */
+	zval *option_val;
+	zend_string *parser_name;
+	int parser_name_set;
+	FETCH_STR_OPTION(parser_name, "uri_parser_class");
 
-	if (url == NULL) {
+	uri_handler_t *uri_handler = php_uri_get_handler(parser_name_set ? parser_name : NULL);
+	if (uri_handler == NULL) {
+		zend_throw_error(NULL, "Invalid URI parser used");
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (url->scheme != NULL &&
-		(zend_string_equals_literal_ci(url->scheme, "http") || zend_string_equals_literal_ci(url->scheme, "https"))) {
+	/* Parse the URI - if it fails, we return NULL */
+	php_uri *uri = php_uri_parse_to_struct(uri_handler, Z_STR_P(value), URI_COMPONENT_READ_NORMALIZED_FOR_MACHINE_PROCESSING, NULL);
+	if (uri == NULL) {
+		RETURN_VALIDATION_FAILED
+	}
+
+	if (uri->scheme != NULL &&
+		(zend_string_equals_literal_ci(uri->scheme, "http") || zend_string_equals_literal_ci(uri->scheme, "https"))) {
 		const char *s;
 		size_t l;
 
-		if (url->host == NULL) {
-			goto bad_url;
+		if (uri->host == NULL) {
+			php_uri_struct_free(uri);
+			RETURN_VALIDATION_FAILED
 		}
 
-		s = ZSTR_VAL(url->host);
-		l = ZSTR_LEN(url->host);
+		s = ZSTR_VAL(uri->host);
+		l = ZSTR_LEN(uri->host);
 
 		if (
+			/* @todo Find a better solution than hardcoding the uri handler name. Skipping these checks is needed because
+			 * both uriparser and lexbor performs comprehensive validations. Also, the [] pair is removed by these
+			 * libraries in case of ipv6 URIs, therefore php_filter_is_valid_ipv6_hostname() would case false positive
+			 * failures. */
+			strcmp(uri_handler->name, "parse_url") == 0 &&
 			/* An IPv6 enclosed by square brackets is a valid hostname.*/
 			!php_filter_is_valid_ipv6_hostname(s, l) &&
 			/* Validate domain.
 			 * This includes a loose check for an IPv4 address. */
-			!_php_filter_validate_domain(ZSTR_VAL(url->host), l, FILTER_FLAG_HOSTNAME)
+			!_php_filter_validate_domain(ZSTR_VAL(uri->host), l, FILTER_FLAG_HOSTNAME)
 		) {
-			php_url_free(url);
+			php_uri_struct_free(uri);
 			RETURN_VALIDATION_FAILED
 		}
 	}
 
-	if (
-		url->scheme == NULL ||
-		/* some schemas allow the host to be empty */
-		(url->host == NULL && (!zend_string_equals_literal(url->scheme, "mailto") && !zend_string_equals_literal(url->scheme, "news") && !zend_string_equals_literal(url->scheme, "file"))) ||
-		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
+	if (uri->scheme == NULL ||
+		/* some schemes allow the host to be empty */
+		(uri->host == NULL && (!zend_string_equals_literal(uri->scheme, "mailto") && !zend_string_equals_literal(uri->scheme, "news") && !zend_string_equals_literal(uri->scheme, "file"))) ||
+		((flags & FILTER_FLAG_PATH_REQUIRED) && uri->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && uri->query == NULL)
 	) {
-bad_url:
-		php_url_free(url);
+		php_uri_struct_free(uri);
 		RETURN_VALIDATION_FAILED
 	}
 
-	if ((url->user != NULL && !is_userinfo_valid(url->user))
-		|| (url->pass != NULL && !is_userinfo_valid(url->pass))
+	if (strcmp(uri_handler->name, "parse_url") == 0 &&
+		(
+			(uri->user != NULL && !is_userinfo_valid(uri->user)) ||
+			(uri->password != NULL && !is_userinfo_valid(uri->password))
+		)
 	) {
-		php_url_free(url);
+		php_uri_struct_free(uri);
 		RETURN_VALIDATION_FAILED
-
 	}
 
-	php_url_free(url);
+	php_uri_struct_free(uri);
 }
 /* }}} */
 

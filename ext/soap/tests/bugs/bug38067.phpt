@@ -21,7 +21,7 @@ class TestSoapClient extends SoapClient {
     $this->server->addFunction('Test');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): string {
+  function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserName = null): string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();
@@ -32,13 +32,13 @@ class TestSoapClient extends SoapClient {
 
 $client = new TestSoapClient(__DIR__.'/bug38067.wsdl',
     array('encoding' => 'ISO-8859-1'));
-$str = 'test: Ä';
+$str = 'test: ï¿½';
 $res = $client->Test(array('str'=>$str));
 echo $str."\n";
 echo $res."\n";
 echo $g."\n";
 ?>
 --EXPECT--
-test: Ä
-test: Ä
-test: Ä
+test: ï¿½
+test: ï¿½
+test: ï¿½
