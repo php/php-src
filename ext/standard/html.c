@@ -809,112 +809,144 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 /* +2 is 1 because of rest (probably unnecessary), 1 because of terminating 0 */
 #define TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(oldlen) ((oldlen) + (oldlen) / 5 + 2)
 static void traverse_for_entities(
-	const char *old,
-	size_t oldlen,
-	zend_string *ret, /* should have allocated TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(olden) */
-	int all,
-	int flags,
+	const zend_string *input,
+	zend_string *output, /* should have allocated TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(olden) */
+	const int all,
+	const int flags,
 	const entity_ht *inv_map,
-	enum entity_charset charset)
+	const enum entity_charset charset)
 {
-	const char *p,
-			   *lim;
-	char	   *q;
-	int doctype = flags & ENT_HTML_DOC_TYPE_MASK;
+	const char *current_ptr = ZSTR_VAL(input);
+	const char *input_end   = current_ptr + input->len; /* terminator address */
+	char *output_ptr		= ZSTR_VAL(output);
+	const int doctype	   = flags & ENT_HTML_DOC_TYPE_MASK;
 
-	lim = old + oldlen; /* terminator address */
-	assert(*lim == '\0');
-
-	for (p = old, q = ZSTR_VAL(ret); p < lim;) {
-		unsigned code, code2 = 0;
-		const char *next = NULL; /* when set, next > p, otherwise possible inf loop */
-
-		/* Shift JIS, Big5 and HKSCS use multi-byte encodings where an
-		 * ASCII range byte can be part of a multi-byte sequence.
-		 * However, they start at 0x40, therefore if we find a 0x26 byte,
-		 * we're sure it represents the '&' character. */
-
-		/* assumes there are no single-char entities */
-		if (p[0] != '&' || (p + 3 >= lim)) {
-			*(q++) = *(p++);
-			continue;
+	while (current_ptr < input_end) {
+		const char *ampersand_ptr = memchr(current_ptr, '&', input_end - current_ptr);
+		if (!ampersand_ptr) {
+			const size_t tail_len = input_end - current_ptr;
+			if (tail_len > 0) {
+				memcpy(output_ptr, current_ptr, tail_len);
+				output_ptr += tail_len;
+			}
+			break;
 		}
 
-		/* now p[3] is surely valid and is no terminator */
+		/* Copy everything up to the found '&' */
+		const size_t chunk_len = ampersand_ptr - current_ptr;
+		if (chunk_len > 0) {
+			memcpy(output_ptr, current_ptr, chunk_len);
+			output_ptr += chunk_len;
+		}
 
-		/* numerical entity */
-		if (p[1] == '#') {
-			next = &p[2];
-			if (process_numeric_entity(&next, &code) == FAILURE)
-				goto invalid_code;
+		/* Now current_ptr points to the '&' character. */
+		current_ptr = ampersand_ptr;
 
-			/* If we're in htmlspecialchars_decode, we're only decoding entities
-			 * that represent &, <, >, " and '. Is this one of them? */
-			if (!all && (code > 63U ||
-					stage3_table_be_apos_00000[code].data.ent.entity == NULL))
-				goto invalid_code;
+		/* If there are less than 4 bytes remaining, there isn't enough for an entity – copy '&' as a normal character */
+		if (input_end - current_ptr < 4){
+			const size_t remaining = input_end - current_ptr;
+			memcpy(output_ptr, current_ptr, remaining);
+			output_ptr += remaining;
+			break;
+		}
 
-			/* are we allowed to decode this entity in this document type?
-			 * HTML 5 is the only that has a character that cannot be used in
-			 * a numeric entity but is allowed literally (U+000D). The
-			 * unoptimized version would be ... || !numeric_entity_is_allowed(code) */
-			if (!unicode_cp_is_allowed(code, doctype) ||
-					(doctype == ENT_HTML_DOC_HTML5 && code == 0x0D))
-				goto invalid_code;
+		unsigned code = 0, code2 = 0;
+		const char *entity_end_ptr = NULL;
+		bool valid_entity = true;
+
+		if (current_ptr[1] == '#') {
+			/* Processing numeric entity */
+			const char *num_start = current_ptr + 2;
+			entity_end_ptr = num_start;
+			if (process_numeric_entity(&entity_end_ptr, &code) == FAILURE) {
+				valid_entity = false;
+			}
+            if (valid_entity && !all && (code > 63U || stage3_table_be_apos_00000[code].data.ent.entity == NULL)) {
+				/* If we're in htmlspecialchars_decode, we're only decoding entities
+				 * that represent &, <, >, " and '. Is this one of them? */
+				valid_entity = false;
+			} else if (valid_entity && (!unicode_cp_is_allowed(code, doctype) ||
+						(doctype == ENT_HTML_DOC_HTML5 && code == 0x0D))) {
+				/* are we allowed to decode this entity in this document type?
+				 * HTML 5 is the only that has a character that cannot be used in
+				 * a numeric entity but is allowed literally (U+000D). The
+				 * unoptimized version would be ... || !numeric_entity_is_allowed(code) */
+				valid_entity = false;
+			}
 		} else {
-			const char *start;
-			size_t ent_len;
-
-			next = &p[1];
-			start = next;
-
-			if (process_named_entity_html(&next, &start, &ent_len) == FAILURE)
-				goto invalid_code;
-
-			if (resolve_named_entity_html(start, ent_len, inv_map, &code, &code2) == FAILURE) {
-				if (doctype == ENT_HTML_DOC_XHTML && ent_len == 4 && start[0] == 'a'
-							&& start[1] == 'p' && start[2] == 'o' && start[3] == 's') {
-					/* uses html4 inv_map, which doesn't include apos;. This is a
-					 * hack to support it */
-					code = (unsigned) '\'';
+			 /* Processing named entity */
+			const char *name_start = current_ptr + 1;
+			/* Search for ';' */
+			const size_t max_search_len = MIN(LONGEST_ENTITY_LENGTH + 1, input_end - name_start);
+			const char *semi_colon_ptr = memchr(name_start, ';', max_search_len);
+			if (!semi_colon_ptr) {
+				valid_entity = false;
+			} else {
+				const size_t name_len = semi_colon_ptr - name_start;
+				if (name_len == 0) {
+					valid_entity = false;
 				} else {
-					goto invalid_code;
+					if (resolve_named_entity_html(name_start, name_len, inv_map, &code, &code2) == FAILURE) {
+						if (doctype == ENT_HTML_DOC_XHTML && name_len == 4 &&
+							name_start[0] == 'a' && name_start[1] == 'p' &&
+							name_start[2] == 'o' && name_start[3] == 's')
+						{
+							/* uses html4 inv_map, which doesn't include apos;. This is a
+							 * hack to support it */
+							code = (unsigned)'\'';
+						} else {
+							valid_entity = false;
+						}
+					}
+					entity_end_ptr = semi_colon_ptr;
 				}
 			}
 		}
 
-		assert(*next == ';');
+		/* If entity_end_ptr is not found or does not point to ';', consider the entity invalid */
+		if (!valid_entity || entity_end_ptr == NULL || *entity_end_ptr != ';') {
+			*output_ptr++ = *current_ptr++;
+			continue;
+		}
 
-		if (((code == '\'' && !(flags & ENT_HTML_QUOTE_SINGLE)) ||
-				(code == '"' && !(flags & ENT_HTML_QUOTE_DOUBLE)))
-				/* && code2 == '\0' always true for current maps */)
-			goto invalid_code;
+		/* Check if quotes are allowed for entities representing ' or " */
+		if ((code == '\'' && !(flags & ENT_HTML_QUOTE_SINGLE)) ||
+			(code == '"'  && !(flags & ENT_HTML_QUOTE_DOUBLE)))
+		{
+			valid_entity = false;
+		}
 
 		/* UTF-8 doesn't need mapping (ISO-8859-1 doesn't either, but
 		 * the call is needed to ensure the codepoint <= U+00FF)  */
-		if (charset != cs_utf_8) {
+		if (valid_entity && charset != cs_utf_8) {
 			/* replace unicode code point */
 			if (map_from_unicode(code, charset, &code) == FAILURE || code2 != 0)
-				goto invalid_code; /* not representable in target charset */
+				valid_entity = false;
 		}
 
-		q += write_octet_sequence((unsigned char*)q, charset, code);
-		if (code2) {
-			q += write_octet_sequence((unsigned char*)q, charset, code2);
-		}
-
-		/* jump over the valid entity; may go beyond size of buffer; np */
-		p = next + 1;
-		continue;
-
-invalid_code:
-		for (; p < next; p++) {
-			*(q++) = *p;
+		if (valid_entity) {
+			/* Write the parsed entity into the output buffer */
+			output_ptr += write_octet_sequence((unsigned char*)output_ptr, charset, code);
+			if (code2) {
+				output_ptr += write_octet_sequence((unsigned char*)output_ptr, charset, code2);
+			}
+			/* Move current_ptr past the semicolon */
+			current_ptr = entity_end_ptr + 1;
+		} else {
+			/* If the entity is invalid, copy characters from current_ptr up to entity_end_ptr */
+			if (entity_end_ptr) {
+				const size_t len = entity_end_ptr - current_ptr;
+				memcpy(output_ptr, current_ptr, len);
+				output_ptr += len;
+				current_ptr = entity_end_ptr;
+			} else {
+				*output_ptr++ = *current_ptr++;
+			}
 		}
 	}
 
-	*q = '\0';
-	ZSTR_LEN(ret) = (size_t)(q - ZSTR_VAL(ret));
+	*output_ptr = '\0';
+	ZSTR_LEN(output) = (size_t)(output_ptr - ZSTR_VAL(output));
 }
 /* }}} */
 
@@ -999,7 +1031,7 @@ PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int fl
 	inverse_map = unescape_inverse_map(all, flags);
 
 	/* replace numeric entities */
-	traverse_for_entities(ZSTR_VAL(str), ZSTR_LEN(str), ret, all, flags, inverse_map, charset);
+	traverse_for_entities(str, ret, all, flags, inverse_map, charset);
 
 	return ret;
 }
