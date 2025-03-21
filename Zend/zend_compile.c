@@ -1087,12 +1087,12 @@ static zend_string *zend_resolve_non_class_name(
 		return zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
 	}
 
-	if (type == ZEND_NAME_FQ) {
+	if (NAME_QUAL(type) == ZEND_NAME_FQ) {
 		*is_fully_qualified = 1;
 		return zend_string_copy(name);
 	}
 
-	if (type == ZEND_NAME_RELATIVE) {
+	if (NAME_QUAL(type) == ZEND_NAME_RELATIVE) {
 		*is_fully_qualified = 1;
 		return zend_prefix_with_ns(name);
 	}
@@ -1149,23 +1149,24 @@ static zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /*
 	char *compound;
 
 	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
-		if (type == ZEND_NAME_FQ) {
+		if (NAME_QUAL(type) == ZEND_NAME_FQ) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"'\\%s' is an invalid class name", ZSTR_VAL(name));
 		}
-		if (type == ZEND_NAME_RELATIVE) {
+		if (NAME_QUAL(type) == ZEND_NAME_RELATIVE) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"'namespace\\%s' is an invalid class name", ZSTR_VAL(name));
 		}
-		ZEND_ASSERT(type == ZEND_NAME_NOT_FQ);
+
+		ZEND_ASSERT(NAME_QUAL(type) == ZEND_NAME_NOT_FQ);
 		return zend_string_copy(name);
 	}
 
-	if (type == ZEND_NAME_RELATIVE) {
+	if (NAME_QUAL(type) == ZEND_NAME_RELATIVE) {
 		return zend_prefix_with_ns(name);
 	}
 
-	if (type == ZEND_NAME_FQ) {
+	if (NAME_QUAL(type) == ZEND_NAME_FQ) {
 		if (ZSTR_VAL(name)[0] == '\\') {
 			/* Remove \ prefix (only relevant if this is a string rather than a label) */
 			name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
@@ -1752,7 +1753,7 @@ uint32_t zend_get_class_fetch_type(const zend_string *name) /* {{{ */
 static uint32_t zend_get_class_fetch_type_ast(zend_ast *name_ast) /* {{{ */
 {
 	/* Fully qualified names are always default refs */
-	if (name_ast->attr == ZEND_NAME_FQ) {
+	if (NAME_QUAL(name_ast->attr) == ZEND_NAME_FQ) {
 		return ZEND_FETCH_CLASS_DEFAULT;
 	}
 
@@ -2881,7 +2882,7 @@ static void zend_compile_class_ref(znode *result, zend_ast *name_ast, uint32_t f
 	}
 
 	/* Fully qualified names are always default refs */
-	if (name_ast->attr == ZEND_NAME_FQ) {
+	if (NAME_QUAL(name_ast->attr) == ZEND_NAME_FQ) {
 		result->op_type = IS_CONST;
 		ZVAL_STR(&result->u.constant, zend_resolve_class_name_ast(name_ast));
 		return;
@@ -6967,7 +6968,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		uint8_t type_code = zend_lookup_builtin_type_by_name(type_name);
 
 		if (type_code != 0) {
-			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
+			if (NAME_QUAL(ast->attr) != ZEND_NAME_NOT_FQ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(type_name)));
@@ -7011,7 +7012,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				zend_string_addref(class_name);
 			}
 
-			if (ast->attr == ZEND_NAME_NOT_FQ
+			if (NAME_QUAL(ast->attr) == ZEND_NAME_NOT_FQ
 					&& zend_is_confusable_type(type_name, &correct_name)
 					&& zend_is_not_imported(type_name)) {
 				const char *extra =
@@ -8068,12 +8069,13 @@ static void add_stringable_interface(zend_class_entry *ce) {
 
 	ce->num_interfaces++;
 	ce->interface_names =
-		erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
+		erealloc(ce->interface_names, sizeof(zend_interface_name) * ce->num_interfaces);
 	// TODO: Add known interned strings instead?
 	ce->interface_names[ce->num_interfaces - 1].name =
 		ZSTR_INIT_LITERAL("Stringable", 0);
 	ce->interface_names[ce->num_interfaces - 1].lc_name =
 		ZSTR_INIT_LITERAL("stringable", 0);
+	ce->interface_names[ce->num_interfaces - 1].is_optional = false;
 }
 
 static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, bool has_body) /* {{{ */
@@ -8984,16 +8986,17 @@ static void zend_compile_implements(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
-	zend_class_name *interface_names;
+	zend_interface_name *interface_names;
 	uint32_t i;
 
-	interface_names = emalloc(sizeof(zend_class_name) * list->children);
+	interface_names = emalloc(sizeof(zend_interface_name) * list->children);
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *class_ast = list->child[i];
 		interface_names[i].name =
 			zend_resolve_const_class_name_reference(class_ast, "interface name");
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
+		interface_names[i].is_optional = class_ast->attr & ZEND_NAME_OPTIONAL;
 	}
 
 	ce->num_interfaces = list->children;
@@ -10795,7 +10798,7 @@ static void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 	zend_string *orig_name = zend_ast_get_str(name_ast);
 	zend_string *resolved_name = zend_resolve_const_name(orig_name, name_ast->attr, &is_fully_qualified);
 
-	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__") || (name_ast->attr != ZEND_NAME_RELATIVE && zend_string_equals_literal(orig_name, "__COMPILER_HALT_OFFSET__"))) {
+	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__") || (NAME_QUAL(name_ast->attr) != ZEND_NAME_RELATIVE && zend_string_equals_literal(orig_name, "__COMPILER_HALT_OFFSET__"))) {
 		zend_ast *last = CG(ast);
 
 		while (last && last->kind == ZEND_AST_STMT_LIST) {
@@ -11237,7 +11240,7 @@ static void zend_compile_const_expr_class_reference(zend_ast *class_ast)
 	zval *class_ast_zv = zend_ast_get_zval(class_ast);
 	zval_ptr_dtor_nogc(class_ast_zv);
 	ZVAL_STR(class_ast_zv, class_name);
-	class_ast->attr = fetch_type << ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT;
+	class_ast->attr = (fetch_type << ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT) | (fetch_type ? ZEND_NAME_NOT_FQ : ZEND_NAME_FQ);
 }
 
 static void zend_compile_const_expr_new(zend_ast **ast_ptr)
