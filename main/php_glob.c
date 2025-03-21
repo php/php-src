@@ -55,7 +55,8 @@
  *	Number of matches in the current invocation of glob.
  */
 
-#if defined(HAVE_GLOB)
+#if defined(HAVE_GLOB) && defined(PHP_SYSTEM_GLOB)
+#else
 
 #ifdef PHP_WIN32
 #if _MSC_VER < 1800
@@ -81,6 +82,11 @@
 # endif
 #endif
 
+#ifndef _PW_BUF_LEN
+/* XXX: Should be sysconf(_SC_GETPW_R_SIZE_MAX), but then VLA */
+#define _PW_BUF_LEN 4096
+#endif
+
 #include "php.h"
 #include <sys/stat.h>
 
@@ -92,7 +98,7 @@
 #include <unistd.h>
 #endif
 #include <errno.h>
-#include "glob.h"
+#include "php_glob.h"
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -210,29 +216,29 @@ reallocarray(void *optr, size_t nmemb, size_t size)
 static int	 compare(const void *, const void *);
 static int	 compare_gps(const void *, const void *);
 static int	 g_Ctoc(const Char *, char *, size_t);
-static int	 g_lstat(Char *, zend_stat_t *, glob_t *);
-static DIR	*g_opendir(Char *, glob_t *);
+static int	 g_lstat(Char *, zend_stat_t *, php_glob_t *);
+static DIR	*g_opendir(Char *, php_glob_t *);
 static Char	*g_strchr(const Char *, int);
 static int	 g_strncmp(const Char *, const char *, size_t);
-static int	 g_stat(Char *, zend_stat_t *, glob_t *);
-static int	 glob0(const Char *, glob_t *, struct glob_lim *);
-static int	 glob1(Char *, Char *, glob_t *, struct glob_lim *);
+static int	 g_stat(Char *, zend_stat_t *, php_glob_t *);
+static int	 glob0(const Char *, php_glob_t *, struct glob_lim *);
+static int	 glob1(Char *, Char *, php_glob_t *, struct glob_lim *);
 static int	 glob2(Char *, Char *, Char *, Char *, Char *, Char *,
-				glob_t *, struct glob_lim *);
+				php_glob_t *, struct glob_lim *);
 static int	 glob3(Char *, Char *, Char *, Char *, Char *,
-				Char *, Char *, glob_t *, struct glob_lim *);
-static int	 globextend(const Char *, glob_t *, struct glob_lim *,
+				Char *, Char *, php_glob_t *, struct glob_lim *);
+static int	 globextend(const Char *, php_glob_t *, struct glob_lim *,
 				zend_stat_t *);
-static const Char *globtilde(const Char *, Char *, size_t, glob_t *);
-static int	 globexp1(const Char *, glob_t *, struct glob_lim *);
-static int	 globexp2(const Char *, const Char *, glob_t *,
+static const Char *globtilde(const Char *, Char *, size_t, php_glob_t *);
+static int	 globexp1(const Char *, php_glob_t *, struct glob_lim *);
+static int	 globexp2(const Char *, const Char *, php_glob_t *,
 				struct glob_lim *);
 static int	 match(Char *, Char *, Char *);
 #ifdef DEBUG
 static void	 qprintf(const char *, Char *);
 #endif
 
-PHPAPI int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
+PHPAPI int php_glob(const char *pattern, int flags, int (*errfunc)(const char *, int), php_glob_t *pglob)
 {
 	const uint8_t *patnext;
 	int c;
@@ -295,7 +301,7 @@ PHPAPI int glob(const char *pattern, int flags, int (*errfunc)(const char *, int
  * invoke the standard globbing routine to glob the rest of the magic
  * characters
  */
-static int globexp1(const Char *pattern, glob_t *pglob, struct glob_lim *limitp)
+static int globexp1(const Char *pattern, php_glob_t *pglob, struct glob_lim *limitp)
 {
 	const Char* ptr = pattern;
 
@@ -315,7 +321,7 @@ static int globexp1(const Char *pattern, glob_t *pglob, struct glob_lim *limitp)
  * If it succeeds then it invokes globexp1 with the new pattern.
  * If it fails then it tries to glob the rest of the pattern and returns.
  */
-static int globexp2(const Char *ptr, const Char *pattern, glob_t *pglob, struct glob_lim *limitp)
+static int globexp2(const Char *ptr, const Char *pattern, php_glob_t *pglob, struct glob_lim *limitp)
 {
 	int     i, rv;
 	Char   *lm, *ls;
@@ -420,7 +426,7 @@ static int globexp2(const Char *ptr, const Char *pattern, glob_t *pglob, struct 
 /*
  * expand tilde from the passwd file.
  */
-static const Char *globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
+static const Char *globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, php_glob_t *pglob)
 {
 #ifndef PHP_WIN32
 	struct passwd pwstore, *pwd = NULL;
@@ -538,7 +544,7 @@ static int g_charclass(const Char **patternp, Char **bufnextp)
  * if things went well, nonzero if errors occurred.  It is not an error
  * to find no matches.
  */
-static int glob0(const Char *pattern, glob_t *pglob, struct glob_lim *limitp)
+static int glob0(const Char *pattern, php_glob_t *pglob, struct glob_lim *limitp)
 {
 	const Char *qpatnext;
 	int c, err;
@@ -674,7 +680,7 @@ static int compare_gps(const void *_p, const void *_q)
 	return(strcmp(p->gps_path, q->gps_path));
 }
 
-static int glob1(Char *pattern, Char *pattern_last, glob_t *pglob, struct glob_lim *limitp)
+static int glob1(Char *pattern, Char *pattern_last, php_glob_t *pglob, struct glob_lim *limitp)
 {
 	Char pathbuf[PATH_MAX];
 
@@ -691,7 +697,7 @@ static int glob1(Char *pattern, Char *pattern_last, glob_t *pglob, struct glob_l
  * of recursion for each segment in the pattern that contains one or more
  * meta characters.
  */
-static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, Char *pattern, Char *pattern_last, glob_t *pglob, struct glob_lim *limitp)
+static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, Char *pattern, Char *pattern_last, php_glob_t *pglob, struct glob_lim *limitp)
 {
 	zend_stat_t sb;
 	Char *p, *q;
@@ -757,7 +763,7 @@ static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 	/* NOTREACHED */
 }
 
-static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, Char *pattern, Char *restpattern, Char *restpattern_last, glob_t *pglob, struct glob_lim *limitp)
+static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, Char *pattern, Char *restpattern, Char *restpattern_last, php_glob_t *pglob, struct glob_lim *limitp)
 {
 	struct dirent *dp;
 	DIR *dirp;
@@ -841,7 +847,7 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 
 
 /*
- * Extend the gl_pathv member of a glob_t structure to accommodate a new item,
+ * Extend the gl_pathv member of a php_glob_t structure to accommodate a new item,
  * add the new item, and update gl_pathc.
  *
  * This assumes the BSD realloc, which only copies the block when its size
@@ -850,11 +856,11 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
  *
  * Return 0 if new item added, error code if memory couldn't be allocated.
  *
- * Invariant of the glob_t structure:
+ * Invariant of the php_glob_t structure:
  *	Either gl_pathc is zero and gl_pathv is NULL; or gl_pathc > 0 and
  *	gl_pathv points to (gl_offs + gl_pathc + 1) items.
  */
-static int globextend(const Char *path, glob_t *pglob, struct glob_lim *limitp, zend_stat_t *sb)
+static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limitp, zend_stat_t *sb)
 {
 	char **pathv;
 	size_t i, newn, len;
@@ -1025,8 +1031,8 @@ fail:
 	return(0);
 }
 
-/* Free allocated data belonging to a glob_t structure. */
-PHPAPI void globfree(glob_t *pglob)
+/* Free allocated data belonging to a php_glob_t structure. */
+PHPAPI void php_globfree(php_glob_t *pglob)
 {
 	size_t i;
 	char **pp;
@@ -1047,7 +1053,7 @@ PHPAPI void globfree(glob_t *pglob)
 	}
 }
 
-static DIR *g_opendir(Char *str, glob_t *pglob)
+static DIR *g_opendir(Char *str, php_glob_t *pglob)
 {
 	char buf[PATH_MAX];
 
@@ -1064,7 +1070,7 @@ static DIR *g_opendir(Char *str, glob_t *pglob)
 	return(opendir(buf));
 }
 
-static int g_lstat(Char *fn, zend_stat_t *sb, glob_t *pglob)
+static int g_lstat(Char *fn, zend_stat_t *sb, php_glob_t *pglob)
 {
 	char buf[PATH_MAX];
 
@@ -1075,7 +1081,7 @@ static int g_lstat(Char *fn, zend_stat_t *sb, glob_t *pglob)
 	return(php_sys_lstat(buf, sb));
 }
 
-static int g_stat(Char *fn, zend_stat_t *sb, glob_t *pglob)
+static int g_stat(Char *fn, zend_stat_t *sb, php_glob_t *pglob)
 {
 	char buf[PATH_MAX];
 
