@@ -52,26 +52,26 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
-	size_t dividend_len = comma1 - Data;
-	char *dividend_str = estrndup((char *) Data, dividend_len);
+	size_t num1_len = comma1 - Data;
+	char *num1_str = estrndup((char *) Data, num1_len);
 	Data = comma1 + 1;
-	Size -= dividend_len + 1;
+	Size -= num1_len + 1;
 
 	const uint8_t *comma2 = memchr(Data, ',', Size);
 	if (!comma2) {
-		efree(dividend_str);
+		efree(num1_str);
 		return 0;
 	}
 
-	size_t divisor_len = comma2 - Data;
-	char *divisor_str = estrndup((char *) Data, divisor_len);
+	size_t num2_len = comma2 - Data;
+	char *num2_str = estrndup((char *) Data, num2_len);
 	Data = comma2 + 1;
-	Size -= divisor_len + 1;
+	Size -= num2_len + 1;
 
 	zend_long scale = 0;
 	if (!char_to_zend_long((char *) Data, Size, &scale)) {
-		efree(dividend_str);
-		efree(divisor_str);
+		efree(num1_str);
+		efree(num2_str);
 		return 0;
 	}
 
@@ -79,19 +79,41 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
+	char func_name[6];
+	switch (rand() % 6) {
+		case 0:
+			sprintf(func_name, "%s", "bcadd");
+			break;
+		case 1:
+			sprintf(func_name, "%s", "bcsub");
+			break;
+		case 2:
+			sprintf(func_name, "%s", "bcmul");
+			break;
+		case 3:
+			sprintf(func_name, "%s", "bcdiv");
+			break;
+		case 4:
+			sprintf(func_name, "%s", "bcmod");
+			break;
+		case 5:
+			sprintf(func_name, "%s", "bcpow");
+			break;
+	}
+
 	fuzzer_setup_dummy_frame();
 
 	zval args[3];
-	ZVAL_STRINGL(&args[0], dividend_str, dividend_len);
-	ZVAL_STRINGL(&args[1], divisor_str, divisor_len);
+	ZVAL_STRINGL(&args[0], num1_str, num1_len);
+	ZVAL_STRINGL(&args[1], num2_str, num2_len);
 	ZVAL_LONG(&args[2], scale);
 
-	fuzzer_call_php_func_zval("bcdiv", 3, args);
+	fuzzer_call_php_func_zval(func_name, 3, args);
 
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&args[1]);
-	efree(dividend_str);
-	efree(divisor_str);
+	efree(num1_str);
+	efree(num2_str);
 
 	fuzzer_request_shutdown();
 
