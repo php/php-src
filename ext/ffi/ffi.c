@@ -45,13 +45,7 @@
 #endif
 #endif
 
-#ifdef HAVE_GLOB
-#ifdef PHP_WIN32
-#include "win32/glob.h"
-#else
-#include <glob.h>
-#endif
-#endif
+#include "php_glob.h"
 
 #ifndef __BIGGEST_ALIGNMENT__
 /* XXX need something better, perhaps with regard to SIMD, etc. */

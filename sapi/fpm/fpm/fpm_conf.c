@@ -10,9 +10,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <inttypes.h>
-#ifdef HAVE_GLOB
-# include <glob.h>
-#endif
+#include "php_glob.h"
 
 #include <stdio.h>
 #include <unistd.h>

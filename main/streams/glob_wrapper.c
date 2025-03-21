@@ -17,13 +17,7 @@
 #include "php.h"
 #include "php_streams_int.h"
 
-#ifdef HAVE_GLOB
-# ifndef PHP_WIN32
-#  include <glob.h>
-# else
-#  include "win32/glob.h"
-# endif
-#endif
+#include "php_glob.h"
 
 #ifdef HAVE_GLOB
 #ifndef GLOB_ONLYDIR

@@ -35,6 +35,10 @@
  *	@(#)glob.h	8.1 (Berkeley) 6/2/93
  */
 
+#if defined(HAVE_GLOB)
+#include <glob.h>
+#else
+
 #ifndef _GLOB_H_
 #define	_GLOB_H_
 
@@ -98,3 +102,5 @@ PHPAPI void	globfree(glob_t *);
 END_EXTERN_C()
 
 #endif /* !_GLOB_H_ */
+
+#endif /* defined(HAVE_GLOB) */

@@ -17,13 +17,7 @@
 #ifndef PHP_DIR_INT_H
 #define PHP_DIR_INT_H
 
-#ifdef HAVE_GLOB
-#ifndef PHP_WIN32
-#include <glob.h>
-#else
-#include "win32/glob.h"
-#endif
-#endif
+#include "php_glob.h"
 
 #ifdef HAVE_GLOB
 
