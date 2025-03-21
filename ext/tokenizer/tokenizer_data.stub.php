@@ -714,6 +714,11 @@ const T_CURLY_OPEN = UNKNOWN;
 const T_PAAMAYIM_NEKUDOTAYIM = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_INNER_REF
+ */
+const T_INNER_REF = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_NS_SEPARATOR
  */
 const T_NS_SEPARATOR = UNKNOWN;

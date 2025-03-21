@@ -1121,6 +1121,27 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 	return ce;
 }
 
+void zend_update_required_scope(zend_class_entry *ce)
+{
+	if (ce->required_scope) {
+		zend_class_entry *required_scope = ce->required_scope;
+
+		zend_class_entry *r = zend_shared_alloc_get_xlat_entry(required_scope);
+		if (r) {
+			ce->required_scope = r;
+		}
+	}
+
+	if (ce->lexical_scope) {
+		zend_class_entry *lexical_scope = ce->lexical_scope;
+
+		zend_class_entry *l = zend_shared_alloc_get_xlat_entry(lexical_scope);
+		if (l) {
+			ce->lexical_scope = l;
+		}
+	}
+}
+
 void zend_update_parent_ce(zend_class_entry *ce)
 {
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
@@ -1294,6 +1315,7 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 		if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 			ce = Z_PTR(p->val);
 			zend_update_parent_ce(ce);
+			zend_update_required_scope(ce);
 		}
 	} ZEND_HASH_FOREACH_END();
 #ifdef HAVE_JIT
