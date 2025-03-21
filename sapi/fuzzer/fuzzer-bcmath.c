@@ -47,31 +47,24 @@ bool char_to_zend_long(const char *c, size_t scale_len, zend_long *ret) {
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	/* num1,num2,scale */
-	const uint8_t *comma1 = memchr(Data, ',', Size);
+	const char *n1ptr = (char *) Data;
+	const char *comma1 = memchr(n1ptr, ',', Size);
 	if (!comma1) {
 		return 0;
 	}
+	size_t n1len = comma1 - n1ptr;
+	Size -= n1len + 1;
 
-	size_t num1_len = comma1 - Data;
-	char *num1_str = estrndup((char *) Data, num1_len);
-	Data = comma1 + 1;
-	Size -= num1_len + 1;
-
-	const uint8_t *comma2 = memchr(Data, ',', Size);
+	const char *n2ptr = comma1 + 1;
+	const char *comma2 = memchr(n2ptr, ',', Size);
 	if (!comma2) {
-		efree(num1_str);
 		return 0;
 	}
-
-	size_t num2_len = comma2 - Data;
-	char *num2_str = estrndup((char *) Data, num2_len);
-	Data = comma2 + 1;
-	Size -= num2_len + 1;
+	size_t n2len = comma2 - n2ptr;
+	Size -= n2len + 1;
 
 	zend_long scale = 0;
-	if (!char_to_zend_long((char *) Data, Size, &scale)) {
-		efree(num1_str);
-		efree(num2_str);
+	if (!char_to_zend_long((char *) comma2 + 1, Size, &scale)) {
 		return 0;
 	}
 
@@ -104,16 +97,14 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	fuzzer_setup_dummy_frame();
 
 	zval args[3];
-	ZVAL_STRINGL(&args[0], num1_str, num1_len);
-	ZVAL_STRINGL(&args[1], num2_str, num2_len);
+	ZVAL_STRINGL(&args[0], n1ptr, n1len);
+	ZVAL_STRINGL(&args[1], n2ptr, n2len);
 	ZVAL_LONG(&args[2], scale);
 
 	fuzzer_call_php_func_zval(func_name, 3, args);
 
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&args[1]);
-	efree(num1_str);
-	efree(num2_str);
 
 	fuzzer_request_shutdown();
 
