@@ -1917,7 +1917,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 	bool did_rerun_gc = 0;
 
 	zend_hrtime_t start_time = zend_hrtime();
-	if (GC_G(num_roots) && GC_G(gc_active)) {
+	if (GC_G(num_roots) && !GC_G(gc_active)) {
 		zend_gc_remove_root_tmpvars();
 	}
 
