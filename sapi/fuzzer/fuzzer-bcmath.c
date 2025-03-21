@@ -120,68 +120,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	return 0;
 }
 
-#define BUF_SIZE 128
-
-static inline bool rand_bool() {
-	return rand() & 1;
-}
-
-static inline size_t generate_random_num_fraction(char *buf, size_t len) {
-	int zeros = rand() % 10;
-	for (int i = 0; i < zeros; i++) {
-		buf[len] = '0';
-		len++;
-	}
-	len += snprintf(buf + len, BUF_SIZE - len, "%ld", random());
-	return len;
-}
-
-static inline size_t generate_random_num(char *buf, size_t len) {
-	if (rand_bool()) {
-		/* num < 1 */
-		buf[len] = '0';
-		buf[len + 1]= '.';
-		len += 2;
-		/* fraction */
-		len = generate_random_num_fraction(buf, len);
-	} else {
-		/* integer */
-		len += snprintf(buf + len, BUF_SIZE - len, "%ld", random());
-		if (rand_bool()) {
-			/* fraction */
-			buf[len] = '.';
-			len++;
-			len = generate_random_num_fraction(buf, len);
-		}
-	}
-
-	return len;
-}
-
-size_t LLVMFuzzerCustomMutator(uint8_t *Data, size_t Size, size_t MaxSize, unsigned int Seed) {
-	char buf[BUF_SIZE];
-	size_t len = 0;
-
-	/*  num1 */
-	len = generate_random_num(buf, len);
-	buf[len] = ',';
-	len++;
-
-	/* num2 */
-	len = generate_random_num(buf, len);
-	buf[len] = ',';
-	len++;
-
-	/* scale */
-	len += snprintf(buf + len, BUF_SIZE - len, "%d", rand() % 10);
-
-	if (len > MaxSize) {
-		return 0;
-	}
-	memcpy(Data, buf, len);
-	return len;
-}
-
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
 	fuzzer_init_php(NULL);
 
