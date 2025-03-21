@@ -35,12 +35,12 @@
  *	@(#)glob.h	8.1 (Berkeley) 6/2/93
  */
 
-#if defined(HAVE_GLOB)
+#if defined(HAVE_GLOB) && defined(PHP_SYSTEM_GLOB)
 #include <glob.h>
 #else
 
-#ifndef _GLOB_H_
-#define	_GLOB_H_
+#ifndef _PHP_GLOB_H_
+#define	_PHP_GLOB_H_
 
 #ifndef PHP_WIN32
 # include <sys/cdefs.h>
@@ -68,7 +68,7 @@ typedef struct {
 	void *(*gl_opendir)(const char *);
 	int (*gl_lstat)(const char *, zend_stat_t *);
 	int (*gl_stat)(const char *, zend_stat_t *);
-} glob_t;
+} php_glob_t;
 
 #define	GLOB_APPEND	0x0001	/* Append to output from previous call. */
 #define	GLOB_DOOFFS	0x0002	/* Use gl_offs. */
@@ -96,10 +96,15 @@ typedef struct {
 #endif
 
 BEGIN_EXTERN_C()
-PHPAPI int	glob(const char *__restrict, int, int (*)(const char *, int),
-	    glob_t *__restrict);
-PHPAPI void	globfree(glob_t *);
+PHPAPI int	php_glob(const char *__restrict, int, int (*)(const char *, int),
+	    php_glob_t *__restrict);
+PHPAPI void	php_globfree(php_glob_t *);
 END_EXTERN_C()
+
+// XXX: Invert defs
+#define glob_t php_glob_t
+#define glob php_glob
+#define globfree php_globfree
 
 #endif /* !_GLOB_H_ */
 
