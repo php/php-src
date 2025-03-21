@@ -32,6 +32,10 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fix UConverter::transcode with substitutes as references. (David Carlier)
 
+- libxml:
+  . Fixed custom external entity loader returning an invalid resource leading
+    to a confusing TypeError message. (Girgias)
+
 - Mbstring:
   . Fixed bug GH-17989 (mb_output_handler crash with unset
     http_output_conv_mimetypes). (nielsdos)
