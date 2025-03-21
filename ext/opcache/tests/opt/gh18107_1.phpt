@@ -5,6 +5,8 @@ SpencerMalone
 --EXTENSIONS--
 opcache
 --INI--
+opcache.enable=1
+opcache.enable_cli=1
 opcache.optimization_level=0x10
 opcache.opt_debug_level=0x20000
 --FILE--
