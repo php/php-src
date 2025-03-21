@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-15367 (dl() of module with aliased class crashes in shutdown).
     (Arnaud)
+  . Fixed bug GH-13193 again (Significant performance degradation in 'foreach').
+    (nielsdos)
 
 - DOM:
   . Fix weird unpack behaviour in DOM. (nielsdos)
