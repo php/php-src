@@ -40,6 +40,10 @@ PHP                                                                        NEWS
 - PDO:
   . Fix memory leak when destroying PDORow. (nielsdos)
 
+- SOAP:
+  . Fixed bug #66049 (Typemap can break parsing in parse_packet_soap leading to
+    a segfault) . (Remi)
+
 - SPL:
   . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
     ArrayObject). (nielsdos)
