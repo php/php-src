@@ -1613,8 +1613,12 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		/* Use the default properties table to also update initializers of private properties
 		 * that have been shadowed in a child class. */
 		for (uint32_t i = 0; i < class_type->default_properties_count; i++) {
-			val = &default_properties_table[i];
 			prop_info = class_type->properties_info_table[i];
+			if (!prop_info) {
+				continue;
+			}
+
+			val = &default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST
 					&& UNEXPECTED(update_property(val, prop_info) != SUCCESS)) {
 				return FAILURE;
