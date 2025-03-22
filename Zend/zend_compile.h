@@ -1092,6 +1092,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
 #define ZEND_FREE_SWITCH        (1<<1)
+#define ZEND_FREE_VOID_CAST     (1<<2)
 
 #define ZEND_SEND_BY_VAL     0u
 #define ZEND_SEND_BY_REF     1u

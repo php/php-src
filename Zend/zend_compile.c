@@ -10589,6 +10589,26 @@ static void zend_compile_include_or_eval(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_void_cast(znode *result, zend_ast *ast)
+{
+	zend_ast *expr_ast = ast->child[0];
+	znode expr_node;
+	zend_op *opline;
+
+	zend_compile_expr(&expr_node, expr_ast);
+
+	switch (expr_node.op_type) {
+		case IS_TMP_VAR:
+		case IS_VAR:
+			opline = zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
+			opline->extended_value = ZEND_FREE_VOID_CAST;
+			break;
+		case IS_CONST:
+			zend_do_free(&expr_node);
+			break;
+	}
+}
+
 static void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -11546,6 +11566,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_THROW:
 			zend_compile_expr(NULL, ast);
+			break;
+		case ZEND_AST_CAST_VOID:
+			zend_compile_void_cast(NULL, ast);
 			break;
 		default:
 		{
