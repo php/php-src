@@ -10153,7 +10153,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				ir_GUARD_NOT(
 					ir_AND_U32(
 						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-						ir_CONST_U32(ZEND_ACC_DEPRECATED)),
+						ir_CONST_U32(ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)),
 					ir_CONST_ADDR(exit_addr));
 			}
 		}
@@ -10193,16 +10193,46 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				}
 				ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
 				ir_MERGE_WITH_EMPTY_FALSE(if_deprecated);
-			}
-		} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
-			ir_ref ret;
 
-			if (GCC_GLOBAL_REGS) {
-				ret = ir_CALL(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper));
-			} else {
-				ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper), rx);
+				if (!RETURN_VALUE_USED(opline)) {
+					ir_ref if_nodiscard, ret;
+
+					if_nodiscard = ir_IF(ir_AND_U32(
+							ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+							ir_CONST_U32(ZEND_ACC_NODISCARD)));
+					ir_IF_TRUE_cold(if_nodiscard);
+
+					if (GCC_GLOBAL_REGS) {
+						ret = ir_CALL(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_nodiscard_helper));
+					} else {
+						ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_nodiscard_helper), rx);
+					}
+					ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
+					ir_MERGE_WITH_EMPTY_FALSE(if_nodiscard);
+				}
 			}
-			ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
+		} else {
+			if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
+				ir_ref ret;
+
+				if (GCC_GLOBAL_REGS) {
+					ret = ir_CALL(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper));
+				} else {
+					ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper), rx);
+				}
+				ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
+			}
+
+			if ((func->common.fn_flags & ZEND_ACC_NODISCARD) && !RETURN_VALUE_USED(opline)) {
+				ir_ref ret;
+
+				if (GCC_GLOBAL_REGS) {
+					ret = ir_CALL(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_nodiscard_helper));
+				} else {
+					ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_nodiscard_helper), rx);
+				}
+				ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
+			}
 		}
 	}
 
