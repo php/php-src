@@ -116,7 +116,6 @@ static bool php_openssl_pkey_init_dsa_data(DSA *dsa, zval *data, bool *is_privat
 	}
 
 	/* generate key */
-	PHP_OPENSSL_RAND_ADD_TIME();
 	if (!DSA_generate_key(dsa)) {
 		php_openssl_store_errors();
 		return 0;
@@ -185,7 +184,6 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 	}
 
 	/* generate key */
-	PHP_OPENSSL_RAND_ADD_TIME();
 	if (!DH_generate_key(dh)) {
 		php_openssl_store_errors();
 		return 0;
@@ -341,7 +339,6 @@ static bool php_openssl_pkey_init_ec_data(EC_KEY *eckey, zval *data, bool *is_pr
 
 	if (!EC_KEY_check_key(eckey)) {
 		*is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		EC_KEY_generate_key(eckey);
 	}
 
