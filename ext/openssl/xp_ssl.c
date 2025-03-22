@@ -148,10 +148,6 @@
 #define HAVE_IPV6_SAN 1
 #endif
 
-#if PHP_OPENSSL_API_VERSION < 0x10100
-static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength);
-#endif
-
 extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 extern zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
 extern int php_openssl_get_ssl_stream_data_index(void);
@@ -987,45 +983,6 @@ static zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) 
 }
 /* }}} */
 
-#if PHP_OPENSSL_API_VERSION < 0x10100
-static int php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
-{
-	int ssl_ctx_options = SSL_OP_ALL;
-
-#ifdef SSL_OP_NO_SSLv2
-	ssl_ctx_options |= SSL_OP_NO_SSLv2;
-#endif
-#ifdef HAVE_SSL3
-	if (!(method_flags & STREAM_CRYPTO_METHOD_SSLv3)) {
-		ssl_ctx_options |= SSL_OP_NO_SSLv3;
-	}
-#endif
-#ifdef HAVE_TLS1
-	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_0)) {
-		ssl_ctx_options |= SSL_OP_NO_TLSv1;
-	}
-#endif
-#ifdef HAVE_TLS11
-	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_1)) {
-		ssl_ctx_options |= SSL_OP_NO_TLSv1_1;
-	}
-#endif
-#ifdef HAVE_TLS12
-	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_2)) {
-		ssl_ctx_options |= SSL_OP_NO_TLSv1_2;
-	}
-#endif
-#ifdef HAVE_TLS13
-	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_3)) {
-		ssl_ctx_options |= SSL_OP_NO_TLSv1_3;
-	}
-#endif
-
-	return ssl_ctx_options;
-}
-/* }}} */
-#endif
-
 static inline int php_openssl_get_min_proto_version_flag(int flags) /* {{{ */
 {
 	int ver;
@@ -1050,7 +1007,6 @@ static inline int php_openssl_get_max_proto_version_flag(int flags) /* {{{ */
 }
 /* }}} */
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100
 static inline int php_openssl_map_proto_version(int flag) /* {{{ */
 {
 	switch (flag) {
@@ -1085,7 +1041,6 @@ static int php_openssl_get_max_proto_version(int flags) /* {{{ */
 	return php_openssl_map_proto_version(php_openssl_get_max_proto_version_flag(flags));
 }
 /* }}} */
-#endif
 
 static int php_openssl_get_proto_version_flags(int flags, int min, int max) /* {{{ */
 {
@@ -1219,30 +1174,6 @@ static void php_openssl_init_server_reneg_limit(php_stream *stream, php_openssl_
 }
 /* }}} */
 
-#if PHP_OPENSSL_API_VERSION < 0x10100
-static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength)
-{
-	BIGNUM *bn = NULL;
-	static RSA *rsa_tmp = NULL;
-
-	if (!rsa_tmp && ((bn = BN_new()) == NULL)) {
-		php_error_docref(NULL, E_WARNING, "allocation error generating RSA key");
-	}
-	if (!rsa_tmp && bn) {
-		if (!BN_set_word(bn, RSA_F4) || ((rsa_tmp = RSA_new()) == NULL) ||
-			!RSA_generate_key_ex(rsa_tmp, keylength, bn, NULL)) {
-			if (rsa_tmp) {
-				RSA_free(rsa_tmp);
-			}
-			rsa_tmp = NULL;
-		}
-		BN_free(bn);
-	}
-
-	return (rsa_tmp);
-}
-#endif
-
 static zend_result php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zdhpath = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "dh_param");
@@ -1303,57 +1234,11 @@ static zend_result php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX 
 }
 /* }}} */
 
-#if defined(HAVE_ECDH) && PHP_OPENSSL_API_VERSION < 0x10100
-static zend_result php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /* {{{ */
-{
-	zval *zvcurve;
-	int curve_nid;
-	EC_KEY *ecdh;
-
-	zvcurve = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "ecdh_curve");
-	if (zvcurve == NULL) {
-		SSL_CTX_set_ecdh_auto(ctx, 1);
-		return SUCCESS;
-	} else {
-		if (!try_convert_to_string(zvcurve)) {
-			return FAILURE;
-		}
-
-		curve_nid = OBJ_sn2nid(Z_STRVAL_P(zvcurve));
-		if (curve_nid == NID_undef) {
-			php_error_docref(NULL, E_WARNING, "Invalid ecdh_curve specified");
-			return FAILURE;
-		}
-	}
-
-	ecdh = EC_KEY_new_by_curve_name(curve_nid);
-	if (ecdh == NULL) {
-		php_error_docref(NULL, E_WARNING, "Failed generating ECDH curve");
-		return FAILURE;
-	}
-
-	SSL_CTX_set_tmp_ecdh(ctx, ecdh);
-	EC_KEY_free(ecdh);
-
-	return SUCCESS;
-}
-/* }}} */
-#endif
-
 static zend_result php_openssl_set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zv;
 	long ssl_ctx_options = SSL_CTX_get_options(ctx);
 
-#if defined(HAVE_ECDH) && PHP_OPENSSL_API_VERSION < 0x10100
-	if (php_openssl_set_server_ecdh_curve(stream, ctx) == FAILURE) {
-		return FAILURE;
-	}
-#endif
-
-#if PHP_OPENSSL_API_VERSION < 0x10100
-	SSL_CTX_set_tmp_rsa_callback(ctx, php_openssl_tmp_rsa_cb);
-#endif
 	/* We now use php_openssl_tmp_rsa_cb to generate a key of appropriate size whenever necessary */
 	if (php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "rsa_key_size") != NULL) {
 		php_error_docref(NULL, E_WARNING, "rsa_key_size context option has been removed");
@@ -1690,11 +1575,7 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 	GET_VER_OPT_LONG("min_proto_version", min_version);
 	GET_VER_OPT_LONG("max_proto_version", max_version);
 	method_flags = php_openssl_get_proto_version_flags(method_flags, min_version, max_version);
-#if PHP_OPENSSL_API_VERSION < 0x10100
-	ssl_ctx_options = php_openssl_get_crypto_method_ctx_flags(method_flags);
-#else
 	ssl_ctx_options = SSL_OP_ALL;
-#endif
 
 	if (GET_VER_OPT("no_ticket") && zend_is_true(val)) {
 		ssl_ctx_options |= SSL_OP_NO_TICKET;
@@ -1780,10 +1661,8 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 
 	SSL_CTX_set_options(sslsock->ctx, ssl_ctx_options);
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100
 	SSL_CTX_set_min_proto_version(sslsock->ctx, php_openssl_get_min_proto_version(method_flags));
 	SSL_CTX_set_max_proto_version(sslsock->ctx, php_openssl_get_max_proto_version(method_flags));
-#endif
 
 	if (sslsock->is_client == 0 &&
 		PHP_STREAM_CONTEXT(stream) &&
