@@ -268,14 +268,17 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 
 		obj = zend_objects_new(reflection_ce);
 
-		for (int i = 0; i < obj->ce->default_properties_count; i++) {
+		/* Iterate in reverse to avoid overriding Z_PROP_FLAG_P() of child props with added hooks (GH-17870). */
+		for (int i = obj->ce->default_properties_count - 1; i >= 0; i--) {
 			zval *p = &obj->properties_table[i];
 			ZVAL_UNDEF(p);
-			if (EXPECTED(obj->ce->properties_info_table[i])) {
+			Z_PROP_FLAG_P(p) = 0;
+
+			zend_property_info *prop_info = obj->ce->properties_info_table[i];
+			if (prop_info) {
+				zval *p = &obj->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 				Z_PROP_FLAG_P(p) = IS_PROP_UNINIT | IS_PROP_LAZY;
 				lazy_properties_count++;
-			} else {
-				Z_PROP_FLAG_P(p) = 0;
 			}
 		}
 	} else {
@@ -326,7 +329,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		for (int i = 0; i < reflection_ce->default_properties_count; i++) {
 			zend_property_info *prop_info = obj->ce->properties_info_table[i];
 			if (EXPECTED(prop_info)) {
-				zval *p = &obj->properties_table[i];
+				zval *p = &obj->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 				if (Z_TYPE_P(p) != IS_UNDEF) {
 					if ((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(p) & IS_PROP_REINITABLE)
 							/* TODO: test final property */
@@ -408,12 +411,16 @@ static void zend_lazy_object_revert_init(zend_object *obj, zval *properties_tabl
 		zval *properties_table = obj->properties_table;
 
 		for (int i = 0; i < ce->default_properties_count; i++) {
-			zval *p = &properties_table[i];
-			zend_object_dtor_property(obj, p);
-			ZVAL_COPY_VALUE_PROP(p, &properties_table_snapshot[i]);
-
 			zend_property_info *prop_info = ce->properties_info_table[i];
-			if (Z_ISREF_P(p) && prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
+			if (!prop_info) {
+				continue;
+			}
+
+			zval *p = &properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+			zend_object_dtor_property(obj, p);
+			ZVAL_COPY_VALUE_PROP(p, &properties_table_snapshot[OBJ_PROP_TO_NUM(prop_info->offset)]);
+
+			if (Z_ISREF_P(p) && ZEND_TYPE_IS_SET(prop_info->type)) {
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(p), prop_info);
 			}
 		}
@@ -526,10 +533,12 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	obj->properties = NULL;
 
 	for (int i = 0; i < Z_OBJ(retval)->ce->default_properties_count; i++) {
-		if (EXPECTED(Z_OBJ(retval)->ce->properties_info_table[i])) {
-			zend_object_dtor_property(obj, &obj->properties_table[i]);
-			ZVAL_UNDEF(&obj->properties_table[i]);
-			Z_PROP_FLAG_P(&obj->properties_table[i]) = IS_PROP_UNINIT | IS_PROP_LAZY;
+		zend_property_info *prop_info = Z_OBJ(retval)->ce->properties_info_table[i];
+		if (EXPECTED(prop_info)) {
+			zval *prop = &obj->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+			zend_object_dtor_property(obj, prop);
+			ZVAL_UNDEF(prop);
+			Z_PROP_FLAG_P(prop) = IS_PROP_UNINIT | IS_PROP_LAZY;
 		}
 	}
 
@@ -722,13 +731,16 @@ zend_object *zend_lazy_object_clone(zend_object *old_obj)
 	zend_class_entry *ce = old_obj->ce;
 	zend_object *new_proxy = zend_objects_new(ce);
 
-	for (int i = 0; i < ce->default_properties_count; i++) {
+	/* Iterate in reverse to avoid overriding Z_PROP_FLAG_P() of child props with added hooks (GH-17870). */
+	for (int i = ce->default_properties_count - 1; i >= 0; i--) {
 		zval *p = &new_proxy->properties_table[i];
 		ZVAL_UNDEF(p);
-		if (EXPECTED(ce->properties_info_table[i])) {
+		Z_PROP_FLAG_P(p) = 0;
+
+		zend_property_info *prop_info = ce->properties_info_table[i];
+		if (prop_info) {
+			zval *p = &new_proxy->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 			Z_PROP_FLAG_P(p) = IS_PROP_UNINIT | IS_PROP_LAZY;
-		} else {
-			Z_PROP_FLAG_P(p) = 0;
 		}
 	}
 

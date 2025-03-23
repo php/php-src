@@ -3879,9 +3879,13 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 			bool resolved = true;
 
 			for (i = 0; i < ce->default_properties_count; i++) {
-				val = &ce->default_properties_table[i];
+				zend_property_info *prop = ce->properties_info_table[i];
+				if (!prop) {
+					continue;
+				}
+
+				val = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop->offset)];
 				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-					zend_property_info *prop = ce->properties_info_table[i];
 					if (UNEXPECTED(zval_update_constant_ex(val, prop->ce) != SUCCESS)) {
 						resolved = ok = false;
 					}
