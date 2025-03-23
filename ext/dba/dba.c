@@ -435,10 +435,9 @@ PHP_MSHUTDOWN_FUNCTION(dba)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(dba)
 {
-	const dba_handler *hptr;
 	smart_str handlers = {0};
 
-	for(hptr = handler; hptr->name; hptr++) {
+	for (const dba_handler *hptr = handler; hptr->name; hptr++) {
 		smart_str_appends(&handlers, hptr->name);
 		smart_str_appendc(&handlers, ' ');
 	}
@@ -1252,7 +1251,6 @@ PHP_FUNCTION(dba_sync)
 /* {{{ List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
-	const dba_handler *hptr;
 	bool full_info = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
@@ -1261,7 +1259,7 @@ PHP_FUNCTION(dba_handlers)
 
 	array_init(return_value);
 
-	for(hptr = handler; hptr->name; hptr++) {
+	for (const dba_handler *hptr = handler; hptr->name; hptr++) {
 		if (full_info) {
 			// TODO: avoid reallocation ???
 			char *str = hptr->info(hptr, NULL);
