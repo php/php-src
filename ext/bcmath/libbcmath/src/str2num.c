@@ -37,7 +37,7 @@
 #include <stddef.h>
 
 /* Convert strings to bc numbers.  Base 10 only.*/
-static const char *bc_count_digits(const char *str, const char *end)
+static inline const char *bc_count_digits(const char *str, const char *end)
 {
 	/* Process in bulk */
 #ifdef HAVE_BC_SIMD_128
