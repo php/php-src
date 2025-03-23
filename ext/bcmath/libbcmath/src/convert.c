@@ -24,7 +24,7 @@ char *bc_copy_and_toggle_bcd(char *restrict dest, const char *source, const char
 	const size_t bulk_shift = SWAR_REPEAT('0');
 
 #ifdef HAVE_BC_SIMD_128
-	/* SIMD SSE2 of NEON bulk shift + copy */
+	/* SIMD SSE2 or NEON bulk shift + copy */
 	bc_simd_128_t shift_vector = bc_simd_set_8x16('0');
 	while (source + sizeof(bc_simd_128_t) <= source_end) {
 		bc_simd_128_t bytes = bc_simd_load_8x16((const bc_simd_128_t *) source);
