@@ -106,6 +106,9 @@ PHP 8.5 UPGRADE NOTES
   . Fatal Errors (such as an exceeded maximum execution time) now include a
     backtrace.
     RFC: https://wiki.php.net/rfc/error_backtraces_v2
+  . Added the (void) to indicate that not using a value is intentional. The
+    (void) cast does nothing by itself.
+    RFC: https://wiki.php.net/rfc/marking_return_value_as_important
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
