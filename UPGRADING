@@ -146,6 +146,8 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/attributes-on-constants
   . Added the pipe (|>) operator.
     RFC: https://wiki.php.net/rfc/pipe-operator-v3
+  . Constructor property promotion can now be used for final properties.
+    RFC: https://wiki.php.net/rfc/final_promotion
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
