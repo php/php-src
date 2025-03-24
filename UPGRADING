@@ -106,6 +106,8 @@ PHP 8.5 UPGRADE NOTES
   . Fatal Errors (such as an exceeded maximum execution time) now include a
     backtrace.
     RFC: https://wiki.php.net/rfc/error_backtraces_v2
+  . Constructor property promotion can now be used for final properties.
+    RFC: https://wiki.php.net/rfc/final_promotion
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
