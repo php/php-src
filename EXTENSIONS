@@ -426,6 +426,7 @@ EXTENSION:           reflection
 PRIMARY MAINTAINER:  Marcus Börger <helly@php.net> (2003 - 2009)
                      Johannes Schlüter <johannes@php.net> (2006 - 2014)
                      Nikita Popov <nikic@php.net> (2019 - 2020)
+                     Daniel Scherzer <daniel.e.scherzer@gmail.com> (2025 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
