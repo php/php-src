@@ -1798,6 +1798,108 @@ ZEND_VM_C_LABEL(fetch_this):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(210, ZEND_FETCH_INNER_CLASS, CONST|TMPVAR|UNUSED, CONST, CACHE_SLOT)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_string *inner_class_name, *full_class_name;
+	zend_class_entry *outer_ce = NULL, *inner_ce = NULL, *scope = NULL;
+
+	scope = EX(func)->op_array.scope;
+
+	if (OP1_TYPE == IS_CONST) {
+		zval *outer_class_zv = RT_CONSTANT(opline, opline->op1);
+		outer_ce = zend_lookup_class(Z_STR_P(outer_class_zv));
+		if (!outer_ce) {
+			zend_error(E_ERROR, "Outer class '%s' not found for inner class %s:>%s", Z_STRVAL_P(outer_class_zv), Z_STRVAL_P(outer_class_zv), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+			HANDLE_EXCEPTION();
+		}
+	} else if (OP1_TYPE == IS_UNUSED) {
+		uint32_t fetch_type;
+		zend_class_entry *called_scope;
+
+		fetch_type = opline->op1.num & ZEND_FETCH_CLASS_MASK;
+		if (UNEXPECTED(scope == NULL)) {
+			SAVE_OPLINE();
+			zend_throw_error(NULL, "Cannot use \"%s\" in the global scope",
+				fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
+				fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
+		}
+		if (fetch_type == ZEND_FETCH_CLASS_SELF) {
+			outer_ce = scope;
+		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT) {
+			if (UNEXPECTED(scope->parent == NULL)) {
+				SAVE_OPLINE();
+				zend_throw_error(NULL,
+					"Cannot use \"parent\" when current class scope has no parent");
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+				HANDLE_EXCEPTION();
+			}
+			outer_ce = scope->parent;
+		} else if (fetch_type == ZEND_FETCH_CLASS_STATIC) {
+			if (Z_TYPE(EX(This)) == IS_OBJECT) {
+				called_scope = Z_OBJCE(EX(This));
+			} else {
+				called_scope = Z_CE(EX(This));
+			}
+			outer_ce = called_scope;
+		} else {
+			zend_throw_error(NULL, "Unknown scope resolution");
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		outer_ce = Z_CE_P(EX_VAR(opline->op1.var));
+	}
+
+	inner_class_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+
+	if (UNEXPECTED(ZSTR_LEN(outer_ce->name) + ZSTR_LEN(inner_class_name) + 2 > ZSTR_MAX_LEN)) {
+		zend_error(E_ERROR, "Class name is too long");
+		HANDLE_EXCEPTION();
+	}
+
+	full_class_name = zend_string_concat3(
+		ZSTR_VAL(outer_ce->name), ZSTR_LEN(outer_ce->name),
+		":>", 2,
+		ZSTR_VAL(inner_class_name), ZSTR_LEN(inner_class_name)
+	);
+
+	inner_ce = zend_lookup_class(full_class_name);
+	if (!inner_ce) {
+		zend_error(E_ERROR, "Inner class '%s' not found in outer class %s", ZSTR_VAL(full_class_name), ZSTR_VAL(outer_ce->name));
+		HANDLE_EXCEPTION();
+	}
+
+	if (inner_ce->required_scope) {
+		if (inner_ce->required_scope_absolute) {
+			// for private classes, we check if the scope we are currently in has access
+			if (scope != NULL && (inner_ce->required_scope == scope || scope->lexical_scope == inner_ce->required_scope)) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Cannot access private inner class '%s'", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
+		} else {
+			// for protected classes, we check if the scope is an instance of the required scope
+			if (scope != NULL && (instanceof_function(scope, inner_ce->required_scope) || instanceof_function(scope->lexical_scope, inner_ce->required_scope))) {
+				// we are in the correct scope
+			} else {
+				zend_error(E_ERROR, "Cannot access protected inner class '%s'", ZSTR_VAL(full_class_name));
+				HANDLE_EXCEPTION();
+			}
+		}
+	}
+
+	Z_CE_P(EX_VAR(opline->result.var)) = inner_ce;
+
+	zend_string_release(full_class_name);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(80, ZEND_FETCH_R, CONST|TMPVAR|CV, UNUSED, VAR_FETCH)
 {
 	ZEND_VM_DISPATCH_TO_HELPER(zend_fetch_var_address_helper, type, BP_VAR_R);
@@ -4427,6 +4529,24 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		}
 
 		SAVE_OPLINE();
+
+		if (Z_TYPE_P(retval_ptr) == IS_OBJECT && Z_OBJCE_P(retval_ptr)->required_scope) {
+			if (EX(func)->common.fn_flags & ZEND_ACC_PUBLIC) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute) {
+					zend_type_error("Public method %s cannot return private class %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				} else {
+					zend_type_error("Public method %s cannot return protected class %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			} else if (EX(func)->common.fn_flags & ZEND_ACC_PROTECTED) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute && Z_OBJCE_P(retval_ptr)->required_scope != EX(func)->common.scope) {
+					zend_type_error("Protected method %s cannot return private class %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, cache_slot, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
@@ -8173,6 +8293,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 
 			case ZEND_FETCH_CLASS:
 			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_FETCH_INNER_CLASS:
 				break; /* return value is zend_class_entry pointer */
 
 			default:

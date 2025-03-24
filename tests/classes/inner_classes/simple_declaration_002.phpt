@@ -1,16 +1,13 @@
 --TEST--
-errmsg: class declarations may not be nested
+nested inside function
 --FILE--
 <?php
 
-class test {
-    function foo() {
-        class test2 {
-        }
+class Outer {
+    public function test() {
+        class Inner {}
     }
 }
-
-echo "Done\n";
 ?>
 --EXPECTF--
 Fatal error: Class declarations may not be declared inside functions in %s on line %d

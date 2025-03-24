@@ -1045,8 +1045,45 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
+static zend_always_inline bool zend_check_class_visibility(const zend_class_entry *ce, const zend_property_info *info, uint32_t current_visibility) {
+	// a public class is always visible
+	if (!ce->required_scope) {
+		return 1;
+	}
+
+	// a protected class is visible if it is a subclass of the lexical scope and the current visibility is protected or private
+	if (!ce->required_scope_absolute) {
+		if (current_visibility & ZEND_ACC_PUBLIC) {
+			zend_type_error("Cannot assign protected %s to higher visibile property %s::%s",
+				ZSTR_VAL(ce->name),
+				ZSTR_VAL(info->ce->name),
+				zend_get_unmangled_property_name(info->name));
+			return 0;
+		}
+
+		return 1;
+	}
+
+	// a private class is visible if it is the same class as the lexical scope and the current visibility is private
+	if (ce->required_scope_absolute && current_visibility & ZEND_ACC_PRIVATE) {
+		return 1;
+	}
+
+	zend_type_error("Cannot assign private %s to higher visibile property %s::%s",
+		ZSTR_VAL(ce->name),
+		ZSTR_VAL(info->ce->name),
+		zend_get_unmangled_property_name(info->name));
+
+	return 0;
+}
+
 static zend_always_inline bool i_zend_verify_property_type(const zend_property_info *info, zval *property, bool strict)
 {
+	if(Z_TYPE_P(property) == IS_OBJECT && !zend_check_class_visibility(Z_OBJCE_P(property), info, info->flags)) {
+		zend_verify_property_type_error(info, property);
+		return 0;
+	}
+
 	if (i_zend_check_property_type(info, property, strict)) {
 		return 1;
 	}
@@ -1196,6 +1233,23 @@ static zend_always_inline bool zend_check_type_slow(
 			}
 		} else {
 			ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
+
+			// verify that the class is being used in the correct scope
+			if (ce && ce->required_scope) {
+				zend_class_entry *scope = zend_get_executed_scope();
+				if (ce->required_scope_absolute && scope != ce->required_scope) {
+					if (scope == NULL) {
+						zend_error(E_ERROR, "Private inner class %s cannot be used as a type declaration in the global scope", ZSTR_VAL(ce->name));
+					}
+
+					zend_error(E_ERROR, "Private inner class %s cannot be used as a type declaration in the scope of %s", ZSTR_VAL(ce->name), ZSTR_VAL(scope->name));
+				} else if (scope == NULL) {
+					zend_error(E_ERROR, "Protected inner class %s cannot be used as a type declaration in the global scope", ZSTR_VAL(ce->name));
+				} else if (!instanceof_function(scope, ce->required_scope)) {
+					zend_error(E_ERROR, "Protected inner class %s cannot be used as a type declaration in the scope of %s", ZSTR_VAL(ce->name), ZSTR_VAL(scope->name));
+				}
+			}
+
 			/* If we have a CE we check if it satisfies the type constraint,
 			 * otherwise it will check if a standard type satisfies it. */
 			if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
