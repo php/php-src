@@ -92,7 +92,7 @@ ZEND_GET_MODULE(dba)
 #endif
 
 /* {{{ php_dba_make_key */
-static zend_string* php_dba_make_key(HashTable *key)
+static zend_string* php_dba_make_key(const HashTable *key)
 {
 	zval *group, *name;
 	zend_string *group_str, *name_str;
