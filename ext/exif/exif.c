@@ -2157,7 +2157,7 @@ static int exif_file_sections_realloc(image_info_type *ImageInfo, int section_in
 /* {{{ exif_file_section_free
    Discard all file_sections in ImageInfo
 */
-static bool exif_file_sections_free(image_info_type *ImageInfo)
+static void exif_file_sections_free(image_info_type *ImageInfo)
 {
 	int i;
 
@@ -2168,7 +2168,6 @@ static bool exif_file_sections_free(image_info_type *ImageInfo)
 	}
 	EFREE_IF(ImageInfo->file.list);
 	ImageInfo->file.count = 0;
-	return true;
 }
 /* }}} */
 
