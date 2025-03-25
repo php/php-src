@@ -6454,7 +6454,9 @@ PHP_FUNCTION(array_product)
 PHP_FUNCTION(array_reduce)
 {
 	zval *input;
-	zval args[2];
+	zval args[3];
+	zend_ulong num_key;
+	zend_string *string_key;
 	zval *operand;
 	zval retval;
 	zend_fcall_info fci;
@@ -6486,14 +6488,20 @@ PHP_FUNCTION(array_reduce)
 	}
 
 	fci.retval = &retval;
-	fci.param_count = 2;
+	fci.param_count = 3;
 
-	ZEND_HASH_FOREACH_VAL(htbl, operand) {
+	ZEND_HASH_FOREACH_KEY_VAL(htbl, num_key, string_key, operand) {
 		ZVAL_COPY_VALUE(&args[0], return_value);
 		ZVAL_COPY(&args[1], operand);
+		if (!string_key) {
+			ZVAL_LONG(&args[2], num_key);
+		} else {
+			ZVAL_STR_COPY(&args[2], string_key);
+		}
 		fci.params = args;
 
 		if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+			zval_ptr_dtor(&args[2]);
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			ZVAL_COPY_VALUE(return_value, &retval);
@@ -6501,6 +6509,7 @@ PHP_FUNCTION(array_reduce)
 				zend_unwrap_reference(return_value);
 			}
 		} else {
+			zval_ptr_dtor(&args[2]);
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			RETURN_NULL();

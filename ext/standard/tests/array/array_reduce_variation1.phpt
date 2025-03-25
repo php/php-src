@@ -9,8 +9,8 @@ function oneArg($v) {
   return $v;
 }
 
-function threeArgs($v, $w, $x) {
-  return $v + $w + $x;
+function fourArgs($v, $w, $x, $y) {
+  return $v + $w + $x + $y;
 }
 
 $array = array(1);
@@ -20,7 +20,7 @@ var_dump(array_reduce($array, "oneArg", 2));
 
 echo "\n--- Testing with a callback with too many parameters ---\n";
 try {
-    var_dump(array_reduce($array, "threeArgs", 2));
+    var_dump(array_reduce($array, 'fourArgs', 2));
 } catch (Throwable $e) {
     echo "Exception: " . $e->getMessage() . "\n";
 }
@@ -33,4 +33,4 @@ try {
 int(2)
 
 --- Testing with a callback with too many parameters ---
-Exception: Too few arguments to function threeArgs(), 2 passed and exactly 3 expected
+Exception: Too few arguments to function fourArgs(), 3 passed and exactly 4 expected
