@@ -2158,10 +2158,8 @@ static int exif_file_sections_realloc(image_info_type *ImageInfo, int section_in
 */
 static void exif_file_sections_free(image_info_type *ImageInfo)
 {
-	int i;
-
 	if (ImageInfo->file.count) {
-		for (i=0; i<ImageInfo->file.count; i++) {
+		for (int i = 0; i<ImageInfo->file.count; i++) {
 			EFREE_IF(ImageInfo->file.list[i].data);
 		}
 	}
@@ -2403,11 +2401,10 @@ static void exif_iif_add_buffer(image_info_type *image_info, int section_index, 
  Free memory allocated for image_info
 */
 static void exif_iif_free(image_info_type *image_info, int section_index) {
-	int  i;
 	void *f; /* faster */
 
 	if (image_info->info_list[section_index].count) {
-		for (i=0; i < image_info->info_list[section_index].count; i++) {
+		for (int i = 0; i < image_info->info_list[section_index].count; i++) {
 			if ((f=image_info->info_list[section_index].list[i].name) != NULL) {
 				efree(f);
 			}
@@ -2448,7 +2445,6 @@ static void exif_iif_free(image_info_type *image_info, int section_index) {
  * Add image_info to associative array value. */
 static void add_assoc_image_info(zval *value, int sub_array, image_info_type *image_info, int section_index)
 {
-	char buffer[64], uname[64];
 	int idx = 0, unknown = 0;
 
 	if (!image_info->info_list[section_index].count) {
@@ -2466,6 +2462,8 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 		image_info_data *info_data = &image_info->info_list[section_index].list[i];
 		image_info_value *info_value = &info_data->value;
 		const char *name = info_data->name;
+		char uname[64];
+
 		if (!name) {
 			snprintf(uname, sizeof(uname), "%d", unknown++);
 			name = uname;
@@ -2516,6 +2514,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 						array_init(&array);
 					}
 					for (int ap = 0; ap < l; ap++) {
+						char buffer[64];
 						if (l>1) {
 							info_value = &info_data->value.list[ap];
 						}
@@ -2785,8 +2784,7 @@ PHP_FUNCTION(exif_tagname)
  * Create a value for an ifd from an info_data pointer */
 static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel) {
 	size_t  byte_count;
-	char    *value_ptr, *data_ptr;
-	size_t  i;
+	char    *value_ptr;
 
 	image_info_value  *info_value;
 
@@ -2808,8 +2806,8 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel)
 		*value_ptr = info_data->value.i;
 		return value_ptr;
 	} else {
-		data_ptr = value_ptr;
-		for(i=0; i<info_data->length; i++) {
+		char *data_ptr = value_ptr;
+		for(size_t i = 0; i < info_data->length; i++) {
 			if (info_data->length==1) {
 				info_value = &info_data->value;
 			} else {
@@ -3032,8 +3030,6 @@ static int exif_process_string(char **result, const char *value, size_t byte_cou
  * Process UserComment in IFD. */
 static int exif_process_user_comment(const image_info_type *ImageInfo, char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount)
 {
-	int   a;
-	char  *decode;
 	size_t len;
 
 	*pszEncoding = NULL;
@@ -3041,6 +3037,7 @@ static int exif_process_user_comment(const image_info_type *ImageInfo, char **ps
 	if (ByteCount>=8) {
 		const zend_encoding *from, *to;
 		if (!memcmp(szValuePtr, "UNICODE\0", 8)) {
+			char  *decode;
 			*pszEncoding = estrdup(szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
@@ -3105,7 +3102,7 @@ static int exif_process_user_comment(const image_info_type *ImageInfo, char **ps
 
 	/* Olympus has this padded with trailing spaces.  Remove these first. */
 	if (ByteCount>0) {
-		for (a=ByteCount-1;a && szValuePtr[a]==' ';a--) {
+		for (int a = ByteCount-1; a && szValuePtr[a]==' '; a--) {
 			(szValuePtr)[a] = '\0';
 		}
 	}
@@ -3141,14 +3138,13 @@ static int exif_process_unicode(const image_info_type *ImageInfo, xp_field_type 
  * Process nested IFDs directories in Maker Note. */
 static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, const exif_offset_info *info, size_t displacement)
 {
-	size_t i;
-	int de, section_index = SECTION_MAKERNOTE;
+	int section_index = SECTION_MAKERNOTE;
 	int NumDirEntries, old_motorola_intel;
 	const maker_note_type *maker_note;
 	char *dir_start;
 	exif_offset_info new_info;
 
-	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
+	for (size_t i = 0; i <= sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
 		if (i==sizeof(maker_note_array)/sizeof(maker_note_type)) {
 #ifdef EXIF_DEBUG
 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "No maker note data found. Detected maker: %s (length = %d)", ImageInfo->make, ImageInfo->make ? strlen(ImageInfo->make) : 0);
@@ -3229,7 +3225,7 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 			break;
 	}
 
-	for (de=0;de<NumDirEntries;de++) {
+	for (int de = 0; de < NumDirEntries; de++) {
 		size_t offset = 2 + 12 * de;
 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + offset,
 								  info, displacement, section_index, 0, maker_note->tag_table)) {
@@ -3257,16 +3253,10 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
  * Process one of the nested IFDs directories. */
 static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entry, const exif_offset_info *info, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table)
 {
-	size_t length;
 	unsigned int tag, format, components;
 	char *value_ptr, tagname[64], cbuf[32], *outside=NULL;
-	size_t byte_count, offset_val, fpos, fgot;
+	size_t byte_count, offset_val;
 	int64_t byte_count_signed;
-	xp_field_type *tmp_xp;
-#ifdef EXIF_DEBUG
-	char *dump_data;
-	int dump_free;
-#endif /* EXIF_DEBUG */
 
 	tag = php_ifd_get16u(dir_entry, ImageInfo->motorola_intel);
 	format = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
@@ -3314,9 +3304,9 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 				value_ptr = cbuf;
 			}
 
-			fpos = php_stream_tell(ImageInfo->infile);
+			size_t fpos = php_stream_tell(ImageInfo->infile);
 			php_stream_seek(ImageInfo->infile, displacement+offset_val, SEEK_SET);
-			fgot = php_stream_tell(ImageInfo->infile);
+			size_t fgot = php_stream_tell(ImageInfo->infile);
 			if (fgot!=displacement+offset_val) {
 				EFREE_IF(outside);
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08X != 0x%08X", fgot, displacement+offset_val);
@@ -3339,7 +3329,8 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 
 	ImageInfo->sections_found |= FOUND_ANY_TAG;
 #ifdef EXIF_DEBUG
-	dump_data = exif_dump_data(&dump_free, format, components, ImageInfo->motorola_intel, value_ptr);
+	int dump_free;
+	char *dump_data = exif_dump_data(&dump_free, format, components, ImageInfo->motorola_intel, value_ptr);
 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE,
 		"Process tag(x%04X=%s,@0x%04X + x%04X(=%d)): %s%s %s",
 		tag, exif_get_tagname_debug(tag, tag_table), offset_val+displacement, byte_count, byte_count, (components>1)&&format!=TAG_FMT_UNDEFINED&&format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(format), dump_data);
@@ -3392,7 +3383,8 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 	} else {
 		if (section_index==SECTION_IFD0 || section_index==SECTION_EXIF)
 		switch(tag) {
-			case TAG_COPYRIGHT:
+			case TAG_COPYRIGHT: {
+				size_t length;
 				/* check for "<photographer> NUL <editor> NUL" */
 				if (byte_count>1 && (length=zend_strnlen(value_ptr, byte_count)) > 0) {
 					if (length<byte_count-1) {
@@ -3412,6 +3404,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 					}
 				}
 				break;
+			}
 
 			case TAG_USERCOMMENT:
 				EFREE_IF(ImageInfo->UserComment);
@@ -3425,13 +3418,14 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 			case TAG_XP_COMMENTS:
 			case TAG_XP_AUTHOR:
 			case TAG_XP_KEYWORDS:
-			case TAG_XP_SUBJECT:
-				tmp_xp = (xp_field_type*)safe_erealloc(ImageInfo->xp_fields.list, (ImageInfo->xp_fields.count+1), sizeof(xp_field_type), 0);
+			case TAG_XP_SUBJECT: {
+				xp_field_type *tmp_xp = (xp_field_type*)safe_erealloc(ImageInfo->xp_fields.list, (ImageInfo->xp_fields.count+1), sizeof(xp_field_type), 0);
 				ImageInfo->sections_found |= FOUND_WINXP;
 				ImageInfo->xp_fields.list = tmp_xp;
 				ImageInfo->xp_fields.count++;
 				exif_process_unicode(ImageInfo, &(ImageInfo->xp_fields.list[ImageInfo->xp_fields.count-1]), tag, value_ptr, byte_count);
 				break;
+			}
 
 			case TAG_FNUMBER:
 				/* Simplest way of expressing aperture, so I trust it the most.
@@ -4032,7 +4026,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 {
 	int i, sn, num_entries, sub_section_index = 0;
 	unsigned char *dir_entry;
-	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value=0, fgot;
+	size_t ifd_size, dir_size, next_offset, entry_length, entry_value=0;
 	int entry_tag , entry_type;
 	tag_table_type tag_table = exif_get_tag_table(section_index);
 
@@ -4119,7 +4113,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 							break;
 					}
 				} else {
-					entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
+					size_t entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 					/* if entry needs expanding ifd cache and entry is at end of current ifd cache. */
 					/* otherwise there may be huge holes between two entries */
 					if (entry_offset + entry_length > dir_offset + ifd_size
@@ -4178,7 +4172,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 								sub_section_index = SECTION_THUMBNAIL;
 								break;
 						}
-						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
+						size_t entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s @0x%04X", exif_get_sectionname(sub_section_index), entry_offset);
 #endif
@@ -4195,7 +4189,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 								if (!ImageInfo->Thumbnail.data) {
 									ImageInfo->Thumbnail.data = safe_emalloc(ImageInfo->Thumbnail.size, 1, 0);
 									php_stream_seek(ImageInfo->infile, ImageInfo->Thumbnail.offset, SEEK_SET);
-									fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
+									size_t fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
 									if (fgot != ImageInfo->Thumbnail.size) {
 										EXIF_ERRLOG_THUMBEOF(ImageInfo)
 										efree(ImageInfo->Thumbnail.data);
@@ -4235,7 +4229,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 					if (!ImageInfo->Thumbnail.data && ImageInfo->Thumbnail.offset && ImageInfo->Thumbnail.size && ImageInfo->read_thumbnail) {
 						ImageInfo->Thumbnail.data = safe_emalloc(ImageInfo->Thumbnail.size, 1, 0);
 						php_stream_seek(ImageInfo->infile, ImageInfo->Thumbnail.offset, SEEK_SET);
-						fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
+						size_t fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
 						if (fgot != ImageInfo->Thumbnail.size) {
 							EXIF_ERRLOG_THUMBEOF(ImageInfo)
 							efree(ImageInfo->Thumbnail.data);
@@ -4494,7 +4488,7 @@ PHP_FUNCTION(exif_read_data)
 	bool ret;
 	int i, sections_needed = 0;
 	image_info_type ImageInfo;
-	char tmp[64], *sections_str, *s;
+	char *sections_str;
 
 	/* Parse arguments */
 	ZEND_PARSE_PARAMETERS_START(1, 4)
@@ -4510,7 +4504,7 @@ PHP_FUNCTION(exif_read_data)
 	if (z_sections_needed) {
 		spprintf(&sections_str, 0, ",%s,", ZSTR_VAL(z_sections_needed));
 		/* sections_str DOES start with , and SPACES are NOT allowed in names */
-		s = sections_str;
+		char *s = sections_str;
 		while (*++s) {
 			if (*s == ' ') {
 				*s = ',';
@@ -4518,6 +4512,7 @@ PHP_FUNCTION(exif_read_data)
 		}
 
 		for (i = 0; i < SECTION_COUNT; i++) {
+			char tmp[64];
 			snprintf(tmp, sizeof(tmp), ",%s,", exif_get_sectionname(i));
 			if (strstr(sections_str, tmp)) {
 				sections_needed |= 1<<i;
