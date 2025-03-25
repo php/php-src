@@ -32,15 +32,11 @@
 #define CONST_IS_RECURSIVE(c) (Z_CONSTANT_FLAGS((c)->value) & CONST_RECURSIVE)
 #define CONST_PROTECT_RECURSION(c) \
 	do { \
-		if (Z_TYPE((c)->value) == IS_CONSTANT_AST) { \
-			Z_CONSTANT_FLAGS((c)->value) |= CONST_RECURSIVE; \
-		} \
+		Z_CONSTANT_FLAGS((c)->value) |= CONST_RECURSIVE; \
 	} while (0)
 #define CONST_UNPROTECT_RECURSION(c) \
 	do { \
-		if (Z_TYPE((c)->value) == IS_CONSTANT_AST) { \
-			Z_CONSTANT_FLAGS((c)->value) &= ~CONST_RECURSIVE; \
-		} \
+		Z_CONSTANT_FLAGS((c)->value) &= ~CONST_RECURSIVE; \
 	} while (0)
 
 #define	PHP_USER_CONSTANT   0x7fffff /* a constant defined in user space */
