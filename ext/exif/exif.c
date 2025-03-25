@@ -1833,7 +1833,7 @@ typedef struct {
 #define FOUND_WINXP         (1<<SECTION_WINXP)
 #define FOUND_MAKERNOTE     (1<<SECTION_MAKERNOTE)
 
-static char *exif_get_sectionname(int section)
+static const char *exif_get_sectionname(int section)
 {
 	switch(section) {
 		case SECTION_FILE:      return "FILE";
@@ -2047,7 +2047,7 @@ typedef struct {
 	char *valid_end;   /* exclusive */
 } exif_offset_info;
 
-static zend_always_inline bool ptr_offset_overflows(char *ptr, size_t offset) {
+static zend_always_inline bool ptr_offset_overflows(const char *ptr, size_t offset) {
 	return UINTPTR_MAX - (uintptr_t) ptr < offset;
 }
 
@@ -2084,15 +2084,14 @@ static inline char *exif_offset_info_try_get(
 }
 
 static inline bool exif_offset_info_contains(
-		const exif_offset_info *info, char *start, size_t length) {
-	char *end;
+		const exif_offset_info *info, const char *start, size_t length) {
 	if (ptr_offset_overflows(start, length)) {
 		return 0;
 	}
 
 	/* start and valid_start are both inclusive, end and valid_end are both exclusive,
 	 * so we use >= and <= to do the checks, respectively. */
-	end = start + length;
+	const char *end = start + length;
 	return start >= info->valid_start && end <= info->valid_end;
 }
 
@@ -2184,7 +2183,7 @@ static image_info_data *exif_alloc_image_info_data(image_info_list *info_list) {
 /* {{{ exif_iif_add_value
  Add a value to image_info
 */
-static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, size_t value_len, int motorola_intel)
+static void exif_iif_add_value(image_info_type *image_info, int section_index, const char *name, int tag, int format, size_t length, void* value, size_t value_len, int motorola_intel)
 {
 	size_t idex;
 	void *vptr, *vptr_end;
@@ -2323,7 +2322,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 /* {{{ exif_iif_add_tag
  Add a tag from IFD to image_info
 */
-static void exif_iif_add_tag(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, size_t value_len)
+static void exif_iif_add_tag(image_info_type *image_info, int section_index, const char *name, int tag, int format, size_t length, void* value, size_t value_len)
 {
 	exif_iif_add_value(image_info, section_index, name, tag, format, length, value, value_len, image_info->motorola_intel);
 }
@@ -2332,7 +2331,7 @@ static void exif_iif_add_tag(image_info_type *image_info, int section_index, cha
 /* {{{ exif_iif_add_int
  Add an int value to image_info
 */
-static void exif_iif_add_int(image_info_type *image_info, int section_index, char *name, int value)
+static void exif_iif_add_int(image_info_type *image_info, int section_index, const char *name, int value)
 {
 	image_info_data *info_data = exif_alloc_image_info_data(&image_info->info_list[section_index]);
 	info_data->tag    = TAG_NONE;
@@ -2347,7 +2346,7 @@ static void exif_iif_add_int(image_info_type *image_info, int section_index, cha
 /* {{{ exif_iif_add_str
  Add a string value to image_info MUST BE NUL TERMINATED
 */
-static void exif_iif_add_str(image_info_type *image_info, int section_index, char *name, char *value)
+static void exif_iif_add_str(image_info_type *image_info, int section_index, const char *name, const char *value)
 {
 	if (value) {
 		image_info_data *info_data =
@@ -2365,7 +2364,7 @@ static void exif_iif_add_str(image_info_type *image_info, int section_index, cha
 /* {{{ exif_iif_add_fmt
  Add a format string value to image_info MUST BE NUL TERMINATED
 */
-static void exif_iif_add_fmt(image_info_type *image_info, int section_index, char *name, char *value, ...)
+static void exif_iif_add_fmt(image_info_type *image_info, int section_index, const char *name, char *value, ...)
 {
 	char             *tmp;
 	va_list 		 arglist;
@@ -2383,7 +2382,7 @@ static void exif_iif_add_fmt(image_info_type *image_info, int section_index, cha
 /* {{{ exif_iif_add_str
  Add a string value to image_info MUST BE NUL TERMINATED
 */
-static void exif_iif_add_buffer(image_info_type *image_info, int section_index, char *name, int length, char *value)
+static void exif_iif_add_buffer(image_info_type *image_info, int section_index, const char *name, int length, const char *value)
 {
 	if (value) {
 		image_info_data *info_data =
@@ -2979,7 +2978,7 @@ static void exif_thumbnail_extract(image_info_type *ImageInfo, const exif_offset
 
 /* {{{ exif_process_undefined
  * Copy a string/buffer in Exif header to a character string and return length of allocated buffer if any. */
-static int exif_process_undefined(char **result, char *value, size_t byte_count) {
+static int exif_process_undefined(char **result, const char *value, size_t byte_count) {
 	/* we cannot use strlcpy - here the problem is that we have to copy NUL
 	 * chars up to byte_count, we also have to add a single NUL character to
 	 * force end of string.
@@ -2995,7 +2994,7 @@ static int exif_process_undefined(char **result, char *value, size_t byte_count)
 
 /* {{{ exif_process_string_raw
  * Copy a string in Exif header to a character string returns length of allocated buffer if any. */
-static int exif_process_string_raw(char **result, char *value, size_t byte_count) {
+static int exif_process_string_raw(char **result, const char *value, size_t byte_count) {
 	/* we cannot use strlcpy - here the problem is that we have to copy NUL
 	 * chars up to byte_count, we also have to add a single NUL character to
 	 * force end of string.
@@ -3013,7 +3012,7 @@ static int exif_process_string_raw(char **result, char *value, size_t byte_count
 /* {{{ exif_process_string
  * Copy a string in Exif header to a character string and return length of allocated buffer if any.
  * In contrast to exif_process_string this function does always return a string buffer */
-static int exif_process_string(char **result, char *value, size_t byte_count) {
+static int exif_process_string(char **result, const char *value, size_t byte_count) {
 	/* we cannot use strlcpy - here the problem is that we cannot use strlen to
 	 * determine length of string and we cannot use strlcpy with len=byte_count+1
 	 * because then we might get into an EXCEPTION if we exceed an allocated
@@ -3031,7 +3030,7 @@ static int exif_process_string(char **result, char *value, size_t byte_count) {
 
 /* {{{ exif_process_user_comment
  * Process UserComment in IFD. */
-static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount)
+static int exif_process_user_comment(const image_info_type *ImageInfo, char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount)
 {
 	int   a;
 	char  *decode;
@@ -3119,7 +3118,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 
 /* {{{ exif_process_unicode
  * Process unicode field in IFD. */
-static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_field, int tag, char *szValuePtr, int ByteCount)
+static int exif_process_unicode(const image_info_type *ImageInfo, xp_field_type *xp_field, int tag, const char *szValuePtr, int ByteCount)
 {
 	xp_field->tag = tag;
 	xp_field->value = NULL;
@@ -3127,7 +3126,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 	if (zend_multibyte_encoding_converter(
 			(unsigned char**)&xp_field->value,
 			&xp_field->size,
-			(unsigned char*)szValuePtr,
+			(const unsigned char*)szValuePtr,
 			ByteCount,
 			zend_multibyte_fetch_encoding(ImageInfo->encode_unicode),
 			zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_unicode_be : ImageInfo->decode_unicode_le)
@@ -4463,7 +4462,7 @@ static bool exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream
 /* }}} */
 
 /* {{{ exif_read_from_file */
-static bool exif_read_from_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all)
+static bool exif_read_from_file(image_info_type *ImageInfo, const char *FileName, int read_thumbnail, int read_all)
 {
 	bool ret;
 	php_stream *stream;
