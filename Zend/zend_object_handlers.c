@@ -982,7 +982,7 @@ static zend_always_inline bool property_uses_strict_types(void) {
 		&& ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data));
 }
 
-static zend_always_inline zval *forward_write_to_lazy_object(zend_object *zobj,
+static zval *forward_write_to_lazy_object(zend_object *zobj,
 		zend_string *name, zval *value, void **cache_slot, bool guarded)
 {
 	zval *variable_ptr;
