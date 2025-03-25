@@ -698,6 +698,7 @@ asm(
     ".ascii \"\\\"\\\"\\\"\\n\"\n"
     ".ascii \"\\n\"\n"
     ".ascii \"import gdb\\n\"\n"
+    ".ascii \"import gdb.printing\\n\"\n"
     ".ascii \"import re\\n\"\n"
     ".ascii \"\\n\"\n"
     ".ascii \"pp_set = gdb.printing.RegexpCollectionPrettyPrinter(\\\"php\\\")\\n\"\n"

@@ -28,6 +28,7 @@ Then you can interact with that variable:
 """
 
 import gdb
+import gdb.printing
 import re
 
 pp_set = gdb.printing.RegexpCollectionPrettyPrinter("php")
