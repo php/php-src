@@ -4278,63 +4278,72 @@ static bool exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offs
 static bool exif_scan_FILE_header(image_info_type *ImageInfo)
 {
 	unsigned char file_header[8];
-	bool ret = false;
 
 	ImageInfo->FileType = IMAGE_FILETYPE_UNKNOWN;
 
-	if (ImageInfo->FileSize >= 2) {
-		php_stream_seek(ImageInfo->infile, 0, SEEK_SET);
-		if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)file_header, 2) != 2) {
+	if (UNEXPECTED(ImageInfo->FileSize < 2)) {
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File too small (%d)", ImageInfo->FileSize);
+		return false;
+	}
+
+	php_stream_seek(ImageInfo->infile, 0, SEEK_SET);
+	if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)file_header, 2) != 2) {
+		return false;
+	}
+
+	if ((file_header[0]==0xff) && (file_header[1]==M_SOI)) {
+		ImageInfo->FileType = IMAGE_FILETYPE_JPEG;
+		if (exif_scan_JPEG_header(ImageInfo)) {
+			return true;
+		} else {
+			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid JPEG file");
 			return false;
 		}
-		if ((file_header[0]==0xff) && (file_header[1]==M_SOI)) {
-			ImageInfo->FileType = IMAGE_FILETYPE_JPEG;
-			if (exif_scan_JPEG_header(ImageInfo)) {
-				ret = true;
-			} else {
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid JPEG file");
-			}
-		} else if (ImageInfo->FileSize >= 8) {
-			if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(file_header+2), 6) != 6) {
-				return false;
-			}
-			if (!memcmp(file_header, "II\x2A\x00", 4)) {
-				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_II;
-				ImageInfo->motorola_intel = 0;
-#ifdef EXIF_DEBUG
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "File has TIFF/II format");
-#endif
-				ImageInfo->sections_found |= FOUND_IFD0;
-				if (exif_process_IFD_in_TIFF(ImageInfo,
-											 php_ifd_get32u(file_header + 4, ImageInfo->motorola_intel),
-											 SECTION_IFD0)) {
-					ret = true;
-				} else {
-					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");
-				}
-			} else if (!memcmp(file_header, "MM\x00\x2a", 4)) {
-				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_MM;
-				ImageInfo->motorola_intel = 1;
-#ifdef EXIF_DEBUG
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "File has TIFF/MM format");
-#endif
-				ImageInfo->sections_found |= FOUND_IFD0;
-				if (exif_process_IFD_in_TIFF(ImageInfo,
-											 php_ifd_get32u(file_header + 4, ImageInfo->motorola_intel),
-											 SECTION_IFD0)) {
-					ret = true;
-				} else {
-					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");
-				}
-			} else {
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File not supported");
-				return false;
-			}
+	} else if (ImageInfo->FileSize >= 8) {
+		if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(file_header+2), 6) != 6) {
+			return false;
 		}
-	} else {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File too small (%d)", ImageInfo->FileSize);
+
+		if (!memcmp(file_header, "II\x2A\x00", 4)) {
+			ImageInfo->FileType = IMAGE_FILETYPE_TIFF_II;
+			ImageInfo->motorola_intel = 0;
+#ifdef EXIF_DEBUG
+			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "File has TIFF/II format");
+#endif
+			ImageInfo->sections_found |= FOUND_IFD0;
+			if (exif_process_IFD_in_TIFF(
+				ImageInfo,
+				php_ifd_get32u(file_header + 4, ImageInfo->motorola_intel),
+				SECTION_IFD0
+			)) {
+				return true;
+			} else {
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");
+				return false;
+			}
+		} else if (!memcmp(file_header, "MM\x00\x2a", 4)) {
+			ImageInfo->FileType = IMAGE_FILETYPE_TIFF_MM;
+			ImageInfo->motorola_intel = 1;
+#ifdef EXIF_DEBUG
+			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "File has TIFF/MM format");
+#endif
+			ImageInfo->sections_found |= FOUND_IFD0;
+			if (exif_process_IFD_in_TIFF(
+				ImageInfo,
+				php_ifd_get32u(file_header + 4, ImageInfo->motorola_intel),
+				SECTION_IFD0
+			)) {
+				return true;
+			} else {
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");
+				return false;
+			}
+		} else {
+			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File not supported");
+			return false;
+		}
 	}
-	return ret;
+	return false;
 }
 /* }}} */
 
