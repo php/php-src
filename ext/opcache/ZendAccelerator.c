@@ -3800,6 +3800,11 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+				/* For deprecated constants, we need to flag the zval for recursion
+				 * detection. Make sure the zval is separated out of shm. */
+				if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED) {
+					ok = true;
+				}
 				if (EXPECTED(zend_update_class_constant(c, key, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
 				} else {
