@@ -8,61 +8,81 @@ class C {
     static function handleStatic() {}
 }
 
+class Invokable {
+    public function __invoke() {
+    }
+}
+
 function foo() {}
 
-set_error_handler("foo");
-var_dump(get_error_handler());
+echo "No error handler\n";
+var_dump(get_error_handler() === null);
 
+echo "\nFunction string\n";
+set_error_handler('foo');
+var_dump(get_error_handler() === 'foo');
+
+echo "\nNULL\n";
 set_error_handler(null);
-var_dump(get_error_handler());
+var_dump(get_error_handler() === null);
 
+echo "\nStatic method array\n";
 set_error_handler([C::class, 'handleStatic']);
-var_dump(get_error_handler());
+var_dump(get_error_handler() === [C::class, 'handleStatic']);
 
+echo "\nStatic method string\n";
 set_error_handler('C::handleStatic');
-var_dump(get_error_handler());
+var_dump(get_error_handler() === 'C::handleStatic');
 
-set_error_handler([new C(), 'handle']);
-var_dump(get_error_handler());
+echo "\nInstance method array\n";
+set_error_handler([$c = new C(), 'handle']);
+var_dump(get_error_handler() === [$c, 'handle']);
 
-set_error_handler((new C())->handle(...));
-var_dump(get_error_handler());
+echo "\nFirst class callable method\n";
+set_error_handler($f = (new C())->handle(...));
+var_dump(get_error_handler() === $f);
 
-set_error_handler(function () {});
-var_dump(get_error_handler());
+echo "\nClosure\n";
+set_error_handler($f = function () {});
+var_dump(get_error_handler() === $f);
+
+echo "\nInvokable\n";
+set_error_handler($object = new Invokable());
+var_dump(get_error_handler() === $object);
+
+echo "\nStable return value\n";
+var_dump(get_error_handler() === get_error_handler());
 
 ?>
 ==DONE==
---EXPECTF--
-string(3) "foo"
+--EXPECT--
+No error handler
+bool(true)
+
+Function string
+bool(true)
+
 NULL
-array(2) {
-  [0]=>
-  string(1) "C"
-  [1]=>
-  string(12) "handleStatic"
-}
-string(15) "C::handleStatic"
-array(2) {
-  [0]=>
-  object(C)#%d (0) {
-  }
-  [1]=>
-  string(6) "handle"
-}
-object(Closure)#%d (2) {
-  ["function"]=>
-  string(9) "C::handle"
-  ["this"]=>
-  object(C)#%d (0) {
-  }
-}
-object(Closure)#%d (3) {
-  ["name"]=>
-  string(%d) "{closure:%s:%d}"
-  ["file"]=>
-  string(%d) "%s"
-  ["line"]=>
-  int(%d)
-}
+bool(true)
+
+Static method array
+bool(true)
+
+Static method string
+bool(true)
+
+Instance method array
+bool(true)
+
+First class callable method
+bool(true)
+
+Closure
+bool(true)
+
+Invokable
+bool(true)
+
+Stable return value
+bool(true)
 ==DONE==
