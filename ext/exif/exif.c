@@ -4552,7 +4552,7 @@ PHP_FUNCTION(exif_read_data)
 			RETURN_THROWS();
 		}
 
-		if (CHECK_NULL_PATH(Z_STRVAL_P(stream), Z_STRLEN_P(stream))) {
+		if (UNEXPECTED(zend_str_has_nul_byte(Z_STR_P(stream)))) {
 			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
