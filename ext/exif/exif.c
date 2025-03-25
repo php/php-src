@@ -3042,7 +3042,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 	if (ByteCount>=8) {
 		const zend_encoding *from, *to;
 		if (!memcmp(szValuePtr, "UNICODE\0", 8)) {
-			*pszEncoding = estrdup((const char*)szValuePtr);
+			*pszEncoding = estrdup(szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 			/* First try to detect BOM: ZERO WIDTH NOBREAK SPACE (FEFF 16)
@@ -3075,12 +3075,12 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			}
 			return len;
 		} else if (!memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
-			*pszEncoding = estrdup((const char*)szValuePtr);
+			*pszEncoding = estrdup(szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 		} else if (!memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
 			/* JIS should be translated to MB or we leave it to the user - leave it to the user */
-			*pszEncoding = estrdup((const char*)szValuePtr);
+			*pszEncoding = estrdup(szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
@@ -4588,7 +4588,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileDateTime",  ImageInfo.FileDateTime);
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileSize",      ImageInfo.FileSize);
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileType",      ImageInfo.FileType);
-	exif_iif_add_str(&ImageInfo, SECTION_FILE, "MimeType",      (char*)php_image_type_to_mime_type(ImageInfo.FileType));
+	exif_iif_add_str(&ImageInfo, SECTION_FILE, "MimeType",      php_image_type_to_mime_type(ImageInfo.FileType));
 	exif_iif_add_str(&ImageInfo, SECTION_FILE, "SectionsFound", sections_str ? sections_str : "NONE");
 
 #ifdef EXIF_DEBUG
