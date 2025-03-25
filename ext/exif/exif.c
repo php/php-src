@@ -4348,7 +4348,7 @@ static bool exif_scan_FILE_header(image_info_type *ImageInfo)
 /* {{{ exif_discard_imageinfo
    Discard data scanned by exif_read_file.
 */
-static bool exif_discard_imageinfo(image_info_type *ImageInfo)
+static void exif_discard_imageinfo(image_info_type *ImageInfo)
 {
 	int i;
 
@@ -4376,7 +4376,6 @@ static bool exif_discard_imageinfo(image_info_type *ImageInfo)
 	}
 	exif_file_sections_free(ImageInfo);
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
-	return true;
 }
 /* }}} */
 
