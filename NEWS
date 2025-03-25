@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.20
+27 Mar 2025, PHP 8.3.20RC1
 
 - Core:
   . Fixed bug GH-17961 (use-after-free during dl()'ed module class destruction).
