@@ -28,12 +28,15 @@ var_export( MyBool::cases() );
 
 ?>
 --EXPECTF--
-Class [ <user> final class MyBool implements MyStringable, UnitEnum, BackedEnum ] {
+Enum [ <user> enum MyBool: string implements MyStringable, UnitEnum, BackedEnum ] {
   @@ %sReflectionEnum_toString_backed_string.php 7-16
 
-  - Constants [3] {
-    Constant [ public MyBool MyFalse ] { Object }
-    Constant [ public MyBool MyTrue ] { Object }
+  - Enum cases [2] {
+    Case MyFalse = ~FALSE~
+    Case MyTrue = ~TRUE~
+  }
+
+  - Constants [1] {
     Constant [ public MyBool OtherTrue ] { Object }
   }
 
@@ -81,12 +84,15 @@ Class [ <user> final class MyBool implements MyStringable, UnitEnum, BackedEnum 
   }
 }
 
-Class [ <user> final class MyBool implements MyStringable, UnitEnum, BackedEnum ] {
+Enum [ <user> enum MyBool: string implements MyStringable, UnitEnum, BackedEnum ] {
   @@ %sReflectionEnum_toString_backed_string.php 7-16
 
-  - Constants [3] {
-    Constant [ public MyBool MyFalse ] { Object }
-    Constant [ public MyBool MyTrue ] { Object }
+  - Enum cases [2] {
+    Case MyFalse = ~FALSE~
+    Case MyTrue = ~TRUE~
+  }
+
+  - Constants [1] {
     Constant [ public MyBool OtherTrue ] { Object }
   }
 

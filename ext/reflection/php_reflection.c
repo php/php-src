@@ -306,6 +306,7 @@ static void _const_string(smart_str *str, const char *name, zval *value, const c
 static void _function_string(smart_str *str, zend_function *fptr, zend_class_entry *scope, const char* indent);
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, const char* indent);
 static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
+static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
 static void _extension_string(smart_str *str, const zend_module_entry *module, const char *indent);
 static void _zend_extension_string(smart_str *str, const zend_extension *extension, const char *indent);
@@ -330,6 +331,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 			kind = "Interface";
 		} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
 			kind = "Trait";
+		} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+			kind = "Enum";
 		}
 		smart_str_append_printf(str, "%s%s [ ", indent, kind);
 	}
@@ -345,6 +348,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 		smart_str_append_printf(str, "interface ");
 	} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
 		smart_str_append_printf(str, "trait ");
+	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+		smart_str_append_printf(str, "enum ");
 	} else {
 		if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 			smart_str_append_printf(str, "abstract ");
@@ -362,6 +367,12 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 		smart_str_append_printf(str, " extends %s", ZSTR_VAL(ce->parent->name));
 	}
 
+	// Show backing type of enums
+	if ((ce->ce_flags & ZEND_ACC_ENUM) && (ce->enum_backing_type != IS_UNDEF)) {
+		smart_str_append_printf(str,
+			ce->enum_backing_type == IS_STRING ? ": string" : ": int"
+		);
+	}
 	if (ce->num_interfaces) {
 		uint32_t i;
 
@@ -384,22 +395,48 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	}
 
 	/* Constants */
-	smart_str_append_printf(str, "\n");
-	count = zend_hash_num_elements(&ce->constants_table);
-	smart_str_append_printf(str, "%s  - Constants [%d] {\n", indent, count);
-	if (count > 0) {
+	uint32_t total_count = zend_hash_num_elements(&ce->constants_table);
+	uint32_t constant_count = 0;
+	uint32_t enum_case_count = 0;
+	smart_str constant_str = {0};
+	smart_str enum_case_str = {0};
+	/* So that we don't need to loop through all of the constants multiple
+	 * times (count the constants vs. enum cases, print the constants, print
+	 * the enum cases) use some temporary helper smart strings. */
+	if (total_count > 0) {
 		zend_string *key;
 		zend_class_constant *c;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), key, c) {
-			_class_const_string(str, key, c, ZSTR_VAL(sub_indent));
+			if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE) {
+				_enum_case_string(&enum_case_str, key, c, ZSTR_VAL(sub_indent));
+				enum_case_count++;
+			} else {
+				_class_const_string(&constant_str, key, c, ZSTR_VAL(sub_indent));
+				constant_count++;
+			}
 			if (UNEXPECTED(EG(exception))) {
 				zend_string_release(sub_indent);
+				smart_str_free(&enum_case_str);
+				smart_str_free(&constant_str);
 				return;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
+	// Enum cases go first, but the heading is only shown if there are any
+	if (enum_case_count) {
+		smart_str_appendc(str, '\n');
+		smart_str_append_printf(str, "%s  - Enum cases [%d] {\n", indent, enum_case_count);
+		smart_str_append_smart_str(str, &enum_case_str);
+		smart_str_append_printf(str, "%s  }\n", indent);
+	}
+	smart_str_appendc(str, '\n');
+	smart_str_append_printf(str, "%s  - Constants [%d] {\n", indent, constant_count);
+	smart_str_append_smart_str(str, &constant_str);
 	smart_str_append_printf(str, "%s  }\n", indent);
+
+	smart_str_free(&enum_case_str);
+	smart_str_free(&constant_str);
 
 	/* Static properties */
 	/* counting static properties */
@@ -625,6 +662,32 @@ static void _class_const_string(smart_str *str, const zend_string *name, zend_cl
 	}
 }
 /* }}} */
+
+static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent)
+{
+	if (Z_TYPE(c->value) == IS_CONSTANT_AST && zend_update_class_constant(c, name, c->ce) == FAILURE) {
+		return;
+	}
+
+	if (c->doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(c->doc_comment));
+	}
+	smart_str_append_printf(str, "%sCase %s", indent, ZSTR_VAL(name));
+	if (c->ce->enum_backing_type == IS_UNDEF) {
+		// No value
+		smart_str_appendc(str, '\n');
+	} else {
+		/* Has a value, which is the enum instance, get the value from that.
+		 * We know it must be either a string or integer so no need
+		 * for the IS_ARRAY or IS_OBJECT handling that _class_const_string()
+		 * requires. */
+		zval *enum_val = zend_enum_fetch_case_value(Z_OBJ(c->value));
+		zend_string *tmp_value_str;
+		zend_string *value_str = zval_get_tmp_string(enum_val, &tmp_value_str);
+		smart_str_append_printf(str, " = %s\n", ZSTR_VAL(value_str));
+		zend_tmp_string_release(tmp_value_str);
+	}
+}
 
 static zend_op *get_recv_op(const zend_op_array *op_array, uint32_t offset)
 {
