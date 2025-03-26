@@ -3803,7 +3803,7 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 				/* For deprecated constants, we need to flag the zval for recursion
 				 * detection. Make sure the zval is separated out of shm. */
 				if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED) {
-					ok = true;
+					ok = false;
 				}
 				if (EXPECTED(zend_update_class_constant(c, key, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
