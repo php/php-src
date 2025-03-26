@@ -125,6 +125,8 @@ PHP                                                                        NEWS
     (DanielEScherzer)
   . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
     zval for uninitialized typed properties). (nielsdos)
+  . Fixed bug GH-15766 (ReflectionClass::toString() should have better output
+    for enums). (DanielEScherzer)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap
