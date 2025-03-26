@@ -1439,7 +1439,7 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&class_type->constants_table, key, c) {
 		if (c->ce == class_type) {
-			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+			if (Z_TYPE(c->value) == IS_CONSTANT_AST || (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
 				new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 				memcpy(new_c, c, sizeof(zend_class_constant));
 				c = new_c;
