@@ -432,7 +432,7 @@ class ReflectionClass implements Reflector
     public function getShortName(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
-    
+
 	public function isInnerClass(): bool {}
 
 	public function isPrivate(): bool {}
