@@ -31,4 +31,4 @@ var_dump(Outer2::testSelf());
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of Outer2::testSelf(): Outer2\middle must be compatible with Outer::testSelf(): Outer\middle in %s on line %d
+Fatal error: Declaration of Outer2::testSelf(): Outer2\Middle must be compatible with Outer::testSelf(): Outer\Middle in %s on line %d

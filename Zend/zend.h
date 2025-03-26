@@ -210,6 +210,7 @@ struct _zend_class_entry {
 	uint32_t num_traits;
 	uint32_t num_hooked_props;
 	uint32_t num_hooked_prop_variance_checks;
+	uint32_t num_nested_classes;
 
 	/* class_entry or string(s) depending on ZEND_ACC_LINKED */
 	union {
@@ -218,6 +219,7 @@ struct _zend_class_entry {
 	};
 
 	zend_class_name *trait_names;
+	zend_class_entry **nested_classes;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 	HashTable *attributes;

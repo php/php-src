@@ -1,5 +1,11 @@
 --TEST--
 circular inheritance
+--SKIPIF--
+<?php
+if (!extension_loaded('opcache')) {
+    die('skip opcache required');
+}
+?>
 --FILE--
 <?php
 
