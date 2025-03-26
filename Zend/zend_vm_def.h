@@ -4427,6 +4427,24 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		}
 
 		SAVE_OPLINE();
+
+		if (Z_TYPE_P(retval_ptr) == IS_OBJECT && Z_OBJCE_P(retval_ptr)->required_scope) {
+			if (EX(func)->common.fn_flags & ZEND_ACC_PUBLIC) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute) {
+					zend_type_error("Public method %s cannot return private class %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				} else {
+					zend_type_error("Public method %s cannot return protected class %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			} else if (EX(func)->common.fn_flags & ZEND_ACC_PROTECTED) {
+				if (Z_OBJCE_P(retval_ptr)->required_scope_absolute && Z_OBJCE_P(retval_ptr)->required_scope != EX(func)->common.scope) {
+					zend_type_error("Protected method %s cannot return private class %s", ZSTR_VAL(EX(func)->common.function_name), ZSTR_VAL(Z_OBJCE_P(retval_ptr)->name));
+					HANDLE_EXCEPTION();
+				}
+			}
+		}
+
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, cache_slot, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();

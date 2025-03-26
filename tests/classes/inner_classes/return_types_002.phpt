@@ -29,7 +29,7 @@ var_dump($outer->getInner());
 object(Outer\Inner)#2 (0) {
 }
 
-Fatal error: Uncaught Error: Cannot instantiate private class Outer\Inner from Foo in %s:%d
+Fatal error: Uncaught TypeError: Cannot instantiate private class Outer\Inner from scope Foo in %s:%d
 Stack trace:
 #0 %s(%d): Foo->getInner()
 #1 {main}

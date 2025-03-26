@@ -13,7 +13,7 @@ var_dump($line);
 --EXPECTF--
 autoload(inner_classes\Line)
 
-Fatal error: Uncaught Error: Cannot instantiate class inner_classes\Line from the global scope in %s:%d
+Fatal error: Uncaught TypeError: Cannot instantiate class inner_classes\Line from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
