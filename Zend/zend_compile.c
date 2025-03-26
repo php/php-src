@@ -1180,41 +1180,15 @@ static zend_string *zend_resolve_const_name(zend_string *name, uint32_t type, bo
 		name, type, is_fully_qualified, 1, FC(imports_const));
 }
 
-static zend_string *get_namespace_from_scope(const zend_class_entry *scope)
-{
-	ZEND_ASSERT(scope != NULL);
-	while (scope && scope->lexical_scope && scope->type != ZEND_NAMESPACE_CLASS) {
-		scope = scope->lexical_scope;
-	}
-	return zend_string_copy(scope->name);
-}
-
-static zend_string *get_scoped_name(zend_string *ns, zend_string *name)
-{
-	name = zend_string_tolower(name);
-	if (ns && ZSTR_LEN(ns) && ZSTR_LEN(name) > ZSTR_LEN(ns) + 1 &&
-		memcmp(ZSTR_VAL(name), ZSTR_VAL(ns), ZSTR_LEN(ns)) == 0 &&
-		ZSTR_VAL(name)[ZSTR_LEN(ns)] == '\\') {
-		zend_string *ret = zend_string_init(ZSTR_VAL(name) + ZSTR_LEN(ns) + 1, ZSTR_LEN(name) - ZSTR_LEN(ns) - 1, 0);
-		zend_string_release(name);
-		return ret;
-		}
-	return name;
-}
-
 zend_string *zend_resolve_class_in_scope(zend_string *name, const zend_class_entry *scope)
 {
-	zend_string *ns_name = get_namespace_from_scope(scope);
-	zend_string *original_suffix = get_scoped_name(ns_name, name);
-	zend_string_release(ns_name);
-
 	const zend_class_entry *current_scope = scope;
 
 	while (current_scope && current_scope->type != ZEND_NAMESPACE_CLASS) {
 		zend_string *try_name = zend_string_concat3(
 			ZSTR_VAL(current_scope->name), ZSTR_LEN(current_scope->name),
 			"\\", 1,
-			ZSTR_VAL(original_suffix), ZSTR_LEN(original_suffix));
+			ZSTR_VAL(name), ZSTR_LEN(name));
 
 		zend_string *lc_try_name = zend_string_tolower(try_name);
 
@@ -1222,7 +1196,6 @@ zend_string *zend_resolve_class_in_scope(zend_string *name, const zend_class_ent
 		zend_string_release(lc_try_name);
 
 		if (has_seen) {
-			zend_string_release(original_suffix);
 			return try_name;
 		}
 		zend_string_release(try_name);
@@ -1230,7 +1203,6 @@ zend_string *zend_resolve_class_in_scope(zend_string *name, const zend_class_ent
 		current_scope = current_scope->lexical_scope;
 	}
 
-	zend_string_release(original_suffix);
 	return NULL;
 }
 
