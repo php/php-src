@@ -4138,6 +4138,55 @@ static void add_class_vars(zend_class_entry *ce, bool statics, zval *return_valu
 }
 /* }}} */
 
+/* {{{ Returns whether the class is private */
+ZEND_METHOD(ReflectionClass, isPrivate)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(ce);
+	RETURN_BOOL(ce->required_scope && ce->required_scope_absolute);
+}
+/* }}} */
+
+/* {{{ Returns true if the class is protected */
+ZEND_METHOD(ReflectionClass, isProtected)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(ce);
+	RETURN_BOOL(ce->required_scope && !ce->required_scope_absolute);
+}
+/* }}} */
+
+/* {{{ Returns true if the class is public */
+ZEND_METHOD(ReflectionClass, isPublic)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(ce);
+	RETURN_BOOL(!ce->required_scope);
+}
+/* }}} */
+
+/* {{{ Returns whether the current class is an inner class */
+ZEND_METHOD(ReflectionClass, isInnerClass)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	RETURN_BOOL(ce->lexical_scope && ce->lexical_scope->type != ZEND_NAMESPACE_CLASS);
+}
+/* }}} */
+
 /* {{{ Returns an associative array containing all static property values of the class */
 ZEND_METHOD(ReflectionClass, getStaticProperties)
 {

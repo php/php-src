@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3c6be99bb36965139464925a618cb0bf03affa62 */
+ * Stub hash: 192b737230cefd6dd019062664e7deb49f920645 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -365,6 +365,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClass_getShortName arginfo_class_ReflectionFunctionAbstract_getName
 
 #define arginfo_class_ReflectionClass_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
+
+#define arginfo_class_ReflectionClass_isInnerClass arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+#define arginfo_class_ReflectionClass_isPrivate arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+#define arginfo_class_ReflectionClass_isPublic arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+#define arginfo_class_ReflectionClass_isProtected arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionObject___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
@@ -847,6 +855,10 @@ ZEND_METHOD(ReflectionClass, inNamespace);
 ZEND_METHOD(ReflectionClass, getNamespaceName);
 ZEND_METHOD(ReflectionClass, getShortName);
 ZEND_METHOD(ReflectionClass, getAttributes);
+ZEND_METHOD(ReflectionClass, isInnerClass);
+ZEND_METHOD(ReflectionClass, isPrivate);
+ZEND_METHOD(ReflectionClass, isPublic);
+ZEND_METHOD(ReflectionClass, isProtected);
 ZEND_METHOD(ReflectionObject, __construct);
 ZEND_METHOD(ReflectionProperty, __construct);
 ZEND_METHOD(ReflectionProperty, __toString);
@@ -1139,6 +1151,10 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, getNamespaceName, arginfo_class_ReflectionClass_getNamespaceName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getShortName, arginfo_class_ReflectionClass_getShortName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getAttributes, arginfo_class_ReflectionClass_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isInnerClass, arginfo_class_ReflectionClass_isInnerClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isPrivate, arginfo_class_ReflectionClass_isPrivate, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isPublic, arginfo_class_ReflectionClass_isPublic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isProtected, arginfo_class_ReflectionClass_isProtected, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
