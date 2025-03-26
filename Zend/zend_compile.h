@@ -1061,6 +1061,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 #define ZEND_INTERNAL_CLASS         1
 #define ZEND_USER_CLASS             2
+#define ZEND_NAMESPACE_CLASS        3
 
 #define ZEND_EVAL				(1<<0)
 #define ZEND_INCLUDE			(1<<1)
