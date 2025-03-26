@@ -6749,8 +6749,6 @@ PHP_FUNCTION(array_map)
 	if (n_arrays == 1) {
 		zend_ulong num_key;
 		zend_string *str_key;
-		zval *zv, arg;
-		int ret;
 
 		if (Z_TYPE(arrays[0]) != IS_ARRAY) {
 			zend_argument_type_error(2, "must be of type array, %s given", zend_zval_value_name(&arrays[0]));
@@ -6767,15 +6765,14 @@ PHP_FUNCTION(array_map)
 		array_init_size(return_value, maxlen);
 		zend_hash_real_init(Z_ARRVAL_P(return_value), HT_IS_PACKED(Z_ARRVAL(arrays[0])));
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(arrays[0]), num_key, str_key, zv) {
-			fci.retval = &result;
-			fci.param_count = 1;
-			fci.params = &arg;
+		fci.retval = &result;
+		fci.param_count = 1;
 
-			ZVAL_COPY(&arg, zv);
-			ret = zend_call_function(&fci, &fci_cache);
-			i_zval_ptr_dtor(&arg);
-			if (ret != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(arrays[0]), num_key, str_key, fci.params) {
+			zend_result ret = zend_call_function(&fci, &fci_cache);
+			ZEND_ASSERT(ret == SUCCESS);
+			ZEND_IGNORE_VALUE(ret);
+			if (Z_TYPE(result) == IS_UNDEF) {
 				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_NULL();
 			}
@@ -6885,7 +6882,11 @@ PHP_FUNCTION(array_map)
 				fci.param_count = n_arrays;
 				fci.params = params;
 
-				if (zend_call_function(&fci, &fci_cache) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
+				zend_result ret = zend_call_function(&fci, &fci_cache);
+				ZEND_ASSERT(ret == SUCCESS);
+				ZEND_IGNORE_VALUE(ret);
+
+				if (Z_TYPE(result) == IS_UNDEF) {
 					efree(array_pos);
 					zend_array_destroy(Z_ARR_P(return_value));
 					for (i = 0; i < n_arrays; i++) {
