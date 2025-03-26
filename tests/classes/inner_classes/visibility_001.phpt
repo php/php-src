@@ -18,7 +18,7 @@ $x->test();
 var_dump($x);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot assign private Outer\Inner to higher visibile property Outer::illegal in %s:%d
+Fatal error: Uncaught TypeError: Cannot declare private class Outer\Inner to a public property in Outer::illegal in %s:%d
 Stack trace:
 #0 %s(%d): Outer->test()
 #1 {main}
