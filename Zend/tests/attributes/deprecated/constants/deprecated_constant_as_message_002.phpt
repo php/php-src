@@ -1,6 +1,5 @@
 --TEST--
 #[\Deprecated]: Using the value of a deprecated constant as the deprecation message with a throwing error handler.
---XFAIL--
 --FILE--
 <?php
 

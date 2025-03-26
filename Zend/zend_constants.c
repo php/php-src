@@ -477,7 +477,11 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	}
 
 	if (!(flags & ZEND_FETCH_CLASS_SILENT) && (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)) {
-		zend_deprecated_constant(c, c->name);
+		if (!CONST_IS_RECURSIVE(c)) {
+			CONST_PROTECT_RECURSION(c);
+			zend_deprecated_constant(c, c->name);
+			CONST_UNPROTECT_RECURSION(c);
+		}
 	}
 	return &c->value;
 }
