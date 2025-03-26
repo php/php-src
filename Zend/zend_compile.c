@@ -893,12 +893,12 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 			}
 			break;
 		case T_READONLY:
-			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP || target == ZEND_MODIFIER_TARGET_NESTED_CLASS) {
 				return ZEND_ACC_READONLY;
 			}
 			break;
 		case T_ABSTRACT:
-			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_PROPERTY) {
+			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_NESTED_CLASS) {
 				return ZEND_ACC_ABSTRACT;
 			}
 			break;
@@ -906,7 +906,8 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 			if (target == ZEND_MODIFIER_TARGET_METHOD
 				|| target == ZEND_MODIFIER_TARGET_CONSTANT
 				|| target == ZEND_MODIFIER_TARGET_PROPERTY
-				|| target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
+				|| target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK
+				|| target == ZEND_MODIFIER_TARGET_NESTED_CLASS) {
 				return ZEND_ACC_FINAL;
 			}
 			break;
@@ -943,6 +944,8 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 		member = "parameter";
 	} else if (target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
 		member = "property hook";
+	} else if (target == ZEND_MODIFIER_TARGET_NESTED_CLASS) {
+		member = "nested class";
 	} else {
 		ZEND_UNREACHABLE();
 	}
@@ -1047,6 +1050,37 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifi
 		if ((flags & ZEND_ACC_PPP_SET_MASK) && (new_flag & ZEND_ACC_PPP_SET_MASK)) {
 			zend_throw_exception(zend_ce_compile_error,
 				"Multiple access type modifiers are not allowed", 0);
+			return 0;
+		}
+	}
+	if (target == ZEND_MODIFIER_TARGET_NESTED_CLASS) {
+		if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Multiple access type modifiers are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_STATIC) || (new_flag & ZEND_ACC_STATIC)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Static inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PUBLIC_SET) || (new_flag & ZEND_ACC_PUBLIC_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Public(set) inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PROTECTED_SET) || (new_flag & ZEND_ACC_PROTECTED_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Protected(set) inner classes are not allowed", 0);
+			return 0;
+		}
+
+		if ((flags & ZEND_ACC_PRIVATE_SET) || (new_flag & ZEND_ACC_PRIVATE_SET)) {
+			zend_throw_exception(zend_ce_compile_error,
+				"Private(set) inner classes are not allowed", 0);
 			return 0;
 		}
 	}
