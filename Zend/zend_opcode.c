@@ -366,8 +366,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 			}
 
-			efree(ce->nested_classes);
-
 			if (ce->default_properties_table) {
 				zval *p = ce->default_properties_table;
 				zval *end = p + ce->default_properties_count;

@@ -26,12 +26,12 @@ zend_class_entry *create_namespace(zend_string *name) {
    zend_initialize_class_data(ns, 1);
    ns->type = ZEND_NAMESPACE_CLASS;
    ns->ce_flags |= ZEND_ACC_UNINSTANTIABLE;
-   ns->name = zend_string_copy(name);
+   ns->name = name;
 
    return ns;
 }
 
-static zend_class_entry *insert_namespace(const zend_string *name) {
+static zend_class_entry *insert_namespace(const zend_string *name, zend_string *lc_name) {
    zend_class_entry *parent_ns = EG(global_namespace);
    zend_class_entry *ns = parent_ns;
    const char *start = ZSTR_VAL(name);
@@ -42,23 +42,17 @@ static zend_class_entry *insert_namespace(const zend_string *name) {
    while (pos <= end) {
       if (pos == end || *pos == '\\') {
          len = pos - start;
-         zend_string *needle = zend_string_init(ZSTR_VAL(name), len, 0);
+         zend_string *needle = zend_string_init(ZSTR_VAL(lc_name), len, 0);
 
          ns = zend_hash_find_ptr(EG(namespaces), needle);
 
          if (!ns) {
-            zend_string *interned_name = zend_new_interned_string(needle);
-            ns = create_namespace(interned_name);
+            zend_string *full_name = zend_string_init_interned(ZSTR_VAL(name), len, 1);
+            ns = create_namespace(full_name);
             ns->lexical_scope = parent_ns;
-            zend_hash_add_ptr(EG(namespaces), interned_name, ns);
-
-            /* sometimes, opcache refuses to intern the string */
-            if (interned_name == needle) {
-               zend_string_release(interned_name);
-            }
-         } else {
-            zend_string_release(needle);
+            zend_hash_add_ptr(EG(namespaces), needle, ns);
          }
+         zend_string_release(needle);
 
          parent_ns = ns;
       }
@@ -85,7 +79,7 @@ zend_class_entry *zend_resolve_namespace(zend_string *name) {
    zend_class_entry *ns = zend_hash_find_ptr(EG(namespaces), lc_name);
 
    if (!ns) {
-      ns = insert_namespace(lc_name);
+      ns = insert_namespace(name, lc_name);
    }
 
    zend_string_release(lc_name);

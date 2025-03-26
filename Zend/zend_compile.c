@@ -2173,8 +2173,6 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->trait_names = NULL;
 		ce->trait_aliases = NULL;
 		ce->trait_precedences = NULL;
-		ce->num_nested_classes = 0;
-		ce->nested_classes = NULL;
 		ce->serialize = NULL;
 		ce->unserialize = NULL;
 		if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -9196,9 +9194,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			ce->required_scope = propFlags & (ZEND_ACC_PRIVATE | ZEND_ACC_PROTECTED) ? CG(active_class_entry) : NULL;
 			ce->required_scope_absolute = propFlags & ZEND_ACC_PRIVATE ? true : false;
 			ce->lexical_scope = CG(active_class_entry);
-			ce->lexical_scope->nested_classes =
-				erealloc(ce->lexical_scope->nested_classes, sizeof(zend_class_entry *) * (ce->lexical_scope->num_nested_classes + 1));
-			ce->lexical_scope->nested_classes[ce->lexical_scope->num_nested_classes++] = ce;
 		} else {
 			name = zend_prefix_with_ns(unqualified_name);
 			ce->required_scope = NULL;
