@@ -39,8 +39,8 @@ static zend_class_entry *insert_namespace(const zend_string *name) {
    const char *pos = start;
    size_t len = 0;
 
-   while (pos < end) {
-      if (*pos == '\\') {
+   while (pos <= end) {
+      if (pos == end || *pos == '\\') {
          len = pos - start;
          zend_string *needle = zend_string_init(ZSTR_VAL(name), len, 0);
 
@@ -51,8 +51,14 @@ static zend_class_entry *insert_namespace(const zend_string *name) {
             ns = create_namespace(interned_name);
             ns->lexical_scope = parent_ns;
             zend_hash_add_ptr(EG(namespaces), interned_name, ns);
+
+            /* sometimes, opcache refuses to intern the string */
+            if (interned_name == needle) {
+               zend_string_release(interned_name);
+            }
+         } else {
+            zend_string_release(needle);
          }
-         zend_string_release(needle);
 
          parent_ns = ns;
       }
@@ -96,9 +102,10 @@ zend_class_entry *zend_lookup_namespace(zend_string *name) {
 }
 
 void zend_destroy_namespaces(void) {
-   zend_hash_destroy(EG(namespaces));
-   FREE_HASHTABLE(EG(namespaces));
-   EG(namespaces) = NULL;
-   pefree(EG(global_namespace), 0);
-   EG(global_namespace) = NULL;
+   if (EG(namespaces) != NULL) {
+      zend_hash_destroy(EG(namespaces));
+      FREE_HASHTABLE(EG(namespaces));
+      EG(namespaces) = NULL;
+      EG(global_namespace) = NULL;
+   }
 }
