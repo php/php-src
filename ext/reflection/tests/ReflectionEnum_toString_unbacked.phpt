@@ -30,14 +30,17 @@ var_export( Suit::cases() );
 
 ?>
 --EXPECTF--
-Class [ <user> final class Suit implements MyStringable, UnitEnum ] {
+Enum [ <user> enum Suit implements MyStringable, UnitEnum ] {
   @@ %sReflectionEnum_toString_unbacked.php 7-18
 
-  - Constants [5] {
-    Constant [ public Suit Hearts ] { Object }
-    Constant [ public Suit Diamonds ] { Object }
-    Constant [ public Suit Clubs ] { Object }
-    Constant [ public Suit Spades ] { Object }
+  - Enum cases [4] {
+    Case Hearts
+    Case Diamonds
+    Case Clubs
+    Case Spades
+  }
+
+  - Constants [1] {
     Constant [ public Suit OtherHearts ] { Object }
   }
 
@@ -68,14 +71,17 @@ Class [ <user> final class Suit implements MyStringable, UnitEnum ] {
   }
 }
 
-Class [ <user> final class Suit implements MyStringable, UnitEnum ] {
+Enum [ <user> enum Suit implements MyStringable, UnitEnum ] {
   @@ %sReflectionEnum_toString_unbacked.php 7-18
 
-  - Constants [5] {
-    Constant [ public Suit Hearts ] { Object }
-    Constant [ public Suit Diamonds ] { Object }
-    Constant [ public Suit Clubs ] { Object }
-    Constant [ public Suit Spades ] { Object }
+  - Enum cases [4] {
+    Case Hearts
+    Case Diamonds
+    Case Clubs
+    Case Spades
+  }
+
+  - Constants [1] {
     Constant [ public Suit OtherHearts ] { Object }
   }
 
