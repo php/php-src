@@ -24,5 +24,6 @@
 
 ZEND_API zend_class_entry *zend_resolve_namespace(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_namespace(zend_string *name);
+ZEND_API void zend_destroy_namespaces(void);
 
 #endif //ZEND_NAMESPACES_H

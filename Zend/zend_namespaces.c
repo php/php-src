@@ -66,6 +66,7 @@ zend_class_entry *zend_resolve_namespace(zend_string *name) {
    if (EG(global_namespace) == NULL) {
       EG(global_namespace) = create_namespace(zend_empty_string);
       EG(global_namespace)->lexical_scope = NULL;
+      ALLOC_HASHTABLE(EG(namespaces));
       zend_hash_init(EG(namespaces), 8, NULL, ZEND_CLASS_DTOR, 0);
       zend_hash_add_ptr(EG(namespaces), zend_empty_string, EG(global_namespace));
    }
@@ -92,4 +93,12 @@ zend_class_entry *zend_lookup_namespace(zend_string *name) {
    zend_string_release(lc_name);
 
    return ns;
+}
+
+void zend_destroy_namespaces(void) {
+   zend_hash_destroy(EG(namespaces));
+   FREE_HASHTABLE(EG(namespaces));
+   EG(namespaces) = NULL;
+   pefree(EG(global_namespace), 0);
+   EG(global_namespace) = NULL;
 }
