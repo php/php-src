@@ -75,6 +75,10 @@ PHP                                                                        NEWS
 - PDO:
   . Fix memory leak when destroying PDORow. (nielsdos)
 
+- PGSQL:
+  . Fixed bug GH-18148 (pg_copy_from() regression with explicit \n terminator
+    due to wrong offset check). (David Carlier)
+
 - Standard:
   . Fix memory leaks in array_any() / array_all(). (nielsdos)
 
