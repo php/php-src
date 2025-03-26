@@ -201,6 +201,11 @@ PHP 8.5 UPGRADE NOTES
   . posix_fpathconf checks invalid file descriptors and sets
     last_error to EBADF and raises an E_WARNING message.
 
+- Reflection:
+  . The output of ReflectionClass::toString() for enums has changed to
+    better indicate that the class is an enum, and that the enum cases
+    are enum cases rather than normal class constants.
+
 - Session:
   . session_start is stricter in regard of the option argument.
     It throws a ValueError if the whole is not a hashmap or
