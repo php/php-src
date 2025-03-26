@@ -6597,7 +6597,7 @@ enum php_array_find_result {
 	PHP_ARRAY_FIND_SOME = 1,
 };
 
-static enum php_array_find_result php_array_find(const HashTable *array, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval *result_key, zval *result_value, bool negate_condition)
+static enum php_array_find_result php_array_find(const HashTable *array, zend_fcall_info fci, zend_fcall_info_cache *fci_cache, zval *result_key, zval *result_value, bool negate_condition)
 {
 	zend_ulong num_key;
 	zend_string *str_key;
@@ -6620,23 +6620,32 @@ static enum php_array_find_result php_array_find(const HashTable *array, zend_fc
 		if (!str_key) {
 			ZVAL_LONG(&args[1], num_key);
 		} else {
+			ZEND_ASSUME(!HT_IS_PACKED(array));
 			ZVAL_STR(&args[1], str_key);
 		}
 
 		ZVAL_COPY_VALUE(&args[0], operand);
 
-		zend_result result = zend_call_function(&fci, &fci_cache);
+		zend_result result = zend_call_function(&fci, fci_cache);
 		ZEND_ASSERT(result == SUCCESS);
 
 		if (UNEXPECTED(Z_ISUNDEF(retval))) {
 			return PHP_ARRAY_FIND_EXCEPTION;
 		}
 
-		bool retval_true = zend_is_true(&retval);
-		zval_ptr_dtor(&retval);
-
-		/* This negates the condition, if negate_condition is true. Otherwise it does nothing with `retval_true`. */
-		retval_true ^= negate_condition;
+		bool retval_true;
+		switch (Z_TYPE(retval)) {
+			case IS_TRUE:
+				retval_true = !negate_condition;
+				break;
+			case IS_FALSE:
+				retval_true = negate_condition;
+				break;
+			default:
+				retval_true = zend_is_true(&retval) ^ negate_condition;
+				zval_ptr_dtor(&retval);
+				break;
+		}
 
 		if (retval_true) {
 			if (result_value != NULL) {
@@ -6667,7 +6676,7 @@ PHP_FUNCTION(array_find)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_find(array, fci, fci_cache, NULL, return_value, false);
+	php_array_find(array, fci, &fci_cache, NULL, return_value, false);
 }
 /* }}} */
 
@@ -6683,7 +6692,7 @@ PHP_FUNCTION(array_find_key)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_find(array, fci, fci_cache, return_value, NULL, false);
+	php_array_find(array, fci, &fci_cache, return_value, NULL, false);
 }
 /* }}} */
 
@@ -6699,7 +6708,7 @@ PHP_FUNCTION(array_any)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(php_array_find(array, fci, fci_cache, NULL, NULL, false) == PHP_ARRAY_FIND_SOME);
+	RETURN_BOOL(php_array_find(array, fci, &fci_cache, NULL, NULL, false) == PHP_ARRAY_FIND_SOME);
 }
 /* }}} */
 
@@ -6715,7 +6724,7 @@ PHP_FUNCTION(array_all)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(php_array_find(array, fci, fci_cache, NULL, NULL, true) == PHP_ARRAY_FIND_NONE);
+	RETURN_BOOL(php_array_find(array, fci, &fci_cache, NULL, NULL, true) == PHP_ARRAY_FIND_NONE);
 }
 /* }}} */
 
