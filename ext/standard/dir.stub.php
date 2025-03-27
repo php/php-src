@@ -55,7 +55,7 @@ const GLOB_NOESCAPE = UNKNOWN;
  */
 const GLOB_NOSORT = UNKNOWN;
 #endif
-#ifdef PHP_GLOB_ONLYDIR
+#if (defined(PHP_GLOB_ONLYDIR) && PHP_GLOB_ONLYDIR != 0)
 /**
  * @var int
  * @cvalue PHP_GLOB_ONLYDIR
