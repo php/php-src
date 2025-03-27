@@ -28,13 +28,13 @@ BEGIN_EXTERN_C()
  * extensions which want to know the version of PHP at run-time, rather than
  * the version they were built with at compile-time.
  */
-PHPAPI const char *php_version(void);
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_version(void);
 
 /* Returns the PHP version id the engine was built with. This is useful for
  * extensions which want to know the version of PHP at run-time, rather than
  * the version they were built with at compile-time.
  */
-PHPAPI unsigned int php_version_id(void);
+ZEND_ATTRIBUTE_CONST PHPAPI unsigned int php_version_id(void);
 
 /* Prints the PHP version string for the -v option. It's in main/ so that
  * it can be shared between SAPIs.

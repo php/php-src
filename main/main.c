@@ -99,12 +99,12 @@ PHPAPI size_t core_globals_offset;
 
 const char php_build_date[] = __DATE__ " " __TIME__;
 
-PHPAPI const char *php_version(void)
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_version(void)
 {
 	return PHP_VERSION;
 }
 
-PHPAPI unsigned int php_version_id(void)
+ZEND_ATTRIBUTE_CONST PHPAPI unsigned int php_version_id(void)
 {
 	return PHP_VERSION_ID;
 }
