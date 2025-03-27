@@ -172,6 +172,7 @@ struct glob_path_stat {
 	zend_stat_t	*gps_stat;
 };
 
+#ifndef HAVE_REALLOCARRAY
 /*
  * XXX: This is temporary to avoid having reallocarray be imported and part of
  * PHP's public API. Since it's only needed here and on Windows, we can just
@@ -212,6 +213,7 @@ reallocarray(void *optr, size_t nmemb, size_t size)
 	}
 	return realloc(optr, size * nmemb);
 }
+#endif
 
 static int	 compare(const void *, const void *);
 static int	 compare_gps(const void *, const void *);
