@@ -37,6 +37,10 @@
 
 #if defined(HAVE_GLOB) && defined(PHP_SYSTEM_GLOB)
 #include <glob.h>
+
+#define php_glob_t glob_t
+#define php_glob glob
+#define php_globfree
 #else
 
 #ifndef _PHP_GLOB_H_
@@ -70,29 +74,28 @@ typedef struct {
 	int (*gl_stat)(const char *, zend_stat_t *);
 } php_glob_t;
 
-#define	GLOB_APPEND	0x0001	/* Append to output from previous call. */
-#define	GLOB_DOOFFS	0x0002	/* Use gl_offs. */
-#define	GLOB_ERR	0x0004	/* Return on error. */
-#define	GLOB_MARK	0x0008	/* Append / to matching directories. */
-#define	GLOB_NOCHECK	0x0010	/* Return pattern itself if nothing matches. */
-#define	GLOB_NOSORT	0x0020	/* Don't sort. */
-#define	GLOB_NOESCAPE	0x1000	/* Disable backslash escaping. */
+#define	PHP_GLOB_APPEND	0x0001	/* Append to output from previous call. */
+#define	PHP_GLOB_DOOFFS	0x0002	/* Use gl_offs. */
+#define	PHP_GLOB_ERR	0x0004	/* Return on error. */
+#define	PHP_GLOB_MARK	0x0008	/* Append / to matching directories. */
+#define	PHP_GLOB_NOCHECK	0x0010	/* Return pattern itself if nothing matches. */
+#define	PHP_GLOB_NOSORT	0x0020	/* Don't sort. */
+#define	PHP_GLOB_NOESCAPE	0x1000	/* Disable backslash escaping. */
 
-#define	GLOB_NOSPACE	(-1)	/* Malloc call failed. */
-#define	GLOB_ABORTED	(-2)	/* Unignored error. */
-#define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
-#define	GLOB_NOSYS	(-4)	/* Function not supported. */
+#define	PHP_GLOB_NOSPACE	(-1)	/* Malloc call failed. */
+#define	PHP_GLOB_ABORTED	(-2)	/* Unignored error. */
+#define	PHP_GLOB_NOMATCH	(-3)	/* No match and PHP_GLOB_NOCHECK not set. */
+#define	PHP_GLOB_NOSYS	(-4)	/* Function not supported. */
 
 #ifndef _POSIX_SOURCE
-#define	GLOB_ALTDIRFUNC	0x0040	/* Use alternately specified directory funcs. */
-#define	GLOB_BRACE	0x0080	/* Expand braces ala csh. */
-#define	GLOB_MAGCHAR	0x0100	/* Pattern had globbing characters. */
-#define	GLOB_NOMAGIC	0x0200	/* GLOB_NOCHECK without magic chars (csh). */
-#define	GLOB_QUOTE	0x0400	/* Quote special chars with \. */
-#define	GLOB_TILDE	0x0800	/* Expand tilde names from the passwd file. */
-#define GLOB_LIMIT	0x2000	/* Limit pattern match output to ARG_MAX */
-#define	GLOB_KEEPSTAT	0x4000	/* Retain stat data for paths in gl_statv. */
-#define GLOB_ABEND	GLOB_ABORTED /* backward compatibility */
+#define	PHP_GLOB_ALTDIRFUNC	0x0040	/* Use alternately specified directory funcs. */
+#define	PHP_GLOB_BRACE	0x0080	/* Expand braces ala csh. */
+#define	PHP_GLOB_MAGCHAR	0x0100	/* Pattern had globbing characters. */
+#define	PHP_GLOB_NOMAGIC	0x0200	/* PHP_GLOB_NOCHECK without magic chars (csh). */
+#define	PHP_GLOB_QUOTE	0x0400	/* Quote special chars with \. */
+#define	PHP_GLOB_TILDE	0x0800	/* Expand tilde names from the passwd file. */
+#define PHP_GLOB_LIMIT	0x2000	/* Limit pattern match output to ARG_MAX */
+#define	PHP_GLOB_KEEPSTAT	0x4000	/* Retain stat data for paths in gl_statv. */
 #endif
 
 BEGIN_EXTERN_C()
@@ -101,11 +104,18 @@ PHPAPI int	php_glob(const char *__restrict, int, int (*)(const char *, int),
 PHPAPI void	php_globfree(php_glob_t *);
 END_EXTERN_C()
 
-// XXX: Invert defs
-#define glob_t php_glob_t
-#define glob php_glob
-#define globfree php_globfree
-
 #endif /* !_GLOB_H_ */
+
+/* These were copied from dir and zip */
+
+#ifndef PHP_GLOB_ONLYDIR
+#define PHP_GLOB_ONLYDIR (1<<30)
+#define PHP_GLOB_EMULATE_ONLYDIR
+#define PHP_GLOB_FLAGMASK (~PHP_GLOB_ONLYDIR)
+#else
+#define PHP_GLOB_FLAGMASK (~0)
+#endif
+
+#define PHP_GLOB_AVAILABLE_FLAGS (0 | PHP_GLOB_BRACE | PHP_GLOB_MARK | PHP_GLOB_NOSORT | PHP_GLOB_NOCHECK | PHP_GLOB_NOESCAPE | PHP_GLOB_ERR | PHP_GLOB_ONLYDIR)
 
 #endif /* defined(HAVE_GLOB) */
