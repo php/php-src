@@ -1136,7 +1136,9 @@ static inheritance_status do_inheritance_check_on_method(
 #define SEPARATE_METHOD() do { \
 			if ((flags & ZEND_INHERITANCE_LAZY_CHILD_CLONE) \
 			 && child_scope != ce \
-			 /* Trait scopes are fixed after inheritance. However, they are always duplicated. */ \
+			 /* Trait methods have already been separated at this point. However, their */ \
+			 /* scope isn't fixed until after inheritance checks to preserve the scope */ \
+			 /* in error messages. Skip them here explicitly. */ \
 			 && !(child_scope->ce_flags & ZEND_ACC_TRAIT) \
 			 && child->type == ZEND_USER_FUNCTION) { \
 				/* op_array wasn't duplicated yet */ \
