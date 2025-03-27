@@ -6509,6 +6509,22 @@ PHP_FUNCTION(array_reduce)
 }
 /* }}} */
 
+/* Consumes `zv` */
+static bool php_is_true(zval *zv)
+{
+	switch (Z_TYPE_P(zv)) {
+		case IS_TRUE:
+			return true;
+		case IS_FALSE:
+			return false;
+		default: {
+			bool rv = zend_is_true(zv);
+			zval_ptr_dtor(zv);
+			return rv;
+		}
+	}
+}
+
 /* {{{ Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
 {
@@ -6571,9 +6587,7 @@ PHP_FUNCTION(array_filter)
 				RETURN_THROWS();
 			}
 
-			bool retval_true = zend_is_true(&retval);
-			zval_ptr_dtor(&retval);
-			if (!retval_true) {
+			if (!php_is_true(&retval)) {
 				continue;
 			}
 		} else if (!zend_is_true(operand)) {
@@ -6620,6 +6634,8 @@ static enum php_array_find_result php_array_find(const HashTable *array, zend_fc
 		if (!str_key) {
 			ZVAL_LONG(&args[1], num_key);
 		} else {
+			/* Allows copying the numeric branch, without this branch, into the iteration code
+			 * that checks for the packed array flag. */
 			ZEND_ASSUME(!HT_IS_PACKED(array));
 			ZVAL_STR(&args[1], str_key);
 		}
@@ -6633,21 +6649,7 @@ static enum php_array_find_result php_array_find(const HashTable *array, zend_fc
 			return PHP_ARRAY_FIND_EXCEPTION;
 		}
 
-		bool retval_true;
-		switch (Z_TYPE(retval)) {
-			case IS_TRUE:
-				retval_true = !negate_condition;
-				break;
-			case IS_FALSE:
-				retval_true = negate_condition;
-				break;
-			default:
-				retval_true = zend_is_true(&retval) ^ negate_condition;
-				zval_ptr_dtor(&retval);
-				break;
-		}
-
-		if (retval_true) {
+		if (php_is_true(&retval) ^ negate_condition) {
 			if (result_value != NULL) {
 				ZVAL_COPY_DEREF(result_value, &args[0]);
 			}
