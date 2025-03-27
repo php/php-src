@@ -698,6 +698,8 @@ asm(
     ".ascii \"\\\"\\\"\\\"\\n\"\n"
     ".ascii \"\\n\"\n"
     ".ascii \"import gdb\\n\"\n"
+    ".ascii \"import gdb.printing\\n\"\n"
+    ".ascii \"import gdb.types\\n\"\n"
     ".ascii \"import re\\n\"\n"
     ".ascii \"import traceback\\n\"\n"
     ".ascii \"import os\\n\"\n"
