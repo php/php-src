@@ -557,6 +557,7 @@ AC_CHECK_FUNCS(m4_normalize([
   getwd
   glob
   gmtime_r
+  issetugid
   lchown
   localtime_r
   memcntl
