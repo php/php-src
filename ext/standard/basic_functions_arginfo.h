@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f1fdd58097ccd7562c63aee8e9cc1ca88f5bdf31 */
+ * Stub hash: dfd7d2cfd31312f7f6c5074c10cab54e9d1fbccc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1133,12 +1133,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_scandir, 0, 1, MAY_BE_ARRAY|MAY_
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_GLOB)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_glob, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_exec, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
@@ -2600,9 +2598,7 @@ ZEND_FUNCTION(getcwd);
 ZEND_FUNCTION(rewinddir);
 ZEND_FUNCTION(readdir);
 ZEND_FUNCTION(scandir);
-#if defined(HAVE_GLOB)
 ZEND_FUNCTION(glob);
-#endif
 ZEND_FUNCTION(exec);
 ZEND_FUNCTION(system);
 ZEND_FUNCTION(passthru);
@@ -3203,9 +3199,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(rewinddir, arginfo_rewinddir)
 	ZEND_FE(readdir, arginfo_readdir)
 	ZEND_FE(scandir, arginfo_scandir)
-#if defined(HAVE_GLOB)
 	ZEND_FE(glob, arginfo_glob)
-#endif
 	ZEND_FE(exec, arginfo_exec)
 	ZEND_FE(system, arginfo_system)
 	ZEND_FE(passthru, arginfo_passthru)

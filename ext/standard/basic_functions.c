@@ -339,9 +339,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	php_register_url_stream_wrapper("php", &php_stream_php_wrapper);
 	php_register_url_stream_wrapper("file", &php_plain_files_wrapper);
-#ifdef HAVE_GLOB
 	php_register_url_stream_wrapper("glob", &php_glob_stream_wrapper);
-#endif
 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper);
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
