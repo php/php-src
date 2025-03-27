@@ -1554,11 +1554,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 
 	const uint32_t no_discard = 0 ? 0 : ZEND_ACC_NODISCARD;
 
-	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
-		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
 			zend_deprecated_function(fbc);
 		}
-		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
+		if ((fbc->common.fn_flags & no_discard) && EG(exception) == NULL) {
 			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1663,11 +1663,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 
 	const uint32_t no_discard = 1 ? 0 : ZEND_ACC_NODISCARD;
 
-	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
-		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
 			zend_deprecated_function(fbc);
 		}
-		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
+		if ((fbc->common.fn_flags & no_discard) && EG(exception) == NULL) {
 			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1772,11 +1772,11 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 
 	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
 
-	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
-		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
 			zend_deprecated_function(fbc);
 		}
-		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
+		if ((fbc->common.fn_flags & no_discard) && EG(exception) == NULL) {
 			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1883,11 +1883,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 	const uint32_t no_discard = 0 ? 0 : ZEND_ACC_NODISCARD;
 
-	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
-		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
 			zend_deprecated_function(fbc);
 		}
-		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
+		if ((fbc->common.fn_flags & no_discard) && EG(exception) == NULL) {
 			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2008,11 +2008,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 	const uint32_t no_discard = 1 ? 0 : ZEND_ACC_NODISCARD;
 
-	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
-		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
 			zend_deprecated_function(fbc);
 		}
-		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
+		if ((fbc->common.fn_flags & no_discard) && EG(exception) == NULL) {
 			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2133,11 +2133,11 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 
 	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
 
-	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard)) != 0)) {
-		if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0) {
+	if (UNEXPECTED(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard))) {
+		if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
 			zend_deprecated_function(fbc);
 		}
-		if ((fbc->common.fn_flags & no_discard) != 0 && EG(exception) == NULL) {
+		if ((fbc->common.fn_flags & no_discard) && EG(exception) == NULL) {
 			zend_nodiscard_function(fbc);
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
