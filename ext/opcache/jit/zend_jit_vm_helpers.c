@@ -235,7 +235,6 @@ bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
 bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D)
 {
 	zend_execute_data *call = (zend_execute_data *) opline;
-	const zend_op *actual_opline = call->opline;
 	zend_function *fbc = call->func;
 
 	if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED)) {
