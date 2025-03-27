@@ -2355,7 +2355,6 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 {
 	zend_function *existing_fn = NULL;
 	zend_function *new_fn;
-	bool check_inheritance = false;
 
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
 		/* if it is the same function with the same visibility and has not been assigned a class scope yet, regardless
@@ -2389,8 +2388,6 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 				ZSTR_VAL(fn->common.scope->name), ZSTR_VAL(fn->common.function_name),
 				ZSTR_VAL(ce->name), ZSTR_VAL(name),
 				ZSTR_VAL(existing_fn->common.scope->name), ZSTR_VAL(existing_fn->common.function_name));
-		} else {
-			check_inheritance = true;
 		}
 	}
 
@@ -2410,19 +2407,6 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	function_add_ref(new_fn);
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_method(ce, fn, key);
-
-	if (check_inheritance) {
-		/* Inherited members are overridden by members inserted by traits.
-		 * Check whether the trait method fulfills the inheritance requirements. */
-		uint32_t flags = ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY;
-		if (!(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
-			flags |= ZEND_INHERITANCE_SET_CHILD_CHANGED |ZEND_INHERITANCE_SET_CHILD_PROTO |
-				ZEND_INHERITANCE_RESET_CHILD_OVERRIDE;
-		}
-		do_inheritance_check_on_method(
-			fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
-			ce, NULL, flags);
-	}
 }
 /* }}} */
 
