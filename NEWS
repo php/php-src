@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.21
 
+- Standard:
+  . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
+    (Jakub Zelenka)
 
 10 Apr 2025, PHP 8.3.20
 
@@ -54,10 +57,6 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
     ArrayObject). (nielsdos)
-
-- Standard:
-  . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
-    (Jakub Zelenka)
 
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
