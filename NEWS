@@ -93,6 +93,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
     ArrayObject). (nielsdos)
 
+- Standard:
+  . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
+    (Jakub Zelenka)
+
 - Treewide:
   . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
 
