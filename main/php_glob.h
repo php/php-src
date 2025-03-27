@@ -87,7 +87,6 @@ typedef struct {
 #define	PHP_GLOB_NOMATCH	(-3)	/* No match and PHP_GLOB_NOCHECK not set. */
 #define	PHP_GLOB_NOSYS	(-4)	/* Function not supported. */
 
-#ifndef _POSIX_SOURCE
 #define	PHP_GLOB_ALTDIRFUNC	0x0040	/* Use alternately specified directory funcs. */
 #define	PHP_GLOB_BRACE	0x0080	/* Expand braces ala csh. */
 #define	PHP_GLOB_MAGCHAR	0x0100	/* Pattern had globbing characters. */
@@ -96,7 +95,6 @@ typedef struct {
 #define	PHP_GLOB_TILDE	0x0800	/* Expand tilde names from the passwd file. */
 #define PHP_GLOB_LIMIT	0x2000	/* Limit pattern match output to ARG_MAX */
 #define	PHP_GLOB_KEEPSTAT	0x4000	/* Retain stat data for paths in gl_statv. */
-#endif
 
 BEGIN_EXTERN_C()
 PHPAPI int	php_glob(const char *__restrict, int, int (*)(const char *, int),
