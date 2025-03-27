@@ -805,9 +805,9 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 #ifdef PHP_BUILD_SYSTEM
 		php_info_print_table_row(2, "Build System", PHP_BUILD_SYSTEM);
 #endif
-#ifdef PHP_BUILD_PROVIDER
-		php_info_print_table_row(2, "Build Provider", PHP_BUILD_PROVIDER);
-#endif
+		if (php_build_provider()) {
+			php_info_print_table_row(2, "Build Provider", php_build_provider());
+		}
 #ifdef PHP_BUILD_COMPILER
 		php_info_print_table_row(2, "Compiler", PHP_BUILD_COMPILER);
 #endif
