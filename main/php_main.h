@@ -36,6 +36,13 @@ ZEND_ATTRIBUTE_CONST PHPAPI const char *php_version(void);
  */
 ZEND_ATTRIBUTE_CONST PHPAPI unsigned int php_version_id(void);
 
+/* Returns the build provider specified at build time. NULL is returned if
+ * no build provider was specified. This is useful for extensions which want
+ * to know the origin of a PHP binary at run-time, for example to provide
+ * statistics.
+ */
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_build_provider(void);
+
 /* Prints the PHP version string for the -v option. It's in main/ so that
  * it can be shared between SAPIs.
  */

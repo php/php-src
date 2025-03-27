@@ -109,6 +109,15 @@ ZEND_ATTRIBUTE_CONST PHPAPI unsigned int php_version_id(void)
 	return PHP_VERSION_ID;
 }
 
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_build_provider(void)
+{
+#ifdef PHP_BUILD_PROVIDER
+	return PHP_BUILD_PROVIDER;
+#else
+	return NULL;
+#endif
+}
+
 PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
 	char *version_info;
