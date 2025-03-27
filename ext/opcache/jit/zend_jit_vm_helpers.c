@@ -232,6 +232,27 @@ bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
 	return 1;
 }
 
+bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D)
+{
+	zend_execute_data *call = (zend_execute_data *) opline;
+	const zend_op *actual_opline = call->opline;
+	zend_function *fbc = call->func;
+
+	if ((fbc->common.fn_flags & ZEND_ACC_DEPRECATED)) {
+		if (zend_jit_deprecated_helper(OPLINE_C) == 0) {
+			return 0;
+		}
+	}
+
+	if ((fbc->common.fn_flags & ZEND_ACC_NODISCARD)) {
+		if (zend_jit_nodiscard_helper(OPLINE_C) == 0) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D)
 {
 	const zend_op *opline = EX(opline);
