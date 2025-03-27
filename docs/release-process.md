@@ -257,7 +257,7 @@ slightly different steps. We'll call attention where the steps differ.
    For example, if the RC is `8.2.1RC1` then the version numbers in the version
    branch should be bumped to `8.2.2-dev`. We do this regardless of whether we
    build a new RC to make sure `version_compare()` works correctly. See
-   [Bump for 8.1.8-dev][] for a real example.
+   [PHP 8.3 is now for PHP 8.3.21-dev][] commit for a real example.
 
    Commit the changes to the version branch.
 
@@ -290,6 +290,11 @@ slightly different steps. We'll call attention where the steps differ.
     > tags you might not wish to push.
     >
     > Local-only release branches should not be pushed!
+
+    Do not forget to merge up PHP-X.Y all the way to master. When resolving
+    the conflicts, ignore the changes from PHP-X.Y in higher branches. It
+    means using something like `git checkout --ours .` when on PHP.X.Y+1 or
+    master after the merge resulting in the conflicts.
 
 11. Run the following using the release tag to export the tree, create the
     `configure` script, and build and compress three tarballs (`.tar.gz`,
@@ -1098,7 +1103,7 @@ volunteers to begin the selection process for the next release managers.
 [Prepare for PHP 8.1.0RC1]: https://github.com/php/php-src/commit/5764414eb8900ae98020a3c20693f4fb793efa99
 [Update NEWS for PHP 8.2.0 alpha2]: https://github.com/php/php-src/commit/418f7211f71658d79d934861be20f277db96fe2c
 [Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
-[Bump for 8.1.8-dev]: https://github.com/php/php-src/commit/3b6ee1eb19c14c3339ebfcf5c967065a9f828971
+[PHP 8.3 is now for PHP 8.3.21-dev]: https://github.com/php/php-src/commit/b57f425cfe20a11003253427424cc0517483550b
 [GitHub command line tool]: https://cli.github.com
 [Announce 8.1.0RC3]: https://github.com/php/web-qa/commit/f264b711fd3827803b79bbb342959eae57ea502b
 [8.1.6RC1]: https://github.com/php/web-qa/commit/e6d61ad7a9d8be0b1cd159af29f3b9cbdde33384
