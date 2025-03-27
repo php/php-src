@@ -6736,14 +6736,12 @@ PHP_FUNCTION(array_map)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (n_arrays == 1) {
-		zend_ulong num_key;
-		zend_string *str_key;
-
 		if (Z_TYPE(arrays[0]) != IS_ARRAY) {
 			zend_argument_type_error(2, "must be of type array, %s given", zend_zval_value_name(&arrays[0]));
 			RETURN_THROWS();
 		}
-		maxlen = zend_hash_num_elements(Z_ARRVAL(arrays[0]));
+		const HashTable *input = Z_ARRVAL(arrays[0]);
+		maxlen = zend_hash_num_elements(input);
 
 		/* Short-circuit: if no callback and only one array, just return it. */
 		if (!ZEND_FCI_INITIALIZED(fci) || !maxlen) {
@@ -6751,26 +6749,60 @@ PHP_FUNCTION(array_map)
 			return;
 		}
 
-		array_init_size(return_value, maxlen);
-		zend_hash_real_init(Z_ARRVAL_P(return_value), HT_IS_PACKED(Z_ARRVAL(arrays[0])));
-
 		fci.retval = &result;
 		fci.param_count = 1;
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(arrays[0]), num_key, str_key, fci.params) {
-			zend_result ret = zend_call_function(&fci, &fci_cache);
-			ZEND_ASSERT(ret == SUCCESS);
-			ZEND_IGNORE_VALUE(ret);
-			if (Z_TYPE(result) == IS_UNDEF) {
-				zend_array_destroy(Z_ARR_P(return_value));
-				RETURN_NULL();
-			}
-			if (str_key) {
-				_zend_hash_append(Z_ARRVAL_P(return_value), str_key, &result);
-			} else {
-				zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &result);
-			}
-		} ZEND_HASH_FOREACH_END();
+		if (HT_IS_PACKED(input)) {
+			array_init_size(return_value, input->nNumUsed);
+			HashTable *output = Z_ARRVAL_P(return_value);
+			zend_hash_real_init_packed(output);
+
+			uint32_t undefs = 0;
+			ZEND_HASH_FILL_PACKED(output) {
+				/* Can't use ZEND_HASH_PACKED_FOREACH_VAL() because we need to also account for the UNDEF values
+				 * so the keys in the output array will match those of the input array. */
+				for (zval *cur = input->arPacked, *end = input->arPacked + input->nNumUsed; cur != end; cur++) {
+					if (EXPECTED(!Z_ISUNDEF_P(cur))) {
+						fci.params = cur;
+						zend_result ret = zend_call_function(&fci, &fci_cache);
+						ZEND_ASSERT(ret == SUCCESS);
+						ZEND_IGNORE_VALUE(ret);
+						if (UNEXPECTED(Z_ISUNDEF(result))) {
+							ZEND_HASH_FILL_FINISH();
+							zend_array_destroy(output);
+							RETURN_NULL();
+						}
+					} else {
+						ZVAL_UNDEF(&result);
+						undefs++;
+					}
+					ZEND_HASH_FILL_ADD(&result);
+				}
+			} ZEND_HASH_FILL_END();
+			output->nNumOfElements -= undefs;
+		} else {
+			zend_ulong num_key;
+			zend_string *str_key;
+
+			array_init_size(return_value, maxlen);
+			HashTable *output = Z_ARRVAL_P(return_value);
+			zend_hash_real_init_mixed(output);
+
+			ZEND_HASH_MAP_FOREACH_KEY_VAL(input, num_key, str_key, fci.params) {
+				zend_result ret = zend_call_function(&fci, &fci_cache);
+				ZEND_ASSERT(ret == SUCCESS);
+				ZEND_IGNORE_VALUE(ret);
+				if (UNEXPECTED(Z_ISUNDEF(result))) {
+					zend_array_destroy(output);
+					RETURN_NULL();
+				}
+				if (str_key) {
+					_zend_hash_append(output, str_key, &result);
+				} else {
+					zend_hash_index_add_new(output, num_key, &result);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	} else {
 		uint32_t *array_pos = (HashPosition *)ecalloc(n_arrays, sizeof(HashPosition));
 
