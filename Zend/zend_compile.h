@@ -452,6 +452,7 @@ typedef struct _zend_property_info {
 	HashTable *attributes;
 	zend_class_entry *ce;
 	zend_type type;
+	zend_type_node *type_tree;
 	const zend_property_info *prototype;
 	zend_function **hooks;
 } zend_property_info;
@@ -479,6 +480,7 @@ typedef struct _zend_class_constant {
 typedef struct _zend_internal_arg_info {
 	const char *name;
 	zend_type type;
+	zend_type_node *type_tree;
 	const char *default_value;
 } zend_internal_arg_info;
 
@@ -486,6 +488,7 @@ typedef struct _zend_internal_arg_info {
 typedef struct _zend_arg_info {
 	zend_string *name;
 	zend_type type;
+	zend_type_node *type_tree;
 	zend_string *default_value;
 } zend_arg_info;
 
@@ -497,6 +500,7 @@ typedef struct _zend_arg_info {
 typedef struct _zend_internal_function_info {
 	uintptr_t required_num_args;
 	zend_type type;
+	zend_type_node *type_tree;
 	const char *default_value;
 } zend_internal_function_info;
 
