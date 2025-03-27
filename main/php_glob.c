@@ -460,7 +460,11 @@ static const Char *globtilde(const Char *pattern, Char *patbuf, size_t patbuf_le
 		 * handle a plain ~ or ~/ by expanding $HOME
 		 * first and then trying the password file
 		 */
+#ifdef HAVE_ISSETUGID
 		if (issetugid() != 0 || (h = getenv("HOME")) == NULL) {
+#else
+		if ((h = getenv("HOME")) == NULL) {
+#endif
 			getpwuid_r(getuid(), &pwstore, pwbuf, sizeof(pwbuf),
 				&pwd);
 			if (pwd == NULL)
