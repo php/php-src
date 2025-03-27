@@ -632,6 +632,18 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 }
 /* }}} */
 
+/* Consumes `zv` */
+static zend_always_inline zend_long php_get_long(zval *zv)
+{
+	if (EXPECTED(Z_TYPE_P(zv) == IS_LONG)) {
+		return Z_LVAL_P(zv);
+	} else {
+		zend_long ret = zval_get_long_func(zv, false);
+		zval_ptr_dtor(zv);
+		return ret;
+	}
+}
+
 /* {{{ Count the number of elements in a variable (usually an array) */
 PHP_FUNCTION(count)
 {
@@ -677,8 +689,7 @@ PHP_FUNCTION(count)
 				zend_function *count_fn = zend_hash_find_ptr(&zobj->ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 				zend_call_known_instance_method_with_0_params(count_fn, zobj, &retval);
 				if (Z_TYPE(retval) != IS_UNDEF) {
-					RETVAL_LONG(zval_get_long(&retval));
-					zval_ptr_dtor(&retval);
+					RETVAL_LONG(php_get_long(&retval));
 				}
 				return;
 			}
@@ -811,20 +822,14 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 {
 	zval args[2];
 	zval retval;
-	bool call_failed;
 
-	ZVAL_COPY(&args[0], &f->val);
-	ZVAL_COPY(&args[1], &s->val);
+	ZVAL_COPY_VALUE(&args[0], &f->val);
+	ZVAL_COPY_VALUE(&args[1], &s->val);
 
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
 	BG(user_compare_fci).retval = &retval;
-	call_failed = zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE || Z_TYPE(retval) == IS_UNDEF;
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[0]);
-	if (UNEXPECTED(call_failed)) {
-		return 0;
-	}
+	zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
 
 	if (UNEXPECTED(Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 		if (!ARRAYG(compare_deprecation_thrown)) {
@@ -836,23 +841,16 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 
 		if (Z_TYPE(retval) == IS_FALSE) {
 			/* Retry with swapped operands. */
-			ZVAL_COPY(&args[0], &s->val);
-			ZVAL_COPY(&args[1], &f->val);
-			call_failed = zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE || Z_TYPE(retval) == IS_UNDEF;
-			zval_ptr_dtor(&args[1]);
-			zval_ptr_dtor(&args[0]);
-			if (call_failed) {
-				return 0;
-			}
+			ZVAL_COPY_VALUE(&args[0], &s->val);
+			ZVAL_COPY_VALUE(&args[1], &f->val);
+			zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
 
-			zend_long ret = zval_get_long(&retval);
-			zval_ptr_dtor(&retval);
+			zend_long ret = php_get_long(&retval);
 			return -ZEND_NORMALIZE_BOOL(ret);
 		}
 	}
 
-	zend_long ret = zval_get_long(&retval);
-	zval_ptr_dtor(&retval);
+	zend_long ret = php_get_long(&retval);
 	return ZEND_NORMALIZE_BOOL(ret);
 }
 /* }}} */
@@ -929,28 +927,22 @@ static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {
 {
 	zval args[2];
 	zval retval;
-	bool call_failed;
 
 	if (f->key == NULL) {
 		ZVAL_LONG(&args[0], f->h);
 	} else {
-		ZVAL_STR_COPY(&args[0], f->key);
+		ZVAL_STR(&args[0], f->key);
 	}
 	if (s->key == NULL) {
 		ZVAL_LONG(&args[1], s->h);
 	} else {
-		ZVAL_STR_COPY(&args[1], s->key);
+		ZVAL_STR(&args[1], s->key);
 	}
 
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
 	BG(user_compare_fci).retval = &retval;
-	call_failed = zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE || Z_TYPE(retval) == IS_UNDEF;
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[0]);
-	if (UNEXPECTED(call_failed)) {
-		return 0;
-	}
+	zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
 
 	if (UNEXPECTED(Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 		if (!ARRAYG(compare_deprecation_thrown)) {
@@ -965,29 +957,22 @@ static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {
 			if (s->key == NULL) {
 				ZVAL_LONG(&args[0], s->h);
 			} else {
-				ZVAL_STR_COPY(&args[0], s->key);
+				ZVAL_STR(&args[0], s->key);
 			}
 			if (f->key == NULL) {
 				ZVAL_LONG(&args[1], f->h);
 			} else {
-				ZVAL_STR_COPY(&args[1], f->key);
+				ZVAL_STR(&args[1], f->key);
 			}
 
-			call_failed = zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE || Z_TYPE(retval) == IS_UNDEF;
-			zval_ptr_dtor(&args[1]);
-			zval_ptr_dtor(&args[0]);
-			if (call_failed) {
-				return 0;
-			}
+			zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
 
-			zend_long ret = zval_get_long(&retval);
-			zval_ptr_dtor(&retval);
+			zend_long ret = php_get_long(&retval);
 			return -ZEND_NORMALIZE_BOOL(ret);
 		}
 	}
 
-	zend_long result = zval_get_long(&retval);
-	zval_ptr_dtor(&retval);
+	zend_long result = php_get_long(&retval);
 	return ZEND_NORMALIZE_BOOL(result);
 }
 /* }}} */
@@ -5065,13 +5050,9 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 	BG(user_compare_fci).params = args;
 	BG(user_compare_fci).retval = &retval;
 
-	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		zend_long ret = zval_get_long(&retval);
-		zval_ptr_dtor(&retval);
-		return ZEND_NORMALIZE_BOOL(ret);
-	} else {
-		return 0;
-	}
+	zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
+	zend_long ret = php_get_long(&retval);
+	return ZEND_NORMALIZE_BOOL(ret);
 }
 /* }}} */
 
