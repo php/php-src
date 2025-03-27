@@ -1,9 +1,15 @@
 --TEST--
-Allow defining closures in attributes
+GH-17851: Use-after-free when instantiating autoloaded class with attribute having a Closure parameter.
 --EXTENSIONS--
 reflection
 --FILE--
 <?php
+
+spl_autoload_register(static function ($className) {
+    if ($className === 'C') {
+        require(__DIR__ . '/attributes_autoload.inc');
+    }
+});
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class Attr {
@@ -11,12 +17,6 @@ class Attr {
         $value('foo');
     }
 }
-
-#[Attr(static function () { })]
-#[Attr(static function (...$args) {
-    var_dump($args);
-})]
-class C {}
 
 foreach ((new ReflectionClass(C::class))->getAttributes() as $reflectionAttribute) {
     var_dump($reflectionAttribute->newInstance());
