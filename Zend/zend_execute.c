@@ -1112,9 +1112,10 @@ static zend_always_inline bool zend_value_instanceof_static(zval *zv) {
 static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 		void **cache_slot, zend_type *type)
 {
-	if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
-		return (zend_class_entry *) *cache_slot;
-	}
+	// todo: work with cache_slot
+	//if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
+	//	return (zend_class_entry *) *cache_slot;
+	//}
 
 	zend_string *name = ZEND_TYPE_NAME(*type);
 	zend_class_entry *ce;
@@ -1140,58 +1141,47 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 	return ce;
 }
 
-static int zend_type_node_matches(const zend_type_node *node, zval *zv)
-{
-	switch (node->kind) {
-		case ZEND_TYPE_SIMPLE: {
-			return 2;
-		}
 
-		case ZEND_TYPE_UNION: {
-			for (uint32_t i = 0; i < node->compound.num_types; i++) {
-				if (zend_type_node_matches(node->compound.types[i], zv)) {
-					return 1;
-				}
-			}
-			return 0;
-		}
-
-		case ZEND_TYPE_INTERSECTION: {
-			for (uint32_t i = 0; i < node->compound.num_types; i++) {
-				if (!zend_type_node_matches(node->compound.types[i], zv)) {
-					return 0;
-				}
-			}
-			return 1;
-		}
-
-		default:
-			return 0;
-	}
-}
-
-
-static zend_always_inline bool zend_check_type_slow(
+static bool zend_check_type_slow(
 		zend_type *type, zend_type_node *type_tree, zval *arg, zend_reference *ref, void **cache_slot,
 		bool is_return_type, bool is_internal)
 {
 	if (EXPECTED(type_tree != NULL) && type_tree->kind != ZEND_TYPE_SIMPLE) {
-		const int result = zend_type_node_matches(type_tree, arg);
-		if (result < 2) {
-			return result;
+		switch (type_tree->kind) {
+			case ZEND_TYPE_UNION: {
+				for (uint32_t i = 0; i < type_tree->compound.num_types; i++) {
+					if (zend_check_type_slow(type, type_tree->compound.types[i], arg, ref, cache_slot, is_return_type, is_internal)) {
+						return true;
+					}
+				}
+				return false;
+			}
+
+			case ZEND_TYPE_INTERSECTION: {
+				for (uint32_t i = 0; i < type_tree->compound.num_types; i++) {
+					if (!zend_check_type_slow(type, type_tree->compound.types[i], arg, ref, cache_slot, is_return_type, is_internal)) {
+						return false;
+					}
+				}
+				return true;
+			}
+
+			default:
+				return false;
 		}
 	}
 
-	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
-		const zend_class_entry *ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
+	if (ZEND_TYPE_IS_COMPLEX(type_tree->simple_type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		const zend_class_entry *ce = zend_fetch_ce_from_cache_slot(cache_slot, &type_tree->simple_type);
 		/* If we have a CE we check if it satisfies the type constraint,
 		 * otherwise it will check if a standard type satisfies it. */
 		if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
 			return true;
 		}
+		PROGRESS_CACHE_SLOT();
 	}
 
-	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
+	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(type_tree->simple_type);
 	if ((type_mask & MAY_BE_CALLABLE) &&
 		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
 		return 1;

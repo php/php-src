@@ -2924,7 +2924,7 @@ static int compare_simple_types(const zend_type a, const zend_type b) {
 	if (a_has_name && b_has_name) {
 		const zend_string *a_name = ZEND_TYPE_NAME(a);
 		const zend_string *b_name = ZEND_TYPE_NAME(b);
-		const int cmp = zend_string_equals_ci(a_name, b_name);
+		const int cmp = ZSTR_VAL(a_name) - ZSTR_VAL(b_name);
 		if (cmp != 0) {
 			return cmp;
 		}
@@ -3107,7 +3107,7 @@ ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
 
 	size_t deduped_count = 0;
 	for (size_t i = 0; i < num_children; i++) {
-		if (i == 0 || compare_type_nodes(&children[i], &children[i - 1]) != 0) {
+		if (i == 0 || children[i] != children[i - 1]) {
 			children[deduped_count++] = children[i];
 		}
 	}
@@ -3117,6 +3117,7 @@ ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
 	node->compound.num_types = deduped_count;
 	node->compound.types = pemalloc(sizeof(zend_type_node *) * deduped_count, 1);
 	memcpy(node->compound.types, children, sizeof(zend_type_node *) * deduped_count);
+	pefree(children, 1);
 
 	return intern_type_node(node);
 }
