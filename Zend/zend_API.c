@@ -2922,7 +2922,7 @@ static int compare_simple_types(const zend_type a, const zend_type b) {
 	if (a_has_name && b_has_name) {
 		const zend_string *a_name = ZEND_TYPE_NAME(a);
 		const zend_string *b_name = ZEND_TYPE_NAME(b);
-		const int cmp = ZSTR_VAL(a_name) == ZSTR_VAL(b_name);
+		const int cmp = zend_string_equals_ci(a_name, b_name);
 		if (cmp != 0) {
 			return cmp;
 		}
@@ -3021,7 +3021,7 @@ bool zend_type_node_equals(const zend_type_node *a, const zend_type_node *b) {
 		if (a_has_name) {
 			const zend_string *a_name = ZEND_TYPE_NAME(at);
 			const zend_string *b_name = ZEND_TYPE_NAME(bt);
-			if (!zend_string_equals(a_name, b_name)) {
+			if (!zend_string_equals_ci(a_name, b_name)) {
 				return false;
 			}
 		}
