@@ -314,6 +314,7 @@ struct _zend_mm_heap {
 			uint8_t poison_free_value;
 			uint8_t padding;
 			bool    check_freelists_on_shutdown;
+			bool    realloc_always_move;
 		} debug;
 	};
 #endif
@@ -2404,7 +2405,7 @@ static void *poison_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
 static void zend_mm_check_freelists(zend_mm_heap *heap)
 {
-	for (int bin_num = 0; bin_num < ZEND_MM_BINS; bin_num++) {
+	for (uint32_t bin_num = 0; bin_num < ZEND_MM_BINS; bin_num++) {
 		zend_mm_free_slot *slot = heap->free_slot[bin_num];
 		while (slot) {
 			slot = zend_mm_get_next_free_slot(heap, bin_num, slot);
@@ -3092,6 +3093,27 @@ static void* poison_realloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_L
 {
 	zend_mm_heap *heap = AG(mm_heap);
 
+	if (heap->debug.realloc_always_move) {
+		void *new = poison_malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		new = (char*)new - heap->debug.padding;
+
+		if (ptr) {
+			ptr = (char*)ptr - heap->debug.padding;
+			size_t oldsize = zend_mm_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+			size_t size = zend_mm_size(heap, new ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+
+#if ZEND_DEBUG
+			oldsize -= sizeof(zend_mm_debug_info);
+			size -= sizeof(zend_mm_debug_info);
+#endif
+
+			memcpy(new, ptr, MIN(oldsize, size));
+			poison_free((char*)ptr + heap->debug.padding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		}
+
+		return (char*)new + heap->debug.padding;
+	}
+
 	if (SIZE_MAX - heap->debug.padding * 2 < size) {
 		zend_mm_panic("Integer overflow in memory allocation");
 	}
@@ -3272,6 +3294,11 @@ static void poison_enable(zend_mm_heap *heap, char *parameters)
 				&& !memcmp(key, "check_freelists_on_shutdown", key_len)) {
 
 			heap->debug.check_freelists_on_shutdown = (bool) ZEND_STRTOUL(value, &tmp, 0);
+
+		} else if (key_len == strlen("realloc_always_move")
+				&& !memcmp(key, "realloc_always_move", key_len)) {
+
+			heap->debug.realloc_always_move = (bool) ZEND_STRTOUL(value, &tmp, 0);
 
 		} else {
 			fprintf(stderr, "Unknown ZEND_MM_DEBUG parameter: '%.*s'\n",
