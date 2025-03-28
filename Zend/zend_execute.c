@@ -1165,61 +1165,33 @@ static bool zend_check_intersection_type_from_cache_slot(zend_type_list *interse
 	return status;
 }
 
-static bool zend_type_node_matches(zend_type_node *node, zval *zv)
+static int zend_type_node_matches(const zend_type_node *node, zval *zv)
 {
 	switch (node->kind) {
 		case ZEND_TYPE_SIMPLE: {
-			zend_type type = node->simple_type;
-			uint32_t type_mask = ZEND_TYPE_FULL_MASK(type);
-
-			if ((type_mask & MAY_BE_NULL) && Z_TYPE_P(zv) == IS_NULL) {
-				return true;
-			}
-
-			if (ZEND_TYPE_HAS_NAME(type)) {
-				zend_class_entry *ce = zend_lookup_class(ZEND_TYPE_NAME(type));
-				if (ce && Z_TYPE_P(zv) == IS_OBJECT &&
-					instanceof_function(Z_OBJCE_P(zv), ce)) {
-					return true;
-					}
-				return false;
-			}
-
-			if ((type_mask & MAY_BE_CALLABLE) &&
-				zend_is_callable(zv, 0, NULL)) {
-				return true;
-				}
-
-			if ((type_mask & MAY_BE_STATIC) &&
-				zend_value_instanceof_static(zv)) {
-				return true;
-				}
-
-			// Scalar check
-			return zend_verify_scalar_type_hint(type_mask, zv,
-				ZEND_ARG_USES_STRICT_TYPES(), 0);
+			return 2;
 		}
 
 		case ZEND_TYPE_UNION: {
 			for (uint32_t i = 0; i < node->compound.num_types; i++) {
 				if (zend_type_node_matches(node->compound.types[i], zv)) {
-					return true;
+					return 1;
 				}
 			}
-			return false;
+			return 0;
 		}
 
 		case ZEND_TYPE_INTERSECTION: {
 			for (uint32_t i = 0; i < node->compound.num_types; i++) {
 				if (!zend_type_node_matches(node->compound.types[i], zv)) {
-					return false;
+					return 0;
 				}
 			}
-			return true;
+			return 1;
 		}
 
 		default:
-			return false;
+			return 0;
 	}
 }
 
@@ -1228,46 +1200,23 @@ static zend_always_inline bool zend_check_type_slow(
 		zend_type *type, zend_type_node *type_tree, zval *arg, zend_reference *ref, void **cache_slot,
 		bool is_return_type, bool is_internal)
 {
-	if (EXPECTED(type_tree != NULL)) {
-		return zend_type_node_matches(type_tree, arg);
-	}
-
-	uint32_t type_mask;
-	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
-		zend_class_entry *ce;
-		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
-			zend_type *list_type;
-			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
-				return zend_check_intersection_type_from_cache_slot(ZEND_TYPE_LIST(*type), Z_OBJCE_P(arg), &cache_slot);
-			} else {
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-					if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
-						if (zend_check_intersection_type_from_cache_slot(ZEND_TYPE_LIST(*list_type), Z_OBJCE_P(arg), &cache_slot)) {
-							return true;
-						}
-						/* The cache_slot is progressed in zend_check_intersection_type_from_cache_slot() */
-					} else {
-						ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-						ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-						/* Instance of a single type part of a union is sufficient to pass the type check */
-						if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
-							return true;
-						}
-						PROGRESS_CACHE_SLOT();
-					}
-				} ZEND_TYPE_LIST_FOREACH_END();
-			}
-		} else {
-			ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
-			/* If we have a CE we check if it satisfies the type constraint,
-			 * otherwise it will check if a standard type satisfies it. */
-			if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
-				return true;
-			}
+	if (EXPECTED(type_tree != NULL) && type_tree->kind != ZEND_TYPE_SIMPLE) {
+		const int result = zend_type_node_matches(type_tree, arg);
+		if (result < 2) {
+			return result;
 		}
 	}
 
-	type_mask = ZEND_TYPE_FULL_MASK(*type);
+	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		const zend_class_entry *ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
+		/* If we have a CE we check if it satisfies the type constraint,
+		 * otherwise it will check if a standard type satisfies it. */
+		if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
+			return true;
+		}
+	}
+
+	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) &&
 		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
 		return 1;
