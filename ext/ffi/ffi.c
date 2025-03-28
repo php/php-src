@@ -4150,7 +4150,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 		cdata->ptr = *(void**)ptr;
 	} else if (old_type->kind == ZEND_FFI_TYPE_ARRAY
 	 && type->kind == ZEND_FFI_TYPE_POINTER
-	 && zend_ffi_is_compatible_type(ZEND_FFI_TYPE(old_type->array.type), ZEND_FFI_TYPE(type->pointer.type))) {		cdata->ptr = &cdata->ptr_holder;
+	 && zend_ffi_is_compatible_type(ZEND_FFI_TYPE(old_type->array.type), ZEND_FFI_TYPE(type->pointer.type))) {
  		cdata->ptr = &cdata->ptr_holder;
  		cdata->ptr_holder = old_cdata->ptr;
 	} else if (old_type->kind == ZEND_FFI_TYPE_POINTER
