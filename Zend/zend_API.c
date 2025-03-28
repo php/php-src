@@ -3088,7 +3088,7 @@ ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
 		zend_type_node *child = zend_type_to_interned_tree(*subtype);
 
 		if (child->kind == kind) {
-			for (uint32_t i = 0; child->compound.num_types; i++) {
+			for (uint32_t i = 0; i < child->compound.num_types; i++) {
 				ADD_TO_TYPE_TREE(children, num_children, child->compound.types[i]);
 			}
 		} else {
