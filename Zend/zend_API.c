@@ -2907,28 +2907,28 @@ static HashTable *interned_type_tree = NULL;
 		list[count++] = value; \
 	} while (0)
 
-static int compare_simple_types(zend_type a, zend_type b) {
-	uint32_t a_mask = ZEND_TYPE_FULL_MASK(a);
-	uint32_t b_mask = ZEND_TYPE_FULL_MASK(b);
+static int compare_simple_types(const zend_type a, const zend_type b) {
+	const uint32_t a_mask = ZEND_TYPE_FULL_MASK(a);
+	const uint32_t b_mask = ZEND_TYPE_FULL_MASK(b);
 
 	if (a_mask != b_mask) {
 		return a_mask < b_mask ? -1 : 1;
 	}
 
-	bool a_has_name = ZEND_TYPE_HAS_NAME(a);
-	bool b_has_name = ZEND_TYPE_HAS_NAME(b);
+	const bool a_has_name = ZEND_TYPE_HAS_NAME(a);
+	const bool b_has_name = ZEND_TYPE_HAS_NAME(b);
 
 	if (a_has_name && b_has_name) {
-		zend_string *a_name = ZEND_TYPE_NAME(a);
-		zend_string *b_name = ZEND_TYPE_NAME(b);
-		int cmp = ZSTR_VAL(a_name) == ZSTR_VAL(b_name);
+		const zend_string *a_name = ZEND_TYPE_NAME(a);
+		const zend_string *b_name = ZEND_TYPE_NAME(b);
+		const int cmp = ZSTR_VAL(a_name) == ZSTR_VAL(b_name);
 		if (cmp != 0) {
 			return cmp;
 		}
 	}
 
-	bool a_nullable = ZEND_TYPE_ALLOW_NULL(a);
-	bool b_nullable = ZEND_TYPE_ALLOW_NULL(b);
+	const bool a_nullable = ZEND_TYPE_ALLOW_NULL(a);
+	const bool b_nullable = ZEND_TYPE_ALLOW_NULL(b);
 
 	if (a_nullable != b_nullable) {
 		return a_nullable ? 1 : -1;
@@ -2939,11 +2939,11 @@ static int compare_simple_types(zend_type a, zend_type b) {
 }
 
 static int compare_type_nodes(const void *a_, const void *b_) {
-	zend_type_node *a = *(zend_type_node **)a_;
-	zend_type_node *b = *(zend_type_node **)b_;
+	const zend_type_node *a = *(zend_type_node **)a_;
+	const zend_type_node *b = *(zend_type_node **)b_;
 
 	if (a->kind != b->kind) {
-		return a->kind - b->kind;
+		return (int)a->kind - (int)b->kind;
 	}
 
 	if (a->kind == ZEND_TYPE_SIMPLE) {
@@ -2964,7 +2964,7 @@ static int compare_type_nodes(const void *a_, const void *b_) {
 	return 0;
 }
 
-zend_ulong zend_type_node_hash(zend_type_node *node) {
+zend_ulong zend_type_node_hash(const zend_type_node *node) {
 	zend_ulong hash = 2166136261u; // FNV-1a offset basis
 
 	hash ^= (zend_ulong)node->kind;
@@ -2972,7 +2972,7 @@ zend_ulong zend_type_node_hash(zend_type_node *node) {
 
 	switch (node->kind) {
 		case ZEND_TYPE_SIMPLE: {
-			zend_type type = node->simple_type;
+			const zend_type type = node->simple_type;
 			hash ^= (zend_ulong)ZEND_TYPE_FULL_MASK(type);
 			hash *= 16777619;
 
@@ -2988,7 +2988,7 @@ zend_ulong zend_type_node_hash(zend_type_node *node) {
 		case ZEND_TYPE_UNION:
 		case ZEND_TYPE_INTERSECTION: {
 			for (uint32_t i = 0; i < node->compound.num_types; ++i) {
-				zend_ulong child_hash = zend_type_node_hash(node->compound.types[i]);
+				const zend_ulong child_hash = zend_type_node_hash(node->compound.types[i]);
 				hash ^= child_hash;
 				hash *= 16777619;
 			}
@@ -2999,27 +2999,27 @@ zend_ulong zend_type_node_hash(zend_type_node *node) {
 	return hash;
 }
 
-bool zend_type_node_equals(zend_type_node *a, zend_type_node *b) {
+bool zend_type_node_equals(const zend_type_node *a, const zend_type_node *b) {
 	if (a == b) return true;
 	if (a->kind != b->kind) return false;
 
 	if (a->kind == ZEND_TYPE_SIMPLE) {
-		zend_type at = a->simple_type;
-		zend_type bt = b->simple_type;
+		const zend_type at = a->simple_type;
+		const zend_type bt = b->simple_type;
 
 		if (ZEND_TYPE_FULL_MASK(at) != ZEND_TYPE_FULL_MASK(bt)) {
 			return false;
 		}
 
-		bool a_has_name = ZEND_TYPE_HAS_NAME(at);
-		bool b_has_name = ZEND_TYPE_HAS_NAME(bt);
+		const bool a_has_name = ZEND_TYPE_HAS_NAME(at);
+		const bool b_has_name = ZEND_TYPE_HAS_NAME(bt);
 		if (a_has_name != b_has_name) {
 			return false;
 		}
 
 		if (a_has_name) {
-			zend_string *a_name = ZEND_TYPE_NAME(at);
-			zend_string *b_name = ZEND_TYPE_NAME(bt);
+			const zend_string *a_name = ZEND_TYPE_NAME(at);
+			const zend_string *b_name = ZEND_TYPE_NAME(bt);
 			if (!zend_string_equals(a_name, b_name)) {
 				return false;
 			}
@@ -3042,9 +3042,8 @@ bool zend_type_node_equals(zend_type_node *a, zend_type_node *b) {
 	return true;
 }
 
-
 static zend_type_node *intern_type_node(zend_type_node *node) {
-	zend_ulong hash = zend_type_node_hash(node);
+	const zend_ulong hash = zend_type_node_hash(node);
 	zend_type_node *existing;
 
 	if (interned_type_tree == NULL) {
@@ -3054,6 +3053,7 @@ static zend_type_node *intern_type_node(zend_type_node *node) {
 
 	if ((existing = zend_hash_index_find_ptr(interned_type_tree, hash))) {
 		if (zend_type_node_equals(existing, node)) {
+			pefree(node, 1);
 			return existing; // reuse interned node
 		}
 	}
@@ -3062,8 +3062,7 @@ static zend_type_node *intern_type_node(zend_type_node *node) {
 	return node;
 }
 
-
-ZEND_API zend_type_node *zend_type_to_interned_tree(zend_type type) {
+ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
 	if (type.type_mask == 0) {
 		return NULL;
 	}
@@ -3076,7 +3075,7 @@ ZEND_API zend_type_node *zend_type_to_interned_tree(zend_type type) {
 	}
 
 	zend_type_list *list = ZEND_TYPE_LIST(type);
-	zend_type_node_kind kind = ZEND_TYPE_IS_INTERSECTION(type) ?
+	const zend_type_node_kind kind = ZEND_TYPE_IS_INTERSECTION(type) ?
 		ZEND_TYPE_INTERSECTION : ZEND_TYPE_UNION;
 
 	zend_type_node **children = NULL;
