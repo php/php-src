@@ -2926,22 +2926,11 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	zend_function   *func;
 	zend_ffi_type   *type;
 
-	if (ZSTR_LEN(name) == sizeof("new") -1
-	 && (ZSTR_VAL(name)[0] == 'n' || ZSTR_VAL(name)[0] == 'N')
-	 && (ZSTR_VAL(name)[1] == 'e' || ZSTR_VAL(name)[1] == 'E')
-	 && (ZSTR_VAL(name)[2] == 'w' || ZSTR_VAL(name)[2] == 'W')) {
+	if (zend_string_equals_literal_ci(name, "new")) {
 		return (zend_function*)&zend_ffi_new_fn;
-	} else if (ZSTR_LEN(name) == sizeof("cast") -1
-	 && (ZSTR_VAL(name)[0] == 'c' || ZSTR_VAL(name)[0] == 'C')
-	 && (ZSTR_VAL(name)[1] == 'a' || ZSTR_VAL(name)[1] == 'A')
-	 && (ZSTR_VAL(name)[2] == 's' || ZSTR_VAL(name)[2] == 'S')
-	 && (ZSTR_VAL(name)[3] == 't' || ZSTR_VAL(name)[3] == 'T')) {
+	} else if (zend_string_equals_literal_ci(name, "cast")) {
 		return (zend_function*)&zend_ffi_cast_fn;
-	} else if (ZSTR_LEN(name) == sizeof("type") -1
-	 && (ZSTR_VAL(name)[0] == 't' || ZSTR_VAL(name)[0] == 'T')
-	 && (ZSTR_VAL(name)[1] == 'y' || ZSTR_VAL(name)[1] == 'Y')
-	 && (ZSTR_VAL(name)[2] == 'p' || ZSTR_VAL(name)[2] == 'P')
-	 && (ZSTR_VAL(name)[3] == 'e' || ZSTR_VAL(name)[3] == 'E')) {
+	} else if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_TYPE))) {
 		return (zend_function*)&zend_ffi_type_fn;
 	}
 
