@@ -929,7 +929,7 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 	if (callback_data->fcc.function_handler->common.fn_flags & ZEND_ACC_CLOSURE) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(callback_data->fcc.function_handler));
 	}
-	for (int i = 0; i < callback_data->arg_count; ++i) {
+	for (uint32_t i = 0; i < callback_data->arg_count; ++i) {
 		if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
 			efree(callback_data->arg_types[i]);
 		}
@@ -974,7 +974,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	}
 
 	if (callback_data->arg_count) {
-		int n = 0;
+		uint32_t n = 0;
 
 		for (n = 0; n < callback_data->arg_count; n++) {
 			zval_ptr_dtor(&fci.params[n]);
