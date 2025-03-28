@@ -619,27 +619,29 @@ static bool pgsql_handle_rollback(pdo_dbh_t *dbh)
 
 static bool _pdo_pgsql_send_copy_data(pdo_pgsql_db_handle *H, zval *line) {
 	size_t query_len;
-	char *query;
+	zend_string *query;
 
 	if (!try_convert_to_string(line)) {
 		return false;
 	}
 
 	query_len = Z_STRLEN_P(line);
-	query = emalloc(query_len + 2); /* room for \n\0 */
-	memcpy(query, Z_STRVAL_P(line), query_len);
+	query = zend_string_alloc(query_len + 2, false); /* room for \n\0 */
+	memcpy(ZSTR_VAL(query), Z_STRVAL_P(line), query_len + 1);
+	ZSTR_LEN(query) = query_len;
 
-	if (query[query_len - 1] != '\n') {
-		query[query_len++] = '\n';
+	if (query_len > 0 && ZSTR_VAL(query)[query_len - 1] != '\n') {
+		ZSTR_VAL(query)[query_len] = '\n';
+		ZSTR_VAL(query)[query_len + 1] = '\0';
+		ZSTR_LEN(query) ++;
 	}
-	query[query_len] = '\0';
 
-	if (PQputCopyData(H->server, query, query_len) != 1) {
-		efree(query);
+	if (PQputCopyData(H->server, ZSTR_VAL(query), ZSTR_LEN(query)) != 1) {
+		zend_string_release_ex(query, false);
 		return false;
 	}
 
-	efree(query);
+	zend_string_release_ex(query, false);
 	return true;
 }
 
