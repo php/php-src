@@ -1171,7 +1171,7 @@ static bool zend_check_type_slow(
 		}
 	}
 
-	if (ZEND_TYPE_IS_COMPLEX(type_tree->simple_type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+	if (type_tree != NULL && ZEND_TYPE_IS_COMPLEX(type_tree->simple_type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		const zend_class_entry *ce = zend_fetch_ce_from_cache_slot(cache_slot, &type_tree->simple_type);
 		/* If we have a CE we check if it satisfies the type constraint,
 		 * otherwise it will check if a standard type satisfies it. */
@@ -1181,7 +1181,7 @@ static bool zend_check_type_slow(
 		PROGRESS_CACHE_SLOT();
 	}
 
-	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(type_tree->simple_type);
+	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) &&
 		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
 		return 1;
