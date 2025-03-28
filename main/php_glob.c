@@ -55,6 +55,8 @@
  *	Number of matches in the current invocation of glob.
  */
 
+#include "php_glob.h"
+
 #if defined(HAVE_GLOB) && defined(PHP_SYSTEM_GLOB)
 #else
 
@@ -98,7 +100,6 @@
 #include <unistd.h>
 #endif
 #include <errno.h>
-#include "php_glob.h"
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
