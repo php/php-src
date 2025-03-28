@@ -6767,7 +6767,6 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, bool incomplete) /* {{{ */
 {
 	zend_ffi_tag *tag;
-	zend_ffi_type *type;
 
 	if (!FFI_G(tags)) {
 		FFI_G(tags) = pemalloc(sizeof(HashTable), FFI_G(persistent));
@@ -6810,8 +6809,10 @@ void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, 
 			type->attr &= ~ZEND_FFI_ATTR_INCOMPLETE_TAG;
 		}
 	} else {
-		zend_ffi_tag *tag = pemalloc(sizeof(zend_ffi_tag), FFI_G(persistent));
 		zend_string *tag_name = zend_string_init(name, name_len, FFI_G(persistent));
+		zend_ffi_type *type;
+
+		tag = pemalloc(sizeof(zend_ffi_tag), FFI_G(persistent));
 
 		if (dcl->flags & ZEND_FFI_DCL_STRUCT) {
 			tag->kind = ZEND_FFI_TAG_STRUCT;
