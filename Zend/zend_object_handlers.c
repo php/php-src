@@ -2451,17 +2451,9 @@ ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **c
 		return FAILURE;
 	}
 	*fptr_ptr = Z_FUNC_P(func);
-
 	*ce_ptr = ce;
-	if ((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC) {
-		if (obj_ptr) {
-			*obj_ptr = NULL;
-		}
-	} else {
-		if (obj_ptr) {
-			*obj_ptr = obj;
-		}
-	}
+	*obj_ptr = obj;
+
 	return SUCCESS;
 }
 /* }}} */
