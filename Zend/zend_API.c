@@ -2906,6 +2906,7 @@ ZEND_API void zend_type_free_interned_trees(void) {
 		pefree(tree, 1);
 	} ZEND_HASH_FOREACH_END();
 	pefree(interned_type_tree, 1);
+	interned_type_tree = NULL;
 }
 
 static int compare_simple_types(const zend_type a, const zend_type b) {
