@@ -4803,6 +4803,7 @@ static zend_result accel_finish_startup_preload(bool in_child)
 #endif
 		php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
 		EG(class_table) = NULL;
+		EG(type_trees) = NULL;
 		EG(function_table) = NULL;
 		PG(report_memleaks) = orig_report_memleaks;
 #ifdef ZTS

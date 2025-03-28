@@ -2898,18 +2898,16 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, z
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arg_info_toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-static HashTable *interned_type_tree = NULL;
-
 ZEND_API void zend_type_free_interned_trees(void) {
 	zend_type_node *tree = NULL;
-	ZEND_HASH_FOREACH_PTR(interned_type_tree, tree) {
+	ZEND_HASH_FOREACH_PTR(CG(type_trees), tree) {
 		if (tree->kind != ZEND_TYPE_SIMPLE) {
 			pefree(tree->compound.types, 1);
 		}
 		pefree(tree, 1);
 	} ZEND_HASH_FOREACH_END();
-	pefree(interned_type_tree, 1);
-	interned_type_tree = NULL;
+	pefree(CG(type_trees), 1);
+	CG(type_trees) = NULL;
 }
 
 static int compare_simple_types(const zend_type a, const zend_type b) {
@@ -3051,12 +3049,12 @@ static zend_type_node *intern_type_node(zend_type_node *node) {
 	const zend_ulong hash = zend_type_node_hash(node);
 	zend_type_node *existing;
 
-	if (interned_type_tree == NULL) {
-		interned_type_tree = pemalloc(sizeof(HashTable), 1);
-		zend_hash_init(interned_type_tree, 64, NULL, NULL, 1);
+	if (CG(type_trees) == NULL) {
+		CG(type_trees) = pemalloc(sizeof(HashTable), 1);
+		zend_hash_init(CG(type_trees), 64, NULL, NULL, 1);
 	}
 
-	if ((existing = zend_hash_index_find_ptr(interned_type_tree, hash))) {
+	if ((existing = zend_hash_index_find_ptr(CG(type_trees), hash))) {
 		if (zend_type_node_equals(existing, node)) {
 			if (node->kind != ZEND_TYPE_SIMPLE) {
 				pefree(node->compound.types, 1);
@@ -3066,7 +3064,7 @@ static zend_type_node *intern_type_node(zend_type_node *node) {
 		}
 	}
 
-	zend_hash_index_add_new_ptr(interned_type_tree, hash, node);
+	zend_hash_index_add_new_ptr(CG(type_trees), hash, node);
 	return node;
 }
 
