@@ -2336,7 +2336,7 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 ZEND_METHOD(ReflectionGenerator, getTrace)
 {
 	zend_long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
-	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
 	zend_generator *root_generator;
 	zend_execute_data *ex_backup = EG(current_execute_data);
 	zend_execute_data *ex = generator->execute_data;
@@ -2371,7 +2371,7 @@ ZEND_METHOD(ReflectionGenerator, getTrace)
 /* {{{ */
 ZEND_METHOD(ReflectionGenerator, getExecutingLine)
 {
-	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
 	zend_execute_data *ex = generator->execute_data;
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2385,7 +2385,7 @@ ZEND_METHOD(ReflectionGenerator, getExecutingLine)
 /* {{{ */
 ZEND_METHOD(ReflectionGenerator, getExecutingFile)
 {
-	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
 	zend_execute_data *ex = generator->execute_data;
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2399,7 +2399,7 @@ ZEND_METHOD(ReflectionGenerator, getExecutingFile)
 /* {{{ */
 ZEND_METHOD(ReflectionGenerator, getFunction)
 {
-	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
 	zend_function *func = generator->func;
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2419,7 +2419,7 @@ ZEND_METHOD(ReflectionGenerator, getFunction)
 /* {{{ */
 ZEND_METHOD(ReflectionGenerator, getThis)
 {
-	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
 	zend_execute_data *ex = generator->execute_data;
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2437,7 +2437,7 @@ ZEND_METHOD(ReflectionGenerator, getThis)
 /* {{{ */
 ZEND_METHOD(ReflectionGenerator, getExecutingGenerator)
 {
-	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
 	zend_execute_data *ex = generator->execute_data;
 	zend_generator *current;
 
@@ -2452,7 +2452,7 @@ ZEND_METHOD(ReflectionGenerator, getExecutingGenerator)
 
 ZEND_METHOD(ReflectionGenerator, isClosed)
 {
-	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
 	zend_execute_data *ex = generator->execute_data;
 
 	ZEND_PARSE_PARAMETERS_NONE();
