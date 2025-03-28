@@ -421,6 +421,7 @@ PHP 8.5 UPGRADE NOTES
   . The clone language construct is now a function and supports reassigning
     (readonly) properties during cloning via the new $withProperties parameter.
     RFC: https://wiki.php.net/rfc/clone_with_v2
+  . Added Closure::getCurrent() to receive currently executing closure.
 
 - Curl:
   . curl_multi_get_handles() allows retrieving all CurlHandles current
