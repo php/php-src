@@ -3053,8 +3053,6 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	zend_string *lib = NULL;
 	zend_ffi *ffi = NULL;
 	DL_HANDLE handle = NULL;
-	char *err;
-	void *addr;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(0, 2)
@@ -3066,7 +3064,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	if (lib) {
 		handle = DL_LOAD(ZSTR_VAL(lib));
 		if (!handle) {
-			err = GET_DL_ERROR();
+			char *err = GET_DL_ERROR();
 #ifdef PHP_WIN32
 			if (err && err[0]) {
 				zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s' (%s)", ZSTR_VAL(lib), err);
@@ -3114,6 +3112,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 			zend_ffi_symbol *sym;
 
 			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(FFI_G(symbols), name, sym) {
+				void *addr;
 				if (sym->kind == ZEND_FFI_SYM_VAR) {
 					addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(name));
 					if (!addr) {
@@ -3333,7 +3332,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 {
 	struct stat buf;
 	int fd;
-	char *code, *code_pos, *scope_name, *lib, *err;
+	char *code, *code_pos, *scope_name, *lib;
 	size_t code_size, scope_name_len;
 	zend_ffi *ffi;
 	DL_HANDLE handle = NULL;
@@ -3341,7 +3340,6 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 	zend_string *name;
 	zend_ffi_symbol *sym;
 	zend_ffi_tag *tag;
-	void *addr;
 
 	if (stat(filename, &buf) != 0) {
 		if (preload) {
@@ -3414,7 +3412,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 			if (preload) {
 				zend_error(E_WARNING, "FFI: Failed pre-loading '%s'", lib);
 			} else {
-				err = GET_DL_ERROR();
+				char *err = GET_DL_ERROR();
 #ifdef PHP_WIN32
 				if (err && err[0]) {
 					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s' (%s)", lib, err);
@@ -3448,6 +3446,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 
 	if (FFI_G(symbols)) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(FFI_G(symbols), name, sym) {
+			void *addr;
 			if (sym->kind == ZEND_FFI_SYM_VAR) {
 				addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(name));
 				if (!addr) {
@@ -5941,15 +5940,13 @@ void zend_ffi_resolve_typedef(const char *name, size_t name_len, zend_ffi_dcl *d
 
 void zend_ffi_resolve_const(const char *name, size_t name_len, zend_ffi_val *val) /* {{{ */
 {
-	zend_ffi_symbol *sym;
-
 	if (UNEXPECTED(FFI_G(attribute_parsing))) {
 		val->kind = ZEND_FFI_VAL_NAME;
 		val->str = name;
 		val->len = name_len;
 		return;
 	} else if (FFI_G(symbols)) {
-		sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
+		zend_ffi_symbol *sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
 		if (sym && sym->kind == ZEND_FFI_SYM_CONST) {
 			val->i64 = sym->value;
 			switch (sym->type->kind) {
