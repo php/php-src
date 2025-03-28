@@ -2900,12 +2900,13 @@ ZEND_END_ARG_INFO()
 
 static HashTable *interned_type_tree = NULL;
 
-// todo: move to zend_types.h
-#define ADD_TO_TREE(list, count, value) \
-	do { \
-		list = erealloc(list, sizeof(zend_type) * (count + 1)); \
-		list[count++] = value; \
-	} while (0)
+ZEND_API void zend_type_free_interned_trees(void) {
+	zend_type_node *tree = NULL;
+	ZEND_HASH_FOREACH_PTR(interned_type_tree, tree) {
+		pefree(tree, 1);
+	} ZEND_HASH_FOREACH_END();
+	pefree(interned_type_tree, 1);
+}
 
 static int compare_simple_types(const zend_type a, const zend_type b) {
 	const uint32_t a_mask = ZEND_TYPE_FULL_MASK(a);
@@ -3088,10 +3089,10 @@ ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
 
 		if (child->kind == kind) {
 			for (uint32_t i = 0; child->compound.num_types; i++) {
-				ADD_TO_TREE(children, num_children, child->compound.types[i]);
+				ADD_TO_TYPE_TREE(children, num_children, child->compound.types[i]);
 			}
 		} else {
-			ADD_TO_TREE(children, num_children, child);
+			ADD_TO_TYPE_TREE(children, num_children, child);
 		}
 	} ZEND_TYPE_LIST_FOREACH_END();
 
