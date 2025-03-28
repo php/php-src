@@ -2906,6 +2906,7 @@ ZEND_API void zend_type_free_interned_trees(void) {
 		}
 		pefree(tree, 1);
 	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(CG(type_trees));
 	pefree(CG(type_trees), 1);
 	CG(type_trees) = NULL;
 }
