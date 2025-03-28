@@ -35,16 +35,82 @@
  *	@(#)glob.h	8.1 (Berkeley) 6/2/93
  */
 
-#if defined(HAVE_GLOB) && defined(PHP_SYSTEM_GLOB)
-#include <glob.h>
-
-#define php_glob_t glob_t
-#define php_glob glob
-#define php_globfree
+#ifdef PHP_WIN32
+#include "config.w32.h"
 #else
+#include <php_config.h>
+#endif
 
 #ifndef _PHP_GLOB_H_
 #define	_PHP_GLOB_H_
+
+#if defined(HAVE_GLOB) && defined(PHP_SYSTEM_GLOB)
+#include <glob.h>
+
+#ifdef GLOB_APPEND
+#define PHP_GLOB_APPEND GLOB_APPEND
+#endif
+#ifdef GLOB_DOOFFS
+#define PHP_GLOB_DOOFFS GLOB_DOOFFS
+#endif
+#ifdef GLOB_ERR
+#define PHP_GLOB_ERR GLOB_ERR
+#endif
+#ifdef GLOB_MARK
+#define PHP_GLOB_MARK GLOB_MARK
+#endif
+#ifdef GLOB_NOCHECK
+#define PHP_GLOB_NOCHECK GLOB_NOCHECK
+#endif
+#ifdef GLOB_NOSORT
+#define PHP_GLOB_NOSORT GLOB_NOSORT
+#endif
+#ifdef GLOB_NOESCAPE
+#define PHP_GLOB_NOESCAPE GLOB_NOESCAPE
+#endif
+#ifdef GLOB_NOSPACE
+#define PHP_GLOB_NOSPACE GLOB_NOSPACE
+#endif
+#ifdef GLOB_ABORTED
+#define PHP_GLOB_ABORTED GLOB_ABORTED
+#endif
+#ifdef GLOB_NOMATCH
+#define PHP_GLOB_NOMATCH GLOB_NOMATCH
+#endif
+#ifdef GLOB_NOSYS
+#define PHP_GLOB_NOSYS GLOB_NOSYS
+#endif
+#ifdef GLOB_ALTDIRFUNC
+#define PHP_GLOB_ALTDIRFUNC GLOB_ALTDIRFUNC
+#endif
+#ifdef GLOB_BRACE
+#define PHP_GLOB_BRACE GLOB_BRACE
+#endif
+#ifdef GLOB_MAGCHAR
+#define PHP_GLOB_MAGCHAR GLOB_MAGCHAR
+#endif
+#ifdef GLOB_NOMAGIC
+#define PHP_GLOB_NOMAGIC GLOB_NOMAGIC
+#endif
+#ifdef GLOB_QUOTE
+#define PHP_GLOB_QUOTE GLOB_QUOTE
+#endif
+#ifdef GLOB_TILDE
+#define PHP_GLOB_TILDE GLOB_TILDE
+#endif
+#ifdef GLOB_LIMIT
+#define PHP_GLOB_LIMIT GLOB_LIMIT
+#endif
+#ifdef GLOB_KEEPSTAT
+#define PHP_GLOB_KEEPSTAT GLOB_KEEPSTAT
+#endif
+
+#define php_glob_t glob_t
+#define php_glob glob
+#define php_globfree globfree
+#else
+
+#include "php.h"
 
 #ifndef PHP_WIN32
 # include <sys/cdefs.h>
@@ -102,7 +168,7 @@ PHPAPI int	php_glob(const char *__restrict, int, int (*)(const char *, int),
 PHPAPI void	php_globfree(php_glob_t *);
 END_EXTERN_C()
 
-#endif /* !_GLOB_H_ */
+#endif /* defined(HAVE_GLOB) */
 
 /* These were copied from dir and zip */
 
@@ -115,4 +181,4 @@ END_EXTERN_C()
 
 #define PHP_GLOB_AVAILABLE_FLAGS (0 | PHP_GLOB_BRACE | PHP_GLOB_MARK | PHP_GLOB_NOSORT | PHP_GLOB_NOCHECK | PHP_GLOB_NOESCAPE | PHP_GLOB_ERR | PHP_GLOB_ONLYDIR)
 
-#endif /* defined(HAVE_GLOB) */
+#endif /* !_GLOB_H_ */
