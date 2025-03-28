@@ -314,7 +314,6 @@ struct _zend_mm_heap {
 			uint8_t poison_free_value;
 			uint8_t padding;
 			bool    check_freelists_on_shutdown;
-			bool    realloc_always_move;
 		} debug;
 	};
 #endif
@@ -3093,102 +3092,24 @@ static void* poison_realloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_L
 {
 	zend_mm_heap *heap = AG(mm_heap);
 
-	if (heap->debug.realloc_always_move) {
-		void *new = poison_malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		new = (char*)new - heap->debug.padding;
+	void *new = poison_malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	new = (char*)new - heap->debug.padding;
 
-		if (ptr) {
-			ptr = (char*)ptr - heap->debug.padding;
-			size_t oldsize = zend_mm_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-			size_t size = zend_mm_size(heap, new ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-
-#if ZEND_DEBUG
-			oldsize -= sizeof(zend_mm_debug_info);
-			size -= sizeof(zend_mm_debug_info);
-#endif
-
-			memcpy(new, ptr, MIN(oldsize, size));
-			poison_free((char*)ptr + heap->debug.padding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		}
-
-		return (char*)new + heap->debug.padding;
-	}
-
-	if (SIZE_MAX - heap->debug.padding * 2 < size) {
-		zend_mm_panic("Integer overflow in memory allocation");
-	}
-	size += heap->debug.padding * 2;
-
-	size_t oldsize;
 	if (ptr) {
 		ptr = (char*)ptr - heap->debug.padding;
-		oldsize = zend_mm_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		size_t oldsize = zend_mm_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		size_t size = zend_mm_size(heap, new ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 
-		if (oldsize > size) {
-			if (heap->debug.poison_free) {
-				memset((char*)ptr + size, heap->debug.poison_free_value, oldsize - size);
-			}
-		}
-	} else {
-		oldsize = 0;
+#if ZEND_DEBUG
+		oldsize -= sizeof(zend_mm_debug_info);
+		size -= sizeof(zend_mm_debug_info);
+#endif
+
+		memcpy(new, ptr, MIN(oldsize, size));
+		poison_free((char*)ptr + heap->debug.padding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 
-	void *old_ptr = ptr;
-	ptr = zend_mm_realloc_heap(heap, ptr, size, 0, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-
-	if (EXPECTED(ptr)) {
-		size = zend_mm_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		if (old_ptr != ptr) {
-			if (old_ptr) {
-				/* old ptr was freed */
-				if (heap->debug.poison_free && oldsize <= ZEND_MM_MAX_SMALL_SIZE) {
-#if ZEND_DEBUG
-					size_t len = oldsize - sizeof(zend_mm_free_slot*) - sizeof(zend_mm_debug_info);
-#else
-					size_t len = oldsize - sizeof(zend_mm_free_slot*) * 2;
-#endif
-					memset((char*)old_ptr + sizeof(zend_mm_free_slot*), heap->debug.poison_free_value, len);
-				}
-			}
-			/* ptr is a new allocation */
-			if (heap->debug.poison_alloc) {
-				if (oldsize == 0) {
-#if ZEND_DEBUG
-					memset(ptr, heap->debug.poison_alloc_value, size - sizeof(zend_mm_debug_info));
-#else
-					memset(ptr, heap->debug.poison_alloc_value, size);
-#endif
-				/* old content was copied to ptr, don't override it */
-				} else if (size > oldsize) {
-#if ZEND_DEBUG
-					memset((char*)ptr + oldsize - sizeof(zend_mm_debug_info), heap->debug.poison_alloc_value, size - oldsize);
-#else
-					memset((char*)ptr + oldsize, heap->debug.poison_alloc_value, size - oldsize);
-#endif
-				}
-			}
-		} else if (size > oldsize) {
-			if (heap->debug.poison_alloc) {
-#if ZEND_DEBUG
-				memset((char*)ptr + oldsize - sizeof(zend_mm_debug_info), heap->debug.poison_alloc_value, size - oldsize);
-#else
-				memset((char*)ptr + oldsize, heap->debug.poison_alloc_value, size - oldsize);
-#endif
-			}
-		} else if (size < oldsize) {
-			if (heap->debug.poison_free) {
-#if ZEND_DEBUG
-				memset((char*)ptr + size - sizeof(zend_mm_debug_info), heap->debug.poison_free_value, oldsize - size);
-#else
-				memset((char*)ptr + size, heap->debug.poison_free_value, oldsize - size);
-#endif
-			}
-		}
-
-		ptr = (char*)ptr + heap->debug.padding;
-	}
-
-	return ptr;
+	return (char*)new + heap->debug.padding;
 }
 
 static size_t poison_gc(void)
@@ -3294,11 +3215,6 @@ static void poison_enable(zend_mm_heap *heap, char *parameters)
 				&& !memcmp(key, "check_freelists_on_shutdown", key_len)) {
 
 			heap->debug.check_freelists_on_shutdown = (bool) ZEND_STRTOUL(value, &tmp, 0);
-
-		} else if (key_len == strlen("realloc_always_move")
-				&& !memcmp(key, "realloc_always_move", key_len)) {
-
-			heap->debug.realloc_always_move = (bool) ZEND_STRTOUL(value, &tmp, 0);
 
 		} else {
 			fprintf(stderr, "Unknown ZEND_MM_DEBUG parameter: '%.*s'\n",
