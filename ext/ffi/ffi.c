@@ -6436,7 +6436,7 @@ static zend_result zend_ffi_validate_array_element_type(zend_ffi_type *type) /* 
 
 void zend_ffi_make_array_type(zend_ffi_dcl *dcl, zend_ffi_val *len) /* {{{ */
 {
-	int length = 0;
+	int64_t length = 0;
 	zend_ffi_type *element_type;
 	zend_ffi_type *type;
 
