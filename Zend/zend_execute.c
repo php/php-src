@@ -1140,31 +1140,6 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 	return ce;
 }
 
-static bool zend_check_intersection_type_from_cache_slot(zend_type_list *intersection_type_list,
-	zend_class_entry *arg_ce, void ***cache_slot_ptr)
-{
-	void **cache_slot = *cache_slot_ptr;
-	zend_class_entry *ce;
-	zend_type *list_type;
-	bool status = true;
-	ZEND_TYPE_LIST_FOREACH(intersection_type_list, list_type) {
-		/* Only check classes if the type might be valid */
-		if (status) {
-			ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-			/* If type is not an instance of one of the types taking part in the
-			 * intersection it cannot be a valid instance of the whole intersection type. */
-			if (!ce || !instanceof_function(arg_ce, ce)) {
-				status = false;
-			}
-		}
-		PROGRESS_CACHE_SLOT();
-	} ZEND_TYPE_LIST_FOREACH_END();
-	if (HAVE_CACHE_SLOT) {
-		*cache_slot_ptr = cache_slot;
-	}
-	return status;
-}
-
 static int zend_type_node_matches(const zend_type_node *node, zval *zv)
 {
 	switch (node->kind) {
