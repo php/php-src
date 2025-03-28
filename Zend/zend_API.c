@@ -2903,6 +2903,9 @@ static HashTable *interned_type_tree = NULL;
 ZEND_API void zend_type_free_interned_trees(void) {
 	zend_type_node *tree = NULL;
 	ZEND_HASH_FOREACH_PTR(interned_type_tree, tree) {
+		if (tree->kind != ZEND_TYPE_SIMPLE) {
+			pefree(tree->compound.types, 1);
+		}
 		pefree(tree, 1);
 	} ZEND_HASH_FOREACH_END();
 	pefree(interned_type_tree, 1);
@@ -3055,6 +3058,9 @@ static zend_type_node *intern_type_node(zend_type_node *node) {
 
 	if ((existing = zend_hash_index_find_ptr(interned_type_tree, hash))) {
 		if (zend_type_node_equals(existing, node)) {
+			if (node->kind != ZEND_TYPE_SIMPLE) {
+				pefree(node->compound.types, 1);
+			}
 			pefree(node, 1);
 			return existing; // reuse interned node
 		}
@@ -3085,15 +3091,17 @@ ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
 
 	zend_type *subtype;
 
+	children = pemalloc(list->num_types * sizeof(zend_type_node *), 1);
+
 	ZEND_TYPE_LIST_FOREACH(list, subtype) {
 		zend_type_node *child = zend_type_to_interned_tree(*subtype);
 
 		if (child->kind == kind) {
 			for (uint32_t i = 0; i < child->compound.num_types; i++) {
-				ADD_TO_TYPE_TREE(children, num_children, child->compound.types[i]);
+				children[num_children++] = child->compound.types[i];
 			}
 		} else {
-			ADD_TO_TYPE_TREE(children, num_children, child);
+			children[num_children++] = child;
 		}
 	} ZEND_TYPE_LIST_FOREACH_END();
 

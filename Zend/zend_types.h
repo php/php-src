@@ -814,13 +814,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_TYPE_REFCOUNTED			(1<<0)
 #define IS_TYPE_COLLECTABLE			(1<<1)
 
-#define ADD_TO_TYPE_TREE(list, count, value) \
-do { \
-	list = erealloc(list, sizeof(zend_type) * (count + 1)); \
-	list[count++] = value; \
-} while (0)
-
-
 #if 1
 /* This optimized version assumes that we have a single "type_flag" */
 /* IS_TYPE_COLLECTABLE may be used only with IS_TYPE_REFCOUNTED */
