@@ -6,7 +6,7 @@ gd
 <?php
 $img = imagecreatetruecolor(10, 10);
 
-$arr = array("x" => 2147483647, "y" => 2147483647, "width" => 10, "height" => 10);
+$arr = ["x" => 2147483647, "y" => 2147483647, "width" => 10, "height" => 10];
 
 try {
 	imagecrop($img, $arr);
@@ -14,7 +14,7 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 
-$arr = array("x" => -2147483648, "y" => 0, "width" => -10, "height" => 10);
+$arr = ["x" => -2147483648, "y" => 0, "width" => -10, "height" => 10];
 
 try {
 	imagecrop($img, $arr);
@@ -22,7 +22,7 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 
-$arr = array("x" => 1, "y" => 2147483647, "width" => 10, "height" => 10);
+$arr = ["x" => 1, "y" => 2147483647, "width" => 10, "height" => 10];
 
 try {
 	imagecrop($img, $arr);
@@ -30,7 +30,7 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 
-$arr = array("x" => 1, "y" => -2147483648, "width" => 10, "height" => -10);
+$arr = ["x" => 1, "y" => -2147483648, "width" => 10, "height" => -10];
 
 try {
 	imagecrop($img, $arr);
