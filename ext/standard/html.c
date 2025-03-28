@@ -817,7 +817,7 @@ static void traverse_for_entities(
 	const enum entity_charset charset)
 {
 	const char *current_ptr = ZSTR_VAL(input);
-	const char *input_end   = current_ptr + input->len; /* terminator address */
+	const char *input_end   = current_ptr + ZSTR_LEN(input); /* terminator address */
 	char *output_ptr		= ZSTR_VAL(output);
 	const int doctype	   = flags & ENT_HTML_DOC_TYPE_MASK;
 
