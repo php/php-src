@@ -4180,9 +4180,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
  * on the zend_execute_data, and when the executor leaves the function, the
  * args will be freed in zend_leave_helper.
  */
-static zend_never_inline void zend_copy_extra_args(EXECUTE_DATA_D)
+static zend_never_inline void zend_copy_extra_args(const zend_op_array *op_array EXECUTE_DATA_DC)
 {
-	zend_op_array *op_array = &EX(func)->op_array;
 	uint32_t first_extra_arg = op_array->num_args;
 	uint32_t num_args = EX_NUM_ARGS();
 	zval *src;
@@ -4257,7 +4256,7 @@ static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array,
 	num_args = EX_NUM_ARGS();
 	if (UNEXPECTED(num_args > first_extra_arg)) {
 		if (!may_be_trampoline || EXPECTED(!(op_array->fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
-			zend_copy_extra_args(EXECUTE_DATA_C);
+			zend_copy_extra_args(op_array EXECUTE_DATA_CC);
 		}
 	} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
