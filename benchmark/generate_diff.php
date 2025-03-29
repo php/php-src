@@ -73,7 +73,11 @@ function find_benchmarked_commit_hash(string $repo, string $commitHash): ?string
         if (file_exists($summaryFile)) {
             break;
         }
-        $commitHash = trim(runCommand(['git', 'rev-parse', $commitHash . '^'], dirname(__DIR__))->stdout);
+        $commitHash = trim(runCommand(
+            ['git', 'rev-parse', $commitHash . '^'],
+            dirname(__DIR__),
+            printCommand: false,
+        )->stdout);
     }
 
     return $commitHash;
