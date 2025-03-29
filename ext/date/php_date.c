@@ -4264,6 +4264,7 @@ PHP_FUNCTION(timezone_transitions_get)
 	uint64_t             begin = 0;
 	bool                 found;
 	zend_long            timestamp_begin = ZEND_LONG_MIN, timestamp_end = INT32_MAX;
+	zend_long            timestamp_added_last = ZEND_LONG_MIN;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
 		RETURN_THROWS();
@@ -4281,34 +4282,44 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[0].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx]); \
-		add_next_index_zval(return_value, &element);
+		add_next_index_zval(return_value, &element); \
+		timestamp_added_last = timestamp_begin;
 
 #define add(i,ts) \
-		array_init(&element); \
-		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
-		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
-		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
-		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]); \
-		add_next_index_zval(return_value, &element);
+		if (timestamp_added_last != ts) { \
+			array_init(&element); \
+			add_assoc_long(&element, "ts",     ts); \
+			add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
+			add_assoc_long(&element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
+			add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
+			add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]); \
+			add_next_index_zval(return_value, &element); \
+			timestamp_added_last = ts; \
+		}
 
 #define add_by_index(i,ts) \
-		array_init(&element); \
-		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
-		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[i].offset); \
-		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[i].isdst); \
-		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
-		add_next_index_zval(return_value, &element);
+		if (timestamp_added_last != ts) { \
+			array_init(&element); \
+			add_assoc_long(&element, "ts",     ts); \
+			add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
+			add_assoc_long(&element, "offset", tzobj->tzi.tz->type[i].offset); \
+			add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[i].isdst); \
+			add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
+			add_next_index_zval(return_value, &element); \
+			timestamp_added_last = ts; \
+		}
 
 #define add_from_tto(to,ts) \
-		array_init(&element); \
-		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
-		add_assoc_long(&element, "offset", (to)->offset); \
-		add_assoc_bool(&element, "isdst",  (to)->is_dst); \
-		add_assoc_string(&element, "abbr", (to)->abbr); \
-		add_next_index_zval(return_value, &element);
+		if (timestamp_added_last != ts) { \
+			array_init(&element); \
+			add_assoc_long(&element, "ts",     ts); \
+			add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
+			add_assoc_long(&element, "offset", (to)->offset); \
+			add_assoc_bool(&element, "isdst",  (to)->is_dst); \
+			add_assoc_string(&element, "abbr", (to)->abbr); \
+			add_next_index_zval(return_value, &element); \
+			timestamp_added_last = ts; \
+		}
 
 #define add_last() add(tzobj->tzi.tz->bit64.timecnt - 1, timestamp_begin)
 
