@@ -18,8 +18,13 @@ var_dump($rcc->getAttributes());
 $rp = new ReflectionProperty('Exception', 'message');
 var_dump($rp->getAttributes());
 
+$rct = new ReflectionConstant('PHP_VERSION');
+var_dump($rct->getAttributes());
+
 ?>
 --EXPECT--
+array(0) {
+}
 array(0) {
 }
 array(0) {
