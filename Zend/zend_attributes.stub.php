@@ -84,3 +84,14 @@ final class Deprecated
 
     public function __construct(?string $message = null, ?string $since = null) {}
 }
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION)]
+final class NoDiscard
+{
+    public readonly ?string $message;
+
+    public function __construct(?string $message = null) {}
+}
