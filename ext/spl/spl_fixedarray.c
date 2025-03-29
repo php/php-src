@@ -324,14 +324,14 @@ static zend_object *spl_fixedarray_object_clone(zend_object *old_object)
 	return new_object;
 }
 
-static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
+static zend_never_inline zend_ulong spl_offset_convert_to_ulong_slow(const zval *offset) /* {{{ */
 {
 	try_again:
 	switch (Z_TYPE_P(offset)) {
 		case IS_STRING: {
 			zend_ulong index;
 			if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), index)) {
-				return (zend_long) index;
+				return index;
 			}
 			break;
 		}
@@ -356,10 +356,22 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 	return 0;
 }
 
+/* Returned index is an unsigned number such that we don't have to do a negative check.
+ * Negative numbers will be mapped at indices larger than ZEND_ULONG_MAX,
+ * which is beyond the maximum length. */
+static zend_always_inline zend_ulong spl_offset_convert_to_ulong(const zval *offset)
+{
+	if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+		/* Allow skipping exception check at call-site. */
+		ZEND_ASSERT(!EG(exception));
+		return Z_LVAL_P(offset);
+	} else {
+		return spl_offset_convert_to_ulong_slow(offset);
+	}
+}
+
 static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *intern, zval *offset)
 {
-	zend_long index;
-
 	/* we have to return NULL on error here to avoid memleak because of
 	 * ZE duplicating uninitialized_zval_ptr */
 	if (!offset) {
@@ -367,12 +379,12 @@ static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *
 		return NULL;
 	}
 
-	index = spl_offset_convert_to_long(offset);
-	if (EG(exception)) {
+	zend_ulong index = spl_offset_convert_to_ulong(offset);
+	if (UNEXPECTED(EG(exception))) {
 		return NULL;
 	}
 
-	if (index < 0 || index >= intern->array.size) {
+	if (UNEXPECTED(index >= intern->array.size)) {
 		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return NULL;
 	} else {
@@ -407,22 +419,19 @@ static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *off
 
 static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *intern, zval *offset, zval *value)
 {
-	zend_long index;
-
 	if (!offset) {
 		/* '$array[] = value' syntax is not supported */
 		zend_throw_error(NULL, "[] operator not supported for SplFixedArray");
 		return;
 	}
 
-	index = spl_offset_convert_to_long(offset);
-	if (EG(exception)) {
+	zend_ulong index = spl_offset_convert_to_ulong(offset);
+	if (UNEXPECTED(EG(exception))) {
 		return;
 	}
 
-	if (index < 0 || index >= intern->array.size) {
+	if (UNEXPECTED(index >= intern->array.size)) {
 		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
-		return;
 	} else {
 		/* Fix #81429 */
 		zval *ptr = &(intern->array.elements[index]);
@@ -452,16 +461,13 @@ static void spl_fixedarray_object_write_dimension(zend_object *object, zval *off
 
 static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *intern, zval *offset)
 {
-	zend_long index;
-
-	index = spl_offset_convert_to_long(offset);
-	if (EG(exception)) {
+	zend_ulong index = spl_offset_convert_to_ulong(offset);
+	if (UNEXPECTED(EG(exception))) {
 		return;
 	}
 
-	if (index < 0 || index >= intern->array.size) {
+	if (UNEXPECTED(index >= intern->array.size)) {
 		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
-		return;
 	} else {
 		zval garbage;
 		ZVAL_COPY_VALUE(&garbage, &intern->array.elements[index]);
@@ -483,14 +489,12 @@ static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *off
 
 static bool spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset, bool check_empty)
 {
-	zend_long index;
-
-	index = spl_offset_convert_to_long(offset);
-	if (EG(exception)) {
+	zend_ulong index = spl_offset_convert_to_ulong(offset);
+	if (UNEXPECTED(EG(exception))) {
 		return false;
 	}
 
-	if (index < 0 || index >= intern->array.size) {
+	if (index >= intern->array.size) {
 		return false;
 	}
 
