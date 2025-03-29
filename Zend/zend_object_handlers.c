@@ -877,7 +877,6 @@ try_again:
 
 		if (!((*guard) & IN_ISSET)) {
 			GC_ADDREF(zobj);
-			ZVAL_UNDEF(&tmp_result);
 
 			*guard |= IN_ISSET;
 			zend_std_call_issetter(zobj, name, &tmp_result);
