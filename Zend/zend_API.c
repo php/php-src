@@ -2905,7 +2905,9 @@ ZEND_API void zend_type_free_interned_trees(void) {
 			pefree(tree->compound.types, 1);
 		} else {
 			if (ZEND_TYPE_HAS_NAME(tree->simple_type)) {
-				zend_string_release_ex(ZEND_TYPE_NAME(tree->simple_type), 1);
+				if (!ZSTR_IS_INTERNED(ZEND_TYPE_NAME(tree->simple_type))) {
+					zend_string_release_ex(ZEND_TYPE_NAME(tree->simple_type), 1);
+				}
 			}
 		}
 		pefree(tree, 1);
