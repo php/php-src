@@ -118,9 +118,7 @@ enum php_openssl_encoding {
 #ifndef OPENSSL_NO_MD2
 #define OPENSSL_ALGO_MD2	4
 #endif
-#if PHP_OPENSSL_API_VERSION < 0x10100
-#define OPENSSL_ALGO_DSS1	5
-#endif
+/* Number 5 was used for OPENSSL_ALGO_DSS1 which is no longer available */
 #define OPENSSL_ALGO_SHA224 6
 #define OPENSSL_ALGO_SHA256 7
 #define OPENSSL_ALGO_SHA384 8
@@ -220,23 +218,6 @@ const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo);
 int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args);
 void php_openssl_dispose_config(struct php_x509_request * req);
 
-
-#if defined(PHP_WIN32) || PHP_OPENSSL_API_VERSION >= 0x10100
-#define PHP_OPENSSL_RAND_ADD_TIME() ((void) 0)
-#else
-#define PHP_OPENSSL_RAND_ADD_TIME() php_openssl_rand_add_timeval()
-
-static inline void php_openssl_rand_add_timeval(void)  /* {{{ */
-{
-	struct timeval tv;
-
-	gettimeofday(&tv, NULL);
-	RAND_add(&tv, sizeof(tv), 0.0);
-}
-/* }}} */
-
-#endif
-
 zend_result php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded);
 zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int seeded);
 
@@ -279,7 +260,7 @@ X509_REQ *php_openssl_csr_from_str(zend_string *csr_str, uint32_t arg_num);
 X509_REQ *php_openssl_csr_from_param(
 		zend_object *csr_obj, zend_string *csr_str, uint32_t arg_num);
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100 && !defined (LIBRESSL_VERSION_NUMBER)
+#if !defined (LIBRESSL_VERSION_NUMBER)
 #define PHP_OPENSSL_ASN1_INTEGER_set ASN1_INTEGER_set_int64
 #else
 #define PHP_OPENSSL_ASN1_INTEGER_set ASN1_INTEGER_set
@@ -349,14 +330,12 @@ struct php_openssl_cipher_mode {
 	int aead_ivlen_flag;
 };
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100
 static inline void php_openssl_set_aead_flags(struct php_openssl_cipher_mode *mode) {
 	mode->is_aead = true;
 	mode->aead_get_tag_flag = EVP_CTRL_AEAD_GET_TAG;
 	mode->aead_set_tag_flag = EVP_CTRL_AEAD_SET_TAG;
 	mode->aead_ivlen_flag = EVP_CTRL_AEAD_SET_IVLEN;
 }
-#endif
 
 void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EVP_CIPHER *cipher_type);
 zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
@@ -375,6 +354,4 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 
 const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method);
 
-
 #endif
-
