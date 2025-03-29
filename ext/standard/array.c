@@ -3502,8 +3502,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 PHP_FUNCTION(array_push)
 {
 	zval   *args,		/* Function arguments array */
-		   *stack,		/* Input array */
-		    new_var;	/* Variable to be pushed */
+		   *stack;		/* Input array */
 	uint32_t argc;		/* Number of function arguments */
 
 
@@ -3514,10 +3513,10 @@ PHP_FUNCTION(array_push)
 
 	/* For each subsequent argument, make it a reference, increase refcount, and add it to the end of the array */
 	for (uint32_t i = 0; i < argc; i++) {
-		ZVAL_COPY(&new_var, &args[i]);
+		Z_TRY_ADDREF(args[i]);
 
-		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &new_var) == NULL) {
-			Z_TRY_DELREF(new_var);
+		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &args[i]) == NULL) {
+			Z_TRY_DELREF(args[i]);
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			RETURN_THROWS();
 		}
