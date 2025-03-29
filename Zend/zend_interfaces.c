@@ -412,13 +412,12 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	zend_call_method_with_0_params(
 		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "serialize", &retval);
 
-	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
+	if (Z_TYPE(retval) == IS_UNDEF) {
 		result = FAILURE;
 	} else {
 		switch(Z_TYPE(retval)) {
 		case IS_NULL:
 			/* we could also make this '*buf_len = 0' but this allows to skip variables */
-			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
 			*buffer = (unsigned char*)estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
