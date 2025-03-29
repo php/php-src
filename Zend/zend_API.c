@@ -2903,6 +2903,10 @@ ZEND_API void zend_type_free_interned_trees(void) {
 	ZEND_HASH_FOREACH_PTR(CG(type_trees), tree) {
 		if (tree->kind != ZEND_TYPE_SIMPLE) {
 			pefree(tree->compound.types, 1);
+		} else {
+			if (ZEND_TYPE_HAS_NAME(tree->simple_type)) {
+				zend_string_release_ex(ZEND_TYPE_NAME(tree->simple_type), 1);
+			}
 		}
 		pefree(tree, 1);
 	} ZEND_HASH_FOREACH_END();
@@ -3077,7 +3081,13 @@ ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
 	if (!ZEND_TYPE_HAS_LIST(type)) {
 		zend_type_node *node = pemalloc(sizeof(zend_type_node), 1);
 		node->kind = ZEND_TYPE_SIMPLE;
-		node->simple_type = type;
+		zend_type new_type = type;
+		if (ZEND_TYPE_HAS_NAME(type)) {
+			const zend_string *name = ZEND_TYPE_NAME(type);
+			zend_string *new_name = zend_string_init_interned(ZSTR_VAL(name), ZSTR_LEN(name), 1);
+			ZEND_TYPE_SET_PTR(new_type, new_name);
+		}
+		node->simple_type = new_type;
 		return intern_type_node(node);
 	}
 
