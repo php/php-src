@@ -6437,7 +6437,6 @@ PHP_FUNCTION(array_reduce)
 	zval *input;
 	zval args[2];
 	zval *operand;
-	zval retval;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	zval *initial = NULL;
@@ -6450,8 +6449,7 @@ PHP_FUNCTION(array_reduce)
 		Z_PARAM_ZVAL(initial)
 	ZEND_PARSE_PARAMETERS_END();
 
-
-	if (ZEND_NUM_ARGS() > 2) {
+	if (initial) {
 		ZVAL_COPY(return_value, initial);
 	} else {
 		ZVAL_NULL(return_value);
@@ -6466,24 +6464,22 @@ PHP_FUNCTION(array_reduce)
 		return;
 	}
 
-	fci.retval = &retval;
+	fci.retval = return_value;
 	fci.param_count = 2;
+	fci.params = args;
 
 	ZEND_HASH_FOREACH_VAL(htbl, operand) {
 		ZVAL_COPY_VALUE(&args[0], return_value);
-		ZVAL_COPY(&args[1], operand);
-		fci.params = args;
+		ZVAL_COPY_VALUE(&args[1], operand);
 
-		if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-			zval_ptr_dtor(&args[1]);
-			zval_ptr_dtor(&args[0]);
-			ZVAL_COPY_VALUE(return_value, &retval);
+		zend_call_function(&fci, &fci_cache);
+		zval_ptr_dtor(&args[0]);
+
+		if (EXPECTED(!Z_ISUNDEF_P(return_value))) {
 			if (UNEXPECTED(Z_ISREF_P(return_value))) {
 				zend_unwrap_reference(return_value);
 			}
 		} else {
-			zval_ptr_dtor(&args[1]);
-			zval_ptr_dtor(&args[0]);
 			RETURN_NULL();
 		}
 	} ZEND_HASH_FOREACH_END();
