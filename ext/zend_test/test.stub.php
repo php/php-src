@@ -69,6 +69,9 @@ namespace {
         static public function variadicTest(string|Iterator ...$elements) : static {}
 
         public function takesUnionType(stdclass|Iterator $arg): void {}
+
+        /** @frameless-function {"arity": 2} */
+        public static function framelessStaticMethod(int $lhs, int $rhs): int {}
     }
 
     class _ZendTestMagicCall
