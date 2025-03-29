@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed imagecrop() overflow with rect argument with x/width y/heigh usage
     in gdImageCrop(). (David Carlier)
 
+- OpenSSL:
+  . Fix memory leak in openssl_sign() when passing invalid algorithm.
+    (nielsdos)
+
 - Standard:
   . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
     (Jakub Zelenka)
