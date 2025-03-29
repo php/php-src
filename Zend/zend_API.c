@@ -3069,6 +3069,14 @@ static zend_type_node *intern_type_node(zend_type_node *node) {
 		}
 	}
 
+	if (node->kind == ZEND_TYPE_SIMPLE) {
+		if (ZEND_TYPE_HAS_NAME(node->simple_type)) {
+			const zend_string *name = ZEND_TYPE_NAME(node->simple_type);
+			zend_string *new_name = zend_string_init_interned(ZSTR_VAL(name), ZSTR_LEN(name), 1);
+			ZEND_TYPE_SET_PTR(node->simple_type, new_name);
+		}
+	}
+
 	zend_hash_index_add_new_ptr(CG(type_trees), hash, node);
 	return node;
 }
@@ -3081,13 +3089,7 @@ ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
 	if (!ZEND_TYPE_HAS_LIST(type)) {
 		zend_type_node *node = pemalloc(sizeof(zend_type_node), 1);
 		node->kind = ZEND_TYPE_SIMPLE;
-		zend_type new_type = type;
-		if (ZEND_TYPE_HAS_NAME(type)) {
-			const zend_string *name = ZEND_TYPE_NAME(type);
-			zend_string *new_name = zend_string_init_interned(ZSTR_VAL(name), ZSTR_LEN(name), 1);
-			ZEND_TYPE_SET_PTR(new_type, new_name);
-		}
-		node->simple_type = new_type;
+		node->simple_type = type;
 		return intern_type_node(node);
 	}
 
