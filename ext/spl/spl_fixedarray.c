@@ -872,18 +872,6 @@ PHP_METHOD(SplFixedArray, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
-PHP_METHOD(SplFixedArray, jsonSerialize)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
-	array_init_size(return_value, intern->array.size);
-	for (zend_long i = 0; i < intern->array.size; i++) {
-		zend_hash_next_index_insert_new(Z_ARR_P(return_value), &intern->array.elements[i]);
-		Z_TRY_ADDREF(intern->array.elements[i]);
-	}
-}
-
 static void spl_fixedarray_it_dtor(zend_object_iterator *iter)
 {
 	zval_ptr_dtor(&iter->data);
