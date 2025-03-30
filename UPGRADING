@@ -273,6 +273,7 @@ PHP 8.5 UPGRADE NOTES
   . pg_close_stmt offers an alternative way to close a prepared
     statement from the DEALLOCATE sql command in that we can reuse
     its name afterwards.
+  . pg_service returns the ongoing service name of the connection.
 
 - Reflection:
   . ReflectionConstant::getFileName() was introduced.

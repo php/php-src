@@ -110,6 +110,8 @@ PHP                                                                        NEWS
   . pg_connect checks if connection_string contains any null byte,
     pg_close_stmt check if the statement contains any null byte.
     (David Carlier)
+  . Added pg_service to get the connection current service identifier.
+    (David Carlier)
 
 - POSIX:
   . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
