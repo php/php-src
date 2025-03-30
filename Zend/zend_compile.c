@@ -9133,7 +9133,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	CG(active_class_entry) = ce;
 
-	if (decl->child[3]) {
+	if (decl->child[3] && decl->child[3]->kind != ZEND_AST_GENERIC_TYPE_PARAM_LIST) {
 		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
 	}
 
