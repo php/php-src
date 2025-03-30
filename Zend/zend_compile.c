@@ -5404,7 +5404,14 @@ static void zend_compile_clone(znode *result, zend_ast *ast) /* {{{ */
 	znode obj_node;
 	zend_compile_expr(&obj_node, obj_ast);
 
-	zend_emit_op_tmp(result, ZEND_CLONE, &obj_node, NULL);
+	znode value_node;
+	if (ast->child[1]) {
+		zend_compile_expr(&value_node, ast->child[1]);
+	} else {
+		value_node.op_type = IS_UNUSED;
+	}
+
+	zend_emit_op_tmp(result, ZEND_CLONE, &obj_node, &value_node);
 }
 /* }}} */
 
