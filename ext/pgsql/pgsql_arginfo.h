@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 49e3493be11a5da1ed9a57339f14f92f34bf5d1b */
+ * Stub hash: ea2f06b6ff6fb8d9e3207831bf773f53f17b3788 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -37,6 +37,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_version, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_jit arginfo_pg_version
+
+#if defined(HAVE_PG_SERVICE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_service, 0, 0, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_parameter_status, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
@@ -514,6 +520,9 @@ ZEND_FUNCTION(pg_tty);
 ZEND_FUNCTION(pg_host);
 ZEND_FUNCTION(pg_version);
 ZEND_FUNCTION(pg_jit);
+#if defined(HAVE_PG_SERVICE)
+ZEND_FUNCTION(pg_service);
+#endif
 ZEND_FUNCTION(pg_parameter_status);
 ZEND_FUNCTION(pg_ping);
 ZEND_FUNCTION(pg_query);
@@ -623,6 +632,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_host, arginfo_pg_host)
 	ZEND_FE(pg_version, arginfo_pg_version)
 	ZEND_FE(pg_jit, arginfo_pg_jit)
+#if defined(HAVE_PG_SERVICE)
+	ZEND_FE(pg_service, arginfo_pg_service)
+#endif
 	ZEND_FE(pg_parameter_status, arginfo_pg_parameter_status)
 	ZEND_FE(pg_ping, arginfo_pg_ping)
 	ZEND_FE(pg_query, arginfo_pg_query)
