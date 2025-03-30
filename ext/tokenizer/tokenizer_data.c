@@ -173,6 +173,8 @@ char *get_token_type_name(int token_type)
 		case T_COALESCE: return "T_COALESCE";
 		case T_POW: return "T_POW";
 		case T_POW_EQUAL: return "T_POW_EQUAL";
+		case T_GENERIC_START: return "T_GENERIC_START";
+		case T_GENERIC_END: return "T_GENERIC_END";
 		case T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG: return "T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG";
 		case T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG: return "T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG";
 		case T_BAD_CHARACTER: return "T_BAD_CHARACTER";

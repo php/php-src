@@ -180,6 +180,7 @@ enum _zend_ast_kind {
 
 	/* 6 child nodes */
 	ZEND_AST_PARAM = 6 << ZEND_AST_NUM_CHILDREN_SHIFT,
+	ZEND_AST_GENERIC_TYPE_PARAM
 };
 
 typedef uint16_t zend_ast_kind;

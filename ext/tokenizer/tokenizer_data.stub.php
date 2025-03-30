@@ -744,6 +744,16 @@ const T_POW = UNKNOWN;
 const T_POW_EQUAL = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_GENERIC_START
+ */
+const T_GENERIC_START = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_GENERIC_END
+ */
+const T_GENERIC_END = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
  */
 const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG = UNKNOWN;
