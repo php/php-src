@@ -45,6 +45,12 @@ PHP 8.5 UPGRADE NOTES
     change, but should closer match user expectations, demonstrated by GH-15753
     and GH-16198.
 
+- FileInfo:
+  . finfo_file() and finfo::file() now throws a ValueError instead of a
+    TypeError when $filename contains nul bytes.
+    This aligns the type of Error thrown to be consistent with the rest of
+    the language.
+
 - Intl:
   . The extension now requires at least ICU 57.1.
 
