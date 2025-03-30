@@ -973,6 +973,10 @@ namespace {
 #ifdef HAVE_PG_CLOSE_STMT
     function pg_close_stmt(Pgsql\Connection $connection, string $statement_name): Pgsql\Result|false {}
 #endif
+#ifdef HAVE_PG_RESULT_ERROR_MESSAGE
+    /** @refcount 1 */
+    function pg_result_verbose_error(PgSql\Result $result, int $verbosity, int $visibility): string|false {}
+#endif
 }
 
 namespace PgSql {

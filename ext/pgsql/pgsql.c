@@ -6347,3 +6347,39 @@ PHP_FUNCTION(pg_close_stmt)
 	}
 }
 #endif
+
+#if defined(HAVE_PG_RESULT_VERBOSE_ERROR_MESSAGE)
+PHP_FUNCTION(pg_result_verbose_error)
+{
+	zval *result;
+	pgsql_result_handle *pg_result;
+	zend_long verbosity, visibility;
+	char *err = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
+		Z_PARAM_LONG(verbosity)
+		Z_PARAM_LONG(visibility)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!(verbosity & (PQERRORS_TERSE|PQERRORS_DEFAULT|PQERRORS_VERBOSE|PQERRORS_SQLSTATE))) {
+		zend_argument_value_error(2, "verbosity must be one of the PQERRORS_* constants");
+		RETURN_THROWS();
+	}
+	if (visibility < PQSHOW_CONTEXT_NEVER || !(visibility & (PQSHOW_CONTEXT_ERRORS|PQSHOW_CONTEXT_ALWAYS))) {
+		zend_argument_value_error(3, "visibility must be one of the PQSHOW_CONTEXT_* constants");
+		RETURN_THROWS();
+	}
+
+	pg_result = Z_PGSQL_RESULT_P(result);
+	CHECK_PGSQL_RESULT(pg_result);
+
+	err = PQresultVerboseErrorMessage(pg_result->result, verbosity, visibility);
+	if (UNEXPECTED(!err)) {
+		RETURN_FALSE;
+	} else {
+		RETVAL_STRING(err);
+		PQfreemem(err);
+	}
+}
+#endif

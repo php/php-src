@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 13be2a3c9a4ef4a72c0a67019b7400418752b603 */
+ * Stub hash: d2d1653309c442627202d28ae27dcb4d6a828a24 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -502,6 +502,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_close_stmt, 0, 2, Pgsql\\
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PG_RESULT_ERROR_MESSAGE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_result_verbose_error, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, result, PgSql\\Result, 0)
+	ZEND_ARG_TYPE_INFO(0, verbosity, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, visibility, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
 ZEND_FUNCTION(pg_connect_poll);
@@ -607,6 +615,9 @@ ZEND_FUNCTION(pg_set_chunked_rows_size);
 #endif
 #if defined(HAVE_PG_CLOSE_STMT)
 ZEND_FUNCTION(pg_close_stmt);
+#endif
+#if defined(HAVE_PG_RESULT_ERROR_MESSAGE)
+ZEND_FUNCTION(pg_result_verbose_error);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -738,6 +749,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_PG_CLOSE_STMT)
 	ZEND_FE(pg_close_stmt, arginfo_pg_close_stmt)
+#endif
+#if defined(HAVE_PG_RESULT_ERROR_MESSAGE)
+	ZEND_FE(pg_result_verbose_error, arginfo_pg_result_verbose_error)
 #endif
 	ZEND_FE_END
 };

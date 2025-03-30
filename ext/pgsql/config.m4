@@ -31,6 +31,9 @@ if test "$PHP_PGSQL" != "no"; then
   PHP_CHECK_LIBRARY([pq], [PQclosePrepared],
     [AC_DEFINE([HAVE_PG_CLOSE_STMT], [1], [PostgreSQL 17 or later])],,
     [$PGSQL_LIBS])
+  PHP_CHECK_LIBRARY([pq], [PQresultVerboseErrorMessage],
+    [AC_DEFINE([HAVE_PG_RESULT_VERBOSE_ERROR_MESSAGE], [1], [PostgreSQL 14 or later])],,
+    [$PGSQL_LIBS])
 
   old_CFLAGS=$CFLAGS
   CFLAGS="$CFLAGS $PGSQL_CFLAGS"
