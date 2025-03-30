@@ -691,11 +691,16 @@ PHP_METHOD(SplFixedArray, toArray)
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
 	if (!spl_fixedarray_empty(&intern->array)) {
-		array_init(return_value);
-		for (zend_long i = 0; i < intern->array.size; i++) {
-			zend_hash_index_update(Z_ARRVAL_P(return_value), i, &intern->array.elements[i]);
-			Z_TRY_ADDREF(intern->array.elements[i]);
-		}
+		array_init_size(return_value, intern->array.size);
+		HashTable *ht = Z_ARRVAL_P(return_value);
+		zend_hash_real_init_packed(ht);
+
+		ZEND_HASH_FILL_PACKED(ht) {
+			for (zend_long i = 0; i < intern->array.size; i++) {
+				ZEND_HASH_FILL_ADD(&intern->array.elements[i]);
+				Z_TRY_ADDREF(intern->array.elements[i]);
+			}
+		} ZEND_HASH_FILL_END();
 	} else {
 		RETURN_EMPTY_ARRAY();
 	}
