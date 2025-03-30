@@ -1839,7 +1839,8 @@ check_lexical_scope:
 		}
 	}
 
-	if (check_class != scope && check_class->lexical_scope && check_class->lexical_scope->type != ZEND_NAMESPACE_CLASS) {
+	// preloading may have changed the class type from ZEND_NAMESPACE_CLASS, so we need to check for user/internal class
+	if (check_class != scope && check_class->lexical_scope && (check_class->lexical_scope->type != ZEND_USER_CLASS && check_class->lexical_scope->type != ZEND_INTERNAL_CLASS)) {
 		check_class = check_class->lexical_scope;
 		goto check_lexical_scope;
 	}

@@ -27,6 +27,8 @@ zend_class_entry *create_namespace(zend_string *name) {
    ns->type = ZEND_NAMESPACE_CLASS;
    ns->ce_flags |= ZEND_ACC_UNINSTANTIABLE;
    ns->name = name;
+   ns->required_scope = NULL;
+   ns->lexical_scope = NULL;
 
    return ns;
 }
