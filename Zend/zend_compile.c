@@ -9196,6 +9196,12 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			int propFlags = decl->attr & ZEND_ACC_PPP_MASK;
 			decl->attr &= ~(ZEND_ACC_PPP_MASK | ZEND_ACC_FINAL | ZEND_ACC_READONLY | ZEND_ACC_ABSTRACT);
 
+			if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE && propFlags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s::$%s as %s in interface %s",
+					ZSTR_VAL(CG(active_class_entry)->name), ZSTR_VAL(unqualified_name),
+					zend_visibility_string(propFlags), ZSTR_VAL(CG(active_class_entry)->name));
+			}
+
 			ce->required_scope = propFlags & (ZEND_ACC_PRIVATE | ZEND_ACC_PROTECTED) ? CG(active_class_entry) : NULL;
 			ce->required_scope_absolute = propFlags & ZEND_ACC_PRIVATE ? true : false;
 			ce->lexical_scope = CG(active_class_entry);
