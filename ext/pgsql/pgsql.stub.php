@@ -509,7 +509,6 @@ namespace {
     function pg_jit(?PgSql\Connection $connection = null): array {}
 
 #ifdef HAVE_PG_SERVICE
-    /** @refcount 1 */
     function pg_service(?PgSql\Connection $connection = null): string {}
 #endif
     /**
