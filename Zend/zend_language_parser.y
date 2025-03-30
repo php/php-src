@@ -291,8 +291,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list
+%type <ast> generic_type_parameter_list
 %type <ast> generic_type_parameters
-%type <ast> generic_type_parameter
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -612,12 +612,13 @@ class_declaration_statement:
 ;
 
 generic_type_parameters:
-    T_GENERIC_START generic_type_parameter T_GENERIC_END { $$ = $2; }
+    T_GENERIC_START generic_type_parameter_list possible_comma T_GENERIC_END { $$ = $2; }
     | %empty { $$ = NULL; }
 ;
 
-generic_type_parameter:
-    T_STRING { $$ = zend_ast_create_decl(ZEND_AST_GENERIC_TYPE_PARAM, 0, 0, NULL, zend_ast_get_str($1), NULL, NULL, NULL, NULL, NULL); }
+generic_type_parameter_list:
+    T_STRING { $$ = zend_ast_create_list(1, ZEND_AST_GENERIC_TYPE_PARAM_LIST, $1); }
+    | generic_type_parameter_list ',' T_STRING { $$ = zend_ast_list_add($1, $3); }
 ;
 
 class_modifiers:

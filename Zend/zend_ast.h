@@ -70,6 +70,7 @@ enum _zend_ast_kind {
 	ZEND_AST_ATTRIBUTE_GROUP,
 	ZEND_AST_MATCH_ARM_LIST,
 	ZEND_AST_MODIFIER_LIST,
+	ZEND_AST_GENERIC_TYPE_PARAM_LIST,
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -180,7 +181,6 @@ enum _zend_ast_kind {
 
 	/* 6 child nodes */
 	ZEND_AST_PARAM = 6 << ZEND_AST_NUM_CHILDREN_SHIFT,
-	ZEND_AST_GENERIC_TYPE_PARAM
 };
 
 typedef uint16_t zend_ast_kind;
