@@ -954,6 +954,8 @@ class_statement_list:
 nested_class_statement:
 		T_CLASS T_STRING { $<num>$ = CG(zend_lineno); } extends_from implements_list backup_doc_comment '{' class_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>3, $6, zend_ast_get_str($2), $4, $5, $8, NULL, NULL); }
+	|	trait_declaration_statement { $$ = $1; }
+	|	enum_declaration_statement { $$ = $1; }
 ;
 
 attributed_class_statement:
