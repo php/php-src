@@ -10,4 +10,4 @@ class Outer {
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected identifier "int", expecting "class" in %s on line %d
+Parse error: syntax error, unexpected identifier "int", expecting "class" or "enum" in %s on line %d

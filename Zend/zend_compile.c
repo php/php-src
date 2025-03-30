@@ -9179,6 +9179,11 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 				"\\", 1,
 				ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
 
+			if (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s inside a trait",
+					ZSTR_VAL(name));
+			}
+
 			/* configure the class from the modifiers */
 			decl->flags |= decl->attr & ZEND_ACC_FINAL;
 			if (decl->attr & ZEND_ACC_ABSTRACT) {
