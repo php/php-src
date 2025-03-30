@@ -7961,17 +7961,15 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		RETURN_THROWS();
 	}
 
-	if (zstrong_result_returned) {
-		ZEND_TRY_ASSIGN_REF_FALSE(zstrong_result_returned);
-	}
-
 	if ((buffer = php_openssl_random_pseudo_bytes(buffer_length))) {
 		ZSTR_VAL(buffer)[buffer_length] = 0;
 		RETVAL_NEW_STR(buffer);
-	}
 
-	if (zstrong_result_returned) {
-		ZEND_TRY_ASSIGN_REF_TRUE(zstrong_result_returned);
+		if (zstrong_result_returned) {
+			ZEND_TRY_ASSIGN_REF_TRUE(zstrong_result_returned);
+		}
+	} else if (zstrong_result_returned) {
+		ZEND_TRY_ASSIGN_REF_FALSE(zstrong_result_returned);
 	}
 }
 /* }}} */
