@@ -212,12 +212,15 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 static HashTable* spl_fixedarray_object_get_gc(zend_object *obj, zval **table, int *n)
 {
 	spl_fixedarray_object *intern = spl_fixed_array_from_obj(obj);
-	HashTable *ht = zend_std_get_properties(obj);
 
 	*table = intern->array.elements;
 	*n = (int)intern->array.size;
 
-	return ht;
+	if (obj->properties == NULL && obj->ce->default_properties_count == 0) {
+		return NULL;
+	} else {
+		return zend_std_get_properties(obj);
+	}
 }
 
 static HashTable* spl_fixedarray_object_get_properties_for(zend_object *obj, zend_prop_purpose purpose)
