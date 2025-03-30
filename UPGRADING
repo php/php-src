@@ -42,6 +42,11 @@ PHP 8.5 UPGRADE NOTES
     have run and the output handlers have been cleaned up.
     This is a consequence of fixing GH-18033.
 
+- PCRE:
+  . The extension is compiled without semi-deprecated
+    PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK compile option.
+    https://github.com/PCRE2Project/pcre2/issues/736#issuecomment-2754024651
+
 - Intl:
   . The extension now requires at least ICU 57.1.
 
