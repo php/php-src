@@ -1226,7 +1226,8 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2); }
+	|	T_CLONE '(' expr ',' expr ')' { $$ = zend_ast_create(ZEND_AST_CLONE, $3, $5); }
+	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2, NULL); }
 	|	variable T_PLUS_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ADD, $1, $3); }
 	|	variable T_MINUS_EQUAL expr
