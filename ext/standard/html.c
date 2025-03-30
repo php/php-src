@@ -852,39 +852,38 @@ static void traverse_for_entities(
 
 		unsigned code = 0, code2 = 0;
 		const char *entity_end_ptr = NULL;
-		bool valid_entity = true;
 
 		if (current_ptr[1] == '#') {
 			/* Processing numeric entity */
 			const char *num_start = current_ptr + 2;
 			entity_end_ptr = num_start;
 			if (process_numeric_entity(&entity_end_ptr, &code) == FAILURE) {
-				valid_entity = false;
+				goto invalid_incomplete_entity;
 			}
-            if (valid_entity && !all && (code > 63U || stage3_table_be_apos_00000[code].data.ent.entity == NULL)) {
+			if (!all && (code > 63U || stage3_table_be_apos_00000[code].data.ent.entity == NULL)) {
 				/* If we're in htmlspecialchars_decode, we're only decoding entities
 				 * that represent &, <, >, " and '. Is this one of them? */
-				valid_entity = false;
-			} else if (valid_entity && (!unicode_cp_is_allowed(code, doctype) ||
-						(doctype == ENT_HTML_DOC_HTML5 && code == 0x0D))) {
+				goto invalid_incomplete_entity;
+			} else if (!unicode_cp_is_allowed(code, doctype) ||
+					   (doctype == ENT_HTML_DOC_HTML5 && code == 0x0D)) {
 				/* are we allowed to decode this entity in this document type?
 				 * HTML 5 is the only that has a character that cannot be used in
 				 * a numeric entity but is allowed literally (U+000D). The
 				 * unoptimized version would be ... || !numeric_entity_is_allowed(code) */
-				valid_entity = false;
+				goto invalid_incomplete_entity;
 			}
 		} else {
-			 /* Processing named entity */
+			/* Processing named entity */
 			const char *name_start = current_ptr + 1;
 			/* Search for ';' */
 			const size_t max_search_len = MIN(LONGEST_ENTITY_LENGTH + 1, input_end - name_start);
 			const char *semi_colon_ptr = memchr(name_start, ';', max_search_len);
 			if (!semi_colon_ptr) {
-				valid_entity = false;
+				goto invalid_incomplete_entity;
 			} else {
 				const size_t name_len = semi_colon_ptr - name_start;
 				if (name_len == 0) {
-					valid_entity = false;
+					goto invalid_incomplete_entity;
 				} else {
 					if (resolve_named_entity_html(name_start, name_len, inv_map, &code, &code2) == FAILURE) {
 						if (doctype == ENT_HTML_DOC_XHTML && name_len == 4 &&
@@ -895,7 +894,7 @@ static void traverse_for_entities(
 							 * hack to support it */
 							code = (unsigned)'\'';
 						} else {
-							valid_entity = false;
+							goto invalid_incomplete_entity;
 						}
 					}
 					entity_end_ptr = semi_colon_ptr;
@@ -904,45 +903,51 @@ static void traverse_for_entities(
 		}
 
 		/* If entity_end_ptr is not found or does not point to ';', consider the entity invalid */
-		if (!valid_entity || entity_end_ptr == NULL || *entity_end_ptr != ';') {
-			*output_ptr++ = *current_ptr++;
-			continue;
+		if (entity_end_ptr == NULL) {
+			goto invalid_incomplete_entity;
 		}
 
 		/* Check if quotes are allowed for entities representing ' or " */
 		if ((code == '\'' && !(flags & ENT_HTML_QUOTE_SINGLE)) ||
 			(code == '"'  && !(flags & ENT_HTML_QUOTE_DOUBLE)))
 		{
-			valid_entity = false;
+			goto invalid_complete_entity;
 		}
 
 		/* UTF-8 doesn't need mapping (ISO-8859-1 doesn't either, but
 		 * the call is needed to ensure the codepoint <= U+00FF)  */
-		if (valid_entity && charset != cs_utf_8) {
+		if (charset != cs_utf_8) {
 			/* replace unicode code point */
-			if (map_from_unicode(code, charset, &code) == FAILURE || code2 != 0)
-				valid_entity = false;
+			if (map_from_unicode(code, charset, &code) == FAILURE || code2 != 0) {
+				goto invalid_complete_entity;
+			}
 		}
 
-		if (valid_entity) {
-			/* Write the parsed entity into the output buffer */
-			output_ptr += write_octet_sequence((unsigned char*)output_ptr, charset, code);
-			if (code2) {
-				output_ptr += write_octet_sequence((unsigned char*)output_ptr, charset, code2);
-			}
-			/* Move current_ptr past the semicolon */
-			current_ptr = entity_end_ptr + 1;
-		} else {
-			/* If the entity is invalid, copy characters from current_ptr up to entity_end_ptr */
-			if (entity_end_ptr) {
-				const size_t len = entity_end_ptr - current_ptr;
-				memcpy(output_ptr, current_ptr, len);
-				output_ptr += len;
-				current_ptr = entity_end_ptr;
-			} else {
-				*output_ptr++ = *current_ptr++;
-			}
+		/* Write the parsed entity into the output buffer */
+		output_ptr += write_octet_sequence((unsigned char*)output_ptr, charset, code);
+		if (code2) {
+			output_ptr += write_octet_sequence((unsigned char*)output_ptr, charset, code2);
 		}
+		/* Move current_ptr past the semicolon */
+		current_ptr = entity_end_ptr + 1;
+		continue;
+
+invalid_incomplete_entity:
+		/* If the entity is invalid at parse stage or entity_end_ptr was never found, copy '&' as normal */
+		*output_ptr++ = *current_ptr++;
+		continue;
+
+invalid_complete_entity:
+		/* If the entity became invalid after we found entity_end_ptr */
+		if (entity_end_ptr) {
+			const size_t len = entity_end_ptr - current_ptr;
+			memcpy(output_ptr, current_ptr, len);
+			output_ptr += len;
+			current_ptr = entity_end_ptr;
+		} else {
+			*output_ptr++ = *current_ptr++;
+		}
+		continue;
 	}
 
 	*output_ptr = '\0';
