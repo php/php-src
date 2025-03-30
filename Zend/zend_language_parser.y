@@ -604,11 +604,11 @@ is_variadic:
 
 class_declaration_statement:
 		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}' generic_type_parameters
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, $11, NULL); }
+		T_STRING generic_type_parameters extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $8, zend_ast_get_str($4), $6, $7, $10, $5, NULL); }
 	|	T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}' generic_type_parameters
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, $10, NULL); }
+		T_STRING generic_type_parameters extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $7, zend_ast_get_str($3), $5, $6, $9, $4, NULL); }
 ;
 
 generic_type_parameters:
