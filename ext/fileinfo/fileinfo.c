@@ -94,14 +94,6 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-#define FINFO_SET_OPTION(magic, options) \
-	if (magic_setflags(magic, options) == -1) { \
-		php_error_docref(NULL, E_WARNING, "Failed to set option '" ZEND_LONG_FMT "' %d:%s", \
-				options, magic_errno(magic), magic_error(magic)); \
-		RETURN_FALSE; \
-	}
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(finfo)
 {
@@ -276,7 +268,9 @@ PHP_FUNCTION(finfo_set_flags)
 	}
 	FILEINFO_FROM_OBJECT(finfo, self);
 
-	FINFO_SET_OPTION(finfo->magic, options)
+	/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
+	 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
+	magic_setflags(finfo->magic, options);
 	finfo->options = options;
 
 	RETURN_TRUE;
@@ -337,7 +331,9 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 	/* Set options for the current file/buffer. */
 	if (options) {
-		FINFO_SET_OPTION(magic, options)
+		/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
+		 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
+		magic_setflags(magic, options);
 	}
 
 	switch (mode) {
@@ -436,9 +432,8 @@ clean:
 
 	/* Restore options */
 	if (options) {
-		FINFO_SET_OPTION(magic, finfo->options)
+		magic_setflags(magic, finfo->options);
 	}
-	return;
 }
 /* }}} */
 
