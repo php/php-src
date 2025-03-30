@@ -377,7 +377,7 @@ static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *
 {
 	/* we have to return NULL on error here to avoid memleak because of
 	 * ZE duplicating uninitialized_zval_ptr */
-	if (!offset) {
+	if (UNEXPECTED(!offset)) {
 		zend_throw_error(NULL, "[] operator not supported for SplFixedArray");
 		return NULL;
 	}
@@ -422,7 +422,7 @@ static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *off
 
 static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *intern, zval *offset, zval *value)
 {
-	if (!offset) {
+	if (UNEXPECTED(!offset)) {
 		/* '$array[] = value' syntax is not supported */
 		zend_throw_error(NULL, "[] operator not supported for SplFixedArray");
 		return;
@@ -438,10 +438,10 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 	} else {
 		/* Fix #81429 */
 		zval *ptr = &(intern->array.elements[index]);
-		zval tmp;
-		ZVAL_COPY_VALUE(&tmp, ptr);
-		ZVAL_COPY_DEREF(ptr, value);
-		zval_ptr_dtor(&tmp);
+		/* This should be guaranteed by the VM handler or argument parsing. */
+		ZEND_ASSERT(Z_TYPE_P(value) != IS_REFERENCE);
+		Z_TRY_ADDREF_P(value);
+		zend_safe_assign_to_variable_noref(ptr, value);
 	}
 }
 
@@ -472,10 +472,9 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 	if (UNEXPECTED(index >= intern->array.size)) {
 		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 	} else {
-		zval garbage;
-		ZVAL_COPY_VALUE(&garbage, &intern->array.elements[index]);
-		ZVAL_NULL(&intern->array.elements[index]);
-		zval_ptr_dtor(&garbage);
+		zval null = {0};
+		ZVAL_NULL(&null);
+		zend_safe_assign_to_variable_noref(&intern->array.elements[index], &null);
 	}
 }
 
