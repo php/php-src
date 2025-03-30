@@ -1284,6 +1284,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 			case ZEND_IS_IDENTICAL:
 			case ZEND_IS_NOT_IDENTICAL:
 			case ZEND_IS_EQUAL:
+			case ZEND_IS_APPROX_EQUAL:
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_SMALLER:
 			case ZEND_IS_SMALLER_OR_EQUAL:
@@ -1406,6 +1407,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			case ZEND_IS_IDENTICAL:
 			case ZEND_IS_NOT_IDENTICAL:
 			case ZEND_IS_EQUAL:
+			case ZEND_IS_APPROX_EQUAL:
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_SMALLER:
 			case ZEND_IS_SMALLER_OR_EQUAL:

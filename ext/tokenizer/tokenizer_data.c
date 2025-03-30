@@ -136,6 +136,7 @@ char *get_token_type_name(int token_type)
 		case T_BOOLEAN_OR: return "T_BOOLEAN_OR";
 		case T_BOOLEAN_AND: return "T_BOOLEAN_AND";
 		case T_IS_EQUAL: return "T_IS_EQUAL";
+		case T_IS_APPROX_EQUAL: return "T_IS_APPROX_EQUAL";
 		case T_IS_NOT_EQUAL: return "T_IS_NOT_EQUAL";
 		case T_IS_IDENTICAL: return "T_IS_IDENTICAL";
 		case T_IS_NOT_IDENTICAL: return "T_IS_NOT_IDENTICAL";

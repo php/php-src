@@ -88,6 +88,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
 		case ZEND_IS_EQUAL:
+		case ZEND_IS_APPROX_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:

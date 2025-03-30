@@ -2363,6 +2363,7 @@ ZEND_API bool zend_is_smart_branch(const zend_op *opline) /* {{{ */
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_IS_EQUAL:
+		case ZEND_IS_APPROX_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:

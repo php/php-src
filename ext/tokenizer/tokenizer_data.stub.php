@@ -559,6 +559,11 @@ const T_BOOLEAN_AND = UNKNOWN;
 const T_IS_EQUAL = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_IS_APPROX_EQUAL
+ */
+const T_IS_APPROX_EQUAL = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_IS_NOT_EQUAL
  */
 const T_IS_NOT_EQUAL = UNKNOWN;

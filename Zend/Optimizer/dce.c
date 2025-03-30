@@ -101,6 +101,7 @@ static inline bool may_have_side_effects(
 		case ZEND_SL:
 		case ZEND_SR:
 		case ZEND_IS_EQUAL:
+		case ZEND_IS_APPROX_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:

@@ -1249,6 +1249,8 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_IS_EQUAL:
 		case ZEND_CASE:
 			return (binary_op_type) is_equal_function;
+		case ZEND_IS_APPROX_EQUAL:
+			return (binary_op_type) is_approx_equal_function;
 		case ZEND_IS_NOT_EQUAL:
 			return (binary_op_type) is_not_equal_function;
 		case ZEND_IS_SMALLER:

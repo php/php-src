@@ -572,6 +572,24 @@ ZEND_VM_C_LABEL(is_equal_double):
 	ZEND_VM_DISPATCH_TO_HELPER(zend_is_equal_helper, op_1, op1, op_2, op2);
 }
 
+ZEND_VM_HANDLER(210, ZEND_IS_APPROX_EQUAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+	zval *op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op1) == IS_UNDEF)) {
+		op1 = ZVAL_UNDEFINED_OP1();
+	}
+	zval *op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
+		op2 = ZVAL_UNDEFINED_OP2();
+	}
+	int ret = zend_approx_compare(op1, op2);
+	FREE_OP1();
+	FREE_OP2();
+	ZEND_VM_SMART_BRANCH(ret == 0, 1);
+}
+
 ZEND_VM_HELPER(zend_is_not_equal_helper, ANY, ANY, zval *op_1, zval *op_2)
 {
 	int ret;

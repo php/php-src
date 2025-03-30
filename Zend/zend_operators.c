@@ -2389,6 +2389,177 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int ZEND_FASTCALL zend_approx_compare(zval *op1, zval *op2)
+{
+	ZEND_API zend_long reference_levdist(const zend_string *string1, const zend_string *string2, zend_long cost_ins, zend_long cost_rep, zend_long cost_del );
+
+	int converted = 0;
+	zval op1_copy, op2_copy;
+	zend_string *tmp;
+
+	// printf("types %d %d\n", Z_TYPE_P(op1), Z_TYPE_P(op2));
+
+	while (1) {
+		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
+			case TYPE_PAIR(IS_LONG, IS_LONG):
+				return Z_LVAL_P(op1)>Z_LVAL_P(op2)?1:(Z_LVAL_P(op1)<Z_LVAL_P(op2)?-1:0);
+
+			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
+				if (!zend_finite(Z_DVAL_P(op1))) return ZEND_UNCOMPARABLE;
+				return ZEND_THREEWAY_COMPARE(round(Z_DVAL_P(op1)), (double) Z_LVAL_P(op2));
+
+			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
+				if (!zend_finite(Z_DVAL_P(op2))) return ZEND_UNCOMPARABLE;
+				return ZEND_THREEWAY_COMPARE((double) Z_LVAL_P(op1), round(Z_DVAL_P(op2)));
+
+			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
+				if (!zend_finite(Z_DVAL_P(op1)) || !zend_finite(Z_DVAL_P(op2))) return ZEND_UNCOMPARABLE;
+				return ZEND_THREEWAY_COMPARE(round(Z_DVAL_P(op1)), round(Z_DVAL_P(op2)));
+
+			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
+				return ZEND_THREEWAY_COMPARE(zend_hash_num_elements(Z_ARR_P(op1)), zend_hash_num_elements(Z_ARR_P(op2)));
+
+			case TYPE_PAIR(IS_NULL, IS_NULL):
+			case TYPE_PAIR(IS_NULL, IS_FALSE):
+			case TYPE_PAIR(IS_FALSE, IS_NULL):
+			case TYPE_PAIR(IS_FALSE, IS_FALSE):
+			case TYPE_PAIR(IS_TRUE, IS_TRUE):
+				return 0;
+
+			case TYPE_PAIR(IS_NULL, IS_TRUE):
+				return -1;
+
+			case TYPE_PAIR(IS_TRUE, IS_NULL):
+				return 1;
+
+			case TYPE_PAIR(IS_STRING, IS_STRING): {
+levenshtein:
+				if (Z_STR_P(op1) == Z_STR_P(op2)) {
+					return 0;
+				}
+				zend_long dist = reference_levdist(Z_STR_P(op1), Z_STR_P(op2), 1, 1, 1);
+				float ratio = (float) dist / MAX(Z_STRLEN_P(op1), Z_STRLEN_P(op2));
+				// printf("dist %ld %g\n", dist, ratio);
+				if (ratio <= .5f) return 0;
+				if (Z_STRLEN_P(op1) < Z_STRLEN_P(op2)) return -1;
+				return 1;
+			}
+
+			case TYPE_PAIR(IS_NULL, IS_STRING): {
+				op1 = &op1_copy;
+				ZVAL_EMPTY_STRING(op1);
+				goto levenshtein;
+			}
+
+			case TYPE_PAIR(IS_STRING, IS_NULL): {
+				op2 = &op2_copy;
+				ZVAL_EMPTY_STRING(op2);
+				goto levenshtein;
+			}
+
+			case TYPE_PAIR(IS_LONG, IS_STRING): {
+				tmp = zend_long_to_str(Z_LVAL_P(op1));
+op1_tmp_str_compare:
+				zend_long dist = reference_levdist(tmp, Z_STR_P(op2), 1, 1, 1);
+				size_t len = ZSTR_LEN(tmp);
+				float ratio = (float) dist / MAX(len, Z_STRLEN_P(op2));
+				zend_string_release_ex(tmp, false);
+				if (ratio <= .5f) return 0;
+				if (len < Z_STRLEN_P(op2)) return -1;
+				return 1;
+			}
+
+			case TYPE_PAIR(IS_STRING, IS_LONG): {
+				tmp = zend_long_to_str(Z_LVAL_P(op2));
+op2_tmp_str_compare:
+				zend_long dist = reference_levdist(tmp, Z_STR_P(op1), 1, 1, 1);
+				size_t len = ZSTR_LEN(tmp);
+				float ratio = (float) dist / MAX(Z_STRLEN_P(op1), len);
+				zend_string_release_ex(tmp, false);
+				if (ratio <= .5f) return 0;
+				if (Z_STRLEN_P(op1) < len) return -1;
+				return 1;
+			}
+
+			case TYPE_PAIR(IS_DOUBLE, IS_STRING):
+				tmp = zend_double_to_str(Z_DVAL_P(op1));
+				goto op1_tmp_str_compare;
+
+			case TYPE_PAIR(IS_STRING, IS_DOUBLE):
+				tmp = zend_double_to_str(Z_DVAL_P(op2));
+				goto op2_tmp_str_compare;
+
+			case TYPE_PAIR(IS_OBJECT, IS_NULL):
+				return 1;
+
+			case TYPE_PAIR(IS_NULL, IS_OBJECT):
+				return -1;
+
+			default:
+				if (Z_ISREF_P(op1)) {
+					op1 = Z_REFVAL_P(op1);
+					continue;
+				} else if (Z_ISREF_P(op2)) {
+					op2 = Z_REFVAL_P(op2);
+					continue;
+				}
+
+				if (Z_TYPE_P(op1) == IS_OBJECT
+				 || Z_TYPE_P(op2) == IS_OBJECT) {
+					zval *object, *other;
+					if (Z_TYPE_P(op1) == IS_OBJECT) {
+						object = op1;
+						other = op2;
+					} else {
+						object = op2;
+						other = op1;
+					}
+					if (EXPECTED(Z_TYPE_P(other) == IS_OBJECT)) {
+						if (Z_OBJ_P(object) == Z_OBJ_P(other)) {
+							return 0;
+						}
+					} else if (Z_TYPE_P(other) == IS_TRUE || Z_TYPE_P(other) == IS_FALSE) {
+						zval casted;
+						if (Z_OBJ_HANDLER_P(object, cast_object)(Z_OBJ_P(object), &casted, _IS_BOOL) == FAILURE) {
+							return object == op1 ? 1 : -1;
+						}
+						int ret = object == op1 ? zend_approx_compare(&casted, other) : zend_approx_compare(other, &casted);
+						ZEND_ASSERT(!Z_REFCOUNTED_P(&casted));
+						return ret;
+					}
+					return Z_OBJ_HANDLER_P(object, compare)(op1, op2);
+				}
+
+				if (!converted) {
+					if (Z_TYPE_P(op1) < IS_TRUE) {
+						return zval_is_true(op2) ? -1 : 0;
+					} else if (Z_TYPE_P(op1) == IS_TRUE) {
+						return zval_is_true(op2) ? 0 : 1;
+					} else if (Z_TYPE_P(op2) < IS_TRUE) {
+						return zval_is_true(op1) ? 1 : 0;
+					} else if (Z_TYPE_P(op2) == IS_TRUE) {
+						return zval_is_true(op1) ? 0 : -1;
+					} else {
+						op1 = _zendi_convert_scalar_to_number_silent(op1, &op1_copy);
+						op2 = _zendi_convert_scalar_to_number_silent(op2, &op2_copy);
+						if (EG(exception)) {
+							return 1; /* to stop comparison of arrays */
+						}
+						converted = 1;
+					}
+				} else if (Z_TYPE_P(op1)==IS_ARRAY) {
+					return 1;
+				} else if (Z_TYPE_P(op2)==IS_ARRAY) {
+					return -1;
+				} else {
+					ZEND_UNREACHABLE();
+					zend_throw_error(NULL, "Unsupported operand types");
+					return 1;
+				}
+		}
+	}
+}
+
 /* return int to be compatible with compare_func_t */
 static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 {
@@ -2449,6 +2620,13 @@ ZEND_API zend_result ZEND_FASTCALL is_not_identical_function(zval *result, zval 
 ZEND_API zend_result ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_BOOL(result, zend_compare(op1, op2) == 0);
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API zend_result ZEND_FASTCALL is_approx_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	ZVAL_BOOL(result, zend_approx_compare(op1, op2) == 0);
 	return SUCCESS;
 }
 /* }}} */

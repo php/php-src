@@ -18,7 +18,7 @@
 
 /* {{{ reference_levdist
  * reference implementation, only optimized for memory usage, not speed */
-static zend_long reference_levdist(const zend_string *string1, const zend_string *string2, zend_long cost_ins, zend_long cost_rep, zend_long cost_del )
+ZEND_API zend_long reference_levdist(const zend_string *string1, const zend_string *string2, zend_long cost_ins, zend_long cost_rep, zend_long cost_del )
 {
 	zend_long *p1, *p2, *tmp;
 	zend_long c0, c1, c2;

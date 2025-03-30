@@ -2436,6 +2436,7 @@ simple_list:
 				case ZEND_IS_IDENTICAL:        BINARY_OP(" === ", 170, 171, 171);
 				case ZEND_IS_NOT_IDENTICAL:    BINARY_OP(" !== ", 170, 171, 171);
 				case ZEND_IS_EQUAL:            BINARY_OP(" == ",  170, 171, 171);
+				case ZEND_IS_APPROX_EQUAL:     BINARY_OP(" ~= ",  170, 171, 171);
 				case ZEND_IS_NOT_EQUAL:        BINARY_OP(" != ",  170, 171, 171);
 				case ZEND_IS_SMALLER:          BINARY_OP(" < ",   180, 181, 181);
 				case ZEND_IS_SMALLER_OR_EQUAL: BINARY_OP(" <= ",  180, 181, 181);

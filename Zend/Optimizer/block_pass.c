@@ -431,6 +431,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				ZEND_FALLTHROUGH;
 
 			case ZEND_IS_EQUAL:
+			case ZEND_IS_APPROX_EQUAL:
 			case ZEND_IS_NOT_EQUAL:
 				if (opline->op1_type == IS_CONST &&
 				    opline->op2_type == IS_CONST) {

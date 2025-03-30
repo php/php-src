@@ -69,7 +69,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '|'
 %left '^'
 %left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
-%nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
+%nonassoc T_IS_EQUAL T_IS_APPROX_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
 %left '.'
 %left T_SL T_SR
@@ -200,6 +200,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_BOOLEAN_OR   "'||'"
 %token T_BOOLEAN_AND  "'&&'"
 %token T_IS_EQUAL     "'=='"
+%token T_IS_APPROX_EQUAL     "'~='"
 %token T_IS_NOT_EQUAL "'!='"
 %token T_IS_IDENTICAL "'==='"
 %token T_IS_NOT_IDENTICAL "'!=='"
@@ -1278,6 +1279,8 @@ expr:
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_IDENTICAL, $1, $3); }
 	|	expr T_IS_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_EQUAL, $1, $3); }
+	|	expr T_IS_APPROX_EQUAL expr
+			{ $$ = zend_ast_create_binary_op(ZEND_IS_APPROX_EQUAL, $1, $3); }
 	|	expr T_IS_NOT_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
 	|	expr '<' expr
