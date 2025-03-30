@@ -730,22 +730,29 @@ PHP_METHOD(SplFixedArray, fromArray)
 		zend_ulong num_index, max_index = 0;
 		zend_long tmp;
 
-		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(data), num_index, str_index) {
-			if (str_index != NULL || (zend_long)num_index < 0) {
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array must contain only positive integer keys");
+		if (HT_IS_PACKED(Z_ARRVAL_P(data))) {
+			/* If there are no holes, then nNumUsed is the number of elements.
+			 * If there are holes, then nNumUsed is the index of the last element. */
+			tmp = Z_ARRVAL_P(data)->nNumUsed;
+		} else {
+			ZEND_HASH_MAP_FOREACH_KEY(Z_ARRVAL_P(data), num_index, str_index) {
+				if (str_index != NULL || (zend_long)num_index < 0) {
+					zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array must contain only positive integer keys");
+					RETURN_THROWS();
+				}
+
+				if (num_index > max_index) {
+					max_index = num_index;
+				}
+			} ZEND_HASH_FOREACH_END();
+
+			tmp = max_index + 1;
+			if (tmp <= 0) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "integer overflow detected");
 				RETURN_THROWS();
 			}
-
-			if (num_index > max_index) {
-				max_index = num_index;
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		tmp = max_index + 1;
-		if (tmp <= 0) {
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "integer overflow detected");
-			RETURN_THROWS();
 		}
+
 		spl_fixedarray_init(&array, tmp);
 
 		ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(data), num_index, element) {
