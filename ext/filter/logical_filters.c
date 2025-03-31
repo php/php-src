@@ -566,9 +566,9 @@ void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 static int is_userinfo_valid(const zend_string *str)
 {
-	const char *valid = "-._~!$&'()*+,;=:";
 	const char *p = ZSTR_VAL(str);
 	while (p - ZSTR_VAL(str) < ZSTR_LEN(str)) {
+		static const char *valid = "-._~!$&'()*+,;=:";
 		if (isalpha(*p) || isdigit(*p) || strchr(valid, *p)) {
 			p++;
 		} else if (*p == '%' && p - ZSTR_VAL(str) <= ZSTR_LEN(str) - 3 && isdigit(*(p+1)) && isxdigit(*(p+2))) {
