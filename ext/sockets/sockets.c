@@ -70,6 +70,9 @@
 # if defined(HAVE_LINUX_IF_ETHER_H)
 #  include <linux/if_ether.h>
 # endif
+# if defined(HAVE_LINUX_UDP_H)
+#  include <linux/udp.h>
+# endif
 #endif
 
 #include <stddef.h>
@@ -2297,6 +2300,22 @@ PHP_FUNCTION(socket_set_option)
 				optlen = sizeof(bpfprog);
 				opt_ptr = &bpfprog;
 			}
+			break;
+		}
+#endif
+
+#if defined(UDP_SEGMENT)
+		case UDP_SEGMENT: {
+			ov = zval_get_long(arg4);
+
+			// UDP segmentation offload maximum size or 0 to disable it
+			if (ov < 0 || ov > USHRT_MAX) {
+				zend_argument_value_error(4, "must be of between 0 and %u", USHRT_MAX);
+				RETURN_FALSE;
+			}
+
+			optlen = sizeof(ov);
+			opt_ptr = &ov;
 			break;
 		}
 #endif
