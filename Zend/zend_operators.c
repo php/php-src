@@ -2396,6 +2396,7 @@ ZEND_API int ZEND_FASTCALL zend_approx_compare(zval *op1, zval *op2)
 	int converted = 0;
 	zval op1_copy, op2_copy;
 	zend_string *tmp;
+	zend_long dist;
 
 	// printf("types %d %d\n", Z_TYPE_P(op1), Z_TYPE_P(op2));
 
@@ -2437,7 +2438,7 @@ levenshtein:
 				if (Z_STR_P(op1) == Z_STR_P(op2)) {
 					return 0;
 				}
-				zend_long dist = reference_levdist(Z_STR_P(op1), Z_STR_P(op2), 1, 1, 1);
+				dist = reference_levdist(Z_STR_P(op1), Z_STR_P(op2), 1, 1, 1);
 				float ratio = (float) dist / MAX(Z_STRLEN_P(op1), Z_STRLEN_P(op2));
 				// printf("dist %ld %g\n", dist, ratio);
 				if (ratio <= .5f) return 0;
@@ -2460,7 +2461,7 @@ levenshtein:
 			case TYPE_PAIR(IS_LONG, IS_STRING): {
 				tmp = zend_long_to_str(Z_LVAL_P(op1));
 op1_tmp_str_compare:
-				zend_long dist = reference_levdist(tmp, Z_STR_P(op2), 1, 1, 1);
+				dist = reference_levdist(tmp, Z_STR_P(op2), 1, 1, 1);
 				size_t len = ZSTR_LEN(tmp);
 				float ratio = (float) dist / MAX(len, Z_STRLEN_P(op2));
 				zend_string_release_ex(tmp, false);
@@ -2472,7 +2473,7 @@ op1_tmp_str_compare:
 			case TYPE_PAIR(IS_STRING, IS_LONG): {
 				tmp = zend_long_to_str(Z_LVAL_P(op2));
 op2_tmp_str_compare:
-				zend_long dist = reference_levdist(tmp, Z_STR_P(op1), 1, 1, 1);
+				dist = reference_levdist(tmp, Z_STR_P(op1), 1, 1, 1);
 				size_t len = ZSTR_LEN(tmp);
 				float ratio = (float) dist / MAX(Z_STRLEN_P(op1), len);
 				zend_string_release_ex(tmp, false);
