@@ -504,16 +504,16 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 }
 
-static int _php_filter_validate_domain(const char *domain, size_t len, zend_long flags) /* {{{ */
+static int php_filter_validate_domain_ex(const zend_string *domain, zend_long flags) /* {{{ */
 {
 	const char *e, *s, *t;
 	size_t l;
 	int hostname = flags & FILTER_FLAG_HOSTNAME;
 	unsigned char i = 1;
 
-	s = domain;
-	l = len;
-	e = domain + l;
+	s = ZSTR_VAL(domain);
+	l = ZSTR_LEN(domain);
+	e = s + l;
 	t = e - 1;
 
 	/* Ignore trailing dot */
@@ -558,7 +558,7 @@ static int _php_filter_validate_domain(const char *domain, size_t len, zend_long
 
 void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	if (!_php_filter_validate_domain(Z_STRVAL_P(value), Z_STRLEN_P(value), flags)) {
+	if (!php_filter_validate_domain_ex(Z_STR_P(value), flags)) {
 		RETURN_VALIDATION_FAILED
 	}
 }
@@ -580,12 +580,12 @@ static int is_userinfo_valid(const zend_string *str)
 	return 1;
 }
 
-static bool php_filter_is_valid_ipv6_hostname(const char *s, size_t l)
+static bool php_filter_is_valid_ipv6_hostname(const zend_string *s)
 {
-	const char *e = s + l;
+	const char *e = ZSTR_VAL(s) + ZSTR_LEN(s);
 	const char *t = e - 1;
 
-	return *s == '[' && *t == ']' && _php_filter_validate_ipv6(s + 1, l - 2, NULL);
+	return *ZSTR_VAL(s) == '[' && *t == ']' && _php_filter_validate_ipv6(ZSTR_VAL(s) + 1, ZSTR_LEN(s) - 2, NULL);
 }
 
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
@@ -608,22 +608,17 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (url->scheme != NULL &&
 		(zend_string_equals_literal_ci(url->scheme, "http") || zend_string_equals_literal_ci(url->scheme, "https"))) {
-		const char *s;
-		size_t l;
 
 		if (url->host == NULL) {
 			goto bad_url;
 		}
 
-		s = ZSTR_VAL(url->host);
-		l = ZSTR_LEN(url->host);
-
 		if (
 			/* An IPv6 enclosed by square brackets is a valid hostname.*/
-			!php_filter_is_valid_ipv6_hostname(s, l) &&
+			!php_filter_is_valid_ipv6_hostname(url->host) &&
 			/* Validate domain.
 			 * This includes a loose check for an IPv4 address. */
-			!_php_filter_validate_domain(ZSTR_VAL(url->host), l, FILTER_FLAG_HOSTNAME)
+			!php_filter_validate_domain_ex(url->host, FILTER_FLAG_HOSTNAME)
 		) {
 			php_url_free(url);
 			RETURN_VALIDATION_FAILED
