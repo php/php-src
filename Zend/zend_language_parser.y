@@ -46,7 +46,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %define api.pure full
 %define api.value.type {zend_parser_stack_elem}
 %define parse.error verbose
-%expect 0
+%expect 1
 
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
@@ -1228,10 +1228,10 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	T_CLONE '(' T_ELLIPSIS ')' {
+	|	T_CLONE argument_list {
 			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
 			name->attr = ZEND_NAME_FQ;
-			$$ = zend_ast_create(ZEND_AST_CALL, name, zend_ast_create_fcc());
+			$$ = zend_ast_create(ZEND_AST_CALL, name, $2);
 		}
 	|	T_CLONE expr {
 			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
