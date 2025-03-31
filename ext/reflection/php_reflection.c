@@ -2671,7 +2671,7 @@ ZEND_METHOD(ReflectionParameter, __toString)
 
 /* }}} */
 
-/* {{{ Returns this parameters's name */
+/* {{{ Returns this parameter's name */
 ZEND_METHOD(ReflectionParameter, getName)
 {
 	reflection_object *intern;
