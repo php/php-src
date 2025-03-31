@@ -882,10 +882,11 @@ type_expr_without_static:
 	|	intersection_type_without_static	{ $$ = $1; }
 ;
 
+//TODO add generic type params to AST
 type_without_static:
-		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
+		T_ARRAY	 generic_type_parameters  { $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
-	|	name		{ $$ = $1; }
+	|	name generic_type_parameters  { $$ = $1; }
 ;
 
 union_type_without_static_element:
