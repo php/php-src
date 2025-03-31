@@ -1863,8 +1863,10 @@ static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_t
 			} else {
 				ZVAL_MAKE_REF_EX(entry, 2);
 			}
-			zval_ptr_dtor(orig_var);
+			zval garbage;
+			ZVAL_COPY_VALUE(&garbage, orig_var);
 			ZVAL_REF(orig_var, Z_REF_P(entry));
+			zval_ptr_dtor(&garbage);
 		} else {
 			if (Z_ISREF_P(entry)) {
 				Z_ADDREF_P(entry);

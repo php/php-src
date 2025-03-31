@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
     (Jakub Zelenka)
+  . Fixed bug GH-18209 (Use-after-free in extract() with EXTR_REFS). (ilutov)
 
 10 Apr 2025, PHP 8.3.20
 
