@@ -2300,6 +2300,22 @@ PHP_FUNCTION(socket_set_option)
 		}
 #endif
 
+#if defined(UDP_SEGMENT)
+		case UDP_SEGMENT: {
+			ov = zval_get_long(arg4);
+
+			// UDP segmentation offload maximum size or 0 to disable it
+			if (ov < 0 || ov > USHRT_MAX) {
+				zend_argument_value_error(4, "must be of between 0 and %u", USHRT_MAX);
+				RETURN_FALSE;
+			}
+
+			optlen = sizeof(ov);
+			opt_ptr = &ov;
+			break;
+		}
+#endif
+
 		default:
 default_case:
 			ov = zval_get_long(arg4);

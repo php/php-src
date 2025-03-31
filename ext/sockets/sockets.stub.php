@@ -2022,6 +2022,14 @@ const ETH_P_LOOP = UNKNOWN;
 const ETH_P_ALL = UNKNOWN;
 #endif
 
+#ifdef UDP_SEGMENT
+/**
+ * @var int
+ * @cvalue UDP_SEGMENT
+ */
+const UDP_SEGMENT = UNKNOWN;
+#endif
+
 /**
  * @strict-properties
  * @not-serializable
