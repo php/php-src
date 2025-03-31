@@ -89,16 +89,17 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
-static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]);
+static bool _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]);
 
-static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static bool php_filter_parse_int(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
 	zend_long ctx_value;
-	int sign = 0, digit = 0;
+	bool is_negative = false;
+	int digit = 0;
 	const char *end = str + str_len;
 
 	switch (*str) {
 		case '-':
-			sign = 1;
+			is_negative = true;
 			ZEND_FALLTHROUGH;
 		case '+':
 			str++;
@@ -108,43 +109,43 @@ static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret)
 
 	if (*str == '0' && str + 1 == end) {
 		/* Special cases: +0 and -0 */
-		return 1;
+		return true;
 	}
 
 	/* must start with 1..9*/
 	if (str < end && *str >= '1' && *str <= '9') {
-		ctx_value = ((sign)?-1:1) * ((*(str++)) - '0');
+		ctx_value = (is_negative?-1:1) * ((*(str++)) - '0');
 	} else {
-		return -1;
+		return false;
 	}
 
 	if ((end - str > MAX_LENGTH_OF_LONG - 1) /* number too long */
 	 || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) && *str > '2')) {
 		/* overflow */
-		return -1;
+		return false;
 	}
 
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
 			digit = (*(str++) - '0');
-			if ( (!sign) && ctx_value <= (ZEND_LONG_MAX-digit)/10 ) {
+			if ( (!is_negative) && ctx_value <= (ZEND_LONG_MAX-digit)/10 ) {
 				ctx_value = (ctx_value * 10) + digit;
-			} else if ( sign && ctx_value >= (ZEND_LONG_MIN+digit)/10) {
+			} else if ( is_negative && ctx_value >= (ZEND_LONG_MIN+digit)/10) {
 				ctx_value = (ctx_value * 10) - digit;
 			} else {
-				return -1;
+				return false;
 			}
 		} else {
-			return -1;
+			return false;
 		}
 	}
 
 	*ret = ctx_value;
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static bool php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
 	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 
@@ -154,20 +155,20 @@ static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *re
 
 			if ((ctx_value > ((zend_ulong)(~(zend_long)0)) / 8) ||
 				((ctx_value = ctx_value * 8) > ((zend_ulong)(~(zend_long)0)) - n)) {
-				return -1;
+				return false;
 			}
 			ctx_value += n;
 		} else {
-			return -1;
+			return false;
 		}
 	}
 
 	*ret = (zend_long)ctx_value;
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static bool php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
 	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 	zend_ulong n;
@@ -180,17 +181,17 @@ static int php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret)
 		} else if (*str >= 'A' && *str <= 'F') {
 			n = ((*(str++)) - ('A' - 10));
 		} else {
-			return -1;
+			return false;
 		}
 		if ((ctx_value > ((zend_ulong)(~(zend_long)0)) / 16) ||
 			((ctx_value = ctx_value * 16) > ((zend_ulong)(~(zend_long)0)) - n)) {
-			return -1;
+			return false;
 		}
 		ctx_value += n;
 	}
 
 	*ret = (zend_long)ctx_value;
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -199,9 +200,9 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zval *option_val;
 	zend_long  min_range, max_range, option_flags;
 	int   min_range_set, max_range_set;
-	int   allow_octal = 0, allow_hex = 0;
+	bool allow_octal = false, allow_hex = false;
 	size_t	  len;
-	int error = 0;
+	bool error = false;
 	zend_long  ctx_value;
 	const char *p;
 
@@ -217,11 +218,11 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	if (option_flags & FILTER_FLAG_ALLOW_OCTAL) {
-		allow_octal = 1;
+		allow_octal = true;
 	}
 
 	if (option_flags & FILTER_FLAG_ALLOW_HEX) {
-		allow_hex = 1;
+		allow_hex = true;
 	}
 
 	/* Start the validating loop */
@@ -237,8 +238,8 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (len == 0) {
 				RETURN_VALIDATION_FAILED
 			}
-			if (php_filter_parse_hex(p, len, &ctx_value) < 0) {
-				error = 1;
+			if (!php_filter_parse_hex(p, len, &ctx_value)) {
+				error = true;
 			}
 		} else if (allow_octal) {
 			/* Support explicit octal prefix notation */
@@ -248,19 +249,19 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 					RETURN_VALIDATION_FAILED
 				}
 			}
-			if (php_filter_parse_octal(p, len, &ctx_value) < 0) {
-				error = 1;
+			if (!php_filter_parse_octal(p, len, &ctx_value)) {
+				error = true;
 			}
 		} else if (len != 0) {
-			error = 1;
+			error = true;
 		}
 	} else {
-		if (php_filter_parse_int(p, len, &ctx_value) < 0) {
-			error = 1;
+		if (!php_filter_parse_int(p, len, &ctx_value)) {
+			error = true;
 		}
 	}
 
-	if (error > 0 || (min_range_set && (ctx_value < min_range)) || (max_range_set && (ctx_value > max_range))) {
+	if (error || (min_range_set && (ctx_value < min_range)) || (max_range_set && (ctx_value > max_range))) {
 		RETURN_VALIDATION_FAILED
 	} else {
 		zval_ptr_dtor(value);
@@ -359,7 +360,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	double min_range, max_range;
 	int   min_range_set, max_range_set;
 
-	int first, n;
+	int n;
 
 	len = Z_STRLEN_P(value);
 	str = Z_STRVAL_P(value);
@@ -398,7 +399,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (str < end && (*str == '+' || *str == '-')) {
 		*p++ = *str++;
 	}
-	first = 1;
+	bool first = true;
 	while (1) {
 		n = 0;
 		while (str < end && *str >= '0' && *str <= '9') {
@@ -431,7 +432,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (first?(n < 1 || n > 3):(n != 3)) {
 				goto error;
 			}
-			first = 0;
+			first = false;
 			str++;
 		} else {
 			goto error;
@@ -504,7 +505,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 }
 
-static int php_filter_validate_domain_ex(const zend_string *domain, zend_long flags) /* {{{ */
+static bool php_filter_validate_domain_ex(const zend_string *domain, zend_long flags) /* {{{ */
 {
 	const char *e, *s, *t;
 	size_t l;
@@ -524,26 +525,26 @@ static int php_filter_validate_domain_ex(const zend_string *domain, zend_long fl
 
 	/* The total length cannot exceed 253 characters (final dot not included) */
 	if (l > 253) {
-		return 0;
+		return false;
 	}
 
 	/* First char must be alphanumeric */
 	if(*s == '.' || (hostname && !isalnum((int)*(unsigned char *)s))) {
-		return 0;
+		return false;
 	}
 
 	while (s < e) {
 		if (*s == '.') {
 			/* The first and the last character of a label must be alphanumeric */
 			if (*(s + 1) == '.' || (hostname && (!isalnum((int)*(unsigned char *)(s - 1)) || !isalnum((int)*(unsigned char *)(s + 1))))) {
-				return 0;
+				return false;
 			}
 
 			/* Reset label length counter */
 			i = 1;
 		} else {
 			if (i > 63 || (hostname && (*s != '-' || *(s + 1) == '\0') && !isalnum((int)*(unsigned char *)s))) {
-				return 0;
+				return false;
 			}
 
 			i++;
@@ -552,7 +553,7 @@ static int php_filter_validate_domain_ex(const zend_string *domain, zend_long fl
 		s++;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -564,7 +565,7 @@ void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-static int is_userinfo_valid(const zend_string *str)
+static bool is_userinfo_valid(const zend_string *str)
 {
 	const char *p = ZSTR_VAL(str);
 	while (p - ZSTR_VAL(str) < ZSTR_LEN(str)) {
@@ -574,10 +575,10 @@ static int is_userinfo_valid(const zend_string *str)
 		} else if (*p == '%' && p - ZSTR_VAL(str) <= ZSTR_LEN(str) - 3 && isdigit(*(p+1)) && isxdigit(*(p+2))) {
 			p += 3;
 		} else {
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 static bool php_filter_is_valid_ipv6_hostname(const zend_string *s)
@@ -718,16 +719,16 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-static int _php_filter_validate_ipv4(const char *str, size_t str_len, int *ip) /* {{{ */
+static bool _php_filter_validate_ipv4(const char *str, size_t str_len, int *ip) /* {{{ */
 {
 	const char *end = str + str_len;
 	int num, m;
 	int n = 0;
 
 	while (str < end) {
-		int leading_zero;
+		bool leading_zero;
 		if (*str < '0' || *str > '9') {
-			return 0;
+			return false;
 		}
 		leading_zero = (*str == '0');
 		m = 1;
@@ -735,25 +736,25 @@ static int _php_filter_validate_ipv4(const char *str, size_t str_len, int *ip) /
 		while (str < end && (*str >= '0' && *str <= '9')) {
 			num = num * 10 + ((*(str++)) - '0');
 			if (num > 255 || ++m > 3) {
-				return 0;
+				return false;
 			}
 		}
 		/* don't allow a leading 0; that introduces octal numbers,
 		 * which we don't support */
 		if (leading_zero && (num != 0 || m > 1))
-			return 0;
+			return false;
 		ip[n++] = num;
 		if (n == 4) {
 			return str == end;
 		} else if (str >= end || *(str++) != '.') {
-			return 0;
+			return false;
 		}
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 
-static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]) /* {{{ */
+static bool _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]) /* {{{ */
 {
 	int compressed_pos = -1;
 	int blocks = 0;
@@ -797,11 +798,11 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 		if (*str == ':') {
 			if (++str >= end) {
 				/* cannot end in : without previous : */
-				return 0;
+				return false;
 			}
 			if (*str == ':') {
 				if (compressed_pos >= 0) {
-					return 0;
+					return false;
 				}
 				if (ip && blocks < 8) {
 					ip[blocks] = -1;
@@ -809,13 +810,13 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 				compressed_pos = blocks++; /* :: means 1 or more 16-bit 0 blocks */
 				if (++str == end) {
 					if (blocks > 8) {
-						return 0;
+						return false;
 				}
 					goto fixup_ip;
 				}
 			} else if ((str - 1) == s) {
 				/* don't allow leading : without another : following */
-				return 0;
+				return false;
 			}
 		}
 		num = n = 0;
@@ -836,10 +837,10 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 			ip[blocks] = num;
 		}
 		if (n < 1 || n > 4) {
-			return 0;
+			return false;
 		}
 		if (++blocks > 8)
-			return 0;
+			return false;
 	}
 
 fixup_ip:
@@ -1005,7 +1006,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 	}
 	else if (mode == FORMAT_IPV6) {
-		if (_php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value), ip) < 1) {
+		if (!_php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value), ip)) {
 			RETURN_VALIDATION_FAILED
 		}
 
@@ -1082,7 +1083,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			/* The current token did not end with e.g. a "." */
 			RETURN_VALIDATION_FAILED
 		}
-		if (php_filter_parse_hex(input + offset, length, &ret) < 0) {
+		if (!php_filter_parse_hex(input + offset, length, &ret)) {
 			/* The current token is no valid hexadecimal digit */
 			RETURN_VALIDATION_FAILED
 		}
