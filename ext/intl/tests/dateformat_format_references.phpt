@@ -1,5 +1,7 @@
 --TEST--
 Fix dateformat_format() with array argument with values as references.
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === "Windows") die("skip currently unsupported on Windows");
