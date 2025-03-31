@@ -203,7 +203,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	size_t	  len;
 	int error = 0;
 	zend_long  ctx_value;
-	char *p;
+	const char *p;
 
 	/* Parse options */
 	FETCH_LONG_OPTION(min_range,    "min_range");
@@ -272,7 +272,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	char *str = Z_STRVAL_P(value);
+	const char *str = Z_STRVAL_P(value);
 	size_t len = Z_STRLEN_P(value);
 	int ret;
 
@@ -342,7 +342,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	size_t len;
-	char *str, *end;
+	const char *str, *end;
 	char *num, *p;
 	zval *option_val;
 	char *decimal;
@@ -504,9 +504,9 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 }
 
-static int _php_filter_validate_domain(char * domain, size_t len, zend_long flags) /* {{{ */
+static int _php_filter_validate_domain(const char *domain, size_t len, zend_long flags) /* {{{ */
 {
-	char *e, *s, *t;
+	const char *e, *s, *t;
 	size_t l;
 	int hostname = flags & FILTER_FLAG_HOSTNAME;
 	unsigned char i = 1;
@@ -564,7 +564,7 @@ void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-static int is_userinfo_valid(zend_string *str)
+static int is_userinfo_valid(const zend_string *str)
 {
 	const char *valid = "-._~!$&'()*+,;=:";
 	const char *p = ZSTR_VAL(str);
@@ -723,7 +723,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip) /* {{{ */
+static int _php_filter_validate_ipv4(const char *str, size_t str_len, int *ip) /* {{{ */
 {
 	const char *end = str + str_len;
 	int num, m;
@@ -763,7 +763,7 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 	int compressed_pos = -1;
 	int blocks = 0;
 	int num, n, i;
-	char *ipv4;
+	const char *ipv4;
 	const char *end;
 	int ip4elm[4];
 	const char *s = str;
@@ -1035,7 +1035,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	char *input = Z_STRVAL_P(value);
+	const char *input = Z_STRVAL_P(value);
 	size_t input_len = Z_STRLEN_P(value);
 	int tokens, length, exp_separator_set;
 	size_t exp_separator_len;

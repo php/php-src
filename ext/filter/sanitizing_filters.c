@@ -64,8 +64,8 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 {
 	unsigned char *p;
 	unsigned char tmp[256];
-	unsigned char *s = (unsigned char *)chars;
-	unsigned char *e = s + char_len;
+	const unsigned char *s = chars;
+	const unsigned char *e = s + char_len;
 	zend_string *str;
 
 	memset(tmp, 1, sizeof(tmp)-1);
@@ -75,8 +75,8 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 	}
 
 	str = zend_string_safe_alloc(Z_STRLEN_P(value), 3, 0, 0);
-	p = (unsigned char *) ZSTR_VAL(str);
-	s = (unsigned char *) Z_STRVAL_P(value);
+	p = (unsigned char*)ZSTR_VAL(str);
+	s = (const unsigned char*)Z_STRVAL_P(value);
 	e = s + Z_STRLEN_P(value);
 
 	while (s < e) {
@@ -90,14 +90,14 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		s++;
 	}
 	*p = '\0';
-	ZSTR_LEN(str) = p - (unsigned char *)ZSTR_VAL(str);
+	ZSTR_LEN(str) = p - (const unsigned char *)ZSTR_VAL(str);
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, str);
 }
 
 static void php_filter_strip(zval *value, zend_long flags)
 {
-	unsigned char *str;
+	const unsigned char *str;
 	size_t c;
 	zend_string *buf;
 
@@ -106,7 +106,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 		return;
 	}
 
-	str = (unsigned char *)Z_STRVAL_P(value);
+	str = (const unsigned char *)Z_STRVAL_P(value);
 	buf = zend_string_alloc(Z_STRLEN_P(value), 0);
 	c = 0;
 	for (size_t i = 0; i < Z_STRLEN_P(value); i++) {
@@ -142,9 +142,9 @@ static void filter_map_update(filter_map *map, int flag, const unsigned char *al
 	}
 }
 
-static void filter_map_apply(zval *value, filter_map *map)
+static void filter_map_apply(zval *value, const filter_map *map)
 {
-	unsigned char *str;
+	const unsigned char *str;
 	size_t i, c;
 	zend_string *buf;
 
