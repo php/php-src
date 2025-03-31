@@ -1037,7 +1037,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *input = Z_STRVAL_P(value);
 	size_t input_len = Z_STRLEN_P(value);
-	int tokens, length, i, offset, exp_separator_set;
+	int tokens, length, exp_separator_set;
 	size_t exp_separator_len;
 	char separator;
 	char *exp_separator;
@@ -1080,8 +1080,8 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	 * a hexadecimal number followed by a separator character. (With the
 	 * exception of the last token which does not have the separator.)
 	 */
-	for (i = 0; i < tokens; i++) {
-		offset = i * (length + 1);
+	for (int i = 0; i < tokens; i++) {
+		int offset = i * (length + 1);
 
 		if (i < tokens - 1 && input[offset + length] != separator) {
 			/* The current token did not end with e.g. a "." */
