@@ -60,7 +60,7 @@ static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static void php_filter_encode_url(zval *value, const unsigned char* chars, const int char_len, int high, int low, int encode_nul)
+static void php_filter_encode_url(zval *value, const unsigned char* chars, const int char_len)
 {
 	unsigned char *p;
 	unsigned char tmp[256];
@@ -216,7 +216,7 @@ void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 	/* apply strip_high and strip_low filters */
 	php_filter_strip(value, flags);
 	/* urlencode */
-	php_filter_encode_url(value, (unsigned char *)DEFAULT_URL_ENCODE, sizeof(DEFAULT_URL_ENCODE)-1, flags & FILTER_FLAG_ENCODE_HIGH, flags & FILTER_FLAG_ENCODE_LOW, 1);
+	php_filter_encode_url(value, (unsigned char *)DEFAULT_URL_ENCODE, sizeof(DEFAULT_URL_ENCODE)-1);
 }
 /* }}} */
 
