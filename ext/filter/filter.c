@@ -231,7 +231,7 @@ static unsigned int php_sapi_filter_init(void)
 	return SUCCESS;
 }
 
-static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, bool copy) /* {{{ */
+static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset) /* {{{ */
 {
 	filter_list_entry  filter_func;
 
@@ -327,7 +327,7 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 		/* Register mangled variable */
 		if (IF_G(default_filter) != FILTER_UNSAFE_RAW) {
 			ZVAL_STRINGL(&new_var, *val, val_len);
-			php_zval_filter(&new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL, 0);
+			php_zval_filter(&new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL);
 		} else {
 			ZVAL_STRINGL(&new_var, *val, val_len);
 		}
@@ -356,7 +356,7 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 }
 /* }}} */
 
-static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, bool copy) /* {{{ */
+static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset) /* {{{ */
 {
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
@@ -370,14 +370,14 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 			ZVAL_DEREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
 				SEPARATE_ARRAY(element);
-				php_zval_filter_recursive(element, filter, flags, options, charset, copy);
+				php_zval_filter_recursive(element, filter, flags, options, charset);
 			} else {
-				php_zval_filter(element, filter, flags, options, charset, copy);
+				php_zval_filter(element, filter, flags, options, charset);
 			}
 		} ZEND_HASH_FOREACH_END();
 		Z_UNPROTECT_RECURSION_P(value);
 	} else {
-		php_zval_filter(value, filter, flags, options, charset, copy);
+		php_zval_filter(value, filter, flags, options, charset);
 	}
 }
 /* }}} */
@@ -449,7 +449,7 @@ PHP_FUNCTION(filter_has_var)
 
 static void php_filter_call(
 	zval *filtered, zend_long filter, HashTable *filter_args_ht, zend_long filter_args_long,
-	const int copy, zend_long filter_flags
+	zend_long filter_flags
 ) /* {{{ */ {
 	zval *options = NULL;
 	zval *option;
@@ -501,7 +501,7 @@ static void php_filter_call(
 			}
 			return;
 		}
-		php_zval_filter_recursive(filtered, filter, filter_flags, options, charset, copy);
+		php_zval_filter_recursive(filtered, filter, filter_flags, options, charset);
 		return;
 	}
 	if (filter_flags & FILTER_REQUIRE_ARRAY) {
@@ -514,7 +514,7 @@ static void php_filter_call(
 		return;
 	}
 
-	php_zval_filter(filtered, filter, filter_flags, options, charset, copy);
+	php_zval_filter(filtered, filter, filter_flags, options, charset);
 	if (filter_flags & FILTER_FORCE_ARRAY) {
 		zval tmp;
 		ZVAL_COPY_VALUE(&tmp, filtered);
@@ -532,7 +532,7 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 
 	if (!op_ht) {
 		ZVAL_DUP(return_value, input);
-		php_filter_call(return_value, -1, NULL, op_long, 0, FILTER_REQUIRE_ARRAY);
+		php_filter_call(return_value, -1, NULL, op_long, FILTER_REQUIRE_ARRAY);
 	} else {
 		array_init(return_value);
 
@@ -556,7 +556,7 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 				php_filter_call(&nval, -1,
 					Z_TYPE_P(arg_elm) == IS_ARRAY ? Z_ARRVAL_P(arg_elm) : NULL,
 					Z_TYPE_P(arg_elm) == IS_ARRAY ? 0 : zval_get_long(arg_elm),
-					0, FILTER_REQUIRE_SCALAR
+					FILTER_REQUIRE_SCALAR
 				);
 				zend_hash_update(Z_ARRVAL_P(return_value), arg_key, &nval);
 			}
@@ -625,7 +625,7 @@ PHP_FUNCTION(filter_input)
 
 	ZVAL_DUP(return_value, tmp);
 
-	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, 1, FILTER_REQUIRE_SCALAR);
+	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, FILTER_REQUIRE_SCALAR);
 }
 /* }}} */
 
@@ -651,7 +651,7 @@ PHP_FUNCTION(filter_var)
 
 	ZVAL_DUP(return_value, data);
 
-	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, 1, FILTER_REQUIRE_SCALAR);
+	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, FILTER_REQUIRE_SCALAR);
 }
 /* }}} */
 
