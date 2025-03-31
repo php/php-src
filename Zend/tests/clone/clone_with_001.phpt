@@ -14,6 +14,10 @@ $array = [
 	'array' => [1, 2, 3],
 ];
 
+function gen() {
+	yield 'from_gen' => 'value';
+}
+
 var_dump(clone $x);
 var_dump(clone($x));
 var_dump(clone($x, [ 'foo' => $foo, 'bar' => $bar ]));

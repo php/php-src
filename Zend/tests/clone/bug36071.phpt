@@ -8,7 +8,8 @@ $a = clone 0;
 $a[0]->b = 0;
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: __clone method called on non-object in %sbug36071.php:2
+Fatal error: Uncaught TypeError: clone(): Argument #1 ($object) must be of type object, int given in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): clone(0)
+#1 {main}
   thrown in %sbug36071.php on line 2

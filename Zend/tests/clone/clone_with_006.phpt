@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-TypeError: Updated properties must be of type array, int given
+TypeError: clone(): Argument #2 ($withProperties) must be of type array, int given

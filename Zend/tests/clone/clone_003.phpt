@@ -9,7 +9,8 @@ $a = clone $b;
 --EXPECTF--
 Warning: Undefined variable $b in %s on line %d
 
-Fatal error: Uncaught Error: __clone method called on non-object in %s:%d
+Fatal error: Uncaught TypeError: clone(): Argument #1 ($object) must be of type object, null given in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): clone(NULL)
+#1 {main}
   thrown in %s on line %d
