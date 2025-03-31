@@ -356,6 +356,10 @@ PHP 8.5 UPGRADE NOTES
   . ReflectionConstant::getAttributes() was introduced.
     RFC: https://wiki.php.net/rfc/attributes-on-constants
 
+- Standard:
+  . Added array_first() and array_last().
+    RFC: https://wiki.php.net/rfc/array_first_last
+
 ========================================
 7. New Classes and Interfaces
 ========================================
