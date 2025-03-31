@@ -98,7 +98,6 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 static void php_filter_strip(zval *value, zend_long flags)
 {
 	unsigned char *str;
-	size_t i;
 	size_t c;
 	zend_string *buf;
 
@@ -110,7 +109,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 	str = (unsigned char *)Z_STRVAL_P(value);
 	buf = zend_string_alloc(Z_STRLEN_P(value), 0);
 	c = 0;
-	for (i = 0; i < Z_STRLEN_P(value); i++) {
+	for (size_t i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((str[i] >= 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
 		} else if ((str[i] < 32) && (flags & FILTER_FLAG_STRIP_LOW)) {
 		} else if ((str[i] == '`') && (flags & FILTER_FLAG_STRIP_BACKTICK)) {
