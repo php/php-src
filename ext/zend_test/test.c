@@ -1169,6 +1169,30 @@ static ZEND_METHOD(_ZendTestClass, takesUnionType)
 	RETURN_NULL();
 }
 
+static ZEND_METHOD(_ZendTestClass, framelessStaticMethod)
+{
+	zend_long lhs, rhs;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(lhs)
+		Z_PARAM_LONG(rhs)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(lhs + rhs);
+}
+
+ZEND_FRAMELESS_FUNCTION(_ZendTestClass_framelessStaticMethod, 2)
+{
+	zend_long lhs, rhs;
+
+	Z_FLF_PARAM_LONG(1, lhs);
+	Z_FLF_PARAM_LONG(2, rhs);
+
+	ZVAL_LONG(return_value, lhs + rhs);
+
+flf_clean:;
+}
+
 // Returns a newly allocated DNF type `Iterator|(Traversable&Countable)`.
 //
 // We need to generate it "manually" because gen_stubs.php does not support codegen for DNF types ATM.
