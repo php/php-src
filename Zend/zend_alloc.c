@@ -3093,23 +3093,23 @@ static void* poison_realloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_L
 	zend_mm_heap *heap = AG(mm_heap);
 
 	void *new = poison_malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-	new = (char*)new - heap->debug.padding;
 
 	if (ptr) {
-		ptr = (char*)ptr - heap->debug.padding;
-		size_t oldsize = zend_mm_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		size_t size = zend_mm_size(heap, new ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	    /* Determine the size of the old allocation from the unpadded pointer. */
+		size_t oldsize = zend_mm_size(heap, (char*)ptr - heap->debug.padding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+
+		/* Remove the padding size to determine the size that is available to the user. */
+		oldsize -= (2 * heap->debug.padding);
 
 #if ZEND_DEBUG
 		oldsize -= sizeof(zend_mm_debug_info);
-		size -= sizeof(zend_mm_debug_info);
 #endif
 
 		memcpy(new, ptr, MIN(oldsize, size));
-		poison_free((char*)ptr + heap->debug.padding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		poison_free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 
-	return (char*)new + heap->debug.padding;
+	return new;
 }
 
 static size_t poison_gc(void)
