@@ -2917,6 +2917,7 @@ exit:
 }
 /* }}} */
 
+/* This function was manually optimized to reduce the overhead of calling native functions */
 static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, const zval *key) /* {{{ */
 {
 	zend_ffi        *ffi = (zend_ffi*)*obj;
