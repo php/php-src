@@ -911,14 +911,9 @@ static ir_ref jit_IP32(zend_jit_ctx *jit)
 	return ir_RLOAD_U32(ZREG_IP);
 }
 
-static void jit_LOAD_IP(zend_jit_ctx *jit, ir_ref ref)
-{
-	jit_STORE_IP(jit, ref);
-}
-
 static void jit_LOAD_IP_ADDR(zend_jit_ctx *jit, const zend_op *target)
 {
-	jit_LOAD_IP(jit, ir_CONST_ADDR(target));
+	jit_STORE_IP(jit, ir_CONST_ADDR(target));
 }
 
 static void zend_jit_track_last_valid_opline(zend_jit_ctx *jit)
@@ -2203,7 +2198,7 @@ static int zend_jit_leave_throw_stub(zend_jit_ctx *jit)
 	ir_MERGE_WITH_EMPTY_TRUE(if_set);
 
 	// JIT: opline = EG(exception_op);
-	jit_LOAD_IP(jit, jit_EG(exception_op));
+	jit_STORE_IP(jit, jit_EG(exception_op));
 
 	if (GCC_GLOBAL_REGS) {
 		ir_STORE(jit_EX(opline), jit_IP(jit));
@@ -4163,7 +4158,7 @@ static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_th
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 	} else {
 		ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
-		jit_LOAD_IP(jit, ip);
+		jit_STORE_IP(jit, ip);
 	}
 	if (may_throw) {
 		zend_jit_check_exception(jit);
@@ -10282,7 +10277,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 						if (num_args) {
 							ip = ir_ADD_OFFSET(ip, num_args * sizeof(zend_op));
 						}
-						jit_LOAD_IP(jit, ip);
+						jit_STORE_IP(jit, ip);
 					}
 
 					if (!trace && op_array == &func->op_array && call_num_args >= op_array->required_num_args) {
@@ -10304,7 +10299,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 						}
 						ip = ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes)));
 					}
-					jit_LOAD_IP(jit, ip);
+					jit_STORE_IP(jit, ip);
 					helper = ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper);
 				} else {
 					helper = ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper_no_skip_recv);
@@ -10328,7 +10323,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				}
 				ip = ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes)));
 			}
-			jit_LOAD_IP(jit, ip);
+			jit_STORE_IP(jit, ip);
 
 			// JIT: num_args = EX_NUM_ARGS();
 			ir_ref num_args, first_extra_arg;
@@ -11103,7 +11098,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 					ir_GUARD(jit_IP(jit), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 				} else {
 					ir_GUARD(ir_NE(ref, ir_CONST_ADDR(ZEND_VM_RETURN_VAL)), jit_STUB_ADDR(jit, jit_stub_trace_halt));
-					jit_LOAD_IP(jit, ref);
+					jit_STORE_IP(jit, ref);
 				}
 			}
 
@@ -17078,9 +17073,9 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		    opline->opcode == ZEND_DO_FCALL ||
 		    opline->opcode == ZEND_GENERATOR_CREATE) {
 
-			jit_LOAD_IP(jit, ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
+			jit_STORE_IP(jit, ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
 		} else {
-			jit_LOAD_IP(jit, ref);
+			jit_STORE_IP(jit, ref);
 		}
 	}
 	if (may_throw
