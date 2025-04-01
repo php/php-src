@@ -293,6 +293,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> optional_parameter_list
 %type <ast> generic_type_parameter_list
 %type <ast> generic_type_parameters
+%type <ast> generic_type
+%type <ast> non_empty_generic_type_parameters
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -300,6 +302,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
+%type <str> generic_param_name
 
 %type <ident> reserved_non_modifiers semi_reserved
 
@@ -617,8 +620,17 @@ generic_type_parameters:
 ;
 
 generic_type_parameter_list:
-    T_STRING { $$ = zend_ast_create_list(1, ZEND_AST_GENERIC_TYPE_PARAM_LIST, $1); }
-    | generic_type_parameter_list ',' T_STRING { $$ = zend_ast_list_add($1, $3); }
+    generic_type { $$ = zend_ast_create_list(1, ZEND_AST_GENERIC_TYPE_PARAM_LIST, $1); }
+    | generic_type_parameter_list ',' generic_type { $$ = zend_ast_list_add($1, $3); }
+;
+
+non_empty_generic_type_parameters:
+    T_GENERIC_START generic_type_parameter_list possible_comma T_GENERIC_END { $$ = $2; }
+;
+
+generic_type:
+    T_STRING { $$ = zend_ast_create_zval_from_str(zend_ast_get_str($1)); }
+    | T_STRING non_empty_generic_type_parameters { $$ = zend_ast_create(ZEND_AST_GENERIC_TYPE, zend_ast_create_zval_from_str(zend_ast_get_str($1)), $2); }
 ;
 
 class_modifiers:
@@ -1375,6 +1387,10 @@ function:
 ;
 
 backup_doc_comment:
+	%empty { $$ = CG(doc_comment); CG(doc_comment) = NULL; }
+;
+
+generic_param_name:
 	%empty { $$ = CG(doc_comment); CG(doc_comment) = NULL; }
 ;
 
