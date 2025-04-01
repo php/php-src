@@ -338,7 +338,6 @@ PHP_FUNCTION(readdir)
 }
 /* }}} */
 
-#ifdef HAVE_GLOB
 /* {{{ Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
@@ -351,7 +350,7 @@ PHP_FUNCTION(glob)
 	char *pattern = NULL;
 	size_t pattern_len;
 	zend_long flags = 0;
-	glob_t globbuf;
+	php_glob_t globbuf;
 	size_t n;
 	int ret;
 	bool basedir_limit = 0;
@@ -368,7 +367,7 @@ PHP_FUNCTION(glob)
 		RETURN_FALSE;
 	}
 
-	if ((GLOB_AVAILABLE_FLAGS & flags) != flags) {
+	if ((PHP_GLOB_AVAILABLE_FLAGS & flags) != flags) {
 		php_error_docref(NULL, E_WARNING, "At least one of the passed flags is invalid or not supported on this platform");
 		RETURN_FALSE;
 	}
@@ -392,14 +391,14 @@ PHP_FUNCTION(glob)
 #endif
 
 
-	memset(&globbuf, 0, sizeof(glob_t));
+	memset(&globbuf, 0, sizeof(globbuf));
 	globbuf.gl_offs = 0;
-	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
-#ifdef GLOB_NOMATCH
-		if (GLOB_NOMATCH == ret) {
+	if (0 != (ret = php_glob(pattern, flags & PHP_GLOB_FLAGMASK, NULL, &globbuf))) {
+#ifdef PHP_GLOB_NOMATCH
+		if (PHP_GLOB_NOMATCH == ret) {
 			/* Some glob implementation simply return no data if no matches
-			   were found, others return the GLOB_NOMATCH error code.
-			   We don't want to treat GLOB_NOMATCH as an error condition
+			   were found, others return the PHP_GLOB_NOMATCH error code.
+			   We don't want to treat PHP_GLOB_NOMATCH as an error condition
 			   so that PHP glob() behaves the same on both types of
 			   implementations and so that 'foreach (glob() as ...'
 			   can be used for simple glob() calls without further error
@@ -413,7 +412,7 @@ PHP_FUNCTION(glob)
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
-#ifdef GLOB_NOMATCH
+#ifdef PHP_GLOB_NOMATCH
 no_results:
 #endif
 		array_init(return_value);
@@ -428,7 +427,7 @@ no_results:
 				continue;
 			}
 		}
-		/* we need to do this every time since GLOB_ONLYDIR does not guarantee that
+		/* we need to do this every time since PHP_GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
 		 * following:
 		 * If the information about the type of the file is easily available
@@ -436,7 +435,7 @@ no_results:
 		 * determine the information for each file. I.e., the caller must still be
 		 * able to filter directories out.
 		 */
-		if (flags & GLOB_ONLYDIR) {
+		if (flags & PHP_GLOB_ONLYDIR) {
 			zend_stat_t s = {0};
 
 			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
@@ -451,7 +450,7 @@ no_results:
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	}
 
-	globfree(&globbuf);
+	php_globfree(&globbuf);
 
 	if (basedir_limit && !zend_hash_num_elements(Z_ARRVAL_P(return_value))) {
 		zend_array_destroy(Z_ARR_P(return_value));
@@ -459,7 +458,6 @@ no_results:
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ List files & directories inside the specified path */
 PHP_FUNCTION(scandir)

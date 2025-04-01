@@ -13,63 +13,61 @@ const DIRECTORY_SEPARATOR = UNKNOWN;
  */
 const PATH_SEPARATOR = UNKNOWN;
 
-#ifdef HAVE_GLOB
-#if (defined(GLOB_BRACE) && GLOB_BRACE != 0)
+#if (defined(PHP_GLOB_BRACE) && PHP_GLOB_BRACE != 0)
 /**
  * @var int
- * @cvalue GLOB_BRACE
+ * @cvalue PHP_GLOB_BRACE
  */
 const GLOB_BRACE = UNKNOWN;
 #endif
-#if (defined(GLOB_ERR) && GLOB_ERR != 0)
+#if (defined(PHP_GLOB_ERR) && PHP_GLOB_ERR != 0)
 /**
  * @var int
- * @cvalue GLOB_ERR
+ * @cvalue PHP_GLOB_ERR
  */
 const GLOB_ERR = UNKNOWN;
 #endif
-#if (defined(GLOB_MARK) && GLOB_MARK != 0)
+#if (defined(PHP_GLOB_MARK) && PHP_GLOB_MARK != 0)
 /**
  * @var int
- * @cvalue GLOB_MARK
+ * @cvalue PHP_GLOB_MARK
  */
 const GLOB_MARK = UNKNOWN;
 #endif
-#if (defined(GLOB_NOCHECK) && GLOB_NOCHECK != 0)
+#if (defined(PHP_GLOB_NOCHECK) && PHP_GLOB_NOCHECK != 0)
 /**
  * @var int
- * @cvalue GLOB_NOCHECK
+ * @cvalue PHP_GLOB_NOCHECK
  */
 const GLOB_NOCHECK = UNKNOWN;
 #endif
-#if (defined(GLOB_NOESCAPE) && GLOB_NOESCAPE != 0)
+#if (defined(PHP_GLOB_NOESCAPE) && PHP_GLOB_NOESCAPE != 0)
 /**
  * @var int
- * @cvalue GLOB_NOESCAPE
+ * @cvalue PHP_GLOB_NOESCAPE
  */
 const GLOB_NOESCAPE = UNKNOWN;
 #endif
-#if (defined(GLOB_NOSORT) && GLOB_NOSORT != 0)
+#if (defined(PHP_GLOB_NOSORT) && PHP_GLOB_NOSORT != 0)
 /**
  * @var int
- * @cvalue GLOB_NOSORT
+ * @cvalue PHP_GLOB_NOSORT
  */
 const GLOB_NOSORT = UNKNOWN;
 #endif
-#ifdef GLOB_ONLYDIR
+#if (defined(PHP_GLOB_ONLYDIR) && PHP_GLOB_ONLYDIR != 0)
 /**
  * @var int
- * @cvalue GLOB_ONLYDIR
+ * @cvalue PHP_GLOB_ONLYDIR
  */
 const GLOB_ONLYDIR = UNKNOWN;
 #endif
-#ifdef GLOB_AVAILABLE_FLAGS
+#ifdef PHP_GLOB_AVAILABLE_FLAGS
 /**
  * @var int
- * @cvalue GLOB_AVAILABLE_FLAGS
+ * @cvalue PHP_GLOB_AVAILABLE_FLAGS
  */
 const GLOB_AVAILABLE_FLAGS = UNKNOWN;
-#endif
 #endif
 /**
  * @var int
