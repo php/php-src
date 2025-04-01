@@ -483,9 +483,11 @@ typedef struct _zend_internal_arg_info {
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
+//LEHP-RELEVANT
 typedef struct _zend_arg_info {
 	zend_string *name;
 	zend_type type;
+    //LEHP-ASSUMPTION: LEPHP code evaluated at runtime
 	zend_string *default_value;
 } zend_arg_info;
 

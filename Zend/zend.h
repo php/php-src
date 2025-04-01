@@ -144,16 +144,17 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *traits_and_interfaces[1];
 };
 
-typedef struct _zend_generic_type {
+typedef struct _zend_type_parameter {
 	struct _zend_generic_type *elements;
 	size_t element_count;
-	char *type;
-} zend_generic_type;
+	zend_string *name;
+} zend_type_parameter;
 
 struct _zend_class_entry {
   	// TYPE HERE
 	char type;
-	zend_generic_type *generic_type;
+	size_t generic_type_count;
+	zend_type_parameter *generic_type;
 	zend_string *name;
 	/* class_entry or string depending on ZEND_ACC_LINKED */
 	union {

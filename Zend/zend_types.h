@@ -142,6 +142,7 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
+//LEHP-RELEVANT new generic type
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
 #define _ZEND_TYPE_MASK ((1u << 25) - 1)
 /* Only one of these bits may be set. */
@@ -553,11 +554,20 @@ typedef struct _HashTableIterator {
 	uint32_t      next_copy; // circular linked list via index into EG(ht_iterators)
 } HashTableIterator;
 
+typedef struct _zend_generic_value {
+	struct _zend_generic_value *elements;
+	size_t element_count;
+	zend_string *name;
+} zend_generic_value;
+
 struct _zend_object {
 	zend_refcounted_h gc;
 	uint32_t          handle; // TODO: may be removed ???
 	uint32_t          extra_flags; /* OBJ_EXTRA_FLAGS() */
 	zend_class_entry *ce;
+    //LEHP-OPTIMIZATION: COPY THIS FROM _zend_class_entry
+	size_t generic_value_count;
+	zend_generic_value *generic_values;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
 	zval              properties_table[1];
