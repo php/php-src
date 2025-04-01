@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-18209 (Use-after-free in extract() with EXTR_REFS). (ilutov)
   . Fixed bug GH-18212 (fseek with SEEK_CUR whence value and negative offset
     leads to negative stream position). (David Carlier)
+  . Fix resource leak in iptcembed() on error. (nielsdos)
 
 10 Apr 2025, PHP 8.3.20
 
