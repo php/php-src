@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
     (Jakub Zelenka)
   . Fixed bug GH-18209 (Use-after-free in extract() with EXTR_REFS). (ilutov)
+  . Fixed bug GH-18212 (fseek with SEEK_CUR whence value and negative offset
+    leads to negative stream position). (David Carlier)
 
 10 Apr 2025, PHP 8.3.20
 
