@@ -546,7 +546,9 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
-	return zend_std_get_properties(object);
+	/* CurlHandle can never have properties as it's final and has strict-properties on.
+	 * Avoid building a hash table. */
+	return NULL;
 }
 
 zend_result curl_cast_object(zend_object *obj, zval *result, int type)
