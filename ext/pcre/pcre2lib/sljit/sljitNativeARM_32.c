@@ -93,7 +93,7 @@ static const sljit_u8 freg_ebit_map[((SLJIT_NUMBER_OF_FLOAT_REGISTERS + 2) << 1)
 #define VN(vn) (((sljit_ins)freg_map[vn] << 16) | ((sljit_ins)freg_ebit_map[vn] << 7))
 
 /* --------------------------------------------------------------------- */
-/*  Instrucion forms                                                     */
+/*  Instruction forms                                                     */
 /* --------------------------------------------------------------------- */
 
 /* The instruction includes the AL condition.

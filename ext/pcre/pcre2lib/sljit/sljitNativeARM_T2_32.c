@@ -102,7 +102,7 @@ static const sljit_u8 freg_ebit_map[((SLJIT_NUMBER_OF_FLOAT_REGISTERS + 2) << 1)
 	(COPY_BITS(imm, 11, 26, 1) | COPY_BITS(imm, 8, 12, 3) | ((sljit_ins)imm & 0xff))
 
 /* --------------------------------------------------------------------- */
-/*  Instrucion forms                                                     */
+/*  Instruction forms                                                     */
 /* --------------------------------------------------------------------- */
 
 /* dot '.' changed to _

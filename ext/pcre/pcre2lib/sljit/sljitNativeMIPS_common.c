@@ -121,7 +121,7 @@ static const sljit_u8 freg_map[SLJIT_NUMBER_OF_FLOAT_REGISTERS + 4] = {
 #endif /* SLJIT_CONFIG_MIPS_32 */
 
 /* --------------------------------------------------------------------- */
-/*  Instrucion forms                                                     */
+/*  Instruction forms                                                     */
 /* --------------------------------------------------------------------- */
 
 #define S(s)		((sljit_ins)reg_map[s] << 21)
