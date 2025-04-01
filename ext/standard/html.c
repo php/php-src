@@ -812,6 +812,126 @@ static void init_htmlspecialchars_lut(htmlspecialchars_lut* lut, const int flags
 }
 /* }}} */
 
+static unsigned int validate_utf8_char(
+	const unsigned char *str,
+	const size_t str_len,
+	size_t* cursor,
+	zend_result* status
+) {
+	const size_t pos = *cursor;
+	*status = SUCCESS;
+	const size_t tail_len = str_len - pos;
+
+	/* Check if at least 1 byte is available */
+	if (tail_len < 1) {
+		MB_FAILURE(pos, 1);
+	}
+
+	const unsigned char c = str[pos];
+
+	/* ASCII (single byte) */
+	if (c < 0x80) {
+		*cursor = pos + 1;
+		return c;
+	}
+
+	/* Leading byte < 0xC2 => invalid multibyte start */
+	if (c < 0xC2) {
+		MB_FAILURE(pos, 1);
+	}
+
+	/* 2-byte sequence (0xC2..0xDF) */
+	if (c < 0xE0) {
+		/* Need 2 bytes total */
+		if (tail_len < 2) {
+			MB_FAILURE(pos, 1);
+		}
+		const unsigned char b2 = str[pos + 1];
+
+		/* Check continuation byte 10xxxxxx */
+		if ((b2 & 0xC0) != 0x80) {
+			MB_FAILURE(pos, ((b2 < 0x80) || (b2 >= 0xC2 && b2 <= 0xF4)) ? 1 : 2);
+		}
+
+		/* Combine bits into code point and check range >= 0x80 */
+		const unsigned int cp = ((c & 0x1F) << 6) | (b2 & 0x3F);
+		if (cp < 0x80) {
+			MB_FAILURE(pos, 2);
+		}
+
+		*cursor = pos + 2;
+		return cp;
+	}
+
+	/* 3-byte sequence (0xE0..0xEF) */
+	if (c < 0xF0) {
+		/* Need 3 bytes total and valid continuation bytes */
+		if (tail_len < 3 ||
+			((str[pos + 1] & 0xC0) != 0x80) ||
+			((str[pos + 2] & 0xC0) != 0x80)) {
+			if (tail_len < 2 ||
+				((str[pos + 1] < 0x80) || (str[pos + 1] >= 0xC2 && str[pos + 1] <= 0xF4))) {
+				MB_FAILURE(pos, 1);
+			} else if (tail_len < 3 ||
+				((str[pos + 2] < 0x80) || (str[pos + 2] >= 0xC2 && str[pos + 2] <= 0xF4))) {
+				MB_FAILURE(pos, 2);
+			} else {
+				MB_FAILURE(pos, 3);
+			}
+		}
+
+		/* Combine bits and check for >= 0x800 and not in surrogate area */
+		const unsigned int cp = ((c & 0x0F) << 12)
+			| ((str[pos + 1] & 0x3F) << 6)
+			| (str[pos + 2] & 0x3F);
+
+		if (cp < 0x800 || (cp >= 0xD800 && cp <= 0xDFFF)) {
+			MB_FAILURE(pos, 3);
+		}
+
+		*cursor = pos + 3;
+		return cp;
+	}
+
+	/* 4-byte sequence (0xF0..0xF4) */
+	if (c < 0xF5) {
+		/* Need 4 bytes total and valid continuation bytes */
+		if (tail_len < 4 ||
+			((str[pos + 1] & 0xC0) != 0x80) ||
+			((str[pos + 2] & 0xC0) != 0x80) ||
+			((str[pos + 3] & 0xC0) != 0x80)) {
+			if (tail_len < 2 ||
+				((str[pos + 1] < 0x80) || (str[pos + 1] >= 0xC2 && str[pos + 1] <= 0xF4))) {
+				MB_FAILURE(pos, 1);
+			} else if (tail_len < 3 ||
+				((str[pos + 2] < 0x80) || (str[pos + 2] >= 0xC2 && str[pos + 2] <= 0xF4))) {
+				MB_FAILURE(pos, 2);
+			} else if (tail_len < 4 ||
+				((str[pos + 3] < 0x80) || (str[pos + 3] >= 0xC2 && str[pos + 3] <= 0xF4))) {
+				MB_FAILURE(pos, 3);
+			} else {
+				MB_FAILURE(pos, 4);
+			}
+		}
+
+		/* Combine bits and check range 0x10000..0x10FFFF */
+		const unsigned int cp = ((c & 0x07) << 18)
+			| ((str[pos + 1] & 0x3F) << 12)
+			| ((str[pos + 2] & 0x3F) << 6)
+			| (str[pos + 3] & 0x3F);
+
+		if (cp < 0x10000 || cp > 0x10FFFF) {
+			MB_FAILURE(pos, 4);
+		}
+
+		*cursor = pos + 4;
+		return cp;
+	}
+
+	/* Leading byte >= 0xF5 is invalid */
+	MB_FAILURE(pos, 1);
+}
+
 static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charset charset, unsigned code) {
 	/* code is not necessarily a unicode code point */
 	switch (charset) {
@@ -1478,15 +1598,23 @@ PHPAPI zend_string* php_htmlspecialchars_ex(
                 free_space--;
             }
 
-            input_ptr++;
-        } else {
-            /* Multibyte chars */
-            zend_result status;
-            const size_t original_pos = (const char*)input_ptr - ZSTR_VAL(input);
-            size_t cursor = original_pos;
-            const unsigned int this_char = get_next_char(charset, (unsigned char*)ZSTR_VAL(input), ZSTR_LEN(input),
-                                                         &cursor, &status);
-            const size_t processed_len = cursor - original_pos;
+			input_ptr++;
+		} else {
+			/* Multibyte chars */
+			zend_result status;
+			const size_t original_pos = (const char*)input_ptr - ZSTR_VAL(input);
+			size_t cursor = original_pos;
+
+			unsigned int this_char = 0;
+			if (charset == cs_utf_8) {
+				this_char = validate_utf8_char((unsigned char*)ZSTR_VAL(input), ZSTR_LEN(input),
+								   				&cursor, &status);
+			} else {
+				this_char = get_next_char(charset, (unsigned char*)ZSTR_VAL(input), ZSTR_LEN(input),
+										  &cursor, &status);
+			}
+
+			const size_t processed_len = cursor - original_pos;
 
             if (status == FAILURE) {
                 if (flags & ENT_HTML_IGNORE_ERRORS) {
