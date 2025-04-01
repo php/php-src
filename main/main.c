@@ -74,6 +74,7 @@
 #include "zend_dtrace.h"
 #include "zend_observer.h"
 #include "zend_system_id.h"
+#include "zend_smart_string.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -99,20 +100,30 @@ PHPAPI size_t core_globals_offset;
 
 const char php_build_date[] = __DATE__ " " __TIME__;
 
-PHPAPI const char *php_version(void)
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_version(void)
 {
 	return PHP_VERSION;
 }
 
-PHPAPI unsigned int php_version_id(void)
+ZEND_ATTRIBUTE_CONST PHPAPI unsigned int php_version_id(void)
 {
 	return PHP_VERSION_ID;
 }
 
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_build_provider(void)
+{
+#ifdef PHP_BUILD_PROVIDER
+	return PHP_BUILD_PROVIDER;
+#else
+	return NULL;
+#endif
+}
+
 PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
-	char *version_info;
-	spprintf(&version_info, 0, "PHP %s (%s) (built: %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
+	smart_string version_info = {0};
+	smart_string_append_printf(&version_info,
+		"PHP %s (%s) (built: %s) (%s)\n",
 		PHP_VERSION, sapi_module->name, php_build_date,
 #ifdef ZTS
 		"ZTS"
@@ -131,16 +142,15 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 #ifdef HAVE_GCOV
 		" GCOV"
 #endif
-		,
-#ifdef PHP_BUILD_PROVIDER
-		"Built by " PHP_BUILD_PROVIDER "\n"
-#else
-					""
-#endif
-		,
-		get_zend_version()
 	);
-	return version_info;
+	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
+	if (php_build_provider()) {
+		smart_string_append_printf(&version_info, "Built by %s\n", php_build_provider());
+	}
+	smart_string_appends(&version_info, get_zend_version());
+	smart_string_0(&version_info);
+
+	return version_info.c;
 }
 
 PHPAPI void php_print_version(sapi_module_struct *sapi_module)

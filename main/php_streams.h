@@ -285,6 +285,10 @@ END_EXTERN_C()
 #define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), "stream", php_file_le_stream(), php_file_le_pstream())
 #define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", php_file_le_stream(), php_file_le_pstream())
 
+static zend_always_inline php_stream* php_stream_from_zval_no_verify_no_error(zval *zval) {
+	return (php_stream*)zend_fetch_resource2_ex(zval, NULL, php_file_le_stream(), php_file_le_pstream());
+}
+
 BEGIN_EXTERN_C()
 
 static zend_always_inline bool php_stream_zend_parse_arg_into_stream(

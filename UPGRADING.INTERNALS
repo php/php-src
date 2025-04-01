@@ -21,6 +21,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     could interfere.
   . zend_get_callable_name() now returns the name of the underlying function
     for fake closures.
+  . Added smart_string_append_printf() matching smart_str_append_printf() for
+    char* instead of zend_string*-based smart strings.
+  . Added php_build_provider() to retrieve the value of PHP_BUILD_PROVIDER at
+    runtime.
 
 ========================
 2. Build system changes

@@ -907,6 +907,7 @@ PHP_FUNCTION(pg_close)
 #define PHP_PG_HOST 6
 #define PHP_PG_VERSION 7
 #define PHP_PG_JIT 8
+#define PHP_PG_SERVICE 9
 
 /* php_pgsql_get_link_info */
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
@@ -991,6 +992,12 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			PQclear(res);
 			return;
 		}
+#if defined(HAVE_PG_SERVICE)
+		case PHP_PG_SERVICE: {
+			result = PQservice(pgsql);
+			break;
+		}
+#endif
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	if (result) {
@@ -1046,6 +1053,13 @@ PHP_FUNCTION(pg_jit)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_JIT);
 }
+
+#if defined(HAVE_PG_SERVICE)
+PHP_FUNCTION(pg_service)
+{
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_SERVICE);
+}
+#endif
 
 /* Returns the value of a server parameter */
 PHP_FUNCTION(pg_parameter_status)

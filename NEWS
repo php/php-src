@@ -40,6 +40,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-18026 (Improve "expecting token" error for ampersand). (ilutov)
   . Added the (void) cast to indicate that not using a value is intentional.
     (timwolla)
+  . Added get_error_handler(), get_exception_handler() functions. (Arnaud)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -95,6 +96,8 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
+  . Remove PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK from pcre compile options.
+    (mvorisek)
 
 - PDO_PGSQL:
   . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
@@ -108,6 +111,8 @@ PHP                                                                        NEWS
   . Added Iterable support for pgsql_copy_from. (David Carlier)
   . pg_connect checks if connection_string contains any null byte,
     pg_close_stmt check if the statement contains any null byte.
+    (David Carlier)
+  . Added pg_service to get the connection current service identifier.
     (David Carlier)
 
 - POSIX:

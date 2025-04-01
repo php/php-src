@@ -59,6 +59,11 @@ PHP 8.5 UPGRADE NOTES
   . pcntl_exec() now throws ValueErrors when entries or keys of the
     $env_vars parameter contain null bytes.
 
+- PCRE:
+  . The extension is compiled without semi-deprecated
+    PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK compile option.
+    https://github.com/PCRE2Project/pcre2/issues/736#issuecomment-2754024651
+
 - PDO:
   . The constructor arguments set in conjunction with PDO::FETCH_CLASS now
     follow the usual CUFA (call_user_func_array) semantics.
@@ -244,6 +249,14 @@ PHP 8.5 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Core:
+  . get_error_handler() allows retrieving the current user-defined error handler
+    function.
+    RFC: https://wiki.php.net/rfc/get-error-exception-handler
+  . get_exception_handler() allows retrieving the current user-defined exception
+    handler function.
+    RFC: https://wiki.php.net/rfc/get-error-exception-handler
+
 - Curl:
   . curl_multi_get_handles() allows retrieving all CurlHandles current
     attached to a CurlMultiHandle. This includes both handles added using
@@ -265,6 +278,7 @@ PHP 8.5 UPGRADE NOTES
   . pg_close_stmt offers an alternative way to close a prepared
     statement from the DEALLOCATE sql command in that we can reuse
     its name afterwards.
+  . pg_service returns the ongoing service name of the connection.
 
 - Reflection:
   . ReflectionConstant::getFileName() was introduced.

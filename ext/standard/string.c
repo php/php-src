@@ -1273,10 +1273,10 @@ PHP_FUNCTION(str_increment)
 				ZSTR_VAL(tmp)[0] = ZSTR_VAL(incremented)[0];
 				break;
 		}
-		zend_string_release_ex(incremented, /* persistent */ false);
-		RETURN_STR(tmp);
+		zend_string_efree(incremented);
+		RETURN_NEW_STR(tmp);
 	}
-	RETURN_STR(incremented);
+	RETURN_NEW_STR(incremented);
 }
 
 
@@ -1323,17 +1323,17 @@ PHP_FUNCTION(str_decrement)
 
 	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
 		if (ZSTR_LEN(decremented) == 1) {
-			zend_string_release_ex(decremented, /* persistent */ false);
+			zend_string_efree(decremented);
 			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
 			RETURN_THROWS();
 		}
 		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
 		memcpy(ZSTR_VAL(tmp), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
 		ZSTR_VAL(tmp)[ZSTR_LEN(decremented) - 1] = '\0';
-		zend_string_release_ex(decremented, /* persistent */ false);
-		RETURN_STR(tmp);
+		zend_string_efree(decremented);
+		RETURN_NEW_STR(tmp);
 	}
-	RETURN_STR(decremented);
+	RETURN_NEW_STR(decremented);
 }
 
 #if defined(PHP_WIN32)
