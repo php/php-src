@@ -120,7 +120,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(ZEND_OPCODE_HAN
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_copy_extra_args_helper_ex(bool skip_recv EXECUTE_DATA_DC)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper_ex(ZEND_OPCODE_HANDLER_ARGS_EX bool skip_recv)
 {
 	zend_op_array *op_array = &EX(func)->op_array;
 
@@ -132,11 +132,7 @@ static void ZEND_FASTCALL zend_jit_copy_extra_args_helper_ex(bool skip_recv EXEC
 
 		if (skip_recv && EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-#ifdef HAVE_GCC_GLOBAL_REGS
 			opline += first_extra_arg;
-#else
-			EX(opline) += first_extra_arg;
-#endif
 		}
 
 		/* move extra args into separate array after all CV and TMP vars */
@@ -164,16 +160,20 @@ static void ZEND_FASTCALL zend_jit_copy_extra_args_helper_ex(bool skip_recv EXEC
 			} while (src != end);
 		}
 	}
+
+#ifndef HAVE_GCC_GLOBAL_REGS
+	return opline;
+#endif
 }
 
-void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D)
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_jit_copy_extra_args_helper_ex(true EXECUTE_DATA_CC);
+	return zend_jit_copy_extra_args_helper_ex(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX true);
 }
 
-void ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(EXECUTE_DATA_D)
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_jit_copy_extra_args_helper_ex(false EXECUTE_DATA_CC);
+	return zend_jit_copy_extra_args_helper_ex(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX false);
 }
 
 bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
