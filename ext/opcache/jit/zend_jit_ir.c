@@ -10307,7 +10307,8 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				if (GCC_GLOBAL_REGS) {
 					ir_CALL(IR_VOID, helper);
 				} else {
-					ir_CALL_1(IR_VOID, helper, jit_FP(jit));
+					ir_ref ref = ir_CALL_2(IR_ADDR, helper, jit_FP(jit), jit_IP(jit));
+					jit_STORE_IP(jit, ref);
 				}
 			}
 		} else {
@@ -10343,7 +10344,8 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			if (GCC_GLOBAL_REGS) {
 				ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper));
 			} else {
-				ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper), jit_FP(jit));
+				ir_ref ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_copy_extra_args_helper), jit_FP(jit), jit_IP(jit));
+				jit_STORE_IP(jit, ref);
 			}
 			ir_END_list(merge_inputs);
 			ir_IF_FALSE(if_extra_args);
