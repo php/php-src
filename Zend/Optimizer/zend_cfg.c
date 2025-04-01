@@ -143,7 +143,11 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 							end = blocks + block_map[op_array->try_catch_array[j].finally_op];
 							while (b != end) {
 								if (b->flags & ZEND_BB_REACHABLE) {
-									op_array->try_catch_array[j].try_op = op_array->try_catch_array[j].catch_op;
+									/* In case we get here, there is no live try block but there is a live finally block.
+									 * If we do have catch_op set, we need to set it to the first catch block to satisfy
+									 * the constraint try_op <= catch_op <= finally_op */
+									op_array->try_catch_array[j].try_op =
+										op_array->try_catch_array[j].catch_op ? op_array->try_catch_array[j].catch_op : b->start;
 									changed = 1;
 									zend_mark_reachable(op_array->opcodes, cfg, blocks + block_map[op_array->try_catch_array[j].try_op]);
 									break;

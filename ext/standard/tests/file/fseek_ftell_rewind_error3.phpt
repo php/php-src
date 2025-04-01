@@ -20,5 +20,5 @@ echo "Done\n";
 --EXPECT--
 *** Testing rewind() : error conditions ***
 -- Testing rewind() with closed/unset file handle --
-rewind(): supplied resource is not a valid stream resource
+rewind(): Argument #1 ($stream) must be an open stream resource
 Done

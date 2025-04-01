@@ -877,7 +877,6 @@ try_again:
 
 		if (!((*guard) & IN_ISSET)) {
 			GC_ADDREF(zobj);
-			ZVAL_UNDEF(&tmp_result);
 
 			*guard |= IN_ISSET;
 			zend_std_call_issetter(zobj, name, &tmp_result);
@@ -946,6 +945,18 @@ uninit_error:
 				goto exit;
 			}
 
+			if (UNEXPECTED(guard)) {
+				uint32_t guard_type = (type == BP_VAR_IS) && zobj->ce->__isset
+					? IN_ISSET : IN_GET;
+				guard = zend_get_property_guard(zobj, name);
+				if (!((*guard) & guard_type)) {
+					(*guard) |= guard_type;
+					retval = zend_std_read_property(zobj, name, type, cache_slot, rv);
+					(*guard) &= ~guard_type;
+					return retval;
+				}
+			}
+
 			return zend_std_read_property(zobj, name, type, cache_slot, rv);
 		}
 	}
@@ -968,6 +979,43 @@ static zend_always_inline bool property_uses_strict_types(void) {
 	return execute_data
 		&& execute_data->func
 		&& ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data));
+}
+
+static zval *forward_write_to_lazy_object(zend_object *zobj,
+		zend_string *name, zval *value, void **cache_slot, bool guarded)
+{
+	zval *variable_ptr;
+
+	/* backup value as it may change during initialization */
+	zval backup;
+	ZVAL_COPY(&backup, value);
+
+	zend_object *instance = zend_lazy_object_init(zobj);
+	if (UNEXPECTED(!instance)) {
+		zval_ptr_dtor(&backup);
+		return &EG(error_zval);
+	}
+
+	if (UNEXPECTED(guarded)) {
+		uint32_t *guard = zend_get_property_guard(instance, name);
+		if (!((*guard) & IN_SET)) {
+			(*guard) |= IN_SET;
+			variable_ptr = zend_std_write_property(instance, name, &backup, cache_slot);
+			(*guard) &= ~IN_SET;
+			goto exit;
+		}
+	}
+
+	variable_ptr = zend_std_write_property(instance, name, &backup, cache_slot);
+
+exit:
+	zval_ptr_dtor(&backup);
+
+	if (variable_ptr == &backup) {
+		variable_ptr = value;
+	}
+
+	return variable_ptr;
 }
 
 ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zval *value, void **cache_slot) /* {{{ */
@@ -1151,7 +1199,8 @@ found:;
 			variable_ptr = value;
 		} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-				goto lazy_init;
+				return forward_write_to_lazy_object(zobj, name, value,
+						cache_slot, /* guarded */ true);
 			}
 
 			goto write_std_property;
@@ -1198,26 +1247,9 @@ write_std_property:
 exit:
 	return variable_ptr;
 
-lazy_init:;
-	/* backup value as it may change during initialization */
-	zval backup;
-	ZVAL_COPY(&backup, value);
-
-	zobj = zend_lazy_object_init(zobj);
-	if (UNEXPECTED(!zobj)) {
-		variable_ptr = &EG(error_zval);
-		zval_ptr_dtor(&backup);
-		goto exit;
-	}
-
-	variable_ptr = zend_std_write_property(zobj, name, &backup, cache_slot);
-	zval_ptr_dtor(&backup);
-
-	if (variable_ptr == &backup) {
-		variable_ptr = value;
-	}
-
-	return variable_ptr;
+lazy_init:
+	return forward_write_to_lazy_object(zobj, name, value, cache_slot,
+			/* guarded */ false);
 }
 /* }}} */
 
@@ -1538,6 +1570,17 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		if (!zobj) {
 			return;
 		}
+
+		if (UNEXPECTED(guard)) {
+			guard = zend_get_property_guard(zobj, name);
+			if (!((*guard) & IN_UNSET)) {
+				(*guard) |= IN_UNSET;
+				zend_std_unset_property(zobj, name, cache_slot);
+				(*guard) &= ~IN_UNSET;
+				return;
+			}
+		}
+
 		zend_std_unset_property(zobj, name, cache_slot);
 		return;
 	}
@@ -1731,6 +1774,9 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 		func = (zend_function *)(uintptr_t)ecalloc(1, sizeof(zend_internal_function));
 	}
 	func->type = ZEND_INTERNAL_FUNCTION;
+	/* This trampoline does not use the call_trampoline_op, so it won't reuse the call frame,
+	 * which means we don't even need to reserve a temporary for observers. */
+	func->common.T = 0;
 	func->common.arg_flags[0] = 0;
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
@@ -2324,6 +2370,8 @@ found:
 			}
 			(*guard) &= ~IN_ISSET;
 			OBJ_RELEASE(zobj);
+		} else {
+			goto lazy_init;
 		}
 	}
 
@@ -2337,6 +2385,16 @@ lazy_init:
 			if (!zobj) {
 				result = 0;
 				goto exit;
+			}
+
+			if (UNEXPECTED(zobj->ce->__isset)) {
+				uint32_t *guard = zend_get_property_guard(zobj, name);
+				if (!((*guard) & IN_ISSET)) {
+					(*guard) |= IN_ISSET;
+					result = zend_std_has_property(zobj, name, has_set_exists, cache_slot);
+					(*guard) &= ~IN_ISSET;
+					return result;
+				}
 			}
 
 			return zend_std_has_property(zobj, name, has_set_exists, cache_slot);
@@ -2393,17 +2451,9 @@ ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **c
 		return FAILURE;
 	}
 	*fptr_ptr = Z_FUNC_P(func);
-
 	*ce_ptr = ce;
-	if ((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC) {
-		if (obj_ptr) {
-			*obj_ptr = NULL;
-		}
-	} else {
-		if (obj_ptr) {
-			*obj_ptr = obj;
-		}
-	}
+	*obj_ptr = obj;
+
 	return SUCCESS;
 }
 /* }}} */

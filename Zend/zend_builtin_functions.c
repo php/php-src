@@ -1322,6 +1322,15 @@ ZEND_FUNCTION(restore_error_handler)
 }
 /* }}} */
 
+ZEND_FUNCTION(get_error_handler)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
+		RETURN_COPY(&EG(user_error_handler));
+	}
+}
+
 /* {{{ Sets a user-defined exception handler function. Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
 {
@@ -1367,6 +1376,15 @@ ZEND_FUNCTION(restore_exception_handler)
 	RETURN_TRUE;
 }
 /* }}} */
+
+ZEND_FUNCTION(get_exception_handler)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+		RETURN_COPY(&EG(user_exception_handler));
+	}
+}
 
 static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags) /* {{{ */
 {

@@ -927,7 +927,7 @@ static bool ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_ref ref, ir_i
 	IR_ASSERT(insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN);
 	old_merge_inputs = insn->inputs_count;
 	new_merge_inputs = 0;
-	life_inputs = (old_merge_inputs - IR_BITSET_BITS) ? &holder : ir_bitset_malloc(old_merge_inputs + 1);
+	life_inputs = (old_merge_inputs < IR_BITSET_BITS) ? &holder : ir_bitset_malloc(old_merge_inputs + 1);
 
 	for (i = 1; i <= old_merge_inputs; i++) {
 		ir_ref input = ir_insn_op(insn, i);
@@ -1517,7 +1517,7 @@ static bool ir_may_promote_f2d(ir_ctx *ctx, ir_ref ref)
 	return 0;
 }
 
-static ir_ref ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_ref use)
+static ir_ref ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_bitqueue *worklist)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 	uint32_t count;
@@ -1526,6 +1526,7 @@ static ir_ref ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_ref use)
 	if (IR_IS_CONST_REF(ref)) {
 		return ir_const_float(ctx, (float)insn->val.d);
 	} else {
+		ir_bitqueue_add(worklist, ref);
 		switch (insn->op) {
 			case IR_FP2FP:
 				count = ctx->use_lists[ref].count;
@@ -1555,7 +1556,7 @@ static ir_ref ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_ref use)
 //				return ref;
 			case IR_NEG:
 			case IR_ABS:
-				insn->op1 = ir_promote_d2f(ctx, insn->op1, ref);
+				insn->op1 = ir_promote_d2f(ctx, insn->op1, ref, worklist);
 				insn->type = IR_FLOAT;
 				return ref;
 			case IR_ADD:
@@ -1565,10 +1566,10 @@ static ir_ref ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_ref use)
 			case IR_MIN:
 			case IR_MAX:
 				if (insn->op1 == insn->op2) {
-					insn->op2 = insn->op1 = ir_promote_d2f(ctx, insn->op1, ref);
+					insn->op2 = insn->op1 = ir_promote_d2f(ctx, insn->op1, ref, worklist);
 				} else {
-					insn->op1 = ir_promote_d2f(ctx, insn->op1, ref);
-					insn->op2 = ir_promote_d2f(ctx, insn->op2, ref);
+					insn->op1 = ir_promote_d2f(ctx, insn->op1, ref, worklist);
+					insn->op2 = ir_promote_d2f(ctx, insn->op2, ref, worklist);
 				}
 				insn->type = IR_FLOAT;
 				return ref;
@@ -1580,7 +1581,7 @@ static ir_ref ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_ref use)
 	return ref;
 }
 
-static ir_ref ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_ref use)
+static ir_ref ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_bitqueue *worklist)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 	uint32_t count;
@@ -1590,6 +1591,7 @@ static ir_ref ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_ref use)
 	if (IR_IS_CONST_REF(ref)) {
 		return ir_const_double(ctx, (double)insn->val.f);
 	} else {
+		ir_bitqueue_add(worklist, ref);
 		switch (insn->op) {
 			case IR_FP2FP:
 				count = ctx->use_lists[ref].count;
@@ -1628,7 +1630,7 @@ static ir_ref ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_ref use)
 				return ref;
 			case IR_NEG:
 			case IR_ABS:
-				insn->op1 = ir_promote_f2d(ctx, insn->op1, ref);
+				insn->op1 = ir_promote_f2d(ctx, insn->op1, ref, worklist);
 				insn->type = IR_DOUBLE;
 				return ref;
 			case IR_ADD:
@@ -1638,10 +1640,10 @@ static ir_ref ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_ref use)
 			case IR_MIN:
 			case IR_MAX:
 				if (insn->op1 == insn->op2) {
-					insn->op2 = insn->op1 = ir_promote_f2d(ctx, insn->op1, ref);
+					insn->op2 = insn->op1 = ir_promote_f2d(ctx, insn->op1, ref, worklist);
 				} else {
-					insn->op1 = ir_promote_f2d(ctx, insn->op1, ref);
-					insn->op2 = ir_promote_f2d(ctx, insn->op2, ref);
+					insn->op1 = ir_promote_f2d(ctx, insn->op1, ref, worklist);
+					insn->op2 = ir_promote_f2d(ctx, insn->op2, ref, worklist);
 				}
 				insn->type = IR_DOUBLE;
 				return ref;
@@ -1707,7 +1709,7 @@ static bool ir_may_promote_trunc(ir_ctx *ctx, ir_type type, ir_ref ref)
 						}
 					}
 				}
-				for (p = insn->ops + 1, n = insn->inputs_count - 1; n > 0; p++, n--) {
+				for (p = insn->ops + 2, n = insn->inputs_count - 1; n > 0; p++, n--) {
 					input = *p;
 					if (input != ref) {
 						if (!ir_may_promote_trunc(ctx, type, input)) {
@@ -1723,7 +1725,7 @@ static bool ir_may_promote_trunc(ir_ctx *ctx, ir_type type, ir_ref ref)
 	return 0;
 }
 
-static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
+static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use, ir_bitqueue *worklist)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 	uint32_t count;
@@ -1732,6 +1734,7 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
 	if (IR_IS_CONST_REF(ref)) {
 		return ir_const(ctx, insn->val, type);
 	} else {
+		ir_bitqueue_add(worklist, ref);
 		switch (insn->op) {
 			case IR_ZEXT:
 			case IR_SEXT:
@@ -1776,7 +1779,7 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
 			case IR_NEG:
 			case IR_ABS:
 			case IR_NOT:
-				insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref);
+				insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref, worklist);
 				insn->type = type;
 				return ref;
 			case IR_ADD:
@@ -1789,10 +1792,10 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
 			case IR_XOR:
 			case IR_SHL:
 				if (insn->op1 == insn->op2) {
-					insn->op2 = insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref);
+					insn->op2 = insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref, worklist);
 				} else {
-					insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref);
-					insn->op2 = ir_promote_i2i(ctx, type, insn->op2, ref);
+					insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref, worklist);
+					insn->op2 = ir_promote_i2i(ctx, type, insn->op2, ref, worklist);
 				}
 				insn->type = type;
 				return ref;
@@ -1804,18 +1807,18 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
 //				TODO: ???
 			case IR_COND:
 				if (insn->op2 == insn->op3) {
-					insn->op3 = insn->op2 = ir_promote_i2i(ctx, type, insn->op2, ref);
+					insn->op3 = insn->op2 = ir_promote_i2i(ctx, type, insn->op2, ref, worklist);
 				} else {
-					insn->op2 = ir_promote_i2i(ctx, type, insn->op2, ref);
-					insn->op3 = ir_promote_i2i(ctx, type, insn->op3, ref);
+					insn->op2 = ir_promote_i2i(ctx, type, insn->op2, ref, worklist);
+					insn->op3 = ir_promote_i2i(ctx, type, insn->op3, ref, worklist);
 				}
 				insn->type = type;
 				return ref;
 			case IR_PHI:
-				for (p = insn->ops + 1, n = insn->inputs_count - 1; n > 0; p++, n--) {
+				for (p = insn->ops + 2, n = insn->inputs_count - 1; n > 0; p++, n--) {
 					input = *p;
 					if (input != ref) {
-						*p = ir_promote_i2i(ctx, type, input, ref);
+						*p = ir_promote_i2i(ctx, type, input, ref, worklist);
 					}
 				}
 				insn->type = type;
@@ -1906,7 +1909,7 @@ static uint32_t _ir_estimated_control(ir_ctx *ctx, ir_ref val)
 	}
 
 	IR_ASSERT(ir_op_flags[insn->op] & IR_OP_FLAG_DATA);
-	if (IR_OPND_KIND(ir_op_flags[insn->op], 1) & IR_OPND_CONTROL_DEP) {
+	if (IR_OPND_KIND(ir_op_flags[insn->op], 1) == IR_OPND_CONTROL_DEP) {
 		return insn->op1;
 	}
 
@@ -3328,6 +3331,10 @@ static ir_ref ir_iter_optimize_condition(ir_ctx *ctx, ir_ref control, ir_ref con
 		condition_insn = &ctx->ir_base[condition];
 	}
 
+	if (condition_insn->op == IR_ALLOCA || condition_insn->op == IR_VADDR) {
+		return IR_TRUE;
+	}
+
 	if (!IR_IS_CONST_REF(condition) && ctx->use_lists[condition].count > 1) {
 		condition = ir_check_dominating_predicates(ctx, control, condition);
 	}
@@ -3475,14 +3482,14 @@ void ir_iter_opt(ir_ctx *ctx, ir_bitqueue *worklist)
 					case IR_FP2FP:
 						if (insn->type == IR_FLOAT) {
 							if (ir_may_promote_d2f(ctx, insn->op1)) {
-								ir_ref ref = ir_promote_d2f(ctx, insn->op1, i);
+								ir_ref ref = ir_promote_d2f(ctx, insn->op1, i, worklist);
 								insn->op1 = ref;
 								ir_iter_replace_insn(ctx, i, ref, worklist);
 								break;
 							}
 						} else {
 							if (ir_may_promote_f2d(ctx, insn->op1)) {
-								ir_ref ref = ir_promote_f2d(ctx, insn->op1, i);
+								ir_ref ref = ir_promote_f2d(ctx, insn->op1, i, worklist);
 								insn->op1 = ref;
 								ir_iter_replace_insn(ctx, i, ref, worklist);
 								break;
@@ -3492,17 +3499,17 @@ void ir_iter_opt(ir_ctx *ctx, ir_bitqueue *worklist)
 					case IR_FP2INT:
 						if (ctx->ir_base[insn->op1].type == IR_DOUBLE) {
 							if (ir_may_promote_d2f(ctx, insn->op1)) {
-								insn->op1 = ir_promote_d2f(ctx, insn->op1, i);
+								insn->op1 = ir_promote_d2f(ctx, insn->op1, i, worklist);
 							}
 						} else {
 							if (ir_may_promote_f2d(ctx, insn->op1)) {
-								insn->op1 = ir_promote_f2d(ctx, insn->op1, i);
+								insn->op1 = ir_promote_f2d(ctx, insn->op1, i, worklist);
 							}
 						}
 						goto folding;
 					case IR_TRUNC:
 						if (ir_may_promote_trunc(ctx, insn->type, insn->op1)) {
-							ir_ref ref = ir_promote_i2i(ctx, insn->type, insn->op1, i);
+							ir_ref ref = ir_promote_i2i(ctx, insn->type, insn->op1, i, worklist);
 							insn->op1 = ref;
 							ir_iter_replace_insn(ctx, i, ref, worklist);
 							break;

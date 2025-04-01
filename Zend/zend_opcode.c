@@ -636,13 +636,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 	if (op_array->num_dynamic_func_defs) {
 		for (i = 0; i < op_array->num_dynamic_func_defs; i++) {
-			/* Closures overwrite static_variables in their copy.
-			 * Make sure to destroy them when the prototype function is destroyed. */
-			if (op_array->dynamic_func_defs[i]->static_variables
-					&& (op_array->dynamic_func_defs[i]->fn_flags & ZEND_ACC_CLOSURE)) {
-				zend_array_destroy(op_array->dynamic_func_defs[i]->static_variables);
-				op_array->dynamic_func_defs[i]->static_variables = NULL;
-			}
 			destroy_op_array(op_array->dynamic_func_defs[i]);
 		}
 		efree(op_array->dynamic_func_defs);

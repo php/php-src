@@ -113,9 +113,9 @@ enumerate_providers_fn (const char * const name,
 
 	array_init(&tmp_array);
 
-	add_assoc_string(&tmp_array, "name", (char *)name);
-	add_assoc_string(&tmp_array, "desc", (char *)desc);
-	add_assoc_string(&tmp_array, "file", (char *)file);
+	add_assoc_string(&tmp_array, "name", name);
+	add_assoc_string(&tmp_array, "desc", desc);
+	add_assoc_string(&tmp_array, "file", file);
 	add_next_index_zval(zdesc, &tmp_array);
 }
 /* }}} */
@@ -129,10 +129,10 @@ describe_dict_fn (const char * const lang,
 {
 	zval *zdesc = (zval *) ud;
 	array_init(zdesc);
-	add_assoc_string(zdesc, "lang", (char *)lang);
-	add_assoc_string(zdesc, "name", (char *)name);
-	add_assoc_string(zdesc, "desc", (char *)desc);
-	add_assoc_string(zdesc, "file", (char *)file);
+	add_assoc_string(zdesc, "lang", lang);
+	add_assoc_string(zdesc, "name", name);
+	add_assoc_string(zdesc, "desc", desc);
+	add_assoc_string(zdesc, "file", file);
 }
 /* }}} */
 
@@ -144,10 +144,10 @@ static void php_enchant_list_dicts_fn( const char * const lang_tag,
 	zval tmp_array;
 
 	array_init(&tmp_array);
-	add_assoc_string(&tmp_array, "lang_tag", (char *)lang_tag);
-	add_assoc_string(&tmp_array, "provider_name", (char *)provider_name);
-	add_assoc_string(&tmp_array, "provider_desc", (char *)provider_desc);
-	add_assoc_string(&tmp_array, "provider_file", (char *)provider_file);
+	add_assoc_string(&tmp_array, "lang_tag", lang_tag);
+	add_assoc_string(&tmp_array, "provider_name", provider_name);
+	add_assoc_string(&tmp_array, "provider_desc", provider_desc);
+	add_assoc_string(&tmp_array, "provider_file", provider_file);
 	add_next_index_zval(zdesc, &tmp_array);
 
 }
@@ -318,7 +318,7 @@ PHP_FUNCTION(enchant_broker_get_error)
 
 	msg = enchant_broker_get_error(pbroker->pbroker);
 	if (msg) {
-		RETURN_STRING((char *)msg);
+		RETURN_STRING(msg);
 	}
 	RETURN_FALSE;
 }
@@ -346,12 +346,12 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 
 	switch (dict_type) {
 		case PHP_ENCHANT_MYSPELL:
-			enchant_broker_set_param(pbroker->pbroker, "enchant.myspell.dictionary.path", (const char *)value);
+			enchant_broker_set_param(pbroker->pbroker, "enchant.myspell.dictionary.path", value);
 			RETURN_TRUE;
 			break;
 
 		case PHP_ENCHANT_ISPELL:
-			enchant_broker_set_param(pbroker->pbroker, "enchant.ispell.dictionary.path", (const char *)value);
+			enchant_broker_set_param(pbroker->pbroker, "enchant.ispell.dictionary.path", value);
 			RETURN_TRUE;
 			break;
 
@@ -440,7 +440,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 		RETURN_THROWS();
 	}
 
-	pdict = enchant_broker_request_dict(pbroker->pbroker, (const char *)tag);
+	pdict = enchant_broker_request_dict(pbroker->pbroker, tag);
 	if (pdict) {
 		pbroker->nb_dict++;
 

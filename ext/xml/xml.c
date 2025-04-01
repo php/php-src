@@ -86,7 +86,7 @@ typedef struct {
 	int toffset;
 	int curtag;
 	zend_long ctag_index;
-	char **ltags;
+	zend_string **ltags;
 	bool lastwasopen;
 	bool skipwhite;
 	bool isparsing;
@@ -116,8 +116,6 @@ ZEND_GET_MODULE(xml)
 
 #define XML_MAXLEVEL 255 /* XXX this should be dynamic */
 
-#define SKIP_TAGSTART(str) ((str) + (parser->toffset > strlen(str) ? strlen(str) : parser->toffset))
-
 static zend_class_entry *xml_parser_ce;
 static zend_object_handlers xml_parser_object_handlers;
 
@@ -138,7 +136,7 @@ inline static unsigned short xml_encode_us_ascii(unsigned char);
 inline static char xml_decode_us_ascii(unsigned short);
 static void xml_xmlchar_zval(const XML_Char *, int, const XML_Char *, zval *);
 static int xml_xmlcharlen(const XML_Char *);
-static void xml_add_to_info(xml_parser *parser, const char *name);
+static void xml_add_to_info(xml_parser *parser, zend_string *name);
 inline static zend_string *xml_decode_tag(xml_parser *parser, const XML_Char *tag);
 
 void xml_startElementHandler(void *, const XML_Char *, const XML_Char **);
@@ -311,7 +309,6 @@ static inline xml_parser *xml_parser_from_obj(zend_object *obj) {
 
 static zend_object *xml_parser_create_object(zend_class_entry *class_type) {
 	xml_parser *intern = zend_object_alloc(sizeof(xml_parser), class_type);
-	memset(intern, 0, sizeof(xml_parser) - sizeof(zend_object));
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -323,8 +320,11 @@ static void xml_parser_free_ltags(xml_parser *parser)
 {
 	if (parser->ltags) {
 		int inx;
-		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++)
-			efree(parser->ltags[ inx ]);
+		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++) {
+			if (parser->ltags[inx]) {
+				zend_string_release_ex(parser->ltags[inx], false);
+			}
+		}
 		efree(parser->ltags);
 	}
 }
@@ -553,7 +553,7 @@ static int xml_xmlcharlen(const XML_Char *s)
 /* }}} */
 
 /* {{{ xml_add_to_info() */
-static void xml_add_to_info(xml_parser *parser, const char *name)
+static void xml_add_to_info(xml_parser *parser, zend_string *name)
 {
 	zval *element;
 
@@ -564,11 +564,10 @@ static void xml_add_to_info(xml_parser *parser, const char *name)
 	SEPARATE_ARRAY(Z_REFVAL(parser->info));
 	zend_array *arr = Z_ARRVAL_P(Z_REFVAL(parser->info));
 
-	size_t name_len = strlen(name);
-	if ((element = zend_hash_str_find(arr, name, name_len)) == NULL) {
+	if ((element = zend_hash_find(arr, name)) == NULL) {
 		zval values;
 		array_init(&values);
-		element = zend_hash_str_update(arr, name, name_len, &values);
+		element = zend_hash_update(arr, name, &values);
 	}
 
 	add_next_index_long(element, parser->curtag);
@@ -591,6 +590,17 @@ static zend_string *xml_decode_tag(xml_parser *parser, const XML_Char *tag)
 	return str;
 }
 /* }}} */
+
+static zend_string *xml_stripped_tag(zend_string *tag_name, int offset)
+{
+	if (offset == 0) {
+		return zend_string_copy(tag_name);
+	} else if (offset >= ZSTR_LEN(tag_name)) {
+		return ZSTR_EMPTY_ALLOC();
+	} else {
+		return zend_string_init(ZSTR_VAL(tag_name) + offset, ZSTR_LEN(tag_name) - offset, false);
+	}
+}
 
 static zval *xml_get_separated_data(xml_parser *parser)
 {
@@ -632,7 +642,7 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 	if (ZEND_FCC_INITIALIZED(parser->startElementHandler)) {
 		zval args[3];
 		ZVAL_COPY(&args[0], &parser->index);
-		ZVAL_STRING(&args[1], SKIP_TAGSTART(ZSTR_VAL(tag_name)));
+		ZVAL_STR(&args[1], xml_stripped_tag(tag_name, parser->toffset));
 		array_init(&args[2]);
 
 		while (attributes && *attributes) {
@@ -651,7 +661,7 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 
 		zend_call_known_fcc(&parser->startElementHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
 		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 		zval_ptr_dtor(&args[2]);
 	}
 
@@ -663,15 +673,15 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 			array_init(&tag);
 			array_init(&atr);
 
-			char *skipped_tag_name = SKIP_TAGSTART(ZSTR_VAL(tag_name));
+			zend_string *stripped_tag = xml_stripped_tag(tag_name, parser->toffset);
+			xml_add_to_info(parser, stripped_tag);
 
-			xml_add_to_info(parser, skipped_tag_name);
-
-			add_assoc_string(&tag, "tag", skipped_tag_name);
+			add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
 			add_assoc_string(&tag, "type", "open");
 			add_assoc_long(&tag, "level", parser->level);
 
-			parser->ltags[parser->level-1] = estrdup(ZSTR_VAL(tag_name));
+			/* Because toffset may change, we should use the original tag name */
+			parser->ltags[parser->level - 1] = zend_string_copy(tag_name);
 			parser->lastwasopen = 1;
 
 			attributes = (const XML_Char **) attrs;
@@ -733,11 +743,11 @@ void xml_endElementHandler(void *userData, const XML_Char *name)
 	if (ZEND_FCC_INITIALIZED(parser->endElementHandler)) {
 		zval args[2];
 		ZVAL_COPY(&args[0], &parser->index);
-		ZVAL_STRING(&args[1], SKIP_TAGSTART(ZSTR_VAL(tag_name)));
+		ZVAL_STR(&args[1], xml_stripped_tag(tag_name, parser->toffset));
 
 		zend_call_known_fcc(&parser->endElementHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
 		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 	}
 
 	if (!Z_ISUNDEF(parser->data) && !EG(exception)) {
@@ -749,17 +759,19 @@ void xml_endElementHandler(void *userData, const XML_Char *name)
 				add_assoc_string(zv, "type", "complete");
 			}
 		} else {
-			char *skipped_tag_name = SKIP_TAGSTART(ZSTR_VAL(tag_name));
+			zend_string *stripped_tag = xml_stripped_tag(tag_name, parser->toffset);
 
-			xml_add_to_info(parser, skipped_tag_name);
+			xml_add_to_info(parser, stripped_tag);
 
 			zval *data = xml_get_separated_data(parser);
 			if (EXPECTED(data)) {
 				array_init(&tag);
-				add_assoc_string(&tag, "tag", skipped_tag_name);
+				add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
 				add_assoc_string(&tag, "type", "close");
 				add_assoc_long(&tag, "level", parser->level);
 				zend_hash_next_index_insert(Z_ARRVAL_P(data), &tag);
+			} else {
+				zend_string_release_ex(stripped_tag, false);
 			}
 		}
 
@@ -769,7 +781,11 @@ void xml_endElementHandler(void *userData, const XML_Char *name)
 	zend_string_release_ex(tag_name, 0);
 
 	if ((parser->ltags) && (parser->level <= XML_MAXLEVEL)) {
-		efree(parser->ltags[parser->level-1]);
+		zend_string **str = &parser->ltags[parser->level - 1];
+		if (*str) {
+			zend_string_release_ex(*str, false);
+			*str = NULL;
+		}
 	}
 
 	parser->level--;
@@ -792,7 +808,7 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 		zend_call_known_fcc(&parser->characterDataHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
 		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 	}
 
 	if (Z_ISUNDEF(parser->data) || EG(exception)) {
@@ -868,8 +884,9 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		} ZEND_HASH_FOREACH_END();
 		if (parser->level <= XML_MAXLEVEL && parser->level > 0 && (doprint || (! parser->skipwhite))) {
 			array_init(&tag);
-			xml_add_to_info(parser,SKIP_TAGSTART(parser->ltags[parser->level-1]));
-			add_assoc_string(&tag, "tag", SKIP_TAGSTART(parser->ltags[parser->level-1]));
+			zend_string *stripped_tag = xml_stripped_tag(parser->ltags[parser->level - 1], parser->toffset);
+			xml_add_to_info(parser, stripped_tag);
+			add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
 			add_assoc_str(&tag, "value", decoded_value);
 			add_assoc_string(&tag, "type", "cdata");
 			add_assoc_long(&tag, "level", parser->level);
@@ -900,8 +917,8 @@ void xml_processingInstructionHandler(void *userData, const XML_Char *target, co
 
 	zend_call_known_fcc(&parser->processingInstructionHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
 }
 /* }}} */
 
@@ -921,7 +938,7 @@ void xml_defaultHandler(void *userData, const XML_Char *s, int len)
 
 	zend_call_known_fcc(&parser->defaultHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor_str(&args[1]);
 }
 /* }}} */
 
@@ -947,11 +964,11 @@ void xml_unparsedEntityDeclHandler(void *userData,
 
 	zend_call_known_fcc(&parser->unparsedEntityDeclHandler, /* retval */ NULL, /* param_count */ 6, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
-	zval_ptr_dtor(&args[5]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
+	zval_ptr_dtor_str(&args[5]);
 }
 /* }}} */
 
@@ -975,10 +992,10 @@ void xml_notationDeclHandler(void *userData, const XML_Char *notationName,
 
 	zend_call_known_fcc(&parser->notationDeclHandler, /* retval */ NULL, /* param_count */ 5, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
 }
 /* }}} */
 
@@ -1004,10 +1021,10 @@ int xml_externalEntityRefHandler(XML_Parser userData, const XML_Char *openEntity
 
 	zend_call_known_fcc(&parser->externalEntityRefHandler, /* retval */ &retval, /* param_count */ 5, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
 
 	/* TODO Better handling from callable return value */
 	if (!Z_ISUNDEF(retval)) {
@@ -1037,8 +1054,8 @@ void xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const 
 
 	zend_call_known_fcc(&parser->startNamespaceDeclHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
 }
 /* }}} */
 
@@ -1058,7 +1075,7 @@ void xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 
 	zend_call_known_fcc(&parser->endNamespaceDeclHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor_str(&args[1]);
 }
 /* }}} */
 
@@ -1448,8 +1465,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 
 	parser->level = 0;
 	xml_parser_free_ltags(parser);
-	parser->ltags = safe_emalloc(XML_MAXLEVEL, sizeof(char *), 0);
-	memset(parser->ltags, 0, XML_MAXLEVEL * sizeof(char *));
+	parser->ltags = ecalloc(XML_MAXLEVEL, sizeof(zend_string *));
 
 	XML_SetElementHandler(parser->parser, xml_startElementHandler, xml_endElementHandler);
 	XML_SetCharacterDataHandler(parser->parser, xml_characterDataHandler);

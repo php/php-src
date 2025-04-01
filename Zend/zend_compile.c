@@ -8244,9 +8244,6 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
 	switch (level) {
-		case FUNC_DECL_LEVEL_CONSTEXPR:
-			zend_add_dynamic_func_def(op_array);
-			break;
 		case FUNC_DECL_LEVEL_NESTED: {
 			uint32_t func_ref = zend_add_dynamic_func_def(op_array);
 			if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
@@ -8261,6 +8258,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			}
 			break;
 		}
+		case FUNC_DECL_LEVEL_CONSTEXPR:
 		case FUNC_DECL_LEVEL_TOPLEVEL:
 			/* Nothing to do. */
 			break;
@@ -8686,7 +8684,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 		flags |= zend_property_is_virtual(ce, name, hooks_ast, flags) ? ZEND_ACC_VIRTUAL : 0;
 
-		ZEND_ASSERT(!CG(context).active_property_info_name);
+		zend_string *old_active_property_info_name = CG(context).active_property_info_name;
 		CG(context).active_property_info_name = name;
 
 		if (!hooks_ast) {
@@ -8782,7 +8780,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
 		}
 
-		CG(context).active_property_info_name = NULL;
+		CG(context).active_property_info_name = old_active_property_info_name;
 	}
 }
 /* }}} */
@@ -8862,6 +8860,10 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 
 			if (deprecated) {
 				ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
+				/* For deprecated constants, we need to flag the zval for recursion
+				 * detection. Make sure the zval is separated out of shm. */
+				ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
 		}
 	}
@@ -10589,6 +10591,26 @@ static void zend_compile_include_or_eval(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_void_cast(znode *result, zend_ast *ast)
+{
+	zend_ast *expr_ast = ast->child[0];
+	znode expr_node;
+	zend_op *opline;
+
+	zend_compile_expr(&expr_node, expr_ast);
+
+	switch (expr_node.op_type) {
+		case IS_TMP_VAR:
+		case IS_VAR:
+			opline = zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
+			opline->extended_value = ZEND_FREE_VOID_CAST;
+			break;
+		case IS_CONST:
+			zend_do_free(&expr_node);
+			break;
+	}
+}
+
 static void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -11546,6 +11568,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_THROW:
 			zend_compile_expr(NULL, ast);
+			break;
+		case ZEND_AST_CAST_VOID:
+			zend_compile_void_cast(NULL, ast);
 			break;
 		default:
 		{

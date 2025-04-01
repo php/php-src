@@ -32,30 +32,28 @@
 #include "bcmath.h"
 #include "convert.h"
 #include "private.h"
+#include "simd.h"
 #include <stdbool.h>
 #include <stddef.h>
-#ifdef __SSE2__
-# include <emmintrin.h>
-#endif
 
 /* Convert strings to bc numbers.  Base 10 only.*/
-static const char *bc_count_digits(const char *str, const char *end)
+static inline const char *bc_count_digits(const char *str, const char *end)
 {
 	/* Process in bulk */
-#ifdef __SSE2__
-	const __m128i offset = _mm_set1_epi8((signed char) (SCHAR_MIN - '0'));
+#ifdef HAVE_BC_SIMD_128
+	const bc_simd_128_t offset = bc_simd_set_8x16((signed char) (SCHAR_MIN - '0'));
 	/* we use the less than comparator, so add 1 */
-	const __m128i threshold = _mm_set1_epi8(SCHAR_MIN + ('9' + 1 - '0'));
+	const bc_simd_128_t threshold = bc_simd_set_8x16(SCHAR_MIN + ('9' + 1 - '0'));
 
-	while (str + sizeof(__m128i) <= end) {
-		__m128i bytes = _mm_loadu_si128((const __m128i *) str);
+	while (str + sizeof(bc_simd_128_t) <= end) {
+		bc_simd_128_t bytes = bc_simd_load_8x16((const bc_simd_128_t *) str);
 		/* Wrapping-add the offset to the bytes, such that all bytes below '0' are positive and others are negative.
 		 * More specifically, '0' will be -128 and '9' will be -119. */
-		bytes = _mm_add_epi8(bytes, offset);
+		bytes = bc_simd_add_8x16(bytes, offset);
 		/* Now mark all bytes that are <= '9', i.e. <= -119, i.e. < -118, i.e. the threshold. */
-		bytes = _mm_cmplt_epi8(bytes, threshold);
+		bytes = bc_simd_cmplt_8x16(bytes, threshold);
 
-		int mask = _mm_movemask_epi8(bytes);
+		int mask = bc_simd_movemask_8x16(bytes);
 		if (mask != 0xffff) {
 			/* At least one of the bytes is not within range. Move to the first offending byte. */
 #ifdef PHP_HAVE_BUILTIN_CTZL
@@ -65,7 +63,7 @@ static const char *bc_count_digits(const char *str, const char *end)
 #endif
 		}
 
-		str += sizeof(__m128i);
+		str += sizeof(bc_simd_128_t);
 	}
 #endif
 
@@ -79,19 +77,19 @@ static const char *bc_count_digits(const char *str, const char *end)
 static inline const char *bc_skip_zero_reverse(const char *scanner, const char *stop)
 {
 	/* Check in bulk */
-#ifdef __SSE2__
-	const __m128i c_zero_repeat = _mm_set1_epi8('0');
-	while (scanner - sizeof(__m128i) >= stop) {
-		scanner -= sizeof(__m128i);
-		__m128i bytes = _mm_loadu_si128((const __m128i *) scanner);
+#ifdef HAVE_BC_SIMD_128
+	const bc_simd_128_t c_zero_repeat = bc_simd_set_8x16('0');
+	while (scanner - sizeof(bc_simd_128_t) >= stop) {
+		scanner -= sizeof(bc_simd_128_t);
+		bc_simd_128_t bytes = bc_simd_load_8x16((const bc_simd_128_t *) scanner);
 		/* Checks if all numeric strings are equal to '0'. */
-		bytes = _mm_cmpeq_epi8(bytes, c_zero_repeat);
+		bytes = bc_simd_cmpeq_8x16(bytes, c_zero_repeat);
 
-		int mask = _mm_movemask_epi8(bytes);
+		int mask = bc_simd_movemask_8x16(bytes);
 		/* The probability of having 16 trailing 0s in a row is very low, so we use EXPECTED. */
 		if (EXPECTED(mask != 0xffff)) {
 			/* Move the pointer back and check each character in loop. */
-			scanner += sizeof(__m128i);
+			scanner += sizeof(bc_simd_128_t);
 			break;
 		}
 	}

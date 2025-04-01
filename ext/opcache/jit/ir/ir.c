@@ -2413,10 +2413,18 @@ static ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
 		if (IR_IS_TYPE_INT(op2_insn->type) && op2_insn->val.u64 == 0) {
 			ref = insn->op1;
 			insn = &ctx->ir_base[ref];
+			if (insn->op == IR_ALLOCA || insn->op == IR_VADDR) {
+				return IR_TRUE;
+			}
 		}
 	} else if (insn->op == IR_EQ && insn->op2 == IR_TRUE) {
 		ref = insn->op1;
 		insn = &ctx->ir_base[ref];
+	} else if (insn->op == IR_EQ && insn->op2 == IR_NULL) {
+		ir_insn *op1_insn = &ctx->ir_base[insn->op1];
+		if (op1_insn->op == IR_ALLOCA || op1_insn->op == IR_VADDR) {
+			return IR_FALSE;
+		}
 	}
 //	while (insn->op == IR_SEXT || insn->op == IR_ZEXT || insn->op == IR_BITCAST) {
 //		ref = insn->op1;

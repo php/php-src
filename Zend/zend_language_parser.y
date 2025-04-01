@@ -217,6 +217,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_OBJECT_CAST "'(object)'"
 %token T_BOOL_CAST   "'(bool)'"
 %token T_UNSET_CAST  "'(unset)'"
+%token T_VOID_CAST   "'(void)'"
 %token T_OBJECT_OPERATOR "'->'"
 %token T_NULLSAFE_OBJECT_OPERATOR "'?->'"
 %token T_DOUBLE_ARROW    "'=>'"
@@ -534,6 +535,7 @@ statement:
 			{ $$ = zend_ast_create(ZEND_AST_TRY, $3, $5, $6); }
 	|	T_GOTO T_STRING ';' { $$ = zend_ast_create(ZEND_AST_GOTO, $2); }
 	|	T_STRING ':' { $$ = zend_ast_create(ZEND_AST_LABEL, $1); }
+	|	T_VOID_CAST expr ';' { $$ = zend_ast_create(ZEND_AST_CAST_VOID, $2); }
 ;
 
 catch_list:
@@ -1817,6 +1819,14 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			yystpcpy(yyres, "\"\\\"");
 		}
 		return sizeof("\"\\\"")-1;
+	}
+
+	/* We used "amp" as a dummy label to avoid a duplicate token literal warning. */
+	if (strcmp(toktype, "\"amp\"") == 0) {
+		if (yyres) {
+			yystpcpy(yyres, "token \"&\"");
+		}
+		return sizeof("token \"&\"")-1;
 	}
 
 	/* Strip off the outer quote marks */

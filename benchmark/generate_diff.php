@@ -10,6 +10,7 @@ function main(?string $headCommitHash, ?string $baseCommitHash) {
 
     $repo = __DIR__ . '/repos/data';
     cloneRepo($repo, 'git@github.com:php/benchmarking-data.git');
+    $baseCommitHash = find_benchmarked_commit_hash($repo, $baseCommitHash);
     $headSummaryFile = $repo . '/' . substr($headCommitHash, 0, 2) . '/' . $headCommitHash . '/summary.json';
     $baseSummaryFile = $repo . '/' . substr($baseCommitHash, 0, 2) . '/' . $baseCommitHash . '/summary.json';
     if (!file_exists($headSummaryFile)) {
@@ -58,6 +59,28 @@ function formatDiff(?int $baseInstructions, int $headInstructions): string {
     }
     $instructionDiff = $headInstructions - $baseInstructions;
     return sprintf('%.2f%%', $instructionDiff / $baseInstructions * 100);
+}
+
+function find_benchmarked_commit_hash(string $repo, string $commitHash): ?string {
+    $repeat = 10;
+
+    while (true) {
+        if ($repeat-- <= 0) {
+            fwrite(STDERR, "Count not find benchmarked commit hash\n");
+            exit(1);
+        }
+        $summaryFile = $repo . '/' . substr($commitHash, 0, 2) . '/' . $commitHash . '/summary.json';
+        if (file_exists($summaryFile)) {
+            break;
+        }
+        $commitHash = trim(runCommand(
+            ['git', 'rev-parse', $commitHash . '^'],
+            dirname(__DIR__),
+            printCommand: false,
+        )->stdout);
+    }
+
+    return $commitHash;
 }
 
 $headCommitHash = $argv[1] ?? null;

@@ -1439,7 +1439,7 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&class_type->constants_table, key, c) {
 		if (c->ce == class_type) {
-			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+			if (Z_TYPE(c->value) == IS_CONSTANT_AST || (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
 				new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 				memcpy(new_c, c, sizeof(zend_class_constant));
 				c = new_c;
@@ -1613,8 +1613,12 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		/* Use the default properties table to also update initializers of private properties
 		 * that have been shadowed in a child class. */
 		for (uint32_t i = 0; i < class_type->default_properties_count; i++) {
-			val = &default_properties_table[i];
 			prop_info = class_type->properties_info_table[i];
+			if (!prop_info) {
+				continue;
+			}
+
+			val = &default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST
 					&& UNEXPECTED(update_property(val, prop_info) != SUCCESS)) {
 				return FAILURE;
@@ -4134,6 +4138,19 @@ try_again:
 		case IS_OBJECT:
 		{
 			zend_class_entry *ce = Z_OBJCE_P(callable);
+
+			if (ce == zend_ce_closure) {
+				const zend_function *fn = zend_get_closure_method_def(Z_OBJ_P(callable));
+
+				if (fn->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+					if (fn->common.scope) {
+						return zend_create_member_string(fn->common.scope->name, fn->common.function_name);
+					} else {
+						return zend_string_copy(fn->common.function_name);
+					}
+				}
+			}
+
 			return zend_string_concat2(
 				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
 				"::__invoke", sizeof("::__invoke") - 1);

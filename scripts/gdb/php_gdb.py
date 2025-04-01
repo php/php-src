@@ -28,6 +28,8 @@ Then you can interact with that variable:
 """
 
 import gdb
+import gdb.printing
+import gdb.types
 import re
 import traceback
 import os

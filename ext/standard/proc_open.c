@@ -1247,8 +1247,8 @@ PHP_FUNCTION(proc_open)
 
 	if (command_ht) {
 		uint32_t num_elems = zend_hash_num_elements(command_ht);
-		if (num_elems == 0) {
-			zend_argument_value_error(1, "must have at least one element");
+		if (UNEXPECTED(num_elems == 0)) {
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 

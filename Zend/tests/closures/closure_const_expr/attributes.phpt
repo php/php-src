@@ -8,13 +8,13 @@ reflection
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class Attr {
     public function __construct(public Closure $value) {
-      $value('foo');
+        $value('foo');
     }
 }
 
 #[Attr(static function () { })]
 #[Attr(static function (...$args) {
-  var_dump($args);
+    var_dump($args);
 })]
 class C {}
 

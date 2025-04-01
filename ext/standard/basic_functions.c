@@ -216,31 +216,16 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	BG(umask) = -1;
-	BG(user_tick_functions) = NULL;
-	BG(user_filter_map) = NULL;
-	BG(serialize_lock) = 0;
+	memset(basic_globals_p, 0, sizeof(php_basic_globals));
 
-	memset(&BG(serialize), 0, sizeof(BG(serialize)));
-	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
+	basic_globals_p->umask = -1;
+	basic_globals_p->url_adapt_session_ex.type = 1;
 
-	memset(&BG(url_adapt_session_ex), 0, sizeof(BG(url_adapt_session_ex)));
-	memset(&BG(url_adapt_output_ex), 0, sizeof(BG(url_adapt_output_ex)));
+	zend_hash_init(&basic_globals_p->url_adapt_session_hosts_ht, 0, NULL, NULL, 1);
+	zend_hash_init(&basic_globals_p->url_adapt_output_hosts_ht, 0, NULL, NULL, 1);
 
-	BG(url_adapt_session_ex).type = 1;
-	BG(url_adapt_output_ex).type  = 0;
-
-	zend_hash_init(&BG(url_adapt_session_hosts_ht), 0, NULL, NULL, 1);
-	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
-
-#if defined(_REENTRANT)
-	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
-#endif
-
-	BG(page_uid) = -1;
-	BG(page_gid) = -1;
-
-	BG(syslog_device) = NULL;
+	basic_globals_p->page_uid = -1;
+	basic_globals_p->page_gid = -1;
 }
 /* }}} */
 
