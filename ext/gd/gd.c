@@ -4143,6 +4143,7 @@ PHP_FUNCTION(imageaffinematrixget)
 				case IS_LONG:
 				case IS_DOUBLE:
 				case IS_STRING:
+				case IS_OBJECT:
 					x = zval_get_double(tmp);
 					break;
 				default:
@@ -4159,6 +4160,7 @@ PHP_FUNCTION(imageaffinematrixget)
 				case IS_LONG:
 				case IS_DOUBLE:
 				case IS_STRING:
+				case IS_OBJECT:
 					y = zval_get_double(tmp);
 					break;
 				default:
@@ -4187,6 +4189,7 @@ PHP_FUNCTION(imageaffinematrixget)
 			case IS_LONG:
 			case IS_DOUBLE:
 			case IS_STRING:
+			case IS_OBJECT:
 				angle = zval_get_double(options);
 				break;
 			default:

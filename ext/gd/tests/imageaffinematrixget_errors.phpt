@@ -23,10 +23,13 @@ try {
 }
 var_dump(imageaffinematrixget(IMG_AFFINE_SCALE, ["x" => &$a, "y" => &$a]));
 ?>
---EXPECT--
-imageaffinematrixget(): Argument #2 ($options) must be of type float, A given
-imageaffinematrixget(): Argument #2 ($options) must be a float for the "x" key, A given
-imageaffinematrixget(): Argument #2 ($options) must be a float for the "y" key, A given
+--EXPECTF--
+
+Warning: Object of class A could not be converted to float in %s on line %d
+
+Warning: Object of class A could not be converted to float in %s on line %d
+
+Warning: Object of class A could not be converted to float in %s on line %d
 array(6) {
   [0]=>
   float(10)
