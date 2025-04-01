@@ -417,6 +417,10 @@ PHP 8.5 UPGRADE NOTES
   . The high resolution timer (`hrtime()`) on macOS now uses the recommended
     `clock_gettime_nsec_np(CLOCK_UPTIME_RAW)` API instead of
     `mach_absolute_time()`.
+  . Exceptions now exclude arguments passed in the stack trace. If the old
+    behaviour is desired, then set `zend.exception_ignore_args=0` in INI
+    settings.
+    RFC: https://wiki.php.net/rfc/exception_ignore_args_default_value
 
 - CLI/CGI:
   . The `-z` or `--zend-extension` option has been removed as it was

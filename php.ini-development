@@ -160,7 +160,7 @@
 ;   Production Value: -1
 
 ; zend.exception_ignore_args
-;   Default Value: Off
+;   Default Value: On
 ;   Development Value: Off
 ;   Production Value: On
 

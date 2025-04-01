@@ -72,24 +72,24 @@ foreach ($combinations as list($wsdl, $xsd)) {
 --EXPECTF--
 Fatal error: Uncaught SoapFault exception: [WSDL] SOAP-ERROR: Parsing Schema: can't import schema from '%sbug62900.xsd', unexpected 'targetNamespace'='http://www.w3.org/XML/1998/namespacex', expected 'http://www.w3.org/XML/1998/namespace' in %s:%d
 Stack trace:
-#0 %s(%d): SoapClient->__construct(%s)
+#0 %s(%d): SoapClient->__construct()
 #1 {main}
   thrown in %s on line %d
 
 Fatal error: Uncaught SoapFault exception: [WSDL] SOAP-ERROR: Parsing Schema: can't import schema from '%sbug62900.xsd', missing 'targetNamespace', expected 'http://www.w3.org/XML/1998/namespace' in %s:%d
 Stack trace:
-#0 %s(%d): SoapClient->__construct(%s)
+#0 %s(%d): SoapClient->__construct()
 #1 {main}
   thrown in %s on line %d
 
 Fatal error: Uncaught SoapFault exception: [WSDL] SOAP-ERROR: Parsing Schema: can't import schema from '%sbug62900.xsd', unexpected 'targetNamespace'='http://www.w3.org/XML/1998/namespacex', expected no 'targetNamespace' in %s:%d
 Stack trace:
-#0 %s(%d): SoapClient->__construct(%s)
+#0 %s(%d): SoapClient->__construct()
 #1 {main}
   thrown in %s on line %d
 
 Fatal error: Uncaught SoapFault exception: [WSDL] SOAP-ERROR: Parsing WSDL: Couldn't bind to service in %s:%d
 Stack trace:
-#0 %s(%d): SoapClient->__construct(%s)
+#0 %s(%d): SoapClient->__construct()
 #1 {main}
   thrown in %s on line %d
