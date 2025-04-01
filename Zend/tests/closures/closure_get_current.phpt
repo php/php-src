@@ -27,6 +27,16 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+function foo() {
+    var_dump(Closure::getCurrent());
+}
+
+try {
+    foo(...)();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 int(1)
@@ -50,4 +60,5 @@ int(9)
 int(10)
 int(10)
 int(11)
+Current function is not a closure
 Current function is not a closure

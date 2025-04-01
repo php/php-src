@@ -426,7 +426,7 @@ ZEND_METHOD(Closure, getCurrent)
 
 	if (!prev_ex
 	 || !prev_ex->func
-	 || !(prev_ex->func->common.fn_flags & ZEND_ACC_CLOSURE)) {
+	 || (prev_ex->func->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
 			zend_throw_error(NULL, "Current function is not a closure");
 			RETURN_THROWS();
 	}
