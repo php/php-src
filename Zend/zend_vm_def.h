@@ -3783,7 +3783,19 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+			if (zend_attribute_get_nonpublic_suffix(ce->constructor->common.attributes, &message_suffix) == FAILURE) {
+				ZEND_ASSERT(EG(exception));
+			} else {
+				zend_throw_error(
+					NULL,
+					"Cannot call private %s::__construct()%s",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(message_suffix)
+				);
+				zend_string_release(message_suffix);
+			}
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;

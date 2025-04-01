@@ -84,3 +84,14 @@ final class Deprecated
 
     public function __construct(?string $message = null, ?string $since = null) {}
 }
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_METHOD)]
+final class NonpublicConstructor
+{
+    public readonly string $message;
+
+    public function __construct(string $message) {}
+}

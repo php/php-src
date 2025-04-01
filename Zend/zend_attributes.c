@@ -31,6 +31,7 @@ ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 ZEND_API zend_class_entry *zend_ce_override;
 ZEND_API zend_class_entry *zend_ce_deprecated;
+ZEND_API zend_class_entry *zend_ce_nonpublic_constructor;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -92,6 +93,110 @@ static void validate_allow_dynamic_properties(
 		);
 	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+}
+
+static void validate_nonpublic_constructor(
+	zend_attribute *attr,
+	uint32_t target,
+	zend_class_entry *scope
+) {
+	zend_op_array *op_array = CG(active_op_array);
+	ZEND_ASSERT(op_array);
+
+	if (!(op_array->fn_flags & ZEND_ACC_CTOR)) {
+		zend_error_noreturn(
+			E_ERROR,
+			"#[NonpublicConstructor] can only be applied to constructors"
+		);
+	}
+	if (!(op_array->fn_flags & (ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE))) {
+		zend_error_noreturn(
+			E_ERROR,
+			"#[NonpublicConstructor] can only be applied to protected or private constructors"
+		);
+	}
+	if (attr->argc != 1) {
+		zend_error_noreturn(
+			E_ERROR,
+			"#[NonpublicConstructor] takes 1 parameter, %d given",
+			attr->argc
+		);
+	}
+	zval message;
+	if (FAILURE == zend_get_attribute_value(&message, attr, 0, NULL)) {
+		ZEND_ASSERT(EG(exception));
+		return;
+	}
+
+	if (Z_TYPE(message) != IS_STRING) {
+		zend_error_noreturn(
+			E_ERROR,
+			"NonpublicConstructor::__construct(): Argument #1 ($message) must be of type string, %s given",
+			zend_zval_value_name(&message)
+		);
+	}
+	zval_ptr_dtor(&message);
+}
+
+ZEND_API ZEND_COLD zend_result ZEND_FASTCALL zend_attribute_get_nonpublic_suffix(HashTable *attributes, zend_string **message_suffix)
+{
+	*message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (!attributes) {
+		return SUCCESS;
+	}
+
+	zend_attribute *nonpublicConstructor = zend_get_attribute_str(
+		attributes,
+		"nonpublicconstructor", 
+		sizeof("nonpublicconstructor")-1
+	);
+
+	if (!nonpublicConstructor) {
+		return SUCCESS;
+	}
+
+	ZEND_ASSERT(nonpublicConstructor->argc == 1);
+
+	zend_result result = FAILURE;
+	zend_string *message_prop = ZSTR_EMPTY_ALLOC();
+
+	zval obj;
+	ZVAL_UNDEF(&obj);
+	zval *z;
+
+	/* Construct the NonpublicConstructor object to correctly handle parameter processing. */
+	if (FAILURE == zend_get_attribute_object(
+		&obj,
+		zend_ce_nonpublic_constructor,
+		nonpublicConstructor,
+		NULL,
+		NULL
+	)) {
+		goto out;
+	}
+
+	/* Extract the $message property. */
+	z = zend_read_property_ex(zend_ce_nonpublic_constructor, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL);
+	ZEND_ASSERT(z != &EG(uninitialized_zval));
+	ZEND_ASSERT(Z_TYPE_P(z) == IS_STRING);
+	message_prop = zend_string_copy(Z_STR_P(z));
+
+	/* Construct the suffix. */
+	*message_suffix = zend_strpprintf_unchecked(
+		0,
+		", %S,",
+		message_prop
+	);
+
+	result = SUCCESS;
+
+ out:
+
+	zend_string_release(message_prop);
+	zval_ptr_dtor(&obj);
+
+	return result;
 }
 
 ZEND_METHOD(Attribute, __construct)
@@ -186,6 +291,30 @@ ZEND_METHOD(Deprecated, __construct)
 		ZVAL_NULL(&value);
 	}
 	zend_update_property_ex(zend_ce_deprecated, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_SINCE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+}
+
+ZEND_METHOD(NonpublicConstructor, __construct)
+{
+	zend_string *message = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(message)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval messageValue;
+	ZVAL_STR(&messageValue, message);
+
+	zend_update_property_ex(
+		zend_ce_nonpublic_constructor,
+		Z_OBJ_P(ZEND_THIS),
+		ZSTR_KNOWN(ZEND_STR_MESSAGE),
+		&messageValue
+	);
 
 	/* The assignment might fail due to 'readonly'. */
 	if (UNEXPECTED(EG(exception))) {
@@ -520,6 +649,10 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_deprecated = register_class_Deprecated();
 	attr = zend_mark_internal_attribute(zend_ce_deprecated);
+
+	zend_ce_nonpublic_constructor = register_class_NonpublicConstructor();
+	attr = zend_mark_internal_attribute(zend_ce_nonpublic_constructor);
+	attr->validator = validate_nonpublic_constructor;
 }
 
 void zend_attributes_shutdown(void)
