@@ -74,12 +74,6 @@
 #define sjis_lead(c) ((c) != 0x80 && (c) != 0xA0 && (c) < 0xFD)
 #define sjis_trail(c) ((c) >= 0x40  && (c) != 0x7F && (c) < 0xFD)
 
-/* Lookup table for php_htmlspecialchars */
-typedef struct  {
-	char* entity[256];
-	ushort entity_len[256];
-} htmlspecialchars_lut;
-
 /* {{{ get_default_charset */
 static char *get_default_charset(void) {
 	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
@@ -759,11 +753,11 @@ static zend_result resolve_named_entity_html(const char *start, size_t length, c
 /* }}} */
 
 /* {{{ is_codepoint_allowed */
-static inline zend_bool is_codepoint_allowed(
-	unsigned int cp,               /* The codepoint to check */
+static inline bool is_codepoint_allowed(
+	unsigned int cp,			   /* The codepoint to check */
 	enum entity_charset charset,   /* Current charset */
-	int doctype,                   /* The doctype flags (ENT_HTML401, ENT_HTML5, etc.) */
-	const enc_to_uni* to_uni_table /* Mapping table if needed */
+	int doctype,				   /* The doctype flags (ENT_HTML401, ENT_HTML5, etc.) */
+	const enc_to_uni *to_uni_table /* Mapping table if needed */
 	) {
 	// If charset is Unicode-compatible, the code point is used as-is
 	if (CHARSET_UNICODE_COMPAT(charset)) {
@@ -779,35 +773,41 @@ static inline zend_bool is_codepoint_allowed(
 		return unicode_cp_is_allowed(cp, doctype);
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
+/* Lookup table for php_htmlspecialchars */
+typedef struct  {
+	char *entity[256];
+	uint8_t entity_len[256];
+} htmlspecialchars_lut;
+
 /* {{{ init_htmlspecialchars_lut */
-static void init_htmlspecialchars_lut(htmlspecialchars_lut* lut, const int flags, const int doctype) {
+static void init_htmlspecialchars_lut(htmlspecialchars_lut *lut, const int flags, const int doctype) {
 	memset(lut, 0, sizeof(*lut));
 
 	lut->entity['&'] = "&amp;";
 	lut->entity['>'] = "&gt;";
 	lut->entity['<'] = "&lt;";
-	lut->entity_len['&'] = 5;
-	lut->entity_len['>'] = 4;
-	lut->entity_len['<'] = 4;
+	lut->entity_len['&'] = strlen(lut->entity['&']);
+	lut->entity_len['>'] = strlen(lut->entity['>']);
+	lut->entity_len['<'] = strlen(lut->entity['<']);
 
 	if (flags & ENT_QUOTES & ENT_HTML_QUOTE_DOUBLE) {
 		lut->entity['"'] = "&quot;";
-		lut->entity_len['"'] = 6;
+		lut->entity_len['"'] = strlen(lut->entity['"']);
 	}
 
 	if (flags & ENT_QUOTES & ENT_HTML_QUOTE_SINGLE) {
-		char* apos = "&#039;";
+		char *apos = "&#039;";
 		if (doctype != ENT_HTML401) {
 			if (doctype & (ENT_XML1 | ENT_XHTML | ENT_HTML5)) {
 				apos = "&apos;";
 			}
 		}
 		lut->entity['\''] = apos;
-		lut->entity_len['\''] = 6;
+		lut->entity_len['\''] = strlen(apos);
 	}
 }
 /* }}} */
@@ -1485,118 +1485,118 @@ encode_amp:
 /* }}} */
 
 /* {{{ php_htmlspecialchars */
-PHPAPI zend_string* php_htmlspecialchars_ex(
-    const zend_string* input, const int flags,
-    const char* hint_charset, const bool double_encode,
-    const bool quiet
-    ) {
-    const entity_ht* inv_map = NULL;
-    htmlspecialchars_lut lut;
-    const int doctype = flags & ENT_HTML_DOC_TYPE_MASK;
+PHPAPI zend_string *php_htmlspecialchars_ex(const zend_string *input, const int flags, const char *hint_charset, const bool double_encode) {
+	const entity_ht *inv_map = NULL;
+	htmlspecialchars_lut lut;
+	const int doctype = flags & ENT_HTML_DOC_TYPE_MASK;
 
-    const size_t initial_size = (ZSTR_LEN(input) < 64)
-                                    ? 256
-                                    : zend_safe_addmult(ZSTR_LEN(input), 2, 0, "htmlspecialchars");
-    zend_string* output = zend_string_alloc(initial_size, 0);
+	const size_t initial_size = (ZSTR_LEN(input) < 64)
+									? 256
+									: zend_safe_addmult(ZSTR_LEN(input), 2, 0, "htmlspecialchars");
+	zend_string *output = zend_string_alloc(initial_size, 0);
 
-    size_t free_space = initial_size;
-    char* output_ptr = ZSTR_VAL(output);
-    const char* input_ptr = ZSTR_VAL(input);
-    const char* input_end = input_ptr + input->len;
+	size_t free_space = initial_size;
+	char *output_ptr = ZSTR_VAL(output);
+	const char *input_ptr = ZSTR_VAL(input);
+	const char *input_end = input_ptr + ZSTR_LEN(input);
 
-    const enum entity_charset charset = determine_charset(hint_charset, quiet);
-    const enc_to_uni* to_uni_table = NULL;
-    if (!CHARSET_UNICODE_COMPAT(charset)) {
-        to_uni_table = enc_to_uni_index[charset];
-    }
+	const enum entity_charset charset = determine_charset(hint_charset, false);
+	const enc_to_uni *to_uni_table = NULL;
+	if (!CHARSET_UNICODE_COMPAT(charset)) {
+		to_uni_table = enc_to_uni_index[charset];
+	}
 
-    /* Replacement for invalid characters and byte sequences */
-    const unsigned char* replacement = NULL;
-    size_t replacement_len = 0;
-    if (flags & (ENT_HTML_SUBSTITUTE_ERRORS | ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS)) {
-        if (charset == cs_utf_8) {
-            replacement = (const unsigned char*)"\xEF\xBF\xBD";
-            replacement_len = sizeof("\xEF\xBF\xBD") - 1;
-        } else {
-            replacement = (const unsigned char*)"&#xFFFD;";
-            replacement_len = sizeof("&#xFFFD;") - 1;
-        }
-    }
+	/* Replacement for invalid characters and byte sequences */
+	const char *replacement = NULL;
+	size_t replacement_len = 0;
+	if (flags & (ENT_HTML_SUBSTITUTE_ERRORS | ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS)) {
+		if (charset == cs_utf_8) {
+			replacement = "\xEF\xBF\xBD";
+			replacement_len = sizeof("\xEF\xBF\xBD") - 1;
+		} else {
+			replacement = "&#xFFFD;";
+			replacement_len = sizeof("&#xFFFD;") - 1;
+		}
+	}
+	const char *amp = "&amp;";
+	const size_t amp_len = strlen(amp);
+	const size_t max_numeric_entity_len = 10;
 
-    init_htmlspecialchars_lut(&lut, flags, doctype);
+	init_htmlspecialchars_lut(&lut, flags, doctype);
 
-    if (!double_encode) {
-        inv_map = unescape_inverse_map(1, flags);
-    }
+	if (!double_encode) {
+		inv_map = unescape_inverse_map(1, flags);
+	}
 
-    while (input_ptr < input_end) {
-        const unsigned char c = *input_ptr;
-        /* ASCII chars */
-        if (c < 0x80) {
-            /* Handle HTML entities */
-            if (c == '&' && !double_encode) {
-                const char* semicolon = memchr(input_ptr, ';', MIN(LONGEST_ENTITY_LENGTH + 1, input_end - input_ptr));
-                if (semicolon) {
-                    const size_t candidate_len = semicolon - (const char*)input_ptr + 1;
-                    unsigned dummy1, dummy2;
+	const bool singlebyte_charset = CHARSET_SINGLE_BYTE(charset);
 
-                    /* Named entity */
-                    if (resolve_named_entity_html((const char*)input_ptr + 1, candidate_len - 2, inv_map, &dummy1,
-                                                  &dummy2) == SUCCESS) {
-                        memcpy(output_ptr, input_ptr, candidate_len);
-                        output_ptr += candidate_len;
-                        input_ptr += candidate_len;
-                        free_space -= candidate_len;
-                        goto ensure_memory;
-                    }
+	while (input_ptr < input_end) {
+		const unsigned char c = *input_ptr;
+		/* ASCII chars */
+		if (c < 0x80 || singlebyte_charset) {
+			/* Handle HTML entities */
+			if (c == '&' && !double_encode) {
+				const char *semicolon = memchr(input_ptr, ';', MIN(LONGEST_ENTITY_LENGTH + 1, input_end - input_ptr));
+				if (semicolon) {
+					const size_t candidate_len = semicolon - input_ptr + 1;
+					unsigned dummy1, dummy2;
+					/* Numeric entity */
+					if (input_ptr[1] == '#' && candidate_len <= max_numeric_entity_len) {
+						unsigned code_point;
+						char *start = (char*)input_ptr + 2;
+						const int valid = process_numeric_entity((const char**)&start, &code_point);
+						if (valid == SUCCESS && start == semicolon) {
+							if (!(flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS) ||
+								numeric_entity_is_allowed(code_point, doctype)) {
+								memcpy(output_ptr, input_ptr, candidate_len);
+								output_ptr += candidate_len;
+								input_ptr += candidate_len;
+								free_space -= candidate_len;
+								goto ensure_memory;
+							}
+						}
+					}
 
-                    /* Numeric entity */
-                    if (input_ptr[1] == '#') {
-                        unsigned code_point;
-                        char* start = (char*)input_ptr + 2;
-                        const int valid = process_numeric_entity((const char**)&start, &code_point);
-                        if (valid == SUCCESS && start == semicolon) {
-                            if (!(flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS) ||
-                                numeric_entity_is_allowed(code_point, doctype)) {
-                                memcpy(output_ptr, input_ptr, candidate_len);
-                                output_ptr += candidate_len;
-                                input_ptr += candidate_len;
-                                free_space -= candidate_len;
-                                goto ensure_memory;
-                            }
-                        }
-                    }
-                }
+					/* Named entity */
+					if (resolve_named_entity_html((const char*)input_ptr + 1, candidate_len - 2, inv_map, &dummy1,
+												  &dummy2) == SUCCESS) {
+						memcpy(output_ptr, input_ptr, candidate_len);
+						output_ptr += candidate_len;
+						input_ptr += candidate_len;
+						free_space -= candidate_len;
+						goto ensure_memory;
+					}
+				}
 
-                /* Invalid entity */
-                memcpy(output_ptr, "&amp;", 5);
-                output_ptr += 5;
-                free_space -= 5;
-                input_ptr++;
-                goto ensure_memory;
-            }
+				/* Invalid entity */
+				memcpy(output_ptr, amp, amp_len);
+				output_ptr += amp_len;
+				free_space -= amp_len;
+				input_ptr++;
+				goto ensure_memory;
+			}
 
-            /* Check disallowed chars */
-            if (flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS) {
-                if (!is_codepoint_allowed(c, charset, doctype, NULL)) {
-                    memcpy(output_ptr, replacement, replacement_len);
-                    output_ptr += replacement_len;
-                    free_space -= replacement_len;
-                    input_ptr++;
-                    goto ensure_memory;
-                }
-            }
+			/* Check disallowed chars */
+			if (flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS) {
+				if (!is_codepoint_allowed(c, charset, doctype, NULL)) {
+					memcpy(output_ptr, replacement, replacement_len);
+					output_ptr += replacement_len;
+					free_space -= replacement_len;
+					input_ptr++;
+					goto ensure_memory;
+				}
+			}
 
-            /* Use lookup table for fast replace */
-            if (lut.entity[c]) {
-                const size_t entity_len = lut.entity_len[c];
-                memcpy(output_ptr, lut.entity[c], entity_len);
-                output_ptr += entity_len;
-                free_space -= entity_len;
-            } else {
-                *output_ptr++ = c;
-                free_space--;
-            }
+			/* Use lookup table for fast replace */
+			if (lut.entity[c]) {
+				const size_t entity_len = lut.entity_len[c];
+				memcpy(output_ptr, lut.entity[c], entity_len);
+				output_ptr += entity_len;
+				free_space -= entity_len;
+			} else {
+				*output_ptr++ = c;
+				free_space--;
+			}
 
 			input_ptr++;
 		} else {
@@ -1616,52 +1616,52 @@ PHPAPI zend_string* php_htmlspecialchars_ex(
 
 			const size_t processed_len = cursor - original_pos;
 
-            if (status == FAILURE) {
-                if (flags & ENT_HTML_IGNORE_ERRORS) {
-                    input_ptr += processed_len;
-                    continue;
-                }
-                if (flags & ENT_HTML_SUBSTITUTE_ERRORS) {
-                    memcpy(output_ptr, replacement, replacement_len);
-                    output_ptr += replacement_len;
-                    free_space -= replacement_len;
-                    input_ptr += processed_len;
-                } else {
-                    zend_string_release(output);
-                    return ZSTR_EMPTY_ALLOC();
-                }
-            } else {
-                /* Check disallowed chars */
-                const unsigned char* sequence = (unsigned char*)input_ptr;
-                size_t sequence_len = processed_len;
+			if (status == FAILURE) {
+				if (flags & ENT_HTML_IGNORE_ERRORS) {
+					input_ptr += processed_len;
+					continue;
+				}
+				if (flags & ENT_HTML_SUBSTITUTE_ERRORS) {
+					memcpy(output_ptr, replacement, replacement_len);
+					output_ptr += replacement_len;
+					free_space -= replacement_len;
+					input_ptr += processed_len;
+				} else {
+					zend_string_release(output);
+					return ZSTR_EMPTY_ALLOC();
+				}
+			} else {
+				/* Check disallowed chars */
+				const char *sequence = input_ptr;
+				size_t sequence_len = processed_len;
 
-                if (flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS) {
-                    if (!is_codepoint_allowed(this_char, charset, doctype, to_uni_table)) {
-                        sequence = replacement;
-                        sequence_len = replacement_len;
-                    }
-                }
+				if (flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS) {
+					if (!is_codepoint_allowed(this_char, charset, doctype, to_uni_table)) {
+						sequence = replacement;
+						sequence_len = replacement_len;
+					}
+				}
 
-                memcpy(output_ptr, sequence, sequence_len);
-                output_ptr += sequence_len;
-                free_space -= sequence_len;
-                input_ptr += processed_len;
-            }
-        }
+				memcpy(output_ptr, sequence, sequence_len);
+				output_ptr += sequence_len;
+				free_space -= sequence_len;
+				input_ptr += processed_len;
+			}
+		}
 
-    ensure_memory:
-        if (free_space < 128) {
-            const size_t used = ZSTR_LEN(output) - free_space;
-            const size_t new_size = used + 1024;
-            output = zend_string_realloc(output, new_size, 0);
-            output_ptr = ZSTR_VAL(output) + used;
-            free_space = new_size - used;
-        }
-    }
+	ensure_memory:
+		if (free_space < 128) {
+			const size_t used = ZSTR_LEN(output) - free_space;
+			const size_t new_size = used + 1024;
+			output = zend_string_realloc(output, new_size, 0);
+			output_ptr = ZSTR_VAL(output) + used;
+			free_space = new_size - used;
+		}
+	}
 
-    *output_ptr = '\0';
-    ZSTR_LEN(output) = (output_ptr - ZSTR_VAL(output));
-    return output;
+	*output_ptr = '\0';
+	ZSTR_LEN(output) = (output_ptr - ZSTR_VAL(output));
+	return output;
 }
 /* }}} */
 
@@ -1688,8 +1688,8 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 }
 /* }}} */
 
-/* {{{ php_html_entities */
-static void php_htmlspecialchars(INTERNAL_FUNCTION_PARAMETERS)
+/* {{{ Convert special characters to HTML entities */
+PHP_FUNCTION(htmlspecialchars)
 {
 	zend_string *str, *hint_charset = NULL;
 	zend_long flags = ENT_QUOTES|ENT_SUBSTITUTE;
@@ -1704,17 +1704,14 @@ static void php_htmlspecialchars(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
 
-	replaced = php_htmlspecialchars_ex(
-		str, (int) flags,
-		hint_charset ? ZSTR_VAL(hint_charset) : NULL, double_encode, /* quiet */ 0);
+	if (ZSTR_LEN(str) == 0) {
+		replaced = zend_string_copy(str);
+	} else {
+		replaced = php_htmlspecialchars_ex(
+			str, (int)flags,
+			hint_charset ? ZSTR_VAL(hint_charset) : NULL, double_encode);
+	}
 	RETVAL_STR(replaced);
-}
-/* }}} */
-
-/* {{{ Convert special characters to HTML entities */
-PHP_FUNCTION(htmlspecialchars)
-{
-	php_htmlspecialchars(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
