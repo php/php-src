@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
     (Jakub Zelenka)
+  . Fix resource leak in iptcembed() on error. (nielsdos)
 
 - Tests:
   . Address deprecated PHP 8.4 session options to prevent test failures.
