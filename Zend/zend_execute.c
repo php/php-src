@@ -1850,14 +1850,14 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 	z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL);
 	ZEND_ASSERT(z != &EG(uninitialized_zval));
 	if (Z_TYPE_P(z) == IS_STRING) {
-		message = zend_string_copy(Z_STR_P(z));
+		message = Z_STR_P(z);
 	}
 
 	/* Extract the $since property. */
 	z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_SINCE), false, NULL);
 	ZEND_ASSERT(z != &EG(uninitialized_zval));
 	if (Z_TYPE_P(z) == IS_STRING) {
-		since = zend_string_copy(Z_STR_P(z));
+		since = Z_STR_P(z);
 	}
 
 	/* Construct the suffix. */
@@ -1874,8 +1874,6 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 
  out:
 
-	zend_string_release(since);
-	zend_string_release(message);
 	zval_ptr_dtor(&obj);
 
 	return result;
