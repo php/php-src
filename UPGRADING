@@ -114,8 +114,13 @@ PHP 8.5 UPGRADE NOTES
   . Fatal Errors (such as an exceeded maximum execution time) now include a
     backtrace.
     RFC: https://wiki.php.net/rfc/error_backtraces_v2
-  . Added the (void) to indicate that not using a value is intentional. The
-    (void) cast does nothing by itself.
+  . Added the #[\NoDiscard] attribute to indicate that a function's return
+    value is important and should be consumed.
+    RFC: https://wiki.php.net/rfc/marking_return_value_as_important
+  . Added the (void) cast to indicate that not using a value is intentional.
+    The (void) cast has no effect on the program's execution by itself, but
+    it can be used to suppress warnings emitted by #[\NoDiscard] and possibly
+    also diagnostics emitted by external IDEs or static analysis tools.
     RFC: https://wiki.php.net/rfc/marking_return_value_as_important
 
 - Curl:
