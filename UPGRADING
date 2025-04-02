@@ -41,6 +41,9 @@ PHP 8.5 UPGRADE NOTES
   . The tick handlers are now deactivated after all shutdown functions, destructors
     have run and the output handlers have been cleaned up.
     This is a consequence of fixing GH-18033.
+  . Traits are now bound before the parent class. This is a subtle behavioral
+    change, but should closer match user expectations, demonstrated by GH-15753
+    and GH-16198.
 
 - Intl:
   . The extension now requires at least ICU 57.1.
