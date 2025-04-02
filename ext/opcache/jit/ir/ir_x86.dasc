@@ -1066,6 +1066,7 @@ const char *ir_reg_name(int8_t reg, ir_type type)
 	_(SSE_CEIL)            \
 	_(SSE_TRUNC)           \
 	_(SSE_NEARBYINT)       \
+	_(OR_PWR2)             \
 
 #define IR_LEA_FIRST IR_LEA_OB
 #define IR_LEA_LAST  IR_LEA_O_SYM
@@ -1400,6 +1401,7 @@ op2_const:
 		case IR_DIV_PWR2:
 		case IR_OP_INT:
 		case IR_OP_FP:
+		case IR_OR_PWR2:
 			flags = IR_DEF_REUSES_OP1_REG | IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
 			break;
 		case IR_MOD_PWR2:
@@ -2280,6 +2282,9 @@ binop_fp:
 					// return IR_COPY_INT;
 				} else if (op2_insn->val.i64 == -1) {
 					// -1
+				} else if (IR_IS_POWER_OF_TWO(op2_insn->val.u64) && op2_insn->val.u64 > (1ULL<<30)) {
+					/* OR(X, PWR2) => BTS */
+					return IR_OR_PWR2;
 				}
 			}
 			goto binop_int;
@@ -4318,6 +4323,26 @@ static void ir_emit_mul_div_mod_pwr2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		uint32_t shift = IR_LOG2(ctx->ir_base[insn->op2].val.u64);
 
 		|	ASM_REG_IMM_OP shr, type, def_reg, shift
+	} else if (insn->op == IR_OR) {
+		uint32_t shift = IR_LOG2(ctx->ir_base[insn->op2].val.u64);
+
+		/* bts doesn't support r/m8 first operand */
+		switch (ir_type_size[type]) {
+			default:
+				IR_ASSERT(0);
+			case 1:
+			case 2:
+				| bts Rw(def_reg), (shift & 0xffff)
+				break;
+			case 4:
+				| bts Rd(def_reg), shift
+				break;
+|.if X64
+||			case 8:
+				| bts Rq(def_reg), shift
+||				break;
+|.endif
+		}
 	} else {
 		IR_ASSERT(insn->op == IR_MOD);
 		uint64_t mask = ctx->ir_base[insn->op2].val.u64 - 1;
@@ -10666,6 +10691,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 				case IR_MUL_PWR2:
 				case IR_DIV_PWR2:
 				case IR_MOD_PWR2:
+				case IR_OR_PWR2:
 					ir_emit_mul_div_mod_pwr2(ctx, i, insn);
 					break;
 				case IR_SDIV_PWR2:
