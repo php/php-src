@@ -2732,6 +2732,7 @@ function proc_nice(int $priority): bool {}
  * @param resource $stream
  * @param int $would_block
  */
+#[\NoDiscard(message: "as locking the stream might have failed")]
 function flock($stream, int $operation, &$would_block = null): bool {}
 
 /**

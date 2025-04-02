@@ -2698,6 +2698,12 @@ static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_
 
 static void zend_check_magic_method_return_type(const zend_class_entry *ce, const zend_function *fptr, int error_type, int return_type)
 {
+	if (return_type == MAY_BE_VOID) {
+		if (fptr->common.fn_flags & ZEND_ACC_NODISCARD) {
+			zend_error_noreturn(error_type, "Method %s::%s cannot be #[\\NoDiscard]", ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		}
+	}
+
 	if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		/* For backwards compatibility reasons, do not enforce the return type if it is not set. */
 		return;
@@ -2756,6 +2762,10 @@ static void zend_check_magic_method_no_return_type(
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_error_noreturn(error_type, "Method %s::%s() cannot declare a return type",
 			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+	}
+
+	if (fptr->common.fn_flags & ZEND_ACC_NODISCARD) {
+		zend_error_noreturn(error_type, "Method %s::%s cannot be #[\\NoDiscard]", ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
 	}
 }
 

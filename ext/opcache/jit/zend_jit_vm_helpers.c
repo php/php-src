@@ -204,6 +204,54 @@ bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 	return 1;
 }
 
+bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
+{
+	zend_execute_data *call = (zend_execute_data *) opline;
+	zend_function *fbc = call->func;
+
+	zend_nodiscard_function(fbc);
+
+	if (EG(exception)) {
+#ifndef HAVE_GCC_GLOBAL_REGS
+		zend_execute_data *execute_data = EG(current_execute_data);
+#endif
+		const zend_op *opline = EG(opline_before_exception);
+		if (opline && RETURN_VALUE_USED(opline)) {
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+		}
+
+		zend_vm_stack_free_args(call);
+
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+			OBJ_RELEASE(Z_OBJ(call->This));
+		}
+
+		zend_vm_stack_free_call_frame(call);
+		return 0;
+	}
+	return 1;
+}
+
+bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D)
+{
+	zend_execute_data *call = (zend_execute_data *) opline;
+	zend_function *fbc = call->func;
+
+	if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
+		if (zend_jit_deprecated_helper(OPLINE_C) == 0) {
+			return 0;
+		}
+	}
+
+	if (fbc->common.fn_flags & ZEND_ACC_NODISCARD) {
+		if (zend_jit_nodiscard_helper(OPLINE_C) == 0) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D)
 {
 	const zend_op *opline = EX(opline);

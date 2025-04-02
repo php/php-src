@@ -3927,13 +3927,15 @@ static uint32_t zend_compile_args(
 }
 /* }}} */
 
-ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
+ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc, bool result_used) /* {{{ */
 {
-	if (fbc) {
+	uint32_t no_discard = result_used ? 0 : ZEND_ACC_NODISCARD;
+
+	if (fbc && init_op->opcode != ZEND_NEW) {
 		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE));
 		if (fbc->type == ZEND_INTERNAL_FUNCTION && !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS)) {
 			if (init_op->opcode == ZEND_INIT_FCALL && !zend_execute_internal) {
-				if (!(fbc->common.fn_flags & ZEND_ACC_DEPRECATED)) {
+				if (!(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard))) {
 					return ZEND_DO_ICALL;
 				} else {
 					return ZEND_DO_FCALL_BY_NAME;
@@ -3941,7 +3943,7 @@ ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /*
 			}
 		} else if (!(CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS)){
 			if (zend_execute_ex == execute_ex) {
-				if (!(fbc->common.fn_flags & ZEND_ACC_DEPRECATED)) {
+				if (!(fbc->common.fn_flags & (ZEND_ACC_DEPRECATED|no_discard))) {
 					return ZEND_DO_UCALL;
 				} else {
 					return ZEND_DO_FCALL_BY_NAME;
@@ -3991,7 +3993,16 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
 	}
 
-	opline = zend_emit_op(result, zend_get_call_op(opline, fbc), NULL, NULL);
+	uint8_t call_op = zend_get_call_op(
+		opline,
+		fbc,
+		/* result_used: At this point we do not yet reliably
+		 * know if the result is used. Deoptimize #[\NoDiscard]
+		 * calls to be sure. The optimizer will fix this up.
+		 */
+		false
+	);
+	opline = zend_emit_op(result, call_op, NULL, NULL);
 	if (may_have_extra_named_args) {
 		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 	}
@@ -8353,6 +8364,16 @@ static zend_op_array *zend_compile_func_decl_ex(
 		if (deprecated_attribute) {
 			op_array->fn_flags |= ZEND_ACC_DEPRECATED;
 		}
+
+		zend_attribute *nodiscard_attribute = zend_get_attribute_str(
+			op_array->attributes,
+			"nodiscard",
+			sizeof("nodiscard")-1
+		);
+	
+		if (nodiscard_attribute) {
+			op_array->fn_flags |= ZEND_ACC_NODISCARD;
+		}	
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
@@ -8400,6 +8421,27 @@ static zend_op_array *zend_compile_func_decl_ex(
 		if (needs_return) {
 			stmt_ast = zend_ast_create(ZEND_AST_RETURN, stmt_ast);
 			decl->child[2] = stmt_ast;
+		}
+	}
+
+	if (op_array->fn_flags & ZEND_ACC_NODISCARD) {
+		if (is_hook) {
+			zend_error_noreturn(E_COMPILE_ERROR, "#[\\NoDiscard] is not supported for property hooks");
+		}
+
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
+			if (ZEND_TYPE_CONTAINS_CODE(return_info->type, IS_VOID)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A void %s does not return a value, but #[\\NoDiscard] requires a return value",
+					CG(active_class_entry) != NULL ? "method" : "function");
+			}
+
+			if (ZEND_TYPE_CONTAINS_CODE(return_info->type, IS_NEVER)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"A never returning %s does not return a value, but #[\\NoDiscard] requires a return value",
+					CG(active_class_entry) != NULL ? "method" : "function");
+			}
 		}
 	}
 

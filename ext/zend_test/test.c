@@ -124,6 +124,13 @@ static ZEND_FUNCTION(zend_test_deprecated_attr)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+static ZEND_FUNCTION(zend_test_deprecated_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
 /* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2358a0d820edd06a1702c84104bfd545af08311c */
+ * Stub hash: 6b54bc195be211caabb395b621380681953c1f5a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -29,6 +29,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Deprecated___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, since, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NoDiscard___construct, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Attribute, __construct);
 ZEND_METHOD(ReturnTypeWillChange, __construct);
 ZEND_METHOD(AllowDynamicProperties, __construct);
@@ -38,6 +42,7 @@ ZEND_METHOD(SensitiveParameterValue, getValue);
 ZEND_METHOD(SensitiveParameterValue, __debugInfo);
 ZEND_METHOD(Override, __construct);
 ZEND_METHOD(Deprecated, __construct);
+ZEND_METHOD(NoDiscard, __construct);
 
 static const zend_function_entry class_Attribute_methods[] = {
 	ZEND_ME(Attribute, __construct, arginfo_class_Attribute___construct, ZEND_ACC_PUBLIC)
@@ -73,6 +78,11 @@ static const zend_function_entry class_Override_methods[] = {
 
 static const zend_function_entry class_Deprecated_methods[] = {
 	ZEND_ME(Deprecated, __construct, arginfo_class_Deprecated___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_NoDiscard_methods[] = {
+	ZEND_ME(NoDiscard, __construct, arginfo_class_NoDiscard___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -250,6 +260,27 @@ static zend_class_entry *register_class_Deprecated(void)
 	zval attribute_Attribute_class_Deprecated_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_Deprecated_0->args[0].value, &attribute_Attribute_class_Deprecated_0_arg0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_NoDiscard(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "NoDiscard", class_NoDiscard_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zval property_message_default_value;
+	ZVAL_UNDEF(&property_message_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_MESSAGE), &property_message_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+	zend_string *attribute_name_Attribute_class_NoDiscard_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_NoDiscard_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_NoDiscard_0, 1);
+	zend_string_release(attribute_name_Attribute_class_NoDiscard_0);
+	zval attribute_Attribute_class_NoDiscard_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_NoDiscard_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_NoDiscard_0->args[0].value, &attribute_Attribute_class_NoDiscard_0_arg0);
 
 	return class_entry;
 }
