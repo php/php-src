@@ -7162,6 +7162,7 @@ PHP_FUNCTION(openssl_sign)
 		mdtype = php_openssl_get_evp_md_from_algo(method_long);
 	}
 	if (!mdtype && (!can_default_digest || method_long != 0)) {
+		EVP_PKEY_free(pkey);
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
