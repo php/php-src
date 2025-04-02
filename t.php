@@ -1,5 +1,5 @@
 <?php
-class test!🥖K!🥖!🥖bruh!🥥!🥥{
+class test!🥖lebruh, bruh : LELE!🥥 extends bruh {
     public function __construct(
     public K $lol
 ){

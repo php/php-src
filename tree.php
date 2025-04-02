@@ -1,7 +1,7 @@
 <?php
 $tokens = token_get_all('<?php
 
-                         class test!🥖K!🥥{
+                         class test!🥖bruh : LELE, lebruh!🥥 {
                              public function __construct(
                              public !🥖K!🥥 $lol
                          ){
