@@ -70,6 +70,9 @@
 # if defined(HAVE_LINUX_IF_ETHER_H)
 #  include <linux/if_ether.h>
 # endif
+# if defined(HAVE_LINUX_UDP_H)
+#  include <linux/udp.h>
+# endif
 #endif
 
 #include <stddef.h>
