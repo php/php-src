@@ -32,6 +32,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-17403 (Potential deadlock when putenv fails). (nielsdos)
 
+- Windows:
+  . Fix leak+crash with sapi_windows_set_ctrl_handler(). (nielsdos)
+
 - Zip:
   . Fixed bug GH-18431 (Registering ZIP progress callback twice doesn't work).
     (nielsdos)
