@@ -8157,11 +8157,10 @@ PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_le
 	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(buffer_length, length);
 	PHP_OPENSSL_RAND_ADD_TIME();
 	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
+		php_openssl_store_errors();
 		zend_string_release_ex(buffer, 0);
 		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
 		return NULL;
-	} else {
-		php_openssl_store_errors();
 	}
 
 	return buffer;
@@ -8178,17 +8177,15 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		RETURN_THROWS();
 	}
 
-	if (zstrong_result_returned) {
-		ZEND_TRY_ASSIGN_REF_FALSE(zstrong_result_returned);
-	}
-
 	if ((buffer = php_openssl_random_pseudo_bytes(buffer_length))) {
 		ZSTR_VAL(buffer)[buffer_length] = 0;
 		RETVAL_NEW_STR(buffer);
-	}
 
-	if (zstrong_result_returned) {
-		ZEND_TRY_ASSIGN_REF_TRUE(zstrong_result_returned);
+		if (zstrong_result_returned) {
+			ZEND_TRY_ASSIGN_REF_TRUE(zstrong_result_returned);
+		}
+	} else if (zstrong_result_returned) {
+		ZEND_TRY_ASSIGN_REF_FALSE(zstrong_result_returned);
 	}
 }
 /* }}} */
