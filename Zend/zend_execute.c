@@ -1942,7 +1942,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_nodiscard_suffix_from_attribute(H
 	z = zend_read_property_ex(zend_ce_nodiscard, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL);
 	ZEND_ASSERT(z != &EG(uninitialized_zval));
 	if (Z_TYPE_P(z) == IS_STRING) {
-		message = zend_string_copy(Z_STR_P(z));
+		message = Z_STR_P(z);
 	}
 
 	/* Construct the suffix. */
@@ -1957,7 +1957,6 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_nodiscard_suffix_from_attribute(H
 
  out:
 
-	zend_string_release(message);
 	zval_ptr_dtor(&obj);
 
 	return result;
