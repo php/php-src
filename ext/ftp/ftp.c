@@ -1181,7 +1181,7 @@ bool ftp_site(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len)
 static bool ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *args, const size_t args_len)
 {
 	int size;
-	char *data;
+	char data[FTP_BUFSIZE];
 
 	if (strpbrk(cmd, "\r\n")) {
 		return false;
@@ -1195,16 +1195,14 @@ static bool ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, con
 		if (strpbrk(args, "\r\n")) {
 			return 0;
 		}
-		size = slprintf(ftp->outbuf, sizeof(ftp->outbuf), "%s %s\r\n", cmd, args);
+		size = slprintf(data, sizeof(data), "%s %s\r\n", cmd, args);
 	} else {
 		/* "cmd\r\n\0" */
 		if (cmd_len + 3 > FTP_BUFSIZE) {
 			return false;
 		}
-		size = slprintf(ftp->outbuf, sizeof(ftp->outbuf), "%s\r\n", cmd);
+		size = slprintf(data, sizeof(data), "%s\r\n", cmd);
 	}
-
-	data = ftp->outbuf;
 
 	/* Clear the inbuf and extra-lines buffer */
 	ftp->inbuf[0] = '\0';
