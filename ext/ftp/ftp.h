@@ -103,7 +103,7 @@ int		ftp_quit(ftpbuf_t *ftp);
 void		ftp_gc(ftpbuf_t *ftp);
 
 /* close the FTP connection and return NULL */
-ftpbuf_t*	ftp_close(ftpbuf_t *ftp);
+void ftp_close(ftpbuf_t *ftp);
 
 /* logs into the FTP server, returns true on success, false on error */
 int		ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pass, const size_t pass_len);

@@ -161,11 +161,10 @@ bail:
 /* }}} */
 
 /* {{{ ftp_close */
-ftpbuf_t*
-ftp_close(ftpbuf_t *ftp)
+void ftp_close(ftpbuf_t *ftp)
 {
 	if (ftp == NULL) {
-		return NULL;
+		return;
 	}
 #ifdef HAVE_FTP_SSL
 	if (ftp->last_ssl_session) {
@@ -186,7 +185,6 @@ ftp_close(ftpbuf_t *ftp)
 	}
 	ftp_gc(ftp);
 	efree(ftp);
-	return NULL;
 }
 /* }}} */
 
