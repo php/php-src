@@ -87,7 +87,7 @@ PHP_FUNCTION(uniqid)
 		Z_PARAM_BOOL(more_entropy)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef __NetBSD__
+#ifdef HAVE_UUIDGEN
 	struct uuid uuid;
 	int *n = (int *)&uuid;
 
