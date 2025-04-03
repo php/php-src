@@ -337,6 +337,7 @@ jobs:
             $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
             > $GITHUB_STEP_SUMMARY
   FREEBSD:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: FREEBSD
     runs-on: ubuntu-latest
     steps:
