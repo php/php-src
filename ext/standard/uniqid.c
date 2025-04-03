@@ -76,7 +76,6 @@ PHP_FUNCTION(uniqid)
 {
 	char *prefix = "";
 	bool more_entropy = 0;
-	zend_string *uniqid;
 	int sec, usec;
 	size_t prefix_len = 0;
 	struct timeval tv;
