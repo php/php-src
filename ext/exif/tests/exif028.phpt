@@ -10,13 +10,13 @@ zlib.output_compression=0
 var_dump(exif_read_data(__DIR__.'/image028.jpg'));
 ?>
 --EXPECTF--
-array(15) {
+array(17) {
   ["FileName"]=>
   string(12) "image028.jpg"
   ["FileDateTime"]=>
-  int(1743698202)
+  int(1743698945)
   ["FileSize"]=>
-  int(475)
+  int(527)
   ["FileType"]=>
   int(2)
   ["MimeType"]=>
@@ -42,12 +42,16 @@ array(15) {
   string(5) "300/1"
   ["ResolutionUnit"]=>
   int(2)
+  ["DateTime"]=>
+  string(19) "2025:04:03 00:02:00"
   ["YCbCrPositioning"]=>
   int(1)
   ["DateTimeOriginal"]=>
   string(19) "2025:04:03 00:00:00"
   ["DateTimeDigitized"]=>
   string(19) "2025:04:03 00:01:00"
+  ["OffsetTime"]=>
+  string(6) "-02:00"
   ["OffsetTimeOriginal"]=>
   string(6) "+00:00"
   ["OffsetTimeDigitized"]=>
