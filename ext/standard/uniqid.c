@@ -31,10 +31,44 @@
 #include <sys/time.h>
 #endif
 
+#ifdef HAVE_UUIDGEN
+#include <sys/types.h>
+#include <sys/uuid.h>
+#endif
+
 #include "ext/random/php_random.h"
 #include "ext/random/php_random_csprng.h"
 
-#ifdef HAVE_GETTIMEOFDAY
+#ifdef HAVE_UUIDGEN
+/* {{{ Generates a unique ID */
+PHP_FUNCTION(uniqid)
+{
+	char *prefix = "";
+	bool more_entropy = 0;
+	zend_string *uniqid;
+	size_t prefix_len = 0;
+	struct uuid uuid;
+	int *n = (int *)&uuid;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(prefix, prefix_len)
+		Z_PARAM_BOOL(more_entropy)
+	ZEND_PARSE_PARAMETERS_END();
+
+	(void)uuidgen(&uuid, 1);
+
+	if (more_entropy) {
+		n[1] &= 0xffffff;
+		uniqid = strpprintf(0, "%s%08x%06x.%08x", prefix, n[0], n[1], n[2]);
+	} else {
+		n[1] &= 0xfffff;
+		uniqid = strpprintf(0, "%s%08x%05x", prefix, n[0], n[1]);
+	}
+
+	RETURN_STR(uniqid);
+}
+#elif HAVE_GETTIMEOFDAY
 ZEND_TLS struct timeval prev_tv = { 0, 0 };
 
 /* {{{ Generates a unique ID */
@@ -52,6 +86,24 @@ PHP_FUNCTION(uniqid)
 		Z_PARAM_STRING(prefix, prefix_len)
 		Z_PARAM_BOOL(more_entropy)
 	ZEND_PARSE_PARAMETERS_END();
+
+#ifdef __NetBSD__
+	struct uuid uuid;
+	int *n = (int *)&uuid;
+
+	/* Use faster uuidgen() if available */
+	(void)uuidgen(&uuid, 1);
+
+	if (more_entropy) {
+		n[1] &= 0xffffff;
+		uniqid = strpprintf(0, "%s%08x%06x.%08x", prefix, n[0], n[1], n[2]);
+	} else {
+		n[1] &= 0xfffff;
+		uniqid = strpprintf(0, "%s%08x%05x", prefix, n[0], n[1]);
+	}
+
+	RETURN_STR(uniqid);
+#endif
 
 	/* This implementation needs current microsecond to change,
 	 * hence we poll time until it does. This is much faster than
