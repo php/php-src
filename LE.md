@@ -1,5 +1,33 @@
 # Generics syntax
 
+```
+interface Comparable {
+
+}
+
+interface Equatable {
+
+}
+
+int implements Comparable, Equatable;
+
+class Foo {
+
+    class Bar {
+    
+    }
+
+}
+
+enum FooBar<T> {
+
+    case Blum(int bam);
+    case Bam(T boom);
+
+}
+
+```
+
 ## Generic classes and interfaces
 
 ### Basic case

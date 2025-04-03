@@ -1,19 +1,24 @@
 <?php
-class test!🥖lebruh, bruh : LELE!🥥 extends bruh {
+
+class RandomAssSerializableContaier!🥖T, K : Serializer!🥖T, K, A!🥥!🥥 {
+
+    private array $content = [];
+
     public function __construct(
-    public K $lol
-){
+        private K $serializer
+    ) {}
+
+    public function add(T $toAdd)
+    {
+        $content[] = $toAdd;
+    }
+
+    public function asSerializedList(): array
+    {
+        return array_map(
+            fn ($obj) => $this->serializer->serialize($obj),
+            $this->content
+        );
     }
 }
-
-class bruh {
-    public function __construct(
-    public array!🥖bruh!🥥 $le
-    ){}
-
-    public function test(test!🥖bruh!🥥 $le): test!🥖bruh!🥥 {
-    }
-};
-
-
 echo "hi\n";
