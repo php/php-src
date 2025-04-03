@@ -14,9 +14,9 @@ array(17) {
   ["FileName"]=>
   string(12) "image028.jpg"
   ["FileDateTime"]=>
-  int(1743698945)
+  int(%d)
   ["FileSize"]=>
-  int(527)
+  int(%d)
   ["FileType"]=>
   int(2)
   ["MimeType"]=>
