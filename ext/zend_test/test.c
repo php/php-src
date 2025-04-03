@@ -124,6 +124,13 @@ static ZEND_FUNCTION(zend_test_deprecated_attr)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+static ZEND_FUNCTION(zend_test_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
 static ZEND_FUNCTION(zend_test_deprecated_nodiscard)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

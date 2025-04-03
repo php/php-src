@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 824ccb41163307bd0fad452b705a8222b6f42d09 */
+ * Stub hash: 85677dc3476d25b7820fd3a26fe39f2e9378b6e7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3205,7 +3205,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_NICE)
 	ZEND_FE(proc_nice, arginfo_proc_nice)
 #endif
-	ZEND_RAW_FENTRY("flock", zif_flock, arginfo_flock, ZEND_ACC_NODISCARD, NULL, NULL)
+	ZEND_FE(flock, arginfo_flock)
 	ZEND_FE(get_meta_tags, arginfo_get_meta_tags)
 	ZEND_FE(pclose, arginfo_pclose)
 	ZEND_FE(popen, arginfo_popen)
@@ -4038,15 +4038,6 @@ static void register_basic_functions_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0_arg1, attribute_Deprecated_func_utf8_decode_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_decode_0->args[1].value, &attribute_Deprecated_func_utf8_decode_0_arg1);
 	attribute_Deprecated_func_utf8_decode_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-
-	zend_string *attribute_name_NoDiscard_func_flock_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
-	zend_attribute *attribute_NoDiscard_func_flock_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "flock", sizeof("flock") - 1), attribute_name_NoDiscard_func_flock_0, 1);
-	zend_string_release(attribute_name_NoDiscard_func_flock_0);
-	zval attribute_NoDiscard_func_flock_0_arg0;
-	zend_string *attribute_NoDiscard_func_flock_0_arg0_str = zend_string_init("as locking the stream might have failed", strlen("as locking the stream might have failed"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_flock_0_arg0, attribute_NoDiscard_func_flock_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_flock_0->args[0].value, &attribute_NoDiscard_func_flock_0_arg0);
-	attribute_NoDiscard_func_flock_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
