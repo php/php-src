@@ -390,7 +390,7 @@ PHP_FUNCTION(ftp_rmdir)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 
-	/* remove directorie */
+	/* remove directories */
 	if (!ftp_rmdir(ftp, dir, dir_len)) {
 		if (*ftp->inbuf) {
 			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
