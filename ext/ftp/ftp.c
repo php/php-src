@@ -573,12 +573,12 @@ bool ftp_rmdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len)
 	return true;
 }
 
-bool ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filename_len)
+bool ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const size_t filename_len)
 {
 	char *buffer;
 	size_t buffer_len;
 
-	if (ftp == NULL || filename_len <= 0) {
+	if (ftp == NULL || filename_len == 0) {
 		return false;
 	}
 
