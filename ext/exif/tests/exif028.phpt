@@ -1,5 +1,5 @@
 --TEST--
-Check for exif_read_data, JPEG with IFD data containg OffsetTimeOriginal and OffsetTimeDigitized tags in Motorola byte-order.
+Check for exif_read_data, JPEG with IFD data containg OffsetTime, OffsetTimeOriginal, and OffsetTimeDigitized tags in Motorola byte-order.
 --EXTENSIONS--
 exif
 --INI--
