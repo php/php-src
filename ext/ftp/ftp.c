@@ -692,7 +692,7 @@ int ftp_mlsd_parse_line(HashTable *ht, const char *input)
 	return SUCCESS;
 }
 
-int ftp_type(ftpbuf_t *ftp, ftptype_t type)
+static int ftp_type(ftpbuf_t *ftp, ftptype_t type)
 {
 	const char *typechar;
 
@@ -1178,8 +1178,7 @@ int ftp_site(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len)
 	return 1;
 }
 
-/* static functions */
-int ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *args, const size_t args_len)
+static int ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *args, const size_t args_len)
 {
 	int size;
 	char *data;
@@ -1217,7 +1216,7 @@ int ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char 
 	return 1;
 }
 
-int ftp_readline(ftpbuf_t *ftp)
+static int ftp_readline(ftpbuf_t *ftp)
 {
 	long size, rcvd;
 	char *data, *eol;
@@ -1267,7 +1266,7 @@ int ftp_readline(ftpbuf_t *ftp)
 	return 0;
 }
 
-int ftp_getresp(ftpbuf_t *ftp)
+static int ftp_getresp(ftpbuf_t *ftp)
 {
 	if (ftp == NULL) {
 		return 0;
@@ -1317,7 +1316,7 @@ static ssize_t my_recv_wrapper_with_restart(php_socket_t fd, void *buf, size_t s
 	return n;
 }
 
-int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
+static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 #ifdef HAVE_FTP_SSL
 	int err;
 	bool retry = 0;
@@ -1400,7 +1399,7 @@ static int my_poll(php_socket_t fd, int events, int timeout) {
 	return n;
 }
 
-int my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
+static int my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
 	zend_long size, sent;
 	int       n;
@@ -1434,7 +1433,7 @@ int my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 	return len;
 }
 
-int my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
+static int my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
 	int n, nr_bytes;
 #ifdef HAVE_FTP_SSL
@@ -1510,7 +1509,7 @@ int my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 	return (nr_bytes);
 }
 
-int data_available(ftpbuf_t *ftp, php_socket_t s)
+static int data_available(ftpbuf_t *ftp, php_socket_t s)
 {
 	int n;
 
@@ -1531,7 +1530,7 @@ int data_available(ftpbuf_t *ftp, php_socket_t s)
 	return 1;
 }
 
-int data_writeable(ftpbuf_t *ftp, php_socket_t s)
+static int data_writeable(ftpbuf_t *ftp, php_socket_t s)
 {
 	int n;
 
@@ -1552,7 +1551,7 @@ int data_writeable(ftpbuf_t *ftp, php_socket_t s)
 	return 1;
 }
 
-int my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrlen)
+static int my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrlen)
 {
 	int n;
 
@@ -1573,7 +1572,7 @@ int my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *a
 	return accept(s, addr, addrlen);
 }
 
-databuf_t* ftp_getdata(ftpbuf_t *ftp)
+static databuf_t* ftp_getdata(ftpbuf_t *ftp)
 {
 	int				fd = -1;
 	databuf_t		*data;
@@ -1703,7 +1702,7 @@ bail:
 	return NULL;
 }
 
-databuf_t* data_accept(databuf_t *data, ftpbuf_t *ftp)
+static databuf_t* data_accept(databuf_t *data, ftpbuf_t *ftp)
 {
 	php_sockaddr_storage addr;
 	socklen_t size;
@@ -1874,7 +1873,7 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 }
 #endif
 
-void data_close(ftpbuf_t *ftp)
+static void data_close(ftpbuf_t *ftp)
 {
 	ZEND_ASSERT(ftp != NULL);
 	databuf_t *data = ftp->data;
@@ -1905,7 +1904,7 @@ void data_close(ftpbuf_t *ftp)
 	efree(data);
 }
 
-char** ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *path, const size_t path_len)
+static char** ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *path, const size_t path_len)
 {
 	php_stream	*tmpstream = NULL;
 	databuf_t	*data = NULL;
