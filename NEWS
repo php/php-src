@@ -63,6 +63,9 @@ PHP                                                                        NEWS
   . Added enchant_dict_remove_from_session(). (nielsdos)
   . Added enchant_dict_remove(). (nielsdos)
 
+- EXIF:
+  . Add OffsetTime* Exif tags. (acc987)
+
 - Fileinfo:
   . Upgrade to file 5.46. (nielsdos)
 

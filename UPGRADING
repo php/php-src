@@ -151,6 +151,9 @@ PHP 8.5 UPGRADE NOTES
 - DOM:
   . Added Dom\Element::$outerHTML.
 
+- EXIF:
+  . Add OffsetTime* Exif tags.
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()
