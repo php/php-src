@@ -23,62 +23,39 @@
 
 #include <string.h>
 #include <errno.h>
-
 #include <stdio.h>
+
+#ifdef HAVE_UUIDGEN
+#include <sys/types.h>
+#include <sys/uuid.h>
+#else
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #else
 #include <sys/time.h>
 #endif
 
-#ifdef HAVE_UUIDGEN
-#include <sys/types.h>
-#include <sys/uuid.h>
+ZEND_TLS struct timeval prev_tv = { 0, 0 };
 #endif
 
 #include "ext/random/php_random.h"
 #include "ext/random/php_random_csprng.h"
 
-#ifdef HAVE_UUIDGEN
+#if defined(HAVE_UUIDGEN) || defined(HAVE_GETTIMEOFDAY)
 /* {{{ Generates a unique ID */
 PHP_FUNCTION(uniqid)
 {
 	char *prefix = "";
 	bool more_entropy = 0;
 	zend_string *uniqid;
-	size_t prefix_len = 0;
-	struct uuid uuid;
-	int *n = (int *)&uuid;
-
-	ZEND_PARSE_PARAMETERS_START(0, 2)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(prefix, prefix_len)
-		Z_PARAM_BOOL(more_entropy)
-	ZEND_PARSE_PARAMETERS_END();
-
-	(void)uuidgen(&uuid, 1);
-
-	if (more_entropy) {
-		n[1] &= 0xffffff;
-		uniqid = strpprintf(0, "%s%08x%06x.%08x", prefix, n[0], n[1], n[2]);
-	} else {
-		n[1] &= 0xfffff;
-		uniqid = strpprintf(0, "%s%08x%05x", prefix, n[0], n[1]);
-	}
-
-	RETURN_STR(uniqid);
-}
-#elif HAVE_GETTIMEOFDAY
-ZEND_TLS struct timeval prev_tv = { 0, 0 };
-
-/* {{{ Generates a unique ID */
-PHP_FUNCTION(uniqid)
-{
-	char *prefix = "";
-	bool more_entropy = 0;
 	int sec, usec;
 	size_t prefix_len = 0;
+#ifdef HAVE_UUIDGEN
+	struct uuid uuid;
+	int *n = (int *)&uuid;
+#else
 	struct timeval tv;
+#endif
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -86,6 +63,12 @@ PHP_FUNCTION(uniqid)
 		Z_PARAM_BOOL(more_entropy)
 	ZEND_PARSE_PARAMETERS_END();
 
+#ifdef HAVE_UUIDGEN
+	(void)uuidgen(&uuid, 1);
+
+	sec = n[0];
+	usec = n[1] % 0x100000;
+#else
 	/* This implementation needs current microsecond to change,
 	 * hence we poll time until it does. This is much faster than
 	 * calling usleep(1) which may cause the kernel to schedule
@@ -100,6 +83,7 @@ PHP_FUNCTION(uniqid)
 
 	sec = (int) tv.tv_sec;
 	usec = (int) (tv.tv_usec % 0x100000);
+#endif
 
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs.
@@ -118,5 +102,5 @@ PHP_FUNCTION(uniqid)
 
 	RETURN_STR(uniqid);
 }
-#endif
 /* }}} */
+#endif
