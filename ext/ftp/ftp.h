@@ -138,7 +138,7 @@ zend_string* ftp_mkdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len);
 bool ftp_rmdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len);
 
 /* Set permissions on a file */
-bool ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filename_len);
+bool ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const size_t filename_len);
 
 /* Allocate space on remote server with ALLO command
  * Many servers will respond with 202 Allocation not necessary,
