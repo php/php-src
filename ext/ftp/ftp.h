@@ -60,7 +60,6 @@ typedef struct ftpbuf
 	char		inbuf[FTP_BUFSIZE];	/* last response text */
 	char		*extra;			/* extra characters */
 	int		extralen;		/* number of extra chars */
-	char		outbuf[FTP_BUFSIZE];	/* command output buffer */
 	char		*pwd;			/* cached pwd */
 	char		*syst;			/* cached system type */
 	ftptype_t	type;			/* current transfer type */
