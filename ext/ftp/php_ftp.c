@@ -162,7 +162,7 @@ PHP_FUNCTION(ftp_connect)
 	ftp->usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;
 #ifdef HAVE_FTP_SSL
 	/* disable ssl */
-	ftp->use_ssl = 0;
+	ftp->use_ssl = false;
 #endif
 
 	object_init_ex(return_value, php_ftp_ce);
@@ -198,7 +198,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
 	ftp->usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;
 	/* enable ssl */
-	ftp->use_ssl = 1;
+	ftp->use_ssl = true;
 
 	object_init_ex(return_value, php_ftp_ce);
 	ftp_object_from_zend_object(Z_OBJ_P(return_value))->ftp = ftp;
@@ -432,7 +432,7 @@ PHP_FUNCTION(ftp_alloc)
 {
 	zval		*z_ftp, *zresponse = NULL;
 	ftpbuf_t	*ftp;
-	zend_long		size, ret;
+	zend_long		size;
 	zend_string	*response = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol|z", &z_ftp, php_ftp_ce, &size, &zresponse) == FAILURE) {
@@ -440,17 +440,13 @@ PHP_FUNCTION(ftp_alloc)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 
-	ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
+	bool ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
 
 	if (response) {
 		ZEND_TRY_ASSIGN_REF_STR(zresponse, response);
 	}
 
-	if (!ret) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(ret);
 }
 /* }}} */
 
@@ -797,8 +793,8 @@ PHP_FUNCTION(ftp_nb_get)
 	}
 
 	/* configuration */
-	ftp->direction = 0;   /* recv */
-	ftp->closestream = 1; /* do close */
+	ftp->direction = false;   /* recv */
+	ftp->closestream = true; /* do close */
 
 	if ((ret = ftp_nb_get(ftp, outstream, remote, remote_len, xtype, resumepos)) == PHP_FTP_FAILED) {
 		php_stream_close(outstream);
@@ -950,8 +946,8 @@ PHP_FUNCTION(ftp_nb_fput)
 	}
 
 	/* configuration */
-	ftp->direction = 1;   /* send */
-	ftp->closestream = 0; /* do not close */
+	ftp->direction = true;   /* send */
+	ftp->closestream = false; /* do not close */
 
 	if (((ret = ftp_nb_put(ftp, remote, remote_len, stream, xtype, startpos)) == PHP_FTP_FAILED)) {
 		if (*ftp->inbuf) {
@@ -1091,8 +1087,8 @@ PHP_FUNCTION(ftp_nb_put)
 	}
 
 	/* configuration */
-	ftp->direction = 1;   /* send */
-	ftp->closestream = 1; /* do close */
+	ftp->direction = true;   /* send */
+	ftp->closestream = true; /* do close */
 
 	ret = ftp_nb_put(ftp, remote, remote_len, instream, xtype, startpos);
 
