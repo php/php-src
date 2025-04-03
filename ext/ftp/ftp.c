@@ -651,7 +651,7 @@ char** ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	return ftp_genlist(ftp, "MLSD", sizeof("MLSD")-1, path, path_len);
 }
 
-int ftp_mlsd_parse_line(HashTable *ht, const char *input)
+zend_result ftp_mlsd_parse_line(HashTable *ht, const char *input)
 {
 	zval zstr;
 	const char *end = input + strlen(input);
