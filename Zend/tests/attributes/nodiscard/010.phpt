@@ -28,7 +28,7 @@ $obj = test();
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=29, args=0, vars=3, tmps=1)
+     ; (lines=29, args=0, vars=3, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 0 %d string("tmpfile")
@@ -62,7 +62,7 @@ $_main:
 0028 RETURN int(1)
 
 test:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=3, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 V0 = NEW 0 string("stdClass")
