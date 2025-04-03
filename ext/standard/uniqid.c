@@ -87,24 +87,6 @@ PHP_FUNCTION(uniqid)
 		Z_PARAM_BOOL(more_entropy)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef HAVE_UUIDGEN
-	struct uuid uuid;
-	int *n = (int *)&uuid;
-
-	/* Use faster uuidgen() if available */
-	(void)uuidgen(&uuid, 1);
-
-	if (more_entropy) {
-		n[1] &= 0xffffff;
-		uniqid = strpprintf(0, "%s%08x%06x.%08x", prefix, n[0], n[1], n[2]);
-	} else {
-		n[1] &= 0xfffff;
-		uniqid = strpprintf(0, "%s%08x%05x", prefix, n[0], n[1]);
-	}
-
-	RETURN_STR(uniqid);
-#endif
-
 	/* This implementation needs current microsecond to change,
 	 * hence we poll time until it does. This is much faster than
 	 * calling usleep(1) which may cause the kernel to schedule
