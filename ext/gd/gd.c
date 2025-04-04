@@ -1753,7 +1753,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 	char *file = NULL;
 	zend_long quality = 128, type = 1;
 	gdImagePtr im;
-	FILE *fp;
 	size_t file_len = 0;
 
 	/* The quality parameter for gd2 stands for chunk size */
@@ -1783,7 +1782,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 	if (file_len) {
 		PHP_GD_CHECK_OPEN_BASEDIR(file, "Invalid filename");
 
-		fp = VCWD_FOPEN(file, "wb");
+		FILE *fp = VCWD_FOPEN(file, "wb");
 		if (!fp) {
 			php_error_docref(NULL, E_WARNING, "Unable to open \"%s\" for writing", file);
 			RETURN_FALSE;
@@ -1851,9 +1850,7 @@ PHP_FUNCTION(imagexbm)
 	zend_long foreground_color;
 	bool foreground_color_is_null = true;
 	gdImagePtr im;
-	int i;
 	gdIOCtx *ctx = NULL;
-	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_OBJECT_OF_CLASS(imgind, gd_image_ce)
@@ -1865,7 +1862,7 @@ PHP_FUNCTION(imagexbm)
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
 	if (file != NULL) {
-		stream = php_stream_open_wrapper(file, "wb", REPORT_ERRORS|IGNORE_PATH, NULL);
+		php_stream *stream = php_stream_open_wrapper(file, "wb", REPORT_ERRORS|IGNORE_PATH, NULL);
 		if (stream == NULL) {
 			RETURN_FALSE;
 		}
@@ -1876,6 +1873,7 @@ PHP_FUNCTION(imagexbm)
 	}
 
 	if (foreground_color_is_null) {
+		int i;
 		for (i = 0; i < gdImageColorsTotal(im); i++) {
 			if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) {
 				break;
@@ -2083,7 +2081,6 @@ PHP_FUNCTION(imagewbmp)
 	zend_long foreground_color;
 	bool foreground_color_is_null = true;
 	gdImagePtr im;
-	int i;
 	gdIOCtx *ctx;
 	zval *to_zval = NULL;
 
@@ -2102,6 +2099,7 @@ PHP_FUNCTION(imagewbmp)
 	}
 
 	if (foreground_color_is_null) {
+		int i;
 		for (i = 0; i < gdImageColorsTotal(im); i++) {
 			if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) {
 				break;
@@ -2462,7 +2460,6 @@ PHP_FUNCTION(imagegammacorrect)
 {
 	zval *IM;
 	gdImagePtr im;
-	int i;
 	double input, output, gamma;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
@@ -2486,11 +2483,9 @@ PHP_FUNCTION(imagegammacorrect)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if (gdImageTrueColor(im))	{
-		int x, y, c;
-
-		for (y = 0; y < gdImageSY(im); y++)	{
-			for (x = 0; x < gdImageSX(im); x++)	{
-				c = gdImageGetPixel(im, x, y);
+		for (int y = 0; y < gdImageSY(im); y++)	{
+			for (int x = 0; x < gdImageSX(im); x++)	{
+				int c = gdImageGetPixel(im, x, y);
 				gdImageSetPixel(im, x, y,
 					gdTrueColorAlpha(
 						(int) ((pow((gdTrueColorGetRed(c)   / 255.0), gamma) * 255) + .5),
@@ -2504,7 +2499,7 @@ PHP_FUNCTION(imagegammacorrect)
 		RETURN_TRUE;
 	}
 
-	for (i = 0; i < gdImageColorsTotal(im); i++) {
+	for (int i = 0; i < gdImageColorsTotal(im); i++) {
 		im->red[i]   = (int)((pow((im->red[i]   / 255.0), gamma) * 255) + .5);
 		im->green[i] = (int)((pow((im->green[i] / 255.0), gamma) * 255) + .5);
 		im->blue[i]  = (int)((pow((im->blue[i]  / 255.0), gamma) * 255) + .5);
@@ -2810,7 +2805,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	zval *var = NULL;
 	gdImagePtr im;
 	gdPointPtr points;
-	int npoints, col, nelem, i;
+	int npoints, col, nelem;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_OBJECT_OF_CLASS(IM, gd_image_ce)
@@ -2850,7 +2845,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 
 	points = (gdPointPtr) safe_emalloc(npoints, sizeof(gdPoint), 0);
 
-	for (i = 0; i < npoints; i++) {
+	for (int i = 0; i < npoints; i++) {
 		if ((var = zend_hash_index_find(Z_ARRVAL_P(POINTS), (i * 2))) != NULL) {
 			points[i].x = zval_get_long(var);
 		}
@@ -3701,7 +3696,7 @@ PHP_FUNCTION(imageconvolution)
 	zval *var = NULL, *var2 = NULL;
 	gdImagePtr im_src = NULL;
 	double div, offset;
-	int i, j, res;
+	int res;
 	float matrix[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
@@ -3718,14 +3713,14 @@ PHP_FUNCTION(imageconvolution)
 		RETURN_THROWS();
 	}
 
-	for (i=0; i<3; i++) {
+	for (uint8_t i = 0; i < 3; i++) {
 		if ((var = zend_hash_index_find_deref(Z_ARRVAL_P(hash_matrix), (i))) != NULL && Z_TYPE_P(var) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(var)) != 3 ) {
 				zend_argument_value_error(2, "must be a 3x3 array, matrix[%d] only has %d elements", i, zend_hash_num_elements(Z_ARRVAL_P(var)));
 				RETURN_THROWS();
 			}
 
-			for (j=0; j<3; j++) {
+			for (uint8_t j = 0; j < 3; j++) {
 				if ((var2 = zend_hash_index_find(Z_ARRVAL_P(var), j)) != NULL) {
 					matrix[i][j] = (float) zval_get_double(var2);
 				} else {
@@ -4031,9 +4026,7 @@ PHP_FUNCTION(imageaffine)
 	gdRectPtr pRect = NULL;
 	zval *z_rect = NULL;
 	zval *z_affine;
-	zval *tmp;
 	double affine[6];
-	zval *zval_affine_elem = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_OBJECT_OF_CLASS(IM, gd_image_ce)
@@ -4051,7 +4044,8 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	for (uint32_t i = 0; i < nelems; i++) {
-		if ((zval_affine_elem = zend_hash_index_find_deref(Z_ARRVAL_P(z_affine), i)) != NULL) {
+		zval *zval_affine_elem = zend_hash_index_find_deref(Z_ARRVAL_P(z_affine), i);
+		if (zval_affine_elem != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
 				case IS_LONG:
 				case IS_DOUBLE:
@@ -4070,6 +4064,7 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	if (z_rect != NULL) {
+		zval *tmp;
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
 			rect.x = zval_get_long(tmp);
 		} else {
@@ -4119,7 +4114,7 @@ PHP_FUNCTION(imageaffinematrixget)
 	zend_long type;
 	zval *options = NULL;
 	zval *tmp;
-	int res = GD_FALSE, i;
+	int res = GD_FALSE;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(type)
@@ -4183,7 +4178,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		RETURN_FALSE;
 	} else {
 		array_init(return_value);
-		for (i = 0; i < 6; i++) {
+		for (uint8_t i = 0; i < 6; i++) {
 			add_index_double(return_value, i, affine[i]);
 		}
 	}
