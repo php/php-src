@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-18038 (Lazy proxy calls magic methods twice). (Arnaud)
   . Fixed bug GH-18209 (Use-after-free in extract() with EXTR_REFS). (ilutov)
 
+- DBA:
+  . FIxed bug GH-18247 dba_popen() memory leak on invalid path. (David Carlier)
+
 - GD:
   . Fixed imagecrop() overflow with rect argument with x/width y/heigh usage
     in gdImageCrop(). (David Carlier)
