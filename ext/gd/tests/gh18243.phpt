@@ -1,5 +1,5 @@
 --TEST--
-GH-17984: array of references handling
+GH-18243: imagefttext underflow/overflow on $size
 --EXTENSIONS--
 gd
 --FILE--
