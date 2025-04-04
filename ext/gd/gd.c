@@ -3712,7 +3712,7 @@ PHP_FUNCTION(imageconvolution)
 	zval *var = NULL, *var2 = NULL;
 	gdImagePtr im_src = NULL;
 	double div, offset;
-	int nelem, i, j, res;
+	int i, j, res;
 	float matrix[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
@@ -3724,8 +3724,7 @@ PHP_FUNCTION(imageconvolution)
 
 	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
 
-	nelem = zend_hash_num_elements(Z_ARRVAL_P(hash_matrix));
-	if (nelem != 3) {
+	if (zend_hash_num_elements(Z_ARRVAL_P(hash_matrix)) != 3) {
 		zend_argument_value_error(2, "must be a 3x3 array");
 		RETURN_THROWS();
 	}
@@ -4045,7 +4044,6 @@ PHP_FUNCTION(imageaffine)
 	zval *z_affine;
 	zval *tmp;
 	double affine[6];
-	int i, nelems;
 	zval *zval_affine_elem = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -4057,13 +4055,13 @@ PHP_FUNCTION(imageaffine)
 
 
 	src = php_gd_libgdimageptr_from_zval_p(IM);
-
-	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_affine))) != 6) {
+	uint32_t nelems = zend_hash_num_elements(Z_ARRVAL_P(z_affine));
+	if (nelems != 6) {
 		zend_argument_value_error(2, "must have 6 elements");
 		RETURN_THROWS();
 	}
 
-	for (i = 0; i < nelems; i++) {
+	for (uint32_t i = 0; i < nelems; i++) {
 		if ((zval_affine_elem = zend_hash_index_find_deref(Z_ARRVAL_P(z_affine), i)) != NULL) {
 			switch (Z_TYPE_P(zval_affine_elem)) {
 				case IS_LONG:
