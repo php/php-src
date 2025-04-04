@@ -2785,8 +2785,9 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 				    (y1 < 0 && y > INT_MAX + y1) ||
 				    (x1 > 0 && x2 < INT_MIN + x1) ||
 				    (x1 < 0 && x2 > INT_MAX + x1) ||
-				     overflow2((y - y1), (x2 - x1))) {
-					continue;
+				    (((y - y1) <= 0 || (x2 - x1) <= 0)) ||
+				    ((y - y1) > INT_MAX / (x2 - x1))) {
+					return;
 				}
 				im->polyInts[ints++] = (int) ((float) ((y - y1) * (x2 - x1)) /
 				                              (float) (y2 - y1) + 0.5 + x1);
