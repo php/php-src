@@ -649,7 +649,7 @@ PHP_FUNCTION(imagesetstyle)
 	}
 
 	/* copy the style values in the stylearr */
-	stylearr = safe_emalloc(sizeof(int), num_styles, 0);
+	stylearr = safe_emalloc(num_styles, sizeof(int), 0);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(styles), item) {
 		stylearr[index++] = zval_get_long(item);
