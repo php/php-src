@@ -751,11 +751,7 @@ PHP_FUNCTION(imagepalettetotruecolor)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	if (gdImagePaletteToTrueColor(im) == 0) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(gdImagePaletteToTrueColor(im) != 0);
 }
 /* }}} */
 
@@ -3413,22 +3409,14 @@ static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PHP_GD_SINGLE_RES
 
-	if (gdImageNegate(im_src) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageNegate(im_src) == 1);
 }
 
 static void php_image_filter_grayscale(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PHP_GD_SINGLE_RES
 
-	if (gdImageGrayScale(im_src) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageGrayScale(im_src) == 1);
 }
 
 static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
@@ -3445,11 +3433,7 @@ static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
 
 	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
 
-	if (gdImageBrightness(im_src, (int)brightness) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageBrightness(im_src, (int)brightness) == 1);
 }
 
 static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
@@ -3466,11 +3450,7 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 
 	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
 
-	if (gdImageContrast(im_src, (int)contrast) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageContrast(im_src, (int)contrast) == 1);
 }
 
 static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
@@ -3492,66 +3472,42 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 
 	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
 
-	if (gdImageColor(im_src, (int) r, (int) g, (int) b, (int) a) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageColor(im_src, (int) r, (int) g, (int) b, (int) a) == 1);
 }
 
 static void php_image_filter_edgedetect(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PHP_GD_SINGLE_RES
 
-	if (gdImageEdgeDetectQuick(im_src) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageEdgeDetectQuick(im_src) == 1);
 }
 
 static void php_image_filter_emboss(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PHP_GD_SINGLE_RES
 
-	if (gdImageEmboss(im_src) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageEmboss(im_src) == 1);
 }
 
 static void php_image_filter_gaussian_blur(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PHP_GD_SINGLE_RES
 
-	if (gdImageGaussianBlur(im_src) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageGaussianBlur(im_src) == 1);
 }
 
 static void php_image_filter_selective_blur(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PHP_GD_SINGLE_RES
 
-	if (gdImageSelectiveBlur(im_src) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageSelectiveBlur(im_src) == 1);
 }
 
 static void php_image_filter_mean_removal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PHP_GD_SINGLE_RES
 
-	if (gdImageMeanRemoval(im_src) == 1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageMeanRemoval(im_src) == 1);
 }
 
 static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
@@ -3569,11 +3525,7 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 
 	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
 
-	if (gdImageSmooth(im_src, (float)weight)==1) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImageSmooth(im_src, (float)weight) == 1);
 }
 
 static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
@@ -3593,11 +3545,7 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	if (gdImagePixelate(im, (int) blocksize, (const unsigned int) mode)) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(gdImagePixelate(im, (int) blocksize, (const unsigned int) mode));;
 }
 
 static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
@@ -3696,7 +3644,6 @@ PHP_FUNCTION(imageconvolution)
 	zval *var = NULL, *var2 = NULL;
 	gdImagePtr im_src = NULL;
 	double div, offset;
-	int res;
 	float matrix[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
@@ -3747,13 +3694,7 @@ PHP_FUNCTION(imageconvolution)
 		RETURN_THROWS();
 	}
 
-	res = gdImageConvolution(im_src, matrix, div_float, (float) offset);
-
-	if (res) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(gdImageConvolution(im_src, matrix, div_float, (float) offset));
 }
 /* }}} */
 /* End section: Filters */
