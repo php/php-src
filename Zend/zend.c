@@ -1195,6 +1195,7 @@ void zend_shutdown(void) /* {{{ */
 	free(GLOBAL_CONSTANTS_TABLE);
 	zend_shutdown_strtod();
 	zend_attributes_shutdown();
+	zend_type_free_interned_trees();
 
 #ifdef ZTS
 	GLOBAL_FUNCTION_TABLE = NULL;

@@ -148,6 +148,7 @@ void init_executor(void) /* {{{ */
 
 	EG(function_table) = CG(function_table);
 	EG(class_table) = CG(class_table);
+	EG(type_trees) = CG(type_trees);
 
 	EG(in_autoload) = NULL;
 	EG(error_handling) = EH_NORMAL;
