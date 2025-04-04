@@ -713,6 +713,8 @@ function imagecopymergegray(GdImage $dst_image, GdImage $src_image, int $dst_x, 
 
 function imagecopyresized(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_width, int $dst_height, int $src_width, int $src_height): bool {}
 
+function imagematch(GdImage $image1, GdImage $image2): bool {}
+
 function imagesx(GdImage $image): int {}
 
 function imagesy(GdImage $image): int {}
