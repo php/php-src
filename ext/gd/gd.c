@@ -27,7 +27,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/head.h"
 #include <math.h>
 #include "SAPI.h"
 #include "php_gd.h"
