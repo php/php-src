@@ -27,6 +27,24 @@ try {
 }
 
 try {
+    ldap_search($link, $dn, $filter, array('option'), false, PHP_INT_MIN);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    ldap_search($link, $dn, $filter, array('option'), false, -1, PHP_INT_MIN);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    ldap_search($link, $dn, $filter, array('option'), false, -1, -1, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
     ldap_search(array(), $dn, $filter, array('top'));
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
@@ -61,6 +79,9 @@ try {
 Warning: ldap_search(): Search: No such object in %s on line %d
 bool(false)
 ldap_search(): Argument #4 ($attributes) must be an array with numeric keys
+ldap_search(): Argument #6 ($sizelimit) must be between -1 and %d
+ldap_search(): Argument #7 ($timelimit) must be between -1 and %d
+ldap_search(): Argument #8 ($deref) must be one of the LDAP_DEREF_* constants
 ldap_search(): Argument #1 ($ldap) must not be empty
 ldap_search(): Argument #2 ($base) must be the same size as argument #1
 ldap_search(): Argument #3 ($filter) must be the same size as argument #1
