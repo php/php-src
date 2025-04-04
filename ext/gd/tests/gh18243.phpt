@@ -2,6 +2,10 @@
 GH-18243: imagefttext underflow/overflow on $size
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if(!function_exists('imagettftext')) die('skip imagettftext() not available');
+?>
 --FILE--
 <?php
 $font = __DIR__.'/Rochester-Regular.otf';
