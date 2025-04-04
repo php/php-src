@@ -3311,10 +3311,11 @@ PHP_FUNCTION(imagegetclip)
 }
 /* }}} */
 
+#ifdef HAVE_GD_FREETYPE
+
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
 
-#ifdef HAVE_GD_FREETYPE
 /* {{{ Give the bounding box of a text using fonts via freetype2 */
 PHP_FUNCTION(imageftbbox)
 {
