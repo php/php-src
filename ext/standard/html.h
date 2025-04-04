@@ -48,5 +48,6 @@ PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t ol
 PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet);
 PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, const char *hint_charset);
 PHPAPI unsigned int php_next_utf8_char(const unsigned char *str, size_t str_len, size_t *cursor, zend_result *status);
+PHPAPI unsigned int php_next_utf8_char_mb(const unsigned char *str, unsigned char c, size_t str_len, size_t *cursor);
 
 #endif /* HTML_H */
