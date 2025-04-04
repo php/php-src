@@ -520,7 +520,7 @@ void php_mysqlnd_greet_free_mem(void * _packet)
 /* }}} */
 
 
-#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 4096)
+#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + MYSQLND_MAX_ALLOWED_AUTH_LEN + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 4096)
 
 /* {{{ php_mysqlnd_auth_write */
 static
@@ -561,21 +561,33 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 		if (packet->auth_data == NULL) {
 			packet->auth_data_len = 0;
 		}
-		if (packet->auth_data_len > 0xFF) {
-			const char * const msg = "Authentication data too long. "
-				"Won't fit into the buffer and will be truncated. Authentication will thus fail";
-			SET_CLIENT_ERROR(error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, msg);
-			php_error_docref(NULL, E_WARNING, "%s", msg);
-			DBG_RETURN(0);
+
+		if (packet->client_flags & CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) {
+			if (packet->auth_data_len > MYSQLND_MAX_ALLOWED_AUTH_LEN) {
+				const char * const msg = "Authentication data too long. "
+					"Won't fit into the buffer and will be truncated. Authentication will thus fail";
+				SET_CLIENT_ERROR(error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, msg);
+				php_error_docref(NULL, E_WARNING, "%s", msg);
+				DBG_RETURN(0);
+			}
+/*!!!!! is the buffer big enough ??? */
+			if (sizeof(buffer) < (packet->auth_data_len + (p - buffer))) {
+				DBG_ERR("the stack buffer was not enough!!");
+				DBG_RETURN(0);
+			}
+			p = php_mysqlnd_net_store_length(p, packet->auth_data_len);
+		} else {
+			if (packet->auth_data_len > 0xFF) {
+				const char * const msg = "Authentication data too long. "
+					"Won't fit into the buffer and will be truncated. Authentication will thus fail";
+				SET_CLIENT_ERROR(error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, msg);
+				php_error_docref(NULL, E_WARNING, "%s", msg);
+				DBG_RETURN(0);
+			}
+			int1store(p, (int8_t)packet->auth_data_len);
+			++p;
 		}
 
-		int1store(p, (int8_t)packet->auth_data_len);
-		++p;
-/*!!!!! is the buffer big enough ??? */
-		if (sizeof(buffer) < (packet->auth_data_len + (p - buffer))) {
-			DBG_ERR("the stack buffer was not enough!!");
-			DBG_RETURN(0);
-		}
 		if (packet->auth_data_len) {
 			p = zend_mempcpy(p, packet->auth_data, packet->auth_data_len);
 		}

@@ -68,7 +68,7 @@ mysqlnd_run_authentication(
 	memcpy(plugin_data, auth_plugin_data.s, plugin_data_len);
 	plugin_data[plugin_data_len] = '\0';
 
-	requested_protocol = mnd_pestrdup(auth_protocol? auth_protocol : MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
+	requested_protocol = mnd_pestrdup(mysql_flags & CLIENT_SEND_CLEAR_PASSWORD ? MYSQLND_CLEAR_PASSWORD_AUTH_PROTOCOL : (auth_protocol? auth_protocol : MYSQLND_DEFAULT_AUTH_PROTOCOL), FALSE);
 	if (!requested_protocol) {
 		goto end;
 	}

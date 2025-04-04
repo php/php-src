@@ -72,6 +72,10 @@ class Mysql extends \PDO
     /** @cvalue PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY */
     public const int ATTR_LOCAL_INFILE_DIRECTORY = UNKNOWN;
 #endif
+#ifdef PDO_USE_MYSQLND
+    /** @cvalue PDO_MYSQL_ATTR_SEND_CLEAR_PASSWORD */
+    public const int ATTR_SEND_CLEAR_PASSWORD = UNKNOWN;
+#endif
 
     public function getWarningCount(): int {}
 }
