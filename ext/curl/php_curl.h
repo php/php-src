@@ -39,6 +39,10 @@ PHP_CURL_API extern zend_class_entry *curl_ce;
 PHP_CURL_API extern zend_class_entry *curl_share_ce;
 PHP_CURL_API extern zend_class_entry *curl_share_persistent_ce;
 PHP_CURL_API extern zend_class_entry *curl_multi_ce;
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+PHP_CURL_API extern zend_class_entry *curl_ws_frame_ce;
+PHP_CURL_API extern zend_class_entry *curl_ws_message_type_ce;
+#endif
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 PHP_CURL_API extern zend_class_entry *curl_CURLStringFile_class;
 
