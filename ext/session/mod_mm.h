@@ -17,7 +17,7 @@
 #ifndef MOD_MM_H
 #define MOD_MM_H
 
-#ifdef HAVE_LIBMM
+#ifdef HAVE_LIBGLIB
 
 #include "php_session.h"
 
