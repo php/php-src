@@ -53,6 +53,7 @@
 #endif /* ZTS && HAVE_CURL_OLD_OPENSSL */
 /* }}} */
 
+#include "zend_enum.h"
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -245,6 +246,10 @@ PHP_GSHUTDOWN_FUNCTION(curl)
 zend_class_entry *curl_ce;
 zend_class_entry *curl_share_ce;
 zend_class_entry *curl_share_persistent_ce;
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+zend_class_entry *curl_ws_frame_ce;
+zend_class_entry *curl_ws_message_type_ce;
+#endif
 static zend_object_handlers curl_object_handlers;
 
 static zend_object *curl_create_object(zend_class_entry *class_type);
@@ -431,6 +436,12 @@ PHP_MINIT_FUNCTION(curl)
 
 	curl_share_persistent_ce = register_class_CurlSharePersistentHandle();
 	curl_share_persistent_register_handlers();
+
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+	curl_ws_frame_ce = register_class_CurlWsFrame();
+
+	curl_ws_message_type_ce = register_class_CurlWsMessageType();
+#endif
 
 	curlfile_register_class();
 
@@ -3114,4 +3125,201 @@ PHP_FUNCTION(curl_upkeep)
 	RETURN_BOOL(error == CURLE_OK);
 }
 /*}}} */
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+static zend_result curl_create_ws_frame_obj(zval *return_value, const struct curl_ws_frame *frame)
+{
+	const char *case_name;
+	if (frame->flags & CURLWS_BINARY) {
+		case_name = "Binary";
+	} else if (frame->flags & CURLWS_TEXT) {
+		case_name = "Text";
+	} else if (frame->flags & CURLWS_CLOSE) {
+		case_name = "Close";
+	} else if (frame->flags & CURLWS_PING) {
+		case_name = "Ping";
+	} else if (frame->flags & CURLWS_PONG) {
+		case_name = "Pong";
+	} else {
+		/* Should not happen, here for defensive programming. */
+		zend_throw_error(NULL, "Unable to determine message type");
+		return FAILURE;
+	}
+
+	object_init_ex(return_value, curl_ws_frame_ce);
+	zend_object *obj = Z_OBJ_P(return_value);
+	/* Note: object does not yet contain "age" field because at the time of writing this is always zero. */
+	ZVAL_OBJ_COPY(OBJ_PROP_NUM(obj, 0), zend_enum_get_case_cstr(curl_ws_message_type_ce, case_name));
+	ZVAL_BOOL(OBJ_PROP_NUM(obj, 1), frame->flags & CURLWS_CONT);
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 2), (zend_long) frame->offset);
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 3), (zend_long) frame->bytesleft);
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 4), (zend_long) frame->len);
+
+	return SUCCESS;
+}
+
+PHP_FUNCTION(curl_ws_meta)
+{
+	zval *zid;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_curl *ch = Z_CURL_P(zid);
+
+	const struct curl_ws_frame *frame = curl_ws_meta(ch->cp);
+	if (UNEXPECTED(!frame)) {
+		zend_throw_error(NULL, "%s(): Called outside a valid websocket context", get_active_function_name());
+		RETURN_THROWS();
+	}
+
+	(void) curl_create_ws_frame_obj(return_value, frame);
+}
+
+PHP_FUNCTION(curl_ws_recv)
+{
+	zval *zid, *z_meta = NULL;
+	zend_long length;
+	size_t recv;
+	const struct curl_ws_frame *meta;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)
+		Z_PARAM_LONG(length)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_OR_NULL(z_meta)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(length <= 0)) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(length > ZSTR_MAX_LEN)) {
+		zend_argument_value_error(2, "must be less than the maximum string length");
+		RETURN_THROWS();
+	}
+
+	php_curl *ch = Z_CURL_P(zid);
+
+	zend_string *buffer = zend_string_alloc(length, false);
+
+	CURLcode retcode = curl_ws_recv(ch->cp, ZSTR_VAL(buffer), (size_t) length, &recv, &meta);
+	SAVE_CURL_ERROR(ch, retcode);
+	if (UNEXPECTED(retcode != CURLE_OK)) {
+		zend_string_efree(buffer);
+		RETURN_FALSE;
+	}
+
+	if (recv < length) {
+		ZEND_ASSERT(!ZSTR_IS_INTERNED(buffer) && GC_REFCOUNT(buffer) == 1);
+		buffer = zend_string_truncate(buffer, recv, false);
+	}
+	ZSTR_VAL(buffer)[ZSTR_LEN(buffer)] = '\0';
+
+	if (z_meta) {
+		zval obj;
+		if (curl_create_ws_frame_obj(&obj, meta) == SUCCESS) {
+			ZEND_TRY_ASSIGN_REF_VALUE(z_meta, &obj);
+		}
+	}
+
+	RETURN_NEW_STR(buffer);
+}
+
+PHP_FUNCTION(curl_ws_send)
+{
+	zval *zid;
+	zend_string *buffer;
+	zend_object *type_zv = NULL;
+	zend_long frag_size = 0, flags = 0;
+	size_t sent = 0;
+	zend_long type_nr = CURLWS_TEXT;
+
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)
+		Z_PARAM_STR(buffer)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OF_CLASS(type_zv, curl_ws_message_type_ce)
+		Z_PARAM_LONG(frag_size)
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_curl *ch = Z_CURL_P(zid);
+
+	if (type_zv) {
+		const zend_string *type = Z_STR_P(zend_enum_fetch_case_name(type_zv));
+		switch (ZSTR_VAL(type)[1] + ZSTR_LEN(type)) {
+			case 'i' + sizeof("Binary")-1:
+				type_nr = CURLWS_BINARY;
+				break;
+			case 'e' + sizeof("Text")-1:
+				type_nr = CURLWS_TEXT;
+				break;
+			case 'l' + sizeof("Close")-1:
+				type_nr = CURLWS_CLOSE;
+				break;
+			case 'i' + sizeof("Ping")-1:
+				type_nr = CURLWS_PING;
+				break;
+			case 'o' + sizeof("Pong")-1:
+				type_nr = CURLWS_PONG;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
+	}
+
+	if (UNEXPECTED(frag_size < 0)) {
+		zend_argument_value_error(4, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	const curl_off_t max_curl_off_t = sizeof(curl_off_t) == 8 ? INT64_MAX : INT32_MAX;
+	if (UNEXPECTED(frag_size > max_curl_off_t)) {
+		zend_argument_value_error(4, "must be less than %" PRId64, max_curl_off_t);
+		RETURN_THROWS();
+	}
+
+	if (frag_size == 0) {
+		if (UNEXPECTED(flags & CURLWS_OFFSET)) {
+			zend_argument_value_error(4, "must not be zero when argument #5 ($flags) contains CURLWS_OFFSET");
+			RETURN_THROWS();
+		}
+	} else {
+		if (UNEXPECTED(!(flags & CURLWS_OFFSET))) {
+			zend_argument_value_error(4, "must be zero when argument #5 ($flags) does not contain CURLWS_OFFSET");
+			RETURN_THROWS();
+		}
+	}
+
+	zend_long allowed_flags = CURLWS_CONT|CURLWS_OFFSET;
+#if LIBCURL_VERSION_NUM >= 0x080e00
+	allowed_flags |= CURLWS_NOAUTOPONG;
+#endif
+
+	if (UNEXPECTED(flags & ~allowed_flags)) {
+		if (UNEXPECTED(flags & (CURLWS_BINARY|CURLWS_TEXT|CURLWS_CLOSE|CURLWS_PING|CURLWS_PONG))) {
+			zend_argument_value_error(5, "contains a message type flag, but the message type must be passed to argument #3 ($type)");
+			RETURN_THROWS();
+		}
+		zend_argument_value_error(5, "contains invalid flags (allowed flags: CURLWS_CONT, CURLWS_OFFSET)");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED((flags & CURLWS_CONT) && type_nr != CURLWS_TEXT && type_nr != CURLWS_BINARY)) {
+		zend_argument_value_error(5, "contains CURLWS_CONT, which is only compatible with text or binary messages");
+		RETURN_THROWS();
+	}
+
+	flags |= type_nr;
+	CURLcode retcode = curl_ws_send(ch->cp, ZSTR_VAL(buffer), ZSTR_LEN(buffer), &sent, (curl_off_t) frag_size, (unsigned int) flags);
+	SAVE_CURL_ERROR(ch, retcode);
+	if (UNEXPECTED(retcode != CURLE_OK)) {
+		ZEND_ASSERT(sent == 0);
+		RETURN_LONG(0);
+	}
+
+	RETURN_LONG((zend_long) sent);
+}
 #endif
