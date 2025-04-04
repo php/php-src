@@ -864,9 +864,7 @@ restart:
 		}
 		if (!connection->info->lock.fp) {
 			/* stream operation already wrote an error message */
-			efree(resource_key);
-			zval_ptr_dtor(return_value);
-			RETURN_FALSE;
+			goto fail;
 		}
 		if (!error && !php_stream_supports_lock(connection->info->lock.fp)) {
 			error = "Stream does not support locking";
@@ -885,9 +883,7 @@ restart:
 		}
 		if (!connection->info->fp) {
 			/* stream operation already wrote an error message */
-			efree(resource_key);
-			zval_ptr_dtor(return_value);
-			RETURN_FALSE;
+			goto fail;
 		}
 		if (hptr->flags & (DBA_NO_APPEND|DBA_CAST_AS_FD)) {
 			/* Needed because some systems do not allow to write to the original
@@ -895,9 +891,7 @@ restart:
 			 */
 			if (SUCCESS != php_stream_cast(connection->info->fp, PHP_STREAM_AS_FD, (void*)&connection->info->fd, 1)) {
 				php_error_docref(NULL, E_WARNING, "Could not cast stream");
-				efree(resource_key);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+				goto fail;
 #ifdef F_SETFL
 			} else if (modenr == DBA_CREAT) {
 				int flags = fcntl(connection->info->fd, F_GETFL);
@@ -931,9 +925,7 @@ restart:
 				php_error_docref(NULL, E_WARNING, "Driver initialization failed for handler: %s", hptr->name);
 			}
 		}
-		efree(resource_key);
-		zval_ptr_dtor(return_value);
-		RETURN_FALSE;
+		goto fail;
 	}
 
 	connection->info->hnd = hptr;
@@ -942,6 +934,7 @@ restart:
 		if (zend_register_persistent_resource(resource_key, resource_key_len, connection->info, le_pdb) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Could not register persistent resource");
 			efree(resource_key);
+			dba_close_connection(connection);
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -949,6 +942,14 @@ restart:
 
 	zend_hash_add_new(&DBA_G(connections), connection->hash, return_value);
 	efree(resource_key);
+	return;
+fail:
+	efree(resource_key);
+	zend_string_release_ex(connection->hash, persistent);
+	dba_close_info(connection->info);
+	connection->info = NULL;
+	zval_ptr_dtor(return_value);
+	RETURN_FALSE;
 }
 /* }}} */
 
