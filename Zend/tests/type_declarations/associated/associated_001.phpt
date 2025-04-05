@@ -8,10 +8,25 @@ interface I {
     public function foo(T $param): T;
 }
 
-class C implements I {
-    public function foo(string $param): string {}
+class CS implements I {
+    public function foo(string $param): string {
+        return $param . '!';
+    }
 }
 
+class CI implements I {
+    public function foo(int $param): int {
+        return $param + 42;
+    }
+}
+
+$cs = new CS();
+var_dump($cs->foo("Hello"));
+
+$ci = new CI();
+var_dump($ci->foo(5));
+
 ?>
---EXPECTF--
-Fatal error: Declaration of C::foo(string $param): string must be compatible with I::foo(T $param): T in %s on line %d
+--EXPECT--
+string(6) "Hello!"
+int(47)
