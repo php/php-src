@@ -9020,6 +9020,20 @@ static void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_associated_type(zend_ast *ast) {
+	zend_class_entry *ce = CG(active_class_entry);
+
+	if ((ce->ce_flags & ZEND_ACC_INTERFACE) == 0) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use associated types outside of interfaces, used in %s", ZSTR_VAL(ce->name));
+	}
+
+	zend_ast *name_ast = ast->child[0];
+	zend_string *name = zend_ast_get_str(name_ast);
+	ZEND_ASSERT(name != NULL);
+	// TODO add associated type to CE
+}
+
 static void zend_compile_implements(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -11585,6 +11599,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast);
+			break;
+		case ZEND_AST_ASSOCIATED_TYPE:
+			zend_compile_associated_type(ast);
 			break;
 		case ZEND_AST_CLASS:
 			zend_compile_class_decl(NULL, ast, 0);

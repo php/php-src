@@ -2342,6 +2342,10 @@ simple_list:
 			APPEND_NODE_1("break");
 		case ZEND_AST_CONTINUE:
 			APPEND_NODE_1("continue");
+		case ZEND_AST_ASSOCIATED_TYPE:
+			smart_str_appends(str, "type ");
+			zend_ast_export_name(str, ast->child[0], 0, indent);
+			break;
 
 		/* 2 child nodes */
 		case ZEND_AST_DIM:

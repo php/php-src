@@ -287,6 +287,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list
+%type <ast> associated_type
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -662,6 +663,11 @@ enum_case_expr:
 	|	'=' expr { $$ = $2; }
 ;
 
+associated_type:
+        T_TYPE name ';'
+			{ $$ = zend_ast_create(ZEND_AST_ASSOCIATED_TYPE, $2); }
+;
+
 extends_from:
 		%empty				{ $$ = NULL; }
 	|	T_EXTENDS class_name	{ $$ = $2; }
@@ -963,6 +969,7 @@ attributed_class_statement:
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
 	|	enum_case { $$ = $1; }
+	|   associated_type { $$ = $1; }
 ;
 
 class_statement:
