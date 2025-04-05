@@ -1,9 +1,10 @@
 --TEST--
-Associated types basic
+Repeated associated type
 --FILE--
 <?php
 
 interface I {
+    type T;
     type T;
     public function foo(T $param): T;
 }
@@ -14,4 +15,4 @@ class C implements I {
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "type", expecting "function" in %s on line %d
+Fatal error: Cannot have two associated types with the same name "T" in %s on line %d
