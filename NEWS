@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed imagecrop() overflow with rect argument with x/width y/heigh usage
     in gdImageCrop(). (David Carlier)
+  . Fixed GH-18243 imagettftext() overflow/underflow on font size value.
+    (David Carlier)
 
 - OpenSSL:
   . Fix memory leak in openssl_sign() when passing invalid algorithm.
