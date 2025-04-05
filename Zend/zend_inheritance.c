@@ -2978,9 +2978,9 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 				zend_function **hooks = new_prop->hooks =
 					zend_arena_alloc(&CG(arena), ZEND_PROPERTY_HOOK_STRUCT_SIZE);
 				memcpy(hooks, property_info->hooks, ZEND_PROPERTY_HOOK_STRUCT_SIZE);
-				for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
-					if (hooks[i]) {
-						zend_function *old_fn = hooks[i];
+				for (uint32_t j = 0; j < ZEND_PROPERTY_HOOK_COUNT; j++) {
+					if (hooks[j]) {
+						zend_function *old_fn = hooks[j];
 
 						/* Hooks are not yet supported for internal properties. */
 						ZEND_ASSERT(ZEND_USER_CODE(old_fn->type));
@@ -2995,7 +2995,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 						zend_fixup_trait_method(new_fn, ce);
 
-						hooks[i] = new_fn;
+						hooks[j] = new_fn;
 					}
 				}
 				ce->ce_flags |= ZEND_ACC_USE_GUARDS;
@@ -3343,10 +3343,8 @@ static zend_op_array *zend_lazy_method_load(
 
 static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 {
-	zend_class_entry *ce;
-	Bucket *p, *end;
+	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 
-	ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	memcpy(ce, pce, sizeof(zend_class_entry));
 	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 	ce->refcount = 1;
@@ -3372,11 +3370,11 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	/* methods */
 	ce->function_table.pDestructor = ZEND_FUNCTION_DTOR;
 	if (!(HT_FLAGS(&ce->function_table) & HASH_FLAG_UNINITIALIZED)) {
-		p = emalloc(HT_SIZE(&ce->function_table));
+		Bucket *p = emalloc(HT_SIZE(&ce->function_table));
 		memcpy(p, HT_GET_DATA_ADDR(&ce->function_table), HT_USED_SIZE(&ce->function_table));
 		HT_SET_DATA_ADDR(&ce->function_table, p);
 		p = ce->function_table.arData;
-		end = p + ce->function_table.nNumUsed;
+		const Bucket *end = p + ce->function_table.nNumUsed;
 		for (; p != end; p++) {
 			zend_op_array *op_array = Z_PTR(p->val);
 			zend_op_array *new_op_array = Z_PTR(p->val) = zend_lazy_method_load(op_array, ce, pce);
@@ -3412,11 +3410,11 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 
 	/* properties_info */
 	if (!(HT_FLAGS(&ce->properties_info) & HASH_FLAG_UNINITIALIZED)) {
-		p = emalloc(HT_SIZE(&ce->properties_info));
+		Bucket *p = emalloc(HT_SIZE(&ce->properties_info));
 		memcpy(p, HT_GET_DATA_ADDR(&ce->properties_info), HT_USED_SIZE(&ce->properties_info));
 		HT_SET_DATA_ADDR(&ce->properties_info, p);
 		p = ce->properties_info.arData;
-		end = p + ce->properties_info.nNumUsed;
+		const Bucket *end = p + ce->properties_info.nNumUsed;
 		for (; p != end; p++) {
 			zend_property_info *prop_info, *new_prop_info;
 
@@ -3448,11 +3446,11 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 
 	/* constants table */
 	if (!(HT_FLAGS(&ce->constants_table) & HASH_FLAG_UNINITIALIZED)) {
-		p = emalloc(HT_SIZE(&ce->constants_table));
+		Bucket *p = emalloc(HT_SIZE(&ce->constants_table));
 		memcpy(p, HT_GET_DATA_ADDR(&ce->constants_table), HT_USED_SIZE(&ce->constants_table));
 		HT_SET_DATA_ADDR(&ce->constants_table, p);
 		p = ce->constants_table.arData;
-		end = p + ce->constants_table.nNumUsed;
+		const Bucket *end = p + ce->constants_table.nNumUsed;
 		for (; p != end; p++) {
 			zend_class_constant *c, *new_c;
 
