@@ -677,6 +677,42 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 
 ZEND_API inheritance_status zend_perform_covariant_type_check(
 		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
+		zend_class_entry *proto_scope, const zend_type *proto_type_ptr);
+
+static inheritance_status zend_is_type_subtype_of_associated_type(
+	zend_class_entry *concrete_scope,
+	const zend_type *concrete_type_ptr,
+	zend_class_entry *associated_type_scope,
+	const zend_type *associated_type_ptr
+) {
+	const zend_type associated_type = *associated_type_ptr;
+
+	ZEND_ASSERT(CG(bound_associated_types) && "Have associated type");
+	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(associated_type));
+
+	zend_string *associated_type_name = ZEND_TYPE_NAME(associated_type);
+	const zend_type *bound_type_ptr = zend_hash_find_ptr(CG(bound_associated_types), associated_type_name);
+	if (bound_type_ptr == NULL) {
+		/* Loosing const qualifier here is OK because this hashtable never frees or does anything with the value */
+		zend_hash_add_new_ptr(CG(bound_associated_types), associated_type_name, (void*)concrete_type_ptr);
+		return INHERITANCE_SUCCESS;
+	} else {
+		/* Associated type must be invariant */
+		const inheritance_status sub_type_status = zend_perform_covariant_type_check(
+			concrete_scope, concrete_type_ptr, associated_type_scope, bound_type_ptr);
+		const inheritance_status super_type_status = zend_perform_covariant_type_check(
+			associated_type_scope, bound_type_ptr, concrete_scope, concrete_type_ptr);
+
+		if (sub_type_status != super_type_status) {
+			return INHERITANCE_ERROR;
+		} else {
+			return sub_type_status;
+		}
+	}
+}
+
+ZEND_API inheritance_status zend_perform_covariant_type_check(
+		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
 		zend_class_entry *proto_scope, const zend_type *proto_type_ptr)
 {
 	const zend_type fe_type = *fe_type_ptr;
@@ -688,6 +724,17 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 	if (ZEND_TYPE_PURE_MASK(proto_type) == MAY_BE_ANY &&
 			!ZEND_TYPE_CONTAINS_CODE(fe_type, IS_VOID)) {
 		return INHERITANCE_SUCCESS;
+	}
+
+	/* If we check for concrete return type */
+	if (ZEND_TYPE_IS_ASSOCIATED(proto_type)) {
+		return zend_is_type_subtype_of_associated_type(
+			fe_scope, fe_type_ptr, proto_scope, proto_type_ptr);
+	}
+	/* If we check for concrete parameter type */
+	if (ZEND_TYPE_IS_ASSOCIATED(fe_type)) {
+		return zend_is_type_subtype_of_associated_type(
+			proto_scope, proto_type_ptr, fe_scope, fe_type_ptr);
 	}
 
 	/* Builtin types may be removed, but not added */
@@ -2174,6 +2221,11 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 			ZEND_INHERITANCE_RESET_CHILD_OVERRIDE;
 	}
 
+	if (iface->associated_types) {
+		HashTable *ht = emalloc(sizeof(HashTable));
+		zend_hash_init(ht, zend_hash_num_elements(iface->associated_types), NULL, NULL, false);
+		CG(bound_associated_types) = ht;
+	}
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
 		do_inherit_iface_constant(key, c, ce, iface);
 	} ZEND_HASH_FOREACH_END();
@@ -2194,6 +2246,11 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	do_implement_interface(ce, iface);
 	if (iface->num_interfaces) {
 		zend_do_inherit_interfaces(ce, iface);
+	}
+	if (CG(bound_associated_types)) {
+		zend_hash_destroy(CG(bound_associated_types));
+		efree(CG(bound_associated_types));
+		CG(bound_associated_types) = NULL;
 	}
 }
 /* }}} */

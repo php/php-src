@@ -463,6 +463,7 @@ void init_compiler(void) /* {{{ */
 	CG(delayed_autoloads) = NULL;
 	CG(unlinked_uses) = NULL;
 	CG(current_linking_class) = NULL;
+	CG(bound_associated_types) = NULL;
 }
 /* }}} */
 
@@ -491,6 +492,7 @@ void shutdown_compiler(void) /* {{{ */
 		CG(unlinked_uses) = NULL;
 	}
 	CG(current_linking_class) = NULL;
+	ZEND_ASSERT(CG(bound_associated_types) == NULL);
 }
 /* }}} */
 

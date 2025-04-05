@@ -151,6 +151,8 @@ struct _zend_compiler_globals {
 	HashTable *delayed_autoloads;
 	HashTable *unlinked_uses;
 	zend_class_entry *current_linking_class;
+	/* Those are initialized and destroyed by zend_do_inheritance_ex() */
+	HashTable *bound_associated_types;
 
 	uint32_t rtd_key_counter;
 
