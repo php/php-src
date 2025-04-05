@@ -428,16 +428,16 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 
 /* Check whether any type in the fe_type intersection type is a subtype of the proto class. */
 static inheritance_status zend_is_intersection_subtype_of_class(
-		zend_class_entry *fe_scope, const zend_type fe_type,
+		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
 		zend_class_entry *proto_scope, zend_string *proto_class_name, zend_class_entry *proto_ce)
 {
-	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(fe_type));
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(*fe_type_ptr));
 	bool have_unresolved = false;
 	const zend_type *single_type;
 
 	/* Traverse the list of child types and check that at least one is
 	 * a subtype of the parent type being checked */
-	ZEND_TYPE_FOREACH(fe_type, single_type) {
+	ZEND_TYPE_FOREACH(*fe_type_ptr, single_type) {
 		zend_class_entry *fe_ce;
 		zend_string *fe_class_name = NULL;
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
@@ -473,7 +473,9 @@ static inheritance_status zend_is_intersection_subtype_of_class(
 /* Check whether a single class proto type is a subtype of a potentially complex fe_type. */
 static inheritance_status zend_is_class_subtype_of_type(
 		zend_class_entry *fe_scope, zend_string *fe_class_name,
-		zend_class_entry *proto_scope, const zend_type proto_type) {
+		zend_class_entry *proto_scope, const zend_type *proto_type_ptr
+) {
+	const zend_type proto_type = *proto_type_ptr;
 	zend_class_entry *fe_ce = NULL;
 	bool have_unresolved = 0;
 
@@ -521,7 +523,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 	ZEND_TYPE_FOREACH(proto_type, single_type) {
 		if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
 			inheritance_status subtype_status = zend_is_class_subtype_of_type(
-				fe_scope, fe_class_name, proto_scope, *single_type);
+				fe_scope, fe_class_name, proto_scope, single_type);
 
 			switch (subtype_status) {
 				case INHERITANCE_ERROR:
@@ -606,9 +608,11 @@ static void register_unresolved_classes(zend_class_entry *scope, const zend_type
 }
 
 static inheritance_status zend_is_intersection_subtype_of_type(
-	zend_class_entry *fe_scope, const zend_type fe_type,
-	zend_class_entry *proto_scope, const zend_type proto_type)
-{
+		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
+		zend_class_entry *proto_scope, const zend_type *proto_type_ptr
+) {
+	const zend_type fe_type = *fe_type_ptr;
+	const zend_type proto_type = *proto_type_ptr;
 	bool have_unresolved = false;
 	const zend_type *single_type;
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
@@ -644,7 +648,7 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 
 		if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
 			status = zend_is_intersection_subtype_of_type(
-				fe_scope, fe_type, proto_scope, *single_type);
+				fe_scope, fe_type_ptr, proto_scope, single_type);
 		} else {
 			zend_string *proto_class_name = get_class_from_type(proto_scope, *single_type);
 			if (!proto_class_name) {
@@ -653,7 +657,7 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 
 			zend_class_entry *proto_ce = NULL;
 			status = zend_is_intersection_subtype_of_class(
-				fe_scope, fe_type, proto_scope, proto_class_name, proto_ce);
+				fe_scope, fe_type_ptr, proto_scope, proto_class_name, proto_ce);
 		}
 
 		if (status == early_exit_status) {
@@ -672,9 +676,11 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 }
 
 ZEND_API inheritance_status zend_perform_covariant_type_check(
-		zend_class_entry *fe_scope, const zend_type fe_type,
-		zend_class_entry *proto_scope, const zend_type proto_type)
+		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
+		zend_class_entry *proto_scope, const zend_type *proto_type_ptr)
 {
+	const zend_type fe_type = *fe_type_ptr;
+	const zend_type proto_type = *proto_type_ptr;
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type) && ZEND_TYPE_IS_SET(proto_type));
 
 	/* Apart from void, everything is trivially covariant to the mixed type.
@@ -713,7 +719,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 		early_exit_status =
 			ZEND_TYPE_IS_INTERSECTION(proto_type) ? INHERITANCE_ERROR : INHERITANCE_SUCCESS;
 		inheritance_status status = zend_is_intersection_subtype_of_type(
-			fe_scope, fe_type, proto_scope, proto_type);
+			fe_scope, fe_type_ptr, proto_scope, proto_type_ptr);
 
 		if (status == early_exit_status) {
 			return status;
@@ -733,7 +739,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 			/* Union has an intersection type as it's member */
 			if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
 				status = zend_is_intersection_subtype_of_type(
-					fe_scope, *single_type, proto_scope, proto_type);
+					fe_scope, single_type, proto_scope, proto_type_ptr);
 			} else {
 				zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
 				if (!fe_class_name) {
@@ -741,7 +747,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 				}
 
 				status = zend_is_class_subtype_of_type(
-					fe_scope, fe_class_name, proto_scope, proto_type);
+					fe_scope, fe_class_name, proto_scope, proto_type_ptr);
 			}
 
 			if (status == early_exit_status) {
@@ -763,7 +769,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 }
 
 static inheritance_status zend_do_perform_arg_type_hint_check(
-		zend_class_entry *fe_scope, zend_arg_info *fe_arg_info,
+		zend_class_entry *fe_scope, const zend_arg_info *fe_arg_info,
 		zend_class_entry *proto_scope, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {
@@ -779,7 +785,7 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 	/* Contravariant type check is performed as a covariant type check with swapped
 	 * argument order. */
 	return zend_perform_covariant_type_check(
-		proto_scope, proto_arg_info->type, fe_scope, fe_arg_info->type);
+		proto_scope, &proto_arg_info->type, fe_scope, &fe_arg_info->type);
 }
 /* }}} */
 
@@ -881,7 +887,7 @@ static inheritance_status zend_do_perform_implementation_check(
 		}
 
 		local_status = zend_perform_covariant_type_check(
-			fe_scope, fe->common.arg_info[-1].type, proto_scope, proto->common.arg_info[-1].type);
+			fe_scope, &fe->common.arg_info[-1].type, proto_scope, &proto->common.arg_info[-1].type);
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
 			if (local_status == INHERITANCE_ERROR
@@ -1297,10 +1303,10 @@ static inheritance_status full_property_types_compatible(
 	/* Perform a covariant type check in both directions to determined invariance. */
 	inheritance_status status1 = variance == PROP_CONTRAVARIANT ? INHERITANCE_SUCCESS :
 		zend_perform_covariant_type_check(
-			child_info->ce, child_info->type, parent_info->ce, parent_info->type);
+			child_info->ce, &child_info->type, parent_info->ce, &parent_info->type);
 	inheritance_status status2 = variance == PROP_COVARIANT ? INHERITANCE_SUCCESS :
 		zend_perform_covariant_type_check(
-			parent_info->ce, parent_info->type, child_info->ce, child_info->type);
+			parent_info->ce, &parent_info->type, child_info->ce, &child_info->type);
 	if (status1 == INHERITANCE_SUCCESS && status2 == INHERITANCE_SUCCESS) {
 		return INHERITANCE_SUCCESS;
 	}
@@ -1357,7 +1363,7 @@ static inheritance_status verify_property_type_compatibility(
 		 && (!child_info->hooks || !child_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
 			zend_type set_type = parent_info->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0].type;
 			inheritance_status result = zend_perform_covariant_type_check(
-				parent_info->ce, set_type, child_info->ce, child_info->type);
+				parent_info->ce, &set_type, child_info->ce, &child_info->type);
 			if ((result == INHERITANCE_ERROR && throw_on_error) || (result == INHERITANCE_UNRESOLVED && throw_on_unresolved)) {
 				emit_set_hook_type_error(child_info, parent_info);
 			}
@@ -1645,7 +1651,7 @@ static inheritance_status class_constant_types_compatible(const zend_class_const
 		return INHERITANCE_ERROR;
 	}
 
-	return zend_perform_covariant_type_check(child->ce, child->type, parent->ce, parent->type);
+	return zend_perform_covariant_type_check(child->ce, &child->type, parent->ce, &parent->type);
 }
 
 static bool do_inherit_constant_check(
@@ -1791,7 +1797,7 @@ ZEND_API inheritance_status zend_verify_property_hook_variance(const zend_proper
 {
 	ZEND_ASSERT(prop_info->hooks && prop_info->hooks[ZEND_PROPERTY_HOOK_SET] == func);
 
-	zend_arg_info *value_arg_info = &func->op_array.arg_info[0];
+	const zend_arg_info *value_arg_info = &func->op_array.arg_info[0];
 	if (!ZEND_TYPE_IS_SET(value_arg_info->type)) {
 		return INHERITANCE_SUCCESS;
 	}
@@ -1801,7 +1807,7 @@ ZEND_API inheritance_status zend_verify_property_hook_variance(const zend_proper
 	}
 
 	zend_class_entry *ce = prop_info->ce;
-	return zend_perform_covariant_type_check(ce, prop_info->type, ce, value_arg_info->type);
+	return zend_perform_covariant_type_check(ce, &prop_info->type, ce, &value_arg_info->type);
 }
 
 #ifdef ZEND_OPCACHE_SHM_REATTACHMENT
@@ -2777,8 +2783,8 @@ static bool do_trait_constant_check(
 		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
 		return false;
 	} else if (ZEND_TYPE_IS_SET(trait_constant->type)) {
-		inheritance_status status1 = zend_perform_covariant_type_check(ce, existing_constant->type, traits[current_trait], trait_constant->type);
-		inheritance_status status2 = zend_perform_covariant_type_check(traits[current_trait], trait_constant->type, ce, existing_constant->type);
+		inheritance_status status1 = zend_perform_covariant_type_check(ce, &existing_constant->type, traits[current_trait], &trait_constant->type);
+		inheritance_status status2 = zend_perform_covariant_type_check(traits[current_trait], &trait_constant->type, ce, &existing_constant->type);
 		if (status1 == INHERITANCE_ERROR || status2 == INHERITANCE_ERROR) {
 			emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
 			return false;
