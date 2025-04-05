@@ -1,5 +1,5 @@
 /*
-   +----------------------------------------------------------------------+
++----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -857,9 +857,7 @@ restart:
 		}
 		if (!connection->info->lock.fp) {
 			/* stream operation already wrote an error message */
-			zend_string_release_ex(resource_key, /* persistent */ false);
-			zval_ptr_dtor(return_value);
-			RETURN_FALSE;
+			goto fail;
 		}
 		if (!error && !php_stream_supports_lock(connection->info->lock.fp)) {
 			error = "Stream does not support locking";
@@ -878,9 +876,7 @@ restart:
 		}
 		if (!connection->info->fp) {
 			/* stream operation already wrote an error message */
-			zend_string_release_ex(resource_key, /* persistent */ false);
-			zval_ptr_dtor(return_value);
-			RETURN_FALSE;
+			goto fail;
 		}
 		if (hptr->flags & (DBA_NO_APPEND|DBA_CAST_AS_FD)) {
 			/* Needed because some systems do not allow to write to the original
@@ -888,9 +884,7 @@ restart:
 			 */
 			if (SUCCESS != php_stream_cast(connection->info->fp, PHP_STREAM_AS_FD, (void*)&connection->info->fd, 1)) {
 				php_error_docref(NULL, E_WARNING, "Could not cast stream");
-				zend_string_release_ex(resource_key, /* persistent */ false);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+				goto fail;
 #ifdef F_SETFL
 			} else if (modenr == DBA_CREAT) {
 				int flags = fcntl(connection->info->fd, F_GETFL);
@@ -924,9 +918,7 @@ restart:
 				php_error_docref(NULL, E_WARNING, "Driver initialization failed for handler: %s", hptr->name);
 			}
 		}
-		zend_string_release_ex(resource_key, /* persistent */ false);
-		zval_ptr_dtor(return_value);
-		RETURN_FALSE;
+		goto fail;
 	}
 
 	connection->info->hnd = hptr;
@@ -935,6 +927,7 @@ restart:
 		if (zend_register_persistent_resource_ex(connection->hash, connection->info, le_pdb) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Could not register persistent resource");
 			zend_string_release_ex(resource_key, /* persistent */ false);
+			dba_close_connection(connection);
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -942,6 +935,14 @@ restart:
 
 	zend_hash_add_new(&DBA_G(connections), connection->hash, return_value);
 	zend_string_release_ex(resource_key, /* persistent */ false);
+	return;
+fail:
+	zend_string_release_ex(resource_key, /* persistent */ false);
+	zend_string_release_ex(connection->hash, persistent);
+	dba_close_info(connection->info);
+	connection->info = NULL;
+	zval_ptr_dtor(return_value);
+	RETURN_FALSE;
 }
 /* }}} */
 
