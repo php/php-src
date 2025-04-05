@@ -1567,6 +1567,16 @@ static ZEND_COLD void zend_ast_export_ns_name(smart_str *str, zend_ast *ast, int
 	zend_ast_export_ex(str, ast, priority, indent);
 }
 
+static ZEND_COLD void zend_ast_export_class_name(smart_str *str, zend_ast *ast, int priority, int indent)
+{
+	if (ast->kind == ZEND_AST_CLASS_REF) {
+		ZEND_ASSERT(ast->child[1] == NULL && "Generic params not supported yet");
+		zend_ast_export_ns_name(str, ast->child[0], priority, indent);
+		return;
+	}
+	zend_ast_export_ex(str, ast, priority, indent);
+}
+
 static ZEND_COLD bool zend_ast_valid_var_char(char ch)
 {
 	unsigned char c = (unsigned char)ch;
@@ -1687,7 +1697,7 @@ static ZEND_COLD void zend_ast_export_name_list_ex(smart_str *str, const zend_as
 		if (i != 0) {
 			smart_str_appends(str, separator);
 		}
-		zend_ast_export_name(str, list->child[i], 0, indent);
+		zend_ast_export_ns_name(str, list->child[i], 0, indent);
 		i++;
 	}
 }
@@ -1954,6 +1964,21 @@ static ZEND_COLD void zend_ast_export_type(smart_str *str, zend_ast *ast, int in
 	zend_ast_export_ns_name(str, ast, 0, indent);
 }
 
+static ZEND_COLD void zend_ast_export_generic_arg_list(smart_str *str, const zend_ast_list *list, int indent) {
+	// TODO Why cannot I just use
+	// zend_ast_export_list(str, list, true, 0, indent);
+	// ?
+
+	uint32_t i = 0;
+	while (i < list->children) {
+		if (i != 0) {
+			smart_str_appends(str, ", ");
+		}
+		zend_ast_export_type(str, list->child[i], indent);
+		i++;
+	}
+}
+
 static ZEND_COLD void zend_ast_export_hook_list(smart_str *str, const zend_ast_list *hook_list, int indent)
 {
 	smart_str_appends(str, " {");
@@ -2159,10 +2184,17 @@ tail_call:
 				}
 				smart_str_appends(str, "class ");
 			}
-			smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));
-			if (decl->flags & ZEND_ACC_ENUM && decl->child[4]) {
-				smart_str_appends(str, ": ");
-				zend_ast_export_type(str, decl->child[4], indent);
+			smart_str_append(str, decl->name);
+			if (decl->child[4]) {
+				if (decl->flags & ZEND_ACC_ENUM) {
+					smart_str_appends(str, ": ");
+					zend_ast_export_type(str, decl->child[4], indent);
+				} else {
+					ZEND_ASSERT(decl->flags & ZEND_ACC_INTERFACE);
+					smart_str_appendc(str, '<');
+					zend_ast_export_list(str, zend_ast_get_list(decl->child[4]), true, 0, indent);
+					smart_str_appendc(str, '>');
+				}
 			}
 			zend_ast_export_class_no_header(str, decl, indent);
 			smart_str_appendc(str, '\n');
@@ -2453,6 +2485,21 @@ simple_list:
 			smart_str_appends(str, "::");
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			break;
+		case ZEND_AST_GENERIC_PARAM:
+			zend_ast_export_name(str, ast->child[0], 0, indent);
+			if (ast->child[1]) {
+				smart_str_appendl(str, ZEND_STRL(" : "));
+				zend_ast_export_type(str, ast->child[1], indent);
+			}
+			break;
+		case ZEND_AST_CLASS_REF:
+			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			if (ast->child[1]) {
+				smart_str_appendc(str, '<');
+				zend_ast_export_generic_arg_list(str, zend_ast_get_list(ast->child[1]), indent);
+				smart_str_appendc(str, '>');
+			}
+			break;
 		case ZEND_AST_CLASS_NAME:
 			if (ast->child[0] == NULL) {
 				/* The const expr representation stores the fetch type instead. */
@@ -2466,7 +2513,7 @@ simple_list:
 					EMPTY_SWITCH_DEFAULT_CASE()
 				}
 			} else {
-				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+				zend_ast_export_class_name(str, ast->child[0], 0, indent);
 			}
 			smart_str_appends(str, "::class");
 			break;
