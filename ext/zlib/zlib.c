@@ -622,7 +622,7 @@ PHP_FUNCTION(gzfile)
 	}
 
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
-	stream = php_stream_gzopen(NULL, filename, "rb", flags, NULL, php_stream_context_from_zval(NULL, false) STREAMS_CC);
+	stream = php_stream_gzopen(NULL, filename, "rb", flags, NULL, php_stream_context_get_default(false) STREAMS_CC);
 
 	if (!stream) {
 		/* Error reporting is already done by stream code */
@@ -660,7 +660,7 @@ PHP_FUNCTION(gzopen)
 		flags |= USE_PATH;
 	}
 
-	stream = php_stream_gzopen(NULL, filename, mode, flags, NULL, php_stream_context_from_zval(NULL, false) STREAMS_CC);
+	stream = php_stream_gzopen(NULL, filename, mode, flags, NULL, php_stream_context_get_default(false) STREAMS_CC);
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -687,7 +687,7 @@ PHP_FUNCTION(readgzfile)
 		flags |= USE_PATH;
 	}
 
-	stream = php_stream_gzopen(NULL, filename, "rb", flags, NULL, php_stream_context_from_zval(NULL, false) STREAMS_CC);
+	stream = php_stream_gzopen(NULL, filename, "rb", flags, NULL, php_stream_context_get_default(false) STREAMS_CC);
 
 	if (!stream) {
 		RETURN_FALSE;
