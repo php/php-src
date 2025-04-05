@@ -2194,7 +2194,7 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
-	uint32_t ignore = 0;
+	bool ignore = false;
 	uint32_t current_iface_num = ce->num_interfaces;
 	uint32_t parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
 
@@ -2206,7 +2206,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 			i--;
 		} else if (ce->interfaces[i] == iface) {
 			if (EXPECTED(i < parent_iface_num)) {
-				ignore = 1;
+				ignore = true;
 			} else {
 				zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
 			}
