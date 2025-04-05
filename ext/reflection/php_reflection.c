@@ -3170,7 +3170,7 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 
 	array_init(return_value);
 	if (ZEND_TYPE_HAS_LIST(param->type)) {
-		zend_type *list_type;
+		const zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
 			append_type(return_value, *list_type);
 		} ZEND_TYPE_LIST_FOREACH_END();
@@ -3221,7 +3221,7 @@ ZEND_METHOD(ReflectionIntersectionType, getTypes)
 {
 	reflection_object *intern;
 	type_reference *param;
-	zend_type *list_type;
+	const zend_type *list_type;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(param);

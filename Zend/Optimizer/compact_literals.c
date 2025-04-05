@@ -69,7 +69,7 @@ static size_t type_num_classes(const zend_op_array *op_array, uint32_t arg_num)
 			}
 			ZEND_ASSERT(ZEND_TYPE_IS_UNION(arg_info->type));
 			size_t count = 0;
-			zend_type *list_type;
+			const zend_type *list_type;
 
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
 				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {

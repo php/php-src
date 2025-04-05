@@ -254,7 +254,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 	free_alloca(shiftlist, use_heap);
 }
 
-static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
+static bool safe_instanceof(const zend_class_entry *ce1, const zend_class_entry *ce2) {
 	if (ce1 == ce2) {
 		return 1;
 	}
@@ -267,9 +267,9 @@ static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 
 static inline bool can_elide_list_type(
 	const zend_script *script, const zend_op_array *op_array,
-	const zend_ssa_var_info *use_info, zend_type type)
+	const zend_ssa_var_info *use_info, const zend_type type)
 {
-	zend_type *single_type;
+	const zend_type *single_type;
 	/* For intersection: result==false is failure, default is success.
 	 * For union: result==true is success, default is failure. */
 	bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
@@ -280,7 +280,7 @@ static inline bool can_elide_list_type(
 		}
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
-			zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
+			const zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
 			zend_string_release(lcname);
 			bool result = ce && safe_instanceof(use_info->ce, ce);
 			if (result == !is_intersection) {
