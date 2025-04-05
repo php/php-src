@@ -2072,6 +2072,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	ce->default_static_members_count = 0;
 	ce->properties_info_table = NULL;
 	ce->attributes = NULL;
+	ce->associated_types = NULL;
 	ce->enum_backing_type = IS_UNDEF;
 	ce->backed_enum_table = NULL;
 
@@ -9020,18 +9021,33 @@ static void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+
+
 static void zend_compile_associated_type(zend_ast *ast) {
 	zend_class_entry *ce = CG(active_class_entry);
+	HashTable *associated_types = ce->associated_types;
+	zend_ast *name_ast = ast->child[0];
+	zend_string *name = zend_ast_get_str(name_ast);
 
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE) == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot use associated types outside of interfaces, used in %s", ZSTR_VAL(ce->name));
 	}
 
-	zend_ast *name_ast = ast->child[0];
-	zend_string *name = zend_ast_get_str(name_ast);
 	ZEND_ASSERT(name != NULL);
-	// TODO add associated type to CE
+	bool persistent = ce->type == ZEND_INTERNAL_CLASS;
+	if (associated_types == NULL) {
+		ce->associated_types = pemalloc(sizeof(HashTable), persistent);
+		zend_hash_init(ce->associated_types, 8, NULL, NULL, persistent);
+		associated_types = ce->associated_types;
+	}
+	if (zend_hash_exists(associated_types, name)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot have two associated types with the same name \"%s\"", ZSTR_VAL(name));
+	}
+	zval tmp;
+	ZVAL_UNDEF(&tmp);
+	zend_hash_add_new(associated_types, name, &tmp);
 }
 
 static void zend_compile_implements(zend_ast *ast) /* {{{ */
