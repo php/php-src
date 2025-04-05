@@ -626,7 +626,7 @@ static inline void accel_copy_permanent_list_types(
 	zend_new_interned_string_func_t new_interned_string, zend_type type)
 {
 	zend_type *single_type;
-	ZEND_TYPE_FOREACH(type, single_type) {
+	ZEND_TYPE_FOREACH_MUTABLE(type, single_type) {
 		if (ZEND_TYPE_HAS_LIST(*single_type)) {
 			ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(*single_type));
 			accel_copy_permanent_list_types(new_interned_string, *single_type);

@@ -2914,14 +2914,14 @@ static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
 		ZEND_ASSERT(!ZEND_TYPE_CONTAINS_CODE(*type, IS_RESOURCE) && "resource is not allowed in a zend_type");
 	}
 	zend_type *current;
-	ZEND_TYPE_FOREACH(*type, current) {
+	ZEND_TYPE_FOREACH_MUTABLE(*type, current) {
 		if (ZEND_TYPE_HAS_NAME(*current)) {
 			zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*current));
 			zend_alloc_ce_cache(name);
 			ZEND_TYPE_SET_PTR(*current, name);
 		} else if (ZEND_TYPE_HAS_LIST(*current)) {
 			zend_type *inner;
-			ZEND_TYPE_FOREACH(*current, inner) {
+			ZEND_TYPE_FOREACH_MUTABLE(*current, inner) {
 				ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*inner) && !ZEND_TYPE_HAS_LIST(*inner));
 				if (ZEND_TYPE_HAS_NAME(*inner)) {
 					zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*inner));
