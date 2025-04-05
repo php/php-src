@@ -468,7 +468,7 @@ static void zend_file_cache_serialize_type(
 		UNSERIALIZE_PTR(list);
 
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(list, list_type) {
 			zend_file_cache_serialize_type(list_type, script, info, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
@@ -1348,7 +1348,7 @@ static void zend_file_cache_unserialize_type(
 		ZEND_TYPE_SET_PTR(*type, list);
 
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(list, list_type) {
 			zend_file_cache_unserialize_type(list_type, scope, script, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {

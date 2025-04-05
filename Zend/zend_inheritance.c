@@ -83,7 +83,7 @@ static void zend_type_list_copy_ctor(
 	}
 
 	zend_type *list_type;
-	ZEND_TYPE_LIST_FOREACH(new_list, list_type) {
+	ZEND_TYPE_LIST_FOREACH_MUTABLE(new_list, list_type) {
 		zend_type_copy_ctor(list_type, use_arena, persistent);
 	} ZEND_TYPE_LIST_FOREACH_END();
 }
@@ -362,7 +362,7 @@ static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_en
 }
 
 static bool zend_type_permits_self(
-		zend_type type, const zend_class_entry *scope, zend_class_entry *self) {
+		const zend_type type, const zend_class_entry *scope, zend_class_entry *self) {
 	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
 		return 1;
 	}
@@ -370,7 +370,7 @@ static bool zend_type_permits_self(
 	/* Any types that may satisfy self must have already been loaded at this point
 	 * (as a parent or interface), so we never need to register delayed variance obligations
 	 * for this case. */
-	zend_type *single_type;
+	const zend_type *single_type;
 	ZEND_TYPE_FOREACH(type, single_type) {
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *name = resolve_class_name(scope, ZEND_TYPE_NAME(*single_type));
@@ -428,12 +428,12 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 
 /* Check whether any type in the fe_type intersection type is a subtype of the proto class. */
 static inheritance_status zend_is_intersection_subtype_of_class(
-		zend_class_entry *fe_scope, zend_type fe_type,
+		zend_class_entry *fe_scope, const zend_type fe_type,
 		zend_class_entry *proto_scope, zend_string *proto_class_name, zend_class_entry *proto_ce)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(fe_type));
 	bool have_unresolved = false;
-	zend_type *single_type;
+	const zend_type *single_type;
 
 	/* Traverse the list of child types and check that at least one is
 	 * a subtype of the parent type being checked */
@@ -473,7 +473,7 @@ static inheritance_status zend_is_intersection_subtype_of_class(
 /* Check whether a single class proto type is a subtype of a potentially complex fe_type. */
 static inheritance_status zend_is_class_subtype_of_type(
 		zend_class_entry *fe_scope, zend_string *fe_class_name,
-		zend_class_entry *proto_scope, zend_type proto_type) {
+		zend_class_entry *proto_scope, const zend_type proto_type) {
 	zend_class_entry *fe_ce = NULL;
 	bool have_unresolved = 0;
 
@@ -513,7 +513,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 		}
 	}
 
-	zend_type *single_type;
+	const zend_type *single_type;
 
 	/* Traverse the list of parent types and check if the current child (FE)
 	 * class is the subtype of at least one of them (union) or all of them (intersection). */
@@ -584,15 +584,15 @@ static inheritance_status zend_is_class_subtype_of_type(
 	return is_intersection ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
-static zend_string *get_class_from_type(const zend_class_entry *scope, zend_type single_type) {
+static zend_string *get_class_from_type(const zend_class_entry *scope, const zend_type single_type) {
 	if (ZEND_TYPE_HAS_NAME(single_type)) {
 		return resolve_class_name(scope, ZEND_TYPE_NAME(single_type));
 	}
 	return NULL;
 }
 
-static void register_unresolved_classes(zend_class_entry *scope, zend_type type) {
-	zend_type *single_type;
+static void register_unresolved_classes(zend_class_entry *scope, const zend_type type) {
+	const zend_type *single_type;
 	ZEND_TYPE_FOREACH(type, single_type) {
 		if (ZEND_TYPE_HAS_LIST(*single_type)) {
 			register_unresolved_classes(scope, *single_type);
@@ -606,11 +606,11 @@ static void register_unresolved_classes(zend_class_entry *scope, zend_type type)
 }
 
 static inheritance_status zend_is_intersection_subtype_of_type(
-	zend_class_entry *fe_scope, zend_type fe_type,
-	zend_class_entry *proto_scope, zend_type proto_type)
+	zend_class_entry *fe_scope, const zend_type fe_type,
+	zend_class_entry *proto_scope, const zend_type proto_type)
 {
 	bool have_unresolved = false;
-	zend_type *single_type;
+	const zend_type *single_type;
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
 
 	/* Currently, for object type any class name would be allowed here.
@@ -672,8 +672,8 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 }
 
 ZEND_API inheritance_status zend_perform_covariant_type_check(
-		zend_class_entry *fe_scope, zend_type fe_type,
-		zend_class_entry *proto_scope, zend_type proto_type)
+		zend_class_entry *fe_scope, const zend_type fe_type,
+		zend_class_entry *proto_scope, const zend_type proto_type)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type) && ZEND_TYPE_IS_SET(proto_type));
 
@@ -727,7 +727,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 		 * We need to iterate over fe_type (U_i) first and the logic is independent of
 		 * whether proto_type is a union or intersection (only the inner check differs). */
 		early_exit_status = INHERITANCE_ERROR;
-		zend_type *single_type;
+		const zend_type *single_type;
 		ZEND_TYPE_FOREACH(fe_type, single_type) {
 			inheritance_status status;
 			/* Union has an intersection type as it's member */
