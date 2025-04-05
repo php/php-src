@@ -14,4 +14,4 @@ class C implements I {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of C::foo(string $param): string must be compatible with I::foo(T $param): T in %s on line %d
+Parse error: syntax error, unexpected token "type", expecting "function" in %s on line %d
