@@ -107,9 +107,6 @@ MYSQLND_METHOD(mysqlnd_command, init_db)(MYSQLND_CONN_DATA * const conn, const M
 	  a protocol of giving back -1. Thus we have to follow it :(
 	*/
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
-	if (ret == PASS) {
-		mysqlnd_set_persistent_string(&conn->connect_or_select_db, db.s, db.l, conn->persistent);
-	}
 
 	DBG_RETURN(ret);
 }
