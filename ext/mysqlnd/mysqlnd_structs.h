@@ -297,11 +297,11 @@ typedef struct st_mysqlnd_stats MYSQLND_STATS;
 
 struct st_mysqlnd_stats
 {
-	uint64_t				*values;
 	size_t					count;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
+	uint64_t values[] ZEND_ELEMENT_COUNT(count);
 };
 
 
