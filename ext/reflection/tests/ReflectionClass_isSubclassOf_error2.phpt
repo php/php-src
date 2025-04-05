@@ -34,6 +34,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 After first check
-Checking for Base@%s
+Checking for class@%s
 true
 Done
