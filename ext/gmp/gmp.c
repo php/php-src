@@ -651,14 +651,20 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 		}
 	}
 
-	int gmp_ret = mpz_set_str(gmp_number, (skip_lead ? &num_str[2] : num_str), (int) base);
+	const char *nval = (skip_lead ? &num_str[2] : num_str);
+	int gmp_ret = mpz_set_str(gmp_number, nval, (int) base);
 	if (-1 == gmp_ret) {
-		if (arg_pos == 0) {
-			zend_value_error("Number is not an integer string");
-		} else {
-			zend_argument_value_error(arg_pos, "is not an integer string");
+		const char *err;
+		double dval = zend_strtod(nval, &err);
+		if (err == nval || *err != '\0') {
+			if (arg_pos == 0) {
+				zend_value_error("Number is not an integer string");
+			} else {
+				zend_argument_value_error(arg_pos, "is not an integer string");
+			}
+			return FAILURE;
 		}
-		return FAILURE;
+		mpz_set_d(gmp_number, dval);
 	}
 
 	return SUCCESS;
