@@ -436,6 +436,13 @@ PHP 8.5 UPGRADE NOTES
   . Improved performance of the following methods: getValue(), getRawValue(),
     isInitialized(), setValue(), setRawValue().
 
+- SPL:
+  . Improved performance of dimension accessors and methods of SplFixedArray.
+
+- Standard:
+  . Improved performance of array functions with callbacks
+    (array_find, array_filter, array_map, usort, ...).
+
 - XMLReader:
   . Improved property access performance.
 
