@@ -86,14 +86,6 @@ const OPENSSL_ALGO_MD4 = UNKNOWN;
  */
 const OPENSSL_ALGO_MD2 = UNKNOWN;
 #endif
-#if PHP_OPENSSL_API_VERSION < 0x10100
-/**
- * @var int
- * @cvalue OPENSSL_ALGO_DSS1
- */
-const OPENSSL_ALGO_DSS1 = UNKNOWN;
-#endif
-
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_SHA224
