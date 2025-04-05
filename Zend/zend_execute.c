@@ -609,7 +609,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg
 	zend_string_release(func_name);
 }
 
-static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_property_info *prop) {
+static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(const zend_property_info *prop) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error(
 		"Cannot auto-initialize an array inside property %s::$%s of type %s",
@@ -619,7 +619,7 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_
 	zend_string_release(type_str);
 }
 
-static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_ref_error(zend_property_info *prop) {
+static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_ref_error(const zend_property_info *prop) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error(
 		"Cannot auto-initialize an array inside a reference held by property %s::$%s of type %s",
@@ -630,7 +630,7 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_ref_error(zend_p
 }
 
 static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_error(
-		zend_property_info *prop) {
+		const zend_property_info *prop) {
 	zend_throw_error(NULL,
 		"Cannot access uninitialized non-nullable property %s::$%s by reference",
 		ZSTR_VAL(prop->ce->name),
@@ -638,7 +638,7 @@ static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_err
 }
 
 /* this should modify object only if it's empty */
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_error(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_error(const zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
@@ -673,7 +673,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 }
 
 static ZEND_COLD void zend_verify_type_error_common(
-		const zend_function *zf, const zend_arg_info *arg_info, zval *value,
+		const zend_function *zf, const zend_arg_info *arg_info, const zval *value,
 		const char **fname, const char **fsep, const char **fclass,
 		zend_string **need_msg, const char **given_kind)
 {
@@ -696,9 +696,9 @@ static ZEND_COLD void zend_verify_type_error_common(
 }
 
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *value)
+		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, const zval *value)
 {
-	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
+	const zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname, *fsep, *fclass;
 	zend_string *need_msg;
 	const char *given_msg;
@@ -909,7 +909,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modificati
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(uint8_t type)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(const uint8_t type)
 {
 	zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(type));
 }
@@ -975,9 +975,9 @@ static zend_always_inline const zend_class_entry *zend_ce_from_type(
 }
 
 static bool zend_check_intersection_for_property_or_class_constant_class_type(
-	const zend_class_entry *scope, zend_type_list *intersection_type_list, const zend_class_entry *value_ce)
+	const zend_class_entry *scope, const zend_type_list *intersection_type_list, const zend_class_entry *value_ce)
 {
-	zend_type *list_type;
+	const zend_type *list_type;
 
 	ZEND_TYPE_LIST_FOREACH(intersection_type_list, list_type) {
 		ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
@@ -990,13 +990,13 @@ static bool zend_check_intersection_for_property_or_class_constant_class_type(
 }
 
 static bool zend_check_and_resolve_property_or_class_constant_class_type(
-	const zend_class_entry *scope, zend_type member_type, const zend_class_entry *value_ce) {
+	const zend_class_entry *scope, const zend_type member_type, const zend_class_entry *value_ce) {
 	if (ZEND_TYPE_HAS_LIST(member_type)) {
-		zend_type *list_type;
 		if (ZEND_TYPE_IS_INTERSECTION(member_type)) {
 			return zend_check_intersection_for_property_or_class_constant_class_type(
 				scope, ZEND_TYPE_LIST(member_type), value_ce);
 		} else {
+			const zend_type *list_type;
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(member_type), list_type) {
 				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
 					if (zend_check_intersection_for_property_or_class_constant_class_type(
@@ -1059,7 +1059,7 @@ ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_in
 	return i_zend_verify_property_type(info, property, strict);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
 {
 	zval tmp;
 
@@ -1087,7 +1087,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
-static zend_always_inline bool zend_value_instanceof_static(zval *zv) {
+static zend_always_inline bool zend_value_instanceof_static(const zval *zv) {
 	if (Z_TYPE_P(zv) != IS_OBJECT) {
 		return 0;
 	}
@@ -1110,7 +1110,7 @@ static zend_always_inline bool zend_value_instanceof_static(zval *zv) {
 #define PROGRESS_CACHE_SLOT() if (HAVE_CACHE_SLOT) {cache_slot++;}
 
 static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
-		void **cache_slot, zend_type *type)
+		void **cache_slot, const zend_type *type)
 {
 	if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
 		return (zend_class_entry *) *cache_slot;
@@ -1140,17 +1140,18 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 	return ce;
 }
 
-static bool zend_check_intersection_type_from_cache_slot(zend_type_list *intersection_type_list,
-	zend_class_entry *arg_ce, void ***cache_slot_ptr)
+static bool zend_check_intersection_type_from_cache_slot(
+	const zend_type_list *intersection_type_list,
+	const zend_class_entry *arg_ce,
+	void ***cache_slot_ptr)
 {
 	void **cache_slot = *cache_slot_ptr;
-	zend_class_entry *ce;
-	zend_type *list_type;
+	const zend_type *list_type;
 	bool status = true;
 	ZEND_TYPE_LIST_FOREACH(intersection_type_list, list_type) {
 		/* Only check classes if the type might be valid */
 		if (status) {
-			ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
+			zend_class_entry *ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
 			/* If type is not an instance of one of the types taking part in the
 			 * intersection it cannot be a valid instance of the whole intersection type. */
 			if (!ce || !instanceof_function(arg_ce, ce)) {
@@ -1166,17 +1167,16 @@ static bool zend_check_intersection_type_from_cache_slot(zend_type_list *interse
 }
 
 static zend_always_inline bool zend_check_type_slow(
-		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot,
+		const zend_type *type, zval *arg, const zend_reference *ref, void **cache_slot,
 		bool is_return_type, bool is_internal)
 {
-	uint32_t type_mask;
 	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_class_entry *ce;
 		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
-			zend_type *list_type;
 			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
 				return zend_check_intersection_type_from_cache_slot(ZEND_TYPE_LIST(*type), Z_OBJCE_P(arg), &cache_slot);
 			} else {
+				const zend_type *list_type;
 				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
 					if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
 						if (zend_check_intersection_type_from_cache_slot(ZEND_TYPE_LIST(*list_type), Z_OBJCE_P(arg), &cache_slot)) {
@@ -1204,7 +1204,7 @@ static zend_always_inline bool zend_check_type_slow(
 		}
 	}
 
-	type_mask = ZEND_TYPE_FULL_MASK(*type);
+	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) &&
 		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
 		return 1;
@@ -1232,10 +1232,10 @@ static zend_always_inline bool zend_check_type_slow(
 }
 
 static zend_always_inline bool zend_check_type(
-		zend_type *type, zval *arg, void **cache_slot, zend_class_entry *scope,
+		const zend_type *type, zval *arg, void **cache_slot, zend_class_entry *scope,
 		bool is_return_type, bool is_internal)
 {
-	zend_reference *ref = NULL;
+	const zend_reference *ref = NULL;
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(*type));
 
 	if (UNEXPECTED(Z_ISREF_P(arg))) {
@@ -1251,15 +1251,15 @@ static zend_always_inline bool zend_check_type(
 }
 
 ZEND_API bool zend_check_user_type_slow(
-		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, bool is_return_type)
+		const zend_type *type, zval *arg, const zend_reference *ref, void **cache_slot, bool is_return_type)
 {
 	return zend_check_type_slow(
 		type, arg, ref, cache_slot, is_return_type, /* is_internal */ false);
 }
 
-static zend_always_inline bool zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
+static zend_always_inline bool zend_verify_recv_arg_type(const zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
 {
-	zend_arg_info *cur_arg_info;
+	const zend_arg_info *cur_arg_info;
 
 	ZEND_ASSERT(arg_num <= zf->common.num_args);
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
@@ -1274,7 +1274,7 @@ static zend_always_inline bool zend_verify_recv_arg_type(zend_function *zf, uint
 }
 
 static zend_always_inline bool zend_verify_variadic_arg_type(
-		zend_function *zf, zend_arg_info *arg_info, uint32_t arg_num, zval *arg, void **cache_slot)
+		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *arg, void **cache_slot)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
 	if (UNEXPECTED(!zend_check_type(&arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
@@ -1285,7 +1285,7 @@ static zend_always_inline bool zend_verify_variadic_arg_type(
 	return 1;
 }
 
-static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
+static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_types(const zend_function *fbc, zend_execute_data *call)
 {
 	uint32_t i;
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
@@ -1314,7 +1314,7 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
 /* Determine whether an internal call should throw, because the passed arguments violate
  * an arginfo constraint. This is only checked in debug builds. In release builds, we
  * trust that arginfo matches what is enforced by zend_parse_parameters. */
-ZEND_API bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
+ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_execute_data *call)
 {
 	if (fbc->internal_function.handler == ZEND_FN(pass) || (fbc->internal_function.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 		/* Be lenient about the special pass function and about fake closures. */
@@ -1341,7 +1341,7 @@ ZEND_API bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_d
 	return 0;
 }
 
-ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
+ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(const zend_function *fbc)
 {
 	zend_error_noreturn(E_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
 		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
@@ -1353,10 +1353,10 @@ ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
 # define ZEND_VERIFY_FUNC_INFO 0
 #endif
 
-static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
+static void zend_verify_internal_func_info(const zend_function *fn, const zval *retval) {
 #if ZEND_VERIFY_FUNC_INFO
 	zend_string *name = fn->common.function_name;
-	uint32_t type_mask = zend_get_internal_func_info(fn, NULL, NULL);
+	const uint32_t type_mask = zend_get_internal_func_info(fn, NULL, NULL);
 	if (!type_mask) {
 		return;
 	}
@@ -1371,14 +1371,14 @@ static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
 		}
 	}
 
-	uint32_t type = 1u << Z_TYPE_P(retval);
+	const uint32_t type = 1u << Z_TYPE_P(retval);
 	if (!(type_mask & type)) {
 		zend_error_noreturn(E_CORE_ERROR, "%s() missing type %s",
 			ZSTR_VAL(name), zend_get_type_by_const(Z_TYPE_P(retval)));
 	}
 
 	if (Z_TYPE_P(retval) == IS_ARRAY) {
-		HashTable *ht = Z_ARRVAL_P(retval);
+		const HashTable *ht = Z_ARRVAL_P(retval);
 		uint32_t num_checked = 0;
 		zend_string *str;
 		zval *val;
@@ -1395,7 +1395,7 @@ static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
 				}
 			}
 
-			uint32_t array_type = 1u << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+			const uint32_t array_type = 1u << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
 			if (!(type_mask & array_type)) {
 				zend_error_noreturn(E_CORE_ERROR,
 					"%s() missing array element type %s",
@@ -1412,9 +1412,9 @@ static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
 }
 #endif
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(const zend_execute_data *execute_data)
 {
-	zend_execute_data *ptr = EX(prev_execute_data);
+	const zend_execute_data *ptr = EX(prev_execute_data);
 
 	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
@@ -1437,7 +1437,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 	}
 }
 
-ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, zval *value)
+ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, const zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
@@ -1464,7 +1464,7 @@ ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
 }
 
 #if ZEND_DEBUG
-static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, zval *value)
+static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
@@ -1496,9 +1496,9 @@ static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, con
 		fclass, fsep, fname, returned_msg, returned_kind);
 }
 
-ZEND_API bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
+ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *ret)
 {
-	zend_internal_arg_info *ret_info = zf->internal_function.arg_info - 1;
+	const zend_internal_arg_info *ret_info = zf->internal_function.arg_info - 1;
 
 	if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_VOID) {
 		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
@@ -1523,7 +1523,7 @@ static ZEND_COLD void zend_verify_missing_return_type(const zend_function *zf)
 	zend_verify_return_error(zf, NULL);
 }
 
-static zend_always_inline bool zend_check_class_constant_type(zend_class_constant *c, zval *constant)
+static zend_always_inline bool zend_check_class_constant_type(const zend_class_constant *c, zval *constant)
 {
 	ZEND_ASSERT(!Z_ISREF_P(constant));
 	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(c->type, Z_TYPE_P(constant)))) {
@@ -1540,7 +1540,7 @@ static zend_always_inline bool zend_check_class_constant_type(zend_class_constan
 	return zend_verify_scalar_type_hint(type_mask, constant, true, false);
 }
 
-ZEND_API bool zend_never_inline zend_verify_class_constant_type(zend_class_constant *c, const zend_string *name, zval *constant)
+ZEND_API bool zend_never_inline zend_verify_class_constant_type(const zend_class_constant *c, const zend_string *name, zval *constant)
 {
 	if (!zend_check_class_constant_type(c, constant)) {
 		zend_verify_class_constant_type_error(c, name, constant);
@@ -1709,7 +1709,7 @@ static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *re
 	}
 }
 
-static zend_never_inline void zend_binary_assign_op_typed_prop(zend_property_info *prop_info, zval *zptr, zval *value OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_binary_assign_op_typed_prop(const zend_property_info *prop_info, zval *zptr, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval z_copy;
 
