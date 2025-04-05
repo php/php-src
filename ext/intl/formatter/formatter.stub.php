@@ -31,8 +31,16 @@ class NumberFormatter
     public const int PATTERN_RULEBASED = UNKNOWN;
     /** @cvalue UNUM_IGNORE */
     public const int IGNORE = UNKNOWN;
+    /** @cvalue UNUM_CURRENCY_ISO */
+    public const int CURRENCY_ISO = UNKNOWN;
+    /** @cvalue UNUM_CURRENCY_PLURAL */
+    public const int CURRENCY_PLURAL = UNKNOWN;
     /** @cvalue UNUM_CURRENCY_ACCOUNTING */
     public const int CURRENCY_ACCOUNTING = UNKNOWN;
+    /** @cvalue UNUM_CASH_CURRENCY */
+    public const int CASH_CURRENCY = UNKNOWN;
+    /** @cvalue UNUM_CURRENCY_STANDARD */
+    public const int CURRENCY_STANDARD = UNKNOWN;
     /** @cvalue UNUM_DEFAULT */
     public const int DEFAULT_STYLE = UNKNOWN;
 
