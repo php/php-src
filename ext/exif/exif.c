@@ -420,6 +420,9 @@ static char *exif_get_tagformat(int format)
 #define TAG_EXIFVERSION                 0x9000
 #define TAG_DATE_TIME_ORIGINAL          0x9003
 #define TAG_DATE_TIME_DIGITIZED         0x9004
+#define TAG_OFFSET_TIME                 0x9010
+#define TAG_OFFSET_TIME_ORIGINAL        0x9011
+#define TAG_OFFSET_TIME_DIGITIZED       0x9012
 #define TAG_COMPONENT_CONFIG            0x9101
 #define TAG_COMPRESSED_BITS_PER_PIXEL   0x9102
 #define TAG_SHUTTERSPEED                0x9201
@@ -692,6 +695,9 @@ static tag_info_array tag_table_IFD = {
   { 0x9000, "ExifVersion"},
   { 0x9003, "DateTimeOriginal"},
   { 0x9004, "DateTimeDigitized"},
+  { 0x9010, "OffsetTime"},
+  { 0x9011, "OffsetTimeOriginal"},
+  { 0x9012, "OffsetTimeDigitized"},
   { 0x9101, "ComponentsConfiguration"},
   { 0x9102, "CompressedBitsPerPixel"},
   { 0x9201, "ShutterSpeedValue"},
