@@ -282,7 +282,7 @@ static inline bool can_elide_list_type(
 			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
 			zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
 			zend_string_release(lcname);
-			bool result = ce && safe_instanceof(use_info->ce, ce);
+			bool result = ce && !ce->required_scope && safe_instanceof(use_info->ce, ce);
 			if (result == !is_intersection) {
 				return result;
 			}

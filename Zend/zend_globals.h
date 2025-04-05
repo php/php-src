@@ -85,6 +85,7 @@ struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
 
 	zend_class_entry *active_class_entry;
+	HashTable *nested_class_queue;
 
 	zend_string *compiled_filename;
 
@@ -191,6 +192,8 @@ struct _zend_executor_globals {
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 	HashTable *zend_constants;	/* constants table */
+	HashTable *namespaces;		/* namespace table */
+	zend_class_entry *global_namespace;
 
 	zval          *vm_stack_top;
 	zval          *vm_stack_end;

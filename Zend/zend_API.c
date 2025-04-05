@@ -1816,6 +1816,35 @@ static zend_always_inline zend_result _object_and_properties_init(zval *arg, zen
 		return FAILURE;
 	}
 
+	const zend_class_entry *check_class = class_type;
+	const zend_class_entry *scope = zend_get_executed_scope();
+check_lexical_scope:
+	if (check_class->required_scope) {
+		if (UNEXPECTED(scope == NULL)) {
+			zend_type_error("Cannot instantiate class %s from the global scope", ZSTR_VAL(class_type->name));
+			ZVAL_NULL(arg);
+			Z_OBJ_P(arg) = NULL;
+			return FAILURE;
+		}
+
+		if (check_class->required_scope_absolute) {
+			if (scope != check_class->required_scope && scope->lexical_scope != check_class->required_scope) {
+				zend_type_error("Cannot instantiate private class %s from scope %s", ZSTR_VAL(class_type->name), ZSTR_VAL(scope->name));
+				ZVAL_NULL(arg);
+				Z_OBJ_P(arg) = NULL;
+				return FAILURE;
+			}
+		} else if (!instanceof_function(scope, class_type->required_scope) && !instanceof_function(scope->lexical_scope, class_type->required_scope)) {
+			zend_type_error("Cannot instantiate protected class %s from scope %s", ZSTR_VAL(class_type->name), ZSTR_VAL(scope->name));
+		}
+	}
+
+	// preloading may have changed the class type from ZEND_NAMESPACE_CLASS, so we need to check for user/internal class
+	if (check_class != scope && check_class->lexical_scope && (check_class->lexical_scope->type == ZEND_USER_CLASS || check_class->lexical_scope->type == ZEND_INTERNAL_CLASS)) {
+		check_class = check_class->lexical_scope;
+		goto check_lexical_scope;
+	}
+
 	if (UNEXPECTED(!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 		if (UNEXPECTED(zend_update_class_constants(class_type) != SUCCESS)) {
 			ZVAL_NULL(arg);
