@@ -53,6 +53,7 @@
 
 typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
+extern const zend_type zend_mixed_type;
 
 /* On 64-bit systems less optimal, but more compact VM code leads to better
  * performance. So on 32-bit systems we use absolute addresses for jump
