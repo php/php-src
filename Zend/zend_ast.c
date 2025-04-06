@@ -702,6 +702,71 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			}
 			zval_ptr_dtor_nogc(&op1);
 			break;
+		case ZEND_AST_CAST:
+			if (UNEXPECTED(zend_ast_evaluate_ex(&op1, ast->child[0], scope, &short_circuited, ctx) != SUCCESS)) {
+				ret = FAILURE;
+				break;
+			}
+			if (ast->attr == Z_TYPE(op1)) {
+				ZVAL_COPY_VALUE(result, &op1);
+			} else {
+				switch (ast->attr) {
+					case _IS_BOOL:
+						ZVAL_BOOL(result, zend_is_true(&op1));
+						zval_ptr_dtor_nogc(&op1);
+						break;
+					case IS_LONG:
+						ZVAL_LONG(result, zval_get_long_func(&op1, false));
+						zval_ptr_dtor_nogc(&op1);
+						break;
+					case IS_DOUBLE:
+						ZVAL_DOUBLE(result, zval_get_double_func(&op1));
+						zval_ptr_dtor_nogc(&op1);
+						break;
+					case IS_STRING:
+						ZVAL_STR(result, zval_get_string_func(&op1));
+						zval_ptr_dtor_nogc(&op1);
+						break;
+					case IS_ARRAY:
+						/* Adapted from VM */
+						if (Z_TYPE(op1) != IS_OBJECT || Z_OBJCE(op1) == zend_ce_closure) {
+							if (Z_TYPE(op1) != IS_NULL) {
+								ZVAL_ARR(result, zend_new_array(1));
+								zend_hash_index_add_new(Z_ARRVAL_P(result), 0, &op1);
+							} else {
+								ZVAL_EMPTY_ARRAY(result);
+							}
+						} else {
+							/* Constant AST only allows building stdClass objects, closures, or user classes;
+							 * all of which should be compatible. */
+							ZEND_ASSERT(ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(&op1));
+
+							/* Optimized version without rebuilding properties HashTable */
+							ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ(op1)));
+							zval_ptr_dtor_nogc(&op1);
+						}
+						break;
+					case IS_OBJECT:
+						/* Adapted from VM */
+						ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
+						if (Z_TYPE(op1) == IS_ARRAY) {
+							HashTable *ht = zend_symtable_to_proptable(Z_ARR(op1));
+							if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+								/* TODO: try not to duplicate immutable arrays as well ??? */
+								ht = zend_array_dup(ht);
+							}
+							Z_OBJ_P(result)->properties = ht;
+							zval_ptr_dtor_nogc(&op1);
+						} else if (Z_TYPE(op1) != IS_NULL) {
+							HashTable *ht = zend_new_array(1);
+							Z_OBJ_P(result)->properties = ht;
+							zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_SCALAR), &op1);
+						}
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE();
+				}
+			}
+			break;
 		case ZEND_AST_OR:
 			if (UNEXPECTED(zend_ast_evaluate_ex(&op1, ast->child[0], scope, &short_circuited, ctx) != SUCCESS)) {
 				ret = FAILURE;
