@@ -1223,8 +1223,8 @@ static void register_ZendTestClass_dnf_property(zend_class_entry *ce) {
 // The types are upgraded to DNF types in `register_dynamic_function_entries()`
 static zend_internal_arg_info arginfo_zend_test_internal_dnf_arguments[] = {
 	// first entry is a zend_internal_function_info (see zend_compile.h): {argument_count, return_type, unused}
-	{(const char*)(uintptr_t)(1), {0}, NULL},
-	{"arg", {0}, NULL}
+	{(const char*)(uintptr_t)(1), {0}, NULL, NULL},
+	{"arg", {0}, NULL, NULL}
 };
 
 static ZEND_NAMED_FUNCTION(zend_test_internal_dnf_arguments)

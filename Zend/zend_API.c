@@ -2908,7 +2908,246 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, z
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arg_info_toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
+ZEND_API void zend_type_free_interned_trees(void) {
+	zend_type_node *tree = NULL;
+	ZEND_HASH_FOREACH_PTR(CG(type_trees), tree) {
+		if (tree->kind != ZEND_TYPE_SIMPLE) {
+			pefree(tree->compound.types, 1);
+		} else {
+			if (ZEND_TYPE_HAS_NAME(tree->simple_type)) {
+				if (!ZSTR_IS_INTERNED(ZEND_TYPE_NAME(tree->simple_type))) {
+					zend_string_release_ex(ZEND_TYPE_NAME(tree->simple_type), 1);
+				}
+			}
+		}
+		pefree(tree, 1);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(CG(type_trees));
+	pefree(CG(type_trees), 1);
+	CG(type_trees) = NULL;
+}
+
+static int compare_simple_types(const zend_type a, const zend_type b) {
+	const uint32_t a_mask = ZEND_TYPE_FULL_MASK(a);
+	const uint32_t b_mask = ZEND_TYPE_FULL_MASK(b);
+
+	if (a_mask != b_mask) {
+		return a_mask < b_mask ? -1 : 1;
+	}
+
+	const bool a_has_name = ZEND_TYPE_HAS_NAME(a);
+	const bool b_has_name = ZEND_TYPE_HAS_NAME(b);
+
+	if (a_has_name && b_has_name) {
+		const zend_string *a_name = ZEND_TYPE_NAME(a);
+		const zend_string *b_name = ZEND_TYPE_NAME(b);
+		const int cmp = ZSTR_VAL(a_name) - ZSTR_VAL(b_name);
+		if (cmp != 0) {
+			return cmp;
+		}
+	}
+
+	const bool a_nullable = ZEND_TYPE_ALLOW_NULL(a);
+	const bool b_nullable = ZEND_TYPE_ALLOW_NULL(b);
+
+	if (a_nullable != b_nullable) {
+		return a_nullable ? 1 : -1;
+	}
+
+	// Types are equal
+	return 0;
+}
+
+static int compare_type_nodes(const void *a_, const void *b_) {
+	const zend_type_node *a = *(zend_type_node **)a_;
+	const zend_type_node *b = *(zend_type_node **)b_;
+
+	if (a->kind != b->kind) {
+		return (int)a->kind - (int)b->kind;
+	}
+
+	if (a->kind == ZEND_TYPE_SIMPLE) {
+		return compare_simple_types(a->simple_type, b->simple_type);
+	}
+
+	if (a->compound.num_types != b->compound.num_types) {
+		return (int)a->compound.num_types - (int)b->compound.num_types;
+	}
+
+	for (uint32_t i = 0; i < a->compound.num_types; i++) {
+		const int cmp = compare_type_nodes(&a->compound.types[i], &b->compound.types[i]);
+		if (cmp != 0) {
+			return cmp;
+		}
+	}
+
+	return 0;
+}
+
+zend_ulong zend_type_node_hash(const zend_type_node *node) {
+	zend_ulong hash = 2166136261u; // FNV-1a offset basis
+
+	hash ^= (zend_ulong)node->kind;
+	hash *= 16777619;
+
+	switch (node->kind) {
+		case ZEND_TYPE_SIMPLE: {
+			const zend_type type = node->simple_type;
+			hash ^= (zend_ulong)ZEND_TYPE_FULL_MASK(type);
+			hash *= 16777619;
+
+			if (ZEND_TYPE_HAS_NAME(type)) {
+				zend_string *name = ZEND_TYPE_NAME(type);
+				hash ^= zend_string_hash_val(name);
+				hash *= 16777619;
+			}
+
+			break;
+		}
+
+		case ZEND_TYPE_UNION:
+		case ZEND_TYPE_INTERSECTION: {
+			for (uint32_t i = 0; i < node->compound.num_types; ++i) {
+				const zend_ulong child_hash = zend_type_node_hash(node->compound.types[i]);
+				hash ^= child_hash;
+				hash *= 16777619;
+			}
+			break;
+		}
+	}
+
+	return hash;
+}
+
+bool zend_type_node_equals(const zend_type_node *a, const zend_type_node *b) {
+	if (a == b) return true;
+	if (a->kind != b->kind) return false;
+
+	if (a->kind == ZEND_TYPE_SIMPLE) {
+		const zend_type at = a->simple_type;
+		const zend_type bt = b->simple_type;
+
+		if (ZEND_TYPE_FULL_MASK(at) != ZEND_TYPE_FULL_MASK(bt)) {
+			return false;
+		}
+
+		const bool a_has_name = ZEND_TYPE_HAS_NAME(at);
+		const bool b_has_name = ZEND_TYPE_HAS_NAME(bt);
+		if (a_has_name != b_has_name) {
+			return false;
+		}
+
+		if (a_has_name) {
+			const zend_string *a_name = ZEND_TYPE_NAME(at);
+			const zend_string *b_name = ZEND_TYPE_NAME(bt);
+			if (!zend_string_equals_ci(a_name, b_name)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	// Compound type: union or intersection
+	if (a->compound.num_types != b->compound.num_types) {
+		return false;
+	}
+
+	for (uint32_t i = 0; i < a->compound.num_types; ++i) {
+		if (!zend_type_node_equals(a->compound.types[i], b->compound.types[i])) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+static zend_type_node *intern_type_node(zend_type_node *node) {
+	const zend_ulong hash = zend_type_node_hash(node);
+	zend_type_node *existing;
+
+	if (CG(type_trees) == NULL) {
+		CG(type_trees) = pemalloc(sizeof(HashTable), 1);
+		zend_hash_init(CG(type_trees), 64, NULL, NULL, 1);
+	}
+
+	if ((existing = zend_hash_index_find_ptr(CG(type_trees), hash))) {
+		if (zend_type_node_equals(existing, node)) {
+			if (node->kind != ZEND_TYPE_SIMPLE) {
+				pefree(node->compound.types, 1);
+			}
+			pefree(node, 1);
+			return existing; // reuse interned node
+		}
+	}
+
+	if (node->kind == ZEND_TYPE_SIMPLE) {
+		if (ZEND_TYPE_HAS_NAME(node->simple_type)) {
+			const zend_string *name = ZEND_TYPE_NAME(node->simple_type);
+			zend_string *new_name = zend_string_init_interned(ZSTR_VAL(name), ZSTR_LEN(name), 1);
+			ZEND_TYPE_SET_PTR(node->simple_type, new_name);
+		}
+	}
+
+	zend_hash_index_add_new_ptr(CG(type_trees), hash, node);
+	return node;
+}
+
+ZEND_API zend_type_node *zend_type_to_interned_tree(const zend_type type) {
+	if (type.type_mask == 0) {
+		return NULL;
+	}
+
+	if (!ZEND_TYPE_HAS_LIST(type)) {
+		zend_type_node *node = pemalloc(sizeof(zend_type_node), 1);
+		node->kind = ZEND_TYPE_SIMPLE;
+		node->simple_type = type;
+		return intern_type_node(node);
+	}
+
+	zend_type_list *list = ZEND_TYPE_LIST(type);
+	const zend_type_node_kind kind = ZEND_TYPE_IS_INTERSECTION(type) ?
+		ZEND_TYPE_INTERSECTION : ZEND_TYPE_UNION;
+
+	zend_type_node **children = NULL;
+	uint32_t num_children = 0;
+
+	zend_type *subtype;
+
+	children = pemalloc(list->num_types * sizeof(zend_type_node *), 1);
+
+	ZEND_TYPE_LIST_FOREACH(list, subtype) {
+		zend_type_node *child = zend_type_to_interned_tree(*subtype);
+
+		if (child->kind == kind) {
+			for (uint32_t i = 0; i < child->compound.num_types; i++) {
+				children[num_children++] = child->compound.types[i];
+			}
+		} else {
+			children[num_children++] = child;
+		}
+	} ZEND_TYPE_LIST_FOREACH_END();
+
+	qsort(children, num_children, sizeof(zend_type_node*), compare_type_nodes);
+
+	size_t deduped_count = 0;
+	for (size_t i = 0; i < num_children; i++) {
+		if (i == 0 || children[i] != children[i - 1]) {
+			children[deduped_count++] = children[i];
+		}
+	}
+
+	zend_type_node *node = pemalloc(sizeof(zend_type_node), 1);
+	node->kind = kind;
+	node->compound.num_types = deduped_count;
+	node->compound.types = pemalloc(sizeof(zend_type_node *) * deduped_count, 1);
+	memcpy(node->compound.types, children, sizeof(zend_type_node *) * deduped_count);
+	pefree(children, 1);
+
+	return intern_type_node(node);
+}
+
+static zend_always_inline zend_type_node *zend_normalize_internal_type(zend_type *type) {
 	ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*type));
 	if (ZEND_TYPE_PURE_MASK(*type) != MAY_BE_ANY) {
 		ZEND_ASSERT(!ZEND_TYPE_CONTAINS_CODE(*type, IS_RESOURCE) && "resource is not allowed in a zend_type");
@@ -2931,6 +3170,8 @@ static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
 			} ZEND_TYPE_FOREACH_END();
 		}
 	} ZEND_TYPE_FOREACH_END();
+
+	return zend_type_to_interned_tree(*type);
 }
 
 /* registers all functions in *library_functions in the function hash */
@@ -3200,7 +3441,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					new_arg_info[i].type = legacy_iterable;
 				}
 
-				zend_normalize_internal_type(&new_arg_info[i].type);
+				new_arg_info[i].type_tree = zend_normalize_internal_type(&new_arg_info[i].type);
 			}
 		}
 
@@ -4675,7 +4916,9 @@ skip_property_storage:
 	property_info->type = type;
 
 	if (is_persistent_class(ce)) {
-		zend_normalize_internal_type(&property_info->type);
+		property_info->type_tree = zend_normalize_internal_type(&property_info->type);
+	} else {
+		property_info->type_tree = zend_type_to_interned_tree(property_info->type);
 	}
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);

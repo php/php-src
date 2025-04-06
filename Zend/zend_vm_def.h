@@ -4482,7 +4482,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, cache_slot, 1, 0))) {
+		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, ret_info->type_tree, retval_ptr, ref, cache_slot, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}

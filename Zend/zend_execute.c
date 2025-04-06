@@ -1112,9 +1112,10 @@ static zend_always_inline bool zend_value_instanceof_static(zval *zv) {
 static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 		void **cache_slot, zend_type *type)
 {
-	if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
-		return (zend_class_entry *) *cache_slot;
-	}
+	// todo: work with cache_slot
+	//if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
+	//	return (zend_class_entry *) *cache_slot;
+	//}
 
 	zend_string *name = ZEND_TYPE_NAME(*type);
 	zend_class_entry *ce;
@@ -1140,71 +1141,47 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 	return ce;
 }
 
-static bool zend_check_intersection_type_from_cache_slot(zend_type_list *intersection_type_list,
-	zend_class_entry *arg_ce, void ***cache_slot_ptr)
-{
-	void **cache_slot = *cache_slot_ptr;
-	zend_class_entry *ce;
-	zend_type *list_type;
-	bool status = true;
-	ZEND_TYPE_LIST_FOREACH(intersection_type_list, list_type) {
-		/* Only check classes if the type might be valid */
-		if (status) {
-			ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-			/* If type is not an instance of one of the types taking part in the
-			 * intersection it cannot be a valid instance of the whole intersection type. */
-			if (!ce || !instanceof_function(arg_ce, ce)) {
-				status = false;
-			}
-		}
-		PROGRESS_CACHE_SLOT();
-	} ZEND_TYPE_LIST_FOREACH_END();
-	if (HAVE_CACHE_SLOT) {
-		*cache_slot_ptr = cache_slot;
-	}
-	return status;
-}
 
-static zend_always_inline bool zend_check_type_slow(
-		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot,
+static bool zend_check_type_slow(
+		zend_type *type, zend_type_node *type_tree, zval *arg, zend_reference *ref, void **cache_slot,
 		bool is_return_type, bool is_internal)
 {
-	uint32_t type_mask;
-	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
-		zend_class_entry *ce;
-		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
-			zend_type *list_type;
-			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
-				return zend_check_intersection_type_from_cache_slot(ZEND_TYPE_LIST(*type), Z_OBJCE_P(arg), &cache_slot);
-			} else {
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-					if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
-						if (zend_check_intersection_type_from_cache_slot(ZEND_TYPE_LIST(*list_type), Z_OBJCE_P(arg), &cache_slot)) {
-							return true;
-						}
-						/* The cache_slot is progressed in zend_check_intersection_type_from_cache_slot() */
-					} else {
-						ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-						ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-						/* Instance of a single type part of a union is sufficient to pass the type check */
-						if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
-							return true;
-						}
-						PROGRESS_CACHE_SLOT();
+	if (EXPECTED(type_tree != NULL) && type_tree->kind != ZEND_TYPE_SIMPLE) {
+		switch (type_tree->kind) {
+			case ZEND_TYPE_UNION: {
+				for (uint32_t i = 0; i < type_tree->compound.num_types; i++) {
+					if (zend_check_type_slow(type, type_tree->compound.types[i], arg, ref, cache_slot, is_return_type, is_internal)) {
+						return true;
 					}
-				} ZEND_TYPE_LIST_FOREACH_END();
+				}
+				return false;
 			}
-		} else {
-			ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
-			/* If we have a CE we check if it satisfies the type constraint,
-			 * otherwise it will check if a standard type satisfies it. */
-			if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
+
+			case ZEND_TYPE_INTERSECTION: {
+				for (uint32_t i = 0; i < type_tree->compound.num_types; i++) {
+					if (!zend_check_type_slow(type, type_tree->compound.types[i], arg, ref, cache_slot, is_return_type, is_internal)) {
+						return false;
+					}
+				}
 				return true;
 			}
+
+			default:
+				return false;
 		}
 	}
 
-	type_mask = ZEND_TYPE_FULL_MASK(*type);
+	if (type_tree != NULL && ZEND_TYPE_IS_COMPLEX(type_tree->simple_type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		const zend_class_entry *ce = zend_fetch_ce_from_cache_slot(cache_slot, &type_tree->simple_type);
+		/* If we have a CE we check if it satisfies the type constraint,
+		 * otherwise it will check if a standard type satisfies it. */
+		if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
+			return true;
+		}
+		PROGRESS_CACHE_SLOT();
+	}
+
+	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) &&
 		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
 		return 1;
@@ -1232,7 +1209,7 @@ static zend_always_inline bool zend_check_type_slow(
 }
 
 static zend_always_inline bool zend_check_type(
-		zend_type *type, zval *arg, void **cache_slot, zend_class_entry *scope,
+		zend_type *type, zend_type_node *type_tree, zval *arg, void **cache_slot, zend_class_entry *scope,
 		bool is_return_type, bool is_internal)
 {
 	zend_reference *ref = NULL;
@@ -1247,14 +1224,14 @@ static zend_always_inline bool zend_check_type(
 		return 1;
 	}
 
-	return zend_check_type_slow(type, arg, ref, cache_slot, is_return_type, is_internal);
+	return zend_check_type_slow(type, type_tree, arg, ref, cache_slot, is_return_type, is_internal);
 }
 
 ZEND_API bool zend_check_user_type_slow(
-		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, bool is_return_type)
+		zend_type *type, zend_type_node *type_tree, zval *arg, zend_reference *ref, void **cache_slot, bool is_return_type)
 {
 	return zend_check_type_slow(
-		type, arg, ref, cache_slot, is_return_type, /* is_internal */ false);
+		type, type_tree, arg, ref, cache_slot, is_return_type, /* is_internal */ false);
 }
 
 static zend_always_inline bool zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
@@ -1265,7 +1242,7 @@ static zend_always_inline bool zend_verify_recv_arg_type(zend_function *zf, uint
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 
 	if (ZEND_TYPE_IS_SET(cur_arg_info->type)
-			&& UNEXPECTED(!zend_check_type(&cur_arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
+			&& UNEXPECTED(!zend_check_type(&cur_arg_info->type, cur_arg_info->type_tree, arg, cache_slot, zf->common.scope, 0, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, arg);
 		return 0;
 	}
@@ -1277,7 +1254,7 @@ static zend_always_inline bool zend_verify_variadic_arg_type(
 		zend_function *zf, zend_arg_info *arg_info, uint32_t arg_num, zval *arg, void **cache_slot)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
-	if (UNEXPECTED(!zend_check_type(&arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
+	if (UNEXPECTED(!zend_check_type(&arg_info->type, arg_info->type_tree, arg, cache_slot, zf->common.scope, 0, 0))) {
 		zend_verify_arg_error(zf, arg_info, arg_num, arg);
 		return 0;
 	}
@@ -1302,7 +1279,7 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
 		}
 
 		if (ZEND_TYPE_IS_SET(cur_arg_info->type)
-				&& UNEXPECTED(!zend_check_type(&cur_arg_info->type, arg, /* cache_slot */ NULL, fbc->common.scope, 0, /* is_internal */ 1))) {
+				&& UNEXPECTED(!zend_check_type(&cur_arg_info->type, cur_arg_info->type_tree, arg, /* cache_slot */ NULL, fbc->common.scope, 0, /* is_internal */ 1))) {
 			return 0;
 		}
 		arg++;
@@ -1508,7 +1485,7 @@ ZEND_API bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
 		return 1;
 	}
 
-	if (UNEXPECTED(!zend_check_type(&ret_info->type, ret, /* cache_slot */ NULL, NULL, 1, /* is_internal */ 1))) {
+	if (UNEXPECTED(!zend_check_type(&ret_info->type, ret_info->type_tree, ret, /* cache_slot */ NULL, NULL, 1, /* is_internal */ 1))) {
 		zend_verify_internal_return_error(zf, ret);
 		return 0;
 	}

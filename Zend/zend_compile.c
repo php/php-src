@@ -7359,6 +7359,7 @@ static zend_type zend_compile_typename_ex(
 	}
 
 	ast->attr = orig_ast_attr;
+
 	return type;
 }
 /* }}} */
@@ -7595,6 +7596,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		} else {
 			arg_infos->type = (zend_type) ZEND_TYPE_INIT_CODE(fallback_return_type, 0, 0);
 		}
+		arg_infos->type_tree = zend_type_to_interned_tree(arg_infos->type);
 		arg_infos++;
 		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 
@@ -7841,6 +7843,8 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 			}
 		}
+
+		arg_info->type_tree = zend_type_to_interned_tree(arg_info->type);
 	}
 
 	/* These are assigned at the end to avoid uninitialized memory in case of an error */

@@ -142,6 +142,27 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
+typedef struct _zend_type_node zend_type_node;
+
+typedef enum {
+	ZEND_TYPE_SIMPLE,
+	ZEND_TYPE_UNION,
+	ZEND_TYPE_INTERSECTION,
+} zend_type_node_kind;
+
+struct _zend_type_node {
+	zend_type_node_kind kind;
+
+	union {
+		zend_type simple_type;
+
+		struct {
+			uint32_t num_types;
+			zend_type_node **types;
+		} compound;
+	};
+};
+
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
 #define _ZEND_TYPE_MASK ((1u << 25) - 1)
 /* Only one of these bits may be set. */
