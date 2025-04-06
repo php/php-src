@@ -1,19 +1,10 @@
 <?php
-class test!🥖lebruh, bruh : LELE!🥥 extends bruh {
+class test!🥖lebruh, bruh : LELE!🥥 {
     public function __construct(
-    public K $lol
+    public string $lol
 ){
     }
 }
 
-class bruh {
-    public function __construct(
-    public array!🥖bruh!🥥 $le
-    ){}
-
-    public function test(test!🥖bruh!🥥 $le): test!🥖bruh!🥥 {
-    }
-};
-
-
+$lelelele = new test("le");
 echo "hi\n";

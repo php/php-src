@@ -9043,6 +9043,53 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 	zend_type_release(type, 0);
 }
 
+// LEHP-RELEVANT
+// compiles generic class params from the AST to the zend_class_entry
+static void zend_compile_class_generic_params(zend_class_entry *class_entry, zend_ast *ast) {
+    ZEND_ASSERT(ast->kind == ZEND_AST_GENERIC_TYPE_PARAM_LIST);
+    // we know this is a list as it has GENERIC_LIST_TYPE
+    zend_ast_list *generic_param_list = zend_ast_get_list(ast);
+
+    class_entry->generic_type_count = generic_param_list->children;
+    class_entry->generic_type = ecalloc(generic_param_list->children, sizeof(zend_type_parameter));
+    for (uint32_t i = 0; i < generic_param_list->children; i++) {
+        zend_ast *param_ast = generic_param_list->child[i];
+        zend_type_parameter *type_param = &class_entry->generic_type[i];
+
+        if (param_ast->kind == ZEND_AST_ZVAL) {
+            // Simple type parameter T
+            zend_ast_zval *zval_ast = (zend_ast_zval*)param_ast;
+            if (Z_TYPE(zval_ast->val) != IS_STRING) {
+                zend_error_noreturn(E_COMPILE_ERROR, "Generic type parameter name must be a string");
+            }
+            type_param->name = zend_string_copy(Z_STR(zval_ast->val));
+            type_param->element_count = 0;
+            type_param->elements = NULL;
+            zend_resolve_const_class_name_reference(zval_ast, "class name");
+        } else if (param_ast->kind == ZEND_AST_GENERIC_TYPE) {
+            // Type parameter with constraints like T:string
+            if (param_ast->child[0]->kind != ZEND_AST_ZVAL) {
+                zend_error_noreturn(E_COMPILE_ERROR, "Generic type parameter name must be a simple identifier");
+            }
+
+            zend_ast_zval *name_ast = (zend_ast_zval*)param_ast->child[0];
+            if (Z_TYPE(name_ast->val) != IS_STRING) {
+                zend_error_noreturn(E_COMPILE_ERROR, "Generic type parameter name must be a string");
+            }
+
+            type_param->name = zend_string_copy(Z_STR(name_ast->val));
+
+            // LEHP-TODO add constraints to model
+            type_param->element_count = 0;
+            type_param->elements = NULL;
+
+            // TODO: In the future, process constraint list from param_ast->child[1]
+        } else {
+            zend_error_noreturn(E_COMPILE_ERROR, "Invalid generic type parameter");
+        }
+    }
+}
+
 static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
@@ -9133,8 +9180,13 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	CG(active_class_entry) = ce;
 
-	if (decl->child[3] && decl->child[3]->kind != ZEND_AST_GENERIC_TYPE_PARAM_LIST) {
-		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
+	if (decl->child[3]) {
+        if(decl->child[3]->kind == ZEND_AST_GENERIC_TYPE_PARAM_LIST){
+         	zend_compile_class_generic_params(ce, decl->child[3]);
+        } else {
+        	// LEHP-TODO this should never happen, attributes are never passed as third child to zend_ast_create_decl(ZEND_AST_CLASS, ...)???
+         	zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
+        }
 	}
 
 	if (implements_ast) {
