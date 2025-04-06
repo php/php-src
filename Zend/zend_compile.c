@@ -9037,7 +9037,10 @@ static void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-
+static void zend_associated_table_ht_dtor(zval *val) {
+	/* NO OP as we only use it to be able to refer and save pointers to zend_types */
+	// TODO do we actually want to store copies of types?
+}
 
 static void zend_compile_associated_type(zend_ast *ast) {
 	zend_class_entry *ce = CG(active_class_entry);
@@ -9054,16 +9057,15 @@ static void zend_compile_associated_type(zend_ast *ast) {
 	bool persistent = ce->type == ZEND_INTERNAL_CLASS;
 	if (associated_types == NULL) {
 		ce->associated_types = pemalloc(sizeof(HashTable), persistent);
-		zend_hash_init(ce->associated_types, 8, NULL, NULL, persistent);
+		zend_hash_init(ce->associated_types, 8, NULL, zend_associated_table_ht_dtor, persistent);
 		associated_types = ce->associated_types;
 	}
 	if (zend_hash_exists(associated_types, name)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot have two associated types with the same name \"%s\"", ZSTR_VAL(name));
 	}
-	zval tmp;
-	ZVAL_UNDEF(&tmp);
-	zend_hash_add_new(associated_types, name, &tmp);
+
+	zend_hash_add_new_ptr(associated_types, name, (void*) &zend_mixed_type);
 }
 
 static void zend_compile_implements(zend_ast *ast) /* {{{ */
