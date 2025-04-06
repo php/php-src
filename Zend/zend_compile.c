@@ -84,6 +84,8 @@ static inline uint32_t zend_alloc_cache_slot(void) {
 	return zend_alloc_cache_slots(1);
 }
 
+const zend_type zend_mixed_type = { NULL, MAY_BE_ANY };
+
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename, zend_compile_position position);
 
