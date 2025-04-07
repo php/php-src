@@ -39,6 +39,7 @@
 #include "zend_observer.h"
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
+#include "zend_namespaces.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -148,6 +149,8 @@ void init_executor(void) /* {{{ */
 
 	EG(function_table) = CG(function_table);
 	EG(class_table) = CG(class_table);
+	EG(namespaces) = NULL;
+	EG(global_namespace) = NULL;
 
 	EG(in_autoload) = NULL;
 	EG(error_handling) = EH_NORMAL;
@@ -495,6 +498,8 @@ void shutdown_executor(void) /* {{{ */
 			zend_hash_destroy(*EG(symtable_cache_ptr));
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
 		}
+
+		zend_destroy_namespaces();
 
 		zend_hash_destroy(&EG(included_files));
 

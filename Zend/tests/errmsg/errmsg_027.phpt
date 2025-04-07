@@ -13,4 +13,4 @@ class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Class declarations may not be nested in %s on line %d
+Fatal error: Class declarations may not be declared inside functions in %s on line %d

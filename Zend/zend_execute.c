@@ -1045,8 +1045,51 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
+static zend_result zend_check_type_visibility(const zend_class_entry *ce, const zend_property_info *info, uint32_t current_visibility)
+{
+check_lexical_scope:
+	/* public classes are always visible */
+	if (!ce->required_scope) {
+		return SUCCESS;
+	}
+
+	/* a protected class is visible if it is a subclass of the lexical scope
+	 * and the current visibility is protected or private */
+	if (!ce->required_scope_absolute && instanceof_function(info->ce, ce->required_scope)) {
+		if (current_visibility & ZEND_ACC_PUBLIC) {
+			zend_type_error("Cannot declare protected class %s to a public property in %s::%s", ZSTR_VAL(ce->name), ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
+			return FAILURE;
+		}
+
+		return SUCCESS;
+	}
+
+	/* a private class is visible if it is the same class as the lexical scope and the current visibility is private */
+	if (ce->required_scope_absolute && ce->required_scope == info->ce) {
+		if ((current_visibility & ZEND_ACC_PPP_MASK) < ZEND_ACC_PRIVATE) {
+			zend_type_error("Cannot declare private class %s to a %s property in %s::%s", ZSTR_VAL(ce->name), zend_visibility_string(current_visibility), ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
+			return FAILURE;
+		}
+
+		return SUCCESS;
+	}
+
+	if (ce->lexical_scope != info->ce && ce->lexical_scope && (ce->lexical_scope->type == ZEND_USER_CLASS || ce->lexical_scope->type == ZEND_INTERNAL_CLASS)) {
+		ce = ce->lexical_scope;
+		goto check_lexical_scope;
+	}
+
+	zend_type_error("Cannot declare %s to weaker visible property %s::%s", ZSTR_VAL(ce->name), ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
+	return FAILURE;
+}
+
 static zend_always_inline bool i_zend_verify_property_type(const zend_property_info *info, zval *property, bool strict)
 {
+	if (Z_TYPE_P(property) == IS_OBJECT && zend_check_type_visibility(Z_OBJCE_P(property), info, info->flags)) {
+		zend_verify_property_type_error(info, property);
+		return 0;
+	}
+
 	if (i_zend_check_property_type(info, property, strict)) {
 		return 1;
 	}
