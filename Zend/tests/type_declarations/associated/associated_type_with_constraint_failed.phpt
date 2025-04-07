@@ -13,4 +13,5 @@ class C implements I {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Fatal error: Declaration of C::foo(float $param): float must be compatible with I::foo(T<string|int> $param): T<string|int> in %s on line %d

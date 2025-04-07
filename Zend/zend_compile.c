@@ -494,7 +494,12 @@ void shutdown_compiler(void) /* {{{ */
 		CG(unlinked_uses) = NULL;
 	}
 	CG(current_linking_class) = NULL;
-	ZEND_ASSERT(CG(bound_associated_types) == NULL);
+	/* This can happen during a fatal error */
+	if (CG(bound_associated_types)) {
+		zend_hash_destroy(CG(bound_associated_types));
+		FREE_HASHTABLE(CG(bound_associated_types));
+		CG(bound_associated_types) = NULL;
+	}
 }
 /* }}} */
 
@@ -1436,6 +1441,26 @@ static zend_string *add_intersection_type(zend_string *str,
 	return str;
 }
 
+static zend_string *add_associated_type(zend_string *associated_type, zend_class_entry *scope)
+{
+	const zend_type *constraint = zend_hash_find_ptr(scope->associated_types, associated_type);
+	ZEND_ASSERT(constraint != NULL);
+
+	zend_string *constraint_type_str = zend_type_to_string_resolved(*constraint, scope);
+
+	size_t len = ZSTR_LEN(associated_type) + ZSTR_LEN(constraint_type_str) + strlen("<>");
+	zend_string *result = zend_string_alloc(len, 0);
+
+	memcpy(ZSTR_VAL(result), ZSTR_VAL(associated_type), ZSTR_LEN(associated_type));
+	ZSTR_VAL(result)[ZSTR_LEN(associated_type)] = '<';
+	memcpy(ZSTR_VAL(result) + ZSTR_LEN(associated_type) + 1, ZSTR_VAL(constraint_type_str), ZSTR_LEN(constraint_type_str));
+	ZSTR_VAL(result)[len-1] = '>';
+	ZSTR_VAL(result)[len] = '\0';
+
+	zend_string_release(constraint_type_str);
+	return result;
+}
+
 zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
 
@@ -1459,6 +1484,8 @@ zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry
 			str = add_type_string(str, resolved, /* is_intersection */ false);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_IS_ASSOCIATED(type)) {
+		str = add_associated_type(ZEND_TYPE_NAME(type), scope);
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
@@ -9031,12 +9058,18 @@ static void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 static void zend_associated_table_ht_dtor(zval *val) {
 	/* NO OP as we only use it to be able to refer and save pointers to zend_types */
 	// TODO do we actually want to store copies of types?
+	zend_type *associated_type = Z_PTR_P(val);
+	if (associated_type != &zend_mixed_type) {
+		zend_type_release(*associated_type, false);
+		efree(associated_type);
+	}
 }
 
 static void zend_compile_associated_type(zend_ast *ast) {
 	zend_class_entry *ce = CG(active_class_entry);
 	HashTable *associated_types = ce->associated_types;
 	zend_ast *name_ast = ast->child[0];
+	zend_ast *type_ast = ast->child[1];
 	zend_string *name = zend_ast_get_str(name_ast);
 
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE) == 0) {
@@ -9056,7 +9089,12 @@ static void zend_compile_associated_type(zend_ast *ast) {
 			"Cannot have two associated types with the same name \"%s\"", ZSTR_VAL(name));
 	}
 
-	zend_hash_add_new_ptr(associated_types, name, (void*) &zend_mixed_type);
+	if (type_ast != NULL) {
+		zend_type type = zend_compile_typename(type_ast);
+		zend_hash_add_new_mem(associated_types, name, &type, sizeof(type));
+	} else {
+		zend_hash_add_new_ptr(associated_types, name, (void*) &zend_mixed_type);
+	}
 }
 
 static void zend_compile_implements(zend_ast *ast) /* {{{ */
