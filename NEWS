@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     evaluation). (ilutov)
   . Fixed bug GH-18038 (Lazy proxy calls magic methods twice). (Arnaud)
   . Fixed bug GH-18209 (Use-after-free in extract() with EXTR_REFS). (ilutov)
+  . Fixed bug GH-18268 (Segfault in array_walk() on object with added property
+    hooks). (ilutov)
 
 - DBA:
   . FIxed bug GH-18247 dba_popen() memory leak on invalid path. (David Carlier)
