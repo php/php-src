@@ -769,13 +769,18 @@ static xmlParserInputPtr php_libxml_external_entity_loader(const char *URL,
 is_string:
 			resource = Z_STRVAL(retval);
 		} else if (Z_TYPE(retval) == IS_RESOURCE) {
-			php_stream *stream;
-			php_stream_from_zval_no_verify(stream, &retval);
-			if (stream == NULL) {
-				php_libxml_ctx_error(context,
-						"The user entity loader callback '%s' has returned a "
-						"resource, but it is not a stream",
-						ZSTR_VAL(LIBXML(entity_loader_callback).function_handler->common.function_name));
+			php_stream *stream = (php_stream*)zend_fetch_resource2_ex(&retval, NULL, php_file_le_stream(), php_file_le_pstream());
+			if (UNEXPECTED(stream == NULL)) {
+				zval callable;
+				zend_get_callable_zval_from_fcc(&LIBXML(entity_loader_callback), &callable);
+				zend_string *callable_name = zend_get_callable_name(&callable);
+				zend_string *func_name = get_active_function_or_method_name();
+				zend_type_error(
+					"%s(): The user entity loader callback \"%s\" has returned a resource, but it is not a stream",
+					ZSTR_VAL(func_name), ZSTR_VAL(callable_name));
+				zend_string_release(func_name);
+				zend_string_release(callable_name);
+				zval_ptr_dtor(&callable);
 			} else {
 				/* TODO: allow storing the encoding in the stream context? */
 				xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
