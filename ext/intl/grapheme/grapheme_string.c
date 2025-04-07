@@ -978,31 +978,31 @@ PHP_FUNCTION(grapheme_levenshtein)
 
 	intl_convert_utf8_to_utf16(&ustring1, &ustring1_len, pstr1, ZSTR_LEN(string1), &ustatus1);
 
-	if ( U_FAILURE( ustatus1 ) ) {
+	if (U_FAILURE(ustatus1)) {
 		/* Set global error code. */
 		intl_error_set_code( NULL, ustatus1 );
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
 		if (ustring1) {
-			efree( ustring1 );
+			efree(ustring1);
 		}
 		RETURN_FALSE;
 	}
 
 	intl_convert_utf8_to_utf16(&ustring2, &ustring2_len, pstr2, ZSTR_LEN(string2), &ustatus2);
 
-	if ( U_FAILURE( ustatus2 ) ) {
+	if (U_FAILURE(ustatus2)) {
 		/* Set global error code. */
-		intl_error_set_code( NULL, ustatus2 );
+		intl_error_set_code(NULL, ustatus2);
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
+		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16", 0);
 		if (ustring2) {
-			efree( ustring2 );
+			efree(ustring2);
 		}
 		if (ustring1) {
-			efree( ustring1 );
+			efree(ustring1);
 		}
 		RETURN_FALSE;
 	}
@@ -1012,8 +1012,8 @@ PHP_FUNCTION(grapheme_levenshtein)
 	UBreakIterator *bi1, *bi2;
 
 	int32_t strlen_1, strlen_2;
-	strlen_1 = grapheme_split_string(ustring1, ustring1_len, NULL, 0 );
-	strlen_2 = grapheme_split_string(ustring2, ustring2_len, NULL, 0 );
+	strlen_1 = grapheme_split_string(ustring1, ustring1_len, NULL, 0);
+	strlen_2 = grapheme_split_string(ustring2, ustring2_len, NULL, 0);
 
 	if (strlen_1 == 0) {
 		efree(ustring1);
@@ -1028,8 +1028,8 @@ PHP_FUNCTION(grapheme_levenshtein)
 
 	unsigned char u_break_iterator_buffer1[U_BRK_SAFECLONE_BUFFERSIZE];
 	unsigned char u_break_iterator_buffer2[U_BRK_SAFECLONE_BUFFERSIZE];
-	bi1 = grapheme_get_break_iterator((void*)u_break_iterator_buffer1, &ustatus1 );
-	bi2 = grapheme_get_break_iterator((void*)u_break_iterator_buffer2, &ustatus2 );
+	bi1 = grapheme_get_break_iterator((void*)u_break_iterator_buffer1, &ustatus1);
+	bi2 = grapheme_get_break_iterator((void*)u_break_iterator_buffer2, &ustatus2);
 
 	ut1 = utext_openUTF8(ut1, pstr1, ZSTR_LEN(string1), &ustatus1);
 	ubrk_setUText(bi1, ut1, &ustatus1);
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	int32_t pos1 = 0;
 	int32_t pos2 = 0;
 	int32_t usrch_pos = 0;
-	for ( ; pos1 != UBRK_DONE; ) {
+	for (; pos1 != UBRK_DONE;) {
 		current1 = ubrk_current(bi1);
 		pos1 = ubrk_next(bi1);
 		if (pos1 == UBRK_DONE) {
