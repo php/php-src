@@ -736,13 +736,20 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 							} else {
 								ZVAL_EMPTY_ARRAY(result);
 							}
-						} else {
-							/* Constant AST only allows building stdClass objects, closures, or user classes;
-							 * all of which should be compatible. */
-							ZEND_ASSERT(ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(&op1));
-
-							/* Optimized version without rebuilding properties HashTable */
+						} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(&op1)) {
 							ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ(op1)));
+							zval_ptr_dtor_nogc(&op1);
+						} else {
+							HashTable *obj_ht = zend_get_properties_for(&op1, ZEND_PROP_PURPOSE_ARRAY_CAST);
+							if (obj_ht) {
+								ZVAL_ARR(result, zend_proptable_to_symtable(obj_ht,
+									(Z_OBJCE(op1)->default_properties_count ||
+									 Z_OBJ(op1)->handlers != &std_object_handlers ||
+									 GC_IS_RECURSIVE(obj_ht))));
+								zend_release_properties(obj_ht);
+							} else {
+								ZVAL_EMPTY_ARRAY(result);
+							}
 							zval_ptr_dtor_nogc(&op1);
 						}
 						break;
