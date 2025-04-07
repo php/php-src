@@ -61,7 +61,7 @@ PHP_FUNCTION(uniqid)
 	 * a pause of around 10ms.
 	 */
 	(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
-	if (tv.tv_sec <= prev_tv.tv_sec ||
+	if (tv.tv_sec < prev_tv.tv_sec ||
             (tv.tv_sec == prev_tv.tv_sec && tv.tv_usec <= prev_tv.tv_usec)) {
 		tv.tv_sec = prev_tv.tv_sec;
 		tv.tv_usec = prev_tv.tv_usec + 1;
