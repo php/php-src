@@ -6439,7 +6439,7 @@ PHP_FUNCTION(array_reduce)
 	zval args[2];
 	zval *operand;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 	zval *initial = NULL;
 	HashTable *htbl;
 
@@ -6515,7 +6515,7 @@ PHP_FUNCTION(array_filter)
 	zend_long use_type = 0;
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 	zend_ulong num_key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -6649,7 +6649,7 @@ PHP_FUNCTION(array_find)
 {
 	HashTable *array;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(array)
@@ -6665,7 +6665,7 @@ PHP_FUNCTION(array_find_key)
 {
 	HashTable *array;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(array)
@@ -6681,7 +6681,7 @@ PHP_FUNCTION(array_any)
 {
 	HashTable *array;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(array)
@@ -6697,7 +6697,7 @@ PHP_FUNCTION(array_all)
 {
 	HashTable *array;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(array)
@@ -6714,8 +6714,8 @@ PHP_FUNCTION(array_map)
 	zval *arrays = NULL;
 	int n_arrays = 0;
 	zval result;
-	zend_fcall_info fci = empty_fcall_info;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
 	int i;
 	uint32_t k, maxlen = 0;
 
