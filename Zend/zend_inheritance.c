@@ -693,6 +693,16 @@ static inheritance_status zend_is_type_subtype_of_associated_type(
 	zend_string *associated_type_name = ZEND_TYPE_NAME(associated_type);
 	const zend_type *bound_type_ptr = zend_hash_find_ptr(CG(bound_associated_types), associated_type_name);
 	if (bound_type_ptr == NULL) {
+		const zend_type *constraint = zend_hash_find_ptr(associated_type_scope->associated_types, associated_type_name);
+		ZEND_ASSERT(constraint != NULL);
+		/* Check that the provided type is a subtype of the constraint */
+		const inheritance_status status = zend_perform_covariant_type_check(
+			concrete_scope, concrete_type_ptr,
+			associated_type_scope, constraint);
+		if (status != INHERITANCE_SUCCESS) {
+			return status;
+		}
+
 		/* Loosing const qualifier here is OK because this hashtable never frees or does anything with the value */
 		zend_hash_add_new_ptr(CG(bound_associated_types), associated_type_name, (void*)concrete_type_ptr);
 		return INHERITANCE_SUCCESS;
