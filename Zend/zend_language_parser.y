@@ -668,8 +668,10 @@ enum_case_expr:
 ;
 
 associated_type:
-        T_TYPE name ';'
-			{ $$ = zend_ast_create(ZEND_AST_ASSOCIATED_TYPE, $2); }
+        T_TYPE name ':' type_expr_without_static ';'
+			{ $$ = zend_ast_create(ZEND_AST_ASSOCIATED_TYPE, $2, $4); }
+	|	T_TYPE name ';'
+			{ $$ = zend_ast_create(ZEND_AST_ASSOCIATED_TYPE, $2, NULL); }
 ;
 
 extends_from:
