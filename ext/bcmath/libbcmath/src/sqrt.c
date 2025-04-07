@@ -51,7 +51,7 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		return true;
 	}
 
-	bcmath_compare_result num_cmp_one = bc_compare(local_num, BCG(_one_));
+	bcmath_compare_result num_cmp_one = bc_compare(local_num, BCG(_one_), local_num->n_scale);
 	/* Square root of 1 is 1 */
 	if (num_cmp_one == BCMATH_EQUAL) {
 		bc_free_num (num);

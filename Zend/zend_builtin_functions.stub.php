@@ -7,6 +7,11 @@ class stdClass
 {
 }
 
+function exit(string|int $status = 0): never {}
+
+/** @alias exit */
+function die(string|int $status = 0): never {}
+
 /** @refcount 1 */
 function zend_version(): string {}
 
@@ -112,10 +117,14 @@ function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
 function restore_error_handler(): true {}
 
+function get_error_handler(): ?callable {}
+
 /** @return callable|null */
 function set_exception_handler(?callable $callback) {}
 
 function restore_exception_handler(): true {}
+
+function get_exception_handler(): ?callable {}
 
 /**
  * @return array<int, string>

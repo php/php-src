@@ -45,7 +45,7 @@ zend_result zend_load_extension(const char *path)
 #ifdef ZEND_WIN32
 	char *err;
 	if (!php_win32_image_compatible(handle, &err)) {
-		zend_error(E_CORE_WARNING, err);
+		zend_error(E_CORE_WARNING, "%s", err);
 		return FAILURE;
 	}
 #endif
@@ -272,7 +272,7 @@ ZEND_API int zend_get_resource_handle(const char *module_name)
  *
  * The extension slot has been available since PHP 7.4 on user functions and
  * has been available since PHP 8.2 on internal functions.
- * 
+ *
  * # Safety
  * The extension slot made available by calling this function is initialized on
  * the first call made to the function in that request. If you need to
@@ -280,13 +280,13 @@ ZEND_API int zend_get_resource_handle(const char *module_name)
  *
  * The function cache slots are not available if the function is a trampoline,
  * which can be checked with something like:
- * 
+ *
  *     if (fbc->type == ZEND_USER_FUNCTION
  *         && !(fbc->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
  *     ) {
  *         // Use ZEND_OP_ARRAY_EXTENSION somehow
  *     }
- */  
+ */
 ZEND_API int zend_get_op_array_extension_handle(const char *module_name)
 {
 	int handle = zend_op_array_extension_handles++;
@@ -331,24 +331,33 @@ ZEND_API void zend_init_internal_run_time_cache(void) {
 			functions += zend_hash_num_elements(&ce->function_table);
 		} ZEND_HASH_FOREACH_END();
 
-		char *ptr = zend_arena_calloc(&CG(arena), functions, rt_size);
+		size_t alloc_size = functions * rt_size;
+		char *ptr = pemalloc(alloc_size, 1);
+
+		CG(internal_run_time_cache) = ptr;
+		CG(internal_run_time_cache_size) = alloc_size;
+
 		zend_internal_function *zif;
 		ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), zif) {
-			if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL)
-			{
+			if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL) {
 				ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
 				ptr += rt_size;
 			}
 		} ZEND_HASH_FOREACH_END();
 		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zif) {
-				if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL)
-				{
+				if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL) {
 					ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
 					ptr += rt_size;
 				}
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
+	}
+}
+
+ZEND_API void zend_reset_internal_run_time_cache(void) {
+	if (CG(internal_run_time_cache)) {
+		memset(CG(internal_run_time_cache), 0, CG(internal_run_time_cache_size));
 	}
 }
 

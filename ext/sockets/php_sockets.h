@@ -41,7 +41,7 @@ extern zend_module_entry sockets_module_entry;
 #ifdef PHP_WIN32
 #include <Winsock2.h>
 #else
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #endif

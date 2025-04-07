@@ -451,7 +451,7 @@ static inline unsigned char unimap_bsearch(const uni_to_enc *table, unsigned cod
 /* }}} */
 
 /* {{{ map_from_unicode */
-static inline int map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
+static inline zend_result map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
 {
 	unsigned char found;
 	const uni_to_enc *table;
@@ -667,7 +667,7 @@ static inline int numeric_entity_is_allowed(unsigned uni_cp, int document_type)
  * On input, *buf should point to the first character after # and on output, it's the last
  * byte read, no matter if there was success or insuccess.
  */
-static inline int process_numeric_entity(const char **buf, unsigned *code_point)
+static inline zend_result process_numeric_entity(const char **buf, unsigned *code_point)
 {
 	zend_long code_l;
 	int hexadecimal = (**buf == 'x' || **buf == 'X'); /* TODO: XML apparently disallows "X" */
@@ -703,7 +703,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 /* }}} */
 
 /* {{{ process_named_entity */
-static inline int process_named_entity_html(const char **buf, const char **start, size_t *length)
+static inline zend_result process_named_entity_html(const char **buf, const char **start, size_t *length)
 {
 	*start = *buf;
 
@@ -732,7 +732,7 @@ static inline int process_named_entity_html(const char **buf, const char **start
 /* }}} */
 
 /* {{{ resolve_named_entity_html */
-static int resolve_named_entity_html(const char *start, size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
+static zend_result resolve_named_entity_html(const char *start, size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
 {
 	const entity_cp_map *s;
 	zend_ulong hash = zend_inline_hash_func(start, length);
@@ -780,9 +780,7 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #if 0
 		return php_mb2_int_to_char(buf, code);
 #else
-#if ZEND_DEBUG
-		assert(code <= 0xFFU);
-#endif
+		ZEND_ASSERT(code <= 0xFFU);
 		*buf = code;
 		return 1;
 #endif
@@ -791,9 +789,7 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #if 0 /* idem */
 		return php_mb2_int_to_char(buf, code);
 #else
-#if ZEND_DEBUG
-		assert(code <= 0xFFU);
-#endif
+		ZEND_ASSERT(code <= 0xFFU);
 		*buf = code;
 		return 1;
 #endif

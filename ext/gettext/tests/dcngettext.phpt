@@ -33,6 +33,6 @@ string(1) "1"
 string(4) "test"
 string(4) "test"
 string(4) "test"
-dcngettext(): Argument #1 ($domain) cannot be empty
-dcngettext(): Argument #1 ($domain) cannot be empty
+dcngettext(): Argument #1 ($domain) must not be empty
+dcngettext(): Argument #1 ($domain) must not be empty
 Done

@@ -3,7 +3,6 @@ Stack limit 002 - Stack limit checks with max_allowed_stack_size detection (fibe
 --SKIPIF--
 <?php
 if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
-if (getenv('SKIP_MSAN')) die("skip msan requires a considerably higher zend.reserved_stack_size due to instrumentation");
 ?>
 --EXTENSIONS--
 zend_test
@@ -26,13 +25,6 @@ class Test2 {
     }
 }
 
-class Test3 {
-    public function __sleep()
-    {
-        serialize($this);
-    }
-}
-
 function replace() {
     return preg_replace_callback('#.#', function () {
         return replace();
@@ -48,12 +40,6 @@ $fiber = new Fiber(function (): void {
 
     try {
         clone new Test2;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
-    }
-
-    try {
-        serialize(new Test3);
     } catch (Error $e) {
         echo $e->getMessage(), "\n";
     }
@@ -79,7 +65,6 @@ array(4) {
   ["EG(stack_limit)"]=>
   string(%d) "0x%x"
 }
-Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
 Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
 Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
 Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?

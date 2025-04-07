@@ -88,4 +88,4 @@ num: 1
 idx: 2
 bool(false)
 bool(false)
-XMLReader::moveToAttribute(): Argument #1 ($name) cannot be empty
+XMLReader::moveToAttribute(): Argument #1 ($name) must not be empty

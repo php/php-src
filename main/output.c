@@ -359,7 +359,11 @@ PHPAPI int php_output_get_level(void)
 PHPAPI zend_result php_output_get_contents(zval *p)
 {
 	if (OG(active)) {
-		ZVAL_STRINGL(p, OG(active)->buffer.data, OG(active)->buffer.used);
+		if (OG(active)->buffer.used) {
+			ZVAL_STRINGL(p, OG(active)->buffer.data, OG(active)->buffer.used);
+		} else {
+			ZVAL_EMPTY_STRING(p);
+		}
 		return SUCCESS;
 	} else {
 		ZVAL_NULL(p);
@@ -920,6 +924,10 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			context->in.used
 	);
 #endif
+
+	if (handler->flags & PHP_OUTPUT_HANDLER_DISABLED) {
+		return PHP_OUTPUT_HANDLER_FAILURE;
+	}
 
 	if (php_output_lock_error(context->op)) {
 		/* fatal error */

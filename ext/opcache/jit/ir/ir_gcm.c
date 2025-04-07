@@ -112,6 +112,25 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 		bb = &ctx->cfg_blocks[b];
 		if (bb->loop_depth < loop_depth) {
 			if (!bb->loop_depth) {
+#if 1
+				/* Avoid LICM if LOOP doesn't have a pre-header block */
+				ir_block *loop_bb = &ctx->cfg_blocks[best];
+
+				if (!(loop_bb->flags & IR_BB_LOOP_HEADER)) {
+					loop_bb = &ctx->cfg_blocks[loop_bb->loop_header];
+				}
+				if (loop_bb->predecessors_count > 2) {
+					int n = loop_bb->predecessors_count;
+					uint32_t *p = ctx->cfg_edges + loop_bb->predecessors;
+
+					while (n && *p != b) {
+						n--; p++;
+					}
+					if (!n) {
+						break;
+					}
+				}
+#endif
 				best = b;
 				break;
 			}
@@ -337,9 +356,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 			}
 		} else {
 			j = i = ctx->cfg_map[use];
-			IR_ASSERT(i > 0);
-			while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
-				j = ctx->cfg_blocks[j].idom;
+			if (i) {
+				IR_ASSERT(i > 0);
+				while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
+					j = ctx->cfg_blocks[j].idom;
+				}
 			}
 			clone = ir_hashtab_find(&hash, j);
 			if (clone == IR_INVALID_VAL) {
@@ -380,9 +401,10 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	for (i = 1; i < clones_count; i++) {
 		clones[i].ref = clone = ir_emit(ctx, insn->optx, insn->op1, insn->op2, insn->op3);
 		insn = &ctx->ir_base[ref];
-		if (insn->op1 > 0) ir_use_list_add(ctx, insn->op1, clone);
-		if (insn->op2 > 0) ir_use_list_add(ctx, insn->op2, clone);
-		if (insn->op3 > 0) ir_use_list_add(ctx, insn->op3, clone);
+		/* Depending on the flags in IR_OPS, these can be references or data. */
+		if (insn->op1 > 0 && insn->inputs_count >= 1) ir_use_list_add(ctx, insn->op1, clone);
+		if (insn->op2 > 0 && insn->inputs_count >= 2) ir_use_list_add(ctx, insn->op2, clone);
+		if (insn->op3 > 0 && insn->inputs_count >= 3) ir_use_list_add(ctx, insn->op3, clone);
 	}
 
 	/* Reconstruct IR: Update DEF->USE lists, CFG mapping and etc */
@@ -391,10 +413,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	n = ctx->use_lists[ref].refs;
 	for (i = 0; i < clones_count; i++) {
 		clone = clones[i].ref;
-		if (clones[i].use_count == 1) {
+		if (clones[i].use_count == 1
+		 && ctx->cfg_blocks[clones[i].block].loop_depth >= ctx->cfg_blocks[uses[clones[i].use].block].loop_depth) {
 			/* TOTALLY_USEFUL block may be a head of a diamond above the real usage.
 			 * Sink it down to the real usage block.
-			 * Clones with few uses we be sunk into the LCA block.
+			 * Clones with few uses will be sunk into the LCA block.
 			 */
 			clones[i].block = uses[clones[i].use].block;
 		}
@@ -871,9 +894,11 @@ int ir_schedule(ir_ctx *ctx)
 
 	/* Topological sort according dependencies inside each basic block */
 	for (b = 1, bb = ctx->cfg_blocks + 1; b <= ctx->cfg_blocks_count; b++, bb++) {
+		ir_ref start;
+
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 		/* Schedule BB start */
-		i = bb->start;
+		start = i = bb->start;
 		_xlat[i] = bb->start = insns_count;
 		insn = &ctx->ir_base[i];
 		if (insn->op == IR_CASE_VAL) {
@@ -885,12 +910,15 @@ int ir_schedule(ir_ctx *ctx)
 		i = _next[i];
 		insn = &ctx->ir_base[i];
 		if (bb->flags & (IR_BB_HAS_PHI|IR_BB_HAS_PI|IR_BB_HAS_PARAM|IR_BB_HAS_VAR)) {
+			int count = 0;
+
 			/* Schedule PARAM, VAR, PI */
 			while (insn->op == IR_PARAM || insn->op == IR_VAR || insn->op == IR_PI) {
 				_xlat[i] = insns_count;
 				insns_count += 1;
 				i = _next[i];
 				insn = &ctx->ir_base[i];
+				count++;
 			}
 			/* Schedule PHIs */
 			while (insn->op == IR_PHI) {
@@ -906,6 +934,53 @@ int ir_schedule(ir_ctx *ctx)
 					}
 				}
 				i = _next[i];
+				insn = &ctx->ir_base[i];
+				count++;
+			}
+			/* Schedule remaining PHIs */
+			if (UNEXPECTED(count < ctx->use_lists[start].count - 1)) {
+				ir_use_list *use_list = &ctx->use_lists[start];
+				ir_ref *p, count = use_list->count;
+				ir_ref phis = _prev[i];
+
+				for (p = &ctx->use_edges[use_list->refs]; count > 0; p++, count--) {
+					ir_ref use = *p;
+					ir_insn *use_insn = &ctx->ir_base[use];
+					if (!_xlat[use] && (_blocks[use] || use_insn->op == IR_PARAM)) {
+						IR_ASSERT(_blocks[use] == b || use_insn->op == IR_PARAM);
+						if (use_insn->op == IR_PARAM
+						 || use_insn->op == IR_VAR
+						 || use_insn->op == IR_PI
+						 || use_insn->op == IR_PHI) {
+							if (_prev[use] != phis) {
+								/* remove "use" */
+								_prev[_next[use]] = _prev[use];
+								_next[_prev[use]] = _next[use];
+								/* insert "use" after "phis" */
+								_prev[use] = phis;
+								_next[use] = _next[phis];
+								_prev[_next[phis]] = use;
+								_next[phis] = use;
+							}
+							phis = use;
+							_xlat[use] = insns_count;
+							if (use_insn->op == IR_PHI) {
+								ir_ref *q;
+								/* Reuse "n" from MERGE and skip first input */
+								insns_count += ir_insn_inputs_to_len(n + 1);
+								for (j = n, q = use_insn->ops + 2; j > 0; q++, j--) {
+									ir_ref input = *q;
+									if (input < IR_TRUE) {
+										consts_count += ir_count_constant(_xlat, input);
+									}
+								}
+							} else {
+								insns_count += 1;
+							}
+						}
+					}
+				}
+				i = _next[phis];
 				insn = &ctx->ir_base[i];
 			}
 		}
@@ -986,7 +1061,7 @@ restart:
 	if (ctx->flags & IR_DEBUG_SCHEDULE) {
 		fprintf(stderr, "After Schedule\n");
 		for (i = 1; i != 0; i = _next[i]) {
-			fprintf(stderr, "%d -> %d\n", i, _blocks[i]);
+			fprintf(stderr, "%d -> %d (%d)\n", i, _blocks[i], _xlat[i]);
 		}
 	}
 #endif
@@ -1255,11 +1330,13 @@ restart:
 	new_ctx.cfg_edges = ctx->cfg_edges;
 	ctx->cfg_blocks = NULL;
 	ctx->cfg_edges = NULL;
+	ir_code_buffer *saved_code_buffer = ctx->code_buffer;
 
 	ir_free(ctx);
 	IR_ASSERT(new_ctx.consts_count == new_ctx.consts_limit);
 	IR_ASSERT(new_ctx.insns_count == new_ctx.insns_limit);
 	memcpy(ctx, &new_ctx, sizeof(ir_ctx));
+	ctx->code_buffer = saved_code_buffer;
 	ctx->flags2 |= IR_LINEAR;
 
 	ir_mem_free(_next);

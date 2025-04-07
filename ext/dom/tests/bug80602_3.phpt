@@ -24,14 +24,14 @@ var_dump($target);
 --EXPECTF--
 <a>barfoobaz<last/></a>
 object(DOMElement)#3 (27) {
-  ["schemaTypeInfo"]=>
-  NULL
   ["tagName"]=>
   string(4) "last"
   ["className"]=>
   string(0) ""
   ["id"]=>
   string(0) ""
+  ["schemaTypeInfo"]=>
+  NULL
   ["firstElementChild"]=>
   NULL
   ["lastElementChild"]=>
@@ -81,14 +81,14 @@ object(DOMElement)#3 (27) {
 }
 <a><last/>barfoobaz</a>
 object(DOMElement)#2 (27) {
-  ["schemaTypeInfo"]=>
-  NULL
   ["tagName"]=>
   string(4) "last"
   ["className"]=>
   string(0) ""
   ["id"]=>
   string(0) ""
+  ["schemaTypeInfo"]=>
+  NULL
   ["firstElementChild"]=>
   NULL
   ["lastElementChild"]=>

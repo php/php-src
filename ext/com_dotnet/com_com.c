@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -38,7 +38,7 @@ PHP_METHOD(com, __construct)
 	OLECHAR *moniker;
 	CLSID clsid;
 	CLSCTX ctx = CLSCTX_SERVER;
-	HRESULT res = E_FAIL;
+	HRESULT res = E_FAIL, res2;
 	ITypeLib *TL = NULL;
 	COSERVERINFO	info;
 	COAUTHIDENTITY	authid = {0};
@@ -142,7 +142,7 @@ PHP_METHOD(com, __construct)
 		}
 	}
 
-	if (FAILED(CLSIDFromString(moniker, &clsid))) {
+	if (FAILED(res2 = CLSIDFromString(moniker, &clsid))) {
 		/* try to use it as a moniker */
 		IBindCtx *pBindCtx = NULL;
 		IMoniker *pMoniker = NULL;
@@ -181,6 +181,9 @@ PHP_METHOD(com, __construct)
 		}
 		if (pBindCtx) {
 			IBindCtx_Release(pBindCtx);
+		}
+		if (FAILED(res) && res2 == CO_E_CLASSSTRING && !wcspbrk(moniker, L"\\:")) {
+			res = res2;
 		}
 	} else if (server_name) {
 		MULTI_QI		qi;
@@ -306,7 +309,7 @@ PHP_FUNCTION(com_get_active_object)
 		if (FAILED(res)) {
 			php_com_throw_exception(res, NULL);
 		} else {
-			res = IUnknown_QueryInterface(unk, &IID_IDispatch, &obj);
+			res = IUnknown_QueryInterface(unk, &IID_IDispatch, (void **) &obj);
 
 			if (FAILED(res)) {
 				php_com_throw_exception(res, NULL);
@@ -392,7 +395,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 			default:
 				desc = php_win32_error_to_msg(hr);
-				spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
+				spprintf(&msg, 0, "Error [0x%08lx] %s", hr, desc);
 				php_win32_error_msg_free(desc);
 				break;
 		}
@@ -639,7 +642,7 @@ zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
 
 	if (FAILED(hr)) {
 		char *winerr = php_win32_error_to_msg(hr);
-		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
+		spprintf(&msg, 0, "Unable to lookup `%s': %s", ZSTR_VAL(name), winerr);
 		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);

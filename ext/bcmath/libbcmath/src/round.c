@@ -18,7 +18,8 @@
 #include "private.h"
 #include <stddef.h>
 
-void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
+/* Returns the scale of the value after rounding. */
+size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 {
 	/* clear result */
 	bc_free_num(result);
@@ -33,10 +34,54 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	* - If the fractional part ends with zeros, the zeros are omitted and the number of digits in num is reduced.
 	*   Meaning we might end up in the previous case.
 	*/
+
+	/* e.g. value is 0.1 and precision is -3, ret is 0 or 1000  */
 	if (precision < 0 && num->n_len < (size_t) (-(precision + Z_L(1))) + 1) {
-		*result = bc_copy_num(BCG(_zero_));
-		return;
+		switch (mode) {
+			case PHP_ROUND_HALF_UP:
+			case PHP_ROUND_HALF_DOWN:
+			case PHP_ROUND_HALF_EVEN:
+			case PHP_ROUND_HALF_ODD:
+			case PHP_ROUND_TOWARD_ZERO:
+				*result = bc_copy_num(BCG(_zero_));
+				return 0;
+
+			case PHP_ROUND_CEILING:
+				if (num->n_sign == MINUS) {
+					*result = bc_copy_num(BCG(_zero_));
+					return 0;
+				}
+				break;
+
+			case PHP_ROUND_FLOOR:
+				if (num->n_sign == PLUS) {
+					*result = bc_copy_num(BCG(_zero_));
+					return 0;
+				}
+				break;
+
+			case PHP_ROUND_AWAY_FROM_ZERO:
+				break;
+
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+
+		if (bc_is_zero(num)) {
+			*result = bc_copy_num(BCG(_zero_));
+			return 0;
+		}
+
+		/* If precision is -3, it becomes 1000. */
+		if (UNEXPECTED(precision == ZEND_LONG_MIN)) {
+			*result = bc_new_num((size_t) ZEND_LONG_MAX + 2, 0);
+		} else {
+			*result = bc_new_num(-precision + 1, 0);
+		}
+		(*result)->n_value[0] = 1;
+		(*result)->n_sign = num->n_sign;
+		return 0;
 	}
+
 	/* Just like bcadd('1', '1', 4) becomes '2.0000', it pads with zeros at the end if necessary. */
 	if (precision >= 0 && num->n_scale <= precision) {
 		if (num->n_scale == precision) {
@@ -46,7 +91,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			(*result)->n_sign = num->n_sign;
 			memcpy((*result)->n_value, num->n_value, num->n_len + num->n_scale);
 		}
-		return;
+		return precision;
 	}
 
 	/*
@@ -61,7 +106,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	 * If the result of rounding is carried over, it will be added later, so first set it to 0 here.
 	 */
 	if (rounded_len == 0) {
-		*result = bc_copy_num(BCG(_zero_));
+		*result = bc_new_num(1, 0);
 	} else {
 		*result = bc_new_num(num->n_len, precision > 0 ? precision : 0);
 		memcpy((*result)->n_value, num->n_value, rounded_len);
@@ -76,7 +121,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			if (*nptr >= 5) {
 				goto up;
 			} else if (*nptr < 5) {
-				return;
+				goto check_zero;
 			}
 			break;
 
@@ -86,14 +131,14 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			if (*nptr > 5) {
 				goto up;
 			} else if (*nptr < 5) {
-				return;
+				goto check_zero;
 			}
 			/* if *nptr == 5, we need to look-up further digits before making a decision. */
 			break;
 
 		case PHP_ROUND_CEILING:
 			if (num->n_sign != PLUS) {
-				return;
+				goto check_zero;
 			} else if (*nptr > 0) {
 				goto up;
 			}
@@ -102,7 +147,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 
 		case PHP_ROUND_FLOOR:
 			if (num->n_sign != MINUS) {
-				return;
+				goto check_zero;
 			} else if (*nptr > 0) {
 				goto up;
 			}
@@ -110,7 +155,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			break;
 
 		case PHP_ROUND_TOWARD_ZERO:
-			return;
+			goto check_zero;
 
 		case PHP_ROUND_AWAY_FROM_ZERO:
 			if (*nptr > 0) {
@@ -139,17 +184,17 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 		case PHP_ROUND_CEILING:
 		case PHP_ROUND_FLOOR:
 		case PHP_ROUND_AWAY_FROM_ZERO:
-			return;
+			goto check_zero;
 
 		case PHP_ROUND_HALF_EVEN:
 			if (rounded_len == 0 || num->n_value[rounded_len - 1] % 2 == 0) {
-				return;
+				goto check_zero;
 			}
 			break;
 
 		case PHP_ROUND_HALF_ODD:
 			if (rounded_len != 0 && num->n_value[rounded_len - 1] % 2 == 1) {
-				return;
+				goto check_zero;
 			}
 			break;
 
@@ -175,5 +220,15 @@ up:
 
 		bc_free_num(result);
 		*result = tmp;
+	}
+
+check_zero:
+	{
+		size_t scale = (*result)->n_scale;
+		if (bc_is_zero(*result)) {
+			(*result)->n_sign = PLUS;
+			(*result)->n_scale = 0;
+		}
+		return scale;
 	}
 }

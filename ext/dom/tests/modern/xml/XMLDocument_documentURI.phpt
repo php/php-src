@@ -10,4 +10,4 @@ var_dump($dom->documentURI);
 
 ?>
 --EXPECTF--
-string(%d) "file://%stest%20foo.xml"
+string(%d) "file://%stest%sfoo.xml"

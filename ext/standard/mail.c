@@ -56,6 +56,14 @@
 
 extern zend_long php_getuid(void);
 
+typedef enum {
+	NO_HEADER_ERROR,
+	CONTAINS_LF_ONLY,
+	CONTAINS_CR_ONLY,
+	CONTAINS_CRLF,
+	CONTAINS_NULL
+} php_mail_header_value_error_type;
+
 static php_mail_header_value_error_type php_mail_build_headers_check_field_value(zval *val)
 {
 	size_t len = 0;
@@ -181,6 +189,20 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 	} ZEND_HASH_FOREACH_END();
 }
 
+#define PHP_MAIL_BUILD_HEADER_CHECK(target, s, key, val) \
+do { \
+	if (Z_TYPE_P(val) == IS_STRING) { \
+		php_mail_build_headers_elem(&s, key, val); \
+	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
+		if (zend_string_equals_literal_ci(key, target)) { \
+			zend_type_error("Header \"%s\" must be of type string, array given", target); \
+			break; \
+		} \
+		php_mail_build_headers_elems(&s, key, val); \
+	} else { \
+		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val)); \
+	} \
+} while(0)
 
 PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 {
@@ -219,7 +241,13 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 		} else if (zend_string_equals_literal_ci(key, "subject")) {
 			zend_value_error("The additional headers cannot contain the \"Subject\" header");
 		} else {
-			PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
+			if (Z_TYPE_P(val) == IS_STRING) {
+				php_mail_build_headers_elem(&s, key, val);
+			} else if (Z_TYPE_P(val) == IS_ARRAY) {
+				php_mail_build_headers_elems(&s, key, val);
+			} else {
+				zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
+			}
 		}
 
 		if (EG(exception)) {
@@ -408,14 +436,9 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 
 
 /* {{{ php_mail */
-PHPAPI int php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
+PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
 {
-#ifdef PHP_WIN32
-	int tsm_err;
-	char *tsm_errmsg = NULL;
-#endif
 	FILE *sendmail;
-	int ret;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
 	char *mail_log = INI_STR("mail.log");
@@ -464,7 +487,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 	}
 
 	if (EG(exception)) {
-		MAIL_RET(0);
+		MAIL_RET(false);
 	}
 
 	char *line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : "\r\n";
@@ -486,11 +509,14 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 
 	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
 		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
-		MAIL_RET(0);
+		MAIL_RET(false);
 	}
 
 	if (!sendmail_path) {
 #ifdef PHP_WIN32
+		int tsm_err;
+		char *tsm_errmsg = NULL;
+
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {
@@ -499,11 +525,11 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 			} else {
 				php_error_docref(NULL, E_WARNING, "%s", GetSMErrorText(tsm_err));
 			}
-			MAIL_RET(0);
+			MAIL_RET(false);
 		}
-		MAIL_RET(1);
+		MAIL_RET(true);
 #else
-		MAIL_RET(0);
+		MAIL_RET(false);
 #endif
 	}
 	if (extra_cmd != NULL) {
@@ -547,7 +573,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 				signal(SIGCHLD, sig_handler);
 			}
 #endif
-			MAIL_RET(0);
+			MAIL_RET(false);
 		}
 #endif
 		fprintf(sendmail, "To: %s%s", to, line_sep);
@@ -556,7 +582,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 			fprintf(sendmail, "%s%s", hdr, line_sep);
 		}
 		fprintf(sendmail, "%s%s%s", line_sep, message, line_sep);
-		ret = pclose(sendmail);
+		int ret = pclose(sendmail);
 
 #if PHP_SIGCHILD
 		if (sig_handler) {
@@ -576,9 +602,9 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 #endif
 #endif
 		{
-			MAIL_RET(0);
+			MAIL_RET(false);
 		} else {
-			MAIL_RET(1);
+			MAIL_RET(true);
 		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
@@ -587,10 +613,10 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 			signal(SIGCHLD, sig_handler);
 		}
 #endif
-		MAIL_RET(0);
+		MAIL_RET(false);
 	}
 
-	MAIL_RET(1); /* never reached */
+	MAIL_RET(true); /* never reached */
 }
 /* }}} */
 

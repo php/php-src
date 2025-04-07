@@ -92,6 +92,9 @@ char *get_token_type_name(int token_type)
 		case T_PRIVATE: return "T_PRIVATE";
 		case T_PROTECTED: return "T_PROTECTED";
 		case T_PUBLIC: return "T_PUBLIC";
+		case T_PRIVATE_SET: return "T_PRIVATE_SET";
+		case T_PROTECTED_SET: return "T_PROTECTED_SET";
+		case T_PUBLIC_SET: return "T_PUBLIC_SET";
 		case T_READONLY: return "T_READONLY";
 		case T_VAR: return "T_VAR";
 		case T_UNSET: return "T_UNSET";
@@ -115,6 +118,7 @@ char *get_token_type_name(int token_type)
 		case T_TRAIT_C: return "T_TRAIT_C";
 		case T_METHOD_C: return "T_METHOD_C";
 		case T_FUNC_C: return "T_FUNC_C";
+		case T_PROPERTY_C: return "T_PROPERTY_C";
 		case T_NS_C: return "T_NS_C";
 		case T_ATTRIBUTE: return "T_ATTRIBUTE";
 		case T_PLUS_EQUAL: return "T_PLUS_EQUAL";
@@ -149,6 +153,7 @@ char *get_token_type_name(int token_type)
 		case T_OBJECT_CAST: return "T_OBJECT_CAST";
 		case T_BOOL_CAST: return "T_BOOL_CAST";
 		case T_UNSET_CAST: return "T_UNSET_CAST";
+		case T_VOID_CAST: return "T_VOID_CAST";
 		case T_OBJECT_OPERATOR: return "T_OBJECT_OPERATOR";
 		case T_NULLSAFE_OBJECT_OPERATOR: return "T_NULLSAFE_OBJECT_OPERATOR";
 		case T_DOUBLE_ARROW: return "T_DOUBLE_ARROW";

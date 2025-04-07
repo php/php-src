@@ -47,9 +47,9 @@ echo 'Done.' . PHP_EOL;
   </main:NULL>
   <!-- init Exception::getMessage() -->
   <Exception::getMessage>
-  </Exception::getMessage:'SOAP-ERROR: Parsing WSDL: Couldn\'t load from \'foo\' : failed to load external entity "foo"
+  </Exception::getMessage:'SOAP-ERROR: Parsing WSDL: %s
 '>
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'foo' : failed to load external entity "foo"
+SOAP-ERROR: Parsing WSDL: %s
 
 Done.
 </file '%s%eobserver_error_%d.php'>

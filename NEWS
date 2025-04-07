@@ -1,325 +1,222 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0alpha1
+?? ??? ????, PHP 8.5.0alpha1
 
 - BCMath:
-  . [RFC] Add bcfloor, bcceil and bcround to BCMath. (Saki Takamachi)
-  . Improve performance. (Saki Takamachi, nielsdos)
+  . Simplify `bc_divide()` code. (SakiTakamachi)
+  . If the result is 0, n_scale is set to 0. (SakiTakamachi)
+  . If size of BC_VECTOR array is within 64 bytes, stack area is now used.
+    (SakiTakamachi)
+
+- CLI:
+  . Add --ini=diff to print INI settings changed from the builtin default.
+    (timwolla)
+  . Drop support for -z CLI/CGI flag. (nielsdos)
+  . Fixed GH-17956 - development server 404 page does not adapt to mobiles.
+    (pascalchevrel)
+
+- COM:
+  . Fixed property access of PHP objects wrapped in variant. (cmb)
+  . Fixed method calls for PHP objects wrapped in variant. (cmb)
 
 - Core:
-  . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,
-    Solaris and Haiku. (David Carlier)
-  . Enabled ifunc checks on FreeBSD from the 12.x releases. (Freaky)
-  . Changed the type of PHP_DEBUG and PHP_ZTS constants to bool. (haszi)
-  . Fixed bug GH-13142 (Undefined variable name is shortened when contains \0).
-    (nielsdos)
-  . Fixed bug GH-13178 (Iterator positions incorrect when converting packed
-    array to hashed). (ilutov)
-  . Fixed zend fiber build for solaris default mode (32 bits). (David Carlier)
-  . Fixed zend call stack size for macOs/arm64. (David Carlier)
-  . Added support for Zend Max Execution Timers on FreeBSD. (Kévin Dunglas)
-  . Ensure fiber stack is not backed by THP. (crrodriguez)
-  . Implement GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
-  . Added sparc64 arch assembly support for zend fiber. (Claudio Jeker)
-  . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
-  . Added fiber Sys-V loongarch64 support. (qiangxuhui)
-  . Adjusted closure names to include the parent function's name. (timwolla)
-  . Improve randomness of uploaded file names and files created by tempnam().
-    (Arnaud)
+  . Fixed bug GH-16665 (\array and \callable should not be usable in
+    class_alias). (nielsdos)
+  . Added PHP_BUILD_DATE constant. (cmb)
+  . Added support for Closures and first class callables in constant
+    expressions. (timwolla, Volker Dusch)
+  . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
+    if available. (timwolla)
+  . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
+    non-printable characters in string literals). (nielsdos, WangYihang)
+  . Add support for backtraces for fatal errors. (enorris)
+  . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
+  . Improved error message of UnhandledMatchError for
+    zend.exception_string_param_max_len=0. (timwolla)
+  . Fixed bug GH-17959 (Relax missing trait fatal error to error exception).
+    (ilutov)
+  . Fixed bug GH-18033 (NULL-ptr dereference when using register_tick_function
+    in destructor). (nielsdos)
+  . Fixed bug GH-18026 (Improve "expecting token" error for ampersand). (ilutov)
+  . Added the #[\NoDiscard] attribute to indicate that a function's return
+    value is important and should be consumed. (timwolla, Volker Dusch)
+  . Added the (void) cast to indicate that not using a value is intentional.
+    (timwolla, Volker Dusch)
+  . Added get_error_handler(), get_exception_handler() functions. (Arnaud)
+  . Fixed bug GH-15753 and GH-16198 (Bind traits before parent class). (ilutov)
 
 - Curl:
-  . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
-  . Bumped required libcurl version to 7.61.0. (Ayesh)
-  . Added feature_list key to the curl_version() return value. (Ayesh)
+  . Added curl_multi_get_handles(). (timwolla)
+  . Added curl_share_init_persistent(). (enorris)
+  . Added CURLINFO_USED_PROXY, CURLINFO_HTTPAUTH_USED, and CURLINFO_PROXYAUTH_USED
+    support to curl_getinfo. (Ayesh Karunaratne)
 
 - Date:
-  . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
-  . Added DateTime[Immutable]::[get|set]Microsecond. (Marc Bennewitz)
+  . Fix undefined behaviour problems regarding integer overflow in extreme edge
+    cases. (nielsdos, cmb, ilutov)
 
 - DOM:
-  . Added DOMNode::compareDocumentPosition(). (nielsdos)
-  . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
-    (nielsdos)
-  . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
-  . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
-  . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
-  . Handle OOM more consistently. (nielsdos)
-  . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
-  . Added DOMXPath::quote() static method. (divinity76)
-  . Implemented opt-in ext/dom spec compliance RFC. (nielsdos)
-  . Fixed bug #79701 (getElementById does not correctly work with duplicate
-    definitions). (nielsdos)
+  . Added Dom\Element::$outerHTML. (nielsdos)
+  . Added Dom\Element::insertAdjacentHTML(). (nielsdos)
+
+- Enchant:
+  . Added enchant_dict_remove_from_session(). (nielsdos)
+  . Added enchant_dict_remove(). (nielsdos)
 
 - Fileinfo:
-  . Update to libmagic 5.45. (nielsdos)
-  . Fixed bug #65106 (PHP fails to compile ext/fileinfo). (Guillaume Outters)
+  . Upgrade to file 5.46. (nielsdos)
 
 - FPM:
-  . Implement GH-12385 (flush headers without body when calling flush()).
-    (nielsdos)
-  . Added DragonFlyBSD system to the list which set FPM_BACKLOG_DEFAULT
-    to SOMAXCONN. (David Carlier)
-
-- FTP:
-  . Removed the deprecated inet_ntoa call support. (David Carlier)
-  . Fixed bug #63937 (Upload speed 10 times slower with PHP). (nielsdos)
+  . Fixed GH-17645 (FPM with httpd ProxyPass does not decode script path).
+    (Jakub Zelenka)
 
 - GD:
-  . Fix parameter numbers and missing alpha check for imagecolorset().
-    (Giovanni Giacobbi)
-  . imagepng/imagejpeg/imagewep/imageavif now throw an exception on
-    invalid quality parameter. (David Carlier)
-
-- Gettext:
-  . bind_textdomain_codeset, textdomain and d(*)gettext functions
-    now throw an exception on empty domain. (David Carlier)
-
-- Hash:
-  . Changed return type of hash_update() to true. (nielsdos)
-
-- IMAP:
-  . Moved to PECL. (Derick Rethans)
+  . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
+    cmb)
+  . Fixed bug #64823 (ZTS GD fails to to find system TrueType font). (cmb)
 
 - Intl:
-  . Added IntlDateFormatter::PATTERN constant. (David Carlier)
-  . Fixed Numberformatter::__construct when the locale is invalid, now
-    throws an exception. (David Carlier)
-  . Added NumberFormatter::ROUND_TOWARD_ZERO and ::ROUND_AWAY_FROM_ZERO as
-    aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
-  . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
-  . Added PROPERTY_IDS_UNARY_OPERATOR, PROPERTY_ID_COMPAT_MATH_START and
-    PROPERTY_ID_COMPAT_MATH_CONTINUE constants. (David Carlier)
-  . Added IntlDateFormatter::getIanaID/intltz_get_iana_id method/function.
-    (David Carlier)
-  . Set to C++17 standard for icu 74 and onwards. (David Carlier)
-  . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
-    ResourceBundle object now throw:
-    - TypeError for invalid offset types
-    - ValueError for an empty string
-    - ValueError if the integer index does not fit in a signed 32 bit integer
-  . ResourceBundle::get() now has a tentative return type of:
-    ResourceBundle|array|string|int|null
-  . Added the new Grapheme function grapheme_str_split. (youkidearitai)
-  . Added IntlDateFormatter::parseToCalendar. (David Carlier)
+  . Bumped ICU requirement to ICU >= 57.1. (cmb)
+  . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
+    with uninitialised classes or clone failure. (David Carlier)
+  . Added DECIMAL_COMPACT_SHORT/DECIMAL_COMPACT_LONG for NumberFormatter class.
+    (BogdanUngureanu)
 
-- LDAP:
-  . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
-    constants. (StephenWall)
-
-- LibXML:
-  . Added LIBXML_RECOVER constant. (nielsdos)
-  . libxml_set_streams_context() now throws immediately on an invalid context
-    instead of at the use-site. (nielsdos)
-
-- MBString:
-  . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
-  . Added mb_ucfirst and mb_lcfirst. (Yuya Hamada)
+- MySQLi:
+  . Fixed bugs GH-17900 and GH-8084 (calling mysqli::__construct twice).
+    (nielsdos)
 
 - MySQLnd:
-  . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
-  . Fixed bug GH-10599 (Apache crash on Windows when using a self-referencing
-    anonymous function inside a class with an active mysqli connection).
-    (nielsdos)
+  . Added mysqlnd.collect_memory_statistics to ini quick reference.
+    (hauk92)
 
-- Opcache:
-  . Added large shared segments support for FreeBSD. (David Carlier)
-  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
-    of JIT startup initialization issues. (danog)
-  . Increased the maximum value of opcache.interned_strings_buffer to 32767 on
-    64bit archs. (Arnaud)
-  . Fixed bug GH-13834 (Applying non-zero offset 36 to null pointer in
-    zend_jit.c). (nielsdos)
-  . Fixed bug GH-14361 (Deep recursion in zend_cfg.c causes segfault).
-    (nielsdos)
-
-- OpenSSL:
-  . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
-    (Jakub Zelenka)
-  . Implement request #48520 (openssl_csr_new - allow multiple values in DN).
-    (Jakub Zelenka)
-  . Introduced new serial_hex parameter to openssl_csr_sign. (Jakub Zelenka,
-    Florian Sowade)
-  . Added X509_PURPOSE_OCSP_HELPER and X509_PURPOSE_TIMESTAMP_SIGN constants.
-    (Vincent Jardin)
-  . Bumped minimum required OpenSSL version to 1.1.1. (Ayesh Karunaratne)
-  . Added compile-time option --with-openssl-legacy-provider to enable legacy
-    provider. (Adam Saponara)
-  . Added support for Curve25519 + Curve448 based keys. (Manuel Mausz)
-  . Fixed bug GH-13343 (openssl_x509_parse should not allow omitted seconds in
-    UTCTimes). (Jakub Zelenka)
+- OPcache:
+  . Fixed ZTS OPcache build on Cygwin. (cmb)
+  . Added opcache.file_cache_read_only. (Samuel Melrose)
 
 - Output:
-  . Clear output handler status flags during handler initialization. (haszi)
-  . Fixed bug with url_rewriter.hosts not used by output_add_rewrite_var().
-    (haszi)
-
-- PCNTL:
-  . Added pcntl_setns for Linux. (David Carlier)
-  . Added pcntl_getaffinity/pcntl_setaffinity. (David Carlier)
-  . Updated pcntl_get_signal_handler signal id upper limit to be
-    more in line with platforms limits. (David Carlier)
-  . Added pcntl_getcpu for Linux/FreeBSD/Solaris/Illumos. (David Carlier)
-  . Added pcntl_getqos_class/pcntl_setqos_class for macOs. (David Carlier)
-  . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
-  . Added FreeBSD's SIGTRAP handling to pcntl_siginfo_to_zval. (David Carlier)
+  . Fixed calculation of aligned buffer size. (cmb)
 
 - PCRE:
-  . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
-  . Add "/r" modifier. (Ayesh)
-  . Upgrade bundled pcre2lib to version 10.44. (Ayesh)
-
-- PDO:
-  . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
-  . Added support for PDO driver-specific SQL parsers. (Matteo Beccati)
-
-- PDO_DBLIB:
-  . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class Pdo\DbLib. (danack, kocsismate)
-
-- PDO_FIREBIRD:
-  . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Feature: Add transaction isolation level and mode settings to pdo_firebird.
-    (SakiTakamachi)
-  . Added class Pdo\Firebird. (danack, kocsismate)
-
-- PDO_MYSQL:
-  . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class Pdo\Mysql. (danack, kocsismate)
-  . Added custom SQL parser. (Matteo Beccati)
-
-- PDO_ODBC:
-  . Added class Pdo\Odbc. (danack, kocsismate)
+  . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
+  . Remove PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK from pcre compile options.
+    (mvorisek)
 
 - PDO_PGSQL:
-  . Fixed GH-12423, DSN credentials being prioritized over the user/password
-    PDO constructor arguments. (SakiTakamachi)
-  . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
-  . Added class Pdo\Pgsql. (danack, kocsismate)
-  . Retrieve the memory usage of the query result resource. (KentarouTakeda)
-  . Added Pdo\Pgsql::setNoticeCallBack method to receive DB notices.
-    (outtersg)
-  . Added custom SQL parser. (Matteo Beccati)
-
-- PDO_SQLITE:
-  . Added class Pdo\Sqlite. (danack, kocsismate)
-  . Fixed bug #81227 (PDO::inTransaction reports false when in transaction).
-    (nielsdos)
-  . Added custom SQL parser. (Matteo Beccati)
+  . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
+  . Implement GH-15387 Pdo\Pgsql::setAttribute(PDO::ATTR_PREFETCH, 0) or
+    Pdo\Pgsql::prepare(…, [ PDO::ATTR_PREFETCH => 0 ]) make fetch() lazy
+    instead of storing the whole result set in memory (Guillaume Outters)
 
 - PGSQL:
-  . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
-  . Persistent connections support the PGSQL_CONNECT_FORCE_RENEW flag.
+  . Added pg_close_stmt to close a prepared statement while allowing
+    its name to be reused. (David Carlier)
+  . Added Iterable support for pgsql_copy_from. (David Carlier)
+  . pg_connect checks if connection_string contains any null byte,
+    pg_close_stmt check if the statement contains any null byte.
     (David Carlier)
-  . Added pg_result_memory_size to get the query result memory usage.
-    (KentarouTakeda)
-  . Added pg_change_password to alter an user's password. (David Carlier)
-  . Added pg_put_copy_data/pg_put_copy_end to send COPY commands and signal
-    the end of the COPY. (David Carlier)
-  . Added pg_socket_poll to poll on the connection. (David Carlier)
-  . Added pg_jit to get infos on server JIT support. (David Carlier)
-  . Added pg_set_chunked_rows_size to fetch results per chunk. (David Carlier)
-
-- Phar:
-  . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
-    (nielsdos)
+  . Added pg_service to get the connection current service identifier.
+    (David Carlier)
 
 - POSIX:
-  . Added POSIX_SC_CHILD_MAX and POSIX_SC_CLK_TCK constants. (Jakub Zelenka)
-  . Updated posix_isatty to set the error number on file descriptors.
-    (David Carlier)
+  . Added POSIX_SC_OPEN_MAX constant to get the number of file descriptors
+    a process can handle. (David Carlier)
+  . posix_ttyname() sets last_error to EBADF on invalid file descriptors,
+    posix_isatty() raises E_WARNING on invalid file descriptors,
+    posix_fpathconf checks invalid file descriptors. (David Carlier)
 
-- PSpell:
-  . Moved to PECL. (Derick Rethans)
+- Random:
+  . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
 
 - Reflection:
-  . Implement GH-12908 (Show attribute name/class in ReflectionAttribute dump).
-    (nielsdos)
-  . Make ReflectionGenerator::getFunction() legal after generator termination.
-    (timwolla)
-  . Added ReflectionGenerator::isClosed(). (timwolla)
+  . Added ReflectionConstant::getExtension() and ::getExtensionName().
+    (DanielEScherzer)
+  . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
+    zval for uninitialized typed properties). (nielsdos)
+  . Fixed bug GH-15766 (ReflectionClass::toString() should have better output
+    for enums). (DanielEScherzer)
+
+- Session:
+  . session_start() throws a ValueError on option argument if not a hashmap
+    or a TypeError if read_and_close value is not compatible with int.
+    (David Carlier)
 
 - SimpleXML:
-  . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
-    within foreach). (nielsdos)
-  . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
-    foreach). (nielsdos)
-  . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
-  . Fix signature of simplexml_import_dom(). (nielsdos)
-
-- Sockets:
-  . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
-  . Added the TCP_SYNCNT constant for Linux to set number of attempts to send
-    SYN packets from the client. (David Carlier)
-  . Added the SO_EXCLBIND constant for exclusive socket binding on illumos/solaris.
-    (David Carlier)
-  . Updated the socket_create_listen backlog argument default value to SOMAXCONN.
-    (David Carlier)
-  . Added the SO_NOSIGPIPE constant to control the generation of SIGPIPE for
-    macOs and FreeBSD. (David Carlier)
-  . Added SO_LINGER_SEC for macOs, true equivalent of SO_LINGER in other platforms.
-    (David Carlier)
+  . Fixed bug GH-12231 (SimpleXML xpath should warn when returning other return
+    types than node lists). (nielsdos)
 
 - SNMP:
-  . Removed the deprecated inet_ntoa call support. (David Carlier)
+  . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3 and
+    SNMP::__construct() throw an exception on invalid hostname, community
+    timeout and retries arguments. (David Carlier)
 
 - SOAP:
-  . Add support for clark notation for namespaces in class map. (lxShaDoWxl)
-  . Mitigate #51561 (SoapServer with a extented class and using sessions,
-    lost the setPersistence()). (nielsdos)
-  . Fixed bug #49278 (SoapClient::__getLastResponseHeaders returns NULL if
-    wsdl operation !has output). (nielsdos)
-  . Fixed bug #44383 (PHP DateTime not converted to xsd:datetime). (nielsdos)
-  . Fixed bug GH-11941 (soap with session persistence will silently fail when
-    "session" built as a shared object). (nielsdos)
+  . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
+    header is correct). (nielsdos)
 
 - Sockets:
-  . Removed the deprecated inet_ntoa call support. (David Carlier)
-  . Added the SO_EXECLUSIVEADDRUSE windows constant. (David Carlier)
-  . Added the SOCK_CONN_DGRAM/SOCK_DCCP netbsd constants. (David Carlier)
+  . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
+    (David Carlier)
+  . Added TCP_FUNCTION_BLK to change the TCP stack algorithm on FreeBSD.
+    (David Carlier)
+  . socket_set_option() catches possible overflow with SO_RCVTIMEO/SO_SNDTIMEO
+    with timeout setting on windows. (David Carlier)
+  . Added TCP_FUNCTION_ALIAS, TCP_REUSPORT_LB_NUMA, TCP_REUSPORT_LB_NUMA_NODOM,
+    TCP_REUSPORT_LB_CURDOM, TCP_BBR_ALGORITHM constants.
+  . socket_create_listen() throws an exception on invalid port value.
+    (David Carlier)
+  . socket_bind() throws an exception on invalid port value.
+    (David Carlier)
+  . socket_sendto() throws an exception on invalid port value.
+    (David Carlier)
+  . socket_addrinfo_lookup throws an exception on invalid hints value types.
+    (David Carlier)
+  . socket_addrinfo_lookup throws an exception if any of the hints value
+    overflows. (David Carlier)
+  . socket_addrinfo_lookup throws an exception if one or more hints entries
+    has an index as numeric. (David Carlier)
+  . socket_set_option with the options MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
+    will throw an exception if its value is not a valid array/object.
+    (David Carlier)
+  . socket_getsockname/socket_create/socket_bind handled AF_PACKET family socket.
+    (David Carlier)
+  . Added IP_BINDANY for a socket to bind to any address. (David Carlier)
+  . Added SO_BUSY_POOL to reduce packets poll latency. (David Carlier)
 
 - Sodium:
-  . Add support for AEGIS-128L and AEGIS-256. (jedisct1)
-  . Enable AES-GCM on aarch64 with the ARM crypto extensions. (jedisct1)
-
-- SPL:
-  . Implement SeekableIterator for SplObjectStorage. (nielsdos)
+  . Fix overall theorical overflows on zend_string buffer allocations.
+    (David Carlier/nielsdos)
 
 - Standard:
-  . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
-  . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
-    (timwolla)
-  . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
-  . Increase the default BCrypt cost to 12. (timwolla)
-  . Fixed bug GH-12592 (strcspn() odd behaviour with NUL bytes and empty mask).
-    (nielsdos)
-  . Removed the deprecated inet_ntoa call support. (David Carlier)
-  . Cast large floats that are within int range to int in number_format so
-    the precision is not lost. (Marc Bennewitz)
-  . Add support for 4 new rounding modes to the round() function. (Jorg Sowa)
-  . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
-  . Fix GH-12143 (Optimize round). (SakiTakamachi)
-  . Changed return type of long2ip to string from string|false. (Jorg Sowa)
-  . Fix GH-12143 (Extend the maximum precision round can handle by one digit).
-    (SakiTakamachi)
-  . Added the http_get_last_response_headers() and
-    http_clear_last_response_headers() that allows retrieving the same content
-    as the magic $http_response_header variable.
-  . Add php_base64_encode_ex() API. (Remi)
-  . Implemented "Raising zero to the power of negative number" RFC. (Jorg Sowa)
-  . Added array_find(), array_find_key(), array_all(), and array_any(). (josh)
+  . Fixed crypt() tests on musl when using --with-external-libcrypt
+    (Michael Orlitzky).
+  . Fixed bug GH-18062 (is_callable(func(...), callable_name: $name) for first
+    class callables returns wrong name). (timwolla)
 
-- XML:
-  . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
+- Streams:
+  . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
+    (cmb)
 
-- XMLReader:
-  . Declares class constant types. (Ayesh)
+- Tests:
+  . Allow to shuffle tests even in non-parallell mode. (dhuang00)
+
+- Windows:
+  . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
+    nielsdos)
+  . Fixed bug GH-16843 (Windows phpize builds ignore source subfolders). (cmb)
+
+- XMLWriter:
+  . Improved performance and reduce memory consumption. (nielsdos)
 
 - XSL:
-  . Implement request #64137 (XSLTProcessor::setParameter() should allow both
-    quotes to be used). (nielsdos)
-  . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
-  . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars.
-    (nielsdos)
+  . Implement request #30622 (make $namespace parameter functional). (nielsdos)
+
+- Zlib:
+  . gzfile, gzopen and readgzfile, their "use_include_path" argument
+    is now a boolean. (David Carlier)
+  . Fixed bug GH-16883 (gzopen() does not use the default stream context when
+    opening HTTP URLs). (nielsdos)
+  . Implemented GH-17668 (zlib streams should support locking). (nielsdos)
+
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

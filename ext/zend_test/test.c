@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include "zend_modules.h"
+#include "zend_types.h"
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -35,12 +37,7 @@
 #include "test_arginfo.h"
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
-
-// `php.h` sets `NDEBUG` when not `PHP_DEBUG` which will make `assert()` from
-// assert.h a no-op. In order to have `assert()` working on NDEBUG builds, we
-// undefine `NDEBUG` and re-include assert.h
-#undef NDEBUG
-#include "assert.h"
+#include "zend_mm_custom_handlers.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -122,6 +119,18 @@ static ZEND_FUNCTION(zend_test_deprecated)
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1);
 }
 
+static ZEND_FUNCTION(zend_test_deprecated_attr)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(zend_test_deprecated_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
 /* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
@@ -179,6 +188,19 @@ static ZEND_FUNCTION(zend_leak_variable)
 	}
 
 	Z_ADDREF_P(zv);
+}
+
+static ZEND_FUNCTION(zend_delref)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	Z_TRY_DELREF_P(zv);
+
+	RETURN_NULL();
 }
 
 /* Tests Z_PARAM_OBJ_OR_STR */
@@ -242,7 +264,7 @@ static ZEND_FUNCTION(zend_test_compile_string)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(source_string)
-		Z_PARAM_STR(filename)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_LONG(position)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -696,6 +718,15 @@ void * zend_test_custom_realloc(void * ptr, size_t len ZEND_FILE_LINE_DC ZEND_FI
 	return _zend_mm_realloc(ZT_G(zend_orig_heap), ptr, len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
+static void zend_test_reset_heap(zend_zend_test_globals *zend_test_globals)
+{
+	if (zend_test_globals->zend_test_heap) {
+		free(zend_test_globals->zend_test_heap);
+		zend_test_globals->zend_test_heap = NULL;
+		zend_mm_set_heap(zend_test_globals->zend_orig_heap);
+	}
+}
+
 static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 {
 	if (new_value == NULL) {
@@ -717,10 +748,8 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 		);
 		ZT_G(zend_orig_heap) = zend_mm_get_heap();
 		zend_mm_set_heap(ZT_G(zend_test_heap));
-	} else if (ZT_G(zend_test_heap))  {
-		free(ZT_G(zend_test_heap));
-		ZT_G(zend_test_heap) = NULL;
-		zend_mm_set_heap(ZT_G(zend_orig_heap));
+	} else {
+		zend_test_reset_heap(ZEND_MODULE_GLOBALS_BULK(zend_test));
 	}
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
@@ -812,6 +841,28 @@ static ZEND_FUNCTION(zend_test_cast_fread)
 	}
 }
 
+static ZEND_FUNCTION(zend_test_is_zend_ptr)
+{
+	zend_long addr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(addr);
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(is_zend_ptr((void*)addr));
+}
+
+static ZEND_FUNCTION(zend_test_log_err_debug)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str);
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);
@@ -832,7 +883,7 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 	    }
 		memset(fptr, 0, sizeof(zend_internal_function));
 		fptr->type = ZEND_INTERNAL_FUNCTION;
-		fptr->num_args = 1;
+		fptr->num_args = 0;
 		fptr->scope = (*object)->ce;
 		fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		fptr->function_name = zend_string_copy(name);
@@ -856,7 +907,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 		}
 		memset(fptr, 0, sizeof(zend_internal_function));
 		fptr->type = ZEND_INTERNAL_FUNCTION;
-		fptr->num_args = 1;
+		fptr->num_args = 0;
 		fptr->scope = ce;
 		fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
 		fptr->function_name = zend_string_copy(name);
@@ -1073,6 +1124,26 @@ static ZEND_METHOD(_ZendTestMagicCall, __call)
 	RETURN_ARR(zend_new_pair(&name_zv, arguments));
 }
 
+static ZEND_METHOD(_ZendTestMagicCallForward, __call)
+{
+	zend_string *name;
+	zval *arguments;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(name)
+		Z_PARAM_ARRAY(arguments)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_IGNORE_VALUE(arguments);
+
+	zval func, rv;
+	ZVAL_STR(&func, name);
+	call_user_function(NULL, NULL, &func, &rv, 0, NULL);
+
+	ZVAL_COPY_DEREF(return_value, &rv);
+	zval_ptr_dtor(&rv);
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -1262,6 +1333,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_magic_call = register_class__ZendTestMagicCall();
 
+	register_class__ZendTestMagicCallForward();
+
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
 	// Loading via dl() not supported with the observer API
@@ -1282,6 +1355,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
+	zend_test_mm_custom_handlers_minit(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
 	zend_test_iterators_init();
 	zend_test_object_handlers_init();
@@ -1310,16 +1384,13 @@ PHP_RINIT_FUNCTION(zend_test)
 {
 	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	ZT_G(observer_nesting_depth) = 0;
+	zend_test_mm_custom_handlers_rinit();
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
-	zend_ulong obj_key;
-	ZEND_HASH_FOREACH_NUM_KEY(&ZT_G(global_weakmap), obj_key) {
-		zend_weakrefs_hash_del(&ZT_G(global_weakmap), zend_weakref_key_to_object(obj_key));
-	} ZEND_HASH_FOREACH_END();
-	zend_hash_destroy(&ZT_G(global_weakmap));
+	zend_weakrefs_hash_destroy(&ZT_G(global_weakmap));
 
 	if (ZT_G(zend_test_heap))  {
 		free(ZT_G(zend_test_heap));
@@ -1327,6 +1398,7 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 		zend_mm_set_heap(ZT_G(zend_orig_heap));
 	}
 
+	zend_test_mm_custom_handlers_rshutdown();
 	return SUCCESS;
 }
 
@@ -1343,6 +1415,7 @@ static PHP_GINIT_FUNCTION(zend_test)
 static PHP_GSHUTDOWN_FUNCTION(zend_test)
 {
 	zend_test_observer_gshutdown(zend_test_globals);
+	zend_test_reset_heap(zend_test_globals);
 }
 
 PHP_MINFO_FUNCTION(zend_test)
@@ -1451,6 +1524,41 @@ PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
 }
 
 PHP_ZEND_TEST_API int gh11934b_ffi_var_test_cdata;
+
+enum bug_gh16013_enum {
+	BUG_GH16013_A = 1,
+	BUG_GH16013_B = 2,
+};
+
+struct bug_gh16013_int_struct {
+	int field;
+};
+
+PHP_ZEND_TEST_API char bug_gh16013_return_char(void) {
+	return 'A';
+}
+
+PHP_ZEND_TEST_API bool bug_gh16013_return_bool(void) {
+	return true;
+}
+
+PHP_ZEND_TEST_API short bug_gh16013_return_short(void) {
+	return 12345;
+}
+
+PHP_ZEND_TEST_API int bug_gh16013_return_int(void) {
+	return 123456789;
+}
+
+PHP_ZEND_TEST_API enum bug_gh16013_enum bug_gh16013_return_enum(void) {
+	return BUG_GH16013_B;
+}
+
+PHP_ZEND_TEST_API struct bug_gh16013_int_struct bug_gh16013_return_struct(void) {
+	struct bug_gh16013_int_struct ret;
+	ret.field = 123456789;
+	return ret;
+}
 
 #ifdef HAVE_COPY_FILE_RANGE
 /**

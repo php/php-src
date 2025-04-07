@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 68008c87b5dd1895761f51bff8f63df4b517a54b */
+ * Stub hash: ab66d2fff7ac7556d4244582a2bd3e83a3f95243 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -286,7 +286,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RecursiveRegexIte
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_OBJ_TYPE_MASK(0, iterator, RecursiveIterator|IteratorAggregate, 0, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "RecursiveTreeIterator::BYPASS_KEY")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cachingIteratorFlags, IS_LONG, 0, "CachingIterator::CATCH_GET_CHILD")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "RecursiveTreeIterator::SELF_FIRST")
@@ -605,7 +605,7 @@ static zend_class_entry *register_class_EmptyIterator(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "EmptyIterator", class_EmptyIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	return class_entry;
@@ -616,7 +616,7 @@ static zend_class_entry *register_class_CallbackFilterIterator(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "CallbackFilterIterator", class_CallbackFilterIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_FilterIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_FilterIterator, 0);
 
 	return class_entry;
 }
@@ -626,7 +626,7 @@ static zend_class_entry *register_class_RecursiveCallbackFilterIterator(zend_cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveCallbackFilterIterator", class_RecursiveCallbackFilterIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_CallbackFilterIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_CallbackFilterIterator, 0);
 	zend_class_implements(class_entry, 1, class_entry_RecursiveIterator);
 
 	return class_entry;
@@ -648,7 +648,7 @@ static zend_class_entry *register_class_RecursiveIteratorIterator(zend_class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveIteratorIterator", class_RecursiveIteratorIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_OuterIterator);
 
 	zval const_LEAVES_ONLY_value;
@@ -694,7 +694,7 @@ static zend_class_entry *register_class_IteratorIterator(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IteratorIterator", class_IteratorIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_OuterIterator);
 
 	return class_entry;
@@ -705,8 +705,7 @@ static zend_class_entry *register_class_FilterIterator(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "FilterIterator", class_FilterIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IteratorIterator);
-	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IteratorIterator, ZEND_ACC_ABSTRACT);
 
 	return class_entry;
 }
@@ -716,8 +715,7 @@ static zend_class_entry *register_class_RecursiveFilterIterator(zend_class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveFilterIterator", class_RecursiveFilterIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_FilterIterator);
-	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_FilterIterator, ZEND_ACC_ABSTRACT);
 	zend_class_implements(class_entry, 1, class_entry_RecursiveIterator);
 
 	return class_entry;
@@ -728,7 +726,7 @@ static zend_class_entry *register_class_ParentIterator(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ParentIterator", class_ParentIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveFilterIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveFilterIterator, 0);
 
 	return class_entry;
 }
@@ -749,7 +747,7 @@ static zend_class_entry *register_class_LimitIterator(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "LimitIterator", class_LimitIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IteratorIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IteratorIterator, 0);
 
 	return class_entry;
 }
@@ -759,7 +757,7 @@ static zend_class_entry *register_class_CachingIterator(zend_class_entry *class_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "CachingIterator", class_CachingIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IteratorIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IteratorIterator, 0);
 	zend_class_implements(class_entry, 3, class_entry_ArrayAccess, class_entry_Countable, class_entry_Stringable);
 
 	zval const_CALL_TOSTRING_value;
@@ -806,7 +804,7 @@ static zend_class_entry *register_class_RecursiveCachingIterator(zend_class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveCachingIterator", class_RecursiveCachingIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_CachingIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_CachingIterator, 0);
 	zend_class_implements(class_entry, 1, class_entry_RecursiveIterator);
 
 	return class_entry;
@@ -817,7 +815,7 @@ static zend_class_entry *register_class_NoRewindIterator(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "NoRewindIterator", class_NoRewindIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IteratorIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IteratorIterator, 0);
 
 	return class_entry;
 }
@@ -827,7 +825,7 @@ static zend_class_entry *register_class_AppendIterator(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "AppendIterator", class_AppendIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IteratorIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IteratorIterator, 0);
 
 	return class_entry;
 }
@@ -837,7 +835,7 @@ static zend_class_entry *register_class_InfiniteIterator(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "InfiniteIterator", class_InfiniteIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IteratorIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IteratorIterator, 0);
 
 	return class_entry;
 }
@@ -847,7 +845,7 @@ static zend_class_entry *register_class_RegexIterator(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RegexIterator", class_RegexIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_FilterIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_FilterIterator, 0);
 
 	zval const_USE_KEY_value;
 	ZVAL_LONG(&const_USE_KEY_value, REGIT_USE_KEY);
@@ -905,7 +903,7 @@ static zend_class_entry *register_class_RecursiveRegexIterator(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveRegexIterator", class_RecursiveRegexIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RegexIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RegexIterator, 0);
 	zend_class_implements(class_entry, 1, class_entry_RecursiveIterator);
 
 	return class_entry;
@@ -916,7 +914,7 @@ static zend_class_entry *register_class_RecursiveTreeIterator(zend_class_entry *
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveTreeIterator", class_RecursiveTreeIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveIteratorIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveIteratorIterator, 0);
 
 	zval const_BYPASS_CURRENT_value;
 	ZVAL_LONG(&const_BYPASS_CURRENT_value, RTIT_BYPASS_CURRENT);

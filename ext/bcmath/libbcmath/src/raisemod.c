@@ -59,7 +59,7 @@ raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *resul
 	}
 
 	/* Any integer number mod 1 (or -1) must be equal to 0 */
-	if (_bc_do_compare(mod, BCG(_one_), false) == BCMATH_EQUAL) {
+	if (_bc_do_compare(mod, BCG(_one_), mod->n_scale, false) == BCMATH_EQUAL) {
 		bc_free_num (result);
 		*result = bc_new_num(1, scale);
 		return OK;

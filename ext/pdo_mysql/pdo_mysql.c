@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -43,7 +43,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
  The default socket location is sometimes defined by configure.
  With libmysql `mysql_config --socket` will fill PDO_MYSQL_UNIX_ADDR
  and the user can use --with-mysql-sock=SOCKET which will fill
- PDO_MYSQL_UNIX_ADDR. If both aren't set we're using mysqlnd and use
+ PHP_MYSQL_UNIX_SOCK_ADDR. If both aren't set we're using mysqlnd and use
  /tmp/mysql.sock as default on *nix and NULL for Windows (default
  named pipe name is set in mysqlnd).
 */
@@ -126,7 +126,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_GROUP", (zend_long)PDO_MYSQL_ATTR_READ_DEFAULT_GROUP);
 #endif
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_COMPRESS", (zend_long)PDO_MYSQL_ATTR_COMPRESS);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_DIRECT_QUERY", (zend_long)PDO_MYSQL_ATTR_DIRECT_QUERY);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_DIRECT_QUERY", (zend_long)PDO_ATTR_EMULATE_PREPARES);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_FOUND_ROWS", (zend_long)PDO_MYSQL_ATTR_FOUND_ROWS);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_IGNORE_SPACE", (zend_long)PDO_MYSQL_ATTR_IGNORE_SPACE);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_KEY", (zend_long)PDO_MYSQL_ATTR_SSL_KEY);

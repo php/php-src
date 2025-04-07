@@ -17,7 +17,7 @@
 /* {{{ includes & prototypes */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -171,7 +171,7 @@ PHP_FUNCTION(readline_info)
 				: ZSTR_CHAR(rl_completion_append_character));
 		add_assoc_bool(return_value,"completion_suppress_append",rl_completion_suppress_append);
 #endif
-#if HAVE_ERASE_EMPTY_LINE
+#ifdef HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
 #ifndef PHP_WIN32
@@ -181,15 +181,35 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
 		if (zend_string_equals_literal_ci(what,"line_buffer")) {
-			oldstr = rl_line_buffer;
+			oldstr = strdup(rl_line_buffer ? rl_line_buffer : "");
 			if (value) {
-				/* XXX if (rl_line_buffer) free(rl_line_buffer); */
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-				rl_line_buffer = strdup(Z_STRVAL_P(value));
+#if !defined(PHP_WIN32) && !defined(HAVE_LIBEDIT)
+				if (!rl_line_buffer) {
+					rl_line_buffer = malloc(Z_STRLEN_P(value) + 1);
+				} else if (strlen(oldstr) < Z_STRLEN_P(value)) {
+					rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
+					free(oldstr);
+					oldstr = strdup(rl_line_buffer ? rl_line_buffer : "");
+				}
+				memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
+#else
+				char *tmp = strdup(Z_STRVAL_P(value));
+				if (tmp) {
+					if (rl_line_buffer) {
+						free(rl_line_buffer);
+					}
+					rl_line_buffer = tmp;
+				}
+#endif
+#if !defined(PHP_WIN32)
+				rl_end = Z_STRLEN_P(value);
+#endif
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
+			free(oldstr);
 		} else if (zend_string_equals_literal_ci(what, "point")) {
 			RETVAL_LONG(rl_point);
 #ifndef PHP_WIN32
@@ -235,7 +255,7 @@ PHP_FUNCTION(readline_info)
 			RETVAL_INTERNED_STR(
 				oldval == 0 ? ZSTR_EMPTY_ALLOC() : ZSTR_CHAR(oldval));
 #endif
-#if HAVE_ERASE_EMPTY_LINE
+#ifdef HAVE_ERASE_EMPTY_LINE
 		} else if (zend_string_equals_literal_ci(what, "erase_empty_line")) {
 			oldval = rl_erase_empty_line;
 			if (value) {
@@ -435,19 +455,14 @@ static void _readline_string_zval(zval *ret, const char *str)
 	}
 }
 
-static void _readline_long_zval(zval *ret, long l)
-{
-	ZVAL_LONG(ret, l);
-}
-
 char **php_readline_completion_cb(const char *text, int start, int end)
 {
 	zval params[3];
 	char **matches = NULL;
 
 	_readline_string_zval(&params[0], text);
-	_readline_long_zval(&params[1], start);
-	_readline_long_zval(&params[2], end);
+	ZVAL_LONG(&params[1], start);
+	ZVAL_LONG(&params[2], end);
 
 	if (call_user_function(NULL, NULL, &_readline_completion, &_readline_array, 3, params) == SUCCESS) {
 		if (Z_TYPE(_readline_array) == IS_ARRAY) {

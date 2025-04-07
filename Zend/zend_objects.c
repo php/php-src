@@ -25,12 +25,14 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_weakrefs.h"
+#include "zend_lazy_objects.h"
 
 static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = GC_OBJECT;
 	object->ce = ce;
+	object->extra_flags = 0;
 	object->handlers = ce->default_object_handlers;
 	object->properties = NULL;
 	zend_objects_store_put(object);
@@ -46,14 +48,8 @@ ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class
 	_zend_object_std_init(object, ce);
 }
 
-ZEND_API void zend_object_std_dtor(zend_object *object)
+void zend_object_dtor_dynamic_properties(zend_object *object)
 {
-	zval *p, *end;
-
-	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
-		zend_weakrefs_notify(object);
-	}
-
 	if (object->properties) {
 		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
 			if (EXPECTED(GC_DELREF(object->properties) == 0)
@@ -62,20 +58,41 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 			}
 		}
 	}
+}
+
+void zend_object_dtor_property(zend_object *object, zval *p)
+{
+	if (Z_REFCOUNTED_P(p)) {
+		if (UNEXPECTED(Z_ISREF_P(p)) &&
+				(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(p)))) {
+			zend_property_info *prop_info = zend_get_property_info_for_slot_self(object, p);
+			if (ZEND_TYPE_IS_SET(prop_info->type)) {
+				ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+			}
+		}
+		i_zval_ptr_dtor(p);
+	}
+}
+
+ZEND_API void zend_object_std_dtor(zend_object *object)
+{
+	zval *p, *end;
+
+	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
+		zend_weakrefs_notify(object);
+	}
+
+	if (UNEXPECTED(zend_object_is_lazy(object))) {
+		zend_lazy_object_del_info(object);
+	}
+
+	zend_object_dtor_dynamic_properties(object);
+
 	p = object->properties_table;
 	if (EXPECTED(object->ce->default_properties_count)) {
 		end = p + object->ce->default_properties_count;
 		do {
-			if (Z_REFCOUNTED_P(p)) {
-				if (UNEXPECTED(Z_ISREF_P(p)) &&
-						(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(p)))) {
-					zend_property_info *prop_info = zend_get_property_info_for_slot(object, p);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
-					}
-				}
-				i_zval_ptr_dtor(p);
-			}
+			zend_object_dtor_property(object, p);
 			p++;
 		} while (p != end);
 	}
@@ -99,6 +116,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	zend_function *destructor = object->ce->destructor;
 
 	if (destructor) {
+		if (UNEXPECTED(zend_object_is_lazy(object))) {
+			return;
+		}
+
 		zend_object *old_exception;
 		const zend_op *old_opline_before_exception;
 
@@ -212,7 +233,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(dst)))) {
-				zend_property_info *prop_info = zend_get_property_info_for_slot(new_object, dst);
+				zend_property_info *prop_info = zend_get_property_info_for_slot_self(new_object, dst);
 				if (ZEND_TYPE_IS_SET(prop_info->type)) {
 					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(dst), prop_info);
 				}
@@ -285,6 +306,10 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 {
 	zend_object *new_object;
+
+	if (UNEXPECTED(zend_object_is_lazy(old_object))) {
+		return zend_lazy_object_clone(old_object);
+	}
 
 	/* assume that create isn't overwritten, so when clone depends on the
 	 * overwritten one then it must itself be overwritten */

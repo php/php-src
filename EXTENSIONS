@@ -184,7 +184,8 @@ SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           soap
 PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2004 - 2018)
-MAINTENANCE:         Maintained
+                     Niels Dossche <nielsdos@php.net> (2024 - 2024)
+MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xml
@@ -363,7 +364,8 @@ STATUS:              Working
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net> (2001 - 2013)
                      Nikita Popov <nikic@php.net> (2017 - 2020)
-                     Alex Dowad <alexinbeijing@gmail.com> (2021 - 2022)
+                     Alex Dowad <alexinbeijing@gmail.com> (2021 - 2024)
+                     Yuya Hamada <youkidearitai@gmail.com> (2024 - 2024)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -409,8 +411,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           random
-PRIMARY MAINTAINER   Go Kudo <zeriyoshi@php.net> (2022 - 2022)
-                     Tim Düsterhus <timwolla@php.net> (2022 - 2024)
+PRIMARY MAINTAINER   Go Kudo <zeriyoshi@php.net> (2022 - 2024)
+                     Tim Düsterhus <timwolla@php.net> (2022 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               8.2.0
@@ -424,6 +426,7 @@ EXTENSION:           reflection
 PRIMARY MAINTAINER:  Marcus Börger <helly@php.net> (2003 - 2009)
                      Johannes Schlüter <johannes@php.net> (2006 - 2014)
                      Nikita Popov <nikic@php.net> (2019 - 2020)
+                     Daniel Scherzer <daniel.e.scherzer@gmail.com> (2025 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------

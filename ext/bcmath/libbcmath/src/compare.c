@@ -39,12 +39,24 @@
    than N2 and +1 if N1 is greater than N2.  If USE_SIGN is false, just
    compare the magnitudes. */
 
-bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
+bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool use_sign)
 {
 	char *n1ptr, *n2ptr;
 
 	/* First, compare signs. */
 	if (use_sign && n1->n_sign != n2->n_sign) {
+		/*
+		 * scale and n->n_scale differ only in Number objects.
+		 * This happens when explicitly specify the scale in a Number method.
+		 */
+		if ((n1->n_scale > scale || n2->n_scale > scale) &&
+			n1->n_len == 1 && n2->n_len == 1 &&
+			n1->n_value[0] == 0 && n2->n_value[0] == 0 &&
+			bc_is_zero_for_scale(n1, scale) && bc_is_zero_for_scale(n2, scale)
+		) {
+			/* e.g. 0.00 <=> -0.00 */
+			return BCMATH_EQUAL;
+		}
 		if (n1->n_sign == PLUS) {
 			/* Positive N1 > Negative N2 */
 			return BCMATH_LEFT_GREATER;
@@ -73,9 +85,12 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 		}
 	}
 
+	size_t n1_scale = MIN(n1->n_scale, scale);
+	size_t n2_scale = MIN(n2->n_scale, scale);
+
 	/* If we get here, they have the same number of integer digits.
 	   check the integer part and the equal length part of the fraction. */
-	size_t count = n1->n_len + MIN (n1->n_scale, n2->n_scale);
+	size_t count = n1->n_len + MIN (n1_scale, n2_scale);
 	n1ptr = n1->n_value;
 	n2ptr = n2->n_value;
 
@@ -104,9 +119,9 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 	}
 
 	/* They are equal up to the last part of the equal part of the fraction. */
-	if (n1->n_scale != n2->n_scale) {
-		if (n1->n_scale > n2->n_scale) {
-			for (count = n1->n_scale - n2->n_scale; count > 0; count--) {
+	if (n1_scale != n2_scale) {
+		if (n1_scale > n2_scale) {
+			for (count = n1_scale - n2_scale; count > 0; count--) {
 				if (*n1ptr++ != 0) {
 					/* Magnitude of n1 > n2. */
 					if (!use_sign || n1->n_sign == PLUS) {
@@ -117,7 +132,7 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 				}
 			}
 		} else {
-			for (count = n2->n_scale - n1->n_scale; count > 0; count--) {
+			for (count = n2_scale - n1_scale; count > 0; count--) {
 				if (*n2ptr++ != 0) {
 					/* Magnitude of n1 < n2. */
 					if (!use_sign || n1->n_sign == PLUS) {
@@ -136,7 +151,7 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 
 
 /* This is the "user callable" routine to compare numbers N1 and N2. */
-bcmath_compare_result bc_compare(bc_num n1, bc_num n2)
+bcmath_compare_result bc_compare(bc_num n1, bc_num n2, size_t scale)
 {
-	return _bc_do_compare(n1, n2, true);
+	return _bc_do_compare(n1, n2, scale, true);
 }

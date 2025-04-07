@@ -44,7 +44,7 @@ PHP_FUNCTION(header)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line = line;
-	ctr.line_len = (uint32_t)len;
+	ctr.line_len = len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
 }
 /* }}} */
@@ -62,17 +62,17 @@ PHP_FUNCTION(header_remove)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line = line;
-	ctr.line_len = (uint32_t)len;
+	ctr.line_len = len;
 	sapi_header_op(line == NULL ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
 /* }}} */
 
-PHPAPI int php_header(void)
+PHPAPI bool php_header(void)
 {
 	if (sapi_send_headers()==FAILURE || SG(request_info).headers_only) {
-		return 0; /* don't allow output */
+		return false; /* don't allow output */
 	} else {
-		return 1; /* allow output */
+		return true; /* allow output */
 	}
 }
 
@@ -87,7 +87,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 	smart_str buf = {0};
 
 	if (!ZSTR_LEN(name)) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		return FAILURE;
 	}
 	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */

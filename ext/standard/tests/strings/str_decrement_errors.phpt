@@ -37,7 +37,7 @@ foreach ($strings as $s) {
 
 ?>
 --EXPECT--
-str_decrement(): Argument #1 ($string) cannot be empty
+str_decrement(): Argument #1 ($string) must not be empty
 str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
 str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
 str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters

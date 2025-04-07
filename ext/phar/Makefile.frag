@@ -1,9 +1,9 @@
 $(srcdir)/phar_path_check.c: $(srcdir)/phar_path_check.re
 	@(cd $(top_srcdir); \
 	if test -f ./php_phar.h; then \
-		$(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o phar_path_check.c phar_path_check.re; \
+		$(RE2C) $(RE2C_FLAGS) -b -o phar_path_check.c phar_path_check.re; \
 	else \
-		$(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re; \
+		$(RE2C) $(RE2C_FLAGS) -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re; \
 	fi)
 
 pharcmd: $(builddir)/phar.php $(builddir)/phar.phar
@@ -28,7 +28,6 @@ PHP_PHARCMD_BANG = `$(top_srcdir)/build/shtool echo -n -- "$(INSTALL_ROOT)$(bind
 $(builddir)/phar/phar.inc: $(srcdir)/phar/phar.inc
 	-@test -d $(builddir)/phar || mkdir $(builddir)/phar
 	-@test -f $(builddir)/phar/phar.inc || cp $(srcdir)/phar/phar.inc $(builddir)/phar/phar.inc
-
 
 TEST_PHP_EXECUTABLE = $(shell $(PHP_EXECUTABLE) -v 2>&1)
 TEST_PHP_EXECUTABLE_RES = $(shell echo "$(TEST_PHP_EXECUTABLE)" | grep -c 'Exec format error')

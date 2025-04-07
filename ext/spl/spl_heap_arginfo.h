@@ -161,7 +161,7 @@ static zend_class_entry *register_class_SplPriorityQueue(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplPriorityQueue", class_SplPriorityQueue_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 2, class_entry_Iterator, class_entry_Countable);
 
 	zval const_EXTR_BOTH_value;
@@ -190,8 +190,7 @@ static zend_class_entry *register_class_SplHeap(zend_class_entry *class_entry_It
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplHeap", class_SplHeap_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_ABSTRACT);
 	zend_class_implements(class_entry, 2, class_entry_Iterator, class_entry_Countable);
 
 	return class_entry;
@@ -202,7 +201,7 @@ static zend_class_entry *register_class_SplMinHeap(zend_class_entry *class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplMinHeap", class_SplMinHeap_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplHeap);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplHeap, 0);
 
 	return class_entry;
 }
@@ -212,7 +211,7 @@ static zend_class_entry *register_class_SplMaxHeap(zend_class_entry *class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplMaxHeap", class_SplMaxHeap_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplHeap);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplHeap, 0);
 
 	return class_entry;
 }

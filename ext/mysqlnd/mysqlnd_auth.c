@@ -746,7 +746,7 @@ static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 {
 	BCRYPT_KEY_HANDLE ret = 0;
-	LPSTR der_buf = NULL;
+	BYTE *der_buf = NULL;
 	DWORD der_len;
 	CERT_PUBLIC_KEY_INFO *key_info = NULL;
 	DWORD key_info_len;
@@ -789,7 +789,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 
 	ZeroMemory(&padding_info, sizeof padding_info);
 	padding_info.pszAlgId = BCRYPT_SHA1_ALGORITHM;
-	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, NULL, 0, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		DBG_RETURN(0);
 	}
@@ -809,7 +809,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 
 	*auth_data_len = server_public_key_len;
 	ret = malloc(*auth_data_len);
-	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, ret, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
 		DBG_RETURN(0);
@@ -1052,7 +1052,7 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 
 	ZeroMemory(&padding_info, sizeof padding_info);
 	padding_info.pszAlgId = BCRYPT_SHA1_ALGORITHM;
-	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, NULL, 0, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		DBG_RETURN(0);
 	}
@@ -1071,7 +1071,7 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 	}
 
 	*crypted = emalloc(server_public_key_len);
-	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, *crypted, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
 		DBG_RETURN(0);

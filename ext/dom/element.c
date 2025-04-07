@@ -16,15 +16,18 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
+#include "zend_enum.h"
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
+#include "token_list.h"
 
 /*
 * class DOMElement extends DOMNode
@@ -174,6 +177,33 @@ zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 }
 /* }}} */
 
+/* {{{ classList	TokenList
+URL: https://dom.spec.whatwg.org/#dom-element-classlist
+*/
+zend_result dom_element_class_list_read(dom_object *obj, zval *retval)
+{
+	const uint32_t PROP_INDEX = 0;
+
+#if ZEND_DEBUG
+	zend_string *class_list_str = ZSTR_INIT_LITERAL("classList", false);
+	const zend_property_info *prop_info = zend_get_property_info(dom_modern_element_class_entry, class_list_str, 0);
+	zend_string_release_ex(class_list_str, false);
+	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
+#endif
+
+	zval *cached_token_list = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	if (Z_ISUNDEF_P(cached_token_list)) {
+		object_init_ex(cached_token_list, dom_token_list_class_entry);
+		dom_token_list_object *intern = php_dom_token_list_from_obj(Z_OBJ_P(cached_token_list));
+		dom_token_list_ctor(intern, obj);
+	}
+
+	ZVAL_OBJ_COPY(retval, Z_OBJ_P(cached_token_list));
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ id	string
 URL: https://dom.spec.whatwg.org/#dom-element-id
 Since:
@@ -261,7 +291,6 @@ Since:
 */
 PHP_METHOD(DOMElement, getAttribute)
 {
-	zval *id;
 	xmlNode *nodep;
 	char *name;
 	xmlChar *value = NULL;
@@ -270,12 +299,11 @@ PHP_METHOD(DOMElement, getAttribute)
 	size_t name_len;
 	bool should_free = false;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(name, name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attr) {
@@ -318,9 +346,7 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	dom_object *intern;
 	zval tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -331,7 +357,11 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	if (!php_dom_follow_spec_intern(intern)) {
 		for (xmlNsPtr nsptr = nodep->nsDef; nsptr; nsptr = nsptr->next) {
 			const char *prefix = (const char *) nsptr->prefix;
-			ZVAL_NEW_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+			if (prefix == NULL) {
+				ZVAL_STRING(&tmp, "xmlns");
+			} else {
+				ZVAL_NEW_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+			}
 			zend_hash_next_index_insert(ht, &tmp);
 		}
 	}
@@ -368,20 +398,19 @@ Since:
 */
 PHP_METHOD(DOMElement, setAttribute)
 {
-	zval *id;
 	xmlNode *nodep;
 	int name_valid;
 	size_t name_len, value_len;
 	dom_object *intern;
 	char *name, *value;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &value, &value_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STRING(value, value_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -391,7 +420,7 @@ PHP_METHOD(DOMElement, setAttribute)
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	if (php_dom_follow_spec_intern(intern)) {
 		xmlChar *name_processed = BAD_CAST name;
@@ -447,7 +476,7 @@ PHP_METHOD(DOMElement, setAttribute)
 }
 /* }}} end dom_element_set_attribute */
 
-typedef struct _dom_deep_ns_redef_item {
+typedef struct dom_deep_ns_redef_item {
 	xmlNodePtr current_node;
 	xmlNsPtr defined_ns;
 } dom_deep_ns_redef_item;
@@ -612,18 +641,16 @@ Since:
 */
 PHP_METHOD(DOMElement, getAttributeNode)
 {
-	zval *id;
 	xmlNodePtr nodep, attrp;
 	size_t name_len;
 	dom_object *intern;
 	char *name;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(name, name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp == NULL) {
@@ -653,7 +680,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	dom_object *intern, *attrobj, *oldobj;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_get_node_ce(modern)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_get_attr_ce(modern)) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -700,9 +727,8 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 		xmlUnlinkNode((xmlNodePtr) attrp);
 	}
 
-	if (attrp->doc == NULL && nodep->doc != NULL) {
-		attrobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)attrobj, NULL);
+	if (attrp->doc == NULL && nodep->doc != NULL && intern->document != NULL) {
+		dom_set_document_ref_pointers_attr(attrp, intern->document);
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
@@ -741,9 +767,9 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 	xmlAttr *attrp;
 	dom_object *intern, *attrobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node, node_ce)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
@@ -763,12 +789,12 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 
 PHP_METHOD(DOMElement, removeAttributeNode)
 {
-	dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
+	dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_attr_class_entry);
 }
 
 PHP_METHOD(Dom_Element, removeAttributeNode)
 {
-	dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
+	dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_attr_class_entry);
 }
 /* }}} end dom_element_remove_attribute_node */
 
@@ -776,35 +802,35 @@ PHP_METHOD(Dom_Element, removeAttributeNode)
 Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagname
 Since:
 */
-static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, bool modern)
+static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *iter_ce)
 {
-	size_t name_len;
 	dom_object *intern, *namednode;
-	char *name;
+	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &name) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(name) > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
 
 	DOM_GET_THIS_INTERN(intern);
 
-	if (modern) {
-		php_dom_create_iterator(return_value, DOM_HTMLCOLLECTION, true);
-	} else {
-		php_dom_create_iterator(return_value, DOM_NODELIST, false);
-	}
+	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, NULL, 0);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, NULL);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagName)
 {
-	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_nodelist_class_entry);
 }
 
 PHP_METHOD(Dom_Element, getElementsByTagName)
 {
-	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_html_collection_class_entry);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
@@ -873,7 +899,7 @@ PHP_METHOD(DOMElement, getAttributeNS)
 static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, char *uri, size_t uri_len, char *name, size_t name_len, const char *value)
 {
 	if (name_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		return;
 	}
 
@@ -1199,35 +1225,44 @@ PHP_METHOD(Dom_Element, setAttributeNodeNS)
 Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
 Since: DOM Level 2
 */
-static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS, bool modern)
+static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *iter_ce)
 {
-	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
-	char *uri, *name;
+	zend_string *uri, *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P!P", &uri, &name) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!uri) {
+		uri = ZSTR_EMPTY_ALLOC();
+	}
+
+	if (ZSTR_LEN(uri) > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(name) > INT_MAX) {
+		zend_argument_value_error(2, "is too long");
 		RETURN_THROWS();
 	}
 
 	DOM_GET_THIS_INTERN(intern);
 
-	if (modern) {
-		php_dom_create_iterator(return_value, DOM_HTMLCOLLECTION, true);
-	} else {
-		php_dom_create_iterator(return_value, DOM_NODELIST, false);
-	}
+	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, uri ? uri : "", uri_len);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, uri);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagNameNS)
 {
-	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_nodelist_class_entry);
 }
 
 PHP_METHOD(Dom_Element, getElementsByTagNameNS)
 {
-	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_html_collection_class_entry);
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 
@@ -1423,9 +1458,9 @@ PHP_METHOD(DOMElement, after)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1438,9 +1473,9 @@ PHP_METHOD(DOMElement, before)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1456,9 +1491,9 @@ PHP_METHOD(DOMElement, append)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1475,9 +1510,9 @@ PHP_METHOD(DOMElement, prepend)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1494,9 +1529,9 @@ PHP_METHOD(DOMElement, replaceWith)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1513,9 +1548,9 @@ PHP_METHOD(DOMElement, replaceChildren)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1573,16 +1608,11 @@ static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
 Since:
 */
-static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *element_ce)
+static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, const zend_string *where, zval *element_zval)
 {
-	zend_string *where;
-	zval *element_zval, *id;
+	zval *id;
 	xmlNodePtr thisp, otherp;
 	dom_object *this_intern, *other_intern;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where, &element_zval, element_ce) != SUCCESS) {
-		RETURN_THROWS();
-	}
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
 	DOM_GET_OBJ(otherp, element_zval, xmlNodePtr, other_intern);
@@ -1599,28 +1629,38 @@ static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, ze
 
 PHP_METHOD(DOMElement, insertAdjacentElement)
 {
-	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_element_class_entry);
+	zend_string *where;
+	zval *element_zval;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where, &element_zval, dom_element_class_entry) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, where, element_zval);
 }
 
 PHP_METHOD(Dom_Element, insertAdjacentElement)
 {
-	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_element_class_entry);
+	zval *element_zval, *where_zv;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_OBJECT_OF_CLASS(element_zval, dom_modern_element_class_entry)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
+	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, where, element_zval);
 }
 /* }}} end DOMElement::insertAdjacentElement */
 
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
 Since:
 */
-PHP_METHOD(DOMElement, insertAdjacentText)
+static void dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAMETERS, const zend_string *where, const zend_string *data)
 {
-	zend_string *where, *data;
 	dom_object *this_intern;
 	zval *id;
 	xmlNodePtr thisp;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &where, &data) == FAILURE) {
-		RETURN_THROWS();
-	}
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
 
@@ -1635,7 +1675,124 @@ PHP_METHOD(DOMElement, insertAdjacentText)
 		xmlFreeNode(otherp);
 	}
 }
+
+PHP_METHOD(DOMElement, insertAdjacentText)
+{
+	zend_string *where, *data;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &where, &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAM_PASSTHRU, where, data);
+}
+
+PHP_METHOD(Dom_Element, insertAdjacentText)
+{
+	zval *where_zv;
+	zend_string *data;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_STR(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
+	dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAM_PASSTHRU, where, data);
+}
 /* }}} end DOMElement::insertAdjacentText */
+
+/* https://html.spec.whatwg.org/#dom-element-insertadjacenthtml */
+PHP_METHOD(Dom_Element, insertAdjacentHTML)
+{
+	zval *where_zv;
+	zend_string *string;
+
+	dom_object *this_intern;
+	zval *id;
+	xmlNodePtr thisp;
+
+	bool created_context = false;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_STR(string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
+
+	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
+
+	/* 1. We don't do injection sinks. */
+
+	/* 2. Let context be NULL */
+	xmlNodePtr context = NULL;
+
+	/* 3. Use the first matching item from this list: (...) */
+	switch (ZSTR_LEN(where) + ZSTR_VAL(where)[2]) {
+		case sizeof("BeforeBegin") - 1 + 'f':
+		case sizeof("AfterEnd") - 1 + 't':
+			/* 1. Set context to this's parent. */
+			context = thisp->parent;
+
+			/* 2. If context is null or a Document, throw a "NoModificationAllowedError" DOMException. */
+			if (context == NULL || context->type == XML_DOCUMENT_NODE || context->type == XML_HTML_DOCUMENT_NODE) {
+				php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, true);
+				RETURN_THROWS();
+			}
+			break;
+		case sizeof("AfterBegin") - 1 + 't':
+		case sizeof("BeforeEnd") - 1 + 'f':
+			/* Set context to this. */
+			context = thisp;
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+	/* 4. If context is not an Element or all of the following are true: (...) */
+	if (context->type != XML_ELEMENT_NODE
+		|| (php_dom_ns_is_html_and_document_is_html(context) && xmlStrEqual(context->name, BAD_CAST "html"))) {
+		/* set context to the result of creating an element given this's node document, body, and the HTML namespace. */
+		xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(php_dom_get_ns_mapper(this_intern));
+
+		context = xmlNewDocNode(thisp->doc, html_ns, BAD_CAST "body", NULL);
+		created_context = true;
+		if (UNEXPECTED(context == NULL)) {
+			php_dom_throw_error(INVALID_STATE_ERR, true);
+			goto err;
+		}
+	}
+
+	/* 5. Let fragment be the result of invoking the fragment parsing algorithm steps with context and compliantString. */
+	xmlNodePtr fragment = dom_parse_fragment(this_intern, context, string);
+	if (fragment == NULL) {
+		goto err;
+	}
+
+	php_libxml_invalidate_node_list_cache(this_intern->document);
+
+	/* 6. Use the first matching item from this list: (...) */
+	switch (ZSTR_LEN(where) + ZSTR_VAL(where)[2]) {
+		case sizeof("BeforeBegin") - 1 + 'f':
+			php_dom_pre_insert(this_intern->document, fragment, thisp->parent, thisp);
+			break;
+		case sizeof("AfterEnd") - 1 + 't':
+			php_dom_pre_insert(this_intern->document, fragment, thisp->parent, thisp->next);
+			break;
+		case sizeof("AfterBegin") - 1 + 't':
+			php_dom_pre_insert(this_intern->document, fragment, thisp, thisp->children);
+			break;
+		case sizeof("BeforeEnd") - 1 + 'f':
+			php_dom_node_append(this_intern->document, fragment, thisp);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+err:
+	if (created_context) {
+		xmlFreeNode(context);
+	}
+}
 
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-toggleattribute
 Since:
@@ -1683,7 +1840,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 			if (follow_spec) {
 				xmlSetNsProp(thisp, NULL, BAD_CAST qname, NULL);
 			} else {
-				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browers behaviour.
+				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browsers' behaviour.
 				* It follows the same rules when you'd manually add an attribute using the other APIs. */
 				int len;
 				const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);
@@ -1720,5 +1877,292 @@ out:
 	RETURN_BOOL(retval);
 }
 /* }}} end DOMElement::prepend */
+
+static void php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAMETERS, bool all)
+{
+	zend_string *selectors_str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(selectors_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	if (all) {
+		dom_parent_node_query_selector_all(thisp, intern, return_value, selectors_str);
+	} else {
+		dom_parent_node_query_selector(thisp, intern, return_value, selectors_str);
+	}
+}
+
+PHP_METHOD(Dom_Element, querySelector)
+{
+	php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+
+PHP_METHOD(Dom_Element, querySelectorAll)
+{
+	php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(Dom_Element, matches)
+{
+	zend_string *selectors_str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(selectors_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	dom_element_matches(thisp, intern, return_value, selectors_str);
+}
+
+PHP_METHOD(Dom_Element, closest)
+{
+	zend_string *selectors_str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(selectors_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	dom_element_closest(thisp, intern, return_value, selectors_str);
+}
+
+zend_result dom_modern_element_substituted_node_value_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	xmlChar *content = xmlNodeGetContent(nodep);
+
+	if (UNEXPECTED(content == NULL)) {
+		php_dom_throw_error(INVALID_STATE_ERR, true);
+		return FAILURE;
+	} else {
+		ZVAL_STRING(retval, (const char *) content);
+		xmlFree(content);
+	}
+
+	return SUCCESS;
+}
+
+zend_result dom_modern_element_substituted_node_value_write(dom_object *obj, zval *newval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	php_libxml_invalidate_node_list_cache(obj->document);
+	dom_remove_all_children(nodep);
+	xmlNodeSetContentLen(nodep, (xmlChar *) Z_STRVAL_P(newval), Z_STRLEN_P(newval));
+
+	return SUCCESS;
+}
+
+static void dom_element_get_in_scope_namespace_info(php_dom_libxml_ns_mapper *ns_mapper, HashTable *result, xmlNodePtr nodep, dom_object *intern)
+{
+	HashTable prefix_to_ns_table;
+	zend_hash_init(&prefix_to_ns_table, 0, NULL, NULL, false);
+	zend_hash_real_init_mixed(&prefix_to_ns_table);
+
+	/* https://www.w3.org/TR/1999/REC-xpath-19991116/#namespace-nodes */
+	for (const xmlNode *cur = nodep; cur != NULL; cur = cur->parent) {
+		if (cur->type == XML_ELEMENT_NODE) {
+			/* Find the last attribute */
+			const xmlAttr *last = NULL;
+			for (const xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
+				last = attr;
+			}
+
+			/* Reversed loop because the parent traversal is reversed as well,
+			 * this will keep the ordering consistent. */
+			for (const xmlAttr *attr = last; attr != NULL; attr = attr->prev) {
+				if (attr->ns != NULL && php_dom_ns_is_fast_ex(attr->ns, php_dom_ns_is_xmlns_magic_token)
+					&& attr->children != NULL && attr->children->content != NULL) {
+					const char *prefix = attr->ns->prefix == NULL ? NULL : (const char *) attr->name;
+					const char *key = prefix == NULL ? "" : prefix;
+					xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, prefix, (const char *) attr->children->content);
+					/* NULL is a valid value for the sentinel */
+					zval zv;
+					ZVAL_PTR(&zv, ns);
+					zend_hash_str_add(&prefix_to_ns_table, key, strlen(key), &zv);
+				}
+			}
+		}
+	}
+
+	xmlNsPtr ns;
+	zend_string *prefix;
+	ZEND_HASH_MAP_REVERSE_FOREACH_STR_KEY_PTR(&prefix_to_ns_table, prefix, ns) {
+		if (ZSTR_LEN(prefix) == 0 && (ns == NULL || ns->href == NULL || *ns->href == '\0')) {
+			/* Exception: "the value of the xmlns attribute for the nearest such element is non-empty" */
+			continue;
+		}
+
+		zval zv;
+		object_init_ex(&zv, dom_namespace_info_class_entry);
+		zend_object *obj = Z_OBJ(zv);
+
+		if (ZSTR_LEN(prefix) != 0) {
+			ZVAL_STR_COPY(OBJ_PROP_NUM(obj, 0), prefix);
+		} else {
+			ZVAL_NULL(OBJ_PROP_NUM(obj, 0));
+		}
+
+		if (ns != NULL && ns->href != NULL && *ns->href != '\0') {
+			ZVAL_STRING(OBJ_PROP_NUM(obj, 1), (const char *) ns->href);
+		} else {
+			ZVAL_NULL(OBJ_PROP_NUM(obj, 1));
+		}
+
+		php_dom_create_object(nodep, OBJ_PROP_NUM(obj, 2), intern);
+
+		zend_hash_next_index_insert_new(result, &zv);
+	} ZEND_HASH_FOREACH_END();
+
+	zend_hash_destroy(&prefix_to_ns_table);
+}
+
+PHP_METHOD(Dom_Element, getInScopeNamespaces)
+{
+	zval *id;
+	xmlNode *nodep;
+	dom_object *intern;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+
+	array_init(return_value);
+	HashTable *result = Z_ARRVAL_P(return_value);
+
+	dom_element_get_in_scope_namespace_info(ns_mapper, result, nodep, intern);
+}
+
+PHP_METHOD(Dom_Element, getDescendantNamespaces)
+{
+	zval *id;
+	xmlNode *nodep;
+	dom_object *intern;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+
+	array_init(return_value);
+	HashTable *result = Z_ARRVAL_P(return_value);
+
+	dom_element_get_in_scope_namespace_info(ns_mapper, result, nodep, intern);
+
+	xmlNodePtr cur = nodep->children;
+	while (cur != NULL) {
+		if (cur->type == XML_ELEMENT_NODE) {
+			/* TODO: this could be more optimized by updating the same HashTable repeatedly
+			 * instead of recreating it on every node. */
+			dom_element_get_in_scope_namespace_info(ns_mapper, result, cur, intern);
+		}
+
+		cur = php_dom_next_in_tree_order(cur, nodep);
+	}
+}
+
+PHP_METHOD(Dom_Element, rename)
+{
+	zend_string *namespace_uri, *qualified_name;
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR_OR_NULL(namespace_uri)
+		Z_PARAM_STR(qualified_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *id;
+	dom_object *intern;
+	xmlNodePtr nodep;
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	xmlChar *localname = NULL, *prefix = NULL;
+	int errorcode = dom_validate_and_extract(namespace_uri, qualified_name, &localname, &prefix);
+	if (UNEXPECTED(errorcode != 0)) {
+		php_dom_throw_error(errorcode, /* strict */ true);
+		goto cleanup;
+	}
+
+	if (nodep->type == XML_ATTRIBUTE_NODE) {
+		/* Check for duplicate attributes. */
+		xmlAttrPtr existing = xmlHasNsProp(nodep->parent, localname, namespace_uri && ZSTR_VAL(namespace_uri)[0] != '\0' ? BAD_CAST ZSTR_VAL(namespace_uri) : NULL);
+		if (existing != NULL && existing != (xmlAttrPtr) nodep) {
+			php_dom_throw_error_with_message(INVALID_MODIFICATION_ERR, "An attribute with the given name in the given namespace already exists", /* strict */ true);
+			goto cleanup;
+		}
+	} else {
+		ZEND_ASSERT(nodep->type == XML_ELEMENT_NODE);
+
+		/* Check for moving to or away from the HTML namespace. */
+		bool is_currently_html_ns = php_dom_ns_is_fast(nodep, php_dom_ns_is_html_magic_token);
+		bool will_be_html_ns = namespace_uri != NULL && zend_string_equals_literal(namespace_uri, DOM_XHTML_NS_URI);
+		if (is_currently_html_ns != will_be_html_ns) {
+			if (is_currently_html_ns) {
+				php_dom_throw_error_with_message(
+					INVALID_MODIFICATION_ERR,
+					"It is not possible to move an element out of the HTML namespace because the HTML namespace is tied to the HTMLElement class",
+					/* strict */ true
+				);
+			} else {
+				php_dom_throw_error_with_message(
+					INVALID_MODIFICATION_ERR,
+					"It is not possible to move an element into the HTML namespace because the HTML namespace is tied to the HTMLElement class",
+					/* strict */ true
+				);
+			}
+			goto cleanup;
+		}
+
+		/* If we currently have a template but the new element type won't be a template, then throw away the templated content. */
+		if (is_currently_html_ns && xmlStrEqual(nodep->name, BAD_CAST "template") && !xmlStrEqual(localname, BAD_CAST "template")) {
+			php_dom_throw_error_with_message(
+				INVALID_MODIFICATION_ERR,
+				"It is not possible to rename the template element because it hosts a document fragment",
+				/* strict */ true
+			);
+			goto cleanup;
+		}
+	}
+
+	php_libxml_invalidate_node_list_cache(intern->document);
+
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+
+	/* Update namespace uri + prefix by querying the namespace mapper */
+	/* prefix can be NULL here, but that is taken care of by the called APIs. */
+	nodep->ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), namespace_uri);
+
+	/* Change the local name */
+	if (xmlDictOwns(nodep->doc->dict, nodep->name) != 1) {
+		xmlFree((xmlChar *) nodep->name);
+	}
+	const xmlChar *copy = xmlDictLookup(nodep->doc->dict, localname, -1);
+	if (copy != NULL) {
+		nodep->name = copy;
+	} else {
+		nodep->name = localname;
+		localname = NULL;
+	}
+
+cleanup:
+	xmlFree(localname);
+	xmlFree(prefix);
+}
 
 #endif

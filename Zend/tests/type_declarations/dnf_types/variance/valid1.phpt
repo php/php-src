@@ -1,5 +1,5 @@
 --TEST--
-Valid inheritence - co-variance
+Valid inheritance - co-variance
 --FILE--
 <?php
 

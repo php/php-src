@@ -20,7 +20,7 @@ function test(?Test $test) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0, ssa_vars=0, no_loops)
+     ; (lines=1, args=0, vars=0, tmps=%d, ssa_vars=0, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [long] RANGE[1..1]
@@ -30,7 +30,7 @@ BB0:
 0000 RETURN int(1)
 
 test:
-     ; (lines=7, args=1, vars=1, tmps=2, ssa_vars=6, no_loops)
+     ; (lines=7, args=1, vars=1, tmps=%d, ssa_vars=6, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]

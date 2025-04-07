@@ -210,10 +210,6 @@ ZEND_METHOD(SQLite3Result, fetchArray);
 ZEND_METHOD(SQLite3Result, reset);
 ZEND_METHOD(SQLite3Result, finalize);
 
-static const zend_function_entry class_SQLite3Exception_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_SQLite3_methods[] = {
 	ZEND_RAW_FENTRY("__construct", zim_SQLite3_open, arginfo_class_SQLite3___construct, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SQLite3, open, arginfo_class_SQLite3_open, ZEND_ACC_PUBLIC)
@@ -293,9 +289,8 @@ static zend_class_entry *register_class_SQLite3Exception(zend_class_entry *class
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SQLite3Exception", class_SQLite3Exception_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "SQLite3Exception", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -305,8 +300,7 @@ static zend_class_entry *register_class_SQLite3(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SQLite3", class_SQLite3_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_OK_value;
 	ZVAL_LONG(&const_OK_value, SQLITE_OK);
@@ -540,8 +534,7 @@ static zend_class_entry *register_class_SQLite3Stmt(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Stmt", class_SQLite3Stmt_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -551,8 +544,7 @@ static zend_class_entry *register_class_SQLite3Result(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Result", class_SQLite3Result_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

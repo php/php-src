@@ -99,6 +99,7 @@ echo token_name(T_LIST), "\n";
 echo token_name(T_ARRAY), "\n";
 echo token_name(T_CLASS_C), "\n";
 echo token_name(T_FUNC_C), "\n";
+echo token_name(T_PROPERTY_C), "\n";
 echo token_name(T_METHOD_C), "\n";
 echo token_name(T_LINE), "\n";
 echo token_name(T_FILE), "\n";
@@ -223,6 +224,7 @@ T_LIST
 T_ARRAY
 T_CLASS_C
 T_FUNC_C
+T_PROPERTY_C
 T_METHOD_C
 T_LINE
 T_FILE

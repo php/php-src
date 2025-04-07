@@ -349,14 +349,15 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
+	ssize_t bytes_written;
 
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
-		ssize_t bytes_written = _write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
+		bytes_written = _write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
 #else
-		ssize_t bytes_written = write(data->fd, buf, count);
+		bytes_written = write(data->fd, buf, count);
 #endif
 		if (bytes_written < 0) {
 			if (PHP_IS_TRANSIENT_ERROR(errno)) {
@@ -370,7 +371,6 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 				php_error_docref(NULL, E_NOTICE, "Write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
 			}
 		}
-		return bytes_written;
 	} else {
 
 #ifdef HAVE_FLUSHIO
@@ -380,8 +380,15 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 		data->last_op = 'w';
 #endif
 
-		return (ssize_t) fwrite(buf, 1, count, data->file);
+		bytes_written = (ssize_t) fwrite(buf, 1, count, data->file);
 	}
+
+	if (EG(active)) {
+		/* clear stat cache as mtime and ctime got changed */
+		php_clear_stat_cache(0, NULL, 0);
+	}
+
+	return bytes_written;
 }
 
 static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
@@ -460,6 +467,12 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 
 		stream->eof = feof(data->file);
 	}
+
+	if (EG(active)) {
+		/* clear stat cache as atime got changed */
+		php_clear_stat_cache(0, NULL, 0);
+	}
+
 	return ret;
 }
 
@@ -540,6 +553,10 @@ static int php_stdiop_flush(php_stream *stream)
 	 * something completely different.
 	 */
 	if (data->file) {
+		if (EG(active)) {
+			/* clear stat cache as there might be a write so mtime and ctime might have changed */
+			php_clear_stat_cache(0, NULL, 0);
+		}
 		return fflush(data->file);
 	}
 	return 0;
@@ -1028,7 +1045,12 @@ static ssize_t php_plain_files_dirstream_read(php_stream *stream, char *buf, siz
 
 	result = readdir(dir);
 	if (result) {
-		PHP_STRLCPY(ent->d_name, result->d_name, sizeof(ent->d_name), strlen(result->d_name));
+		size_t len = strlen(result->d_name);
+		if (UNEXPECTED(len >= sizeof(ent->d_name))) {
+			return -1;
+		}
+		/* Include null byte */
+		memcpy(ent->d_name, result->d_name, len+1);
 #ifdef _DIRENT_HAVE_D_TYPE
 		ent->d_type = result->d_type;
 #else
@@ -1152,6 +1174,12 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 			 * (unless the file has been opened in
 			 * O_APPEND mode) */
 			ret = php_stream_fopen_from_fd_rel(fd, mode, persistent_id, (open_flags & O_APPEND) == 0);
+		}
+
+		if (EG(active)) {
+			/* clear stat cache as mtime and ctime might got changed - phar can use stream before
+			 * cache is initialized so we need to check if the execution is active. */
+			php_clear_stat_cache(0, NULL, 0);
 		}
 
 		if (ret)	{
@@ -1374,7 +1402,17 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	}
 
 	if (!(options & PHP_STREAM_MKDIR_RECURSIVE)) {
-		return php_mkdir(dir, mode) == 0;
+		if (php_check_open_basedir(dir)) {
+			return 0;
+		}
+
+		int ret = VCWD_MKDIR(dir, (mode_t)mode);
+		if (ret < 0 && (options & REPORT_ERRORS)) {
+			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+			return 0;
+		}
+
+		return 1;
 	}
 
 	char buf[MAXPATHLEN];

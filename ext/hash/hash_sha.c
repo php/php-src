@@ -17,6 +17,7 @@
 
 #include "php_hash.h"
 #include "php_hash_sha.h"
+#include "Zend/zend_cpuinfo.h"
 
 static const unsigned char PADDING[128] =
 {
@@ -160,6 +161,24 @@ PHP_HASH_API void PHP_SHA256InitArgs(PHP_SHA256_CTX * context, ZEND_ATTRIBUTE_UN
  */
 static void SHA256Transform(uint32_t state[8], const unsigned char block[64])
 {
+#if defined(PHP_HASH_INTRIN_SHA_NATIVE)
+	SHA256_Transform_shani(state, block);
+	return;
+#elif defined(PHP_HASH_INTRIN_SHA_RESOLVER)
+	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSSE3) && zend_cpu_supports(ZEND_CPU_FEATURE_SHA)) {
+		SHA256_Transform_shani(state, block);
+		return;
+	}
+#endif
+
+#if defined(__SSE2__)
+	uint32_t tmp32[72];
+
+	SHA256_Transform_sse2(state, block, &tmp32[0], &tmp32[64]);
+	ZEND_SECURE_ZERO((unsigned char*) tmp32, sizeof(tmp32));
+	return;
+#endif
+
 	uint32_t a = state[0], b = state[1], c = state[2], d = state[3];
 	uint32_t e = state[4], f = state[5], g = state[6], h = state[7];
 	uint32_t x[16], T1, T2, W[64];

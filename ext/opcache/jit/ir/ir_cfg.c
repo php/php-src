@@ -8,6 +8,8 @@
 #include "ir.h"
 #include "ir_private.h"
 
+static int ir_remove_unreachable_blocks(ir_ctx *ctx);
+
 IR_ALWAYS_INLINE void _ir_add_successors(const ir_ctx *ctx, ir_ref ref, ir_worklist *worklist)
 {
 	ir_use_list *use_list = &ctx->use_lists[ref];
@@ -57,9 +59,27 @@ IR_ALWAYS_INLINE void _ir_add_predecessors(const ir_insn *insn, ir_worklist *wor
 	}
 }
 
+void ir_reset_cfg(ir_ctx *ctx)
+{
+	ctx->cfg_blocks_count = 0;
+	ctx->cfg_edges_count = 0;
+	if (ctx->cfg_blocks) {
+		ir_mem_free(ctx->cfg_blocks);
+		ctx->cfg_blocks = NULL;
+		if (ctx->cfg_edges) {
+			ir_mem_free(ctx->cfg_edges);
+			ctx->cfg_edges = NULL;
+		}
+		if (ctx->cfg_map) {
+			ir_mem_free(ctx->cfg_map);
+			ctx->cfg_map = NULL;
+		}
+	}
+}
+
 int ir_build_cfg(ir_ctx *ctx)
 {
-	ir_ref n, *p, ref, start, end, next;
+	ir_ref n, *p, ref, start, end;
 	uint32_t b;
 	ir_insn *insn;
 	ir_worklist worklist;
@@ -72,7 +92,7 @@ int ir_build_cfg(ir_ctx *ctx)
 	uint32_t len = ir_bitset_len(ctx->insns_count);
 	ir_bitset bb_starts = ir_mem_calloc(len * 2, IR_BITSET_BITS / 8);
 	ir_bitset bb_leaks = bb_starts + len;
-	_blocks = ir_mem_calloc(ctx->insns_count, sizeof(uint32_t));
+	_blocks = ir_mem_calloc(ctx->insns_limit, sizeof(uint32_t));
 	ir_worklist_init(&worklist, ctx->insns_count);
 
 	/* First try to perform backward DFS search starting from "stop" nodes */
@@ -97,7 +117,7 @@ int ir_build_cfg(ir_ctx *ctx)
 		/* Some successors of IF and SWITCH nodes may be inaccessible by backward DFS */
 		use_list = &ctx->use_lists[end];
 		n = use_list->count;
-		if (n > 1) {
+		if (n > 1 || (n == 1 && (ir_op_flags[insn->op] & IR_OP_FLAG_TERMINATOR) != 0)) {
 			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 				/* Remember possible inaccessible successors */
 				ir_bitset_incl(bb_leaks, *p);
@@ -145,18 +165,8 @@ int ir_build_cfg(ir_ctx *ctx)
 			start = ref;
 			/* Skip control nodes untill BB end */
 			while (1) {
-				use_list = &ctx->use_lists[ref];
-				n = use_list->count;
-				next = IR_UNUSED;
-				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
-					next = *p;
-					insn = &ctx->ir_base[next];
-					if ((ir_op_flags[insn->op] & IR_OP_FLAG_CONTROL) && insn->op1 == ref) {
-						break;
-					}
-				}
-				IR_ASSERT(next != IR_UNUSED);
-				ref = next;
+				ref = ir_next_control(ctx, ref);
+				insn = &ctx->ir_base[ref];
 				if (IR_IS_BB_END(insn->op)) {
 					break;
 				}
@@ -245,6 +255,7 @@ int ir_build_cfg(ir_ctx *ctx)
 				IR_ASSERT(ref);
 				ir_ref pred_b = _blocks[ref];
 				ir_block *pred_bb = &blocks[pred_b];
+				IR_ASSERT(pred_b > 0);
 				*q = pred_b;
 				edges[pred_bb->successors + pred_bb->successors_count++] = b;
 			}
@@ -317,7 +328,7 @@ static void ir_remove_predecessor(ir_ctx *ctx, ir_block *bb, uint32_t from)
 
 static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 {
-	ir_ref i, j, n, k, *p, use;
+	ir_ref i, j, n, k, *p, *q, use;
 	ir_insn *use_insn;
 	ir_use_list *use_list;
 	ir_bitset life_inputs;
@@ -339,12 +350,16 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 		}
 	}
 	i--;
+	for (j = i + 1; j <= n; j++) {
+		ir_insn_set_op(insn, j, IR_UNUSED);
+	}
 	if (i == 1) {
 		insn->op = IR_BEGIN;
 		insn->inputs_count = 1;
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
-			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+			n++;
+			for (k = use_list->count, p = q = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
 				if (use_insn->op == IR_PHI) {
@@ -356,23 +371,39 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 						if (ir_bitset_in(life_inputs, j - 1)) {
 							use_insn->op1 = ir_insn_op(use_insn, j);
 						} else if (input > 0) {
-							ir_use_list_remove_all(ctx, input, use);
+							ir_use_list_remove_one(ctx, input, use);
 						}
 					}
 					use_insn->op = IR_COPY;
-					use_insn->op2 = IR_UNUSED;
-					use_insn->op3 = IR_UNUSED;
-					ir_use_list_remove_all(ctx, merge, use);
+					use_insn->inputs_count = 1;
+					for (j = 2; j <= n; j++) {
+						ir_insn_set_op(use_insn, j, IR_UNUSED);
+					}
+					continue;
 				}
+
+				/*compact use list */
+				if (p != q){
+					*q = use;
+				}
+				q++;
+			}
+
+			if (p != q) {
+				use_list->count -= (p - q);
+				do {
+					*q = IR_UNUSED; /* clenu-op the removed tail */
+					q++;
+				} while (p != q);
 			}
 		}
 	} else {
 		insn->inputs_count = i;
 
-		n++;
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
-			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+			n++;
+			for (k = use_list->count, p = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
 				if (use_insn->op == IR_PHI) {
@@ -387,8 +418,12 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 							}
 							i++;
 						} else if (input > 0) {
-							ir_use_list_remove_all(ctx, input, use);
+							ir_use_list_remove_one(ctx, input, use);
 						}
+					}
+					use_insn->inputs_count = i - 1;
+					for (j = i; j <= n; j++) {
+						ir_insn_set_op(use_insn, j, IR_UNUSED);
 					}
 				}
 			}
@@ -399,7 +434,7 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 }
 
 /* CFG constructed after SCCP pass doesn't have unreachable BBs, otherwise they should be removed */
-int ir_remove_unreachable_blocks(ir_ctx *ctx)
+static int ir_remove_unreachable_blocks(ir_ctx *ctx)
 {
 	uint32_t b, *p, i;
 	uint32_t unreachable_count = 0;
@@ -661,7 +696,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		uint32_t idom = *p;
 		ir_block *idom_bb;
 
-		if (UNEXPECTED(idom > b)) {
+		if (UNEXPECTED(idom >= b)) {
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
 			ctx->flags2 &= ~IR_NO_LOOPS;
 			IR_ASSERT(k > 1 && "Wrong blocks order: BB is before its single predecessor");
@@ -1032,6 +1067,20 @@ next:
 				bb->loop_depth = loop_depth;
 				if (bb->flags & (IR_BB_ENTRY|IR_BB_LOOP_WITH_ENTRY)) {
 					loop->flags |= IR_BB_LOOP_WITH_ENTRY;
+					if (loop_depth > 1) {
+						/* Set IR_BB_LOOP_WITH_ENTRY flag for all the enclosing loops */
+						bb = &blocks[loop->loop_header];
+						while (1) {
+							if (bb->flags & IR_BB_LOOP_WITH_ENTRY) {
+								break;
+							}
+							bb->flags |= IR_BB_LOOP_WITH_ENTRY;
+							if (bb->loop_depth == 1) {
+								break;
+							}
+							bb = &blocks[loop->loop_header];
+						}
+					}
 				}
 			}
 		}

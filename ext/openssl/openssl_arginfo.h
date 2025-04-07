@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1867498c895461f81aad433c21cf899ffdb65b3d */
+ * Stub hash: 32bd0ec5db046bfe3bba8a5d3fe1c0c51ff89e00 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -93,7 +93,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_sign, 0, 4, Open
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, serial_hex, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_new, 0, 2, OpenSSLCertificateSigningRequest, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_new, 0, 2, OpenSSLCertificateSigningRequest, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, distinguished_names, IS_ARRAY, 0)
 	ZEND_ARG_INFO(1, private_key)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
@@ -388,6 +388,20 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_cert_locations, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_OPENSSL_ARGON2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_hash, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, hash, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(openssl_x509_export_to_file);
 ZEND_FUNCTION(openssl_x509_export);
 ZEND_FUNCTION(openssl_x509_fingerprint);
@@ -451,6 +465,10 @@ ZEND_FUNCTION(openssl_spki_verify);
 ZEND_FUNCTION(openssl_spki_export);
 ZEND_FUNCTION(openssl_spki_export_challenge);
 ZEND_FUNCTION(openssl_get_cert_locations);
+#if defined(HAVE_OPENSSL_ARGON2)
+ZEND_FUNCTION(openssl_password_hash);
+ZEND_FUNCTION(openssl_password_verify);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_export_to_file, arginfo_openssl_x509_export_to_file)
@@ -519,18 +537,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_spki_export, arginfo_openssl_spki_export)
 	ZEND_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
 	ZEND_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_OpenSSLCertificate_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_OpenSSLCertificateSigningRequest_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_OpenSSLAsymmetricKey_methods[] = {
+#if defined(HAVE_OPENSSL_ARGON2)
+	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
+	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
+#endif
 	ZEND_FE_END
 };
 
@@ -648,6 +658,18 @@ static void register_openssl_symbols(int module_number)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_x509_check_private_key", sizeof("openssl_x509_check_private_key") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
+	zend_attribute *attribute_Deprecated_func_openssl_x509_free_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_x509_free", sizeof("openssl_x509_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_openssl_x509_free_0_arg0;
+	zend_string *attribute_Deprecated_func_openssl_x509_free_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_openssl_x509_free_0_arg0, attribute_Deprecated_func_openssl_x509_free_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_openssl_x509_free_0->args[0].value, &attribute_Deprecated_func_openssl_x509_free_0_arg0);
+	attribute_Deprecated_func_openssl_x509_free_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_openssl_x509_free_0_arg1;
+	zend_string *attribute_Deprecated_func_openssl_x509_free_0_arg1_str = zend_string_init("as OpenSSLCertificate objects are freed automatically", strlen("as OpenSSLCertificate objects are freed automatically"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_openssl_x509_free_0_arg1, attribute_Deprecated_func_openssl_x509_free_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_openssl_x509_free_0->args[1].value, &attribute_Deprecated_func_openssl_x509_free_0_arg1);
+	attribute_Deprecated_func_openssl_x509_free_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export_to_file", sizeof("openssl_pkcs12_export_to_file") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export_to_file", sizeof("openssl_pkcs12_export_to_file") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
@@ -669,6 +691,30 @@ static void register_openssl_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export", sizeof("openssl_pkey_export") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export", sizeof("openssl_pkey_export") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_openssl_pkey_free_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_free", sizeof("openssl_pkey_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_openssl_pkey_free_0_arg0;
+	zend_string *attribute_Deprecated_func_openssl_pkey_free_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_openssl_pkey_free_0_arg0, attribute_Deprecated_func_openssl_pkey_free_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_openssl_pkey_free_0->args[0].value, &attribute_Deprecated_func_openssl_pkey_free_0_arg0);
+	attribute_Deprecated_func_openssl_pkey_free_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_openssl_pkey_free_0_arg1;
+	zend_string *attribute_Deprecated_func_openssl_pkey_free_0_arg1_str = zend_string_init("as OpenSSLAsymmetricKey objects are freed automatically", strlen("as OpenSSLAsymmetricKey objects are freed automatically"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_openssl_pkey_free_0_arg1, attribute_Deprecated_func_openssl_pkey_free_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_openssl_pkey_free_0->args[1].value, &attribute_Deprecated_func_openssl_pkey_free_0_arg1);
+	attribute_Deprecated_func_openssl_pkey_free_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_openssl_free_key_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_free_key", sizeof("openssl_free_key") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_openssl_free_key_0_arg0;
+	zend_string *attribute_Deprecated_func_openssl_free_key_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_openssl_free_key_0_arg0, attribute_Deprecated_func_openssl_free_key_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_openssl_free_key_0->args[0].value, &attribute_Deprecated_func_openssl_free_key_0_arg0);
+	attribute_Deprecated_func_openssl_free_key_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_openssl_free_key_0_arg1;
+	zend_string *attribute_Deprecated_func_openssl_free_key_0_arg1_str = zend_string_init("as OpenSSLAsymmetricKey objects are freed automatically", strlen("as OpenSSLAsymmetricKey objects are freed automatically"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_openssl_free_key_0_arg1, attribute_Deprecated_func_openssl_free_key_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_openssl_free_key_0->args[1].value, &attribute_Deprecated_func_openssl_free_key_0_arg1);
+	attribute_Deprecated_func_openssl_free_key_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_get_private", sizeof("openssl_pkey_get_private") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
@@ -723,15 +769,20 @@ static void register_openssl_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_derive", sizeof("openssl_pkey_derive") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_spki_new", sizeof("openssl_spki_new") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(HAVE_OPENSSL_ARGON2)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_password_hash", sizeof("openssl_password_hash") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_password_verify", sizeof("openssl_password_verify") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
 }
 
 static zend_class_entry *register_class_OpenSSLCertificate(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "OpenSSLCertificate", class_OpenSSLCertificate_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "OpenSSLCertificate", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -740,9 +791,8 @@ static zend_class_entry *register_class_OpenSSLCertificateSigningRequest(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "OpenSSLCertificateSigningRequest", class_OpenSSLCertificateSigningRequest_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "OpenSSLCertificateSigningRequest", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -751,9 +801,8 @@ static zend_class_entry *register_class_OpenSSLAsymmetricKey(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "OpenSSLAsymmetricKey", class_OpenSSLAsymmetricKey_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "OpenSSLAsymmetricKey", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

@@ -390,7 +390,8 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 	size_t n = 0;
 	zval *hash_entry;
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-		zend_string *encoding_str = zval_try_get_string(hash_entry);
+		zend_string *tmp_encoding_str;
+		zend_string *encoding_str = zval_try_get_tmp_string(hash_entry, &tmp_encoding_str);
 		if (UNEXPECTED(!encoding_str)) {
 			efree(ZEND_VOIDP(list));
 			return FAILURE;
@@ -415,12 +416,12 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 				n++;
 			} else {
 				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
-				zend_string_release(encoding_str);
+				zend_tmp_string_release(tmp_encoding_str);
 				efree(ZEND_VOIDP(list));
 				return FAILURE;
 			}
 		}
-		zend_string_release(encoding_str);
+		zend_tmp_string_release(tmp_encoding_str);
 	} ZEND_HASH_FOREACH_END();
 	*return_list = list;
 	*return_size = n;
@@ -1572,7 +1573,9 @@ PHP_FUNCTION(mb_output_handler)
 		char *mimetype = NULL;
 
 		/* Analyze mime type */
-		if (SG(sapi_headers).mimetype && _php_mb_match_regex(MBSTRG(http_output_conv_mimetypes), SG(sapi_headers).mimetype, strlen(SG(sapi_headers).mimetype))) {
+		if (SG(sapi_headers).mimetype
+		 && MBSTRG(http_output_conv_mimetypes)
+		 && _php_mb_match_regex(MBSTRG(http_output_conv_mimetypes), SG(sapi_headers).mimetype, strlen(SG(sapi_headers).mimetype))) {
 			char *s;
 			if ((s = strchr(SG(sapi_headers).mimetype, ';')) == NULL) {
 				mimetype = estrdup(SG(sapi_headers).mimetype);
@@ -2238,7 +2241,7 @@ PHP_FUNCTION(mb_substr_count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(needle) == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -2278,7 +2281,7 @@ PHP_FUNCTION(mb_substr_count)
 		if (ZSTR_LEN(needle_u8) == 0) {
 			zend_string_free(haystack_u8);
 			zend_string_free(needle_u8);
-			zend_argument_value_error(2, "must not be empty");
+			zend_argument_must_not_be_empty_error(2);
 			RETURN_THROWS();
 		}
 	}
@@ -2325,6 +2328,16 @@ PHP_FUNCTION(mb_substr)
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (from == ZEND_LONG_MIN) {
+		zend_argument_value_error(2, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (ZEND_LONG_MIN + 1), ZEND_LONG_MAX);
+		RETURN_THROWS();
+	}
+
+	if (!len_is_null && len == ZEND_LONG_MIN) {
+		zend_argument_value_error(3, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (ZEND_LONG_MIN + 1), ZEND_LONG_MAX);
+		RETURN_THROWS();
+	}
 
 	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 4);
 	if (!enc) {
@@ -3338,7 +3351,8 @@ try_next_encoding:;
 	}
 
 	for (size_t i = 0; i < length; i++) {
-		array[i].demerits *= array[i].multiplier;
+		double demerits = array[i].demerits * (double) array[i].multiplier;
+		array[i].demerits = demerits < (double) UINT64_MAX ? (uint64_t) demerits : UINT64_MAX;
 	}
 
 	return length;
@@ -3770,7 +3784,22 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 
 		HashTable *ht = HASH_OF(var);
 		if (ht != NULL) {
-			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
+			ZEND_HASH_FOREACH_VAL(ht, entry) {
+				/* Can be a typed property declaration, in which case we need to remove the reference from the source list.
+				 * Just using ZEND_TRY_ASSIGN_STRINGL is not sufficient because that would not unwrap the reference
+				 * and change values through references (see bug #26639). */
+				if (Z_TYPE_P(entry) == IS_INDIRECT) {
+					ZEND_ASSERT(Z_TYPE_P(var) == IS_OBJECT);
+
+					entry = Z_INDIRECT_P(entry);
+					if (Z_ISREF_P(entry) && Z_TYPE_P(Z_REFVAL_P(entry)) == IS_STRING) {
+						zend_property_info *info = zend_get_typed_property_info_for_slot(Z_OBJ_P(var), entry);
+						if (info) {
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(entry), info);
+						}
+					}
+				}
+
 				if (mb_recursive_convert_variable(entry, from_encoding, to_encoding)) {
 					if (Z_REFCOUNTED_P(var)) {
 						Z_UNPROTECT_RECURSION_P(var);
@@ -4444,7 +4473,6 @@ PHP_FUNCTION(mb_send_mail)
 	bool suppress_content_transfer_encoding = false;
 
 	char *p;
-	enum mbfl_no_encoding;
 	const mbfl_encoding *tran_cs,	/* transfer text charset */
 						*head_enc,	/* header transfer encoding */
 						*body_enc;	/* body transfer encoding */
@@ -4607,7 +4635,7 @@ PHP_FUNCTION(mb_send_mail)
 	smart_str str = {0};
 	bool empty = true;
 
-	if (str_headers != NULL) {
+	if (str_headers != NULL && ZSTR_LEN(str_headers) > 0) {
 		/* Strip trailing CRLF from `str_headers`; we will add CRLF back if necessary */
 		size_t len = ZSTR_LEN(str_headers);
 		if (ZSTR_VAL(str_headers)[len-1] == '\n') {
@@ -5673,7 +5701,7 @@ PHP_FUNCTION(mb_ord)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -5810,7 +5838,7 @@ PHP_FUNCTION(mb_str_pad)
 	}
 
 	if (ZSTR_LEN(pad) == 0) {
-		zend_argument_value_error(3, "must be a non-empty string");
+		zend_argument_must_not_be_empty_error(3);
 		RETURN_THROWS();
 	}
 

@@ -1968,6 +1968,10 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 					/* TODO: support for array keys and ($str . "")*/   \
 					__type |= MAY_BE_RCN;                               \
 				}                                                       \
+				if ((__type & MAY_BE_RC1) && (__type & MAY_BE_OBJECT)) {\
+					/* TODO: object may be captured by magic handlers */\
+					__type |= MAY_BE_RCN;                               \
+				}                                                       \
 				if (__ssa_var->alias) {									\
 					__type |= get_ssa_alias_types(__ssa_var->alias);	\
 				}														\
@@ -3959,6 +3963,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 			} else {
 				zend_arg_info *ret_info = op_array->arg_info - 1;
 				tmp = zend_fetch_arg_info_type(script, ret_info, &ce);
+				if ((tmp & MAY_BE_NULL) && opline->op1_type == IS_CV) {
+					tmp |= MAY_BE_UNDEF;
+				}
 				tmp |= (t1 & MAY_BE_INDIRECT);
 
 				// TODO: We could model more precisely how illegal types are converted.
@@ -4056,11 +4063,11 @@ static zend_always_inline zend_result _zend_update_type_info(
 				fprintf(stderr, "Missing op2 type inference for opcode %s, line %d\n", zend_get_opcode_name(opline->opcode), opline->lineno);
 			}
 #endif
-unknown_opcode:
 			if (ssa_op->op1_def >= 0) {
 				tmp = MAY_BE_ANY | MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			}
+unknown_opcode:
 			if (ssa_op->result_def >= 0) {
 				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				if (opline->result_type == IS_TMP_VAR) {
@@ -4998,8 +5005,6 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 
 	switch (opline->opcode) {
 		case ZEND_NOP:
-		case ZEND_IS_IDENTICAL:
-		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP:
 		case ZEND_CHECK_VAR:
@@ -5021,10 +5026,14 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
 		case ZEND_COPY_TMP:
-		case ZEND_CASE_STRICT:
 		case ZEND_JMP_NULL:
 		case ZEND_JMP_FRAMELESS:
 			return 0;
+		case ZEND_IS_IDENTICAL:
+		case ZEND_IS_NOT_IDENTICAL:
+		case ZEND_CASE_STRICT:
+			/* Array to array comparison may lead to recursion. */
+			return (t1 & t2) & MAY_BE_ARRAY_OF_ARRAY;
 		case ZEND_SEND_VAR:
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_REF:
@@ -5038,7 +5047,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			return 0;
 		case ZEND_BIND_GLOBAL:
 			if ((opline+1)->opcode == ZEND_BIND_GLOBAL) {
-				return zend_may_throw(opline + 1, ssa_op + 1, op_array, ssa);
+				return zend_may_throw(opline + 1, ssa_op ? ssa_op + 1 : NULL, op_array, ssa);
 			}
 			return 0;
 		case ZEND_ADD:

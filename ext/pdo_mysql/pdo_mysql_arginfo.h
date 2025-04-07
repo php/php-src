@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 065388b9ae5ffe9feb14fc4738ea5df66e0cf755 */
+ * Stub hash: 9d2c0327499693f1ca2825a9ad42ad769f44a24a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Mysql_getWarningCount, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -11,13 +11,12 @@ static const zend_function_entry class_Pdo_Mysql_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_Pdo_Mysql(zend_class_entry *class_entry_Pdo_PDO)
+static zend_class_entry *register_class_Pdo_Mysql(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Mysql", class_Pdo_Mysql_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Pdo_PDO);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_USE_BUFFERED_QUERY_value;
 	ZVAL_LONG(&const_ATTR_USE_BUFFERED_QUERY_value, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);
@@ -68,7 +67,7 @@ static zend_class_entry *register_class_Pdo_Mysql(zend_class_entry *class_entry_
 	zend_string_release(const_ATTR_COMPRESS_name);
 
 	zval const_ATTR_DIRECT_QUERY_value;
-	ZVAL_LONG(&const_ATTR_DIRECT_QUERY_value, PDO_MYSQL_ATTR_DIRECT_QUERY);
+	ZVAL_LONG(&const_ATTR_DIRECT_QUERY_value, PDO_ATTR_EMULATE_PREPARES);
 	zend_string *const_ATTR_DIRECT_QUERY_name = zend_string_init_interned("ATTR_DIRECT_QUERY", sizeof("ATTR_DIRECT_QUERY") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_DIRECT_QUERY_name, &const_ATTR_DIRECT_QUERY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_DIRECT_QUERY_name);

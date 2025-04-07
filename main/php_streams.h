@@ -107,11 +107,7 @@ typedef struct _php_stream_statbuf {
 } php_stream_statbuf;
 
 typedef struct _php_stream_dirent {
-#ifdef NAME_MAX
-	char d_name[NAME_MAX + 1];
-#else
 	char d_name[MAXPATHLEN];
-#endif
 	unsigned char d_type;
 } php_stream_dirent;
 
@@ -289,7 +285,50 @@ END_EXTERN_C()
 #define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), "stream", php_file_le_stream(), php_file_le_pstream())
 #define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", php_file_le_stream(), php_file_le_pstream())
 
+static zend_always_inline php_stream* php_stream_from_zval_no_verify_no_error(zval *zval) {
+	return (php_stream*)zend_fetch_resource2_ex(zval, NULL, php_file_le_stream(), php_file_le_pstream());
+}
+
 BEGIN_EXTERN_C()
+
+static zend_always_inline bool php_stream_zend_parse_arg_into_stream(
+	zval *arg,
+	php_stream **destination_stream_ptr,
+	bool check_null,
+	uint32_t arg_num
+) {
+	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
+		zend_resource *res = Z_RES_P(arg);
+		/* We do not use zend_fetch_resource2() API,
+		 * as we want to be able to specify the argument number in the type error */
+		if (EXPECTED(res->type == php_file_le_stream() || res->type == php_file_le_pstream())) {
+			*destination_stream_ptr = (php_stream*)res->ptr;
+			return true;
+		} else {
+			zend_argument_type_error(arg_num, "must be an open stream resource");
+			return false;
+		}
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*destination_stream_ptr = NULL;
+	} else {
+		return false;
+	}
+	return true;
+}
+
+#define PHP_Z_PARAM_STREAM_EX(destination_stream_ptr, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!php_stream_zend_parse_arg_into_stream(_arg, &destination_stream_ptr, check_null, _i))) { \
+		_error_code = ZPP_ERROR_FAILURE; \
+		if (!EG(exception)) { \
+			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+		} \
+		break; \
+	}
+#define PHP_Z_PARAM_STREAM(dest) PHP_Z_PARAM_STREAM_EX(dest, false)
+#define PHP_Z_PARAM_STREAM_OR_NULL(dest) PHP_Z_PARAM_STREAM_EX(dest, true)
+
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
 #define php_stream_free_enclosed(stream_enclosed, close_options) _php_stream_free_enclosed((stream_enclosed), (close_options))
 PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options);

@@ -21,5 +21,5 @@ $string_out = iconv($in_charset, $out_charset, $string_to_translate);
 
 var_dump($string_out);
 ?>
---EXPECT--
-string(15) "Zlutoucky kun\n"
+--EXPECTF--
+string(1%d) "Zlutouck%Sy kun\n"

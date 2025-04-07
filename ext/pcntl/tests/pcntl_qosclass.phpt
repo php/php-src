@@ -9,10 +9,10 @@ if (getenv('SKIP_REPEAT')) die("skip Not repeatable");
 ?>
 --FILE--
 <?php
-pcntl_setqos_class(QosClass::Default);
-var_dump(QosClass::Default === pcntl_getqos_class());
-pcntl_setqos_class(QosClass::Background);
-var_dump(QosClass::Background == pcntl_getqos_class());
+pcntl_setqos_class(Pcntl\QosClass::Default);
+var_dump(Pcntl\QosClass::Default === pcntl_getqos_class());
+pcntl_setqos_class(Pcntl\QosClass::Background);
+var_dump(Pcntl\QosClass::Background == pcntl_getqos_class());
 ?>
 --EXPECT--
 bool(true)

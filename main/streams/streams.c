@@ -1382,9 +1382,18 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 		switch(whence) {
 			case SEEK_CUR:
-				offset = stream->position + offset;
-				whence = SEEK_SET;
+				ZEND_ASSERT(stream->position >= 0);
+				if (UNEXPECTED(offset > ZEND_LONG_MAX - stream->position)) {
+					offset = ZEND_LONG_MAX;
+				} else {
+					offset = stream->position + offset;
+				}
+ 				whence = SEEK_SET;
 				break;
+			case SEEK_SET:
+				if (offset < 0) {
+					return -1;
+				}
 		}
 		ret = stream->ops->seek(stream, offset, whence, &stream->position);
 
@@ -2194,7 +2203,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (!path || !*path) {
-		zend_value_error("Path cannot be empty");
+		zend_value_error("Path must not be empty");
 		return NULL;
 	}
 
@@ -2211,6 +2220,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			options &= ~USE_PATH;
 		}
 		if (EG(exception)) {
+			if (resolved_path) {
+				zend_string_release_ex(resolved_path, false);
+			}
 			return NULL;
 		}
 	}
@@ -2461,25 +2473,19 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 				vector_size = 10;
 			} else {
 				if(vector_size*2 < vector_size) {
-					/* overflow */
-					php_stream_closedir(stream);
-					efree(vector);
-					return -1;
+					goto overflow;
 				}
 				vector_size *= 2;
 			}
-			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
+			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(zend_string *), 0);
 		}
 
 		vector[nfiles] = zend_string_init(sdp.d_name, strlen(sdp.d_name), 0);
 
-		nfiles++;
-		if(vector_size < 10 || nfiles == 0) {
-			/* overflow */
-			php_stream_closedir(stream);
-			efree(vector);
-			return -1;
+		if(vector_size < 10 || nfiles + 1 == 0) {
+			goto overflow;
 		}
+		nfiles++;
 	}
 	php_stream_closedir(stream);
 
@@ -2489,5 +2495,13 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 		qsort(*namelist, nfiles, sizeof(zend_string *), (int(*)(const void *, const void *))compare);
 	}
 	return nfiles;
+
+overflow:
+	php_stream_closedir(stream);
+	for (unsigned int i = 0; i < nfiles; i++) {
+		zend_string_efree(vector[i]);
+	}
+	efree(vector);
+	return -1;
 }
 /* }}} */

@@ -2,6 +2,7 @@
 Test trampoline for curl option CURLMOPT_PUSHFUNCTION
 --EXTENSIONS--
 curl
+--XFAIL--
 --SKIPIF--
 <?php
 include 'skipif-nocaddy.inc';
@@ -59,6 +60,7 @@ sort($responses);
 print_r($responses);
 ?>
 --EXPECT--
+Trampoline for trampoline
 Array
 (
     [0] => main response

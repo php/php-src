@@ -374,26 +374,38 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 
 		if (s) {			/* if there is no path name after the file, do not bother */
 			char user[32];			/* to try open the directory */
-			struct passwd *pw;
-#if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
-			struct passwd pwstruc;
-			long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-			char *pwbuf;
 
-			if (pwbuflen < 1) {
-				return FAILURE;
-			}
-
-			pwbuf = emalloc(pwbuflen);
-#endif
 			length = s - (path_info + 2);
 			if (length > sizeof(user) - 1) {
 				length = sizeof(user) - 1;
 			}
 			memcpy(user, path_info + 2, length);
 			user[length] = '\0';
+
+			struct passwd *pw;
 #if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
-			if (getpwnam_r(user, &pwstruc, pwbuf, pwbuflen, &pw)) {
+			struct passwd pwstruc;
+			long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+			char *pwbuf;
+			int err;
+
+			if (pwbuflen < 1) {
+				pwbuflen = 1024;
+			}
+# if ZEND_DEBUG
+			/* Test retry logic */
+			pwbuflen = 1;
+# endif
+			pwbuf = emalloc(pwbuflen);
+
+try_again:
+			err = getpwnam_r(user, &pwstruc, pwbuf, pwbuflen, &pw);
+			if (err) {
+				if (err == ERANGE) {
+					pwbuflen *= 2;
+					pwbuf = erealloc(pwbuf, pwbuflen);
+					goto try_again;
+				}
 				efree(pwbuf);
 				return FAILURE;
 			}
@@ -519,7 +531,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
 		   might be a big thing to extend, thus just a local handling for
 		   now. */
-		filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
+		(filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1])) ||
 #endif
 	    !path ||
 	    !*path) {
@@ -591,7 +603,13 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		const char *exec_fname = ZSTR_VAL(exec_filename);
 		size_t exec_fname_length = ZSTR_LEN(exec_filename);
 
-		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
+		while (exec_fname_length > 0) {
+			--exec_fname_length;
+			if (IS_SLASH(exec_fname[exec_fname_length])) {
+				break;
+			}
+		}
+
 		if (exec_fname_length > 0 &&
 			filename_length < (MAXPATHLEN - 2) &&
 		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {

@@ -43,7 +43,7 @@ END_EXTERN_C()
 
    The current macros are currently only used on x86 and x86_64 architectures,
    on every other architecture, these macros expand to NOPs. This assumes that
-   other architectures do not have an internal precision and the operhand types
+   other architectures do not have an internal precision and the operand types
    define the computational precision of floating point operations. This
    assumption may be false, in that case, the author is interested in further
    details on the other platform.

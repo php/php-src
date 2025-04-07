@@ -30,6 +30,8 @@ ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 ZEND_API zend_class_entry *zend_ce_override;
+ZEND_API zend_class_entry *zend_ce_deprecated;
+ZEND_API zend_class_entry *zend_ce_nodiscard;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -71,13 +73,22 @@ static void validate_allow_dynamic_properties(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
-		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to trait");
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to trait %s",
+			ZSTR_VAL(scope->name)
+		);
 	}
 	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to interface");
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to interface %s",
+			ZSTR_VAL(scope->name)
+		);
 	}
 	if (scope->ce_flags & ZEND_ACC_READONLY_CLASS) {
 		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to readonly class %s",
+			ZSTR_VAL(scope->name)
+		);
+	}
+	if (scope->ce_flags & ZEND_ACC_ENUM) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to enum %s",
 			ZSTR_VAL(scope->name)
 		);
 	}
@@ -144,6 +155,66 @@ static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_o
 ZEND_METHOD(Override, __construct)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(Deprecated, __construct)
+{
+	zend_string *message = NULL;
+	zend_string *since = NULL;
+	zval value;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+		Z_PARAM_STR_OR_NULL(since)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		ZVAL_STR(&value, message);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_deprecated, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+
+	if (since) {
+		ZVAL_STR(&value, since);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_deprecated, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_SINCE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+}
+
+ZEND_METHOD(NoDiscard, __construct)
+{
+	zend_string *message = NULL;
+	zval value;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		ZVAL_STR(&value, message);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_nodiscard, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
 }
 
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
@@ -470,6 +541,12 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_override = register_class_Override();
 	zend_mark_internal_attribute(zend_ce_override);
+
+	zend_ce_deprecated = register_class_Deprecated();
+	attr = zend_mark_internal_attribute(zend_ce_deprecated);
+
+	zend_ce_nodiscard = register_class_NoDiscard();
+	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
 }
 
 void zend_attributes_shutdown(void)

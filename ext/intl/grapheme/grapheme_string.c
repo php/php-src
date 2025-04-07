@@ -14,7 +14,7 @@
 
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <php.h>
@@ -781,6 +781,7 @@ PHP_FUNCTION(grapheme_extract)
 
 		while ( !U8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
 			pstr++;
+			start++;
 			if ( pstr >= str_end ) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 								"grapheme_extract: invalid input string", 0 );

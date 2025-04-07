@@ -61,6 +61,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_INIT_FCALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
 					script, op_array, opline, &is_prototype);
@@ -78,7 +79,8 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 
 					if (build_flags & ZEND_CALL_TREE) {
 						call_info->next_caller = NULL;
-					} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+					} else if (func->type == ZEND_INTERNAL_FUNCTION
+					 || func->op_array.filename != script->filename) {
 						call_info->next_caller = NULL;
 					} else {
 						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
@@ -160,10 +162,6 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 				if (call_info) {
 					call_info->send_unpack = 1;
 				}
-				break;
-			case ZEND_EXIT:
-				/* In this case the DO_CALL opcode may have been dropped
-				 * and caller_call_opline will be NULL. */
 				break;
 		}
 		opline++;

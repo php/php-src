@@ -24,6 +24,6 @@ try {
 var_dump(pg_change_password($conn, "inexistent_user", "postitpwd"));
 ?>
 --EXPECT--
-pg_change_password(): Argument #2 ($user) cannot be empty
-pg_change_password(): Argument #3 ($password) cannot be empty
+pg_change_password(): Argument #2 ($user) must not be empty
+pg_change_password(): Argument #3 ($password) must not be empty
 bool(false)

@@ -16,13 +16,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 
 /*
 * class DOMImplementation
@@ -63,7 +64,7 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 	}
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -266,7 +267,8 @@ PHP_METHOD(Dom_Implementation, createDocument)
 
 	xmlDocPtr document = NULL;
 	xmlChar *localname = NULL, *prefix = NULL;
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+	php_dom_private_data *private_data = php_dom_private_data_create();
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
 
 	/* 1. Let document be a new XMLDocument. */
 	document = xmlNewDoc(BAD_CAST "1.0");
@@ -307,7 +309,7 @@ PHP_METHOD(Dom_Implementation, createDocument)
 		NULL
 	);
 	dom_set_xml_class(intern->document);
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 
 	/* 4. If doctype is non-null, append doctype to document. */
 	if (doctype != NULL) {
@@ -337,7 +339,7 @@ error:
 	xmlFree(localname);
 	xmlFree(prefix);
 	xmlFreeDoc(document);
-	php_dom_libxml_ns_mapper_destroy(ns_mapper);
+	php_dom_private_data_destroy(private_data);
 	RETURN_THROWS();
 }
 /* }}} end dom_domimplementation_create_document */
@@ -366,7 +368,8 @@ PHP_METHOD(Dom_Implementation, createHTMLDocument)
 	/* 3. Append a new doctype, with "html" as its name and with its node document set to doc, to doc. */
 	xmlDtdPtr dtd = xmlCreateIntSubset(doc, BAD_CAST "html", NULL, NULL);
 
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+	php_dom_private_data *private_data = php_dom_private_data_create();
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
 	xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper);
 
 	/* 4. Append the result of creating an element given doc, html, and the HTML namespace, to doc. */
@@ -396,7 +399,7 @@ PHP_METHOD(Dom_Implementation, createHTMLDocument)
 	if (UNEXPECTED(dtd == NULL || html_element == NULL || head_element == NULL || (title != NULL && title_element == NULL) || body_element == NULL)) {
 		php_dom_throw_error(INVALID_STATE_ERR, true);
 		xmlFreeDoc(doc);
-		php_dom_libxml_ns_mapper_destroy(ns_mapper);
+		php_dom_private_data_destroy(private_data);
 		RETURN_THROWS();
 	}
 
@@ -408,25 +411,8 @@ PHP_METHOD(Dom_Implementation, createHTMLDocument)
 		NULL
 	);
 	dom_set_xml_class(intern->document);
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 }
 /* }}} */
-
-/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
-Since: DOM Level 3
-*/
-PHP_METHOD(DOMImplementation, getFeature)
-{
-	size_t feature_len, version_len;
-	char *feature, *version;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	zend_throw_error(NULL, "Not yet implemented");
-	RETURN_THROWS();
-}
-/* }}} end dom_domimplementation_get_feature */
 
 #endif

@@ -8,11 +8,12 @@ if (PHP_ODBC == "yes") {
 	&& CHECK_HEADER_ADD_INCLUDE("sql.h", "CFLAGS_ODBC")
 	&& CHECK_HEADER_ADD_INCLUDE("sqlext.h", "CFLAGS_ODBC")) {
 		EXTENSION("odbc", "php_odbc.c odbc_utils.c", PHP_ODBC_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		AC_DEFINE("HAVE_UODBC", 1, "ODBC support");
+		AC_DEFINE("HAVE_UODBC", 1, "Define to 1 if the PHP extension 'odbc' is available.");
+		AC_DEFINE("HAVE_SQLDATASOURCES", 1, "Define to 1 if ODBC library has 'SQLDataSources', as a function or macro.");
 		if ("no" == PHP_ODBCVER) {
-			AC_DEFINE("ODBCVER", "0x0350", "The highest supported ODBC version", false);
+			AC_DEFINE("ODBCVER", "0x0350", "The highest supported ODBC version.", false);
 		} else if ("0" != PHP_ODBCVER) {
-			AC_DEFINE("ODBCVER", PHP_ODBCVER, "The highest supported ODBC version", false);
+			AC_DEFINE("ODBCVER", PHP_ODBCVER, "The highest supported ODBC version.", false);
 		}
 	} else {
 		WARNING("odbc support can't be enabled, libraries or header are missing (SDK)")

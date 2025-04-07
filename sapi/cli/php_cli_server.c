@@ -24,12 +24,13 @@
 #ifdef PHP_WIN32
 # include <process.h>
 # include <io.h>
+# include "win32/console.h"
 # include "win32/time.h"
 # include "win32/signal.h"
 # include "win32/php_registry.h"
 # include <sys/timeb.h>
 #else
-# include "php_config.h"
+# include <php_config.h>
 #endif
 
 #ifdef __riscos__
@@ -94,7 +95,6 @@
 #include "zend_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_raw_url_decode() */
-#include "ext/standard/php_string.h" /* for php_dirname() */
 #include "ext/date/php_date.h" /* for php_format_date() */
 #include "php_network.h"
 
@@ -110,7 +110,7 @@
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0
 
-#if HAVE_FORK
+#ifdef HAVE_FORK
 # include <sys/wait.h>
 static pid_t	 php_cli_server_master;
 static pid_t	*php_cli_server_workers;
@@ -510,9 +510,9 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE_END
 };
 
-static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module, &cli_server_module_entry);
+	return php_module_startup(sapi_module_ptr, &cli_server_module_entry);
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -1680,14 +1680,33 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 {
 	/* Wrap header value in a zval to add is to the HashTable which acts as an array */
 	zval tmp;
-	ZVAL_STR(&tmp, client->current_header_value);
 	/* strip off the colon */
 	zend_string *lc_header_name = zend_string_tolower_ex(client->current_header_name, /* persistent */ true);
 	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
 
-	/* Add the wrapped zend_string to the HashTable */
-	zend_hash_add(&client->request.headers, lc_header_name, &tmp);
-	zend_hash_add(&client->request.headers_original_case, client->current_header_name, &tmp);
+	zval *entry = zend_hash_find(&client->request.headers, lc_header_name);
+	bool with_comma = !zend_string_equals_literal(lc_header_name, "set-cookie");
+
+	/**
+	 * `Set-Cookie` HTTP header being the exception, they can have 1 or more values separated
+	 * by a comma while still possibly be set separately by the client.
+	 **/
+	if (!with_comma || entry == NULL) {
+		ZVAL_STR(&tmp, client->current_header_value);
+	} else {
+		zend_string *curval = Z_STR_P(entry);
+		zend_string *newval = zend_string_safe_alloc(1, ZSTR_LEN(curval),  ZSTR_LEN(client->current_header_value) + 2, /* persistent */true);
+
+		memcpy(ZSTR_VAL(newval), ZSTR_VAL(curval), ZSTR_LEN(curval));
+		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval), ", ", 2);
+		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval) + 2, ZSTR_VAL(client->current_header_value), ZSTR_LEN(client->current_header_value) + 1);
+
+		ZVAL_STR(&tmp, newval);
+	}
+
+	/* Add/Update the wrapped zend_string to the HashTable */
+	zend_hash_update(&client->request.headers, lc_header_name, &tmp);
+	zend_hash_update(&client->request.headers_original_case, client->current_header_name, &tmp);
 
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
 	zend_string_release_ex(client->current_header_name, /* persistent */ true);
@@ -1927,6 +1946,8 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
 	if (NULL != (val = zend_hash_str_find(&client->request.headers, "content-type", sizeof("content-type")-1))) {
 		request_info->content_type = Z_STRVAL_P(val);
+	} else {
+		request_info->content_type = NULL;
 	}
 } /* }}} */
 
@@ -2005,7 +2026,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 		escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(client->request.request_uri), ZSTR_LEN(client->request.request_uri), 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
 		{
-			static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
+			static const char prologue_template[] = "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>%d %s</title>";
 			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
 			if (!chunk) {
 				goto fail;
@@ -2247,6 +2268,7 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 		int sg_options_back = SG(options);
 		/* Don't chdir to the router script because the file path may be relative. */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		CG(skip_shebang) = true;
 		bool result = php_execute_script_ex(&zfd, &retval);
 		SG(options) = sg_options_back;
 		if (result) {
@@ -2333,14 +2355,14 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 }
 /* }}} */
 
-static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map_ptr) /* {{{ */
 {
 	const php_cli_server_ext_mime_type_pair *pair;
 
 	zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1);
 	GC_MAKE_PERSISTENT_LOCAL(&server->extension_mime_types);
 
-	for (pair = mime_type_map; pair->ext; pair++) {
+	for (pair = mime_type_map_ptr; pair->ext; pair++) {
 		size_t ext_len = strlen(pair->ext);
 		zend_hash_str_add_ptr(&server->extension_mime_types, pair->ext, ext_len, (void*)pair->mime_type);
 	}
@@ -2362,7 +2384,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 	if (server->router) {
 		pefree(server->router, 1);
 	}
-#if HAVE_FORK
+#ifdef HAVE_FORK
 	if (php_cli_server_workers_max > 1 &&
 		php_cli_server_workers &&
 		getpid() == php_cli_server_master) {
@@ -2376,7 +2398,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 			 do {
 				if (waitpid(php_cli_server_workers[php_cli_server_worker],
 						   &php_cli_server_worker_status,
-						   0) == FAILURE) {
+						   0) == (pid_t) -1) {
 					/* an extremely bad thing happened */
 					break;
 				}
@@ -2484,7 +2506,7 @@ static void php_cli_server_startup_workers(void) {
 		return;
 	}
 
-#if HAVE_FORK
+#ifdef HAVE_FORK
 	php_cli_server_workers_max = ZEND_ATOL(workers);
 	if (php_cli_server_workers_max > 1) {
 		zend_long php_cli_server_worker;

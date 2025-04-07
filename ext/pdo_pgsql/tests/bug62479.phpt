@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #62479 (PDO-psql cannot connect if password contains spaces)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

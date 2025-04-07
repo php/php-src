@@ -88,10 +88,7 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 #endif
 
 #ifdef HAVE_GETADDRINFO
-#ifdef HAVE_GAI_STRERROR
-#  define PHP_GAI_STRERROR(x) (gai_strerror(x))
-#else
-#  define PHP_GAI_STRERROR(x) (php_gai_strerror(x))
+# if !defined(PHP_WIN32) && !defined(HAVE_GAI_STRERROR)
 /* {{{ php_gai_strerror */
 static const char *php_gai_strerror(int code)
 {
@@ -113,7 +110,9 @@ static const char *php_gai_strerror(int code)
 		{EAI_NONAME, "Name or service not known"},
 		{EAI_SERVICE, "Servname not supported for ai_socktype"},
 		{EAI_SOCKTYPE, "ai_socktype not supported"},
+#  ifdef EAI_SYSTEM
 		{EAI_SYSTEM, "System error"},
+#  endif
 		{0, NULL}
 	};
 	int i;
@@ -127,7 +126,7 @@ static const char *php_gai_strerror(int code)
 	return "Unknown error";
 }
 /* }}} */
-#endif
+# endif
 #endif
 
 /* {{{ php_network_freeaddresses */
@@ -191,16 +190,26 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 # endif
 
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
+# if defined(PHP_WIN32)
+		char *gai_error = php_win32_error_to_msg(n);
+# elif defined(HAVE_GAI_STRERROR)
+		const char *gai_error = gai_strerror(n);
+# else
+		const char *gai_error = php_gai_strerror(n)
+# endif
 		if (error_string) {
 			/* free error string received during previous iteration (if any) */
 			if (*error_string) {
 				zend_string_release_ex(*error_string, 0);
 			}
-			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, gai_error);
 			php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 		} else {
-			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, gai_error);
 		}
+# ifdef PHP_WIN32
+		php_win32_error_msg_free(gai_error);
+# endif
 		return 0;
 	} else if (res == NULL) {
 		if (error_string) {
@@ -288,6 +297,35 @@ typedef int php_non_blocking_flags_t;
 	 fcntl(sock, F_SETFL, save)
 #endif
 
+#ifdef HAVE_GETTIMEOFDAY
+/* Subtract times */
+static inline void sub_times(struct timeval a, struct timeval b, struct timeval *result)
+{
+	result->tv_usec = a.tv_usec - b.tv_usec;
+	if (result->tv_usec < 0L) {
+		a.tv_sec--;
+		result->tv_usec += 1000000L;
+	}
+	result->tv_sec = a.tv_sec - b.tv_sec;
+	if (result->tv_sec < 0L) {
+		result->tv_sec++;
+		result->tv_usec -= 1000000L;
+	}
+}
+
+static inline void php_network_set_limit_time(struct timeval *limit_time,
+		struct timeval *timeout)
+{
+	gettimeofday(limit_time, NULL);
+	limit_time->tv_sec += timeout->tv_sec;
+	limit_time->tv_usec += timeout->tv_usec;
+	if (limit_time->tv_usec >= 1000000) {
+		limit_time->tv_usec -= 1000000;
+		limit_time->tv_sec++;
+	}
+}
+#endif
+
 /* Connect to a socket using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
@@ -340,25 +378,53 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	 * expected when a connection is actively refused. This way,
 	 * php_pollfd_for will return a mask with POLLOUT if the connection
 	 * is successful and with POLLPRI otherwise. */
-	if ((n = php_pollfd_for(sockfd, POLLOUT|POLLPRI, timeout)) == 0) {
+	int events = POLLOUT|POLLPRI;
 #else
-	if ((n = php_pollfd_for(sockfd, PHP_POLLREADABLE|POLLOUT, timeout)) == 0) {
+	int events = PHP_POLLREADABLE|POLLOUT;
 #endif
-		error = PHP_TIMEOUT_ERROR_VALUE;
+	struct timeval working_timeout;
+#ifdef HAVE_GETTIMEOFDAY
+	struct timeval limit_time, time_now;
+#endif
+	if (timeout) {
+		memcpy(&working_timeout, timeout, sizeof(working_timeout));
+#ifdef HAVE_GETTIMEOFDAY
+		php_network_set_limit_time(&limit_time, &working_timeout);
+#endif
 	}
 
-	if (n > 0) {
-		len = sizeof(error);
-		/*
-		   BSD-derived systems set errno correctly
-		   Solaris returns -1 from getsockopt in case of error
-		   */
-		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
+	while (true) {
+		n = php_pollfd_for(sockfd, events, timeout ? &working_timeout : NULL);
+		if (n < 0) {
+			if (errno == EINTR) {
+#ifdef HAVE_GETTIMEOFDAY
+				if (timeout) {
+					gettimeofday(&time_now, NULL);
+
+					if (!timercmp(&time_now, &limit_time, <)) {
+						/* time limit expired; no need for another poll */
+						error = PHP_TIMEOUT_ERROR_VALUE;
+						break;
+					} else {
+						/* work out remaining time */
+						sub_times(limit_time, time_now, &working_timeout);
+					}
+				}
+#endif
+				continue;
+			}
 			ret = -1;
+		} else if (n == 0) {
+			error = PHP_TIMEOUT_ERROR_VALUE;
+		} else {
+			len = sizeof(error);
+			/* BSD-derived systems set errno correctly.
+			 * Solaris returns -1 from getsockopt in case of error. */
+			if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
+				ret = -1;
+			}
 		}
-	} else {
-		/* whoops: sockfd has disappeared */
-		ret = -1;
+		break;
 	}
 
 ok:
@@ -378,22 +444,6 @@ ok:
 		}
 	}
 	return ret;
-}
-/* }}} */
-
-/* {{{ sub_times */
-static inline void sub_times(struct timeval a, struct timeval b, struct timeval *result)
-{
-	result->tv_usec = a.tv_usec - b.tv_usec;
-	if (result->tv_usec < 0L) {
-		a.tv_sec--;
-		result->tv_usec += 1000000L;
-	}
-	result->tv_sec = a.tv_sec - b.tv_sec;
-	if (result->tv_sec < 0L) {
-		result->tv_sec++;
-		result->tv_usec -= 1000000L;
-	}
 }
 /* }}} */
 
@@ -499,11 +549,11 @@ bound:
 }
 /* }}} */
 
-PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_long addrlen, struct sockaddr *sa, socklen_t *sl)
+PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr, size_t addrlen, struct sockaddr *sa, socklen_t *sl)
 {
 	char *colon;
 	char *tmp;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 	short port;
 	struct sockaddr_in *in4 = (struct sockaddr_in*)sa;
 	struct sockaddr **psal;
@@ -756,7 +806,6 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 }
 /* }}} */
 
-
 /* Connect to a remote host using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
@@ -788,13 +837,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	if (timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
 #ifdef HAVE_GETTIMEOFDAY
-		gettimeofday(&limit_time, NULL);
-		limit_time.tv_sec += working_timeout.tv_sec;
-		limit_time.tv_usec += working_timeout.tv_usec;
-		if (limit_time.tv_usec >= 1000000) {
-			limit_time.tv_usec -= 1000000;
-			limit_time.tv_sec++;
-		}
+		php_network_set_limit_time(&limit_time, &working_timeout);
 #endif
 	}
 
@@ -842,15 +885,14 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 #ifdef HAVE_IPV6
 				struct sockaddr_in6 in6;
 #endif
-			} local_address;
-			int local_address_len = 0;
+			} local_address = {0};
+			size_t local_address_len = 0;
 
 			if (sa->sa_family == AF_INET) {
 				if (inet_pton(AF_INET, bindto, &local_address.in4.sin_addr) == 1) {
 					local_address_len = sizeof(struct sockaddr_in);
 					local_address.in4.sin_family = sa->sa_family;
 					local_address.in4.sin_port = htons(bindport);
-					memset(&(local_address.in4.sin_zero), 0, sizeof(local_address.in4.sin_zero));
 				}
 			}
 #ifdef HAVE_IPV6
@@ -975,7 +1017,7 @@ PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short 
 /* {{{ php_sockaddr_size
  * Returns the size of struct sockaddr_xx for the family
  */
-PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
+PHPAPI socklen_t php_sockaddr_size(php_sockaddr_storage *addr)
 {
 	switch (((struct sockaddr *)addr)->sa_family) {
 	case AF_INET:
@@ -1100,9 +1142,9 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 	return stream;
 }
 
-PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block)
+PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block)
 {
-	int ret = SUCCESS;
+	zend_result ret = SUCCESS;
 
 #ifdef PHP_WIN32
 	u_long flags;
@@ -1254,7 +1296,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
 	}
 
-	if (res != SUCCESS) {
+	if (res != 0) {
 		return NULL;
 	}
 
@@ -1296,7 +1338,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 	}
 	memset((void *)(*tmphstbuf),0,*hstbuflen);
 
-	if (SUCCESS != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
+	if (0 != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
 		return NULL;
 	}
 

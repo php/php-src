@@ -50,11 +50,46 @@ struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 #define MYSQLND_PS_SKIP_RESULT_W_LEN	-1
 #define MYSQLND_PS_SKIP_RESULT_STR		-2
 
+static inline void ps_fetch_over_read_error(const zend_uchar ** row)
+{
+	php_error_docref(NULL, E_WARNING, "Malformed server packet. Field length pointing after the end of packet");
+	*row = NULL;
+}
+
+static inline bool ps_fetch_is_packet_over_read_with_variable_length(const unsigned int pack_len,
+		const zend_uchar ** row, const zend_uchar *p, unsigned int length)
+{
+	if (pack_len == 0) {
+		return false;
+	}
+	size_t length_len = *row - p;
+	if (length_len > pack_len || length > pack_len - length_len) {
+		ps_fetch_over_read_error(row);
+		return true;
+	}
+	return false;
+}
+
+static inline bool ps_fetch_is_packet_over_read_with_static_length(const unsigned int pack_len,
+		const zend_uchar ** row, unsigned int length)
+{
+	if (pack_len > 0 && length > pack_len) {
+		ps_fetch_over_read_error(row);
+		return true;
+	}
+	return false;
+}
+
+
 /* {{{ ps_fetch_from_1_to_8_bytes */
 void
 ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len,
 						   const zend_uchar ** row, unsigned int byte_count)
 {
+	if (UNEXPECTED(ps_fetch_is_packet_over_read_with_static_length(pack_len, row, byte_count))) {
+		return;
+	}
+
 	bool is_bit = field->type == MYSQL_TYPE_BIT;
 	DBG_ENTER("ps_fetch_from_1_to_8_bytes");
 	DBG_INF_FMT("zv=%p byte_count=%u", zv, byte_count);
@@ -174,6 +209,11 @@ ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, const unsigned int 
 	float fval;
 	double dval;
 	DBG_ENTER("ps_fetch_float");
+
+	if (UNEXPECTED(ps_fetch_is_packet_over_read_with_static_length(pack_len, row, 4))) {
+		return;
+	}
+
 	float4get(fval, *row);
 	(*row)+= 4;
 	DBG_INF_FMT("value=%f", fval);
@@ -196,6 +236,11 @@ ps_fetch_double(zval * zv, const MYSQLND_FIELD * const field, const unsigned int
 {
 	double value;
 	DBG_ENTER("ps_fetch_double");
+
+	if (UNEXPECTED(ps_fetch_is_packet_over_read_with_static_length(pack_len, row, 8))) {
+		return;
+	}
+
 	float8get(value, *row);
 	ZVAL_DOUBLE(zv, value);
 	(*row)+= 8;
@@ -211,9 +256,14 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 {
 	struct st_mysqlnd_time t;
 	zend_ulong length; /* First byte encodes the length */
+	const zend_uchar *p = *row;
 	DBG_ENTER("ps_fetch_time");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
+		if (UNEXPECTED(ps_fetch_is_packet_over_read_with_variable_length(pack_len, row, p, length))) {
+			return;
+		}
+
 		const zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
@@ -256,9 +306,14 @@ ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 {
 	struct st_mysqlnd_time t = {0};
 	zend_ulong length; /* First byte encodes the length*/
+	const zend_uchar *p = *row;
 	DBG_ENTER("ps_fetch_date");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
+		if (UNEXPECTED(ps_fetch_is_packet_over_read_with_variable_length(pack_len, row, p, length))) {
+			return;
+		}
+
 		const zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_DATE;
@@ -288,9 +343,14 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 {
 	struct st_mysqlnd_time t;
 	zend_ulong length; /* First byte encodes the length*/
+	const zend_uchar *p = *row;
 	DBG_ENTER("ps_fetch_datetime");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
+		if (UNEXPECTED(ps_fetch_is_packet_over_read_with_variable_length(pack_len, row, p, length))) {
+			return;
+		}
+
 		const zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
@@ -332,7 +392,11 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 static void
 ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
+	const zend_uchar *p = *row;
 	const zend_ulong length = php_mysqlnd_net_field_length(row);
+	if (UNEXPECTED(ps_fetch_is_packet_over_read_with_variable_length(pack_len, row, p, length))) {
+		return;
+	}
 	DBG_ENTER("ps_fetch_string");
 	DBG_INF_FMT("len = " ZEND_ULONG_FMT, length);
 	DBG_INF("copying from the row buffer");
@@ -348,7 +412,11 @@ ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, const unsigned int
 static void
 ps_fetch_bit(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
+	const zend_uchar *p = *row;
 	const zend_ulong length = php_mysqlnd_net_field_length(row);
+	if (UNEXPECTED(ps_fetch_is_packet_over_read_with_variable_length(pack_len, row, p, length))) {
+		return;
+	}
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, length);
 }
 /* }}} */
@@ -413,6 +481,10 @@ void _mysqlnd_init_ps_fetch_subsystem(void)
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].func	= ps_fetch_datetime;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].pack_len= MYSQLND_PS_SKIP_RESULT_W_LEN;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].php_type= IS_STRING;
+
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VECTOR].func		= ps_fetch_string;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VECTOR].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VECTOR].php_type	= IS_STRING;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].func	= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].pack_len= MYSQLND_PS_SKIP_RESULT_STR;

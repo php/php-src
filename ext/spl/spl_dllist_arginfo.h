@@ -146,16 +146,12 @@ static const zend_function_entry class_SplQueue_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_SplStack_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_SplDoublyLinkedList(zend_class_entry *class_entry_Iterator, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Serializable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplDoublyLinkedList", class_SplDoublyLinkedList_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_Iterator, class_entry_Countable, class_entry_ArrayAccess, class_entry_Serializable);
 
 	zval const_IT_MODE_LIFO_value;
@@ -190,7 +186,7 @@ static zend_class_entry *register_class_SplQueue(zend_class_entry *class_entry_S
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplQueue", class_SplQueue_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplDoublyLinkedList);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
 
 	return class_entry;
 }
@@ -199,8 +195,8 @@ static zend_class_entry *register_class_SplStack(zend_class_entry *class_entry_S
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SplStack", class_SplStack_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplDoublyLinkedList);
+	INIT_CLASS_ENTRY(ce, "SplStack", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
 
 	return class_entry;
 }

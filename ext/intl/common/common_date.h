@@ -29,8 +29,7 @@ U_CDECL_END
 using icu::TimeZone;
 
 U_CFUNC TimeZone *timezone_convert_datetimezone(int type, void *object, int is_datetime, intl_error *outside_error, const char *func);
-U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
-		intl_error *err, const char *func);
+U_CFUNC zend_result intl_datetime_decompose(zend_object *obj, double *millis, TimeZone **tz, intl_error *err, const char *func);
 
 #endif
 

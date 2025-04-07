@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -169,9 +169,7 @@ PHP_METHOD(Pdo_Pgsql, setNoticeCallback)
 	return;
 
 cleanup:
-	if (ZEND_FCC_INITIALIZED(fcc)) {
-		zend_fcc_dtor(&fcc);
-	}
+	zend_release_fcall_info_cache(&fcc);
 	RETURN_THROWS();
 }
 
@@ -186,9 +184,6 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INTRANS", (zend_long)PGSQL_TRANSACTION_INTRANS);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
-#ifdef HAVE_PG_RESULT_MEMORY_SIZE
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_RESULT_MEMORY_SIZE", (zend_long)PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE);
-#endif
 
 	PdoPgsql_ce = register_class_Pdo_Pgsql(pdo_dbh_ce);
 	PdoPgsql_ce->create_object = pdo_dbh_new;

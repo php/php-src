@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b45ef763d82e1ad9ab27336fd0ab95e2d2e79a90 */
+ * Stub hash: 168eabfdcbf29189f2327448f104ea98752d1c5a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -622,12 +622,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_normalizer_is_normalized, 0, 1, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()
 
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_normalizer_get_raw_decomposition, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_resourcebundle_create, 0, 2, ResourceBundle, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -732,18 +730,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_intltz_get_unknown arginfo_intltz_create_default
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_windows_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_intltz_get_windows_id arginfo_intltz_get_region
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_id_for_windows_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intltz_has_same_rules, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, timezone, IntlTimeZone, 0)
@@ -940,9 +932,7 @@ ZEND_FUNCTION(msgfmt_get_error_code);
 ZEND_FUNCTION(msgfmt_get_error_message);
 ZEND_FUNCTION(normalizer_normalize);
 ZEND_FUNCTION(normalizer_is_normalized);
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_FUNCTION(normalizer_get_raw_decomposition);
-#endif
 ZEND_FUNCTION(resourcebundle_create);
 ZEND_FUNCTION(resourcebundle_get);
 ZEND_FUNCTION(resourcebundle_count);
@@ -968,12 +958,8 @@ ZEND_FUNCTION(intltz_get_raw_offset);
 ZEND_FUNCTION(intltz_get_region);
 ZEND_FUNCTION(intltz_get_tz_data_version);
 ZEND_FUNCTION(intltz_get_unknown);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_windows_id);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_id_for_windows_id);
-#endif
 ZEND_FUNCTION(intltz_has_same_rules);
 ZEND_FUNCTION(intltz_to_date_time_zone);
 ZEND_FUNCTION(intltz_use_daylight_time);
@@ -1133,9 +1119,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(msgfmt_get_error_message, arginfo_msgfmt_get_error_message)
 	ZEND_FE(normalizer_normalize, arginfo_normalizer_normalize)
 	ZEND_FE(normalizer_is_normalized, arginfo_normalizer_is_normalized)
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 	ZEND_FE(normalizer_get_raw_decomposition, arginfo_normalizer_get_raw_decomposition)
-#endif
 	ZEND_FE(resourcebundle_create, arginfo_resourcebundle_create)
 	ZEND_FE(resourcebundle_get, arginfo_resourcebundle_get)
 	ZEND_FE(resourcebundle_count, arginfo_resourcebundle_count)
@@ -1161,12 +1145,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intltz_get_region, arginfo_intltz_get_region)
 	ZEND_FE(intltz_get_tz_data_version, arginfo_intltz_get_tz_data_version)
 	ZEND_FE(intltz_get_unknown, arginfo_intltz_get_unknown)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_FE(intltz_get_windows_id, arginfo_intltz_get_windows_id)
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_FE(intltz_get_id_for_windows_id, arginfo_intltz_get_id_for_windows_id)
-#endif
 	ZEND_FE(intltz_has_same_rules, arginfo_intltz_has_same_rules)
 	ZEND_FE(intltz_to_date_time_zone, arginfo_intltz_to_date_time_zone)
 	ZEND_FE(intltz_use_daylight_time, arginfo_intltz_use_daylight_time)
@@ -1180,10 +1160,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(transliterator_transliterate, arginfo_transliterator_transliterate)
 	ZEND_FE(transliterator_get_error_code, arginfo_transliterator_get_error_code)
 	ZEND_FE(transliterator_get_error_message, arginfo_transliterator_get_error_message)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_IntlException_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1218,14 +1194,39 @@ static void register_php_intl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_INVALID_ACE_LABEL", UIDNA_ERROR_INVALID_ACE_LABEL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_BIDI", UIDNA_ERROR_BIDI, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_PERSISTENT);
+
+
+	zend_attribute *attribute_Deprecated_func_intlcal_set_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlcal_set", sizeof("intlcal_set") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_intlcal_set_0_arg0;
+	zend_string *attribute_Deprecated_func_intlcal_set_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0_arg0, attribute_Deprecated_func_intlcal_set_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlcal_set_0->args[0].value, &attribute_Deprecated_func_intlcal_set_0_arg0);
+	attribute_Deprecated_func_intlcal_set_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_intlcal_set_0_arg1;
+	zend_string *attribute_Deprecated_func_intlcal_set_0_arg1_str = zend_string_init("use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead", strlen("use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0_arg1, attribute_Deprecated_func_intlcal_set_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlcal_set_0->args[1].value, &attribute_Deprecated_func_intlcal_set_0_arg1);
+	attribute_Deprecated_func_intlcal_set_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_intlgregcal_create_instance_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlgregcal_create_instance", sizeof("intlgregcal_create_instance") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_intlgregcal_create_instance_0_arg0;
+	zend_string *attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0_arg0, attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlgregcal_create_instance_0->args[0].value, &attribute_Deprecated_func_intlgregcal_create_instance_0_arg0);
+	attribute_Deprecated_func_intlgregcal_create_instance_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_intlgregcal_create_instance_0_arg1;
+	zend_string *attribute_Deprecated_func_intlgregcal_create_instance_0_arg1_str = zend_string_init("use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead", strlen("use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0_arg1, attribute_Deprecated_func_intlgregcal_create_instance_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlgregcal_create_instance_0->args[1].value, &attribute_Deprecated_func_intlgregcal_create_instance_0_arg1);
+	attribute_Deprecated_func_intlgregcal_create_instance_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_IntlException(zend_class_entry *class_entry_Exception)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "IntlException", class_IntlException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	INIT_CLASS_ENTRY(ce, "IntlException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }

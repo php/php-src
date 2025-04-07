@@ -7,7 +7,7 @@ if (PHP_SOCKETS != "no") {
 	&& CHECK_LIB("Iphlpapi.lib", "sockets", PHP_SOCKETS)
 	&& CHECK_HEADER_ADD_INCLUDE("winsock.h", "CFLAGS_SOCKETS")) {
 		EXTENSION('sockets', 'sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c', PHP_SOCKETS_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		AC_DEFINE('HAVE_SOCKETS', 1);
+		AC_DEFINE('HAVE_SOCKETS', 1, "Define to 1 if the PHP extension 'sockets' is available.");
 		PHP_INSTALL_HEADERS("ext/sockets", "php_sockets.h windows_common.h");
 		ADD_FLAG("CFLAGS_SOCKETS", "/D PHP_SOCKETS_EXPORTS=1");
 	} else {

@@ -43,6 +43,9 @@ namespace {
          */
         public const int ZEND_TEST_DEPRECATED = 42;
 
+        #[\Deprecated(message: "custom message")]
+        public const int ZEND_TEST_DEPRECATED_ATTR = 42;
+
         /** @var mixed */
         public static $_StaticProp;
         public static int $staticIntProp = 123;
@@ -52,6 +55,7 @@ namespace {
         public stdClass|Iterator|null $classUnionProp = null;
         public Traversable&Countable $classIntersectionProp;
         public readonly int $readonlyProp;
+        public final int $finalProp;
 
         public static function is_object(): int {}
 
@@ -68,6 +72,11 @@ namespace {
     }
 
     class _ZendTestMagicCall
+    {
+        public function __call(string $name, array $args): mixed {}
+    }
+
+    class _ZendTestMagicCallForward
     {
         public function __call(string $name, array $args): mixed {}
     }
@@ -206,6 +215,14 @@ namespace {
     /** @deprecated */
     function zend_test_deprecated(mixed $arg = null): void {}
 
+    #[\Deprecated(message: "custom message")]
+    function zend_test_deprecated_attr(): void {}
+
+
+    #[\Deprecated(message: "custom message")]
+    #[\NoDiscard(message: "custom message 2")]
+    function zend_test_deprecated_nodiscard(): int {}
+
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}
 
@@ -222,6 +239,8 @@ namespace {
     function zend_leak_variable(mixed $variable): void {}
 
     function zend_leak_bytes(int $bytes = 3): void {}
+
+    function zend_delref(mixed $variable): void {}
 
     function zend_string_or_object(object|string $param): object|string {}
 
@@ -294,6 +313,10 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @param resource $stream */
     function zend_test_cast_fread($stream): void {}
+
+    function zend_test_is_zend_ptr(int $addr): bool {}
+
+    function zend_test_log_err_debug(string $str): void {}
 }
 
 namespace ZendTestNS {

@@ -83,18 +83,21 @@ const DATE_W3C = DATE_RFC3339;
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_TIMESTAMP
+ * @deprecated
  */
 const SUNFUNCS_RET_TIMESTAMP = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_STRING
+ * @deprecated
  */
 const SUNFUNCS_RET_STRING = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_DOUBLE
+ * @deprecated
  */
 const SUNFUNCS_RET_DOUBLE = UNKNOWN;
 
@@ -120,14 +123,14 @@ function checkdate(int $month, int $day, int $year): bool {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use IntlDateFormatter::format() instead')]
 function strftime(string $format, ?int $timestamp = null): string|false {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use IntlDateFormatter::format() instead')]
 function gmstrftime(string $format, ?int $timestamp = null): string|false {}
 
 function time(): int {}
@@ -260,8 +263,8 @@ function date_default_timezone_get(): string {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use date_sun_info() instead')]
 function date_sunrise(
     int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
     ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
@@ -269,8 +272,8 @@ function date_sunrise(
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use date_sun_info() instead')]
 function date_sunset(
     int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
     ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
@@ -521,29 +524,38 @@ class DateTimeImmutable implements DateTimeInterface
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::modify() does not modify the object itself")]
     public function modify(string $modifier): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::add() does not modify the object itself")]
     public function add(DateInterval $interval): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::sub() does not modify the object itself")]
     public function sub(DateInterval $interval): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTimezone() does not modify the object itself")]
     public function setTimezone(DateTimeZone $timezone): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTime() does not modify the object itself")]
     public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setDate() does not modify the object itself")]
     public function setDate(int $year, int $month, int $day): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setISODate() does not modify the object itself")]
     public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTimestamp() does not modify the object itself")]
     public function setTimestamp(int $timestamp): DateTimeImmutable {}
 
+    #[\NoDiscard(message: "as DateTimeImmutable::setMicrosecond() does not modify the object itself")]
     public function setMicrosecond(int $microsecond): static {}
 
     /** @tentative-return-type */
@@ -670,19 +682,40 @@ class DatePeriod implements IteratorAggregate
     /** @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE */
     public const int INCLUDE_END_DATE = UNKNOWN;
 
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $start;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $current;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $end;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateInterval $interval;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public int $recurrences;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public bool $include_start_date;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public bool $include_end_date;
 
     public static function createFromISO8601String(string $specification, int $options = 0): static {}

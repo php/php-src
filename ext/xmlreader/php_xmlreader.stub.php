@@ -99,32 +99,46 @@ class XMLReader
     public const int SUBST_ENTITIES = UNKNOWN;
 
 
+    /** @virtual */
     public int $attributeCount;
 
+    /** @virtual */
     public string $baseURI;
 
+    /** @virtual */
     public int $depth;
 
+    /** @virtual */
     public bool $hasAttributes;
 
+    /** @virtual */
     public bool $hasValue;
 
+    /** @virtual */
     public bool $isDefault;
 
+    /** @virtual */
     public bool $isEmptyElement;
 
+    /** @virtual */
     public string $localName;
 
+    /** @virtual */
     public string $name;
 
+    /** @virtual */
     public string $namespaceURI;
 
+    /** @virtual */
     public int $nodeType;
 
+    /** @virtual */
     public string $prefix;
 
+    /** @virtual */
     public string $value;
 
+    /** @virtual */
     public string $xmlLang;
 
     /** @tentative-return-type */
@@ -175,6 +189,11 @@ class XMLReader
     /** @return bool|XMLReader */
     public static function open(string $uri, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
 
+    public static function fromUri(string $uri, ?string $encoding = null, int $flags = 0): static {}
+
+    /** @param resource $stream */
+    public static function fromStream($stream, ?string $encoding = null, int $flags = 0, ?string $documentUri = null): static {}
+
     /** @tentative-return-type */
     public function readInnerXml(): string {}
 
@@ -198,6 +217,8 @@ class XMLReader
 
     /** @return bool|XMLReader */
     public static function XML(string $source, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
+
+    public static function fromString(string $source, ?string $encoding = null, int $flags = 0): static {}
 
     /** @tentative-return-type */
     public function expand(?DOMNode $baseNode = null): DOMNode|false {}

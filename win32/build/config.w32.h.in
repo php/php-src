@@ -6,7 +6,7 @@
 #undef _WIN32_WINNT
 #undef NTDDI_VERSION
 #define _WIN32_WINNT 0x0602
-#define NTDDI_VERSION 0x06010000
+#define NTDDI_VERSION 0x06020000
 
 /* Default PHP / PEAR directories */
 #define PHP_CONFIG_FILE_PATH ""
@@ -48,7 +48,6 @@
 
 #define HAVE_GETCWD 1
 #undef HAVE_SETITIMER
-#undef HAVE_SIGSETJMP
 #undef HAVE_IODBC
 #define HAVE_LIBDL 1
 #define HAVE_GETTIMEOFDAY 1
@@ -96,7 +95,6 @@
 #define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
 #define PHP_SHLIB_EXT_PREFIX "php_"
-#define HAVE_SQLDATASOURCES
 
 /* Win32 supports socketpair by the emulation in win32/sockets.c */
 #define HAVE_SOCKETPAIR 1

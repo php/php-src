@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | https://php.net/license/3_01.txt                                     |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -26,7 +26,7 @@
 /* Let there be no top-level code beyond this point:
  * Only functions and classes, thanks!
  *
- * Minimum required PHP version: 7.4.0
+ * Minimum required PHP version: 8.0.0
  */
 
 function show_usage(): void
@@ -49,7 +49,7 @@ Options:
 
     -w <file>   Write a list of all failed tests to <file>.
 
-    -a <file>   Same as -w but append rather then truncating <file>.
+    -a <file>   Same as -w but append rather than truncating <file>.
 
     -W <file>   Write a list of all tests and their result status to <file>.
 
@@ -90,7 +90,7 @@ Options:
     --temp-source <sdir>  --temp-target <tdir> [--temp-urlbase <url>]
                 Write temporary files to <tdir> by replacing <sdir> from the
                 filenames to generate with <tdir>. In general you want to make
-                <sdir> the path to your source files and <tdir> some patch in
+                <sdir> the path to your source files and <tdir> some path in
                 your web page hierarchy with <url> pointing to <tdir>.
 
     --keep-[all|php|skip|clean]
@@ -272,6 +272,7 @@ function main(): void
         'disable_functions=',
         'output_buffering=Off',
         'error_reporting=' . E_ALL,
+        'fatal_error_backtraces=Off',
         'display_errors=1',
         'display_startup_errors=1',
         'log_errors=0',
@@ -307,8 +308,6 @@ function main(): void
     ];
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
-
-    define('TRAVIS_CI', (bool) getenv('TRAVIS'));
 
     // Determine the tests to be run.
 
@@ -695,7 +694,6 @@ function main(): void
     if ($test_cnt) {
         putenv('NO_INTERACTION=1');
         usort($test_files, "test_sort");
-        $start_timestamp = time();
         $start_time = hrtime(true);
 
         echo "Running selected tests.\n";
@@ -786,23 +784,6 @@ function main(): void
     }
 }
 
-if (!function_exists("hrtime")) {
-    /**
-     * @return array|float|int
-     */
-    function hrtime(bool $as_num = false)
-    {
-        $t = microtime(true);
-
-        if ($as_num) {
-            return $t * 1000000000;
-        }
-
-        $s = floor($t);
-        return [0 => $s, 1 => ($t - $s) * 1000000000];
-    }
-}
-
 function verify_config(string $php): void
 {
     if (empty($php) || !file_exists($php)) {
@@ -869,7 +850,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         $ext_dir = ini_get('extension_dir');
         foreach (scandir($ext_dir) as $file) {
             if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
-                if (!extension_loaded($matches[1]) && @dl($matches[1])) {
+                if (!extension_loaded($matches[1])) {
                     $exts[] = $matches[1];
                 }
             }
@@ -916,7 +897,7 @@ function save_results(string $output_file, bool $prompt_to_save_results): void
 {
     global $sum_results, $failed_test_summary, $PHP_FAILED_TESTS, $php;
 
-    if (getenv('NO_INTERACTION') || TRAVIS_CI) {
+    if (getenv('NO_INTERACTION')) {
         return;
     }
 
@@ -1096,7 +1077,7 @@ function test_sort($a, $b): int
 }
 
 //
-//  Write the given text to a temporary file, and return the filename.
+//  Write the given text to a temporary file.
 //
 
 function save_text(string $filename, string $text, ?string $filename_copy = null): void
@@ -1158,7 +1139,7 @@ function system_with_timeout(
     // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
     // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
     if (IS_WINDOWS) {
-        $commandline = 'start "" /b /wait ' . $commandline;
+        $commandline = 'start "" /b /wait ' . $commandline . ' & exit';
     }
 
     $data = '';
@@ -1251,7 +1232,7 @@ function system_with_timeout(
 
 function run_all_tests(array $test_files, array $env, ?string $redir_tested = null): void
 {
-    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
+    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache, $shuffle;
     global $preload;
     // Parallel testing
     global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
@@ -1271,6 +1252,11 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
             }
             return true;
         });
+    }
+
+    // To discover parallelization issues and order dependent tests it is useful to randomize the test order.
+    if ($shuffle) {
+        shuffle($test_files);
     }
 
     /* Ignore -jN if there is only one file to analyze. */
@@ -1378,11 +1364,8 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
     // Some tests assume that they are executed in a certain order. We will be popping from
     // $test_files, so reverse its order here. This makes sure that order is preserved at least
     // for tests with a common conflict key.
-    $test_files = array_reverse($test_files);
-
-    // To discover parallelization issues it is useful to randomize the test order.
-    if ($shuffle) {
-        shuffle($test_files);
+    if (!$shuffle) {
+        $test_files = array_reverse($test_files);
     }
 
     // Don't start more workers than test files.
@@ -1440,7 +1423,6 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
                 "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
-                "TRAVIS_CI" => TRAVIS_CI
             ]
         ])) . "\n";
 
@@ -1619,7 +1601,6 @@ escape:
                                 'E_USER_ERROR',
                                 'E_USER_WARNING',
                                 'E_USER_NOTICE',
-                                'E_STRICT', // TODO Cleanup when removed from Zend Engine.
                                 'E_RECOVERABLE_ERROR',
                                 'E_DEPRECATED',
                                 'E_USER_DEPRECATED'
@@ -2180,6 +2161,9 @@ TEST $file
         } elseif (!strncasecmp('xleak', $output, 5)) {
             // Pretend we have an XLEAK section
             $test->setSection('XLEAK', ltrim(substr($output, 5)));
+        } elseif (!strncasecmp('flaky', $output, 5)) {
+            // Pretend we have a FLAKY section
+            $test->setSection('FLAKY', ltrim(substr($output, 5)));
         } elseif ($output !== '') {
             show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF');
             $PHP_FAILED_TESTS['BORKED'][] = [
@@ -2873,8 +2857,8 @@ function expectf_to_regex(?string $wanted): string
         '%e' => preg_quote(DIRECTORY_SEPARATOR, '/'),
         '%s' => '[^\r\n]+',
         '%S' => '[^\r\n]*',
-        '%a' => '.+',
-        '%A' => '.*',
+        '%a' => '.+?',
+        '%A' => '.*?',
         '%w' => '\s*',
         '%i' => '[+-]?\d+',
         '%d' => '\d+',
@@ -2884,19 +2868,6 @@ function expectf_to_regex(?string $wanted): string
         '%0' => '\x00',
     ]);
 }
-
-/**
- * @return bool|int
- */
-function comp_line(string $l1, string $l2, bool $is_reg)
-{
-    if ($is_reg) {
-        return preg_match('/^' . $l1 . '$/s', $l2);
-    }
-
-    return !strcmp($l1, $l2);
-}
-
 /**
  * Map "Zend OPcache" to "opcache" and convert all ext names to lowercase.
  */
@@ -3102,18 +3073,6 @@ SLOW TEST SUMMARY
         $failed_test_summary .= "=====================================================================\n";
     }
 
-    if (count($PHP_FAILED_TESTS['XFAILED'])) {
-        $failed_test_summary .= '
-=====================================================================
-EXPECTED FAILED TEST SUMMARY
----------------------------------------------------------------------
-';
-        foreach ($PHP_FAILED_TESTS['XFAILED'] as $failed_test_data) {
-            $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
-        }
-        $failed_test_summary .= "=====================================================================\n";
-    }
-
     if (count($PHP_FAILED_TESTS['BORKED'])) {
         $failed_test_summary .= '
 =====================================================================
@@ -3158,19 +3117,6 @@ LEAKED TEST SUMMARY
 ---------------------------------------------------------------------
 ';
         foreach ($PHP_FAILED_TESTS['LEAKED'] as $failed_test_data) {
-            $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
-        }
-
-        $failed_test_summary .= "=====================================================================\n";
-    }
-
-    if (count($PHP_FAILED_TESTS['XLEAKED'])) {
-        $failed_test_summary .= '
-=====================================================================
-EXPECTED LEAK TEST SUMMARY
----------------------------------------------------------------------
-';
-        foreach ($PHP_FAILED_TESTS['XLEAKED'] as $failed_test_data) {
             $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
         }
 

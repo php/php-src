@@ -183,6 +183,13 @@ ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key) {
 	return FAILURE;
 }
 
+ZEND_API void zend_weakrefs_hash_clean(HashTable *ht) {
+	zend_ulong obj_key;
+	ZEND_HASH_FOREACH_NUM_KEY(ht, obj_key) {
+		zend_weakrefs_hash_del(ht, zend_weakref_key_to_object(obj_key));
+	} ZEND_HASH_FOREACH_END();
+}
+
 void zend_weakrefs_init(void) {
 	zend_hash_init(&EG(weakrefs), 8, NULL, NULL, 0);
 }
@@ -642,6 +649,10 @@ static void zend_weakmap_iterator_get_current_key(zend_object_iterator *obj_iter
 	zend_string *string_key;
 	zend_ulong num_key;
 	int key_type = zend_hash_get_current_key_ex(&wm->ht, &string_key, &num_key, pos);
+	if (key_type == HASH_KEY_NON_EXISTENT) {
+		ZVAL_NULL(key);
+		return;
+	}
 	if (key_type != HASH_KEY_IS_LONG) {
 		ZEND_ASSERT(0 && "Must have integer key");
 	}

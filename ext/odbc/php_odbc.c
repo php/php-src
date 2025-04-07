@@ -19,7 +19,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -545,7 +545,6 @@ PHP_MINIT_FUNCTION(odbc)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(odbc)
 {
-	ODBCG(defConn) = -1;
 	ODBCG(num_links) = ODBCG(num_persistent);
 	memset(ODBCG(laststate), '\0', 6);
 	memset(ODBCG(lasterrormsg), '\0', SQL_MAX_MESSAGE_LENGTH);
@@ -1412,6 +1411,13 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	rc = SQLFetch(result->stmt);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		if (rc == SQL_ERROR) {
+#ifdef HAVE_SQL_EXTENDED_FETCH
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+#else
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
+#endif
+		}
 		RETURN_FALSE;
 	}
 
@@ -1576,6 +1582,13 @@ PHP_FUNCTION(odbc_fetch_into)
 		rc = SQLFetch(result->stmt);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		if (rc == SQL_ERROR) {
+#ifdef HAVE_SQL_EXTENDED_FETCH
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+#else
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
+#endif
+		}
 		RETURN_FALSE;
 	}
 
@@ -1703,6 +1716,13 @@ PHP_FUNCTION(odbc_fetch_row)
 		rc = SQLFetch(result->stmt);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		if (rc == SQL_ERROR) {
+#ifdef HAVE_SQL_EXTENDED_FETCH
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+#else
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
+#endif
+		}
 		RETURN_FALSE;
 	}
 
@@ -1792,6 +1812,13 @@ PHP_FUNCTION(odbc_result)
 			rc = SQLFetch(result->stmt);
 
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+			if (rc == SQL_ERROR) {
+#ifdef HAVE_SQL_EXTENDED_FETCH
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+#else
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
+#endif
+			}
 			RETURN_FALSE;
 		}
 
@@ -1967,10 +1994,10 @@ PHP_FUNCTION(odbc_result_all)
 	}
 
 	/* Start table tag */
-	if (ZEND_NUM_ARGS() == 1) {
-		php_printf("<table><tr>");
-	} else {
+	if (pv_format != NULL) {
 		php_printf("<table %s ><tr>", pv_format);
+	} else {
+		php_printf("<table><tr>");
 	}
 
 	for (i = 0; i < result->numcols; i++) {
@@ -2256,7 +2283,6 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	size_t db_len, uid_len, pwd_len;
 	zend_long pv_opt = SQL_CUR_DEFAULT;
 	odbc_connection *db_conn;
-	int cur_opt;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(db, db_len)
@@ -2266,19 +2292,17 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		Z_PARAM_LONG(pv_opt)
 	ZEND_PARSE_PARAMETERS_END();
 
-	cur_opt = pv_opt;
-
-	if (ZEND_NUM_ARGS() > 3) {
-		/* Confirm the cur_opt range */
-		if (! (cur_opt == SQL_CUR_USE_IF_NEEDED ||
-			cur_opt == SQL_CUR_USE_ODBC ||
-			cur_opt == SQL_CUR_USE_DRIVER ||
-			cur_opt == SQL_CUR_DEFAULT) ) {
-			zend_argument_value_error(4, "must be one of SQL_CUR_USE_IF_NEEDED, "
-				"SQL_CUR_USE_ODBC, or SQL_CUR_USE_DRIVER");
-			RETURN_THROWS();
-		}
+	if (
+		pv_opt != SQL_CUR_DEFAULT
+		&& pv_opt != SQL_CUR_USE_IF_NEEDED
+		&& pv_opt != SQL_CUR_USE_ODBC
+		&& pv_opt != SQL_CUR_USE_DRIVER
+	) {
+		zend_argument_value_error(4, "must be one of SQL_CUR_USE_IF_NEEDED, "
+			"SQL_CUR_USE_ODBC, or SQL_CUR_USE_DRIVER");
+		RETURN_THROWS();
 	}
+	int cur_opt = (int) pv_opt;
 
 	if (!ODBCG(allow_persistent)) {
 		persistent = 0;

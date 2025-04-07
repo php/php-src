@@ -319,8 +319,8 @@ static char *next_line(multipart_buffer *self)
 		}
 		/* return entire buffer as a partial line */
 		line[self->bufsize] = 0;
-		self->buf_begin = ptr;
 		self->bytes_in_buffer = 0;
+		/* Let fill_buffer() handle the reset of self->buf_begin */
 	}
 
 	return line;
@@ -740,6 +740,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	if (boundary_end) {
 		boundary_end[0] = '\0';
 		boundary_len = boundary_end-boundary;
+	}
+
+	/* Boundaries larger than FILLUNIT-strlen("\r\n--") characters lead to
+	 * erroneous parsing */
+	if (boundary_len > FILLUNIT-strlen("\r\n--")) {
+		sapi_module.sapi_error(E_WARNING, "Boundary too large in multipart/form-data POST data");
+		return;
 	}
 
 	/* Initialize the buffer */

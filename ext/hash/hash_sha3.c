@@ -292,7 +292,7 @@ const php_hash_ops php_hash_sha3_##bits##_ops = { \
 #endif
 #define PHP_KECCAK_SPEC "b200IiIIB"
 
-static int php_keccak_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv)
+static zend_result php_keccak_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv)
 {
 	*magic = PHP_HASH_SERIALIZE_MAGIC_KECCAK;
 	return php_hash_serialize_spec(hash, zv, PHP_KECCAK_SPEC);

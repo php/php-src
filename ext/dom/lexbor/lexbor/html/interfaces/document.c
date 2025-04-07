@@ -58,6 +58,7 @@ static lxb_html_document_css_custom_entry_t *
 lxb_html_document_css_customs_insert(lxb_html_document_t *document,
                                      const lxb_char_t *key, size_t length);
 
+#if 0
 static lxb_status_t
 lxb_html_document_style_remove_by_rule_cb(lxb_dom_node_t *node,
                                           lxb_css_selector_specificity_t spec,
@@ -72,7 +73,6 @@ static lxb_status_t
 lxb_html_document_style_cb(lxb_dom_node_t *node,
                            lxb_css_selector_specificity_t spec, void *ctx);
 
-#if 0
 static lxb_status_t
 lxb_html_document_done(lxb_html_document_t *document);
 #endif
@@ -604,23 +604,30 @@ lxb_status_t
 lxb_html_document_style_attach(lxb_html_document_t *document,
                                lxb_css_rule_style_t *style)
 {
+#if 0
     lxb_html_document_css_t *css = &document->css;
 
     return lxb_selectors_find(css->selectors, lxb_dom_interface_node(document),
                               style->selector, lxb_html_document_style_cb, style);
+#endif
+    return LXB_STATUS_OK;
 }
 
 lxb_status_t
 lxb_html_document_style_remove(lxb_html_document_t *document,
                                lxb_css_rule_style_t *style)
 {
+#if 0
     lxb_html_document_css_t *css = &document->css;
 
     return lxb_selectors_find(css->selectors, lxb_dom_interface_node(document),
                               style->selector,
                               lxb_html_document_style_remove_by_rule_cb, style);
+#endif
+    return LXB_STATUS_OK;
 }
 
+#if 0
 static lxb_status_t
 lxb_html_document_style_remove_by_rule_cb(lxb_dom_node_t *node,
                                           lxb_css_selector_specificity_t spec,
@@ -668,20 +675,25 @@ lxb_html_document_style_remove_avl_cb(lexbor_avl_t *avl,
                                           style, context->list);
     return LXB_STATUS_OK;
 }
+#endif
 
 lxb_status_t
 lxb_html_document_style_attach_by_element(lxb_html_document_t *document,
                                           lxb_html_element_t *element,
                                           lxb_css_rule_style_t *style)
 {
+#if 0
     lxb_html_document_css_t *css = &document->css;
 
     return lxb_selectors_match_node(css->selectors,
                                     lxb_dom_interface_node(element),
                                     style->selector,
                                     lxb_html_document_style_cb, style);
+#endif
+    return LXB_STATUS_OK;
 }
 
+#if 0
 static lxb_status_t
 lxb_html_document_style_cb(lxb_dom_node_t *node,
                            lxb_css_selector_specificity_t spec, void *ctx)
@@ -703,6 +715,7 @@ lxb_html_document_style_cb(lxb_dom_node_t *node,
     return lxb_html_element_style_list_append(lxb_html_interface_element(node),
                                               style->declarations, spec);
 }
+#endif
 
 lxb_html_document_t *
 lxb_html_document_destroy(lxb_html_document_t *document)

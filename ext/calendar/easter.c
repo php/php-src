@@ -33,6 +33,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 	struct tm te;
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
+	const zend_long max_year = (zend_long)(ZEND_LONG_MAX / 5) * 4;
 	bool year_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
@@ -53,8 +54,13 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 		}
 	}
 
+	if (year <= 0 || year > max_year) {
+		zend_argument_value_error(1, "must be between 1 and " ZEND_LONG_FMT, max_year);
+		RETURN_THROWS();
+	}
+
 	#ifdef ZEND_ENABLE_ZVAL_LONG64
-	/* Compiling for 64bit, allow years between 1970 and 2.000.000.000 */	
+	/* Compiling for 64bit, allow years between 1970 and 2.000.000.000 */
 	if (gm && year < 1970) {
 		/* timestamps only start after 1970 */
 		zend_argument_value_error(1, "must be a year after 1970 (inclusive)");
@@ -67,7 +73,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 		RETURN_THROWS();
 	}
 	#else
-	/* Compiling for 32bit, allow years between 1970 and 2037 */	
+	/* Compiling for 32bit, allow years between 1970 and 2037 */
 	if (gm && (year < 1970 || year > 2037)) {
 		zend_argument_value_error(1, "must be between 1970 and 2037 (inclusive)");
 		RETURN_THROWS();

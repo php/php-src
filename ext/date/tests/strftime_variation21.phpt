@@ -30,24 +30,24 @@ foreach($inputs as $key =>$value) {
 
 --Preferred date and time representation--
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%s %s %d %d:%d:%d %d"
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(24) "Fri Aug  8 08:08:08 2008"
 
 --Preferred date representation--
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d/%d/%d"
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(8) "08/08/08"
 
 --Preferred time representation--
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d:%d:%d"
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(8) "08:08:08"

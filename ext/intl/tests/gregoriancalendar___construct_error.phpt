@@ -40,13 +40,13 @@ try {
 }
 ?>
 --EXPECTF--
-Deprecated: Function intlgregcal_create_instance() is deprecated in %s on line %d
+Deprecated: Function intlgregcal_create_instance() is deprecated since 8.4, use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
 Too many arguments
 
-Deprecated: Function intlgregcal_create_instance() is deprecated in %s on line %d
+Deprecated: Function intlgregcal_create_instance() is deprecated since 8.4, use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
 Too many arguments
 
-Deprecated: Function intlgregcal_create_instance() is deprecated in %s on line %d
+Deprecated: Function intlgregcal_create_instance() is deprecated since 8.4, use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
 No variant with 4 arguments (excluding trailing NULLs)
 
 Deprecated: Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d

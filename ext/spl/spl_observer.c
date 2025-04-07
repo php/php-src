@@ -115,9 +115,11 @@ static void spl_object_storage_free_hash(spl_SplObjectStorage *intern, zend_hash
 static void spl_object_storage_dtor(zval *element) /* {{{ */
 {
 	spl_SplObjectStorageElement *el = Z_PTR_P(element);
-	zend_object_release(el->obj);
-	zval_ptr_dtor(&el->inf);
-	efree(el);
+	if (el) {
+		zend_object_release(el->obj);
+		zval_ptr_dtor(&el->inf);
+		efree(el);
+	}
 } /* }}} */
 
 static spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage *intern, zend_hash_key *key) /* {{{ */
@@ -165,8 +167,10 @@ static spl_SplObjectStorageElement *spl_object_storage_attach_handle(spl_SplObje
 		return pelement;
 	}
 
+	/* NULL initialization necessary because `spl_object_storage_create_element` could bail out due to OOM. */
+	ZVAL_PTR(entry_zv, NULL);
 	pelement = spl_object_storage_create_element(obj, inf);
-	ZVAL_PTR(entry_zv, pelement);
+	Z_PTR_P(entry_zv) = pelement;
 	return pelement;
 } /* }}} */
 
@@ -253,8 +257,7 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 	spl_SplObjectStorage *intern;
 	zend_class_entry *parent = class_type;
 
-	intern = emalloc(sizeof(spl_SplObjectStorage) + zend_object_properties_size(parent));
-	memset(intern, 0, sizeof(spl_SplObjectStorage) - sizeof(zval));
+	intern = zend_object_alloc(sizeof(spl_SplObjectStorage), parent);
 	intern->pos = 0;
 
 	zend_object_std_init(&intern->std, class_type);
@@ -735,8 +738,10 @@ PHP_METHOD(SplObjectStorage, setInfo)
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
 		RETURN_NULL();
 	}
-	zval_ptr_dtor(&element->inf);
+	zval garbage;
+	ZVAL_COPY_VALUE(&garbage, &element->inf);
 	ZVAL_COPY(&element->inf, inf);
+	zval_ptr_dtor(&garbage);
 } /* }}} */
 
 /* {{{ Moves position forward */
@@ -827,11 +832,18 @@ PHP_METHOD(SplObjectStorage, serialize)
 			RETURN_NULL();
 		}
 		ZVAL_OBJ(&obj, element->obj);
+
+		/* Protect against modification; we need a full copy because the data may be refcounted. */
+		zval inf_copy;
+		ZVAL_COPY(&inf_copy, &element->inf);
+
 		php_var_serialize(&buf, &obj, &var_hash);
 		smart_str_appendc(&buf, ',');
-		php_var_serialize(&buf, &element->inf, &var_hash);
+		php_var_serialize(&buf, &inf_copy, &var_hash);
 		smart_str_appendc(&buf, ';');
 		zend_hash_move_forward_ex(&intern->storage, &pos);
+
+		zval_ptr_dtor(&inf_copy);
 	}
 
 	/* members */

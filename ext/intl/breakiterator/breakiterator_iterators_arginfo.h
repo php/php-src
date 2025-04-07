@@ -21,8 +21,7 @@ static zend_class_entry *register_class_IntlPartsIterator(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlIterator);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlIterator, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_KEY_SEQUENTIAL_value;
 	ZVAL_LONG(&const_KEY_SEQUENTIAL_value, PARTS_ITERATOR_KEY_SEQUENTIAL);

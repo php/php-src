@@ -8,13 +8,13 @@ dom
 $dom = Dom\HTMLDocument::createEmpty();
 $foo = $dom->appendChild($dom->createElement("foo"));
 try {
-    $foo->insertAdjacentText("beforebegin", "bar");
+    $foo->insertAdjacentText(Dom\AdjacentPosition::BeforeBegin, "bar");
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
 
-$foo->insertAdjacentText("afterbegin", "bar");
-$foo->insertAdjacentText("beforeend", "baz");
+$foo->insertAdjacentText(Dom\AdjacentPosition::AfterBegin, "bar");
+$foo->insertAdjacentText(Dom\AdjacentPosition::BeforeEnd, "baz");
 
 echo $dom->saveHtml(), "\n";
 

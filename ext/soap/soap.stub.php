@@ -44,6 +44,7 @@ namespace {
     /**
      * @var int
      * @cvalue SOAP_FUNCTIONS_ALL
+     * @deprecated since 8.4
      */
     const SOAP_FUNCTIONS_ALL = UNKNOWN;
 
@@ -526,6 +527,8 @@ namespace {
 
         /** @tentative-return-type */
         public function handle(?string $request = null): void {}
+
+        public function __getLastResponse(): ?string {}
     }
 
     class SoapClient

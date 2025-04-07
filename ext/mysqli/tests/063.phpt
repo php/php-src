@@ -29,6 +29,6 @@ require_once 'skipifconnectfailure.inc';
 
     $mysql->close();
 ?>
---EXPECT--
+--EXPECTF--
 string(3) "foo"
-Unknown column 'invalid' in 'field list'
+Unknown column 'invalid' in '%r(SELECT|field list)%r'

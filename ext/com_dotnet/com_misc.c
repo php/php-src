@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -50,8 +50,6 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	obj = emalloc(sizeof(*obj));
 	memset(obj, 0, sizeof(*obj));
 	obj->code_page = codepage;
-	obj->ce = php_com_variant_class_entry;
-	obj->zo.ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
 	V_VT(&obj->v) = VT_DISPATCH;
@@ -72,8 +70,6 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 	obj = emalloc(sizeof(*obj));
 	memset(obj, 0, sizeof(*obj));
 	obj->code_page = codepage;
-	obj->ce = php_com_variant_class_entry;
-	obj->zo.ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
 	VariantCopyInd(&obj->v, v);

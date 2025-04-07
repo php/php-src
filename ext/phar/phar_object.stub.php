@@ -187,10 +187,10 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function offsetUnset($localName): void {}
 
     /** @tentative-return-type */
-    public function setAlias(string $alias): bool {}
+    public function setAlias(string $alias): true {}
 
     /** @tentative-return-type */
-    public function setDefaultStub(?string $index = null, ?string $webIndex = null): bool {}
+    public function setDefaultStub(?string $index = null, ?string $webIndex = null): true {}
 
     /** @tentative-return-type */
     public function setMetadata(mixed $metadata): void {}

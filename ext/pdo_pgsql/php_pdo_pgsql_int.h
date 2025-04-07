@@ -16,6 +16,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifndef PHP_PDO_PGSQL_INT_H
 #define PHP_PDO_PGSQL_INT_H
 
@@ -32,6 +34,8 @@ typedef struct {
 	char *errmsg;
 } pdo_pgsql_error_info;
 
+typedef struct pdo_pgsql_stmt pdo_pgsql_stmt;
+
 /* stuff we use in a pgsql database handle */
 typedef struct {
 	PGconn		*server;
@@ -40,20 +44,19 @@ typedef struct {
 	pdo_pgsql_error_info	einfo;
 	Oid 		pgoid;
 	unsigned int	stmt_counter;
-	/* The following two variables have the same purpose. Unfortunately we need
-	   to keep track of two different attributes having the same effect. */
 	bool		emulate_prepares;
-	bool		disable_native_prepares; /* deprecated since 5.6 */
 	bool		disable_prepares;
 	HashTable       *lob_streams;
 	zend_fcall_info_cache *notice_callback;
+	bool		default_fetching_laziness;
+	pdo_pgsql_stmt  *running_stmt;
 } pdo_pgsql_db_handle;
 
 typedef struct {
 	Oid          pgsql_type;
 } pdo_pgsql_column;
 
-typedef struct {
+struct pdo_pgsql_stmt {
 	pdo_pgsql_db_handle     *H;
 	PGresult                *result;
 	pdo_pgsql_column        *cols;
@@ -66,7 +69,9 @@ typedef struct {
 	Oid *param_types;
 	int                     current_row;
 	bool is_prepared;
-} pdo_pgsql_stmt;
+	bool is_unbuffered;
+	bool is_running_unbuffered;
+};
 
 typedef struct {
 	Oid     oid;
@@ -107,7 +112,7 @@ enum pdo_pgsql_specific_constants {
 	PGSQL_TRANSACTION_UNKNOWN = PQTRANS_UNKNOWN
 };
 
-php_stream *pdo_pgsql_create_lob_stream(zval *pdh, int lfd, Oid oid);
+php_stream *pdo_pgsql_create_lob_stream(zend_object *pdh, int lfd, Oid oid);
 extern const php_stream_ops pdo_pgsql_lob_stream_ops;
 
 void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H);

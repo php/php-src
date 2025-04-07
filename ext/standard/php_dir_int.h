@@ -12,6 +12,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* internal header; not supposed to be installed; FIXME but unfortunately is */
+
 #ifndef PHP_DIR_INT_H
 #define PHP_DIR_INT_H
 

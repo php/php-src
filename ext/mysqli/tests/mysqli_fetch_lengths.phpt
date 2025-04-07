@@ -9,13 +9,12 @@ require_once 'skipifconnectfailure.inc';
 --FILE--
 <?php
     require 'table.inc';
-    $mysqli = $link;
     if (!$res = mysqli_query($link, "SELECT id, label FROM test ORDER BY id LIMIT 1")) {
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
     var_dump(mysqli_fetch_lengths($res));
-    while ($row = mysqli_fetch_assoc($res))
+    while (mysqli_fetch_assoc($res))
         var_dump(mysqli_fetch_lengths($res));
     var_dump(mysqli_fetch_lengths($res));
 

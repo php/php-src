@@ -101,9 +101,10 @@ echo "nocache";
             return false;
         }
 
-        if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
+        if (!$res = $link->query("SELECT id FROM test WHERE id = 1")) {
             printf("[%03d + 003] [%d] %s\n", $offset, $link->errno, $link->error);
             return false;
+        }
 
         if (!$row = mysqli_fetch_assoc($res)) {
             printf("[%03d + 004] [%d] %s\n", $offset, $link->errno, $link->error);

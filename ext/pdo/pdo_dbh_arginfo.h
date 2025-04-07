@@ -107,8 +107,7 @@ static zend_class_entry *register_class_PDO(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PDO", class_PDO_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_PARAM_NULL_value;
 	ZVAL_LONG(&const_PARAM_NULL_value, LONG_CONST(PDO_PARAM_NULL));

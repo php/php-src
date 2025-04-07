@@ -3,7 +3,6 @@ Stack limit 009 - Check that we can actually use all the stack
 --SKIPIF--
 <?php
 if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
-if (getenv('SKIP_MSAN')) die("skip msan requires a considerably higher zend.reserved_stack_size due to instrumentation");
 ?>
 --EXTENSIONS--
 zend_test

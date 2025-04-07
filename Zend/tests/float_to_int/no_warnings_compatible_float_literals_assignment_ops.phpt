@@ -1,5 +1,5 @@
 --TEST--
-Implicit float to int conversions should not warn for literals in combined assingment operetor if float has a fractional part equal to 0
+Implicit float to int conversions should not warn for literals in combined assignment operator if float has a fractional part equal to 0
 --FILE--
 <?php
 

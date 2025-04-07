@@ -6,27 +6,36 @@ dnl
 dnl Check for CCRandomGenerateBytes
 dnl header absent in previous macOs releases
 dnl
-AC_CHECK_HEADERS([CommonCrypto/CommonRandom.h], [], [],
-[
-	#include <sys/types.h>
-	#include <Availability.h>
-	#include <CommonCrypto/CommonCryptoError.h>
+AC_CHECK_HEADERS([CommonCrypto/CommonRandom.h],,, [dnl
+  #include <sys/types.h>
+  #include <Availability.h>
+  #include <CommonCrypto/CommonCryptoError.h>
 ])
+
+dnl
+dnl Mostly for non Linux systems
+dnl
+AC_CHECK_FUNCS([getrandom])
 
 dnl
 dnl Setup extension
 dnl
-PHP_NEW_EXTENSION(random,
-      random.c \
-      csprng.c \
-      engine_combinedlcg.c \
-      engine_mt19937.c \
-      engine_pcgoneseq128xslrr64.c \
-      engine_xoshiro256starstar.c \
-      engine_secure.c \
-      engine_user.c \
-      gammasection.c \
-      randomizer.c \
-      zend_utils.c,
-      no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-PHP_INSTALL_HEADERS([ext/random], [php_random.h php_random_csprng.h php_random_uint128.h])
+PHP_NEW_EXTENSION([random], m4_normalize([
+    csprng.c
+    engine_mt19937.c
+    engine_pcgoneseq128xslrr64.c
+    engine_secure.c
+    engine_user.c
+    engine_xoshiro256starstar.c
+    gammasection.c
+    random.c
+    randomizer.c
+    zend_utils.c
+  ]),
+  [no],,
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+PHP_INSTALL_HEADERS([ext/random], m4_normalize([
+  php_random_csprng.h
+  php_random_uint128.h
+  php_random.h
+]))

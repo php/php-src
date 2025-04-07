@@ -64,11 +64,17 @@ typedef int boolean_t;
 #include <sys/syscall.h>
 #endif
 #ifdef __sun
-#define _STRUCTURED_PROC 1
-#include <sys/lwp.h>
-#include <sys/procfs.h>
-#include <libproc.h>
+# include <sys/lwp.h>
+# ifdef HAVE_LIBPROC_H
+#  define _STRUCTURED_PROC 1
+#  include <sys/procfs.h>
+#  include <libproc.h>
+# endif
 #include <thread.h>
+#endif
+
+#ifdef HAVE_VALGRIND
+# include <valgrind/valgrind.h>
 #endif
 
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -176,7 +182,7 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 {
 	FILE *f;
 	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	uintptr_t start, end, prev_end = 0;
 	size_t max_size;
 	bool found = false;
@@ -237,6 +243,13 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 	}
 
 	max_size = rlim.rlim_cur;
+
+#ifdef HAVE_VALGRIND
+	/* Under Valgrind, the last page is not useable */
+	if (RUNNING_ON_VALGRIND) {
+		max_size -= zend_get_page_size();
+	}
+#endif
 
 	/* Previous mapping may prevent the stack from growing */
 	if (end - max_size < prev_end) {
@@ -367,7 +380,6 @@ static bool zend_call_stack_get_freebsd(zend_call_stack *stack)
 static bool zend_call_stack_get_win32(zend_call_stack *stack)
 {
 	ULONG_PTR low_limit, high_limit;
-	ULONG size;
 	MEMORY_BASIC_INFORMATION guard_region = {0}, uncommitted_region = {0};
 	size_t result_size, page_size;
 
@@ -609,8 +621,7 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack, void **ptr)
 	char *start, *end;
 	struct kinfo_vmentry *entry;
 	size_t len, max_size;
-	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	int mib[5] = { CTL_VM, VM_PROC, VM_PROC_MAP, getpid(), sizeof(struct kinfo_vmentry) };
 	bool found = false;
 	struct rlimit rlim;
@@ -688,10 +699,10 @@ static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 	return true;
 }
 
+#ifdef HAVE_LIBPROC_H
 static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 {
-	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	bool found = false, r = false;
 	struct ps_prochandle *proc;
 	prmap_t *map, *orig;
@@ -760,12 +771,15 @@ end:
 	close(fd);
 	return r;
 }
+#endif
 
 static bool zend_call_stack_get_solaris(zend_call_stack *stack)
 {
+#ifdef HAVE_LIBPROC_H
 	if (_lwp_self() == 1) {
 		return zend_call_stack_get_solaris_proc_maps(stack);
 	}
+#endif
 	return zend_call_stack_get_solaris_pthread(stack);
 }
 #else

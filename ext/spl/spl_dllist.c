@@ -41,9 +41,12 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 	efree(elem); \
 }
 
-#define SPL_LLIST_CHECK_DELREF(elem) if ((elem) && !--SPL_LLIST_RC(elem)) { \
+#define SPL_LLIST_CHECK_DELREF_EX(elem, on_free) if ((elem) && !--SPL_LLIST_RC(elem)) { \
 	efree(elem); \
+	on_free \
 }
+
+#define SPL_LLIST_CHECK_DELREF(elem) SPL_LLIST_CHECK_DELREF_EX(elem, ;)
 
 #define SPL_LLIST_ADDREF(elem) SPL_LLIST_RC(elem)++
 #define SPL_LLIST_CHECK_ADDREF(elem) if (elem) SPL_LLIST_RC(elem)++
@@ -427,14 +430,11 @@ static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /* {
 	spl_ptr_llist_element *current = intern->llist->head;
 	zval tmp, dllist_array;
 	HashTable *debug_info;
-
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
+	HashTable *properties = zend_std_get_properties_ex(&intern->std);
 
 	/* +2 As we are adding 2 additional key-entries */
-	debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 2);
-	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
+	debug_info = zend_new_array(zend_hash_num_elements(properties) + 2);
+	zend_hash_copy(debug_info, properties, (copy_ctor_func_t) zval_add_ref);
 
 	ZVAL_LONG(&tmp, intern->flags);
 	spl_set_private_debug_info_property(spl_ce_SplDoublyLinkedList, "flags", strlen("flags"), debug_info, &tmp);
@@ -729,8 +729,10 @@ PHP_METHOD(SplDoublyLinkedList, offsetSet)
 		if (element != NULL) {
 			/* the element is replaced, delref the old one as in
 			 * SplDoublyLinkedList::pop() */
-			zval_ptr_dtor(&element->data);
+			zval garbage;
+			ZVAL_COPY_VALUE(&garbage, &element->data);
 			ZVAL_COPY(&element->data, value);
+			zval_ptr_dtor(&garbage);
 		} else {
 			zval_ptr_dtor(value);
 			zend_argument_error(spl_ce_OutOfRangeException, 1, "is an invalid offset");
@@ -762,7 +764,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 	if (element != NULL) {
-		/* connect the neightbors */
+		/* connect the neighbors */
 		if (element->prev) {
 			element->prev->next = element->next;
 		}
@@ -1014,7 +1016,11 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 		smart_str_appendc(&buf, ':');
 		next = current->next;
 
+		SPL_LLIST_CHECK_ADDREF(next);
+
 		php_var_serialize(&buf, &current->data, &var_hash);
+
+		SPL_LLIST_CHECK_DELREF_EX(next, break;);
 
 		current = next;
 	}

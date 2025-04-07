@@ -42,7 +42,6 @@ static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator )
 		resourcebundle_extract_value( &iterator->current, rb );
 	}
 	else {
-		// zend_throw_exception( spl_ce_OutOfRangeException, "Running past end of ResourceBundle", 0);
 		ZVAL_UNDEF(&iterator->current);
 	}
 }

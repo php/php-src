@@ -15,7 +15,6 @@
 */
 
 #include "php.h"
-#include "php_incomplete_class.h"
 
 /* {{{ Returns the type of the variable */
 PHP_FUNCTION(gettype)

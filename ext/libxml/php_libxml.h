@@ -39,6 +39,8 @@ extern zend_module_entry libxml_module_entry;
 
 #define LIBXML_SAVE_NOEMPTYTAG 1<<2
 
+#define LIBXML_NS_TAG_HOOK 1
+
 ZEND_BEGIN_MODULE_GLOBALS(libxml)
 	zval stream_context;
 	smart_str error_buffer;
@@ -58,12 +60,16 @@ typedef struct _libxml_doc_props {
 	bool recover;
 } libxml_doc_props;
 
+/* Modification tracking: when the object changes, we increment its counter.
+ * When this counter no longer matches the counter at the time of caching,
+ * we know that the object has changed and we have to update the cache. */
 typedef struct {
 	size_t modification_nr;
 } php_libxml_cache_tag;
 
-typedef struct _php_libxml_private_data_header {
-	void (*dtor)(struct _php_libxml_private_data_header *);
+typedef struct php_libxml_private_data_header {
+	void (*dtor)(struct php_libxml_private_data_header *);
+	void (*ns_hook)(struct php_libxml_private_data_header *, xmlNodePtr);
 	/* extra fields */
 } php_libxml_private_data_header;
 
@@ -95,19 +101,26 @@ typedef enum _php_libxml_class_type {
 	PHP_LIBXML_CLASS_MODERN = 2,
 } php_libxml_class_type;
 
+typedef enum php_libxml_quirks_mode {
+	PHP_LIBXML_NO_QUIRKS = 0,
+	PHP_LIBXML_QUIRKS,
+	PHP_LIBXML_LIMITED_QUIRKS,
+} php_libxml_quirks_mode;
+
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
 	libxml_doc_props *doc_props;
 	php_libxml_cache_tag cache_tag;
 	php_libxml_private_data_header *private_data;
 	const php_libxml_document_handlers *handlers;
-	int refcount;
-	php_libxml_class_type class_type;
+	unsigned int refcount;
+	php_libxml_class_type class_type : 8;
+	php_libxml_quirks_mode quirks_mode : 8;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
 	xmlNodePtr node;
-	int	refcount;
+	unsigned int refcount;
 	void *_private;
 } php_libxml_node_ptr;
 
@@ -122,21 +135,37 @@ static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *
 	return (php_libxml_node_object *)((char*)(obj) - obj->handlers->offset);
 }
 
-static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_ref_obj *doc_ptr)
+static zend_always_inline void php_libxml_invalidate_cache_tag(php_libxml_cache_tag *cache_tag)
 {
-	if (!doc_ptr) {
-		return;
-	}
 #if SIZEOF_SIZE_T == 8
 	/* If one operation happens every nanosecond, then it would still require 584 years to overflow
 	 * the counter. So we'll just assume this never happens. */
-	doc_ptr->cache_tag.modification_nr++;
+	cache_tag->modification_nr++;
 #else
-	size_t new_modification_nr = doc_ptr->cache_tag.modification_nr + 1;
+	size_t new_modification_nr = cache_tag->modification_nr + 1;
 	if (EXPECTED(new_modification_nr > 0)) { /* unsigned overflow; checking after addition results in one less instruction */
-		doc_ptr->cache_tag.modification_nr = new_modification_nr;
+		cache_tag->modification_nr = new_modification_nr;
 	}
 #endif
+}
+
+static zend_always_inline bool php_libxml_is_cache_tag_stale(const php_libxml_cache_tag *object_tag, const php_libxml_cache_tag *cache_tag)
+{
+	ZEND_ASSERT(object_tag != NULL);
+	ZEND_ASSERT(cache_tag != NULL);
+	/* See overflow comment in php_libxml_invalidate_node_list_cache(). */
+#if SIZEOF_SIZE_T == 8
+	return cache_tag->modification_nr != object_tag->modification_nr;
+#else
+	return cache_tag->modification_nr != object_tag->modification_nr || UNEXPECTED(object_tag->modification_nr == SIZE_MAX);
+#endif
+}
+
+static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_ref_obj *doc_ptr)
+{
+	if (doc_ptr) {
+		php_libxml_invalidate_cache_tag(&doc_ptr->cache_tag);
+	}
 }
 
 static zend_always_inline void php_libxml_invalidate_node_list_cache_from_doc(xmlDocPtr docp)
@@ -160,11 +189,12 @@ typedef enum {
 	PHP_LIBXML_CTX_WARNING = 2,
 } php_libxml_error_level;
 
-PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data);
-PHP_LIBXML_API int php_libxml_decrement_node_ptr(php_libxml_node_object *object);
-PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp);
-PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document);
-PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
+PHP_LIBXML_API unsigned int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data);
+PHP_LIBXML_API unsigned int php_libxml_decrement_node_ptr(php_libxml_node_object *object);
+PHP_LIBXML_API unsigned int php_libxml_decrement_node_ptr_ref(php_libxml_node_ptr *ptr);
+PHP_LIBXML_API unsigned int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp);
+PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document);
+PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object);
 PHP_LIBXML_API zval *php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function);
 /* When an explicit freeing of node and children is required */
@@ -231,6 +261,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
  * Generally faster because no locking is involved, and this has the advantage that it sets the options to a known good value. */
 static zend_always_inline void php_libxml_sanitize_parse_ctxt_options(xmlParserCtxtPtr ctxt)
 {
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations") \
 	ctxt->loadsubset = 0;
 	ctxt->validate = 0;
 	ctxt->pedantic = 0;
@@ -238,10 +269,8 @@ static zend_always_inline void php_libxml_sanitize_parse_ctxt_options(xmlParserC
 	ctxt->linenumbers = 0;
 	ctxt->keepBlanks = 1;
 	ctxt->options = 0;
+	ZEND_DIAGNOSTIC_IGNORED_END
 }
-
-#else /* HAVE_LIBXML */
-#define libxml_module_ptr NULL
 #endif
 
 #define phpext_libxml_ptr libxml_module_ptr

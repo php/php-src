@@ -46,11 +46,17 @@ void free_zend_constant(zval *zv)
 		if (c->name) {
 			zend_string_release_ex(c->name, 0);
 		}
+		if (c->filename) {
+			zend_string_release_ex(c->filename, 0);
+		}
 		efree(c);
 	} else {
 		zval_internal_ptr_dtor(&c->value);
 		if (c->name) {
 			zend_string_release_ex(c->name, 1);
+		}
+		if (c->filename) {
+			zend_string_release_ex(c->filename, 1);
 		}
 		free(c);
 	}
@@ -68,6 +74,9 @@ static void copy_zend_constant(zval *zv)
 
 	c = Z_PTR_P(zv);
 	c->name = zend_string_copy(c->name);
+	if (c->filename != NULL) {
+		c->filename = zend_string_copy(c->filename);
+	}
 	if (Z_TYPE(c->value) == IS_STRING) {
 		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
 	}
@@ -303,13 +312,13 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 		if (!ce) {
 			ce = zend_fetch_class(class_name, flags);
 		}
-	} else if (zend_string_equals_literal_ci(class_name, "self")) {
+	} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_SELF))) {
 		if (UNEXPECTED(!scope)) {
 			zend_throw_error(NULL, "Cannot access \"self\" when no class scope is active");
 			goto failure;
 		}
 		ce = scope;
-	} else if (zend_string_equals_literal_ci(class_name, "parent")) {
+	} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		if (UNEXPECTED(!scope)) {
 			zend_throw_error(NULL, "Cannot access \"parent\" when no class scope is active");
 			goto failure;
@@ -353,8 +362,10 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 			}
 
 			if (UNEXPECTED(ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
-				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_error(E_DEPRECATED, "Constant %s::%s is deprecated", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0 && !CONST_IS_RECURSIVE(c)) {
+					CONST_PROTECT_RECURSION(c);
+					zend_deprecated_class_constant(c, constant_name);
+					CONST_UNPROTECT_RECURSION(c);
 					if (EG(exception)) {
 						goto failure;
 					}
@@ -411,78 +422,6 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		zend_string_release_ex(class_name, 0);
 		zend_string_efree(constant_name);
 		return ret_constant;
-/*
-		zend_class_entry *ce = NULL;
-		zend_class_constant *c = NULL;
-		zval *ret_constant = NULL;
-
-		if (zend_string_equals_literal_ci(class_name, "self")) {
-			if (UNEXPECTED(!scope)) {
-				zend_throw_error(NULL, "Cannot access \"self\" when no class scope is active");
-				goto failure;
-			}
-			ce = scope;
-		} else if (zend_string_equals_literal_ci(class_name, "parent")) {
-			if (UNEXPECTED(!scope)) {
-				zend_throw_error(NULL, "Cannot access \"parent\" when no class scope is active");
-				goto failure;
-			} else if (UNEXPECTED(!scope->parent)) {
-				zend_throw_error(NULL, "Cannot access \"parent\" when current class scope has no parent");
-				goto failure;
-			} else {
-				ce = scope->parent;
-			}
-		} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_STATIC))) {
-			ce = zend_get_called_scope(EG(current_execute_data));
-			if (UNEXPECTED(!ce)) {
-				zend_throw_error(NULL, "Cannot access \"static\" when no class scope is active");
-				goto failure;
-			}
-		} else {
-			ce = zend_fetch_class(class_name, flags);
-		}
-		if (ce) {
-			c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), constant_name);
-			if (c == NULL) {
-				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_throw_error(NULL, "Undefined constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-					goto failure;
-				}
-				ret_constant = NULL;
-			} else {
-				if (!zend_verify_const_access(c, scope)) {
-					if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-						zend_throw_error(NULL, "Cannot access %s constant %s::%s", zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-					}
-					goto failure;
-				}
-				ret_constant = &c->value;
-			}
-		}
-
-		if (ret_constant && Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
-			zend_result ret;
-
-			if (IS_CONSTANT_VISITED(ret_constant)) {
-				zend_throw_error(NULL, "Cannot declare self-referencing constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-				ret_constant = NULL;
-				goto failure;
-			}
-
-			MARK_CONSTANT_VISITED(ret_constant);
-			ret = zval_update_constant_ex(ret_constant, c->ce);
-			RESET_CONSTANT_VISITED(ret_constant);
-
-			if (UNEXPECTED(ret != SUCCESS)) {
-				ret_constant = NULL;
-				goto failure;
-			}
-		}
-failure:
-		zend_string_release_ex(class_name, 0);
-		zend_string_efree(constant_name);
-		return ret_constant;
-*/
 	}
 
 	/* non-class constant */
@@ -567,6 +506,14 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 		name = c->name;
 	}
 
+	c->filename = NULL;
+	if (ZEND_CONSTANT_MODULE_NUMBER(c) == PHP_USER_CONSTANT) {
+		zend_string *filename = zend_get_executed_filename_ex();
+		if (filename) {
+			c->filename = zend_string_copy(filename);
+		}
+	}
+
 	/* Check if the user is trying to define any special constant */
 	if (zend_string_equals_literal(name, "__COMPILER_HALT_OFFSET__")
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
@@ -574,6 +521,10 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 	) {
 		zend_error(E_WARNING, "Constant %s already defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
+		if (c->filename) {
+			zend_string_release(c->filename);
+			c->filename = NULL;
+		}
 		if (!persistent) {
 			zval_ptr_dtor_nogc(&c->value);
 		}

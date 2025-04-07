@@ -8,7 +8,7 @@ namespace Pdo;
  * @strict-properties
  * @not-serializable
  */
-class Firebird extends PDO
+class Firebird extends \PDO
 {
     /** @cvalue PDO_FB_ATTR_DATE_FORMAT */
     public const int ATTR_DATE_FORMAT = UNKNOWN;
@@ -33,4 +33,6 @@ class Firebird extends PDO
 
     /** @cvalue PDO_FB_WRITABLE_TRANSACTION */
     public const int WRITABLE_TRANSACTION = UNKNOWN;
+
+    public static function getApiVersion(): int {}
 }

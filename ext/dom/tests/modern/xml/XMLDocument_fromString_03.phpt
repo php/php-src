@@ -12,7 +12,7 @@ $flags = [
 try {
     Dom\XMLDocument::createFromString('<?xml version="1.0"?><container/>', -1);
 } catch (ValueError $e) {
-    echo $e->getMessage();
+    echo $e->getMessage(), "\n";
 }
 
 foreach ($flags as $flag) {
@@ -20,8 +20,9 @@ foreach ($flags as $flag) {
 }
 
 ?>
---EXPECT--
-Dom\XMLDocument::createFromString(): Argument #2 ($options) contains invalid flags (allowed flags: LIBXML_RECOVER, LIBXML_NOENT, LIBXML_DTDLOAD, LIBXML_DTDATTR, LIBXML_DTDVALID, LIBXML_NOERROR, LIBXML_NOWARNING, LIBXML_NOBLANKS, LIBXML_XINCLUDE, LIBXML_NSCLEAN, LIBXML_NOCDATA, LIBXML_NONET, LIBXML_PEDANTIC, LIBXML_COMPACT, LIBXML_PARSEHUGE, LIBXML_BIGLINES)bool(true)
+--EXPECTF--
+Dom\XMLDocument::createFromString(): Argument #2 ($options) contains invalid flags (allowed flags: %s)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

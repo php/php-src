@@ -16,11 +16,14 @@ $values = [
 
 foreach ($values as $value) {
     var_dump(posix_ttyname($value));
+    var_dump(posix_strerror(posix_get_last_error()));
 }
 ?>
 --EXPECTF--
 Warning: posix_ttyname(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
+string(19) "Bad file descriptor"
 
 Warning: posix_ttyname(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
+string(19) "Bad file descriptor"

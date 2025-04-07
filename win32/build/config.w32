@@ -93,7 +93,7 @@ if (VS_TOOLSET) {
 }
 
 // General link flags
-toolset_setup_common_ldlags();
+toolset_setup_common_ldflags();
 
 // General libs
 toolset_setup_common_libs();
@@ -116,7 +116,7 @@ else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
 
 // Find the php_build dir - it contains headers and libraries
 // that we need
-ARG_WITH('php-build', 'Path to where you extracted the development libraries (http://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
+ARG_WITH('php-build', 'Path to where you extracted the development libraries (https://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
 php_build_option_handle();
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
@@ -240,7 +240,8 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c zend_weakrefs.c \
 	zend_float.c zend_string.c zend_generators.c zend_virtual_cwd.c zend_ast.c \
 	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_observer.c zend_system_id.c \
-	zend_enum.c zend_fibers.c zend_atomic.c zend_hrtime.c zend_frameless_function.c");
+	zend_enum.c zend_fibers.c zend_atomic.c zend_hrtime.c zend_frameless_function.c zend_property_hooks.c \
+	zend_lazy_objects.c");
 ADD_SOURCES("Zend\\Optimizer", "zend_optimizer.c pass1.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c zend_dump.c escape_analysis.c compact_vars.c dce.c sccp.c scdf.c");
 
 var PHP_ASSEMBLER = PATH_PROG({
@@ -323,13 +324,9 @@ STDOUT.WriteBlankLines(1);
 /* Can we build with IPv6 support? */
 ARG_ENABLE("ipv6", "Disable IPv6 support (default is turn it on if available)", "yes");
 
-var main_network_has_ipv6 = 0;
+AC_DEFINE('HAVE_GAI_STRERROR', 1);
 if (PHP_IPV6 == "yes") {
-	main_network_has_ipv6 = CHECK_HEADER_ADD_INCLUDE("wspiapi.h", "CFLAGS") ? 1 : 0;
-}
-if (main_network_has_ipv6) {
 	STDOUT.WriteLine("Enabling IPv6 support");
-	AC_DEFINE('HAVE_GAI_STRERROR', 1);
 	AC_DEFINE('HAVE_IPV6', 1);
 }
 
@@ -358,15 +355,28 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
-if (CLANG_TOOLSET) {
-	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
-	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
-		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
-		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +
-		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
+ARG_ENABLE("sanitizer", "Enable ASan (and UBSan) extensions", "no");
+if (PHP_SANITIZER == "yes" && PHP_DEBUG == "yes") {
+	ERROR("Use of both --enable-sanitizer and --enable-debug not allowed.");
+}
+if (PHP_SANITIZER == "yes" && PHP_DEBUG_PACK == "no") {
+	ERROR("--enable-sanitizer requires --enable-debug-pack");
+}
+if (VS_TOOLSET) {
+	if (PHP_SANITIZER == "yes") {
+		if (COMPILER_NUMERIC_VERSION < 1929) {
+			ERROR("MSVC at least 16.10 required for sanitation plugins");
+		}
 	}
+} else if (CLANG_TOOLSET) {
+	AC_DEFINE("PHP_HAVE_BUILTIN_EXPECT", 1, "Define to 1 if the compiler supports '__builtin_expect'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SADDL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_saddl_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SADDLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_saddll_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SSUBL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_ssubl_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_ssubll_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SMULL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_smull_overflow '.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SMULLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_smulll_overflow'.");
 
-	ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 500) {
 			ERROR("Clang at least 5.0.0 required for sanitation plugins");
@@ -393,9 +403,13 @@ ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
 		be excluded from the test.ini", "no");
 
 ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
-	Available instruction set names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \
+	Available instruction set names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx512. \
 	SSE and SSE2 are enabled by default. The best instruction set specified will \
 	automatically enable all the older instruction sets. Note, that the produced binary \
 	might not work properly, if the chosen instruction sets are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
+
+ARG_ENABLE('snapshot-build', 'Build a snapshot: turns on everything it can and ignores build errors', 'no');
+
+ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');

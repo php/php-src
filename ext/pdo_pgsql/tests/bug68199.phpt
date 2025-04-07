@@ -1,7 +1,6 @@
 --TEST--
 Bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

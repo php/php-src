@@ -11,11 +11,13 @@ echo $rc;
 --EXPECT--
 Class [ <internal:Reflection> class ReflectionClass implements Stringable, Reflector ] {
 
-  - Constants [4] {
+  - Constants [6] {
     Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
     Constant [ public int IS_EXPLICIT_ABSTRACT ] { 64 }
     Constant [ public int IS_FINAL ] { 32 }
     Constant [ public int IS_READONLY ] { 65536 }
+    Constant [ public int SKIP_INITIALIZATION_ON_SERIALIZE ] { 8 }
+    Constant [ public int SKIP_DESTRUCTOR ] { 16 }
   }
 
   - Static properties [0] {
@@ -28,7 +30,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     Property [ public string $name ]
   }
 
-  - Methods [56] {
+  - Methods [64] {
     Method [ <internal:Reflection> private method __clone ] {
 
       - Parameters [0] {
@@ -328,6 +330,76 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
         Parameter #0 [ <optional> array $args = [] ]
       }
       - Tentative return [ ?object ]
+    }
+
+    Method [ <internal:Reflection> public method newLazyGhost ] {
+
+      - Parameters [2] {
+        Parameter #0 [ <required> callable $initializer ]
+        Parameter #1 [ <optional> int $options = 0 ]
+      }
+      - Return [ object ]
+    }
+
+    Method [ <internal:Reflection> public method newLazyProxy ] {
+
+      - Parameters [2] {
+        Parameter #0 [ <required> callable $factory ]
+        Parameter #1 [ <optional> int $options = 0 ]
+      }
+      - Return [ object ]
+    }
+
+    Method [ <internal:Reflection> public method resetAsLazyGhost ] {
+
+      - Parameters [3] {
+        Parameter #0 [ <required> object $object ]
+        Parameter #1 [ <required> callable $initializer ]
+        Parameter #2 [ <optional> int $options = 0 ]
+      }
+      - Return [ void ]
+    }
+
+    Method [ <internal:Reflection> public method resetAsLazyProxy ] {
+
+      - Parameters [3] {
+        Parameter #0 [ <required> object $object ]
+        Parameter #1 [ <required> callable $factory ]
+        Parameter #2 [ <optional> int $options = 0 ]
+      }
+      - Return [ void ]
+    }
+
+    Method [ <internal:Reflection> public method initializeLazyObject ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> object $object ]
+      }
+      - Return [ object ]
+    }
+
+    Method [ <internal:Reflection> public method isUninitializedLazyObject ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> object $object ]
+      }
+      - Return [ bool ]
+    }
+
+    Method [ <internal:Reflection> public method markLazyObjectAsInitialized ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> object $object ]
+      }
+      - Return [ object ]
+    }
+
+    Method [ <internal:Reflection> public method getLazyInitializer ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> object $object ]
+      }
+      - Return [ ?callable ]
     }
 
     Method [ <internal:Reflection> public method getParentClass ] {

@@ -16,13 +16,15 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
+#include "internal_helpers.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -177,6 +179,11 @@ zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 		docp = (xmlDocPtr) ctx->doc;
 	}
 
+	if (UNEXPECTED(!docp)) {
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		return FAILURE;
+	}
+
 	php_dom_create_object((xmlNodePtr) docp, retval, obj);
 	return SUCCESS;
 }
@@ -287,7 +294,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 	if (register_node_ns && nodep != NULL) {
 		if (modern) {
 			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(&intern->dom);
-			in_scope_ns = php_dom_get_in_scope_ns(ns_mapper, nodep);
+			in_scope_ns = php_dom_get_in_scope_ns(ns_mapper, nodep, false);
 		} else {
 			in_scope_ns = php_dom_get_in_scope_ns_legacy(nodep);
 		}
@@ -338,14 +345,21 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 					if (node->type == XML_NAMESPACE_DECL) {
 						if (modern) {
-							continue;
+							if (!EG(exception)) {
+								php_dom_throw_error_with_message(NOT_SUPPORTED_ERR,
+									"The namespace axis is not well-defined in the living DOM specification. "
+									"Use Dom\\Element::getInScopeNamespaces() or Dom\\Element::getDescendantNamespaces() instead.",
+									/* strict */ true
+								);
+							}
+							break;
 						}
 
 						xmlNodePtr nsparent = node->_private;
 						xmlNsPtr original = (xmlNsPtr) node;
 
 						/* Make sure parent dom object exists, so we can take an extra reference. */
-						zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+						zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
 						php_dom_create_object(nsparent, &parent_zval, &intern->dom);
 						dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
 
@@ -358,7 +372,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
-			php_dom_create_iterator(return_value, DOM_NODELIST, modern);
+			object_init_ex(return_value, dom_get_nodelist_ce(modern));
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;
@@ -454,11 +468,12 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) {
+		zend_release_fcall_info_cache(&fcc);
 		zend_argument_value_error(1, "must not be \"http://php.net/xpath\" because it is reserved by PHP");
 		RETURN_THROWS();
 	}
 
-	php_dom_xpath_callbacks_update_single_method_handler(
+	if (php_dom_xpath_callbacks_update_single_method_handler(
 		&intern->xpath_callbacks,
 		intern->dom.ptr,
 		namespace,
@@ -466,7 +481,9 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 		&fcc,
 		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
 		dom_xpath_register_func_in_ctx
-	);
+	) != SUCCESS) {
+		zend_release_fcall_info_cache(&fcc);
+	}
 }
 
 /* {{{ */
@@ -478,22 +495,22 @@ PHP_METHOD(DOMXPath, quote) {
 	}
 	if (memchr(input, '\'', input_len) == NULL) {
 		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
-		output->val[0] = '\'';
-		memcpy(output->val + 1, input, input_len);
-		output->val[input_len + 1] = '\'';
-		output->val[input_len + 2] = '\0';
+		ZSTR_VAL(output)[0] = '\'';
+		memcpy(ZSTR_VAL(output) + 1, input, input_len);
+		ZSTR_VAL(output)[input_len + 1] = '\'';
+		ZSTR_VAL(output)[input_len + 2] = '\0';
 		RETURN_STR(output);
 	} else if (memchr(input, '"', input_len) == NULL) {
 		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
-		output->val[0] = '"';
-		memcpy(output->val + 1, input, input_len);
-		output->val[input_len + 1] = '"';
-		output->val[input_len + 2] = '\0';
+		ZSTR_VAL(output)[0] = '"';
+		memcpy(ZSTR_VAL(output) + 1, input, input_len);
+		ZSTR_VAL(output)[input_len + 1] = '"';
+		ZSTR_VAL(output)[input_len + 2] = '\0';
 		RETURN_STR(output);
 	} else {
 		smart_str output = {0};
 		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
-		smart_str_appendl(&output, "concat(", 7);
+		smart_str_appendl(&output, ZEND_STRL("concat("));
 		const char *ptr = input;
 		const char *const end = input + input_len;
 		while (ptr < end) {
@@ -510,7 +527,7 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendc(&output, ',');
 		}
 		ZEND_ASSERT(ptr == end);
-		output.s->val[output.s->len - 1] = ')';
+		ZSTR_VAL(output.s)[output.s->len - 1] = ')';
 		RETURN_STR(smart_str_extract(&output));
 	}
 }

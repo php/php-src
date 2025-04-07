@@ -29,6 +29,10 @@
 #include <capstone/capstone.h>
 #define HAVE_CAPSTONE_ITER
 
+#ifndef IR_DISASM_INTEL_SYNTAX
+# define IR_DISASM_INTEL_SYNTAX 0
+#endif
+
 typedef struct _ir_sym_node {
 	uint64_t             addr;
 	uint64_t             end;
@@ -365,7 +369,7 @@ int ir_disasm(const char    *name,
 	}
 #  endif
 	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
-#  if DISASM_INTEL_SYNTAX
+#  if IR_DISASM_INTEL_SYNTAX
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_INTEL);
 #  else
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);

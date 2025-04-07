@@ -55,10 +55,10 @@ foreach($names_arr as $key =>$value) {
 9 bytes written to: '1'
 
 -- Filename: FALSE --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 
 -- Filename: "" --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 
 -- Filename: " " --
 

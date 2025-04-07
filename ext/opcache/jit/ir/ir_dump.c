@@ -177,7 +177,7 @@ static void ir_dump_dessa_moves(const ir_ctx *ctx, int b, ir_block *bb, FILE *f)
 	use_list = &ctx->use_lists[succ_bb->start];
 	k = ir_phi_input_number(ctx, succ_bb, b);
 
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
+	for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 		use_ref = *p;
 		use_insn = &ctx->ir_base[use_ref];
 		if (use_insn->op == IR_PHI) {

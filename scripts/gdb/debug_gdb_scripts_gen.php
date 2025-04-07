@@ -28,7 +28,7 @@ $ccode = sprintf(
      * See https://sourceware.org/gdb/current/onlinedocs/gdb.html/dotdebug_005fgdb_005fscripts-section.html#dotdebug_005fgdb_005fscripts-section
      */
     asm(
-        ".pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n"
+        ".pushsection \".debug_gdb_scripts\", \"MS\",%%progbits,1\n"
         ".byte 4 /* Python Text */\n"
         ".ascii \"gdb.inlined-script\\n\"\n"
         %s
@@ -40,7 +40,7 @@ $ccode = sprintf(
     basename(__FILE__),
     implode("\n    ", array_map(function ($line) {
         $escapedPy = addcslashes($line."\n", "\"\n\\");
-        $escapedAsm = addcslashes(sprintf(".ascii \"%s\"\n", $escapedPy), "\"\n\\");
+        $escapedAsm = addcslashes(sprintf(".ascii \"%s\"\n", $escapedPy), "\"\n\\?");
         return sprintf('"%s"', $escapedAsm);
     }, explode("\n", $pyscript))),
 );

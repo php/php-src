@@ -297,11 +297,11 @@ typedef struct st_mysqlnd_stats MYSQLND_STATS;
 
 struct st_mysqlnd_stats
 {
-	uint64_t				*values;
 	size_t					count;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
+	uint64_t values[] ZEND_ELEMENT_COUNT(count);
 };
 
 
@@ -1267,7 +1267,6 @@ struct st_mysqlnd_stmt_data
 	MYSQLND_ERROR_INFO			error_info_impl;
 
 	bool					update_max_length;
-	zend_ulong					prefetch_rows;
 
 	bool					cursor_exists;
 	mysqlnd_stmt_use_or_store_func default_rset_handler;

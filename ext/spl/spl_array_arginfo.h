@@ -259,7 +259,7 @@ static zend_class_entry *register_class_ArrayObject(zend_class_entry *class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ArrayObject", class_ArrayObject_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_IteratorAggregate, class_entry_ArrayAccess, class_entry_Serializable, class_entry_Countable);
 
 	zval const_STD_PROP_LIST_value;
@@ -282,7 +282,7 @@ static zend_class_entry *register_class_ArrayIterator(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ArrayIterator", class_ArrayIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_SeekableIterator, class_entry_ArrayAccess, class_entry_Serializable, class_entry_Countable);
 
 	zval const_STD_PROP_LIST_value;
@@ -305,7 +305,7 @@ static zend_class_entry *register_class_RecursiveArrayIterator(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveArrayIterator", class_RecursiveArrayIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ArrayIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ArrayIterator, 0);
 	zend_class_implements(class_entry, 1, class_entry_RecursiveIterator);
 
 	zval const_CHILD_ARRAYS_ONLY_value;

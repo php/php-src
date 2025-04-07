@@ -352,7 +352,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 			return NULL;
 		}
 
-		if (!(stream = php_stream_open_wrapper(p + 10, mode, options, opened_path))) {
+		if (!(stream = php_stream_open_wrapper_ex(p + 10, mode, options, opened_path, context))) {
 			efree(pathdup);
 			return NULL;
 		}

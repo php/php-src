@@ -560,6 +560,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 }
 
+// When adding a new string here, please also update build/gen_stub.php to the
+// known strings to be used in property registration; see gh-15751
 #define ZEND_KNOWN_STRINGS(_) \
 	_(ZEND_STR_FILE,                   "file") \
 	_(ZEND_STR_LINE,                   "line") \
@@ -572,6 +574,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_ARGS,                   "args") \
 	_(ZEND_STR_UNKNOWN,                "unknown") \
 	_(ZEND_STR_UNKNOWN_CAPITALIZED,    "Unknown") \
+	_(ZEND_STR_EXIT,                   "exit") \
 	_(ZEND_STR_EVAL,                   "eval") \
 	_(ZEND_STR_INCLUDE,                "include") \
 	_(ZEND_STR_REQUIRE,                "require") \
@@ -621,6 +624,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_NULL_LOWERCASE,         "null") \
 	_(ZEND_STR_MIXED,                  "mixed") \
 	_(ZEND_STR_TRAVERSABLE,            "Traversable") \
+	_(ZEND_STR_SELF,                   "self") \
+	_(ZEND_STR_PARENT,                 "parent") \
 	_(ZEND_STR_SLEEP,                  "__sleep") \
 	_(ZEND_STR_WAKEUP,                 "__wakeup") \
 	_(ZEND_STR_CASES,                  "cases") \
@@ -633,6 +638,10 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_COUNT,                  "count") \
 	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
+	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \
+	_(ZEND_STR_SINCE,                  "since") \
+	_(ZEND_STR_GET,                    "get") \
+	_(ZEND_STR_SET,                    "set") \
 
 
 typedef enum _zend_known_string_id {

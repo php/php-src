@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -25,7 +25,7 @@
 #include "html_collection.h"
 #include "namespace_compat.h"
 
-typedef struct _dom_named_item {
+typedef struct dom_named_item {
 	dom_object *context_intern;
 	xmlNodePtr node;
 } dom_named_item;
@@ -46,8 +46,8 @@ static dom_named_item dom_html_collection_named_item(zend_string *key, zend_obje
 	/* 2. Return the first element in the collection for which at least one of the following is true: */
 	xmlNodePtr basep = dom_object_get_node(objmap->baseobj);
 	if (basep != NULL) {
-		int cur = 0;
-		int next = cur; /* not +1, otherwise we skip the first candidate */
+		zend_long cur = 0;
+		zend_long next = cur; /* not +1, otherwise we skip the first candidate */
 		xmlNodePtr candidate = basep->children;
 		while (candidate != NULL) {
 			candidate = dom_get_elements_by_tag_name_ns_raw(basep, candidate, objmap->ns, objmap->local, objmap->local_lower, &cur, next);

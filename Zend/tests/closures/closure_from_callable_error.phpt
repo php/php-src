@@ -140,7 +140,7 @@ catch (\Throwable $t) {
     echo "Wrong exception type thrown: ".get_class($t)." : ".$t->getMessage()."\n";
 }
 
-echo 'Subclass cannot closure over parant private static method'."\n";
+echo 'Subclass cannot closure over parent private static method'."\n";
 try {
     $subFoo = new SubFoo;
     $fn = $subFoo->closePrivateStaticInvalid();
@@ -205,7 +205,7 @@ Non-existent method should fail
 Non-existent class should fail
 Non-existent function should fail
 Subclass cannot closure over parent private instance method
-Subclass cannot closure over parant private static method
+Subclass cannot closure over parent private static method
 Function scope cannot closure over protected instance method
 Function scope cannot closure over private instance method
 Access private instance method of parent object through "self::" to parent method

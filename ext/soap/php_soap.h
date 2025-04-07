@@ -94,10 +94,13 @@ struct _soapService {
 	char      *actor;
 	char      *uri;
 	xmlCharEncodingHandlerPtr encoding;
-	zval       class_map;
+	HashTable *class_map;
 	int        features;
 	int        send_errors;
 	struct _soapHeader **soap_headers_ptr;
+
+	bool         trace;
+	zend_string *last_response_body;
 };
 
 #define SOAP_CLASS 1
@@ -158,7 +161,6 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	char*      error_code;
 	zval       error_object;
 	bool       use_soap_error_handler;
-	char       cache;
 	char       cache_mode;
 	char       cache_enabled;
 	char*      cache_dir;

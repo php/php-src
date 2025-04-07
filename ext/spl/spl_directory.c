@@ -23,7 +23,8 @@
 #include "ext/standard/php_filestat.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/scanf.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* For php_basename() */
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
@@ -186,7 +187,11 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 {
 	spl_filesystem_object *intern;
 
-	intern = ecalloc(1, sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
+	intern = emalloc(sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
+	/* Avoid initializing the entirety of spl_filesystem_object.u.dir.entry. */
+	memset(intern, 0,
+		MAX(XtOffsetOf(spl_filesystem_object, u.dir.entry),
+			XtOffsetOf(spl_filesystem_object, u.file.escape) + sizeof(int)));
 	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
@@ -198,10 +203,16 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 }
 /* }}} */
 
+static inline bool spl_intern_is_glob(const spl_filesystem_object *intern)
+{
+	/* NULL check on `dirp` is necessary as destructors may interfere. */
+	return intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops);
+}
+
 PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *intern) /* {{{ */
 {
 #ifdef HAVE_GLOB
-	if (intern->type == SPL_FS_DIR && php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
+	if (intern->type == SPL_FS_DIR && spl_intern_is_glob(intern)) {
 		size_t len = 0;
 		char *tmp = php_glob_stream_get_path(intern->u.dir.dirp, &len);
 		if (len == 0) {
@@ -216,7 +227,7 @@ PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *
 	return zend_string_copy(intern->path);
 } /* }}} */
 
-static inline zend_result spl_filesystem_object_get_file_name(spl_filesystem_object *intern) /* {{{ */
+static zend_result spl_filesystem_object_get_file_name(spl_filesystem_object *intern) /* {{{ */
 {
 	if (intern->file_name) {
 		/* already known */
@@ -364,6 +375,7 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 	intern->u.file.delimiter = ',';
 	intern->u.file.enclosure = '"';
 	intern->u.file.escape = (unsigned char) '\\';
+	intern->u.file.is_escape_default = true;
 
 	intern->u.file.func_getCurr = zend_hash_str_find_ptr(&intern->std.ce->function_table, "getcurrentline", sizeof("getcurrentline") - 1);
 
@@ -600,12 +612,8 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	HashTable *debug_info;
 	zend_string *path_name;
 
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
-
 	// TODO Do zend_new_array() + zend_hash_copy() trick?
-	debug_info = zend_array_dup(intern->std.properties);
+	debug_info = zend_array_dup(zend_std_get_properties_ex(&intern->std));
 
 	path_name = spl_filesystem_object_get_pathname(intern);
 	if (path_name) {
@@ -634,7 +642,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	}
 	if (intern->type == SPL_FS_DIR) {
 #ifdef HAVE_GLOB
-		if (php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
+		if (spl_intern_is_glob(intern)) {
 			ZVAL_STR_COPY(&tmp, intern->path);
 		} else {
 			ZVAL_FALSE(&tmp);
@@ -699,7 +707,7 @@ static void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_l
 	}
 
 	if (ZSTR_LEN(path) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1230,7 +1238,7 @@ PHP_METHOD(SplFileInfo, getLinkTarget)
 	}
 #if defined(PHP_WIN32) || defined(HAVE_SYMLINK)
 	if (intern->file_name == NULL) {
-		zend_value_error("Filename cannot be empty");
+		zend_value_error("Filename must not be empty");
 		RETURN_THROWS();
 	}
 	if (!IS_ABSOLUTE_PATH(ZSTR_VAL(intern->file_name), ZSTR_LEN(intern->file_name))) {
@@ -1360,12 +1368,15 @@ PHP_METHOD(SplFileInfo, getPathInfo)
 
 	if (ce == NULL) {
 		ce = intern->info_class;
+	} else if (!instanceof_function(ce, spl_ce_SplFileInfo)) {
+		zend_argument_type_error(1, "must be a class name derived from %s or null, %s given", ZSTR_VAL(spl_ce_SplFileInfo->name), ZSTR_VAL(ce->name));
+		RETURN_THROWS();
 	}
 
 	path = spl_filesystem_object_get_pathname(intern);
 	if (path && ZSTR_LEN(path)) {
 		zend_string *dpath = zend_string_init(ZSTR_VAL(path), ZSTR_LEN(path), 0);
-		ZSTR_LEN(dpath) = php_dirname(ZSTR_VAL(dpath), ZSTR_LEN(path));
+		ZSTR_LEN(dpath) = zend_dirname(ZSTR_VAL(dpath), ZSTR_LEN(path));
 		spl_filesystem_object_create_info(dpath, ce, return_value);
 		zend_string_release(dpath);
 	}
@@ -1588,13 +1599,12 @@ PHP_METHOD(GlobIterator, count)
 		RETURN_THROWS();
 	}
 
-	if (intern->u.dir.dirp && php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
-		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
-	} else {
-		/* should not happen */
-		// TODO ZEND_ASSERT ?
-		php_error_docref(NULL, E_ERROR, "GlobIterator lost glob state");
-	}
+	/* The spl_filesystem_object_get_method_check() function is called prior to calling this function.
+	 * Therefore, the directory entry cannot be NULL. However, if it is not NULL, then it must be a glob iterator
+	 * by construction. */
+	ZEND_ASSERT(spl_intern_is_glob(intern));
+
+	RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 }
 /* }}} */
 #endif /* HAVE_GLOB */
@@ -2014,22 +2024,27 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 PHP_METHOD(SplFileObject, __construct)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
+	zend_string *file_name = NULL;
 	zend_string *open_mode = ZSTR_CHAR('r');
+	zval *stream_context = NULL;
 	bool use_include_path = 0;
 	size_t path_len;
 	zend_error_handling error_handling;
 
-	intern->u.file.open_mode = ZSTR_CHAR('r');
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|Sbr!", &file_name, &open_mode, &use_include_path, &stream_context) == FAILURE) {
+		RETURN_THROWS();
+	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|Sbr!",
-			&intern->file_name, &open_mode,
-			&use_include_path, &intern->u.file.zcontext) == FAILURE) {
-		intern->u.file.open_mode = NULL;
-		intern->file_name = NULL;
+	/* Prevent reinitialization of Object */
+	if (UNEXPECTED(intern->u.file.stream)) {
+		zend_throw_error(NULL, "Cannot call constructor twice");
 		RETURN_THROWS();
 	}
 
 	intern->u.file.open_mode = zend_string_copy(open_mode);
+	/* file_name and zcontext are copied by spl_filesystem_file_open() */
+	intern->file_name = file_name;
+	intern->u.file.zcontext = stream_context;
 
 	/* spl_filesystem_file_open() can generate E_WARNINGs which we want to promote to exceptions */
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
@@ -2065,6 +2080,12 @@ PHP_METHOD(SplTempFileObject, __construct)
 	zend_error_handling error_handling;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &max_memory) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	/* Prevent reinitialization of Object */
+	if (UNEXPECTED(intern->u.file.stream)) {
+		zend_throw_error(NULL, "Cannot call constructor twice");
 		RETURN_THROWS();
 	}
 
@@ -2276,16 +2297,33 @@ PHP_METHOD(SplFileObject, getChildren)
 	/* return NULL */
 } /* }}} */
 
+static int spl_csv_enclosure_param_handling(const zend_string* escape_str, const spl_filesystem_object *intern, uint32_t arg_num)
+{
+	if (escape_str == NULL) {
+		if (intern->u.file.is_escape_default) {
+			php_error_docref(NULL, E_DEPRECATED, "the $escape parameter must be provided,"
+				" as its default value will change,"
+				" either explicitly or via SplFileObject::setCsvControl()");
+			if (UNEXPECTED(EG(exception))) {
+				return PHP_CSV_ESCAPE_ERROR;
+			}
+		}
+		return intern->u.file.escape;
+	} else {
+		return php_csv_handle_escape_argument(escape_str, arg_num);
+	}
+}
+
 /* {{{ Return current line as CSV */
 PHP_METHOD(SplFileObject, fgetcsv)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
-	int escape = intern->u.file.escape;
-	char *delim = NULL, *enclo = NULL, *esc = NULL;
-	size_t d_len = 0, e_len = 0, esc_len = 0;
+	char *delim = NULL, *enclo = NULL;
+	size_t d_len = 0, e_len = 0;
+	zend_string *escape_str = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssS", &delim, &d_len, &enclo, &e_len, &escape_str) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2305,19 +2343,12 @@ PHP_METHOD(SplFileObject, fgetcsv)
 		}
 		enclosure = enclo[0];
 	}
-	if (esc) {
-		if (esc_len > 1) {
-			zend_argument_value_error(3, "must be empty or a single character");
-			RETURN_THROWS();
-		}
-		if (esc_len == 0) {
-			escape = PHP_CSV_NO_ESCAPE;
-		} else {
-			escape = (unsigned char) esc[0];
-		}
+	int escape_char = spl_csv_enclosure_param_handling(escape_str, intern, 3);
+	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
+		RETURN_THROWS();
 	}
 
-	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value, true) == FAILURE) {
+	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape_char, return_value, true) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -2328,14 +2359,14 @@ PHP_METHOD(SplFileObject, fputcsv)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
-	int escape = intern->u.file.escape;
-	char *delim = NULL, *enclo = NULL, *esc = NULL;
-	size_t d_len = 0, e_len = 0, esc_len = 0;
+	char *delim = NULL, *enclo = NULL;
+	size_t d_len = 0, e_len = 0;
 	zend_long ret;
 	zval *fields = NULL;
+	zend_string *escape_str = NULL;
 	zend_string *eol = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|sssS", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len, &eol) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|ssSS", &fields, &delim, &d_len, &enclo, &e_len, &escape_str, &eol) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2353,19 +2384,12 @@ PHP_METHOD(SplFileObject, fputcsv)
 		}
 		enclosure = enclo[0];
 	}
-	if (esc) {
-		if (esc_len > 1) {
-			zend_argument_value_error(4, "must be empty or a single character");
-			RETURN_THROWS();
-		}
-		if (esc_len == 0) {
-			escape = PHP_CSV_NO_ESCAPE;
-		} else {
-			escape = (unsigned char) esc[0];
-		}
+	int escape_char = spl_csv_enclosure_param_handling(escape_str, intern, 4);
+	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
+		RETURN_THROWS();
 	}
 
-	ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape, eol);
+	ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape_char, eol);
 	if (ret < 0) {
 		RETURN_FALSE;
 	}
@@ -2378,11 +2402,11 @@ PHP_METHOD(SplFileObject, setCsvControl)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	char delimiter = ',', enclosure = '"';
-	int escape = (unsigned char) '\\';
-	char *delim = NULL, *enclo = NULL, *esc = NULL;
-	size_t d_len = 0, e_len = 0, esc_len = 0;
+	char *delim = NULL, *enclo = NULL;
+	size_t d_len = 0, e_len = 0;
+	zend_string *escape_str = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssS", &delim, &d_len, &enclo, &e_len, &escape_str) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2400,21 +2424,17 @@ PHP_METHOD(SplFileObject, setCsvControl)
 		}
 		enclosure = enclo[0];
 	}
-	if (esc) {
-		if (esc_len > 1) {
-			zend_argument_value_error(3, "must be empty or a single character");
-			RETURN_THROWS();
-		}
-		if (esc_len == 0) {
-			escape = PHP_CSV_NO_ESCAPE;
-		} else {
-			escape = (unsigned char) esc[0];
-		}
+	int escape_char = php_csv_handle_escape_argument(escape_str, 3);
+	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
+		RETURN_THROWS();
+	}
+	if (escape_str != NULL) {
+		intern->u.file.is_escape_default = false;
 	}
 
 	intern->u.file.delimiter = delimiter;
 	intern->u.file.enclosure = enclosure;
-	intern->u.file.escape    = escape;
+	intern->u.file.escape    = escape_char;
 }
 /* }}} */
 
@@ -2588,15 +2608,18 @@ PHP_METHOD(SplFileObject, fwrite)
 	char *str;
 	size_t str_len;
 	zend_long length = 0;
+	bool length_is_null = true;
 	ssize_t written;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &length) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (!length_is_null) {
 		if (length >= 0) {
 			str_len = MIN((size_t)length, str_len);
 		} else {
@@ -2665,6 +2688,12 @@ PHP_METHOD(SplFileObject, ftruncate)
 	}
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
+
+	if (size < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
 
 	if (!php_stream_truncate_supported(intern->u.file.stream)) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't truncate file %s", ZSTR_VAL(intern->file_name));

@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -27,7 +27,7 @@
 #include <lexbor/encoding/encoding.h>
 
 /* This file implements the HTML 5 serialization algorithm.
- * https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2023-12-14)
+ * https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2024-12-11)
  */
 
 #define TRY(x) do { if (UNEXPECTED((x) != SUCCESS)) { return FAILURE; } } while (0)
@@ -42,7 +42,9 @@ static zend_result dom_html5_serialize_doctype(dom_html5_serialize_context *ctx,
 static zend_result dom_html5_serialize_comment(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
 	TRY(ctx->write_string_len(ctx->application_data, "<!--", strlen("<!--")));
-	TRY(ctx->write_string(ctx->application_data, (const char *) node->content));
+	if (node->content) {
+		TRY(ctx->write_string(ctx->application_data, (const char*) node->content));
+	}
 	return ctx->write_string_len(ctx->application_data, "-->", strlen("-->"));
 }
 
@@ -131,8 +133,12 @@ static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, con
 
 static zend_result dom_html5_serialize_text_node(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
-	if (node->parent->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(node->parent, php_dom_ns_is_html_magic_token)) {
-		const xmlNode *parent = node->parent;
+	if (!node->content) {
+		return SUCCESS;
+	}
+
+	const xmlNode *parent = node->parent;
+	if (parent != NULL && parent->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(parent, php_dom_ns_is_html_magic_token)) {
 		size_t name_length = strlen((const char *) parent->name);
 		/* Spec tells us to only emit noscript content as-is if scripting is enabled.
 		 * However, the user agent (PHP) does not support (JS) scripting.
@@ -289,14 +295,26 @@ static zend_result dom_html5_serialize_node(dom_html5_serialize_context *ctx, co
 
 			case XML_ELEMENT_NODE: {
 				TRY(dom_html5_serialize_element_start(ctx, node));
-				if (node->children) {
+				const xmlNode *children = node->children;
+				if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token) && xmlStrEqual(node->name, BAD_CAST "template")) {
+					children = php_dom_retrieve_templated_content(ctx->private_data, node);
+				}
+				if (children) {
 					if (!dom_html5_serializes_as_void(node)) {
-						node = node->children;
+						node = children;
 						continue;
 					}
 				} else {
 					/* Not descended, so wouldn't put the closing tag as it's normally only done when going back upwards. */
 					TRY(dom_html5_serialize_element_end(ctx, node));
+				}
+				break;
+			}
+
+			case XML_DOCUMENT_FRAG_NODE: {
+				if (node->children) {
+					node = node->children;
+					continue;
 				}
 				break;
 			}
@@ -346,10 +364,17 @@ zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode 
 	}
 
 	/* Step 2 not needed because we're not using a string to store the serialized data */
-	/* Step 3 not needed because we don't support template contents yet */
 
-	/* Step 4 */
-	return dom_html5_serialize_node(ctx, node->children, node);
+	/* Step 3. If the node is a template element, then let the node instead be the template element's template contents (a DocumentFragment node). */
+	xmlNodePtr children = php_dom_retrieve_templated_content(ctx->private_data, node);
+	if (!children) {
+		children = node->children;
+	}
+
+	/* Step 4 concerns shadow roots, but we don't have these, so skip. */
+
+	/* Step 5 */
+	return dom_html5_serialize_node(ctx, children, node);
 }
 
 /* Variant on the above that is equivalent to the "outer HTML". */

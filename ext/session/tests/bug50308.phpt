@@ -25,6 +25,9 @@ session.use_only_cookies=0
 <a href=./>
 <a href="./">
 --EXPECTF--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 <a href="?PHPSESSID=%s"/>
 <a href="?PHPSESSID=%s" />
 <a href="foo?PHPSESSID=%s"/>

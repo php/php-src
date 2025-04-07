@@ -275,7 +275,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename);
 
-	if (SCNG(script_filtered)) {
+	if (SCNG(script_filtered) && SCNG(script_filtered) != lex_state->script_filtered) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
 	}
@@ -1597,12 +1597,6 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_STR(T_STRING, 0);
 }
 
-<ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
-	yyless(0);
-	yy_pop_state();
-	goto restart;
-}
-
 <ST_IN_SCRIPTING>"::" {
 	RETURN_TOKEN(T_PAAMAYIM_NEKUDOTAYIM);
 }
@@ -1661,6 +1655,10 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
 	RETURN_TOKEN(T_UNSET_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("void"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_VOID_CAST);
 }
 
 <ST_IN_SCRIPTING>"eval" {
@@ -1729,6 +1727,18 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"protected" {
 	RETURN_TOKEN_WITH_IDENT(T_PROTECTED);
+}
+
+<ST_IN_SCRIPTING>"public(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PUBLIC_SET);
+}
+
+<ST_IN_SCRIPTING>"protected(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PROTECTED_SET);
+}
+
+<ST_IN_SCRIPTING>"private(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PRIVATE_SET);
 }
 
 <ST_IN_SCRIPTING>"public" {
@@ -2194,6 +2204,10 @@ string:
 	RETURN_TOKEN_WITH_IDENT(T_FUNC_C);
 }
 
+<ST_IN_SCRIPTING>"__PROPERTY__" {
+	RETURN_TOKEN_WITH_IDENT(T_PROPERTY_C);
+}
+
 <ST_IN_SCRIPTING>"__METHOD__" {
 	RETURN_TOKEN_WITH_IDENT(T_METHOD_C);
 }
@@ -2385,7 +2399,7 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>"#"|"//" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>"#"|"//" {
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR++) {
 			case '\r':
@@ -2409,7 +2423,7 @@ inline_char_handler:
 	RETURN_OR_SKIP_TOKEN(T_COMMENT);
 }
 
-<ST_IN_SCRIPTING>"/*"|"/**"{WHITESPACE} {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>"/*"|"/**"{WHITESPACE} {
 	int doc_com;
 
 	if (yyleng > 2) {
@@ -2443,6 +2457,12 @@ inline_char_handler:
 	}
 
 	RETURN_OR_SKIP_TOKEN(T_COMMENT);
+}
+
+<ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
+	yyless(0);
+	yy_pop_state();
+	goto restart;
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {

@@ -118,11 +118,7 @@ PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
-	void (*sig_handler)() = NULL;
-#endif
-
-#if PHP_SIGCHILD
-	sig_handler = signal (SIGCHLD, SIG_DFL);
+	void (*sig_handler)() = signal(SIGCHLD, SIG_DFL);
 #endif
 
 #ifdef PHP_WIN32
@@ -218,7 +214,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!cmd_len) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (strlen(cmd) != cmd_len) {
@@ -272,8 +268,7 @@ PHP_FUNCTION(passthru)
    Escape all chars that could possibly be used to
    break out of a shell command
 
-   This function emalloc's a string and returns the pointer.
-   Remember to efree it when done with it.
+   This function returns an owned zend_string, remember to release it when done.
 
    *NOT* safe for binary strings
 */
@@ -514,15 +509,11 @@ PHP_FUNCTION(shell_exec)
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(command, command_len)
+		Z_PARAM_PATH(command, command_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!command_len) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-	if (strlen(command) != command_len) {
-		zend_argument_value_error(1, "must not contain any null bytes");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

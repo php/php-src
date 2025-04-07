@@ -47,6 +47,9 @@
 #include "../TSRM/TSRM.h"
 
 #include <stdio.h>
+#if ZEND_DEBUG && defined(NDEBUG)
+# error "NDEBUG must not be defined when ZEND_DEBUG is enabled"
+#endif
 #include <assert.h>
 #include <math.h>
 
@@ -92,7 +95,7 @@
 #elif defined(__clang__) && __has_builtin(__builtin_assume)
 # pragma clang diagnostic ignored "-Wassume"
 # define ZEND_ASSUME(c)	__builtin_assume(c)
-#elif PHP_HAVE_BUILTIN_UNREACHABLE && PHP_HAVE_BUILTIN_EXPECT
+#elif defined(PHP_HAVE_BUILTIN_UNREACHABLE) && defined(PHP_HAVE_BUILTIN_EXPECT)
 # define ZEND_ASSUME(c)	do { \
 		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \
 	} while (0)
@@ -304,9 +307,7 @@ char *alloca();
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
-#elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
-# define ZEND_FASTCALL __fastcall
-#elif defined(_MSC_VER) && _MSC_VER >= 1800 && !defined(__clang__)
+#elif defined(_MSC_VER)
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
@@ -337,9 +338,7 @@ char *alloca();
 # define HAVE_BUILTIN_CONSTANT_P
 #endif
 
-#if __has_attribute(element_count)
-#define ZEND_ELEMENT_COUNT(m) __attribute__((element_count(m)))
-#elif __has_attribute(counted_by)
+#if __has_attribute(counted_by)
 #define ZEND_ELEMENT_COUNT(m) __attribute__((counted_by(m)))
 #else
 #define ZEND_ELEMENT_COUNT(m)
@@ -394,7 +393,7 @@ char *alloca();
 # define XtOffsetOf(s_type, field) offsetof(s_type, field)
 #endif
 
-#ifdef HAVE_SIGSETJMP
+#ifndef ZEND_WIN32
 # define SETJMP(a) sigsetjmp(a, 0)
 # define LONGJMP(a,b) siglongjmp(a, b)
 # define JMP_BUF sigjmp_buf
@@ -442,14 +441,6 @@ char *alloca();
 # define ZTS_V 1
 #else
 # define ZTS_V 0
-#endif
-
-#ifndef LONG_MAX
-# define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-# define LONG_MIN (- LONG_MAX - 1)
 #endif
 
 #define MAX_LENGTH_OF_DOUBLE 32
@@ -518,6 +509,13 @@ extern "C++" {
 #if __has_feature(memory_sanitizer) || __has_feature(thread_sanitizer) || \
 	__has_feature(dataflow_sanitizer)
 # undef HAVE_FUNC_ATTRIBUTE_IFUNC
+#endif
+
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+# define MSAN_UNPOISON(value) __msan_unpoison(&(value), sizeof(value))
+#else
+# define MSAN_UNPOISON(value)
 #endif
 
 /* Only use ifunc resolvers if we have __builtin_cpu_supports() and __builtin_cpu_init(),
@@ -675,7 +673,7 @@ extern "C++" {
 # define ZEND_INTRIN_AVX2_FUNC_DECL(func)
 #endif
 
-#if PHP_HAVE_AVX512_SUPPORTS && defined(HAVE_FUNC_ATTRIBUTE_TARGET) || defined(ZEND_WIN32)
+#if defined(PHP_HAVE_AVX512_SUPPORTS) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) || defined(ZEND_WIN32)
 #define ZEND_INTRIN_AVX512_RESOLVER 1
 #endif
 
@@ -695,7 +693,7 @@ extern "C++" {
 # define ZEND_INTRIN_AVX512_FUNC_DECL(func)
 #endif
 
-#if PHP_HAVE_AVX512_VBMI_SUPPORTS && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#if defined(PHP_HAVE_AVX512_VBMI_SUPPORTS) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 #define ZEND_INTRIN_AVX512_VBMI_RESOLVER 1
 #endif
 
@@ -791,8 +789,8 @@ extern "C++" {
 # define ZEND_STATIC_ASSERT(c, m)
 #endif
 
-#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) /* C11 */ \
-  || (defined(__cplusplus) && __cplusplus >= 201103L) /* C++11 */
+#if ((defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) /* C11 */ \
+  || (defined(__cplusplus) && __cplusplus >= 201103L) /* C++11 */) && !defined(ZEND_WIN32)
 typedef max_align_t zend_max_align_t;
 #else
 typedef union {
@@ -809,6 +807,61 @@ typedef union {
 	void *p;
 	void (*fun)(void);
 } zend_max_align_t;
+#endif
+
+/* Bytes swap */
+#ifdef _MSC_VER
+#  include <stdlib.h>
+#  define ZEND_BYTES_SWAP32(u) _byteswap_ulong(u)
+#  define ZEND_BYTES_SWAP64(u) _byteswap_uint64(u)
+#elif defined(HAVE_BYTESWAP_H)
+#  include <byteswap.h>
+#  define ZEND_BYTES_SWAP32(u) bswap_32(u)
+#  define ZEND_BYTES_SWAP64(u) bswap_64(u)
+#elif defined(HAVE_SYS_BSWAP_H)
+#  include <sys/bswap.h>
+#  define ZEND_BYTES_SWAP32(u) bswap32(u)
+#  define ZEND_BYTES_SWAP64(u) bswap64(u)
+#elif defined(__GNUC__)
+#  define ZEND_BYTES_SWAP32(u) __builtin_bswap32(u)
+#  define ZEND_BYTES_SWAP64(u) __builtin_bswap64(u)
+#elif defined(__has_builtin)
+#  if __has_builtin(__builtin_bswap32)
+#    define ZEND_BYTES_SWAP32(u) __builtin_bswap32(u)
+#  endif
+#  if __has_builtin(__builtin_bswap64)
+#    define ZEND_BYTES_SWAP64(u) __builtin_bswap64(u)
+#  endif
+#endif
+
+#ifndef ZEND_BYTES_SWAP32
+static zend_always_inline uint32_t ZEND_BYTES_SWAP32(uint32_t u)
+{
+  return (((u & 0xff000000) >> 24)
+          | ((u & 0x00ff0000) >>  8)
+          | ((u & 0x0000ff00) <<  8)
+          | ((u & 0x000000ff) << 24));
+}
+#endif
+#ifndef ZEND_BYTES_SWAP64
+static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
+{
+   return (((u & 0xff00000000000000ULL) >> 56)
+          | ((u & 0x00ff000000000000ULL) >> 40)
+          | ((u & 0x0000ff0000000000ULL) >> 24)
+          | ((u & 0x000000ff00000000ULL) >>  8)
+          | ((u & 0x00000000ff000000ULL) <<  8)
+          | ((u & 0x0000000000ff0000ULL) << 24)
+          | ((u & 0x000000000000ff00ULL) << 40)
+          | ((u & 0x00000000000000ffULL) << 56));
+}
+#endif
+
+#ifdef ZEND_WIN32
+/* Whether it's allowed to reattach to a shm segment from different processes on
+ * this platform. This prevents pointing to internal structures from shm due to
+ * ASLR. Currently only possible on Windows. */
+# define ZEND_OPCACHE_SHM_REATTACHMENT 1
 #endif
 
 #endif /* ZEND_PORTABILITY_H */

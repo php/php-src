@@ -5,10 +5,16 @@
 # the problem area and could aid in deciding whether a pull request is ready
 # for merging.
 #
+# When changing this file, please make sure to commit the changes to the
+# earliest supported PHP branch (PHP-X.Y) and not only to the master branch.
+# GitHub reads the CODEOWNERS file from the pull request's targeted branch.
+# Commit changes here similar to bug fixes:
+# https://github.com/php/php-src/blob/master/CONTRIBUTING.md#pull-requests
+#
 # For more information, see the GitHub CODEOWNERS documentation:
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-/.github @iluuu1994 @TimWolla
+/.github @TimWolla
 /build/gen_stub.php @kocsismate
 /ext/bcmath @Girgias @nielsdos @SakiTakamachi
 /ext/curl @adoy
@@ -22,23 +28,26 @@
 /ext/intl @devnexen
 /ext/json @bukka
 /ext/libxml @nielsdos
-/ext/mbstring @alexdowad
-/ext/mysqlnd @SakiTakamachi
+/ext/mbstring @alexdowad @youkidearitai
+/ext/mysqli @bukka @kamil-tekiela
+/ext/mysqlnd @bukka @kamil-tekiela @SakiTakamachi
 /ext/odbc @NattyNarwhal
-/ext/opcache @dstogov @iluuu1994
+/ext/opcache @dstogov
 /ext/openssl @bukka
 /ext/pcntl @devnexen
 /ext/pdo @SakiTakamachi
 /ext/pdo_dblib @SakiTakamachi
 /ext/pdo_firebird @SakiTakamachi
-/ext/pdo_mysql @SakiTakamachi
+/ext/pdo_mysql @kamil-tekiela @SakiTakamachi
 /ext/pdo_odbc @NattyNarwhal @SakiTakamachi
 /ext/pdo_pgsql @devnexen @SakiTakamachi
 /ext/pdo_sqlite @SakiTakamachi
 /ext/pgsql @devnexen
 /ext/random @TimWolla @zeriyoshi
+/ext/reflection @DanielEScherzer
 /ext/session @Girgias
 /ext/simplexml @nielsdos
+/ext/soap @nielsdos
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
@@ -48,27 +57,24 @@
 /ext/xsl @nielsdos
 /main @bukka
 /sapi/fpm @bukka
-/Zend/Optimizer @dstogov @iluuu1994
+/Zend/Optimizer @dstogov
 /Zend/zend.* @dstogov
 /Zend/zend_alloc.* @dstogov
-/Zend/zend_API.* @dstogov @iluuu1994
+/Zend/zend_API.* @dstogov
 /Zend/zend_call_stack.* @arnaud-lb
 /Zend/zend_closures.* @dstogov
-/Zend/zend_compile.* @iluuu1994
-/Zend/zend_enum.* @iluuu1994
-/Zend/zend_execute.* @dstogov @iluuu1994
-/Zend/zend_execute_API.c @dstogov @iluuu1994
-/Zend/zend_frameless_function.* @iluuu1994
+/Zend/zend_execute.* @dstogov
+/Zend/zend_execute_API.c @dstogov
 /Zend/zend_gc.* @dstogov @arnaud-lb
 /Zend/zend_hash.* @dstogov
-/Zend/zend_inheritance.* @dstogov @iluuu1994
+/Zend/zend_inheritance.* @dstogov
 /Zend/zend_max_execution_timer.* @arnaud-lb
-/Zend/zend_object_handlers.* @dstogov @iluuu1994
-/Zend/zend_objects.* @dstogov @iluuu1994
-/Zend/zend_objects_API.* @dstogov @iluuu1994
-/Zend/zend_opcode.* @dstogov @iluuu1994
+/Zend/zend_object_handlers.* @dstogov
+/Zend/zend_objects.* @dstogov
+/Zend/zend_objects_API.* @dstogov
+/Zend/zend_opcode.* @dstogov
 /Zend/zend_string.* @dstogov
-/Zend/zend_type*.h @dstogov @iluuu1994
+/Zend/zend_type*.h @dstogov
 /Zend/zend_variables.* @dstogov
-/Zend/zend_vm* @dstogov @iluuu1994
+/Zend/zend_vm* @dstogov
 *.stub.php @kocsismate

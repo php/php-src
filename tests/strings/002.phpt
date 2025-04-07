@@ -44,6 +44,8 @@ try {
 } catch(\ValueError $e) {
     print('Error found: '.$e->getMessage()."\n");
 }
+printf("printf test 31:%.17g\n", INF);
+printf("printf test 32:%.17g\n", -INF);
 vprintf("vprintf test 1:%2\$-2d %1\$2d\n", array(1, 2));
 
 
@@ -83,4 +85,6 @@ printf test 27:3 1 2
 printf test 28:02  1
 printf test 29:2   1
 printf test 30:Error found: Argument number specifier must be greater than zero and less than 2147483647
+printf test 31:INF
+printf test 32:-INF
 vprintf test 1:2   1

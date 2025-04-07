@@ -184,7 +184,7 @@ lxb_dom_node_interface_copy(lxb_dom_node_t *dst,
             dst->local_name = src->local_name;
         }
         else {
-            tag = lxb_tag_data_by_id(from->tags, src->local_name);
+            tag = lxb_tag_data_by_id(src->local_name);
             if (tag == NULL) {
                 return LXB_STATUS_ERROR_NOT_EXISTS;
             }

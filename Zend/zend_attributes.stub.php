@@ -71,3 +71,27 @@ final class Override
 {
     public function __construct() {}
 }
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION|Attribute::TARGET_CLASS_CONSTANT)]
+final class Deprecated
+{
+    public readonly ?string $message;
+
+    public readonly ?string $since;
+
+    public function __construct(?string $message = null, ?string $since = null) {}
+}
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION)]
+final class NoDiscard
+{
+    public readonly ?string $message;
+
+    public function __construct(?string $message = null) {}
+}

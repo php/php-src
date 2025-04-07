@@ -1,5 +1,5 @@
 --TEST--
-Test that FFI::load returns a detailed error when failling to load a shared library
+Test that FFI::load returns a detailed error when failing to load a shared library
 --EXTENSIONS--
 ffi
 --INI--

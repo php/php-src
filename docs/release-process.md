@@ -54,7 +54,6 @@ releases.
 
 3. Ensure that the relevant tests on CI are green.
 
-   - https://travis-ci.com/github/php/php-src
    - https://cirrus-ci.com/github/php/php-src
    - https://github.com/php/php-src/actions
 
@@ -239,7 +238,18 @@ slightly different steps. We'll call attention where the steps differ.
    git tag -s -u YOURKEYID php-X.Y.ZRCn -m "Tag for php-X.Y.ZRCn"
    ```
 
-9. 🔷 **For post-GA releases only,** switch back to the *version branch* for
+9. 🔸 **For pre-GA releases only,** switch back to the `master` (for alphas and betas),
+   or `PHP-X.Y` (for RCs), and update a `NEWS` for the new version. See
+   [Update NEWS for PHP 8.2.0 alpha2][] and [Update NEWS for PHP 8.2.0RC6][] for a real example.
+
+   Commit the changes to the `master` (or `PHP-X.Y`) branch.
+
+   ```shell
+   git add -p
+   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.Z alpha2"
+   ```
+
+   🔷 **For post-GA releases only,** switch back to the *version branch* for
    your release (e.g., `PHP-8.2`) and bump the version numbers in
    `main/php_version.h`, `Zend/zend.h`, `configure.ac` and `NEWS`. This prepares
    the version branch for the next version.
@@ -247,7 +257,7 @@ slightly different steps. We'll call attention where the steps differ.
    For example, if the RC is `8.2.1RC1` then the version numbers in the version
    branch should be bumped to `8.2.2-dev`. We do this regardless of whether we
    build a new RC to make sure `version_compare()` works correctly. See
-   [Bump for 8.1.8-dev][] for a real example.
+   [PHP 8.3 is now for PHP 8.3.21-dev][] commit for a real example.
 
    Commit the changes to the version branch.
 
@@ -280,6 +290,11 @@ slightly different steps. We'll call attention where the steps differ.
     > tags you might not wish to push.
     >
     > Local-only release branches should not be pushed!
+
+    Do not forget to merge up PHP-X.Y all the way to master. When resolving
+    the conflicts, ignore the changes from PHP-X.Y in higher branches. It
+    means using something like `git checkout --ours .` when on PHP.X.Y+1 or
+    master after the merge resulting in the conflicts.
 
 11. Run the following using the release tag to export the tree, create the
     `configure` script, and build and compress three tarballs (`.tar.gz`,
@@ -918,7 +933,7 @@ feature development that cannot go into the new version.
    All the changes that are already present in the previous version NEWS should be
    removed. It means all bug fixes that went to the previous version as well should
    have their entries removed. It is possible to use `grep` to compare the changes.
-   For exampe if `82/NEWS` is NEWS for PHP 8.2 and `83/NEWS` is NEWS file for PHP 8.3,
+   For example if `82/NEWS` is NEWS for PHP 8.2 and `83/NEWS` is NEWS file for PHP 8.3,
    then following command will show changes present in both files:
 
    ```sh
@@ -984,7 +999,7 @@ volunteers to begin the selection process for the next release managers.
 
    Provide the following information in a single email:
 
-   - Prefered Unix username (will also become part of location to download RCs,
+   - Preferred Unix username (will also become part of location to download RCs,
      such as `https://downloads.php.net/~derick/`).
    - An SSH public key, preferably a new unique one for PHP systems and
      projects.
@@ -1086,7 +1101,9 @@ volunteers to begin the selection process for the next release managers.
 [Update versions for PHP 8.1.6RC1]: https://github.com/php/php-src/commit/40e8ced23898e3069340ca03ea5febc5361015ad
 [Update NEWS for PHP 8.1.6RC1]: https://github.com/php/php-src/commit/a4fdeaebe419b88e3b4a1f5aba845c2d4e81fd4e
 [Prepare for PHP 8.1.0RC1]: https://github.com/php/php-src/commit/5764414eb8900ae98020a3c20693f4fb793efa99
-[Bump for 8.1.8-dev]: https://github.com/php/php-src/commit/3b6ee1eb19c14c3339ebfcf5c967065a9f828971
+[Update NEWS for PHP 8.2.0 alpha2]: https://github.com/php/php-src/commit/418f7211f71658d79d934861be20f277db96fe2c
+[Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
+[PHP 8.3 is now for PHP 8.3.21-dev]: https://github.com/php/php-src/commit/b57f425cfe20a11003253427424cc0517483550b
 [GitHub command line tool]: https://cli.github.com
 [Announce 8.1.0RC3]: https://github.com/php/web-qa/commit/f264b711fd3827803b79bbb342959eae57ea502b
 [8.1.6RC1]: https://github.com/php/web-qa/commit/e6d61ad7a9d8be0b1cd159af29f3b9cbdde33384

@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifdef PHP_WIN32
 # define PDO_ODBC_TYPE	"Win32"
 #endif

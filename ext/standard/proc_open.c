@@ -23,6 +23,9 @@
 #include "SAPI.h"
 #include "main/php_network.h"
 #include "zend_smart_str.h"
+#ifdef PHP_WIN32
+# include "win32/sockets.h"
+#endif
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -35,7 +38,7 @@
 #ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP
 /* Only defined on glibc >= 2.29, FreeBSD CURRENT, musl >= 1.1.24,
  * MacOS Catalina or later..
- * It should be posible to modify this so it is also
+ * It should be possible to modify this so it is also
  * used in older systems when $cwd == NULL but care must be taken
  * as at least glibc < 2.24 has a legacy implementation known
  * to be really buggy.
@@ -232,7 +235,7 @@ static void _php_free_envp(php_process_env env)
 }
 /* }}} */
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int options)
 {
 	if (proc->has_cached_exit_wait_status) {
@@ -544,7 +547,7 @@ static bool is_special_character_present(const zend_string *arg)
 	return false;
 }
 
-/* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments and 
+/* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments and
  * https://learn.microsoft.com/en-us/archive/blogs/twistylittlepassagesallalike/everyone-quotes-command-line-arguments-the-wrong-way */
 static void append_win_escaped_arg(smart_str *str, zend_string *arg, bool is_cmd_argument)
 {
@@ -695,22 +698,77 @@ static void init_process_info(PROCESS_INFORMATION *pi)
 	memset(&pi, 0, sizeof(pi));
 }
 
+/* on success, returns length of *comspec, which then needs to be efree'd by caller */
+static size_t find_comspec_nt(wchar_t **comspec)
+{
+	zend_string *path = NULL;
+	wchar_t *pathw = NULL;
+	wchar_t *bufp = NULL;
+	DWORD buflen = MAX_PATH, len = 0;
+
+	path = php_getenv("PATH", 4);
+	if (path == NULL) {
+		goto out;
+	}
+	pathw = php_win32_cp_any_to_w(ZSTR_VAL(path));
+	if (pathw == NULL) {
+		goto out;
+	}
+	bufp = emalloc(buflen * sizeof(wchar_t));
+	do {
+		/* the first call to SearchPathW() fails if the buffer is too small,
+		 * what is unlikely but possible; to avoid an explicit second call to
+		 * SeachPathW() and the error handling, we're looping */
+		len = SearchPathW(pathw, L"cmd.exe", NULL, buflen, bufp, NULL);
+		if (len == 0) {
+			goto out;
+		}
+		if (len < buflen) {
+			break;
+		}
+		buflen = len;
+		bufp = erealloc(bufp, buflen * sizeof(wchar_t));
+	} while (1);
+	*comspec = bufp;
+
+out:
+	if (path != NULL) {
+		zend_string_release(path);
+	}
+	if (pathw != NULL) {
+		free(pathw);
+	}
+	if (bufp != NULL && bufp != *comspec) {
+		efree(bufp);
+	}
+	return len;
+}
+
 static zend_result convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 {
-	size_t len = sizeof(COMSPEC_NT) + sizeof(" /s /c ") + cmdw_len + 3;
+	wchar_t *comspec;
+	size_t len = find_comspec_nt(&comspec);
+	if (len == 0) {
+		php_error_docref(NULL, E_WARNING, "Command conversion failed");
+		return FAILURE;
+	}
+	len += sizeof(" /s /c ") + cmdw_len + 3;
 	wchar_t *cmdw_shell = (wchar_t *)malloc(len * sizeof(wchar_t));
 
 	if (cmdw_shell == NULL) {
+		efree(comspec);
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		return FAILURE;
 	}
 
-	if (_snwprintf(cmdw_shell, len, L"%hs /s /c \"%s\"", COMSPEC_NT, *cmdw) == -1) {
+	if (_snwprintf(cmdw_shell, len, L"%s /s /c \"%s\"", comspec, *cmdw) == -1) {
+		efree(comspec);
 		free(cmdw_shell);
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		return FAILURE;
 	}
 
+	efree(comspec);
 	free(*cmdw);
 	*cmdw = cmdw_shell;
 
@@ -718,6 +776,7 @@ static zend_result convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 }
 #endif
 
+#ifndef PHP_WIN32
 /* Convert command parameter array passed as first argument to `proc_open` into command string */
 static zend_string* get_command_from_array(HashTable *array, char ***argv, int num_elems)
 {
@@ -749,6 +808,7 @@ static zend_string* get_command_from_array(HashTable *array, char ***argv, int n
 	(*argv)[i] = NULL;
 	return command;
 }
+#endif
 
 static descriptorspec_item* alloc_descriptor_array(HashTable *descriptorspec)
 {
@@ -1119,6 +1179,7 @@ static void close_all_descriptors(descriptorspec_item *descriptors, int ndesc)
 	}
 }
 
+#ifndef PHP_WIN32
 static void efree_argv(char **argv)
 {
 	if (argv) {
@@ -1130,6 +1191,7 @@ static void efree_argv(char **argv)
 		efree(argv);
 	}
 }
+#endif
 
 /* {{{ Execute a command, with specified files used for input/output */
 PHP_FUNCTION(proc_open)
@@ -1185,8 +1247,8 @@ PHP_FUNCTION(proc_open)
 
 	if (command_ht) {
 		uint32_t num_elems = zend_hash_num_elements(command_ht);
-		if (num_elems == 0) {
-			zend_argument_value_error(1, "must have at least one element");
+		if (UNEXPECTED(num_elems == 0)) {
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 
@@ -1314,7 +1376,9 @@ PHP_FUNCTION(proc_open)
 	if (newprocok == FALSE) {
 		DWORD dw = GetLastError();
 		close_all_descriptors(descriptors, ndesc);
-		php_error_docref(NULL, E_WARNING, "CreateProcess failed, error code: %u", dw);
+		char *msg = php_win32_error_to_msg(dw);
+		php_error_docref(NULL, E_WARNING, "CreateProcess failed: %s", msg);
+		php_win32_error_msg_free(msg);
 		goto exit_fail;
 	}
 
@@ -1352,7 +1416,7 @@ PHP_FUNCTION(proc_open)
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
 		goto exit_fail;
 	}
-#elif HAVE_FORK
+#elif defined(HAVE_FORK)
 	/* the Unix way */
 	child = fork();
 
@@ -1414,7 +1478,7 @@ PHP_FUNCTION(proc_open)
 	proc->childHandle = childHandle;
 #endif
 	proc->env = env;
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 	proc->has_cached_exit_wait_status = false;
 #endif
 

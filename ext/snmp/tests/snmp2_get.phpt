@@ -54,7 +54,7 @@ var_dump(snmp2_get($hostname, $community, array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.
 --EXPECTF--
 Checking error handling
 Empty OID array
-Array of object IDs cannot be empty
+Array of object IDs must not be empty
 Checking working
 Single OID
 string(%d) "%s"

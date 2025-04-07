@@ -24,12 +24,11 @@
 #endif
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "ext/standard/info.h"
-#include "php_pcntl.h"
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_fibers.h"
@@ -40,6 +39,22 @@
 #include <sys/resource.h>
 #endif
 
+#ifdef HAVE_WAITID
+#if defined (HAVE_DECL_P_ALL) && HAVE_DECL_P_ALL == 1
+#define HAVE_POSIX_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_PIDFD) && HAVE_DECL_P_PIDFD == 1
+#define HAVE_LINUX_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_UID) && HAVE_DECL_P_UID == 1
+#define HAVE_NETBSD_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_JAILID) && HAVE_DECL_P_JAILID == 1
+#define HAVE_FREEBSD_IDTYPES 1
+#endif
+#endif
+
+#include "php_pcntl.h"
 #include <errno.h>
 #if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY) || defined(HAVE_SCHED_GETCPU)
 #include <sched.h>
@@ -108,7 +123,6 @@ typedef psetid_t cpu_set_t;
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 #include <pthread/qos.h>
-static zend_class_entry *QosClass_ce;
 #endif
 
 #ifdef HAVE_PIDFD_OPEN
@@ -129,6 +143,7 @@ static zend_class_entry *QosClass_ce;
 #include "Zend/zend_max_execution_timer.h"
 
 #include "pcntl_arginfo.h"
+static zend_class_entry *QosClass_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -138,7 +153,7 @@ zend_module_entry pcntl_module_entry = {
 	"pcntl",
 	ext_functions,
 	PHP_MINIT(pcntl),
-	PHP_MSHUTDOWN(pcntl),
+	NULL,
 	PHP_RINIT(pcntl),
 	PHP_RSHUTDOWN(pcntl),
 	PHP_MINFO(pcntl),
@@ -197,18 +212,11 @@ PHP_RINIT_FUNCTION(pcntl)
 
 PHP_MINIT_FUNCTION(pcntl)
 {
-#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-	QosClass_ce = register_class_QosClass();
-#endif
+	QosClass_ce = register_class_Pcntl_QosClass();
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
 
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(pcntl)
-{
 	return SUCCESS;
 }
 
@@ -384,6 +392,39 @@ PHP_FUNCTION(pcntl_waitpid)
 	RETURN_LONG((zend_long) child_id);
 }
 /* }}} */
+
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+PHP_FUNCTION(pcntl_waitid)
+{
+	zend_long idtype = P_ALL;
+	zend_long id = 0;
+	bool id_is_null = 1;
+	zval *user_siginfo = NULL;
+	zend_long options = WEXITED;
+
+	ZEND_PARSE_PARAMETERS_START(0, 4)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(idtype)
+		Z_PARAM_LONG_OR_NULL(id, id_is_null)
+		Z_PARAM_ZVAL(user_siginfo)
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	errno = 0;
+	siginfo_t siginfo;
+
+	int status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+
+	if (status == -1) {
+		PCNTL_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	pcntl_siginfo_to_zval(SIGCHLD, &siginfo, user_siginfo);
+
+	RETURN_TRUE;
+}
+#endif
 
 /* {{{ Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_wait)
@@ -579,44 +620,44 @@ PHP_FUNCTION(pcntl_wstopsig)
 /* {{{ Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
-	zval *args = NULL, *envs = NULL;
+	zval *args = NULL;
+	HashTable *env_vars_ht = NULL;
 	zval *element;
-	HashTable *args_hash, *envs_hash;
-	int argc = 0, argi = 0;
-	int envc = 0, envi = 0;
 	char **argv = NULL, **envp = NULL;
-	char **current_arg, **pair;
-	size_t pair_length;
-	zend_string *key;
 	char *path;
 	size_t path_len;
-	zend_ulong key_num;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(path, path_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(args)
-		Z_PARAM_ARRAY(envs)
+		Z_PARAM_ARRAY_HT(env_vars_ht)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (args != NULL) {
+		// TODO Check array is a list?
 		/* Build argument list */
 		SEPARATE_ARRAY(args);
-		args_hash = Z_ARRVAL_P(args);
-		argc = zend_hash_num_elements(args_hash);
+		const HashTable *args_ht = Z_ARRVAL_P(args);
+		uint32_t argc = zend_hash_num_elements(args_ht);
 
+		/* We want a NULL terminated array of char* with the first entry being the path,
+		 * followed by the arguments */
 		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
-		*argv = path;
-		current_arg = argv+1;
-		ZEND_HASH_FOREACH_VAL(args_hash, element) {
-			if (argi >= argc) break;
+		argv[0] = path;
+		char **current_arg = argv+1;
+		ZEND_HASH_FOREACH_VAL(args_ht, element) {
 			if (!try_convert_to_string(element)) {
+				efree(argv);
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(element))) {
+				zend_argument_value_error(2, "individual argument must not contain null bytes");
 				efree(argv);
 				RETURN_THROWS();
 			}
 
 			*current_arg = Z_STRVAL_P(element);
-			argi++;
 			current_arg++;
 		} ZEND_HASH_FOREACH_END();
 		*current_arg = NULL;
@@ -626,39 +667,51 @@ PHP_FUNCTION(pcntl_exec)
 		argv[1] = NULL;
 	}
 
-	if ( ZEND_NUM_ARGS() == 3 ) {
+	if (env_vars_ht != NULL) {
 		/* Build environment pair list */
-		SEPARATE_ARRAY(envs);
-		envs_hash = Z_ARRVAL_P(envs);
-		envc = zend_hash_num_elements(envs_hash);
+		char **pair;
+		zend_ulong key_num;
+		zend_string *key;
 
-		pair = envp = safe_emalloc((envc + 1), sizeof(char *), 0);
-		ZEND_HASH_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
-			if (envi >= envc) break;
+		/* We want a NULL terminated array of char* */
+		size_t envp_len = zend_hash_num_elements(env_vars_ht) + 1;
+		pair = envp = safe_emalloc(envp_len, sizeof(char *), 0);
+		memset(envp, 0, sizeof(char *) * envp_len);
+		ZEND_HASH_FOREACH_KEY_VAL(env_vars_ht, key_num, key, element) {
+			zend_string *element_str = zval_try_get_string(element);
+			if (element_str == NULL) {
+				goto cleanup_env_vars;
+			}
+
+			if (zend_str_has_nul_byte(element_str)) {
+				zend_argument_value_error(3, "value for environment variable must not contain null bytes");
+				zend_string_release_ex(element_str, false);
+				goto cleanup_env_vars;
+			}
+
+			/* putenv() allows integer environment variables */
 			if (!key) {
-				key = zend_long_to_str(key_num);
+				key = zend_long_to_str((zend_long) key_num);
 			} else {
+				if (zend_str_has_nul_byte(key)) {
+					zend_argument_value_error(3, "name for environment variable must not contain null bytes");
+					zend_string_release_ex(element_str, false);
+					goto cleanup_env_vars;
+				}
 				zend_string_addref(key);
 			}
 
-			if (!try_convert_to_string(element)) {
-				zend_string_release(key);
-				efree(argv);
-				efree(envp);
-				RETURN_THROWS();
-			}
-
 			/* Length of element + equal sign + length of key + null */
-			ZEND_ASSERT(Z_STRLEN_P(element) < SIZE_MAX && ZSTR_LEN(key) < SIZE_MAX);
-			*pair = safe_emalloc(Z_STRLEN_P(element) + 1, sizeof(char), ZSTR_LEN(key) + 1);
-			pair_length = Z_STRLEN_P(element) + ZSTR_LEN(key) + 2;
-			strlcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
-			strlcat(*pair, "=", pair_length);
-			strlcat(*pair, Z_STRVAL_P(element), pair_length);
+			*pair = safe_emalloc(ZSTR_LEN(element_str) + 1, sizeof(char), ZSTR_LEN(key) + 1);
+			/* Copy key=element + final null byte into buffer */
+			memcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key));
+			(*pair)[ZSTR_LEN(key)] = '=';
+			/* Copy null byte */
+			memcpy(*pair + ZSTR_LEN(key) + 1, ZSTR_VAL(element_str), ZSTR_LEN(element_str) + 1);
 
 			/* Cleanup */
-			zend_string_release_ex(key, 0);
-			envi++;
+			zend_string_release_ex(key, false);
+			zend_string_release_ex(element_str, false);
 			pair++;
 		} ZEND_HASH_FOREACH_END();
 		*(pair) = NULL;
@@ -668,6 +721,7 @@ PHP_FUNCTION(pcntl_exec)
 			php_error_docref(NULL, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
 
+cleanup_env_vars:
 		/* Cleanup */
 		for (pair = envp; *pair != NULL; pair++) efree(*pair);
 		efree(envp);
@@ -814,7 +868,7 @@ static bool php_pcntl_set_user_signal_infos(
 	bool allow_empty_signal_array
 ) {
 	if (!allow_empty_signal_array && zend_hash_num_elements(user_signals) == 0) {
-		zend_argument_value_error(arg_num, "cannot be empty");
+		zend_argument_must_not_be_empty_error(arg_num);
 		return false;
 	}
 
@@ -828,6 +882,7 @@ static bool php_pcntl_set_user_signal_infos(
 	zval *user_signal_no;
 	ZEND_HASH_FOREACH_VAL(user_signals, user_signal_no) {
 		bool failed = true;
+		ZVAL_DEREF(user_signal_no);
 		zend_long tmp = zval_try_get_long(user_signal_no, &failed);
 
 		if (failed) {
@@ -1647,8 +1702,9 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		Z_PARAM_ARRAY(hmask)
 	ZEND_PARSE_PARAMETERS_END();
 
+	// TODO Why are the arguments optional?
 	if (!hmask || zend_hash_num_elements(Z_ARRVAL_P(hmask)) == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -1671,9 +1727,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 				cpu = (zend_long)tmp;
 			} else {
-				zend_string *wcpu = zval_get_string_func(ncpu);
-				zend_argument_value_error(2, "cpu id invalid type (%s)", ZSTR_VAL(wcpu));
-				zend_string_release(wcpu);
+				zend_argument_type_error(2, "value must be of type int|string, %s given", zend_zval_value_name(ncpu));
 				PCNTL_CPU_DESTROY(mask);
 				RETURN_THROWS();
 			}
@@ -1685,7 +1739,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
 			RETURN_THROWS();
 		}
-		       
+
 		if (!PCNTL_CPU_ISSET(cpu, mask)) {
 			PCNTL_CPU_SET(cpu, mask);
 		}

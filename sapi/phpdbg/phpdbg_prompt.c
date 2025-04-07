@@ -81,7 +81,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(clear,     "clear breakpoints",                        'C', NULL, 0, 0),
 	PHPDBG_COMMAND_D(help,      "show help menu",                           'h', phpdbg_help_commands, "|s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(set,       "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(register,  "register a function",                      'R', NULL, "s", 0),
+	PHPDBG_COMMAND_D(register,  "register a phpdbginit function as a command alias", 'R', NULL, "s", 0),
 	PHPDBG_COMMAND_D(source,    "execute a phpdbginit",                     '<', NULL, "s", 0),
 	PHPDBG_COMMAND_D(export,    "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(sh,   	    "shell a command",                           0 , NULL, "i", 0),
@@ -96,34 +96,18 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 	phpdbg_param_t *name = NULL;
 
 	if (stack->type == STACK_PARAM) {
-		char *lc_name;
-
 		name = stack->next;
 
 		if (!name || name->type != STR_PARAM) {
 			return FAILURE;
 		}
 
-		lc_name = zend_str_tolower_dup(name->str, name->len);
-
-		if (zend_hash_str_exists(&PHPDBG_G(registered), lc_name, name->len)) {
-			zval fretval;
-			zend_fcall_info fci;
-
-			memset(&fci, 0, sizeof(zend_fcall_info));
-
-			ZVAL_STRINGL(&fci.function_name, lc_name, name->len);
-			fci.size = sizeof(zend_fcall_info);
-			fci.object = NULL;
-			fci.retval = &fretval;
-			fci.param_count = 0;
-			fci.params = NULL;
-			fci.named_params = NULL;
-
-			zval params;
+		zend_function *user_fn = zend_hash_str_find_ptr_lc(&PHPDBG_G(registered), name->str, name->len);
+		if (user_fn != NULL) {
+			HashTable *params_ht = NULL;
 			if (name->next) {
 				phpdbg_param_t *next = name->next;
-
+				zval params;
 				array_init(&params);
 
 				while (next) {
@@ -173,27 +157,23 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 					next = next->next;
 				}
 				/* Add positional arguments */
-				fci.named_params = Z_ARRVAL(params);
+				params_ht = Z_ARRVAL(params);
+				phpdbg_debug("created " PRIu32 " params from arguments", zend_hash_num_elements(params_ht));
 			}
 
 			phpdbg_activate_err_buf(0);
 			phpdbg_free_err_buf();
 
-			phpdbg_debug("created %d params from arguments", fci.param_count);
 
-			if (zend_call_function(&fci, NULL) == SUCCESS) {
-				zend_print_zval_r(&fretval, 0);
-				phpdbg_out("\n");
-				zval_ptr_dtor(&fretval);
+			zend_call_known_function(user_fn, NULL, NULL, NULL, 0, NULL, params_ht);
+			phpdbg_out("\n");
+
+			if (params_ht) {
+				zend_array_destroy(params_ht);
 			}
-
-			zval_ptr_dtor_str(&fci.function_name);
-			efree(lc_name);
 
 			return SUCCESS;
 		}
-
-		efree(lc_name);
 	}
 
 	return FAILURE;
@@ -608,7 +588,6 @@ int phpdbg_skip_line_helper(void) /* {{{ */ {
 		 || opline->opcode == ZEND_RETURN
 		 || opline->opcode == ZEND_FAST_RET
 		 || opline->opcode == ZEND_GENERATOR_RETURN
-		 || opline->opcode == ZEND_EXIT
 		 || opline->opcode == ZEND_YIELD
 		 || opline->opcode == ZEND_YIELD_FROM
 		) {
@@ -652,7 +631,6 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 			case ZEND_RETURN:
 			case ZEND_FAST_RET:
 			case ZEND_GENERATOR_RETURN:
-			case ZEND_EXIT:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
@@ -906,7 +884,7 @@ free_cmd:
 				}
 			} zend_end_try();
 
-			if (EG(exception)) {
+			if (EG(exception) && !zend_is_unwind_exit(EG(exception))) {
 				phpdbg_handle_exception();
 			}
 		}
@@ -1422,7 +1400,6 @@ PHPDBG_COMMAND(register) /* {{{ */
 	if (!zend_hash_str_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
 		if ((function = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len))) {
 			zend_hash_str_update_ptr(&PHPDBG_G(registered), lcname, lcname_len, function);
-			function_add_ref(function);
 
 			phpdbg_notice("Registered %s", lcname);
 		} else {
@@ -1547,6 +1524,8 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 				ret = phpdbg_stack_execute(&stack, allow_async_unsafe);
 			} zend_catch {
 				phpdbg_stack_free(&stack);
+				phpdbg_destroy_input(&input);
+				/* TODO: should use proper unwinding instead of bailing out */
 				zend_bailout();
 			} zend_end_try();
 
@@ -1651,6 +1630,15 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 	}
 
 	PHPDBG_G(in_execution) = 1;
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		/* No opline was executed before exception */
+		EG(opline_before_exception) = NULL;
+		/* Fall through to handle exception below. */
+	}
+#endif /* ZEND_CHECK_STACK_LIMIT */
 
 	while (1) {
 		zend_object *exception = EG(exception);

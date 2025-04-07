@@ -401,8 +401,9 @@ IC_METHOD(foldCase) {
 	zend_string *string_codepoint;
 	zend_long int_codepoint = 0;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -615,9 +616,7 @@ IC_CHAR_METHOD_CHAR(charMirror)
 IC_CHAR_METHOD_CHAR(tolower)
 IC_CHAR_METHOD_CHAR(toupper)
 IC_CHAR_METHOD_CHAR(totitle)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
-#endif /* ICU >= 52 */
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 

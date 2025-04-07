@@ -93,6 +93,9 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+#  include "valgrind/cachegrind.h"
+# endif
 #endif
 
 #ifndef PHP_WIN32
@@ -155,7 +158,6 @@ static const opt_struct OPTIONS[] = {
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
-	{'z', 1, "zend-extension"},
 	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
@@ -595,23 +597,23 @@ static char *sapi_fcgi_getenv(const char *name, size_t name_len)
 
 static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 {
-#if !HAVE_SETENV || !HAVE_UNSETENV
+#if !defined(HAVE_SETENV) || !defined(HAVE_UNSETENV)
 	size_t len;
 	char *buf;
 #endif
 
-#if HAVE_SETENV
+#ifdef HAVE_SETENV
 	if (value) {
 		setenv(name, value, 1);
 	}
 #endif
-#if HAVE_UNSETENV
+#ifdef HAVE_UNSETENV
 	if (!value) {
 		unsetenv(name);
 	}
 #endif
 
-#if !HAVE_SETENV || !HAVE_UNSETENV
+#if !defined(HAVE_SETENV) || !defined(HAVE_UNSETENV)
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment
 		this leaks, but it's only cgi anyway, we'll fix
@@ -623,13 +625,13 @@ static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 		return getenv(name);
 	}
 #endif
-#if !HAVE_SETENV
+#if !defined(HAVE_SETENV)
 	if (value) {
 		len = slprintf(buf, len - 1, "%s=%s", name, value);
 		putenv(buf);
 	}
 #endif
-#if !HAVE_UNSETENV
+#if !defined(HAVE_UNSETENV)
 	if (!value) {
 		len = slprintf(buf, len - 1, "%s=", name);
 		putenv(buf);
@@ -965,9 +967,9 @@ static int sapi_cgi_deactivate(void)
 	return SUCCESS;
 }
 
-static int php_cgi_startup(sapi_module_struct *sapi_module)
+static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 {
-	return php_module_startup(sapi_module, &cgi_module_entry);
+	return php_module_startup(sapi_module_ptr, &cgi_module_entry);
 }
 
 /* {{{ sapi_module_struct cgi_sapi_module */
@@ -1039,7 +1041,6 @@ static void php_cgi_usage(char *argv0)
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
 				"  -T <count>       Measure execution time of script repeated <count> times.\n",
 				prog, prog);
 }
@@ -1515,23 +1516,23 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor */
-static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
+static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals_ptr)
 {
 #if defined(ZTS) && defined(PHP_WIN32)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	php_cgi_globals->rfc2616_headers = 0;
-	php_cgi_globals->nph = 0;
-	php_cgi_globals->check_shebang_line = 1;
-	php_cgi_globals->force_redirect = 1;
-	php_cgi_globals->redirect_status_env = NULL;
-	php_cgi_globals->fix_pathinfo = 1;
-	php_cgi_globals->discard_path = 0;
-	php_cgi_globals->fcgi_logging = 1;
+	php_cgi_globals_ptr->rfc2616_headers = 0;
+	php_cgi_globals_ptr->nph = 0;
+	php_cgi_globals_ptr->check_shebang_line = 1;
+	php_cgi_globals_ptr->force_redirect = 1;
+	php_cgi_globals_ptr->redirect_status_env = NULL;
+	php_cgi_globals_ptr->fix_pathinfo = 1;
+	php_cgi_globals_ptr->discard_path = 0;
+	php_cgi_globals_ptr->fcgi_logging = 1;
 #ifdef PHP_WIN32
-	php_cgi_globals->impersonate = 0;
+	php_cgi_globals_ptr->impersonate = 0;
 #endif
-	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals_ptr->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
 }
 /* }}} */
 
@@ -1746,7 +1747,6 @@ int main(int argc, char *argv[])
 	int status = 0;
 #endif
 	char *query_string;
-	char *decoded_query_string;
 	int skip_getopt = 0;
 
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1801,10 +1801,15 @@ int main(int argc, char *argv[])
 	 * the executable. Ideally we skip argument parsing when we're in cgi or fastcgi mode,
 	 * but that breaks PHP scripts on Linux with a hashbang: `#!/php-cgi -d option=value`.
 	 * Therefore, this code only prevents passing arguments if the query string starts with a '-'.
-	 * Similarly, scripts spawned in subprocesses on Windows may have the same issue. */
+	 * Similarly, scripts spawned in subprocesses on Windows may have the same issue.
+	 * However, Windows has lots of conversion rules and command line parsing rules that
+	 * are too difficult and dangerous to reliably emulate. */
 	if((query_string = getenv("QUERY_STRING")) != NULL && strchr(query_string, '=') == NULL) {
+#ifdef PHP_WIN32
+		skip_getopt = cgi || fastcgi;
+#else
 		unsigned char *p;
-		decoded_query_string = strdup(query_string);
+		char *decoded_query_string = strdup(query_string);
 		php_url_decode(decoded_query_string, strlen(decoded_query_string));
 		for (p = (unsigned char *)decoded_query_string; *p &&  *p <= ' '; p++) {
 			/* skip all leading spaces */
@@ -1813,22 +1818,8 @@ int main(int argc, char *argv[])
 			skip_getopt = 1;
 		}
 
-		/* On Windows we have to take into account the "best fit" mapping behaviour. */
-#ifdef PHP_WIN32
-		if (*p >= 0x80) {
-			wchar_t wide_buf[1];
-			wide_buf[0] = *p;
-			char char_buf[4];
-			size_t wide_buf_len = sizeof(wide_buf) / sizeof(wide_buf[0]);
-			size_t char_buf_len = sizeof(char_buf) / sizeof(char_buf[0]);
-			if (WideCharToMultiByte(CP_ACP, 0, wide_buf, wide_buf_len, char_buf, char_buf_len, NULL, NULL) == 0
-				|| char_buf[0] == '-') {
-				skip_getopt = 1;
-			}
-		}
-#endif
-
 		free(decoded_query_string);
+#endif
 	}
 
 	php_ini_builder_init(&ini_builder);
@@ -1895,32 +1886,31 @@ int main(int argc, char *argv[])
 
 	/* check force_cgi after startup, so we have proper output */
 	if (cgi && CGIG(force_redirect)) {
-		/* Apache will generate REDIRECT_STATUS,
-		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
-		 * redirect.so and installation instructions available from
-		 * http://www.koehntopp.de/php.
-		 *   -- kk@netuse.de
-		 */
-		if (!getenv("REDIRECT_STATUS") &&
-			!getenv ("HTTP_REDIRECT_STATUS") &&
-			/* this is to allow a different env var to be configured
-			 * in case some server does something different than above */
-			(!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
-		) {
+		/* This is to allow a different environment variable to be configured
+		 * in case the we cannot auto-detect which environment variable to use.
+		 * Checking this first to allow user overrides in case the environment
+		 * variable can be set by an untrusted party. */
+		const char *redirect_status_env = CGIG(redirect_status_env);
+		if (!redirect_status_env) {
+			/* Apache will generate REDIRECT_STATUS. */
+			redirect_status_env = "REDIRECT_STATUS";
+		}
+
+		if (!getenv(redirect_status_env)) {
 			zend_try {
 				SG(sapi_headers).http_response_code = 400;
 				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
 <p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
 set, e.g. via an Apache Action directive.</p>\n\
-<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"http://php.net/security.cgi-bin\">\
+<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"https://www.php.net/security.cgi-bin\">\
 manual page for CGI security</a>.</p>\n\
 <p>For more information about changing this behaviour or re-enabling this webserver,\n\
 consult the installation file that came with this distribution, or visit \n\
-<a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
+<a href=\"https://www.php.net/install.windows\">the manual page</a>.</p>\n");
 			} zend_catch {
 			} zend_end_try();
-#if defined(ZTS) && !defined(PHP_DEBUG)
+#if defined(ZTS) && !PHP_DEBUG
 			/* XXX we're crashing here in msvc6 debug builds at
 			 * php_message_handler_for_zend:839 because
 			 * SG(request_info).path_translated is an invalid pointer.
@@ -2249,6 +2239,10 @@ parent_loop_end:
 								CALLGRIND_STOP_INSTRUMENTATION;
 								/* We're not interested in measuring startup */
 								CALLGRIND_ZERO_STATS;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+								CACHEGRIND_STOP_INSTRUMENTATION;
+								/* Zeroing stats is not supported for cachegrind. */
+# endif
 							}
 #endif
 						} else {
@@ -2377,11 +2371,7 @@ parent_loop_end:
 							}
 							SG(headers_sent) = 1;
 							SG(request_info).no_headers = 1;
-#if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#endif
+							php_print_version(&cgi_sapi_module);
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
 							exit_status = 0;
@@ -2389,10 +2379,6 @@ parent_loop_end:
 
 						case 'w':
 							behavior = PHP_MODE_STRIP;
-							break;
-
-						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
 							break;
 
 						default:
@@ -2461,6 +2447,9 @@ do_repeat:
 #ifdef HAVE_VALGRIND
 			if (warmup_repeats == 0) {
 				CALLGRIND_START_INSTRUMENTATION;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+				CACHEGRIND_START_INSTRUMENTATION;
+# endif
 			}
 #endif
 
@@ -2553,11 +2542,11 @@ do_repeat:
 					break;
 				case PHP_MODE_HIGHLIGHT:
 					{
-						zend_syntax_highlighter_ini syntax_highlighter_ini;
+						zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 
 						if (open_file_for_scanning(&file_handle) == SUCCESS) {
-							php_get_highlight_struct(&syntax_highlighter_ini);
-							zend_highlight(&syntax_highlighter_ini);
+							php_get_highlight_struct(&default_syntax_highlighter_ini);
+							zend_highlight(&default_syntax_highlighter_ini);
 						}
 					}
 					break;
@@ -2585,6 +2574,9 @@ fastcgi_request_done:
 #ifdef HAVE_VALGRIND
 			/* We're not interested in measuring shutdown */
 			CALLGRIND_STOP_INSTRUMENTATION;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+			CACHEGRIND_STOP_INSTRUMENTATION;
+# endif
 #endif
 
 			if (!fastcgi) {

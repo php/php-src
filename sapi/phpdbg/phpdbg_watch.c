@@ -138,10 +138,10 @@ const phpdbg_command_t phpdbg_watch_commands[] = {
 bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *newPtr) {
 	switch (type) {
 		case WATCH_ON_BUCKET:
-			if (memcmp(&((Bucket *) oldPtr)->h, &((Bucket *) newPtr)->h, sizeof(Bucket) - sizeof(zval) /* key/val comparison */) != 0) {
+			if (memcmp(&((Bucket *) oldPtr)->h, &((Bucket *) newPtr)->h, sizeof(Bucket) - sizeof(zval) /* hash+key comparison */) != 0) {
 				return 2;
 			}
-			/* TODO: Is this intentional? */
+			/* Fall through to also compare the value from the bucket. */
 			ZEND_FALLTHROUGH;
 		case WATCH_ON_ZVAL:
 			return memcmp(oldPtr, newPtr, sizeof(zend_value) + sizeof(uint32_t) /* value + typeinfo */) != 0;
@@ -310,9 +310,9 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context) {
 # if defined(__GNUC__) && !defined(__clang__)
 __attribute__((no_sanitize_address))
 # endif
-void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals) {
+void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals_ptr) {
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	zend_phpdbg_globals *globals = (zend_phpdbg_globals *) phpdbg_globals;
+	zend_phpdbg_globals *globals = (zend_phpdbg_globals *) phpdbg_globals_ptr;
 
 	struct uffd_msg fault_msg = {0};
 	while (read(globals->watch_userfaultfd, &fault_msg, sizeof(fault_msg)) == sizeof(fault_msg)) {
@@ -519,7 +519,9 @@ phpdbg_watch_element *phpdbg_add_watch_element(phpdbg_watchpoint_t *watch, phpdb
 		phpdbg_watch_element *old_element;
 		watch = res->ptr;
 		if ((old_element = zend_hash_find_ptr(&watch->elements, element->str))) {
-			phpdbg_free_watch_element(element);
+			if (element != old_element) {
+				phpdbg_free_watch_element(element);
+			}
 			return old_element;
 		}
 	}
@@ -1468,11 +1470,13 @@ void phpdbg_setup_watchpoints(void) {
 
 	/* put these on a separate page, to avoid conflicts with other memory */
 	PHPDBG_G(watchlist_mem) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
+	PHPDBG_G(original_watchlist_mem) = PHPDBG_G(watchlist_mem);
 	zend_hash_init(PHPDBG_G(watchlist_mem), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
 	PHPDBG_G(watchlist_mem_backup) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
 	zend_hash_init(PHPDBG_G(watchlist_mem_backup), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
 
 	PHPDBG_G(watch_tmp) = NULL;
+	PHPDBG_G(watchpoint_hit) = false;
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	int flags = O_CLOEXEC;
@@ -1521,8 +1525,8 @@ void phpdbg_destroy_watchpoints(void) {
 	zend_hash_destroy(&PHPDBG_G(watch_recreation));
 	zend_hash_destroy(&PHPDBG_G(watch_free));
 	zend_hash_destroy(&PHPDBG_G(watch_collisions));
-	zend_hash_destroy(PHPDBG_G(watchlist_mem));
-	free(PHPDBG_G(watchlist_mem));
+	zend_hash_destroy(PHPDBG_G(original_watchlist_mem));
+	free(PHPDBG_G(original_watchlist_mem));
 	zend_hash_destroy(PHPDBG_G(watchlist_mem_backup));
 	free(PHPDBG_G(watchlist_mem_backup));
 }

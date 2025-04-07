@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #ifndef _GNU_SOURCE
@@ -30,6 +30,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "pdo_firebird_utils.h"
 
 static int php_firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
@@ -460,6 +461,65 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 	return 1;
 }
 
+#if FB_API_VER >= 40
+/* set coercing a data type */
+static void set_coercing_output_data_types(XSQLDA* sqlda)
+{
+	/* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */
+	/* These data types include DECFLOAT(16), DECFLOAT(34), INT128 (NUMERIC/DECIMAL(38, x)). */
+	/* In any case, at this data types can only be mapped to strings. */
+	/* This function allows you to ensure minimal performance of queries if they contain columns of the above types. */
+	unsigned int i;
+	short dtype;
+	short nullable;
+	XSQLVAR* var;
+	unsigned fb_client_version = fb_get_client_version();
+	unsigned fb_client_major_version = (fb_client_version >> 8) & 0xFF;
+	for (i=0, var = sqlda->sqlvar; i < sqlda->sqld; i++, var++) {
+		dtype = (var->sqltype & ~1); /* drop flag bit  */
+		nullable = (var->sqltype & 1);
+		switch(dtype) {
+			case SQL_INT128:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 46;
+				var->sqlscale = 0;
+				break;
+
+			case SQL_DEC16:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 24;
+				break;
+
+			case SQL_DEC34:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 43;
+				break;
+
+			case SQL_TIMESTAMP_TZ:
+			    if (fb_client_major_version < 4) {
+					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */
+					/* so we convert these types to a string. */
+					var->sqltype = SQL_VARYING + nullable;
+					var->sqllen = 58;
+				}
+				break;
+
+			case SQL_TIME_TZ:
+				if (fb_client_major_version < 4) {
+					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */
+					/* so we convert these types to a string. */
+					var->sqltype = SQL_VARYING + nullable;
+					var->sqllen = 46;
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
+}
+#endif
+
 /* map driver specific error message to PDO error */
 void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
 	const char *msg, const size_t msg_len) /* {{{ */
@@ -475,7 +535,7 @@ void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state,
 		einfo->errmsg_length = 0;
 	}
 
-	if (H->isc_status && (H->isc_status[0] == 1 && H->isc_status[1] > 0)) {
+	if (H->isc_status[0] == 1 && H->isc_status[1] > 0) {
 		char buf[512];
 		size_t buf_size = sizeof(buf), read_len = 0;
 		ssize_t tmp_len;
@@ -495,14 +555,12 @@ void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state,
 		einfo->errmsg_length = read_len;
 		einfo->errmsg = pestrndup(buf, read_len, dbh->is_persistent);
 
-#if FB_API_VER >= 25
 		char sqlstate[sizeof(pdo_error_type)];
 		fb_sqlstate(sqlstate, H->isc_status);
-		if (sqlstate != NULL && strlen(sqlstate) < sizeof(pdo_error_type)) {
+		if (strlen(sqlstate) < sizeof(pdo_error_type)) {
 			strcpy(*error_code, sqlstate);
 			goto end;
 		}
-#endif
 	} else if (msg && msg_len) {
 		einfo->errmsg_length = msg_len;
 		einfo->errmsg = pestrndup(msg, einfo->errmsg_length, dbh->is_persistent);
@@ -541,13 +599,13 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 
 	if (H->date_format) {
-		efree(H->date_format);
+		zend_string_release_ex(H->date_format, false);
 	}
 	if (H->time_format) {
-		efree(H->time_format);
+		zend_string_release_ex(H->time_format, false);
 	}
 	if (H->timestamp_format) {
-		efree(H->timestamp_format);
+		zend_string_release_ex(H->timestamp_format, false);
 	}
 
 	if (H->einfo.errmsg) {
@@ -605,6 +663,11 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 			break;
 		}
 
+#if FB_API_VER >= 40
+		/* set coercing a data type */
+		set_coercing_output_data_types(&S->out_sqlda);
+#endif
+
 		/* allocate the input descriptors */
 		if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, &num_sqlda)) {
 			break;
@@ -617,6 +680,14 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 			if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
 				break;
+			}
+
+			/* make all parameters nullable */
+			unsigned int i;
+			XSQLVAR* var;
+			for (i = 0, var = S->in_sqlda->sqlvar; i < S->in_sqlda->sqld; i++, var++) {
+				/* The low bit of sqltype indicates that the parameter can take a NULL value */
+				var->sqltype |= 1;
 			}
 		}
 
@@ -719,7 +790,7 @@ free_statement:
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
 static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
-	int qcount = 0;
+	size_t qcount = 0;
 	char const *co, *l, *r;
 	char *c;
 	size_t quotedlen;
@@ -732,6 +803,10 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
 	/* count the number of ' characters */
 	for (co = ZSTR_VAL(unquoted); (co = strchr(co,'\'')); qcount++, co++);
+
+	if (UNEXPECTED(ZSTR_LEN(unquoted) + 2 > ZSTR_MAX_LEN - qcount)) {
+		return NULL;
+	}
 
 	quotedlen = ZSTR_LEN(unquoted) + qcount + 2;
 	quoted_str = zend_string_alloc(quotedlen, 0);
@@ -926,12 +1001,6 @@ static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sq
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char *new_sql;
 
-	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (ZSTR_LEN(sql) > 65536) {
-		php_firebird_error_with_info(dbh, "01004", strlen("01004"), NULL, 0);
-		return 0;
-	}
-
 	/* allocate the statement */
 	if (isc_dsql_allocate_statement(H->isc_status, &H->db, s)) {
 		php_firebird_error(dbh);
@@ -1022,10 +1091,9 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->date_format) {
-					efree(H->date_format);
+					zend_string_release_ex(H->date_format, false);
 				}
-				spprintf(&H->date_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release_ex(str, 0);
+				H->date_format = str;
 			}
 			return true;
 
@@ -1036,10 +1104,9 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->time_format) {
-					efree(H->time_format);
+					zend_string_release_ex(H->time_format, false);
 				}
-				spprintf(&H->time_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release_ex(str, 0);
+				H->time_format = str;
 			}
 			return true;
 
@@ -1050,10 +1117,9 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->timestamp_format) {
-					efree(H->timestamp_format);
+					zend_string_release_ex(H->timestamp_format, false);
 				}
-				spprintf(&H->timestamp_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release_ex(str, 0);
+				H->timestamp_format = str;
 			}
 			return true;
 
@@ -1080,8 +1146,8 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 						 */
 						H->txn_isolation_level = lval;
 					} else {
-						zend_value_error("PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
-							"(PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)");
+						zend_value_error("Pdo\\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+							"(Pdo\\Firebird::READ_COMMITTED, Pdo\\Firebird::REPEATABLE_READ, or Pdo\\Firebird::SERIALIZABLE)");
 						return false;
 					}
 				}
@@ -1154,27 +1220,9 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			ZVAL_BOOL(val, !isc_version(&H->db, php_firebird_info_cb, NULL));
 			return 1;
 
-		case PDO_ATTR_CLIENT_VERSION: {
-#if defined(__GNUC__) || defined(PHP_WIN32)
-			info_func_t info_func = NULL;
-#ifdef __GNUC__
-			info_func = (info_func_t)dlsym(RTLD_DEFAULT, "isc_get_client_version");
-#else
-			HMODULE l = GetModuleHandle("fbclient");
-
-			if (!l) {
-				break;
-			}
-			info_func = (info_func_t)GetProcAddress(l, "isc_get_client_version");
-#endif
-			if (info_func) {
-				info_func(tmp);
-				ZVAL_STRING(val, tmp);
-			}
-#else
-			ZVAL_NULL(val);
-#endif
-			}
+		case PDO_ATTR_CLIENT_VERSION:
+			isc_get_client_version(tmp);
+			ZVAL_STRING(val, tmp);
 			return 1;
 
 		case PDO_ATTR_SERVER_VERSION:
@@ -1185,23 +1233,34 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				ZVAL_STRING(val, tmp);
 				return 1;
 			}
-			/* TODO Check this is correct? */
-			ZEND_FALLTHROUGH;
+			return -1;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			ZVAL_BOOL(val, H->fetch_table_names);
 			return 1;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
-			ZVAL_STRING(val, H->date_format);
+			if (H->date_format) {
+				ZVAL_STR_COPY(val, H->date_format);
+			} else {
+				ZVAL_STRING(val, PDO_FB_DEF_DATE_FMT);
+			}
 			return 1;
 
 		case PDO_FB_ATTR_TIME_FORMAT:
-			ZVAL_STRING(val, H->time_format);
+			if (H->time_format) {
+				ZVAL_STR_COPY(val, H->time_format);
+			} else {
+				ZVAL_STRING(val, PDO_FB_DEF_TIME_FMT);
+			}
 			return 1;
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
-			ZVAL_STRING(val, H->timestamp_format);
+			if (H->timestamp_format) {
+				ZVAL_STR_COPY(val, H->timestamp_format);
+			} else {
+				ZVAL_STRING(val, PDO_FB_DEF_TIMESTAMP_FMT);
+			}
 			return 1;
 
 		case PDO_FB_TRANSACTION_ISOLATION_LEVEL:
@@ -1216,7 +1275,6 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 }
 /* }}} */
 
-#if FB_API_VER >= 30
 /* called by PDO to check liveness */
 static zend_result pdo_firebird_check_liveness(pdo_dbh_t *dbh) /* {{{ */
 {
@@ -1226,7 +1284,6 @@ static zend_result pdo_firebird_check_liveness(pdo_dbh_t *dbh) /* {{{ */
 	return fb_ping(H->isc_status, &H->db) ? FAILURE : SUCCESS;
 }
 /* }}} */
-#endif
 
 /* called by PDO to retrieve driver-specific information about an error that has occurred */
 static void pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
@@ -1266,11 +1323,7 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
 	pdo_firebird_get_attribute,
-#if FB_API_VER >= 30
 	pdo_firebird_check_liveness,
-#else
-	NULL,
-#endif
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	pdo_firebird_in_manually_transaction,
@@ -1314,8 +1367,8 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 	) {
 		H->txn_isolation_level = txn_isolation_level;
 	} else {
-		zend_value_error("PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
-			"(PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)");
+		zend_value_error("Pdo\\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+			"(Pdo\\Firebird::READ_COMMITTED, Pdo\\Firebird::REPEATABLE_READ, or Pdo\\Firebird::SERIALIZABLE)");
 		ret = 0;
 	}
 
@@ -1365,11 +1418,11 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		char errmsg[512];
 		const ISC_STATUS *s = H->isc_status;
 		fb_interpret(errmsg, sizeof(errmsg),&s);
-		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%ld] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%" PRIiPTR "] %s",
 				"HY000", H->isc_status[1], errmsg);
 	}
 
-	if (dbh->auto_commit && !H->tr) {
+	if (ret && dbh->auto_commit && !H->tr) {
 		ret = php_firebird_begin_transaction(dbh, /* auto commit mode */ true);
 	}
 

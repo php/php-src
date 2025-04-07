@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4182a1159f6cf8a0d71a7814d0435b5e2be29276 */
+ * Stub hash: 031dc8f07d2d9bac4a5f82f4ac2c5b3da5995405 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -133,11 +133,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetUnset
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setAlias, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setAlias, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setDefaultStub, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setDefaultStub, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, webIndex, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -302,9 +302,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_offsetUnset arginfo_class_Phar_offsetUnset
 
-#define arginfo_class_PharData_setAlias arginfo_class_Phar_setAlias
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharData_setAlias, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_PharData_setDefaultStub arginfo_class_Phar_setDefaultStub
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharData_setDefaultStub, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, webIndex, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_setMetadata arginfo_class_Phar_setMetadata
 
@@ -460,10 +465,6 @@ ZEND_METHOD(PharFileInfo, isCompressed);
 ZEND_METHOD(PharFileInfo, isCRCChecked);
 ZEND_METHOD(PharFileInfo, setMetadata);
 
-static const zend_function_entry class_PharException_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Phar_methods[] = {
 	ZEND_ME(Phar, __construct, arginfo_class_Phar___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Phar, __destruct, arginfo_class_Phar___destruct, ZEND_ACC_PUBLIC)
@@ -607,8 +608,8 @@ static zend_class_entry *register_class_PharException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PharException", class_PharException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	INIT_CLASS_ENTRY(ce, "PharException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }
@@ -618,7 +619,7 @@ static zend_class_entry *register_class_Phar(zend_class_entry *class_entry_Recur
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Phar", class_Phar_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
 
 	zval const_BZ2_value;
@@ -725,7 +726,7 @@ static zend_class_entry *register_class_PharData(zend_class_entry *class_entry_R
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharData", class_PharData_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
 
 	return class_entry;
@@ -736,7 +737,7 @@ static zend_class_entry *register_class_PharFileInfo(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", class_PharFileInfo_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplFileInfo);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplFileInfo, 0);
 
 	return class_entry;
 }

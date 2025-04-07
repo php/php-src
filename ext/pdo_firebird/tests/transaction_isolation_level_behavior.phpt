@@ -4,9 +4,6 @@ PDO_Firebird: transaction isolation level (Testing for behavior)
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---XLEAK--
-A bug in firebird causes a memory leak when calling `isc_attach_database()`.
-See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 
@@ -51,7 +48,7 @@ $dbh = new PDO(
     PDO_FIREBIRD_TEST_DSN,
     PDO_FIREBIRD_TEST_USER,
     PDO_FIREBIRD_TEST_PASS,
-    [PDO::FB_TRANSACTION_ISOLATION_LEVEL => PDO::FB_READ_COMMITTED]
+    [Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL => Pdo\Firebird::READ_COMMITTED]
 );
 echo "begin transaction\n";
 $dbh->beginTransaction();
@@ -74,7 +71,7 @@ $dbh = new PDO(
     PDO_FIREBIRD_TEST_DSN,
     PDO_FIREBIRD_TEST_USER,
     PDO_FIREBIRD_TEST_PASS,
-    [PDO::FB_TRANSACTION_ISOLATION_LEVEL => PDO::FB_REPEATABLE_READ]
+    [Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL => Pdo\Firebird::REPEATABLE_READ]
 );
 echo "begin transaction\n";
 $dbh->beginTransaction();
@@ -104,7 +101,7 @@ $dbh = new PDO(
     PDO_FIREBIRD_TEST_DSN,
     PDO_FIREBIRD_TEST_USER,
     PDO_FIREBIRD_TEST_PASS,
-    [PDO::FB_TRANSACTION_ISOLATION_LEVEL => PDO::FB_SERIALIZABLE]
+    [Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL => Pdo\Firebird::SERIALIZABLE]
 );
 echo "begin transaction\n";
 $dbh->beginTransaction();

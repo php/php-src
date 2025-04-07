@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3a3ee52b0773e96ead463517e6d9a68c2b385b92 */
+ * Stub hash: 42d486d2666d23569e70860e2b1ef203161792b3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -201,15 +201,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_wsaprotocol_info_export, 
 	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_socket_wsaprotocol_info_import, 0, 1, Socket, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, info_id, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_wsaprotocol_info_release, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, info_id, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -258,11 +254,7 @@ ZEND_FUNCTION(socket_addrinfo_bind);
 ZEND_FUNCTION(socket_addrinfo_explain);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(socket_wsaprotocol_info_export);
-#endif
-#if defined(PHP_WIN32)
 ZEND_FUNCTION(socket_wsaprotocol_info_import);
-#endif
-#if defined(PHP_WIN32)
 ZEND_FUNCTION(socket_wsaprotocol_info_release);
 #endif
 
@@ -312,21 +304,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(socket_addrinfo_explain, arginfo_socket_addrinfo_explain)
 #if defined(PHP_WIN32)
 	ZEND_FE(socket_wsaprotocol_info_export, arginfo_socket_wsaprotocol_info_export)
-#endif
-#if defined(PHP_WIN32)
 	ZEND_FE(socket_wsaprotocol_info_import, arginfo_socket_wsaprotocol_info_import)
-#endif
-#if defined(PHP_WIN32)
 	ZEND_FE(socket_wsaprotocol_info_release, arginfo_socket_wsaprotocol_info_release)
 #endif
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Socket_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_AddressInfo_methods[] = {
 	ZEND_FE_END
 };
 
@@ -340,6 +320,9 @@ static void register_sockets_symbols(int module_number)
 #if defined(AF_DIVERT)
 	REGISTER_LONG_CONSTANT("AF_DIVERT", AF_DIVERT, CONST_PERSISTENT);
 #endif
+#if defined(AF_PACKET)
+	REGISTER_LONG_CONSTANT("AF_PACKET", AF_PACKET, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SOCK_STREAM", SOCK_STREAM, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_DGRAM", SOCK_DGRAM, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_RAW", SOCK_RAW, CONST_PERSISTENT);
@@ -350,8 +333,14 @@ static void register_sockets_symbols(int module_number)
 #if defined(SOCK_CONN_DGRAM)
 	REGISTER_LONG_CONSTANT("SOCK_CONN_DGRAM", SOCK_CONN_DGRAM, CONST_PERSISTENT);
 #endif
-#if defined(SOCK_CONN_DGRAM)
+#if defined(SOCK_DCCP)
 	REGISTER_LONG_CONSTANT("SOCK_DCCP", SOCK_DCCP, CONST_PERSISTENT);
+#endif
+#if defined(SOCK_CLOEXEC)
+	REGISTER_LONG_CONSTANT("SOCK_CLOEXEC", SOCK_CLOEXEC, CONST_PERSISTENT);
+#endif
+#if defined(SOCK_NONBLOCK)
+	REGISTER_LONG_CONSTANT("SOCK_NONBLOCK", SOCK_NONBLOCK, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("MSG_OOB", MSG_OOB, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MSG_WAITALL", MSG_WAITALL, CONST_PERSISTENT);
@@ -419,6 +408,9 @@ static void register_sockets_symbols(int module_number)
 #if defined(SO_BINDTODEVICE)
 	REGISTER_LONG_CONSTANT("SO_BINDTODEVICE", SO_BINDTODEVICE, CONST_PERSISTENT);
 #endif
+#if defined(SO_BINDTOIFINDEX)
+	REGISTER_LONG_CONSTANT("SO_BINDTOIFINDEX", SO_BINDTOIFINDEX, CONST_PERSISTENT);
+#endif
 #if defined(SO_USER_COOKIE)
 	REGISTER_LONG_CONSTANT("SO_LABEL", SO_LABEL, CONST_PERSISTENT);
 #endif
@@ -483,6 +475,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(SO_EXCLBIND)
 	REGISTER_LONG_CONSTANT("SO_EXCLBIND", SO_EXCLBIND, CONST_PERSISTENT);
+#endif
+#if defined(SO_BUSY_POLL)
+	REGISTER_LONG_CONSTANT("SO_BUSY_POLL", SO_BUSY_POLL, CONST_PERSISTENT);
 #endif
 #if defined(SKF_AD_OFF)
 	REGISTER_LONG_CONSTANT("SKF_AD_OFF", SKF_AD_OFF, CONST_PERSISTENT);
@@ -568,6 +563,24 @@ static void register_sockets_symbols(int module_number)
 #if defined(TCP_KEEPIDLE)
 	REGISTER_LONG_CONSTANT("TCP_KEEPCNT", TCP_KEEPCNT, CONST_PERSISTENT);
 #endif
+#if defined(TCP_FUNCTION_BLK)
+	REGISTER_LONG_CONSTANT("TCP_FUNCTION_BLK", TCP_FUNCTION_BLK, CONST_PERSISTENT);
+#endif
+#if defined(TCP_FUNCTION_ALIAS)
+	REGISTER_LONG_CONSTANT("TCP_FUNCTION_ALIAS", TCP_FUNCTION_ALIAS, CONST_PERSISTENT);
+#endif
+#if defined(TCP_REUSPORT_LB_NUMA)
+	REGISTER_LONG_CONSTANT("TCP_REUSPORT_LB_NUMA", TCP_REUSPORT_LB_NUMA, CONST_PERSISTENT);
+#endif
+#if defined(TCP_REUSPORT_LB_NUMA)
+	REGISTER_LONG_CONSTANT("TCP_REUSPORT_LB_NUMA_NODOM", TCP_REUSPORT_LB_NUMA_NODOM, CONST_PERSISTENT);
+#endif
+#if defined(TCP_REUSPORT_LB_NUMA)
+	REGISTER_LONG_CONSTANT("TCP_REUSPORT_LB_NUMA_CURDOM", TCP_REUSPORT_LB_NUMA_CURDOM, CONST_PERSISTENT);
+#endif
+#if defined(TCP_BBR_ALGORITHM)
+	REGISTER_LONG_CONSTANT("TCP_BBR_ALGORITHM", TCP_BBR_ALGORITHM, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("PHP_NORMAL_READ", PHP_NORMAL_READ, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_BINARY_READ", PHP_BINARY_READ, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MCAST_JOIN_GROUP", PHP_MCAST_JOIN_GROUP, CONST_PERSISTENT);
@@ -601,6 +614,18 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(IPV6_V6ONLY)
 	REGISTER_LONG_CONSTANT("IPV6_V6ONLY", IPV6_V6ONLY, CONST_PERSISTENT);
+#endif
+#if defined(IP_PORTRANGE)
+	REGISTER_LONG_CONSTANT("IP_PORTRANGE", IP_PORTRANGE, CONST_PERSISTENT);
+#endif
+#if defined(IP_PORTRANGE)
+	REGISTER_LONG_CONSTANT("IP_PORTRANGE_DEFAULT", IP_PORTRANGE_DEFAULT, CONST_PERSISTENT);
+#endif
+#if defined(IP_PORTRANGE)
+	REGISTER_LONG_CONSTANT("IP_PORTRANGE_HIGH", IP_PORTRANGE_HIGH, CONST_PERSISTENT);
+#endif
+#if defined(IP_PORTRANGE)
+	REGISTER_LONG_CONSTANT("IP_PORTRANGE_LOW", IP_PORTRANGE_LOW, CONST_PERSISTENT);
 #endif
 #if defined(EPERM)
 	REGISTER_LONG_CONSTANT("SOCKET_EPERM", EPERM, CONST_PERSISTENT);
@@ -944,6 +969,12 @@ static void register_sockets_symbols(int module_number)
 #if defined(IPPROTO_UDPLITE)
 	REGISTER_LONG_CONSTANT("SOL_UDPLITE", IPPROTO_UDPLITE, CONST_PERSISTENT);
 #endif
+#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
+	REGISTER_LONG_CONSTANT("IPPROTO_ICMP", IPPROTO_ICMP, CONST_PERSISTENT);
+#endif
+#if defined(IPPROTO_ICMPV6) || defined(PHP_WIN32)
+	REGISTER_LONG_CONSTANT("IPPROTO_ICMPV6", IPPROTO_ICMPV6, CONST_PERSISTENT);
+#endif
 #if defined(HAVE_IPV6)
 	REGISTER_LONG_CONSTANT("IPV6_UNICAST_HOPS", IPV6_UNICAST_HOPS, CONST_PERSISTENT);
 #endif
@@ -1032,6 +1063,9 @@ static void register_sockets_symbols(int module_number)
 #if defined(TCP_REPAIR)
 	REGISTER_LONG_CONSTANT("TCP_REPAIR", TCP_REPAIR, CONST_PERSISTENT);
 #endif
+#if defined(IP_BINDANY)
+	REGISTER_LONG_CONSTANT("IP_BINDANY", IP_BINDANY, CONST_PERSISTENT);
+#endif
 #if defined(IP_DONTFRAG)
 	REGISTER_LONG_CONSTANT("IP_DONTFRAG", IP_DONTFRAG, CONST_PERSISTENT);
 #endif
@@ -1062,15 +1096,26 @@ static void register_sockets_symbols(int module_number)
 #if defined(UDPLITE_RECV_CSCOV)
 	REGISTER_LONG_CONSTANT("UDPLITE_RECV_CSCOV", UDPLITE_RECV_CSCOV, CONST_PERSISTENT);
 #endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_P_IP", ETH_P_IP, CONST_PERSISTENT);
+#endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_P_IPV6", ETH_P_IPV6, CONST_PERSISTENT);
+#endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_P_LOOP", ETH_P_LOOP, CONST_PERSISTENT);
+#endif
+#if defined(ETH_P_ALL)
+	REGISTER_LONG_CONSTANT("ETH_P_ALL", ETH_P_ALL, CONST_PERSISTENT);
+#endif
 }
 
 static zend_class_entry *register_class_Socket(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Socket", class_Socket_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "Socket", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -1079,9 +1124,8 @@ static zend_class_entry *register_class_AddressInfo(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "AddressInfo", class_AddressInfo_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "AddressInfo", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

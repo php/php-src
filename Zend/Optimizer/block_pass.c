@@ -274,7 +274,9 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				 * If it's not local, then the other blocks successors must also eventually either FREE or consume the temporary,
 				 * hence removing the temporary is not safe in the general case, especially when other consumers are not FREE.
 				 * A FREE may not be removed without also removing the source's result, because otherwise that would cause a memory leak. */
-				if (opline->op1_type == IS_TMP_VAR) {
+				if (opline->extended_value == ZEND_FREE_VOID_CAST) {
+					/* Keep the ZEND_FREE opcode alive. */
+				} else if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
 					if (src) {
 						switch (src->opcode) {
@@ -868,7 +870,6 @@ optimize_const_unary_op:
 				break;
 
 			case ZEND_RETURN:
-			case ZEND_EXIT:
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
 					if (src && src->opcode == ZEND_QM_ASSIGN) {
@@ -1221,8 +1222,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 				target = op_array->opcodes + target_block->start;
 				if ((target->opcode == ZEND_RETURN ||
 				            target->opcode == ZEND_RETURN_BY_REF ||
-				            target->opcode == ZEND_GENERATOR_RETURN ||
-				            target->opcode == ZEND_EXIT) &&
+				            target->opcode == ZEND_GENERATOR_RETURN) &&
 				           !(op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
 					/* JMP L, L: RETURN to immediate RETURN */
 					*last_op = *target;
