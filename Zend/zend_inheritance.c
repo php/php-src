@@ -2232,8 +2232,31 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	}
 
 	if (iface->associated_types) {
+		const uint32_t num_associated_types = zend_hash_num_elements(iface->associated_types);
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			const bool persistent = ce->type == ZEND_INTERNAL_CLASS;
+			if (ce->associated_types) {
+				zend_string *associated_type_name;
+				zend_type *associated_type_ptr;
+				ZEND_HASH_FOREACH_STR_KEY_PTR(iface->associated_types, associated_type_name, associated_type_ptr) {
+					if (zend_hash_exists(ce->associated_types, associated_type_name)) {
+						zend_error_noreturn(E_ERROR,
+							"Cannot redeclare associated type %s in interface %s inherited from interface %s",
+							ZSTR_VAL(associated_type_name), ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+					}
+					/* Deep copy the type information */
+					zend_type_copy_ctor(associated_type_ptr, /* use_arena */ !persistent, /* persistent */ persistent);
+					zend_hash_add_new_mem(ce->associated_types, associated_type_name, associated_type_ptr, sizeof(*associated_type_ptr));
+				} ZEND_HASH_FOREACH_END();
+			} else {
+				ce->associated_types = pemalloc(sizeof(HashTable), persistent);
+				zend_hash_init(ce->associated_types, num_associated_types, NULL, NULL, false);
+				zend_hash_copy(ce->associated_types, iface->associated_types, NULL);
+			}
+			return;
+		}
 		HashTable *ht = emalloc(sizeof(HashTable));
-		zend_hash_init(ht, zend_hash_num_elements(iface->associated_types), NULL, NULL, false);
+		zend_hash_init(ht, num_associated_types, NULL, NULL, false);
 		CG(bound_associated_types) = ht;
 	}
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
