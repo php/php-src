@@ -11031,11 +11031,10 @@ static bool zend_jit_verify_return_type(zend_jit_ctx *jit, const zend_op *opline
 			ref = zend_jit_zval_check_undef(jit, ref, opline->op1.var, NULL, 1);
 		}
 
-		ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_verify_return_slow),
+		ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_verify_return_slow),
 			ref,
 			ir_LOAD_A(jit_EX(func)),
-			ir_CONST_ADDR(arg_info),
-			ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), opline->op2.num));
+			ir_CONST_ADDR(arg_info));
 
 		zend_jit_check_exception(jit);
 

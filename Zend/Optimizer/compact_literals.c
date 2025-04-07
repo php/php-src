@@ -43,50 +43,6 @@ typedef struct _literal_info {
 		info[n].num_related = (related); \
 	} while (0)
 
-static size_t type_num_classes(const zend_op_array *op_array, uint32_t arg_num)
-{
-	zend_arg_info *arg_info;
-	if (arg_num > 0) {
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			return 0;
-		}
-		if (EXPECTED(arg_num <= op_array->num_args)) {
-			arg_info = &op_array->arg_info[arg_num-1];
-		} else if (UNEXPECTED(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
-			arg_info = &op_array->arg_info[op_array->num_args];
-		} else {
-			return 0;
-		}
-	} else {
-		arg_info = op_array->arg_info - 1;
-	}
-
-	if (ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
-		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			/* Intersection types cannot have nested list types */
-			if (ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
-				return ZEND_TYPE_LIST(arg_info->type)->num_types;
-			}
-			ZEND_ASSERT(ZEND_TYPE_IS_UNION(arg_info->type));
-			size_t count = 0;
-			const zend_type *list_type;
-
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
-				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
-					count += ZEND_TYPE_LIST(*list_type)->num_types;
-				} else {
-					ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-					count += 1;
-				}
-			} ZEND_TYPE_LIST_FOREACH_END();
-			return count;
-		}
-		return 1;
-	}
-
-	return 0;
-}
-
 static uint32_t add_static_slot(HashTable     *hash,
                                 zend_op_array *op_array,
                                 uint32_t       op1,
@@ -504,26 +460,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				opline->op2.constant = map[opline->op2.constant];
 			}
 			switch (opline->opcode) {
-				case ZEND_RECV_INIT:
-				case ZEND_RECV:
-				case ZEND_RECV_VARIADIC:
-				{
-					size_t num_classes = type_num_classes(op_array, opline->op1.num);
-					if (num_classes) {
-						opline->extended_value = cache_size;
-						cache_size += num_classes * sizeof(void *);
-					}
-					break;
-				}
-				case ZEND_VERIFY_RETURN_TYPE:
-				{
-					size_t num_classes = type_num_classes(op_array, 0);
-					if (num_classes) {
-						opline->op2.num = cache_size;
-						cache_size += num_classes * sizeof(void *);
-					}
-					break;
-				}
 				case ZEND_ASSIGN_STATIC_PROP_OP:
 					if (opline->op1_type == IS_CONST) {
 						// op1 static property
