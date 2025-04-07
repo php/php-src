@@ -2183,24 +2183,20 @@ namespace Socket {
     {
 	public \Socket $socket;
 	public int $ethProtocol;
-	public string $macSrc;
-	public string $macDst;
-	public ?object $payload;
+	public string $srcMac;
+	public string $dstMac;
+	public ?Packet $payload;
     }
 
     final readonly class TcpPacket extends Packet
     {
-	public string $srcAddr;
-	public string $dstAddr;
 	public string $srcPort;
 	public int $dstPort;
     }
 
     final readonly class UdpPacket extends Packet
     {
-	public string $srcAddr;
-	public string $dstAddr;
-	public string $srcPort;
+	public int $srcPort;
 	public int $dstPort;
     }
 
@@ -2208,7 +2204,7 @@ namespace Socket {
     {
 	public string $srcAddr;
 	public string $dstAddr;
-	public ?object $payload;
+	public ?Packet $payload;
     }
 
     final readonly class Ipv6Packet extends Packet

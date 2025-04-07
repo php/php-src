@@ -76,9 +76,9 @@ object(Socket\EthernetPacket)#3 (%d) {
   }
   ["ethProtocol"]=>
   int(%i)
-  ["macSrc"]=>
+  ["srcMac"]=>
   string(%d) "%s:%s:%s:%s:%s:%s"
-  ["macDst"]=>
+  ["dstMac"]=>
   string(%d) "%s:%s:%s:%s:%s:%s"
   ["payload"]=>
   object(%s)#4 (%d) {
