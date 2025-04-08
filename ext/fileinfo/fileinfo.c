@@ -344,6 +344,9 @@ PHP_FUNCTION(finfo_file)
 		RETURN_THROWS();
 	}
 	php_stream_context *context = php_stream_context_from_zval(zcontext, false);
+	if (!context) {
+		RETURN_THROWS();
+	}
 
 	/* Set options for the current file/buffer. */
 	if (options) {
