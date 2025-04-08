@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eebe535d0295f707201ff751e38a5ad3837dbbd2 */
+ * Stub hash: bedc3883fbfe2491c95375beb13140e7fcfd83a5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -22,8 +22,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_deprecated_attr arginfo_zend_test_void_return
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_deprecated_nodiscard, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nodiscard, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_deprecated_nodiscard arginfo_zend_test_nodiscard
 
 #define arginfo_zend_test_aliased arginfo_zend_test_void_return
 
@@ -131,7 +133,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_is_string_marked_as_va
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_get_map_ptr_last arginfo_zend_test_deprecated_nodiscard
+#define arginfo_zend_get_map_ptr_last arginfo_zend_test_nodiscard
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_crash, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
@@ -189,7 +191,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
 
-#define arginfo_class__ZendTestClass_is_object arginfo_zend_test_deprecated_nodiscard
+#define arginfo_class__ZendTestClass_is_object arginfo_zend_test_nodiscard
 
 #define arginfo_class__ZendTestClass___toString arginfo_zend_get_current_func_name
 
@@ -264,6 +266,7 @@ static ZEND_FUNCTION(zend_test_void_return);
 static ZEND_FUNCTION(zend_test_compile_string);
 static ZEND_FUNCTION(zend_test_deprecated);
 static ZEND_FUNCTION(zend_test_deprecated_attr);
+static ZEND_FUNCTION(zend_test_nodiscard);
 static ZEND_FUNCTION(zend_test_deprecated_nodiscard);
 static ZEND_FUNCTION(zend_create_unterminated_string);
 static ZEND_FUNCTION(zend_terminate_string);
@@ -360,6 +363,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("zend_test_deprecated_attr", zif_zend_test_deprecated_attr, arginfo_zend_test_deprecated_attr, ZEND_ACC_DEPRECATED, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY("zend_test_deprecated_attr", zif_zend_test_deprecated_attr, arginfo_zend_test_deprecated_attr, ZEND_ACC_DEPRECATED)
+#endif
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, ZEND_ACC_NODISCARD, NULL, NULL)
+#else
+	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, ZEND_ACC_NODISCARD)
 #endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD, NULL, NULL)
@@ -571,6 +579,15 @@ static void register_test_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zend_test_deprecated_attr_0->args[0].value, &attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0);
 	attribute_Deprecated_func_zend_test_deprecated_attr_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_zend_test_nodiscard_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_zend_test_nodiscard_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_nodiscard", sizeof("zend_test_nodiscard") - 1), attribute_name_NoDiscard_func_zend_test_nodiscard_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_zend_test_nodiscard_0);
+	zval attribute_NoDiscard_func_zend_test_nodiscard_0_arg0;
+	zend_string *attribute_NoDiscard_func_zend_test_nodiscard_0_arg0_str = zend_string_init("custom message", strlen("custom message"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_zend_test_nodiscard_0_arg0, attribute_NoDiscard_func_zend_test_nodiscard_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].value, &attribute_NoDiscard_func_zend_test_nodiscard_0_arg0);
+	attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, 1);
 	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_nodiscard", sizeof("zend_test_deprecated_nodiscard") - 1), attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0, 1);
