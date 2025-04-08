@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.6
+10 Apr 2025, PHP 8.4.6
 
 - BCMath:
   . Fixed pointer subtraction for scale. (SakiTakamachi)
