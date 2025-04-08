@@ -12,6 +12,11 @@ respond /serverpush "main response"
 respond /serverpush/pushed "pushed response"
 push /serverpush /serverpush/pushed
 
+route /show_upload_size {
+    templates
+    respond `Content-length: ={{.Req.Header.Get "Content-length"}}=`
+}
+
 basic_auth /http-basic-auth {
 	# bcrypt password hash for "password", calculated with 'caddy hash-password'
 	user $2a$14$yUKl9SGqVTAAqPTzLup.DefsbXXx3kfreNnzpJOUHcIrKnr5lgef2
