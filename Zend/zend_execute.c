@@ -1177,8 +1177,14 @@ static zend_always_inline bool zend_check_type_slow(
 	}
 
 	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
-	if ((type_mask & MAY_BE_CALLABLE) &&
-		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
+	if (
+		(type_mask & MAY_BE_CALLABLE)
+		&& (
+			/* Fast check for closures. */
+			EXPECTED(Z_OBJCE_P(arg) == zend_ce_closure)
+			|| zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)
+		)
+	) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
