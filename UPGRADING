@@ -147,6 +147,11 @@ PHP 8.5 UPGRADE NOTES
     indicating the http and proxy authentication methods that were
     used in the previous request. See CURLAUTH_* constants for
     possible values.
+  . Added CURLOPT_INFILESIZE_LARGE Curl option, which is a safe
+    replacement for CURLOPT_INFILESIZE. On certain systems,
+    CURLOPT_INFILESIZE only accepts a 32-bit signed integer as the file
+    size (2.0 GiB) even on 64-bit systems. CURLOPT_INFILESIZE_LARGE
+    accepts the largest integer value the system can handle.
 
 - DOM:
   . Added Dom\Element::$outerHTML.
@@ -343,6 +348,7 @@ PHP 8.5 UPGRADE NOTES
   . CURLINFO_USED_PROXY.
   . CURLINFO_HTTPAUTH_USED.
   . CURLINFO_PROXYAUTH_USED.
+  . CURLOPT_INFILESIZE_LARGE.
 
 - Intl:
   . DECIMAL_COMPACT_SHORT.
