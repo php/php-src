@@ -44,6 +44,16 @@ void php_openssl_backend_shutdown(void)
 #endif
 }
 
+EVP_PKEY_CTX *php_openssl_pkey_new_from_name(const char *name, int id)
+{
+	return EVP_PKEY_CTX_new_id(id, NULL);
+}
+
+EVP_PKEY_CTX *php_openssl_pkey_new_from_pkey(EVP_PKEY *pkey)
+{
+	return EVP_PKEY_CTX_new(pkey, NULL);
+}
+
 static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data)
 {
 	BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
