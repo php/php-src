@@ -3599,7 +3599,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 			RETURN_BOOL(gdImageScatter(im, (int)scatter_sub, (int)scatter_plus));
 		}
 
-		colors = emalloc(num_colors * sizeof(int));
+		colors = safe_emalloc(num_colors, sizeof(int), 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hash_colors), color) {
 			*(colors + i++) = (int) zval_get_long(color);
