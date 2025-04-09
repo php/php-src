@@ -159,6 +159,12 @@ PHP 8.5 UPGRADE NOTES
 - EXIF:
   . Add OffsetTime* Exif tags.
 
+- Intl:
+  . Added class constants NumberFormatter::CURRENCY_ISO,
+    NumberFormatter::CURRENCY_PLURAL, NumberFormatter::CASH_CURRENCY,
+    and NumberFormatter::CURRENCY_STANDARD for various currency-related
+    number formats.
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()
