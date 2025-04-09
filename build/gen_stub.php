@@ -3049,6 +3049,7 @@ class PropertyInfo extends VariableLike
         "parent" => "ZEND_STR_PARENT",
         "username" => "ZEND_STR_USERNAME",
         "password" => "ZEND_STR_PASSWORD",
+        "clone" => "ZEND_STR_CLONE",
     ];
 
     /**
