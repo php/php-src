@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 85677dc3476d25b7820fd3a26fe39f2e9378b6e7 */
+ * Stub hash: f2a8b629fe3e2ee7f7d9d8163e6536f811ee8c7c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -335,6 +335,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
+
+#define arginfo_list_filter arginfo_array_filter
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_find, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
@@ -2380,6 +2382,7 @@ ZEND_FUNCTION(array_sum);
 ZEND_FUNCTION(array_product);
 ZEND_FUNCTION(array_reduce);
 ZEND_FUNCTION(array_filter);
+ZEND_FUNCTION(list_filter);
 ZEND_FUNCTION(array_find);
 ZEND_FUNCTION(array_find_key);
 ZEND_FUNCTION(array_any);
@@ -2973,6 +2976,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("array_product", zif_array_product, arginfo_array_product, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(array_reduce, arginfo_array_reduce)
 	ZEND_FE(array_filter, arginfo_array_filter)
+	ZEND_FE(list_filter, arginfo_list_filter)
 	ZEND_FE(array_find, arginfo_array_find)
 	ZEND_FE(array_find_key, arginfo_array_find_key)
 	ZEND_FE(array_any, arginfo_array_any)
