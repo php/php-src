@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b8f9832290e537afb712a6c23be442b45294a6bc */
+ * Stub hash: d4f304fdef699a42e6734ccbaebc7f2030ce9888 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -542,7 +542,7 @@ static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
 };
 
 static const zend_function_entry class_ZendTestBox_methods[] = {
-	ZEND_ME(ZendTestBox, setNull, arginfo_class_ZendTestBox_setNull, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZendTestBox, setNull, arginfo_class_ZendTestBox_setNull, ZEND_ACC_PUBLIC|ZEND_ACC_MUTATING)
 	ZEND_FE_END
 };
 

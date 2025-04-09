@@ -1176,6 +1176,7 @@ class FuncInfo {
     /** @var FramelessFunctionInfo[] */
     private array $framelessFunctionInfos;
     private ?ExposedDocComment $exposedDocComment;
+    private bool $isMutating;
 
     /**
      * @param ArgInfo[] $args
@@ -1199,7 +1200,8 @@ class FuncInfo {
         ?int $minimumPhpVersionIdCompatibility,
         array $attributes,
         array $framelessFunctionInfos,
-        ?ExposedDocComment $exposedDocComment
+        ?ExposedDocComment $exposedDocComment,
+        bool $isMutating,
     ) {
         $this->name = $name;
         $this->classFlags = $classFlags;
@@ -1218,6 +1220,7 @@ class FuncInfo {
         $this->attributes = $attributes;
         $this->framelessFunctionInfos = $framelessFunctionInfos;
         $this->exposedDocComment = $exposedDocComment;
+        $this->isMutating = $isMutating;
         if ($return->tentativeReturnType && $this->isFinalMethod()) {
             throw new Exception("Tentative return inapplicable for final method");
         }
@@ -1516,6 +1519,10 @@ class FuncInfo {
 
         if ($this->isDeprecated) {
             $flags[] = "ZEND_ACC_DEPRECATED";
+        }
+
+        if ($this->isMutating) {
+            $flags[] = "ZEND_ACC_MUTATING";
         }
 
         foreach ($this->attributes as $attr) {
@@ -4344,6 +4351,7 @@ function parseFunctionLike(
         $docParamTypes = [];
         $refcount = null;
         $framelessFunctionInfos = [];
+        $isMutating = false;
 
         if ($comments) {
             $tags = parseDocComments($comments);
@@ -4403,6 +4411,10 @@ function parseFunctionLike(
 
                     case 'frameless-function':
                         $framelessFunctionInfos[] = new FramelessFunctionInfo($tag->getValue());
+                        break;
+
+                    case 'mutating':
+                        $isMutating = true;
                         break;
                 }
             }
@@ -4507,7 +4519,8 @@ function parseFunctionLike(
             $minimumPhpVersionIdCompatibility,
             AttributeInfo::createFromGroups($func->attrGroups),
             $framelessFunctionInfos,
-            ExposedDocComment::extractExposedComment($comments)
+            ExposedDocComment::extractExposedComment($comments),
+            $isMutating,
         );
     } catch (Exception $e) {
         throw new Exception($name . "(): " .$e->getMessage());

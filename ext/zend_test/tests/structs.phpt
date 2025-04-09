@@ -12,7 +12,7 @@ $copy->value++;
 var_dump($box);
 var_dump($copy);
 $copy = $box;
-$copy->setNull();
+$copy->setNull!();
 var_dump($box);
 var_dump($copy);
 

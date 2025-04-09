@@ -181,7 +181,8 @@ namespace {
     class ZendTestBox {
         public mixed $value;
 
-        public /* mutating */ function setNull(): void {}
+        /** @mutating */
+        public function setNull(): void {}
     }
 
     enum ZendTestUnitEnum {
