@@ -14,7 +14,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $descriptorspec = array(
     0 => array("pipe", "r"),
-    1 => array("pipe", "w"),  
+    1 => array("pipe", "w"),
     2 => array("pipe", "w")
 );
 
@@ -26,13 +26,13 @@ $process = proc_open(
 
 if (is_resource($process)) {
     usleep(100000);
-    
+
     $stderr = stream_get_contents($pipes[2]);
-    
+
     fclose($pipes[0]);
     fclose($pipes[1]);
     fclose($pipes[2]);
-    
+
     proc_terminate($process);
     proc_close($process);
 
