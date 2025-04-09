@@ -1019,7 +1019,7 @@ static void bcmath_number_register_class(void)
 }
 
 static zend_always_inline void bcmath_number_add_internal(
-	bc_num n1, bc_num n2, bc_num *ret,
+	const bc_num n1, const bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1031,7 +1031,7 @@ static zend_always_inline void bcmath_number_add_internal(
 }
 
 static zend_always_inline void bcmath_number_sub_internal(
-	bc_num n1, bc_num n2, bc_num *ret,
+	const bc_num n1, const bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1043,7 +1043,7 @@ static zend_always_inline void bcmath_number_sub_internal(
 }
 
 static zend_always_inline zend_result bcmath_number_mul_internal(
-	bc_num n1, bc_num n2, bc_num *ret,
+	const bc_num n1, const bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1060,7 +1060,7 @@ static zend_always_inline zend_result bcmath_number_mul_internal(
 }
 
 static zend_always_inline zend_result bcmath_number_div_internal(
-	bc_num n1, bc_num n2, bc_num *ret,
+	const bc_num n1, const bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1083,7 +1083,7 @@ static zend_always_inline zend_result bcmath_number_div_internal(
 }
 
 static zend_always_inline zend_result bcmath_number_mod_internal(
-	bc_num n1, bc_num n2, bc_num *ret,
+	const bc_num n1, const bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1164,7 +1164,7 @@ static zend_always_inline bcmath_number_obj_t *bcmath_number_new_obj(bc_num ret,
 	return intern;
 }
 
-static zend_result bcmath_number_parse_num(zval *zv, zend_object **obj, zend_string **str, zend_long *lval)
+static zend_result bcmath_number_parse_num(const zval *zv, zend_object **obj, zend_string **str, zend_long *lval)
 {
 	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), bcmath_number_ce)) {
 		*obj = Z_OBJ_P(zv);
@@ -1372,7 +1372,7 @@ failure:
  	}
 
 static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
-	bc_num *num, size_t *scale, zend_object *obj, zend_string *str, zend_long lval, uint32_t arg_num)
+	bc_num *num, size_t *scale, const zend_object *obj, const zend_string *str, zend_long lval, uint32_t arg_num)
 {
 	size_t full_scale = 0;
 	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(num, &full_scale, obj, str, lval) == FAILURE)) {

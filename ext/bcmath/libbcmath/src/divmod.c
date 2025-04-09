@@ -41,7 +41,7 @@
    true otherwise for success.
  */
 
-bool bc_divmod(bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, size_t scale)
+bool bc_divmod(const bc_num num1, const bc_num num2, bc_num *quot, bc_num *rem, size_t scale)
 {
 	bc_num quotient = NULL;
 	bc_num temp;
@@ -84,7 +84,7 @@ bool bc_divmod(bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, size_t scale
 /* Modulo for numbers.  This computes NUM1 % NUM2  and puts the
    result in RESULT.   */
 
-bool bc_modulo(bc_num num1, bc_num num2, bc_num *result, size_t scale)
+bool bc_modulo(const bc_num num1, const bc_num num2, bc_num *result, size_t scale)
 {
 	return bc_divmod(num1, num2, NULL, result, scale);
 }

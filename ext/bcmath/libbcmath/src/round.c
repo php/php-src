@@ -19,7 +19,7 @@
 #include <stddef.h>
 
 /* Returns the scale of the value after rounding. */
-size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
+size_t bc_round(const bc_num num, zend_long precision, zend_long mode, bc_num *result)
 {
 	/* clear result */
 	bc_free_num(result);

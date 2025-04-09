@@ -39,10 +39,8 @@
    than N2 and +1 if N1 is greater than N2.  If USE_SIGN is false, just
    compare the magnitudes. */
 
-bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool use_sign)
+bcmath_compare_result _bc_do_compare(const bc_num n1, const bc_num n2, size_t scale, bool use_sign)
 {
-	char *n1ptr, *n2ptr;
-
 	/* First, compare signs. */
 	if (use_sign && n1->n_sign != n2->n_sign) {
 		/*
@@ -91,8 +89,8 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool us
 	/* If we get here, they have the same number of integer digits.
 	   check the integer part and the equal length part of the fraction. */
 	size_t count = n1->n_len + MIN (n1_scale, n2_scale);
-	n1ptr = n1->n_value;
-	n2ptr = n2->n_value;
+	const char *n1ptr = n1->n_value;
+	const char *n2ptr = n2->n_value;
 
 	while ((count > 0) && (*n1ptr == *n2ptr)) {
 		n1ptr++;
@@ -151,7 +149,7 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool us
 
 
 /* This is the "user callable" routine to compare numbers N1 and N2. */
-bcmath_compare_result bc_compare(bc_num n1, bc_num n2, size_t scale)
+bcmath_compare_result bc_compare(const bc_num n1, const bc_num n2, size_t scale)
 {
 	return _bc_do_compare(n1, n2, scale, true);
 }

@@ -70,7 +70,7 @@ static inline void bc_fast_div(
  */
 static inline void bc_standard_div(
 	BC_VECTOR *numerator_vectors, size_t numerator_arr_size,
-	BC_VECTOR *divisor_vectors, size_t divisor_arr_size, size_t divisor_len,
+	const BC_VECTOR *divisor_vectors, size_t divisor_arr_size, size_t divisor_len,
 	BC_VECTOR *quot_vectors, size_t quot_arr_size
 ) {
 	size_t numerator_top_index = numerator_arr_size - 1;
@@ -300,7 +300,7 @@ static void bc_do_div(
 	}
 }
 
-static inline void bc_divide_by_one(bc_num numerator, bc_num *quot, size_t quot_scale)
+static inline void bc_divide_by_one(const bc_num numerator, bc_num *quot, size_t quot_scale)
 {
 	quot_scale = MIN(numerator->n_scale, quot_scale);
 	*quot = bc_new_num_nonzeroed(numerator->n_len, quot_scale);
@@ -332,7 +332,7 @@ static inline void bc_divide_by_pow_10(
 	}
 }
 
-bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
+bool bc_divide(const bc_num numerator, const bc_num divisor, bc_num *quot, size_t scale)
 {
 	/* divide by zero */
 	if (bc_is_zero(divisor)) {
@@ -354,10 +354,10 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 		return true;
 	}
 
-	char *numeratorptr = numerator->n_value;
+	const char *numeratorptr = numerator->n_value;
 	size_t numerator_size = numerator->n_len + quot_scale + divisor->n_scale;
 
-	char *divisorptr = divisor->n_value;
+	const char *divisorptr = divisor->n_value;
 	size_t divisor_size = divisor->n_len + divisor->n_scale;
 
 	/* check and remove numerator leading zeros */
