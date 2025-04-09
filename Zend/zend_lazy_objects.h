@@ -71,7 +71,7 @@ zend_object *zend_lazy_object_get_instance(zend_object *obj);
 zend_lazy_object_flags_t zend_lazy_object_get_flags(zend_object *obj);
 void zend_lazy_object_del_info(zend_object *obj);
 ZEND_API HashTable *zend_lazy_object_get_properties(zend_object *object);
-zend_object *zend_lazy_object_clone(zend_object *old_obj);
+zend_object *zend_lazy_object_clone(zend_object *old_obj, zend_class_entry *scope, const HashTable *properties);
 HashTable *zend_lazy_object_debug_info(zend_object *object, int *is_temp);
 HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n);
 bool zend_lazy_object_decr_lazy_props(zend_object *obj);
