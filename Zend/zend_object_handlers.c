@@ -2536,6 +2536,7 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_object_std_dtor,					/* free_obj */
 	zend_objects_destroy_object,			/* dtor_obj */
 	zend_objects_clone_obj,					/* clone_obj */
+	zend_objects_clone_obj_with,					/* clone_obj_with */
 
 	zend_std_read_property,					/* read_property */
 	zend_std_write_property,				/* write_property */
