@@ -38,7 +38,7 @@
 
 bool bc_sqrt(bc_num *num, size_t scale)
 {
-	bc_num local_num = *num;
+	const bc_num local_num = *num;
 	/* Initial checks. */
 	if (bc_is_neg(local_num)) {
 		/* Cannot take the square root of a negative number */
