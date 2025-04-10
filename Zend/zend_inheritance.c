@@ -3608,6 +3608,11 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_do_traits_method_binding(ce, traits_and_interfaces, trait_exclude_tables, trait_aliases, false, &trait_contains_abstract_methods);
 			zend_do_traits_constant_binding(ce, traits_and_interfaces);
 			zend_do_traits_property_binding(ce, traits_and_interfaces);
+
+			zend_function *fn;
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
+				zend_fixup_trait_method(fn, ce);
+			} ZEND_HASH_FOREACH_END();
 		}
 		if (parent) {
 			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
