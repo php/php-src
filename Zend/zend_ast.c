@@ -754,21 +754,8 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 						}
 						break;
 					case IS_OBJECT:
-						/* Adapted from VM */
-						ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
-						if (Z_TYPE(op1) == IS_ARRAY) {
-							HashTable *ht = zend_symtable_to_proptable(Z_ARR(op1));
-							if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
-								/* TODO: try not to duplicate immutable arrays as well ??? */
-								ht = zend_array_dup(ht);
-							}
-							Z_OBJ_P(result)->properties = ht;
-							zval_ptr_dtor_nogc(&op1);
-						} else if (Z_TYPE(op1) != IS_NULL) {
-							HashTable *ht = zend_new_array(1);
-							Z_OBJ_P(result)->properties = ht;
-							zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_SCALAR), &op1);
-						}
+						zend_cast_zval_to_object(result, &op1, IS_VAR);
+						Z_TRY_DELREF(op1);
 						break;
 					EMPTY_SWITCH_DEFAULT_CASE();
 				}

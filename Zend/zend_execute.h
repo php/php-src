@@ -219,6 +219,28 @@ static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable
 	}
 }
 
+static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr, uint8_t op1_type) {
+	HashTable *ht;
+
+	ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
+	if (Z_TYPE_P(expr) == IS_ARRAY) {
+		ht = zend_symtable_to_proptable(Z_ARR_P(expr));
+		if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+			/* TODO: try not to duplicate immutable arrays as well ??? */
+			ht = zend_array_dup(ht);
+		}
+		Z_OBJ_P(result)->properties = ht;
+	} else if (Z_TYPE_P(expr) != IS_NULL) {
+		Z_OBJ_P(result)->properties = ht = zend_new_array(1);
+		expr = zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_SCALAR), expr);
+		if (op1_type == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
+		} else {
+			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
+		}
+	}
+}
+
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant(zval *pp);
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *pp, zend_class_entry *scope);
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *pp, zend_class_entry *scope, zend_ast_evaluate_ctx *ctx);
