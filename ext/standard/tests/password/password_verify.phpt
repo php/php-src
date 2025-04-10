@@ -1,5 +1,5 @@
 --TEST--
-Test normal operation of password_verify)
+Test normal operation of password_verify()
 --FILE--
 <?php
 //-=-=-=-
