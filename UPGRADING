@@ -188,8 +188,8 @@ PHP 8.5 UPGRADE NOTES
     default.
 
 - FPM:
-  . FPM with httpd ProxyPass decodes the full scirpt path script path. Added
-    fastcgi.script_path_encoded INI setting to prevent this new behevior.
+  . FPM with httpd ProxyPass decodes the full script path. Added
+    fastcgi.script_path_encoded INI setting to prevent this new behavior.
 
 ========================================
 4. Deprecated Functionality
