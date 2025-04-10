@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed GH-18243 imagettftext() overflow/underflow on font size value.
     (David Carlier)
 
+- LDAP:
+  . Fixed bug GH-17940 (LDAP_OPT_X_TLS_REQUIRE_CERT can't be overridden). (Remi)
+
 - libxml:
   . Fixed custom external entity loader returning an invalid resource leading
     to a confusing TypeError message. (Girgias)
