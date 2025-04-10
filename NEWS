@@ -44,6 +44,7 @@ PHP                                                                        NEWS
     (timwolla, Volker Dusch)
   . Added get_error_handler(), get_exception_handler() functions. (Arnaud)
   . Fixed bug GH-15753 and GH-16198 (Bind traits before parent class). (ilutov)
+  . Added support for casts in constant expressions. (nielsdos)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
