@@ -294,22 +294,28 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members_ex(zend_object *new_objec
 		}
 
 		if (EXPECTED(!EG(exception)) && properties != NULL) {
+			zend_class_entry *old_scope = EG(fake_scope);
+
+			EG(fake_scope) = scope;
+
 			zend_ulong num_key;
 			zend_string *key;
 			zval *val;
 			ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, val) {
 				if (UNEXPECTED(key == NULL)) {
 					key = zend_long_to_str(num_key);
-					zend_update_property_ex(scope, new_object, key, val);
+					new_object->handlers->write_property(new_object, key, val, NULL);
 					zend_string_release_ex(key, false);
 				} else {
-					zend_update_property_ex(scope, new_object, key, val);
+					new_object->handlers->write_property(new_object, key, val, NULL);
 				}
 	
 				if (UNEXPECTED(EG(exception))) {
 					break;
 				}
 			} ZEND_HASH_FOREACH_END();
+
+			EG(fake_scope) = old_scope;
 		}
 
 
