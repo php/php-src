@@ -63,5 +63,7 @@ PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 {/*{{{*/
 	closelog();
 
+	php_win32_signal_ctrl_handler_request_shutdown();
+
 	return SUCCESS;
 }/*}}}*/
