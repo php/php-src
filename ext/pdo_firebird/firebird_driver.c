@@ -1250,7 +1250,12 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 		case PDO_FB_ATTR_DATE_FORMAT:
 			if (H->date_format) {
-				ZVAL_STR_COPY(val, H->date_format);
+				if (dbh->is_persistent) {
+					zend_string *str = zend_string_dup(H->date_format, false);
+					ZVAL_STR(val, str);
+				} else {
+					ZVAL_STR_COPY(val, H->date_format);
+				}
 			} else {
 				ZVAL_STRING(val, PDO_FB_DEF_DATE_FMT);
 			}
@@ -1258,7 +1263,12 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 		case PDO_FB_ATTR_TIME_FORMAT:
 			if (H->time_format) {
-				ZVAL_STR_COPY(val, H->time_format);
+				if (dbh->is_persistent) {
+					zend_string *str = zend_string_dup(H->time_format, false);
+					ZVAL_STR(val, str);
+				} else {
+					ZVAL_STR_COPY(val, H->time_format);
+				}
 			} else {
 				ZVAL_STRING(val, PDO_FB_DEF_TIME_FMT);
 			}
@@ -1266,7 +1276,12 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
 			if (H->timestamp_format) {
-				ZVAL_STR_COPY(val, H->timestamp_format);
+				if (dbh->is_persistent) {
+					zend_string *str = zend_string_dup(H->timestamp_format, false);
+					ZVAL_STR(val, str);
+				} else {
+					ZVAL_STR_COPY(val, H->timestamp_format);
+				}
 			} else {
 				ZVAL_STRING(val, PDO_FB_DEF_TIMESTAMP_FMT);
 			}
