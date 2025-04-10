@@ -17,4 +17,4 @@ class B extends A {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of T::foo(): string must be compatible with A::foo(): int in %sbug81192_trait.inc on line 4
+Fatal error: Declaration of B::foo(): string must be compatible with A::foo(): int in %sbug81192_trait.inc on line 4
