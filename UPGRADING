@@ -130,7 +130,7 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/marking_return_value_as_important
   . Added asymmetric visibility support for static properties.
     RFC: https://wiki.php.net/rfc/static-aviz
-  . It is now possible to use casts in constant expressions.
+  . Added support for casts in constant expressions.
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
