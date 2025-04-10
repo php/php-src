@@ -732,6 +732,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					EMPTY_SWITCH_DEFAULT_CASE();
 				}
 				zval_ptr_dtor_nogc(&op1);
+				if (UNEXPECTED(EG(exception))) {
+					ret = FAILURE;
+				}
 			}
 			break;
 		case ZEND_AST_OR:
