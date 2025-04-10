@@ -599,13 +599,13 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 
 	if (H->date_format) {
-		zend_string_release_ex(H->date_format, false);
+		zend_string_release(H->date_format);
 	}
 	if (H->time_format) {
-		zend_string_release_ex(H->time_format, false);
+		zend_string_release(H->time_format);
 	}
 	if (H->timestamp_format) {
-		zend_string_release_ex(H->timestamp_format, false);
+		zend_string_release(H->timestamp_format);
 	}
 
 	if (H->einfo.errmsg) {
@@ -1086,12 +1086,15 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 
 		case PDO_FB_ATTR_DATE_FORMAT:
 			{
-				zend_string *str = zval_try_get_string(val);
-				if (UNEXPECTED(!str)) {
+				zend_string *strval = zval_try_get_string(val);
+				if (UNEXPECTED(!strval)) {
 					return false;
 				}
+				zend_string *str = zend_string_dup(strval, dbh->is_persistent);
+				zend_string_release_ex(strval, false);
+
 				if (H->date_format) {
-					zend_string_release_ex(H->date_format, false);
+					zend_string_release(H->date_format);
 				}
 				H->date_format = str;
 			}
@@ -1099,12 +1102,15 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 
 		case PDO_FB_ATTR_TIME_FORMAT:
 			{
-				zend_string *str = zval_try_get_string(val);
-				if (UNEXPECTED(!str)) {
+				zend_string *strval = zval_try_get_string(val);
+				if (UNEXPECTED(!strval)) {
 					return false;
 				}
+				zend_string *str = zend_string_dup(strval, dbh->is_persistent);
+				zend_string_release_ex(strval, false);
+
 				if (H->time_format) {
-					zend_string_release_ex(H->time_format, false);
+					zend_string_release(H->time_format);
 				}
 				H->time_format = str;
 			}
@@ -1112,12 +1118,15 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
 			{
-				zend_string *str = zval_try_get_string(val);
-				if (UNEXPECTED(!str)) {
+				zend_string *strval = zval_try_get_string(val);
+				if (UNEXPECTED(!strval)) {
 					return false;
 				}
+				zend_string *str = zend_string_dup(strval, dbh->is_persistent);
+				zend_string_release_ex(strval, false);
+
 				if (H->timestamp_format) {
-					zend_string_release_ex(H->timestamp_format, false);
+					zend_string_release(H->timestamp_format);
 				}
 				H->timestamp_format = str;
 			}
