@@ -23,6 +23,28 @@
 #include "php_network.h"
 #include "file.h"
 
+static size_t php_fsockopen_format_host_port(char **message, const char *prefix, size_t prefix_len,
+	const char *host, size_t host_len, zend_long port)
+{
+    char portbuf[32];
+    int portlen = snprintf(portbuf, sizeof(portbuf), ":" ZEND_LONG_FMT, port);
+    size_t total_len = prefix_len + host_len + portlen;
+
+    char *result = emalloc(total_len + 1); 
+
+	if (prefix_len > 0) {
+    	memcpy(result, prefix, prefix_len);
+	}
+    memcpy(result + prefix_len, host, host_len);
+    memcpy(result + prefix_len + host_len, portbuf, portlen);
+
+    result[total_len] = '\0';
+
+    *message = result;
+
+	return total_len;
+}
+
 /* {{{ php_fsockopen() */
 
 static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
@@ -62,11 +84,12 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (persistent) {
-		spprintf(&hashkey, 0, "pfsockopen__%s:" ZEND_LONG_FMT, host, port);
+		php_fsockopen_format_host_port(&hashkey, "pfsockopen__", strlen("pfsockopen__"), host,
+				host_len, port);
 	}
 
 	if (port > 0) {
-		hostname_len = spprintf(&hostname, 0, "%s:" ZEND_LONG_FMT, host, port);
+		hostname_len = php_fsockopen_format_host_port(&hostname, "", 0, host, host_len, port);
 	} else {
 		hostname_len = host_len;
 		hostname = host;
