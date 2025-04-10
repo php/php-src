@@ -493,15 +493,12 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->date_format) {
 		pefree(H->date_format, dbh->is_persistent);
-		H->date_format = NULL;
 	}
 	if (H->time_format) {
 		pefree(H->time_format, dbh->is_persistent);
-		H->time_format = NULL;
 	}
 	if (H->timestamp_format) {
 		pefree(H->timestamp_format, dbh->is_persistent);
-		H->timestamp_format = NULL;
 	}
 
 	pefree(H, dbh->is_persistent);
@@ -887,7 +884,7 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 					pefree(H->date_format, dbh->is_persistent);
 					H->date_format = NULL;
 				}
-				H->date_format = pestrdup(ZSTR_VAL(str), dbh->is_persistent);
+				H->date_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}
 			return true;
@@ -902,7 +899,7 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 					pefree(H->time_format, dbh->is_persistent);
 					H->time_format = NULL;
 				}
-				H->time_format = pestrdup(ZSTR_VAL(str), dbh->is_persistent);
+				H->time_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}
 			return true;
@@ -917,7 +914,7 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 					pefree(H->timestamp_format, dbh->is_persistent);
 					H->timestamp_format = NULL;
 				}
-				H->timestamp_format = pestrdup(ZSTR_VAL(str), dbh->is_persistent);
+				H->timestamp_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}
 			return true;
