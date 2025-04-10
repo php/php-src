@@ -39,7 +39,7 @@
    N1 is added to N2 and the result placed into RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-bc_num bc_add(const bc_num n1, const bc_num n2, size_t scale_min)
+bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num sum = NULL;
 

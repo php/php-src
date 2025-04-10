@@ -300,7 +300,7 @@ static void bc_do_div(
 	}
 }
 
-static inline void bc_divide_by_one(const bc_num numerator, bc_num *quot, size_t quot_scale)
+static inline void bc_divide_by_one(bc_num numerator, bc_num *quot, size_t quot_scale)
 {
 	quot_scale = MIN(numerator->n_scale, quot_scale);
 	*quot = bc_new_num_nonzeroed(numerator->n_len, quot_scale);
@@ -332,7 +332,7 @@ static inline void bc_divide_by_pow_10(
 	}
 }
 
-bool bc_divide(const bc_num numerator, const bc_num divisor, bc_num *quot, size_t scale)
+bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 {
 	/* divide by zero */
 	if (bc_is_zero(divisor)) {

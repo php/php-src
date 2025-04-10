@@ -39,7 +39,7 @@
    N2 is subtracted from N1 and the result placed in RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-bc_num bc_sub(const bc_num n1, const bc_num n2, size_t scale_min)
+bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff = NULL;
 

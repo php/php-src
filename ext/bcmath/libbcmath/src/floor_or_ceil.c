@@ -18,7 +18,7 @@
 #include "private.h"
 #include <stddef.h>
 
-bc_num bc_floor_or_ceil(const bc_num num, bool is_floor)
+bc_num bc_floor_or_ceil(bc_num num, bool is_floor)
 {
 	/*  Initialize result */
 	bc_num result = bc_new_num(num->n_len, 0);

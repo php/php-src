@@ -1019,7 +1019,7 @@ static void bcmath_number_register_class(void)
 }
 
 static zend_always_inline void bcmath_number_add_internal(
-	const bc_num n1, const bc_num n2, bc_num *ret,
+	bc_num n1, bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1031,7 +1031,7 @@ static zend_always_inline void bcmath_number_add_internal(
 }
 
 static zend_always_inline void bcmath_number_sub_internal(
-	const bc_num n1, const bc_num n2, bc_num *ret,
+	bc_num n1, bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1043,7 +1043,7 @@ static zend_always_inline void bcmath_number_sub_internal(
 }
 
 static zend_always_inline zend_result bcmath_number_mul_internal(
-	const bc_num n1, const bc_num n2, bc_num *ret,
+	bc_num n1, bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1060,7 +1060,7 @@ static zend_always_inline zend_result bcmath_number_mul_internal(
 }
 
 static zend_always_inline zend_result bcmath_number_div_internal(
-	const bc_num n1, const bc_num n2, bc_num *ret,
+	bc_num n1, bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
@@ -1083,7 +1083,7 @@ static zend_always_inline zend_result bcmath_number_div_internal(
 }
 
 static zend_always_inline zend_result bcmath_number_mod_internal(
-	const bc_num n1, const bc_num n2, bc_num *ret,
+	bc_num n1, bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {

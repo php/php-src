@@ -35,7 +35,7 @@
 
 /* In some places we need to check if the number NUM is zero. */
 
-bool bc_is_zero_for_scale(const bc_num num, size_t scale)
+bool bc_is_zero_for_scale(bc_num num, size_t scale)
 {
 	size_t count;
 	char *nptr;
@@ -55,7 +55,7 @@ bool bc_is_zero_for_scale(const bc_num num, size_t scale)
 	return count == 0;
 }
 
-bool bc_is_zero(const bc_num num)
+bool bc_is_zero(bc_num num)
 {
 	return bc_is_zero_for_scale(num, num->n_scale);
 }

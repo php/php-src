@@ -38,7 +38,7 @@
    returned.  The signs of N1 and N2 are ignored.
    SCALE_MIN is to set the minimum scale of the result. */
 
-bc_num _bc_do_add(const bc_num n1, const bc_num n2)
+bc_num _bc_do_add(bc_num n1, bc_num n2)
 {
 	bc_num sum;
 	size_t sum_len = MAX(n1->n_len, n2->n_len) + 1;
@@ -169,7 +169,7 @@ bc_num _bc_do_add(const bc_num n1, const bc_num n2)
    returned.  The signs of N1 and N2 are ignored.  Also, N1 is
    assumed to be larger than N2.  SCALE_MIN is the minimum scale
    of the result. */
-bc_num _bc_do_sub(const bc_num n1, const bc_num n2)
+bc_num _bc_do_sub(bc_num n1, bc_num n2)
 {
 	bc_num diff;
 	/* The caller is guaranteed that n1 is always large. */

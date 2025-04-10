@@ -39,7 +39,7 @@
    than N2 and +1 if N1 is greater than N2.  If USE_SIGN is false, just
    compare the magnitudes. */
 
-bcmath_compare_result _bc_do_compare(const bc_num n1, const bc_num n2, size_t scale, bool use_sign)
+bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool use_sign)
 {
 	/* First, compare signs. */
 	if (use_sign && n1->n_sign != n2->n_sign) {
@@ -149,7 +149,7 @@ bcmath_compare_result _bc_do_compare(const bc_num n1, const bc_num n2, size_t sc
 
 
 /* This is the "user callable" routine to compare numbers N1 and N2. */
-bcmath_compare_result bc_compare(const bc_num n1, const bc_num n2, size_t scale)
+bcmath_compare_result bc_compare(bc_num n1, bc_num n2, size_t scale)
 {
 	return _bc_do_compare(n1, n2, scale, true);
 }

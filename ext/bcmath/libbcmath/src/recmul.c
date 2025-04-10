@@ -52,7 +52,7 @@ static inline void bc_mul_carry_calc(BC_VECTOR *prod_vector, size_t prod_arr_siz
  * If the n_values of n1 and n2 are both 4 (32-bit) or 8 (64-bit) digits or less,
  * the calculation will be performed at high speed without using an array.
  */
-static inline void bc_fast_mul(const bc_num n1, size_t n1len, const bc_num n2, size_t n2len, bc_num *prod)
+static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
 {
 	const char *n1end = n1->n_value + n1len - 1;
 	const char *n2end = n2->n_value + n2len - 1;
@@ -76,7 +76,7 @@ static inline void bc_fast_mul(const bc_num n1, size_t n1len, const bc_num n2, s
  * Equivalent of bc_fast_mul for small numbers to perform computations
  * without using array.
  */
-static inline void bc_fast_square(const bc_num n1, size_t n1len, bc_num *prod)
+static inline void bc_fast_square(bc_num n1, size_t n1len, bc_num *prod)
 {
 	const char *n1end = n1->n_value + n1len - 1;
 
@@ -119,7 +119,7 @@ static inline void bc_mul_finish_from_vector(BC_VECTOR *prod_vector, size_t prod
  * Multiply and add these groups of numbers to perform multiplication fast.
  * How much to shift the digits when adding values can be calculated from the index of the array.
  */
-static void bc_standard_mul(const bc_num n1, size_t n1len, const bc_num n2, size_t n2len, bc_num *prod)
+static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
 {
 	size_t i;
 	const char *n1end = n1->n_value + n1len - 1;
@@ -181,7 +181,7 @@ static void bc_standard_mul(const bc_num n1, size_t n1len, const bc_num n2, size
 }
 
 /** This is bc_standard_mul implementation for square */
-static void bc_standard_square(const bc_num n1, size_t n1len, bc_num *prod)
+static void bc_standard_square(bc_num n1, size_t n1len, bc_num *prod)
 {
 	size_t i;
 	const char *n1end = n1->n_value + n1len - 1;
