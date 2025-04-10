@@ -859,6 +859,21 @@ static PHP_GINIT_FUNCTION(ldap)
 }
 /* }}} */
 
+/* {{{ PHP_RINIT_FUNCTION */
+static PHP_RINIT_FUNCTION(ldap)
+{
+#if defined(COMPILE_DL_LDAP) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
+	/* needed before first connect and after TLS option changes */
+	LDAPG(tls_newctx) = true;
+
+	return SUCCESS;
+}
+/* }}} */
+
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(ldap)
 {
@@ -1013,6 +1028,20 @@ PHP_FUNCTION(ldap_connect)
 			url = emalloc(urllen);
 			snprintf( url, urllen, "ldap://%s:" ZEND_LONG_FMT, host, port );
 		}
+
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+		if (LDAPG(tls_newctx) && url && !strncmp(url, "ldaps:", 6)) {
+			int val = 0;
+
+			/* ensure all pending TLS options are applied in a new context */
+			if (ldap_set_option(NULL, LDAP_OPT_X_TLS_NEWCTX, &val) != LDAP_OPT_SUCCESS) {
+				zval_ptr_dtor(return_value);
+				php_error_docref(NULL, E_WARNING, "Could not create new security context");
+				RETURN_FALSE;
+			}
+			LDAPG(tls_newctx) = false;
+		}
+#endif
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
 		/* ldap_init() is deprecated, use ldap_initialize() instead.
@@ -3141,15 +3170,7 @@ PHP_FUNCTION(ldap_set_option)
 	}
 
 	switch (option) {
-	/* options with int value */
-	case LDAP_OPT_DEREF:
-	case LDAP_OPT_SIZELIMIT:
-	case LDAP_OPT_TIMELIMIT:
-	case LDAP_OPT_PROTOCOL_VERSION:
-	case LDAP_OPT_ERROR_NUMBER:
-#ifdef LDAP_OPT_DEBUG_LEVEL
-	case LDAP_OPT_DEBUG_LEVEL:
-#endif
+	/* TLS options with int value */
 #ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
 	case LDAP_OPT_X_TLS_REQUIRE_CERT:
 #endif
@@ -3161,6 +3182,18 @@ PHP_FUNCTION(ldap_set_option)
 #endif
 #ifdef LDAP_OPT_X_TLS_PROTOCOL_MAX
 	case LDAP_OPT_X_TLS_PROTOCOL_MAX:
+#endif
+		/* TLS option change requires resetting TLS context */
+		LDAPG(tls_newctx) = true;
+		ZEND_FALLTHROUGH;
+	/* other options with int value */
+	case LDAP_OPT_DEREF:
+	case LDAP_OPT_SIZELIMIT:
+	case LDAP_OPT_TIMELIMIT:
+	case LDAP_OPT_PROTOCOL_VERSION:
+	case LDAP_OPT_ERROR_NUMBER:
+#ifdef LDAP_OPT_DEBUG_LEVEL
+	case LDAP_OPT_DEBUG_LEVEL:
 #endif
 #ifdef LDAP_OPT_X_KEEPALIVE_IDLE
 	case LDAP_OPT_X_KEEPALIVE_IDLE:
@@ -3234,17 +3267,7 @@ PHP_FUNCTION(ldap_set_option)
 			}
 		} break;
 #endif
-		/* options with string value */
-	case LDAP_OPT_ERROR_STRING:
-#ifdef LDAP_OPT_HOST_NAME
-	case LDAP_OPT_HOST_NAME:
-#endif
-#ifdef HAVE_LDAP_SASL
-	case LDAP_OPT_X_SASL_MECH:
-	case LDAP_OPT_X_SASL_REALM:
-	case LDAP_OPT_X_SASL_AUTHCID:
-	case LDAP_OPT_X_SASL_AUTHZID:
-#endif
+	/* TLS options with string value */
 #if (LDAP_API_VERSION > 2000)
 	case LDAP_OPT_X_TLS_CACERTDIR:
 	case LDAP_OPT_X_TLS_CACERTFILE:
@@ -3258,6 +3281,20 @@ PHP_FUNCTION(ldap_set_option)
 #endif
 #ifdef LDAP_OPT_X_TLS_DHFILE
 	case LDAP_OPT_X_TLS_DHFILE:
+#endif
+		/* TLS option change requires resetting TLS context */
+		LDAPG(tls_newctx) = true;
+		ZEND_FALLTHROUGH;
+	/* other options with string value */
+	case LDAP_OPT_ERROR_STRING:
+#ifdef LDAP_OPT_HOST_NAME
+	case LDAP_OPT_HOST_NAME:
+#endif
+#ifdef HAVE_LDAP_SASL
+	case LDAP_OPT_X_SASL_MECH:
+	case LDAP_OPT_X_SASL_REALM:
+	case LDAP_OPT_X_SASL_AUTHCID:
+	case LDAP_OPT_X_SASL_AUTHZID:
 #endif
 #ifdef LDAP_OPT_MATCHED_DN
 	case LDAP_OPT_MATCHED_DN:
@@ -3675,6 +3712,9 @@ PHP_FUNCTION(ldap_start_tls)
 	zval *link;
 	ldap_linkdata *ld;
 	int rc, protocol = LDAP_VERSION3;
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+	int val = 0;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &link, ldap_link_ce) != SUCCESS) {
 		RETURN_THROWS();
@@ -3684,13 +3724,16 @@ PHP_FUNCTION(ldap_start_tls)
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 
 	if (((rc = ldap_set_option(ld->link, LDAP_OPT_PROTOCOL_VERSION, &protocol)) != LDAP_SUCCESS) ||
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+		(LDAPG(tls_newctx) && (rc = ldap_set_option(ld->link, LDAP_OPT_X_TLS_NEWCTX, &val)) != LDAP_OPT_SUCCESS) ||
+#endif
 		((rc = ldap_start_tls_s(ld->link, NULL, NULL)) != LDAP_SUCCESS)
 	) {
 		php_error_docref(NULL, E_WARNING,"Unable to start TLS: %s", ldap_err2string(rc));
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+	LDAPG(tls_newctx) = false;
+	RETURN_TRUE;
 }
 /* }}} */
 #endif
@@ -4213,7 +4256,7 @@ zend_module_entry ldap_module_entry = { /* {{{ */
 	ext_functions,
 	PHP_MINIT(ldap),
 	PHP_MSHUTDOWN(ldap),
-	NULL,
+	PHP_RINIT(ldap),
 	NULL,
 	PHP_MINFO(ldap),
 	PHP_LDAP_VERSION,
