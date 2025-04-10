@@ -9,7 +9,7 @@ PHP                                                                        NEWS
     (David Carlier)
 
 - LDAP:
-  . Fixed bug GH-17940 (LDAP_OPT_X_TLS_REQUIRE_CERT can't be overridden). (Remi)
+  . Fixed bug GH-17776 (LDAP_OPT_X_TLS_* options can't be overridden). (Remi)
 
 - libxml:
   . Fixed custom external entity loader returning an invalid resource leading
