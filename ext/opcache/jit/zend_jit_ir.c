@@ -14476,7 +14476,7 @@ result_fetched:
 		ZEND_ASSERT(end_inputs == IR_UNUSED);
 		if ((res_info & MAY_BE_GUARD) && JIT_G(current_frame)) {
 			uint8_t type = concrete_type(res_info);
-			uint32_t flags = 0;
+			uint32_t flags = ZEND_JIT_EXIT_CHECK_EXCEPTION;
 
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
 			 && !delayed_fetch_this
