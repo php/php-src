@@ -5265,34 +5265,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 			}
 
 			if (opline->extended_value == IS_ARRAY) {
-				if (IS_CONST == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
-					if (Z_TYPE_P(expr) != IS_NULL) {
-						ZVAL_ARR(result, zend_new_array(1));
-						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
-						if (IS_CONST == IS_CONST) {
-							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
-						} else {
-							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-						}
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
-				} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(expr)) {
-					/* Optimized version without rebuilding properties HashTable */
-					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
-				} else {
-					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
-					if (obj_ht) {
-						/* fast copy */
-						ZVAL_ARR(result, zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(expr)->default_properties_count ||
-							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht))));
-						zend_release_properties(obj_ht);
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
-				}
+				zend_cast_zval_to_array(result, expr, IS_CONST);
 			} else {
 				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
 				zend_cast_zval_to_object(result, expr, IS_CONST);
@@ -20170,34 +20143,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 			}
 
 			if (opline->extended_value == IS_ARRAY) {
-				if (IS_TMP_VAR == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
-					if (Z_TYPE_P(expr) != IS_NULL) {
-						ZVAL_ARR(result, zend_new_array(1));
-						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
-						if (IS_TMP_VAR == IS_CONST) {
-							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
-						} else {
-							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-						}
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
-				} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(expr)) {
-					/* Optimized version without rebuilding properties HashTable */
-					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
-				} else {
-					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
-					if (obj_ht) {
-						/* fast copy */
-						ZVAL_ARR(result, zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(expr)->default_properties_count ||
-							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht))));
-						zend_release_properties(obj_ht);
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
-				}
+				zend_cast_zval_to_array(result, expr, IS_TMP_VAR);
 			} else {
 				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
 				zend_cast_zval_to_object(result, expr, IS_TMP_VAR);
@@ -22821,34 +22767,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 			}
 
 			if (opline->extended_value == IS_ARRAY) {
-				if (IS_VAR == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
-					if (Z_TYPE_P(expr) != IS_NULL) {
-						ZVAL_ARR(result, zend_new_array(1));
-						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
-						if (IS_VAR == IS_CONST) {
-							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
-						} else {
-							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-						}
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
-				} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(expr)) {
-					/* Optimized version without rebuilding properties HashTable */
-					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
-				} else {
-					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
-					if (obj_ht) {
-						/* fast copy */
-						ZVAL_ARR(result, zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(expr)->default_properties_count ||
-							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht))));
-						zend_release_properties(obj_ht);
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
-				}
+				zend_cast_zval_to_array(result, expr, IS_VAR);
 			} else {
 				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
 				zend_cast_zval_to_object(result, expr, IS_VAR);
@@ -41046,34 +40965,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 			}
 
 			if (opline->extended_value == IS_ARRAY) {
-				if (IS_CV == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
-					if (Z_TYPE_P(expr) != IS_NULL) {
-						ZVAL_ARR(result, zend_new_array(1));
-						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
-						if (IS_CV == IS_CONST) {
-							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
-						} else {
-							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-						}
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
-				} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(expr)) {
-					/* Optimized version without rebuilding properties HashTable */
-					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
-				} else {
-					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
-					if (obj_ht) {
-						/* fast copy */
-						ZVAL_ARR(result, zend_proptable_to_symtable(obj_ht,
-							(Z_OBJCE_P(expr)->default_properties_count ||
-							 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
-							 GC_IS_RECURSIVE(obj_ht))));
-						zend_release_properties(obj_ht);
-					} else {
-						ZVAL_EMPTY_ARRAY(result);
-					}
-				}
+				zend_cast_zval_to_array(result, expr, IS_CV);
 			} else {
 				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
 				zend_cast_zval_to_object(result, expr, IS_CV);

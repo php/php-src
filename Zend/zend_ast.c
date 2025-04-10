@@ -713,52 +713,25 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 				switch (ast->attr) {
 					case _IS_BOOL:
 						ZVAL_BOOL(result, zend_is_true(&op1));
-						zval_ptr_dtor_nogc(&op1);
 						break;
 					case IS_LONG:
 						ZVAL_LONG(result, zval_get_long_func(&op1, false));
-						zval_ptr_dtor_nogc(&op1);
 						break;
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(result, zval_get_double_func(&op1));
-						zval_ptr_dtor_nogc(&op1);
 						break;
 					case IS_STRING:
 						ZVAL_STR(result, zval_get_string_func(&op1));
-						zval_ptr_dtor_nogc(&op1);
 						break;
 					case IS_ARRAY:
-						/* Adapted from VM */
-						if (Z_TYPE(op1) != IS_OBJECT || Z_OBJCE(op1) == zend_ce_closure) {
-							if (Z_TYPE(op1) != IS_NULL) {
-								ZVAL_ARR(result, zend_new_array(1));
-								zend_hash_index_add_new(Z_ARRVAL_P(result), 0, &op1);
-							} else {
-								ZVAL_EMPTY_ARRAY(result);
-							}
-						} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(&op1)) {
-							ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ(op1)));
-							zval_ptr_dtor_nogc(&op1);
-						} else {
-							HashTable *obj_ht = zend_get_properties_for(&op1, ZEND_PROP_PURPOSE_ARRAY_CAST);
-							if (obj_ht) {
-								ZVAL_ARR(result, zend_proptable_to_symtable(obj_ht,
-									(Z_OBJCE(op1)->default_properties_count ||
-									 Z_OBJ(op1)->handlers != &std_object_handlers ||
-									 GC_IS_RECURSIVE(obj_ht))));
-								zend_release_properties(obj_ht);
-							} else {
-								ZVAL_EMPTY_ARRAY(result);
-							}
-							zval_ptr_dtor_nogc(&op1);
-						}
+						zend_cast_zval_to_array(result, &op1, IS_VAR);
 						break;
 					case IS_OBJECT:
 						zend_cast_zval_to_object(result, &op1, IS_VAR);
-						Z_TRY_DELREF(op1);
 						break;
 					EMPTY_SWITCH_DEFAULT_CASE();
 				}
+				zval_ptr_dtor_nogc(&op1);
 			}
 			break;
 		case ZEND_AST_OR:
