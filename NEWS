@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed custom external entity loader returning an invalid resource leading
     to a confusing TypeError message. (Girgias)
 
+- Opcache:
+  . Fixed bug GH-18294 (assertion failure zend_jit_ir.c). (nielsdos)
+
 - OpenSSL:
   . Fix memory leak in openssl_sign() when passing invalid algorithm.
     (nielsdos)
