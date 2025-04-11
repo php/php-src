@@ -14481,7 +14481,7 @@ result_fetched:
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
 			 && !delayed_fetch_this
 			 && !op1_avoid_refcounting) {
-				flags = ZEND_JIT_EXIT_FREE_OP1;
+				flags |= ZEND_JIT_EXIT_FREE_OP1;
 			}
 
 			if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
