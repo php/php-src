@@ -514,7 +514,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	mpz_ptr gmpnum;
 	const unsigned char *p, *max;
 	zval *zv;
-	int retval = FAILURE;
+	zend_result retval = FAILURE;
 	php_unserialize_data_t unserialize_data;
 	zend_object *zobj;
 
