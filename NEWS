@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fix memory leak in openssl_sign() when passing invalid algorithm.
     (nielsdos)
+  . Fix potential leaks when writing to BIO fails. (nielsdos)
 
 - Standard:
   . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
