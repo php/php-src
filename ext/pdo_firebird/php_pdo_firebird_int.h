@@ -73,9 +73,9 @@ typedef struct {
 	zend_ulong txn_isolation_level;
 
 	/* date and time format strings, can be set by the set_attribute method */
-	zend_string *date_format;
-	zend_string *time_format;
-	zend_string *timestamp_format;
+	char *date_format;
+	char *time_format;
+	char *timestamp_format;
 
 	unsigned sql_dialect:2;
 
