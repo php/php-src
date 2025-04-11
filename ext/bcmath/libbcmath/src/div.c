@@ -70,7 +70,7 @@ static inline void bc_fast_div(
  */
 static inline void bc_standard_div(
 	BC_VECTOR *numerator_vectors, size_t numerator_arr_size,
-	BC_VECTOR *divisor_vectors, size_t divisor_arr_size, size_t divisor_len,
+	const BC_VECTOR *divisor_vectors, size_t divisor_arr_size, size_t divisor_len,
 	BC_VECTOR *quot_vectors, size_t quot_arr_size
 ) {
 	size_t numerator_top_index = numerator_arr_size - 1;
@@ -354,10 +354,10 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 		return true;
 	}
 
-	char *numeratorptr = numerator->n_value;
+	const char *numeratorptr = numerator->n_value;
 	size_t numerator_size = numerator->n_len + quot_scale + divisor->n_scale;
 
-	char *divisorptr = divisor->n_value;
+	const char *divisorptr = divisor->n_value;
 	size_t divisor_size = divisor->n_len + divisor->n_scale;
 
 	/* check and remove numerator leading zeros */
