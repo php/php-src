@@ -1429,7 +1429,7 @@ EVP_PKEY *php_openssl_pkey_from_zval(
 
 zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t key_size)
 {
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(key, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_pkey(key);
 	if (!ctx) {
 		return NULL;
 	}
@@ -1487,6 +1487,37 @@ int php_openssl_get_evp_pkey_type(int key_type) {
 	}
 }
 
+const char *php_openssl_get_evp_pkey_name(int key_type) {
+	switch (key_type) {
+	case OPENSSL_KEYTYPE_RSA:
+		return "RSA";
+#if !defined(OPENSSL_NO_DSA)
+	case OPENSSL_KEYTYPE_DSA:
+		return "DSA";
+#endif
+#if !defined(NO_DH)
+	case OPENSSL_KEYTYPE_DH:
+		return "DH";
+#endif
+#ifdef HAVE_EVP_PKEY_EC
+	case OPENSSL_KEYTYPE_EC:
+		return "EC";
+#endif
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	case OPENSSL_KEYTYPE_X25519:
+		return "X25519";
+	case OPENSSL_KEYTYPE_ED25519:
+		return "ED25519";
+	case OPENSSL_KEYTYPE_X448:
+		return "X448";
+	case OPENSSL_KEYTYPE_ED448:
+		return "ED448";
+#endif
+	default:
+		return "";
+	}
+}
+
 EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req)
 {
 	if (req->priv_key_bits < MIN_KEY_LENGTH) {
@@ -1500,6 +1531,7 @@ EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req)
 		php_error_docref(NULL, E_WARNING, "Unsupported private key type");
 		return NULL;
 	}
+	const char *name = php_openssl_get_evp_pkey_name(req->priv_key_type);
 
 	int egdsocket, seeded;
 	char *randfile = php_openssl_conf_get_string(req->req_config, req->section_name, "RANDFILE");
@@ -1507,7 +1539,7 @@ EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req)
 
 	EVP_PKEY *key = NULL;
 	EVP_PKEY *params = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(type, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name(name, type);
 	if (!ctx) {
 		php_openssl_store_errors();
 		goto cleanup;
@@ -1569,7 +1601,7 @@ EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req)
 		}
 
 		EVP_PKEY_CTX_free(ctx);
-		ctx = EVP_PKEY_CTX_new(params, NULL);
+		ctx = php_openssl_pkey_new_from_pkey(params);
 		if (!ctx) {
 			php_openssl_store_errors();
 			goto cleanup;
