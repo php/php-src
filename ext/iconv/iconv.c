@@ -418,16 +418,16 @@ static php_iconv_err_t _php_iconv_appendc(smart_str *d, const char c, iconv_t cd
 
 /* {{{ */
 #ifdef ICONV_BROKEN_IGNORE
-static int _php_check_ignore(const char *charset)
+static bool _php_check_ignore(const char *charset)
 {
 	size_t clen = strlen(charset);
 	if (clen >= 9 && strcmp("//IGNORE", charset+clen-8) == 0) {
-		return 1;
+		return true;
 	}
 	if (clen >= 19 && strcmp("//IGNORE//TRANSLIT", charset+clen-18) == 0) {
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 #else
 #define _php_check_ignore(x) (0)
@@ -443,7 +443,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	size_t bsz, result = 0;
 	php_iconv_err_t retval = PHP_ICONV_ERR_SUCCESS;
 	zend_string *out_buf;
-	int ignore_ilseq = _php_check_ignore(out_charset);
+	bool ignore_ilseq = _php_check_ignore(out_charset);
 
 	*out = NULL;
 
@@ -560,7 +560,7 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 	size_t out_left;
 
 	size_t cnt;
-	int more;
+	bool more;
 
 	*pretval = (size_t)-1;
 
@@ -637,7 +637,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 	size_t cnt;
 	size_t total_len;
-	int more;
+	bool more;
 
 	err = _php_iconv_strlen(&total_len, str, nbytes, enc);
 	if (err != PHP_ICONV_ERR_SUCCESS) {
@@ -775,7 +775,7 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 	size_t ndl_buf_left;
 
 	size_t match_ofs;
-	int more;
+	bool more;
 
 	*pretval = (size_t)-1;
 
