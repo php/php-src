@@ -1,0 +1,12 @@
+options {
+    directory "@ZONES_DIR@";
+    listen-on port 53 { 127.0.0.1; };
+    allow-query { any; };
+    pid-file "@PID_FILE@";
+    recursion yes;
+};
+
+zone "basic.dnstest.php.net" {
+    type master;
+    file "basic.dnstest.php.net.zone";
+};
