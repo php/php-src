@@ -7943,6 +7943,9 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_FREE_OP2) {
 			fprintf(stderr, "/FREE_OP2");
 		}
+		if (t->exit_info[i].flags & ZEND_JIT_EXIT_CHECK_EXCEPTION) {
+			fprintf(stderr, "/CHK_EXC");
+		}
 		for (j = 0; j < stack_size; j++) {
 			uint8_t type = STACK_TYPE(stack, j);
 			if (type != IS_UNKNOWN) {
