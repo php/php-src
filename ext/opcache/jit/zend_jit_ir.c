@@ -2658,7 +2658,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 #endif
 			/* JIT-ed code is called only from execute_ex, which takes care
 			 * of saving ZREG_FP, ZREG_IP when GCC_GLOBAL_REGS is 1, so we don't
-			 * have to save them. When GCC_GLOBAL_REGS is 1, always save them.
+			 * have to save them.
 			 */
 			if (GCC_GLOBAL_REGS) {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
