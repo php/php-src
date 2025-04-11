@@ -268,11 +268,11 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
-%type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
+%type <ast> alt_if_stmt for_exprs for_expr_statements switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_name_list catch_list optional_variable parameter_list class_statement_list
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
-%type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs
+%type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs non_empty_for_expr_statements
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
@@ -508,7 +508,7 @@ statement:
 			{ $$ = zend_ast_create(ZEND_AST_WHILE, $3, $5); }
 	|	T_DO statement T_WHILE '(' expr ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_DO_WHILE, $2, $5); }
-	|	T_FOR '(' for_exprs ';' for_exprs ';' for_exprs ')' for_statement
+	|	T_FOR '(' for_expr_statements ';' for_exprs ';' for_expr_statements ')' for_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOR, $3, $5, $7, $9); }
 	|	T_SWITCH '(' expr ')' switch_case_list
 			{ $$ = zend_ast_create(ZEND_AST_SWITCH, $3, $5); }
@@ -1175,7 +1175,19 @@ for_exprs:
 ;
 
 non_empty_for_exprs:
-		non_empty_for_exprs ',' expr { $$ = zend_ast_list_add($1, $3); }
+		non_empty_for_expr_statements ',' expr { $$ = zend_ast_list_add($1, $3); }
+	|	expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
+;
+
+for_expr_statements:
+		%empty			{ $$ = NULL; }
+	|	non_empty_for_expr_statements	{ $$ = $1; }
+;
+
+non_empty_for_expr_statements:
+		non_empty_for_expr_statements ',' expr { $$ = zend_ast_list_add($1, $3); }
+	|	non_empty_for_expr_statements ',' T_VOID_CAST expr { $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_CAST_VOID, $4)); }
+	|	T_VOID_CAST expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, zend_ast_create(ZEND_AST_CAST_VOID, $2)); }
 	|	expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
 ;
 
