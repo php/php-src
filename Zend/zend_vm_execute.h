@@ -399,11 +399,7 @@ static const void *zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op
 # define ZEND_OPCODE_HANDLER_RET const zend_op *
 # define ZEND_VM_TAIL_CALL(call) return call
 # define ZEND_VM_CONTINUE()      return opline
-# ifdef ZEND_HIGH_HALF_KERNEL
-#  define ZEND_VM_RETURN()        return NULL
-# else
-#  define ZEND_VM_RETURN()        return (const zend_op*)ZEND_VM_ENTER_BIT
-# endif
+# define ZEND_VM_RETURN()        return (const zend_op*)ZEND_VM_ENTER_BIT
 # define ZEND_VM_HOT
 # define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE
 #endif
@@ -440,11 +436,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 # define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()
 # define ZEND_VM_LEAVE()           return  2
 #else
-# ifdef ZEND_HIGH_HALF_KERNEL
-#  define ZEND_VM_ENTER_BIT        (1ULL<<(UINTPTR_WIDTH-1))
-# else
-#  define ZEND_VM_ENTER_BIT        1ULL
-# endif
+# define ZEND_VM_ENTER_BIT         1ULL
 # define ZEND_VM_ENTER_EX()        return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)
 # define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()
 # define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)
@@ -58691,11 +58683,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 		if (UNEXPECTED(!OPLINE)) {
 #else
 		opline = ((opcode_handler_t)opline->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-# ifdef ZEND_HIGH_HALF_KERNEL
-		if (UNEXPECTED((intptr_t)opline <= 0)) {
-# else
 		if (UNEXPECTED(((uintptr_t)opline & ZEND_VM_ENTER_BIT))) {
-# endif
 #endif
 #endif /* ZEND_VM_KIND != ZEND_VM_KIND_HYBRID */
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
@@ -68574,11 +68562,7 @@ ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data* ex)
 	}
 #else
 	opline = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-# ifdef ZEND_HIGH_HALF_KERNEL
-	if (UNEXPECTED((intptr_t)opline <= 0)) {
-# else
-	if (UNEXPECTED(((uintptr_t)opline & ZEND_VM_ENTER_BIT))) {
-# endif
+if (UNEXPECTED(((uintptr_t)opline & ZEND_VM_ENTER_BIT))) {
 		opline = (const zend_op*)((uintptr_t)opline & ~ZEND_VM_ENTER_BIT);
 		if (EXPECTED(opline)) {
 			/* ZEND_VM_ENTER() or ZEND_VM_LEAVE() */
