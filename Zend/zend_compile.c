@@ -84,6 +84,8 @@ static inline uint32_t zend_alloc_cache_slot(void) {
 	return zend_alloc_cache_slots(1);
 }
 
+const zend_type zend_mixed_type = { NULL, MAY_BE_ANY };
+
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename, zend_compile_position position);
 
@@ -463,6 +465,7 @@ void init_compiler(void) /* {{{ */
 	CG(delayed_autoloads) = NULL;
 	CG(unlinked_uses) = NULL;
 	CG(current_linking_class) = NULL;
+	CG(bound_associated_types) = NULL;
 }
 /* }}} */
 
@@ -491,6 +494,12 @@ void shutdown_compiler(void) /* {{{ */
 		CG(unlinked_uses) = NULL;
 	}
 	CG(current_linking_class) = NULL;
+	/* This can happen during a fatal error */
+	if (CG(bound_associated_types)) {
+		zend_hash_destroy(CG(bound_associated_types));
+		FREE_HASHTABLE(CG(bound_associated_types));
+		CG(bound_associated_types) = NULL;
+	}
 }
 /* }}} */
 
@@ -1432,6 +1441,26 @@ static zend_string *add_intersection_type(zend_string *str,
 	return str;
 }
 
+static zend_string *add_associated_type(zend_string *associated_type, zend_class_entry *scope)
+{
+	const zend_type *constraint = zend_hash_find_ptr(scope->associated_types, associated_type);
+	ZEND_ASSERT(constraint != NULL);
+
+	zend_string *constraint_type_str = zend_type_to_string_resolved(*constraint, scope);
+
+	size_t len = ZSTR_LEN(associated_type) + ZSTR_LEN(constraint_type_str) + strlen("<>");
+	zend_string *result = zend_string_alloc(len, 0);
+
+	memcpy(ZSTR_VAL(result), ZSTR_VAL(associated_type), ZSTR_LEN(associated_type));
+	ZSTR_VAL(result)[ZSTR_LEN(associated_type)] = '<';
+	memcpy(ZSTR_VAL(result) + ZSTR_LEN(associated_type) + 1, ZSTR_VAL(constraint_type_str), ZSTR_LEN(constraint_type_str));
+	ZSTR_VAL(result)[len-1] = '>';
+	ZSTR_VAL(result)[len] = '\0';
+
+	zend_string_release(constraint_type_str);
+	return result;
+}
+
 zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
 
@@ -1455,6 +1484,8 @@ zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry
 			str = add_type_string(str, resolved, /* is_intersection */ false);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_IS_ASSOCIATED(type)) {
+		str = add_associated_type(ZEND_TYPE_NAME(type), scope);
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
@@ -2072,6 +2103,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	ce->default_static_members_count = 0;
 	ce->properties_info_table = NULL;
 	ce->attributes = NULL;
+	ce->associated_types = NULL;
 	ce->enum_backing_type = IS_UNDEF;
 	ce->backed_enum_table = NULL;
 
@@ -6936,9 +6968,11 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 
 static zend_type zend_compile_single_typename(zend_ast *ast)
 {
+	zend_class_entry *ce = CG(active_class_entry);
+
 	ZEND_ASSERT(!(ast->attr & ZEND_TYPE_NULLABLE));
 	if (ast->kind == ZEND_AST_TYPE) {
-		if (ast->attr == IS_STATIC && !CG(active_class_entry) && zend_is_scope_known()) {
+		if (ast->attr == IS_STATIC && !ce && zend_is_scope_known()) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use \"static\" when no class scope is active");
 		}
@@ -6968,10 +7002,14 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			const char *correct_name;
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			zend_string *class_name = type_name;
+			uint32_t flags = 0;
 
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 				class_name = zend_resolve_class_name_ast(ast);
 				zend_assert_valid_class_name(class_name, "a type name");
+				if (ce && ce->associated_types && zend_hash_exists(ce->associated_types, class_name)) {
+					flags = _ZEND_TYPE_ASSOCIATED_BIT;
+				}
 			} else {
 				ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_SELF || fetch_type == ZEND_FETCH_CLASS_PARENT);
 
@@ -6979,14 +7017,14 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				if (fetch_type == ZEND_FETCH_CLASS_SELF) {
 					/* Scope might be unknown for unbound closures and traits */
 					if (zend_is_scope_known()) {
-						class_name = CG(active_class_entry)->name;
+						class_name = ce->name;
 						ZEND_ASSERT(class_name && "must know class name when resolving self type at compile time");
 					}
 				} else {
 					ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_PARENT);
 					/* Scope might be unknown for unbound closures and traits */
 					if (zend_is_scope_known()) {
-						class_name = CG(active_class_entry)->parent_name;
+						class_name = ce->parent_name;
 						ZEND_ASSERT(class_name && "must know class name when resolving parent type at compile time");
 					}
 				}
@@ -7014,7 +7052,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 			class_name = zend_new_interned_string(class_name);
 			zend_alloc_ce_cache(class_name);
-			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, /* allow null */ false, 0);
+			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, /* allow null */ false, flags);
 		}
 	}
 }
@@ -7163,6 +7201,9 @@ static zend_type zend_compile_typename_ex(
 			single_type = zend_compile_single_typename(type_ast);
 			uint32_t single_type_mask = ZEND_TYPE_PURE_MASK(single_type);
 
+			if (ZEND_TYPE_IS_ASSOCIATED(single_type)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Associated type cannot be part of a union type");
+			}
 			if (single_type_mask == MAY_BE_ANY) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Type mixed can only be used as a standalone type");
 			}
@@ -7245,6 +7286,9 @@ static zend_type zend_compile_typename_ex(
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
 
+			if (ZEND_TYPE_IS_ASSOCIATED(single_type)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Associated type cannot be part of an intersection type");
+			}
 			/* An intersection of union types cannot exist so invalidate it
 			 * Currently only can happen with iterable getting canonicalized to Traversable|array */
 			if (ZEND_TYPE_IS_ITERABLE_FALLBACK(single_type)) {
@@ -8984,6 +9028,48 @@ static void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 	}
 }
 /* }}} */
+
+static void zend_associated_table_ht_dtor(zval *val) {
+	/* NO OP as we only use it to be able to refer and save pointers to zend_types */
+	// TODO do we actually want to store copies of types?
+	zend_type *associated_type = Z_PTR_P(val);
+	if (associated_type != &zend_mixed_type) {
+		zend_type_release(*associated_type, false);
+		efree(associated_type);
+	}
+}
+
+static void zend_compile_associated_type(zend_ast *ast) {
+	zend_class_entry *ce = CG(active_class_entry);
+	HashTable *associated_types = ce->associated_types;
+	zend_ast *name_ast = ast->child[0];
+	zend_ast *type_ast = ast->child[1];
+	zend_string *name = zend_ast_get_str(name_ast);
+
+	if ((ce->ce_flags & ZEND_ACC_INTERFACE) == 0) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use associated types outside of interfaces, used in %s", ZSTR_VAL(ce->name));
+	}
+
+	ZEND_ASSERT(name != NULL);
+	bool persistent = ce->type == ZEND_INTERNAL_CLASS;
+	if (associated_types == NULL) {
+		ce->associated_types = pemalloc(sizeof(HashTable), persistent);
+		zend_hash_init(ce->associated_types, 8, NULL, zend_associated_table_ht_dtor, persistent);
+		associated_types = ce->associated_types;
+	}
+	if (zend_hash_exists(associated_types, name)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot have two associated types with the same name \"%s\"", ZSTR_VAL(name));
+	}
+
+	if (type_ast != NULL) {
+		zend_type type = zend_compile_typename(type_ast);
+		zend_hash_add_new_mem(associated_types, name, &type, sizeof(type));
+	} else {
+		zend_hash_add_new_ptr(associated_types, name, (void*) &zend_mixed_type);
+	}
+}
 
 static void zend_compile_implements(zend_ast *ast) /* {{{ */
 {
@@ -11557,6 +11643,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast);
+			break;
+		case ZEND_AST_ASSOCIATED_TYPE:
+			zend_compile_associated_type(ast);
 			break;
 		case ZEND_AST_CLASS:
 			zend_compile_class_decl(NULL, ast, 0);
