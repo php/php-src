@@ -771,6 +771,11 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 		return INHERITANCE_SUCCESS;
 	}
 
+	if (ZEND_TYPE_PURE_MASK(proto_arg_info->type) == MAY_BE_NEVER) {
+		/* Parent uses bottom type, always compatible */
+		return INHERITANCE_SUCCESS;
+	}
+
 	if (!ZEND_TYPE_IS_SET(proto_arg_info->type)) {
 		/* Child defines a type, but parent doesn't, violates LSP */
 		return INHERITANCE_ERROR;
