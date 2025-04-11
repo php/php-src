@@ -63,15 +63,15 @@
 #define PHP_ICONV_IMPL_VALUE "unknown"
 #endif
 
-static char *get_iconv_version(void) {
-	char *version = "unknown";
+static const char *get_iconv_version(void) {
+	const char *version = "unknown";
 
 #ifdef HAVE_LIBICONV
 	static char buf[16];
 	snprintf(buf, sizeof(buf), "%d.%d", _libiconv_version >> 8, _libiconv_version & 0xff);
 	version = buf;
 #elif defined(HAVE_GLIBC_ICONV)
-	version = (char *) gnu_get_libc_version();
+	version = gnu_get_libc_version();
 #endif
 
 	return version;
@@ -243,7 +243,7 @@ PHP_MSHUTDOWN_FUNCTION(miconv)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(miconv)
 {
-	zval *iconv_impl, *iconv_ver;
+	const zval *iconv_impl, *iconv_ver;
 
 	iconv_impl = zend_get_constant_str("ICONV_IMPL", sizeof("ICONV_IMPL")-1);
 	iconv_ver = zend_get_constant_str("ICONV_VERSION", sizeof("ICONV_VERSION")-1);
@@ -308,7 +308,7 @@ static zend_result php_iconv_output_handler(void **nothing, php_output_context *
 
 		int mimetype_len = 0;
 		if (SG(sapi_headers).mimetype && !strncasecmp(SG(sapi_headers).mimetype, "text/", 5)) {
-			char *s = strchr(SG(sapi_headers).mimetype,';');
+			const char *s = strchr(SG(sapi_headers).mimetype,';');
 			if (s == NULL){
 				mimetype = SG(sapi_headers).mimetype;
 			} else {
@@ -321,7 +321,7 @@ static zend_result php_iconv_output_handler(void **nothing, php_output_context *
 
 		if (mimetype != NULL && (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN) || ((output_context->op & PHP_OUTPUT_HANDLER_START) && !(output_context->op & PHP_OUTPUT_HANDLER_FINAL)))) {
 			size_t len;
-			char *p = strstr(get_output_encoding(), "//");
+			const char *p = strstr(get_output_encoding(), "//");
 
 			if (p) {
 				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, (int) (p - get_output_encoding()), get_output_encoding());
@@ -2577,7 +2577,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 {
 	php_stream_filter *retval = NULL;
 	php_iconv_stream_filter *inst;
-	char *from_charset = NULL, *to_charset = NULL;
+	const char *from_charset = NULL, *to_charset = NULL;
 	size_t from_charset_len, to_charset_len;
 
 	if ((from_charset = strchr(name, '.')) == NULL) {
