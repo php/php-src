@@ -2723,8 +2723,12 @@ $output
     if (!$passed || $leaked) {
         // write .sh
         if (strpos($log_format, 'S') !== false) {
-            $env_lines = [];
+            $env_lines = ['unset $(env | cut -d= -f1)'];
             foreach ($env as $env_var => $env_val) {
+                if (strval($env_val) === '') {
+                    // proc_open does not pass empty env vars
+                    continue;
+                }
                 $env_lines[] = "export $env_var=" . escapeshellarg($env_val ?? "");
             }
             $exported_environment = "\n" . implode("\n", $env_lines) . "\n";
@@ -2733,7 +2737,7 @@ $output
 {$exported_environment}
 case "$1" in
 "gdb")
-    gdb --args {$orig_cmd}
+    gdb -ex 'unset environment LINES' -ex 'unset environment COLUMNS' --args {$orig_cmd}
     ;;
 "lldb")
     lldb -- {$orig_cmd}
