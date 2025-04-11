@@ -15,7 +15,7 @@ if (!function_exists("posix_getuid") || posix_getuid() != 0) {
 ?>
 --FILE--
 <?php
-    $s_c     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_IP);
+    $s_c     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
     $s_bind  = socket_bind($s_c, 'lo');
     var_dump($s_bind);
 
@@ -26,6 +26,34 @@ if (!function_exists("posix_getuid") || posix_getuid() != 0) {
     var_dump($iindex);
 
     socket_getpeername($s_c, $istr2, $iindex2);
+
+    $s_s     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_LOOP);
+    $v_bind  = socket_bind($s_s, 'lo');
+
+    $buf = pack("H12H12n", "ffffffffffff", "000000000000", ETH_P_LOOP);
+    $buf .= str_repeat("A", 46);
+
+    var_dump(socket_sendto($s_s, $buf, strlen($buf), 0, "lo", 1));
+    var_dump(socket_recvfrom($s_c, $rsp, strlen($buf), 0, $addr));
+
+    var_dump($addr);
+    var_dump($rsp);
+
+    socket_close($s_c);
+    // purposely unsupported ethernet protocol (ARP)
+    $s_c     = socket_create(AF_PACKET, SOCK_RAW, 0x0806);
+    $s_bind  = socket_bind($s_c, 'lo');
+    $buf = pack("H12H12n", "ffffffffffff", "000000000000", 0x0806);
+    $buf .= str_repeat("A", 46);
+
+    var_dump(socket_sendto($s_s, $buf, strlen($buf), 0, "lo", 1));
+
+    try {
+    	socket_recvfrom($s_c, $rsp2, strlen($buf), 0, $addr2);
+    } catch (\ValueError $e) {
+        echo $e->getMessage();
+    }
+ 
     socket_close($s_c);
 ?>
 --EXPECTF--
@@ -35,3 +63,27 @@ string(2) "lo"
 int(%i)
 
 Warning: socket_getpeername(): unable to retrieve peer name [95]: %sot supported in %s on line %d
+int(60)
+int(60)
+string(2) "lo"
+object(Socket\EthernetPacket)#3 (%d) {
+  ["headerSize"]=>
+  int(%d)
+  ["rawPacket"]=>
+  string(%d) "%A"
+  ["socket"]=>
+  object(Socket)#1 (0) {
+  }
+  ["ethProtocol"]=>
+  int(%i)
+  ["srcMac"]=>
+  string(%d) "%s:%s:%s:%s:%s:%s"
+  ["dstMac"]=>
+  string(%d) "%s:%s:%s:%s:%s:%s"
+  ["payload"]=>
+  object(%s)#4 (%d) {
+    %a
+  }
+}
+int(60)
+unsupported ethernet protocol
