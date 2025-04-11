@@ -298,17 +298,18 @@ static php_output_handler *php_iconv_output_handler_init(const char *handler_nam
 
 static zend_result php_iconv_output_handler(void **nothing, php_output_context *output_context)
 {
-	char *s, *content_type, *mimetype = NULL;
-	int output_status, mimetype_len = 0;
+	char *content_type, *mimetype = NULL;
 
 	if (output_context->op & PHP_OUTPUT_HANDLER_START) {
-		output_status = php_output_get_status();
+		int output_status = php_output_get_status();
 		if (output_status & PHP_OUTPUT_SENT) {
 			return FAILURE;
 		}
 
+		int mimetype_len = 0;
 		if (SG(sapi_headers).mimetype && !strncasecmp(SG(sapi_headers).mimetype, "text/", 5)) {
-			if ((s = strchr(SG(sapi_headers).mimetype,';')) == NULL){
+			char *s = strchr(SG(sapi_headers).mimetype,';');
+			if (s == NULL){
 				mimetype = SG(sapi_headers).mimetype;
 			} else {
 				mimetype = SG(sapi_headers).mimetype;
@@ -775,7 +776,6 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 
 	size_t match_ofs;
 	int more;
-	size_t iconv_ret;
 
 	*pretval = (size_t)-1;
 
@@ -812,7 +812,7 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 
 		more = in_left > 0;
 
-		iconv_ret = iconv(cd, more ? (ICONV_CONST char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
+		size_t iconv_ret = iconv(cd, more ? (ICONV_CONST char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
 		if (out_left == sizeof(buf)) {
 			break;
 		}
