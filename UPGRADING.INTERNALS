@@ -61,6 +61,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     is still valid. This is useful when a GC cycle is collected and the
     database object can be destroyed prior to destroying the statement.
 
+- ext/standard
+  . Added `php_next_utf8_char_mb()` to decode the next UTF-8 multibyte
+    codepoint (i.e. >= 2 bytes).
+
 ========================
 4. OpCode changes
 ========================
