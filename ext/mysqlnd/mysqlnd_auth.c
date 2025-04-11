@@ -78,6 +78,7 @@ php_log_err_with_severity((char*) plugin_data, LOG_NOTICE);
 		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol);
 
 		if (!auth_plugin) {
+php_log_err_with_severity("auth plugin not found", LOG_NOTICE);
 			if (first_call) {
 				mnd_pefree(requested_protocol, FALSE);
 				requested_protocol = mnd_pestrdup(MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
@@ -113,6 +114,7 @@ php_log_err_with_severity((char*) plugin_data, LOG_NOTICE);
 					passwd_len, plugin_data, plugin_data_len,
 					session_options, conn->protocol_frame_codec->data,
 					mysql_flags);
+php_log_err_with_severity((char*) scrambled_data, LOG_NOTICE);
 			}
 
 			if (conn->error_info->error_no) {
