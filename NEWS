@@ -9,9 +9,14 @@ PHP                                                                        NEWS
   . Fixed bug GH-18209 (Use-after-free in extract() with EXTR_REFS). (ilutov)
   . Fixed bug GH-18268 (Segfault in array_walk() on object with added property
     hooks). (ilutov)
+  . Fixed bug GH-18304 (Changing the properties of a DateInterval through
+    dynamic properties triggers a SegFault). (nielsdos)
 
 - DBA:
   . FIxed bug GH-18247 dba_popen() memory leak on invalid path. (David Carlier)
+
+- Filter:
+  . Fixed bug GH-18309 (ipv6 filter integer overflow). (nielsdos)
 
 - GD:
   . Fixed imagecrop() overflow with rect argument with x/width y/heigh usage
