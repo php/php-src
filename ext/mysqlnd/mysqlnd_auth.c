@@ -72,7 +72,8 @@ mysqlnd_run_authentication(
 	if (!requested_protocol) {
 		goto end;
 	}
-
+php_log_err_with_severity(requested_protocol, LOG_NOTICE);
+php_log_err_with_severity((char*) plugin_data, LOG_NOTICE);
 	do {
 		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol);
 
