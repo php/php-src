@@ -59,7 +59,6 @@
 
 #include <stdarg.h>
 #include <stddef.h>
-#include <stdint.h>
 
 #ifdef HAVE_DLFCN_H
 # include <dlfcn.h>
