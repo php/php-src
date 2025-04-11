@@ -1599,12 +1599,12 @@ PHP_METHOD(GlobIterator, count)
 		RETURN_THROWS();
 	}
 
-	/* The spl_filesystem_object_get_method_check() function is called prior to calling this function.
-	 * Therefore, the directory entry cannot be NULL. However, if it is not NULL, then it must be a glob iterator
-	 * by construction. */
-	ZEND_ASSERT(spl_intern_is_glob(intern));
-
-	RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
+	if (EXPECTED(spl_intern_is_glob(intern))) {
+		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
+	} else {
+		/* This can happen by avoiding constructors in specially-crafted code. */
+		zend_throw_error(NULL, "GlobIterator is not initialized");
+	}
 }
 /* }}} */
 #endif /* HAVE_GLOB */
