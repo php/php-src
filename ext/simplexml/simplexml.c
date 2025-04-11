@@ -631,7 +631,9 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 	SXE_ITER        type;
 	zval            member;
 
-	cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
 
 	sxe = php_sxe_fetch_object(object);
 	GET_NODE(sxe, node);

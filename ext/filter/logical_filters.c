@@ -758,7 +758,8 @@ static bool _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]
 {
 	int compressed_pos = -1;
 	int blocks = 0;
-	int num, n, i;
+	unsigned int num, n;
+	int i;
 	const char *ipv4;
 	const char *end;
 	int ip4elm[4];

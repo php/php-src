@@ -863,7 +863,9 @@ static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *na
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
-		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+		if (cache_slot) {
+			cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+		}
 
 		/* If object has offsetGet() overridden, then fallback to read_property,
 		 * which will call offsetGet(). */
