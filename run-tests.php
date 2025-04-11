@@ -1934,6 +1934,7 @@ TEST $file
     $diff_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'diff';
     $log_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'log';
     $exp_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'exp';
+    $stdin_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'stdin';
     $output_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'out';
     $memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'mem';
     $sh_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'sh';
@@ -1972,6 +1973,7 @@ TEST $file
     @unlink($diff_filename);
     @unlink($log_filename);
     @unlink($exp_filename);
+    @unlink($stdin_filename);
     @unlink($output_filename);
     @unlink($memcheck_filename);
     @unlink($sh_filename);
@@ -2694,6 +2696,16 @@ COMMAND $cmd
             $diff = generate_diff_external($environment['TEST_PHP_DIFF_CMD'], $exp_filename, $output_filename);
         } else {
             $diff = generate_diff($wanted, $wanted_re, $output);
+        }
+
+        // write .stdin
+        if ($test->hasSection('STDIN') || $test->hasSection('PHPDBG')) {
+            $stdin = $test->hasSection('STDIN')
+                ? $test->getSection('STDIN')
+                : $test->getSection('PHPDBG') . "\n";
+            if (file_put_contents($stdin_filename, $stdin) === false) {
+                error("Cannot create test stdin - $stdin_filename");
+            }
         }
 
         if (is_array($IN_REDIRECT)) {
