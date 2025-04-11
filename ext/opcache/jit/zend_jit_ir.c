@@ -2660,14 +2660,14 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			 * of saving ZREG_FP, ZREG_IP when GCC_GLOBAL_REGS is 1, so we don't
 			 * have to save them. When GCC_GLOBAL_REGS is 1, always save them.
 			 */
-#if GCC_GLOBAL_REGS
-			jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
-#else
-			jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED;
-#endif
+			if (GCC_GLOBAL_REGS) {
+				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
+			} else {
+				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED;
 //#ifdef _WIN64
 //				jit->ctx.fixed_save_regset &= 0xffff; // TODO: don't save FP registers ???
 //#endif
+			}
 #ifdef _WIN64
 			jit->ctx.fixed_call_stack_size = 16 + IR_SHADOW_ARGS;
 #else
