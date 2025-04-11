@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-18304 (Changing the properties of a DateInterval through
     dynamic properties triggers a SegFault). (nielsdos)
 
+- Filter:
+  . Fixed bug GH-18309 (ipv6 filter integer overflow). (nielsdos)
+
 - GD:
   . Fixed imagecrop() overflow with rect argument with x/width y/heigh usage
     in gdImageCrop(). (David Carlier)
