@@ -2391,7 +2391,7 @@ static int zend_jit_trace_halt_stub(zend_jit_ctx *jit)
 		jit_STORE_IP(jit, IR_NULL);
 		ir_RETURN(IR_VOID);
 	} else {
-		ir_RETURN(ir_CONST_ADDR(ZEND_VM_RETURN_VAL)); // ZEND_VM_RETURN
+		ir_RETURN(ir_CONST_ADDR(ZEND_VM_ENTER_BIT)); // ZEND_VM_RETURN
 	}
 	return 1;
 }
@@ -11099,7 +11099,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 				} else if (GCC_GLOBAL_REGS) {
 					ir_GUARD(jit_IP(jit), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 				} else {
-					ir_GUARD(ir_NE(ref, ir_CONST_ADDR(ZEND_VM_RETURN_VAL)), jit_STUB_ADDR(jit, jit_stub_trace_halt));
+					ir_GUARD(ir_NE(ref, ir_CONST_ADDR(ZEND_VM_ENTER_BIT)), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 					jit_STORE_IP(jit, ref);
 				}
 			}

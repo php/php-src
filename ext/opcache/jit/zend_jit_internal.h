@@ -201,7 +201,6 @@ extern const zend_op *zend_jit_halt_op;
 		return; \
 	} while(0)
 # define ZEND_VM_ENTER_BIT 0
-# define ZEND_VM_RETURN_VAL 0
 #else
 # define EXECUTE_DATA_D                       zend_execute_data* execute_data
 # define EXECUTE_DATA_C                       execute_data
@@ -223,13 +222,7 @@ extern const zend_op *zend_jit_halt_op;
 # define ZEND_OPCODE_TAIL_CALL_EX(handler, arg) do { \
 		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX arg); \
 	} while(0)
-# ifdef ZEND_HIGH_HALF_KERNEL
-#  define ZEND_VM_ENTER_BIT (1ULL<<(UINTPTR_WIDTH-1))
-#  define ZEND_VM_RETURN_VAL 0
-# else
-#  define ZEND_VM_ENTER_BIT 1ULL
-#  define ZEND_VM_RETURN_VAL ZEND_VM_ENTER_BIT
-# endif
+# define ZEND_VM_ENTER_BIT 1ULL
 #endif
 
 /* VM handlers */
