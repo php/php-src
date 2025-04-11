@@ -3012,6 +3012,9 @@ function get_summary(bool $show_ext_summary): string
     $summary = '';
 
     if ($show_ext_summary) {
+        static $exts_skipped_sorted;
+        $exts_skipped = (array) $exts_skipped;
+        $exts_skipped_sorted ??= sort($exts_skipped);
         $summary .= '
 =====================================================================
 TEST RESULT SUMMARY
