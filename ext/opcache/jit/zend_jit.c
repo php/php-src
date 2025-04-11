@@ -3033,6 +3033,10 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 				op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
 			}
 
+#ifdef HAVE_GCC_GLOBAL_REGS
+			EX(opline) = opline;
+#endif
+
 			/* perform real JIT for this function */
 			zend_real_jit_func(op_array, NULL, opline, ZEND_JIT_ON_HOT_COUNTERS);
 		} zend_catch {
