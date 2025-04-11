@@ -93,7 +93,7 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 	}
 	time = fb_encode_time(hours, minutes, seconds, fractions);
 	isc_decode_sql_time(&time, &t);
-	fmt = S->H->time_format ? ZSTR_VAL(S->H->time_format) : PDO_FB_DEF_TIME_FMT;
+	fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
 
 	size_t len = strftime(timeBuf, sizeof(timeBuf), fmt, &t);
 	if (len == 0) {
@@ -123,7 +123,7 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 	ts.timestamp_time = fb_encode_time(hours, minutes, seconds, fractions);
 	isc_decode_timestamp(&ts, &t);
 
-	fmt = S->H->timestamp_format ? ZSTR_VAL(S->H->timestamp_format) : PDO_FB_DEF_TIMESTAMP_FMT;
+	fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
 
 	size_t len = strftime(timestampBuf, sizeof(timestampBuf), fmt, &t);
 	if (len == 0) {
@@ -546,18 +546,18 @@ static int pdo_firebird_stmt_get_col(
 					break;
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
-					fmt = S->H->date_format ? ZSTR_VAL(S->H->date_format) : PDO_FB_DEF_DATE_FMT;
+					fmt = S->H->date_format ? S->H->date_format : PDO_FB_DEF_DATE_FMT;
 					if (0) {
 				case SQL_TYPE_TIME:
 						isc_decode_sql_time((ISC_TIME*)var->sqldata, &t);
-						fmt = S->H->time_format ? ZSTR_VAL(S->H->time_format) : PDO_FB_DEF_TIME_FMT;
+						fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
 					} else if (0) {
 				case SQL_TIMESTAMP:
 						{
 							ISC_TIMESTAMP timestamp = php_get_isc_timestamp_from_sqldata(var->sqldata);
 							isc_decode_timestamp(&timestamp, &t);
 						}
-						fmt = S->H->timestamp_format ? ZSTR_VAL(S->H->timestamp_format) : PDO_FB_DEF_TIMESTAMP_FMT;
+						fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
 					}
 					/* convert the timestamp into a string */
 					char buf[80];
