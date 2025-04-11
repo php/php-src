@@ -1934,7 +1934,6 @@ TEST $file
     $diff_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'diff';
     $log_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'log';
     $exp_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'exp';
-    $stdin_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'stdin';
     $output_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'out';
     $memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'mem';
     $sh_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'sh';
@@ -1973,7 +1972,6 @@ TEST $file
     @unlink($diff_filename);
     @unlink($log_filename);
     @unlink($exp_filename);
-    @unlink($stdin_filename);
     @unlink($output_filename);
     @unlink($memcheck_filename);
     @unlink($sh_filename);
@@ -2698,16 +2696,6 @@ COMMAND $cmd
             $diff = generate_diff($wanted, $wanted_re, $output);
         }
 
-        // write .stdin
-        if ($test->hasSection('STDIN') || $test->hasSection('PHPDBG')) {
-            $stdin = $test->hasSection('STDIN')
-                ? $test->getSection('STDIN')
-                : $test->getSection('PHPDBG') . "\n";
-            if (file_put_contents($stdin_filename, $stdin) === false) {
-                error("Cannot create test stdin - $stdin_filename");
-            }
-        }
-
         if (is_array($IN_REDIRECT)) {
             $orig_shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
             $diff = "# original source file: $orig_shortname\n" . $diff;
@@ -2735,12 +2723,8 @@ $output
     if (!$passed || $leaked) {
         // write .sh
         if (strpos($log_format, 'S') !== false) {
-            $env_lines = ['unset $(env | cut -d= -f1)'];
+            $env_lines = [];
             foreach ($env as $env_var => $env_val) {
-                if (strval($env_val) === '') {
-                    // proc_open does not pass empty env vars
-                    continue;
-                }
                 $env_lines[] = "export $env_var=" . escapeshellarg($env_val ?? "");
             }
             $exported_environment = "\n" . implode("\n", $env_lines) . "\n";
@@ -2749,7 +2733,7 @@ $output
 {$exported_environment}
 case "$1" in
 "gdb")
-    gdb -ex 'unset environment LINES' -ex 'unset environment COLUMNS' --args {$orig_cmd}
+    gdb --args {$orig_cmd}
     ;;
 "lldb")
     lldb -- {$orig_cmd}
