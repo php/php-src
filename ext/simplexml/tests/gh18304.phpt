@@ -11,8 +11,8 @@ $field = 'abc';
 $sxe->$field .= 'hello';
 var_dump($sxe->$field);
 ?>
---EXPECT--
-object(SimpleXMLElement)#3 (1) {
+--EXPECTF--
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(5) "hello"
 }
