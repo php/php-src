@@ -7813,6 +7813,18 @@ ZEND_METHOD(ReflectionConstant, getExtensionName)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionConstant, getAttributes)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		const_->attributes, 0, NULL, ZEND_ATTRIBUTE_TARGET_CONST,
+		const_->filename);
+}
+
 ZEND_METHOD(ReflectionConstant, __toString)
 {
 	reflection_object *intern;

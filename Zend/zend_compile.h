@@ -395,6 +395,9 @@ typedef struct _zend_oparray_context {
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* Has IS_PTR operands that needs special cleaning        |     |     |     */
+#define ZEND_ACC_PTR_OPS                 (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* has #[\NoDiscard] attribute                            |     |     |     */
 #define ZEND_ACC_NODISCARD               (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */

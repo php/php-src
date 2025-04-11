@@ -923,4 +923,6 @@ final class ReflectionConstant implements Reflector
     public function getExtensionName(): string|false {}
 
     public function __toString(): string {}
+
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
