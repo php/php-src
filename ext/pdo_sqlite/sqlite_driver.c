@@ -226,6 +226,19 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
 		return NULL;
 	}
+
+	if (UNEXPECTED(zend_str_has_nul_byte(unquoted))) {
+		if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
+			zend_throw_exception_ex(
+				php_pdo_get_exception(), 0,
+				"SQLite PDO::quote does not support null bytes");
+		} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
+			php_error_docref(NULL, E_WARNING,
+				"SQLite PDO::quote does not support null bytes");
+		}
+		return NULL;
+	}
+
 	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 	/* TODO use %Q format? */
 	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
@@ -741,7 +754,7 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_request_shutdown,
 	pdo_sqlite_in_transaction,
 	pdo_sqlite_get_gc,
-    pdo_sqlite_scanner
+	pdo_sqlite_scanner
 };
 
 static char *make_filename_safe(const char *filename)

@@ -222,6 +222,10 @@ PHP 8.5 UPGRADE NOTES
     PDO::ATTR_PREFETCH sets to 0 which set to lazy fetch mode.
     In this mode, statements cannot be run parallely.
 
+- PDO_SQLITE:
+  . SQLite PDO::quote() will now throw an exception or emit a warning,
+    depending on the error mode, if the string contains a null byte.
+
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
   . pg_connect checks if the connection_string argument contains
