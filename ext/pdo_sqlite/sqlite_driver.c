@@ -28,7 +28,6 @@
 #include "zend_exceptions.h"
 #include "sqlite_driver_arginfo.h"
 
-
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
@@ -74,6 +73,7 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 			strncpy(*pdo_err, "HY000", sizeof(*pdo_err));
 			break;
 	}
+
 	if (!dbh->methods) {
 		pdo_throw_exception(einfo->errcode, einfo->errmsg, pdo_err);
 	}
@@ -226,15 +226,19 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
 		return NULL;
 	}
-	if(memchr(ZSTR_VAL(unquoted), '\0', ZSTR_LEN(unquoted)) != NULL) {
-		if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0,
-				"SQLite PDO::quote does not support NULL bytes");
-		} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
-			php_error_docref(NULL, E_WARNING, "SQLite PDO::quote does not support NULL bytes");
-		}
-		return NULL;
+
+	if (UNEXPECTED(zend_str_has_nul_byte(unquoted))) {
+	  if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
+		zend_throw_exception_ex(
+			php_pdo_get_exception(), 0,
+			"SQLite PDO::quote does not support null bytes");
+	  } else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
+		php_error_docref(NULL, E_WARNING,
+						 "SQLite PDO::quote does not support null bytes");
+	  }
+	  return NULL;
 	}
+
 	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 	/* TODO use %Q format? */
 	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
@@ -750,7 +754,7 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_request_shutdown,
 	pdo_sqlite_in_transaction,
 	pdo_sqlite_get_gc,
-    pdo_sqlite_scanner
+	pdo_sqlite_scanner
 };
 
 static char *make_filename_safe(const char *filename)
@@ -846,8 +850,6 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 	if (driver_options) {
 		timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, timeout);
 	}
-	
-
 	sqlite3_busy_timeout(H->db, timeout * 1000);
 
 	dbh->alloc_own_columns = 1;
