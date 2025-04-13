@@ -226,6 +226,11 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
 		return NULL;
 	}
+	if(memchr(ZSTR_VAL(unquoted), '\0', ZSTR_LEN(unquoted)) != NULL) {
+		zend_throw_exception_ex(php_pdo_get_exception(), 0,
+			"SQLite PDO::quote does not support NULL bytes");
+		return NULL;
+	}
 	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 	/* TODO use %Q format? */
 	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
