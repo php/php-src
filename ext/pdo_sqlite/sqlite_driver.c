@@ -851,12 +851,6 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 		timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, timeout);
 	}
 	
-	/* Set the error mode attribute based on driver options, defaulting to ERRMODE_EXCEPTION */
-	if (driver_options) {
-		dbh->error_mode = pdo_attr_lval(driver_options, PDO_ATTR_ERRMODE, PDO_ERRMODE_EXCEPTION);
-	} else {
-		dbh->error_mode = PDO_ERRMODE_EXCEPTION;
-	}
 
 	sqlite3_busy_timeout(H->db, timeout * 1000);
 
