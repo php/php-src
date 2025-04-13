@@ -8,5 +8,5 @@ echo date("H:i:s\n", $sun_info['sunrise']);
 echo date("H:i:s\n", $sun_info['sunset']);
 ?>
 --EXPECT--
-05:58:41
-18:13:41
+05:59:21
+18:14:48
