@@ -28,6 +28,14 @@
 #include "zend_exceptions.h"
 #include "sqlite_driver_arginfo.h"
 
+/*
+ * Updated to add support for PDO::ERRMODE_SILENT and PDO::ERRMODE_WARNING
+ * in addition to PDO::ERRMODE_EXCEPTION. The error mode is stored in
+ * dbh->error_mode (assumed to be part of pdo_dbh_t) and is set in the
+ * handle factory. Depending on the error mode, errors either throw an
+ * exception, emit a warning, or remain silent.
+ */
+
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
@@ -74,8 +82,11 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 			break;
 	}
 
-	if (!dbh->methods) {
-		pdo_throw_exception(einfo->errcode, einfo->errmsg, pdo_err);
+	/* Handle error based on error mode */
+	if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
+		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode, "%s", einfo->errmsg);
+	} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
+		php_error_docref(NULL, E_WARNING, "%s", einfo->errmsg);
 	}
 
 	return einfo->errcode;
@@ -227,8 +238,12 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 		return NULL;
 	}
 	if(memchr(ZSTR_VAL(unquoted), '\0', ZSTR_LEN(unquoted)) != NULL) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0,
-			"SQLite PDO::quote does not support NULL bytes");
+		if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0,
+				"SQLite PDO::quote does not support NULL bytes");
+		} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
+			php_error_docref(NULL, E_WARNING, "SQLite PDO::quote does not support NULL bytes");
+		}
 		return NULL;
 	}
 	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
@@ -842,6 +857,14 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 	if (driver_options) {
 		timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, timeout);
 	}
+	
+	/* Set the error mode attribute based on driver options, defaulting to ERRMODE_EXCEPTION */
+	if (driver_options) {
+		dbh->error_mode = pdo_attr_lval(driver_options, PDO_ATTR_ERRMODE, PDO_ERRMODE_EXCEPTION);
+	} else {
+		dbh->error_mode = PDO_ERRMODE_EXCEPTION;
+	}
+
 	sqlite3_busy_timeout(H->db, timeout * 1000);
 
 	dbh->alloc_own_columns = 1;
