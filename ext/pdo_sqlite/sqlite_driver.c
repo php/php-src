@@ -229,12 +229,12 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 
 	if (UNEXPECTED(zend_str_has_nul_byte(unquoted))) {
 		if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
-		zend_throw_exception_ex(
-			php_pdo_get_exception(), 0,
-			"SQLite PDO::quote does not support null bytes");
+			zend_throw_exception_ex(
+				php_pdo_get_exception(), 0,
+				"SQLite PDO::quote does not support null bytes");
 		} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
-		php_error_docref(NULL, E_WARNING,
-						 "SQLite PDO::quote does not support null bytes");
+			php_error_docref(NULL, E_WARNING,
+				"SQLite PDO::quote does not support null bytes");
 		}
 		return NULL;
 	}
