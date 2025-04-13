@@ -28,13 +28,6 @@
 #include "zend_exceptions.h"
 #include "sqlite_driver_arginfo.h"
 
-/*
- * Updated to add support for PDO::ERRMODE_SILENT and PDO::ERRMODE_WARNING
- * in addition to PDO::ERRMODE_EXCEPTION. The error mode is stored in
- * dbh->error_mode (assumed to be part of pdo_dbh_t) and is set in the
- * handle factory. Depending on the error mode, errors either throw an
- * exception, emit a warning, or remain silent.
- */
 
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {
