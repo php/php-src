@@ -74,12 +74,8 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 			strncpy(*pdo_err, "HY000", sizeof(*pdo_err));
 			break;
 	}
-
-	/* Handle error based on error mode */
-	if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
-		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode, "%s", einfo->errmsg);
-	} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
-		php_error_docref(NULL, E_WARNING, "%s", einfo->errmsg);
+	if (!dbh->methods) {
+		pdo_throw_exception(einfo->errcode, einfo->errmsg, pdo_err);
 	}
 
 	return einfo->errcode;
