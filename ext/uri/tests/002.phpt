@@ -93,7 +93,7 @@ array(%d) {
   string(14) "www.google.com"
   ["port"]=>
   int(8080)
-  ["username"]=>
+  ["user"]=>
   string(8) "username"
   ["pass"]=>
   string(8) "password"

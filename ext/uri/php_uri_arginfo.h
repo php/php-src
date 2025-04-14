@@ -408,7 +408,7 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationErrorType(void)
 
 	zend_enum_add_case_cstr(class_entry, "HostMissing", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "PortOfOfRange", NULL);
+	zend_enum_add_case_cstr(class_entry, "PortOutOfRange", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "PortInvalid", NULL);
 

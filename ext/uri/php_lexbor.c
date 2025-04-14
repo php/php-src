@@ -219,7 +219,7 @@ static void fill_errors(zval *errors)
 				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_PORT_OUT_OF_RANGE:
-				error_str = zend_string_init("PortOfOfRange", sizeof("PortOfOfRange"), false);
+				error_str = zend_string_init("PortOutOfRange", sizeof("PortOutOfRange"), false);
 				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_PORT_INVALID:

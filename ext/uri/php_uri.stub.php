@@ -120,7 +120,7 @@ namespace Uri\WhatWg {
         case InvalidReverseSoldius;
         case InvalidCredentials;
         case HostMissing;
-        case PortOfOfRange;
+        case PortOutOfRange;
         case PortInvalid;
         case FileInvalidWindowsDriveLetter;
         case FileInvalidWindowsDriveLetterHost;
