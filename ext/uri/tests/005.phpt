@@ -20,7 +20,7 @@ NULL
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(4) "http"
-  ["user"]=>
+  ["username"]=>
   string(8) "username"
   ["password"]=>
   string(8) "password"

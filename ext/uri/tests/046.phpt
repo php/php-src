@@ -52,7 +52,7 @@ var_dump($url->getPath());
 var_dump($url->getRawPath());
 
 ?>
---EXPECTF--
+--EXPECT--
 string(26) "mailto:johndoe@example.com"
 string(19) "johndoe@example.com"
 string(19) "johndoe@example.com"

@@ -9,25 +9,14 @@ namespace Uri {
     }
 
     /** @strict-properties */
-    class UninitializedUriException extends \Uri\UriException
-    {
-    }
-
-    /** @strict-properties */
-    class UriOperationException extends \Uri\UriException
-    {
-    }
-
-    /** @strict-properties */
     class InvalidUriException extends \Uri\UriException
     {
-        public readonly array $errors;
     }
 }
 
 namespace Uri\Rfc3986 {
     /** @strict-properties */
-    readonly class Uri
+    final readonly class Uri
     {
         public static function parse(string $uri, ?string $baseUrl = null): ?static {}
 
@@ -45,9 +34,9 @@ namespace Uri\Rfc3986 {
 
         public function withUserInfo(?string $userInfo): static {}
 
-        public function getUser(): ?string {}
+        public function getUsername(): ?string {}
 
-        public function getRawUser(): ?string {}
+        public function getRawUsername(): ?string {}
 
         public function getPassword(): ?string {}
 
@@ -98,6 +87,12 @@ namespace Uri\Rfc3986 {
 }
 
 namespace Uri\WhatWg {
+    /** @strict-properties */
+    class InvalidUrlException extends \Uri\InvalidUriException
+    {
+        public readonly array $errors;
+    }
+
     enum UrlValidationErrorType
     {
         case DomainToAscii;
@@ -142,7 +137,7 @@ namespace Uri\WhatWg {
     }
 
     /** @strict-properties */
-    readonly class Url
+    final readonly class Url
     {
         /** @param array $errors */
         public static function parse(string $uri, ?string $baseUrl = null, &$errors = null): ?static {}
@@ -154,13 +149,13 @@ namespace Uri\WhatWg {
 
         public function withScheme(string $scheme): static {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getUser */
-        public function getUser(): ?string {}
+        /** @implementation-alias Uri\Rfc3986\Uri::getUsername */
+        public function getUsername(): ?string {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getRawUser */
-        public function getRawUser(): ?string {}
+        /** @implementation-alias Uri\Rfc3986\Uri::getRawUsername */
+        public function getRawUsername(): ?string {}
 
-        public function withUser(?string $user): static {}
+        public function withUsername(?string $user): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPassword */
         public function getPassword(): ?string {}

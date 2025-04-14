@@ -47,7 +47,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -68,7 +68,7 @@ float(0.004510875)
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL

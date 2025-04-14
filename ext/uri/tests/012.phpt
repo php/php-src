@@ -18,7 +18,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(6) "mailto"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -36,7 +36,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(6) "mailto"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -56,7 +56,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(4) "file"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -74,7 +74,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(4) "file"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL

@@ -335,7 +335,7 @@ static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, uri
 	return SUCCESS;
 }
 
-static zend_result parse_url_read_user(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result parse_url_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	php_url *parse_url_uri = (php_url *) internal_uri->uri;
 
@@ -431,7 +431,7 @@ static zend_result parse_url_init_parser(void)
 	zend_hash_init(&parse_url_property_handlers, 8, NULL, NULL, true);
 
 	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), parse_url_read_scheme);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), parse_url_read_user);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), parse_url_read_username);
 	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_PASSWORD), parse_url_read_password);
 	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_HOST), parse_url_read_host);
 	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_PORT), parse_url_read_port);
@@ -456,6 +456,19 @@ static void *parse_url_parse_uri(const zend_string *uri_str, const zend_string *
 	return php_url_parse_ex2(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), &has_port);
 }
 
+static void parse_url_create_invalid_url_exception(zval *exception_zv, zval *errors)
+{
+	object_init_ex(exception_zv, invalid_uri_exception_ce);
+
+	zend_update_property_string(
+		invalid_uri_exception_ce,
+		Z_OBJ_P(exception_zv),
+		ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_MESSAGE)),
+		ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_MESSAGE)),
+		"URI parsing failed"
+	);
+}
+
 static zend_string *parse_url_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
 {
 	ZEND_UNREACHABLE();
@@ -472,6 +485,7 @@ const uri_handler_t parse_url_uri_handler = {
 	"parse_url",
 	parse_url_init_parser,
 	parse_url_parse_uri,
+	parse_url_create_invalid_url_exception,
 	parse_url_clone_uri,
 	parse_url_uri_to_string,
 	parse_url_free_uri,

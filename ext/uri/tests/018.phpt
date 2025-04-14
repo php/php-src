@@ -22,7 +22,7 @@ object(Uri\Rfc3986\Uri)#1 (%d) {
   string(5) "https"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -42,7 +42,7 @@ object(Uri\Rfc3986\Uri)#2 (%d) {
   string(5) "https"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -60,7 +60,7 @@ object(Uri\Rfc3986\Uri)#2 (%d) {
 object(Uri\WhatWg\Url)#3 (%d) {
   ["scheme"]=>
   string(5) "https"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -78,7 +78,7 @@ object(Uri\WhatWg\Url)#3 (%d) {
 object(Uri\WhatWg\Url)#4 (%d) {
   ["scheme"]=>
   string(5) "https"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL

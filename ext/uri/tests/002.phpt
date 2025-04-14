@@ -47,7 +47,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   string(17) "username:password"
-  ["user"]=>
+  ["username"]=>
   string(8) "username"
   ["password"]=>
   string(8) "password"
@@ -68,7 +68,7 @@ float(0.007400166)
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
-  ["user"]=>
+  ["username"]=>
   string(8) "username"
   ["password"]=>
   string(8) "password"
@@ -93,7 +93,7 @@ array(%d) {
   string(14) "www.google.com"
   ["port"]=>
   int(8080)
-  ["user"]=>
+  ["username"]=>
   string(8) "username"
   ["pass"]=>
   string(8) "password"

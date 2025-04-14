@@ -20,7 +20,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   NULL
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL

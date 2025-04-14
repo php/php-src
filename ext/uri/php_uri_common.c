@@ -30,26 +30,11 @@ uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_interna
 	return zend_hash_find_ptr(internal_uri->handler->property_handlers, name);
 }
 
-void throw_invalid_uri_exception(zval *errors)
+void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
 {
 	zval exception_zv;
-	object_init_ex(&exception_zv, invalid_uri_exception_ce);
 
-	zend_update_property_string(
-		invalid_uri_exception_ce,
-		Z_OBJ(exception_zv),
-		ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_MESSAGE)),
-		ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_MESSAGE)),
-		"URI parsing failed"
-	);
-
-	if (Z_TYPE_P(errors) == IS_ARRAY) {
-		zend_update_property(invalid_uri_exception_ce, Z_OBJ(exception_zv), "errors", sizeof("errors") - 1, errors);
-	} else {
-		ZEND_ASSERT(Z_TYPE_P(errors) == IS_UNDEF);
-		ZVAL_EMPTY_ARRAY(errors);
-		zend_update_property(invalid_uri_exception_ce, Z_OBJ(exception_zv), "errors", sizeof("errors") - 1, errors);
-	}
+	uri_handler->create_invalid_uri_exception(&exception_zv, errors);
 
 	zend_throw_exception_object(&exception_zv);
 }

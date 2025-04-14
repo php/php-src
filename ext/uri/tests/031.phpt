@@ -51,7 +51,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   string(17) "username:password"
-  ["user"]=>
+  ["username"]=>
   string(8) "username"
   ["password"]=>
   string(8) "password"
@@ -72,7 +72,7 @@ string(144) "O:14:"Uri\WhatWg\Url":1:{s:5:"__uri";s:98:"https://username:passwor
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
-  ["user"]=>
+  ["username"]=>
   string(8) "username"
   ["password"]=>
   string(8) "password"

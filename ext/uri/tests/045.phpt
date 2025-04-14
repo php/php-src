@@ -18,7 +18,7 @@ var_dump($url->getPath());
 var_dump($url->getRawPath());
 
 ?>
---EXPECTF--
+--EXPECT--
 string(33) "https://example.com/foo/bar%2Fbaz"
 string(14) "/foo/bar%2Fbaz"
 string(14) "/foo/bar%2Fbaz"

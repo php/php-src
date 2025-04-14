@@ -3,7 +3,7 @@ Test property mutation - query
 --EXTENSIONS--
 uri
 --XFAIL--
-uriparser component modification must be fixed
+validation is not implemented for uriparser withers
 --FILE--
 <?php
 

@@ -21,6 +21,7 @@
 
 static zend_result uriparser_init_parser(void);
 static void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors);
+static void uriparser_create_invalid_uri_exception(zval *exception_zv, zval *errors);
 static void *uriparser_clone_uri(void *uri);
 static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
 static void uriparser_free_uri(void *uri);
@@ -33,6 +34,7 @@ const uri_handler_t uriparser_uri_handler = {
 	URI_PARSER_RFC3986,
 	uriparser_init_parser,
 	uriparser_parse_uri,
+	uriparser_create_invalid_uri_exception,
 	uriparser_clone_uri,
 	uriparser_uri_to_string,
 	uriparser_free_uri,
@@ -84,12 +86,14 @@ static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri)
 	if (uriparser_uri->hostData.ip4 == NULL) {
 		new_uriparser_uri->hostData.ip4 = NULL;
 	} else {
-		memcpy(&new_uriparser_uri->hostData.ip4, &uriparser_uri->hostData.ip4, sizeof(UriIp4));
+		new_uriparser_uri->hostData.ip4 = emalloc(sizeof(UriIp4));
+		*(new_uriparser_uri->hostData.ip4) = *(uriparser_uri->hostData.ip4);
 	}
 	if (uriparser_uri->hostData.ip6 == NULL) {
 		new_uriparser_uri->hostData.ip6 = NULL;
 	} else {
-		memcpy(&new_uriparser_uri->hostData.ip6, &uriparser_uri->hostData.ip6, sizeof(UriIp6));
+		new_uriparser_uri->hostData.ip6 = emalloc(sizeof(UriIp6));
+		*(new_uriparser_uri->hostData.ip6) = *(uriparser_uri->hostData.ip6);
 	}
 	uriparser_copy_text_range(&uriparser_uri->hostData.ipFuture, &new_uriparser_uri->hostData.ipFuture, false);
 	uriparser_copy_text_range(&uriparser_uri->portText, &new_uriparser_uri->portText, false);
@@ -101,7 +105,7 @@ static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri)
 
 		UriPathSegmentA *p = uriparser_uri->pathHead->next;
 		UriPathSegmentA *new_p = new_uriparser_uri->pathHead;
-		while (p != NULL && (p->text.first != p->text.afterLast)) {
+		while (p != NULL && (p->text.first != p->text.afterLast || p->text.first == uriSafeToPointToA)) {
 			new_p->next = emalloc(sizeof(UriPathSegmentA));
 			new_p = new_p->next;
 			uriparser_copy_text_range(&p->text, &new_p->text, true);
@@ -179,7 +183,7 @@ static zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, u
 	return SUCCESS;
 }
 
-static zend_result uriparser_read_user(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result uriparser_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
 	UriUriA *uriparser_uri;
@@ -226,9 +230,19 @@ static zend_result uriparser_read_host(const uri_internal_t *internal_uri, uri_c
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
 	UriUriA *uriparser_uri;
 	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
-	// TODO return ipv6 inside []
+
 	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL && uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first > 0) {
-		ZVAL_STRINGL(retval, uriparser_uri->hostText.first, uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first);
+		if (uriparser_uri->hostData.ip6 != NULL) {
+			smart_str host_str = {0};
+
+			smart_str_appendc(&host_str, '[');
+			smart_str_appendl(&host_str, uriparser_uri->hostText.first, uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first);
+			smart_str_appendc(&host_str, ']');
+
+			ZVAL_STR(retval, smart_str_extract(&host_str));
+		} else {
+			ZVAL_STRINGL(retval, uriparser_uri->hostText.first, uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first);
+		}
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -272,6 +286,8 @@ static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_c
 		}
 
 		ZVAL_STR(retval, smart_str_extract(&str));
+	} else if (uriparser_uri->absolutePath) {
+		ZVAL_CHAR(retval, '/');
 	} else {
 		ZVAL_EMPTY_STRING(retval);
 	}
@@ -576,7 +592,7 @@ static zend_result uriparser_init_parser(void)
 
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), uriparser_read_scheme, uriparser_write_scheme);
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USERINFO), uriparser_read_userinfo, uriparser_write_userinfo);
-	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), uriparser_read_user);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_USERNAME), uriparser_read_username);
 	URI_REGISTER_PROPERTY_READ_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PASSWORD), uriparser_read_password);
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_HOST), uriparser_read_host, uriparser_write_host);
 	URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(&uriparser_property_handlers, ZSTR_KNOWN(ZEND_STR_PORT), uriparser_read_port, uriparser_write_port);
@@ -655,6 +671,19 @@ static void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *
 	efree(uriparser_uri);
 
 	return uriparser_create_uris(absolute_uri, original_uri_str, original_base_uri_str, NULL, NULL, NULL);
+}
+
+static void uriparser_create_invalid_uri_exception(zval *exception_zv, zval *errors)
+{
+	object_init_ex(exception_zv, invalid_uri_exception_ce);
+
+	zend_update_property_string(
+		invalid_uri_exception_ce,
+		Z_OBJ_P(exception_zv),
+		ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_MESSAGE)),
+		ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_MESSAGE)),
+		"URI parsing failed"
+	);
 }
 
 static void *uriparser_clone_uri(void *uri)

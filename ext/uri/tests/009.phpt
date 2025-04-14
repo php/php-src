@@ -15,7 +15,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(16) "chrome-extension"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -33,7 +33,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(16) "chrome-extension"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL

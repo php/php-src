@@ -26,13 +26,13 @@ var_dump($url2->getScheme());
 
 try {
     $url2->withScheme("");
-} catch (Uri\InvalidUriException $e) {
+} catch (Uri\WhatWg\InvalidUrlException $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     $url2->withScheme("http%73");
-} catch (Uri\InvalidUriException $e) {
+} catch (Uri\WhatWg\InvalidUrlException $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -43,5 +43,5 @@ NULL
 URI parsing failed
 string(5) "https"
 string(4) "http"
-URI parsing failed
-URI parsing failed
+URL parsing failed
+URL parsing failed

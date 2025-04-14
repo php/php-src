@@ -1,5 +1,5 @@
 --TEST--
-Test URN parsing
+Test reference resolution
 --EXTENSIONS--
 uri
 --FILE--
@@ -33,7 +33,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -53,7 +53,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -73,7 +73,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -93,7 +93,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "HTTPS"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -112,7 +112,7 @@ string(34) "https://test.com/with-base-in-vain"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -130,7 +130,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -148,7 +148,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
