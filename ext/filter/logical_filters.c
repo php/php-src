@@ -620,16 +620,11 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (uri->scheme != NULL &&
 		(zend_string_equals_literal_ci(uri->scheme, "http") || zend_string_equals_literal_ci(uri->scheme, "https"))) {
-		const char *s;
-		size_t l;
 
 		if (uri->host == NULL) {
 			php_uri_struct_free(uri);
 			RETURN_VALIDATION_FAILED
 		}
-
-		s = ZSTR_VAL(uri->host);
-		l = ZSTR_LEN(uri->host);
 
 		if (
 			/* @todo Find a better solution than hardcoding the uri handler name. Skipping these checks is needed because
@@ -638,10 +633,10 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			 * failures. */
 			strcmp(uri_handler->name, "parse_url") == 0 &&
 			/* An IPv6 enclosed by square brackets is a valid hostname.*/
-			!php_filter_is_valid_ipv6_hostname(url->host) &&
+			!php_filter_is_valid_ipv6_hostname(uri->host) &&
 			/* Validate domain.
 			 * This includes a loose check for an IPv4 address. */
-			!_php_filter_validate_domain(ZSTR_VAL(uri->host), l, FILTER_FLAG_HOSTNAME)
+			!php_filter_validate_domain_ex(uri->host, FILTER_FLAG_HOSTNAME)
 		) {
 			php_uri_struct_free(uri);
 			RETURN_VALIDATION_FAILED

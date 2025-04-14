@@ -11,8 +11,8 @@ function callGetters($uri)
     if ($uri instanceof Uri\Rfc3986\Uri) {
         var_dump($uri->getRawScheme());
     }
-    var_dump($uri->getUser());
-    var_dump($uri->getRawUser());
+    var_dump($uri->getUsername());
+    var_dump($uri->getRawUsername());
     var_dump($uri->getPassword());
     var_dump($uri->getRawPassword());
     if ($uri instanceof Uri\Rfc3986\Uri) {

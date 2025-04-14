@@ -19,23 +19,29 @@ var_dump($uri->toString());
 
 $url = new Uri\WhatWg\Url("https://192.168.0.1");
 var_dump($url->getAsciiHost());
-var_dump($url->toString());
+var_dump($url->toAsciiString());
 
 $url = new Uri\WhatWg\Url("https://[2001:0db8:0001:0000:0000:0ab9:C0A8:0102]");
 var_dump($url->getAsciiHost());
-var_dump($url->toString());
+var_dump($url->toAsciiString());
+
+$url = new Uri\WhatWg\Url("https://[0:0::1]");
+var_dump($url->getAsciiHost());
+var_dump($url->toAsciiString());
 
 ?>
---EXPECTF--
+--EXPECT--
 string(11) "192.168.0.1"
 string(11) "192.168.0.1"
 string(19) "https://192.168.0.1"
 string(19) "https://192.168.0.1"
 string(41) "[2001:0db8:0001:0000:0000:0ab9:C0A8:0102]"
-string(41) "[2001:0db8:0001:0000:0000:0ab9:C0A8:0102]"
-string(51) "https://[2001:0db8:0001:0000:0000:0ab9:c0a8:0102]"
-string(51) "https://[2001:0db8:0001:0000:0000:0ab9:c0a8:0102]"
-string(13) "15.192.161.40"
+string(41) "[2001:0db8:0001:0000:0000:0ab9:c0a8:0102]"
+string(49) "https://[2001:0db8:0001:0000:0000:0ab9:c0a8:0102]"
+string(49) "https://[2001:0db8:0001:0000:0000:0ab9:c0a8:0102]"
+string(11) "192.168.0.1"
 string(20) "https://192.168.0.1/"
-string(32) "[2001:0db8:0001:0000:0000:0ab9:C0A8:0102]"
+string(26) "[2001:db8:1::ab9:c0a8:102]"
 string(35) "https://[2001:db8:1::ab9:c0a8:102]/"
+string(5) "[::1]"
+string(14) "https://[::1]/"

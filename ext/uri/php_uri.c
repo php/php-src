@@ -35,9 +35,8 @@ zend_object_handlers rfc3986_uri_object_handlers;
 zend_class_entry *whatwg_url_ce;
 zend_object_handlers whatwg_uri_object_handlers;
 zend_class_entry *uri_exception_ce;
-zend_class_entry *uninitialized_uri_exception_ce;
-zend_class_entry *uri_operation_exception_ce;
 zend_class_entry *invalid_uri_exception_ce;
+zend_class_entry *whatwg_invalid_url_exception_ce;
 zend_class_entry *whatwg_url_validation_error_type_ce;
 zend_class_entry *whatwg_url_validation_error_ce;
 
@@ -135,9 +134,9 @@ PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, uri_co
 	return php_uri_get_property(internal_uri, ZSTR_KNOWN(ZEND_STR_SCHEME), read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_user(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+PHPAPI zend_result php_uri_get_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, ZSTR_KNOWN(ZEND_STR_USER), read_mode, zv);
+	return php_uri_get_property(internal_uri, ZSTR_KNOWN(ZEND_STR_USERNAME), read_mode, zv);
 }
 
 PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
@@ -200,7 +199,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		zval_ptr_dtor(&tmp);
 	}
 
-	result = php_uri_get_user(uri_internal, read_mode, &tmp);
+	result = php_uri_get_username(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
 		php_uri_struct_free(uri);
 		return NULL;
@@ -355,7 +354,7 @@ PHPAPI void php_uri_instantiate_uri(
 	void *uri = handler->parse_uri(uri_str, base_url_str, is_constructor || errors_zv != NULL ? &errors : NULL);
 	if (UNEXPECTED(uri == NULL)) {
 		if (is_constructor) {
-			throw_invalid_uri_exception(&errors);
+			throw_invalid_uri_exception(handler, &errors);
 			zval_ptr_dtor(&errors);
 			RETURN_THROWS();
 		} else {
@@ -478,14 +477,14 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_USERINFO));
 }
 
-PHP_METHOD(Uri_Rfc3986_Uri, getUser)
+PHP_METHOD(Uri_Rfc3986_Uri, getUsername)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USER), URI_COMPONENT_READ_NORMALIZED_ASCII);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USERNAME), URI_COMPONENT_READ_NORMALIZED_ASCII);
 }
 
-PHP_METHOD(Uri_Rfc3986_Uri, getRawUser)
+PHP_METHOD(Uri_Rfc3986_Uri, getRawUsername)
 {
-	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USER), URI_COMPONENT_READ_RAW);
+	URI_GETTER(ZSTR_KNOWN(ZEND_STR_USERNAME), URI_COMPONENT_READ_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getPassword)
@@ -572,10 +571,10 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, b
 {
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *this_internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(this_internal_uri, this_object);
+	URI_CHECK_INITIALIZATION(this_internal_uri);
 
 	uri_internal_t *that_internal_uri = uri_internal_from_obj(that_object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(that_internal_uri, that_object);
+	URI_CHECK_INITIALIZATION(that_internal_uri);
 
 	if (this_object->ce != that_object->ce &&
 		!instanceof_function(this_object->ce, that_object->ce) &&
@@ -586,8 +585,17 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, b
 
 	zend_string *this_str = this_internal_uri->handler->uri_to_string(
 			this_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
+	if (this_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
+
 	zend_string *that_str = that_internal_uri->handler->uri_to_string(
 			that_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
+	if (that_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(that_object->ce->name));
+		RETURN_THROWS();
+	}
 
 	RETVAL_BOOL(zend_string_equals(this_str, that_str));
 
@@ -615,20 +623,32 @@ PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+	URI_CHECK_INITIALIZATION(internal_uri);
 
-	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false));
+	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
+	if (uri_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
+
+	RETVAL_STR(uri_str);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, object);
+	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	URI_CHECK_INITIALIZATION(internal_uri);
 
-	RETVAL_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, false));
+	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, false);
+	if (uri_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
+
+	RETVAL_STR(uri_str);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, resolve)
@@ -641,10 +661,14 @@ PHP_METHOD(Uri_Rfc3986_Uri, resolve)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+	URI_CHECK_INITIALIZATION(internal_uri);
 
 	zend_string *base_uri_str = internal_uri->handler->uri_to_string(
 			internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false); // TODO optimize by not reparsing the base URI
+	if (base_uri_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
 
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, base_uri_str, true, NULL);
 }
@@ -655,7 +679,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+	URI_CHECK_INITIALIZATION(internal_uri);
 
 	HashTable *result = zend_array_dup(this_object->handlers->get_properties(this_object));
 	if (zend_hash_str_find_ind(result, URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1) != NULL) {
@@ -664,8 +688,14 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 		RETURN_THROWS();
 	}
 
+	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
+	if (uri_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
+
 	zval uri_zv;
-	ZVAL_STR(&uri_zv, internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false));
+	ZVAL_STR(&uri_zv, uri_str);
 	zend_hash_str_add_new(result, URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1, &uri_zv);
 
 	ZVAL_ARR(return_value, result);
@@ -720,7 +750,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_na
 	}
 	internal_uri->uri = internal_uri->handler->parse_uri(Z_STR_P(uri_zv), NULL, &errors);
 	if (internal_uri->uri == NULL) {
-		throw_invalid_uri_exception(&errors);
+		throw_invalid_uri_exception(internal_uri->handler, &errors);
 		zval_ptr_dtor(&errors);
 		zval_ptr_dtor(uri_zv);
 		RETURN_THROWS();
@@ -754,9 +784,9 @@ PHP_METHOD(Uri_WhatWg_Url, withScheme)
 	URI_WITHER_STR(ZSTR_KNOWN(ZEND_STR_SCHEME));
 }
 
-PHP_METHOD(Uri_WhatWg_Url, withUser)
+PHP_METHOD(Uri_WhatWg_Url, withUsername)
 {
-	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_USER));
+	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_USERNAME));
 }
 
 PHP_METHOD(Uri_WhatWg_Url, withPassword)
@@ -811,7 +841,7 @@ PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+	URI_CHECK_INITIALIZATION(internal_uri);
 
 	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_UNICODE, false));
 }
@@ -822,7 +852,7 @@ PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION_RETURN_THROWS(internal_uri, this_object);
+	URI_CHECK_INITIALIZATION(internal_uri);
 
 	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false));
 }
@@ -868,11 +898,11 @@ static zend_object *uri_clone_obj_handler(zend_object *object)
 	ZEND_ASSERT(new_object != NULL);
 	uri_object_t *new_uri_object = uri_object_from_obj(new_object);
 
-	URI_CHECK_INITIALIZATION_RETURN(internal_uri, object, &new_uri_object->std);
+	URI_CHECK_INITIALIZATION(internal_uri);
 
 	new_uri_object->internal.handler = internal_uri->handler;
 
-	void *uri = internal_uri->handler->clone_uri(internal_uri->uri);  // TODO what happens if the __clone() method is overridden?
+	void *uri = internal_uri->handler->clone_uri(internal_uri->uri);
 	ZEND_ASSERT(uri != NULL);
 
 	new_uri_object->internal.uri = uri;
@@ -899,6 +929,7 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler)
 	ZEND_ASSERT(uri_handler->name != NULL);
 	ZEND_ASSERT(uri_handler->init_parser != NULL);
 	ZEND_ASSERT(uri_handler->parse_uri != NULL);
+	ZEND_ASSERT(uri_handler->create_invalid_uri_exception != NULL);
 	ZEND_ASSERT(uri_handler->clone_uri != NULL);
 	ZEND_ASSERT(uri_handler->uri_to_string != NULL);
 	ZEND_ASSERT(uri_handler->free_uri != NULL);
@@ -917,9 +948,8 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_implementation_set_object_handlers(whatwg_url_ce, &whatwg_uri_object_handlers);
 
 	uri_exception_ce = register_class_Uri_UriException(zend_ce_exception);
-	uninitialized_uri_exception_ce = register_class_Uri_UninitializedUriException(uri_exception_ce);
-	uri_operation_exception_ce = register_class_Uri_UriOperationException(uri_exception_ce);
 	invalid_uri_exception_ce = register_class_Uri_InvalidUriException(uri_exception_ce);
+	whatwg_invalid_url_exception_ce = register_class_Uri_WhatWg_InvalidUrlException(invalid_uri_exception_ce);
 	whatwg_url_validation_error_ce = register_class_Uri_WhatWg_UrlValidationError();
 	whatwg_url_validation_error_type_ce = register_class_Uri_WhatWg_UrlValidationErrorType();
 

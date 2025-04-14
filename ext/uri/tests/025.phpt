@@ -12,7 +12,7 @@ $url4 = $url3->withPassword("p%61ss");
 $url5 = $url4->withPassword("p:s/");
 
 $url6 = Uri\WhatWg\Url::parse("file:///foo/bar/");
-$url6 = $url6->withUser("pass");
+$url6 = $url6->withUsername("pass");
 
 var_dump($url2->getRawPassword());
 var_dump($url3->getRawPassword());

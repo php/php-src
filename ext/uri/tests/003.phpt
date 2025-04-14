@@ -17,7 +17,7 @@ NULL
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(4) "http"
-  ["user"]=>
+  ["username"]=>
   string(8) "username"
   ["password"]=>
   string(8) "password"
@@ -37,7 +37,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   NULL
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
