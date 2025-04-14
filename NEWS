@@ -27,6 +27,10 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fix potential leaks when writing to BIO fails. (nielsdos)
 
+- SPL:
+  . Fixed bug GH-18322 (SplObjectStorage debug handler mismanages memory).
+    (nielsdos)
+
 - Standard:
   . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
     (Jakub Zelenka)
