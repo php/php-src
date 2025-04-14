@@ -191,6 +191,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_scheme(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
+		php_uri_free(uri_internal);
 		php_uri_struct_free(uri);
 		return NULL;
 	}
@@ -201,6 +202,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_username(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
+		php_uri_free(uri_internal);
 		php_uri_struct_free(uri);
 		return NULL;
 	}
@@ -211,6 +213,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_password(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
+		php_uri_free(uri_internal);
 		php_uri_struct_free(uri);
 		return NULL;
 	}
@@ -221,6 +224,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_host(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
+		php_uri_free(uri_internal);
 		php_uri_struct_free(uri);
 		return NULL;
 	}
@@ -231,6 +235,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_port(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
+		php_uri_free(uri_internal);
 		php_uri_struct_free(uri);
 		return NULL;
 	}
@@ -240,6 +245,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_path(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
+		php_uri_free(uri_internal);
 		php_uri_struct_free(uri);
 		return NULL;
 	}
@@ -250,6 +256,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_query(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
+		php_uri_free(uri_internal);
 		php_uri_struct_free(uri);
 		return NULL;
 	}
@@ -260,6 +267,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_fragment(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
+		php_uri_free(uri_internal);
 		php_uri_struct_free(uri);
 		return NULL;
 	}
