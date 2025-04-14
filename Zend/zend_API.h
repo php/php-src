@@ -690,11 +690,11 @@ ZEND_API zend_result _call_user_function_impl(zval *object, zval *function_name,
 #define call_user_function_named(function_table, object, function_name, retval_ptr, param_count, params, named_params) \
 	_call_user_function_impl(object, function_name, retval_ptr, param_count, params, named_params)
 
-ZEND_API extern const zend_fcall_info empty_fcall_info;
-
 #ifndef __cplusplus
+# define empty_fcall_info (zend_fcall_info) {0}
 # define empty_fcall_info_cache (zend_fcall_info_cache) {0}
 #else
+# define empty_fcall_info zend_fcall_info {0}
 # define empty_fcall_info_cache zend_fcall_info_cache {0}
 #endif
 
