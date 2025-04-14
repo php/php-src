@@ -53,10 +53,6 @@ ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
-/* true globals */
-ZEND_API const zend_fcall_info empty_fcall_info = {0};
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = {0};
-
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
 #endif
