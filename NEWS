@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-18294 (assertion failure zend_jit_ir.c). (nielsdos)
   . Fixed bug GH-18289 (Fix segfault in JIT). (Florian Engelhardt)
+  . Fixed bug GH-18136 (tracing JIT floating point register clobbering on
+    Windows and ARM64). (nielsdos)
 
 - OpenSSL:
   . Fix memory leak in openssl_sign() when passing invalid algorithm.
