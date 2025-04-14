@@ -49,19 +49,19 @@ var_dump($url4->getPort());
 
 try {
     $url4->withHost("t%3As%2Ft.com"); // t:s/t.com
-} catch (Uri\InvalidUriException $e) {
+} catch (Uri\WhatWg\InvalidUrlException $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     $url4->withHost("t:s/t.com");
-} catch (Uri\InvalidUriException $e) {
+} catch (Uri\WhatWg\InvalidUrlException $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     $url2->withHost(null);
-} catch (Uri\InvalidUriException $e) {
+} catch (Uri\WhatWg\InvalidUrlException $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -88,7 +88,7 @@ string(8) "test.com"
 string(8) "test.com"
 string(8) "test.com"
 NULL
-URI parsing failed
-URI parsing failed
+URL parsing failed
+URL parsing failed
 string(7) "foo.com"
 string(8) "test.com"

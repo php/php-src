@@ -40,7 +40,7 @@ typedef struct {
 PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name);
 PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str, zval *errors);
 PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
-PHPAPI zend_result php_uri_get_user(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+PHPAPI zend_result php_uri_get_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
 PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
 PHPAPI zend_result php_uri_get_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
 PHPAPI zend_result php_uri_get_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);

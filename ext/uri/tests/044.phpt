@@ -30,7 +30,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   string(13) "us%65rinfo:::"
-  ["user"]=>
+  ["username"]=>
   string(10) "us%65rinfo"
   ["password"]=>
   string(2) "::"
@@ -52,7 +52,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   NULL
-  ["user"]=>
+  ["username"]=>
   NULL
   ["password"]=>
   NULL
@@ -74,7 +74,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   string(5) "https"
   ["userinfo"]=>
   string(8) "userinfo"
-  ["user"]=>
+  ["username"]=>
   string(8) "userinfo"
   ["password"]=>
   NULL
