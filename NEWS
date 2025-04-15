@@ -45,6 +45,8 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fix uouv when handling empty options in ZipArchive::addGlob(). (nielsdos)
+  . Fix memory leak when handling a too long path in ZipArchive::addGlob().
+    (nielsdos)
 
 10 Apr 2025, PHP 8.3.20
 
