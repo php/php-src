@@ -39,6 +39,10 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fix potential leaks when writing to BIO fails. (nielsdos)
 
+- PDO Firebird:
+  . Fixed GH-18276 - persistent connection - "zend_mm_heap corrupted"
+    with setAttribute() (SakiTakamachi).
+
 - SPL:
   . Fixed bug GH-18322 (SplObjectStorage debug handler mismanages memory).
     (nielsdos)
