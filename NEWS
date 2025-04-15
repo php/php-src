@@ -45,6 +45,9 @@ PHP                                                                        NEWS
   . Fixed GH-18276 - persistent connection - "zend_mm_heap corrupted"
     with setAttribute() (SakiTakamachi).
 
+- PDO Sqlite:
+  . Fix memory leak on error return of collation callback. (nielsdos)
+
 - SPL:
   . Fixed bug GH-18322 (SplObjectStorage debug handler mismanages memory).
     (nielsdos)
