@@ -2174,7 +2174,7 @@ class EvaluatedValue
             static function (Expr $expr) use ($allConstInfos, &$isUnknownConstValue) {
                 // $expr is a ConstFetch with a name of a C macro here
                 if (!$expr instanceof Expr\ConstFetch) {
-                    throw new Exception($this->getVariableTypeName() . " " . $this->name->__toString() . " has an unsupported value");
+                    throw new Exception("Expression at line " . $expr->getStartLine() . " must be a global, non-magic constant");
                 }
 
                 $constName = $expr->name->__toString();
