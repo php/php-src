@@ -2723,6 +2723,8 @@ $output
     if (!$passed || $leaked) {
         // write .sh
         if (strpos($log_format, 'S') !== false) {
+            // Unset all environment variables so that we don't inherit extra
+            // ones from the parent process.
             $env_lines = ['unset $(env | cut -d= -f1)'];
             foreach ($env as $env_var => $env_val) {
                 if (strval($env_val) === '') {
