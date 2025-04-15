@@ -2785,12 +2785,12 @@ PHP_FUNCTION(ldap_modify_batch)
 	ldap_mods = safe_emalloc((num_mods+1), sizeof(LDAPMod *), 0);
 
 	/* for each modification */
-	for (i = 0; i < num_mods; i++) {
+	i = 0;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(mods), fetched) {
 		/* allocate the modification struct */
 		ldap_mods[i] = safe_emalloc(1, sizeof(LDAPMod), 0);
 
 		/* fetch the relevant data */
-		fetched = zend_hash_index_find(Z_ARRVAL_P(mods), i);
 		mod = fetched;
 
 		_ldap_hash_fetch(mod, LDAP_MODIFY_BATCH_ATTRIB, &attrib);
@@ -2855,7 +2855,9 @@ PHP_FUNCTION(ldap_modify_batch)
 			/* NULL-terminate values */
 			ldap_mods[i]->mod_bvalues[num_modvals] = NULL;
 		}
-	}
+
+		i++;
+	} ZEND_HASH_FOREACH_END();
 
 	/* NULL-terminate modifications */
 	ldap_mods[num_mods] = NULL;

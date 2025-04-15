@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 
 - LDAP:
   . Fixed bug GH-17776 (LDAP_OPT_X_TLS_* options can't be overridden). (Remi)
+  . Fix NULL deref on high modification key. (nielsdos)
 
 - libxml:
   . Fixed custom external entity loader returning an invalid resource leading
