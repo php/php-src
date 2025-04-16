@@ -12127,6 +12127,9 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_eval_const_expr(&ast->child[0]);
 			zend_eval_const_expr(&ast->child[1]);
 			return;
+		case ZEND_AST_CAST:
+			zend_eval_const_expr(&ast->child[0]);
+			return;
 		default:
 			return;
 	}
