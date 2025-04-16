@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 228e4290fe2dd24354b9f11227dee581b9f7dbf4 */
+ * Stub hash: e21d382cd4001001874c49d8c5244efb57613910 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Directory_close, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -42,7 +42,7 @@ static void register_dir_symbols(int module_number)
 #if (defined(PHP_GLOB_NOSORT) && PHP_GLOB_NOSORT != 0)
 	REGISTER_LONG_CONSTANT("GLOB_NOSORT", PHP_GLOB_NOSORT, CONST_PERSISTENT);
 #endif
-#if defined(PHP_GLOB_ONLYDIR)
+#if (defined(PHP_GLOB_ONLYDIR) && PHP_GLOB_ONLYDIR != 0)
 	REGISTER_LONG_CONSTANT("GLOB_ONLYDIR", PHP_GLOB_ONLYDIR, CONST_PERSISTENT);
 #endif
 #if defined(PHP_GLOB_AVAILABLE_FLAGS)
