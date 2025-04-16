@@ -4264,6 +4264,7 @@ PHP_FUNCTION(timezone_transitions_get)
 	uint64_t             begin = 0;
 	bool                 found;
 	zend_long            timestamp_begin = ZEND_LONG_MIN, timestamp_end = INT32_MAX;
+	zend_long            last_transition_ts = ZEND_LONG_MIN;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
 		RETURN_THROWS();
@@ -4326,8 +4327,10 @@ PHP_FUNCTION(timezone_transitions_get)
 				if (tzobj->tzi.tz->trans[begin] > timestamp_begin) {
 					if (begin > 0) {
 						add(begin - 1, timestamp_begin);
+						last_transition_ts = timestamp_begin;
 					} else {
 						add_nominal();
+						last_transition_ts = timestamp_begin;
 					}
 					found = 1;
 					break;
@@ -4343,24 +4346,31 @@ PHP_FUNCTION(timezone_transitions_get)
 				timelib_time_offset *tto = timelib_get_time_zone_info(timestamp_begin, tzobj->tzi.tz);
 				add_from_tto(tto, timestamp_begin);
 				timelib_time_offset_dtor(tto);
+				last_transition_ts = timestamp_begin;
 			} else {
 				add_last();
+				last_transition_ts = timestamp_begin;
 			}
 		} else {
 			add_nominal();
+			last_transition_ts = timestamp_begin;
 		}
 	} else {
 		for (uint64_t i = begin; i < tzobj->tzi.tz->bit64.timecnt; ++i) {
-			if (tzobj->tzi.tz->trans[i] < timestamp_end) {
-				add(i, tzobj->tzi.tz->trans[i]);
-			} else {
+			if (tzobj->tzi.tz->trans[i] > timestamp_end) {
 				return;
 			}
+
+			if (tzobj->tzi.tz->trans[i] > timestamp_begin) {
+				add(i, tzobj->tzi.tz->trans[i]);
+			}
 		}
+
+		last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
 	}
+
 	if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
 		timelib_sll start_y, end_y, dummy_m, dummy_d;
-		timelib_sll last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
 
 		/* Find out year for last transition */
 		timelib_unixtime2date(last_transition_ts, &start_y, &dummy_m, &dummy_d);
