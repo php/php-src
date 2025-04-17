@@ -334,8 +334,8 @@ PHP_METHOD(Pdo_Sqlite, openBlob)
 
 PHP_METHOD(Pdo_Sqlite, setAuthorizer)
 {
-	zend_fcall_info fci = empty_fcall_info;
-	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
