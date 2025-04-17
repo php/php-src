@@ -965,7 +965,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	UErrorCode ustatus2 = U_ZERO_ERROR;
 
 	/* When all costs are equal, levenshtein fulfills the requirements of a metric, which means
-	 * that the distance is symmetric. If string1 is shorter than string 2 we can save memory (and CPU time)
+	 * that the distance is symmetric. If string1 is shorter than string2 we can save memory (and CPU time)
 	 * by having shorter rows (p1 & p2). */
 	if (ZSTR_LEN(string1) < ZSTR_LEN(string2) && cost_ins == cost_rep && cost_rep == cost_del) {
 		zend_string *tmp = string1;
@@ -980,10 +980,10 @@ PHP_FUNCTION(grapheme_levenshtein)
 
 	if (U_FAILURE(ustatus1)) {
 		/* Set global error code. */
-		intl_error_set_code( NULL, ustatus1 );
+		intl_error_set_code(NULL, ustatus1);
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
+		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16", 0);
 		if (ustring1) {
 			efree(ustring1);
 		}
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	int32_t pos1 = 0;
 	int32_t pos2 = 0;
 	int32_t usrch_pos = 0;
-	for (; pos1 != UBRK_DONE;) {
+	while (pos1 != UBRK_DONE) {
 		current1 = ubrk_current(bi1);
 		pos1 = ubrk_next(bi1);
 		if (pos1 == UBRK_DONE) {
