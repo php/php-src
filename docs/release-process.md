@@ -325,7 +325,7 @@ slightly different steps. We'll call attention where the steps differ.
     downloads.php.net.
 
     ```shell
-    scp php-X.Y.ZRCn.tar.* downloads.php.net:~/public_html/
+    scp php-X.Y.ZRCn.tar.* downloads.internal.php.net:~/public_html/
     ```
 
     > 💬 **Hint** \
