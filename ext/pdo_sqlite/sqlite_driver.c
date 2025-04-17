@@ -793,10 +793,12 @@ static char *make_filename_safe(const char *filename)
 }
 
 #define ZVAL_NULLABLE_STRING(zv, str) do { \
-	if ((str)) { \
-		ZVAL_STRING((zv), (str)); \
+	zval *zv_ = zv; \
+	const char *str_ = str; \
+	if (str_) { \
+		ZVAL_STRING(zv_, str_); \
 	} else { \
-		ZVAL_NULL(zv); \
+		ZVAL_NULL(zv_); \
 	} \
 } while (0)
 
