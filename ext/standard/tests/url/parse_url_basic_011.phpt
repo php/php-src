@@ -15,20 +15,16 @@ var_dump(parse_url('magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C'));
 --EXPECT--
 *** Testing parse_url() :can not recognize port without scheme ***
 parse 127.0.0.1:9999?
-array(3) {
-  ["scheme"]=>
-  string(9) "127.0.0.1"
+array(2) {
   ["path"]=>
-  string(4) "9999"
+  string(14) "127.0.0.1:9999"
   ["query"]=>
   string(0) ""
 }
 parse 127.0.0.1:9999#
-array(3) {
-  ["scheme"]=>
-  string(9) "127.0.0.1"
+array(2) {
   ["path"]=>
-  string(4) "9999"
+  string(14) "127.0.0.1:9999"
   ["fragment"]=>
   string(0) ""
 }

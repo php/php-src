@@ -116,8 +116,8 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 		/* validate scheme */
 		p = s;
 		while (p < e) {
-			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
-			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
+			/* scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
+			if (!isalpha(*p) && (p == s || !isdigit(*p) && *p != '+' && *p != '.' && *p != '-')) {
 				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
 					goto parse_port;
 				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
