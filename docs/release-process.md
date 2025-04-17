@@ -986,13 +986,16 @@ volunteers to begin the selection process for the next release managers.
 
 ## New release manager checklist
 
-1. Request membership to the
+1. Fill out [the form](https://www.php.net/git-php.php)
+   to get a PHP account (if you don't already have one).
+
+2. Request membership to the
    [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-2. Subscribe to the php-announce@lists.php.net mailing list by emailing
+3. Subscribe to the php-announce@lists.php.net mailing list by emailing
    php-announce+subscribe@lists.php.net
 
-3. Email systems@php.net to get setup for access to downloads.php.net, to be
+4. Email systems@php.net to get setup for access to downloads.php.net, to be
    added to the release-managers@php.net distribution list, and to be added to
    the moderators for php-announce@lists.php.net so you are able to moderate
    your release announcements.
@@ -1021,7 +1024,7 @@ volunteers to begin the selection process for the next release managers.
    > "[Send emails from a different address or alias][]."
 
 
-4. Create a [GPG key][] for your @php.net address.
+5. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -1086,7 +1089,7 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-5. Make sure you have the following repositories cloned locally:
+6. Make sure you have the following repositories cloned locally:
 
    * https://github.com/php/php-src
    * https://github.com/php/web-php
