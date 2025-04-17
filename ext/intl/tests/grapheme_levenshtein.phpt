@@ -66,19 +66,19 @@ echo '--- Corner case ---' . PHP_EOL;
 try {
 	grapheme_levenshtein($nabe, $nabe_E0100, 0, 1, 1);
 } catch (ValueError $e) {
-	var_dump($e->getMessage());
+	echo $e->getMessage() . PHP_EOL;
 }
 
 try {
 	grapheme_levenshtein($nabe, $nabe_E0100, 1, 0, 1);
 } catch (ValueError $e) {
-	var_dump($e->getMessage());
+	echo $e->getMessage() . PHP_EOL;
 }
 
 try {
 	grapheme_levenshtein($nabe, $nabe_E0100, 1, 1, 0);
 } catch (ValueError $e) {
-	var_dump($e->getMessage());
+	echo $e->getMessage() . PHP_EOL;
 }
 ?>
 --EXPECTF--
@@ -123,6 +123,6 @@ int(1)
 int(0)
 int(0)
 --- Corner case ---
-string(%d) "grapheme_levenshtein(): Argument #3 ($insertion_cost) must be greater than 0 and less than or equal to %d"
-string(%d) "grapheme_levenshtein(): Argument #4 ($replacement_cost) must be greater than 0 and less than or equal to %d"
-string(%d) "grapheme_levenshtein(): Argument #5 ($deletion_cost) must be greater than 0 and less than or equal to %d"
+grapheme_levenshtein(): Argument #3 ($insertion_cost) must be greater than 0 and less than or equal to %d
+grapheme_levenshtein(): Argument #4 ($replacement_cost) must be greater than 0 and less than or equal to %d
+grapheme_levenshtein(): Argument #5 ($deletion_cost) must be greater than 0 and less than or equal to %d
