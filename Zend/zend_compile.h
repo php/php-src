@@ -1301,4 +1301,6 @@ ZEND_API bool zend_is_op_long_compatible(const zval *op);
 ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, const zval *op2);
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op);
 
+bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1);
+
 #endif /* ZEND_COMPILE_H */
