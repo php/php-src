@@ -4117,6 +4117,14 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 	checkpoint = zend_arena_checkpoint(CG(arena));
 
+	zend_accel_hash_entry *accel_h_entry = zend_accel_hash_find_entry(&ZCSG(hash), trace_buffer->op_array->filename);
+	if (accel_h_entry) {
+		zend_persistent_script *persistent_script = (zend_persistent_script *) accel_h_entry->data;
+		if (!persistent_script->corrupted) {
+			script = &persistent_script->script;
+		}
+	}
+
 	ssa = zend_jit_trace_build_tssa(trace_buffer, parent_trace, exit_num, script, op_arrays, &num_op_arrays);
 
 	if (!ssa) {
