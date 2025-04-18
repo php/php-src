@@ -1032,6 +1032,9 @@ PHP_FUNCTION(grapheme_levenshtein)
 		intl_error_set_code(NULL, ustatus1);
 
 		intl_error_set_custom_msg(NULL, "Error on ubrk_setText on ustring1", 0);
+		if (ustring2) {
+			efree(ustring2);
+		}
 		if (ustring1) {
 			efree(ustring1);
 		}
@@ -1045,6 +1048,9 @@ PHP_FUNCTION(grapheme_levenshtein)
 		intl_error_set_custom_msg(NULL, "Error on ubrk_setText on ustring2", 0);
 		if (ustring2) {
 			efree(ustring2);
+		}
+		if (ustring1) {
+			efree(ustring1);
 		}
 		RETURN_FALSE;
 	}
@@ -1079,11 +1085,29 @@ PHP_FUNCTION(grapheme_levenshtein)
 			if (U_FAILURE(ustatus2)) {
 				intl_error_set_code(NULL, ustatus2);
 				intl_error_set_custom_msg(NULL, "Error usearch_open", 0);
+				ubrk_close(bi1);
+				ubrk_close(bi2);
+
+				efree(ustring1);
+				efree(ustring2);
+
+				efree(p1);
+				efree(p2);
+				RETURN_FALSE;
 			}
 			usrch_pos = usearch_first(srch, &ustatus2);
 			if (U_FAILURE(ustatus2)) {
 				intl_error_set_code(NULL, ustatus2);
 				intl_error_set_custom_msg(NULL, "Error usearch_first", 0);
+				ubrk_close(bi1);
+				ubrk_close(bi2);
+
+				efree(ustring1);
+				efree(ustring2);
+
+				efree(p1);
+				efree(p2);
+				RETURN_FALSE;
 			}
 			usearch_close(srch);
 
