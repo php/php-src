@@ -9,7 +9,7 @@ interface UnitEnum
 
 interface BackedEnum extends UnitEnum
 {
-    public static function from(int|string $value): static;
+    public static function from(never $value): static;
 
-    public static function tryFrom(int|string $value): ?static;
+    public static function tryFrom(never $value): ?static;
 }
