@@ -26,6 +26,7 @@
 #include <unicode/ucol.h>
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
+#include <unicode/usearch.h>
 
 /* }}} */
 
@@ -979,10 +980,8 @@ PHP_FUNCTION(grapheme_levenshtein)
 	intl_convert_utf8_to_utf16(&ustring1, &ustring1_len, pstr1, ZSTR_LEN(string1), &ustatus1);
 
 	if (U_FAILURE(ustatus1)) {
-		/* Set global error code. */
 		intl_error_set_code(NULL, ustatus1);
 
-		/* Set error messages. */
 		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16", 0);
 		if (ustring1) {
 			efree(ustring1);
@@ -993,10 +992,8 @@ PHP_FUNCTION(grapheme_levenshtein)
 	intl_convert_utf8_to_utf16(&ustring2, &ustring2_len, pstr2, ZSTR_LEN(string2), &ustatus2);
 
 	if (U_FAILURE(ustatus2)) {
-		/* Set global error code. */
 		intl_error_set_code(NULL, ustatus2);
 
-		/* Set error messages. */
 		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16", 0);
 		if (ustring2) {
 			efree(ustring2);
@@ -1007,8 +1004,6 @@ PHP_FUNCTION(grapheme_levenshtein)
 		RETURN_FALSE;
 	}
 
-	UText *ut1 = NULL;
-	UText *ut2 = NULL;
 	UBreakIterator *bi1, *bi2;
 
 	int32_t strlen_1, strlen_2;
@@ -1031,10 +1026,28 @@ PHP_FUNCTION(grapheme_levenshtein)
 	bi1 = grapheme_get_break_iterator((void*)u_break_iterator_buffer1, &ustatus1);
 	bi2 = grapheme_get_break_iterator((void*)u_break_iterator_buffer2, &ustatus2);
 
-	ut1 = utext_openUTF8(ut1, pstr1, ZSTR_LEN(string1), &ustatus1);
-	ubrk_setUText(bi1, ut1, &ustatus1);
-	ut2 = utext_openUTF8(ut2, pstr2, ZSTR_LEN(string2), &ustatus2);
-	ubrk_setUText(bi2, ut2, &ustatus2);
+	ubrk_setText(bi1, ustring1, ustring1_len, &ustatus1);
+
+	if (U_FAILURE(ustatus1)) {
+		intl_error_set_code(NULL, ustatus1);
+
+		intl_error_set_custom_msg(NULL, "Error on ubrk_setText on ustring1", 0);
+		if (ustring1) {
+			efree(ustring1);
+		}
+		RETURN_FALSE;
+	}
+
+	ubrk_setText(bi2, ustring2, ustring2_len, &ustatus2);
+	if (U_FAILURE(ustatus2)) {
+		intl_error_set_code(NULL, ustatus2);
+
+		intl_error_set_custom_msg(NULL, "Error on ubrk_setText on ustring2", 0);
+		if (ustring2) {
+			efree(ustring2);
+		}
+		RETURN_FALSE;
+	}
 
 	p1 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
 	p2 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
@@ -1048,6 +1061,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	int32_t pos1 = 0;
 	int32_t pos2 = 0;
 	int32_t usrch_pos = 0;
+
 	while (pos1 != UBRK_DONE) {
 		current1 = ubrk_current(bi1);
 		pos1 = ubrk_next(bi1);
@@ -1061,8 +1075,19 @@ PHP_FUNCTION(grapheme_levenshtein)
 			if (pos2 == UBRK_DONE) {
 				break;
 			}
-			usrch_pos = grapheme_strpos_utf16(pstr1 + current1, pos1 - current1, pstr2 + current2, pos2 - current2, 0, NULL, 0, 0);
-			if (usrch_pos == 0) {
+			UStringSearch *srch = usearch_open(ustring1 + current1, pos1 - current1, ustring2 + current2, pos2 - current2, "", NULL, &ustatus2);
+			if (U_FAILURE(ustatus2)) {
+				intl_error_set_code(NULL, ustatus2);
+				intl_error_set_custom_msg(NULL, "Error usearch_open", 0);
+			}
+			usrch_pos = usearch_first(srch, &ustatus2);
+			if (U_FAILURE(ustatus2)) {
+				intl_error_set_code(NULL, ustatus2);
+				intl_error_set_custom_msg(NULL, "Error usearch_first", 0);
+			}
+			usearch_close(srch);
+
+			if (usrch_pos != USEARCH_DONE) {
 				c0 = p1[i2];
 			} else {
 				c0 = p1[i2] + cost_rep;
@@ -1082,9 +1107,6 @@ PHP_FUNCTION(grapheme_levenshtein)
 		p1 = p2;
 		p2 = tmp;
 	}
-
-	utext_close(ut1);
-	utext_close(ut2);
 
 	ubrk_close(bi1);
 	ubrk_close(bi2);
