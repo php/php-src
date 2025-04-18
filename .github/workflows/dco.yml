@@ -1,0 +1,43 @@
+name: DCO Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  dco:
+    name: Check Signed-off-by in commits
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.base_ref }}
+
+      - name: Check commits for Signed-off-by
+        run: |
+          git log --pretty=format:"%H %P %s%n%b%n==END==" origin/${{ github.base_ref }}...HEAD |
+          awk '
+            BEGIN { commit = ""; parent_count = 0; has_signed_off = 0; }
+            /^[0-9a-f]{40} / {
+              commit = $1;
+              n = split($0, parts, " ");
+              parent_count = n - 2;
+              next;
+            }
+            /==END==/ {
+              if (parent_count < 2 && !has_signed_off) {
+                print "Commit " commit " is missing Signed-off-by";
+                exit 1;
+              }
+              commit = "";
+              parent_count = 0;
+              has_signed_off = 0;
+              next;
+            }
+            /Signed-off-by:/ { has_signed_off = 1; }
+          '

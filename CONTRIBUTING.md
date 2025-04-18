@@ -59,6 +59,27 @@ and build PHP source code. We recommend to look at our
 [workflow](https://wiki.php.net/vcs/gitworkflow) and our
 [FAQ](https://wiki.php.net/vcs/gitfaq).
 
+All contributions must comply with the Developer Certificate of Origin.
+
+Each commit must include a Signed-off-by line with your name and email address.
+
+You can add it automatically by using:
+
+```bash
+git commit -s
+```
+
+Example commit message:
+
+```
+Fix bug in X
+
+Signed-off-by: Jane Developer <jane@example.com>
+```
+
+By signing off, you confirm that you have the right to submit your code under the
+PHP License.
+
 ## Filing bugs
 
 Bugs can be filed on [GitHub Issues](https://github.com/php/php-src/issues/new/choose).
