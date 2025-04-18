@@ -1619,3 +1619,19 @@ PHP_FUNCTION(locale_accept_from_http)
 	RETURN_STRINGL(resultLocale, len);
 }
 /* }}} */
+
+PHP_FUNCTION(locale_is_right_to_left)
+{
+	char *locale;
+	size_t locale_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(locale, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!locale_len) {
+		locale = (char *)intl_locale_get_default();
+	}
+
+	RETURN_BOOL(uloc_isRightToLeft(locale));
+}

@@ -1,0 +1,16 @@
+--TEST--
+locale_is_right_to_left
+--EXTENSIONS--
+intl
+--FILE--
+<?php
+var_dump(Locale::isRightToLeft("en-US"));
+var_dump(Locale::isRightToLeft("\INVALID\\"));
+var_dump(Locale::isRightToLeft(""));
+var_dump(Locale::isRightToLeft("ar"));
+?>
+--EXPECT--
+bool(false)
+bool(false)
+bool(false)
+bool(true)

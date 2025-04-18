@@ -501,6 +501,8 @@ function locale_lookup(array $languageTag, string $locale, bool $canonicalize = 
 
 function locale_accept_from_http(string $header): string|false {}
 
+function locale_is_right_to_left(string $locale): bool {}
+
 /* msgformat */
 
 function msgfmt_create(string $locale, string $pattern): ?MessageFormatter {}
