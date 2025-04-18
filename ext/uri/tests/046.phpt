@@ -36,19 +36,16 @@ var_dump($uri->getRawPath());
 $url = new Uri\Whatwg\Url("mailto:johndoe@example.com");
 
 var_dump($url->toAsciiString());
-var_dump($url->getPath());
 var_dump($url->getRawPath());
 
 $url = new Uri\Whatwg\Url("https://example.com");
 
 var_dump($url->toAsciiString());
-var_dump($url->getPath());
 var_dump($url->getRawPath());
 
 $url = new Uri\Whatwg\Url("https://example.com/");
 
 var_dump($url->toAsciiString());
-var_dump($url->getPath());
 var_dump($url->getRawPath());
 
 ?>
@@ -70,10 +67,7 @@ string(1) "/"
 string(1) "/"
 string(26) "mailto:johndoe@example.com"
 string(19) "johndoe@example.com"
-string(19) "johndoe@example.com"
 string(20) "https://example.com/"
 string(1) "/"
-string(1) "/"
 string(20) "https://example.com/"
-string(1) "/"
 string(1) "/"
