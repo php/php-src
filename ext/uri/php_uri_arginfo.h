@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ee524bad83e9cb8a59580fd380127041a1574512 */
+ * Stub hash: 5bc77a7885cf2a98fe08ce4247e12b1bd96aee5d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -122,15 +122,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withScheme,
 	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_WhatWg_Url_getUsername arginfo_class_Uri_Rfc3986_Uri_getScheme
-
 #define arginfo_class_Uri_WhatWg_Url_getRawUsername arginfo_class_Uri_Rfc3986_Uri_getScheme
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withUsername, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 1)
 ZEND_END_ARG_INFO()
-
-#define arginfo_class_Uri_WhatWg_Url_getPassword arginfo_class_Uri_Rfc3986_Uri_getScheme
 
 #define arginfo_class_Uri_WhatWg_Url_getRawPassword arginfo_class_Uri_Rfc3986_Uri_getScheme
 
@@ -148,19 +144,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_withPort arginfo_class_Uri_Rfc3986_Uri_withPort
 
-#define arginfo_class_Uri_WhatWg_Url_getPath arginfo_class_Uri_Rfc3986_Uri_getPath
-
 #define arginfo_class_Uri_WhatWg_Url_getRawPath arginfo_class_Uri_Rfc3986_Uri_getPath
 
 #define arginfo_class_Uri_WhatWg_Url_withPath arginfo_class_Uri_Rfc3986_Uri_withPath
 
-#define arginfo_class_Uri_WhatWg_Url_getQuery arginfo_class_Uri_Rfc3986_Uri_getScheme
-
 #define arginfo_class_Uri_WhatWg_Url_getRawQuery arginfo_class_Uri_Rfc3986_Uri_getScheme
 
 #define arginfo_class_Uri_WhatWg_Url_withQuery arginfo_class_Uri_Rfc3986_Uri_withQuery
-
-#define arginfo_class_Uri_WhatWg_Url_getFragment arginfo_class_Uri_Rfc3986_Uri_getScheme
 
 #define arginfo_class_Uri_WhatWg_Url_getRawFragment arginfo_class_Uri_Rfc3986_Uri_getScheme
 
@@ -278,10 +268,8 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_ME(Uri_WhatWg_Url, __construct, arginfo_class_Uri_WhatWg_Url___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, getScheme, arginfo_class_Uri_WhatWg_Url_getScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, withScheme, arginfo_class_Uri_WhatWg_Url_withScheme, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("getUsername", zim_Uri_Rfc3986_Uri_getUsername, arginfo_class_Uri_WhatWg_Url_getUsername, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getRawUsername", zim_Uri_Rfc3986_Uri_getRawUsername, arginfo_class_Uri_WhatWg_Url_getRawUsername, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Uri_WhatWg_Url, withUsername, arginfo_class_Uri_WhatWg_Url_withUsername, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("getPassword", zim_Uri_Rfc3986_Uri_getPassword, arginfo_class_Uri_WhatWg_Url_getPassword, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getRawPassword", zim_Uri_Rfc3986_Uri_getRawPassword, arginfo_class_Uri_WhatWg_Url_getRawPassword, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Uri_WhatWg_Url, withPassword, arginfo_class_Uri_WhatWg_Url_withPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, getAsciiHost, arginfo_class_Uri_WhatWg_Url_getAsciiHost, ZEND_ACC_PUBLIC)
@@ -289,13 +277,10 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_ME(Uri_WhatWg_Url, withHost, arginfo_class_Uri_WhatWg_Url_withHost, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("getPort", zim_Uri_Rfc3986_Uri_getPort, arginfo_class_Uri_WhatWg_Url_getPort, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withPort", zim_Uri_Rfc3986_Uri_withPort, arginfo_class_Uri_WhatWg_Url_withPort, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("getPath", zim_Uri_Rfc3986_Uri_getPath, arginfo_class_Uri_WhatWg_Url_getPath, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getRawPath", zim_Uri_Rfc3986_Uri_getRawPath, arginfo_class_Uri_WhatWg_Url_getRawPath, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withPath", zim_Uri_Rfc3986_Uri_withPath, arginfo_class_Uri_WhatWg_Url_withPath, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("getQuery", zim_Uri_Rfc3986_Uri_getQuery, arginfo_class_Uri_WhatWg_Url_getQuery, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getRawQuery", zim_Uri_Rfc3986_Uri_getRawQuery, arginfo_class_Uri_WhatWg_Url_getRawQuery, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withQuery", zim_Uri_Rfc3986_Uri_withQuery, arginfo_class_Uri_WhatWg_Url_withQuery, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("getFragment", zim_Uri_Rfc3986_Uri_getFragment, arginfo_class_Uri_WhatWg_Url_getFragment, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getRawFragment", zim_Uri_Rfc3986_Uri_getRawFragment, arginfo_class_Uri_WhatWg_Url_getRawFragment, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withFragment", zim_Uri_Rfc3986_Uri_withFragment, arginfo_class_Uri_WhatWg_Url_withFragment, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Uri_WhatWg_Url, equals, arginfo_class_Uri_WhatWg_Url_equals, ZEND_ACC_PUBLIC)
