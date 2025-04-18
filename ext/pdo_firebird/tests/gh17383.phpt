@@ -20,6 +20,7 @@ foreach ([
 ] as [$dsn, $user, $pass]) {
     try {
         $dbh = new PDO($dsn, $user, $pass);
+        var_dump($dsn, $user, $pass);
     } catch (PDOException $e) {
 		echo 'PDOException code: ' . $e->getCode() . "\n";
 		echo 'PDOException message: ' . $e->getMessage() . "\n";
