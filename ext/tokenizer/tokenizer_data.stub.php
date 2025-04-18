@@ -324,6 +324,11 @@ const T_ABSTRACT = UNKNOWN;
 const T_FINAL = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_MUTATING
+ */
+const T_MUTATING = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_PRIVATE
  */
 const T_PRIVATE = UNKNOWN;
@@ -387,6 +392,11 @@ const T_HALT_COMPILER = UNKNOWN;
  * @cvalue T_CLASS
  */
 const T_CLASS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_STRUCT
+ */
+const T_STRUCT = UNKNOWN;
 /**
  * @var int
  * @cvalue T_TRAIT
