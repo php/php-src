@@ -67,24 +67,13 @@ const uri_handler_t lexbor_uri_handler = {
 	return SUCCESS; \
 } while (0)
 
-#define LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(start, len, read_mode, retval) do { \
+#define LEXBOR_READ_ASCII_URI_COMPONENT(start, len, read_mode, retval) do { \
 	switch (read_mode) { \
-		case URI_COMPONENT_READ_RAW: \
-			ZVAL_STRINGL(retval, (const char *) start, len); \
-			break; \
+		case URI_COMPONENT_READ_RAW: /* Intentional fallthrough */ \
 		case URI_COMPONENT_READ_NORMALIZED_UNICODE: /* Intentional fallthrough */ \
 		case URI_COMPONENT_READ_NORMALIZED_ASCII: { \
-			lexbor_str_t *str = lexbor_str_create(); \
-			lxb_url_host_opt_t opt; \
-			lxb_status_t result = lxb_url_percent_decode(start, start + len, \
-				str, lexbor_uri->mraw, &opt \
-			); \
-			if (result != LXB_STATUS_OK) { \
-				return FAILURE; \
-			} \
-			ZVAL_STRINGL(retval, (const char *) str->data, str->length); \
-			lexbor_str_destroy(str, lexbor_uri->mraw, true); \
-			break; \
+			ZVAL_STRINGL(retval, (const char *) start, len);  \
+        	break; \
 		} \
 		EMPTY_SWITCH_DEFAULT_CASE() \
 	} \
@@ -291,7 +280,7 @@ static zend_result lexbor_read_username(const uri_internal_t *internal_uri, uri_
 	lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
 	if (lexbor_uri->username.length) {
-		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->username.data, lexbor_uri->username.length, read_mode, retval);
+		LEXBOR_READ_ASCII_URI_COMPONENT(lexbor_uri->username.data, lexbor_uri->username.length, read_mode, retval);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -316,7 +305,7 @@ static zend_result lexbor_read_password(const uri_internal_t *internal_uri, uri_
 	lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
 	if (lexbor_uri->password.length > 0) {
-		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->password.data, lexbor_uri->password.length, read_mode, retval);
+		LEXBOR_READ_ASCII_URI_COMPONENT(lexbor_uri->password.data, lexbor_uri->password.length, read_mode, retval);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -427,9 +416,9 @@ static zend_result lexbor_read_path(const uri_internal_t *internal_uri, uri_comp
 	lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
 	if (lexbor_uri->path.opaque) {
-		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
+		LEXBOR_READ_ASCII_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
 	} else if (lexbor_uri->path.str.length) {
-		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
+		LEXBOR_READ_ASCII_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
 	} else {
 		ZVAL_EMPTY_STRING(retval);
 	}
@@ -454,7 +443,7 @@ static zend_result lexbor_read_query(const uri_internal_t *internal_uri, uri_com
 	lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
 	if (lexbor_uri->query.length) {
-		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->query.data, lexbor_uri->query.length, read_mode, retval);
+		LEXBOR_READ_ASCII_URI_COMPONENT(lexbor_uri->query.data, lexbor_uri->query.length, read_mode, retval);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -479,7 +468,7 @@ static zend_result lexbor_read_fragment(const uri_internal_t *internal_uri, uri_
 	lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
 	if (lexbor_uri->fragment.length) {
-		LEXBOR_READ_PERCENT_ENCODED_URI_COMPONENT(lexbor_uri->fragment.data, lexbor_uri->fragment.length, read_mode, retval);
+		LEXBOR_READ_ASCII_URI_COMPONENT(lexbor_uri->fragment.data, lexbor_uri->fragment.length, read_mode, retval);
 	} else {
 		ZVAL_NULL(retval);
 	}

@@ -14,7 +14,6 @@ var_dump($uri->getRawPath());
 $url = new Uri\Whatwg\Url("https://example.com/foo/bar%2Fbaz");
 
 var_dump($url->toAsciiString());
-var_dump($url->getPath());
 var_dump($url->getRawPath());
 
 ?>
@@ -23,5 +22,4 @@ string(33) "https://example.com/foo/bar%2Fbaz"
 string(14) "/foo/bar%2Fbaz"
 string(14) "/foo/bar%2Fbaz"
 string(33) "https://example.com/foo/bar%2Fbaz"
-string(12) "/foo/bar/baz"
 string(14) "/foo/bar%2Fbaz"

@@ -5,23 +5,18 @@ uri
 --FILE--
 <?php
 
-function callGetters($uri)
+function callRfc3986Getters($uri)
 {
     var_dump($uri->getScheme());
-    if ($uri instanceof Uri\Rfc3986\Uri) {
-        var_dump($uri->getRawScheme());
-    }
+    var_dump($uri->getRawScheme());
     var_dump($uri->getUsername());
     var_dump($uri->getRawUsername());
     var_dump($uri->getPassword());
     var_dump($uri->getRawPassword());
-    if ($uri instanceof Uri\Rfc3986\Uri) {
-        var_dump($uri->getHost());
-        var_dump($uri->getRawHost());
-    } else {
-        var_dump($uri->getAsciiHost());
-        var_dump($uri->getUnicodeHost());
-    }
+    var_dump($uri->getUserInfo());
+    var_dump($uri->getRawUserInfo());
+    var_dump($uri->getHost());
+    var_dump($uri->getRawHost());
     var_dump($uri->getPort());
     var_dump($uri->getPath());
     var_dump($uri->getRawPath());
@@ -31,13 +26,26 @@ function callGetters($uri)
     var_dump($uri->getRawFragment());
 }
 
+function callWhatWgGetters($uri)
+{
+    var_dump($uri->getScheme());
+    var_dump($uri->getRawUsername());
+    var_dump($uri->getRawPassword());
+    var_dump($uri->getAsciiHost());
+    var_dump($uri->getUnicodeHost());
+    var_dump($uri->getPort());
+    var_dump($uri->getRawPath());
+    var_dump($uri->getRawQuery());
+    var_dump($uri->getRawFragment());
+}
+
 $uri = Uri\Rfc3986\Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
-callGetters($uri);
+callRfc3986Getters($uri);
 
 echo "\n";
 
 $url = Uri\WhatWg\Url::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
-callGetters($url);
+callWhatWgGetters($url);
 
 ?>
 --EXPECT--
@@ -47,6 +55,8 @@ string(8) "username"
 string(8) "username"
 string(8) "password"
 string(8) "password"
+string(17) "username:password"
+string(17) "username:password"
 string(14) "www.google.com"
 string(14) "www.google.com"
 int(8080)
@@ -59,15 +69,10 @@ string(11) "hash-exists"
 
 string(5) "https"
 string(8) "username"
-string(8) "username"
-string(8) "password"
 string(8) "password"
 string(14) "www.google.com"
 string(14) "www.google.com"
 int(8080)
 string(30) "/pathname1/pathname2/pathname3"
-string(30) "/pathname1/pathname2/pathname3"
 string(10) "query=true"
-string(10) "query=true"
-string(11) "hash-exists"
 string(11) "hash-exists"
