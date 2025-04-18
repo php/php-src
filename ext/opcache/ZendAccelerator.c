@@ -3800,6 +3800,11 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+				/* For deprecated constants, we need to flag the zval for recursion
+				 * detection. Make sure the zval is separated out of shm. */
+				if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED) {
+					ok = false;
+				}
 				if (EXPECTED(zend_update_class_constant(c, key, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
 				} else {
@@ -3815,9 +3820,13 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 			bool resolved = true;
 
 			for (i = 0; i < ce->default_properties_count; i++) {
-				val = &ce->default_properties_table[i];
+				zend_property_info *prop = ce->properties_info_table[i];
+				if (!prop) {
+					continue;
+				}
+
+				val = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop->offset)];
 				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-					zend_property_info *prop = ce->properties_info_table[i];
 					if (UNEXPECTED(zval_update_constant_ex(val, prop->ce) != SUCCESS)) {
 						resolved = ok = false;
 					}
@@ -4733,6 +4742,11 @@ static zend_result accel_finish_startup_preload(bool in_child)
 		EG(class_table) = NULL;
 		EG(function_table) = NULL;
 		PG(report_memleaks) = orig_report_memleaks;
+#ifdef ZTS
+		/* Reset the virtual CWD state back to the original state created by virtual_cwd_startup().
+		 * This is necessary because the normal startup code assumes the CWD state is active. */
+		virtual_cwd_activate();
+#endif
 	} else {
 		zend_shared_alloc_unlock();
 		ret = FAILURE;

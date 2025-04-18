@@ -2489,9 +2489,10 @@ static zval *pdo_row_get_property_ptr_ptr(zend_object *object, zend_string *name
 	ZEND_IGNORE_VALUE(object);
 	ZEND_IGNORE_VALUE(name);
 	ZEND_IGNORE_VALUE(type);
-	ZEND_IGNORE_VALUE(cache_slot);
 
-	cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
 	return NULL;
 }
 
@@ -2502,6 +2503,7 @@ void pdo_row_free_storage(zend_object *std)
 		ZVAL_UNDEF(&row->stmt->lazy_object_ref);
 		OBJ_RELEASE(&row->stmt->std);
 	}
+	zend_object_std_dtor(std);
 }
 
 zend_object *pdo_row_new(zend_class_entry *ce)

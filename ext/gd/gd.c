@@ -3378,6 +3378,17 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		im = php_gd_libgdimageptr_from_zval_p(IM);
 	}
 
+	// FT_F26Dot6 is a signed long alias
+	if (ptsize < (double)LONG_MIN / 64 || ptsize > (double)LONG_MAX / 64) {
+		zend_argument_value_error(2, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (zend_long)((double)LONG_MIN / 64), (zend_long)((double)LONG_MAX / 64));
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!zend_finite(ptsize))) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+
 	/* convert angle to radians */
 	angle = angle * (M_PI/180);
 
@@ -3891,6 +3902,26 @@ PHP_FUNCTION(imagecrop)
 		rect.height = zval_get_long(tmp);
 	} else {
 		zend_argument_value_error(2, "must have a \"height\" key");
+		RETURN_THROWS();
+	}
+
+	if ((rect.width > 0 && rect.x > INT_MAX - rect.width)) {
+		zend_argument_value_error(2, "overflow with \"x\" and \"width\" keys");
+		RETURN_THROWS();
+	}
+
+	if ((rect.width < 0 && rect.x < INT_MIN - rect.width)) {
+		zend_argument_value_error(2, "underflow with \"x\" and \"width\" keys");
+		RETURN_THROWS();
+	}
+
+	if ((rect.height > 0 && rect.y > INT_MAX - rect.height)) {
+		zend_argument_value_error(2, "overflow with \"y\" and \"height\" keys");
+		RETURN_THROWS();
+	}
+
+	if ((rect.height < 0 && rect.y < INT_MIN - rect.height)) {
+		zend_argument_value_error(2, "underflow with \"y\" and \"height\" keys");
 		RETURN_THROWS();
 	}
 

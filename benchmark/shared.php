@@ -5,12 +5,14 @@ class ProcessResult {
     public $stderr;
 }
 
-function runCommand(array $args, ?string $cwd = null): ProcessResult {
+function runCommand(array $args, ?string $cwd = null, bool $printCommand = true): ProcessResult {
     $cmd = implode(' ', array_map('escapeshellarg', $args));
     $pipes = null;
     $result = new ProcessResult();
     $descriptorSpec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-    fwrite(STDOUT, "> $cmd\n");
+    if ($printCommand) {
+        fwrite(STDOUT, "> $cmd\n");
+    }
     $processHandle = proc_open($cmd, $descriptorSpec, $pipes, $cwd ?? getcwd(), null);
 
     $stdin = $pipes[0];

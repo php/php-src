@@ -8645,7 +8645,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		/* FIXME: This is a dirty fix to maintain ABI compatibility. We don't
 		 * have an actual property info yet, but we really only need the name
 		 * anyway. We should convert this to a zend_string. */
-		ZEND_ASSERT(!CG(context).active_property_info);
+		const zend_property_info *old_active_property_info = CG(context).active_property_info;
 		zend_property_info dummy_prop_info = { .name = name };
 		CG(context).active_property_info = &dummy_prop_info;
 
@@ -8742,7 +8742,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
 		}
 
-		CG(context).active_property_info = NULL;
+		CG(context).active_property_info = old_active_property_info;
 	}
 }
 /* }}} */
@@ -8822,6 +8822,10 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 
 			if (deprecated) {
 				ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
+				/* For deprecated constants, we need to flag the zval for recursion
+				 * detection. Make sure the zval is separated out of shm. */
+				ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
 		}
 	}

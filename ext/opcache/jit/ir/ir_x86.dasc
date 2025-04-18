@@ -650,6 +650,26 @@ IR_ALWAYS_INLINE ir_mem IR_MEM(ir_reg base, int32_t offset, ir_reg index, int32_
 ||	}
 |.endmacro
 
+/* Like ASM_REG_IMM_OP, but op1 accepts r16,r32,r64 (not r8) */
+|.macro ASM_REG16_IMM_OP, op, type, op1, op2
+||	switch (ir_type_size[type]) {
+|| 		default:
+||			IR_ASSERT(0);
+||		case 1:
+||		case 2:
+|			op Rw(op1), (op2 & 0xffff)
+|| 			break;
+||		case 4:
+|			op Rd(op1), op2
+|| 			break;
+|.if X64
+||		case 8:
+|			op Rq(op1), op2
+|| 			break;
+|.endif
+||	}
+|.endmacro
+
 |.macro ASM_MEM_REG_OP, op, type, op1, op2
 |	ASM_EXPAND_OP1_MEM ASM_EXPAND_TYPE_MEM_REG, op, type, op1, op2
 |.endmacro
@@ -1003,6 +1023,8 @@ const char *ir_reg_name(int8_t reg, ir_type type)
 	_(LEA_SI_B)            \
 	_(LEA_B_SI_O)          \
 	_(LEA_SI_B_O)          \
+	_(LEA_SYM_O)           \
+	_(LEA_O_SYM)           \
 	_(INC)                 \
 	_(DEC)                 \
 	_(MUL_PWR2)            \
@@ -1064,6 +1086,10 @@ const char *ir_reg_name(int8_t reg, ir_type type)
 	_(SSE_CEIL)            \
 	_(SSE_TRUNC)           \
 	_(SSE_NEARBYINT)       \
+	_(BIT_OP)              \
+
+#define IR_LEA_FIRST IR_LEA_OB
+#define IR_LEA_LAST  IR_LEA_O_SYM
 
 #define IR_RULE_ENUM(name) IR_ ## name,
 
@@ -1395,6 +1421,7 @@ op2_const:
 		case IR_DIV_PWR2:
 		case IR_OP_INT:
 		case IR_OP_FP:
+		case IR_BIT_OP:
 			flags = IR_DEF_REUSES_OP1_REG | IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG;
 			break;
 		case IR_MOD_PWR2:
@@ -1584,7 +1611,7 @@ static void ir_match_fuse_addr(ir_ctx *ctx, ir_ref addr_ref)
 		if (!rule) {
 			ctx->rules[addr_ref] = rule = ir_match_insn(ctx, addr_ref);
 		}
-		if (rule >= IR_LEA_OB && rule <= IR_LEA_SI_B_O) {
+		if (rule >= IR_LEA_FIRST && rule <= IR_LEA_LAST) {
 			ir_use_list *use_list;
 			ir_ref j;
 
@@ -1972,6 +1999,19 @@ static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 				if ((ctx->flags & IR_OPT_CODEGEN) && IR_IS_CONST_REF(insn->op2)) {
 					op2_insn = &ctx->ir_base[insn->op2];
 					if (IR_IS_CONST_REF(insn->op1)) {
+						ir_insn *op1_insn = &ctx->ir_base[insn->op1];
+
+						if (insn->op == IR_ADD
+						 && IR_IS_SYM_CONST(op1_insn->op)
+						 && !IR_IS_SYM_CONST(op2_insn->op)
+						 && IR_IS_SIGNED_32BIT((intptr_t)ir_sym_val(ctx, op1_insn) + (intptr_t)op2_insn->val.i64)) {
+							return IR_LEA_SYM_O;
+						} else if (insn->op == IR_ADD
+						 && IR_IS_SYM_CONST(op2_insn->op)
+						 && !IR_IS_SYM_CONST(op1_insn->op)
+						 && IR_IS_SIGNED_32BIT((intptr_t)ir_sym_val(ctx, op2_insn) + (intptr_t)op1_insn->val.i64)) {
+							return IR_LEA_O_SYM;
+						}
 						// const
 						// TODO: add support for sym+offset ???
 					} else if (IR_IS_SYM_CONST(op2_insn->op)) {
@@ -2262,6 +2302,9 @@ binop_fp:
 					// return IR_COPY_INT;
 				} else if (op2_insn->val.i64 == -1) {
 					// -1
+				} else if (IR_IS_POWER_OF_TWO(op2_insn->val.u64) && !IR_IS_SIGNED_32BIT(op2_insn->val.i64)) {
+					/* OR(X, PWR2) => BTS */
+					return IR_BIT_OP;
 				}
 			}
 			goto binop_int;
@@ -2276,6 +2319,9 @@ binop_fp:
 					// 0
 				} else if (op2_insn->val.i64 == -1) {
 					// return IR_COPY_INT;
+				} else if (IR_IS_POWER_OF_TWO(~op2_insn->val.u64) && !IR_IS_SIGNED_32BIT(op2_insn->val.i64)) {
+					/* AND(X, ~PWR2) => BTR */
+					return IR_BIT_OP;
 				}
 			}
 			goto binop_int;
@@ -3264,7 +3310,11 @@ static void ir_emit_mov_ext(ir_ctx *ctx, ir_type type, ir_reg dst, ir_reg src)
 		|	ASM_REG_REG_OP mov, type, dst, src
 	} else if (ir_type_size[type] == 2) {
 		if (IR_IS_TYPE_SIGNED(type)) {
-			|	movsx Rd(dst), Rw(src)
+			if (dst == IR_REG_RAX && src == IR_REG_RAX) {
+				|	cwde
+			} else {
+				|	movsx Rd(dst), Rw(src)
+			}
 		} else {
 			|	movzx Rd(dst), Rw(src)
 		}
@@ -3311,8 +3361,8 @@ static ir_mem ir_fuse_addr(ir_ctx *ctx, ir_ref root, ir_ref ref)
 	ir_reg base_reg = IR_REG_NONE, index_reg;
 	int32_t offset = 0, scale;
 
-	IR_ASSERT(((rule & IR_RULE_MASK) >= IR_LEA_OB &&
-			(rule & IR_RULE_MASK) <= IR_LEA_SI_B_O) ||
+	IR_ASSERT(((rule & IR_RULE_MASK) >= IR_LEA_FIRST &&
+			(rule & IR_RULE_MASK) <= IR_LEA_LAST) ||
 		rule == IR_STATIC_ALLOCA);
 	switch (rule & IR_RULE_MASK) {
 		default:
@@ -3497,6 +3547,22 @@ static ir_mem ir_fuse_addr(ir_ctx *ctx, ir_ref root, ir_ref ref)
 			base_reg_ref = insn->op1 * sizeof(ir_ref) + 2;
 			op1_insn = &ctx->ir_base[op1_insn->op1];
 			scale = ctx->ir_base[op1_insn->op2].val.i32;
+			break;
+		case IR_LEA_SYM_O:
+			op1_insn = &ctx->ir_base[insn->op1];
+			op2_insn = &ctx->ir_base[insn->op2];
+			offset = (intptr_t)ir_sym_val(ctx, op1_insn) + (intptr_t)op2_insn->val.i64;
+			base_reg_ref = index_reg_ref = IR_UNUSED;
+			scale = 1;
+			offset_insn = NULL;
+			break;
+		case IR_LEA_O_SYM:
+			op1_insn = &ctx->ir_base[insn->op1];
+			op2_insn = &ctx->ir_base[insn->op2];
+			offset = (intptr_t)ir_sym_val(ctx, op2_insn) + (intptr_t)op1_insn->val.i64;
+			base_reg_ref = index_reg_ref = IR_UNUSED;
+			scale = 1;
+			offset_insn = NULL;
 			break;
 		case IR_ALLOCA:
 			offset = IR_SPILL_POS_TO_OFFSET(insn->op3);
@@ -4297,6 +4363,45 @@ static void ir_emit_mul_div_mod_pwr2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.if X64
 ||		}
 |.endif
+	}
+	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+		ir_emit_store(ctx, type, def, def_reg);
+	}
+}
+
+static void ir_emit_bit_op(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_type type = insn->type;
+	ir_ref op1 = insn->op1;
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
+	ir_reg op1_reg = ctx->regs[def][1];
+
+	IR_ASSERT(IR_IS_CONST_REF(insn->op2));
+	IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
+	IR_ASSERT(def_reg != IR_REG_NONE);
+
+	if (op1_reg != IR_REG_NONE && IR_REG_SPILLED(op1_reg)) {
+		op1_reg = IR_REG_NUM(op1_reg);
+		ir_emit_load(ctx, type, op1_reg, op1);
+	}
+	if (def_reg != op1_reg) {
+		if (op1_reg != IR_REG_NONE) {
+			ir_emit_mov(ctx, type, def_reg, op1_reg);
+		} else {
+			ir_emit_load(ctx, type, def_reg, op1);
+		}
+	}
+	if (insn->op == IR_OR) {
+		uint32_t bit = IR_LOG2(ctx->ir_base[insn->op2].val.u64);
+
+		|	ASM_REG16_IMM_OP, bts, type, def_reg, bit
+	} else {
+		IR_ASSERT(insn->op == IR_AND);
+		uint32_t bit = IR_LOG2(~ctx->ir_base[insn->op2].val.u64);
+
+		|	ASM_REG16_IMM_OP, btr, type, def_reg, bit
 	}
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
 		ir_emit_store(ctx, type, def, def_reg);
@@ -5186,7 +5291,7 @@ static void ir_emit_mul_div_mod(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			} else if (ir_type_size[type] == 2) {
 				|	cwd
 			} else {
-				|	movsx ax, al
+				|	cbw
 			}
 			if (op2_reg != IR_REG_NONE) {
 				|	ASM_REG_OP idiv, type, op2_reg
@@ -6813,7 +6918,11 @@ static void ir_emit_sext(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		}
 		if (ir_type_size[src_type] == 1) {
 			if (ir_type_size[dst_type] == 2) {
-				|	movsx Rw(def_reg), Rb(op1_reg)
+				if (def_reg == IR_REG_RAX && op1_reg == IR_REG_RAX) {
+					|	cbw
+				} else {
+					|	movsx Rw(def_reg), Rb(op1_reg)
+				}
 			} else if (ir_type_size[dst_type] == 4) {
 				|	movsx Rd(def_reg), Rb(op1_reg)
 			} else {
@@ -6825,7 +6934,11 @@ static void ir_emit_sext(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			}
 		} else if (ir_type_size[src_type] == 2) {
 			if (ir_type_size[dst_type] == 4) {
-				|	movsx Rd(def_reg), Rw(op1_reg)
+				if (def_reg == IR_REG_RAX && op1_reg == IR_REG_RAX) {
+					|	cwde
+				} else {
+					|	movsx Rd(def_reg), Rw(op1_reg)
+				}
 			} else {
 				IR_ASSERT(ir_type_size[dst_type] == 8);
 				IR_ASSERT(sizeof(void*) == 8);
@@ -6838,7 +6951,11 @@ static void ir_emit_sext(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			IR_ASSERT(ir_type_size[dst_type] == 8);
 			IR_ASSERT(sizeof(void*) == 8);
 |.if X64
-			|	movsxd Rq(def_reg), Rd(op1_reg)
+			if (def_reg == IR_REG_RAX && op1_reg == IR_REG_RAX) {
+				|	cdqe
+			} else {
+				|	movsxd Rq(def_reg), Rd(op1_reg)
+			}
 |.endif
 		}
 	} else if (IR_IS_CONST_REF(insn->op1)) {
@@ -7203,6 +7320,8 @@ static void ir_emit_int2fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.else
 ||				if (ir_type_size[src_type] == 1) {
 					| movsx Rd(op1_reg), Rb(op1_reg)
+||				} else if (op1_reg == IR_REG_RAX) {
+					| cwde
 ||				} else {
 					| movsx Rd(op1_reg), Rw(op1_reg)
 ||				}
@@ -8502,7 +8621,11 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 			case 4:
 |.if X64
 				if (IR_IS_TYPE_SIGNED(type)) {
-					|	movsxd Ra(op2_reg), Rd(op2_reg)
+					if (op2_reg == IR_REG_RAX) {
+						|	cdqe
+					} else {
+						|	movsxd Ra(op2_reg), Rd(op2_reg)
+					}
 				} else {
 					|	mov Rd(op2_reg), Rd(op2_reg)
 				}
@@ -10603,12 +10726,17 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 				case IR_LEA_SI_B:
 				case IR_LEA_B_SI_O:
 				case IR_LEA_SI_B_O:
+				case IR_LEA_SYM_O:
+				case IR_LEA_O_SYM:
 					ir_emit_lea(ctx, i, insn->type);
 					break;
 				case IR_MUL_PWR2:
 				case IR_DIV_PWR2:
 				case IR_MOD_PWR2:
 					ir_emit_mul_div_mod_pwr2(ctx, i, insn);
+					break;
+				case IR_BIT_OP:
+					ir_emit_bit_op(ctx, i, insn);
 					break;
 				case IR_SDIV_PWR2:
 					ir_emit_sdiv_pwr2(ctx, i, insn);
