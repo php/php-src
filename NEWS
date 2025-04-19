@@ -42,8 +42,10 @@ PHP                                                                        NEWS
   . Fix potential leaks when writing to BIO fails. (nielsdos)
 
 - PDO Firebird:
-  . Fixed GH-18276 - persistent connection - "zend_mm_heap corrupted"
-    with setAttribute() (SakiTakamachi).
+  . Fixed bug GH-18276 (persistent connection - "zend_mm_heap corrupted"
+    with setAttribute()) (SakiTakamachi).
+  . Fixed bug GH-17383 (PDOException has wrong code and message since PHP 8.4)
+    (SakiTakamachi).
 
 - PDO Sqlite:
   . Fix memory leak on error return of collation callback. (nielsdos)

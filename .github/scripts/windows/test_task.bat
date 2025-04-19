@@ -58,12 +58,15 @@ if "%PLATFORM%" == "x64" (
 curl -sLo Firebird.zip %PHP_FIREBIRD_DOWNLOAD_URL%
 7z x -oC:\Firebird Firebird.zip
 set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
-set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
+set PDO_FIREBIRD_TEST_DSN=firebird:dbname=127.0.0.1:%PDO_FIREBIRD_TEST_DATABASE%
 set PDO_FIREBIRD_TEST_USER=SYSDBA
 set PDO_FIREBIRD_TEST_PASS=phpfi
+echo create user %PDO_FIREBIRD_TEST_USER% password '%PDO_FIREBIRD_TEST_PASS%';> C:\Firebird\create_user.sql
+echo commit;>> C:\Firebird\create_user.sql
 echo create database '%PDO_FIREBIRD_TEST_DATABASE%' user '%PDO_FIREBIRD_TEST_USER%' password '%PDO_FIREBIRD_TEST_PASS%';> C:\Firebird\setup.sql
 C:\Firebird\instsvc.exe install -n TestInstance
 C:\Firebird\isql -q -i C:\Firebird\setup.sql
+C:\Firebird\isql -q -i C:\Firebird\create_user.sql -user sysdba %PDO_FIREBIRD_TEST_DATABASE%
 C:\Firebird\instsvc.exe start -n TestInstance
 if %errorlevel% neq 0 exit /b 3
 path C:\Firebird;%PATH%
