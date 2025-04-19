@@ -97,7 +97,6 @@ typedef struct dom_nnodemap_object {
 typedef struct {
 	zend_object_iterator intern;
 	zval curobj;
-	HashPosition pos;
 	/* intern->index is only updated for FE_* opcodes, not for e.g. unpacking,
 	 * yet we need to track the position of the node relative to the start. */
 	zend_ulong index;
