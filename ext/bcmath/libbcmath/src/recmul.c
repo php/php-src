@@ -73,7 +73,8 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 }
 
 static inline void bc_standard_vector_mul(
-	BC_VECTOR *n1_vector, size_t n1_arr_size, BC_VECTOR *n2_vector, size_t n2_arr_size, BC_VECTOR *prod_vector, size_t prod_arr_size)
+	const BC_VECTOR *n1_vector, size_t n1_arr_size, const BC_VECTOR *n2_vector, size_t n2_arr_size,
+	BC_VECTOR *prod_vector, size_t prod_arr_size)
 {
 	for (size_t i = 0; i < prod_arr_size; i++) {
 		prod_vector[i] = 0;
@@ -187,7 +188,8 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 }
 
 void bc_multiply_vector(
-	BC_VECTOR *n1_vector, size_t n1_arr_size, BC_VECTOR *n2_vector, size_t n2_arr_size, BC_VECTOR *prod_vector, size_t prod_arr_size)
+	const BC_VECTOR *n1_vector, size_t n1_arr_size, const BC_VECTOR *n2_vector, size_t n2_arr_size,
+	BC_VECTOR *prod_vector, size_t prod_arr_size)
 {
 	if (n1_arr_size == 1 && n2_arr_size == 1) {
 		prod_vector[0] = *n1_vector * *n2_vector;
