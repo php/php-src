@@ -3474,7 +3474,7 @@ static int zend_jit_trace_exit_needs_deoptimization(uint32_t trace_num, uint32_t
 	uint32_t stack_size;
 	zend_jit_trace_stack *stack;
 
-	if (opline || (flags & (ZEND_JIT_EXIT_RESTORE_CALL|ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2))) {
+	if (opline || (flags & (ZEND_JIT_EXIT_RESTORE_CALL|ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2|ZEND_JIT_EXIT_CHECK_EXCEPTION))) {
 		return 1;
 	}
 
@@ -3634,7 +3634,7 @@ static int zend_jit_trace_deoptimization(
 		}
 	}
 
-	if (flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2)) {
+	if (flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2|ZEND_JIT_EXIT_CHECK_EXCEPTION)) {
 		zend_jit_check_exception(jit);
 	}
 
@@ -7943,6 +7943,9 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_FREE_OP2) {
 			fprintf(stderr, "/FREE_OP2");
 		}
+		if (t->exit_info[i].flags & ZEND_JIT_EXIT_CHECK_EXCEPTION) {
+			fprintf(stderr, "/CHK_EXC");
+		}
 		for (j = 0; j < stack_size; j++) {
 			uint8_t type = STACK_TYPE(stack, j);
 			if (type != IS_UNKNOWN) {
@@ -8654,9 +8657,14 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			EX(opline) = opline-1;
 			zval_ptr_dtor_nogc(EX_VAR((opline-1)->op1.var));
 		}
-		if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2)) {
+		if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2|ZEND_JIT_EXIT_CHECK_EXCEPTION)) {
 			if (EG(exception)) {
-				return 1;
+				/* EX(opline) was overridden in zend_jit_trace_exit_stub(),
+				 * and may be wrong when IP is reused. */
+				if (GCC_GLOBAL_REGS) {
+					EX(opline) = EG(exception_op);
+				}
+				return 0;
 			}
 		}
 		if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_METHOD_CALL) {
