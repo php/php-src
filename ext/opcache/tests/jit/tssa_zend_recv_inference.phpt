@@ -23,10 +23,7 @@ for ($i=0;$i<3;$i++) {
 }
 ?>
 --EXPECTF--
-$_main:
 %A
-0011 RETURN int(1)
-
 test:
      ; (lines=4, args=1, vars=1, tmps=%d, ssa_vars=3)
      ; (JIT)
@@ -48,7 +45,4 @@ BB1:
 0001 ASSIGN_OBJ #1.CV0($obj) [rc1, rcn, object (Foo)] -> #2.CV0($obj) NOVAL [rc1, rcn, object (Foo)] string("prop")
 0002 OP_DATA int(1)
 0003 RETURN null
-
-$_main:
 %A
-0011 RETURN int(1)
