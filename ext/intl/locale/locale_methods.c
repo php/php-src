@@ -1633,5 +1633,5 @@ PHP_FUNCTION(locale_is_right_to_left)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	RETURN_BOOL(uloc_isRightToLeft((const char *)locale));
+	RETURN_BOOL(uloc_isRightToLeft(locale));
 }
