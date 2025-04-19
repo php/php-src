@@ -3351,7 +3351,7 @@ class JUnit
     }
 
     public function markTestAs(
-        $type,
+        string|array $type,
         string $file_name,
         string $test_name,
         ?int $time = null,
