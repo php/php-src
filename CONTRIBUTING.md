@@ -32,6 +32,12 @@ had several contributions accepted, commit privileges are often quickly granted.
 PHP welcomes pull requests to [add tests](#writing-tests), fix bugs and to
 implement RFCs. Please be sure to include tests as appropriate!
 
+By submitting a pull request, you certify that you have the necessary rights
+to submit the work, that the work does not violate any third-party rights
+(including those of your employer, if applicable), and that you license your
+contribution under the PHP License or under another license if explicitly
+accepted by the PHP project maintainers.
+
 If you are fixing a bug, then please submit your PR against the lowest actively
 supported branch of PHP that the bug affects (only green branches on
 [the supported version page](https://www.php.net/supported-versions.php) are
