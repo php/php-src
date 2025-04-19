@@ -22,9 +22,39 @@
 #include <openssl/param_build.h>
 #include <openssl/provider.h>
 
+ZEND_EXTERN_MODULE_GLOBALS(openssl)
+
 void php_openssl_backend_shutdown(void)
 {
 	(void) 0;
+}
+
+void php_openssl_backend_init_libctx(OSSL_LIB_CTX **plibctx, char **ppropq)
+{
+	/* The return value is not checked because we cannot reasonable fail in GINIT so using NULL 
+	 * (default context) is probably better. */
+	*plibctx = OSSL_LIB_CTX_new();
+	*ppropq = NULL;
+}
+
+void php_openssl_backend_destroy_libctx(OSSL_LIB_CTX *libctx, char *propq)
+{
+	if (libctx != NULL) {
+		OSSL_LIB_CTX_free(libctx);
+	}
+	if (propq != NULL) {
+		free(propq);
+	}
+}
+
+EVP_PKEY_CTX *php_openssl_pkey_new_from_name(const char *name, int id)
+{
+	return EVP_PKEY_CTX_new_from_name(OPENSSL_G(libctx), name, OPENSSL_G(propq));
+}
+
+EVP_PKEY_CTX *php_openssl_pkey_new_from_pkey(EVP_PKEY *pkey)
+{
+	return  EVP_PKEY_CTX_new_from_pkey(OPENSSL_G(libctx), pkey, OPENSSL_G(propq));
 }
 
 EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
@@ -32,7 +62,7 @@ EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
 	BIGNUM *n = NULL, *e = NULL, *d = NULL, *p = NULL, *q = NULL;
 	BIGNUM *dmp1 = NULL, *dmq1 = NULL, *iqmp = NULL;
 	EVP_PKEY *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name("RSA", EVP_PKEY_RSA);
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
 
@@ -100,7 +130,7 @@ EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
 {
 	BIGNUM *p = NULL, *q = NULL, *g = NULL, *priv_key = NULL, *pub_key = NULL;
 	EVP_PKEY *param_key = NULL, *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_DSA, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name("DSA", EVP_PKEY_DSA);
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
 
@@ -144,7 +174,7 @@ EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
 	} else {
 		*is_private = true;
 		EVP_PKEY_CTX_free(ctx);
-		ctx = EVP_PKEY_CTX_new(param_key, NULL);
+		ctx = php_openssl_pkey_new_from_pkey(param_key);
 		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
 			goto cleanup;
 		}
@@ -168,7 +198,7 @@ EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private)
 {
 	BIGNUM *p = NULL, *q = NULL, *g = NULL, *priv_key = NULL, *pub_key = NULL;
 	EVP_PKEY *param_key = NULL, *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_DH, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name("DH", EVP_PKEY_DH);
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
 
@@ -219,7 +249,7 @@ EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private)
 	} else {
 		*is_private = true;
 		EVP_PKEY_CTX_free(ctx);
-		ctx = EVP_PKEY_CTX_new(param_key, NULL);
+		ctx = php_openssl_pkey_new_from_pkey(param_key);
 		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
 			goto cleanup;
 		}
@@ -250,7 +280,7 @@ EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 	unsigned char *point_q_buf = NULL;
 	EC_GROUP *group = NULL;
 	EVP_PKEY *param_key = NULL, *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name("EC", EVP_PKEY_EC);
 	BN_CTX *bctx = BN_CTX_new();
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
@@ -269,7 +299,7 @@ EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 			goto cleanup;
 		}
 
-		if (!(group = EC_GROUP_new_by_curve_name(nid))) {
+		if (!(group = EC_GROUP_new_by_curve_name_ex(OPENSSL_G(libctx), OPENSSL_G(propq), nid))) {
 			goto cleanup;
 		}
 
@@ -438,7 +468,7 @@ cleanup:
 }
 #endif
 
-void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_type, zval *data) {
+void php_openssl_pkey_object_curve_25519_448(zval *return_value, const char *name, zval *data) {
 	EVP_PKEY *pkey = NULL;
 	EVP_PKEY_CTX *ctx = NULL;
 	OSSL_PARAM *params = NULL;
@@ -466,7 +496,7 @@ void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_type, z
 	}
 
 	params = OSSL_PARAM_BLD_to_param(bld);
-	ctx = EVP_PKEY_CTX_new_id(key_type, NULL);
+	ctx = php_openssl_pkey_new_from_name(name, 0);
 	if (!params || !ctx) {
 		goto cleanup;
 	}
