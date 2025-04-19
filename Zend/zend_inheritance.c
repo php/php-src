@@ -3608,6 +3608,11 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_do_traits_method_binding(ce, traits_and_interfaces, trait_exclude_tables, trait_aliases, false, &trait_contains_abstract_methods);
 			zend_do_traits_constant_binding(ce, traits_and_interfaces);
 			zend_do_traits_property_binding(ce, traits_and_interfaces);
+
+			zend_function *fn;
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
+				zend_fixup_trait_method(fn, ce);
+			} ZEND_HASH_FOREACH_END();
 		}
 		if (parent) {
 			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
@@ -3618,6 +3623,13 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		if (ce->num_traits) {
 			if (trait_contains_abstract_methods) {
 				zend_do_traits_method_binding(ce, traits_and_interfaces, trait_exclude_tables, trait_aliases, true, &trait_contains_abstract_methods);
+
+				/* New abstract methods may have been added, make sure to add
+				 * ZEND_ACC_IMPLICIT_ABSTRACT_CLASS to ce. */
+				zend_function *fn;
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
+					zend_fixup_trait_method(fn, ce);
+				} ZEND_HASH_FOREACH_END();
 			}
 
 			if (trait_exclude_tables) {
@@ -3634,11 +3646,6 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			if (trait_aliases) {
 				efree(trait_aliases);
 			}
-
-			zend_function *fn;
-			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
-				zend_fixup_trait_method(fn, ce);
-			} ZEND_HASH_FOREACH_END();
 		}
 		if (ce->num_interfaces) {
 			/* Also copy the parent interfaces here, so we don't need to reallocate later. */

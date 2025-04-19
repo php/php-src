@@ -25,4 +25,4 @@ B::createApp();
 
 ?>
 --EXPECTF--
-Fatal error: Cannot make non static method A::createApp() static in class C in %s on line %d
+Fatal error: Cannot make non static method A::createApp() static in class B in %s on line %d
