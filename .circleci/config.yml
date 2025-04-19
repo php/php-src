@@ -179,9 +179,10 @@ jobs:
               --no-progress \
               --offline \
               --show-diff \
+              --show-out \
               --show-slow 1000 \
               --set-timeout 120 \
-              --repeat 2
+              --repeat 2 ext/opcache
 
 workflows:
   push-workflow:
