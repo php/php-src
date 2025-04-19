@@ -30,13 +30,7 @@
 #include "php_zip.h"
 #include "php_zip_arginfo.h"
 
-#ifdef HAVE_GLOB
-#ifndef PHP_WIN32
-#include <glob.h>
-#else
-#include "win32/glob.h"
-#endif
-#endif
+#include "php_glob.h"
 
 /* {{{ Resource le */
 static int le_zip_dir;
@@ -580,48 +574,15 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
-#ifdef HAVE_GLOB /* {{{ */
-#ifndef GLOB_ONLYDIR
-#define GLOB_ONLYDIR (1<<30)
-#define GLOB_EMULATE_ONLYDIR
-#define GLOB_FLAGMASK (~GLOB_ONLYDIR)
-#else
-#define GLOB_FLAGMASK (~0)
-#endif
-#ifndef GLOB_BRACE
-# define GLOB_BRACE 0
-#endif
-#ifndef GLOB_MARK
-# define GLOB_MARK 0
-#endif
-#ifndef GLOB_NOSORT
-# define GLOB_NOSORT 0
-#endif
-#ifndef GLOB_NOCHECK
-# define GLOB_NOCHECK 0
-#endif
-#ifndef GLOB_NOESCAPE
-# define GLOB_NOESCAPE 0
-#endif
-#ifndef GLOB_ERR
-# define GLOB_ERR 0
-#endif
-
-/* This is used for checking validity of passed flags (passing invalid flags causes segfault in glob()!! */
-#define GLOB_AVAILABLE_FLAGS (0 | GLOB_BRACE | GLOB_MARK | GLOB_NOSORT | GLOB_NOCHECK | GLOB_NOESCAPE | GLOB_ERR | GLOB_ONLYDIR)
-
-#endif /* }}} */
-
 int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_value) /* {{{ */
 {
-#ifdef HAVE_GLOB
 	int cwd_skip = 0;
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
 	char *result;
 #endif
-	glob_t globbuf;
+	php_glob_t globbuf;
 	size_t n;
 	int ret;
 
@@ -630,7 +591,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 		return -1;
 	}
 
-	if ((GLOB_AVAILABLE_FLAGS & flags) != flags) {
+	if ((PHP_GLOB_AVAILABLE_FLAGS & flags) != flags) {
 
 		php_error_docref(NULL, E_WARNING, "At least one of the passed flags is invalid or not supported on this platform");
 		return -1;
@@ -655,12 +616,12 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 #endif
 
 	globbuf.gl_offs = 0;
-	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
-#ifdef GLOB_NOMATCH
-		if (GLOB_NOMATCH == ret) {
+	if (0 != (ret = php_glob(pattern, flags & PHP_GLOB_FLAGMASK, NULL, &globbuf))) {
+#ifdef PHP_GLOB_NOMATCH
+		if (PHP_GLOB_NOMATCH == ret) {
 			/* Some glob implementation simply return no data if no matches
-			   were found, others return the GLOB_NOMATCH error code.
-			   We don't want to treat GLOB_NOMATCH as an error condition
+			   were found, others return the PHP_GLOB_NOMATCH error code.
+			   We don't want to treat PHP_GLOB_NOMATCH as an error condition
 			   so that PHP glob() behaves the same on both types of
 			   implementations and so that 'foreach (glob() as ...'
 			   can be used for simple glob() calls without further error
@@ -687,7 +648,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
-		/* we need to do this every time since GLOB_ONLYDIR does not guarantee that
+		/* we need to do this every time since PHP_GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
 		 * following:
 		 * If the information about the type of the file is easily available
@@ -695,7 +656,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 		 * determine the information for each file. I.e., the caller must still be
 		 * able to filter directories out.
 		 */
-		if (flags & GLOB_ONLYDIR) {
+		if (flags & PHP_GLOB_ONLYDIR) {
 			zend_stat_t s = {0};
 
 			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
@@ -710,12 +671,8 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 	}
 
 	ret = globbuf.gl_pathc;
-	globfree(&globbuf);
+	php_globfree(&globbuf);
 	return ret;
-#else
-	zend_throw_error(NULL, "Glob support is not available");
-	return 0;
-#endif  /* HAVE_GLOB */
 }
 /* }}} */
 
