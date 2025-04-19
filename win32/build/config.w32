@@ -267,13 +267,22 @@ if (TARGET_ARCH == 'arm64') {
 	DEFINE('FIBER_ASM_FLAGS', '/DBOOST_CONTEXT_EXPORT=EXPORT /nologo /c /Fo');
 }
 
-ADD_FLAG('ASM_OBJS', '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj');
+var all_asm_objs = '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj';
+if (TARGET_ARCH == 'x64') {
+	all_asm_objs += ' $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj';
+}
+ADD_FLAG('ASM_OBJS', all_asm_objs);
 
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\jump_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(FIBER_ASM_ABI).obj Zend\\asm\\jump_$(FIBER_ASM_ABI).asm');
 
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\make_$(FIBER_ASM_ABI).obj Zend\\asm\\make_$(FIBER_ASM_ABI).asm');
+
+if (TARGET_ARCH == 'x64') {
+	MFO.WriteLine('$(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj: Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
+	MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
+}
 
 ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 if (VS_TOOLSET && VCVERS >= 1914) {
