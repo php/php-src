@@ -137,6 +137,7 @@ PHP                                                                        NEWS
   . Implement GH-15387 Pdo\Pgsql::setAttribute(PDO::ATTR_PREFETCH, 0) or
     Pdo\Pgsql::prepare(…, [ PDO::ATTR_PREFETCH => 0 ]) make fetch() lazy
     instead of storing the whole result set in memory (Guillaume Outters)
+  . Removed unused constants Pdo\Pgsql::TRANSACTION_*.
 
 - PDO_SQLITE:
   . throw on null bytes / resolve GH-13952 (divinity76).

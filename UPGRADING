@@ -101,6 +101,9 @@ PHP 8.5 UPGRADE NOTES
   . A ValueError is now thrown when trying to set a cursor name that is too
     long on a PDOStatement resulting from the Firebird driver.
 
+- PDO_PGSQL:
+  . Removed unused constants Pdo\Pgsql::TRANSACTION_*.
+
 - Session:
   . Attempting to write session data where $_SESSION has a key containing
     the pipe character will now emit a warning instead of silently failing.

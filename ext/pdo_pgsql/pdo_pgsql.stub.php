@@ -18,21 +18,6 @@ class Pgsql extends \PDO
     public const int ATTR_RESULT_MEMORY_SIZE = UNKNOWN;
 #endif
 
-    /** @cvalue PGSQL_TRANSACTION_IDLE */
-    public const int TRANSACTION_IDLE = UNKNOWN;
-
-    /** @cvalue PGSQL_TRANSACTION_ACTIVE */
-    public const int TRANSACTION_ACTIVE = UNKNOWN;
-
-    /** @cvalue PGSQL_TRANSACTION_INTRANS */
-    public const int TRANSACTION_INTRANS = UNKNOWN;
-
-    /**  @cvalue PGSQL_TRANSACTION_INERROR */
-    public const int TRANSACTION_INERROR = UNKNOWN;
-
-    /** @cvalue PGSQL_TRANSACTION_UNKNOWN */
-    public const int TRANSACTION_UNKNOWN = UNKNOWN;
-
     public function escapeIdentifier(string $input): string {}
 
     public function copyFromArray(string $tableName, array $rows, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}
