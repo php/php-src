@@ -1054,7 +1054,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	int32_t pos2 = 0;
 	int32_t usrch_pos = 0;
 
-	while (pos1 != UBRK_DONE) {
+	while (true) {
 		current1 = ubrk_current(bi1);
 		pos1 = ubrk_next(bi1);
 		if (pos1 == UBRK_DONE) {
