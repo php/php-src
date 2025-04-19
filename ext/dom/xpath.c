@@ -527,7 +527,7 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendc(&output, ',');
 		}
 		ZEND_ASSERT(ptr == end);
-		ZSTR_VAL(output.s)[output.s->len - 1] = ')';
+		ZSTR_VAL(output.s)[ZSTR_LEN(output.s) - 1] = ')';
 		RETURN_STR(smart_str_extract(&output));
 	}
 }
