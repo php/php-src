@@ -1,5 +1,5 @@
 --TEST--
-GH-17383 PDOException has wrong code and message since PHP 8.4
+GH-17383 (PDOException has wrong code and message since PHP 8.4)
 --EXTENSIONS--
 pdo_firebird
 --SKIPIF--
