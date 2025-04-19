@@ -82,31 +82,8 @@ zend_result zend_optimizer_eval_unary_op(zval *result, uint8_t opcode, zval *op1
 
 zend_result zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* {{{ */
 {
-	switch (type) {
-		case IS_NULL:
-			ZVAL_NULL(result);
-			return SUCCESS;
-		case _IS_BOOL:
-			ZVAL_BOOL(result, zval_is_true(op1));
-			return SUCCESS;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(op1));
-			return SUCCESS;
-		case IS_DOUBLE:
-			ZVAL_DOUBLE(result, zval_get_double(op1));
-			return SUCCESS;
-		case IS_STRING:
-			/* Conversion from double to string takes into account run-time
-			   'precision' setting and cannot be evaluated at compile-time */
-			if (Z_TYPE_P(op1) != IS_ARRAY && Z_TYPE_P(op1) != IS_DOUBLE) {
-				ZVAL_STR(result, zval_get_string(op1));
-				return SUCCESS;
-			}
-			break;
-		case IS_ARRAY:
-			ZVAL_COPY(result, op1);
-			convert_to_array(result);
-			return SUCCESS;
+	if (zend_try_ct_eval_cast(result, type, op1)) {
+		return SUCCESS;
 	}
 	return FAILURE;
 }

@@ -11842,6 +11842,34 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 }
 /* }}} */
 
+bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1)
+{
+	switch (type) {
+		case _IS_BOOL:
+			ZVAL_BOOL(result, zval_is_true(op1));
+			return true;
+		case IS_LONG:
+			ZVAL_LONG(result, zval_get_long(op1));
+			return true;
+		case IS_DOUBLE:
+			ZVAL_DOUBLE(result, zval_get_double(op1));
+			return true;
+		case IS_STRING:
+			/* Conversion from double to string takes into account run-time
+			   'precision' setting and cannot be evaluated at compile-time */
+			if (Z_TYPE_P(op1) != IS_ARRAY && Z_TYPE_P(op1) != IS_DOUBLE) {
+				ZVAL_STR(result, zval_get_string(op1));
+				return true;
+			}
+			break;
+		case IS_ARRAY:
+			ZVAL_COPY(result, op1);
+			convert_to_array(result);
+			return true;
+	}
+	return false;
+}
+
 static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
@@ -12129,6 +12157,10 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			return;
 		case ZEND_AST_CAST:
 			zend_eval_const_expr(&ast->child[0]);
+			if (ast->child[0]->kind == ZEND_AST_ZVAL
+			 && zend_try_ct_eval_cast(&result, ast->attr, zend_ast_get_zval(ast->child[0]))) {
+				break;
+			}
 			return;
 		default:
 			return;
