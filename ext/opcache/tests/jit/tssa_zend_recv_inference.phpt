@@ -8,6 +8,7 @@ opcache.enable_cli=1
 opcache.jit=tracing
 opcache.jit_buffer_size=16M
 opcache.jit_debug=2
+opcache.jit_hot_func=2
 --FILE--
 <?php
 final class Foo {
@@ -18,7 +19,7 @@ function test(Foo $obj) {
 }
 
 $foo = new Foo;
-for ($i=0;$i<3;$i++) {
+for ($i=0; $i < 5; $i++) {
   test($foo);
 }
 ?>
