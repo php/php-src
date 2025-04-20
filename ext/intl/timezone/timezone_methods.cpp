@@ -419,7 +419,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 	TIMEZONE_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"Odbz/z/", &object, TimeZone_ce_ptr, &date, &local, &rawOffsetArg,
+			"Odbzz", &object, TimeZone_ce_ptr, &date, &local, &rawOffsetArg,
 			&dstOffsetArg) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -431,10 +431,8 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
 
-	zval_ptr_dtor(rawOffsetArg);
-	ZVAL_LONG(rawOffsetArg, rawOffset);
-	zval_ptr_dtor(dstOffsetArg);
-	ZVAL_LONG(dstOffsetArg, dstOffset);
+	ZEND_TRY_ASSIGN_REF_LONG(rawOffsetArg, rawOffset);
+	ZEND_TRY_ASSIGN_REF_LONG(dstOffsetArg, dstOffset);
 
 	RETURN_TRUE;
 }
