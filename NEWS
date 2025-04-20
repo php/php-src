@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     inaccurate sunrise and sunset times, but other calculated times are
     correct) (JiriJozif).
 
+- Standard:
+  . Fixed bug GH-17403 (Potential deadlock when putenv fails). (nielsdos)
+
 08 May 2025, PHP 8.3.21
 
 - Core:
