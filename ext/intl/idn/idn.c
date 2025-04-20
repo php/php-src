@@ -57,6 +57,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	UErrorCode	  status = U_ZERO_ERROR;
 	UIDNA		  *uts46;
 	int32_t		  len;
+	int32_t       buffer_capac;
 	zend_string	  *buffer;
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 
@@ -66,35 +67,24 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	if (mode == INTL_IDN_TO_ASCII) {
-		const int32_t buffer_capac = 255;
+		buffer_capac = 255;
 		buffer = zend_string_alloc(buffer_capac, 0);
 		len = uidna_nameToASCII_UTF8(uts46, ZSTR_VAL(domain), ZSTR_LEN(domain),
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
-		if (len >= buffer_capac || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
-			uidna_close(uts46);
-			zend_string_efree(buffer);
-			RETURN_FALSE;
-		}
 	} else {
-		const int32_t buffer_capac = 252*4;
+		buffer_capac = 252*4;
 		buffer = zend_string_alloc(buffer_capac, 0);
 		len = uidna_nameToUnicodeUTF8(uts46, ZSTR_VAL(domain), ZSTR_LEN(domain),
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
-		if (len >= buffer_capac || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
-			uidna_close(uts46);
-			zend_string_efree(buffer);
-			RETURN_FALSE;
-		}
+	}
+	if (len >= buffer_capac || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
+		uidna_close(uts46);
+		zend_string_efree(buffer);
+		RETURN_FALSE;
 	}
 
 	ZSTR_VAL(buffer)[len] = '\0';
 	ZSTR_LEN(buffer) = len;
-
-	if (info.errors == 0) {
-		RETVAL_STR_COPY(buffer);
-	} else {
-		RETVAL_FALSE;
-	}
 
 	if (idna_info) {
 		add_assoc_str_ex(idna_info, "result", sizeof("result")-1, zend_string_copy(buffer));
@@ -103,7 +93,13 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
 	}
 
-	zend_string_release(buffer);
+	if (info.errors == 0) {
+		RETVAL_STR(buffer);
+	} else {
+		zend_string_release_ex(buffer, false);
+		RETVAL_FALSE;
+	}
+
 	uidna_close(uts46);
 }
 
