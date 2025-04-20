@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-18304 (Changing the properties of a DateInterval through
     dynamic properties triggers a SegFault). (nielsdos)
+  . Fix some leaks in php_scandir. (nielsdos)
 
 - Filter:
   . Fixed bug GH-18309 (ipv6 filter integer overflow). (nielsdos)
