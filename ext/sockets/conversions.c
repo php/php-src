@@ -1024,6 +1024,7 @@ static void to_zval_read_control_array(const char *msghdr_c, zval *zv, res_conte
 	uint32_t		i = 1;
 
 	array_init(zv);
+	zend_hash_real_init_packed(Z_ARRVAL_P(zv));
 
 	for (cmsg = CMSG_FIRSTHDR(msg);
 			cmsg != NULL && !ctx->err.has_error;
