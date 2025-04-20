@@ -42,7 +42,8 @@ static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, size_t s
 	}
 	INTL_METHOD_CHECK_STATUS(mfo, "Parsing failed");
 
-	array_init(return_value);
+	array_init_size(return_value, count);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for(i=0;i<count;i++) {
 		add_next_index_zval(return_value, &fargs[i]);
 	}
