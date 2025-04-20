@@ -315,7 +315,7 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 	char *default_locale = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(locale_name)
+		Z_PARAM_PATH_STR(locale_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(locale_name) == 0) {
@@ -481,7 +481,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(loc_name_len == 0) {
@@ -568,9 +568,9 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(disp_loc_name, disp_loc_name_len)
+		Z_PARAM_PATH_OR_NULL(disp_loc_name, disp_loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(loc_name_len > ULOC_FULLNAME_CAPACITY) {
@@ -735,7 +735,7 @@ PHP_FUNCTION( locale_get_keywords )
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
@@ -1126,7 +1126,7 @@ PHP_FUNCTION(locale_parse)
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
@@ -1166,7 +1166,7 @@ PHP_FUNCTION(locale_get_all_variants)
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(loc_name_len == 0) {
@@ -1260,8 +1260,8 @@ PHP_FUNCTION(locale_filter_matches)
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(lang_tag, lang_tag_len)
-		Z_PARAM_STRING(loc_range,  loc_range_len)
+		Z_PARAM_PATH(lang_tag, lang_tag_len)
+		Z_PARAM_PATH(loc_range,  loc_range_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(boolCanonical)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1434,6 +1434,10 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 			zend_argument_type_error(2, "must only contain string values");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
+		if (zend_str_has_nul_byte(Z_STR_P(ele_value))) {
+			zend_argument_value_error(2, "must not contain any null bytes");
+			LOOKUP_CLEAN_RETURN(NULL);
+		}
 		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
 		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[cur_arr_len*2]);
 		if(result == 0) {
@@ -1535,10 +1539,10 @@ PHP_FUNCTION(locale_lookup)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY(arr)
-		Z_PARAM_STRING(loc_range, loc_range_len)
+		Z_PARAM_PATH(loc_range, loc_range_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(boolCanonical)
-		Z_PARAM_STR_OR_NULL(fallback_loc_str)
+		Z_PARAM_PATH_STR_OR_NULL(fallback_loc_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(loc_range_len == 0) {
@@ -1626,7 +1630,7 @@ PHP_FUNCTION(locale_is_right_to_left)
 	size_t locale_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!locale_len) {

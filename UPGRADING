@@ -212,6 +212,8 @@ PHP 8.5 UPGRADE NOTES
   . grapheme_extract() properly assigns $next value when skipping over
     invalid starting bytes. Previously there were cases where it would
     point to the start of the grapheme boundary instead of the end.
+  . Locale:: methods throw a ValueError when locale inputs contain null
+    bytes.
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
