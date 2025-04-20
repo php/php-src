@@ -4292,10 +4292,10 @@ PHP_FUNCTION(imageresolution)
 		RETURN_TRUE;
 	}
 
-	array_init_size(return_value, 2);
-	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-	add_index_long(return_value, 0, gdImageResolutionX(im));
-	add_index_long(return_value, 1, gdImageResolutionY(im));
+	zval imx, imy;
+	ZVAL_LONG(&imx, gdImageResolutionX(im));
+	ZVAL_LONG(&imy, gdImageResolutionY(im));
+	RETURN_ARR(zend_new_pair(&imx, &imy));
 }
 /* }}} */
 
