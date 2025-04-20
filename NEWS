@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed GH-18243 imagettftext() overflow/underflow on font size value.
     (David Carlier)
 
+- Intl:
+  . Fix reference support for intltz_get_offset(). (nielsdos)
+
 - LDAP:
   . Fixed bug GH-17776 (LDAP_OPT_X_TLS_* options can't be overridden). (Remi)
   . Fix NULL deref on high modification key. (nielsdos)
