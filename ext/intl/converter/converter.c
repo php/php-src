@@ -294,7 +294,8 @@ static void php_converter_from_u_callback(const void *context,
 	zval zargs[4];
 
 	ZVAL_LONG(&zargs[0], reason);
-	array_init(&zargs[1]);
+	array_init_size(&zargs[1], length);
+	zend_hash_real_init_packed(Z_ARRVAL(zargs[1]));
 	int i = 0;
 	while (i < length) {
 		UChar32 c;
@@ -807,7 +808,8 @@ PHP_METHOD(UConverter, getAvailable) {
 
 	intl_error_reset(NULL);
 
-	array_init(return_value);
+	array_init_size(return_value, count);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for(i = 0; i < count; i++) {
 		const char *name = ucnv_getAvailableName(i);
 		add_next_index_string(return_value, name);
@@ -833,7 +835,8 @@ PHP_METHOD(UConverter, getAliases) {
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, count);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for(i = 0; i < count; i++) {
 		const char *alias;
 
@@ -856,8 +859,9 @@ PHP_METHOD(UConverter, getStandards) {
 	ZEND_PARSE_PARAMETERS_NONE();
 	intl_error_reset(NULL);
 
-	array_init(return_value);
 	count = ucnv_countStandards();
+	array_init_size(return_value, count);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for(i = 0; i < count; i++) {
 		UErrorCode error = U_ZERO_ERROR;
 		const char *name = ucnv_getStandard(i, &error);
