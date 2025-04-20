@@ -2438,7 +2438,7 @@ PHP_FUNCTION(imagecolorsforindex)
 	col = index;
 
 	if ((col >= 0 && gdImageTrueColor(im)) || (!gdImageTrueColor(im) && col >= 0 && col < gdImageColorsTotal(im))) {
-		array_init(return_value);
+		array_init_size(return_value, 4);
 
 		add_assoc_long(return_value,"red",  gdImageRed(im,col));
 		add_assoc_long(return_value,"green", gdImageGreen(im,col));
@@ -3303,11 +3303,12 @@ PHP_FUNCTION(imagegetclip)
 
 	gdImageGetClip(im, &x1, &y1, &x2, &y2);
 
-	array_init(return_value);
-	add_next_index_long(return_value, x1);
-	add_next_index_long(return_value, y1);
-	add_next_index_long(return_value, x2);
-	add_next_index_long(return_value, y2);
+	array_init_size(return_value, 4);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+	add_index_long(return_value, 0, x1);
+	add_index_long(return_value, 1, y1);
+	add_index_long(return_value, 2, x2);
+	add_index_long(return_value, 3, y2);
 }
 /* }}} */
 
@@ -3398,11 +3399,12 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 8);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	/* return array with the text's bounding box */
 	for (i = 0; i < 8; i++) {
-		add_next_index_long(return_value, brect[i]);
+		add_index_long(return_value, i, brect[i]);
 	}
 }
 /* }}} */
@@ -4130,7 +4132,8 @@ PHP_FUNCTION(imageaffinematrixget)
 	if (res == GD_FALSE) {
 		RETURN_FALSE;
 	} else {
-		array_init(return_value);
+		array_init_size(return_value, 6);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		for (uint8_t i = 0; i < 6; i++) {
 			add_index_double(return_value, i, affine[i]);
 		}
@@ -4196,7 +4199,8 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 6);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for (i = 0; i < 6; i++) {
 		add_index_double(return_value, i, mr[i]);
 	}
@@ -4288,9 +4292,10 @@ PHP_FUNCTION(imageresolution)
 		RETURN_TRUE;
 	}
 
-	array_init(return_value);
-	add_next_index_long(return_value, gdImageResolutionX(im));
-	add_next_index_long(return_value, gdImageResolutionY(im));
+	zval imx, imy;
+	ZVAL_LONG(&imx, gdImageResolutionX(im));
+	ZVAL_LONG(&imy, gdImageResolutionY(im));
+	RETURN_ARR(zend_new_pair(&imx, &imy));
 }
 /* }}} */
 
