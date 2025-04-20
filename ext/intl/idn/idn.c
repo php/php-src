@@ -90,12 +90,6 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	ZSTR_VAL(buffer)[len] = '\0';
 	ZSTR_LEN(buffer) = len;
 
-	if (info.errors == 0) {
-		RETVAL_STR_COPY(buffer);
-	} else {
-		RETVAL_FALSE;
-	}
-
 	if (idna_info) {
 		add_assoc_str_ex(idna_info, "result", sizeof("result")-1, zend_string_copy(buffer));
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
@@ -103,7 +97,13 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
 	}
 
-	zend_string_release(buffer);
+	if (info.errors == 0) {
+		RETVAL_STR(buffer);
+	} else {
+		zend_string_release_ex(buffer, false);
+		RETVAL_FALSE;
+	}
+
 	uidna_close(uts46);
 }
 
