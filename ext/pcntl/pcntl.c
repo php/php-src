@@ -956,6 +956,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 			RETURN_THROWS();
 		}
 
+		zend_hash_real_init_packed(Z_ARRVAL_P(user_old_set));
 		for (unsigned int signal_no = 1; signal_no < PCNTL_G(num_signals); ++signal_no) {
 			if (sigismember(&old_set, signal_no) != 1) {
 				continue;
@@ -1680,6 +1681,7 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 
 	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (zend_ulong i = 0; i < maxcpus; i ++) {
 		if (PCNTL_CPU_ISSET(i, mask)) {
