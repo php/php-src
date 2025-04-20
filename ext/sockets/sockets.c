@@ -1973,6 +1973,7 @@ PHP_FUNCTION(socket_get_option)
 				size_t arrlen = optlen / sizeof(struct fil_info);
 
 				array_init_size(return_value, arrlen);
+				zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 				for (i = 0; i < arrlen; i++) {
 					add_index_string(return_value, i, fi[i].fi_name);
@@ -2373,7 +2374,7 @@ PHP_FUNCTION(socket_create_pair)
 		RETURN_FALSE;
 	}
 
-	fds_array_zval = zend_try_array_init(fds_array_zval);
+	fds_array_zval = zend_try_array_init_size(fds_array_zval, 2);
 	if (!fds_array_zval) {
 		zval_ptr_dtor(&retval[0]);
 		zval_ptr_dtor(&retval[1]);
@@ -2776,6 +2777,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 	}
 
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (rp = result; rp != NULL; rp = rp->ai_next) {
 		if (rp->ai_family != AF_UNSPEC) {
