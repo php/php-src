@@ -631,6 +631,7 @@ PHP_FUNCTION(gzfile)
 
 	/* Initialize return array */
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf, 0, sizeof(buf));
