@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     hooks). (ilutov)
   . Fixed bug GH-18304 (Changing the properties of a DateInterval through
     dynamic properties triggers a SegFault). (nielsdos)
+  . Fix some leaks in php_scandir. (nielsdos)
 
 - DBA:
   . FIxed bug GH-18247 dba_popen() memory leak on invalid path. (David Carlier)
