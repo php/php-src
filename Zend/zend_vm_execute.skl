@@ -7,9 +7,18 @@
 # pragma GCC optimize("no-gcse")
 # pragma GCC optimize("no-ivopts")
 #endif
+#ifdef _WIN64
+/* See save_xmm_x86_64_ms_masm.asm */
+void {%EXECUTOR_NAME%}_ex_real(zend_execute_data *ex)
+#else
 ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *ex)
+#endif
 {
 	DCL_OPLINE
+
+#if defined(__GNUC__) && defined(__aarch64__)
+	__asm__ __volatile__ (""::: "v8","v9","v10","v11","v12","v13","v14","v15");
+#endif
 
 	{%HELPER_VARS%}
 

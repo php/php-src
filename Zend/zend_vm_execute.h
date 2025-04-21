@@ -54953,9 +54953,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDL
 # pragma GCC optimize("no-gcse")
 # pragma GCC optimize("no-ivopts")
 #endif
+#ifdef _WIN64
+/* See save_xmm_x86_64_ms_masm.asm */
+void execute_ex_real(zend_execute_data *ex)
+#else
 ZEND_API void execute_ex(zend_execute_data *ex)
+#endif
 {
 	DCL_OPLINE
+
+#if defined(__GNUC__) && defined(__aarch64__)
+	__asm__ __volatile__ (""::: "v8","v9","v10","v11","v12","v13","v14","v15");
+#endif
 
 #if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG)
 	struct {
