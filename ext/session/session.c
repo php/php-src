@@ -1727,7 +1727,7 @@ PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, s
 PHP_FUNCTION(session_set_cookie_params)
 {
 	HashTable *options_ht;
-	zend_long lifetime_long;
+	zend_long lifetime_long = 0;
 	zend_string *lifetime = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	bool secure = 0, secure_null = 1;
 	bool httponly = 0, httponly_null = 1;
