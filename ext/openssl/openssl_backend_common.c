@@ -83,9 +83,10 @@ void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, 
 				if (Z_TYPE_P(data) == IS_ARRAY) {
 					add_next_index_stringl(data, (const char *)to_add, to_add_len);
 				} else if (Z_TYPE_P(data) == IS_STRING) {
-					array_init(&tmp);
-					add_next_index_str(&tmp, zend_string_copy(Z_STR_P(data)));
-					add_next_index_stringl(&tmp, (const char *)to_add, to_add_len);
+					array_init_size(&tmp, 2);
+					zend_hash_real_init_packed(Z_ARRVAL(tmp));
+					add_index_str(&tmp, 0, zend_string_copy(Z_STR_P(data)));
+					add_index_stringl(&tmp, 1, (const char *)to_add, to_add_len);
 					zend_hash_str_update(Z_ARRVAL(subitem), sname, strlen(sname), &tmp);
 				}
 			} else {
