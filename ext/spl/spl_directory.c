@@ -721,10 +721,8 @@ static void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_l
 		path = zend_strpprintf(0, "glob://%s", ZSTR_VAL(path));
 		spl_filesystem_dir_open(intern, path);
 		zend_string_release(path);
-	} else
-	{
+	} else {
 		spl_filesystem_dir_open(intern, path);
-
 	}
 	zend_restore_error_handling(&error_handling);
 }
