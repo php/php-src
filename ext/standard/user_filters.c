@@ -476,16 +476,19 @@ PHP_FUNCTION(stream_get_filters)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	array_init(return_value);
 
 	filters_hash = php_get_stream_filters_hash();
 
 	if (filters_hash && !HT_IS_PACKED(filters_hash)) {
+		array_init(return_value);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_MAP_FOREACH_STR_KEY(filters_hash, filter_name) {
 			if (filter_name) {
 				add_next_index_str(return_value, zend_string_copy(filter_name));
 			}
 		} ZEND_HASH_FOREACH_END();
+	} else {
+		RETURN_EMPTY_ARRAY();
 	}
 	/* It's okay to return an empty array if no filters are registered */
 }
