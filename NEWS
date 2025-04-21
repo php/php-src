@@ -56,6 +56,9 @@ PHP                                                                        NEWS
 - PDO Sqlite:
   . Fix memory leak on error return of collation callback. (nielsdos)
 
+- PgSql:
+  . Fix uouv in pg_put_copy_end(). (nielsdos)
+
 - SPL:
   . Fixed bug GH-18322 (SplObjectStorage debug handler mismanages memory).
     (nielsdos)

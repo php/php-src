@@ -6215,7 +6215,7 @@ PHP_FUNCTION(pg_put_copy_end)
 {
 	zval *pgsql_link;
 	pgsql_link_handle *link;
-	zend_string *error;
+	zend_string *error = NULL;
 	char *err = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
