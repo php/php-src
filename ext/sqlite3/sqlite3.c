@@ -701,9 +701,10 @@ PHP_METHOD(SQLite3, querySingle)
 			if (!entire_row) {
 				sqlite_value_to_zval(stmt, 0, return_value);
 			} else {
-				int i = 0;
-				array_init(return_value);
-				for (i = 0; i < sqlite3_data_count(stmt); i++) {
+				int i = 0, count = sqlite3_data_count(stmt);
+
+				array_init_size(return_value, count);
+				for (i = 0; i < count; i++) {
 					zval data;
 					sqlite_value_to_zval(stmt, i, &data);
 					add_assoc_zval(return_value, (char*)sqlite3_column_name(stmt, i), &data);
