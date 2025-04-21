@@ -57,8 +57,7 @@
 
 #include "php_glob.h"
 
-#if defined(HAVE_GLOB) && defined(PHP_SYSTEM_GLOB)
-#else
+#if !(defined(HAVE_GLOB) && defined(PHP_SYSTEM_GLOB))
 
 #ifdef PHP_WIN32
 #if _MSC_VER < 1800
