@@ -202,6 +202,7 @@ static zend_result link_error_list_read(mysqli_object *obj, zval *retval, bool q
 
 	if (mysql) {
 		array_init(retval);
+		zend_hash_real_init_packed(Z_ARRVAL_P(retval));
 		MYSQLND_ERROR_LIST_ELEMENT * message;
 		zend_llist_position pos;
 		for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(&mysql->mysql->data->error_info->error_list, &pos);
@@ -209,7 +210,7 @@ static zend_result link_error_list_read(mysqli_object *obj, zval *retval, bool q
 				message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(&mysql->mysql->data->error_info->error_list, &pos))
 		{
 			zval single_error;
-			array_init(&single_error);
+			array_init_size(&single_error, 3);
 			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
 			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
 			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
@@ -269,7 +270,8 @@ static zend_result result_lengths_read(mysqli_object *obj, zval *retval, bool qu
 	} else {
 		zend_ulong i;
 
-		array_init(retval);
+		array_init_size(retval, field_count);
+		zend_hash_real_init_packed(Z_ARRVAL_P(retval));
 
 		for (i = 0; i < field_count; i++) {
 			add_index_long(retval, i, ret[i]);

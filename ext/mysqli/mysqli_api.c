@@ -696,8 +696,14 @@ PHP_FUNCTION(mysqli_fetch_fields)
 
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	array_init(return_value);
 	num_fields = mysql_num_fields(result);
+
+	if (UNEXPECTED(!num_fields)) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	array_init_size(return_value, num_fields);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (i = 0; i < num_fields; i++) {
 		const MYSQL_FIELD *field = mysql_fetch_field_direct(result, i);
@@ -762,8 +768,14 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
 	num_fields = mysql_num_fields(result);
+
+	if (UNEXPECTED(!num_fields)) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	array_init_size(return_value, num_fields);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (i = 0; i < num_fields; i++) {
 		add_index_long(return_value, i, ret[i]);

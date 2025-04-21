@@ -433,6 +433,7 @@ PHP_FUNCTION(mysqli_fetch_all)
 	}
 
 	array_init_size(return_value, mysql_num_rows(result));
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	zend_ulong i = 0;
 	do {
@@ -487,12 +488,13 @@ PHP_FUNCTION(mysqli_error_list)
 	MYSQLND_ERROR_LIST_ELEMENT * message;
 	zend_llist_position pos;
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(&mysql->mysql->data->error_info->error_list, &pos);
 			message;
 			message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(&mysql->mysql->data->error_info->error_list, &pos))
 	{
 		zval single_error;
-		array_init(&single_error);
+		array_init_size(&single_error, 3);
 		add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
 		add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
@@ -515,12 +517,13 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		MYSQLND_ERROR_LIST_ELEMENT * message;
 		zend_llist_position pos;
 		array_init(return_value);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(&stmt->stmt->data->error_info->error_list, &pos);
 			 message;
 			 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(&stmt->stmt->data->error_info->error_list, &pos))
 		{
 			zval single_error;
-			array_init(&single_error);
+			array_init_size(&single_error, 3);
 			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
 			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
 			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
@@ -730,6 +733,7 @@ static void mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, 
 
 	array_init(&proxy);
 	if (in_array) {
+		zend_hash_real_init_packed(Z_ARRVAL(proxy));
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(in_zval_array), elem) {
 			MY_MYSQL *mysql;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
@@ -1091,7 +1095,7 @@ PHP_FUNCTION(mysqli_get_links_stats)
 		RETURN_THROWS();
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 3);
 	add_assoc_long_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));
 	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks") - 1, MyG(num_active_persistent));
 	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks") - 1, MyG(num_inactive_persistent));
