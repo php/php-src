@@ -415,7 +415,7 @@ done:
 static unsigned int php_htoi_single(unsigned char x)
 {
 	ZEND_ASSERT((x >= 'a' && x <= 'f') || (x >= 'A' && x <= 'F') || (x >= '0' && x <= '9'));
-    return 9 * (x >> 6) + (x & 017);
+	return 9 * (x >> 6) + (x & 0xf);
 }
 
 /* {{{ php_htoi */
