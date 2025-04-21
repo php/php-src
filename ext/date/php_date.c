@@ -3061,7 +3061,6 @@ static void zval_from_error_container(zval *z, const timelib_error_container *er
 
 	add_assoc_long(z, "warning_count", error->warning_count);
 	array_init_size(&element, error->warning_count);
-	zend_hash_real_init_packed(Z_ARRVAL(element));
 	for (i = 0; i < error->warning_count; i++) {
 		add_index_string(&element, error->warning_messages[i].position, error->warning_messages[i].message);
 	}
@@ -3069,7 +3068,6 @@ static void zval_from_error_container(zval *z, const timelib_error_container *er
 
 	add_assoc_long(z, "error_count", error->error_count);
 	array_init_size(&element, error->error_count);
-	zend_hash_real_init_packed(Z_ARRVAL(element));
 	for (i = 0; i < error->error_count; i++) {
 		add_index_string(&element, error->error_messages[i].position, error->error_messages[i].message);
 	}
