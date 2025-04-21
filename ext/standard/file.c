@@ -1788,16 +1788,11 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 		) {
 			char *ch = ZSTR_VAL(field_str);
 			char *end = ch + ZSTR_LEN(field_str);
-			int escaped = 0;
 
 			smart_str_appendc(&csvline, enclosure);
 			while (ch < end) {
-				if (escape_char != PHP_CSV_NO_ESCAPE && *ch == escape_char) {
-					escaped = 1;
-				} else if (!escaped && *ch == enclosure) {
+				if (*ch == enclosure) {
 					smart_str_appendc(&csvline, enclosure);
-				} else {
-					escaped = 0;
 				}
 				smart_str_appendc(&csvline, *ch);
 				ch++;
