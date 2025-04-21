@@ -536,6 +536,7 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 	}
 	*to = '\0';
 
+	ZEND_ASSERT(!ZSTR_IS_INTERNED(start) && GC_REFCOUNT(start) == 1);
 	start = zend_string_truncate(start, to - (unsigned char*)ZSTR_VAL(start), 0);
 
 	return start;
