@@ -61,6 +61,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     is still valid. This is useful when a GC cycle is collected and the
     database object can be destroyed prior to destroying the statement.
 
+- ext/standard
+  . Added php_url_decode_ex() and php_raw_url_decode_ex() that unlike their
+    non-ex counterparts do not work in-place.
+
 ========================
 4. OpCode changes
 ========================
