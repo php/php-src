@@ -1463,7 +1463,7 @@ static zend_result php_socket_afpacket_add_tcp(unsigned char *ipdata, struct soc
 	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("srcPort"), ntohs(tcp->th_sport));
 	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("dstPort"), ntohs(tcp->th_dport));
 	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("headerSize"), sizeof(*tcp));
-	zend_update_property_string(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("rawPacket"), (char *)ipdata);
+	zend_update_property_stringl(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("rawPacket"), (char *)ipdata, sizeof(*tcp));
 	zend_update_property(Z_OBJCE_P(zpayload), Z_OBJ_P(zpayload), ZEND_STRL("payload"), szpayload);
 	Z_DELREF_P(szpayload);
 	return SUCCESS;
@@ -1475,11 +1475,12 @@ static zend_result php_socket_afpacket_add_udp(unsigned char *ipdata, struct soc
 	ETH_SUB_CHECKLENGTH(a, "UDP");
 	memcpy(&a, ipdata, sizeof(a));
 	struct udphdr *udp = &a;
+	size_t headersize = sizeof(*udp);
 	object_init_ex(szpayload, udppacket_ce);
 	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("srcPort"), ntohs(udp->uh_sport));
 	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("dstPort"), ntohs(udp->uh_dport));
-	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("headerSize"), sizeof(*udp));
-	zend_update_property_string(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("rawPacket"), (char *)ipdata);
+	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("headerSize"), headersize);
+	zend_update_property_stringl(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("rawPacket"), (char *)ipdata, headersize);
 	zend_update_property(Z_OBJCE_P(zpayload), Z_OBJ_P(zpayload), ZEND_STRL("payload"), szpayload);
 	Z_DELREF_P(szpayload);
 	return SUCCESS;
@@ -1771,7 +1772,7 @@ PHP_FUNCTION(socket_recvfrom)
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("srcAddr"), inet_ntoa(s));
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("dstAddr"), inet_ntoa(d));
 					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headerSize"), totalip);
-					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)payload);
+					zend_update_property_stringl(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)payload, totalip);
 
 					switch (ip->protocol) {
 						case IPPROTO_TCP: {
@@ -1830,7 +1831,7 @@ PHP_FUNCTION(socket_recvfrom)
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("srcAddr"), s);
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("dstAddr"), d);
 					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headerSize"), totalip);
-					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)payload);
+					zend_update_property_stringl(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)payload, totalip);
 					unsigned char ipprotocol = ip->nexthdr;
 					unsigned char *ipdata = payload + sizeof(*ip);
 
