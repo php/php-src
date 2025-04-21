@@ -559,7 +559,7 @@ PHP_FUNCTION(urlencode)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
+	RETURN_NEW_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
 /* }}} */
 
@@ -621,7 +621,7 @@ PHP_FUNCTION(rawurlencode)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
+	RETURN_NEW_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
 /* }}} */
 
