@@ -411,21 +411,24 @@ done:
 }
 /* }}} */
 
+/* https://stackoverflow.com/questions/34365746/whats-the-fastest-way-to-convert-hex-to-integer-in-c */
+static unsigned int php_htoi_single(unsigned char x)
+{
+	ZEND_ASSERT((x >= 'a' && x <= 'f') || (x >= 'A' && x <= 'F') || (x >= '0' && x <= '9'));
+	return 9 * (x >> 6) + (x & 0xf);
+}
+
 /* {{{ php_htoi */
-static int php_htoi(char *s)
+static int php_htoi(const char *s)
 {
 	int value;
-	int c;
+	unsigned char c;
 
 	c = ((unsigned char *)s)[0];
-	if (isupper(c))
-		c = tolower(c);
-	value = (c >= '0' && c <= '9' ? c - '0' : c - 'a' + 10) * 16;
+	value = php_htoi_single(c) * 16;
 
 	c = ((unsigned char *)s)[1];
-	if (isupper(c))
-		c = tolower(c);
-	value += c >= '0' && c <= '9' ? c - '0' : c - 'a' + 10;
+	value += php_htoi_single(c);
 
 	return (value);
 }
@@ -572,28 +575,27 @@ PHP_FUNCTION(urldecode)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
-	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
+	out_str = zend_string_alloc(ZSTR_LEN(in_str), false);
+	ZSTR_LEN(out_str) = php_url_decode_ex(ZSTR_VAL(out_str), ZSTR_VAL(in_str), ZSTR_LEN(in_str));
 
 	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
-/* {{{ php_url_decode */
-PHPAPI size_t php_url_decode(char *str, size_t len)
+PHPAPI size_t php_url_decode_ex(char *dest, const char *src, size_t src_len)
 {
-	char *dest = str;
-	char *data = str;
+	char *dest_start = dest;
+	const char *data = src;
 
-	while (len--) {
+	while (src_len--) {
 		if (*data == '+') {
 			*dest = ' ';
 		}
-		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1))
+		else if (*data == '%' && src_len >= 2 && isxdigit((int) *(data + 1))
 				 && isxdigit((int) *(data + 2))) {
 			*dest = (char) php_htoi(data + 1);
 			data += 2;
-			len -= 2;
+			src_len -= 2;
 		} else {
 			*dest = *data;
 		}
@@ -601,7 +603,13 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
 		dest++;
 	}
 	*dest = '\0';
-	return dest - str;
+	return dest - dest_start;
+}
+
+/* {{{ php_url_decode */
+PHPAPI size_t php_url_decode(char *str, size_t len)
+{
+	return php_url_decode_ex(str, str, len);
 }
 /* }}} */
 
@@ -634,25 +642,24 @@ PHP_FUNCTION(rawurldecode)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
-	ZSTR_LEN(out_str) = php_raw_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
+	out_str = zend_string_alloc(ZSTR_LEN(in_str), false);
+	ZSTR_LEN(out_str) = php_raw_url_decode_ex(ZSTR_VAL(out_str), ZSTR_VAL(in_str), ZSTR_LEN(in_str));
 
 	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
-/* {{{ php_raw_url_decode */
-PHPAPI size_t php_raw_url_decode(char *str, size_t len)
+PHPAPI size_t php_raw_url_decode_ex(char *dest, const char *src, size_t src_len)
 {
-	char *dest = str;
-	char *data = str;
+	char *dest_start = dest;
+	const char *data = src;
 
-	while (len--) {
-		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1))
+	while (src_len--) {
+		if (*data == '%' && src_len >= 2 && isxdigit((int) *(data + 1))
 			&& isxdigit((int) *(data + 2))) {
 			*dest = (char) php_htoi(data + 1);
 			data += 2;
-			len -= 2;
+			src_len -= 2;
 		} else {
 			*dest = *data;
 		}
@@ -660,7 +667,13 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 		dest++;
 	}
 	*dest = '\0';
-	return dest - str;
+	return dest - dest_start;
+}
+
+/* {{{ php_raw_url_decode */
+PHPAPI size_t php_raw_url_decode(char *str, size_t len)
+{
+	return php_raw_url_decode_ex(str, str, len);
 }
 /* }}} */
 
