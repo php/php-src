@@ -11,6 +11,6 @@ max_memory_limit=128M
 echo ini_get('max_memory_limit') . PHP_EOL;
 echo ini_get('memory_limit') . PHP_EOL;
 --EXPECTF--
-Fatal error: Failed to set memory_limit to unlimited. memory_limit (currently: %d bytes) cannot be set to unlimited if max_memory_limit (%d bytes) is not unlimited in %s
+Warning: Failed to set memory_limit to unlimited. memory_limit (currently: %d bytes) cannot be set to unlimited if max_memory_limit (%d bytes) is not unlimited in %s
 128M
 128M

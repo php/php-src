@@ -327,7 +327,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	if (PG(max_memory_limit) != -1) {
 		if (value == -1) {
 			zend_error(
-				stage == ZEND_INI_STAGE_STARTUP ? E_ERROR : E_WARNING,
+				E_WARNING,
 				"Failed to set memory_limit to unlimited. memory_limit (currently: " ZEND_LONG_FMT " bytes) cannot be set to unlimited if max_memory_limit (" ZEND_LONG_FMT " bytes) is not unlimited",
 				PG(memory_limit),
 				PG(max_memory_limit)
@@ -338,7 +338,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
 		if (value > PG(max_memory_limit)) {
 			zend_error(
-				stage == ZEND_INI_STAGE_STARTUP ? E_ERROR : E_WARNING,
+				E_WARNING,
 				"Failed to set memory_limit to %zd bytes. memory_limit (currently: " ZEND_LONG_FMT " bytes) cannot exceed max_memory_limit (" ZEND_LONG_FMT " bytes)",
 				value,
 				PG(memory_limit),
