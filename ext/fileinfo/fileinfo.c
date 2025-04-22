@@ -234,6 +234,11 @@ PHP_FUNCTION(finfo_set_flags)
 		RETURN_THROWS();
 	}
 
+	if (!Z_FINFO_P(self)->magic) {
+		zend_throw_error(NULL, "Invalid finfo object");
+		RETURN_THROWS();
+	}
+
 	/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
 	 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
 	magic_setflags(Z_FINFO_P(self)->magic, options);
@@ -301,6 +306,11 @@ PHP_FUNCTION(finfo_file)
 		RETURN_THROWS();
 	}
 
+	if (!Z_FINFO_P(self)->magic) {
+		zend_throw_error(NULL, "Invalid finfo object");
+		RETURN_THROWS();
+	}
+
 	struct magic_set *magic = Z_FINFO_P(self)->magic;
 
 	if (UNEXPECTED(ZSTR_LEN(path) == 0)) {
@@ -343,6 +353,11 @@ PHP_FUNCTION(finfo_buffer)
 	zval *dummy_context = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OS|lr!", &self, finfo_class_entry, &buffer, &options, &dummy_context) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!Z_FINFO_P(self)->magic) {
+		zend_throw_error(NULL, "Invalid finfo object");
 		RETURN_THROWS();
 	}
 
