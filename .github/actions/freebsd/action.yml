@@ -27,7 +27,6 @@ runs:
             bzip2 \
             t1lib \
             gmp \
-            tidyp \
             libsodium \
             libzip \
             libxml2 \
