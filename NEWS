@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.7
+?? ??? ????, PHP 8.4.8
+
+
+24 Apr 2025, PHP 8.4.7
 
 - Core:
   . Fixed bug GH-17711 and GH-18022 (Infinite recursion on deprecated attribute
