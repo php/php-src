@@ -348,6 +348,9 @@ PHP 8.5 UPGRADE NOTES
 
 - Fileinfo:
   . Upgraded to file 5.46.
+  . The return type of finfo_close() has been changed to true, rather
+    than bool.
+
 
 - PCRE:
   . Upgraded to pcre2lib from 10.44 to 10.45.

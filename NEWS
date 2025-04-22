@@ -69,6 +69,7 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Upgrade to file 5.46. (nielsdos)
+  . Change return type of finfo_close() to true. (timwolla)
 
 - FPM:
   . Fixed GH-17645 (FPM with httpd ProxyPass does not decode script path).
