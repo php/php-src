@@ -27,6 +27,8 @@
 #include "Zend/Optimizer/zend_func_info.h"
 #include "Zend/Optimizer/zend_call_graph.h"
 
+typedef struct _zend_jit_ctx zend_jit_ctx;
+
 /* Address Encoding */
 typedef uintptr_t zend_jit_addr;
 

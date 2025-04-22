@@ -4797,7 +4797,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 			}
 		}
 
-		exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+		exit_point = zend_jit_trace_get_exit_point(jit, opline + 1, 0);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		ir_GUARD_NOT(ir_OVERFLOW(ref), ir_CONST_ADDR(exit_addr));
 
@@ -4831,7 +4831,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG, 0);
 				}
 			}
-			exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+			exit_point = zend_jit_trace_get_exit_point(jit, opline + 1, 0);
 			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 			    opline->result_type != IS_UNUSED) {
@@ -5091,17 +5091,17 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 					old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
 					SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE((double)ZEND_LONG_MAX + 1.0));
-					exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+					exit_point = zend_jit_trace_get_exit_point(jit, opline + 1, 0);
 					SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
 				} else if (opline->opcode == ZEND_SUB
 				 && Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1) {
 					old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
 					SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE((double)ZEND_LONG_MIN - 1.0));
-					exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+					exit_point = zend_jit_trace_get_exit_point(jit, opline + 1, 0);
 					SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
 				} else {
-					exit_point = zend_jit_trace_get_exit_point(opline, 0);
+					exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 				}
 
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
@@ -5111,7 +5111,7 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 				ir_GUARD_NOT(ir_OVERFLOW(ref), ir_CONST_ADDR(exit_addr));
 				may_overflow = 0;
 			} else if ((res_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -6404,7 +6404,7 @@ static int zend_jit_assign_to_variable_call(zend_jit_ctx   *jit,
 
 	if (val_info & MAY_BE_UNDEF) {
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 			if (!exit_addr) {
@@ -8037,7 +8037,7 @@ static zend_jit_addr zend_jit_guard_fetch_result_type(zend_jit_ctx         *jit,
 		ir_IF_FALSE_cold(if_type);
 
 		SET_STACK_REF_EX(stack, EX_VAR_TO_NUM(opline->result.var), ref, ZREG_ZVAL_COPY);
-		exit_point = zend_jit_trace_get_exit_point(opline+1, flags);
+		exit_point = zend_jit_trace_get_exit_point(jit, opline+1, flags);
 		res_exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!res_exit_addr) {
 			return 0;
@@ -8049,7 +8049,7 @@ static zend_jit_addr zend_jit_guard_fetch_result_type(zend_jit_ctx         *jit,
 	}
 
 	SET_STACK_REF_EX(stack, EX_VAR_TO_NUM(opline->result.var), ref, ZREG_ZVAL_COPY);
-	exit_point = zend_jit_trace_get_exit_point(opline+1, flags);
+	exit_point = zend_jit_trace_get_exit_point(jit, opline+1, flags);
 	res_exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 	if (!res_exit_addr) {
 		return 0;
@@ -8422,7 +8422,7 @@ typedef struct _zend_closure {
 
 static int zend_jit_stack_check(zend_jit_ctx *jit, const zend_op *opline, uint32_t used_stack)
 {
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+	int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 	if (!exit_addr) {
@@ -8526,7 +8526,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 			bool may_be_trampoline = !func && (opline->opcode == ZEND_INIT_METHOD_CALL);
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline,
+			int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline,
 				may_be_trampoline ?
 					(ZEND_JIT_EXIT_TO_VM | ZEND_JIT_EXIT_METHOD_CALL) : ZEND_JIT_EXIT_TO_VM);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
@@ -8761,7 +8761,7 @@ static int zend_jit_init_fcall_guard(zend_jit_ctx *jit, uint32_t level, const ze
 		return 0;
 	}
 
-	exit_point = zend_jit_trace_get_exit_point(to_opline, ZEND_JIT_EXIT_POLYMORPHISM);
+	exit_point = zend_jit_trace_get_exit_point(jit, to_opline, ZEND_JIT_EXIT_POLYMORPHISM);
 	exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 	if (!exit_addr) {
 		return 0;
@@ -8786,7 +8786,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 	ir_ref func_ref = IR_UNUSED;
 
 	if (jit->delayed_call_level) {
-		if (!zend_jit_save_call_chain(jit, jit->delayed_call_level)) {
+		if (!zend_jit_save_call_chain(jit, jit->delayed_call_level, ZREG_NONE)) {
 			return 0;
 		}
 	}
@@ -8873,7 +8873,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 				ZEND_UNREACHABLE();
 			}
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline,
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline,
 					func && (func->common.fn_flags & ZEND_ACC_IMMUTABLE) ? ZEND_JIT_EXIT_INVALIDATE : 0);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
@@ -8993,7 +8993,7 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 			}
 			if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
 				if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-					int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+					int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 					const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 					if (!exit_addr) {
@@ -9104,7 +9104,7 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 		int32_t exit_point;
 		const void *exit_addr;
 
-		exit_point = zend_jit_trace_get_exit_point(opline, func ? ZEND_JIT_EXIT_INVALIDATE : ZEND_JIT_EXIT_METHOD_CALL);
+		exit_point = zend_jit_trace_get_exit_point(jit, opline, func ? ZEND_JIT_EXIT_INVALIDATE : ZEND_JIT_EXIT_METHOD_CALL);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
@@ -9274,7 +9274,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 		int32_t exit_point;
 		const void *exit_addr;
 
-		exit_point = zend_jit_trace_get_exit_point(opline, func ? ZEND_JIT_EXIT_INVALIDATE : 0);
+		exit_point = zend_jit_trace_get_exit_point(jit, opline, func ? ZEND_JIT_EXIT_INVALIDATE : 0);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
@@ -9382,7 +9382,7 @@ static int zend_jit_init_closure_call(zend_jit_ctx         *jit,
 
 	if (ssa->var_info[ssa_op->op2_use].ce != zend_ce_closure
 	 && !(ssa->var_info[ssa_op->op2_use].type & MAY_BE_CLASS_GUARD)) {
-		int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+		int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 		const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 		if (!exit_addr) {
@@ -9412,7 +9412,7 @@ static int zend_jit_init_closure_call(zend_jit_ctx         *jit,
 
 		func = (zend_function*)trace->func;
 		opcodes = func->op_array.opcodes;
-		exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_CLOSURE_CALL);
+		exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_CLOSURE_CALL);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
@@ -9486,7 +9486,7 @@ static int zend_jit_send_val(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 				ir_CONST_U32(mask));
 
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
 					return 0;
@@ -9679,7 +9679,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 						/* Don't generate code that always throws exception */
 						return 0;
 					} else {
-						int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+						int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 						const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 						if (!exit_addr) {
 							return 0;
@@ -9727,7 +9727,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 			ir_IF_FALSE(if_prefer_ref);
 
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
 					return 0;
@@ -9815,7 +9815,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 				ir_IF_FALSE(if_ref);
 		}
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if (!exit_addr) {
 				return 0;
@@ -10100,7 +10100,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	if (opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 		if (!func) {
 			if (trace) {
-				uint32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				uint32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
@@ -10423,7 +10423,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			jit_observer_fcall_begin(jit, rx, observer_handler);
 
 			if (trace) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
@@ -10702,7 +10702,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		if (!zend_interrupt_function) {
 			// TODO: Can we avoid checking for interrupts after each call ???
 			if (trace && jit->last_valid_opline != opline) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline + 1, ZEND_JIT_EXIT_TO_VM);
 
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
@@ -10846,7 +10846,7 @@ static int zend_jit_recv(zend_jit_ctx *jit, const zend_op *opline, const zend_op
 			if (!JIT_G(current_frame) ||
 			    TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)) < 0 ||
 			    arg_num > TRACE_FRAME_NUM_ARGS(JIT_G(current_frame))) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -11946,7 +11946,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
 	 && type == BP_VAR_R
 	 && !exit_addr) {
-		int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+		int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
@@ -11967,7 +11967,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 			ir_IF_TRUE(if_type);
 		}
 		if (op1_info & MAY_BE_PACKED_GUARD) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_PACKED_GUARD);
+			int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_PACKED_GUARD);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 			if (!exit_addr) {
@@ -12543,7 +12543,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 	if (opline->opcode != ZEND_FETCH_DIM_IS
 	 && JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
 	 && !has_concrete_type(op1_info)) {
-		int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+		int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
@@ -12597,7 +12597,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 			old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 			SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_NULL, 0);
 			SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_NONE, ZREG_TYPE_ONLY);
-			exit_point = zend_jit_trace_get_exit_point(opline+1, flags);
+			exit_point = zend_jit_trace_get_exit_point(jit, opline+1, flags);
 			SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
 			not_found_exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if (!not_found_exit_addr) {
@@ -13376,7 +13376,7 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 	}
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && (val_info & MAY_BE_UNDEF)) {
-		int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+		int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 		const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 		if (!exit_addr) {
@@ -13603,7 +13603,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 			 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY
 			 && (op2_info & (MAY_BE_LONG|MAY_BE_STRING))
 			 && !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING)))) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 				not_found_exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!not_found_exit_addr) {
 					return 0;
@@ -13775,7 +13775,7 @@ static int zend_jit_fe_reset(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 
 static int zend_jit_packed_guard(zend_jit_ctx *jit, const zend_op *opline, uint32_t var, uint32_t op_info)
 {
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_PACKED_GUARD);
+	int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_PACKED_GUARD);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 	ir_ref ref;
@@ -14153,7 +14153,7 @@ static int zend_jit_fetch_this(zend_jit_ctx *jit, const zend_op *opline, const z
 			    !TRACE_FRAME_IS_THIS_CHECKED(JIT_G(current_frame))) {
 
 				zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -14189,7 +14189,7 @@ static int zend_jit_fetch_this(zend_jit_ctx *jit, const zend_op *opline, const z
 
 static int zend_jit_class_guard(zend_jit_ctx *jit, const zend_op *opline, ir_ref obj_ref, zend_class_entry *ce)
 {
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+	int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 	if (!exit_addr) {
@@ -14254,7 +14254,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		}
 		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -14474,7 +14474,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 			if (opline->opcode == ZEND_FETCH_OBJ_W || !(res_info & MAY_BE_GUARD) || !JIT_G(current_frame)) {
 				/* perform IS_UNDEF check only after result type guard (during deoptimization) */
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -14795,7 +14795,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		}
 		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -14933,7 +14933,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		}
 		// Undefined property with potential magic __get()/__set() or lazy object
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 			if (!exit_addr) {
@@ -15140,7 +15140,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 		}
 		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -15254,7 +15254,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 
 		if (ZEND_TYPE_IS_SET(prop_info->type) || !use_prop_guard) {
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -15336,7 +15336,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 		uint32_t var_def_info = MAY_BE_ANY|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
 
 		if (use_prop_guard) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+			int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if (!exit_addr) {
 				return 0;
@@ -15575,7 +15575,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 		}
 		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -15677,7 +15677,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 
 		if (ZEND_TYPE_IS_SET(prop_info->type) || !use_prop_guard) {
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
@@ -15758,7 +15758,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 		ir_ref if_overflow = IR_UNUSED;
 
 		if (use_prop_guard) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+			int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if (!exit_addr) {
 				return 0;
@@ -15932,7 +15932,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				const void *exit_addr;
 
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
-				exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+				exit_point = zend_jit_trace_get_exit_point(jit, opline + 1, 0);
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
 					return 0;
@@ -16219,7 +16219,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 
 		if (next_opline) {
 			if (next_opline != default_opline) {
-				exit_point = zend_jit_trace_get_exit_point(default_opline, 0);
+				exit_point = zend_jit_trace_get_exit_point(jit, default_opline, 0);
 				default_label = zend_jit_trace_get_exit_addr(exit_point);
 				if (!default_label) {
 					return 0;
@@ -16233,7 +16233,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 
 				if (next_opline) {
 					if (next_opline != opline + 1) {
-						exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+						exit_point = zend_jit_trace_get_exit_point(jit, opline + 1, 0);
 						fallback_label = zend_jit_trace_get_exit_addr(exit_point);
 						if (!fallback_label) {
 							return 0;
@@ -16315,7 +16315,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 						if (target == next_opline) {
 							ir_END_list(continue_list);
 						} else {
-							exit_point = zend_jit_trace_get_exit_point(target, 0);
+							exit_point = zend_jit_trace_get_exit_point(jit, target, 0);
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								return 0;
@@ -16360,7 +16360,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 
 				if (next_opline) {
 					if (next_opline != opline + 1) {
-						exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+						exit_point = zend_jit_trace_get_exit_point(jit, opline + 1, 0);
 						fallback_label = zend_jit_trace_get_exit_addr(exit_point);
 						if (!fallback_label) {
 							return 0;
@@ -16440,7 +16440,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 						if (target == next_opline) {
 							ir_END_list(continue_list);
 						} else {
-							exit_point = zend_jit_trace_get_exit_point(target, 0);
+							exit_point = zend_jit_trace_get_exit_point(jit, target, 0);
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								return 0;
@@ -16576,7 +16576,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 						if (target == next_opline) {
 							ir_END_list(continue_list);
 						} else {
-							exit_point = zend_jit_trace_get_exit_point(target, 0);
+							exit_point = zend_jit_trace_get_exit_point(jit, target, 0);
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								return 0;
@@ -16853,7 +16853,7 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 
 static int zend_jit_type_guard(zend_jit_ctx *jit, const zend_op *opline, uint32_t var, uint8_t type)
 {
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+	int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 
@@ -16867,7 +16867,7 @@ static int zend_jit_type_guard(zend_jit_ctx *jit, const zend_op *opline, uint32_
 
 static int zend_jit_scalar_type_guard(zend_jit_ctx *jit, const zend_op *opline, uint32_t var)
 {
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+	int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 
@@ -16881,7 +16881,7 @@ static int zend_jit_scalar_type_guard(zend_jit_ctx *jit, const zend_op *opline, 
 
 static bool zend_jit_noref_guard(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr var_addr)
 {
-	uint32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+	uint32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 	if (!exit_addr) {
@@ -16894,7 +16894,7 @@ static bool zend_jit_noref_guard(zend_jit_ctx *jit, const zend_op *opline, zend_
 
 static int zend_jit_trace_opline_guard(zend_jit_ctx *jit, const zend_op *opline)
 {
-	uint32_t exit_point = zend_jit_trace_get_exit_point(NULL, 0);
+	uint32_t exit_point = zend_jit_trace_get_exit_point(jit, NULL, 0);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 	if (!exit_addr) {
@@ -16918,7 +16918,7 @@ static bool zend_jit_guard_reference(zend_jit_ctx  *jit,
 	ir_ref ref;
 
 	if (add_ref_guard) {
-		int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+		int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
@@ -16952,7 +16952,7 @@ static bool zend_jit_fetch_reference(zend_jit_ctx  *jit,
 	ir_ref ref;
 
 	if (add_ref_guard || add_type_guard) {
-		int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+		int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
@@ -17013,7 +17013,7 @@ static bool zend_jit_fetch_indirect_var(zend_jit_ctx *jit, const zend_op *opline
 	ir_ref ref = IR_UNUSED;
 
 	if (add_indirect_guard) {
-		int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+		int32_t exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 		const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 		if (!exit_addr) {
@@ -17036,7 +17036,7 @@ static bool zend_jit_fetch_indirect_var(zend_jit_ctx *jit, const zend_op *opline
 	if (!(var_type & IS_TRACE_REFERENCE)
 	 && var_type != IS_UNKNOWN
 	 && (var_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << var_type)) {
-		exit_point = zend_jit_trace_get_exit_point(opline, 0);
+		exit_point = zend_jit_trace_get_exit_point(jit, opline, 0);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 		if (!exit_addr) {
@@ -17194,7 +17194,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 				old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 			}
-			exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
+			exit_point = zend_jit_trace_get_exit_point(jit, exit_opline, 0);
 			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 			if (opline->result_type == IS_VAR || opline->result_type == IS_TMP_VAR) {
