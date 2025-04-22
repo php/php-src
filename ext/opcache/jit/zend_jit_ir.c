@@ -315,6 +315,8 @@ typedef struct _zend_jit_registers_buf {
 static uint32_t zend_jit_exit_point_by_addr(const void *addr);
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
 
+static ir_ref zend_jit_deopt_rload(zend_jit_ctx *jit, ir_type type, int32_t reg);
+
 static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
                                        const zend_op  *opline,
                                        zend_jit_addr   var_use_addr,
@@ -988,7 +990,7 @@ static int zend_jit_save_call_chain(zend_jit_ctx *jit, uint32_t call_level, int8
 
 	if (call_reg != ZREG_NONE) {
 		/* In deoptimization */
-		rx = ir_RLOAD_A(call_reg);
+		rx = zend_jit_deopt_rload(jit, IR_ADDR, call_reg);
 		jit->call = rx;
 	} else {
 		ZEND_ASSERT(jit->call != IR_UNUSED || call_level == 1);
@@ -17294,6 +17296,11 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 		ZEND_ASSERT(parent->exit_info[exit_num].poly_func_reg >= 0 && parent->exit_info[exit_num].poly_this_reg >= 0);
 		ir_RLOAD_A(parent->exit_info[exit_num].poly_func_reg);
 		ir_RLOAD_A(parent->exit_info[exit_num].poly_this_reg);
+	}
+
+	if (parent && parent->exit_info[exit_num].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
+		ZEND_ASSERT(parent->exit_info[exit_num].call_reg >= 0);
+		ir_RLOAD_A(parent->exit_info[exit_num].call_reg);
 	}
 
 	ir_STORE(jit_EG(jit_trace_num), ir_CONST_U32(trace_num));
