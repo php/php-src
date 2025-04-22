@@ -97,7 +97,7 @@ PHP 8.5 UPGRADE NOTES
     long on a PDOStatement resulting from the Firebird driver.
 
 - SimpleXML:
-  - Passing an XPath expression that returns something other than a node set
+  . Passing an XPath expression that returns something other than a node set
     to SimpleXMLElement::xpath() will now emit a warning and return false,
     instead of silently failing and returning an empty array.
 
@@ -197,9 +197,9 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 
 - Hash:
-  The MHASH_* constants have been deprecated.  These have been overlooked
-  when the mhash*() function family has been deprecated per
-  https://wiki.php.net/rfc/deprecations_php_8_1#mhash_function_family
+  . The MHASH_* constants have been deprecated.  These have been overlooked
+    when the mhash*() function family has been deprecated per
+    https://wiki.php.net/rfc/deprecations_php_8_1#mhash_function_family
 
 ========================================
 5. Changed Functions
