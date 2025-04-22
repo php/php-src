@@ -135,10 +135,10 @@ ZEND_GET_MODULE(fileinfo)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(fileinfo)
 {
-	char magic_ver[5];
+	char magic_ver[15];
 
-	(void)snprintf(magic_ver, 4, "%d", magic_version());
-	magic_ver[4] = '\0';
+	int raw_version = magic_version();
+	(void)snprintf(magic_ver, sizeof(magic_ver), "%d.%d", raw_version / 100, raw_version % 100);
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "fileinfo support", "enabled");
