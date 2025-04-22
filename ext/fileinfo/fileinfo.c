@@ -40,7 +40,6 @@ static zend_object_handlers finfo_object_handlers;
 zend_class_entry *finfo_class_entry;
 
 typedef struct _finfo_object {
-	zend_long options;
 	struct magic_set *magic;
 	zend_object zo;
 } finfo_object;
@@ -203,12 +202,10 @@ PHP_FUNCTION(finfo_open)
 		zend_restore_error_handling(&zeh);
 		finfo_object *obj = Z_FINFO_P(object);
 		obj->magic = magic;
-		obj->options = options;
 	} else {
 		zend_object *zobj = finfo_objects_new(finfo_class_entry);
 		finfo_object *obj = php_finfo_fetch_object(zobj);
 		obj->magic = magic;
-		obj->options = options;
 		RETURN_OBJ(zobj);
 	}
 }
@@ -240,7 +237,6 @@ PHP_FUNCTION(finfo_set_flags)
 	/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
 	 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
 	magic_setflags(Z_FINFO_P(self)->magic, options);
-	Z_FINFO_P(self)->options = options;
 
 	RETURN_TRUE;
 }
@@ -317,6 +313,7 @@ PHP_FUNCTION(finfo_file)
 	}
 
 	/* Set options for the current file/buffer. */
+	int old_options = magic_getflags(magic);
 	if (options) {
 		/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
 		 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
@@ -324,9 +321,10 @@ PHP_FUNCTION(finfo_file)
 	}
 
 	const char *ret_val = php_fileinfo_from_path(magic, path, context);
+
 	/* Restore options */
 	if (options) {
-		magic_setflags(magic, Z_FINFO_P(self)->options);
+		magic_setflags(magic, old_options);
 	}
 
 	if (UNEXPECTED(ret_val == NULL)) {
@@ -351,7 +349,10 @@ PHP_FUNCTION(finfo_buffer)
 	struct magic_set *magic = Z_FINFO_P(self)->magic;
 
 	/* Set options for the current file/buffer. */
+	int old_options = magic_getflags(magic);
 	if (options) {
+		/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
+		 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
 		magic_setflags(magic, options);
 	}
 
@@ -359,7 +360,7 @@ PHP_FUNCTION(finfo_buffer)
 
 	/* Restore options */
 	if (options) {
-		magic_setflags(magic, Z_FINFO_P(self)->options);
+		magic_setflags(magic, old_options);
 	}
 
 	if (UNEXPECTED(ret_val == NULL)) {
