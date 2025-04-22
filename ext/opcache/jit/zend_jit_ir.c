@@ -7964,7 +7964,7 @@ static int zend_jit_defined(zend_jit_ctx *jit, const zend_op *opline, uint8_t sm
 	return 1;
 }
 
-static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, const zend_op *opline, int8_t reg, uint8_t call_reg)
+static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, const zend_op *opline, int8_t reg, int8_t call_reg)
 {
 	zend_jit_addr reg_addr = ZEND_ADDR_REF_ZVAL(zend_jit_deopt_rload(jit, IR_ADDR, reg));
 	ir_ref if_def = ir_IF(jit_Z_TYPE(jit, reg_addr));
