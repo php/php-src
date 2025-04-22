@@ -88,6 +88,7 @@ PHP                                                                        NEWS
     (BogdanUngureanu)
   . Added Locale::isRightToLeft to check if a locale is written right to left.
     (David Carlier)
+  . Added null bytes presence in locale inputs for Locale class. (David Carlier)
 
 - MySQLi:
   . Fixed bugs GH-17900 and GH-8084 (calling mysqli::__construct twice).
