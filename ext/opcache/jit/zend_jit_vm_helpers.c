@@ -176,9 +176,8 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_re
 	return zend_jit_copy_extra_args_helper_ex(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX false);
 }
 
-bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
+bool ZEND_FASTCALL zend_jit_deprecated_helper(zend_execute_data *call)
 {
-	zend_execute_data *call = (zend_execute_data *) opline;
 	zend_function *fbc = call->func;
 
 	zend_deprecated_function(fbc);
@@ -204,9 +203,8 @@ bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 	return 1;
 }
 
-bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
+bool ZEND_FASTCALL zend_jit_nodiscard_helper(zend_execute_data *call)
 {
-	zend_execute_data *call = (zend_execute_data *) opline;
 	zend_function *fbc = call->func;
 
 	zend_nodiscard_function(fbc);
@@ -232,19 +230,18 @@ bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
 	return 1;
 }
 
-bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D)
+bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(zend_execute_data *call)
 {
-	zend_execute_data *call = (zend_execute_data *) opline;
 	zend_function *fbc = call->func;
 
 	if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
-		if (zend_jit_deprecated_helper(OPLINE_C) == 0) {
+		if (zend_jit_deprecated_helper(call) == 0) {
 			return 0;
 		}
 	}
 
 	if (fbc->common.fn_flags & ZEND_ACC_NODISCARD) {
-		if (zend_jit_nodiscard_helper(OPLINE_C) == 0) {
+		if (zend_jit_nodiscard_helper(call) == 0) {
 			return 0;
 		}
 	}
