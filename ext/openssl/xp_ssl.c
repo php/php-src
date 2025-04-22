@@ -1753,8 +1753,7 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 
 		if (chain && sk_X509_num(chain) > 0) {
 			int i, num_chains = sk_X509_num(chain);
-			array_init_size(&arr, num_chains);
-			zend_hash_real_init_packed(Z_ARRVAL(arr));
+			array_init_packed_size(&arr, num_chains);
 
 			for (i = 0; i < sk_X509_num(chain); i++) {
 				X509 *mycert = X509_dup(sk_X509_value(chain, i));

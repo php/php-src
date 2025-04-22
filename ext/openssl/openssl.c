@@ -1075,8 +1075,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		X509_PURPOSE * purp;
 		zval subsub;
 
-		array_init_size(&subsub, 3);
-		zend_hash_real_init_packed(Z_ARRVAL(subsub));
+		array_init_packed_size(&subsub, 3);
 
 		purp = X509_PURPOSE_get0(i);
 		id = X509_PURPOSE_get_id(purp);
