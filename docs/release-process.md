@@ -1002,8 +1002,6 @@ volunteers to begin the selection process for the next release managers.
 
    Provide the following information in a single email:
 
-   - Preferred Unix username (will also become part of location to download RCs,
-     such as `https://downloads.php.net/~derick/`).
    - An SSH public key, preferably a new unique one for PHP systems and
      projects.
    - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
