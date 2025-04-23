@@ -4394,7 +4394,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 			opline = p->opline;
 
-#if ZEND_DEBUG && 1
+#if ZEND_DEBUG && 0
 			{
 				const void *handler = ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->call_handler;
 				ir_RSTORE(8, jit_CONST_FUNC(&ctx, (uintptr_t)handler, IR_FASTCALL_FUNC));
