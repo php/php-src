@@ -16,6 +16,7 @@ project = 'php-src docs'
 author = 'The PHP Group'
 extensions = [
     'sphinx_design',
+    'sphinx.ext.autosectionlabel',
 ]
 templates_path = ['_templates']
 html_theme = 'sphinxawesome_theme'
