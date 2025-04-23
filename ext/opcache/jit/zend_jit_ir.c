@@ -316,6 +316,7 @@ static uint32_t zend_jit_exit_point_by_addr(const void *addr);
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
 
 static ir_ref zend_jit_deopt_rload(zend_jit_ctx *jit, ir_type type, int32_t reg);
+static void zend_jit_reset_last_valid_opline(zend_jit_ctx *jit);
 
 static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
                                        const zend_op  *opline,
@@ -921,9 +922,15 @@ static ir_ref jit_IP(zend_jit_ctx *jit)
 	return ir_RLOAD_A(ZREG_IP);
 }
 
-static void jit_STORE_IP(zend_jit_ctx *jit, ir_ref ref)
+static void jit_STORE_IP_no_reset(zend_jit_ctx *jit, ir_ref ref)
 {
 	ir_RSTORE(ZREG_IP, ref);
+}
+
+static void jit_STORE_IP(zend_jit_ctx *jit, ir_ref ref)
+{
+	jit_STORE_IP_no_reset(jit, ref);
+	zend_jit_reset_last_valid_opline(jit);
 }
 
 static ir_ref jit_IP32(zend_jit_ctx *jit)
@@ -1028,10 +1035,10 @@ static int zend_jit_set_ip(zend_jit_ctx *jit, const zend_op *target)
 			} else {
 				ref = ir_SUB_A(ref, ir_CONST_ADDR((uintptr_t)jit->last_valid_opline - (uintptr_t)target));
 			}
-			jit_STORE_IP(jit, ref);
+			jit_STORE_IP_no_reset(jit, ref);
 		}
 	} else {
-		jit_STORE_IP(jit, ir_CONST_ADDR(target));
+		jit_STORE_IP_no_reset(jit, ir_CONST_ADDR(target));
 	}
 	zend_jit_set_last_valid_opline(jit, target);
 	return 1;
@@ -2021,7 +2028,7 @@ static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_leave_nested_func_helper), call_info);
-		jit_STORE_IP(jit,
+		jit_STORE_IP_no_reset(jit,
 			ir_LOAD_A(jit_EX(opline)));
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else if (GCC_GLOBAL_REGS) {
@@ -9516,7 +9523,7 @@ static int zend_jit_send_val(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 					jit_set_Z_TYPE_INFO(jit, addr, IS_UNDEF);
 				}
 				jit_SET_EX_OPLINE(jit, opline);
-				jit_STORE_IP(jit, call);
+				jit_STORE_IP_no_reset(jit, call);
 				ir_IJMP(jit_STUB_ADDR(jit, jit_stub_throw_cannot_pass_by_ref));
 
 				ir_IF_FALSE(if_pass_by_ref);
