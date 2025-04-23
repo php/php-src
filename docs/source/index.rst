@@ -20,6 +20,7 @@
    :hidden:
 
    miscellaneous/stubs
+   miscellaneous/writing-tests
 
 Welcome to the php-src documentation!
 
