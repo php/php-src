@@ -1,6 +1,6 @@
-############
- Test Files
-############
+###############
+ Writing Tests
+###############
 
 ******************
  phpt Test Basics
@@ -501,7 +501,7 @@ configurations, preventing your test from failing due inconsistencies in the err
 Alternatively you can use ``--EXPECTF--`` and check for the message by replacing the path of the
 source of the message with ``%s`` and the line number with ``%d``. The end of a message in a test
 file ``example.phpt`` then looks like ``in %sexample.php on line %d``. We explicitly dropped the
-last path devider as that is a system dependent character ``/`` or ``\``.
+last path divider as that is a system dependent character ``/`` or ``\``.
 
 Last bit
 ========
