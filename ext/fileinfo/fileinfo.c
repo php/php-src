@@ -36,17 +36,11 @@
 #include "fopen_wrappers.h" /* needed for is_url */
 #include "Zend/zend_exceptions.h"
 
-/* {{{ macros and type definitions */
-typedef struct _php_fileinfo {
-	zend_long options;
-	struct magic_set *magic;
-} php_fileinfo;
-
 static zend_object_handlers finfo_object_handlers;
 zend_class_entry *finfo_class_entry;
 
 typedef struct _finfo_object {
-	php_fileinfo *ptr;
+	struct magic_set *magic;
 	zend_object zo;
 } finfo_object;
 
@@ -56,26 +50,12 @@ static inline finfo_object *php_finfo_fetch_object(zend_object *obj) {
 
 #define Z_FINFO_P(zv) php_finfo_fetch_object(Z_OBJ_P((zv)))
 
-#define FILEINFO_FROM_OBJECT(finfo, object) \
-{ \
-	finfo_object *obj = Z_FINFO_P(object); \
-	finfo = obj->ptr; \
-	if (!finfo) { \
-		zend_throw_error(NULL, "Invalid finfo object"); \
-		RETURN_THROWS(); \
-	} \
-}
-
 /* {{{ finfo_objects_free */
 static void finfo_objects_free(zend_object *object)
 {
 	finfo_object *intern = php_finfo_fetch_object(object);
 
-	if (intern->ptr) {
-		magic_close(intern->ptr->magic);
-		efree(intern->ptr);
-	}
-
+	magic_close(intern->magic);
 	zend_object_std_dtor(&intern->zo);
 }
 /* }}} */
@@ -153,7 +133,6 @@ PHP_FUNCTION(finfo_open)
 	zend_long options = MAGIC_NONE;
 	char *file = NULL;
 	size_t file_len = 0;
-	php_fileinfo *finfo;
 	zval *object = getThis();
 	char resolved_path[MAXPATHLEN];
 	zend_error_handling zeh;
@@ -163,15 +142,10 @@ PHP_FUNCTION(finfo_open)
 	}
 
 	if (object) {
-		finfo_object *finfo_obj = Z_FINFO_P(object);
-
 		zend_replace_error_handling(EH_THROW, NULL, &zeh);
 
-		if (finfo_obj->ptr) {
-			magic_close(finfo_obj->ptr->magic);
-			efree(finfo_obj->ptr);
-			finfo_obj->ptr = NULL;
-		}
+		magic_close(Z_FINFO_P(object)->magic);
+		Z_FINFO_P(object)->magic = NULL;
 	}
 
 	if (file_len == 0) {
@@ -199,13 +173,9 @@ PHP_FUNCTION(finfo_open)
 		file = resolved_path;
 	}
 
-	finfo = emalloc(sizeof(php_fileinfo));
+	struct magic_set *magic = magic_open(options);
 
-	finfo->options = options;
-	finfo->magic = magic_open(options);
-
-	if (finfo->magic == NULL) {
-		efree(finfo);
+	if (magic == NULL) {
 		php_error_docref(NULL, E_WARNING, "Invalid mode '" ZEND_LONG_FMT "'.", options);
 		if (object) {
 			zend_restore_error_handling(&zeh);
@@ -216,10 +186,9 @@ PHP_FUNCTION(finfo_open)
 		RETURN_FALSE;
 	}
 
-	if (magic_load(finfo->magic, file) == -1) {
+	if (magic_load(magic, file) == -1) {
 		php_error_docref(NULL, E_WARNING, "Failed to load magic database at \"%s\"", file);
-		magic_close(finfo->magic);
-		efree(finfo);
+		magic_close(magic);
 		if (object) {
 			zend_restore_error_handling(&zeh);
 			if (!EG(exception)) {
@@ -230,14 +199,13 @@ PHP_FUNCTION(finfo_open)
 	}
 
 	if (object) {
-		finfo_object *obj;
 		zend_restore_error_handling(&zeh);
-		obj = Z_FINFO_P(object);
-		obj->ptr = finfo;
+		finfo_object *obj = Z_FINFO_P(object);
+		obj->magic = magic;
 	} else {
 		zend_object *zobj = finfo_objects_new(finfo_class_entry);
 		finfo_object *obj = php_finfo_fetch_object(zobj);
-		obj->ptr = finfo;
+		obj->magic = magic;
 		RETURN_OBJ(zobj);
 	}
 }
@@ -260,18 +228,20 @@ PHP_FUNCTION(finfo_close)
 PHP_FUNCTION(finfo_set_flags)
 {
 	zend_long options;
-	php_fileinfo *finfo;
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &self, finfo_class_entry, &options) == FAILURE) {
 		RETURN_THROWS();
 	}
-	FILEINFO_FROM_OBJECT(finfo, self);
+
+	if (!Z_FINFO_P(self)->magic) {
+		zend_throw_error(NULL, "Invalid finfo object");
+		RETURN_THROWS();
+	}
 
 	/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
 	 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
-	magic_setflags(finfo->magic, options);
-	finfo->options = options;
+	magic_setflags(Z_FINFO_P(self)->magic, options);
 
 	RETURN_TRUE;
 }
@@ -331,13 +301,17 @@ PHP_FUNCTION(finfo_file)
 	zend_string *path = NULL;
 	zend_long options = 0;
 	zval *zcontext = NULL;
-	php_fileinfo *finfo = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OP|lr!", &self, finfo_class_entry, &path, &options, &zcontext) == FAILURE) {
 		RETURN_THROWS();
 	}
-	FILEINFO_FROM_OBJECT(finfo, self);
-	struct magic_set *magic = finfo->magic;
+
+	if (!Z_FINFO_P(self)->magic) {
+		zend_throw_error(NULL, "Invalid finfo object");
+		RETURN_THROWS();
+	}
+
+	struct magic_set *magic = Z_FINFO_P(self)->magic;
 
 	if (UNEXPECTED(ZSTR_LEN(path) == 0)) {
 		zend_argument_must_not_be_empty_error(2);
@@ -349,6 +323,7 @@ PHP_FUNCTION(finfo_file)
 	}
 
 	/* Set options for the current file/buffer. */
+	int old_options = magic_getflags(magic);
 	if (options) {
 		/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
 		 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
@@ -356,9 +331,10 @@ PHP_FUNCTION(finfo_file)
 	}
 
 	const char *ret_val = php_fileinfo_from_path(magic, path, context);
+
 	/* Restore options */
 	if (options) {
-		magic_setflags(magic, finfo->options);
+		magic_setflags(magic, old_options);
 	}
 
 	if (UNEXPECTED(ret_val == NULL)) {
@@ -375,16 +351,23 @@ PHP_FUNCTION(finfo_buffer)
 	zend_string *buffer = NULL;
 	zend_long options = 0;
 	zval *dummy_context = NULL;
-	php_fileinfo *finfo = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OS|lr!", &self, finfo_class_entry, &buffer, &options, &dummy_context) == FAILURE) {
 		RETURN_THROWS();
 	}
-	FILEINFO_FROM_OBJECT(finfo, self);
-	struct magic_set *magic = finfo->magic;
+
+	if (!Z_FINFO_P(self)->magic) {
+		zend_throw_error(NULL, "Invalid finfo object");
+		RETURN_THROWS();
+	}
+
+	struct magic_set *magic = Z_FINFO_P(self)->magic;
 
 	/* Set options for the current file/buffer. */
+	int old_options = magic_getflags(magic);
 	if (options) {
+		/* We do not check the return value as it can only ever fail if options contains MAGIC_PRESERVE_ATIME
+		 * and the system neither has utime(3) nor utimes(2). Something incredibly unlikely. */
 		magic_setflags(magic, options);
 	}
 
@@ -392,7 +375,7 @@ PHP_FUNCTION(finfo_buffer)
 
 	/* Restore options */
 	if (options) {
-		magic_setflags(magic, finfo->options);
+		magic_setflags(magic, old_options);
 	}
 
 	if (UNEXPECTED(ret_val == NULL)) {
