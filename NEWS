@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.22
 
+- Date:
+  . Fixed bug GH-18076 (Since PHP 8, the date_sun_info() function returns
+    inaccurate sunrise and sunset times, but other calculated times are
+    correct) (JiriJozif).
+
 08 May 2025, PHP 8.3.21
 
 - Core:
