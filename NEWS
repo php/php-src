@@ -29,6 +29,7 @@ PHP                                                                        NEWS
     memory_consumption or jit_buffer_size). (nielsdos)
   . Fixed bug GH-18297 (Exception not handled when jit guard is triggered).
     (Arnaud)
+  . Fixed bug GH-18408 (Snapshotted poly_func / poly_this may be spilled).
 
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
