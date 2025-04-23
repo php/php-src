@@ -660,8 +660,8 @@ static void jit_SNAPSHOT(zend_jit_ctx *jit, ir_ref addr)
 					ir_SNAPSHOT_SET_OP(snapshot, i + 1, ref);
 				}
 				if (n) {
-					ir_SNAPSHOT_SET_OP(snapshot, snapshot_size + 1, t->exit_info[exit_point].poly_func_ref);
-					ir_SNAPSHOT_SET_OP(snapshot, snapshot_size + 2, t->exit_info[exit_point].poly_this_ref);
+					ir_SNAPSHOT_SET_OP(snapshot, snapshot_size + 1, t->exit_info[exit_point].poly_func.ref);
+					ir_SNAPSHOT_SET_OP(snapshot, snapshot_size + 2, t->exit_info[exit_point].poly_this.ref);
 				}
 			}
 		}
@@ -710,6 +710,29 @@ uint32_t zend_jit_duplicate_exit_point(ir_ctx *ctx, zend_jit_trace_info *t, uint
 	return new_exit_point;
 }
 
+zend_jit_ref_snapshot zend_jit_resolve_ref_snapshot(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snapshot, int op)
+{
+	int8_t *reg_ops = ctx->regs[snapshot_ref];
+	ZEND_ASSERT(reg_ops[op] != ZREG_NONE);
+
+	zend_jit_ref_snapshot rs = {
+		.reg = reg_ops[op],
+	};
+
+	if (IR_REG_SPILLED(rs.reg)) {
+		rs.reg = ((ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FP : IR_REG_SP) | IR_REG_SPILL_LOAD;
+		rs.offset = ir_get_spill_slot_offset(ctx, ir_insn_op(snapshot, op));
+	}
+
+	return rs;
+}
+
+bool zend_jit_ref_snapshot_equals(zend_jit_ref_snapshot *a, zend_jit_ref_snapshot *b)
+{
+	return a->reg == b->reg
+		&& (!IR_REG_SPILLED(a->reg) || (a->offset == b->offset));
+}
+
 void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snapshot, void *addr)
 {
 	zend_jit_trace_info *t = ((zend_jit_ctx*)ctx)->trace;
@@ -722,38 +745,18 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 	exit_flags = t->exit_info[exit_point].flags;
 
 	if (exit_flags & ZEND_JIT_EXIT_METHOD_CALL) {
-		int8_t *reg_ops = ctx->regs[snapshot_ref];
-		ZEND_ASSERT(reg_ops[n - 1] != -1 && reg_ops[n] != -1);
-
-		int8_t func_reg = reg_ops[n - 1];
-		ir_ref func_ref = ir_insn_op(snapshot, n - 1);
-		if (IR_REG_SPILLED(func_reg)) {
-			func_reg = ((ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FP : IR_REG_SP) | IR_REG_SPILL_LOAD;
-			func_ref = ir_get_spill_slot_offset(ctx, func_ref);
-		}
-
-		int8_t this_reg = reg_ops[n];
-		ir_ref this_ref = ir_insn_op(snapshot, n);
-		if (IR_REG_SPILLED(this_reg)) {
-			this_reg = ((ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FP : IR_REG_SP) | IR_REG_SPILL_LOAD;
-			this_ref = ir_get_spill_slot_offset(ctx, this_ref);
-		}
+		zend_jit_ref_snapshot func = zend_jit_resolve_ref_snapshot(ctx, snapshot_ref, snapshot, n - 1);
+		zend_jit_ref_snapshot this = zend_jit_resolve_ref_snapshot(ctx, snapshot_ref, snapshot, n);
 
 		if ((exit_flags & ZEND_JIT_EXIT_FIXED)
-		 && ((t->exit_info[exit_point].poly_func_reg != func_reg
-				 || (IR_REG_SPILLED(func_reg)
-					 && t->exit_info[exit_point].poly_func_ref != func_ref))
-		  || (t->exit_info[exit_point].poly_this_reg != this_reg
-				 || (IR_REG_SPILLED(this_reg)
-					 && t->exit_info[exit_point].poly_this_ref != this_ref)))) {
+		 && (!zend_jit_ref_snapshot_equals(&t->exit_info[exit_point].poly_func, &func)
+			 || !zend_jit_ref_snapshot_equals(&t->exit_info[exit_point].poly_this, &this))) {
 			exit_point = zend_jit_duplicate_exit_point(ctx, t, exit_point, snapshot_ref);
 			addr = (void*)zend_jit_trace_get_exit_addr(exit_point);
 			exit_flags &= ~ZEND_JIT_EXIT_FIXED;
 		}
-		t->exit_info[exit_point].poly_func_reg = func_reg;
-		t->exit_info[exit_point].poly_func_ref = func_ref;
-		t->exit_info[exit_point].poly_this_reg = this_reg;
-		t->exit_info[exit_point].poly_this_ref = this_ref;
+		t->exit_info[exit_point].poly_func = func;
+		t->exit_info[exit_point].poly_this = this;
 		n -= 2;
 	}
 
@@ -4446,7 +4449,7 @@ static ir_ref zend_jit_deopt_rload(zend_jit_ctx *jit, ir_type type, int32_t reg)
 }
 
 /* Same as zend_jit_deopt_rload(), but 'reg' may be spilled on C stack */
-static ir_ref zend_jit_deopt_rload_spilled(zend_jit_ctx *jit, ir_type type, int8_t reg, ir_ref offset)
+static ir_ref zend_jit_deopt_rload_spilled(zend_jit_ctx *jit, ir_type type, int8_t reg, int32_t offset)
 {
 	ZEND_ASSERT(reg >= 0);
 
@@ -9168,8 +9171,8 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 			return 0;
 		}
 
-		jit->trace->exit_info[exit_point].poly_func_ref = func_ref;
-		jit->trace->exit_info[exit_point].poly_this_ref = this_ref;
+		jit->trace->exit_info[exit_point].poly_func.ref = func_ref;
+		jit->trace->exit_info[exit_point].poly_this.ref = this_ref;
 
 		func = (zend_function*)trace->func;
 
@@ -17022,12 +17025,12 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 	}
 
 	if (parent && parent->exit_info[exit_num].flags & ZEND_JIT_EXIT_METHOD_CALL) {
-		ZEND_ASSERT(parent->exit_info[exit_num].poly_func_reg >= 0 && parent->exit_info[exit_num].poly_this_reg >= 0);
-		if (!IR_REG_SPILLED(parent->exit_info[exit_num].poly_func_reg)) {
-			ir_RLOAD_A(parent->exit_info[exit_num].poly_func_reg);
+		ZEND_ASSERT(parent->exit_info[exit_num].poly_func.reg >= 0 && parent->exit_info[exit_num].poly_this.reg >= 0);
+		if (!IR_REG_SPILLED(parent->exit_info[exit_num].poly_func.reg)) {
+			ir_RLOAD_A(parent->exit_info[exit_num].poly_func.reg);
 		}
-		if (!IR_REG_SPILLED(parent->exit_info[exit_num].poly_this_reg)) {
-			ir_RLOAD_A(parent->exit_info[exit_num].poly_this_reg);
+		if (!IR_REG_SPILLED(parent->exit_info[exit_num].poly_this.reg)) {
+			ir_RLOAD_A(parent->exit_info[exit_num].poly_this.reg);
 		}
 	}
 
