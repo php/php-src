@@ -29,6 +29,9 @@ on:
       windows_version:
         required: true
         type: string
+      skip_laravel:
+        required: true
+        type: boolean
       skip_symfony:
         required: true
         type: boolean
@@ -550,7 +553,7 @@ jobs:
             git clone "https://github.com/amphp/$repository.git" "amphp-$repository" --depth 1
             cd "amphp-$repository"
             git rev-parse HEAD
-            php /usr/bin/composer install --no-progress --ignore-platform-reqs
+            php /usr/bin/composer install --no-progress --ignore-platform-req=php+
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -559,12 +562,12 @@ jobs:
           done
           exit $X
       - name: Test Laravel
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && !inputs.skip_laravel }}
         run: |
           git clone https://github.com/laravel/framework.git --depth=1
           cd framework
           git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php /usr/bin/composer install --no-progress --ignore-platform-req=php+
           # Hack to disable a test that hangs
           php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("public function testSharedGet()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
           php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
@@ -581,7 +584,7 @@ jobs:
             git clone "https://github.com/reactphp/$repository.git" "reactphp-$repository" --depth 1
             cd "reactphp-$repository"
             git rev-parse HEAD
-            php /usr/bin/composer install --no-progress --ignore-platform-reqs
+            php /usr/bin/composer install --no-progress --ignore-platform-req=php+
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -595,7 +598,7 @@ jobs:
           git clone https://github.com/revoltphp/event-loop.git --depth=1
           cd event-loop
           git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php /usr/bin/composer install --no-progress --ignore-platform-req=php+
           vendor/bin/phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -606,7 +609,7 @@ jobs:
           git clone https://github.com/symfony/symfony.git --depth=1
           cd symfony
           git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php /usr/bin/composer install --no-progress --ignore-platform-req=php+
           php ./phpunit install
           # Test causes a heap-buffer-overflow but I cannot reproduce it locally...
           php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "/** @group skip */\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
@@ -627,7 +630,7 @@ jobs:
           git clone https://github.com/sebastianbergmann/phpunit.git --branch=main --depth=1
           cd phpunit
           git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php /usr/bin/composer install --no-progress --ignore-platform-req=php+
           php ./phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -635,7 +638,7 @@ jobs:
       - name: 'Symfony Preloading'
         if: ${{ !cancelled() && !inputs.skip_symfony }}
         run: |
-          php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
+          php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-req=php+
           cd symfony_demo
           git rev-parse HEAD
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
@@ -646,7 +649,7 @@ jobs:
           git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
           cd wordpress
           git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php /usr/bin/composer install --no-progress --ignore-platform-req=php+
           cp wp-tests-config-sample.php wp-tests-config.php
           sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
           sed -i 's/yourusernamehere/root/g' wp-tests-config.php
