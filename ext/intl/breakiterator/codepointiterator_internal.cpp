@@ -84,7 +84,7 @@ UBool CodePointBreakIterator::operator==(const BreakIterator& that) const
 	}
 
 	const CodePointBreakIterator& that2 =
-		static_cast<const CodePointBreakIterator&>(that);
+		dynamic_cast<const CodePointBreakIterator&>(that);
 
 	if (!utext_equals(this->fText, that2.fText)) {
 		return false;
@@ -154,7 +154,7 @@ int32_t CodePointBreakIterator::first(void)
 
 int32_t CodePointBreakIterator::last(void)
 {
-	int32_t pos = (int32_t)utext_nativeLength(this->fText);
+	int32_t pos = static_cast<int32_t>(utext_nativeLength(this->fText));
 	UTEXT_SETNATIVEINDEX(this->fText, pos);
 	this->lastCodePoint = U_SENTINEL;
 
@@ -168,7 +168,7 @@ int32_t CodePointBreakIterator::previous(void)
 		return BreakIterator::DONE;
 	}
 
-	return (int32_t)UTEXT_GETNATIVEINDEX(this->fText);
+	return static_cast<int32_t>(UTEXT_GETNATIVEINDEX(this->fText));
 }
 
 int32_t CodePointBreakIterator::next(void)
@@ -178,12 +178,12 @@ int32_t CodePointBreakIterator::next(void)
 		return BreakIterator::DONE;
 	}
 
-	return (int32_t)UTEXT_GETNATIVEINDEX(this->fText);
+	return static_cast<int32_t>(UTEXT_GETNATIVEINDEX(this->fText));
 }
 
 int32_t CodePointBreakIterator::current(void) const
 {
-	return (int32_t)UTEXT_GETNATIVEINDEX(this->fText);
+	return static_cast<int32_t>(UTEXT_GETNATIVEINDEX(this->fText));
 }
 
 int32_t CodePointBreakIterator::following(int32_t offset)
@@ -193,7 +193,7 @@ int32_t CodePointBreakIterator::following(int32_t offset)
 		return BreakIterator::DONE;
 	}
 
-	return (int32_t)UTEXT_GETNATIVEINDEX(this->fText);
+	return static_cast<int32_t>(UTEXT_GETNATIVEINDEX(this->fText));
 }
 
 int32_t CodePointBreakIterator::preceding(int32_t offset)
@@ -203,7 +203,7 @@ int32_t CodePointBreakIterator::preceding(int32_t offset)
 		return BreakIterator::DONE;
 	}
 
-	return (int32_t)UTEXT_GETNATIVEINDEX(this->fText);
+	return static_cast<int32_t>(UTEXT_GETNATIVEINDEX(this->fText));
 }
 
 UBool CodePointBreakIterator::isBoundary(int32_t offset)
@@ -223,7 +223,7 @@ int32_t CodePointBreakIterator::next(int32_t n)
 
 	if (res) {
 		this->lastCodePoint = UTEXT_CURRENT32(this->fText);
-		return (int32_t)UTEXT_GETNATIVEINDEX(this->fText);
+		return static_cast<int32_t>(UTEXT_GETNATIVEINDEX(this->fText));
 	} else {
 		this->lastCodePoint = U_SENTINEL;
 		return BreakIterator::DONE;
@@ -243,7 +243,7 @@ CodePointBreakIterator *CodePointBreakIterator::createBufferClone(
 		return NULL;
 	}
 
-	char *buf = (char*)stackBuffer;
+	char *buf = static_cast<char *>(stackBuffer);
 	uint32_t s = bufferSize;
 
 	if (stackBuffer == NULL) {
@@ -251,8 +251,9 @@ CodePointBreakIterator *CodePointBreakIterator::createBufferClone(
 	}
 
 	if (U_ALIGNMENT_OFFSET(stackBuffer) != 0) {
-		uint32_t offsetUp = (uint32_t)U_ALIGNMENT_OFFSET_UP(buf);
+		uint32_t offsetUp = static_cast<uint32_t>(U_ALIGNMENT_OFFSET_UP(buf));
 		s -= offsetUp;
+		// TODO buf pointer might be null?
 		buf += offsetUp;
 	}
 

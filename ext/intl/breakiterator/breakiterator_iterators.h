@@ -17,7 +17,6 @@
 #include <unicode/umachine.h>
 
 U_CDECL_BEGIN
-#include <math.h>
 #include <php.h>
 U_CDECL_END
 

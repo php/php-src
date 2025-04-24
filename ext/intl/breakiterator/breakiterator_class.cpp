@@ -186,9 +186,9 @@ static void BreakIterator_objects_free(zend_object *object)
 /* {{{ BreakIterator_object_create */
 static zend_object *BreakIterator_object_create(zend_class_entry *ce)
 {
-	BreakIterator_object*	intern;
+	BreakIterator_object* intern;
 
-	intern = (BreakIterator_object*) zend_object_alloc(sizeof(BreakIterator_object), ce);
+	intern = static_cast<BreakIterator_object *>(zend_object_alloc(sizeof(BreakIterator_object), ce));
 
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);

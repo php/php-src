@@ -25,8 +25,6 @@ extern "C" {
 #define USE_BREAKITERATOR_POINTER
 #include "breakiterator_class.h"
 #include "breakiterator_iterators_arginfo.h"
-#include "../intl_convert.h"
-#include "../locale/locale.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 }
@@ -35,10 +33,9 @@ static zend_class_entry *IntlPartsIterator_ce_ptr;
 
 /* BreakIterator's iterator */
 
-inline BreakIterator *_breakiter_prolog(zend_object_iterator *iter)
+static BreakIterator *_breakiter_prolog(const zend_object_iterator *iter)
 {
-	BreakIterator_object *bio;
-	bio = Z_INTL_BREAKITERATOR_P(&iter->data);
+	BreakIterator_object *bio = Z_INTL_BREAKITERATOR_P(&iter->data);
 	intl_errors_reset(BREAKITER_ERROR_P(bio));
 	if (bio->biter == NULL) {
 		intl_errors_set(BREAKITER_ERROR_P(bio), U_INVALID_STATE_ERROR,
@@ -57,7 +54,7 @@ static void _breakiterator_destroy_it(zend_object_iterator *iter)
 static void _breakiterator_move_forward(zend_object_iterator *iter)
 {
 	BreakIterator *biter = _breakiter_prolog(iter);
-	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
+	zoi_with_current *zoi_iter = reinterpret_cast<zoi_with_current *>(iter);
 
 	iter->funcs->invalidate_current(iter);
 
@@ -67,23 +64,23 @@ static void _breakiterator_move_forward(zend_object_iterator *iter)
 
 	int32_t pos = biter->next();
 	if (pos != BreakIterator::DONE) {
-		ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
+		ZVAL_LONG(&zoi_iter->current, static_cast<zend_long>(pos));
 	} //else we've reached the end of the enum, nothing more is required
 }
 
 static void _breakiterator_rewind(zend_object_iterator *iter)
 {
 	BreakIterator *biter = _breakiter_prolog(iter);
-	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
+	zoi_with_current *zoi_iter = reinterpret_cast<zoi_with_current *>(iter);
 
 	int32_t pos = biter->first();
-	ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
+	ZVAL_LONG(&zoi_iter->current, static_cast<zend_long>(pos));
 }
 
 static void zoi_with_current_dtor_self(zend_object_iterator *iter)
 {
 	// Note: wrapping_obj is unused, call to zoi_with_current_dtor() not necessary
-	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
+	zoi_with_current *zoi_iter = reinterpret_cast<zoi_with_current *>(iter);
 	ZEND_ASSERT(Z_ISUNDEF(zoi_iter->wrapping_obj));
 
 	// Unlike the other iterators, this iterator is a new, standalone instance
@@ -112,7 +109,7 @@ U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
 	}
 
 	bio = Z_INTL_BREAKITERATOR_P(object);
-	BreakIterator *biter = bio->biter;
+	const BreakIterator *biter = bio->biter;
 
 	if (biter == NULL) {
 		zend_throw_exception(NULL,
@@ -162,19 +159,16 @@ static void _breakiterator_parts_get_current_key(zend_object_iterator *iter, zva
 
 static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 {
-	zoi_break_iter_parts *zoi_bit = (zoi_break_iter_parts*)iter;
+	zoi_break_iter_parts *zoi_bit = reinterpret_cast<zoi_break_iter_parts *>(iter);
 	BreakIterator_object *bio = zoi_bit->bio;
 
 	iter->funcs->invalidate_current(iter);
 
-	int32_t cur,
-			next;
-
-	cur = bio->biter->current();
+	const int32_t cur = bio->biter->current();
 	if (cur == BreakIterator::DONE) {
 		return;
 	}
-	next = bio->biter->next();
+	const int32_t next = bio->biter->next();
 	if (next == BreakIterator::DONE) {
 		return;
 	}
@@ -191,8 +185,8 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 	const char	*s = Z_STRVAL(bio->text);
 	zend_string	*res;
 
-	assert(next <= Z_STRLEN(bio->text) && next >= cur);
-	res = zend_string_alloc(next - cur, 0);
+	ZEND_ASSERT(next <= Z_STRLEN(bio->text) && next >= cur);
+	res = zend_string_alloc(next - cur, false);
 
 	memcpy(ZSTR_VAL(res), &s[cur], ZSTR_LEN(res));
 	ZSTR_VAL(res)[ZSTR_LEN(res)] = '\0';
@@ -202,8 +196,8 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 
 static void _breakiterator_parts_rewind(zend_object_iterator *iter)
 {
-	zoi_break_iter_parts *zoi_bit = (zoi_break_iter_parts*)iter;
-	BreakIterator_object *bio = zoi_bit->bio;
+	const zoi_break_iter_parts *zoi_bit = reinterpret_cast<zoi_break_iter_parts *>(iter);
+	const BreakIterator_object *bio = zoi_bit->bio;
 
 	if (!Z_ISUNDEF(zoi_bit->zoi_cur.current)) {
 		iter->funcs->invalidate_current(iter);
@@ -234,23 +228,23 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	object_init_ex(object, IntlPartsIterator_ce_ptr);
 	ii = Z_INTL_ITERATOR_P(object);
 
-	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_break_iter_parts));
+	ii->iterator = static_cast<zend_object_iterator *>(emalloc(sizeof(zoi_break_iter_parts)));
 	zend_iterator_init(ii->iterator);
 
 	ZVAL_COPY(&ii->iterator->data, break_iter_zv);
 	ii->iterator->funcs = &breakiterator_parts_it_funcs;
 	ii->iterator->index = 0;
 
-	((zoi_with_current*)ii->iterator)->destroy_it = _breakiterator_parts_destroy_it;
-	ZVAL_OBJ_COPY(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
-	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
+	reinterpret_cast<zoi_with_current *>(ii->iterator)->destroy_it = _breakiterator_parts_destroy_it;
+	ZVAL_OBJ_COPY(&reinterpret_cast<zoi_with_current *>(ii->iterator)->wrapping_obj, Z_OBJ_P(object));
+	ZVAL_UNDEF(&reinterpret_cast<zoi_with_current *>(ii->iterator)->current);
 
-	((zoi_break_iter_parts*)ii->iterator)->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);
+	reinterpret_cast<zoi_break_iter_parts *>(ii->iterator)->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);
 
-	assert(((zoi_break_iter_parts*)ii->iterator)->bio->biter != NULL);
+	ZEND_ASSERT(reinterpret_cast<zoi_break_iter_parts *>(ii->iterator)->bio->biter != NULL);
 
-	((zoi_break_iter_parts*)ii->iterator)->key_type = key_type;
-	((zoi_break_iter_parts*)ii->iterator)->index_right = 0;
+	reinterpret_cast<zoi_break_iter_parts *>(ii->iterator)->key_type = key_type;
+	reinterpret_cast<zoi_break_iter_parts *>(ii->iterator)->index_right = 0;
 }
 
 U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)

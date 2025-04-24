@@ -21,10 +21,6 @@ extern "C" {
 
 using PHP::CodePointBreakIterator;
 
-static inline CodePointBreakIterator *fetch_cpbi(BreakIterator_object *bio) {
-	return (CodePointBreakIterator*)bio->biter;
-}
-
 U_CFUNC PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint)
 {
 	BREAKITER_METHOD_INIT_VARS;
@@ -34,5 +30,5 @@ U_CFUNC PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	RETURN_LONG(fetch_cpbi(bio)->getLastCodePoint());
+	RETURN_LONG(dynamic_cast<CodePointBreakIterator *>(bio->biter)->getLastCodePoint());
 }
