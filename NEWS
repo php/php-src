@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     inaccurate sunrise and sunset times, but other calculated times are
     correct) (JiriJozif).
 
+- SPL:
+  . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
+    (nielsdos)
+
 - Standard:
   . Fixed bug GH-17403 (Potential deadlock when putenv fails). (nielsdos)
 
