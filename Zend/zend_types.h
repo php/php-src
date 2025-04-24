@@ -28,7 +28,6 @@
 #include <stdint.h>
 
 #ifdef __SSE2__
-# include <mmintrin.h>
 # include <emmintrin.h>
 #endif
 #if defined(__AVX2__)
