@@ -828,6 +828,7 @@ PHP_FUNCTION(putenv)
 #endif
 		RETURN_TRUE;
 	} else {
+		tsrm_env_unlock();
 		free(pe.putenv_string);
 		zend_string_release(pe.key);
 #ifdef PHP_WIN32
