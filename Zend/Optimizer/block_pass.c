@@ -487,6 +487,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					COPY_NODE(opline->op1, opline->op2);
 					SET_UNUSED(opline->op2);
 					++(*opt_count);
+					goto optimize_type_check;
 				} else if (opline->op2_type == IS_CONST &&
 					(Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_TRUE && Z_TYPE(ZEND_OP2_LITERAL(opline)) >= IS_NULL)) {
 					/* IS_IDENTICAL(T, TRUE)  => TYPE_CHECK(T, TRUE)
@@ -497,6 +498,36 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					opline->extended_value = (1 << Z_TYPE(ZEND_OP2_LITERAL(opline)));
 					SET_UNUSED(opline->op2);
 					++(*opt_count);
+					goto optimize_type_check;
+				}
+				break;
+			case ZEND_TYPE_CHECK:
+optimize_type_check:
+				if (opline->extended_value == (1 << IS_TRUE) || opline->extended_value == (1 << IS_FALSE)) {
+					if (opline->op1_type == IS_TMP_VAR &&
+						!zend_bitset_in(used_ext, VAR_NUM(opline->op1.var))) {
+						src = VAR_SOURCE(opline->op1);
+
+						if (src) {
+							switch (src->opcode) {
+								case ZEND_BOOL:
+								case ZEND_BOOL_NOT:
+									/* T = BOOL(X)     + TYPE_CHECK(T, TRUE)  -> BOOL(X), NOP
+									 * T = BOOL(X)     + TYPE_CHECK(T, FALSE) -> BOOL_NOT(X), NOP
+									 * T = BOOL_NOT(X) + TYPE_CHECK(T, TRUE)  -> BOOL_NOT(X), NOP
+									 * T = BOOL_NOT(X) + TYPE_CHECK(T, FALSE) -> BOOL(X), NOP
+									 */
+									src->opcode =
+										((src->opcode == ZEND_BOOL) == (opline->extended_value == (1 << IS_TRUE))) ?
+										ZEND_BOOL : ZEND_BOOL_NOT;
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+							}
+						}
+					}
 				}
 				break;
 	
