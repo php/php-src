@@ -98,6 +98,10 @@ typedef int gid_t;
 #include <immintrin.h>
 #endif
 
+#if defined(__aarch64__) || defined(_M_ARM64)
+#include <arm_neon.h>
+#endif
+
 ZEND_EXTENSION();
 
 #ifndef ZTS
@@ -181,6 +185,18 @@ static void bzero_aligned(void *mem, size_t size)
 		_mm_store_si128((__m128i*)(p+16), xmm0);
 		_mm_store_si128((__m128i*)(p+32), xmm0);
 		_mm_store_si128((__m128i*)(p+48), xmm0);
+		p += 64;
+	}
+#elif defined(__aarch64__) || defined(_M_ARM64)
+	char *p = (char*)mem;
+	char *end = p + size;
+	uint8x16_t xmm0 = vdupq_n_u8(0);
+
+	while (p < end) {
+		vst1q_u8((uint8_t*)p, xmm0);
+		vst1q_u8((uint8_t*)(p+16), xmm0);
+		vst1q_u8((uint8_t*)(p+32), xmm0);
+		vst1q_u8((uint8_t*)(p+48), xmm0);
 		p += 64;
 	}
 #else
