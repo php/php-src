@@ -218,6 +218,13 @@ namespace {
     #[\Deprecated(message: "custom message")]
     function zend_test_deprecated_attr(): void {}
 
+    #[\NoDiscard(message: "custom message")]
+    function zend_test_nodiscard(): int {}
+
+    #[\Deprecated(message: "custom message")]
+    #[\NoDiscard(message: "custom message 2")]
+    function zend_test_deprecated_nodiscard(): int {}
+
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}
 
@@ -234,6 +241,8 @@ namespace {
     function zend_leak_variable(mixed $variable): void {}
 
     function zend_leak_bytes(int $bytes = 3): void {}
+
+    function zend_delref(mixed $variable): void {}
 
     function zend_string_or_object(object|string $param): object|string {}
 

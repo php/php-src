@@ -306,6 +306,7 @@ static void _const_string(smart_str *str, const char *name, zval *value, const c
 static void _function_string(smart_str *str, zend_function *fptr, zend_class_entry *scope, const char* indent);
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, const char* indent);
 static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
+static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
 static void _extension_string(smart_str *str, const zend_module_entry *module, const char *indent);
 static void _zend_extension_string(smart_str *str, const zend_extension *extension, const char *indent);
@@ -330,38 +331,48 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 			kind = "Interface";
 		} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
 			kind = "Trait";
+		} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+			kind = "Enum";
 		}
 		smart_str_append_printf(str, "%s%s [ ", indent, kind);
 	}
-	smart_str_append_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user" : "<internal");
+	smart_str_appends(str, (ce->type == ZEND_USER_CLASS) ? "<user" : "<internal");
 	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module) {
 		smart_str_append_printf(str, ":%s", ce->info.internal.module->name);
 	}
-	smart_str_append_printf(str, "> ");
+	smart_str_appends(str, "> ");
 	if (ce->get_iterator != NULL) {
-		smart_str_append_printf(str, "<iterateable> ");
+		smart_str_appends(str, "<iterateable> ");
 	}
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		smart_str_append_printf(str, "interface ");
+		smart_str_appends(str, "interface ");
 	} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
-		smart_str_append_printf(str, "trait ");
+		smart_str_appends(str, "trait ");
+	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+		smart_str_appends(str, "enum ");
 	} else {
 		if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-			smart_str_append_printf(str, "abstract ");
+			smart_str_appends(str, "abstract ");
 		}
 		if (ce->ce_flags & ZEND_ACC_FINAL) {
-			smart_str_append_printf(str, "final ");
+			smart_str_appends(str, "final ");
 		}
 		if (ce->ce_flags & ZEND_ACC_READONLY_CLASS) {
-			smart_str_append_printf(str, "readonly ");
+			smart_str_appends(str, "readonly ");
 		}
-		smart_str_append_printf(str, "class ");
+		smart_str_appends(str, "class ");
 	}
-	smart_str_append_printf(str, "%s", ZSTR_VAL(ce->name));
+	smart_str_append(str, ce->name);
 	if (ce->parent) {
 		smart_str_append_printf(str, " extends %s", ZSTR_VAL(ce->parent->name));
 	}
 
+	// Show backing type of enums
+	if ((ce->ce_flags & ZEND_ACC_ENUM) && (ce->enum_backing_type != IS_UNDEF)) {
+		smart_str_appends(str,
+			ce->enum_backing_type == IS_STRING ? ": string" : ": int"
+		);
+	}
 	if (ce->num_interfaces) {
 		uint32_t i;
 
@@ -375,7 +386,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 			smart_str_append_printf(str, ", %s", ZSTR_VAL(ce->interfaces[i]->name));
 		}
 	}
-	smart_str_append_printf(str, " ] {\n");
+	smart_str_appends(str, " ] {\n");
 
 	/* The information where a class is declared is only available for user classes */
 	if (ce->type == ZEND_USER_CLASS) {
@@ -384,22 +395,48 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	}
 
 	/* Constants */
-	smart_str_append_printf(str, "\n");
-	count = zend_hash_num_elements(&ce->constants_table);
-	smart_str_append_printf(str, "%s  - Constants [%d] {\n", indent, count);
-	if (count > 0) {
+	uint32_t total_count = zend_hash_num_elements(&ce->constants_table);
+	uint32_t constant_count = 0;
+	uint32_t enum_case_count = 0;
+	smart_str constant_str = {0};
+	smart_str enum_case_str = {0};
+	/* So that we don't need to loop through all of the constants multiple
+	 * times (count the constants vs. enum cases, print the constants, print
+	 * the enum cases) use some temporary helper smart strings. */
+	if (total_count > 0) {
 		zend_string *key;
 		zend_class_constant *c;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), key, c) {
-			_class_const_string(str, key, c, ZSTR_VAL(sub_indent));
+			if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE) {
+				_enum_case_string(&enum_case_str, key, c, ZSTR_VAL(sub_indent));
+				enum_case_count++;
+			} else {
+				_class_const_string(&constant_str, key, c, ZSTR_VAL(sub_indent));
+				constant_count++;
+			}
 			if (UNEXPECTED(EG(exception))) {
 				zend_string_release(sub_indent);
+				smart_str_free(&enum_case_str);
+				smart_str_free(&constant_str);
 				return;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
+	// Enum cases go first, but the heading is only shown if there are any
+	if (enum_case_count) {
+		smart_str_appendc(str, '\n');
+		smart_str_append_printf(str, "%s  - Enum cases [%d] {\n", indent, enum_case_count);
+		smart_str_append_smart_str(str, &enum_case_str);
+		smart_str_append_printf(str, "%s  }\n", indent);
+	}
+	smart_str_appendc(str, '\n');
+	smart_str_append_printf(str, "%s  - Constants [%d] {\n", indent, constant_count);
+	smart_str_append_smart_str(str, &constant_str);
 	smart_str_append_printf(str, "%s  }\n", indent);
+
+	smart_str_free(&enum_case_str);
+	smart_str_free(&constant_str);
 
 	/* Static properties */
 	/* counting static properties */
@@ -453,12 +490,12 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 			if ((mptr->common.fn_flags & ZEND_ACC_STATIC)
 				&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 			{
-				smart_str_append_printf(str, "\n");
+				smart_str_appendc(str, '\n');
 				_function_string(str, mptr, ce, ZSTR_VAL(sub_indent));
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		smart_str_append_printf(str, "\n");
+		smart_str_appendc(str, '\n');
 	}
 	smart_str_append_printf(str, "%s  }\n", indent);
 
@@ -529,7 +566,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 		smart_str_append_printf(str, "\n%s  - Methods [%d] {", indent, count);
 		smart_str_append_smart_str(str, &method_str);
 		if (!count) {
-			smart_str_append_printf(str, "\n");
+			smart_str_appendc(str, '\n');
 		}
 		smart_str_free(&method_str);
 	} else {
@@ -553,7 +590,7 @@ static void _const_string(smart_str *str, const char *name, zval *value, const c
 
 	if (flags & (CONST_PERSISTENT|CONST_NO_FILE_CACHE|CONST_DEPRECATED)) {
 		bool first = true;
-		smart_str_appends(str, "<");
+		smart_str_appendc(str, '<');
 
 #define DUMP_CONST_FLAG(flag, output) \
 	do { \
@@ -626,6 +663,32 @@ static void _class_const_string(smart_str *str, const zend_string *name, zend_cl
 }
 /* }}} */
 
+static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent)
+{
+	if (Z_TYPE(c->value) == IS_CONSTANT_AST && zend_update_class_constant(c, name, c->ce) == FAILURE) {
+		return;
+	}
+
+	if (c->doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(c->doc_comment));
+	}
+	smart_str_append_printf(str, "%sCase %s", indent, ZSTR_VAL(name));
+	if (c->ce->enum_backing_type == IS_UNDEF) {
+		// No value
+		smart_str_appendc(str, '\n');
+	} else {
+		/* Has a value, which is the enum instance, get the value from that.
+		 * We know it must be either a string or integer so no need
+		 * for the IS_ARRAY or IS_OBJECT handling that _class_const_string()
+		 * requires. */
+		zval *enum_val = zend_enum_fetch_case_value(Z_OBJ(c->value));
+		zend_string *tmp_value_str;
+		zend_string *value_str = zval_get_tmp_string(enum_val, &tmp_value_str);
+		smart_str_append_printf(str, " = %s\n", ZSTR_VAL(value_str));
+		zend_tmp_string_release(tmp_value_str);
+	}
+}
+
 static zend_op *get_recv_op(const zend_op_array *op_array, uint32_t offset)
 {
 	zend_op *op = op_array->opcodes;
@@ -682,6 +745,16 @@ static int format_default_value(smart_str *str, zval *value) {
 			format_default_value(str, zv);
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
+	} else if (Z_TYPE_P(value) == IS_OBJECT) {
+		/* This branch is reached if the constant AST was already evaluated and
+		 * resulted in an object; enums are already handled in smart_str_append_zval()
+		 * (GH-15902) */
+		zend_object *obj = Z_OBJ_P(value);
+		zend_class_entry *class = obj->ce;
+		ZEND_ASSERT(!(class->ce_flags & ZEND_ACC_ENUM));
+		smart_str_appends(str, "object(");
+		smart_str_append(str, class->name);
+		smart_str_appendc(str, ')');
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
 		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
@@ -701,9 +774,9 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 {
 	smart_str_append_printf(str, "Parameter #%d [ ", offset);
 	if (!required) {
-		smart_str_append_printf(str, "<optional> ");
+		smart_str_appends(str, "<optional> ");
 	} else {
-		smart_str_append_printf(str, "<required> ");
+		smart_str_appends(str, "<required> ");
 	}
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
 		zend_string *type_str = zend_type_to_string(arg_info->type);
@@ -789,7 +862,7 @@ static void _function_closure_string(smart_str *str, const zend_function *fptr, 
 		return;
 	}
 
-	smart_str_append_printf(str, "\n");
+	smart_str_appendc(str, '\n');
 	smart_str_append_printf(str, "%s- Bound Variables [%u] {\n", indent, count);
 	i = 0;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(static_variables, key) {
@@ -817,8 +890,8 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	}
 
 	smart_str_appendl(str, indent, strlen(indent));
-	smart_str_append_printf(str, fptr->common.fn_flags & ZEND_ACC_CLOSURE ? "Closure [ " : (fptr->common.scope ? "Method [ " : "Function [ "));
-	smart_str_append_printf(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
+	smart_str_appends(str, fptr->common.fn_flags & ZEND_ACC_CLOSURE ? "Closure [ " : (fptr->common.scope ? "Method [ " : "Function [ "));
+	smart_str_appends(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
 	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
 		smart_str_appends(str, ", deprecated");
 	}
@@ -932,6 +1005,12 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 	if (!prop) {
 		smart_str_append_printf(str, "<dynamic> public $%s", prop_name);
 	} else {
+		if (prop->flags & ZEND_ACC_ABSTRACT) {
+			smart_str_appends(str, "abstract ");
+		}
+		if (prop->flags & ZEND_ACC_FINAL) {
+			smart_str_appends(str, "final ");
+		}
 		/* These are mutually exclusive */
 		switch (prop->flags & ZEND_ACC_PPP_MASK) {
 			case ZEND_ACC_PUBLIC:
@@ -1023,7 +1102,7 @@ static void _extension_class_string(zend_class_entry *ce, zend_string *key, smar
 	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
 		/* dump class if it is not an alias */
 		if (zend_string_equals_ci(ce->name, key)) {
-			smart_str_append_printf(str, "\n");
+			smart_str_appendc(str, '\n');
 			_class_string(str, ce, NULL, indent);
 			(*num_classes)++;
 		}
@@ -1086,7 +1165,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 			_extension_ini_string(ini_entry, &str_ini, indent, module->module_number);
 		} ZEND_HASH_FOREACH_END();
 		if (smart_str_get_len(&str_ini) > 0) {
-			smart_str_append_printf(str, "\n  - INI {\n");
+			smart_str_appends(str, "\n  - INI {\n");
 			smart_str_append_smart_str(str, &str_ini);
 			smart_str_append_printf(str, "%s  }\n", indent);
 		}
@@ -1121,7 +1200,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 			if (fptr->common.type==ZEND_INTERNAL_FUNCTION
 				&& fptr->internal_function.module == module) {
 				if (first) {
-					smart_str_append_printf(str, "\n  - Functions {\n");
+					smart_str_appends(str, "\n  - Functions {\n");
 					first = 0;
 				}
 				_function_string(str, fptr, NULL, "    ");
@@ -2592,7 +2671,7 @@ ZEND_METHOD(ReflectionParameter, __toString)
 
 /* }}} */
 
-/* {{{ Returns this parameters's name */
+/* {{{ Returns this parameter's name */
 ZEND_METHOD(ReflectionParameter, getName)
 {
 	reflection_object *intern;
@@ -3091,7 +3170,7 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 
 	array_init(return_value);
 	if (ZEND_TYPE_HAS_LIST(param->type)) {
-		zend_type *list_type;
+		const zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
 			append_type(return_value, *list_type);
 		} ZEND_TYPE_LIST_FOREACH_END();
@@ -3142,7 +3221,7 @@ ZEND_METHOD(ReflectionIntersectionType, getTypes)
 {
 	reflection_object *intern;
 	type_reference *param;
-	zend_type *list_type;
+	const zend_type *list_type;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(param);

@@ -22,15 +22,22 @@ body:
         ```
     validations:
       required: true
-  - type: input
+  - type: textarea
     attributes:
       label: PHP Version
-      description: "The used PHP version. Make sure it is [supported](https://www.php.net/supported-versions.php)."
-      placeholder: "PHP 8.0.12"
+      description: |
+        Please run PHP with the `-v` flag (e.g. `php -v`, `php8.3 -v`, `php-fpm -v` or similar) and provide the full output of that command. If executing that command is not possible, please provide the full version number as given in PHPInfo.
+
+        Please make sure that the used PHP version [is a supported version](https://www.php.net/supported-versions.php).
+      placeholder: |
+        PHP 8.3.19 (cli) (built: Mar 13 2025 17:44:40) (NTS)
+        Copyright (c) The PHP Group
+        Zend Engine v4.3.19, Copyright (c) Zend Technologies
+            with Zend OPcache v8.3.19, Copyright (c), by Zend Technologies
     validations:
       required: true
   - type: input
     attributes:
       label: Operating System
       description: "The used operating system, if relevant."
-      placeholder: "Ubuntu 20.04"
+      placeholder: "Ubuntu 24.04"

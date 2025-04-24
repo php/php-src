@@ -362,8 +362,10 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 			}
 
 			if (UNEXPECTED(ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
-				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0 && !CONST_IS_RECURSIVE(c)) {
+					CONST_PROTECT_RECURSION(c);
 					zend_deprecated_class_constant(c, constant_name);
+					CONST_UNPROTECT_RECURSION(c);
 					if (EG(exception)) {
 						goto failure;
 					}

@@ -27,4 +27,4 @@ object(Directory)#2 (0) {
   ["handle"]=>
   uninitialized(mixed)
 }
-Error: Unable to find my handle property
+Error: Internal directory stream has been altered

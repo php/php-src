@@ -91,6 +91,8 @@ static void zend_persist_ast_calc(zend_ast *ast)
 		zval z;
 		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
 		zend_persist_op_array_calc(&z);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		ADD_SIZE(sizeof(zend_ast_fcc));
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -195,7 +197,7 @@ static void zend_persist_type_calc(zend_type *type)
 	}
 
 	zend_type *single_type;
-	ZEND_TYPE_FOREACH(*type, single_type) {
+	ZEND_TYPE_FOREACH_MUTABLE(*type, single_type) {
 		if (ZEND_TYPE_HAS_LIST(*single_type)) {
 			zend_persist_type_calc(single_type);
 			continue;

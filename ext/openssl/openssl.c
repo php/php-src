@@ -2752,8 +2752,8 @@ PHP_FUNCTION(openssl_pkcs7_read)
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
-				BIO_free(bio_out);
 			}
+			BIO_free(bio_out);
 		}
 	}
 
@@ -2767,8 +2767,8 @@ PHP_FUNCTION(openssl_pkcs7_read)
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
-				BIO_free(bio_out);
 			}
+			BIO_free(bio_out);
 		}
 	}
 
@@ -3393,8 +3393,8 @@ PHP_FUNCTION(openssl_cms_read)
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
-				BIO_free(bio_out);
 			}
+			BIO_free(bio_out);
 		}
 	}
 
@@ -3408,8 +3408,8 @@ PHP_FUNCTION(openssl_cms_read)
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
-				BIO_free(bio_out);
 			}
+			BIO_free(bio_out);
 		}
 	}
 
@@ -3968,26 +3968,18 @@ PHP_FUNCTION(openssl_sign)
 		mdtype = php_openssl_get_evp_md_from_algo(method_long);
 	}
 	if (!mdtype && (!can_default_digest || method_long != 0)) {
+		EVP_PKEY_free(pkey);
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
 
 	md_ctx = EVP_MD_CTX_create();
 	size_t siglen;
-#if PHP_OPENSSL_API_VERSION >= 0x10100
 	if (md_ctx != NULL &&
 			EVP_DigestSignInit(md_ctx, NULL, mdtype, NULL, pkey) &&
 			EVP_DigestSign(md_ctx, NULL, &siglen, (unsigned char*)data, data_len) &&
 			(sigbuf = zend_string_alloc(siglen, 0)) != NULL &&
 			EVP_DigestSign(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, (unsigned char*)data, data_len)) {
-#else
-	if (md_ctx != NULL &&
-			EVP_SignInit(md_ctx, mdtype) &&
-			EVP_SignUpdate(md_ctx, data, data_len) &&
-			(siglen = EVP_PKEY_size(pkey)) &&
-			(sigbuf = zend_string_alloc(siglen, 0)) != NULL &&
-			EVP_SignFinal(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), (unsigned int*)&siglen, pkey)) {
-#endif
 		ZSTR_VAL(sigbuf)[siglen] = '\0';
 		ZSTR_LEN(sigbuf) = siglen;
 		ZEND_TRY_ASSIGN_REF_NEW_STR(signature, sigbuf);
@@ -4048,14 +4040,8 @@ PHP_FUNCTION(openssl_verify)
 
 	md_ctx = EVP_MD_CTX_create();
 	if (md_ctx == NULL ||
-#if PHP_OPENSSL_API_VERSION >= 0x10100
 			!EVP_DigestVerifyInit(md_ctx, NULL, mdtype, NULL, pkey) ||
 			(err = EVP_DigestVerify(md_ctx, (unsigned char *)signature, signature_len, (unsigned char*)data, data_len)) < 0) {
-#else
-			!EVP_VerifyInit (md_ctx, mdtype) ||
-			!EVP_VerifyUpdate (md_ctx, data, data_len) ||
-			(err = EVP_VerifyFinal(md_ctx, (unsigned char *)signature, (unsigned int)signature_len, pkey)) < 0) {
-#endif
 		php_openssl_store_errors();
 	}
 	EVP_MD_CTX_destroy(md_ctx);
@@ -4471,17 +4457,15 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		RETURN_THROWS();
 	}
 
-	if (zstrong_result_returned) {
-		ZEND_TRY_ASSIGN_REF_FALSE(zstrong_result_returned);
-	}
-
 	if ((buffer = php_openssl_random_pseudo_bytes(buffer_length))) {
 		ZSTR_VAL(buffer)[buffer_length] = 0;
 		RETVAL_NEW_STR(buffer);
-	}
 
-	if (zstrong_result_returned) {
-		ZEND_TRY_ASSIGN_REF_TRUE(zstrong_result_returned);
+		if (zstrong_result_returned) {
+			ZEND_TRY_ASSIGN_REF_TRUE(zstrong_result_returned);
+		}
+	} else if (zstrong_result_returned) {
+		ZEND_TRY_ASSIGN_REF_FALSE(zstrong_result_returned);
 	}
 }
 /* }}} */

@@ -536,6 +536,7 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 	}
 	*to = '\0';
 
+	ZEND_ASSERT(!ZSTR_IS_INTERNED(start) && GC_REFCOUNT(start) == 1);
 	start = zend_string_truncate(start, to - (unsigned char*)ZSTR_VAL(start), 0);
 
 	return start;
@@ -558,7 +559,7 @@ PHP_FUNCTION(urlencode)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
+	RETURN_NEW_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
 /* }}} */
 
@@ -620,7 +621,7 @@ PHP_FUNCTION(rawurlencode)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
+	RETURN_NEW_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
 /* }}} */
 

@@ -13,11 +13,11 @@ code, but instead contain empty function and method bodies. A very basic stub lo
    /** @var float */
    const WEIGHT = 6.8;
 
-   class Atmopshere {
+   class Atmosphere {
        public function calculateBar(): float {}
    }
 
-   function fahrenheitToCelcius(float $fahrenheitToCelcius): float {}
+   function fahrenheitToCelsius(float $fahrenheitToCelsius): float {}
 
 Any kind of symbol can be declared via stubs. Every type can be used, with the exception of
 disjunctive normal form (DNF) types. Additional meta information can be added via PHPDoc blocks or
@@ -33,17 +33,17 @@ using namespace blocks:
        /** @var float */
        const WEIGHT_TON = 6.8;
 
-       class Atmopshere {
+       class Atmosphere {
            public function calculateBar(): float {}
        }
    }
 
    namespace Algorithms {
-       function fahrenheitToCelcius(float $fahrenheit): float {}
+       function fahrenheitToCelsius(float $fahrenheit): float {}
    }
 
 The above example declares the global constants ``ANIMAL`` and ``WEIGHT_TON``, and the class
-``Atmopshere`` in the top-level namespace. The ``fahrenheitToCelcius()`` function is declared to be
+``Atmosphere`` in the top-level namespace. The ``fahrenheitToCelsius()`` function is declared to be
 in the ``Algorithms`` namespace.
 
 ********************
@@ -77,11 +77,11 @@ The arginfo file matching our first example looks like:
    /* This is a generated file, edit the .stub.php file instead.
     * Stub hash: e4ed788d54a20272a92a3f6618b73d48ec848f97 */
 
-   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelcius, 0, 1, IS_DOUBLE, 0)
-       ZEND_ARG_TYPE_INFO(0, fahrenheitToCelcius, IS_DOUBLE, 0)
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelsius, 0, 1, IS_DOUBLE, 0)
+       ZEND_ARG_TYPE_INFO(0, fahrenheitToCelsius, IS_DOUBLE, 0)
    ZEND_END_ARG_INFO()
 
-   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Atmopshere_calculateBar, 0, 0, IS_DOUBLE, 0)
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Atmosphere_calculateBar, 0, 0, IS_DOUBLE, 0)
    ZEND_END_ARG_INFO()
 
 The hash that is included in the file makes sure that stub files are not reprocessed unless the stub
@@ -186,24 +186,24 @@ In order to generate these, add the file-level ``@generate-function-entries`` PH
       public function calculateBar(): float {}
    }
 
-   function fahrenheitToCelcius(float $fahrenheit): float {}
+   function fahrenheitToCelsius(float $fahrenheit): float {}
 
 Now, the following C code is generated:
 
 .. code:: c
 
-   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelcius, 0, 1, IS_DOUBLE, 0)
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelsius, 0, 1, IS_DOUBLE, 0)
        ZEND_ARG_TYPE_INFO(0, fahrenheit, IS_DOUBLE, 0)
    ZEND_END_ARG_INFO()
 
    ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Atmosphere_calculateBar, 0, 0, IS_DOUBLE, 0)
    ZEND_END_ARG_INFO()
 
-   ZEND_FUNCTION(fahrenheitToCelcius);
+   ZEND_FUNCTION(fahrenheitToCelsius);
    ZEND_METHOD(Atmosphere, calculateBar);
 
    static const zend_function_entry ext_functions[] = {
-       ZEND_FE(fahrenheitToCelcius, arginfo_fahrenheitToCelcius)
+       ZEND_FE(fahrenheitToCelsius, arginfo_fahrenheitToCelsius)
        ZEND_FE_END
    };
 
@@ -762,7 +762,7 @@ Running it with the stub examples that are used in this guide, the following war
    Warning: Missing class synopsis for Number
    Warning: Missing class synopsis for Elephant
    Warning: Missing class synopsis for Atmosphere
-   Warning: Missing method synopsis for fahrenheitToCelcius()
+   Warning: Missing method synopsis for fahrenheitToCelsius()
    Warning: Missing method synopsis for Atmosphere::calculateBar()
 
 **********************

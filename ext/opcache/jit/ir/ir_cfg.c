@@ -328,7 +328,7 @@ static void ir_remove_predecessor(ir_ctx *ctx, ir_block *bb, uint32_t from)
 
 static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 {
-	ir_ref i, j, n, k, *p, use;
+	ir_ref i, j, n, k, *p, *q, use;
 	ir_insn *use_insn;
 	ir_use_list *use_list;
 	ir_bitset life_inputs;
@@ -359,7 +359,7 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
 			n++;
-			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+			for (k = use_list->count, p = q = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
 				if (use_insn->op == IR_PHI) {
@@ -379,8 +379,22 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 					for (j = 2; j <= n; j++) {
 						ir_insn_set_op(use_insn, j, IR_UNUSED);
 					}
-					ir_use_list_remove_all(ctx, merge, use);
+					continue;
 				}
+
+				/*compact use list */
+				if (p != q){
+					*q = use;
+				}
+				q++;
+			}
+
+			if (p != q) {
+				use_list->count -= (p - q);
+				do {
+					*q = IR_UNUSED; /* clenu-op the removed tail */
+					q++;
+				} while (p != q);
 			}
 		}
 	} else {
@@ -389,7 +403,7 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
 			n++;
-			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+			for (k = use_list->count, p = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
 				if (use_insn->op == IR_PHI) {

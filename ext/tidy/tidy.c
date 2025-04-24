@@ -705,6 +705,7 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 
 	if (tempnode) {
 		array_init(&children);
+		zend_hash_real_init_packed(Z_ARRVAL(children));
 		do {
 			tidy_create_node_object(&temp, obj->ptdoc, tempnode);
 			add_next_index_zval(&children, &temp);

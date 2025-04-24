@@ -487,10 +487,6 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		}
 	}
 	if (ret == PASS) {
-		ZEND_ASSERT(conn->username.s != user && conn->password.s != passwd);
-		mysqlnd_set_persistent_string(&conn->username, user, user_len, conn->persistent);
-		mysqlnd_set_persistent_string(&conn->password, passwd, passwd_len, conn->persistent);
-
 		mysqlnd_set_string(&conn->last_message, NULL, 0);
 		UPSERT_STATUS_RESET(conn->upsert_status);
 		/* set charset for old servers */

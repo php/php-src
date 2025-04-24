@@ -461,7 +461,6 @@ zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int se
 	if (file == NULL) {
 		file = RAND_file_name(buffer, sizeof(buffer));
 	}
-	PHP_OPENSSL_RAND_ADD_TIME();
 	if (file == NULL || !RAND_write_file(file)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to write random state");
@@ -488,11 +487,6 @@ EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo) {
 #ifndef OPENSSL_NO_MD2
 		case OPENSSL_ALGO_MD2:
 			mdtype = (EVP_MD *) EVP_md2();
-			break;
-#endif
-#if PHP_OPENSSL_API_VERSION < 0x10100
-		case OPENSSL_ALGO_DSS1:
-			mdtype = (EVP_MD *) EVP_dss1();
 			break;
 #endif
 		case OPENSSL_ALGO_SHA224:
@@ -1510,7 +1504,6 @@ EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req)
 	int egdsocket, seeded;
 	char *randfile = php_openssl_conf_get_string(req->req_config, req->section_name, "RANDFILE");
 	php_openssl_load_rand_file(randfile, &egdsocket, &seeded);
-	PHP_OPENSSL_RAND_ADD_TIME();
 
 	EVP_PKEY *key = NULL;
 	EVP_PKEY *params = NULL;
@@ -1700,48 +1693,25 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 	int cipher_mode = EVP_CIPHER_mode(cipher_type);
 	memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
 	switch (cipher_mode) {
-#if PHP_OPENSSL_API_VERSION >= 0x10100
-		/* Since OpenSSL 1.1, all AEAD ciphers use a common framework. We check for
-		 * EVP_CIPH_OCB_MODE, because LibreSSL does not support it. */
 		case EVP_CIPH_GCM_MODE:
 		case EVP_CIPH_CCM_MODE:
-# ifdef EVP_CIPH_OCB_MODE
+		/* We check for EVP_CIPH_OCB_MODE, because LibreSSL does not support it. */
+#ifdef EVP_CIPH_OCB_MODE
 		case EVP_CIPH_OCB_MODE:
 			/* For OCB mode, explicitly set the tag length even when decrypting,
 			 * see https://github.com/openssl/openssl/issues/8331. */
 			mode->set_tag_length_always = cipher_mode == EVP_CIPH_OCB_MODE;
-# endif
+#endif
 			php_openssl_set_aead_flags(mode);
 			mode->set_tag_length_when_encrypting = cipher_mode == EVP_CIPH_CCM_MODE;
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
 			break;
-# ifdef NID_chacha20_poly1305
+#ifdef NID_chacha20_poly1305
 		default:
 			if (EVP_CIPHER_nid(cipher_type) == NID_chacha20_poly1305) {
 				php_openssl_set_aead_flags(mode);
 			}
 			break;
-
-# endif
-#else
-# ifdef EVP_CIPH_GCM_MODE
-		case EVP_CIPH_GCM_MODE:
-			mode->is_aead = 1;
-			mode->aead_get_tag_flag = EVP_CTRL_GCM_GET_TAG;
-			mode->aead_set_tag_flag = EVP_CTRL_GCM_SET_TAG;
-			mode->aead_ivlen_flag = EVP_CTRL_GCM_SET_IVLEN;
-			break;
-# endif
-# ifdef EVP_CIPH_CCM_MODE
-		case EVP_CIPH_CCM_MODE:
-			mode->is_aead = 1;
-			mode->is_single_run_aead = 1;
-			mode->set_tag_length_when_encrypting = 1;
-			mode->aead_get_tag_flag = EVP_CTRL_CCM_GET_TAG;
-			mode->aead_set_tag_flag = EVP_CTRL_CCM_SET_TAG;
-			mode->aead_ivlen_flag = EVP_CTRL_CCM_SET_IVLEN;
-			break;
-# endif
 #endif
 	}
 }
@@ -2121,13 +2091,11 @@ PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_le
 	buffer = zend_string_alloc(buffer_length, 0);
 
 	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(buffer_length, length);
-	PHP_OPENSSL_RAND_ADD_TIME();
 	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
+		php_openssl_store_errors();
 		zend_string_release_ex(buffer, 0);
 		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
 		return NULL;
-	} else {
-		php_openssl_store_errors();
 	}
 
 	return buffer;

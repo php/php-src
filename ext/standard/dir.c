@@ -59,39 +59,6 @@ static zend_function *dir_class_get_constructor(zend_object *object)
 	return NULL;
 }
 
-#define FETCH_DIRP() \
-	myself = getThis(); \
-	if (!myself) { \
-		ZEND_PARSE_PARAMETERS_START(0, 1) \
-			Z_PARAM_OPTIONAL \
-			Z_PARAM_RESOURCE_OR_NULL(id) \
-		ZEND_PARSE_PARAMETERS_END(); \
-		if (id) { \
-			if ((dirp = (php_stream *)zend_fetch_resource(Z_RES_P(id), "Directory", php_file_le_stream())) == NULL) { \
-				RETURN_THROWS(); \
-			} \
-		} else { \
-			if (!DIRG(default_dir)) { \
-				zend_type_error("No resource supplied"); \
-				RETURN_THROWS(); \
-			} \
-			if ((dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
-				RETURN_THROWS(); \
-			} \
-		} \
-	} else { \
-		ZEND_PARSE_PARAMETERS_NONE(); \
-		zval *handle_zv = Z_DIRECTORY_HANDLE_P(myself); \
-		if (Z_TYPE_P(handle_zv) != IS_RESOURCE) { \
-			zend_throw_error(NULL, "Unable to find my handle property"); \
-			RETURN_THROWS(); \
-		} \
-		if ((dirp = (php_stream *)zend_fetch_resource_ex(handle_zv, "Directory", php_file_le_stream())) == NULL) { \
-			RETURN_THROWS(); \
-		} \
-	}
-
-
 static void php_set_default_dir(zend_resource *res)
 {
 	if (DIRG(default_dir)) {
@@ -189,28 +156,158 @@ PHP_FUNCTION(dir)
 }
 /* }}} */
 
+
+static php_stream* php_dir_get_directory_stream_from_user_arg(php_stream *dir_stream)
+{
+	if (dir_stream == NULL) {
+		if (UNEXPECTED(DIRG(default_dir) == NULL)) {
+			zend_type_error("No resource supplied");
+			return NULL;
+		}
+		zend_resource *res = DIRG(default_dir);
+		ZEND_ASSERT(res->type == php_file_le_stream());
+		dir_stream = (php_stream*) res->ptr;
+	}
+
+	if (UNEXPECTED((dir_stream->flags & PHP_STREAM_FLAG_IS_DIR)) == 0) {
+		zend_argument_type_error(1, "must be a valid Directory resource");
+		return NULL;
+	}
+	return dir_stream;
+}
+
+static php_stream* php_dir_get_directory_stream_from_this(zval *this_z)
+{
+	zval *handle_zv = Z_DIRECTORY_HANDLE_P(this_z);
+	if (UNEXPECTED(Z_TYPE_P(handle_zv) != IS_RESOURCE)) {
+		zend_throw_error(NULL, "Internal directory stream has been altered");
+		return NULL;
+	}
+	zend_resource *res = Z_RES_P(handle_zv);
+	/* Assume the close() method was called
+	 * (instead of the hacky case where a different resource would have been set via the ArrayObject "hack") */
+	if (UNEXPECTED(res->type != php_file_le_stream())) {
+		/* TypeError is used for BC, TODO: Use base Error in PHP 9 */
+		zend_type_error("Directory::%s(): cannot use Directory resource after it has been closed", get_active_function_name());
+		return NULL;
+	}
+	php_stream *dir_stream = (php_stream*) res->ptr;
+	if (UNEXPECTED((dir_stream->flags & PHP_STREAM_FLAG_IS_DIR)) == 0) {
+		zend_throw_error(NULL, "Internal directory stream has been altered");
+		return NULL;
+	}
+	return dir_stream;
+}
+
 /* {{{ Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
-	zval *id = NULL, *myself;
-	php_stream *dirp;
-	zend_resource *res;
+	php_stream *dirp = NULL;
 
-	FETCH_DIRP();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_argument_type_error(1, "must be a valid Directory resource");
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
+	if (UNEXPECTED(dirp == NULL)) {
 		RETURN_THROWS();
 	}
-
-	res = dirp->res;
-	zend_list_close(dirp->res);
+	zend_resource *res = dirp->res;
+	zend_list_close(res);
 
 	if (res == DIRG(default_dir)) {
 		php_set_default_dir(NULL);
 	}
 }
 /* }}} */
+
+PHP_METHOD(Directory, close)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_stream *dirp = php_dir_get_directory_stream_from_this(ZEND_THIS);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	zend_resource *res = dirp->res;
+	zend_list_close(res);
+
+	if (res == DIRG(default_dir)) {
+		php_set_default_dir(NULL);
+	}
+}
+
+/* {{{ Rewind dir_handle back to the start */
+PHP_FUNCTION(rewinddir)
+{
+	php_stream *dirp = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	php_stream_rewinddir(dirp);
+}
+/* }}} */
+
+PHP_METHOD(Directory, rewind)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_stream *dirp = php_dir_get_directory_stream_from_this(ZEND_THIS);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	php_stream_rewinddir(dirp);
+}
+
+/* {{{ Read directory entry from dir_handle */
+PHP_FUNCTION(readdir)
+{
+	php_stream *dirp = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	php_stream_dirent entry;
+	if (php_stream_readdir(dirp, &entry)) {
+		RETURN_STRING(entry.d_name);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+PHP_METHOD(Directory, read)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_stream *dirp = php_dir_get_directory_stream_from_this(ZEND_THIS);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	php_stream_dirent entry;
+	if (php_stream_readdir(dirp, &entry)) {
+		RETURN_STRING(entry.d_name);
+	}
+	RETURN_FALSE;
+}
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 /* {{{ Change root directory */
@@ -297,44 +394,6 @@ PHP_FUNCTION(getcwd)
 	} else {
 		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-/* {{{ Rewind dir_handle back to the start */
-PHP_FUNCTION(rewinddir)
-{
-	zval *id = NULL, *myself;
-	php_stream *dirp;
-
-	FETCH_DIRP();
-
-	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_argument_type_error(1, "must be a valid Directory resource");
-		RETURN_THROWS();
-	}
-
-	php_stream_rewinddir(dirp);
-}
-/* }}} */
-
-/* {{{ Read directory entry from dir_handle */
-PHP_FUNCTION(readdir)
-{
-	zval *id = NULL, *myself;
-	php_stream *dirp;
-	php_stream_dirent entry;
-
-	FETCH_DIRP();
-
-	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_argument_type_error(1, "must be a valid Directory resource");
-		RETURN_THROWS();
-	}
-
-	if (php_stream_readdir(dirp, &entry)) {
-		RETURN_STRINGL(entry.d_name, strlen(entry.d_name));
-	}
-	RETURN_FALSE;
 }
 /* }}} */
 

@@ -22,6 +22,7 @@
 #include "zend.h"
 #include "zend_execute.h"
 #include "zend_API.h"
+#include "zend_hash.h"
 #include "zend_modules.h"
 #include "zend_extensions.h"
 #include "zend_constants.h"
@@ -1438,7 +1439,7 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&class_type->constants_table, key, c) {
 		if (c->ce == class_type) {
-			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+			if (Z_TYPE(c->value) == IS_CONSTANT_AST || (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
 				new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 				memcpy(new_c, c, sizeof(zend_class_constant));
 				c = new_c;
@@ -1612,8 +1613,12 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		/* Use the default properties table to also update initializers of private properties
 		 * that have been shadowed in a child class. */
 		for (uint32_t i = 0; i < class_type->default_properties_count; i++) {
-			val = &default_properties_table[i];
 			prop_info = class_type->properties_info_table[i];
+			if (!prop_info) {
+				continue;
+			}
+
+			val = &default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST
 					&& UNEXPECTED(update_property(val, prop_info) != SUCCESS)) {
 				return FAILURE;
@@ -2693,6 +2698,12 @@ static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_
 
 static void zend_check_magic_method_return_type(const zend_class_entry *ce, const zend_function *fptr, int error_type, int return_type)
 {
+	if (return_type == MAY_BE_VOID) {
+		if (fptr->common.fn_flags & ZEND_ACC_NODISCARD) {
+			zend_error_noreturn(error_type, "Method %s::%s cannot be #[\\NoDiscard]", ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		}
+	}
+
 	if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		/* For backwards compatibility reasons, do not enforce the return type if it is not set. */
 		return;
@@ -2751,6 +2762,10 @@ static void zend_check_magic_method_no_return_type(
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_error_noreturn(error_type, "Method %s::%s() cannot declare a return type",
 			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+	}
+
+	if (fptr->common.fn_flags & ZEND_ACC_NODISCARD) {
+		zend_error_noreturn(error_type, "Method %s::%s cannot be #[\\NoDiscard]", ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
 	}
 }
 
@@ -2899,14 +2914,14 @@ static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
 		ZEND_ASSERT(!ZEND_TYPE_CONTAINS_CODE(*type, IS_RESOURCE) && "resource is not allowed in a zend_type");
 	}
 	zend_type *current;
-	ZEND_TYPE_FOREACH(*type, current) {
+	ZEND_TYPE_FOREACH_MUTABLE(*type, current) {
 		if (ZEND_TYPE_HAS_NAME(*current)) {
 			zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*current));
 			zend_alloc_ce_cache(name);
 			ZEND_TYPE_SET_PTR(*current, name);
 		} else if (ZEND_TYPE_HAS_LIST(*current)) {
 			zend_type *inner;
-			ZEND_TYPE_FOREACH(*current, inner) {
+			ZEND_TYPE_FOREACH_MUTABLE(*current, inner) {
 				ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*inner) && !ZEND_TYPE_HAS_LIST(*inner));
 				if (ZEND_TYPE_HAS_NAME(*inner)) {
 					zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*inner));
@@ -3263,21 +3278,17 @@ ZEND_API zend_result zend_get_module_started(const char *module_name) /* {{{ */
 }
 /* }}} */
 
-static int clean_module_class(zval *el, void *arg) /* {{{ */
-{
-	zend_class_entry *ce = (zend_class_entry *)Z_PTR_P(el);
-	int module_number = *(int *)arg;
-	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module->module_number == module_number) {
-		return ZEND_HASH_APPLY_REMOVE;
-	} else {
-		return ZEND_HASH_APPLY_KEEP;
-	}
-}
-/* }}} */
-
 static void clean_module_classes(int module_number) /* {{{ */
 {
-	zend_hash_apply_with_argument(EG(class_table), clean_module_class, (void *) &module_number);
+	/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
+	Bucket *bucket;
+	ZEND_HASH_REVERSE_FOREACH_BUCKET(EG(class_table), bucket) {
+		zend_class_entry *ce = Z_CE(bucket->val);
+		if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module->module_number == module_number) {
+			zend_hash_del_bucket(EG(class_table), bucket);
+		}
+	} ZEND_HASH_FOREACH_END();
+
 }
 /* }}} */
 
@@ -4137,6 +4148,19 @@ try_again:
 		case IS_OBJECT:
 		{
 			zend_class_entry *ce = Z_OBJCE_P(callable);
+
+			if (ce == zend_ce_closure) {
+				const zend_function *fn = zend_get_closure_method_def(Z_OBJ_P(callable));
+
+				if (fn->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+					if (fn->common.scope) {
+						return zend_create_member_string(fn->common.scope->name, fn->common.function_name);
+					} else {
+						return zend_string_copy(fn->common.function_name);
+					}
+				}
+			}
+
 			return zend_string_concat2(
 				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
 				"::__invoke", sizeof("::__invoke") - 1);

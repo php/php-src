@@ -180,7 +180,7 @@ PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(php
 	return php_dom_libxml_ns_mapper_get_ns_raw_strings(mapper, prefix, uri);
 }
 
-static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr ns)
+static void php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr ns)
 {
 	ZEND_ASSERT(ns != NULL);
 
@@ -198,16 +198,9 @@ static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_l
 		prefix_len = xmlStrlen(ns->prefix);
 	}
 
-	zval *zv = zend_hash_str_find_ptr(prefix_map, prefix, prefix_len);
-	if (zv != NULL) {
-		return Z_PTR_P(zv);
-	}
-
 	zval new_zv;
 	DOM_Z_UNOWNED(&new_zv, ns);
-	zend_hash_str_add_new(prefix_map, prefix, prefix_len, &new_zv);
-
-	return ns;
+	zend_hash_str_add(prefix_map, prefix, prefix_len, &new_zv);
 }
 
 typedef struct {

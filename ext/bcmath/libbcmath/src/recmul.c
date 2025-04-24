@@ -107,27 +107,8 @@ static inline void bc_mul_finish_from_vector(BC_VECTOR *prod_vector, size_t prod
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
 	char *pptr = (*prod)->n_value;
 	char *pend = pptr + prodlen - 1;
-	size_t i = 0;
-	while (i < prod_arr_size - 1) {
-#if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(prod_vector[i], pend - 3);
-		pend -= 4;
-#else
-		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
-		pend -= 8;
-#endif
-		i++;
-	}
 
-	/*
-	 * The last digit may carry over.
-	 * Also need to fill it to the end with zeros, so loop until the end of the string.
-	 */
-	while (pend >= pptr) {
-		*pend-- = prod_vector[i] % BASE;
-		prod_vector[i] /= BASE;
-	}
+	bc_convert_vector_to_char(prod_vector, pptr, pend, prod_arr_size);
 }
 
 /*
@@ -145,19 +126,25 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n1_arr_size = BC_ARR_SIZE_FROM_LEN(n1len);
+	size_t n2_arr_size = BC_ARR_SIZE_FROM_LEN(n2len);
+	size_t prod_arr_size = BC_ARR_SIZE_FROM_LEN(prodlen);
 
-	/*
-	 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
-	 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
-	 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
-	 */
-	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
+	BC_VECTOR stack_vectors[BC_STACK_VECTOR_SIZE];
+	size_t allocation_arr_size = n1_arr_size + n2_arr_size + prod_arr_size;
 
-	BC_VECTOR *n1_vector = buf;
-	BC_VECTOR *n2_vector = buf + n1_arr_size;
+	BC_VECTOR *n1_vector;
+	if (allocation_arr_size <= BC_STACK_VECTOR_SIZE) {
+		n1_vector = stack_vectors;
+	} else {
+		/*
+		 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
+		 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
+		 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
+		 */
+		n1_vector = safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
+	}
+	BC_VECTOR *n2_vector = n1_vector + n1_arr_size;
 	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
 
 	for (i = 0; i < prod_arr_size; i++) {
@@ -188,7 +175,9 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 
 	bc_mul_finish_from_vector(prod_vector, prod_arr_size, prodlen, prod);
 
-	efree(buf);
+	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
+		efree(n1_vector);
+	}
 }
 
 /** This is bc_standard_mul implementation for square */
@@ -198,8 +187,8 @@ static void bc_standard_square(bc_num n1, size_t n1len, bc_num *prod)
 	const char *n1end = n1->n_value + n1len - 1;
 	size_t prodlen = n1len + n1len;
 
-	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n1_arr_size = BC_ARR_SIZE_FROM_LEN(n1len);
+	size_t prod_arr_size = BC_ARR_SIZE_FROM_LEN(prodlen);
 
 	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n1_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
 
@@ -264,6 +253,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	_bc_rm_leading_zeros(prod);
 	if (bc_is_zero(prod)) {
 		prod->n_sign = PLUS;
+		prod->n_scale = 0;
 	}
 	return prod;
 }

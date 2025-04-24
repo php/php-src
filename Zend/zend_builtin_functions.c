@@ -840,7 +840,7 @@ ZEND_FUNCTION(get_object_vars)
 				}
 				const char *unmangled_name_cstr = zend_get_unmangled_property_name(prop_info->name);
 				zend_string *unmangled_name = zend_string_init(unmangled_name_cstr, strlen(unmangled_name_cstr), false);
-				zend_read_property_ex(prop_info->ce, zobj, unmangled_name, /* silent */ true, &tmp);
+				value = zend_read_property_ex(prop_info->ce, zobj, unmangled_name, /* silent */ true, &tmp);
 				zend_string_release_ex(unmangled_name, false);
 				if (EG(exception)) {
 					zend_release_properties(properties);
@@ -848,7 +848,6 @@ ZEND_FUNCTION(get_object_vars)
 					ZVAL_UNDEF(return_value);
 					RETURN_THROWS();
 				}
-				value = &tmp;
 			}
 			Z_TRY_ADDREF_P(value);
 
@@ -1323,6 +1322,15 @@ ZEND_FUNCTION(restore_error_handler)
 }
 /* }}} */
 
+ZEND_FUNCTION(get_error_handler)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
+		RETURN_COPY(&EG(user_error_handler));
+	}
+}
+
 /* {{{ Sets a user-defined exception handler function. Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
 {
@@ -1368,6 +1376,15 @@ ZEND_FUNCTION(restore_exception_handler)
 	RETURN_TRUE;
 }
 /* }}} */
+
+ZEND_FUNCTION(get_exception_handler)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+		RETURN_COPY(&EG(user_exception_handler));
+	}
+}
 
 static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags) /* {{{ */
 {

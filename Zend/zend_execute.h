@@ -60,8 +60,9 @@ ZEND_API zend_result zend_eval_stringl_ex(const char *str, size_t str_len, zval 
 /* export zend_pass_function to allow comparisons against it */
 extern ZEND_API const zend_internal_function zend_pass_function;
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(const zend_execute_data *execute_data);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(const zend_function *fbc);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void);
 ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num);
@@ -94,23 +95,23 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_pr
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void);
 
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(const zend_property_info *info, const char *operation);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(const zend_property_info *prop_info, const char *operation);
 
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *value);
+		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, const zval *value);
 ZEND_API ZEND_COLD void zend_verify_return_error(
-		const zend_function *zf, zval *value);
+		const zend_function *zf, const zval *value);
 ZEND_API ZEND_COLD void zend_verify_never_error(
 		const zend_function *zf);
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API bool zend_check_user_type_slow(
-		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, bool is_return_type);
+		const zend_type *type, zval *arg, const zend_reference *ref, bool is_return_type);
 
 #if ZEND_DEBUG
-ZEND_API bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call);
-ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc);
-ZEND_API bool zend_verify_internal_return_type(zend_function *zf, zval *ret);
+ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_execute_data *call);
+ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(const zend_function *fbc);
+ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *ret);
 #endif
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
@@ -215,6 +216,60 @@ static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable
 		GC_DTOR_NO_REF(ref);
 	} else {
 		ZVAL_COPY_VALUE(variable_ptr, value);
+	}
+}
+
+static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr, uint8_t op1_type) {
+	HashTable *ht;
+
+	ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
+	if (Z_TYPE_P(expr) == IS_ARRAY) {
+		ht = zend_symtable_to_proptable(Z_ARR_P(expr));
+		if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+			/* TODO: try not to duplicate immutable arrays as well ??? */
+			ht = zend_array_dup(ht);
+		}
+		Z_OBJ_P(result)->properties = ht;
+	} else if (Z_TYPE_P(expr) != IS_NULL) {
+		Z_OBJ_P(result)->properties = ht = zend_new_array(1);
+		expr = zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_SCALAR), expr);
+		if (op1_type == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
+		} else {
+			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
+		}
+	}
+}
+
+static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr, uint8_t op1_type) {
+	extern zend_class_entry *zend_ce_closure;
+	if (op1_type == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
+		if (Z_TYPE_P(expr) != IS_NULL) {
+			ZVAL_ARR(result, zend_new_array(1));
+			expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
+			if (op1_type == IS_CONST) {
+				if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
+			} else {
+				if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
+			}
+		} else {
+			ZVAL_EMPTY_ARRAY(result);
+		}
+	} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(expr)) {
+		/* Optimized version without rebuilding properties HashTable */
+		ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
+	} else {
+		HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
+		if (obj_ht) {
+			/* fast copy */
+			ZVAL_ARR(result, zend_proptable_to_symtable(obj_ht,
+				(Z_OBJCE_P(expr)->default_properties_count ||
+				 Z_OBJ_P(expr)->handlers != &std_object_handlers ||
+				 GC_IS_RECURSIVE(obj_ht))));
+			zend_release_properties(obj_ht);
+		} else {
+			ZVAL_EMPTY_ARRAY(result);
+		}
 	}
 }
 
@@ -447,6 +502,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer);
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield);
 ZEND_API zval* ZEND_FASTCALL zend_fetch_static_property(zend_execute_data *ex, int fetch_type);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method);
 ZEND_API void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc);
 
 ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data);
@@ -520,7 +576,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS))
 
 
-ZEND_API bool zend_verify_class_constant_type(zend_class_constant *c, const zend_string *name, zval *constant);
+ZEND_API bool zend_verify_class_constant_type(const zend_class_constant *c, const zend_string *name, zval *constant);
 ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *c, const zend_string *name, const zval *constant);
 
 ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);

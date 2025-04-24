@@ -112,7 +112,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(ZEND_TYPE_LIST(type), list_type) {
 			zend_type_release(*list_type, persistent);
 		} ZEND_TYPE_LIST_FOREACH_END();
 		if (!ZEND_TYPE_USES_ARENA(type)) {
@@ -636,13 +636,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 	if (op_array->num_dynamic_func_defs) {
 		for (i = 0; i < op_array->num_dynamic_func_defs; i++) {
-			/* Closures overwrite static_variables in their copy.
-			 * Make sure to destroy them when the prototype function is destroyed. */
-			if (op_array->dynamic_func_defs[i]->static_variables
-					&& (op_array->dynamic_func_defs[i]->fn_flags & ZEND_ACC_CLOSURE)) {
-				zend_array_destroy(op_array->dynamic_func_defs[i]->static_variables);
-				op_array->dynamic_func_defs[i]->static_variables = NULL;
-			}
 			destroy_op_array(op_array->dynamic_func_defs[i]);
 		}
 		efree(op_array->dynamic_func_defs);
@@ -939,6 +932,14 @@ static void zend_calc_live_ranges(
 	while (opnum > 0) {
 		opnum--;
 		opline--;
+
+		/* SEPARATE always redeclares its op1. For the purposes of live-ranges,
+		 * its declaration is irrelevant. Don't terminate the current live-range
+		 * to avoid breaking special handling of COPY_TMP. */
+		if (opline->opcode == ZEND_SEPARATE) {
+			ZEND_ASSERT(opline->op1.var == opline->result.var);
+			continue;
+		}
 
 		if ((opline->result_type & (IS_TMP_VAR|IS_VAR)) && !is_fake_def(opline)) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->result.var) - var_offset;

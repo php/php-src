@@ -242,6 +242,15 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
                                              zend_persistent_script  *script,
                                              void                    *buf);
 
+static void zend_file_cache_serialize_func(zval                     *zv,
+                                           zend_persistent_script   *script,
+                                           zend_file_cache_metainfo *info,
+                                           void                     *buf);
+
+static void zend_file_cache_unserialize_func(zval                    *zv,
+                                             zend_persistent_script  *script,
+                                             void                    *buf);
+
 static void *zend_file_cache_serialize_interned(zend_string              *str,
                                                 zend_file_cache_metainfo *info)
 {
@@ -364,8 +373,13 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 			}
 		}
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
-		/* The op_array itself will be serialized as part of the dynamic_func_defs. */
-		SERIALIZE_PTR(zend_ast_get_op_array(ast)->op_array);
+		zval z;
+		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
+		zend_file_cache_serialize_func(&z, script, info, buf);
+		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
+		ZEND_MAP_PTR_INIT(fcc->fptr, NULL);
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -454,7 +468,7 @@ static void zend_file_cache_serialize_type(
 		UNSERIALIZE_PTR(list);
 
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(list, list_type) {
 			zend_file_cache_serialize_type(list_type, script, info, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
@@ -1249,8 +1263,13 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 			}
 		}
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
-		/* The op_array itself will be unserialized as part of the dynamic_func_defs. */
-		UNSERIALIZE_PTR(zend_ast_get_op_array(ast)->op_array);
+		zval z;
+		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
+		zend_file_cache_unserialize_func(&z, script, buf);
+		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
+		ZEND_MAP_PTR_NEW(fcc->fptr);
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -1329,7 +1348,7 @@ static void zend_file_cache_unserialize_type(
 		ZEND_TYPE_SET_PTR(*type, list);
 
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(list, list_type) {
 			zend_file_cache_unserialize_type(list_type, scope, script, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7ceaf5fc8e9c92bf192e824084a706794395ce1a */
+ * Stub hash: f8cd6b3c6aa662d76dca3d0a28d61acfb5a611b5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -34,6 +34,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Pdo_Sqlite_openBlob, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Pdo\\Sqlite::OPEN_READONLY")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_setAuthorizer, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Pdo_Sqlite, createAggregate);
 ZEND_METHOD(Pdo_Sqlite, createCollation);
 ZEND_METHOD(Pdo_Sqlite, createFunction);
@@ -41,6 +45,7 @@ ZEND_METHOD(Pdo_Sqlite, createFunction);
 ZEND_METHOD(Pdo_Sqlite, loadExtension);
 #endif
 ZEND_METHOD(Pdo_Sqlite, openBlob);
+ZEND_METHOD(Pdo_Sqlite, setAuthorizer);
 
 static const zend_function_entry class_Pdo_Sqlite_methods[] = {
 	ZEND_ME(Pdo_Sqlite, createAggregate, arginfo_class_Pdo_Sqlite_createAggregate, ZEND_ACC_PUBLIC)
@@ -50,6 +55,7 @@ static const zend_function_entry class_Pdo_Sqlite_methods[] = {
 	ZEND_ME(Pdo_Sqlite, loadExtension, arginfo_class_Pdo_Sqlite_loadExtension, ZEND_ACC_PUBLIC)
 #endif
 	ZEND_ME(Pdo_Sqlite, openBlob, arginfo_class_Pdo_Sqlite_openBlob, ZEND_ACC_PUBLIC)
+	ZEND_ME(Pdo_Sqlite, setAuthorizer, arginfo_class_Pdo_Sqlite_setAuthorizer, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -103,6 +109,24 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_string *const_ATTR_EXTENDED_RESULT_CODES_name = zend_string_init_interned("ATTR_EXTENDED_RESULT_CODES", sizeof("ATTR_EXTENDED_RESULT_CODES") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_EXTENDED_RESULT_CODES_name, &const_ATTR_EXTENDED_RESULT_CODES_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_EXTENDED_RESULT_CODES_name);
+
+	zval const_OK_value;
+	ZVAL_LONG(&const_OK_value, SQLITE_OK);
+	zend_string *const_OK_name = zend_string_init_interned("OK", sizeof("OK") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_OK_name, &const_OK_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_OK_name);
+
+	zval const_DENY_value;
+	ZVAL_LONG(&const_DENY_value, SQLITE_DENY);
+	zend_string *const_DENY_name = zend_string_init_interned("DENY", sizeof("DENY") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_DENY_name, &const_DENY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_DENY_name);
+
+	zval const_IGNORE_value;
+	ZVAL_LONG(&const_IGNORE_value, SQLITE_IGNORE);
+	zend_string *const_IGNORE_name = zend_string_init_interned("IGNORE", sizeof("IGNORE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IGNORE_name, &const_IGNORE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IGNORE_name);
 
 	return class_entry;
 }

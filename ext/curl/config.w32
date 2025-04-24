@@ -3,7 +3,8 @@
 ARG_WITH("curl", "cURL support", "no");
 
 if (PHP_CURL != "no") {
-	if (CHECK_LIB("libcurl_a.lib;libcurl.lib", "curl", PHP_CURL) &&
+	var curl_location;
+	if ((curl_location = CHECK_LIB("libcurl_a.lib;libcurl.lib", "curl", PHP_CURL)) &&
 		CHECK_HEADER_ADD_INCLUDE("curl/easy.h", "CFLAGS_CURL") &&
 		SETUP_OPENSSL("curl", PHP_CURL) >= 2 &&
 		CHECK_LIB("winmm.lib", "curl", PHP_CURL) &&
@@ -15,7 +16,10 @@ if (PHP_CURL != "no") {
 		) {
 		EXTENSION("curl", "interface.c multi.c share.c curl_file.c");
 		AC_DEFINE('HAVE_CURL', 1, "Define to 1 if the PHP extension 'curl' is available.");
-		ADD_FLAG("CFLAGS_CURL", "/D CURL_STATICLIB /D PHP_CURL_EXPORTS=1");
+		ADD_FLAG("CFLAGS_CURL", "/D PHP_CURL_EXPORTS=1");
+		if (curl_location.match(/libcurl_a\.lib$/)) {
+			ADD_FLAG("CFLAGS_CURL", "/D CURL_STATICLIB");
+		}
 		PHP_INSTALL_HEADERS("ext/curl", "php_curl.h");
 	} else {
 		WARNING("curl not enabled; libraries and headers not found");

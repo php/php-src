@@ -17,6 +17,9 @@ on:
       run_alpine:
         required: true
         type: boolean
+      run_linux_ppc64:
+        required: true
+        type: boolean
       run_macos_arm64:
         required: true
         type: boolean
@@ -35,6 +38,44 @@ on:
 permissions:
   contents: read
 jobs:
+  LINUX_PPC64:
+    if: inputs.run_linux_ppc64
+    name: LINUX_PPC64_ASAN_UBSAN_DEBUG_ZTS
+    # This runs on a self-hosted runner; see https://wiki.php.net/systems/ci
+    runs-on: [self-hosted, gentoo, ppc64]
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed packages"
+          cat /var/lib/portage/world
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-gentoo
+        with:
+          configurationParameters: >-
+            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
+            CC=clang-17
+            CXX=clang++-17
+            --enable-debug
+            --enable-zts
+          skipSlow: false # FIXME: This should likely include slow extensions
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      # Skip an install action for now
+      - name: Tests
+        uses: ./.github/actions/test-gentoo
+        # There is no PPC JIT, so rip this out
+        with:
+          runTestsParameters: >-
+            --asan -x
   ALPINE:
     if: inputs.run_alpine
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
@@ -520,7 +561,7 @@ jobs:
       - name: Test Laravel
         if: ${{ !cancelled() }}
         run: |
-          git clone https://github.com/laravel/framework.git --branch=master --depth=1
+          git clone https://github.com/laravel/framework.git --depth=1
           cd framework
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs

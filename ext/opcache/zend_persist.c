@@ -195,6 +195,9 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		zend_persist_op_array(&z);
 		copy->op_array = Z_PTR(z);
 		node = (zend_ast *) copy;
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *copy = zend_shared_memdup(ast, sizeof(zend_ast_fcc));
+		node = (zend_ast *) copy;
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -364,7 +367,7 @@ static void zend_persist_type(zend_type *type) {
 	}
 
 	zend_type *single_type;
-	ZEND_TYPE_FOREACH(*type, single_type) {
+	ZEND_TYPE_FOREACH_MUTABLE(*type, single_type) {
 		if (ZEND_TYPE_HAS_LIST(*single_type)) {
 			zend_persist_type(single_type);
 			continue;
@@ -745,7 +748,11 @@ static zend_op_array *zend_persist_class_method(zend_op_array *op_array, zend_cl
 				// Real dynamically created internal functions like enum methods must have their own run_time_cache pointer. They're always on the same scope as their defining class.
 				// However, copies - as caused by inheritance of internal methods - must retain the original run_time_cache pointer, shared with the source function.
 				if (!op_array->scope || (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))) {
-					ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+					if (op_array->fn_flags & ZEND_ACC_PRELOADED) {
+						ZEND_MAP_PTR_NEW_STATIC(op_array->run_time_cache);
+					} else {
+						ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+					}
 				}
 			}
 		}
@@ -1423,6 +1430,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 	if (for_shm) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
+		ZCSG(map_ptr_static_last) = zend_map_ptr_static_last;
 	}
 
 #ifdef HAVE_JIT

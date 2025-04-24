@@ -353,13 +353,13 @@ typedef struct {
 #endif
 } zip_options;
 
+/* Expects opts to be zero-initialized. */
 static int php_zip_parse_options(HashTable *options, zip_options *opts)
 /* {{{ */
 {
 	zval *option;
 
 	/* default values */
-	memset(opts, 0, sizeof(zip_options));
 	opts->flags = ZIP_FL_OVERWRITE;
 	opts->comp_method = -1; /* -1 to not change default */
 #ifdef HAVE_ENCRYPTION
@@ -897,6 +897,8 @@ static zval *php_zip_get_property_ptr_ptr(zend_object *object, zend_string *name
 
 	if (hnd == NULL) {
 		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+	} else if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	}
 
 	return retval;
@@ -1734,7 +1736,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	size_t  path_len = 1;
 	zend_long glob_flags = 0;
 	HashTable *options = NULL;
-	zip_options opts;
+	zip_options opts = {0};
 	int found;
 	zend_string *pattern;
 
@@ -1798,6 +1800,9 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 
 				if (opts.add_path) {
 					if ((opts.add_path_len + file_stripped_len) > MAXPATHLEN) {
+						if (basename) {
+							zend_string_release_ex(basename, 0);
+						}
 						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %zd given)",
 						MAXPATHLEN - 1, (opts.add_path_len + file_stripped_len));
 						zend_array_destroy(Z_ARR_P(return_value));

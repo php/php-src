@@ -98,18 +98,9 @@ final class Directory
     /** @var resource */
     public readonly mixed $handle;
 
-    /**
-     * @implementation-alias closedir
-     */
     public function close(): void {}
 
-    /**
-     * @implementation-alias rewinddir
-     */
     public function rewind(): void {}
 
-    /**
-     * @implementation-alias readdir
-     */
     public function read(): string|false {}
 }

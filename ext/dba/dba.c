@@ -1,5 +1,5 @@
 /*
-   +----------------------------------------------------------------------+
++----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -57,6 +57,7 @@ ZEND_BEGIN_MODULE_GLOBALS(dba)
 	const char *default_handler;
 	const dba_handler *default_hptr;
 	HashTable connections;
+	unsigned int connection_counter;
 ZEND_END_MODULE_GLOBALS(dba)
 
 ZEND_DECLARE_MODULE_GLOBALS(dba)
@@ -91,7 +92,7 @@ ZEND_GET_MODULE(dba)
 #endif
 
 /* {{{ php_dba_make_key */
-static zend_string* php_dba_make_key(HashTable *key)
+static zend_string* php_dba_make_key(const HashTable *key)
 {
 	zval *group, *name;
 	zend_string *group_str, *name_str;
@@ -434,10 +435,9 @@ PHP_MSHUTDOWN_FUNCTION(dba)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(dba)
 {
-	const dba_handler *hptr;
 	smart_str handlers = {0};
 
-	for(hptr = handler; hptr->name; hptr++) {
+	for (const dba_handler *hptr = handler; hptr->name; hptr++) {
 		smart_str_appends(&handlers, hptr->name);
 		smart_str_appendc(&handlers, ' ');
 	}
@@ -569,7 +569,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	}
 
 	zend_string *resource_key = zend_strpprintf(0,
-		"dba_%d_%s_%s_%s", persistent, ZSTR_VAL(path), ZSTR_VAL(mode), handler_str ? ZSTR_VAL(handler_str) : ""
+		"dba_%d_%u_%s_%s_%s", persistent, persistent ? 0 : DBA_G(connection_counter)++, ZSTR_VAL(path), ZSTR_VAL(mode), handler_str ? ZSTR_VAL(handler_str) : ""
 	);
 
 	if (persistent) {
@@ -857,9 +857,7 @@ restart:
 		}
 		if (!connection->info->lock.fp) {
 			/* stream operation already wrote an error message */
-			zend_string_release_ex(resource_key, /* persistent */ false);
-			zval_ptr_dtor(return_value);
-			RETURN_FALSE;
+			goto fail;
 		}
 		if (!error && !php_stream_supports_lock(connection->info->lock.fp)) {
 			error = "Stream does not support locking";
@@ -878,9 +876,7 @@ restart:
 		}
 		if (!connection->info->fp) {
 			/* stream operation already wrote an error message */
-			zend_string_release_ex(resource_key, /* persistent */ false);
-			zval_ptr_dtor(return_value);
-			RETURN_FALSE;
+			goto fail;
 		}
 		if (hptr->flags & (DBA_NO_APPEND|DBA_CAST_AS_FD)) {
 			/* Needed because some systems do not allow to write to the original
@@ -888,9 +884,7 @@ restart:
 			 */
 			if (SUCCESS != php_stream_cast(connection->info->fp, PHP_STREAM_AS_FD, (void*)&connection->info->fd, 1)) {
 				php_error_docref(NULL, E_WARNING, "Could not cast stream");
-				zend_string_release_ex(resource_key, /* persistent */ false);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+				goto fail;
 #ifdef F_SETFL
 			} else if (modenr == DBA_CREAT) {
 				int flags = fcntl(connection->info->fd, F_GETFL);
@@ -924,9 +918,7 @@ restart:
 				php_error_docref(NULL, E_WARNING, "Driver initialization failed for handler: %s", hptr->name);
 			}
 		}
-		zend_string_release_ex(resource_key, /* persistent */ false);
-		zval_ptr_dtor(return_value);
-		RETURN_FALSE;
+		goto fail;
 	}
 
 	connection->info->hnd = hptr;
@@ -935,6 +927,7 @@ restart:
 		if (zend_register_persistent_resource_ex(connection->hash, connection->info, le_pdb) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Could not register persistent resource");
 			zend_string_release_ex(resource_key, /* persistent */ false);
+			dba_close_connection(connection);
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -942,6 +935,14 @@ restart:
 
 	zend_hash_add_new(&DBA_G(connections), connection->hash, return_value);
 	zend_string_release_ex(resource_key, /* persistent */ false);
+	return;
+fail:
+	zend_string_release_ex(resource_key, /* persistent */ false);
+	zend_string_release_ex(connection->hash, persistent);
+	dba_close_info(connection->info);
+	connection->info = NULL;
+	zval_ptr_dtor(return_value);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1251,7 +1252,6 @@ PHP_FUNCTION(dba_sync)
 /* {{{ List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
-	const dba_handler *hptr;
 	bool full_info = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
@@ -1260,7 +1260,7 @@ PHP_FUNCTION(dba_handlers)
 
 	array_init(return_value);
 
-	for(hptr = handler; hptr->name; hptr++) {
+	for (const dba_handler *hptr = handler; hptr->name; hptr++) {
 		if (full_info) {
 			// TODO: avoid reallocation ???
 			char *str = hptr->info(hptr, NULL);

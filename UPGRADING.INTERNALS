@@ -19,6 +19,14 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     a value to a non-reference zval.
   . Added zval_ptr_safe_dtor() to safely destroy a zval when a destructor
     could interfere.
+  . zend_get_callable_name() now returns the name of the underlying function
+    for fake closures.
+  . Added smart_string_append_printf() matching smart_str_append_printf() for
+    char* instead of zend_string*-based smart strings.
+  . Added php_build_provider() to retrieve the value of PHP_BUILD_PROVIDER at
+    runtime.
+  . Removed the cache_slot argument of zend_check_user_type_slow() because
+    now it only relies on the CE cache.
 
 ========================
 2. Build system changes

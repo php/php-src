@@ -38,7 +38,7 @@
 #ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP
 /* Only defined on glibc >= 2.29, FreeBSD CURRENT, musl >= 1.1.24,
  * MacOS Catalina or later..
- * It should be posible to modify this so it is also
+ * It should be possible to modify this so it is also
  * used in older systems when $cwd == NULL but care must be taken
  * as at least glibc < 2.24 has a legacy implementation known
  * to be really buggy.
@@ -1247,8 +1247,8 @@ PHP_FUNCTION(proc_open)
 
 	if (command_ht) {
 		uint32_t num_elems = zend_hash_num_elements(command_ht);
-		if (num_elems == 0) {
-			zend_argument_value_error(1, "must have at least one element");
+		if (UNEXPECTED(num_elems == 0)) {
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 

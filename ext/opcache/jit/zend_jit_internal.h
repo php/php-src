@@ -21,6 +21,12 @@
 #ifndef ZEND_JIT_INTERNAL_H
 #define ZEND_JIT_INTERNAL_H
 
+#include "Zend/zend_types.h"
+#include "Zend/zend_compile.h"
+#include "Zend/zend_constants.h"
+#include "Zend/Optimizer/zend_func_info.h"
+#include "Zend/Optimizer/zend_call_graph.h"
+
 /* Address Encoding */
 typedef uintptr_t zend_jit_addr;
 
@@ -183,17 +189,18 @@ extern const zend_op *zend_jit_halt_op;
 # define ZEND_OPCODE_HANDLER_RET              void
 # define ZEND_OPCODE_HANDLER_ARGS             EXECUTE_DATA_D
 # define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU
-# define ZEND_OPCODE_HANDLER_ARGS_DC
-# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC
+# define ZEND_OPCODE_HANDLER_ARGS_EX
+# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX
 # define ZEND_OPCODE_RETURN()                 return
 # define ZEND_OPCODE_TAIL_CALL(handler)       do { \
 		handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 		return; \
 	} while(0)
 # define ZEND_OPCODE_TAIL_CALL_EX(handler, arg) do { \
-		handler(arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC); \
+		handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX arg); \
 		return; \
 	} while(0)
+# define ZEND_VM_ENTER_BIT 0
 #else
 # define EXECUTE_DATA_D                       zend_execute_data* execute_data
 # define EXECUTE_DATA_C                       execute_data
@@ -203,36 +210,39 @@ extern const zend_op *zend_jit_halt_op;
 # define OPLINE_C                             opline
 # define OPLINE_DC                            , OPLINE_D
 # define OPLINE_CC                            , OPLINE_C
-# define ZEND_OPCODE_HANDLER_RET              int
-# define ZEND_OPCODE_HANDLER_ARGS             EXECUTE_DATA_D
-# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU    EXECUTE_DATA_C
-# define ZEND_OPCODE_HANDLER_ARGS_DC          EXECUTE_DATA_DC
-# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC EXECUTE_DATA_CC
-# define ZEND_OPCODE_RETURN()                 return 0
+# define ZEND_OPCODE_HANDLER_RET              const zend_op *
+# define ZEND_OPCODE_HANDLER_ARGS             EXECUTE_DATA_D OPLINE_DC
+# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU    EXECUTE_DATA_C OPLINE_CC
+# define ZEND_OPCODE_HANDLER_ARGS_EX          EXECUTE_DATA_D OPLINE_DC,
+# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX EXECUTE_DATA_C OPLINE_CC,
+# define ZEND_OPCODE_RETURN()                 return opline
 # define ZEND_OPCODE_TAIL_CALL(handler)       do { \
 		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 	} while(0)
 # define ZEND_OPCODE_TAIL_CALL_EX(handler, arg) do { \
-		return handler(arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC); \
+		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX arg); \
 	} while(0)
+# define ZEND_VM_ENTER_BIT 1ULL
 #endif
 
 /* VM handlers */
 typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *zend_vm_opcode_handler_t)(ZEND_OPCODE_HANDLER_ARGS);
 
 /* VM helpers */
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_DATA_DC);
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info EXECUTE_DATA_DC);
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(EXECUTE_DATA_D);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
 
-void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
-void ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(EXECUTE_DATA_D);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper(ZEND_OPCODE_HANDLER_ARGS);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(ZEND_OPCODE_HANDLER_ARGS);
 bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
+bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D);
+bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D);
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D);
 void ZEND_FASTCALL zend_jit_undefined_long_key_ex(zend_long key EXECUTE_DATA_DC);
 void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D);

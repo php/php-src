@@ -143,7 +143,6 @@ EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
 		pkey = param_key;
 	} else {
 		*is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		EVP_PKEY_CTX_free(ctx);
 		ctx = EVP_PKEY_CTX_new(param_key, NULL);
 		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
@@ -219,7 +218,6 @@ EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private)
 		pkey = param_key;
 	} else {
 		*is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		EVP_PKEY_CTX_free(ctx);
 		ctx = EVP_PKEY_CTX_new(param_key, NULL);
 		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
@@ -407,7 +405,6 @@ EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 		pkey = param_key;
 	} else {
 		*is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		if (EVP_PKEY_keygen_init(ctx) != 1 ||
 				EVP_PKEY_CTX_set_params(ctx, params) != 1 ||
 				EVP_PKEY_generate(ctx, &pkey) != 1) {
@@ -482,7 +479,6 @@ void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_type, z
 		is_private = priv_key != NULL;
 	} else {
 		is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
 			goto cleanup;
 		}

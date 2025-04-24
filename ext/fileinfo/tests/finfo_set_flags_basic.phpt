@@ -12,8 +12,6 @@ echo "*** Testing finfo_set_flags() : basic functionality ***\n";
 var_dump( finfo_set_flags( $finfo, FILEINFO_NONE ) );
 var_dump( finfo_set_flags( $finfo, FILEINFO_SYMLINK ) );
 
-finfo_close( $finfo );
-
 // OO way
 $finfo = new finfo( FILEINFO_NONE, $magicFile );
 var_dump( $finfo->set_flags( FILEINFO_MIME ) );

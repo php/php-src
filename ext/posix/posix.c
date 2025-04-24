@@ -236,10 +236,11 @@ PHP_FUNCTION(posix_getgroups)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, result);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (i=0; i<result; i++) {
-		add_next_index_long(return_value, gidlist[i]);
+		add_index_long(return_value, i, gidlist[i]);
 	}
 	efree(gidlist);
 }
@@ -380,7 +381,7 @@ PHP_FUNCTION(posix_times)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 5);
 
 	add_assoc_long(return_value, "ticks",	ticks);			/* clock ticks */
 	add_assoc_long(return_value, "utime",	t.tms_utime);	/* user time */
@@ -670,6 +671,7 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 		return 0;
 
 	array_init(&array_members);
+	zend_hash_real_init_packed(Z_ARRVAL(array_members));
 
 	add_assoc_string(array_group, "name", g->gr_name);
 	if (g->gr_passwd) {
@@ -1174,7 +1176,8 @@ PHP_FUNCTION(posix_getrlimit)
 			RETURN_FALSE;
 		}
 
-		array_init(return_value);
+		array_init_size(return_value, 2);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		if (rl.rlim_cur == RLIM_INFINITY) {
 			add_next_index_stringl(return_value, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
 		} else {

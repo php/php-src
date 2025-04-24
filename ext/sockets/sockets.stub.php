@@ -454,6 +454,13 @@ const SO_BPF_EXTENSIONS = UNKNOWN;
  */
 const SO_EXCLBIND = UNKNOWN;
 #endif
+#ifdef SO_BUSY_POLL
+/**
+ * @var int
+ * @cvalue SO_BUSY_POLL
+ */
+const SO_BUSY_POLL = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int

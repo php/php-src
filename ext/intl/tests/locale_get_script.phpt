@@ -74,6 +74,12 @@ function ut_main()
         $res_str .= "\n";
     }
 
+    try {
+	    ut_loc_get_script("de\0-419-DE");
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(). PHP_EOL;
+    }
+
     return $res_str;
 
 }
@@ -83,6 +89,8 @@ ut_run();
 
 ?>
 --EXPECT--
+Locale::getScript(): Argument #1 ($locale) must not contain any null bytes
+locale_get_script(): Argument #1 ($locale) must not contain any null bytes
 uk-ua_CALIFORNIA@currency=;currency=GRN:  script=''
 root:  script=''
 uk@currency=EURO:  script=''
