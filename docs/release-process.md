@@ -74,7 +74,7 @@ releases.
    > When you are unsure about anything, ask a previous RM before proceeding.
    > Ideally, make sure a previous RM is available to answer questions during
    > the first few releases of your version. For the steps related to the
-   > `web-php`, `web-qa`, and `web-php-distributions` repositories, try to have
+   > `web-php` and `web-php-distributions` repositories, try to have
    > someone from the webmaster team on hand.
 
 5. Verify the tags to be extra sure everything was tagged properly.
@@ -360,11 +360,10 @@ slightly different steps. We'll call attention where the steps differ.
 
 ## Announcing a non-stable release (alpha/beta/RC)
 
-1. Switch to your local clone of the `web-qa` repository and update the
+1. Switch to your local clone of the `web-php` repository and update the
    information in the `$QA_RELEASES` array in `include/release-qa.php`.
 
    Follow the documentation in the file for editing the QA release information.
-   See also [Announce 8.1.0RC3][] and [8.1.6RC1][] for examples.
 
    Add, commit, and push your changes, when finished.
 
@@ -717,6 +716,15 @@ slightly different steps. We'll call attention where the steps differ.
    ```shell
    ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'ChangeLog-X.php'
    ```
+8. Update the information in the `$QA_RELEASES` array in `include/release-qa.php`.
+
+   The array probably contains information about the RC released two weeks ago
+   in preparation for the current release. Since the current release is now GA,
+   it's time to remove the RC build from the QA website.
+
+   It is sufficient to set the `number` property for the release to `0` to
+   stop displaying the RC build on the QA website. You may also remove the
+   sha256 hashes for the RC tarballs, but it's not necessary.
 
 9. Review all the changes in `web-php`, commit, and push them.
 
@@ -729,27 +737,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    See [Announce PHP 8.1.6][] for an example commit.
 
-10. Switch to your local clone of the `web-qa` repository and update the
-   information in the `$QA_RELEASES` array in `include/release-qa.php`.
-
-   The array probably contains information about the RC released two weeks ago
-   in preparation for the current release. Since the current release is now GA,
-   it's time to remove the RC build from the QA website.
-
-   It is sufficient to set the `number` property for the release to `0` to
-   stop displaying the RC build on the QA website. You may also remove the
-   sha256 hashes for the RC tarballs, but it's not necessary. For an example,
-   see [PHP 8.1.6 released][].
-
-   Add, commit, and push your changes, when finished.
-
-   ```shell
-   git add -p
-   git commit --gpg-sign=YOURKEYID -m "PHP X.Y.Z released"
-   git push upstream master
-   ```
-
-11. 🚨 **Before sending announcement emails, check to make sure the websites have
+10. 🚨 **Before sending announcement emails, check to make sure the websites have
    synced.**
 
    * Make sure the tarballs are available from, e.g.,
@@ -761,8 +749,8 @@ slightly different steps. We'll call attention where the steps differ.
      e.g., https://www.php.net/ChangeLog-8.php
    * Is there a release page for the new version?
      e.g., `https://www.php.net/releases/X_Y_Z.php`
-   * Does the RC for this version still appear on the QA home page?
-     https://qa.php.net
+   * Does the RC for this version still appear on the Release Candidate Builds page?
+     https://www.php.net/release-candidates.php
 
    Keep in mind it may take up to an hour for the websites to sync.
 
@@ -987,21 +975,22 @@ volunteers to begin the selection process for the next release managers.
 
 ## New release manager checklist
 
-1. Request membership to the
+1. Fill out [the form](https://www.php.net/git-php.php)
+   to get a PHP account (if you don't already have one).
+
+2. Request membership to the
    [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-2. Subscribe to the php-announce@lists.php.net mailing list by emailing
+3. Subscribe to the php-announce@lists.php.net mailing list by emailing
    php-announce+subscribe@lists.php.net
 
-3. Email systems@php.net to get setup for access to downloads.php.net, to be
+4. Email systems@php.net to get setup for access to downloads.php.net, to be
    added to the release-managers@php.net distribution list, and to be added to
    the moderators for php-announce@lists.php.net so you are able to moderate
    your release announcements.
 
    Provide the following information in a single email:
 
-   - Preferred Unix username (will also become part of location to download RCs,
-     such as `https://downloads.php.net/~derick/`).
    - An SSH public key, preferably a new unique one for PHP systems and
      projects.
    - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
@@ -1022,7 +1011,7 @@ volunteers to begin the selection process for the next release managers.
    > "[Send emails from a different address or alias][]."
 
 
-4. Create a [GPG key][] for your @php.net address.
+5. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -1087,11 +1076,10 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-5. Make sure you have the following repositories cloned locally:
+6. Make sure you have the following repositories cloned locally:
 
    * https://github.com/php/php-src
    * https://github.com/php/web-php
-   * https://github.com/php/web-qa
    * https://github.com/php/web-php-distributions
 
 
@@ -1106,13 +1094,10 @@ volunteers to begin the selection process for the next release managers.
 [Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
 [PHP 8.3 is now for PHP 8.3.21-dev]: https://github.com/php/php-src/commit/b57f425cfe20a11003253427424cc0517483550b
 [GitHub command line tool]: https://cli.github.com
-[Announce 8.1.0RC3]: https://github.com/php/web-qa/commit/f264b711fd3827803b79bbb342959eae57ea502b
-[8.1.6RC1]: https://github.com/php/web-qa/commit/e6d61ad7a9d8be0b1cd159af29f3b9cbdde33384
 [merged upwards as usual]: https://wiki.php.net/vcs/gitworkflow
 [Update versions for PHP 8.1.7]: https://github.com/php/php-src/commit/d35e577a1bd0b35b9386cea97cddc73fd98eed6d
 [Update NEWS for PHP 8.1.7]: https://github.com/php/php-src/commit/b241f07f52ca9f87bf52be81817f475e6e727439
 [Announce PHP 8.1.6]: https://github.com/php/web-php/commit/9f796a96c65f07e45845ec248933bfb0010b94a9
-[PHP 8.1.6 released]: https://github.com/php/web-qa/commit/bff725f8373cf6fd9d97ba62a8517b19721a4c2e
 [feature freeze]: https://en.wikipedia.org/wiki/Freeze_(software_engineering)
 [Prepare for PHP 8.2]: https://github.com/php/php-src/commit/1c33ddb5e5598c5385c4c965992c6e031fd00dd6
 [Prepare for PHP 8.2 (bis)]: https://github.com/php/php-src/commit/a93e12f8a6dfc23e334339317c97aa35356db821
