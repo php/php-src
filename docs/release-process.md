@@ -73,7 +73,7 @@ releases.
    > When you are unsure about anything, ask a previous RM before proceeding.
    > Ideally, make sure a previous RM is available to answer questions during
    > the first few releases of your version. For the steps related to the
-   > `web-php`, and `web-php-distributions` repositories, try to have
+   > `web-php` and `web-php-distributions` repositories, try to have
    > someone from the webmaster team on hand.
 
 5. Verify the tags to be extra sure everything was tagged properly.
@@ -748,7 +748,7 @@ slightly different steps. We'll call attention where the steps differ.
      e.g., https://www.php.net/ChangeLog-8.php
    * Is there a release page for the new version?
      e.g., `https://www.php.net/releases/X_Y_Z.php`
-   * Does the RC for this version still appear on the QA home page?
+   * Does the RC for this version still appear on the Release Candidate Builds page?
      https://www.php.net/release-candidates.php
 
    Keep in mind it may take up to an hour for the websites to sync.
