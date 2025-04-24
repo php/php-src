@@ -50,6 +50,7 @@ jobs:
         (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9) && '24.04')
         || '22.04' }}
       branch: ${{ matrix.branch.ref }}
+      community_composer_ignore_platform_reqs: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9 }}
       community_verify_type_inference: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
       libmysqlclient_with_mysqli: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1) }}
       run_alpine: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
