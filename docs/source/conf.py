@@ -21,6 +21,7 @@ extensions = [
 templates_path = ['_templates']
 html_theme = 'sphinxawesome_theme'
 html_static_path = ['_static']
+html_css_files = ['css/code-no-font-ligatures.css']
 html_title = project
 html_permalinks_icon = Icons.permalinks_icon
 theme_options = ThemeOptions(
