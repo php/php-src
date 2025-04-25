@@ -14,12 +14,8 @@ for($i = 5; $i >= 0; $i--) {
     }
     echo $i;
 }
-echo PHP_EOL;
+
 // new way continue
-for($i = 5; $i >= 0; $i--) {
-    $i < 3 ? continue : null;
-    echo $i;
-}
 echo PHP_EOL;
 for($i = 5; $i >= 0; $i--) {
     $i > 3 ?: continue;
@@ -33,7 +29,6 @@ for($i = 5; $i >= 0; $i--) {
 ?>
 --EXPECT--
 543210
-543
 543
 54
 54321

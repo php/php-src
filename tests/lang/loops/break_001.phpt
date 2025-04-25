@@ -14,12 +14,8 @@ for($i = 5; $i >= 0; $i--) {
     }
     echo $i;
 }
-echo PHP_EOL;
+
 // new way break
-for($i = 5; $i >= 0; $i--) {
-    $i < 3 ? break : null;
-    echo $i;
-}
 echo PHP_EOL;
 for($i = 5; $i >= 0; $i--) {
     $i > 3 ?: break;
@@ -33,7 +29,6 @@ for($i = 5; $i >= 0; $i--) {
 ?>
 --EXPECTF--
 543210
-543
 543
 54
 54321

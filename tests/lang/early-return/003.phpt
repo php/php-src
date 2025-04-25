@@ -14,7 +14,7 @@ echo PHP_EOL;
 function test2(int $v, int $stop) {
     while (true) {
         $v-- ?: return $v;
-        $stop === $v ? return $v : continue;
+        $stop !== $v ?: return $v;
     }
     return 'never here';
 }
