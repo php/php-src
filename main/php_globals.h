@@ -48,8 +48,8 @@ extern ZEND_API struct _php_core_globals core_globals;
 struct _php_tick_function_entry;
 
 typedef struct _arg_separators {
-	char *output;
-	char *input;
+	zend_string *output;
+	zend_string *input;
 } arg_separators;
 
 struct _php_core_globals {
