@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed bug GH-18431 (Registering ZIP progress callback twice doesn't work).
     (nielsdos)
+  . Fixed bug GH-18438 (Handling of empty data and errors in
+    ZipArchive::addPattern). (nielsdos)
 
 08 May 2025, PHP 8.3.21
 
