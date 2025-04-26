@@ -240,7 +240,7 @@ PHPAPI void *php_random_status_alloc(const php_random_algo *algo, const bool per
 	return algo->state_size > 0 ? pecalloc(1, algo->state_size, persistent) : NULL;
 }
 
-PHPAPI void *php_random_status_copy(const php_random_algo *algo, void *old_status, void *new_status)
+PHPAPI void *php_random_status_copy(const php_random_algo *algo, const void *old_status, void *new_status)
 {
 	return memcpy(new_status, old_status, algo->state_size);
 }
@@ -250,7 +250,7 @@ PHPAPI void php_random_status_free(void *status, const bool persistent)
 	pefree(status, persistent);
 }
 
-PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, zend_object_handlers *handlers, const php_random_algo *algo)
+PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, const zend_object_handlers *handlers, const php_random_algo *algo)
 {
 	php_random_engine *engine = zend_object_alloc(sizeof(php_random_engine), ce);
 
@@ -355,10 +355,11 @@ PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len)
 
 /* {{{ php_random_hex2bin_le */
 /* stolen from standard/string.c */
-PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
+PHPAPI bool php_random_hex2bin_le(const zend_string *hexstr, void *dest)
 {
 	size_t len = hexstr->len >> 1;
-	unsigned char *str = (unsigned char *) hexstr->val, c, l, d;
+	const unsigned char *str = (unsigned char *) hexstr->val;
+	unsigned char c, l, d;
 	unsigned char *ptr = (unsigned char *) dest;
 	int is_letter, i = 0;
 
@@ -462,7 +463,7 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
  * rand() allows min > max, mt_rand does not */
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
-	php_random_status_state_mt19937 *s = php_random_default_status();
+	const php_random_status_state_mt19937 *s = php_random_default_status();
 
 	if (s->mode == MT_RAND_MT19937) {
 		return php_mt_rand_range(min, max);
@@ -633,7 +634,7 @@ PHP_FUNCTION(random_int)
 }
 /* }}} */
 
-static inline void fallback_seed_add(PHP_SHA1_CTX *c, void *p, size_t l){
+static inline void fallback_seed_add(PHP_SHA1_CTX *c, const void *p, size_t l){
 	/* Wrapper around PHP_SHA1Update allowing to pass
 	 * arbitrary pointers without (unsigned char*) casts
 	 * everywhere.
