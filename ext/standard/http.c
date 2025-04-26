@@ -124,7 +124,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	if (!arg_sep) {
-		arg_sep = zend_ini_str("arg_separator.output", strlen("arg_separator.output"), false);
+		arg_sep = PG(arg_separator).output;
 		if (ZSTR_LEN(arg_sep) == 0) {
 			arg_sep = ZSTR_CHAR('&');
 		}
