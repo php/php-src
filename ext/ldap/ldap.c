@@ -32,7 +32,6 @@
 
 #include <stddef.h>
 
-#include "ext/standard/dl.h"
 #include "php_ldap.h"
 
 #ifdef PHP_WIN32
