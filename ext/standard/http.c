@@ -37,14 +37,7 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 		smart_str_append(form_str, key_prefix);
 	}
 	if (index_string) {
-		zend_string *encoded_key;
-		if (encoding_type == PHP_QUERY_RFC3986) {
-			encoded_key = php_raw_url_encode(index_string, index_string_len);
-		} else {
-			encoded_key = php_url_encode(index_string, index_string_len);
-		}
-		smart_str_append(form_str, encoded_key);
-		zend_string_free(encoded_key);
+		php_url_encode_to_smart_str(form_str, index_string, index_string_len, encoding_type == PHP_QUERY_RFC3986);
 	} else {
 		/* Numeric key */
 		if (num_prefix) {
@@ -59,31 +52,16 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 
 try_again:
 	switch (Z_TYPE_P(scalar)) {
-		case IS_STRING: {
-			zend_string *encoded_data;
-			if (encoding_type == PHP_QUERY_RFC3986) {
-				encoded_data = php_raw_url_encode(Z_STRVAL_P(scalar), Z_STRLEN_P(scalar));
-			} else {
-				encoded_data = php_url_encode(Z_STRVAL_P(scalar), Z_STRLEN_P(scalar));
-			}
-			smart_str_append(form_str, encoded_data);
-			zend_string_free(encoded_data);
+		case IS_STRING:
+			php_url_encode_to_smart_str(form_str, Z_STRVAL_P(scalar), Z_STRLEN_P(scalar), encoding_type == PHP_QUERY_RFC3986);
 			break;
-		}
 		case IS_LONG:
 			smart_str_append_long(form_str, Z_LVAL_P(scalar));
 			break;
 		case IS_DOUBLE: {
-			zend_string *encoded_data;
 			zend_string *tmp = zend_double_to_str(Z_DVAL_P(scalar));
-			if (encoding_type == PHP_QUERY_RFC3986) {
-				encoded_data = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-			} else {
-				encoded_data = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-			}
-			smart_str_append(form_str, encoded_data);
+			php_url_encode_to_smart_str(form_str, ZSTR_VAL(tmp), ZSTR_LEN(tmp), encoding_type == PHP_QUERY_RFC3986);
 			zend_string_free(tmp);
-			zend_string_free(encoded_data);
 			break;
 		}
 		case IS_FALSE:

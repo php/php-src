@@ -68,6 +68,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 - ext/standard
   . Added php_url_decode_ex() and php_raw_url_decode_ex() that unlike their
     non-ex counterparts do not work in-place.
+  . Added php_url_encode_to_smart_str() to encode a URL to a smart_str buffer.
 
 ========================
 4. OpCode changes
