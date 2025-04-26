@@ -409,7 +409,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	php_stream_statbuf ssbuf;
 	char *resolved_path;
 	const char *path_to_open = NULL;
-	bool isescaped = false;
+	bool is_escaped = false;
 
 	if (strstr(filename, "%00")) {
 		php_error_docref(NULL, E_WARNING, "URI must not contain percent-encoded NUL bytes");
@@ -420,7 +420,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	if (uri && (uri->scheme == NULL ||
 			(xmlStrncmp(BAD_CAST uri->scheme, BAD_CAST "file", 4) == 0))) {
 		resolved_path = xmlURIUnescapeString(filename, 0, NULL);
-		isescaped = 1;
+		is_escaped = true;
 #if LIBXML_VERSION >= 20902 && LIBXML_VERSION < 21300 && defined(PHP_WIN32)
 		/* Libxml 2.9.2 prefixes local paths with file:/ instead of file://,
 			thus the php stream wrapper will fail on a valid case. For this
@@ -458,7 +458,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	php_stream_wrapper *wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, 0);
 	if (wrapper && read_only && wrapper->wops->url_stat) {
 		if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssbuf, NULL) == -1) {
-			if (isescaped) {
+			if (is_escaped) {
 				xmlFree(resolved_path);
 			}
 			return NULL;
@@ -472,7 +472,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		/* Prevent from closing this by fclose() */
 		ret_val->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	}
-	if (isescaped) {
+	if (is_escaped) {
 		xmlFree(resolved_path);
 	}
 	return ret_val;
@@ -513,13 +513,14 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 		return NULL;
 	}
 
-	if (URI == NULL)
-		return(NULL);
+	if (URI == NULL) {
+		return NULL;
+	}
 
 	context = php_libxml_streams_IO_open_read_wrapper(URI);
 
 	if (context == NULL) {
-		return(NULL);
+		return NULL;
 	}
 
 	/* Check if there's been an external transport protocol with an encoding information */
@@ -544,7 +545,7 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 	} else
 		php_libxml_streams_IO_close(context);
 
-	return(ret);
+	return ret;
 }
 
 static xmlOutputBufferPtr
@@ -559,8 +560,9 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	void *context = NULL;
 	char *unescaped = NULL;
 
-	if (URI == NULL)
+	if (URI == NULL) {
 		goto err;
+	}
 
 	if (strstr(URI, "%00")) {
 		php_error_docref(NULL, E_WARNING, "URI must not contain percent-encoded NUL bytes");
@@ -569,8 +571,9 @@ php_libxml_output_buffer_create_filename(const char *URI,
 
 	puri = xmlParseURI(URI);
 	if (puri != NULL) {
-		if (puri->scheme != NULL)
+		if (puri->scheme != NULL) {
 			unescaped = xmlURIUnescapeString(URI, 0, NULL);
+		}
 		xmlFreeURI(puri);
 	}
 
@@ -596,7 +599,7 @@ php_libxml_output_buffer_create_filename(const char *URI,
 		ret->closecallback = php_libxml_streams_IO_close;
 	}
 
-	return(ret);
+	return ret;
 
 err:
 	/* Similarly to __xmlOutputBufferCreateFilename we should also close the encoder on failure. */
@@ -992,7 +995,7 @@ static PHP_RINIT_FUNCTION(libxml)
 	 * other threads/requests that might have disabled the loader
 	 * do not affect the current request.
 	 */
-	LIBXML(entity_loader_disabled) = 0;
+	LIBXML(entity_loader_disabled) = false;
 
 	return SUCCESS;
 }
@@ -1094,7 +1097,7 @@ PHP_FUNCTION(libxml_use_internal_errors)
 		RETURN_BOOL(retval);
 	}
 
-	if (use_errors == 0) {
+	if (use_errors == false) {
 		xmlSetStructuredErrorFunc(NULL, NULL);
 		if (LIBXML(error_list)) {
 			zend_llist_destroy(LIBXML(error_list));
@@ -1196,7 +1199,7 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
 /* {{{ Disable/Enable ability to load external entities */
 PHP_FUNCTION(libxml_disable_entity_loader)
 {
-	bool disable = 1;
+	bool disable = true;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
