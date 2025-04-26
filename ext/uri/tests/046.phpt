@@ -36,17 +36,17 @@ var_dump($uri->getRawPath());
 $url = new Uri\Whatwg\Url("mailto:johndoe@example.com");
 
 var_dump($url->toAsciiString());
-var_dump($url->getRawPath());
+var_dump($url->getPath());
 
 $url = new Uri\Whatwg\Url("https://example.com");
 
 var_dump($url->toAsciiString());
-var_dump($url->getRawPath());
+var_dump($url->getPath());
 
 $url = new Uri\Whatwg\Url("https://example.com/");
 
 var_dump($url->toAsciiString());
-var_dump($url->getRawPath());
+var_dump($url->getPath());
 
 ?>
 --EXPECT--

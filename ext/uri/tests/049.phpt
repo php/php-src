@@ -10,7 +10,7 @@ var_dump($uri->getRawPath());
 var_dump($uri->getPath());
 
 $url = new Uri\WhatWg\Url("https://example.com/foo/bar%2Fbaz");
-var_dump($url->getRawPath());
+var_dump($url->getPath());
 
 ?>
 --EXPECT--

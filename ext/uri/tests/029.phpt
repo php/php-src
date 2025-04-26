@@ -33,9 +33,9 @@ $url1 = Uri\WhatWg\Url::parse("https://example.com?foo=bar");
 $url2 = $url1->withQuery("?foo=baz");
 $url3 = $url2->withQuery(null);
 
-var_dump($url1->getRawQuery());
-var_dump($url2->getRawQuery());
-var_dump($url3->getRawQuery());
+var_dump($url1->getQuery());
+var_dump($url2->getQuery());
+var_dump($url3->getQuery());
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
 $url2 = $url1->withQuery("?foo=bar&foo=baz");
@@ -44,12 +44,12 @@ $url4 = $url3->withQuery("t%65st");
 $url5 = $url4->withQuery("foo=foo%26bar&baz=/qux%3D");
 $url6 = $url5->withQuery("#");
 
-var_dump($url1->getRawQuery());
-var_dump($url2->getRawQuery());
-var_dump($url3->getRawQuery());
-var_dump($url4->getRawQuery());
-var_dump($url5->getRawQuery());
-var_dump($url6->getRawQuery());
+var_dump($url1->getQuery());
+var_dump($url2->getQuery());
+var_dump($url3->getQuery());
+var_dump($url4->getQuery());
+var_dump($url5->getQuery());
+var_dump($url6->getQuery());
 
 ?>
 --EXPECT--

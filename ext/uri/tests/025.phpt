@@ -14,11 +14,11 @@ $url5 = $url4->withPassword("p:s/");
 $url6 = Uri\WhatWg\Url::parse("file:///foo/bar/");
 $url6 = $url6->withUsername("pass");
 
-var_dump($url2->getRawPassword());
-var_dump($url3->getRawPassword());
-var_dump($url4->getRawPassword());
-var_dump($url5->getRawPassword());
-var_dump($url6->getRawPassword());
+var_dump($url2->getPassword());
+var_dump($url3->getPassword());
+var_dump($url4->getPassword());
+var_dump($url5->getPassword());
+var_dump($url6->getPassword());
 
 ?>
 --EXPECT--
