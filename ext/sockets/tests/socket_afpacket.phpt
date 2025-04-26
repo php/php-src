@@ -178,7 +178,7 @@ object(Socket\EthernetPacket)#3 (%d) {
   ["headerSize"]=>
   int(%d)
   ["rawPacket"]=>
-  string(%d) "%A"
+  string(%d) "%r(.|\n)*?"%r
   ["socket"]=>
   object(Socket)#1 (0) {
   }
@@ -200,7 +200,7 @@ object(Socket\EthernetPacket)#2 (7) {
   ["headerSize"]=>
   int(14)
   ["rawPacket"]=>
-  string(%d) "%A"
+  string(%d) "%r(.|\n)*?"%r
   ["socket"]=>
   object(Socket)#%d (0) {
   }
@@ -215,7 +215,7 @@ object(Socket\EthernetPacket)#2 (7) {
     ["headerSize"]=>
     int(%d)
     ["rawPacket"]=>
-    string(%d) "%s"
+    string(%d) "%r(.|\n)*?"%r
     ["srcAddr"]=>
     string(%d) "%d.%d.%d.%d"
     ["dstAddr"]=>
@@ -225,7 +225,7 @@ object(Socket\EthernetPacket)#2 (7) {
       ["headerSize"]=>
       int(%d)
       ["rawPacket"]=>
-      string(%d) "%s"
+      string(%d) "%r(.|\n)*?"%r
       ["srcPort"]=>
       int(%d)
       ["dstPort"]=>
@@ -240,7 +240,7 @@ object(Socket\EthernetPacket)#%d (7) {
   ["headerSize"]=>
   int(14)
   ["rawPacket"]=>
-  string(%d) "%A"
+  string(%d) "%r(.|\n)*?"%r
   ["socket"]=>
   object(Socket)#3 (0) {
   }
@@ -265,7 +265,7 @@ object(Socket\EthernetPacket)#%d (7) {
       ["headerSize"]=>
       int(%d)
       ["rawPacket"]=>
-      string(%d) "%A"
+      string(%d) "%r(.|\n)*?"%r
       ["srcPort"]=>
       int(%d)
       ["dstPort"]=>
