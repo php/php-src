@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17403 (Potential deadlock when putenv fails). (nielsdos)
   . Fixed bug GH-18400 (http_build_query type error is inaccurate). (nielsdos)
 
+- Zip:
+  . Fixed bug GH-18431 (Registering ZIP progress callback twice doesn't work).
+    (nielsdos)
+
 24 Apr 2025, PHP 8.4.7
 
 - Core:
