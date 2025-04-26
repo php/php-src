@@ -322,10 +322,8 @@ static void php_libxml_node_free(xmlNodePtr node)
 
 PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 {
-	xmlNodePtr curnode;
-
 	if (node != NULL) {
-		curnode = node;
+		xmlNodePtr curnode = node;
 		while (curnode != NULL) {
 			/* If the _private field is set, there's still a userland reference somewhere. We'll delay freeing in this case. */
 			if (curnode->_private) {
@@ -1157,13 +1155,11 @@ PHP_FUNCTION(libxml_get_last_error)
 /* {{{ Retrieve array of errors */
 PHP_FUNCTION(libxml_get_errors)
 {
-	xmlErrorPtr error;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (LIBXML(error_list)) {
 		array_init(return_value);
-		error = zend_llist_get_first(LIBXML(error_list));
+		xmlErrorPtr error = zend_llist_get_first(LIBXML(error_list));
 
 		while (error != NULL) {
 			zval z_error;
@@ -1285,16 +1281,15 @@ zval *php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node ex
 
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object)
 {
-	zend_class_entry *ce = NULL;
 	xmlNodePtr node = NULL;
-	php_libxml_func_handler *export_hnd;
 
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		ce = Z_OBJCE_P(object);
+		zend_class_entry *ce = Z_OBJCE_P(object);
 		while (ce->parent != NULL) {
 			ce = ce->parent;
 		}
-		if ((export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name))) {
+		php_libxml_func_handler *export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name);
+		if (export_hnd) {
 			node = export_hnd->export_func(object);
 		}
 	}
