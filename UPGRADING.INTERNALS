@@ -70,6 +70,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     non-ex counterparts do not work in-place.
   . The php_std_date() function has been removed. Use php_format_date() with
     the "D, d M Y H:i:s \\G\\M\\T" format instead.
+  . Added php_url_encode_to_smart_str() to encode a URL to a smart_str buffer.
 
 ========================
 4. OpCode changes

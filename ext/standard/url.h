@@ -38,6 +38,7 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len); /* return value: length
 PHPAPI size_t php_raw_url_decode_ex(char *dest, const char *src, size_t src_len);
 PHPAPI zend_string *php_url_encode(char const *s, size_t len);
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len);
+PHPAPI void php_url_encode_to_smart_str(smart_str *buf, char const *s, size_t len, bool raw);
 
 #define PHP_URL_SCHEME 0
 #define PHP_URL_HOST 1
