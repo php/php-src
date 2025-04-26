@@ -1047,9 +1047,6 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	ze_zip_object * intern = php_zip_fetch_object(object);
 	int i;
 
-	if (!intern) {
-		return;
-	}
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
