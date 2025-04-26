@@ -84,7 +84,7 @@ UBool CodePointBreakIterator::operator==(const BreakIterator& that) const
 	}
 
 	const CodePointBreakIterator& that2 =
-		dynamic_cast<const CodePointBreakIterator&>(that);
+		static_cast<const CodePointBreakIterator&>(that);
 
 	if (!utext_equals(this->fText, that2.fText)) {
 		return false;
@@ -253,7 +253,6 @@ CodePointBreakIterator *CodePointBreakIterator::createBufferClone(
 	if (U_ALIGNMENT_OFFSET(stackBuffer) != 0) {
 		uint32_t offsetUp = static_cast<uint32_t>(U_ALIGNMENT_OFFSET_UP(buf));
 		s -= offsetUp;
-		// TODO buf pointer might be null?
 		buf += offsetUp;
 	}
 

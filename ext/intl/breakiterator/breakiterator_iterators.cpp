@@ -235,16 +235,18 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	ii->iterator->funcs = &breakiterator_parts_it_funcs;
 	ii->iterator->index = 0;
 
-	reinterpret_cast<zoi_with_current *>(ii->iterator)->destroy_it = _breakiterator_parts_destroy_it;
-	ZVAL_OBJ_COPY(&reinterpret_cast<zoi_with_current *>(ii->iterator)->wrapping_obj, Z_OBJ_P(object));
-	ZVAL_UNDEF(&reinterpret_cast<zoi_with_current *>(ii->iterator)->current);
+	zoi_with_current *zend_iterator_with_current = reinterpret_cast<zoi_with_current *>(ii->iterator);
+	zend_iterator_with_current->destroy_it = _breakiterator_parts_destroy_it;
+	ZVAL_OBJ_COPY(&zend_iterator_with_current->wrapping_obj, Z_OBJ_P(object));
+	ZVAL_UNDEF(&zend_iterator_with_current->current);
 
-	reinterpret_cast<zoi_break_iter_parts *>(ii->iterator)->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);
+	zoi_break_iter_parts *zend_break_iterator_parts = reinterpret_cast<zoi_break_iter_parts *>(ii->iterator);
+	zend_break_iterator_parts->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);
 
-	ZEND_ASSERT(reinterpret_cast<zoi_break_iter_parts *>(ii->iterator)->bio->biter != NULL);
+	ZEND_ASSERT(zend_break_iterator_parts->bio->biter != NULL);
 
-	reinterpret_cast<zoi_break_iter_parts *>(ii->iterator)->key_type = key_type;
-	reinterpret_cast<zoi_break_iter_parts *>(ii->iterator)->index_right = 0;
+	zend_break_iterator_parts->key_type = key_type;
+	zend_break_iterator_parts->index_right = 0;
 }
 
 U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
