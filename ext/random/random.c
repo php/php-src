@@ -357,9 +357,9 @@ PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len)
 PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 {
 	size_t len = hexstr->len >> 1;
-	unsigned char *str = (unsigned char *) hexstr->val, c, l, d;
+	unsigned char *str = (unsigned char *) hexstr->val;
 	unsigned char *ptr = (unsigned char *) dest;
-	int is_letter, i = 0;
+	int i = 0;
 
 #ifdef WORDS_BIGENDIAN
 	/* force little endian */
@@ -368,9 +368,10 @@ PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 #else
 	for (size_t j = 0; j < len; j++) {
 #endif
-		c = str[i++];
-		l = c & ~0x20;
-		is_letter = ((uint32_t) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(uint32_t) - 1);
+		unsigned char c = str[i++];
+		unsigned char l = c & ~0x20;
+		int is_letter = ((uint32_t) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(uint32_t) - 1);
+		unsigned char d;
 
 		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(uint32_t) - 1)) | is_letter)) {
