@@ -188,7 +188,7 @@ static bool serialize(void *state, HashTable *data)
 	return true;
 }
 
-static bool unserialize(void *state, HashTable *data)
+static bool unserialize(void *state, const HashTable *data)
 {
 	php_random_status_state_mt19937 *s = state;
 	zval *t;
