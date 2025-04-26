@@ -14,6 +14,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Core
+  . PG(arg_separator).input and PG(arg_separator).output are now `zend_string*`
+    instead of `char*`.
+
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
     a value to a non-reference zval.

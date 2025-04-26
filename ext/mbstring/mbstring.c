@@ -1537,7 +1537,7 @@ PHP_FUNCTION(mb_parse_str)
 	encstr = estrndup(encstr, encstr_len);
 
 	info.data_type              = PARSE_STRING;
-	info.separator              = PG(arg_separator).input;
+	info.separator              = ZSTR_VAL(PG(arg_separator).input);
 	info.report_errors          = true;
 	info.to_encoding            = MBSTRG(current_internal_encoding);
 	info.from_encodings         = MBSTRG(http_input_list);
