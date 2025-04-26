@@ -41,12 +41,6 @@ static zend_always_inline bool php_json_check_stack_limit(void)
 #endif
 }
 
-static int php_json_determine_array_type(const HashTable *ht) /* {{{ */
-{
-	return zend_array_is_list(ht) ? PHP_JSON_OUTPUT_ARRAY : PHP_JSON_OUTPUT_OBJECT;
-}
-/* }}} */
-
 /* {{{ Pretty printing support functions */
 
 static inline void php_json_pretty_print_char(smart_str *buf, int options, char c) /* {{{ */
@@ -114,7 +108,7 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 
 static zend_result php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
-	int r;
+	bool encode_as_object = options & PHP_JSON_FORCE_OBJECT;
 	bool need_comma = false;
 	HashTable *myht, *prop_ht;
 	zend_refcounted *recursion_rc;
@@ -131,7 +125,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 		myht = Z_ARRVAL_P(val);
 		recursion_rc = (zend_refcounted *)myht;
 		prop_ht = NULL;
-		r = (options & PHP_JSON_FORCE_OBJECT) ? PHP_JSON_OUTPUT_OBJECT : php_json_determine_array_type(myht);
+		encode_as_object = encode_as_object || !zend_array_is_list(myht);
 	} else if (Z_OBJ_P(val)->properties == NULL
 	 && Z_OBJ_HT_P(val)->get_properties_for == NULL
 	 && Z_OBJ_HT_P(val)->get_properties == zend_std_get_properties
@@ -219,7 +213,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			 * referenced from a different place in the object graph. */
 			recursion_rc = (zend_refcounted *)obj;
 		}
-		r = PHP_JSON_OUTPUT_OBJECT;
+		encode_as_object = true;
 	}
 
 	if (recursion_rc && GC_IS_RECURSIVE(recursion_rc)) {
@@ -231,7 +225,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 	PHP_JSON_HASH_PROTECT_RECURSION(recursion_rc);
 
-	if (r == PHP_JSON_OUTPUT_ARRAY) {
+	if (!encode_as_object) {
 		smart_str_appendc(buf, '[');
 	} else {
 		smart_str_appendc(buf, '{');
@@ -250,7 +244,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			zval tmp;
 			ZVAL_UNDEF(&tmp);
 
-			if (r == PHP_JSON_OUTPUT_ARRAY) {
+			if (!encode_as_object) {
 				ZEND_ASSERT(Z_TYPE_P(data) != IS_PTR);
 
 				if (need_comma) {
@@ -262,7 +256,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				php_json_pretty_print_char(buf, options, '\n');
 				php_json_pretty_print_indent(buf, options, encoder);
 			} else {
-				ZEND_ASSERT(r == PHP_JSON_OUTPUT_OBJECT);
 				if (key) {
 					if (ZSTR_VAL(key)[0] == '\0' && ZSTR_LEN(key) > 0 && Z_TYPE_P(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
@@ -346,7 +339,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 		php_json_pretty_print_indent(buf, options, encoder);
 	}
 
-	if (r == PHP_JSON_OUTPUT_ARRAY) {
+	if (!encode_as_object) {
 		smart_str_appendc(buf, ']');
 	} else {
 		smart_str_appendc(buf, '}');
