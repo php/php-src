@@ -333,11 +333,11 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 				if (curnode->type == XML_ELEMENT_NODE) {
 					/* This ensures that namespace references in this subtree are defined within this subtree,
 					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
-					php_libxml_node_ptr *ptr = curnode->_private;
+					const php_libxml_node_ptr *ptr = curnode->_private;
 
 					/* Checking in case it runs out of reference */
 					if (ptr->_private) {
-						php_libxml_node_object *obj = ptr->_private;
+						const php_libxml_node_object *obj = ptr->_private;
 						if (!obj->document || obj->document->class_type < PHP_LIBXML_CLASS_MODERN) {
 							xmlReconciliateNs(curnode->doc, curnode);
 						}
@@ -524,7 +524,7 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 
 	/* Check if there's been an external transport protocol with an encoding information */
 	if (enc == XML_CHAR_ENCODING_NONE) {
-		php_stream *s  = (php_stream *) context;
+		const php_stream *s  = (php_stream *) context;
 		zend_string *charset = php_libxml_sniff_charset_from_stream(s);
 		if (charset != NULL) {
 			enc = xmlParseCharEncoding(ZSTR_VAL(charset));
@@ -934,7 +934,7 @@ PHP_LIBXML_API void php_libxml_shutdown(void)
 	}
 }
 
-PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext)
+PHP_LIBXML_API void php_libxml_switch_context(const zval *context, zval *oldcontext)
 {
 	if (oldcontext) {
 		ZVAL_COPY_VALUE(oldcontext, &LIBXML(stream_context));
@@ -1268,7 +1268,7 @@ int php_libxml_xmlCheckUTF8(const unsigned char *s)
 	return 1;
 }
 
-zval *php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function)
+zval *php_libxml_register_export(const zend_class_entry *ce, php_libxml_export_node export_function)
 {
 	php_libxml_func_handler export_hnd;
 
@@ -1284,11 +1284,11 @@ PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object)
 	xmlNodePtr node = NULL;
 
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zend_class_entry *ce = Z_OBJCE_P(object);
+		const zend_class_entry *ce = Z_OBJCE_P(object);
 		while (ce->parent != NULL) {
 			ce = ce->parent;
 		}
-		php_libxml_func_handler *export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name);
+		const php_libxml_func_handler *export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name);
 		if (export_hnd) {
 			node = export_hnd->export_func(object);
 		}
