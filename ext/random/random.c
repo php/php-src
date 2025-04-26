@@ -361,7 +361,7 @@ PHPAPI bool php_random_hex2bin_le(const zend_string *hexstr, void *dest)
 	const unsigned char *str = (unsigned char *) hexstr->val;
 	unsigned char c, l, d;
 	unsigned char *ptr = (unsigned char *) dest;
-	int is_letter, i = 0;
+	uint32_t is_letter, i = 0;
 
 #ifdef WORDS_BIGENDIAN
 	/* force little endian */
