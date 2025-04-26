@@ -2433,7 +2433,9 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			object_init_ex(return_value, ldap_result_ce);
 			result = Z_LDAP_RESULT_P(return_value);
 			result->result = ldap_res;
-		} else RETVAL_TRUE;
+		} else {
+			RETVAL_TRUE;
+		}
 	}
 
 cleanup:
