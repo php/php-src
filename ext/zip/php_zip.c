@@ -3048,14 +3048,11 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 
 	obj = Z_ZIP_P(self);
 
-	/* free if called twice */
-	_php_zip_progress_callback_free(obj);
-
 	/* register */
-	ZVAL_COPY(&obj->progress_callback, &fci.function_name);
 	if (zip_register_progress_callback_with_state(intern, rate, _php_zip_progress_callback, _php_zip_progress_callback_free, obj)) {
 		RETURN_FALSE;
 	}
+	ZVAL_COPY(&obj->progress_callback, &fci.function_name);
 
 	RETURN_TRUE;
 }
@@ -3093,14 +3090,11 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 
 	obj = Z_ZIP_P(self);
 
-	/* free if called twice */
-	_php_zip_cancel_callback_free(obj);
-
 	/* register */
-	ZVAL_COPY(&obj->cancel_callback, &fci.function_name);
 	if (zip_register_cancel_callback_with_state(intern, _php_zip_cancel_callback, _php_zip_cancel_callback_free, obj)) {
 		RETURN_FALSE;
 	}
+	ZVAL_COPY(&obj->cancel_callback, &fci.function_name);
 
 	RETURN_TRUE;
 }
