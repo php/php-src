@@ -323,7 +323,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 			RETURN_THROWS();
 		}
 
- non_64:
+non_64:
 
 		for (size_t i = 0; i < result.size; i++) {
 			ZSTR_VAL(retval)[total_size++] = result.result & 0xff;
