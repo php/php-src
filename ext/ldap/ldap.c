@@ -719,15 +719,13 @@ failure:
 		zend_string_release(tmpstring);
 	}
 	if (tmpstrings1 != NULL) {
-		int i;
-		for (i = 0; i < num_tmpstrings1; ++i) {
+		for (size_t i = 0; i < num_tmpstrings1; ++i) {
 			zend_string_release(tmpstrings1[i]);
 		}
 		efree(tmpstrings1);
 	}
 	if (tmpstrings2 != NULL) {
-		int i;
-		for (i = 0; i < num_tmpstrings2; ++i) {
+		for (size_t i = 0; i < num_tmpstrings2; ++i) {
 			zend_string_release(tmpstrings2[i]);
 		}
 		efree(tmpstrings2);
