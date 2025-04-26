@@ -3050,14 +3050,11 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 		RETURN_THROWS();
 	}
 
-	/* free if called twice */
-	php_zip_progress_callback_free(obj);
-
 	/* register */
-	zend_fcc_dup(&obj->progress_callback, &fcc);
 	if (zip_register_progress_callback_with_state(intern, rate, php_zip_progress_callback, php_zip_progress_callback_free, obj)) {
 		RETURN_FALSE;
 	}
+	zend_fcc_dup(&obj->progress_callback, &fcc);
 
 	RETURN_TRUE;
 }
@@ -3108,14 +3105,11 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 		RETURN_THROWS();
 	}
 
-	/* free if called twice */
-	php_zip_cancel_callback_free(obj);
-
 	/* register */
-	zend_fcc_dup(&obj->cancel_callback, &fcc);
 	if (zip_register_cancel_callback_with_state(intern, php_zip_cancel_callback, php_zip_cancel_callback_free, obj)) {
 		RETURN_FALSE;
 	}
+	zend_fcc_dup(&obj->cancel_callback, &fcc);
 
 	RETURN_TRUE;
 }
