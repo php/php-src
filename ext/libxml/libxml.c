@@ -49,8 +49,8 @@
 #include "libxml_arginfo.h"
 
 /* a true global for initialization */
-static int php_libxml_initialized = 0;
-static int php_libxml_per_request_initialization = 1;
+static bool php_libxml_initialized = false;
+static bool php_libxml_per_request_initialization = true;
 static xmlExternalEntityLoader php_libxml_default_entity_loader;
 
 typedef struct php_libxml_func_handler {
@@ -404,7 +404,7 @@ PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void)
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
-static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
+static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const bool read_only)
 {
 	php_stream_statbuf ssbuf;
 	char *resolved_path;
@@ -480,12 +480,12 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 
 static void *php_libxml_streams_IO_open_read_wrapper(const char *filename)
 {
-	return php_libxml_streams_IO_open_wrapper(filename, "rb", 1);
+	return php_libxml_streams_IO_open_wrapper(filename, "rb", true);
 }
 
 static void *php_libxml_streams_IO_open_write_wrapper(const char *filename)
 {
-	return php_libxml_streams_IO_open_wrapper(filename, "wb", 0);
+	return php_libxml_streams_IO_open_wrapper(filename, "wb", false);
 }
 
 static int php_libxml_streams_IO_read(void *context, char *buffer, int len)
@@ -916,7 +916,7 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 
 		zend_hash_init(&php_libxml_exports, 0, NULL, php_libxml_exports_dtor, 1);
 
-		php_libxml_initialized = 1;
+		php_libxml_initialized = true;
 	}
 }
 
@@ -930,7 +930,7 @@ PHP_LIBXML_API void php_libxml_shutdown(void)
 		zend_hash_destroy(&php_libxml_exports);
 
 		xmlSetExternalEntityLoader(php_libxml_default_entity_loader);
-		php_libxml_initialized = 0;
+		php_libxml_initialized = false;
 	}
 }
 
@@ -962,7 +962,7 @@ static PHP_MINIT_FUNCTION(libxml)
 
 		for (sapi_name = supported_sapis; *sapi_name; sapi_name++) {
 			if (strcmp(sapi_module.name, *sapi_name) == 0) {
-				php_libxml_per_request_initialization = 0;
+				php_libxml_per_request_initialization = false;
 				break;
 			}
 		}
@@ -1242,7 +1242,7 @@ PHP_FUNCTION(libxml_get_external_entity_loader)
 /* }}} */
 
 /* {{{ Common functions shared by extensions */
-int php_libxml_xmlCheckUTF8(const unsigned char *s)
+bool php_libxml_xmlCheckUTF8(const unsigned char *s)
 {
 	size_t i;
 	unsigned char c;
@@ -1251,21 +1251,21 @@ int php_libxml_xmlCheckUTF8(const unsigned char *s)
 		if ((c & 0x80) == 0) {
 		} else if ((c & 0xe0) == 0xc0) {
 			if ((s[i++] & 0xc0) != 0x80) {
-				return 0;
+				return false;
 			}
 		} else if ((c & 0xf0) == 0xe0) {
 			if ((s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80) {
-				return 0;
+				return false;
 			}
 		} else if ((c & 0xf8) == 0xf0) {
 			if ((s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80) {
-				return 0;
+				return false;
 			}
 		} else {
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 zval *php_libxml_register_export(const zend_class_entry *ce, php_libxml_export_node export_function)
