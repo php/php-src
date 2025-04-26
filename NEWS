@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 
 - Intl:
   . datefmt_parse/datefmt_localtime references type system fixes. (nielsdos)
+  . Fix IntlDateFormatter::parseToCalendar() reference type system breaks.
+    (nielsdos)
 
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
