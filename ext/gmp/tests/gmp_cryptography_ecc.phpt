@@ -181,6 +181,14 @@ class UnsafePrimeCurveMath
             throw new Exception('No square root of alpha.');
         }
 
+        /*
+         * take the square root of alpha, while doing a (much cheaper) exponentiation
+         *
+         * observe that alpha^((p+1)/4) = y^((p+1)/2) = y^((p-1)/2) * y = y
+         * (p+1)/4 is an integer, as for our prime p it holds that p mod 4 = 3
+         * alpha = y^2 by the jacobi symbol check above that asserts y is a quadratic residue
+         * y^((p-1)/2) = 1 by Euler's Criterion applies to the quadratic residue y
+         */
         $const = gmp_div(gmp_add($this->curve->getP(), 1), 4);
         $beta = gmp_powm($alpha, $const, $this->curve->getP());
 
