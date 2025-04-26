@@ -381,7 +381,7 @@ PHP_METHOD(Random_Randomizer, shuffleBytes)
 PHP_METHOD(Random_Randomizer, pickArrayKeys)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
-	zval *input, t;
+	zval *input;
 	zend_long num_req;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2);
@@ -401,6 +401,7 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 
 	/* Keep compatibility, But the result is always an array */
 	if (Z_TYPE_P(return_value) != IS_ARRAY) {
+		zval t;
 		ZVAL_COPY_VALUE(&t, return_value);
 		array_init(return_value);
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
