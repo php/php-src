@@ -30,5 +30,5 @@ U_CFUNC PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	RETURN_LONG(dynamic_cast<CodePointBreakIterator *>(bio->biter)->getLastCodePoint());
+	RETURN_LONG(static_cast<CodePointBreakIterator *>(bio->biter)->getLastCodePoint());
 }

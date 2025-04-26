@@ -29,7 +29,8 @@ using icu::RuleBasedBreakIterator;
 using icu::Locale;
 
 static inline RuleBasedBreakIterator *fetch_rbbi(const BreakIterator_object *bio) {
-	return dynamic_cast<RuleBasedBreakIterator *>(bio->biter);
+	ZEND_ASSERT(bio != nullptr);
+	return static_cast<RuleBasedBreakIterator *>(bio->biter);
 }
 
 static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
