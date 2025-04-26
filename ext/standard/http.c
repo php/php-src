@@ -246,7 +246,7 @@ PHP_FUNCTION(http_build_query)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(Z_TYPE_P(formdata) == IS_OBJECT && (Z_OBJCE_P(formdata)->ce_flags & ZEND_ACC_ENUM))) {
-		zend_argument_type_error(1, "must be of type array, %s given", zend_zval_value_name(formdata));
+		zend_argument_type_error(1, "must not be an enum, %s given", zend_zval_value_name(formdata));
 		RETURN_THROWS();
 	}
 
