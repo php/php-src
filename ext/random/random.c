@@ -524,9 +524,8 @@ PHP_FUNCTION(mt_srand)
 PHP_FUNCTION(mt_rand)
 {
 	zend_long min, max;
-	int argc = ZEND_NUM_ARGS();
 
-	if (argc == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		/* genrand_int31 in mt19937ar.c performs a right shift */
 		RETURN_LONG(php_mt_rand() >> 1);
 	}
@@ -562,9 +561,8 @@ PHP_FUNCTION(mt_getrandmax)
 PHP_FUNCTION(rand)
 {
 	zend_long min, max;
-	int argc = ZEND_NUM_ARGS();
 
-	if (argc == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		/* genrand_int31 in mt19937ar.c performs a right shift */
 		RETURN_LONG(php_mt_rand() >> 1);
 	}
