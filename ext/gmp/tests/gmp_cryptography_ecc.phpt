@@ -370,7 +370,9 @@ $alicePublicKeyReconstructed = $math->fromXCoordinate($alicePublicKey->x, gmp_cm
 $bobSharedKey = $math->mul($alicePublicKey, $bobSecret);
 
 var_dump($aliceSharedKey->equals($bobSharedKey));
+var_dump(gmp_strval($aliceSharedKey->x, 16));
 ?>
 --EXPECT--
 bool(true)
 bool(true)
+string(64) "f480daf4f56a674c16944cda9e7c9fd0ab2813eae3a5935bf9e091cadb5c9ac3"
