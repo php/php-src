@@ -181,7 +181,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				} else {
 					new_prefix = zend_string_concat2(ZSTR_VAL(encoded_key), ZSTR_LEN(encoded_key), "%5B", strlen("%5B"));
 				}
-				zend_string_release_ex(encoded_key, false);
+				zend_string_efree(encoded_key);
 			} else { /* is integer index */
 				char *index_int_as_str;
 				size_t index_int_as_str_len;
@@ -210,7 +210,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			GC_TRY_PROTECT_RECURSION(ht);
 			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, new_prefix, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type);
 			GC_TRY_UNPROTECT_RECURSION(ht);
-			zend_string_release_ex(new_prefix, false);
+			zend_string_efree(new_prefix);
 		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
 			/* Skip these types */
 			continue;
