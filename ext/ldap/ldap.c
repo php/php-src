@@ -1485,7 +1485,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	LDAPControl **lserverctrls = NULL;
 	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;
-	int ret = 1, argcount = ZEND_NUM_ARGS();
+	int ret = 1;
 
 	ZEND_PARSE_PARAMETERS_START(3, 9)
 		Z_PARAM_ZVAL(link)
@@ -1501,7 +1501,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Reverse -> fall through */
-	switch (argcount) {
+	switch (ZEND_NUM_ARGS()) {
 		case 9:
 		case 8:
 			ldap_deref = deref;
