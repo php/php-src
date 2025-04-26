@@ -215,6 +215,9 @@ PHP 8.5 UPGRADE NOTES
   . Locale:: methods throw a ValueError when locale inputs contain null
     bytes.
 
+- libxml:
+  . libxml_set_external_entity_loader() now has a formal return type of true.
+
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
 
