@@ -521,10 +521,10 @@ static void set_coercing_output_data_types(XSQLDA* sqlda)
 #endif
 
 /* map driver specific error message to PDO error */
-void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
-	const char *msg, const size_t msg_len) /* {{{ */
+void php_firebird_set_error(
+	pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, size_t state_len, const char *msg, size_t msg_len) /* {{{ */
 {
-	pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
+	pdo_error_type *error_code = stmt ? &stmt->error_code : &dbh->error_code;
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	pdo_firebird_error_info *einfo = &H->einfo;
 	int sqlcode = -999;

@@ -123,8 +123,8 @@ extern const pdo_driver_t pdo_firebird_driver;
 
 extern const struct pdo_stmt_methods firebird_stmt_methods;
 
-extern void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
-	const char *msg, const size_t msg_len);
+void php_firebird_set_error(
+	pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, size_t state_len, const char *msg, size_t msg_len);
 #define php_firebird_error(d) php_firebird_set_error(d, NULL, NULL, 0, NULL, 0)
 #define php_firebird_error_stmt(s) php_firebird_set_error(s->dbh, s, NULL, 0, NULL, 0)
 #define php_firebird_error_with_info(d,e,el,m,ml) php_firebird_set_error(d, NULL, e, el, m, ml)
