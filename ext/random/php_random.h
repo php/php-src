@@ -89,8 +89,8 @@ typedef struct _php_random_algo {
 	const size_t state_size;
 	php_random_result (*generate)(void *state);
 	zend_long (*range)(void *state, zend_long min, zend_long max);
-	bool (*serialize)(void *state, HashTable *data);
-	bool (*unserialize)(void *state, HashTable *data);
+	bool (*serialize)(const void *state, HashTable *data);
+	bool (*unserialize)(void *state, const HashTable *data);
 } php_random_algo;
 
 typedef struct _php_random_algo_with_state {
@@ -149,7 +149,7 @@ static inline php_random_randomizer *php_random_randomizer_from_obj(zend_object 
 # define Z_RANDOM_RANDOMIZER_P(zval) php_random_randomizer_from_obj(Z_OBJ_P(zval));
 
 PHPAPI void *php_random_status_alloc(const php_random_algo *algo, const bool persistent);
-PHPAPI void *php_random_status_copy(const php_random_algo *algo, void *old_status, void *new_status);
+PHPAPI void *php_random_status_copy(const php_random_algo *algo, const void *old_status, void *new_status);
 PHPAPI void php_random_status_free(void *status, const bool persistent);
 PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, const php_random_algo *algo);
 PHPAPI void php_random_engine_common_free_object(zend_object *object);
@@ -169,7 +169,7 @@ static inline php_random_algo_with_state php_random_default_engine(void)
 }
 
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len);
-PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest);
+PHPAPI bool php_random_hex2bin_le(const zend_string *hexstr, void *dest);
 
 PHPAPI void php_random_mt19937_seed32(php_random_status_state_mt19937 *state, uint32_t seed);
 PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *state);

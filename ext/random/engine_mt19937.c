@@ -171,9 +171,9 @@ static zend_long range(void *state, zend_long min, zend_long max)
 	}, min, max);
 }
 
-static bool serialize(void *state, HashTable *data)
+static bool serialize(const void *state, HashTable *data)
 {
-	php_random_status_state_mt19937 *s = state;
+	const php_random_status_state_mt19937 *s = state;
 	zval t;
 
 	for (uint32_t i = 0; i < N; i++) {
@@ -188,7 +188,7 @@ static bool serialize(void *state, HashTable *data)
 	return true;
 }
 
-static bool unserialize(void *state, HashTable *data)
+static bool unserialize(void *state, const HashTable *data)
 {
 	php_random_status_state_mt19937 *s = state;
 	zval *t;
