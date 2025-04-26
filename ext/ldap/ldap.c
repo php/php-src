@@ -541,15 +541,14 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 					rc = -1;
 					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
 				} else {
-					int num_attribs, i;
 					zval* attr;
 
-					num_attribs = zend_hash_num_elements(Z_ARRVAL_P(tmp));
+					uint32_t num_attribs = zend_hash_num_elements(Z_ARRVAL_P(tmp));
 					ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
 					tmpstrings1 = safe_emalloc(num_attribs, sizeof(zend_string*), 0);
 					num_tmpstrings1 = 0;
 
-					for (i = 0; i<num_attribs; i++) {
+					for (uint32_t i = 0; i < num_attribs; i++) {
 						if ((attr = zend_hash_index_find(Z_ARRVAL_P(tmp), i)) == NULL) {
 							rc = -1;
 							php_error_docref(NULL, E_WARNING, "Failed to encode attribute list");
@@ -582,17 +581,16 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 				}
 			}
 		} else if (zend_string_equals_literal(control_oid, LDAP_CONTROL_SORTREQUEST)) {
-			int num_keys, i;
 			zval *sortkey, *tmp;
 
-			num_keys = zend_hash_num_elements(Z_ARRVAL_P(val));
+			uint32_t num_keys = zend_hash_num_elements(Z_ARRVAL_P(val));
 			sort_keys = safe_emalloc((num_keys+1), sizeof(LDAPSortKey*), 0);
 			tmpstrings1 = safe_emalloc(num_keys, sizeof(zend_string*), 0);
 			tmpstrings2 = safe_emalloc(num_keys, sizeof(zend_string*), 0);
 			num_tmpstrings1 = 0;
 			num_tmpstrings2 = 0;
 
-			for (i = 0; i<num_keys; i++) {
+			for (uint32_t i = 0; i < num_keys; i++) {
 				if ((sortkey = zend_hash_index_find(Z_ARRVAL_P(val), i)) == NULL) {
 					rc = -1;
 					php_error_docref(NULL, E_WARNING, "Failed to encode sort keys list");
