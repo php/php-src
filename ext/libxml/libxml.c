@@ -53,10 +53,6 @@ static bool php_libxml_initialized = false;
 static bool php_libxml_per_request_initialization = true;
 static xmlExternalEntityLoader php_libxml_default_entity_loader;
 
-typedef struct php_libxml_func_handler {
-	php_libxml_export_node export_func;
-} php_libxml_func_handler;
-
 static HashTable php_libxml_exports;
 
 static ZEND_DECLARE_MODULE_GLOBALS(libxml)
@@ -901,11 +897,6 @@ PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
 	va_end(args);
 }
 
-static void php_libxml_exports_dtor(zval *zv)
-{
-	free(Z_PTR_P(zv));
-}
-
 PHP_LIBXML_API void php_libxml_initialize(void)
 {
 	if (!php_libxml_initialized) {
@@ -917,7 +908,7 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 		php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
 		xmlSetExternalEntityLoader(php_libxml_pre_ext_ent_loader);
 
-		zend_hash_init(&php_libxml_exports, 0, NULL, php_libxml_exports_dtor, 1);
+		zend_hash_init(&php_libxml_exports, 0, NULL, NULL, 1);
 
 		php_libxml_initialized = true;
 	}
@@ -1273,13 +1264,10 @@ bool php_libxml_xmlCheckUTF8(const unsigned char *s)
 
 zval *php_libxml_register_export(const zend_class_entry *ce, php_libxml_export_node export_function)
 {
-	php_libxml_func_handler export_hnd;
-
 	/* Initialize in case this module hasn't been loaded yet */
 	php_libxml_initialize();
-	export_hnd.export_func = export_function;
 
-	return zend_hash_add_mem(&php_libxml_exports, ce->name, &export_hnd, sizeof(export_hnd));
+	return zend_hash_add_ptr(&php_libxml_exports, ce->name, export_function);
 }
 
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object)
@@ -1291,9 +1279,9 @@ PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object)
 		while (ce->parent != NULL) {
 			ce = ce->parent;
 		}
-		const php_libxml_func_handler *export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name);
-		if (export_hnd) {
-			node = export_hnd->export_func(object);
+		const php_libxml_export_node export_function = zend_hash_find_ptr(&php_libxml_exports, ce->name);
+		if (export_function) {
+			node = export_function(object);
 		}
 	}
 	return node;
