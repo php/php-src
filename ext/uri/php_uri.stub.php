@@ -149,13 +149,13 @@ namespace Uri\WhatWg {
 
         public function withScheme(string $scheme): static {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getRawUsername */
-        public function getRawUsername(): ?string {}
+        /** @implementation-alias Uri\Rfc3986\Uri::getUsername */
+        public function getUsername(): ?string {}
 
-        public function withUsername(?string $user): static {}
+        public function withUsername(?string $username): static {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getRawPassword */
-        public function getRawPassword(): ?string {}
+        /** @implementation-alias Uri\Rfc3986\Uri::getPassword */
+        public function getPassword(): ?string {}
 
         public function withPassword(?string $password): static {}
 
@@ -171,20 +171,20 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::withPort */
         public function withPort(?int $port): static {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getRawPath */
-        public function getRawPath(): string {}
+        /** @implementation-alias Uri\Rfc3986\Uri::getPath */
+        public function getPath(): string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withPath */
         public function withPath(string $path): static {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getRawQuery */
-        public function getRawQuery(): ?string {}
+        /** @implementation-alias Uri\Rfc3986\Uri::getQuery */
+        public function getQuery(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withQuery */
         public function withQuery(?string $query): static {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::getRawFragment */
-        public function getRawFragment(): ?string {}
+        /** @implementation-alias Uri\Rfc3986\Uri::getFragment */
+        public function getFragment(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withFragment */
         public function withFragment(?string $fragment): static {}

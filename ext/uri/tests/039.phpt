@@ -26,17 +26,17 @@ function callRfc3986Getters($uri)
     var_dump($uri->getRawFragment());
 }
 
-function callWhatWgGetters($uri)
+function callWhatWgGetters($url)
 {
-    var_dump($uri->getScheme());
-    var_dump($uri->getRawUsername());
-    var_dump($uri->getRawPassword());
-    var_dump($uri->getAsciiHost());
-    var_dump($uri->getUnicodeHost());
-    var_dump($uri->getPort());
-    var_dump($uri->getRawPath());
-    var_dump($uri->getRawQuery());
-    var_dump($uri->getRawFragment());
+    var_dump($url->getScheme());
+    var_dump($url->getUsername());
+    var_dump($url->getPassword());
+    var_dump($url->getAsciiHost());
+    var_dump($url->getUnicodeHost());
+    var_dump($url->getPort());
+    var_dump($url->getPath());
+    var_dump($url->getQuery());
+    var_dump($url->getFragment());
 }
 
 $uri = Uri\Rfc3986\Uri::parse("http://%61pple:p%61ss@ex%61mple.com/foob%61r?%61bc=%61bc#%61bc");
