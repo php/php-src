@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - Intl:
   . datefmt_parse/datefmt_localtime references type system fixes. (nielsdos)
 
+- Opcache:
+  . Fixed bug GH-18417 (Windows SHM reattachment fails when increasing
+    memory_consumption or jit_buffer_size). (nielsdos)
+
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
     (nielsdos)
