@@ -254,41 +254,45 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 }
 /* }}} */
 
+/* Same as OBJ_PROP_NUM(), but checks the offset is correct when Zend is built in debug mode. */
+static zend_always_inline zval *zend_obj_prop_num_checked(zend_object *object, uint32_t prop_num, zend_string *str)
+{
+#if ZEND_DEBUG
+	zend_class_entry *old_scope = EG(fake_scope);
+	EG(fake_scope) = i_get_exception_base(object);
+	const zend_property_info *prop_info = zend_get_property_info(object->ce, str, true);
+	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == prop_num);
+	EG(fake_scope) = old_scope;
+#else
+	ZEND_IGNORE_VALUE(str);
+#endif
+	return OBJ_PROP_NUM(object, prop_num);
+}
+
 static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* {{{ */
 {
-	zval tmp;
-	zval trace;
-	zend_class_entry *base_ce;
 	zend_string *filename;
 
 	zend_object *object = zend_objects_new(class_type);
 	object_properties_init(object, class_type);
+	zval *trace = zend_obj_prop_num_checked(object, 5, ZSTR_KNOWN(ZEND_STR_TRACE));
 
 	if (EG(current_execute_data)) {
-		zend_fetch_debug_backtrace(&trace,
+		zend_fetch_debug_backtrace(trace,
 			0,
 			EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
 	} else {
-		array_init(&trace);
+		ZVAL_EMPTY_ARRAY(trace);
 	}
-	Z_SET_REFCOUNT(trace, 0);
-
-	base_ce = i_get_exception_base(object);
 
 	if (EXPECTED((class_type != zend_ce_parse_error && class_type != zend_ce_compile_error)
 			|| !(filename = zend_get_compiled_filename()))) {
-		ZVAL_STRING(&tmp, zend_get_executed_filename());
-		zend_update_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
-		zval_ptr_dtor(&tmp);
-		ZVAL_LONG(&tmp, zend_get_executed_lineno());
-		zend_update_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		ZVAL_STRING(zend_obj_prop_num_checked(object, 3, ZSTR_KNOWN(ZEND_STR_FILE)), zend_get_executed_filename());
+		ZVAL_LONG(zend_obj_prop_num_checked(object, 4, ZSTR_KNOWN(ZEND_STR_LINE)), zend_get_executed_lineno());
 	} else {
-		ZVAL_STR(&tmp, filename);
-		zend_update_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
-		ZVAL_LONG(&tmp, zend_get_compiled_lineno());
-		zend_update_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		ZVAL_STR_COPY(zend_obj_prop_num_checked(object, 3, ZSTR_KNOWN(ZEND_STR_FILE)), filename);
+		ZVAL_LONG(zend_obj_prop_num_checked(object, 4, ZSTR_KNOWN(ZEND_STR_LINE)), zend_get_compiled_lineno());
 	}
-	zend_update_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_TRACE), &trace);
 
 	return object;
 }
@@ -307,28 +311,30 @@ ZEND_METHOD(Exception, __construct)
 {
 	zend_string *message = NULL;
 	zend_long   code = 0;
-	zval  tmp, *object, *previous = NULL;
-	zend_class_entry *base_ce;
+	zval  *object, *previous = NULL;
 
 	object = ZEND_THIS;
-	base_ce = i_get_exception_base(Z_OBJ_P(object));
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|SlO!", &message, &code, &previous, zend_ce_throwable) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if (message) {
-		ZVAL_STR(&tmp, message);
-		zend_update_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 0, ZSTR_KNOWN(ZEND_STR_MESSAGE));
+		zval_ptr_dtor(tmp);
+		ZVAL_STR_COPY(tmp, message);
 	}
 
 	if (code) {
-		ZVAL_LONG(&tmp, code);
-		zend_update_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 2, ZSTR_KNOWN(ZEND_STR_CODE));
+		zval_ptr_dtor(tmp);
+		ZVAL_LONG(tmp, code);
 	}
 
 	if (previous) {
-		zend_update_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 6, ZSTR_KNOWN(ZEND_STR_PREVIOUS));
+		zval_ptr_dtor(tmp);
+		ZVAL_COPY(tmp, previous);
 	}
 }
 /* }}} */
@@ -358,7 +364,7 @@ ZEND_METHOD(ErrorException, __construct)
 	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
 	bool lineno_is_null = 1;
-	zval   tmp, *object, *previous = NULL;
+	zval   *object, *previous = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|SllS!l!O!", &message, &code, &severity, &filename, &lineno, &lineno_is_null, &previous, zend_ce_throwable) == FAILURE) {
 		RETURN_THROWS();
@@ -367,35 +373,41 @@ ZEND_METHOD(ErrorException, __construct)
 	object = ZEND_THIS;
 
 	if (message) {
-		ZVAL_STR_COPY(&tmp, message);
-		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
-		zval_ptr_dtor(&tmp);
+		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 0, ZSTR_KNOWN(ZEND_STR_MESSAGE));
+		zval_ptr_dtor(tmp);
+		ZVAL_STR_COPY(tmp, message);
 	}
 
 	if (code) {
-		ZVAL_LONG(&tmp, code);
-		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 2, ZSTR_KNOWN(ZEND_STR_CODE));
+		zval_ptr_dtor(tmp);
+		ZVAL_LONG(tmp, code);
 	}
 
 	if (previous) {
-		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 6, ZSTR_KNOWN(ZEND_STR_PREVIOUS));
+		zval_ptr_dtor(tmp);
+		ZVAL_COPY(tmp, previous);
 	}
 
-	ZVAL_LONG(&tmp, severity);
-	zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	{
+		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 7, ZSTR_KNOWN(ZEND_STR_SEVERITY));
+		zval_ptr_dtor(tmp);
+		ZVAL_LONG(tmp, severity);
+	}
 
 	if (filename) {
-		ZVAL_STR_COPY(&tmp, filename);
-		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
-		zval_ptr_dtor(&tmp);
+		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 3, ZSTR_KNOWN(ZEND_STR_FILE));
+		zval_ptr_dtor(tmp);
+		ZVAL_STR_COPY(tmp, filename);
 	}
 
+	zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 4, ZSTR_KNOWN(ZEND_STR_LINE));
+	zval_ptr_dtor(tmp);
 	if (!lineno_is_null) {
-		ZVAL_LONG(&tmp, lineno);
-		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		ZVAL_LONG(tmp, lineno);
 	} else if (filename) {
-		ZVAL_LONG(&tmp, 0);
-		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		ZVAL_LONG(tmp, 0);
 	}
 }
 /* }}} */
