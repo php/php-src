@@ -108,6 +108,7 @@ static bc_num bc_standard_raise(
 	}
 
 	size_t base_arr_size = BC_ARR_SIZE_FROM_LEN(base_len);
+	/* Since it is guaranteed that base_len * exponent does not overflow, there is no possibility of overflow here. */
 	size_t max_power_arr_size =	base_arr_size * exponent;
 
 	/* The allocated memory area is reused on a rotational basis, so the same size is required. */
@@ -169,7 +170,7 @@ static bc_num bc_standard_raise(
 /* Raise "base" to the "exponent" power.  The result is placed in RESULT.
    Maximum exponent is LONG_MAX.  If a "exponent" is not an integer,
    only the integer part is used.  */
-bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
+bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 	size_t rscale;
 	bool is_neg;
 
@@ -177,7 +178,7 @@ bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 	if (exponent == 0) {
 		bc_free_num (result);
 		*result = bc_copy_num(BCG(_one_));
-		return true;
+		return BC_RAISE_STATUS_OK;
 	}
 
 	/* Other initializations. */
@@ -193,13 +194,32 @@ bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 	if (bc_is_zero(base)) {
 		bc_free_num(result);
 		*result = bc_copy_num(BCG(_zero_));
-		/* If the exponent is negative, it divides by 0, so it is false. */
-		return !is_neg;
+		/* If the exponent is negative, it divides by 0 */
+		return is_neg ? BC_RAISE_STATUS_DIVIDE_BY_ZERO : BC_RAISE_STATUS_OK;
+	}
+
+	/* check overflow */
+	if (UNEXPECTED(base->n_len > SIZE_T_MAX / exponent)) {
+		bc_free_num (result);
+		*result = bc_copy_num(BCG(_one_));
+		return BC_RAISE_STATUS_LEN_IS_OVERFLOW;
+	}
+	if (UNEXPECTED(base->n_scale > SIZE_T_MAX / exponent)) {
+		bc_free_num (result);
+		*result = bc_copy_num(BCG(_one_));
+		return BC_RAISE_STATUS_SCALE_IS_OVERFLOW;
 	}
 
 	size_t base_len = base->n_len + base->n_scale;
 	size_t power_len = base->n_len * exponent;
 	size_t power_scale = base->n_scale * exponent;
+
+	/* check overflow */
+	if (UNEXPECTED(power_len > SIZE_T_MAX - power_scale)) {
+		bc_free_num (result);
+		*result = bc_copy_num(BCG(_one_));
+		return BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW;
+	}
 	size_t power_full_len = power_len + power_scale;
 
 	sign power_sign;
@@ -230,7 +250,7 @@ bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 	if (is_neg) {
 		if (bc_divide(BCG(_one_), power, result, rscale) == false) {
 			bc_free_num (&power);
-			return false;
+			return BC_RAISE_STATUS_DIVIDE_BY_ZERO;
 		}
 		bc_free_num (&power);
 	} else {
@@ -238,7 +258,7 @@ bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 		*result = power;
 		(*result)->n_scale = MIN(scale, (*result)->n_scale);
 	}
-	return true;
+	return BC_RAISE_STATUS_OK;
 }
 
 /* This is used internally by BCMath */

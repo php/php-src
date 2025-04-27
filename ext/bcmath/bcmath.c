@@ -615,11 +615,19 @@ PHP_FUNCTION(bcpow)
 		goto cleanup;
 	}
 
-	if (!bc_raise(first, exponent, &result, scale)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
-		goto cleanup;
+	switch (bc_raise(first, exponent, &result, scale)) {
+		case BC_RAISE_STATUS_OK:
+			break;
+		case BC_RAISE_STATUS_DIVIDE_BY_ZERO:
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+			goto cleanup;
+		case BC_RAISE_STATUS_LEN_IS_OVERFLOW:
+		case BC_RAISE_STATUS_SCALE_IS_OVERFLOW:
+		case BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW:
+			zend_argument_value_error(2, "exponent is too large, the number of digits overflowed");
+			goto cleanup;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
-
 	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
@@ -1144,9 +1152,22 @@ static zend_result bcmath_number_pow_internal(
 		}
 		return FAILURE;
 	}
-	if (!bc_raise(n1, exponent, ret, *scale)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
-		return FAILURE;
+	switch (bc_raise(n1, exponent, ret, *scale)) {
+		case BC_RAISE_STATUS_OK:
+			break;
+		case BC_RAISE_STATUS_DIVIDE_BY_ZERO:
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+			return FAILURE;
+		case BC_RAISE_STATUS_LEN_IS_OVERFLOW:
+		case BC_RAISE_STATUS_SCALE_IS_OVERFLOW:
+		case BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW:
+			if (is_op) {
+				zend_value_error("exponent is too large, the number of digits overflowed");
+			} else {
+				zend_argument_value_error(1, "exponent is too large, the number of digits overflowed");
+			}
+			return FAILURE;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	bc_rm_trailing_zeros(*ret);
 	if (scale_expand) {

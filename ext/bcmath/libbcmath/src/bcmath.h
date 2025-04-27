@@ -74,6 +74,10 @@ typedef struct bc_struct {
 #define MAX(a, b)      ((a)>(b)?(a):(b))
 #define MIN(a, b)      ((a)>(b)?(b):(a))
 
+#ifndef SIZE_T_MAX
+#define SIZE_T_MAX (~((size_t) 0))
+#endif
+
 /* Function Prototypes */
 
 void bc_init_numbers(void);
@@ -158,6 +162,14 @@ bc_num bc_floor_or_ceil(bc_num num, bool is_floor);
 size_t bc_round(bc_num num, zend_long places, zend_long mode, bc_num *result);
 
 typedef enum {
+	BC_RAISE_STATUS_OK,
+	BC_RAISE_STATUS_LEN_IS_OVERFLOW,
+	BC_RAISE_STATUS_SCALE_IS_OVERFLOW,
+	BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW,
+	BC_RAISE_STATUS_DIVIDE_BY_ZERO,
+} bc_raise_status;
+
+typedef enum {
 	OK,
 	BASE_HAS_FRACTIONAL,
 	EXPO_HAS_FRACTIONAL,
@@ -168,7 +180,7 @@ typedef enum {
 
 raise_mod_status bc_raisemod(bc_num base, bc_num exponent, bc_num mod, bc_num *result, size_t scale);
 
-bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale);
+bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scale);
 
 void bc_raise_bc_exponent(bc_num base, bc_num exponent, bc_num *resul, size_t scale);
 
