@@ -520,6 +520,7 @@ PHP 8.5 UPGRADE NOTES
   . Remove OPcodes for identity comparisons against booleans, particularly
     for the match(true) pattern.
   . Add OPcode specialization for `=== []` and `!== []` comparisons.
+  . Creating exception objects is now much faster.
 
 - ReflectionProperty:
   . Improved performance of the following methods: getValue(), getRawValue(),
