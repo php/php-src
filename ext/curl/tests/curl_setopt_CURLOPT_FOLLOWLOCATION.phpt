@@ -6,7 +6,6 @@ curl
 <?php
 include 'skipif-nocaddy.inc';
 if (curl_version()['version_number'] < 0x080d00) die('skip requires curl >= 8.13.0');
-if (ini_get('open_basedir')) exit("skip open_basedir is set");
 ?>
 --FILE--
 <?php
