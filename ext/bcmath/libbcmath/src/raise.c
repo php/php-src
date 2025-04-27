@@ -102,7 +102,8 @@ static bc_num bc_standard_raise(
 	const char *base_ptr, const char *base_end, long exponent, size_t base_len, size_t power_scale)
 {
 	/* Remove the leading zeros as they will be filled in later. */
-	while (*base_ptr++ == 0) {
+	while (*base_ptr == 0) {
+		base_ptr++;
 		base_len--;
 	}
 
@@ -110,7 +111,7 @@ static bc_num bc_standard_raise(
 	size_t max_power_arr_size =	base_arr_size * exponent;
 
 	/* The allocated memory area is reused on a rotational basis, so the same size is required. */
-	BC_VECTOR *buf = safe_emalloc(max_power_arr_size * 3, sizeof(BC_VECTOR), 0);
+	BC_VECTOR *buf = safe_emalloc(max_power_arr_size, sizeof(BC_VECTOR) * 3, 0);
 	BC_VECTOR *base_vector = buf;
 	BC_VECTOR *power_vector = base_vector + max_power_arr_size;
 	BC_VECTOR *tmp_result_vector = power_vector + max_power_arr_size;
@@ -155,14 +156,8 @@ static bc_num bc_standard_raise(
 	char *pend = pptr + power_full_len - 1;
 
 	/* Pad with leading zeros if necessary. */
-	while (power_leading_zeros > sizeof(uint32_t)) {
-		bc_write_bcd_representation(0, pptr);
-		pptr += sizeof(uint32_t);
-		power_leading_zeros -= sizeof(uint32_t);
-	}
-	for (size_t i = 0; i < power_leading_zeros; i++) {
-		*pptr++ = 0;
-	}
+	memset(pptr, 0, power_leading_zeros);
+	pptr += power_leading_zeros;
 
 	bc_convert_vector_to_char(power_vector, pptr, pend, power_arr_size);
 
