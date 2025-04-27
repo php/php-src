@@ -159,6 +159,13 @@ PHP 8.5 UPGRADE NOTES
     CURLOPT_INFILESIZE only accepts a 32-bit signed integer as the file
     size (2.0 GiB) even on 64-bit systems. CURLOPT_INFILESIZE_LARGE
     accepts the largest integer value the system can handle.
+  . Added CURLFOLLOW_OBEYCODE, CURLFOLLOW_FIRSTONLY and CURLFOLLOW_ALL values for
+    CURLOPT_FOLLOWLOCATION curl_easy_setopt option.
+    CURLFOLLOW_OBEYCODE to follow more strictly in regard of redirect
+    if they are allowed. CURLFOLLOW_FIRSTONLY to follow only the
+    first redirect thus if there any follow up redirect, it won't go
+    any further. CURLFOLLOW_ALL is equivalent to set CURLOPT_FOLLOWLOCATION
+    to true.
 
 - DOM:
   . Added Dom\Element::$outerHTML.
@@ -361,6 +368,11 @@ PHP 8.5 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Curl:
+  . curl_easy_setopt with CURLOPT_FOLLOWLOCATION option's value no longer
+    is treated as boolean but integer to handle CURLFOLLOW_OBEYCODE and
+    CURLFOLLOW_FIRSTONLY.
+
 - Fileinfo:
   . Upgraded to file 5.46.
   . The return type of finfo_close() has been changed to true, rather
@@ -387,6 +399,9 @@ PHP 8.5 UPGRADE NOTES
   . CURLINFO_HTTPAUTH_USED.
   . CURLINFO_PROXYAUTH_USED.
   . CURLOPT_INFILESIZE_LARGE.
+  . CURLFOLLOW_ALL.
+  . CURLFOLLOW_OBEYCODE.
+  . CURLFOLLOW_FIRSTONLY.
 
 - Intl:
   . DECIMAL_COMPACT_SHORT.

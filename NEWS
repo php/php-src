@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed GH-17956 - development server 404 page does not adapt to mobiles.
     (pascalchevrel)
 
+- CURL:
+  . Added CURLFOLLOW_ALL, CURLFOLLOW_OBEYCODE and CURLFOLLOW_FIRSTONLY
+    values for CURLOPT_FOLLOLOCATION curl_easy_setopt option. (David Carlier)
+
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
   . Fixed method calls for PHP objects wrapped in variant. (cmb)

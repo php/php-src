@@ -497,6 +497,24 @@ const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
  */
 const CURLOPT_DEBUGFUNCTION = UNKNOWN;
 
+#if LIBCURL_VERSION_NUM >= 0x080d00 /* Available since 8.13.0 */
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_ALL
+ */
+const CURLFOLLOW_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_OBEYCODE
+ */
+const CURLFOLLOW_OBEYCODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_FIRSTONLY
+ */
+const CURLFOLLOW_FIRSTONLY = UNKNOWN;
+#endif
+
 /**
  * @var int
  * @cvalue CURLINFO_TEXT
