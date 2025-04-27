@@ -59,9 +59,13 @@ class Point
  */
 class Curve
 {
-    public function __construct(private readonly \GMP $p, private readonly \GMP $a, private readonly \GMP $b, private readonly Point $G, private readonly \GMP $n)
-    {
-    }
+    public function __construct(
+        private readonly \GMP $p,
+        private readonly \GMP $a,
+        private readonly \GMP $b,
+        private readonly Point $G,
+        private readonly \GMP $n
+    ) {}
 
     public function getP(): \GMP
     {
