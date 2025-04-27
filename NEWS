@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     inaccurate sunrise and sunset times, but other calculated times are
     correct) (JiriJozif).
 
+- Intl:
+  . datefmt_parse/datefmt_localtime references type system fixes. (nielsdos)
+
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
     (nielsdos)
@@ -18,6 +21,8 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed bug GH-18431 (Registering ZIP progress callback twice doesn't work).
     (nielsdos)
+  . Fixed bug GH-18438 (Handling of empty data and errors in
+    ZipArchive::addPattern). (nielsdos)
 
 24 Apr 2025, PHP 8.4.7
 
