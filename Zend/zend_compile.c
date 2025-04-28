@@ -7384,6 +7384,12 @@ static zend_type zend_compile_typename_ex(
 	if ((type_mask & MAY_BE_NULL) && is_marked_nullable) {
 		zend_error_noreturn(E_COMPILE_ERROR, "null cannot be marked as nullable");
 	}
+	if (ZEND_TYPE_IS_ASSOCIATED(type) && is_marked_nullable) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Associated type cannot be part of a union type");
+	}
+	if (ZEND_TYPE_IS_ASSOCIATED(type) && force_allow_null) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Associated type cannot be part of a union type (implicitly nullable due to default null value)");
+	}
 
 	if (force_allow_null && !is_marked_nullable && !(type_mask & MAY_BE_NULL)) {
 		*forced_allow_null = true;
