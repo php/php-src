@@ -176,13 +176,13 @@ static void bzero_aligned(void *mem, size_t size)
 #elif defined(ZEND_HAVE_VECTOR_128)
 	char *p = (char*)mem;
 	char *end = p + size;
-	zend_vec_8x16_t xmm0 = zend_vec_setzero_8x16();
+	__m128i xmm0 = _mm_setzero_si128();
 
 	while (p < end) {
-		zend_vec_store_8x16(p, xmm0);
-		zend_vec_store_8x16((p+16), xmm0);
-		zend_vec_store_8x16((p+32), xmm0);
-		zend_vec_store_8x16((p+48), xmm0);
+		_mm_store_si128((__m128i*)p, xmm0);
+		_mm_store_si128((__m128i*)(p+16), xmm0);
+		_mm_store_si128((__m128i*)(p+32), xmm0);
+		_mm_store_si128((__m128i*)(p+48), xmm0);
 		p += 64;
 	}
 #else

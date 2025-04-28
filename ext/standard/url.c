@@ -459,51 +459,51 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 
 #ifdef ZEND_HAVE_VECTOR_128
 	while (from + 16 < end) {
-		zend_vec_8x16_t mask;
+		__m128i mask;
 		uint32_t bits;
-		const zend_vec_8x16_t _A = zend_vec_set_8x16('A' - 1);
-		const zend_vec_8x16_t Z_ = zend_vec_set_8x16('Z' + 1);
-		const zend_vec_8x16_t _a = zend_vec_set_8x16('a' - 1);
-		const zend_vec_8x16_t z_ = zend_vec_set_8x16('z' + 1);
-		const zend_vec_8x16_t _zero = zend_vec_set_8x16('0' - 1);
-		const zend_vec_8x16_t nine_ = zend_vec_set_8x16('9' + 1);
-		const zend_vec_8x16_t dot = zend_vec_set_8x16('.');
-		const zend_vec_8x16_t minus = zend_vec_set_8x16('-');
-		const zend_vec_8x16_t under = zend_vec_set_8x16('_');
+		const __m128i _A = _mm_set1_epi8('A' - 1);
+		const __m128i Z_ = _mm_set1_epi8('Z' + 1);
+		const __m128i _a = _mm_set1_epi8('a' - 1);
+		const __m128i z_ = _mm_set1_epi8('z' + 1);
+		const __m128i _zero = _mm_set1_epi8('0' - 1);
+		const __m128i nine_ = _mm_set1_epi8('9' + 1);
+		const __m128i dot = _mm_set1_epi8('.');
+		const __m128i minus = _mm_set1_epi8('-');
+		const __m128i under = _mm_set1_epi8('_');
 
-		zend_vec_8x16_t in = zend_vec_loadu_8x16(from);
+		__m128i in = _mm_loadu_si128((__m128i *)from);
 
-		zend_vec_8x16_t gt = zend_vec_cmpgt_8x16(in, _A);
-		zend_vec_8x16_t lt = zend_vec_cmplt_8x16(in, Z_);
-		mask = zend_vec_and_8x16(lt, gt); /* upper */
-		gt = zend_vec_cmpgt_8x16(in, _a);
-		lt = zend_vec_cmplt_8x16(in, z_);
-		mask = zend_vec_or_8x16(mask, zend_vec_and_8x16(lt, gt)); /* lower */
-		gt = zend_vec_cmpgt_8x16(in, _zero);
-		lt = zend_vec_cmplt_8x16(in, nine_);
-		mask = zend_vec_or_8x16(mask, zend_vec_and_8x16(lt, gt)); /* number */
-		mask = zend_vec_or_8x16(mask, zend_vec_cmpeq_8x16(in, dot));
-		mask = zend_vec_or_8x16(mask, zend_vec_cmpeq_8x16(in, minus));
-		mask = zend_vec_or_8x16(mask, zend_vec_cmpeq_8x16(in, under));
+		__m128i gt = _mm_cmpgt_epi8(in, _A);
+		__m128i lt = _mm_cmplt_epi8(in, Z_);
+		mask = _mm_and_si128(lt, gt); /* upper */
+		gt = _mm_cmpgt_epi8(in, _a);
+		lt = _mm_cmplt_epi8(in, z_);
+		mask = _mm_or_si128(mask, _mm_and_si128(lt, gt)); /* lower */
+		gt = _mm_cmpgt_epi8(in, _zero);
+		lt = _mm_cmplt_epi8(in, nine_);
+		mask = _mm_or_si128(mask, _mm_and_si128(lt, gt)); /* number */
+		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, dot));
+		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, minus));
+		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, under));
 
 		if (!raw) {
-			const zend_vec_8x16_t blank = zend_vec_set_8x16(' ');
-			zend_vec_8x16_t eq = zend_vec_cmpeq_8x16(in, blank);
-			if (zend_vec_movemask_8x16(eq)) {
-				in = zend_vec_add_8x16(in, zend_vec_and_8x16(eq, zend_vec_set_8x16('+' - ' ')));
-				mask = zend_vec_or_8x16(mask, eq);
+			const __m128i blank = _mm_set1_epi8(' ');
+			__m128i eq = _mm_cmpeq_epi8(in, blank);
+			if (_mm_movemask_epi8(eq)) {
+				in = _mm_add_epi8(in, _mm_and_si128(eq, _mm_set1_epi8('+' - ' ')));
+				mask = _mm_or_si128(mask, eq);
 			}
 		}
 		if (raw) {
-			const zend_vec_8x16_t wavy = zend_vec_set_8x16('~');
-			mask = zend_vec_or_8x16(mask, zend_vec_cmpeq_8x16(in, wavy));
+			const __m128i wavy = _mm_set1_epi8('~');
+			mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, wavy));
 		}
-		if (((bits = zend_vec_movemask_8x16(mask)) & 0xffff) == 0xffff) {
-			zend_vec_storeu_8x16(to, in);
+		if (((bits = _mm_movemask_epi8(mask)) & 0xffff) == 0xffff) {
+			_mm_storeu_si128((__m128i*)to, in);
 			to += 16;
 		} else {
 			unsigned char xmm[16];
-			zend_vec_storeu_8x16(xmm, in);
+			_mm_storeu_si128((__m128i*)xmm, in);
 			for (size_t i = 0; i < sizeof(xmm); i++) {
 				if ((bits & (0x1 << i))) {
 					*to++ = xmm[i];
