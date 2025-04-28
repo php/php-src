@@ -267,7 +267,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30,31)                            |     |     |     */
+/* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -333,7 +333,10 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 30)                            |     |     |     */
+/* Structs are value types                                |     |     |     */
+#define ZEND_ACC_STRUCT              (1 << 30) /*  X      |     |     |     */
+/*                                                        |     |     |     */
+/* Function Flags (unused: none)                          |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -397,6 +400,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* has #[\NoDiscard] attribute                            |     |     |     */
 #define ZEND_ACC_NODISCARD               (1 << 29) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* Mutating function of a struct                          |     |     |     */
+#define ZEND_ACC_MUTATING                (1 << 30) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
@@ -1106,6 +1112,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_THROW_IS_EXPR 1u
 
 #define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS 1
+
+#define ZEND_INIT_METHOD_CALL_MUTATING ((uint32_t)1 << 31)
 
 /* The send mode, the is_variadic, the is_promoted, and the is_tentative flags are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT

@@ -78,6 +78,15 @@ static void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 	zend_hash_destroy(&intern->storage);
 } /* }}} */
 
+static zend_result spl_check_struct(zend_object *obj)
+{
+	if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_STRUCT)) {
+		zend_type_error("Instance of struct %s may not be used as key", ZSTR_VAL(obj->ce->name));
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static zend_result spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage *intern, zend_object *obj) {
 	if (UNEXPECTED(intern->fptr_get_hash)) {
 		zval param;
@@ -431,12 +440,25 @@ PHP_METHOD(SplObjectStorage, attach)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(inf)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
+		RETURN_THROWS();
+	}
+
 	spl_object_storage_attach(intern, obj, inf);
 } /* }}} */
 
 // todo: make spl_object_storage_has_dimension return bool as well
 static int spl_object_storage_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
+	if (EXPECTED(offset)) {
+		ZVAL_DEREF(offset);
+		if (Z_TYPE_P(offset) == IS_OBJECT
+		 && UNEXPECTED(spl_check_struct(Z_OBJ_P(offset)) == FAILURE)) {
+			return 0;
+		}
+	}
+
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 	if (UNEXPECTED(offset == NULL || Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_READ_DIMENSION))) {
 		/* Can't optimize empty()/isset() check if getHash, offsetExists, or offsetGet is overridden */
@@ -456,6 +478,14 @@ static int spl_object_storage_has_dimension(zend_object *object, zval *offset, i
 
 static zval *spl_object_storage_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
+	if (EXPECTED(offset)) {
+		ZVAL_DEREF(offset);
+		if (Z_TYPE_P(offset) == IS_OBJECT
+		 && UNEXPECTED(spl_check_struct(Z_OBJ_P(offset)) == FAILURE)) {
+			return NULL;
+		}
+	}
+
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 	if (UNEXPECTED(offset == NULL || Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_READ_DIMENSION))) {
 		/* Can't optimize it if getHash, offsetExists, or offsetGet is overridden */
@@ -479,6 +509,14 @@ static zval *spl_object_storage_read_dimension(zend_object *object, zval *offset
 
 static void spl_object_storage_write_dimension(zend_object *object, zval *offset, zval *inf)
 {
+	if (EXPECTED(offset)) {
+		ZVAL_DEREF(offset);
+		if (Z_TYPE_P(offset) == IS_OBJECT
+		 && UNEXPECTED(spl_check_struct(Z_OBJ_P(offset)) == FAILURE)) {
+			return;
+		}
+	}
+
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 	if (UNEXPECTED(offset == NULL || Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_WRITE_DIMENSION))) {
 		zend_std_write_dimension(object, offset, inf);
@@ -489,6 +527,14 @@ static void spl_object_storage_write_dimension(zend_object *object, zval *offset
 
 static void spl_object_storage_unset_dimension(zend_object *object, zval *offset)
 {
+	if (EXPECTED(offset)) {
+		ZVAL_DEREF(offset);
+		if (Z_TYPE_P(offset) == IS_OBJECT
+		 && UNEXPECTED(spl_check_struct(Z_OBJ_P(offset)) == FAILURE)) {
+			return;
+		}
+	}
+
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_UNSET_DIMENSION))) {
 		zend_std_unset_dimension(object, offset);
@@ -506,6 +552,11 @@ PHP_METHOD(SplObjectStorage, detach)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
+		RETURN_THROWS();
+	}
+
 	spl_object_storage_detach(intern, obj);
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
@@ -520,6 +571,10 @@ PHP_METHOD(SplObjectStorage, getHash)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
+		RETURN_THROWS();
+	}
 
 	RETURN_NEW_STR(php_spl_object_hash(obj));
 
@@ -536,6 +591,10 @@ PHP_METHOD(SplObjectStorage, offsetGet)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
+		RETURN_THROWS();
+	}
 
 	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
 		RETURN_NULL();
@@ -632,6 +691,11 @@ PHP_METHOD(SplObjectStorage, contains)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
+		RETURN_THROWS();
+	}
+
 	RETURN_BOOL(spl_object_storage_contains(intern, obj));
 } /* }}} */
 
