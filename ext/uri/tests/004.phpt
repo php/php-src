@@ -7,51 +7,19 @@ uri
 
 try {
     new Uri\Rfc3986\Uri("");
-} catch (ValueError $e) {
+} catch (Uri\InvalidUriException $e) {
     echo $e->getMessage() . "\n";
 }
 
-try {
-    Uri\Rfc3986\Uri::parse("");
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
+var_dump(Uri\Rfc3986\Uri::parse(""));
 
 try {
     new Uri\WhatWg\Url("");
-} catch (ValueError $e) {
+} catch (Uri\WhatWg\InvalidUrlException $e) {
     echo $e->getMessage() . "\n";
 }
 
-try {
-    Uri\WhatWg\Url::parse("");
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
-
-try {
-    Uri\Rfc3986\Uri::parse("https://example.com", "");
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
-
-try {
-    new Uri\Rfc3986\Uri("https://example.com", "");
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
-
-try {
-    new Uri\WhatWg\Url("https://example.com", "");
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
-
-try {
-    Uri\WhatWg\Url::parse("https://example.com", "");
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
+var_dump(Uri\WhatWg\Url::parse(""));
 
 var_dump(Uri\Rfc3986\Uri::parse("192.168/contact.html"));
 var_dump(Uri\WhatWg\Url::parse("192.168/contact.html", null));
@@ -61,14 +29,10 @@ var_dump(Uri\WhatWg\Url::parse("http://RuPaul's Drag Race All Stars 7 Winners Ca
 
 ?>
 --EXPECTF--
-Uri\Rfc3986\Uri::__construct(): Argument #1 ($uri) cannot be empty
-Uri\Rfc3986\Uri::parse(): Argument #1 ($uri) cannot be empty
-Uri\WhatWg\Url::__construct(): Argument #1 ($uri) cannot be empty
-Uri\WhatWg\Url::parse(): Argument #1 ($uri) cannot be empty
-Uri\Rfc3986\Uri::parse(): Argument #2 ($baseUrl) cannot be empty
-Uri\Rfc3986\Uri::__construct(): Argument #2 ($baseUrl) cannot be empty
-Uri\WhatWg\Url::__construct(): Argument #2 ($baseUrl) cannot be empty
-Uri\WhatWg\Url::parse(): Argument #2 ($baseUrl) cannot be empty
+URI parsing failed
+NULL
+URL parsing failed
+NULL
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   NULL

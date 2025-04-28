@@ -449,7 +449,7 @@ static void *parse_url_clone_uri(void *uri)
 	return NULL;
 }
 
-static void *parse_url_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors)
+static void *parse_url_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors)
 {
 	bool has_port;
 

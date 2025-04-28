@@ -25,10 +25,8 @@ extern const uri_handler_t uriparser_uri_handler;
 typedef struct uriparser_uris_t {
 	UriUriA *uri;
 	zend_string *uri_str;
-	zend_string *base_uri_str;
 	UriUriA *normalized_uri;
 	zend_string *normalized_uri_str;
-	zend_string *normalized_base_uri_str;
 } uriparser_uris_t;
 
 #endif

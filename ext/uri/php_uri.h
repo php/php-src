@@ -52,7 +52,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 PHPAPI void php_uri_struct_free(php_uri *uri);
 
 PHPAPI void php_uri_instantiate_uri(
-	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_string *base_url_str,
+	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_object *base_url_object,
 	bool is_constructor, zval *errors_zv
 );
 PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers);

@@ -12,15 +12,21 @@ namespace Uri {
     class InvalidUriException extends \Uri\UriException
     {
     }
+
+    enum UriComparisonMode
+    {
+        case IncludeFragment;
+        case ExcludeFragment;
+    }
 }
 
 namespace Uri\Rfc3986 {
     /** @strict-properties */
     final readonly class Uri
     {
-        public static function parse(string $uri, ?string $baseUrl = null): ?static {}
+        public static function parse(string $uri, ?\Uri\Rfc3986\Uri $baseUrl = null): ?static {}
 
-        public function __construct(string $uri, ?string $baseUrl = null) {}
+        public function __construct(string $uri, ?\Uri\Rfc3986\Uri $baseUrl = null) {}
 
         public function getScheme(): ?string {}
 
@@ -70,7 +76,7 @@ namespace Uri\Rfc3986 {
 
         public function withFragment(?string $fragment): static {}
 
-        public function equals(\Uri\Rfc3986\Uri $uri, bool $excludeFragment = true): bool {}
+        public function equals(\Uri\Rfc3986\Uri $uri, \Uri\UriComparisonMode $comparisonMode = \Uri\UriComparisonMode::ExcludeFragment): bool {}
 
         public function toString(): string {}
 
@@ -140,10 +146,10 @@ namespace Uri\WhatWg {
     final readonly class Url
     {
         /** @param array $errors */
-        public static function parse(string $uri, ?string $baseUrl = null, &$errors = null): ?static {}
+        public static function parse(string $uri, ?\Uri\WhatWg\Url $baseUrl = null, &$errors = null): ?static {}
 
         /** @param array $softErrors */
-        public function __construct(string $uri, ?string $baseUrl = null, &$softErrors = null) {}
+        public function __construct(string $uri, ?\Uri\WhatWg\Url $baseUrl = null, &$softErrors = null) {}
 
         public function getScheme(): string {}
 
@@ -189,7 +195,7 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::withFragment */
         public function withFragment(?string $fragment): static {}
 
-        public function equals(\Uri\WhatWg\Url $url, bool $excludeFragment = true): bool {}
+        public function equals(\Uri\WhatWg\Url $url, \Uri\UriComparisonMode $comparisonMode = \Uri\UriComparisonMode::ExcludeFragment): bool {}
 
         public function toAsciiString(): string {}
 

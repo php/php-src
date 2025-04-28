@@ -24,7 +24,7 @@
 #endif
 
 static zend_result lexbor_init_parser(void);
-static void *lexbor_parse_uri(const zend_string *url_str, const zend_string *base_url_str, zval *errors);
+static void *lexbor_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors);
 static void lexbor_create_invalid_uri_exception(zval *exception_zv, zval *errors);
 static void *lexbor_clone_uri(void *uri);
 static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
@@ -521,20 +521,17 @@ static zend_result lexbor_init_parser(void)
 	return SUCCESS;
 }
 
-static void *lexbor_parse_uri(const zend_string *url_str, const zend_string *base_url_str, zval *errors)
+static void *lexbor_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors)
 {
 	lexbor_cleanup_parser();
 
-	lxb_url_t *url, *base_url = NULL;
+	lxb_url_t *url, *lexbor_base_url = NULL;
 
-	if (base_url_str) {
-		if ((base_url = lxb_url_parse(lexbor_parser, NULL, (unsigned char *) ZSTR_VAL(base_url_str), ZSTR_LEN(base_url_str))) == NULL) {
-			fill_errors(errors);
-			return NULL;
-		}
+	if (base_url) {
+		lexbor_base_url = (lxb_url_t *) base_url;
 	}
 
-	url = lxb_url_parse(lexbor_parser, base_url, (unsigned char *) ZSTR_VAL(url_str), ZSTR_LEN(url_str));
+	url = lxb_url_parse(lexbor_parser, lexbor_base_url, (unsigned char *) ZSTR_VAL(uri_str), ZSTR_LEN(uri_str));
 	fill_errors(errors);
 
 	return url;

@@ -8,23 +8,23 @@ uri
 $uri = Uri\Rfc3986\Uri::parse("https://example.com/without-base");
 var_dump($uri);
 
-$uri = Uri\Rfc3986\Uri::parse("/with-base", "https://example.com");
+$uri = Uri\Rfc3986\Uri::parse("/with-base", new Uri\Rfc3986\Uri("https://example.com"));
 var_dump($uri);
 
-$uri = Uri\Rfc3986\Uri::parse("https://test.com/with-base-in-vain", "https://example.com");
+$uri = Uri\Rfc3986\Uri::parse("https://test.com/with-base-in-vain", new Uri\Rfc3986\Uri("https://example.com"));
 var_dump($uri);
 
-$uri = Uri\Rfc3986\Uri::parse("HTTPS://TEST.com/with-base-in-vain", "https://example.com");
+$uri = Uri\Rfc3986\Uri::parse("HTTPS://TEST.com/with-base-in-vain", Uri\Rfc3986\Uri::parse("https://example.com"));
 var_dump($uri);
 var_dump($uri->toString());
 
 $url = Uri\WhatWg\Url::parse("https://example.com/without-base/");
 var_dump($url);
 
-$url = Uri\WhatWg\Url::parse("/with-base", "https://example.com");
+$url = Uri\WhatWg\Url::parse("/with-base", new Uri\WhatWg\Url("https://example.com"));
 var_dump($url);
 
-$url = Uri\WhatWg\Url::parse("https://test.com/with-base-in-vain", "https://example.com/");
+$url = Uri\WhatWg\Url::parse("https://test.com/with-base-in-vain", Uri\WhatWg\Url::parse("https://example.com/"));
 var_dump($url);
 ?>
 --EXPECTF--
