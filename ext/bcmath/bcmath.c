@@ -179,7 +179,7 @@ static zend_result php_str2num(bc_num *num, const zend_string *str)
 }
 /* }}} */
 
-static void bc_pow_err(raise_mod_status status, uint32_t arg_num)
+static void bc_pow_err(bc_raise_status status, uint32_t arg_num)
 {
 	/* If arg_num is 0, it means it is an op */
 	switch (status) {
