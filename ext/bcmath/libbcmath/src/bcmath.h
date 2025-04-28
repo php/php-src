@@ -74,10 +74,6 @@ typedef struct bc_struct {
 #define MAX(a, b)      ((a)>(b)?(a):(b))
 #define MIN(a, b)      ((a)>(b)?(b):(a))
 
-#ifndef SIZE_T_MAX
-#define SIZE_T_MAX (~((size_t) 0))
-#endif
-
 /* Function Prototypes */
 
 void bc_init_numbers(void);
