@@ -1,14 +1,14 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 98e3cb6e7c0aa578e814135b0e75d353603134c6 */
+ * Stub hash: 90902634fedd28f17d862a8a825b8f0c48718346 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\Rfc3986\\\125ri, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_Rfc3986_Uri___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\Rfc3986\\\125ri, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getScheme, 0, 0, IS_STRING, 1)
@@ -78,7 +78,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_equals, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, uri, Uri\\Rfc3986\\\125ri, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, excludeFragment, _IS_BOOL, 0, "true")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, comparisonMode, Uri\\\125riComparisonMode, 0, "Uri\\UriComparisonMode::ExcludeFragment")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Rfc3986_Uri_toString arginfo_class_Uri_Rfc3986_Uri_getPath
@@ -106,13 +106,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\WhatWg\\\125rl, 1, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errors, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWg_Url___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseUrl, IS_STRING, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\WhatWg\\\125rl, 1, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, softErrors, "null")
 ZEND_END_ARG_INFO()
 
@@ -158,7 +158,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_equals, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, url, Uri\\WhatWg\\\125rl, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, excludeFragment, _IS_BOOL, 0, "true")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, comparisonMode, Uri\\\125riComparisonMode, 0, "Uri\\UriComparisonMode::ExcludeFragment")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_toAsciiString arginfo_class_Uri_Rfc3986_Uri_getPath
@@ -309,6 +309,17 @@ static zend_class_entry *register_class_Uri_InvalidUriException(zend_class_entry
 
 	INIT_NS_CLASS_ENTRY(ce, "Uri", "InvalidUriException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Uri_UriException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_UriComparisonMode(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Uri\\UriComparisonMode", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "IncludeFragment", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "ExcludeFragment", NULL);
 
 	return class_entry;
 }

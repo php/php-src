@@ -21,6 +21,7 @@ extern zend_class_entry *rfc3986_uri_ce;
 extern zend_object_handlers rfc3986_uri_object_handlers;
 extern zend_class_entry *whatwg_url_ce;
 extern zend_object_handlers whatwg_uri_object_handlers;
+extern zend_class_entry *uri_comparison_mode_ce;
 extern zend_class_entry *uri_exception_ce;
 extern zend_class_entry *invalid_uri_exception_ce;
 extern zend_class_entry *whatwg_invalid_url_exception_ce;
@@ -44,7 +45,7 @@ typedef struct uri_handler_t {
 	const char *name;
 
 	zend_result (*init_parser)(void);
-	void *(*parse_uri)(const zend_string *uri_str, const zend_string *base_url_str, zval *errors);
+	void *(*parse_uri)(const zend_string *uri_str, const void *base_url, zval *errors);
 	void (*create_invalid_uri_exception)(zval *exception_zv, zval *errors);
 	void *(*clone_uri)(void *uri);
 	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
@@ -63,11 +64,11 @@ typedef struct uri_object_t {
 	zend_object std;
 } uri_object_t;
 
-static inline uri_object_t *uri_object_from_obj(zend_object *object) {
+static inline uri_object_t *uri_object_from_obj(const zend_object *object) {
 	return (uri_object_t*)((char*)(object) - XtOffsetOf(uri_object_t, std));
 }
 
-static inline uri_internal_t *uri_internal_from_obj(zend_object *object) {
+static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 	return &(uri_object_from_obj(object)->internal);
 }
 
