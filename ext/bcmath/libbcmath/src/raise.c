@@ -192,21 +192,15 @@ bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scal
 	}
 
 	if (bc_is_zero(base)) {
-		bc_free_num(result);
-		*result = bc_copy_num(BCG(_zero_));
 		/* If the exponent is negative, it divides by 0 */
 		return is_neg ? BC_RAISE_STATUS_DIVIDE_BY_ZERO : BC_RAISE_STATUS_OK;
 	}
 
 	/* check overflow */
 	if (UNEXPECTED(base->n_len > SIZE_MAX / exponent)) {
-		bc_free_num (result);
-		*result = bc_copy_num(BCG(_one_));
 		return BC_RAISE_STATUS_LEN_IS_OVERFLOW;
 	}
 	if (UNEXPECTED(base->n_scale > SIZE_MAX / exponent)) {
-		bc_free_num (result);
-		*result = bc_copy_num(BCG(_one_));
 		return BC_RAISE_STATUS_SCALE_IS_OVERFLOW;
 	}
 
@@ -216,8 +210,6 @@ bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scal
 
 	/* check overflow */
 	if (UNEXPECTED(power_len > SIZE_MAX - power_scale)) {
-		bc_free_num (result);
-		*result = bc_copy_num(BCG(_one_));
 		return BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW;
 	}
 	size_t power_full_len = power_len + power_scale;
