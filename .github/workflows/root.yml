@@ -59,6 +59,7 @@ jobs:
         (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9) && '24.04')
         || '22.04' }}
       windows_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9) && '2022' || '2019' }}
+      skip_laravel: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
       skip_symfony: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
       skip_wordpress: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
     secrets: inherit
