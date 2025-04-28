@@ -179,6 +179,26 @@ static zend_result php_str2num(bc_num *num, const zend_string *str)
 }
 /* }}} */
 
+static void bc_pow_err(raise_mod_status status, uint32_t arg_num)
+{
+	/* If arg_num is 0, it means it is an op */
+	switch (status) {
+		case BC_RAISE_STATUS_DIVIDE_BY_ZERO:
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+			break;
+		case BC_RAISE_STATUS_LEN_IS_OVERFLOW:
+		case BC_RAISE_STATUS_SCALE_IS_OVERFLOW:
+		case BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW:
+			if (arg_num == 0) {
+				zend_value_error("exponent is too large, the number of digits overflowed");
+			} else {
+				zend_argument_value_error(arg_num, "exponent is too large, the number of digits overflowed");
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
 /* {{{ Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
 {
@@ -615,18 +635,10 @@ PHP_FUNCTION(bcpow)
 		goto cleanup;
 	}
 
-	switch (bc_raise(first, exponent, &result, scale)) {
-		case BC_RAISE_STATUS_OK:
-			break;
-		case BC_RAISE_STATUS_DIVIDE_BY_ZERO:
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
-			goto cleanup;
-		case BC_RAISE_STATUS_LEN_IS_OVERFLOW:
-		case BC_RAISE_STATUS_SCALE_IS_OVERFLOW:
-		case BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW:
-			zend_argument_value_error(2, "exponent is too large, the number of digits overflowed");
-			goto cleanup;
-		EMPTY_SWITCH_DEFAULT_CASE();
+	bc_raise_status ret_status = bc_raise(first, exponent, &result, scale);
+	if (UNEXPECTED(ret_status != BC_RAISE_STATUS_OK)) {
+		bc_pow_err(ret_status, 2);
+		goto cleanup;
 	}
 	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
@@ -1152,22 +1164,10 @@ static zend_result bcmath_number_pow_internal(
 		}
 		return FAILURE;
 	}
-	switch (bc_raise(n1, exponent, ret, *scale)) {
-		case BC_RAISE_STATUS_OK:
-			break;
-		case BC_RAISE_STATUS_DIVIDE_BY_ZERO:
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
-			return FAILURE;
-		case BC_RAISE_STATUS_LEN_IS_OVERFLOW:
-		case BC_RAISE_STATUS_SCALE_IS_OVERFLOW:
-		case BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW:
-			if (is_op) {
-				zend_value_error("exponent is too large, the number of digits overflowed");
-			} else {
-				zend_argument_value_error(1, "exponent is too large, the number of digits overflowed");
-			}
-			return FAILURE;
-		EMPTY_SWITCH_DEFAULT_CASE();
+	bc_raise_status ret_status = bc_raise(n1, exponent, ret, *scale);
+	if (UNEXPECTED(ret_status != BC_RAISE_STATUS_OK)) {
+		bc_pow_err(ret_status, is_op ? 0 : 1);
+		return FAILURE;
 	}
 	bc_rm_trailing_zeros(*ret);
 	if (scale_expand) {
