@@ -34,6 +34,7 @@ zend_class_entry *rfc3986_uri_ce;
 zend_object_handlers rfc3986_uri_object_handlers;
 zend_class_entry *whatwg_url_ce;
 zend_object_handlers whatwg_uri_object_handlers;
+zend_class_entry *uri_comparison_mode_ce;
 zend_class_entry *uri_exception_ce;
 zend_class_entry *invalid_uri_exception_ce;
 zend_class_entry *whatwg_invalid_url_exception_ce;
@@ -353,13 +354,20 @@ static zend_result pass_errors_by_ref(zval *errors_zv, zval *errors)
 }
 
 PHPAPI void php_uri_instantiate_uri(
-	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_string *base_url_str,
+	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_object *base_url_object,
 	bool is_constructor, zval *errors_zv
 ) {
 	zval errors;
 	ZVAL_UNDEF(&errors);
 
-	void *uri = handler->parse_uri(uri_str, base_url_str, is_constructor || errors_zv != NULL ? &errors : NULL);
+	void *base_url = NULL;
+	if (base_url_object != NULL) {
+		uri_internal_t *internal_base_url = uri_internal_from_obj(base_url_object);
+		URI_CHECK_INITIALIZATION(internal_base_url);
+		base_url = internal_base_url->uri;
+	}
+
+	void *uri = handler->parse_uri(uri_str, base_url, is_constructor || errors_zv != NULL ? &errors : NULL);
 	if (UNEXPECTED(uri == NULL)) {
 		if (is_constructor) {
 			throw_invalid_uri_exception(handler, &errors);
@@ -389,25 +397,16 @@ PHPAPI void php_uri_instantiate_uri(
 
 static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
-	zend_string *uri_str, *base_url_str = NULL;
+	zend_string *uri_str;
+	zend_object *base_url_object = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH_STR(uri_str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_PATH_STR_OR_NULL(base_url_str)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, rfc3986_uri_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZSTR_LEN(uri_str) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-
-	if (base_url_str && ZSTR_LEN(base_url_str) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
-
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_handler, uri_str, base_url_str, is_constructor, NULL);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_handler, uri_str, base_url_object, is_constructor, NULL);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, parse)
@@ -422,27 +421,18 @@ PHP_METHOD(Uri_Rfc3986_Uri, __construct)
 
 static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
-	zend_string *uri_str, *base_url_str = NULL;
+	zend_string *uri_str;
+	zend_object *base_url_object = NULL;
 	zval *errors = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH_STR(uri_str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_PATH_STR_OR_NULL(base_url_str)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, whatwg_url_ce)
 		Z_PARAM_ZVAL(errors)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZSTR_LEN(uri_str) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-
-	if (base_url_str && ZSTR_LEN(base_url_str) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
-
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_handler, uri_str, base_url_str, is_constructor, errors);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_handler, uri_str, base_url_object, is_constructor, errors);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, parse)
@@ -575,7 +565,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withFragment)
 	URI_WITHER_STR_OR_NULL(ZSTR_KNOWN(ZEND_STR_FRAGMENT));
 }
 
-static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, bool exclude_fragment)
+static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, zend_object *comparison_mode)
 {
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *this_internal_uri = uri_internal_from_obj(this_object);
@@ -589,6 +579,14 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, b
 		!instanceof_function(that_object->ce, this_object->ce)
 	) {
 		RETURN_FALSE;
+	}
+
+	bool exclude_fragment = true;
+	if (comparison_mode) {
+		zval *case_name = zend_enum_fetch_case_name(comparison_mode);
+		zend_string *comparison_mode_name = Z_STR_P(case_name);
+
+		exclude_fragment = ZSTR_VAL(comparison_mode_name)[0] + ZSTR_LEN(comparison_mode_name) == 'E' + sizeof("ExcludeFragment") - 1;
 	}
 
 	zend_string *this_str = this_internal_uri->handler->uri_to_string(
@@ -614,15 +612,15 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, b
 PHP_METHOD(Uri_Rfc3986_Uri, equals)
 {
 	zend_object *that_object;
-	bool exclude_fragment = true;
+	zend_object *comparison_mode = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS(that_object, rfc3986_uri_ce)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(exclude_fragment)
+		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce);
 	ZEND_PARSE_PARAMETERS_END();
 
-	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, exclude_fragment);
+	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, comparison_mode);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
@@ -671,14 +669,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, resolve)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_CHECK_INITIALIZATION(internal_uri);
 
-	zend_string *base_uri_str = internal_uri->handler->uri_to_string(
-			internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false); // TODO optimize by not reparsing the base URI
-	if (base_uri_str == NULL) {
-		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
-		RETURN_THROWS();
-	}
-
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, base_uri_str, true, NULL);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, this_object, true, NULL);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
@@ -832,15 +823,15 @@ PHP_METHOD(Uri_WhatWg_Url, withHost)
 PHP_METHOD(Uri_WhatWg_Url, equals)
 {
 	zend_object *that_object;
-	bool exclude_fragment = true;
+	zend_object *comparison_mode = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS(that_object, whatwg_url_ce)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(exclude_fragment)
+		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce);
 	ZEND_PARSE_PARAMETERS_END();
 
-	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, exclude_fragment);
+	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, comparison_mode);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
@@ -955,6 +946,7 @@ static PHP_MINIT_FUNCTION(uri)
 	whatwg_url_ce = register_class_Uri_WhatWg_Url();
 	php_uri_implementation_set_object_handlers(whatwg_url_ce, &whatwg_uri_object_handlers);
 
+	uri_comparison_mode_ce = register_class_Uri_UriComparisonMode();
 	uri_exception_ce = register_class_Uri_UriException(zend_ce_exception);
 	invalid_uri_exception_ce = register_class_Uri_InvalidUriException(uri_exception_ce);
 	whatwg_invalid_url_exception_ce = register_class_Uri_WhatWg_InvalidUrlException(invalid_uri_exception_ce);
