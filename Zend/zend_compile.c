@@ -7027,15 +7027,15 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		} else {
 			const char *correct_name;
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
-			zend_string *class_name = type_name;
-			uint32_t flags = 0;
 
+			if (ce && ce->associated_types && zend_hash_exists(ce->associated_types, type_name)) {
+				return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(type_name), /* allow null */ false, _ZEND_TYPE_ASSOCIATED_BIT);
+			}
+
+			zend_string *class_name = type_name;
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 				class_name = zend_resolve_class_name_ast(ast);
 				zend_assert_valid_class_name(class_name, "a type name");
-				if (ce && ce->associated_types && zend_hash_exists(ce->associated_types, class_name)) {
-					flags = _ZEND_TYPE_ASSOCIATED_BIT;
-				}
 			} else {
 				ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_SELF || fetch_type == ZEND_FETCH_CLASS_PARENT);
 
@@ -7078,7 +7078,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 			class_name = zend_new_interned_string(class_name);
 			zend_alloc_ce_cache(class_name);
-			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, /* allow null */ false, flags);
+			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, /* allow null */ false, 0);
 		}
 	}
 }
