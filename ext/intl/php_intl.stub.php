@@ -447,6 +447,8 @@ function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle =
 
 function grapheme_str_split(string $string, int $length = 1): array|false {}
 
+function grapheme_levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1): int|false {}
+
 /** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR_COUNT, int $offset = 0, &$next = null): string|false {}
 
