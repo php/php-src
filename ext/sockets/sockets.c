@@ -1933,7 +1933,7 @@ PHP_FUNCTION(socket_recvfrom)
 							if (arg6) {
 								ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
 							}
-							zend_value_error("unsupported ip header protocol");
+							zend_value_error("unsupported ipv6 header protocol");
 							RETURN_THROWS();
 					}
 					break;
