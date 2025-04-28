@@ -19,8 +19,8 @@ class C implements I2 {
 }
 
 // TODO: Ideally error message would be:
-//Fatal error: Declaration of C::bar(float $o, string $param): float must be compatible with I2::bar(T2<stdClass|float|bool> $o, T<(Traversable&Countable)|int|string> $param): T2<stdClass|float|bool> in %s on line %d
+//Fatal error: Declaration of C::bar(float $o, string $param): float must be compatible with I2::bar(<T2 : stdClass|float|bool> $o, <T : (Traversable&Countable)|int|string> $param): <T2 : stdClass|float|bool> in %s on line %d
 //Improve zend_append_type_hint()?
 ?>
 --EXPECTF--
-Fatal error: Declaration of C::bar(float $o, string $param): float must be compatible with I2::bar(T2<stdClass|float|bool> $o, T $param): T2<stdClass|float|bool> in %s on line %d
+Fatal error: Declaration of C::bar(float $o, string $param): float must be compatible with I2::bar(<T2 : stdClass|float|bool> $o, T $param): <T2 : stdClass|float|bool> in %s on line %d

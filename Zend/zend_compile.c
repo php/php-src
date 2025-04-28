@@ -1448,12 +1448,15 @@ static zend_string *add_associated_type(zend_string *associated_type, zend_class
 
 	zend_string *constraint_type_str = zend_type_to_string_resolved(*constraint, scope);
 
-	size_t len = ZSTR_LEN(associated_type) + ZSTR_LEN(constraint_type_str) + strlen("<>");
+	size_t len = ZSTR_LEN(associated_type) + ZSTR_LEN(constraint_type_str) + strlen("< : >");
 	zend_string *result = zend_string_alloc(len, 0);
 
-	memcpy(ZSTR_VAL(result), ZSTR_VAL(associated_type), ZSTR_LEN(associated_type));
-	ZSTR_VAL(result)[ZSTR_LEN(associated_type)] = '<';
-	memcpy(ZSTR_VAL(result) + ZSTR_LEN(associated_type) + 1, ZSTR_VAL(constraint_type_str), ZSTR_LEN(constraint_type_str));
+	ZSTR_VAL(result)[0] = '<';
+	memcpy(ZSTR_VAL(result) + strlen("<"), ZSTR_VAL(associated_type), ZSTR_LEN(associated_type));
+	ZSTR_VAL(result)[ZSTR_LEN(associated_type) + 1] = ' ';
+	ZSTR_VAL(result)[ZSTR_LEN(associated_type) + 2] = ':';
+	ZSTR_VAL(result)[ZSTR_LEN(associated_type) + 3] = ' ';
+	memcpy(ZSTR_VAL(result) + ZSTR_LEN(associated_type) + strlen("< : "), ZSTR_VAL(constraint_type_str), ZSTR_LEN(constraint_type_str));
 	ZSTR_VAL(result)[len-1] = '>';
 	ZSTR_VAL(result)[len] = '\0';
 

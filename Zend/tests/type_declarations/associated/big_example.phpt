@@ -99,4 +99,4 @@ final class StringTable
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of Sequence\StringTableSequence::next(): ?Sequence\StringTablePair must be compatible with Sequence\Sequence::next(): Item<object|array|string|int|float|bool>|null in %s on line %d
+Fatal error: Declaration of Sequence\StringTableSequence::next(): ?Sequence\StringTablePair must be compatible with Sequence\Sequence::next(): <Item : object|array|string|int|float|bool>|null in %s on line %d
