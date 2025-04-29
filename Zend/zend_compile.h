@@ -523,7 +523,7 @@ struct _zend_op_array {
 	const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
 	/* END of common elements */
 
-	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
+	uint32_t cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
 	int last_var;       /* number of CV variables */
 	uint32_t last;      /* number of opcodes */
 
