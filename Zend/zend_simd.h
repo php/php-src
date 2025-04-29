@@ -55,7 +55,11 @@ typedef int8x16_t __m128i;
     ((imm) >= 16 ? vdupq_n_s8(0) : \
      vreinterpretq_s8_u8(vextq_u8(vreinterpretq_u8_s8(x), vdupq_n_u8(0), (imm))))
 
-#define _mm_add_epi8(a, b) vaddq_s8(a, b)
+/**
+ * In practice, there is no problem, but a runtime error for signed integer overflow is triggered by UBSAN,
+ * so perform the calculation as unsigned. Since it is optimized at compile time, there are no unnecessary casts at runtime.
+ */
+#define _mm_add_epi8(a, b) vreinterpretq_s8_u8(vaddq_u8(vreinterpretq_u8_s8(a), vreinterpretq_u8_s8(b)))
 
 #define _mm_cmpeq_epi8(a, b) (vreinterpretq_s8_u8(vceqq_s8(a, b)))
 #define _mm_cmplt_epi8(a, b) (vreinterpretq_s8_u8(vcltq_s8(a, b)))
