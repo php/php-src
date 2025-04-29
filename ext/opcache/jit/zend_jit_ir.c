@@ -4174,6 +4174,7 @@ static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_th
 		case ZEND_ASSIGN_STATIC_PROP_REF:
 		case ZEND_ASSIGN_OBJ_REF:
 		case ZEND_FRAMELESS_ICALL_3:
+		case ZEND_DECLARE_ATTRIBUTED_CONST:
 			zend_jit_set_last_valid_opline(jit, opline + 2);
 			break;
 		default:
