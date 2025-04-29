@@ -13,6 +13,12 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
 $link = default_mysqli_connect();
 
+try {
+    mysqli_query($link, "DROP TABLE test_mysqli_fetch_all_data_types_variation");
+} catch (mysqli_sql_exception $e) {
+    // harmless, to avoid table already existing if the test gets wedged and then done again with persistent DB instance
+}
+
 function func_mysqli_fetch_all(
     mysqli $link,
     string $engine,
