@@ -321,17 +321,18 @@ typedef enum _zend_jit_trace_stop {
 
 #define ZEND_JIT_TRACE_SUPPORTED    0
 
-#define ZEND_JIT_EXIT_JITED         (1<<0)
-#define ZEND_JIT_EXIT_BLACKLISTED   (1<<1)
-#define ZEND_JIT_EXIT_TO_VM         (1<<2) /* exit to VM without attempt to create a side trace */
-#define ZEND_JIT_EXIT_RESTORE_CALL  (1<<3) /* deoptimizer should restore EX(call) chain */
-#define ZEND_JIT_EXIT_POLYMORPHISM  (1<<4) /* exit because of polymorphic call */
-#define ZEND_JIT_EXIT_FREE_OP1      (1<<5)
-#define ZEND_JIT_EXIT_FREE_OP2      (1<<6)
-#define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
-#define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
-#define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
-#define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
+#define ZEND_JIT_EXIT_JITED             (1<<0)
+#define ZEND_JIT_EXIT_BLACKLISTED       (1<<1)
+#define ZEND_JIT_EXIT_TO_VM             (1<<2) /* exit to VM without attempt to create a side trace */
+#define ZEND_JIT_EXIT_RESTORE_CALL      (1<<3) /* deoptimizer should restore EX(call) chain */
+#define ZEND_JIT_EXIT_POLYMORPHISM      (1<<4) /* exit because of polymorphic call */
+#define ZEND_JIT_EXIT_FREE_OP1          (1<<5)
+#define ZEND_JIT_EXIT_FREE_OP2          (1<<6)
+#define ZEND_JIT_EXIT_PACKED_GUARD      (1<<7)
+#define ZEND_JIT_EXIT_CLOSURE_CALL      (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
+#define ZEND_JIT_EXIT_METHOD_CALL       (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
+#define ZEND_JIT_EXIT_INVALIDATE        (1<<10) /* invalidate current trace */
+#define ZEND_JIT_EXIT_CHECK_EXCEPTION   (1<<11)
 
 #define ZEND_JIT_EXIT_FIXED         (1U<<31) /* the exit_info can't be changed by zend_jit_snapshot_handler() */
 
