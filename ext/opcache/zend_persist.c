@@ -280,6 +280,8 @@ static void zend_persist_zval(zval *z)
 				efree(old_ref);
 			}
 			break;
+		case IS_PTR:
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;
@@ -612,6 +614,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				}
 			}
 #endif
+			if (opline->opcode == ZEND_OP_DATA && (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST) {
+				zval *literal = RT_CONSTANT(opline, opline->op1);
+				HashTable *attributes = Z_PTR_P(literal);
+				attributes = zend_persist_attributes(attributes);
+				ZVAL_PTR(literal, attributes);
+			}
 		}
 
 		efree(op_array->opcodes);

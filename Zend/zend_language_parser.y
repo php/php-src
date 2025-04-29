@@ -391,6 +391,7 @@ attributed_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	enum_declaration_statement			{ $$ = $1; }
+	|	T_CONST const_list ';'				{ $$ = $2; }
 ;
 
 top_statement:
@@ -414,7 +415,6 @@ top_statement:
 	|	T_USE use_type group_use_declaration ';'	{ $$ = $3; $$->attr = $2; }
 	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = ZEND_SYMBOL_CLASS; }
 	|	T_USE use_type use_declarations ';'			{ $$ = $3; $$->attr = $2; }
-	|	T_CONST const_list ';'						{ $$ = $2; }
 ;
 
 use_type:

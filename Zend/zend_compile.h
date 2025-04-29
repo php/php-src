@@ -395,6 +395,11 @@ typedef struct _zend_oparray_context {
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* Has IS_PTR operands that needs special cleaning; same  |     |     |     */
+/* value as ZEND_ACC_OVERRIDE but override is for class   |     |     |     */
+/* methods and this is for the top level op array         |     |     |     */
+#define ZEND_ACC_PTR_OPS                 (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* has #[\NoDiscard] attribute                            |     |     |     */
 #define ZEND_ACC_NODISCARD               (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */

@@ -15,10 +15,12 @@ PHP constants (referring to non-class constants) are stored in a dedicated struc
        zval value;
        zend_string *name;
        zend_string *filename;
+       HashTable *attributes;
    } zend_constant;
 
 The ``value`` field stores both the value itself and some metadata. The ``name`` and ``filename``
-store the name of the constant and the name of the file in which it was defined.
+store the name of the constant and the name of the file in which it was defined. The ``attributes``
+field stores the attributes applied to the constant.
 
 *******
  value
@@ -59,6 +61,15 @@ constants that have already been defined. This string is released when the const
  filename
 **********
 
-Finally, the ``filename`` holds another ``zend_string`` with the name of the file in which the
-constant was defined, or ``NULL`` if not defined userland code. This field provides the foundation
-for the PHP method ``ReflectionConstant::getFileName()``.
+The ``filename`` holds another ``zend_string`` with the name of the file in which the constant was
+defined, or ``NULL`` if not defined userland code. This field provides the foundation for the PHP
+method ``ReflectionConstant::getFileName()``.
+
+************
+ attributes
+************
+
+The ``attributes`` holds a ``HashTable`` (essentially an array) with the details of the attributes
+that were applied to the constant. Note that attributes can only be added to constants declared at
+compile time via ``const``, e.g. ``const EXAMPLE = 123``, not those declared at runtime, e.g.
+``define( 'EXAMPLE', 123 );``.

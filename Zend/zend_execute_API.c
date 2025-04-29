@@ -300,6 +300,9 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 				if (c->filename) {
 					zend_string_release_ex(c->filename, 0);
 				}
+				if (c->attributes) {
+					zend_hash_release(c->attributes);
+				}
 				efree(c);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
