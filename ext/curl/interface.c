@@ -1900,7 +1900,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_SSLKEYTYPE:
 		case CURLOPT_SSL_CIPHER_LIST:
 		case CURLOPT_USERAGENT:
-		case CURLOPT_USERPWD:
 		case CURLOPT_COOKIELIST:
 		case CURLOPT_FTP_ALTERNATIVE_TO_USER:
 		case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
@@ -1996,6 +1995,23 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			zend_result ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str));
 			zend_tmp_string_release(tmp_str);
 			return ret;
+		}
+
+		case CURLOPT_USERPWD:
+		{
+			if (Z_ISNULL_P(zvalue)) {
+				// Authorization header would be implictly set
+				// with an empty string thus we explictly set the option
+				// to null to avoid this unwarranted side effect
+				error = curl_easy_setopt(ch->cp, option, NULL);
+			} else {
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
+				zend_result ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str));
+				zend_tmp_string_release(tmp_str);
+				return ret;
+			}
+			break;
 		}
 
 		/* Curl nullable string options */
