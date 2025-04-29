@@ -626,7 +626,9 @@ static void jit_SNAPSHOT(zend_jit_ctx *jit, ir_ref addr)
 		uint32_t exit_point = 0, n = 0;
 
 		if (addr < 0) {
-			exit_point = zend_jit_exit_point_by_addr((void*)(uintptr_t) jit->ctx.ir_base[addr].val.u64);
+			/* addr is not always the address of the *last* exit point,
+			 * so we can not optimize this to 'exit_point = t->exit_count-1' */
+			exit_point = zend_jit_exit_point_by_addr(ptr);
 			ZEND_ASSERT(exit_point != -1);
 			if (t->exit_info[exit_point].flags & ZEND_JIT_EXIT_METHOD_CALL) {
 				n = 2;
@@ -710,24 +712,26 @@ uint32_t zend_jit_duplicate_exit_point(ir_ctx *ctx, zend_jit_trace_info *t, uint
 	return new_exit_point;
 }
 
-zend_jit_ref_snapshot zend_jit_resolve_ref_snapshot(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snapshot, int op)
+static void zend_jit_resolve_ref_snapshot(zend_jit_ref_snapshot *dest, ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snapshot, int op)
 {
 	int8_t *reg_ops = ctx->regs[snapshot_ref];
 	ZEND_ASSERT(reg_ops[op] != ZREG_NONE);
 
-	zend_jit_ref_snapshot rs = {
-		.reg = reg_ops[op],
-	};
+	int8_t reg = reg_ops[op];
+	int32_t offset;
 
-	if (IR_REG_SPILLED(rs.reg)) {
-		rs.reg = ((ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FP : IR_REG_SP) | IR_REG_SPILL_LOAD;
-		rs.offset = ir_get_spill_slot_offset(ctx, ir_insn_op(snapshot, op));
+	if (IR_REG_SPILLED(reg)) {
+		reg = ((ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FP : IR_REG_SP) | IR_REG_SPILL_LOAD;
+		offset = ir_get_spill_slot_offset(ctx, ir_insn_op(snapshot, op));
+	} else {
+		offset = 0;
 	}
 
-	return rs;
+	dest->reg = reg;
+	dest->offset = offset;
 }
 
-bool zend_jit_ref_snapshot_equals(zend_jit_ref_snapshot *a, zend_jit_ref_snapshot *b)
+static bool zend_jit_ref_snapshot_equals(const zend_jit_ref_snapshot *a, const zend_jit_ref_snapshot *b)
 {
 	return a->reg == b->reg
 		&& (!IR_REG_SPILLED(a->reg) || (a->offset == b->offset));
@@ -745,8 +749,9 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 	exit_flags = t->exit_info[exit_point].flags;
 
 	if (exit_flags & ZEND_JIT_EXIT_METHOD_CALL) {
-		zend_jit_ref_snapshot func = zend_jit_resolve_ref_snapshot(ctx, snapshot_ref, snapshot, n - 1);
-		zend_jit_ref_snapshot this = zend_jit_resolve_ref_snapshot(ctx, snapshot_ref, snapshot, n);
+		zend_jit_ref_snapshot func, this;
+		zend_jit_resolve_ref_snapshot(&func, ctx, snapshot_ref, snapshot, n - 1);
+		zend_jit_resolve_ref_snapshot(&this, ctx, snapshot_ref, snapshot, n);
 
 		if ((exit_flags & ZEND_JIT_EXIT_FIXED)
 		 && (!zend_jit_ref_snapshot_equals(&t->exit_info[exit_point].poly_func, &func)
