@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6b54bc195be211caabb395b621380681953c1f5a */
+ * Stub hash: 9aee3d8f2ced376f5929048444eaa2529ff90311 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -128,6 +128,12 @@ static zend_class_entry *register_class_Attribute(void)
 	zend_string *const_TARGET_PARAMETER_name = zend_string_init_interned("TARGET_PARAMETER", sizeof("TARGET_PARAMETER") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_PARAMETER_name, &const_TARGET_PARAMETER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_PARAMETER_name);
+
+	zval const_TARGET_CONSTANT_value;
+	ZVAL_LONG(&const_TARGET_CONSTANT_value, ZEND_ATTRIBUTE_TARGET_CONST);
+	zend_string *const_TARGET_CONSTANT_name = zend_string_init_interned("TARGET_CONSTANT", sizeof("TARGET_CONSTANT") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_CONSTANT_name, &const_TARGET_CONSTANT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_TARGET_CONSTANT_name);
 
 	zval const_TARGET_ALL_value;
 	ZVAL_LONG(&const_TARGET_ALL_value, ZEND_ATTRIBUTE_TARGET_ALL);
@@ -258,7 +264,7 @@ static zend_class_entry *register_class_Deprecated(void)
 	zend_attribute *attribute_Attribute_class_Deprecated_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Deprecated_0, 1);
 	zend_string_release(attribute_name_Attribute_class_Deprecated_0);
 	zval attribute_Attribute_class_Deprecated_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
+	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST | ZEND_ATTRIBUTE_TARGET_CONST);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_Deprecated_0->args[0].value, &attribute_Attribute_class_Deprecated_0_arg0);
 
 	return class_entry;

@@ -1631,17 +1631,25 @@ static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int pri
 	smart_str_appendc(str, '}');
 }
 
-static ZEND_COLD void zend_ast_export_list(smart_str *str, zend_ast_list *list, bool separator, int priority, int indent)
+/* Use zend_ast_export_list() unless fewer than `list->children` children should
+ * be exported. */
+static ZEND_COLD void zend_ast_export_list_ex(smart_str *str, zend_ast_list *list, bool separator, int priority, int indent, int children)
 {
+	ZEND_ASSERT(children <= list->children);
 	uint32_t i = 0;
 
-	while (i < list->children) {
+	while (i < children) {
 		if (i != 0 && separator) {
 			smart_str_appends(str, ", ");
 		}
 		zend_ast_export_ex(str, list->child[i], priority, indent);
 		i++;
 	}
+}
+
+static ZEND_COLD void zend_ast_export_list(smart_str *str, zend_ast_list *list, bool separator, int priority, int indent)
+{
+	zend_ast_export_list_ex(str, list, separator, priority, indent, list->children);
 }
 
 static ZEND_COLD void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_list *list, int indent)
@@ -2216,9 +2224,26 @@ simple_list:
 			goto simple_list;
 		}
 
-		case ZEND_AST_CONST_DECL:
+		case ZEND_AST_CONST_DECL: {
+			zend_ast_list *ast_list = zend_ast_get_list(ast);
+			/* Attributes are stored at the end of the list if present. */
+			if (ast_list->child[ast_list->children - 1]->kind == ZEND_AST_ATTRIBUTE_LIST) {
+				zend_ast_export_attributes(
+					str,
+					ast_list->child[ast_list->children - 1],
+					indent,
+					1
+				);
+				/* So that the list printing doesn't try to print the attributes,
+				 * use zend_ast_export_list_ex() to override the number of children
+				 * to print. */
+				smart_str_appends(str, "const ");
+				zend_ast_export_list_ex(str, ast_list, 1, 20, indent, ast_list->children - 1);
+				break;
+			}
 			smart_str_appends(str, "const ");
 			goto simple_list;
+		}
 		case ZEND_AST_CLASS_CONST_GROUP:
 			if (ast->child[1]) {
 				zend_ast_export_attributes(str, ast->child[1], indent, 1);
@@ -2915,6 +2940,12 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 		break;
 	case ZEND_AST_CLASS_CONST_GROUP:
 		ast->child[1] = attr;
+		break;
+	case ZEND_AST_CONST_DECL:
+		/* Since constants are already stored in a list, just add the attributes
+		 * to that list instead of storing them elsewhere;
+		 * zend_compile_const_decl() checks the kind of the list elements. */
+		zend_ast_list_add(ast, attr);
 		break;
 	EMPTY_SWITCH_DEFAULT_CASE()
 	}

@@ -18,6 +18,7 @@
 */
 
 #include "zend.h"
+#include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_execute.h"
@@ -49,6 +50,9 @@ void free_zend_constant(zval *zv)
 		if (c->filename) {
 			zend_string_release_ex(c->filename, 0);
 		}
+		if (c->attributes) {
+			zend_hash_release(c->attributes);
+		}
 		efree(c);
 	} else {
 		zval_internal_ptr_dtor(&c->value);
@@ -57,6 +61,9 @@ void free_zend_constant(zval *zv)
 		}
 		if (c->filename) {
 			zend_string_release_ex(c->filename, 1);
+		}
+		if (c->attributes) {
+			zend_hash_release(c->attributes);
 		}
 		free(c);
 	}
@@ -76,6 +83,9 @@ static void copy_zend_constant(zval *zv)
 	c->name = zend_string_copy(c->name);
 	if (c->filename != NULL) {
 		c->filename = zend_string_copy(c->filename);
+	}
+	if (c->attributes != NULL) {
+		c->attributes = zend_array_dup(c->attributes);
 	}
 	if (Z_TYPE(c->value) == IS_STRING) {
 		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
@@ -467,7 +477,11 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	}
 
 	if (!(flags & ZEND_FETCH_CLASS_SILENT) && (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)) {
-		zend_error(E_DEPRECATED, "Constant %s is deprecated", name);
+		if (!CONST_IS_RECURSIVE(c)) {
+			CONST_PROTECT_RECURSION(c);
+			zend_deprecated_constant(c, c->name);
+			CONST_UNPROTECT_RECURSION(c);
+		}
 	}
 	return &c->value;
 }
@@ -514,6 +528,8 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 		}
 	}
 
+	c->attributes = NULL;
+
 	/* Check if the user is trying to define any special constant */
 	if (zend_string_equals_literal(name, "__COMPILER_HALT_OFFSET__")
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
@@ -534,4 +550,23 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 		zend_string_release(lowercase_name);
 	}
 	return ret;
+}
+
+void zend_constant_add_attributes(zend_constant *c, HashTable *attributes) {
+	GC_TRY_ADDREF(attributes);
+	c->attributes = attributes;
+
+	zend_attribute *deprecated_attribute = zend_get_attribute_str(
+		c->attributes,
+		"deprecated",
+		strlen("deprecated")
+	);
+
+	if (deprecated_attribute) {
+		ZEND_CONSTANT_SET_FLAGS(
+			c,
+			ZEND_CONSTANT_FLAGS(c) | CONST_DEPRECATED,
+			ZEND_CONSTANT_MODULE_NUMBER(c)
+		);
+	}
 }
