@@ -8731,9 +8731,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			if (EG(exception)) {
 				/* EX(opline) was overridden in zend_jit_trace_exit_stub(),
 				 * and may be wrong when IP is reused. */
-				if (GCC_GLOBAL_REGS) {
-					EX(opline) = EG(exception_op);
-				}
+				EX(opline) = EG(exception_op);
 				return 0;
 			}
 		}
