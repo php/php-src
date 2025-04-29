@@ -422,7 +422,7 @@ struct _zend_jit_trace_rec {
 
 typedef struct _zend_jit_ref_snapshot {
 	union {
-		int32_t ref;        /* While tracing */
+		int32_t ref;        /* While generating code: The ir_ref to snapshot */
 		int32_t offset;     /* After compilation / during deopt: C stack offset if 'reg' is spilled */
 	};
 	int8_t reg;             /* Set after compilation by zend_jit_snapshot_handler() */
