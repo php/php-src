@@ -980,8 +980,8 @@ PHP_FUNCTION(grapheme_levenshtein)
 		intl_error_set_code(NULL, ustatus);
 
 		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16", 0);
-		efree(ustring1);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_ustring1;
 	}
 
 	intl_convert_utf8_to_utf16(&ustring2, &ustring2_len, pstr2, ZSTR_LEN(string2), &ustatus);
@@ -990,9 +990,8 @@ PHP_FUNCTION(grapheme_levenshtein)
 		intl_error_set_code(NULL, ustatus);
 
 		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16", 0);
-		efree(ustring2);
-		efree(ustring1);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_ustring2;
 	}
 
 	UBreakIterator *bi1, *bi2;
@@ -1002,14 +1001,12 @@ PHP_FUNCTION(grapheme_levenshtein)
 	strlen_2 = grapheme_split_string(ustring2, ustring2_len, NULL, 0);
 
 	if (strlen_1 == 0) {
-		efree(ustring1);
-		efree(ustring2);
-		RETURN_LONG(strlen_2 * cost_ins);
+		RETVAL_LONG(strlen_2 * cost_ins);
+		goto out_ustring2;
 	}
 	if (strlen_2 == 0) {
-		efree(ustring1);
-		efree(ustring2);
-		RETURN_LONG(strlen_1 * cost_del);
+		RETVAL_LONG(strlen_1 * cost_del);
+		goto out_ustring2;
 	}
 
 	unsigned char u_break_iterator_buffer1[U_BRK_SAFECLONE_BUFFERSIZE];
@@ -1018,33 +1015,25 @@ PHP_FUNCTION(grapheme_levenshtein)
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 		intl_error_set_custom_msg(NULL, "Error on grapheme_get_break_iterator for argument #1 ($string1)", 0);
-		efree(ustring2);
-		efree(ustring1);
-		ubrk_close(bi1);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_bi1;
 	}
 
 	bi2 = grapheme_get_break_iterator(u_break_iterator_buffer2, &ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 		intl_error_set_custom_msg(NULL, "Error on grapheme_get_break_iterator for argument #2 ($string2)", 0);
-		efree(ustring2);
-		efree(ustring1);
-		ubrk_close(bi2);
-		ubrk_close(bi1);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_bi2;
 	}
-	ubrk_setText(bi1, ustring1, ustring1_len, &ustatus);
 
+	ubrk_setText(bi1, ustring1, ustring1_len, &ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
 		intl_error_set_custom_msg(NULL, "Error on ubrk_setText for argument #1 ($string1)", 0);
-		efree(ustring2);
-		efree(ustring1);
-		ubrk_close(bi2);
-		ubrk_close(bi1);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_bi2;
 	}
 
 	ubrk_setText(bi2, ustring2, ustring2_len, &ustatus);
@@ -1052,23 +1041,16 @@ PHP_FUNCTION(grapheme_levenshtein)
 		intl_error_set_code(NULL, ustatus);
 
 		intl_error_set_custom_msg(NULL, "Error on ubrk_setText for argument #2 ($string2)", 0);
-		efree(ustring2);
-		efree(ustring1);
-		ubrk_close(bi2);
-		ubrk_close(bi1);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_bi2;
 	}
 	UCollator *collator = ucol_open("", &ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
 		intl_error_set_custom_msg(NULL, "Error on ucol_open", 0);
-		efree(ustring2);
-		efree(ustring1);
-		ubrk_close(bi2);
-		ubrk_close(bi1);
-		ucol_close(collator);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_collator;
 	}
 
 	zend_long *p1, *p2, *tmp;
@@ -1118,19 +1100,22 @@ PHP_FUNCTION(grapheme_levenshtein)
 		p2 = tmp;
 	}
 
-	ucol_close(collator);
-
-	ubrk_close(bi1);
-	ubrk_close(bi2);
-
-	efree(ustring1);
-	efree(ustring2);
-
 	retval = p1[strlen_2];
+	RETVAL_LONG(retval);
 
-	efree(p1);
 	efree(p2);
-	RETURN_LONG(retval);
+	efree(p1);
+
+out_collator:
+	ucol_close(collator);
+out_bi2:
+	ubrk_close(bi2);
+out_bi1:
+	ubrk_close(bi1);
+out_ustring2:
+	efree(ustring2);
+out_ustring1:
+	efree(ustring1);
 }
 
 /* }}} */
