@@ -1495,7 +1495,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-static inline void _zend_dirname(zval *return_value, zend_string *str, zend_long levels)
+static void _zend_dirname(zval *return_value, zend_string *str, zend_long levels)
 {
 	zend_string *ret;
 
@@ -1740,7 +1740,7 @@ PHP_FUNCTION(stristr)
 }
 /* }}} */
 
-static inline void _zend_strstr(zval *return_value, zend_string *haystack, zend_string *needle, bool part)
+static void _zend_strstr(zval *return_value, zend_string *haystack, zend_string *needle, bool part)
 {
 	const char *found = NULL;
 	zend_long found_offset;
@@ -1884,7 +1884,7 @@ PHP_FUNCTION(str_ends_with)
 }
 /* }}} */
 
-static inline void _zend_strpos(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
+static void _zend_strpos(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
 {
 	const char *found = NULL;
 
@@ -2218,7 +2218,7 @@ PHP_FUNCTION(chunk_split)
 }
 /* }}} */
 
-static inline void _zend_substr(zval *return_value, zend_string *str, zend_long f, bool len_is_null, zend_long l)
+static void _zend_substr(zval *return_value, zend_string *str, zend_long f, bool len_is_null, zend_long l)
 {
 	if (f < 0) {
 		/* if "from" position is negative, count start position from the end

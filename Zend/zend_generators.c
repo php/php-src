@@ -213,7 +213,7 @@ static zend_always_inline void clear_link_to_root(zend_generator *generator) {
 }
 
 /* Check if the node 'generator' is running in a fiber */
-static inline bool check_node_running_in_fiber(zend_generator *generator) {
+static bool check_node_running_in_fiber(zend_generator *generator) {
 	ZEND_ASSERT(generator->execute_data);
 
 	if (EXPECTED(generator->flags & ZEND_GENERATOR_IN_FIBER)) {
@@ -872,7 +872,7 @@ try_again:
 }
 /* }}} */
 
-static inline void zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
+static void zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
 {
 	if (UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->execute_data) && EXPECTED(generator->node.parent == NULL)) {
 		zend_generator_resume(generator);
@@ -881,7 +881,7 @@ static inline void zend_generator_ensure_initialized(zend_generator *generator) 
 }
 /* }}} */
 
-static inline void zend_generator_rewind(zend_generator *generator) /* {{{ */
+static void zend_generator_rewind(zend_generator *generator) /* {{{ */
 {
 	zend_generator_ensure_initialized(generator);
 

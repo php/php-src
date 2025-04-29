@@ -82,7 +82,7 @@
 #define HTTP_WRAPPER_REDIRECTED     2
 #define HTTP_WRAPPER_KEEP_METHOD    4
 
-static inline void strip_header(char *header_bag, char *lc_header_bag,
+static void strip_header(char *header_bag, char *lc_header_bag,
 		const char *lc_header_name)
 {
 	char *lc_header_start = strstr(lc_header_bag, lc_header_name);

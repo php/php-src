@@ -818,7 +818,7 @@ PHP_FUNCTION(rsort)
 }
 /* }}} */
 
-static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval args[2];
 	zval retval;
@@ -923,7 +923,7 @@ PHP_FUNCTION(uasort)
 }
 /* }}} */
 
-static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval args[2];
 	zval retval;
@@ -1614,7 +1614,7 @@ PHP_FUNCTION(array_walk_recursive)
  * 0 = return boolean
  * 1 = return key
  */
-static inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
+static zend_always_inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
 {
 	zval *entry; /* pointer to array entry */
 	zend_ulong num_idx;
@@ -1706,7 +1706,7 @@ static inline void _php_search_array(zval *return_value, zval *value, zval *arra
  * 0 = return boolean
  * 1 = return key
  */
-static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
 	zval *value,		/* value to check for */
 		 *array;		/* array to check in */

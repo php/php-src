@@ -29,17 +29,17 @@
 
 ZEND_API zend_ast_process_t zend_ast_process = NULL;
 
-static inline void *zend_ast_alloc(size_t size) {
+static void *zend_ast_alloc(size_t size) {
 	return zend_arena_alloc(&CG(ast_arena), size);
 }
 
-static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size) {
+static void *zend_ast_realloc(void *old, size_t old_size, size_t new_size) {
 	void *new = zend_ast_alloc(new_size);
 	memcpy(new, old, old_size);
 	return new;
 }
 
-static inline size_t zend_ast_list_size(uint32_t children) {
+static size_t zend_ast_list_size(uint32_t children) {
 	return sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
 }
 
@@ -494,7 +494,7 @@ zend_ast *zend_ast_create_concat_op(zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_binary_op(ZEND_CONCAT, op0, op1);
 }
 
-static inline bool is_power_of_two(uint32_t n) {
+static zend_always_inline bool is_power_of_two(uint32_t n) {
 	return ((n != 0) && (n == (n & (~n + 1))));
 }
 

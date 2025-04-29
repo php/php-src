@@ -296,7 +296,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
-static inline char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
+static char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
 {
 	char *mimetype, *charset, *content_type;
 	uint32_t mimetype_len, charset_len;

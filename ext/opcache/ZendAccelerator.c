@@ -230,7 +230,7 @@ static ZEND_FUNCTION(accel_chdir)
 	ZCG(cwd_check) = true;
 }
 
-static inline zend_string* accel_getcwd(void)
+static zend_string* accel_getcwd(void)
 {
 	if (ZCG(cwd)) {
 		return ZCG(cwd);

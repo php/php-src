@@ -1249,7 +1249,7 @@ static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *
 
 #define APPENDIT_CHECK_CTOR(intern) SPL_CHECK_CTOR(intern, AppendIterator)
 
-static inline zend_result spl_dual_it_fetch(spl_dual_it_object *intern, int check_more);
+static zend_result spl_dual_it_fetch(spl_dual_it_object *intern, int check_more);
 
 static inline zend_result spl_cit_check_flags(zend_long flags)
 {
@@ -1481,7 +1481,7 @@ static inline zend_result spl_dual_it_valid(spl_dual_it_object *intern)
 	return intern->inner.iterator->funcs->valid(intern->inner.iterator);
 }
 
-static inline zend_result spl_dual_it_fetch(spl_dual_it_object *intern, int check_more)
+static zend_result spl_dual_it_fetch(spl_dual_it_object *intern, int check_more)
 {
 	zval *data;
 
@@ -2125,7 +2125,7 @@ static inline zend_result spl_limit_it_valid(spl_dual_it_object *intern)
 	}
 }
 
-static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
+static void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
 {
 	zval  zpos;
 

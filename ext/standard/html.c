@@ -86,7 +86,7 @@ static char *get_default_charset(void) {
 /* }}} */
 
 /* {{{ get_next_char */
-static inline unsigned int get_next_char(
+static unsigned int get_next_char(
 		enum entity_charset charset,
 		const unsigned char *str,
 		size_t str_len,
@@ -451,7 +451,7 @@ static inline unsigned char unimap_bsearch(const uni_to_enc *table, unsigned cod
 /* }}} */
 
 /* {{{ map_from_unicode */
-static inline zend_result map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
+static zend_result map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
 {
 	unsigned char found;
 	const uni_to_enc *table;
@@ -1381,7 +1381,7 @@ PHP_FUNCTION(htmlentities)
 /* }}} */
 
 /* {{{ write_s3row_data */
-static inline void write_s3row_data(
+static void write_s3row_data(
 	const entity_stage3_row *r,
 	unsigned orig_cp,
 	enum entity_charset charset,
