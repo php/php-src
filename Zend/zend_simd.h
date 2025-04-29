@@ -38,7 +38,7 @@ typedef int8x16_t __m128i;
 		(int16_t) (x3), (int16_t) (x2), (int16_t) (x1), (int16_t) (x0) })
 #define _mm_set_epi32(x0, x1, x2, x3) \
 	vreinterpretq_s8_s32((int32x4_t) { (int32_t) (x3), (int32_t) (x2), (int32_t) (x1), (int32_t) (x0) })
-#define _mm_set_epi64(x0, x1) vreinterpretq_s8_s64((int64x2_t) { (int64_t) (x1), (int64_t) (x0) })
+#define _mm_set_epi64x(x0, x1) vreinterpretq_s8_s64((int64x2_t) { (int64_t) (x1), (int64_t) (x0) })
 #define _mm_load_si128(x) vld1q_s8((const int8_t *) (x))
 #define _mm_loadu_si128(x) _mm_load_si128(x)
 #define _mm_store_si128(to, x) vst1q_s8((int8_t *) (to), x)
