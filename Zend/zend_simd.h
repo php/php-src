@@ -56,7 +56,7 @@ typedef int8x16_t __m128i;
 #define _mm_cmplt_epi8(a, b) (vreinterpretq_s8_u8(vcltq_s8(a, b)))
 #define _mm_cmpgt_epi8(a, b) (vreinterpretq_s8_u8(vcgtq_s8(a, b)))
 
-static zend_always_inline int _mm_movemask_epi8(int8x16_t x)
+static zend_always_inline int _mm_movemask_epi8(__m128i x)
 {
     /**
      * based on code from
