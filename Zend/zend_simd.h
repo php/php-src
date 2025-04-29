@@ -47,8 +47,13 @@ typedef int8x16_t __m128i;
 #define _mm_or_si128(a, b) vorrq_s8(a, b)
 #define _mm_xor_si128(a, b) veorq_s8(a, b)
 #define _mm_and_si128(a, b) vandq_s8(a, b)
-#define _mm_srli_si128(x, bytes) vreinterpretq_s8_u8(vextq_u8(vdupq_n_u8(0), vreinterpretq_u8_s8(x), bytes))
-#define _mm_slli_si128(x, bytes) vreinterpretq_s8_u8(vextq_u8(vreinterpretq_u8_s8(x), vdupq_n_u8(0), 16 - bytes))
+
+#define _mm_slli_si128(x, imm) \
+    ((imm) >= 16 ? vdupq_n_s8(0) : \
+     vreinterpretq_s8_u8(vextq_u8(vdupq_n_u8(0), vreinterpretq_u8_s8(x), 16 - (imm))))
+#define _mm_srli_si128(x, imm) \
+    ((imm) >= 16 ? vdupq_n_s8(0) : \
+     vreinterpretq_s8_u8(vextq_u8(vreinterpretq_u8_s8(x), vdupq_n_u8(0), (imm))))
 
 #define _mm_add_epi8(a, b) vaddq_s8(a, b)
 
