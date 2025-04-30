@@ -35,8 +35,6 @@ PHP                                                                        NEWS
 24 Apr 2025, PHP 8.4.7
 
 - Core:
-  . Fixed bug GH-17711 and GH-18022 (Infinite recursion on deprecated attribute
-    evaluation). (ilutov)
   . Fixed bug GH-18038 (Lazy proxy calls magic methods twice). (Arnaud)
   . Fixed bug GH-18209 (Use-after-free in extract() with EXTR_REFS). (ilutov)
   . Fixed bug GH-18268 (Segfault in array_walk() on object with added property
