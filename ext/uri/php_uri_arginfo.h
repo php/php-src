@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 90902634fedd28f17d862a8a825b8f0c48718346 */
+ * Stub hash: d3ee538cdb5a57b103c9a5f304719a8f1782471f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -165,7 +165,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_toUnicodeString arginfo_class_Uri_Rfc3986_Uri_getPath
 
-#define arginfo_class_Uri_WhatWg_Url_resolve arginfo_class_Uri_Rfc3986_Uri_resolve
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_resolve, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, softErrors, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url___serialize arginfo_class_Uri_Rfc3986_Uri___serialize
 
@@ -219,6 +222,7 @@ ZEND_METHOD(Uri_WhatWg_Url, withHost);
 ZEND_METHOD(Uri_WhatWg_Url, equals);
 ZEND_METHOD(Uri_WhatWg_Url, toAsciiString);
 ZEND_METHOD(Uri_WhatWg_Url, toUnicodeString);
+ZEND_METHOD(Uri_WhatWg_Url, resolve);
 ZEND_METHOD(Uri_WhatWg_Url, __unserialize);
 
 static const zend_function_entry class_Uri_Rfc3986_Uri_methods[] = {
@@ -286,7 +290,7 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_ME(Uri_WhatWg_Url, equals, arginfo_class_Uri_WhatWg_Url_equals, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, toAsciiString, arginfo_class_Uri_WhatWg_Url_toAsciiString, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, toUnicodeString, arginfo_class_Uri_WhatWg_Url_toUnicodeString, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("resolve", zim_Uri_Rfc3986_Uri_resolve, arginfo_class_Uri_WhatWg_Url_resolve, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Uri_WhatWg_Url, resolve, arginfo_class_Uri_WhatWg_Url_resolve, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("__serialize", zim_Uri_Rfc3986_Uri___serialize, arginfo_class_Uri_WhatWg_Url___serialize, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Uri_WhatWg_Url, __unserialize, arginfo_class_Uri_WhatWg_Url___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("__debugInfo", zim_Uri_Rfc3986_Uri___debugInfo, arginfo_class_Uri_WhatWg_Url___debugInfo, ZEND_ACC_PUBLIC, NULL, NULL)
