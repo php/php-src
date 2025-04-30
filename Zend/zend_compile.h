@@ -204,7 +204,7 @@ typedef struct _zend_oparray_context {
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
-	const zend_property_info *active_property_info;
+	zend_string *active_property_info_name;
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
 } zend_oparray_context;
@@ -333,7 +333,7 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 29-30)                         |     |     |     */
+/* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -394,6 +394,14 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* Has IS_PTR operands that needs special cleaning; same  |     |     |     */
+/* value as ZEND_ACC_OVERRIDE but override is for class   |     |     |     */
+/* methods and this is for the top level op array         |     |     |     */
+#define ZEND_ACC_PTR_OPS                 (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* has #[\NoDiscard] attribute                            |     |     |     */
+#define ZEND_ACC_NODISCARD               (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
@@ -464,6 +472,8 @@ typedef struct _zend_property_info {
 	((uint32_t)(XtOffsetOf(zend_object, properties_table) + sizeof(zval) * (num)))
 #define OBJ_PROP_TO_NUM(offset) \
 	(((offset) - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
+#define OBJ_PROP_SLOT_TO_OFFSET(obj, slot) \
+	((uintptr_t)(slot) - (uintptr_t)(obj))
 
 typedef struct _zend_class_constant {
 	zval value; /* flags are stored in u2 */
@@ -981,7 +991,7 @@ ZEND_API bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(const zend_string *name);
-ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc);
+ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc, bool result_used);
 ZEND_API bool zend_is_smart_branch(const zend_op *opline);
 
 typedef bool (*zend_auto_global_callback)(zend_string *name);
@@ -1092,6 +1102,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
 #define ZEND_FREE_SWITCH        (1<<1)
+#define ZEND_FREE_VOID_CAST     (1<<2)
 
 #define ZEND_SEND_BY_VAL     0u
 #define ZEND_SEND_BY_REF     1u
@@ -1294,5 +1305,7 @@ END_EXTERN_C()
 ZEND_API bool zend_is_op_long_compatible(const zval *op);
 ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, const zval *op2);
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op);
+
+bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1);
 
 #endif /* ZEND_COMPILE_H */

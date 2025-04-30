@@ -30,7 +30,7 @@ struct pdo_sqlite_func {
 	struct pdo_sqlite_func *next;
 
 	int argc;
-	const char *funcname;
+	zend_string *funcname;
 
 	/* accelerated callback references */
 	zend_fcall_info_cache func;
@@ -41,7 +41,7 @@ struct pdo_sqlite_func {
 struct pdo_sqlite_collation {
 	struct pdo_sqlite_collation *next;
 
-	const char *name;
+	zend_string *name;
 	zend_fcall_info_cache callback;
 };
 
@@ -50,6 +50,7 @@ typedef struct {
 	pdo_sqlite_error_info einfo;
 	struct pdo_sqlite_func *funcs;
 	struct pdo_sqlite_collation *collations;
+	zend_fcall_info_cache authorizer_fcc;
 } pdo_sqlite_db_handle;
 
 typedef struct {

@@ -35,7 +35,7 @@ extern zend_module_entry xmlwriter_module_entry;
 /* Extends zend object */
 typedef struct _ze_xmlwriter_object {
 	xmlTextWriterPtr ptr;
-	xmlBufferPtr output;
+	smart_str *output;
 	zend_object std;
 } ze_xmlwriter_object;
 

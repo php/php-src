@@ -35,6 +35,6 @@ unlink( $filename );
 
  Initial file size = 36
 -- Testing ftruncate() with closed/unset file handle --
-ftruncate(): supplied resource is not a valid stream resource
+ftruncate(): Argument #1 ($stream) must be an open stream resource
 int(36)
 Done

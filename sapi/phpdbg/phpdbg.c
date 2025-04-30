@@ -429,7 +429,8 @@ PHP_FUNCTION(phpdbg_start_oplog)
 static zend_always_inline bool phpdbg_is_ignored_opcode(uint8_t opcode) {
 	return
 	    opcode == ZEND_NOP || opcode == ZEND_OP_DATA || opcode == ZEND_FE_FREE || opcode == ZEND_FREE || opcode == ZEND_ASSERT_CHECK || opcode == ZEND_VERIFY_RETURN_TYPE
-	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_FUNCTION
+	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_ATTRIBUTED_CONST
+	 || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_FUNCTION
 	 || opcode == ZEND_DECLARE_CLASS_DELAYED
 	 || opcode == ZEND_DECLARE_ANON_CLASS || opcode == ZEND_FAST_RET || opcode == ZEND_TICKS
 	 || opcode == ZEND_EXT_STMT || opcode == ZEND_EXT_FCALL_BEGIN || opcode == ZEND_EXT_FCALL_END
@@ -851,6 +852,7 @@ typedef struct {
 	int fd;
 } php_stdio_stream_data;
 
+#ifndef _WIN32
 static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count) {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
@@ -877,6 +879,7 @@ static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t c
 
 	return PHPDBG_G(php_stdiop_write)(stream, buf, count);
 }
+#endif
 
 /* copied from sapi/cli/php_cli.c cli_register_file_handles */
 void phpdbg_register_file_handles(void) /* {{{ */
@@ -1120,8 +1123,8 @@ int main(int argc, char **argv) /* {{{ */
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *sapi_name;
 	struct php_ini_builder ini_builder;
-	char **zend_extensions = NULL;
-	zend_ulong zend_extensions_len = 0L;
+	char **zend_extensions_list = NULL;
+	size_t zend_extensions_len = 0;
 	bool ini_ignore;
 	char *ini_override;
 	char *exec = NULL;
@@ -1173,8 +1176,6 @@ phpdbg_main:
 	php_ini_builder_init(&ini_builder);
 	ini_ignore = 0;
 	ini_override = NULL;
-	zend_extensions = NULL;
-	zend_extensions_len = 0L;
 	init_file = NULL;
 	init_file_len = 0;
 	init_file_default = 1;
@@ -1212,10 +1213,12 @@ phpdbg_main:
 
 			case 'z':
 				zend_extensions_len++;
-				if (zend_extensions) {
-					zend_extensions = realloc(zend_extensions, sizeof(char*) * zend_extensions_len);
-				} else zend_extensions = malloc(sizeof(char*) * zend_extensions_len);
-				zend_extensions[zend_extensions_len-1] = strdup(php_optarg);
+				if (zend_extensions_list) {
+					zend_extensions_list = realloc(zend_extensions_list, sizeof(char*) * zend_extensions_len);
+				} else {
+					zend_extensions_list = malloc(sizeof(char*) * zend_extensions_len);
+				}
+				zend_extensions_list[zend_extensions_len-1] = strdup(php_optarg);
 			break;
 
 			/* begin phpdbg options */
@@ -1312,19 +1315,19 @@ phpdbg_main:
 	php_ini_builder_prepend_literal(&ini_builder, phpdbg_ini_hardcoded);
 
 	if (zend_extensions_len) {
-		zend_ulong zend_extension = 0L;
+		size_t zend_extension_index = 0;
 
-		while (zend_extension < zend_extensions_len) {
-			const char *ze = zend_extensions[zend_extension];
+		while (zend_extension_index < zend_extensions_len) {
+			const char *ze = zend_extensions_list[zend_extension_index];
 			size_t ze_len = strlen(ze);
 
 			php_ini_builder_unquoted(&ini_builder, "zend_extension", strlen("zend_extension"), ze, ze_len);
 
-			free(zend_extensions[zend_extension]);
-			zend_extension++;
+			free(zend_extensions_list[zend_extension_index]);
+			zend_extension_index++;
 		}
 
-		free(zend_extensions);
+		free(zend_extensions_list);
 	}
 
 	phpdbg->ini_entries = php_ini_builder_finish(&ini_builder);

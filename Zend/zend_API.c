@@ -1439,7 +1439,7 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&class_type->constants_table, key, c) {
 		if (c->ce == class_type) {
-			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+			if (Z_TYPE(c->value) == IS_CONSTANT_AST || (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
 				new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 				memcpy(new_c, c, sizeof(zend_class_constant));
 				c = new_c;
@@ -2698,6 +2698,12 @@ static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_
 
 static void zend_check_magic_method_return_type(const zend_class_entry *ce, const zend_function *fptr, int error_type, int return_type)
 {
+	if (return_type == MAY_BE_VOID) {
+		if (fptr->common.fn_flags & ZEND_ACC_NODISCARD) {
+			zend_error_noreturn(error_type, "Method %s::%s cannot be #[\\NoDiscard]", ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		}
+	}
+
 	if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		/* For backwards compatibility reasons, do not enforce the return type if it is not set. */
 		return;
@@ -2756,6 +2762,10 @@ static void zend_check_magic_method_no_return_type(
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_error_noreturn(error_type, "Method %s::%s() cannot declare a return type",
 			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+	}
+
+	if (fptr->common.fn_flags & ZEND_ACC_NODISCARD) {
+		zend_error_noreturn(error_type, "Method %s::%s cannot be #[\\NoDiscard]", ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
 	}
 }
 
@@ -2904,14 +2914,14 @@ static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
 		ZEND_ASSERT(!ZEND_TYPE_CONTAINS_CODE(*type, IS_RESOURCE) && "resource is not allowed in a zend_type");
 	}
 	zend_type *current;
-	ZEND_TYPE_FOREACH(*type, current) {
+	ZEND_TYPE_FOREACH_MUTABLE(*type, current) {
 		if (ZEND_TYPE_HAS_NAME(*current)) {
 			zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*current));
 			zend_alloc_ce_cache(name);
 			ZEND_TYPE_SET_PTR(*current, name);
 		} else if (ZEND_TYPE_HAS_LIST(*current)) {
 			zend_type *inner;
-			ZEND_TYPE_FOREACH(*current, inner) {
+			ZEND_TYPE_FOREACH_MUTABLE(*current, inner) {
 				ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*inner) && !ZEND_TYPE_HAS_LIST(*inner));
 				if (ZEND_TYPE_HAS_NAME(*inner)) {
 					zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*inner));
@@ -3761,7 +3771,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 	zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name), name_len);
 
 	*strict_class = 0;
-	if (zend_string_equals_literal(lcname, "self")) {
+	if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_SELF))) {
 		if (!scope) {
 			if (error) *error = estrdup("cannot access \"self\" when no class scope is active");
 		} else {
@@ -3778,7 +3788,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			}
 			ret = 1;
 		}
-	} else if (zend_string_equals_literal(lcname, "parent")) {
+	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		if (!scope) {
 			if (error) *error = estrdup("cannot access \"parent\" when no class scope is active");
 		} else if (!scope->parent) {
@@ -4138,6 +4148,19 @@ try_again:
 		case IS_OBJECT:
 		{
 			zend_class_entry *ce = Z_OBJCE_P(callable);
+
+			if (ce == zend_ce_closure) {
+				const zend_function *fn = zend_get_closure_method_def(Z_OBJ_P(callable));
+
+				if (fn->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+					if (fn->common.scope) {
+						return zend_create_member_string(fn->common.scope->name, fn->common.function_name);
+					} else {
+						return zend_string_copy(fn->common.function_name);
+					}
+				}
+			}
+
 			return zend_string_concat2(
 				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
 				"::__invoke", sizeof("::__invoke") - 1);
@@ -4667,8 +4690,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_ex(zend_reference *ref, zval *val
 		zval_ptr_dtor(val);
 		return FAILURE;
 	} else {
-		zval_ptr_dtor(&ref->val);
-		ZVAL_COPY_VALUE(&ref->val, val);
+		zend_safe_assign_to_variable_noref(&ref->val, val);
 		return SUCCESS;
 	}
 }

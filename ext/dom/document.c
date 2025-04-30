@@ -194,13 +194,12 @@ zend_result dom_document_version_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	/* Cannot fail because the type is either null or a string. */
-	zend_string *str = zval_get_string(newval);
+	/* Type is ?string */
+	zend_string *str = Z_TYPE_P(newval) == IS_NULL ? ZSTR_EMPTY_ALLOC() : Z_STR_P(newval);
 
 	if (php_dom_follow_spec_intern(obj)) {
 		if (!zend_string_equals_literal(str, "1.0") && !zend_string_equals_literal(str, "1.1")) {
 			zend_value_error("Invalid XML version");
-			zend_string_release_ex(str, 0);
 			return FAILURE;
 		}
 	}
@@ -211,7 +210,6 @@ zend_result dom_document_version_write(dom_object *obj, zval *newval)
 
 	docp->version = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -349,14 +347,14 @@ zend_result dom_document_recover_write(dom_object *obj, zval *newval)
 /* {{{ substituteEntities	boolean
 readonly=no
 */
-zend_result dom_document_substitue_entities_read(dom_object *obj, zval *retval)
+zend_result dom_document_substitute_entities_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->substituteentities);
 	return SUCCESS;
 }
 
-zend_result dom_document_substitue_entities_write(dom_object *obj, zval *newval)
+zend_result dom_document_substitute_entities_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
@@ -394,8 +392,8 @@ zend_result dom_document_document_uri_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	/* Cannot fail because the type is either null or a string. */
-	zend_string *str = zval_get_string(newval);
+	/* Type is ?string */
+	zend_string *str = Z_TYPE_P(newval) == IS_NULL ? ZSTR_EMPTY_ALLOC() : Z_STR_P(newval);
 
 	if (docp->URL != NULL) {
 		xmlFree(BAD_CAST docp->URL);
@@ -403,7 +401,6 @@ zend_result dom_document_document_uri_write(dom_object *obj, zval *newval)
 
 	docp->URL = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -1074,7 +1071,7 @@ PHP_METHOD(DOMDocument, getElementById)
 }
 /* }}} end dom_document_get_element_by_id */
 
-static zend_always_inline void php_dom_transfer_document_ref_single_node(xmlNodePtr node, php_libxml_ref_obj *new_document)
+static void php_dom_transfer_document_ref_single_node(xmlNodePtr node, php_libxml_ref_obj *new_document)
 {
 	php_libxml_node_ptr *iteration_object_ptr = node->_private;
 	if (iteration_object_ptr) {
@@ -1087,21 +1084,25 @@ static zend_always_inline void php_dom_transfer_document_ref_single_node(xmlNode
 	}
 }
 
+static void php_dom_transfer_document_ref_single_aux(xmlNodePtr node, php_libxml_ref_obj *new_document)
+{
+	php_dom_transfer_document_ref_single_node(node, new_document);
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+			php_dom_transfer_document_ref_single_node((xmlNodePtr) attr, new_document);
+		}
+	}
+}
+
 static void php_dom_transfer_document_ref(xmlNodePtr node, php_libxml_ref_obj *new_document)
 {
-	if (node->children) {
-		php_dom_transfer_document_ref(node->children, new_document);
-	}
+	xmlNodePtr base = node;
+	php_dom_transfer_document_ref_single_aux(base, new_document);
 
-	while (node) {
-		if (node->type == XML_ELEMENT_NODE) {
-			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
-				php_dom_transfer_document_ref_single_node((xmlNodePtr) attr, new_document);
-			}
-		}
-
-		php_dom_transfer_document_ref_single_node(node, new_document);
-		node = node->next;
+	node = node->children;
+	while (node != NULL) {
+		php_dom_transfer_document_ref_single_aux(node, new_document);
+		node = php_dom_next_in_tree_order(node, base);
 	}
 }
 
@@ -1279,10 +1280,7 @@ PHP_METHOD(DOMDocument, __construct)
 		}
 	}
 	intern->document = NULL;
-	if (php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp) == -1) {
-		/* docp is always non-null so php_libxml_increment_doc_ref() never returns -1 */
-		ZEND_UNREACHABLE();
-	}
+	php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)docp, (void *)intern);
 }
 /* }}} end DOMDocument::__construct */
@@ -1491,9 +1489,7 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 			}
 		}
 		intern->document = NULL;
-		if (php_libxml_increment_doc_ref((php_libxml_node_object *)intern, newdoc) == -1) {
-			RETURN_FALSE;
-		}
+		php_libxml_increment_doc_ref((php_libxml_node_object *)intern, newdoc);
 		intern->document->doc_props = doc_prop;
 		intern->document->class_type = class_type;
 	}

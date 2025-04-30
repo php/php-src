@@ -50,9 +50,9 @@ try {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 string(2) "-1"
-gmp_setbit(): Argument #2 ($index) must be greater than or equal to 0
+gmp_setbit(): Argument #2 ($index) must be between 0 and %d * %d
 string(1) "5"
 string(1) "1"
 string(1) "7"

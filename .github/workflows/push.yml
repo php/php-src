@@ -78,7 +78,8 @@ jobs:
             zts: true
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-${{ !matrix.asan && '22' || '24' }}.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -139,12 +140,14 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
+    timeout-minutes: 50
     container:
-      image: ubuntu:22.04
+      image: ubuntu:24.04
     env:
       MYSQL_TEST_HOST: mysql
       PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
       PDO_MYSQL_TEST_HOST: mysql
+      PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
       mysql:
         image: mysql:8.3
@@ -153,6 +156,15 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -186,12 +198,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 13
-            arch: X64
           - os: 14
             arch: ARM64
     name: MACOS_${{ matrix.arch }}_DEBUG_NTS
     runs-on: macos-${{ matrix.os }}
+    timeout-minutes: 50
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -226,6 +237,7 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
     runs-on: windows-2022
+    timeout-minutes: 50
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
@@ -251,7 +263,8 @@ jobs:
   BENCHMARKING:
     name: BENCHMARKING
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -355,6 +368,7 @@ jobs:
           path: ${{ github.workspace }}/benchmark/profiles
           retention-days: 30
   FREEBSD:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: FREEBSD
     runs-on: ubuntu-latest
     steps:

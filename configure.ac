@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.4.6-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
+AC_INIT([PHP],[8.5.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -799,6 +799,8 @@ PHP_ARG_ENABLE([debug],
 AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
+  CFLAGS="$CFLAGS -UNDEBUG"
+  CXXFLAGS="$CXXFLAGS -UNDEBUG"
   PHP_REMOVE_OPTIMIZATION_FLAGS
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
@@ -817,6 +819,8 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
 ], [
   PHP_DEBUG=0
   ZEND_DEBUG=no
+  CFLAGS="$CFLAGS -DNDEBUG"
+  CXXFLAGS="$CXXFLAGS -DNDEBUG"
 ])
 
 PHP_ARG_ENABLE([debug-assertions],
@@ -829,6 +833,8 @@ PHP_ARG_ENABLE([debug-assertions],
 AS_VAR_IF([PHP_DEBUG_ASSERTIONS], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
+  CFLAGS="$CFLAGS -UNDEBUG"
+  CXXFLAGS="$CXXFLAGS -UNDEBUG"
 ])
 
 AC_ARG_ENABLE([zts],

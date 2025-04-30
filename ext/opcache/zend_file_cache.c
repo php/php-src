@@ -75,7 +75,7 @@
 # define LOCK_UN 2
 static int zend_file_cache_flock(int fd, int op)
 {
-	OVERLAPPED offset = {0,0,0,0,NULL};
+	OVERLAPPED offset = {0, 0, {{0}}, NULL};
 	if (op == LOCK_EX) {
 		if (LockFileEx((HANDLE)_get_osfhandle(fd),
 		               LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &offset) == TRUE) {
@@ -242,6 +242,22 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
                                              zend_persistent_script  *script,
                                              void                    *buf);
 
+static void zend_file_cache_serialize_func(zval                     *zv,
+                                           zend_persistent_script   *script,
+                                           zend_file_cache_metainfo *info,
+                                           void                     *buf);
+
+static void zend_file_cache_unserialize_func(zval                    *zv,
+                                             zend_persistent_script  *script,
+                                             void                    *buf);
+
+static void zend_file_cache_serialize_attribute(zval                     *zv,
+                                                zend_persistent_script   *script,
+                                                zend_file_cache_metainfo *info,
+                                                void                     *buf);
+
+static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_script *script, void *buf);
+
 static void *zend_file_cache_serialize_interned(zend_string              *str,
                                                 zend_file_cache_metainfo *info)
 {
@@ -363,6 +379,17 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 				zend_file_cache_serialize_ast(tmp, script, info, buf);
 			}
 		}
+	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
+		zval z;
+		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
+		zend_file_cache_serialize_func(&z, script, info, buf);
+		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
+		ZEND_MAP_PTR_INIT(fcc->fptr, NULL);
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
@@ -411,6 +438,9 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 			/* Used by static properties. */
 			SERIALIZE_PTR(Z_INDIRECT_P(zv));
 			break;
+		case IS_PTR:
+			/* Used by attributes on constants, will be handled separately */
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
@@ -448,7 +478,7 @@ static void zend_file_cache_serialize_type(
 		UNSERIALIZE_PTR(list);
 
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(list, list_type) {
 			zend_file_cache_serialize_type(list_type, script, info, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
@@ -529,6 +559,13 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		UNSERIALIZE_PTR(opline);
 		end = opline + op_array->last;
 		while (opline < end) {
+			if (opline->opcode == ZEND_OP_DATA
+				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
+			) {
+				zval *literal = RT_CONSTANT(opline, opline->op1);
+				SERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
+			}
+
 #if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op1.zv);
@@ -1100,6 +1137,10 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	}
 #endif
 
+	if (ZCG(accel_directives).file_cache_read_only) {
+		return FAILURE;
+	}
+
 	filename = zend_file_cache_get_bin_file_path(script->script.filename);
 
 	if (zend_file_cache_mkdir(filename, strlen(ZCG(accel_directives).file_cache)) != SUCCESS) {
@@ -1238,6 +1279,17 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 				zend_file_cache_unserialize_ast(list->child[i], script, buf);
 			}
 		}
+	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
+		zval z;
+		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
+		zend_file_cache_unserialize_func(&z, script, buf);
+		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
+		ZEND_MAP_PTR_NEW(fcc->fptr);
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
@@ -1281,6 +1333,9 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			/* Used by static properties. */
 			UNSERIALIZE_PTR(Z_INDIRECT_P(zv));
 			break;
+		case IS_PTR:
+			/* Used by attributes on constants, will be handled separately */
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
@@ -1313,7 +1368,7 @@ static void zend_file_cache_unserialize_type(
 		ZEND_TYPE_SET_PTR(*type, list);
 
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(list, list_type) {
 			zend_file_cache_unserialize_type(list_type, scope, script, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
@@ -1450,6 +1505,13 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					break;
 			}
 #endif
+
+			if (opline->opcode == ZEND_OP_DATA
+				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
+			) {
+				zval *literal = RT_CONSTANT(opline, opline->op1);
+				UNSERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
+			}
 			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}
@@ -1843,7 +1905,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (info)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		efree(filename);
 		return NULL;
 	}
@@ -1853,7 +1917,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong header)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		efree(filename);
 		return NULL;
 	}
@@ -1861,7 +1927,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong \"system_id\")\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		efree(filename);
 		return NULL;
 	}
@@ -1873,7 +1941,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
 		}
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		efree(filename);
 		return NULL;
 	}
@@ -1891,7 +1961,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (mem)\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
@@ -1905,7 +1977,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if (ZCG(accel_directives).file_cache_consistency_checks &&
 	    (actual_checksum = zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size)) != info.checksum) {
 		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s' excepted checksum: 0x%08x actual checksum: 0x%08x\n", filename, info.checksum, actual_checksum);
-		zend_file_cache_unlink(filename);
+		if (!ZCG(accel_directives).file_cache_read_only) {
+			zend_file_cache_unlink(filename);
+		}
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
@@ -1997,6 +2071,10 @@ use_process_mem:
 
 void zend_file_cache_invalidate(zend_string *full_path)
 {
+	if (ZCG(accel_directives).file_cache_read_only) {
+		return;
+	}
+	
 	char *filename;
 
 	filename = zend_file_cache_get_bin_file_path(full_path);

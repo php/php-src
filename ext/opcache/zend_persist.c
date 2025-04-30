@@ -188,6 +188,19 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 			}
 		}
 		node = (zend_ast *) copy;
+	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
+		zend_ast_op_array *copy = zend_shared_memdup(ast, sizeof(zend_ast_op_array));
+		zval z;
+		ZVAL_PTR(&z, copy->op_array);
+		zend_persist_op_array(&z);
+		copy->op_array = Z_PTR(z);
+		node = (zend_ast *) copy;
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *copy = zend_shared_memdup(ast, sizeof(zend_ast_fcc));
+		node = (zend_ast *) copy;
+	} else if (zend_ast_is_decl(ast)) {
+		/* Not implemented. */
+		ZEND_UNREACHABLE();
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		node = zend_shared_memdup(ast, zend_ast_size(children));
@@ -267,6 +280,8 @@ static void zend_persist_zval(zval *z)
 				efree(old_ref);
 			}
 			break;
+		case IS_PTR:
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;
@@ -318,8 +333,8 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name)
 {
 	uint32_t ret;
 
-	if (zend_string_equals_literal_ci(type_name, "self") ||
-			zend_string_equals_literal_ci(type_name, "parent")) {
+	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_SELF)) ||
+			zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return 0;
 	}
 
@@ -354,7 +369,7 @@ static void zend_persist_type(zend_type *type) {
 	}
 
 	zend_type *single_type;
-	ZEND_TYPE_FOREACH(*type, single_type) {
+	ZEND_TYPE_FOREACH_MUTABLE(*type, single_type) {
 		if (ZEND_TYPE_HAS_LIST(*single_type)) {
 			zend_persist_type(single_type);
 			continue;
@@ -599,6 +614,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				}
 			}
 #endif
+			if (opline->opcode == ZEND_OP_DATA && (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST) {
+				zval *literal = RT_CONSTANT(opline, opline->op1);
+				HashTable *attributes = Z_PTR_P(literal);
+				attributes = zend_persist_attributes(attributes);
+				ZVAL_PTR(literal, attributes);
+			}
 		}
 
 		efree(op_array->opcodes);

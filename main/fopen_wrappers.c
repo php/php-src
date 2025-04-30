@@ -531,7 +531,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
 		   might be a big thing to extend, thus just a local handling for
 		   now. */
-		filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
+		(filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1])) ||
 #endif
 	    !path ||
 	    !*path) {

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7a1b6eb454be08742ba45131de8ec57ec70a88c7 */
+ * Stub hash: adcf3b6ef720a518087efedbe2b62b10ad4b2624 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -489,6 +489,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_str_split, 0, 1, MAY_BE
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_levenshtein, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, insertion_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, replacement_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deletion_cost, IS_LONG, 0, "1")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -566,6 +574,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_accept_from_http, 0, 1, M
 	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_is_right_to_left, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_msgfmt_create, 0, 2, MessageFormatter, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
@@ -622,12 +634,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_normalizer_is_normalized, 0, 1, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()
 
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_normalizer_get_raw_decomposition, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_resourcebundle_create, 0, 2, ResourceBundle, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -732,16 +742,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_intltz_get_unknown arginfo_intltz_create_default
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_windows_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_intltz_get_windows_id arginfo_intltz_get_region
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_id_for_windows_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intltz_has_same_rules, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, timezone, IntlTimeZone, 0)
@@ -905,6 +911,7 @@ ZEND_FUNCTION(grapheme_substr);
 ZEND_FUNCTION(grapheme_strstr);
 ZEND_FUNCTION(grapheme_stristr);
 ZEND_FUNCTION(grapheme_str_split);
+ZEND_FUNCTION(grapheme_levenshtein);
 ZEND_FUNCTION(grapheme_extract);
 ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
@@ -926,6 +933,7 @@ ZEND_FUNCTION(locale_filter_matches);
 ZEND_FUNCTION(locale_canonicalize);
 ZEND_FUNCTION(locale_lookup);
 ZEND_FUNCTION(locale_accept_from_http);
+ZEND_FUNCTION(locale_is_right_to_left);
 ZEND_FUNCTION(msgfmt_create);
 ZEND_FUNCTION(msgfmt_format);
 ZEND_FUNCTION(msgfmt_format_message);
@@ -938,9 +946,7 @@ ZEND_FUNCTION(msgfmt_get_error_code);
 ZEND_FUNCTION(msgfmt_get_error_message);
 ZEND_FUNCTION(normalizer_normalize);
 ZEND_FUNCTION(normalizer_is_normalized);
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_FUNCTION(normalizer_get_raw_decomposition);
-#endif
 ZEND_FUNCTION(resourcebundle_create);
 ZEND_FUNCTION(resourcebundle_get);
 ZEND_FUNCTION(resourcebundle_count);
@@ -966,10 +972,8 @@ ZEND_FUNCTION(intltz_get_raw_offset);
 ZEND_FUNCTION(intltz_get_region);
 ZEND_FUNCTION(intltz_get_tz_data_version);
 ZEND_FUNCTION(intltz_get_unknown);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_windows_id);
 ZEND_FUNCTION(intltz_get_id_for_windows_id);
-#endif
 ZEND_FUNCTION(intltz_has_same_rules);
 ZEND_FUNCTION(intltz_to_date_time_zone);
 ZEND_FUNCTION(intltz_use_daylight_time);
@@ -1096,6 +1100,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(grapheme_strstr, arginfo_grapheme_strstr)
 	ZEND_FE(grapheme_stristr, arginfo_grapheme_stristr)
 	ZEND_FE(grapheme_str_split, arginfo_grapheme_str_split)
+	ZEND_FE(grapheme_levenshtein, arginfo_grapheme_levenshtein)
 	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
 	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
@@ -1117,6 +1122,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(locale_canonicalize, arginfo_locale_canonicalize)
 	ZEND_FE(locale_lookup, arginfo_locale_lookup)
 	ZEND_FE(locale_accept_from_http, arginfo_locale_accept_from_http)
+	ZEND_FE(locale_is_right_to_left, arginfo_locale_is_right_to_left)
 	ZEND_FE(msgfmt_create, arginfo_msgfmt_create)
 	ZEND_FE(msgfmt_format, arginfo_msgfmt_format)
 	ZEND_FE(msgfmt_format_message, arginfo_msgfmt_format_message)
@@ -1129,9 +1135,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(msgfmt_get_error_message, arginfo_msgfmt_get_error_message)
 	ZEND_FE(normalizer_normalize, arginfo_normalizer_normalize)
 	ZEND_FE(normalizer_is_normalized, arginfo_normalizer_is_normalized)
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 	ZEND_FE(normalizer_get_raw_decomposition, arginfo_normalizer_get_raw_decomposition)
-#endif
 	ZEND_FE(resourcebundle_create, arginfo_resourcebundle_create)
 	ZEND_FE(resourcebundle_get, arginfo_resourcebundle_get)
 	ZEND_FE(resourcebundle_count, arginfo_resourcebundle_count)
@@ -1157,10 +1161,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intltz_get_region, arginfo_intltz_get_region)
 	ZEND_FE(intltz_get_tz_data_version, arginfo_intltz_get_tz_data_version)
 	ZEND_FE(intltz_get_unknown, arginfo_intltz_get_unknown)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_FE(intltz_get_windows_id, arginfo_intltz_get_windows_id)
 	ZEND_FE(intltz_get_id_for_windows_id, arginfo_intltz_get_id_for_windows_id)
-#endif
 	ZEND_FE(intltz_has_same_rules, arginfo_intltz_has_same_rules)
 	ZEND_FE(intltz_to_date_time_zone, arginfo_intltz_to_date_time_zone)
 	ZEND_FE(intltz_use_daylight_time, arginfo_intltz_use_daylight_time)

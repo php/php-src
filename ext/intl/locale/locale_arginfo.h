@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 59861342e0075231d2a576afb2d5df6973d70684 */
+ * Stub hash: f09cfd61f3e20576c7f6d5da17a6d9c009d6ab64 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -62,6 +62,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_acceptFro
 	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Locale_isRightToLeft, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_FUNCTION(locale_get_default);
 ZEND_FUNCTION(locale_set_default);
 ZEND_FUNCTION(locale_get_primary_language);
@@ -80,6 +84,7 @@ ZEND_FUNCTION(locale_filter_matches);
 ZEND_FUNCTION(locale_lookup);
 ZEND_FUNCTION(locale_canonicalize);
 ZEND_FUNCTION(locale_accept_from_http);
+ZEND_FUNCTION(locale_is_right_to_left);
 
 static const zend_function_entry class_Locale_methods[] = {
 	ZEND_RAW_FENTRY("getDefault", zif_locale_get_default, arginfo_class_Locale_getDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
@@ -100,6 +105,7 @@ static const zend_function_entry class_Locale_methods[] = {
 	ZEND_RAW_FENTRY("lookup", zif_locale_lookup, arginfo_class_Locale_lookup, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("canonicalize", zif_locale_canonicalize, arginfo_class_Locale_canonicalize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("acceptFromHttp", zif_locale_accept_from_http, arginfo_class_Locale_acceptFromHttp, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isRightToLeft", zif_locale_is_right_to_left, arginfo_class_Locale_isRightToLeft, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_FE_END
 };
 

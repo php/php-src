@@ -87,6 +87,8 @@ function enchant_dict_suggest(EnchantDictionary $dictionary, string $word): arra
 
 function enchant_dict_add(EnchantDictionary $dictionary, string $word): void {}
 
+function enchant_dict_remove(EnchantDictionary $dictionary, string $word): void {}
+
 /**
 * @alias enchant_dict_add
 */
@@ -94,6 +96,8 @@ function enchant_dict_add(EnchantDictionary $dictionary, string $word): void {}
 function enchant_dict_add_to_personal(EnchantDictionary $dictionary, string $word): void {}
 
 function enchant_dict_add_to_session(EnchantDictionary $dictionary, string $word): void {}
+
+function enchant_dict_remove_from_session(EnchantDictionary $dictionary, string $word): void {}
 
 function enchant_dict_is_added(EnchantDictionary $dictionary, string $word): bool {}
 

@@ -133,4 +133,9 @@ class Locale
      * @alias locale_accept_from_http
      */
     public static function acceptFromHttp(string $header): string|false {}
+
+    /**
+     * @alias locale_is_right_to_left
+     */
+    public static function isRightToLeft(string $locale): bool {}
 }

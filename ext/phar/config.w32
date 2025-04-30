@@ -36,7 +36,6 @@ if (PHP_PHAR != "no") {
 	}
 	ADD_EXTENSION_DEP('phar', 'hash');
 	ADD_EXTENSION_DEP('phar', 'spl');
-	PHP_INSTALL_HEADERS("ext/phar", "php_phar.h");
 
 	ADD_MAKEFILE_FRAGMENT();
 }

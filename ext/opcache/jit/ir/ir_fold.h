@@ -1859,8 +1859,39 @@ IR_FOLD(SUB(ADD, ADD))
 }
 
 // IR_FOLD(SUB(NEG, CONST))  TODO: -a - b => -b - a
-// IR_FOLD(MUL(NEG, CONST))  TODO: -a * b => a * -b
-// IR_FOLD(DIV(NEG, CONST))  TODO: -a / b => a / -b
+
+IR_FOLD(MUL(NEG, C_I8))
+IR_FOLD(MUL(NEG, C_I16))
+IR_FOLD(MUL(NEG, C_I32))
+IR_FOLD(MUL(NEG, C_I64))
+IR_FOLD(DIV(NEG, C_I8))
+IR_FOLD(DIV(NEG, C_I16))
+IR_FOLD(DIV(NEG, C_I32))
+IR_FOLD(DIV(NEG, C_I64))
+{
+	op1 = op1_insn->op1;
+	val.i64 = -op2_insn->val.i64;
+	op2 = ir_const(ctx, val, op2_insn->type);
+	IR_FOLD_RESTART;
+}
+
+IR_FOLD(MUL(NEG, C_FLOAT))
+IR_FOLD(DIV(NEG, C_FLOAT))
+{
+	op1 = op1_insn->op1;
+	val.f = -op2_insn->val.f;
+	op2 = ir_const(ctx, val, op2_insn->type);
+	IR_FOLD_RESTART;
+}
+
+IR_FOLD(MUL(NEG, C_DOUBLE))
+IR_FOLD(DIV(NEG, C_DOUBLE))
+{
+	op1 = op1_insn->op1;
+	val.d = -op2_insn->val.d;
+	op2 = ir_const(ctx, val, op2_insn->type);
+	IR_FOLD_RESTART;
+}
 
 IR_FOLD(MUL(_, C_U8))
 IR_FOLD(MUL(_, C_U16))

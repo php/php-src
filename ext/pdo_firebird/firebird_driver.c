@@ -535,7 +535,7 @@ void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state,
 		einfo->errmsg_length = 0;
 	}
 
-	if (H->isc_status && (H->isc_status[0] == 1 && H->isc_status[1] > 0)) {
+	if (H->isc_status[0] == 1 && H->isc_status[1] > 0) {
 		char buf[512];
 		size_t buf_size = sizeof(buf), read_len = 0;
 		ssize_t tmp_len;
@@ -557,7 +557,7 @@ void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state,
 
 		char sqlstate[sizeof(pdo_error_type)];
 		fb_sqlstate(sqlstate, H->isc_status);
-		if (sqlstate != NULL && strlen(sqlstate) < sizeof(pdo_error_type)) {
+		if (strlen(sqlstate) < sizeof(pdo_error_type)) {
 			strcpy(*error_code, sqlstate);
 			goto end;
 		}
@@ -594,18 +594,19 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 	H->in_manually_txn = 0;
 
-	if (isc_detach_database(H->isc_status, &H->db)) {
+	/* isc_detach_database returns 0 on success, 1 on failure. */
+	if (H->db && isc_detach_database(H->isc_status, &H->db)) {
 		php_firebird_error(dbh);
 	}
 
 	if (H->date_format) {
-		efree(H->date_format);
+		pefree(H->date_format, dbh->is_persistent);
 	}
 	if (H->time_format) {
-		efree(H->time_format);
+		pefree(H->time_format, dbh->is_persistent);
 	}
 	if (H->timestamp_format) {
-		efree(H->timestamp_format);
+		pefree(H->timestamp_format, dbh->is_persistent);
 	}
 
 	if (H->einfo.errmsg) {
@@ -1091,9 +1092,10 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->date_format) {
-					efree(H->date_format);
+					pefree(H->date_format, dbh->is_persistent);
+					H->date_format = NULL;
 				}
-				spprintf(&H->date_format, 0, "%s", ZSTR_VAL(str));
+				H->date_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}
 			return true;
@@ -1105,9 +1107,10 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->time_format) {
-					efree(H->time_format);
+					pefree(H->time_format, dbh->is_persistent);
+					H->time_format = NULL;
 				}
-				spprintf(&H->time_format, 0, "%s", ZSTR_VAL(str));
+				H->time_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}
 			return true;
@@ -1119,9 +1122,10 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 				if (H->timestamp_format) {
-					efree(H->timestamp_format);
+					pefree(H->timestamp_format, dbh->is_persistent);
+					H->timestamp_format = NULL;
 				}
-				spprintf(&H->timestamp_format, 0, "%s", ZSTR_VAL(str));
+				H->timestamp_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}
 			return true;
@@ -1223,27 +1227,9 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			ZVAL_BOOL(val, !isc_version(&H->db, php_firebird_info_cb, NULL));
 			return 1;
 
-		case PDO_ATTR_CLIENT_VERSION: {
-#if defined(__GNUC__) || defined(PHP_WIN32)
-			info_func_t info_func = NULL;
-#ifdef __GNUC__
-			info_func = (info_func_t)dlsym(RTLD_DEFAULT, "isc_get_client_version");
-#else
-			HMODULE l = GetModuleHandle("fbclient");
-
-			if (!l) {
-				break;
-			}
-			info_func = (info_func_t)GetProcAddress(l, "isc_get_client_version");
-#endif
-			if (info_func) {
-				info_func(tmp);
-				ZVAL_STRING(val, tmp);
-			}
-#else
-			ZVAL_NULL(val);
-#endif
-			}
+		case PDO_ATTR_CLIENT_VERSION:
+			isc_get_client_version(tmp);
+			ZVAL_STRING(val, tmp);
 			return 1;
 
 		case PDO_ATTR_SERVER_VERSION:
@@ -1427,7 +1413,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		char errmsg[512];
 		const ISC_STATUS *s = H->isc_status;
 		fb_interpret(errmsg, sizeof(errmsg),&s);
-		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%ld] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%" PRIiPTR "] %s",
 				"HY000", H->isc_status[1], errmsg);
 	}
 

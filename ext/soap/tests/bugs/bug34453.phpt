@@ -1,5 +1,5 @@
 --TEST--
-Bug #29839 (incorrect convert (xml:lang to lang))
+Bug #34453 (parsing http://www.w3.org/2001/xml.xsd exception)
 --EXTENSIONS--
 soap
 --INI--

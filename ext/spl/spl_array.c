@@ -863,7 +863,9 @@ static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *na
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
-		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+		if (cache_slot) {
+			cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+		}
 
 		/* If object has offsetGet() overridden, then fallback to read_property,
 		 * which will call offsetGet(). */
@@ -1001,6 +1003,13 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
 					"Overloaded object of type %s is not compatible with %s",
 					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
+				return;
+			}
+			if (UNEXPECTED(Z_OBJCE_P(array)->ce_flags & ZEND_ACC_ENUM)) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+					"Enums are not compatible with %s",
+					ZSTR_VAL(intern->std.ce->name));
 				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
 				return;
 			}

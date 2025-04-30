@@ -39,7 +39,7 @@ echo "Done";
 *** Testing stream_set_timeout() : error conditions ***
 
 -- Testing stream_set_timeout() function with a closed socket --
-stream_set_timeout(): supplied resource is not a valid stream resource
+stream_set_timeout(): Argument #1 ($stream) must be an open stream resource
 
 -- Testing stream_set_timeout() function with a stream that does not support timeouts --
 bool(false)

@@ -1858,7 +1858,7 @@ function array_udiff_uassoc(array $array, ...$rest): array {}
  * @prefer-ref $array
  * @prefer-ref $rest
  */
-function array_multisort(&$array, &...$rest): bool {}
+function array_multisort(&$array, &...$rest): true {}
 
 /** @return int|string|array<int, int|string> */
 function array_rand(array $array, int $num = 1): int|string|array {}
@@ -1977,7 +1977,7 @@ function get_cfg_var(string $option): string|array|false {}
 function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
 
 /**
- * @return array<string, int|string>|null
+ * @return array<string, int|string|array>|null
  * @refcount 1
  */
 function error_get_last(): ?array {}
@@ -2026,7 +2026,6 @@ function ini_parse_quantity(string $shorthand): int {}
 /** @refcount 1 */
 function set_include_path(string $include_path): string|false {}
 
-/** @refcount 1 */
 function get_include_path(): string|false {}
 
 /** @refcount 1 */

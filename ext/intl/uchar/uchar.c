@@ -616,9 +616,7 @@ IC_CHAR_METHOD_CHAR(charMirror)
 IC_CHAR_METHOD_CHAR(tolower)
 IC_CHAR_METHOD_CHAR(toupper)
 IC_CHAR_METHOD_CHAR(totitle)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
-#endif /* ICU >= 52 */
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 

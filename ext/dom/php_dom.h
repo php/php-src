@@ -83,20 +83,20 @@ typedef struct dom_nnodemap_object {
 	int nodetype;
 	int cached_length;
 	xmlHashTable *ht;
-	xmlChar *local, *local_lower;
+	xmlChar *local;
+	zend_string *local_lower;
 	xmlChar *ns;
 	php_libxml_cache_tag cache_tag;
 	dom_object *cached_obj;
 	zend_long cached_obj_index;
 	xmlDictPtr dict;
-	bool free_local : 1;
-	bool free_ns : 1;
+	bool release_local : 1;
+	bool release_ns : 1;
 } dom_nnodemap_object;
 
 typedef struct {
 	zend_object_iterator intern;
 	zval curobj;
-	HashPosition pos;
 	/* intern->index is only updated for FE_* opcodes, not for e.g. unpacking,
 	 * yet we need to track the position of the node relative to the start. */
 	zend_ulong index;
@@ -110,13 +110,6 @@ typedef struct {
 	dom_object *parent_intern;
 	dom_object dom;
 } dom_object_namespace_node;
-
-typedef enum dom_iterator_type {
-	DOM_NODELIST,
-	DOM_NAMEDNODEMAP,
-	DOM_DTD_NAMEDNODEMAP,
-	DOM_HTMLCOLLECTION,
-} dom_iterator_type;
 
 struct php_dom_libxml_ns_mapper;
 typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
@@ -147,14 +140,13 @@ void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void php_dom_normalize_legacy(xmlNodePtr nodep);
 void php_dom_normalize_modern(xmlNodePtr nodep);
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, zend_long *cur, zend_long index);
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, const xmlChar *ns, const xmlChar *local, const zend_string *local_lower, zend_long *cur, zend_long index);
 void php_dom_create_implementation(zval *retval, bool modern);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
-int dom_node_is_read_only(const xmlNode *node);
+bool dom_node_is_read_only(const xmlNode *node);
 bool dom_node_children_valid(const xmlNode *node);
-void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type, bool modern);
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len);
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(dom_nnodemap_object *objmap, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
@@ -215,13 +207,14 @@ void dom_parent_node_query_selector(xmlNodePtr thisp, dom_object *intern, zval *
 void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
+xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input);
 
 /* nodemap and nodelist APIs */
 xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const zend_string *named, bool may_transform);
 void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, zval *return_value);
 xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index);
 void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
-int php_dom_get_namednodemap_length(dom_object *obj);
+zend_long php_dom_get_namednodemap_length(dom_object *obj);
 xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep);
 
 #define DOM_GET_INTERN(__id, __intern) { \

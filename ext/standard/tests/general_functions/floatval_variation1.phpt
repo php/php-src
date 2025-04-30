@@ -2,18 +2,12 @@
 Testing floatval() and its alias doubleval() functions : usage variations - different data types as $y arg
 --FILE--
 <?php
-// get a resource type variable
-$fp = fopen (__FILE__, "r");
-fclose($fp);
-$dfp = opendir ( __DIR__ );
-closedir($dfp);
 
 // other types in an array
 $not_float_types = array (
            "-2147483648" => -2147483648, // max negative integer value
            "2147483647" => 2147483648,  // max positive integer value
-           "file resoruce" => $fp,
-           "directory resource" => $dfp,
+           "stream resource" => STDERR,
            "\"0.0\"" => "0.0", // string
            "\"1.0\"" => "1.0",
            "\"-1.3e3\"" => "-1.3e3",
@@ -24,7 +18,6 @@ $not_float_types = array (
            "\"10.0 dollar\" + 1.0" => "10.0 dollar" + 1.0,
            "\"\"" => "",
            "true" => true,
-           "NULL" => NULL,
            "null" => null,
                  );
 /* loop through the $not_float_types to see working of
@@ -57,11 +50,8 @@ float(-2147483648)
 -- Iteration : 2147483647 --
 float(2147483648)
 
--- Iteration : file resoruce --
-float(5)
-
--- Iteration : directory resource --
-float(6)
+-- Iteration : stream resource --
+float(3)
 
 -- Iteration : "0.0" --
 float(0)
@@ -92,9 +82,6 @@ float(0)
 
 -- Iteration : true --
 float(1)
-
--- Iteration : NULL --
-float(0)
 
 -- Iteration : null --
 float(0)
@@ -107,11 +94,8 @@ float(-2147483648)
 -- Iteration : 2147483647 --
 float(2147483648)
 
--- Iteration : file resoruce --
-float(5)
-
--- Iteration : directory resource --
-float(6)
+-- Iteration : stream resource --
+float(3)
 
 -- Iteration : "0.0" --
 float(0)
@@ -142,9 +126,6 @@ float(0)
 
 -- Iteration : true --
 float(1)
-
--- Iteration : NULL --
-float(0)
 
 -- Iteration : null --
 float(0)

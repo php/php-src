@@ -146,22 +146,16 @@ final class ReflectionGenerator
 {
     public function __construct(Generator $generator) {}
 
-    /** @tentative-return-type */
     public function getExecutingLine(): int {}
 
-    /** @tentative-return-type */
     public function getExecutingFile(): string {}
 
-    /** @tentative-return-type */
     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
 
-    /** @tentative-return-type */
     public function getFunction(): ReflectionFunctionAbstract {}
 
-    /** @tentative-return-type */
     public function getThis(): ?object {}
 
-    /** @tentative-return-type */
     public function getExecutingGenerator(): Generator {}
 
     public function isClosed(): bool {}
@@ -922,5 +916,13 @@ final class ReflectionConstant implements Reflector
 
     public function isDeprecated(): bool {}
 
+    public function getFileName(): string|false {}
+
+    public function getExtension(): ?ReflectionExtension {}
+
+    public function getExtensionName(): string|false {}
+
     public function __toString(): string {}
+
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }

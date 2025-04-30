@@ -88,12 +88,11 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 	return PDO_ODBC_CONV_NOT_REQUIRED;
 }
 
-static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, zval *result)
+static int pdo_odbc_ucs22utf8(int is_unicode, zval *result)
 {
 #ifdef PHP_WIN32
 	ZEND_ASSERT(Z_TYPE_P(result) == IS_STRING);
 	if (is_unicode && Z_STRLEN_P(result) != 0) {
-		pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 		DWORD ret;
 
 		ret = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR) Z_STRVAL_P(result), Z_STRLEN_P(result)/sizeof(WCHAR), NULL, 0, NULL, NULL);
@@ -136,11 +135,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 
-	// TODO: Factor this out; pg/mysql/firebird do the same thing
-	bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
-		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
-	if (S->stmt != SQL_NULL_HANDLE && server_obj_usable) {
+	if (S->stmt != SQL_NULL_HANDLE && php_pdo_stmt_valid_db_obj_handle(stmt)) {
 		if (stmt->executed) {
 			SQLCloseCursor(S->stmt);
 		}
@@ -506,7 +501,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 
 					if (P->len >= 0) {
 							ZVAL_STRINGL(parameter, P->outbuf, P->len);
-							switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, parameter)) {
+							switch (pdo_odbc_ucs22utf8(P->is_unicode, parameter)) {
 								case PDO_ODBC_CONV_FAIL:
 									/* something fishy, but allow it to come back as binary */
 								case PDO_ODBC_CONV_NOT_REQUIRED:
@@ -755,7 +750,7 @@ in_data:
 	}
 
 unicode_conv:
-	switch (pdo_odbc_ucs22utf8(stmt, C->is_unicode, result)) {
+	switch (pdo_odbc_ucs22utf8(C->is_unicode, result)) {
 		case PDO_ODBC_CONV_FAIL:
 			/* oh well.  They can have the binary version of it */
 		case PDO_ODBC_CONV_NOT_REQUIRED:

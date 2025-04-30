@@ -15,6 +15,7 @@
 */
 
 #include "zend_modules.h"
+#include "zend_types.h"
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -37,12 +38,6 @@
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
 #include "zend_mm_custom_handlers.h"
-
-// `php.h` sets `NDEBUG` when not `PHP_DEBUG` which will make `assert()` from
-// assert.h a no-op. In order to have `assert()` working on NDEBUG builds, we
-// undefine `NDEBUG` and re-include assert.h
-#undef NDEBUG
-#include "assert.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -129,6 +124,20 @@ static ZEND_FUNCTION(zend_test_deprecated_attr)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+static ZEND_FUNCTION(zend_test_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
+static ZEND_FUNCTION(zend_test_deprecated_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
 /* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
@@ -186,6 +195,19 @@ static ZEND_FUNCTION(zend_leak_variable)
 	}
 
 	Z_ADDREF_P(zv);
+}
+
+static ZEND_FUNCTION(zend_delref)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	Z_TRY_DELREF_P(zv);
+
+	RETURN_NULL();
 }
 
 /* Tests Z_PARAM_OBJ_OR_STR */
@@ -249,7 +271,7 @@ static ZEND_FUNCTION(zend_test_compile_string)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(source_string)
-		Z_PARAM_STR(filename)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_LONG(position)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1375,11 +1397,7 @@ PHP_RINIT_FUNCTION(zend_test)
 
 PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
-	zend_ulong obj_key;
-	ZEND_HASH_FOREACH_NUM_KEY(&ZT_G(global_weakmap), obj_key) {
-		zend_weakrefs_hash_del(&ZT_G(global_weakmap), zend_weakref_key_to_object(obj_key));
-	} ZEND_HASH_FOREACH_END();
-	zend_hash_destroy(&ZT_G(global_weakmap));
+	zend_weakrefs_hash_destroy(&ZT_G(global_weakmap));
 
 	if (ZT_G(zend_test_heap))  {
 		free(ZT_G(zend_test_heap));
@@ -1572,4 +1590,23 @@ static PHP_FUNCTION(zend_test_create_throwing_resource)
 	ZEND_PARSE_PARAMETERS_NONE();
 	zend_resource *res = zend_register_resource(NULL, le_throwing_resource);
 	ZVAL_RES(return_value, res);
+}
+
+static PHP_FUNCTION(zend_test_compile_to_ast)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_arena *ast_arena;
+	zend_ast *ast = zend_compile_string_to_ast(str, &ast_arena, ZSTR_EMPTY_ALLOC());
+	
+	zend_string *result = zend_ast_export("", ast, "");
+
+	zend_ast_destroy(ast);
+	zend_arena_destroy(ast_arena);
+
+	RETVAL_STR(result);
 }

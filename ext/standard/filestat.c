@@ -39,7 +39,7 @@
 
 #if defined(__APPLE__)
   /*
-   Apple statvfs has an interger overflow in libc copying to statvfs.
+   Apple statvfs has an integer overflow in libc copying to statvfs.
    cvt_statfs_to_statvfs(struct statfs *from, struct statvfs *to) {
    to->f_blocks = (fsblkcnt_t)from->f_blocks;
    */

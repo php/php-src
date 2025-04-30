@@ -81,7 +81,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(clear,     "clear breakpoints",                        'C', NULL, 0, 0),
 	PHPDBG_COMMAND_D(help,      "show help menu",                           'h', phpdbg_help_commands, "|s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(set,       "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(register,  "register a function",                      'R', NULL, "s", 0),
+	PHPDBG_COMMAND_D(register,  "register a phpdbginit function as a command alias", 'R', NULL, "s", 0),
 	PHPDBG_COMMAND_D(source,    "execute a phpdbginit",                     '<', NULL, "s", 0),
 	PHPDBG_COMMAND_D(export,    "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(sh,   	    "shell a command",                           0 , NULL, "i", 0),
@@ -96,34 +96,18 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 	phpdbg_param_t *name = NULL;
 
 	if (stack->type == STACK_PARAM) {
-		char *lc_name;
-
 		name = stack->next;
 
 		if (!name || name->type != STR_PARAM) {
 			return FAILURE;
 		}
 
-		lc_name = zend_str_tolower_dup(name->str, name->len);
-
-		if (zend_hash_str_exists(&PHPDBG_G(registered), lc_name, name->len)) {
-			zval fretval;
-			zend_fcall_info fci;
-
-			memset(&fci, 0, sizeof(zend_fcall_info));
-
-			ZVAL_STRINGL(&fci.function_name, lc_name, name->len);
-			fci.size = sizeof(zend_fcall_info);
-			fci.object = NULL;
-			fci.retval = &fretval;
-			fci.param_count = 0;
-			fci.params = NULL;
-			fci.named_params = NULL;
-
-			zval params;
+		zend_function *user_fn = zend_hash_str_find_ptr_lc(&PHPDBG_G(registered), name->str, name->len);
+		if (user_fn != NULL) {
+			HashTable *params_ht = NULL;
 			if (name->next) {
 				phpdbg_param_t *next = name->next;
-
+				zval params;
 				array_init(&params);
 
 				while (next) {
@@ -173,30 +157,23 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 					next = next->next;
 				}
 				/* Add positional arguments */
-				fci.named_params = Z_ARRVAL(params);
+				params_ht = Z_ARRVAL(params);
+				phpdbg_debug("created " PRIu32 " params from arguments", zend_hash_num_elements(params_ht));
 			}
 
 			phpdbg_activate_err_buf(0);
 			phpdbg_free_err_buf();
 
-			phpdbg_debug("created %d params from arguments", fci.param_count);
 
-			if (zend_call_function(&fci, NULL) == SUCCESS) {
-				zend_print_zval_r(&fretval, 0);
-				phpdbg_out("\n");
-				zval_ptr_dtor(&fretval);
-			}
+			zend_call_known_function(user_fn, NULL, NULL, NULL, 0, NULL, params_ht);
+			phpdbg_out("\n");
 
-			zval_ptr_dtor_str(&fci.function_name);
-			efree(lc_name);
-			if (fci.named_params) {
-				zend_array_destroy(fci.named_params);
+			if (params_ht) {
+				zend_array_destroy(params_ht);
 			}
 
 			return SUCCESS;
 		}
-
-		efree(lc_name);
 	}
 
 	return FAILURE;

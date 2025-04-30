@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 79398fd5abd2d1f5176388b67423d937d0e25da4 */
+ * Stub hash: d886941aa76837aed1da08845dbaff9442107203 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -137,6 +137,18 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_declare_typed_class_constant(class_entry, const_DECIMAL_name, &const_DECIMAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_DECIMAL_name);
 
+	zval const_DECIMAL_COMPACT_SHORT_value;
+	ZVAL_LONG(&const_DECIMAL_COMPACT_SHORT_value, UNUM_DECIMAL_COMPACT_SHORT);
+	zend_string *const_DECIMAL_COMPACT_SHORT_name = zend_string_init_interned("DECIMAL_COMPACT_SHORT", sizeof("DECIMAL_COMPACT_SHORT") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_DECIMAL_COMPACT_SHORT_name, &const_DECIMAL_COMPACT_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_DECIMAL_COMPACT_SHORT_name);
+
+	zval const_DECIMAL_COMPACT_LONG_value;
+	ZVAL_LONG(&const_DECIMAL_COMPACT_LONG_value, UNUM_DECIMAL_COMPACT_LONG);
+	zend_string *const_DECIMAL_COMPACT_LONG_name = zend_string_init_interned("DECIMAL_COMPACT_LONG", sizeof("DECIMAL_COMPACT_LONG") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_DECIMAL_COMPACT_LONG_name, &const_DECIMAL_COMPACT_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_DECIMAL_COMPACT_LONG_name);
+
 	zval const_CURRENCY_value;
 	ZVAL_LONG(&const_CURRENCY_value, UNUM_CURRENCY);
 	zend_string *const_CURRENCY_name = zend_string_init_interned("CURRENCY", sizeof("CURRENCY") - 1, 1);
@@ -184,14 +196,36 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_string *const_IGNORE_name = zend_string_init_interned("IGNORE", sizeof("IGNORE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_IGNORE_name, &const_IGNORE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IGNORE_name);
-#if U_ICU_VERSION_MAJOR_NUM >= 53
+
+	zval const_CURRENCY_ISO_value;
+	ZVAL_LONG(&const_CURRENCY_ISO_value, UNUM_CURRENCY_ISO);
+	zend_string *const_CURRENCY_ISO_name = zend_string_init_interned("CURRENCY_ISO", sizeof("CURRENCY_ISO") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CURRENCY_ISO_name, &const_CURRENCY_ISO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CURRENCY_ISO_name);
+
+	zval const_CURRENCY_PLURAL_value;
+	ZVAL_LONG(&const_CURRENCY_PLURAL_value, UNUM_CURRENCY_PLURAL);
+	zend_string *const_CURRENCY_PLURAL_name = zend_string_init_interned("CURRENCY_PLURAL", sizeof("CURRENCY_PLURAL") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CURRENCY_PLURAL_name, &const_CURRENCY_PLURAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CURRENCY_PLURAL_name);
 
 	zval const_CURRENCY_ACCOUNTING_value;
 	ZVAL_LONG(&const_CURRENCY_ACCOUNTING_value, UNUM_CURRENCY_ACCOUNTING);
 	zend_string *const_CURRENCY_ACCOUNTING_name = zend_string_init_interned("CURRENCY_ACCOUNTING", sizeof("CURRENCY_ACCOUNTING") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_CURRENCY_ACCOUNTING_name, &const_CURRENCY_ACCOUNTING_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_CURRENCY_ACCOUNTING_name);
-#endif
+
+	zval const_CASH_CURRENCY_value;
+	ZVAL_LONG(&const_CASH_CURRENCY_value, UNUM_CASH_CURRENCY);
+	zend_string *const_CASH_CURRENCY_name = zend_string_init_interned("CASH_CURRENCY", sizeof("CASH_CURRENCY") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CASH_CURRENCY_name, &const_CASH_CURRENCY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CASH_CURRENCY_name);
+
+	zval const_CURRENCY_STANDARD_value;
+	ZVAL_LONG(&const_CURRENCY_STANDARD_value, UNUM_CURRENCY_STANDARD);
+	zend_string *const_CURRENCY_STANDARD_name = zend_string_init_interned("CURRENCY_STANDARD", sizeof("CURRENCY_STANDARD") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CURRENCY_STANDARD_name, &const_CURRENCY_STANDARD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CURRENCY_STANDARD_name);
 
 	zval const_DEFAULT_STYLE_value;
 	ZVAL_LONG(&const_DEFAULT_STYLE_value, UNUM_DEFAULT);

@@ -96,8 +96,10 @@ END_EXTERN_C()
 
 #ifdef PHP_WIN32
 typedef SOCKET php_socket_t;
+#define PHP_SOCKET_FMT "%" PRIxPTR
 #else
 typedef int php_socket_t;
+#define PHP_SOCKET_FMT "%d"
 #endif
 
 #ifdef PHP_WIN32

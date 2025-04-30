@@ -123,21 +123,8 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out)
 	tsrm_mutex_lock( locale_mutex );
 #endif
 
-/*  cur->locinfo is struct __crt_locale_info which implementation is
-	hidden in vc14. TODO revisit this and check if a workaround available
-	and needed. */
-#if defined(PHP_WIN32) && _MSC_VER < 1900 && defined(ZTS)
-	{
-		/* Even with the enabled per thread locale, localeconv
-			won't check any locale change in the master thread. */
-		_locale_t cur = _get_current_locale();
-		*out = *cur->locinfo->lconv;
-		_free_locale(cur);
-	}
-#else
 	/* localeconv doesn't return an error condition */
 	*out = *localeconv();
-#endif
 
 #ifdef ZTS
 	tsrm_mutex_unlock( locale_mutex );
@@ -1286,10 +1273,10 @@ PHP_FUNCTION(str_increment)
 				ZSTR_VAL(tmp)[0] = ZSTR_VAL(incremented)[0];
 				break;
 		}
-		zend_string_release_ex(incremented, /* persistent */ false);
-		RETURN_STR(tmp);
+		zend_string_efree(incremented);
+		RETURN_NEW_STR(tmp);
 	}
-	RETURN_STR(incremented);
+	RETURN_NEW_STR(incremented);
 }
 
 
@@ -1336,17 +1323,17 @@ PHP_FUNCTION(str_decrement)
 
 	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
 		if (ZSTR_LEN(decremented) == 1) {
-			zend_string_release_ex(decremented, /* persistent */ false);
+			zend_string_efree(decremented);
 			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
 			RETURN_THROWS();
 		}
 		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
 		memcpy(ZSTR_VAL(tmp), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
 		ZSTR_VAL(tmp)[ZSTR_LEN(decremented) - 1] = '\0';
-		zend_string_release_ex(decremented, /* persistent */ false);
-		RETURN_STR(tmp);
+		zend_string_efree(decremented);
+		RETURN_NEW_STR(tmp);
 	}
-	RETURN_STR(decremented);
+	RETURN_NEW_STR(decremented);
 }
 
 #if defined(PHP_WIN32)
@@ -1600,11 +1587,11 @@ PHP_FUNCTION(pathinfo)
 		Z_PARAM_LONG(opt)
 	ZEND_PARSE_PARAMETERS_END();
 
-	have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
+	have_basename = (opt & PHP_PATHINFO_BASENAME);
 
 	array_init(&tmp);
 
-	if ((opt & PHP_PATHINFO_DIRNAME) == PHP_PATHINFO_DIRNAME) {
+	if (opt & PHP_PATHINFO_DIRNAME) {
 		dirname = estrndup(path, path_len);
 		php_dirname(dirname, path_len);
 		if (*dirname) {
@@ -1618,7 +1605,7 @@ PHP_FUNCTION(pathinfo)
 		add_assoc_str(&tmp, "basename", zend_string_copy(ret));
 	}
 
-	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
+	if (opt & PHP_PATHINFO_EXTENSION) {
 		const char *p;
 		ptrdiff_t idx;
 
@@ -1634,7 +1621,7 @@ PHP_FUNCTION(pathinfo)
 		}
 	}
 
-	if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
+	if (opt & PHP_PATHINFO_FILENAME) {
 		const char *p;
 		ptrdiff_t idx;
 

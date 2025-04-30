@@ -314,8 +314,8 @@ PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_stream(const php_strea
 		ZEND_HASH_REVERSE_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
 			if (Z_TYPE_P(header) == IS_STRING) {
 				/* If no colon is found in the header, we assume it's the HTTP status line and bail out. */
-				char *colon = memchr(Z_STRVAL_P(header), ':', Z_STRLEN_P(header));
-				char *space = memchr(Z_STRVAL_P(header), ' ', Z_STRLEN_P(header));
+				const char *colon = memchr(Z_STRVAL_P(header), ':', Z_STRLEN_P(header));
+				const char *space = memchr(Z_STRVAL_P(header), ' ', Z_STRLEN_P(header));
 				if (colon == NULL || space < colon) {
 					return NULL;
 				}

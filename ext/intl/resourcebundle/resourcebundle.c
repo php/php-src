@@ -57,7 +57,8 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_INT_VECTOR:
 			vfield = ures_getIntVector( source->child, &ilen, &INTL_DATA_ERROR_CODE(source) );
 			INTL_METHOD_CHECK_STATUS(source, "Failed to retrieve vector value");
-			array_init( return_value );
+			array_init_size( return_value, ilen );
+			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 			for (i=0; i<ilen; i++) {
 				add_next_index_long( return_value, vfield[i] );
 			}

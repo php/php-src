@@ -93,7 +93,7 @@ if (VS_TOOLSET) {
 }
 
 // General link flags
-toolset_setup_common_ldlags();
+toolset_setup_common_ldflags();
 
 // General libs
 toolset_setup_common_libs();
@@ -267,13 +267,22 @@ if (TARGET_ARCH == 'arm64') {
 	DEFINE('FIBER_ASM_FLAGS', '/DBOOST_CONTEXT_EXPORT=EXPORT /nologo /c /Fo');
 }
 
-ADD_FLAG('ASM_OBJS', '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj');
+var all_asm_objs = '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj';
+if (TARGET_ARCH == 'x64') {
+	all_asm_objs += ' $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj';
+}
+ADD_FLAG('ASM_OBJS', all_asm_objs);
 
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\jump_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(FIBER_ASM_ABI).obj Zend\\asm\\jump_$(FIBER_ASM_ABI).asm');
 
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\make_$(FIBER_ASM_ABI).obj Zend\\asm\\make_$(FIBER_ASM_ABI).asm');
+
+if (TARGET_ARCH == 'x64') {
+	MFO.WriteLine('$(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj: Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
+	MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
+}
 
 ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 if (VS_TOOLSET && VCVERS >= 1914) {
@@ -355,15 +364,28 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
-if (CLANG_TOOLSET) {
-	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
-	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
-		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
-		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +
-		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
+ARG_ENABLE("sanitizer", "Enable ASan (and UBSan) extensions", "no");
+if (PHP_SANITIZER == "yes" && PHP_DEBUG == "yes") {
+	ERROR("Use of both --enable-sanitizer and --enable-debug not allowed.");
+}
+if (PHP_SANITIZER == "yes" && PHP_DEBUG_PACK == "no") {
+	ERROR("--enable-sanitizer requires --enable-debug-pack");
+}
+if (VS_TOOLSET) {
+	if (PHP_SANITIZER == "yes") {
+		if (COMPILER_NUMERIC_VERSION < 1929) {
+			ERROR("MSVC at least 16.10 required for sanitation plugins");
+		}
 	}
+} else if (CLANG_TOOLSET) {
+	AC_DEFINE("PHP_HAVE_BUILTIN_EXPECT", 1, "Define to 1 if the compiler supports '__builtin_expect'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SADDL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_saddl_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SADDLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_saddll_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SSUBL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_ssubl_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_ssubll_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SMULL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_smull_overflow '.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SMULLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_smulll_overflow'.");
 
-	ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 500) {
 			ERROR("Clang at least 5.0.0 required for sanitation plugins");
@@ -396,3 +418,7 @@ ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations
 	might not work properly, if the chosen instruction sets are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
+
+ARG_ENABLE('snapshot-build', 'Build a snapshot: turns on everything it can and ignores build errors', 'no');
+
+ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');

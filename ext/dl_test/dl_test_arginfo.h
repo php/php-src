@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0641a8eeff00e6c8083fe4a8639f970e3ba80db9 */
+ * Stub hash: 75bdb57a45060b123fe48003fef43d2af07726e1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_test1, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -32,6 +32,11 @@ static const zend_function_entry class_DlTestSuperClass_methods[] = {
 	ZEND_ME(DlTestSuperClass, test, arginfo_class_DlTestSuperClass_test, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_dl_test_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("DL_TEST_CONST", 42, CONST_PERSISTENT);
+}
 
 static zend_class_entry *register_class_DlTest(void)
 {
@@ -75,7 +80,6 @@ static zend_class_entry *register_class_DlTestAliasedClass(void)
 
 	INIT_CLASS_ENTRY(ce, "DlTestAliasedClass", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_register_class_alias("DlTestClassAlias", class_entry);
 
 	return class_entry;
 }

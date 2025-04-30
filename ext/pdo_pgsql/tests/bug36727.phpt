@@ -1,7 +1,6 @@
 --TEST--
 Bug #36727 (segfault in bindValue() when no parameters are defined)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

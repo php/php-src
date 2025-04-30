@@ -26,6 +26,13 @@ const AF_INET6 = UNKNOWN;
  */
 const AF_DIVERT = UNKNOWN;
 #endif
+#ifdef AF_PACKET
+/**
+ * @var int
+ * @cvalue AF_PACKET
+ */
+const AF_PACKET = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SOCK_STREAM
@@ -447,6 +454,13 @@ const SO_BPF_EXTENSIONS = UNKNOWN;
  */
 const SO_EXCLBIND = UNKNOWN;
 #endif
+#ifdef SO_BUSY_POLL
+/**
+ * @var int
+ * @cvalue SO_BUSY_POLL
+ */
+const SO_BUSY_POLL = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int
@@ -639,6 +653,44 @@ const TCP_KEEPINTVL = UNKNOWN;
  * @cvalue TCP_KEEPCNT
  */
 const TCP_KEEPCNT = UNKNOWN;
+#endif
+#ifdef TCP_FUNCTION_BLK
+/**
+ * @var int
+ * @cvalue TCP_FUNCTION_BLK
+ */
+const TCP_FUNCTION_BLK = UNKNOWN;
+#endif
+#ifdef TCP_FUNCTION_ALIAS
+/**
+ * @var int
+ * @cvalue TCP_FUNCTION_ALIAS
+ */
+const TCP_FUNCTION_ALIAS = UNKNOWN;
+#endif
+#ifdef TCP_REUSPORT_LB_NUMA
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA
+ */
+const TCP_REUSPORT_LB_NUMA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA_NODOM
+ */
+const TCP_REUSPORT_LB_NUMA_NODOM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA_CURDOM
+ */
+const TCP_REUSPORT_LB_NUMA_CURDOM = UNKNOWN;
+#endif
+#ifdef TCP_BBR_ALGORITHM
+/**
+ * @var int
+ * @cvalue TCP_BBR_ALGORITHM
+ */
+const TCP_BBR_ALGORITHM = UNKNOWN;
 #endif
 /**
  * @var int
@@ -1647,6 +1699,20 @@ const SOL_UDP = UNKNOWN;
  */
 const SOL_UDPLITE = UNKNOWN;
 #endif
+#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMP
+ */
+const IPPROTO_ICMP = UNKNOWN;
+#endif
+#if defined(IPPROTO_ICMPV6) || defined(PHP_WIN32)
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMPV6
+ */
+const IPPROTO_ICMPV6 = UNKNOWN;
+#endif
 
 #ifdef HAVE_IPV6
 /**
@@ -1856,6 +1922,13 @@ const TCP_QUICKACK = UNKNOWN;
  */
 const TCP_REPAIR = UNKNOWN;
 #endif
+#if defined(IP_BINDANY)
+/**
+ * @var int
+ * @cvalue IP_BINDANY
+ */
+const IP_BINDANY = UNKNOWN;
+#endif
 #if defined(IP_DONTFRAG)
 /**
  * @var int
@@ -1925,6 +1998,28 @@ const UDPLITE_SEND_CSCOV = UNKNOWN;
  * @cvalue UDPLITE_RECV_CSCOV
  */
 const UDPLITE_RECV_CSCOV = UNKNOWN;
+#endif
+#if defined(ETH_P_ALL)
+/**
+ * @var int
+ * @cvalue ETH_P_IP
+ */
+const ETH_P_IP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_IPV6
+ */
+const ETH_P_IPV6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_LOOP
+ */
+const ETH_P_LOOP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_ALL
+ */
+const ETH_P_ALL = UNKNOWN;
 #endif
 
 /**

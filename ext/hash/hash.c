@@ -707,18 +707,20 @@ PHP_FUNCTION(hash_update)
 /* {{{ Pump data into the hashing algorithm from an open stream */
 PHP_FUNCTION(hash_update_stream)
 {
-	zval *zhash, *zstream;
+	zend_object *hash_obj;
 	php_hashcontext_object *hash;
 	php_stream *stream = NULL;
 	zend_long length = -1, didread = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Or|l", &zhash, php_hashcontext_ce, &zstream, &length) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJ_OF_CLASS(hash_obj, php_hashcontext_ce)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(length)
+	ZEND_PARSE_PARAMETERS_END();
 
-	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
+	hash = php_hashcontext_from_object(hash_obj);
 	PHP_HASHCONTEXT_VERIFY(hash);
-	php_stream_from_zval(stream, zstream);
 
 	while (length) {
 		char buf[1024];
@@ -1189,7 +1191,7 @@ static void mhash_init(INIT_FUNC_ARGS)
 		}
 
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name);
-		zend_register_long_constant(buf, len, algorithm.value, CONST_PERSISTENT, module_number);
+		zend_register_long_constant(buf, len, algorithm.value, CONST_PERSISTENT|CONST_DEPRECATED, module_number);
 	}
 
 	/* TODO: this cause #69823 zend_register_internal_module(&mhash_module_entry); */

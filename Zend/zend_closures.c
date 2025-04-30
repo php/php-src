@@ -40,6 +40,8 @@ typedef struct _zend_closure {
 ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
 
+static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
+
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
 	zend_function *func = EX(func);
@@ -51,9 +53,12 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 		Z_PARAM_VARIADIC_WITH_NAMED(args, num_args, named_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (call_user_function_named(CG(function_table), NULL, ZEND_THIS, return_value, num_args, args, named_args) == FAILURE) {
-		RETVAL_FALSE;
-	}
+	zend_fcall_info_cache fcc = {
+		.closure = Z_OBJ_P(ZEND_THIS),
+	};
+	zend_closure_get_closure(Z_OBJ_P(ZEND_THIS), &fcc.calling_scope, &fcc.function_handler, &fcc.object, false);
+	fcc.called_scope = fcc.calling_scope;
+	zend_call_known_fcc(&fcc, return_value, num_args, args, named_args);
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release_ex(func->internal_function.function_name, 0);
@@ -523,7 +528,6 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 		/* We don't own the static variables of fake closures. */
 		if (!(closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			zend_destroy_static_vars(&closure->func.op_array);
-			closure->func.op_array.static_variables = NULL;
 		}
 		destroy_op_array(&closure->func.op_array);
 	} else if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
@@ -755,16 +759,14 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		}
 
 		/* For fake closures, we want to reuse the static variables of the original function. */
+		HashTable *ht = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
 		if (!is_fake) {
-			if (closure->func.op_array.static_variables) {
-				closure->func.op_array.static_variables =
-					zend_array_dup(closure->func.op_array.static_variables);
+			if (!ht) {
+				ht = closure->func.op_array.static_variables;
 			}
 			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
-				closure->func.op_array.static_variables);
+				ht ? zend_array_dup(ht) : NULL);
 		} else if (func->op_array.static_variables) {
-			HashTable *ht = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
-
 			if (!ht) {
 				ht = zend_array_dup(func->op_array.static_variables);
 				ZEND_MAP_PTR_SET(func->op_array.static_variables_ptr, ht);

@@ -73,7 +73,7 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
+	if (dom_node_is_read_only(nodep)) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}

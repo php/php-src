@@ -1,7 +1,6 @@
 --TEST--
 PgSQL PDO Parser custom syntax
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

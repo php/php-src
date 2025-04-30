@@ -21,6 +21,12 @@
 #ifndef ZEND_JIT_INTERNAL_H
 #define ZEND_JIT_INTERNAL_H
 
+#include "Zend/zend_types.h"
+#include "Zend/zend_compile.h"
+#include "Zend/zend_constants.h"
+#include "Zend/Optimizer/zend_func_info.h"
+#include "Zend/Optimizer/zend_call_graph.h"
+
 /* Address Encoding */
 typedef uintptr_t zend_jit_addr;
 
@@ -183,17 +189,18 @@ extern const zend_op *zend_jit_halt_op;
 # define ZEND_OPCODE_HANDLER_RET              void
 # define ZEND_OPCODE_HANDLER_ARGS             EXECUTE_DATA_D
 # define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU
-# define ZEND_OPCODE_HANDLER_ARGS_DC
-# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC
+# define ZEND_OPCODE_HANDLER_ARGS_EX
+# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX
 # define ZEND_OPCODE_RETURN()                 return
 # define ZEND_OPCODE_TAIL_CALL(handler)       do { \
 		handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 		return; \
 	} while(0)
 # define ZEND_OPCODE_TAIL_CALL_EX(handler, arg) do { \
-		handler(arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC); \
+		handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX arg); \
 		return; \
 	} while(0)
+# define ZEND_VM_ENTER_BIT 0
 #else
 # define EXECUTE_DATA_D                       zend_execute_data* execute_data
 # define EXECUTE_DATA_C                       execute_data
@@ -203,36 +210,39 @@ extern const zend_op *zend_jit_halt_op;
 # define OPLINE_C                             opline
 # define OPLINE_DC                            , OPLINE_D
 # define OPLINE_CC                            , OPLINE_C
-# define ZEND_OPCODE_HANDLER_RET              int
-# define ZEND_OPCODE_HANDLER_ARGS             EXECUTE_DATA_D
-# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU    EXECUTE_DATA_C
-# define ZEND_OPCODE_HANDLER_ARGS_DC          EXECUTE_DATA_DC
-# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC EXECUTE_DATA_CC
-# define ZEND_OPCODE_RETURN()                 return 0
+# define ZEND_OPCODE_HANDLER_RET              const zend_op *
+# define ZEND_OPCODE_HANDLER_ARGS             EXECUTE_DATA_D OPLINE_DC
+# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU    EXECUTE_DATA_C OPLINE_CC
+# define ZEND_OPCODE_HANDLER_ARGS_EX          EXECUTE_DATA_D OPLINE_DC,
+# define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX EXECUTE_DATA_C OPLINE_CC,
+# define ZEND_OPCODE_RETURN()                 return opline
 # define ZEND_OPCODE_TAIL_CALL(handler)       do { \
 		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 	} while(0)
 # define ZEND_OPCODE_TAIL_CALL_EX(handler, arg) do { \
-		return handler(arg ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC); \
+		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX arg); \
 	} while(0)
+# define ZEND_VM_ENTER_BIT 1ULL
 #endif
 
 /* VM handlers */
 typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *zend_vm_opcode_handler_t)(ZEND_OPCODE_HANDLER_ARGS);
 
 /* VM helpers */
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_DATA_DC);
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info EXECUTE_DATA_DC);
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(EXECUTE_DATA_D);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
 
-void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
-void ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(EXECUTE_DATA_D);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper(ZEND_OPCODE_HANDLER_ARGS);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(ZEND_OPCODE_HANDLER_ARGS);
 bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
+bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D);
+bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D);
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D);
 void ZEND_FASTCALL zend_jit_undefined_long_key_ex(zend_long key EXECUTE_DATA_DC);
 void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D);
@@ -249,8 +259,11 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSIVE_CALL,    "recursive call") \
 	_(RECURSIVE_RET,     "recursive return") \
 	_(RETURN,            "return") \
-	_(INTERPRETER,       "exit to VM interpreter") \
 	_(LINK,              "link to another trace") \
+	_(INTERPRETER,       "exit to VM interpreter") \
+	_(TRAMPOLINE,        "trampoline call") \
+	_(PROP_HOOK_CALL,    "property hook call") \
+	_(BAD_FUNC,          "bad function call") \
 	/* compilation and linking successful */ \
 	_(COMPILED,          "compiled") \
 	_(ALREADY_DONE,      "already prcessed") \
@@ -268,9 +281,6 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(BLACK_LIST,        "trace blacklisted") \
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
 	_(COMPILED_LOOP,     "compiled loop") \
-	_(TRAMPOLINE,        "trampoline call") \
-	_(PROP_HOOK_CALL,    "property hook call") \
-	_(BAD_FUNC,          "bad function call") \
 	_(COMPILER_ERROR,    "JIT compilation error") \
 	/* no recoverable error (blacklist immediately) */ \
 	_(NO_SHM,            "insufficient shared memory") \
@@ -311,17 +321,18 @@ typedef enum _zend_jit_trace_stop {
 
 #define ZEND_JIT_TRACE_SUPPORTED    0
 
-#define ZEND_JIT_EXIT_JITED         (1<<0)
-#define ZEND_JIT_EXIT_BLACKLISTED   (1<<1)
-#define ZEND_JIT_EXIT_TO_VM         (1<<2) /* exit to VM without attempt to create a side trace */
-#define ZEND_JIT_EXIT_RESTORE_CALL  (1<<3) /* deoptimizer should restore EX(call) chain */
-#define ZEND_JIT_EXIT_POLYMORPHISM  (1<<4) /* exit because of polymorphic call */
-#define ZEND_JIT_EXIT_FREE_OP1      (1<<5)
-#define ZEND_JIT_EXIT_FREE_OP2      (1<<6)
-#define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
-#define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
-#define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
-#define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
+#define ZEND_JIT_EXIT_JITED             (1<<0)
+#define ZEND_JIT_EXIT_BLACKLISTED       (1<<1)
+#define ZEND_JIT_EXIT_TO_VM             (1<<2) /* exit to VM without attempt to create a side trace */
+#define ZEND_JIT_EXIT_RESTORE_CALL      (1<<3) /* deoptimizer should restore EX(call) chain */
+#define ZEND_JIT_EXIT_POLYMORPHISM      (1<<4) /* exit because of polymorphic call */
+#define ZEND_JIT_EXIT_FREE_OP1          (1<<5)
+#define ZEND_JIT_EXIT_FREE_OP2          (1<<6)
+#define ZEND_JIT_EXIT_PACKED_GUARD      (1<<7)
+#define ZEND_JIT_EXIT_CLOSURE_CALL      (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
+#define ZEND_JIT_EXIT_METHOD_CALL       (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
+#define ZEND_JIT_EXIT_INVALIDATE        (1<<10) /* invalidate current trace */
+#define ZEND_JIT_EXIT_CHECK_EXCEPTION   (1<<11)
 
 #define ZEND_JIT_EXIT_FIXED         (1U<<31) /* the exit_info can't be changed by zend_jit_snapshot_handler() */
 
@@ -380,6 +391,12 @@ typedef enum _zend_jit_trace_op {
 
 #define ZEND_JIT_TRACE_FAKE_INFO(level) \
 	(((level) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT) | ZEND_JIT_TRACE_FAKE_INIT_CALL)
+
+#define ZEND_JIT_TRACE_NUM_ARGS_INFO(count) \
+	((count) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
+
+#define ZEND_JIT_TRACE_NUM_ARGS(info) \
+	(((info) & ZEND_JIT_TRACE_FAKE_LEVEL_MASK) >> ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
 
 #define ZEND_JIT_TRACE_SET_FIRST_SSA_VAR(_info, var) do { \
 		_info |= (var << ZEND_JIT_TRACE_SSA_VAR_SHIFT); \
@@ -676,26 +693,6 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	}
 	*exit_if_true = 0;
 	return NULL;
-}
-
-static inline bool zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
-{
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-#ifdef _WIN32
-		/* ASLR */
-		return 1;
-#else
-		return 0;
-#endif
-	} else if (func->type == ZEND_USER_FUNCTION) {
-		if (func->common.fn_flags & ZEND_ACC_PRELOADED) {
-			return 0;
-		}
-		if (func->op_array.filename == called_from->filename && !func->op_array.scope) {
-			return 0;
-		}
-	}
-	return 1;
 }
 
 static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *opline)

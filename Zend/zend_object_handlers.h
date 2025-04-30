@@ -272,6 +272,8 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
 ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 /* Use zend_std_get_properties_ex() */
 ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
+ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope);
+ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc);
 
 static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
 {
@@ -333,8 +335,8 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
 
 #define zend_release_properties(ht) do { \
-	if ((ht) && !(GC_FLAGS(ht) & GC_IMMUTABLE) && !GC_DELREF(ht)) { \
-		zend_array_destroy(ht); \
+	if (ht) { \
+		zend_array_release(ht); \
 	} \
 } while (0)
 

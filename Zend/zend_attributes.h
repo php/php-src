@@ -28,9 +28,10 @@
 #define ZEND_ATTRIBUTE_TARGET_PROPERTY		(1<<3)
 #define ZEND_ATTRIBUTE_TARGET_CLASS_CONST	(1<<4)
 #define ZEND_ATTRIBUTE_TARGET_PARAMETER		(1<<5)
-#define ZEND_ATTRIBUTE_TARGET_ALL			((1<<6) - 1)
-#define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<6)
-#define ZEND_ATTRIBUTE_FLAGS				((1<<7) - 1)
+#define ZEND_ATTRIBUTE_TARGET_CONST			(1<<6)
+#define ZEND_ATTRIBUTE_TARGET_ALL			((1<<7) - 1)
+#define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<7)
+#define ZEND_ATTRIBUTE_FLAGS				((1<<8) - 1)
 
 /* Flags for zend_attribute.flags */
 #define ZEND_ATTRIBUTE_PERSISTENT   (1<<0)
@@ -47,6 +48,7 @@ extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 extern ZEND_API zend_class_entry *zend_ce_override;
 extern ZEND_API zend_class_entry *zend_ce_deprecated;
+extern ZEND_API zend_class_entry *zend_ce_nodiscard;
 
 typedef struct {
 	zend_string *name;

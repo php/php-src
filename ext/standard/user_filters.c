@@ -357,8 +357,8 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 		object_init_ex(return_value, stream_bucket_class_entry);
 		zend_update_property(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("bucket"), &zbucket);
-		/* add_property_zval increments the refcount which is unwanted here */
-		zval_ptr_dtor(&zbucket);
+		/* zend_update_property increments the refcount which is unwanted here */
+		Z_DELREF(zbucket);
 		zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
 		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
 		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("dataLength"), bucket->buflen);
@@ -439,7 +439,7 @@ PHP_FUNCTION(stream_bucket_append)
 /* {{{ Create a new bucket for use on the current stream */
 PHP_FUNCTION(stream_bucket_new)
 {
-	zval *zstream, zbucket;
+	zval zbucket;
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
@@ -447,11 +447,10 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream_bucket *bucket;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(zstream)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STRING(buffer, buffer_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_stream_from_zval(stream, zstream);
 	pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream));
 
 	memcpy(pbuffer, buffer, buffer_len);
@@ -461,8 +460,8 @@ PHP_FUNCTION(stream_bucket_new)
 	ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 	object_init_ex(return_value, stream_bucket_class_entry);
 	zend_update_property(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("bucket"), &zbucket);
-	/* add_property_zval increments the refcount which is unwanted here */
-	zval_ptr_dtor(&zbucket);
+	/* zend_update_property increments the refcount which is unwanted here */
+	Z_DELREF(zbucket);
 	zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
 	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
 	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("dataLength"), bucket->buflen);
@@ -477,16 +476,19 @@ PHP_FUNCTION(stream_get_filters)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	array_init(return_value);
 
 	filters_hash = php_get_stream_filters_hash();
 
 	if (filters_hash && !HT_IS_PACKED(filters_hash)) {
+		array_init(return_value);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_MAP_FOREACH_STR_KEY(filters_hash, filter_name) {
 			if (filter_name) {
 				add_next_index_str(return_value, zend_string_copy(filter_name));
 			}
 		} ZEND_HASH_FOREACH_END();
+	} else {
+		RETURN_EMPTY_ARRAY();
 	}
 	/* It's okay to return an empty array if no filters are registered */
 }

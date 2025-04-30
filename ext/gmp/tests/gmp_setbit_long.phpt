@@ -41,5 +41,5 @@ FFFFFFFF
 3FFFFFFFF
 FFFFFFFFF
 3FFFFFFFFF
-gmp_setbit(): Argument #2 ($index) must be less than %d * %d
+gmp_setbit(): Argument #2 ($index) must be between 0 and %d * %d
 Done

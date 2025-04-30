@@ -190,6 +190,11 @@ const CURLOPT_INFILE = UNKNOWN;
 const CURLOPT_INFILESIZE = UNKNOWN;
 /**
  * @var int
+ * @cvalue CURLOPT_INFILESIZE_LARGE
+ */
+const CURLOPT_INFILESIZE_LARGE = UNKNOWN;
+/**
+ * @var int
  * @cvalue CURLOPT_INTERFACE
  */
 const CURLOPT_INTERFACE = UNKNOWN;
@@ -491,6 +496,24 @@ const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
  * @cvalue CURLOPT_DEBUGFUNCTION
  */
 const CURLOPT_DEBUGFUNCTION = UNKNOWN;
+
+#if LIBCURL_VERSION_NUM >= 0x080d00 /* Available since 8.13.0 */
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_ALL
+ */
+const CURLFOLLOW_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_OBEYCODE
+ */
+const CURLFOLLOW_OBEYCODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_FIRSTONLY
+ */
+const CURLFOLLOW_FIRSTONLY = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -999,6 +1022,18 @@ const CURLINFO_CAPATH = UNKNOWN;
  * @cvalue CURLINFO_CAINFO
  */
 const CURLINFO_CAINFO = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080c00 /* Available since 8.12.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_HTTPAUTH_USED
+ */
+const CURLINFO_HTTPAUTH_USED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLINFO_PROXYAUTH_USED
+ */
+const CURLINFO_PROXYAUTH_USED = UNKNOWN;
 #endif
 
 /* Other */
@@ -3054,6 +3089,13 @@ const CURLINFO_STARTTRANSFER_TIME_T = UNKNOWN;
  * @cvalue CURLINFO_TOTAL_TIME_T
  */
 const CURLINFO_TOTAL_TIME_T = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080700 /* Available since 8.7.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_USED_PROXY
+ */
+const CURLINFO_USED_PROXY = UNKNOWN;
+#endif
 #if LIBCURL_VERSION_NUM >= 0x080a00 /* Available since 8.10.0 */
 /**
  * @var int
@@ -3668,6 +3710,15 @@ final class CurlShareHandle
 {
 }
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class CurlSharePersistentHandle
+{
+    public readonly array $options;
+}
+
 function curl_close(CurlHandle $handle): void {}
 
 /** @refcount 1 */
@@ -3701,6 +3752,8 @@ function curl_upkeep(CurlHandle $handle): bool {}
 #endif
 
 function curl_multi_add_handle(CurlMultiHandle $multi_handle, CurlHandle $handle): int {}
+
+function curl_multi_get_handles(CurlMultiHandle $multi_handle): array {}
 
 function curl_multi_close(CurlMultiHandle $multi_handle): void {}
 
@@ -3747,6 +3800,9 @@ function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $va
 
 /** @refcount 1 */
 function curl_share_strerror(int $error_code): ?string {}
+
+/** @refcount 1 */
+function curl_share_init_persistent(array $share_options): CurlSharePersistentHandle {}
 
 /** @refcount 1 */
 function curl_strerror(int $error_code): ?string {}

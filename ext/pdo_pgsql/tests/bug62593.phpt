@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #62593 (Emulate prepares behave strangely with PARAM_BOOL)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

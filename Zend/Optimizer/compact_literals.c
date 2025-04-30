@@ -43,50 +43,6 @@ typedef struct _literal_info {
 		info[n].num_related = (related); \
 	} while (0)
 
-static size_t type_num_classes(const zend_op_array *op_array, uint32_t arg_num)
-{
-	zend_arg_info *arg_info;
-	if (arg_num > 0) {
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			return 0;
-		}
-		if (EXPECTED(arg_num <= op_array->num_args)) {
-			arg_info = &op_array->arg_info[arg_num-1];
-		} else if (UNEXPECTED(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
-			arg_info = &op_array->arg_info[op_array->num_args];
-		} else {
-			return 0;
-		}
-	} else {
-		arg_info = op_array->arg_info - 1;
-	}
-
-	if (ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
-		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			/* Intersection types cannot have nested list types */
-			if (ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
-				return ZEND_TYPE_LIST(arg_info->type)->num_types;
-			}
-			ZEND_ASSERT(ZEND_TYPE_IS_UNION(arg_info->type));
-			size_t count = 0;
-			zend_type *list_type;
-
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
-				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
-					count += ZEND_TYPE_LIST(*list_type)->num_types;
-				} else {
-					ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-					count += 1;
-				}
-			} ZEND_TYPE_LIST_FOREACH_END();
-			return count;
-		}
-		return 1;
-	}
-
-	return 0;
-}
-
 static uint32_t add_static_slot(HashTable     *hash,
                                 zend_op_array *op_array,
                                 uint32_t       op1,
@@ -165,7 +121,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
-	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot;
+	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot;
 
 	if (op_array->last_literal) {
 		info = (literal_info*)zend_arena_calloc(&ctx->arena, op_array->last_literal, sizeof(literal_info));
@@ -175,6 +131,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		end = opline + op_array->last;
 		while (opline < end) {
 			switch (opline->opcode) {
+				case ZEND_JMP_FRAMELESS:
+					LITERAL_INFO(opline->op1.constant, 1);
+					break;
 				case ZEND_INIT_FCALL_BY_NAME:
 					LITERAL_INFO(opline->op2.constant, 2);
 					break;
@@ -480,13 +439,14 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_clean(&hash);
 		op_array->last_literal = j;
 
-		const_slot = zend_arena_alloc(&ctx->arena, j * 6 * sizeof(int));
-		memset(const_slot, -1, j * 6 * sizeof(int));
+		const_slot = zend_arena_alloc(&ctx->arena, j * 7 * sizeof(int));
+		memset(const_slot, -1, j * 7 * sizeof(int));
 		class_slot = const_slot + j;
 		func_slot = class_slot + j;
 		bind_var_slot = func_slot + j;
 		property_slot = bind_var_slot + j;
 		method_slot = property_slot + j;
+		jmp_slot = method_slot + j;
 
 		/* Update opcodes to use new literals table */
 		cache_size = zend_op_array_extension_handles * sizeof(void*);
@@ -500,26 +460,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				opline->op2.constant = map[opline->op2.constant];
 			}
 			switch (opline->opcode) {
-				case ZEND_RECV_INIT:
-				case ZEND_RECV:
-				case ZEND_RECV_VARIADIC:
-				{
-					size_t num_classes = type_num_classes(op_array, opline->op1.num);
-					if (num_classes) {
-						opline->extended_value = cache_size;
-						cache_size += num_classes * sizeof(void *);
-					}
-					break;
-				}
-				case ZEND_VERIFY_RETURN_TYPE:
-				{
-					size_t num_classes = type_num_classes(op_array, 0);
-					if (num_classes) {
-						opline->op2.num = cache_size;
-						cache_size += num_classes * sizeof(void *);
-					}
-					break;
-				}
 				case ZEND_ASSIGN_STATIC_PROP_OP:
 					if (opline->op1_type == IS_CONST) {
 						// op1 static property
@@ -773,9 +713,18 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
-				case ZEND_JMP_FRAMELESS:
 					opline->extended_value = cache_size;
 					cache_size += sizeof(void *);
+					break;
+				case ZEND_JMP_FRAMELESS:
+					// op1 func
+					if (jmp_slot[opline->op1.constant] >= 0) {
+						opline->extended_value = jmp_slot[opline->op1.constant];
+					} else {
+						opline->extended_value = cache_size;
+						cache_size += sizeof(void *);
+						jmp_slot[opline->op1.constant] = opline->extended_value;
+					}
 					break;
 				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAL_EX:

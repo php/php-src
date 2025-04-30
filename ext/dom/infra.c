@@ -46,7 +46,7 @@ zend_string *dom_strip_and_collapse_ascii_whitespace(zend_string *input)
 	while (current < end) {
 		/* Copy non-whitespace */
 		size_t non_whitespace_len = strcspn(current, ascii_whitespace);
-		/* If the pointers are equal, we still haven't encountered collapsable or strippable whitespace. */
+		/* If the pointers are equal, we still haven't encountered collapsible or strippable whitespace. */
 		if (write_ptr != current) {
 			memmove(write_ptr, current, non_whitespace_len);
 		}

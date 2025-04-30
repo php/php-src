@@ -560,6 +560,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 }
 
+// When adding a new string here, please also update build/gen_stub.php to the
+// known strings to be used in property registration; see gh-15751
 #define ZEND_KNOWN_STRINGS(_) \
 	_(ZEND_STR_FILE,                   "file") \
 	_(ZEND_STR_LINE,                   "line") \
@@ -622,6 +624,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_NULL_LOWERCASE,         "null") \
 	_(ZEND_STR_MIXED,                  "mixed") \
 	_(ZEND_STR_TRAVERSABLE,            "Traversable") \
+	_(ZEND_STR_SELF,                   "self") \
+	_(ZEND_STR_PARENT,                 "parent") \
 	_(ZEND_STR_SLEEP,                  "__sleep") \
 	_(ZEND_STR_WAKEUP,                 "__wakeup") \
 	_(ZEND_STR_CASES,                  "cases") \

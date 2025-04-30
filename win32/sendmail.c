@@ -65,28 +65,28 @@ char *php_mailer = "PHP 7 WIN32";
 /* Error messages */
 static char *ErrorMessages[] =
 {
-	{"Success"}, /* 0 */
-	{"Bad arguments from form"}, /* 1 */
-	{"Unable to open temporary mailfile for read"},
-	{"Failed to Start Sockets"},
-	{"Failed to Resolve Host"},
-	{"Failed to obtain socket handle"}, /* 5 */
-	{"Failed to connect to mailserver, verify your \"SMTP\" setting in php.ini"},
-	{"Failed to Send"},
-	{"Failed to Receive"},
-	{"Server Error"},
-	{"Failed to resolve the host IP name"}, /* 10 */
-	{"Out of memory"},
-	{"Unknown error"},
-	{"Bad Message Contents"},
-	{"Bad Message Subject"},
-	{"Bad Message destination"}, /* 15 */
-	{"Bad Message Return Path"},
-	{"Bad Mail Host"},
-	{"Bad Message File"},
-	{"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing"},
-	{"Mailserver rejected our \"sendmail_from\" setting"}, /* 20 */
-	{"Error while trimming mail header with PCRE, please file a bug report at https://github.com/php/php-src/issues"} /* 21 */
+	"Success", /* 0 */
+	"Bad arguments from form", /* 1 */
+	"Unable to open temporary mailfile for read",
+	"Failed to Start Sockets",
+	"Failed to Resolve Host",
+	"Failed to obtain socket handle", /* 5 */
+	"Failed to connect to mailserver, verify your \"SMTP\" setting in php.ini",
+	"Failed to Send",
+	"Failed to Receive",
+	"Server Error",
+	"Failed to resolve the host IP name", /* 10 */
+	"Out of memory",
+	"Unknown error",
+	"Bad Message Contents",
+	"Bad Message Subject",
+	"Bad Message destination", /* 15 */
+	"Bad Message Return Path",
+	"Bad Mail Host",
+	"Bad Message File",
+	"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing",
+	"Mailserver rejected our \"sendmail_from\" setting", /* 20 */
+	"Error while trimming mail header with PCRE, please file a bug report at https://github.com/php/php-src/issues" /* 21 */
 };
 
 /* This pattern converts all single occurrences of \n (Unix)
@@ -110,6 +110,15 @@ static char *ErrorMessages[] =
  * message body. */
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
+
+static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
+                    const char *headers, char *headers_lc, char **error_message);
+static int MailConnect();
+static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
+static int Post(LPCSTR msg);
+static int Ack(char **server_response);
+static unsigned long GetAddr(LPSTR szHost);
+static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 
 /* This function is meant to unify the headers passed to to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
@@ -195,8 +204,6 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 
 	if (headers) {
-		char *pos = NULL;
-
 		/* Use PCRE to trim the header into the right format */
 		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
