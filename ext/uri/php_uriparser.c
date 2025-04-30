@@ -66,13 +66,12 @@ static void uriparser_copy_text_range(UriTextRangeA *text_range, UriTextRangeA *
 		new_text_range->first = uriSafeToPointToA;
 		new_text_range->afterLast = uriSafeToPointToA;
 	} else {
-		size_t char_length = (size_t) (text_range->afterLast - text_range->first);
-		size_t bytes_length = char_length * sizeof(char);
-		char *dup = emalloc(bytes_length);   // TODO remove if wchar support is not necessary
-		memcpy(dup, text_range->first, bytes_length);
+		size_t length = (size_t) (text_range->afterLast - text_range->first);
+		char *dup = emalloc(length);
+		memcpy(dup, text_range->first, length);
 
 		new_text_range->first = dup;
-		new_text_range->afterLast = dup + char_length;
+		new_text_range->afterLast = dup + length;
 	}
 }
 
@@ -652,6 +651,7 @@ static void *uriparser_parse_uri(const zend_string *uri_str, const void *base_ur
 	}
 
 	efree(uriparser_uri);
+	efree(uriparser_base_url);
 
 	return uriparser_create_uris(absolute_uri, original_uri_str, NULL, NULL);
 }
