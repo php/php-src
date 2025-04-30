@@ -1906,7 +1906,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_PASSWORD:
 		case CURLOPT_PROXYPASSWORD:
 		case CURLOPT_PROXYUSERNAME:
-		case CURLOPT_USERNAME:
 		case CURLOPT_NOPROXY:
 		case CURLOPT_SOCKS5_GSSAPI_SERVICE:
 		case CURLOPT_MAIL_FROM:
@@ -1998,6 +1997,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		}
 
 		case CURLOPT_USERPWD:
+		case CURLOPT_USERNAME:
 		{
 			if (Z_ISNULL_P(zvalue)) {
 				// Authorization header would be implictly set

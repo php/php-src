@@ -15,7 +15,15 @@ curl_setopt($ch, CURLOPT_VERBOSE, true);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 $response = curl_exec($ch);
 var_dump(str_contains($response, "authorization"));
+$ch = curl_init("https://localhost/username");
+curl_setopt($ch, CURLOPT_USERNAME, null);
+curl_setopt($ch, CURLOPT_VERBOSE, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+$response = curl_exec($ch);
+var_dump(str_contains($response, "authorization"));
 ?>
 --EXPECT--
+%A
+bool(false)
 %A
 bool(false)
