@@ -1057,8 +1057,10 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 			// release mutex and wait for ack
 			tsrm_cond_wait(FFI_G(vm_ack), FFI_G(vm_request_lock));
 
+#ifdef ZEND_CHECK_STACK_LIMIT
 			// prepare the stack call info/limits for the current thread
 			zend_call_stack_init();
+#endif
 		}
 
 		// dispatch the callback
