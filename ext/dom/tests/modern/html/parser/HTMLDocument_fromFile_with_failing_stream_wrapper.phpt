@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument::createFromFile() with failing stream wrapper
+Dom\HTMLDocument::createFromFile() with failing stream wrapper
 --EXTENSIONS--
 dom
 --FILE--
@@ -32,13 +32,13 @@ class FailingWrapper {
 
 stream_wrapper_register("fail", FailingWrapper::class, 0);
 
-DOM\HTMLDocument::createFromFile("fail://x");
+Dom\HTMLDocument::createFromFile("fail://x");
 
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: fail in %s:%d
 Stack trace:
 #0 [internal function]: FailingWrapper->stream_read(8192)
-#1 %s(%d): DOM\HTMLDocument::createFromFile('fail://x')
+#1 %s(%d): Dom\HTMLDocument::createFromFile('fail://x')
 #2 {main}
   thrown in %s on line %d

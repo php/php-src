@@ -27,7 +27,6 @@
 # include <string.h>
 #endif
 
-extern void * __php_mempcpy(void * dst, const void * src, size_t len);
 extern char * __php_stpncpy(char *dst, const char *src, size_t len);
 
 #ifndef MIN
@@ -486,7 +485,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	ALLOCA_FLAG(use_heap_p_bytes);
 	cp = p_bytes = do_alloca(key_len, use_heap_p_bytes);
 	for (cnt = key_len; cnt >= 64; cnt -= 64) {
-		cp = __php_mempcpy((void *) cp, (const void *)temp_result, 64);
+		cp = zend_mempcpy((void *) cp, (const void *)temp_result, 64);
 	}
 
 	memcpy(cp, temp_result, cnt);
@@ -506,7 +505,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	ALLOCA_FLAG(use_heap_s_bytes);
 	cp = s_bytes = do_alloca(salt_len, use_heap_s_bytes);
 	for (cnt = salt_len; cnt >= 64; cnt -= 64) {
-		cp = __php_mempcpy(cp, temp_result, 64);
+		cp = zend_mempcpy(cp, temp_result, 64);
 	}
 	memcpy(cp, temp_result, cnt);
 

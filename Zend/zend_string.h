@@ -424,7 +424,7 @@ static zend_always_inline bool zend_string_starts_with_ci(const zend_string *str
 }
 
 #define zend_string_starts_with_literal_ci(str, prefix) \
-	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
+	zend_string_starts_with_cstr_ci(str, prefix, strlen(prefix))
 
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
@@ -572,6 +572,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_ARGS,                   "args") \
 	_(ZEND_STR_UNKNOWN,                "unknown") \
 	_(ZEND_STR_UNKNOWN_CAPITALIZED,    "Unknown") \
+	_(ZEND_STR_EXIT,                   "exit") \
 	_(ZEND_STR_EVAL,                   "eval") \
 	_(ZEND_STR_INCLUDE,                "include") \
 	_(ZEND_STR_REQUIRE,                "require") \
@@ -633,6 +634,10 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_COUNT,                  "count") \
 	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
+	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \
+	_(ZEND_STR_SINCE,                  "since") \
+	_(ZEND_STR_GET,                    "get") \
+	_(ZEND_STR_SET,                    "set") \
 
 
 typedef enum _zend_known_string_id {

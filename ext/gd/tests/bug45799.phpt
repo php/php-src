@@ -2,6 +2,12 @@
 Bug #45799 (imagepng() crashes on empty image).
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 $img = imagecreate(500,500);

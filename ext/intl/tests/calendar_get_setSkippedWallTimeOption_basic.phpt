@@ -42,7 +42,8 @@ var_dump(
 
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
 int(0)
 Should be 3h30
 int(3)

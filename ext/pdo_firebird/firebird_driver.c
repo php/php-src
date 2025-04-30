@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #ifndef _GNU_SOURCE
@@ -26,10 +26,11 @@
 #include "zend_exceptions.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "pdo_firebird_utils.h"
 
 static int php_firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
@@ -460,6 +461,65 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 	return 1;
 }
 
+#if FB_API_VER >= 40
+/* set coercing a data type */
+static void set_coercing_output_data_types(XSQLDA* sqlda)
+{
+	/* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */
+	/* These data types include DECFLOAT(16), DECFLOAT(34), INT128 (NUMERIC/DECIMAL(38, x)). */
+	/* In any case, at this data types can only be mapped to strings. */
+	/* This function allows you to ensure minimal performance of queries if they contain columns of the above types. */
+	unsigned int i;
+	short dtype;
+	short nullable;
+	XSQLVAR* var;
+	unsigned fb_client_version = fb_get_client_version();
+	unsigned fb_client_major_version = (fb_client_version >> 8) & 0xFF;
+	for (i=0, var = sqlda->sqlvar; i < sqlda->sqld; i++, var++) {
+		dtype = (var->sqltype & ~1); /* drop flag bit  */
+		nullable = (var->sqltype & 1);
+		switch(dtype) {
+			case SQL_INT128:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 46;
+				var->sqlscale = 0;
+				break;
+
+			case SQL_DEC16:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 24;
+				break;
+
+			case SQL_DEC34:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 43;
+				break;
+
+			case SQL_TIMESTAMP_TZ:
+			    if (fb_client_major_version < 4) {
+					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */
+					/* so we convert these types to a string. */
+					var->sqltype = SQL_VARYING + nullable;
+					var->sqllen = 58;
+				}
+				break;
+
+			case SQL_TIME_TZ:
+				if (fb_client_major_version < 4) {
+					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */
+					/* so we convert these types to a string. */
+					var->sqltype = SQL_VARYING + nullable;
+					var->sqllen = 46;
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
+}
+#endif
+
 /* map driver specific error message to PDO error */
 void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
 	const char *msg, const size_t msg_len) /* {{{ */
@@ -495,14 +555,12 @@ void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state,
 		einfo->errmsg_length = read_len;
 		einfo->errmsg = pestrndup(buf, read_len, dbh->is_persistent);
 
-#if FB_API_VER >= 25
 		char sqlstate[sizeof(pdo_error_type)];
 		fb_sqlstate(sqlstate, H->isc_status);
 		if (sqlstate != NULL && strlen(sqlstate) < sizeof(pdo_error_type)) {
 			strcpy(*error_code, sqlstate);
 			goto end;
 		}
-#endif
 	} else if (msg && msg_len) {
 		einfo->errmsg_length = msg_len;
 		einfo->errmsg = pestrndup(msg, einfo->errmsg_length, dbh->is_persistent);
@@ -529,7 +587,7 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->tr) {
 		if (dbh->auto_commit) {
-			php_firebird_commit_transaction(dbh, /* release */ false);
+			php_firebird_commit_transaction(dbh, /* retain */ false);
 		} else {
 			php_firebird_rollback_transaction(dbh);
 		}
@@ -605,6 +663,11 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 			break;
 		}
 
+#if FB_API_VER >= 40
+		/* set coercing a data type */
+		set_coercing_output_data_types(&S->out_sqlda);
+#endif
+
 		/* allocate the input descriptors */
 		if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, &num_sqlda)) {
 			break;
@@ -617,6 +680,14 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 			if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
 				break;
+			}
+
+			/* make all parameters nullable */
+			unsigned int i;
+			XSQLVAR* var;
+			for (i = 0, var = S->in_sqlda->sqlvar; i < S->in_sqlda->sqld; i++, var++) {
+				/* The low bit of sqltype indicates that the parameter can take a NULL value */
+				var->sqltype |= 1;
 			}
 		}
 
@@ -719,7 +790,7 @@ free_statement:
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
 static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
-	int qcount = 0;
+	size_t qcount = 0;
 	char const *co, *l, *r;
 	char *c;
 	size_t quotedlen;
@@ -732,6 +803,10 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
 	/* count the number of ' characters */
 	for (co = ZSTR_VAL(unquoted); (co = strchr(co,'\'')); qcount++, co++);
+
+	if (UNEXPECTED(ZSTR_LEN(unquoted) + 2 > ZSTR_MAX_LEN - qcount)) {
+		return NULL;
+	}
 
 	quotedlen = ZSTR_LEN(unquoted) + qcount + 2;
 	quoted_str = zend_string_alloc(quotedlen, 0);
@@ -756,51 +831,54 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 /* }}} */
 
 /* php_firebird_begin_transaction */
-static bool php_firebird_begin_transaction(pdo_dbh_t *dbh) /* {{{ */
+static bool php_firebird_begin_transaction(pdo_dbh_t *dbh, bool is_auto_commit_txn) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
-	char tpb[8] = { isc_tpb_version3 }, *ptpb = tpb+1;
-#ifdef abies_0
-	if (dbh->transaction_flags & PDO_TRANS_ISOLATION_LEVEL) {
-		if (dbh->transaction_flags & PDO_TRANS_READ_UNCOMMITTED) {
-			/* this is a poor fit, but it's all we have */
-			*ptpb++ = isc_tpb_read_committed;
-			*ptpb++ = isc_tpb_rec_version;
-			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_READ_UNCOMMITTED);
-		} else if (dbh->transaction_flags & PDO_TRANS_READ_COMMITTED) {
-			*ptpb++ = isc_tpb_read_committed;
-			*ptpb++ = isc_tpb_no_rec_version;
-			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_READ_COMMITTED);
-		} else if (dbh->transaction_flags & PDO_TRANS_REPEATABLE_READ) {
-			*ptpb++ = isc_tpb_concurrency;
-			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_REPEATABLE_READ);
-		} else {
-			*ptpb++ = isc_tpb_consistency;
-			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_SERIALIZABLE);
+
+	/* isc_xxx are all 1 byte. */
+	char tpb[4] = { isc_tpb_version3 };
+	size_t tpb_size;
+
+	/* access mode. writable or readonly */
+	tpb[1] = H->is_writable_txn ? isc_tpb_write : isc_tpb_read;
+
+	if (is_auto_commit_txn) {
+		/*
+		 * In autocommit mode, we need to always read the latest information, so we set `read committed`.
+		 */
+		tpb[2] = isc_tpb_read_committed;
+		/* Ignore indeterminate data from other transactions. This option only required with `read committed`. */
+		tpb[3] = isc_tpb_rec_version;
+		tpb_size = 4;
+	} else {
+		switch (H->txn_isolation_level) {
+			/*
+			* firebird's `read committed` has the option to wait until other transactions
+			* commit or rollback if there is indeterminate data.
+			* Introducing too many configuration values at once can cause confusion, so
+			* we don't support in PDO that feature yet.
+			*/
+			case PDO_FB_READ_COMMITTED:
+				tpb[2] = isc_tpb_read_committed;
+				/* Ignore indeterminate data from other transactions. This option only required with `read committed`. */
+				tpb[3] = isc_tpb_rec_version;
+				tpb_size = 4;
+				break;
+
+			case PDO_FB_SERIALIZABLE:
+				tpb[2] = isc_tpb_consistency;
+				tpb_size = 3;
+				break;
+
+			case PDO_FB_REPEATABLE_READ:
+			default:
+				tpb[2] = isc_tpb_concurrency;
+				tpb_size = 3;
+				break;
 		}
 	}
 
-	if (dbh->transaction_flags & PDO_TRANS_ACCESS_MODE) {
-		if (dbh->transaction_flags & PDO_TRANS_READONLY) {
-			*ptpb++ = isc_tpb_read;
-			dbh->transaction_flags &= ~(PDO_TRANS_ACCESS_MODE^PDO_TRANS_READONLY);
-		} else {
-			*ptpb++ = isc_tpb_write;
-			dbh->transaction_flags &= ~(PDO_TRANS_ACCESS_MODE^PDO_TRANS_READWRITE);
-		}
-	}
-
-	if (dbh->transaction_flags & PDO_TRANS_CONFLICT_RESOLUTION) {
-		if (dbh->transaction_flags & PDO_TRANS_RETRY) {
-			*ptpb++ = isc_tpb_wait;
-			dbh->transaction_flags &= ~(PDO_TRANS_CONFLICT_RESOLUTION^PDO_TRANS_RETRY);
-		} else {
-			*ptpb++ = isc_tpb_nowait;
-			dbh->transaction_flags &= ~(PDO_TRANS_CONFLICT_RESOLUTION^PDO_TRANS_ABORT);
-		}
-	}
-#endif
-	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, (unsigned short)(ptpb-tpb), tpb)) {
+	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, tpb_size, tpb)) {
 		php_firebird_error(dbh);
 		return false;
 	}
@@ -817,12 +895,12 @@ static bool firebird_handle_manually_begin(pdo_dbh_t *dbh) /* {{{ */
 	 * If in autocommit mode and in transaction, we will need to close the transaction once.
 	 */
 	if (dbh->auto_commit && H->tr) {
-		if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+		if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
 			return false;
 		}
 	}
 
-	if (!php_firebird_begin_transaction(dbh)) {
+	if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ false)) {
 		return false;
 	}
 	H->in_manually_txn = 1;
@@ -871,7 +949,7 @@ static bool firebird_handle_manually_commit(pdo_dbh_t *dbh) /* {{{ */
 	 * Reopen instead of retain because isolation level may change
 	 */
 	if (dbh->auto_commit) {
-		if (!php_firebird_begin_transaction(dbh)) {
+		if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ true)) {
 			return false;
 		}
 	}
@@ -907,7 +985,7 @@ static bool firebird_handle_manually_rollback(pdo_dbh_t *dbh) /* {{{ */
 	 * Reopen instead of retain because isolation level may change
 	 */
 	if (dbh->auto_commit) {
-		if (!php_firebird_begin_transaction(dbh)) {
+		if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ true)) {
 			return false;
 		}
 	}
@@ -922,12 +1000,6 @@ static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sq
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char *new_sql;
-
-	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (ZSTR_LEN(sql) > 65536) {
-		php_firebird_error_with_info(dbh, "01004", strlen("01004"), NULL, 0);
-		return 0;
-	}
 
 	/* allocate the statement */
 	if (isc_dsql_allocate_statement(H->isc_status, &H->db, s)) {
@@ -961,6 +1033,7 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	bool bval;
+	zend_long lval;
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
@@ -979,22 +1052,22 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 				/* ignore if the new value equals the old one */
 				if (dbh->auto_commit ^ bval) {
 					if (bval) {
-						/* change to auto commit mode.
+						/*
+						 * change to auto commit mode.
 						 * If the transaction is not started, start it.
-						 * However, this is a fallback since such a situation usually does not occur.
 						 */
 						if (!H->tr) {
-							if (!php_firebird_begin_transaction(dbh)) {
+							if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ true)) {
 								return false;
 							}
 						}
 					} else {
-						/* change to not auto commit mode.
+						/*
+						 * change to not auto commit mode.
 						 * close the transaction if exists.
-						 * However, this is a fallback since such a situation usually does not occur.
 						 */
 						if (H->tr) {
-							if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+							if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
 								return false;
 							}
 						}
@@ -1052,6 +1125,69 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 				zend_string_release_ex(str, 0);
 			}
 			return true;
+
+		case PDO_FB_TRANSACTION_ISOLATION_LEVEL:
+			{
+				if (!pdo_get_long_param(&lval, val)) {
+					return false;
+				}
+
+				if (H->in_manually_txn) {
+					pdo_raise_impl_error(dbh, NULL, "HY000", "Cannot change transaction isolation level while a transaction is already open");
+					return false;
+				}
+
+				/* ignore if the new value equals the old one */
+				if (H->txn_isolation_level != lval) {
+					if (lval == PDO_FB_READ_COMMITTED ||
+						lval == PDO_FB_REPEATABLE_READ ||
+						lval == PDO_FB_SERIALIZABLE
+					) {
+						/*
+						 * Autocommit mode is always read-committed, so this setting is used the next time
+						 * a manual transaction starts. Therefore, there is no need to immediately reopen the transaction.
+						 */
+						H->txn_isolation_level = lval;
+					} else {
+						zend_value_error("Pdo\\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+							"(Pdo\\Firebird::READ_COMMITTED, Pdo\\Firebird::REPEATABLE_READ, or Pdo\\Firebird::SERIALIZABLE)");
+						return false;
+					}
+				}
+			}
+			return true;
+
+		case PDO_FB_WRITABLE_TRANSACTION:
+			{
+				if (!pdo_get_bool_param(&bval, val)) {
+					return false;
+				}
+
+				if (H->in_manually_txn) {
+					pdo_raise_impl_error(dbh, NULL, "HY000", "Cannot change access mode while a transaction is already open");
+					return false;
+				}
+
+				/* ignore if the new value equals the old one */
+				if (H->is_writable_txn != bval) {
+					H->is_writable_txn = bval;
+					if (dbh->auto_commit) {
+						if (H->tr) {
+							if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
+								/* In case of error, revert the setting */
+								H->is_writable_txn = !bval;
+								return false;
+							}
+						}
+						if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ true)) {
+							/* In case of error, revert the setting */
+							H->is_writable_txn = !bval;
+							return false;
+						}
+					}
+				}
+			}
+			return true;
 	}
 	return false;
 }
@@ -1080,7 +1216,7 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		char tmp[INFO_BUF_LEN];
 
 		case PDO_ATTR_AUTOCOMMIT:
-			ZVAL_LONG(val,dbh->auto_commit);
+			ZVAL_BOOL(val,dbh->auto_commit);
 			return 1;
 
 		case PDO_ATTR_CONNECTION_STATUS:
@@ -1118,14 +1254,43 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				ZVAL_STRING(val, tmp);
 				return 1;
 			}
-			/* TODO Check this is correct? */
-			ZEND_FALLTHROUGH;
+			return -1;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			ZVAL_BOOL(val, H->fetch_table_names);
 			return 1;
+
+		case PDO_FB_ATTR_DATE_FORMAT:
+			ZVAL_STRING(val, H->date_format ? H->date_format : PDO_FB_DEF_DATE_FMT);
+			return 1;
+
+		case PDO_FB_ATTR_TIME_FORMAT:
+			ZVAL_STRING(val, H->time_format ? H->time_format : PDO_FB_DEF_TIME_FMT);
+			return 1;
+
+		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
+			ZVAL_STRING(val, H->timestamp_format ? H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT);
+			return 1;
+
+		case PDO_FB_TRANSACTION_ISOLATION_LEVEL:
+			ZVAL_LONG(val, H->txn_isolation_level);
+			return 1;
+
+		case PDO_FB_WRITABLE_TRANSACTION:
+			ZVAL_BOOL(val, H->is_writable_txn);
+			return 1;
 	}
 	return 0;
+}
+/* }}} */
+
+/* called by PDO to check liveness */
+static zend_result pdo_firebird_check_liveness(pdo_dbh_t *dbh) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	/* fb_ping return 0 if the connection is alive */
+	return fb_ping(H->isc_status, &H->db) ? FAILURE : SUCCESS;
 }
 /* }}} */
 
@@ -1167,11 +1332,12 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
 	pdo_firebird_get_attribute,
-	NULL, /* check_liveness */
+	pdo_firebird_check_liveness,
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	pdo_firebird_in_manually_transaction,
-	NULL /* get gc */
+	NULL, /* get gc */
+	NULL /* scanner */
 };
 /* }}} */
 
@@ -1199,6 +1365,20 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 
 	if (!dbh->password && vars[5].optval) {
 		dbh->password = pestrdup(vars[5].optval, dbh->is_persistent);
+	}
+
+	H->in_manually_txn = 0;
+	H->is_writable_txn = pdo_attr_lval(driver_options, PDO_FB_WRITABLE_TRANSACTION, 1);
+	zend_long txn_isolation_level = pdo_attr_lval(driver_options, PDO_FB_TRANSACTION_ISOLATION_LEVEL, PDO_FB_REPEATABLE_READ);
+	if (txn_isolation_level == PDO_FB_READ_COMMITTED ||
+		txn_isolation_level == PDO_FB_REPEATABLE_READ ||
+		txn_isolation_level == PDO_FB_SERIALIZABLE
+	) {
+		H->txn_isolation_level = txn_isolation_level;
+	} else {
+		zend_value_error("Pdo\\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+			"(Pdo\\Firebird::READ_COMMITTED, Pdo\\Firebird::REPEATABLE_READ, or Pdo\\Firebird::SERIALIZABLE)");
+		ret = 0;
 	}
 
 	do {
@@ -1251,9 +1431,8 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 				"HY000", H->isc_status[1], errmsg);
 	}
 
-	H->in_manually_txn = 0;
-	if (dbh->auto_commit && !H->tr) {
-		ret = php_firebird_begin_transaction(dbh);
+	if (ret && dbh->auto_commit && !H->tr) {
+		ret = php_firebird_begin_transaction(dbh, /* auto commit mode */ true);
 	}
 
 	if (!ret) {

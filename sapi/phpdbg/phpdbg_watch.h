@@ -106,12 +106,7 @@ typedef struct _phpdbg_watch_element {
 typedef struct {
 	/* to watch rehashes (yes, this is not *perfect*, but good enough for everything in PHP...) */
 	phpdbg_watchpoint_t hash_watch; /* must be first element */
-	Bucket *last;
-	zend_string *last_str;
-	zend_ulong last_idx;
-
 	HashTable *ht;
-	size_t data_size;
 	HashTable watches; /* contains phpdbg_watch_element */
 } phpdbg_watch_ht_info;
 
@@ -135,7 +130,7 @@ int phpdbg_print_changed_zvals(void);
 
 void phpdbg_list_watchpoints(void);
 
-void phpdbg_watch_efree(void *ptr);
+void phpdbg_watch_efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 
 static long phpdbg_pagesize;

@@ -22,7 +22,7 @@
  * */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -455,7 +455,7 @@ static void saproxy_iter_dtor(zend_object_iterator *iter)
 	efree(I);
 }
 
-static int saproxy_iter_valid(zend_object_iterator *iter)
+static zend_result saproxy_iter_valid(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 

@@ -45,8 +45,7 @@ PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache fcc;
 	FILE                 *fp;
 	smart_str             buf;
 	int                   method;
@@ -54,8 +53,7 @@ typedef struct {
 } php_curl_write;
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache fcc;
 	FILE                 *fp;
 	zend_resource        *res;
 	int                   method;
@@ -63,22 +61,19 @@ typedef struct {
 } php_curl_read;
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
-} php_curl_callback;
-
-typedef struct {
 	php_curl_write    *write;
 	php_curl_write    *write_header;
 	php_curl_read     *read;
 	zval               std_err;
-	php_curl_callback *progress;
-#if LIBCURL_VERSION_NUM >= 0x072000
-	php_curl_callback  *xferinfo;
+	zend_fcall_info_cache progress;
+	zend_fcall_info_cache xferinfo;
+	zend_fcall_info_cache fnmatch;
+	zend_fcall_info_cache debug;
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+	zend_fcall_info_cache prereq;
 #endif
-	php_curl_callback  *fnmatch;
-#if LIBCURL_VERSION_NUM >= 0x075400
-	php_curl_callback  *sshhostkey;
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+	zend_fcall_info_cache sshhostkey;
 #endif
 } php_curl_handlers;
 
@@ -94,9 +89,6 @@ struct _php_curl_send_headers {
 struct _php_curl_free {
 	zend_llist post;
 	zend_llist stream;
-#if LIBCURL_VERSION_NUM < 0x073800 /* 7.56.0 */
-	zend_llist buffers;
-#endif
 	HashTable *slist;
 };
 
@@ -119,7 +111,7 @@ typedef struct {
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
-	php_curl_callback	*server_push;
+	zend_fcall_info_cache server_push;
 } php_curlm_handlers;
 
 typedef struct {

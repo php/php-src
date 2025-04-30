@@ -61,7 +61,7 @@ foreach ($csv_lists as $csv_list) {
 
     // call fgetcsv() to parse csv fields
 
-    var_dump( fgetcsv($file_handle, 1024, $delimiter) );
+    var_dump( fgetcsv($file_handle, 1024, $delimiter, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

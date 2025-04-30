@@ -29,6 +29,8 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_save_handler() : error functionality ***
 
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
+
 Fatal error: Uncaught Exception: Do something bad..! in %s:%d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')

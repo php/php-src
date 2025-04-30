@@ -65,6 +65,7 @@ ZEND_API int  zend_gc_collect_cycles(void);
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status);
 
+void gc_init(void);
 void gc_globals_ctor(void);
 void gc_globals_dtor(void);
 void gc_reset(void);

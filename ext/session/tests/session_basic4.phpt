@@ -5,8 +5,6 @@ session.use_strict_mode=0
 session.use_only_cookies=0
 session.use_trans_sid=1
 session.save_handler=files
-session.hash_bits_per_character=4
-session.hash_function=0
 session.gc_probability=1
 session.gc_divisor=1000
 session.gc_maxlifetime=300
@@ -50,6 +48,9 @@ echo '
 ';
 ?>
 --EXPECT--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 *** Testing basic session functionality : variation4 use_trans_sid ***
 *** Test trans sid ***
 

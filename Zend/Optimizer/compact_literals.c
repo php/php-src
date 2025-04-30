@@ -197,6 +197,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						LITERAL_INFO(opline->op2.constant, 2);
 					}
 					break;
+				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+					LITERAL_INFO(opline->op1.constant, 1);
+					break;
 				case ZEND_CATCH:
 					LITERAL_INFO(opline->op1.constant, 2);
 					break;
@@ -770,6 +773,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
+				case ZEND_JMP_FRAMELESS:
 					opline->extended_value = cache_size;
 					cache_size += sizeof(void *);
 					break;

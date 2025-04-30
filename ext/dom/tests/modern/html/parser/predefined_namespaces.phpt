@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
 <head>
@@ -28,7 +28,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 HTML);
 
 echo "--- Namespaces ---\n";
-$xpath = new DOMXPath($dom);
+$xpath = new Dom\XPath($dom);
 foreach ($xpath->query("//*[name()='body']//*") as $node) {
     echo $node->nodeName, " ", $node->namespaceURI ?? "(NONE)", "\n";
     foreach ($node->attributes as $attribute) {
@@ -37,9 +37,9 @@ foreach ($xpath->query("//*[name()='body']//*") as $node) {
 }
 
 echo "--- HTML serialization ---\n";
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 echo "--- XML serialization ---\n";
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--
@@ -47,15 +47,15 @@ echo $dom->saveXML();
 svg http://www.w3.org/2000/svg
   Attribute: width (NONE)
   Attribute: height (NONE)
-  Attribute: viewbox (NONE)
+  Attribute: viewBox (NONE)
 rect http://www.w3.org/2000/svg
   Attribute: id (NONE)
   Attribute: x (NONE)
   Attribute: y (NONE)
   Attribute: width (NONE)
   Attribute: height (NONE)
-div http://www.w3.org/1999/xhtml
-p http://www.w3.org/1999/xhtml
+DIV http://www.w3.org/1999/xhtml
+P http://www.w3.org/1999/xhtml
 math http://www.w3.org/1998/Math/MathML
 mtable http://www.w3.org/1998/Math/MathML
   Attribute: id (NONE)
@@ -65,7 +65,7 @@ svg http://www.w3.org/1998/Math/MathML
     <title>Test</title>
 </head>
 <body>
-    <svg width="100" height="100" viewbox="0 0 4 2">
+    <svg width="100" height="100" viewBox="0 0 4 2">
         <rect id="rectangle" x="10" y="20" width="90" height="60">
         </rect>
     </svg>
@@ -85,7 +85,7 @@ svg http://www.w3.org/1998/Math/MathML
     <title>Test</title>
 </head>
 <body>
-    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewbox="0 0 4 2">
+    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 4 2">
         <rect id="rectangle" x="10" y="20" width="90" height="60">
         </rect>
     </svg>

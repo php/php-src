@@ -173,7 +173,8 @@ PHPAPI void PHP_SHA1InitArgs(PHP_SHA1_CTX * context, ZEND_ATTRIBUTE_UNUSED HashT
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
 			   size_t inputLen)
 {
-	unsigned int i, index, partLen;
+	unsigned int index, partLen;
+	size_t i;
 
 	/* Compute number of bytes mod 64 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
@@ -182,7 +183,7 @@ PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
 	if ((context->count[0] += ((uint32_t) inputLen << 3))
 		< ((uint32_t) inputLen << 3))
 		context->count[1]++;
-	context->count[1] += ((uint32_t) inputLen >> 29);
+	context->count[1] += (uint32_t) (inputLen >> 29);
 
 	partLen = 64 - index;
 

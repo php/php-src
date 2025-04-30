@@ -15,9 +15,6 @@ if (mysqli_get_server_version($link) >= 50600)
 <?php
     require_once 'connect.inc';
 
-    $link	= NULL;
-    $tmp	= NULL;
-
     $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (false !== ($tmp = $mysqli->change_user($user . '_unknown_really', $passwd . 'non_empty', $db)))

@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -43,7 +43,7 @@
 #include "exif_arginfo.h"
 #include <math.h>
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* for php_basename() */
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h"
 
@@ -73,7 +73,7 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
 	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
 
-	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
+	if (USE_MBSTRING) {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "enabled");
 	} else {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "disabled");
@@ -220,7 +220,7 @@ ZEND_GET_MODULE(exif)
  * is read or until there is no more data available to read. */
 static ssize_t exif_read_from_stream_file_looped(php_stream *stream, char *buf, size_t count)
 {
-	ssize_t total_read = 0;
+	size_t total_read = 0;
 	while (total_read < count) {
 		ssize_t ret = php_stream_read(stream, buf + total_read, count - total_read);
 		if (ret == -1) {
@@ -2185,16 +2185,12 @@ static image_info_data *exif_alloc_image_info_data(image_info_list *info_list) {
 /* {{{ exif_iif_add_value
  Add a value to image_info
 */
-static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value, size_t value_len, int motorola_intel)
+static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, size_t value_len, int motorola_intel)
 {
 	size_t idex;
 	void *vptr, *vptr_end;
 	image_info_value *info_value;
 	image_info_data  *info_data;
-
-	if (length < 0) {
-		return;
-	}
 
 	info_data = exif_alloc_image_info_data(&image_info->info_list[section_index]);
 	memset(info_data, 0, sizeof(image_info_data));
@@ -2211,7 +2207,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				value = NULL;
 			}
 			if (value) {
-				length = (int)zend_strnlen(value, length);
+				length = zend_strnlen(value, length);
 				info_value->s = estrndup(value, length);
 				info_data->length = length;
 			} else {
@@ -2242,7 +2238,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			}
 			if (value) {
 				if (tag == TAG_MAKER_NOTE) {
-					length = (int) zend_strnlen(value, length);
+					length = zend_strnlen(value, length);
 				}
 
 				/* do not recompute length here */
@@ -2264,14 +2260,14 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 		case TAG_FMT_DOUBLE:
 			if (length==0) {
 				break;
-			} else
+			}
 			if (length>1) {
 				info_value->list = safe_emalloc(length, sizeof(image_info_value), 0);
 			} else {
 				info_value = &info_data->value;
 			}
 			vptr_end = (char *) value + value_len;
-			for (idex=0,vptr=value; idex<(size_t)length; idex++,vptr=(char *) vptr + php_tiff_bytes_per_format[format]) {
+			for (idex=0,vptr=value; idex<length; idex++,vptr=(char *) vptr + php_tiff_bytes_per_format[format]) {
 				if ((char *) vptr_end - (char *) vptr < php_tiff_bytes_per_format[format]) {
 					exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "Value too short");
 					break;
@@ -2330,7 +2326,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 */
 static void exif_iif_add_tag(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, size_t value_len)
 {
-	exif_iif_add_value(image_info, section_index, name, tag, format, (int)length, value, value_len, image_info->motorola_intel);
+	exif_iif_add_value(image_info, section_index, name, tag, format, length, value, value_len, image_info->motorola_intel);
 }
 /* }}} */
 
@@ -2805,7 +2801,7 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel)
 	if (info_data->format == TAG_FMT_UNDEFINED || info_data->format == TAG_FMT_STRING
 	  || (byte_count>1 && (info_data->format == TAG_FMT_BYTE || info_data->format == TAG_FMT_SBYTE))
 	) {
-		memmove(value_ptr, info_data->value.s, byte_count);
+		memcpy(value_ptr, info_data->value.s, byte_count);
 		return value_ptr;
 	} else if (info_data->format == TAG_FMT_BYTE) {
 		*value_ptr = info_data->value.u;
@@ -2849,11 +2845,11 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel)
 					data_ptr += 8;
 					break;
 				case TAG_FMT_SINGLE:
-					memmove(data_ptr, &info_value->f, 4);
+					memcpy(data_ptr, &info_value->f, 4);
 					data_ptr += 4;
 					break;
 				case TAG_FMT_DOUBLE:
-					memmove(data_ptr, &info_value->d, 8);
+					memcpy(data_ptr, &info_value->d, 8);
 					data_ptr += 8;
 					break;
 			}
@@ -2906,9 +2902,9 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 			ImageInfo->Thumbnail.size += new_size;
 			/* fill in data */
 			if (ImageInfo->motorola_intel) {
-				memmove(new_data, "MM\x00\x2a\x00\x00\x00\x08", 8);
+				memcpy(new_data, "MM\x00\x2a\x00\x00\x00\x08", 8);
 			} else {
-				memmove(new_data, "II\x2a\x00\x08\x00\x00\x00", 8);
+				memcpy(new_data, "II\x2a\x00\x08\x00\x00\x00", 8);
 			}
 			new_data += 8;
 			php_ifd_set16u(new_data, info_list->count, ImageInfo->motorola_intel);
@@ -4399,7 +4395,7 @@ static bool exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, 
 	ImageInfo->FileName			= NULL;
 
 	if (php_stream_is(ImageInfo->infile, PHP_STREAM_IS_STDIO)) {
-		if (VCWD_STAT(stream->orig_path, &st) >= 0) {
+		if (stream->orig_path && VCWD_STAT(stream->orig_path, &st) >= 0) {
 			zend_string *base;
 			if ((st.st_mode & S_IFMT) != S_IFREG) {
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Not a file");
@@ -4554,7 +4550,7 @@ PHP_FUNCTION(exif_read_data)
 		}
 
 		if (!Z_STRLEN_P(stream)) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 
@@ -4731,7 +4727,7 @@ PHP_FUNCTION(exif_thumbnail)
 		}
 
 		if (!Z_STRLEN_P(stream)) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 

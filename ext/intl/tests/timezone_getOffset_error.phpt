@@ -19,7 +19,7 @@ var_dump($tz->getOffset(INF, true, $a, $a));
 intltz_get_offset(null, time()*1000, false, $a, $a);
 ?>
 --EXPECTF--
-Warning: IntlTimeZone::getOffset(): intltz_get_offset: error obtaining offset in %s on line %d
+Warning: IntlTimeZone::getOffset(): error obtaining offset in %s on line %d
 bool(false)
 
 Fatal error: Uncaught TypeError: intltz_get_offset(): Argument #1 ($timezone) must be of type IntlTimeZone, null given in %s:%d

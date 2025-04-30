@@ -30,22 +30,22 @@ Deprecated: PHP Startup: assert.callback INI setting is deprecated in Unknown on
 
 Deprecated: Constant ASSERT_ACTIVE is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 Initial values: assert_options(ASSERT_ACTIVE) => [0]
 
 Deprecated: Constant ASSERT_WARNING is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 Initial values: assert_options(ASSERT_WARNING) => [0]
 
 Deprecated: Constant ASSERT_BAIL is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 Initial values: assert_options(ASSERT_BAIL) => [0]
 
 Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
 
-Deprecated: Function assert_options() is deprecated in %s on line %d
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 Initial values: assert_options(ASSERT_CALLBACK) => [f1]
 Initial values: ini.get("assert.active") => [0]
 Initial values: ini.get("assert.warning") => [0]

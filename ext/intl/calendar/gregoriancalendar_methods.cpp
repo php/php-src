@@ -91,6 +91,14 @@ static void _php_intlgregcal_constructor_body(
 	int			variant;
 	intl_error_reset(NULL);
 
+	if (is_constructor && ZEND_NUM_ARGS() > 2) {
+		zend_error(E_DEPRECATED, "Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, "
+			"use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	// parameter number validation / variant determination
 	if (ZEND_NUM_ARGS() > 6 ||
 			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
@@ -109,14 +117,14 @@ static void _php_intlgregcal_constructor_body(
 	// argument parsing
 	if (variant <= 2) {
 		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2),
-				"|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
-			RETURN_THROWS();
-		}
-	}
-	if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS(),
-			"lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
-			&largs[5]) == FAILURE) {
-		RETURN_THROWS();
+                               "|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
+                       RETURN_THROWS();
+               }
+       }
+       if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS(),
+                       "lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
+                       &largs[5]) == FAILURE) {
+               RETURN_THROWS();
 	}
 
 	if (error_handling != NULL) {
@@ -170,7 +178,7 @@ static void _php_intlgregcal_constructor_body(
 	} else {
 		// From date/time (3, 5 or 6 arguments)
 		for (int i = 0; i < variant; i++) {
-			ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(largs[i], getThis() ? (i-1) : i);
+			ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(largs[i], hasThis() ? (i-1) : i);
 		}
 
 		if (variant == 3) {
@@ -230,9 +238,11 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDate)
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &year, &month, &day) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_LONG(year)
+		Z_PARAM_LONG(month)
+		Z_PARAM_LONG(day)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
 	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
@@ -265,9 +275,15 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lllll|l!", &year, &month, &day, &hour, &minute, &second, &second_is_null) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(5, 6)
+		Z_PARAM_LONG(year)
+		Z_PARAM_LONG(month)
+		Z_PARAM_LONG(day)
+		Z_PARAM_LONG(hour)
+		Z_PARAM_LONG(minute)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(second, second_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
 	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
@@ -302,9 +318,10 @@ U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"Od", &object, GregorianCalendar_ce_ptr, &date) == FAILURE) {
-		RETURN_THROWS();
-	}
+                       "Od", &object, GregorianCalendar_ce_ptr, &date) == FAILURE) {
+               RETURN_THROWS();
+       }
+
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
@@ -320,9 +337,10 @@ U_CFUNC PHP_FUNCTION(intlgregcal_get_gregorian_change)
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"O", &object, GregorianCalendar_ce_ptr) == FAILURE) {
+				"O", &object, GregorianCalendar_ce_ptr) == FAILURE) {
 		RETURN_THROWS();
-	}
+       }
+
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
@@ -335,12 +353,13 @@ U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"Ol", &object, GregorianCalendar_ce_ptr, &year) == FAILURE) {
-		RETURN_THROWS();
-	}
+                       "Ol", &object, GregorianCalendar_ce_ptr, &year) == FAILURE) {
+               RETURN_THROWS();
+       }
+
 
 	if (UNEXPECTED(year < INT32_MIN || year > INT32_MAX)) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be between %d and %d", INT32_MIN, INT32_MAX);
 		RETURN_THROWS();
 	}
 

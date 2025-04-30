@@ -11,4 +11,4 @@ class b { }
 
 ?>
 --EXPECTF--
-Warning: Cannot declare interface b, because the name is already in use in %s on line %d
+Warning: Cannot redeclare interface b (previously declared in %s:%d) in %s on line %d

@@ -43,7 +43,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msg_queue_exists, 0, 1, _IS_BOOL
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(msg_get_queue);
 ZEND_FUNCTION(msg_send);
 ZEND_FUNCTION(msg_receive);
@@ -51,7 +50,6 @@ ZEND_FUNCTION(msg_remove_queue);
 ZEND_FUNCTION(msg_stat_queue);
 ZEND_FUNCTION(msg_set_queue);
 ZEND_FUNCTION(msg_queue_exists);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(msg_get_queue, arginfo_msg_get_queue)
@@ -61,11 +59,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(msg_stat_queue, arginfo_msg_stat_queue)
 	ZEND_FE(msg_set_queue, arginfo_msg_set_queue)
 	ZEND_FE(msg_queue_exists, arginfo_msg_queue_exists)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_SysvMessageQueue_methods[] = {
 	ZEND_FE_END
 };
 
@@ -82,9 +75,8 @@ static zend_class_entry *register_class_SysvMessageQueue(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SysvMessageQueue", class_SysvMessageQueue_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "SysvMessageQueue", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

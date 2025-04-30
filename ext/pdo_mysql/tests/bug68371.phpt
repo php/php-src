@@ -15,8 +15,8 @@ $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
 $attrs = [
     // Extensive test: default value and set+get values
-    PDO::ATTR_EMULATE_PREPARES		=> array(null, 1, 0),
-    PDO::MYSQL_ATTR_DIRECT_QUERY	=> array(null, 0, 1),
+    PDO::ATTR_EMULATE_PREPARES	    => array(null, true, false),
+    PDO::MYSQL_ATTR_DIRECT_QUERY	=> array(null, false, true),
     PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => array(null, false, true),
 
     // Just test the default
@@ -67,16 +67,16 @@ foreach ($attrs as $a => $vals) {
 
 ?>
 --EXPECTF--
-int(1)
+bool(true)
 OK
 OK
-int(0)
+bool(false)
 OK
 OK
 bool(true)
 OK
 OK
-int(1)
+bool(true)
 ERR
 ERR
 int(2)
@@ -93,9 +93,9 @@ array(1) {
   [0]=>
   string(12) "PDOStatement"
 }
-ERR
+bool(false)
 ERR
 string(5) "mysql"
-ERR
+bool(false)
 ERR
 int(4)

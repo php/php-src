@@ -7,24 +7,27 @@ if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_
 --EXTENSIONS--
 zend_test
 --INI--
-zend.max_allowed_stack_size=128K
+zend.max_allowed_stack_size=512K
 --FILE--
 <?php
 
 var_dump(zend_test_zend_call_stack_get());
 
-class Test1 {
-    public function __destruct() {
-        new Test1;
-    }
-}
-
-function replace() {
+function replace2() {
     return preg_replace_callback('#.#', function () {
+        replace2();
+    }, 'x');
+}
+function replace() {
+    static $once = false;
+    return preg_replace_callback('#.#', function () use (&$once) {
         try {
             replace();
         } finally {
-            new Test1();
+            if (!$once) {
+                $once = true;
+                replace2();
+            }
         }
     }, 'x');
 }
@@ -48,5 +51,5 @@ array(4) {
   ["EG(stack_limit)"]=>
   string(%d) "0x%x"
 }
-Maximum call stack size of %d bytes reached. Infinite recursion?
-Previous: Maximum call stack size of %d bytes reached. Infinite recursion?
+Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+Previous: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?

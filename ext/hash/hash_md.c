@@ -204,7 +204,8 @@ PHP_HASH_API void PHP_MD4InitArgs(PHP_MD4_CTX * context, ZEND_ATTRIBUTE_UNUSED H
  */
 PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *input, size_t inputLen)
 {
-	unsigned int i, index, partLen;
+	unsigned int index, partLen;
+	size_t i;
 
 	/* Compute number of bytes mod 64 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
@@ -213,7 +214,7 @@ PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *inpu
 	if ((context->count[0] += ((uint32_t) inputLen << 3))
 		< ((uint32_t) inputLen << 3))
 		context->count[1]++;
-	context->count[1] += ((uint32_t) inputLen >> 29);
+	context->count[1] += (uint32_t) (inputLen >> 29);
 
 	partLen = 64 - index;
 

@@ -1134,7 +1134,7 @@ if(!cl->isC){
 CallInfo*ci;
 StkId st,base;
 Proto*p=cl->p;
-luaD_checkstack(L,p->maxstacksize);
+luaD_checkstack(L,p->maxstacksize+p->numparams);
 func=restorestack(L,funcr);
 if(!p->is_vararg){
 base=func+1;
@@ -1639,6 +1639,7 @@ lua_number2int(k,n);
 if(luai_numeq(cast_num(k),nvalue(key)))
 return luaH_getnum(t,k);
 }
+/*fallthrough*/
 default:{
 Node*n=mainposition(t,key);
 do{
@@ -2905,8 +2906,8 @@ if(sep>=0){
 read_long_string(ls,seminfo,sep);
 return TK_STRING;
 }
-else if(sep==-1)return'[';
-else luaX_lexerror(ls,"invalid long string delimiter",TK_STRING);
+else if (sep!=-1)luaX_lexerror(ls,"invalid long string delimiter",TK_STRING);
+return'[';
 }
 case'=':{
 next(ls);
@@ -6985,9 +6986,14 @@ return os_pushresult(L,remove(filename)==0,filename);
 static int os_exit(lua_State*L){
 exit(luaL_optint(L,1,EXIT_SUCCESS));
 }
+static int os_clock(lua_State*L){
+lua_pushnumber(L,((lua_Number)clock())/(lua_Number)CLOCKS_PER_SEC);
+return 1;
+}
 static const luaL_Reg syslib[]={
 {"exit",os_exit},
 {"remove",os_remove},
+{"clock",os_clock},
 {NULL,NULL}
 };
 static int luaopen_os(lua_State*L){

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b91206482b5119ce6d7c899e9599acfa2e06ec2a */
+ * Stub hash: 9b2eea541946c291eb002ee98997f3dcad8bdfce */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -123,14 +123,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_com___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, typelib, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-#if HAVE_MSCOREE_H
+#if defined(HAVE_MSCOREE_H)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_dotnet___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, assembly_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, datatype_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, codepage, IS_LONG, 0, "CP_ACP")
 ZEND_END_ARG_INFO()
 #endif
-
 
 ZEND_FUNCTION(variant_set);
 ZEND_FUNCTION(variant_add);
@@ -166,10 +165,9 @@ ZEND_FUNCTION(com_message_pump);
 ZEND_FUNCTION(com_load_typelib);
 ZEND_METHOD(variant, __construct);
 ZEND_METHOD(com, __construct);
-#if HAVE_MSCOREE_H
+#if defined(HAVE_MSCOREE_H)
 ZEND_METHOD(dotnet, __construct);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(variant_set, arginfo_variant_set)
@@ -207,35 +205,22 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_variant_methods[] = {
 	ZEND_ME(variant, __construct, arginfo_class_variant___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_com_methods[] = {
 	ZEND_ME(com, __construct, arginfo_class_com___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
-#if HAVE_MSCOREE_H
+#if defined(HAVE_MSCOREE_H)
 static const zend_function_entry class_dotnet_methods[] = {
 	ZEND_ME(dotnet, __construct, arginfo_class_dotnet___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 #endif
-
-
-static const zend_function_entry class_com_safearray_proxy_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_com_exception_methods[] = {
-	ZEND_FE_END
-};
 
 static void register_com_extension_symbols(int module_number)
 {
@@ -307,8 +292,7 @@ static zend_class_entry *register_class_variant(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -318,18 +302,18 @@ static zend_class_entry *register_class_com(zend_class_entry *class_entry_varian
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_variant);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_variant, 0);
 
 	return class_entry;
 }
 
-#if HAVE_MSCOREE_H
+#if defined(HAVE_MSCOREE_H)
 static zend_class_entry *register_class_dotnet(zend_class_entry *class_entry_variant)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_variant);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_variant, 0);
 
 	return class_entry;
 }
@@ -339,9 +323,8 @@ static zend_class_entry *register_class_com_safearray_proxy(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", class_com_safearray_proxy_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
 }
@@ -350,9 +333,8 @@ static zend_class_entry *register_class_com_exception(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "com_exception", class_com_exception_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_FINAL);
 
 	return class_entry;
 }

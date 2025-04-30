@@ -20,6 +20,8 @@
 #ifndef ZEND_LLIST_H
 #define ZEND_LLIST_H
 
+#include "zend_portability.h"
+
 typedef struct _zend_llist_element {
 	struct _zend_llist_element *next;
 	struct _zend_llist_element *prev;

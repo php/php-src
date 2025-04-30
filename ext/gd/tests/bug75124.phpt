@@ -7,6 +7,9 @@ gd
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<')) {
     die('skip only for bundled libgd or external libgd >= 2.2.5');
 }
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

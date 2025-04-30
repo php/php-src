@@ -50,6 +50,8 @@ rmdir($path);
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : variation ***
+
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
@@ -65,6 +67,8 @@ array(3) {
 Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
 bool(true)
+
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]

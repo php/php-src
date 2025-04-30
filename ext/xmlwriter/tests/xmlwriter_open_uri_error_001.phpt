@@ -15,4 +15,4 @@ Koen Kuipers koenk82@gmail.com
 Theo van der Zee
 #Test Fest Utrecht 09-05-2009
 --EXPECT--
-xmlwriter_open_uri(): Argument #1 ($uri) cannot be empty
+xmlwriter_open_uri(): Argument #1 ($uri) must not be empty

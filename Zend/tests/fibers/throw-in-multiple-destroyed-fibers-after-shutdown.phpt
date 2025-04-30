@@ -37,11 +37,11 @@ done
 
 Fatal error: Uncaught Exception: test1 in %sthrow-in-multiple-destroyed-fibers-after-shutdown.php:%d
 Stack trace:
-#0 [internal function]: {closure}()
+#0 [internal function]: {closure:%s:%d}()
 #1 {main}
 
 Next Exception: test2 in %sthrow-in-multiple-destroyed-fibers-after-shutdown.php:%d
 Stack trace:
-#0 [internal function]: {closure}()
+#0 [internal function]: {closure:%s:%d}()
 #1 {main}
   thrown in %sthrow-in-multiple-destroyed-fibers-after-shutdown.php on line %d

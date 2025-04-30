@@ -43,6 +43,8 @@
 #define PHP_OUTPUT_HANDLER_DISABLED		0x2000
 #define PHP_OUTPUT_HANDLER_PROCESSED	0x4000
 
+#define PHP_OUTPUT_HANDLER_ABILITY_FLAGS(bitmask) ((bitmask) & ~0xf00f)
+
 /* handler op return values */
 typedef enum _php_output_handler_status_t {
 	PHP_OUTPUT_HANDLER_FAILURE,
@@ -103,11 +105,11 @@ typedef struct _php_output_context {
 /* old-style, stateless callback */
 typedef void (*php_output_handler_func_t)(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode);
 /* new-style, opaque context callback */
-typedef int (*php_output_handler_context_func_t)(void **handler_context, php_output_context *output_context);
+typedef zend_result (*php_output_handler_context_func_t)(void **handler_context, php_output_context *output_context);
 /* output handler context dtor */
 typedef void (*php_output_handler_context_dtor_t)(void *opaq);
 /* conflict check callback */
-typedef int (*php_output_handler_conflict_check_t)(const char *handler_name, size_t handler_name_len);
+typedef zend_result (*php_output_handler_conflict_check_t)(const char *handler_name, size_t handler_name_len);
 /* ctor for aliases */
 typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
 
@@ -200,42 +202,42 @@ PHPAPI int php_output_get_start_lineno(void);
 PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len);
 PHPAPI size_t php_output_write(const char *str, size_t len);
 
-PHPAPI int php_output_flush(void);
+PHPAPI zend_result php_output_flush(void);
 PHPAPI void php_output_flush_all(void);
-PHPAPI int php_output_clean(void);
+PHPAPI zend_result php_output_clean(void);
 PHPAPI void php_output_clean_all(void);
-PHPAPI int php_output_end(void);
+PHPAPI zend_result php_output_end(void);
 PHPAPI void php_output_end_all(void);
-PHPAPI int php_output_discard(void);
+PHPAPI zend_result php_output_discard(void);
 PHPAPI void php_output_discard_all(void);
 
-PHPAPI int php_output_get_contents(zval *p);
-PHPAPI int php_output_get_length(zval *p);
+PHPAPI zend_result php_output_get_contents(zval *p);
+PHPAPI zend_result php_output_get_length(zval *p);
 PHPAPI int php_output_get_level(void);
 PHPAPI php_output_handler* php_output_get_active_handler(void);
 
-PHPAPI int php_output_start_default(void);
-PHPAPI int php_output_start_devnull(void);
+PHPAPI zend_result php_output_start_default(void);
+PHPAPI zend_result php_output_start_devnull(void);
 
-PHPAPI int php_output_start_user(zval *output_handler, size_t chunk_size, int flags);
-PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_output_handler_func_t output_handler, size_t chunk_size, int flags);
+PHPAPI zend_result php_output_start_user(zval *output_handler, size_t chunk_size, int flags);
+PHPAPI zend_result php_output_start_internal(const char *name, size_t name_len, php_output_handler_func_t output_handler, size_t chunk_size, int flags);
 
 PHPAPI php_output_handler *php_output_handler_create_user(zval *handler, size_t chunk_size, int flags);
 PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, size_t name_len, php_output_handler_context_func_t handler, size_t chunk_size, int flags);
 
 PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *opaq, void (*dtor)(void*));
-PHPAPI int php_output_handler_start(php_output_handler *handler);
-PHPAPI int php_output_handler_started(const char *name, size_t name_len);
-PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg);
+PHPAPI zend_result php_output_handler_start(php_output_handler *handler);
+PHPAPI bool php_output_handler_started(const char *name, size_t name_len);
+PHPAPI zend_result php_output_handler_hook(php_output_handler_hook_t type, void *arg);
 PHPAPI void php_output_handler_dtor(php_output_handler *handler);
 PHPAPI void php_output_handler_free(php_output_handler **handler);
 
-PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_new_len, const char *handler_set, size_t handler_set_len);
-PHPAPI int php_output_handler_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func);
-PHPAPI int php_output_handler_reverse_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func);
+PHPAPI bool php_output_handler_conflict(const char *handler_new, size_t handler_new_len, const char *handler_set, size_t handler_set_len);
+PHPAPI zend_result php_output_handler_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func);
+PHPAPI zend_result php_output_handler_reverse_conflict_register(const char *handler_name, size_t handler_name_len, php_output_handler_conflict_check_t check_func);
 
 PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *handler_name, size_t handler_name_len);
-PHPAPI int php_output_handler_alias_register(const char *handler_name, size_t handler_name_len, php_output_handler_alias_ctor_t func);
+PHPAPI zend_result php_output_handler_alias_register(const char *handler_name, size_t handler_name_len, php_output_handler_alias_ctor_t func);
 
 END_EXTERN_C()
 

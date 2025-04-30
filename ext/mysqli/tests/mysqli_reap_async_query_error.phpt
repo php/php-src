@@ -19,7 +19,7 @@ mysqli::poll($reads, $errors, $rejects, 1);
 $link = $reads[0];
 
 try {
-    $rs = $link->reap_async_query();
+    $link->reap_async_query();
 } catch (mysqli_sql_exception $exception) {
     echo $exception->getMessage() . "\n";
 }

@@ -20,7 +20,6 @@ extern "C" {
 #include "lexbor/dom/interfaces/attr.h"
 #include "lexbor/dom/interfaces/document.h"
 #include "lexbor/css/css.h"
-#include "lexbor/selectors/selectors.h"
 
 
 typedef lxb_status_t
@@ -45,7 +44,6 @@ typedef struct {
     lxb_css_memory_t    *memory;
     lxb_css_selectors_t *css_selectors;
     lxb_css_parser_t    *parser;
-    lxb_selectors_t     *selectors;
 
     lexbor_avl_t        *styles;
     lexbor_array_t      *stylesheets;

@@ -28,13 +28,20 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 {
 	zend_basic_block *blocks = cfg->blocks;
 
-	while (1) {
+	zend_worklist work;
+	ALLOCA_FLAG(list_use_heap)
+	ZEND_WORKLIST_ALLOCA(&work, cfg->blocks_count, list_use_heap);
+
+	zend_worklist_push(&work, b - cfg->blocks);
+
+	while (zend_worklist_len(&work)) {
 		int i;
+		b = cfg->blocks + zend_worklist_pop(&work);
 
 		b->flags |= ZEND_BB_REACHABLE;
 		if (b->successors_count == 0) {
 			b->flags |= ZEND_BB_EXIT;
-			return;
+			continue;
 		}
 
 		for (i = 0; i < b->successors_count; i++) {
@@ -86,22 +93,14 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 				succ->flags |= ZEND_BB_FOLLOW;
 			}
 
-			if (i == b->successors_count - 1) {
-				/* Tail call optimization */
-				if (succ->flags & ZEND_BB_REACHABLE) {
-					return;
-				}
-
-				b = succ;
-				break;
-			} else {
-				/* Recursively check reachability */
-				if (!(succ->flags & ZEND_BB_REACHABLE)) {
-					zend_mark_reachable(opcodes, cfg, succ);
-				}
+			/* Check reachability of successor */
+			if (!(succ->flags & ZEND_BB_REACHABLE)) {
+				zend_worklist_push(&work, succ - cfg->blocks);
 			}
 		}
 	}
+
+	ZEND_WORKLIST_FREE_ALLOCA(&work, list_use_heap);
 }
 /* }}} */
 
@@ -144,7 +143,11 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 							end = blocks + block_map[op_array->try_catch_array[j].finally_op];
 							while (b != end) {
 								if (b->flags & ZEND_BB_REACHABLE) {
-									op_array->try_catch_array[j].try_op = op_array->try_catch_array[j].catch_op;
+									/* In case we get here, there is no live try block but there is a live finally block.
+									 * If we do have catch_op set, we need to set it to the first catch block to satisfy
+									 * the constraint try_op <= catch_op <= finally_op */
+									op_array->try_catch_array[j].try_op =
+										op_array->try_catch_array[j].catch_op ? op_array->try_catch_array[j].catch_op : b->start;
 									changed = 1;
 									zend_mark_reachable(op_array->opcodes, cfg, blocks + block_map[op_array->try_catch_array[j].try_op]);
 									break;
@@ -303,7 +306,6 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 				}
 				break;
 			case ZEND_MATCH_ERROR:
-			case ZEND_EXIT:
 			case ZEND_THROW:
 				/* Don't treat THROW as terminator if it's used in expression context,
 				 * as we may lose live ranges when eliminating unreachable code. */
@@ -370,6 +372,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
@@ -506,7 +509,6 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
-			case ZEND_EXIT:
 			case ZEND_THROW:
 			case ZEND_MATCH_ERROR:
 			case ZEND_VERIFY_NEVER_TYPE:
@@ -524,6 +526,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				block->successors_count = 2;
 				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
 				block->successors[1] = j + 1;

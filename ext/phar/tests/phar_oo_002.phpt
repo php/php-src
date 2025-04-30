@@ -5,6 +5,12 @@ phar
 --INI--
 phar.readonly=1
 phar.require_hash=0
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
+?>
 --FILE--
 <?php
 

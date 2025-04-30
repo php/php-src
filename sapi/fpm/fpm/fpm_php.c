@@ -93,7 +93,21 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 	if (!strcmp(name, "extension") && *value) {
 		zval zv;
 		zend_interned_strings_switch_storage(0);
+
+#if ZEND_RC_DEBUG
+		bool orig_rc_debug = zend_rc_debug;
+		/* Loading extensions after php_module_startup() breaks some invariants.
+		 * For instance, it will update the refcount of persistent strings,
+		 * which is normally not allowed at this stage. */
+		zend_rc_debug = false;
+#endif
+
 		php_dl(value, MODULE_PERSISTENT, &zv, 1);
+
+#if ZEND_RC_DEBUG
+		zend_rc_debug = orig_rc_debug;
+#endif
+
 		zend_interned_strings_switch_storage(1);
 		return Z_TYPE(zv) == IS_TRUE ? FPM_PHP_INI_EXTENSION_LOADED : FPM_PHP_INI_EXTENSION_FAILED;
 	}
@@ -165,7 +179,7 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 	char max_workers[10 + 1]; /* 4294967295 */
 	int len;
 
-	len = sprintf(max_workers, "%u", (unsigned int) wp->config->pm_max_children);
+	len = snprintf(max_workers, sizeof(max_workers), "%u", (unsigned int) wp->config->pm_max_children);
 
 	fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, max_workers, len);
 	fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  max_workers, len);

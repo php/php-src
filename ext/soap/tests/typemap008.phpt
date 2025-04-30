@@ -7,7 +7,7 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class TestSoapClient extends SoapClient{
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): never {
         echo $request;
         exit;
     }

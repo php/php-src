@@ -12,6 +12,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 
 require("testdb.inc");
 
+$dbh = getDbConnection();
 $dbh->exec('CREATE TABLE test53280(A VARCHAR(30), B VARCHAR(30), C VARCHAR(30))');
 $dbh->exec("INSERT INTO test53280 VALUES ('A', 'B', 'C')");
 
@@ -37,6 +38,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE test53280");
 unset($dbh);
 ?>

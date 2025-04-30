@@ -58,6 +58,8 @@ rmdir($path);
 *** Testing session_set_save_handler() : variation ***
 string(0) ""
 *** Without lazy_write ***
+
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 bool(true)
 Open [%s,PHPSESSID]
 CreateID [PHPT-%d]
@@ -72,6 +74,8 @@ bool(true)
 string(%d) "PHPT-%d"
 *** With lazy_write ***
 string(%d) "PHPT-%d"
+
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 bool(true)
 Open [%s,PHPSESSID]
 ValidateID [%s,PHPT-%d]

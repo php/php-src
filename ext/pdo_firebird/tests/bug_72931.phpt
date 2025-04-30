@@ -11,6 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 require 'testdb.inc';
 
+$dbh = getDbConnection();
 $dbh->exec('recreate table test72931 (id integer)');
 $S = $dbh->prepare('insert into test72931 (id) values (1) returning id');
 $S->execute();
@@ -22,6 +23,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE test72931");
 unset($dbh);
 ?>

@@ -636,6 +636,17 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* some fatal error. Theoretically, the stream is borked, so all
 					 * further reads should fail. */
 					stream->eof = 1;
+					/* free all data left in brigades */
+					while ((bucket = brig_inp->head)) {
+						/* Remove unconsumed buckets from the input brigade */
+						php_stream_bucket_unlink(bucket);
+						php_stream_bucket_delref(bucket);
+					}
+					while ((bucket = brig_outp->head)) {
+						/* Remove unconsumed buckets from the output brigade */
+						php_stream_bucket_unlink(bucket);
+						php_stream_bucket_delref(bucket);
+					}
 					efree(chunk_buf);
 					retval = FAILURE;
 					goto out_is_eof;
@@ -1153,8 +1164,15 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 
 	bool old_eof = stream->eof;
 
+	/* See GH-13071: userspace stream is subject to the memory limit. */
+	size_t chunk_size = count;
+	if (php_stream_is(stream, PHP_STREAM_IS_USERSPACE)) {
+		/* If the stream is unbuffered, we can only write one byte at a time. */
+		chunk_size = stream->chunk_size;
+	}
+
 	while (count > 0) {
-		ssize_t justwrote = stream->ops->write(stream, buf, count);
+		ssize_t justwrote = stream->ops->write(stream, buf, MIN(chunk_size, count));
 		if (justwrote <= 0) {
 			/* If we already successfully wrote some bytes and a write error occurred
 			 * later, report the successfully written bytes. */
@@ -1364,8 +1382,13 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 		switch(whence) {
 			case SEEK_CUR:
-				offset = stream->position + offset;
-				whence = SEEK_SET;
+				ZEND_ASSERT(stream->position >= 0);
+				if (UNEXPECTED(offset > ZEND_LONG_MAX - stream->position)) {
+					offset = ZEND_LONG_MAX;
+				} else {
+					offset = stream->position + offset;
+				}
+ 				whence = SEEK_SET;
 				break;
 		}
 		ret = stream->ops->seek(stream, offset, whence, &stream->position);
@@ -2176,7 +2199,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (!path || !*path) {
-		zend_value_error("Path cannot be empty");
+		zend_value_error("Path must not be empty");
 		return NULL;
 	}
 
@@ -2193,6 +2216,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			options &= ~USE_PATH;
 		}
 		if (EG(exception)) {
+			if (resolved_path) {
+				zend_string_release_ex(resolved_path, false);
+			}
 			return NULL;
 		}
 	}
@@ -2443,25 +2469,19 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 				vector_size = 10;
 			} else {
 				if(vector_size*2 < vector_size) {
-					/* overflow */
-					php_stream_closedir(stream);
-					efree(vector);
-					return -1;
+					goto overflow;
 				}
 				vector_size *= 2;
 			}
-			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
+			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(zend_string *), 0);
 		}
 
 		vector[nfiles] = zend_string_init(sdp.d_name, strlen(sdp.d_name), 0);
 
-		nfiles++;
-		if(vector_size < 10 || nfiles == 0) {
-			/* overflow */
-			php_stream_closedir(stream);
-			efree(vector);
-			return -1;
+		if(vector_size < 10 || nfiles + 1 == 0) {
+			goto overflow;
 		}
+		nfiles++;
 	}
 	php_stream_closedir(stream);
 
@@ -2471,5 +2491,13 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 		qsort(*namelist, nfiles, sizeof(zend_string *), (int(*)(const void *, const void *))compare);
 	}
 	return nfiles;
+
+overflow:
+	php_stream_closedir(stream);
+	for (unsigned int i = 0; i < nfiles; i++) {
+		zend_string_efree(vector[i]);
+	}
+	efree(vector);
+	return -1;
 }
 /* }}} */

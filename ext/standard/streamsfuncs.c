@@ -16,11 +16,8 @@
 */
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_filestat.h"
-#include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
 #include "streamsfuncs.h"
@@ -33,13 +30,11 @@
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 typedef unsigned long long php_timeout_ull;
-#define PHP_TIMEOUT_ULL_MAX ULLONG_MAX
 #else
 #include "win32/select.h"
 #include "win32/sockets.h"
 #include "win32/console.h"
 typedef unsigned __int64 php_timeout_ull;
-#define PHP_TIMEOUT_ULL_MAX UINT64_MAX
 #endif
 
 #define GET_CTX_OPT(stream, wrapper, name, val) (PHP_STREAM_CONTEXT(stream) && NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), wrapper, name)))
@@ -127,6 +122,9 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (timeout_is_null) {
 		timeout = (double)FG(default_socket_timeout);
+	} else if (!zend_finite(timeout)) {
+		zend_argument_value_error(4, "must be a finite value");
+		RETURN_THROWS();
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
@@ -279,6 +277,9 @@ PHP_FUNCTION(stream_socket_accept)
 
 	if (timeout_is_null) {
 		timeout = (double)FG(default_socket_timeout);
+	} else if (!zend_finite(timeout)) {
+		zend_argument_value_error(2, "must be a finite value");
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, zstream);
@@ -1021,6 +1022,15 @@ PHP_FUNCTION(stream_context_set_option)
 	size_t optionname_len;
 	zval *zvalue = NULL;
 
+	if (ZEND_NUM_ARGS() == 2) {
+		zend_error(E_DEPRECATED, "Calling stream_context_set_option() with 2 arguments is deprecated, "
+			"use stream_context_set_options() instead"
+		);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_RESOURCE(zcontext)
 		Z_PARAM_ARRAY_HT_OR_STR(options, wrappername)
@@ -1627,9 +1637,6 @@ PHP_FUNCTION(stream_is_local)
 
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
 		php_stream_from_zval(stream, zstream);
-		if (stream == NULL) {
-			RETURN_FALSE;
-		}
 		wrapper = stream->wrapper;
 	} else {
 		if (!try_convert_to_string(zstream)) {
@@ -1694,7 +1701,7 @@ PHP_FUNCTION(stream_isatty)
 #ifdef PHP_WIN32
 	/* Check if the Windows standard handle is redirected to file */
 	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
-#elif HAVE_UNISTD_H
+#elif defined(HAVE_UNISTD_H)
 	/* Check if the file descriptor identifier is a terminal */
 	RETVAL_BOOL(isatty(fileno));
 #else

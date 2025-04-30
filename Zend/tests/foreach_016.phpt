@@ -1,5 +1,5 @@
 --TEST--
-array_unshift() function precerve foreach by reference iterator pointer
+array_unshift() function preserve foreach by reference iterator pointer
 --FILE--
 <?php
 $a = [1,2,3];

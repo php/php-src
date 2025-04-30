@@ -23,10 +23,10 @@
 #include "ext/standard/php_filestat.h"
 #include <stddef.h>
 #include <fcntl.h>
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_SYS_FILE_H
+#ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
 #ifdef HAVE_SYS_MMAN_H
@@ -40,6 +40,7 @@
 # include "win32/time.h"
 # include "win32/ioutil.h"
 # include "win32/readdir.h"
+# include <limits.h>
 #endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC)
@@ -53,7 +54,7 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
 
 #if defined(PHP_WIN32)
-# define PLAIN_WRAP_BUF_SIZE(st) (((st) > UINT_MAX) ? UINT_MAX : (unsigned int)(st))
+# define PLAIN_WRAP_BUF_SIZE(st) ((unsigned int)(st > INT_MAX ? INT_MAX : st))
 #define fsync _commit
 #define fdatasync fsync
 #else
@@ -348,18 +349,15 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
+	ssize_t bytes_written;
 
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
-		ssize_t bytes_written;
-		if (ZEND_SIZE_T_UINT_OVFL(count)) {
-			count = UINT_MAX;
-		}
-		bytes_written = _write(data->fd, buf, (unsigned int)count);
+		bytes_written = _write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
 #else
-		ssize_t bytes_written = write(data->fd, buf, count);
+		bytes_written = write(data->fd, buf, count);
 #endif
 		if (bytes_written < 0) {
 			if (PHP_IS_TRANSIENT_ERROR(errno)) {
@@ -373,7 +371,6 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 				php_error_docref(NULL, E_NOTICE, "Write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
 			}
 		}
-		return bytes_written;
 	} else {
 
 #ifdef HAVE_FLUSHIO
@@ -383,8 +380,15 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 		data->last_op = 'w';
 #endif
 
-		return (ssize_t) fwrite(buf, 1, count, data->file);
+		bytes_written = (ssize_t) fwrite(buf, 1, count, data->file);
 	}
+
+	if (EG(active)) {
+		/* clear stat cache as mtime and ctime got changed */
+		php_clear_stat_cache(0, NULL, 0);
+	}
+
+	return bytes_written;
 }
 
 static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
@@ -463,6 +467,12 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 
 		stream->eof = feof(data->file);
 	}
+
+	if (EG(active)) {
+		/* clear stat cache as atime got changed */
+		php_clear_stat_cache(0, NULL, 0);
+	}
+
 	return ret;
 }
 
@@ -543,6 +553,10 @@ static int php_stdiop_flush(php_stream *stream)
 	 * something completely different.
 	 */
 	if (data->file) {
+		if (EG(active)) {
+			/* clear stat cache as there might be a write so mtime and ctime might have changed */
+			php_clear_stat_cache(0, NULL, 0);
+		}
 		return fflush(data->file);
 	}
 	return 0;
@@ -1157,6 +1171,12 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 			ret = php_stream_fopen_from_fd_rel(fd, mode, persistent_id, (open_flags & O_APPEND) == 0);
 		}
 
+		if (EG(active)) {
+			/* clear stat cache as mtime and ctime might got changed - phar can use stream before
+			 * cache is initialized so we need to check if the execution is active. */
+			php_clear_stat_cache(0, NULL, 0);
+		}
+
 		if (ret)	{
 			if (opened_path) {
 				*opened_path = zend_string_init(realpath, strlen(realpath), 0);
@@ -1377,7 +1397,17 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	}
 
 	if (!(options & PHP_STREAM_MKDIR_RECURSIVE)) {
-		return php_mkdir(dir, mode) == 0;
+		if (php_check_open_basedir(dir)) {
+			return 0;
+		}
+
+		int ret = VCWD_MKDIR(dir, (mode_t)mode);
+		if (ret < 0 && (options & REPORT_ERRORS)) {
+			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+			return 0;
+		}
+
+		return 1;
 	}
 
 	char buf[MAXPATHLEN];

@@ -29,28 +29,28 @@ var_dump(preg_match("[abc\0def]", "abc\0fed"));
 
 ?>
 --EXPECTF--
-Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %snull_bytes.php on line 3
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL byte in %snull_bytes.php on line 3
 bool(false)
 int(0)
 int(1)
 
-Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 6
+Warning: preg_match(): NUL byte is not a valid modifier in %snull_bytes.php on line 6
 bool(false)
 
-Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 7
-bool(false)
-int(0)
-int(1)
-
-Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %snull_bytes.php on line 11
+Warning: preg_match(): NUL byte is not a valid modifier in %snull_bytes.php on line 7
 bool(false)
 int(0)
 int(1)
 
-Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 14
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL byte in %snull_bytes.php on line 11
+bool(false)
+int(0)
+int(1)
+
+Warning: preg_match(): NUL byte is not a valid modifier in %snull_bytes.php on line 14
 bool(false)
 
-Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 15
+Warning: preg_match(): NUL byte is not a valid modifier in %snull_bytes.php on line 15
 bool(false)
 int(0)
 int(1)

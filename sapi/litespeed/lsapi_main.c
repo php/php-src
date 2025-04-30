@@ -20,6 +20,7 @@
 #include "php_ini.h"
 #include "php_variables.h"
 #include "zend_highlight.h"
+#include "zend_portability.h"
 #include "zend.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/info.h"
@@ -30,17 +31,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #include <sys/wait.h>
 #include <sys/stat.h>
 
-#if HAVE_SYS_TYPES_H
-
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-
 #endif
 
 #include <signal.h>
@@ -1196,6 +1195,7 @@ static int parse_opt( int argc, char * argv[], int *climode,
         case '?':
             if ( *((*(p-1))+2) == 's' )
                 exit( 99 );
+            ZEND_FALLTHROUGH;
         case 'h':
         case 'i':
         case 'l':
@@ -1272,11 +1272,7 @@ static int cli_main( int argc, char * argv[] )
                 break;
             case 'v':
                 if (php_request_startup() != FAILURE) {
-#if ZEND_DEBUG
-                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#endif
+                    php_print_version(&sapi_module);
 #ifdef PHP_OUTPUT_NEWAPI
                     php_output_end_all();
 #else

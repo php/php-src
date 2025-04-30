@@ -17,18 +17,16 @@
 
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <php.h>
 
 #include <unicode/uidna.h>
 #include <unicode/ustring.h>
-#include "ext/standard/php_string.h"
 
 #include "idn.h"
 #include "intl_error.h"
-#include "intl_convert.h"
 /* }}} */
 
 enum {
@@ -37,7 +35,7 @@ enum {
 };
 
 /* like INTL_CHECK_STATUS, but as a function and varying the name of the func */
-static int php_intl_idn_check_status(UErrorCode err, const char *msg)
+static zend_result php_intl_idn_check_status(UErrorCode err, const char *msg)
 {
 	intl_error_set_code(NULL, err);
 	if (U_FAILURE(err)) {
@@ -51,11 +49,6 @@ static int php_intl_idn_check_status(UErrorCode err, const char *msg)
 	}
 
 	return SUCCESS;
-}
-
-static inline void php_intl_bad_args(const char *msg)
-{
-	php_intl_idn_check_status(U_ILLEGAL_ARGUMENT_ERROR, msg);
 }
 
 static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
@@ -123,23 +116,25 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz",
-			&domain, &option, &variant, &idna_info) == FAILURE) {
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STR(domain)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(option)
+		Z_PARAM_LONG(variant)
+		Z_PARAM_ZVAL(idna_info)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(domain) == 0) {
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
-
-	if (variant != INTL_IDN_VARIANT_UTS46) {
-		php_intl_bad_args("invalid variant, must be INTL_IDNA_VARIANT_UTS46");
-		RETURN_FALSE;
-	}
-
-	if (ZSTR_LEN(domain) < 1) {
-		php_intl_bad_args("empty domain name");
-		RETURN_FALSE;
-	}
 	if (ZSTR_LEN(domain) > INT32_MAX - 1) {
-		php_intl_bad_args("domain name too large");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be less than " PRId32 " bytes", INT32_MAX);
+		RETURN_THROWS();
+	}
+	if (variant != INTL_IDN_VARIANT_UTS46) {
+		zend_argument_value_error(2, "must be INTL_IDNA_VARIANT_UTS46");
+		RETURN_THROWS();
 	}
 	/* don't check options; it wasn't checked before */
 

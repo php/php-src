@@ -15,7 +15,6 @@
 */
 
 #include "php.h"
-#include "basic_functions.h"
 #include "crc32.h"
 #include "crc32_x86.h"
 
@@ -28,7 +27,7 @@
 #  include <asm/hwcap.h>
 # elif defined(__APPLE__)
 #  include <sys/sysctl.h>
-# elif defined(__FreeBSD__)
+# elif defined(HAVE_ELF_AUX_INFO)
 #  include <sys/auxv.h>
 
 static unsigned long getauxval(unsigned long key) {
@@ -55,7 +54,7 @@ static inline int has_crc32_insn(void) {
 	if (sysctlbyname("hw.optional.armv8_crc32", &res, &reslen, NULL, 0) < 0)
 		res = 0;
 	return res;
-# elif defined(WIN32)
+# elif defined(_WIN32)
 	res = (int)IsProcessorFeaturePresent(PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE);
 	return res;
 # else
@@ -115,7 +114,7 @@ PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 	}
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 	size_t nr_simd = crc32_x86_simd_update(X86_CRC32B, &crc, (const unsigned char *)p, nr);
 	nr -= nr_simd;
 	p += nr_simd;
@@ -129,7 +128,7 @@ PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 	return crc;
 }
 
-PHPAPI int php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
+PHPAPI zend_result php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
 {
 	size_t handled = 0, n;
 	char buf[1024];

@@ -137,9 +137,10 @@ IR_ALWAYS_INLINE uint32_t ir_ntz(uint32_t num)
 /* Number of trailing zero bits (0x01 -> 0; 0x40 -> 6; 0x00 -> LEN) */
 IR_ALWAYS_INLINE uint32_t ir_ntzl(uint64_t num)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl))
-	return __builtin_ctzl(num);
-#elif defined(_WIN64)
+  // Note that the _WIN64 case should come before __has_builtin() below so that
+  // clang-cl on Windows will use the uint64_t version, not the "long" uint32_t
+  // version.
+#if defined(_WIN64)
 	unsigned long index;
 
 	if (!_BitScanForward64(&index, num)) {
@@ -148,6 +149,8 @@ IR_ALWAYS_INLINE uint32_t ir_ntzl(uint64_t num)
 	}
 
 	return (uint32_t) index;
+#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzl))
+	return __builtin_ctzl(num);
 #else
 	uint32_t n;
 
@@ -479,6 +482,95 @@ IR_ALWAYS_INLINE int ir_bitset_pop_first(ir_bitset set, uint32_t len)
 	} \
 } while (0)
 
+/* Sparse Set */
+typedef struct _ir_sparse_set {
+	uint32_t size;
+	uint32_t len;
+	uint32_t *data;
+} ir_sparse_set;
+
+#define IR_SPARSE_SET_DENSE(set,  n) (set)->data[n]
+#define IR_SPARSE_SET_SPARSE(set, n) (set)->data[-1 - ((int32_t)(n))]
+
+IR_ALWAYS_INLINE void ir_sparse_set_init(ir_sparse_set *set, uint32_t size)
+{
+	set->size = size;
+	set->len = 0;
+	set->data = (uint32_t*)ir_mem_malloc(sizeof(uint32_t) * 2 * size) + size;
+#ifdef IR_DEBUG
+	/* initialize sparse part to avoid valgrind warnings */
+	memset(&IR_SPARSE_SET_SPARSE(set, size - 1), 0, size * sizeof(uint32_t));
+#endif
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_clear(ir_sparse_set *set)
+{
+	set->len = 0;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_free(ir_sparse_set *set)
+{
+	ir_mem_free(set->data - set->size);
+}
+
+IR_ALWAYS_INLINE bool ir_sparse_set_empty(const ir_sparse_set *set)
+{
+	return set->len == 0;
+}
+
+IR_ALWAYS_INLINE bool ir_sparse_set_in(const ir_sparse_set *set, uint32_t n)
+{
+	uint32_t idx = IR_SPARSE_SET_SPARSE(set, n);
+
+	return idx < set->len && IR_SPARSE_SET_DENSE(set, idx) == n;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_add(ir_sparse_set *set, uint32_t n)
+{
+	uint32_t idx;
+
+	IR_ASSERT(!ir_sparse_set_in(set, n));
+	idx = set->len++;
+	IR_SPARSE_SET_DENSE(set,	idx) = n;
+	IR_SPARSE_SET_SPARSE(set, n) = idx;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_del(ir_sparse_set *set, uint32_t n)
+{
+	uint32_t last;
+
+	IR_ASSERT(ir_sparse_set_in(set, n));
+	last = IR_SPARSE_SET_DENSE(set,	set->len - 1);
+	if (last != n) {
+		uint32_t idx = IR_SPARSE_SET_SPARSE(set, n);
+
+		IR_SPARSE_SET_DENSE(set, idx) = last;
+		IR_SPARSE_SET_SPARSE(set, last) = idx;
+
+	}
+	set->len--;
+}
+
+IR_ALWAYS_INLINE uint32_t ir_sparse_set_pop(ir_sparse_set *set)
+{
+	if (set->len > 0) {
+		set->len--;
+		return IR_SPARSE_SET_DENSE(set, set->len);
+	}
+	return -1; /* empty set */
+}
+
+#define IR_SPARSE_SET_FOREACH(set, bit) do { \
+	ir_sparse_set *_set = (set); \
+	uint32_t _i, _len = _set->len; \
+	uint32_t *_p = _set->data; \
+	for (_i = 0; _i < _len; _p++, _i++) { \
+		(bit) = *_p; \
+
+#define IR_SPARSE_SET_FOREACH_END() \
+	} \
+} while (0)
+
 /* Bit Queue */
 typedef struct _ir_bitqueue {
 	uint32_t  len;
@@ -491,6 +583,17 @@ IR_ALWAYS_INLINE void ir_bitqueue_init(ir_bitqueue *q, uint32_t n)
 	q->len = ir_bitset_len(n);
 	q->pos = q->len - 1;
 	q->set = ir_bitset_malloc(n);
+}
+
+IR_ALWAYS_INLINE void ir_bitqueue_grow(ir_bitqueue *q, uint32_t n)
+{
+	uint32_t len = ir_bitset_len(n);
+	IR_ASSERT(len >= q->len);
+	if (len > q->len) {
+		q->set = ir_mem_realloc(q->set, len * (IR_BITSET_BITS / 8));
+		memset(q->set + q->len, 0, (len - q->len) * (IR_BITSET_BITS / 8));
+		q->len = len;
+	}
 }
 
 IR_ALWAYS_INLINE void ir_bitqueue_free(ir_bitqueue *q)
@@ -601,7 +704,7 @@ typedef struct _ir_list {
 	uint32_t len;
 } ir_list;
 
-bool ir_list_contains(const ir_list *l, ir_ref val);
+uint32_t ir_list_find(const ir_list *l, ir_ref val);
 void ir_list_insert(ir_list *l, uint32_t i, ir_ref val);
 void ir_list_remove(ir_list *l, uint32_t i);
 
@@ -664,6 +767,19 @@ IR_ALWAYS_INLINE void ir_list_set(ir_list *l, uint32_t i, ir_ref val)
 {
 	IR_ASSERT(i < l->len);
 	ir_array_set_unchecked(&l->a, i, val);
+}
+
+/* Doesn't preserve order */
+IR_ALWAYS_INLINE void ir_list_del(ir_list *l, uint32_t i)
+{
+	IR_ASSERT(i < l->len);
+	l->len--;
+	ir_array_set_unchecked(&l->a, i, ir_array_at(&l->a, l->len));
+}
+
+IR_ALWAYS_INLINE bool ir_list_contains(const ir_list *l, ir_ref val)
+{
+	return ir_list_find(l, val) != (uint32_t)-1;
 }
 
 /* Worklist (unique list) */
@@ -756,7 +872,7 @@ typedef struct _ir_addrtab_bucket {
 void ir_addrtab_init(ir_hashtab *tab, uint32_t size);
 void ir_addrtab_free(ir_hashtab *tab);
 ir_ref ir_addrtab_find(const ir_hashtab *tab, uint64_t key);
-bool ir_addrtab_add(ir_hashtab *tab, uint64_t key, ir_ref val);
+void ir_addrtab_set(ir_hashtab *tab, uint64_t key, ir_ref val);
 
 /*** IR OP info ***/
 extern const uint8_t ir_type_flags[IR_LAST_TYPE];
@@ -766,13 +882,19 @@ extern const uint8_t ir_type_size[IR_LAST_TYPE];
 extern const uint32_t ir_op_flags[IR_LAST_OP];
 extern const char *ir_op_name[IR_LAST_OP];
 
+void ir_print_escaped_str(const char *s, size_t len, FILE *f);
+
 #define IR_IS_CONST_OP(op)       ((op) > IR_NOP && (op) <= IR_C_FLOAT)
 #define IR_IS_FOLDABLE_OP(op)    ((op) <= IR_LAST_FOLDABLE_OP)
+#define IR_IS_SYM_CONST(op)      ((op) == IR_STR || (op) == IR_SYM || (op) == IR_FUNC)
+
+ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx);
 
 IR_ALWAYS_INLINE bool ir_const_is_true(const ir_insn *v)
 {
-
-	if (v->type == IR_BOOL) {
+	if (IR_IS_SYM_CONST(v->op)) {
+		return 1;
+	} else if (v->type == IR_BOOL) {
 		return v->val.b;
 	} else if (IR_IS_TYPE_INT(v->type)) {
 		return v->val.i64 != 0;
@@ -828,6 +950,7 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(ir_ctx *ctx, ir_ref ref)
 #define IR_OPND_STR               0x5
 #define IR_OPND_NUM               0x6
 #define IR_OPND_PROB              0x7
+#define IR_OPND_PROTO             0x8
 
 #define IR_OP_FLAGS(op_flags, op1_flags, op2_flags, op3_flags) \
 	((op_flags) | ((op1_flags) << 20) | ((op2_flags) << 24) | ((op3_flags) << 28))
@@ -883,9 +1006,18 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 #define IR_HAS_CALLS           (1<<3)
 #define IR_OPT_IN_SCCP         (1<<4)
 #define IR_LINEAR              (1<<5)
+#define IR_HAS_VA_START        (1<<6)
+#define IR_HAS_VA_COPY         (1<<7)
+#define IR_HAS_VA_ARG_GP       (1<<8)
+#define IR_HAS_VA_ARG_FP       (1<<9)
+#define IR_HAS_FP_RET_SLOT     (1<<10)
+#define IR_16B_FRAME_ALIGNMENT (1<<11)
+
+/* Temporary: MEM2SSA -> SCCP */
+#define IR_MEM2SSA_VARS        (1<<25)
 
 /* Temporary: SCCP -> CFG */
-#define IR_SCCP_DONE           (1<<25)
+#define IR_CFG_REACHABLE       (1<<26)
 
 /* Temporary: Dominators -> Loops */
 #define IR_NO_LOOPS            (1<<25)
@@ -897,18 +1029,71 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 #define IR_RA_HAVE_SPLITS      (1<<25)
 #define IR_RA_HAVE_SPILLS      (1<<26)
 
-/*** IR Binding ***/
-IR_ALWAYS_INLINE ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
-{
-	ir_ref var = ir_hashtab_find(ctx->binding, ref);
-	return (var != (ir_ref)IR_INVALID_VAL) ? var : 0;
-}
+#define IR_RESERVED_FLAG_1     (1U<<31)
 
 /*** IR Use Lists ***/
 struct _ir_use_list {
 	ir_ref        refs; /* index in ir_ctx->use_edges[] array */
 	ir_ref        count;
 };
+
+void ir_use_list_remove_all(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_remove_one(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_replace_all(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
+void ir_use_list_replace_one(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
+bool ir_use_list_add(ir_ctx *ctx, ir_ref def, ir_ref use);
+void ir_use_list_sort(ir_ctx *ctx, ir_ref def);
+
+IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
+{
+	ir_use_list *use_list = &ctx->use_lists[ref];
+	ir_ref n = use_list->count;
+	ir_ref *p;
+
+	IR_ASSERT(ir_op_flags[ctx->ir_base[ref].op] & IR_OP_FLAG_CONTROL);
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+		ir_ref next = *p;
+		ir_insn *insn = &ctx->ir_base[next];
+
+		if ((ir_op_flags[insn->op] & IR_OP_FLAG_CONTROL) && insn->op1 == ref) {
+			return next;
+		}
+	}
+	IR_ASSERT(0);
+	return IR_UNUSED;
+}
+
+/*** Modification helpers ***/
+#define MAKE_NOP(_insn) do { \
+		ir_insn *__insn = _insn; \
+		__insn->optx = IR_NOP; \
+		__insn->op1 = __insn->op2 = __insn->op3 = IR_UNUSED; \
+	} while (0)
+
+#define CLEAR_USES(_ref) do { \
+		ir_use_list *__use_list = &ctx->use_lists[_ref]; \
+		__use_list->count = 0; \
+	} while (0)
+
+#define SWAP_REFS(_ref1, _ref2) do { \
+		ir_ref _tmp = _ref1; \
+		_ref1 = _ref2; \
+		_ref2 = _tmp; \
+	} while (0)
+
+#define SWAP_INSNS(_insn1, _insn2) do { \
+		ir_insn *_tmp = _insn1; \
+		_insn1 = _insn2; \
+		_insn2 = _tmp; \
+	} while (0)
+
+void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref);
+void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val);
+
+/*** Iterative Optimization ***/
+void ir_iter_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bitqueue *worklist);
+void ir_iter_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val, ir_bitqueue *worklist);
+void ir_iter_opt(ir_ctx *ctx, ir_bitqueue *worklist);
 
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \
@@ -937,6 +1122,8 @@ struct _ir_use_list {
 #define IR_BB_HAS_PARAM        (1<<12)
 #define IR_BB_HAS_VAR          (1<<13)
 
+/* The following flags are set by BB scheduler */
+#define IR_BB_ALIGN_LOOP       (1<<14)
 
 struct _ir_block {
 	uint32_t flags;
@@ -960,9 +1147,10 @@ struct _ir_block {
 	uint32_t     loop_depth;
 };
 
+void ir_build_prev_refs(ir_ctx *ctx);
 uint32_t ir_skip_empty_target_blocks(const ir_ctx *ctx, uint32_t b);
-uint32_t ir_skip_empty_next_blocks(const ir_ctx *ctx, uint32_t b);
-void ir_get_true_false_blocks(const ir_ctx *ctx, uint32_t b, uint32_t *true_block, uint32_t *false_block, uint32_t *next_block);
+uint32_t ir_next_block(const ir_ctx *ctx, uint32_t b);
+void ir_get_true_false_blocks(const ir_ctx *ctx, uint32_t b, uint32_t *true_block, uint32_t *false_block);
 
 IR_ALWAYS_INLINE uint32_t ir_phi_input_number(const ir_ctx *ctx, const ir_block *bb, uint32_t from)
 {
@@ -987,6 +1175,15 @@ typedef enum _ir_fold_action {
 } ir_fold_action;
 
 ir_ref ir_folding(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3, ir_insn *op1_insn, ir_insn *op2_insn, ir_insn *op3_insn);
+
+/*** Alias Analyzes (see ir.c) ***/
+ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr);
+ir_ref ir_find_aliasing_vload(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var);
+ir_ref ir_find_aliasing_store(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val);
+ir_ref ir_find_aliasing_vstore(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val);
+
+/*** Predicates (see ir.c) ***/
+ir_ref ir_check_dominating_predicates(ir_ctx *ctx, ir_ref ref, ir_ref condition);
 
 /*** IR Live Info ***/
 typedef ir_ref                   ir_live_pos;
@@ -1201,6 +1398,9 @@ IR_ALWAYS_INLINE int8_t ir_get_alocated_reg(const ir_ctx *ctx, ir_ref ref, int o
 #define IR_FUSED     (1U<<31) /* Insn is fused into others (code is generated as part of the fusion root) */
 #define IR_SKIPPED   (1U<<30) /* Insn is skipped (code is not generated) */
 #define IR_SIMPLE    (1U<<29) /* Insn doesn't have any target constraints */
+#define IR_FUSED_REG (1U<<28) /* Register assignemnt may be stored in ctx->fused_regs instead of ctx->regs */
+#define IR_MAY_SWAP  (1U<<27) /* Allow swapping operands for better register allocation */
+#define IR_MAY_REUSE (1U<<26) /* Result may reuse register of the source */
 
 #define IR_RULE_MASK 0xff
 
@@ -1213,7 +1413,7 @@ typedef struct _ir_target_constraints ir_target_constraints;
 #define IR_SCRATCH_REG(_reg, _start, _end) \
 	(ir_tmp_reg){.reg=(_reg), .type=IR_VOID, .start=(_start), .end=(_end)}
 
-int ir_get_target_constraints(const ir_ctx *ctx, ir_ref ref, ir_target_constraints *constraints);
+int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *constraints);
 
 void ir_fix_stack_frame(ir_ctx *ctx);
 

@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument::createFromString() with LIBXML_COMPACT
+Dom\HTMLDocument::createFromString() with LIBXML_COMPACT
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -23,7 +23,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 </html>
 HTML, LIBXML_COMPACT);
 
-$xpath = new DOMXPath($dom);
+$xpath = new Dom\XPath($dom);
 foreach ($xpath->query("//*[name()='p']") as $p) {
     echo $p->textContent, "\n";
 }

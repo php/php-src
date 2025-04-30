@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -26,7 +26,6 @@
 
 /* PHP Includes */
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "main/php_network.h"
 
 /* for fileno() */
@@ -97,7 +96,7 @@ static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 
 static ssize_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count)
 {
-	ssize_t wrote = 0;
+	size_t wrote = 0;
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 
 	do {
@@ -350,7 +349,7 @@ PHP_FUNCTION(bzopen)
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 

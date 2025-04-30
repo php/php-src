@@ -10,7 +10,7 @@ interface foo {
 }
 
 class bar {
-    public function __construct(foo $x = NULL) {
+    public function __construct(?foo $x = NULL) {
         var_dump($x);
     }
 }

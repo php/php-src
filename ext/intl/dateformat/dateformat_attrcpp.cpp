@@ -158,8 +158,8 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 /* {{{ Set formatter's calendar. */
 U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 {
-	zend_object *calendar_obj;
-	zend_long calendar_long;
+	zend_object *calendar_obj = NULL;
+	zend_long calendar_long = 0;
 	bool calendar_is_null;
 	DATE_FORMAT_METHOD_INIT_VARS;
 

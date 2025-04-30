@@ -17,7 +17,7 @@ opcache.file_cache={PWD}/024-file_cache
 opcache.memory_consumption=64
 opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=4000
-opcache.jit_buffer_size=64M
+opcache.jit=tracing
 opcache.revalidate_freq=60
 opcache.fast_shutdown=1
 --FILE--

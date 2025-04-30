@@ -36,7 +36,7 @@
 /* 8 - Standalone Open Source Zend OPcache */
 #define ACCELERATOR_API_NO 8
 
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
 # include "zend_config.w32.h"
 #else
 #include "zend_config.h"
@@ -44,12 +44,13 @@
 # include <sys/resource.h>
 #endif
 
-#if HAVE_UNISTD_H
-# include "unistd.h"
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 #include "zend_extensions.h"
 #include "zend_compile.h"
+#include "zend_API.h"
 
 #include "Optimizer/zend_optimizer.h"
 #include "zend_accelerator_hash.h"
@@ -97,7 +98,7 @@ extern int lock_file;
 # define ENABLE_FILE_CACHE_FALLBACK 0
 #endif
 
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
 typedef unsigned __int64 accel_time_t;
 #else
 typedef time_t accel_time_t;
@@ -216,6 +217,8 @@ typedef struct _zend_accel_globals {
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
 #endif
+	void                   *preloaded_internal_run_time_cache;
+	size_t                  preloaded_internal_run_time_cache_size;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	zend_persistent_script *current_persistent_script;
@@ -223,8 +226,7 @@ typedef struct _zend_accel_globals {
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
-	zend_string             key;
-	char                    _key[MAXPATHLEN * 8];
+	zend_string            *key;
 } zend_accel_globals;
 
 typedef struct _zend_string_table {
@@ -235,6 +237,11 @@ typedef struct _zend_string_table {
 	zend_string *end;
 	zend_string *saved_top;
 } zend_string_table;
+
+typedef uint32_t zend_string_table_pos_t;
+
+#define ZEND_STRING_TABLE_POS_MAX UINT32_MAX
+#define ZEND_STRING_TABLE_POS_ALIGNMENT 8
 
 typedef struct _zend_accel_shared_globals {
 	/* Cache Data Structures */
@@ -247,6 +254,7 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_hash hash;             /* hash table for cached scripts */
 
 	size_t map_ptr_last;
+    size_t map_ptr_static_last;
 
 	/* Directives & Maintenance */
 	time_t          start_time;
@@ -275,7 +283,7 @@ typedef struct _zend_accel_shared_globals {
 	const void **jit_exit_groups;
 
 	/* Interned Strings Support (must be the last element) */
-	zend_string_table interned_strings;
+	ZEND_SET_ALIGNED(ZEND_STRING_TABLE_POS_ALIGNMENT, zend_string_table interned_strings);
 } zend_accel_shared_globals;
 
 #ifdef ZEND_WIN32
@@ -306,7 +314,7 @@ extern const char *zps_api_failure_reason;
 BEGIN_EXTERN_C()
 
 void accel_shutdown(void);
-zend_result  accel_activate(INIT_FUNC_ARGS);
+ZEND_RINIT_FUNCTION(zend_accelerator);
 zend_result accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);

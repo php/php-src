@@ -31,7 +31,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_shm_remove_var arginfo_shm_has_var
 
-
 ZEND_FUNCTION(shm_attach);
 ZEND_FUNCTION(shm_detach);
 ZEND_FUNCTION(shm_has_var);
@@ -39,7 +38,6 @@ ZEND_FUNCTION(shm_remove);
 ZEND_FUNCTION(shm_put_var);
 ZEND_FUNCTION(shm_get_var);
 ZEND_FUNCTION(shm_remove_var);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(shm_attach, arginfo_shm_attach)
@@ -52,18 +50,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
-static const zend_function_entry class_SysvSharedMemory_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_SysvSharedMemory(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", class_SysvSharedMemory_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

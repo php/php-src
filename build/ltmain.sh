@@ -3467,7 +3467,7 @@ EOF
 	tempremovelist=`$echo "$output_objdir/*"`
 	for p in $tempremovelist; do
 	  case $p in
-	    *.$objext)
+	    *.$objext | *.gcno)
 	       ;;
 	    $output_objdir/$outputname | $output_objdir/$libname.* | $output_objdir/${libname}${release}.*)
 	       if test "X$precious_files_regex" != "X"; then
@@ -3598,7 +3598,7 @@ EOF
 	  # whether they linked in statically or dynamically with ldd.
 	  $rm conftest.c
 	  cat > conftest.c <<EOF
-	  int main() { return 0; }
+	  int main(void) { return 0; }
 EOF
 	  $rm conftest
 	  if $LTCC $LTCFLAGS -o conftest conftest.c $deplibs; then

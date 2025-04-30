@@ -5,9 +5,6 @@ mysqli
 --SKIPIF--
 <?PHP
 require_once 'skipifconnectfailure.inc';
-if (!function_exists('mysqli_get_client_stats')) {
-    die("skip only available with mysqlnd");
-}
 ?>
 --INI--
 mysqlnd.collect_statistics=1
@@ -88,7 +85,7 @@ mysqli.allow_local_infile=1
 
     var_dump($info);
 
-    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    if (false === my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);
         exit(1);
@@ -115,7 +112,6 @@ mysqli.allow_local_infile=1
     // we assume the above as tested and in the following we check only those
     mysqli_get_client_stats_assert_eq('result_set_queries', $new_info, $info, $test_counter);
 
-    /* we need to skip this test in unicode - we send set names utf8 during mysql_connect */
     mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, $info, $test_counter);
     mysqli_get_client_stats_assert_eq('buffered_sets', $new_info, $info, $test_counter);
     mysqli_get_client_stats_assert_eq('unbuffered_sets', $new_info, $info, $test_counter);
@@ -247,7 +243,7 @@ mysqli.allow_local_infile=1
     mysqli_get_client_stats_assert_eq('rows_fetched_from_client_normal_unbuffered', $info, $expected, $test_counter);
     mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, $expected, $test_counter);
 
-    while ($row = mysqli_fetch_assoc($res))
+    while (mysqli_fetch_assoc($res))
         ;
     mysqli_free_result($res);
 
@@ -274,7 +270,7 @@ mysqli.allow_local_infile=1
             ++$test_counter, mysqli_errno($link), mysqli_error($link));
 
     for ($i = 0; $i < $num_rows - 1; $i++)
-        $row = mysqli_fetch_assoc($res);
+        mysqli_fetch_assoc($res);
 
     $expected['rows_fetched_from_server_normal'] = (string)($expected['rows_fetched_from_server_normal'] + $num_rows - 1);
     $expected['rows_fetched_from_client_normal_unbuffered'] = (string)($expected['rows_fetched_from_client_normal_unbuffered'] + $num_rows - 1);
@@ -555,7 +551,7 @@ mysqli.allow_local_infile=1
             mysqli_errno($link), mysqli_error($link));
 
     $rows = 0;
-    while ($row = mysqli_fetch_assoc($res))
+    while (mysqli_fetch_assoc($res))
         $rows++;
 
     if (0 == $rows)
@@ -621,7 +617,6 @@ mysqli.allow_local_infile=1
                 ++$test_counter, gettype($new_info), $new_info);
         mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 2), $test_counter, 'DROP INDEX');
     }
-    $info = $new_info;
 
     // RENAME TABLE
     if (!mysqli_query($link, "DROP TABLE IF EXISTS client_stats_test"))
@@ -644,7 +639,6 @@ mysqli.allow_local_infile=1
         mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'RENAME TABLE');
 
     }
-    $info = $new_info;
 
     if (!mysqli_query($link, "DROP TABLE IF EXISTS non_result_set_queries_test"))
         printf("[%03d] Cleanup, DROP TABLE failed, [%d] %s\n", ++$test_counter,
@@ -679,7 +673,6 @@ mysqli.allow_local_infile=1
             printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
                 ++$test_counter, gettype($new_info), $new_info);
         mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'CREATE DATABASE');
-        $info = $new_info;
 
         if (!mysqli_query($link, "CREATE DATABASE mysqli_get_client_stats_"))
             printf("[%03d] CREATE DATABASE failed, [%d] %s\n", ++$test_counter,
@@ -697,7 +690,6 @@ mysqli.allow_local_infile=1
             printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
                 ++$test_counter, gettype($new_info), $new_info);
         mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'DROP DATABASE');
-        $info = $new_info;
     }
 
     // CREATE SERVER, ALTER SERVER, DROP SERVER
@@ -816,7 +808,7 @@ mysqli.allow_local_infile=1
     mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'DELETE');
     $info = $new_info;
 
-    if (!$res = mysqli_query($link, "TRUNCATE TABLE test"))
+    if (false === mysqli_query($link, "TRUNCATE TABLE test"))
         printf("[%03d] TRUNCATE failed, [%d] %s\n", ++$test_counter,
             mysqli_errno($link), mysqli_error($link));
 
@@ -858,7 +850,7 @@ mysqli.allow_local_infile=1
         printf("[%03d] Cannot insert new records, [%d] %s\n", ++$test_counter,
             mysqli_errno($link), mysqli_error($link));
 
-    if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
+    if (false === mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
         printf("[%03d] Cannot SELECT with mysqli_real_query(), [%d] %s\n", ++$test_counter,
             mysqli_errno($link), mysqli_error($link));
 
@@ -866,7 +858,7 @@ mysqli.allow_local_infile=1
         printf("[%03d] mysqli_use_result() failed, [%d] %s\n", ++$test_counter,
             mysqli_errno($link), mysqli_error($link));
 
-    while ($row = mysqli_fetch_assoc($res))
+    while (mysqli_fetch_assoc($res))
         ;
     mysqli_free_result($res);
     if (!is_array($new_info = mysqli_get_client_stats()) || empty($new_info))
@@ -875,7 +867,7 @@ mysqli.allow_local_infile=1
     mysqli_get_client_stats_assert_eq('unbuffered_sets', $new_info, (string)($info['unbuffered_sets'] + 1), $test_counter, 'mysqli_use_result()');
     $info = $new_info;
 
-    if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
+    if (false === mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
         printf("[%03d] Cannot SELECT with mysqli_real_query() II, [%d] %s\n", ++$test_counter,
             mysqli_errno($link), mysqli_error($link));
 
@@ -883,7 +875,7 @@ mysqli.allow_local_infile=1
         printf("[%03d] mysqli_use_result() failed, [%d] %s\n", ++$test_counter,
             mysqli_errno($link), mysqli_error($link));
 
-    while ($row = mysqli_fetch_assoc($res))
+    while (mysqli_fetch_assoc($res))
         ;
     mysqli_free_result($res);
     if (!is_array($new_info = mysqli_get_client_stats()) || empty($new_info))

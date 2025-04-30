@@ -22,6 +22,6 @@ done
 Fatal error: Uncaught FiberError: Cannot suspend in a force-closed fiber in %ssuspend-in-force-close-fiber-after-shutdown.php:%d
 Stack trace:
 #0 %ssuspend-in-force-close-fiber-after-shutdown.php(%d): Fiber::suspend()
-#1 [internal function]: {closure}()
+#1 [internal function]: {closure:%s:%d}()
 #2 {main}
   thrown in %ssuspend-in-force-close-fiber-after-shutdown.php on line %d

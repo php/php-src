@@ -30,50 +30,64 @@ ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 ZEND_API zend_class_entry *zend_ce_override;
+ZEND_API zend_class_entry *zend_ce_deprecated;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
 static HashTable internal_attributes;
 
-void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope)
 {
 	// TODO: More proper signature validation: Too many args, incorrect arg names.
 	if (attr->argc > 0) {
 		zval flags;
 
-		/* As this is run in the middle of compilation, fetch the attribute value without
-		 * specifying a scope. The class is not fully linked yet, and we may seen an
-		 * inconsistent state. */
-		if (FAILURE == zend_get_attribute_value(&flags, attr, 0, NULL)) {
-			return;
+		if (FAILURE == zend_get_attribute_value(&flags, attr, 0, scope)) {
+			ZEND_ASSERT(EG(exception));
+			return 0;
 		}
 
 		if (Z_TYPE(flags) != IS_LONG) {
-			zend_error_noreturn(E_ERROR,
+			zend_throw_error(NULL,
 				"Attribute::__construct(): Argument #1 ($flags) must be of type int, %s given",
 				zend_zval_value_name(&flags)
 			);
+			zval_ptr_dtor(&flags);
+			return 0;
 		}
 
-		if (Z_LVAL(flags) & ~ZEND_ATTRIBUTE_FLAGS) {
-			zend_error_noreturn(E_ERROR, "Invalid attribute flags specified");
+		uint32_t flags_l = Z_LVAL(flags);
+		if (flags_l & ~ZEND_ATTRIBUTE_FLAGS) {
+			zend_throw_error(NULL, "Invalid attribute flags specified");
+			return 0;
 		}
 
-		zval_ptr_dtor(&flags);
+		return flags_l;
 	}
+
+	return ZEND_ATTRIBUTE_TARGET_ALL;
 }
 
 static void validate_allow_dynamic_properties(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
-		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to trait");
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to trait %s",
+			ZSTR_VAL(scope->name)
+		);
 	}
 	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to interface");
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to interface %s",
+			ZSTR_VAL(scope->name)
+		);
 	}
 	if (scope->ce_flags & ZEND_ACC_READONLY_CLASS) {
 		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to readonly class %s",
+			ZSTR_VAL(scope->name)
+		);
+	}
+	if (scope->ce_flags & ZEND_ACC_ENUM) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to enum %s",
 			ZSTR_VAL(scope->name)
 		);
 	}
@@ -142,6 +156,43 @@ ZEND_METHOD(Override, __construct)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+ZEND_METHOD(Deprecated, __construct)
+{
+	zend_string *message = NULL;
+	zend_string *since = NULL;
+	zval value;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+		Z_PARAM_STR_OR_NULL(since)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		ZVAL_STR(&value, message);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_deprecated, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+
+	if (since) {
+		ZVAL_STR(&value, since);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_deprecated, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_SINCE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+}
+
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
 {
 	if (attributes) {
@@ -208,6 +259,93 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, u
 	}
 
 	return SUCCESS;
+}
+
+ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attribute_ce, zend_attribute *attribute_data, zend_class_entry *scope, zend_string *filename)
+{
+	zend_execute_data *call = NULL;
+
+	if (filename) {
+		/* Set up dummy call frame that makes it look like the attribute was invoked
+		 * from where it occurs in the code. */
+		zend_function dummy_func;
+		zend_op *opline;
+
+		memset(&dummy_func, 0, sizeof(zend_function));
+
+		call = zend_vm_stack_push_call_frame_ex(
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_execute_data), sizeof(zval)) +
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op), sizeof(zval)) +
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_function), sizeof(zval)),
+			0, &dummy_func, 0, NULL);
+
+		opline = (zend_op*)(call + 1);
+		memset(opline, 0, sizeof(zend_op));
+		opline->opcode = ZEND_DO_FCALL;
+		opline->lineno = attribute_data->lineno;
+
+		call->opline = opline;
+		call->call = NULL;
+		call->return_value = NULL;
+		call->func = (zend_function*)(call->opline + 1);
+		call->prev_execute_data = EG(current_execute_data);
+
+		memset(call->func, 0, sizeof(zend_function));
+		call->func->type = ZEND_USER_FUNCTION;
+		call->func->op_array.fn_flags =
+			attribute_data->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
+		call->func->op_array.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
+		call->func->op_array.filename = filename;
+
+		EG(current_execute_data) = call;
+	}
+
+	zval *args = NULL;
+	HashTable *named_params = NULL;
+
+	zend_result result = FAILURE;
+
+	uint32_t argc = 0;
+	if (attribute_data->argc) {
+		args = emalloc(attribute_data->argc * sizeof(zval));
+
+		for (uint32_t i = 0; i < attribute_data->argc; i++) {
+			zval val;
+			if (FAILURE == zend_get_attribute_value(&val, attribute_data, i, scope)) {
+				result = FAILURE;
+				goto out;
+			}
+			if (attribute_data->args[i].name) {
+				if (!named_params) {
+					named_params = zend_new_array(0);
+				}
+				zend_hash_add_new(named_params, attribute_data->args[i].name, &val);
+			} else {
+				ZVAL_COPY_VALUE(&args[i], &val);
+				argc++;
+			}
+		}
+	}
+
+	result = object_init_with_constructor(obj, attribute_ce, argc, args, named_params);
+
+ out:
+	for (uint32_t i = 0; i < argc; i++) {
+		zval_ptr_dtor(&args[i]);
+	}
+
+	efree(args);
+
+	if (named_params) {
+		zend_array_destroy(named_params);
+	}
+
+	if (filename) {
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
+	}
+
+	return result;
 }
 
 static const char *target_names[] = {
@@ -359,7 +497,6 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_attribute = register_class_Attribute();
 	attr = zend_mark_internal_attribute(zend_ce_attribute);
-	attr->validator = validate_attribute;
 
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
 	zend_mark_internal_attribute(zend_ce_return_type_will_change_attribute);
@@ -380,6 +517,9 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_override = register_class_Override();
 	zend_mark_internal_attribute(zend_ce_override);
+
+	zend_ce_deprecated = register_class_Deprecated();
+	attr = zend_mark_internal_attribute(zend_ce_deprecated);
 }
 
 void zend_attributes_shutdown(void)

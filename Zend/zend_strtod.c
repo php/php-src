@@ -189,6 +189,7 @@
 #include <zend_operators.h>
 #include <zend_strtod.h>
 #include "zend_strtod_int.h"
+#include "zend_globals.h"
 
 #ifndef Long
 #define Long int32_t
@@ -196,6 +197,16 @@
 #ifndef ULong
 #define ULong uint32_t
 #endif
+
+#undef Bigint
+#undef freelist
+#undef p5s
+#undef dtoa_result
+
+#define Bigint      _zend_strtod_bigint
+#define freelist    (EG(strtod_state).freelist)
+#define p5s         (EG(strtod_state).p5s)
+#define dtoa_result (EG(strtod_state).result)
 
 #ifdef DEBUG
 static void Bug(const char *message) {
@@ -224,6 +235,7 @@ extern void *MALLOC(size_t);
 #endif
 #else
 #define MALLOC malloc
+#define FREE   free
 #endif
 
 #ifndef Omit_Private_Memory
@@ -522,7 +534,7 @@ BCinfo { int dp0, dp1, dplen, dsign, e0, inexact, nd, nd0, rounding, scale, uflc
 #define FREE_DTOA_LOCK(n)	/*nothing*/
 #endif
 
-#define Kmax 7
+#define Kmax ZEND_STRTOD_K_MAX
 
  struct
 Bigint {
@@ -533,37 +545,23 @@ Bigint {
 
  typedef struct Bigint Bigint;
 
+#ifndef Bigint
  static Bigint *freelist[Kmax+1];
+#endif
 
 static void destroy_freelist(void);
 static void free_p5s(void);
 
-#ifdef ZTS
+#ifdef MULTIPLE_THREADS
 static MUTEX_T dtoa_mutex;
 static MUTEX_T pow5mult_mutex;
 #endif /* ZTS */
 
-ZEND_API int zend_startup_strtod(void) /* {{{ */
-{
-#ifdef ZTS
-	dtoa_mutex = tsrm_mutex_alloc();
-	pow5mult_mutex = tsrm_mutex_alloc();
-#endif
-	return 1;
-}
-/* }}} */
 ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
 	destroy_freelist();
 	free_p5s();
 
-#ifdef ZTS
-	tsrm_mutex_free(dtoa_mutex);
-	dtoa_mutex = NULL;
-
-	tsrm_mutex_free(pow5mult_mutex);
-	pow5mult_mutex = NULL;
-#endif
 	return 1;
 }
 /* }}} */
@@ -627,11 +625,7 @@ Bfree
 {
 	if (v) {
 		if (v->k > Kmax)
-#ifdef FREE
 			FREE((void*)v);
-#else
-			free((void*)v);
-#endif
 		else {
 			ACQUIRE_DTOA_LOCK(0);
 			v->next = freelist[v->k];
@@ -947,7 +941,9 @@ mult
 	return c;
 	}
 
+#ifndef p5s
  static Bigint *p5s;
+#endif
 
  static Bigint *
 pow5mult
@@ -3602,7 +3598,7 @@ zend_strtod
 	return sign ? -dval(&rv) : dval(&rv);
 	}
 
-#ifndef MULTIPLE_THREADS
+#if !defined(MULTIPLE_THREADS) && !defined(dtoa_result)
  ZEND_TLS char *dtoa_result;
 #endif
 
@@ -3613,13 +3609,20 @@ rv_alloc(i) int i;
 rv_alloc(int i)
 #endif
 {
+
 	int j, k, *r;
+	size_t rem;
+
+	rem = sizeof(Bigint) - sizeof(ULong) - sizeof(int);
+
 
 	j = sizeof(ULong);
+	if (i > ((INT_MAX >> 2) + rem))
+		i = (INT_MAX >> 2) + rem;
 	for(k = 0;
-		sizeof(Bigint) - sizeof(ULong) - sizeof(int) + (size_t)j <= (size_t)i;
-		j <<= 1)
+		rem + j <= (size_t)i; j <<= 1)
 			k++;
+
 	r = (int*)Balloc(k);
 	*r = k;
 	return
@@ -4616,7 +4619,7 @@ static void destroy_freelist(void)
 		Bigint **listp = &freelist[i];
 		while ((tmp = *listp) != NULL) {
 			*listp = tmp->next;
-			free(tmp);
+			FREE(tmp);
 		}
 		freelist[i] = NULL;
 	}
@@ -4631,7 +4634,8 @@ static void free_p5s(void)
 	listp = &p5s;
 	while ((tmp = *listp) != NULL) {
 		*listp = tmp->next;
-		free(tmp);
+		FREE(tmp);
 	}
+	p5s = NULL;
 	FREE_DTOA_LOCK(1)
 }

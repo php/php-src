@@ -9,13 +9,13 @@ permissions:
 
 jobs:
   stale:
-    if: github.repository_owner == 'php'
+    if: github.repository == 'php/php-src'
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v9
         with:
           days-before-close: 7
           days-before-stale: 60

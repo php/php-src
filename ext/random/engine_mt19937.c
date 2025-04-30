@@ -29,6 +29,7 @@
 
 #include "php.h"
 #include "php_random.h"
+#include "php_random_csprng.h"
 
 #include "Zend/zend_exceptions.h"
 
@@ -85,7 +86,11 @@
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#define N             MT_N                 /* length of state vector */
+#define N             624                 /* length of state vector */
+ZEND_STATIC_ASSERT(
+	N == sizeof(((php_random_status_state_mt19937*)0)->state) / sizeof(((php_random_status_state_mt19937*)0)->state[0]),
+	"Assumed length of Mt19937 state vector does not match actual size."
+);
 #define M             (397)                /* a period parameter */
 #define hiBit(u)      ((u) & 0x80000000U)  /* mask all but highest   bit of u */
 #define loBit(u)      ((u) & 0x00000001U)  /* mask all but lowest    bit of u */
@@ -120,7 +125,7 @@ static inline void mt19937_reload(php_random_status_state_mt19937 *state)
 	state->count = 0;
 }
 
-static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, uint64_t seed)
+PHPAPI inline void php_random_mt19937_seed32(php_random_status_state_mt19937 *state, uint32_t seed)
 {
 	uint32_t i, prev_state;
 
@@ -128,8 +133,8 @@ static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, ui
 	   See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
 	   In previous versions, most significant bits (MSBs) of the seed affect
 	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
-	state->state[0] = seed & 0xffffffffU;
-	for (i = 1; i < MT_N; i++) {
+	state->state[0] = seed;
+	for (i = 1; i < N; i++) {
 		prev_state = state->state[i - 1];
 		state->state[i] = (1812433253U * (prev_state  ^ (prev_state  >> 30)) + i) & 0xffffffffU;
 	}
@@ -138,17 +143,12 @@ static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, ui
 	mt19937_reload(state);
 }
 
-static void seed(php_random_status *status, uint64_t seed)
+static php_random_result generate(void *state)
 {
-	mt19937_seed_state(status->state, seed);
-}
-
-static uint64_t generate(php_random_status *status)
-{
-	php_random_status_state_mt19937 *s = status->state;
+	php_random_status_state_mt19937 *s = state;
 	uint32_t s1;
 
-	if (s->count >= MT_N) {
+	if (s->count >= N) {
 		mt19937_reload(s);
 	}
 
@@ -157,20 +157,26 @@ static uint64_t generate(php_random_status *status)
 	s1 ^= (s1 << 7) & 0x9d2c5680U;
 	s1 ^= (s1 << 15) & 0xefc60000U;
 
-	return (uint64_t) (s1 ^ (s1 >> 18));
+	return (php_random_result){
+		.size = sizeof(uint32_t),
+		.result = (uint64_t) (s1 ^ (s1 >> 18)),
+	};
 }
 
-static zend_long range(php_random_status *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
-	return php_random_range(&php_random_algo_mt19937, status, min, max);
+	return php_random_range((php_random_algo_with_state){
+		.algo = &php_random_algo_mt19937,
+		.state = state,
+	}, min, max);
 }
 
-static bool serialize(php_random_status *status, HashTable *data)
+static bool serialize(void *state, HashTable *data)
 {
-	php_random_status_state_mt19937 *s = status->state;
+	php_random_status_state_mt19937 *s = state;
 	zval t;
 
-	for (uint32_t i = 0; i < MT_N; i++) {
+	for (uint32_t i = 0; i < N; i++) {
 		ZVAL_STR(&t, php_random_bin2hex_le(&s->state[i], sizeof(uint32_t)));
 		zend_hash_next_index_insert(data, &t);
 	}
@@ -182,17 +188,17 @@ static bool serialize(php_random_status *status, HashTable *data)
 	return true;
 }
 
-static bool unserialize(php_random_status *status, HashTable *data)
+static bool unserialize(void *state, HashTable *data)
 {
-	php_random_status_state_mt19937 *s = status->state;
+	php_random_status_state_mt19937 *s = state;
 	zval *t;
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
-	if (zend_hash_num_elements(data) != (MT_N + 2)) {
+	if (zend_hash_num_elements(data) != (N + 2)) {
 		return false;
 	}
 
-	for (uint32_t i = 0; i < MT_N; i++) {
+	for (uint32_t i = 0; i < N; i++) {
 		t = zend_hash_index_find(data, i);
 		if (!t || Z_TYPE_P(t) != IS_STRING || Z_STRLEN_P(t) != (2 * sizeof(uint32_t))) {
 			return false;
@@ -201,16 +207,16 @@ static bool unserialize(php_random_status *status, HashTable *data)
 			return false;
 		}
 	}
-	t = zend_hash_index_find(data, MT_N);
+	t = zend_hash_index_find(data, N);
 	if (!t || Z_TYPE_P(t) != IS_LONG) {
 		return false;
 	}
 	s->count = Z_LVAL_P(t);
-	if (s->count > MT_N) {
+	if (s->count > N) {
 		return false;
 	}
 
-	t = zend_hash_index_find(data, MT_N + 1);
+	t = zend_hash_index_find(data, N + 1);
 	if (!t || Z_TYPE_P(t) != IS_LONG) {
 		return false;
 	}
@@ -222,10 +228,8 @@ static bool unserialize(php_random_status *status, HashTable *data)
 	return true;
 }
 
-const php_random_algo php_random_algo_mt19937 = {
-	sizeof(uint32_t),
+PHPAPI const php_random_algo php_random_algo_mt19937 = {
 	sizeof(php_random_status_state_mt19937),
-	seed,
 	generate,
 	range,
 	serialize,
@@ -235,21 +239,21 @@ const php_random_algo php_random_algo_mt19937 = {
 /* {{{ php_random_mt19937_seed_default */
 PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *state)
 {
-	zend_long seed = 0;
+	uint32_t seed = 0;
 
-	if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
-		seed = GENERATE_SEED();
+	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+		seed = (uint32_t)php_random_generate_fallback_seed();
 	}
 
-	mt19937_seed_state(state, (uint64_t) seed);
+	php_random_mt19937_seed32(state, seed);
 }
 /* }}} */
 
 /* {{{ Random\Engine\Mt19937::__construct() */
 PHP_METHOD(Random_Engine_Mt19937, __construct)
 {
-	php_random_engine *engine = Z_RANDOM_ENGINE_P(ZEND_THIS);
-	php_random_status_state_mt19937 *state = engine->status->state;
+	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
+	php_random_status_state_mt19937 *state = engine.state;
 	zend_long seed, mode = MT_RAND_MT19937;
 	bool seed_is_null = true;
 
@@ -274,39 +278,36 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 
 	if (seed_is_null) {
 		/* MT19937 has a very large state, uses CSPRNG for seeding only */
-		if (php_random_bytes_throw(&seed, sizeof(zend_long)) == FAILURE) {
+		if (php_random_bytes_throw(&seed, sizeof(seed)) == FAILURE) {
 			zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	}
 
-	engine->algo->seed(engine->status, seed);
+	php_random_mt19937_seed32(state, seed);
 }
 /* }}} */
 
 /* {{{ Random\Engine\Mt19937::generate() */
 PHP_METHOD(Random_Engine_Mt19937, generate)
 {
-	php_random_engine *engine = Z_RANDOM_ENGINE_P(ZEND_THIS);
-	uint64_t generated;
-	size_t size;
+	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
 	zend_string *bytes;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generated = engine->algo->generate(engine->status);
-	size = engine->status->last_generated_size;
+	php_random_result generated = engine.algo->generate(engine.state);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
-	bytes = zend_string_alloc(size, false);
+	bytes = zend_string_alloc(generated.size, false);
 
 	/* Endianness safe copy */
-	for (size_t i = 0; i < size; i++) {
-		ZSTR_VAL(bytes)[i] = (generated >> (i * 8)) & 0xff;
+	for (size_t i = 0; i < generated.size; i++) {
+		ZSTR_VAL(bytes)[i] = (generated.result >> (i * 8)) & 0xff;
 	}
-	ZSTR_VAL(bytes)[size] = '\0';
+	ZSTR_VAL(bytes)[generated.size] = '\0';
 
 	RETURN_STR(bytes);
 }
@@ -329,7 +330,7 @@ PHP_METHOD(Random_Engine_Mt19937, __serialize)
 
 	/* state */
 	array_init(&t);
-	if (!engine->algo->serialize(engine->status, Z_ARRVAL(t))) {
+	if (!engine->engine.algo->serialize(engine->engine.state, Z_ARRVAL(t))) {
 		zend_throw_exception(NULL, "Engine serialize failed", 0);
 		RETURN_THROWS();
 	}
@@ -372,7 +373,7 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
-	if (!engine->algo->unserialize(engine->status, Z_ARRVAL_P(t))) {
+	if (!engine->engine.algo->unserialize(engine->engine.state, Z_ARRVAL_P(t))) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
@@ -387,14 +388,11 @@ PHP_METHOD(Random_Engine_Mt19937, __debugInfo)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (!engine->std.properties) {
-		rebuild_object_properties(&engine->std);
-	}
-	ZVAL_ARR(return_value, zend_array_dup(engine->std.properties));
+	ZVAL_ARR(return_value, zend_array_dup(zend_std_get_properties_ex(&engine->std)));
 
-	if (engine->algo->serialize) {
+	if (engine->engine.algo->serialize) {
 		array_init(&t);
-		if (!engine->algo->serialize(engine->status, Z_ARRVAL(t))) {
+		if (!engine->engine.algo->serialize(engine->engine.state, Z_ARRVAL(t))) {
 			zend_throw_exception(NULL, "Engine serialize failed", 0);
 			RETURN_THROWS();
 		}

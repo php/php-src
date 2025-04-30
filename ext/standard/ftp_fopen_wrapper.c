@@ -678,7 +678,7 @@ static const php_stream_ops php_ftp_dirstream_ops = {
 };
 
 /* {{{ php_stream_ftp_opendir */
-php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
+static php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
 									zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	php_stream *stream, *reuseid, *datastream = NULL;

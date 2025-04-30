@@ -66,6 +66,8 @@ $expected_constants = array(
     "MYSQLI_TYPE_NEWDATE"				=> true,
     "MYSQLI_TYPE_ENUM"					=> true,
     "MYSQLI_TYPE_SET"					=> true,
+    "MYSQLI_TYPE_VECTOR"			    => true,
+    "MYSQLI_TYPE_JSON"			        => true,
     "MYSQLI_TYPE_TINY_BLOB"				=> true,
     "MYSQLI_TYPE_MEDIUM_BLOB"			=> true,
     "MYSQLI_TYPE_LONG_BLOB"				=> true,
@@ -73,7 +75,6 @@ $expected_constants = array(
     "MYSQLI_TYPE_VAR_STRING"			=> true,
     "MYSQLI_TYPE_STRING"				=> true,
     "MYSQLI_TYPE_CHAR"					=> true,
-    "MYSQLI_TYPE_INTERVAL"				=> true,
     "MYSQLI_TYPE_GEOMETRY"				=> true,
     "MYSQLI_NO_DATA"					=> true,
     "MYSQLI_REPORT_INDEX"				=> true,
@@ -82,7 +83,6 @@ $expected_constants = array(
     "MYSQLI_REPORT_ERROR"				=> true,
     "MYSQLI_REPORT_OFF"					=> true,
     "MYSQLI_SET_CHARSET_NAME"			=> true,
-    "MYSQLI_SET_CHARSET_DIR"			=> true,
     "MYSQLI_REFRESH_GRANT"				=> true,
     "MYSQLI_REFRESH_LOG"				=> true,
     "MYSQLI_REFRESH_TABLES"				=> true,
@@ -108,7 +108,6 @@ $expected_constants['MYSQLI_STORE_RESULT_COPY_DATA'] = true;
 
 $expected_constants['MYSQLI_REFRESH_BACKUP_LOG'] = true;
 
-$version = 50007 + 1;
 $expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
 $expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
 $expected_constants['MYSQLI_ASYNC'] = true;
@@ -135,12 +134,6 @@ $expected_constants = array_merge($expected_constants, array(
     "MYSQLI_STMT_ATTR_CURSOR_TYPE"		=> true,
     "MYSQLI_CURSOR_TYPE_NO_CURSOR"		=> true,
     "MYSQLI_CURSOR_TYPE_READ_ONLY"		=> true,
-    "MYSQLI_CURSOR_TYPE_FOR_UPDATE"		=> true,
-    "MYSQLI_CURSOR_TYPE_SCROLLABLE"		=> true,
-));
-
-$expected_constants = array_merge($expected_constants, array(
-    "MYSQLI_STMT_ATTR_PREFETCH_ROWS"	=> true,
 ));
 
 $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
@@ -151,11 +144,9 @@ $expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
 $expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 $expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 
-$expected_constants["MYSQLI_TYPE_JSON"]	= true;
-
 $unexpected_constants = array();
 
-foreach ($constants as $group => $consts) {
+foreach ($constants as $consts) {
     foreach ($consts as $name => $value) {
         if (stristr($name, 'mysqli')) {
             $name = strtoupper($name);

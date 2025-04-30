@@ -108,6 +108,26 @@ typedef struct {
 	int proto_num;
 } sapi_request_info;
 
+typedef struct {
+	bool throw_exceptions;
+	struct {
+		bool set;
+		zend_long value;
+	} options_cache[5];
+} sapi_request_parse_body_context;
+
+typedef enum {
+	REQUEST_PARSE_BODY_OPTION_max_file_uploads = 0,
+	REQUEST_PARSE_BODY_OPTION_max_input_vars,
+	REQUEST_PARSE_BODY_OPTION_max_multipart_body_parts,
+	REQUEST_PARSE_BODY_OPTION_post_max_size,
+	REQUEST_PARSE_BODY_OPTION_upload_max_filesize,
+} request_parse_body_option;
+
+#define REQUEST_PARSE_BODY_OPTION_GET(name, fallback) \
+	(SG(request_parse_body_context).options_cache[REQUEST_PARSE_BODY_OPTION_ ## name].set \
+		? SG(request_parse_body_context).options_cache[REQUEST_PARSE_BODY_OPTION_ ## name].value \
+		: (fallback))
 
 typedef struct _sapi_globals_struct {
 	void *server_context;
@@ -127,6 +147,7 @@ typedef struct _sapi_globals_struct {
 	HashTable known_post_content_types;
 	zval callback_func;
 	zend_fcall_info_cache fci_cache;
+	sapi_request_parse_body_context request_parse_body_context;
 } sapi_globals_struct;
 
 
@@ -186,6 +207,7 @@ SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len,
 SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
+SAPI_API void sapi_read_post_data(void);
 SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
 SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entry);
 SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry);

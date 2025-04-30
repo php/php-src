@@ -34,8 +34,8 @@ typedef struct _php_hashcontext_object php_hashcontext_object;
 typedef void (*php_hash_init_func_t)(void *context, HashTable *args);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, size_t count);
 typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
-typedef int  (*php_hash_copy_func_t)(const void *ops, void *orig_context, void *dest_context);
-typedef int  (*php_hash_serialize_func_t)(const php_hashcontext_object *hash, zend_long *magic, zval *zv);
+typedef zend_result (*php_hash_copy_func_t)(const void *ops, const void *orig_context, void *dest_context);
+typedef zend_result (*php_hash_serialize_func_t)(const php_hashcontext_object *hash, zend_long *magic, zval *zv);
 typedef int  (*php_hash_unserialize_func_t)(php_hashcontext_object *hash, zend_long magic, const zval *zv);
 
 typedef struct _php_hash_ops {
@@ -147,10 +147,10 @@ extern zend_module_entry hash_module_entry;
 extern PHP_HASH_API zend_class_entry *php_hashcontext_ce;
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
-PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
-PHP_HASH_API int php_hash_serialize(const php_hashcontext_object *context, zend_long *magic, zval *zv);
+PHP_HASH_API zend_result php_hash_copy(const void *ops, const void *orig_context, void *dest_context);
+PHP_HASH_API zend_result php_hash_serialize(const php_hashcontext_object *context, zend_long *magic, zval *zv);
 PHP_HASH_API int php_hash_unserialize(php_hashcontext_object *context, zend_long magic, const zval *zv);
-PHP_HASH_API int php_hash_serialize_spec(const php_hashcontext_object *context, zval *zv, const char *spec);
+PHP_HASH_API zend_result php_hash_serialize_spec(const php_hashcontext_object *context, zval *zv, const char *spec);
 PHP_HASH_API int php_hash_unserialize_spec(php_hashcontext_object *hash, const zval *zv, const char *spec);
 
 static inline void *php_hash_alloc_context(const php_hash_ops *ops) {

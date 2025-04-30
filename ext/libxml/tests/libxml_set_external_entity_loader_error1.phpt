@@ -21,7 +21,7 @@ try {
 
 echo "Done.\n";
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
-Exception: Too few arguments to function {closure}(), 3 passed and exactly 4 expected
+Exception: Too few arguments to function {closure:%s:%d}(), 3 passed and exactly 4 expected
 Done.

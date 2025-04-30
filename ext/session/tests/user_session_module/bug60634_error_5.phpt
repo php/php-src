@@ -11,32 +11,34 @@ session
 
 ob_start();
 
-function open($save_path, $session_name) {
-    return true;
+class MySessionHandler implements SessionHandlerInterface {
+    function open($save_path, $session_name): bool {
+        return true;
+    }
+
+    function close(): bool {
+        echo "close: goodbye cruel world\n";
+        undefined_function();
+    }
+
+    function read($id): string {
+        return '';
+    }
+
+    function write($id, $session_data): bool {
+        return true;
+    }
+
+    function destroy($id): bool {
+        return true;
+    }
+
+    function gc($maxlifetime): int {
+        return 1;
+    }
 }
 
-function close() {
-    echo "close: goodbye cruel world\n";
-    undefined_function();
-}
-
-function read($id) {
-    return '';
-}
-
-function write($id, $session_data) {
-    return true;
-}
-
-function destroy($id) {
-    return true;
-}
-
-function gc($maxlifetime) {
-    return true;
-}
-
-session_set_save_handler('open', 'close', 'read', 'write', 'destroy', 'gc');
+session_set_save_handler(new MySessionHandler());
 session_start();
 session_write_close();
 echo "um, hi\n";
@@ -47,7 +49,7 @@ close: goodbye cruel world
 
 Fatal error: Uncaught Error: Call to undefined function undefined_function() in %s:%d
 Stack trace:
-#0 [internal function]: close()
+#0 [internal function]: MySessionHandler->close()
 #1 %s(%d): session_write_close()
 #2 {main}
   thrown in %s on line %d

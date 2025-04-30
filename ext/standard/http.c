@@ -17,6 +17,10 @@
 #include "php_http.h"
 #include "php_ini.h"
 #include "url.h"
+#include "SAPI.h"
+#include "zend_exceptions.h"
+#include "basic_functions.h"
+#include "zend_enum.h"
 
 static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 	int encoding_type, zend_ulong index_int,
@@ -53,6 +57,7 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 	}
 	smart_str_appendc(form_str, '=');
 
+try_again:
 	switch (Z_TYPE_P(scalar)) {
 		case IS_STRING: {
 			zend_string *encoded_data;
@@ -87,6 +92,14 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 		case IS_TRUE:
 			smart_str_appendc(form_str, '1');
 			break;
+		case IS_OBJECT:
+			ZEND_ASSERT(Z_OBJCE_P(scalar)->ce_flags & ZEND_ACC_ENUM);
+			if (Z_OBJCE_P(scalar)->enum_backing_type == IS_UNDEF) {
+				zend_value_error("Unbacked enum %s cannot be converted to a string", ZSTR_VAL(Z_OBJCE_P(scalar)->name));
+				return;
+			}
+			scalar = zend_enum_fetch_case_value(Z_OBJ_P(scalar));
+			goto try_again;
 		/* All possible types are either handled here or previously */
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
@@ -151,7 +164,9 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		}
 
 		ZVAL_DEREF(zdata);
-		if (Z_TYPE_P(zdata) == IS_ARRAY || Z_TYPE_P(zdata) == IS_OBJECT) {
+		if (Z_TYPE_P(zdata) == IS_ARRAY
+		 || (Z_TYPE_P(zdata) == IS_OBJECT
+		  && !(Z_OBJCE_P(zdata)->ce_flags & ZEND_ACC_ENUM))) {
 			zend_string *new_prefix;
 			if (key) {
 				zend_string *encoded_key;
@@ -230,8 +245,159 @@ PHP_FUNCTION(http_build_query)
 		Z_PARAM_LONG(enc_type)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(Z_TYPE_P(formdata) == IS_OBJECT && (Z_OBJCE_P(formdata)->ce_flags & ZEND_ACC_ENUM))) {
+		zend_argument_type_error(1, "must be of type array, %s given", zend_zval_value_name(formdata));
+		RETURN_THROWS();
+	}
+
 	php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, /* key_prefix */ NULL, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type);
 
 	RETURN_STR(smart_str_extract(&formstr));
 }
 /* }}} */
+
+static zend_result cache_request_parse_body_option(HashTable *options, zval *option, int cache_offset)
+{
+	if (option) {
+		zend_long result;
+		ZVAL_DEREF(option);
+		if (Z_TYPE_P(option) == IS_STRING) {
+			zend_string *errstr;
+			result = zend_ini_parse_quantity(Z_STR_P(option), &errstr);
+			if (errstr) {
+				zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+				zend_string_release(errstr);
+			}
+		} else if (Z_TYPE_P(option) == IS_LONG) {
+			result = Z_LVAL_P(option);
+		} else {
+			zend_value_error("Invalid %s value in $options argument", zend_zval_value_name(option));
+			return FAILURE;
+		}
+		SG(request_parse_body_context).options_cache[cache_offset].set = true;
+		SG(request_parse_body_context).options_cache[cache_offset].value = result;
+	} else {
+		SG(request_parse_body_context).options_cache[cache_offset].set = false;
+	}
+
+	return SUCCESS;
+}
+
+static zend_result cache_request_parse_body_options(HashTable *options)
+{
+	zend_string *key;
+	zval *value;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(options, key, value) {
+		if (!key) {
+			zend_value_error("Invalid integer key in $options argument");
+			return FAILURE;
+		}
+		if (ZSTR_LEN(key) == 0) {
+			zend_value_error("Invalid empty string key in $options argument");
+			return FAILURE;
+		}
+
+#define CHECK_OPTION(name) \
+	if (zend_string_equals_literal_ci(key, #name)) { \
+		if (cache_request_parse_body_option(options, value, REQUEST_PARSE_BODY_OPTION_ ## name) == FAILURE) { \
+			return FAILURE; \
+		} \
+		continue; \
+	}
+
+		switch (ZSTR_VAL(key)[0]) {
+			case 'm':
+			case 'M':
+				CHECK_OPTION(max_file_uploads);
+				CHECK_OPTION(max_input_vars);
+				CHECK_OPTION(max_multipart_body_parts);
+				break;
+			case 'p':
+			case 'P':
+				CHECK_OPTION(post_max_size);
+				break;
+			case 'u':
+			case 'U':
+				CHECK_OPTION(upload_max_filesize);
+				break;
+		}
+
+		zend_value_error("Invalid key \"%s\" in $options argument", ZSTR_VAL(key));
+		return FAILURE;
+	} ZEND_HASH_FOREACH_END();
+
+#undef CACHE_OPTION
+
+	return SUCCESS;
+}
+
+PHP_FUNCTION(request_parse_body)
+{
+	HashTable *options = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT_OR_NULL(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SG(request_parse_body_context).throw_exceptions = true;
+	if (options) {
+		if (cache_request_parse_body_options(options) == FAILURE) {
+			goto exit;
+		}
+	}
+
+	if (!SG(request_info).content_type) {
+		zend_throw_error(zend_ce_request_parse_body_exception, "Request does not provide a content type");
+		goto exit;
+	}
+
+	sapi_read_post_data();
+	if (!SG(request_info).post_entry) {
+		zend_throw_error(zend_ce_request_parse_body_exception, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
+		goto exit;
+	}
+
+	zval post, files, old_post, old_files;
+	zval *global_post = &PG(http_globals)[TRACK_VARS_POST];
+	zval *global_files = &PG(http_globals)[TRACK_VARS_FILES];
+
+	ZVAL_COPY_VALUE(&old_post, global_post);
+	ZVAL_COPY_VALUE(&old_files, global_files);
+	array_init(global_post);
+	array_init(global_files);
+	sapi_handle_post(global_post);
+	ZVAL_COPY_VALUE(&post, global_post);
+	ZVAL_COPY_VALUE(&files, global_files);
+	ZVAL_COPY_VALUE(global_post, &old_post);
+	ZVAL_COPY_VALUE(global_files, &old_files);
+
+	RETVAL_ARR(zend_new_pair(&post, &files));
+
+exit:
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
+}
+
+PHP_FUNCTION(http_get_last_response_headers)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!Z_ISUNDEF(BG(last_http_headers))) {
+		RETURN_COPY(&BG(last_http_headers));
+	} else {
+		RETURN_NULL();
+	}
+}
+
+PHP_FUNCTION(http_clear_last_response_headers)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zval_ptr_dtor(&BG(last_http_headers));
+	ZVAL_UNDEF(&BG(last_http_headers));
+}

@@ -27,11 +27,11 @@ AC_DEFUN([PHP_CXX_COMPILE_STDCXX], [dnl
         [$1], [14], [ax_cxx_compile_alternatives="14 1y"],
         [$1], [17], [ax_cxx_compile_alternatives="17 1z"],
         [$1], [20], [ax_cxx_compile_alternatives="20"],
-        [m4_fatal([invalid first argument `$1' to PHP_CXX_COMPILE_STDCXX])])dnl
+        [m4_fatal([invalid first argument `$1' to PHP_CXX_COMPILE_STDCXX])])[]dnl
   m4_if([$2], [], [ax_cxx_compile_cxx$1_required=true],
         [$2], [mandatory], [ax_cxx_compile_cxx$1_required=true],
         [$2], [optional], [ax_cxx_compile_cxx$1_required=false],
-        [m4_fatal([invalid third argument `$2' to PHP_CXX_COMPILE_STDCXX])])dnl
+        [m4_fatal([invalid third argument `$2' to PHP_CXX_COMPILE_STDCXX])])[]dnl
   AC_LANG_PUSH([C++])dnl
   ac_success=no
 

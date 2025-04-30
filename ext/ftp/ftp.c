@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -94,8 +94,8 @@ static databuf_t*	ftp_getdata(ftpbuf_t *ftp);
 /* accepts the data connection, returns updated data buffer */
 static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp);
 
-/* closes the data connection, returns NULL */
-static databuf_t*	data_close(ftpbuf_t *ftp, databuf_t *data);
+/* closes the data connection, no-op if already closed */
+static void		data_close(ftpbuf_t *ftp);
 
 /* generic file lister */
 static char**		ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *path, const size_t path_len);
@@ -167,9 +167,12 @@ ftp_close(ftpbuf_t *ftp)
 	if (ftp == NULL) {
 		return NULL;
 	}
-	if (ftp->data) {
-		data_close(ftp, ftp->data);
+#ifdef HAVE_FTP_SSL
+	if (ftp->last_ssl_session) {
+		SSL_SESSION_free(ftp->last_ssl_session);
 	}
+#endif
+	data_close(ftp);
 	if (ftp->stream && ftp->closestream) {
 			php_stream_close(ftp->stream);
 	}
@@ -229,6 +232,22 @@ ftp_quit(ftpbuf_t *ftp)
 }
 /* }}} */
 
+#ifdef HAVE_FTP_SSL
+static int ftp_ssl_new_session_cb(SSL *ssl, SSL_SESSION *sess)
+{
+	ftpbuf_t *ftp = SSL_get_app_data(ssl);
+
+	/* Technically there can be multiple sessions per connection, but we only care about the most recent one. */
+	if (ftp->last_ssl_session) {
+		SSL_SESSION_free(ftp->last_ssl_session);
+	}
+	ftp->last_ssl_session = SSL_get1_session(ssl);
+
+	/* Return 0 as we are not using OpenSSL's session cache. */
+	return 0;
+}
+#endif
+
 /* {{{ ftp_login */
 int
 ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pass, const size_t pass_len)
@@ -274,15 +293,16 @@ ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pa
 			return 0;
 		}
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
 		ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
-#endif
 		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
-		/* allow SSL to re-use sessions */
-		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH);
+		/* Allow SSL to re-use sessions.
+		 * We're relying on our own session storage as only at most one session will ever be active per FTP connection. */
+		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH | SSL_SESS_CACHE_NO_INTERNAL);
+		SSL_CTX_sess_set_new_cb(ctx, ftp_ssl_new_session_cb);
 
 		ftp->ssl_handle = SSL_new(ctx);
+		SSL_set_app_data(ftp->ssl_handle, ftp); /* Needed for ftp_ssl_new_session_cb */
 		SSL_CTX_free(ctx);
 
 		if (ftp->ssl_handle == NULL) {
@@ -880,8 +900,6 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 		goto bail;
 	}
 
-	ftp->data = data;
-
 	if (resumepos > 0) {
 		int arg_len = snprintf(arg, sizeof(arg), ZEND_LONG_FMT, resumepos);
 
@@ -943,7 +961,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 		}
 	}
 
-	ftp->data = data = data_close(ftp, data);
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
@@ -951,19 +969,89 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 
 	return 1;
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return 0;
 }
 /* }}} */
+
+static zend_result ftp_send_stream_to_data_socket(ftpbuf_t *ftp, databuf_t *data, php_stream *instream, ftptype_t type, bool send_once_and_return)
+{
+	if (type == FTPTYPE_ASCII) {
+		/* Change (and later restore) flags to make sure php_stream_get_line() searches '\n'. */
+		const uint32_t flags_mask = PHP_STREAM_FLAG_EOL_UNIX | PHP_STREAM_FLAG_DETECT_EOL | PHP_STREAM_FLAG_EOL_MAC;
+		uint32_t old_flags = instream->flags & flags_mask;
+		instream->flags = (instream->flags & ~flags_mask) | PHP_STREAM_FLAG_EOL_UNIX;
+
+		char *ptr = data->buf;
+		const char *end = data->buf + FTP_BUFSIZE;
+		while (!php_stream_eof(instream)) {
+			size_t line_length;
+			if (!php_stream_get_line(instream, ptr, end - ptr, &line_length)) {
+				break;
+			}
+
+			ZEND_ASSERT(line_length != 0);
+
+			ptr += line_length - 1;
+			/* Replace \n with \r\n */
+			if (*ptr == '\n') {
+				*ptr = '\r';
+				/* The streams layer always puts a \0 byte at the end of a line,
+				 * so there is always place to add an extra byte. */
+				*++ptr = '\n';
+			}
+
+			ptr++;
+
+			/* If less than 2 bytes remain, either the buffer is completely full or there is a single byte left to put a '\0'
+			 * which isn't really useful, in this case send and reset the buffer. */
+			if (end - ptr < 2) {
+				size_t send_size = FTP_BUFSIZE - (end - ptr);
+				if (UNEXPECTED(my_send(ftp, data->fd, data->buf, send_size) != send_size)) {
+					instream->flags = (instream->flags & ~flags_mask) | old_flags;
+					return FAILURE;
+				}
+				ptr = data->buf;
+				if (send_once_and_return) {
+					break;
+				}
+			}
+		}
+
+		instream->flags = (instream->flags & ~flags_mask) | old_flags;
+
+		if (end - ptr < FTP_BUFSIZE) {
+			size_t send_size = FTP_BUFSIZE - (end - ptr);
+			if (UNEXPECTED(my_send(ftp, data->fd, data->buf, send_size) != send_size)) {
+				return FAILURE;
+			}
+		}
+	} else {
+		while (!php_stream_eof(instream)) {
+			ssize_t size = php_stream_read(instream, data->buf, FTP_BUFSIZE);
+			if (size == 0) {
+				break;
+			}
+			if (UNEXPECTED(size < 0)) {
+				return FAILURE;
+			}
+			if (UNEXPECTED(my_send(ftp, data->fd, data->buf, size) != size)) {
+				return FAILURE;
+			}
+			if (send_once_and_return) {
+				break;
+			}
+		}
+	}
+
+	return SUCCESS;
+}
 
 /* {{{ ftp_put */
 int
 ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type, zend_long startpos)
 {
 	databuf_t		*data = NULL;
-	zend_long			size;
-	char			*ptr;
-	int			ch;
 	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
@@ -975,7 +1063,6 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
 	}
-	ftp->data = data;
 
 	if (startpos > 0) {
 		int arg_len = snprintf(arg, sizeof(arg), ZEND_LONG_FMT, startpos);
@@ -1001,38 +1088,18 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 		goto bail;
 	}
 
-	size = 0;
-	ptr = data->buf;
-	while (!php_stream_eof(instream) && (ch = php_stream_getc(instream))!=EOF) {
-		/* flush if necessary */
-		if (FTP_BUFSIZE - size < 2) {
-			if (my_send(ftp, data->fd, data->buf, size) != size) {
-				goto bail;
-			}
-			ptr = data->buf;
-			size = 0;
-		}
-
-		if (ch == '\n' && type == FTPTYPE_ASCII) {
-			*ptr++ = '\r';
-			size++;
-		}
-
-		*ptr++ = ch;
-		size++;
-	}
-
-	if (size && my_send(ftp, data->fd, data->buf, size) != size) {
+	if (ftp_send_stream_to_data_socket(ftp, data, instream, type, false) != SUCCESS) {
 		goto bail;
 	}
-	ftp->data = data = data_close(ftp, data);
+
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250 && ftp->resp != 200)) {
 		goto bail;
 	}
 	return 1;
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return 0;
 }
 /* }}} */
@@ -1043,9 +1110,6 @@ int
 ftp_append(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type)
 {
 	databuf_t		*data = NULL;
-	zend_long			size;
-	char			*ptr;
-	int			ch;
 
 	if (ftp == NULL) {
 		return 0;
@@ -1068,38 +1132,18 @@ ftp_append(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *i
 		goto bail;
 	}
 
-	size = 0;
-	ptr = data->buf;
-	while (!php_stream_eof(instream) && (ch = php_stream_getc(instream))!=EOF) {
-		/* flush if necessary */
-		if (FTP_BUFSIZE - size < 2) {
-			if (my_send(ftp, data->fd, data->buf, size) != size) {
-				goto bail;
-			}
-			ptr = data->buf;
-			size = 0;
-		}
-
-		if (ch == '\n' && type == FTPTYPE_ASCII) {
-			*ptr++ = '\r';
-			size++;
-		}
-
-		*ptr++ = ch;
-		size++;
-	}
-
-	if (size && my_send(ftp, data->fd, data->buf, size) != size) {
+	if (ftp_send_stream_to_data_socket(ftp, data, instream, type, false) != SUCCESS) {
 		goto bail;
 	}
-	ftp->data = data = data_close(ftp, data);
+
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250 && ftp->resp != 200)) {
 		goto bail;
 	}
 	return 1;
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return 0;
 }
 /* }}} */
@@ -1363,6 +1407,22 @@ ftp_getresp(ftpbuf_t *ftp)
 }
 /* }}} */
 
+static ssize_t my_send_wrapper_with_restart(php_socket_t fd, const void *buf, size_t size, int flags) {
+	ssize_t n;
+	do {
+		n = send(fd, buf, size, flags);
+	} while (n == -1 && php_socket_errno() == EINTR);
+	return n;
+}
+
+static ssize_t my_recv_wrapper_with_restart(php_socket_t fd, void *buf, size_t size, int flags) {
+	ssize_t n;
+	do {
+		n = recv(fd, buf, size, flags);
+	} while (n == -1 && php_socket_errno() == EINTR);
+	return n;
+}
+
 int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 #ifdef HAVE_FTP_SSL
 	int err;
@@ -1378,7 +1438,7 @@ int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 		handle = ftp->data->ssl_handle;
 		fd = ftp->data->fd;
 	} else {
-		return send(s, buf, size, 0);
+		return my_send_wrapper_with_restart(s, buf, size, 0);
 	}
 
 	do {
@@ -1417,8 +1477,33 @@ int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 	} while (retry);
 	return sent;
 #else
-	return send(s, buf, size, 0);
+	return my_send_wrapper_with_restart(s, buf, size, 0);
 #endif
+}
+
+static int my_poll(php_socket_t fd, int events, int timeout) {
+	int n;
+	zend_hrtime_t timeout_hr = (zend_hrtime_t) timeout * 1000000;
+
+	while (true) {
+		zend_hrtime_t start_ns = zend_hrtime();
+		n = php_pollfd_for_ms(fd, events, (int) (timeout_hr / 1000000));
+
+		if (n == -1 && php_socket_errno() == EINTR) {
+			zend_hrtime_t delta_ns = zend_hrtime() - start_ns;
+			if (delta_ns > timeout_hr) {
+#ifndef PHP_WIN32
+				errno = ETIMEDOUT;
+#endif
+				break;
+			}
+			timeout_hr -= delta_ns;
+		} else {
+			break;
+		}
+	}
+
+	return n;
 }
 
 /* {{{ my_send */
@@ -1430,7 +1515,7 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 
 	size = len;
 	while (size) {
-		n = php_pollfd_for_ms(s, POLLOUT, ftp->timeout_sec * 1000);
+		n = my_poll(s, POLLOUT, ftp->timeout_sec * 1000);
 
 		if (n < 1) {
 			char buf[256];
@@ -1469,7 +1554,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 	SSL *handle = NULL;
 	php_socket_t fd;
 #endif
-	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
+	n = my_poll(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
@@ -1529,7 +1614,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		} while (retry);
 	} else {
 #endif
-		nr_bytes = recv(s, buf, len, 0);
+		nr_bytes = my_recv_wrapper_with_restart(s, buf, len, 0);
 #ifdef HAVE_FTP_SSL
 	}
 #endif
@@ -1543,7 +1628,7 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 {
 	int		n;
 
-	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
+	n = my_poll(s, PHP_POLLREADABLE, 1000);
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
@@ -1566,7 +1651,7 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 {
 	int		n;
 
-	n = php_pollfd_for_ms(s, POLLOUT, 1000);
+	n = my_poll(s, POLLOUT, 1000);
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
@@ -1590,7 +1675,7 @@ my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrl
 {
 	int		n;
 
-	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
+	n = my_poll(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
@@ -1685,7 +1770,7 @@ ftp_getdata(ftpbuf_t *ftp)
 
 	data->listener = fd;
 
-#if defined(HAVE_IPV6)
+#ifdef HAVE_IPV6
 	if (sa->sa_family == AF_INET6) {
 		/* need to use EPRT */
 		char eprtarg[INET6_ADDRSTRLEN + sizeof("|x||xxxxx|")];
@@ -1792,7 +1877,7 @@ data_accepted:
 		}
 
 		/* get the session from the control connection so we can re-use it */
-		session = SSL_get_session(ftp->ssl_handle);
+		session = ftp->last_ssl_session;
 		if (session == NULL) {
 			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL session");
 			SSL_free(data->ssl_handle);
@@ -1800,6 +1885,7 @@ data_accepted:
 		}
 
 		/* and set it on the data connection */
+		SSL_set_app_data(data->ssl_handle, ftp); /* Needed for ftp_ssl_new_session_cb */
 		res = SSL_set_session(data->ssl_handle, session);
 		if (res == 0) {
 			php_error_docref(NULL, E_WARNING, "data_accept: failed to set the existing SSL session");
@@ -1917,11 +2003,12 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 /* }}} */
 
 /* {{{ data_close */
-databuf_t*
-data_close(ftpbuf_t *ftp, databuf_t *data)
+void data_close(ftpbuf_t *ftp)
 {
+	ZEND_ASSERT(ftp != NULL);
+	databuf_t *data = ftp->data;
 	if (data == NULL) {
-		return NULL;
+		return;
 	}
 	if (data->listener != -1) {
 #ifdef HAVE_FTP_SSL
@@ -1943,11 +2030,8 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 #endif
 		closesocket(data->fd);
 	}
-	if (ftp) {
-		ftp->data = NULL;
-	}
+	ftp->data = NULL;
 	efree(data);
-	return NULL;
 }
 /* }}} */
 
@@ -1989,7 +2073,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *pa
 
 	/* some servers don't open a ftp-data connection if the directory is empty */
 	if (ftp->resp == 226) {
-		ftp->data = data_close(ftp, data);
+		data_close(ftp);
 		php_stream_close(tmpstream);
 		return ecalloc(1, sizeof(char*));
 	}
@@ -2017,7 +2101,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *pa
 		}
 	}
 
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 
 	php_stream_rewind(tmpstream);
 
@@ -2047,7 +2131,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *pa
 
 	return ret;
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	php_stream_close(tmpstream);
 	if (ret)
 		efree(ret);
@@ -2069,7 +2153,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t 
 	if (ftp->data != NULL) {
 		/* If there is a transfer in action, abort it.
 		 * If we don't, we get an invalid state and memory leaks when the new connection gets opened. */
-		data_close(ftp, ftp->data);
+		data_close(ftp);
 		if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 			goto bail;
 		}
@@ -2116,7 +2200,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t 
 	return (ftp_nb_continue_read(ftp));
 
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return PHP_FTP_FAILED;
 }
 /* }}} */
@@ -2127,7 +2211,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 {
 	databuf_t	*data = NULL;
 	char		*ptr;
-	int		lastch;
+	char		lastch;
 	size_t		rcvd;
 	ftptype_t	type;
 
@@ -2168,7 +2252,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 		php_stream_putc(ftp->stream, '\r');
 	}
 
-	ftp->data = data = data_close(ftp, data);
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
@@ -2178,7 +2262,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 	return PHP_FTP_FINISHED;
 bail:
 	ftp->nb = 0;
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return PHP_FTP_FAILED;
 }
 /* }}} */
@@ -2230,7 +2314,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *i
 	return (ftp_nb_continue_write(ftp));
 
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return PHP_FTP_FAILED;
 }
 /* }}} */
@@ -2240,40 +2324,20 @@ bail:
 int
 ftp_nb_continue_write(ftpbuf_t *ftp)
 {
-	long			size;
-	char			*ptr;
-	int 			ch;
-
 	/* check if we can write more data */
 	if (!data_writeable(ftp, ftp->data->fd)) {
 		return PHP_FTP_MOREDATA;
 	}
 
-	size = 0;
-	ptr = ftp->data->buf;
-	while (!php_stream_eof(ftp->stream) && (ch = php_stream_getc(ftp->stream)) != EOF) {
-
-		if (ch == '\n' && ftp->type == FTPTYPE_ASCII) {
-			*ptr++ = '\r';
-			size++;
-		}
-
-		*ptr++ = ch;
-		size++;
-
-		/* flush if necessary */
-		if (FTP_BUFSIZE - size < 2) {
-			if (my_send(ftp, ftp->data->fd, ftp->data->buf, size) != size) {
-				goto bail;
-			}
-			return PHP_FTP_MOREDATA;
-		}
-	}
-
-	if (size && my_send(ftp, ftp->data->fd, ftp->data->buf, size) != size) {
+	if (ftp_send_stream_to_data_socket(ftp, ftp->data, ftp->stream, ftp->type, true) != SUCCESS) {
 		goto bail;
 	}
-	ftp->data = data_close(ftp, ftp->data);
+
+	if (!php_stream_eof(ftp->stream)) {
+		return PHP_FTP_MOREDATA;
+	}
+
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
@@ -2281,7 +2345,7 @@ ftp_nb_continue_write(ftpbuf_t *ftp)
 	ftp->nb = 0;
 	return PHP_FTP_FINISHED;
 bail:
-	ftp->data = data_close(ftp, ftp->data);
+	data_close(ftp);
 	ftp->nb = 0;
 	return PHP_FTP_FAILED;
 }

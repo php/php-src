@@ -21,7 +21,8 @@ var_dump($intlcal->get(IntlCalendar::FIELD_MINUTE));
 var_dump($intlcal->isSet(IntlCalendar::FIELD_SECOND));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
 bool(false)
 int(58)
 bool(true)

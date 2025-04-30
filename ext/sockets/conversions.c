@@ -514,7 +514,7 @@ static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 
 	ZVAL_LONG(zv, (zend_long)ival);
 }
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
 {
 	unsigned ival;
@@ -597,7 +597,7 @@ static void to_zval_read_sockaddr_in(const char *data, zval *zv, res_context *ct
 {
 	to_zval_read_aggregation(data, zv, descriptors_sockaddr_in, ctx);
 }
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_context *ctx)
 {
 	int					res;
@@ -662,7 +662,7 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 	 * this is not required, at least on linux for abstract paths. It also
 	 * assumes that the path is not empty */
 	if (ZSTR_LEN(path_str) == 0) {
-		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
+		do_from_zval_err(ctx, "%s", "the path is must not be empty");
 		zend_tmp_string_release(tmp_path_str);
 		return;
 	}
@@ -753,7 +753,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 		}
 		break;
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	case AF_INET6:
 		if (ctx->sock->type != AF_INET6) {
 			do_from_zval_err(ctx, "the specified family (AF_INET6) is not "
@@ -817,7 +817,7 @@ static void to_zval_read_sockaddr_aux(const char *sockaddr_c, zval *zv, res_cont
 		to_zval_read_sockaddr_in(sockaddr_c, zv, ctx);
 		break;
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	case AF_INET6:
 		to_zval_read_sockaddr_in6(sockaddr_c, zv, ctx);
 		break;
@@ -1243,7 +1243,7 @@ void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx)
 	to_zval_read_aggregation(msghdr_c, zv, descriptors, ctx);
 }
 
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
+#if defined(IPV6_PKTINFO) && defined(HAVE_IPV6)
 /* CONVERSIONS for if_index */
 static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context *ctx)
 {
@@ -1261,7 +1261,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 
 		str = zval_get_tmp_string((zval *) zv, &tmp_str);
 
-#if HAVE_IF_NAMETOINDEX
+#ifdef HAVE_IF_NAMETOINDEX
 		ret = if_nametoindex(ZSTR_VAL(str));
 		if (ret == 0) {
 			do_from_zval_err(ctx, "no interface with name \"%s\" could be found", ZSTR_VAL(str));
@@ -1330,7 +1330,7 @@ static const field_descriptor descriptors_ucred[] = {
 		{"uid", sizeof("uid"), 1, offsetof(struct sockcred, sc_euid), from_zval_write_uid_t, to_zval_read_uid_t},
 		/* the type gid_t is the same as uid_t: */
 		{"gid", sizeof("gid"), 1, offsetof(struct sockcred, sc_egid), from_zval_write_uid_t, to_zval_read_uid_t},
-#elif defined(ANC_CREDS_CMSGCRED)
+#elif defined(HAVE_STRUCT_CMSGCRED)
 		{"pid", sizeof("pid"), 1, offsetof(struct cmsgcred, cmcred_pid), from_zval_write_pid_t, to_zval_read_pid_t},
 		{"uid", sizeof("uid"), 1, offsetof(struct cmsgcred, cmcred_uid), from_zval_write_uid_t, to_zval_read_uid_t},
 		/* assume the type gid_t is the same as uid_t: */

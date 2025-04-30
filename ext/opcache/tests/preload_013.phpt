@@ -5,7 +5,6 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.preload={PWD}/preload_nested_function.inc
-opcache.interned_strings_buffer=0
 --EXTENSIONS--
 opcache
 --SKIPIF--

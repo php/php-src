@@ -23,7 +23,7 @@
 
 void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, bool is_dir);
 
-const php_stream_ops phar_dir_ops = {
+static const php_stream_ops phar_dir_ops = {
 	phar_dir_write, /* write */
 	phar_dir_read,  /* read  */
 	phar_dir_close, /* close */
@@ -295,7 +295,6 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	zend_ulong unused;
 	phar_archive_data *phar;
 	phar_entry_info *entry = NULL;
-	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar url \"%s\" is unknown", path);
@@ -320,7 +319,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return NULL;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 	phar_request_initialize();
 	internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
 
@@ -401,7 +400,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	char *error, *arch, *entry2;
 	size_t arch_len, entry_len;
 	php_url *resource = NULL;
-	uint32_t host_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
 	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
@@ -438,7 +436,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 
 	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), host_len, NULL, 0, &error)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", ZSTR_VAL(resource->path) + 1, ZSTR_VAL(resource->host), error);
@@ -509,7 +507,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	phar_flush(phar, 0, 0, 0, &error);
+	phar_flush(phar, &error);
 
 	if (error) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
@@ -533,10 +531,8 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	char *error, *arch, *entry2;
 	size_t arch_len, entry_len;
 	php_url *resource = NULL;
-	uint32_t host_len;
 	zend_string *str_key;
 	zend_ulong unused;
-	uint32_t path_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
 	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
@@ -573,7 +569,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		return 0;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 
 	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), host_len, NULL, 0, &error)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", error retrieving phar information: %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
@@ -582,7 +578,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		return 0;
 	}
 
-	path_len = ZSTR_LEN(resource->path) - 1;
+	size_t path_len = ZSTR_LEN(resource->path) - 1;
 
 	if (!(entry = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, path_len, 2, &error, 1))) {
 		if (error) {
@@ -638,7 +634,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	} else {
 		entry->is_deleted = 1;
 		entry->is_modified = 1;
-		phar_flush(phar, 0, 0, 0, &error);
+		phar_flush(phar, &error);
 
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);

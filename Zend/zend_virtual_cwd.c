@@ -230,22 +230,20 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_cwd_activate(void) /* {{{ */
+CWD_API void virtual_cwd_activate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd == NULL) {
 		CWD_STATE_COPY(&CWDG(cwd), &main_cwd_state);
 	}
-	return 0;
 }
 /* }}} */
 
-CWD_API int virtual_cwd_deactivate(void) /* {{{ */
+CWD_API void virtual_cwd_deactivate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd != NULL) {
 		CWD_STATE_FREE(&CWDG(cwd));
 		CWDG(cwd).cwd = NULL;
 	}
-	return 0;
 }
 /* }}} */
 
@@ -713,7 +711,7 @@ retry_reparse_tag_cloud:
 					FREE_PATHW()
 					return (size_t)-1;
 				}
-				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
+				memcpy(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
 				tmpsubstname[substitutename_len] = L'\0';
 				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
 				if (!substitutename || substitutename_len >= MAXPATHLEN) {
@@ -748,7 +746,7 @@ retry_reparse_tag_cloud:
 					FREE_PATHW()
 					return (size_t)-1;
 				}
-				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
+				memcpy(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
 				tmpsubstname[substitutename_len] = L'\0';
 				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
 				if (!substitutename || substitutename_len >= MAXPATHLEN) {
@@ -1354,7 +1352,7 @@ CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
 }
 /* }}} */
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	cwd_state new_state;
@@ -1425,7 +1423,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 	}
 
 	if (link) {
-#if HAVE_LCHOWN
+#ifdef HAVE_LCHOWN
 		ret = lchown(new_state.cwd, owner, group);
 #else
 		ret = -1;
@@ -1681,8 +1679,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	dir = CWDG(cwd).cwd;
 
 	ptr = command_line = (char *) emalloc(command_length + sizeof("cd '' ; ") + dir_length + extra+1+1);
-	memcpy(ptr, "cd ", sizeof("cd ")-1);
-	ptr += sizeof("cd ")-1;
+	ptr = zend_mempcpy(ptr, "cd ", sizeof("cd ") - 1);
 
 	if (CWDG(cwd).cwd_length == 0) {
 		*ptr++ = DEFAULT_SLASH;

@@ -1,9 +1,7 @@
 --TEST--
 Bug #79971 (special character is breaking the path in xml function)
---SKIPIF--
-<?php
-if (!extension_loaded('dom')) die('skip dom extension not available');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $imp = new DOMImplementation;

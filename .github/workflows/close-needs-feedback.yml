@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    if: github.repository_owner == 'php'
+    if: github.repository == 'php/php-src'
     runs-on: ubuntu-latest
     permissions:
       issues: write

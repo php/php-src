@@ -1,5 +1,5 @@
 --TEST--
-Bug #77632 (FFI Segfaults When Called With Variadics)
+Bug #77706 (Error messages in FFI for incompatible arguments)
 --EXTENSIONS--
 ffi
 --SKIPIF--

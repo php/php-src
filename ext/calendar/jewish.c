@@ -260,10 +260,6 @@
  *
  **************************************************************************/
 
-#if defined(PHP_WIN32)
-#pragma setlocale("english")
-#endif
-
 #include "sdncal.h"
 
 #define HALAKIM_PER_HOUR 1080
@@ -433,16 +429,31 @@ static void MoladOfMetonicCycle(
 								   zend_long *pMoladHalakim)
 {
 	register zend_ulong r1, r2, d1, d2;
+	zend_long chk;
 
 	/* Start with the time of the first molad after creation. */
 	r1 = NEW_MOON_OF_CREATION;
+	chk = (zend_long)metonicCycle;
+
+	if (chk > (ZEND_LONG_MAX - NEW_MOON_OF_CREATION) / (HALAKIM_PER_METONIC_CYCLE & 0xFFFF)) {
+		*pMoladDay = 0;
+		*pMoladHalakim = 0;
+		return;
+	}
 
 	/* Calculate metonicCycle * HALAKIM_PER_METONIC_CYCLE.  The upper 32
 	 * bits of the result will be in r2 and the lower 16 bits will be
 	 * in r1. */
-	r1 += metonicCycle * (HALAKIM_PER_METONIC_CYCLE & 0xFFFF);
+	r1 += chk * (HALAKIM_PER_METONIC_CYCLE & 0xFFFF);
+
+	if (chk > (ZEND_LONG_MAX - (r1 >> 16)) / ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF)) {
+		*pMoladDay = 0;
+		*pMoladHalakim = 0;
+		return;
+	}
+
 	r2 = r1 >> 16;
-	r2 += metonicCycle * ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF);
+	r2 += chk * ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF);
 
 	/* Calculate r2r1 / HALAKIM_PER_DAY.  The remainder will be in r1, the
 	 * upper 16 bits of the quotient will be in d2 and the lower 16 bits

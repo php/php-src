@@ -166,6 +166,13 @@ class PDO
 
     public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
 
+    public static function connect(
+        string $dsn,
+        ?string $username = null,
+        #[\SensitiveParameter] ?string $password = null,
+        ?array $options = null
+    ): static {}
+
     /** @tentative-return-type */
     public function beginTransaction(): bool {}
 

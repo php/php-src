@@ -1,9 +1,7 @@
 --TEST--
 Bug #72809 (Locale::lookup() wrong result with canonicalize option)
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) die("skip intl extension not avaible");
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 var_dump(

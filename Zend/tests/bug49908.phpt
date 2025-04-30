@@ -29,7 +29,7 @@ string(3) "Bar"
 
 Fatal error: Uncaught Exception: Bar in %s:%d
 Stack trace:
-#0 %s(%d): {closure}('Bar')
-#1 %s(%d): {closure}('Foo')
+#0 %s(%d): {closure:%s:%d}('Bar')
+#1 %s(%d): {closure:%s:%d}('Foo')
 #2 {main}
   thrown in %s on line %d

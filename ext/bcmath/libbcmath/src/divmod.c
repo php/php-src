@@ -61,13 +61,19 @@ bool bc_divmod(bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, size_t scale
 	if (quot) {
 		quotient = bc_copy_num(temp);
 	}
-	bc_multiply(temp, num2, &temp, rscale);
-	bc_sub(num1, temp, rem, rscale);
+	bc_multiply_ex(temp, num2, &temp, rscale);
+	bc_sub_ex(num1, temp, rem, rscale);
 	bc_free_num (&temp);
 
 	if (quot) {
 		bc_free_num (quot);
 		*quot = quotient;
+	}
+
+	/* The value of rscale changes during processing. Here we use the value of scale. It's not a typo. */
+	(*rem)->n_scale = MIN(scale, (*rem)->n_scale);
+	if (bc_is_zero(*rem)) {
+		(*rem)->n_sign = PLUS;
 	}
 
 	return true;

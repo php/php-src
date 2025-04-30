@@ -12,7 +12,7 @@ require_once 'skipifconnectfailure.inc';
 
     /* Initial persistent connection */
     $mysql_1 = new mysqli('p:'.$host, $user, $passwd, $db, $port);
-    $result = $mysql_1->query("SHOW STATUS LIKE 'Connections'");
+    $result = $mysql_1->query("SELECT CONNECTION_ID()");
     $c1 = $result->fetch_row();
     $result->free();
     $mysql_1->close();
@@ -28,7 +28,7 @@ require_once 'skipifconnectfailure.inc';
     /* Re-use persistent connection */
     $mysql_3 = new mysqli('p:'.$host, $user, $passwd, $db, $port);
     $error = mysqli_connect_errno();
-    $result = $mysql_3->query("SHOW STATUS LIKE 'Connections'");
+    $result = $mysql_3->query("SELECT CONNECTION_ID()");
     $c3 = $result->fetch_row();
     $result->free();
     $mysql_3->close();

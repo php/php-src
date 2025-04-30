@@ -7,10 +7,11 @@ permissions:
 
 jobs:
   triage:
+    if: github.repository == 'php/php-src'
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/labeler@v4
+      - uses: actions/labeler@v5
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"

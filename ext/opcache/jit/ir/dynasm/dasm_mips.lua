@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- DynASM MIPS32/MIPS64 module.
 --
--- Copyright (C) 2005-2021 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2023 Mike Pall. All rights reserved.
 -- See dynasm.lua for full copyright notice.
 ------------------------------------------------------------------------------
 

@@ -9,13 +9,13 @@ and neither should return FALSE.
 $s = fopen("php://memory", "w+");
 fwrite($s, "\",bar");
 rewind($s);
-var_dump(fgetcsv($s));
+var_dump(fgetcsv($s, escape: "\\"));
 fclose($s);
 
 $s = fopen("php://memory", "w+");
 fwrite($s, "\",bar\n");
 rewind($s);
-var_dump(fgetcsv($s));
+var_dump(fgetcsv($s, escape: "\\"));
 fclose($s);
 ?>
 --EXPECT--

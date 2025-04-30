@@ -125,9 +125,9 @@ IC_METHOD(getIntPropertyValue) {
 IC_METHOD(getIntPropertyMinValue) {
 	zend_long prop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &prop) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(prop)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(u_getIntPropertyMinValue((UProperty)prop));
 }
@@ -137,9 +137,9 @@ IC_METHOD(getIntPropertyMinValue) {
 IC_METHOD(getIntPropertyMaxValue) {
 	zend_long prop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &prop) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(prop)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(u_getIntPropertyMaxValue((UProperty)prop));
 }
@@ -191,9 +191,9 @@ static UBool enumCharType_callback(enumCharType_data *context,
 IC_METHOD(enumCharTypes) {
 	enumCharType_data context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &context.fci, &context.fci_cache) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(context.fci, context.fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
 	u_enumCharTypes((UCharEnumTypeRange*)enumCharType_callback, &context);
 }
 /* }}} */
@@ -250,9 +250,11 @@ IC_METHOD(charFromName) {
 	UChar32 ret;
 	UErrorCode error = U_ZERO_ERROR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &name, &name_len, &nameChoice) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(nameChoice)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ret = u_charFromName((UCharNameChoice)nameChoice, name, &error);
 	INTL_CHECK_STATUS_OR_NULL(error, NULL);
@@ -324,9 +326,11 @@ IC_METHOD(getPropertyName) {
 	zend_long nameChoice = U_LONG_PROPERTY_NAME;
 	const char *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &property, &nameChoice) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(property)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(nameChoice)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ret = u_getPropertyName((UProperty)property, (UPropertyNameChoice)nameChoice);
 	if (ret) {
@@ -344,9 +348,9 @@ IC_METHOD(getPropertyEnum) {
 	char *alias;
 	size_t alias_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &alias, &alias_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(alias, alias_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(u_getPropertyEnum(alias));
 }
@@ -357,9 +361,12 @@ IC_METHOD(getPropertyValueName) {
 	zend_long property, value, nameChoice = U_LONG_PROPERTY_NAME;
 	const char *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l", &property, &value, &nameChoice) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_LONG(property)
+		Z_PARAM_LONG(value)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(nameChoice)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ret = u_getPropertyValueName((UProperty)property, value, (UPropertyNameChoice)nameChoice);
 	if (ret) {
@@ -378,9 +385,10 @@ IC_METHOD(getPropertyValueEnum) {
 	char *name;
 	size_t name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &property, &name, &name_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(property)
+		Z_PARAM_STRING(name, name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(u_getPropertyValueEnum((UProperty)property, name));
 }
@@ -393,8 +401,9 @@ IC_METHOD(foldCase) {
 	zend_string *string_codepoint;
 	zend_long int_codepoint = 0;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -447,9 +456,11 @@ IC_METHOD(digit) {
 IC_METHOD(forDigit) {
 	zend_long digit, radix = 10;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &digit, &radix) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(digit)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(radix)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(u_forDigit(digit, radix));
 }
@@ -478,9 +489,7 @@ IC_METHOD(getUnicodeVersion) {
 	UVersionInfo version;
 	int i;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	u_getUnicodeVersion(version);
 	array_init(return_value);

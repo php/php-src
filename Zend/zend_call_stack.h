@@ -28,7 +28,7 @@
 #ifdef ZEND_CHECK_STACK_LIMIT
 
 typedef struct _zend_call_stack {
-	void *base;
+	void *base; /* high address of the stack */
 	size_t max_size;
 } zend_call_stack;
 
@@ -40,7 +40,7 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack);
 static zend_always_inline void *zend_call_stack_position(void) {
 #ifdef ZEND_WIN32
 	return _AddressOfReturnAddress();
-#elif PHP_HAVE_BUILTIN_FRAME_ADDRESS
+#elif defined(PHP_HAVE_BUILTIN_FRAME_ADDRESS)
 	return __builtin_frame_address(0);
 #else
 	void *a;
@@ -91,6 +91,9 @@ static inline size_t zend_call_stack_default_size(void)
 #endif
 #ifdef __HAIKU__
 	return 64 * 4096;
+#endif
+#ifdef __sun
+	return 8 * 4096;
 #endif
 
 	return 2 * 1024 * 1024;

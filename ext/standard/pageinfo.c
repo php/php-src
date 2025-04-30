@@ -27,7 +27,7 @@
 #include <pwd.h>
 #endif
 #endif
-#if HAVE_GRP_H
+#ifdef HAVE_GRP_H
 # include <grp.h>
 #endif
 #ifdef PHP_WIN32

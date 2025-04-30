@@ -21,9 +21,11 @@ try {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 OK
 OK
+
+Deprecated: Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, use DatePeriod::createFromISO8601String() instead in %s on line %d
 OK
 OK
 TypeError: DatePeriod::__construct() accepts (DateTimeInterface, DateInterval, int [, int]), or (DateTimeInterface, DateInterval, DateTime [, int]), or (string [, int]) as arguments

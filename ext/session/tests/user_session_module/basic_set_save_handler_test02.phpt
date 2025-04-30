@@ -13,7 +13,7 @@ session.serialize_handler=php
 error_reporting(E_ALL);
 ob_start();
 
-class handler {
+class handler implements SessionHandlerInterface {
     public $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
     function open($save_path, $session_name): bool
     {
@@ -44,7 +44,7 @@ class handler {
         return true;
     }
 
-    function gc() { return true; }
+    function gc($max_lifetime): int { return 1; }
 }
 
 $hnd = new handler;
@@ -55,7 +55,7 @@ class foo {
     function method() { $this->yes++; }
 }
 
-session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
+session_set_save_handler($hnd);
 
 session_id("test005");
 session_start();
@@ -69,7 +69,7 @@ var_dump($_SESSION["arr"]);
 
 session_write_close();
 
-session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
+session_set_save_handler($hnd);
 session_start();
 $_SESSION["baz"]->method();
 $_SESSION["arr"][3]->method();
@@ -82,7 +82,7 @@ var_dump($_SESSION["c"]);
 
 session_write_close();
 
-session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
+session_set_save_handler($hnd);
 session_start();
 var_dump($_SESSION["baz"]);
 var_dump($_SESSION["arr"]);

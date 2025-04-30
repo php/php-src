@@ -14,6 +14,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
 
     $expected = [
         '__construct'						=> true,
+        'connect' 							=> true,
         'prepare' 							=> true,
         'beginTransaction'					=> true,
         'commit'							=> true,

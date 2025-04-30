@@ -73,14 +73,27 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	/* prepare the timeout value for use */
+	if (timeout != -1.0 && !(timeout >= 0.0 && timeout <= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0)) {
+		if (port > 0) {
+			efree(hostname);
+		}
+
+		if (hashkey) {
+			efree(hashkey);
+		}
+
+		zend_argument_value_error(6, "must be -1 or between 0 and " ZEND_ULONG_FMT, ((double) PHP_TIMEOUT_ULL_MAX / 1000000.0));
+		RETURN_THROWS();
+	} else {
 #ifndef PHP_WIN32
-	conv = (time_t) (timeout * 1000000.0);
-	tv.tv_sec = conv / 1000000;
+		conv = (time_t) (timeout * 1000000.0);
+		tv.tv_sec = conv / 1000000;
 #else
-	conv = (long) (timeout * 1000000.0);
-	tv.tv_sec = conv / 1000000;
+		conv = (long) (timeout * 1000000.0);
+		tv.tv_sec = conv / 1000000;
 #endif
-	tv.tv_usec = conv % 1000000;
+		tv.tv_usec = conv % 1000000;
+	}
 
 	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, hashkey, &tv, NULL, &errstr, &err);

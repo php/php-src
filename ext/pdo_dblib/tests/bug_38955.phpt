@@ -5,10 +5,13 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
+
+$db = getDbConnection();
 
 /*We see these rows */
 $db->query("CREATE table test38955(val int)");
@@ -34,6 +37,7 @@ var_dump($rows);
 --CLEAN--
 <?php
 require __DIR__ . '/config.inc';
+$db = getDbConnection();
 $db->exec("DROP TABLE IF EXISTS test38955");
 ?>
 --EXPECT--

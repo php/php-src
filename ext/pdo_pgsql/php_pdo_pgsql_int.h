@@ -16,6 +16,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifndef PHP_PDO_PGSQL_INT_H
 #define PHP_PDO_PGSQL_INT_H
 
@@ -46,6 +48,7 @@ typedef struct {
 	bool		disable_native_prepares; /* deprecated since 5.6 */
 	bool		disable_prepares;
 	HashTable       *lob_streams;
+	zend_fcall_info_cache *notice_callback;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -73,6 +76,8 @@ typedef struct {
 
 extern const pdo_driver_t pdo_pgsql_driver;
 
+extern int pdo_pgsql_scanner(pdo_scanner_t *s);
+
 extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line);
 #define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__)
 #define pdo_pgsql_error_msg(d,e,m)	_pdo_pgsql_error(d, NULL, e, NULL, m, __FILE__, __LINE__)
@@ -86,6 +91,7 @@ extern const struct pdo_stmt_methods pgsql_stmt_methods;
 
 enum {
 	PDO_PGSQL_ATTR_DISABLE_PREPARES = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE,
 };
 
 struct pdo_pgsql_lob_self {
@@ -106,7 +112,19 @@ enum pdo_pgsql_specific_constants {
 php_stream *pdo_pgsql_create_lob_stream(zval *pdh, int lfd, Oid oid);
 extern const php_stream_ops pdo_pgsql_lob_stream_ops;
 
+void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H);
+
 void pdo_libpq_version(char *buf, size_t len);
 void pdo_pgsql_close_lob_streams(pdo_dbh_t *dbh);
+
+void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAMETERS);
 
 #endif /* PHP_PDO_PGSQL_INT_H */

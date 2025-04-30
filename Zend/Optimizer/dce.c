@@ -146,6 +146,7 @@ static inline bool may_have_side_effects(
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
 		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			/* For our purposes a jumps and branches are side effects. */
 			return 1;
 		case ZEND_BEGIN_SILENCE:
@@ -167,6 +168,10 @@ static inline bool may_have_side_effects(
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
+		case ZEND_FRAMELESS_ICALL_0:
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3:
 			/* For now assume all calls have side effects */
 			return 1;
 		case ZEND_RECV:

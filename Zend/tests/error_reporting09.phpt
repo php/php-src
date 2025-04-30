@@ -27,5 +27,5 @@ echo "Done\n";
 Warning: Undefined variable $blah in %s on line %d
 
 Warning: Undefined variable $undef2 in %s on line %d
-int(32767)
+int(30719)
 Done

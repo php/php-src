@@ -107,7 +107,7 @@
 ; error_reporting
 ;   Default Value: E_ALL
 ;   Development Value: E_ALL
-;   Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
+;   Production Value: E_ALL & ~E_DEPRECATED
 
 ; log_errors
 ;   Default Value: Off
@@ -138,16 +138,6 @@
 ;   Default Value: 100
 ;   Development Value: 1000
 ;   Production Value: 1000
-
-; session.sid_bits_per_character
-;   Default Value: 4
-;   Development Value: 5
-;   Production Value: 5
-
-; session.sid_length
-;   Default Value: 32
-;   Development Value: 26
-;   Production Value: 26
 
 ; short_open_tag
 ;   Default Value: On
@@ -452,7 +442,7 @@ memory_limit = 128M
 ; operators. The error level constants are below here for convenience as well as
 ; some common settings and their meanings.
 ; By default, PHP is set to take action on all errors, notices and warnings EXCEPT
-; those related to E_NOTICE and E_STRICT, which together cover best practices and
+; those related to E_NOTICE, which together cover best practices and
 ; recommended coding standards in PHP. For performance reasons, this is the
 ; recommend error reporting setting. Your production server shouldn't be wasting
 ; resources complaining about best practices and coding standards. That's what
@@ -472,9 +462,6 @@ memory_limit = 128M
 ;                     intentional (e.g., using an uninitialized variable and
 ;                     relying on the fact it is automatically initialized to an
 ;                     empty string)
-; E_STRICT          - run-time notices, enable to have PHP suggest changes
-;                     to your code which will ensure the best interoperability
-;                     and forward compatibility of your code
 ; E_CORE_ERROR      - fatal errors that occur during PHP's initial startup
 ; E_CORE_WARNING    - warnings (non-fatal errors) that occur during PHP's
 ;                     initial startup
@@ -490,11 +477,10 @@ memory_limit = 128M
 ; Common Values:
 ;   E_ALL (Show all errors, warnings and notices including coding standards.)
 ;   E_ALL & ~E_NOTICE  (Show all errors, except for notices)
-;   E_ALL & ~E_NOTICE & ~E_STRICT  (Show all errors, except for notices and coding standards warnings.)
 ;   E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR  (Show only errors)
 ; Default Value: E_ALL
 ; Development Value: E_ALL
-; Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
+; Production Value: E_ALL & ~E_DEPRECATED
 ; https://php.net/error-reporting
 error_reporting = E_ALL
 
@@ -928,12 +914,6 @@ default_socket_timeout = 60
 ;   Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=bz2
-
-; The ldap extension must be before curl if OpenSSL 1.0.2 and OpenLDAP is used
-; otherwise it results in segfault when unloading after using SASL.
-; See https://github.com/php/php-src/issues/8620 for more info.
-;extension=ldap
-
 ;extension=curl
 ;extension=ffi
 ;extension=ftp
@@ -942,17 +922,14 @@ default_socket_timeout = 60
 ;extension=gettext
 ;extension=gmp
 ;extension=intl
-;extension=imap
+;extension=ldap
 ;extension=mbstring
 ;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
-;extension=oci8_12c  ; Use with Oracle Database 12c Instant Client
-;extension=oci8_19  ; Use with Oracle Database 19 Instant Client
 ;extension=odbc
 ;extension=openssl
 ;extension=pdo_firebird
 ;extension=pdo_mysql
-;extension=pdo_oci
 ;extension=pdo_odbc
 ;extension=pdo_pgsql
 ;extension=pdo_sqlite
@@ -1022,13 +999,6 @@ cli_server.color = On
 ; To use an output encoding conversion, iconv's output handler must be set
 ; otherwise output encoding conversion cannot be performed.
 ;iconv.output_encoding =
-
-[imap]
-; rsh/ssh logins are disabled by default. Use this INI entry if you want to
-; enable them. Note that the IMAP library does not filter mailbox names before
-; passing them to rsh/ssh command, thus passing untrusted data to this function
-; with rsh/ssh enabled is insecure.
-;imap.enable_insecure_rsh=0
 
 [intl]
 ;intl.default_locale =
@@ -1250,66 +1220,6 @@ mysqlnd.collect_memory_statistics = On
 ; key.
 ;mysqlnd.sha256_server_public_key =
 
-[OCI8]
-
-; Connection: Enables privileged connections using external
-; credentials (OCI_SYSOPER, OCI_SYSDBA)
-; https://php.net/oci8.privileged-connect
-;oci8.privileged_connect = Off
-
-; Connection: The maximum number of persistent OCI8 connections per
-; process. Using -1 means no limit.
-; https://php.net/oci8.max-persistent
-;oci8.max_persistent = -1
-
-; Connection: The maximum number of seconds a process is allowed to
-; maintain an idle persistent connection. Using -1 means idle
-; persistent connections will be maintained forever.
-; https://php.net/oci8.persistent-timeout
-;oci8.persistent_timeout = -1
-
-; Connection: The number of seconds that must pass before issuing a
-; ping during oci_pconnect() to check the connection validity. When
-; set to 0, each oci_pconnect() will cause a ping. Using -1 disables
-; pings completely.
-; https://php.net/oci8.ping-interval
-;oci8.ping_interval = 60
-
-; Connection: Set this to a user chosen connection class to be used
-; for all pooled server requests with Oracle Database Resident
-; Connection Pooling (DRCP).  To use DRCP, this value should be set to
-; the same string for all web servers running the same application,
-; the database pool must be configured, and the connection string must
-; specify to use a pooled server.
-;oci8.connection_class =
-
-; High Availability: Using On lets PHP receive Fast Application
-; Notification (FAN) events generated when a database node fails. The
-; database must also be configured to post FAN events.
-;oci8.events = Off
-
-; Tuning: This option enables statement caching, and specifies how
-; many statements to cache. Using 0 disables statement caching.
-; https://php.net/oci8.statement-cache-size
-;oci8.statement_cache_size = 20
-
-; Tuning: Enables row prefetching and sets the default number of
-; rows that will be fetched automatically after statement execution.
-; https://php.net/oci8.default-prefetch
-;oci8.default_prefetch = 100
-
-; Tuning: Sets the amount of LOB data that is internally returned from
-; Oracle Database when an Oracle LOB locator is initially retrieved as
-; part of a query. Setting this can improve performance by reducing
-; round-trips.
-; https://php.net/oci8.prefetch-lob-size
-; oci8.prefetch_lob_size = 0
-
-; Compatibility. Using On means oci_close() will not close
-; oci_connect() and oci_new_connect() connections.
-; https://php.net/oci8.old-oci-close-semantics
-;oci8.old_oci_close_semantics = Off
-
 [PostgreSQL]
 ; Allow or prevent persistent links.
 ; https://php.net/pgsql.allow-persistent
@@ -1498,15 +1408,6 @@ session.cache_expire = 180
 ; https://php.net/session.use-trans-sid
 session.use_trans_sid = 0
 
-; Set session ID character length. This value could be between 22 to 256.
-; Shorter length than default is supported only for compatibility reason.
-; Users should use 32 or more chars.
-; https://php.net/session.sid-length
-; Default Value: 32
-; Development Value: 26
-; Production Value: 26
-session.sid_length = 26
-
 ; The URL rewriter will look for URLs in a defined set of HTML tags.
 ; <form> is special; if you include them here, the rewriter will
 ; add a hidden <input> field with the info which is otherwise appended
@@ -1531,18 +1432,6 @@ session.trans_sid_tags = "a=href,area=href,frame=src,form="
 ; Development Value: ""
 ; Production Value: ""
 ;session.trans_sid_hosts=""
-
-; Define how many bits are stored in each character when converting
-; the binary hash data to something readable.
-; Possible values:
-;   4  (4 bits: 0-9, a-f)
-;   5  (5 bits: 0-9, a-v)
-;   6  (6 bits: 0-9, a-z, A-Z, "-", ",")
-; Default Value: 4
-; Development Value: 5
-; Production Value: 5
-; https://php.net/session.hash-bits-per-character
-session.sid_bits_per_character = 5
 
 ; Enable upload progress tracking in $_SESSION
 ; Default Value: On
@@ -1712,7 +1601,7 @@ zend.assertions = 1
 ; With mbstring support this will automatically be converted into the encoding
 ; given by corresponding encode setting. When empty mbstring.internal_encoding
 ; is used. For the decode settings you can distinguish between motorola and
-; intel byte order. A decode setting cannot be empty.
+; intel byte order. A decode setting must not be empty.
 ; https://php.net/exif.encode-unicode
 ;exif.encode_unicode = ISO-8859-15
 

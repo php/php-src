@@ -10,6 +10,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require("testdb.inc");
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, true);
 
 echo "========== not in manually transaction ==========\n";
@@ -91,30 +92,30 @@ echo "done!";
 --EXPECT--
 ========== not in manually transaction ==========
 auto commit ON from ON
-int(1)
+bool(true)
 Success
 
 auto commit OFF from ON
-int(0)
+bool(false)
 Success
 
 auto commit OFF from OFF
-int(0)
+bool(false)
 Success
 
 auto commit ON from OFF
-int(1)
+bool(true)
 Success
 
 ========== in manually transaction ==========
 begin transaction
 
 auto commit ON from ON, expect error
-int(1)
+bool(true)
 SQLSTATE[HY000]: General error: Cannot change autocommit mode while a transaction is already open
 
 auto commit OFF from ON, expect error
-int(1)
+bool(true)
 SQLSTATE[HY000]: General error: Cannot change autocommit mode while a transaction is already open
 
 end transaction
@@ -122,11 +123,11 @@ auto commit OFF
 begin transaction
 
 auto commit ON from OFF, expect error
-int(0)
+bool(false)
 SQLSTATE[HY000]: General error: Cannot change autocommit mode while a transaction is already open
 
 auto commit OFF from OFF, expect error
-int(0)
+bool(false)
 SQLSTATE[HY000]: General error: Cannot change autocommit mode while a transaction is already open
 
 end transaction

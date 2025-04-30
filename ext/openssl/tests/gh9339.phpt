@@ -1,9 +1,7 @@
 --TEST--
 GH-9339: oid_file path check warning contains uninitialized path
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $configCode = <<<CONFIG

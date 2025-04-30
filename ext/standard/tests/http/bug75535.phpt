@@ -19,12 +19,9 @@ var_dump($http_response_header);
 
 http_server_kill($pid);
 
-?>
 --EXPECT--
 string(0) ""
-array(2) {
+array(1) {
   [0]=>
   string(15) "HTTP/1.0 200 Ok"
-  [1]=>
-  string(14) "Content-Length"
 }

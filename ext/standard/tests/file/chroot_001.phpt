@@ -2,13 +2,21 @@
 chroot()
 --SKIPIF--
 <?php
-chdir("/");
-if (!@mkdir("testtmpskipifdir")) {
-    die("skip for root only");
-}
-rmdir("testtmpskipifdir");
 if (!function_exists("chroot")) {
     die("skip chroot() not available");
+}
+// Skip if not being run by root (files are always readable, writeable and executable)
+$filename = @tempnam(__DIR__, 'root_check_');
+if (!file_exists($filename)) {
+    die('WARN Unable to create the "root check" file');
+}
+
+$isRoot = fileowner($filename) == 0;
+
+unlink($filename);
+
+if (!$isRoot) {
+    die('SKIP Must be run as root');
 }
 ?>
 --FILE--

@@ -14,7 +14,7 @@ require 'notfound.php';
 error(require(notfound.php): Failed to open stream: %s)
 Fatal error: Uncaught Exception: Foo in %sbug60909_1.php:5
 Stack trace:
-#0 %sbug60909_1.php(8): {closure}(2, 'require(notfoun...', '%s', 8)
+#0 %s(%d): {closure:%s:%d}(2, 'require(notfoun...', '%s', 8)
 #1 %sbug60909_1.php(8): require()
 #2 {main}
   thrown in %sbug60909_1.php on line 5

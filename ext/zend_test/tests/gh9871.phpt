@@ -5,6 +5,7 @@ zend_test
 --INI--
 opcache.enable_cli=1
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
 --FILE--

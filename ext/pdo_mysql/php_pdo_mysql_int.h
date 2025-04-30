@@ -16,6 +16,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifndef PHP_PDO_MYSQL_INT_H
 #define PHP_PDO_MYSQL_INT_H
 
@@ -146,6 +148,8 @@ typedef struct {
 } pdo_mysql_stmt;
 
 extern const pdo_driver_t pdo_mysql_driver;
+
+extern int pdo_mysql_scanner(pdo_scanner_t *s);
 
 extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
 #define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__)

@@ -55,15 +55,13 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 		case ZEND_USER_FUNCTION: {
 			zend_op_array* op_array = &(method->op_array);
 
-			if (op_array) {
-				zend_dump_op_array(op_array, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
+			zend_dump_op_array(op_array, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
 
-				for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
-					zend_op_array *def = op_array->dynamic_func_defs[i];
-					phpdbg_out("\ndynamic def: %i, function name: %.*s\n",
-						i, (int) ZSTR_LEN(def->function_name), ZSTR_VAL(def->function_name));
-					zend_dump_op_array(def, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
-				}
+			for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+				zend_op_array *def = op_array->dynamic_func_defs[i];
+				phpdbg_out("\ndynamic def: %i, function name: %.*s\n",
+					i, (int) ZSTR_LEN(def->function_name), ZSTR_VAL(def->function_name));
+				zend_dump_op_array(def, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
 			}
 		} break;
 

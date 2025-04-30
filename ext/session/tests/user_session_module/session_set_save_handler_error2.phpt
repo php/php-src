@@ -11,14 +11,16 @@ ob_start();
 
 echo "*** Testing session_set_save_handler() : error functionality ***\n";
 
-function open($save_path, $session_name) { return true; }
-function close() { return true; }
-function read($id) { return false; }
-function write($id, $session_data) { }
-function destroy($id) {  return true; }
-function gc($maxlifetime) {  return true; }
+class MySessionHandler implements SessionHandlerInterface {
+    function open($save_path, $session_name): bool { return true; }
+    function close(): bool { return true; }
+    function read($id): string|false { return false; }
+    function write($id, $session_data): bool { }
+    function destroy($id): bool {  return true; }
+    function gc($maxlifetime): int|false {  return true; }
+}
 
-session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
+session_set_save_handler(new MySessionHandler());
 
 session_start();
 $_SESSION["Blah"] = "Hello World!";
@@ -28,7 +30,7 @@ var_dump($_SESSION);
 
 session_write_close();
 var_dump($_SESSION);
-session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
+session_set_save_handler(new MySessionHandler());
 session_start();
 var_dump($_SESSION);
 session_destroy();

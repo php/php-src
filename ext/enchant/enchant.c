@@ -16,14 +16,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
-#include "../spl/spl_exceptions.h"
 #include <enchant.h>
 #include "php_enchant.h"
 
@@ -339,11 +339,11 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 	char *value;
 	size_t value_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ols", &broker, enchant_broker_ce, &dict_type, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olp", &broker, enchant_broker_ce, &dict_type, &value, &value_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
+#ifdef HAVE_ENCHANT_BROKER_SET_PARAM
 	enchant_broker *pbroker;
 	if (!value_len) {
 		RETURN_FALSE;
@@ -382,7 +382,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 		RETURN_THROWS();
 	}
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
+#ifdef HAVE_ENCHANT_BROKER_SET_PARAM
 	enchant_broker *pbroker;
 	char *value;
 	PHP_ENCHANT_GET_BROKER;
@@ -440,14 +440,14 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	char *tag;
 	size_t taglen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &broker, enchant_broker_ce, &tag, &taglen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &broker, enchant_broker_ce, &tag, &taglen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
 
 	if (taglen == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -534,7 +534,7 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 	size_t taglen;
 	enchant_broker * pbroker;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &broker, enchant_broker_ce,  &tag, &taglen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &broker, enchant_broker_ce,  &tag, &taglen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -559,7 +559,7 @@ PHP_FUNCTION(enchant_broker_set_ordering)
 	size_t ptaglen;
 	enchant_broker * pbroker;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oss", &broker, enchant_broker_ce, &ptag, &ptaglen, &pordering, &porderinglen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opp", &broker, enchant_broker_ce, &ptag, &ptaglen, &pordering, &porderinglen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -597,7 +597,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|z", &dict, enchant_dict_ce, &word, &wordlen, &sugg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op|z", &dict, enchant_dict_ce, &word, &wordlen, &sugg) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -642,7 +642,7 @@ PHP_FUNCTION(enchant_dict_check)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -662,7 +662,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 	enchant_dict *pdict;
 	size_t n_sugg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -690,7 +690,7 @@ PHP_FUNCTION(enchant_dict_add)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -708,7 +708,7 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -726,7 +726,7 @@ PHP_FUNCTION(enchant_dict_is_added)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -748,7 +748,7 @@ PHP_FUNCTION(enchant_dict_store_replacement)
 
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oss", &dict, enchant_dict_ce, &mis, &mislen, &cor, &corlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opp", &dict, enchant_dict_ce, &mis, &mislen, &cor, &corlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 

@@ -15,18 +15,22 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_error.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
+#include "pdo_pgsql_arginfo.h"
 
-/* {{{ pdo_sqlite_deps */
+static zend_class_entry *PdoPgsql_ce;
+
+/* {{{ pdo_pgsql_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
@@ -53,6 +57,122 @@ zend_module_entry pdo_pgsql_module_entry = {
 ZEND_GET_MODULE(pdo_pgsql)
 #endif
 
+/* Escape an identifier for insertion into a text field	*/
+PHP_METHOD(Pdo_Pgsql, escapeIdentifier)
+{
+	zend_string *from = NULL;
+	char *tmp;
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &from) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK;
+	PDO_DBH_CLEAR_ERR();
+
+	/* Obtain db Handle */
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	if (H->server == NULL) {
+		zend_throw_error(NULL, "PostgreSQL connection has already been closed");
+		RETURN_THROWS();
+	}
+
+	tmp = PQescapeIdentifier(H->server, ZSTR_VAL(from), ZSTR_LEN(from));
+	if (!tmp) {
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+		PDO_HANDLE_DBH_ERR();
+		RETURN_THROWS();
+	}
+
+	RETVAL_STRING(tmp);
+	PQfreemem(tmp);
+}
+
+/* Returns true if the copy worked fine or false if error */
+PHP_METHOD(Pdo_Pgsql, copyFromArray)
+{
+	pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Returns true if the copy worked fine or false if error */
+PHP_METHOD(Pdo_Pgsql, copyFromFile)
+{
+	pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Returns true if the copy worked fine or false if error */
+PHP_METHOD(Pdo_Pgsql, copyToFile)
+{
+	pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Returns true if the copy worked fine or false if error */
+PHP_METHOD(Pdo_Pgsql, copyToArray)
+{
+	pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Creates a new large object, returning its identifier.  Must be called inside a transaction. */
+PHP_METHOD(Pdo_Pgsql, lobCreate)
+{
+	pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Opens an existing large object stream.  Must be called inside a transaction. */
+PHP_METHOD(Pdo_Pgsql, lobOpen)
+{
+	pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Deletes the large object identified by oid.  Must be called inside a transaction. */
+PHP_METHOD(Pdo_Pgsql, lobUnlink)
+{
+	pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Get asynchronous notification */
+PHP_METHOD(Pdo_Pgsql, getNotify)
+{
+	pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Get backend(server) pid */
+PHP_METHOD(Pdo_Pgsql, getPid)
+{
+	pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Sets a callback to receive DB notices (after client_min_messages has been set */
+PHP_METHOD(Pdo_Pgsql, setNoticeCallback)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "F!", &fci, &fcc)) {
+		RETURN_THROWS();
+	}
+
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(cleanup);
+
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	pdo_pgsql_cleanup_notice_callback(H);
+
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		H->notice_callback = emalloc(sizeof(zend_fcall_info_cache));
+		zend_fcc_dup(H->notice_callback, &fcc);
+	}
+
+	return;
+
+cleanup:
+	zend_release_fcall_info_cache(&fcc);
+	RETURN_THROWS();
+}
+
 /* true global environment */
 
 /* {{{ PHP_MINIT_FUNCTION */
@@ -65,7 +185,14 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
 
-	return php_pdo_register_driver(&pdo_pgsql_driver);
+	PdoPgsql_ce = register_class_Pdo_Pgsql(pdo_dbh_ce);
+	PdoPgsql_ce->create_object = pdo_dbh_new;
+
+	if (php_pdo_register_driver(&pdo_pgsql_driver) == FAILURE) {
+		return FAILURE;
+	}
+
+	return php_pdo_register_driver_specific_ce(&pdo_pgsql_driver, PdoPgsql_ce);
 }
 /* }}} */
 

@@ -24,15 +24,15 @@
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
-static int is_blank(const xmlChar* str)
+static bool is_blank(const xmlChar* str)
 {
 	while (*str != '\0') {
 		if (*str != ' '  && *str != 0x9 && *str != 0xa && *str != 0xd) {
-			return 0;
+			return false;
 		}
 		str++;
 	}
-	return 1;
+	return true;
 }
 
 /* removes all empty text, comments and other insignoficant nodes */
@@ -92,13 +92,16 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 		bool old;
 
 		php_libxml_sanitize_parse_ctxt_options(ctxt);
+		/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		ctxt->keepBlanks = 0;
+		ctxt->options |= XML_PARSE_HUGE;
+		ZEND_DIAGNOSTIC_IGNORED_END
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
-		ctxt->options |= XML_PARSE_HUGE;
 		old = php_libxml_disable_entity_loader(1);
 		xmlParseDocument(ctxt);
 		php_libxml_disable_entity_loader(old);
@@ -146,7 +149,10 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
+		/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		ctxt->options |= XML_PARSE_HUGE;
+		ZEND_DIAGNOSTIC_IGNORED_END
 		old = php_libxml_disable_entity_loader(1);
 		xmlParseDocument(ctxt);
 		php_libxml_disable_entity_loader(old);
@@ -309,17 +315,16 @@ xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, cha
 	return NULL;
 }
 
-int parse_namespace(const xmlChar *inval, char **value, char **namespace)
+/* namespace is either a copy or NULL, value is never NULL and never a copy. */
+void parse_namespace(const xmlChar *inval, const char **value, char **namespace)
 {
-	char *found = strrchr((char*)inval, ':');
+	const char *found = strrchr((const char *) inval, ':');
 
-	if (found != NULL && found != (char*)inval) {
-		(*namespace) = estrndup((char*)inval, found - (char*)inval);
-		(*value) = estrdup(++found);
+	if (found != NULL && found != (const char *) inval) {
+		(*namespace) = estrndup((const char *) inval, found - (const char *) inval);
+		(*value) = ++found;
 	} else {
-		(*value) = estrdup((char*)inval);
+		(*value) = (const char *) inval;
 		(*namespace) = NULL;
 	}
-
-	return FALSE;
 }

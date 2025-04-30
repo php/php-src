@@ -14,34 +14,30 @@ ob_start();
 function open($save_path, $session_name) {
     return true;
 }
-
 function close() {
     echo "close: goodbye cruel world\n";
     exit;
 }
-
 function read($id) {
     return '';
 }
-
 function write($id, $session_data) {
     echo "write: goodbye cruel world\n";
     throw new Exception;
 }
-
 function destroy($id) {
     return true;
 }
-
 function gc($maxlifetime) {
     return true;
 }
-
 session_set_save_handler('open', 'close', 'read', 'write', 'destroy', 'gc');
+
 session_start();
 
 ?>
 --EXPECTF--
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 write: goodbye cruel world
 
 Fatal error: Uncaught Exception in %s

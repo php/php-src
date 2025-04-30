@@ -26,6 +26,7 @@
 
 #include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
+#include "zend_portability.h"
 
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
 	if (engine_object->ce->type == ZEND_INTERNAL_CLASS) {
@@ -33,12 +34,15 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 		php_random_engine *engine = php_random_engine_from_obj(engine_object);
 
 		/* Copy engine pointers */
-		randomizer->algo = engine->algo;
-		randomizer->status = engine->status;
+		randomizer->engine = engine->engine;
 	} else {
 		/* Self allocation */
-		randomizer->status = php_random_status_alloc(&php_random_algo_user, false);
-		php_random_status_state_user *state = randomizer->status->state;
+		php_random_status_state_user *state = php_random_status_alloc(&php_random_algo_user, false);
+		randomizer->engine = (php_random_algo_with_state){
+			.algo = &php_random_algo_user,
+			.state = state,
+		};
+
 		zend_string *mname;
 		zend_function *generate_method;
 
@@ -49,9 +53,6 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 		/* Create compatible state */
 		state->object = engine_object;
 		state->generate_method = generate_method;
-
-		/* Copy common pointers */
-		randomizer->algo = &php_random_algo_user;
 
 		/* Mark self-allocated for memory management */
 		randomizer->is_userland_algo = true;
@@ -93,6 +94,8 @@ PHP_METHOD(Random_Randomizer, __construct)
 PHP_METHOD(Random_Randomizer, nextFloat)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	php_random_algo_with_state engine = randomizer->engine;
+
 	uint64_t result;
 	size_t total_size;
 
@@ -101,9 +104,9 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 	result = 0;
 	total_size = 0;
 	do {
-		uint64_t r = randomizer->algo->generate(randomizer->status);
-		result = result | (r << (total_size * 8));
-		total_size += randomizer->status->last_generated_size;
+		php_random_result r = engine.algo->generate(engine.state);
+		result = result | (r.result << (total_size * 8));
+		total_size += r.size;
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -169,28 +172,28 @@ PHP_METHOD(Random_Randomizer, getFloat)
 			RETURN_THROWS();
 		}
 
-		RETURN_DOUBLE(php_random_gammasection_closed_open(randomizer->algo, randomizer->status, min, max));
+		RETURN_DOUBLE(php_random_gammasection_closed_open(randomizer->engine, min, max));
 	case 'C' + sizeof("ClosedClosed") - 1:
 		if (UNEXPECTED(max < min)) {
 			zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
-		RETURN_DOUBLE(php_random_gammasection_closed_closed(randomizer->algo, randomizer->status, min, max));
+		RETURN_DOUBLE(php_random_gammasection_closed_closed(randomizer->engine, min, max));
 	case 'O' + sizeof("OpenClosed") - 1:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
-		RETURN_DOUBLE(php_random_gammasection_open_closed(randomizer->algo, randomizer->status, min, max));
+		RETURN_DOUBLE(php_random_gammasection_open_closed(randomizer->engine, min, max));
 	case 'O' + sizeof("OpenOpen") - 1:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
-		RETVAL_DOUBLE(php_random_gammasection_open_open(randomizer->algo, randomizer->status, min, max));
+		RETVAL_DOUBLE(php_random_gammasection_open_open(randomizer->engine, min, max));
 
 		if (UNEXPECTED(isnan(Z_DVAL_P(return_value)))) {
 			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max).");
@@ -208,20 +211,20 @@ PHP_METHOD(Random_Randomizer, getFloat)
 PHP_METHOD(Random_Randomizer, nextInt)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
-	uint64_t result;
+	php_random_algo_with_state engine = randomizer->engine;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	result = randomizer->algo->generate(randomizer->status);
+	php_random_result result = engine.algo->generate(engine.state);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
-	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
+	if (result.size > sizeof(zend_long)) {
 		zend_throw_exception(random_ce_Random_RandomException, "Generated value exceeds size of int", 0);
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG((zend_long) (result >> 1));
+	RETURN_LONG((zend_long) (result.result >> 1));
 }
 /* }}} */
 
@@ -229,6 +232,8 @@ PHP_METHOD(Random_Randomizer, nextInt)
 PHP_METHOD(Random_Randomizer, getInt)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	php_random_algo_with_state engine = randomizer->engine;
+
 	uint64_t result;
 	zend_long min, max;
 
@@ -243,10 +248,10 @@ PHP_METHOD(Random_Randomizer, getInt)
 	}
 
 	if (UNEXPECTED(
-		randomizer->algo->range == php_random_algo_mt19937.range
-		&& ((php_random_status_state_mt19937 *) randomizer->status->state)->mode != MT_RAND_MT19937
+		engine.algo->range == php_random_algo_mt19937.range
+		&& ((php_random_status_state_mt19937 *) engine.state)->mode != MT_RAND_MT19937
 	)) {
-		uint64_t r = php_random_algo_mt19937.generate(randomizer->status) >> 1;
+		uint64_t r = php_random_algo_mt19937.generate(engine.state).result >> 1;
 
 		/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
 		 * (max - min) > ZEND_LONG_MAX.
@@ -255,7 +260,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 
 		result = (zend_long) (offset + min);
 	} else {
-		result = randomizer->algo->range(randomizer->status, min, max);
+		result = engine.algo->range(engine.state, min, max);
 	}
 
 	if (EG(exception)) {
@@ -270,29 +275,66 @@ PHP_METHOD(Random_Randomizer, getInt)
 PHP_METHOD(Random_Randomizer, getBytes)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	php_random_algo_with_state engine = randomizer->engine;
+
 	zend_string *retval;
-	zend_long length;
+	zend_long user_length;
 	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(length)
+		Z_PARAM_LONG(user_length)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (length < 1) {
+	if (user_length < 1) {
 		zend_argument_value_error(1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
+	size_t length = (size_t)user_length;
 	retval = zend_string_alloc(length, 0);
 
-	while (total_size < length) {
-		uint64_t result = randomizer->algo->generate(randomizer->status);
+	php_random_result result;
+	while (total_size + 8 <= length) {
+		result = engine.algo->generate(engine.state);
 		if (EG(exception)) {
 			zend_string_free(retval);
 			RETURN_THROWS();
 		}
-		for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
-			ZSTR_VAL(retval)[total_size++] = (result >> (i * 8)) & 0xff;
+
+		/* If the result is not 64 bits, we can't use the fast path and
+		 * we don't attempt to use it in the future, because we don't
+		 * expect engines to change their output size.
+		 *
+		 * While it would be possible to always memcpy() the entire output,
+		 * using result.size as the length that would result in much worse
+		 * assembly, because it will actually emit a call to memcpy()
+		 * instead of just storing the 64 bit value at a memory offset.
+		 */
+		if (result.size != 8) {
+			goto non_64;
+		}
+
+#ifdef WORDS_BIGENDIAN
+		uint64_t swapped = ZEND_BYTES_SWAP64(result.result);
+		memcpy(ZSTR_VAL(retval) + total_size, &swapped, 8);
+#else
+		memcpy(ZSTR_VAL(retval) + total_size, &result.result, 8);
+#endif
+		total_size += 8;
+	}
+
+	while (total_size < length) {
+		result = engine.algo->generate(engine.state);
+		if (EG(exception)) {
+			zend_string_free(retval);
+			RETURN_THROWS();
+		}
+
+ non_64:
+
+		for (size_t i = 0; i < result.size; i++) {
+			ZSTR_VAL(retval)[total_size++] = result.result & 0xff;
+			result.result >>= 8;
 			if (total_size >= length) {
 				break;
 			}
@@ -315,7 +357,7 @@ PHP_METHOD(Random_Randomizer, shuffleArray)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_DUP(return_value, array);
-	if (!php_array_data_shuffle(randomizer->algo, randomizer->status, return_value)) {
+	if (!php_array_data_shuffle(randomizer->engine, return_value)) {
 		RETURN_THROWS();
 	}
 }
@@ -336,7 +378,7 @@ PHP_METHOD(Random_Randomizer, shuffleBytes)
 	}
 
 	RETVAL_STRINGL(ZSTR_VAL(bytes), ZSTR_LEN(bytes));
-	if (!php_binary_string_shuffle(randomizer->algo, randomizer->status, Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value))) {
+	if (!php_binary_string_shuffle(randomizer->engine, Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value))) {
 		RETURN_THROWS();
 	}
 }
@@ -355,8 +397,7 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!php_array_pick_keys(
-		randomizer->algo,
-		randomizer->status,
+		randomizer->engine,
 		input,
 		num_req,
 		return_value,
@@ -378,33 +419,36 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 PHP_METHOD(Random_Randomizer, getBytesFromString)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
-	zend_long length;
+	php_random_algo_with_state engine = randomizer->engine;
+
+	zend_long user_length;
 	zend_string *source, *retval;
 	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2);
 		Z_PARAM_STR(source)
-		Z_PARAM_LONG(length)
+		Z_PARAM_LONG(user_length)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const size_t source_length = ZSTR_LEN(source);
 	const size_t max_offset = source_length - 1;
 
 	if (source_length < 1) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
-	if (length < 1) {
+	if (user_length < 1) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
+	size_t length = (size_t)user_length;
 	retval = zend_string_alloc(length, 0);
 
 	if (max_offset > 0xff) {
 		while (total_size < length) {
-			uint64_t offset = randomizer->algo->range(randomizer->status, 0, max_offset);
+			uint64_t offset = engine.algo->range(engine.state, 0, max_offset);
 
 			if (EG(exception)) {
 				zend_string_free(retval);
@@ -422,17 +466,21 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 		mask |= mask >> 1;
 		mask |= mask >> 2;
 		mask |= mask >> 4;
+		// Expand the lowest byte into all bytes.
+		mask *= 0x0101010101010101;
 
 		int failures = 0;
 		while (total_size < length) {
-			uint64_t result = randomizer->algo->generate(randomizer->status);
+			php_random_result result = engine.algo->generate(engine.state);
 			if (EG(exception)) {
 				zend_string_free(retval);
 				RETURN_THROWS();
 			}
 
-			for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
-				uint64_t offset = (result >> (i * 8)) & mask;
+			uint64_t offsets = result.result & mask;
+			for (size_t i = 0; i < result.size; i++) {
+				uint64_t offset = offsets & 0xff;
+				offsets >>= 8;
 
 				if (offset > max_offset) {
 					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {

@@ -1,5 +1,5 @@
 --TEST--
-Bug #80584: "0x" and "0X" are considered valid hex numbers by filter_var()
+Bug #80584 ("0x" and "0X" are considered valid hex numbers by filter_var())
 --EXTENSIONS--
 filter
 --FILE--

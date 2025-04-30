@@ -1,80 +1,66 @@
 --TEST--
-Bug #72964 (White space not unfolded for CC/Bcc headers)
---EXTENSIONS--
-imap
---CONFLICTS--
-imap
+Bug #80706 (Headers after Bcc headers may be ignored)
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
-require_once __DIR__ . '/mail_skipif.inc';
+require_once __DIR__.'/mail_windows_skipif.inc';
 ?>
 --INI--
 SMTP=localhost
 smtp_port=25
+sendmail_from=from@example.com
 --FILE--
 <?php
-require_once __DIR__ . '/mail_include.inc';
 
-function find_and_delete_message($username, $subject) {
-    global $default_mailbox, $password;
+require_once __DIR__.'/mail_util.inc';
+$users = MailBox::USERS;
 
-    $imap_stream = imap_open($default_mailbox, $username, $password);
-    if ($imap_stream === false) {
-        die("Cannot connect to IMAP server $server: " . imap_last_error() . "\n");
-    }
-
-    $found = false;
-    $repeat_count = 20; // we will repeat a max of 20 times
-    while (!$found && $repeat_count > 0) {
-        // sleep for a while to allow msg to be delivered
-        sleep(1);
-    
-        $num_messages = imap_check($imap_stream)->Nmsgs;
-        for ($i = $num_messages; $i > 0; $i--) {
-            $info = imap_headerinfo($imap_stream, $i);
-            if ($info->subject === $subject) {
-                $header = imap_fetchheader($imap_stream, $i);
-                echo "X-Mailer header found: ";
-                var_dump(strpos($header, 'X-Mailer: bug80706') !== false);
-                imap_delete($imap_stream, $i);
-                $found = true;
-                break;
-            }
-        }
-        $repeat_count--;
-    }
-
-    imap_close($imap_stream, CL_EXPUNGE);
-    return $found;
-}
-
-$to = "{$users[1]}@$domain";
-$subject = bin2hex(random_bytes(16));
+$to = $users[0];
+$from = ini_get('sendmail_from');
+$bcc = $users[2];
+$subject = 'mail_bug80706';
 $message = 'hello';
-$headers = "From: webmaster@example.com\r\n"
-    . "Bcc: {$users[2]}@$domain\r\n"
-    . "X-Mailer: bug80706";
+$xMailer = 'bug80706_x_mailer';
+$headers = "From: {$from}\r\n"
+    . "Bcc: {$bcc}\r\n"
+    . "X-Mailer: {$xMailer}";
 
 $res = mail($to, $subject, $message, $headers);
+
 if ($res !== true) {
-	die("TEST FAILED : Unable to send test email\n");
-} else {
-	echo "Message sent OK\n";
+    die("Unable to send the email.\n");
 }
 
-foreach ([$users[1], $users[2]] as $user) {
-    if (!find_and_delete_message("$user@$domain", $subject)) {
-        echo "TEST FAILED: email not delivered\n";
-    } else {
-        echo "TEST PASSED: Message sent and deleted OK\n";
+echo "Email sent.\n";
+
+foreach (['to' => $to, 'bcc' => $bcc] as $recipient => $mailAddress) {
+    $mailBox = MailBox::login($mailAddress);
+    $mail = $mailBox->getMailsBySubject($subject);
+    $mailBox->logout();
+
+    if ($mail->isAsExpected($from, $to, $subject, $message)) {
+        echo "Found the email. {$recipient} received.\n";
+    }
+
+    if ($mail->getHeader('X-Mailer') === $xMailer) {
+        echo "The specified x-Mailer exists.\n\n";
     }
 }
 ?>
+--CLEAN--
+<?php
+require_once __DIR__.'/mail_util.inc';
+$subject = 'mail_bug80706';
+foreach ([MailBox::USERS[0], MailBox::USERS[2]] as $mailAddress) {
+    $mailBox = MailBox::login($mailAddress);
+    $mailBox->deleteMailsBySubject($subject);
+    $mailBox->logout();
+}
+?>
 --EXPECT--
-Message sent OK
-X-Mailer header found: bool(true)
-TEST PASSED: Message sent and deleted OK
-X-Mailer header found: bool(true)
-TEST PASSED: Message sent and deleted OK
+Email sent.
+Found the email. to received.
+The specified x-Mailer exists.
+
+Found the email. bcc received.
+The specified x-Mailer exists.

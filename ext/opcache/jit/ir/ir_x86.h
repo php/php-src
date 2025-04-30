@@ -178,6 +178,13 @@ enum _ir_reg {
 	| IR_REGSET(IR_REG_RBP) \
 	| IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15))
 
+typedef struct _ir_va_list {
+	uint32_t  gp_offset;
+	uint32_t  fp_offset;
+	void     *overflow_arg_area;
+	void     *reg_save_area;
+} ir_va_list;
+
 #elif defined(IR_TARGET_X86)
 
 # define IR_REG_INT_RET1   IR_REG_RAX

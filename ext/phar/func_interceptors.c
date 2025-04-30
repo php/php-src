@@ -17,11 +17,10 @@
 */
 
 #include "phar_internal.h"
+#include "ext/standard/php_filestat.h"
+#include "ext/standard/file.h" /* For php_le_stream_context() */
 
-#define PHAR_FUNC(name) \
-	static PHP_NAMED_FUNCTION(name)
-
-PHAR_FUNC(phar_opendir) /* {{{ */
+PHP_FUNCTION(phar_opendir) /* {{{ */
 {
 	char *filename;
 	size_t filename_len;
@@ -156,7 +155,7 @@ notfound:
 	return name;
 }
 
-PHAR_FUNC(phar_file_get_contents) /* {{{ */
+PHP_FUNCTION(phar_file_get_contents) /* {{{ */
 {
 	zend_string *filename;
 	zend_string *contents;
@@ -233,7 +232,7 @@ skip_phar:
 }
 /* }}} */
 
-PHAR_FUNC(phar_readfile) /* {{{ */
+PHP_FUNCTION(phar_readfile) /* {{{ */
 {
 	zend_string *filename;
 	bool use_include_path = 0;
@@ -277,7 +276,7 @@ skip_phar:
 }
 /* }}} */
 
-PHAR_FUNC(phar_fopen) /* {{{ */
+PHP_FUNCTION(phar_fopen) /* {{{ */
 {
 	zend_string *filename;
 	char *mode;
@@ -653,7 +652,7 @@ skip_phar:
 /* }}} */
 
 #define PharFileFunction(fname, funcnum, orig) \
-ZEND_NAMED_FUNCTION(fname) { \
+PHP_FUNCTION(fname) { \
 	if (!PHAR_G(intercepted)) { \
 		PHAR_G(orig)(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} else { \
@@ -725,7 +724,7 @@ PharFileFunction(phar_file_exists, FS_EXISTS, orig_file_exists)
 PharFileFunction(phar_is_dir, FS_IS_DIR, orig_is_dir)
 /* }}} */
 
-PHAR_FUNC(phar_is_file) /* {{{ */
+PHP_FUNCTION(phar_is_file) /* {{{ */
 {
 	char *filename;
 	size_t filename_len;
@@ -791,7 +790,7 @@ skip_phar:
 }
 /* }}} */
 
-PHAR_FUNC(phar_is_link) /* {{{ */
+PHP_FUNCTION(phar_is_link) /* {{{ */
 {
 	char *filename;
 	size_t filename_len;
@@ -886,7 +885,7 @@ void phar_release_functions(void)
 	PHAR_G(orig_##func) = NULL; \
 	if (NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
 		PHAR_G(orig_##func) = orig->internal_function.handler; \
-		orig->internal_function.handler = phar_##func; \
+		orig->internal_function.handler = PHP_FN(phar_##func); \
 	}
 
 void phar_intercept_functions_init(void)

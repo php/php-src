@@ -6,7 +6,7 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 --FILE--
 <?php
-function foo(int $a = null) {
+function foo(?int $a = null) {
     $a -= 1;
     return $a;
 }

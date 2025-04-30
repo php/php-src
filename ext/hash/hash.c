@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <math.h>
@@ -24,7 +24,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_var.h"
-#include "ext/spl/spl_exceptions.h"
 
 #include "zend_attributes.h"
 #include "zend_exceptions.h"
@@ -42,7 +41,7 @@
 # endif
 #endif
 
-HashTable php_hash_hashtable;
+static HashTable php_hash_hashtable;
 zend_class_entry *php_hashcontext_ce;
 static zend_object_handlers php_hashcontext_handlers;
 
@@ -106,7 +105,7 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo) /* {{{ */
 {
 	zend_string *lower = zend_string_tolower(algo);
-	php_hash_ops *ops = zend_hash_find_ptr(&php_hash_hashtable, lower);
+	const php_hash_ops *ops = zend_hash_find_ptr(&php_hash_hashtable, lower);
 	zend_string_release(lower);
 
 	return ops;
@@ -122,7 +121,7 @@ PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *o
 }
 /* }}} */
 
-PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context) /* {{{ */
+PHP_HASH_API zend_result php_hash_copy(const void *ops, const void *orig_context, void *dest_context) /* {{{ */
 {
 	php_hash_ops *hash_ops = (php_hash_ops *)ops;
 
@@ -230,7 +229,7 @@ static void one_to_buffer(size_t sz, unsigned char *buf, uint64_t val) {
    significant bits first. This allows 32-bit and 64-bit architectures to
    interchange serialized HashContexts. */
 
-PHP_HASH_API int php_hash_serialize_spec(const php_hashcontext_object *hash, zval *zv, const char *spec) /* {{{ */
+PHP_HASH_API zend_result php_hash_serialize_spec(const php_hashcontext_object *hash, zval *zv, const char *spec) /* {{{ */
 {
 	size_t pos = 0, max_alignment = 1;
 	unsigned char *buf = (unsigned char *) hash->context;
@@ -332,7 +331,7 @@ PHP_HASH_API int php_hash_unserialize_spec(php_hashcontext_object *hash, const z
 }
 /* }}} */
 
-PHP_HASH_API int php_hash_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv) /* {{{ */
+PHP_HASH_API zend_result php_hash_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv) /* {{{ */
 {
 	if (hash->ops->serialize_spec) {
 		*magic = PHP_HASH_SERIALIZE_MAGIC_SPEC;
@@ -636,7 +635,7 @@ PHP_FUNCTION(hash_init)
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
-			zend_argument_value_error(3, "cannot be empty when HMAC is requested");
+			zend_argument_value_error(3, "must not be empty when HMAC is requested");
 			RETURN_THROWS();
 		}
 	}
@@ -915,7 +914,7 @@ PHP_FUNCTION(hash_hkdf)
 	}
 
 	if (ZSTR_LEN(ikm) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -1213,7 +1212,11 @@ PHP_FUNCTION(mhash)
 		struct mhash_bc_entry algorithm_lookup = mhash_to_hash[algorithm];
 		if (algorithm_lookup.hash_name) {
 			algo = zend_string_init(algorithm_lookup.hash_name, strlen(algorithm_lookup.hash_name), 0);
+		} else {
+			RETURN_FALSE;
 		}
+	} else {
+		RETURN_FALSE;
 	}
 
 	if (key) {
@@ -1560,6 +1563,21 @@ PHP_METHOD(HashContext, __unserialize)
 	object_properties_load(&hash->std, Z_ARRVAL_P(members_zv));
 }
 /* }}} */
+
+ZEND_METHOD(HashContext, __debugInfo)
+{
+	zval *object = ZEND_THIS;
+	php_hashcontext_object *hash = php_hashcontext_from_object(Z_OBJ_P(object));
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval tmp;
+
+	array_init(return_value);
+
+	ZVAL_STRING(&tmp, hash->ops->algo);
+	zend_hash_str_update(Z_ARR_P(return_value), "algo", strlen("algo"), &tmp);
+}
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(hash)

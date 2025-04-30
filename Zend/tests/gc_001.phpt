@@ -1,5 +1,5 @@
 --TEST--
-GC 001: gc_enable()/gc_diable()/gc_enabled()
+GC 001: gc_enable()/gc_disable()/gc_enabled()
 --FILE--
 <?php
 gc_disable();

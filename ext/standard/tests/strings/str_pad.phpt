@@ -302,5 +302,5 @@ string(16) "\t\variation\t\t"
 #### error conditions ####
 
 --- empty padding string ---
-str_pad(): Argument #3 ($pad_string) must be a non-empty string
+str_pad(): Argument #3 ($pad_string) must not be empty
 str_pad(): Argument #4 ($pad_type) must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH

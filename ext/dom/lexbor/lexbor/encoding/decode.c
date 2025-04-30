@@ -2955,6 +2955,77 @@ lxb_encoding_decode_valid_utf_8_single(const lxb_char_t **data,
     return cp;
 }
 
+lxb_codepoint_t
+lxb_encoding_decode_valid_utf_8_single_reverse(const lxb_char_t **end,
+                                               const lxb_char_t *begin)
+{
+    lxb_codepoint_t cp;
+    const lxb_char_t *p = *end;
+
+    while (p > begin) {
+        p -= 1;
+
+        if (*p < 0x80){
+            cp = (lxb_codepoint_t) *p;
+
+            (*end) = p;
+            return cp;
+        }
+        else if ((*p & 0xe0) == 0xc0) {
+            /* 110xxxxx 10xxxxxx */
+
+            if (*end - p < 2) {
+                *end = p;
+                return LXB_ENCODING_DECODE_ERROR;
+            }
+
+            cp  = (p[0] ^ (0xC0 & p[0])) << 6;
+            cp |= (p[1] ^ (0x80 & p[1]));
+
+            (*end) = p;
+            return cp;
+        }
+        else if ((*p & 0xf0) == 0xe0) {
+            /* 1110xxxx 10xxxxxx 10xxxxxx */
+
+            if (*end - p < 3) {
+                *end = p;
+                return LXB_ENCODING_DECODE_ERROR;
+            }
+
+            cp  = (p[0] ^ (0xE0 & p[0])) << 12;
+            cp |= (p[1] ^ (0x80 & p[1])) << 6;
+            cp |= (p[2] ^ (0x80 & p[2]));
+
+            (*end) = p;
+            return cp;
+        }
+        else if ((*p & 0xf8) == 0xf0) {
+            /* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
+
+            if (*end - p < 4) {
+                *end = p;
+                return LXB_ENCODING_DECODE_ERROR;
+            }
+
+            cp  = (p[0] ^ (0xF0 & p[0])) << 18;
+            cp |= (p[1] ^ (0x80 & p[1])) << 12;
+            cp |= (p[2] ^ (0x80 & p[2])) << 6;
+            cp |= (p[3] ^ (0x80 & p[3]));
+
+            (*end) = p;
+            return cp;
+        }
+        else if (*end - p >= 4) {
+            break;
+        }
+    }
+
+    *end = p;
+
+    return LXB_ENCODING_DECODE_ERROR;
+}
+
 uint8_t
 lxb_encoding_decode_utf_8_length(lxb_char_t data)
 {

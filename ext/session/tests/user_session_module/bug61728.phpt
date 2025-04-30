@@ -8,34 +8,36 @@ function output_html($ext) {
     return strlen($ext);
 }
 
-function open ($save_path, $session_name) {
-    return true;
+class MySessionHandler implements SessionHandlerInterface {
+    function open ($save_path, $session_name): bool {
+        return true;
+    }
+
+    function close(): bool {
+        return true;
+    }
+
+    function read ($id): string {
+        return '';
+    }
+
+    function write ($id, $sess_data): bool {
+        ob_start("output_html");
+        echo "laruence";
+        ob_end_flush();
+        return true;
+    }
+
+    function destroy ($id): bool {
+        return true;
+    }
+
+    function gc ($maxlifetime): int {
+        return 1;
+    }
 }
 
-function close() {
-    return true;
-}
-
-function read ($id) {
-    return '';
-}
-
-function write ($id, $sess_data) {
-    ob_start("output_html");
-    echo "laruence";
-    ob_end_flush();
-    return true;
-}
-
-function destroy ($id) {
-    return true;
-}
-
-function gc ($maxlifetime) {
-    return true;
-}
-
-session_set_save_handler ("open", "close", "read", "write", "destroy", "gc");
+session_set_save_handler(new MySessionHandler());
 session_start();
 ?>
 --EXPECT--

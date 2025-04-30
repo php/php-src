@@ -27,6 +27,9 @@ try {
 ob_end_flush();
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 Session callback must have a return value of type bool, null returned
+
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 Session callback must have a return value of type bool, int returned

@@ -40,7 +40,7 @@ PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...) {
 	return ret;
 }
 
-static int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
+int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
 	char *msgout = NULL;
 	int msgoutlen = FAILURE;
 

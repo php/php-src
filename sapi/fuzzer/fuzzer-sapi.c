@@ -30,7 +30,7 @@
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
 
-const char HARDCODED_INI[] =
+static const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
@@ -146,12 +146,10 @@ int fuzzer_init_php(const char *extra_ini)
 	}
 	char *p = malloc(ini_len + 1);
 	fuzzer_module.ini_entries = p;
-	memcpy(p, HARDCODED_INI, sizeof(HARDCODED_INI) - 1);
-	p += sizeof(HARDCODED_INI) - 1;
+	p = zend_mempcpy(p, HARDCODED_INI, sizeof(HARDCODED_INI) - 1);
 	if (extra_ini) {
 		*p++ = '\n';
-		memcpy(p, extra_ini, extra_ini_len);
-		p += extra_ini_len;
+		p = zend_mempcpy(p, extra_ini, extra_ini_len);
 	}
 	*p = '\0';
 
@@ -283,7 +281,9 @@ int fuzzer_do_request_from_buffer(
 
 	CG(compiled_filename) = NULL; /* ??? */
 	if (before_shutdown) {
-		before_shutdown();
+		zend_try {
+			before_shutdown();
+		} zend_end_try();
 	}
 	fuzzer_request_shutdown();
 

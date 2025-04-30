@@ -15,12 +15,12 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 # include "php_ini.h"
 # include "ext/standard/info.h"
 # include "php_com_dotnet.h"
@@ -217,7 +217,7 @@ out:
 /* {{{ com_dotnet_create_instance - ctor for DOTNET class */
 PHP_METHOD(dotnet, __construct)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	php_com_dotnet_object *obj;
 	char *assembly_name, *datatype_name;
 	size_t assembly_name_len, datatype_name_len;
@@ -245,7 +245,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] %s", where, err);
+			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			RETURN_THROWS();
@@ -258,7 +258,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
+			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
@@ -270,7 +270,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
+			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
@@ -344,7 +344,7 @@ PHP_METHOD(dotnet, __construct)
 	if (ret == FAILURE) {
 		char buf[1024];
 		char *err = php_win32_error_to_msg(hr);
-		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08x] %s", where, hr, err);
+		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08lx] %s", where, hr, err);
 		php_win32_error_msg_free(err);
 		php_com_throw_exception(hr, buf);
 		RETURN_THROWS();

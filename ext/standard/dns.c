@@ -25,7 +25,6 @@
 #endif
 
 #ifdef PHP_WIN32
-# include "win32/inet.h"
 # include <winsock2.h>
 # include <windows.h>
 # include <Ws2tcpip.h>
@@ -40,7 +39,7 @@
 #undef T_UNSPEC
 #endif
 #ifdef HAVE_ARPA_NAMESER_H
-#ifdef DARWIN
+#ifdef __APPLE__
 # define BIND_8_COMPAT 1
 #endif
 #include <arpa/nameser.h>
@@ -157,7 +156,7 @@ PHP_FUNCTION(gethostbyaddr)
 	hostname = php_gethostbyaddr(addr);
 
 	if (hostname == NULL) {
-#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
+#ifdef HAVE_IPV6
 		php_error_docref(NULL, E_WARNING, "Address is not a valid IPv4 or IPv6 address");
 #else
 		php_error_docref(NULL, E_WARNING, "Address is not in a.b.c.d form");
@@ -172,7 +171,7 @@ PHP_FUNCTION(gethostbyaddr)
 /* {{{ php_gethostbyaddr */
 static zend_string *php_gethostbyaddr(char *ip)
 {
-#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
+#ifdef HAVE_IPV6
 	struct sockaddr_in sa4;
 	struct sockaddr_in6 sa6;
 	char out[NI_MAXHOST];
@@ -389,7 +388,7 @@ PHP_FUNCTION(dns_check_record)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -642,7 +641,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 						tp[0] = ':';
 						tp++;
 					}
-					tp += sprintf((char*)tp,"%x",s);
+					tp += snprintf((char*)tp, sizeof(name) - (tp - (uint8_t *) name), "%x", s);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;
@@ -687,7 +686,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 						tp[0] = ':';
 						tp++;
 					}
-					sprintf((char*)tp, "%x", cp[0] & 0xFF);
+					snprintf((char*)tp, sizeof(name) - (tp - (uint8_t *) name), "%x", cp[0] & 0xFF);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;
@@ -712,7 +711,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 						tp[0] = ':';
 						tp++;
 					}
-					tp += sprintf((char*)tp,"%x",s);
+					tp += snprintf((char*)tp, sizeof(name) - (tp - (uint8_t *) name),"%x",s);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;

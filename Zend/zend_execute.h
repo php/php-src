@@ -62,9 +62,11 @@ extern ZEND_API const zend_internal_function zend_pass_function;
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void);
 ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_call_stack_size_error(void);
 
 ZEND_API bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, bool strict);
 
@@ -82,6 +84,7 @@ ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht,
 ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void);
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(const zend_property_info *info);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error_ex(const char *class_name, const char *prop_name);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(const zend_property_info *info);
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(uint8_t type);
@@ -89,6 +92,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(uin
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_property_error(const zend_property_info *info);
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void);
+
+ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(const zend_property_info *info, const char *operation);
 
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(
@@ -372,6 +378,18 @@ ZEND_API const char *get_active_class_name(const char **space);
 ZEND_API const char *get_active_function_name(void);
 ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
 ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
+ZEND_API zend_function *zend_active_function_ex(zend_execute_data *execute_data);
+
+static zend_always_inline zend_function *zend_active_function(void)
+{
+	zend_function *func = EG(current_execute_data)->func;
+	if (ZEND_USER_CODE(func->type)) {
+		return zend_active_function_ex(EG(current_execute_data));
+	} else {
+		return func;
+	}
+}
+
 ZEND_API zend_string *get_active_function_or_method_name(void);
 ZEND_API zend_string *get_function_or_method_name(const zend_function *func);
 ZEND_API const char *zend_get_executed_filename(void);
@@ -417,6 +435,8 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num);
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer);
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield);
+
+ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data);
 
 zval * ZEND_FASTCALL zend_handle_named_arg(
 		zend_execute_data **call_ptr, zend_string *arg_name,
@@ -522,6 +542,11 @@ ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_prope
 	} while (0)
 
 ZEND_COLD void zend_match_unhandled_error(const zval *value);
+
+/* Call this to handle the timeout or the interrupt function. It will set
+ * EG(vm_interrupt) to false.
+ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *call);
 
 static zend_always_inline void *zend_get_bad_ptr(void)
 {

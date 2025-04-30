@@ -16,6 +16,8 @@ function c(
 ) {}
 ?>
 --EXPECTF--
-Deprecated: Optional parameter $a declared before required parameter $b is implicitly treated as a required parameter in %s on line %d
+Deprecated: a(): Optional parameter $a declared before required parameter $b is implicitly treated as a required parameter in %s on line %d
 
-Deprecated: Optional parameter $e declared before required parameter $f is implicitly treated as a required parameter in %s on line %d
+Deprecated: b(): Implicitly marking parameter $c as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+
+Deprecated: c(): Optional parameter $e declared before required parameter $f is implicitly treated as a required parameter in %s on line %d

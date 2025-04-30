@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument::createFromFile() HTTP header Content-Type
+Dom\HTMLDocument::createFromFile() HTTP header Content-Type
 --EXTENSIONS--
 dom
 --SKIPIF--
@@ -12,6 +12,10 @@ http_server_skipif();
 require "./ext/standard/tests/http/server.inc";
 
 $tests = [
+    "No slashes" => [
+        "foo",
+        "      ",
+    ],
     "Invalid type/subtype" => [
         "/html; Charset=\"ISO-8859-1\"",
         "text/; Charset=\"ISO-8859-1\"",
@@ -32,6 +36,8 @@ $tests = [
     "All valid inputs" => [
         "text/html; charset=ISO-8859-1",
         "\t\r text/html; charset=ISO-8859-1   \t",
+        "\t\r text/html; charset=ISO-8859-1   \t;bar=\"foo\"",
+        "\t\r text/html; charset=ISO-8859-1   \t;bar=\"foo\"\r\n\t ",
         "text/html; foo=bar;charset=ISO-8859-1",
         "text/html; foo=bar;charset=ISO-8859-1;bar=\"foooooo\"",
         "text/html;;;; charset=ISO-8859-1",
@@ -45,6 +51,7 @@ $tests = [
         "text/html;Charset=\"ISO-8859-1\\",
         "text/html;Charset=\"ISO-8859-1\\\"",
         "text/html;Charset=\"foobar\\\"",
+        "text/html;Charset=\"%7F\\\"",
         "text/html;Charset=\"\\\"",
         "text/html;Charset=",
     ],
@@ -55,13 +62,16 @@ foreach ($tests as $name => $headers) {
     $responses = array_map(fn ($header) => "data://text/plain,HTTP/1.1 200 OK\r\nContent-Type: " . $header . "\r\n\r\n" . "<p>\xE4\xF6\xFC</p>\n", $headers);
     ['pid' => $pid, 'uri' => $uri] = http_server($responses);
     for ($i = 0; $i < count($responses); $i++) {
-        $result = DOM\HTMLDocument::createFromFile($uri, LIBXML_NOERROR);
-        echo $result->textContent;
+        $result = Dom\HTMLDocument::createFromFile($uri, LIBXML_NOERROR);
+        echo $result->getElementsByTagName("p")[0]->textContent, "\n";
     }
     http_server_kill($pid);
 }
 ?>
 --EXPECT--
+--- No slashes ---
+���
+���
 --- Invalid type/subtype ---
 ���
 ���
@@ -88,7 +98,10 @@ foreach ($tests as $name => $headers) {
 äöü
 äöü
 äöü
+äöü
+äöü
 --- Valid input, but invalid encoding name ---
+���
 ���
 ���
 ���

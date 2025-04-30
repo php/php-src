@@ -1,6 +1,6 @@
 /*
 ** DynASM MIPS encoding engine.
-** Copyright (C) 2005-2021 Mike Pall. All rights reserved.
+** Copyright (C) 2005-2023 Mike Pall. All rights reserved.
 ** Released under the MIT license. See dynasm.lua for full copyright notice.
 */
 
@@ -69,7 +69,7 @@ struct dasm_State {
   size_t lgsize;
   int *pclabels;		/* PC label chains/pos ptrs. */
   size_t pcsize;
-  void **globals;		/* Array of globals (bias -10). */
+  void **globals;		/* Array of globals. */
   dasm_Section *section;	/* Pointer to active section. */
   size_t codesize;		/* Total size of all code sections. */
   int maxsection;		/* 0 <= sectionidx < maxsection. */
@@ -86,7 +86,6 @@ void dasm_init(Dst_DECL, int maxsection)
 {
   dasm_State *D;
   size_t psz = 0;
-  int i;
   Dst_REF = NULL;
   DASM_M_GROW(Dst, struct dasm_State, Dst_REF, psz, DASM_PSZ(maxsection));
   D = Dst_REF;
@@ -97,12 +96,7 @@ void dasm_init(Dst_DECL, int maxsection)
   D->pcsize = 0;
   D->globals = NULL;
   D->maxsection = maxsection;
-  for (i = 0; i < maxsection; i++) {
-    D->sections[i].buf = NULL;  /* Need this for pass3. */
-    D->sections[i].rbuf = D->sections[i].buf - DASM_SEC2POS(i);
-    D->sections[i].bsize = 0;
-    D->sections[i].epos = 0;  /* Wrong, but is recalculated after resize. */
-  }
+  memset((void *)D->sections, 0, maxsection * sizeof(dasm_Section));
 }
 
 /* Free DynASM state. */
@@ -122,7 +116,7 @@ void dasm_free(Dst_DECL)
 void dasm_setupglobal(Dst_DECL, void **gl, unsigned int maxgl)
 {
   dasm_State *D = Dst_REF;
-  D->globals = gl - 10;  /* Negative bias to compensate for locals. */
+  D->globals = gl;
   DASM_M_GROW(Dst, int, D->lglabels, D->lgsize, (10+maxgl)*sizeof(int));
 }
 
@@ -147,6 +141,7 @@ void dasm_setup(Dst_DECL, const void *actionlist)
   if (D->pclabels) memset((void *)D->pclabels, 0, D->pcsize);
   for (i = 0; i < D->maxsection; i++) {
     D->sections[i].pos = DASM_SEC2POS(i);
+    D->sections[i].rbuf = D->sections[i].buf - D->sections[i].pos;
     D->sections[i].ofs = 0;
   }
 }
@@ -155,10 +150,10 @@ void dasm_setup(Dst_DECL, const void *actionlist)
 #ifdef DASM_CHECKS
 #define CK(x, st) \
   do { if (!(x)) { \
-    D->status = DASM_S_##st|(p-D->actionlist-1); return; } } while (0)
+    D->status = DASM_S_##st|(int)(p-D->actionlist-1); return; } } while (0)
 #define CKPL(kind, st) \
   do { if ((size_t)((char *)pl-(char *)D->kind##labels) >= D->kind##size) { \
-    D->status = DASM_S_RANGE_##st|(p-D->actionlist-1); return; } } while (0)
+    D->status = DASM_S_RANGE_##st|(int)(p-D->actionlist-1); return; } } while (0)
 #else
 #define CK(x, st)	((void)0)
 #define CKPL(kind, st)	((void)0)
@@ -314,7 +309,7 @@ int dasm_link(Dst_DECL, size_t *szp)
 
 #ifdef DASM_CHECKS
 #define CK(x, st) \
-  do { if (!(x)) return DASM_S_##st|(p-D->actionlist-1); } while (0)
+  do { if (!(x)) return DASM_S_##st|(int)(p-D->actionlist-1); } while (0)
 #else
 #define CK(x, st)	((void)0)
 #endif
@@ -350,7 +345,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  break;
 	case DASM_REL_LG:
 	  if (n < 0) {
-	    n = (int)((ptrdiff_t)D->globals[-n] - (ptrdiff_t)cp);
+	    n = (int)((ptrdiff_t)D->globals[-n-10] - (ptrdiff_t)cp);
 	    goto patchrel;
 	  }
 	  /* fallthrough */
@@ -369,7 +364,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  }
 	  break;
 	case DASM_LABEL_LG:
-	  ins &= 2047; if (ins >= 20) D->globals[ins-10] = (void *)(base + n);
+	  ins &= 2047; if (ins >= 20) D->globals[ins-20] = (void *)(base + n);
 	  break;
 	case DASM_LABEL_PC: break;
 	case DASM_IMMS:
@@ -417,7 +412,7 @@ int dasm_checkstep(Dst_DECL, int secmatch)
   }
   if (D->status == DASM_S_OK && secmatch >= 0 &&
       D->section != &D->sections[secmatch])
-    D->status = DASM_S_MATCH_SEC|(D->section-D->sections);
+    D->status = DASM_S_MATCH_SEC|(int)(D->section-D->sections);
   return D->status;
 }
 #endif

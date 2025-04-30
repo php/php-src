@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::fgetcsv with alternative delimiter
+SplFileObject::fgetcsv with alternative escape
 --FILE--
 <?php
 $fp = fopen('SplFileObject__fgetcsv6.csv', 'w+');
@@ -13,7 +13,7 @@ var_dump($fo->fgetcsv(',', '"', '"'));
 <?php
 unlink('SplFileObject__fgetcsv6.csv');
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
   [0]=>
   string(3) "aaa"

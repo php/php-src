@@ -20,11 +20,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_SQLite_Ext_s
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(PDO_SQLite_Ext, sqliteCreateFunction);
 ZEND_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate);
 ZEND_METHOD(PDO_SQLite_Ext, sqliteCreateCollation);
-
 
 static const zend_function_entry class_PDO_SQLite_Ext_methods[] = {
 	ZEND_ME(PDO_SQLite_Ext, sqliteCreateFunction, arginfo_class_PDO_SQLite_Ext_sqliteCreateFunction, ZEND_ACC_PUBLIC)

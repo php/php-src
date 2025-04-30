@@ -243,6 +243,7 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 			if (p->name) {
 				zend_string_release_ex(p->name, 1);
 			}
+			pefree(p, true);
 			zend_unregister_ini_entries_ex(module_number, module_type);
 			return FAILURE;
 		}
@@ -586,7 +587,7 @@ typedef enum {
 	ZEND_INI_PARSE_QUANTITY_UNSIGNED,
 } zend_ini_parse_quantity_signed_result_t;
 
-static const char *zend_ini_consume_quantity_prefix(const char *const digits, const char *const str_end) {
+static const char *zend_ini_consume_quantity_prefix(const char *const digits, const char *const str_end, int base) {
 	const char *digits_consumed = digits;
 	/* Ignore leading whitespace. */
 	while (digits_consumed < str_end && zend_is_whitespace(*digits_consumed)) {++digits_consumed;}
@@ -597,7 +598,7 @@ static const char *zend_ini_consume_quantity_prefix(const char *const digits, co
 	if (digits_consumed[0] == '0' && !isdigit(digits_consumed[1])) {
 		/* Value is just 0 */
 		if ((digits_consumed+1) == str_end) {
-			return digits;
+			return digits_consumed;
 		}
 
 		switch (digits_consumed[1]) {
@@ -605,9 +606,14 @@ static const char *zend_ini_consume_quantity_prefix(const char *const digits, co
 			case 'X':
 			case 'o':
 			case 'O':
+				digits_consumed += 2;
+				break;
 			case 'b':
 			case 'B':
-				digits_consumed += 2;
+				if (base != 16) {
+					/* 0b or 0B is valid in base 16, but not in the other supported bases. */
+					digits_consumed += 2;
+				}
 				break;
 		}
 	}
@@ -695,19 +701,8 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 				return 0;
         }
         digits += 2;
-		if (UNEXPECTED(digits == str_end)) {
-			/* Escape the string to avoid null bytes and to make non-printable chars
-			 * visible */
-			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
-			smart_str_0(&invalid);
-
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no digits after base prefix, interpreting as \"0\" for backwards compatibility",
-							ZSTR_VAL(invalid.s));
-
-			smart_str_free(&invalid);
-			return 0;
-		}
-		if (UNEXPECTED(digits != zend_ini_consume_quantity_prefix(digits, str_end))) {
+		/* STRTOULL may silently ignore a prefix of whitespace, sign, and base prefix, which would be invalid at this position */
+		if (UNEXPECTED(digits == str_end || digits != zend_ini_consume_quantity_prefix(digits, str_end, base))) {
 			/* Escape the string to avoid null bytes and to make non-printable chars
 			 * visible */
 			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
@@ -939,7 +934,7 @@ ZEND_INI_DISP(zend_ini_color_displayer_cb) /* {{{ */
 	}
 	if (value) {
 		if (zend_uv.html_errors) {
-			zend_printf("<font style=\"color: %s\">%s</font>", value, value);
+			zend_printf("<span style=\"color: %s\">%s</span>", value, value);
 		} else {
 			ZEND_PUTS(value);
 		}

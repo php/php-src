@@ -7,150 +7,142 @@ class XMLReader
     /* Constants for NodeType - cannot define common types to share with dom as there are differences in these types */
 
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_NONE
      */
-    public const NONE = UNKNOWN;
+    public const int NONE = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_ELEMENT
      */
-    public const ELEMENT = UNKNOWN;
+    public const int ELEMENT = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_ATTRIBUTE
      */
-    public const ATTRIBUTE = UNKNOWN;
+    public const int ATTRIBUTE = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_TEXT
      */
-    public const TEXT = UNKNOWN;
+    public const int TEXT = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_CDATA
      */
-    public const CDATA = UNKNOWN;
+    public const int CDATA = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_ENTITY_REFERENCE
      */
-    public const ENTITY_REF = UNKNOWN;
+    public const int ENTITY_REF = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_ENTITY
      */
-    public const ENTITY = UNKNOWN;
+    public const int ENTITY = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_PROCESSING_INSTRUCTION
      */
-    public const PI = UNKNOWN;
+    public const int PI = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_COMMENT
      */
-    public const COMMENT = UNKNOWN;
+    public const int COMMENT = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_DOCUMENT
      */
-    public const DOC = UNKNOWN;
+    public const int DOC = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_DOCUMENT_TYPE
      */
-    public const DOC_TYPE = UNKNOWN;
+    public const int DOC_TYPE = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_DOCUMENT_FRAGMENT
      */
-    public const DOC_FRAGMENT = UNKNOWN;
+    public const int DOC_FRAGMENT = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_NOTATION
      */
-    public const NOTATION = UNKNOWN;
+    public const int NOTATION = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_WHITESPACE
      */
-    public const WHITESPACE = UNKNOWN;
+    public const int WHITESPACE = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_SIGNIFICANT_WHITESPACE
      */
-    public const SIGNIFICANT_WHITESPACE = UNKNOWN;
+    public const int SIGNIFICANT_WHITESPACE = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_END_ELEMENT
      */
-    public const END_ELEMENT = UNKNOWN;
+    public const int END_ELEMENT = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_END_ENTITY
      */
-    public const END_ENTITY = UNKNOWN;
+    public const int END_ENTITY = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_READER_TYPE_XML_DECLARATION
      */
-    public const XML_DECLARATION = UNKNOWN;
+    public const int XML_DECLARATION = UNKNOWN;
 
     /* Constants for Parser options */
 
     /**
-     * @var int
      * @cvalue XML_PARSER_LOADDTD
      */
-    public const LOADDTD = UNKNOWN;
+    public const int LOADDTD = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_PARSER_DEFAULTATTRS
      */
-    public const DEFAULTATTRS = UNKNOWN;
+    public const int DEFAULTATTRS = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_PARSER_VALIDATE
      */
-    public const VALIDATE = UNKNOWN;
+    public const int VALIDATE = UNKNOWN;
     /**
-     * @var int
      * @cvalue XML_PARSER_SUBST_ENTITIES
      */
-    public const SUBST_ENTITIES = UNKNOWN;
+    public const int SUBST_ENTITIES = UNKNOWN;
 
 
+    /** @virtual */
     public int $attributeCount;
 
+    /** @virtual */
     public string $baseURI;
 
+    /** @virtual */
     public int $depth;
 
+    /** @virtual */
     public bool $hasAttributes;
 
+    /** @virtual */
     public bool $hasValue;
 
+    /** @virtual */
     public bool $isDefault;
 
+    /** @virtual */
     public bool $isEmptyElement;
 
+    /** @virtual */
     public string $localName;
 
+    /** @virtual */
     public string $name;
 
+    /** @virtual */
     public string $namespaceURI;
 
+    /** @virtual */
     public int $nodeType;
 
+    /** @virtual */
     public string $prefix;
 
+    /** @virtual */
     public string $value;
 
+    /** @virtual */
     public string $xmlLang;
 
-    /** @return true */
-    public function close() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function close(): true {}
 
     /** @tentative-return-type */
     public function getAttribute(string $name): ?string {}
@@ -197,6 +189,11 @@ class XMLReader
     /** @return bool|XMLReader */
     public static function open(string $uri, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
 
+    public static function fromUri(string $uri, ?string $encoding = null, int $flags = 0): static {}
+
+    /** @param resource $stream */
+    public static function fromStream($stream, ?string $encoding = null, int $flags = 0, ?string $documentUri = null): static {}
+
     /** @tentative-return-type */
     public function readInnerXml(): string {}
 
@@ -220,6 +217,8 @@ class XMLReader
 
     /** @return bool|XMLReader */
     public static function XML(string $source, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
+
+    public static function fromString(string $source, ?string $encoding = null, int $flags = 0): static {}
 
     /** @tentative-return-type */
     public function expand(?DOMNode $baseNode = null): DOMNode|false {}

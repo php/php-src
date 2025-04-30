@@ -25,13 +25,18 @@ var_dump($intlcal->getTime(),
         strtotime('2012-02-29 23:58:31 +0000') * 1000.);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
 bool(true)
 float(1330473600000)
 float(1330473600000)
+
+Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
 bool(true)
 float(1330559880000)
 float(1330559880000)
+
+Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
 bool(true)
 float(1330559911000)
-float(1330559911000)
+float(1330559911000)

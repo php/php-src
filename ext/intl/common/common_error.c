@@ -14,7 +14,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -23,9 +23,7 @@
 /* {{{ Get code of the last occurred error. */
 PHP_FUNCTION( intl_get_error_code )
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG( intl_error_get_code( NULL ) );
 }
@@ -34,9 +32,7 @@ PHP_FUNCTION( intl_get_error_code )
 /* {{{ Get text description of the last occurred error. */
 PHP_FUNCTION( intl_get_error_message )
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STR(intl_error_get_message( NULL ));
 }
@@ -50,12 +46,9 @@ PHP_FUNCTION( intl_is_failure )
 {
 	zend_long err_code;
 
-	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
-		&err_code ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(err_code)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_BOOL( U_FAILURE( err_code ) );
 }
@@ -68,12 +61,9 @@ PHP_FUNCTION( intl_error_name )
 {
 	zend_long err_code;
 
-	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
-		&err_code ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(err_code)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_STRING( (char*)u_errorName( err_code ) );
 }

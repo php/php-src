@@ -79,10 +79,10 @@ array(2) {
   string(1) "C"
 }
 
-Warning: {closure}(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 a = a, b = b, c = D
 NULL
-{closure}(): Argument #1 ($a) not passed
+{closure:%s:%d}(): Argument #1 ($a) not passed
 array_slice(): Argument #2 ($offset) not passed
 array(2) {
   [3]=>

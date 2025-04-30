@@ -108,7 +108,7 @@ PHP_FUNCTION(dns_check_record)
 	}
 
 	if (hostname_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -282,7 +282,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw
 							tp[0] = ':';
 							tp++;
 						}
-						tp += sprintf((char*)tp,"%x", out[i]);
+						tp += snprintf((char*)tp, sizeof(buf) - (tp - (char *) buf), "%x", out[i]);
 					} else {
 						if (!have_v6_break) {
 							have_v6_break = 1;

@@ -42,6 +42,7 @@ session_start();
 
 ?>
 --EXPECTF--
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 write: goodbye cruel world
 
 Fatal error: Uncaught Error: Call to undefined function undefined_function() in %s:%d

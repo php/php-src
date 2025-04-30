@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECT--
-enchant_broker_request_dict(): Argument #2 ($tag) cannot be empty
+enchant_broker_request_dict(): Argument #2 ($tag) must not be empty

@@ -514,6 +514,11 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *h
 	return _zend_hash_get_current_pos(ht);
 }
 
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos_ex(const HashTable *ht, HashPosition pos)
+{
+	return _zend_hash_get_valid_pos(ht, pos);
+}
+
 static void zend_hash_remove_iterator_copies(uint32_t idx) {
 	HashTableIterator *iterators = EG(ht_iterators);
 
@@ -1331,6 +1336,18 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 		if (!(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 			ht->nNumUsed = 0;
 			HT_HASH_RESET(ht);
+			/* Even if the array is empty, we still need to reset the iterator positions. */
+			ht->nInternalPointer = 0;
+			if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+				HashTableIterator *iter = EG(ht_iterators);
+				HashTableIterator *end  = iter + EG(ht_iterators_used);
+				while (iter != end) {
+					if (iter->ht == ht) {
+						iter->pos = 0;
+					}
+					iter++;
+				}
+			}
 		}
 		return;
 	}
@@ -1412,32 +1429,30 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 	}
 }
 
+static zend_always_inline void zend_hash_iterators_clamp_max(HashTable *ht, uint32_t max)
+{
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		HashTableIterator *iter = EG(ht_iterators);
+		HashTableIterator *end  = iter + EG(ht_iterators_used);
+		while (iter != end) {
+			if (iter->ht == ht) {
+				iter->pos = MIN(iter->pos, max);
+			}
+			iter++;
+		}
+	}
+}
+
 static zend_always_inline void _zend_hash_packed_del_val(HashTable *ht, uint32_t idx, zval *zv)
 {
 	idx = HT_HASH_TO_IDX(idx);
 	ht->nNumOfElements--;
-	if (ht->nInternalPointer == idx || UNEXPECTED(HT_HAS_ITERATORS(ht))) {
-		uint32_t new_idx;
-
-		new_idx = idx;
-		while (1) {
-			new_idx++;
-			if (new_idx >= ht->nNumUsed) {
-				break;
-			} else if (Z_TYPE(ht->arPacked[new_idx]) != IS_UNDEF) {
-				break;
-			}
-		}
-		if (ht->nInternalPointer == idx) {
-			ht->nInternalPointer = new_idx;
-		}
-		zend_hash_iterators_update(ht, idx, new_idx);
-	}
 	if (ht->nNumUsed - 1 == idx) {
 		do {
 			ht->nNumUsed--;
 		} while (ht->nNumUsed > 0 && (UNEXPECTED(Z_TYPE(ht->arPacked[ht->nNumUsed-1]) == IS_UNDEF)));
 		ht->nInternalPointer = MIN(ht->nInternalPointer, ht->nNumUsed);
+		zend_hash_iterators_clamp_max(ht, ht->nNumUsed);
 	}
 	if (ht->pDestructor) {
 		zval tmp;
@@ -1458,28 +1473,12 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 	}
 	idx = HT_HASH_TO_IDX(idx);
 	ht->nNumOfElements--;
-	if (ht->nInternalPointer == idx || UNEXPECTED(HT_HAS_ITERATORS(ht))) {
-		uint32_t new_idx;
-
-		new_idx = idx;
-		while (1) {
-			new_idx++;
-			if (new_idx >= ht->nNumUsed) {
-				break;
-			} else if (Z_TYPE(ht->arData[new_idx].val) != IS_UNDEF) {
-				break;
-			}
-		}
-		if (ht->nInternalPointer == idx) {
-			ht->nInternalPointer = new_idx;
-		}
-		zend_hash_iterators_update(ht, idx, new_idx);
-	}
 	if (ht->nNumUsed - 1 == idx) {
 		do {
 			ht->nNumUsed--;
 		} while (ht->nNumUsed > 0 && (UNEXPECTED(Z_TYPE(ht->arData[ht->nNumUsed-1].val) == IS_UNDEF)));
 		ht->nInternalPointer = MIN(ht->nInternalPointer, ht->nNumUsed);
+		zend_hash_iterators_clamp_max(ht, ht->nNumUsed);
 	}
 	if (ht->pDestructor) {
 		zval tmp;
@@ -2346,17 +2345,20 @@ static zend_always_inline bool zend_array_dup_element(HashTable *source, HashTab
 
 // We need to duplicate iterators to be able to search through all copy-on-write copies to find the actually iterated HashTable and position back
 static void zend_array_dup_ht_iterators(HashTable *source, HashTable *target) {
-	HashTableIterator *iter = EG(ht_iterators);
-	HashTableIterator *end  = iter + EG(ht_iterators_used);
+	uint32_t iter_index = 0;
+	uint32_t end_index = EG(ht_iterators_used);
 
-	while (iter != end) {
+	while (iter_index != end_index) {
+		HashTableIterator *iter = &EG(ht_iterators)[iter_index];
 		if (iter->ht == source) {
 			uint32_t copy_idx = zend_hash_iterator_add(target, iter->pos);
+			/* Refetch iter because the memory may be reallocated. */
+			iter = &EG(ht_iterators)[iter_index];
 			HashTableIterator *copy_iter = EG(ht_iterators) + copy_idx;
 			copy_iter->next_copy = iter->next_copy;
 			iter->next_copy = copy_idx;
 		}
-		iter++;
+		iter_index++;
 	}
 }
 
@@ -2407,7 +2409,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 					idx++; p++;
 				}
 			} else {
-				target->nNumUsed = source->nNumOfElements;
+				target->nNumUsed = source->nNumUsed;
 				uint32_t iter_pos = zend_hash_iterators_lower_pos(target, idx);
 
 				while (p != end) {
@@ -2971,13 +2973,12 @@ ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q)
 	q->h = h;
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
+static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
 {
 	Bucket *p;
 	uint32_t i, j;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT_RC1(ht);
 
 	if (!(ht->nNumOfElements>1) && !(renumber && ht->nNumOfElements>0)) {
 		/* Doesn't require sorting */
@@ -3061,6 +3062,33 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, b
 		} else {
 			zend_hash_rehash(ht);
 		}
+	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
+{
+	HT_ASSERT_RC1(ht);
+	zend_hash_sort_internal(ht, sort, compar, renumber);
+}
+
+void ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
+{
+	HT_ASSERT_RC1(ht);
+
+	/* Unpack the array early to avoid RCn assertion failures. */
+	if (HT_IS_PACKED(ht)) {
+		zend_hash_packed_to_hash(ht);
+	}
+
+	/* Adding a refcount prevents the array from going away. */
+	GC_ADDREF(ht);
+
+	zend_hash_sort_internal(ht, sort, compar, renumber);
+
+	if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+		zend_array_destroy(ht);
+	} else {
+		gc_check_possible_root((zend_refcounted *)ht);
 	}
 }
 
@@ -3181,7 +3209,8 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 	 * false recursion detection.
 	 */
 	if (UNEXPECTED(GC_IS_RECURSIVE(ht1))) {
-		zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
+		zend_throw_error(NULL, "Nesting level too deep - recursive dependency?");
+		return ZEND_UNCOMPARABLE;
 	}
 
 	GC_TRY_PROTECT_RECURSION(ht1);

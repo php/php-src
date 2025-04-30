@@ -104,10 +104,16 @@ enum _ir_reg {
 	IR_REG_X31
 #define IR_REG_FRAME_POINTER \
 	IR_REG_X29
+
+#if defined(__linux__)
 #define IR_REGSET_FIXED \
-	( IR_REGSET(IR_REG_INT_TMP) \
-	| IR_REGSET(IR_REG_X18) /* platform specific register */ \
-	| IR_REGSET_INTERVAL(IR_REG_X29, IR_REG_X31))
+	(IR_REGSET(IR_REG_INT_TMP) | IR_REGSET_INTERVAL(IR_REG_X29, IR_REG_X31))
+#else
+#define IR_REGSET_FIXED \
+	(IR_REGSET(IR_REG_INT_TMP) | IR_REGSET_INTERVAL(IR_REG_X29, IR_REG_X31) \
+	| IR_REGSET(IR_REG_X18)) /* Other platforms reserve x18 register */
+#endif
+
 #define IR_REGSET_GP \
 	IR_REGSET_DIFFERENCE(IR_REGSET_INTERVAL(IR_REG_GP_FIRST, IR_REG_GP_LAST), IR_REGSET_FIXED)
 #define IR_REGSET_FP \
@@ -151,6 +157,16 @@ enum _ir_reg {
 # define IR_REGSET_PRESERVED \
 	(IR_REGSET_INTERVAL(IR_REG_X19, IR_REG_X30) \
 	| IR_REGSET_INTERVAL(IR_REG_V8, IR_REG_V15))
+
+#ifndef __APPLE__
+typedef struct _ir_va_list {
+	void    *stack;
+	void    *gr_top;
+	void    *vr_top;
+	int32_t  gr_offset;
+	int32_t  vr_offset;
+} ir_va_list;
+#endif
 
 typedef struct _ir_tmp_reg {
 	union {

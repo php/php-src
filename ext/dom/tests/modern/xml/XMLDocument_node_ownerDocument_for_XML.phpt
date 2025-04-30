@@ -1,11 +1,11 @@
 --TEST--
-DOM\XMLDocument getting ownerDocument from a node in an XML document should yield a DOM\XMLDocument
+Dom\XMLDocument getting ownerDocument from a node in an XML document should yield a Dom\XMLDocument
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<?xml version="1.0"?><container/>');
+$dom = Dom\XMLDocument::createFromString('<?xml version="1.0"?><container/>');
 
 $element = $dom->documentElement;
 unset($dom);
@@ -13,51 +13,53 @@ var_dump($element->ownerDocument);
 
 ?>
 --EXPECTF--
-object(DOM\XMLDocument)#1 (37) {
-  ["encoding"]=>
-  string(5) "UTF-8"
+object(Dom\XMLDocument)#1 (32) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
-  ["standalone"]=>
-  bool(false)
   ["xmlStandalone"]=>
   bool(false)
-  ["version"]=>
-  string(3) "1.0"
   ["xmlVersion"]=>
   string(3) "1.0"
   ["formatOutput"]=>
   bool(false)
-  ["validateOnParse"]=>
-  bool(false)
-  ["resolveExternals"]=>
-  bool(false)
-  ["preserveWhiteSpace"]=>
-  bool(true)
-  ["recover"]=>
-  bool(false)
-  ["substituteEntities"]=>
-  bool(false)
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["URL"]=>
+  string(%d) "%s"
+  ["documentURI"]=>
+  string(%d) "%s"
+  ["characterSet"]=>
+  string(5) "UTF-8"
+  ["charset"]=>
+  string(5) "UTF-8"
+  ["inputEncoding"]=>
+  string(5) "UTF-8"
   ["doctype"]=>
   NULL
   ["documentElement"]=>
   string(22) "(object value omitted)"
-  ["strictErrorChecking"]=>
-  bool(true)
-  ["documentURI"]=>
-  string(%d) "%s"
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>
   string(22) "(object value omitted)"
   ["childElementCount"]=>
   int(1)
-  ["nodeName"]=>
-  string(9) "#document"
-  ["nodeValue"]=>
+  ["body"]=>
   NULL
+  ["head"]=>
+  NULL
+  ["title"]=>
+  string(0) ""
   ["nodeType"]=>
   int(9)
+  ["nodeName"]=>
+  string(9) "#document"
+  ["baseURI"]=>
+  string(%d) "%s"
+  ["isConnected"]=>
+  bool(true)
+  ["ownerDocument"]=>
+  NULL
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -72,20 +74,8 @@ object(DOM\XMLDocument)#1 (37) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
+  ["nodeValue"]=>
   NULL
-  ["isConnected"]=>
-  bool(true)
-  ["ownerDocument"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
-  string(%d) %s
   ["textContent"]=>
-  string(0) ""
+  NULL
 }

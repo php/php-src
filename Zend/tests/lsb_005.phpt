@@ -1,5 +1,5 @@
 --TEST--
-ZE2 Late Static Binding stacking static calleds
+ZE2 Late Static Binding stacking static calls
 --FILE--
 <?php
 

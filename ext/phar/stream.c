@@ -22,7 +22,7 @@
 #include "stream.h"
 #include "dirstream.h"
 
-const php_stream_ops phar_ops = {
+static const php_stream_ops phar_ops = {
 	phar_stream_write, /* write */
 	phar_stream_read,  /* read */
 	phar_stream_close, /* close */
@@ -34,7 +34,7 @@ const php_stream_ops phar_ops = {
 	NULL, /* set option */
 };
 
-const php_stream_wrapper_ops phar_stream_wops = {
+static const php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_open_url,
 	NULL,                  /* phar_wrapper_close */
 	NULL,                  /* phar_wrapper_stat, */
@@ -63,7 +63,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	char *arch = NULL, *entry = NULL, *error;
 	size_t arch_len, entry_len;
 
-	if (strlen(filename) < 7 || strncasecmp(filename, "phar://", 7)) {
+	if (strncasecmp(filename, "phar://", 7)) {
 		return NULL;
 	}
 	if (mode[0] == 'a') {
@@ -168,7 +168,6 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	php_url *resource = NULL;
 	php_stream *fpf;
 	zval *pzoption, *metadata;
-	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
 		return NULL;
@@ -187,7 +186,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 		return NULL;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 	phar_request_initialize();
 
 	/* strip leading "/" */
@@ -254,6 +253,17 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				php_url_free(resource);
 				goto phar_stub;
 			} else {
+				php_stream *stream = phar_get_pharfp(phar);
+				if (stream == NULL) {
+					if (UNEXPECTED(FAILURE == phar_open_archive_fp(phar))) {
+						php_stream_wrapper_log_error(wrapper, options, "phar error: could not reopen phar \"%s\"", ZSTR_VAL(resource->host));
+						efree(internal_file);
+						php_url_free(resource);
+						return NULL;
+					}
+					stream = phar_get_pharfp(phar);
+				}
+
 				phar_entry_info *entry;
 
 				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
@@ -266,7 +276,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				entry->is_crc_checked = 1;
 
 				idata = (phar_entry_data *) ecalloc(1, sizeof(phar_entry_data));
-				idata->fp = phar_get_pharfp(phar);
+				idata->fp = stream;
 				idata->phar = phar;
 				idata->internal_file = entry;
 				if (!phar->is_persistent) {
@@ -361,7 +371,7 @@ static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-	size_t got;
+	ssize_t got;
 	phar_entry_info *entry;
 
 	if (data->internal_file->link) {
@@ -459,17 +469,16 @@ static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t cou
 static int phar_stream_flush(php_stream *stream) /* {{{ */
 {
 	char *error;
-	int ret;
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
 	if (data->internal_file->is_modified) {
 		data->internal_file->timestamp = time(0);
-		ret = phar_flush(data->phar, 0, 0, 0, &error);
+		phar_flush(data->phar, &error);
 		if (error) {
 			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS, "%s", error);
 			efree(error);
 		}
-		return ret;
+		return EOF;
 	} else {
 		return EOF;
 	}
@@ -554,7 +563,6 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	char *internal_file, *error;
 	phar_archive_data *phar;
 	phar_entry_info *entry;
-	uint32_t host_len;
 	size_t internal_file_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
@@ -572,7 +580,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		return FAILURE;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 	phar_request_initialize();
 
 	internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
@@ -663,7 +671,6 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	int internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data *pphar;
-	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "rb", options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: unlink failed");
@@ -683,7 +690,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		return 0;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 	phar_request_initialize();
 
 	pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), resource->host);
@@ -736,7 +743,6 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	char *error;
 	phar_archive_data *phar, *pfrom, *pto;
 	phar_entry_info *entry;
-	uint32_t host_len;
 	int is_dir = 0;
 	int is_modified = 0;
 
@@ -771,6 +777,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	}
 	if (PHAR_G(readonly) && (!pto || !pto->is_data)) {
 		php_url_free(resource_from);
+		php_url_free(resource_to);
 		php_error_docref(NULL, E_WARNING, "phar error: Write operations disabled by the php.ini setting phar.readonly");
 		return 0;
 	}
@@ -811,7 +818,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		return 0;
 	}
 
-	host_len = ZSTR_LEN(resource_from->host);
+	size_t host_len = ZSTR_LEN(resource_from->host);
 
 	if (SUCCESS != phar_get_archive(&phar, ZSTR_VAL(resource_from->host), host_len, NULL, 0, &error)) {
 		php_url_free(resource_from);
@@ -847,8 +854,9 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		entry->link = entry->tmp = NULL;
 		source = entry;
 
-		/* add to the manifest, and then store the pointer to the new guy in entry */
-		entry = zend_hash_str_add_mem(&(phar->manifest), ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info));
+		/* add to the manifest, and then store the pointer to the new guy in entry
+		 * if it already exists, we overwrite the destination like what copy('phar://...', 'phar://...') does. */
+		entry = zend_hash_str_update_mem(&(phar->manifest), ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info));
 
 		entry->filename = estrndup(ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1);
 		if (FAILURE == phar_copy_entry_fp(source, entry, &error)) {
@@ -880,8 +888,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		Bucket *b;
 		zend_string *str_key;
 		zend_string *new_str_key;
-		uint32_t from_len = ZSTR_LEN(resource_from->path) - 1;
-		uint32_t to_len = ZSTR_LEN(resource_to->path) - 1;
+		size_t from_len = ZSTR_LEN(resource_from->path) - 1;
+		size_t to_len = ZSTR_LEN(resource_to->path) - 1;
 
 		ZEND_HASH_MAP_FOREACH_BUCKET(&phar->manifest, b) {
 			str_key = b->key;
@@ -946,7 +954,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	}
 
 	if (is_modified) {
-		phar_flush(phar, 0, 0, 0, &error);
+		phar_flush(phar, &error);
 		if (error) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);

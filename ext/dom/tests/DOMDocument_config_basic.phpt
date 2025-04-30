@@ -19,8 +19,10 @@ var_dump( $test );
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 DOMDocument created
+
+Deprecated: Property DOMDocument::$config is deprecated in %s on line %d
 Read config:
 NULL
 Done

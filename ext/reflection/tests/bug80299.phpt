@@ -12,4 +12,4 @@ $function = function (int &$foo, DateTimeInterface &$bar) {};
 
 ?>
 --EXPECTF--
-Warning: {closure}(): Argument #1 ($foo) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #1 ($foo) must be passed by reference, value given in %s on line %d

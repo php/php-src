@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4cf2c620393f468968a219b5bd12a2b5f6b03ecc */
+ * Stub hash: ba1562ca8fe2fe48c40bc52d10545aa989afd86c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -81,7 +81,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Error___toString arginfo_class_Throwable_getMessage
 
-
 ZEND_METHOD(Exception, __clone);
 ZEND_METHOD(Exception, __construct);
 ZEND_METHOD(Exception, __wakeup);
@@ -96,18 +95,16 @@ ZEND_METHOD(Exception, __toString);
 ZEND_METHOD(ErrorException, __construct);
 ZEND_METHOD(ErrorException, getSeverity);
 
-
 static const zend_function_entry class_Throwable_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getMessage, arginfo_class_Throwable_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getCode, arginfo_class_Throwable_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getFile, arginfo_class_Throwable_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getLine, arginfo_class_Throwable_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getTrace, arginfo_class_Throwable_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getPrevious, arginfo_class_Throwable_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getTraceAsString, arginfo_class_Throwable_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_RAW_FENTRY("getMessage", NULL, arginfo_class_Throwable_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getCode", NULL, arginfo_class_Throwable_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getFile", NULL, arginfo_class_Throwable_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getLine", NULL, arginfo_class_Throwable_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getTrace", NULL, arginfo_class_Throwable_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getPrevious", NULL, arginfo_class_Throwable_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getTraceAsString", NULL, arginfo_class_Throwable_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Exception_methods[] = {
 	ZEND_ME(Exception, __clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE)
@@ -124,66 +121,24 @@ static const zend_function_entry class_Exception_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ErrorException_methods[] = {
 	ZEND_ME(ErrorException, __construct, arginfo_class_ErrorException___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ErrorException, getSeverity, arginfo_class_ErrorException_getSeverity, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_Error_methods[] = {
-	ZEND_MALIAS(Exception, __clone, __clone, arginfo_class_Error___clone, ZEND_ACC_PRIVATE)
-	ZEND_MALIAS(Exception, __construct, __construct, arginfo_class_Error___construct, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Exception, __wakeup, __wakeup, arginfo_class_Error___wakeup, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(Exception, getMessage, getMessage, arginfo_class_Error_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Exception, getCode, getCode, arginfo_class_Error_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Exception, getFile, getFile, arginfo_class_Error_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Exception, getLine, getLine, arginfo_class_Error_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Exception, getTrace, getTrace, arginfo_class_Error_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Exception, getPrevious, getPrevious, arginfo_class_Error_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Exception, getTraceAsString, getTraceAsString, arginfo_class_Error_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_MALIAS(Exception, __toString, __toString, arginfo_class_Error___toString, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_CompileError_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_ParseError_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_TypeError_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_ArgumentCountError_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_ValueError_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_ArithmeticError_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_DivisionByZeroError_methods[] = {
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_UnhandledMatchError_methods[] = {
+	ZEND_RAW_FENTRY("__clone", zim_Exception___clone, arginfo_class_Error___clone, ZEND_ACC_PRIVATE, NULL, NULL)
+	ZEND_RAW_FENTRY("__construct", zim_Exception___construct, arginfo_class_Error___construct, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("__wakeup", zim_Exception___wakeup, arginfo_class_Error___wakeup, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getMessage", zim_Exception_getMessage, arginfo_class_Error_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getCode", zim_Exception_getCode, arginfo_class_Error_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getFile", zim_Exception_getFile, arginfo_class_Error_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getLine", zim_Exception_getLine, arginfo_class_Error_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getTrace", zim_Exception_getTrace, arginfo_class_Error_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getPrevious", zim_Exception_getPrevious, arginfo_class_Error_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getTraceAsString", zim_Exception_getTraceAsString, arginfo_class_Error_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("__toString", zim_Exception___toString, arginfo_class_Error___toString, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -203,7 +158,7 @@ static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Exception", class_Exception_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Throwable);
 
 	zval property_message_default_value;
@@ -257,7 +212,7 @@ static zend_class_entry *register_class_ErrorException(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ErrorException", class_ErrorException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	zval property_severity_default_value;
 	ZVAL_LONG(&property_severity_default_value, E_ERROR);
@@ -273,7 +228,7 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Error", class_Error_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Throwable);
 
 	zval property_message_default_value;
@@ -326,8 +281,8 @@ static zend_class_entry *register_class_CompileError(zend_class_entry *class_ent
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "CompileError", class_CompileError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	INIT_CLASS_ENTRY(ce, "CompileError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -336,8 +291,8 @@ static zend_class_entry *register_class_ParseError(zend_class_entry *class_entry
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "ParseError", class_ParseError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_CompileError);
+	INIT_CLASS_ENTRY(ce, "ParseError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_CompileError, 0);
 
 	return class_entry;
 }
@@ -346,8 +301,8 @@ static zend_class_entry *register_class_TypeError(zend_class_entry *class_entry_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "TypeError", class_TypeError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	INIT_CLASS_ENTRY(ce, "TypeError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -356,8 +311,8 @@ static zend_class_entry *register_class_ArgumentCountError(zend_class_entry *cla
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "ArgumentCountError", class_ArgumentCountError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_TypeError);
+	INIT_CLASS_ENTRY(ce, "ArgumentCountError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_TypeError, 0);
 
 	return class_entry;
 }
@@ -366,8 +321,8 @@ static zend_class_entry *register_class_ValueError(zend_class_entry *class_entry
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "ValueError", class_ValueError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	INIT_CLASS_ENTRY(ce, "ValueError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -376,8 +331,8 @@ static zend_class_entry *register_class_ArithmeticError(zend_class_entry *class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "ArithmeticError", class_ArithmeticError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	INIT_CLASS_ENTRY(ce, "ArithmeticError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -386,8 +341,8 @@ static zend_class_entry *register_class_DivisionByZeroError(zend_class_entry *cl
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", class_DivisionByZeroError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ArithmeticError);
+	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ArithmeticError, 0);
 
 	return class_entry;
 }
@@ -396,8 +351,18 @@ static zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *cl
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "UnhandledMatchError", class_UnhandledMatchError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	INIT_CLASS_ENTRY(ce, "UnhandledMatchError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_RequestParseBodyException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "RequestParseBodyException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }

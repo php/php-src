@@ -113,12 +113,10 @@ lxb_html_tree_insertion_mode_foreign_content_anything_else(lxb_html_tree_t *tree
     node = lxb_html_tree_current_node(tree);
 
     if (token->tag_id == LXB_TAG_SCRIPT && node->ns == LXB_NS_SVG) {
-        lxb_html_tree_acknowledge_token_self_closing(tree, token);
         return lxb_html_tree_insertion_mode_foreign_content_script_closed(tree, token);
     }
     else {
         lxb_html_tree_open_elements_pop(tree);
-        lxb_html_tree_acknowledge_token_self_closing(tree, token);
     }
 
     return true;

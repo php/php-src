@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 #include "php.h"
 
@@ -373,12 +373,14 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			php_stream_wrapper *wrap;
 			php_stream_statbuf ssb;
 
+			// Implementation is used for both finfo_file() and mimetype_emu()
+			int buffer_param_num = (mimetype_emu ? 1 : 2);
 			if (buffer == NULL || buffer_len == 0) {
-				zend_argument_value_error(1, "cannot be empty");
+				zend_argument_must_not_be_empty_error(buffer_param_num);
 				goto clean;
 			}
 			if (CHECK_NULL_PATH(buffer, buffer_len)) {
-				zend_argument_type_error(1, "must not contain any null bytes");
+				zend_argument_type_error(buffer_param_num, "must not contain any null bytes");
 				goto clean;
 			}
 

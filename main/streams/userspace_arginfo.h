@@ -1,8 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: 9198095c858c95fcb31252ddfa24fe04787d0460 */
 
-
-
 static void register_userspace_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("STREAM_USE_PATH", USE_PATH, CONST_PERSISTENT);

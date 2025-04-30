@@ -15,6 +15,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 require("testdb.inc");
 
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $dbh->setAttribute(PDO::FB_ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
 
@@ -56,6 +57,7 @@ echo "done\n";
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec('DROP TABLE test_dialect_1');
 unset($dbh);
 --EXPECT--

@@ -8,6 +8,7 @@ if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 ?>
 --FILE--
 <?php
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 $binaryOperators = [
     "==",
@@ -44,6 +45,7 @@ $unaryOperators = [
 
 $input = [
     0,
+    0.0,
     1,
     2,
     -1,
@@ -121,7 +123,7 @@ function prepareBinaryLine($op1, $op2, $cmp, $operator) {
     try {
         $result = makeParam($cmp());
         $line .= "if (" . ($result === "(NAN)" ? "!is_nan($compare)" : "$compare !== $result") . ") { $error }";
-    } catch (Error $e) {
+    } catch (Throwable $e) {
         $msg = makeParam($e->getMessage());
         $line .= "try { $compare; $error } catch (Error \$e) { if (\$e->getMessage() !== $msg) { $error } }";
     }
@@ -137,7 +139,7 @@ function prepareUnaryLine($op, $cmp, $operator) {
     try {
         $result = makeParam($cmp());
         $line .= "if (" . ($result === "(NAN)" ? "!is_nan($compare)" : "$compare !== $result") . ") { $error }";
-    } catch (Error $e) {
+    } catch (Throwable $e) {
         $msg = makeParam($e->getMessage());
         $line .= "try { $compare; $error } catch (Error \$e) { if (\$e->getMessage() !== $msg) { $error } }";
     }

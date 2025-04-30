@@ -1,18 +1,14 @@
 --TEST--
-DOM\HTMLDocument fallback encoding test
+Dom\HTMLDocument fallback encoding test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/fallback_encoding.html");
-var_dump($dom->encoding);
-echo $dom->saveHTML();
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/fallback_encoding.html");
+var_dump($dom->inputEncoding);
+echo $dom->saveHtml();
 
-?>
---CLEAN--
-<?php
-@unlink(__DIR__ . "/windows1251_output.tmp");
 ?>
 --EXPECT--
 string(5) "UTF-8"

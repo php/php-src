@@ -2,6 +2,7 @@
 Bug #51561 (SoapServer with a extended class and using sessions, lost the setPersistence())
 --EXTENSIONS--
 soap
+session
 --SKIPIF--
 <?php
     if (!file_exists(__DIR__ . "/../../../../sapi/cli/tests/php_cli_server.inc")) {

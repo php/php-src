@@ -183,7 +183,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
-			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR) {
+			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR && conn->error_info->error_no != CR_CLIENT_INTERACTION_TIMEOUT) {
 				php_error_docref(NULL, E_WARNING, "Error reading result set's header");
 			}
 			break;
@@ -300,7 +300,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				if (FAIL == (ret = result->m.read_result_metadata(result, conn))) {
 					/* For PS, we leave them in Prepared state */
 					if (!stmt && conn->current_result) {
-						mnd_efree(conn->current_result);
+						conn->current_result->m.free_result(conn->current_result, TRUE);
 						conn->current_result = NULL;
 					}
 					DBG_ERR("Error occurred while reading metadata");
@@ -969,6 +969,13 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 {
 	bool fetched_anything;
 	zval *row_data;
+
+	// We clean the error here because in unbuffered mode we could receive a new error
+	// and therefore consumers of this method are checking for errors
+	MYSQLND_CONN_DATA *conn = result->conn;
+	if (conn) {
+		SET_EMPTY_ERROR(conn->error_info);
+	}
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 	if (FAIL == result->m.fetch_row(result, &row_data, flags, &fetched_anything)) {

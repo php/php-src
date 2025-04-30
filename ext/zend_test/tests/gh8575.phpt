@@ -10,4 +10,4 @@ zend_test.print_stderr_mshutdown=1
 ==DONE==
 --EXPECTF--
 ==DONE==
-[zend-test] MSHUTDOWN
+[zend_test] MSHUTDOWN

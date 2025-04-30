@@ -67,16 +67,6 @@ TODO:
 # include <emmintrin.h>
 #endif
 
-#ifndef HAVE_FLOORF
-# define HAVE_FLOORF 0
-#endif
-#if HAVE_FLOORF == 0
-# ifndef floorf
-/* float floorf(float x);*/
-#  define floorf(x) ((float)(floor(x)))
-# endif
-#endif
-
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
@@ -748,8 +738,8 @@ static int getPixelInterpolateWeight(gdImagePtr im, const double x, const double
  */
 int getPixelInterpolated(gdImagePtr im, const double x, const double y, const int bgColor)
 {
-	const int xi=(int)((x) < 0 ? x - 1: x);
-	const int yi=(int)((y) < 0 ? y - 1: y);
+	const int xi=(int)(x);
+	const int yi=(int)(y);
 	int yii;
 	int i;
 	double kernel, kernel_cache_y;
@@ -929,6 +919,32 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
 	return res;
 }
 
+/* Convert a double to an unsigned char, rounding to the nearest
+ * integer and clamping the result between 0 and max.  The absolute
+ * value of clr must be less than the maximum value of an unsigned
+ * short. */
+static inline unsigned char
+uchar_clamp(double clr, unsigned char max) {
+	unsigned short result;
+
+	//assert(fabs(clr) <= SHRT_MAX);
+
+	/* Casting a negative float to an unsigned short is undefined.
+	 * However, casting a float to a signed truncates toward zero and
+	 * casting a negative signed value to an unsigned of the same size
+	 * results in a bit-identical value (assuming twos-complement
+	 * arithmetic).	 This is what we want: all legal negative values
+	 * for clr will be greater than 255. */
+
+	/* Convert and clamp. */
+	result = (unsigned short)(short)(clr + 0.5);
+	if (result > max) {
+		result = (clr < 0) ? 0 : max;
+	}/* if */
+
+	return result;
+}/* uchar_clamp*/
+
 static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImagePtr dst, unsigned int dst_width, unsigned int row, LineContribType *contrib)
 {
     int *p_src_row = pSrc->tpixels[row];
@@ -936,20 +952,22 @@ static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImage
 	unsigned int x;
 
     for (x = 0; x < dst_width; x++) {
-		register unsigned char r = 0, g = 0, b = 0, a = 0;
+	    double r = 0, g = 0, b = 0, a = 0;
         const int left = contrib->ContribRow[x].Left;
         const int right = contrib->ContribRow[x].Right;
-		int i;
+	int i;
 
-		/* Accumulate each channel */
-        for (i = left; i <= right; i++) {
-			const int left_channel = i - left;
-            r += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i])));
-            g += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i])));
-            b += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i])));
-			a += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetAlpha(p_src_row[i])));
-        }
-        p_dst_row[x] = gdTrueColorAlpha(r, g, b, a);
+	/* Accumulate each channel */
+	for (i = left; i <= right; i++) {
+		const int left_channel = i - left;
+		r += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i]));
+		g += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i]));
+		b += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i]));
+		a += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetAlpha(p_src_row[i]));
+	}
+	p_dst_row[x] = gdTrueColorAlpha(uchar_clamp(r, 0xFF), uchar_clamp(g, 0xFF),
+									uchar_clamp(b, 0xFF),
+									uchar_clamp(a, 0x7F)); /* alpha is 0..127 */
     }
 }
 
@@ -982,7 +1000,7 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 {
 	unsigned int y;
 	for (y = 0; y < dst_height; y++) {
-		register unsigned char r = 0, g = 0, b = 0, a = 0;
+		double r = 0, g = 0, b = 0, a = 0;
 		const int iLeft = contrib->ContribRow[y].Left;
 		const int iRight = contrib->ContribRow[y].Right;
 		int i;
@@ -991,12 +1009,14 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 		for (i = iLeft; i <= iRight; i++) {
 			const int pCurSrc = pSrc->tpixels[i][uCol];
 			const int i_iLeft = i - iLeft;
-			r += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc)));
-			g += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc)));
-			b += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc)));
-			a += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetAlpha(pCurSrc)));
+			r += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc));
+			g += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc));
+			b += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc));
+			a += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetAlpha(pCurSrc));
 		}
-		pRes->tpixels[y][uCol] = gdTrueColorAlpha(r, g, b, a);
+		pRes->tpixels[y][uCol] = gdTrueColorAlpha(uchar_clamp(r, 0xFF), uchar_clamp(g, 0xFF),
+												  uchar_clamp(b, 0xFF),
+												  uchar_clamp(a, 0x7F)); /* alpha is 0..127 */
 	}
 }
 
@@ -1683,13 +1703,6 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 	int new_width, new_height;
 	gdRect bbox;
 
-	const gdFixed f_slop_y = f_sin;
-	const gdFixed f_slop_x = f_cos;
-	const gdFixed f_slop = f_slop_x > 0 && f_slop_y > 0 ?
-							(f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y))
-						: 0;
-
-
 	if (bgColor < 0) {
 		return NULL;
 	}
@@ -1715,15 +1728,10 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 			long m = gd_fxtoi(f_m);
 			long n = gd_fxtoi(f_n);
 
-			if ((n <= 0) || (m <= 0) || (m >= src_h) || (n >= src_w)) {
+			if (m < -1 || n < -1 || m >= src_h || n >= src_w ) {
 				dst->tpixels[dst_offset_y][dst_offset_x++] = bgColor;
-			} else if ((n <= 1) || (m <= 1) || (m >= src_h - 1) || (n >= src_w - 1)) {
-				register int c = getPixelInterpolated(src, n, m, bgColor);
-				c = c | (( gdTrueColorGetAlpha(c) + ((int)(127* gd_fxtof(f_slop)))) << 24);
-
-				dst->tpixels[dst_offset_y][dst_offset_x++] = _color_blend(bgColor, c);
 			} else {
-				dst->tpixels[dst_offset_y][dst_offset_x++] = getPixelInterpolated(src, n, m, bgColor);
+				dst->tpixels[dst_offset_y][dst_offset_x++] = getPixelInterpolated(src, gd_fxtod(f_n), gd_fxtod(f_m), bgColor);
 			}
 		}
 		dst_offset_y++;

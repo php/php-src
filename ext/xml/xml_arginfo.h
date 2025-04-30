@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 69734dd8094fd69c878383d488900886d1162998 */
+ * Stub hash: 94b232499672dfd61c2c585a5d1d8a27d1a4a7ce */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create, 0, 0, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
@@ -82,7 +82,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_xml_parser_get_option, 0, 2, MAY
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(xml_parser_create);
 ZEND_FUNCTION(xml_parser_create_ns);
 ZEND_FUNCTION(xml_set_object);
@@ -106,11 +105,10 @@ ZEND_FUNCTION(xml_parser_free);
 ZEND_FUNCTION(xml_parser_set_option);
 ZEND_FUNCTION(xml_parser_get_option);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xml_parser_create, arginfo_xml_parser_create)
 	ZEND_FE(xml_parser_create_ns, arginfo_xml_parser_create_ns)
-	ZEND_FE(xml_set_object, arginfo_xml_set_object)
+	ZEND_RAW_FENTRY("xml_set_object", zif_xml_set_object, arginfo_xml_set_object, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(xml_set_element_handler, arginfo_xml_set_element_handler)
 	ZEND_FE(xml_set_character_data_handler, arginfo_xml_set_character_data_handler)
 	ZEND_FE(xml_set_processing_instruction_handler, arginfo_xml_set_processing_instruction_handler)
@@ -130,11 +128,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xml_parser_free, arginfo_xml_parser_free)
 	ZEND_FE(xml_parser_set_option, arginfo_xml_parser_set_option)
 	ZEND_FE(xml_parser_get_option, arginfo_xml_parser_get_option)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_XMLParser_methods[] = {
 	ZEND_FE_END
 };
 
@@ -168,15 +161,27 @@ static void register_xml_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_WHITE", PHP_XML_OPTION_SKIP_WHITE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_OPTION_PARSE_HUGE", PHP_XML_OPTION_PARSE_HUGE, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("XML_SAX_IMPL", PHP_XML_SAX_IMPL, CONST_PERSISTENT);
+
+
+	zend_attribute *attribute_Deprecated_func_xml_set_object_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "xml_set_object", sizeof("xml_set_object") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_xml_set_object_0_arg0;
+	zend_string *attribute_Deprecated_func_xml_set_object_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_xml_set_object_0_arg0, attribute_Deprecated_func_xml_set_object_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_xml_set_object_0->args[0].value, &attribute_Deprecated_func_xml_set_object_0_arg0);
+	attribute_Deprecated_func_xml_set_object_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_xml_set_object_0_arg1;
+	zend_string *attribute_Deprecated_func_xml_set_object_0_arg1_str = zend_string_init("provide a proper method callable to xml_set_*_handler() functions", strlen("provide a proper method callable to xml_set_*_handler() functions"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_xml_set_object_0_arg1, attribute_Deprecated_func_xml_set_object_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_xml_set_object_0->args[1].value, &attribute_Deprecated_func_xml_set_object_0_arg1);
+	attribute_Deprecated_func_xml_set_object_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_XMLParser(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "XMLParser", class_XMLParser_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "XMLParser", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

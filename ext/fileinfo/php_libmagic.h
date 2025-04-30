@@ -17,15 +17,11 @@
 #ifndef PHP_LIBMAGIC_H
 #define PHP_LIBMAGIC_H
 
-#include "php_fileinfo.h"
-
 #include "main/php_network.h"
-#include "ext/standard/php_string.h"
 #include "ext/pcre/php_pcre.h"
 
 #ifdef PHP_WIN32
 #include "win32/param.h"
-#include "win32/unistd.h"
 
 #ifdef _WIN64
 #define FINFO_LSEEK_FUNC _lseeki64

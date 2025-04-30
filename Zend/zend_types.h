@@ -139,7 +139,7 @@ typedef struct {
 
 typedef struct {
 	uint32_t num_types;
-	zend_type types[1] ZEND_ELEMENT_COUNT(num_types);
+	zend_type types[1];
 } zend_type_list;
 
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
@@ -374,7 +374,7 @@ struct _zend_string {
 	zend_refcounted_h gc;
 	zend_ulong        h;                /* hash value */
 	size_t            len;
-	char              val[1] ZEND_ELEMENT_COUNT(len);
+	char              val[1];
 };
 
 typedef struct _Bucket {
@@ -556,6 +556,7 @@ typedef struct _HashTableIterator {
 struct _zend_object {
 	zend_refcounted_h gc;
 	uint32_t          handle; // TODO: may be removed ???
+	uint32_t          extra_flags; /* OBJ_EXTRA_FLAGS() */
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
@@ -572,7 +573,7 @@ struct _zend_resource {
 typedef struct {
 	size_t num;
 	size_t num_allocated;
-	struct _zend_property_info *ptr[1] ZEND_ELEMENT_COUNT(num);
+	struct _zend_property_info *ptr[1];
 } zend_property_info_list;
 
 typedef union {
@@ -633,10 +634,11 @@ struct _zend_ast_ref {
 #define ZEND_GUARD_PROPERTY_SET		(1<<1)
 #define ZEND_GUARD_PROPERTY_UNSET	(1<<2)
 #define ZEND_GUARD_PROPERTY_ISSET	(1<<3)
-#define ZEND_GUARD_PROPERTY_MASK	15
-#define ZEND_GUARD_RECURSION_DEBUG	(1<<4)
-#define ZEND_GUARD_RECURSION_EXPORT	(1<<5)
-#define ZEND_GUARD_RECURSION_JSON	(1<<6)
+#define ZEND_GUARD_PROPERTY_HOOK	(1<<4)
+#define ZEND_GUARD_PROPERTY_MASK	31
+#define ZEND_GUARD_RECURSION_DEBUG	(1<<5)
+#define ZEND_GUARD_RECURSION_EXPORT	(1<<6)
+#define ZEND_GUARD_RECURSION_JSON	(1<<7)
 
 #define ZEND_GUARD_RECURSION_TYPE(t) ZEND_GUARD_RECURSION_ ## t
 
@@ -790,11 +792,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 /* zval.u1.v.type_flags */
 #define IS_TYPE_REFCOUNTED			(1<<0)
 #define IS_TYPE_COLLECTABLE			(1<<1)
-/* Used for static variables to check if they have been initialized. We can't use IS_UNDEF because
- * we can't store IS_UNDEF zvals in the static_variables HashTable. This needs to live in type_info
- * so that the ZEND_ASSIGN overrides it but is moved to extra to avoid breaking the Z_REFCOUNTED()
- * optimization that only checks for Z_TYPE_FLAGS() without `& (IS_TYPE_COLLECTABLE|IS_TYPE_REFCOUNTED)`. */
-#define IS_STATIC_VAR_UNINITIALIZED		(1<<0)
 
 #if 1
 /* This optimized version assumes that we have a single "type_flag" */
@@ -832,6 +829,13 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_OBJ_FREE_CALLED			(1<<9)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
+
+/* object extra flags (zend_object.flags) */
+
+#define IS_OBJ_LAZY_UNINITIALIZED   (1U<<31) /* Virtual proxy or uninitialized Ghost */
+#define IS_OBJ_LAZY_PROXY           (1U<<30) /* Virtual proxy (may be initialized) */
+
+#define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 
 /* Fast class cache */
 #define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
@@ -1560,6 +1564,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
  * macros for this purpose, so this workaround is easier to remove in the future. */
 #define IS_PROP_UNINIT (1<<0)
 #define IS_PROP_REINITABLE (1<<1)  /* It has impact only on readonly properties */
+#define IS_PROP_LAZY (1<<2)
 #define Z_PROP_FLAG_P(z) Z_EXTRA_P(z)
 #define ZVAL_COPY_VALUE_PROP(z, v) \
 	do { *(z) = *(v); } while (0)

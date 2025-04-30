@@ -45,7 +45,7 @@ if($locale_info_before != $locale_info_after){
 
 echo "\nDone\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing setlocale() : usage variations - Setting system locale = null ***
 Locale info, before setting the locale
 array(18) {
@@ -82,17 +82,13 @@ array(18) {
   ["n_sign_posn"]=>
   int(1)
   ["grouping"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
+  array(%d) {%A
+    [%d]=>
     int(3)
   }
   ["mon_grouping"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
+  array(%d) {%A
+    [%d]=>
     int(3)
   }
 }
@@ -132,17 +128,13 @@ array(18) {
   ["n_sign_posn"]=>
   int(1)
   ["grouping"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
+  array(%d) {%A
+    [%d]=>
     int(3)
   }
   ["mon_grouping"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
+  array(%d) {%A
+    [%d]=>
     int(3)
   }
 }

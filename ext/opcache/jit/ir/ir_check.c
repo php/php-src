@@ -42,11 +42,11 @@ void ir_consistency_check(void)
 
 static bool ir_check_use_list(const ir_ctx *ctx, ir_ref from, ir_ref to)
 {
-	ir_ref n, j, *p;
+	ir_ref n, *p;
 	ir_use_list *use_list = &ctx->use_lists[from];
 
 	n = use_list->count;
-	for (j = 0, p = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 		if (*p == to) {
 			return 1;
 		}
@@ -106,7 +106,10 @@ bool ir_check(const ir_ctx *ctx)
 			use = *p;
 			if (use != IR_UNUSED) {
 				if (IR_IS_CONST_REF(use)) {
-					if (use >= ctx->consts_count) {
+					if (IR_OPND_KIND(flags, j) != IR_OPND_DATA) {
+						fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) must not be constant\n", i, j, use);
+						ok = 0;
+					} else if (use >= ctx->consts_count) {
 						fprintf(stderr, "ir_base[%d].ops[%d] constant reference (%d) is out of range\n", i, j, use);
 						ok = 0;
 					}
@@ -125,9 +128,9 @@ bool ir_check(const ir_ctx *ctx)
 									ok = 0;
 								}
 							}
-							if (use >= i
-							 && !(insn->op == IR_PHI
-							  && (!(ctx->flags2 & IR_LINEAR) || ctx->ir_base[insn->op1].op == IR_LOOP_BEGIN))) {
+							if ((ctx->flags2 & IR_LINEAR)
+							 && use >= i
+							 && !(insn->op == IR_PHI && ctx->ir_base[insn->op1].op == IR_LOOP_BEGIN)) {
 								fprintf(stderr, "ir_base[%d].ops[%d] invalid forward reference (%d)\n", i, j, use);
 								ok = 0;
 							}
@@ -178,14 +181,10 @@ bool ir_check(const ir_ctx *ctx)
 												/* boolean not */
 												break;
 											}
-											if (sizeof(void*) == 8) {
-												if (insn->type == IR_ADDR && (use_insn->type == IR_U64 || use_insn->type == IR_I64)) {
-													break;
-												}
-											} else {
-												if (insn->type == IR_ADDR && (use_insn->type == IR_U32 || use_insn->type == IR_I32)) {
-													break;
-												}
+											if (insn->type == IR_ADDR && (use_insn->type == IR_UINTPTR_T || use_insn->type == IR_INTPTR_T)) {
+												break;
+											} else if (use_insn->type == IR_ADDR && (insn->type == IR_UINTPTR_T || insn->type == IR_INTPTR_T)) {
+												break;
 											}
 											fprintf(stderr, "ir_base[%d].ops[%d] (%d) type is incompatible with result type (%d != %d)\n",
 												i, j, use, use_insn->type, insn->type);
@@ -216,7 +215,8 @@ bool ir_check(const ir_ctx *ctx)
 							}
 							break;
 						case IR_OPND_CONTROL_DEP:
-							if (use >= i
+							if ((ctx->flags2 & IR_LINEAR)
+							 && use >= i
 							 && !(insn->op == IR_LOOP_BEGIN)) {
 								fprintf(stderr, "ir_base[%d].ops[%d] invalid forward reference (%d)\n", i, j, use);
 								ok = 0;
@@ -294,13 +294,19 @@ bool ir_check(const ir_ctx *ctx)
 					ok = 0;
 				}
 				break;
+			case IR_PARAM:
+				if (i > 2 && ctx->ir_base[i - 1].op != IR_PARAM) {
+					fprintf(stderr, "ir_base[%d].op PARAMs must be used only right after START\n", i);
+					ok = 0;
+				}
+				break;
 		}
 
 		if (ctx->use_lists) {
 			ir_use_list *use_list = &ctx->use_lists[i];
-			ir_ref count;
+			ir_ref count, n = use_list->count;
 
-			for (j = 0, p = &ctx->use_edges[use_list->refs]; j < use_list->count; j++, p++) {
+			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 				use = *p;
 				if (!ir_check_input_list(ctx, i, use)) {
 					fprintf(stderr, "ir_base[%d] is in use list of ir_base[%d]\n", use, i);
@@ -341,8 +347,8 @@ bool ir_check(const ir_ctx *ctx)
 						break;
 					default:
 						/* skip data references */
-						count = use_list->count;
-						for (j = 0, p = &ctx->use_edges[use_list->refs]; j < use_list->count; j++, p++) {
+						count = n = use_list->count;
+						for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 							use = *p;
 							if (!(ir_op_flags[ctx->ir_base[use].op] & IR_OP_FLAG_CONTROL)) {
 								count--;
@@ -364,6 +370,10 @@ bool ir_check(const ir_ctx *ctx)
 								if (count == 1) {
 									break;
 								}
+							}
+							if (count == 0 && (insn->op == IR_END || insn->op == IR_LOOP_END)) {
+								/* Dead block */
+								break;
 							}
 							fprintf(stderr, "ir_base[%d].op (%s) must have 1 successor (%d)\n",
 								i, ir_op_name[insn->op], count);

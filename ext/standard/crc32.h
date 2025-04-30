@@ -29,7 +29,7 @@
 PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr);
 
 /* Return FAILURE if stream reading fail */
-PHPAPI int php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr);
+PHPAPI zend_result php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr);
 
 /* generated using the AUTODIN II polynomial
  *	x^32 + x^26 + x^23 + x^22 + x^16 +

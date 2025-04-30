@@ -77,15 +77,6 @@ void collator_register_Collator_symbols(int module_number)
 	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
 	Collator_handlers.clone_obj = NULL;
 	Collator_handlers.free_obj = Collator_objects_free;
-
-	/* Declare 'Collator' class properties. */
-	if( !Collator_ce_ptr )
-	{
-		zend_error( E_ERROR,
-			"Collator: attempt to create properties "
-			"on a non-registered class." );
-		return;
-	}
 }
 /* }}} */
 

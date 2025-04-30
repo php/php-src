@@ -66,7 +66,7 @@ static inline bool php_com_is_valid_object(zval *zv)
 } while(0)
 
 /* com_extension.c */
-zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *php_com_saproxy_class_entry;
+extern zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *php_com_saproxy_class_entry;
 
 /* com_handlers.c */
 zend_object* php_com_object_new(zend_class_entry *ce);
@@ -103,7 +103,6 @@ zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_fu
 		WORD flags,	VARIANT *v, int nargs, zval *args);
 
 /* com_wrapper.c */
-int php_com_wrapper_minit(INIT_FUNC_ARGS);
 PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name);
 PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val);
 

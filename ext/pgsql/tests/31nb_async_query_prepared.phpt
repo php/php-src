@@ -5,7 +5,6 @@ pgsql
 --SKIPIF--
 <?php
 include("inc/skipif.inc");
-if (!function_exists('pg_send_prepare')) die('skip function pg_send_prepare() does not exist');
 ?>
 --FILE--
 <?php
@@ -114,5 +113,8 @@ $table_name = "table_31nb_async_query_prepared";
 $db = pg_connect($conn_str);
 pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling pg_field_prtlen() with 2 arguments is deprecated, use the 3-parameter signature with a null $row parameter instead in %s on line %d
+
+Deprecated: Calling pg_field_is_null() with 2 arguments is deprecated, use the 3-parameter signature with a null $row parameter instead in %s on line %d
 OK

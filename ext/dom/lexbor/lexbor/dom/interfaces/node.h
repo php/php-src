@@ -166,7 +166,7 @@ lxb_dom_node_text_content_set(lxb_dom_node_t *node,
                               const lxb_char_t *content, size_t len);
 
 LXB_API bool
-lxb_dom_node_is_empty(lxb_dom_node_t *root);
+lxb_dom_node_is_empty(const lxb_dom_node_t *root);
 
 
 /*

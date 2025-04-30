@@ -29,7 +29,6 @@
 #include "php_ini.h"
 #include "SAPI.h"
 
-#define CORE_PRIVATE
 #include "apr_strings.h"
 #include "apr_time.h"
 #include "ap_config.h"
@@ -141,9 +140,6 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_STRING(method);
 		ADD_TIME(mtime);
 		ADD_LONG(clength);
-#if MODULE_MAGIC_NUMBER < 20020506
-		ADD_STRING(boundary);
-#endif
 		ADD_STRING(range);
 		ADD_LONG(chunked);
 		ADD_STRING(content_type);
@@ -317,19 +313,15 @@ PHP_FUNCTION(apache_getenv)
 }
 /* }}} */
 
-static char *php_apache_get_version(void)
+static const char *php_apache_get_version(void)
 {
-#if MODULE_MAGIC_NUMBER_MAJOR >= 20060905
-	return (char *) ap_get_server_banner();
-#else
-	return (char *) ap_get_server_version();
-#endif
+	return ap_get_server_banner();
 }
 
 /* {{{ Fetch Apache version */
 PHP_FUNCTION(apache_get_version)
 {
-	char *apv = php_apache_get_version();
+	const char *apv = php_apache_get_version();
 
 	if (apv && *apv) {
 		RETURN_STRING(apv);
@@ -348,7 +340,7 @@ PHP_FUNCTION(apache_get_modules)
 	array_init(return_value);
 
 	for (n = 0; ap_loaded_modules[n]; ++n) {
-		char *s = (char *) ap_loaded_modules[n]->name;
+		const char *s = ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
 			add_next_index_stringl(return_value, s, (p - s));
 		} else {
@@ -360,42 +352,37 @@ PHP_FUNCTION(apache_get_modules)
 
 PHP_MINFO_FUNCTION(apache)
 {
-	char *apv = php_apache_get_version();
+	const char *apv = php_apache_get_version();
 	smart_str tmp1 = {0};
 	char tmp[1024];
 	int n, max_requests;
 	char *p;
 	server_rec *serv = ((php_struct *) SG(server_context))->r->server;
 #ifndef PHP_WIN32
-# if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	AP_DECLARE_DATA extern unixd_config_rec ap_unixd_config;
-# else
-	AP_DECLARE_DATA extern unixd_config_rec unixd_config;
-# endif
 #endif
 
 	for (n = 0; ap_loaded_modules[n]; ++n) {
-		char *s = (char *) ap_loaded_modules[n]->name;
+		const char *s = ap_loaded_modules[n]->name;
+		if (n > 0) {
+			smart_str_appendc(&tmp1, ' ');
+		}
 		if ((p = strchr(s, '.'))) {
 			smart_str_appendl(&tmp1, s, (p - s));
 		} else {
 			smart_str_appends(&tmp1, s);
 		}
-		smart_str_appendc(&tmp1, ' ');
 	}
-	if (tmp1.s) {
-		if (tmp1.s->len > 0) {
-			tmp1.s->val[tmp1.s->len - 1] = '\0';
-		} else {
-			tmp1.s->val[0] = '\0';
-		}
+	if (!tmp1.s) {
+		smart_str_appendc(&tmp1, '/');
 	}
+	smart_str_0(&tmp1);
 
 	php_info_print_table_start();
 	if (apv && *apv) {
 		php_info_print_table_row(2, "Apache Version", apv);
 	}
-	snprintf(tmp, sizeof(tmp), "%d", MODULE_MAGIC_NUMBER);
+	snprintf(tmp, sizeof(tmp), "%d", MODULE_MAGIC_NUMBER_MAJOR);
 	php_info_print_table_row(2, "Apache API Version", tmp);
 
 	if (serv->server_admin && *(serv->server_admin)) {
@@ -406,11 +393,7 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(2, "Hostname:Port", tmp);
 
 #ifndef PHP_WIN32
-#if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", ap_unixd_config.user_name, ap_unixd_config.user_id, ap_unixd_config.group_id);
-#else
-	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
-#endif
 	php_info_print_table_row(2, "User/Group", tmp);
 #endif
 
@@ -425,7 +408,7 @@ PHP_MINFO_FUNCTION(apache)
 
 	php_info_print_table_row(2, "Virtual Server", (serv->is_virtual ? "Yes" : "No"));
 	php_info_print_table_row(2, "Server Root", ap_server_root);
-	php_info_print_table_row(2, "Loaded Modules", tmp1.s->val);
+	php_info_print_table_row(2, "Loaded Modules", ZSTR_VAL(tmp1.s));
 
 	smart_str_free(&tmp1);
 	php_info_print_table_end();

@@ -374,14 +374,16 @@ static process_pair *process_get(FILE *stream)
 	process_pair *ptr;
 	process_pair *newptr;
 
-	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
-		if (ptr->stream == stream) {
-			break;
+	if (TWG(process) != NULL) {
+		for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
+			if (ptr->stream == stream) {
+				break;
+			}
 		}
-	}
 
-	if (ptr < (TWG(process) + TWG(process_size))) {
-		return ptr;
+		if (ptr < (TWG(process) + TWG(process_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (process_pair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(process_pair));
@@ -400,19 +402,21 @@ static shm_pair *shm_get(key_t key, void *addr)
 	shm_pair *ptr;
 	shm_pair *newptr;
 
-	for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
-		if (!ptr->descriptor) {
-			continue;
+	if (TWG(shm) != NULL) {
+		for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (!ptr->descriptor) {
+				continue;
+			}
+			if (!addr && ptr->descriptor->shm_perm.key == key) {
+				break;
+			} else if (ptr->addr == addr) {
+				break;
+			}
 		}
-		if (!addr && ptr->descriptor->shm_perm.key == key) {
-			break;
-		} else if (ptr->addr == addr) {
-			break;
-		}
-	}
 
-	if (ptr < (TWG(shm) + TWG(shm_size))) {
-		return ptr;
+		if (ptr < (TWG(shm) + TWG(shm_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (shm_pair*)realloc((void*)TWG(shm), (TWG(shm_size)+1)*sizeof(shm_pair));
@@ -477,12 +481,13 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /s /c ")+2);
+	size_t cmd_buffer_size = strlen(command) + strlen(TWG(comspec)) + sizeof(" /s /c ") + 2;
+	cmd = malloc(cmd_buffer_size);
 	if (!cmd) {
 		return NULL;
 	}
 
-	sprintf(cmd, "%s /s /c \"%s\"", TWG(comspec), command);
+	snprintf(cmd, cmd_buffer_size, "%s /s /c \"%s\"", TWG(comspec), command);
 	cmdw = php_win32_cp_any_to_w(cmd);
 	if (!cmdw) {
 		free(cmd);
@@ -707,8 +712,10 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	if (NULL != shm->descriptor && (shm->descriptor->shm_perm.key != key || size > shm->descriptor->shm_segsz)) {
 		if (NULL != shm->segment) {
 			CloseHandle(shm->segment);
+			shm->segment = INVALID_HANDLE_VALUE;
 		}
 		UnmapViewOfFile(shm->descriptor);
+		shm->descriptor = NULL;
 		return -1;
 	}
 
@@ -744,8 +751,8 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch--;
 
-	ret = 1;
-	if (!ret  && shm->descriptor->shm_nattch <= 0) {
+	ret = 0;
+	if (shm->descriptor->shm_nattch <= 0) {
 		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
 		shm->descriptor = NULL;
 	}

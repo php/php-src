@@ -232,6 +232,52 @@ ZEND_METHOD(NumericCastableNoOperations, __construct)
 	ZVAL_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), n);
 }
 
+static zend_class_entry *dimension_handlers_no_ArrayAccess_ce;
+static zend_object_handlers dimension_handlers_no_ArrayAccess_object_handlers;
+
+static zend_object* dimension_handlers_no_ArrayAccess_object_create(zend_class_entry* ce) {
+	zend_object *object = zend_objects_new(ce);
+	object_properties_init(object, ce);
+	object->handlers = &dimension_handlers_no_ArrayAccess_object_handlers;
+	return object;
+}
+
+static void dimension_common_helper(zend_object *object, zval *offset, int prop_access_type) {
+	ZVAL_BOOL(OBJ_PROP_NUM(object, prop_access_type), true);
+	/* hasOffset */
+	ZVAL_BOOL(OBJ_PROP_NUM(object, 5), offset != NULL);
+	if (offset) {
+		ZVAL_COPY(OBJ_PROP_NUM(object, 7), offset);
+	}
+}
+
+static zval* dimension_handlers_no_ArrayAccess_read_dimension(zend_object *object, zval *offset, int type, zval *rv) {
+	dimension_common_helper(object, offset, 0);
+	/* ReadType */
+	ZVAL_LONG(OBJ_PROP_NUM(object, 4), type);
+
+	/* Normal logic */
+	ZVAL_BOOL(rv, true);
+	return rv;
+}
+
+static void dimension_handlers_no_ArrayAccess_write_dimension(zend_object *object, zval *offset, zval *value) {
+	dimension_common_helper(object, offset, 1);
+}
+
+static int dimension_handlers_no_ArrayAccess_has_dimension(zend_object *object, zval *offset, int check_empty) {
+	/* checkEmpty */
+	ZVAL_LONG(OBJ_PROP_NUM(object, 6), check_empty);
+	dimension_common_helper(object, offset, 2);
+
+	/* Normal logic */
+	return 1;
+}
+
+static void dimension_handlers_no_ArrayAccess_unset_dimension(zend_object *object, zval *offset) {
+	dimension_common_helper(object, offset, 3);
+}
+
 void zend_test_object_handlers_init(void)
 {
 	/* DoOperationNoCast class */
@@ -255,4 +301,12 @@ void zend_test_object_handlers_init(void)
 	numeric_castable_no_operation_ce->create_object = numeric_castable_no_operation_object_create;
 	memcpy(&numeric_castable_no_operation_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	numeric_castable_no_operation_object_handlers.cast_object = numeric_castable_no_operation_cast_object;
+
+	dimension_handlers_no_ArrayAccess_ce = register_class_DimensionHandlersNoArrayAccess();
+	dimension_handlers_no_ArrayAccess_ce->create_object = dimension_handlers_no_ArrayAccess_object_create;
+	memcpy(&dimension_handlers_no_ArrayAccess_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	dimension_handlers_no_ArrayAccess_object_handlers.read_dimension = dimension_handlers_no_ArrayAccess_read_dimension;
+	dimension_handlers_no_ArrayAccess_object_handlers.write_dimension = dimension_handlers_no_ArrayAccess_write_dimension;
+	dimension_handlers_no_ArrayAccess_object_handlers.has_dimension = dimension_handlers_no_ArrayAccess_has_dimension;
+	dimension_handlers_no_ArrayAccess_object_handlers.unset_dimension = dimension_handlers_no_ArrayAccess_unset_dimension;
 }

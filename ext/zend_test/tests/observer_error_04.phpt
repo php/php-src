@@ -5,6 +5,7 @@ zend_test
 soap
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
 --FILE--
@@ -46,9 +47,9 @@ echo 'Done.' . PHP_EOL;
   </main:NULL>
   <!-- init Exception::getMessage() -->
   <Exception::getMessage>
-  </Exception::getMessage:'SOAP-ERROR: Parsing WSDL: Couldn\'t load from \'foo\' : failed to load external entity "foo"
+  </Exception::getMessage:'SOAP-ERROR: Parsing WSDL: %s
 '>
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'foo' : failed to load external entity "foo"
+SOAP-ERROR: Parsing WSDL: %s
 
 Done.
 </file '%s%eobserver_error_%d.php'>

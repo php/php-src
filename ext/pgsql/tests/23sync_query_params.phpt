@@ -5,7 +5,6 @@ pgsql
 --SKIPIF--
 <?php
 include("inc/skipif.inc");
-if (!function_exists('pg_query_params')) die('skip function pg_query_params() does not exist');
 ?>
 --FILE--
 <?php

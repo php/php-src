@@ -23,4 +23,4 @@ try {
 
 ?>
 --EXPECT--
-pcntl_unshare(): Argument #1 ($flags) must be a combination of CLONE_* flags
+pcntl_unshare(): Argument #1 ($flags) must be a combination of CLONE_* flags, or at least one flag is unsupported by the kernel 

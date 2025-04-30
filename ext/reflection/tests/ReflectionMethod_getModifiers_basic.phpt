@@ -87,7 +87,7 @@ reflectMethodModifiers("DerivedClass");
 reflectMethodModifiers("TestInterface");
 reflectMethodModifiers("AbstractClass");
 
-$a = new ReflectionMethod('ReflectionMethod::getModifiers');
+$a = new ReflectionMethod('ReflectionMethod', 'getModifiers');
 
 echo "ReflectionMethod::getModifiers() modifiers:\n";
 printf("0x%08x\n", $a->getModifiers());

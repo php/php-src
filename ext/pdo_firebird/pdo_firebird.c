@@ -15,16 +15,19 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "pdo_firebird_arginfo.h"
+
+static zend_class_entry *PdoFirebird_ce;
 
 /* {{{ pdo_firebird_deps */
 static const zend_module_dep pdo_firebird_deps[] = {
@@ -62,12 +65,15 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 		return FAILURE;
 	}
 
+	PdoFirebird_ce = register_class_Pdo_Firebird(pdo_dbh_ce);
+	PdoFirebird_ce->create_object = pdo_dbh_new;
+
 #ifdef ZEND_SIGNALS
 	/* firebird replaces some signals at runtime, suppress warnings. */
 	SIGG(check) = 0;
 #endif
 
-	return SUCCESS;
+	return php_pdo_register_driver_specific_ce(&pdo_firebird_driver, PdoFirebird_ce);
 }
 /* }}} */
 
@@ -82,11 +88,24 @@ PHP_MSHUTDOWN_FUNCTION(pdo_firebird) /* {{{ */
 PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 {
 	char version[64];
+	char api_version[8];
 	isc_get_client_version(version);
+
+	snprintf(api_version, 7, "%d", FB_API_VER);
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PDO Driver for Firebird", "enabled");
 	php_info_print_table_row(2, "Client Library Version", version);
+	php_info_print_table_row(2, "Firebird API version", api_version);
 	php_info_print_table_end();
 }
 /* }}} */
+
+PHP_METHOD(Pdo_Firebird, getApiVersion)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(FB_API_VER);
+}

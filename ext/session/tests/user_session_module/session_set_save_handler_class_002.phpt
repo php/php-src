@@ -86,6 +86,8 @@ session_unset();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : full handler implementation ***
+
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 string(%d) "%s"
 string(4) "user"
 array(1) {

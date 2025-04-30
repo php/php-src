@@ -64,6 +64,7 @@ php llk.php ffi.g
 /* forward declarations */
 static void yy_error(const char *msg);
 static void yy_error_sym(const char *msg, int sym);
+static void yy_error_str(const char *msg, const char *str);
 
 %}
 
@@ -96,7 +97,10 @@ declarations:
 				initializer?
 				{zend_ffi_declare(name, name_len, &dcl);}
 			)*
-		)?
+		|
+			/* empty */
+			{if (common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STRUCT | ZEND_FFI_DCL_UNION)) zend_ffi_cleanup_dcl(&common_dcl);}
+		)
 		";"
 	)*
 ;
@@ -260,12 +264,14 @@ struct_contents(zend_ffi_dcl *dcl):
 
 struct_declaration(zend_ffi_dcl *struct_dcl):
 	{zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;}
+	{zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;}
 	specifier_qualifier_list(&common_field_dcl)
+	{base_field_dcl = common_field_dcl;}
 	(	/* empty */
 		{zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);}
 	|	struct_declarator(struct_dcl, &common_field_dcl)
 		(	","
-			{zend_ffi_dcl field_dcl = common_field_dcl;}
+			{zend_ffi_dcl field_dcl = base_field_dcl;}
 			attributes(&field_dcl)?
 			struct_declarator(struct_dcl, &field_dcl)
 		)*
@@ -917,4 +923,8 @@ static void yy_error(const char *msg) {
 
 static void yy_error_sym(const char *msg, int sym) {
 	zend_ffi_parser_error("%s '%s' at line %d", msg, sym_name[sym], yy_line);
+}
+
+static void yy_error_str(const char *msg, const char *str) {
+	zend_ffi_parser_error("%s '%s' at line %d\n", msg, str, yy_line);
 }

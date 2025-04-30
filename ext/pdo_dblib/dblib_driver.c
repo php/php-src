@@ -22,8 +22,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
@@ -148,7 +148,7 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	bool use_national_character_set = 0;
 	size_t i;
 	char *q;
-	size_t quotedlen = 0;
+	size_t quotedlen = 0, extralen = 0;
 	zend_string *quoted_str;
 
 	if (H->assume_national_character_set_strings) {
@@ -163,7 +163,7 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 
 	/* Detect quoted length, adding extra char for doubled single quotes */
 	for (i = 0; i < ZSTR_LEN(unquoted); i++) {
-		if (ZSTR_VAL(unquoted)[i] == '\'') ++quotedlen;
+		if (ZSTR_VAL(unquoted)[i] == '\'') ++extralen;
 		++quotedlen;
 	}
 
@@ -171,6 +171,12 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	if (use_national_character_set) {
 		++quotedlen; /* N prefix */
 	}
+
+	if (UNEXPECTED(quotedlen > ZSTR_MAX_LEN - extralen)) {
+		return NULL;
+	}
+
+	quotedlen += extralen;
 	quoted_str = zend_string_alloc(quotedlen, 0);
 	q = ZSTR_VAL(quoted_str);
 	if (use_national_character_set) {
@@ -290,10 +296,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			return SUCCEED == dbsettime(lval);
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			if (!pdo_get_long_param(&lval, val)) {
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
-			H->stringify_uniqueidentifier = lval;
+			H->stringify_uniqueidentifier = bval;
 			return true;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
 			if (!pdo_get_bool_param(&bval, val)) {
@@ -302,10 +308,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			H->skip_empty_rowsets = bval;
 			return true;
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
-			if (!pdo_get_long_param(&lval, val)) {
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
-			H->datetime_convert = lval;
+			H->datetime_convert = bval;
 			return true;
 		default:
 			return false;
@@ -436,7 +442,8 @@ static const struct pdo_dbh_methods dblib_methods = {
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */
-	NULL /* get gc */
+	NULL, /* get gc */
+	NULL /* scanner */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)

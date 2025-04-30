@@ -533,14 +533,15 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			return -1;
 		}
 
-		new_con = malloc(strlen(con) + strlen(wp->config->apparmor_hat) + 3); // // + 0 Byte
+		size_t new_con_length = strlen(con) + strlen(wp->config->apparmor_hat) + 3; // // + 0 Byte
+		new_con = malloc(new_con_length);
 		if (!new_con) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to allocate memory for apparmor hat change.", wp->config->name);
 			free(con);
 			return -1;
 		}
 
-		if (0 > sprintf(new_con, "%s//%s", con, wp->config->apparmor_hat)) {
+		if (0 > snprintf(new_con, new_con_length, "%s//%s", con, wp->config->apparmor_hat)) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to construct apparmor confinement.", wp->config->name);
 			free(con);
 			free(new_con);

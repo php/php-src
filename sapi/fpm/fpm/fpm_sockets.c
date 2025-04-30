@@ -43,12 +43,12 @@ enum { FPM_GET_USE_SOCKET = 1, FPM_STORE_SOCKET = 2, FPM_STORE_USE_SOCKET = 3 };
 static int routemax = -1;
 #endif
 
-static inline void fpm_sockets_get_env_name(char *envname, unsigned idx) /* {{{ */
+static inline void fpm_sockets_get_env_name(char *envname, size_t envname_length, unsigned idx) /* {{{ */
 {
 	if (!idx) {
 		strcpy(envname, "FPM_SOCKETS");
 	} else {
-		sprintf(envname, "FPM_SOCKETS_%d", idx);
+		snprintf(envname, envname_length, "FPM_SOCKETS_%d", idx);
 	}
 }
 /* }}} */
@@ -70,7 +70,7 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 		} else { /* on PARENT EXEC we want socket fds to be inherited through environment variable */
 			char fd[32];
 			char *tmpenv_value;
-			sprintf(fd, "%d", ls->sock);
+			snprintf(fd, sizeof(fd), "%d", ls->sock);
 
 			socket_set_buf = (i % FPM_ENV_SOCKET_SET_SIZE == 0 && i) ? 1 : 0;
 			tmpenv_value = realloc(env_value, p + (p ? 1 : 0) + strlen(ls->key) + 1 + strlen(fd) + socket_set_buf + 1);
@@ -104,10 +104,10 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 
 	if (env_value) {
 		for (i = 0; i < socket_set_count; i++) {
-			fpm_sockets_get_env_name(envname, i);
+			fpm_sockets_get_env_name(envname, sizeof(envname), i);
 			setenv(envname, env_value + socket_set[i], 1);
 		}
-		fpm_sockets_get_env_name(envname, socket_set_count);
+		fpm_sockets_get_env_name(envname, sizeof(envname), socket_set_count);
 		unsetenv(envname);
 		free(env_value);
 	}
@@ -143,7 +143,8 @@ static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int typ
 			case FPM_AF_INET : {
 				key = alloca(INET6_ADDRSTRLEN+10);
 				inet_ntop(sa->sa_family, fpm_get_in_addr(sa), key, INET6_ADDRSTRLEN);
-				sprintf(key+strlen(key), ":%d", fpm_get_in_port(sa));
+				size_t key_length = strlen(key);
+				snprintf(key + key_length, INET6_ADDRSTRLEN + 10 - key_length, ":%d", fpm_get_in_port(sa));
 				break;
 			}
 
@@ -455,7 +456,7 @@ int fpm_sockets_init_main(void)
 
 	/* import inherited sockets */
 	for (i = 0; i < FPM_ENV_SOCKET_SET_MAX; i++) {
-		fpm_sockets_get_env_name(envname, i);
+		fpm_sockets_get_env_name(envname, sizeof(envname), i);
 		inherited = getenv(envname);
 		if (!inherited) {
 			break;
@@ -513,7 +514,7 @@ int fpm_sockets_init_main(void)
 		}
 
 	if (wp->listen_address_domain == FPM_AF_INET && fpm_socket_get_listening_queue(wp->listening_socket, NULL, &lq_len) >= 0) {
-			fpm_scoreboard_update(-1, -1, -1, (int)lq_len, -1, -1, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
+			fpm_scoreboard_update(-1, -1, -1, (int)lq_len, -1, -1, 0, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
 		}
 	}
 
@@ -609,9 +610,8 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 
 	return 0;
 }
-#endif
 
-#ifdef HAVE_LQ_SO_LISTENQ
+#elif defined(HAVE_LQ_SO_LISTENQ)
 
 int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {

@@ -1,9 +1,7 @@
 --TEST--
 Bug GH-8781 (ZipArchive deletes zip file with no contents)
---SKIPIF--
-<?php
-if (!extension_loaded('zip')) die('skip zip extension not available');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 touch($file = __DIR__ . '/bug_gh8781.zip');

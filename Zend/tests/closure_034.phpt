@@ -8,7 +8,13 @@ var_dump($a);
 
 ?>
 --EXPECTF--
-object(Closure)#%d (1) {
+object(Closure)#%d (4) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["static"]=>
   array(1) {
     ["a"]=>

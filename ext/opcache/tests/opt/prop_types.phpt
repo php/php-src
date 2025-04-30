@@ -40,7 +40,7 @@ function noScope(Test $test) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0, ssa_vars=0, no_loops)
+     ; (lines=1, args=0, vars=0, tmps=%d, ssa_vars=0, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [long] RANGE[1..1]
@@ -50,7 +50,7 @@ BB0:
 0000 RETURN int(1)
 
 noScope:
-     ; (lines=10, args=1, vars=1, tmps=4, ssa_vars=5, no_loops)
+     ; (lines=10, args=1, vars=1, tmps=%d, ssa_vars=5, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -70,7 +70,7 @@ BB0:
 0009 RETURN null
 
 Test::inTest:
-     ; (lines=9, args=0, vars=0, tmps=4, ssa_vars=3, no_loops)
+     ; (lines=9, args=0, vars=0, tmps=%d, ssa_vars=3, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -88,7 +88,7 @@ BB0:
 0008 RETURN null
 
 Test::inTestWithTest2:
-     ; (lines=10, args=1, vars=1, tmps=4, ssa_vars=5, no_loops)
+     ; (lines=10, args=1, vars=1, tmps=%d, ssa_vars=5, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -108,7 +108,7 @@ BB0:
 0009 RETURN null
 
 Test2::inTest2:
-     ; (lines=9, args=0, vars=0, tmps=4, ssa_vars=3, no_loops)
+     ; (lines=9, args=0, vars=0, tmps=%d, ssa_vars=3, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]

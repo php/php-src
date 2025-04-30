@@ -245,6 +245,7 @@ static zend_always_inline bool zend_hash_index_exists(const HashTable *ht, zend_
 }
 
 /* traversing */
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos_ex(const HashTable *ht, HashPosition pos);
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht);
 
 ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
@@ -298,10 +299,18 @@ ZEND_API void  zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
 typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
 ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered);
 ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
+void  ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
 
 static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucket_compare_func_t compare_func, bool renumber) {
 	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber);
+}
+
+/* Use this variant over zend_hash_sort() when sorting user arrays that may
+ * trigger user code. It will ensure the user code cannot free the array during
+ * sorting. */
+static zend_always_inline void zend_array_sort(HashTable *ht, bucket_compare_func_t compare_func, bool renumber) {
+	zend_array_sort_ex(ht, zend_sort, compare_func, renumber);
 }
 
 static zend_always_inline uint32_t zend_hash_num_elements(const HashTable *ht) {
@@ -646,7 +655,7 @@ static zend_always_inline void *zend_hash_add_ptr(HashTable *ht, zend_string *ke
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_add(ht, key, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -660,7 +669,7 @@ static zend_always_inline void *zend_hash_add_new_ptr(HashTable *ht, zend_string
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_add_new(ht, key, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -674,7 +683,7 @@ static zend_always_inline void *zend_hash_str_add_ptr(HashTable *ht, const char 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_add(ht, str, len, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -688,7 +697,7 @@ static zend_always_inline void *zend_hash_str_add_new_ptr(HashTable *ht, const c
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_add_new(ht, str, len, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -701,7 +710,7 @@ static zend_always_inline void *zend_hash_update_ptr(HashTable *ht, zend_string 
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_update(ht, key, &tmp);
-	ZEND_ASSUME(Z_PTR_P(zv));
+	ZEND_ASSERT(Z_PTR_P(zv));
 	return Z_PTR_P(zv);
 }
 
@@ -711,7 +720,7 @@ static zend_always_inline void *zend_hash_str_update_ptr(HashTable *ht, const ch
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_update(ht, str, len, &tmp);
-	ZEND_ASSUME(Z_PTR_P(zv));
+	ZEND_ASSERT(Z_PTR_P(zv));
 	return Z_PTR_P(zv);
 }
 
@@ -809,7 +818,7 @@ static zend_always_inline void *zend_hash_index_update_ptr(HashTable *ht, zend_u
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_index_update(ht, h, &tmp);
-	ZEND_ASSUME(Z_PTR_P(zv));
+	ZEND_ASSERT(Z_PTR_P(zv));
 	return Z_PTR_P(zv);
 }
 
@@ -833,7 +842,7 @@ static zend_always_inline void *zend_hash_next_index_insert_ptr(HashTable *ht, v
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_next_index_insert(ht, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -851,15 +860,16 @@ static zend_always_inline void *zend_hash_index_update_mem(HashTable *ht, zend_u
 
 static zend_always_inline void *zend_hash_next_index_insert_mem(HashTable *ht, void *pData, size_t size)
 {
-	zval tmp, *zv;
+	zval tmp;
 
-	ZVAL_PTR(&tmp, NULL);
-	if ((zv = zend_hash_next_index_insert(ht, &tmp))) {
-		Z_PTR_P(zv) = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
-		memcpy(Z_PTR_P(zv), pData, size);
-		return Z_PTR_P(zv);
+	void *p = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+	memcpy(p, pData, size);
+	ZVAL_PTR(&tmp, p);
+	if (!zend_hash_next_index_insert(ht, &tmp)) {
+		pefree(p, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+		return NULL;
 	}
-	return NULL;
+	return p;
 }
 
 static zend_always_inline void *zend_hash_find_ptr(const HashTable *ht, zend_string *key)
@@ -901,6 +911,8 @@ static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, cons
 	}
 }
 
+BEGIN_EXTERN_C()
+
 /* Will lowercase the str; use only if you don't need the lowercased string for
  * anything else. If you have a lowered string, use zend_hash_str_find_ptr. */
 ZEND_API void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, size_t len);
@@ -908,6 +920,8 @@ ZEND_API void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, s
 /* Will lowercase the str; use only if you don't need the lowercased string for
  * anything else. If you have a lowered string, use zend_hash_find_ptr. */
 ZEND_API void *zend_hash_find_ptr_lc(const HashTable *ht, zend_string *key);
+
+END_EXTERN_C()
 
 static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, zend_ulong h)
 {

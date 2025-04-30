@@ -29,7 +29,7 @@ lxb_tag_data_t;
 
 
 LXB_API const lxb_tag_data_t *
-lxb_tag_data_by_id(lexbor_hash_t *hash, lxb_tag_id_t tag_id);
+lxb_tag_data_by_id(lxb_tag_id_t tag_id);
 
 LXB_API const lxb_tag_data_t *
 lxb_tag_data_by_name(lexbor_hash_t *hash, const lxb_char_t *name, size_t len);
@@ -42,9 +42,9 @@ lxb_tag_data_by_name_upper(lexbor_hash_t *hash,
  * Inline functions
  */
 lxb_inline const lxb_char_t *
-lxb_tag_name_by_id(lexbor_hash_t *hash, lxb_tag_id_t tag_id, size_t *len)
+lxb_tag_name_by_id(lxb_tag_id_t tag_id, size_t *len)
 {
-    const lxb_tag_data_t *data = lxb_tag_data_by_id(hash, tag_id);
+    const lxb_tag_data_t *data = lxb_tag_data_by_id(tag_id);
     if (data == NULL) {
         if (len != NULL) {
             *len = 0;
@@ -61,9 +61,9 @@ lxb_tag_name_by_id(lexbor_hash_t *hash, lxb_tag_id_t tag_id, size_t *len)
 }
 
 lxb_inline const lxb_char_t *
-lxb_tag_name_upper_by_id(lexbor_hash_t *hash, lxb_tag_id_t tag_id, size_t *len)
+lxb_tag_name_upper_by_id(lxb_tag_id_t tag_id, size_t *len)
 {
-    const lxb_tag_data_t *data = lxb_tag_data_by_id(hash, tag_id);
+    const lxb_tag_data_t *data = lxb_tag_data_by_id(tag_id);
     if (data == NULL) {
         if (len != NULL) {
             *len = 0;
@@ -101,12 +101,10 @@ lxb_tag_mraw(lexbor_hash_t *hash)
  * No inline functions for ABI.
  */
 LXB_API const lxb_char_t *
-lxb_tag_name_by_id_noi(lexbor_hash_t *hash, lxb_tag_id_t tag_id,
-                       size_t *len);
+lxb_tag_name_by_id_noi(lxb_tag_id_t tag_id, size_t *len);
 
 LXB_API const lxb_char_t *
-lxb_tag_name_upper_by_id_noi(lexbor_hash_t *hash,
-                             lxb_tag_id_t tag_id, size_t *len);
+lxb_tag_name_upper_by_id_noi(lxb_tag_id_t tag_id, size_t *len);
 
 LXB_API lxb_tag_id_t
 lxb_tag_id_by_name_noi(lexbor_hash_t *hash,

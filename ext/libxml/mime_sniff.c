@@ -195,7 +195,7 @@ PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *sta
 	while (start < end && is_http_whitespace(*start)) {
 		start++;
 	}
-	while (start < end && is_http_whitespace(*end)) {
+	while (start < end && is_http_whitespace(*(end - 1))) {
 		end--;
 	}
 
@@ -308,11 +308,21 @@ PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_stream(const php_strea
 	if (Z_TYPE(s->wrapperdata) == IS_ARRAY) {
 		zval *header;
 
-		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
-			const char buf[] = "Content-Type:";
-			if (Z_TYPE_P(header) == IS_STRING &&
-					!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
-				return php_libxml_sniff_charset_from_string(Z_STRVAL_P(header) + sizeof(buf) - 1, Z_STRVAL_P(header) + Z_STRLEN_P(header));
+		/* Scan backwards: The header array might contain the headers for multiple responses, if
+		 * a redirect was followed.
+		 */
+		ZEND_HASH_REVERSE_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
+			if (Z_TYPE_P(header) == IS_STRING) {
+				/* If no colon is found in the header, we assume it's the HTTP status line and bail out. */
+				char *colon = memchr(Z_STRVAL_P(header), ':', Z_STRLEN_P(header));
+				char *space = memchr(Z_STRVAL_P(header), ' ', Z_STRLEN_P(header));
+				if (colon == NULL || space < colon) {
+					return NULL;
+				}
+
+				if (zend_string_starts_with_literal_ci(Z_STR_P(header), "content-type:")) {
+					return php_libxml_sniff_charset_from_string(Z_STRVAL_P(header) + strlen("content-type:"), Z_STRVAL_P(header) + Z_STRLEN_P(header));
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

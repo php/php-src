@@ -26,8 +26,6 @@
 #include "fopen_wrappers.h"
 #include "php_zip.h"
 
-#include "ext/standard/url.h"
-
 /* needed for ssize_t definition */
 #include <sys/types.h>
 

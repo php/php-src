@@ -44,21 +44,21 @@ using icu::Locale;
 
 #define ZEND_VALUE_ERROR_INVALID_FIELD(argument, zpp_arg_position) \
 	if (argument < 0 || argument >= UCAL_FIELD_COUNT) { \
-		zend_argument_value_error(getThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
+		zend_argument_value_error(hasThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
 			"must be a valid field"); \
 		RETURN_THROWS(); \
 	}
 
 #define ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(argument, zpp_arg_position) \
 	if (UNEXPECTED(argument < INT32_MIN || argument > INT32_MAX)) { \
-		zend_argument_value_error(getThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
+		zend_argument_value_error(hasThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
 			"must be between %d and %d", INT32_MIN, INT32_MAX); \
 		RETURN_THROWS(); \
 	}
 
 #define ZEND_VALUE_ERROR_INVALID_DAY_OF_WEEK(argument, zpp_arg_position) \
 	if (argument < UCAL_SUNDAY || argument > UCAL_SATURDAY) { \
-		zend_argument_value_error(getThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
+		zend_argument_value_error(hasThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
 			"must be a valid day of the week"); \
 		RETURN_THROWS(); \
 	}
@@ -73,16 +73,17 @@ U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 {
 	zval		*zv_timezone	= NULL;
-	const char	*locale_str		= NULL;
-	size_t			dummy;
+	char	        *locale_str	= NULL;
+	size_t		locale_len      = 0;
 	TimeZone	*timeZone;
 	UErrorCode	status			= U_ZERO_ERROR;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zs!",
-			&zv_timezone, &locale_str, &dummy) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(zv_timezone)
+		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	timeZone = timezone_process_timezone_argument(zv_timezone, NULL,
 		"intlcal_create_instance");
@@ -91,7 +92,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 	}
 
 	if (!locale_str) {
-		locale_str = intl_locale_get_default();
+		locale_str = (char *)intl_locale_get_default();
 	}
 
 	Calendar *cal = Calendar::createInstance(timeZone,
@@ -168,10 +169,11 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 	bool	commonly_used;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssb",
-			&key, &key_len, &locale, &locale_len, &commonly_used) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STRING(key, key_len)
+		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_BOOL(commonly_used)
+	ZEND_PARSE_PARAMETERS_END();
 
 	StringEnumeration *se = Calendar::getKeywordValuesForLocale(key,
 		Locale::createFromName(locale), (UBool)commonly_used,
@@ -189,9 +191,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_now)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_DOUBLE((double)Calendar::getNow());
 }
@@ -200,9 +200,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	int32_t count;
 	const Locale *availLocales = Calendar::getAvailableLocales(count);
@@ -376,6 +374,14 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	object = getThis();
 
 	int arg_num = ZEND_NUM_ARGS() - (object ? 0 : 1);
+
+	if (object && arg_num > 2) {
+		zend_error(E_DEPRECATED, "Calling IntlCalendar::set() with more than 2 arguments is deprecated, "
+			"use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
 
 	if (zend_parse_method_parameters(
 		ZEND_NUM_ARGS(), object, "Oll|llll",
@@ -633,7 +639,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_locale)
 	}
 
 	if (locale_type != ULOC_ACTUAL_LOCALE && locale_type != ULOC_VALID_LOCALE) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be either Locale::ACTUAL_LOCALE or Locale::VALID_LOCALE");
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be either Locale::ACTUAL_LOCALE or Locale::VALID_LOCALE");
 		RETURN_THROWS();
 	}
 
@@ -878,7 +884,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_minimal_days_in_first_week)
 
 	// Use ZEND_VALUE_ERROR_INVALID_DAY_OF_WEEK ?
 	if (num_days < 1 || num_days > 7) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be between 1 and 7");
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be between 1 and 7");
 		RETURN_THROWS();
 	}
 
@@ -953,7 +959,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
 	}
 
 	if (option != UCAL_WALLTIME_FIRST && option != UCAL_WALLTIME_LAST) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be either IntlCalendar::WALLTIME_FIRST or "
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be either IntlCalendar::WALLTIME_FIRST or "
 			"IntlCalendar::WALLTIME_LAST");
 		RETURN_THROWS();
 	}
@@ -977,7 +983,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 
 	if (option != UCAL_WALLTIME_FIRST && option != UCAL_WALLTIME_LAST
 			&& option != UCAL_WALLTIME_NEXT_VALID) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be one of IntlCalendar::WALLTIME_FIRST, "
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be one of IntlCalendar::WALLTIME_FIRST, "
 			"IntlCalendar::WALLTIME_LAST, or IntlCalendar::WALLTIME_NEXT_VALID");
 		RETURN_THROWS();
 	}

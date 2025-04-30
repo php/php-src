@@ -19,9 +19,7 @@
 
 #include <php.h>
 
-#ifdef PHP_WIN32
-# include "win32/inet.h"
-#else
+#ifndef PHP_WIN32
 # undef closesocket
 # define closesocket close
 # include <netinet/tcp.h>
@@ -162,7 +160,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout);
 /* timeval-to-timeout (for poll(2)) */
 static inline int php_tvtoto(struct timeval *timeouttv)
 {
-	if (timeouttv) {
+	if (timeouttv && timeouttv->tv_sec >= 0 && timeouttv->tv_sec <= ((INT_MAX - 1000) / 1000)) {
 		return (timeouttv->tv_sec * 1000) + (timeouttv->tv_usec / 1000);
 	}
 	return -1;
@@ -247,11 +245,11 @@ static inline bool _php_check_fd_setsize(php_socket_t *max_fd, int setsize)
 
 #define PHP_SOCK_CHUNK_SIZE	8192
 
-#ifdef HAVE_SOCKADDR_STORAGE
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 typedef struct sockaddr_storage php_sockaddr_storage;
 #else
 typedef struct {
-#ifdef HAVE_SOCKADDR_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
 		unsigned char ss_len;
 		unsigned char ss_family;
 #else
@@ -308,7 +306,7 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 		);
 
 PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port);
-PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr);
+PHPAPI socklen_t php_sockaddr_size(php_sockaddr_storage *addr);
 END_EXTERN_C()
 
 struct _php_netstream_data_t	{
@@ -338,12 +336,12 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 		socklen_t *addrlen
 		);
 
-PHPAPI int php_network_parse_network_address_with_port(const char *addr,
-		zend_long addrlen, struct sockaddr *sa, socklen_t *sl);
+PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr,
+		size_t addrlen, struct sockaddr *sa, socklen_t *sl);
 
 PHPAPI struct hostent*	php_network_gethostbyname(const char *name);
 
-PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
+PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block);
 END_EXTERN_C()
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC)

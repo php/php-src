@@ -102,6 +102,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			case T_TRAIT_C:
 			case T_METHOD_C:
 			case T_FUNC_C:
+			case T_PROPERTY_C:
 			case T_NS_C:
 			case T_CLASS_C:
 				next_color = syntax_highlighter_ini->highlight_default;

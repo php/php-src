@@ -16,14 +16,11 @@
 
 #include <math.h>				/* modf() */
 #include "php.h"
-#include "ext/standard/head.h"
-#include "php_string.h"
 #include "zend_execute.h"
-#include <stdio.h>
 
 #include <locale.h>
 #ifdef ZTS
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* for localeconv_r() */
 #define LCONV_DECIMAL_POINT (*lconv.decimal_point)
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
@@ -249,9 +246,10 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 	}
 
 	if (zend_isinf(number)) {
-		is_negative = (number<0);
-		php_sprintf_appendstring(buffer, pos, "INF", 3, 0, padding,
-								 alignment, 3, is_negative, 0, always_sign);
+		is_negative = (number<0);		
+		char *str = is_negative ? "-INF" : "INF";
+		php_sprintf_appendstring(buffer, pos, str, strlen(str), 0, padding,
+								alignment, strlen(str), is_negative, 0, always_sign);
 		return;
 	}
 

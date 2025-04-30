@@ -2,6 +2,12 @@
 
 require_once __DIR__ . '/shared.php';
 
+foreach (array("mbstring", "sockets", "mysqli", "openssl", "gmp") as $ext) {
+    if (!extension_loaded($ext)) {
+        throw new LogicException("Extension $ext is required.");
+    }
+}
+
 $storeResult = ($argv[1] ?? 'false') === 'true';
 $phpCgi = $argv[2] ?? dirname(PHP_BINARY) . '/php-cgi';
 if (!file_exists($phpCgi)) {
@@ -118,7 +124,8 @@ function runValgrindPhpCgiCommand(
         '-T' . ($warmup ? $warmup . ',' : '') . $repeat,
         '-d max_execution_time=0',
         '-d opcache.enable=1',
-        '-d opcache.jit_buffer_size=' . ($jit ? '128M' : '0'),
+        '-d opcache.jit=' . ($jit ? 'tracing' : 'disable'),
+        '-d opcache.jit_buffer_size=128M',
         '-d opcache.validate_timestamps=0',
         ...$args,
     ]);

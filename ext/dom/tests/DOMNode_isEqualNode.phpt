@@ -2,6 +2,12 @@
 DOMNode::isEqualNode()
 --EXTENSIONS--
 dom
+--SKIPIF--
+<?php
+if (LIBXML_VERSION >= 21200 && LIBXML_VERSION <= 21201) {
+    die("xfail Broken for libxml2 2.12.0 - 2.12.1 see https://gitlab.gnome.org/GNOME/libxml2/-/issues/634");
+}
+?>
 --FILE--
 <?php
 

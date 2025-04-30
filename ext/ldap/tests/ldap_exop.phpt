@@ -68,6 +68,9 @@ $link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
+Deprecated: Calling ldap_exop() with more than 4 arguments is deprecated, use ldap_exop_sync() instead in %s on line %d
+
+Deprecated: Calling ldap_exop() with more than 4 arguments is deprecated, use ldap_exop_sync() instead in %s on line %d
 bool(true)
 string(%d) "dn:%s"
 string(0) ""

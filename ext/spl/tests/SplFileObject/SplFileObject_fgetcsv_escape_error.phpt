@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::fgetcsv with alternative delimiter
+SplFileObject::fgetcsv() escape error
 --FILE--
 <?php
 $fp = fopen('SplFileObject__fgetcsv8.csv', 'w+');

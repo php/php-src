@@ -5,7 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-die("skip - is the server still buggy?");
 ?>
 --FILE--
 <?php
@@ -20,6 +19,7 @@ die("skip - is the server still buggy?");
         printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     /*
+    Do not verify that we have aquired a lock, as this would block the test
     if ($res = mysqli_query($link2, 'SELECT COUNT(*) AS _num FROM test')) {
         printf("[003] Reading from test should not be possible due to a lock, [%d] %s\n",
             mysqli_errno($link2), mysqli_error($link2));

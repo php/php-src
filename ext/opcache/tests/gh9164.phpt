@@ -4,6 +4,7 @@ Bug GH-9164: Segfault in zend_accel_class_hash_copy
 opcache
 pcntl
 --INI--
+opcache.enable=1
 opcache.enable_cli=1
 --FILE--
 <?php

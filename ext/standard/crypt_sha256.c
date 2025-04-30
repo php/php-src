@@ -37,11 +37,6 @@ char * __php_stpncpy(char *dst, const char *src, size_t len)
 	return strncpy(dst, src, len) + n;
 }
 
-void * __php_mempcpy(void * dst, const void * src, size_t len)
-{
-	return (((char *)memcpy(dst, src, len)) + len);
-}
-
 #ifndef MIN
 # define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
@@ -452,7 +447,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	ALLOCA_FLAG(use_heap_p_bytes);
 	cp = p_bytes = do_alloca(key_len, use_heap_p_bytes);
 	for (cnt = key_len; cnt >= 32; cnt -= 32) {
-		cp = __php_mempcpy((void *)cp, (const void *)temp_result, 32);
+		cp = zend_mempcpy((void *)cp, (const void *)temp_result, 32);
 	}
 	memcpy(cp, temp_result, cnt);
 
@@ -471,7 +466,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	ALLOCA_FLAG(use_heap_s_bytes);
 	cp = s_bytes = do_alloca(salt_len, use_heap_s_bytes);
 	for (cnt = salt_len; cnt >= 32; cnt -= 32) {
-		cp = __php_mempcpy(cp, temp_result, 32);
+		cp = zend_mempcpy(cp, temp_result, 32);
 	}
 	memcpy(cp, temp_result, cnt);
 

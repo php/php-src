@@ -60,7 +60,7 @@ try {
 ?>
 --EXPECTF--
 ValueError: pcntl_sigprocmask(): Argument #1 ($mode) must be one of SIG_BLOCK, SIG_UNBLOCK, or SIG_SETMASK
-ValueError: pcntl_sigprocmask(): Argument #2 ($signals) cannot be empty
+ValueError: pcntl_sigprocmask(): Argument #2 ($signals) must not be empty
 ValueError: pcntl_sigprocmask(): Argument #2 ($signals) signals must be between 1 and %d
 ValueError: pcntl_sigprocmask(): Argument #2 ($signals) signals must be between 1 and %d
 TypeError: pcntl_sigprocmask(): Argument #2 ($signals) signals must be of type int, string given

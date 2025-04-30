@@ -23,7 +23,7 @@ const PHP_MINOR_VERSION = UNKNOWN;
  * @cvalue PHP_RELEASE_VERSION
  */
 const PHP_RELEASE_VERSION = UNKNOWN;
-	
+
 /**
  * @var string
  * @cvalue PHP_EXTRA_VERSION
@@ -35,12 +35,12 @@ const PHP_EXTRA_VERSION = UNKNOWN;
  */
 const PHP_VERSION_ID = UNKNOWN;
 /**
- * @var int
+ * @var bool
  * @cvalue PHP_ZTS
  */
 const PHP_ZTS = UNKNOWN;
 /**
- * @var int
+ * @var bool
  * @cvalue PHP_DEBUG
  */
 const PHP_DEBUG = UNKNOWN;
@@ -84,6 +84,11 @@ const PHP_PREFIX = UNKNOWN;
  * @cvalue PHP_BINDIR
  */
 const PHP_BINDIR = UNKNOWN;
+/**
+ * @var string
+ * @cvalue PHP_SBINDIR
+ */
+const PHP_SBINDIR = UNKNOWN;
 #ifndef PHP_WIN32
 /**
  * @var string
@@ -301,6 +306,11 @@ const PHP_OUTPUT_HANDLER_STARTED = UNKNOWN;
  * @cvalue PHP_OUTPUT_HANDLER_DISABLED
  */
 const PHP_OUTPUT_HANDLER_DISABLED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_PROCESSED
+ */
+const PHP_OUTPUT_HANDLER_PROCESSED = UNKNOWN;
 
 /**
  * @var int
@@ -342,3 +352,22 @@ const UPLOAD_ERR_CANT_WRITE = UNKNOWN;
  * @cvalue PHP_UPLOAD_ERROR_X
  */
 const UPLOAD_ERR_EXTENSION = UNKNOWN;
+#ifdef ZEND_VERIFY_TYPE_INFERENCE
+/**
+ * @var bool
+ * @cvalue ZEND_VERIFY_TYPE_INFERENCE
+ */
+const ZEND_VERIFY_TYPE_INFERENCE = UNKNOWN;
+#endif
+/**
+ * @var string
+ * @cvalue sapi_module.name
+ * @no-file-cache
+ */
+const PHP_SAPI = UNKNOWN;
+/**
+ * @var string
+ * @cvalue PG(php_binary) ? PG(php_binary) : ""
+ * @no-file-cache
+ */
+const PHP_BINARY = UNKNOWN;

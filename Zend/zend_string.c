@@ -378,6 +378,7 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 	}
 }
 
+#if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 /* Even if we don't build with valgrind support, include the symbol so that valgrind available
  * only at runtime will not result in false positives. */
 #ifndef I_REPLACE_SONAME_FNNAME_ZU
@@ -385,57 +386,48 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 #endif
 
 /* See GH-9068 */
-#if defined(__GNUC__) && (__GNUC__ >= 11 || defined(__clang__)) && __has_attribute(no_caller_saved_registers)
-# define NO_CALLER_SAVED_REGISTERS __attribute__((no_caller_saved_registers))
-# ifndef __clang__
-#  pragma GCC push_options
-#  pragma GCC target ("general-regs-only")
-#  define POP_OPTIONS
-# endif
+#if __has_attribute(noipa)
+# define NOIPA __attribute__((noipa))
 #else
-# define NO_CALLER_SAVED_REGISTERS
+# define NOIPA
 #endif
 
-ZEND_API bool ZEND_FASTCALL NO_CALLER_SAVED_REGISTERS I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(const zend_string *s1, const zend_string *s2)
+ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(const zend_string *s1, const zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
-
-#ifdef POP_OPTIONS
-# pragma GCC pop_options
-# undef POP_OPTIONS
 #endif
 
 #if defined(__GNUC__) && defined(__i386__)
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
+ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);
-	size_t delta = (const char*)s2 - (const char*)s1;
+	uintptr_t delta = (uintptr_t) s2 - (uintptr_t) s1;
 	size_t len = ZSTR_LEN(s1);
 	zend_ulong ret;
 
 	__asm__ (
-		".LL0%=:\n\t"
+		"0:\n\t"
 		"movl (%2,%3), %0\n\t"
 		"xorl (%2), %0\n\t"
-		"jne .LL1%=\n\t"
+		"jne 1f\n\t"
 		"addl $0x4, %2\n\t"
 		"subl $0x4, %1\n\t"
-		"ja .LL0%=\n\t"
+		"ja 0b\n\t"
 		"movl $0x1, %0\n\t"
-		"jmp .LL3%=\n\t"
-		".LL1%=:\n\t"
+		"jmp 3f\n\t"
+		"1:\n\t"
 		"cmpl $0x4,%1\n\t"
-		"jb .LL2%=\n\t"
+		"jb 2f\n\t"
 		"xorl %0, %0\n\t"
-		"jmp .LL3%=\n\t"
-		".LL2%=:\n\t"
+		"jmp 3f\n\t"
+		"2:\n\t"
 		"negl %1\n\t"
 		"lea 0x20(,%1,8), %1\n\t"
 		"shll %b1, %0\n\t"
 		"sete %b0\n\t"
 		"movzbl %b0, %0\n\t"
-		".LL3%=:\n"
+		"3:\n"
 		: "=&a"(ret),
 		  "+c"(len),
 		  "+r"(ptr)
@@ -445,35 +437,35 @@ ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const z
 }
 
 #elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
+ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);
-	size_t delta = (const char*)s2 - (const char*)s1;
+	uintptr_t delta = (uintptr_t) s2 - (uintptr_t) s1;
 	size_t len = ZSTR_LEN(s1);
 	zend_ulong ret;
 
 	__asm__ (
-		".LL0%=:\n\t"
+		"0:\n\t"
 		"movq (%2,%3), %0\n\t"
 		"xorq (%2), %0\n\t"
-		"jne .LL1%=\n\t"
+		"jne 1f\n\t"
 		"addq $0x8, %2\n\t"
 		"subq $0x8, %1\n\t"
-		"ja .LL0%=\n\t"
+		"ja 0b\n\t"
 		"movq $0x1, %0\n\t"
-		"jmp .LL3%=\n\t"
-		".LL1%=:\n\t"
+		"jmp 3f\n\t"
+		"1:\n\t"
 		"cmpq $0x8,%1\n\t"
-		"jb .LL2%=\n\t"
+		"jb 2f\n\t"
 		"xorq %0, %0\n\t"
-		"jmp .LL3%=\n\t"
-		".LL2%=:\n\t"
+		"jmp 3f\n\t"
+		"2:\n\t"
 		"negq %1\n\t"
 		"lea 0x40(,%1,8), %1\n\t"
 		"shlq %b1, %0\n\t"
 		"sete %b0\n\t"
 		"movzbq %b0, %0\n\t"
-		".LL3%=:\n"
+		"3:\n"
 		: "=&a"(ret),
 		  "+c"(len),
 		  "+r"(ptr)

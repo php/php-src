@@ -97,7 +97,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 		arg_start = 2;
 
 		/* Check for <arg>=<val> */
-		if ((pos = php_memnstr(&argv[*optind][arg_start], "=", 1, argv[*optind]+arg_end)) != NULL) {
+		if ((pos = memchr(&argv[*optind][arg_start], '=', arg_end - arg_start)) != NULL) {
 			arg_end = pos-&argv[*optind][arg_start];
 			arg_start++;
 		} else {

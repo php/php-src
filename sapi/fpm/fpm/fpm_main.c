@@ -93,9 +93,6 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fpm_log.h"
 #include "zlog.h"
 
-/* XXX this will need to change later when threaded fastcgi is implemented.  shane */
-struct sigaction act, old_term, old_quit, old_int;
-
 static void (*php_php_import_environment_variables)(zval *array_ptr);
 
 /* these globals used for forking children on unix systems */
@@ -291,8 +288,11 @@ static void sapi_cgibin_flush(void *server_context) /* {{{ */
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) server_context;
-		if (!parent && request && !fcgi_flush(request, 0)) {
-			php_handle_aborted_connection();
+		if (!parent && request) {
+			sapi_send_headers();
+			if (!fcgi_flush(request, 0)) {
+				php_handle_aborted_connection();
+			}
 		}
 		return;
 	}
@@ -516,7 +516,21 @@ static void cgi_php_load_env_var(const char *var, unsigned int var_len, char *va
 }
 /* }}} */
 
-void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
+static void cgi_php_load_env_var_unfilterd(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
+{
+	zval *array_ptr = (zval *) arg;
+	php_register_variable_safe(var, val, val_len, array_ptr);
+}
+
+static void cgi_php_load_environment_variables(zval *array_ptr)
+{
+	php_php_import_environment_variables(array_ptr);
+
+	fcgi_request *request = (fcgi_request*) SG(server_context);
+	fcgi_loadenv(request, cgi_php_load_env_var_unfilterd, array_ptr);
+}
+
+static void cgi_php_import_environment_variables(zval *array_ptr)
 {
 	fcgi_request *request = NULL;
 
@@ -542,7 +556,6 @@ void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 	request = (fcgi_request*) SG(server_context);
 	fcgi_loadenv(request, cgi_php_load_env_var, array_ptr);
 }
-/* }}} */
 
 static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 {
@@ -590,7 +603,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
  *
  * Ignore level, we want to send all messages through fastcgi
  */
-void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
+static void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 {
 
 	fcgi_request *request = (fcgi_request*) SG(server_context);
@@ -1140,6 +1153,7 @@ static void init_request_info(void)
 							}
 
 							if (tflag) {
+								char *decoded_path_info = NULL;
 								if (orig_path_info) {
 									char old;
 
@@ -1161,11 +1175,10 @@ static void init_request_info(void)
 									 * As we can extract PATH_INFO from PATH_TRANSLATED
 									 * it is probably also in SCRIPT_NAME and need to be removed
 									 */
-									char *decoded_path_info = NULL;
 									size_t decoded_path_info_len = 0;
 									if (strchr(path_info, '%')) {
 										decoded_path_info = estrdup(path_info);
-										decoded_path_info_len = php_url_decode(decoded_path_info, strlen(path_info));
+										decoded_path_info_len = php_raw_url_decode(decoded_path_info, strlen(path_info));
 									}
 									size_t snlen = strlen(env_script_name);
 									size_t env_script_file_info_start = 0;
@@ -1184,11 +1197,13 @@ static void init_request_info(void)
 										env_script_name[env_script_file_info_start] = 0;
 										SG(request_info).request_uri = FCGI_PUTENV(request, "SCRIPT_NAME", env_script_name);
 									}
-									if (decoded_path_info) {
-										efree(decoded_path_info);
-									}
 								}
-								env_path_info = FCGI_PUTENV(request, "PATH_INFO", path_info);
+								if (decoded_path_info) {
+									env_path_info = FCGI_PUTENV(request, "PATH_INFO", decoded_path_info);
+									efree(decoded_path_info);
+								} else {
+									env_path_info = FCGI_PUTENV(request, "PATH_INFO", path_info);
+								}
 							}
 							if (!orig_script_filename ||
 								strcmp(orig_script_filename, pt) != 0) {
@@ -1692,11 +1707,7 @@ int main(int argc, char *argv[])
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
 
-#if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
-#else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
-#endif
+				php_print_version(&sapi_module);
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
 				exit_status = FPM_EXIT_OK;
@@ -1840,6 +1851,7 @@ consult the installation file that came with this distribution, or visit \n\
 	/* make php call us to get _ENV vars */
 	php_php_import_environment_variables = php_import_environment_variables;
 	php_import_environment_variables = cgi_php_import_environment_variables;
+	php_load_environment_variables = cgi_php_load_environment_variables;
 
 	/* library is already initialized, now init our request */
 	request = fpm_init_request(fcgi_fd);

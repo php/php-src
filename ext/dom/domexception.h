@@ -46,4 +46,7 @@ typedef enum {
 	VALIDATION_ERR                 = 16
 } dom_exception_code;
 
+void php_dom_throw_error(dom_exception_code error_code, bool strict_error);
+void php_dom_throw_error_with_message(dom_exception_code error_code, const char *error_message, bool strict_error);
+
 #endif /* DOM_EXCEPTION_H */

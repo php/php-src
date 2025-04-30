@@ -11,6 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 require 'testdb.inc';
 
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $dbh->exec('create table test_aaa (id integer)');
 $S = $dbh->prepare('insert into test_aaa (id) values (:id) returning id');
@@ -23,6 +24,7 @@ echo 'OK';
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE test_aaa");
 unset($dbh);
 ?>

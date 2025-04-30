@@ -16,11 +16,14 @@
 
 /* Infrastructure for working with persistent COM objects.
  * Implements: IStream* wrapper for PHP streams.
- * TODO: Magic __wakeup and __sleep handlers for serialization
- * (can wait till 5.1) */
+ * TODO:
+ *  - Magic __wakeup and __sleep handlers for serialization.
+ *  - Track the stream and dispatch instances in a global list to make sure
+ *    they are destroyed when a fatal error occurs.
+ */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -38,17 +41,9 @@ typedef struct {
 	DWORD engine_thread;
 	LONG refcount;
 	php_stream *stream;
-	zend_resource *res;
 } php_istream;
 
-static int le_istream;
 static void istream_destructor(php_istream *stm);
-
-static void istream_dtor(zend_resource *rsrc)
-{
-	php_istream *stm = (php_istream *)rsrc->ptr;
-	istream_destructor(stm);
-}
 
 #define FETCH_STM()	\
 	php_istream *stm = (php_istream*)This; \
@@ -93,8 +88,7 @@ static ULONG STDMETHODCALLTYPE stm_release(IStream *This)
 	ret = InterlockedDecrement(&stm->refcount);
 	if (ret == 0) {
 		/* destroy it */
-		if (stm->res)
-			zend_list_delete(stm->res);
+		istream_destructor(stm);
 	}
 	return ret;
 }
@@ -271,14 +265,13 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 	stm->stream = stream;
 
 	GC_ADDREF(stream->res);
-	stm->res = zend_register_resource(stm, le_istream);
 
 	return (IStream*)stm;
 }
 
 #define CPH_METHOD(fname)		PHP_METHOD(COMPersistHelper, fname)
 
-#define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)Z_OBJ_P(getThis());
+#define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)Z_OBJ_P(ZEND_THIS);
 
 #define CPH_NO_OBJ()			if (helper->unk == NULL) { php_com_throw_exception(E_INVALIDARG, "No COM object is associated with this helper instance"); RETURN_THROWS(); }
 
@@ -722,7 +715,4 @@ void php_com_persist_minit(INIT_FUNC_ARGS)
 	helper_ce = register_class_COMPersistHelper();
 	helper_ce->create_object = helper_new;
 	helper_ce->default_object_handlers = &helper_handlers;
-
-	le_istream = zend_register_list_destructors_ex(istream_dtor,
-			NULL, "com_dotnet_istream_wrapper", module_number);
 }

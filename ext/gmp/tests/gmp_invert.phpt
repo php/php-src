@@ -15,6 +15,13 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
+try {
+    $zero = new GMP(0);
+    var_dump(gmp_invert(5, $zero));
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 var_dump(gmp_strval(gmp_invert(0,28347)));
 var_dump(gmp_strval(gmp_invert(-12,456456)));
 var_dump(gmp_strval(gmp_invert(234234,-435345)));
@@ -47,6 +54,7 @@ echo "Done\n";
 string(7) "2293131"
 string(1) "0"
 string(4) "5827"
+Division by zero
 Division by zero
 string(1) "0"
 string(1) "0"

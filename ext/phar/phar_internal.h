@@ -18,46 +18,15 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <time.h>
 #include "php.h"
 #include "tar.h"
-#include "php_ini.h"
-#include "zend_constants.h"
-#include "zend_execute.h"
-#include "zend_exceptions.h"
+#include "pharzip.h"
 #include "zend_hash.h"
-#include "zend_interfaces.h"
-#include "zend_operators.h"
-#include "zend_sort.h"
-#include "zend_vm.h"
-#include "zend_smart_str.h"
-#include "main/php_streams.h"
-#include "main/streams/php_stream_plain_wrapper.h"
-#include "main/SAPI.h"
-#include "main/php_main.h"
-#include "main/php_open_temporary_file.h"
-#include "ext/standard/info.h"
-#include "ext/standard/basic_functions.h"
-#include "ext/standard/file.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/url.h"
-#include "ext/standard/crc32.h"
-#include "ext/standard/md5.h"
-#include "ext/standard/sha1.h"
-#include "ext/standard/php_var.h"
-#include "ext/standard/php_versioning.h"
-#include "Zend/zend_virtual_cwd.h"
-#include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
-#include "ext/spl/spl_engine.h"
-#include "ext/spl/spl_exceptions.h"
-#include "ext/spl/spl_iterators.h"
-#include "php_phar.h"
-#include "ext/hash/php_hash.h"
-#include "ext/hash/php_hash_sha.h"
 
 /* PHP_ because this is public information via MINFO */
 #define PHP_PHAR_API_VERSION      "1.1.1"
@@ -137,19 +106,19 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	phar_entry_fp *cached_fp;
 	HashTable   phar_alias_map;
 	int         phar_SERVER_mung_list;
-	int         readonly;
 	char*       cache_list;
-	int         manifest_cached;
-	int         persist;
-	int         has_zlib;
-	int         has_bz2;
+	bool        readonly;
+	bool        manifest_cached;
+	bool        persist;
+	bool        has_zlib;
+	bool        has_bz2;
 	bool   readonly_orig;
 	bool   require_hash_orig;
 	bool   intercepted;
-	int         request_init;
-	int         require_hash;
-	int         request_done;
-	int         request_ends;
+	bool        request_init;
+	bool        require_hash;
+	bool        request_done;
+	bool        request_ends;
 	zif_handler orig_fopen;
 	zif_handler orig_file_get_contents;
 	zif_handler orig_is_file;
@@ -175,7 +144,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
 	uint32_t    cwd_len;
-	int         cwd_init;
+	bool        cwd_init;
 	char        *openssl_privatekey;
 	uint32_t    openssl_privatekey_len;
 	/* phar_get_archive cache */
@@ -193,8 +162,6 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 #if defined(ZTS) && defined(COMPILE_DL_PHAR)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
-
-#include "pharzip.h"
 
 typedef union _phar_archive_object  phar_archive_object;
 typedef union _phar_entry_object    phar_entry_object;
@@ -285,7 +252,6 @@ struct _phar_archive_data {
 	char                     *alias;
 	uint32_t                      alias_len;
 	char                     version[12];
-	size_t                   internal_file_start;
 	size_t                   halt_offset;
 	HashTable                manifest;
 	/* hash of virtual directories, as in path/to/file.txt has path/to and path as virtual directories */
@@ -333,7 +299,7 @@ struct _phar_entry_fp {
 	phar_entry_fp_info *manifest;
 };
 
-static inline php_stream *phar_get_entrypfp(phar_entry_info *entry)
+static inline php_stream *phar_get_entrypfp(const phar_entry_info *entry)
 {
 	if (!entry->is_persistent) {
 		return entry->phar->fp;
@@ -341,35 +307,7 @@ static inline php_stream *phar_get_entrypfp(phar_entry_info *entry)
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].fp;
 }
 
-static inline php_stream *phar_get_entrypufp(phar_entry_info *entry)
-{
-	if (!entry->is_persistent) {
-		return entry->phar->ufp;
-	}
-	return PHAR_G(cached_fp)[entry->phar->phar_pos].ufp;
-}
-
-static inline void phar_set_entrypfp(phar_entry_info *entry, php_stream *fp)
-{
-	if (!entry->phar->is_persistent) {
-		entry->phar->fp =  fp;
-		return;
-	}
-
-	PHAR_G(cached_fp)[entry->phar->phar_pos].fp = fp;
-}
-
-static inline void phar_set_entrypufp(phar_entry_info *entry, php_stream *fp)
-{
-	if (!entry->phar->is_persistent) {
-		entry->phar->ufp =  fp;
-		return;
-	}
-
-	PHAR_G(cached_fp)[entry->phar->phar_pos].ufp = fp;
-}
-
-static inline php_stream *phar_get_pharfp(phar_archive_data *phar)
+static inline php_stream *phar_get_pharfp(const phar_archive_data *phar)
 {
 	if (!phar->is_persistent) {
 		return phar->fp;
@@ -377,67 +315,12 @@ static inline php_stream *phar_get_pharfp(phar_archive_data *phar)
 	return PHAR_G(cached_fp)[phar->phar_pos].fp;
 }
 
-static inline php_stream *phar_get_pharufp(phar_archive_data *phar)
-{
-	if (!phar->is_persistent) {
-		return phar->ufp;
-	}
-	return PHAR_G(cached_fp)[phar->phar_pos].ufp;
-}
-
-static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
-{
-	if (!phar->is_persistent) {
-		phar->fp =  fp;
-		return;
-	}
-
-	PHAR_G(cached_fp)[phar->phar_pos].fp = fp;
-}
-
-static inline void phar_set_pharufp(phar_archive_data *phar, php_stream *fp)
-{
-	if (!phar->is_persistent) {
-		phar->ufp =  fp;
-		return;
-	}
-
-	PHAR_G(cached_fp)[phar->phar_pos].ufp = fp;
-}
-
-static inline void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, zend_off_t offset)
-{
-	phar_entry_fp_info *data;
-
-	if (!entry->is_persistent) {
-		entry->fp_type = type;
-		entry->offset = offset;
-		return;
-	}
-	data = &(PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos]);
-	data->fp_type = type;
-	data->offset = offset;
-}
-
-static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
+static inline enum phar_fp_type phar_get_fp_type(const phar_entry_info *entry)
 {
 	if (!entry->is_persistent) {
 		return entry->fp_type;
 	}
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
-}
-
-static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry)
-{
-	if (!entry->is_persistent) {
-		return entry->offset;
-	}
-	if (PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type == PHAR_FP) {
-		if (!PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset) {
-			PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset = entry->offset;
-		}
-	}
-	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset;
 }
 
 #define PHAR_MIME_PHP '\0'
@@ -459,9 +342,6 @@ typedef struct _phar_entry_data {
 	zend_off_t                    position;
 	/* for copies of the phar fp, defines where 0 is */
 	zend_off_t                    zero;
-	uint32_t             for_write:1;
-	uint32_t             is_zip:1;
-	uint32_t             is_tar:1;
 	phar_entry_info          *internal_file;
 } phar_entry_data;
 
@@ -492,10 +372,8 @@ static inline void phar_unixify_path_separators(char *path, size_t path_len)
 	}
 }
 #endif
-/**
- * validate an alias, returns 1 for success, 0 for failure
- */
-static inline int phar_validate_alias(const char *alias, size_t alias_len) /* {{{ */
+
+static inline bool phar_validate_alias(const char *alias, size_t alias_len) /* {{{ */
 {
 	return !(memchr(alias, '/', alias_len) || memchr(alias, '\\', alias_len) || memchr(alias, ':', alias_len) ||
 		memchr(alias, ';', alias_len) || memchr(alias, '\n', alias_len) || memchr(alias, '\r', alias_len));
@@ -527,17 +405,15 @@ void phar_request_initialize(void);
 void phar_object_init(void);
 void phar_destroy_phar_data(phar_archive_data *phar);
 
-int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
-int phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_open_executed_filename(char *alias, size_t alias_len, char **error);
-int phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len);
-int phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error);
-int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error);
-int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);
+zend_result phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
+zend_result phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_open_executed_filename(char *alias, size_t alias_len, char **error);
+zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len);
+zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error);
+zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error);
+zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);
 
 /* utility functions */
 zend_string *phar_create_default_stub(const char *index_php, const char *web_index, char **error);
@@ -546,60 +422,56 @@ char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
 
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len);
-int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len);
+zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len);
 zend_string *phar_find_in_include_path(zend_string *file, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
-void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, int persistent);
-bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, int persistent);
+void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, bool persistent);
+bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, bool persistent);
 /* If this has data, free it and set all values to undefined. */
-void phar_metadata_tracker_free(phar_metadata_tracker* val, int persistent);
-void phar_metadata_tracker_copy(phar_metadata_tracker* dest, const phar_metadata_tracker *source, int persistent);
+void phar_metadata_tracker_free(phar_metadata_tracker* val, bool persistent);
+void phar_metadata_tracker_copy(phar_metadata_tracker* dest, const phar_metadata_tracker *source, bool persistent);
 void phar_metadata_tracker_clone(phar_metadata_tracker* tracker);
-void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker* tracker, int persistent);
-int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker* tracker, zval *value, int persistent, HashTable *unserialize_options, const char* method_name);
-void phar_release_entry_metadata(phar_entry_info *entry);
-void phar_release_archive_metadata(phar_archive_data *phar);
+void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker* tracker, bool persistent);
+zend_result phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker* tracker, zval *value, bool persistent, HashTable *unserialize_options, const char* method_name);
 void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);
-int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error);
-int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links);
+zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error);
+zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links);
 phar_entry_info *phar_get_link_source(phar_entry_info *entry);
-int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_separate_entry_fp(phar_entry_info *entry, char **error);
-int phar_open_archive_fp(phar_archive_data *phar);
-int phar_copy_on_write(phar_archive_data **pphar);
+zend_result phar_open_archive_fp(phar_archive_data *phar);
+zend_result phar_copy_on_write(phar_archive_data **pphar);
 
 /* tar functions in tar.c */
-int phar_is_tar(char *buf, char *fname);
-int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, int is_data, uint32_t compression, char **error);
-int phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error);
+bool phar_is_tar(char *buf, char *fname);
+zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error);
+zend_result phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error);
+void phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error);
 
 /* zip functions in zip.c */
 int phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error);
 int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_zip_flush(phar_archive_data *archive, char *user_stub, zend_long len, int defaultstub, char **error);
+void phar_zip_flush(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 
 #ifdef PHAR_MAIN
-static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, int is_data, char **error);
 extern const php_stream_wrapper php_stream_phar_wrapper;
 #else
 extern HashTable cached_phars;
 extern HashTable cached_alias;
 #endif
 
-int phar_archive_delref(phar_archive_data *phar);
-int phar_entry_delref(phar_entry_data *idata);
+bool phar_archive_delref(phar_archive_data *phar);
+void phar_entry_delref(phar_entry_data *idata);
 
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, int security);
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, int security);
 phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
-int phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
-int phar_flush(phar_archive_data *archive, char *user_stub, zend_long len, int convert, char **error);
-int phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const char **ext_str, size_t *ext_len, int executable, int for_create, int is_complete);
-int phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, char **entry, size_t *entry_len, int executable, int for_create);
+zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
+void phar_flush_ex(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
+void phar_flush(phar_archive_data *archive, char **error);
+zend_result phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const char **ext_str, size_t *ext_len, int executable, int for_create, int is_complete);
+zend_result phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, char **entry, size_t *entry_len, int executable, int for_create);
 
 typedef enum {
 	pcr_use_query,
