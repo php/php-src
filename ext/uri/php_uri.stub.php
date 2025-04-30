@@ -201,8 +201,8 @@ namespace Uri\WhatWg {
 
         public function toUnicodeString(): string {}
 
-        /** @implementation-alias Uri\Rfc3986\Uri::resolve */
-        public function resolve(string $uri): static {}
+        /** @param array $softErrors */
+        public function resolve(string $uri, &$softErrors = null): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::__serialize */
         public function __serialize(): array {}
