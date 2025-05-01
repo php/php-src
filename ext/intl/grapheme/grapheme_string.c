@@ -734,15 +734,10 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( NULL != next ) {
-		if ( !Z_ISREF_P(next) ) {
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				 "grapheme_extract: 'next' was not passed by reference", 0 );
-			RETURN_FALSE;
-		} else {
-			ZVAL_DEREF(next);
-			/* initialize next */
-			zval_ptr_dtor(next);
-			ZVAL_LONG(next, lstart);
+		ZEND_ASSERT(Z_ISREF_P(next));
+		ZEND_TRY_ASSIGN_REF_LONG(next, lstart);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
 		}
 	}
 
@@ -799,7 +794,7 @@ PHP_FUNCTION(grapheme_extract)
 	if ( -1 != grapheme_ascii_check((unsigned char *)pstr, MIN(size + 1, str_len)) ) {
 		size_t nsize = MIN(size, str_len);
 		if ( NULL != next ) {
-			ZVAL_LONG(next, start+nsize);
+			ZEND_TRY_ASSIGN_REF_LONG(next, start + nsize);
 		}
 		RETURN_STRINGL(pstr, nsize);
 	}
@@ -833,7 +828,7 @@ PHP_FUNCTION(grapheme_extract)
 	ubrk_close(bi);
 
 	if ( NULL != next ) {
-		ZVAL_LONG(next, start+ret_pos);
+		ZEND_TRY_ASSIGN_REF_LONG(next, start + ret_pos);
 	}
 
 	RETURN_STRINGL(((char *)pstr), ret_pos);

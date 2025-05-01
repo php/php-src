@@ -8,9 +8,7 @@ PHP                                                                        NEWS
     correct) (JiriJozif).
 
 - Intl:
-  . datefmt_parse/datefmt_localtime references type system fixes. (nielsdos)
-  . Fix IntlDateFormatter::parseToCalendar() reference type system breaks.
-    (nielsdos)
+  . Fix various reference issues. (nielsdos)
 
 - Opcache:
   . Fixed bug GH-18417 (Windows SHM reattachment fails when increasing
