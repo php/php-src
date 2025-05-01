@@ -1,26 +1,11 @@
 --TEST--
-test operations done in finite field and elliptic curve cryptography. (GH-16870)
+test operations done in finite field and elliptic curve cryptography, using operator overloads. (GH-16870)
 --DESCRIPTION--
-Test operations using gmp with number sizes useful in cryptography.
-To gather the to-be-executed operations, the gmp_cryptography_ecc.phpt and gmp_cryptography_ffc.phpt files have been analysed.
+Test overload operators of gmp with number sizes useful in cryptography.
+It has the same content as `gmp_cryptography.phpt`, to which we refer for motivation of the operations.
 
-For finite field crypto (FFC), the operations are executed in a 8192bit prime group, with a 512bit factor.
-This is the biggest prime that was standarized in https://datatracker.ietf.org/doc/html/rfc3526.
-Note that this is insufficient according to the NIST guidelines for the security strength 256bit.
-However, it is doubtful that such big groups (or even bigger ones) are used, as then elliptic curves are much more efficient.
-
-For elliptic curve crypto (EEC), the operations are executed in a 512bit prime group.
-This corresponds to the biggest curve standardized in https://www.secg.org/sec2-v2.pdf.
-Operations already executed as part of FCC are ommitted: As FFC operates on larger numbers, ECC operations are implicitly covered.
-
-Further context: 
-- See https://www.keylength.com/en/4/ for an overview of the recommended key lengths by NIST.
-- See https://doi.org/10.6028/NIST.IR.8547.ipd for a public draft of NIST which proposes to fade-out FFC/ECC crypto by 2035.
-
-Factors were produced using
-$random = gmp_random_bits(512);
-$randomHex = strtoupper(gmp_strval($random, 16));
-echo chunk_split(chunk_split($randomHex, 8, " "), 54);
+The only difference in this file is that whenever possible operator overloads are used.
+The reason is that while fixing GH-16870, it was noticed that the overload operators and the functions evolved independently.
 --EXTENSIONS--
 gmp
 --FILE--
@@ -80,18 +65,18 @@ FD4C0344 D9E03882 A7C65C49 F47E843A', 16);
 $factor = gmp_powm($generator, $factor512, $prime);
 var_dump(gmp_strval($factor, 16));
 
-$result = gmp_add($factor, $prime);
-$result = gmp_mod($result, $prime);
-$result = gmp_sub($result, $factor);
+$result = $factor + $prime;
+$result = $result % $prime;
+$result = $result - $factor;
 var_dump(gmp_cmp($result, 0) === 0);
 
 $factor = gmp_random_range(0, $prime);
 $factorInverted = gmp_invert($factor, $prime);
-$result = gmp_mul($factor, $factorInverted);
-$result = gmp_mod($result, $prime);
+$result = $factor * $factorInverted;
+$result = $result % $prime;
 var_dump(gmp_cmp($result, 1) === 0);
 
-$primeP = gmp_div($prime - 1, 2);
+$primeP = ($prime - 1) / 2;
 var_dump(gmp_prob_prime($prime) > 0);
 
 
@@ -106,13 +91,13 @@ B8B48991 8EF109E1 56193951 EC7E937B 1652C0BD 3BB1BF07 3573DF88
 $jacobi = gmp_jacobi($b, $p);
 var_dump($jacobi === 1);
 
-$result = gmp_and($p, $b);
+$result = $p & $b;
 var_dump(gmp_cmp($result, $b) === 0);
 
-$result = gmp_xor($p, $p);
+$result = $p ^ $p;
 var_dump(gmp_cmp($result, 0) === 0);
 
-$result = gmp_pow($b, 3);
+$result = $b ** 3;
 var_dump(gmp_strval($result, 16));
 
 ?>
