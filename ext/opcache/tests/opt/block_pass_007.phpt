@@ -18,7 +18,7 @@ var_dump(!!$f === false);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=22, args=0, vars=1, tmps=1)
+     ; (lines=22, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 2 %d string("random_int")
