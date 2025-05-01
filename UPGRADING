@@ -221,12 +221,15 @@ PHP 8.5 UPGRADE NOTES
 - Intl:
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone()
     throws an IntlException on uninitialised classes/clone failures.
-
   . grapheme_extract() properly assigns $next value when skipping over
     invalid starting bytes. Previously there were cases where it would
     point to the start of the grapheme boundary instead of the end.
   . Locale:: methods throw a ValueError when locale inputs contain null
     bytes.
+  . transliterator_get_error_code(), transliterator_get_error_message()
+    TransLiterator::getErrorCode(), and TransLiterator::getErrorMessage()
+    have dropped the false from the return type union. Returning false
+    was actually never possible.
 
 - libxml:
   . libxml_set_external_entity_loader() now has a formal return type of true.

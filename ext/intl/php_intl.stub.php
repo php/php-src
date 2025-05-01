@@ -637,6 +637,6 @@ function transliterator_create_inverse(Transliterator $transliterator): ?Transli
 
 function transliterator_transliterate(Transliterator|string $transliterator, string $string, int $start = 0, int $end = -1): string|false {}
 
-function transliterator_get_error_code(Transliterator $transliterator): int|false {}
+function transliterator_get_error_code(Transliterator $transliterator): int {}
 
-function transliterator_get_error_message(Transliterator $transliterator): string|false {}
+function transliterator_get_error_message(Transliterator $transliterator): string {}
