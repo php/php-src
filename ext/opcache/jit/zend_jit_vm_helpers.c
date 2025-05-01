@@ -380,6 +380,7 @@ static zend_always_inline zend_constant* _zend_quick_get_constant(
 				zend_deprecated_constant(c, c->name);
 				CONST_UNPROTECT_RECURSION(c);
 				if (EG(exception)) {
+					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					return NULL;
 				}
 			}
