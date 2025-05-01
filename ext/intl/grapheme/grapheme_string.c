@@ -1048,16 +1048,10 @@ PHP_FUNCTION(grapheme_levenshtein)
 		goto out_collator;
 	}
 
-	zend_long *p1, *p2, *tmp;
-#if SIZEOF_SIZE_T == 8
-	/* strlen_2 is an int32_t, so it will not overflow. */
-	zend_long *pbuf = safe_emalloc(((size_t) strlen_2 + 1) * 2, sizeof(zend_long), 0);
+	zend_long *pbuf, *p1, *p2, *tmp;
+	pbuf = safe_emalloc(strlen_2 + 1, sizeof(zend_long) * 2, 0);
 	p1 = pbuf;
 	p2 = p1 + (strlen_2 + 1);
-#else
-	p1 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
-	p2 = safe_emalloc(strlen_2 + 1, sizeof(zend_long), 0);
-#endif
 
 	for (i2 = 0; i2 <= strlen_2; i2++) {
 		p1[i2] = i2 * cost_ins;
@@ -1105,12 +1099,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	retval = p1[strlen_2];
 	RETVAL_LONG(retval);
 
-#if SIZEOF_SIZE_T == 8
 	efree(pbuf);
-#else
-	efree(p2);
-	efree(p1);
-#endif
 
 out_collator:
 	ucol_close(collator);
