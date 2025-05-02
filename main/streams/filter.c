@@ -22,10 +22,32 @@
 #include <stddef.h>
 #include <fcntl.h>
 
+#ifndef ZEND_HEAP_CHECK
+# define ZEND_HEAP_CHECK(condition, message)  do { \
+		if (UNEXPECTED(!(condition))) { \
+			zend_heap(message); \
+		} \
+	} while (0)
+#endif
+
 #include "php_streams_int.h"
 
 /* Global filter hash, copied to FG(stream_filters) on registration of volatile filter */
 static HashTable stream_filters_hash;
+
+static ZEND_COLD ZEND_NORETURN void zend_heap(const char *message)
+{
+	fprintf(stderr, "%s\n", message);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef ZEND_WIN32
+	fflush(stderr);
+#endif
+#if ZEND_DEBUG && defined(HAVE_KILL) && defined(HAVE_GETPID)
+	kill(getpid(), SIGSEGV);
+#endif
+	abort();
+}
+
 
 /* Should only be used during core initialization */
 PHPAPI HashTable *php_get_stream_filters_hash_global(void)
@@ -192,11 +214,13 @@ PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_str
 PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
 {
 	if (bucket->prev) {
+		ZEND_HEAP_CHECK(bucket->prev->next == bucket, "Stream bucket list corruption.");
 		bucket->prev->next = bucket->next;
 	} else if (bucket->brigade) {
 		bucket->brigade->head = bucket->next;
 	}
 	if (bucket->next) {
+		ZEND_HEAP_CHECK(bucket->next->prev == bucket, "Stream bucket list corruption.");
 		bucket->next->prev = bucket->prev;
 	} else if (bucket->brigade) {
 		bucket->brigade->tail = bucket->prev;
