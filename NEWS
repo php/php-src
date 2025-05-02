@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-18076 (Since PHP 8, the date_sun_info() function returns
     inaccurate sunrise and sunset times, but other calculated times are
     correct) (JiriJozif).
+  . Fixed bug GH-18481 (date_sunrise with unexpected nan value for the offset).
+    (nielsdos/David Carlier)
 
 - Intl:
   . Fix various reference issues. (nielsdos)
