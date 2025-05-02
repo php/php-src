@@ -31,3 +31,6 @@
 
 # Vendored libraries
 /ext/dom/lexbor/lexbor linguist-vendored
+
+# Test data files
+**/tests/**/*.data binary
