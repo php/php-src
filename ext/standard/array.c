@@ -3234,7 +3234,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	/* Create and initialize output hash */
 	zend_hash_init(&out_hash, (length > 0 ? num_in - length : 0) + (replace ? zend_hash_num_elements(replace) : 0), NULL, ZVAL_PTR_DTOR, 0);
 
-	if (length > ZEND_LONG_MAX - offset) {
+	if (length > ZEND_LONG_MAX - offset || length < ZEND_LONG_MIN + offset) {
 		goto end;
 	}
 
