@@ -994,6 +994,10 @@ PHP_FUNCTION(grapheme_levenshtein)
 	int32_t strlen_1, strlen_2;
 	strlen_1 = grapheme_split_string(ustring1, ustring1_len, NULL, 0);
 	strlen_2 = grapheme_split_string(ustring2, ustring2_len, NULL, 0);
+	if (UNEXPECTED(strlen_1 < 0 || strlen_2 < 0)) {
+		RETVAL_FALSE;
+		goto out_ustring2;
+	}
 
 	if (strlen_1 == 0) {
 		RETVAL_LONG(strlen_2 * cost_ins);
