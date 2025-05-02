@@ -1896,14 +1896,11 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_SSLKEYTYPE:
 		case CURLOPT_SSL_CIPHER_LIST:
 		case CURLOPT_USERAGENT:
-		case CURLOPT_USERPWD:
 		case CURLOPT_COOKIELIST:
 		case CURLOPT_FTP_ALTERNATIVE_TO_USER:
 		case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
-		case CURLOPT_PASSWORD:
 		case CURLOPT_PROXYPASSWORD:
 		case CURLOPT_PROXYUSERNAME:
-		case CURLOPT_USERNAME:
 		case CURLOPT_NOPROXY:
 		case CURLOPT_SOCKS5_GSSAPI_SERVICE:
 		case CURLOPT_MAIL_FROM:
@@ -1997,6 +1994,12 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_HSTS:
 #endif
 		case CURLOPT_KRBLEVEL:
+		// Authorization header would be implictly set
+		// with an empty string thus we explictly set the option
+		// to null to avoid this unwarranted side effect
+		case CURLOPT_USERPWD:
+		case CURLOPT_USERNAME:
+		case CURLOPT_PASSWORD:
 		{
 			if (Z_ISNULL_P(zvalue)) {
 				error = curl_easy_setopt(ch->cp, option, NULL);
