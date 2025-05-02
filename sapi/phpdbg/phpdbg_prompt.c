@@ -1551,7 +1551,7 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 				ret = phpdbg_stack_execute(&stack, allow_async_unsafe);
 			} zend_catch {
 				phpdbg_stack_free(&stack);
-				zend_bailout();
+				zend_bailout_without_gc_protect();
 			} zend_end_try();
 
 			switch (ret) {
