@@ -3252,7 +3252,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 
 		/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 		if (removed != NULL) {
-			for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
+			for ( ; length <= ZEND_LONG_MAX - offset && pos < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos++;
 				Z_TRY_ADDREF_P(entry);
@@ -3260,9 +3260,9 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				zend_hash_packed_del_val(in_hash, entry);
 			}
 		} else { /* otherwise just skip those entries */
-			int pos2 = pos;
+			zend_long pos2 = pos;
 
-			for ( ; pos2 < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
+			for ( ; length <= ZEND_LONG_MAX - offset && pos2 < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_packed_del_val(in_hash, entry);
