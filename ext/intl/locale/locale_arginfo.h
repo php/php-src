@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f09cfd61f3e20576c7f6d5da17a6d9c009d6ab64 */
+ * Stub hash: ff1f75bd34a52f57210734e2f5e29efb87566137 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -66,6 +66,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Locale_isRightToLeft, 0, 1
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Locale_addLikelySubtags, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Locale_minimizeSubtags arginfo_class_Locale_addLikelySubtags
+
 ZEND_FUNCTION(locale_get_default);
 ZEND_FUNCTION(locale_set_default);
 ZEND_FUNCTION(locale_get_primary_language);
@@ -85,6 +91,8 @@ ZEND_FUNCTION(locale_lookup);
 ZEND_FUNCTION(locale_canonicalize);
 ZEND_FUNCTION(locale_accept_from_http);
 ZEND_FUNCTION(locale_is_right_to_left);
+ZEND_FUNCTION(locale_add_likely_subtags);
+ZEND_FUNCTION(locale_minimize_subtags);
 
 static const zend_function_entry class_Locale_methods[] = {
 	ZEND_RAW_FENTRY("getDefault", zif_locale_get_default, arginfo_class_Locale_getDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
@@ -106,6 +114,8 @@ static const zend_function_entry class_Locale_methods[] = {
 	ZEND_RAW_FENTRY("canonicalize", zif_locale_canonicalize, arginfo_class_Locale_canonicalize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("acceptFromHttp", zif_locale_accept_from_http, arginfo_class_Locale_acceptFromHttp, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("isRightToLeft", zif_locale_is_right_to_left, arginfo_class_Locale_isRightToLeft, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("addLikelySubtags", zif_locale_add_likely_subtags, arginfo_class_Locale_addLikelySubtags, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("minimizeSubtags", zif_locale_minimize_subtags, arginfo_class_Locale_minimizeSubtags, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_FE_END
 };
 

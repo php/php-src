@@ -1639,3 +1639,49 @@ PHP_FUNCTION(locale_is_right_to_left)
 
 	RETURN_BOOL(uloc_isRightToLeft(locale));
 }
+
+PHP_FUNCTION(locale_add_likely_subtags)
+{
+	char *locale, maximized_locale[ULOC_FULLNAME_CAPACITY];
+	UErrorCode status = 0;
+	size_t locale_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(locale, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!locale_len) {
+		locale = (char *)intl_locale_get_default();
+	}
+
+	int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
+	INTL_CHECK_STATUS(status, "locale_add_likely_subtags: invalid locale");
+	if (maximized_locale_len < 0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(maximized_locale, maximized_locale_len);
+}
+
+PHP_FUNCTION(locale_minimize_subtags)
+{
+	char *locale, minimized_locale[ULOC_FULLNAME_CAPACITY];
+	UErrorCode status = 0;
+	size_t locale_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(locale, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!locale_len) {
+		locale = (char *)intl_locale_get_default();
+	}
+
+	int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
+	INTL_CHECK_STATUS(status, "locale_minimize_subtags: invalid locale");
+	if (minimized_locale_len < 0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(minimized_locale, minimized_locale_len);
+}

@@ -178,6 +178,8 @@ PHP 8.5 UPGRADE NOTES
     NumberFormatter::CURRENCY_PLURAL, NumberFormatter::CASH_CURRENCY,
     and NumberFormatter::CURRENCY_STANDARD for various currency-related
     number formats.
+  . Added Locale::addLikelySubtags and Locale::minimizeSubtags to
+    handle likely tags on a given locale.
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
