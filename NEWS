@@ -94,6 +94,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added null bytes presence in locale inputs for Locale class. (David Carlier)
   . Added grapheme_levenshtein() function. (Yuya Hamada)
+  . Added Locale::addLikelySubtags/Locale::minimizeSubtags to handle
+    adding/removing likely subtags to a locale. (David Carlier)
 
 - MySQLi:
   . Fixed bugs GH-17900 and GH-8084 (calling mysqli::__construct twice).

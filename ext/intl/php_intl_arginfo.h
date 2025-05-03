@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 70b621ef9169fd3b913347adc0baf3626584a2c3 */
+ * Stub hash: 0d5b028a1ab8f35e8ee1b51ce3141b6ef782af28 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -578,6 +578,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_is_right_to_left, 0, 1, _
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_add_likely_subtags, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_locale_minimize_subtags arginfo_locale_add_likely_subtags
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_msgfmt_create, 0, 2, MessageFormatter, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
@@ -934,6 +940,8 @@ ZEND_FUNCTION(locale_canonicalize);
 ZEND_FUNCTION(locale_lookup);
 ZEND_FUNCTION(locale_accept_from_http);
 ZEND_FUNCTION(locale_is_right_to_left);
+ZEND_FUNCTION(locale_add_likely_subtags);
+ZEND_FUNCTION(locale_minimize_subtags);
 ZEND_FUNCTION(msgfmt_create);
 ZEND_FUNCTION(msgfmt_format);
 ZEND_FUNCTION(msgfmt_format_message);
@@ -1123,6 +1131,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(locale_lookup, arginfo_locale_lookup)
 	ZEND_FE(locale_accept_from_http, arginfo_locale_accept_from_http)
 	ZEND_FE(locale_is_right_to_left, arginfo_locale_is_right_to_left)
+	ZEND_FE(locale_add_likely_subtags, arginfo_locale_add_likely_subtags)
+	ZEND_FE(locale_minimize_subtags, arginfo_locale_minimize_subtags)
 	ZEND_FE(msgfmt_create, arginfo_msgfmt_create)
 	ZEND_FE(msgfmt_format, arginfo_msgfmt_format)
 	ZEND_FE(msgfmt_format_message, arginfo_msgfmt_format_message)

@@ -505,6 +505,10 @@ function locale_accept_from_http(string $header): string|false {}
 
 function locale_is_right_to_left(string $locale): bool {}
 
+function locale_add_likely_subtags(string $locale): string|false {}
+
+function locale_minimize_subtags(string $locale): string|false {}
+
 /* msgformat */
 
 function msgfmt_create(string $locale, string $pattern): ?MessageFormatter {}

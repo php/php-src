@@ -138,4 +138,14 @@ class Locale
      * @alias locale_is_right_to_left
      */
     public static function isRightToLeft(string $locale): bool {}
+
+    /**
+     * @alias locale_add_likely_subtags
+     */
+    public static function addLikelySubtags(string $locale): string|false {}
+
+    /**
+     * @alias locale_minimize_subtags
+     */
+    public static function minimizeSubtags(string $locale): string|false {}
 }
