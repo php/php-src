@@ -38,7 +38,7 @@ namespace Uri\Rfc3986 {
 
         public function getRawUserInfo(): ?string {}
 
-        public function withUserInfo(?string $userInfo): static {}
+        public function withUserInfo(#[\SensitiveParameter] ?string $userInfo): static {}
 
         public function getUsername(): ?string {}
 
@@ -163,7 +163,7 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getPassword */
         public function getPassword(): ?string {}
 
-        public function withPassword(?string $password): static {}
+        public function withPassword(#[\SensitiveParameter] ?string $password): static {}
 
         public function getAsciiHost(): ?string {}
 
