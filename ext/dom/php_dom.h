@@ -56,11 +56,11 @@ extern zend_module_entry dom_module_entry;
 #include "xpath_callbacks.h"
 #include "zend_exceptions.h"
 #include "dom_ce.h"
-/* DOM API_VERSION, please bump it up, if you change anything in the API
-    therefore it's easier for the script-programmers to check, what's working how
-   Can be checked with phpversion("dom");
-*/
-#define DOM_API_VERSION "20031129"
+
+#define PHP_DOM_STRINGIFY(x) #x
+#define PHP_DOM_TOSTRING(x) PHP_DOM_STRINGIFY(x)
+#define DOM_API_VERSION PHP_DOM_TOSTRING(ZEND_MODULE_API_NO)
+
 /* Define a custom type for iterating using an unused nodetype */
 #define DOM_NODESET XML_XINCLUDE_START
 
