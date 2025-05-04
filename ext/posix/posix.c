@@ -906,12 +906,9 @@ try_again:
 }
 /* }}} */
 
-int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
+static void php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 {
-	if (NULL == pw)
-		return 0;
-	if (NULL == return_value || Z_TYPE_P(return_value) != IS_ARRAY)
-		return 0;
+	ZEND_ASSERT(Z_TYPE_P(return_value) == IS_ARRAY);
 
 	add_assoc_string(return_value, "name",      pw->pw_name);
 	add_assoc_string(return_value, "passwd",    pw->pw_passwd);
@@ -920,7 +917,6 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 	add_assoc_string(return_value, "gecos",     pw->pw_gecos);
 	add_assoc_string(return_value, "dir",       pw->pw_dir);
 	add_assoc_string(return_value, "shell",     pw->pw_shell);
-	return 1;
 }
 /* }}} */
 
@@ -973,11 +969,7 @@ try_again:
 #endif
 	array_init(return_value);
 
-	if (!php_posix_passwd_to_array(pw, return_value)) {
-		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "Unable to convert posix passwd struct to array");
-		RETVAL_FALSE;
-	}
+	php_posix_passwd_to_array(pw, return_value);
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	efree(buf);
 #endif
@@ -1033,11 +1025,7 @@ try_again:
 #endif
 	array_init(return_value);
 
-	if (!php_posix_passwd_to_array(pw, return_value)) {
-		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "Unable to convert posix passwd struct to array");
-		RETVAL_FALSE;
-	}
+	php_posix_passwd_to_array(pw, return_value);
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	efree(pwbuf);
 #endif
