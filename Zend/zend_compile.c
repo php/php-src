@@ -8365,7 +8365,9 @@ static zend_op_array *zend_compile_func_decl_ex(
 		zend_compile_closure_uses(uses_ast);
 	}
 
-	if (ast->kind == ZEND_AST_ARROW_FUNC && decl->child[2]->kind != ZEND_AST_RETURN) {
+	if (ast->kind == ZEND_AST_ARROW_FUNC
+        && stmt_ast->kind != ZEND_AST_RETURN
+        && stmt_ast->kind != ZEND_AST_STMT_LIST) {
 		bool needs_return = true;
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
