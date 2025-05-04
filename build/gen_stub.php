@@ -1396,7 +1396,7 @@ class FuncInfo {
                             $flagsByPhpVersions,
                             $this->minimumPhpVersionIdCompatibility
                         );
-                        $functionEntryCode = rtrim( implode("", $flagsCode) );
+                        $functionEntryCode = rtrim(implode("", $flagsCode));
                     }
                 }
             }
