@@ -2134,7 +2134,7 @@ static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is below the offset " ZEND_LONG_FMT, pos, intern->u.limit.offset);
 		return;
 	}
-	if (pos >= intern->u.limit.offset + intern->u.limit.count && intern->u.limit.count != -1) {
+	if (pos - intern->u.limit.offset >= intern->u.limit.count && intern->u.limit.count != -1) {
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is behind offset " ZEND_LONG_FMT " plus count " ZEND_LONG_FMT, pos, intern->u.limit.offset, intern->u.limit.count);
 		return;
 	}
@@ -3059,10 +3059,9 @@ PHP_FUNCTION(iterator_count)
 /* }}} */
 
 typedef struct {
-	zval                   *obj;
-	zend_long              count;
-	zend_fcall_info        fci;
-	zend_fcall_info_cache  fcc;
+	zend_long count;
+	HashTable *params_ht;
+	zend_fcall_info_cache fcc;
 } spl_iterator_apply_info;
 
 static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -3072,7 +3071,7 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 	int result;
 
 	apply_info->count++;
-	zend_call_function_with_return_value(&apply_info->fci, &apply_info->fcc, &retval);
+	zend_call_known_fcc(&apply_info->fcc, &retval, 0, NULL, apply_info->params_ht);
 	result = zend_is_true(&retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
 	zval_ptr_dtor(&retval);
 	return result;
@@ -3082,18 +3081,26 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 /* {{{ Calls a function for every element in an iterator */
 PHP_FUNCTION(iterator_apply)
 {
-	spl_iterator_apply_info  apply_info;
+	zval *traversable;
+	zend_fcall_info dummy_fci;
+	spl_iterator_apply_info apply_info = {
+		.count = 0,
+		.params_ht = NULL,
+		.fcc = { 0 },
+	};
 
 	/* The HashTable is used to determine positional arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of|h!", &apply_info.obj, zend_ce_traversable,
-			&apply_info.fci, &apply_info.fcc, &apply_info.fci.named_params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OF|h!", &traversable, zend_ce_traversable,
+			&dummy_fci, &apply_info.fcc, &apply_info.params_ht) == FAILURE) {
+		zend_release_fcall_info_cache(&apply_info.fcc);
 		RETURN_THROWS();
 	}
 
-	apply_info.count = 0;
-	if (spl_iterator_apply(apply_info.obj, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
-		return;
+	if (spl_iterator_apply(traversable, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
+		zend_release_fcall_info_cache(&apply_info.fcc);
+		RETURN_THROWS();
 	}
+	zend_release_fcall_info_cache(&apply_info.fcc);
 	RETURN_LONG(apply_info.count);
 }
 /* }}} */

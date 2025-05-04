@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bcd5195c8a1eea47d881747a57f1b1342ef0bbd1 */
+ * Stub hash: 9dd3fce23840ced1c265f8ec1dd3929298fdfe37 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_enchant_broker_init, 0, 0, EnchantBroker, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -75,9 +75,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_add, 0, 2, IS_VOID,
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_enchant_dict_remove arginfo_enchant_dict_add
+
 #define arginfo_enchant_dict_add_to_personal arginfo_enchant_dict_add
 
 #define arginfo_enchant_dict_add_to_session arginfo_enchant_dict_add
+
+#define arginfo_enchant_dict_remove_from_session arginfo_enchant_dict_add
 
 #define arginfo_enchant_dict_is_added arginfo_enchant_dict_check
 
@@ -113,7 +117,9 @@ ZEND_FUNCTION(enchant_dict_quick_check);
 ZEND_FUNCTION(enchant_dict_check);
 ZEND_FUNCTION(enchant_dict_suggest);
 ZEND_FUNCTION(enchant_dict_add);
+ZEND_FUNCTION(enchant_dict_remove);
 ZEND_FUNCTION(enchant_dict_add_to_session);
+ZEND_FUNCTION(enchant_dict_remove_from_session);
 ZEND_FUNCTION(enchant_dict_is_added);
 ZEND_FUNCTION(enchant_dict_store_replacement);
 ZEND_FUNCTION(enchant_dict_get_error);
@@ -136,8 +142,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(enchant_dict_check, arginfo_enchant_dict_check)
 	ZEND_FE(enchant_dict_suggest, arginfo_enchant_dict_suggest)
 	ZEND_FE(enchant_dict_add, arginfo_enchant_dict_add)
+	ZEND_FE(enchant_dict_remove, arginfo_enchant_dict_remove)
 	ZEND_RAW_FENTRY("enchant_dict_add_to_personal", zif_enchant_dict_add, arginfo_enchant_dict_add_to_personal, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(enchant_dict_add_to_session, arginfo_enchant_dict_add_to_session)
+	ZEND_FE(enchant_dict_remove_from_session, arginfo_enchant_dict_remove_from_session)
 	ZEND_FE(enchant_dict_is_added, arginfo_enchant_dict_is_added)
 	ZEND_RAW_FENTRY("enchant_dict_is_in_session", zif_enchant_dict_is_added, arginfo_enchant_dict_is_in_session, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(enchant_dict_store_replacement, arginfo_enchant_dict_store_replacement)

@@ -90,11 +90,6 @@ static void php_phpdbg_destroy_bp_condition(zval *data) /* {{{ */
 	efree(brake);
 } /* }}} */
 
-static void php_phpdbg_destroy_registered(zval *data) /* {{{ */
-{
-	zend_function_dtor(data);
-} /* }}} */
-
 static void php_phpdbg_destroy_file_source(zval *data) /* {{{ */
 {
 	phpdbg_file_source *source = (phpdbg_file_source *) Z_PTR_P(data);
@@ -164,7 +159,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], 8, NULL, NULL, 0);
 
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
-	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
+	zend_hash_init(&PHPDBG_G(registered), 8, NULL, NULL, true);
 
 	zend_hash_init(&PHPDBG_G(file_sources), 0, NULL, php_phpdbg_destroy_file_source, 0);
 	phpdbg_setup_watchpoints();
@@ -434,7 +429,8 @@ PHP_FUNCTION(phpdbg_start_oplog)
 static zend_always_inline bool phpdbg_is_ignored_opcode(uint8_t opcode) {
 	return
 	    opcode == ZEND_NOP || opcode == ZEND_OP_DATA || opcode == ZEND_FE_FREE || opcode == ZEND_FREE || opcode == ZEND_ASSERT_CHECK || opcode == ZEND_VERIFY_RETURN_TYPE
-	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_FUNCTION
+	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_ATTRIBUTED_CONST
+	 || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_FUNCTION
 	 || opcode == ZEND_DECLARE_CLASS_DELAYED
 	 || opcode == ZEND_DECLARE_ANON_CLASS || opcode == ZEND_FAST_RET || opcode == ZEND_TICKS
 	 || opcode == ZEND_EXT_STMT || opcode == ZEND_EXT_FCALL_BEGIN || opcode == ZEND_EXT_FCALL_END
@@ -856,6 +852,7 @@ typedef struct {
 	int fd;
 } php_stdio_stream_data;
 
+#ifndef _WIN32
 static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count) {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
@@ -882,6 +879,7 @@ static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t c
 
 	return PHPDBG_G(php_stdiop_write)(stream, buf, count);
 }
+#endif
 
 /* copied from sapi/cli/php_cli.c cli_register_file_handles */
 void phpdbg_register_file_handles(void) /* {{{ */

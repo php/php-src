@@ -27,9 +27,13 @@ namespace {
 
     function mt_rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
+    /** @compile-time-eval */
     function mt_getrandmax(): int {}
 
-    /** @alias mt_getrandmax */
+    /**
+     * @compile-time-eval
+     * @alias mt_getrandmax
+     */
     function getrandmax(): int {}
 
     /** @refcount 1 */

@@ -138,7 +138,9 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
              * If a prefix:name format is used, then the local name will be "prefix:name" and the prefix will be empty.
              * There is however still somewhat of a concept of namespaces. There are three: HTML (the default), SVG, and MATHML. */
             lxb_dom_element_t *element = lxb_dom_interface_element(node);
-            const lxb_char_t *name = lxb_dom_element_local_name(element, NULL);
+            const lxb_char_t *name = lxb_dom_element_qualified_name(element, NULL);
+            ZEND_ASSERT(!element->node.prefix);
+
             xmlNodePtr lxml_element = xmlNewDocNode(lxml_doc, NULL, name, NULL);
             if (UNEXPECTED(lxml_element == NULL)) {
                 retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
@@ -203,7 +205,13 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
             for (lxb_dom_attr_t *attr = element->first_attr; attr != NULL; attr = attr->next) {
                 /* Same namespace remark as for elements */
                 size_t local_name_length, value_length;
-                const lxb_char_t *local_name = lxb_dom_attr_local_name(attr, &local_name_length);
+                const lxb_char_t *local_name = lxb_dom_attr_qualified_name(attr, &local_name_length);
+                if (attr->node.prefix) {
+                    const char *pos = strchr((const char *) local_name, ':');
+                    if (EXPECTED(pos)) {
+                        local_name = (const lxb_char_t *) pos + 1;
+                    }
+                }
                 const lxb_char_t *value = lxb_dom_attr_value(attr, &value_length);
 
                 if (UNEXPECTED(local_name_length >= INT_MAX || value_length >= INT_MAX)) {

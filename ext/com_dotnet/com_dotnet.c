@@ -303,7 +303,7 @@ PHP_METHOD(dotnet, __construct)
 		IObjectHandle *handle = NULL;
 
 		where = "QI: IObjectHandle";
-		hr = IUnknown_QueryInterface(unk, &IID_IObjectHandle, &handle);
+		hr = IUnknown_QueryInterface(unk, &IID_IObjectHandle, (void**) &handle);
 
 		if (SUCCEEDED(hr)) {
 			where = "IObjectHandle_Unwrap";
@@ -312,7 +312,7 @@ PHP_METHOD(dotnet, __construct)
 
 				if (V_VT(&unwrapped) == VT_UNKNOWN) {
 					where = "Unwrapped, QI for IDispatch";
-					hr = IUnknown_QueryInterface(V_UNKNOWN(&unwrapped), &IID_IDispatch, &V_DISPATCH(&obj->v));
+					hr = IUnknown_QueryInterface(V_UNKNOWN(&unwrapped), &IID_IDispatch, (void **) &V_DISPATCH(&obj->v));
 
 					if (SUCCEEDED(hr)) {
 						V_VT(&obj->v) = VT_DISPATCH;

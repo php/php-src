@@ -294,7 +294,8 @@ static void php_converter_from_u_callback(const void *context,
 	zval zargs[4];
 
 	ZVAL_LONG(&zargs[0], reason);
-	array_init(&zargs[1]);
+	array_init_size(&zargs[1], length);
+	zend_hash_real_init_packed(Z_ARRVAL(zargs[1]));
 	int i = 0;
 	while (i < length) {
 		UChar32 c;
@@ -374,20 +375,23 @@ static bool php_converter_set_encoding(php_converter_object *objval,
 		if (objval) {
 			THROW_UFAILURE(objval, "ucnv_open", error);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Error setting encoding: %d - %s", (int)error, u_errorName(error));
+			char *msg;
+			spprintf(&msg, 0, "Error setting encoding: %d - %s", (int)error, u_errorName(error));
+			intl_error_set(NULL, error, msg, 1);
+			efree(msg);
 		}
-		return 0;
+		return false;
 	}
 
 	if (objval && !php_converter_set_callbacks(objval, cnv)) {
-		return 0;
+		return false;
 	}
 
 	if (*pcnv) {
 		ucnv_close(*pcnv);
 	}
 	*pcnv = cnv;
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -735,13 +739,13 @@ PHP_METHOD(UConverter, transcode) {
 			zval *tmpzval;
 
 			if (U_SUCCESS(error) &&
-				(tmpzval = zend_hash_str_find(Z_ARRVAL_P(options), "from_subst", sizeof("from_subst") - 1)) != NULL &&
+				(tmpzval = zend_hash_str_find_deref(Z_ARRVAL_P(options), "from_subst", sizeof("from_subst") - 1)) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
 				ucnv_setSubstChars(src_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
 			}
 			if (U_SUCCESS(error) &&
-				(tmpzval = zend_hash_str_find(Z_ARRVAL_P(options), "to_subst", sizeof("to_subst") - 1)) != NULL &&
+				(tmpzval = zend_hash_str_find_deref(Z_ARRVAL_P(options), "to_subst", sizeof("to_subst") - 1)) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
 				ucnv_setSubstChars(dest_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
@@ -804,7 +808,8 @@ PHP_METHOD(UConverter, getAvailable) {
 
 	intl_error_reset(NULL);
 
-	array_init(return_value);
+	array_init_size(return_value, count);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for(i = 0; i < count; i++) {
 		const char *name = ucnv_getAvailableName(i);
 		add_next_index_string(return_value, name);
@@ -830,7 +835,8 @@ PHP_METHOD(UConverter, getAliases) {
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, count);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for(i = 0; i < count; i++) {
 		const char *alias;
 
@@ -853,8 +859,9 @@ PHP_METHOD(UConverter, getStandards) {
 	ZEND_PARSE_PARAMETERS_NONE();
 	intl_error_reset(NULL);
 
-	array_init(return_value);
 	count = ucnv_countStandards();
+	array_init_size(return_value, count);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for(i = 0; i < count; i++) {
 		UErrorCode error = U_ZERO_ERROR;
 		const char *name = ucnv_getStandard(i, &error);

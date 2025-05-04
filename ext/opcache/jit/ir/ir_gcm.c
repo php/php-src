@@ -356,9 +356,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 			}
 		} else {
 			j = i = ctx->cfg_map[use];
-			IR_ASSERT(i > 0);
-			while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
-				j = ctx->cfg_blocks[j].idom;
+			if (i) {
+				IR_ASSERT(i > 0);
+				while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
+					j = ctx->cfg_blocks[j].idom;
+				}
 			}
 			clone = ir_hashtab_find(&hash, j);
 			if (clone == IR_INVALID_VAL) {
@@ -399,9 +401,10 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	for (i = 1; i < clones_count; i++) {
 		clones[i].ref = clone = ir_emit(ctx, insn->optx, insn->op1, insn->op2, insn->op3);
 		insn = &ctx->ir_base[ref];
-		if (insn->op1 > 0) ir_use_list_add(ctx, insn->op1, clone);
-		if (insn->op2 > 0) ir_use_list_add(ctx, insn->op2, clone);
-		if (insn->op3 > 0) ir_use_list_add(ctx, insn->op3, clone);
+		/* Depending on the flags in IR_OPS, these can be references or data. */
+		if (insn->op1 > 0 && insn->inputs_count >= 1) ir_use_list_add(ctx, insn->op1, clone);
+		if (insn->op2 > 0 && insn->inputs_count >= 2) ir_use_list_add(ctx, insn->op2, clone);
+		if (insn->op3 > 0 && insn->inputs_count >= 3) ir_use_list_add(ctx, insn->op3, clone);
 	}
 
 	/* Reconstruct IR: Update DEF->USE lists, CFG mapping and etc */
@@ -410,10 +413,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	n = ctx->use_lists[ref].refs;
 	for (i = 0; i < clones_count; i++) {
 		clone = clones[i].ref;
-		if (clones[i].use_count == 1) {
+		if (clones[i].use_count == 1
+		 && ctx->cfg_blocks[clones[i].block].loop_depth >= ctx->cfg_blocks[uses[clones[i].use].block].loop_depth) {
 			/* TOTALLY_USEFUL block may be a head of a diamond above the real usage.
 			 * Sink it down to the real usage block.
-			 * Clones with few uses we be sunk into the LCA block.
+			 * Clones with few uses will be sunk into the LCA block.
 			 */
 			clones[i].block = uses[clones[i].use].block;
 		}
@@ -941,8 +945,9 @@ int ir_schedule(ir_ctx *ctx)
 
 				for (p = &ctx->use_edges[use_list->refs]; count > 0; p++, count--) {
 					ir_ref use = *p;
-					if (!_xlat[use]) {
-						ir_insn *use_insn = &ctx->ir_base[use];
+					ir_insn *use_insn = &ctx->ir_base[use];
+					if (!_xlat[use] && (_blocks[use] || use_insn->op == IR_PARAM)) {
+						IR_ASSERT(_blocks[use] == b || use_insn->op == IR_PARAM);
 						if (use_insn->op == IR_PARAM
 						 || use_insn->op == IR_VAR
 						 || use_insn->op == IR_PI
@@ -1056,7 +1061,7 @@ restart:
 	if (ctx->flags & IR_DEBUG_SCHEDULE) {
 		fprintf(stderr, "After Schedule\n");
 		for (i = 1; i != 0; i = _next[i]) {
-			fprintf(stderr, "%d -> %d\n", i, _blocks[i]);
+			fprintf(stderr, "%d -> %d (%d)\n", i, _blocks[i], _xlat[i]);
 		}
 	}
 #endif
@@ -1325,11 +1330,13 @@ restart:
 	new_ctx.cfg_edges = ctx->cfg_edges;
 	ctx->cfg_blocks = NULL;
 	ctx->cfg_edges = NULL;
+	ir_code_buffer *saved_code_buffer = ctx->code_buffer;
 
 	ir_free(ctx);
 	IR_ASSERT(new_ctx.consts_count == new_ctx.consts_limit);
 	IR_ASSERT(new_ctx.insns_count == new_ctx.insns_limit);
 	memcpy(ctx, &new_ctx, sizeof(ir_ctx));
+	ctx->code_buffer = saved_code_buffer;
 	ctx->flags2 |= IR_LINEAR;
 
 	ir_mem_free(_next);

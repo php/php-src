@@ -2026,7 +2026,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 		escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(client->request.request_uri), ZSTR_LEN(client->request.request_uri), 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
 		{
-			static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
+			static const char prologue_template[] = "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>%d %s</title>";
 			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
 			if (!chunk) {
 				goto fail;

@@ -46,6 +46,7 @@ static const func_info_t func_infos[] = {
 	F1("curl_multi_strerror", MAY_BE_STRING|MAY_BE_NULL),
 	F1("curl_share_init", MAY_BE_OBJECT),
 	F1("curl_share_strerror", MAY_BE_STRING|MAY_BE_NULL),
+	F1("curl_share_init_persistent", MAY_BE_OBJECT),
 	F1("curl_strerror", MAY_BE_STRING|MAY_BE_NULL),
 	F1("curl_version", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 	F1("date", MAY_BE_STRING),
@@ -428,13 +429,12 @@ static const func_info_t func_infos[] = {
 #endif
 	F1("get_current_user", MAY_BE_STRING),
 	FN("get_cfg_var", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
-	F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
+	F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_NULL),
 	F1("highlight_file", MAY_BE_STRING|MAY_BE_BOOL),
 	F1("php_strip_whitespace", MAY_BE_STRING),
 	F1("highlight_string", MAY_BE_STRING|MAY_BE_TRUE),
 	F1("ini_get_all", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
 	F1("set_include_path", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("get_include_path", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("print_r", MAY_BE_STRING|MAY_BE_TRUE),
 #if defined(HAVE_GETSERVBYPORT)
 	F1("getservbyport", MAY_BE_STRING|MAY_BE_FALSE),

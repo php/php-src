@@ -398,7 +398,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	if ((e = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 2, &error, 1))) {
 		/* directory exists, or is a subdirectory of an existing file */
 		if (e->is_temp_dir) {
-			efree(e->filename);
+			zend_string_efree(e->filename);
 			efree(e);
 		}
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", directory already exists", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host));
@@ -434,14 +434,13 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		entry.is_zip = 1;
 	}
 
-	entry.filename = estrdup(ZSTR_VAL(resource->path) + 1);
+	entry.filename = zend_string_init(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, false);
 
 	if (phar->is_tar) {
 		entry.is_tar = 1;
 		entry.tar_type = TAR_DIR;
 	}
 
-	entry.filename_len = ZSTR_LEN(resource->path) - 1;
 	php_url_free(resource);
 	entry.is_dir = 1;
 	entry.phar = phar;
@@ -450,23 +449,23 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	entry.flags = PHAR_ENT_PERM_DEF_DIR;
 	entry.old_flags = PHAR_ENT_PERM_DEF_DIR;
 
-	if (NULL == zend_hash_str_add_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", entry.filename, phar->fname);
+	if (NULL == zend_hash_add_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info))) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", ZSTR_VAL(entry.filename), phar->fname);
 		efree(error);
-		efree(entry.filename);
+		zend_string_efree(entry.filename);
 		return 0;
 	}
 
 	phar_flush(phar, &error);
 
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
-		zend_hash_str_del(&phar->manifest, entry.filename, entry.filename_len);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(entry.filename), phar->fname, error);
+		zend_hash_del(&phar->manifest, entry.filename);
 		efree(error);
 		return 0;
 	}
 
-	phar_add_virtual_dirs(phar, entry.filename, entry.filename_len);
+	phar_add_virtual_dirs(phar, ZSTR_VAL(entry.filename), ZSTR_LEN(entry.filename));
 	return 1;
 }
 /* }}} */
@@ -547,7 +546,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 			) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
-					efree(entry->filename);
+					zend_string_efree(entry->filename);
 					efree(entry);
 				}
 				php_url_free(resource);
@@ -563,7 +562,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 			) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
-					efree(entry->filename);
+					zend_string_efree(entry->filename);
 					efree(entry);
 				}
 				php_url_free(resource);
@@ -574,7 +573,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 
 	if (entry->is_temp_dir) {
 		zend_hash_str_del(&phar->virtual_dirs, ZSTR_VAL(resource->path)+1, path_len);
-		efree(entry->filename);
+		zend_string_efree(entry->filename);
 		efree(entry);
 	} else {
 		entry->is_deleted = 1;
@@ -582,7 +581,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		phar_flush(phar, &error);
 
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(entry->filename), phar->fname, error);
 			php_url_free(resource);
 			efree(error);
 			return 0;

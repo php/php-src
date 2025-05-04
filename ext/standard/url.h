@@ -33,7 +33,9 @@ PHPAPI php_url *php_url_parse(char const *str);
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length);
 PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port);
 PHPAPI size_t php_url_decode(char *str, size_t len); /* return value: length of decoded string */
+PHPAPI size_t php_url_decode_ex(char *dest, const char *src, size_t src_len);
 PHPAPI size_t php_raw_url_decode(char *str, size_t len); /* return value: length of decoded string */
+PHPAPI size_t php_raw_url_decode_ex(char *dest, const char *src, size_t src_len);
 PHPAPI zend_string *php_url_encode(char const *s, size_t len);
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len);
 

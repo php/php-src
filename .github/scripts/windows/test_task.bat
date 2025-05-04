@@ -58,12 +58,15 @@ if "%PLATFORM%" == "x64" (
 curl -sLo Firebird.zip %PHP_FIREBIRD_DOWNLOAD_URL%
 7z x -oC:\Firebird Firebird.zip
 set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
-set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
+set PDO_FIREBIRD_TEST_DSN=firebird:dbname=127.0.0.1:%PDO_FIREBIRD_TEST_DATABASE%
 set PDO_FIREBIRD_TEST_USER=SYSDBA
 set PDO_FIREBIRD_TEST_PASS=phpfi
+echo create user %PDO_FIREBIRD_TEST_USER% password '%PDO_FIREBIRD_TEST_PASS%';> C:\Firebird\create_user.sql
+echo commit;>> C:\Firebird\create_user.sql
 echo create database '%PDO_FIREBIRD_TEST_DATABASE%' user '%PDO_FIREBIRD_TEST_USER%' password '%PDO_FIREBIRD_TEST_PASS%';> C:\Firebird\setup.sql
 C:\Firebird\instsvc.exe install -n TestInstance
 C:\Firebird\isql -q -i C:\Firebird\setup.sql
+C:\Firebird\isql -q -i C:\Firebird\create_user.sql -user sysdba %PDO_FIREBIRD_TEST_DATABASE%
 C:\Firebird\instsvc.exe start -n TestInstance
 if %errorlevel% neq 0 exit /b 3
 path C:\Firebird;%PATH%
@@ -118,20 +121,30 @@ hMailServer.exe /verysilent
 cd %APPVEYOR_BUILD_FOLDER%
 %PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet .github\setup_hmailserver.php
 
+rem prepare for com_dotnet
+nmake register_comtest
+
 mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
 echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\php.ini
 if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\php.ini
-rem work-around for some spawned PHP processes requiring OpenSSL
+rem work-around for some spawned PHP processes requiring OpenSSL and sockets
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
+echo extension=php_sockets.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
 for %%i in (ldap) do (
 	del %PHP_BUILD_DIR%\php_%%i.dll
 )
 
+rem reduce excessive stack reserve for testing
+editbin /stack:8388608 %PHP_BUILD_DIR%\php.exe
+editbin /stack:8388608 %PHP_BUILD_DIR%\php-cgi.exe
+
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
+
+copy /-y %DEPS_DIR%\bin\*.dll %PHP_BUILD_DIR%\*
 
 if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
@@ -141,6 +154,7 @@ nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK %ASAN_OPTS% --no-progre
 
 set EXIT_CODE=%errorlevel%
 
+nmake unregister_comtest
 taskkill /f /im snmpd.exe
 
 exit /b %EXIT_CODE%

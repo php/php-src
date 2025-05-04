@@ -158,7 +158,6 @@ static const opt_struct OPTIONS[] = {
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
-	{'z', 1, "zend-extension"},
 	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
@@ -1042,7 +1041,6 @@ static void php_cgi_usage(char *argv0)
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
 				"  -T <count>       Measure execution time of script repeated <count> times.\n",
 				prog, prog);
 }
@@ -2381,10 +2379,6 @@ parent_loop_end:
 
 						case 'w':
 							behavior = PHP_MODE_STRIP;
-							break;
-
-						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
 							break;
 
 						default:

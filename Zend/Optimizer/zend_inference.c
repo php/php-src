@@ -1968,6 +1968,10 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 					/* TODO: support for array keys and ($str . "")*/   \
 					__type |= MAY_BE_RCN;                               \
 				}                                                       \
+				if ((__type & MAY_BE_RC1) && (__type & MAY_BE_OBJECT)) {\
+					/* TODO: object may be captured by magic handlers */\
+					__type |= MAY_BE_RCN;                               \
+				}                                                       \
 				if (__ssa_var->alias) {									\
 					__type |= get_ssa_alias_types(__ssa_var->alias);	\
 				}														\

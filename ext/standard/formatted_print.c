@@ -860,17 +860,15 @@ PHP_FUNCTION(fprintf)
 	php_stream *stream;
 	char *format;
 	size_t format_len;
-	zval *arg1, *args;
-	int argc;
+	zval *args = NULL;
+	int argc = 0;
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
-		Z_PARAM_RESOURCE(arg1)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
-
-	php_stream_from_zval(stream, arg1);
 
 	result = php_formatted_print(format, format_len, args, argc, 2);
 	if (result == NULL) {
@@ -890,18 +888,16 @@ PHP_FUNCTION(vfprintf)
 	php_stream *stream;
 	char *format;
 	size_t format_len;
-	zval *arg1, *args;
+	zval *args;
 	zend_array *array;
 	int argc;
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_RESOURCE(arg1)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_ARRAY_HT(array)
 	ZEND_PARSE_PARAMETERS_END();
-
-	php_stream_from_zval(stream, arg1);
 
 	args = php_formatted_print_get_array(array, &argc);
 

@@ -332,6 +332,36 @@ PHP_METHOD(Pdo_Sqlite, openBlob)
 	}
 }
 
+PHP_METHOD(Pdo_Sqlite, setAuthorizer)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(free_fcc);
+	pdo_sqlite_db_handle *db_handle = (pdo_sqlite_db_handle *) dbh->driver_data;
+
+	/* Clear previously set callback */
+	if (ZEND_FCC_INITIALIZED(db_handle->authorizer_fcc)) {
+		zend_fcc_dtor(&db_handle->authorizer_fcc);
+	}
+
+	/* Only enable userland authorizer if argument is not NULL */
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		zend_fcc_dup(&db_handle->authorizer_fcc, &fcc);
+	}
+
+	return;
+
+free_fcc:
+	zend_release_fcall_info_cache(&fcc);
+	RETURN_THROWS();
+}
+
 static int php_sqlite_collation_callback(void *context, int string1_len, const void *string1,
 	int string2_len, const void *string2)
 {
@@ -349,9 +379,10 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			zend_string *func_name = get_active_function_or_method_name();
-			zend_type_error("%s(): Return value of the callback must be of type int, %s returned",
+			zend_type_error("%s(): Return value of the collation callback must be of type int, %s returned",
 				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
 			zend_string_release(func_name);
+			zval_ptr_dtor(&retval);
 			return FAILURE;
 		}
 		if (Z_LVAL(retval) > 0) {
@@ -359,7 +390,6 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 		} else if (Z_LVAL(retval) < 0) {
 			ret = -1;
 		}
-		zval_ptr_dtor(&retval);
 	}
 
 	zval_ptr_dtor(&zargs[0]);

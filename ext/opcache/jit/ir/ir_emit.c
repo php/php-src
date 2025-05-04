@@ -161,7 +161,7 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 	}
 #endif
 
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
+	for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 		use = *p;
 		insn = &ctx->ir_base[use];
 		if (insn->op == IR_PARAM) {
@@ -272,10 +272,10 @@ static bool ir_is_same_mem_var(const ir_ctx *ctx, ir_ref r1, int32_t offset)
 
 void *ir_resolve_sym_name(const char *name)
 {
-	void *handle = NULL;
 	void *addr;
 
 #ifndef _WIN32
+	void *handle = NULL;
 # ifdef RTLD_DEFAULT
 	handle = RTLD_DEFAULT;
 # endif
@@ -917,7 +917,7 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 
 	copies = alloca(use_list->count * sizeof(ir_dessa_copy));
 
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
+	for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 		ir_ref ref = *p;
 		ir_insn *insn = &ctx->ir_base[ref];
 

@@ -74,6 +74,7 @@
 #include "zend_dtrace.h"
 #include "zend_observer.h"
 #include "zend_system_id.h"
+#include "zend_smart_string.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -99,20 +100,30 @@ PHPAPI size_t core_globals_offset;
 
 const char php_build_date[] = __DATE__ " " __TIME__;
 
-PHPAPI const char *php_version(void)
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_version(void)
 {
 	return PHP_VERSION;
 }
 
-PHPAPI unsigned int php_version_id(void)
+ZEND_ATTRIBUTE_CONST PHPAPI unsigned int php_version_id(void)
 {
 	return PHP_VERSION_ID;
 }
 
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_build_provider(void)
+{
+#ifdef PHP_BUILD_PROVIDER
+	return PHP_BUILD_PROVIDER;
+#else
+	return NULL;
+#endif
+}
+
 PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
-	char *version_info;
-	spprintf(&version_info, 0, "PHP %s (%s) (built: %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
+	smart_string version_info = {0};
+	smart_string_append_printf(&version_info,
+		"PHP %s (%s) (built: %s) (%s)\n",
 		PHP_VERSION, sapi_module->name, php_build_date,
 #ifdef ZTS
 		"ZTS"
@@ -131,16 +142,15 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 #ifdef HAVE_GCOV
 		" GCOV"
 #endif
-		,
-#ifdef PHP_BUILD_PROVIDER
-		"Built by " PHP_BUILD_PROVIDER "\n"
-#else
-					""
-#endif
-		,
-		get_zend_version()
 	);
-	return version_info;
+	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
+	if (php_build_provider()) {
+		smart_string_append_printf(&version_info, "Built by %s\n", php_build_provider());
+	}
+	smart_string_appends(&version_info, get_zend_version());
+	smart_string_0(&version_info);
+
+	return version_info.c;
 }
 
 PHPAPI void php_print_version(sapi_module_struct *sapi_module)
@@ -1282,6 +1292,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 {
 	bool display;
 	int type = orig_type & E_ALL;
+	zend_string *backtrace = ZSTR_EMPTY_ALLOC();
 
 	/* check for repeated errors to be ignored */
 	if (PG(ignore_repeated_errors) && PG(last_error_message)) {
@@ -1319,6 +1330,10 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 			default:
 				break;
 		}
+	}
+
+	if (!Z_ISUNDEF(EG(last_fatal_error_backtrace))) {
+		backtrace = zend_trace_to_string(Z_ARRVAL(EG(last_fatal_error_backtrace)), /* include_main */ true);
 	}
 
 	/* store the error if it has changed */
@@ -1389,14 +1404,14 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, ZSTR_VAL(message), GetCommandLine());
 			}
 #endif
-			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32, error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno);
+			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32 "%s%s", error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
 			php_log_err_with_severity(log_buffer, syslog_type_int);
 			efree(log_buffer);
 		}
 
 		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
 			if (PG(xmlrpc_errors)) {
-				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno);
+				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "%s%s</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
 			} else {
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
@@ -1407,7 +1422,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
-						php_printf_unchecked("%s<br />\n<b>%s</b>:  %S in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
+						php_printf_unchecked("%s<br />\n<b>%s</b>:  %S in <b>%s</b> on line <b>%" PRIu32 "</b><br />%s%s\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace), STR_PRINT(append_string));
 					}
 				} else {
 					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
@@ -1416,17 +1431,19 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 					) {
 						fprintf(stderr, "%s: ", error_type_str);
 						fwrite(ZSTR_VAL(message), sizeof(char), ZSTR_LEN(message), stderr);
-						fprintf(stderr, " in %s on line %" PRIu32 "\n", ZSTR_VAL(error_filename), error_lineno);
+						fprintf(stderr, " in %s on line %" PRIu32 "%s%s\n", ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
 #ifdef PHP_WIN32
 						fflush(stderr);
 #endif
 					} else {
-						php_printf_unchecked("%s\n%s: %S in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
+						php_printf_unchecked("%s\n%s: %S in %s on line %" PRIu32 "%s%s\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace), STR_PRINT(append_string));
 					}
 				}
 			}
 		}
 	}
+
+	zend_string_release(backtrace);
 
 	/* Bail out if we can't recover */
 	switch (type) {
@@ -1897,8 +1914,6 @@ void php_request_shutdown(void *dummy)
 	 */
 	EG(current_execute_data) = NULL;
 
-	php_deactivate_ticks();
-
 	/* 0. Call any open observer end handlers that are still open after a zend_bailout */
 	if (ZEND_OBSERVER_ENABLED) {
 		zend_observer_fcall_end_all();
@@ -1918,6 +1933,8 @@ void php_request_shutdown(void *dummy)
 	zend_try {
 		php_output_end_all();
 	} zend_end_try();
+
+	php_deactivate_ticks();
 
 	/* 4. Reset max_execution_time (no longer executing php code after response sent) */
 	zend_try {
@@ -2191,7 +2208,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 #ifdef PHP_WIN32
 	char *img_err;
 	if (!php_win32_crt_compatible(&img_err)) {
-		php_error(E_CORE_WARNING, img_err);
+		php_error(E_CORE_WARNING, "%s", img_err);
 		efree(img_err);
 		return FAILURE;
 	}

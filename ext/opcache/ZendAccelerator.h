@@ -50,6 +50,7 @@
 
 #include "zend_extensions.h"
 #include "zend_compile.h"
+#include "zend_API.h"
 
 #include "Optimizer/zend_optimizer.h"
 #include "zend_accelerator_hash.h"
@@ -217,6 +218,8 @@ typedef struct _zend_accel_globals {
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
 #endif
+	void                   *preloaded_internal_run_time_cache;
+	size_t                  preloaded_internal_run_time_cache_size;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	zend_persistent_script *current_persistent_script;
@@ -224,8 +227,7 @@ typedef struct _zend_accel_globals {
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
-	zend_string             key;
-	char                    _key[MAXPATHLEN * 8];
+	zend_string            *key;
 } zend_accel_globals;
 
 typedef struct _zend_string_table {
@@ -253,6 +255,7 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_hash hash;             /* hash table for cached scripts */
 
 	size_t map_ptr_last;
+    size_t map_ptr_static_last;
 
 	/* Directives & Maintenance */
 	time_t          start_time;
@@ -312,7 +315,7 @@ extern const char *zps_api_failure_reason;
 BEGIN_EXTERN_C()
 
 void accel_shutdown(void);
-zend_result accel_activate(INIT_FUNC_ARGS);
+ZEND_RINIT_FUNCTION(zend_accelerator);
 zend_result accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);

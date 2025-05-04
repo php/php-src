@@ -40,9 +40,20 @@
 #define SAVE_CURL_ERROR(__handle, __err) \
     do { (__handle)->err.no = (int) __err; } while (0)
 
+
+ZEND_BEGIN_MODULE_GLOBALS(curl)
+	HashTable persistent_curlsh;
+ZEND_END_MODULE_GLOBALS(curl)
+
+ZEND_EXTERN_MODULE_GLOBALS(curl)
+
+#define CURL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(curl, v)
+
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
+PHP_GINIT_FUNCTION(curl);
+PHP_GSHUTDOWN_FUNCTION(curl);
 
 typedef struct {
 	zend_fcall_info_cache fcc;
@@ -153,6 +164,8 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 
 void curl_multi_register_handlers(void);
 void curl_share_register_handlers(void);
+void curl_share_persistent_register_handlers(void);
+void curl_share_free_persistent_curlsh(zval *data);
 void curlfile_register_class(void);
 zend_result curl_cast_object(zend_object *obj, zval *result, int type);
 

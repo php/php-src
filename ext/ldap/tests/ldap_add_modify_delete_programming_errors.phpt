@@ -137,7 +137,7 @@ ValueError: ldap_add(): Argument #3 ($entry) must be an associative array of att
 ValueError: ldap_add(): Argument #3 ($entry) key must not be empty
 ValueError: ldap_add(): Argument #3 ($entry) key must not contain any null bytes
 Error: Object of class stdClass could not be converted to string
-ValueError: ldap_add(): Argument #3 ($entry) list of attribute values must not be empty
-ValueError: ldap_add(): Argument #3 ($entry) must be a list of attribute values
+ValueError: ldap_add(): Argument #3 ($entry) attribute "attribute2" must be a non-empty list of attribute values
+ValueError: ldap_add(): Argument #3 ($entry) attribute "attribute2" must be an array of attribute values with numeric keys
 TypeError: LDAP value must be of type string|int|bool, array given
 Error: Object of class stdClass could not be converted to string

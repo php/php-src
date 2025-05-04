@@ -102,11 +102,17 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		}
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
+			if (nodep->name) {
+				ZVAL_STRING(retval, (const char *) nodep->name);
+			} else {
+				ZVAL_EMPTY_STRING(retval);
+			}
+			break;
 		case XML_PI_NODE:
 		case XML_ENTITY_DECL:
 		case XML_ENTITY_REF_NODE:
 		case XML_NOTATION_NODE:
-			ZVAL_STRING(retval, (char *) nodep->name);
+			ZVAL_STRING(retval, (const char *) nodep->name);
 			break;
 		case XML_CDATA_SECTION_NODE:
 			ZVAL_STRING(retval, "#cdata-section");
@@ -179,8 +185,8 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	/* Cannot fail because the type is either null or a string. */
-	zend_string *str = zval_get_string(newval);
+	/* Type is ?string */
+	zend_string *str = Z_TYPE_P(newval) == IS_NULL ? ZSTR_EMPTY_ALLOC() : Z_STR_P(newval);
 
 	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
@@ -207,7 +213,6 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 
 	php_libxml_invalidate_node_list_cache(obj->document);
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -281,9 +286,9 @@ zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	php_dom_create_iterator(retval, DOM_NODELIST, php_dom_follow_spec_intern(obj));
+	object_init_ex(retval, dom_get_nodelist_ce(php_dom_follow_spec_intern(obj)));
 	dom_object *intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, 0, NULL, 0);
+	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
 
 	return SUCCESS;
 }
@@ -415,9 +420,9 @@ zend_result dom_node_attributes_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (nodep->type == XML_ELEMENT_NODE) {
-		php_dom_create_iterator(retval, DOM_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
+		object_init_ex(retval, dom_get_namednodemap_ce(php_dom_follow_spec_intern(obj)));
 		dom_object *intern = Z_DOMOBJ_P(retval);
-		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, 0, NULL, 0);
+		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL);
 	} else {
 		ZVAL_NULL(retval);
 	}

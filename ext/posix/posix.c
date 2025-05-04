@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include "ext/standard/info.h"
 #include "php_posix.h"
+#include "main/php_network.h"
 
 #ifdef HAVE_POSIX
 
@@ -235,10 +236,11 @@ PHP_FUNCTION(posix_getgroups)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, result);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (i=0; i<result; i++) {
-		add_next_index_long(return_value, gidlist[i]);
+		add_index_long(return_value, i, gidlist[i]);
 	}
 	efree(gidlist);
 }
@@ -379,7 +381,7 @@ PHP_FUNCTION(posix_times)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 5);
 
 	add_assoc_long(return_value, "ticks",	ticks);			/* clock ticks */
 	add_assoc_long(return_value, "utime",	t.tms_utime);	/* user time */
@@ -415,7 +417,7 @@ PHP_FUNCTION(posix_ctermid)
 /* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
+static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *ret) /* {{{ */
 {
 	php_stream *stream;
 
@@ -425,19 +427,21 @@ static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 		return FAILURE;
 	}
 
-	/* get the fd.
+	/* get the fd. php_socket_t is used for FDs, and is shorter than zend_long.
 	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
 	 * It is only used here so that the buffered data warning is not displayed.
 	 */
+	php_socket_t fd = -1;
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)fd, 0);
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void**)&fd, 0);
 	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)fd, 0);
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void**)&fd, 0);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
 		return FAILURE;
 	}
+	*ret = fd;
 	return SUCCESS;
 }
 /* }}} */
@@ -470,6 +474,7 @@ PHP_FUNCTION(posix_ttyname)
 		/* fd must fit in an int and be positive */
 		if (fd < 0 || fd > INT_MAX) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
+			POSIX_G(last_error) = EBADF;
 			RETURN_FALSE;
 		}
 	}
@@ -532,6 +537,7 @@ PHP_FUNCTION(posix_isatty)
 
 	/* A valid file descriptor must fit in an int and be positive */
 	if (fd < 0 || fd > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
 		POSIX_G(last_error) = EBADF;
 		RETURN_FALSE;
 	}
@@ -665,6 +671,7 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 		return 0;
 
 	array_init(&array_members);
+	zend_hash_real_init_packed(Z_ARRVAL(array_members));
 
 	add_assoc_string(array_group, "name", g->gr_name);
 	if (g->gr_passwd) {
@@ -1169,7 +1176,8 @@ PHP_FUNCTION(posix_getrlimit)
 			RETURN_FALSE;
 		}
 
-		array_init(return_value);
+		array_init_size(return_value, 2);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		if (rl.rlim_cur == RLIM_INFINITY) {
 			add_next_index_stringl(return_value, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
 		} else {
@@ -1324,6 +1332,12 @@ PHP_FUNCTION(posix_fpathconf)
 				zend_zval_value_name(z_fd));
 			RETURN_THROWS();
 		}
+	}
+	/* fd must fit in an int and be positive */
+	if (fd < 0 || fd > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
+		POSIX_G(last_error) = EBADF;
+		RETURN_FALSE;
 	}
 
 	ret = fpathconf(fd, name);

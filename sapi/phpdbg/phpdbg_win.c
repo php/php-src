@@ -20,13 +20,12 @@
 #include "phpdbg.h"
 
 int mprotect(void *addr, size_t size, int protection) {
-	int var;
+	DWORD var;
 	return (int)VirtualProtect(addr, size, protection == (PROT_READ | PROT_WRITE) ? PAGE_READWRITE : PAGE_READONLY, &var);
 }
 
 int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp) {
 	EXCEPTION_RECORD *xr = xp->ExceptionRecord;
-	CONTEXT *xc = xp->ContextRecord;
 
 	switch (xr->ExceptionCode) {
 		case EXCEPTION_ACCESS_VIOLATION:

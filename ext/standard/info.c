@@ -609,7 +609,7 @@ static void php_get_windows_cpu(char *buf, size_t bufsize)
 	GetSystemInfo(&SysInfo);
 	switch (SysInfo.wProcessorArchitecture) {
 		case PROCESSOR_ARCHITECTURE_INTEL :
-			snprintf(buf, bufsize, "i%d", SysInfo.dwProcessorType);
+			snprintf(buf, bufsize, "i%lu", SysInfo.dwProcessorType);
 			break;
 		case PROCESSOR_ARCHITECTURE_MIPS :
 			snprintf(buf, bufsize, "MIPS R%d000", SysInfo.wProcessorLevel);
@@ -659,10 +659,10 @@ PHPAPI zend_string *php_get_uname(char mode)
 	ZEND_ASSERT(php_is_valid_uname_mode(mode));
 #ifdef PHP_WIN32
 	char tmp_uname[256];
-	DWORD dwBuild=0;
-	DWORD dwVersion = GetVersion();
-	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
-	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
+	OSVERSIONINFOEX osvi = EG(windows_version_info);
+	DWORD dwWindowsMajorVersion = osvi.dwMajorVersion;
+	DWORD dwWindowsMinorVersion = osvi.dwMinorVersion;
+	DWORD dwBuild = osvi.dwBuildNumber;
 	DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
 	char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
 
@@ -671,16 +671,15 @@ PHPAPI zend_string *php_get_uname(char mode)
 	if (mode == 's') {
 		php_uname = "Windows NT";
 	} else if (mode == 'r') {
-		return strpprintf(0, "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
+		return strpprintf(0, "%lu.%lu", dwWindowsMajorVersion, dwWindowsMinorVersion);
 	} else if (mode == 'n') {
 		php_uname = ComputerName;
 	} else if (mode == 'v') {
 		char *winver = php_get_windows_name();
-		dwBuild = (DWORD)(HIWORD(dwVersion));
 
 		ZEND_ASSERT(winver != NULL);
 
-		zend_string *build_with_version = strpprintf(0, "build %d (%s)", dwBuild, winver);
+		zend_string *build_with_version = strpprintf(0, "build %lu (%s)", dwBuild, winver);
 		efree(winver);
 		return build_with_version;
 	} else if (mode == 'm') {
@@ -693,7 +692,6 @@ PHPAPI zend_string *php_get_uname(char mode)
 		ZEND_ASSERT(winver != NULL);
 
 		php_get_windows_cpu(wincpu, sizeof(wincpu));
-		dwBuild = (DWORD)(HIWORD(dwVersion));
 
 		/* Windows "version" 6.2 could be Windows 8/Windows Server 2012, but also Windows 8.1/Windows Server 2012 R2 */
 		if (dwWindowsMajorVersion == 6 && dwWindowsMinorVersion == 2) {
@@ -702,7 +700,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 			}
 		}
 
-		zend_string *build_with_all_info = strpprintf(0, "%s %s %d.%d build %d (%s) %s",
+		zend_string *build_with_all_info = strpprintf(0, "%s %s %lu.%lu build %lu (%s) %s",
 			"Windows NT", ComputerName, dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild,
 			winver ? winver: "unknown", wincpu);
 		efree(winver);
@@ -807,9 +805,9 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 #ifdef PHP_BUILD_SYSTEM
 		php_info_print_table_row(2, "Build System", PHP_BUILD_SYSTEM);
 #endif
-#ifdef PHP_BUILD_PROVIDER
-		php_info_print_table_row(2, "Build Provider", PHP_BUILD_PROVIDER);
-#endif
+		if (php_build_provider()) {
+			php_info_print_table_row(2, "Build Provider", php_build_provider());
+		}
 #ifdef PHP_BUILD_COMPILER
 		php_info_print_table_row(2, "Compiler", PHP_BUILD_COMPILER);
 #endif

@@ -53,10 +53,6 @@ ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
-/* true globals */
-ZEND_API const zend_fcall_info empty_fcall_info = {0};
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = {0};
-
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
 #endif
@@ -139,6 +135,8 @@ void init_executor(void) /* {{{ */
 #if 0&&ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
 #endif
+
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	EG(symtable_cache_ptr) = EG(symtable_cache);
 	EG(symtable_cache_limit) = EG(symtable_cache) + SYMTABLE_CACHE_SIZE;
@@ -302,10 +300,16 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 				if (c->filename) {
 					zend_string_release_ex(c->filename, 0);
 				}
+				if (c->attributes) {
+					zend_hash_release(c->attributes);
+				}
 				efree(c);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
 		}
+
+		zval_ptr_dtor(&EG(last_fatal_error_backtrace));
+		ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 		/* Release static properties and static variables prior to the final GC run,
 		 * as they may hold GC roots. */
@@ -819,7 +823,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		return SUCCESS; /* we would result in an unstable executor otherwise */
 	}
 
-	ZEND_ASSERT(fci->size == sizeof(zend_fcall_info));
+	ZEND_ASSERT(ZEND_FCI_INITIALIZED(*fci));
 
 	if (!fci_cache || !fci_cache->function_handler) {
 		char *error = NULL;
@@ -884,7 +888,11 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 						ZEND_CALL_NUM_ARGS(call) = i;
 cleanup_args:
 						zend_vm_stack_free_args(call);
+						if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+							zend_free_extra_named_params(call->extra_named_params);
+						}
 						zend_vm_stack_free_call_frame(call);
+						zend_release_fcall_info_cache(fci_cache);
 						return SUCCESS;
 					}
 				}

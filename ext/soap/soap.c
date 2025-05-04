@@ -1307,18 +1307,16 @@ PHP_METHOD(SoapServer, handle)
 			sapi_add_header(hdr, sizeof("Location: ")+strlen(service->sdl->source)-1, 1);
 			efree(hdr);
 */
-			zval readfile, readfile_ret, param;
 
 			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
-			ZVAL_STRING(&param, service->sdl->source);
-			ZVAL_STRING(&readfile, "readfile");
-			if (call_user_function(EG(function_table), NULL, &readfile, &readfile_ret, 1, &param ) == FAILURE) {
+			php_stream_context *context = php_stream_context_from_zval(NULL, false);
+			php_stream *stream = php_stream_open_wrapper_ex(service->sdl->source, "rb", REPORT_ERRORS, NULL, context);
+			if (stream) {
+				php_stream_passthru(stream);
+				php_stream_close(stream);
+			} else {
 				soap_server_fault("Server", "Couldn't find WSDL", NULL, NULL, NULL);
 			}
-
-			zval_ptr_dtor(&param);
-			zval_ptr_dtor_str(&readfile);
-			zval_ptr_dtor(&readfile_ret);
 
 			SOAP_SERVER_END_CODE();
 			return;

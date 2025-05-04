@@ -461,7 +461,7 @@ extern "C" {
 #define ir_COND_A(_op1, _op2, _op3)       ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_ADDR),   (_op1), (_op2), (_op3))
 #define ir_COND_C(_op1, _op2, _op3)       ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_CHAR),   (_op1), (_op2), (_op3))
 #define ir_COND_I8(_op1, _op2, _op3)      ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_I8),     (_op1), (_op2), (_op3))
-#define ir_COND_I16(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COMD, IR_I16),    (_op1), (_op2), (_op3))
+#define ir_COND_I16(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_I16),    (_op1), (_op2), (_op3))
 #define ir_COND_I32(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_I32),    (_op1), (_op2), (_op3))
 #define ir_COND_I64(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_I64),    (_op1), (_op2), (_op3))
 #define ir_COND_D(_op1, _op2, _op3)       ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_DOUBLE), (_op1), (_op2), (_op3))
@@ -528,7 +528,7 @@ extern "C" {
 
 #define ir_ALLOCA(_size)                  _ir_ALLOCA(_ir_CTX, (_size))
 #define ir_AFREE(_size)                   _ir_AFREE(_ir_CTX, (_size))
-#define ir_VADDR(_var)                    ir_emit1(_ir_CTX, IR_OPT(IR_VADDR, IR_ADDR), (_var))
+#define ir_VADDR(_var)                    ir_fold1(_ir_CTX, IR_OPT(IR_VADDR, IR_ADDR), (_var))
 #define ir_VLOAD(_type, _var)             _ir_VLOAD(_ir_CTX, (_type), (_var))
 #define ir_VLOAD_B(_var)                  _ir_VLOAD(_ir_CTX, IR_BOOL, (_var))
 #define ir_VLOAD_U8(_var)                 _ir_VLOAD(_ir_CTX, IR_U8, (_var))

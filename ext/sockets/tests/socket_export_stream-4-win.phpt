@@ -92,7 +92,7 @@ stream_set_blocking 1
 
 
 close stream
-stream_set_blocking TypeError: stream_set_blocking(): supplied resource is not a valid stream resource
+stream_set_blocking TypeError: stream_set_blocking(): Argument #1 ($stream) must be an open stream resource
 
 socket_set_block 
 Warning: socket_set_block(): unable to set blocking mode [%d]: An operation was attempted on something that is not a socket in %s on line %d
@@ -103,7 +103,7 @@ Warning: socket_get_option(): Unable to retrieve socket option [%d]: An operatio
 
 
 close socket
-stream_set_blocking TypeError: stream_set_blocking(): supplied resource is not a valid stream resource
+stream_set_blocking TypeError: stream_set_blocking(): Argument #1 ($stream) must be an open stream resource
 
 socket_set_block Error: socket_set_block(): Argument #1 ($socket) has already been closed
 

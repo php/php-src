@@ -283,13 +283,12 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						if ((prop_info->flags & ZEND_ACC_VIRTUAL) && !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
 							continue;
 						}
-						zend_read_property_ex(prop_info->ce, Z_OBJ_P(val), prop_info->name, /* silent */ true, &tmp);
+						data = zend_read_property_ex(prop_info->ce, Z_OBJ_P(val), prop_info->name, /* silent */ true, &tmp);
 						if (EG(exception)) {
 							PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
 							zend_release_properties(prop_ht);
 							return FAILURE;
 						}
-						data = &tmp;
 					}
 
 					if (need_comma) {
@@ -579,12 +578,11 @@ zend_result php_json_escape_string(
 }
 /* }}} */
 
-static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
+static zend_result php_json_encode_serializable_object(smart_str *buf, zend_object *obj, int options, php_json_encoder *encoder)
 {
-	zend_class_entry *ce = Z_OBJCE_P(val);
-	zend_object *obj = Z_OBJ_P(val);
+	zend_class_entry *ce = obj->ce;
 	uint32_t *guard = zend_get_recursion_guard(obj);
-	zval retval, fname;
+	zval retval;
 	zend_result return_code;
 
 	ZEND_ASSERT(guard != NULL);
@@ -599,14 +597,11 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 
 	ZEND_GUARD_PROTECT_RECURSION(guard, JSON);
 
-	ZVAL_STRING(&fname, "jsonSerialize");
-
-	if (FAILURE == call_user_function(NULL, val, &fname, &retval, 0, NULL) || Z_TYPE(retval) == IS_UNDEF) {
-		if (!EG(exception)) {
-			zend_throw_exception_ex(NULL, 0, "Failed calling %s::jsonSerialize()", ZSTR_VAL(ce->name));
-		}
-		zval_ptr_dtor(&fname);
-
+	zend_function *json_serialize_method = zend_hash_str_find_ptr(&ce->function_table, ZEND_STRL("jsonserialize"));
+	ZEND_ASSERT(json_serialize_method != NULL && "This should be guaranteed prior to calling this function");
+	zend_call_known_function(json_serialize_method, obj, ce, &retval, 0, NULL, NULL);
+	/* An exception has occurred */
+	if (Z_TYPE(retval) == IS_UNDEF) {
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
 			smart_str_appendl(buf, "null", 4);
 		}
@@ -614,20 +609,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 		return FAILURE;
 	}
 
-	if (EG(exception)) {
-		/* Error already raised */
-		zval_ptr_dtor(&retval);
-		zval_ptr_dtor(&fname);
-
-		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-			smart_str_appendl(buf, "null", 4);
-		}
-		ZEND_GUARD_UNPROTECT_RECURSION(guard, JSON);
-		return FAILURE;
-	}
-
-	if ((Z_TYPE(retval) == IS_OBJECT) &&
-		(Z_OBJ(retval) == Z_OBJ_P(val))) {
+	if (Z_TYPE(retval) == IS_OBJECT && Z_OBJ(retval) == obj) {
 		/* Handle the case where jsonSerialize does: return $this; by going straight to encode array */
 		ZEND_GUARD_UNPROTECT_RECURSION(guard, JSON);
 		return_code = php_json_encode_array(buf, &retval, options, encoder);
@@ -638,11 +620,9 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 	}
 
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&fname);
 
 	return return_code;
 }
-/* }}} */
 
 static zend_result php_json_encode_serializable_enum(smart_str *buf, zval *val, int options, php_json_encoder *encoder)
 {
@@ -691,7 +671,7 @@ again:
 
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(val), php_json_serializable_ce)) {
-				return php_json_encode_serializable_object(buf, val, options, encoder);
+				return php_json_encode_serializable_object(buf, Z_OBJ_P(val), options, encoder);
 			}
 			if (Z_OBJCE_P(val)->ce_flags & ZEND_ACC_ENUM) {
 				return php_json_encode_serializable_enum(buf, val, options, encoder);
@@ -702,7 +682,7 @@ again:
 			/* Avoid modifications (and potential freeing) of the array through a reference when a
 			 * jsonSerialize() method is invoked. */
 			zval zv;
-			int res;
+			zend_result res;
 			ZVAL_COPY(&zv, val);
 			res = php_json_encode_array(buf, &zv, options, encoder);
 			zval_ptr_dtor_nogc(&zv);

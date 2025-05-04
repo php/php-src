@@ -925,7 +925,7 @@ binop_fp:
 			if (ctx->flags & IR_FUNCTION) {
 				ctx->flags |= IR_USE_FRAME_POINTER;
 			}
-			ctx->flags2 |= IR_HAS_CALLS | IR_16B_FRAME_ALIGNMENT;
+			ctx->flags2 |= IR_HAS_CALLS;
 			return IR_CALL;
 		case IR_VAR:
 			return IR_SKIPPED | IR_VAR;
@@ -941,7 +941,7 @@ binop_fp:
 					}
 				}
 				ctx->flags |= IR_USE_FRAME_POINTER;
-				ctx->flags2 |= IR_HAS_ALLOCA | IR_16B_FRAME_ALIGNMENT;
+				ctx->flags2 |= IR_HAS_ALLOCA;
 			}
 			return IR_ALLOCA;
 		case IR_LOAD:
@@ -1094,6 +1094,8 @@ binop_fp:
 					}
 				}
 			}
+			return IR_SKIPPED | IR_NOP;
+		case IR_NOP:
 			return IR_SKIPPED | IR_NOP;
 		default:
 			break;
@@ -1381,9 +1383,16 @@ static void ir_load_local_addr(ir_ctx *ctx, ir_reg reg, ir_ref src)
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	ir_reg base = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
-	int32_t offset = IR_SPILL_POS_TO_OFFSET(ctx->ir_base[src].op3);
+	ir_insn *var_insn;
+	int32_t offset;
 
 	IR_ASSERT(ir_rule(ctx, src) == IR_STATIC_ALLOCA);
+	var_insn = &ctx->ir_base[src];
+	if (var_insn->op == IR_VADDR) {
+		var_insn = &ctx->ir_base[var_insn->op1];
+	}
+	IR_ASSERT(var_insn->op == IR_VAR || var_insn->op == IR_ALLOCA);
+	offset = IR_SPILL_POS_TO_OFFSET(var_insn->op3);
 	if (aarch64_may_encode_imm12(offset)) {
 		|	add Rx(reg), Rx(base), #offset
 	} else {
@@ -5603,7 +5612,8 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 						} else if (def_flags & IR_USE_MUST_BE_IN_REG) {
 							if (insn->op == IR_VLOAD
 							 && ctx->live_intervals[ctx->vregs[i]]
-							 && ctx->live_intervals[ctx->vregs[i]]->stack_spill_pos != -1) {
+							 && ctx->live_intervals[ctx->vregs[i]]->stack_spill_pos != -1
+							 && ir_is_same_mem_var(ctx, i, ctx->ir_base[insn->op2].op3)) {
 								/* pass */
 							} else if (insn->op != IR_PARAM) {
 								reg = ir_get_free_reg(insn->type, available);
@@ -5677,10 +5687,15 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 								ir_reg reg = ir_get_free_reg(constraints.tmp_regs[n].type, available);
 								ir_ref *ops = insn->ops;
 								IR_REGSET_EXCL(available, reg);
-								if (constraints.tmp_regs[n].num > 0
-								 && IR_IS_CONST_REF(ops[constraints.tmp_regs[n].num])) {
-									/* rematerialization */
-									reg |= IR_REG_SPILL_LOAD;
+								if (constraints.tmp_regs[n].num > 0) {
+									if (IR_IS_CONST_REF(ops[constraints.tmp_regs[n].num])) {
+										/* rematerialization */
+										reg |= IR_REG_SPILL_LOAD;
+									} else if (ctx->ir_base[ops[constraints.tmp_regs[n].num]].op == IR_ALLOCA ||
+											ctx->ir_base[ops[constraints.tmp_regs[n].num]].op == IR_VADDR) {
+										/* local address rematerialization */
+										reg |= IR_REG_SPILL_LOAD;
+									}
 								}
 								ctx->regs[i][constraints.tmp_regs[n].num] = reg;
 							} else if (constraints.tmp_regs[n].reg == IR_REG_SCRATCH) {
@@ -5704,7 +5719,7 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 								if (reg != IR_REG_NONE && IR_REGSET_IN(available, reg)) {
 									IR_REGSET_EXCL(available, reg);
 									ctx->regs[i][j] = reg | IR_REG_SPILL_LOAD;
-								} else if (j > 1 && input == insn->op1 && ctx->regs[i][1] != IR_REG_NONE) {
+								} else if (IR_IS_FOLDABLE_OP(insn->op) && j > 1 && input == insn->op1 && ctx->regs[i][1] != IR_REG_NONE) {
 									ctx->regs[i][j] = ctx->regs[i][1];
 								} else if (use_flags & IR_USE_MUST_BE_IN_REG) {
 									reg = ir_get_free_reg(ctx->ir_base[input].type, available);
@@ -5785,12 +5800,12 @@ void ir_fix_stack_frame(ir_ctx *ctx)
 	ctx->stack_frame_alignment = 0;
 	ctx->call_stack_size = 0;
 
-	if ((ctx->flags2 & IR_16B_FRAME_ALIGNMENT) && !(ctx->flags & IR_FUNCTION)) {
+	if (!(ctx->flags & IR_FUNCTION)) {
 		while (IR_ALIGNED_SIZE(ctx->stack_frame_size, 16) != ctx->stack_frame_size) {
 			ctx->stack_frame_size += sizeof(void*);
 			ctx->stack_frame_alignment += sizeof(void*);
 		}
-	} else if (ctx->flags2 & IR_16B_FRAME_ALIGNMENT) {
+	} else {
 		/* Stack must be 16 byte aligned */
 		if (!(ctx->flags & IR_FUNCTION)) {
 			while (IR_ALIGNED_SIZE(ctx->stack_frame_size, 16) != ctx->stack_frame_size) {

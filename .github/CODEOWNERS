@@ -44,6 +44,7 @@
 /ext/pdo_sqlite @SakiTakamachi
 /ext/pgsql @devnexen
 /ext/random @TimWolla @zeriyoshi
+/ext/reflection @DanielEScherzer
 /ext/session @Girgias
 /ext/simplexml @nielsdos
 /ext/soap @nielsdos

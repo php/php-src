@@ -15,6 +15,7 @@
 */
 
 #include "zend_modules.h"
+#include "zend_types.h"
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -123,6 +124,20 @@ static ZEND_FUNCTION(zend_test_deprecated_attr)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+static ZEND_FUNCTION(zend_test_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
+static ZEND_FUNCTION(zend_test_deprecated_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
 /* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
@@ -180,6 +195,19 @@ static ZEND_FUNCTION(zend_leak_variable)
 	}
 
 	Z_ADDREF_P(zv);
+}
+
+static ZEND_FUNCTION(zend_delref)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	Z_TRY_DELREF_P(zv);
+
+	RETURN_NULL();
 }
 
 /* Tests Z_PARAM_OBJ_OR_STR */
@@ -243,7 +271,7 @@ static ZEND_FUNCTION(zend_test_compile_string)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(source_string)
-		Z_PARAM_STR(filename)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_LONG(position)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -697,6 +725,15 @@ void * zend_test_custom_realloc(void * ptr, size_t len ZEND_FILE_LINE_DC ZEND_FI
 	return _zend_mm_realloc(ZT_G(zend_orig_heap), ptr, len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
+static void zend_test_reset_heap(zend_zend_test_globals *zend_test_globals)
+{
+	if (zend_test_globals->zend_test_heap) {
+		free(zend_test_globals->zend_test_heap);
+		zend_test_globals->zend_test_heap = NULL;
+		zend_mm_set_heap(zend_test_globals->zend_orig_heap);
+	}
+}
+
 static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 {
 	if (new_value == NULL) {
@@ -718,10 +755,8 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 		);
 		ZT_G(zend_orig_heap) = zend_mm_get_heap();
 		zend_mm_set_heap(ZT_G(zend_test_heap));
-	} else if (ZT_G(zend_test_heap))  {
-		free(ZT_G(zend_test_heap));
-		ZT_G(zend_test_heap) = NULL;
-		zend_mm_set_heap(ZT_G(zend_orig_heap));
+	} else {
+		zend_test_reset_heap(ZEND_MODULE_GLOBALS_BULK(zend_test));
 	}
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
@@ -1387,6 +1422,7 @@ static PHP_GINIT_FUNCTION(zend_test)
 static PHP_GSHUTDOWN_FUNCTION(zend_test)
 {
 	zend_test_observer_gshutdown(zend_test_globals);
+	zend_test_reset_heap(zend_test_globals);
 }
 
 PHP_MINFO_FUNCTION(zend_test)
@@ -1496,6 +1532,41 @@ PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
 
 PHP_ZEND_TEST_API int gh11934b_ffi_var_test_cdata;
 
+enum bug_gh16013_enum {
+	BUG_GH16013_A = 1,
+	BUG_GH16013_B = 2,
+};
+
+struct bug_gh16013_int_struct {
+	int field;
+};
+
+PHP_ZEND_TEST_API char bug_gh16013_return_char(void) {
+	return 'A';
+}
+
+PHP_ZEND_TEST_API bool bug_gh16013_return_bool(void) {
+	return true;
+}
+
+PHP_ZEND_TEST_API short bug_gh16013_return_short(void) {
+	return 12345;
+}
+
+PHP_ZEND_TEST_API int bug_gh16013_return_int(void) {
+	return 123456789;
+}
+
+PHP_ZEND_TEST_API enum bug_gh16013_enum bug_gh16013_return_enum(void) {
+	return BUG_GH16013_B;
+}
+
+PHP_ZEND_TEST_API struct bug_gh16013_int_struct bug_gh16013_return_struct(void) {
+	struct bug_gh16013_int_struct ret;
+	ret.field = 123456789;
+	return ret;
+}
+
 #ifdef HAVE_COPY_FILE_RANGE
 /**
  * This function allows us to simulate early return of copy_file_range by setting the limit_copy_file_range ini setting.
@@ -1519,4 +1590,23 @@ static PHP_FUNCTION(zend_test_create_throwing_resource)
 	ZEND_PARSE_PARAMETERS_NONE();
 	zend_resource *res = zend_register_resource(NULL, le_throwing_resource);
 	ZVAL_RES(return_value, res);
+}
+
+static PHP_FUNCTION(zend_test_compile_to_ast)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_arena *ast_arena;
+	zend_ast *ast = zend_compile_string_to_ast(str, &ast_arena, ZSTR_EMPTY_ALLOC());
+	
+	zend_string *result = zend_ast_export("", ast, "");
+
+	zend_ast_destroy(ast);
+	zend_arena_destroy(ast_arena);
+
+	RETVAL_STR(result);
 }

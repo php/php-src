@@ -17,24 +17,22 @@
 #include "bcmath.h"
 #include "convert.h"
 #include "private.h"
-#ifdef __SSE2__
-# include <emmintrin.h>
-#endif
+#include "simd.h"
 
 char *bc_copy_and_toggle_bcd(char *restrict dest, const char *source, const char *source_end)
 {
 	const size_t bulk_shift = SWAR_REPEAT('0');
 
-#ifdef __SSE2__
-	/* SIMD SSE2 bulk shift + copy */
-	__m128i shift_vector = _mm_set1_epi8('0');
-	while (source + sizeof(__m128i) <= source_end) {
-		__m128i bytes = _mm_loadu_si128((const __m128i *) source);
-		bytes = _mm_xor_si128(bytes, shift_vector);
-		_mm_storeu_si128((__m128i *) dest, bytes);
+#ifdef HAVE_BC_SIMD_128
+	/* SIMD SSE2 or NEON bulk shift + copy */
+	bc_simd_128_t shift_vector = bc_simd_set_8x16('0');
+	while (source + sizeof(bc_simd_128_t) <= source_end) {
+		bc_simd_128_t bytes = bc_simd_load_8x16((const bc_simd_128_t *) source);
+		bytes = bc_simd_xor_8x16(bytes, shift_vector);
+		bc_simd_store_8x16((bc_simd_128_t *) dest, bytes);
 
-		source += sizeof(__m128i);
-		dest += sizeof(__m128i);
+		source += sizeof(bc_simd_128_t);
+		dest += sizeof(bc_simd_128_t);
 	}
 #endif
 

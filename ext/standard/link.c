@@ -30,18 +30,7 @@
 #include <sys/stat.h>
 #endif
 #include <string.h>
-#ifdef HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
-#include <pwd.h>
-#endif
-#endif
-#ifdef HAVE_GRP_H
-# include <grp.h>
-#endif
 #include <errno.h>
-#include <ctype.h>
 
 #include "php_string.h"
 
@@ -73,7 +62,7 @@ PHP_FUNCTION(readlink)
 
 	if (ret == -1) {
 #ifdef PHP_WIN32
-		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d", link, GetLastError());
+		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %ld", link, GetLastError());
 #else
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 #endif

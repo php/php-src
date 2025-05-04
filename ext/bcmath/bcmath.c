@@ -109,9 +109,9 @@ static PHP_GINIT_FUNCTION(bcmath)
 /* {{{ PHP_GSHUTDOWN_FUNCTION */
 static PHP_GSHUTDOWN_FUNCTION(bcmath)
 {
-	_bc_free_num_ex(&bcmath_globals->_zero_, 1);
-	_bc_free_num_ex(&bcmath_globals->_one_, 1);
-	_bc_free_num_ex(&bcmath_globals->_two_, 1);
+	bc_force_free_number(&bcmath_globals->_zero_);
+	bc_force_free_number(&bcmath_globals->_one_);
+	bc_force_free_number(&bcmath_globals->_two_);
 	bcmath_globals->arena = NULL;
 	bcmath_globals->arena_offset = 0;
 }
@@ -178,6 +178,26 @@ static zend_result php_str2num(bc_num *num, const zend_string *str)
 	return php_str2num_ex(num, str, NULL);
 }
 /* }}} */
+
+static void bc_pow_err(bc_raise_status status, uint32_t arg_num)
+{
+	/* If arg_num is 0, it means it is an op */
+	switch (status) {
+		case BC_RAISE_STATUS_DIVIDE_BY_ZERO:
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+			break;
+		case BC_RAISE_STATUS_LEN_IS_OVERFLOW:
+		case BC_RAISE_STATUS_SCALE_IS_OVERFLOW:
+		case BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW:
+			if (arg_num == 0) {
+				zend_value_error("exponent is too large, the number of digits overflowed");
+			} else {
+				zend_argument_value_error(arg_num, "exponent is too large, the number of digits overflowed");
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
 
 /* {{{ Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
@@ -615,11 +635,11 @@ PHP_FUNCTION(bcpow)
 		goto cleanup;
 	}
 
-	if (!bc_raise(first, exponent, &result, scale)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+	bc_raise_status ret_status = bc_raise(first, exponent, &result, scale);
+	if (UNEXPECTED(ret_status != BC_RAISE_STATUS_OK)) {
+		bc_pow_err(ret_status, 2);
 		goto cleanup;
 	}
-
 	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
@@ -807,8 +827,8 @@ PHP_FUNCTION(bcround)
 		goto cleanup;
 	}
 
-	bc_round(num, precision, mode, &result);
-	RETVAL_NEW_STR(bc_num2str_ex(result, result->n_scale));
+	size_t scale = bc_round(num, precision, mode, &result);
+	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&num);
@@ -1144,8 +1164,9 @@ static zend_result bcmath_number_pow_internal(
 		}
 		return FAILURE;
 	}
-	if (!bc_raise(n1, exponent, ret, *scale)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+	bc_raise_status ret_status = bc_raise(n1, exponent, ret, *scale);
+	if (UNEXPECTED(ret_status != BC_RAISE_STATUS_OK)) {
+		bc_pow_err(ret_status, is_op ? 0 : 1);
 		return FAILURE;
 	}
 	bc_rm_trailing_zeros(*ret);
@@ -1164,7 +1185,7 @@ static zend_always_inline bcmath_number_obj_t *bcmath_number_new_obj(bc_num ret,
 	return intern;
 }
 
-static zend_result bcmath_number_parse_num(zval *zv, zend_object **obj, zend_string **str, zend_long *lval)
+static zend_result bcmath_number_parse_num(const zval *zv, zend_object **obj, zend_string **str, zend_long *lval)
 {
 	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), bcmath_number_ce)) {
 		*obj = Z_OBJ_P(zv);
@@ -1372,7 +1393,7 @@ failure:
  	}
 
 static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
-	bc_num *num, size_t *scale, zend_object *obj, zend_string *str, zend_long lval, uint32_t arg_num)
+	bc_num *num, size_t *scale, const zend_object *obj, const zend_string *str, zend_long lval, uint32_t arg_num)
 {
 	size_t full_scale = 0;
 	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(num, &full_scale, obj, str, lval) == FAILURE)) {
@@ -1799,9 +1820,10 @@ PHP_METHOD(BcMath_Number, round)
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 
 	bc_num ret = NULL;
-	bc_round(intern->num, precision, rounding_mode, &ret);
+	size_t scale = bc_round(intern->num, precision, rounding_mode, &ret);
+	bc_rm_trailing_zeros(ret);
 
-	bcmath_number_obj_t *new_intern = bcmath_number_new_obj(ret, ret->n_scale);
+	bcmath_number_obj_t *new_intern = bcmath_number_new_obj(ret, scale);
 	RETURN_OBJ(&new_intern->std);
 }
 

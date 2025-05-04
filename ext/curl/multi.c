@@ -185,7 +185,8 @@ PHP_FUNCTION(curl_multi_get_handles)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	array_init(return_value);
+	array_init_size(return_value, zend_llist_count(&mh->easyh));
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	zend_llist_position pos;
 	zval	*pz_ch;
 
@@ -214,8 +215,8 @@ PHP_FUNCTION(curl_multi_select)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	if (!(timeout >= 0.0 && timeout <= ((double)INT_MAX / 1000.0))) {
-		zend_argument_value_error(2, "must be between 0 and %d", (int)ceilf((double)INT_MAX / 1000));
+	if (!(timeout >= 0.0 && timeout <= (INT_MAX / 1000.0))) {
+		zend_argument_value_error(2, "must be between 0 and %f", INT_MAX / 1000.0);
 		RETURN_THROWS();
 	}
 
@@ -403,7 +404,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	php_curl 				*ch;
 	php_curl 				*parent;
 	php_curlm 				*mh 			= (php_curlm *)userp;
-	size_t 					rval 			= CURL_PUSH_DENY;
+	int 					rval 			= CURL_PUSH_DENY;
 	zval					*pz_parent_ch 	= NULL;
 	zval 					pz_ch;
 	zval 					headers;
@@ -420,10 +421,11 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	ch->cp = easy;
 	_php_setup_easy_copy_handlers(ch, parent);
 
-	array_init(&headers);
+	array_init_size(&headers, num_headers);
+	zend_hash_real_init_packed(Z_ARRVAL(headers));
 	for (size_t i = 0; i < num_headers; i++) {
 		char *header = curl_pushheader_bynum(push_headers, i);
-		add_next_index_string(&headers, header);
+		add_index_string(&headers, i, header);
 	}
 
 	ZEND_ASSERT(pz_parent_ch);
@@ -524,11 +526,7 @@ PHP_FUNCTION(curl_multi_setopt)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	if (_php_curl_multi_setopt(mh, options, zvalue, return_value)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(_php_curl_multi_setopt(mh, options, zvalue, return_value));
 }
 /* }}} */
 
@@ -598,7 +596,9 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
-	return zend_std_get_properties(object);
+	/* CurlMultiHandle can never have properties as it's final and has strict-properties on.
+	 * Avoid building a hash table. */
+	return NULL;
 }
 
 static zend_object_handlers curl_multi_handlers;

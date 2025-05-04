@@ -39,7 +39,7 @@
 
 #if defined(__APPLE__)
   /*
-   Apple statvfs has an interger overflow in libc copying to statvfs.
+   Apple statvfs has an integer overflow in libc copying to statvfs.
    cvt_statfs_to_statvfs(struct statfs *from, struct statvfs *to) {
    to->f_blocks = (fsblkcnt_t)from->f_blocks;
    */
@@ -388,6 +388,9 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
+
+	php_clear_stat_cache(0, NULL, 0);
+
 	RETURN_TRUE;
 #endif
 }
@@ -527,6 +530,9 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
+
+	php_clear_stat_cache(0, NULL, 0);
+
 	RETURN_TRUE;
 #endif
 }
@@ -591,6 +597,9 @@ PHP_FUNCTION(chmod)
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
+
+	php_clear_stat_cache(0, NULL, 0);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -676,6 +685,9 @@ PHP_FUNCTION(touch)
 		php_error_docref(NULL, E_WARNING, "Utime failed: %s", strerror(errno));
 		RETURN_FALSE;
 	}
+
+	php_clear_stat_cache(0, NULL, 0);
+
 	RETURN_TRUE;
 }
 /* }}} */

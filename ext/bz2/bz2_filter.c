@@ -50,12 +50,12 @@ typedef struct _php_bz2_filter_data {
 
 static void *php_bz2_alloc(void *opaque, int items, int size)
 {
-	return (void *)safe_pemalloc(items, size, 0, ((php_bz2_filter_data*)opaque)->persistent);
+	return safe_pemalloc(items, size, 0, ((php_bz2_filter_data*)opaque)->persistent);
 }
 
 static void php_bz2_free(void *opaque, void *address)
 {
-	pefree((void *)address, ((php_bz2_filter_data*)opaque)->persistent);
+	pefree(address, ((php_bz2_filter_data*)opaque)->persistent);
 }
 /* }}} */
 

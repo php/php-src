@@ -123,8 +123,9 @@ PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
 typedef struct _php_shutdown_function_entry {
-	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	zval *params;
+	uint32_t param_count;
 } php_shutdown_function_entry;
 
 PHPAPI extern bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry);

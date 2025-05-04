@@ -48,6 +48,7 @@ $result = curl_exec($ch);
 var_dump($result);
 var_dump(curl_error($ch));
 var_dump(curl_errno($ch));
+var_dump(curl_errno($ch) === CURLE_ABORTED_BY_CALLBACK);
 
 $returnValue = CURL_PREREQFUNC_OK;
 
@@ -133,6 +134,7 @@ bool(true)
 bool(false)
 string(41) "operation aborted by pre-request callback"
 int(42)
+bool(true)
 
 Testing with CURL_PREREQFUNC_OK
 string(8) "callback"
