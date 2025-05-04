@@ -75,7 +75,6 @@ typedef zend_result (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
 typedef zend_result (*mysqli_write_t)(mysqli_object *obj, zval *newval);
 
 typedef struct _mysqli_prop_handler {
-	zend_string *name;
 	mysqli_read_t read_func;
 	mysqli_write_t write_func;
 } mysqli_prop_handler;
@@ -294,11 +293,11 @@ zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value,
 void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysqli_read_t r_func, mysqli_write_t w_func) {
 	mysqli_prop_handler	p;
 
-	p.name = zend_string_init_interned(pname, pname_len, 1);
+	zend_string *name = zend_string_init_interned(pname, pname_len, 1);
 	p.read_func = (r_func) ? r_func : mysqli_read_na;
 	p.write_func = w_func;
-	zend_hash_add_mem(h, p.name, &p, sizeof(mysqli_prop_handler));
-	zend_string_release_ex(p.name, 1);
+	zend_hash_add_mem(h, name, &p, sizeof(mysqli_prop_handler));
+	zend_string_release_ex(name, 1);
 }
 /* }}} */
 
@@ -344,17 +343,17 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 {
 	mysqli_object *obj = php_mysqli_fetch_object(object);
 	HashTable *retval, *props = obj->prop_handler;
-	mysqli_prop_handler *entry;
+	zend_string *name;
 
 	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
-	ZEND_HASH_MAP_FOREACH_PTR(props, entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(props, name) {
 		zval rv;
 		zval *value;
 
-		value = mysqli_read_property(object, entry->name, BP_VAR_IS, 0, &rv);
+		value = mysqli_read_property(object, name, BP_VAR_IS, 0, &rv);
 		if (value != &EG(uninitialized_zval)) {
-			zend_hash_add(retval, entry->name, value);
+			zend_hash_add(retval, name, value);
 		}
 	} ZEND_HASH_FOREACH_END();
 
