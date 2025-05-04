@@ -3,7 +3,7 @@
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  * Adapted for PHP + libxml2 by: Niels Dossche <nielsdos@php.net>
- * Based on Lexbor 2.4.0 (upstream commit e9d35f6384de7bd8c1b79e7111bc3a44f8822967)
+ * Based on Lexbor (upstream commit b347aa4e4da4e82b1cae18989ceea1aa0278daf1)
  */
 
 #include <libxml/xmlstring.h>
@@ -967,7 +967,7 @@ lxb_selectors_state_has_relative(const xmlNode *node,
 			break;
 		}
 
-		while (node !=root && node->next == NULL) {
+		while (node != root && node->next == NULL && node->parent != NULL) {
 			node = node->parent;
 		}
 
