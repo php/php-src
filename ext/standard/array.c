@@ -3234,10 +3234,6 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	/* Create and initialize output hash */
 	zend_hash_init(&out_hash, (length > 0 ? num_in - length : 0) + (replace ? zend_hash_num_elements(replace) : 0), NULL, ZVAL_PTR_DTOR, 0);
 
-	if (length > ZEND_LONG_MAX - offset || length < ZEND_LONG_MIN + offset) {
-		goto end;
-	}
-
 	if (HT_IS_PACKED(in_hash)) {
 		/* Start at the beginning of the input hash and copy entries to output hash until offset is reached */
 		entry = in_hash->arPacked;
@@ -3256,7 +3252,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 
 		/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 		if (removed != NULL) {
-			for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
+			for ( ; pos - offset < length && idx < in_hash->nNumUsed; idx++, entry++) {
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos++;
 				Z_TRY_ADDREF_P(entry);
@@ -3266,7 +3262,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 		} else { /* otherwise just skip those entries */
 			zend_long pos2 = pos;
 
-			for ( ; pos2 < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
+			for ( ; pos2 - offset < length && idx < in_hash->nNumUsed; idx++, entry++) {
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_packed_del_val(in_hash, entry);
@@ -3321,7 +3317,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 
 		/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 		if (removed != NULL) {
-			for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++, p++) {
+			for ( ; pos - offset < length && idx < in_hash->nNumUsed; idx++, p++) {
 				if (Z_TYPE(p->val) == IS_UNDEF) continue;
 				pos++;
 				entry = &p->val;
@@ -3334,9 +3330,9 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				zend_hash_del_bucket(in_hash, p);
 			}
 		} else { /* otherwise just skip those entries */
-			int pos2 = pos;
+			zend_long pos2 = pos;
 
-			for ( ; pos2 < offset + length && idx < in_hash->nNumUsed; idx++, p++) {
+			for ( ; pos2 - offset < length && idx < in_hash->nNumUsed; idx++, p++) {
 				if (Z_TYPE(p->val) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_del_bucket(in_hash, p);
@@ -3372,7 +3368,6 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 		}
 	}
 
-end:
 	/* replace HashTable data */
 	HT_SET_ITERATORS_COUNT(&out_hash, HT_ITERATORS_COUNT(in_hash));
 	HT_SET_ITERATORS_COUNT(in_hash, 0);
