@@ -1390,7 +1390,13 @@ class FuncInfo {
                     $name = "zim_" . $this->name->getDeclarationClassName() . "_" . $this->name->methodName;
 
                     if ($isVanillaEntry) {
-                        $functionEntryCode = "\tZEND_ME(" . $this->name->getDeclarationClassName() . ", " . $this->name->methodName . ", $argInfoName, " . implode("|", reset($flagsByPhpVersions)) . ")";
+                        $template = "\tZEND_ME(" . $this->name->getDeclarationClassName() . ", " . $this->name->methodName . ", $argInfoName, %s)\n";
+                        $flagsCode = generateVersionDependentFlagCode(
+                            $template,
+                            $flagsByPhpVersions,
+                            $this->minimumPhpVersionIdCompatibility
+                        );
+                        $functionEntryCode = rtrim(implode("", $flagsCode));
                     }
                 }
             }
@@ -1406,7 +1412,15 @@ class FuncInfo {
                 $zendName = '"' . $functionName . '"';
                 $name = "zif_$declarationName";
 
-                if ($isVanillaEntry && reset($flagsByPhpVersions) === ["0"]) {
+                // Can only use ZEND_FE() if we have no flags for *all* versions
+                $hasFlags = false;
+                foreach ($flagsByPhpVersions as $flags) {
+                    if ($flags !== ['0']) {
+                        $hasFlags = true;
+                        break;
+                    }
+                }
+                if ($isVanillaEntry && !$hasFlags) {
                     $functionEntryCode = "\tZEND_FE($declarationName, $argInfoName)";
                 }
             }
@@ -1523,9 +1537,6 @@ class FuncInfo {
                 case "Deprecated":
                     $flags[] = "ZEND_ACC_DEPRECATED";
                     break;
-                case "NoDiscard":
-                    $flags[] = "ZEND_ACC_NODISCARD";
-                    break;
             }
         }
 
@@ -1534,11 +1545,23 @@ class FuncInfo {
             $php82AndAboveFlags[] = "ZEND_ACC_COMPILE_TIME_EVAL";
         }
 
+        $php85AndAboveFlags = $php82AndAboveFlags;
+        foreach ($this->attributes as $attr) {
+            switch ($attr->class) {
+                case "NoDiscard":
+                    $php85AndAboveFlags[] = "ZEND_ACC_NODISCARD";
+                    break;
+            }
+        }
+
         if (empty($flags)) {
             $flags[] = "0";
         }
         if (empty($php82AndAboveFlags)) {
             $php82AndAboveFlags[] = "0";
+        }
+        if (empty($php85AndAboveFlags)) {
+            $php85AndAboveFlags[] = "0";
         }
 
         return [
@@ -1548,7 +1571,7 @@ class FuncInfo {
             PHP_82_VERSION_ID => $php82AndAboveFlags,
             PHP_83_VERSION_ID => $php82AndAboveFlags,
             PHP_84_VERSION_ID => $php82AndAboveFlags,
-            PHP_85_VERSION_ID => $php82AndAboveFlags,
+            PHP_85_VERSION_ID => $php85AndAboveFlags,
         ];
     }
 

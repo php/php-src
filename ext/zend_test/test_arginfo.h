@@ -368,14 +368,22 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("zend_test_deprecated_attr", zif_zend_test_deprecated_attr, arginfo_zend_test_deprecated_attr, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
+#if (PHP_VERSION_ID >= 80500)
 	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, 0, NULL, NULL)
+#endif
 #else
-	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, ZEND_ACC_NODISCARD)
+	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, 0)
 #endif
 #if (PHP_VERSION_ID >= 80400)
+#if (PHP_VERSION_ID >= 80500)
 	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED, NULL, NULL)
+#endif
 #else
-	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)
+	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_aliased", zif_zend_test_void_return, arginfo_zend_test_aliased, 0, NULL, NULL)
