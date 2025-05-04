@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-18481 (date_sunrise with unexpected nan value for the offset).
     (nielsdos/David Carlier)
 
+- DOM:
+  . Backport lexbor/lexbor#274. (nielsdos, alexpeattie)
+
 - Intl:
   . Fix various reference issues. (nielsdos)
 
