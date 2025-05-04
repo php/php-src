@@ -123,15 +123,6 @@ $repos["symfony"] = [
     "",
     function (): void {
         e("php ./phpunit install");
-
-        // Test causes a heap-buffer-overflow but I cannot reproduce it locally...
-        $c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php");
-        $c = str_replace("public function testSanitizeDeepNestedString()", "/** @group skip */\n    public function testSanitizeDeepNestedString()", $c);
-        file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);
-        // Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
-        $c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); 
-        $c = str_replace("*/\n    public function testCastNonTrailingCharPointer()", "* @group skip\n     */\n    public function testCastNonTrailingCharPointer()", $c);
-        file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);
     },
     function (): iterable {
         $it = new RecursiveDirectoryIterator("src/Symfony");
