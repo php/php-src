@@ -98,14 +98,21 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 		S->einfo.errmsg = NULL;
 	}
 
+	/* TODO: There's php_pdo_stmt_valid_db_obj_handle in PHP-8.5-dev that does these checks. */
+	bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
+		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
+		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
+
 	if (S->cols) {
 		for (i = 0; i < stmt->column_count; i++) {
 			if (S->cols[i].data) {
 				switch (S->cols[i].dtype) {
 					case SQLT_BLOB:
 					case SQLT_CLOB:
-						OCI_TEMPLOB_CLOSE(S->H->env, S->H->svc, S->H->err,
-							(OCILobLocator *) S->cols[i].data);
+						if (server_obj_usable) {
+							OCI_TEMPLOB_CLOSE(S->H->env, S->H->svc, S->H->err,
+								(OCILobLocator *) S->cols[i].data);
+						}
 						OCIDescriptorFree(S->cols[i].data, OCI_DTYPE_LOB);
 						break;
 					default:
