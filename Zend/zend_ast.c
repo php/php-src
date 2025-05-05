@@ -1628,7 +1628,7 @@ static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int pri
 
 /* Use zend_ast_export_list() unless fewer than `list->children` children should
  * be exported. */
-static ZEND_COLD void zend_ast_export_list_ex(smart_str *str, const zend_ast_list *list, bool separator, int priority, int indent, int children)
+static ZEND_COLD void zend_ast_export_list_ex(smart_str *str, const zend_ast_list *list, bool separator, int priority, int indent, uint32_t children)
 {
 	ZEND_ASSERT(children <= list->children);
 	uint32_t i = 0;
