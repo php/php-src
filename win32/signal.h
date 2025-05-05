@@ -10,6 +10,7 @@
 #define	SIGPROF	27				/* profiling time alarm */
 
 PHP_WINUTIL_API void php_win32_signal_ctrl_handler_init(void);
+PHP_WINUTIL_API void php_win32_signal_ctrl_handler_request_shutdown(void);
 PHP_WINUTIL_API void php_win32_signal_ctrl_handler_shutdown(void);
 
 #endif /* PHP_WIN32_SIGNAL_H */
