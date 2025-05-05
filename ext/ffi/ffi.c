@@ -1086,45 +1086,43 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 			} ZEND_HASH_FOREACH_END();
 		}
 		
-		if (zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
-			// call PHP function
-			zend_fiber_resume_internal(&call_data.data->fiber, NULL, false);
-			zend_ffi_type *ret_type = ZEND_FFI_TYPE(call_data.data->type->func.ret_type);
-			if(ret_type->kind != ZEND_FFI_TYPE_VOID){
-				// extract return value from fiber
-				zend_ffi_zval_to_cdata(call_data.ret, ret_type, &call_data.data->fiber.result);
+		// call PHP function
+		zend_fiber_resume_internal(&call_data.data->fiber, NULL, false);
+		zend_ffi_type *ret_type = ZEND_FFI_TYPE(call_data.data->type->func.ret_type);
+		if(ret_type->kind != ZEND_FFI_TYPE_VOID){
+			// extract return value from fiber
+			zend_ffi_zval_to_cdata(call_data.ret, ret_type, &call_data.data->fiber.result);
 
-				if (callback_data->arg_count) {
-					for (uint32_t i = 0; i < callback_data->arg_count; i++) {
-						zval_ptr_dtor(&call_data.data->fiber.fci.params[i]);
-					}
+			if (callback_data->arg_count) {
+				for (uint32_t i = 0; i < callback_data->arg_count; i++) {
+					zval_ptr_dtor(&call_data.data->fiber.fci.params[i]);
 				}
-
-#ifdef WORDS_BIGENDIAN
-				zval *ret_type = &call_data.data->fiber.result;
-				if (ret_type->size < sizeof(ffi_arg)
-				 && ret_type->kind >= ZEND_FFI_TYPE_UINT8
-				 && ret_type->kind < ZEND_FFI_TYPE_POINTER) {
-					/* We need to widen the value (zero extend) */
-					switch (ret_type->size) {
-						case 1:
-							*(ffi_arg*)ret = *(uint8_t*)ret;
-							break;
-						case 2:
-							*(ffi_arg*)ret = *(uint16_t*)ret;
-							break;
-						case 4:
-							*(ffi_arg*)ret = *(uint32_t*)ret;
-							break;
-						default:
-							break;
-					}
-				}
-#endif
 			}
 
-			efree(call_data.data->fiber.fci.params);
+#ifdef WORDS_BIGENDIAN
+			zval *ret_type = &call_data.data->fiber.result;
+			if (ret_type->size < sizeof(ffi_arg)
+				&& ret_type->kind >= ZEND_FFI_TYPE_UINT8
+				&& ret_type->kind < ZEND_FFI_TYPE_POINTER) {
+				/* We need to widen the value (zero extend) */
+				switch (ret_type->size) {
+					case 1:
+						*(ffi_arg*)ret = *(uint8_t*)ret;
+						break;
+					case 2:
+						*(ffi_arg*)ret = *(uint16_t*)ret;
+						break;
+					case 4:
+						*(ffi_arg*)ret = *(uint32_t*)ret;
+						break;
+					default:
+						break;
+				}
+			}
+#endif
 		}
+
+		efree(call_data.data->fiber.fci.params);
 		
 		zend_ffi_dispatch_callback_end();
 	}
@@ -1171,7 +1169,10 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 	callback_data->arg_count = arg_count;
 	callback_data->fiber.fci_cache = fcc;
 
-	zend_fiber_init_context(&callback_data->fiber.context, NULL, zend_fiber_execute, EG(fiber_stack_size));
+	if(zend_fiber_init_context(&callback_data->fiber.context, NULL, zend_fiber_execute, EG(fiber_stack_size)) == FAILURE){
+		zend_throw_error(zend_ffi_exception_ce, "Cannot allocate fiber");
+		return NULL;
+	}
 	callback_data->fiber.previous = &callback_data->fiber.context;
 
 	zend_ffi_fci_prepare(callback_data, &callback_data->fiber.fci);
