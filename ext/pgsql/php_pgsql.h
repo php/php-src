@@ -178,9 +178,6 @@ static const php_stream_ops php_stream_pgsql_fd_ops = {
 #define PGSQL_MAX_REGEXES 11
 
 ZEND_BEGIN_MODULE_GLOBALS(pgsql)
-	HashTable field_oids;
-	HashTable table_oids;
-	HashTable connections;
 	zend_long num_links,num_persistent;
 	zend_long max_links,max_persistent;
 	zend_long auto_reset_persistent;
@@ -189,6 +186,9 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	bool allow_persistent;
 	bool ignore_notices;
 	bool log_notices;
+	HashTable field_oids;
+	HashTable table_oids;
+	HashTable connections;
 ZEND_END_MODULE_GLOBALS(pgsql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pgsql)
