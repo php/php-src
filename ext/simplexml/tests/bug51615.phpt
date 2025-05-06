@@ -7,7 +7,7 @@ dom
 <?php
 
 $dom = new DOMDocument;
-$dom->loadHTML('<span title=""y">x</span><span title=""z">x</span>');
+$dom->loadHTML('<span title=""y">x</span><span title=""z">x</span>', LIBXML_NOERROR);
 $html = simplexml_import_dom($dom);
 
 var_dump($html->body->span);
@@ -18,15 +18,12 @@ foreach ($html->body->span as $obj) {
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::loadHTML(): error parsing attribute name in Entity, line: 1 in %s on line %d
-
-Warning: DOMDocument::loadHTML(): error parsing attribute name in Entity, line: 1 in %s on line %d
 object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>
   array(2) {
     ["title"]=>
     string(0) ""
-    ["y"]=>
+    [%r("y"{1,2})%r]=>
     string(0) ""
   }
   [0]=>

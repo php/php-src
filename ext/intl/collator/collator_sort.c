@@ -469,7 +469,8 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 
 	ZVAL_COPY_VALUE(&garbage, array);
 	/* for resulting hash we'll assign new hash keys rather then reordering */
-	array_init(array);
+	array_init_size(array, sortKeyCount);
+	zend_hash_real_init_packed(Z_ARRVAL_P(array));
 
 	for( j = 0; j < sortKeyCount; j++ )
 	{

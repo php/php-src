@@ -112,9 +112,9 @@ disp_locale=fr :  display_name=slovène #Italie, NEDIS_KIRTI#
 disp_locale=de :  display_name=Slowenisch #Italien, NEDIS_KIRTI#
 -----------------
 locale='sl_IT_nedis-a-kirti-x-xyz'
-disp_locale=en :  display_name=Slovenian #Italy, NEDIS_A_KIRTI_X_XYZ#
-disp_locale=fr :  display_name=slovène #Italie, NEDIS_A_KIRTI_X_XYZ#
-disp_locale=de :  display_name=Slowenisch #Italien, NEDIS_A_KIRTI_X_XYZ#
+disp_locale=en :  display_name=Slovenian #Italy, NEDIS_A_KIRTI(_X_XYZ)?#
+disp_locale=fr :  display_name=slovène #Italie, NEDIS_A_KIRTI(_X_XYZ)?#
+disp_locale=de :  display_name=Slowenisch #Italien, NEDIS_A_KIRTI(_X_XYZ)?#
 -----------------
 locale='sl_IT_rozaj'
 disp_locale=en :  display_name=Slovenian #Italy, Resian#
@@ -317,9 +317,9 @@ disp_locale=fr :  display_name=anglais #États-Unis, attribute=islamcal#
 disp_locale=de :  display_name=Englisch #Vereinigte Staaten, attribute=islamcal#
 -----------------
 locale='zh-CN-a-myExt-x-private'
-disp_locale=en :  display_name=Chinese #China(, A_MYEXT_X_PRIVATE)?, a=myext, Private-Use=private#
-disp_locale=fr :  display_name=chinois #Chine(, A_MYEXT_X_PRIVATE)?, a=myext, usage privé=private#
-disp_locale=de :  display_name=Chinesisch #China(, A_MYEXT_X_PRIVATE)?, a=myext, Privatnutzung=private#
+disp_locale=en :  display_name=Chinese #China(, A_MYEXT(_X_PRIVATE)?)?, a=myext, Private-Use=private#
+disp_locale=fr :  display_name=chinois #Chine(, A_MYEXT(_X_PRIVATE)?)?, a=myext, usage privé=private#
+disp_locale=de :  display_name=Chinesisch #China(, A_MYEXT(_X_PRIVATE)?)?, a=myext, Privatnutzung=private#
 -----------------
 locale='en-a-myExt-b-another'
 disp_locale=en :  display_name=English #(A_MYEXT_B_ANOTHER, )?a=myext, b=another#

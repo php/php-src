@@ -48,39 +48,5 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_fetch_class_ctor_named_and_positional");
 ?>
---EXPECTF--
-Value of $a: My key is B
-Value of $b: No key
-Value of $a: My key is B
-Value of $b: No key
-Value of $a: My key is B
-Value of $b: No key
-array(3) {
-  [0]=>
-  object(TestBase)#%d (3) {
-    ["id"]=>
-    string(1) "1"
-    ["val":protected]=>
-    string(1) "A"
-    ["val2":"TestBase":private]=>
-    string(2) "AA"
-  }
-  [1]=>
-  object(TestBase)#%d (3) {
-    ["id"]=>
-    string(1) "2"
-    ["val":protected]=>
-    string(1) "B"
-    ["val2":"TestBase":private]=>
-    string(2) "BB"
-  }
-  [2]=>
-  object(TestBase)#%d (3) {
-    ["id"]=>
-    string(1) "3"
-    ["val":protected]=>
-    string(1) "C"
-    ["val2":"TestBase":private]=>
-    string(2) "CC"
-  }
-}
+--EXPECT--
+Error: Cannot use positional argument after named argument

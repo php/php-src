@@ -454,6 +454,13 @@ const SO_BPF_EXTENSIONS = UNKNOWN;
  */
 const SO_EXCLBIND = UNKNOWN;
 #endif
+#ifdef SO_BUSY_POLL
+/**
+ * @var int
+ * @cvalue SO_BUSY_POLL
+ */
+const SO_BUSY_POLL = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int
@@ -1914,6 +1921,13 @@ const TCP_QUICKACK = UNKNOWN;
  * @cvalue TCP_REPAIR
  */
 const TCP_REPAIR = UNKNOWN;
+#endif
+#if defined(IP_BINDANY)
+/**
+ * @var int
+ * @cvalue IP_BINDANY
+ */
+const IP_BINDANY = UNKNOWN;
 #endif
 #if defined(IP_DONTFRAG)
 /**

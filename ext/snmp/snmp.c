@@ -170,10 +170,6 @@ static void php_snmp_object_free_storage(zend_object *object) /* {{{ */
 {
 	php_snmp_object *intern = php_snmp_fetch_object(object);
 
-	if (!intern) {
-		return;
-	}
-
 	snmp_session_free(&(intern->session));
 
 	zend_object_std_dtor(&intern->zo);
@@ -1921,6 +1917,9 @@ static zval *php_snmp_get_property_ptr_ptr(zend_object *object, zend_string *nam
 		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
 
+	if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
 	return NULL;
 }
 

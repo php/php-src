@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0be24cb2f268ab3d43121637ae451d8da4b50410 */
+ * Stub hash: 42d486d2666d23569e70860e2b1ef203161792b3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -475,6 +475,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(SO_EXCLBIND)
 	REGISTER_LONG_CONSTANT("SO_EXCLBIND", SO_EXCLBIND, CONST_PERSISTENT);
+#endif
+#if defined(SO_BUSY_POLL)
+	REGISTER_LONG_CONSTANT("SO_BUSY_POLL", SO_BUSY_POLL, CONST_PERSISTENT);
 #endif
 #if defined(SKF_AD_OFF)
 	REGISTER_LONG_CONSTANT("SKF_AD_OFF", SKF_AD_OFF, CONST_PERSISTENT);
@@ -1059,6 +1062,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(TCP_REPAIR)
 	REGISTER_LONG_CONSTANT("TCP_REPAIR", TCP_REPAIR, CONST_PERSISTENT);
+#endif
+#if defined(IP_BINDANY)
+	REGISTER_LONG_CONSTANT("IP_BINDANY", IP_BINDANY, CONST_PERSISTENT);
 #endif
 #if defined(IP_DONTFRAG)
 	REGISTER_LONG_CONSTANT("IP_DONTFRAG", IP_DONTFRAG, CONST_PERSISTENT);

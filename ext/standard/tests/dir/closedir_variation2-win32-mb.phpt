@@ -47,5 +47,5 @@ NULL
 Directory Handle: resource(%d) of type (Unknown)
 
 -- Close directory handle second time: --
-closedir(): %s is not a valid Directory resource
+closedir(): Argument #1 ($dir_handle) must be an open stream resource
 Directory Handle: resource(%d) of type (Unknown)

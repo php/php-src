@@ -42,11 +42,11 @@ void ir_consistency_check(void)
 
 static bool ir_check_use_list(const ir_ctx *ctx, ir_ref from, ir_ref to)
 {
-	ir_ref n, j, *p;
+	ir_ref n, *p;
 	ir_use_list *use_list = &ctx->use_lists[from];
 
 	n = use_list->count;
-	for (j = 0, p = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 		if (*p == to) {
 			return 1;
 		}
@@ -106,7 +106,10 @@ bool ir_check(const ir_ctx *ctx)
 			use = *p;
 			if (use != IR_UNUSED) {
 				if (IR_IS_CONST_REF(use)) {
-					if (use >= ctx->consts_count) {
+					if (IR_OPND_KIND(flags, j) != IR_OPND_DATA) {
+						fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) must not be constant\n", i, j, use);
+						ok = 0;
+					} else if (use >= ctx->consts_count) {
 						fprintf(stderr, "ir_base[%d].ops[%d] constant reference (%d) is out of range\n", i, j, use);
 						ok = 0;
 					}
@@ -301,9 +304,9 @@ bool ir_check(const ir_ctx *ctx)
 
 		if (ctx->use_lists) {
 			ir_use_list *use_list = &ctx->use_lists[i];
-			ir_ref count;
+			ir_ref count, n = use_list->count;
 
-			for (j = 0, p = &ctx->use_edges[use_list->refs]; j < use_list->count; j++, p++) {
+			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 				use = *p;
 				if (!ir_check_input_list(ctx, i, use)) {
 					fprintf(stderr, "ir_base[%d] is in use list of ir_base[%d]\n", use, i);
@@ -344,8 +347,8 @@ bool ir_check(const ir_ctx *ctx)
 						break;
 					default:
 						/* skip data references */
-						count = use_list->count;
-						for (j = 0, p = &ctx->use_edges[use_list->refs]; j < use_list->count; j++, p++) {
+						count = n = use_list->count;
+						for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 							use = *p;
 							if (!(ir_op_flags[ctx->ir_base[use].op] & IR_OP_FLAG_CONTROL)) {
 								count--;

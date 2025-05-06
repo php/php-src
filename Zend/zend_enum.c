@@ -418,7 +418,10 @@ static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id n
 	zif->module = EG(current_module);
 	zif->scope = ce;
 	zif->T = ZEND_OBSERVER_ENABLED;
-    if (EG(active)) { // at run-time
+	if (EG(active)) { // at run-time
+		if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+			zif->fn_flags |= ZEND_ACC_PRELOADED;
+		}
 		ZEND_MAP_PTR_INIT(zif->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 	} else {
 #ifdef ZTS
@@ -607,8 +610,7 @@ ZEND_API void zend_enum_add_case_cstr(zend_class_entry *ce, const char *name, zv
 	zend_string_release(name_str);
 }
 
-ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name) {
-	zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
+static zend_object *zend_enum_case_from_class_constant(zend_class_constant *c) {
 	ZEND_ASSERT(c && "Must be a valid enum case");
 	ZEND_ASSERT(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE);
 
@@ -621,9 +623,12 @@ ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name
 	return Z_OBJ(c->value);
 }
 
+ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name) {
+	zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
+	return zend_enum_case_from_class_constant(c);
+}
+
 ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name) {
-	zend_string *name_str = zend_string_init(name, strlen(name), 0);
-	zend_object *result = zend_enum_get_case(ce, name_str);
-	zend_string_release(name_str);
-	return result;
+	zend_class_constant *c = zend_hash_str_find_ptr(CE_CONSTANTS_TABLE(ce), name, strlen(name));
+	return zend_enum_case_from_class_constant(c);
 }

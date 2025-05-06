@@ -92,7 +92,7 @@ class finfo
 /** @refcount 1 */
 function finfo_open(int $flags = FILEINFO_NONE, ?string $magic_database = null): finfo|false {}
 
-function finfo_close(finfo $finfo): bool {}
+function finfo_close(finfo $finfo): true {}
 
 function finfo_set_flags(finfo $finfo, int $flags): true {}
 

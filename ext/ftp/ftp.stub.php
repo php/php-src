@@ -132,7 +132,7 @@ namespace {
     function ftp_quit(FTP\Connection $ftp): bool {}
 
     /** @param int|bool $value */
-    function ftp_set_option(FTP\Connection $ftp, int $option, $value): bool {}
+    function ftp_set_option(FTP\Connection $ftp, int $option, $value): true {}
     function ftp_get_option(FTP\Connection $ftp, int $option): int|bool {}
 }
 

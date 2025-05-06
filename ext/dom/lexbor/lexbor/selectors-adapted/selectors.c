@@ -3,7 +3,7 @@
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  * Adapted for PHP + libxml2 by: Niels Dossche <nielsdos@php.net>
- * Based on Lexbor 2.4.0 (upstream commit e9d35f6384de7bd8c1b79e7111bc3a44f8822967)
+ * Based on Lexbor (upstream commit b347aa4e4da4e82b1cae18989ceea1aa0278daf1)
  */
 
 #include <libxml/xmlstring.h>
@@ -65,7 +65,21 @@ static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_id(const xml
 
 static zend_always_inline const xmlAttr *lxb_selectors_adapted_attr(const xmlNode *node, const lxb_char_t *name)
 {
-	const xmlAttr *attr = xmlHasProp(node, (const xmlChar *) name);
+	const xmlAttr *attr = NULL;
+	ZEND_ASSERT(node->doc != NULL);
+	if (php_dom_ns_is_html_and_document_is_html(node)) {
+		/* No need to handle DTD entities as we're in HTML. */
+		size_t name_bound = strlen((const char *) name) + 1;
+		for (const xmlAttr *cur = node->properties; cur != NULL; cur = cur->next) {
+			if (lexbor_str_data_nlocmp_right(cur->name, name, name_bound)) {
+				attr = cur;
+				break;
+			}
+		}
+	} else {
+		attr = xmlHasProp(node, (const xmlChar *) name);
+	}
+
 	if (attr != NULL && attr->ns != NULL) {
 		return NULL;
 	}
@@ -85,8 +99,67 @@ static zend_always_inline dom_lxb_str_wrapper lxb_selectors_adapted_attr_value(c
 	return ret;
 }
 
+static bool lxb_selectors_attrib_name_cmp(const lxb_css_selector_t *selector, const char *name, size_t len)
+{
+	return selector->name.length == len && lexbor_str_data_nlocmp_right((const lxb_char_t *) name, selector->name.data, len);
+}
+
+/* From https://html.spec.whatwg.org/#case-sensitivity-of-selectors
+ * "Attribute selectors on an HTML element in an HTML document must treat the values of attributes with the following names as ASCII case-insensitive:" */
+static bool lxb_selectors_is_lowercased_html_attrib_name(const lxb_css_selector_t *selector)
+{
+	return lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("accept"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("accept-charset"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("align"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("alink"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("axis"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("bgcolor"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("charset"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("checked"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("clear"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("codetype"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("color"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("compact"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("declare"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("defer"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("dir"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("direction"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("disabled"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("enctype"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("face"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("frame"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("hreflang"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("http-equiv"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("lang"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("language"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("link"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("media"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("method"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("multiple"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("nohref"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("noresize"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("noshade"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("nowrap"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("readonly"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("rel"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("rev"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("rules"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("scope"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("scrolling"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("selected"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("shape"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("target"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("text"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("type"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("valign"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("valuetype"))
+		|| lxb_selectors_attrib_name_cmp(selector, ZEND_STRL("vlink"));
+}
+
 static void lxb_selectors_adapted_set_entry_id_ex(lxb_selectors_entry_t *entry, const lxb_css_selector_t *selector, const xmlNode *node)
 {
+	entry->id.attr_case_insensitive = lxb_selectors_is_lowercased_html_attrib_name(selector);
+
 	if (node->doc != NULL && node->doc->dict != NULL) {
 		const xmlChar *interned = xmlDictExists(node->doc->dict, selector->name.data, selector->name.length);
 		if (interned != NULL) {
@@ -338,16 +411,14 @@ lxb_selectors_find(lxb_selectors_t *selectors, const xmlNode *root,
 				   const lxb_css_selector_list_t *list,
 				   lxb_selectors_cb_f cb, void *ctx)
 {
-	lxb_selectors_entry_t *entry;
+	lxb_selectors_entry_t entry = {0};
 	lxb_selectors_nested_t nested;
 
-	entry = lexbor_dobject_calloc(selectors->objs);
-
-	entry->combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
-	entry->selector = list->last;
+	entry.combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
+	entry.selector = list->last;
 
 	nested.parent = NULL;
-	nested.entry = entry;
+	nested.entry = &entry;
 	nested.cb = cb;
 	nested.ctx = ctx;
 
@@ -363,20 +434,19 @@ lxb_selectors_match_node(lxb_selectors_t *selectors, const xmlNode *node,
 						 lxb_selectors_cb_f cb, void *ctx)
 {
 	lxb_status_t status;
-	lxb_selectors_entry_t *entry;
 	lxb_selectors_nested_t nested;
 
 	if (!CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
 		return LXB_STATUS_OK;
 	}
 
-	entry = lexbor_dobject_calloc(selectors->objs);
+	lxb_selectors_entry_t entry = {0};
 
-	entry->combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
-	entry->selector = list->last;
+	entry.combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
+	entry.selector = list->last;
 
 	nested.parent = NULL;
-	nested.entry = entry;
+	nested.entry = &entry;
 	nested.cb = cb;
 	nested.ctx = ctx;
 
@@ -897,7 +967,7 @@ lxb_selectors_state_has_relative(const xmlNode *node,
 			break;
 		}
 
-		while (node !=root && node->next == NULL) {
+		while (node != root && node->next == NULL && node->parent != NULL) {
 			node = node->parent;
 		}
 
@@ -1290,10 +1360,10 @@ lxb_selectors_match_class(const lexbor_str_t *target, const lexbor_str_t *src,
 }
 
 static bool
-lxb_selectors_match_attribute_value(const lxb_css_selector_attribute_t *attr, const lexbor_str_t *trg, const lexbor_str_t *src)
+lxb_selectors_match_attribute_value(const lxb_css_selector_attribute_t *attr, bool force_modifier_i, const lexbor_str_t *trg, const lexbor_str_t *src)
 {
 	bool res;
-	bool ins = attr->modifier == LXB_CSS_SELECTOR_MODIFIER_I;
+	bool ins = attr->modifier == LXB_CSS_SELECTOR_MODIFIER_I || force_modifier_i;
 
 	switch (attr->match) {
 		case LXB_CSS_SELECTOR_MATCH_EQUAL:      /*  = */
@@ -1405,7 +1475,13 @@ lxb_selectors_match_attribute(const lxb_css_selector_t *selector,
 	}
 
 	dom_lxb_str_wrapper trg = lxb_selectors_adapted_attr_value(dom_attr);
-	bool res = lxb_selectors_match_attribute_value(attr, &trg.str, src);
+	ZEND_ASSERT(node->doc != NULL);
+	bool res = lxb_selectors_match_attribute_value(
+		attr,
+		entry->id.attr_case_insensitive && php_dom_ns_is_html_and_document_is_html(node),
+		&trg.str,
+		src
+	);
 	dom_lxb_str_wrapper_release(&trg);
 	return res;
 }

@@ -546,7 +546,9 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
-	return zend_std_get_properties(object);
+	/* CurlHandle can never have properties as it's final and has strict-properties on.
+	 * Avoid building a hash table. */
+	return NULL;
 }
 
 zend_result curl_cast_object(zend_object *obj, zval *result, int type)
@@ -843,7 +845,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl *ch = (php_curl *)ctx;
 	php_curl_read *read_handler = ch->handlers.read;
-	int length = 0;
+	size_t length = 0;
 
 	switch (read_handler->method) {
 		case PHP_CURL_DIRECT:
@@ -1184,7 +1186,6 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
 
 			array_init(&certhash);
 			for (slist = ci->certinfo[i]; slist; slist = slist->next) {
-				int len;
 				char s[64];
 				char *tmp;
 				strncpy(s, slist->data, sizeof(s));
@@ -1192,7 +1193,7 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
 				tmp = memchr(s, ':', sizeof(s));
 				if(tmp) {
 					*tmp = '\0';
-					len = strlen(s);
+					size_t len = strlen(s);
 					add_assoc_string(&certhash, s, &slist->data[len+1]);
 				} else {
 					php_error_docref(NULL, E_WARNING, "Could not extract hash key from certificate info");
@@ -1445,7 +1446,6 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			zval *prop, rv;
 			char *type = NULL, *filename = NULL;
 			struct mime_data_cb_arg *cb_arg;
-			php_stream *stream;
 			php_stream_statbuf ssb;
 			size_t filesize = -1;
 			curl_seek_callback seekfunc = seek_cb;
@@ -1475,6 +1475,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 				zval_ptr_dtor(&ch->postfields);
 				ZVAL_COPY(&ch->postfields, zpostfields);
 
+				php_stream *stream;
 				if ((stream = php_stream_open_wrapper(ZSTR_VAL(postval), "rb", STREAM_MUST_SEEK, NULL))) {
 					if (!stream->readfilters.head && !php_stream_stat(stream, &ssb)) {
 						filesize = ssb.sb.st_size;
@@ -1862,6 +1863,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 #if LIBCURL_VERSION_NUM >= 0x080900 /* Available since 8.9.0 */
 		case CURLOPT_TCP_KEEPCNT:
 #endif
+		case CURLOPT_FOLLOWLOCATION:
 			lval = zval_get_long(zvalue);
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
 				(PG(open_basedir) && *PG(open_basedir)) && (lval & CURLPROTO_FILE)) {
@@ -1894,14 +1896,11 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_SSLKEYTYPE:
 		case CURLOPT_SSL_CIPHER_LIST:
 		case CURLOPT_USERAGENT:
-		case CURLOPT_USERPWD:
 		case CURLOPT_COOKIELIST:
 		case CURLOPT_FTP_ALTERNATIVE_TO_USER:
 		case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
-		case CURLOPT_PASSWORD:
 		case CURLOPT_PROXYPASSWORD:
 		case CURLOPT_PROXYUSERNAME:
-		case CURLOPT_USERNAME:
 		case CURLOPT_NOPROXY:
 		case CURLOPT_SOCKS5_GSSAPI_SERVICE:
 		case CURLOPT_MAIL_FROM:
@@ -1995,6 +1994,12 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_HSTS:
 #endif
 		case CURLOPT_KRBLEVEL:
+		// Authorization header would be implictly set
+		// with an empty string thus we explictly set the option
+		// to null to avoid this unwarranted side effect
+		case CURLOPT_USERPWD:
+		case CURLOPT_USERNAME:
+		case CURLOPT_PASSWORD:
 		{
 			if (Z_ISNULL_P(zvalue)) {
 				error = curl_easy_setopt(ch->cp, option, NULL);
@@ -2209,11 +2214,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			/* Do nothing, just backward compatibility */
 			break;
 
-		case CURLOPT_FOLLOWLOCATION:
-			lval = zend_is_true(zvalue);
-			error = curl_easy_setopt(ch->cp, option, lval);
-			break;
-
 		case CURLOPT_POSTFIELDS:
 			if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 				if (zend_hash_num_elements(Z_ARRVAL_P(zvalue)) == 0) {
@@ -2243,6 +2243,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			break;
 
 		/* Curl off_t options */
+		case CURLOPT_INFILESIZE_LARGE:
 		case CURLOPT_MAX_RECV_SPEED_LARGE:
 		case CURLOPT_MAX_SEND_SPEED_LARGE:
 		case CURLOPT_MAXFILESIZE_LARGE:
@@ -2409,7 +2410,7 @@ PHP_FUNCTION(curl_setopt_array)
 	ch = Z_CURL_P(zid);
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(arr), option, string_key, entry) {
-		if (string_key) {
+		if (UNEXPECTED(string_key)) {
 			zend_argument_value_error(2, "contains an invalid cURL option");
 			RETURN_THROWS();
 		}
@@ -2663,6 +2664,19 @@ PHP_FUNCTION(curl_getinfo)
 			CAAS("cainfo", s_code);
 		}
 #endif
+#if LIBCURL_VERSION_NUM >= 0x080700 /* Available since 8.7.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_USED_PROXY, &l_code) == CURLE_OK) {
+			CAAL("used_proxy", l_code);
+		}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080c00 /* Available since 8.12.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_HTTPAUTH_USED, &l_code) == CURLE_OK) {
+			CAAL("httpauth_used", l_code);
+		}
+		if (curl_easy_getinfo(ch->cp, CURLINFO_PROXYAUTH_USED, &l_code) == CURLE_OK) {
+			CAAL("proxyauth_used", l_code);
+		}
+#endif
 	} else {
 		switch (option) {
 			case CURLINFO_HEADER_OUT:
@@ -2732,6 +2746,7 @@ PHP_FUNCTION(curl_getinfo)
 						if (curl_easy_getinfo(ch->cp, option, &slist) == CURLE_OK) {
 							struct curl_slist *current = slist;
 							array_init(return_value);
+							zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 							while (current) {
 								add_next_index_string(return_value, current->data);
 								current = current->next;

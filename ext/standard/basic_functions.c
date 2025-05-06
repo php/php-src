@@ -216,31 +216,16 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	BG(umask) = -1;
-	BG(user_tick_functions) = NULL;
-	BG(user_filter_map) = NULL;
-	BG(serialize_lock) = 0;
+	memset(basic_globals_p, 0, sizeof(php_basic_globals));
 
-	memset(&BG(serialize), 0, sizeof(BG(serialize)));
-	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
+	basic_globals_p->umask = -1;
+	basic_globals_p->url_adapt_session_ex.type = 1;
 
-	memset(&BG(url_adapt_session_ex), 0, sizeof(BG(url_adapt_session_ex)));
-	memset(&BG(url_adapt_output_ex), 0, sizeof(BG(url_adapt_output_ex)));
+	zend_hash_init(&basic_globals_p->url_adapt_session_hosts_ht, 0, NULL, NULL, 1);
+	zend_hash_init(&basic_globals_p->url_adapt_output_hosts_ht, 0, NULL, NULL, 1);
 
-	BG(url_adapt_session_ex).type = 1;
-	BG(url_adapt_output_ex).type  = 0;
-
-	zend_hash_init(&BG(url_adapt_session_hosts_ht), 0, NULL, NULL, 1);
-	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
-
-#if defined(_REENTRANT)
-	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
-#endif
-
-	BG(page_uid) = -1;
-	BG(page_gid) = -1;
-
-	BG(syslog_device) = NULL;
+	basic_globals_p->page_uid = -1;
+	basic_globals_p->page_gid = -1;
 }
 /* }}} */
 
@@ -807,7 +792,7 @@ PHP_FUNCTION(putenv)
 			valw = php_win32_cp_any_to_w(value);
 		}
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
-		if (!keyw || !valw && value) {
+		if (!keyw || (!valw && value)) {
 			tsrm_env_unlock();
 			free(pe.putenv_string);
 			zend_string_release(pe.key);
@@ -843,6 +828,7 @@ PHP_FUNCTION(putenv)
 #endif
 		RETURN_TRUE;
 	} else {
+		tsrm_env_unlock();
 		free(pe.putenv_string);
 		zend_string_release(pe.key);
 #ifdef PHP_WIN32
@@ -1336,7 +1322,7 @@ PHP_FUNCTION(get_cfg_var)
 error options:
 	0 = send to php_error_log (uses syslog or file depending on ini setting)
 	1 = send via email to 3rd parameter 4th option = additional headers
-	2 = send via tcp/ip to 3rd parameter (name or ip:port)
+	2 = no longer an option
 	3 = save to file in 3rd parameter
 	4 = send to SAPI logger directly
 */

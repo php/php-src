@@ -26,7 +26,6 @@ int mprotect(void *addr, size_t size, int protection) {
 
 int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp) {
 	EXCEPTION_RECORD *xr = xp->ExceptionRecord;
-	CONTEXT *xc = xp->ContextRecord;
 
 	switch (xr->ExceptionCode) {
 		case EXCEPTION_ACCESS_VIOLATION:

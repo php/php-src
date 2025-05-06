@@ -1013,8 +1013,10 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 #define IR_HAS_FP_RET_SLOT     (1<<10)
 #define IR_16B_FRAME_ALIGNMENT (1<<11)
 
+/* Temporary: MEM2SSA -> SCCP */
+#define IR_MEM2SSA_VARS        (1<<25)
+
 /* Temporary: SCCP -> CFG */
-#define IR_SCCP_DONE           (1<<25)
 #define IR_CFG_REACHABLE       (1<<26)
 
 /* Temporary: Dominators -> Loops */
@@ -1087,6 +1089,11 @@ IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
 
 void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref);
 void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val);
+
+/*** Iterative Optimization ***/
+void ir_iter_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bitqueue *worklist);
+void ir_iter_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val, ir_bitqueue *worklist);
+void ir_iter_opt(ir_ctx *ctx, ir_bitqueue *worklist);
 
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \
@@ -1168,6 +1175,15 @@ typedef enum _ir_fold_action {
 } ir_fold_action;
 
 ir_ref ir_folding(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3, ir_insn *op1_insn, ir_insn *op2_insn, ir_insn *op3_insn);
+
+/*** Alias Analyzes (see ir.c) ***/
+ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr);
+ir_ref ir_find_aliasing_vload(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var);
+ir_ref ir_find_aliasing_store(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val);
+ir_ref ir_find_aliasing_vstore(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val);
+
+/*** Predicates (see ir.c) ***/
+ir_ref ir_check_dominating_predicates(ir_ctx *ctx, ir_ref ref, ir_ref condition);
 
 /*** IR Live Info ***/
 typedef ir_ref                   ir_live_pos;

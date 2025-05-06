@@ -673,9 +673,23 @@ static bool zend_is_in_hook(const zend_property_info *prop_info)
 
 static bool zend_should_call_hook(const zend_property_info *prop_info, const zend_object *obj)
 {
-	return !zend_is_in_hook(prop_info)
-		/* execute_data and This are guaranteed to be set if zend_is_in_hook() returns true. */
-		|| Z_OBJ(EG(current_execute_data)->This) != obj;
+	if (!zend_is_in_hook(prop_info)) {
+		return true;
+	}
+
+	/* execute_data and This are guaranteed to be set if zend_is_in_hook() returns true. */
+	zend_object *parent_obj = Z_OBJ(EG(current_execute_data)->This);
+	if (parent_obj == obj) {
+		return false;
+	}
+
+	if (zend_object_is_lazy_proxy(parent_obj)
+	 && zend_lazy_object_initialized(parent_obj)
+	 && zend_lazy_object_get_instance(parent_obj) == obj) {
+		return false;
+	}
+
+	return true;
 }
 
 static ZEND_COLD void zend_throw_no_prop_backing_value_access(zend_string *class_name, zend_string *prop_name, bool is_read)
@@ -863,7 +877,6 @@ try_again:
 
 		if (!((*guard) & IN_ISSET)) {
 			GC_ADDREF(zobj);
-			ZVAL_UNDEF(&tmp_result);
 
 			*guard |= IN_ISSET;
 			zend_std_call_issetter(zobj, name, &tmp_result);
@@ -932,6 +945,18 @@ uninit_error:
 				goto exit;
 			}
 
+			if (UNEXPECTED(guard)) {
+				uint32_t guard_type = (type == BP_VAR_IS) && zobj->ce->__isset
+					? IN_ISSET : IN_GET;
+				guard = zend_get_property_guard(zobj, name);
+				if (!((*guard) & guard_type)) {
+					(*guard) |= guard_type;
+					retval = zend_std_read_property(zobj, name, type, cache_slot, rv);
+					(*guard) &= ~guard_type;
+					return retval;
+				}
+			}
+
 			return zend_std_read_property(zobj, name, type, cache_slot, rv);
 		}
 	}
@@ -954,6 +979,43 @@ static zend_always_inline bool property_uses_strict_types(void) {
 	return execute_data
 		&& execute_data->func
 		&& ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data));
+}
+
+static zval *forward_write_to_lazy_object(zend_object *zobj,
+		zend_string *name, zval *value, void **cache_slot, bool guarded)
+{
+	zval *variable_ptr;
+
+	/* backup value as it may change during initialization */
+	zval backup;
+	ZVAL_COPY(&backup, value);
+
+	zend_object *instance = zend_lazy_object_init(zobj);
+	if (UNEXPECTED(!instance)) {
+		zval_ptr_dtor(&backup);
+		return &EG(error_zval);
+	}
+
+	if (UNEXPECTED(guarded)) {
+		uint32_t *guard = zend_get_property_guard(instance, name);
+		if (!((*guard) & IN_SET)) {
+			(*guard) |= IN_SET;
+			variable_ptr = zend_std_write_property(instance, name, &backup, cache_slot);
+			(*guard) &= ~IN_SET;
+			goto exit;
+		}
+	}
+
+	variable_ptr = zend_std_write_property(instance, name, &backup, cache_slot);
+
+exit:
+	zval_ptr_dtor(&backup);
+
+	if (variable_ptr == &backup) {
+		variable_ptr = value;
+	}
+
+	return variable_ptr;
 }
 
 ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zval *value, void **cache_slot) /* {{{ */
@@ -1137,7 +1199,8 @@ found:;
 			variable_ptr = value;
 		} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-				goto lazy_init;
+				return forward_write_to_lazy_object(zobj, name, value,
+						cache_slot, /* guarded */ true);
 			}
 
 			goto write_std_property;
@@ -1184,21 +1247,9 @@ write_std_property:
 exit:
 	return variable_ptr;
 
-lazy_init:;
-	/* backup value as it may change during initialization */
-	zval backup;
-	ZVAL_COPY(&backup, value);
-
-	zobj = zend_lazy_object_init(zobj);
-	if (UNEXPECTED(!zobj)) {
-		variable_ptr = &EG(error_zval);
-		zval_ptr_dtor(&backup);
-		goto exit;
-	}
-
-	variable_ptr = zend_std_write_property(zobj, name, &backup, cache_slot);
-	zval_ptr_dtor(&backup);
-	return variable_ptr;
+lazy_init:
+	return forward_write_to_lazy_object(zobj, name, value, cache_slot,
+			/* guarded */ false);
 }
 /* }}} */
 
@@ -1519,6 +1570,17 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		if (!zobj) {
 			return;
 		}
+
+		if (UNEXPECTED(guard)) {
+			guard = zend_get_property_guard(zobj, name);
+			if (!((*guard) & IN_UNSET)) {
+				(*guard) |= IN_UNSET;
+				zend_std_unset_property(zobj, name, cache_slot);
+				(*guard) &= ~IN_UNSET;
+				return;
+			}
+		}
+
 		zend_std_unset_property(zobj, name, cache_slot);
 		return;
 	}
@@ -1617,13 +1679,9 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
-		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_DEPRECATED));
-	if (fbc->common.attributes) {
-		func->attributes = fbc->common.attributes;
-		GC_TRY_ADDREF(func->attributes);
-	} else {
-		func->attributes = NULL;
-	}
+		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD));
+	/* Attributes outlive the trampoline because they are created by the compiler. */
+	func->attributes = fbc->common.attributes;
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
@@ -1716,6 +1774,9 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 		func = (zend_function *)(uintptr_t)ecalloc(1, sizeof(zend_internal_function));
 	}
 	func->type = ZEND_INTERNAL_FUNCTION;
+	/* This trampoline does not use the call_trampoline_op, so it won't reuse the call frame,
+	 * which means we don't even need to reserve a temporary for observers. */
+	func->common.T = 0;
 	func->common.arg_flags[0] = 0;
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
@@ -1748,7 +1809,7 @@ static zend_always_inline zend_function *zend_get_user_call_function(zend_class_
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope) /* {{{ */
+ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope) /* {{{ */
 {
 	zend_throw_error(NULL, "Call to %s method %s::%s() from %s%s",
 		zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name),
@@ -1758,7 +1819,7 @@ static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc,
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
+ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
 {
 	zend_throw_error(NULL, "Cannot call abstract method %s::%s()",
 		ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
@@ -1898,19 +1959,27 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	if (EXPECTED(fbc)) {
 		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 			zend_abstract_method_call(fbc);
-			fbc = NULL;
+			goto fail;
 		} else if (UNEXPECTED(fbc->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
 			zend_error(E_DEPRECATED,
 				"Calling static trait method %s::%s is deprecated, "
 				"it should only be called on a class using the trait",
 				ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 			if (EG(exception)) {
-				return NULL;
+				goto fail;
 			}
 		}
 	}
 
 	return fbc;
+
+ fail:
+	if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_string_release_ex(fbc->common.function_name, 0);
+		zend_free_trampoline(fbc);
+	}
+
+	return NULL;
 }
 /* }}} */
 
@@ -2301,6 +2370,8 @@ found:
 			}
 			(*guard) &= ~IN_ISSET;
 			OBJ_RELEASE(zobj);
+		} else {
+			goto lazy_init;
 		}
 	}
 
@@ -2314,6 +2385,16 @@ lazy_init:
 			if (!zobj) {
 				result = 0;
 				goto exit;
+			}
+
+			if (UNEXPECTED(zobj->ce->__isset)) {
+				uint32_t *guard = zend_get_property_guard(zobj, name);
+				if (!((*guard) & IN_ISSET)) {
+					(*guard) |= IN_ISSET;
+					result = zend_std_has_property(zobj, name, has_set_exists, cache_slot);
+					(*guard) &= ~IN_ISSET;
+					return result;
+				}
 			}
 
 			return zend_std_has_property(zobj, name, has_set_exists, cache_slot);
@@ -2370,17 +2451,9 @@ ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **c
 		return FAILURE;
 	}
 	*fptr_ptr = Z_FUNC_P(func);
-
 	*ce_ptr = ce;
-	if ((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC) {
-		if (obj_ptr) {
-			*obj_ptr = NULL;
-		}
-	} else {
-		if (obj_ptr) {
-			*obj_ptr = obj;
-		}
-	}
+	*obj_ptr = obj;
+
 	return SUCCESS;
 }
 /* }}} */
